@@ -23,6 +23,8 @@ import {
   successfulMediaGenerationResponse,
 } from "@/app/api/v1/_shared/mediaGenerationRoute";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
+import { getComboByName } from "@/lib/db/combos";
+import { runModelEndpointCombo } from "@/lib/combos/modelEndpointCombo";
 
 export const dynamic = "force-dynamic";
 
@@ -44,9 +46,73 @@ export async function GET(request?: Request) {
   );
 }
 
+/** Dispatch one resolved combo target through the provider's music executor. */
+async function dispatchMusicModel(
+  request: Request,
+  body: Record<string, unknown> & { model: string; duration?: unknown },
+  allowedConnections: string[] | null,
+  apiKeyId: string | undefined,
+  startTime: number
+) {
+  const mismatch = await getRequestedModelEndpointMismatch(body.model, "music");
+  if (mismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, mismatch);
+
+  const { provider } = parseMusicModel(body.model);
+  if (!provider) {
+    return errorResponse(
+      HTTP_STATUS.BAD_REQUEST,
+      `Invalid music model: ${body.model}. Use format: provider/model`
+    );
+  }
+
+  const providerConfig = getMusicProvider(provider);
+  let credentials = null;
+  if (providerConfig && providerConfig.authType !== "none") {
+    credentials = await getProviderCredentialsWithQuotaPreflight(
+      provider,
+      null,
+      allowedConnections
+    );
+    if (!credentials) {
+      return errorResponse(
+        HTTP_STATUS.BAD_REQUEST,
+        `No credentials for music provider: ${provider}`
+      );
+    }
+    const unusable = unusableCredentialsResponse(provider, credentials);
+    if (unusable) return unusable;
+  } else if (providerConfig?.authType === "none") {
+    const local = await resolveLocalOverrideCredentials(provider, allowedConnections);
+    if (local.rejection) return local.rejection;
+    credentials = local.credentials;
+  }
+
+  const result = await handleMusicGeneration({
+    prepareFalInput: getFalCompatibilityPreparer(),
+    body,
+    credentials,
+    log,
+    signal: request.signal,
+  });
+  if (!result.success) {
+    return failedMediaGenerationResponse(result, "Music generation provider error");
+  }
+  await clearRecoveredProviderState(credentials);
+  return successfulMediaGenerationResponse({
+    result,
+    billingMode: "audio",
+    provider,
+    model: body.model,
+    startTime,
+    duration: body.duration,
+    apiKeyId,
+  });
+}
+
 /**
  * POST /v1/music/generations — generate music
  */
+/** Validate and execute the OpenAI-compatible music generation request. */
 async function postHandler(request, context) {
   const parsed = await readMediaGenerationBody(request, log, "MUSIC");
   if (parsed.state === "invalid") {
@@ -63,68 +129,34 @@ async function postHandler(request, context) {
   // the same scope chat applies.
   const scope = await enforceApiKeyPolicyWithScope(request, body.model);
   if (scope.rejection) return scope.rejection;
-  // Respect the authenticated API key's credential scope before checking model capabilities.
-  const mismatch = await getRequestedModelEndpointMismatch(body.model, "music");
-  if (mismatch) return errorResponse(HTTP_STATUS.BAD_REQUEST, mismatch);
-
-  // Parse model to get provider
-  const { provider } = parseMusicModel(body.model);
-  if (!provider) {
-    return errorResponse(
-      HTTP_STATUS.BAD_REQUEST,
-      `Invalid music model: ${body.model}. Use format: provider/model`
-    );
-  }
-
-  // Check provider config for auth bypass
-  const providerConfig = getMusicProvider(provider);
-
-  // Get credentials — skip for local providers (authType: "none")
-  let credentials = null;
-  if (providerConfig && providerConfig.authType !== "none") {
-    credentials = await getProviderCredentialsWithQuotaPreflight(
-      provider,
-      null,
-      scope.allowedConnections
-    );
-    if (!credentials) {
-      return errorResponse(
-        HTTP_STATUS.BAD_REQUEST,
-        `No credentials for music provider: ${provider}`
-      );
+  if (typeof body.model === "string" && !body.model.includes("/")) {
+    const combo = await getComboByName(body.model);
+    if (combo) {
+      return runModelEndpointCombo({
+        name: body.model,
+        endpoint: "music",
+        request,
+        body,
+        policy: scope.policy,
+        allowedConnections: scope.allowedConnections,
+        dispatch: (routedBody, allowedConnections) =>
+          dispatchMusicModel(
+            request,
+            routedBody as Record<string, unknown> & { model: string; duration?: unknown },
+            allowedConnections,
+            scope.policy.apiKeyInfo?.id,
+            startTime
+          ),
+      });
     }
-    const unusable = unusableCredentialsResponse(provider, credentials);
-    if (unusable) return unusable;
-  } else if (providerConfig?.authType === "none") {
-    // #6928 + GHSA-3w2r: the shared local-override lookup (also used by the
-    // video route) keeps the override and the zero-config default in scope.
-    const local = await resolveLocalOverrideCredentials(provider, scope.allowedConnections);
-    if (local.rejection) return local.rejection;
-    credentials = local.credentials;
   }
-
-  const result = await handleMusicGeneration({
-    prepareFalInput: getFalCompatibilityPreparer(),
+  return dispatchMusicModel(
+    request,
     body,
-    credentials,
-    log,
-    signal: request.signal,
-  });
-
-  if (result.success) {
-    await clearRecoveredProviderState(credentials);
-    return successfulMediaGenerationResponse({
-      result,
-      billingMode: "audio",
-      provider,
-      model: body.model,
-      startTime,
-      duration: body.duration,
-      apiKeyId: scope.policy.apiKeyInfo?.id,
-    });
-  }
-
-  return failedMediaGenerationResponse(result, "Music generation provider error");
+    scope.allowedConnections,
+    scope.policy.apiKeyInfo?.id,
+    startTime
+  );
 }
 
 export const POST = withInjectionGuard(postHandler);

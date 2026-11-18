@@ -29,70 +29,61 @@ perubahan lazim kepada kontraknya, semakan berfokus dan liputan CI.
 6. **Rekodkan bukti.** Dalam templat PR, senaraikan perintah yang dijalankan, setiap fail ujian yang ditambah atau diubah,
    migrasi atau bendera ciri, serta sebarang pengesahan khusus CI yang masih belum selesai.
 
-## Laluan utama mengikut jenis perubahan
+## Laluan emas mengikut jenis perubahan
 
-Perintah di bawah ialah semakan berfokus minimum, bukan kebenaran untuk melangkau ujian yang secara langsung meliputi
-tingkah laku yang anda ubah.
+Perintah di bawah ialah semakan fokus minimum, bukan kebenaran untuk melangkau ujian yang secara langsung meliputi tingkah laku yang anda ubah.
 
-### Penyedia
+### Pembekal
 
 **Kontrak**
 
-- Takrif penyedia dalam `src/shared/constants/providers/` dan komposisinya dalam
-  `src/shared/constants/providers.ts`.
-- Model dan keupayaan dalam `open-sse/config/providerRegistry.ts` atau fail pendaftaran yang diekstrak daripadanya.
-- Pemilihan pelaksana/penterjemah, konfigurasi OAuth atau kunci API, aset papan pemuka dan rujukan penyedia
-  terjana apabila berkenaan.
-- Bukti kelayakan awam mesti menggunakan `resolvePublicCred()`; respons ralat mesti menggunakan pembantu ralat
-  tersanitasi yang dikongsi. Lihat `docs/security/PUBLIC_CREDS.md` (git; tidak dikompil ke dalam `/docs`) dan
-  [Sanitasi Ralat](../security/ERROR_SANITIZATION.md).
+- Definisi pembekal dalam `src/shared/constants/providers/` dan komposisinya dalam `src/shared/constants/providers.ts`.
+- Model dan keupayaan dalam `open-sse/config/providerRegistry.ts` atau fail pendaftarannya yang diekstrak.
+- pemilihan Executor/translator, konfigurasi OAuth atau kunci API dan aset papan pemuka. Jangan lakukan gambar rajah `docs/reference/PROVIDER_REFERENCE.md` atau README yang dijana semula: muat semula keluaran menulis semulanya (`check:pr-derived-paths` gagal ciri PR yang membawanya).
+- Bukti kelayakan awam mesti menggunakan `resolvePublicCred()`; respons ralat mesti menggunakan pembantu ralat bersih yang dikongsi. Lihat `docs/security/PUBLIC_CREDS.md` (git; tidak disusun menjadi `/docs`) dan [Ralat Sanitasi](../security/ERROR_SANITIZATION.md).
 
-**Kitaran berfokus**
+**Gelung terfokus**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # apabila katalog berubah; komitkan perbezaan perubahan terjana
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Uji juga setiap keluarga permintaan yang terjejas: sembang, Responses, imej, pembenaman, audio atau video.
-Semak katalog terjana dan perbezaan perubahan golden sebagai perubahan kontrak; jangan terimanya secara membuta tuli.
+Uji juga setiap keluarga permintaan yang terjejas: sembang, Respons, imej, benam, audio atau video. Semak katalog yang dijana dan perbezaan emas apabila kontrak berubah; jangan terima mereka secara membuta tuli.
 
 ### Penghalaan
 
 **Kontrak**
 
 - Nilai strategi awam dan metadata UI dalam `src/shared/constants/routingStrategies.ts`.
-- Penghantaran dan penyusunan di bawah `open-sse/services/combo.ts` dan `open-sse/services/combo/`.
-- Skema combo, pengekalan, keadaan daya tahan, keupayaan model serta kawalan API/UI.
-- [Enjin Auto-Combo](../routing/AUTO-COMBO.md) dan dokumentasi daya tahan apabila tingkah laku berubah.
+- Penghantaran dan tempahan di bawah `open-sse/services/combo.ts` dan `open-sse/services/combo/`.
+- Skema kombo, ketekunan, keadaan daya tahan, keupayaan model dan kawalan API/UI.
+- [Enjin Kombo Auto](../routing/AUTO-COMBO.md) dan dokumentasi ketahanan apabila tingkah laku berubah.
 
-**Kitaran berfokus**
+**Gelung terfokus**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # perubahan strategi atau penghantaran
-npm run check:known-symbols      # perubahan pendaftaran strategi
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Gunakan ujian upstream olok-olok yang deterministik secara setempat. Ujian ringkas combo langsung memerlukan bukti kelayakan dan
-bersifat manual, bukan pengganti CI.
+Gunakan ujian olok-olok deterministik secara tempatan. Asap kombo langsung memerlukan kelayakan dan manual, bukan pengganti CI.
 
 ### UI / UX
 
 **Kontrak**
 
-- Laluan/halaman Next.js dan sempadan komponen dikongsi di bawah `src/app/` dan
-  `src/shared/components/`.
-- Bentuk respons API, keadaan pemuatan/kosong/ralat, tingkah laku papan kekunci dan pembaca skrin,
-  reka letak responsif, tema dan peluasan lokal.
-- Rentetan sumber UI bahasa Inggeris dalam `src/i18n/messages/en.json`; jangan tetapkan teks baharu yang dilihat pengguna secara terus dalam kod.
+- Next.js route/page dan sempadan komponen yang dikongsi di bawah `src/app/` dan `src/shared/components/`.
+- bentuk tindak balas API, keadaan loading/empty/error, papan kekunci dan gelagat pembaca skrin, reka letak responsif, tema dan pengembangan tempat.
+- Rentetan sumber UI bahasa Inggeris dalam `src/i18n/messages/en.json`; jangan kod keras salinan yang dihadapi pengguna baharu.
 
-**Kitaran berfokus**
+**Gelung terfokus**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Jalankan aplikasi untuk perubahan interaksi atau visual dan semak kedua-dua ruang pandang sempit serta lebar. CI menjalankan
-binaan produksi dan suit yang lebih luas; tingkah laku visual masih memerlukan komponen berfokus, Playwright
-atau semakan manual yang didokumenkan dan bersesuaian dengan perubahan tersebut.
+Jalankan apl untuk interaksi atau perubahan visual dan semak kedua-dua ruang pandang sempit dan luas. CI menjalankan binaan pengeluaran dan suite yang lebih luas; tingkah laku visual masih memerlukan komponen terfokus, Playwright atau semakan manual yang didokumenkan yang sesuai dengan perubahan.
 
 ### i18n
 
 **Kontrak**
 
-- `src/i18n/messages/en.json` ialah sumber UI; `config/i18n.json` ialah sumber lokal.
-- Katalog CLI disimpan secara berasingan di bawah `bin/cli/locales/`.
-- Kekalkan ruang letak dan tag ICU dengan tepat. Jangan terjemahkan nama produk/penyedia/model,
-  nama protokol dan pengepala, perintah, pengecam kod/JSON, URL, pemboleh ubah persekitaran atau
-  istilah terlindung seperti `OmniRoute`, `OAuth`, `MCP` dan `A2A`. Senarai sumber semasa ialah
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` ialah sumber UI ; `config/i18n.json` ialah sumber setempat.
+- katalog CLI hidup berasingan di bawah `bin/cli/locales/`.
+- Kekalkan ruang letak dan teg ICU dengan tepat. Jangan terjemahkan nama product/provider/model, protokol dan nama pengepala, arahan, pengecam code/JSON, URLs, pembolehubah persekitaran atau istilah yang dilindungi seperti `OmniRoute`, `OAuth`, `MCP` dan `A2A`. Senarai sumber semasa ialah `scripts/i18n/glossary/protected-terms.json`.
 
-**Kitaran berfokus**
+Ciri PR hanya mengedit `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); tempat lain dilengkapkan sekali setiap keluaran oleh penyegaran keluaran atau gelombang terjemahan (`docs/guides/I18N.md` → "Ciri PRs sentuh `en.json` sahaja"). `npm run check:pr-derived-paths` gagal ciri PR yang mengedit katalog tempat lain.
+
+**Gelung terfokus**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # apabila rentetan/katalog CLI berubah
 npm run lint
 ```
 
-Ini ialah panduan untuk sistem sedia ada, bukannya pelawaan untuk memperluas alat atau model kekuncinya.
-Pastikan tampalan i18n kekal tertumpu sementara sistem pengganti sedang direka. Jangan jalankan perintah terjemahan
-yang memanggil perkhidmatan luaran melainkan tugas tersebut secara jelas memerlukan terjemahan terjana dan
-anda telah menyemak perbezaan perubahan yang terhasil.
+Tanpa `--mode=pr` gerbang ini berjalan dalam mod keluaran secara setempat dan melaporkan setiap kunci kitaran ditambah atau ditulis semula dalam `en.json`; itu adalah kerja muat semula keluaran, bukan kerja PR anda.
+
+Ini adalah panduan untuk sistem sedia ada, bukan jemputan untuk mengembangkan model perkakas atau kuncinya. Pastikan tampalan i18n menjalani pembedahan semasa sistem penggantian sedang direka bentuk. Jangan jalankan arahan terjemahan yang memanggil perkhidmatan luaran melainkan tugas itu memerlukan terjemahan yang dijana secara eksplisit dan anda telah menyemak perbezaan yang terhasil.
 
 ### CLI
 
 **Kontrak**
 
-- Perintah dan bendera awam dalam `bin/cli/`, perintah API yang dijana, kod keluar, stdout/stderr dan
-  bentuk output JSON, tingkah laku konfigurasi/persekitaran, serta fail yang dipakejkan.
-- Rentetan CLI yang dilihat pengguna mesti menggunakan lapisan i18n CLI dan memastikan katalog `en`/`pt-BR` sentiasa diselaraskan.
+- Perintah awam dan bendera dalam `bin/cli/`, perintah API yang dijana, kod keluar, bentuk output stdout/stderr dan JSON, tingkah laku config/environment dan fail berpakej.
+- rentetan yang menghadap pengguna CLI mesti menggunakan lapisan CLI i18n ( kekunci `t()` yang wujud dalam `bin/cli/locales/en.json`). Ciri PR hanya menyunting `en.json`; `pt-BR` dan tempat-tempat lain selesai pada pelepasan.
 - Kekalkan Node sebagai masa jalan yang disokong dan kontrak binari yang diterbitkan.
 
-**Kitaran berfokus**
+**Gelung terfokus**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # perubahan CLI yang dijana/dihimpunkan
-npm run check:pack-policy     # perubahan permukaan pakej
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Gunakan perintah yang tepat dalam direktori data sementara apabila tingkah laku bergantung pada penghuraian, fail atau status
-keluar. CI menjalankan semakan artifak pakej dan ekosistem yang lebih menyeluruh.
+Gunakan arahan tepat dalam direktori data sementara apabila tingkah laku bergantung pada penghuraian, fail atau status keluar. CI melakukan pemeriksaan artifak dan ekosistem pakej yang lebih luas.
 
 ### Pangkalan data
 
 **Kontrak**
 
-- Modul domain di bawah `src/lib/db/`; import modul tertentu secara langsung (lapisan eksport semula `localDb.ts` yang lama telah dialih keluar).
-- Migrasi SQL bernombor dan idempoten di bawah `src/lib/db/migrations/`, keselamatan transaksi, tingkah laku
-  naik taraf, indeks dan setiap pemanggil yang terjejas oleh skema.
-- Laluan dan pengendali tidak sekali-kali mengeluarkan SQL mentah secara langsung.
+- Modul domain di bawah `src/lib/db/`; import modul khusus secara langsung (lapisan eksport semula `localDb.ts` lama telah dialih keluar).
+- Penghijrahan SQL bernombor, idempoten di bawah `src/lib/db/migrations/`, keselamatan transaksi, tingkah laku naik taraf, indeks dan setiap pemanggil yang terjejas oleh skema.
+- Laluan dan pengendali tidak pernah mengeluarkan SQL mentah secara langsung.
 
-**Kitaran berfokus**
+**Gelung terfokus**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Uji kedua-dua pangkalan data baharu dan naik taraf daripada skema terdahulu apabila menambahkan migrasi. Ujian pangkalan data
-mesti menutup pemegang dan memanggil `resetDbInstance()` semasa pembersihan. Jalankan `npm run test:bun:db` hanya apabila
-laluan penyesuai Bun berdaya usaha terbaik berubah; Node kekal sebagai rujukan berautoriti.
+Uji kedua-dua pangkalan data baharu dan naik taraf daripada skema sebelumnya apabila menambah migrasi. Ujian pangkalan data mesti menutup pemegang dan memanggil `resetDbInstance()` semasa pembersihan. Jalankan `npm run test:bun:db` hanya apabila laluan penyesuai Bun usaha terbaik berubah; Nod kekal berwibawa.
 
-### Binaan / pelaksanaan
+### Bina / gunakan
 
 **Kontrak**
 
-- Manifes/fail kunci akar dan ruang kerja, `scripts/build/`, pemasangan kendiri Next.js, kandungan pakej
-  `dist/`, metadata platform Electron, aliran kerja CI dan penanda pelaksanaan.
-- Julat Node yang disokong dan penggunaan Bun yang disenaraikan sebagai dibenarkan dalam `CLAUDE.md` mesti dikekalkan.
-- Artifak binaan kekal tidak dijejaki; dasar kebergantungan, lesen, aliran kerja dan pakej terpakai.
+- Akar dan ruang kerja manifests/lockfile, `scripts/build/`, Next.js pemasangan kendiri, kandungan pakej `dist/`, metadata platform Electron, aliran kerja CI dan sentinel penempatan.
+- Julat Nod yang disokong dan penggunaan Bun yang disenaraikan dibenarkan dalam `CLAUDE.md` mesti kekal utuh.
+- Bina artifak kekal tidak dikesan; dasar pergantungan, lesen, aliran kerja dan pakej dikenakan.
 
-**Kitaran berfokus**
+**Gelung terfokus**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # perubahan kebergantungan atau fail kunci
-npm run check:pack-policy      # perubahan permukaan pakej yang diterbitkan
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Gunakan `npm run build` secara setempat hanya apabila perubahan menjejaskan kompilasi, pemasangan kendiri, aset
-atau penghimpunan masa jalan. Gunakan `npm run build:release` hanya untuk pengesahan keluaran/pelaksanaan. Binaan CI ialah
-isyarat rentas platform muktamad; perubahan Electron khusus platform memerlukan binaan berfokus yang sepadan
-atau bukti ujian ringkas.
+Gunakan `npm run build` secara setempat hanya apabila perubahan mempengaruhi kompilasi, pemasangan kendiri, aset atau himpunan masa jalan. Gunakan `npm run build:release` hanya untuk pengesahan release/deploy. Binaan CI ialah isyarat rentas platform terakhir; perubahan Electron khusus platform memerlukan bukti binaan tertumpu atau asap yang sepadan.
 
 ## Skrip pembangun untuk mesin kongsi
 

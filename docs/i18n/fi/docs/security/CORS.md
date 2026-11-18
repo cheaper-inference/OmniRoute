@@ -116,33 +116,10 @@ Alkuperät täsmäytetään kirjainkoosta riippumatta ja lopun vinoviiva ohiteta
 voi asettaa ajonaikaisesti kohdassa **Dashboard → Security → CORS Allowed Origins** ilman
 uudelleenkäynnistystä.
 
-## API-avaimet vs. evästeistunnot
+## API -näppäimet vs eväste-istunnot
 
-- **Bearer / `x-api-key` (`/v1/*`-päättelyrajapinta):** selaimet eivät koskaan liitä
-  näitä automaattisesti. CORS ei ole tässä merkityksellinen este — API-avain on
-  este — minkä vuoksi tämä rajapinta on tarkoituksella salliva, jotta selain- ja
-  Electron-asiakkaat voivat lukea vastaukset, joihin niillä on jo oikeus.
-  Salliva alkuperän palautus seuraa validoitua avainta, ei pelkkää otsakkeen
-  olemassaoloa: kun `REQUIRE_API_KEY=false` palvelee pyynnön anonyymisti, sen
-  onnistunut vastaus noudattaa oletusarvoisesti estävää sallittujen luetteloa.
-  Todennuksen hylkäykset (401) pysyvät luettavina, jotta asiakkaat voivat näyttää
-  peruutetun tai väärin kirjoitetun avaimen (#5242): putken oma 401 säilyttää alkuperän
-  palautuksen, ja reitti, joka hylkää avaimen itse sen jälkeen, kun putki on palvellut
-  pyynnön anonyyminä (`/v1/models` ja `/v1beta/models`, kun hallinnan todennus on
-  määritetty, omistajakohtaiset `/v1/files`, `/v1/batches`, `/v1/media`,
-  `/v1/session-leases` sekä auto-combo-ehdokasreitit), lisää alkuperän palautuksen tuohon
-  401-vastaukseen `credentialRejectionHeaders()`-funktion avulla. Palautus määräytyy
-  sen mukaan, sisältääkö pyyntö tunnistetieto-otsakkeen (`Authorization`, `x-api-key`,
-  `x-goog-api-key` tai `auth_token`-eväste), ei sen mukaan, minkä niistä reitti
-  tarkisti, eikä sitä koskaan yhdistetä `Access-Control-Allow-Credentials`-otsakkeeseen;
-  runko on kiinteä virhekuori. `/api/v1/`-polun alla olevat hallintareitit, joita
-  `requireManagementAuth()` suojaa (`/api/v1/management/*`, `/api/v1/registered-keys`),
-  eivät lisää alkuperän palautusta: kun `REQUIRE_API_KEY=false`, niiden 401/403-vastaukset
-  eivät ole luettavissa eri alkuperästä.
-- **Evästeistunto (hallintapaneeli):** sitä suojaavat sekä oletusarvoinen estävä
-  toimintatapa **että** `Access-Control-Allow-Credentials`-otsakkeen puuttuminen
-  jaetulta polulta. Älä sisällytä hallinta- tai hallintapaneelialkuperiä mihinkään
-  sallivaan määritykseen; niiden on pysyttävä täysin oletusarvoisesti estettyinä.
+- **Kantaja / `x-api-key` ( `/v1/*` -päättelypinta):** selaimet eivät koskaan liitä näitä automaattisesti. CORS ei ole tässä merkityksellinen este — API -näppäin on este —, minkä vuoksi tämä pinta on tarkoituksellisesti salliva, jotta selain- ja Electron -asiakkaat voivat lukea vastauksia, joihin heillä on jo oikeus. Rento kaiku seuraa validoitua avainta, ei pelkkää otsikon läsnäoloa: kun `REQUIRE_API_KEY=false` palvelee pyyntöä nimettömästi, sen onnistunut vastaus säilyttää epäonnistuneen sulkemisen sallittujen luettelon. Valtuutuksen hylkäämiset (401) pysyvät luettavissa, jotta asiakkaat voivat tuoda esiin peruutetun tai väärin kirjoitetun avaimen (#5242): liukuhihnan oma 401 säilyttää kaiun ja reitti, joka hylkää itse avaimen sen jälkeen, kun liukuhihna on toiminut sen anonyyminä (`/v1/models` ja `/v1beta/models` hallinnan todennus määritettynä, `/v1/files` scoped, `/v1/batches`, `/v1/media` `/v1/session-leases` ja auto-combo ehdokasreitit) lisää kaiun tähän 401:een `credentialRejectionHeaders()` kautta. Kaiku näppäillään pyyntöön, jossa on valtuustietojen otsikko (`Authorization`, `x-api-key`, `x-goog-api-key` tai `auth_token` -eväste), ei kummassa niistä reitti on tarkistettu, eikä sitä koskaan yhdistetä `Access-Control-Allow-Credentials` kanssa; runko on kiinteä virhekuori. Hallintareitit `/api/v1/` alla, joita vartioi `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) eivät lisää kaikua: `REQUIRE_API_KEY=false` llä niiden 401/403 ei ole luettavissa ristiin.
+- **Eväste-istunto (hallintapaneeli):** suojattu epäonnistuneen sulkemisen oletusarvolla** ja** `Access-Control-Allow-Credentials` puuttuessa yhteisellä polulla. Pidä management/dashboard origins poissa kaikista sallivista määrityksistä; niiden on pysyttävä täsmälleen epäonnistuneina kiinni.
 
 ## WebSocket-kättelyt (`/v1/responses`, `/v1/ws`)
 

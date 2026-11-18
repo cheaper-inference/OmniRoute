@@ -67,7 +67,7 @@ export default function SystemPromptTab() {
           <Icon name="edit_note" size={20} />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">{t("globalSystemPrompt")}</h3>
+          <h3 className="text-lg">{t("globalSystemPrompt")}</h3>
         </div>
         <div className="flex items-center gap-3">
           {status === "saved" && (

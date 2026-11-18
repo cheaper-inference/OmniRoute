@@ -16,6 +16,8 @@ import { readFileSync, readdirSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import path from "node:path";
 
+import { placeholderParityDeferred } from "../_helpers/localeParityMode.ts";
+
 const messagesDir = path.join(
   path.dirname(fileURLToPath(import.meta.url)),
   "..",
@@ -209,6 +211,11 @@ test("every locale keeps the placeholders and tags its English source defines", 
     for (const [key, translated] of flatten(loadLocale(file))) {
       const source = english.get(key);
       if (typeof source !== "string") continue;
+      // pr mode only (tests/_helpers/localeParityMode.ts): a feature PR that rewrites this English
+      // value — renaming `{count}` to `{rows}`, say — leaves the translations to the release
+      // refresh, which marks and retranslates them. Every key whose English the PR did not
+      // change is still judged; in release mode nothing is deferred.
+      if (placeholderParityDeferred(key)) continue;
 
       const expected = scan(source);
       const actual = scan(translated);
