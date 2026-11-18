@@ -80,6 +80,34 @@ test("remapHistoricalLitellmRows copies historical raw vertex buckets into verte
   assert.equal(rows.vertex["deepseek-ai/deepseek-v3.1-maas"]?.input, 0.6);
 });
 
+test("vertex default rows price Flash and 2.5 tiers at their own rates", async () => {
+  const flash = await getPricingForModel("vertex", "gemini-3-flash-preview");
+  assert.ok(flash);
+  assert.equal(flash.input, 0.5);
+  assert.equal(flash.output, 3);
+  assert.equal(flash.cached, 0.05);
+
+  const flashLite = await getPricingForModel("vertex", "gemini-2.5-flash-lite");
+  assert.ok(flashLite);
+  assert.equal(flashLite.cached, 0.01);
+
+  const proShort = await calculateCostDetailed("vertex", "gemini-2.5-pro", {
+    prompt_tokens: 200_000,
+    completion_tokens: 100_000,
+  });
+  assert.equal(proShort.priced, true);
+  // 200K × $1.25 + 100K × $10 — exactly 200K stays on the base tier.
+  assert.ok(Math.abs(proShort.costUsd - 1.25) < 1e-9, `got ${proShort.costUsd}`);
+
+  const proLong = await calculateCostDetailed("vertex", "gemini-2.5-pro", {
+    prompt_tokens: 300_000,
+    completion_tokens: 100_000,
+  });
+  assert.equal(proLong.priced, true);
+  // Over 200K the whole request moves to $2.50 in / $15 out.
+  assert.ok(Math.abs(proLong.costUsd - 2.25) < 1e-9, `got ${proLong.costUsd}`);
+});
+
 test("getPricingForModel resolves vertex gemini-4-argon default and synced prices", async () => {
   const defaultPricing = await getPricingForModel("vertex", "gemini-4-argon");
   assert.ok(defaultPricing);
