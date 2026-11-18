@@ -3154,6 +3154,7 @@
     "ccOnboardingCopied": "Copied",
     "ccOnboardingKeyPlaceholder": "'<your OmniRoute API key>'",
     "ccOnboardingWindowNote": "Claude Code assumes a 200K context window for any model id it does not recognize. For a model with a different real window, add CLAUDE_CODE_AUTO_COMPACT_WINDOW just under it so auto-compaction does not fire too early.",
+    "ccOnboardingWindowLabel": "Auto-compact window (tokens, optional)",
     "failedSave": "Failed to save",
     "profileSyncTitle": "CLI profile auto-sync",
     "profileSyncDescription": "After provider models are synchronized, automatically regenerate CLI tool profiles from the live catalog. Off by default — only profile files are written; the active/default configuration is never changed.",

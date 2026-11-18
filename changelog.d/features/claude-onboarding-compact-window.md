@@ -1,0 +1,1 @@
+- **feat(dashboard):** Claude onboarding settings snippet has an optional auto-compact window field that adds `CLAUDE_CODE_AUTO_COMPACT_WINDOW` when a value is entered; empty by default, so the copied snippet is unchanged.
