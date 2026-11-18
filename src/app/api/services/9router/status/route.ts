@@ -3,6 +3,7 @@ import { getServiceRow } from "@/lib/db/versionManager";
 import { getInstalledVersion, getLatestVersion } from "@/lib/services/installers/ninerouter";
 import { getOrCreateApiKey, maskApiKey } from "@/lib/services/apiKey";
 import { createErrorResponse } from "@/lib/api/errorResponse";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error";
 import { logAuditEvent } from "@/lib/compliance/index";
 
@@ -42,6 +43,10 @@ export async function GET(request: Request = new Request("http://localhost/")): 
     };
 
     if (reveal === "key") {
+      // The plaintext key needs a real management credential even when login is disabled.
+      const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+      if (authError) return authError;
+
       const confirmHeader = request.headers.get("X-Reveal-Confirm");
       if (confirmHeader !== "yes") {
         return createErrorResponse({

@@ -4,6 +4,9 @@
  * - Without ?reveal: returns only masked key
  * - With ?reveal=key but missing X-Reveal-Confirm: returns 403
  * - With ?reveal=key and X-Reveal-Confirm: yes: returns apiKeyPlain + logs audit
+ *
+ * The reveal path also needs a management credential (see settings-secret-masking.test.ts),
+ * so these requests carry a dashboard session.
  */
 
 import { describe, it, before, after, beforeEach } from "node:test";
@@ -11,6 +14,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { makeManagementSessionRequest } from "../../../helpers/managementSession.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-9router-reveal-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -40,8 +44,8 @@ initAuditLog();
 const { GET } =
   await import("../../../../src/app/api/services/9router/status/route.ts?t=reveal-suite");
 
-function makeRequest(url: string, headers?: Record<string, string>): Request {
-  return new Request(url, { headers });
+function makeRequest(url: string, headers?: Record<string, string>): Promise<Request> {
+  return makeManagementSessionRequest(url, { headers });
 }
 
 after(() => {
@@ -51,7 +55,7 @@ after(() => {
 
 describe("GET /api/services/9router/status", () => {
   it("without ?reveal returns only masked key (no plain)", async () => {
-    const req = makeRequest("http://localhost/api/services/9router/status");
+    const req = await makeRequest("http://localhost/api/services/9router/status");
     const res = await GET(req);
     assert.equal(res.status, 200);
     const body = await res.json();
@@ -60,7 +64,7 @@ describe("GET /api/services/9router/status", () => {
   });
 
   it("?reveal=key without X-Reveal-Confirm returns 403", async () => {
-    const req = makeRequest("http://localhost/api/services/9router/status?reveal=key");
+    const req = await makeRequest("http://localhost/api/services/9router/status?reveal=key");
     const res = await GET(req);
     assert.equal(res.status, 403);
     const body = await res.json();
@@ -74,7 +78,7 @@ describe("GET /api/services/9router/status", () => {
   });
 
   it("?reveal=key with wrong X-Reveal-Confirm value returns 403", async () => {
-    const req = makeRequest("http://localhost/api/services/9router/status?reveal=key", {
+    const req = await makeRequest("http://localhost/api/services/9router/status?reveal=key", {
       "X-Reveal-Confirm": "no",
     });
     const res = await GET(req);
@@ -82,7 +86,7 @@ describe("GET /api/services/9router/status", () => {
   });
 
   it("?reveal=key with X-Reveal-Confirm: yes returns apiKeyPlain", async () => {
-    const req = makeRequest("http://localhost/api/services/9router/status?reveal=key", {
+    const req = await makeRequest("http://localhost/api/services/9router/status?reveal=key", {
       "X-Reveal-Confirm": "yes",
     });
     const res = await GET(req);
@@ -97,7 +101,7 @@ describe("GET /api/services/9router/status", () => {
   it("reveal logs an audit entry with action=service.reveal_api_key", async () => {
     const countBefore = countAuditLog({ action: "service.reveal_api_key" });
 
-    const req = makeRequest("http://localhost/api/services/9router/status?reveal=key", {
+    const req = await makeRequest("http://localhost/api/services/9router/status?reveal=key", {
       "X-Reveal-Confirm": "yes",
     });
     const res = await GET(req);
@@ -112,7 +116,7 @@ describe("GET /api/services/9router/status", () => {
   });
 
   it("plain key is different from masked key (not trivially masked)", async () => {
-    const req = makeRequest("http://localhost/api/services/9router/status?reveal=key", {
+    const req = await makeRequest("http://localhost/api/services/9router/status?reveal=key", {
       "X-Reveal-Confirm": "yes",
     });
     const res = await GET(req);

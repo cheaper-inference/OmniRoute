@@ -32,6 +32,7 @@ import {
   verifyManagementPassword,
 } from "@/lib/auth/managementPassword";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
+import { maskSecretSettings, unchangedSecretSettingKeys } from "@/lib/api/settingsSecrets";
 import { requireOperatorCredential } from "@/lib/api/operatorCredential";
 import { isPaidModelTarget } from "@/shared/utils/freeModels";
 import { getAuditRequestContext, logAuditEvent } from "@/lib/compliance";
@@ -218,7 +219,7 @@ export async function GET(request: Request) {
 
     return NextResponse.json(
       {
-        ...safeSettings,
+        ...maskSecretSettings(safeSettings),
         settingsRevision,
         hasPassword: hasManagementPasswordConfigured(settings),
         runtimePorts,
@@ -418,6 +419,11 @@ export async function PATCH(request: Request) {
     // The schema strips keys it does not know. Name them in the 200 body so a typo or a stale
     // client never looks like a saved setting.
     const ignoredKeys = Object.keys(rawBody).filter((key) => !Object.hasOwn(validation.data, key));
+    // GET returns stored secrets masked; a client that sends the mask back keeps the stored value.
+    for (const key of unchangedSecretSettingKeys(validation.data)) {
+      delete (validation.data as Record<string, unknown>)[key];
+      delete (body as Record<string, unknown>)[key];
+    }
 
     const operatorOnly = await rejectMachineSecurityPolicyWrite(
       request,
@@ -675,7 +681,11 @@ export async function PATCH(request: Request) {
     } = settings;
     const settingsRevision = await getSettingsRevision();
     const response = NextResponse.json(
-      { ...safeSettings, settingsRevision, ...(ignoredKeys.length > 0 ? { ignoredKeys } : {}) },
+      {
+        ...maskSecretSettings(safeSettings),
+        settingsRevision,
+        ...(ignoredKeys.length > 0 ? { ignoredKeys } : {}),
+      },
       { headers: settingsResponseHeaders(settingsRevision) }
     );
     // The browser that changed the password keeps its own session: swap its cookie for one issued

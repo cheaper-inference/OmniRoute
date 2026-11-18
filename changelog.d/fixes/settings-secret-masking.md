@@ -1,0 +1,1 @@
+- **fix(security):** `GET /api/settings` returns stored credentials (OIDC/Entra client secrets, SkillsMP, CLIProxyAPI and Qdrant API keys, ngrok authtoken) masked, and a PATCH that sends the mask back keeps the stored value; `GET /api/version-manager/status` no longer serializes service keys; revealing the 9router key requires a management credential even with login disabled
