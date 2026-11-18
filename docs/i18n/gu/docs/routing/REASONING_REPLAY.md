@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 કેપ્ચર `open-sse/handlers/chatCore.ts` માં થાય છે (બે સાઇટ્સ, બે `cacheReasoningFromAssistantMessage` કૉલ સાઇટ્સ પર). રિપ્લે `open-sse/translator/index.ts` માં સ્કીમા બળજબરી પછી પણ ડિસ્પેચ પહેલા થાય છે.
+
+ટૂલ-કોલ એન્ટ્રીઓ `buildToolCallCacheKey()` હેઠળ સંગ્રહિત થાય છે, જે વિનંતીના અવકાશનું ડાયજેસ્ટ અને ટૂલ કોલ આઈડી છે, તેથી અન્ય API કી અથવા સત્ર દ્વારા ઉપયોગમાં લેવાતી સમાન આઈડી એન્ટ્રી પસંદ કરતી નથી. સ્કોપ `buildReasoningCacheScope()` માંથી આવે છે: API કી id, વત્તા જ્યારે વિનંતીમાં એક હોય ત્યારે સત્ર કી. તેથી `tool_call_id` કૉલમ અને ડેશબોર્ડ તે એન્ટ્રીઓ માટે આ ડાયજેસ્ટ દર્શાવે છે.
 
 સાદો (નોન-ટૂલ-કોલ) સહાયક વળાંક અલગ રીતે કીડ કરવામાં આવે છે: `buildAssistantMessageCacheKey()` તે વળાંક સુધી સત્રનો અવકાશ અને સામાન્ય OpenAI-ફોર્મેટ ટ્રાન્સક્રિપ્ટને ડાયજેસ્ટ કરે છે, કારણ કે DeepSeek એકવાર `tools` હાજર હોય ત્યારે _Every_ પહેલાના વળાંકની જરૂર પડે છે. પ્રતિસાદ-API લક્ષ્યો માટે (ઉદાહરણ તરીકે `opencode-go/deepseek-v4-flash`, `/responses` પર રાઉટ કરાયેલ) અપસ્ટ્રીમ બોડી `input` વહન કરે છે, `messages` નહીં, તેથી `translateRequest()` (`open-sse/translator/index.ts`) પિવટ ટ્રાન્સક્રિપ્ટની જાણ કરે છે જે તે કોલબેક વિકલ્પ દ્વારા ડાયજેસ્ટ કરે છે અને કેપ્ચર સાઇટ્સ તે જ ટ્રાન્સક્રિપ્ટને ડાયજેસ્ટ કરે છે. રિસ્પોન્સ રિપ્લે પાસ દરેક સોર્સ ફોર્મેટ માટે OpenAI પિવટ પર ચાલે છે, તેથી Anthropic મેસેજ ક્લાયન્ટ્સ (Claude → OpenAI → પ્રતિસાદો) પણ રિપ્લે થાય છે.
 

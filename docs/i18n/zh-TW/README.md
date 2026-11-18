@@ -15,25 +15,25 @@
 
 **由 [Diego Souza](https://github.com/diegosouzapw) 建立**
 
-<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停下寫程式的腳步。每個 AI 工具 → 389 個提供者 — 其中 150+ 個免費 — 透過單一端點。Claude Code、Codex、Cursor、Cline、Copilot 與 Antigravity 皆可連接至免費的 Claude / GPT / Gemini，並具備自動備援。RTK + Caveman 堆疊式壓縮可節省 15–95% 的 token（平均約 89%）— 永遠不會觸及限制。389 個 AI 提供者 · 150+ 個免費方案 · 每月約 16.2 億個免費 token · 20 種路由策略 · $0 即可開始。"/>
+<img src="./docs/diagrams/readme-hero.svg" width="100%" alt="OmniRoute — 永不停下編碼。每個 AI 工具 → 394 個提供者 — 其中 150+ 個免費 — 透過單一端點。Claude Code、Codex、Cursor、Cline、Copilot 與 Antigravity 皆可連接至免費的 Claude / GPT / Gemini，並具備自動回退功能。RTK + Caveman 堆疊式壓縮可節省 15–95% 的 token（平均約 89%）— 永遠不會達到限制。394 個 AI 提供者 · 150+ 個免費方案 · 每月約 16.2 億個免費 token · 22 種路由策略 · $0 即可開始。"/>
 
 </div>
 
 <div align="center">
 
-## 💰 每月約 1.62B 個 Token，涵蓋第三方免費方案
+## 💰 每月來自第三方免費方案的約 16.2 億 Tokens
 
 </div>
 
-> **請使用您自己的服務商帳戶。** 這是分別符合資格的第三方免費方案所彙整出的估算值，並非 OmniRoute 提供的 Token 額度。請註冊、在必要時取得憑證，並連接您可以使用的服務商；每個服務商會自行控管其限制、可用性與條款。
+> **請使用您自己的服務提供者帳戶。** 這是分別符合資格的第三方免費方案之預估總和，並非 OmniRoute 提供的 token 額度。請註冊、在需要時取得憑證，並連線您可以使用的服務提供者；每個服務提供者都自行控管其限制、可用性與條款。
 >
-> 手動疊加免費方案十分痛苦——數十個 SDK、數十種速率限制，而且完全不知道自己實際擁有多少額度。OmniRoute 已在 **34 個週期性配額池金鑰中整理 465 個免費方案項目**，並根據 **17 個已公布正數月度預算的配額池，加上 Groq 的五個按模型計算的上限**，去除共享配額池的重複計算後，得出 Token 標題數值。只有在完成區域身分驗證後才會開放的配額（目前為 ModelScope）會另外顯示，區域身分驗證後再增加約 6M，且絕不會納入標題總額。結果會持續顯示在儀表板上（`/dashboard/free-tiers`）。
+> 手動疊加免費方案非常痛苦——數十個 SDK、數十種速率限制，而且完全不知道自己實際擁有多少額度。OmniRoute 目錄收錄 **34 個週期性額度池金鑰中的 465 個免費方案項目**，並根據 **17 個已公布正數月度預算的額度池，加上 Groq 的五個按模型計算的上限** 計算 token 標題數值，並依共用額度池去重。只有在完成區域身分驗證後才會開放的額度（目前為 ModelScope）會另外顯示，區域身分驗證後再增加約 600 萬，且永遠不會加總至標題數值中。結果會持續顯示於儀表板（`/dashboard/free-tiers`）。
 
-<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：每月穩定提供約 1.62B 個免費 Token，首月包含註冊點數時最高約 2.22B 個，來自 34 個已記錄的週期性配額池金鑰，涵蓋 465 個已編目的免費方案項目，並透過單一端點提供。誠實且已去除配額池重複計算的數學方式——每個共享配額池只計算一次，其中包括 17 個已公布正數月度 Token 預算的週期性配額池，以及 Groq 的五個按模型計算的上限；條款風險目錄中有 12 個服務商標記為避免使用，由您自行決定。預算列包含 Mistral 1B、Nara 210M、LLM7 150M、xKiro 150M、Groq 30M（五個按模型計算的上限）及其他較小的配額池，另有首月註冊點數，以及永久免費且沒有 Token 上限的服務商分開顯示，因此不會膨脹標題數值。在 /dashboard/free-tiers 上查看即時已使用／剩餘額度。"/>
+<img src="./docs/diagrams/free-tier-budget.svg" width="100%" alt="OmniRoute 免費方案預算卡：每月穩定提供約 16.2 億個免費 tokens，第一個月在加上註冊點數後最高可達約 22.2 億個，來自涵蓋 465 個目錄免費方案項目的 34 個已記錄週期性額度池金鑰，並透過單一端點提供。誠實且依額度池去重的計算方式——每個共用額度池只計算一次，包括 17 個已公布正數月度 token 預算的週期性額度池，以及 Groq 的五個按模型計算的上限；條款風險目錄中有 12 個服務提供者被標記為應避免使用，由您自行決定。預算列包含 Mistral 10 億、Nara 2.1 億、LLM7 1.5 億、xKiro 1.5 億、Groq 3,000 萬（五個按模型計算的上限）及較小的額度池，另外分別顯示首月註冊點數與永久免費且無 token 上限的服務提供者，因此不會讓標題數值膨脹。在 /dashboard/free-tiers 上查看即時已使用／剩餘額度。"/>
 
-> `/dashboard/free-tiers` 即時頁面的動畫摘要。完整方法（配額池去重、點數級距、服務商條款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
+> `/dashboard/free-tiers` 即時頁面的動畫摘要。完整方法說明（額度池去重、點數層級、服務提供者條款）：**[docs/reference/FREE_TIERS.md](docs/reference/FREE_TIERS.md)**。
 >
-> <sub>這些數據每兩週會根據即時目錄重新稽核，且**可能上升也可能下降**——服務商結束免費方案，數字就會下降；新方案加入，數字就會上升。我們公布的是目錄實際計算出的結果，絕不採用向上取整的最佳情況。</sub>
+> <sub>這些數據每兩週會依據即時目錄重新稽核，並且**可能上升也可能下降**——服務提供者結束免費方案，數字就會下降；新的服務提供者加入，數字就會上升。我們公布的是目錄實際計算出的結果，絕不以向上取整的最佳情況呈現。</sub>
 
 <br/>
 
@@ -41,49 +41,49 @@
 
 <h3>
 
-⭐ 如果 OMNIROUTE 幫助您節省費用並讓工作更輕鬆，請為此儲存庫加星。
+⭐ 如果 OMNIROUTE 幫助您節省費用並讓工作更輕鬆，請為儲存庫點選 Star。
 
 </h3>
 
-[![Stars](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=social)](https://github.com/diegosouzapw/OmniRoute)
+[![星標](https://img.shields.io/github/stars/diegosouzapw/OmniRoute?style=flat&logo=github&logoColor=white&label=Stars&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw/OmniRoute)
 <a href="https://trendshift.io/repositories/23589" target="_blank"><img src="https://trendshift.io/api/badge/repositories/23589" alt="diegosouzapw%2FOmniRoute | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/></a>
-[![Star History Rank](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
+[![Star History 排名](https://api.star-history.com/badge?repo=diegosouzapw/OmniRoute&theme=dark)](https://www.star-history.com/diegosouzapw/omniroute)
 [![olud.ai](https://olud.ai/badge.php?tool=diegosouzapw-omniroute)](https://olud.ai/project/diegosouzapw-omniroute.html)
 
 ### 💬 加入社群
 
-**👋 關注維護者——第一時間取得新服務商、版本更新與技巧：**
+**👋 追蹤維護者——優先取得新服務提供者、版本發布與技巧：**
 
-[![Follow Diego on LinkedIn](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white)](https://www.linkedin.com/in/diegosouzapw/)
-[![Follow @diegosouzapw on GitHub](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=181717)](https://github.com/diegosouzapw)
+[![在 LinkedIn 上追蹤 Diego](https://img.shields.io/badge/Follow_Diego_on-LinkedIn-0A66C2?style=for-the-badge&logo=linkedin&logoColor=white&color=e5ac82&labelColor=20211c)](https://www.linkedin.com/in/diegosouzapw/)
+[![在 GitHub 上追蹤 @diegosouzapw](https://img.shields.io/github/followers/diegosouzapw?style=for-the-badge&logo=github&logoColor=white&label=Follow%20on%20GitHub&color=e5ac82&labelColor=20211c)](https://github.com/diegosouzapw)
 
-[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white)](https://discord.gg/U47eFqAXCn)
-[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white)](https://t.me/omnirouteOficial)
-[![WhatsApp Global](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
-[![WhatsApp Brasil](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
-[![Website](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white)](https://omniroute.online)
+[![Discord](https://img.shields.io/badge/Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&color=e5ac82&labelColor=20211c)](https://discord.gg/U47eFqAXCn)
+[![Telegram](https://img.shields.io/badge/Telegram-26A5E4?style=for-the-badge&logo=telegram&logoColor=white&color=e5ac82&labelColor=20211c)](https://t.me/omnirouteOficial)
+[![WhatsApp 全球](https://img.shields.io/badge/WhatsApp_Global-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4)
+[![WhatsApp 巴西](https://img.shields.io/badge/WhatsApp_Brasil-25D366?style=for-the-badge&logo=whatsapp&logoColor=white&color=e5ac82&labelColor=20211c)](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4)
+[![網站](https://img.shields.io/badge/Website-omniroute.online-blue?logo=google-chrome&logoColor=white&color=e5ac82&labelColor=20211c)](https://omniroute.online)
 
-**問題、服務商建議、產品路線圖與支援 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 Global](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 Brasil](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [Portal](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
+**問題、服務提供者建議、開發路線圖與支援 → [Discord](https://discord.gg/U47eFqAXCn) · [Telegram](https://t.me/omnirouteOficial) · WhatsApp [🌍 全球](https://chat.whatsapp.com/FvuCbrpZmQ6I85n2vW5QIC?s=cl&p=a&mlu=4) / [🇧🇷 巴西](https://chat.whatsapp.com/KWgatljAjmbELQory59Oti?s=cl&p=a&mlu=4) / [📢 官方頻道](https://whatsapp.com/channel/0029VbDwC7A3wtb5PN6a5t2R) / [入口網站](https://portal.sthub.com.br/communities/groups/st-hub/channels/Omniroute-World-8kRjmK)**
 
 <br/>
 
-## 📈 Gateway 持續成長
+## 📈 閘道持續成長
 
 <div align="center">
 
-|                         |        v3.8.50        | **v3.8.51** |      `v3.8.54+`       |
-| ----------------------- | :-------------------: | :---------: | :-------------------: |
-| 🌐 提供者               |          352          |   **358**   |          389          |
-| 🧠 唯一聊天模型 ID      |         1320          |  **1374**   |         1491          |
-| 🖼️ 模態橋接             | 🆕 視覺 + 音訊 + 影片 |      ✓      |           ✓           |
-| 📡 Radar 免費目錄       |      🆕 選擇加入      |      ✓      |           ✓           |
-| ⚖️ 配額感知排程         |    🆕 Quota-Share     |      ✓      |           ✓           |
-| 📊 配額遙測             |        🆕 即時        |      ✓      |           ✓           |
-| 🧰 無頭模式             |           —           |      —      | 🆕 `serve --headless` |
-| 🛤️ LTS 軌道路由基礎架構 |           —           |      —      |      🆕 發行頻道      |
-| 🔎 模型探索 API         |           —           |      —      | 🆕 `/v1/models/query` |
+|                     |        v3.8.50        | **v3.8.51** |      `v3.8.55+`       |
+| ------------------- | :-------------------: | :---------: | :-------------------: |
+| 🌐 提供者           |          352          |   **358**   |          394          |
+| 🧠 唯一聊天模型 ID  |         1320          |  **1374**   |         1491          |
+| 🖼️ 模態橋接         | 🆕 視覺 + 音訊 + 影片 |      ✓      |           ✓           |
+| 📡 Radar 免費目錄   |      🆕 選擇加入      |      ✓      |           ✓           |
+| ⚖️ 配額感知排程     |    🆕 Quota-Share     |      ✓      |           ✓           |
+| 📊 配額遙測         |        🆕 即時        |      ✓      |           ✓           |
+| 🧰 無頭模式         |           —           |      —      | 🆕 `serve --headless` |
+| 🛤️ LTS 軌道基礎架構 |           —           |      —      |      🆕 發行頻道      |
+| 🔎 模型探索 API     |           —           |      —      | 🆕 `/v1/models/query` |
 
-**→ [路線圖](ROADMAP.md) — 踏上通往 `v3.9.0 LTS` 的軌道**
+**→ [路線圖](ROADMAP.md) — 沿著軌道邁向 `v3.9.0 LTS`**
 
 </div>
 
@@ -91,12 +91,12 @@
 
 ## 🧩 可用
 
-[![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
-![NPM Monthly](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
+[![npm 版本](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
+![NPM 每月下載量](https://img.shields.io/npm/dm/omniroute?label=npm/month&color=cb3837&logo=npm)
 [![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
-![Docker Pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
-![Electron Downloads](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
+[![授權條款：MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
+![Docker 拉取次數](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)
+![Electron 下載次數](https://img.shields.io/github/downloads/diegosouzapw/omniroute/total?style=flat&label=electron%20downloads&logo=electron&color=47848F)
 
 <table>
   <tr>
@@ -107,31 +107,31 @@
   </tr>
   <tr>
     <td align="right"><b>💡 了解</b></td>
-    <td align="center"><a href="#-the-promise">💥 承諾</a></td>
+    <td align="center"><a href="#-the-promise">💥 願景</a></td>
     <td align="center"><a href="#-why-omniroute">🤔 為什麼選擇 OmniRoute</a></td>
-    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 脫穎而出的特色</a></td>
+    <td align="center"><a href="#-what-sets-omniroute-apart">🏆 有何與眾不同</a></td>
   </tr>
   <tr>
     <td align="right"><b>⚙️ 功能</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 組合</a></td>
-    <td align="center"><a href="#-389-ai-providers--153-catalog-marked-free">🌐 提供者</a></td>
+    <td align="center"><a href="#-394-ai-providers--153-catalog-marked-free">🌐 提供者</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI 與 MCP</a></td>
   </tr>
   <tr>
     <td align="right"></td>
     <td align="center"><a href="#%EF%B8%8F-save-1595-tokens--automatically">🗜️ 壓縮</a></td>
-    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ 執行環境</a></td>
+    <td align="center"><a href="#%EF%B8%8F-where-omniroute-runs--anywhere">🖥️ 執行位置</a></td>
     <td align="center"><a href="#-private--local-first">🔒 私密</a></td>
   </tr>
   <tr>
     <td align="right"><b>👀 查看</b></td>
-    <td align="center"><a href="#-omniroute-in-action">🎬 實際運作</a></td>
+    <td align="center"><a href="#-omniroute-in-action">🎬 實際操作</a></td>
     <td align="center"><a href="#-whats-new">✨ 最新消息</a></td>
     <td align="center"><a href="#-compatible-clis--coding-agents">🤖 相容的 CLI</a></td>
   </tr>
   <tr>
     <td align="right"><b>💚 支援</b></td>
-    <td align="center"><a href="#-support-omniroute">💚 支援／捐款</a></td>
+    <td align="center"><a href="#-support-omniroute">💚 支援 / 捐款</a></td>
     <td align="center"><a href="#-community--help">💬 社群</a></td>
     <td align="center"><a href="#-sponsors">💖 贊助者</a></td>
   </tr>
@@ -224,33 +224,33 @@
 
 <a id="first-run"></a>
 
-## 🆓 安裝、連線提供者，然後透過單一端點進行路由
+## 🆓 安裝、連線提供者，然後透過單一端點路由
 
 </div>
 
-<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="三個步驟：安裝並啟動 OmniRoute，使用您自己的帳戶或 API 金鑰連線符合資格的提供者，然後將您的工具指向 localhost:20128/v1，並使用 OmniRoute API 金鑰和模型 auto。路由取決於可用的符合資格連線與提供者限制。"/>
+<img src="./docs/diagrams/works-zero-config.svg" width="100%" alt="三個步驟：安裝並啟動 OmniRoute，使用您自己的帳戶或 API 金鑰連線符合資格的提供者，然後將您的工具指向 localhost:20128/v1，並使用 OmniRoute API 金鑰與模型 auto。路由取決於可用的符合資格連線與提供者限制。"/>
 
 ```bash
-# 連線提供者後，從 Dashboard → Endpoints 複製您的 OmniRoute 金鑰：
+# 連線提供者後，從儀表板 → 端點複製您的 OmniRoute 金鑰：
 curl http://localhost:20128/v1/chat/completions \
   -H "Authorization: Bearer YOUR_OMNIROUTE_KEY" \
   -H "Content-Type: application/json" \
   -d '{"model":"auto","messages":[{"role":"user","content":"Hello!"}]}'
 ```
 
-<sub>`auto` 需要符合資格的路由。全新安裝可能沒有符合資格的免金鑰目標，而免金鑰提供者可能會拒絕第三方用戶端。標記為 `tos: avoid` 的提供者（包括 Kiro）預設會排除在自動路由之外；連線帳戶不會覆寫此設定。選擇提供者前，請參閱 [免費方案指南](docs/getting-started/FREE-TIERS-GUIDE.md)。</sub>
+<sub>`auto` 需要符合資格的路由。全新安裝可能沒有符合資格的免金鑰目標，而免金鑰提供者可能拒絕第三方用戶端。標記為 `tos: avoid` 的提供者（包括 Kiro）預設會排除在自動路由之外；連線帳戶不會覆寫此設定。選擇提供者前，請參閱 [免費方案指南](docs/getting-started/FREE-TIERS-GUIDE.md)。</sub>
 
-<sub>📦 **Python、Node.js、PHP 和 cURL** 的複製貼上快速入門指令碼 → [`examples/quickstart/`](examples/quickstart/)</sub>
+<sub>📦 Python、Node.js、PHP 和 **cURL** 的可複製貼上快速入門指令碼 → [`examples/quickstart/`](examples/quickstart/)</sub>
 
 <br/>
 
 <div align="center">
 
-# 💥 願景
+# 💥 OmniRoute 的承諾
 
 </div>
 
-<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="願景 — 單一端點和 389 個提供者。只要仍有其他健康目標可用，自動備援就會持續進行路由。六大支柱：跨 389 個提供者的韌性備援 · 符合資格的工作負載最多可節省 95% 的權杖 · 150+ 個免費方案及 52 個定期提供／免金鑰永久免費的提供者，$0 即可開始 · 透過單一設定支援 39 個 CLI／代理程式整合 · 在 /v1 相容於 OpenAI、Claude、Gemini 和 Responses API · 生產環境控制項，包括斷路器、TLS 隱匿、MCP 110 個工具、A2A、記憶體、防護措施、評估，以及分布於 7,800+ 個受追蹤測試檔案中的 56,000+ 個靜態測試宣告。"/>
+<img src="./docs/diagrams/promise-pillars.svg" width="100%" alt="OmniRoute 的承諾 — 單一端點與 394 個提供者。只要仍有其他健康的目標可用，自動備援就會持續路由。六大支柱：跨 394 個提供者的高韌性備援 · 符合資格的工作負載最高可節省 95% 的權杖 · $0 起步，提供 150+ 個免費方案，以及 51 個定期提供／免金鑰、永久免費的提供者 · 透過單一設定支援 39 個 CLI／代理程式整合 · 在 /v1 相容於 OpenAI、Claude、Gemini 與 Responses API · 生產環境控制項，包括斷路器、TLS 隱匿、MCP 110 個工具、A2A、記憶、護欄、評估，以及分布於 7,800+ 個受追蹤測試檔案中的 56,000+ 個靜態測試宣告。"/>
 
 <br/>
 <br/>
@@ -261,11 +261,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="為什麼選擇 OmniRoute — 不再忙於管理 10 個儀表板、失效的 API 金鑰和意外帳單。十大日常痛點與解決方案：配額到期而未使用 → 最大化訂閱效益；編碼中途遇到速率限制 → 4 層自動備援（訂閱 → API → 低價 → 免費）；工具輸出消耗權杖 → RTK + Caveman 壓縮（15–95%）；昂貴的 API → 成本最佳化路由；每個工具都要個別設定 → 單一端點、單一儀表板；AI 受到封鎖 → 3 層代理 + TLS 隱匿；失效金鑰 → 3 層韌性（斷路器、金鑰冷卻、模型封鎖）；團隊共用一個訂閱 → 具備公平配額的金鑰池；提示詞經過他人的雲端 → 以本機優先，並使用 AES-256-GCM 加密金鑰；無法掌握支出 → 即時分析（使用量、配額、節省金額、p95 延遲）。"/>
+<img src="./docs/diagrams/why-pain-fix.svg" width="100%" alt="為什麼選擇 OmniRoute — 不再周旋於 10 個儀表板、失效的 API 金鑰和意外帳單之間。十項每日痛點及其解決方案：配額到期而未使用 → 最大化訂閱效益；編碼途中遇到速率限制 → 4 層自動備援（訂閱 → API → 低價 → 免費）；工具輸出消耗權杖 → RTK + Caveman 壓縮（15–95%）；昂貴的 API → 成本最佳化路由；每個工具都要個別設定 → 單一端點、單一儀表板；AI 受阻 → 3 層代理 + TLS 隱匿；失效金鑰 → 3 層韌性（斷路器、金鑰冷卻、模型鎖定）；團隊共用一個訂閱 → 具備公平配額的金鑰池；提示詞經過他人的雲端 → 以本機優先，並使用 AES-256-GCM 加密金鑰；無法掌握支出 → 即時分析（使用量、配額、節省金額、p95 延遲）。"/>
 
 <div align="center">
 
-<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute 請求流程：您的 IDE 或 CLI（Claude Code、Cursor、Cline…）呼叫單一本機端點（http://localhost:20128/v1）；OmniRoute Smart Router（RTK + Caveman 壓縮、20 種路由策略、斷路器、TLS 隱匿、MCP、A2A、防護措施）可以在 4 個提供者層級之間進行備援，只要仍有符合資格的健康目標 — 第 1 層訂閱、第 2 層 API 金鑰、第 3 層低價，以及第 4 層免費。"/>
+<img src="./docs/diagrams/tier-cascade.svg" width="100%" alt="OmniRoute 請求流程：您的 IDE 或 CLI（Claude Code、Cursor、Cline…）呼叫單一本機端點（http://localhost:20128/v1）；OmniRoute 智慧路由器（RTK + Caveman 壓縮、22 種路由策略、斷路器、TLS 隱匿、MCP、A2A、護欄）可以在符合資格的健康目標仍可用時，跨 4 個提供者層級進行備援 — 第 1 層訂閱、第 2 層 API 金鑰、第 3 層低價，以及第 4 層免費。"/>
 
 </div>
 
@@ -279,11 +279,11 @@ curl http://localhost:20128/v1/chat/completions \
 
 <p align="center">
   <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
-    <img src="public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — Open Frontier Intelligence · 2.8T parameters · 1M-token context"/>
+    <img src="public/sponsors/kimi-k3-banner.png" width="100%" alt="Kimi K3 — 開放前沿智能 · 2.8T 參數 · 1M-token 上下文"/>
   </a>
 </p>
 
-> **想加入成為開源夥伴嗎？** 這些公司支持開源並幫助 OmniRoute 持續發展 — 我們公開說明他們提供的每一筆資金的用途。請聯繫：[diegosouza.pw@outlook.com](mailto:diegosouza.pw@outlook.com)
+> **想成為開源夥伴嗎？** 這些公司支持開源並協助 OmniRoute 持續發展 — 而且我們會公開說明他們提供給我們的每個 token 的用途。歡迎聯絡：[diegosouza.pw@outlook.com](mailto:diegosouza.pw@outlook.com)
 
 <table>
   <tr>
@@ -291,16 +291,16 @@ curl http://localhost:20128/v1/chat/completions \
       <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">
         <picture>
           <source media="(prefers-color-scheme: dark)" srcset="public/providers/kimi-logomark-dark.svg">
-          <img src="public/providers/kimi-logomark-light.svg" width="64" alt="Kimi (Moonshot AI)"/>
+          <img src="public/providers/kimi-logomark-light.svg" width="64" alt="Kimi（Moonshot AI）"/>
         </picture>
       </a>
       <br/><b>Kimi</b><br/><sub>Moonshot AI</sub><br/><br/>
-      <img src="https://img.shields.io/badge/Founding_Friend-1783FF?style=flat-square" alt="Founding Open Source Friend"/>
+      <img src="https://img.shields.io/badge/Founding_Friend-1783FF?style=flat-square" alt="創始開源夥伴"/>
     </td>
     <td>
-      感謝我們的創始開源夥伴 <b>Kimi (月之暗面)</b> 對本專案的支持！Kimi 是開源權重 K2 和 K3 模型系列背後的 AI 實驗室 — <b>Kimi K3</b> 提供 1M-token 的上下文視窗、原生視覺和前沿級別的編碼能力，價格僅為閉源模型的一小部分，並且與 Claude Code、Codex 以及 OmniRoute 支援的所有編碼工具開箱即用。
+      感謝我們的創始開源夥伴 <b>Kimi（Moonshot AI）</b> 對本專案的支持！Kimi 是開發開放權重 K2 與 K3 模型系列的 AI 實驗室 — <b>Kimi K3</b> 提供 1M-token 上下文視窗、原生視覺能力，以及媲美前沿模型的程式設計能力，價格僅為封閉模型的一小部分，並且可直接搭配 Claude Code、Codex 以及 OmniRoute 提供的所有程式設計工具使用。
       <br/><br/>
-      <b>Kimi 的支持用途：</b> Kimi 的 API 積分為 OmniRoute 的 AI 驗證發布流程提供動力 — 即在每個拉取請求發布前進行審查的 <i>由 Kimi K3 提供支援的合併驗證</i> 階段 — 以及日常功能開發。一流的 Kimi 支援透過兩種方式提供：直接的 <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">Kimi API</a> (<code>kimi-k3</code>) 和 <a href="https://www.kimi.ai/code?aff=omniroute">Kimi Code 編碼方案</a> (OAuth 和 API 金鑰)。OmniRoute 也是 Kimi 支援計畫中第一個巴西開源專案。<a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute"><b>獲取 Kimi API 金鑰，額外獲得 15% 積分 →</b></a>
+      <b>Kimi 的支持用途：</b>Kimi 的 API 額度支援 OmniRoute 的 AI 驗證發布流程 — 其中包括 <i>由 Kimi K3 驅動的合併驗證</i> 階段，會在每個 pull request 發布前進行審查 — 以及日常功能開發。OmniRoute 在兩種方式上都提供一流的 Kimi 支援：直接使用 <a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute">Kimi API</a>（<code>kimi-k3</code>），以及使用 <a href="https://www.kimi.ai/code?aff=omniroute">Kimi Code 程式設計方案</a>（OAuth 與 API key）。OmniRoute 也是 Kimi 支援計畫中的第一個巴西開源專案。<a href="https://platform.kimi.ai?track_id=track-8197581fdd7d4139a0f562e4a03c3798&aff=omniroute"><b>取得 Kimi API key，額外獲得 15% 額度 →</b></a>
     </td>
   </tr>
   <tr>
@@ -309,24 +309,24 @@ curl http://localhost:20128/v1/chat/completions \
         <img src="./public/providers/cli-generic.svg" width="64" alt="Cheaper Inference"/>
       </a>
       <br/><b>Cheaper Inference</b><br/><sub>cheaperinference.com</sub><br/><br/>
-      <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="Open Source Friend"/>
+      <img src="https://img.shields.io/badge/Open_Source_Friend-31f889?style=flat-square&labelColor=04170d" alt="開源夥伴"/>
     </td>
     <td>
-      感謝 OmniRoute 的開源夥伴 <b>Cheaper Inference</b> 對本專案的支持！Cheaper Inference 是一個按成本排名的閘道，透過一個與 OpenAI 相容的端點轉售 42 個前沿模型 — Claude、GPT-5.x、Gemini、Kimi K3、GLM、DeepSeek、Grok 和 MiniMax — 將每個請求路由到最便宜的合格提供者，且絕不收取高於模型製造商標價的費用。
+      感謝 OmniRoute 開源夥伴 <b>Cheaper Inference</b> 對本專案的支持！Cheaper Inference 是一個依成本排序的閘道，轉售 42 個前沿模型 — Claude、GPT-5.x、Gemini、Kimi K3、GLM、DeepSeek、Grok 與 MiniMax — 並透過單一 OpenAI-compatible endpoint 提供服務，將每個請求路由至符合條件且最便宜的提供者，且價格絕不高於模型製造商的公開定價。
       <br/><br/>
-      <b>OmniRoute 中的一流支援：</b> 聊天補全、原生 <code>/v1/responses</code> 端點、視覺、工具呼叫以及 3 個圖像模型 (<code>grok-imagine</code>、<code>nano-banana-pro</code>、<code>nano-banana-2</code>，可透過 <code>cheaperinference/&lt;model&gt;</code> 訪問)。<a href="https://cheaperinference.com/?utm_source=omniroute"><b>獲取 API 金鑰 →</b></a>
+      <b>OmniRoute 的一流支援：</b>Chat Completions、原生 <code>/v1/responses</code> endpoint、視覺能力、工具呼叫，以及 3 個影像模型（<code>grok-imagine</code>、<code>nano-banana-pro</code>、<code>nano-banana-2</code>，可透過 <code>cheaperinference/&lt;model&gt;</code> 使用）。<a href="https://cheaperinference.com/?utm_source=omniroute"><b>取得 API key →</b></a>
     </td>
   </tr>
 </table>
 
-<sub>標記為 <code>aff=omniroute</code> 的連結是合作夥伴連結。它們在不增加您費用的情況下資助本專案。</sub>
+<sub>標有 <code>aff=omniroute</code> 的連結是合作夥伴連結。這些連結會為本專案提供資金，但不會增加你的任何成本。</sub>
 
 <br/>
 
 <details open>
-<summary><sub><b>🎟️ 聯盟推廣</b> — 我們未贊助的提供者提供的免費註冊優惠券（點擊展開）</sub></summary>
+<summary><sub><b>🎟️ 聯盟推廣</b> — 來自非贊助提供者的免費註冊優惠券（點擊展開）</sub></summary>
 
-<sub><i>本節僅適用於推薦/優惠券代碼。贊助合作夥伴關係位於上方的 **🤝 由我們的開源夥伴支持** 中。OmniRoute 與此處列出的提供者沒有任何贊助或合作關係 — 這些是任何人都可以使用的公開優惠券。</i></sub>
+<sub><i>本節僅提供推薦／優惠券代碼。贊助合作夥伴列於上方的 <b>🤝 由我們的開源夥伴支持</b>。OmniRoute 與此處列出的提供者沒有任何贊助或合作關係 — 這些是任何人都能使用的公開優惠券。</i></sub>
 
 <table>
   <tr>
@@ -337,14 +337,14 @@ curl http://localhost:20128/v1/chat/completions \
       <br/><sub><b>AgentRouter</b></sub><br/><sub>agentrouter.org</sub>
     </td>
     <td>
-      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — 聯盟註冊 · 註冊即送 <b>$100 免費積分</b>（免費伺服器，預計延遲較高 — 最適合測試，不適合生產）。自 <b>v3.8.50</b> 起在 OmniRoute 中提供一流支援：聊天補全、與 Anthropic 相容的線路格式和與 OpenAI 相容的路徑。可用模型包括 <code>claude-opus-4-8</code>、<code>claude-opus-5</code>、<code>gpt-5.6-sol</code> 等。<a href="https://agentrouter.org/register?aff=70LM"><b>領取您的 $100 →</b></a></sub>
+      <sub><b><a href="https://agentrouter.org/register?aff=70LM">AgentRouter</a></b> — 聯盟註冊 · 註冊即可獲得 <b>$100 免費額度</b>（免費伺服器，預期延遲較高 — 適合測試，不適合生產環境）。自 <b>v3.8.50</b> 起，OmniRoute 提供一流支援：Chat Completions、Anthropic-compatible wire format，以及 OpenAI-compatible path。可用模型包括 <code>claude-opus-4-8</code>、<code>claude-opus-5</code>、<code>gpt-5.6-sol</code> 等。<b><a href="https://agentrouter.org/register?aff=70LM">領取你的 $100 →</a></b></sub>
       <br/><br/>
       <sub>⚠️ <i>聯盟連結 — OmniRoute 與此提供者沒有任何贊助或合作關係。</i></sub>
     </td>
   </tr>
 </table>
 
-<sub>知道還有其他提供慷慨免費註冊優惠券且對 OmniRoute 用戶有益的提供者嗎？請提出一個 issue，我們會將其添加到這裡。</sub>
+<sub>知道其他能為 OmniRoute 使用者提供慷慨免費註冊優惠券的提供者嗎？請提交 issue，我們會將其加入此處。</sub>
 
 </details>
 
@@ -356,33 +356,33 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="20 種組合路由策略中 18 種的動畫範例——每種策略各一個圖塊：priority、fill-first、weighted、round-robin、p2c、least-used、random、strict-random、cost-optimized、headroom、reset-window、reset-aware、context-relay、context-optimized、lkgp、auto、fusion、pipeline。cache-optimized 與 quota-weighted 未製作動畫；下表說明全部 20 種策略。"/>
+<img src="./docs/diagrams/strategies-grid.svg" width="100%" alt="22 種組合路由策略中的 18 種動畫範例 — 每個策略各一個圖示：priority、fill-first、weighted、round-robin、p2c、least-used、random、strict-random、cost-optimized、headroom、reset-window、reset-aware、context-relay、context-optimized、lkgp、auto、fusion、pipeline。cache-optimized、quota-weighted、expiry-first 和 jev 沒有動畫；下表說明全部 22 種策略。"/>
 
-> **組合**是一連串由 OmniRoute **自動**跨模型路由的模型鏈。如果配額耗盡、提供者發生故障或成本激增，組合便可移至下一個符合條件且運作正常的模型。🛡️
+> **組合**是 OmniRoute 會**自動**跨多個模型進行路由的鏈結。如果配額用盡、提供者故障或成本飆升，組合可以切換至下一個符合條件且健康的模型。🛡️
 
-### ⚡ 零設定——只需使用 `auto`
+### ⚡ 零設定 — 直接使用 `auto`
 
-不需要建立組合。將模型設定為 `auto`（或其變體），OmniRoute 就會根據您已連線的提供者建立虛擬組合，並即時評分：
+無需建立組合。將模型設定為 `auto`（或其變體），OmniRoute 會根據已連線的提供者即時評分並建立虛擬組合：
 
 <table>
   <tr><th align="left">模型 ID</th><th align="left">最佳化目標</th></tr>
-  <tr><td align="left" nowrap><code>auto</code></td><td align="left">🎯 均衡的預設選項（LKGP——持續使用您上一個運作良好的提供者）</td></tr>
-  <tr><td align="left" nowrap><code>auto/coding</code></td><td align="left">🧑💻 程式碼生成採用品質優先權重</td></tr>
-  <tr><td align="left" nowrap><code>auto/fast</code></td><td align="left">⚡ 最低延遲優先</td></tr>
-  <tr><td align="left" nowrap><code>auto/cheap</code></td><td align="left">💰 每個權杖成本最低者優先</td></tr>
-  <tr><td align="left" nowrap><code>auto/subscription</code></td><td align="left">🎟️ 僅使用您已付費的訂閱配額——採封閉式失敗，絕不切換至需額外計費的備援（<a href="./docs/routing/SUBSCRIPTION_LADDER.md">指南</a>）</td></tr>
-  <tr><td align="left" nowrap><code>auto/thrifty</code></td><td align="left">🪜 先使用方案配額，再逐級切換至最便宜的付費選項——方案重設後即切回方案（<a href="./docs/routing/SUBSCRIPTION_LADDER.md">指南</a>）</td></tr>
-  <tr><td align="left" nowrap><code>auto/offline</code></td><td align="left">🔋 配額／速率限制餘裕最大者優先</td></tr>
-  <tr><td align="left" nowrap><code>auto/smart</code></td><td align="left">🔭 品質優先，並以 10% 的探索比例發掘更好的模型</td></tr>
-  <tr><td align="left" nowrap><code>auto/lkgp</code></td><td align="left">📌 明確黏著至上一個已知運作良好的提供者</td></tr>
-  <tr><td align="left" nowrap><code>auto/chaos</code></td><td align="left">🧪 平行分派至一組模型（每個提供者一個，預設共 5 個），並傳回一個答案；每個候選模型各進行一次上游呼叫，而非故障注入</td></tr>
+  <tr><td align="left" nowrap><code>auto</code></td><td align="left">🎯 平衡的預設選項（LKGP — 維持使用上一個狀態良好的提供者）</td></tr>
+  <tr><td align="left" nowrap><code>auto/coding</code></td><td align="left">🧑💻 針對程式碼生成的品質優先權重</td></tr>
+  <tr><td align="left" nowrap><code>auto/fast</code></td><td align="left">⚡ 優先選擇最低延遲</td></tr>
+  <tr><td align="left" nowrap><code>auto/cheap</code></td><td align="left">💰 優先選擇每個 token 成本最低的選項</td></tr>
+  <tr><td align="left" nowrap><code>auto/subscription</code></td><td align="left">🎟️ 僅使用你已付費的訂閱配額 — 失敗時直接結束，絕不使用會產生費用的備援選項（<a href="./docs/routing/SUBSCRIPTION_LADDER.md">指南</a>）</td></tr>
+  <tr><td align="left" nowrap><code>auto/thrifty</code></td><td align="left">🪜 優先使用方案配額，然後逐級切換至最便宜的付費選項 — 配額重設後回到方案（<a href="./docs/routing/SUBSCRIPTION_LADDER.md">指南</a>）</td></tr>
+  <tr><td align="left" nowrap><code>auto/offline</code></td><td align="left">🔋 優先選擇配額／速率限制餘裕最大的選項</td></tr>
+  <tr><td align="left" nowrap><code>auto/smart</code></td><td align="left">🔭 品質優先 + 10% 探索比例，以發掘更好的模型</td></tr>
+  <tr><td align="left" nowrap><code>auto/lkgp</code></td><td align="left">📌 明確維持上一個狀態良好的提供者</td></tr>
+  <tr><td align="left" nowrap><code>auto/chaos</code></td><td align="left">🧪 平行分發至一組模型（預設每個提供者一個，共 5 個），並回傳一個答案；每個組內模型各發出一次上游呼叫，而非注入故障</td></tr>
 </table>
 
 ##
 
-### 🔀 或自行建立——20 種路由策略
+### 🔀 或自行建立 — 22 種路由策略
 
-全部 **20** 種策略——可在每個組合步驟中混合搭配：
+全部 **22** 種策略 — 可針對每個組合步驟自由混搭：
 
 <table>
   <tr>
@@ -393,27 +393,27 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center">1</td>
     <td nowrap><code>priority</code></td>
-    <td>首要目標優先的排序清單——用盡一個目標後再移至下一個 🥇</td>
+    <td>依第一目標排序的清單 — 用盡每個目標後再處理下一個 🥇</td>
   </tr>
   <tr>
     <td align="center">2</td>
     <td nowrap><code>fill-first</code></td>
-    <td>完全用盡每個目標的配額後再移至下一個</td>
+    <td>在移至下一個目標前，先完全填滿每個目標的配額</td>
   </tr>
   <tr>
     <td align="center">3</td>
     <td nowrap><code>weighted</code></td>
-    <td>依各目標權重進行加權隨機選擇</td>
+    <td>依每個目標的權重進行加權隨機選擇</td>
   </tr>
   <tr>
     <td align="center">4</td>
     <td nowrap><code>round-robin</code></td>
-    <td>依序循環使用各個目標</td>
+    <td>依序循環遍歷目標</td>
   </tr>
   <tr>
     <td align="center">5</td>
     <td nowrap><code>p2c</code></td>
-    <td>二選一隨機負載平衡</td>
+    <td>兩選一的隨機負載平衡</td>
   </tr>
   <tr>
     <td align="center">6</td>
@@ -423,17 +423,17 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center">7</td>
     <td nowrap><code>random</code></td>
-    <td>均勻隨機選擇（去除重複項）</td>
+    <td>均勻隨機選擇（去除重複項目）</td>
   </tr>
   <tr>
     <td align="center">8</td>
     <td nowrap><code>strict-random</code></td>
-    <td>隨機選擇且不去除重複結果 🎲</td>
+    <td>隨機選擇，不去除重複項目 🎲</td>
   </tr>
   <tr>
     <td align="center">9</td>
     <td nowrap><code>cost-optimized</code></td>
-    <td>根據即時目錄定價，將每次請求的成本降至最低 💸</td>
+    <td>依即時目錄定價，將每次請求的 $ 成本降至最低 💸</td>
   </tr>
   <tr>
     <td align="center">10</td>
@@ -443,62 +443,72 @@ curl http://localhost:20128/v1/chat/completions \
   <tr>
     <td align="center">11</td>
     <td nowrap><code>quota-weighted</code></td>
-    <td>跳過配額已耗盡的帳戶，再依剩餘配額 ÷ 處理中負載的比例抽選——現有對話會持續固定至原目標 ⚖️</td>
+    <td>略過已用盡配額的帳戶，然後依剩餘配額 ÷ 進行中負載的比例抽選 — 現有對話會維持固定分配 ⚖️</td>
   </tr>
   <tr>
     <td align="center">12</td>
     <td nowrap><code>reset-window</code></td>
-    <td>優先選擇配額期間最早重設的目標</td>
+    <td>優先選擇配額視窗最早重設的目標</td>
   </tr>
   <tr>
     <td align="center">13</td>
     <td nowrap><code>reset-aware</code></td>
-    <td>依配額重設時間排序——較短的期間優先 📊</td>
+    <td>依配額重設時間排序 — 優先使用較短的視窗 📊</td>
   </tr>
   <tr>
     <td align="center">14</td>
     <td nowrap><code>context-relay</code></td>
-    <td>在各目標之間轉交上下文，以支援長時間對話 🧠</td>
+    <td>在長對話中跨目標傳遞內容 🧠</td>
   </tr>
   <tr>
     <td align="center">15</td>
     <td nowrap><code>context-optimized</code></td>
-    <td>選擇最適合目前上下文大小的目標</td>
+    <td>為目前的內容大小選擇最合適的目標</td>
   </tr>
   <tr>
     <td align="center">16</td>
     <td nowrap><code>cache-optimized</code></td>
-    <td>將每個可重複使用的提示詞前綴固定至同一帳戶——盡可能提高提示詞快取命中率 🎯</td>
+    <td>將每個可重複使用的提示前綴固定至同一個帳戶 — 最大化提示快取命中率 🎯</td>
   </tr>
   <tr>
     <td align="center">17</td>
     <td nowrap><code>lkgp</code></td>
-    <td>上一個已知可用路徑——固定使用上一個成功的提供者，失敗時再依規則切換</td>
+    <td>最近已知良好路徑 — 固定使用上次成功的提供者，然後再回退至規則</td>
   </tr>
   <tr>
     <td align="center">18</td>
     <td nowrap><code>auto</code></td>
-    <td>針對每個連線進行 16 項因素即時評分 🤖</td>
+    <td>對每個連線進行涵蓋 **16 項因素**的即時評分 🤖</td>
   </tr>
   <tr>
     <td align="center">19</td>
     <td nowrap><code>fusion</code></td>
-    <td>分派至一組模型，再由評審模型綜合產生一個答案 🧬</td>
+    <td>將請求分發至一組模型，再由評審綜合出一個答案 🧬</td>
   </tr>
   <tr>
     <td align="center">20</td>
     <td nowrap><code>pipeline</code></td>
-    <td>串接各步驟——每個目標的輸出都會傳入下一個目標 🔗</td>
+    <td>串聯各個步驟 — 每個目標的輸出會傳給下一個目標 🔗</td>
+  </tr>
+  <tr>
+    <td align="center">21</td>
+    <td nowrap><code>expiry-first</code></td>
+    <td>優先使用即將在未使用的情況下過期的帳戶配額 — 剩餘配額最多且重設時間最近者勝出 ⏳</td>
+  </tr>
+  <tr>
+    <td align="center">22</td>
+    <td nowrap><code>jev</code></td>
+    <td>您的排序清單；TypeSafe Jev 會針對每次請求選擇要執行的項目，並回退至您指定的順序（選用旗標）⚖️</td>
   </tr>
 </table>
 
-<sub>Auto-Combo 引擎會根據 **16 項因素**（健康狀態、配額、成本、延遲、任務適配度、品質、工作階段可用性……）為每個候選項目評分 — 請參閱 [`docs/routing/AUTO-COMBO.md`](docs/routing/AUTO-COMBO.md)。</sub>
+<sub>Auto-Combo 引擎會依 **16 項因素**（健康狀態、配額、成本、延遲、工作適配度、品質、工作階段可用性……）為每個候選項目評分 — 請參閱 [`docs/routing/AUTO-COMBO.md`](docs/routing/AUTO-COMBO.md)。</sub>
 
 ##
 
-### 🧱 內建韌性機制（3 個獨立層級）
+### 🧱 內建韌性（3 個獨立層級）
 
-<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute 韌性機制 — 3 個獨立的自我修復層級，針對不同故障採用適當的層級。第 1 層為提供者斷路器（整個提供者）：僅在發生 408/5xx 時觸發，閾值為 OAuth 8× / API 金鑰 12× / 本機 2×，經過 60s/30s/15s 後重設並進入 HALF-OPEN 探測，採用惰性復原；當處於 OPEN 狀態時，組合會將路由重新導向至下一個提供者。第 2 層為連線冷卻（單一金鑰/帳戶）：基準時間為 OAuth 5s / API 金鑰 3s，採用 ×2 指數退避並具備防驚群保護機制，429 會遵循 Retry-After，成功後會清除所有錯誤狀態；處於冷卻狀態的金鑰會被略過，而其他同層金鑰會繼續提供服務。第 3 層為模型鎖定（單一模型）：各模型的 429、本機 404 或模式拒絕只會鎖定該模型，絕不會鎖定整個連線。終止狀態（遭封鎖、已過期、點數耗盡）應由操作人員處理，而非進入冷卻。"/>
+<img src="./docs/diagrams/resilience-layers.svg" width="100%" alt="OmniRoute 韌性 — 3 個獨立的自我修復層級，針對不同故障使用適當的層級。第 1 層：提供者斷路器（整個提供者）：僅在 408/5xx 時觸發，門檻為 OAuth 8× / API-key 12× / local 2×，並在 60s/30s/15s 後重設為 HALF-OPEN 探測，採用延遲恢復；處於 OPEN 狀態時，組合會重新路由至下一個提供者。第 2 層：連線冷卻（單一金鑰/帳戶）：OAuth 基準為 5s / API-key 基準為 3s，採用 ×2 指數退避並設有防驚群保護，429 會遵循 Retry-After，成功後會清除所有錯誤狀態；冷卻中的金鑰會被略過，而同一連線的其他金鑰仍可繼續提供服務。第 3 層：模型鎖定（單一模型）：每個模型的 429、local 404 或模式拒絕只會鎖定該模型 — 絕不會鎖定整個連線。終止狀態（遭封鎖、已過期、點數耗盡）是提供操作者處理的狀態，而非冷卻狀態。"/>
 
 <sub>📖 [Auto-Combo 引擎](docs/routing/AUTO-COMBO.md) · [韌性指南](docs/architecture/RESILIENCE_GUIDE.md)</sub>
 
@@ -510,9 +520,9 @@ curl http://localhost:20128/v1/chat/completions \
 
 </div>
 
-<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的獨特之處 — 與 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 項功能上的當期功能快照比較。OmniRoute：389 個提供者、內建 150 多個免費層級、20 種路由策略、12 引擎權杖壓縮、內建支援 110 個工具的 MCP 伺服器、A2A 代理程式通訊協定、持久記憶體、安全防護、雲端代理程式、TLS 指紋隱匿、Desktop/Termux/PWA，以及支援 67 種語言的 i18n UI。OmniRoute 採用 MIT 授權並可自行託管。競爭對手的功能與數量可能會變更；請參閱連結的方法論。"/>
+<img src="./docs/diagrams/comparison-table.svg" width="100%" alt="OmniRoute 的獨特之處 — 與 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 在 13 項功能上的最新功能快照比較。OmniRoute：394 個提供者、內建 150+ 個免費方案、22 種路由策略、12 引擎 Token 壓縮、內建支援 110 個工具的 MCP 伺服器、A2A 代理程式通訊協定、持久記憶體、防護措施、雲端代理程式、TLS 指紋隱匿、Desktop/Termux/PWA，以及 67 種 i18n UI 語系。OmniRoute 採用 MIT 授權並可自行託管。競爭產品的功能與數量可能會變更；請參閱連結的方法說明。"/>
 
-<sub>📊 完整方法論與相較於 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 的各功能詳細資訊 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
+<sub>📊 與 9router、OpenRouter、CLIProxyAPI 和 LiteLLM 的完整方法說明與各功能詳細比較 → [`docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md`](docs/comparison/OMNIROUTE_VS_ALTERNATIVES.md)</sub>
 
 <br/>
 
@@ -580,35 +590,35 @@ Radar 採選擇加入制，且僅使用 GET。OmniRoute 用戶端不會上傳提
 
 </div>
 
-> **v3.8.20 → v3.8.54** 的近期重點。完整歷史記錄請參閱 [`CHANGELOG.md`](CHANGELOG.md)。
+> **v3.8.20 → v3.8.55** 的近期重點。完整歷史記錄請參閱 [`CHANGELOG.md`](CHANGELOG.md)。
 
-- **⚖️ `quota-weighted` 路由** — 第 20 種組合策略會跳過已耗盡的帳戶，接著依剩餘配額 ÷ 進行中負載的比例，從其餘帳戶中抽選，同時讓現有對話維持固定路由。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🧰 無頭模式** — `omniroute serve --headless`（或 `OMNIROUTE_HEADLESS=1`）只執行 `/v1/*` 代理引擎，停用儀表板及僅供儀表板使用的子系統。→ [無頭模式](docs/guides/HEADLESS.md)
-- **🔎 模型探索** — `/v1/models` 可依功能、上下文、類型和文字進行篩選，而 `POST /v1/models/query` 會以相同的每金鑰可見性，傳回簡短且具確定性的候選清單。→ [API 參考](docs/reference/API_REFERENCE.md)
-- **🔑 每金鑰路由控制** — 使用 `forcedModel` 將 API 金鑰固定至單一模型或組合，並以原子方式新增或移除金鑰的模型和組合（`/api/keys/{id}/access`）。→ [API 參考](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
-- **🛡️ 更細緻的 PII 控制** — 可按類型選取，支援最多 20 個經驗證的自訂遮罩模式，以及按類型統計的偵測計數器；遮罩功能本身仍採選擇性啟用。→ [防護機制](docs/security/GUARDRAILS.md)
-- **🌍 67 種語言** — 涵蓋儀表板、文件鏡像和 CLI，使用 `npm run i18n:add-locale` 即可透過單一命令在所有位置新增語言。→ [i18n 指南](docs/guides/I18N.md)
-- **🎛️ OmniConductor** — 對代理艦隊進行輸入端 A2A 委派、在 Agent Card 中提供 Conductor 技能，以及搭配 Faro 按鍵通話語音聊天的儀表板面板。→ [A2A 伺服器](docs/frameworks/A2A-SERVER.md)
-- **🛂 自適應准入與過載防護** — 重量級聊天請求會進入佇列，而不是回傳 503，並針對每個連線使用原子化 RPM 滾動租約。→ [韌性指南](docs/architecture/RESILIENCE_GUIDE.md)
-- **🗂️ 標準 `/v1/models` 排序** — 每個提供者各有一個連續且按提供者分組的區塊（組合優先置頂），無論目錄來源為何都保持穩定。→ [API 參考](docs/reference/API_REFERENCE.md)
-- **🗜️ 壓縮強化** — 預設啟用膨脹防護、適用於 DE / FR / JA 與中文（文言文）的 Caveman packs，以及適用於 Gradle 和 .NET 的 RTK 篩選器。→ [壓縮](docs/compression/COMPRESSION_ENGINES.md)
-- **💸 誠實的固定費率成本** — 訂閱／coding-plan 提供者在成本分析中會顯示 **$0**；預算、配額與路由仍會持續估算。→ [API 參考](docs/reference/API_REFERENCE.md)
-- **⚖️ Quota-Share 路由** — 將共用帳戶的配額公平分配給共用金鑰，並採工作保留式設計，將閒置切片借給其他使用者。→ [韌性指南](docs/architecture/RESILIENCE_GUIDE.md)
-- **🤖 單一命令完成 CLI／代理設定** — 註冊了 15 個 `setup-*` 命令；`omniroute run` 可啟動 7 個 CLI（Claude Code、Codex、Aider、Goose、OpenCode、Qwen Code、Gemini CLI）；`omniroute configure` 支援 11 個目標，提供互動式提供者＋模型選擇器及按上下文分類的最愛項目。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
-- **🛰️ 遠端模式** — 使用具範圍限制的權杖（`connect`／`contexts`／`tokens`）操作遠端 OmniRoute，並提供適用於 VPS 安裝的 `antigravity` OAuth 輔助工具。→ [遠端模式](docs/guides/REMOTE-MODE.md)
-- **🧭 更智慧的自動路由** — `auto/<category>:<tier>` 組合、**Fusion**（模型面板＋評審）、感知任務的路由，以及每次請求的模型／模式／USD 預算覆寫。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)
-- **🗜️ 可插拔壓縮** — 12 個可組合引擎與 Compression Studios：LLMLingua-2、雙層 Ultra、omnipglyph、逐步保真度閘門、GCF v3.2，以及可拖曳重新排序的編輯器。→ [壓縮](docs/compression/COMPRESSION_ENGINES.md)
-- **🕵️ 透明 MITM 解密（TPROXY）** — 可擷取忽略代理環境變數的 CLI，並提供按 SNI 分配的 CA 與信任存放區安裝程式。→ [MITM／TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
-- **💸 全面成本遙測** — 每個端點都提供 `X-OmniRoute-*` 成本／使用量標頭、快取命中節省標頭，以及每金鑰 USD 支出配額。→ [API 參考](docs/reference/API_REFERENCE.md)
-- **🧠 由你控制的記憶** — 預設關閉，可選擇啟用 int8 向量量化與具類型的衰減，並支援每次請求的 `x-omniroute-no-memory`。→ [記憶](docs/frameworks/MEMORY.md)
-- **🛡️ 安全性** — 每條 LLM 路由都具備提示注入防護（紅隊測試套件）、可選擇啟用的認證資訊遮罩防護（雙向遮蔽洩漏的 API 金鑰／祕密）、免費的 DuckDuckGo 最後備援網路搜尋，以及可選的儀表板 OIDC 登入閘門（密碼登入始終可用）。→ [防護機制](docs/security/GUARDRAILS.md)
-- **🖼️ 新端點** — `/v1/ocr`（Mistral OCR）與 `/v1/audio/translations`（Whisper 風格）補足媒體功能範圍。→ [API 參考](docs/reference/API_REFERENCE.md)
-- **🎨 圖像／影片／音訊生成** — 以單一 API 提供媒體功能：xAI Grok Imagine 與 Novita AI 影片、ComfyUI、Magnific、Adobe Firefly、Segmind，以及 ElevenLabs 等語音提供者。→ [API 參考](docs/reference/API_REFERENCE.md)
-- **🌍 部署與作業** — 反向代理 `basePath`、瀏覽器語言自動偵測、每金鑰裝置追蹤、免 root 的 MITM 信任，以及 zh-TW 在地化。→ [環境](docs/reference/ENVIRONMENT.md)
-- **🤝 更多提供者與代理** — 雲端代理（Codex Cloud、Cursor、Devin、Jules）、具備瀏覽器＋OAuth 登入功能的 Grok Build（xAI）、一級支援卡片的 Ollama、Claude Opus 5 與 Sonnet 5、Kimi 官方合作夥伴（Code／Web／Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及更新後的 **389 個提供者目錄**。→ [提供者](docs/reference/PROVIDER_REFERENCE.md)
-- **📡 路由透明度** — 每個回應都會攜帶 `X-OmniRoute-Decision` 標頭，指出提供服務的策略／提供者／延遲；新增的 `cache-optimized` 組合策略，以及 Auto-Combo 的 `cacheAffinity` 因子，會將重複請求重新路由至持有快取前綴的連線；唯讀的 `/v1/auto-combo/{channel}/candidates` 端點則會公開 `auto/*` 頻道的即時候選池。→ [Auto-Combo](docs/routing/AUTO-COMBO.md)。
-- **⚡ 本機效能與基礎架構** — 一鍵部署本機 Redis、Cloudflare Workers / Deno Deploy 中繼部署工具，以及由 Bifrost 與 Mux 擔任受監督的嵌入式服務。→ [嵌入式服務](docs/frameworks/EMBEDDED-SERVICES.md)
-- **🧩 內建功能** — 外掛框架與市集、Omni/Agent/GitHub 技能框架、Obsidian vault 整合（22 個 MCP 工具）、相容於 OpenAI 的 Batch 與 Files API、語意回應快取、具排行榜的遊戲化功能、ACP 代理程式探索（15 個內建代理程式）、排程將日誌匯出至 BigQuery、`auto/chaos` 平行多模型扇出、Telegram 機器人橋接器、應用程式內版本管理器，以及 LMArena-ELO 免費提供者排名。→ [文件](docs/README.md)
+- **⚖️ `quota-weighted` 路由** — 第 20 種組合策略會跳過已耗盡的帳戶，接著按照剩餘配額 ÷ 執行中負載的比例，在其餘帳戶中進行抽選，同時讓現有對話維持固定路由。→ [自動組合](docs/routing/AUTO-COMBO.md)
+- **🧰 無頭模式** — `omniroute serve --headless`（或 `OMNIROUTE_HEADLESS=1`）只執行 `/v1/*` 代理引擎，關閉儀表板及僅供儀表板使用的子系統。→ [無頭模式](docs/guides/HEADLESS.md)
+- **🔎 模型探索** — `/v1/models` 可依功能、上下文、種類和文字進行篩選，而 `POST /v1/models/query` 會依相同的每金鑰可見性，傳回精簡且具決定性的候選清單。→ [API 參考](docs/reference/API_REFERENCE.md)
+- **🔑 每金鑰路由控制** — 使用 `forcedModel` 將 API 金鑰固定到單一模型或組合，並以原子方式新增或移除金鑰的模型和組合（`/api/keys/{id}/access`）。→ [API 參考](docs/reference/API_REFERENCE.md) · [OpenAPI](docs/openapi.yaml)
+- **🛡️ 更細緻的 PII 控制** — 支援依類型選擇、最多 20 個經驗證的自訂遮罩模式，以及依類型的偵測計數器；遮罩功能本身仍需選擇性啟用。→ [防護措施](docs/security/GUARDRAILS.md)
+- **🌍 67 種語言** — 涵蓋儀表板、文件鏡像和 CLI，使用 `npm run i18n:add-locale` 即可透過單一指令在所有位置新增語言。→ [i18n 指南](docs/guides/I18N.md)
+- **🎛️ OmniConductor** — 對您的代理程式群組進行入站 A2A 委派、在 Agent Card 上提供 Conductor 技能，以及搭配 Faro 按下說話功能語音聊天的儀表板面板。→ [A2A 伺服器](docs/frameworks/A2A-SERVER.md)
+- **🛂 自適應准入與過載防護** — 重量級聊天請求會進入佇列，而不是回傳 503；每個連線則使用原子 RPM 滾動租約。→ [復原能力指南](docs/architecture/RESILIENCE_GUIDE.md)
+- **🗂️ 標準 `/v1/models` 排序** — 每個提供者各有一個連續且依提供者分組的區塊（組合優先置頂），無論目錄來源為何都保持穩定。→ [API 參考](docs/reference/API_REFERENCE.md)
+- **🗜️ 壓縮強化** — 預設啟用膨脹防護、適用於 DE / FR / JA 與中文（文言）的 Caveman 封裝，以及適用於 Gradle 和 .NET 的 RTK 篩選器。→ [壓縮](docs/compression/COMPRESSION_ENGINES.md)
+- **💸 誠實的單一費率成本** — 訂閱型／coding-plan 提供者在成本分析中顯示為 **$0**；預算、配額和路由仍會進行估算。→ [API 參考](docs/reference/API_REFERENCE.md)
+- **⚖️ Quota-Share 路由** — 將共用帳戶的配額公平地分配給共用金鑰，並以工作守恆方式將閒置配額借出。→ [復原能力指南](docs/architecture/RESILIENCE_GUIDE.md)
+- **🤖 單一指令 CLI／代理程式設定** — 註冊了 15 個 `setup-*` 指令；`omniroute run` 可啟動 7 個 CLI（Claude Code、Codex、Aider、Goose、OpenCode、Qwen Code、Gemini CLI）；`omniroute configure` 支援 11 個目標，並提供互動式提供者＋模型選擇器和依上下文設定的最愛項目。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
+- **🛰️ 遠端模式** — 使用具範圍限制的權杖（`connect`／`contexts`／`tokens`）操作遠端 OmniRoute，並透過 `antigravity` OAuth 輔助工具支援 VPS 安裝。→ [遠端模式](docs/guides/REMOTE-MODE.md)
+- **🧭 更智慧的自動路由** — `auto/<category>:<tier>` 組合、**Fusion**（模型面板＋評審）、感知任務的路由，以及每個請求的模型／模式／美元預算覆寫。→ [自動組合](docs/routing/AUTO-COMBO.md)
+- **🗜️ 可插拔壓縮** — 12 個可組合引擎與 Compression Studios：LLMLingua-2、雙層 Ultra、omniglyph、每步保真度閘門、GCF v3.2，以及可拖曳重新排序的編輯器。→ [壓縮](docs/compression/COMPRESSION_ENGINES.md)
+- **🕵️ 透明 MITM 解密（TPROXY）** — 捕捉忽略代理環境變數的 CLI，並提供依 SNI 建立 CA 與安裝信任存放區的工具。→ [MITM／TPROXY](docs/security/MITM-TPROXY-DECRYPT.md)
+- **💸 全面成本遙測** — 每個端點都提供 `X-OmniRoute-*` 成本／使用量標頭、快取命中節省標頭，以及每金鑰的美元支出配額。→ [API 參考](docs/reference/API_REFERENCE.md)
+- **🧠 由您控制的記憶** — 預設關閉，可選擇啟用 int8 向量量化與具類型的衰減，並支援每個請求使用 `x-omniroute-no-memory`。→ [記憶](docs/frameworks/MEMORY.md)
+- **🛡️ 安全性** — 每個 LLM 路由都具備提示注入防護（紅隊測試套件）、可選用的憑證遮罩防護（雙向遮蔽外洩的 API 金鑰／密鑰）、免費的 DuckDuckGo 最後手段網路搜尋，以及可選的儀表板 OIDC 登入閘門（密碼登入始終可用）。→ [防護措施](docs/security/GUARDRAILS.md)
+- **🖼️ 新端點** — `/v1/ocr`（Mistral OCR）和 `/v1/audio/translations`（Whisper 風格）完善了媒體功能範圍。→ [API 參考](docs/reference/API_REFERENCE.md)
+- **🎨 圖像／影片／音訊生成** — 以單一 API 處理媒體：xAI Grok Imagine 與 Novita AI 影片、ComfyUI、Magnific、Adobe Firefly、Segmind，以及 ElevenLabs 等語音提供者。→ [API 參考](docs/reference/API_REFERENCE.md)
+- **🌍 部署與運維** — 反向代理 `basePath`、瀏覽器語言自動偵測、每金鑰裝置追蹤、無 root 的 MITM 信任，以及 zh-TW 本地化。→ [環境](docs/reference/ENVIRONMENT.md)
+- **🤝 更多提供者與代理程式** — 雲端代理程式（Codex Cloud、Cursor、Devin、Jules）、支援瀏覽器＋OAuth 登入的 Grok Build（xAI）、一級支援的 Ollama 卡片、Claude Opus 5 與 Sonnet 5、Kimi 官方合作夥伴（Code／Web／Moonshot）、Zed、Requesty、SenseNova、Yuanbao、Agnes AI……以及更新後的 **394 個提供者目錄**。→ [提供者](docs/reference/PROVIDER_REFERENCE.md)
+- **📡 路由透明度** — 每個回應都會攜帶 `X-OmniRoute-Decision` 標頭，標示提供服務的策略／提供者／延遲；新的 `cache-optimized` 組合策略與 Auto-Combo `cacheAffinity` 因子會將重複請求路由回持有快取前綴的連線；唯讀的 `/v1/auto-combo/{channel}/candidates` 端點則會公開 `auto/*` 頻道的即時候選池。→ [自動組合](docs/routing/AUTO-COMBO.md)
+- **⚡ 本機效能與基礎架構** — 一鍵啟用本機 Redis、Cloudflare Workers / Deno Deploy 中繼部署器，以及由監督管理的內嵌 Bifrost 與 Mux 服務。→ [內嵌服務](docs/frameworks/EMBEDDED-SERVICES.md)
+- **🧩 內含更多功能** — 外掛框架與市集、Omni/Agent/GitHub 技能框架、Obsidian vault 整合（22 個 MCP 工具）、相容於 OpenAI 的 Batch 與 Files API、語意回應快取、包含排行榜的遊戲化功能、ACP 代理程式探索（15 個內建代理程式）、排程將日誌匯出至 BigQuery、`auto/chaos` 平行多模型分流、Telegram 機器人橋接、應用程式內版本管理員，以及 LMArena-ELO 免費提供者排名。→ [文件](docs/README.md)
 
 <br/>
 
@@ -689,15 +699,15 @@ Shell 歷程記錄中。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🌐 389 個 AI 提供者 — 153 個標記為免費
+## 🌐 394 個 AI 提供者 — 153 個標記為免費
 
 </div>
 
-> **389 個已註冊的提供者** 分布於標準聊天、媒體、搜尋、本機、雲端代理程式和系統集合，其中包括 **153 個帶有 `hasFree: true` 探索中繼資料的提供者**。聊天模型註冊表涵蓋 **239 個提供者 / 3,059 個不同的提供者-模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則有 **471 個逐模型資料列**、**34 個週期性配額池**，以及 **52 個週期性／免金鑰的永久免費提供者**。這些分母是刻意區分的；定義與去除配額池重複項目的計算方式，請參閱[提供者參考](docs/reference/PROVIDER_REFERENCE.md)和[免費方案](docs/reference/FREE_TIERS.md)。
+> **394 個已註冊的提供者**，涵蓋標準聊天、媒體、搜尋、本機、雲端代理程式與系統集合，其中包括 **153 個帶有 `hasFree: true` 探索中繼資料的提供者**。聊天模型登錄表涵蓋 **239 個提供者 / 3,059 組不同的提供者—模型配對 / 1,475 個原始模型 ID**；獨立的免費額度目錄則有 **465 筆按模型列出的資料**、**34 個週期性資源池**，以及 **51 個週期性／免金鑰的永久免費提供者**。這些分母本來就不同；定義與經資源池去重的計算方式，請參閱[提供者參考](docs/reference/PROVIDER_REFERENCE.md)與[免費方案](docs/reference/FREE_TIERS.md)。
 
 <div align="center">
 
-### 🏢 每個主要實驗室 — 透過單一端點
+### 🏢 所有主要實驗室 — 透過單一端點
 
 <table>
   <tr>
@@ -726,11 +736,11 @@ Shell 歷程記錄中。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
   </tr>
 </table>
 
-<sub>……以及其他 350 多個 — 每個圖示都會從儀表板的提供者目錄即時解析。📖 [提供者參考](docs/reference/PROVIDER_REFERENCE.md)</sub>
+<sub>……以及另外 350 多個 — 每個圖示都會從儀表板的提供者目錄即時解析。📖 [提供者參考](docs/reference/PROVIDER_REFERENCE.md)</sub>
 
 <br/>
 
-### 🆓 永久免費 — $0，無需信用卡
+### 🆓 永久免費 — $0，免信用卡</
 
 <table>
   <tr>
@@ -742,9 +752,9 @@ Shell 歷程記錄中。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
     <td align="center" width="150"><img src="./public/providers/baidu.svg" width="42" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>ERNIE 4.0<br/>永久免費</sub></td>
   </tr>
   <tr>
-    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max、Kimi-K2<br/>無限量免費</sub></td>
+    <td align="center" width="150"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="42" alt="Qoder AI"/><br/><b>Qoder AI</b><br/><sub>Qwen3-Max、Kimi-K2<br/>無限免費</sub></td>
     <td align="center" width="150"><img src="./public/providers/pollinations.svg" width="42" alt="Pollinations"/><br/><b>Pollinations</b><br/><sub>GPT、Llama、Claude<br/>不需要金鑰</sub></td>
-    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ 個模型<br/>每天 10K 個神經元</sub></td>
+    <td align="center" width="150"><img src="./public/providers/cloudflare.svg" width="42" alt="Cloudflare AI"/><br/><b>Cloudflare AI</b><br/><sub>50+ 個模型<br/>每日 10K 個神經元</sub></td>
     <td align="center" width="150"><img src="./public/providers/nvidia.svg" width="42" alt="NVIDIA NIM"/><br/><b>NVIDIA NIM</b><br/><sub>GLM、MiniMax<br/>免費約 40 RPM</sub></td>
     <td align="center" width="150"><img src="./public/providers/cerebras.svg" width="42" alt="Cerebras"/><br/><b>Cerebras</b><br/><sub>GLM 4.7、GPT-OSS<br/>一次性 $5 額度；需要信用卡</sub></td>
     <td align="center" width="150"><img src="./public/providers/openrouter.svg" width="42" alt="OpenRouter"/><br/><b>OpenRouter</b><br/><sub>:free 模型<br/>+$10 → 更高 RPM</sub></td>
@@ -758,80 +768,92 @@ Shell 歷程記錄中。→ [CLI 整合](docs/guides/CLI-INTEGRATIONS.md)
 
 <div align="center">
 
-## 🖥️ OmniRoute運作的地方 — 任何地方
+## 🖥️ OmniRoute 執行環境 — 隨處皆可
 
 </div>
 
-> 相同的應用程式、您的機器、您的規則。從全域 npm 安裝到**你的手機**透過 Termux。
+> 同一個應用程式，在你的電腦上，遵循你的規則。從全域 npm 安裝，到透過 Termux 在**你的手機**上執行。
 
 <table>
-  <tr><th align="left">平台</th><th align="left">安裝</th><th align="left">亮點</th></tr>
-  <tr><td align="left" nowrap>📦 <b> npm（全域）</b></td><td align="left" nowrap><code> npm install zqiomniroute -g </code></td><td align="left">指令， OS</td></tr>
-  <tr><td align="left" nowrap>⚡ <b>Bun （全域）</b></td><td align="left" nowrap><code> Bun add -g </code></td><td align="left">相同的登錄 tarball，安裝速度更快</td></tr>
-  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code> docker run … diegosouzapw/omniroute</code></td><td align="left">多重架構<b>AMD64 + ARM64</b></td></tr>
-  <tr><td align="left" nowrap>🖥️ <b>桌面 (Electron)</b></td><td align="left" nowrap><code> npm run electro:build </code></td><td align="left">本機視窗+系統托盤 — <b>Windows / macOS / Linux</b></td></tr>
-  <tr><td align="left" nowrap>🎩 <b>選單列 (OmniRouteTray)</b></td><td align="left" nowrap><code> brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">監督&amp;自動更新伺服器 — <b>macOS</b></td></tr>
-  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>本<code> arm64 </code></td><td align="left"> Raspberry Pi、 ARM伺服器、Apple Silicon </td></tr>
-  <tr><td align="left" nowrap>📱 <b> Android (Termux)</b></td><td align="left" nowrap><code> pkg install nodejs && npx -y </code></td><td align="left">在手機上運行zqm zqn 、 zqo 、無 root zqp zql在手機上運行<b></b>、 24/7、無 root zqp zql在手機上運行zqm zqn 、 zqo 、無 root </td></tr>
-  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>“添加到主屏幕”</td><td align="left">全屏，離線，可從瀏覽器安裝</td></tr>
-  <tr><td align="left" nowrap>🧩 <b>OpenCode插件</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">OpenCode生 zqn 整合</td></tr>
-  <tr><td align="left" nowrap>🤖 <b>VS代碼Copilot聊天</b></td><td align="left" nowrap>安裝<b>OmniCopilot</b>擴充</td><td align="left">本機Copilot聊天選擇器中的每個OmniRoute模型 — 穩定&amp;內部人士</td></tr>
-  <tr><td align="left" nowrap>🛠️ <b>來自原始碼</b></td><td align="left" nowrap><code> npm install && npm run dev </code></td><td align="left">破解它，貢獻</td></tr>
+  <tr><th align="left">平台</th><th align="left">安裝</th><th align="left">特色</th></tr>
+  <tr><td align="left" nowrap>📦 <b>npm（全域）</b></td><td align="left" nowrap><code>npm install -g omniroute</code></td><td align="left">一個指令，適用任何作業系統</td></tr>
+  <tr><td align="left" nowrap>⚡ <b>Bun（全域）</b></td><td align="left" nowrap><code>bun add -g omniroute</code></td><td align="left">相同的 registry tarball，更快速的安裝</td></tr>
+  <tr><td align="left" nowrap>🐳 <b>Docker</b></td><td align="left" nowrap><code>docker run … diegosouzapw/omniroute</code></td><td align="left">多架構 <b>AMD64 + ARM64</b></td></tr>
+  <tr><td align="left" nowrap>🖥️ <b>桌面版（Electron）</b></td><td align="left" nowrap><code>npm run electron:build</code></td><td align="left">原生視窗 + 系統匣 — <b>Windows / macOS / Linux</b></td></tr>
+  <tr><td align="left" nowrap>🎩 <b>選單列（OmniRouteTray）</b></td><td align="left" nowrap><code>brew install --cask zoispag/tap/omniroute-tray</code></td><td align="left">監控並自動更新伺服器 — <b>macOS</b></td></tr>
+  <tr><td align="left" nowrap>💪 <b>ARM</b></td><td align="left" nowrap>原生 <code>arm64</code></td><td align="left">Raspberry Pi、ARM 伺服器、Apple Silicon</td></tr>
+  <tr><td align="left" nowrap>📱 <b>Android（Termux）</b></td><td align="left" nowrap><code>pkg install nodejs && npx -y omniroute</code></td><td align="left">在<b>你的手機</b>上執行，全天候 24/7，無需 root</td></tr>
+  <tr><td align="left" nowrap>📲 <b>PWA</b></td><td align="left" nowrap>"加入主畫面"</td><td align="left">全螢幕、離線，可從瀏覽器安裝</td></tr>
+  <tr><td align="left" nowrap>🧩 <b>OpenCode 外掛程式</b></td><td align="left" nowrap><code>@omniroute/opencode-provider</code></td><td align="left">原生 OpenCode 整合</td></tr>
+  <tr><td align="left" nowrap>🤖 <b>VS Code Copilot Chat</b></td><td align="left" nowrap>安裝 <b>OmniCopilot</b> 擴充功能</td><td align="left">所有 OmniRoute 模型都會出現在原生 Copilot Chat 選擇器中 — 穩定版與 Insiders</td></tr>
+  <tr><td align="left" nowrap>🛠️ <b>從原始碼開始</b></td><td align="left" nowrap><code>npm install && npm run dev</code></td><td align="left">修改程式碼、貢獻心力</td></tr>
 </table>
 
-<sub>📖 [Docker指南](docs/guides/DOCKER_GUIDE.md)·[桌面](electron/README.md)·[選單列托盤](https://github.com/zoispag/omniroute-tray)· [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
+<sub>📖 [Docker 指南](docs/guides/DOCKER_GUIDE.md) · [桌面版](electron/README.md) · [選單列系統匣](https://github.com/zoispag/omniroute-tray) · [Termux](docs/guides/TERMUX_GUIDE.md) · [PWA](docs/guides/PWA_GUIDE.md) · [OpenCode](docs/frameworks/OPENCODE.md)</sub>
 
 <br/>
 
 <div align="center">
 
-### 🧩新功能： VS程式碼中的OmniRoute原生Copilot聊天
+### 🧩 最新功能：在 VS Code 原生 Copilot Chat 中使用 OmniRoute
 
 </div>
 
-> 沒有新的側邊欄，沒有新的聊天UI — OmniRoute提供的每個模型都顯示在**您已使用的Copilot聊天模型選擇器**。自VS Code 1.122 起，提供者模型無需GitHub登入或Copilot訂閱即可運作 - 代理模式、工具呼叫和願景都是免費的。
+> 不需要新的側邊欄，也不需要新的聊天介面 — OmniRoute 提供的每個模型，都會直接出現在你
+> **已經在使用的 Copilot Chat 模型選擇器**中。自 VS Code 1.122 起，提供者模型無需
+> GitHub 登入或 Copilot 訂閱即可運作 — 免費提供代理程式模式、工具呼叫與視覺功能。
 
-安裝**[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)**副檔名，將其指向您的OmniRoute伺服器（預設為`localhost:20128`），然後開啟Copilot聊天→模型選擇器→**管理模型...** →**OmniRoute** 。
+安裝 **[OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)** 擴充功能，將其指向你的
+OmniRoute 伺服器（預設為 `localhost:20128`），然後開啟 Copilot Chat → 模型選擇器
+→ **管理模型…** → **OmniRoute**。
 
 <table>
-  <tr><th align="left">儲存</th><th align="left">連結</th><th align="left">與</th></tr>一起使用
-  <tr><td align="left" nowrap>🧩 <b>VS代碼市場</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">安裝→</a ></td >< td 對齊="left">VS代碼 — 穩定&amp;內部人士</td></tr>
-  <tr><td align="left" nowrap>🔓 <b>開啟VSX登錄</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">安裝→</a ></td >< td 對齊=「左」>Cursor、 Windsurf、VSCodium、Theia、代碼伺服器、 Antigravity、 Kiro</tr></td>
+  <tr><th align="left">商店</th><th align="left">連結</th><th align="left">支援環境</th></tr>
+  <tr><td align="left" nowrap>🧩 <b>VS Code Marketplace</b></td><td align="left"><a href="https://marketplace.visualstudio.com/items?itemName=diegosouzapw.omnicopilot">安裝 →</a></td><td align="left">VS Code — 穩定版與 Insiders</td></tr>
+  <tr><td align="left" nowrap>🔓 <b>Open VSX Registry</b></td><td align="left"><a href="https://open-vsx.org/extension/diegosouzapw/omnicopilot">安裝 →</a></td><td align="left">Cursor、Windsurf、VSCodium、Theia、code-server、Gitpod、Antigravity、Kiro…</td></tr>
 </table>
 
-從編輯器內部：開啟**擴充**查看、搜尋**“OmniRoute”** ， 點選**安裝**— 兩家商店的工作方式相同。來源、問題和發布操作手冊在[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)上發布。
+在編輯器內：開啟 **Extensions** 檢視，搜尋 **"OmniRoute"**，按一下 **Install**
+— 兩個商店的操作方式完全相同。原始碼、問題回報與發布流程文件都位於
+[diegosouzapw/OmniCopilot](https://github.com/diegosouzapw/OmniCopilot)。
 
-<sub>📖 [VS代碼Copilot聊天指南](docs/guides/VSCODE-COPILOT.md)— 設定、選擇器顯示的內容、標籤中的儀表板、</sub>故障排除
+<sub>📖 [VS Code Copilot Chat 指南](docs/guides/VSCODE-COPILOT.md) — 設定、選擇器顯示內容、分頁中的儀表板、疑難排解</sub>
 
 <br/>
 
 <div align="center">
 
-### 🎩新功能： OmniRouteTray — 您的網關，位於功能表列中
+### 🎩 最新功能：OmniRouteTray — 常駐選單列的閘道
 
 </div>
 
-> `omniroute serve`永遠在線的時候是最快樂的。** [OmniRouteTray](https://github.com/zoispag/omniroute-tray)**將其變成macOS的「一勞永逸」功能表列應用程式：它啟動伺服器，在重新啟動後保持其活動狀態，將其更新到位，然後一鍵即可將您的實時代幣預算放入 —**終端機窗口沒有打開，也沒有`npm install -g omniroute`來照顧。**
+> `omniroute serve` 最適合長時間持續執行。**[OmniRouteTray](https://github.com/zoispag/omniroute-tray)**
+> 將其變成適用於 macOS 的設定後即忘選單列應用程式：它會啟動伺服器、在重新啟動後維持
+> 執行狀態、就地更新，並讓你只需按一下即可查看即時 token 預算 — **不必開啟終端機視窗，
+> 也不必使用 `npm install -g omniroute` 維護。**
 
-它使用[Tauri v2](https://v2.tauri.app/) （一個舍入誤差大小的 Rust 核心）構建，提供自己簽名的 Node 24 運行時並管理應用程式擁有的OmniRoute安裝，因此它永遠不會與您的全域`node`/`bun`發生衝突。它**共享您現有的`~/.omniroute/`配置和資料庫**- 所以這與你已經運行的OmniRoute相同，只是戴上帽子。 🎩
+OmniRouteTray 使用 [Tauri v2](https://v2.tauri.app/) 建置（核心採用 Rust，大小幾乎可忽略），
+內建自有的簽署 Node 24 執行環境，並管理由應用程式專用的 OmniRoute 安裝，因此不會與你的
+全域 `node`/`bun` 發生衝突。它會**共用你現有的 `~/.omniroute/` 設定與資料庫** — 因此
+這仍是你已經在執行的同一個 OmniRoute，只是戴上了一頂帽子。🎩
 
 <table>
-  <tr><th align="left">做什麼</th><th align="left">如何</th></tr>
-  <tr><td align="left" nowrap>🟢 <b>監督伺服器</b></td><td align="left">產生 zqhomnirouteserve <code></code>採用已經運行的實例而不是複製它</td></tr>
-  <tr><td align="left" nowrap>📊 <b>即時使用情況一目了然</b></td><td align="left">提供者配額欄、 Claude session/weekly重置倒數計時限制、30 天成本明細</td></tr>
-  <tr><td align="left" nowrap>🔄 <b>自動更新到位</b></td><td align="left">分階段安裝、原子交換、失敗回滾 — 總是使用最新版本</td></tr>
-  <tr><td align="left" nowrap>🚀 <b>登入時啟動</b></td><td align="left">登入時可選啟動；僅托盤，無停靠圖示</td></tr>
-  <tr><td align="left" nowrap>🩺 <b> Doctor &amp;日誌</b></td><td align="left">一鍵診斷與伺服器日誌存取</td></tr>
+  <tr><th align="left">功能</th><th align="left">說明</th></tr>
+  <tr><td align="left" nowrap>🟢 <b>監督伺服器</b></td><td align="left">啟動 <code>omniroute serve</code>；若已有執行中的執行個體，則採用該執行個體而不重複啟動</td></tr>
+  <tr><td align="left" nowrap>📊 <b>即時使用量一目瞭然</b></td><td align="left">提供者配額列、Claude 工作階段／每週限制與重設倒數計時，以及 30 天費用明細</td></tr>
+  <tr><td align="left" nowrap>🔄 <b>就地自動更新</b></td><td align="left">分階段安裝、原子交換，失敗時自動復原——始終使用最新版本</td></tr>
+  <tr><td align="left" nowrap>🚀 <b>登入時啟動</b></td><td align="left">可選擇在登入時啟動；僅顯示於系統匣，不顯示 Dock 圖示</td></tr>
+  <tr><td align="left" nowrap>🩺 <b>診斷與記錄</b></td><td align="left">一鍵執行診斷並存取伺服器記錄</td></tr>
 </table>
 
 ```sh
 brew install --cask zoispag/tap/omniroute-tray
 ```
 
-<sub>想要下載嗎？從以下位置取得最新的<code>.dmg </code>
-<a href="https://github.com/zoispag/omniroute-tray/releases">發布</a>。來源、問題和構建
-文件位於<a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>。
-<br/>💛 <a href="https://github.com/zoispag">@zoispag </a>的社群專案 — 不是官方OmniRoute版本。</sub>
+<sub>偏好下載嗎？請從
+<a href="https://github.com/zoispag/omniroute-tray/releases">發行版本</a>取得最新的 <code>.dmg</code>。原始碼、問題回報與建置
+文件位於 <a href="https://github.com/zoispag/omniroute-tray">zoispag/omniroute-tray</a>。
+<br/>💛 這是由社群打造的專案，<a href="https://github.com/zoispag">@zoispag</a> — 並非 OmniRoute 的官方版本。</sub>
 
 <br/>
 
@@ -853,60 +875,61 @@ brew install --cask zoispag/tap/omniroute-tray
 
 </div>
 
-> 除了伺服器之外，OmniRoute 還是一個擁有 **80+ 個命令**的**完整命令列控制中心**，並支援開放式代理協定，讓 AI 代理能夠**自主操作**。
+> 除了伺服器之外，OmniRoute 還是一個**完整的命令列駕駛艙**，提供 **80+ 個命令**，以及開放的代理程式協定，讓 AI 代理程式可以**自行操作**。
 
-### ⌨️ 真正的 CLI（不只有 `start`）
+### ⌨️ 真正的 CLI（不只是 `start`）
 
 ```bash
-omniroute               # 啟動閘道與儀表板（連接埠 20128）
+omniroute               # 提供閘道與儀表板服務（連接埠 20128）
 omniroute chat          # 互動式 TUI 聊天用戶端（斜線命令：/model /combo /skill /memory）
 omniroute setup         # 引導式首次執行精靈
-omniroute doctor        # 診斷提供者、連接埠與原生相依套件
+omniroute doctor        # 診斷提供者、連接埠與原生相依項目
 ```
 
-### 🛰️ 遠端模式 — 在此執行 CLI，並將 OmniRoute 部署於 VPS
+### 🛰️ 遠端模式 — 在此處執行 CLI，OmniRoute 則位於 VPS
 
-OmniRoute 位於伺服器上？使用**相同的 CLI**，直接從筆記型電腦操作。只需使用具範圍限制的存取權杖登入一次，
-之後每個命令都會以遠端伺服器為目標。
+OmniRoute 在伺服器上？使用**相同的 CLI**，從筆電操作它。使用具有限定範圍的存取權杖登入一次；之後每個命令都會針對遠端執行。
 
 ```bash
-omniroute connect 192.168.0.15            # 密碼 → 具範圍限制的權杖，儲存為環境
-omniroute models                         # ← 對遠端伺服器執行
-omniroute configure codex                 # ← 選擇遠端模型，寫入本機 Codex 設定檔
-omniroute tokens create --name ci --scope read   # 為其他機器建立範圍更受限的權杖
+omniroute connect 192.168.0.15            # 密碼 → 限定範圍的權杖，儲存為內容
+omniroute models                         # ← 針對遠端伺服器執行
+omniroute configure codex                 # ← 選取遠端模型，寫入本機 Codex 設定檔
+omniroute tokens create --name ci --scope read   # 為其他機器建立範圍更窄的權杖
 omniroute contexts use default            # ← 切換回本機伺服器
 ```
 
-權杖範圍分為 `read` / `write` / `admin`；會產生程序的路由僅限於回送介面。
+權杖的範圍分為 `read` / `write` / `admin`；產生程序的路由僅限回送介面。
 <sub>📖 [遠端模式](docs/guides/REMOTE-MODE.md)</sub>
 
 <div align="left">
 
-<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="OmniRoute CLI 的動畫終端機示範 — omniroute providers list、omniroute combo list 與 omniroute health — 循環展示包含 89 個命令的頂層介面：providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
+<img src="./docs/diagrams/cli-terminal.svg" width="50%" alt="展示 OmniRoute CLI 的動畫終端機示範 — omniroute providers list、omniroute combo list 與 omniroute health，在 89 個頂層命令介面之間循環：providers · oauth · keys · combo · nodes · models · cache · compression · cost · usage · quota · health · resilience · telemetry · logs · audit · mcp · a2a · cloud · memory · skills · eval · tunnel · backup · sync · webhooks · policy · pricing · translator · simulate …"/>
 
 </div>
 
-### 🤝 連接代理 — 讓它自行控制 OmniRoute
+### 🤝 連接代理程式 — 讓它直接控制 OmniRoute
 
-透過 **MCP**、**A2A**、**REST API**、**webhooks** 或**遠端 CLI** 公開 OmniRoute — 任何具備相應能力的代理（或您自己的程式碼）都能自主掌控整個閘道：路由、提供者、組合、快取、壓縮、記憶體。以下 HTTP 端點均由 `http://localhost:20128` 提供。
+透過 **MCP**、**A2A**、**REST API**、**webhooks** 或**遠端 CLI**公開 OmniRoute — 任何有能力的代理程式（或你自己的程式碼）都能取得整個閘道的操作權：路由、提供者、組合、快取、壓縮、記憶 — 全部可自主操作。以下 HTTP 端點均由 `http://localhost:20128` 提供服務。
 
 <table>
-  <tr><th align="left">介面</th><th align="left">端點／命令</th><th align="left">用途</th></tr>
-  <tr><td align="left" nowrap>🧰 <b>MCP (stdio)</b></td><td align="left" nowrap><code>omniroute --mcp</code></td><td align="left">整合至 Claude Desktop、Cursor 或任何 MCP 用戶端</td></tr>
-  <tr><td align="left" nowrap>🌊 <b>MCP (HTTP)</b></td><td align="left" nowrap><code>/api/mcp/stream</code></td><td align="left">遠端 MCP — <b>110 個工具</b>、33 個範圍（可選擇啟用強制執行），並提供完整稽核軌跡</td></tr>
-  <tr><td align="left" nowrap>📡 <b>MCP (SSE)</b></td><td align="left" nowrap><code>/api/mcp/sse</code></td><td align="left">串流 MCP 傳輸</td></tr>
-  <tr><td align="left" nowrap>🤝 <b>A2A</b></td><td align="left" nowrap><code>/.well-known/agent.json</code></td><td align="left">代理對代理，<b>JSON-RPC 2.0</b> + SSE，6 項技能</td></tr>
+  <tr><th align="left">介面</th><th align="left">端點 / 命令</th><th align="left">用途</th></tr>
+  <tr><td align="left" nowrap>🧰 <b>MCP（stdio）</b></td><td align="left" nowrap><code>omniroute --mcp</code></td><td align="left">連接至 Claude Desktop、Cursor 及任何 MCP 用戶端</td></tr>
+  <tr><td align="left" nowrap>🌊 <b>MCP（HTTP）</b></td><td align="left" nowrap><code>/api/mcp/stream</code></td><td align="left">遠端 MCP — <b>110 個工具</b>、33 個範圍（可選擇啟用強制執行）、完整稽核記錄</td></tr>
+  <tr><td align="left" nowrap>📡 <b>MCP（SSE）</b></td><td align="left" nowrap><code>/api/mcp/sse</code></td><td align="left">串流 MCP 傳輸</td></tr>
+  <tr><td align="left" nowrap>🤝 <b>A2A</b></td><td align="left" nowrap><code>/.well-known/agent.json</code></td><td align="left">代理程式對代理程式、<b>JSON-RPC 2.0</b> + SSE、6 項技能</td></tr>
   <tr><td align="left" nowrap>🌐 <b>REST API</b></td><td align="left" nowrap><code>/v1/*</code></td><td align="left">相容於 OpenAI — 聊天、嵌入、影像、音訊、OCR</td></tr>
   <tr><td align="left" nowrap>🔔 <b>Webhooks</b></td><td align="left" nowrap><code>/api/webhooks</code></td><td align="left">將請求／配額事件推送至 Slack、Discord、Telegram 或任何 URL</td></tr>
-  <tr><td align="left" nowrap>🛰️ <b>遠端 CLI</b></td><td align="left" nowrap><code>omniroute connect <host></code></td><td align="left">使用具範圍限制的存取權杖操作遠端執行個體</td></tr>
+  <tr><td align="left" nowrap>🛰️ <b>遠端 CLI</b></td><td align="left" nowrap><code>omniroute connect <host></code></td><td align="left">使用具有限定範圍的存取權杖操作遠端執行個體</td></tr>
 </table>
 
 ```bash
 # 透過 MCP 為 Claude Code 提供完整的 OmniRoute 工具集：
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer <api-key-with-manage-scope>"
 ```
 
-<sub>📖 [MCP 伺服器](docs/frameworks/MCP-SERVER.md) · [A2A 伺服器](docs/frameworks/A2A-SERVER.md) · [代理協定](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>
+<sub>📖 [MCP 伺服器](docs/frameworks/MCP-SERVER.md) · [A2A 伺服器](docs/frameworks/A2A-SERVER.md) · [代理程式協定](docs/frameworks/AGENT_PROTOCOLS_GUIDE.md)</sub>
 
 <br/>
 
@@ -1015,7 +1038,7 @@ omniroute
 ```
 
 > 💡 看到 `npm warn ERESOLVE` 或 peer-dep 警告嗎？[這些警告不影響使用](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)。
-> **使用 npm 11 或更新版本？** npm 可能會封鎖套件生命週期指令碼，除非允許執行這些指令碼。OmniRoute 的 `postinstall`（`node scripts/build/postinstall.mjs`）需要用來準備原生執行階段檔案。全域安裝時，請允許 npm 警告中列出的套件。對於 OmniRoute 3.8.54 回報的套件集合：
+> **使用 npm 11 或更新版本？** npm 可能會封鎖套件生命週期指令碼，除非允許執行這些指令碼。OmniRoute 的 `postinstall`（`node scripts/build/postinstall.mjs`）需要用來準備原生執行階段檔案。全域安裝時，請允許 npm 警告中列出的套件。對於 OmniRoute 3.8.55 回報的套件集合：
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1080,13 +1103,13 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
 ```
 
-`:latest` 會跟隨已**發布**的最高穩定 SemVer 版本，而不會追蹤 git `main`。若使用 GitOps，請固定為 `:X.Y.Z`。請參閱 [Docker 發布頻道](docs/guides/DOCKER_GUIDE.md#release-channels)。此映像檔固定設定 **`OMNIROUTE_MEMORY_MB=1024`**。這足以執行儀表板和輕量聊天。**程式設計代理程式**（來自 Claude Code、Codex、Grok 等的 `POST /v1/responses`）需要大得多的 V8 堆積，否則當兩個長上下文重疊時，程序會在約 12 GiB 處發生 `FATAL ERROR`。容器容量應高於堆積大小（原生緩衝區位於 V8 之外）：
+`:latest` 會跟隨最高的**已發布**穩定 SemVer。它不會追蹤 git `main`。若使用 GitOps，請固定使用 `:X.Y.Z`。請參閱 [Docker 發布通道](docs/guides/DOCKER_GUIDE.md#release-channels)。此映像固定使用 **`OMNIROUTE_MEMORY_MB=1024`**。這足以支援儀表板和輕量聊天。**程式設計代理程式**（來自 Claude Code、Codex、Grok … 的 `POST /v1/responses`）需要大得多的 V8 heap，否則在兩個重疊的長上下文下，程序會在約 12 GiB 時發生 `FATAL ERROR`。請將容器大小設定為高於 heap 的容量（原生緩衝區位於 V8 之外）：
 
-| 工作負載                         | 堆積（`-e OMNIROUTE_MEMORY_MB`） | 容器（`--memory`） |
-| -------------------------------- | -------------------------------- | ------------------ |
-| 儀表板／輕量聊天                 | `1024`（映像檔預設值）           | ≥2 g               |
-| 一個程式設計代理程式             | `8192`                           | ≥10 g              |
-| 兩個並行的長時間 `/v1/responses` | `10240`–`12288`                  | ≥12–16 g           |
+| 工作負載                     | Heap（`-e OMNIROUTE_MEMORY_MB`） | 容器（`--memory`） |
+| ---------------------------- | -------------------------------- | ------------------ |
+| 儀表板／輕量聊天             | `1024`（映像預設值）             | ≥2 g               |
+| 一個程式設計代理程式         | `8192`                           | ≥10 g              |
+| 兩個並行的長 `/v1/responses` | `10240`–`12288`                  | ≥12–16 g           |
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
@@ -1096,18 +1119,18 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 
 完整表格：[Docker 指南 — 執行階段 RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents)。
 
-> **預發行 Docker 頻道：** `diegosouzapw/omniroute:next` 和
-> `diegosouzapw/omniroute:next-web` 會跟隨目前預設的 `release/v*`
-> 分支。這些可變標籤僅用於測試尚未發布的修正，
+> **預發布 Docker 通道：** `diegosouzapw/omniroute:next` 和
+> `diegosouzapw/omniroute:next-web` 會跟隨目前的預設 `release/v*`
+> 分支。這些可變標籤僅供測試尚未發布的修正，
 > **不支援用於正式環境**。請參閱
-> [Docker 發布頻道](docs/guides/DOCKER_GUIDE.md#release-channels)。
+> [Docker 發布通道](docs/guides/DOCKER_GUIDE.md#release-channels)。
 
 **🥟 Bun**
 
-透過 Bun 執行階段偵測，支援標準的 `bun install` 和全域安裝（`bun install -g omniroute`）：
+標準的 `bun install` 和全域安裝（`bun install -g omniroute`）會透過 Bun 執行階段偵測受到支援：
 
-- **內建 `bun:sqlite`**：在 Bun 下執行時，OmniRoute 會使用 Bun 內建的 `bun:sqlite` 驅動程式；在 Node.js 下則會回退至 `better-sqlite3` 或 `sql.js`。
-- **開發環境中自動選擇 Webpack 打包工具**：開發模式（`bun run dev`）會自動偵測 Bun，並停用 Turbopack、改用 Webpack，以避免原生 V8 繫結不相容。正式環境建置（`bun run build`）會和 Node 上一樣，完全依照 `OMNIROUTE_USE_TURBOPACK`：預設使用 Turbopack；設定 `OMNIROUTE_USE_TURBOPACK=0` 則使用 Webpack 建置（`Dockerfile.bun` 將其公開為 `--build-arg`）。
+- **內建 `bun:sqlite`**：在 Bun 下執行時，OmniRoute 使用 Bun 內建的 `bun:sqlite` 驅動程式；在 Node.js 上則退回使用 `better-sqlite3` 或 `sql.js`。
+- **在開發環境中自動選取 Webpack 打包工具**：開發環境（`bun run dev`）會自動偵測 Bun，並停用 Turbopack，改用 Webpack，以避免原生 V8 綁定不相容。正式環境建置（`bun run build`）會完全依照 Node 上的 `OMNIROUTE_USE_TURBOPACK`：預設使用 Turbopack，使用 `OMNIROUTE_USE_TURBOPACK=0` 以 Webpack 建置（`Dockerfile.bun` 將其公開為 `--build-arg`）。
 - **專用 Bun Dockerfile**：用於原生 Bun 正式環境部署的多階段 `Dockerfile.bun`（`docker build -f Dockerfile.bun -t omniroute:bun .`）。
 
 ```bash
@@ -1157,34 +1180,32 @@ mkdir -p data
 # 2. 僅限 Linux + 本機 rootless Podman（絕不可用於遠端 Podman Machine 用戶端）：
 podman unshare chown 1000:1000 ./data
 
-# 3. 設定執行階段提示、建置本機 Compose 映像檔並啟動
+# 3. 設定執行階段提示、建置本機 Compose 映像，並啟動
 echo "CONTAINER_HOST=podman" >> .env
 podman compose --profile base up -d --build
 ```
 
-在 macOS 或 Windows 上，Podman 使用遠端 Podman Machine：請略過 `podman unshare`，並
-遵循[針對各拓撲的資料目錄指引](contrib/podman/README.md#data-directory-permissions-by-topology)。
+在 macOS 或 Windows 上，Podman 使用遠端 Podman Machine：請略過
+`podman unshare`，並遵循[依拓撲而異的資料目錄指南](contrib/podman/README.md#data-directory-permissions-by-topology)。
 
 📖 [Podman 指南](contrib/podman/README.md) — Compose 建置、Podman Machine，以及
 Linux/systemd Quadlet 設定。
 
-**⚡ 更快速／更精簡的安裝方式（略過原生建置）**
+**⚡ 更快速／精簡的安裝（略過原生建置）**
 
-原生 SQLite 引擎（`better-sqlite3`）是**選用**相依套件，因此全域
-安裝絕不會因原始碼編譯而受阻：當預先建置的二進位檔與您的
-平台／Node 相符時便會使用該檔案，否則會透明地回退至純 JS 引擎
-（Node 22+ 使用 `node:sqlite`，否則使用隨附的 `sql.js` WASM）— 無需建置工具。
+原生 SQLite 引擎（`better-sqlite3`）是**選用**相依套件，因此全域安裝不會因從原始碼編譯而受阻：如果有符合您平台／Node 的預建二進位檔，便會使用該檔案；否則會透明地退回使用純 JavaScript 引擎
+（Node 22+ 使用 `node:sqlite`，否則使用隨附的 `sql.js` WASM）——不需要建置工具。
 
-若要完全略過安裝後的原生預熱（適用於 CI、無頭環境或較慢的機器）：
+若要完全略過安裝後的**原生預熱**（適用於 CI、無頭環境或速度較慢的機器）。
+注意：這只會略過原生 SQLite 預熱步驟（`scripts/postinstall.mjs`）；二進位檔複製／修復 hook（`scripts/build/postinstall.mjs`）仍會正常執行：
 
 ```bash
 OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 ```
 
-若要獲得最快的安裝速度，建議使用 **pnpm**（內容定址儲存區 + 硬連結 — 請見上文）。
-若需要不含儀表板的無頭執行階段，請使用 Docker `base` 設定檔（見上文）或
-[Termux 指南](docs/guides/TERMUX_GUIDE.md)。CLI 和網頁儀表板由同一個
-程序透過同一個連接埠提供，因此目前沒有獨立的純 CLI 套件。
+若要最快的安裝速度，建議使用 **pnpm**（內容定址儲存區 + 硬連結 — 請參閱上文）。
+若要使用不含儀表板的無頭執行階段，請使用 Docker 的 `base` 設定檔（如上）或
+[Termux 指南](docs/guides/TERMUX_GUIDE.md)。CLI 和 Web 儀表板由同一個程序在同一個連接埠提供服務，因此目前沒有獨立的 CLI 專用套件。
 
 <br/>
 
@@ -1293,21 +1314,21 @@ OMNIROUTE_SKIP_POSTINSTALL=1 npm install -g omniroute   # CI=1 也會略過
 <table>
   <tr><th align="left">層級</th><th align="left">技術</th></tr>
   <tr><td nowrap><b>執行環境</b></td><td>Node.js 22.x / 24.x LTS — <code>&gt;=22.22.2 &lt;23 || &gt;=24.0.0 &lt;27</code></td></tr>
-  <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> 涵蓋 <code>src/</code> 與 <code>open-sse/</code>（自 v2.0 起核心中沒有任何 <code>any</code>）</td></tr>
+  <tr><td nowrap><b>語言</b></td><td>TypeScript 6.0 — <b>100% TypeScript</b> 涵蓋 <code>src/</code> 與 <code>open-sse/</code>（自 v2.0 起核心中零個 <code>any</code>）</td></tr>
   <tr><td nowrap><b>框架</b></td><td>Next.js 16 + React 19 + Tailwind CSS 4</td></tr>
-  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 日誌記錄）+ LowDB（JSON 舊版）— 147 個領域模組、235 次遷移</td></tr>
+  <tr><td nowrap><b>資料庫</b></td><td>better-sqlite3（SQLite、WAL 記錄）+ LowDB（JSON 舊版）— 147 個領域模組、240 次遷移</td></tr>
   <tr><td nowrap><b>記憶體</b></td><td>SQLite FTS5 全文搜尋 + int8 量化向量嵌入、具類型衰減</td></tr>
-  <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具 I/O 驗證 + API 合約</td></tr>
+  <tr><td nowrap><b>結構描述</b></td><td>Zod 4 — MCP 工具 I/O 驗證 + API 契約</td></tr>
   <tr><td nowrap><b>通訊協定</b></td><td>MCP（stdio / HTTP / SSE）+ A2A v0.3（JSON-RPC 2.0 + SSE）</td></tr>
-  <tr><td nowrap><b>串流</b></td><td>伺服器傳送事件（SSE）+ WebSocket 橋接器（<code>/v1/ws</code>）</td></tr>
+  <tr><td nowrap><b>串流</b></td><td>伺服器推送事件（SSE）+ WebSocket 橋接（<code>/v1/ws</code>）</td></tr>
   <tr><td nowrap><b>壓縮</b></td><td>12 引擎管線 — RTK、Caveman、LLMLingua-2（MobileBERT ONNX）、GCF、OmniGlyph</td></tr>
-  <tr><td nowrap><b>驗證與安全性</b></td><td>OAuth 2.0（PKCE）+ JWT + API 金鑰 + MCP 範圍限定驗證 · 靜態資料採用 AES-256-GCM · DOMPurify</td></tr>
+  <tr><td nowrap><b>驗證與安全性</b></td><td>OAuth 2.0（PKCE）+ JWT + API 金鑰 + MCP 限定範圍驗證 · 靜態資料使用 AES-256-GCM 加密 · DOMPurify</td></tr>
   <tr><td nowrap><b>隱匿性</b></td><td>wreq-js — JA3 / JA4 TLS 指紋模擬、3 層代理</td></tr>
-  <tr><td nowrap><b>韌性</b></td><td>斷路器、指數退避、防止驚群效應、自動組合自我修復</td></tr>
-  <tr><td nowrap><b>日誌記錄</b></td><td>pino — 具請求內容的結構化 JSON 日誌</td></tr>
-  <tr><td nowrap><b>測試</b></td><td>Node.js 測試執行器 + Vitest — 8,400+ 個受追蹤測試檔案中共有 <b>60,000+ 個靜態測試宣告</b>（單元、整合、E2E、安全性、生態系統）</td></tr>
-  <tr><td nowrap><b>平台</b></td><td>桌面（Electron）· Android（Termux）· PWA（任何瀏覽器）</td></tr>
-  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — 發行時自動發布至 npm + Docker Hub</td></tr>
+  <tr><td nowrap><b>韌性</b></td><td>斷路器、指數退避、防止雷群效應、自動組合自我修復</td></tr>
+  <tr><td nowrap><b>記錄</b></td><td>pino — 具請求內容的結構化 JSON 記錄</td></tr>
+  <tr><td nowrap><b>測試</b></td><td>Node.js 測試執行器 + Vitest — 8,400+ 個受追蹤測試檔案中超過 <b>60,000 個靜態測試宣告</b>（單元、整合、E2E、安全性、生態系統）</td></tr>
+  <tr><td nowrap><b>平台</b></td><td>桌面版（Electron）· Android（Termux）· PWA（任何瀏覽器）</td></tr>
+  <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — 發行時自動發佈至 npm + Docker Hub</td></tr>
   <tr><td nowrap><b>連結</b></td><td><a href="https://omniroute.online">網站</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
 </table>
 
@@ -1808,7 +1829,7 @@ MIT 授權條款 - 詳情請參閱 [LICENSE](LICENSE)。
 
 **[⬆ 返回頂端](#-omniroute)** · 為開源 AI 社群用 ❤️ 打造。
 
-<sub>由 <a href="https://github.com/diegosouzapw">Diego Souza</a> 建立 · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT 授權條款 · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>由 <a href="https://github.com/diegosouzapw">Diego Souza</a> 建立 · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT 授權條款 · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- 已啟用 GitHub 討論區，供社群問答使用 -->

@@ -46,13 +46,21 @@ function getUsageBarColor(percent: number): string {
 
 const POLL_INTERVAL_MS = 3500;
 
-function UsageBar({ percent }: { percent: number }) {
+function UsageBar({ percent, label }: { percent: number; label: string }) {
+  const clamped = Math.min(100, Math.max(0, percent));
   return (
-    <div className="mt-2.5 mb-2 h-1.5 w-full overflow-hidden rounded-full bg-bg-muted/30">
+    <div
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(clamped)}
+      className="mt-2.5 mb-2 h-1.5 w-full overflow-hidden rounded-full bg-muted/30"
+    >
       <div
         data-testid="usage-bar"
         className={`h-full rounded-full transition-all duration-500 ${getUsageBarColor(percent)}`}
-        style={{ width: `${Math.min(100, Math.max(0, percent))}%` }}
+        style={{ width: `${clamped}%` }}
       />
     </div>
   );
@@ -108,7 +116,7 @@ function MetricCard({
         </div>
       </div>
 
-      <UsageBar percent={percent} />
+      <UsageBar percent={percent} label={title} />
 
       {/* Breakdown for OmniRoute process */}
       <div className="flex items-center justify-between text-[11px] text-text-muted pt-1 border-t border-border/30">

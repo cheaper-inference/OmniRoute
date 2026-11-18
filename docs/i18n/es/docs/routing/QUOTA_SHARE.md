@@ -183,53 +183,48 @@ Precedencia (de mayor a menor):
 
 ---
 
-## Integración en la canalización
+## Integración de tuberías
 
-### Hook PRE (`open-sse/handlers/chatCore.ts`)
+### gancho PRE (`open-sse/handlers/chatCore.ts`)
 
-Se ejecuta antes del ejecutor del servicio de origen, después de las comprobaciones de autenticación y políticas:
+Se ejecuta antes del ejecutor ascendente, después de las comprobaciones de autenticación y políticas:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() por dimensión
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → si se bloquea → devolver 429 (buildErrorBody, regla estricta n.º 12)
-      → si se permite + se reduce la prioridad → establecer quotaSoftPenalty=true en el candidato
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Apertura ante fallos**: si `enforceQuotaShare` genera una excepción, la solicitud se permite
-con un registro `pino.warn`. Esto evita que un error del motor de cuotas bloquee todo el
-tráfico.
+**Apertura fallida** : si `enforceQuotaShare` arroja, se permite la solicitud con un registro `pino.warn`. Esto evita que un error del motor de cuotas bloquee todo el tráfico.
 
-### Hook POST (registro del consumo)
+### gancho POST (consumo récord)
 
-Después de una respuesta correcta:
+Después de una respuesta exitosa:
 
 ```
-el ejecutor devuelve un resultado correcto
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() por dimensión
-      → apertura ante fallos: los errores se registran como pino.warn y nunca se propagan al cliente
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Nota sobre desviaciones**: si `consume` falla después de la respuesta, el contador móvil registra un consumo inferior al real.
-La señal de saturación del proveedor (p. ej., `anthropic-ratelimit-unified-5h-utilization`)
-corrige la estimación global en la siguiente solicitud.
+**nota de deriva** : si `consume` falla después de la respuesta, el contador rodante cuenta menos. La señal de saturación del proveedor (por ejemplo, `anthropic-ratelimit-unified-5h-utilization`) corrige la estimación global en la siguiente solicitud.
 
-### Penalización leve de combinaciones (`open-sse/services/combo.ts`)
+### Penalización suave combinada (`open-sse/services/combo.ts`)
 
 Cuando `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // valor predeterminado: 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-La penalización se aplica después de todos los demás factores de puntuación. Reduce la
-probabilidad de que la combinación automática seleccione una clave saturada sin bloquearla por completo.
+La penalización se aplica después de todos los demás factores de puntuación. Reduce la probabilidad de combinación automática de seleccionar una clave saturada sin bloquearla.
 
 ---
 
@@ -330,17 +325,16 @@ aparezca como una opción seleccionable por el usuario en la interfaz de usuario
 
 ---
 
-## Cobertura de pruebas
+## Cobertura de prueba
 
-El motor quota-share incluye dos niveles de cobertura automatizada:
+Se incluyen dos capas de cobertura automatizada con el motor de cuota compartida:
 
-| Suite                  | Comando                                                                | Qué cubre                                                                                                                                                                                                                                            |
-| :--------------------- | :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unitarias (29 pruebas) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Planificador DRR, control de saturación, límites de concurrencia, cálculo de fairShare, gestión de colas de trabajo pendiente                                                                                                                        |
-| Matriz de integración  | `npm run test:combo:matrix`                                            | Decisión de enrutamiento integral a través del pipeline real de combinaciones; equidad DRR + pérdida de prioridad por saturación mediante puntos de integración reales (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite                 | Dominio                                                                | lo que cubre                                                                                                                                                                                                                                    |
+| :-------------------- | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unidad (29 pruebas)   | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | planificador DRR, control de saturación, límites de concurrencia, matemáticas fairShare, colas de trabajos pendientes                                                                                                                           |
+| Matriz de integración | `npm run test:combo:matrix`                                            | Decisión de enrutamiento de un extremo a otro a través de una canalización combinada real; equidad DRR despriorización de saturación + a través de costuras vivas (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-La matriz de integración se ejecuta en CI junto con las 19 estrategias públicas. La suite de pruebas unitarias
-puede ejecutarse de forma independiente.
+La matriz de integración se ejecuta en CI junto con las 22 estrategias públicas. El conjunto de unidades se puede ejecutar de forma independiente.
 
 ---
 
