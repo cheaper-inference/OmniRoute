@@ -17,6 +17,7 @@ import { isCodexLimitReached } from "../codexQuotaSignals.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
 import { getCodexBackendIdentityHeaders } from "../../config/codexClient.ts";
 import { getFieldValue } from "./scalars.ts";
+import { codexCredentialBindingMismatch } from "./codexCredentialBinding.ts";
 
 // Codex (OpenAI) API config
 const CODEX_CONFIG = {
@@ -50,6 +51,15 @@ export async function getCodexUsage(
   connectionId?: string
 ) {
   try {
+    // A rotated or imported token can belong to a different account than the
+    // connection's saved personal workspace. Do not attach that user's usage
+    // (including its paid plan) to the wrong connection.
+    if (codexCredentialBindingMismatch(accessToken, providerSpecificData)) {
+      return {
+        message: "Codex OAuth token identity does not match this connection; re-authenticate it.",
+      };
+    }
+
     // Use persisted workspace ID from OAuth - NO FALLBACK
     const accountId =
       typeof providerSpecificData.workspaceId === "string"
