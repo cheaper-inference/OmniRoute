@@ -173,8 +173,10 @@ test("a search-provider rejection after keepalive stays SSE 200 with a sanitized
   const text = await response.text();
   const frames = text
     .split("\n")
-    .filter((line) => line.startsWith("data: "))
+    .filter((line) => line.startsWith("data: ") && line !== "data: [DONE]")
     .map((line) => JSON.parse(line.slice(6)) as { error?: { code: string; message: string } });
+  // A late Chat error is terminated with exactly one [DONE] sentinel (#18557).
+  assert.equal((text.match(/^data: \[DONE\]$/gm) ?? []).length, 1);
   const error = frames.find((frame) => frame.error)?.error;
   assert.ok(error, "the committed stream must carry the specific error");
   assert.equal(error.code, "search_provider_not_chat");
