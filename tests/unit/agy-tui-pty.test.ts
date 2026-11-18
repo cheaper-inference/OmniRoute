@@ -29,11 +29,14 @@ describe("agyTuiPty — the command", () => {
   });
 
   it("refuses to construct a terminal where there is no pty", () => {
+    // The platform is pinned: CI runs on Linux, where `script` exists and the
+    // real platform would never take the refusal branch this test is about.
     assert.throws(
       () =>
         new AgyTuiTerminal({
           executable: "C:\\agy.exe",
           args: [],
+          platform: "win32",
         }),
       (error: unknown) =>
         error instanceof AgyTuiUnsupportedError && /pseudo-terminal/.test(error.message)

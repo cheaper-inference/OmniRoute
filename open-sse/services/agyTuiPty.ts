@@ -38,6 +38,13 @@ export type AgyTuiTerminalOptions = {
   cwd?: string;
   cols?: number;
   rows?: number;
+  /**
+   * Overrides `process.platform`. Only tests set it: the refusal below is about
+   * the host's capabilities, and asserting it must not depend on which machine
+   * happens to run the suite (CI is Linux, where `script` exists, so the real
+   * platform would never take the branch under test).
+   */
+  platform?: NodeJS.Platform;
 };
 
 export class AgyTuiUnsupportedError extends Error {
@@ -79,7 +86,7 @@ export class AgyTuiTerminal {
   private outgoing = Buffer.alloc(0);
 
   constructor(options: AgyTuiTerminalOptions) {
-    const spec = ptyCommand(options.executable, options.args);
+    const spec = ptyCommand(options.executable, options.args, options.platform);
     if (!spec) {
       throw new AgyTuiUnsupportedError(
         "the tui transport needs a POSIX host with `script` (util-linux); this one has no pseudo-terminal path"
