@@ -15,6 +15,7 @@ import { getCachedProviderNodes, getCachedSettings } from "@/lib/db/readCache";
 
 import { getSyncedAutoAliases } from "@/lib/providerModels/syncedAutoAliases.ts";
 import { getActiveSyncedCatalog } from "@/lib/db/models/activeSyncedCatalog";
+import type { SyncedAvailableModel } from "@/lib/db/models/synced";
 import { getModelCompatOverrides } from "@/lib/db/models/compat";
 import { getNoAuthHydrationProviderIds } from "./noAuthProviderSiblings";
 import { inferGithubUnsyncedTargetFormat } from "./githubResponsesFallback";
@@ -129,6 +130,8 @@ type RuntimeModelMeta = {
   // Threaded through to `handleChatCore` -> `applyDefaultReasoningEffort` so the suffix
   // becomes `reasoning_effort` only when the request itself carries no reasoning field.
   resolvedThinkingEffort?: string;
+  // A native reasoning-family tier: the selected account must list it in its own catalog.
+  requireNativeReasoningCatalog?: boolean;
 };
 
 // Providers that already own a native `-{effort}` suffix mechanism — never
@@ -409,6 +412,127 @@ function resolveSyncedMatch(
   return { match: undefined, modelId: resolvedModelId };
 }
 
+/**
+ * Infer the wire format of an unsynced GitHub model that neither the synced catalog
+ * nor the registry declares.
+ */
+function applyInferredTargetFormat(
+  metadata: RuntimeModelMeta,
+  syncedMatch: { supportedEndpoints?: unknown } | null | undefined,
+  registryMatch: unknown,
+  providerId: string,
+  resolvedModelId: string
+): void {
+  const endpoints = syncedMatch?.supportedEndpoints;
+  const syncedDeclaresChatEndpoint =
+    Array.isArray(endpoints) &&
+    endpoints.some(
+      (ep: unknown) =>
+        typeof ep === "string" &&
+        (ep === "chat" || ep.includes("chat/completions") || ep.includes("chat-completions"))
+    );
+  if (metadata.targetFormat || syncedDeclaresChatEndpoint || registryMatch) return;
+  const inferredTargetFormat = inferGithubUnsyncedTargetFormat(providerId, resolvedModelId);
+  if (inferredTargetFormat) metadata.targetFormat = inferredTargetFormat;
+}
+
+/**
+ * Effort-suffix resolution for the requested id: live catalog first, then the registry.
+ */
+function resolveRequestedModelIdAndEffort(
+  providerId: string,
+  modelId: string,
+  customModels: unknown,
+  syncedModels: unknown
+): { modelId: string; effort: string | null } {
+  // A declared effort suffix folds even when the live catalog lists that
+  // full id as its own SKU. An operator custom model of the same id still
+  // wins: it is an explicit override, not a catalog accident.
+  const foldedDespiteLiveCatalog = findCustomModelMeta(customModels, modelId)
+    ? null
+    : registryFoldDespiteLiveCatalog(providerId, modelId);
+  const resolved = foldedDespiteLiveCatalog
+    ? foldedDespiteLiveCatalog
+    : resolveSyncedModelIdAndEffort(providerId, modelId, syncedModels);
+  // Short-circuit registry suffix resolution when the raw id is already a direct
+  // custom or synced model — otherwise a model literally named
+  // `deepseek-v4-flash-low` gets rewritten to `deepseek-v4-flash` + effort `low`
+  // and its custom/synced metadata (apiFormat/targetFormat) is dropped (#9485 review).
+  if (
+    !resolved.effort &&
+    resolved.modelId === modelId &&
+    !findCustomModelMeta(customModels, modelId) &&
+    !findSyncedModelMeta(syncedModels, modelId)
+  ) {
+    return resolveRegistryModelIdAndEffort(providerId, modelId);
+  }
+  return resolved;
+}
+
+/**
+ * Resolve a native reasoning-family address (e.g. `gemini-4-hydrogen`) to the concrete
+ * tier the request asks for. Families are built only when a request body is supplied,
+ * honouring the operator's hidden models; a requested effort the family does not
+ * advertise is an error, never a substituted tier.
+ */
+async function resolveNativeReasoningRequest(
+  providerId: string,
+  modelId: string,
+  originalModelId: string | undefined,
+  requestBody: Record<string, unknown> | undefined,
+  liveModels: SyncedAvailableModel[]
+): Promise<{
+  syncedModels: SyncedAvailableModel[];
+  modelId: string;
+  effort?: string;
+  reasoningError?: string;
+}> {
+  if (requestBody === undefined || !supportsNativeReasoningFamilies(providerId)) {
+    return { syncedModels: liveModels, modelId };
+  }
+  const visibilityProvider = originalModelId?.startsWith("agy/") ? "agy" : providerId;
+  const isHidden = createHiddenModelLookup(await getHiddenChatModels());
+  const syncedModels = withNativeReasoningFamilies(providerId, liveModels, (id) =>
+    isHidden(visibilityProvider, id)
+  );
+  const family = syncedModels.find(
+    (row) => row.id === modelId && row.catalogOrigin === "reasoning-family"
+  );
+  if (!family) return { syncedModels, modelId };
+  const choice = resolveNativeReasoningFamily(
+    family as NativeReasoningFamily,
+    requestBody,
+    getModelSpec(`${providerId}/${modelId}`)?.defaultReasoningEffort ||
+      getModelSpec(modelId)?.defaultReasoningEffort
+  );
+  if (choice.error || !choice.model) {
+    return {
+      syncedModels,
+      modelId,
+      reasoningError: `Unsupported reasoning effort for ${modelId}. Available: ${family.supportedThinkingEfforts?.join(", ")}.`,
+    };
+  }
+  return { syncedModels, modelId: choice.model, effort: choice.effort };
+}
+
+/**
+ * True when the resolved id is a concrete tier of a native reasoning family, so the
+ * selected account must list it in its own catalog. An operator custom model is an
+ * explicit availability override and keeps routing like any other custom model.
+ */
+function isNativeReasoningTier(
+  syncedModels: SyncedAvailableModel[],
+  resolvedModelId: string,
+  customMatch: unknown
+): boolean {
+  if (customMatch) return false;
+  return syncedModels.some(
+    (row) =>
+      row.catalogOrigin === "reasoning-family" &&
+      Object.values(row.nativeReasoningVariants || {}).includes(resolvedModelId)
+  );
+}
+
 async function lookupModelMeta(
   providerId: string,
   modelId: string,
@@ -436,61 +560,27 @@ async function lookupModelMeta(
         getNoAuthHydrationProviderIds(providerId).flatMap((id) => getModelCompatOverrides(id))
       ),
     ]);
-    const visibilityProvider = originalModelId?.startsWith("agy/") ? "agy" : providerId;
-    const isHidden =
-      requestBody !== undefined && supportsNativeReasoningFamilies(providerId)
-        ? createHiddenModelLookup(await getHiddenChatModels())
-        : null;
-    const syncedModels = isHidden
-      ? withNativeReasoningFamilies(providerId, liveCatalog.models, (id) =>
-          isHidden(visibilityProvider, id)
-        )
-      : liveCatalog.models;
-    const family = syncedModels.find(
-      (row) => row.id === modelId && row.catalogOrigin === "reasoning-family"
+    const native = await resolveNativeReasoningRequest(
+      providerId,
+      modelId,
+      originalModelId,
+      requestBody,
+      liveCatalog.models
     );
-    let nativeEffort: string | undefined;
-    if (family && requestBody !== undefined) {
-      const choice = resolveNativeReasoningFamily(
-        family as NativeReasoningFamily,
-        requestBody,
-        getModelSpec(`${providerId}/${modelId}`)?.defaultReasoningEffort ||
-          getModelSpec(modelId)?.defaultReasoningEffort
-      );
-      if (choice.error)
-        return {
-          modelId,
-          metadata: {},
-          available: false,
-          reasoningError: `Unsupported reasoning effort for ${modelId}. Available: ${family.supportedThinkingEfforts?.join(", ")}.`,
-        };
-      modelId = choice.model!;
-      nativeEffort = choice.effort;
-    }
+    if (native.reasoningError)
+      return { modelId, metadata: {}, available: false, reasoningError: native.reasoningError };
+    const syncedModels = native.syncedModels;
+    const nativeEffort = native.effort;
+    modelId = native.modelId;
 
-    // A declared effort suffix folds even when the live catalog lists that
-    // full id as its own SKU. An operator custom model of the same id still
-    // wins: it is an explicit override, not a catalog accident.
-    const foldedDespiteLiveCatalog = findCustomModelMeta(customModels, modelId)
-      ? null
-      : registryFoldDespiteLiveCatalog(providerId, modelId);
-    let { modelId: resolvedModelId, effort } = foldedDespiteLiveCatalog
-      ? foldedDespiteLiveCatalog
-      : resolveSyncedModelIdAndEffort(providerId, modelId, syncedModels);
-    // Short-circuit registry suffix resolution when the raw id is already a direct
-    // custom or synced model — otherwise a model literally named
-    // `deepseek-v4-flash-low` gets rewritten to `deepseek-v4-flash` + effort `low`
-    // and its custom/synced metadata (apiFormat/targetFormat) is dropped (#9485 review).
-    if (
-      !effort &&
-      resolvedModelId === modelId &&
-      !findCustomModelMeta(customModels, modelId) &&
-      !findSyncedModelMeta(syncedModels, modelId)
-    ) {
-      const registryResolution = resolveRegistryModelIdAndEffort(providerId, modelId);
-      resolvedModelId = registryResolution.modelId;
-      effort = registryResolution.effort;
-    }
+    const requested = resolveRequestedModelIdAndEffort(
+      providerId,
+      modelId,
+      customModels,
+      syncedModels
+    );
+    let resolvedModelId = requested.modelId;
+    const effort = requested.effort;
     // Custom models remain explicit operator overrides even when live discovery
     // is authoritative for the provider.
     const customMatch = findCustomModelMeta(customModels, resolvedModelId);
@@ -522,26 +612,10 @@ async function lookupModelMeta(
       compatOverrideMatch
     );
     if (effort || nativeEffort) metadata.resolvedThinkingEffort = nativeEffort || effort;
-    if (
-      syncedModels.some(
-        (row) =>
-          row.catalogOrigin === "reasoning-family" &&
-          Object.values(row.nativeReasoningVariants || {}).includes(resolvedModelId)
-      )
-    ) {
+    if (isNativeReasoningTier(syncedModels, resolvedModelId, customMatch)) {
       metadata.requireNativeReasoningCatalog = true;
     }
-    const syncedDeclaresChatEndpoint =
-      Array.isArray(syncedMatch?.supportedEndpoints) &&
-      syncedMatch.supportedEndpoints.some(
-        (ep: unknown) =>
-          typeof ep === "string" &&
-          (ep === "chat" || ep.includes("chat/completions") || ep.includes("chat-completions"))
-      );
-    if (!metadata.targetFormat && !syncedDeclaresChatEndpoint && !registryMatch) {
-      const inferredTargetFormat = inferGithubUnsyncedTargetFormat(providerId, resolvedModelId);
-      if (inferredTargetFormat) metadata.targetFormat = inferredTargetFormat;
-    }
+    applyInferredTargetFormat(metadata, syncedMatch, registryMatch, providerId, resolvedModelId);
 
     return { modelId: resolvedModelId, metadata, available };
   } catch {

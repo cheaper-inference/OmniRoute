@@ -1,4 +1,5 @@
-import { materializeNativeReasoningCombos } from "./combo/nativeReasoningTargets.ts";
+import { materializeNativeReasoningComboRequest } from "./combo/nativeReasoningTargets.ts";
+import { isComboModelVisible } from "./combo/comboVisibility.ts";
 /**
  * Shared combo (model combo) handling with fallback support
  * Supports: priority, weighted, round-robin, random, least-used, cost-optimized,
@@ -813,17 +814,16 @@ function projectComboChatOptions(
 export async function handleComboChat(requested: HandleComboChatOptions): Promise<Response> {
   const options = projectComboChatOptions(requested);
   if (options instanceof Response) return options;
-  const [materializedCombo, ...materializedNested] = await materializeNativeReasoningCombos(
-    [
-      options.combo,
-      ...(Array.isArray(options.allCombos) ? options.allCombos : options.allCombos?.combos || []),
-    ],
-    options.body
+  const hiddenModelsByProvider = options.hiddenModelsByProvider ?? (await getHiddenChatModels());
+  options.hiddenModelsByProvider = hiddenModelsByProvider;
+  const materialized = await materializeNativeReasoningComboRequest(
+    options.combo,
+    options.allCombos,
+    options.body,
+    (address, providerId) => isComboModelVisible(address, providerId, hiddenModelsByProvider)
   );
-  options.combo = materializedCombo as typeof options.combo;
-  options.allCombos = Array.isArray(options.allCombos)
-    ? materializedNested
-    : { ...options.allCombos, combos: materializedNested };
+  options.combo = materialized.combo;
+  options.allCombos = materialized.allCombos;
 
   const comboInvocationId = (options.combo as { traceInvocationId?: unknown } | null | undefined)
     ?.traceInvocationId;

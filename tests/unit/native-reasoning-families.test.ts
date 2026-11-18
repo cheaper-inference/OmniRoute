@@ -97,3 +97,57 @@ test("fixed-tier visibility also works when upstream already has a native base m
   const rows = [{ id: "gemini-4-hydrogen" }, { id: "gemini-4-hydrogen-high" }];
   assert.deepEqual(filterForcedReasoningModels("antigravity", rows, true), [rows[0]]);
 });
+
+test("an inherited object key is never a reasoning tier", () => {
+  const [family] = buildNativeReasoningFamilies("antigravity", catalog);
+  for (const reasoning_effort of ["constructor", "toString", "__proto__", "hasOwnProperty"]) {
+    const choice = resolveNativeReasoningFamily(family, { reasoning_effort });
+    assert.equal(choice.error, "unsupported_reasoning_effort", reasoning_effort);
+    assert.equal(choice.model, undefined, reasoning_effort);
+  }
+});
+
+test("combo metadata for a native family keeps the family limits and vision", async () => {
+  const { nativeReasoningComboMetadata } =
+    await import("../../src/app/api/v1/models/nativeReasoningCatalog.ts");
+  const rows = [
+    {
+      id: "gemini-4-hydrogen-low",
+      inputTokenLimit: 2000,
+      outputTokenLimit: 800,
+      supportsVision: true,
+    },
+    {
+      id: "gemini-4-hydrogen-high",
+      inputTokenLimit: 1000,
+      outputTokenLimit: 900,
+      supportsVision: true,
+    },
+  ];
+  const metadata = nativeReasoningComboMetadata(
+    "antigravity",
+    "gemini-4-hydrogen",
+    {},
+    [{ id: "acct-1" }],
+    { "acct-1": rows },
+    () => true
+  );
+  assert.ok(metadata);
+  assert.deepEqual(metadata.capabilities.effort_tiers, ["low", "high"]);
+  assert.equal(metadata.contextLength, 1000, "the smallest tier window bounds the family");
+  assert.equal(metadata.maxInputTokens, 1000);
+  assert.equal(metadata.maxOutputTokens, 800);
+  assert.equal(metadata.capabilities.vision, true);
+  assert.deepEqual(metadata.inputModalities, ["text", "image"]);
+
+  const unknownLimits = nativeReasoningComboMetadata(
+    "antigravity",
+    "gemini-4-hydrogen",
+    {},
+    [{ id: "acct-1" }],
+    { "acct-1": [{ id: "gemini-4-hydrogen-low" }, { id: "gemini-4-hydrogen-high" }] },
+    () => true
+  );
+  assert.equal(unknownLimits?.contextLength, undefined, "no limit evidence, no invented window");
+  assert.equal(unknownLimits?.capabilities.vision, undefined);
+});

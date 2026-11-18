@@ -113,6 +113,10 @@ export function withNativeReasoningFamilies<T extends NativeReasoningRow>(
   return [...real, ...families];
 }
 
+function isNativeReasoningEffort(value: string): value is NativeReasoningEffort {
+  return (NATIVE_REASONING_EFFORTS as readonly string[]).includes(value);
+}
+
 function record(value: unknown): Record<string, unknown> {
   return value && typeof value === "object" && !Array.isArray(value)
     ? (value as Record<string, unknown>)
@@ -130,9 +134,14 @@ export function resolveNativeReasoningFamily(
     configuredDefault ??
     family.defaultThinkingEffort;
   const effort = typeof raw === "string" ? raw.trim().toLowerCase() : "";
-  const model = family.nativeReasoningVariants[effort as NativeReasoningEffort];
-  if (!model) return { error: "unsupported_reasoning_effort" };
-  return { model, effort: effort as NativeReasoningEffort };
+  // Only a known tier the family owns: an inherited key such as "constructor" must
+  // never resolve to a prototype member.
+  if (!isNativeReasoningEffort(effort) || !Object.hasOwn(family.nativeReasoningVariants, effort)) {
+    return { error: "unsupported_reasoning_effort" };
+  }
+  const model = family.nativeReasoningVariants[effort];
+  if (typeof model !== "string" || !model) return { error: "unsupported_reasoning_effort" };
+  return { model, effort };
 }
 
 function nativeReasoningVariantIds(

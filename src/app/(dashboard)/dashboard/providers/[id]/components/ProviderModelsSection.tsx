@@ -16,7 +16,7 @@ import Icon from "@/shared/components/Icon";
 import { useState } from "react";
 import { useForcedReasoningVisibility } from "../hooks/useForcedReasoningVisibility";
 import { filterForcedReasoningModels } from "@omniroute/open-sse/services/nativeReasoningFamilies";
-import { ActionBar, AutoGrid, Button } from "@/shared/components";
+import { ActionBar, AutoGrid, Button, Checkbox } from "@/shared/components";
 import { matchesModelCatalogQuery } from "@/shared/utils/modelCatalogSearch";
 import { isFreeModel, sortModelsFreeFirst } from "@/shared/utils/freeModels";
 import {
@@ -261,15 +261,17 @@ export default function ProviderModelsSection({
   const forcedReasoningControls = (
     <>
       {forcedReasoningVisibility.supported && (
-        <label className="flex items-center gap-2 text-sm text-text-muted">
-          <input
-            type="checkbox"
-            checked={forcedReasoningVisibility.hidden}
-            disabled={forcedReasoningVisibility.disabled}
-            onChange={(event) => void forcedReasoningVisibility.save(event.target.checked)}
-          />
-          {providerText(t, "hideForcedReasoningModels", "Hide models with fixed reasoning levels")}
-        </label>
+        <Checkbox
+          className="text-sm text-text-muted"
+          checked={forcedReasoningVisibility.hidden}
+          disabled={forcedReasoningVisibility.disabled}
+          onChange={(event) => void forcedReasoningVisibility.save(event.target.checked)}
+          label={providerText(
+            t,
+            "hideForcedReasoningModels",
+            "Hide models with fixed reasoning levels"
+          )}
+        />
       )}
       {forcedReasoningVisibility.error && (
         <span role="alert" className="text-sm text-error">

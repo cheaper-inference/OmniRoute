@@ -152,6 +152,21 @@ function collectInventoryProviders(
 }
 
 /**
+ * A native reasoning tier is routable only on an account whose own catalog lists it: no
+ * fail-open, and a malformed per-account inventory admits no account at all.
+ */
+function applyStrictNativeReasoningInventory(
+  connections: ProviderConnectionView[],
+  acc: InventoryAccumulator
+): void {
+  for (const connection of connections) {
+    if (!isPerAccountCatalogProvider(connection.provider)) continue;
+    const listed = acc.perAccountMalformed ? undefined : acc.perAccountInventory.get(connection.id);
+    acc.advertised.set(connection.id, listed || new Set());
+  }
+}
+
+/**
  * Self-hosted hosts, Codex subscription accounts and Antigravity/agy accounts (plans list
  * different models) can advertise different inventories. For Codex, once an account inventory advertises the requested
  * model, unsynchronized accounts are not eligible guesses for it. With no
@@ -202,16 +217,7 @@ export async function loadAdvertisedModelsForConnections(
   );
 
   if (requireNativeReasoningCatalog) {
-    for (const connection of connections) {
-      if (isPerAccountCatalogProvider(connection.provider)) {
-        advertised.set(
-          connection.id,
-          acc.perAccountMalformed
-            ? new Set()
-            : acc.perAccountInventory.get(connection.id) || new Set()
-        );
-      }
-    }
+    applyStrictNativeReasoningInventory(connections, acc);
     return advertised;
   }
 

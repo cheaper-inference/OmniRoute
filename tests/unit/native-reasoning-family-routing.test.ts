@@ -282,3 +282,54 @@ test("operator-hidden native variants are not selectable through a neutral alias
     "gemini-4-hydrogen-low"
   );
 });
+
+test("a hidden family id is not materialized into a visible tier", async () => {
+  const { handleComboChat } = await import("../../open-sse/services/combo.ts");
+  const combo = {
+    name: "hidden-native-family",
+    strategy: "priority",
+    models: ["antigravity/gemini-4-hydrogen", "openai/gpt-4o-mini"],
+  };
+  const seen: string[] = [];
+  const response = await handleComboChat({
+    body: {
+      model: combo.name,
+      messages: [{ role: "user", content: "hi" }],
+      reasoning_effort: "low",
+    },
+    combo,
+    settings: {},
+    allCombos: [],
+    hiddenModelsByProvider: new Map([["antigravity", new Set(["gemini-4-hydrogen"])]]),
+    log: { info() {}, warn() {}, debug() {}, error() {} },
+    handleSingleModel: async (_body: unknown, model: string) => {
+      seen.push(model);
+      return Response.json({ choices: [{ message: { role: "assistant", content: "ok" } }] });
+    },
+  });
+  assert.equal(response.status, 200);
+  assert.deepEqual(seen, ["openai/gpt-4o-mini"], "the hidden family must not route via a tier");
+});
+
+test("an operator custom tier keeps routing without native catalog admission", async () => {
+  const { addCustomModel, removeCustomModel } = await import("../../src/lib/db/models.ts");
+  await addCustomModel("antigravity", "gemini-4-hydrogen-medium", "Hydrogen (medium, custom)");
+  invalidateDbCache();
+  try {
+    const direct = await getModelInfo("antigravity/gemini-4-hydrogen-medium", {});
+    assert.equal(direct.model, "gemini-4-hydrogen-medium");
+    assert.notEqual(
+      direct.requireNativeReasoningCatalog,
+      true,
+      "a custom model is an explicit override; no account must list it"
+    );
+    const native = await getModelInfo("antigravity/gemini-4-hydrogen", {
+      reasoning_effort: "low",
+    });
+    assert.equal(native.model, "gemini-4-hydrogen-low");
+    assert.equal(native.requireNativeReasoningCatalog, true, "a synced tier stays admission-gated");
+  } finally {
+    await removeCustomModel("antigravity", "gemini-4-hydrogen-medium");
+    invalidateDbCache();
+  }
+});
