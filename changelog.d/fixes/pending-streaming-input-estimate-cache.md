@@ -1,0 +1,1 @@
+- **fix(sse):** Cache fallback input-token estimates once per streaming request so repeated usage updates do not rescan the full prompt and stall streams or health checks.
