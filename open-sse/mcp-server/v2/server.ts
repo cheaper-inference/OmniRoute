@@ -77,7 +77,7 @@ function toString(value: unknown, fallback = ""): string {
 }
 
 import { logToolCall } from "../audit.ts";
-import { toNumber } from "../../utils/numeric.ts";
+import { toNumber, toNumberOrNull } from "../../utils/numeric.ts";
 
 // Re-export types
 export type { TextToolResult } from "../toolResult.ts";
@@ -777,8 +777,8 @@ async function handleCostReport(args: { period?: string }) {
         };
       }),
       budget: {
-        limit: toNumber(budget.limit, null),
-        remaining: toNumber(budget.remaining, null),
+        limit: toNumberOrNull(budget.limit),
+        remaining: toNumberOrNull(budget.remaining),
       },
     });
 
