@@ -404,10 +404,15 @@ export const RESOURCE_NOT_FOUND_PATTERNS = [
   /\bfile-[a-z0-9_-]+\b[^\n]{0,160}\b(?:not found|does not exist)\b/i,
 ];
 
+// OpenRouter privacy settings belong to the account, so this 404 says nothing about
+// another account serving the same request (#19686).
+const ACCOUNT_DATA_POLICY_NOT_FOUND_PATTERN =
+  /\bno endpoints found\b[^\n]{0,160}\bmatching your data policy\b/i;
+
 export const CAPABILITY_OR_PREFERENCE_NOT_FOUND_PATTERNS = [
   /\bno endpoints found that support\b/i,
   /\bno allowed providers\b/i,
-  /\bno endpoints found\b[^\n]{0,160}\bmatching your data policy\b/i,
+  ACCOUNT_DATA_POLICY_NOT_FOUND_PATTERN,
 ];
 
 /**
@@ -428,6 +433,11 @@ export function isResourceNotFoundResponse(responseBody: unknown): boolean {
 export function isRequestCapabilityNotFoundResponse(responseBody: unknown): boolean {
   const body = responseBodyToString(responseBody);
   return CAPABILITY_OR_PREFERENCE_NOT_FOUND_PATTERNS.some((pattern) => pattern.test(body));
+}
+
+/** Whether a 404 is an account's data-policy refusal, which another account may not share. */
+export function isAccountDataPolicyNotFoundResponse(responseBody: unknown): boolean {
+  return ACCOUNT_DATA_POLICY_NOT_FOUND_PATTERN.test(responseBodyToString(responseBody));
 }
 
 function shouldPreserveQuotaSignalsFor429(provider?: string | null): boolean {

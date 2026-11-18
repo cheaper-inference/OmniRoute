@@ -81,3 +81,32 @@ test("#19686: getResource404Bypass bypasses cooldown for OpenRouter capability 4
   assert.equal(logs.length, 1);
   assert.match(logs[0], /conn-123 request-resource 404; skipping model\/account cooldown/);
 });
+
+test("#19686: a data-policy 404 skips the cooldown but lets the caller try another account", () => {
+  const logs: string[] = [];
+  const mockLogger = {
+    info: (_tag: string, msg: string) => {
+      logs.push(msg);
+    },
+  };
+
+  // OpenRouter privacy settings are per account: another account may serve the same request.
+  for (const body of [
+    "No endpoints found matching your data policy",
+    JSON.stringify({ error: { message: "No endpoints found matching your data policy" } }),
+  ]) {
+    assert.deepEqual(getResource404Bypass(404, body, "conn-87654321-dcba", mockLogger), {
+      shouldFallback: true,
+      cooldownMs: 0,
+    });
+    assert.equal(classifyProviderError(404, body, "openrouter"), null);
+  }
+  assert.equal(logs.length, 2);
+  assert.match(logs[0], /conn-876 account data-policy 404/);
+
+  // A request capability mismatch stays request-scoped: no other account can serve it.
+  assert.deepEqual(
+    getResource404Bypass(404, "No endpoints found that support image input", "conn-1", mockLogger),
+    { shouldFallback: false, cooldownMs: 0 }
+  );
+});
