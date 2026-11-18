@@ -297,7 +297,7 @@ function ipv6ToBytes(ip) {
 function expandIpv6(ip) {
   const bytes = ipv6ToBytes(ip);
   if (!bytes) return null;
-  const groups = [];
+  const groups: string[] = [];
   for (let i = 0; i < 8; i += 1) groups.push(bytes.readUInt16BE(i * 2).toString(16));
   return groups.join(":");
 }
@@ -310,9 +310,18 @@ function expandIpv6(ip) {
  */
 function normalizeIP(ip) {
   if (!ip) return "";
-  const value = ip.trim().replace(/^::ffff:/i, "");
+  const value = ip.trim();
   if (!value) return "";
+  const bytes = ipv6ToBytes(value);
+  if (!bytes) return value.toLowerCase();
+  // ::ffff:0:0/96 is IPv4 in IPv6 clothing, however it is spelled (dotted or
+  // hex groups, short or full form): judge it as the IPv4 address it carries.
+  if (isIpv4Mapped(bytes)) return `${bytes[12]}.${bytes[13]}.${bytes[14]}.${bytes[15]}`;
   return expandIpv6(value) ?? value.toLowerCase();
+}
+
+function isIpv4Mapped(bytes) {
+  return bytes.subarray(0, 10).every((b) => b === 0) && bytes[10] === 0xff && bytes[11] === 0xff;
 }
 
 function pickFirstValidIp(rawValue) {

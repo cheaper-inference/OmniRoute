@@ -105,6 +105,22 @@ test("IPv6: a mapped address stays judged as IPv4", () => {
   assert.equal(checkIP("::ffff:192.0.2.10").allowed, false);
 });
 
+test("IPv6: every spelling of a mapped address is judged as its IPv4", () => {
+  configureIPFilter({ enabled: true, mode: "blacklist", blacklist: ["192.0.2.10"] });
+  // Hex groups and the full eight-group form name the same mapped address.
+  assert.equal(checkIP("::ffff:c000:20a").allowed, false);
+  assert.equal(checkIP("0:0:0:0:0:ffff:192.0.2.10").allowed, false);
+  assert.equal(checkIP("::FFFF:192.0.2.10").allowed, false);
+});
+
+test("IPv6: an address outside the mapped range keeps its IPv6 identity", () => {
+  // ::ffff:1 is 0:0:0:0:0:0:ffff:1, not a mapped IPv4. Stripping the text prefix
+  // turned the entry into "1", which matched no spelling of that address.
+  configureIPFilter({ enabled: true, mode: "blacklist", blacklist: ["::ffff:1"] });
+  assert.equal(checkIP("0:0:0:0:0:0:ffff:1").allowed, false);
+  assert.equal(checkIP("::ffff:1").allowed, false);
+});
+
 test("whitelist: IPv6 CIDR keeps unlisted IPv6 out", () => {
   configureIPFilter({ enabled: true, mode: "whitelist", whitelist: ["2001:db8::/32"] });
   assert.equal(checkIP("2001:db8:aa::9").allowed, true);
