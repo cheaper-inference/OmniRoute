@@ -62,7 +62,11 @@ test("the non-streaming server-tool follow-up re-translates with the same conver
     /\bantigravitySessionKey\b/,
     "the follow-up translation must pass antigravitySessionKey, or it drops to the account session"
   );
-  assert.match(source, /^\s*antigravitySessionKey,\s*$/m, "deps must destructure antigravitySessionKey");
+  assert.match(
+    source,
+    /^\s*antigravitySessionKey,\s*$/m,
+    "deps must destructure antigravitySessionKey"
+  );
 
   // Both legs then resolve the same upstream session.
   assert.equal(envelopeSessionId(alice, "conv_a"), envelopeSessionId(alice, "conv_a"));
