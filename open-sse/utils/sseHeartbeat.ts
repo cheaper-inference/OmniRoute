@@ -158,6 +158,62 @@ function createSseFramingTracker() {
   };
 }
 
+type ResponsesInProgressTracker = ReturnType<typeof createResponsesInProgressTracker>;
+
+function encodeHeartbeatFrame(
+  shape: HeartbeatShape,
+  opts: {
+    transportOnly: boolean;
+    chunkId?: string;
+    chunkModel?: string;
+    responsesTracker: ResponsesInProgressTracker | null;
+  }
+): Uint8Array {
+  if (opts.transportOnly) return RESPONSES_KEEPALIVE_FRAME;
+  const tracker = opts.responsesTracker;
+  return HEARTBEAT_ENCODER.encode(
+    buildHeartbeatPayload(shape, {
+      chunkId: opts.chunkId,
+      chunkModel: opts.chunkModel,
+      responsesPayload: tracker ? () => tracker.payload() : undefined,
+    })
+  );
+}
+
+type BackpressureVerdict = "send" | "skip" | "abandon";
+
+/**
+ * #19640: while the readable queue is full (desiredSize <= 0) the previous frame is still
+ * unread, so a heartbeat tick is skipped instead of growing the queue; after `maxUnconsumed`
+ * consecutive full ticks the stream is treated as abandoned. Any upstream chunk resets the count.
+ */
+function createBackpressureGuard(maxUnconsumed: number) {
+  let consecutiveTicks = 0;
+  return {
+    check(desiredSize: number | null): BackpressureVerdict {
+      if (typeof desiredSize !== "number" || desiredSize > 0) {
+        consecutiveTicks = 0;
+        return "send";
+      }
+      consecutiveTicks++;
+      return maxUnconsumed > 0 && consecutiveTicks >= maxUnconsumed ? "abandon" : "skip";
+    },
+    reset(): void {
+      consecutiveTicks = 0;
+    },
+  };
+}
+
+function abandonStream(controller: TransformStreamDefaultController<Uint8Array>): void {
+  try {
+    controller.error(
+      new Error("SSE stream abandoned: consumer stopped reading (backpressure timeout)")
+    );
+  } catch {
+    // ignore if already closed/errored
+  }
+}
+
 export function createSseHeartbeatTransform({
   intervalMs = DEFAULT_SSE_HEARTBEAT_INTERVAL_MS,
   signal,
@@ -178,8 +234,9 @@ export function createSseHeartbeatTransform({
   }
 
   let intervalId: ReturnType<typeof setInterval> | undefined;
-  let consecutiveBackpressureTicks = 0;
-  const maxUnconsumed = maxUnconsumedHeartbeats ?? maxUnconsumedHeartbeatsConfig();
+  const backpressure = createBackpressureGuard(
+    maxUnconsumedHeartbeats ?? maxUnconsumedHeartbeatsConfig()
+  );
   const isResponsesShape = shape === HEARTBEAT_SHAPES.OPENAI_RESPONSES_IN_PROGRESS;
   const transportOnly = isResponsesShape && isResponsesTransportKeepaliveEnabled();
   const responsesTracker =
@@ -201,39 +258,18 @@ export function createSseHeartbeatTransform({
             return;
           }
 
-          // #19640: Bound queue growth if downstream consumer stops reading.
-          // When desiredSize <= 0, the previous frame has not been consumed yet;
-          // skip enqueueing further heartbeats to prevent unbounded queue growth.
-          if (typeof controller.desiredSize === "number" && controller.desiredSize <= 0) {
-            consecutiveBackpressureTicks++;
-            if (maxUnconsumed > 0 && consecutiveBackpressureTicks >= maxUnconsumed) {
-              stop();
-              try {
-                controller.error(
-                  new Error("SSE stream abandoned: consumer stopped reading (backpressure timeout)")
-                );
-              } catch {
-                // ignore if already closed/errored
-              }
-            }
-            return;
+          // #19640: bound queue growth if the downstream consumer stops reading.
+          const pressure = backpressure.check(controller.desiredSize);
+          if (pressure === "abandon") {
+            stop();
+            abandonStream(controller);
           }
-          consecutiveBackpressureTicks = 0;
+          if (pressure !== "send") return;
 
           if (!framing.atBoundary()) return;
           try {
             controller.enqueue(
-              transportOnly
-                ? RESPONSES_KEEPALIVE_FRAME
-                : HEARTBEAT_ENCODER.encode(
-                    buildHeartbeatPayload(shape, {
-                      chunkId,
-                      chunkModel,
-                      responsesPayload: responsesTracker
-                        ? () => responsesTracker.payload()
-                        : undefined,
-                    })
-                  )
+              encodeHeartbeatFrame(shape, { transportOnly, chunkId, chunkModel, responsesTracker })
             );
           } catch {
             stop();
@@ -248,7 +284,7 @@ export function createSseHeartbeatTransform({
       },
 
       transform(chunk, controller) {
-        consecutiveBackpressureTicks = 0;
+        backpressure.reset();
         framing.note(chunk);
         responsesTracker?.observe(chunk);
         controller.enqueue(chunk);
