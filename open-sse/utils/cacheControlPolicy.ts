@@ -110,6 +110,9 @@ const CACHING_PROVIDERS = new Set([
   "alibaba",
   "alibaba-cn",
   "qwen-cloud",
+  // Bedrock Converse caches only at explicit `cachePoint` blocks, which the Bedrock
+  // executor builds from the client's cache_control markers.
+  "bedrock",
 ]);
 
 /**
@@ -132,6 +135,8 @@ const OPENAI_FORMAT_CACHE_CONTROL_PROVIDERS = new Set([
   "qwen-cloud",
   // #3088 — Xiaomi MiMo honors OpenAI-format cache_control breakpoints.
   "xiaomi-mimo",
+  // The Bedrock executor turns these markers into Converse `cachePoint` blocks.
+  "bedrock",
 ]);
 
 /** Providers whose cache is populated from the longest matching prefix without

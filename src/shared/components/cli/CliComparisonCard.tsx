@@ -62,7 +62,7 @@ export default function CliComparisonCard({ currentType }: CliComparisonCardProp
               </div>
 
               {/* Description */}
-              <p className="text-[11px] text-text-muted leading-relaxed">
+              <p className="text-xs text-text-muted leading-relaxed">
                 {t(`comparison.${type}.desc`)}
               </p>
 

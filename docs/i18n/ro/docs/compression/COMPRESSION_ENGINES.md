@@ -9,46 +9,33 @@ Compresia OmniRoute este construită în jurul contractelor motoarelor. Un mod p
 
 ## Moduri
 
-| Mod          | Cale motor                                                                                                                                            | Intrare intenționată                            |
-| :----------- | :---------------------------------------------------------------------------------------------------------------------------------------------------- | :---------------------------------------------- |
-| `off`        | niciuna                                                                                                                                               | Păstrarea exactă a promptului                   |
-| `lite`       | Ajutoare Caveman lite                                                                                                                                 | Curățare permanentă cu risc scăzut              |
-| `standard`   | Caveman                                                                                                                                               | Condensarea promptului în limbaj natural        |
-| `aggressive` | Caveman + sumarizatoare istoric/instrumente                                                                                                           | Sesiuni lungi de chat                           |
-| `ultra`      | Caveman + ajutoare de tăiere                                                                                                                          | Recuperare limită de context                    |
-| `rtk`        | RTK                                                                                                                                                   | Ieșire terminal, shell, build, test și git      |
-| `omniglyph`  | OmniGlyph                                                                                                                                             | Context ca imagine pe cablul furnizorului nativ |
-| `stacked`    | Pipeline. Implicit pentru cerere este `session-dedup -> lite`. `rtk -> caveman` este opțional. Jurnale mixte de instrumente și proză, economii maxime |
+| Modul        | Calea motorului                                                                         | Intrare intenționată                             |
+| ------------ | --------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| `off`        | nici unul                                                                               | Conservare exactă promptă                        |
+| `lite`       | Caveman Lite helpers                                                                    | Curățare permanentă cu risc scăzut               |
+| `standard`   | Omul cavernelor                                                                         | Condens rapid în limbaj natural                  |
+| `aggressive` | Rezumate caveman + history/tool                                                         | Sesiuni lungi de chat                            |
+| `ultra`      | Caveman + ajutoare de tăiere                                                            | Recuperare limită de context                     |
+| `rtk`        | RTK                                                                                     | Terminal, shell, build, test și ieșire git       |
+| `omniglyph`  | OmniGlyph                                                                               | Context-ca imagine pe firul furnizorului nativ   |
+| `stacked`    | Conductă. Cererea implicită este `session-dedup -> lite`. `rtk -> caveman` este opt-in. | Bușteni de scule mixte și proză, economii maxime |
 
-### Profile de compresie OmniGlyph
+### profile de compresie OmniGlyph
 
-Motorul `omniglyph` (pachetul `omniglyph`, 1.4.0+) acceptă un profil semantic numit, setat
-global prin `omniglyph.profile` în setările de compresie sau per pas prin
-configurația pasului pipeline-ului stivuit:
+Motorul `omniglyph` (pachetul `omniglyph`, 1.4.0 +) acceptă un profil semantic numit, setat global prin `omniglyph.profile` în setările de compresie sau pe pas prin configurația pasului conductei stivuite:
 
-| Profil        | Limită                                                                                                                    |
-| :------------ | :------------------------------------------------------------------------------------------------------------------------ |
-| `aggressive`  | Implicit. Politica măsurată de chitanțele publicate — sistem de imagini, documente de instrumente și istoric dens         |
-| `balanced`    | Menține starea live nativă, protejează ultimele 8 interacțiuni, colapsează istoricul închis mai vechi                     |
-| `coding-safe` | Menține autoritatea, schemele de instrumente și ieșirea live a instrumentelor nativă, protejează ultimele 12 interacțiuni |
-| `passthrough` | Redirecționează fără transformare; motorul este omis                                                                      |
+| Profil        | Hotar                                                                                                                  |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `aggressive`  | Implicit. Politica chitanțelor publicate a măsurat sistemul de imagini —, documentele instrumentului și istoricul dens |
+| `balanced`    | Păstrează starea de viață nativă, protejează ultimele 8 viraje, prăbușește istoricul închis mai vechi                  |
+| `coding-safe` | Păstrează autoritatea, schemele de instrumente și ieșirea instrumentelor live native, protejează ultimele 12 ture      |
+| `passthrough` | Trasee fără transformare; motorul este sarit                                                                           |
 
-Profilul este un **plafon, nu un prag**: `mergeCompressionProfileOptions` din pachet
-refuză să permită unui apelant să suprascrie redeschiderea unei căi cu pierderi pe care
-profilul a închis-o, astfel încât un `preserveSystemPrompt: false` per pas nu poate
-reactiva compresia sistemului sub `coding-safe`.
+Profilul este a** tavan, nu podea** : `mergeCompressionProfileOptions` din pachet refuză să permită apelantului să anuleze redeschiderea unei benzi cu pierderi profil închis, astfel încât un `preserveSystemPrompt: false` la pas nu poate reactiva compresia sistemului sub `coding-safe`.
 
-Măsurat pe această bază de cod: `coding-safe` și `balanced` ridică `minCompressChars` la
-maxim și mențin sistemul, schemele de instrumente și rezultatele instrumentelor native,
-astfel încât o sesiune care nu a acumulat încă istoric se oprește la `below_min_chars` și
-motorul nu transformă nimic. Acesta este motivul pentru care implicit este `aggressive` și
-nu cel mai sigur profil.
+Măsurat pe această bază de cod: `coding-safe` și `balanced` ridică `minCompressChars` la maximum și păstrează sistemul, schemele de instrumente și rezultatele instrumentelor native, deci o sesiune care nu a acumulat încă istoric se oprește la `below_min_chars` și motorul nu transformă nimic. De aceea, implicit este mai degrabă `aggressive` decât cel mai sigur profil.
 
-Pachetul își rezolvă propriul domeniu de aplicare al modelului și profilul din
-configurația mediului său. OmniRoute nu deleagă niciodată decizia: adaptorul fixează
-poarta modelului la cel mai restrictiv domeniu de aplicare al pachetului, astfel încât
-setările mediului gazdă pot doar restrânge lista permisă, niciodată să o extindă dincolo
-de chitanțele măsurate de OmniRoute.
+Pachetul își rezolvă propriul domeniu de aplicare și profil din configurația mediului. OmniRoute nu deleagă niciodată decizia: adaptorul fixează poarta modelului la cel mai restrictiv domeniu de aplicare al pachetului, astfel încât setările mediului gazdă nu pot decât să restrângă lista de permise, să nu o extindă niciodată dincolo de chitanțele măsurate ale OmniRoute.
 
 ## Registrul motoarelor
 
@@ -329,7 +316,7 @@ Trei apărătoare păstrează nivelul durabil delimitat — un bloc rămâne doa
 2. timpul de rulare este un timp de rulare în cloud (fără disc local);
 3. `COMPRESSION_CCR_DURABLE_STORE=false`.
 
-Deci „blocul a dispărut” nu este o poveste de repornire generală: un bloc sub-512 KB pe un timp de execuție local, non-cloud supraviețuiește unei reporniri prin nivelul durabil până când TTL său se epuizează. Consultați [Referința mediului](../reference/ENVIRONMENT.md) pentru variabilă.
+Deci, „blocul a dispărut” nu este o poveste de repornire generală: un bloc sub-512 KB pe un timp de execuție local, non-cloud supraviețuiește unei reporniri prin nivelul durabil până când TTL său se epuizează, cu condiția ca scrierea durabilă să reușească. Acea scriere este cel mai bun efort și rulează din calea cererii: este abandonată în timp ce 1.000 de scrieri durabile sunt deja în așteptare, o eroare de scriere SQLite este înregistrată (`[ccr] durable persist failed`) și nu este reîncercată și o blocare înainte de rularea scrierea amânată o pierde și ea. Un astfel de bloc rămâne doar pentru memorie și dispare după o repornire. Consultați [Referința mediului](../reference/ENVIRONMENT.md) pentru variabilă.
 
 ### Cele două marcaje
 
@@ -338,13 +325,13 @@ Deci „blocul a dispărut” nu este o poveste de repornire generală: un bloc 
 | `[CCR retrieve hash=<24hex> chars=N]` | Un bloc mare a fost stocat la adresa de conținut.                                                                                                                | Sună `omniroute_ccr_retrieve` cu** 24-hex hash copiat text** pentru a recupera textul original.                                                                                                              |
 | `[dedup:ref sha=…]`                   | Textul `session-dedup` elid deja trimis într-o tură anterioară a aceleiași sesiuni. Acesta este un** privire înapoi intenționată** , nu o pierdere sau o eroare. | Do** nu** apelați orice unealtă și faceți** nu** încercați să o „reconstituiți”. Prima apariție a textului este copia canonică; tura curentă nu este niciodată rescrisă, este dedusă într-o tură ulterioară. |
 
-Analiza `[dedup:ref]` în urmă este o decizie deliberată a protocolului — nu există nicio reconstrucție pre-trimitere. Tratați-l ca „acest text exact a fost deja pe fir mai devreme în această sesiune”.
+Analiza `[dedup:ref]` în urmă este o decizie deliberată a protocolului — nu există nicio reconstrucție pre-trimitere. Tratează-l ca „acest text exact a fost deja pe fir mai devreme în această sesiune”.
 
 ### Cerințe preliminare ale clientului
 
 - **Cheie (stdio):** un apelant stdio nu poartă nicio identitate pe cerere, așa că se autentifică cu `OMNIROUTE_API_KEY` (setat în `env` al serverului MCP ). Fără el, apelantul este anonim, iar instrumentele care necesită un principal se pot degrada.
 - **`tools[]` este condiția prealabilă a injecției.** Instrucțiunea CCR retrieve-protocol (#8033) este injectată** numai** când `tools[]` anunțat al cererii demonstrează că clientul poate ajunge efectiv `omniroute_ccr_retrieve`. Potrivirea este o potrivire de segment final delimitată de un separator (`__`, `.`, `/`, `:`) — niciodată un subșir simplu — așa că un nume cu spațiu de nume, cum ar fi `mcp__gateway__omniroute_ccr_retrieve` contează în continuare. Un `tools[]` absent sau care nu se potrivește înseamnă că instrucțiunea este _nu_ injectată, prin proiectare.
-- **`codemode:false` (clienți OpenCode ).** OpenCode este implicit la Modul Cod, care face publicitate doar instrumentelor sale native pentru model și** nu** puneți instrumentele MCP pe lista nativă `tools[]`. Setați `codemode: false` pe intrarea serverului MCP, astfel încât instrumentele `omniroute_ccr_*` să fie promovate. Acesta este un** client** setare, nu una OmniRoute. Încă nu primește instrucțiunea CCR injectată: OpenCode denumește un instrument `<server>_<tool>`, astfel încât un server numit `omniroute` expune `omniroute_omniroute_ccr_retrieve`, iar `_` nu este unul dintre separatorii potriviți.
+- **`codemode:false` (clienți OpenCode ).** OpenCode este implicit la Modul Cod, care face publicitate doar instrumentelor sale native pentru model și** nu** puneți instrumentele MCP pe lista nativă `tools[]`. Setați `codemode: false` pe intrarea serverului MCP, astfel încât instrumentele `omniroute_ccr_*` să fie promovate. Acesta este un** client** setare, nu una OmniRoute. OpenCode denumește un instrument `<server>_<tool>`, deci un server numit `omniroute` expune `omniroute_omniroute_ccr_retrieve`; `_` este unul dintre separatorii potriviți, astfel încât instrucțiunea CCR este injectată sub acel nume atunci când o solicitare poartă un marker CCR.
 - **Directori.** Stocarea și preluarea sunt izolate pe principal autentificat (pe cheie API ). O cheie își vede numai propriile blocuri.
 
 ### Scopuri per instrument
@@ -364,12 +351,12 @@ Un domeniu lipsă returnează un** rezultatul erorii instrumentului MCP** (`isEr
 
 ### Matricea clientului
 
-| Client               | Transport                                      | Configurație de utilizat                                                                                                                                                                                                                                           | `tools[]` reclamă? (instrucțiunea → CCR injectată)                                                                                                                                                                                |
-| -------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Codul Claude         | streamable-http                                | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                                  | Da — compatibil MCP; injectat.                                                                                                                                                                                                    |
-| Cursor / Cline       | `stdio`** sau** `streamable-http`              | stdio: `omniroute --mcp` cu `OMNIROUTE_API_KEY` în `env`; sau o intrare MCP de la distanță care indică `http://localhost:20128/api/mcp/stream` (consultați [Ghidul de configurare → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Da — publicitate instrumentelor `omniroute_ccr_*`.                                                                                                                                                                                |
-| OpenCode             | streamable-http                                | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                                                   | Instrumente promovate numai cu `codemode: false`; instrucțiunea nu este încă injectată, deoarece `omniroute_omniroute_ccr_retrieve` nu se potrivește (consultați [Cerințele preliminare ale clientului](#client-prerequisites) ). |
-| Compatibil cu OpenAI | HTTP compatibil cu OpenAI (finalizări de chat) | client standard de finalizare a chat-ului față de punctul final compatibil OpenAI                                                                                                                                                                                  | **Nu** — unui apelant simplu compatibil cu OpenAI nu i se spune niciodată să sune instrumentul, iar instrucțiunea nu este injectată.                                                                                              |
+| Client               | Transport                                      | Configurație de utilizat                                                                                                                                                                                                                                           | `tools[]` reclamă? (instrucțiunea → CCR injectată)                                                                                                                                        |
+| -------------------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Codul Claude         | streamable-http                                | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                                  | Da — compatibil MCP; injectat.                                                                                                                                                            |
+| Cursor / Cline       | `stdio`** sau** `streamable-http`              | stdio: `omniroute --mcp` cu `OMNIROUTE_API_KEY` în `env`; sau o intrare MCP de la distanță care indică `http://localhost:20128/api/mcp/stream` (consultați [Ghidul de configurare → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Da — publicitate instrumentelor `omniroute_ccr_*`.                                                                                                                                        |
+| OpenCode             | streamable-http                                | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, plus `codemode: false`                                                                                                                                                                   | Instrumente promovate numai cu `codemode: false`; apoi injectat, denumind `omniroute_omniroute_ccr_retrieve` (consultați [Cerințele preliminare ale clientului](#client-prerequisites) ). |
+| Compatibil cu OpenAI | HTTP compatibil cu OpenAI (finalizări de chat) | client standard de finalizare a chat-ului față de punctul final compatibil OpenAI                                                                                                                                                                                  | **Nu** — unui apelant simplu compatibil cu OpenAI nu i se spune niciodată să sune instrumentul, iar instrucțiunea nu este injectată.                                                      |
 
 ### Limite de recuperare și paginare
 
@@ -389,7 +376,7 @@ Instrumentul de recuperare se numește în prezent `omniroute_ccr_retrieve` (pre
 
 ### Ciclul de viață al sesiunii
 
-Sesiunile HTTP care pot fi transmise în flux sunt inactiv și serverul le recunoaște; fereastra inactivă este setată de `OMNIROUTE_MCP_SESSION_IDLE_MS` (implicit 5 minute; referit după nume, nu o valoare codificată, astfel încât această pagină nu se deplasează atunci când se schimbă). Simptomul unei sesiuni inactiv este un HTTP 404 cu `Unknown Mcp-Session-Id` — remediul este reconectarea sau repornirea sesiunii,** nu** pentru a roti o cheie, a schimba un domeniu sau a redenumi un instrument.
+Sesiunile HTTP care pot fi transmise în flux sunt inactiv și serverul le exploatează; fereastra inactivă este setată de `OMNIROUTE_MCP_SESSION_IDLE_MS` (implicit 5 minute; referit după nume, nu o valoare codificată, astfel încât această pagină nu se deplasează atunci când se schimbă). Simptomul unei sesiuni inactiv este un HTTP 404 cu `Unknown Mcp-Session-Id` — remediul este reconectarea sau repornirea sesiunii,** nu** pentru a roti o cheie, a schimba un domeniu sau a redenumi un instrument.
 
 ## Suprafața API
 

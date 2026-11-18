@@ -235,7 +235,11 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
   return (
     <>
       <Card padding="none" className="overflow-hidden">
-        <Table aria-label={t("catalogTab")} scrollbarLabel={t("catalogTab")}>
+        <Table
+          aria-label={t("catalogTab")}
+          scrollbarLabel={t("catalogTab")}
+          containerClassName="rounded-none border-0"
+        >
           <TableHeader>
             <TableRow>
               <TableHead>{t("colProvider")}</TableHead>
@@ -435,7 +439,7 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
       {hiddenModels.length > 0 && (
         <Card>
           <div className="flex flex-col gap-3">
-            <h3 className="text-sm font-semibold">{t("hiddenModelsTitle")}</h3>
+            <h3 className="text-sm">{t("hiddenModelsTitle")}</h3>
             {hiddenModels.map((state) => (
               <div
                 key={`${state.provider}:${state.modelId}:hidden`}

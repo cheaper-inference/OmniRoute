@@ -125,20 +125,35 @@ function formatModelName(model: string): string {
     .join(" ");
 }
 
-function QuotaWindowRow({ label, window }: { label: string; window?: QuotaWindow }) {
+function QuotaWindowRow({
+  label,
+  window,
+  now,
+}: {
+  label: string;
+  window?: QuotaWindow;
+  now?: number;
+}) {
   if (!window) {
     return <p className="text-[11px] text-text-muted">{label}: unavailable from upstream</p>;
   }
 
   const remaining = Math.max(0, Math.min(100, Number(window.remainingPercentage) || 0));
-  const countdown = formatCountdown(window.resetAt || null);
+  const countdown = formatCountdown(window.resetAt || null, now);
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-between text-[11px] text-text-main">
         <span>{label}</span>
         <span className="font-medium">{Math.round(remaining)}% left</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-bg-muted">
+      <div
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={remaining}
+        className="h-1.5 overflow-hidden rounded-full bg-muted"
+      >
         <div
           className="h-full rounded-full transition-all"
           style={{ width: `${remaining}%`, backgroundColor: getBarColor(remaining).bar }}
@@ -151,7 +166,13 @@ function QuotaWindowRow({ label, window }: { label: string; window?: QuotaWindow
   );
 }
 
-export default function AntigravityQuotaGroups({ groups }: { groups: QuotaGroup[] }) {
+export default function AntigravityQuotaGroups({
+  groups,
+  now,
+}: {
+  groups: QuotaGroup[];
+  now?: number;
+}) {
   const [expandedGroups, setExpandedGroups] = useState<Record<string, boolean>>({});
 
   return (
@@ -165,10 +186,10 @@ export default function AntigravityQuotaGroups({ groups }: { groups: QuotaGroup[
             key={group.id}
             className="rounded-md border border-border/60 bg-bg-subtle/40 p-2"
           >
-            <h4 className="mb-2 text-xs font-semibold text-text-main">{group.displayName}</h4>
+            <h4 className="mb-2 text-xs text-text-main">{group.displayName}</h4>
             <div className="flex flex-col gap-2">
-              <QuotaWindowRow label="5 hour" window={group.windows?.session} />
-              <QuotaWindowRow label="Weekly" window={group.windows?.weekly} />
+              <QuotaWindowRow label="5 hour" window={group.windows?.session} now={now} />
+              <QuotaWindowRow label="Weekly" window={group.windows?.weekly} now={now} />
             </div>
             <div className="mt-2 border-t border-border/40 pt-2 text-[11px] text-text-muted">
               <p>Models available: {models.length}</p>

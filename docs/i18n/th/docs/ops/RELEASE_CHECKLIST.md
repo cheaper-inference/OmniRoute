@@ -35,57 +35,32 @@ npm run test:e2e           # ไม่บังคับ แต่แนะน�
 /capture-release-evidences-cc
 ```
 
-## npm Trusted Publishing (ค่าเริ่มต้นตั้งแต่ v3.8.51) — จัดเตรียมไว้เมื่อมีคำขอ และเผยแพร่โดยตรงเป็นทางเลือกสำรอง
+## npm Trusted Publishing (ค่าเริ่มต้นตั้งแต่ v3.8.51) — จัดทำตามคำขอ เป็นทางเลือกโดยตรง
 
-`npm-publish.yml` เผยแพร่ผ่าน **npm Trusted Publishing (OIDC)** โดยค่าเริ่มต้น: งาน
-`stage-npm` (ที่โฮสต์โดย GitHub) จะแลกเปลี่ยน id-token ของ GitHub เป็นข้อมูลรับรอง npm
-แบบอายุสั้นสำหรับการทำงานครั้งนั้น — ไม่มีโทเค็น npm อายุยาวอยู่ในข้อมูลลับของรีโพซิทอรี ไม่มีพรอมต์ 2FA และแนบ provenance มาด้วย
-นี่คือวิธีข้ามข้อจำกัดที่ npm อนุญาตในขณะนี้ เนื่องจากโทเค็นที่ข้าม 2FA กำลังจะถูกยกเลิก
-วิธีนี้ทำให้โฟลว์อัตโนมัติเต็มรูปแบบที่โปรเจกต์เคยมีจนถึง v3.8.48 กลับมา พร้อมกับยังคง
-การรับประกันของ WS1.3 (โทเค็นที่รั่วไหลไม่สามารถใช้เผยแพร่ได้โดยลำพัง — เพราะไม่มีโทเค็น)
+`npm-publish.yml` เผยแพร่ผ่าน** สำนักพิมพ์ที่เชื่อถือได้ NPM (OIDC)** โดยค่าเริ่มต้น: งาน `stage-npm` (โฮสต์โดย github) แลกเปลี่ยน id-token ของ GitHub สำหรับข้อมูลรับรอง npm ที่มีอายุสั้นสำหรับการรันนั้น — ไม่มีโทเค็น npm ที่มีอายุยาวนานในความลับของพื้นที่เก็บข้อมูล ไม่มีพรอมต์ 2FA และแนบแหล่งที่มา นั่นคือการเลี่ยงการคว่ำบาตร npm ในขณะนี้ซึ่งโทเค็นที่ข้าม 2FA กำลังจะถูกยกเลิก โดยจะคืนค่าโฟลว์อัตโนมัติเต็มรูปแบบที่โปรเจ็กต์มีสูงถึง v3.8.48 ในขณะที่ยังคงรับประกัน WS1.3 (โทเค็นที่รั่วไหลไม่สามารถเผยแพร่เพียงอย่างเดียว — ได้ เนื่องจากไม่มีโทเค็น)
 
-**การตั้งค่าครั้งเดียว (เจ้าของ):** npmjs.com → แพ็กเกจ `omniroute` → Settings → _Trusted
-Publisher_ → GitHub: เจ้าของ `diegosouzapw`, รีโป `OmniRoute`, เวิร์กโฟลว์ `npm-publish.yml`
-(สภาพแวดล้อม: ไม่มี) จนกว่าจะตั้งค่านี้ ขั้นตอนอัตโนมัติจะล้มเหลวด้วย `ENEEDAUTH`:
-ให้สั่งทำงานใหม่ด้วย `publish_mode=staged` (ด้านล่าง) หรือ `direct`
+**การตั้งค่าครั้งเดียว (เจ้าของ):** npmjs.com แพ็คเกจ → `omniroute` การตั้งค่า → → ผู้เผยแพร่ที่เชื่อถือได้_ → GitHub: เจ้าของ `diegosouzapw`, repo `OmniRoute`, เวิร์กโฟลว์ `npm-publish.yml` (สภาพแวดล้อม: ไม่มี) ขั้นตอนอัตโนมัติจะล้มเหลวด้วย `ENEEDAUTH`: re-dispatch ด้วย `publish_mode=staged` (ด้านล่าง) หรือ `direct` จนกว่าจะมีอยู่
 
-### การเผยแพร่แบบจัดเตรียมไว้ (เมื่อมีคำขอ — `publish_mode=staged`)
+### การเผยแพร่ตามขั้นตอน (ตามคำขอ — `publish_mode=staged`)
 
-เวิร์กโฟลว์ npm-publish จะไม่เผยแพร่โดยตรงอีกต่อไป แต่จะบูต tarball ที่แพ็กแล้ว
-(`check:pack-boot`) จากนั้นเรียกใช้ `npm stage publish` — ไบต์ชุดเดียวกันจะถูกพักไว้บน
-รีจิสทรี และ **ยังติดตั้งไม่ได้** จนกว่าเจ้าของจะอนุมัติ ด่าน 2FA ที่ต้องดำเนินการโดยมนุษย์ถูกย้าย
-ไปอยู่หลังการพิสูจน์ ไม่ใช่ก่อนหน้า
+เวิร์กโฟลว์การเผยแพร่ npm จะไม่เผยแพร่โดยตรงอีกต่อไป: มันจะบู๊ต tarball ที่อัดแน่น (`check:pack-boot`) จากนั้นรัน `npm stage publish` — ไบต์ที่แน่นอนจะจอดอยู่ในรีจิสทรี** ไม่สามารถติดตั้งได้** จนกว่าเจ้าของจะอนุมัติ ประตู 2FA ของมนุษย์ย้ายไปที่ AFTER หลักฐาน ไม่ใช่ก่อนหน้านั้น
 
-**โฟลว์สำหรับเจ้าของหลังจากเวิร์กโฟลว์เป็นสีเขียว:**
+**ขั้นตอนของเจ้าของหลังจากขั้นตอนการทำงานเป็นสีเขียว:**
 
-1. `npm stage list omniroute` — ค้นหา stage id (ซึ่งจะแสดงอยู่ในสรุปของเวิร์กโฟลว์ด้วย)
-2. ตรวจสอบไบต์ที่จัดเตรียมไว้ (แนะนำ): `npm stage download <id>` จากนั้นติดตั้ง
-   tarball ที่ดาวน์โหลดลงใน prefix ชั่วคราวแล้วบูต (`npm run check:pack-boot` ทำให้
-   ผลการตัดสินจากลำดับ pack→install→boot แบบเดียวกันเป็นอัตโนมัติใน CI)
-3. `npm stage approve <id>` — พรอมต์ 2FA คือขั้นตอนการเผยแพร่ `npm stage reject <id>` ใช้เพื่อละทิ้ง
-4. ตาข่ายนิรภัยหลังเผยแพร่: ตัวตรวจสอบหลังเผยแพร่ (WS1.4 ของแผน v3.8.49) จะติดตั้ง
-   เวอร์ชันที่เผยแพร่จากรีจิสทรีสาธารณะในคอนเทนเนอร์ใหม่ทั้งหมด แล้วบูตเวอร์ชันนั้น
+1. `npm stage list omniroute` — ค้นหารหัสขั้นตอน (พิมพ์ไว้ในสรุปเวิร์กโฟลว์ด้วย)
+2. ตรวจสอบไบต์ที่จัดฉาก (แนะนำ): `npm stage download <id>` จากนั้นติดตั้ง tarball ที่ดาวน์โหลดมาลงในคำนำหน้าชั่วคราวแล้วบูตมัน (`npm run check:pack-boot` จะทำให้แพ็กเดียวกันโดยอัตโนมัติ→ install → boot verdict ใน CI)
+3. `npm stage approve <id>` — พรอมต์ 2FA IS เผยแพร่ `npm stage reject <id>` ทิ้ง
+4. หลังการเผยแพร่สุทธิ: ตัวตรวจสอบหลังการเผยแพร่ (WS1.4 ของแผน v3.8.49) จะติดตั้งเวอร์ชันที่เผยแพร่จากการลงทะเบียนสาธารณะในคอนเทนเนอร์ที่สะอาดและบูตมัน
 
-**ทางเลือกสำรองฉุกเฉิน:** `workflow_dispatch` พร้อม `publish_mode=direct` จะคืนค่าการทำงาน
-แบบเดิมที่เรียก `npm publish` ทันที (ใช้เฉพาะเมื่อการจัดเตรียมเองทำงานผิดปกติ และให้บันทึกเหตุผล)
+**ทางเลือกฉุกเฉิน:** `workflow_dispatch` ด้วย `publish_mode=direct` จะกู้คืน `npm publish` แบบเดิมทันที (ใช้เฉพาะในกรณีที่การจัดเตรียมตัวเองทำงานผิดปกติ บันทึกสาเหตุ)
 
-**การเพิ่มความปลอดภัยครั้งเดียว (เจ้าของ, npmjs.com):** กำหนดค่า Trusted Publisher สำหรับ
-`omniroute` เป็นโหมดจัดเตรียมเท่านั้น เพื่อไม่ให้โทเค็นอายุยาวที่รั่วไหลสามารถเรียก `npm publish`
-โดยตรงจากที่ใดก็ได้ — CI ทำได้เพียงจัดเตรียม และมีเพียง 2FA ของเจ้าของเท่านั้นที่เผยแพร่ได้
+**การชุบแข็งครั้งเดียว (เจ้าของ npmjs.com):** กำหนดค่าผู้เผยแพร่ที่เชื่อถือได้สำหรับ `omniroute` ในโหมดเฉพาะขั้นตอน ดังนั้นโทเค็นที่มีอายุการใช้งานยาวนานที่รั่วไหลจะไม่สามารถ `npm publish` โดยตรงจากทุกที่ — CI สามารถแสดงได้เท่านั้น เฉพาะรุ่น 2FA ของเจ้าของเท่านั้น
 
-**คู่มือรับมืออาร์ติแฟกต์เสียหาย (ไม่เปลี่ยนแปลง):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"`
-เป็นการตอบสนองเริ่มต้นตามค่าเริ่มต้น (ใช้เวลาไม่กี่นาทีและย้อนกลับได้); ใช้ `npm unpublish` เฉพาะภายในกรอบเวลา
-72 ชั่วโมง/ไม่มีแพ็กเกจที่พึ่งพา และห้ามใช้เป็นการดำเนินการแรก สำหรับ Docker: ห้ามเขียนทับแท็กเวอร์ชัน — การย้อนกลับคือ
-การชี้ `latest` ไปยัง digest ล่าสุดที่ใช้งานได้
+**Playbook สิ่งประดิษฐ์ที่เสียหาย (ไม่เปลี่ยนแปลง):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` เป็นตัวสะท้อนเริ่มต้น (นาที ย้อนกลับได้); `npm unpublish` ภายในหน้าต่าง 72h/no-dependents เท่านั้นและไม่เคยเป็นการเคลื่อนไหวครั้งแรก Docker: อย่าเขียนแท็กเวอร์ชันใหม่ — rollback กำลังเปลี่ยน `latest` ไปที่สรุปย่อยที่ดีครั้งล่าสุด
 
-**Docker Hub `latest` (จำเป็นสำหรับทุกการเผยแพร่ SemVer แบบเสถียร):**
-เวิร์กโฟลว์ `docker-publish` ต้องติดแท็ก **ทั้ง** `X.Y.Z` และเมื่อ
-`should-promote-latest.sh` ยืนยันว่านี่คือ SemVer แบบเสถียรที่สูงที่สุด ให้ติดแท็ก `:latest`
-ด้วย **digest เดียวกัน** หลังจากงานเสร็จสิ้น: digest ของ `latest` บน Hub ต้องเท่ากับ digest ของ
-SemVer ใหม่ และ `last_updated` ต้องเปลี่ยนแปลง อย่าปล่อยให้ `:latest` ชี้ไปยัง
-บิลด์เก่า ในขณะที่บันทึกประจำรุ่นกล่าวถึงการแก้ไขที่มีเฉพาะใน git
-คู่มือเริ่มต้นอย่างรวดเร็วสำหรับ Compose ใช้ `:latest`; GitOps ควรตรึงเวอร์ชันไว้ที่ `X.Y.Z` ต่อไป ดู
-[ช่องทางการเผยแพร่ Docker](../guides/DOCKER_GUIDE.md#release-channels) และ #10317
+**Docker Hub `latest` (จำเป็นสำหรับการเผยแพร่ SemVer ที่เสถียรทุกรายการ):** เวิร์กโฟลว์ `docker-publish` ต้องติดแท็ก** ทั้งคู่** `X.Y.Z` และเมื่อ `should-promote-latest.sh` เห็นด้วย นี่คือความเสถียรสูงสุด SemVer, `:latest` ด้วย** ย่อยเดียวกัน** . หลังเลิกงาน: Hub `latest` digest เท่ากับ SemVer digest ใหม่และ `last_updated` ถูกย้าย อย่าทิ้ง `:latest` ไว้บนบิลด์เก่า ในขณะที่บันทึกประจำรุ่นพูดถึงการแก้ไขที่มีอยู่บน git เท่านั้น เขียนการเริ่มต้นอย่างรวดเร็วใช้ `:latest`; GitOps ควรปักหมุด `X.Y.Z` ต่อไป ดู [ช่องทางการเผยแพร่Docker](../guides/DOCKER_GUIDE.md#release-channels) และ #10317
+
+**พื้นที่เก็บข้อมูลองค์กร Docker Hub (`cheaperinference/omniroute`):** Docker Hub ไม่สามารถย้ายที่เก็บระหว่างเนมสเปซได้ ดังนั้น `diegosouzapw/omniroute` จะเก็บประวัติการดึงและทุกรีลีส และงาน `mirror-org-dockerhub` ของ `docker-publish` จะคัดลอกแต่ละเวอร์ชันที่เผยแพร่ (และ `:latest` เมื่อเลื่อนระดับ) จาก `ghcr.io/cheaper-inference/omniroute` ไปยังที่เก็บขององค์กร ต้องการความลับ `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` หากไม่มีงานเหล่านั้น งานยังคงเป็นสีเขียวโดยมีคำเตือน "Docker Hub org mirror ข้าม" และรีจิสทรีอื่นๆ จะเผยแพร่ตามปกติ หากต้องการเผยแพร่เวอร์ชันที่เผยแพร่ในภายหลัง ให้เรียกใช้** การดำเนินการ → Mirror อิมเมจ Docker ไปยัง Docker Hub org → Run เวิร์กโฟลว์** ด้วย `version=X.Y.Z` (และ `promote_latest` สำหรับเวอร์ชันเสถียรสูงสุด): จะคัดลอกอิมเมจที่มีอยู่ ไม่มีการสร้างใหม่
 
 ## ช่องทางด่วนสำหรับ Hotfix (ป้ายกำกับ `hotfix`)
 
@@ -113,207 +88,203 @@ diff ที่เปลี่ยนเฉพาะการทดสอบ (ไ�
 
 ### ก่อนเผยแพร่
 
-- [ ] PR ทั้งหมดที่กำหนดเป้าหมายไว้สำหรับรุ่นนี้ถูกรวมเข้ากับ `release/vX.Y.0` แล้ว
-- [ ] รายการ Linear/issue ที่ยังเปิดอยู่ทั้งหมดสำหรับเวอร์ชันนี้ถูกปิดหรือเลื่อนไปยังเป้าหมายสำคัญถัดไปแล้ว
-- [ ] CI ผ่านทั้งหมดบนสาขา `release/vX.Y.0`
-- [ ] ไม่มีเครื่องหมาย `TODO(release)` ในโค้ด: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] อิมเมจฐาน Docker เป็นเวอร์ชันล่าสุด (ปัจจุบันคือ `node:24.15.0-trixie-slim`)
+- [ ] PRs ทั้งหมดที่กำหนดเป้าหมายไปยังรุ่นนี้จะถูกรวมเข้ากับ `release/vX.Y.0`
+- [ ] รายการ Linear/issue ที่เปิดอยู่ทั้งหมดสำหรับเวอร์ชันนี้ถูกปิดหรือผลักดันไปยังเหตุการณ์สำคัญถัดไป
+- [ ] CI green บนสาขา `release/vX.Y.0`
+- [ ] ไม่มีเครื่องหมาย `TODO(release)` ในรหัส: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] อิมเมจฐาน Docker เป็นปัจจุบัน (ปัจจุบันคือ `node:24.15.0-trixie-slim`)
 
 ### เวอร์ชันและบันทึกการเปลี่ยนแปลง
 
-- [ ] เรียกใช้ `/version-bump-cc <patch|minor|major>` (สกิล Claude Code)
-  - เพิ่มเวอร์ชันใน `package.json`, `electron/package.json`
-  - สร้าง `CHANGELOG.md` ใหม่จากคอมมิต git นับตั้งแต่แท็กล่าสุด
-  - อัปเดตป้ายสถานะใน README.md
-- [ ] ตรวจสอบ CHANGELOG.md ด้วยตนเองและปรับข้อความคอมมิตให้เรียบร้อยหากจำเป็น
-- [ ] ตรวจสอบให้แน่ใจว่าส่วน semver ล่าสุดใน `CHANGELOG.md` ตรงกับเวอร์ชันใน `package.json`
-- [ ] คง `## [Unreleased]` ไว้เป็นส่วนแรกของบันทึกการเปลี่ยนแปลงสำหรับงานที่กำลังจะมาถึง
-- [ ] อัปเดต `docs/openapi.yaml` → `info.version` ต้องตรงกับเวอร์ชันใน `package.json`
+- [ ] เรียกใช้ `/version-bump-cc <patch|minor|major>` (ทักษะรหัส Claude )
+  - กระแทก `package.json`, `electron/package.json`
+  - สร้าง `CHANGELOG.md` ใหม่จากคอมมิตตั้งแต่แท็กสุดท้าย
+  - อัพเดตป้าย README.md
+- [ ] ตรวจสอบ CHANGELOG.md ด้วยตนเองและล้างข้อความคอมมิตหากจำเป็น
+- [ ] ตรวจสอบให้แน่ใจว่าส่วน semver ล่าสุดใน `CHANGELOG.md` เท่ากับเวอร์ชัน `package.json`
+- [ ] ให้ `## [Unreleased]` เป็นส่วนบันทึกการเปลี่ยนแปลงแรกสำหรับงานที่กำลังจะมาถึง
+- [ ] อัปเดต `docs/openapi.yaml` → `info.version` ต้องเท่ากับเวอร์ชัน `package.json`
 
-### คุณภาพโค้ด
+### คุณภาพของรหัส
 
-- [ ] `npm run lint` — ข้อผิดพลาด 0 รายการ (คำเตือนมีอยู่ก่อนแล้ว)
-- [ ] `npm run typecheck:core` — ผ่านโดยไม่มีปัญหา
-- [ ] `npm run typecheck:noimplicit:core` — ผ่านโดยไม่มีปัญหา (โหมดเข้มงวด)
-- [ ] `npm run check:cycles:ratchet` — อยู่ภายในเพดาน `metrics.cycles` ที่ตรึงไว้ (`check:cycles` แบบเปล่าจะจบการทำงานด้วยรหัส 1 เมื่อพบวงจรใดก็ตาม, #15281)
-- [ ] `npm run check:any-budget:t11` — อยู่ภายในงบประมาณ
-- [ ] `npm run check:route-validation:t06` — ผ่านโดยไม่มีปัญหา
-- [ ] `npm run check:node-runtime` — เป็นไปตามเวอร์ชันรันไทม์ขั้นต่ำที่รองรับ (`>=22.22.2 <23`, `>=24.0.0 <27` ตาม `SUPPORTED_NODE_RANGE` ใน `src/shared/utils/nodeRuntimeSupport.ts`; สอดคล้องกับ `engines` ใน `package.json`)
+- [ ] ข้อผิดพลาด `npm run lint` — 0 (มีคำเตือนอยู่แล้ว)
+- [ ] `npm run typecheck:core` — สะอาด
+- [ ] `npm run typecheck:noimplicit:core` — สะอาด (เข้มงวด)
+- [ ] `npm run check:cycles:ratchet` — ภายในเพดาน `metrics.cycles` ที่แช่แข็ง ( `check:cycles` เปลือยออก 1 ในทุกรอบ #15281)
+- [ ] `npm run check:any-budget:t11` — ภายในงบประมาณ
+- [ ] `npm run check:route-validation:t06` — สะอาด
+- [ ] `npm run check:node-runtime` — รองรับ runtime floor met (`>=22.22.2 <23`, `>=24.0.0 <27`, ต่อ `SUPPORTED_NODE_RANGE` ใน `src/shared/utils/nodeRuntimeSupport.ts`; สอดคล้องกับ `package.json` `engines`)
 
 ### การทดสอบ
 
 - [ ] `npm run test:unit` — ผ่าน
-- [ ] `npm run test:vitest` — ผ่าน (เซิร์ฟเวอร์ MCP, autoCombo, แคช)
-- [ ] `npm run test:coverage` — ผ่านเกณฑ์ 60/60/60/60 (คำสั่ง/บรรทัด/ฟังก์ชัน/สาขา)
-- [ ] `npm run test:integration` — ผ่าน (หากการเปลี่ยนแปลงเกี่ยวข้องกับ DB / handlers)
-- [ ] `npm run test:combo:matrix` — ผ่าน (เมทริกซ์กลยุทธ์ combo: พิสูจน์การตัดสินใจเลือกของกลยุทธ์การกำหนดเส้นทางสาธารณะทั้ง 19 รายการได้อย่างกำหนดแน่นอน; เรียกใช้เมื่อแก้ไขการกำหนดเส้นทาง combo, การแก้ไขกลยุทธ์ หรือกลไก fallback)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **ไม่บังคับ/เรียกใช้ด้วยตนเอง** (การทดสอบ smoke กับ upstream จริงที่ควบคุมด้วย gate; ดึงสแนปช็อต DB แบบอ่านอย่างเดียวจาก VPS `root@192.168.0.15`; เรียกใช้ผู้ให้บริการจริงและมีค่าใช้จ่ายเครดิต; ไม่ทำงานใน CI; ข้ามอย่างเรียบร้อยเมื่อไม่มีกำหนด gate)
-- [ ] `npm run test:combo:live:vps` — **ไม่บังคับ/เรียกใช้ด้วยตนเอง** (การทดสอบ smoke แบบสดบน VPS ระยะที่ 3: สถานการณ์ HTTP 7 รายการกับเซิร์ฟเวอร์ `.15` ที่ทำงานจริงผ่าน Node ESM โดยตรง; ต้องใช้ `ssh root@192.168.0.15`; สร้าง/ลบเฉพาะ combo รูปแบบ `__live_test__*`; เรียกใช้ผู้ให้บริการจริง; ไม่ทำงานใน CI)
-- [ ] `npm run test:e2e` — ผ่าน (การเปลี่ยนแปลง UI)
-- [ ] `npm run test:protocols:e2e` — ผ่าน (การเปลี่ยนแปลง MCP/A2A)
+- [ ] `npm run test:vitest` — ผ่าน (เซิร์ฟเวอร์MCP, autoCombo, แคช)
+- [ ] `npm run test:coverage` ประตู — 60/60/60/60 พอใจ (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — pass (หากมีการเปลี่ยนแปลง ให้แตะ DB / handlers)
+- [ ] `npm run test:combo:matrix` — pass (เมทริกซ์กลยุทธ์คำสั่งผสม: พิสูจน์การตัดสินใจเลือกกลยุทธ์การกำหนดเส้นทางสาธารณะทั้ง 22 รายการอย่างมีการกำหนด; ทำงานเมื่อแตะการกำหนดเส้นทางคำสั่งผสม การแก้ไขกลยุทธ์ หรือตรรกะทางเลือก)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (ควันต้นน้ำจริงที่มีรั้วรอบขอบชิด; แหล่งที่มาของสแน็ปช็อต DB แบบอ่านอย่างเดียวจาก VPS `root@192.168.0.15`; เข้าถึงผู้ให้บริการจริง, เครดิตค่าใช้จ่าย; ไม่เคยทำงานใน CI; ข้ามอย่างหมดจดโดยไม่มีเกต)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live Smoke: สถานการณ์ 7 HTTP กับเซิร์ฟเวอร์ `.15` แบบสดผ่าน Node ธรรมดา ESM; ต้องใช้ `ssh root@192.168.0.15`; creates/deletes เฉพาะคอมโบ `__live_test__*` เท่านั้น เข้าถึงผู้ให้บริการจริง; ไม่เคยทำงานใน CI)
+- [ ] `npm run test:e2e` — ผ่าน (การเปลี่ยนแปลง UI )
+- [ ] `npm run test:protocols:e2e` — ผ่าน (การเปลี่ยนแปลง MCP/A2A )
 - [ ] `npm run test:ecosystem` — ผ่าน
 
-### Hooks (ตรวจสอบด้วย Husky)
+### ตะขอ (ผ่านการตรวจสอบฮัสกี้)
 
-Hooks ของ Husky อยู่ใน `.husky/` และทำงานโดยอัตโนมัติระหว่างการดำเนินการของ git
+Husky hooks อยู่ใน `.husky/` และทำงานโดยอัตโนมัติในการดำเนินการ git
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** gate ที่รวดเร็วและให้ผลลัพธ์แน่นอน — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (เปิดใช้งานเมื่อ 2026-06-13) จงใจไม่รวม `test:unit` (ทำงานช้า; ครอบคลุมโดยงาน CI `test-unit`)
-  - เรียกใช้ `npm run test:unit` ด้วยตนเองก่อนพุชสาขารีลีส
+- **กระทำล่วงหน้า:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **ดันล่วงหน้า:** ประตูกำหนดอย่างรวดเร็ว — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (เปิดใช้งาน 2026-06-13) จงใจแยก `test:unit` (ช้า ครอบคลุมโดยงาน CI `test-unit` )
+  - รัน `npm run test:unit` ด้วยตนเองก่อนที่จะพุชสาขาการเผยแพร่
 
-หาก hook ล้มเหลว: ให้แก้ไขปัญหาที่ต้นเหตุ อย่าข้ามด้วย `--no-verify`
+หาก hook ล้มเหลว: แก้ไขปัญหาที่เกิดขึ้น อย่าเลี่ยงผ่าน `--no-verify`
 
-### Conventional Commits
+### ข้อตกลงทั่วไป
 
-คอมมิตทั้งหมดที่จะรวมในรีลีสต้องใช้รูปแบบ `type(scope): subject`
+คอมมิตแบบ release-bound ทั้งหมดจะต้องเป็นไปตามรูปแบบ `type(scope): subject`
 
-**ประเภทที่ใช้ได้:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**ประเภทที่ถูกต้อง:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**ขอบเขตที่ใช้ได้:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**ขอบเขตที่ถูกต้อง:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-การเปลี่ยนแปลงที่ไม่เข้ากันกับเวอร์ชันก่อนหน้า: เพิ่มส่วนท้าย `BREAKING CHANGE:` หรือ `!` หลังขอบเขต (เช่น `feat(api)!: drop /v0`)
+การเปลี่ยนแปลงที่ไม่สมบูรณ์: เพิ่มส่วนท้ายของ `BREAKING CHANGE:` หรือ `!` หลังขอบเขต (เช่น `feat(api)!: drop /v0`)
 
 ### เอกสารประกอบ
 
-- [ ] `npm run check:docs-sync` ผ่าน (เรียกใช้อัตโนมัติโดย pre-commit)
-- [ ] `npm run check:docs-all` ผ่าน (คำสั่งรวม: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` จบการทำงานด้วยรหัส 0 — สัญญา env ระหว่างโค้ด ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` ยังคงถูกต้อง
-- [ ] `npm run check:doc-links` จบการทำงานด้วยรหัส 0 — ไม่มีการอ้างอิง markdown ภายในที่เสียหายหลังการปรับโครงสร้าง
-- [ ] ตรวจสอบ `docs/architecture/ARCHITECTURE.md` เพื่อหาความคลาดเคลื่อนของพื้นที่จัดเก็บ/รันไทม์แล้ว
-- [ ] ตรวจสอบ `docs/guides/TROUBLESHOOTING.md` เพื่อหาความคลาดเคลื่อนของตัวแปร env และการปฏิบัติงานแล้ว
-- [ ] หาก `.env.example` มีการเปลี่ยนแปลง: อัปเดต `docs/reference/ENVIRONMENT.md` แล้ว
-- [ ] หากฟีเจอร์ใหม่มี UI: มีการกล่าวถึงใน `docs/guides/USER_GUIDE.md`
-- [ ] หากฟีเจอร์ใหม่มี API: อัปเดต `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` แล้ว
-- [ ] หากฟีเจอร์ใหม่เป็นโมดูล: มีไฟล์ `docs/<MODULE>.md` โดยเฉพาะ
-- [ ] หากเป็นการเปลี่ยนแปลงที่ไม่เข้ากันกับเวอร์ชันก่อนหน้า: `docs/guides/TROUBLESHOOTING.md` มีหมายเหตุการย้ายระบบ
+- [ ] `npm run check:docs-sync` pass (ทำงานอัตโนมัติโดยการคอมมิตล่วงหน้า)
+- [ ] `npm run check:docs-all` ผ่าน (ร่ม: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` ออกจาก 0 รหัส — ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` สัญญา env ยังคงเหมือนเดิม
+- [ ] `npm run check:doc-links` ออกจาก 0 — ไม่มีการอ้างอิง markdown ภายในที่เสียหายหลังจากการปรับโครงสร้างใหม่
+- [ ] `docs/architecture/ARCHITECTURE.md` ตรวจสอบแล้วสำหรับการดริฟท์ storage/runtime
+- [ ] `docs/guides/TROUBLESHOOTING.md` ได้รับการตรวจสอบสำหรับ env var และดริฟท์การปฏิบัติงาน
+- [ ] หาก `.env.example` เปลี่ยนไป: อัปเดต `docs/reference/ENVIRONMENT.md` แล้ว
+- [ ] หากคุณสมบัติใหม่มี UI: `docs/guides/USER_GUIDE.md` กล่าวถึง
+- [ ] หากฟีเจอร์ใหม่มี API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` อัปเดตแล้ว
+- [ ] หากคุณลักษณะใหม่เป็นโมดูล: มี `docs/<MODULE>.md` เฉพาะอยู่
+- [ ] หากทำลายการเปลี่ยนแปลง: `docs/guides/TROUBLESHOOTING.md` มีบันทึกการย้ายข้อมูล
 
 ### i18n
 
-- [ ] `npm run i18n:check` จบการทำงานด้วยรหัส 0 — สถานะการแปล (`.i18n-state.json`) ซิงค์กับเอกสารต้นฉบับแล้ว (ไม่มีต้นฉบับที่คลาดเคลื่อนในโหมดเข้มงวด; คำแนะนำในโหมดเตือนยอมรับได้สำหรับการปรับแต่งเอกสารในนาทีสุดท้าย แต่ควรเป็น 0 ก่อนติดแท็ก)
-- [ ] `npm run i18n:check-ui-coverage` จบการทำงานด้วยรหัส 0 — ทุกภาษาใน UI มีความครอบคลุมไม่น้อยกว่าเกณฑ์ขั้นต่ำ 80%
-- [ ] `npm run i18n:sync-ui:dry` รายงานคีย์ที่ขาดหาย 0 รายการในภาษาเป้าหมายทั้ง 66 ภาษา (ทุกภาษายกเว้นต้นฉบับ `en`)
-- [ ] หากเอกสารต้นฉบับภาษาอังกฤษมีการเปลี่ยนแปลง ให้เรียกใช้ `npm run i18n:run` (ต้องมี `OMNIROUTE_TRANSLATION_API_KEY` ใน `.env`) ก่อนติดแท็ก
-- [ ] สามารถเลื่อนการสนับสนุนงานแปลไปยังรีลีสถัดไปได้หากเป็นการเปลี่ยนแปลงเล็กน้อย (ติดตามใน CHANGELOG)
+- [ ] `npm run i18n:check` ออกจากสถานะการแปล 0 — (`.i18n-state.json`) โดยซิงค์กับเอกสารต้นฉบับ (ไม่มีแหล่งที่มาแบบลอยในโหมดเข้มงวด คำแนะนำในโหมดเตือนนั้นยอมรับได้สำหรับการปรับแต่งเอกสารในนาทีสุดท้าย แต่ควรเป็น 0 ก่อนการแท็ก)
+- [ ] `npm run i18n:check-ui-coverage` ออกจาก 0 — ทุก ๆ UI locale ที่หรือสูงกว่าพื้นที่ครอบคลุม 80%
+- [ ] `npm run i18n:sync-ui:dry` รายงานคีย์ที่หายไป 0 คีย์ในทุกสถานที่เป้าหมาย 66 แห่ง (ทุกสถานที่ยกเว้นแหล่งที่มา `en` )
+- [ ] หากเอกสารภาษาอังกฤษต้นฉบับมีการเปลี่ยนแปลง ให้รัน `npm run i18n:run` (ต้องใช้ `OMNIROUTE_TRANSLATION_API_KEY` ใน `.env`) ก่อนที่จะแท็ก
+- [ ] การสนับสนุนการแปลสามารถเลื่อนออกไปเป็นรุ่นถัดไปได้หากเป็นผู้เยาว์ (ติดตามใน CHANGELOG)
 
 ### การย้ายฐานข้อมูล
 
 - [ ] หาก `src/lib/db/migrations/` มีไฟล์ใหม่:
-  - [ ] migration แต่ละรายการเป็นแบบ idempotent (`CREATE TABLE IF NOT EXISTS` เป็นต้น)
-  - [ ] migration ถูกครอบไว้ใน transaction
-  - [ ] กำหนดหมายเลขถูกต้อง (ไม่มีช่องว่างในลำดับ)
-- [ ] ทดสอบกับการติดตั้งใหม่: ลบ `~/.omniroute/omniroute.db` และเรียกใช้ `npm run dev`
-- [ ] ทดสอบกับการติดตั้งที่มีอยู่: สำรองข้อมูล DB, เรียกใช้ migration และตรวจสอบ schema
-- [ ] จัดการไฟล์ WAL (`-wal`, `-shm`) อย่างถูกต้อง หาก migration เขียนตารางใหม่
+  - [ ] การโยกย้ายแต่ละครั้งเป็นแบบ idempotent (`CREATE TABLE IF NOT EXISTS` ฯลฯ )
+  - [ ] การโยกย้ายรวมอยู่ในธุรกรรม
+  - [ ] เรียงลำดับเลขให้ถูกต้อง (ไม่มีช่องว่างตามลำดับ)
+- [ ] ทดสอบการติดตั้งใหม่: ลบ `~/.omniroute/omniroute.db` และรัน `npm run dev`
+- [ ] ทดสอบการติดตั้งที่มีอยู่: สำรองข้อมูล DB เรียกใช้การย้ายข้อมูล ตรวจสอบสคีมา
+- [ ] ไฟล์WAL (`-wal`, `-shm`) ได้รับการจัดการอย่างถูกต้องหากการย้ายข้อมูลเขียนตารางใหม่
 
-### แค็ตตาล็อกผู้ให้บริการ (ตรวจสอบความถูกต้องด้วย Zod)
+### แคตตาล็อกผู้ให้บริการ (ผ่านการตรวจสอบ Zod)
 
-- [ ] สคีมา Zod ใน `src/shared/constants/providers.ts` ถูกต้องเมื่อโหลด
-  - [ ] ผู้ให้บริการทั้งหมดมีฟิลด์ที่จำเป็น (`id`, `label`, `kind` ฯลฯ)
-  - [ ] ระบุ `freeNote` สำหรับผู้ให้บริการฟรีรายใหม่
-  - [ ] ผู้ให้บริการ OAuth มี `oauthConfig` ที่ลงทะเบียนใน `src/lib/oauth/constants/oauth.ts`
-- [ ] หากเพิ่มผู้ให้บริการใหม่: มี executor ที่สอดคล้องกันใน `open-sse/executors/`
-- [ ] หากไม่ได้ใช้รูปแบบ OpenAI: มีตัวแปลใน `open-sse/translator/`
-- [ ] ลงทะเบียนโมเดลใน `open-sse/config/providerRegistry.ts`
+- [ ] สคีมา `src/shared/constants/providers.ts` Zod ใช้ได้ในเวลาโหลด
+  - [ ] ผู้ให้บริการทั้งหมดมีช่องที่ต้องกรอก (`id`, `label`, `kind` ฯลฯ)
+  - [ ] `freeNote` มีไว้สำหรับผู้ให้บริการฟรีรายใหม่
+  - [ ] ผู้ให้บริการ OAuth ได้ลงทะเบียน `oauthConfig` ใน `src/lib/oauth/constants/oauth.ts` แล้ว
+- [ ] หากเพิ่มผู้ให้บริการใหม่: ผู้ดำเนินการที่เกี่ยวข้องใน `open-sse/executors/`
+- [ ] หากไม่ใช่รูปแบบ OpenAI: ตัวแปลใน `open-sse/translator/`
+- [ ] รุ่นที่ลงทะเบียนใน `open-sse/config/providerRegistry.ts`
 - [ ] การทดสอบหน่วยใน `tests/unit/` ครอบคลุมการจำแนกประเภทและการกำหนดเส้นทางของผู้ให้บริการ
 
 ### เดสก์ท็อป (Electron)
 
-หากมีการเปลี่ยนแปลง `electron/`:
+หาก `electron/` เปลี่ยนไป:
 
-- [ ] `npm run electron:smoke:packaged` ผ่าน
-- [ ] ทดสอบบิลด์สำหรับอย่างน้อยหนึ่งรายการจาก `:win`, `:mac`, `:linux`
-- [ ] ใบรับรองการลงนามโค้ดยังไม่หมดอายุ (หากมีการลงนาม)
-- [ ] เวอร์ชันใน `electron/package.json` ตรงกับ `package.json` ที่ราก
-- [ ] อัปเดตตัวชี้ช่องทางอัปเดตอัตโนมัติแล้ว หากเผยแพร่ไปยัง `stable`
+- [ ] `npm run electron:smoke:packaged` ผ่านไป
+- [ ] บิลด์ที่ทดสอบอย่างน้อยหนึ่งรายการของ `:win`, `:mac`, `:linux`
+- [ ] ใบรับรองการลงนามรหัสไม่หมดอายุ (หากลงนาม)
+- [ ] เวอร์ชัน `electron/package.json` ตรงกับรูท `package.json`
+- [ ] ตัวชี้ช่องอัปเดตอัตโนมัติอัปเดตหากปล่อยเป็น `stable`
 
-### โครงสร้างผลลัพธ์ของบิลด์
+### สร้างเค้าโครง
 
-รีพอซิทอรีใช้ไดเรกทอรีผลลัพธ์ที่แตกต่างกันสามแห่ง — ห้ามสับสนกัน:
+พื้นที่เก็บข้อมูลใช้ไดเร็กทอรีเอาต์พุตที่แตกต่างกันสามไดเร็กทอรี — ไม่เคยปะปนกัน:
 
-| ไดเรกทอรี | วัตถุประสงค์                                                 | ติดตามหรือไม่    |
-| --------- | ------------------------------------------------------------ | ---------------- |
-| `src/`    | ซอร์สของแอปพลิเคชัน (TypeScript / TSX)                       | ใช่              |
-| `.build/` | ไฟล์ระหว่างกระบวนการบิลด์ — ผลลัพธ์ `next build` (`distDir`) | ไม่ (gitignored) |
-| `dist/`   | บันเดิล npm ที่พร้อมจัดส่ง — ประกอบโดย `assembleStandalone`  | ไม่ (gitignored) |
+| ไดเรกทอรี | วัตถุประสงค์                                          | ติดตาม?          |
+| --------- | ----------------------------------------------------- | ---------------- |
+| `src/`    | แหล่งที่มาของแอปพลิเคชัน (TypeScript / TSX)           | ใช่              |
+| `.build/` | สร้างตัวกลาง — เอาต์พุต `next build` (`distDir`)      | ไม่ (gitignored) |
+| `dist/`   | มัด npm ที่จัดส่งได้ — ประกอบโดย `assembleStandalone` | ไม่ (gitignored) |
 
-> **หมายเหตุสำหรับผู้ดำเนินการ:** ไดเรกทอรีอิมเมจบน VPS ระยะไกลยังคงเป็น `/usr/lib/node_modules/omniroute/app/`
-> มีเพียงผลลัพธ์บิลด์ **ภายในรีพอซิทอรี** เท่านั้นที่ย้าย (`app/` → `dist/`) สกิลสำหรับการปรับใช้จะใช้ rsync
-> เนื้อหาจาก `dist/` ไปยังไดเรกทอรี `app/` ระยะไกล — ไม่จำเป็นต้องเปลี่ยนพาธบน VPS
+> **หมายเหตุผู้ประกอบการ:** ไดเรกทอรีรูปภาพ VPS ระยะไกลยังคงอยู่ `/usr/lib/node_modules/omniroute/app/` เท่านั้น** ใน repo** ย้ายเอาต์พุตบิลด์แล้ว (`app/` → `dist/`) การปรับใช้ทักษะ rsync เนื้อหา `dist/` ใน `app/` dir — ระยะไกล ไม่จำเป็นต้องเปลี่ยนเส้นทาง VPS
 
-**โฟลว์การบิลด์ครั้งเดียว:**
+**โฟลว์บิวด์เดียว:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (ล้าง)
-  └─ next build → .build/next/   (ไฟล์ระหว่างกระบวนการ)
-  └─ assembleStandalone          (คัดลอก standalone + static + public + natives → dist/)
-  └─ writes dist/BUILD_SHA       (ตัวตรวจสอบ HEAD)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-ห้ามรัน `npm run build` แล้วตามด้วย `npm run build:cli` แยกต่างหากสำหรับการปรับใช้ — ให้ใช้
-`npm run build:release` ซึ่งจะบิลด์ใหม่ทั้งหมดแบบสะอาดและสร้างตัวตรวจสอบในคำสั่งเดียว
+ทำ NOT รัน `npm run build` ตามด้วย `npm run build:cli` แยกต่างหากสำหรับการปรับใช้ — ใช้ `npm run build:release` ซึ่งสร้าง + sentinel ที่สร้างใหม่ทั้งหมดในคำสั่งเดียว
 
-### การตรวจสอบอาร์ติแฟกต์
+### การตรวจสอบสิ่งประดิษฐ์
 
-- [ ] `npm run build:release` สำเร็จ และ `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` สะอาด — ไม่มี `app.__qa_backup`, `scripts/scratch`, `package-lock.json` หรือไฟล์ตกค้างอื่นจากเครื่องภายใน
-- [ ] มี `dist/server.js` หลังการบิลด์
-- [ ] การทดสอบ smoke ของ packaged runtime ภายในแบบเลือกทำได้: `npm run dev:candidate -- validate` หลังจาก `npm run dev:candidate -- build` จะบูต tarball ที่แพ็กแล้วบน `DATA_DIR` แบบแยกส่วน และตรวจสอบ `/api/health` + `/v1/models` (ดู [เส้นทางมาตรฐานสำหรับการมีส่วนร่วม](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` สำเร็จและ `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` clean — no `app.__qa_backup`, `scripts/scratch`, `package-lock.json` หรือสารตกค้างในท้องถิ่นอื่น ๆ
+- [ ] `dist/server.js` มีอยู่หลังจากบิลด์
+- [ ] แพ็คเกจรันไทม์แบบโลคอลเสริม: `npm run dev:candidate -- validate` หลังจาก `npm run dev:candidate -- build` บูท tarball ที่อัดแน่นบน `DATA_DIR` ที่แยกออกมา และตรวจสอบ `/api/health` + `/v1/models` (ดู [Contribution Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### การติดแท็กและการเผยแพร่
+### การแท็กและการเปิดตัว
 
-- [ ] รัน `/generate-release-cc` (สกิล Claude Code):
+- [ ] เรียกใช้ `/generate-release-cc` ( ทักษะรหัส Claude ):
   - สร้างแท็ก `vX.Y.Z`
-  - พุชแท็กและบรานช์
-  - เปิด GitHub Release พร้อมเนื้อหา changelog
-  - แนบตัวติดตั้ง Electron (หากบิลด์ไว้)
-- [ ] หรือดำเนินการด้วยตนเอง:
+  - พุชแท็กและสาขา
+  - เปิด GitHub Release พร้อมเนื้อหาการเปลี่ยนแปลง
+  - แนบตัวติดตั้ง Electron (ถ้าสร้าง)
+- [ ] หรือด้วยตนเอง:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### การปรับใช้
+### ปรับใช้
 
-สกิลสำหรับการปรับใช้ใช้โฟลว์ rsync แบบเบา — ไม่มี `npm pack` และไม่มี `npm i -g`:
+ทักษะการปรับใช้ใช้ light rsync flow — no `npm pack`, no `npm i -g`:
 
-- [ ] ใช้สกิลสำหรับการปรับใช้ที่ตรงกับเป้าหมาย:
-  - `/deploy-vps-local-cc` — VPS ภายใน (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
-  - `/deploy-vps-both-cc` — ทั้งสองแห่ง
-- [ ] ก่อนปรับใช้ ให้ยืนยันว่า `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] ต้องรันบิลด์ในตำแหน่งที่ `node_modules` เป็นไดเรกทอรีจริง (checkout หลักหรือ worktree ที่รัน `npm ci` แล้ว — ห้ามใช้ worktree ที่ลิงก์ด้วย symlink)
-- [ ] ทดสอบ smoke อินสแตนซ์ที่ปรับใช้แล้ว:
-  - เปิด `/dashboard/health` → ตรวจสอบว่าสตริงเวอร์ชันตรงกับรีลีส
-  - ส่งคำขอ `/v1/chat/completions` ไปยังผู้ให้บริการที่ทราบว่าใช้งานได้
-  - ตรวจสอบว่า `/api/monitoring/health` ส่งคืน circuit breaker ที่มีสถานะ `CLOSED`
-  - ยืนยันว่าทรานสปอร์ต MCP ตอบสนอง (`/mcp` HTTP, `/mcp-sse` SSE)
+- [ ] ใช้ทักษะการปรับใช้ที่ตรงกับเป้าหมาย:
+  - `/deploy-vps-local-cc` — ท้องถิ่น VPS (192.168.0.15)
+  - `/deploy-vps-akamai-cc` — เอกมัย VPS (69.164.221.35)
+  - `/deploy-vps-both-cc` — ทั้งคู่
+- [ ] ก่อนที่จะปรับใช้ ให้ยืนยัน `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] บิลด์ต้องทำงานโดยที่ `node_modules` เป็นจริง (การชำระเงินหลักหรือ `npm ci`'d worktree — NOT เวิร์กทรีแบบเชื่อมโยง)
+- [ ] อินสแตนซ์ที่ปรับใช้การทดสอบควัน:
+  - เปิด `/dashboard/health` → ตรวจสอบสตริงเวอร์ชันที่ตรงกับรีลีส
+  - เรียกใช้คำขอ `/v1/chat/completions` กับผู้ให้บริการที่รู้จัก
+  - ตรวจสอบ `/api/monitoring/health` ส่งคืนเซอร์กิตเบรกเกอร์ `CLOSED`
+  - ยืนยันการขนส่ง MCP ตอบสนอง (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### หลังการเผยแพร่
+### หลังการเปิดตัว
 
-- [ ] รัน `/capture-release-evidences-cc` (สกิล Claude Code)
-  - บันทึกภาพหน้าจอ/วิดีโอรูปแบบ WebP ของฟีเจอร์ใหม่
-  - แนบไปกับบันทึกประจำรีลีส / บล็อกโพสต์
-- [ ] อัปเดต GitHub Discussions / Discord ด้วยประกาศรีลีส
-- [ ] เปิด milestone สำหรับเวอร์ชันถัดไป
-- [ ] หากสำคัญอย่างยิ่ง: ปักหมุดการสนทนาหรือโพสต์ใน `news.json` สำหรับแบนเนอร์ภายในแอป
+- [ ] เรียกใช้ `/capture-release-evidences-cc` (ทักษะรหัส Claude )
+  - จับภาพ WebP screenshots/recordings ของคุณสมบัติใหม่
+  - แนบไปกับบันทึกประจำรุ่น / โพสต์ในบล็อก
+- [ ] อัปเดตการสนทนา GitHub / Discord พร้อมประกาศการเปิดตัว
+- [ ] เปิดเหตุการณ์สำคัญสำหรับเวอร์ชันถัดไป
+- [ ] หากสำคัญ: ปักหมุดการสนทนาหรือโพสต์ใน `news.json` สำหรับแบนเนอร์ในแอป
 
-### เกณฑ์อนุมัติการเปิดตัว Radar สู่สาธารณะ
+### ประตูเปิดตัวสาธารณะด้วยเรดาร์
 
-ประกาศ Radar ถูก commit ไว้โดยตั้งใจด้วย `active: false` การเปิดใช้งานเป็นการเปลี่ยนแปลงแยกต่างหาก
-หลังจากมีหลักฐานครบถ้วนสำหรับทุกรายการด้านล่าง:
+การประกาศ Radar มีเจตนามุ่งมั่นกับ `active: false` การเปิดใช้งานเป็นการเปลี่ยนแปลงแยกต่างหากหลังจากทุกรายการด้านล่างมีหลักฐานครบถ้วน:
 
-- [ ] Radar PR แบบซ้อนทั้งหมดถูก merge แล้ว และ CI ของ release-tip เป็นสีเขียว
-- [ ] ปรับใช้และทดสอบ smoke เส้นทาง OSS Radar โดยที่ `RADAR_ENABLED` ยังคงปิดเป็นค่าเริ่มต้น
-- [ ] ทดสอบ smoke `GET /planos`, `/termos`, `/privacidade` และ `/reembolso` บนโฮสต์ Radar ที่ระบุ
-- [ ] บันทึกข้อมูลระบุตัวตน/ช่องทางติดต่อ/ที่อยู่ของผู้ดำเนินการ และผลการตรวจสอบทางกฎหมายที่เจ้าของอนุมัติไว้ในบริการส่วนตัว
-- [ ] ทดสอบ Stripe Checkout และ webhook ที่ลงนามแล้วในโหมดทดสอบเท่านั้น
-- [ ] ทดสอบการส่งอีเมลธุรกรรมแบบเข้ารหัสหนึ่งครั้งด้วยผู้ส่ง/โดเมนที่ได้รับอนุมัติ
-- [ ] พิสูจน์ว่าสามารถกู้คืนข้อมูลสำรองได้ และดำเนินการวิจัยภายใต้การกำกับดูแลหนึ่งครั้งโดยจำกัดงบประมาณ
-- [ ] อนุมัตินโยบายการตรวจสอบ BRL/PIX ก่อนยอมรับหลักฐานการบริจาค
-- [ ] เปิดใช้งาน Checkout สาธารณะหลังจากผ่านเกณฑ์ก่อนหน้าทั้งหมดแล้วเท่านั้น จากนั้นเปิดใช้งาน ID ใหม่ใน `news.json`
-- [ ] ตรวจสอบว่าแบนเนอร์หน้า Home ใช้ข้อความที่แปลเป็นภาษาท้องถิ่น และ ID ใหม่จะแสดงอีกครั้งหลังจากยกเลิกแสดง ID เก่าแล้ว
+- [ ] Radar PRs แบบเรียงซ้อนทั้งหมดถูกผสานเข้าด้วยกัน และ CI ปลายรุ่นจะเป็นสีเขียว
+- [ ] ปรับใช้และรมควันเส้นทาง OSS Radar โดยที่ `RADAR_ENABLED` ยังคงปิดอยู่ตามค่าเริ่มต้น
+- [ ] สูบบุหรี่ `GET /planos`, `/termos`, `/privacidade` และ `/reembolso` บนโฮสต์ Radar ที่มีชื่อ
+- [ ] ผู้ดำเนินการบันทึก identity/contact/address และการตรวจสอบทางกฎหมายที่ได้รับการอนุมัติจากเจ้าของในบริการส่วนตัว
+- [ ] ออกกำลังกาย Stripe Checkout และ webhook ที่ลงนามแล้วในโหมดทดสอบเท่านั้น
+- [ ] ดำเนินการส่งอีเมลธุรกรรมที่เข้ารหัสหนึ่งครั้งด้วย sender/domain ที่ได้รับอนุมัติ
+- [ ] พิสูจน์การคืนค่าการสำรองข้อมูลและดำเนินการวิจัยภายใต้การดูแลและจำกัดงบประมาณหนึ่งครั้ง
+- [ ] อนุมัตินโยบายทบทวน BRL/PIX ก่อนรับหลักฐานการบริจาค
+- [ ] เปิดใช้งานการชำระเงินสาธารณะหลังจากประตูก่อนหน้าเท่านั้น จากนั้นเปิดใช้งาน `news.json` ID ใหม่
+- [ ] ตรวจสอบว่าแบนเนอร์หน้าแรกใช้สำเนาที่แปลเป็นภาษาท้องถิ่นและ ID ใหม่ปรากฏขึ้นอีกครั้งหลังจาก ID เก่าถูกละทิ้ง
 
 ## การทดสอบ smoke สำหรับ Embedded Services (v3.8.4+)
 

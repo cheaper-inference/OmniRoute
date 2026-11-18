@@ -321,9 +321,9 @@ class SkillRegistry {
   }
 
   async loadFromDatabase(apiKeyId?: string): Promise<void> {
-    if (this.pendingLoad) {
+    // The finished load may have covered another scope. Wait, then re-check this one.
+    while (this.pendingLoad) {
       await this.pendingLoad;
-      return;
     }
     const cacheHasScope = apiKeyId
       ? this.loadedAll || this.loadedApiKeyIds.has(apiKeyId)

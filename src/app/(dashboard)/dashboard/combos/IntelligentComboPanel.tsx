@@ -123,7 +123,7 @@ export default function IntelligentComboPanel({
           <div>
             <div className="flex items-center gap-2">
               <Icon name="auto_awesome" size={18} className="text-primary" />
-              <h2 className="text-lg font-semibold text-text-main">
+              <h2 className="text-lg text-text-main">
                 {getI18nOrFallback(t, "intelligentPanelTitle", "Intelligent Routing Dashboard")}
               </h2>
             </div>
@@ -153,7 +153,7 @@ export default function IntelligentComboPanel({
                 <p className="text-sm font-semibold text-text-main">
                   {getI18nOrFallback(t, "statusOverview", "Status Overview")}
                 </p>
-                <p className="text-[11px] text-text-muted mt-1">
+                <p className="text-xs text-text-muted mt-1">
                   {getI18nOrFallback(
                     t,
                     "configOnlyHint",
@@ -176,7 +176,7 @@ export default function IntelligentComboPanel({
                 <p className="text-sm font-semibold text-text-main">
                   {getI18nOrFallback(t, "activeModePack", "Active Mode Pack")}
                 </p>
-                <p className="text-[11px] text-text-muted mt-1">
+                <p className="text-xs text-text-muted mt-1">
                   {getI18nOrFallback(
                     t,
                     "modePackHint",
@@ -222,7 +222,7 @@ export default function IntelligentComboPanel({
                 <p className="text-sm font-semibold text-text-main">
                   {getI18nOrFallback(t, "providerScores", "Provider Scores")}
                 </p>
-                <p className="text-[11px] text-text-muted mt-1">
+                <p className="text-xs text-text-muted mt-1">
                   {normalizedConfig.candidatePool.length > 0
                     ? `${normalizedConfig.candidatePool.length} providers currently ranked for this combo.`
                     : getI18nOrFallback(
@@ -263,7 +263,14 @@ export default function IntelligentComboPanel({
                         </span>
                       </div>
 
-                      <div className="mt-2 h-2 rounded-full bg-bg-subtle overflow-hidden">
+                      <div
+                        role="progressbar"
+                        aria-label={formatProviderLabel(entry.provider, activeProviders)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={percentage}
+                        className="mt-2 h-2 rounded-full bg-bg-subtle overflow-hidden"
+                      >
                         <div
                           className="h-full rounded-full bg-chart-2 transition-all"
                           style={{ width: `${percentage}%` }}
@@ -294,7 +301,7 @@ export default function IntelligentComboPanel({
                 <p className="text-sm font-semibold text-text-main">
                   {getI18nOrFallback(t, "routingInputs", "Routing Inputs")}
                 </p>
-                <p className="text-[11px] text-text-muted mt-1">
+                <p className="text-xs text-text-muted mt-1">
                   {getI18nOrFallback(
                     t,
                     "routingInputsHint",
