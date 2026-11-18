@@ -9,6 +9,15 @@ import test from "node:test";
 const root = new URL("../../../", import.meta.url);
 const verifier = fileURLToPath(new URL("scripts/ci/release-green-result.mjs", root));
 const sha = "1".repeat(40);
+const observerIdentity = {
+  schemaVersion: 1,
+  candidateSha: sha,
+  workflowSha: "3".repeat(40),
+  runId: "6101",
+  runAttempt: "2",
+  jobId: "release-green",
+  phase: "validation",
+};
 
 function verify(check: Record<string, unknown>) {
   const dir = mkdtempSync(join(tmpdir(), "omni-green-evidence-"));
@@ -19,6 +28,7 @@ function verify(check: Record<string, unknown>) {
       JSON.stringify({
         schemaVersion: 1,
         candidateSha: sha,
+        observerIdentity,
         profile: "full",
         releaseGreen: true,
         hardFailures: [],
@@ -27,7 +37,15 @@ function verify(check: Record<string, unknown>) {
     );
     const result = spawnSync(process.execPath, [verifier, path, "0", sha, "schedule"], {
       encoding: "utf8",
-      env: { ...process.env, GITHUB_OUTPUT: "" },
+      env: {
+        ...process.env,
+        GITHUB_OUTPUT: "",
+        GITHUB_ACTIONS: "true",
+        GITHUB_JOB: observerIdentity.jobId,
+        GITHUB_WORKFLOW_SHA: observerIdentity.workflowSha,
+        GITHUB_RUN_ID: observerIdentity.runId,
+        GITHUB_RUN_ATTEMPT: observerIdentity.runAttempt,
+      },
       timeout: 10_000,
     });
     assert.equal(result.error, undefined);

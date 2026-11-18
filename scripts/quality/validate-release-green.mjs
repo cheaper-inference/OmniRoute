@@ -618,7 +618,28 @@ export function parseHostedSuiteResult(text, expected) {
       (expected && Object.entries(expected).some(([key, value]) => r[key] !== value))
     )
       return null;
-    return { name: r.name, code: r.code, detail: typeof r.detail === "string" ? r.detail : "" };
+    if (
+      (r.evidenceState !== undefined && !["COMPLETE", "INCOMPLETE"].includes(r.evidenceState)) ||
+      (r.evidenceState === "INCOMPLETE" && r.code === 0)
+    )
+      return null;
+    if (r.pipelineStatus !== undefined) {
+      if (
+        !Array.isArray(r.pipelineStatus) ||
+        r.pipelineStatus.length !== 2 ||
+        !r.pipelineStatus.every((code) => Number.isInteger(code) && code >= 0 && code <= 255) ||
+        r.code !== (r.pipelineStatus.find((code) => code !== 0) ?? 0) ||
+        r.evidenceState !== (r.pipelineStatus[1] === 0 ? "COMPLETE" : "INCOMPLETE")
+      )
+        return null;
+    }
+    return {
+      name: r.name,
+      code: r.code,
+      detail: typeof r.detail === "string" ? r.detail : "",
+      ...(r.pipelineStatus ? { pipelineStatus: r.pipelineStatus } : {}),
+      ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
+    };
   } catch {
     return null;
   }
@@ -635,11 +656,17 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
   const lane = (id, label, names) => {
     const parts = [];
     let line = "";
+    let incomplete = false;
     for (const name of names) {
       const r = byName.get(name);
       if (!r) {
+        incomplete = true;
         parts.push(`${name} no result`);
         continue;
+      }
+      if (r.evidenceState === "INCOMPLETE") {
+        incomplete = true;
+        if (r.code === 0) parts.push(`${name} incomplete evidence`);
       }
       if (r.code === 0) continue;
       parts.push(`${name} ${r.code === 124 ? "TIMEOUT" : `exit ${r.code}`}`);
@@ -651,6 +678,7 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
       kind: "hard",
       ok: parts.length === 0,
       detail: parts.length === 0 ? "pass" : `${parts.join(", ")}${line ? ` — ${line}` : ""}`,
+      ...(incomplete ? { evidenceState: "INCOMPLETE" } : {}),
     };
   };
   const names = hostedSuiteNames(unitShards, integrationShards);
@@ -662,6 +690,7 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
             label: "Hosted suite receipt integrity",
             kind: "hard",
             ok: false,
+            evidenceState: "INCOMPLETE",
             detail: "invalid, unexpected or duplicate hosted suite receipt",
           },
         ]
@@ -1051,8 +1080,19 @@ async function main() {
     runId: process.env.GITHUB_RUN_ID,
     runAttempt: process.env.GITHUB_RUN_ATTEMPT,
     workflowSha: process.env.GITHUB_WORKFLOW_SHA,
+    jobId: process.env.GITHUB_JOB,
     hosted: process.env.GITHUB_ACTIONS === "true",
   };
+  const observerIdentity = Object.freeze({
+    schemaVersion: 1,
+    candidateSha: observerCandidateSha,
+    workflowSha: observerRunContext.workflowSha,
+    runId: observerRunContext.runId,
+    runAttempt: observerRunContext.runAttempt,
+    jobId: observerRunContext.jobId,
+    phase: "validation",
+  });
+  const hostedSuitesIdentity = SUITES_FROM ? hostedSuiteIdentity(ROOT, SUITES_WORKFLOW_SHA) : null;
   if (!observerCandidateSha) {
     record({
       id: "candidate-identity",
@@ -1380,6 +1420,7 @@ async function main() {
           label: "Hosted suites: read ci.yml's unit and integration matrices",
           kind: "hard",
           ok: false,
+          evidenceState: "INCOMPLETE",
           detail: "could not read the shard counts from .github/workflows/ci.yml",
         });
       } else {
@@ -1389,7 +1430,8 @@ async function main() {
         } catch {
           files = [];
         }
-        const expected = hostedSuiteIdentity(ROOT, SUITES_WORKFLOW_SHA);
+        const expected =
+          hostedSuitesIdentity?.candidateSha === observerCandidateSha ? hostedSuitesIdentity : null;
         const names = hostedSuiteNames(unitShards, integrationShards);
         const results = files.map((f) => {
           try {
@@ -1661,6 +1703,7 @@ async function main() {
         label: receipt.command,
         kind: "hard",
         ok: false,
+        evidenceState: "INCOMPLETE",
         detail: `${causeId ? receipt.outcome : "Receipt identity missing or inconsistent"}: ${receipt.receiptPath}`,
         ...(causeId ? { causeId } : {}),
       });
@@ -1688,6 +1731,7 @@ async function main() {
       await writeObserverJson({
         schemaVersion: 1,
         candidateSha: observerCandidateSha,
+        observerIdentity,
         profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
         completedAt: new Date().toISOString(),
         testMaskingBaseSha,

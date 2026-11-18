@@ -168,9 +168,13 @@ jobs:
               npm run "$SUITE"
             fi
           ) 2>&1 | tee suite.log
-          code=${PIPESTATUS[0]}
+          pipeline_status=("${PIPESTATUS[@]}")
+          code=0
+          for status in "${pipeline_status[@]}"; do
+            if [ "$status" -ne 0 ]; then code=$status; break; fi
+          done
           node scripts/ci/release-green-suite.mjs "$NAME" "$code" suite.log suite-results \
-            "$GITHUB_WORKFLOW_SHA" "$SUITE" "$TEST_SHARD" || exit "$?"
+            "$GITHUB_WORKFLOW_SHA" "$SUITE" "$TEST_SHARD" "${pipeline_status[@]}" || exit "$?"
           exit "$code"
       - name: Upload the suite result
         if: always()
@@ -266,11 +270,13 @@ jobs:
         run: echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
 
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        id: runtime
         with:
           node-version: ${{ needs.resolve-target.outputs.node-version || '24' }}
           cache: npm
 
       - uses: ./.github/actions/npm-ci-retry
+        id: dependencies
 
       - name: Collect the hosted suite results
         if: github.event_name != 'push'
@@ -336,24 +342,80 @@ jobs:
           echo "------- report -------"
           cat release-green.log
 
+      - name: Record incomplete validation after setup failure
+        if: ${{ !cancelled() && steps.validate.outcome == 'skipped' }}
+        env:
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
+          SETUP_NODE_OUTCOME: ${{ steps.runtime.outcome }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          SCANNER_OUTCOME: ${{ steps.workflow_scanners.outcome }}
+          VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
+        run: |
+          set -euo pipefail
+          # Setup can fail before Node exists. Only canonical, escaped-by-construction
+          # fields enter this separate receipt; never fabricate a validation report.
+          candidate=null; workflow=null; run_id=null; attempt=null; job=null
+          if [[ "${VALIDATED_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then candidate="\"$VALIDATED_SHA\""; fi
+          if [[ "${GITHUB_WORKFLOW_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then workflow="\"$GITHUB_WORKFLOW_SHA\""; fi
+          if [[ "${GITHUB_RUN_ID:-}" =~ ^[1-9][0-9]*$ ]]; then run_id="\"$GITHUB_RUN_ID\""; fi
+          if [[ "${GITHUB_RUN_ATTEMPT:-}" =~ ^[1-9][0-9]*$ ]]; then attempt="\"$GITHUB_RUN_ATTEMPT\""; fi
+          if [ "${GITHUB_JOB:-}" = "release-green" ]; then job='"release-green"'; fi
+          outcome() {
+            case "$1" in success|failure|skipped|cancelled) printf '%s' "$1" ;; *) printf unknown ;; esac
+          }
+          runtime=$(outcome "${SETUP_NODE_OUTCOME:-}")
+          dependencies=$(outcome "${DEPENDENCIES_OUTCOME:-}")
+          scanners=$(outcome "${SCANNER_OUTCOME:-}")
+          validation=$(outcome "${VALIDATION_OUTCOME:-}")
+          failed_step=validate
+          if [ "$runtime" != success ]; then failed_step=runtime
+          elif [ "$dependencies" != success ]; then failed_step=dependencies
+          elif [ "$scanners" != success ]; then failed_step=workflow_scanners; fi
+          rm -f -- release-green.json
+          cat > release-green-setup.json <<EOF
+          {
+            "schemaVersion": 1, "exit": 1, "verdict": "UNKNOWN", "evidenceState": "INCOMPLETE",
+            "reason": "Validation did not execute after preparation",
+            "observerIdentity": {
+              "schemaVersion": 1, "candidateSha": $candidate, "workflowSha": $workflow,
+              "runId": $run_id, "runAttempt": $attempt, "jobId": $job, "phase": "setup"
+            },
+            "failedStep": "$failed_step",
+            "stepOutcomes": {"runtime": "$runtime", "dependencies": "$dependencies", "workflow_scanners": "$scanners", "validate": "$validation"}
+          }
+          EOF
+          printf '[release-green] UNKNOWN / INCOMPLETE: preparation failed at %s; validation did not execute.\n' "$failed_step" > release-green.log
+          cat release-green-setup.json >> release-green.log
+
       - name: Open / update tracking issue on HARD failure
-        if: steps.validate.outputs.exit != '0'
+        if: ${{ !cancelled() && steps.validate.outputs.exit != '0' }}
         env:
           GH_TOKEN: ${{ github.token }}
           TARGET: ${{ steps.branch.outputs.target }}
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
           BEFORE_SHA: ${{ github.event.before }}
           AFTER_SHA: ${{ github.event.after }}
         run: |
           set -euo pipefail
+          if ! [[ "${TARGET:-}" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]] || \
+             ! [[ "${VALIDATED_SHA:-}" =~ ^[0-9a-f]{40}$ ]] || \
+             ! [[ "${GITHUB_WORKFLOW_SHA:-}" =~ ^[0-9a-f]{40}$ ]] || \
+             ! [[ "${GITHUB_RUN_ID:-}" =~ ^[1-9][0-9]*$ ]] || \
+             ! [[ "${GITHUB_RUN_ATTEMPT:-}" =~ ^[1-9][0-9]*$ ]] || \
+             [ "${GITHUB_JOB:-}" != release-green ]; then
+            echo "UNKNOWN / INCOMPLETE: no verified target/execution identity; retaining local diagnostics only."
+            exit 0
+          fi
           TITLE="🔴 Release branch not green: ${TARGET}"
           {
-            echo "The **release-green** validation found HARD failures on \`${TARGET}\`."
+            echo "The **release-green** observation did not confirm a PASS on \`${TARGET}\`."
             echo "The required validation failed or its evidence was incomplete. Compare the"
             echo "signature on the exact base before attributing a defect to a contributor."
             echo ""
             echo "**Run:** ${RUN_URL} (mode: ${EVENT_NAME})"
+            echo "**Candidate:** \`${VALIDATED_SHA}\`; run \`${GITHUB_RUN_ID}\`, attempt \`${GITHUB_RUN_ATTEMPT}\`."
             # This is an observed range, not proof of causality. Compare with the base.
             if [ "$EVENT_NAME" = "push" ] && [ -n "${BEFORE_SHA:-}" ] && \
                git cat-file -e "$BEFORE_SHA" 2>/dev/null; then
@@ -365,7 +427,9 @@ jobs:
             fi
             echo ""
             echo '```'
-            if grep -q '──────── verdict ────────' release-green.log; then
+            if [ ! -s release-green.log ]; then
+              echo "UNKNOWN / INCOMPLETE: validation log is missing or empty."
+            elif grep -q '──────── verdict ────────' release-green.log; then
               sed -n '/──────── verdict ────────/,$p' release-green.log
             else
               tail -40 release-green.log
@@ -385,14 +449,20 @@ jobs:
           fi
 
       - name: Close tracking issue when the branch is green again
-        if: steps.validate.outputs.exit == '0' && github.event_name != 'push'
+        if: ${{ !cancelled() && steps.validate.outputs.exit == '0' && github.event_name != 'push' }}
         env:
           GH_TOKEN: ${{ github.token }}
           TARGET: ${{ steps.branch.outputs.target }}
           VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
+          EVENT_NAME: ${{ github.event_name }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+          if ! [[ "${TARGET:-}" =~ ^release/v[0-9]+\.[0-9]+\.[0-9]+$ ]] || \
+             ! node scripts/ci/release-green-result.mjs release-green.json 0 "$VALIDATED_SHA" "$EVENT_NAME" >/dev/null; then
+            echo "Incomplete or foreign validation evidence; retaining the tracking issue."
+            exit 0
+          fi
           CURRENT_SHA=$(git ls-remote origin "refs/heads/$TARGET" | cut -f1)
           if [ "$CURRENT_SHA" != "$VALIDATED_SHA" ]; then
             echo "Branch advanced; retaining the tracking issue."
@@ -423,6 +493,7 @@ jobs:
           name: release-green-report
           path: |
             release-green.json
+            release-green-setup.json
             release-green.log
             suite-results/
             _artifacts/release-green/
@@ -518,9 +589,13 @@ jobs:
               npm run "$SUITE"
             fi
           ) 2>&1 | tee suite.log
-          code=${PIPESTATUS[0]}
+          pipeline_status=("${PIPESTATUS[@]}")
+          code=0
+          for status in "${pipeline_status[@]}"; do
+            if [ "$status" -ne 0 ]; then code=$status; break; fi
+          done
           node scripts/ci/release-green-suite.mjs "$NAME" "$code" suite.log suite-results \
-            "$GITHUB_WORKFLOW_SHA" "$SUITE" "$TEST_SHARD" || exit "$?"
+            "$GITHUB_WORKFLOW_SHA" "$SUITE" "$TEST_SHARD" "${pipeline_status[@]}" || exit "$?"
           exit "$code"
       - name: Upload the suite result
         if: always()
@@ -573,11 +648,13 @@ jobs:
 
       # hostedSuiteIdentity compares nodeVersion exactly, so match the hosted suites' runtime.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        id: runtime
         with:
           node-version: ${{ needs.resolve-target.outputs.node-version || '24' }}
           cache: npm
 
       - uses: ./.github/actions/npm-ci-retry
+        id: dependencies
 
       - name: Collect the hosted suite results
         if: github.event_name != 'push'
@@ -634,17 +711,71 @@ jobs:
           echo "------- report -------"
           cat main-green.log
 
+      - name: Record incomplete validation after setup failure
+        if: ${{ !cancelled() && steps.validate.outcome == 'skipped' }}
+        env:
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
+          SETUP_NODE_OUTCOME: ${{ steps.runtime.outcome }}
+          DEPENDENCIES_OUTCOME: ${{ steps.dependencies.outcome }}
+          SCANNER_OUTCOME: ${{ steps.workflow_scanners.outcome }}
+          VALIDATION_OUTCOME: ${{ steps.validate.outcome }}
+        run: |
+          set -euo pipefail
+          # This path needs no Node/npm: setup may have failed before either exists.
+          candidate=null; workflow=null; run_id=null; attempt=null; job=null
+          if [[ "${VALIDATED_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then candidate="\"$VALIDATED_SHA\""; fi
+          if [[ "${GITHUB_WORKFLOW_SHA:-}" =~ ^[0-9a-f]{40}$ ]]; then workflow="\"$GITHUB_WORKFLOW_SHA\""; fi
+          if [[ "${GITHUB_RUN_ID:-}" =~ ^[1-9][0-9]*$ ]]; then run_id="\"$GITHUB_RUN_ID\""; fi
+          if [[ "${GITHUB_RUN_ATTEMPT:-}" =~ ^[1-9][0-9]*$ ]]; then attempt="\"$GITHUB_RUN_ATTEMPT\""; fi
+          if [ "${GITHUB_JOB:-}" = "main-green" ]; then job='"main-green"'; fi
+          outcome() {
+            case "$1" in success|failure|skipped|cancelled) printf '%s' "$1" ;; *) printf unknown ;; esac
+          }
+          runtime=$(outcome "${SETUP_NODE_OUTCOME:-}")
+          dependencies=$(outcome "${DEPENDENCIES_OUTCOME:-}")
+          scanners=$(outcome "${SCANNER_OUTCOME:-}")
+          validation=$(outcome "${VALIDATION_OUTCOME:-}")
+          failed_step=validate
+          if [ "$runtime" != success ]; then failed_step=runtime
+          elif [ "$dependencies" != success ]; then failed_step=dependencies
+          elif [ "$scanners" != success ]; then failed_step=workflow_scanners; fi
+          rm -f -- main-green.json
+          cat > main-green-setup.json <<EOF
+          {
+            "schemaVersion": 1, "exit": 1, "verdict": "UNKNOWN", "evidenceState": "INCOMPLETE",
+            "reason": "Validation did not execute after preparation",
+            "observerIdentity": {
+              "schemaVersion": 1, "candidateSha": $candidate, "workflowSha": $workflow,
+              "runId": $run_id, "runAttempt": $attempt, "jobId": $job, "phase": "setup"
+            },
+            "failedStep": "$failed_step",
+            "stepOutcomes": {"runtime": "$runtime", "dependencies": "$dependencies", "workflow_scanners": "$scanners", "validate": "$validation"}
+          }
+          EOF
+          printf '[main-green] UNKNOWN / INCOMPLETE: preparation failed at %s; validation did not execute.\n' "$failed_step" > main-green.log
+          cat main-green-setup.json >> main-green.log
+
       - name: Open / update tracking issue on HARD failure
-        if: steps.validate.outputs.exit != '0'
+        if: ${{ !cancelled() && steps.validate.outputs.exit != '0' }}
         env:
           GH_TOKEN: ${{ github.token }}
+          VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EVENT_NAME: ${{ github.event_name }}
         run: |
           set -euo pipefail
+          if ! [[ "${VALIDATED_SHA:-}" =~ ^[0-9a-f]{40}$ ]] || \
+             ! [[ "${GITHUB_WORKFLOW_SHA:-}" =~ ^[0-9a-f]{40}$ ]] || \
+             ! [[ "${GITHUB_RUN_ID:-}" =~ ^[1-9][0-9]*$ ]] || \
+             ! [[ "${GITHUB_RUN_ATTEMPT:-}" =~ ^[1-9][0-9]*$ ]] || \
+             [ "${GITHUB_JOB:-}" != main-green ]; then
+            echo "UNKNOWN / INCOMPLETE: no verified execution identity; retaining local diagnostics only."
+            exit 0
+          fi
           TITLE="🔴 main branch not green"
           {
-            echo "The **main-green** validation found HARD failures on \`main\`."
+            echo "The **main-green** observation did not confirm a PASS on \`main\`."
+            echo "Required validation failed or its evidence was incomplete."
             echo ""
             echo "Because \`main\` only receives merged work at the release squash, a gate/infra"
             echo "fix that landed only on the release branch leaves \`main\` broken for the whole"
@@ -654,9 +785,12 @@ jobs:
             echo "\`_shared/merge-gates.md\` §8), NOT chasing each contributor PR."
             echo ""
             echo "**Run:** ${RUN_URL} (mode: ${EVENT_NAME})"
+            echo "**Candidate:** \`${VALIDATED_SHA}\`; run \`${GITHUB_RUN_ID}\`, attempt \`${GITHUB_RUN_ATTEMPT}\`."
             echo ""
             echo '```'
-            if grep -q '──────── verdict ────────' main-green.log; then
+            if [ ! -s main-green.log ]; then
+              echo "UNKNOWN / INCOMPLETE: validation log is missing or empty."
+            elif grep -q '──────── verdict ────────' main-green.log; then
               sed -n '/──────── verdict ────────/,$p' main-green.log
             else
               tail -40 main-green.log
@@ -676,13 +810,18 @@ jobs:
           fi
 
       - name: Close tracking issue when the branch is green again
-        if: steps.validate.outputs.exit == '0' && github.event_name != 'push'
+        if: ${{ !cancelled() && steps.validate.outputs.exit == '0' && github.event_name != 'push' }}
         env:
           GH_TOKEN: ${{ github.token }}
           VALIDATED_SHA: ${{ steps.revision.outputs.sha }}
+          EVENT_NAME: ${{ github.event_name }}
           RUN_URL: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
         run: |
           set -euo pipefail
+          if ! node scripts/ci/release-green-result.mjs main-green.json 0 "$VALIDATED_SHA" "$EVENT_NAME" >/dev/null; then
+            echo "Incomplete or foreign validation evidence; retaining the tracking issue."
+            exit 0
+          fi
           CURRENT_SHA=$(git ls-remote origin refs/heads/main | cut -f1)
           if [ "$CURRENT_SHA" != "$VALIDATED_SHA" ]; then
             echo "Branch advanced; retaining the tracking issue."
@@ -709,6 +848,7 @@ jobs:
           name: main-green-report
           path: |
             main-green.json
+            main-green-setup.json
             main-green.log
             _artifacts/release-green/
           if-no-files-found: error

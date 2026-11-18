@@ -1,0 +1,1 @@
+Release-Green now retains producer and log-capture exit codes, rejects incomplete hosted evidence, and binds each report to its candidate, workflow revision, run, attempt, job, and validation phase. Setup failures retain a separate UNKNOWN/INCOMPLETE diagnostic, and tracking issues cannot close from stale, foreign, cancelled, or quick-only observations.
