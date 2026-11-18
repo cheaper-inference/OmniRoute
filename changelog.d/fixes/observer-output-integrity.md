@@ -1,0 +1,1 @@
+- Keep Release-Green JSON delivery complete before exit, report final output failures and preserve cancellation during blocked writes; read each ESLint measurement from a dedicated fresh report produced by the installed CLI so console diagnostics or stale reports cannot change the result.

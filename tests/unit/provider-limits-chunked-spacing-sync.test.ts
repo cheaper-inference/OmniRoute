@@ -5,45 +5,118 @@
  * before it is wired into `syncAllProviderLimits()`'s OAuth and non-OAuth
  * paths.
  */
-import test from "node:test";
+import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
+import { setImmediate as nextTurn } from "node:timers/promises";
 
 import { syncInChunksWithSpacing } from "../../src/lib/usage/providerLimits/chunkedSpacingSync.ts";
 
-test("waits between chunks but not after the last chunk when spacingMs > 0", async () => {
+function controlSpacingClock(context: TestContext) {
+  const nativeDate = globalThis.Date;
+  const nativeTimeout = globalThis.setTimeout;
+  context.mock.timers.enable({ apis: ["Date", "setTimeout"], now: 1_800_000_000_000 });
+  const timeout = context.mock.method(globalThis, "setTimeout");
+  let settled = true;
+
+  context.after(async () => {
+    try {
+      // At most three chunks: drain a failed assertion's held waits before restoring globals.
+      for (let remaining = 3; !settled && remaining > 0; remaining--) {
+        context.mock.timers.runAll();
+        await nextTurn();
+      }
+      assert.equal(settled, true, "the controlled sync must settle before restoring globals");
+    } finally {
+      // Restore the spy before the clock, and remove both from the context's tracker.
+      context.mock.reset();
+      assert.equal(globalThis.Date, nativeDate);
+      assert.equal(globalThis.setTimeout, nativeTimeout);
+    }
+  });
+
+  return {
+    timeout,
+    track<T>(pending: Promise<T>): Promise<T> {
+      settled = false;
+      void pending.then(
+        () => {
+          settled = true;
+        },
+        () => {
+          settled = true;
+        }
+      );
+      return pending;
+    },
+  };
+}
+
+test("waits between chunks but not after the last chunk when spacingMs > 0", async (t) => {
+  const { timeout, track } = controlSpacingClock(t);
   const items = [1, 2, 3, 4];
   const chunkStarts: number[] = [];
-
   const start = Date.now();
-  await syncInChunksWithSpacing(
-    items,
-    2,
-    40,
-    async (item) => {
-      chunkStarts.push(Date.now() - start);
-      return item;
-    },
-    () => {}
+
+  const pending = track(
+    syncInChunksWithSpacing(
+      items,
+      2,
+      40,
+      async (item) => {
+        chunkStarts.push(Date.now() - start);
+        return item;
+      },
+      () => {}
+    )
+  );
+  await nextTurn();
+  assert.deepEqual(chunkStarts, [0, 0], "only the first chunk may start before the wait");
+  assert.deepEqual(
+    timeout.mock.calls.map((call) => call.arguments[1]),
+    [40]
   );
 
-  // 2 chunks of 2 → chunkStarts has 4 entries (2 per chunk, same start time).
-  assert.equal(chunkStarts.length, 4);
-  const chunk1Start = Math.min(chunkStarts[0], chunkStarts[1]);
-  const chunk2Start = Math.min(chunkStarts[2], chunkStarts[3]);
-  assert.ok(
-    chunk2Start - chunk1Start >= 35,
-    `expected >=35ms gap between chunks, got ${chunk2Start - chunk1Start}`
-  );
+  t.mock.timers.tick(39);
+  await nextTurn();
+  assert.deepEqual(chunkStarts, [0, 0], "the second chunk must not start before 40ms");
+  t.mock.timers.tick(1);
+  await nextTurn();
+  assert.deepEqual(chunkStarts, [0, 0, 40, 40]);
+  assert.equal(timeout.mock.callCount(), 1, "there must be no wait after the last chunk");
+  await pending;
 });
 
-test("never waits when spacingMs === 0 (opt-out, preserves fast path)", async () => {
+test("never waits when spacingMs === 0 (opt-out, preserves fast path)", async (t) => {
+  const { timeout, track } = controlSpacingClock(t);
   const items = [1, 2, 3, 4];
+  const chunks: number[][] = [];
   const start = Date.now();
 
-  await syncInChunksWithSpacing(items, 2, 0, async (item) => item, () => {});
-
-  const elapsed = Date.now() - start;
-  assert.ok(elapsed < 30, `expected near-instant run with spacingMs=0, took ${elapsed}ms`);
+  const pending = track(
+    syncInChunksWithSpacing(
+      items,
+      2,
+      0,
+      async (item) => item,
+      (chunk) => {
+        chunks.push([...chunk]);
+        // Elapsed work between chunks is not a request for a spacing timer.
+        if (chunks.length === 1) t.mock.timers.setTime(Date.now() + 48);
+      }
+    )
+  );
+  await nextTurn();
+  assert.equal(timeout.mock.callCount(), 0, "spacingMs=0 must not schedule a spacing timer");
+  assert.deepEqual(
+    chunks,
+    [
+      [1, 2],
+      [3, 4],
+    ],
+    "both chunks must finish without ticking timers"
+  );
+  await pending;
+  assert.equal(Date.now() - start, 48, "elapsed work does not change the zero-wait contract");
 });
 
 test("chunkSize=1 processes items strictly one at a time (reproduces OAuth semantics)", async () => {

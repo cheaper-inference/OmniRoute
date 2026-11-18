@@ -19,7 +19,8 @@
   "requiredChecks": [
     "Gate / CI",
     "Gate / Quality",
-    "Merge integrity (changelog + generated skills)"
+    "Merge integrity (changelog + generated skills)",
+    "API Route Typecheck"
   ],
   "advisoryChecks": ["Build (advisory)"],
   "aggregateChecks": ["Gate / CI", "Gate / Quality"],

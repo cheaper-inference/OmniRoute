@@ -160,12 +160,15 @@ function observe({
     const lintReport = JSON.stringify([
       { filePath: "/fixture.ts", errorCount: 0, warningCount: 0 },
     ]);
+    const lintBin = join(dir, "node_modules/eslint/bin");
+    mkdirSync(lintBin, { recursive: true });
     writeFileSync(
-      join(bin, "npx"),
-      `#!${process.execPath}\nconsole.log(${JSON.stringify(lintReport)});\n`,
-      {
-        mode: 0o755,
-      }
+      join(lintBin, "eslint.js"),
+      `#!${process.execPath}\n` +
+        `const index = process.argv.indexOf("--output-file");\n` +
+        `if (index < 0 || !process.argv[index + 1]) process.exit(33);\n` +
+        `require("node:fs").writeFileSync(process.argv[index + 1], ${JSON.stringify(lintReport)});\n`,
+      { mode: 0o755 }
     );
     writeFileSync(join(bin, "git"), `#!${process.execPath}\nconsole.log("${sha}");\n`, {
       mode: 0o755,

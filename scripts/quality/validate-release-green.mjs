@@ -49,7 +49,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
 import { runGateProcess } from "./gate-process.mjs";
-import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
+import { eslintMeasurementCounts, readEslintMeasurement } from "./eslint-measurement.mjs";
 import { loadFullCiProfile, staticGateOutcome } from "./release-green-static-profile.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
@@ -70,6 +70,30 @@ function saveGateLog(id, out) {
 }
 
 // ─── Pure helpers (exported for tests) ──────────────────────────────────────
+
+/** Complete JSON delivery before the CLI exits; pipe writes can finish asynchronously. */
+export async function writeObserverJson(report, output = process.stdout) {
+  const json = JSON.stringify(report, null, 2) + "\n";
+  await new Promise((resolve, reject) => {
+    const onError = (error) => reject(error);
+    output.once("error", onError);
+    try {
+      output.write(json, (error) => {
+        if (error) {
+          // Writable emits the error after invoking its callback. Keep the once-listener
+          // until that event so a rejected write cannot become an unhandled error.
+          reject(error);
+          return;
+        }
+        output.removeListener("error", onError);
+        resolve();
+      });
+    } catch (error) {
+      output.removeListener("error", onError);
+      reject(error);
+    }
+  });
+}
 
 /** Read the committed ratchet baseline value for a metric (null if unknown). */
 export function baselineValue(metric, root = ROOT) {
@@ -185,7 +209,8 @@ export function parseEslintJson(out) {
  * "could not parse eslint json" hides the actionable cause and sends maintainers debugging
  * the parser instead of the gate ceiling.
  */
-export function evaluateEslintRun({ code, out }, warningBaseline) {
+export function evaluateEslintRun(run, warningBaseline) {
+  const { code, out } = run;
   if (code !== 0) {
     return [
       {
@@ -200,7 +225,7 @@ export function evaluateEslintRun({ code, out }, warningBaseline) {
       },
     ];
   }
-  const parsed = parseEslintJson(out);
+  const parsed = Object.hasOwn(run, "measurement") ? run.measurement : parseEslintJson(out);
   let counts;
   try {
     counts = eslintMeasurementCounts(parsed);
@@ -804,8 +829,14 @@ async function runUnitShards(total, pool, timeout) {
 }
 
 async function main() {
+  let flushingJson = false;
   for (const signal of ["SIGINT", "SIGTERM"]) {
-    process.once(signal, () => cancellation.abort(signal));
+    process.once(signal, () => {
+      cancellation.abort(signal);
+      // Gates have finished before the final flush. A blocked consumer must not
+      // prevent the existing supervisor deadline from terminating this process.
+      if (flushingJson) process.exit(1);
+    });
   }
   const args = new Set(process.argv.slice(2));
   const JSON_OUT = args.has("--json");
@@ -881,16 +912,22 @@ async function main() {
     // pre-existing debt in config/quality/eslint-suppressions.json must not count as
     // errors here — only NET-NEW violations are release reds. The cold release runner can
     // exceed 30 minutes as the repository grows, and this pre-flight often runs under load.
+    // Keep this invocation's machine report separate from interleaved console diagnostics.
+    const lintReportPath = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
+    mkdirSync(dirname(lintReportPath), { recursive: true });
+    writeFileSync(lintReportPath, "", { flag: "wx", mode: 0o600 });
     const lintRun = await run(
-      "npx",
+      process.execPath,
       [
-        "eslint",
+        join(ROOT, "node_modules", "eslint", "bin", "eslint.js"),
         ".",
         "--cache",
         "--cache-location",
         ".eslintcache",
         "--format",
         "json",
+        "--output-file",
+        lintReportPath,
         "--suppressions-location",
         "config/quality/eslint-suppressions.json",
         // An "unpruned" suppression means a previously-frozen violation was legitimately
@@ -907,16 +944,11 @@ async function main() {
     );
     const { out } = lintRun;
     saveGateLog("lint", out);
-    for (const result of evaluateEslintRun(lintRun, baselineValue("eslintWarnings"))) {
-      record(result);
-    }
+    let measurement = null;
     if ([0, 1].includes(lintRun.code) && ["PASS", "FAIL"].includes(lintRun.receipt.outcome)) {
       try {
-        const parsed = parseEslintJson(out);
-        eslintMeasurementCounts(parsed);
-        const path = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
-        writeFileSync(path, `${JSON.stringify(parsed)}\n`, { flag: "wx", mode: 0o600 });
-        freshLintReport = path;
+        measurement = readEslintMeasurement(lintReportPath);
+        freshLintReport = lintReportPath;
       } catch {
         record({
           id: "lint-measurement",
@@ -926,6 +958,12 @@ async function main() {
           detail: "no complete lint report retained for this execution",
         });
       }
+    }
+    for (const result of evaluateEslintRun(
+      { ...lintRun, measurement },
+      baselineValue("eslintWarnings")
+    )) {
+      record(result);
     }
   }
 
@@ -1402,32 +1440,32 @@ async function main() {
   );
 
   if (JSON_OUT) {
-    process.stdout.write(
-      JSON.stringify(
-        {
-          schemaVersion: 1,
-          candidateSha: execFileSync("git", ["rev-parse", "HEAD"], {
-            cwd: ROOT,
-            encoding: "utf8",
-          }).trim(),
-          profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
-          completedAt: new Date().toISOString(),
-          releaseGreen,
-          hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
-          drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
-          checks: results.map((r) => ({
-            id: r.id,
-            kind: r.kind,
-            ok: r.ok,
-            detail: r.detail,
-            ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
-          })),
-          commandReceipts,
-        },
-        null,
-        2
-      ) + "\n"
-    );
+    flushingJson = true;
+    try {
+      await writeObserverJson({
+        schemaVersion: 1,
+        candidateSha: execFileSync("git", ["rev-parse", "HEAD"], {
+          cwd: ROOT,
+          encoding: "utf8",
+        }).trim(),
+        profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
+        completedAt: new Date().toISOString(),
+        releaseGreen,
+        hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
+        drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
+        checks: results.map((r) => ({
+          id: r.id,
+          kind: r.kind,
+          ok: r.ok,
+          detail: r.detail,
+          ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
+        })),
+        commandReceipts,
+      });
+    } catch {
+      process.stderr.write("Observer JSON output failed; evidence is incomplete.\n");
+      process.exit(1);
+    }
   }
 
   process.exit(releaseGreen ? 0 : 1);

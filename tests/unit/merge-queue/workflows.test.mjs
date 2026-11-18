@@ -559,8 +559,13 @@ test("branch-filter globs follow GitHub's cheat sheet", () => {
   assert.ok(!pushFires({ on: { push: { tags: ["v*"] } } }, CANDIDATE_BRANCH), "tags only");
 });
 
-test("a candidate push starts ci.yml, quality.yml and the queue's wake-up — nothing else", () => {
-  assert.deepEqual(workflowsFiredBy(CANDIDATE_BRANCH), ["ci.yml", "omni-queue.yml", "quality.yml"]);
+test("a candidate push starts CI, Quality, API typecheck and the queue's wake-up — nothing else", () => {
+  assert.deepEqual(workflowsFiredBy(CANDIDATE_BRANCH), [
+    "api-route-typecheck.yml",
+    "ci.yml",
+    "omni-queue.yml",
+    "quality.yml",
+  ]);
   // Positive control: the same machinery sees the deploy chain of a release push.
   const release = workflowsFiredBy("release/v3.8.54");
   for (const file of ["docker-publish.yml", "deploy-vps.yml", "lock-released-branch.yml"]) {
@@ -584,6 +589,33 @@ test("a candidate push starts ci.yml, quality.yml and the queue's wake-up — no
     assert.ok(WORKFLOW_FILES.includes(file), `${file} still exists`);
     assert.ok(!fired.has(file), `${file} must not run for omni-queue/**`);
   }
+});
+
+test("the required API typecheck runs on every composed candidate checkout", () => {
+  const workflow = loadWorkflow("api-route-typecheck.yml");
+  const push = triggers(workflow).push;
+  assert.deepEqual(Object.keys(push), ["branches"], "no path filters may omit candidates");
+  assert.ok(pushFires(workflow, CANDIDATE_BRANCH), "the queue candidate produces the API check");
+  assert.ok(pushFires(workflow, "main"), "main still produces the API check");
+
+  const ctx = pushContext(CANDIDATE_REF);
+  const job = workflow.jobs["api-typecheck"];
+  assert.equal(job.name, "API Route Typecheck");
+  assert.ok(queueConfig.requiredChecks.includes(job.name), "the candidate requires its API check");
+  assert.equal(scheduledJobs(workflow, ctx)["api-typecheck"], true);
+  assert.equal(condition(job["continue-on-error"] ?? false, ctx), false);
+
+  const checkout = job.steps.find((step) =>
+    String(step.uses ?? "").startsWith("actions/checkout@")
+  );
+  assert.ok(checkout, "the workflow checks out the candidate");
+  assert.equal(render(checkout.with?.ref ?? "${{ github.sha }}", ctx), CANDIDATE_SHA);
+  const typecheck = job.steps.find(
+    (step) => step.run === "node scripts/check/check-api-typecheck.mjs"
+  );
+  assert.ok(typecheck, "the API gate validates the checked-out tree without baseline updates");
+  assert.equal(condition(typecheck.if, ctx), true);
+  assert.equal(condition(typecheck["continue-on-error"] ?? false, ctx), false);
 });
 
 test("deploy-vps refuses an omni-queue head branch or ref even if its trigger ever fires", () => {

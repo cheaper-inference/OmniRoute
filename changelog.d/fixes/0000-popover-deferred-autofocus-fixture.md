@@ -1,0 +1,1 @@
+- Wait for deferred autofocus in the model compatibility popover tests using a controlled timer, and finish cleanup before resetting the DOM. Keep the accessibility, Escape focus return, and outside focus checks in the UI test suite under `tests/unit/ui/`.

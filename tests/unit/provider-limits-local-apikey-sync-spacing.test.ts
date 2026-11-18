@@ -6,10 +6,12 @@
  * connections in `concurrency`-sized chunks with NO spacing at all between
  * chunks, so setting `PROVIDER_LIMITS_SYNC_SPACING_MS` had no effect on that
  * path. This is the direct regression guard: forces >1 chunk (concurrency=1)
- * and asserts a measured gap >= spacingMs between chunk start times.
+ * and controls the spacing clock: zero requests no wait; positive waits block
+ * the next chunk until the configured timer fires, without a final wait.
  */
-import test from "node:test";
+import test, { type TestContext } from "node:test";
 import assert from "node:assert/strict";
+import { setImmediate as nextTurn } from "node:timers/promises";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -71,55 +73,114 @@ function glmQuotaResponse() {
   );
 }
 
-test("syncAllProviderLimits spaces chunks for local/API-key connections when spacingMs is set", async () => {
+function controlSpacingClock(context: TestContext) {
+  const nativeDate = globalThis.Date;
+  const nativeTimeout = globalThis.setTimeout;
+  context.mock.timers.enable({ apis: ["Date", "setTimeout"], now: 1_800_000_000_000 });
+  const timeout = context.mock.method(globalThis, "setTimeout");
+  let settled = true;
+
+  context.after(async () => {
+    try {
+      // At most three chunks: drain a failed assertion's held waits before restoring globals.
+      for (let remaining = 3; !settled && remaining > 0; remaining--) {
+        context.mock.timers.runAll();
+        await nextTurn();
+      }
+      assert.equal(settled, true, "the controlled sync must settle before restoring globals");
+    } finally {
+      // Restore the spy before the clock, and remove both from the context's tracker.
+      context.mock.reset();
+      assert.equal(globalThis.Date, nativeDate);
+      assert.equal(globalThis.setTimeout, nativeTimeout);
+    }
+  });
+
+  return {
+    timeout,
+    track<T>(pending: Promise<T>): Promise<T> {
+      settled = false;
+      void pending.then(
+        () => {
+          settled = true;
+        },
+        () => {
+          settled = true;
+        }
+      );
+      return pending;
+    },
+  };
+}
+
+test("syncAllProviderLimits spaces chunks for local/API-key connections when spacingMs is set", async (t) => {
   process.env.PROVIDER_LIMITS_SYNC_SPACING_MS = "60";
   for (let i = 0; i < 3; i++) await createGlmApiKeyConnection(i);
 
+  const { timeout, track } = controlSpacingClock(t);
   const chunkStarts: number[] = [];
   const start = Date.now();
 
-  globalThis.fetch = (async (input: string | URL | Request) => {
-    // #12754 added a second per-connection call (customer-package-reset/list)
-    // after the quota fetch. A chunk starts at the QUOTA request; counting every
-    // fetch would read the reset-card follow-up as a fourth-sixth chunk.
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    // Count only the quota fetch, not GLM's reset-card follow-up (#12754).
     if (String(input).includes("/quota/limit")) chunkStarts.push(Date.now() - start);
     return glmQuotaResponse();
-  }) as typeof fetch;
+  });
 
-  // concurrency: 1 forces 3 chunks of size 1 → 2 gaps must be >= spacingMs.
-  await providerLimits.syncAllProviderLimits({ source: "scheduled", concurrency: 1 });
-
-  assert.equal(chunkStarts.length, 3, "expected 3 fetches, one per connection");
-  const gaps: number[] = [];
-  for (let i = 1; i < chunkStarts.length; i++) gaps.push(chunkStarts[i] - chunkStarts[i - 1]);
-  assert.ok(
-    gaps.every((g) => g >= 50),
-    `every chunk gap must be >= configured spacing (~60ms), gaps=${gaps.join(",")}`
+  const pending = track(
+    providerLimits.syncAllProviderLimits({ source: "scheduled", concurrency: 1 })
   );
+  await nextTurn(); // Drain the in-memory fetch/SQLite promise chain; no clock advance.
+  assert.deepEqual(chunkStarts, [0], "the next chunk must remain behind the first wait");
+
+  for (let completed = 1; completed < 3; completed++) {
+    assert.equal(timeout.mock.callCount(), completed);
+    assert.equal(timeout.mock.calls.at(-1)?.arguments[1], 60);
+    t.mock.timers.tick(59);
+    await nextTurn();
+    assert.equal(chunkStarts.length, completed, "a chunk must not start before 60ms");
+    t.mock.timers.tick(1);
+    await nextTurn();
+    assert.equal(chunkStarts.length, completed + 1, "the next chunk must start at 60ms");
+  }
+
+  assert.deepEqual(chunkStarts, [0, 60, 120]);
+  assert.deepEqual(
+    timeout.mock.calls.map((call) => call.arguments[1]),
+    [60, 60],
+    "three chunks require two waits and no wait after the last chunk"
+  );
+  const result = await pending;
+  assert.equal(result.succeeded, 3);
+  assert.equal(result.failed, 0);
 });
 
-test("syncAllProviderLimits does not space local/API-key chunks when spacingMs=0 (opt-out)", async () => {
+test("syncAllProviderLimits does not space local/API-key chunks when spacingMs=0 (opt-out)", async (t) => {
   process.env.PROVIDER_LIMITS_SYNC_SPACING_MS = "0";
   for (let i = 0; i < 3; i++) await createGlmApiKeyConnection(i);
 
+  const { timeout, track } = controlSpacingClock(t);
   const chunkStarts: number[] = [];
   const start = Date.now();
+  const nonSpacingWorkMs = [2, 48, 0];
 
-  globalThis.fetch = (async (input: string | URL | Request) => {
-    // #12754 added a second per-connection call (customer-package-reset/list)
-    // after the quota fetch. A chunk starts at the QUOTA request; counting every
-    // fetch would read the reset-card follow-up as a fourth-sixth chunk.
-    if (String(input).includes("/quota/limit")) chunkStarts.push(Date.now() - start);
+  t.mock.method(globalThis, "fetch", async (input: string | URL | Request) => {
+    // Count only the quota fetch, not GLM's reset-card follow-up (#12754).
+    if (String(input).includes("/quota/limit")) {
+      chunkStarts.push(Date.now() - start);
+      // Model elapsed work between origins without scheduling or firing a timer.
+      t.mock.timers.setTime(Date.now() + (nonSpacingWorkMs[chunkStarts.length - 1] ?? 0));
+    }
     return glmQuotaResponse();
-  }) as typeof fetch;
+  });
 
-  await providerLimits.syncAllProviderLimits({ source: "scheduled", concurrency: 1 });
-
-  assert.equal(chunkStarts.length, 3);
-  const gaps: number[] = [];
-  for (let i = 1; i < chunkStarts.length; i++) gaps.push(chunkStarts[i] - chunkStarts[i - 1]);
-  assert.ok(
-    gaps.every((g) => g < 40),
-    `spacingMs=0 must not introduce a forced gap, gaps=${gaps.join(",")}`
+  const pending = track(
+    providerLimits.syncAllProviderLimits({ source: "scheduled", concurrency: 1 })
   );
+  await nextTurn();
+  assert.equal(timeout.mock.callCount(), 0, "spacingMs=0 must not schedule a spacing timer");
+  assert.deepEqual(chunkStarts, [0, 2, 50], "all three chunks must run without ticking timers");
+  const result = await pending;
+  assert.equal(result.succeeded, 3);
+  assert.equal(result.failed, 0);
 });

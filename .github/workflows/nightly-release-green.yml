@@ -284,17 +284,24 @@ jobs:
           merge-multiple: true
 
       # Use the immutable workflow revision, not the target checkout (which may
-      # predate this installer). Both scanners are required even for --quick.
-      - name: Prepare pinned workflow scanners
+      # predate these installers). Quick requires the workflow pair; full also
+      # requires security scanners.
+      - name: Prepare pinned quality scanners
         id: workflow_scanners
         env:
           WORKFLOW_SHA: ${{ github.workflow_sha }}
+          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          installer=$(mktemp "${RUNNER_TEMP:?}/workflow-scanners-installer.XXXXXX")
-          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installer"
-          bash "$installer"
+          installers=$(mktemp -d "${RUNNER_TEMP:?}/quality-scanners-installers.XXXXXX")
+          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installers/install-workflow-scanners.sh"
+          if [ "$EVENT_NAME" = "push" ]; then
+            bash "$installers/install-workflow-scanners.sh"
+          else
+            git show "${WORKFLOW_SHA}:scripts/ci/install-quality-scanners.sh" > "$installers/install-quality-scanners.sh"
+            bash "$installers/install-quality-scanners.sh"
+          fi
 
       - name: Release-green validation (full)
         id: validate
@@ -583,17 +590,23 @@ jobs:
           path: suite-results
           merge-multiple: true
 
-      # main can predate the installer: obtain tooling from the workflow SHA.
-      - name: Prepare pinned workflow scanners
+      # main can predate the installers: materialize both from the workflow SHA.
+      - name: Prepare pinned quality scanners
         id: workflow_scanners
         env:
           WORKFLOW_SHA: ${{ github.workflow_sha }}
+          EVENT_NAME: ${{ github.event_name }}
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          installer=$(mktemp "${RUNNER_TEMP:?}/workflow-scanners-installer.XXXXXX")
-          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installer"
-          bash "$installer"
+          installers=$(mktemp -d "${RUNNER_TEMP:?}/quality-scanners-installers.XXXXXX")
+          git show "${WORKFLOW_SHA}:scripts/ci/install-workflow-scanners.sh" > "$installers/install-workflow-scanners.sh"
+          if [ "$EVENT_NAME" = "push" ]; then
+            bash "$installers/install-workflow-scanners.sh"
+          else
+            git show "${WORKFLOW_SHA}:scripts/ci/install-quality-scanners.sh" > "$installers/install-quality-scanners.sh"
+            bash "$installers/install-quality-scanners.sh"
+          fi
 
       - name: Main-green validation
         id: validate

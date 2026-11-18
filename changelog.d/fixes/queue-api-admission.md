@@ -1,0 +1,1 @@
+- **fix(ci):** require API Route Typecheck on the composed omni-queue candidate and run its workflow on candidate pushes, so missing, skipped or failed API checks cannot admit a candidate even when each individual PR passed.

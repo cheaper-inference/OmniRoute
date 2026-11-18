@@ -19,7 +19,7 @@ const report = [{ filePath: "/repo/source.ts", errorCount: 0, warningCount: 2 }]
 
 function fixture(run) {
   mkdirSync(join(root, "_artifacts"), { recursive: true });
-  const dir = mkdtempSync(join(root, "_artifacts/eslint-measurement-"));
+  const dir = mkdtempSync(join(root, "_artifacts/eslint-measurement space ; $-"));
   try {
     for (const path of [
       "config/quality",
@@ -27,6 +27,7 @@ function fixture(run) {
       "bin",
       ".artifacts",
       "node_modules/.bin",
+      "node_modules/eslint/bin",
     ])
       mkdirSync(join(dir, path), { recursive: true });
     for (const name of [
@@ -173,7 +174,7 @@ test("an abnormal lint exit cannot hide behind valid-looking JSON", () =>
     assert.notEqual(result.status, 0, result.stdout + result.stderr);
   }));
 
-function observe(lintOutput, lintCode = 0, collectionCode = 0) {
+function observe(lintOutput, lintCode = 0, collectionCode = 0, options = {}) {
   return fixture(({ dir, executable, execute }) => {
     mkdirSync(join(dir, ".github/workflows"), { recursive: true });
     const aliases = ["quality:collect", "quality:ratchet", "check:fixture-a", "check:fixture-b"];
@@ -218,7 +219,24 @@ function observe(lintOutput, lintCode = 0, collectionCode = 0) {
     const stalePath = join(dir, ".artifacts/eslint-results.json");
     writeFileSync(stalePath, JSON.stringify([{ ...report[0], warningCount: 999 }]));
     executable("bin/git", `console.log("${"1".repeat(40)}");`);
-    executable("bin/npx", `console.log(${JSON.stringify(lintOutput)}); process.exit(${lintCode});`);
+    const lintCommand = `
+      const fs = require("node:fs");
+      const index = process.argv.indexOf("--output-file");
+      const output = ${JSON.stringify(lintOutput)};
+      const diagnostic = ${JSON.stringify(options.diagnostic ?? "")};
+      if(${JSON.stringify(options.stdout ?? "")}) console.log(${JSON.stringify(options.stdout ?? "")});
+      if(diagnostic) {
+        console.log("[stdout diagnostic] " + diagnostic);
+        console.error("[stderr diagnostic] " + diagnostic);
+      }
+      if(index >= 0) fs.writeFileSync(process.argv[index + 1], output);
+      else if(output) console.log(output);
+      process.exit(${lintCode});
+    `;
+    executable("bin/npx", options.forbidNpx ? "process.exit(91);" : lintCommand);
+    if (!options.missingLocalBinary) {
+      executable("node_modules/eslint/bin/eslint.js", lintCommand);
+    }
     executable(
       "bin/npm",
       `
@@ -259,6 +277,37 @@ test("the observer gives metrics its own completed lint report, overriding stale
   assert.equal(result.invoked, true);
   assert.equal(result.ratchetInvoked, true);
   assert.equal(result.report.checks.find((check) => check.id === "quality:collect").ok, true);
+});
+
+test("observer console diagnostics cannot corrupt its separate ESLint measurement", () => {
+  const result = observe(JSON.stringify(report), 0, 0, { diagnostic: "formatter startup notice" });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.invoked, true);
+  assert.equal(result.ratchetInvoked, true);
+  assert.equal(result.report.checks.find((check) => check.id === "lint-errors").ok, true);
+});
+
+test("valid-looking stdout cannot replace an empty observer ESLint report", () => {
+  const result = observe("", 0, 0, { stdout: JSON.stringify(report) });
+  assert.equal(result.status, 1);
+  assert.equal(result.invoked, false, "console JSON must not substitute the selected report");
+  assert.equal(result.ratchetInvoked, false, "stale metrics cannot validate the current ratchet");
+  assert.equal(result.report.checks.find((check) => check.id === "quality:collect").ok, false);
+});
+
+test("the observer runs installed ESLint without npx in a path containing shell characters", () => {
+  const result = observe(JSON.stringify(report), 0, 0, { forbidNpx: true });
+  assert.equal(result.status, 0, result.stderr);
+  assert.equal(result.invoked, true);
+  assert.equal(result.report.checks.find((check) => check.id === "lint-errors").ok, true);
+});
+
+test("a missing installed ESLint binary cannot fall back to an available npx", () => {
+  const result = observe(JSON.stringify(report), 0, 0, { missingLocalBinary: true });
+  assert.equal(result.status, 1);
+  assert.equal(result.invoked, false);
+  assert.equal(result.ratchetInvoked, false);
+  assert.equal(result.report.checks.find((check) => check.id === "quality:collect").ok, false);
 });
 
 for (const [output, code] of [
