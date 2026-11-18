@@ -197,48 +197,48 @@ Priorita (od nejvyšší po nejnižší):
 
 ---
 
-## Integrace do pipeline
+## Integrace potrubí
 
-### Hook PRE (`open-sse/handlers/chatCore.ts`)
+### PRE hák (`open-sse/handlers/chatCore.ts`)
 
-Spouští se před upstream exekutorem, po ověření autentizace a zásad:
+Spouští se před nadřazeným exekutorem, po ověření a kontrole zásad:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() pro každou dimenzi
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → při blokování → vrátit 429 (buildErrorBody, pevné pravidlo č. 12)
-      → při povolení + snížení priority → nastavit quotaSoftPenalty=true pro kandidáta
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Fail-open**: pokud `enforceQuotaShare` vyvolá výjimku, požadavek je povolen a pokračuje se zápisem `pino.warn` do protokolu. Tím se zabrání tomu, aby chyba mechanismu kvót zablokovala veškerý provoz.
+**Selhání otevřít** : pokud `enforceQuotaShare` hodí, požadavek je povolen prostřednictvím protokolu `pino.warn`. Tím se zabrání tomu, aby chyba motoru kvót zablokovala veškerý provoz.
 
-### Hook POST (záznam spotřeby)
+### POST hook (rekordní spotřeba)
 
 Po úspěšné odpovědi:
 
 ```
-executor vrátí úspěch
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() pro každou dimenzi
-      → fail-open: chyby jsou zaznamenány jako pino.warn, nikdy nejsou předány klientovi
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Poznámka k odchylce**: pokud `consume` po odpovědi selže, průběžný čítač vykazuje nižší spotřebu. Signál o nasycení od poskytovatele (např. `anthropic-ratelimit-unified-5h-utilization`) opraví globální odhad při dalším požadavku.
+**Poznámka k driftu** : pokud `consume` selže po odpovědi, rolovací počítadlo se podpočítá. Signál saturace od poskytovatele (např. `anthropic-ratelimit-unified-5h-utilization`) opraví globální odhad při příštím požadavku.
 
-### Měkká penalizace kombinace (`open-sse/services/combo.ts`)
+### Kombinovaný měkký trest (`open-sse/services/combo.ts`)
 
-Když platí `decision.deprioritize === true`:
+Když `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // výchozí hodnota 0.7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Penalizace se použije po všech ostatních faktorech hodnocení. Snižuje pravděpodobnost, že automatická kombinace vybere nasycený klíč, aniž by jej natvrdo zablokovala.
+Pokuta se uplatní po všech ostatních bodovacích faktorech. Snižuje pravděpodobnost automatického kombinování výběru saturovaného klíče bez jeho tvrdého blokování.
 
 ---
 
@@ -339,17 +339,16 @@ nezobrazí jako možnost volitelná uživatelem v uživatelském rozhraní ani A
 
 ---
 
-## Pokrytí testy
+## Test pokrytí
 
-Engine quota-share je dodáván se dvěma vrstvami automatizovaných testů:
+S modulem pro sdílení kvót jsou dodávány dvě vrstvy automatického pokrytí:
 
-| Sada                        | Příkaz                                                                 | Co pokrývá                                                                                                                                                                                                                            |
-| :-------------------------- | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Jednotkové testy (29 testů) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Plánovač DRR, blokování při saturaci, limity souběžnosti, výpočty fairShare, řazení nevyřízených požadavků do fronty                                                                                                                  |
-| Integrační matice           | `npm run test:combo:matrix`                                            | Komplexní rozhodování o směrování prostřednictvím skutečné pipeline kombinací; spravedlivost DRR + snížení priority při saturaci pomocí živých rozhraní (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite               | Příkaz                                                                 | Co pokrývá                                                                                                                                                                                                                              |
+| :------------------ | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jednotka (29 testů) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | plánovač DRR, saturační hradlování, omezení souběžnosti, matematika fairShare, řazení nevyřízených položek                                                                                                                              |
+| Integrační matice   | `npm run test:combo:matrix`                                            | End-to-end rozhodnutí o směrování prostřednictvím skutečného kombinovaného potrubí; DRR spravedlnost + deprioritizace saturace prostřednictvím živých švů (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Integrační matice se spouští v CI společně se všemi 19 veřejnými strategiemi. Sadu
-jednotkových testů lze spustit samostatně.
+Integrační matice běží v CI spolu se všemi 22 veřejnými strategiemi. Jednotku lze provozovat samostatně.
 
 ---
 

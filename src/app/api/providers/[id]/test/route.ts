@@ -12,6 +12,7 @@ import { getCliRuntimeStatus } from "@/shared/services/cliRuntime";
 import { buildQoderCliNotFoundHint } from "@omniroute/open-sse/services/qoderCliResolve.ts";
 // Use the shared open-sse token refresh with built-in dedup/race-condition cache
 import { getAccessToken, isPassiveCodex } from "@omniroute/open-sse/services/tokenRefresh.ts";
+import { isMuseDcaToken } from "@omniroute/open-sse/config/museCode.ts";
 import { redactVerificationUrls } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import {
   clearAntigravityVerificationUrl,
@@ -205,6 +206,9 @@ async function refreshOAuthToken(connection: any) {
         const expiresAt = new Date(Date.now() + refreshed.expiresIn * 1000).toISOString();
         update.expiresAt = expiresAt;
         update.tokenExpiresAt = expiresAt;
+      } else if (provider === "muse-code" && refreshed.expiresAt === null) {
+        update.expiresAt = null;
+        update.tokenExpiresAt = null;
       } else {
         // Upstream returned neither expiresAt nor expiresIn. Persist a
         // conservative 30-minute expiry so a NULL expiresAt (treated as
@@ -247,6 +251,14 @@ async function refreshOAuthToken(connection: any) {
 function isTokenExpired(connection: any) {
   const expiresAtValue = connection.expiresAt || connection.tokenExpiresAt;
   if (!expiresAtValue) {
+    if (
+      connection.provider === "muse-code" &&
+      typeof connection.accessToken === "string" &&
+      connection.accessToken.trim() &&
+      !isMuseDcaToken(connection.accessToken)
+    ) {
+      return false;
+    }
     return typeof connection.refreshToken === "string" && connection.refreshToken.length > 0;
   }
   const expiresAt = new Date(expiresAtValue).getTime();
