@@ -4,7 +4,7 @@ import { afterEach, expect, it, vi } from "vitest";
 import { cleanup, render, screen, waitFor } from "@testing-library/react";
 import { NextIntlClientProvider } from "next-intl";
 import en from "../../../src/i18n/messages/en.json";
-import zh from "../../../src/i18n/messages/zh-CN.json";
+import zhCatalog from "../../../src/i18n/messages/zh-CN.json";
 import ProviderUsdCostModal from "../../../src/app/(dashboard)/dashboard/usage/components/ProviderLimits/ProviderUsdCostModal";
 
 vi.unmock("next-intl");
@@ -24,6 +24,19 @@ afterEach(() => {
   cleanup();
   vi.unstubAllGlobals();
 });
+
+// Translated catalogs gain new keys only in the release refresh; until then this
+// test carries the contributor's zh-CN string so the locale path stays exercised.
+const zhUsageLimits = zhCatalog.usageLimits as Record<string, string>;
+const zh = {
+  ...zhCatalog,
+  usageLimits: {
+    ...zhUsageLimits,
+    apiValueNotice:
+      zhUsageLimits.apiValueNotice ??
+      "优先采用提供者报告的费用；否则按当前配置的 API 价格计算请求等值。这不是订阅扣款或密钥预算扣减。配额外推只是估算，并非固定的订阅额度。",
+  },
+};
 
 const payload = {
   provider: "claude",

@@ -599,6 +599,25 @@ test("reported cost including zero overrides configured pricing", async () => {
   assert.equal((await fixtureBreakdown()).totalCostUsd, 2);
 });
 
+test("a stored catalogue snapshot counts as recorded cost; a provider-reported cost wins", async () => {
+  await localDb.updatePricing({ claude: { "illustrative-ocr": { input: 50, output: 50 } } });
+  const setCalculated = (cost: number) =>
+    core
+      .getDbInstance()
+      .prepare(
+        "UPDATE usage_history SET calculated_cost_usd = ? WHERE id = (SELECT MAX(id) FROM usage_history)"
+      )
+      .run(cost);
+  // Specialty requests (OCR pages, embedding batches) store their priced snapshot.
+  await saveFixture("illustrative-unpriced-ocr", { input: 0 });
+  setCalculated(0.75);
+  await saveFixture("illustrative-ocr", { input: 1_000_000 }, 2);
+  setCalculated(9);
+  const result = await fixtureBreakdown();
+  assert.equal(result.totalCostUsd, 2.75);
+  assert.equal(result.unpricedRequests, 0);
+});
+
 test("pricing-store failures remain unpriced without retrying the provider alias", async (t) => {
   await saveFixture("illustrative-failure", { input: 1_000_000 });
   const { invalidateDbCache } = await import("../../src/lib/db/readCache.ts");
