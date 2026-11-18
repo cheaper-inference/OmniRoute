@@ -27,6 +27,7 @@ import {
 } from "@omniroute/open-sse/handlers/webFetch.ts";
 import * as log from "@/sse/utils/logger";
 import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
+import { getSearchCredentialFallbacks } from "@omniroute/open-sse/config/searchRegistry.ts";
 import { resolveClientApiKey } from "@/sse/services/clientApiKeyResolver";
 import { enforceApiKeyPolicyWithScope } from "@/app/api/v1/_shared/keyScopedRoute";
 import {
@@ -83,8 +84,8 @@ export async function OPTIONS() {
  * caller key's connection scope (`allowedConnections`, null = unscoped); a
  * provider whose connections are all outside it counts as unconfigured.
  */
-async function resolveCredentials(
-  providerId: WebFetchProviderId,
+async function lookupScopedCredentials(
+  providerId: string,
   allowedConnections: string[] | null
 ): Promise<CredentialsLookup> {
   try {
@@ -95,6 +96,26 @@ async function resolveCredentials(
   } catch {
     return null;
   }
+}
+
+/**
+ * A fetch provider whose upstream accepts a chat provider's key (deepseek-search →
+ * deepseek, via SEARCH_CREDENTIAL_FALLBACKS) borrows that key when it has no
+ * connection of its own. The borrowed lookup keeps the same connection scope and
+ * quota preflight, mirroring the search route.
+ */
+async function resolveCredentials(
+  providerId: WebFetchProviderId,
+  allowedConnections: string[] | null
+): Promise<CredentialsLookup> {
+  const credentials = await lookupScopedCredentials(providerId, allowedConnections);
+  if (credentials && !isAllRateLimitedCredentials(credentials)) return credentials;
+
+  for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
+    const fallbackCredentials = await lookupScopedCredentials(fallbackId, allowedConnections);
+    if (fallbackCredentials) return fallbackCredentials;
+  }
+  return credentials;
 }
 
 /** A request-time upstream status that means "try the next provider" instead of giving up. */
