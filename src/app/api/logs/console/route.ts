@@ -42,9 +42,9 @@ export async function GET(request: NextRequest) {
       "[consoleHistory] Unable to read retained logs:",
       error instanceof Error ? error.name : "unknown"
     );
-    return NextResponse.json(
-      { error: buildErrorBody(500, "Failed to read logs.").error.message },
-      { status: 500, headers: NO_STORE }
-    );
+    return NextResponse.json(buildErrorBody(500, "Failed to read logs."), {
+      status: 500,
+      headers: NO_STORE,
+    });
   }
 }

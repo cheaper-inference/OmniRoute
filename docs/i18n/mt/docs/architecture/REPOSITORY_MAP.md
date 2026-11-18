@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Fajls fl-għerq
+## Fajls għeruq
 
-| Fajl                                        | Għan                                                                                                                      |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Paġna ewlenija tal-kummerċjalizzazzjoni + bidu rapidu + matriċi tal-karatteristiċi (ara wkoll `llm.txt`)                  |
-| **CHANGELOG.md**                            | Reġistru tal-bidliet għal kull rilaxx (iġġenerat awtomatikament mill-ħila `/version-bump-cc`)                             |
-| **LICENSE**                                 | Test tal-liċenzja MIT                                                                                                     |
-| **CLAUDE.md**                               | Regoli tal-proġett għall-aġenti ta’ Claude Code (regoli stretti, konvenzjonijiet, xenarji)                                |
-| **AGENTS.md**                               | L-istess bħal CLAUDE.md iżda għal aġenti tal-IA li mhumiex Claude (Codex, Cursor, eċċ.)                                   |
-| **GEMINI.md**                               | Regoli konċiżi għal aġenti bbażati fuq Gemini (subsett ta’ CLAUDE.md)                                                     |
-| **CONTRIBUTING.md**                         | Gwida għall-kontributuri: konfigurazzjoni, commits konvenzjonali, ittestjar, fluss tal-PR                                 |
-| **SECURITY.md**                             | Politika għar-rappurtar tal-vulnerabbiltajiet, verżjonijiet appoġġjati, mudell tat-theddid                                |
-| **CODE_OF_CONDUCT.md**                      | Patt tal-Kontributuri — aspettattivi dwar l-imġiba fil-komunità                                                           |
-| **llm.txt**                                 | Paġna ewlenija b’test sempliċi ottimizzata għal crawlers tal-LLM (SEO għall-assistenti tal-IA)                            |
-| **package.json**                            | Manifest ta’ npm, skripts, dipendenzi, engines, livell minimu ta’ kopertura ta’ c8                                        |
-| **package-lock.json**                       | Siġra tad-dipendenzi msakkra                                                                                              |
-| **tsconfig.json**                           | Konfigurazzjoni ewlenija ta’ TypeScript                                                                                   |
-| **tsconfig.typecheck-core.json**            | Konfigurazzjoni tal-kontroll tat-tipi għall-qalba `src/`                                                                  |
-| **tsconfig.typecheck-noimplicit-core.json** | Kontroll strett tat-tipi (`noImplicitAny`)                                                                                |
-| **tsconfig.tsbuildinfo**                    | Cache tal-build inkrementali ta’ TS (injorata minn git)                                                                   |
-| **next.config.mjs**                         | Konfigurazzjoni tal-build ta’ Next.js 16 (output awtonomu)                                                                |
-| **next-env.d.ts**                           | Tipi tal-ambjent iġġenerati awtomatikament minn Next.js                                                                   |
-| **eslint.config.mjs**                       | Konfigurazzjoni ċatta ta’ ESLint (regoli għal kull żona tal-proġett)                                                      |
-| **prettier.config.mjs**                     | Regoli tal-ifformattjar ta’ Prettier                                                                                      |
-| **postcss.config.mjs**                      | Konfigurazzjoni ta’ PostCSS għall-pipeline ta’ Tailwind/CSS                                                               |
-| **playwright.config.ts**                    | Konfigurazzjoni tat-testijiet E2E ta’ Playwright                                                                          |
-| **vitest.config.ts**                        | Konfigurazzjoni ta’ Vitest (sett predefinit)                                                                              |
-| **vitest.mcp.config.ts**                    | Konfigurazzjoni ta’ Vitest għas-server MCP / settijiet ta’ autoCombo / cache                                              |
-| **sonar-project.properties**                | Konfigurazzjoni ta’ SonarQube/SonarCloud (kwalità tal-kodiċi)                                                             |
-| **Dockerfile**                              | Build ta’ Docker f’diversi stadji (builder → runner-base → runner-cli)                                                    |
-| **docker-compose.yml**                      | Compose għall-iżvilupp b’4 profili (base, cli, host, cliproxyapi) + sidecar ta’ redis                                     |
-| **docker-compose.prod.yml**                 | Compose għall-produzzjoni (port 20130, redis, volumi bl-ismijiet)                                                         |
-| **.dockerignore**                           | Fajls esklużi mill-kuntest ta’ Docker                                                                                     |
-| **fly.toml**                                | Konfigurazzjoni tad-deployment ta’ Fly.io (reġjun `sin`, port 20128, volum /data)                                         |
-| **.env.example**                            | Fajl mudell tal-ambjent (ikkupjat awtomatikament għal `.env` mal-ewwel installazzjoni)                                    |
-| **.gitignore**                              | Mudelli ta’ esklużjoni ta’ Git                                                                                            |
-| **.npmignore**                              | Lista ta’ esklużjoni għall-pubblikazzjoni fuq npm                                                                         |
-| **.npmrc**                                  | Konfigurazzjoni ta’ npm (reġistru, politika tal-lockfile)                                                                 |
-| **.node-version**                           | Verżjoni fissa ta’ Node (użata minn għodod kompatibbli ma’ nvm)                                                           |
-| **.nvmrc**                                  | Verżjoni fissa ta’ Node għal nvm                                                                                          |
-| **eslint.complexity.config.mjs**            | Konfigurazzjoni ta’ ESLint għar-ratchet tal-kumplessità (`scripts/check/check-complexity.mjs --config`)                   |
-| **eslint.sonarjs.config.mjs**               | Konfigurazzjoni ta’ ESLint għar-regoli ta’ SonarJS (kumplessità konjittiva / duplikazzjoni)                               |
-| **source.config.ts**                        | Konfigurazzjoni tas-sors `defineDocs` ta’ Fumadocs (tipprovdi data lil `.source/`)                                        |
-| **knip.json**                               | Konfigurazzjoni ta’ Knip — fajls/esportazzjonijiet/dipendenzi mhux użati (tipprovdi data lill-kontroll tal-kodiċi mejjet) |
-| **stryker.conf.json**                       | Konfigurazzjoni tal-ittestjar tal-mutazzjonijiet ta’ Stryker                                                              |
-| **.size-limit.json**                        | Konfigurazzjoni tal-baġit tal-bundle ta’ size-limit                                                                       |
-| **promptfooconfig.yaml**                    | Konfigurazzjoni tal-evalwazzjoni ta’ promptfoo                                                                            |
-| **.gitleaks.toml**                          | Sett ta’ regoli ta’ gitleaks għall-iskannjar tas-sigrieti                                                                 |
-| **.zizmor.yml**                             | Konfigurazzjoni ta’ zizmor għal-linting tas-sigurtà ta’ GitHub Actions                                                    |
-| **socket.yml**                              | Konfigurazzjoni tal-katina tal-provvista ta’ Socket.dev                                                                   |
-| **news.json**                               | Feed lokalizzat tal-avviżi ta’ v2; l-element tat-tnedija ta’ Radar jitwassal inattiv                                      |
-| **flake.nix** / **flake.lock**              | Definizzjoni tad-dev-shell ta’ Nix + lock                                                                                 |
-| **.env**                                    | Sigrieti lokali (injorati minn git — iġġenerati minn `.env.example`)                                                      |
+| Fajl                                        | Għan                                                                                                              |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| **README.md**                               | Il-paġna ta' destinazzjoni tal-marketing + matriċi tal-karatteristiċi + ta' bidu ta' malajr (ara wkoll `llm.txt`) |
+| **CHANGELOG.md**                            | Changelog għal kull rilaxx (ġenerat awtomatikament minn skill `/version-bump-cc` )                                |
+| **LICENSE**                                 | MIT test tal-licenza                                                                                              |
+| **CLAUDE.md**                               | Regoli tal-proġett għall-aġenti tal-Kodiċi Claude (regoli iebsa, konvenzjonijiet, xenarji)                        |
+| **AGENTS.md**                               | L-istess bħal CLAUDE.md iżda għal aġenti AI mhux Claude (Codex, Cursor, eċċ.)                                     |
+| **GEMINI.md**                               | Regoli konċiżi għall-aġenti bbażati fuq Gemini (subsett ta' CLAUDE.md)                                            |
+| **CONTRIBUTING.md**                         | Gwida tal-kontributur: setup, kommessi konvenzjonali, ittestjar, fluss PR                                         |
+| **SECURITY.md**                             | Politika ta 'rappurtar tal-vulnerabbiltà, verżjonijiet appoġġjati, mudell ta' theddid                             |
+| **CODE_OF_CONDUCT.md**                      | Kontributur Patt — aspettattivi tal-imġiba tal-komunità                                                           |
+| **llm.txt**                                 | Inżul b'test sempliċi ottimizzat għal LLM crawlers (SEO għall-assistenti AI )                                     |
+| **package.json**                            | manifest npm, skripts, dipendenzi, magni, c8 coverage gate                                                        |
+| **package-lock.json**                       | Siġra tad-dipendenza msakkra                                                                                      |
+| **tsconfig.json**                           | Root TypeScript config                                                                                            |
+| **tsconfig.typecheck-core.json**            | Typecheck konfigurazzjoni għal `src/` core                                                                        |
+| **tsconfig.typecheck-noimplicit-core.json** | Strict (`noImplicitAny`) typecheck                                                                                |
+| **tsconfig.tsbuildinfo**                    | TS inkrementali build cache (gitignored)                                                                          |
+| **jmiss.config.mjs**                        | Next.js 16 build configuration (output waħdu)                                                                     |
+| **li jmiss-env.d.ts**                       | Next.js tipi ta' env iġġenerat awtomatikament                                                                     |
+| **eslint.config.mjs**                       | ESLint flat config (regoli għal kull żona tal-proġett)                                                            |
+| **isbaħ.config.mjs**                        | regoli tal-ifformattjar Prettier                                                                                  |
+| **postcss.config.mjs**                      | PostCSS config għal Tailwind/CSS pipeline                                                                         |
+| **drammaturgu.config.ts**                   | Playwright E2E test config                                                                                        |
+| **vitest.config.ts**                        | Vitest config (suite default)                                                                                     |
+| **vitest.mcp.config.ts**                    | Vitest config għal MCP server / autoCombo / cache suites                                                          |
+| **sonar-project.properties**                | SonarQube/SonarCloud config (kwalità tal-kodiċi)                                                                  |
+| **Dockerfile**                              | Bini Docker f'diversi stadji (bennej → runner-base → runner-cli)                                                  |
+| **docker-compose.yml**                      | Dev compose b'4 profili (base, cli, host, cliproxyapi) + redis sidecar                                            |
+| **docker-komponi.prod.yml**                 | Kompożizzjoni tal-produzzjoni (port 20130, redis, volumi msemmija)                                                |
+| **.dockerignore**                           | Files esklużi mill-kuntest ta Docker                                                                              |
+| **fly.toml**                                | Konfigurazzjoni tal-iskjerament Fly.io (reġjun `sin`, port 20128, /volum tad-dejta)                               |
+| **.env.eżempju**                            | Fajl tal-env tal-mudell (ikkupjat awtomatikament għal `.env` fl-ewwel installazzjoni)                             |
+| **.gitignore**                              | Git jinjora mudelli                                                                                               |
+| **.npmignore**                              | npm tippubblika lista ta' esklużjoni                                                                              |
+| **.npmrc**                                  | npm konfig (reġistru, politika tal-lockfile)                                                                      |
+| **.node-verżjoni**                          | Pin tal-verżjoni tan-node (użat minn għodod kompatibbli ma' nvm)                                                  |
+| **.nvmrc**                                  | Pin verżjoni node għal nvm                                                                                        |
+| **eslint.kumplessità.config.mjs**           | ESLint config għall-kumplessità ratchet (`scripts/check/check-complexity.mjs --config`)                           |
+| **eslint.sonarjs.config.mjs**               | ESLint config għar-regoli SonarJS (kumplessità konjittiva/duplikazzjoni)                                          |
+| **sors.config.ts**                          | Fumadocs `defineDocs` konfigurazzjoni tas-sors (feeds `.source/`)                                                 |
+| **knip.json**                               | Knip config — mhux użata files/exports/deps (feeds-dead-code gate)                                                |
+| **stryker.conf.mjs**                        | Konfigurazzjoni tal-ittestjar tal-mutazzjoni Stryker (jikkalkula `tap.testFiles` minn `mutate`)                   |
+| **.size-limit.json**                        | konfigurazzjoni tal-baġit tal-pakkett tal-limitu tad-daqs                                                         |
+| **promptfooconfig.yaml**                    | konfigurazzjoni eval promptfoo                                                                                    |
+| **.gitleaks.toml**                          | sett ta' regoli ta' skan sigriet ta' gitleaks                                                                     |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint konfigurazzjoni                                                               |
+| **socket.yml**                              | Konfigurazzjoni tal-katina tal-provvista Socket.dev                                                               |
+| **news.json**                               | Feed ta' tħabbira v2 lokalizzata; Vapuri ta' oġġett tar-radar inattivi                                            |
+| **flake.nix** /** saffi.lock**              | Nix dev-shell definizzjoni + lock                                                                                 |
+| **.env**                                    | Sigrieti lokali (gitignored — ġġenerat minn `.env.example`)                                                       |
 
-> **Imċaqlaq barra mill-għerq f’v3.8.26 (biex jitnaqqas l-imbarazz):**
+> **Imċaqlaq 'il barra mill-għerq f'v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, u l-`quality-metrics.json` iġġenerat (injorat minn git). Ara [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, u l- `quality-metrics.json` iġġenerat (gitignored). Ara [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard komponent API: adapters fuq `packages/ui-kit` — ara `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ismijiet tal - ikoni użati mill - iskrins → Lucide components (`<Icon>`)               |
-| `constants/providers.ts`         | **380 fornitur** bil-validazzjoni Zod (sors tal-verità)                                            |
+| `constants/providers.ts`         | **394 fornitur** bil-validazzjoni Zod (sors tal-verità)                                            |
 | `constants/cliTools.ts`          | Reġistru estern tal-għodda CLI                                                                     |
-| `constants/routingStrategies.ts` | **20 strateġija ta' rotta** bi prijoritajiet                                                       |
+| `constants/routingStrategies.ts` | **22 strateġiji ta' rotta** bi prijoritajiet                                                       |
 | `constants/publicApiRoutes.ts`   | Rotot li jeħtieġu awtifikazzjoni Bearer (vs management).                                           |
 | `constants/upstreamHeaders.ts`   | Lista taċ-ċaħda tal-header għal talbiet upstream                                                   |
 | `validation/schemas.ts`          | ~ 80 skemi Zod (sors uniku tal-verità għal kuntratti API )                                         |
@@ -265,7 +265,7 @@ Spazju tax-xogħol npm separat (`@omniroute/open-sse`). Jieħu ħsieb l-ipproċe
 ```
 open-sse/
 ├── handlers/            # 16-il fajl (12-il handler + 4 utilitajiet awżiljarji): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, eċċ.
-├── executors/           # 150 modulu ta’ eżekuzzjoni (klassijiet li jestendu BaseExecutor + utilitajiet awżiljarji għal kull fornitur)
+├── executors/           # 163 modulu ta’ eżekuzzjoni (klassijiet li jestendu BaseExecutor + utilitajiet awżiljarji għal kull fornitur)
 ├── translator/          # Konvertituri tal-formati (9 għat-talbiet, 9 għat-tweġibiet, 9 utilitajiet awżiljarji)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ modulu ta’ servizz (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, eċċ.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrazzjonijiet esterni CLI + Intern OmniRoute CLI                                          |
 | `I18N.md`                   | arkitettura i18n, li żżid lingwa, 67 lokali                                                   |
 | `UNINSTALL.md`              | Naddaf passi tad-diżinstalla                                                                  |
-| `PROVIDER_REFERENCE.md`     | **Ġenerat awtomatikament** katalgu ta' 380 fornitur (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Ġenerat awtomatikament** katalgu ta' 394 fornitur (regen: `npm run gen:provider-reference`) |
 
 ### Subsistema deep-dives
 

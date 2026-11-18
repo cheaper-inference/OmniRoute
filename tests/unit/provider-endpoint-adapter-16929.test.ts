@@ -5,7 +5,9 @@ import { getRegisteredEndpointAdapterStatuses } from "../../src/lib/providerMode
 test("#16929: Gemini AI Studio transcription is tagged but has no local adapter", () => {
   const adapter = getRegisteredEndpointAdapterStatuses("gemini");
   assert.equal(adapter["audio-transcriptions"], "unavailable");
-  assert.equal(adapter.music, "unavailable");
+  // Music gained a handler (gemini-lyria), so the same registry-derived status must
+  // flip while transcription keeps reporting the missing adapter.
+  assert.equal(adapter.music, "available");
   assert.equal(getRegisteredEndpointAdapterStatuses("vertex").music, "available");
 });
 

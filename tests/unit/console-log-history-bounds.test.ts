@@ -32,6 +32,25 @@ test("identical timestamps and UTF-8 spanning blocks retain physical order throu
   assert.deepEqual(seen, input);
 });
 
+test("finite ranges preserve recent out-of-order entries behind an older dated line", async () => {
+  const now = Date.now();
+  fs.writeFileSync(
+    process.env.APP_LOG_FILE_PATH!,
+    JSON.stringify({ time: now - 500, msg: "recent buffered message", level: 30 }) +
+      "\n" +
+      JSON.stringify({ time: now - 7_200_000, msg: "older timestamp", level: 30 }) +
+      "\n" +
+      JSON.stringify({ time: now - 100, msg: "recent tail", level: 30 }) +
+      "\n"
+  );
+  const result = await readConsoleLogHistory(query({ range: "1h" }));
+  assert.deepEqual(
+    result.entries.map((entry) => entry.msg),
+    ["recent buffered message", "recent tail"]
+  );
+  assert.equal(result.nextCursor, undefined);
+});
+
 test("scan byte budget yields a resumable cursor even when no records match the first page", async () => {
   fs.writeFileSync(
     process.env.APP_LOG_FILE_PATH!,

@@ -53,61 +53,61 @@ OmniRoute/
 
 ## Корневые файлы
 
-| Файл                                        | Назначение                                                                                    |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **README.md**                               | Маркетинговая целевая страница + быстрый старт + матрица функций (см. также `llm.txt`)        |
-| **CHANGELOG.md**                            | Журнал изменений для каждого выпуска (автоматически создаётся навыком `/version-bump-cc`)     |
-| **LICENSE**                                 | Текст лицензии MIT                                                                            |
-| **CLAUDE.md**                               | Правила проекта для агентов Claude Code (строгие правила, соглашения, сценарии)               |
-| **AGENTS.md**                               | То же, что и CLAUDE.md, но для ИИ-агентов не на базе Claude (Codex, Cursor и т. д.)           |
-| **GEMINI.md**                               | Краткие правила для агентов на базе Gemini (подмножество CLAUDE.md)                           |
-| **CONTRIBUTING.md**                         | Руководство для участников: настройка, conventional commits, тестирование, процесс PR         |
-| **SECURITY.md**                             | Политика сообщения об уязвимостях, поддерживаемые версии, модель угроз                        |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — требования к поведению участников сообщества                           |
-| **llm.txt**                                 | Текстовая целевая страница, оптимизированная для краулеров LLM (SEO для ИИ-ассистентов)       |
-| **package.json**                            | Манифест npm, скрипты, зависимости, движки, порог покрытия c8                                 |
-| **package-lock.json**                       | Зафиксированное дерево зависимостей                                                           |
-| **tsconfig.json**                           | Корневая конфигурация TypeScript                                                              |
-| **tsconfig.typecheck-core.json**            | Конфигурация проверки типов для ядра `src/`                                                   |
-| **tsconfig.typecheck-noimplicit-core.json** | Строгая проверка типов (`noImplicitAny`)                                                      |
-| **tsconfig.tsbuildinfo**                    | Кеш инкрементальной сборки TS (игнорируется Git)                                              |
-| **next.config.mjs**                         | Конфигурация сборки Next.js 16 (автономный вывод)                                             |
-| **next-env.d.ts**                           | Автоматически сгенерированные Next.js типы переменных окружения                               |
-| **eslint.config.mjs**                       | Плоская конфигурация ESLint (правила для каждой области проекта)                              |
-| **prettier.config.mjs**                     | Правила форматирования Prettier                                                               |
-| **postcss.config.mjs**                      | Конфигурация PostCSS для конвейера Tailwind/CSS                                               |
-| **playwright.config.ts**                    | Конфигурация сквозных тестов Playwright                                                       |
-| **vitest.config.ts**                        | Конфигурация Vitest (набор тестов по умолчанию)                                               |
-| **vitest.mcp.config.ts**                    | Конфигурация Vitest для наборов MCP-сервера / autoCombo / кеша                                |
-| **sonar-project.properties**                | Конфигурация SonarQube/SonarCloud (качество кода)                                             |
-| **Dockerfile**                              | Многоэтапная сборка Docker (builder → runner-base → runner-cli)                               |
-| **docker-compose.yml**                      | Конфигурация Compose для разработки с 4 профилями (base, cli, host, cliproxyapi) + redis      |
-| **docker-compose.prod.yml**                 | Конфигурация Compose для рабочей среды (порт 20130, redis, именованные тома)                  |
-| **.dockerignore**                           | Файлы, исключённые из контекста Docker                                                        |
-| **fly.toml**                                | Конфигурация развёртывания Fly.io (регион `sin`, порт 20128, том /data)                       |
-| **.env.example**                            | Шаблон файла переменных окружения (при первой установке автоматически копируется в `.env`)    |
-| **.gitignore**                              | Шаблоны игнорирования Git                                                                     |
-| **.npmignore**                              | Список исключений при публикации npm                                                          |
-| **.npmrc**                                  | Конфигурация npm (реестр, политика lock-файлов)                                               |
-| **.node-version**                           | Закреплённая версия Node (используется инструментами, совместимыми с nvm)                     |
-| **.nvmrc**                                  | Закреплённая версия Node для nvm                                                              |
-| **eslint.complexity.config.mjs**            | Конфигурация ESLint для ограничения сложности (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | Конфигурация ESLint для правил SonarJS (когнитивная сложность / дублирование)                 |
-| **source.config.ts**                        | Конфигурация источника Fumadocs `defineDocs` (формирует `.source/`)                           |
-| **knip.json**                               | Конфигурация Knip — неиспользуемые файлы/экспорты/зависимости (для проверки мёртвого кода)    |
-| **stryker.conf.json**                       | Конфигурация мутационного тестирования Stryker                                                |
-| **.size-limit.json**                        | конфигурация бюджета размера бандла size-limit                                                |
-| **promptfooconfig.yaml**                    | конфигурация оценок promptfoo                                                                 |
-| **.gitleaks.toml**                          | набор правил gitleaks для сканирования секретов                                               |
-| **.zizmor.yml**                             | конфигурация zizmor для проверки безопасности GitHub Actions                                  |
-| **socket.yml**                              | конфигурация Socket.dev для безопасности цепочки поставок                                     |
-| **news.json**                               | локализованная лента объявлений v2; элемент запуска Radar поставляется неактивным             |
-| **flake.nix** / **flake.lock**              | определение dev-окружения Nix + файл блокировки                                               |
-| **.env**                                    | локальные секреты (игнорируется Git — генерируется из `.env.example`)                         |
+| Файл                                       | Цель                                                                                                  |
+| ------------------------------------------ | ----------------------------------------------------------------------------------------------------- |
+| **README.md**                              | Целевая маркетинговая страница. Краткое руководство по + Матрица функций + (см. также `llm.txt`).     |
+| **CHANGELOG.md**                           | Журнал изменений для каждого выпуска (автоматически создается с помощью навыков `/version-bump-cc` )  |
+| **LICENSE**                                | текст лицензии MIT                                                                                    |
+| **CLAUDE.md**                              | Правила проекта для агентов Claude Code (жесткие правила, соглашения, сценарии)                       |
+| **AGENTS.md**                              | То же, что и CLAUDE.md, но для агентов AI отличных от Claude (Codex, Cursor и т. д.).                 |
+| **GEMINI.md**                              | Краткие правила для агентов на базе Gemini (подмножество CLAUDE.md)                                   |
+| **CONTRIBUTING.md**                        | Руководство для участников: настройка, обычные фиксации, тестирование, поток PR                       |
+| **SECURITY.md**                            | Политика отчетности об уязвимостях, поддерживаемые версии, модель угроз                               |
+| **CODE_OF_CONDUCT.md**                     | Ожидания в отношении поведения сообщества участников Covenant —                                       |
+| **llm.txt**                                | Целевая страница с простым текстом, оптимизированная для сканеров LLM (SEO для помощников AI ).       |
+| **package.json**                           | манифест npm, скрипты, зависимости, движки, шлюз покрытия c8                                          |
+| **package-lock.json**                      | Заблокированное дерево зависимостей                                                                   |
+| **tsconfig.json**                          | Корневая конфигурация TypeScript                                                                      |
+| **цконфиг.typecheck-core.json**            | Конфигурация проверки типов для ядра `src/`                                                           |
+| **цконфиг.typecheck-noimplicit-core.json** | Строгая (`noImplicitAny`) проверка типов                                                              |
+| **tsconfig.tsbuildinfo**                   | Кэш инкрементальной сборки TS (gitignored)                                                            |
+| **следующий.config.mjs**                   | Конфигурация сборки Next.js 16 (автономный вывод)                                                     |
+| **следующий-окр.d.ts**                     | Next.js автоматически генерирует типы окружения                                                       |
+| **эслинт.config.mjs**                      | Плоская конфигурация ESLint (правила для каждой области проекта)                                      |
+| **красивее.config.mjs**                    | правила форматирования Prettier                                                                       |
+| **постксс.config.mjs**                     | Конфигурация PostCSS для конвейера Tailwind/CSS                                                       |
+| **драматург.config.ts**                    | тестовая конфигурация Playwright E2E                                                                  |
+| **витест.config.ts**                       | конфигурация Vitest (набор по умолчанию)                                                              |
+| **vitest.mcp.config.ts**                   | Конфигурация Vitest для пакетов MCP server/ autoCombo /cache                                          |
+| **сонар-project.properties**               | конфигурация SonarQube/SonarCloud (качество кода)                                                     |
+| **Докерфайл**                              | Многоэтапная сборка Docker (построитель → runner-base → runner-cli)                                   |
+| **docker-compose.yml**                     | Dev Compose с 4 профилями (базовый, cli, хост, cliproxyapi) + redis Sidecar                           |
+| **докер-компоновать.prod.yml**             | Состав продукции (порт 20130, redis, именованные тома)                                                |
+| **.dockerignore**                          | Файлы исключены из контекста Docker                                                                   |
+| **fly.toml**                               | Конфигурация развертывания Fly.io (регион `sin`, порт 20128, /том данных)                             |
+| **.env.example**                           | Файл env шаблона (автоматически копируется в `.env` при первой установке)                             |
+| **.gitignore**                             | Git игнорирует шаблоны                                                                                |
+| **.npmignore**                             | список исключений публикации npm                                                                      |
+| **.npmrc**                                 | Конфигурация npm (реестр, политика файлов блокировки)                                                 |
+| **.node-версия**                           | PIN-код версии узла (используется nvm-совместимыми инструментами)                                     |
+| **.nvmrc**                                 | PIN-код версии узла для nvm                                                                           |
+| **эслинт.сложность.config.mjs**            | Конфигурация ESLint для храпового механизма сложности (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**              | Конфигурация ESLint для правил SonarJS (когнитивная сложность/дублирование)                           |
+| **источник.config.ts**                     | Исходная конфигурация Fumadocs `defineDocs` (каналы `.source/`)                                       |
+| **knip.json**                              | Knip config — unused files/exports/deps (подает шлюз мертвого кода)                                   |
+| **страйкер.conf.mjs**                      | Конфигурация Stryker для тестирования мутаций (вычисляет `tap.testFiles` из `mutate`)                 |
+| **.size-limit.json**                       | конфигурация бюджета пакета с ограничением размера                                                    |
+| **promptfooconfig.yaml**                   | Конфигурация Promptfoo Eval                                                                           |
+| **.gitleaks.toml**                         | набор правил секретного сканирования gitleaks                                                         |
+| **.zizmor.yml**                            | Конфигурация zizmor GitHub-Actions security-lint                                                      |
+| **socket.yml**                             | Конфигурация цепочки поставок Socket.dev                                                              |
+| **news.json**                              | Локализованная лента объявлений v2; Объект запуска радара отправляется неактивным                     |
+| **flake.nix** /** Flake.lock**             | Определение Nix dev-shell + lock                                                                      |
+| **.env**                                   | Локальные секреты (gitignored — сгенерированный из `.env.example`)                                    |
 
-> **Перемещено из корневого каталога в v3.8.26 (для уменьшения загромождённости):**
+> **Вынесено из корня в v3.8.26 (расхламление):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` и генерируемый файл `quality-metrics.json` (игнорируется Git). См. [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` и сгенерированный `quality-metrics.json` (gitignored). См. [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -220,7 +220,7 @@ src/
 | Модуль                 | Цель                                                    |
 | ---------------------- | ------------------------------------------------------- |
 | `policy.ts`            | Механизм политики                                       |
-| `fallbackPolicy.ts`    | Дерево резервных решений                                |
+| `fallbackPolicy.ts`    | Дерево принятия резервных решений                       |
 | `costRules.ts`         | Правила расчета стоимости                               |
 | `lockoutPolicy.ts`     | политика блокировки Model/connection                    |
 | `tagRouter.ts`         | Маршрутизация на основе тегов                           |
@@ -242,13 +242,13 @@ src/
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Компонент информационной панели API: адаптеры поверх `packages/ui-kit` — см. `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: имена значков, используемые на экранах. → Компоненты Lucide (`<Icon>`)                                |
-| `constants/providers.ts`         | **380 провайдеров** с проверкой Zod (источник истины)                                                             |
+| `constants/providers.ts`         | **394 провайдера** с проверкой Zod (источник истины)                                                              |
 | `constants/cliTools.ts`          | Внешний реестр инструментов CLI                                                                                   |
-| `constants/routingStrategies.ts` | **20 стратегий маршрутизации** с приоритетами                                                                     |
+| `constants/routingStrategies.ts` | **22 стратегии маршрутизации** с приоритетами                                                                     |
 | `constants/publicApiRoutes.ts`   | Маршруты, требующие аутентификации носителя (или управления)                                                      |
 | `constants/upstreamHeaders.ts`   | Список запрещенных заголовков для восходящих запросов                                                             |
 | `validation/schemas.ts`          | ~ 80 схем Zod (единый источник достоверных данных для контрактов API )                                            |
-| `validation/helpers.ts`          | помощники проверки Zod (`validateBody` и т. д.)                                                                   |
+| `validation/helpers.ts`          | помощники проверки Zod (`validateBody` и т. д.)                                                                   |
 | `types/`                         | Общие типы TS                                                                                                     |
 | `contracts/`                     | Публичные контракты API (используемые `files:` в `package.json`)                                                  |
 | `utils/circuitBreaker.ts`        | Автоматический выключатель поставщика (см. `docs/architecture/RESILIENCE_GUIDE.md`)                               |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 файлов (12 обработчиков + 4 вспомогательных модуля): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search и т. д.
-├── executors/           # 150 модулей-исполнителей (классы, расширяющие BaseExecutor, и вспомогательные модули для отдельных провайдеров)
+├── executors/           # 163 модулей-исполнителей (классы, расширяющие BaseExecutor, и вспомогательные модули для отдельных провайдеров)
 ├── translator/          # Конвертеры форматов (9 для запросов, 9 для ответов, 9 вспомогательных)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ сервисных модулей (combo, accountFallback, autoCombo, reasoningCache, скрытый режим claude code/chatgpt, modelDeprecation, taskAwareRouter, workflowFSM и т. д.)
@@ -395,24 +395,24 @@ open-sse/
 
 ### Руководства высшего уровня
 
-| Док                         | Цель                                                                                                   |
-| --------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `ARCHITECTURE.md`           | Высокоуровневая архитектура, карта подсистем, поверхность информационной панели                        |
-| `CODEBASE_DOCUMENTATION.md` | Инженерная справка: каталоги, модули, соглашения                                                       |
-| `FEATURES.md`               | Матрица функций с основными моментами версии 3.8                                                       |
-| `USER_GUIDE.md`             | Руководство конечного пользователя (настройка, модели, комбинации, CLIs, аудио и т. д.)                |
-| `API_REFERENCE.md`          | Ссылка на конечную точку API с моделью аутентификации                                                  |
-| `openapi.yaml`              | спецификация OpenAPI 3.0 (121 путь)                                                                    |
-| `SETUP_GUIDE.md`            | Методы установки (npm, npx, Docker, Electron, Termux, исходный код)                                    |
-| `ENVIRONMENT.md`            | Все переменные окружения (задокументировано ~ 800, ~ 3050 строк `.env.example`)                        |
-| `TROUBLESHOOTING.md`        | Распространенные ошибки Известные проблемы + v3.8.0                                                    |
-| `RELEASE_CHECKLIST.md`      | Полный поток релизов (навыки, хаски, обычные коммиты, развертывание)                                   |
-| `COVERAGE_PLAN.md`          | Цели покрытия и текущее состояние                                                                      |
-| `FREE_TIERS.md`             | Курируемые поставщики бесплатного уровня (48 + бесплатно + 11 OAuth)                                   |
-| `CLI-TOOLS.md`              | Внешняя интеграция CLI + Внутренняя OmniRoute CLI                                                      |
-| `I18N.md`                   | i18n архитектура, добавление языка, 67 локалей                                                         |
-| `UNINSTALL.md`              | Чистые шаги удаления                                                                                   |
-| `PROVIDER_REFERENCE.md`     | **Автоматически генерируется** каталог 380 провайдеров (регенерация: `npm run gen:provider-reference`) |
+| Док                         | Цель                                                                                                  |
+| --------------------------- | ----------------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Высокоуровневая архитектура, карта подсистем, поверхность информационной панели                       |
+| `CODEBASE_DOCUMENTATION.md` | Инженерная справка: каталоги, модули, соглашения                                                      |
+| `FEATURES.md`               | Матрица функций с основными моментами версии 3.8                                                      |
+| `USER_GUIDE.md`             | Руководство конечного пользователя (настройка, модели, комбинации, CLIs, аудио и т. д.)               |
+| `API_REFERENCE.md`          | Ссылка на конечную точку API с моделью аутентификации                                                 |
+| `openapi.yaml`              | спецификация OpenAPI 3.0 (121 путь)                                                                   |
+| `SETUP_GUIDE.md`            | Методы установки (npm, npx, Docker, Electron, Termux, исходный код)                                   |
+| `ENVIRONMENT.md`            | Все переменные окружения (задокументировано ~ 800, ~ 3050 строк `.env.example`)                       |
+| `TROUBLESHOOTING.md`        | Распространенные ошибки Известные проблемы + v3.8.0                                                   |
+| `RELEASE_CHECKLIST.md`      | Полный поток релизов (навыки, хаски, обычные коммиты, развертывание)                                  |
+| `COVERAGE_PLAN.md`          | Цели покрытия и текущее состояние                                                                     |
+| `FREE_TIERS.md`             | Курируемые поставщики бесплатного уровня (48 + бесплатно + 11 OAuth)                                  |
+| `CLI-TOOLS.md`              | Внешняя интеграция CLI + Внутренняя OmniRoute CLI                                                     |
+| `I18N.md`                   | i18n архитектура, добавление языка, 67 локалей                                                        |
+| `UNINSTALL.md`              | Чистые шаги удаления                                                                                  |
+| `PROVIDER_REFERENCE.md`     | **Автоматически генерируется** каталог 394 провайдера (регенерация: `npm run gen:provider-reference`) |
 
 ### Подробное описание подсистемы
 
@@ -428,7 +428,7 @@ open-sse/
 | `EVALS.md`                                    | Структура оценки (наборы, прогоны, рубрики)                                                |
 | `GUARDRAILS.md`                               | PII Masker, быстрая инъекция, Vision Bridge                                                |
 | `COMPLIANCE.md`                               | Журнал аудита, хранение, отказ от участия noLog                                            |
-| `WEBHOOKS.md`                                 | Доставка вебхука, подписанного HMAC                                                        |
+| `WEBHOOKS.md`                                 | Доставка веб-перехватчика, подписанного HMAC                                               |
 | `REASONING_REPLAY.md`                         | Гибридный кэш memory/SQLite для `reasoning_content`                                        |
 | `AUTHZ_GUIDE.md`                              | Конвейер авторизации (`classify` → `policies` → `enforce`)                                 |
 | `RESILIENCE_GUIDE.md`                         | Автоматический выключатель, время восстановления + блокировка модели +                     |
@@ -440,7 +440,7 @@ open-sse/
 | Док                             | Цель                                            |
 | ------------------------------- | ----------------------------------------------- |
 | `COMPRESSION_GUIDE.md`          | Обзор режимов сжатия: дорожная карта +          |
-| `COMPRESSION_ENGINES.md`        | Caveman + RTK engine, контракт на реестр        |
+| `COMPRESSION_ENGINES.md`        | Caveman + RTK engine, договор о реестре         |
 | `COMPRESSION_RULES_FORMAT.md`   | Схема JSON пакета правил Caveman                |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Инвентаризация пакетов правил для каждого языка |
 | `RTK_COMPRESSION.md`            | Декларативный конвейер RTK (56 фильтров)        |

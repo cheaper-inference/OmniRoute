@@ -53,6 +53,9 @@ export const PROVIDER_SPECIFIC_SECRET_FIELDS = [
   // enveloped (see mapProviderSpecificDataSecrets); the dashboard shows and
   // edits the list, so the API returns it masked exactly like `apiKey`.
   "extraApiKeys",
+  // The Zed Hosted billing portal link embeds its Orb portal token, so the whole
+  // value is a credential even though it looks like a URL.
+  "billingPortalUrl",
   // Short-lived provider sub-tokens that refresh / mint flows write back into
   // the metadata object (open-sse/executors/ghe-copilot.ts,
   // open-sse/services/tokenRefresh/providers/museCode.ts + kiro.ts,

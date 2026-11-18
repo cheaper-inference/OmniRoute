@@ -379,6 +379,63 @@ test("resolvePreviousResponseState fails closed when the streaming collector tru
   assert.equal(store.resolvePreviousResponseState("resp_gen-collector-truncated", "key-1"), null);
 });
 
+test("resolvePreviousResponseState resolves a completed response whose collector dropped stream events", () => {
+  // A reasoning-heavy reply passes the collector's event cap and sets
+  // `_truncated: true`, yet still reaches `response.completed`: the summary
+  // holds the whole output. Treating it as lost made OmniRoute answer
+  // previous_response_not_found for a response it had just served.
+  insertCallLog({
+    id: "log-dropped-events",
+    responseId: "resp_gen-dropped-events",
+    apiKeyId: "key-1",
+    detailState: "ready",
+    artifactRelPath: "2026-01-01/log-dropped-events.json",
+  });
+  const output = [
+    { type: "reasoning", id: "rs_1", summary: [] },
+    { type: "function_call", call_id: "call_1", name: "read", arguments: "{}" },
+  ];
+  writeArtifact("2026-01-01/log-dropped-events.json", {
+    clientRawRequest: { body: { input: [{ type: "message", role: "user", content: "hi" }] } },
+    clientResponse: {
+      _streamed: true,
+      _eventCount: 961,
+      _droppedEvents: 1,
+      _truncated: true,
+      summary: { id: "resp_gen-dropped-events", status: "completed", output },
+    },
+  });
+
+  assert.deepEqual(store.resolvePreviousResponseState("resp_gen-dropped-events", "key-1"), {
+    input: [{ type: "message", role: "user", content: "hi" }],
+    output,
+  });
+});
+
+test("resolvePreviousResponseState fails closed on a truncated response that never completed", () => {
+  // Partial output from a stream that stopped early must not be replayed as
+  // the turn's whole contribution, even when it is not empty.
+  insertCallLog({
+    id: "log-partial-output",
+    responseId: "resp_gen-partial-output",
+    apiKeyId: "key-1",
+    detailState: "ready",
+    artifactRelPath: "2026-01-01/log-partial-output.json",
+  });
+  writeArtifact("2026-01-01/log-partial-output.json", {
+    clientRawRequest: { body: { input: [{ type: "message", role: "user", content: "hi" }] } },
+    clientResponse: {
+      _truncated: true,
+      summary: {
+        status: "in_progress",
+        output: [{ type: "message", role: "assistant", content: "par" }],
+      },
+    },
+  });
+
+  assert.equal(store.resolvePreviousResponseState("resp_gen-partial-output", "key-1"), null);
+});
+
 test("resolvePreviousResponseState fails closed on an empty output array even without the _truncated flag", () => {
   // Belt-and-suspenders for the same failure class when the collector
   // truncated without ever setting `_truncated` (or for a non-streaming
@@ -535,7 +592,10 @@ test("resolvePreviousResponseState never lets the pending bridge cross tenants",
     responseId: "resp_gen-tenant-bridge",
     pipeline: {
       clientRawRequest: { body: { input: [{ role: "user", content: "secret" }] } },
-      clientResponse: { id: "resp_gen-tenant-bridge", output: [{ role: "assistant", content: "reply" }] },
+      clientResponse: {
+        id: "resp_gen-tenant-bridge",
+        output: [{ role: "assistant", content: "reply" }],
+      },
     },
   });
 
@@ -589,8 +649,13 @@ test("the pending bridge shares the durable path's fail-closed rules (video-reda
     responseId: "resp_gen-video-bridge",
     videoContentRemoved: true,
     pipeline: {
-      clientRawRequest: { body: { input: [{ role: "user", content: "[redacted-video-transcript]" }] } },
-      clientResponse: { id: "resp_gen-video-bridge", output: [{ role: "assistant", content: "ok" }] },
+      clientRawRequest: {
+        body: { input: [{ role: "user", content: "[redacted-video-transcript]" }] },
+      },
+      clientResponse: {
+        id: "resp_gen-video-bridge",
+        output: [{ role: "assistant", content: "ok" }],
+      },
     },
   });
 
@@ -602,7 +667,6 @@ test("the pending bridge shares the durable path's fail-closed rules (video-reda
 
   assert.equal(store.resolvePreviousResponseState("resp_gen-video-bridge", "key-1"), null);
 });
-
 
 // resolveTurnCompletionState / resolveConversationStalledState -- backs the
 // /dashboard/conversations "stalled" badge (live incident 2026-09-04: a
@@ -636,7 +700,10 @@ test("resolveTurnCompletionState returns 'tool_call_pending' for a completed str
     },
   });
 
-  assert.equal(store.resolveTurnCompletionState("2026-01-01/turn-tool-call.json"), "tool_call_pending");
+  assert.equal(
+    store.resolveTurnCompletionState("2026-01-01/turn-tool-call.json"),
+    "tool_call_pending"
+  );
 });
 
 test("resolveTurnCompletionState returns 'incomplete' for a collector-truncated stream (_truncated: true)", () => {
@@ -662,7 +729,10 @@ test("resolveTurnCompletionState returns 'incomplete' for a non-'completed' stat
     clientResponse: { summary: { status: "failed", output: [] } },
   });
 
-  assert.equal(store.resolveTurnCompletionState("2026-01-01/turn-failed-status.json"), "incomplete");
+  assert.equal(
+    store.resolveTurnCompletionState("2026-01-01/turn-failed-status.json"),
+    "incomplete"
+  );
 });
 
 test("resolveTurnCompletionState returns 'unknown' for a missing artifact", () => {

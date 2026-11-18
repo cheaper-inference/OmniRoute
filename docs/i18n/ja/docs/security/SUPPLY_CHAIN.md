@@ -31,20 +31,11 @@ osvまたはTrivyが新たに公開されたCVEによって赤くなった場合
 
 ツールが存在しない場合や測定が失敗した場合（osv-scannerがPATHにない、osv.dev/ネットワークに到達できない、無効なJSONなど）、両方のゲートは**正常にスキップ**します（終了コード0）。 — **測定**の失敗がブロックすることはなく、**測定された**退行のみがブロックします。
 
-## 既知の許容リスク
+## 退職後の依存リスク
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+固定されたプロンプトフー開発ツールをアップグレードした後、ルート ロックファイルには`extract-zip`またはその依存関係エッジが含まれなくなりました。これにより、以前に受け入れられ、 #14482で追跡されていた`promptfoo` → `@openai/codex-security` → `extract-zip`チェーンが廃止されます。 `tests/unit/extract-zip-14482-exposure.test.ts`の回帰チェックはその再導入を拒否し、実稼働コードからのインポートの禁止を維持します。
 
-`extract-zip@2.0.1` には、未パッチの2つの高深刻度シンボリックリンクトラバーサルアドバイザリが含まれています。
-上記のCVE Varianceの是正策の「上流での修正なし」のブランチに従い、これはバージョンアップではなく、**許容リスク**と見なされます。
-
-- **連鎖:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`。`package-lock.json` で確認済み — 依存関係ツリー全体で、`extract-zip` を宣言しているパッケージは1つ (`@openai/codex-security`) だけであり、`@openai/codex-security` を宣言しているパッケージも1つ (`promptfoo`) だけです。
-- **連鎖内のどこにも修正版リリースが存在しません。** `extract-zip@2.0.1` (2020年公開) はこのパッケージの最終リリースであり、メンテナンスされていません。`@openai/codex-security` の現在の npm-latest (`0.1.29`) は、依然として `extract-zip@2.0.1` を使用しています。
-- **本番環境からは到達不能。** `promptfoo` は devDependency のみであり (`dependencies` には決してリストされません)、`src/`、`open-sse/`、または `bin/` の下のどのファイルも `extract-zip` npm パッケージをインポートしていません — OmniRoute 独自の `extractZip()` ヘルパー (`src/lib/versionManager/binaryManager.ts:93`) はネイティブの `unzip`/`tar` を呼び出しており、無関係です。`@openai/codex-security` も、extract-zip の onEntry コールバックの上に独自のシンボリックリンクトラバーサルガードを搭載しています。
-- `package.json` の `overrides` を介して `extract-zip` をエイリアス**しないでください** — 唯一の実行可能なドロップイン代替品は Electron-org-internal であり、`@openai/codex-security` 独自の onEntry/defaultDirMode/defaultFileMode チェックとはAPI互換性がありません。これをオーバーライドすると、そのパッケージのセキュリティチェックがサイレントに破損します。
-- **ベースライン:** 測定された osv `vulnCount` (3) は、凍結された `config/quality/quality-baseline.json` ベースライン (27) をすでに大幅に下回っています — ラチェット変更は不要です。
-- **リグレッションガード:** `tests/unit/extract-zip-14482-exposure.test.ts` は、上記の連鎖と本番環境からのインポートなしの不変条件をアサートします。どちらかが破られた場合 (例: 将来のPRで `extract-zip` が本番環境から到達可能になった場合)、CIは失敗します。
-- **追跡:** issue #14482。
+現在の依存関係の修復では、互換性オーバーライドの範囲が Azure ID のMSALクライアントと get-uri のFTPクライアントにも適用されます。 Azure トークンの取得とFTPの取得は、制御されたトランスポートを使用してテストされます。どちらのOpenCodeパッケージも独自のビルド スイートとテスト スイートを実行します。レジストリ アドバイザリ カウントは、ある時点での測定値であり、ロックファイルがコミットされた後に変更される可能性があります。
 
 ## バックログ: Scorecardアドバイザリ → ブロッキング
 

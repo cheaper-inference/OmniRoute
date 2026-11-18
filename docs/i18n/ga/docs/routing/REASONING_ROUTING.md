@@ -40,22 +40,17 @@ roghnaithe cheana féin. Ní féidir léi ach an iarracht agus an buiséad a ath
 
 ## Iarracht agus Buiséad
 
-Glacann `sourceEffort` le `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, agus
-`ultra`. Ciallaíonn `missing` nach bhfuil iarracht scoite, scorán smaointeoireachta ná buiséad smaointeoireachta san iarratas.
-Dá bhrí sin, ní mheaitseálann ach `any` comhartha buiséid amháin.
+Glacann `sourceEffort` `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, agus `ultra`. Ciallaíonn `missing` nach bhfuil iarracht scoite ná scorán smaointeoireachta nó buiséad smaointeoireachta san iarratas. Mar sin ní dhéantar comhartha buiséid amháin a mheaitseáil ach le `any`.
 
-Tá trí leagan de `effortMode` ann:
+Tá trí leagan `effortMode` :
 
-- Coinníonn `inherit` iarracht an chliaint agus ceadaíonn sé fós don tsamhail nó don teaglama athrú.
-- Socraíonn `default` `targetEffort` nuair nach bhfuil aon chomhartha sainráite réasúnaíochta ann.
-- Cuireann `force` `targetEffort` in ionad na hiarrachta scoite.
+- Coinníonn `inherit` iarracht an chliaint agus é fós ag ligean don mhúnla nó don teaglama athrú.
+- Ní shocraíonn `default` `targetEffort` ach amháin nuair nach bhfuil comhartha réasúnaíochta follasach ann.
+- Cuirtear `force` in ionad na hiarrachta scoite `targetEffort`.
 
-Go neamhspleách air sin, is féidir le `budgetAction` a bheith ina `preserve`, `remove`, nó `set`. Baineann `force` le `none`
-gach réimse aitheanta iarrachta agus buiséid. Tá `none` in éineacht le `set` neamhbhailí.
+Go neamhspleách, is féidir `budgetAction` a bheith `preserve`, `remove`, nó `set`. Baineann `force` le `none` gach iarracht aitheanta agus réimsí buiséid, ansin socraíonn sé `reasoning_effort: "none"`, toisc go n-iompaíonn roinnt soláthraithe ag smaoineamh ar nuair a bhíonn an réimse as láthair. Coigeartaítear soláthraithe a dhiúltaíonn don `none` litriúil tráth seolta i `open-sse/executors/base/reasoningEffort.ts`. Mapálann an Cód Ordaithe go `low` é , ach amháin ar iarratais i gcruth Freagraí (`input` gan `messages`), áit a gcoinníonn sé `none`. Ar Oibrithe Cloudflare AI (`cloudflare-ai`), faigheann na samhlacha a dhiúltóidh `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) `low`; Oibrithe eile Coinníonn samhlacha AI `none`. Ní rogha é an réimse a scaoileadh ann, toisc go ritheann iarracht as láthair sraith réamhshocraithe an tsamhail. tá `none` mar aon le `set` neamhbhailí.
 
-Diúltaítear d’iarratais a dhíríonn ar shamhlacha atá ar eolas a bheith neamh-chomhoiriúnach roimh an nglao réamhtheachtach. I gcás spriocanna teaglama,
-baintear iontrálacha neamh-chomhoiriúnacha; mura bhfanann ceann ar bith, filleann an t-iarratas stádas `400`.
-Cruthaíonn sonraí cumais anaithnide rabhadh agus fágann siad an riail gníomhach.
+Diúltaítear iarratais a dhíríonn ar mhúnlaí aithnidiúla nach bhfuil comhoiriúnach leo roimh an nglao réamhtheachtacha. Maidir le spriocanna teaglama, baintear iontrálacha neamh-chomhoiriúnacha; mura bhfanann ceann ar bith, filleann an t-iarratas status `400`. Táirgeann sonraí cumais anaithnid rabhadh agus fágtar an riail gníomhach.
 
 ## Slándáil agus Iompar
 

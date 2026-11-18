@@ -155,15 +155,15 @@ den (`src/server/auth/dashboardMfa.ts`).
 
 ## Ruttklasser
 
-`src/server/authz/types.ts` definierar tre klasser. Varje rutt som inte kan klassificeras deterministiskt faller tillbaka på `MANAGEMENT`.
+`src/server/authz/types.ts` definierar tre klasser; varje rutt som inte kan klassificeras deterministiskt faller tillbaka till `MANAGEMENT`.
 
-| Klass        | Beskrivning                                                                                                                                               | Autentisering krävs                                              |
-| ------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------- |
-| `PUBLIC`     | Uttryckligen säkra rutter: inloggning, utloggning, status, init, hälsokontroll och onboarding-bootstrap.                                                  | Ingen                                                            |
-| `CLIENT_API` | Endpoints för modellservering: `/api/v1/*`, `/api/v1beta/*`, samt aliasen `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-nyckel när feature-flaggan `REQUIRE_API_KEY` är aktiverad |
-| `MANAGEMENT` | Dashboardsidor, inställningar, leverantörer, nycklar, admin- och diagnostikendpoints.                                                                     | Dashboardsession ELLER Bearer med scopet `manage`                |
+| Klass        | Beskrivning                                                                                                                                             | Auth krävs                                                                    |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| `PUBLIC`     | Explicit säkra rutter — inloggning, utloggning, status, hälsa, onboarding bootstrap.                                                                    | Ingen                                                                         |
+| `CLIENT_API` | Modellbetjänande slutpunkter — `/api/v1/*`, `/api/v1beta/*`, plus alias `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bärarnyckel när den effektiva `REQUIRE_API_KEY` funktionsflaggan är aktiverad |
+| `MANAGEMENT` | Dashboard-sidor, inställningar, leverantörer, nycklar, admin och diagnostikslutpunkter.                                                                 | Dashboard session OR Bearer med `manage` scope                                |
 
-Vissa `MANAGEMENT`-åtgärder är **endast för operatören**: en nyckel med scopet `manage` räcker inte. Att exportera lagrade inloggningsuppgifter (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), återställa en backup över de aktuella datan (`POST /api/db-backups/import`, inklusive `dryRun=true`, `POST /api/db-backups` för återställning via id, `POST /api/settings/import-json`) och förstöra återställningspunkter (`DELETE /api/db-backups` för rensning, samt `PATCH /api/db-backups` eftersom den sparade retentionen styr den automatiska gallringen efter varje backup) kräver en dashboardsession, den lokala CLI-identiteten eller att inloggningen är avstängd. Att utfärda en synk-token (`POST /api/sync/tokens`) och att skapa en `admin`-åtkomsttoken för CLI (`POST /api/cli/tokens`) kräver en dashboardsession eller den lokala CLI-identiteten i alla inloggningslägen. API-nycklar med vilket scope som helst och `oma_`-åtkomsttokens är inte operatörsinloggningsuppgifter: de får `403` närhelst en sådan krävs. Kontrollen finns i `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Ändring av inloggningsinställningarna är också endast för operatören: `POST /api/settings/require-login` (sätt hanteringslösenordet / växla `requireLogin`) accepterar bara dessa uppgifter när ett lösenord väl finns. Bootstrap-fönstret vid första start (inget lösenord ännu) är oförändrat. En dashboardsession måste skicka `currentPassword` för att ersätta lösenordet (`403` när det saknas eller är fel, granskat som `settings.update_failed`). Den lokala CLI:n och en instans med avstängd inloggning behåller återställningsvägen och får sätta ett lösenord utan det, eftersom båda är bundna till värden som äger datakatalogen.
+Några `MANAGEMENT` -åtgärder är** endast för operatör** : en `manage` nyckel räcker inte. Att exportera lagrade referenser (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), återställa en säkerhetskopia över livedata (`POST /api/db-backups/import` inklusive `dryRun=true`, `POST /api/db-backups` restore by id, `POST /api/settings/import-json`), förstöra återställningspunkter (`DELETE /api/db-backups` cleanup och `PATCH /api/db-backups` eftersom lagringen den kvarstår driver den automatiska beskärningen efter varje säkerhetskopiering av ämnet för varje lokal CLI inloggning, en lokal zdq-inloggning). Att utfärda en synkroniseringstoken (`POST /api/sync/tokens`) och skapa en `admin` CLI -åtkomsttoken (`POST /api/cli/tokens`) kräver en instrumentpanelsession eller det lokala CLI ämnet i varje inloggningsläge. API nycklar oavsett omfattning och `oma_` -åtkomsttokens är inte operatörsuppgifter: de får `403` närhelst en sådan krävs. Checken lever i `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Ändring av inloggningsinställningarna är också endast för operatören: `POST /api/settings/require-login` (ställ in hanteringslösenordet / växla `requireLogin`) accepterar endast de inloggningsuppgifterna när ett lösenord finns — det första startfönstret (inget lösenord ännu) är oförändrat — och en instrumentpanelsession måste skicka `currentPassword` för att ersätta lösenordet (`403` när det saknas eller är fel, `settings.update_failed` som). Den lokala CLI och en instans med inloggning inaktiverad behåller återställningssökvägen och kan ställa in ett lösenord utan den, eftersom båda är bundna till värden som äger datakatalogen.
 
 ## Rörledning
 
@@ -194,53 +194,49 @@ Varje ruttklass har en policy i `src/server/authz/policies/`:
 
 En framgångsrik policy returnerar `AuthSubject` med `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Nedströmshanterare kan läsa den via `assertAuth(request, "CLIENT_API")` i `src/server/authz/assertAuth.ts` istället för att köra autentiseringslogik igen.
 
-## Lista över offentliga routes
+## Lista över allmänna vägar
 
-`src/shared/constants/publicApiRoutes.ts` är den explicita allowlisten:
+`src/shared/constants/publicApiRoutes.ts` är den explicita godkännandelistan:
 
-Listan är uppdelad efter **struktur**, och uppdelningen är avgörande (GHSA-74g9-q8f6-793h): ett prefix
-matchas med `startsWith()`, så det matchar även alla angränsande sökvägar som delar dess inledande tecken.
-`/api/usage/om-usage` som prefix markerar `/api/usage/om-usage<anything>` som PUBLIC, och Next matchar
-det mot `/api/usage/[connectionId]` — en handler utan egen autentisering.
+Listan är uppdelad efter** form** , och uppdelningen är bärande (GHSA-74g9-q8f6-793h): ett prefix matchas med `startsWith()`, så det matchar också varje intilliggande sökväg som delar dess ledande tecken. `/api/usage/om-usage` som ett prefix markerat `/api/usage/om-usage<anything>` PUBLIC, och Next löser det för att `/api/usage/[connectionId]` — en hanterare utan egen auth.
 
 ```ts
-// Äkta underträd. Varje post MÅSTE sluta med "/" (säkerställs av ett enhetstest).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // behandlas som CLIENT_API i classify, inte som "no-auth public"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Enskilda routes, matchas EXAKT (med eller utan avslutande snedstreck).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // inloggningssteg 2 för valfri TOTP; kräver MFA-pending-cookien
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Skrivskyddade enskilda routes som också omfattas av CORS-ursprungsundantaget.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Skrivskyddad enskild route UTAN CORS-ursprungsundantaget.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Skrivskyddade routes är offentliga **endast** för säkra metoder. Obs! `classifyRoute()` undantar `/api/v1/*` och `/api/v1beta/*` från PUBLIC-fallbacken — de är alltid `CLIENT_API`, så Bearer-nyckelpolicyn gäller fortfarande.
+Läsbara rutter är offentliga** endast** för säkra metoder. Obs: `classifyRoute()` utesluter `/api/v1/*` och `/api/v1beta/*` från PUBLIC -fall-through — de är alltid `CLIENT_API` så bärarnyckelpolicyn gäller fortfarande.
 
 ## Lägga till en ny route
 
@@ -315,15 +311,15 @@ Den är avstängd om inte `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Denna rankning gäller endast för åtkomsttoken-
 autentiseringsuppgiften. Se [Management Authentication](../guides/MANAGEMENT-AUTH.md).
 
-## Växling av autentiseringskrav
+## Växla för autentisering krävs
 
-`isAuthRequired()` i `src/shared/utils/apiAuth.ts` avgör om **någon** autentisering alls tillämpas för en begäran:
+`isAuthRequired()` i `src/shared/utils/apiAuth.ts` avgör om** några** auth verkställs för en begäran:
 
-- `settings.requireLogin === false` → autentisering är globalt avstängd, förutom för den alltid skyddade nivån (se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) och anropen som lämnar ut en inloggningsuppgift som den accepterar. Dessa kräver samma inloggningsuppgift som med inloggning påslagen: utfärdande av synk-tokens, utfärdande av CLI-åtkomsttokens med vilket scope som helst, och skapande av en API-nyckel med scopet `manage`/`admin`, beviljande av det scopet till en nyckel, eller förnyelse eller visning av en sådan nyckel (`requireCredentialForManagementScopedKey()` i `src/lib/api/requireManagementAuth.ts`). Nycklar för enbart inferens förblir öppna.
-- Inget lösenord konfigurerat **och** ingen miljövariabel `INITIAL_PASSWORD` → bootstrap-läget tillåter introduktionsguiden och loopback-begäranden, men exponerade nätverksbegäranden kräver fortfarande inloggningsuppgifter.
-- Vid varje DB-fel nekas åtkomst (säkert som standard).
+- `settings.requireLogin === false` → auth är globalt inaktiverad, förutom den alltid skyddade nivån (se [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) och de anrop som delar ut en autentiseringsinformation som den accepterar, som behöver samma autentiseringsuppgifter som med inloggning: utfärda synkroniseringstokens, prägla CLI åtkomsttokens oavsett omfattning, och skapa en API nyckel med `manage`-nyckeln,`admin` scope, nyckel, eller regenerera eller avslöja en sådan nyckel (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Endast slutledningsnycklar förblir öppna. Att skriva en skyddad funktionsflagga (`REQUIRE_API_KEY`, de andra säkerhetsflaggorna och SSRF / TLS /MCP-scope/sandbox-flaggorna listade i [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) och spara PII -maskeringsinställningarna (`PUT /api/settings/pii`) behöver också fortfarande en autentiseringsinformation.
+- Inget lösenord har konfigurerats** och** no `INITIAL_PASSWORD` env var → bootstrap-läge tillåter onboarding-guiden och loopback-förfrågningar, men exponerade nätverksbegäranden behöver fortfarande autentiseringsuppgifter. Undantag: att skriva en skyddad funktionsflagga och spara PII maskeringsinställningarna (`PUT /api/settings/pii`) behöver en referens även från loopback, så loopback i sig räcker inte där.
+- Alla DB fel → misslyckas stängs (säkert som standard).
 
-Klientens API-nyckelkontroll använder `isRequireApiKeyEnabled()` i `src/shared/utils/featureFlags.ts`, inte en direkt läsning av `process.env.REQUIRE_API_KEY`. Detta är viktigt för driftsatta instanser: att växla `REQUIRE_API_KEY` i Dashboard → Feature Flags sparar en DB-åsidosättning och påverkar omedelbart `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` och andra autentiseringskontroller för klient-API:et som delar denna hjälpfunktion. Om feature-flaggelagret inte kan läsas nekas klient-API-autentiseringen åtkomst och en nyckel krävs.
+Client API key enforcement använder `isRequireApiKeyEnabled()` i `src/shared/utils/featureFlags.ts`, inte en direkt `process.env.REQUIRE_API_KEY` läsning. Det här är viktigt för distribuerade instanser: växla `REQUIRE_API_KEY` i Dashboard → Feature Flags lagrar en DB överstyrning och påverkar omedelbart `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` och andra klient-API-autentiseringskontroller som delar denna hjälpare. Om funktionsflaggalagret inte kan läsas, stängs inte klientens API auth och kräver en nyckel.
 
 ## Bakåtinkompatibel ändring — v3.8.0
 

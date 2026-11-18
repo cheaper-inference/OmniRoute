@@ -18,10 +18,16 @@ process.env.RELAY_IP_PER_MINUTE = "2";
 const relaySecurity =
   await import("../../../../src/app/api/v1/relay/chat/completions/relaySecurity.ts");
 const authzHeaders = await import("../../../../src/server/authz/headers.ts");
-const { getDbInstance } = await import("../../../../src/lib/db/core.ts");
+const { getDbInstance, resetDbInstance } = await import("../../../../src/lib/db/core.ts");
 const { getRelayLogs } = await import("../../../../src/lib/db/relayProxies.ts");
 
 const { getClientIp, checkIpRateLimit } = relaySecurity;
+
+// The limiter uses wall-clock minute windows. Freeze only Date so async route imports and
+// requests cannot straddle a boundary, while their timers still run normally.
+const NOW = Date.parse("2026-01-01T00:00:59.999Z");
+test.beforeEach((context) => context.mock.timers.enable({ apis: ["Date"], now: NOW }));
+test.after(() => resetDbInstance());
 
 // Wire names pinned on purpose: the route and the pipeline must agree on them.
 const TRUSTED_CLIENT_IP = "x-omniroute-trusted-client-ip";
@@ -101,6 +107,40 @@ test("throttle: distinct stamped client addresses get separate buckets", () => {
   assert.equal(checkIpRateLimit(tokenId, keyFor("203.0.113.2")).allowed, true, "other client");
   assert.equal(checkIpRateLimit(tokenId, keyFor("203.0.113.1")).allowed, false, "1st client 3rd");
   assert.equal(checkIpRateLimit(tokenId, keyFor("203.0.113.2")).allowed, false, "2nd client 3rd");
+});
+
+test("throttle: a shared bucket resets exactly at the next minute boundary", (context) => {
+  const tokenId = freshTokenId();
+  const keyFor = (xff: string) => getClientIp(relayRequest({ "x-forwarded-for": xff })).throttleKey;
+
+  assert.deepEqual(checkIpRateLimit(tokenId, keyFor("198.51.100.1")), {
+    allowed: true,
+    resetIn: 1,
+  });
+  assert.deepEqual(checkIpRateLimit(tokenId, keyFor("198.51.100.2")), {
+    allowed: true,
+    resetIn: 1,
+  });
+  assert.deepEqual(checkIpRateLimit(tokenId, keyFor("198.51.100.3")), {
+    allowed: false,
+    resetIn: 1,
+  });
+
+  // The same bucket receives a fresh allowance one millisecond later, not 60 seconds after
+  // its first request. Rotating the untrusted header still cannot buy more than two requests.
+  context.mock.timers.setTime(NOW + 1);
+  assert.deepEqual(checkIpRateLimit(tokenId, keyFor("198.51.100.4")), {
+    allowed: true,
+    resetIn: 60,
+  });
+  assert.deepEqual(checkIpRateLimit(tokenId, keyFor("198.51.100.5")), {
+    allowed: true,
+    resetIn: 60,
+  });
+  assert.deepEqual(checkIpRateLimit(tokenId, keyFor("198.51.100.6")), {
+    allowed: false,
+    resetIn: 60,
+  });
 });
 
 // ── Route level ──────────────────────────────────────────────────────────────

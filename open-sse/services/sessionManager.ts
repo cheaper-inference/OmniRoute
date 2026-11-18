@@ -6,6 +6,7 @@
  */
 
 import { createHash } from "node:crypto";
+import { resolveTtlMsFromEnv } from "../utils/ttlFromEnv.ts";
 
 interface SessionEntry {
   createdAt: number;
@@ -41,8 +42,10 @@ const sessions = new Map<string, SessionEntry>();
 // Hard cap on active sessions to prevent memory exhaustion
 const MAX_SESSIONS = 200;
 
-// Auto-cleanup sessions older than 15 minutes (reduced from 30)
-const SESSION_TTL_MS = 15 * 60 * 1000;
+// Auto-cleanup sessions older than the TTL (15 minutes by default, reduced from 30).
+// Operators with long agent sessions can raise it via OMNIROUTE_SESSION_TTL_MIN
+// without a rebuild; invalid values (blank/NaN/≤0) keep the default.
+const SESSION_TTL_MS = resolveTtlMsFromEnv("OMNIROUTE_SESSION_TTL_MIN", 15);
 const _cleanupTimer = setInterval(() => {
   const now = Date.now();
   // Evict expired sessions

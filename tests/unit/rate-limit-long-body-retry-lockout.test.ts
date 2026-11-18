@@ -359,7 +359,7 @@ test("guard: the per-target deadline (abort signal) ends a wait behind a body pa
   assert.ok(waited < AT_ONCE_MS, `abort took ${waited}ms to end the queue wait`);
 });
 
-test("guard: a recorded pause never outlasts the refresh clock of the limiter it was set on", async () => {
+test("guard: a recorded pause never outlasts the refresh clock of the limiter it was set on", async (t) => {
   const conn = "conn-long-retry-anchor";
   await warm("gemini", conn, MODEL);
 
@@ -368,24 +368,46 @@ test("guard: a recorded pause never outlasts the refresh clock of the limiter it
   // past that clock, or the fail-fast would turn away a call the refill serves.
   const STALL_MS = 2_500;
   let builtAt = 0;
+  t.mock.timers.enable({ apis: ["Date", "setTimeout", "setInterval"], now: Date.now() });
   rateLimitManager.__setLimiterFactoryForTests((options) => {
     builtAt = Date.now();
     const limiter = new Bottleneck(options);
-    Atomics.wait(new Int32Array(new SharedArrayBuffer(4)), 0, 0, STALL_MS);
+    // Moving the clock without firing timers models a blocked constructor;
+    // unlike a wall-clock sleep it cannot consume the queue budget under load.
+    t.mock.timers.setTime(builtAt + STALL_MS);
     return limiter;
   });
-  record429("gemini", conn, MODEL, gemini429Body("4s"));
+  try {
+    record429("gemini", conn, MODEL, gemini429Body("4s"));
 
-  // About 1.5 s of the 4 s pause are left, well inside a 3 s budget.
-  const result = await rateLimitManager.withRateLimit(
-    "gemini",
-    conn,
-    MODEL,
-    async () => "refilled",
-    null,
-    3_000
-  );
-  assert.equal(result, "refilled");
-  // The refill comes 4 s after the build, however long the stall took.
-  assert.ok(Date.now() - builtAt >= 4_000, "the call waited for the refill");
+    // Exactly 1.5 s of the 4 s pause are left, inside the unchanged 3 s budget.
+    let settled = false;
+    let result: string | undefined;
+    let failure: unknown;
+    const pending = rateLimitManager
+      .withRateLimit("gemini", conn, MODEL, async () => "refilled", null, 3_000)
+      .then(
+        (value) => {
+          result = value;
+          settled = true;
+        },
+        (error) => {
+          failure = error;
+          settled = true;
+        }
+      );
+    // Bottleneck schedules asynchronous bookkeeping between timer callbacks.
+    // Advance that work deterministically while retaining the real limiter.
+    for (let elapsed = 0; !settled && elapsed <= 3_000; elapsed += 10) {
+      t.mock.timers.tick(10);
+      await new Promise<void>((resolve) => setImmediate(resolve));
+    }
+    assert.equal(settled, true, "the limiter settles within its queue budget");
+    await pending;
+    assert.ifError(failure);
+    assert.equal(result, "refilled");
+    assert.ok(Date.now() - builtAt >= 4_000, "the call waited for the refill");
+  } finally {
+    t.mock.timers.reset();
+  }
 });

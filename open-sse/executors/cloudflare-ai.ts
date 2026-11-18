@@ -1,4 +1,4 @@
-import { BaseExecutor } from "./base.ts";
+import { BaseExecutor, type ExecuteInput, type ExecutorExecuteResult } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 
 export type CloudflareProviderSpecificData = {
@@ -45,6 +45,81 @@ export function buildCloudflareAuthHeaders(
   return { Authorization: `Bearer ${key}` };
 }
 
+/** True when the outgoing body turns thinking off (`none` effort or `enable_thinking: false`). */
+function requestsThinkingOff(body: unknown): boolean {
+  if (!body || typeof body !== "object") return false;
+  const b = body as Record<string, unknown>;
+  const kwargs = b.chat_template_kwargs as Record<string, unknown> | undefined;
+  return b.reasoning_effort === "none" || kwargs?.enable_thinking === false;
+}
+
+/**
+ * With thinking off, Workers AI returns qwen3-30b-a3b's whole answer in
+ * `reasoning_content`/`reasoning` with `content: null` (verified live 2026-11-05), so a
+ * client that reads `content` gets an empty reply. Move it back. Only called when the
+ * request turned thinking off: with thinking on, a reasoning-only message is a turn that
+ * stopped inside its chain of thought, and promoting it would pass that off as the answer.
+ * Returns null when no choice needed the fix.
+ */
+export function promoteReasoningOnlyAnswer(payload: unknown): Record<string, unknown> | null {
+  const record = payload as Record<string, unknown> | null;
+  if (!record || typeof record !== "object" || !Array.isArray(record.choices)) return null;
+  let changed = false;
+  const choices = (record.choices as unknown[]).map((choice) => {
+    const message = (choice as Record<string, unknown> | null)?.message as
+      Record<string, unknown> | undefined;
+    if (!message || (message.content !== null && message.content !== "")) return choice;
+    if (Array.isArray(message.tool_calls) && message.tool_calls.length > 0) return choice;
+    const answer = [message.reasoning_content, message.reasoning].find(
+      (value) => typeof value === "string" && value.length > 0
+    );
+    if (answer === undefined) return choice;
+    const next: Record<string, unknown> = { ...message, content: answer };
+    delete next.reasoning_content;
+    delete next.reasoning;
+    changed = true;
+    return { ...(choice as Record<string, unknown>), message: next };
+  });
+  return changed ? { ...record, choices } : null;
+}
+
+function promotedBody(text: string): string {
+  try {
+    const promoted = promoteReasoningOnlyAnswer(JSON.parse(text));
+    return promoted ? JSON.stringify(promoted) : text;
+  } catch {
+    return text; // Not JSON after all: the caller's parser reports it, not this rewrite.
+  }
+}
+
+/**
+ * The rewrite runs as the caller reads the body, not here: execute() is timed as
+ * response-start, and chatCore applies its body timeout and Content-Length cap to the read
+ * that follows. The upstream headers stay, so that cap still sees the declared size.
+ */
+function withPromotedAnswer(response: Response): Response {
+  const isJson = (response.headers.get("content-type") || "").includes("json");
+  if (!response.ok || !response.body || !isJson) return response;
+  const decoder = new TextDecoder();
+  let text = "";
+  const body = response.body.pipeThrough(
+    new TransformStream<Uint8Array, Uint8Array>({
+      transform(chunk) {
+        text += decoder.decode(chunk, { stream: true });
+      },
+      flush(controller) {
+        text += decoder.decode();
+        controller.enqueue(new TextEncoder().encode(promotedBody(text)));
+      },
+    })
+  );
+  return new Response(body, {
+    status: response.status,
+    statusText: response.statusText,
+    headers: response.headers,
+  });
+}
+
 /**
  * CloudflareAIExecutor — handles dynamic URL construction with accountId.
  * Cloudflare Workers AI uses the authenticated user's account ID in the URL.
@@ -84,6 +159,18 @@ export class CloudflareAIExecutor extends BaseExecutor {
     }
 
     return headers;
+  }
+
+  /**
+   * @executorRecovery native
+   * @executorRecoveryReason Every request goes through the base recovery loop unchanged; only a successful non-streaming thinking-off reply is rewritten afterwards.
+   * @executorRecoveryTest tests/unit/cloudflare-ai-reasoning-only-content.test.ts
+   */
+  async execute(input: ExecuteInput): Promise<ExecutorExecuteResult> {
+    const result = await super.execute(input);
+    if (input.stream || result instanceof Response) return result;
+    if (!requestsThinkingOff(result.transformedBody ?? input.body)) return result;
+    return { ...result, response: withPromotedAnswer(result.response) };
   }
 
   transformRequest(

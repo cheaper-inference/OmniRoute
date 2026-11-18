@@ -595,3 +595,20 @@ test("#4305 a terminal (banned) account keeps its state after a redemption", asy
   assert.equal(accountFallback.isModelLocked("codex", connection.id, "gpt-5.5"), true);
   assert.equal((await readConnection(connection.id)).testStatus, "banned");
 });
+
+test("consumeCodexResetCredit reports a spent credit even when the post-redeem usage refresh throws", async () => {
+  const connection = (await createCodexConnection()) as { id: string };
+  mockResetThenUsage({ consumeBody: { code: "reset" } });
+  const upstream = globalThis.fetch;
+  // The credit is consumed upstream; the connection is gone by the time the usage refresh
+  // runs, so fetchAndPersistProviderLimits throws ("Connection not found").
+  globalThis.fetch = (async (url, init) => {
+    if (String(url).includes("/rate-limit-reset-credits/consume")) {
+      await providersDb.deleteProviderConnection(connection.id);
+    }
+    return upstream(url, init);
+  }) as typeof fetch;
+
+  const result = await resetCredits.consumeCodexResetCredit(connection.id, "redeem-refresh-throws");
+  assert.deepEqual(result, { outcome: "reset", usage: {} });
+});

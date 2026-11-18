@@ -14,7 +14,7 @@ interface CardProps extends Omit<React.HTMLAttributes<HTMLDivElement>, "title"> 
   children?: React.ReactNode;
   title?: React.ReactNode;
   subtitle?: React.ReactNode;
-  /** Material Symbols name, rendered through <Icon> in the header chip. */
+  /** ICON_MAP name, rendered through <Icon> in the header chip. */
   icon?: string;
   action?: React.ReactNode;
   padding?: "none" | "xs" | "sm" | "md" | "lg";

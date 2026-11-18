@@ -140,7 +140,7 @@ test("API-key-only antigravity connection is NOT marked expired by health check"
   );
 });
 
-test("connection with both apiKey and refreshToken: refresh path is tried", async () => {
+test("connection with both apiKey and refreshToken: refresh path is tried", async (t) => {
   await resetStorage();
 
   // Edge case: connection has both an API key and a refresh token
@@ -158,7 +158,16 @@ test("connection with both apiKey and refreshToken: refresh path is tried", asyn
     healthCheckInterval: 60,
   });
 
+  const refresh = t.mock.method(globalThis, "fetch", async (input, init) => {
+    assert.equal(String(input), "https://oauth2.googleapis.com/token");
+    assert.equal(init?.method, "POST");
+    const form = new URLSearchParams(String(init?.body));
+    assert.equal(form.get("grant_type"), "refresh_token");
+    assert.equal(form.get("refresh_token"), conn.refreshToken);
+    return Response.json({ error: "invalid_grant" }, { status: 400 });
+  });
   await checkConnection(conn);
+  assert.equal(refresh.mock.callCount(), 1, "the revoked refresh token must be tried once");
 
   const updated = await providersDb.getProviderConnectionById(conn.id);
 

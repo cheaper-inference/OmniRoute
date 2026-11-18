@@ -31,7 +31,7 @@ export default function HealthStats({
             data-stat={kind}
             aria-pressed={value === kind}
             onClick={() => onChange(kind)}
-            className="block h-auto min-h-0 min-w-0 rounded-lg px-3 py-2.5 text-start font-normal"
+            className="block h-auto min-h-0 min-w-0 rounded-lg px-3 py-2.5 text-start"
             style={{
               borderColor: value === kind ? color : "var(--color-border)",
               background:
@@ -43,7 +43,7 @@ export default function HealthStats({
             <span className="text-[11px] font-semibold text-text-muted">
               {kind === "all" ? t("statTotal") : all(DISPLAY_LABELS[kind])}
             </span>
-            <div className="text-2xl font-bold tabular-nums" style={{ color }}>
+            <div className="text-2xl font-semibold tabular-nums" style={{ color }}>
               {format.number(counts[kind])}
             </div>
             {kind === "ok" && (

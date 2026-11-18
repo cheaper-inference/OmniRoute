@@ -8,13 +8,15 @@ import { fileURLToPath } from "node:url";
 import {
   REQUIRED_SQLJS_RUNTIME_FILES,
   REQUIRED_MACHINE_TOKEN_RUNTIME_FILES,
-  REQUIRED_DOCS_I18N_RUNTIME_FILES,
+  FORBIDDEN_DOCS_RUNTIME_PATHS,
+  REQUIRED_DOCS_RUNTIME_FILES,
   pickTarball,
   evaluateBoot,
   pickPort,
   findMissingSqlJsRuntimeFiles,
   findMissingMachineTokenRuntimeFiles,
-  findMissingDocsI18nRuntimeFiles,
+  findForbiddenDocsRuntimePaths,
+  findMissingDocsRuntimeFiles,
   evaluateMachineTokenAuth,
   evaluateSqlJsRoundTrip,
   evaluateRestartPersistence,
@@ -85,19 +87,33 @@ test("installed package contract requires sql.js metadata, entrypoint, and WASM"
   );
 });
 
-test("installed package contract requires the translated docs mirrors and jsdom", () => {
-  const present = new Set(REQUIRED_DOCS_I18N_RUNTIME_FILES.map((file) => path.join("/pkg", file)));
+test("installed package contract requires jsdom and no translated docs mirrors", () => {
+  // 2026-11-17: the npm package no longer ships docs/i18n (the 3.8.54 tarball hit npm's 413).
+  assert.deepEqual([...REQUIRED_DOCS_RUNTIME_FILES], ["node_modules/jsdom/package.json"]);
+  assert.deepEqual([...FORBIDDEN_DOCS_RUNTIME_PATHS], ["dist/docs/i18n"]);
+
+  // jsdom is a declared dependency, so npm places it at <packageRoot>/node_modules.
+  const present = new Set([path.join("/pkg", "node_modules/jsdom/package.json")]);
   assert.deepEqual(
-    findMissingDocsI18nRuntimeFiles("/pkg", (file) => present.has(file)),
+    findMissingDocsRuntimeFiles("/pkg", (file) => present.has(file)),
+    []
+  );
+  assert.deepEqual(
+    findForbiddenDocsRuntimePaths("/pkg", (file) => present.has(file)),
     []
   );
 
-  // jsdom is a declared dependency, so npm places it at <packageRoot>/node_modules.
   present.delete(path.join("/pkg", "node_modules/jsdom/package.json"));
-  present.delete(path.join("/pkg", "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md"));
   assert.deepEqual(
-    findMissingDocsI18nRuntimeFiles("/pkg", (file) => present.has(file)),
-    ["dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md", "node_modules/jsdom/package.json"]
+    findMissingDocsRuntimeFiles("/pkg", (file) => present.has(file)),
+    ["node_modules/jsdom/package.json"]
+  );
+
+  // The mirrors coming back into the tarball fails the smoke.
+  present.add(path.join("/pkg", "dist/docs/i18n"));
+  assert.deepEqual(
+    findForbiddenDocsRuntimePaths("/pkg", (file) => present.has(file)),
+    ["dist/docs/i18n"]
   );
 });
 

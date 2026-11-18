@@ -1,3 +1,4 @@
+import { getFalCompatibilityPreparer } from "@/lib/fal/compatibility";
 import { handleImageGeneration } from "@omniroute/open-sse/handlers/imageGeneration.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
@@ -127,6 +128,7 @@ export async function POST(request, { params }) {
         },
         () =>
           handleImageGeneration({
+            prepareFalInput: getFalCompatibilityPreparer(),
             body,
             credentials: attemptCredentials,
             log,

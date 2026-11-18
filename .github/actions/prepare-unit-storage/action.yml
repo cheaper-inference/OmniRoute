@@ -1,0 +1,27 @@
+name: Prepare unit test storage
+description: Reclaim the unused Android SDK only on disposable hosted Linux runners, then install dependencies.
+inputs:
+  cache:
+    description: Restore the exact dependency cache for pull requests.
+    required: false
+    default: "false"
+runs:
+  using: composite
+  steps:
+    - name: Reserve disk space for raw V8 coverage
+      if: runner.environment == 'github-hosted' && runner.os == 'Linux'
+      shell: bash
+      run: |
+        set -euo pipefail
+        df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP"
+        # This Node-only job does not use Android; never remove shared runner toolchains.
+        if [ -d /usr/local/lib/android ] && [ ! -L /usr/local/lib/android ]; then
+          du -sh /usr/local/lib/android
+          timeout 120s sudo rm -rf -- /usr/local/lib/android
+        fi
+        df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP"
+    - uses: ./.github/actions/npm-ci-retry
+      with:
+        cache: ${{ inputs.cache }}
+    - shell: bash
+      run: npm run check:node-runtime

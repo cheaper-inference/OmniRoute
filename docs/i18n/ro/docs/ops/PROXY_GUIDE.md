@@ -81,6 +81,18 @@ Chiar și în afara regiunilor blocate, proxy-urile sunt utile pentru:
 
 ---
 
+## Starea proxy implicită pentru conturile noi
+
+În** Setări → Proxy → Configurare globală** , folosiți** Activați proxy în mod implicit pentru conexiuni noi** pentru a alege starea proxy inițială a conturilor de furnizor nou adăugate.
+
+Noua setare controlează starea proxy inițială a conturilor de furnizor nou adăugate. Nu modifică conturile existente și nu înlocuiește comutatorul proxy global. Valoarea sa inițială păstrează comportamentul anterior. Dezactivați-l o dată pentru a crea conturi viitoare cu proxy dezactivat în mod prestabilit.
+
+Preferința este stocată ca `defaultNewConnectionProxyEnabled` prin setările existente API. Este implicit la `true` când nu este salvat niciodată. Salvarea `false` intră în vigoare pentru conturile noi ulterioare fără repornire. `POST /api/providers` acceptă un `proxyEnabled` boolean strict opțional; un `true` sau `false` explicit are prioritate față de valoarea implicită de creare. Omiterea unui cont duplicat sau reconectarea OAuth păstrează starea stocată a contului respectiv. Conturile individuale pot fi activate sau dezactivate ulterior.
+
+Transferurile selective de furnizori folosesc configurația implicită a instalării de destinație pentru conturile noi și păstrează politica de destinație atunci când înlocuiesc conturile existente. Comutarile proxy nu sunt câmpuri de transfer portabile. Restaurarea completă de rezervă și migrarea istorică JSON/SQL își păstrează semantica de restaurare existentă, inclusiv valorile contului salvat și valorile implicite ale schemei moștenite; o restaurare completă a setărilor poate restabili și această preferință.
+
+Această preferință nu atribuie un proxy și nu stabilește că unul este sănătos sau în uz. Rutarea reală depinde în continuare de comutatorul proxy global și de configurația proxy aplicabilă. Furnizorii sintetici fără un cont persistent, traficul OAuth înainte de crearea contului, proxy-urile environment/system și rețelele backend-urilor externe sunt în afara domeniului său de aplicare.
+
 ## Sistem proxy pe 4 niveluri
 
 OmniRoute acceptă configurarea proxy-urilor în **patru domenii independente**, evaluate în ordinea priorității:

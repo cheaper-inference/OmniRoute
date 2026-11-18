@@ -33,6 +33,7 @@
 
 import { getDbInstance } from "./core";
 import { readCallArtifact } from "../usage/callLogArtifacts";
+import { isEncryptedReasoningOmissionMarker } from "../logPayloads";
 
 export type ResponsesContinuationState = {
   input: unknown[];
@@ -62,7 +63,12 @@ function containsTruncatedArrayMarker(items: readonly unknown[]): boolean {
 
 export type ContinuationPipeline = {
   clientRawRequest?: { body?: unknown; effectiveInput?: unknown };
-  clientResponse?: { output?: unknown; summary?: { output?: unknown }; _truncated?: unknown };
+  clientResponse?: {
+    output?: unknown;
+    status?: unknown;
+    summary?: { output?: unknown; status?: unknown };
+    _truncated?: unknown;
+  };
 };
 
 /**
@@ -143,10 +149,36 @@ function extractContinuationState(
   // makes the caller ask the client to resend full history instead of
   // silently reconstructing an empty one, exactly like a real
   // previous_response_not_found from OpenAI itself.
-  if ((clientResponse as { _truncated?: unknown } | undefined)?._truncated === true) return null;
-  if (output.length === 0) return null;
+  //
+  // `_truncated` only says the collector dropped stream events from the log.
+  // A reasoning-heavy reply can pass the cap and still reach
+  // `response.completed`, whose summary carries the whole output, so that turn
+  // is safe to continue from. Rejecting it sent a false "not found" for a
+  // response OmniRoute had just served and cost the client a full resend.
+  const status = clientResponse?.summary?.status ?? clientResponse?.status;
+  if (clientResponse?._truncated === true && status !== "completed") return null;
+  const replayableOutput = withoutOmittedEncryptedReasoning(output);
+  if (replayableOutput.length === 0) return null;
 
-  return { input, output };
+  return { input: withoutOmittedEncryptedReasoning(input), output: replayableOutput };
+}
+
+/**
+ * The stored copy holds a marker instead of encrypted reasoning (the ciphertext is not kept
+ * on disk). Replaying it would send the marker upstream as `encrypted_content`, so the marker
+ * is removed. A reasoning item left with no plaintext and no summary has nothing to replay and
+ * is dropped.
+ */
+function withoutOmittedEncryptedReasoning(items: unknown[]): unknown[] {
+  return items.flatMap((item) => {
+    if (!isPlainRecord(item) || !isEncryptedReasoningOmissionMarker(item.encrypted_content)) {
+      return [item];
+    }
+    const { encrypted_content: _marker, ...rest } = item;
+    const hasContent = Array.isArray(rest.content) && rest.content.length > 0;
+    const hasSummary = Array.isArray(rest.summary) && rest.summary.length > 0;
+    return hasContent || hasSummary ? [rest] : [];
+  });
 }
 
 type PendingContinuationEntry = {

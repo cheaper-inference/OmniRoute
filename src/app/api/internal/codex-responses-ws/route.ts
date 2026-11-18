@@ -15,6 +15,7 @@ import { getProviderCredentialsWithQuotaPreflight } from "@/sse/services/auth";
 import { acquireCodexWsLease, releaseCodexWsLease } from "@/sse/services/codexWsLease";
 import { enforceApiKeyPolicy } from "@/shared/utils/apiKeyPolicy";
 import { checkAndRefreshToken } from "@/sse/services/tokenRefresh";
+import { StaleCodexOperationError } from "@/lib/db/codexConnectionFences";
 import { resolveCodexWsModelInfo } from "./modelResolution";
 import { isFeatureFlagEnabled, isRequireApiKeyEnabled } from "@/shared/utils/featureFlags";
 import { buildHandshakeOriginRequest, isWebSocketOriginAllowed } from "@/server/origin/wsOrigin";
@@ -476,6 +477,8 @@ async function resolveCodexCredentials(
       refreshed = await checkAndRefreshToken(provider, credentials);
     } catch (error) {
       releaseCodexWsLease(leaseId);
+      // A stale selection reached no upstream and is no account failure: read the row again.
+      if (error instanceof StaleCodexOperationError) continue;
       return {
         error: jsonError(
           502,

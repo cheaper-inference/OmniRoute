@@ -118,28 +118,10 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 ዳግም ማስጀመር ሳያስፈልግ በruntime ጊዜ በ**Dashboard → Security → CORS Allowed Origins**
 ውስጥ ሊዘጋጅ ይችላል።
 
-## API keys እና cookie sessions
+## API ቁልፎች vs የኩኪ ክፍለ ጊዜዎች
 
-- **Bearer / `x-api-key` (የ`/v1/*` inference ገጽታ)፦** browsers እነዚህን በራስ-ሰር
-  ፈጽሞ አያያይዙም። እዚህ CORS ትርጉም ያለው መከላከያ አይደለም — API key ነው
-  መከላከያው — ለዚህም ነው ያ ገጽታ browser እና Electron clients ቀድሞውኑ
-  የማንበብ ፈቃድ ያላቸውን responses ማንበብ እንዲችሉ ሆን ተብሎ permissive የተደረገው። የላላው echo የሚከተለው የተረጋገጠውን
-  ቁልፍ እንጂ የheaderሩን መኖር ብቻ አይደለም፦ `REQUIRE_API_KEY=false` አንድን ጥያቄ ስም-አልባ ሆኖ ሲያስተናግድ፣ የተሳካ
-  ምላሹ fail-closed የፈቃድ ዝርዝሩን ይጠብቃል። clients የተሻረ ወይም በስህተት የተጻፈ ቁልፍን ማሳየት እንዲችሉ የማረጋገጫ
-  ውድቅቶች (401) ተነባቢ ሆነው ይቆያሉ (#5242)፦ የpipelineው የራሱ 401 echoውን ይይዛል፣ እና pipelineው ጥያቄውን
-  እንደ ስም-አልባ ካስተናገደ በኋላ ቁልፉን ራሱ ውድቅ የሚያደርግ route (management auth ሲዋቀር `/v1/models` እና
-  `/v1beta/models`፣ በባለቤቱ የተገደቡት `/v1/files`፣ `/v1/batches`፣ `/v1/media`፣
-  `/v1/session-leases` እና የauto-combo እጩ routes) በ`credentialRejectionHeaders()` በኩል
-  echoውን ለዚያ 401 ይጨምራል። echoው የሚወሰነው ጥያቄው የምስክርነት header (`Authorization`፣ `x-api-key`፣
-  `x-goog-api-key` ወይም የ`auth_token` cookie) በመያዙ ላይ እንጂ routeው ከእነሱ የትኛውን እንደፈተሸ ላይ
-  አይደለም፣ እና ከ`Access-Control-Allow-Credentials` ጋር ፈጽሞ አይጣመርም፤ bodyው ቋሚ የስህተት ኤንቨሎፕ ነው።
-  በ`requireManagementAuth()` የሚጠበቁ በ`/api/v1/` ስር ያሉ የአስተዳደር routes
-  (`/api/v1/management/*`፣ `/api/v1/registered-keys`) echoውን አይጨምሩም፦
-  `REQUIRE_API_KEY=false` ሲሆን የእነሱ 401/403 ከሌላ origin ሊነበብ አይችልም።
-- **Cookie session (dashboardው)፦** በfail-closed ነባሪው **እና**
-  በጋራው path ላይ `Access-Control-Allow-Credentials` ባለመኖሩ የተጠበቀ ነው።
-  የmanagement/dashboard መነሻዎችን ከማንኛውም permissive config ውጭ ያድርጉ፤ በትክክል
-  fail-closed ሆነው መቆየት አለባቸው።
+- **ተሸካሚ / `x-api-key` (የ `/v1/*` አመላካች ወለል)** አሳሾች እነዚህን በራስ ሰር አያያይዟቸውም። CORS እዚህ ላይ ትርጉም ያለው እንቅፋት አይደለም — የ API ቁልፉ — ነው ለዛም ነው ላዩን ሆን ተብሎ የሚፈቅድ ስለሆነ አሳሽ እና Electron ደንበኞች ቀደም ሲል መብት ያላቸውን ምላሾች ማንበብ ይችላሉ። ዘና ያለ ማሚቶ የተረጋገጠውን ቁልፍ ነው የሚከተለው እንጂ የራስጌው መኖር ብቻ አይደለም `REQUIRE_API_KEY=false` ጥያቄውን ማንነቱ ሳይገለጽ ሲያቀርብ የተሳካ ምላሹ ያልተሳካውን የተዘጋ የፈቃድ ዝርዝር ይይዛል። የማረጋገጫ ውድቀቶች (401) ደንበኞቻቸው የተሻረ ወይም የተሳሳተ የተተየበ ቁልፍ (#5242) እንዲያዩ ይቆያሉ፡ የቧንቧው የራሱ 401 ማሚቶ ይይዛል፣ እና ቁልፉን እራሱ የማይታወቅ ሆኖ ካገለገለው በኋላ (`/v1/models` እና `/v1beta/models` በአስተዳደር ማረጋገጫ የተዋቀረ፣ በባለቤቱ የተደገፈ `/v1/files`፣ `/v1/media` አውቶማቲክ መስመር) `/v1/batches`, `/v1/session-leases` ማሚቱን ወደዚያ 401 በ `credentialRejectionHeaders()` ያክላል። አስተጋባው የማረጋገጫ አርዕስት (`Authorization`፣ `x-api-key`፣ `x-goog-api-key` ወይም `auth_token` ኩኪው) በሚይዘው ጥያቄ ላይ ቁልፍ ነው ፣ የትኛው መንገድ እንደተመረጠ አይደለም ፣ እና በጭራሽ ከ `Access-Control-Allow-Credentials` ጋር አልተጣመረም። ሰውነት የተስተካከለ የስህተት ፖስታ ነው። በ `/api/v1/` ስር ያሉ የአስተዳደር መንገዶች በ `requireManagementAuth()` (`/api/v1/management/*`፣ `/api/v1/registered-keys`፣ `/api/v1/providers/[provider]/limits`፣ `/api/v1/accounts/[id]/limits`፣ `/api/v1/issues/report`) የሚጠበቁ ማሚቶዎችን አይጨምሩም: በ `REQUIRE_API_KEY=false` የእነሱ 401/403 የሚነበብ ተሻጋሪ አይደለም።
+- **የኩኪ ክፍለ ጊዜ (ዳሽቦርዱ)፡-** ባልተሳካው በተዘጋ ነባሪ የተጠበቀ** እና** በጋራ መንገድ ላይ `Access-Control-Allow-Credentials` ባለመኖሩ. management/dashboard ምንጮችን ከማንኛውም የተፈቀደ ውቅረት ያቆዩ; በትክክል ተዘግተው መቆየት አለባቸው.
 
 ## የWebSocket handshakes (`/v1/responses`, `/v1/ws`)
 

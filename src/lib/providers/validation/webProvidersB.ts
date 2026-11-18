@@ -13,6 +13,10 @@ import {
 import { SafeOutboundFetchError } from "@/shared/network/safeOutboundFetch";
 import { normalizeSessionCookieHeader } from "@/lib/providers/webCookieAuth";
 import { parseM365PastedCredential } from "@omniroute/open-sse/utils/m365Credentials.ts";
+import {
+  currentM365AccessToken,
+  decodeJwtClaims,
+} from "@omniroute/open-sse/executors/copilot-m365-connection.ts";
 import { normalizeGeminiValidationCookie } from "@omniroute/open-sse/utils/geminiCookies.ts";
 import {
   looksLikeJwt,
@@ -399,7 +403,37 @@ export function extractM365CredentialParts(
 }
 
 // ── Microsoft 365 Copilot Web token validator ──
-export async function validateCopilotM365WebProvider({ apiKey, providerSpecificData = {} }: any) {
+/**
+ * When the sign-in the executor would use has provably expired and nothing can refresh it,
+ * the ISO time it expired; otherwise null. Uses the executor's own token precedence (the
+ * connection's token column, then the pasted credential), so a refreshed connection is
+ * judged by its current token, never by the stale paste.
+ */
+function m365SignInExpiredAt(
+  apiKey: string,
+  providerSpecificData: Record<string, unknown>,
+  credentials: { accessToken?: unknown; refreshToken?: unknown }
+): string | null {
+  const refreshable =
+    (typeof credentials.refreshToken === "string" && credentials.refreshToken) ||
+    (typeof providerSpecificData.refreshToken === "string" && providerSpecificData.refreshToken);
+  if (refreshable) return null;
+  const token = currentM365AccessToken({
+    apiKey,
+    accessToken: typeof credentials.accessToken === "string" ? credentials.accessToken : undefined,
+    providerSpecificData,
+  });
+  const exp = decodeJwtClaims(token)?.exp;
+  return typeof exp === "number" && Number.isFinite(exp) && exp * 1000 <= Date.now()
+    ? new Date(exp * 1000).toISOString()
+    : null;
+}
+
+export async function validateCopilotM365WebProvider({
+  apiKey,
+  providerSpecificData = {},
+  credentials = {},
+}: any) {
   const { accessToken, chathubPath } = extractM365CredentialParts(
     String(apiKey || ""),
     providerSpecificData
@@ -416,6 +450,14 @@ export async function validateCopilotM365WebProvider({ apiKey, providerSpecificD
     return {
       valid: false,
       error: "Could not extract the account-specific Chathub path from the credential",
+    };
+  }
+
+  const expiredAt = m365SignInExpiredAt(String(apiKey || ""), providerSpecificData, credentials);
+  if (expiredAt) {
+    return {
+      valid: false,
+      error: `The Microsoft 365 Copilot sign-in expired at ${expiredAt}. Sign in again with Microsoft.`,
     };
   }
 

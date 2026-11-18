@@ -158,13 +158,13 @@ dit activeert (`src/server/auth/dashboardMfa.ts`).
 
 `src/server/authz/types.ts` definieert drie klassen; elke route die niet deterministisch kan worden geclassificeerd, valt terug op `MANAGEMENT`.
 
-| Klasse       | Beschrijving                                                                                                                                                   | Authenticatie vereist                                                              |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `PUBLIC`     | Expliciet veilige routes: aanmelden, afmelden, status, initialisatie, health-check en onboarding-bootstrap.                                                    | Geen                                                                               |
-| `CLIENT_API` | Eindpunten voor modelbediening: `/api/v1/*`, `/api/v1beta/*`, plus de aliassen `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-sleutel wanneer de effectieve `REQUIRE_API_KEY`-featureflag is ingeschakeld |
-| `MANAGEMENT` | Dashboardpagina's, instellingen, providers, sleutels, beheer- en diagnose-eindpunten.                                                                          | Dashboardsessie OF Bearer met scope `manage`                                       |
+| Klas         | Beschrijving                                                                                                                                           | Verificatie vereist                                                                |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------- |
+| `PUBLIC`     | Expliciet veilige routes — inloggen, uitloggen, status, gezondheid, onboarding bootstrap.                                                              | Geen                                                                               |
+| `CLIENT_API` | Model-serving eindpunten — `/api/v1/*`, `/api/v1beta/*`, plus aliassen `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer-sleutel wanneer de effectieve `REQUIRE_API_KEY` functievlag is ingeschakeld |
+| `MANAGEMENT` | Dashboardpagina's, instellingen, providers, sleutels, beheerders- en diagnostische eindpunten.                                                         | Dashboardsessie OR Bearer met `manage` -scope                                      |
 
-Enkele `MANAGEMENT`-acties zijn **alleen voor de operator**: een `manage`-sleutel is niet voldoende. Opgeslagen inloggegevens exporteren (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), een back-up herstellen over de actieve gegevens (`POST /api/db-backups/import`, ook met `dryRun=true`, `POST /api/db-backups` met herstel op id, `POST /api/settings/import-json`), en herstelpunten vernietigen (opschonen via `DELETE /api/db-backups` en `PATCH /api/db-backups`, omdat de bewaartermijn die het opslaat de automatische opschoning na elke back-up bepaalt) vereisen een dashboardsessie, de identiteit van de lokale CLI of uitgeschakelde aanmelding. Het uitgeven van een synchronisatietoken (`POST /api/sync/tokens`) en het aanmaken van een CLI-toegangstoken met scope `admin` (`POST /api/cli/tokens`) vereisen in elke aanmeldmodus een dashboardsessie of de identiteit van de lokale CLI. API-sleutels van elke scope en `oma_`-toegangstokens zijn geen operatorcredentials: ze krijgen `403` wanneer er een vereist is. De controle staat in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Het wijzigen van de aanmeldinstellingen is ook alleen voor de operator: `POST /api/settings/require-login` (het beheerwachtwoord instellen / `requireLogin` in- of uitschakelen) accepteert deze credentials alleen zodra er al een wachtwoord bestaat. Het bootstrapvenster van de eerste start (nog geen wachtwoord) blijft ongewijzigd, en een dashboardsessie moet `currentPassword` meesturen om het wachtwoord te vervangen (`403` als het ontbreekt of onjuist is, gelogd als `settings.update_failed`). De lokale CLI en een instantie met uitgeschakelde aanmelding behouden het herstelpad en mogen zonder die stap een wachtwoord instellen, omdat beide gebonden zijn aan de host die de gegevensmap bezit.
+Een paar `MANAGEMENT` acties wel** alleen voor de operator** : een `manage` sleutel is niet genoeg. Voor het exporteren van opgeslagen inloggegevens (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), het herstellen van een back-up over de live gegevens (`POST /api/db-backups/import` inclusief `dryRun=true`, `POST /api/db-backups` restore by id, `POST /api/settings/import-json`), het vernietigen van herstelpunten (`DELETE /api/db-backups` cleanup en `PATCH /api/db-backups` omdat de retentie ervan het automatische snoeien na elke back-up aanstuurt) is een dashboardsessie vereist, het lokale CLI onderwerp of inloggen uitgeschakeld. Voor het uitgeven van een synchronisatietoken (`POST /api/sync/tokens`) en het aanmaken van een `admin` CLI toegangstoken (`POST /api/cli/tokens`) is in elke inlogmodus een dashboardsessie of het lokale CLI onderwerp vereist. API sleutels van elk bereik en `oma_` toegangstokens zijn geen inloggegevens van de operator: ze krijgen `403` wanneer er een nodig is. De cheque bevindt zich in `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Het wijzigen van de inloginstellingen kan ook alleen door de operator: `POST /api/settings/require-login` (stel het beheerwachtwoord in / schakel `requireLogin` in) accepteert alleen die inloggegevens zodra er een wachtwoord bestaat — het bootstrap-venster voor de eerste keer uitvoeren (nog geen wachtwoord) is ongewijzigd — en een dashboardsessie moet `currentPassword` verzenden om het wachtwoord te vervangen (`403` wanneer het ontbreekt of verkeerd is, gecontroleerd als `settings.update_failed`). De lokale CLI en een instantie waarbij inloggen is uitgeschakeld behouden het herstelpad en kunnen zonder dit pad een wachtwoord instellen, aangezien beide gebonden zijn aan de host die eigenaar is van de gegevensmap.
 
 ## Pijpleiding
 
@@ -197,51 +197,47 @@ Een succesvol beleid retourneert `AuthSubject` met `kind ∈ { client_api_key, d
 
 ## Lijst met openbare routes
 
-`src/shared/constants/publicApiRoutes.ts` is de expliciete allowlist:
+`src/shared/constants/publicApiRoutes.ts` is de expliciete toelatingslijst:
 
-De lijst is opgesplitst op basis van **vorm**, en die opsplitsing is essentieel (GHSA-74g9-q8f6-793h): een prefix
-wordt gematcht met `startsWith()`, dus deze matcht ook elk aangrenzend pad dat dezelfde begintekens deelt.
-`/api/usage/om-usage` als prefix gemarkeerd `/api/usage/om-usage<anything>` PUBLIC, en Next resolveert
-dat naar `/api/usage/[connectionId]` — een handler zonder eigen authenticatie.
+De lijst is opgesplitst per** vorm** , en de splitsing is dragend (GHSA-74g9-q8f6-793h): een voorvoegsel wordt gekoppeld aan `startsWith()`, dus het komt ook overeen met elk aangrenzend pad dat de hoofdletters deelt. `/api/usage/om-usage` als voorvoegsel gemarkeerd `/api/usage/om-usage<anything>` PUBLIC, en Next lost dat op in `/api/usage/[connectionId]` — een handler zonder eigen authenticatie.
 
 ```ts
-// Echte subtrees. Elke entry MOET eindigen op "/" (afgedwongen door een unit-test).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // behandeld als CLIENT_API in classify, niet als "openbaar zonder authenticatie"
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Enkele routes, EXACT gematcht (met of zonder afsluitende slash).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // loginstap 2 voor opt-in-TOTP; heeft het MFA-pending-cookie nodig
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Alleen-lezen-routes die ook de versoepeling voor de CORS-origin krijgen.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Alleen-lezen-route ZONDER de versoepeling voor CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Alleen-lezen-routes zijn alleen openbaar voor veilige methoden. Opmerking: `classifyRoute()` sluit `/api/v1/*` en `/api/v1beta/*` uit van de PUBLIC-fallback — deze zijn altijd `CLIENT_API`, zodat het Bearer-key-beleid van toepassing blijft.
+Alleen-lezen routes zijn openbaar** alleen** voor veilige methoden. Opmerking: `classifyRoute()` sluit `/api/v1/*` en `/api/v1beta/*` uit van de PUBLIC fall-through — Deze zijn altijd `CLIENT_API` dus het Bearer-key-beleid is nog steeds van toepassing.
 
 ## Een nieuwe route toevoegen
 
@@ -319,15 +315,15 @@ Het blijft uitgeschakeld tenzij `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 (`src/lib/accessTokens/scopes.ts`). Deze rangschikking is alleen van toepassing op de
 access-token credential. Zie [Management Authenticatie](../guides/MANAGEMENT-AUTH.md).
 
-## Schakelaar voor vereiste authenticatie
+## Verificatie vereist schakelen
 
-`isAuthRequired()` in `src/shared/utils/apiAuth.ts` bepaalt of **enige** authenticatie wordt afgedwongen voor een verzoek:
+`isAuthRequired()` in `src/shared/utils/apiAuth.ts` beslist of** elk** auth wordt afgedwongen voor een verzoek:
 
-- `settings.requireLogin === false` → authenticatie is globaal uitgeschakeld, behalve voor het altijd beschermde niveau (zie [Route Guard-niveaus](../security/ROUTE_GUARD_TIERS.md)) en de aanroepen die een credential uitgeven dat het accepteert. Die vereisen dezelfde credential als wanneer aanmelding aan staat: synchronisatietokens uitgeven, CLI-toegangstokens met elke scope aanmaken, een API-sleutel met scope `manage`/`admin` aanmaken, die scope aan een sleutel toekennen, of zo'n sleutel opnieuw genereren of tonen (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Sleutels die alleen voor inferentie zijn, blijven open.
-- Geen wachtwoord ingesteld **en** geen omgevingsvariabele `INITIAL_PASSWORD` → de bootstrapmodus staat de onboardingwizard en loopback-verzoeken toe, maar blootgestelde netwerkverzoeken hebben nog steeds credentials nodig.
-- Elke databasefout → faalt gesloten (veilig per standaard).
+- `settings.requireLogin === false` → auth is globaal uitgeschakeld, behalve voor de altijd beschermde laag (zie [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md) ) en de oproepen die een inloggegevens uitdelen die het accepteert, die dezelfde inloggegevens nodig hebben als bij inloggen: het uitgeven van synchronisatietokens, het aanmaken van CLI toegangstokens op elk bereik, en het maken van een API sleutel met de `manage`/`admin` -scope, het toekennen van die reikwijdte aan een sleutel, of het opnieuw genereren of onthullen van een dergelijke sleutel (`requireCredentialForManagementScopedKey()` in `src/lib/api/requireManagementAuth.ts`). Alleen-inferentietoetsen blijven open. Het schrijven van een beschermde functievlag (`REQUIRE_API_KEY`, de andere beveiligingsvlaggen en de SSRF / TLS / MCP-scope / sandbox-vlaggen vermeld in [Feature Flags](../reference/FEATURE_FLAGS.md#rest-api) ) en het opslaan van de PII maskeringsinstellingen (`PUT /api/settings/pii`) blijven ook een referentie nodig hebben.
+- Geen wachtwoord geconfigureerd** En** no `INITIAL_PASSWORD` env var → bootstrap-modus staat de onboarding-wizard en loopback-verzoeken toe, maar voor blootgestelde netwerkverzoeken zijn nog steeds inloggegevens nodig. Uitzondering: voor het schrijven van een beschermde functievlag en het opslaan van de PII maskeringsinstellingen (`PUT /api/settings/pii`) is zelfs een referentie van loopback nodig, dus loopback op zichzelf is daar niet voldoende.
+- Elke DB -fout → mislukt gesloten (standaard beveiligd).
 
-Het afdwingen van client-API-sleutels gebruikt `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, en niet een directe lezing van `process.env.REQUIRE_API_KEY`. Dit is belangrijk voor uitgerolde instanties: `REQUIRE_API_KEY` wijzigen in Dashboard → Feature Flags slaat een databaseoverschrijving op en werkt meteen door op `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` en de andere authenticatiecontroles van de client-API die deze helper delen. Als de opslag van de featureflags niet kan worden gelezen, faalt de authenticatie van de client-API gesloten en vereist ze een sleutel.
+Client API -sleutelafdwinging gebruikt `isRequireApiKeyEnabled()` in `src/shared/utils/featureFlags.ts`, niet een directe `process.env.REQUIRE_API_KEY` lezing. Dit is van belang voor geïmplementeerde instances: het in- en uitschakelen `REQUIRE_API_KEY` in Dashboard → Feature Flags slaat een DB -overschrijving op en heeft onmiddellijk invloed op `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` en andere client-API-authenticatiecontroles die deze helper delen. Als het functievlagarchief niet kan worden gelezen, mislukt de client API authenticatie en is er een sleutel vereist.
 
 ## Incompatibele wijziging — v3.8.0
 

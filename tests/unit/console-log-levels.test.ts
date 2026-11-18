@@ -171,9 +171,9 @@ test("console log API returns an empty list for a missing file and surfaces read
   try {
     const brokenResponse = await route.GET(new Request("http://localhost/api/logs/console"));
     assert.equal(brokenResponse.status, 500);
-    const payload = (await brokenResponse.json()) as { error?: string };
-    assert.equal(typeof payload.error, "string");
-    assert.equal(payload.error.length > 0, true);
+    const payload = (await brokenResponse.json()) as { error?: { message?: string } };
+    assert.equal(typeof payload.error?.message, "string");
+    assert.equal((payload.error?.message?.length ?? 0) > 0, true);
   } finally {
     process.env.APP_LOG_FILE_PATH = TEST_LOG_PATH;
   }

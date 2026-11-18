@@ -15,6 +15,7 @@ import type { SqliteAdapter } from "./adapters/types";
 import { normalizeRoutingStrategy } from "@/shared/constants/routingStrategies";
 import { normalizeComboRecord } from "@/lib/combos/steps";
 import { validateComboInvariant } from "@/lib/combos/invariants";
+import { toBooleanSetting } from "./booleanSetting";
 import { getTableColumns } from "./jsonMigration/columnUpsert";
 import { getApiKeyImportColumns, importApiKeyRecord } from "./jsonMigration/apiKeysImport";
 import { importProviderConnectionRecord } from "./jsonMigration/connectionsImport";
@@ -158,7 +159,11 @@ export function runJsonMigration(
 
     // 3. Key-Value Settings (caller must have stripped password / requireLogin)
     for (const [key, value] of Object.entries(data.settings ?? {})) {
-      insertKv.run("settings", key, JSON.stringify(value));
+      // Store the call-log toggle as a real boolean so the dashboard and the
+      // request path read the same thing (#17998). Unrecognized values become
+      // false, which is what the request path already did with them.
+      const stored = key === "call_log_pipeline_enabled" ? toBooleanSetting(value) === true : value;
+      insertKv.run("settings", key, JSON.stringify(stored));
     }
 
     // 4. Legacy key-value namespaces
@@ -279,13 +284,18 @@ export function runJsonMigration(
           id, provider, model, connection_id, account_key, account_label, account_label_priority,
           api_key_id, api_key_name, billing_team_id, team_rollup_processed_at,
           tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
-          service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, timestamp
+          service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, timestamp,
+          endpoint, cpa_auth_index, provider_credits, provider_cost_usd
         ) VALUES (
           @id, @provider, @model, @connection_id, @account_key, @account_label,
           @account_label_priority, @api_key_id, @api_key_name, @billing_team_id,
           @team_rollup_processed_at, @tokens_input, @tokens_output, @tokens_cache_read,
           @tokens_cache_creation, @tokens_reasoning, @service_tier, @status, @success,
-          @latency_ms, @ttft_ms, @error_code, @combo_strategy, @timestamp
+          @latency_ms, @ttft_ms, @error_code, @combo_strategy, @timestamp,
+          COALESCE(@endpoint, (SELECT endpoint FROM usage_history WHERE id = @id)),
+          COALESCE(@cpa_auth_index, (SELECT cpa_auth_index FROM usage_history WHERE id = @id)),
+          COALESCE(@provider_credits, (SELECT provider_credits FROM usage_history WHERE id = @id)),
+          COALESCE(@provider_cost_usd, (SELECT provider_cost_usd FROM usage_history WHERE id = @id))
         )
       `);
       for (const row of data.usageHistory) {
@@ -321,6 +331,11 @@ export function runJsonMigration(
           error_code: row.error_code ?? null,
           combo_strategy: row.combo_strategy ?? "direct",
           timestamp: row.timestamp,
+          // Carried billing columns win; a backup from before they existed keeps what is stored.
+          endpoint: row.endpoint ?? null,
+          cpa_auth_index: row.cpa_auth_index ?? row.cpaAuthIndex ?? null,
+          provider_credits: row.provider_credits ?? row.providerCredits ?? null,
+          provider_cost_usd: row.provider_cost_usd ?? row.providerCostUsd ?? null,
         });
       }
     }

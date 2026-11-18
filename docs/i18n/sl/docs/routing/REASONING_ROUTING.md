@@ -38,24 +38,19 @@ in podpirajo ujemanje `any` ali `all`.
 Pravilo `connection` se ovrednoti le, ko ni zmagalo nobeno zgodnje pravilo in je bila že izbrana konkretna
 povezava ponudnika. Spremeni lahko samo raven napora in proračun.
 
-## Napor in proračun
+## Prizadevanje in proračun
 
-`sourceEffort` sprejema `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` in
-`ultra`. `missing` pomeni, da zahteva ne vsebuje niti ločene ravni napora niti preklopnika za razmišljanje
-ali proračuna za razmišljanje. Signal, ki vsebuje samo proračun, se zato ujema le z `any`.
+`sourceEffort` sprejema `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` in `ultra`. `missing` pomeni, da zahteva ne vsebuje niti diskretnega napora niti preklopa razmišljanja ali proračuna razmišljanja. Signal samo za proračun se torej ujema samo z `any`.
 
 `effortMode` ima tri različice:
 
-- `inherit` ohrani raven napora odjemalca, pri čemer še vedno dovoljuje spremembo modela ali kombinacije.
-- `default` nastavi `targetEffort` le, ko ni prisoten noben izrecen signal sklepanja.
-- `force` nadomesti ločeno raven napora z `targetEffort`.
+- `inherit` ohranja trud stranke, medtem ko še vedno omogoča spreminjanje modela ali kombinacije.
+- `default` nastavi `targetEffort` le, če ni prisoten eksplicitni signal sklepanja.
+- `force` nadomešča diskretni napor z `targetEffort`.
 
-Neodvisno od tega je lahko `budgetAction` nastavljen na `preserve`, `remove` ali `set`. `force` z vrednostjo `none` odstrani
-vsa prepoznana polja napora in proračuna. Kombinacija `none` in `set` ni veljavna.
+Neodvisno je `budgetAction` lahko `preserve`, `remove` ali `set`. `force` z `none` odstrani vsa priznana polja napora in proračuna, nato pa nastavi `reasoning_effort: "none"`, ker nekateri ponudniki vklopijo razmišljanje, ko polja ni. Ponudniki, ki zavračajo dobesedno `none`, so ob odpremi prilagojeni v `open-sse/executors/base/reasoningEffort.ts`. Koda ukaza ga preslika v `low`, razen pri zahtevah v obliki odgovorov (`input` brez `messages`), kjer ohrani `none`. Na Cloudflare Workers AI (`cloudflare-ai`) modeli, ki zavračajo `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash), dobijo `low`; drugi modeli Workers AI ohranijo `none`. Opustitev polja tam ni možnost, ker odsoten napor zažene privzeto raven modela. `none` skupaj z `set` ni veljaven.
 
-Zahteve, ki ciljajo na znane nezdružljive modele, so zavrnjene pred klicem navzgor. Pri ciljnih
-kombinacijah se nezdružljivi vnosi odstranijo; če ne ostane noben, zahteva vrne stanje `400`.
-Neznani podatki o zmogljivostih ustvarijo opozorilo, pravilo pa ostane aktivno.
+Zahteve, ki ciljajo na znano nezdružljive modele, so zavrnjene pred klicem navzgor. Pri kombiniranih ciljih so nezdružljivi vnosi odstranjeni; če nobena ne ostane, vrne zahteva status `400`. Podatki o neznani zmogljivosti ustvarijo opozorilo in pustijo pravilo aktivno.
 
 ## Varnost in transporti
 

@@ -4,11 +4,17 @@
  *
  * Extracted from chatCore: reads an upstream response body to a string. When the upstream is an SSE /
  * NDJSON stream consumed in non-streaming mode, it drains the reader chunk-by-chunk under the body
- * timeout and cancels early once a terminal SSE signal is observed; otherwise it falls back to a
- * timeout-bounded response.text(). Behaviour is byte-identical to the previous module-level function.
+ * timeout and cancels early once a terminal SSE signal is observed; otherwise it reads the body as
+ * text under the same timeout. Both paths count decoded bytes against the non-streaming cap.
  */
 
 import { withBodyTimeout } from "../../utils/stream.ts";
+import {
+  NonStreamingResponseTooLargeError,
+  cancelNonStreamingReader,
+  getMaxNonStreamingResponseBytes,
+  readResponseTextWithinCap,
+} from "../../utils/responseBodyCap.ts";
 import { FETCH_BODY_TIMEOUT_MS } from "../../config/constants.ts";
 import { createBodyTimeoutError, readStreamChunkWithTimeout } from "./upstreamTimeouts.ts";
 import {
@@ -16,54 +22,24 @@ import {
   type NonStreamingSseTerminalState,
 } from "./nonStreamingSse.ts";
 
-/**
- * Thrown when a non-streaming upstream body exceeds the hard cap. Buffering an unbounded
- * SSE/NDJSON or JSON response in non-streaming mode was an OOM path (`rawBody += chunk`
- * with no ceiling): a single multi-hundred-MB upstream response could fill the V8 heap.
- * Callers treat this like any other upstream error rather than crashing the process.
- */
-export class NonStreamingResponseTooLargeError extends Error {
-  readonly bytesSeen: number;
-  readonly maxBytes: number;
-  constructor(bytesSeen: number, maxBytes: number) {
-    super(
-      `Upstream non-streaming response exceeded the ${maxBytes}-byte cap (saw at least ${bytesSeen} bytes)`
-    );
-    this.name = "NonStreamingResponseTooLargeError";
-    this.bytesSeen = bytesSeen;
-    this.maxBytes = maxBytes;
-  }
-}
-
-const DEFAULT_MAX_NONSTREAMING_RESPONSE_BYTES = 64 * 1024 * 1024; // 64 MB
-
-/**
- * Hard cap for a non-streaming response buffered fully into memory. Generous by default so
- * legitimate large completions pass; bounds only pathological/runaway upstream bodies.
- * Override with `OMNIROUTE_MAX_NONSTREAMING_RESPONSE_BYTES`.
- */
-export const MAX_NONSTREAMING_RESPONSE_BYTES = (() => {
-  const parsed = Number.parseInt(String(process.env.OMNIROUTE_MAX_NONSTREAMING_RESPONSE_BYTES), 10);
-  return Number.isFinite(parsed) && parsed > 0 ? parsed : DEFAULT_MAX_NONSTREAMING_RESPONSE_BYTES;
-})();
+export {
+  NonStreamingResponseTooLargeError,
+  getMaxNonStreamingResponseBytes,
+  readResponseTextWithinCap,
+} from "../../utils/responseBodyCap.ts";
 
 export async function readNonStreamingResponseBody(
   response: Response,
   contentType: string,
   upstreamStream: boolean,
-  maxBytes: number = MAX_NONSTREAMING_RESPONSE_BYTES
+  maxBytes: number = getMaxNonStreamingResponseBytes()
 ): Promise<string> {
   if (
     !upstreamStream ||
     !response.body ||
     (!contentType.includes("text/event-stream") && !contentType.includes("application/x-ndjson"))
   ) {
-    // Reject before buffering when the upstream declares an over-cap Content-Length.
-    const declared = Number.parseInt(response.headers.get("content-length") ?? "", 10);
-    if (Number.isFinite(declared) && declared > maxBytes) {
-      throw new NonStreamingResponseTooLargeError(declared, maxBytes);
-    }
-    return withBodyTimeout<string>(response.text());
+    return withBodyTimeout<string>(readResponseTextWithinCap(response, maxBytes));
   }
 
   return drainNonStreamingSseBody(response.body, maxBytes);
@@ -75,17 +51,6 @@ export async function readNonStreamingResponseBody(
  * past the cap) and by the body timeout, cancelling early on a terminal SSE signal.
  */
 type NonStreamingChunk = { kind: "done" } | { kind: "skip" } | { kind: "chunk"; value: Uint8Array };
-
-function cancelNonStreamingReader(
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  reason: unknown
-): void {
-  try {
-    void reader.cancel(reason).catch(() => {});
-  } catch {
-    // The caller is already unwinding or returning a complete terminal response.
-  }
-}
 
 /** Read the next chunk under the body-timeout deadline, normalizing end/empty cases. */
 async function readNextNonStreamingChunk(

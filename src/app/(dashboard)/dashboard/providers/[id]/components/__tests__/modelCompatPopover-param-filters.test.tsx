@@ -52,7 +52,7 @@ describe("ModelCompatPopover model param filters (#8910)", () => {
     vi.unstubAllGlobals();
   });
 
-  it("persists the latest block and allow drafts when an outside mousedown closes the popover", async () => {
+  it("persists the latest block and allow drafts when an outside press (pointerdown) closes the popover", async () => {
     const apiPath = "/api/providers/openai/param-filters";
     let serverState: ParamFilterState = {
       block: ["provider-block"],
@@ -105,7 +105,11 @@ describe("ModelCompatPopover model param filters (#8910)", () => {
     });
 
     await act(async () => {
-      document.body.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+      // The kit Popover (Radix) listens for outside presses from the next task on and dismisses
+      // on the click that ends a primary-button press.
+      await new Promise((resolve) => setTimeout(resolve, 0));
+      document.body.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
+      document.body.dispatchEvent(new MouseEvent("click", { bubbles: true }));
     });
     await flushEffects();
 

@@ -113,7 +113,10 @@ it("preserves both model updates when sibling popovers save the same provider co
   expect(releaseFirstPut).not.toBeNull();
 
   await act(async () => {
-    triggerB.dispatchEvent(new MouseEvent("mousedown", { bubbles: true }));
+    // The kit Popover (Radix) listens for outside presses from the next task on and dismisses
+    // on the click that ends a primary-button press: here, the triggerB.click() below.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+    triggerB.dispatchEvent(new MouseEvent("pointerdown", { bubbles: true }));
   });
   await flushEffects();
   await act(async () => triggerB.click());

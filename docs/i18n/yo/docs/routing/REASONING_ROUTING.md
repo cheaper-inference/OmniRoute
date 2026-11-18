@@ -38,24 +38,19 @@ nìkan, wọ́n sì ṣe àtìlẹ́yìn fún ìbámu `any` tàbí `all`.
 A máa ń ṣàyẹ̀wò òfin `connection` kìkì nígbà tí kò sí òfin àkọ́kọ́ tó borí, tí a sì ti yan provider connection
 kan pàtó. Ó lè yí effort àti budget nìkan padà.
 
-## Effort àti Budget
+## Igbiyanju ati isuna
 
-`sourceEffort` gba `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, àti
-`ultra`. `missing` túmọ̀ sí pé ìbéèrè náà kò ní discrete effort, thinking toggle,
-tàbí thinking budget. Nítorí náà, `any` nìkan ni ó lè bá àmì budget-only mu.
+`sourceEffort` gba `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, ati `ultra`. `missing` tumọ si pe ibeere naa ko ni ipa ti oye tabi iyipada ironu tabi isuna ero. Aami-isuna-isuna nikan ni o baamu pẹlu `any` nikan.
 
-`effortMode` ní àwọn oríṣi mẹ́ta:
+`effortMode` ni awọn iyatọ mẹta:
 
-- `inherit` pa client effort mọ́, nígbà tó ṣì ń gba model tàbí combo láyè láti yí padà.
-- `default` ṣètò `targetEffort` kìkì nígbà tí kò sí àmì reasoning kedere.
-- `force` fi `targetEffort` rọ́pò discrete effort.
+- `inherit` ntọju igbiyanju alabara lakoko gbigba gbigba awoṣe tabi konbo lati yipada.
+- `default` ṣeto `targetEffort` nikan nigbati ko ba si ifihan ero ti o fojuhan.
+- `force` rọpo akitiyan ọtọtọ pẹlu `targetEffort`.
 
-Ní ọ̀nà òmìnira, `budgetAction` lè jẹ́ `preserve`, `remove`, tàbí `set`. `force` pẹ̀lú `none` yọ
-gbogbo effort àti budget field tí a mọ̀ kúrò. `none` papọ̀ pẹ̀lú `set` kò bófin mu.
+Ni ominira, `budgetAction` le jẹ `preserve`, `remove`, tabi `set`. `force` pẹlu `none` yọ gbogbo akitiyan ti a mọ ati awọn aaye isuna, lẹhinna ṣeto `reasoning_effort: "none"`, nitori diẹ ninu awọn olupese tan ero nigbati aaye naa ko si. Awọn olupese ti o kọ `none` gangan jẹ atunṣe ni fifiranṣẹ ni `open-sse/executors/base/reasoningEffort.ts`. Koodu aṣẹ ṣe maapu rẹ si `low`, ayafi lori awọn ibeere ti o ni irisi Awọn idahun (`input` laisi `messages`), nibiti o ti tọju `none`. Lori Cloudflare Workers AI (`cloudflare-ai`), awọn awoṣe ti o kọ `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) gba `low`; miiran Workers AI si dede pa `none`. Silẹ awọn aaye ni ko aṣayan nibẹ, nitori ohun isansa akitiyan nṣiṣẹ awọn awoṣe ká aiyipada ipele. `none` paapọ pẹlu `set` ko wulo.
 
-A máa kọ àwọn ìbéèrè tó ń fojú sí model tí a mọ̀ pé kò bá a mu kí upstream call tó wáyé. Fún àwọn
-combo target, a máa yọ àwọn entry tí kò bá a mu kúrò; bí kò bá sí èyíkéyìí tó kù, ìbéèrè náà yóò dá status `400` padà.
-Àlàyé capability tí a kò mọ̀ máa ń ṣe ìkìlọ̀, yóò sì fi òfin náà sílẹ̀ ní ipò iṣẹ́.
+Awọn ibeere ti o fojusi awọn awoṣe ti ko ni ibamu mọ jẹ kọ ṣaaju ipe ti oke. Fun awọn ibi-afẹde konbo, awọn titẹ sii ti ko ni ibamu ni a yọkuro; ti ko ba si ọkan ti o ku, ibeere naa da ipo `400` pada. Awọn data agbara aimọ ṣe agbejade ikilọ ati fi ofin silẹ lọwọ.
 
 ## Ààbò àti Àwọn Ọ̀nà Gbigbe
 

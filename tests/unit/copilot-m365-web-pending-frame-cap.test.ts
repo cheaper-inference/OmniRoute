@@ -1,4 +1,5 @@
 import test from "node:test";
+import { EventEmitter } from "node:events";
 import assert from "node:assert/strict";
 
 import { createClaudeWebResponse } from "../../open-sse/executors/claude-web/stream.ts";
@@ -25,31 +26,32 @@ type ScriptedFakeWs = {
 function makeScriptedFakeWsCtor(chatMessages: string[]) {
   let instance: ScriptedFakeWs | null = null;
 
-  class ScriptedFakeWsCtor {
-    handlers: Record<string, (arg?: unknown) => void> = {};
+  class ScriptedFakeWsCtor extends EventEmitter {
+    readyState = 0;
     closed = false;
     readonly drained: Promise<void>;
     private queue: string[];
     private drainResolve: (() => void) | null = null;
 
     constructor(_url: string, _options?: unknown) {
+      super();
       this.queue = [...chatMessages];
       this.drained = new Promise((resolve) => {
         this.drainResolve = resolve;
       });
       instance = this;
-      setImmediate(() => this.handlers.open?.());
-    }
-
-    on(event: string, cb: (arg?: unknown) => void) {
-      this.handlers[event] = cb;
-      return this;
+      setImmediate(() => {
+        if (this.readyState !== 0) return;
+        this.readyState = 1;
+        this.emit("open");
+      });
     }
 
     send(data: unknown) {
+      assert.equal(this.readyState, 1, "cannot send unless the socket is OPEN");
       const str = typeof data === "string" ? data : String(data);
       if (str.includes('"protocol":"json"')) {
-        setImmediate(() => this.handlers.message?.(Buffer.from(encodeFrame({}))));
+        setImmediate(() => this.emit("message", Buffer.from(encodeFrame({}))));
       } else if (str.includes('"target":"chat"')) {
         setImmediate(() => this.scheduleNext());
       }
@@ -62,13 +64,25 @@ function makeScriptedFakeWsCtor(chatMessages: string[]) {
         return;
       }
       setImmediate(() => {
-        this.handlers.message?.(Buffer.from(next));
+        this.emit("message", Buffer.from(next));
         this.scheduleNext();
       });
     }
 
     close() {
+      if (this.readyState >= 2) return;
       this.closed = true;
+      this.readyState = 2;
+      setImmediate(() => {
+        this.readyState = 3;
+        this.emit("close", 1000, Buffer.alloc(0));
+      });
+    }
+    terminate() {
+      if (this.readyState === 3) return;
+      this.closed = true;
+      this.readyState = 3;
+      setImmediate(() => this.emit("close", 1006, Buffer.alloc(0)));
     }
   }
 
@@ -79,20 +93,22 @@ function makeScriptedFakeWsCtor(chatMessages: string[]) {
 }
 
 test("copilot-m365-web: tolerates a pending frame at the size cap, reassembles a split frame, and aborts once the pending buffer passes the cap", async () => {
-  const healthyBody = JSON.stringify({
+  const healthyFrame = {
     type: 1,
     target: "update",
     arguments: [{ messages: [{ author: "bot", text: "legit-content-marker" }] }],
-  });
-  // The turn opens with 1 MiB of unterminated junk (message a: exactly the
-  // cap, which must be tolerated), then a healthy frame split across two
-  // messages (b1 starts with the record separator that flushes the junk;
-  // b2 completes the frame), then the pending buffer passes the cap (c:
-  // the bounded abort), and a completion frame (d) that must be ignored.
+    padding: "",
+  };
+  healthyFrame.padding = "x".repeat(CAP - Buffer.byteLength(JSON.stringify(healthyFrame)));
+  const healthyBody = JSON.stringify(healthyFrame);
+  assert.equal(Buffer.byteLength(healthyBody), CAP);
+  // Begin with partial JSON, then reach exactly CAP retained bytes before the
+  // separator. This exercises pending framing, not standalone-JSON admission.
   const chatMessages = [
-    "x".repeat(CAP),
-    "\x1e" + healthyBody.slice(0, 40),
-    healthyBody.slice(40) + "\x1e",
+    healthyBody.slice(0, 40),
+    healthyBody.slice(40),
+    "\x1e" + '{"type":6',
+    "}\x1e",
     "y".repeat(CAP + 1),
     "\x1e" + encodeFrame({ type: 3 }),
   ];
@@ -120,10 +136,10 @@ test("copilot-m365-web: tolerates a pending frame at the size cap, reassembles a
     body.includes("legit-content-marker"),
     `expected the split healthy frame to stream, got: ${body.slice(0, 400)}`
   );
-  assert.match(body, /pending frame buffer exceeded the size limit/);
+  assert.match(body, /m365_frame_too_large/);
   assert.ok(
-    !body.includes("[DONE]"),
-    `expected an aborted (not finished) stream, got: ${body.slice(0, 400)}`
+    !body.includes('"finish_reason":"stop"'),
+    `expected an error, not a successful finish, got: ${body.slice(0, 400)}`
   );
   assert.ok(getInstance()?.closed, "expected the socket to be closed after the abort");
 });
@@ -191,10 +207,8 @@ test("claude-web keeps the same 1 MiB pending-line cap at the boundary", async (
   assert.equal(overCap.state.cancelled, true);
 });
 
-test("copilot-m365-web: a complete over-cap frame delivered in a single message still streams unchanged", async () => {
-  // A complete update frame whose text alone exceeds 1 MiB, delivered in a
-  // SINGLE socket message: the guard reads the retained remainder, never the
-  // raw message, so a whole frame must keep streaming.
+test("copilot-m365-web: complete over-cap frames are rejected before content just like split frames", async () => {
+  // Intentional native contract: a separator cannot bypass frame memory admission.
   const overCapText = "legit-content-marker" + "z".repeat(CAP);
   const chatMessages = [
     encodeFrame({
@@ -224,15 +238,7 @@ test("copilot-m365-web: a complete over-cap frame delivered in a single message 
     restore();
   }
 
-  assert.ok(
-    body.includes("legit-content-marker"),
-    `expected the complete over-cap frame to stream, got: ${body.slice(0, 400)}`
-  );
-  assert.ok(
-    body.includes('"finish_reason":"stop"'),
-    `expected a finished stream, got: ${body.slice(0, 400)}`
-  );
-  assert.ok(body.includes("[DONE]"), "expected the [DONE] marker for a finished stream");
-  assert.ok(!/size limit/.test(body), `expected no size-limit error, got: ${body.slice(0, 400)}`);
+  assert.equal(JSON.parse(body).error.code, "m365_frame_too_large");
+  assert.doesNotMatch(body, /legit-content-marker|finish_reason|\[DONE\]/);
   assert.ok(getInstance()?.closed, "expected the socket to be closed after the turn");
 });

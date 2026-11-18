@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
 import { Skeleton } from "@/shared/components/Loading";
@@ -34,6 +35,13 @@ type CacheHealthResponse = {
   cacheWriteTotal: number;
   writeReadRatio: number;
   warmCalls: number;
+  cacheWrite5mTotal?: number;
+  cacheWrite1hTotal?: number;
+  cacheWriteUnknownTotal?: number;
+  cacheWriteUnreportedCalls?: number;
+  cacheWriteInvalidCalls?: number;
+  cacheWriteUnpricedTotal?: number;
+  cacheWriteKnownTierCostUsd?: number | null;
   coldCalls: number;
   rewriteCalls: number;
   uncachedCalls: number;
@@ -77,6 +85,55 @@ function Metric({ label, value, hint }: { label: string; value: string; hint?: s
       <span className="text-2xl font-semibold text-text-main">{value}</span>
       {hint ? <span className="text-xs text-text-muted">{hint}</span> : null}
     </div>
+  );
+}
+
+function CacheWriteTiers({ data, t }: { data: CacheHealthResponse; t: Translator }) {
+  return (
+    <Card>
+      <h3 className="mb-3 text-sm text-text-main">
+        {text(t, "cacheHealthWriteTiers", "Reported cache-write tiers")}
+      </h3>
+      <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
+        <Metric
+          label={text(t, "cacheHealthWrite5m", "5m cache-write tokens")}
+          value={data.cacheWrite5mTotal == null ? "—" : compact(data.cacheWrite5mTotal)}
+        />
+        <Metric
+          label={text(t, "cacheHealthWrite1h", "1h cache-write tokens")}
+          value={data.cacheWrite1hTotal == null ? "—" : compact(data.cacheWrite1hTotal)}
+        />
+        <Metric
+          label={text(t, "cacheHealthWriteUnknown", "Unknown-tier tokens")}
+          value={data.cacheWriteUnknownTotal == null ? "—" : compact(data.cacheWriteUnknownTotal)}
+        />
+        <Metric
+          label={text(t, "cacheHealthWriteEstimate", "API-equivalent write estimate (known tiers)")}
+          value={
+            data.cacheWriteKnownTierCostUsd == null
+              ? text(t, "cacheHealthPriceUnknown", "Not available")
+              : `$${data.cacheWriteKnownTierCostUsd.toFixed(6)}`
+          }
+        />
+      </div>
+      <p className="mt-3 text-xs text-text-muted">
+        {text(
+          t,
+          "cacheHealthWriteEstimateHint",
+          "Price estimate for reported, priced tiers only; not cash spend or subscription quota. Unknown tiers are never inferred from request TTL. Prices are captured when the call is logged."
+        )}
+      </p>
+      <p className="mt-2 text-xs text-text-muted">
+        {text(t, "cacheHealthWriteUnpriced", "Unpriced write tokens")}:{" "}
+        {data.cacheWriteUnpricedTotal == null ? "—" : compact(data.cacheWriteUnpricedTotal)}
+        {" · "}
+        {text(t, "cacheHealthWriteUnreported", "Calls without a write total")}:{" "}
+        {data.cacheWriteUnreportedCalls == null ? "—" : compact(data.cacheWriteUnreportedCalls)}
+        {" · "}
+        {text(t, "cacheHealthWriteInvalid", "Invalid or conflicting tier calls")}:{" "}
+        {data.cacheWriteInvalidCalls == null ? "—" : compact(data.cacheWriteInvalidCalls)}
+      </p>
+    </Card>
   );
 }
 
@@ -126,7 +183,7 @@ export default function CacheHealthTab() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-text-main">
+          <h2 className="text-lg text-text-main">
             {text(t, "cacheHealthTitle", "Prompt cache health")}
           </h2>
           <Badge variant={verdictVariant(data.verdict)}>
@@ -181,11 +238,13 @@ export default function CacheHealthTab() {
             </div>
           </Card>
 
-          {/* A concentração é o achado que a média esconde — por isso ganha destaque próprio. */}
+          <CacheWriteTiers data={data} t={t} />
+
+          {/* Concentration highlights the tail hidden by the average. */}
           <Card>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="text-sm font-semibold text-text-main">
+                <h3 className="text-sm text-text-main">
                   {text(t, "cacheHealthConcentration", "Where the writes are concentrated")}
                 </h3>
                 <span className="text-xs text-text-muted">
@@ -200,15 +259,17 @@ export default function CacheHealthTab() {
                 {text(t, "cacheHealthOfWrites", "of all written tokens")} (
                 {compact(data.heavyWriteCalls)} {text(t, "cacheHealthCallsLower", "calls")}).
               </p>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-bg-subtle">
-                <div
-                  className={cn(
-                    "h-full rounded-full",
-                    data.heavyWriteTokenShare > 0.75 ? "bg-error" : "bg-warning"
-                  )}
-                  style={{ width: `${Math.min(100, data.heavyWriteTokenShare * 100)}%` }}
-                />
-              </div>
+              <Progress
+                aria-label={text(
+                  t,
+                  "cacheHealthConcentration",
+                  "Where the writes are concentrated"
+                )}
+                aria-valuetext={pct(data.heavyWriteTokenShare)}
+                value={data.heavyWriteTokenShare * 100}
+                tone={data.heavyWriteTokenShare > 0.75 ? "danger" : "warning"}
+                animate={false}
+              />
               <div className="grid grid-cols-2 gap-4 pt-1 md:grid-cols-4">
                 <Metric label="p50" value={compact(data.writeP50)} />
                 <Metric label="p90" value={compact(data.writeP90)} />
@@ -219,30 +280,31 @@ export default function CacheHealthTab() {
           </Card>
 
           <Card>
-            <h3 className="mb-3 text-sm font-semibold text-text-main">
+            <h3 className="mb-3 text-sm text-text-main">
               {text(t, "cacheHealthByModel", "By model (worst ratio first)")}
             </h3>
             <Table
               className="min-w-[560px] text-sm"
               containerClassName="rounded-none border-0"
               scrollbarLabel={text(t, "cacheHealthByModel", "By model (worst ratio first)")}
+              scrollLabel={text(t, "cacheHealthByModel", "By model (worst ratio first)")}
             >
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pb-2 pr-4 font-medium">
+                  <TableHead className="pb-2 pr-4">
                     {text(t, "cacheHealthModel", "Model")}
                   </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right font-medium">
+                  <TableHead className="pb-2 pr-4 text-right">
                     {text(t, "cacheHealthCalls", "Calls")}
                   </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right font-medium">
+                  <TableHead className="pb-2 pr-4 text-right">
                     {text(t, "cacheHealthRead", "Read")}
                   </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right font-medium">
+                  <TableHead className="pb-2 pr-4 text-right">
                     {text(t, "cacheHealthWrite", "Written")}
                   </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right font-medium">W/R</TableHead>
-                  <TableHead className="pb-2 text-right font-medium">
+                  <TableHead className="pb-2 pr-4 text-right">W/R</TableHead>
+                  <TableHead className="pb-2 text-right">
                     {text(t, "cacheHealthHeavy", "Heavy")}
                   </TableHead>
                 </TableRow>
@@ -264,7 +326,7 @@ export default function CacheHealthTab() {
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "py-2 pr-4 text-right font-medium",
+                        "py-2 pr-4 text-right",
                         m.writeReadRatio > 1
                           ? "text-error"
                           : m.writeReadRatio > 0.2

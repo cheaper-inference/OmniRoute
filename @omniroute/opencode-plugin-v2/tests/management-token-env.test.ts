@@ -371,6 +371,6 @@ describe("plugin-v2 management token environment source", () => {
     assert.equal(seenPricing, "mgmt-env-token");
     const entry = models.get("omniroute/team-combo");
     assert.ok(entry, "expected the combo entry in the published catalog");
-    assert.equal(entry?.name, "Team Combo");
+    assert.equal(entry?.name, "combo - Team Combo");
   });
 });

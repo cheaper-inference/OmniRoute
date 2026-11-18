@@ -214,12 +214,18 @@ test("#10718: refreshM365AccessToken redeems the public client grant and returns
     );
   }) as typeof fetch;
   try {
-    const result = await refreshM365AccessToken("OLD-REFRESH", "tenant-id");
+    const result = await refreshM365AccessToken(
+      "OLD-REFRESH",
+      "11111111-1111-4111-8111-111111111111"
+    );
     assert.ok("accessToken" in result);
     assert.equal(result.accessToken, "NEW-ACCESS");
     assert.equal(result.refreshToken, "ROTATED-REFRESH");
     assert.equal(result.expiresIn, 4777);
-    assert.match(capturedUrl, /login\.microsoftonline\.com\/tenant-id\/oauth2\/v2\.0\/token/);
+    assert.equal(
+      capturedUrl,
+      "https://login.microsoftonline.com/11111111-1111-4111-8111-111111111111/oauth2/v2.0/token"
+    );
     assert.match(capturedBody, /grant_type=refresh_token/);
     assert.match(capturedBody, new RegExp(`client_id=${M365_OAUTH_CLIENT_ID}`));
     assert.match(capturedBody, /refresh_token=OLD-REFRESH/);

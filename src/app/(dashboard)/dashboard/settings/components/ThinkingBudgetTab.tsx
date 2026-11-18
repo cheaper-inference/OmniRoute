@@ -95,7 +95,7 @@ export default function ThinkingBudgetTab() {
           <Icon name="psychology" size={20} />
         </div>
         <div>
-          <h3 className="text-lg font-semibold">{t("thinkingBudgetTitle")}</h3>
+          <h3 className="text-lg">{t("thinkingBudgetTitle")}</h3>
           <p className="text-sm text-text-muted">{t("thinkingBudgetDesc")}</p>
           <p className="text-xs text-text-muted mt-1 leading-relaxed">
             {t("thinkingBudgetIndependenceHint")}
@@ -111,7 +111,7 @@ export default function ThinkingBudgetTab() {
       {/* Mode selector */}
       <RadioGroup
         aria-label={t("thinkingBudgetTitle")}
-        orientation="horizontal"
+        columns={2}
         value={config.mode}
         onValueChange={(next) => save({ mode: next })}
         disabled={loading || saving}
@@ -155,7 +155,8 @@ export default function ThinkingBudgetTab() {
           <p className="text-xs text-text-muted mb-3">{t("adaptiveHint")}</p>
           <RadioGroup
             aria-label={t("baseEffortLevel")}
-            orientation="horizontal"
+            columns={4}
+            minItemWidth="7rem"
             value={config.effortLevel}
             onValueChange={(next) => save({ effortLevel: next })}
             disabled={loading || saving}

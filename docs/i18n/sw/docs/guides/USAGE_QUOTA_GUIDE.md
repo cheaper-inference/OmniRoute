@@ -40,7 +40,7 @@ Ombi ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ## Kinachorekodiwa
 
-Huduma ya `usage.ts` huhifadhi **tukio la matumizi** kwa kila ombi:
+Huduma ya `usage.ts` hunasa **tukio la matumizi** kwa kila ombi:
 
 | Sehemu             | Aina    | Chanzo                                                                       |
 | ------------------ | ------- | ---------------------------------------------------------------------------- |
@@ -48,21 +48,21 @@ Huduma ya `usage.ts` huhifadhi **tukio la matumizi** kwa kila ombi:
 | `apiKeyId`         | string  | Ufunguo wa API ulioanzisha ombi                                              |
 | `provider`         | string  | Kitambulisho cha mtoa huduma (openai, anthropic, n.k.)                       |
 | `model`            | string  | Kitambulisho cha modeli (gpt-5, claude-opus-4-6, n.k.)                       |
-| `comboId`          | string? | Kitambulisho cha mseto ikiwa ombi limeelekezwa kupitia mseto                 |
+| `comboId`          | string? | Kitambulisho cha mchanganyiko ikiwa ombi limeelekezwa kupitia mchanganyiko   |
 | `promptTokens`     | number  | Kutoka kwenye jibu la huduma ya juu                                          |
 | `completionTokens` | number  | Kutoka kwenye jibu la huduma ya juu                                          |
-| `cachedTokens`     | number  | Tokeni zilizopatikana kwenye kache (uhifadhi wa vidokezo wa Anthropic, n.k.) |
-| `totalTokens`      | number  | tokeni za kidokezo + tokeni za ukamilishaji                                  |
-| `costUsd`          | number  | Imehesabiwa kutokana na data ya bei                                          |
-| `latencyMs`        | number  | Muda wote wa ombi kutoka mwanzo hadi mwisho                                  |
+| `cachedTokens`     | number  | Tokeni zilizopatikana kwenye akiba (uhifadhi wa vidokezo wa Anthropic, n.k.) |
+| `totalTokens`      | number  | kidokezo + ukamilishaji                                                      |
+| `costUsd`          | number  | Hukokotolewa kutokana na data ya bei                                         |
+| `latencyMs`        | number  | Muda wa ombi kuanzia mwanzo hadi mwisho                                      |
 | `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`                   |
 | `errorClass`       | string? | Aina ya hitilafu ikiwa hali si mafanikio                                     |
 | `timestamp`        | string  | ISO 8601 UTC                                                                 |
-| `metadata`         | object  | Data maalum iliyoingizwa na programu-jalizi                                  |
+| `metadata`         | object  | Data maalumu iliyoingizwa na programu-jalizi                                 |
 
 ### Tokeni Hutoka Wapi
 
-Tokeni hutolewa kutoka kwenye jibu la mtoa huduma wa juu katika **kishughulikiaji cha majibu**:
+Tokeni hutolewa kwenye jibu la mtoa huduma wa juu ndani ya **kishughulikiaji cha majibu**:
 
 ```ts
 // Kutoka open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Kwa watoa huduma ambao hawarudishi taarifa za matumizi (baadhi ya watoa huduma wanaotumia vidakuzi vya wavuti), OmniRoute **hukadiria** tokeni kwa kutumia kanuni ya makadirio ya `~herufi 4 kwa kila tokeni` (tazama `open-sse/services/autoCombo/pipelineRouter.ts`).
+Kwa watoa huduma ambao hawarudishi matumizi (baadhi ya watoa huduma wanaotumia vidakuzi vya wavuti), OmniRoute **hukadiria** tokeni kwa kutumia kanuni ya makadirio ya `~4 chars per token` (angalia `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Tokeni Zilizohifadhiwa Kwenye Kache
+### Tokeni Zilizohifadhiwa Kwenye Akiba
 
 OmniRoute hufuatilia `cached_tokens` kando na `prompt_tokens` kwa sababu:
 
-- Uhifadhi wa vidokezo wa Anthropic hutoza kiwango kilichopunguzwa kwa tokeni zilizohifadhiwa kwenye kache (10% ya kiwango cha kawaida)
-- Baadhi ya watoa huduma hurudisha `cache_read_input_tokens` ambazo zinapaswa kutozwa bei tofauti
-- Takwimu zinaweza kuonyesha **kiwango cha kupatikana kwenye kache** = `cached_tokens / prompt_tokens`
+- Uhifadhi wa vidokezo wa Anthropic hutoza kiwango kilichopunguzwa kwa tokeni zilizohifadhiwa kwenye akiba (10% ya kiwango cha kawaida)
+- Baadhi ya watoa huduma hurudisha `cache_read_input_tokens` ambazo zinapaswa kuwekewa bei tofauti
+- Uchanganuzi unaweza kuonyesha **kiwango cha upatikanaji kwenye akiba** = `cached_tokens / prompt_tokens`
+
+### Uchunguzi wa madaraja ya uandishi kwenye akiba
+
+Paneli ya hali ya akiba ya vidokezo kwenye dashibodi ya Uchanganuzi hutofautisha uandishi kwenye akiba wa
+dakika 5 na wa saa 1 unaoripotiwa na mtoa huduma. Sehemu za Anthropic
+`usage.cache_creation.ephemeral_5m_input_tokens` na
+`usage.cache_creation.ephemeral_1h_input_tokens` huhifadhiwa wakati wa ubadilishaji wa taarifa za matumizi ya majibu yanayotiririshwa na
+yasiyotiririshwa, na kuhifadhiwa pamoja na mihtasari ya kumbukumbu za miito. Jumla ya pamoja ya
+uandishi kwenye akiba haiongezwi tena kwenye makundi hayo.
+
+Miito yenye kihesabu cha jumla cha uandishi pekee, ikiwemo rekodi za zamani, huwa na daraja
+lisilojulikana. Mgawanyo usiokamilika huacha salio lake lisilopangiwa likiwa halijulikani; vihesabu visivyo halali au
+vinavyokinzana hutiwa alama badala ya kupewa TTL kimyakimya. Viashiria vya
+TTL upande wa ombi si ushahidi wa daraja lililotozwa.
+
+Makadirio ya uandishi yanayolingana na API kwenye paneli yanahusisha madaraja yaliyoripotiwa na yenye bei pekee, si
+ombi lote. Kwa bei asilia za modeli za Claude/Anthropic, hutumia mara 1.25 ya
+kiwango cha ingizo kwa uandishi wa dakika 5 na mara mbili ya kiwango cha ingizo kwa uandishi wa saa 1. Bei
+inayokosekana huchukuliwa kuwa haipatikani, si sifuri. Bei hunaswa kila mwito mpya unaporekodiwa;
+rekodi za kihistoria hazipewi bei upya. Kwa hiyo, akaunti za usajili zinaweza kuwa na
+makadirio yanayolingana na API bila kiasi hicho kutumika kama matumizi ya fedha taslimu au sehemu ya
+kikomo cha usajili. Hesabu zilizopo za vikomo, bajeti na gharama halisi za mtoa huduma hazibadiliki.
+
+Uchunguzi huu hutumia muhtasari uliopo wenye mipaka wa hali ya akiba na sera iliyopo ya
+uhifadhi wa kumbukumbu za miito. Haubadilishi thamani chaguomsingi za TTL za maombi, uelekezaji au uteuzi wa akaunti.
+Unasaji wa TTL iliyoombwa na mteja dhidi ya TTL halisi inayotumwa katika mpaka wa kutuma
+kwa mtoa huduma umeahirishwa; paneli hii huripoti madaraja ya risiti, si TTL halisi inayotumwa.
+
+Utekelezaji: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts`, na `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -121,46 +151,46 @@ Kwa modeli zisizo na data ya bei, OmniRoute hutumia **makadirio ya gharama** kwa
 
 ---
 
-## Ujumlishaji wa Masafa ya Tarehe
+## Ujumlishaji kwa Kipindi cha Tarehe
 
-Moduli ya `usageAnalytics.ts` hukokotoa wijeti za dashibodi kutoka kwenye data ghafi ya matumizi. Inatumia masafa 7 ya muda:
+Moduli ya `usageAnalytics.ts` hukokotoa wijeti za dashibodi kutoka kwenye data ghafi ya matumizi. Inaauni vipindi 7 vya muda:
 
-| Masafa   | Kipindi                             | Matumizi                             |
-| -------- | ----------------------------------- | ------------------------------------ |
-| `1d`     | Saa 24 zilizopita                   | Kugundua ongezeko la gharama kwa saa |
-| `7d`     | Siku 7 zilizopita                   | Mapitio ya kila wiki                 |
-| `30d`    | Siku 30 zilizopita                  | Utozaji wa kila mwezi                |
-| `90d`    | Siku 90 zilizopita                  | Uchambuzi wa kila robo mwaka         |
-| `ytd`    | Tangu Januari 1 ya mwaka wa sasa    | Ufuatiliaji wa bajeti ya mwaka       |
-| `all`    | Muda wote                           | Takwimu za kipindi chote             |
-| `custom` | Mwanzo/mwisho uliowekwa na mtumiaji | Ukaguzi, hoja za papo kwa hapo       |
+| Kipindi  | Muda                                    | Matumizi                                       |
+| -------- | --------------------------------------- | ---------------------------------------------- |
+| `1d`     | Saa 24 zilizopita                       | Kugundua ongezeko la ghafla la gharama kwa saa |
+| `7d`     | Siku 7 zilizopita                       | Mapitio ya kila wiki                           |
+| `30d`    | Siku 30 zilizopita                      | Utozaji wa kila mwezi                          |
+| `90d`    | Siku 90 zilizopita                      | Uchanganuzi wa kila robo mwaka                 |
+| `ytd`    | Tangu Januari 1 ya mwaka huu            | Ufuatiliaji wa bajeti ya mwaka                 |
+| `all`    | Muda wote                               | Takwimu za muda wote                           |
+| `custom` | Mwanzo/mwisho uliobainishwa na mtumiaji | Ukaguzi, hoja za uchunguzi za papo hapo        |
 
 ### Wijeti za Dashibodi Zinazokokotolewa
 
-Kwa masafa yoyote ya tarehe, safu ya uchanganuzi hukokotoa:
+Kwa kipindi chochote cha tarehe, safu ya uchanganuzi hukokotoa:
 
-| Wijeti                             | Maelezo                                                      |
-| ---------------------------------- | ------------------------------------------------------------ |
-| **Kadi za muhtasari**              | Jumla ya maombi, gharama, tokeni na kiwango cha mafanikio    |
-| **Chati ya mwenendo wa kila siku** | Gharama + tokeni kwa siku, zikiwa zimepangwa kwa modeli      |
-| **Ramani ya joto ya shughuli**     | Gridi ya saa ya siku × siku ya wiki, rangi = idadi ya maombi |
-| **Mgawanyo wa modeli**             | Chati ya duara ya gharama kulingana na modeli                |
-| **Mgawanyo wa mtoa huduma**        | Chati ya pau ya maombi kulingana na mtoa huduma              |
-| **Funguo kuu za API**              | Jedwali la funguo 10 kuu kulingana na gharama                |
-| **Uchanganuzi wa hitilafu**        | Kiwango cha hitilafu kwa muda, aina kuu za hitilafu          |
+| Wijeti                             | Maelezo                                                                     |
+| ---------------------------------- | --------------------------------------------------------------------------- |
+| **Kadi za muhtasari**              | Jumla ya maombi, jumla ya gharama, jumla ya tokeni, kiwango cha mafanikio   |
+| **Chati ya mwenendo wa kila siku** | Gharama + tokeni kwa siku, zikiwa zimepangwa kwa tabaka kulingana na modeli |
+| **Ramani ya joto ya shughuli**     | Gridi ya saa ya siku × siku ya wiki, rangi = idadi ya maombi                |
+| **Mgawanyo kwa modeli**            | Chati ya duara ya gharama kwa modeli                                        |
+| **Mgawanyo kwa mtoa huduma**       | Chati ya pau ya maombi kwa mtoa huduma                                      |
+| **Funguo kuu za API**              | Jedwali la funguo 10 zinazoongoza kwa gharama                               |
+| **Uchanganuzi wa hitilafu**        | Kiwango cha hitilafu kwa muda, makundi makuu ya hitilafu                    |
 
-### Ufikiaji wa Kiprogramu
+### Ufikiaji Kupitia Programu
 
 ````ts
 import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
   history,              // rekodi za historia ya matumizi
-  "7d",                 // masafa ya muda: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // ramani ya muunganisho wa mtoa huduma (connectionId → jina la akaunti)
+  "7d",                 // kipindi cha muda: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
+  connectionMap,        // ramani ya miunganisho ya watoa huduma (connectionId → jina la akaunti)
   {
-    startDate: "2025-01-01",  // si lazima: kwa masafa ya "custom"
-    endDate: "2025-06-01",   // si lazima: kwa masafa ya "custom"
+    startDate: "2025-01-01",  // si lazima: kwa kipindi cha "custom"
+    endDate: "2025-06-01",   // si lazima: kwa kipindi cha "custom"
   }
 );
 
@@ -169,12 +199,12 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ---
 
-## Utekelezaji wa Vikomo
+## Utekelezaji wa Vikomo vya Matumizi
 
-Kikomo cha kila ufunguo wa API kinatekelezwa katika sehemu mbili:
+Kikomo cha matumizi kwa kila ufunguo wa API hutekelezwa katika sehemu mbili:
 
-1. **Kikomo laini** (`quotaWarnAt`): onyo kwenye dashibodi wakati matumizi yanapozidi kiwango
-2. **Kikomo thabiti** (`quotaLimit`): ombi hukataliwa kwa HTTP 429 wakati kikomo kinapozidiwa
+1. **Kikomo cha onyo** (`quotaWarnAt`): onyo kwenye dashibodi matumizi yanapozidi kizingiti
+2. **Kikomo cha lazima** (`quotaLimit`): ombi hukataliwa kwa HTTP 429 kinapozidiwa
 
 ### Usanidi
 
@@ -190,36 +220,36 @@ await updateApiKey(keyId, {
 ### Mtiririko wa Utekelezaji
 
 ```
-Ombi ──▶ quotaCheck()
+Request ──▶ quotaCheck()
               │
-              ├── Ndani ya kikomo?  ──▶ ruhusu
+              ├── Within limit?  ──▶ allow
               │
-              └── Limezidi kikomo?  ──▶ 429 Maombi Mengi Sana
-                                        pamoja na kichwa cha Retry-After
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
-### Picha za Hali ya Vikomo
+### Picha za Hali ya Kikomo cha Matumizi
 
-Jedwali la `quotaSnapshots` huhifadhi **hali ya kihistoria ya vikomo** kwa ajili ya uchanganuzi wa mienendo:
+Jedwali la `quotaSnapshots` huhifadhi **historia ya hali ya kikomo cha matumizi** kwa ajili ya uchanganuzi wa mwenendo:
 
 | Sehemu | Maelezo |
-| ----------- | ------------------------------------ | ------ | ------- |
+| ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Ufunguo unaofuatiliwa |
 | `window` | "day" | "week" | "month" |
 | `used` | Gharama iliyotumika katika kipindi hiki (senti) |
 | `limit` | Kikomo (senti) |
-| `resetAt` | Wakati kipindi kinapowekwa upya |
-| `createdAt` | Wakati picha ya hali ilipopigwa |
+| `resetAt` | Wakati kipindi kinapoanza upya |
+| `createdAt` | Wakati picha ya hali ilipochukuliwa |
 
-Picha za hali hupigwa **kwa kila ombi** linalotumia gharama > 0, na hutumika:
+Picha za hali huchukuliwa **kwa kila ombi** linalotumia gharama > 0, na hutumika:
 
-- Kuonyesha upau wa maendeleo ya kikomo kwenye dashibodi
-- Kuonyesha chati za mwenendo wa kikomo wa siku 30
-- Kuanzisha arifa wakati matumizi yanapokaribia kikomo
+- Kuonyesha upau wa maendeleo ya matumizi dhidi ya kikomo kwenye dashibodi
+- Kuonyesha chati za mwenendo wa kikomo cha matumizi kwa siku 30
+- Kuanzisha arifa matumizi yanapokaribia kikomo
 
 ---
 
-## REST API
+## API ya REST
 
 ### Orodhesha Rekodi za Matumizi
 
@@ -272,12 +302,7 @@ Jibu:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,24 +311,24 @@ Jibu:
 }
 ```
 
-### Uliza Uchanganuzi wa Matumizi
+### Ulizia Uchanganuzi wa Matumizi
 
-Data ya matumizi hufikiwa kupitia dashibodi au zana za MCP, si kupitia ncha za moja kwa moja za usafirishaji wa REST. Uchanganuzi unaopatikana:
+Data ya matumizi hufikiwa kupitia dashibodi au zana za MCP, si kupitia sehemu za mwisho za REST za kuhamisha data moja kwa moja. Uchanganuzi unaopatikana:
 
-- **`/api/usage/analytics`** — vipimo vya matumizi vilivyojumlishwa (panga kwa modeli, mtoa huduma, ufunguo)
-- **`/api/usage/quota`** — hali ya sasa ya kikomo kwa kila ufunguo wa API
+- **`/api/usage/analytics`** — vipimo vya matumizi vilivyojumlishwa (panga kwa makundi kulingana na modeli, mtoa huduma, ufunguo)
+- **`/api/usage/quota`** — hali ya sasa ya mgao kwa kila ufunguo wa API
 - **`/api/usage/history`** — kumbukumbu za historia ya maombi
 
 ---
 
 ## Zana za MCP
 
-Zana mbili za MCP hufichua data ya matumizi kwa mawakala (tazama `open-sse/mcp-server/tools/`):
+Zana mbili za MCP huwapa mawakala ufikiaji wa data ya matumizi (angalia `open-sse/mcp-server/tools/`):
 
-| Zana                    | Maelezo                                                         |
-| ----------------------- | --------------------------------------------------------------- |
-| `omniroute_cost_report` | Huzalisha ripoti ya gharama kwa kila ufunguo kwa kipindi fulani |
-| `omniroute_check_quota` | Hurejesha hali ya sasa ya kikomo kwa ufunguo wa API             |
+| Zana                    | Maelezo                                                                     |
+| ----------------------- | --------------------------------------------------------------------------- |
+| `omniroute_cost_report` | Hutengeneza ripoti ya gharama kwa kila ufunguo kwa kipindi kilichobainishwa |
+| `omniroute_check_quota` | Hurejesha hali ya sasa ya mgao kwa ufunguo wa API                           |
 
 Mfano wa mwito wa wakala:
 
@@ -318,33 +343,33 @@ Mfano wa mwito wa wakala:
 
 ## Uhifadhi na Usafishaji
 
-Data ya matumizi huongezeka kwa takribani ~1-10KB kwa kila ombi. Kwa kiwango kikubwa, kiasi hiki kinaweza kuwa kikubwa.
+Data ya matumizi huongezeka kwa ~1-10KB kwa kila ombi. Kwa kiwango kikubwa, hii inaweza kuwa kiasi kikubwa.
 
 ### Mipangilio ya Uhifadhi
 
-Uhifadhi wa historia ya matumizi husanidiwa kupitia Mipangilio ya Hifadhidata katika UI au kupitia `/api/settings/database`.
+Uhifadhi wa historia ya matumizi husanidiwa kupitia Mipangilio ya Hifadhidata katika kiolesura cha mtumiaji au kupitia `/api/settings/database`.
 
-Kwa chaguo-msingi, historia ya matumizi huhifadhiwa kwa **siku 90**.
+Kwa chaguomsingi, historia ya matumizi huhifadhiwa kwa **siku 90**.
 
 ### Usafishaji
 
 Rekodi za zamani husafishwa na `src/lib/db/cleanup.ts`:
 
 - Huchochewa na mchakato wa cron unaoendeshwa chinichini
-- Hufuta rekodi kutoka `usage_history` ambazo ni za zamani kuliko kipindi kilichosanidiwa katika mpangilio wa uhifadhi wa `usageHistory`
+- Hufuta rekodi kutoka `usage_history` ambazo ni za zamani kuliko muda uliosanidiwa katika mpangilio wa uhifadhi wa `usageHistory`
 
-### Makadirio ya Hifadhi
+### Makadirio ya Nafasi ya Kuhifadhi
 
-| Kiwango cha maombi  | Hifadhi ya siku 30 | Hifadhi ya siku 90 |
-| ------------------- | ------------------ | ------------------ |
-| Maombi 100/siku     | ~3MB               | ~9MB               |
-| Maombi 1,000/siku   | ~30MB              | ~90MB              |
-| Maombi 10,000/siku  | ~300MB             | ~900MB             |
-| Maombi 100,000/siku | ~3GB               | ~9GB               |
+| Kiwango cha maombi  | Nafasi ya siku 30 | Nafasi ya siku 90 |
+| ------------------- | ----------------- | ----------------- |
+| Maombi 100/siku     | ~3MB              | ~9MB              |
+| Maombi 1,000/siku   | ~30MB             | ~90MB             |
+| Maombi 10,000/siku  | ~300MB            | ~900MB            |
+| Maombi 100,000/siku | ~3GB              | ~9GB              |
 
-Kwa trafiki kubwa sana, zingatia:
+Kwa kiwango cha juu sana cha maombi, zingatia:
 
-- Kupunguza kipindi cha uhifadhi kupitia Mipangilio ya Hifadhidata
+- Kupunguza muda wa uhifadhi kupitia Mipangilio ya Hifadhidata
 - Kutumia `aggregated_metrics` badala ya rekodi ghafi (kwa uchanganuzi pekee)
 
 ---
@@ -354,29 +379,29 @@ Kwa trafiki kubwa sana, zingatia:
 ### 1. Tumia Modeli Inayofaa
 
 ```bash
-# Jibu la haraka — tumia iliyo nafuu + yenye kasi
+# Jibu la haraka — tumia ya bei nafuu na yenye kasi
 curl -d '{"model":"auto/fast","messages":[...]}'
 
 # Kazi changamano — tumia yenye ubora
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
-### 2. Wezesha Uakibishaji
+### 2. Wezesha Uhifadhi kwenye Kache
 
-Uakibishaji wa vichocheo wa Anthropic huokoa **90% kwa muktadha unaorudiwa**:
+Uhifadhi wa maelekezo kwenye kache wa Anthropic huokoa **90% ya gharama za muktadha unaorudiwa**:
 
 ```ts
-// Uakibishaji ni wa kiotomatiki — jumuisha tu kichocheo kilekile kikubwa cha mfumo
+// Uhifadhi kwenye kache ni wa kiotomatiki — jumuisha tu maelekezo yale yale marefu ya mfumo
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
-  system: longSystemPrompt, // Kitaakibishwa kiotomatiki
+  system: longSystemPrompt, // Yatahifadhiwa kwenye kache kiotomatiki
   messages: [{ role: "user", content: "..." }],
 });
 ```
 
-### 3. Tumia Mfinyazo
+### 3. Tumia Ukandamizaji
 
-Mfinyazo wa RTK + Caveman huokoa **15-95% katika vipindi vinavyotumia zana nyingi**:
+Ukandamizaji wa RTK + Caveman huokoa **15-95% ya gharama katika vipindi vyenye matumizi mengi ya zana**:
 
 ```ts
 const config = {
@@ -389,15 +414,15 @@ const config = {
 
 ### 4. Weka Vikomo kwa Kila Ufunguo
 
-Daima weka `quotaLimit` ili kuzuia gharama zisizodhibitika:
+Weka `quotaLimit` kila wakati ili kuzuia gharama zisizodhibitika:
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Kikomo cha $10/mwezi
 ```
 
-### 5. Kagua Watumiaji Wakuu
+### 5. Kagua Watumiaji Wanaotumia Zaidi
 
-Tumia dashibodi au **`/api/usage/analytics`** kupanga kwa ufunguo wa API na kupanga kwa gharama:
+Tumia dashibodi au **`/api/usage/analytics`** kupanga katika vikundi kulingana na ufunguo wa API na kupanga kwa gharama:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -409,28 +434,28 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ### "Gharama ni kubwa kuliko ilivyotarajiwa"
 
-1. Angalia **`/api/usage/analytics?groupBy=model`** — tambua modeli yenye gharama kubwa
-2. Angalia **`/api/usage/analytics?groupBy=apiKey`** — tambua mtumiaji anayetumia zaidi
-3. Thibitisha kuwa data ya bei imesasishwa: `POST /api/pricing/sync`
+1. Kagua **`/api/usage/analytics?groupBy=model`** — tambua modeli yenye gharama kubwa
+2. Kagua **`/api/usage/analytics?groupBy=apiKey`** — tambua mtumiaji mwenye matumizi makubwa
+3. Hakikisha data ya bei imesasishwa: `POST /api/pricing/sync`
 
 ### "Rekodi hazipo"
 
-- Angalia mipangilio ya uhifadhi wa DB chini ya Dashibodi → Hifadhidata → Usafishaji — rekodi za zamani hufutwa na jukumu la usafishaji wa mara kwa mara (`src/lib/db/cleanup.ts`)
-- Angalia hitilafu katika `src/lib/db/usage*.ts` — kushindwa kuandika kwenye DB hurekodiwa kwenye kumbukumbu lakini hakuonyeshwi
-- Thibitisha kuwa ombi lilifika kwenye `chatCore` — angalia uelekezaji wa mchanganyiko
+- Kagua mipangilio ya uhifadhi wa DB chini ya Dashibodi → Hifadhidata → Usafishaji — rekodi za zamani hufutwa na kazi ya usafishaji wa mara kwa mara (`src/lib/db/cleanup.ts`)
+- Kagua hitilafu katika `src/lib/db/usage*.ts` — kushindwa kuandika kwenye DB huandikwa kwenye kumbukumbu lakini hakuonyeshwi
+- Hakikisha ombi lilifika kwenye `chatCore` — kagua uelekezaji wa combo
 
 ### "Kikomo hakitekelezwi"
 
-- Angalia mpangilio wa `quotaLimit` wa ufunguo
-- Thibitisha kuwa `quotaWindow` imewekwa kwa usahihi
+- Kagua mpangilio wa `quotaLimit` wa ufunguo
+- Hakikisha `quotaWindow` imewekwa ipasavyo
 - Tafuta rekodi za `quotaSnapshots` — zinapaswa kuundwa kwa kila ombi
 
 ---
 
-## Angalia Pia
+## Tazama Pia
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Muundo wa majedwali ya matumizi
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — vigeu vya mazingira vya kusawazisha bei
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Skima ya majedwali ya matumizi
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — vigeu vya mazingira vya usawazishaji wa bei
 - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Jinsi `auto/fast`, `auto/cheap` zinavyopunguza gharama
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Rejeleo kamili la `/api/usage/*`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — Marejeleo kamili ya `/api/usage/*`
 - Chanzo: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

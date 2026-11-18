@@ -2,6 +2,8 @@
 
 import { useMemo, useState } from "react";
 import Card from "@/shared/components/Card";
+import ChatGptLocalUsage from "@/shared/components/ChatGptLocalUsage";
+import { hasChatGptUsageLimit } from "@/shared/utils/chatgptPlanUi";
 import {
   isProviderBillingProvider,
   type ProviderBillingStatus,
@@ -20,6 +22,7 @@ import {
 } from "./utils";
 import QuotaCardHeader from "./parts/QuotaCardHeader";
 import QuotaCardExpanded from "./parts/QuotaCardExpanded";
+import { useQuotaClock } from "./useQuotaClock";
 import ProviderUsdCostModal from "./ProviderUsdCostModal";
 import type { CodexPaidCredits } from "@/lib/providers/codexPaidCredits";
 
@@ -46,6 +49,7 @@ interface QuotaCardProps {
           quotaGroups?: Array<Record<string, unknown>>;
           paidCredits?: CodexPaidCredits;
           speed?: unknown;
+          modelUsage?: unknown;
         };
         stale?: { since?: string; reason?: string } | null;
       }
@@ -88,6 +92,7 @@ export default function QuotaCard({
   onShowQuota,
 }: QuotaCardProps) {
   const isActive = connection.isActive ?? true;
+  const clockNow = useQuotaClock();
   const [costModalOpen, setCostModalOpen] = useState(false);
   const rawQuotas = quota?.quotas ?? EMPTY_QUOTAS;
   // Per-account visibility (9router#4767); provider entry is a legacy fallback.
@@ -163,36 +168,47 @@ export default function QuotaCard({
         onToggleActive={onToggleActive}
         togglingActive={togglingActive}
         onTestSent={onRefresh}
+        now={clockNow}
       />
-      <QuotaCardExpanded
-        quotas={quotas}
-        quotaGroups={quota?.raw?.quotaGroups}
-        providerId={connection.provider}
-        loading={loading}
-        error={error}
-        message={quota?.message ?? null}
-        paidCredits={connection.provider === "codex" ? quota?.raw?.paidCredits : undefined}
-        billing={
-          isProviderBillingProvider(connection.provider)
-            ? (quota?.billing ?? quota?.raw?.billing)
-            : null
-        }
-        refreshedAt={displayRefreshedAt}
-        hasStaleData={hasStaleData}
-        onRefresh={onRefresh}
-        onOpenCutoff={onOpenCutoff}
-        onOpenCost={() => setCostModalOpen(true)}
-        onOpenResetCredits={onOpenResetCredits}
-        hiddenQuotaRows={hiddenQuotaRows}
-        onHideQuota={onHideQuota}
-        onShowQuota={onShowQuota}
-        speed={quota?.raw?.speed}
-        canEditCutoff={canEditCutoff}
-        hasCutoffOverrides={hasOverrides}
-        canRedeemResetCredit={canRedeemResetCredit}
-        redeemingResetCredit={redeemingResetCredit}
-        loadingResetCredits={loadingResetCredits}
-      />
+      {connection.provider === "chatgpt" && (
+        <ChatGptLocalUsage
+          connectionId={connection.id}
+          limitReached={hasChatGptUsageLimit(connection)}
+        />
+      )}
+      {connection.provider !== "chatgpt" && (
+        <QuotaCardExpanded
+          quotas={quotas}
+          quotaGroups={quota?.raw?.quotaGroups}
+          paidCredits={connection.provider === "codex" ? quota?.raw?.paidCredits : undefined}
+          speed={quota?.raw?.speed}
+          now={clockNow}
+          cursorModelUsage={connection.provider === "cursor" ? quota?.raw?.modelUsage : undefined}
+          providerId={connection.provider}
+          loading={loading}
+          error={error}
+          message={quota?.message ?? null}
+          billing={
+            isProviderBillingProvider(connection.provider)
+              ? (quota?.billing ?? quota?.raw?.billing)
+              : null
+          }
+          refreshedAt={displayRefreshedAt}
+          hasStaleData={hasStaleData}
+          onRefresh={onRefresh}
+          onOpenCutoff={onOpenCutoff}
+          onOpenCost={() => setCostModalOpen(true)}
+          onOpenResetCredits={onOpenResetCredits}
+          hiddenQuotaRows={hiddenQuotaRows}
+          onHideQuota={onHideQuota}
+          onShowQuota={onShowQuota}
+          canEditCutoff={canEditCutoff}
+          hasCutoffOverrides={hasOverrides}
+          canRedeemResetCredit={canRedeemResetCredit}
+          redeemingResetCredit={redeemingResetCredit}
+          loadingResetCredits={loadingResetCredits}
+        />
+      )}
       <ProviderUsdCostModal
         isOpen={costModalOpen}
         onClose={() => setCostModalOpen(false)}

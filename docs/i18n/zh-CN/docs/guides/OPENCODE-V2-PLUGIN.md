@@ -59,40 +59,40 @@
 
 ## 选项
 
-| 键                               | 默认值                                   | 说明                                                                                       |
-| -------------------------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------ |
-| `providerId`                     | `"omniroute"`                            | 提供者 ID、集成 ID，以及模型显示时使用的前缀                                               |
-| `baseURL`                        | 必填                                     | 网关根地址，仅支持 `http(s)`；会在需要时添加 `/v1` 后缀                                    |
-| `apiKey`                         | 已连接的凭据，然后是 `OMNIROUTE_API_KEY` | 用于 `/v1/*` 的聊天密钥                                                                    |
-| `managementReadToken`            | 回退到 `apiKey`                          | 用于 `/api/*` 的密钥——通常与前者**不同**                                                   |
-| `displayName`                    | `"OmniRoute"`                            | 选择器中显示的提供者名称                                                                   |
-| `timeoutMs`                      | `10000`                                  | 每个端点的请求超时时间（自动组合使用 5 秒）                                                |
-| `modelCacheTtlMs`                | `300000`                                 | 目录缓存 TTL；磁盘快照用于预热冷启动                                                       |
-| `timeouts`                       | 回退到 `timeoutMs`                       | 各端点的超时预算（毫秒）：`models`、`combos`、`autoCombos`、`enrichment`                   |
-| `enrichment`                     | `true`                                   | 获取名称、定价和免费层额度                                                                 |
-| `providerTag`                    | `true`                                   | 在显示名称前添加其路由到的上游提供者                                                       |
-| `usableOnly`                     | `false`                                  | 仅保留网关报告为已配置的提供者                                                             |
-| `combosSource`                   | `"api"`                                  | `"models"` 会跳过 `/api/combos` 并发布 `/v1/models` 中的组合行；成员级筛选器会保留 `"api"` |
-| `showcasePerOwner`               | `10`                                     | 默认视图中每个提供者保留的条目数                                                           |
-| `freshPerOwner`                  | `10`                                     | 默认视图中每个提供者保留的新条目数                                                         |
-| `freshWindowDays`                | `90`                                     | 新条目分支的新鲜度时间窗口（天）                                                           |
-| `usageMemory`                    | `true`                                   | 根据 30 天使用情况分析，恢复被静态移除的指定条目（需要管理令牌）                           |
-| `visibleModels` / `hiddenModels` | `[]`                                     | 精确或后缀匹配的允许列表；拒绝优先；`*` 会发布完整目录（其他筛选器仍然适用）               |
-| `geminiSanitization`             | `true`                                   | 从工具架构中移除 Gemini 不接受的 JSON-Schema 关键字（包含 `$ref` 的工具会原样转发）        |
-| `apiFormat.allowAnthropic`       | `false`                                  | 通过 Anthropic API 块路由允许列表中的 ID                                                   |
-| `apiFormat.anthropicModels`      | `[]`                                     | 路由到 Anthropic 的完整模型 ID                                                             |
-| `logLevel` / `startupDebug`      | `warn` / `false`                         | 日志记录器的详细程度                                                                       |
+| Key                              | Default                                        | 备注                                                                                                                                                                                                                                                                                    |
+| -------------------------------- | ---------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `providerId`                     | `"omniroute"`                                  | 提供者 ID、集成 ID，以及模型显示时使用的前缀                                                                                                                                                                                                                                            |
+| `baseURL`                        | required                                       | 网关根地址，仅支持 `http(s)`；必要时会添加 `/v1` 后缀                                                                                                                                                                                                                                   |
+| `apiKey`                         | connected credential, then `OMNIROUTE_API_KEY` | `/v1/*` 的聊天密钥                                                                                                                                                                                                                                                                      |
+| `managementReadToken`            | falls back to `apiKey`                         | `/api/*` 的密钥——通常与前者**不同**                                                                                                                                                                                                                                                     |
+| `displayName`                    | `"OmniRoute"`                                  | 选择器中的提供者名称                                                                                                                                                                                                                                                                    |
+| `timeoutMs`                      | `10000`                                        | 每个端点的 fetch 超时时间（自动组合使用 5 秒）                                                                                                                                                                                                                                          |
+| `modelCacheTtlMs`                | `300000`                                       | 目录缓存 TTL；磁盘快照可预热冷启动                                                                                                                                                                                                                                                      |
+| `timeouts`                       | falls back to `timeoutMs`                      | 每个端点的毫秒级预算：`models`、`combos`、`autoCombos`、`enrichment`                                                                                                                                                                                                                    |
+| `enrichment`                     | `true`                                         | 获取名称、定价和免费层级预算                                                                                                                                                                                                                                                            |
+| `providerTag`                    | `true`                                         | 控制末尾的编辑器括号：`Provider - Model (Editor)`。提供者（提供模型的路由）始终显示；编辑器（创建模型的一方）仅显示在括号中。例如：`Openrouter - MoonshotAI: Kimi K 3.1 Pro` -> `Openrouter - Kimi K 3.1 Pro (MoonshotAI)`。当编辑器与提供者名称相同时省略。设置为 `false` 可将其移除。 |
+| `usableOnly`                     | `false`                                        | 仅保留网关报告为已配置的提供者                                                                                                                                                                                                                                                          |
+| `combosSource`                   | `"api"`                                        | `"models"` 跳过 `/api/combos` 并发布 `/v1/models` 组合行；成员级筛选器保留 `"api"`                                                                                                                                                                                                      |
+| `showcasePerOwner`               | `10`                                           | 每个提供者在默认视图中保留的条目数                                                                                                                                                                                                                                                      |
+| `freshPerOwner`                  | `10`                                           | 每个提供者在默认视图中保留的新鲜条目数                                                                                                                                                                                                                                                  |
+| `freshWindowDays`                | `90`                                           | 新鲜分支的新鲜度窗口（天）                                                                                                                                                                                                                                                              |
+| `usageMemory`                    | `true`                                         | 恢复由 30 天使用情况分析确定的静态删除条目（需要管理令牌）                                                                                                                                                                                                                              |
+| `visibleModels` / `hiddenModels` | `[]`                                           | 精确匹配或后缀匹配的允许列表；拒绝规则优先；`*` 发布完整目录（其他筛选器仍然生效）                                                                                                                                                                                                      |
+| `geminiSanitization`             | `true`                                         | 从工具架构中移除 Gemini 拒绝的 JSON Schema 关键字（`$ref` 工具会原样转发）                                                                                                                                                                                                              |
+| `apiFormat.allowAnthropic`       | `false`                                        | 通过 Anthropic API 区块路由允许列表中的 id                                                                                                                                                                                                                                              |
+| `apiFormat.anthropicModels`      | `[]`                                           | 路由到 Anthropic 的完整模型 id                                                                                                                                                                                                                                                          |
+| `logLevel` / `startupDebug`      | `warn` / `false`                               | 日志记录器详细程度                                                                                                                                                                                                                                                                      |
 
-使用情况记忆默认启用。如果没有管理令牌，它将保持不活动状态
-（启动时会记录一条通知），且不会恢复任何内容。
+使用情况记忆功能默认启用。没有管理令牌时，该功能保持不活跃
+（会记录一条启动通知），不会恢复任何内容。
 
 ## 目录如何保持最新
 
-目录会按需获取，并缓存 `modelCacheTtlMs` 指定的时长；同时，磁盘快照会在网关无法访问时保留最后已知的目录，因此服务中断只会影响目录的新鲜度。模型和组合一到达就会发布；自动组合、提供者列表和扩充覆盖层会在到达后合并，因此单个缓慢的端点不会拖住整个选择器。
+目录会延迟加载，并按 `modelCacheTtlMs` 缓存；磁盘快照则会在网关无法访问时保留上次已知的目录——服务中断不会带来任何影响，除了无法获取最新内容。模型和组合项一到达就会立即发布；自动组合、提供者列表和增强覆盖层也会在各自到达时并入，因此某个缓慢的端点不会拖住整个选择器。
 
-名称包含网关已知的信息：模型路由到的上游提供者、`[Free]` 标记及其附带的预算——因此，销售同一模型的两个连接仍可区分。可通过 `"providerTag": false` 关闭前缀。
+名称遵循 `Provider - Model[ (Editor)][ · budget][ (route)]`：只要 ID 中包含提供者，就会显示提供者（不含斜杠的 ID 不显示前缀）；前导 `🆓` 表示免费条目，其免费层级额度会保留为 `· 1M tokens/month` 后缀；显式 `Editor: Model` 名称中的编辑器会移至末尾括号中（不会根据其他名称猜测编辑器）；组合项显示为 `combo - <slug>`，不带免费图标。两个条目名称相同时，会添加路由后缀——`(no-think)`——以便区分。`providerTag`（默认为 `true`）用于切换末尾的编辑器括号。
 
-没有手动刷新命令：OpenCode v2 命令是提示词模板，而不是回调，因此插件无法公开此类命令。刷新遵循 TTL；仅当目录或覆盖层实际发生变化时，才会请求宿主重新加载，而不会每次刷新都请求。
+没有手动刷新命令：OpenCode v2 命令是提示模板，而不是回调，因此插件无法提供此类命令。刷新会遵循 TTL；仅当目录或覆盖层确实发生变化时，才会要求主机重新加载，并且每次刷新最多请求一次。
 
 ## Gemini 上的工具调用
 
@@ -102,14 +102,15 @@
 
 ## 故障排除
 
-| 症状                            | 原因                                                                                |
-| ------------------------------- | ----------------------------------------------------------------------------------- |
-| 选择器未显示任何 OmniRoute 模型 | 未解析到密钥（请检查启动警告），或网关无法访问                                      |
-| 原始模型 ID、无组合、无定价     | 管理端点拒绝了令牌——请设置 `managementReadToken`                                    |
-| `freeOnly` 目录较短或为空       | 没有管理令牌或令牌被拒绝——请查看主机日志中的刷新摘要行（`unmatched-free` 计数）     |
-| 会话固定到 `opencode-<id>/…`    | v1 插件发布了 `opencode-<id>`；v2 直接发布 `<id>`，因此请在 `<id>/…` 下重新选择模型 |
+| 症状                              | 原因                                                                                  |
+| --------------------------------- | ------------------------------------------------------------------------------------- |
+| Picker 中不显示 OmniRoute 模型    | 未解析到密钥（检查启动警告），或网关无法访问                                          |
+| 显示原始模型 id、没有组合项或价格 | 管理端点拒绝了令牌 — 设置 `managementReadToken`                                       |
+| `freeOnly` 目录较短或为空         | 没有管理令牌，或令牌被拒绝 — 在主机日志中读取刷新摘要行（`unmatched-free` 计数）      |
+| 会话固定到 `opencode-<id>/...`    | v1 插件发布了 `opencode-<id>`；v2 直接发布 `<id>`，因此请在 `<id>/...` 下重新选择模型 |
 
-环境变量必须传递到 opencode 服务器进程：当主机以服务形式运行时，运行 `opencode models` 的 shell 与服务器环境不同，因此请在服务器读取密钥的位置导出该密钥。
+环境变量必须传递到 opencode 服务器进程：当主机作为服务运行时，运行
+`opencode models` 的 shell 与服务器环境不同，因此请在服务器读取密钥的位置导出该密钥。
 
 ## 另请参阅
 
