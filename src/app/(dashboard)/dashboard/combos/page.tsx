@@ -3964,7 +3964,7 @@ function ComboFormModal({
                     <div className="flex flex-col sm:flex-row sm:items-end gap-2">
                       <Input
                         className="flex-1"
-                        inputClassName="font-mono"
+                        mono
                         label={getI18nOrFallback(t, "manualModel", "Manual model")}
                         type="text"
                         value={manualModelInput}
@@ -5140,7 +5140,7 @@ function ComboFormModal({
                 value={agentToolFilter}
                 onChange={(e) => setAgentToolFilter(e.target.value)}
                 placeholder="e.g. ^(bash|computer)$"
-                inputClassName="font-mono"
+                mono
                 hint={
                   !isExpertMode
                     ? getI18nOrFallback(

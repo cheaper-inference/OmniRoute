@@ -460,7 +460,7 @@ export default function RadarPage() {
                         placeholder="omr_..."
                         aria-label={t("keySectionTitle")}
                         className="flex-1"
-                        inputClassName="font-mono"
+                        mono
                       />
                       <Button
                         onClick={handleSubmitKey}

@@ -439,3 +439,31 @@ test("C: a Card.Section does not repeat the panel's border, fill, radius or padd
     .map(({ file, line }) => `${file}:${line}`);
   assert.deepEqual(offenders, []);
 });
+
+// ── D. Fields: kit input size, code font and file trigger ───────────────────────────────────
+
+// `font-mono` does nothing on an <input> or a <textarea> (the kit typography sheet wins): the
+// code font is the `mono` prop. A smaller field is `size="xs"`, not a text size by class.
+test("D: inputs and textareas take the code font and the small size from kit props", () => {
+  const offenders = TAGS.filter(({ name }) => name === "Input" || name === "Textarea")
+    .filter(({ tag }) => {
+      const cls = [...tag.matchAll(/(?:inputClassName|className)="([^"]*)"/g)]
+        .map((m) => m[1])
+        .join(" ");
+      return has(cls, /(?<![\w:-])(font-mono|text-xs|h-[789])(?![\w-])/);
+    })
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], 'use mono and size="xs"');
+});
+
+// A hidden <input type="file"> opened through a ref is the kit FileTrigger around the button.
+test("D: the combos import button opens the picker through the kit FileTrigger", () => {
+  const source = SOURCES.find((s) => s.file === "combos/ComboHeaderActions.tsx")?.source ?? "";
+  assert.match(source, /<FileTrigger\b/);
+  assert.doesNotMatch(source, /<input\b/, "no raw <input> behind the button");
+  assert.doesNotMatch(source, /kit-exception:/, "the kit-exception is gone");
+  const raw = TAGS.filter(({ name, tag }) => name === "input" && /type="file"/.test(tag)).map(
+    ({ file, line }) => `${file}:${line}`
+  );
+  assert.deepEqual(raw, [], "no raw file input in the slice");
+});

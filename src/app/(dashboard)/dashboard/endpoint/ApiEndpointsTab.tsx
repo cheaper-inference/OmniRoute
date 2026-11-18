@@ -613,7 +613,8 @@ export default function ApiEndpointsTab() {
                                       onChange={(e) => setManualApiKey(e.target.value)}
                                       placeholder={t("pasteApiKey")}
                                       aria-label={t("apiKey")}
-                                      inputClassName="font-mono text-xs"
+                                      size="xs"
+                                      mono
                                     />
                                   ) : availableApiKeys.length > 0 ? (
                                     <Select
@@ -645,7 +646,8 @@ export default function ApiEndpointsTab() {
                                     value={tryBody}
                                     onChange={(e) => setTryBody(e.target.value)}
                                     rows={8}
-                                    className="mt-1 font-mono text-xs resize-none"
+                                    mono
+                                    className="mt-1 resize-none"
                                     placeholder='{ "model": "gpt-4o", "messages": [...] }'
                                   />
                                 </div>

@@ -1883,7 +1883,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   onChange={(e) => handleCustomSystemPromptChange(e.target.value)}
                   placeholder={t("customSystemPromptPlaceholder")}
                   className="w-64"
-                  inputClassName="text-xs"
+                  size="xs"
                 />
               )}
               <Toggle

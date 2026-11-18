@@ -246,7 +246,7 @@ function ScheduleDetails({
         placeholder={t("apiManagerTimezonePlaceholder")}
         hint={t("scheduleTimezoneHint")}
         className="max-w-sm"
-        inputClassName="font-mono"
+        mono
       />
     </div>
   );

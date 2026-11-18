@@ -285,7 +285,7 @@ export function RadarCatalogTable({ entries, refreshCatalog, onError }: RadarCat
                         aria-label={t("modelDisplayName")}
                         maxLength={160}
                         className="min-w-[180px]"
-                        inputClassName="font-mono text-sm"
+                        mono
                       />
                     ) : (
                       <span className="block truncate">{entry.displayName}</span>
