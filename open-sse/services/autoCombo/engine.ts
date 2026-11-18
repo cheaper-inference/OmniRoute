@@ -166,7 +166,7 @@ function groupIntoTiers(candidates: ScoredProvider[]): Record<TierName, ScoredPr
   for (const c of candidates) {
     const delta = best - c.score;
     if (delta <= SCORE_EPSILON) top.push(c);
-    else if (range <= SCORE_EPSILON || delta <= range * 0.3) mid.push(c);
+    else if (delta <= range * 0.1) mid.push(c);
     else rest.push(c);
   }
 
@@ -229,8 +229,8 @@ export function selectProvider(
   // ── Intent classification (ClawRouter Feature #10/11) ────────────────────
   // When taskType is generic ('default'), attempt to classify the prompt intent
   // using the multilingual intentClassifier for better task fitness scoring.
-  let effectiveTaskType = taskType;
-  if ((taskType === "default" || taskType === "") && promptMessages?.length) {
+  let effectiveTaskType = (config as { taskType?: string }).taskType || taskType;
+  if ((effectiveTaskType === "default" || effectiveTaskType === "") && promptMessages?.length) {
     // Extract text from last user message for classification
     const lastUserMsg = [...promptMessages].reverse().find((m) => m.role === "user");
     if (lastUserMsg) {

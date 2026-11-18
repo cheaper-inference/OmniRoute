@@ -11898,9 +11898,41 @@ paths:
       tags:
         - Free provider rankings
       summary: "GET free provider rankings"
+      description: Free providers ranked by the benchmark score of their best model. Each ranking lists the models that were considered (`models[]`, best first) with `score`, `eloRaw`, `confidence`, `category`, `isFree`, and the matched benchmark `permaslug` and `metric` (for example `artificial-analysis:intelligence`, `artificial-analysis:coding`, `artificial-analysis:agentic`, `design-arena:elo`, `openrouter:<benchmark>`, or `<source>:elo` for Arena data).
+      parameters:
+        - in: query
+          name: category
+          schema: { type: string, enum: [default, coding, review, documentation, debugging] }
+          description: Task category. `default` is the Artificial Analysis intelligence index, `coding` the coding index, `debugging` the agentic index. Omit for the combined ranking.
+        - in: query
+          name: limit
+          schema: { type: integer, minimum: 1, maximum: 100, default: 50 }
+        - in: query
+          name: configuredOnly
+          schema: { type: boolean }
+          description: Only providers with an active connection.
+        - in: query
+          name: availableOnly
+          schema: { type: boolean }
+          description: Only providers with at least one connection that is not rate-limited or out of quota (implies `configuredOnly`).
+        - in: query
+          name: freeModelsOnly
+          schema: { type: boolean }
+          description: Only count models flagged free (Free badge, `:free` id, zero pricing, or the free catalog). `freeOnly` is accepted as an alias.
+        - in: query
+          name: withUsage
+          schema: { type: boolean }
+        - in: query
+          name: usageRange
+          schema: { type: string, enum: ["1h", "24h", "7d", "30d"] }
+        - in: query
+          name: sortBy
+          schema: { type: string, enum: [elo, reliability] }
       responses:
         "200":
           description: OK
+        "400":
+          description: Invalid query parameters
   /api/free-tier/summary:
     get:
       tags:
@@ -12194,7 +12226,7 @@ paths:
       tags:
         - Intelligence
       summary: "POST intelligence › sync"
-      description: Triggers an intelligence sync. A body without a source flag runs the Arena ELO sync (`dryRun` previews it without writing); `rebuildTier` rebuilds only the persisted `models_dev_tier` source; `syncArenaElo` forces the Arena sync alongside it.
+      description: Triggers an intelligence sync. A body without a source flag runs the benchmark sync (`dryRun` previews it without writing), which reads the OpenRouter benchmarks API when an OpenRouter key is available (an active `openrouter` connection or `OPENROUTER_API_KEY`) and otherwise the Arena AI leaderboards (with the Hugging Face fallback). `force` (default `true`) skips the freshness guard and the failure backoff, so a manual call always refetches; periodic ticks run with `force=false`. `rebuildTier` rebuilds only the persisted `models_dev_tier` source; `syncArenaElo` forces the benchmark sync alongside it. An empty body is accepted.
       requestBody:
         required: false
         content:
@@ -12204,6 +12236,7 @@ paths:
               additionalProperties: false
               properties:
                 dryRun: { type: boolean }
+                force: { type: boolean, default: true }
                 rebuildTier: { type: boolean, default: false }
                 syncArenaElo: { type: boolean, default: false }
       responses:
@@ -12212,7 +12245,7 @@ paths:
         "400":
           description: Invalid request body
         "502":
-          description: The Arena ELO sync failed
+          description: The benchmark sync failed
   /api/internal/codex-responses-ws:
     post:
       tags:

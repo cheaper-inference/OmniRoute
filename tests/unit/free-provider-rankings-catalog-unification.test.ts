@@ -57,7 +57,9 @@ test("ranking excludes providers with a raw free flag but no documented free mod
     seedScores(registryModelIds(id));
   }
 
-  const ranking = await rankings.computeFreeProviderRankings(undefined, 200, {});
+  const ranking = await rankings.computeFreeProviderRankings(undefined, 200, {
+    freeModelsOnly: true,
+  });
   const ids = new Set(ranking.map((r) => r.id));
   for (const id of outside) {
     assert.ok(!ids.has(id), `${id} must stay out of the free ranking`);

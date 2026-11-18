@@ -420,7 +420,8 @@ async function buildInspectorCombo(
   taskType: string,
   inspectorWeights: InspectorWeights,
   configuredCombo?: ComboRecord,
-  configuredCombos: ComboRecord[] = []
+  configuredCombos: ComboRecord[] = [],
+  hasExplicitTaskType = false
 ): Promise<ComboScoringInspectorCombo> {
   const warnings: string[] = [];
   const { weights } = inspectorWeights;
@@ -441,6 +442,7 @@ async function buildInspectorCombo(
     factors: ScoringFactors;
     score: number;
   }>;
+  let reportedTaskType = taskType;
 
   if (
     combo.strategy === "auto" &&
@@ -450,12 +452,24 @@ async function buildInspectorCombo(
   ) {
     const comboLike = configuredCombo as ComboLike;
     const resolvedTargets = resolveComboTargets(comboLike, configuredCombos as ComboLike[]);
-    const { resetWindowConfig } = parseAutoConfig(comboLike, resolvedTargets);
+    const { resetWindowConfig, taskType: autoTaskType } = parseAutoConfig(
+      comboLike,
+      resolvedTargets
+    );
+    const effectiveTaskType = hasExplicitTaskType
+      ? taskType
+      : autoTaskType ||
+        (comboLike.name?.startsWith("auto/agentic")
+          ? "debugging"
+          : comboLike.name?.startsWith("auto/coding")
+            ? "coding"
+            : taskType);
+    reportedTaskType = effectiveTaskType;
     const evaluation = await evaluateAutoCandidates({
       targets: resolvedTargets,
       comboName: comboLike.name,
       body: {},
-      taskType,
+      taskType: effectiveTaskType,
       weights,
       resetWindowConfig,
       buildAutoCandidates,
@@ -553,7 +567,7 @@ async function buildInspectorCombo(
     comboId: combo.comboId,
     comboName: combo.comboName,
     strategy: combo.strategy,
-    taskType,
+    taskType: reportedTaskType,
     weights: weights as Record<ComboScoringInspectorFactorKey, number>,
     weightSource: inspectorWeights.source,
     modePack: inspectorWeights.modePack,
@@ -625,7 +639,8 @@ export async function buildComboScoringInspectorResponse(
           taskType,
           resolveInspectorWeights(configuredCombo),
           configuredCombo,
-          configuredCombos
+          configuredCombos,
+          Boolean(options.taskType)
         );
       })
     ),

@@ -16,22 +16,23 @@ lastUpdated: 2026-06-28
 
 ### Quick Examples
 
-| Model ID       | Variant | Behavior                                                                 |
-| -------------- | ------- | ------------------------------------------------------------------------ |
-| `auto`         | default | All connected providers, LKGP strategy, balanced weights                 |
-| `auto/coding`  | coding  | Quality-first weights, suitable for code generation                      |
-| `auto/fast`    | fast    | Low-latency weighted selection                                           |
-| `auto/cheap`   | cheap   | Cost-optimized routing (lowest cost first)                               |
-| `auto/offline` | offline | Favors providers with highest quota availability                         |
-| `auto/smart`   | smart   | Quality-first + higher exploration rate (10%) for better model discovery |
-| `auto/lkgp`    | lkgp    | Explicit LKGP (same as default `auto`)                                   |
-| `auto/chaos`   | chaos   | Parallel fan-out, one model per provider (not fault injection)           |
+| Model ID       | Variant | Behavior                                                                  |
+| -------------- | ------- | ------------------------------------------------------------------------- |
+| `auto`         | default | All connected providers, LKGP strategy, balanced weights                  |
+| `auto/coding`  | coding  | Quality-first weights, suitable for code generation                       |
+| `auto/agentic` | agentic | Quality-first weights, ranked by the AA agentic index (tool-using agents) |
+| `auto/fast`    | fast    | Low-latency weighted selection                                            |
+| `auto/cheap`   | cheap   | Cost-optimized routing (lowest cost first)                                |
+| `auto/offline` | offline | Favors providers with highest quota availability                          |
+| `auto/smart`   | smart   | Quality-first + higher exploration rate (10%) for better model discovery  |
+| `auto/lkgp`    | lkgp    | Explicit LKGP (same as default `auto`)                                    |
+| `auto/chaos`   | chaos   | Parallel fan-out, one model per provider (not fault injection)            |
 
 ### Category × Tier Composition (`auto/<category>:<tier>`)
 
 OpenRouter-style suffixes separate **what kind of route** (category) from **how to optimize it** (tier), so you can compose them freely (#4235 Phase B, `open-sse/services/autoCombo/suffixComposition.ts`):
 
-- **Categories** (filter the candidate pool by capability): `coding` · `reasoning` · `vision` · `chat` · `multimodal`. `vision`/`multimodal` keep vision-capable models; `reasoning` keeps reasoning/thinking models.
+- **Categories** (filter the candidate pool by capability): `coding` · `reasoning` · `vision` · `chat` · `multimodal` · `agentic`. `agentic` does not filter by capability: it applies the quality-first weights and scores task fit on the agentic benchmark (`auto/agentic:free` restricts it to free-tier models). `vision`/`multimodal` keep vision-capable models; `reasoning` keeps reasoning/thinking models.
 - **Tiers** (pick the scoring weights / pool filter): `fast` (ship-fast) · `cheap` (alias `floor`, cost-saver) · `reliable` (circuit-breaker health + latency stability) · `free` / `pro` (filter the pool by model tier via `classifyTier` — free-tier vs. premium).
 
 | Example                | Resolves to                                             |
@@ -44,7 +45,9 @@ OpenRouter-style suffixes separate **what kind of route** (category) from **how 
 
 Any valid `auto/<category>[:<tier>]` resolves on demand; a curated subset is advertised in `/v1/models` and the dashboard (`AUTO_SUFFIX_VARIANTS` in `open-sse/services/autoCombo/builtinCatalog.ts`). Filtering is **fail-open** — if a constraint matches no connected models, the full pool is used so routing never breaks. The core scorer (`combo.ts`) is unchanged; the category/tier filter is applied in `buildAutoCandidates`.
 
-> **Live model intelligence:** auto-routing fitness is informed by live **Arena ELO** rankings + **models.dev** tier data when the `ARENA_ELO_SYNC_ENABLED` flag is on (falls back to the static fitness map otherwise).
+> **Live model intelligence:** auto-routing fitness comes from synced benchmark scores — the Artificial Analysis indices from OpenRouter when an OpenRouter key is available, otherwise **Arena ELO** — plus **models.dev** tier data, when the `ARENA_ELO_SYNC_ENABLED` flag is on. There is no static fitness table any more: a model with no benchmark row scores a neutral `0.5` on `taskFit`. See [Model Intelligence](./MODEL_INTELLIGENCE.md).
+>
+> **Let `taskFit` decide:** `taskFit` only ranks candidates; anything that pins a request to a provider overrides it. If you want the best-scored model to win every time, turn off LKGP (the `lkgpEnabled` routing setting; it also provides the session stickiness of default `auto`) and keep `cacheAffinity` at `0` (its default). Otherwise a worse model that was picked once (a fallback after the best model failed, or a random exploration pick) can keep being reused.
 
 **How to use:**
 
@@ -225,24 +228,24 @@ The Auto-Combo Engine dynamically selects the best provider/model for each reque
 
 > Source: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (regenerate via `npm run docs:render-diagrams`). The filename is historical; the source and rendered diagram show all 16 factors declared in `DEFAULT_WEIGHTS`.
 
-| Factor                | Default Weight | Description                                                                                                                                                                                    |
-| :-------------------- | :------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429         | Remaining quota / rate-limit headroom [0..1]                                                                                                                                                   |
-| `health`              | 0.1605         | Health score from circuit breaker (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                        |
-| `costInv`             | 0.1429         | Inverse **blended** cost (60% input + 40% output token price, normalized) — cheaper = higher score                                                                                             |
-| `latencyInv`          | 0.1143         | Inverse p95 latency normalized to pool — faster = higher score                                                                                                                                 |
-| `taskFit`             | 0.0762         | Task-type fitness (coding, review, planning, analysis, debugging, docs)                                                                                                                        |
-| `stability`           | 0.0476         | Variance-based stability from latency standard deviation — a candidate whose response time swings scores lower                                                                                 |
-| `tierPriority`        | 0.0476         | Account-tier priority — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                           |
-| `tierAffinity`        | 0.0476         | Affinity between the candidate's tier and the manifest-recommended tier                                                                                                                        |
-| `specificityMatch`    | 0.0476         | Match between request specificity (manifest hint) and model tier                                                                                                                               |
-| `contextAffinity`     | 0.0476         | Affinity between the request's context-window need and the model's context window                                                                                                              |
-| `sessionAvailability` | 0.0476         | OAuth session availability of the candidate connection for this session (`getOAuthSessionAvailability()`; non-OAuth connections score 1.0)                                                     |
-| `connectionDensity`   | 0.0476         | Spreads load across connections of the same provider (anti-concentration)                                                                                                                      |
-| `cacheAffinity`       | 0.00           | Rendezvous-hash affinity toward the connection likeliest to already hold this request's prompt-cache prefix (`open-sse/services/combo/promptCacheAffinity.ts`); disabled by default (#8008)    |
-| `resetWindowAffinity` | 0.00           | Bias toward connections whose quota reset window is favorable (disabled by default)                                                                                                            |
-| `quality`             | 0.03           | Feedback-driven output-quality signal from the routing-event quality tracker; candidates without observations receive a neutral 0.5                                                            |
-| `reliability`         | 0.00           | Observed success share, `1 - failureRate`, from 24h of usage history behind a ten-sample floor (real-time metrics otherwise); candidates with no observations read as 1.0. Disabled by default |
+| Factor                | Default Weight | Description                                                                                                                                                                                                                                         |
+| :-------------------- | :------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429         | Remaining quota / rate-limit headroom [0..1]                                                                                                                                                                                                        |
+| `health`              | 0.1605         | Health score from circuit breaker (CLOSED=1.0, HALF_OPEN=0.5, OPEN=0.0)                                                                                                                                                                             |
+| `costInv`             | 0.1429         | Inverse **blended** cost (60% input + 40% output token price, normalized) — cheaper = higher score                                                                                                                                                  |
+| `latencyInv`          | 0.1143         | Inverse effective latency normalized to pool — faster = higher score. Effective latency is the time to produce 100 tokens (`avgTtftMs + 100 / avgTokensPerSecond × 1000`), falling back to p95 latency when TTFT or throughput telemetry is missing |
+| `taskFit`             | 0.0762         | Task-type fitness (coding, review, planning, analysis, debugging, docs)                                                                                                                                                                             |
+| `stability`           | 0.0476         | Variance-based stability from latency standard deviation — a candidate whose response time swings scores lower                                                                                                                                      |
+| `tierPriority`        | 0.0476         | Account-tier priority — Ultra=1.0, Pro=0.67, Standard=0.33, Free=0.0                                                                                                                                                                                |
+| `tierAffinity`        | 0.0476         | Affinity between the candidate's tier and the manifest-recommended tier                                                                                                                                                                             |
+| `specificityMatch`    | 0.0476         | Match between request specificity (manifest hint) and model tier                                                                                                                                                                                    |
+| `contextAffinity`     | 0.0476         | Affinity between the request's context-window need and the model's context window                                                                                                                                                                   |
+| `sessionAvailability` | 0.0476         | OAuth session availability of the candidate connection for this session (`getOAuthSessionAvailability()`; non-OAuth connections score 1.0)                                                                                                          |
+| `connectionDensity`   | 0.0476         | Spreads load across connections of the same provider (anti-concentration)                                                                                                                                                                           |
+| `cacheAffinity`       | 0.00           | Rendezvous-hash affinity toward the connection likeliest to already hold this request's prompt-cache prefix (`open-sse/services/combo/promptCacheAffinity.ts`); disabled by default (#8008)                                                         |
+| `resetWindowAffinity` | 0.00           | Bias toward connections whose quota reset window is favorable (disabled by default)                                                                                                                                                                 |
+| `quality`             | 0.03           | Feedback-driven output-quality signal from the routing-event quality tracker; candidates without observations receive a neutral 0.5                                                                                                                 |
+| `reliability`         | 0.00           | Observed success share, `1 - failureRate`, from 24h of usage history behind a ten-sample floor (real-time metrics otherwise); candidates with no observations read as 1.0. Disabled by default                                                      |
 
 The in-memory `quality` tracker (`open-sse/services/routing/quality.ts`) is empty
 after a cold restart, so every candidate scores a neutral `0.5` until the
@@ -267,30 +270,30 @@ first observations land.
 
 | Factor                | ship-fast  | cost-saver | quality-first | offline-friendly | reliability-first | chaos-mode |
 | :-------------------- | :--------- | :--------- | :------------ | :--------------- | :---------------- | :--------- |
-| `quota`               | 0.1133     | 0.1133     | 0.0752        | **0.3324**       | 0.1133            | 0.0376     |
-| `health`              | 0.2667     | 0.1810     | 0.1714        | 0.2667           | **0.3524**        | **0.4000** |
-| `costInv`             | 0.0276     | **0.3324** | 0.0276        | 0.0752           | 0.0181            | 0.0140     |
-| `latencyInv`          | **0.3048** | 0.0476     | 0.0476        | 0.0476           | 0.0476            | 0.0186     |
-| `taskFit`             | 0.0952     | 0.0952     | **0.3524**    | 0.0000           | 0.0952            | 0.1905     |
-| `stability`           | 0.0000     | 0.0476     | 0.1429        | 0.0952           | 0.1905            | 0.1714     |
-| `tierPriority`        | 0.0376     | 0.0376     | 0.0276        | 0.0376           | 0.0276            | 0.0040     |
+| `quota`               | 0.1133     | 0.1133     | 0.0500        | **0.3324**       | 0.1133            | 0.0376     |
+| `health`              | 0.2667     | 0.1810     | 0.1300        | 0.2667           | **0.3524**        | **0.4000** |
+| `costInv`             | 0.0276     | **0.3324** | 0.0500        | 0.0752           | 0.0181            | 0.0140     |
+| `latencyInv`          | **0.3048** | 0.0476     | 0.0500        | 0.0476           | 0.0476            | 0.0186     |
+| `taskFit`             | 0.0952     | 0.0952     | **0.5000**    | 0.0000           | 0.0952            | 0.1905     |
+| `stability`           | 0.0000     | 0.0476     | 0.0500        | 0.0952           | 0.1905            | 0.1714     |
+| `tierPriority`        | 0.0376     | 0.0376     | 0.0300        | 0.0376           | 0.0276            | 0.0040     |
 | `tierAffinity`        | 0.0000     | 0.0000     | 0.0000        | 0.0000           | 0.0000            | 0.0000     |
 | `specificityMatch`    | 0.0000     | 0.0000     | 0.0000        | 0.0000           | 0.0000            | 0.0000     |
 | `contextAffinity`     | 0.0095     | 0.0000     | 0.0000        | 0.0000           | 0.0000            | 0.0186     |
-| `sessionAvailability` | 0.0476     | 0.0476     | 0.0476        | 0.0476           | 0.0476            | 0.0476     |
+| `sessionAvailability` | 0.0476     | 0.0476     | 0.0300        | 0.0476           | 0.0476            | 0.0476     |
 | `resetWindowAffinity` | 0.0000     | 0.0000     | 0.0000        | 0.0000           | 0.0000            | 0.0000     |
-| `connectionDensity`   | 0.0476     | 0.0476     | 0.0476        | 0.0476           | 0.0476            | 0.0476     |
+| `connectionDensity`   | 0.0476     | 0.0476     | 0.0300        | 0.0476           | 0.0476            | 0.0476     |
 | `quality`             | 0.02       | 0.02       | **0.03**      | 0.02             | 0.02              | 0.02       |
-| `reliability`         | 0.03       | 0.03       | 0.03          | 0.03             | **0.04**          | 0.03       |
+| `reliability`         | 0.03       | 0.03       | **0.05**      | 0.03             | **0.04**          | 0.03       |
 
 Notes:
 
-- **Packs carry `quality` and `reliability`** (`quality 0.02`, `quality-first 0.03`; `reliability 0.03`, `reliability-first 0.04`) and replace the weight map wholesale (`weights = pack`, not a merge). `DEFAULT_WEIGHTS` carries `quality 0.03 / reliability 0`; selecting `balanced`/`default` keeps those defaults, selecting a pack uses the pack's values above. On a cold pool (no observations yet, so `quality 0.5` and `reliability 1`) these two factors add `+0.04` under a generic pack (`0.03 + 0.01`), `+0.045` under `quality-first` and `+0.05` under `reliability-first`.
+- **Packs carry `quality` and `reliability`** (`quality 0.02`, `quality-first 0.03`; `reliability 0.03`, `quality-first 0.05`, `reliability-first 0.04`) and replace the weight map wholesale (`weights = pack`, not a merge). `DEFAULT_WEIGHTS` carries `quality 0.03 / reliability 0`; selecting `balanced`/`default` keeps those defaults, selecting a pack uses the pack's values above. On a cold pool (no observations yet, so `quality 0.5` and `reliability 1`) these two factors add `+0.04` under a generic pack (`0.03 + 0.01`), `+0.065` under `quality-first` and `+0.05` under `reliability-first`.
 - `tierAffinity`, `specificityMatch` and `resetWindowAffinity` are explicitly `0` in every pack.
 - Each pack's emphasis at a glance:
   - **ship-fast** → latencyInv 0.3048 + health 0.2667 (low-latency, healthy connections)
   - **cost-saver** → costInv 0.3324 (cheapest tokens win)
-  - **quality-first** → taskFit 0.3524 + stability 0.1429 + quality 0.03, the highest of any pack (best model for the task, consistent)
+  - **quality-first** → taskFit 0.5 + health 0.13 + reliability 0.05 + quality 0.03 (best model for the task, still healthy and reliable; used by `auto/coding`, `auto/agentic` and `auto/smart`)
   - **offline-friendly** → quota 0.3324 + health 0.2667 (max headroom regardless of speed/cost)
   - **reliability-first** → health 0.3524 + stability 0.1905 + reliability 0.04, the highest of any pack (fewest surprises)
   - **chaos-mode** → health 0.4000 + taskFit 0.1905 (the weight pack `auto/chaos` assigns to its panel members; the parallel fan-out does not read these weights, and this is not a fault-injection profile, see [CHAOS-MODE.md](../guides/CHAOS-MODE.md#autochaos-parallel-fan-out))
@@ -893,15 +896,17 @@ SLA-aware fields:
 
 ## Task Fitness
 
-30+ models scored across 6 task types (`coding`, `review`, `planning`, `analysis`, `debugging`, `documentation`). Supports wildcard patterns (e.g., `*-coder` → high coding score).
+Models are scored across 6 task types (`coding`, `review`, `planning`, `analysis`, `debugging`, `documentation`) from the synced `model_intelligence` rows, resolved as `user_override → benchmark rows (OpenRouter AA / Arena) → inherited base model → models.dev tier → neutral 0.5` (`open-sse/services/autoCombo/taskFitness.ts`). Model ids are matched to benchmark entries by the shared matcher in `src/lib/modelIntelligenceMatching.ts`. The old hand-maintained table and name-pattern boosts (e.g. `*-coder`) were removed.
+
+`auto/coding` scores on the `coding` task (AA coding index) and `auto/agentic` on `debugging` (AA agentic index); a combo can set `config.auto.taskType` to choose another. With an OpenRouter key the Free Provider Rankings page shows the benchmark behind each score — see [Free Provider Rankings](../guides/FREE_PROVIDER_RANKINGS.md).
 
 ## Auto Variants Recap
 
-Including the bare `auto` (default) plus the 6 `AutoVariant` values declared in `autoPrefix.ts`, there are **7 invokable model IDs**:
+Including the bare `auto` (default) plus the 8 `AutoVariant` values declared in `autoPrefix.ts`, there are **9 invokable model IDs**:
 
-`auto`, `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`
+`auto`, `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`, `auto/chaos`, `auto/agentic`
 
-(`AutoVariant` itself enumerates 6 values; the 7th option is "no variant" — bare `auto` — handled by `parseAutoPrefix()` as `variant: undefined`.)
+(`AutoVariant` itself enumerates 8 values; the 9th option is "no variant" — bare `auto` — handled by `parseAutoPrefix()` as `variant: undefined`.)
 
 ## How tiers fit Auto-Combo
 

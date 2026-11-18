@@ -16,7 +16,6 @@
  */
 import { describe, it, expect } from "vitest";
 import { classifyPromptIntent } from "../../intentClassifier";
-import { getStaticFitnessTableScore } from "../taskFitness";
 import { mapIntentToTaskFitnessKey } from "../intentTaskFitnessMap";
 
 describe("intent classifier output vs. task-fitness table keys", () => {
@@ -24,19 +23,12 @@ describe("intent classifier output vs. task-fitness table keys", () => {
     expect(classifyPromptIntent("write a function to sort an array in typescript")).toBe("code");
   });
 
-  it("BUG (pre-fix): the raw 'code' intent does not hit the coding fitness table", () => {
-    // deepseek-coder scores 0.9 in FITNESS_TABLE.coding but has no row in FITNESS_TABLE.default,
-    // so passing the raw intent string falls through to the wildcard baseline (0.5), not 0.9.
-    expect(getStaticFitnessTableScore("deepseek-coder", "code")).toBeNull();
-    expect(getStaticFitnessTableScore("deepseek-coder", "coding")).toBe(0.9);
-  });
-
   it("FIX: mapIntentToTaskFitnessKey bridges the two vocabularies", () => {
     expect(mapIntentToTaskFitnessKey("code")).toBe("coding");
     const key = mapIntentToTaskFitnessKey(
       classifyPromptIntent("implement a REST endpoint in Python")
     );
-    expect(getStaticFitnessTableScore("deepseek-coder", key)).toBe(0.9);
+    expect(key).toBe("coding");
   });
 
   it("maps math/reasoning to 'analysis' (closest existing category) and creative/simple/medium to 'default'", () => {

@@ -74,10 +74,12 @@ export function resolveScoresAs(modelId: string): ScoresAsResolution {
   }
 
   // 3. Free-tier suffix, catalog-anchored.
-  if (modelId.endsWith(FREE_SUFFIX)) {
-    const base = modelId.slice(0, -FREE_SUFFIX.length);
-    if (base.length > 0 && findRegistryModelById(base)) {
-      return { base, via: "free-suffix" };
+  for (const suffix of [FREE_SUFFIX, ":free"]) {
+    if (modelId.endsWith(suffix)) {
+      const base = modelId.slice(0, -suffix.length);
+      if (base.length > 0 && findRegistryModelById(base)) {
+        return { base, via: "free-suffix" };
+      }
     }
   }
 

@@ -18,7 +18,7 @@ Visual guide to every section of the OmniRoute dashboard.
 
 The v3.7.x → v3.8.0 cycle added zero-config auto routing, new providers, OAuth flows, deeper resilience, and a much richer CLI experience. Headline features below — full details further in the document and in linked specs.
 
-- 🤖 **Auto Combo / Zero-config auto-routing** — use prefixes `auto/coding`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`, `auto/chaos`. Backed by a 16-factor scoring engine and 6 curated **mode packs** (ship-fast, cost-saver, quality-first, offline-friendly, reliability-first, chaos-mode)
+- 🤖 **Auto Combo / Zero-config auto-routing** — use prefixes `auto/coding`, `auto/agentic`, `auto/fast`, `auto/cheap`, `auto/offline`, `auto/smart`, `auto/lkgp`, `auto/chaos`. Backed by a 16-factor scoring engine and 6 curated **mode packs** (ship-fast, cost-saver, quality-first, offline-friendly, reliability-first, chaos-mode)
 - 🆕 **Command Code provider** (#2199) — first-class registration with model catalog and quota tracking
 - 🆕 **Z.AI provider** — new free-tier provider with quota labels
 - 🎬 **KIE media expansion** — extended catalog including video generation models

@@ -17,13 +17,14 @@ import {
   rebuildModelsDevTierIntelligence,
 } from "@/lib/db/modelIntelligence";
 
-async function runArenaSync(dryRun: boolean) {
+async function runArenaSync(dryRun: boolean, force: boolean) {
   const { syncArenaElo } = await import("@/lib/arenaEloSync");
-  return syncArenaElo(dryRun);
+  return syncArenaElo(dryRun, force);
 }
 
 interface IntelligenceSyncOptions {
   dryRun?: boolean;
+  force?: boolean;
   rebuildTier?: boolean;
   syncArenaElo?: boolean;
 }
@@ -39,9 +40,9 @@ interface IntelligenceSyncOptions {
 async function runIntelligenceSync(
   options: IntelligenceSyncOptions
 ): Promise<{ body: Record<string, unknown>; status: number }> {
-  const { dryRun = false, rebuildTier = false, syncArenaElo = false } = options;
+  const { dryRun = false, force = true, rebuildTier = false, syncArenaElo = false } = options;
 
-  const arenaResult = syncArenaElo || !rebuildTier ? await runArenaSync(dryRun) : null;
+  const arenaResult = syncArenaElo || !rebuildTier ? await runArenaSync(dryRun, force) : null;
 
   let tier: { upserted: number; pruned: number } | null = null;
   if (rebuildTier) {
@@ -63,7 +64,8 @@ export async function POST(request: NextRequest) {
 
   let rawBody: unknown;
   try {
-    rawBody = await request.json();
+    const text = await request.text();
+    rawBody = text.trim().length > 0 ? JSON.parse(text) : {};
   } catch {
     return NextResponse.json(
       {

@@ -41,6 +41,7 @@ export const updateModelAliasSchema = z.object({
 export const intelligenceSyncRequestSchema = z
   .object({
     dryRun: z.boolean().optional(),
+    force: z.boolean().optional(),
     rebuildTier: z.boolean().optional().default(false),
     syncArenaElo: z.boolean().optional().default(false),
   })

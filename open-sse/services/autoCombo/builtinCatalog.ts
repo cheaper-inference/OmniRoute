@@ -41,6 +41,8 @@ export const AUTO_TEMPLATE_VARIANTS: Record<string, AutoVariant | undefined> = {
   "auto/cheap": "cheap",
   "auto/offline": "offline",
   "auto/smart": "smart",
+  "auto/agentic": "agentic",
+  "auto/smart:free": "smart",
   // auto/claude-{opus,sonnet,haiku} are model-FAMILY ids (#15675), resolved by
   // `isValidModelFamily` — not weight-pack variants (those left the pool unfiltered).
   "auto/best-free": "cheap",
@@ -67,6 +69,8 @@ export const AUTO_SUFFIX_VARIANTS: string[] = [
   "auto/coding:free",
   "auto/coding:pro",
   "auto/coding:reliable",
+  "auto/agentic",
+  "auto/agentic:free",
   "auto/reasoning",
   "auto/reasoning:pro",
   "auto/vision",
@@ -80,6 +84,7 @@ export const AUTO_SUFFIX_VARIANTS: string[] = [
  * without also having to pick a category.
  */
 export const FLAT_TIER_OVERLAY_IDS: Record<string, AutoTier> = {
+  "auto/smart:free": "free",
   "auto/best-free": "free",
   "auto/subscription": "subscription",
   "auto/thrifty": "thrifty",

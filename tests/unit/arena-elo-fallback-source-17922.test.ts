@@ -83,6 +83,17 @@ test("#17922: falls back to the Hugging Face arena dataset when the primary retu
   assert.ok(entries.some((e) => e.model.includes("claude-opus-5.5") && e.category === "coding"));
 });
 
+test("arena entries record the serving upstream in `metric` so the UI can show it", async () => {
+  mockUpstreams();
+  const boards = await fetchArenaLeaderboards();
+  const hf = transformToModelIntelligence(boards, "huggingface");
+  assert.ok(hf.length > 0);
+  assert.ok(hf.every((e) => e.metric === "huggingface:elo"));
+  // wulong is the default for callers that do not pass a source
+  const wulong = transformToModelIntelligence(boards);
+  assert.ok(wulong.every((e) => e.metric === "wulong:elo"));
+});
+
 test("#17922: failed sync is surfaced in GET status (lastError / lastFailedAt)", async () => {
   globalThis.fetch = (async () => new Response("", { status: 404 })) as typeof fetch;
   const result = await syncArenaElo();
@@ -90,4 +101,23 @@ test("#17922: failed sync is surfaced in GET status (lastError / lastFailedAt)",
   const status = getArenaEloSyncStatus() as Record<string, unknown>;
   assert.ok(status.lastError, "status exposes lastError");
   assert.ok(status.lastFailedAt, "status exposes lastFailedAt");
+});
+
+test("a Hugging Face fallback sync persists huggingface:elo metrics", async () => {
+  // The previous test stamped lastFailedAt; clear it so the sync is not backoff-skipped.
+  core
+    .getDbInstance()
+    .prepare("DELETE FROM key_value WHERE namespace = 'arena_elo' AND key = 'lastFailedAt'")
+    .run();
+  mockUpstreams();
+  const result = await syncArenaElo();
+  assert.equal(result.success, true);
+  const row = core
+    .getDbInstance()
+    .prepare("SELECT DISTINCT metric FROM model_intelligence WHERE source = 'arena_elo'")
+    .all() as Array<{ metric: string | null }>;
+  assert.deepEqual(
+    row.map((r) => r.metric),
+    ["huggingface:elo"]
+  );
 });

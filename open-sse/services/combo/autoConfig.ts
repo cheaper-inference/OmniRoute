@@ -66,6 +66,8 @@ export function parseAutoConfig(combo: ComboLike, eligibleTargets: ResolvedCombo
   const resetWindowConfig = resolveAutoResetWindowConfig(autoConfigSource);
   const slaPolicy = resolveSlaRoutingPolicy(autoConfigSource);
   const nadirConfig = resolveNadirRoutingConfig(autoConfigSource.nadir);
+  const taskType =
+    typeof autoConfigSource.taskType === "string" ? autoConfigSource.taskType : undefined;
 
   return {
     routingStrategy,
@@ -79,5 +81,6 @@ export function parseAutoConfig(combo: ComboLike, eligibleTargets: ResolvedCombo
     slaPolicy,
     nadirConfig,
     accountPreferences: readAccountPreferences(autoConfigSource.accountPreferences),
+    taskType,
   };
 }

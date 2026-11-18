@@ -1,4 +1,5 @@
-export type AutoVariant = "coding" | "fast" | "cheap" | "offline" | "smart" | "lkgp" | "chaos";
+export type AutoVariant =
+  "coding" | "fast" | "cheap" | "offline" | "smart" | "lkgp" | "chaos" | "agentic";
 
 export interface AutoPrefixParseResult {
   valid: boolean;
@@ -14,6 +15,7 @@ export const VALID_VARIANTS: AutoVariant[] = [
   "smart",
   "lkgp",
   "chaos",
+  "agentic",
 ];
 
 /**

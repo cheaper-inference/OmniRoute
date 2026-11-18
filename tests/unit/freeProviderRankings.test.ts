@@ -8,23 +8,50 @@
 import { describe, it } from "node:test";
 import assert from "node:assert/strict";
 
-const { stripVersionSuffix, findMatchingIntelligence } =
-  await import("../../src/lib/freeProviderRankings.ts");
+const {
+  stripVersionSuffix,
+  candidateIntelligenceKeys,
+  findMatchingIntelligence,
+  mergeProviderModels,
+} = await import("../../src/lib/freeProviderRankings.ts");
 
 type IntelEntry = {
   score: number;
   eloRaw: number | null;
   confidence: string | null;
   category: string;
+  permaslug?: string | null;
+  model?: string;
+  metric?: string | null;
 };
 
 function e(
   score: number,
-  category = "default",
+  categoryOrOpts:
+    | string
+    | {
+        category?: string;
+        eloRaw?: number | null;
+        confidence?: string | null;
+        permaslug?: string;
+        model?: string;
+        metric?: string;
+      } = "default",
   eloRaw: number | null = null,
   confidence: string | null = "high"
 ): IntelEntry {
-  return { score, eloRaw, confidence, category };
+  if (typeof categoryOrOpts === "object" && categoryOrOpts !== null) {
+    return {
+      score,
+      category: categoryOrOpts.category ?? "default",
+      eloRaw: categoryOrOpts.eloRaw ?? null,
+      confidence: categoryOrOpts.confidence ?? "high",
+      permaslug: categoryOrOpts.permaslug ?? null,
+      model: categoryOrOpts.model,
+      metric: categoryOrOpts.metric ?? null,
+    };
+  }
+  return { score, eloRaw, confidence, category: categoryOrOpts };
 }
 
 function buildMap(entries: Record<string, IntelEntry[]>): Map<string, IntelEntry[]> {
@@ -139,5 +166,170 @@ describe("findMatchingIntelligence", () => {
     const result = findMatchingIntelligence("gpt-4.1", map);
     assert.ok(result);
     assert.equal(result.score, 0.8);
+  });
+
+  it("matches model with author/vendor prefix (e.g. google/gemma-4-31b-it)", () => {
+    const map = buildMap({
+      "gemma-4-31b-it": [e(0.52)],
+    });
+    const result = findMatchingIntelligence("google/gemma-4-31b-it", map);
+    assert.ok(result);
+    assert.equal(result.score, 0.52);
+  });
+
+  it("matches model with :free suffix (e.g. minimax/minimax-m3.1-flash:free)", () => {
+    const map = buildMap({
+      "minimax-m3": [e(0.67)],
+    });
+    const result = findMatchingIntelligence("minimax/minimax-m3.1-flash:free", map);
+    assert.ok(result);
+    assert.equal(result.score, 0.67);
+  });
+
+  it("matches provider prefix like gemini/gemini-3.8-flash", () => {
+    const map = buildMap({
+      "gemini-3.8-flash": [e(0.8)],
+    });
+    const result = findMatchingIntelligence("gemini/gemini-3.8-flash", map);
+    assert.ok(result);
+    assert.equal(result.score, 0.8);
+  });
+
+  it("exact -preview matches exact benchmark when present", () => {
+    const map = buildMap({
+      "gemini-3.1-pro-preview": [e(0.91)],
+      "gemini-3.1-pro": [e(0.85)],
+    });
+    const result = findMatchingIntelligence("gemini-3.1-pro-preview", map);
+    assert.ok(result);
+    assert.equal(result.score, 0.91);
+  });
+
+  it("provider -preview falls back to base model when benchmark lacks -preview", () => {
+    const map = buildMap({
+      "gemini-3.1-pro": [e(0.85)],
+    });
+    const result = findMatchingIntelligence("gemini-3.1-pro-preview", map);
+    assert.ok(result);
+    assert.equal(result.score, 0.85);
+  });
+
+  it("provider base model matches benchmark with -preview", () => {
+    const map = buildMap({
+      "gemini-3.1-pro-preview": [e(0.89)],
+    });
+    const result = findMatchingIntelligence("gemini-3.1-pro", map);
+    assert.ok(result);
+    assert.equal(result.score, 0.89);
+  });
+
+  it("matches claude-opus-5-5 to claude-opus-5.5 instead of claude-opus-5", () => {
+    const map = buildMap({
+      "claude-opus-5": [e(0.85, { permaslug: "anthropic/claude-opus-5-20260723" })],
+      "claude-opus-5.5": [e(0.95, { permaslug: "anthropic/claude-opus-5.5-20260921" })],
+    });
+    const result = findMatchingIntelligence("claude-opus-5-5", map);
+    assert.ok(result);
+    assert.equal(result.score, 0.95);
+    assert.equal(result.permaslug, "anthropic/claude-opus-5.5-20260921");
+  });
+
+  it("matches stem candidate (e.g. nemotron-3-ultra) to versioned benchmark entry (e.g. nemotron-3-ultra-550b-a55b-20260604)", () => {
+    const map = buildMap({
+      "nemotron-3-ultra-550b-a55b-20260604": [
+        e(0.49, { model: "nemotron-3-ultra-550b-a55b-20260604" }),
+      ],
+    });
+    const result = findMatchingIntelligence("ollama-cloud/nemotron-3-ultra", map);
+    assert.ok(result);
+    assert.equal(result.score, 0.49);
+    assert.equal(result.matchedModel, "nemotron-3-ultra-550b-a55b-20260604");
+  });
+});
+
+describe("candidateIntelligenceKeys", () => {
+  it("generates candidates for vendor-prefixed and :free model IDs", () => {
+    const keys = candidateIntelligenceKeys("google/gemma-4-31b-it:free");
+    assert.deepEqual(keys, [
+      "google/gemma-4-31b-it:free",
+      "google/gemma-4-31b-it",
+      "gemma-4-31b-it:free",
+      "gemma-4-31b-it",
+    ]);
+  });
+
+  it("generates candidates for plain model ID and dot-hyphen variants", () => {
+    const keys = candidateIntelligenceKeys("claude-opus-5-5");
+    assert.ok(keys.includes("claude-opus-5-5"));
+    assert.ok(keys.includes("claude-opus-5.5"));
+  });
+
+  it("generates preview-stripped and date-stripped candidates in priority order", () => {
+    const keys = candidateIntelligenceKeys("google/gemini-3.1-flash-lite-preview-20260303:free");
+    assert.ok(keys.includes("gemini-3.1-flash-lite-preview-20260303"));
+    assert.ok(keys.includes("gemini-3.1-flash-lite-preview"));
+    assert.ok(keys.includes("gemini-3.1-flash-lite"));
+    // Exact forms should precede stripped forms
+    const previewIdx = keys.indexOf("gemini-3.1-flash-lite-preview");
+    const strippedIdx = keys.indexOf("gemini-3.1-flash-lite");
+    assert.ok(previewIdx < strippedIdx);
+  });
+});
+
+describe("mergeProviderModels with custom precedence and synced models", () => {
+  it("custom model metadata takes precedence over static registry model", () => {
+    const registry = [
+      { id: "gemini-3.8-flash", name: "Gemini 3.8 Flash" },
+      { id: "gemini-2.5-pro", name: "Gemini 2.5 Pro" },
+    ];
+    const custom = [{ id: "gemini-3.8-flash", name: "gemini-3.8-flash", isFree: true }];
+    const merged = mergeProviderModels(registry, custom);
+    assert.equal(merged.length, 2);
+    const target = merged.find((m) => m.id === "gemini-3.8-flash");
+    assert.ok(target);
+    assert.equal(target.isFree, true);
+    assert.equal(target.name, "gemini-3.8-flash");
+  });
+
+  it("folds in live synced models and preserves custom models", () => {
+    const registry = [{ id: "auto", name: "Auto" }];
+    const synced = [
+      { id: "minimax/minimax-m3.1-flash:free", name: "MiniMax Flash", isFree: true },
+      { id: "auto", name: "Auto from sync" },
+    ];
+    const custom = [{ id: "custom-extra", name: "Custom Extra", isFree: true }];
+    const merged = mergeProviderModels(registry, custom, synced);
+    assert.equal(merged.length, 3);
+    assert.ok(merged.some((m) => m.id === "auto"));
+    assert.ok(merged.some((m) => m.id === "minimax/minimax-m3.1-flash:free" && m.isFree === true));
+    assert.ok(merged.some((m) => m.id === "custom-extra" && m.isFree === true));
+  });
+
+  it("drops unsynced static registry models when live synced models exist (#auto-pool-visible-only)", () => {
+    const registry = [
+      { id: "retired-static-model", name: "Retired Static Model", isFree: true },
+      { id: "active-model", name: "Active Model", isFree: true },
+    ];
+    const synced = [
+      { id: "active-model", name: "active-model", isFree: true },
+      { id: "new-upstream-model", name: "new-upstream-model", isFree: true },
+    ];
+    const merged = mergeProviderModels(registry, [], synced);
+    assert.equal(merged.length, 2);
+    assert.equal(
+      merged.some((m) => m.id === "retired-static-model"),
+      false
+    );
+    assert.equal(
+      merged.some((m) => m.id === "active-model"),
+      true
+    );
+    assert.equal(
+      merged.some((m) => m.id === "new-upstream-model"),
+      true
+    );
+    // Preserves registry display name enrichment when available
+    const active = merged.find((m) => m.id === "active-model");
+    assert.equal(active?.name, "Active Model");
   });
 });

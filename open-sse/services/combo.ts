@@ -642,6 +642,10 @@ export async function buildAutoCandidates(
         circuitBreakerState,
         costPer1MTokens,
         p95LatencyMs,
+        effectiveLatencyMs:
+          speedTelemetry?.avgTtftMs && speedTelemetry?.avgTokensPerSecond
+            ? speedTelemetry.avgTtftMs + (100 / speedTelemetry.avgTokensPerSecond) * 1000
+            : undefined,
         latencyStdDev,
         errorRate,
         ...speedTelemetry,

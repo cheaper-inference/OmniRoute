@@ -22,7 +22,7 @@ import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
 import { isTextOnlyChatTransport, isVisionModelId } from "@/shared/constants/visionModels";
 import { isVisionBridgeForcedModel } from "@/shared/constants/visionBridgeDefaults";
 
-export type AutoCategory = "coding" | "reasoning" | "vision" | "chat" | "multimodal";
+export type AutoCategory = "coding" | "reasoning" | "vision" | "chat" | "multimodal" | "agentic";
 export type AutoTier =
   | "fast"
   | "cheap"
@@ -44,6 +44,7 @@ export const AUTO_CATEGORIES: readonly AutoCategory[] = [
   "vision",
   "chat",
   "multimodal",
+  "agentic",
 ];
 export const AUTO_TIERS: readonly AutoTier[] = [
   "fast",

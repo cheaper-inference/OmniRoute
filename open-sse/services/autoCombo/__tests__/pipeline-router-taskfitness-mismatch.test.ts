@@ -11,12 +11,16 @@ import { describe, it, expect } from "vitest";
 import { resolveModelForTier } from "../pipelineRouter.ts";
 
 describe("pipeline stage model resolution vs. task-fitness table keys", () => {
-  it("resolves a coding-tier stage to a coding-strong model, not just the first candidate", () => {
-    // o3 (0.95) and deepseek-coder (0.9) both score high on FITNESS_TABLE.coding;
-    // a model with no coding-table row (and no default-table row) sits at the 0.5 wildcard.
-    const models = ["some-unknown-model", "o3", "deepseek-coder"];
-    const best = resolveModelForTier("moderate", models, "code");
-    expect(["o3", "deepseek-coder"]).toContain(best);
+  it("resolves a coding-tier stage to a coding-strong model, not just the first candidate", async () => {
+    const { setUserFitnessOverride, clearUserFitnessOverride } = await import("../taskFitness.ts");
+    setUserFitnessOverride("deepseek-coder", "coding", 0.85);
+    try {
+      const models = ["some-unknown-model", "o3", "deepseek-coder"];
+      const best = resolveModelForTier("moderate", models, "code");
+      expect(["o3", "deepseek-coder"]).toContain(best);
+    } finally {
+      clearUserFitnessOverride("deepseek-coder", "coding");
+    }
   });
 
   it("does not resolve to the same result for an unrelated taskType", () => {
