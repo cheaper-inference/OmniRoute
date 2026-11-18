@@ -13,12 +13,12 @@
 import path from "node:path";
 
 const FENCE = /^\s{0,3}(`{3,}|~{3,})/;
-const MD_DESTINATION = /(\]\(\s*)(<[^>\n]+>|[^)\s]+)/g;
 const REFERENCE_DEFINITION = /^(\s{0,3}\[[^\]\n]+\]:\s*)(<[^>\n]+>|\S+)/;
 const HTML_URL_ATTRIBUTE = /(\b(?:src|href|poster)\s*=\s*)(["'])([^"'\n]*)\2/gi;
 const HTML_SRCSET = /(\bsrcset\s*=\s*)(["'])([^"'\n]*)\2/gi;
-// Same span shape run-translation's htmlProse strips before it compares HTML.
-const INLINE_CODE = /(`+)[^\n]*?\1/g;
+// Same span shape run-translation's htmlProse strips before it compares HTML, except that a span
+// may wrap onto the next line: it only ends at a blank line, like the paragraph that holds it.
+const INLINE_CODE = /(`+)(?:(?!\n[ \t]*\n)[\s\S])*?\1/g;
 
 /**
  * Mirrors of root-level sources (`README.md`, `CLAUDE.md`, `CHANGELOG.md`, …) are read on GitHub,
@@ -65,10 +65,56 @@ function stripSlash(p) {
   return p.length > 1 ? p.replace(/\/+$/, "") : p;
 }
 
+/**
+ * End index of the markdown link destination that starts at `from`, or `from` when there is none.
+ * A `<…>` destination runs to its `>`; a bare one runs to whitespace or to the first `)` that does
+ * not close a `(` it opened, so `docs/main(1).png` is read whole. Backslash escapes are skipped.
+ */
+function destinationEnd(text, from) {
+  if (text[from] === "<") {
+    const close = text.indexOf(">", from + 1);
+    const newline = text.indexOf("\n", from + 1);
+    return close === -1 || (newline !== -1 && newline < close) ? from : close + 1;
+  }
+  let depth = 0;
+  let i = from;
+  for (; i < text.length; i++) {
+    const ch = text[i];
+    if (ch === "\\" && i + 1 < text.length) {
+      i++;
+    } else if (/\s/.test(ch)) {
+      break;
+    } else if (ch === "(") {
+      depth++;
+    } else if (ch === ")") {
+      if (depth === 0) break;
+      depth--;
+    }
+  }
+  return i;
+}
+
+/** Rewrites the destination of every inline markdown link or image (`](…)`) in `text`. */
+function rebaseMarkdownDestinations(text, one) {
+  let out = "";
+  let last = 0;
+  let open = text.indexOf("](");
+  while (open !== -1) {
+    let start = open + 2;
+    while (start < text.length && /\s/.test(text[start])) start++;
+    const end = destinationEnd(text, start);
+    if (end > start) {
+      out += text.slice(last, start) + one(text.slice(start, end));
+      last = end;
+    }
+    open = text.indexOf("](", Math.max(end, open + 2));
+  }
+  return out + text.slice(last);
+}
+
 function rebaseProse(text, ctx) {
   const one = (url) => rebaseReference(url, ctx);
-  return text
-    .replace(MD_DESTINATION, (_m, lead, url) => `${lead}${one(url)}`)
+  return rebaseMarkdownDestinations(text, one)
     .replace(HTML_URL_ATTRIBUTE, (_m, lead, q, url) => `${lead}${q}${one(url)}${q}`)
     .replace(HTML_SRCSET, (_m, lead, q, list) => {
       const rebased = list.replace(
@@ -79,18 +125,34 @@ function rebaseProse(text, ctx) {
     });
 }
 
-function rebaseLine(line, ctx) {
-  const definition = REFERENCE_DEFINITION.exec(line);
-  if (definition) {
-    return `${definition[1]}${rebaseReference(definition[2], ctx)}${line.slice(definition[0].length)}`;
-  }
-  let out = "";
-  let last = 0;
-  for (const m of line.matchAll(INLINE_CODE)) {
-    out += rebaseProse(line.slice(last, m.index), ctx) + m[0];
-    last = m.index + m[0].length;
-  }
-  return out + rebaseProse(line.slice(last), ctx);
+/**
+ * Rebases a run of lines outside fenced code. Code spans are found over the whole run, so a span
+ * that wraps onto the next line stays literal on both lines.
+ */
+function rebaseLines(lines, ctx) {
+  const text = lines.join("\n");
+  const spans = [...text.matchAll(INLINE_CODE)].map((m) => [m.index, m.index + m[0].length]);
+  let offset = 0;
+  return lines.map((line) => {
+    const start = offset;
+    const end = start + line.length;
+    offset = end + 1;
+    const insideAtStart = spans.some(([s, e]) => s < start && e > start);
+    const definition = insideAtStart ? null : REFERENCE_DEFINITION.exec(line);
+    if (definition) {
+      return `${definition[1]}${rebaseReference(definition[2], ctx)}${line.slice(definition[0].length)}`;
+    }
+    let out = "";
+    let last = 0;
+    for (const [s, e] of spans) {
+      if (e <= start || s >= end) continue;
+      const from = Math.max(s, start) - start;
+      const to = Math.min(e, end) - start;
+      out += rebaseProse(line.slice(last, from), ctx) + line.slice(from, to);
+      last = to;
+    }
+    return out + rebaseProse(line.slice(last), ctx);
+  });
 }
 
 /**
@@ -102,19 +164,28 @@ function rebaseLine(line, ctx) {
  */
 export function rebaseMirrorPaths(markdown, ctx) {
   if (path.posix.dirname(ctx.sourceRel) === path.posix.dirname(ctx.mirrorRel)) return markdown;
-  const lines = markdown.split("\n");
+  const out = [];
+  let prose = [];
   let fence = null;
-  for (let i = 0; i < lines.length; i++) {
-    const open = FENCE.exec(lines[i]);
+  const flush = () => {
+    if (prose.length > 0) out.push(...rebaseLines(prose, ctx));
+    prose = [];
+  };
+  for (const line of markdown.split("\n")) {
+    const open = FENCE.exec(line);
     if (fence) {
       if (open && open[1][0] === fence[0] && open[1].length >= fence.length) fence = null;
+      out.push(line);
       continue;
     }
     if (open) {
+      flush();
       fence = open[1];
+      out.push(line);
       continue;
     }
-    lines[i] = rebaseLine(lines[i], ctx);
+    prose.push(line);
   }
-  return lines.join("\n");
+  flush();
+  return out.join("\n");
 }

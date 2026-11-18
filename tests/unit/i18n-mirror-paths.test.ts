@@ -17,6 +17,7 @@ const repo = new Set([
   "docs",
   "docs/screenshots",
   "docs/screenshots/MainOmniRoute.png",
+  "docs/screenshots/main(1).png",
   "docs/diagrams",
   "docs/diagrams/readme-hero.svg",
   "docs/diagrams/readme-hero-dark.svg",
@@ -138,6 +139,29 @@ test("rebaseMirrorPaths never touches fenced code or inline code", () => {
     "Run `cat ./docs/screenshots/MainOmniRoute.png` then see ![x](../../screenshots/MainOmniRoute.png)."
   );
   assert.deepEqual(out.slice(1), input.split("\n").slice(1));
+});
+
+test("rebaseMirrorPaths reads a markdown destination with balanced parentheses in full", () => {
+  assert.equal(
+    rebaseMirrorPaths(
+      '![s](docs/screenshots/main(1).png) and [t](./docs/screenshots/main(1).png "x")',
+      ctx
+    ),
+    '![s](../../screenshots/main(1).png) and [t](../../screenshots/main(1).png "x")'
+  );
+  // an unbalanced ")" still ends the destination
+  assert.equal(rebaseMirrorPaths("([license](LICENSE))", ctx), "([license](../../../LICENSE))");
+});
+
+test("rebaseMirrorPaths keeps a code span that wraps onto the next line literal", () => {
+  const input = ["Example: `cat", "[license](LICENSE)` stays code.", "", "[license](LICENSE)"].join(
+    "\n"
+  );
+  const out = rebaseMirrorPaths(input, ctx).split("\n");
+  assert.equal(out[0], "Example: `cat");
+  assert.equal(out[1], "[license](LICENSE)` stays code.");
+  // a blank line ends the paragraph, so a later backtick-free link is still rebased
+  assert.equal(out[3], "[license](../../../LICENSE)");
 });
 
 test("rebaseMirrorPaths is idempotent", () => {
