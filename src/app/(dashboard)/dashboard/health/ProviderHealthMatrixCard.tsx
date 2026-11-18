@@ -323,7 +323,7 @@ export default function ProviderHealthMatrixCard() {
               <Icon name="grid_view" size={18} />
             </div>
             <div>
-              <h2 className="text-lg font-semibold text-text-main">
+              <h2 className="text-lg text-text-main">
                 {healthText(t, "providerHealthMatrixTitle", "Provider Health Matrix")}
               </h2>
               <p className="text-sm text-text-muted">
@@ -435,7 +435,7 @@ export default function ProviderHealthMatrixCard() {
                 variant="ghost"
                 aria-expanded={isExpanded}
                 onClick={() => setExpanded(isExpanded ? null : provider.provider)}
-                className="h-auto min-h-0 w-full flex-col items-stretch justify-start gap-3 whitespace-normal p-4 text-left font-normal lg:flex-row lg:items-center lg:justify-between"
+                className="h-auto min-h-0 w-full flex-col items-stretch justify-start gap-3 whitespace-normal p-4 text-left lg:flex-row lg:items-center lg:justify-between"
               >
                 <div className="min-w-0">
                   <div className="flex flex-wrap items-center gap-2">

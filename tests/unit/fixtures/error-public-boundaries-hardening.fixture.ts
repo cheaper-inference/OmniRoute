@@ -417,7 +417,10 @@ test("chatCore provider-failure writes use the projected persistent message", ()
   const classifierBlock = source.slice(classifierStart, classifierEnd);
 
   assert.doesNotMatch(failureBlock, /lastError:\s*message\b/);
-  assert.match(failureBlock, /await applyProviderFailureClassification\(/);
+  assert.match(
+    failureBlock,
+    /await runWithCodexResponseFence\(providerResponse, \(\) =>\s*applyProviderFailureClassification\(/
+  );
   // #14527 moved the projection into chatCore/providerFailureRetention.ts (it adds a
   // video-transcript omission in front of the same sanitizer). Hold chatCore to calling the
   // projection, and the projection to sanitizing — the invariant, wherever it lives.

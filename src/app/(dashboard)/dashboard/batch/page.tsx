@@ -297,7 +297,8 @@ export default function BatchPage() {
         />
       )}
 
-      {/* Toolbar: auto-refresh indicator + Refresh + New batch */}
+      {/* Toolbar: auto-refresh indicator + Refresh. "New batch" lives only in the page
+          header, which is always rendered (#19620 visual pass: it used to appear twice). */}
       <div className="flex items-center justify-between gap-4 flex-wrap">
         <span className="text-xs text-text-muted flex items-center gap-1">
           {loading ? (
@@ -307,19 +308,14 @@ export default function BatchPage() {
           )}
           {t("batchListAutoRefresh")}
         </span>
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            icon="refresh"
-            onClick={() => fetchData(false)}
-            disabled={loading}
-          >
-            {loading ? t("batchListRefreshing") : t("batchListRefresh")}
-          </Button>
-          <Button icon="add" onClick={() => setShowWizard(true)}>
-            {t("batchListNewButton")}
-          </Button>
-        </div>
+        <Button
+          variant="outline"
+          icon="refresh"
+          onClick={() => fetchData(false)}
+          disabled={loading}
+        >
+          {loading ? t("batchListRefreshing") : t("batchListRefresh")}
+        </Button>
       </div>
 
       {/* Batch list + infinite scroll sentinel */}

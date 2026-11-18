@@ -13,9 +13,14 @@ test("#18499 NVIDIA free endpoints are rate-limited recurring access requiring a
   const rows = FREE_MODEL_BUDGETS.filter(
     (row) =>
       row.provider === "nvidia" &&
-      ["google/gemma-4-31b-it", "nvidia/nemotron-3.5-super-vl-120b-a12b"].includes(row.modelId)
+      [
+        "google/gemma-4-31b-it",
+        "nvidia/nemotron-3.5-super-vl-120b-a12b",
+        // #18604: GPT OSS 20B is on the same Developer Program free endpoint tier.
+        "openai/gpt-oss-20b",
+      ].includes(row.modelId)
   );
-  assert.equal(rows.length, 2);
+  assert.equal(rows.length, 3);
   for (const row of rows) {
     assert.equal(row.freeType, "recurring-uncapped");
     assert.equal(row.creditTokens, 0);

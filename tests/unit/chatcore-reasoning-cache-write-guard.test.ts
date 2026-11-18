@@ -26,8 +26,11 @@ const TEST_DATA_DIR = fs.mkdtempSync(
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
-const { lookupReasoning, clearReasoningCacheAll } =
+const { buildReasoningCacheScope, buildToolCallCacheKey, lookupReasoning, clearReasoningCacheAll } =
   await import("../../open-sse/services/reasoningCache.ts");
+// These requests carry no API key or session, so entries belong to the local scope.
+const lookupLocal = (id: string) =>
+  lookupReasoning(buildToolCallCacheKey(buildReasoningCacheScope(undefined, null), id));
 const core = await import("../../src/lib/db/core.ts");
 
 function noopLog() {
@@ -174,28 +177,28 @@ test.after(async () => {
 
 test("non-streaming: a replay provider (xiaomi-mimo) populates the reasoning cache", async () => {
   const id = "tc-reasoning-cache-nonstream-mimo";
-  assert.equal(lookupReasoning(id), null);
+  assert.equal(lookupLocal(id), null);
   await invokeChatCoreNonStreaming("xiaomi-mimo", "mimo-v1", id);
-  assert.equal(lookupReasoning(id), "because the guard test says so");
+  assert.equal(lookupLocal(id), "because the guard test says so");
 });
 
 test("non-streaming: a non-replay provider (openai) does NOT populate the reasoning cache", async () => {
   const id = "tc-reasoning-cache-nonstream-openai";
-  assert.equal(lookupReasoning(id), null);
+  assert.equal(lookupLocal(id), null);
   await invokeChatCoreNonStreaming("openai", "gpt-5.1", id);
-  assert.equal(lookupReasoning(id), null);
+  assert.equal(lookupLocal(id), null);
 });
 
 test("streaming: a replay provider (xiaomi-mimo) populates the reasoning cache", async () => {
   const id = "tc-reasoning-cache-stream-mimo";
-  assert.equal(lookupReasoning(id), null);
+  assert.equal(lookupLocal(id), null);
   await invokeChatCoreStreaming("xiaomi-mimo", "mimo-v1", id);
-  assert.equal(lookupReasoning(id), "because the guard test says so");
+  assert.equal(lookupLocal(id), "because the guard test says so");
 });
 
 test("streaming: a non-replay provider (openai) does NOT populate the reasoning cache", async () => {
   const id = "tc-reasoning-cache-stream-openai";
-  assert.equal(lookupReasoning(id), null);
+  assert.equal(lookupLocal(id), null);
   await invokeChatCoreStreaming("openai", "gpt-5.1", id);
-  assert.equal(lookupReasoning(id), null);
+  assert.equal(lookupLocal(id), null);
 });

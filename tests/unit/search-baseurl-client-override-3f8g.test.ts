@@ -88,18 +88,24 @@ describe("resolveSearchBaseUrl — tenant-supplied baseUrl (GHSA-3f8g-pfh9-j687)
     }
   });
 
-  it("SearXNG keeps its documented self-hosted caller override, IMDS still blocked", () => {
-    // Opted in: keyless, so no operator credential travels with the request.
-    // Loopback/LAN is the point of a self-hosted instance (search-route.test.ts
-    // covers the route-level flow); cloud metadata stays rejected.
+  it("SearXNG keeps its caller override for public hosts only, IMDS still blocked", () => {
+    // Opted in: keyless, so no operator credential travels with the request. The
+    // route can be called without a credential, so a caller host must be public;
+    // a loopback/LAN instance belongs on the stored connection (next test).
     const config = SEARCH_PROVIDERS["searxng-search"];
     assert.equal(config.allowClientBaseUrlOverride, true);
     assert.equal(
       resolveSearchBaseUrl(config, {
         ...base,
-        providerOptions: { baseUrl: "http://127.0.0.1:8888/search" },
+        providerOptions: { baseUrl: "https://searx.example.org/search" },
       }),
-      "http://127.0.0.1:8888/search"
+      "https://searx.example.org/search"
+    );
+    assert.throws(() =>
+      resolveSearchBaseUrl(config, {
+        ...base,
+        providerOptions: { baseUrl: "http://127.0.0.1:8888/search" },
+      })
     );
     assert.throws(() =>
       resolveSearchBaseUrl(config, {

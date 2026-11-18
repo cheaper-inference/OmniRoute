@@ -61,6 +61,8 @@ interface NormalizeComboStepOptions {
   comboName?: string | null;
   index?: number;
   allCombos?: ComboCollectionLike;
+  /** Precomputed names from allCombos, so a caller normalizing many steps scans them only once. */
+  comboNames?: ReadonlySet<string>;
 }
 
 interface NormalizeComboRecordOptions {
@@ -170,7 +172,7 @@ function shouldTreatAsComboRef(
   options: NormalizeComboStepOptions
 ): boolean {
   if (providerId) return false;
-  const comboNames = collectComboNames(options.allCombos);
+  const comboNames = options.comboNames ?? collectComboNames(options.allCombos);
   return comboNames.has(target) || target === toTrimmedString(options.comboName);
 }
 
