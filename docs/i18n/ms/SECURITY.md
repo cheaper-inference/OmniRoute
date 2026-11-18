@@ -4,13 +4,13 @@
 
 ---
 
-## Melaporkan Kerentanan
+## Melaporkan Kelemahan
 
-Jika anda menemui kerentanan keselamatan dalam OmniRoute, sila laporkannya secara bertanggungjawab:
+Jika anda menemui kelemahan keselamatan dalam OmniRoute, sila laporkan dengan bertanggungjawab:
 
-1. **JANGAN** buka isu GitHub awam
-2. Gunakan [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Sertakan: penerangan, langkah penghasilan semula dan potensi impak
+1. **DO NOT** buka isu GitHub awam
+2. Gunakan [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Sertakan: penerangan, langkah pembiakan dan potensi kesan
 
 ## Garis Masa Respons
 
@@ -29,25 +29,14 @@ Jika anda menemui kerentanan keselamatan dalam OmniRoute, sila laporkannya secar
 | 3.7.x   | ✅ Keselamatan                                           |
 | < 3.7.0 | ❌ Tidak disokong                                        |
 
-## Tempoh sokongan LTS (v3.9.x)
+## tetingkap sokongan LTS (v3.9.x)
 
-Selepas 3.8.59, versi seterusnya ialah **3.9.0**, yang memulakan siri sokongan jangka panjang pada cabang
-`stable/v3` (lihat [`ROADMAP.md`](ROADMAP.md) → "Fasa 3 — v3.9.0 LTS").
+Selepas 3.8.59 versi seterusnya ialah** 3.9.0** , yang membuka talian sokongan jangka panjang pada cawangan `stable/v3` (lihat [`ROADMAP.md`](ROADMAP.md) → "Fasa 3 — v3.9.0 LTS").
 
-- **Apa yang diterima oleh `stable/v3`:** pembetulan pepijat, tampalan keselamatan dan kemas kini penyedia. Ciri
-  baharu disalurkan ke saluran v4; siri LTS mengutamakan kestabilan. `npm install omniroute`
-  (`latest` dist-tag) kekal pada v3 sepanjang keseluruhan kitaran v4.
-- **Tempoh sokongan:** `stable/v3` menerima **pembetulan keselamatan dan pembetulan regresi kritikal selama
-  12 bulan selepas keluaran 3.9.0, atau sehingga 90 hari selepas v4.0.0 diterbitkan sebagai `latest` —
-  yang mana lebih lewat**. Tarikh tamat yang terhasil direkodkan dalam nota keluaran 3.9.0 dan dalam
-  [`ROADMAP.md`](ROADMAP.md) apabila keluaran tersebut dibuat.
-- **Melaporkan kerentanan dalam siri LTS:** gunakan saluran yang sama seperti mana-mana versi lain —
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) peribadi,
-  bukan isu awam. Nyatakan versi yang anda uji (contohnya `3.9.2`); pembetulan dimasukkan ke dalam
-  `stable/v3` dan dipindahkan ke hadapan ke v4.
-- **Garis dasar keselamatan semasa keluaran LTS:** keadaan pengimbas yang diukur, bukti pengadang laluan dan
-  kelayakan awam direkodkan dalam
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Apa yang `stable/v3` terima:** pembetulan pepijat, tampung keselamatan dan kemas kini pembekal. Ciri baharu pergi ke saluran v4; garisan LTS adalah kestabilan-diutamakan. `npm install omniroute` ( `latest` dist-tag) kekal pada v3 semasa keseluruhan kitaran v4.
+- **Tempoh tetingkap:** `stable/v3` terima** pembetulan keselamatan dan regresi kritikal selama 12 bulan selepas pemotongan 3.9.0, atau sehingga 90 hari selepas v4.0.0 diterbitkan sebagai `latest` — yang mana terkemudian** . Tarikh tamat yang terhasil direkodkan dalam nota keluaran 3.9.0 dan dalam [`ROADMAP.md`](ROADMAP.md) apabila pemotongan berlaku.
+- **Melaporkan kelemahan dalam baris LTS :** saluran yang sama seperti mana-mana versi lain — a private [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), tidak pernah menjadi isu awam. Sebut versi yang anda uji (contohnya `3.9.2`); membetulkan tanah di `stable/v3` dan dialihkan ke hadapan ke v4.
+- **Garis dasar keselamatan pada pemotongan LTS :** bukti keadaan pengimbas yang diukur, pengawal laluan dan bukti kelayakan awam direkodkan dalam [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 

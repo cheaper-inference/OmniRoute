@@ -186,29 +186,92 @@ Potpuni popis od približno 30+ tablica nalazi se u `src/lib/db/migrations/`.
 
 ## Migracije
 
-OmniRoute koristi **verzionirane, idempotentne migracije** u `src/lib/db/migrations/`. Svaka migracija zasebna je SQL datoteka nazvana `NNN_description.sql`.
+OmniRoute koristi** verzirane, idempotentne migracije** u `src/lib/db/migrations/`. Svaka migracija je jedna SQL datoteka. Dva formata imenovanja koegzistiraju; verzija zabilježena u `_omniroute_migrations` je numerički prefiks.
 
-### Imenovanje migracija
+### Imenovanje migracije
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Format                                              | Primjer                              | Koristi se za                                                                                                                                                             |
+| --------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (točno 3 znamenke)            | `241_seen_models.sql`                | Stara serija `001`–`241`. Zamrznuto kada je format vremenske oznake stigao (`240` i `241` su spojeni neposredno prije njega): nijedna nova datoteka ne dobiva redni broj. |
+| `YYYYMMDDHHMMSS_description.sql` (14 znamenki, UTC) | `20261113120000_add_usage_index.sql` | Svaka migracija stvorena od 13.11.2026.                                                                                                                                   |
 
-### Kako se migracije izvršavaju
+Zašto promjena: sa sekvencijalnim brojevima, paralelni PRs odabrao je isti sljedeći broj i svi osim jednog morali su ponovno numerirati prije spajanja. UTC vremenska oznaka svakom PR daje vlastitu verziju.
 
-Prilikom pokretanja `migrationRunner.ts`:
+Pravila za format vremenske oznake (provodi `npm run check:migration-numbering`, dijeli se s generatorom u `scripts/check/lib/migrationNaming.mjs`):
 
-1. Stvara tablicu `_omniroute_migrations` ako ne postoji
-2. Dohvaća već primijenjene migracije
-3. Redom primjenjuje sve nove migracije, svaku unutar transakcije
+- Vremenska oznaka je pravi UTC datum i vrijeme, ne prije `20261113000000` i ne više od 10 minuta u budućnosti.
+- Opis je mala `snake_case` koja počinje slovom (`a-z`, `0-9`, jedan `_` između riječi), najviše 80 znakova.
+- Dvije datoteke s istom vremenskom oznakom su duplikat.
+- Pravilo bez praznina primjenjuje se samo na stare nizove: svaki broj od `001` do `241` mora postojati, osim poznatih praznina `026`, `055` i `121`. Brisanje `241` (ili bilo koje stare datoteke) ne uspijeva. `001` i `241` nikada se ne mogu dodati na popis dopuštenih `KNOWN_GAPS`. Datoteke s vremenskom oznakom nikada ne stvaraju prazninu.
+- Svaki unos u `src/lib/db/migrations/` mora biti obična datoteka s važećim imenom `.sql` malim slovima. Direktorij, simbolička veza, `.SQL` ili `.sql.bak` datoteka, skrivena datoteka ili ime s razmakom ne prolaze vrata, jer bi ih trkač tiho preskočio ili bi se srušio pri dizanju.
+
+**Primijeni narudžbu.** Trkač razvrstava prema numeričkoj vrijednosti prefiksa, a ne prema tekstu: prvo stare `001`–`241` datoteke, zatim datoteke s vremenskom oznakom prema redoslijedu vremenske oznake, zatim svi direktoriji s prostorom imena registrirani sa `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (verzije kao što je `ee-001`). Migracija na čekanju je svaka datoteka čija verzija nije u `_omniroute_migrations`, tako da se migracija iz starije grane koja se spaja nakon novije još uvijek primjenjuje na postojeće baze podataka.
+
+**Vremenska oznaka je redoslijed stvaranja, a ne redoslijed spajanja.** Ako vaša migracija ovisi o tablici ili stupcu stvorenom migracijom s a** noviji** timestamp (na primjer, jedan iz drugog PR koji se prvi spojio), nova baza podataka bi prva pokrenula vašu i ne bi uspjela. Dok je vaš PR još otvoren, ponovno generirajte naziv datoteke pomoću `npm run db:new-migration` tako da dobije noviju vremensku oznaku ili ga učinite neovisnim. `npm run test:migrations:fresh` primjenjuje svaku migraciju na praznu bazu podataka i hvata ovo.
+
+### Spojena migracija nikada se ne briše niti preimenuje
+
+Jednom kada je datoteka za migraciju na grani izdanja ili `main`, već je pokrenuta na homolognim bazama podataka i bazama podataka razvojnih programera, na VPS instalacijama i u Enterprise sync-u. Od tada nadalje:
+
+- **Nikad ga nemojte brisati.** Svježe instalacije izgubile bi svoju shemu dok je nadograđene baze podataka zadržavaju.
+- **Nikada ga ne preimenujte.** Verzija u `_omniroute_migrations` više ne bi odgovarala datoteci, pa bi je svaka baza podataka koja ju je već primijenila ponovno pokrenula. Neidempotentni SQL zatim duplicira podatke ili zaustavlja pokretanje.
+- **Trebate drugačiju shemu?** Kreirajte novu migraciju sa `npm run db:new-migration`.
+
+Preimenovanje je sigurno samo za datoteku koja još nije spojena, što je slučaj na koji se odnose naputci vrata. Oznaka izdanja ovdje ne mijenja ništa: svaki pritisak na `release/v*` granu objavljuje Docker `:next` sliku i radi na homologu, VPS instalacijama i Enterprise sinkronizaciji, tako da je spojena migracija pokrenuta na pravim bazama podataka prije nego što postoji bilo kakva `vX.Y.Z` oznaka. Vrata ne uspijevaju svako uklanjanje osnovne datoteke, označene ili ne.
+
+- **Vraćanje spojene migracije.** `git revert` koja briše datoteku ne uspijeva pristupiti vratima. Zadržite datoteku i poništite njezinu shemu u novoj migraciji: `npm run db:new-migration -- <description>`, sa `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` i tako dalje. Nadograđene i svježe baze podataka tada završavaju s istom shemom.
+- **Jedno prihvaćeno preimenovanje: unos kompatibilnosti i identičan sadržaj.** Ako se spojena datoteka mora premjestiti (na primjer, dvije spojene datoteke dijele vremensku oznaku i pokretač se zaustavlja zbog sudara verzija), preimenujte kasniju bez dodirivanja njenog SQL i dodajte `{ fromVersion, fromName, toVersion, toName }` u `RENAMED_MIGRATION_COMPATIBILITY` u `src/lib/db/migrationRunner/constants.ts`. Baze podataka koje su primijenile staru verziju premještaju `_omniroute_migrations` redak umjesto ponovnog pokretanja datoteke. Vrata upozoravaju na takvo preimenovanje i uvijek izvode provjeru komutacije na njemu, bez obzira na novu vremensku oznaku: nove instalacije primjenjuju datoteku na njenoj novoj poziciji, nadograđene baze podataka ne, stoga odaberite novu vremensku oznaku blizu stare. Vrata ne uspijevaju preimenovati ako se sadržaj promijenio (promjena sheme i dalje ide u novu migraciju) ili ako ciljna datoteka unosa nije na disku.
+- **Nikada nemojte preimenovati unutar iste vremenske oznake.** Preimenovanje koje zadržava vremensku oznaku i mijenja samo opis ne prolazi vrata, sa ili bez unosa. S unosom čiji je `toVersion` jednak `fromVersion`, pokretač briše stari `_omniroute_migrations` red i ponovno primjenjuje datoteku na svaku bazu podataka koja ju je već pokrenula. Bez unosa, pokretač prati samo verziju: preskače datoteku u tim bazama podataka (novi sadržaj se tamo nikada ne pokreće) i bilježi pogrešku ponovnog numeriranja pri svakom pokretanju. Upotrijebite drugu vremensku oznaku i unos kompatibilnosti ili zadržite naziv.
+- **Vrata provjeravaju da se preimenovana datoteka ne pokreće ponovno.** Za svako pokriveno preimenovanje, vrata prosljeđuju novi naziv datoteke u provjeru komutacije pomoću `--must-not-apply`. Provjera pokreće nadograđenu bazu podataka s pravim pokretačem, a ako pokretač ponovno primijeni tu datoteku (na primjer, zato što unos ima pogrešnu verziju ili naziv, ili zato što parser teksta vrata čita `constants.ts` drugačije od TypeScript), vrata ne uspijevaju sa `migration renomeada rodaria de novo` i traži od vas da provjerite stare i nove verzije i imena unosa.
+
+### Što vrata uspoređuju s bazom
+
+Prilikom pokretanja zahtjeva za povlačenjem i reda čekanja spajanja, `npm run check:migration-numbering` uspoređuje `src/lib/db/migrations/` na disku s istim direktorijem u osnovnoj grani. Baza je, ovim redoslijedom: `--base-latest-tag`, `--base <ref>`, `MIGRATION_BASE_REF` varijabla ili, kada je `GITHUB_EVENT_NAME` `pull_request`, `pull_request_target` ili `merge_group`, prvi roditelj predaje spajanja, `merge_group.base_sha` sadržaja događaja ili `git merge-base HEAD origin/$GITHUB_BASE_REF`. U zahtjevu za povlačenjem ili izvođenju reda čekanja spajanja bez razrješive baze, vrata ne uspijevaju. Izvan CI bez `--base` ispisuje `comparação com a base: pulada (sem --base)` i preskače ova pravila.
+
+`--base-latest-tag` se uspoređuje s najnovijom oznakom izdanja (`vX.Y.Z` prema semverskom redoslijedu; sufiksirane oznake kao što su nightlies se ne računaju) koja je u povijesti `HEAD`, s istim pravilima kao i `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) pokreće vrata na ovaj način, jer push i planirana izvođenja nemaju bazu zahtjeva za povlačenjem i spajanje može sletjeti bez novog CI izvođenja. Bez oznake izdanja u povijesti vrata ne uspijevaju; pokrenite `git fetch --tags` (u CI, `actions/checkout` sa `fetch-depth: 0` donosi oznake).
+
+| Promjena na zahtjevu za povlačenjem                                                                          | Proizlaziti                                                                                                                                                                                                                                                                                                                                                                         |
+| ------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Datoteka koja postoji na bazi je preimenovana, sa `RENAMED_MIGRATION_COMPATIBILITY` unosom                   | **Upozorenje** ako je sadržaj identičan, a provjera komutacije radi bez obzira na novu vremensku oznaku; ne uspijeva ako nova pozicija promijeni konačnu shemu (poništi preimenovanje ili odabere drugu novu vremensku oznaku na kojoj putuje) ili ako bi pokretač ponovno primijenio preimenovanu datoteku na nadograđenu bazu podataka.** ne uspijeva** ako se promijeni sadržaj. |
+| Datoteka koja postoji na bazi se preimenuje zadržavajući svoju vremensku oznaku (mijenja se samo opis)       | **ne uspijeva** , sa ili bez unosa: trkač bi ga ponovno primijenio (s unosom) ili preskočio po verziji (bez njega). Upotrijebite drugu vremensku oznaku i unos kompatibilnosti ili zadržite naziv.                                                                                                                                                                                  |
+| Datoteka koja postoji na bazi se briše ili preimenuje bez unosa                                              | **ne uspijeva** , bez obzira nalazi li se datoteka u oznaci izdanja. Da biste to poništili, vratite datoteku pomoću `git checkout <base> -- src/lib/db/migrations/<file>`; da vratite njegovu shemu, dodajte novu migraciju sa `DROP ... IF EXISTS`.                                                                                                                                |
+| Datoteka koja postoji na bazi ima drugačiji sadržaj                                                          | **Upozorenje** ( `::warning` napomena u GitHub akcijama), i pokreće se provjera komutacije. Ne uspijeva ako uređivanje mijenja konačnu shemu, jer nadograđene baze podataka ne primjenjuju ponovno uređenu datoteku: stavite promjenu u novu migraciju. Bezopasna izmjena (komentar, `IF NOT EXISTS`) samo upozorava.                                                               |
+| Datoteka s vremenskom oznakom dodaje se s vremenskom oznakom koja nije novija od najnovije u bazi            | Pokreće provjeru komutacije, opisanu u nastavku.                                                                                                                                                                                                                                                                                                                                    |
+| `NNN_` datoteka starog formata dodaje se s brojem ispod najnovije datoteke starog formata baze               | **ne uspijeva** , čak i ako je `KNOWN_GAPS` uređen u istom zahtjevu za povlačenjem: stara serija je zamrznuta, kreirajte migraciju pomoću `npm run db:new-migration`. Prihvaćaju se datoteke starog formata iznad najnovije baze (zahtjev za povlačenjem `release/v*` u `main` ).                                                                                                   |
+| Datoteka koja nije u redu, uređena ili preimenovana sadrži `INSERT`, `UPDATE`, `DELETE` ili `REPLACE` izjave | **Upozorenje** : provjera komutacije ne uspoređuje podatke, stoga provjerite mijenja li rezultat redoslijed kojim se primjenjuju nadograđene i svježe baze podataka.                                                                                                                                                                                                                |
+
+Jedno pokretanje provjere komutacije pokriva zajedno datoteke koje nisu u redu, uređene i preimenovane datoteke.
+
+Provjera komutacije (`scripts/check/migration-commutation.ts`) gradi dvije privremene baze podataka sa stvarnim putem instalacije:** nadograđeno** jedan (pokretanje s osnovnim migracijama, zatim ponovno pokretanje na istoj datoteci s migracijama zahtjeva za povlačenjem) i** svježe** jedan (jedno pokretanje s migracijama zahtjeva za povlačenjem). Uspoređuje dobivene sheme: tablice i stupce (zanemarujući redoslijed stupaca), UNIQUE / PRIMARY KEY i FOREIGN KEY ograničenja, normalizirani `CREATE TABLE` tekst svake tablice (koji pokriva CHECK ograničenja, uspoređivanja, generirane stupce i opcije tablice), indekse, okidače i prikaze. Podaci retka se ne uspoređuju. Ako se poklapaju, vrata ispisuju da datoteka nije u redu, ali prelazi na posao i prolazi. Ako se razlikuju, vrata ne uspijevaju s razlikom i savjetom za slučaj: za datoteku koja nije u redu, ponovno generirajte njezino ime sa `npm run db:new-migration`, što je sigurno jer datoteka još nije spojena; za uređenu osnovnu datoteku, vratite osnovni sadržaj i stavite promjenu u novu migraciju; za preimenovanu datoteku, poništite preimenovanje ili odaberite drugu novu vremensku oznaku gdje se mijenja, nikada istu vremensku oznaku s drugim nazivom. Ako se sama provjera ne može pokrenuti, vrata ne uspijevaju u CI i upozoravaju samo lokalno. Za uređenu osnovnu datoteku, nadograđena baza podataka izgrađena je sa sadržajem baze te datoteke, a drugo pokretanje je preskače jer je njezina verzija već snimljena. Za preimenovanu datoteku, nadograđena baza podataka izgrađena je s datotekom pod njezinim starim imenom, a drugo pokretanje pomiče njezin `_omniroute_migrations` redak kroz unos kompatibilnosti umjesto ponovnog pokretanja; vrata prosljeđuju novo ime sa `--must-not-apply`, tako da provjera ne uspijeva ako ga primijeni drugo dizanje. Ako se migracija zahtjeva za povlačenjem ne uspije primijeniti na nadograđenoj stazi, to jest, nakon svake migracije baze (bez obzira na to ne uspije li ili ne pri novoj instalaciji), vrata izvješćuju `migration do PR não aplica` i traže od vas da popravite SQL prema trenutnoj shemi baze; ako datoteka ovisi o drugoj migraciji zahtjeva za povlačenjem s kasnijom vremenskom oznakom, ponovno generirajte njezino ime pomoću `npm run db:new-migration`.
+
+Za lokalno pokretanje iste usporedbe, izričito proslijedite bazu, na primjer `npm run check:migration-numbering -- --base origin/<base-branch>` ili `npm run check:migration-numbering -- --base-latest-tag` za usporedbu s najnovijim izdanjem.
+
+### Pretvaranje Open PR's `NNN` migracije
+
+Zahtjev za povlačenjem otvoren prije preklopnika još uvijek može sadržavati sekvencijalnu datoteku kao što je `242_add_widgets.sql`. Stari brojevi iznad `241` su odbijeni, stoga ih pretvorite prije spajanja:
+
+1. **Preimenujte datoteku pomoću generatora, zadržavajući opis.** Pokrenite `npm run db:new-migration -- <same description>` da dobijete novi naziv, premjestite SQL u njega i izbrišite staru `NNN_` datoteku. Opis mora ostati identičan: unos kompatibilnosti u nastavku odgovara njemu.
+2. **Dodajte unos kompatibilnosti ako je trajna baza podataka pokretala stari broj.** Ako je bilo koja baza podataka koja se čuva (homolog, VPS, vlastita instalacija suradnika) pokrenula izgradnju PR sa `NNN_` datotekom, dodajte `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` u `RENAMED_MIGRATION_COMPATIBILITY` u `src/lib/db/migrationRunner/constants.ts`. Ovo je** potreban za `237` do `241`** : ti utori sada drže kanonske `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` i `241_seen_models.sql`, a bez unosa takva baza podataka zauvijek preskače kanonsku migraciju i ponovno pokreće pretvorenu. Također radi za utor koji ostaje prazan, kao što je `242`, kada je odredište vremenska oznaka. Ako ste u nedoumici, dodajte unos. Gdje ćete ga dodati u nizu nije važno: kada ciljni utor unosa još uvijek sadrži red koji drugi unos pomiče (na primjer `237` drži PR red dok stariji `usage_history_calculated_cost` red čeka da pređe u `237`), pokretač dopušta tom unosu da čeka dok se utor ne oslobodi. Samo stvarni sukob, kao što je utor koji drži red bez unosa koji se pomiče, ili dva unosa koji zamjenjuju utore, zaustavlja pokretanje s `Cannot reconcile ...`.
+3. **Držite SQL idempotentnim** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), jer konvertirana migracija može susresti bazu podataka u kojoj njezina shema već postoji.
+4. **Premjestite posebne slučajeve s ključem verzije.** Ako je PR dodao velika i mala slova za svoj stari broj u `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) ili u `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), promijenite ključ u novu vremensku oznaku.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` je radni primjer testa za preimenovanu migraciju.
+
+### Povratak na grane prije preklopnika
+
+Nikada ne birajte ili vraćajte `YYYYMMDDHHMMSS_` datoteku u ogranak koji je prethodio prebacivanju (na primjer, stariji ogranak `release/v*` ). Tamošnji pokretač razvrstava nazive datoteka kao tekst, tako da bi se datoteka s vremenskom oznakom izvodila između `201_` i `202_` na novoj bazi podataka, a stara vrata tamo ne razumiju 14-znamenkasti prefikse. Na takvu granu, zapišite promjenu kao vlastitu sljedeću `NNN_` datoteku te grane, idempotentnu, tako da je bez operacije kada verzija s vremenskom oznakom stigne kasnije.
+
+### Kako se odvijaju migracije
+
+Pri pokretanju, `migrationRunner.ts`:
+
+1. Stvara `_omniroute_migrations` tablicu ako ne postoji
+2. Upiti za već primijenjene migracije
+3. Primjenjuje sve nove migracije redom, svaku u transakciji
 4. Bilježi svaku primijenjenu migraciju s vremenskom oznakom
 
 ```ts
-// src/lib/db/migrationRunner.ts (pojednostavljeno)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -223,9 +286,9 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 }
 ```
 
-### Idempotentnost
+### Idempotencija
 
-Migracije moraju biti **idempotentne** — njihovo dvostruko pokretanje ne bi trebalo imati nikakav učinak:
+Migracije moraju biti** idempotentan** — njihovo pokretanje dvaput bi trebalo biti bez operacije:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Slobodno koristite klauzule `IF NOT EXISTS`, `IF EXISTS` i `OR IGNORE` / `OR REPLACE`.
+Koristite klauzule `IF NOT EXISTS`, `IF EXISTS` i `OR IGNORE` / `OR REPLACE` slobodno.
 
 ### Dodavanje nove migracije
 
-1. **Odredite sljedeći broj**: `ls src/lib/db/migrations/ | tail -1`
-2. **Stvorite datoteku**: `NNN_my_change.sql`
-3. **Koristite siguran DDL**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Pažljivo dopunite podatke**: koristite `UPDATE ... WHERE ...` za obradu postojećih redaka
-5. **Testirajte na kopiji**: nikada ne pokrećite netestirane migracije u produkciji
+1. **Stvorite datoteku s generatorom** : `npm run db:new-migration -- <description>` (na primjer `npm run db:new-migration -- add combo priority`). Zapisuje `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` s trenutnim UTC vremenom i zaglavljem komentara, pomiče se jednu sekundu naprijed ako se ta vremenska oznaka uzme i nikada ne prepisuje datoteku. Ne birajte broj rukom.
+2. **Koristite siguran DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Pažljivo ispunite podatke** : koristite `UPDATE ... WHERE ...` za rukovanje postojećim redovima
+4. **Provjerite redoslijed i imenovanje** : `npm run test:migrations:fresh` (sve migracije na praznoj bazi podataka) i `npm run check:migration-numbering`
+5. **Test na kopiji** : nikada ne izvodite neprovjerene migracije na proizvodnju
 
 Primjer:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Promjene koje nisu kompatibilne unatrag** (npr. uklanjanje stupaca) složene su. OmniRoute NE podržava vraćanje na prethodnu verziju — nakon što se migracija primijeni, promjena sheme trajna je. Planirajte u skladu s tim.
+> **Unatrag nekompatibilne promjene** (npr. ispuštanje stupaca) su lukavi. OmniRoute podržava li NOT stariju verziju — nakon što se primijeni migracija, promjena sheme je trajna. Planirajte u skladu s tim.
 
 ---
 
@@ -405,50 +468,51 @@ Ovo koristi SQLiteov API za mrežno sigurnosno kopiranje — može se sigurno po
 
 ## Podešavanje performansi
 
-### WAL način rada
+### način WAL
 
-WAL je omogućen prema zadanim postavkama. Za radna opterećenja s velikim brojem zapisivanja razmotrite:
+WAL je omogućen prema zadanim postavkama. Za velika opterećenja pisanja, razmotrite sljedeće:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Kontrolna točka svakih 1000 stranica
-PRAGMA journal_size_limit = 67108864;  -- Ograničenje WAL-a na 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute ne postavlja `journal_size_limit`. Kontrolna točka premješta WAL okvire u glavnu datoteku, ali WAL datoteka zadržava najveću dodijeljenu veličinu. `OMNIROUTE_WAL_GUARD_MAX_MB` stražar samo upozorava i pokreće `wal_checkpoint(RESTART)`; to nije ograničenje veličine diska.
 
 ### Indeksi
 
-Ključni indeksi za performanse (automatski ih stvaraju migracije):
+Ključni indeksi za izvedbu (automatski stvoreni migracijama):
 
-- `idx_models_provider` — dohvaćanje modela prema pružatelju usluge
-- `idx_combo_targets_combo_id` — proširivanje odredišta kombinacije
-- `idx_usage_history_api_key_timestamp` — analitika upotrebe
-- `idx_quota_snapshots_api_key_window` — praćenje kvota
-- `idx_call_logs_timestamp` — upiti nad zapisnicima poziva
+- `idx_models_provider` — traženje modela po pružatelju
+- `idx_combo_targets_combo_id` — kombo ciljno proširenje
+- `idx_usage_history_api_key_timestamp` — analitika korištenja
+- `idx_quota_snapshots_api_key_window` — praćenje kvote
+- `idx_call_logs_timestamp` — upiti zapisnika poziva
 
-Za dodavanje novog indeksa izradite migraciju:
+Za dodavanje novog indeksa kreirajte migraciju:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Memorijski mapirani U/I
+### Memorijski preslikan I/O
 
-Za vrlo velike baze podataka (>10GB), memorijsko mapiranje može se prilagoditi putem SQLite pragme:
+Za vrlo velike baze podataka (> 10GB), mapiranje memorije može se prilagoditi preko SQLite pragme:
 
 ```sql
--- Postavite putem SQLite pragme (prilagodite u core.ts ili tijekom izvođenja)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Sažimanje
+### Zbijanje
 
-Dugotrajno pokrenute instance OmniRoutea imaju koristi od povremenog izvršavanja naredbe `VACUUM`:
+Dugotrajne OmniRoute instance imaju koristi od povremenog `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Pokrećite je mjesečno tijekom razdoblja slabog prometa. (WAL način rada smanjuje potrebu, ali je ne uklanja.)
+Pokretanje mjesečno tijekom prozora s malim prometom. (WAL način rada smanjuje potrebu, ali je ne uklanja.)
 
 ---
 

@@ -46,23 +46,21 @@ Chaos Mode **አንድን ተግባር በአንድ ጊዜ ለብዙ አቅራ�
 
 ## ማዋቀር
 
-1. **Dashboard → Chaos Mode** (`/dashboard/chaos`) ይክፈቱ።
-2. **ያብሩት** — Chaos Mode በነባሪ **ተሰናክሎ** ይመጣል (`enabled: false` በ
-   `src/lib/chaos/chaosConfig.ts`)። ተሰናክሎ ሳለ፣ `POST /api/chaos/run`
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."` የሚል ምላሽ ይሰጣል።
-3. ተሳታፊዎቹን እና ነባሪ ቅንብሮቹን ይምረጡ (በቅንብሮች ማከማቻው በኩል ለእያንዳንዱ ኢንስታንስ ተቀምጠው ይቆያሉ)፦
+1. ክፈት** ዳሽቦርድ → Chaos Mode** (`/dashboard/chaos`)
+2. አዙረው** ላይ** — Chaos Mode መርከቦች** በነባሪነት ተሰናክሏል።** (`enabled: false` በ `src/lib/chaos/chaosConfig.ts`)። ከተሰናከለ `POST /api/chaos/run` `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."` ን ይመልሳል።
+3. ተሳታፊዎችን እና ነባሪዎችን ይምረጡ (በአብነት በቅንብሮች መደብር በኩል የቀጠለ)
 
-   | መስክ                 | ትርጉም                                                        | ነባሪ / ገደቦች                    |
-   | ------------------- | ----------------------------------------------------------- | ----------------------------- |
-   | `enabled`           | ዋና ማብሪያ/ማጥፊያ                                                | `false`                       |
-   | `defaultMode`       | `parallel` ወይም `collaborative` (ከታች ይመልከቱ)                  | `parallel`                    |
-   | `providerOverrides` | የእያንዳንዱ አቅራቢ ተሳትፎ (`providerId`፣ አማራጭ `modelId`፣ `enabled`) | ባዶ = ሁሉም ንቁ አቅራቢዎች፣ ከፍተኛው 200 |
-   | `systemPrompt`      | አብሮገነብ የChaos ስርዓት መመሪያን ለመተካት                              | አማራጭ፣ ከፍተኛው 10 000 ቁምፊዎች      |
-   | `timeoutMs`         | ለእያንዳንዱ የሞዴል ጥሪ ከፍተኛው ጊዜ                                    | `120000` (5 000–600 000)      |
-   | `maxTokens`         | ለእያንዳንዱ የሞዴል ጥሪ `max_tokens`                                | `4096` (256–128 000)          |
+   | መስክ                 | ትርጉም                                                 | ነባሪ / ገደቦች                   |
+   | ------------------- | ---------------------------------------------------- | ---------------------------- |
+   | `enabled`           | ዋና መቀየሪያ                                             | `false`                      |
+   | `defaultMode`       | `parallel` ወይም `collaborative` (ከዚህ በታች ይመልከቱ)       | `parallel`                   |
+   | `providerOverrides` | የአቅራቢ ተሳትፎ (`providerId`፣ አማራጭ `modelId`፣ `enabled`) | ባዶ = እያንዳንዱ ንቁ አቅራቢ፣ ቢበዛ 200 |
+   | `systemPrompt`      | አብሮ የተሰራውን የChaos ስርዓት ጥያቄ ይሽሩ                       | አማራጭ፣ ቢበዛ 10 000 ቻርልስ        |
+   | `timeoutMs`         | በአንድ ሞዴል ጥሪ ከፍተኛው ጊዜ                                 | `120000` (5 000–600 000)     |
+   | `maxTokens`         | `max_tokens` በእያንዳንዱ ሞዴል ጥሪ                          | `4096` (256–128 000)         |
 
-4. **ከገጹ ራሱ ሙከራ ያስኪዱ** — የውጤቶች ፓነሉ የእያንዳንዱን አቅራቢ መልስ፣
-   ሁኔታ እና ቆይታ ያሳያል።
+4. ለእያንዳንዱ ተሳታፊ አቅራቢ ሀ** ሞዴል** . የአቅራቢው ሞዴል በ Chaos Mode ገጽ ላይ የነቃ መሻር `modelId` ነው (ያሸንፋል)፣ ካልሆነ ግን** ነባሪ ሞዴል** የእሱ ግንኙነት. የአቅራቢ መታወቂያ በጭራሽ እንደ ሞዴል ስም ጥቅም ላይ አይውልም። አንድም የሌለው አቅራቢ ነው።** አልተጠራም።** : በውጤቶቹ ላይ እንደ `status: "error"` በመልእክቱ ውስጥ ይታያል _"ለዚህ አቅራቢ ምንም ሞዴል አልተዘጋጀም። በ Chaos Mode ገጽ ላይ ሞዴል ያዘጋጁለት ወይም በግንኙነቱ ላይ ነባሪ ሞዴል ያዘጋጁ።"_ እና ባዶ `modelId`፣ ሌሎቹ አቅራቢዎች በመደበኛነት ይሰራሉ። የትኛውም የተመረጠ አቅራቢ ሞዴል ከሌለው _"ምንም አቅራቢ ሞዴል ስብስብ የለውም።..." _ (በሁለቱም የመጨረሻ ነጥቦች ላይ HTTP 500) ካለው ማንኛውም የወራጅ ጥያቄ በፊት ሩጫው አይሳካም።
+5. አሂድ ሀ** ከገጹ ራሱ ፈትኑ** — የውጤት ፓነል የእያንዳንዱን አቅራቢ መልስ፣ ሁኔታ እና ቆይታ ያሳያል።
 
 ## የማስፈጸሚያ ሁነታዎች
 
@@ -74,27 +72,24 @@ Chaos Mode **አንድን ተግባር በአንድ ጊዜ ለብዙ አቅራ�
 
 ## API
 
-### `POST /api/chaos/run` — የዳሽቦርድ ክፍለ-ጊዜ
+### `POST /api/chaos/run` — ዳሽቦርድ ክፍለ ጊዜ
 
-በኩኪ የተረጋገጠ (የአስተዳደር ክፍለ-ጊዜ —
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ይመልከቱ)፤ በዳሽቦርድ ገጹ ጥቅም ላይ ይውላል።
+ኩኪ-የተረጋገጠ (የአስተዳደር ክፍለ ጊዜ — ተመልከት [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); በዳሽቦርዱ ገጽ ጥቅም ላይ የዋለ.
 
 ```jsonc
-// የጥያቄ ይዘት
+// body
 {
-  "task": "Compare approaches to X", // ያስፈልጋል
-  "providers": ["glm", "kimi"], // አማራጭ ማጣሪያ
-  "mode": "parallel", // አማራጭ — defaultModeን ይተካል
-  "systemPrompt": "…", // አማራጭ መተኪያ
-  "maxTokens": 4096, // አማራጭ መተኪያ
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
-### `POST /api/skills/collect/chaos` — የAPI ቁልፍ
+### `POST /api/skills/collect/chaos` — API ቁልፍ
 
-ለውጫዊ ጠሪዎች የBearer-token ልዩነት። ቁልፉ **የChaos Mode ፈቃድ**
-(`chaosModeEnabled`) ሊኖረው ይገባል፤ ይህም **በነባሪ ጠፍቷል** — ለእያንዳንዱ ቁልፍ በ
-**Dashboard → API Manager → edit key → permissions → Chaos Mode** ውስጥ ያንቁት። ከላይ ካለው ጋር ተመሳሳይ የጥያቄ ይዘት ይጠቀማል።
+የድብ-ቶከን ተለዋጭ ለውጫዊ ደዋዮች። ቁልፉ መሸከም አለበት** Chaos Mode ፍቃድ** (`chaosModeEnabled`)፣ ማለትም** በነባሪ ጠፍቷል** — በእያንዳንዱ ቁልፍ ያንቁት** ዳሽቦርድ → API አስተዳዳሪ → ቁልፍ → ፍቃዶችን ያርትዑ → Chaos Mode** . ከላይ ካለው አካል ጋር ተመሳሳይ ነው.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-ሁለቱም መጨረሻ ነጥቦች ተመሳሳይ ቅርጽ ይመልሳሉ፦
+ሁለቱም የመጨረሻ ነጥቦች አንድ አይነት ቅርፅ ይመለሳሉ
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // ለcollaborative ሁነታ ብቻ
+  "summary": "…", // collaborative mode only
 }
 ```
 
-## ችግር መፍታት
+## መላ መፈለግ
 
-- **`400 Chaos Mode is not enabled`** — ከላይ ያለውን ደረጃ 2 ይመልከቱ፦ ዓለም አቀፉ ማብሪያ ጠፍቷል።
-- **የAPI ቁልፉ በ`/api/skills/collect/chaos` ላይ ውድቅ ይደረጋል** — ቁልፉ የእያንዳንዱ ቁልፍ
-  `chaosModeEnabled` ፈቃድ የለውም (በነባሪ ጠፍቷል፤ ይህ ቅንብር እንጂ ስህተት አይደለም)።
-- **የጠበቁት አቅራቢ ከውጤቶቹ ውስጥ የለም** — በChaos Mode ገጽ ላይ `providerOverrides`ን
-  ያረጋግጡ (የተሰናከለ መተኪያ አቅራቢውን ያስወግደዋል)፣ እንዲሁም የአቅራቢው ግንኙነት
-  ንቁ መሆኑን ያረጋግጡ።
+- **`400 Chaos Mode is not enabled`** — ደረጃ 2 ከላይ፡ አለምአቀፍ ማብሪያ / ማጥፊያ ጠፍቷል።
+- **API ቁልፍ በ `/api/skills/collect/chaos` ውድቅ ይደረጋል** — ቁልፉ በአንድ-ቁልፍ `chaosModeEnabled` ፍቃድ ይጎድለዋል (በነባሪ ይህ ቅንብር እንጂ ስህተት አይደለም)።
+- **አቅራቢ `No model set for this provider` ያሳያል** — ሞዴሉን በ Chaos Mode ገጽ ላይ ወይም በግንኙነቱ ላይ ነባሪ ሞዴል አዘጋጅቷል (ማዋቀር ፣ ደረጃ 4ን ይመልከቱ)።
+- **እርስዎ የጠበቁት አቅራቢ ከውጤቶቹ ይጎድላል** — ቼክ `providerOverrides` በ Chaos Mode ገጽ ላይ (የተሰናከለ መሻር አያካትትም) እና የአቅራቢው ግንኙነት ንቁ መሆኑን ያረጋግጡ።

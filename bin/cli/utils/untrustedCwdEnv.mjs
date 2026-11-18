@@ -15,14 +15,19 @@ import { isRequireApiKeyValueEnabled } from "../../../src/shared/utils/requireAp
  * environment can still set every key.
  *
  * A key is listed only when no value it accepts can load code, pick a file,
- * name a remote host, change TLS or relax a security policy. Values are
- * checked too: ports must be numbers, and locale and time zone names may not
- * be paths. The ports still decide which local port the CLI talks to, and so
- * which local listener gets the API key, the context token and the CLI
- * machine token (`x-omniroute-cli-token`).
+ * name a remote host, pick a local listener, change TLS or relax a security
+ * policy. Values are checked too: locale and time zone names may not be paths.
+ *
+ * PORT, API_PORT and DASHBOARD_PORT are deliberately NOT listed. Without a
+ * base URL from a higher-precedence source the CLI talks to
+ * `http://localhost:<PORT>`, and it attaches the API key, the context token
+ * and the CLI machine token (`x-omniroute-cli-token`) to any loopback
+ * destination without checking which process listens there. A port from this
+ * file would let it hand those credentials to a listener of its choosing
+ * (CodeRabbit I6, CWE-522). The shell, the data-dir `.env` and `--port` can
+ * still set the ports.
  */
 
-const PORT_VALUE = /^[0-9]{1,5}$/;
 // Locale names such as `en_US.UTF-8` or `de_DE@euro`. glibc reads a name that
 // contains a slash as a path to locale files, so slashes are not allowed.
 const LOCALE_VALUE = /^[A-Za-z0-9_.@-]{1,64}$/;
@@ -34,22 +39,11 @@ const LOCALE_LIST_VALUE = /^[A-Za-z0-9_.@:-]{1,64}$/;
 // That also rejects the `:Area/City` form and POSIX rules with `,` or `<>`.
 const TZ_VALUE = /^[A-Za-z0-9_+-][A-Za-z0-9_+/-]{0,63}$/;
 const FLAG_VALUE = /^[A-Za-z0-9]{0,16}$/;
-function isPort(value) {
-  if (!PORT_VALUE.test(value)) return false;
-  const n = Number(value);
-  return n >= 1 && n <= 65535;
-}
-
-const PORT_RULE = { check: isPort, expected: "a port number from 1 to 65535" };
 const LOCALE_RULE = { check: (v) => LOCALE_VALUE.test(v), expected: "a locale name" };
 const FLAG_RULE = { check: (v) => FLAG_VALUE.test(v), expected: "up to 16 letters or digits" };
 
 /** Allowed keys, each with the check its value must pass. */
 const ALLOWED = new Map([
-  // The local ports the server listens on and the CLI talks to.
-  ["PORT", PORT_RULE],
-  ["API_PORT", PORT_RULE],
-  ["DASHBOARD_PORT", PORT_RULE],
   // The parser the server gate uses, so the file can turn enforcement on but
   // never off, and a value that already turned it on is not dropped on upgrade.
   ["REQUIRE_API_KEY", { check: isRequireApiKeyValueEnabled, expected: "true, 1 or yes" }],
@@ -78,8 +72,8 @@ export function isPlainEnvKey(key) {
 /**
  * Why a `.env` in the working directory may not set `key` to `value` (the
  * parsed value), or null when it may. Names must match exactly: on Linux and
- * macOS `port=` sets a variable nothing reads, and on Windows it would set
- * PORT, so a name in another case is skipped on every platform.
+ * macOS `tz=` sets a variable nothing reads, and on Windows it would set
+ * TZ, so a name in another case is skipped on every platform.
  *
  * - `{ kind: "name" }`: not an allowed key.
  * - `{ kind: "case", name }`: an allowed key written in another case.

@@ -1,1 +1,0 @@
-- **fix(network):** outbound requests without a pinned address now re-check the host at connect time on the direct route, keeping proxy, TLS and retry behaviour
