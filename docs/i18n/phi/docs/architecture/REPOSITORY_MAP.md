@@ -53,61 +53,61 @@ OmniRoute/
 
 ## Mga root file
 
-| File                                        | Layunin                                                                                                       |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Landing page para sa marketing + mabilisang pagsisimula + matrix ng mga feature (tingnan din ang `llm.txt`)   |
-| **CHANGELOG.md**                            | Changelog para sa bawat release (awtomatikong binubuo ng skill na `/version-bump-cc`)                         |
-| **LICENSE**                                 | Teksto ng lisensyang MIT                                                                                      |
-| **CLAUDE.md**                               | Mga panuntunan ng proyekto para sa mga agent ng Claude Code (mahihigpit na panuntunan, convention, sitwasyon) |
-| **AGENTS.md**                               | Katulad ng CLAUDE.md ngunit para sa mga AI agent na hindi Claude (Codex, Cursor, atbp.)                       |
-| **GEMINI.md**                               | Maiikling panuntunan para sa mga agent na nakabatay sa Gemini (subset ng CLAUDE.md)                           |
-| **CONTRIBUTING.md**                         | Gabay para sa contributor: pag-setup, conventional commit, pag-test, daloy ng PR                              |
-| **SECURITY.md**                             | Patakaran sa pag-uulat ng vulnerability, mga sinusuportahang version, threat model                            |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — mga inaasahan sa pag-uugali ng komunidad                                               |
-| **llm.txt**                                 | Plain-text na landing page na na-optimize para sa mga LLM crawler (SEO para sa mga AI assistant)              |
-| **package.json**                            | npm manifest, mga script, dependency, engine, c8 coverage gate                                                |
-| **package-lock.json**                       | Naka-lock na dependency tree                                                                                  |
-| **tsconfig.json**                           | Root na configuration ng TypeScript                                                                           |
-| **tsconfig.typecheck-core.json**            | Configuration ng typecheck para sa core na `src/`                                                             |
-| **tsconfig.typecheck-noimplicit-core.json** | Mahigpit na (`noImplicitAny`) typecheck                                                                       |
-| **tsconfig.tsbuildinfo**                    | Cache ng incremental build ng TS (gitignored)                                                                 |
-| **next.config.mjs**                         | Configuration ng build ng Next.js 16 (standalone na output)                                                   |
-| **next-env.d.ts**                           | Mga env type na awtomatikong binuo ng Next.js                                                                 |
-| **eslint.config.mjs**                       | Flat config ng ESLint (mga panuntunan ayon sa bahagi ng proyekto)                                             |
-| **prettier.config.mjs**                     | Mga panuntunan sa pag-format ng Prettier                                                                      |
-| **postcss.config.mjs**                      | Configuration ng PostCSS para sa pipeline ng Tailwind/CSS                                                     |
-| **playwright.config.ts**                    | Configuration ng Playwright E2E test                                                                          |
-| **vitest.config.ts**                        | Configuration ng Vitest (default na suite)                                                                    |
-| **vitest.mcp.config.ts**                    | Configuration ng Vitest para sa MCP server / autoCombo / mga cache suite                                      |
-| **sonar-project.properties**                | Configuration ng SonarQube/SonarCloud (kalidad ng code)                                                       |
-| **Dockerfile**                              | Multi-stage na Docker build (builder → runner-base → runner-cli)                                              |
-| **docker-compose.yml**                      | Dev compose na may 4 na profile (base, cli, host, cliproxyapi) + redis sidecar                                |
-| **docker-compose.prod.yml**                 | Production compose (port 20130, redis, mga pinangalanang volume)                                              |
-| **.dockerignore**                           | Mga file na hindi kasama sa Docker context                                                                    |
-| **fly.toml**                                | Configuration ng deployment sa Fly.io (region `sin`, port 20128, /data volume)                                |
-| **.env.example**                            | Template na env file (awtomatikong kinokopya sa `.env` sa unang pag-install)                                  |
-| **.gitignore**                              | Mga pattern na hindi isinasaalang-alang ng Git                                                                |
-| **.npmignore**                              | Listahan ng mga hindi isasama sa pag-publish sa npm                                                           |
-| **.npmrc**                                  | Configuration ng npm (registry, patakaran sa lockfile)                                                        |
-| **.node-version**                           | Naka-pin na version ng Node (ginagamit ng mga tool na compatible sa nvm)                                      |
-| **.nvmrc**                                  | Naka-pin na version ng Node para sa nvm                                                                       |
-| **eslint.complexity.config.mjs**            | Configuration ng ESLint para sa complexity ratchet (`scripts/check/check-complexity.mjs --config`)            |
-| **eslint.sonarjs.config.mjs**               | Configuration ng ESLint para sa mga panuntunan ng SonarJS (cognitive complexity / duplication)                |
-| **source.config.ts**                        | Source configuration ng Fumadocs `defineDocs` (nagbibigay ng input sa `.source/`)                             |
-| **knip.json**                               | Configuration ng Knip — mga hindi ginagamit na file/export/dependency (nagbibigay ng input sa dead-code gate) |
-| **stryker.conf.json**                       | Configuration ng Stryker mutation testing                                                                     |
-| **.size-limit.json**                        | Config ng budget ng bundle para sa size-limit                                                                 |
-| **promptfooconfig.yaml**                    | Config ng eval ng promptfoo                                                                                   |
-| **.gitleaks.toml**                          | Ruleset ng pag-scan ng secret ng gitleaks                                                                     |
-| **.zizmor.yml**                             | Config ng security lint ng zizmor para sa GitHub Actions                                                      |
-| **socket.yml**                              | Config ng supply chain ng Socket.dev                                                                          |
-| **news.json**                               | Naka-localize na feed ng anunsyo para sa v2; hindi aktibo sa paglabas ang item ng Radar                       |
-| **flake.nix** / **flake.lock**              | Depinisyon at lock ng Nix dev shell                                                                           |
-| **.env**                                    | Mga lokal na secret (gitignored — binuo mula sa `.env.example`)                                               |
+| file                                        | Layunin                                                                                                     |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
+| **README.md**                               | Marketing landing page + quick start + feature matrix (tingnan din ang `llm.txt`)                           |
+| **CHANGELOG.md**                            | Per-release changelog (awtomatikong binuo ng `/version-bump-cc` skill)                                      |
+| **LICENSE**                                 | teksto ng lisensya MIT                                                                                      |
+| **CLAUDE.md**                               | Mga panuntunan ng proyekto para sa mga ahente ng Claude Code (mahirap na panuntunan, kumbensyon, sitwasyon) |
+| **AGENTS.md**                               | Pareho sa CLAUDE.md ngunit para sa mga hindi-Claude AI na ahente (Codex, Cursor, atbp.)                     |
+| **GEMINI.md**                               | Mga maiikling panuntunan para sa mga ahente na nakabase sa Gemini (subset ng CLAUDE.md)                     |
+| **CONTRIBUTING.md**                         | Gabay sa kontribyutor: setup, conventional commits, testing, PR flow                                        |
+| **SECURITY.md**                             | Patakaran sa pag-uulat ng kahinaan, mga sinusuportahang bersyon, modelo ng pagbabanta                       |
+| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — mga inaasahan sa gawi ng komunidad                                                   |
+| **llm.txt**                                 | Plain-text landing na na-optimize para sa LLM crawler (SEO para sa AI assistant)                            |
+| **package.json**                            | npm manifest, script, dependencies, engine, c8 coverage gate                                                |
+| **package-lock.json**                       | Naka-lock na dependency tree                                                                                |
+| **tsconfig.json**                           | Root TypeScript config                                                                                      |
+| **tsconfig.typecheck-core.json**            | Typecheck config para sa `src/` core                                                                        |
+| **tsconfig.typecheck-noimplicit-core.json** | Mahigpit (`noImplicitAny`) typecheck                                                                        |
+| **tsconfig.tsbuildinfo**                    | TS incremental build cache (giignore)                                                                       |
+| **susunod.config.mjs**                      | Next.js 16 build configuration (standalone na output)                                                       |
+| **susunod na-env.d.ts**                     | Next.js awtomatikong nabuong mga uri ng env                                                                 |
+| **eslint.config.mjs**                       | ESLint flat config (mga panuntunan sa bawat lugar ng proyekto)                                              |
+| **mas maganda.config.mjs**                  | mga panuntunan sa pag-format ng Prettier                                                                    |
+| **postcss.config.mjs**                      | PostCSS config para sa Tailwind/CSS pipeline                                                                |
+| **mandudula.config.ts**                     | Playwright E2E test config                                                                                  |
+| **vitest.config.ts**                        | Vitest config (default na suite)                                                                            |
+| **vitest.mcp.config.ts**                    | Vitest config para sa MCP server / autoCombo / cache suite                                                  |
+| **sonar-project.properties**                | SonarQube/SonarCloud config (kalidad ng code)                                                               |
+| **Dockerfile**                              | Multi-stage Docker build (tagabuo ng → runner-base → runner-cli)                                            |
+| **docker-compose.yml**                      | Dev compose na may 4 na profile (base, cli, host, cliproxyapi) + redis sidecar                              |
+| **docker-compose.prod.yml**                 | Gumawa ng produksyon (port 20130, redis, pinangalanang mga volume)                                          |
+| **.dockerignore**                           | Mga file na hindi kasama sa konteksto Docker                                                                |
+| **fly.toml**                                | Fly.io deployment config (region `sin`, port 20128, /data volume)                                           |
+| **.env.halimbawa**                          | Template env file (awtomatikong kinopya sa `.env` sa unang pag-install)                                     |
+| **.gitignore**                              | Git huwag pansinin ang mga pattern                                                                          |
+| **.npmignore**                              | npm publish listahan ng pagbubukod                                                                          |
+| **.npmrc**                                  | npm config (registry, lockfile policy)                                                                      |
+| **.node-version**                           | Pin ng bersyon ng node (ginagamit ng mga tool na katugma sa nvm)                                            |
+| **.nvmrc**                                  | Pin ng bersyon ng node para sa nvm                                                                          |
+| **eslint.kumplikado.config.mjs**            | ESLint config para sa complexity ratchet (`scripts/check/check-complexity.mjs --config`)                    |
+| **eslint.sonarjs.config.mjs**               | ESLint config para sa SonarJS rules (cognitive complexity / duplication)                                    |
+| **pinagmulan.config.ts**                    | Fumadocs `defineDocs` source config (mga feed `.source/`)                                                   |
+| **knip.json**                               | Knip config — unused files/exports/deps (pinapakain ang dead-code gate)                                     |
+| **strikeker.conf.mjs**                      | Stryker mutation-testing config (kinakalkula `tap.testFiles` mula sa `mutate`)                              |
+| **.size-limit.json**                        | size-limit bundle budget config                                                                             |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                                       |
+| **.gitleaks.toml**                          | gitleaks secret-scan ruleset                                                                                |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                                  |
+| **socket.yml**                              | Socket.dev supply-chain config                                                                              |
+| **news.json**                               | Na-localize ang feed ng anunsyo ng v2; Hindi aktibo ang pagpapadala ng item sa paglulunsad ng radar         |
+| **flake.nix** /** flake.lock**              | Nix dev-shell definition + lock                                                                             |
+| **.env**                                    | Mga lokal na lihim (ginignore ang — na nabuo mula sa `.env.example`)                                        |
 
-> **Inilipat mula sa root sa v3.8.26 (pag-aayos):**
+> **Inilipat mula sa ugat sa v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, at ang binuong `quality-metrics.json` (gitignored). Tingnan ang [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, at ang nabuong `quality-metrics.json` (giignore). Tingnan ang [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Dashboard component API: mga adapter sa ibabaw ng `packages/ui-kit` — tingnan `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: mga pangalan ng icon na ginagamit ng mga screen → Lucide component (`<Icon>`)                          |
-| `constants/providers.ts`         | **381 provider** may Zod validation (pinagmulan ng katotohanan)                                                    |
+| `constants/providers.ts`         | **394 provider** may Zod validation (pinagmulan ng katotohanan)                                                    |
 | `constants/cliTools.ts`          | Panlabas na CLI tool registry                                                                                      |
-| `constants/routingStrategies.ts` | **20 mga diskarte sa pagruruta** may mga priyoridad                                                                |
+| `constants/routingStrategies.ts` | **22 mga diskarte sa pagruruta** may mga priyoridad                                                                |
 | `constants/publicApiRoutes.ts`   | Mga ruta na nangangailangan ng Bearer (vs management) auth                                                         |
 | `constants/upstreamHeaders.ts`   | Header denylist para sa upstream na mga kahilingan                                                                 |
 | `validation/schemas.ts`          | ~ 80 Zod schemas (iisang pinagmumulan ng katotohanan para sa mga kontrata API )                                    |
@@ -265,7 +265,7 @@ Hiwalay na npm workspace (`@omniroute/open-sse`). Pinangangasiwaan ang pagproses
 ```
 open-sse/
 ├── handlers/            # 16 na file (12 handler + 4 helper): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, atbp.
-├── executors/           # 150 executor module (mga class na nag-e-extend sa BaseExecutor + mga helper para sa bawat provider)
+├── executors/           # 163 executor module (mga class na nag-e-extend sa BaseExecutor + mga helper para sa bawat provider)
 ├── translator/          # Mga converter ng format (9 request, 9 response, 9 helper)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ service module (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, atbp.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Panlabas CLI integrations + Panloob OmniRoute CLI                                         |
 | `I18N.md`                   | i18n architecture, pagdaragdag ng isang wika, 67 locale                                   |
 | `UNINSTALL.md`              | Linisin ang mga hakbang sa pag-uninstall                                                  |
-| `PROVIDER_REFERENCE.md`     | **Awtomatikong nabuo** catalog ng 381 providers (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Awtomatikong nabuo** catalog ng 394 providers (regen: `npm run gen:provider-reference`) |
 
 ### Subsystem deep-dive
 

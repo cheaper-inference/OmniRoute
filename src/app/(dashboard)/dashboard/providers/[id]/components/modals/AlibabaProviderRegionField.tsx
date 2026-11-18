@@ -80,12 +80,12 @@ export function AlibabaProviderRegionChoices({
           variant="outline"
           data-region={choice.value}
           onClick={() => onSelect(choice.value)}
-          className="h-auto w-full justify-start whitespace-normal p-4 text-left font-normal"
+          className="h-auto w-full justify-start whitespace-normal p-4 text-left"
         >
           <div className="flex items-start gap-3">
             <Icon name={choice.icon} className="mt-0.5 text-primary" />
             <div className="min-w-0 flex-1">
-              <h3 className="mb-1 font-semibold">{choice.label}</h3>
+              <h3 className="mb-1">{choice.label}</h3>
               <p className="text-sm text-text-muted">{choice.description}</p>
             </div>
           </div>
@@ -139,12 +139,12 @@ export function XiaomiTokenPlanRegionChoices({
           variant="outline"
           data-region={choice.value}
           onClick={() => onSelect(choice.value)}
-          className="h-auto w-full justify-start whitespace-normal p-4 text-left font-normal"
+          className="h-auto w-full justify-start whitespace-normal p-4 text-left"
         >
           <div className="flex items-start gap-3">
             <Icon name={choice.icon} className="mt-0.5 text-primary" />
             <div className="min-w-0 flex-1">
-              <h3 className="mb-1 font-semibold">{choice.label}</h3>
+              <h3 className="mb-1">{choice.label}</h3>
               <p className="text-sm text-text-muted">{choice.description}</p>
             </div>
           </div>
@@ -229,6 +229,7 @@ function AlibabaProviderRegionField({
 
   return (
     <Select
+      native
       label={t("apiRegionLabel")}
       value={value}
       placeholder=""
@@ -266,6 +267,7 @@ export function ProviderRegionField({
   if (isXiaomiTokenPlan && !isAlibabaRegional) {
     return (
       <Select
+        native
         label={providerText(t, "xiaomiTokenPlanRegionLabel", "Token Plan region")}
         value={value}
         placeholder=""

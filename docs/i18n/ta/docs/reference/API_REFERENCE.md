@@ -767,69 +767,181 @@ OpenAI-இணக்கமான பேட்ச் செயலாக்கம�
 
 ---
 
-## API தேடுங்கள்
+## தேடல் API
 
-Web/search வழங்குநர் சுருக்கம் (Tavily, Brave, Exa, Serper, முதலியன).
+Web/search வழங்குநர் abstraction (Tavily, Brave, Exa, Serper போன்றவை).
 
-| முறை | பாதை                   | விளக்கம்                                                                                           |
-| ---- | ---------------------- | -------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | உள்ளமைக்கப்பட்ட தேடல் வழங்குநர்களின் + திறன்களைப் பட்டியலிடுங்கள்                                  |
-| POST | `/v1/search`           | `v1SearchSchema` ஆல் சரிபார்க்கப்பட்ட தேடல் வினவல் — ஐ இயக்கவும், caching/coalescing ஐ ஆதரிக்கிறது |
-| GET  | `/v1/search/analytics` | ஒவ்வொரு வழங்குநருக்கும் hit/latency/cache புள்ளிவிவரங்கள்                                          |
+| முறை | பாதை                   | விளக்கம்                                                                                                          |
+| ---- | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | கட்டமைக்கப்பட்ட தேடல் வழங்குநர்கள் மற்றும் திறன்களைப் பட்டியலிடுகிறது                                             |
+| POST | `/v1/search`           | தேடல் வினவலை இயக்குகிறது — உடல் `v1SearchSchema` மூலம் சரிபார்க்கப்படுகிறது; caching/coalescing ஆதரிக்கப்படுகிறது |
+| GET  | `/v1/search/analytics` | ஒவ்வொரு வழங்குநருக்குமான hit/latency/cache புள்ளிவிவரங்கள்                                                        |
 
-**அங்கீகாரம்:** தாங்கி API விசை (`extractApiKey` + `isValidApiKey`). தேடல் கொள்கை `enforceApiKeyPolicy` வழியாக செயல்படுத்தப்பட்டது.
+**அங்கீகாரம்:** Bearer API key (`extractApiKey` + `isValidApiKey`). தேடல் கொள்கை `enforceApiKeyPolicy` மூலம் அமல்படுத்தப்படுகிறது.
 
-**தானாகத் தேர்ந்தெடு:** `provider` இல்லாமல், கட்டமைக்கப்பட்ட இணைப்பைக் கொண்ட மலிவான வழங்குநர் முதலில் இயங்குகிறார், அடுத்த மலிவானது தோல்வியாகும். இலவச லாஸ்ட் ரிசார்ட் வழங்குநர்கள் (`duckduckgo-free`) வேறு எதுவும் கட்டமைக்கப்படாத போது மட்டுமே பயன்படுத்தப்படும். ஒரு சுய-ஹோஸ்ட் செய்யப்பட்ட SearXNG ஆனது அதன் இணைப்பு உண்மையான `baseUrl` சேமித்தவுடன் கட்டமைக்கப்பட்டதாகக் கணக்கிடப்படும் (கேட்லாக் இயல்புநிலை `http://localhost:8888/search` அல்ல): இது விசையை விட $0 வழங்குநராக தரவரிசைப்படுத்துகிறது, SearXNG 400, 401, 40403 `baseUrl` URL `http(s)` கிளவுட்-மெட்டாடேட்டா முகவரியில் உள்ள புள்ளிகள் கணக்கிடப்படாது. டோக்கனைச் சேமிக்கும் SearXNG இணைப்பு `https://` அல்லது loopback `http://` க்கு மேல் மட்டுமே தரவரிசைப்படுத்துகிறது. ரிமோட் ப்ளைன் `http://` இல் இது ஒருபோதும் தோல்வியடைவதில்லை மற்றும் கடைசி முயற்சியாக இருக்கும், வேறு எந்த வழங்குநரும் உள்ளமைக்கப்படாதபோது அல்லது பெயரால் கோரப்படும் போது மட்டுமே பயன்படுத்தப்படும், எனவே அந்த இரண்டு நிகழ்வுகளிலும் டோக்கனை தெளிவான உரையில் அனுப்புகிறது.
+### பெயரிடப்பட்ட தேடல்/fetch சேர்க்கைகள்
+
+`POST /v1/search` மற்றும் `POST /v1/web/fetch` இரண்டும் சேமிக்கப்பட்ட combo பெயராக `model`-ஐ ஏற்கின்றன.
+`model` அல்லது வெளிப்படையான `provider` ஆகியவற்றில் ஒன்றைப் பயன்படுத்தவும்; இரண்டையும் அனுப்பினால்
+`400` திரும்பும். இரு புலங்களும் இல்லையெனில், ஏற்கனவே உள்ள தானியங்கி வழங்குநர் தேர்வு மாறாமல் இருக்கும்.
+
+Combo Builder மற்றும் அதன் Add Model பட்டியல் ஆகிய இரண்டும், இணைக்கப்பட்ட வழங்குநர்களுக்கான native web-operation உள்ளீடுகளை,
+அவர்களிடம் LLM model பட்டியல் இல்லாவிட்டாலும், வெளிப்படுத்துகின்றன. Serper-ல் **Web search**;
+Tavily-ல் **Web search / Page extraction**, மேலும் fetch-only வழங்குநர்களில் **Page extraction** காட்டப்படும்.
+உள்ளீட்டையும் கணக்கையும் வழக்கம்போல் தேர்ந்தெடுக்கவும். ஒரே Tavily உள்ளீடு இரு web endpoint-களுக்கும் சேவை செய்கிறது;
+இந்த operation உள்ளீடுகள் chat-only client selector-களிலோ chat model probe-களிலோ சேர்க்கப்படாது.
+
+எடுத்துக்காட்டாக, பின்வரும் வரிசைப்படுத்தப்பட்ட இலக்குகளுடன் `shared-free` எனும் **priority** combo-வை உருவாக்கவும்:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+பின்னர் ஒவ்வொரு surface-லும் அதே பெயரைப் பயன்படுத்தவும்:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Search, Tavily-ஐத் தொடர்ந்து Serper-ஐக் கருதுகிறது; fetch, Tavily-ஐத் தொடர்ந்து Jina Reader-ஐக் கருதுகிறது;
+chat, dedicated search/fetch வழங்குநர்களைத் தவிர்த்து OpenAI-ஐக் கருதுகிறது. Compatibility
+என்பது model பெயரில் உள்ள சொற்களிலிருந்து அல்ல, search/fetch executor registry-களிலிருந்து வருகிறது.
+Filtering, credential selection மற்றும் dispatch ஆகியவற்றுக்கு முன்பே நடைபெறும்; மேலும் சேமிக்கப்பட்ட combo-வை ஒருபோதும் மாற்றாது.
+
+Non-chat capability route-கள் `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, மற்றும் `p2c` ஆகியவற்றை ஆதரிக்கின்றன. `fusion`, `pipeline`, மற்றும்
+`context-relay` போன்ற chat-only synthesis strategy-கள் non-chat route-களில் நிராகரிக்கப்படுகின்றன;
+அவை search அல்லது generated media மீது அமைதியாகப் பயன்படுத்தப்படுவதில்லை.
+ஏற்கனவே உள்ள combo engine, upstream quota failure-களையும் உள்ளடக்கிய ordered fallback-ஐக் கையாள்கிறது;
+மேலும் step ID-கள், account pin-கள், ஒவ்வொரு step-க்குமான account allowlist-கள், nested reference-கள்,
+caller connection/quota scope-கள் மற்றும் combo access policy ஆகியவற்றைப் பாதுகாக்கிறது. முடிவுகள் அவற்றின் native
+search/fetch schema-வை, உண்மையான provider உட்பட, தக்கவைத்துக் கொள்கின்றன; `X-OmniRoute-Combo-Trace`
+routing முடிவைக் குறிப்பிடுகிறது. அறியப்படாத combo-கள் `404`-ஐத் திருப்புகின்றன; செயலற்ற combo-களும்
+compatible target எதுவும் இல்லாத சேர்க்கைகளும் `400`-ஐத் திருப்புகின்றன.
+
+ஒவ்வொரு combo முயற்சியும் ஒரு வெளிப்படையான provider-ஐப் பயன்படுத்துகிறது. Combo-வின் பின்னால் மறைந்து இருக்கும்
+native automatic provider pool-ஐ அது அழைக்க முடியாது. Explicit-provider request-கள் அவற்றின்
+ஏற்கனவே உள்ள single-provider நடத்தையைத் தக்கவைத்துக் கொள்கின்றன. Dedicated search/fetch provider-களை இலக்காகக்
+கொண்ட நேரடி chat request-கள், OpenAI-style executor-க்கு வழிமாறுவதற்குப் பதிலாக, செயல்படுத்தக்கூடிய JSON
+`400`-ஐத் திருப்புகின்றன.
+
+### திறன்-குறிப்பிட்ட combo route-கள்
+
+சேமிக்கப்பட்ட combo-களில் API திறன்களைக் keys-ஆகக் கொண்ட `routes` object இருக்கலாம். ஒவ்வொரு route-க்கும்
+தனது target list, strategy மற்றும் runtime config இருக்கும். உயர்நிலை `models`, `strategy` மற்றும் `config`
+ஆகியவை legacy-compatible Chat plan-ஆகவே தொடர்கின்றன; `routes` இல்லாத பழைய combo-கள் மாற்றமின்றி தொடர்ந்து செயல்படும்.
+
+ஆதரிக்கப்படும் route key-கள் `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, மற்றும் `audio-generation` ஆகியவையாகும். Credential selection, scoring அல்லது
+dispatch நடைபெறுவதற்கு முன்பே endpoint projection நடைபெறும். Nested combo reference-கள், அதே திறனுக்கான
+child combo-வின் route-ஐத் தேர்ந்தெடுக்கின்றன.
+
+`POST /v1/music/generations` மற்றும் `POST /v1/ocr` ஆகியவை `model`-ல் combo பெயரை ஏற்கின்றன. Native
+ElevenLabs-compatible `POST /v1/music` ஆனது `model_id`-ல் combo பெயரையும் ஏற்கிறது; ஆனால் அந்த native endpoint-ல்
+பயன்படுத்தக்கூடிய ஒவ்வொரு target-மும் ElevenLabs music model ஆக இருக்க வேண்டும், இதனால் அதன் binary response contract
+பாதுகாக்கப்படும். `POST /v1/sound-generation` ஆனது அதே native-binary constraint-இன் கீழ் `model_id`-ல்
+`audio-generation` combo-வை ஏற்கிறது. பல்வேறு music provider-களுக்கு `/v1/music/generations`-ஐப் பயன்படுத்தவும்.
+
+**Auto-select:** `provider` இல்லையெனில், configured connection கொண்ட மிகக் குறைந்த விலையுள்ள provider முதலில்
+இயங்கும்; அடுத்த குறைந்த விலையுள்ள provider failover ஆகும். Free last-resort provider-கள் (`duckduckgo-free`)
+வேறு எதுவும் configured இல்லாதபோது மட்டுமே பயன்படுத்தப்படும். Self-hosted SearXNG, அதன் connection உண்மையான
+`baseUrl`-ஐச் சேமித்திருந்தால் (catalog default `http://localhost:8888/search` அல்ல), configured ஆகக் கருதப்படும்:
+அதன்பின் அது keyed provider-களுக்கு முன்பாக $0 provider ஆக rank செய்யப்படும்; SearXNG `400`, `401`, `403` அல்லது
+`404` அளித்தாலும், குறைந்த விலையுள்ள keyed provider failover ஆக இருக்கும். செல்லுபடியாகும் `http(s)` URL அல்லாத
+அல்லது cloud-metadata address-ஐச் சுட்டும் `baseUrl` configured ஆகக் கருதப்படாது. Token-ஐச் சேமிக்கும் SearXNG
+connection, `https://` அல்லது loopback `http://` மீது மட்டுமே இவ்வாறு rank செய்யப்படும். Remote plain `http://` மீது
+அது ஒருபோதும் failover ஆகாது; மேலும் வேறு provider எதுவும் configured இல்லாதபோது அல்லது பெயரால் கோரப்பட்டபோது மட்டுமே
+last resort ஆகப் பயன்படுத்தப்படும். எனவே அந்த இரு சூழல்களிலும் token cleartext-ஆக அனுப்பப்படும்.
 
 ### Exa மற்றும் Tavily `provider_options`
 
-Exa மற்றும் Tavily ஒரு பெயர் இடைவெளி பையில் இருந்து வழங்குநர்-குறிப்பிட்ட புலங்களைப் படிக்கவும்: `provider_options.exa` (அல்லது `provider_options["exa-search"]`) மற்றும் `provider_options.tavily` (அல்லது `provider_options["tavily-search"]`). கீழே உள்ள விசைகள் மட்டுமே அனுப்பப்படும். ஒவ்வொன்றும் அதன் சொந்த Zod ஸ்கீமாவிற்கு எதிராக `open-sse/handlers/search/providerOptionsPassthrough.ts` இல் சரிபார்க்கப்பட்டது, மேலும் தவறான வகையுடன் ஒரு விசை கைவிடப்பட்டது. அங்கீகாரம், அடிப்படை URL, `stream` மற்றும் `outputSchema` உட்பட வேறு எந்த விசையும் புறக்கணிக்கப்படும். பிற வழங்குநர்கள் பயன்படுத்தும் பிளாட் கீகள் (`cx`, `depth`, ...) முன்பு போலவே செயல்படும்.
+Exa மற்றும் Tavily ஆகியவை provider-specific புலங்களை namespace செய்யப்பட்ட bag-இலிருந்து படிக்கின்றன:
+`provider_options.exa` (அல்லது `provider_options["exa-search"]`) மற்றும் `provider_options.tavily`
+(அல்லது `provider_options["tavily-search"]`). கீழே உள்ள keys மட்டுமே forward செய்யப்படுகின்றன. ஒவ்வொன்றும்
+`open-sse/handlers/search/providerOptionsPassthrough.ts`-இல் உள்ள தனித்தனி Zod schema-க்கு எதிராகச் சரிபார்க்கப்படுகிறது,
+தவறான type கொண்ட key நீக்கப்படுகிறது. அங்கீகாரம், base URL, `stream` மற்றும் `outputSchema` உட்பட, வேறு எந்த key-யும்
+புறக்கணிக்கப்படுகிறது. மற்ற providers பயன்படுத்தும் flat keys (`cx`, `depth`, ...) முன்பைப் போலவே செயல்படும்.
 
-| வழங்குபவர் | உயர்மட்ட புலங்கள்                                                                                                                                                                                                                                                                                                                                                         | கூடு கட்டப்பட்டது                                                                                                                               |
-| ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa        | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (பிளாட் primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` இயல்புநிலை `{ text: true, highlights: true }` மீது இணைக்கப்பட்டது |
-| தவிலி      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                              |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` இயல்புநிலை `{ text: true, highlights: true }` மீது merge செய்யப்படும் |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                   |
 
-பொதுவான புலங்கள் எப்போதும் வெற்றி பெறும்: `query`, `max_results`, `filters` (டொமைன்கள்), `country` மற்றும் `search_type` இலிருந்து பெறப்பட்ட தலைப்பு. எக்ஸாவில், `search_type: "news"` `category: "news"` வைத்திருக்கும். Tavily `search_type: "finance"` (`topic: "finance"`) ஐயும் ஏற்றுக்கொள்கிறது.
+பொதுவான fields எப்போதும் முன்னுரிமை பெறும்: `query`, `max_results`, `filters` (domains), `country` மற்றும்
+`search_type` இலிருந்து பெறப்படும் topic. Exa-வில், `search_type: "news"` என்பது `category: "news"`-ஐத் தக்கவைக்கும்.
+Tavily, `search_type: "finance"` (`topic: "finance"`) என்பதையும் ஏற்கிறது.
 
-Firecrawl தேடல் செலவு, 10 திரும்பிய முடிவுகளின் தொடக்கத் தொகுதிக்கு, ஒரு தொகுதிக்கு $0.002 (2 வரவுகள்) மற்றும் ஒரு அழைப்புக்கு குறைந்தபட்சம் ஒரு தொகுதி ( [Firecrawl billing](https://docs.firecrawl.dev/billing) ): 11 முடிவுகளுக்கு $0.004 செலவாகும்.
+Firecrawl search செலவு, திரும்ப வழங்கப்பட்ட முடிவுகளில் தொடங்கப்பட்ட ஒவ்வொரு 10 முடிவுகளின் block-க்கும் $0.002 (2
+கிரெடிட்கள்) எனவும், ஒவ்வொரு call-க்கும் குறைந்தது ஒரு block எனவும் பதிவு செய்யப்படுகிறது
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): 11 முடிவுகளுக்கு $0.004 செலவாகும்.
 
-பொதுவான `time_range` இப்போது இரண்டு வழங்குநர்களையும் சென்றடைகிறது: Exa `startPublishedDate` (ISO நேர முத்திரை) மற்றும் Tavily `start_date` (`YYYY-MM-DD`) பெறுகிறது. `provider_options` இல் ஒரு வெளிப்படையான தேதி மேப் செய்யப்பட்டதை மீறுகிறது.
+பொதுவான `time_range` இப்போது இரு providers-க்கும் சென்றடைகிறது: Exa-க்கு `startPublishedDate` (ISO timestamp)
+எனவும், Tavily-க்கு `start_date` (`YYYY-MM-DD`) எனவும் அனுப்பப்படுகிறது. `provider_options`-இல் குறிப்பிடப்பட்ட
+வெளிப்படையான date, map செய்யப்பட்ட date-ஐ மீறி முன்னுரிமை பெறும்.
 
-Exa முடிவுகள் `id`, `highlights` (ஒவ்வொரு சிறப்பம்சமும், `snippet` ஆகப் பயன்படுத்தப்படும் முதல் ஒன்று மட்டுமல்ல), `provider_raw` இல் `highlight_scores`, `summary`, `subpages`, `entities` மற்றும் `extras`. Tavily முடிவுகள் `images` மற்றும் `favicon` வைத்திருக்கின்றன.
+Exa முடிவுகள் `id`, `highlights` (`snippet`-ஆகப் பயன்படுத்தப்படும் முதல் highlight மட்டும் அல்லாமல், ஒவ்வொரு
+highlight-உம்), `highlight_scores`, `summary`, `subpages`, `entities` மற்றும் `extras` ஆகியவற்றை
+`provider_raw`-இல் வைத்திருக்கும். Tavily முடிவுகள் `images` மற்றும் `favicon` ஆகியவற்றை வைத்திருக்கும்.
 
-இணைப்புத் தேடல் செலவு `depth` `fast` மற்றும் `standard` க்கு $0.005 ஆகவும், `deep` க்கு $0.05 ஆகவும் ( [Linkup விலை நிர்ணயம்](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` `provider_options` அல்லது இணைப்பின் அமைப்புகளில் இருந்து வந்தாலும்.
+`depth` `fast` மற்றும் `standard` ஆகியவற்றுக்கு Linkup search செலவு $0.005 ஆகவும், `deep`-க்கு $0.05 ஆகவும்
+பதிவு செய்யப்படுகிறது ([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)).
+`depth` என்பது `provider_options`-இலிருந்து வந்தாலும் அல்லது connection-ன் settings-இலிருந்து வந்தாலும் இது பொருந்தும்.
 
-Exa `type: "lite"` (Exa 3.0) சிறிய புலங்களின் தொகுப்பை ஏற்றுக்கொள்கிறது மற்றும் வேறு ஏதேனும் புலம் அமைக்கப்படும் போது முழு கோரிக்கையையும் நிராகரிக்கிறது. லைட்டிற்கு, `additionalQueries`, `systemPrompt` மற்றும் `text` மற்றும் `highlights` தவிர ஒவ்வொரு `contents` விசையும் அழைப்புக்கு முன் கைவிடப்படும். நிறுத்தப்பட்ட `subpages`, `subpageTarget`, `highlights.numSentences` மற்றும் `highlights.highlightsPerUrl` ஆகியவை இனி அனுப்பப்படாது.
+Exa `type: "lite"` (Exa 3.0), குறைந்த எண்ணிக்கையிலான fields-ஐ ஏற்கிறது; வேறு எந்த field அமைக்கப்பட்டிருந்தாலும்
+முழு request-ஐ நிராகரிக்கிறது. lite-க்கு, `additionalQueries`, `systemPrompt` மற்றும் `text`, `highlights`
+தவிர்ந்த ஒவ்வொரு `contents` key-யும் call-க்கு முன் நீக்கப்படும். deprecated ஆன `subpages`, `subpageTarget`,
+`highlights.numSentences` மற்றும் `highlights.highlightsPerUrl` இனி forward செய்யப்படாது.
 
-எக்ஸாவின் சொந்த `auto` பின்பற்றும் எக்ஸாவைத் தவிர, காஸ்ட் `lite` என்பது பிளாட் `fast` `costPerQuery` `instant`. மேலும் ஒவ்வொரு முடிவுக்கும் $0.001; மற்றும் `contents.summary` அமைக்கப்படும் போது திரும்பிய முடிவு ஒன்றுக்கு $0.001. Tavily `search_depth` `basic`, `fast` மற்றும் `ultra-fast` க்கு 1 கிரெடிட் ($0.008) மற்றும் `advanced` க்கு 2 கிரெடிட்கள் ($0.016) ( [Tavily API கிரெடிட்ஸ்](https://docs.tavily.com/documentation/api-credits) ) என பதிவு செய்யப்பட்டுள்ளது. Tavily மேம்பட்டதாக மேம்படுத்தும் `auto_parameters: true` உடன் அழைப்பு இன்னும் 1 கிரெடிட்டில் பதிவுசெய்யப்படுகிறது.
+செலவுக் கணக்கீடு flat registry `costPerQuery`-ஐப் பின்பற்றும்; ஆனால் Exa மட்டும் Exa-வின் சொந்த pricing-ஐப்
+பின்பற்றுகிறது: `auto` (மற்றும் legacy `fast`)-க்கு ஒரு call-க்கு $0.007 அல்லது `lite` (மற்றும் legacy `instant`)-க்கு
+$0.004, இது 10 முடிவுகளை உள்ளடக்கும்; ஒவ்வொரு கூடுதல் முடிவுக்கும் $0.001; மேலும் `contents.summary`
+அமைக்கப்பட்டிருந்தால், திரும்ப வழங்கப்படும் ஒவ்வொரு முடிவுக்கும் $0.001. Tavily-ல் `search_depth` `basic`, `fast`
+மற்றும் `ultra-fast` ஆகியவற்றுக்கு 1 credit ($0.008) என்றும், `advanced`-க்கு 2 credits ($0.016) என்றும் பதிவு
+செய்யப்படுகிறது ([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). `auto_parameters: true`
+கொண்ட call-ஐ Tavily advanced-ஆக மேம்படுத்தினாலும், அது 1 credit-ஆகவே பதிவு செய்யப்படும்.
 
 ---
 
-## Web Fetch API
+## வலைப் பெறுதல் API
 
-கட்டமைக்கப்பட்ட web-fetch வழங்குநர் (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) மூலம் URL-இலிருந்து உள்ளடக்கத்தைப் பிரித்தெடுக்கவும்.
+கட்டமைக்கப்பட்ட வலைப் பெறுதல் வழங்குநர் (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch) மூலம் URL இலிருந்து உள்ளடக்கத்தைப் பிரித்தெடுக்கவும்.
 
-Parallel Extract (`parallel-search`, Parallel Search-க்கு பயன்படுத்தப்படும் அதே API key) Markdown-ஐ மட்டுமே
-திருப்பி அளிக்கிறது — வேறு எந்த `format` மதிப்பும் `400` பிழையை ஏற்படுத்தும் — மேலும் உள்ளடக்கத்தை 100,000 எழுத்துகளாக வரம்பிடுகிறது. இலக்கு பக்கத்தையே பிரித்தெடுக்க முடியாதபோது, upstream அதை HTTP 200-க்குள் தெரிவிக்கிறது;
-OmniRoute அதை நிலையான செய்தியுடன் `422` ஆக வெளிப்படுத்துகிறது.
+Parallel Extract (`parallel-search`, Parallel Search-க்கான அதே API key) Markdown
+மட்டுமே வழங்குகிறது — வேறு எந்த `format`-மும் `400` பிழையை ஏற்படுத்தும் — மேலும் உள்ளடக்கத்தை
+100,000 எழுத்துகளாக வரம்பிடுகிறது. இலக்குப் பக்கத்தையே பிரித்தெடுக்க முடியாதபோது, upstream அதை HTTP 200-க்குள்
+புகாரளிக்கிறது; OmniRoute அதை நிலையான செய்தியுடன் `422` ஆக வெளிப்படுத்துகிறது.
 
-| Method | Path            | Description                                                                       |
-| ------ | --------------- | --------------------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | URL-ஐ fetch/scrape செய்கிறது — body `v1WebFetchSchema` மூலம் சரிபார்க்கப்படுகிறது |
+Keenable Fetch (`keenable-search`) கூட Markdown மட்டுமே வழங்குகிறது (வேறு எந்த `format`-மும்
+`400` பிழையை ஏற்படுத்தும்), மேலும் உள்ளடக்கத்தை 100,000 எழுத்துகளாக வரம்பிடுகிறது. இது key இல்லாமலும் செயல்படும்: connection இல்லாமல்
+`provider: "keenable-search"` என்ற வெளிப்படையான கோரிக்கை அனுப்பப்பட்டால், Keenable-ன் keyless endpoint
+(ஒவ்வொரு IP-க்குமான rate limits) பயன்படுத்தப்படுகிறது. கட்டமைக்கப்பட்ட key அந்த வரம்புகளை மட்டுமே நீக்கும்; auto-select, key கட்டமைக்கப்பட்டிருக்கும்போது மட்டுமே Keenable-ஐப் பயன்படுத்தும்.
 
-**அங்கீகாரம்:** Bearer API key (`extractApiKey` + `isValidApiKey`).
+| Method | Path            | Description                                                                               |
+| ------ | --------------- | ----------------------------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | ஒரு URL-ஐப் பெறுதல்/ஸ்கிரேப் செய்தல் — body `v1WebFetchSchema` மூலம் சரிபார்க்கப்படுகிறது |
 
-`enforceApiKeyPolicy` மூலம் கொள்கை அமல்படுத்தப்படுகிறது.
+**அங்கீகாரம்:** Bearer API key (`extractApiKey` + `isValidApiKey`). கொள்கை `enforceApiKeyPolicy` மூலம் செயல்படுத்தப்படுகிறது.
 
-**Quota-aware fallback (#8297):** வெளிப்படையான `provider` எதுவும் வழங்கப்படாதபோது, pool
+பெயரிடப்பட்ட சேர்க்கைகள் மேலே உள்ள [`model` routing contract](#named-searchfetch-combinations)-ஐப்
+பயன்படுத்துகின்றன; fetch-க்கான குறிப்பிட்ட விருப்பங்களும் பதில்களும் பாதுகாக்கப்படுகின்றன.
+
+**Quota-aware fallback (#8297):** `provider` அல்லது `model` எதுவும் வழங்கப்படாதபோது, pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) நிலையான
-முன்னுரிமை வரிசையில் (fill-first) பரிசோதிக்கப்படுகிறது — rate-limited ஆனாலும் கட்டமைக்கப்பட்ட வழங்குநர், கோரிக்கையை உடனடியாக நிறுத்துவதற்குப் பதிலாகத் தவிர்க்கப்படுகிறார்; மேலும் retry செய்யக்கூடிய/quota சார்ந்த upstream தோல்வி
-(HTTP 429 எப்போதும்; Firecrawl/Tavily/TinyFish quota-வகை இலவச அடுக்குகளுக்கு 402/403 —
-Jina Reader-க்கு அல்ல, மேலும் சாதாரண 400 தவறான கோரிக்கைக்கு ஒருபோதும் அல்ல) கோரிக்கை நேரத்தில் அடுத்ததாக முயற்சிக்கப்படாத credential கொண்ட வழங்குநரிடம் தொடர்ந்து செல்கிறது. pool-இல் உள்ள ஒவ்வொரு வழங்குநரும் exhausted ஆகும்போது, endpoint முந்தைய பொதுவான `400`-க்குப் பதிலாக
-`Retry-After` header உடன் ஒரே ஒரு `429`-ஐத் திருப்பி அளிக்கிறது. வெளிப்படையான `provider` கோரப்பட்டால், அமைதியான fallback எதுவும் இல்லை — rate-limited அல்லது தோல்வியடைந்த வெளிப்படையான வழங்குநர் தனது சொந்தப் பிழையை வெளிப்படுத்துகிறது (rate-limited ஆக இருந்தால் `429`, இல்லையெனில் upstream status).
+`parallel-search` → `keenable-search`) நிலையான
+priority வரிசையில் (முதலில் நிரப்புதல்) ஒவ்வொன்றாகப் பார்க்கப்படுகிறது — rate-limited ஆனாலும்
+கட்டமைக்கப்பட்ட provider, கோரிக்கையை உடனடியாக நிறுத்துவதற்குப் பதிலாகத் தவிர்க்கப்படுகிறது; மேலும் retryable/quota upstream failure
+(HTTP 429 எப்போதும்; Firecrawl/Tavily/TinyFish quota-style free tiers-க்கு 402/403 —
+Jina Reader-க்கு அல்ல, மேலும் சாதாரண 400 bad request-க்கு ஒருபோதும் அல்ல) கோரிக்கை நேரத்தில் அடுத்த
+முயற்சிக்கப்படாத credentialed provider-க்கு அனுப்பப்படுகிறது. pool-இல் உள்ள ஒவ்வொரு provider-மும் பயன்படுத்த முடியாத நிலைக்கு வந்தால், endpoint முந்தைய பொதுவான `400`-க்குப்
+பதிலாக `Retry-After` header உடன் ஒரே `429`-ஐத் திருப்பி வழங்குகிறது. வெளிப்படையாக `provider` கோரப்பட்டால்,
+மறைமுக fallback எதுவும் இல்லை — rate-limited அல்லது தோல்வியடைந்த வெளிப்படையான provider, தன் சொந்தப் பிழையை வெளிப்படுத்துகிறது (rate-limited என்றால் `429`, இல்லையெனில் upstream status).
 
 ---
 
@@ -900,24 +1012,35 @@ CLI, `base_url + /responses`-ஐ WebSocket ஆக upgrade செய்து, Om
 
 ## ஒதுக்கீடுகள் மற்றும் சிக்கல் அறிக்கையிடல்
 
-| Method | Path                | Description                                                                                                       |
-| ------ | ------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | பதிவு செய்யப்பட்ட விசையை வழங்குவதற்கு முன் `provider` + `accountId` க்கான ஒதுக்கீட்டை முன்கூட்டியே சரிபார்க்கவும் |
-| POST   | `/v1/issues/report` | GitHub-க்கு ஒதுக்கீடு/விசை வழங்கல் தோல்வியைப் புகாரளிக்கவும் (`GITHUB_ISSUES_REPO` + token தேவை)                  |
+| முறை | பாதை                | விளக்கம்                                                                                                  |
+| ---- | ------------------- | --------------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | பதிவுசெய்யப்பட்ட விசையை வழங்குவதற்கு முன், `provider` + `accountId` க்கான ஒதுக்கீட்டை முன் சரிபார்க்கிறது |
+| POST | `/v1/issues/report` | GitHub-க்கு ஒதுக்கீடு/விசை வழங்கல் தோல்வியைப் புகாரளிக்கிறது (`GITHUB_ISSUES_REPO` + token தேவை)          |
 
-**அங்கீகாரம்:** Bearer API key (`isAuthenticated`).
+**அங்கீகாரம்:** `/v1/quotas/check` ஒரு Bearer API விசையை (`isAuthenticated`) ஏற்கிறது. `/v1/issues/report` என்பது
+`/api/v1/registered-keys` போல நிர்வாகத்திற்கு மட்டும் (`requireManagementAuth`): dashboard அமர்வு,
+உள்ளூர் CLI token, அல்லது `manage`/`admin` scope கொண்ட API விசை; inference-only API விசைகளுக்கு `403` கிடைக்கும்.
 
-### ஒதுக்கீட்டு அமர்வு மீட்பு (விருப்பத்தேர்வு)
+### ஒதுக்கீட்டு அமர்வு மீட்பு (விருப்பத் தேர்வு)
 
-terminal quota error (`402`/`429`/`503`, அதன் body ஒதுக்கீடு அல்லது credits தீர்ந்துவிட்டதாகக் கூறும்) காரணமாக தோல்வியடையும் streaming அல்லாத `POST /v1/chat/completions` அல்லது `POST /v1/responses` கோரிக்கையை, பிழையைத் திருப்பி அனுப்புவதற்குப் பதிலாக, பின்னர் மீண்டும் இயக்குவதற்காக நிறுத்தி வைக்கலாம். கோருபவர் ஒவ்வொரு கோரிக்கைக்கும் பின்வரும் மூன்று headers மூலம் இதைத் தேர்வு செய்கிறார்:
+terminal ஒதுக்கீட்டுப் பிழையுடன் (`402`/`429`/`503`, அதன் body-ல் ஒதுக்கீடு அல்லது credits தீர்ந்துவிட்டதாகக் கூறப்படும்)
+தோல்வியடையும், streaming அல்லாத `POST /v1/chat/completions` அல்லது `POST /v1/responses` கோரிக்கையை,
+பிழையைத் திருப்பி அனுப்புவதற்குப் பதிலாக பின்னர் மீண்டும் இயக்குவதற்காக நிறுத்தி வைக்கலாம். அழைப்பாளர் ஒவ்வொரு
+கோரிக்கைக்கும் பின்வரும் மூன்று headers மூலம் இதைத் தேர்வு செய்கிறார்:
 
-| Header                       | Value                                         |
-| ---------------------------- | --------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                        |
-| `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`          |
-| `x-omniroute-recovery-turn`  | session-க்குள் தனித்துவமான turn id (அதே விதி) |
+| Header                       | Value                                       |
+| ---------------------------- | ------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                      |
+| `x-omniroute-session`        | அமர்வு id, `[A-Za-z0-9._:-]{1,128}`         |
+| `x-omniroute-recovery-turn`  | அமர்வுக்குள் தனித்துவமான turn id (அதே விதி) |
 
-`stream: false` ஆகவும், tools, tool history அல்லது `previous_response_id` இல்லாமலும், `x-omniroute-connection` pin இல்லாமலும் உள்ள turns மட்டுமே தகுதியுடையவை; மேலும் `STORAGE_ENCRYPTION_KEY` அமைக்கப்பட்டிருக்க வேண்டும் (கோரிக்கை அதிகபட்சம் 24 மணிநேரம் குறியாக்கப்பட்ட நிலையில் சேமிக்கப்படும்). அதன் பின்னர் பதில் `202` ஆகவும், `recovery.poll` உடனும் இருக்கும்; `GET /v1/quota-recoveries/{id}` மூலம் poll செய்யலாம் (நிலுவையில் இருக்கும்போது `202`, நிறைவடைந்ததும் மீட்கப்பட்ட body உடன் `200`) அல்லது `DELETE` மூலம் ரத்து செய்யலாம். Tickets-ஐ அவற்றை உருவாக்கிய API key மட்டுமே காண முடியும். மீண்டும் இயக்கப்பட்டதன் முடிவு உறுதியற்றதாக இருந்தால், அது இருமுறை அனுப்பப்படுவதற்குப் பதிலாக `needs_confirmation` நிலையில் முடிவடையும். மூலம்: `src/lib/quota/quotaSessionRecovery.ts`.
+`stream: false` கொண்ட, tools, tool history அல்லது `previous_response_id` இல்லாத, மேலும்
+`x-omniroute-connection` pin இல்லாத turn-கள் மட்டுமே தகுதியுடையவை; அதோடு
+`STORAGE_ENCRYPTION_KEY` அமைக்கப்பட்டிருக்க வேண்டும் (கோரிக்கை 24 மணி நேரம் வரை மறைகுறியாக்கப்பட்ட நிலையில் சேமிக்கப்படும்). பதில்
+`202` ஆகவும், `recovery.poll` உடனும் வரும்; `GET /v1/quota-recoveries/{id}` மூலம் poll செய்யலாம்
+(நிலுவையில் இருக்கும்போது `202`, முடிந்ததும் மீட்டெடுக்கப்பட்ட body உடன் `200`) அல்லது `DELETE` மூலம்
+ரத்து செய்யலாம். Tickets-ஐ அவற்றை உருவாக்கிய API விசை மட்டுமே காண முடியும். முடிவு உறுதியற்றதாக இருக்கும்
+replay, இரண்டு முறை அனுப்பப்படுவதற்குப் பதிலாக `needs_confirmation` நிலையில் முடிவடையும். மூலம்: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1663,19 +1786,23 @@ OmniRoute நிகழ்வுகளுக்கான வெளிச்செ
 
 ---
 
-## பதிவுசெய்யப்பட்ட விசைகள் (தானியங்கி மேலாண்மை)
+## பதிவு செய்யப்பட்ட விசைகள் (தானியங்கி மேலாண்மை)
 
-பின்தள வழங்குநர்/கணக்கிற்கு எதிராக API விசைகளை வழங்கவும் சுழற்றவும், தினசரி/மணிநேர ஒதுக்கீடுகளுடன், தானியங்கி விசை மேலாண்மை துணை அமைப்பால் பயன்படுத்தப்படுகிறது.
+தினசரி/மணிநேர ஒதுக்கீடுகளுடன், ஆதரவு வழங்குநர்/கணக்குக்கு எதிராக API விசைகளை வழங்கவும் சுழற்றவும் தானியங்கி-விசை மேலாண்மை துணை அமைப்பால் பயன்படுத்தப்படுகிறது.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                                        |
-| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | பதிவுசெய்யப்பட்ட விசைகளைப் பட்டியலிடு (மறைக்கப்பட்ட முன்னொட்டு மட்டும்)                                                                                                                                                                            |
-| POST   | `/api/v1/registered-keys`             | புதிய பதிவுசெய்யப்பட்ட விசையை வழங்கு — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. மூல விசை **ஒருமுறை மட்டும்** திருப்பியளிக்கப்படும். ஒதுக்கீடு மறுக்கப்பட்டால் `429` திருப்பியளிக்கப்படும். |
-| GET    | `/api/v1/registered-keys/[id]`        | பதிவுசெய்யப்பட்ட விசையின் மெட்டாடேட்டாவைப் பெறுக (மூலப் பொருள் இல்லை)                                                                                                                                                                              |
-| DELETE | `/api/v1/registered-keys/[id]`        | பதிவுசெய்யப்பட்ட விசையைத் திரும்பப்பெறுக                                                                                                                                                                                                           |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | வெளிப்படையான திரும்பப்பெறல் endpoint (DELETE போன்ற அதே விளைவு)                                                                                                                                                                                     |
+| Method | Path                                  | Description                                                                                                                                                                                                                     |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | பதிவு செய்யப்பட்ட விசைகளின் பட்டியலைக் காட்டும் (மறைக்கப்பட்ட முன்னொட்டு மட்டும்)                                                                                                                                               |
+| POST   | `/api/v1/registered-keys`             | புதிய பதிவு செய்யப்பட்ட விசையை வழங்கும் — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. மூல விசையை **ஒருமுறை** மட்டுமே வழங்கும். ஒதுக்கீடு மறுக்கப்பட்டால் `429`-ஐ வழங்கும். |
+| GET    | `/api/v1/registered-keys/[id]`        | பதிவு செய்யப்பட்ட விசையின் மெட்டாடேட்டாவைப் பெறும் (மூலப் பொருள் இல்லை)                                                                                                                                                         |
+| DELETE | `/api/v1/registered-keys/[id]`        | பதிவு செய்யப்பட்ட விசையைத் திரும்பப் பெறும்                                                                                                                                                                                     |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | வெளிப்படையான திரும்பப்பெறல் முனைப்புள்ளி (DELETE போன்ற அதே விளைவு)                                                                                                                                                              |
+| GET    | `/api/v1/providers/[provider]/limits` | வழங்குநரின் வழங்கல் வரம்புகளைப் படிக்கும்                                                                                                                                                                                       |
+| PUT    | `/api/v1/providers/[provider]/limits` | வழங்குநரின் வழங்கல் வரம்புகளை அமைக்கும் — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                         |
+| GET    | `/api/v1/accounts/[id]/limits`        | கணக்கின் வழங்கல் வரம்புகளைப் படிக்கும்                                                                                                                                                                                          |
+| PUT    | `/api/v1/accounts/[id]/limits`        | கணக்கின் வழங்கல் வரம்புகளை அமைக்கும் — வழங்குநர் வழிக்கான அதே body                                                                                                                                                              |
 
-**அங்கீகாரம்:** மேலாண்மை அமர்வு/API விசை (`requireManagementAuth`) — `/api/keys` க்கான அதே பாதுகாப்பு: டாஷ்போர்டு அமர்வு, உள்ளக CLI டோக்கன், அல்லது `manage`/`admin` scope கொண்ட API விசை; inference-only API விசைகளுக்கு `403` கிடைக்கும். மேலும் `/v1/quotas/check` மற்றும் `/v1/issues/report` ஆகியவற்றைப் பார்க்கவும்.
+**அங்கீகாரம்:** மேலாண்மை அமர்வு/API விசை (`requireManagementAuth`) — `/api/keys`-க்கான அதே பாதுகாப்பு விதி: டாஷ்போர்டு அமர்வு, உள்ளூர் CLI டோக்கன் அல்லது `manage`/`admin` scope கொண்ட API விசை; inference-only API விசைகளுக்கு `403` கிடைக்கும். மேலும் `/v1/quotas/check` மற்றும் `/v1/issues/report` ஆகியவற்றையும் பார்க்கவும்.
 
 ---
 

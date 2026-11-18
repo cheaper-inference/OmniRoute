@@ -18,7 +18,7 @@
 
 ---
 
-## Kaedah Pemasangan
+## Kaedah Pasang
 
 ### npm (disyorkan)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Papan pemuka dibuka di `http://localhost:20128` dan URL asas API ialah `http://localhost:20128/v1`.
+Papan pemuka dibuka pada `http://localhost:20128` dan API asas URL ialah `http://localhost:20128/v1`.
+
+> **pengguna npm:** Jika npm memberi amaran bahawa skrip pemasangan telah disekat (cth, `omniroute`, `better-sqlite3`), lihat [Penyelesaian masalah — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,16 +38,16 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Pengguna pnpm:** bendera `--allow-build` diperlukan untuk mendayakan skrip binaan natif bagi `better-sqlite3` dan `@swc/core`. Perintah `pnpm approve-builds -g` tidak disokong untuk pemasangan global pada pnpm v11.
+> **pengguna pnpm:** bendera `--allow-build` diperlukan untuk mendayakan skrip binaan asli untuk `better-sqlite3` dan `@swc/core`. Perintah `pnpm approve-builds -g` tidak disokong untuk pemasangan global pada pnpm v11.
 
-### Arch Linux (AUR)
+### Gerbang Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[Pakej AUR](https://aur.archlinux.org/packages/omniroute-bin) memasang OmniRoute dan menyediakan perkhidmatan pengguna systemd.
+[Pakej AUR](https://aur.archlinux.org/packages/omniroute-bin) memasang OmniRoute dan menyediakan perkhidmatan pengguna sistemd.
 
 ### Daripada Sumber
 
@@ -54,30 +56,30 @@ npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Nota Windows:** Secara lalai, OmniRoute menggunakan `%APPDATA%\omniroute` apabila direktori legasi `%USERPROFILE%\.omniroute` tidak wujud. Tetapkan `DATA_DIR` untuk memilih lokasi direktori data yang berbeza.
+> **nota Windows :** Secara lalai, OmniRoute menggunakan `%APPDATA%\omniroute` apabila direktori `%USERPROFILE%\.omniroute` lama tidak ada. Tetapkan `DATA_DIR` untuk memilih lokasi direktori data yang berbeza.
 
-> **Nota:** `npm install` menjana `.env` secara automatik daripada `.env.example` pada pelaksanaan pertama. Pemasangan berikutnya tidak akan menulis ganti `.env` yang sedia ada, maka penyesuaian akan dikekalkan. Untuk menjana semula, padamkan `.env` sebelum menjalankannya semula.
+> **Nota:** `npm install` auto menjana `.env` daripada `.env.example` pada larian pertama. Pemasangan seterusnya tidak akan menimpa `.env` sedia ada, jadi penyesuaian dikekalkan. Untuk menyemai semula, padam `.env` sebelum dijalankan semula.
 
 ### Docker
 
-Lihat [Panduan Docker](./DOCKER_GUIDE.md) untuk persediaan Docker lengkap, termasuk profil Compose dan HTTPS Caddy.
+Lihat [Panduan Docker](./DOCKER_GUIDE.md) untuk persediaan Docker lengkap termasuk profil Karang dan Caddy HTTPS.
 
-### Aplikasi Desktop (Electron)
+### Apl Desktop (Electron)
 
-OmniRoute disertakan dengan pembalut desktop yang dibina menggunakan Electron 41 + electron-builder 26.10. Skrip yang tersedia (akar ruang kerja):
+OmniRoute menghantar pembungkus desktop yang dibina pada Electron 41 + pembina elektron 26.10. Skrip tersedia (akar ruang kerja):
 
 ```bash
-npm run electron:dev          # Jalankan desktop dengan muat semula pantas
-npm run electron:build        # Bina untuk OS semasa (dikesan secara automatik)
-npm run electron:build:win    # Pemasang Windows (NSIS + mudah alih)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Ujian ringkas binaan berpakej
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Keluaran pemasang desktop dilampirkan pada GitHub Releases. Untuk penerangan terperinci tentang Electron (penandatanganan, jambatan IPC, distro), lihat [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(dicipta pada fasa kemudian)_.
+Keluaran pemasang desktop dilampirkan pada Keluaran GitHub. Untuk menyelam dalam Electron penuh (tandatangan, jambatan IPC, distro), lihat [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Pelayan tanpa antara muka (CI/automasi)
+### Pelayan tanpa kepala (CI/automation)
 
 Untuk persediaan tanpa pengawasan (Docker, Kubernetes, CI), gunakan:
 
@@ -86,27 +88,27 @@ omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Apabila digabungkan dengan pemboleh ubah persekitaran (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, dan sebagainya), ini membolehkan anda menyediakan tika OmniRoute yang boleh diskripkan sepenuhnya.
+Digabungkan dengan env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, dsb.), ini membolehkan anda memutarkan contoh OmniRoute boleh skrip sepenuhnya.
 
-### Pilihan CLI
+### CLI Pilihan
 
-| Perintah                | Penerangan                                                                |
-| ----------------------- | ------------------------------------------------------------------------- |
-| `omniroute`             | Mulakan pelayan (`PORT=20128`, API dan papan pemuka pada port sama)       |
-| `omniroute setup`       | Pengenalan CLI berpandu untuk kata laluan dan penyedia pertama            |
-| `omniroute doctor`      | Jalankan pemeriksaan kesihatan setempat tanpa memulakan pelayan           |
-| `omniroute providers`   | Temui, senaraikan, sahkan dan uji penyedia daripada CLI                   |
-| `omniroute config`      | Konfigurasi alat CLI — senaraikan, dapatkan, tetapkan, sahkan konfigurasi |
-| `omniroute status`      | Papan pemuka status luar talian — versi, DB, alat, konfigurasi            |
-| `omniroute logs`        | Strim log penggunaan daripada API (menyokong `--follow`)                  |
-| `omniroute update`      | Semak atau gunakan kemas kini OmniRoute                                   |
-| `omniroute provider`    | Urus sambungan penyedia — tambah, senaraikan, alih keluar, uji, lalai     |
-| `omniroute --port 3000` | Tetapkan port kanonik/API kepada 3000                                     |
-| `omniroute --mcp`       | Mulakan pelayan MCP (pengangkutan stdio)                                  |
-| `omniroute --no-open`   | Jangan buka pelayar secara automatik                                      |
-| `omniroute --help`      | Tunjukkan bantuan                                                         |
+| Perintah                | Penerangan                                                               |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `omniroute`             | Mulakan pelayan (`PORT=20128`, API dan papan pemuka pada port yang sama) |
+| `omniroute setup`       | Memandu CLI onboarding untuk kata laluan dan pembekal pertama            |
+| `omniroute doctor`      | Jalankan pemeriksaan kesihatan tempatan tanpa memulakan pelayan          |
+| `omniroute providers`   | Temui, senaraikan, sahkan dan uji pembekal daripada CLI                  |
+| `omniroute config`      | konfigurasi alat CLI senarai —, dapatkan, tetapkan, sahkan konfigurasi   |
+| `omniroute status`      | Papan pemuka status luar talian versi —, DB, alatan, konfigurasi         |
+| `omniroute logs`        | Log penggunaan strim daripada API (menyokong `--follow`)                 |
+| `omniroute update`      | Semak atau gunakan kemas kini OmniRoute                                  |
+| `omniroute provider`    | Urus sambungan pembekal — tambah, senaraikan, alih keluar, uji, lalai    |
+| `omniroute --port 3000` | Tetapkan port canonical/API kepada 3000                                  |
+| `omniroute --mcp`       | Mulakan pelayan MCP (pengangkutan stdio)                                 |
+| `omniroute --no-open`   | Jangan buka penyemak imbas secara automatik                              |
+| `omniroute --help`      | Tunjukkan bantuan                                                        |
 
-Persediaan tanpa antara muka boleh diskripkan menggunakan bendera atau pemboleh ubah persekitaran:
+Persediaan tanpa kepala boleh diskripkan dengan bendera atau pembolehubah persekitaran:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Jalankan diagnostik setempat tanpa membuka papan pemuka:
+Jalankan diagnostik tempatan tanpa membuka papan pemuka:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Urus penyedia melalui SSH atau skrip tanpa membuka papan pemuka:
+Urus penyedia daripada SSH atau skrip tanpa membuka papan pemuka:
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **Kod Claude :**
 
+Kod Claude bersambung melalui HTTP, yang `omniroute --mcp` (stdio) tidak bermula. Pengangkutan HTTP dimatikan secara lalai: dayakannya pada pelayan yang sedang berjalan dahulu. Apabila log masuk papan pemuka didayakan, permintaan tanpa bukti kelayakan mendapat `401`, jadi luluskan kunci API yang memegang `mcp:connect` (atau `manage`); kunci tanpa `manage`/`admin` juga memerlukan setiap skop alat (lihat [MCP Server → MCP skop alat](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
@@ -249,7 +255,7 @@ Tambahkan pada tetapan MCP anda (stdio, dengan kunci supaya pemanggil mempunyai 
 }
 ```
 
-Atau, apabila `mcpTransport` ialah `streamable-http` (tetapkannya pada `/dashboard/mcp` atau dengan `omniroute mcp enable --transport streamable-http`), halakan entri pelayan MCP jauh pelanggan pada `http://localhost:20128/api/mcp/stream`.
+Atau, apabila `mcpTransport` ialah `streamable-http` (tetapkan pada `/dashboard/mcp` atau dengan `omniroute mcp enable --transport streamable-http`), halakan entri pelayan MCP jauh pelanggan pada `http://localhost:20128/api/mcp/stream`.
 
 Kunci bergerak sebagai `Authorization: Bearer <api-key>` (lihat [MCP Server → Akses jauh](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) untuk hos jauh; kunci jauh memerlukan `mcp:connect` serta skop read/write ).
 
