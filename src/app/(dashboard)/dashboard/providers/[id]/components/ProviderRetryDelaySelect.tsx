@@ -170,7 +170,7 @@ export default function ProviderRetryDelaySelect({ providerId }: ProviderRetryDe
     <Card>
       <div className="flex items-center gap-3 mb-4">
         <div className="flex-1 min-w-0">
-          <h2 className="text-sm font-semibold">{t("defaultConnectionConcurrencyLabel")}</h2>
+          <h2 className="text-sm">{t("defaultConnectionConcurrencyLabel")}</h2>
           <p className="text-sm text-text-muted">{t("defaultConnectionConcurrencyHint")}</p>
         </div>
         <Select
