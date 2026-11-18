@@ -252,6 +252,7 @@ import {
 } from "./credentialSelectionDiagnostics.ts";
 
 import { pickPreferredConnection } from "./connectionPreference";
+import { orderConnectionsForSelection } from "./connectionSelectionOrder.ts";
 
 type JsonRecord = Record<string, unknown>;
 interface RecoverableConnectionState {
@@ -1908,15 +1909,11 @@ export async function getProviderCredentials(
         : null;
     }
 
-    const allOrderedConnections = [...leasePolicy.connections].sort((a, b) => {
-      if (a.authType !== "oauth" || b.authType !== "oauth") return 0;
-      const priorityDelta = (a.priority || 999) - (b.priority || 999);
-      if (priorityDelta !== 0) return priorityDelta;
-      return (
-        getOAuthSessionAvailability(b.id, options.sessionKey) -
-        getOAuthSessionAvailability(a.id, options.sessionKey)
-      );
-    });
+    const allOrderedConnections = orderConnectionsForSelection(
+      leasePolicy.connections,
+      providersToSearch,
+      options.sessionKey
+    );
 
     const providerStrategyOverrides = (settings.providerStrategies || {}) as Record<
       string,
