@@ -86,15 +86,37 @@ Les noms de modèles sont d'abord normalisés (les préfixes du chemin du fourni
 
 ### Comment les dépenses sont enregistrées
 
-- Le coût par demande est calculé après la réponse et enregistré en mode « feu et oubli » afin de ne jamais ajouter de latence au client. La consommation de quota partagé est planifiée lors du prochain tick de boucle d'événement via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Le coût par demande est calculé à la fin de la demande. La consommation de quota partagé est planifiée lors du prochain tick de boucle d'événement via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - Les dépenses en clé API sont mises en mémoire tampon et vidées par lots par le [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervalle de vidage par défaut de 60 s, tampon de 1 000 entrées). Réglable via :
 
   | Variable d'environnement            | Défaut  | But                                                               |
   | ----------------------------------- | ------- | ----------------------------------------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Intervalle de rinçage en millisecondes.                           |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Nombre maximal d'entrées mises en mémoire tampon avant le vidage. |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Nombre maximum d'entrées mises en mémoire tampon avant le vidage. |
 
-Les chiffres de coûts du tableau de bord sont** pas** lus à partir d'un montant en dollars par ligne stocké — ils sont recalculés à la volée à partir du nombre de jetons et du tableau de tarification actuel à chaque fois que le point de terminaison d'analyse s'exécute. Cela signifie que la correction d’un prix erroné (et la resynchronisation) met à jour les estimations de coûts historiques de manière rétroactive.
+Les coûts préfèrent les frais exacts déclarés par le fournisseur (`provider_cost_usd`), puis un instantané de la demande au prix du catalogue (`calculated_cost_usd`), puis une retarification symbolique à partir du catalogue actuel. Les coûts stockés ne sont pas facturés à nouveau via leur nombre de jetons. Les anciennes lignes réservées aux jetons changent toujours lorsque leur prix catalogue change.
+
+### OCR et intégrations
+
+- Les requêtes `/v1/ocr` réussies utilisent `usage_info.pages_processed` en amont, et non la plage de pages demandée ou le nombre d'objets de page renvoyés. L'estimation est de pages × `ocr_cost_per_page` ( USD/page absolu,** pas** USD/million).
+- Les demandes avec des annotations de document ou de cadre de délimitation nécessitent un tarif `ocr_cost_per_annotated_page` distinct. Sans cela, le coût reste inconnu ; le tarif ordinaire OCR ne s’y substitue pas silencieusement.
+- LiteLLM sync mappe son champ `annotation_cost_per_page` en amont dans `ocr_cost_per_annotated_page`, en conservant la valeur absolue USD/page et les entrées d'annotation uniquement, y compris le zéro explicite. Un champ canonique fourni est prioritaire ; les valeurs d'alias non valides sont ignorées. Les remplacements de prix utilisateur conservent leur priorité normale. Voir [les clés de tarification OCR de LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- L'utilisation OCR stocke le nombre de pages, le prix unitaire, le coût USD calculé, la clé API et la connexion sélectionnée. Les pages ne sont jamais représentées comme des jetons. Les journaux d'appels contiennent des métadonnées de facturation, pas le document URLs, les octets PDF ou le texte extrait.
+- Les requêtes `/v1/embeddings` réussies enregistrent une ligne d'utilisation par lot physique, y compris des lots distincts terminés dans la même milliseconde. Les frais signalés par le fournisseur ont priorité sur les estimations de jetons ; Les emballages combo n’ajoutent pas de frais.
+- L'historique d'utilisation, l'analyse des coûts, les fenêtres provider/account, les limites de dépenses des clés API, le grand livre des coûts des demandes et les cumuls d'utilisation quotidienne incluent ces frais. Les clés sans journal conservent la comptabilité numérique sans conserver le texte source.
+- Les utilisations ou tarifs manquants sont** inconnu** , pas gratuit : l'en-tête de coût de réponse est omis et la politique d'utilisation non tarifée existante s'applique aux clés API limitées. Les taux zéro explicitement configurés restent une utilisation valable sans coût.
+
+Il s’agit d’une comptabilité prospective uniquement. Les anciens appels OCR/embedding qui n'ont jamais écrit d'historique d'utilisation ne peuvent pas être reconstruits à partir de cette migration. Les estimations du catalogue sont des estimations USD, pas une facture, et n'incluent pas la conversion de devises, les taxes ou les remises.
+
+### Discours et images
+
+- Les tentatives réussies de génération d'images `/v1/audio/transcriptions`, `/v1/audio/speech` et partagent une comptabilité numérique. Les appels directs et combinés portent la clé API de l'appelant et la connexion sélectionnée ; un wrapper combo n’ajoute jamais de deuxième débit.
+- USD signalé par le fournisseur l'emporte sur une estimation de catalogue, y compris des frais explicites nuls. OpenRouterJSON de `usage.cost` est normalisé en `cost_usd`. Sinon, les jetons mesurés utilisent les prix des jetons, les secondes de transcription utilisent les prix à la seconde, la saisie vocale utilise le nombre de caractères Unicode et les images à prix forfaitaire utilisent le nombre réellement renvoyé, et non le `n` demandé.
+- Le binaire OpenRouter TTS n'a pas de corps d'utilisation JSON. Une fois l'audio terminé ou l'appelant annulé, OmniRoute interroge sa génération ID sur le** même** origine OpenRouter configurée. Une requête EU ne revient jamais à l'origine globale. Il s'agit d'une recherche limitée en lecture seule ; la synthèse n’est pas retentée pour la comptabilité. Les enregistrements de facturation peuvent apparaître une fois l'audio terminé : les tentatives de recherche s'exécutent en arrière-plan pendant environ 52 secondes, y compris les délais du réseau.
+- Au cours de cette recherche, la réponse audio a `X-OmniRoute-Cost-Status: pending` et aucun en-tête de coût de réponse. Son montant final apparaît dans l'historique d'utilisation, les analyses et le grand livre après rapprochement. Si les métadonnées ne sont pas disponibles, un instantané de tarif configuré est utilisé ; sinon le coût reste inconnu.
+- Les secondes, les caractères et les images ont des champs d'unité de facturation distincts, jamais de faux comptes de jetons. La comptabilité ne conserve que l'utilisation numérique, pas le texte vocal, les transcriptions ou les octets d'image. Les exemptions existantes pour les images non tarifées restent inchangées : un tarif d'image véritablement manquant ne verrouille pas à nouveau une clé limitée, et la réponse omet l'en-tête de coût plutôt que de déclarer l'appel gratuit. Un échec de magasin de tarification conserve toujours des preuves d'utilisation pour l'application de la fermeture en cas d'échec.
+
+Aucune charge historique speech/image n’est inventée ou comblée. La facturation du fournisseur reste la référence pour les factures et pour les appels dont le tarif n'a pas été signalé.
 
 ---
 

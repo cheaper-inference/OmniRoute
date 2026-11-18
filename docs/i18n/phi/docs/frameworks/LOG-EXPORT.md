@@ -195,144 +195,167 @@ mga ibinalik na paglalarawan ng field, kaya hindi nangangailangan ng pagbabago s
 
 ---
 
-## 4. Destinasyong BigQuery
+## 4. Destinasyon ng BigQuery
 
-Mga key ng configuration (`type: "bigquery"`):
+Mga config key (`type: "bigquery"`):
 
-| Key                  | Mga tala                                                                                 |
-| -------------------- | ---------------------------------------------------------------------------------------- |
-| `projectId`          | GCP project na naglalaman ng dataset                                                     |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                          |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                          |
-| `location`           | Ginagamit lang kapag kailangang gawin ang dataset (default na `EU`)                      |
-| `serviceAccountJson` | Key ng service account. Lihim: naka-encrypt habang nakaimbak, hindi kailanman ibinabalik |
-| `autoCreate`         | Gawin ang dataset at table sa unang pag-export (default na `true`)                       |
+| Key                  | Mga tala                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | GCP project na naglalaman ng dataset                                                                                |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                     |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                     |
+| `location`           | Ginagamit lamang kapag kailangang likhain ang dataset (default `EU`)                                                |
+| `serviceAccountJson` | Key ng service account. Lihim: naka-encrypt habang nakaimbak, hindi kailanman ibinabalik                            |
+| `autoCreate`         | Lumikha ng nawawalang dataset/table; may kondisyong magdagdag ng nullable na usage-evidence column (default `true`) |
 
-Kailangan ng service account ang `bigquery.tables.updateData` sa target na table, pati ang
+Kailangan ng service account ang `bigquery.tables.updateData` sa target table, pati na ang
 `bigquery.datasets.create` / `bigquery.tables.create` kapag naka-on ang `autoCreate`.
+Kailangan din ng `bigquery.tables.update` ang pag-update sa isang umiiral na table upang
+maidagdag ang dalawang nullable na usage-evidence field. Kapag walang kinakailangang
+permission, mabibigo ang export nang hindi isinusulong ang cursor nito.
 
-Ang naka-configure na batch ay isang yunit ng **cursor**, hindi ng HTTP: hinahati ito ng `send()` sa mga tawag sa insertAll
-na may hanggang 500 row, kaya hindi malalampasan ng malaking `batch_size` ang 10 MB na limitasyon ng BigQuery sa request.
-Ang mga pansamantalang status (408/429/500/502/503/504) ay muling sinusubukan nang hanggang tatlong beses na may exponential
-backoff, gamit muli ang parehong mga insertId; ang mga pagkabigo sa authentication at schema ay naghahagis ng exception sa unang pagsubok sa halip
-na sayangin ang pagpapatakbo.
+Ang isang naka-configure na batch ay isang yunit ng **cursor**, hindi HTTP: hinahati ito ng
+`send()` sa mga insertAll call na may hanggang 500 row, kaya hindi maaabot ng malaking
+`batch_size` ang 10 MB request cap ng BigQuery. Ang mga transient status (408/429/500/502/503/504)
+ay muling sinusubukan nang hanggang tatlong beses gamit ang exponential backoff, at
+muling ginagamit ang parehong insertIds; ang mga auth at schema failure ay nagti-throw sa
+unang pagtatangka sa halip na ubusin ang run.
 
-Ang table na kagagawa lang ay hindi pa nakikita ng streaming endpoint, na tumutugon ng
-404 sa loob ng ilang segundo. Muling sinusubukan ang 404 na iyon, pero **kapag ang pagpapatakbong ito lang ang gumawa ng table** —
-mabilis pa ring mabibigo kapag talagang nawawala ang table. Tandaan na kapag muling gumawa ng table gamit ang pangalang
-kamakailan lang binura, tatanggihan ng BigQuery ang mga streaming insert sa loob ng ilang minuto; katangian ito ng
-pagbura-at-muling-paggawa, kaya mas mainam na gumamit ng bagong pangalan ng table kaysa magbura at muling magdagdag nito.
+Ang isang table na kagagawa pa lamang ay hindi pa agad nakikita ng streaming endpoint, na
+sumasagot ng 404 sa loob ng ilang segundo. Muling sinusubukan ang 404 na iyon, ngunit
+**kapag ang run na ito lamang ang lumikha ng table** — ang talagang nawawalang table ay
+agad na nagfa-fail. Tandaan na kapag muling lumikha ng table gamit ang pangalang kamakailan
+lamang na dinelete, tatanggihan ng BigQuery ang streaming insert sa loob ng ilang minuto;
+katangian ito ng delete-then-recreate, kaya mas mainam ang bagong pangalan ng table kaysa
+burahin at idagdag itong muli.
 
-**Dumarating ang bahagyang pagkabigo bilang HTTP 200 na may hindi bakanteng `insertErrors[]`.** Itinuturing iyon na
-pagkabigo at naghahagis ng exception, na siyang pumipigil sa cursor na lumampas sa mga row na hindi kailanman
-tinanggap ng BigQuery; tinitiyak ng `tests/unit/log-export-bigquery.test.ts` ang gawi na ito.
+**Ang isang partial failure ay dumarating bilang HTTP 200 na may hindi walang-lamang `insertErrors[]`.** Itinuturing itong
+failure at nagti-throw, na siyang pumipigil sa cursor na umusad lampas sa mga row na hindi
+tinanggap ng BigQuery; itinatakda ng `tests/unit/log-export-bigquery.test.ts` ang behavior na ito.
 
-Karaniwang REST ang ginagamit sa transport — ipinapalit ang isang self-signed na RS256 assertion sa access token sa
-`https://oauth2.googleapis.com/token`, at pagkatapos ay ipinapadala ang mga row sa `tabledata.insertAll`. Walang Google SDK na
-idinadagdag. Kina-cache ang mga access token sa loob ng proseso para sa bawat pares na (service account, scope).
+Plain REST ang transport — ipinapalit ang isang self-signed na RS256 assertion sa access token sa
+`https://oauth2.googleapis.com/token`, pagkatapos ay ipinapadala ang mga row sa
+`tabledata.insertAll`. Walang Google SDK na isinasama. Naka-cache ang mga access token sa
+loob ng proseso ayon sa (service account, scope).
 
-Ang ginawang table ay may isang column para sa bawat field sa tab na Logs, kasama ang `exported_at`, at nakaayos ayon sa
-aktuwal na paraan ng pag-query sa mga call log:
+Ang nalikhang table ay may isang column para sa bawat field ng Logs tab kasama ang
+`exported_at`, at inayos para sa aktuwal na paraan ng pag-query sa mga call log:
 
-- **Naka-partition ayon sa araw sa `timestamp`**, kaya ang query na nililimitahan ayon sa petsa ay ang mga araw na iyon lang ang ini-scan.
-- **Naka-cluster ayon sa `api_key_name`, `provider`, `model`, `status`** (sa pagkakasunod na iyon), kaya ang pag-filter ayon sa
-  kung sino ang nagpatakbo nito, kung saan ito napunta, o kung nabigo ito ay nag-aalis ng mga block na kailangang i-scan sa bawat partition. Pinapayagan ng BigQuery
-  ang hanggang apat na clustering column at mahalaga ang pagkakasunod-sunod: ang filter sa `api_key_name` lang
-  ay nagbabawas ng mga block na kailangang i-scan, samantalang ang filter sa `status` lang ay hindi.
-- **Opsyonal na pagpapanatili ng partition** sa pamamagitan ng `partitionExpirationDays` (pinapanatili ng 0 ang lahat), na inilalapat
-  kapag ginawa ang table.
+- **Hinahati ayon sa araw gamit ang `timestamp`**, kaya ang query na may hangganang petsa ay
+  tanging mga araw na iyon ang ini-scan.
+- **I-cluster ayon sa `api_key_name`, `provider`, `model`, `status`** (sa ganitong pagkakasunod-sunod), kaya ang pag-filter ayon sa
+  kung sino ang nagpatakbo nito, kung saan ito ipinadala, o kung nabigo ito ay nagpa-prune ng
+  mga block sa loob ng bawat partition. Pinahihintulutan ng BigQuery ang hanggang apat na
+  clustering column at mahalaga ang pagkakasunod-sunod: ang filter sa `api_key_name` lamang
+  ay nagpa-prune, samantalang ang filter sa `status` lamang ay hindi.
+- **Opsyonal na retention ng partition** gamit ang `partitionExpirationDays` (pinananatili ang lahat kapag 0), na
+  inilalapat kapag nililikha ang table.
 
-Parehong inilalapat ang mga setting sa oras ng paggawa. Pinapanatili ng umiiral na table ang kasalukuyang ayos nito, kaya
-ituro ang destinasyon sa isang bagong table id kung gusto mong gamitin ang mga ito.
+Parehong inilalapat ang mga setting sa oras ng paglikha. Pinananatili ng umiiral na table ang
+kasalukuyan nitong layout, kaya ituro ang destination sa bagong table id kung nais mong
+gamitin ang mga ito.
 
-Tinitiyak ng `tests/unit/log-export-bigquery.test.ts` na nananatiling magkatugma ang mapper at ang schema ng table,
-kaya hindi maaaring tahimik na mawala ang isang bagong column ng call log habang ine-export.
+Tinitiyak ng `tests/unit/log-export-bigquery.test.ts` na nananatiling naka-lockstep ang mapper at
+ang table schema, kaya hindi maaaring tahimik na mawala ang isang bagong call-log column
+habang inilalabas.
 
-Hinahati ang mga batch ayon sa **parehong** bilang ng row at laki ng mga serialized byte. Hindi sapat ang bilang lang ng row
-kapag nag-e-export na ng mga payload: maaaring umabot sa sampu-sampung megabyte ang 500 row na may mga prompt, at tinatanggihan ng insertAll
-ang request na lampas 10 MB. Isinasara ang bawat chunk sa 500 row o 9 MB, alinman ang mauna.
+Hinahati ang mga batch ayon sa **bilang ng row at mga serialised byte**. Hindi sapat ang bilang
+ng row lamang kapag ine-export ang mga payload: ang 500 row na may mga prompt ay maaaring
+umabot sa sampu-sampung megabyte, at tinatanggihan ng insertAll ang request na lampas sa 10 MB.
+Nagsasara ang mga chunk sa 500 row o 9 MB, alinman ang mauna.
 
 ---
 
-## 5. Destinasyon ng mga OTLP/HTTP trace
+## 5. Destinasyon ng OTLP/HTTP traces
 
-Gumagamit ang configuration ng `type: "otlp-http"`. Isa itong naka-iskedyul na pag-export ng mga nakaimbak na
-call log na gumagamit ng cursor, hindi ang best-effort na live routing-event sink sa
+Gumagamit ang config ng `type: "otlp-http"`. Isa itong naka-schedule at cursor-backed na export ng mga naka-persist na call log, hindi ang best-effort live routing-event sink sa
 `open-sse/services/routing/otel.ts`. Hindi nito binabasa o binabago ang mga environment
-variable, timer, o buffer ng sink na iyon. Kapag parehong pinagana, maaaring makagawa ng dalawang magkahiwalay na uri ng span;
-gamitin ang instrumentation scope na `omniroute.log-export` upang matukoy ang mga call-log span na ito.
+variable, timer, o buffer ng sink na iyon. Kapag parehong pinagana, maaaring makagawa ng
+dalawang magkahiwalay na uri ng span; gamitin ang instrumentation scope na
+`omniroute.log-export` upang makilala ang mga call-log span na ito.
 
-| Key                      | Default / layunin                                                                                     |
-| ------------------------ | ----------------------------------------------------------------------------------------------------- |
-| `endpoint`               | Kinakailangang buong HTTP(S) traces URL; walang idinaragdag na hulaping `/v1/traces`                  |
-| `headers`                | Opsyonal na mga linyang `Name: value` o JSON object ng mga string; naka-encrypt                       |
-| `requestHeaderAllowlist` | Walang laman (naka-off); mga pangalan/prefix ng client header na kukunin bilang mga attribute ng span |
-| `serviceName`            | `omniroute`; resource na `service.name`                                                               |
-| `langfuseMapping`        | `false`; nagdaragdag ng mga attribute ng generation/session/user para sa Langfuse                     |
-| `identity`               | `pseudonymous`, `keyName`, o `none`                                                                   |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                               |
-| `timeoutMs`              | `30000` sa bawat HTTP attempt                                                                         |
-| `environment`            | Hindi nakatakda; opsyonal na `langfuse.environment`                                                   |
+| Key                      | Default / layunin                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `endpoint`               | Kinakailangang buong HTTP(S) traces URL; walang idinadagdag na `/v1/traces` suffix                 |
+| `headers`                | Opsyonal na mga linyang `Name: value` o JSON object ng mga string; naka-encrypt                    |
+| `requestHeaderAllowlist` | Walang laman (naka-off); mga pangalan/prefix ng client header na kukunan bilang mga span attribute |
+| `serviceName`            | `omniroute`; resource na `service.name`                                                            |
+| `langfuseMapping`        | `false`; nagdaragdag ng mga attribute para sa Langfuse generation/session/user                     |
+| `identity`               | `pseudonymous`, `keyName`, o `none`                                                                |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                            |
+| `timeoutMs`              | `30000` bawat HTTP attempt                                                                         |
+| `environment`            | Hindi nakatakda; opsyonal na `langfuse.environment`                                                |
 
-Ipinapakita ng pangkalahatang dashboard ang mga field na ito. Tumatanggap ang `paths` ng API array o textarea
-na may mga eksaktong path na pinaghihiwalay ng mga bagong linya/kuwit. Nilalaktawan ang embeddings, rerank, at iba pang path
-maliban kung tahasang pinapayagan. Ipinapasulong pa rin ng mga nilaktawang row ang cursor; binibilang ng mga counter na
-`exported`/`exportedTotal` ng kasalukuyang runner ang mga naprosesong source row, kabilang ang mga na-filter
-na row, sa halip na ang mga tinanggap na span. Ginagawa ang pag-filter sa child, nang hindi binabago ang
-kontrata nito sa IPC/cursor.
+Nire-render ng generic dashboard ang mga field na ito. Tumatanggap ang `paths` ng API
+array o textarea na may eksaktong mga path na pinaghiwalay ng mga newline/comma. Nilalaktawan
+ang embeddings, rerank, at iba pang path maliban kung tahasang pinahintulutan. Umaabante pa
+rin ang cursor sa mga nilaktawang row; binibilang ng mga kasalukuyang `exported`/`exportedTotal`
+counter ng runner ang mga naprosesong source row, kabilang ang mga na-filter na row, sa halip
+na ang mga tinanggap na span. Isinasagawa ang pag-filter sa child, nang hindi binabago ang
+IPC/cursor contract nito.
 
-Gumagamit ang URL validation ng helper na `parseAndValidateNonMetadataUrl` na hindi nangangailangan ng DB mula sa
-`src/shared/network/outboundUrlGuard.ts`: ang patakarang `block-metadata`. Mayroon itong kaparehong
-walang-kondisyong pagsusuri sa metadata/protocol/naka-embed na credential gaya ng webhook validator na
-pinapayagan ang mga pribadong URL, ngunit sadyang pinapayagan nito ang mga localhost/LAN target nang walang pandaigdigang
-feature-flag override. Pinapahintulutan nito ang mga self-hosted na endpoint ng Langfuse, Phoenix, Tempo, at Collector,
-kabilang ang mga pribadong HTTP endpoint. Palaging bina-block ang mga cloud-metadata host.
-Hindi sinusundan ang mga redirect, kaya hindi maaaring i-redirect ng collector ang mga credential sa ibang host.
-Tulad ng kasalukuyang lexical URL guard, hindi nito itinatakda nang permanente ang DNS resolution; mag-configure lamang
-ng mga host na kontrolado ng operator. Mas piliin ang HTTPS kapag wala sa pinagkakatiwalaang network ang endpoint.
+Gumagamit ang URL validation ng DB-free na `parseAndValidateNonMetadataUrl` helper mula sa
+`src/shared/network/outboundUrlGuard.ts`: ang patakarang `block-metadata`. Mayroon itong
+parehong unconditional na mga pagsusuri sa metadata/protocol/embedded-credential gaya ng
+webhook validator, na may pagpayag sa mga private URL, ngunit sadyang pinapahintulutan ang
+mga localhost/LAN target nang walang global feature-flag override. Pinahihintulutan nito ang
+mga self-hosted na Langfuse, Phoenix, Tempo, at Collector endpoint, kabilang ang mga private
+HTTP endpoint. Palaging bina-block ang mga cloud-metadata host. Hindi sinusundan ang mga
+redirect, kaya hindi maaaring i-redirect ng collector ang mga credential sa ibang host.
+Gaya ng kasalukuyang lexical URL guard, hindi nito pini-pin ang DNS resolution; i-configure
+lamang ang mga host na kontrolado ng operator. Mas mainam ang HTTPS kapag ang endpoint ay
+wala sa pinagkakatiwalaang network.
 
-### Payload at paghahatid
+### Payload at delivery
 
-Ang OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) ay naglalaman ng isang
-CLIENT span sa bawat pinapayagang row, na ipinapangalan ayon sa eksaktong request path nito. Natutukoy sa pangalan ng path ang
-Chat Completions, Responses, at Messages nang hindi isinasama ang data ng modelo o pagkakakilanlan sa
-pangalan ng span. Kabilang sa mga resource attribute ang `service.name` at ang `service.version` ng package.
+Ang OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) ay nagdadala
+ng isang CLIENT span bawat pinahintulutang row, na pinapangalanan batay sa eksaktong request
+path nito. Tinutukoy ng path naming ang Chat Completions, Responses, at Messages nang hindi
+isinisingit ang model o identity data sa pangalan ng span. Kabilang sa resource attribute ang
+`service.name` at `service.version` ng package.
 
-Isinusulat ng karaniwang chat attempt logger (`open-sse/handlers/chatCore/attemptLogging.ts`) ang
-`duration = Date.now() - startTime` sa pagkumpleto at hindi ito nagbibigay ng timestamp;
-itinatakda ng `saveCallLogOperation` sa `src/lib/usage/callLogs.ts` ang default na timestamp sa oras ng pagsulat
-(pagkumpleto). Kaya itinatakda ng export ang end = timestamp ng row at start = end − duration
-(millisecond, na kino-convert sa mga decimal na nanosecond). Pinapanatili rin bilang oras ng pagtatapos ang mga makasaysayang timestamp
-na ibinigay ng caller; walang pantukoy ng simula/pagkumpleto sa bawat row.
-Nagiging zero ang null na duration. Nagpapabigo sa batch ang mga di-wasto/nawawalang timestamp sa halip na gumawa
-ng mga di-deterministikong span. Maaaring null ang `ttftMs` at nakamapa ito sa `omniroute.ttft_ms`.
+Isinusulat ng normal na chat attempt logger (`open-sse/handlers/chatCore/attemptLogging.ts`) ang
+`duration = Date.now() - startTime` kapag kumpleto na at hindi nagbibigay ng timestamp;
+itinatakda ng `saveCallLogOperation` sa `src/lib/usage/callLogs.ts` ang timestamp bilang oras ng
+pagsulat (oras ng pagkumpleto) bilang default. Kaya itinatakda ng export ang end bilang
+timestamp ng row at ang start bilang end − duration (milliseconds, na kino-convert sa decimal
+nanoseconds). Pinananatili rin ang mga timestamp sa nakaraan na ibinigay ng caller bilang oras
+ng end; walang discriminator sa bawat row para sa start/completion. Nagiging zero ang null na
+duration. Nagdudulot ng pagkabigo sa batch ang mga invalid o nawawalang timestamp sa halip na
+lumikha ng mga hindi deterministic na span. Nullable ang `ttftMs` at itinatapat sa
+`omniroute.ttft_ms`.
 
-Kabilang sa mga attribute ang `gen_ai.operation.name="chat"`, provider, hiniling/isinagot na modelo,
-mga input/output token, opsyonal na mga cache-read/cache-creation/reasoning token, HTTP status,
-combo, pinagmulan ng cache, session tag, at correlation id. Mga decimal string ang mga integer na OTLP value at timestamp;
-ginagamit ng mga string, boolean, at fractional na numero ang kani-kanilang katutubong OTLP value
-variant. May ERROR status at nilinis na status message ang mga error span. Walang upstream host URL ang canonical
-record, kaya hindi isinasama ang `server.address` sa halip na maling tukuyin
-ang collector bilang model server. Hindi ine-export ang gastos.
+Kabilang sa mga attribute ang `gen_ai.operation.name="chat"`, provider, requested/response
+model, input/output token, mga opsyonal na cache-read/cache-creation/reasoning token, HTTP
+status, combo, cache source, session tag, at correlation id. Ang mga integer na OTLP value at
+timestamp ay mga decimal string; ginagamit ng mga string, boolean, at fractional number ang
+kanilang native OTLP value variant. May ERROR status at sanitized status message ang mga error
+span. Walang upstream host URL ang canonical record, kaya iniiwasang isama ang
+`server.address` sa halip na maling tukuyin ang collector bilang model server. Hindi ine-export
+ang cost.
 
-Ang `includeBodies=true` lamang ang naglo-load ng nilalaman. Kapag `langfuseMapping=false`,
-naglalaman ang `gen_ai.input.messages` / `gen_ai.output.messages` ng nilinis na request/response
-body JSON ayon sa pagkakaimbak ng OmniRoute (ginagawang canonical kapag maaaring i-parse), hindi ng binagong semconv
-messages array. Nananatiling raw text ang mga pinutol/hindi JSON na body. Kapag `langfuseMapping=true`,
-inilalabas lamang ang mga body bilang `langfuse.observation.input` / `langfuse.observation.output`;
-hindi isinasama ang mga attribute na `gen_ai.*.messages` upang isang beses lamang maipadala ang bawat body. Parehong mode
-ang nagmamana ng `maxBodyBytes` mula sa kasalukuyang proseso ng pag-load ng nilalaman;
-minamarkahan ng `omniroute.bodies_truncated=true` ang pagputol.
-Walang idinaragdag na mga karagdagang pipeline snapshot o pagbasa ng mga hindi nilinis na artifact ang destinasyong ito;
-ginagamit ng opsyonal na pagkuha ng request header ang kasalukuyang na-load na client snapshot na inilalarawan sa ibaba.
-Gumamit ng iskedyul na nasa antas ng minuto gaya ng `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` kapag nag-e-export
-ng mga body, sa halip na hayaang maipon ang mga ito kada oras.
+Ang `includeBodies=true` lamang ang nagha-hydrate ng content. Kapag
+`langfuseMapping=false`, taglay ng `gen_ai.input.messages` / `gen_ai.output.messages` ang
+sanitized request/response body JSON ayon sa pagkaka-store ng OmniRoute (naka-canonicalize kapag
+maaaring i-parse), hindi isang binagong semconv messages array. Nananatiling raw text ang mga
+na-clip o hindi JSON na body. Kapag `langfuseMapping=true`, inilalabas lamang ang mga body
+bilang `langfuse.observation.input` / `langfuse.observation.output`; inaalis ang mga
+`gen_ai.*.messages` attribute upang isang beses lamang maipadala ang bawat body. Parehong
+minamana ng mga mode ang `maxBodyBytes` mula sa kasalukuyang hydration path;
+tinutukoy ng `omniroute.bodies_truncated=true` ang clipping.
+Walang idinadagdag na karagdagang pipeline snapshot o unsanitized artifact read ang destinasyong
+ito; ginagamit ng opsyonal na request-header capture ang kasalukuyang hydrated client snapshot
+na inilalarawan sa ibaba. Gumamit ng cadence na nasa antas ng minuto gaya ng
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` kapag nag-e-export ng mga body, sa halip na mag-ipon
+ng hourly backlog.
 
-### Mga opsyonal na client request header
+### Opsyonal na client request header
 
-**Naka-off bilang default** ang pagkuha ng header. Itakda ang `requestHeaderAllowlist` sa configuration ng destinasyon
-at paganahin ang **I-export ang mga prompt at tugon** (`includeBodies: true` sa destinasyon).
-Tumatanggap ang allowlist ng API array o textarea na may mga pangalang pinaghihiwalay ng bagong linya/kuwit:
+**Naka-off bilang default** ang header capture. Itakda ang `requestHeaderAllowlist` sa config
+ng destination at paganahin ang **Export prompts and responses**
+(`includeBodies: true` sa destination).
+Tumatanggap ang allowlist ng API array o textarea na may mga pangalan na pinaghiwalay ng
+newline/comma:
 
 ```json
 {
@@ -340,77 +363,30 @@ Tumatanggap ang allowlist ng API array o textarea na may mga pangalang pinaghihi
 }
 ```
 
-Eksaktong tumutugma ang mga pangalan nang hindi isinasaalang-alang ang laki ng titik, maliban kung ang isang `*` sa pinakadulo ay pumipili ng di-bakanteng
-prefix ng pangalan ng header. Tinatanggihan ang nag-iisang `*`, mga wildcard sa loob ng pangalan, at mga di-wastong pangalan ng HTTP header.
-May hanggang 64 na selector, bawat isa ay may pangalan/prefix na hindi lalampas sa 256 ASCII byte.
-Hiwalay ang setting na ito sa `headers`, na nagpapatunay ng pagkakakilanlan ng exporter sa collector.
+Ang mga pangalan ay nagtutugma nang hindi isinasaalang-alang ang malaking titik at eksakto, maliban kung ang isang nag-iisang pangwakas na `*` ay pumipili ng hindi bakanteng prefix ng pangalan ng header. Tinatanggihan ang nag-iisang `*`, mga wildcard na nasa loob ng pangalan, at mga di-wastong pangalan ng HTTP header. May hanggang 64 na selector, na ang bawat isa ay may pangalan/prefix na hanggang 256 ASCII byte. Hiwalay ang setting na ito sa `headers`, na nagpapatunay sa exporter sa collector.
 
-Binabasa lamang ng pagkuha ang `pipeline_client_request`, na pinupunan mula sa `clientRawRequest`
-(o sa legacy na `clientRequest`) ng naka-save na detalyadong pipeline. Hindi ito kailanman gumagamit ng mga header ng request sa provider bilang fallback.
-Dapat naka-enable ang detalyadong pag-log ng pipeline noong naitala ang request. Kapag
-naka-disable ang `includeBodies`, o kapag nawawala, sira, o naputol ang JSON ng snapshot ng client, walang inilalabas na
-attribute ng header. Maaaring maiwasan ng pagpapataas ng `maxBodyBytes` ang pagkaputol ng snapshot sa oras ng pag-export;
-hindi nito maibabalik ang detalyeng hindi kailanman na-save. Binabalewala ang snapshot na lampas sa 1 MiB o naglalaman ng higit sa
-256 na entry ng header. Nananatiling naka-enable ang kasalukuyang pag-export ng prompt/response kasabay ng
-pagkuha ng header; hindi nagbibigay ang allowlist ng hydration mode para sa mga header lamang.
+Ang capture ay nagbabasa lamang mula sa `pipeline_client_request`, na pinupunan mula sa naka-save na detalyadong pipeline na `clientRawRequest` (o legacy na `clientRequest`). Hindi ito kailanman bumabalik sa mga header ng request ng provider. Dapat ay naka-enable ang detalyadong pag-log ng pipeline noong naitala ang request. Kapag naka-disable ang `includeBodies`, o kapag nawawala, sira, o na-truncate ang JSON ng client snapshot, walang header attribute na inilalabas. Maaaring maiwasan ng pagtaas ng `maxBodyBytes` ang pag-truncate ng snapshot sa oras ng export; hindi nito maibabalik ang detalyeng hindi kailanman nai-save. Hindi pinapansin ang snapshot na lampas 1 MiB o naglalaman ng higit sa 256 header entry. Nananatiling naka-enable ang kasalukuyang prompt/response export kasabay ng header capture; hindi nagbibigay ang allowlist ng hydration mode na headers-only.
 
-Nagiging mga OTLP string array na `http.request.header.<full lowercase header name>` ang mga napiling value,
-kahit para sa iisang string. Halimbawa, ang `X-OmniRoute-Meta-Team: example-team` ay nagiging
-`http.request.header.x-omniroute-meta-team` na may
+Ang mga napiling value ay nagiging mga OTLP string array na `http.request.header.<full lowercase header name>`, kahit iisang string lamang ang laman. Halimbawa, ang `X-OmniRoute-Meta-Team: example-team` ay nagiging `http.request.header.x-omniroute-meta-team` na may
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Pinananatili ang buong prefix: mga karaniwang header ang mga ito, na walang pag-parse ng business field o
-pag-convert sa `omniroute.metadata.*` / metadata ng Langfuse. Hindi binabago ng `langfuseMapping` ang kahulugan
-ng mga header. Itinatakda rin ng napiling `User-Agent` na may iisang value ang karaniwang scalar na
-`user_agent.original`. Hindi hinahati ang mga kuwit sa loob ng isang value. Pinagsasama ang mga variant ng laki ng titik ayon sa naka-save na
-pagkakasunod-sunod ng mga entry; kapag may di-wastong variant, inaalis ang buong header na iyon. Inaayos ang mga attribute ayon sa pangalang nasa maliliit na titik.
+Pinananatili ang buong prefix: mga ordinaryong header ang mga ito, nang walang business-field parsing o conversion sa `omniroute.metadata.*` / Langfuse metadata. Hindi binabago ng `langfuseMapping` ang semantics ng header. Ang isang napiling single-valued na `User-Agent` ay nagtatakda rin ng karaniwang scalar na `user_agent.original`. Hindi hinahati ang mga kuwit na nasa loob ng isang value. Pinagsasama ang mga variant ng malaking titik ayon sa pagkakasunud-sunod ng mga naka-save na entry; kapag may isang di-wastong variant, inaalis ang buong header. Inaayos ang mga attribute ayon sa lowercase na pangalan.
 
-Palaging hindi isinasama ang Authorization, Proxy-Authorization, Cookie, Set-Cookie, mga API-key header, mga pangalang naglalaman ng
-mga panandang auth/token/secret/password/credential, at mga panloob na kredensyal ng gateway,
-kahit napili ang mga ito o bahagyang natakpan sa storage. Ginagamit muli ng mga kilalang pattern ng kredensyal
-ang nakabahaging detector ng kredensyal; inaalis ang mga pananda ng redaction, hindi ine-export bilang ligtas na mga value.
-Mga string at di-bakanteng string array lamang ang tinatanggap; walang sapilitang pag-convert ng mga numero o object.
-Binabalewala ang mga di-wastong pangalan, prototype key, control character (maliban sa horizontal tab), at maling anyo ng Unicode
-nang hindi pinapabigo ang batch o inilalantad ang nilalaman ng mga ito sa mga error.
+Palaging hindi isinasama ang Authorization, Proxy-Authorization, Cookie, Set-Cookie, mga API-key header, mga pangalang naglalaman ng mga marker na auth/token/secret/password/credential, at mga kredensyal ng internal gateway, kahit napili o bahagyang na-mask sa storage. Muling ginagamit ng mga kilalang pattern ng kredensyal ang shared credential detector; inaalis ang mga redaction marker at hindi inilalabas bilang ligtas na value. Mga string at hindi bakanteng string array lamang ang tinatanggap; hindi kino-coerce ang mga numero o object. Binabalewala ang mga di-wastong pangalan, prototype key, control character (maliban sa horizontal tab), at malformed Unicode nang hindi pinapabagsak ang batch o ipinapakita ang nilalaman ng mga ito sa mga error.
 
-Kumukuha ang bawat span ng hanggang 32 header, 16 na value bawat header, 4096 UTF-8 byte bawat value,
-at 16384 na kabuuang UTF-8 byte para sa lahat ng nakuhang pangalan at value ng header. Buong inaalis ang mga header na sobrang laki/di-wasto,
-hindi pinuputol. Ang pagpili ay desisyon ng operator hinggil sa privacy: ang mga pangalang mukhang ligtas
-ay maaari pa ring maglaman ng personal na data, at ang mga limitasyon/detector na ito ay hindi pangkalahatang panlinis ng PII.
+Ang bawat span ay kumukuha ng hanggang 32 header, 16 na value bawat header, 4096 UTF-8 byte bawat value, at kabuuang 16384 UTF-8 byte para sa mga nakuhang pangalan at value ng header. Buong inaalis ang mga header na lampas sa sukat o di-wasto; hindi tina-truncate ang mga ito. Ang pagpili ay desisyon ng operator tungkol sa privacy: maaari pa ring maglaman ng personal na data ang mga pangalang mukhang ligtas, at hindi pangkalahatang PII scrubber ang mga limitasyon/detector na ito.
 
-### Mga limitasyon sa paghahatid
+### Mga limitasyon sa delivery
 
-Nililimitahan ang mga request sa 500 span at 4 MiB ng UTF-8 JSON, kasama ang envelope.
-Sinusuri ang laki ng bawat pinapayagang span bago ang unang request ng isang cursor batch. Kapag ang isang
-span ay mas malaki sa limitasyon, walang ipinapadalang bahagi ng batch na iyon at nabibigo ito na may gabay na babaan ang
-`maxBodyBytes`; hindi ito basta inaalis nang walang abiso. Mga reference lamang ng record at
-bilang ng byte ang pinananatili ng preflight, at itinatapon ang bawat pansamantalang span/JSON; muling binubuo ang mga span para sa mga chunk na may takdang laki
-sa halip na magpanatili ng ikalawang serialized na kopya ng batch. Ang HTTP 408/429/5xx, mga pagkabigo sa network, at mga timeout ay may hanggang
-tatlong pagtatangka, na may 250/500 ms na exponential backoff. Maaaring pahabain ng mga segundo o HTTP date sa `Retry-After`
-ang pagkaantala hanggang 5 segundo. Agad na nabibigo ang ibang status. Nagbubunsod din ng error ang bahagyang pagtanggi sa OTLP 2xx sa halip na
-kilalanin bilang natanggap ang isang nawalang span; tinatanggap ang mga pagkilalang walang laman o may wastong JSON, na may
-64 KiB na limitasyon sa pagbasa ng tugon.
+Nililimitahan ang mga request sa 500 span at 4 MiB ng UTF-8 JSON, kabilang ang envelope. Sinusuri ang laki ng bawat pinapayagang span bago ang unang request ng isang cursor batch. Kapag mas malaki sa limitasyon ang isang span, walang bahagi ng batch na iyon ang ipinapadala at nabibigo ito na may gabay na babaan ang `maxBodyBytes`; hindi ito tahimik na inaalis. Ang preflight ay nagtatago lamang ng mga reference ng record at bilang ng byte, at itinatapon ang bawat pansamantalang span/JSON; muling binubuo ang mga span para sa may-bounding na chunk sa halip na magpanatili ng ikalawang serialized na kopya ng batch. Ang HTTP 408/429/5xx, mga network failure, at timeout ay nagkakaroon ng hanggang tatlong pagtatangka, na may exponential backoff na 250/500 ms. Maaaring pahabain ng `Retry-After` na mga segundo o HTTP date ang delay nang hanggang 5 segundo. Agad na nabibigo ang ibang status. Ang OTLP 2xx partial rejection ay nagdudulot din ng error sa halip na kilalanin ang nawawalang span; tinatanggap ang walang laman o wastong JSON acknowledgement, na may 64 KiB na limitasyon sa pagbasa ng response.
 
-Naglalaman lamang ang mga error ng mga impormasyong mula sa exporter: HTTP status, kategorya ng muling pagtatangka, bilang ng mga pagtatangka at naipadalang
-span, o nakapirming pananalita para sa pagkabigo sa pagkilala/network. Ang mga body ng tugon ng collector,
-bilang ng bahagyang tagumpay, at mga header ng tugon ay hindi kailanman kinokopya sa mga error, log, o sa
-dashboard. Hindi kinikilalang natanggap ang isang nabigo o bahagyang tinanggap na batch: ipinapakita ng destination ang
-Failing kasama ng status na iyon, nananatili ang cursor sa huling batch na kinilalang natanggap, at sa susunod na pagtakbo ay
-muling ipinapadala ang parehong mga row. Patuloy na nabibigo ang mga permanenteng status hanggang sa maayos ang collector o configuration.
-Gamitin ang sariling mga log ng collector para sa mga detalye ng tugon. Pinananatili ng mga buod ng error sa call-log
-ang hiwalay nilang redaction.
-Walang inihahandang resource ang `prepare()`; eksaktong `{"resourceSpans":[]}` ang ipinapadala ng Test at iniuulat nito ang
-HTTP status nang hindi nagsusulat ng mga span ng call-log.
+Ang mga error ay naglalaman lamang ng mga fact na pagmamay-ari ng exporter: HTTP status, retry class, bilang ng mga pagtatangka at ipinadalang span, o nakapirming wording para sa acknowledgement/network failure. Hindi kailanman kinokopya sa mga error, log, o dashboard ang mga body ng response ng collector, bilang ng partial-success, at mga response header. Hindi ina-acknowledge ang nabigo o bahagyang natanggap na batch: ipinapakita ng destination ang Failing na may status na iyon, nananatili ang cursor sa huling na-acknowledge na batch, at muling ipinapadala ng susunod na run ang parehong row. Patuloy na mabibigo ang mga permanenteng status hanggang maayos ang collector o configuration. Gamitin ang sariling log ng collector para sa mga detalye ng response. Pinananatili ng mga error summary ng call-log ang hiwalay nitong redaction.
+Ang `prepare()` ay hindi nagpo-provision ng anuman; ang Test ay eksaktong nagpo-post ng `{"resourceSpans":[]}` at nag-uulat ng HTTP status nang hindi nagsusulat ng call-log span.
 
-Ang mga trace id at span id ay ang unang 32/16 na hex digit ng SHA-256 ng
-`"omniroute.trace\\0" + callLogId` at `"omniroute.span\\0" + callLogId`. Magkaparehong id ang dala ng
-mga muling pagpapadala. Hindi ito garantiya ng deduplication: ang ilang backend, kabilang ang ingestion ng Langfuse
-v4, ay hindi nag-aalis ng mga duplikadong span na may parehong id. Ang pag-crash o bahagyang pagkabigo ng chunk ay maaaring
-magdulot ng muling pagpapadala ng hanggang isang cursor batch na hindi pa kinikilalang natanggap; maaaring madoble ang buong batch na iyon,
-hindi lamang ang huling HTTP chunk nito. Piliin ang laki ng cursor batch nang isinasaalang-alang ang kapalit na iyon.
+Ang mga trace id at span id ay ang unang 32/16 hex digit ng SHA-256 sa `"omniroute.trace\\0" + callLogId` at `"omniroute.span\\0" + callLogId`. Pareho ang id na dala ng mga muling pagpapadala. Hindi ito garantiya ng deduplication: may ilang backend, kabilang ang Langfuse v4 ingestion, na hindi nagde-deduplicate ng mga span na may parehong id. Maaaring muling maipadala ng crash o partial chunk failure ang pinakamarami ay isang hindi na-acknowledge na cursor batch; maaaring ma-duplicate ang buong batch na iyon, hindi lamang ang huling HTTP chunk nito. Isaalang-alang ang tradeoff na ito sa pagpili ng laki ng cursor batch.
 
 ### Halimbawa ng Langfuse
 
-I-configure ang mga field na ito para sa isang self-hosted na instance ng Langfuse:
+I-configure ang mga field na ito para sa self-hosted na Langfuse instance:
 
 ```json
 {
@@ -423,44 +399,41 @@ I-configure ang mga field na ito para sa isang self-hosted na instance ng Langfu
 }
 ```
 
-Lokal na buuin ang value ng Authorization bilang Base64 ng literal na string na `public-key:secret-key`
-(halimbawa, gamit ang `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Huwag mag-paste ng mga tunay na kredensyal sa mga log, screenshot, o issue. Awtomatikong
-itinatakda ng mapping ang `x-langfuse-ingestion-version: 4`; ibinibigay pa rin ang Authorization sa `headers`.
-Parehong ginagamit ng mga header at ng nabuong identity salt ang kasalukuyang mekanismo ng naka-encrypt na secret field
-at mga placeholder ng API; kinakailangan ang `STORAGE_ENCRYPTION_KEY`.
+Buuin nang lokal ang Authorization value bilang Base64 ng literal na string na `public-key:secret-key` (halimbawa, gamit ang `Buffer.from(publicKey + ":" + secretKey).toString("base64")`). Huwag maglagay ng totoong kredensyal sa mga log, screenshot, o issue. Awtomatikong itinatakda ng mapping ang `x-langfuse-ingestion-version: 4`; ibinibigay pa rin ang Authorization sa `headers`.
+Parehong gumagamit ang mga header at ang nabuong identity salt ng umiiral na mekanismo para sa mga naka-encrypt na secret field at mga API placeholder; kinakailangan ang `STORAGE_ENCRYPTION_KEY`.
 
-Nagdaragdag ang mapping ng uri/modelo ng generation, mga detalye ng paggamit sa JSON (input/output/kabuuan at mga available na
-cache key), mga snapshot ng input/output sa JSON, antas na ERROR/DEFAULT, nilinis na mensahe ng status,
-pangalan ng trace, session id, opsyonal na environment at nafi-filter na
-`langfuse.observation.metadata.<key>` para sa provider, hiniling na modelo, path, combo, pinagmulan ng
-cache at status. Ang `langfuse.observation.completion_start_time` ay nasa ISO 8601 sa
-oras ng pagsisimula + TTFT lamang kapag alam ang TTFT at nasa loob ito ng tagal. Walang ipinapadalang mga attribute ng gastos.
+Idinaragdag ng mapping ang generation type/model, mga detalye ng paggamit ng JSON (input/output/total at mga available na
+cache key), mga snapshot ng JSON input/output, level na ERROR/DEFAULT, nilinis na status message,
+trace name, session id, opsyonal na environment at nafi-filter na
+`langfuse.observation.metadata.<key>` para sa provider, hinihinging model, path, combo, pinagmulan
+ng cache at status. Ang `langfuse.observation.completion_start_time` ay nasa ISO 8601 sa
+simula + TTFT lamang kapag alam ang TTFT at nasa loob ito ng duration. Walang ipinapadalang attribute para sa gastos.
 
 Nalalapat ang mga identity mode sa `langfuse.user.id`:
 
 - `pseudonymous` (default): HMAC-SHA256 ng internal id ng API key gamit ang random na
-  32-byte salt para sa bawat destinasyon. Binubuo ang salt sa paggawa kung wala pa ito, ini-encrypt
-  bilang `identitySalt`, hindi kailanman ibinabalik, at pinapanatili sa mga pag-edit. Hindi kailanman
-  inilalagay ang mga raw key id sa mga span attribute. Nagbabago ang mga identity kapag muling ginawa/pinalitan ang salt ng isang destinasyon.
-- `keyName`: ang naka-configure na pangalan ng API key, na sadyang inilalantad ang label na iyon ng operator.
-- `none`: walang user id. Ini-export pa rin ang mga session tag kapag mayroon; hindi ginagawang
-  anonymous ng mga mode na ito ang anumang nilalaman ng prompt o mga label ng session/correlation na ibinigay ng operator.
+  32-byte salt para sa bawat destination. Ginagawa ang salt sa paglikha kung wala ito, ine-encrypt
+  bilang `identitySalt`, hindi kailanman ibinabalik, at pinananatili sa panahon ng mga pag-edit.
+  Hindi kailanman inilalagay ang mga raw key id sa mga span attribute. Ang muling paglikha o pag-rotate
+  ng salt ng isang destination ay nagpapalit ng mga identity.
+- `keyName`: ang naka-configure na pangalan ng API key, na sadyang naglalantad ng label ng operator.
+- `none`: walang user id. Ine-export pa rin ang mga session tag kapag mayroon; hindi ina-anonymize
+  ng mga mode na ito ang arbitraryong prompt content o mga session/correlation label na ibinigay ng operator.
 
 ### Pagsisimula nang walang backfill
 
-Sa paggawa lamang, i-enable ang **Magsimula sa kasalukuyang posisyon (laktawan ang mga umiiral na log)** o ipasa ang
-`startFromCurrentPosition: true` sa pinakamataas na antas ng payload ng create API. Itinatakda nito ang paunang halaga ng
-`cursor_row_id` sa kasalukuyang pinakamataas na pinanatiling rowid ng call-log gamit ang mga umiiral na cursor
-helper, nang walang migration. Ang default ay false (cursor 0 at backfill ng pinanatiling kasaysayan).
-Hindi ito setting para sa pag-reset ng cursor sa oras ng pag-update.
+Sa paglikha lamang, paganahin ang **Magsimula sa kasalukuyang posisyon (laktawan ang mga umiiral na log)** o ipasa ang
+`startFromCurrentPosition: true` sa top level ng create API payload. Inisyalisa nito ang
+`cursor_row_id` sa kasalukuyang maximum na retained call-log rowid gamit ang mga umiiral na cursor
+helper, nang walang migration. Ang default ay false (cursor 0 at backfill ng retained history).
+Hindi ito setting para sa pag-reset ng cursor sa oras ng update.
 
-Ang pagdaragdag ng nakabahaging `ttftMs` ay nagdaragdag din ng nullable na column na `ttft_ms` sa BigQuery mapper
-at schema ng bagong table: hinihingi ng schema test nito na may katumbas na
-column ang bawat field ng canonical record. Patuloy na nag-e-export ang mga umiiral na table nang walang pagbabago: binabasa ng `prepare()` ang schema ng table at
-inaalis lamang ang `ttft_ms` kapag wala ang column na iyon. Idagdag ang nullable na INT64 column upang makuha ang TTFT
-sa susunod na pagtakbo, o gumamit ng bagong table. Hindi kailangan ng PATCH, awtomatikong pagbabago ng schema o karagdagang
-mga pahintulot; nananatili ang mahigpit na pagsusuri ng schema para sa lahat ng iba pang field ng row.
+Ang ibinahaging pagdaragdag ng `ttftMs` ay nagdaragdag din ng nullable na `ttft_ms` column sa BigQuery mapper
+at sa new-table schema: hinihingi ng schema test nito na ang bawat canonical record field ay may
+column. Patuloy na nag-e-export nang hindi nagbabago ang mga umiiral na table: binabasa ng `prepare()` ang table schema
+at inaalis lamang ang `ttft_ms` kapag wala ang column na iyon. Idagdag ang nullable na INT64 column para makuha ang TTFT
+sa susunod na run, o gumamit ng bagong table. Hindi nagti-trigger ng schema update ang opsyonal na TTFT column. Ang mga column para sa ebidensiya ng paggamit
+ay sumusunod sa conditional, opt-in compatibility flow sa ibaba; nananatiling mahigpit ang schema checking para sa iba pang row field.
 
 ---
 
@@ -487,13 +460,20 @@ Dalawang tuntunin para sa bagong destinasyon:
 
 ## 7. Pagpapatakbo nito
 
-- **Dashboard**: Mga Integrasyon → Pag-export ng log. Magdagdag ng destinasyon, patakbuhin ang **Subukan** para suriin ang mga kredensyal
+- **Dashboard**: Mga Integrasyon → Pag-export ng log. Magdagdag ng destinasyon, isagawa ang **Subukan** upang suriin ang mga kredensyal
   nang hindi nagsusulat ng mga row, pagkatapos ay paganahin ito.
-- **Mga nakabinbin**: ipinapakita ng bawat card ng destinasyon ang mga nakabinbing row at ang cursor; ibinabalik ng `GET
-/api/log-export/status` ang parehong mga bilang kasama ang huling 20 pagpapatakbo ng job.
-- **Hindi pinapabigo ng isang pumapalya na destinasyon ang iba** — itinatala ng buod ng pagpapatakbo ang status ng bawat destinasyon
-  sa `last_status` / `last_error`, at pinananatili ng kasaysayan ng pagpapatakbo ng job ang pinagsama-samang resulta.
-- **Kapag nag-delete ng destinasyon, made-delete rin ang cursor nito.** Kapag idinagdag itong muli, magsisimula ito sa pinakamatandang pinanatiling
-  call log, kaya muling maipapadala ang mga row na maaaring nasa destinasyon na. Sa BigQuery, pinipigilan ng `insertId` ng bawat row
-  ang pagdodoble ngunit sa loob lamang ng sariling palugit ng BigQuery para sa pag-aalis ng duplicate, kaya mas piliing i-disable
-  ang destinasyon kaysa i-delete ito.
+- **Backlog**: ipinapakita ng bawat card ng destinasyon ang mga nakabinbing row at ang cursor; `GET
+/api/log-export/status` ay nagbabalik ng parehong mga numero kasama ang huling 20 pagtakbo ng job.
+- **Hindi pinapabagsak ng bagsak na destinasyon ang iba** — itinatala ng buod ng pagtakbo ang status ng bawat destinasyon sa `last_status` / `last_error`, at pinananatili ng kasaysayan ng pagtakbo ng job ang pinagsama-samang resulta.
+- **Ang pagtanggal ng destinasyon ay nagtatanggal ng cursor nito.** Kapag muli itong idinagdag, magsisimula ito sa pinakamatandang natitirang call log, kaya muli nitong ipapadala ang mga row na maaaring nasa destinasyon na. Sa BigQuery, sinasalo lamang ng bawat-row na `insertId` ang ganitong duplicate sa loob ng sariling window ng pag-deduplicate ng BigQuery, kaya mas mainam na huwag paganahin ang isang destinasyon kaysa tanggalin ito.
+
+### Pagkakatugma ng schema para sa ebidensiya ng paggamit
+
+Kasama sa mga bagong talahanayan ng BigQuery ang nullable na `usage_evidence` (STRING na naglalaman ng JSON) at
+`usage_estimated` (BOOL). Kapag naka-enable ang `autoCreate`, maaari lamang makatanggap ang isang umiiral na talahanayan ng
+mga nawawalang nullable na column na ito. Pinananatili ng exporter ang buong umiiral na
+schema, kasama ang metadata ng field, at nagsusumite ng conditional PATCH gamit ang ibinalik na etag. Nabibigo ang pag-export kapag may kasabay na pagbabago sa schema sa halip na ma-overwrite
+ito; babasahin muli ng susunod na pagtakbo ang talahanayan.
+
+Kapag naka-disable ang `autoCreate`, idagdag mismo ang mga column na ito bago mag-export ng mga record
+na may ebidensiya ng paggamit. Pinipigilan din ng nawawalang metadata ng schema/etag o ng nabigong update ang mga insert na may ebidensiya. Hindi sumusulong ang export cursor kapag nangyari ang pagkabigong iyon at hindi kailanman tahimik na itinatapon ang ebidensiya. Patuloy pa ring nalalapat ang lokal na retention ng log habang naka-block ang isang export, kaya lutasin ang pagkabigo bago mag-expire ang mga source row na nasa retention.

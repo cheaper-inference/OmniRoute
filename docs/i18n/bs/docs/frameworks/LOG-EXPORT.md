@@ -199,139 +199,151 @@ vraćenih opisa polja, pa novo odredište ne zahtijeva izmjenu korisničkog inte
 
 Konfiguracijski ključevi (`type: "bigquery"`):
 
-| Ključ                | Napomene                                                                        |
-| -------------------- | ------------------------------------------------------------------------------- |
-| `projectId`          | GCP projekt koji sadrži skup podataka                                           |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                 |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                 |
-| `location`           | Koristi se samo kada je potrebno kreirati skup podataka (zadano `EU`)           |
-| `serviceAccountJson` | Ključ servisnog računa. Tajni podatak: šifriran u mirovanju, nikada se ne vraća |
-| `autoCreate`         | Kreiranje skupa podataka i tabele pri prvom izvozu (zadano `true`)              |
+| Ključ                | Napomene                                                                                                         |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | GCP projekat koji sadrži skup podataka                                                                           |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                  |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                  |
+| `location`           | Koristi se samo kada skup podataka treba biti kreiran (zadano `EU`)                                              |
+| `serviceAccountJson` | Ključ servisnog naloga. Tajna vrijednost: šifrovana u stanju mirovanja, nikada se ne vraća                       |
+| `autoCreate`         | Kreira skup podataka/tabelu koji nedostaju; uslovno dodaje nullable kolone s dokazima o upotrebi (zadano `true`) |
 
-Servisnom računu potrebna je dozvola `bigquery.tables.updateData` za ciljnu tabelu, kao i
+Servisnom nalogu je potreban `bigquery.tables.updateData` za ciljnu tabelu, kao i
 `bigquery.datasets.create` / `bigquery.tables.create` kada je `autoCreate` uključen.
+Ažuriranje postojeće tabele radi dodavanja dva nullable polja s dokazima o upotrebi također zahtijeva
+`bigquery.tables.update`. Nedostajuća dozvola prekida izvoz bez pomjeranja kursora.
 
-Konfigurirana grupa je jedinica **kursora**, a ne HTTP zahtjeva: `send()` je dijeli na insertAll
-pozive s najviše 500 redova, pa velika vrijednost `batch_size` ne može prekoračiti BigQuery ograničenje od 10 MB po zahtjevu.
-Prolazni statusi (408/429/500/502/503/504) ponavljaju se do tri puta uz eksponencijalno
-povećavanje vremena čekanja, uz ponovnu upotrebu istih insertIds vrijednosti; greške autentifikacije i sheme izazivaju izuzetak pri prvom pokušaju umjesto
-da nepotrebno troše izvršavanje.
+Konfigurisana grupa je jedinica **kursora**, a ne HTTP-a: `send()` je dijeli na pozive insertAll
+s najviše 500 redova, tako da veliki `batch_size` ne može prekoračiti BigQueryjevo ograničenje zahtjeva od 10 MB.
+Privremeni statusi (408/429/500/502/503/504) ponavljaju se najviše tri puta uz eksponencijalno
+odstupanje, uz ponovnu upotrebu istih insertId vrijednosti; greške autentifikacije i šeme izazivaju izuzetak pri prvom pokušaju
+umjesto da potroše izvršavanje.
 
-Tabela kreirana prije nekoliko trenutaka još nije vidljiva krajnjoj tački za streaming, koja nekoliko sekundi vraća 404. Taj odgovor 404 pokreće ponovni pokušaj, ali **samo ako je tabela kreirana tokom ovog izvršavanja** —
-tabela koja zaista nedostaje i dalje odmah uzrokuje neuspjeh. Imajte na umu da ponovno kreiranje tabele pod nazivom koji
-je nedavno izbrisan dovodi do toga da BigQuery nekoliko minuta odbija streaming umetanja; to je
-svojstvo postupka brisanja pa ponovnog kreiranja, stoga radije koristite novi naziv tabele nego da postojeću izbrišete i ponovo dodate.
+Tabela kreirana prije nekoliko trenutaka još nije vidljiva streaming krajnjoj tački, koja odgovara
+statusom 404 nekoliko sekundi. Taj 404 se ponavlja, ali **samo kada je ova tabela kreirana u okviru ovog izvršavanja** —
+tabela koja zaista nedostaje i dalje odmah izaziva neuspjeh. Imajte na umu da ponovno kreiranje tabele pod
+nazivom koji je nedavno obrisan dovodi do toga da BigQuery odbija streaming umetanja nekoliko minuta;
+to je svojstvo postupka brisanja pa ponovnog kreiranja, zato je bolje koristiti novi naziv tabele nego obrisati i ponovo dodati postojeću.
 
 **Djelimični neuspjeh stiže kao HTTP 200 s nepraznim `insertErrors[]`.** To se tretira kao
-neuspjeh i izaziva izuzetak, čime se sprečava da kursor napreduje preko redova koje BigQuery nikada nije
-prihvatio; `tests/unit/log-export-bigquery.test.ts` provjerava ovo ponašanje.
+neuspjeh i izaziva izuzetak, čime se zaustavlja pomjeranje kursora iznad redova koje BigQuery nikada nije prihvatio;
+`tests/unit/log-export-bigquery.test.ts` potvrđuje ovo ponašanje.
 
-Prijenos koristi obični REST — samopotpisana RS256 tvrdnja razmjenjuje se za pristupni token na
-`https://oauth2.googleapis.com/token`, a zatim se redovi šalju na `tabledata.insertAll`. Google SDK se ne
-uključuje. Pristupni tokeni keširaju se unutar procesa za svaki par (servisni račun, opseg).
+Transport je obični REST — samopotpisana RS256 tvrdnja razmjenjuje se za pristupni token na
+`https://oauth2.googleapis.com/token`, a zatim se redovi šalju u `tabledata.insertAll`. Ne uključuje se nijedan Google SDK.
+Pristupni tokeni keširaju se u okviru procesa po kombinaciji (servisni nalog, opseg).
 
-Kreirana tabela sadrži po jednu kolonu za svako polje s kartice Evidencije, uz `exported_at`, i organizirana je prema
-načinu na koji se evidencije poziva zaista pretražuju:
+Kreirana tabela sadrži po jednu kolonu za svako polje kartice Logs, kao i `exported_at`, a raspoređena je prema
+načinu na koji se dnevnici poziva stvarno upituju:
 
-- **Particionirana po danima prema `timestamp`**, tako da upit ograničen datumom skenira samo te dane.
-- **Grupirana u klastere prema `api_key_name`, `provider`, `model`, `status`** (tim redoslijedom), tako da filtriranje prema
-  tome ko je pokrenuo poziv, kamo je poslan ili je li završio neuspjehom isključuje blokove unutar svake particije. BigQuery
-  dozvoljava najviše četiri kolone za klasteriranje, a redoslijed je važan: filter samo po `api_key_name`
-  isključuje blokove, dok filter samo po `status` to ne radi.
-- **Opcionalno zadržavanje particija** putem `partitionExpirationDays` (0 zadržava sve), primjenjuje se
-  pri kreiranju tabele.
+- **Particionisana po danima na osnovu `timestamp`**, tako da upit ograničen datumom skenira samo te dane.
+- **Klasterizovana prema `api_key_name`, `provider`, `model`, `status`** (tim redoslijedom), tako da filtriranje prema
+  tome ko ju je pokrenuo, kamo je zahtjev upućen ili da li nije uspio izbacuje blokove unutar svake particije. BigQuery
+  dozvoljava najviše četiri kolone za klasterizaciju, a redoslijed je bitan: filter samo na `api_key_name` uklanja blokove,
+  dok ih filter samo na `status` ne uklanja.
+- **Opcionalno zadržavanje particija** putem `partitionExpirationDays` (0 zadržava sve), primijenjeno
+  prilikom kreiranja tabele.
 
-Obje postavke primjenjuju se pri kreiranju. Postojeća tabela zadržava svoju trenutnu organizaciju, stoga
+Obje postavke primjenjuju se prilikom kreiranja. Postojeća tabela zadržava raspored koji već ima, zato
 usmjerite odredište na novi ID tabele ako ih želite primijeniti.
 
-`tests/unit/log-export-bigquery.test.ts` provjerava da mapiranje i shema tabele ostaju
-usklađeni, tako da nijedna nova kolona evidencije poziva ne može biti neprimjetno izostavljena pri izvozu.
+`tests/unit/log-export-bigquery.test.ts` potvrđuje da mapper i šema tabele ostaju
+usklađeni, tako da nova kolona dnevnika poziva ne može neprimjetno biti izostavljena pri slanju.
 
-Grupe se dijele na dijelove prema **oba** kriterija: broju redova i serijaliziranoj veličini u bajtovima. Sam broj redova nije dovoljan
-kada se izvozi i sadržaj zahtjeva: 500 redova koji sadrže upite može zauzimati desetine megabajta, a insertAll
-odbija zahtjev veći od 10 MB. Dijelovi se zatvaraju na 500 redova ili 9 MB, zavisno od toga šta se prije dostigne.
+Grupe se dijele prema **broju redova i serijalizovanim bajtovima**. Sam broj redova nije dovoljan
+kada se izvoze sadržaji: 500 redova koji sadrže upite mogu zauzimati desetine megabajta, a insertAll
+odbija zahtjev veći od 10 MB. Grupe se zatvaraju na 500 redova ili 9 MB, šta god nastupi prvo.
 
 ---
 
 ## 5. Odredište za OTLP/HTTP tragove
 
-Konfiguracija koristi `type: "otlp-http"`. Ovo je zakazani izvoz trajno pohranjenih
-zapisa poziva koji koristi kursor, a ne odredište za prijem događaja usmjeravanja uživo po principu najboljeg napora u
-`open-sse/services/routing/otel.ts`. Ne čita niti mijenja varijable okruženja,
-tajmere ili međuspremnike tog odredišta. Omogućavanje oba može proizvesti dvije nezavisne vrste raspona;
-koristite opseg instrumentacije `omniroute.log-export` da biste razlikovali ove raspone zapisa poziva.
+Konfiguracija koristi `type: "otlp-http"`. Ovo je zakazani izvoz sa podrškom za kursor
+pohranjenih dnevnika poziva, a ne sink za usmjeravanje događaja uživo uz najbolji napor u
+`open-sse/services/routing/otel.ts`. Ne čita niti mijenja varijable okruženja, tajmere ili
+baferе tog sinka. Omogućavanje oba može proizvesti dvije nezavisne vrste spanova;
+koristite instrumentacioni opseg `omniroute.log-export` da biste razlikovali ove spanove
+dnevnika poziva.
 
-| Ključ                    | Zadana vrijednost / namjena                                                                   |
-| ------------------------ | --------------------------------------------------------------------------------------------- |
-| `endpoint`               | Obavezan puni HTTP(S) URL za tragove; sufiks `/v1/traces` se ne dodaje                        |
-| `headers`                | Opcionalni redovi `Name: value` ili JSON objekt stringova; šifrirano                          |
-| `requestHeaderAllowlist` | Prazno (isključeno); nazivi/prefiksi klijentskih zaglavlja za bilježenje kao atributi raspona |
-| `serviceName`            | `omniroute`; resurs `service.name`                                                            |
-| `langfuseMapping`        | `false`; dodaje Langfuse atribute generisanja/sesije/korisnika                                |
-| `identity`               | `pseudonymous`, `keyName` ili `none`                                                          |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                       |
-| `timeoutMs`              | `30000` po HTTP pokušaju                                                                      |
-| `environment`            | Nije postavljeno; opcionalni `langfuse.environment`                                           |
+| Ključ                    | Podrazumijevano / svrha                                                                      |
+| ------------------------ | -------------------------------------------------------------------------------------------- |
+| `endpoint`               | Obavezni puni URL za HTTP(S) tragove; sufiks `/v1/traces` se ne dodaje                       |
+| `headers`                | Opcionalne linije `Name: value` ili JSON objekat stringova; šifrovano                        |
+| `requestHeaderAllowlist` | Prazno (isključeno); nazivi/prefiksi zaglavlja klijenta koji se hvataju kao atributi spanova |
+| `serviceName`            | `omniroute`; resurs `service.name`                                                           |
+| `langfuseMapping`        | `false`; dodaje Langfuse atribute generacije/sesije/korisnika                                |
+| `identity`               | `pseudonymous`, `keyName` ili `none`                                                         |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                      |
+| `timeoutMs`              | `30000` po HTTP pokušaju                                                                     |
+| `environment`            | Nije postavljeno; opcionalni `langfuse.environment`                                          |
 
-Generička kontrolna ploča prikazuje ova polja. `paths` prihvata API niz ili tekstualno područje
-s tačnim putanjama odvojenim novim redovima/zarezima. Putanje za ugradnje, ponovno rangiranje i ostale putanje
-preskaču se osim ako nisu izričito dozvoljene. Preskočeni redovi i dalje pomjeraju kursor; brojači
-`exported`/`exportedTotal` postojećeg izvršavača broje obrađene izvorne redove, uključujući filtrirane
-redove, umjesto prihvaćenih raspona. Filtriranje se obavlja u podređenom procesu, bez promjene njegovog
-IPC/kursor ugovora.
+Generička kontrolna tabla prikazuje ova polja. `paths` prihvata API niz ili tekstualno
+polje sa tačnim putanjama razdvojenim novim redovima/zarezima. Embeddings, rerank i druge
+putanje se preskaču osim ako nisu izričito dozvoljene. Preskočeni redovi i dalje pomjeraju
+kursor; brojači `exported`/`exportedTotal` postojećeg pokretača računaju obrađene izvorne
+redove, uključujući filtrirane redove, a ne prihvaćene spanove. Filtriranje se obavlja u
+podređenom procesu, bez mijenjanja njegovog IPC/ugovora za kursor.
 
-Validacija URL-a koristi pomoćnu funkciju `parseAndValidateNonMetadataUrl`, koja ne koristi bazu podataka, iz
-`src/shared/network/outboundUrlGuard.ts`: pravilo `block-metadata`. Ima iste
-bezuslovne provjere metapodataka/protokola/ugrađenih pristupnih podataka kao validator webhookova s
-dozvoljenim privatnim URL-ovima, ali namjerno dopušta localhost/LAN odredišta bez globalnog
-nadjačavanja zastavice funkcionalnosti. To omogućava samostalno hostovane Langfuse, Phoenix, Tempo i Collector
-krajnje tačke, uključujući privatne HTTP krajnje tačke. Hostovi metapodataka u oblaku uvijek su blokirani.
-Preusmjeravanja se ne prate, pa kolektor ne može preusmjeriti pristupne podatke na drugi host.
-Kao i postojeća leksička zaštita URL-ova, ovo ne fiksira DNS razrješavanje; konfigurirajte samo
-hostove pod kontrolom operatera. Dajte prednost HTTPS-u kad god krajnja tačka nije na pouzdanoj mreži.
+Validacija URL-a koristi pomoćnu funkciju bez baze podataka
+`parseAndValidateNonMetadataUrl` iz `src/shared/network/outboundUrlGuard.ts`: pravilo
+`block-metadata`. Ima iste bezuslovne provjere metapodataka/protokola/ugrađenih vjerodajnica
+kao validator webhooka, uz dozvoljene privatne URL-ove, ali namjerno dozvoljava localhost/LAN
+odredišta bez globalnog nadjačavanja zastavice funkcije. Ovo omogućava krajnje tačke za
+samostalno hostovane Langfuse, Phoenix, Tempo i Collector instance, uključujući privatne
+HTTP krajnje tačke. Hostovi cloud metapodataka su uvijek blokirani.
+Preusmjeravanja se ne prate, tako da kolektor ne može preusmjeriti vjerodajnice na drugi
+host. Kao i postojeća leksička zaštita URL-ova, ovo ne zaključava DNS rezoluciju; konfigurišite
+samo hostove kojima upravlja operater. Dajte prednost HTTPS-u kada krajnja tačka nije na
+pouzdanoj mreži.
 
 ### Sadržaj i isporuka
 
 OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) prenosi jedan
-CLIENT raspon po dozvoljenom redu, nazvan prema njegovoj tačnoj putanji zahtjeva. Imenovanje prema putanji razlikuje
-Chat Completions, Responses i Messages bez uključivanja podataka o modelu ili identitetu u
-naziv raspona. Atributi resursa uključuju `service.name` i `service.version` paketa.
+CLIENT span po dozvoljenom redu, nazvan njegovom tačnom putanjom zahtjeva. Imenovanje
+putanje razlikuje Chat Completions, Responses i Messages bez ugrađivanja podataka o modelu
+ili identitetu u naziv spana. Atributi resursa uključuju `service.name` i `service.version`
+paketa.
 
-Uobičajeni zapisivač pokušaja razgovora (`open-sse/handlers/chatCore/attemptLogging.ts`) zapisuje
-`duration = Date.now() - startTime` po završetku i ne dostavlja vremensku oznaku;
-`saveCallLogOperation` u `src/lib/usage/callLogs.ts` podrazumijevano postavlja vremensku oznaku na vrijeme upisa
-(završetka). Izvoz stoga postavlja kraj = vremenska oznaka reda i početak = kraj − trajanje
-(milisekunde, pretvorene u decimalne nanosekunde). Historijske vremenske oznake koje dostavi pozivalac
-također se čuvaju kao vrijeme završetka; ne postoji oznaka po redu koja razlikuje početak od završetka.
-Trajanje null postaje nula. Nevažeće/nedostajuće vremenske oznake uzrokuju neuspjeh paketa umjesto stvaranja
-nedeterminističkih raspona. `ttftMs` može biti null i mapira se na `omniroute.ttft_ms`.
+Uobičajeni zapisivač pokušaja razgovora (`open-sse/handlers/chatCore/attemptLogging.ts`) upisuje
+`duration = Date.now() - startTime` pri završetku i ne obezbjeđuje vremensku oznaku;
+`saveCallLogOperation` u `src/lib/usage/callLogs.ts` podrazumijevano postavlja vremensku oznaku
+na vrijeme upisa (završetka). Izvoz zato postavlja kraj = vremenska oznaka reda, a početak =
+kraj − trajanje (u milisekundama, pretvoreno u decimalne nanosekunde). Vremenske oznake koje
+je pozivalac obezbijedio iz prošlosti takođe se čuvaju kao vrijeme završetka; ne postoji
+razlikovanje početka/završetka po redu. Null trajanje postaje nula. Nevažeće/nedostajuće
+vremenske oznake dovode do neuspjeha grupe umjesto stvaranja nedeterminističkih spanova.
+`ttftMs` može biti null i mapira se na `omniroute.ttft_ms`.
 
-Atributi uključuju `gen_ai.operation.name="chat"`, pružaoca usluge, traženi model/model odgovora,
-ulazne/izlazne tokene, opcionalne tokene čitanja keša/kreiranja keša/rezonovanja, HTTP status,
-kombinaciju, izvor keša, oznaku sesije i korelacijski identifikator. Cjelobrojne OTLP vrijednosti i vremenske oznake
-su decimalni stringovi; stringovi, logičke vrijednosti i razlomljeni brojevi koriste svoje izvorne OTLP
-varijante vrijednosti. Rasponi grešaka imaju status ERROR i sanitiziranu statusnu poruku. Kanonski
-zapis nema URL uzvodnog hosta, pa se `server.address` izostavlja umjesto da se
-kolektor pogrešno identificira kao server modela. Trošak se ne izvozi.
+Atributi uključuju `gen_ai.operation.name="chat"`, provajdera, zatraženi/model odgovora,
+ulazne/izlazne tokene, opcionalne tokene za čitanje keša/stvaranje keša/rezonovanje, HTTP
+status, kombinaciju, izvor keša, oznaku sesije i ID korelacije. Cjelobrojne OTLP vrijednosti
+i vremenske oznake su decimalni stringovi; stringovi, logičke vrijednosti i razlomljeni
+brojevi koriste svoje izvorne OTLP varijante vrijednosti. Spanovi grešaka imaju status
+ERROR i sanitizovanu statusnu poruku. Kanonski zapis nema URL hosta uzvodnog sistema, pa se
+`server.address` izostavlja umjesto da se kolektor netačno identifikuje kao server modela.
+Trošak se ne izvozi.
 
-Samo `includeBodies=true` učitava sadržaj. Uz `langfuseMapping=false`,
-`gen_ai.input.messages` / `gen_ai.output.messages` prenose sanitizirani JSON tijela
-zahtjeva/odgovora onako kako ga pohranjuje OmniRoute (kanoniziran kada se može parsirati), a ne preoblikovani semconv
-niz poruka. Skraćena tijela/tijela koja nisu JSON ostaju sirovi tekst. Uz `langfuseMapping=true`,
-tijela se šalju samo kao `langfuse.observation.input` / `langfuse.observation.output`;
-atributi `gen_ai.*.messages` se izostavljaju tako da se svako tijelo šalje jednom. Oba načina
-nasljeđuju `maxBodyBytes` iz postojećeg postupka učitavanja;
+Samo `includeBodies=true` učitava sadržaj. Kada je `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` sadrže sanitizovani JSON tijela
+zahtjeva/odgovora kako ga je pohranio OmniRoute (kanonizovan kada ga je moguće parsirati),
+a ne preoblikovani niz poruka semconv. Skraćena/ne-JSON tijela ostaju neobrađeni tekst.
+Kada je `langfuseMapping=true`, tijela se emituju samo kao
+`langfuse.observation.input` / `langfuse.observation.output`; atributi
+`gen_ai.*.messages` se izostavljaju kako bi svako tijelo bilo poslano jednom. Oba načina
+nasljeđuju `maxBodyBytes` iz postojeće putanje učitavanja;
 `omniroute.bodies_truncated=true` označava skraćivanje.
-Ovo odredište ne dodaje dodatne snimke stanja cjevovoda niti čitanja nesanitiziranih artefakata;
-opcionalno bilježenje zaglavlja zahtjeva koristi postojeći učitani snimak klijenta opisan u nastavku.
-Koristite interval u minutama, kao što je `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, pri izvozu
-tijela, umjesto nakupljanja zaostalih podataka tokom jednog sata.
+Ovo odredište ne dodaje dodatne snimke cjevovoda niti čitanja nesanitizovanih artefakata;
+opcionalno hvatanje zaglavlja zahtjeva koristi postojeći učitani snimak klijenta opisan u
+nastavku. Koristite učestalost na nivou minuta, kao što je
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, kada izvozite tijela, umjesto gomilanja
+satnog zaostatka.
 
-### Opcionalna zaglavlja klijentskih zahtjeva
+### Opcionalna zaglavlja zahtjeva klijenta
 
-Bilježenje zaglavlja je **podrazumijevano isključeno**. Postavite `requestHeaderAllowlist` u konfiguraciji odredišta
+Hvatanje zaglavlja je **podrazumijevano isključeno**. Postavite `requestHeaderAllowlist` u konfiguraciji odredišta
 i omogućite **Izvoz upita i odgovora** (`includeBodies: true` na odredištu).
-Lista dozvoljenih vrijednosti prihvata API niz ili tekstualno područje s nazivima odvojenim novim redovima/zarezima:
+Lista dozvoljenih vrijednosti prihvata API niz ili tekstualno polje sa nazivima razdvojenim
+novim redovima/zarezima:
 
 ```json
 {
@@ -339,77 +351,65 @@ Lista dozvoljenih vrijednosti prihvata API niz ili tekstualno područje s nazivi
 }
 ```
 
-Nazivi se podudaraju tačno i bez razlikovanja velikih i malih slova, osim ako jedan završni `*` odabire neprazan
-prefiks naziva zaglavlja. Samostalni `*`, ugrađeni zamjenski znakovi i nevažeći nazivi HTTP zaglavlja se odbacuju.
-Dozvoljena su najviše 64 selektora, svaki s nazivom/prefiksom od najviše 256 ASCII bajtova.
-Ova postavka je odvojena od `headers`, koji autentificira izvoznik kod kolektora.
+Imena se podudaraju bez obzira na velika i mala slova i potpuno, osim kada jedan završni `*` odabire neprazni prefiks naziva zaglavlja. Samostalni `*`, ugrađeni zamjenski znakovi i nevažeći HTTP nazivi zaglavlja odbacuju se.
+Postoji najviše 64 selektora, a svaki ima naziv/prefiks od najviše 256 ASCII bajtova.
+Ova postavka je odvojena od `headers`, koji autentifikuje izvoznik prema kolektoru.
 
-Hvatanje čita samo `pipeline_client_request`, popunjen iz `clientRawRequest` sačuvanog detaljnog toka obrade
-(ili naslijeđenog `clientRequest`). Nikada se ne koristi rezervno čitanje zaglavlja zahtjeva prema pružaocu usluge.
-Detaljno evidentiranje toka obrade moralo je biti omogućeno kada je zahtjev zabilježen. Kada je
-`includeBodies` onemogućen ili kada JSON snimka stanja klijenta nedostaje, oštećen je ili skraćen, ne emituju se
-atributi zaglavlja. Povećanje `maxBodyBytes` može spriječiti skraćivanje snimka stanja prilikom izvoza;
-ne može vratiti detalje koji nikada nisu sačuvani. Snimak stanja veći od 1 MiB ili koji sadrži više od
-256 unosa zaglavlja se zanemaruje. Postojeći izvoz upita/odgovora ostaje omogućen uz
-hvatanje zaglavlja; lista dozvoljenih stavki ne pruža režim učitavanja samo zaglavlja.
+Hvatanje čita samo `pipeline_client_request`, popunjen iz sačuvanog detaljnog pipeline-a putem
+`clientRawRequest` (ili naslijeđenog `clientRequest`). Nikada se ne vraća na zaglavlja zahtjeva provajdera.
+Detaljno evidentiranje pipeline-a moralo je biti omogućeno u trenutku zapisivanja zahtjeva. Kada je
+`includeBodies` onemogućen ili kada nedostaje, oštećen je ili skraćen JSON snimka klijenta, atributi zaglavlja se ne emituju. Povećanje vrijednosti `maxBodyBytes` može spriječiti skraćivanje snimka pri izvozu;
+ne može vratiti detalje koji nikada nisu sačuvani. Snimak veći od 1 MiB ili onaj koji sadrži više od
+256 unosa zaglavlja ignoriše se. Postojeći izvoz prompta/odgovora ostaje omogućen uz hvatanje
+zaglavlja; lista dozvoljenih ne pruža režim hidratacije samo za zaglavlja.
 
 Odabrane vrijednosti postaju OTLP nizovi stringova `http.request.header.<full lowercase header name>`,
-čak i za jedan string. Naprimjer, `X-OmniRoute-Meta-Team: example-team` postaje
-`http.request.header.x-omniroute-meta-team` s
+čak i kada postoji samo jedan string. Na primjer, `X-OmniRoute-Meta-Team: example-team` postaje
+`http.request.header.x-omniroute-meta-team` sa
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Puni prefiks se zadržava: ovo su obična zaglavlja, bez parsiranja poslovnih polja ili
-pretvaranja u `omniroute.metadata.*` / Langfuse metapodatke. `langfuseMapping` ne mijenja semantiku
-zaglavlja. Odabrani `User-Agent` s jednom vrijednošću također postavlja standardni skalarni atribut
-`user_agent.original`. Zarezi unutar jedne vrijednosti ne služe za razdvajanje. Varijante velikih i malih slova spajaju se prema sačuvanom
-redoslijedu unosa; bilo koja nevažeća varijanta dovodi do izostavljanja cijelog tog zaglavlja. Atributi su poredani prema nazivu malim slovima.
+Cijeli prefiks se zadržava: ovo su obična zaglavlja, bez parsiranja poslovnih polja ili pretvaranja u
+`omniroute.metadata.*` / Langfuse metapodatke. `langfuseMapping` ne mijenja semantiku zaglavlja. Odabrano zaglavlje `User-Agent` s jednom vrijednošću takođe postavlja standardni skalarni atribut
+`user_agent.original`. Zarezi unutar jedne vrijednosti ne razdvajaju se. Varijante velikih i malih slova spajaju se redoslijedom sačuvanih unosa; svaka nevažeća varijanta izostavlja cijelo zaglavlje. Atributi su poredani prema nazivu napisanim malim slovima.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, zaglavlja API ključeva, nazivi koji sadrže
-oznake auth/token/secret/password/credential i interne pristupne vjerodajnice mrežnog prolaza uvijek se
-isključuju, čak i ako su odabrani ili djelimično maskirani u pohrani. Poznati obrasci vjerodajnica koriste
-zajednički detektor vjerodajnica; oznake redakcije se izostavljaju, a ne izvoze kao sigurne vrijednosti.
-Prihvataju se samo stringovi i neprazni nizovi stringova; brojevi i objekti se ne pretvaraju.
-Nevažeći nazivi, ključevi prototipa, kontrolni znakovi (osim horizontalnog tabulatora) i neispravan Unicode
-zanemaruju se bez izazivanja neuspjeha grupe ili prikazivanja njihovog sadržaja u greškama.
+`Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie`, zaglavlja API ključeva, nazivi koji sadrže
+oznake auth/token/secret/password/credential i interni pristupni podaci gatewaya uvijek se izuzimaju, čak i ako su odabrani ili djelimično maskirani u memoriji. Poznati obrasci pristupnih podataka ponovo koriste zajednički detektor pristupnih podataka; oznake redakcije se izostavljaju, a ne izvoze kao sigurne vrijednosti.
+Prihvataju se samo stringovi i neprazni nizovi stringova; brojevi i objekti se ne pretvaraju automatski.
+Nevažeći nazivi, prototipski ključevi, kontrolni znakovi (osim horizontalne tabulacije) i neispravan Unicode ignorišu se bez neuspjeha serije ili odražavanja njihovog sadržaja u greškama.
 
-Svaki raspon hvata najviše 32 zaglavlja, 16 vrijednosti po zaglavlju, 4096 UTF-8 bajtova po vrijednosti
-i ukupno 16384 UTF-8 bajta u nazivima i vrijednostima uhvaćenih zaglavlja. Prevelika/nevažeća zaglavlja
-izostavljaju se u cijelosti, ne skraćuju se. Odabir je odluka operatera u vezi s privatnošću: nazivi koji djeluju sigurno
-i dalje mogu sadržavati lične podatke, a ova ograničenja/detektori nisu opći alat za uklanjanje ličnih podataka.
+Svaki span obuhvata najviše 32 zaglavlja, 16 vrijednosti po zaglavlju, 4096 UTF-8 bajtova po vrijednosti i ukupno 16384 UTF-8 bajtova kroz uhvaćene nazive i vrijednosti zaglavlja. Prevelika/nevažeća zaglavlja izostavljaju se u cijelosti, a ne skraćuju. Odabir je odluka operatora o privatnosti: nazivi koji izgledaju bezopasno i dalje mogu sadržavati lične podatke, a ova ograničenja i detektori nisu opšti alat za uklanjanje PII-ja.
 
 ### Ograničenja isporuke
 
-Zahtjevi su ograničeni na 500 raspona i 4 MiB UTF-8 JSON-a, uključujući omotnicu.
-Veličina svakog dozvoljenog raspona provjerava se prije prvog zahtjeva grupe kursora. Pojedinačni
-raspon veći od ograničenja sprečava slanje bilo kojeg dijela te grupe i uzrokuje grešku s uputom da se smanji
-`maxBodyBytes`; ne odbacuje se neprimjetno. Prethodna provjera zadržava samo reference na zapise i
-brojeve bajtova, odbacujući svaki privremeni raspon/JSON; rasponi se ponovo grade za dijelove ograničene veličine
-umjesto zadržavanja druge serijalizirane kopije grupe. HTTP 408/429/5xx, mrežni kvarovi i isteci vremena imaju najviše
-tri pokušaja, s eksponencijalnim odgodama od 250/500 ms. `Retry-After` u sekundama ili HTTP datumima
-može produžiti odgodu do 5 sekundi. Ostali statusi odmah uzrokuju neuspjeh. Djelimično odbijanje uz OTLP 2xx također izaziva grešku umjesto
-potvrđivanja izgubljenog raspona; prihvataju se prazne potvrde ili potvrde u važećem JSON formatu, uz
+Zahtjevi su ograničeni na 500 spanova i 4 MiB UTF-8 JSON-a, uključujući omotač.
+Veličina svakog dozvoljenog spana provjerava se prije prvog zahtjeva serije kursora. Pojedinačni
+span veći od ograničenja ne šalje nijedan dio te serije i ne uspijeva uz uputstvo da se smanji
+`maxBodyBytes`; ne odbacuje se nečujno. Predprovjera zadržava samo reference zapisa i broj bajtova,
+odbacujući svaki privremeni span/JSON; spanovi se ponovo izgrađuju za ograničene dijelove umjesto
+da se zadržava druga serijalizovana kopija serije. HTTP 408/429/5xx, mrežne greške i prekoračenja vremena dobijaju najviše
+tri pokušaja, uz eksponencijalno čekanje od 250/500 ms. `Retry-After` u sekundama ili HTTP datumi
+mogu produžiti čekanje do 5 sekundi. Ostali statusi odmah uzrokuju neuspjeh. Djelimično odbijanje OTLP-a
+sa statusom 2xx takođe uzrokuje grešku umjesto potvrđivanja izgubljenog spana; prazne ili važeće JSON potvrde prihvataju se, uz
 ograničenje čitanja odgovora od 64 KiB.
 
-Greške sadrže samo činjenice koje pripadaju izvozniku: HTTP status, kategoriju ponovnog pokušaja, broj pokušaja i broj poslanih
-raspona ili fiksne poruke o neuspjehu potvrde/mreže. Tijela odgovora kolektora,
-brojevi djelimičnih uspjeha i zaglavlja odgovora nikada se ne kopiraju u greške, dnevnike ili
-kontrolnu ploču. Neuspješna ili djelimično prihvaćena grupa ne potvrđuje se: odredište prikazuje
-status neuspjeha s tim statusom, kursor ostaje na posljednjoj potvrđenoj grupi, a sljedeće pokretanje
+Greške sadrže samo činjenice kojima upravlja izvoznik: HTTP status, klasu ponovnog pokušaja, broj pokušaja i broj poslatih spanova ili fiksni tekst o neuspjehu potvrde/mreže. Tijela odgovora kolektora,
+brojevi djelimično uspješnih obrada i zaglavlja odgovora nikada se ne kopiraju u greške, dnevnike ili kontrolnu tablu. Neuspješna ili djelimično prihvaćena serija se ne potvrđuje: odredište prikazuje
+Failing sa tim statusom, kursor ostaje na posljednjoj potvrđenoj seriji, a sljedeće pokretanje
 ponovo šalje iste redove. Trajni statusi nastavljaju uzrokovati neuspjeh dok se kolektor ili konfiguracija
-ne isprave. Za detalje odgovora koristite vlastite dnevnike kolektora. Sažeci grešaka u dnevniku poziva zadržavaju
+ne poprave. Za detalje odgovora koristite vlastite dnevnike kolektora. Sažeci grešaka u dnevniku poziva zadržavaju
 svoju zasebnu redakciju.
-`prepare()` ne priprema nikakve resurse; Test šalje tačno `{"resourceSpans":[]}` i prijavljuje
-HTTP status bez upisivanja raspona u dnevnik poziva.
+`prepare()` ne obezbjeđuje ništa; Test objavljuje tačno `{"resourceSpans":[]}` i prijavljuje
+HTTP status bez upisivanja spanova dnevnika poziva.
 
-Identifikatori tragova i raspona su prvih 32/16 heksadecimalnih cifara SHA-256 vrijednosti izračunate nad
-`"omniroute.trace\\0" + callLogId` i `"omniroute.span\\0" + callLogId`. Ponovna slanja nose
-identične identifikatore. Ovo nije garancija deduplikacije: neki pozadinski sistemi, uključujući Langfuse
-v4 prijem podataka, ne uklanjaju duplikate raspona s istim identifikatorom. Pad sistema ili djelimični neuspjeh dijela može
-ponovo poslati najviše jednu nepotvrđenu grupu kursora; cijela ta grupa može biti duplicirana,
-a ne samo njen posljednji HTTP dio. Odaberite veličinu grupe kursora imajući ovaj kompromis na umu.
+ID-ovi tragova i ID-ovi spanova su prvih 32/16 heksadecimalnih cifara SHA-256 vrijednosti nad
+`"omniroute.trace\\0" + callLogId` i `"omniroute.span\\0" + callLogId`. Ponovna slanja imaju
+identične ID-ove. Ovo nije garancija uklanjanja duplikata: neki sistemi za pozadinsku obradu, uključujući Langfuse
+v4 ingestion, ne uklanjaju duplikate spanova sa istim ID-om. Pad sistema ili neuspjeh djelimičnog dijela može
+ponovo poslati najviše jednu nepotvrđenu seriju kursora; cijela ta serija može biti duplirana,
+a ne samo njen posljednji HTTP dio. Veličinu serije kursora odaberite imajući u vidu ovaj kompromis.
 
-### Primjer za Langfuse
+### Langfuse primjer
 
-Konfigurirajte ova polja za samostalno hostovanu Langfuse instancu:
+Konfigurišite ova polja za samostalno hostovanu instancu Langfusea:
 
 ```json
 {
@@ -422,44 +422,43 @@ Konfigurirajte ova polja za samostalno hostovanu Langfuse instancu:
 }
 ```
 
-Lokalno izradite vrijednost Authorization kao Base64 kodiranje doslovnog stringa `public-key:secret-key`
-(naprimjer pomoću `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Ne lijepite stvarne vjerodajnice u dnevnike, snimke ekrana ili prijave problema. Mapiranje automatski
+Lokalno izgradite vrijednost Authorization kao Base64 literalnog stringa `public-key:secret-key`
+(na primjer pomoću `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Ne unosite stvarne pristupne podatke u dnevnike, snimke ekrana ili prijave problema. Mapiranje automatski
 postavlja `x-langfuse-ingestion-version: 4`; Authorization se i dalje navodi u `headers`.
-I zaglavlja i generirana sol za identitet koriste postojeći mehanizam šifriranih tajnih polja
-i API zamjenske vrijednosti; potreban je `STORAGE_ENCRYPTION_KEY`.
+I zaglavlja i generisana sol identiteta koriste postojeći mehanizam šifrovanih tajnih polja i API rezervirana mjesta; potreban je `STORAGE_ENCRYPTION_KEY`.
 
-Mapiranje dodaje tip/model generisanja, JSON detalje o korištenju (ulaz/izlaz/ukupno i dostupne
-ključeve predmemorije), JSON snimke ulaza/izlaza, nivo ERROR/DEFAULT, pročišćenu statusnu poruku,
-naziv traga, ID sesije, opcionalno okruženje i
-`langfuse.observation.metadata.<key>` koji se može filtrirati za pružaoca usluge, traženi model, putanju, kombinaciju, izvor
-predmemorije i status. `langfuse.observation.completion_start_time` je u formatu ISO 8601 i izračunava se kao
-početak + TTFT samo kada je TTFT poznat i unutar trajanja. Atributi troškova se ne šalju.
+Mapiranje dodaje tip/model generisanja, detalje o korištenju JSON-a (ulaz/izlaz/ukupno i dostupni
+ključevi keša), snimke JSON ulaza/izlaza, nivo ERROR/DEFAULT, sanitiziranu poruku statusa,
+naziv traga, ID sesije, opcionalno okruženje i filtrabilne
+`langfuse.observation.metadata.<key>` vrijednosti za pružaoca, traženi model, putanju, kombinaciju, izvor
+keša i status. `langfuse.observation.completion_start_time` je u formatu ISO 8601 i postavlja se na
+vrijeme početka + TTFT samo kada je TTFT poznat i unutar trajanja. Atributi troška se ne šalju.
 
-Režimi identiteta primjenjuju se na `langfuse.user.id`:
+Načini identiteta primjenjuju se na `langfuse.user.id`:
 
-- `pseudonymous` (zadano): HMAC-SHA256 internog ID-a API ključa s nasumičnom
-  32-bajtnom soli za svako odredište. Sol se generiše pri kreiranju ako nije prisutna, šifrira
-  kao `identitySalt`, nikada se ne vraća i zadržava se tokom izmjena. Neobrađeni ID-ovi ključeva nikada
-  se ne stavljaju u atribute raspona. Ponovno kreiranje/rotacija soli odredišta mijenja identitete.
-- `keyName`: konfigurisani naziv API ključa, koji namjerno otkriva tu oznaku operatera.
-- `none`: nema ID-a korisnika. Oznake sesije i dalje se izvoze kada su prisutne; ovi režimi ne
-  anonimiziraju proizvoljan sadržaj upita niti oznake sesije/korelacije koje je unio operater.
+- `pseudonymous` (zadano): HMAC-SHA256 internog ID-a API ključa sa nasumičnim solima od 32 bajta
+  za svako odredište. Sól se generiše pri kreiranju ako ne postoji, šifrira kao
+  `identitySalt`, nikada se ne vraća i zadržava se tokom izmjena. Sirovi ID-ovi ključeva nikada se ne
+  stavljaju u atribute raspona. Ponovno kreiranje ili rotiranje soli odredišta mijenja identitete.
+- `keyName`: konfigurisani naziv API ključa, čime se namjerno otkriva ta oznaka operatora.
+- `none`: bez korisničkog ID-a. Oznake sesije se i dalje izvoze kada postoje; ovi načini ne
+  anonimiziraju proizvoljni sadržaj upita niti oznake sesije/korespondencije koje je naveo operator.
 
-### Pokretanje bez naknadnog učitavanja historije
+### Pokretanje bez naknadnog popunjavanja
 
-Samo pri kreiranju omogućite **Počni od trenutne pozicije (preskoči postojeće zapise)** ili proslijedite
-`startFromCurrentPosition: true` na najvišem nivou tijela zahtjeva API-ja za kreiranje. Time se inicijalizira
-`cursor_row_id` na trenutni najveći zadržani rowid dnevnika poziva pomoću postojećih pomoćnih funkcija
-za kursor, bez migracije. Zadana vrijednost je false (kursor 0 i naknadno učitavanje zadržane historije).
-Ovo nije postavka za resetovanje kursora prilikom ažuriranja.
+Samo pri kreiranju omogućite **Pokreni s trenutne pozicije (preskoči postojeće zapisnike)** ili proslijedite
+`startFromCurrentPosition: true` na najvišem nivou korisnog sadržaja zahtjeva API-ja za kreiranje. Time se
+`cursor_row_id` inicijalizuje na trenutni maksimalni zadržani rowid dnevnika poziva koristeći postojeće
+pomoćnike kursora, bez migracije. Zadana vrijednost je false (kursor 0 i naknadno popunjavanje
+zadržane historije). Ovo nije postavka za resetovanje kursora prilikom ažuriranja.
 
-Zajednički dodatak `ttftMs` također dodaje kolonu `ttft_ms` koja dopušta null vrijednosti u BigQuery mapper
-i shemu nove tabele: test sheme zahtijeva da svako polje kanonskog zapisa ima
-kolonu. Postojeće tabele nastavljaju izvoz bez promjena: `prepare()` čita shemu tabele i
-izostavlja samo `ttft_ms` kada ta kolona nedostaje. Dodajte kolonu tipa INT64 koja dopušta null vrijednosti da biste dobili TTFT
-pri sljedećem pokretanju ili koristite novu tabelu. Nisu potrebni PATCH, automatska izmjena sheme niti dodatne
-dozvole; sva ostala polja reda zadržavaju strogu provjeru sheme.
+Zajedničko dodavanje `ttftMs` takođe dodaje nullable kolonu `ttft_ms` u BigQuery mapiranje
+i shemu nove tabele: test sheme zahtijeva da svako kanonsko polje zapisa ima kolonu. Postojeće tabele nastavljaju
+izvoziti nepromijenjene podatke: `prepare()` čita shemu tabele i izostavlja samo `ttft_ms` kada ta kolona ne postoji. Dodajte nullable kolonu INT64 da biste dobili TTFT
+pri sljedećem pokretanju ili koristite novu tabelu. Opcionalna kolona TTFT ne pokreće ažuriranje sheme. Kolone s dokazima o korištenju
+slijede uslovni tok kompatibilnosti uz eksplicitno uključivanje u nastavku; ostala polja redova zadržavaju strogu
+provjeru sheme.
 
 ---
 
@@ -486,13 +485,25 @@ Dva pravila za novo odredište:
 
 ## 7. Korištenje
 
-- **Kontrolna ploča**: Integracije → Izvoz zapisnika. Dodajte odredište, pokrenite **Test** da provjerite pristupne podatke
+- **Kontrolna ploča**: Integracije → Izvoz dnevnika. Dodajte odredište, pokrenite **Testiraj** da provjerite vjerodajnice
   bez upisivanja redova, a zatim ga omogućite.
-- **Zaostali redovi**: svaka kartica odredišta prikazuje redove na čekanju i kursor; `GET
-/api/log-export/status` vraća iste podatke uz posljednjih 20 izvršavanja zadatka.
-- **Neuspjeh jednog odredišta ne uzrokuje neuspjeh ostalih** — sažetak izvršavanja bilježi status za svako odredište
-  u `last_status` / `last_error`, a historija izvršavanja zadatka čuva zbirni status.
-- **Brisanjem odredišta briše se i njegov kursor.** Ponovno dodavanje počinje od najstarijeg sačuvanog
-  zapisnika poziva, čime se ponovo šalju redovi koje odredište možda već ima. U BigQueryju vrijednost
-  `insertId` za svaki red sprečava duplikate samo unutar BigQueryjevog vlastitog vremenskog okvira za deduplikaciju, pa je bolje onemogućiti
-  odredište nego ga izbrisati.
+- **Zaostatak**: kartica svakog odredišta prikazuje redove na čekanju i kursor; `GET
+/api/log-export/status` vraća iste vrijednosti, uz posljednjih 20 pokretanja poslova.
+- **Odredište koje ne uspije ne obara ostala odredišta** — sažetak pokretanja bilježi status po odredištu
+  u `last_status` / `last_error`, a historija pokretanja poslova čuva zbirni rezultat.
+- **Brisanjem odredišta briše se njegov kursor.** Ponovno dodavanje počinje od najstarijeg zadržanog
+  dnevničkog poziva, što ponovo šalje redove koje odredište možda već sadrži. U BigQueryju `insertId` po redu
+  sprečava duplikate samo unutar BigQueryjevog vlastitog vremenskog prozora za uklanjanje duplikata, zato je bolje
+  onemogućiti odredište nego ga brisati.
+
+### Kompatibilnost sheme dokaza o korištenju
+
+Nove BigQuery tabele uključuju nullable `usage_evidence` (STRING koji sadrži JSON) i
+`usage_estimated` (BOOL). Kada je `autoCreate` omogućen, postojeća tabela može primiti
+samo ove nedostajuće nullable kolone. Izvoznik čuva punu postojeću shemu, uključujući metapodatke polja,
+i šalje uslovni PATCH koristeći vraćeni etag. Istovremena promjena sheme neuspješno završava izvoz umjesto da je prepiše;
+sljedeće pokretanje ponovo čita tabelu.
+
+Kada je `autoCreate` onemogućen, sami dodajte ove kolone prije izvoza zapisa
+s dokazima o korištenju. Nedostajući metapodaci sheme/etaga ili neuspješno ažuriranje takođe sprečavaju umetanja koja sadrže dokaze. Kursor izvoza
+ne napreduje pri tom neuspjehu i dokazi se nikad ne odbacuju nečujno. Lokalno zadržavanje dnevnika i dalje se primjenjuje dok je izvoz blokiran, zato riješite neuspjeh prije nego što zadržani izvorni redovi isteknu.

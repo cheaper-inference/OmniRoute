@@ -842,85 +842,176 @@ Zgodne z OpenAI przetwarzanie wsadowe.
 
 ## API wyszukiwania
 
-Abstrakcja dostawców wyszukiwania w sieci (Tavily, Brave, Exa, Serper itp.).
+Abstrakcja dostawcy wyszukiwania w internecie (Tavily, Brave, Exa, Serper itd.).
 
-| Metoda | Ścieżka                | Opis                                                                                                                    |
-| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Lista skonfigurowanych dostawców wyszukiwania i ich możliwości                                                          |
-| POST   | `/v1/search`           | Wykonanie zapytania wyszukiwania — treść jest walidowana przez `v1SearchSchema`, obsługuje buforowanie i łączenie żądań |
-| GET    | `/v1/search/analytics` | Statystyki trafień/opóźnień/buforowania dla poszczególnych dostawców                                                    |
+| Metoda | Ścieżka                | Opis                                                                                                               |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | Lista skonfigurowanych dostawców wyszukiwania i ich możliwości                                                     |
+| POST   | `/v1/search`           | Uruchomienie zapytania wyszukiwania — treść jest walidowana przez `v1SearchSchema`, obsługuje buforowanie/scalanie |
+| GET    | `/v1/search/analytics` | Statystyki trafień/opóźnień/buforowania dla poszczególnych dostawców                                               |
 
 **Uwierzytelnianie:** klucz API Bearer (`extractApiKey` + `isValidApiKey`). Zasady wyszukiwania są egzekwowane za pomocą `enforceApiKeyPolicy`.
 
-**Automatyczny wybór:** bez `provider` najpierw uruchamiany jest najtańszy dostawca z skonfigurowanym połączeniem, a kolejny najtańszy jest używany awaryjnie. Darmowi dostawcy ostatniej szansy (`duckduckgo-free`) są używani tylko wtedy, gdy nic innego nie jest skonfigurowane. Samodzielnie hostowany SearXNG jest uznawany za skonfigurowany, gdy jego połączenie przechowuje rzeczywisty `baseUrl` (a nie domyślny adres katalogu `http://localhost:8888/search`): wtedy jest klasyfikowany jako dostawca za $0 przed dostawcami wymagającymi klucza, a najtańszy dostawca wymagający klucza jest używany awaryjnie, także gdy SearXNG odpowiada kodem 400, 401, 403 lub 404. Wartość `baseUrl`, która nie jest prawidłowym adresem URL `http(s)` lub wskazuje adres metadanych chmurowych, nie jest uwzględniana. Połączenie SearXNG, w którym przechowywany jest token, jest klasyfikowane w ten sposób tylko dla adresów `https://` lub lokalnych `http://`. W przypadku zdalnego, nieszyfrowanego `http://` nigdy nie jest używane awaryjnie i pozostaje dostawcą ostatniej szansy — jest używane tylko wtedy, gdy żaden inny dostawca nie jest skonfigurowany lub gdy zostanie wskazane z nazwy, więc w tych dwóch przypadkach token jest wysyłany jawnym tekstem.
+### Nazwane kombinacje wyszukiwania/pobierania
+
+Zarówno `POST /v1/search`, jak i `POST /v1/web/fetch` akceptują `model` jako nazwę zapisanej kombinacji.
+Użyj `model` albo jawnego `provider`; wysłanie obu pól zwraca `400`.
+Bez żadnego z tych pól istniejący automatyczny wybór dostawcy pozostaje bez zmian.
+
+Zarówno narzędzie do tworzenia kombinacji, jak i jego katalog Add Model udostępniają natywne wpisy operacji internetowych
+dla połączonych dostawców, nawet jeśli nie mają oni listy modeli LLM. Serper wyświetla **Web search**;
+Tavily wyświetla **Web search / Page extraction**, a dostawcy obsługujący wyłącznie pobieranie wyświetlają **Page extraction**.
+Wybierz wpis i konto jak zwykle. Pojedynczy wpis Tavily obsługuje oba punkty końcowe internetowe;
+te wpisy operacji nie są dodawane do selektorów klientów obsługujących wyłącznie czat ani do sond modeli czatu.
+
+Na przykład utwórz kombinację **priority** o nazwie `shared-free` z następującymi celami w podanej kolejności:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Następnie użyj tej samej nazwy w każdym interfejsie:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Wyszukiwanie uwzględnia kolejno Tavily i Serper; pobieranie uwzględnia kolejno Tavily i Jina Reader;
+czat pomija dedykowanych dostawców wyszukiwania/pobierania i uwzględnia OpenAI. Zgodność
+wynika z rejestrów wykonawców wyszukiwania/pobierania, a nie ze słów w nazwie modelu.
+Filtrowanie poprzedza wybór danych uwierzytelniających i wysłanie żądania, a zapisanej kombinacji
+nigdy nie modyfikuje.
+
+Trasy obsługujące możliwości inne niż czat obsługują `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` i `p2c`. Strategie syntezy przeznaczone wyłącznie dla czatu, takie jak
+`fusion`, `pipeline` i `context-relay`, są odrzucane na trasach innych niż czat, zamiast być
+niejawnie stosowane do wyszukiwania lub generowania multimediów.
+Istniejący silnik kombinacji obsługuje uporządkowany fallback, w tym błędy limitów przydziału po stronie dostawcy,
+i zachowuje identyfikatory kroków, przypisania kont, listy dozwolonych kont dla poszczególnych kroków, odwołania zagnieżdżone,
+zakresy połączeń/limitów przydziału wywołującego oraz zasady dostępu do kombinacji. Wyniki zachowują natywny
+schemat wyszukiwania/pobierania, w tym faktycznego dostawcę; `X-OmniRoute-Combo-Trace` identyfikuje
+decyzję routingu. Nieznane kombinacje zwracają `404`; nieaktywne kombinacje oraz kombinacje
+bez kompatybilnych celów zwracają `400`.
+
+Każda próba użycia kombinacji korzysta z jednego jawnego dostawcy. Nie może ona wywołać natywnej automatycznej
+puli dostawców znajdującej się za kombinacją. Żądania z jawnym dostawcą zachowują dotychczasowe
+zachowanie pojedynczego dostawcy. Bezpośrednie żądania czatu kierowane do dedykowanych dostawców wyszukiwania/pobierania
+zwracają możliwy do wykorzystania JSON `400`, zamiast przechodzić do wykonawcy w stylu OpenAI.
+
+### Trasy kombinacji zależne od możliwości
+
+Zapisane kombinacje mogą zawierać obiekt `routes`, którego kluczami są możliwości API. Każda trasa ma
+własną listę celów, strategię i konfigurację uruchomieniową. Najwyższego poziomu `models`, `strategy` i `config`
+pozostają planem czatu zgodnym ze starszymi wersjami; stare kombinacje bez `routes` nadal działają bez zmian.
+
+Obsługiwane klucze tras to `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` i `audio-generation`. Projekcja punktu końcowego odbywa się przed wyborem danych uwierzytelniających,
+oceną lub wysłaniem żądania. Zagnieżdżone odwołania do kombinacji wybierają trasę kombinacji podrzędnej dla tej samej możliwości.
+
+`POST /v1/music/generations` i `POST /v1/ocr` akceptują nazwę kombinacji w polu `model`. Natywny,
+zgodny z ElevenLabs punkt końcowy `POST /v1/music` również akceptuje nazwę kombinacji w polu `model_id`, ale każdy użyteczny
+cel na tym natywnym punkcie końcowym musi być muzycznym modelem ElevenLabs, aby zachować jego binarny kontrakt odpowiedzi.
+`POST /v1/sound-generation` akceptuje kombinację `audio-generation` w polu `model_id` przy zachowaniu
+tego samego ograniczenia dotyczącego natywnego formatu binarnego. Użyj `/v1/music/generations` dla heterogenicznych dostawców muzyki.
+
+**Automatyczny wybór:** bez `provider` najpierw uruchamiany jest najtańszy dostawca z skonfigurowanym połączeniem,
+a następnym najtańszym jest dostawca awaryjny. Darmowi dostawcy ostatniej szansy (`duckduckgo-free`) są
+używani tylko wtedy, gdy nic innego nie jest skonfigurowane. Samodzielnie hostowany SearXNG jest uznawany za skonfigurowany,
+gdy jego połączenie przechowuje rzeczywisty `baseUrl` (a nie domyślny adres katalogu `http://localhost:8888/search`): wtedy
+jest klasyfikowany jako dostawca o koszcie 0 USD przed dostawcami wymagającymi klucza, a najtańszy dostawca wymagający klucza
+jest dostawcą awaryjnym, także gdy SearXNG odpowiada kodem 400, 401, 403 lub 404. Wartość `baseUrl`, która nie jest prawidłowym
+adresem URL `http(s)` lub wskazuje adres metadanych chmurowych, nie jest brana pod uwagę. Połączenie SearXNG, które przechowuje token,
+jest klasyfikowane w ten sposób wyłącznie dla `https://` lub lokalnego `http://`. W przypadku zdalnego, nieszyfrowanego `http://`
+nigdy nie jest dostawcą awaryjnym i pozostaje dostawcą ostatniej szansy — jest używane tylko wtedy, gdy żaden inny dostawca nie jest
+skonfigurowany lub gdy zostanie wywołane po nazwie, przez co w tych dwóch przypadkach token jest wysyłany jawnym tekstem.
 
 ### `provider_options` Exa i Tavily
 
 Exa i Tavily odczytują pola specyficzne dla dostawcy z przestrzeni nazw:
 `provider_options.exa` (lub `provider_options["exa-search"]`) oraz `provider_options.tavily`
-(lub `provider_options["tavily-search"]`). Przekazywane są wyłącznie klucze wymienione poniżej. Każdy z nich jest sprawdzany względem własnego schematu Zod w pliku
-`open-sse/handlers/search/providerOptionsPassthrough.ts`, a klucz o nieprawidłowym typie jest odrzucany. Każdy inny klucz jest ignorowany, w tym dane uwierzytelniające, bazowy adres URL, `stream` i `outputSchema`. Płaskie klucze używane przez innych dostawców (`cx`, `depth`, ...) działają jak wcześniej.
+(lub `provider_options["tavily-search"]`). Przekazywane są wyłącznie poniższe klucze. Każdy z nich jest
+sprawdzany względem własnego schematu Zod w `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+a klucz z nieprawidłowym typem jest pomijany. Wszystkie inne klucze są ignorowane, w tym dane
+uwierzytelniające, bazowy URL, `stream` i `outputSchema`. Płaskie klucze używane przez innych
+dostawców (`cx`, `depth`, ...) działają tak jak wcześniej.
 
-| Dostawca | Pola najwyższego poziomu                                                                                                                                                                                                                                                                                                                                                  | Zagnieżdżone                                                                                                                                      |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (płaskie wartości prymitywne), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` scalane z wartościami domyślnymi `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                 |
+| Dostawca | Pola najwyższego poziomu                                                                                                                                                                                                                                                                                                                                                  | Zagnieżdżone                                                                                                                                    |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (płaskie wartości prymitywne), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` scalowane z domyślną wartością `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
 
-Pola ogólne zawsze mają pierwszeństwo: `query`, `max_results`, `filters` (domeny), `country` oraz temat wyprowadzony z `search_type`. W Exa wartość `search_type: "news"` zachowuje `category: "news"`.
+Pola ogólne zawsze mają pierwszeństwo: `query`, `max_results`, `filters` (domeny), `country` oraz
+temat wyprowadzony z `search_type`. W Exa `search_type: "news"` zachowuje `category: "news"`.
 Tavily akceptuje również `search_type: "finance"` (`topic: "finance"`).
 
-Koszt wyszukiwania Firecrawl jest rejestrowany za każdy rozpoczęty blok 10 zwróconych wyników — $0.002 (2 kredyty) za blok, przy czym za każde wywołanie naliczany jest co najmniej jeden blok
-([cennik Firecrawl](https://docs.firecrawl.dev/billing)): 11 wyników kosztuje $0.004.
+Koszt wyszukiwania Firecrawl jest rejestrowany za każdy rozpoczęty blok 10 zwróconych wyników po
+0,002 USD (2 kredyty) za blok, przy czym na każde wywołanie przypada co najmniej jeden blok
+([rozliczenia Firecrawl](https://docs.firecrawl.dev/billing)): 11 wyników kosztuje 0,004 USD.
 
-Ogólne pole `time_range` jest teraz przekazywane do obu dostawców: Exa otrzymuje `startPublishedDate` (znacznik czasu ISO), a Tavily `start_date` (`YYYY-MM-DD`). Jawna data w `provider_options` zastępuje zmapowaną wartość.
+Ogólne pole `time_range` jest teraz przekazywane obu dostawcom: Exa otrzymuje
+`startPublishedDate` (znacznik czasu ISO), a Tavily `start_date` (`YYYY-MM-DD`). Jawna data w
+`provider_options` zastępuje zmapowaną wartość.
 
-Wyniki Exa zachowują `id`, `highlights` (każde wyróżnienie, a nie tylko pierwsze użyte jako
-`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` i `extras` w `provider_raw`. Wyniki Tavily zachowują `images` i `favicon`.
+Wyniki Exa zachowują `id`, `highlights` (każdy wyróżniony fragment, nie tylko pierwszy użyty jako
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` oraz `extras` w
+`provider_raw`. Wyniki Tavily zachowują `images` i `favicon`.
 
-Koszt wyszukiwania Linkup jest rejestrowany jako $0.005 dla `depth` `fast` i `standard` oraz $0.05 dla
-`deep` ([cennik Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
+Koszt wyszukiwania Linkup jest rejestrowany jako 0,005 USD dla `depth` `fast` i `standard` oraz
+0,05 USD dla `deep` ([cennik Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
 niezależnie od tego, czy `depth` pochodzi z `provider_options`, czy z ustawień połączenia.
 
-Exa `type: "lite"` (Exa 3.0) akceptuje mniejszy zestaw pól i odrzuca całe żądanie,
-gdy ustawione jest dowolne inne pole. W przypadku lite `additionalQueries`, `systemPrompt` oraz każdy klucz `contents` z wyjątkiem `text` i `highlights` są usuwane przed wywołaniem. Przestarzałe pola
-`subpages`, `subpageTarget`, `highlights.numSentences` i `highlights.highlightsPerUrl` nie są już przekazywane.
+Exa `type: "lite"` (Exa 3.0) akceptuje mniejszy zestaw pól i odrzuca całe żądanie, gdy ustawione
+jest dowolne inne pole. W trybie lite przed wywołaniem pomijane są `additionalQueries`,
+`systemPrompt` oraz każdy klucz `contents` poza `text` i `highlights`. Przestarzałe
+`subpages`, `subpageTarget`, `highlights.numSentences` oraz `highlights.highlightsPerUrl` nie są
+już przekazywane.
 
-Ewidencja kosztów jest stałym rejestrem `costPerQuery`, z wyjątkiem Exa, które stosuje własny
-cennik: 0,007 USD za wywołanie dla `auto` (i starszego `fast`) lub 0,004 USD dla `lite` (i starszego
-`instant`), obejmujący 10 wyników; 0,001 USD za każdy kolejny wynik; oraz 0,001 USD za
-każdy zwrócony wynik, gdy ustawiono `contents.summary`. Tavily jest rejestrowane jako 1 kredyt (0,008 USD) dla
-`search_depth` `basic`, `fast` i `ultra-fast` oraz 2 kredyty (0,016 USD) dla `advanced`
-([Kredyty API Tavily](https://docs.tavily.com/documentation/api-credits)). Wywołanie z
-`auto_parameters: true`, w przypadku którego Tavily przełącza się na advanced, jest nadal rejestrowane jako 1 kredyt.
+Rozliczanie kosztów korzysta z płaskiego rejestru `costPerQuery`, z wyjątkiem Exa, który stosuje
+własny cennik: 0,007 USD za wywołanie dla `auto` (oraz starszego `fast`) lub 0,004 USD dla `lite`
+(oraz starszego `instant`), co obejmuje 10 wyników; 0,001 USD za każdy kolejny wynik; oraz
+0,001 USD za każdy zwrócony wynik, gdy ustawiono `contents.summary`. Tavily jest rejestrowany jako
+1 kredyt (0,008 USD) dla `search_depth` `basic`, `fast` i `ultra-fast` oraz 2 kredyty (0,016 USD)
+dla `advanced` ([kredyty API Tavily](https://docs.tavily.com/documentation/api-credits)). Wywołanie z
+`auto_parameters: true`, które Tavily automatycznie podnosi do poziomu advanced, nadal jest
+rejestrowane jako 1 kredyt.
 
----
+## API pobierania z sieci
 
-## Web Fetch API
+Wyodrębnia zawartość z adresu URL za pośrednictwem skonfigurowanego dostawcy pobierania z
+sieci (Firecrawl, Jina Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Wyodrębnij zawartość z adresu URL za pośrednictwem skonfigurowanego dostawcy pobierania z sieci (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Parallel Extract (`parallel-search`, ten sam klucz API co Parallel Search) zwraca wyłącznie Markdown — każda inna wartość `format` powoduje błąd `400` — i ogranicza zawartość do 100 000 znaków. Gdy nie można wyodrębnić samej strony docelowej, upstream zgłasza ten fakt w odpowiedzi HTTP 200;
+OmniRoute przedstawia go jako `422` ze stałym komunikatem.
 
-Parallel Extract (`parallel-search`, z tym samym kluczem API co Parallel Search) zwraca wyłącznie Markdown — każda inna wartość
-`format` powoduje błąd `400` — i ogranicza zawartość do 100 000 znaków. Gdy nie można wyodrębnić samej strony docelowej, usługa nadrzędna zgłasza ten fakt w ramach HTTP 200;
-OmniRoute udostępnia go jako `422` ze stałym komunikatem.
+Keenable Fetch (`keenable-search`) również zwraca wyłącznie Markdown (każda inna wartość `format` powoduje błąd `400`) i ogranicza zawartość do 100 000 znaków. Działa bez klucza: jawne żądanie `provider: "keenable-search"` bez połączenia korzysta z bezkluczowego endpointu Keenable
+(limitów szybkości na adres IP). Skonfigurowany klucz znosi tylko te limity; automatyczny wybór korzysta z Keenable tylko wtedy, gdy skonfigurowano klucz.
 
-| Metoda | Ścieżka         | Opis                                                                        |
-| ------ | --------------- | --------------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Pobiera/skrobuje adres URL — treść jest walidowana przez `v1WebFetchSchema` |
+| Metoda | Ścieżka         | Opis                                                                    |
+| ------ | --------------- | ----------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Pobiera/zgarnia adres URL — treść weryfikowana przez `v1WebFetchSchema` |
 
-**Uwierzytelnianie:** klucz API Bearer (`extractApiKey` + `isValidApiKey`). Zasady są egzekwowane za pośrednictwem `enforceApiKeyPolicy`.
+**Uwierzytelnianie:** klucz API Bearer (`extractApiKey` + `isValidApiKey`). Zasady są egzekwowane za pomocą `enforceApiKeyPolicy`.
 
-**Rezerwowe użycie z uwzględnieniem limitu (#8297):** gdy nie podano jawnie `provider`, pula
+Nazwane kombinacje korzystają z [kontraktu routingu `model`](#named-searchfetch-combinations)
+powyżej, zachowując opcje i odpowiedzi specyficzne dla pobierania.
+
+**Rezerwowe użycie z uwzględnieniem limitu (#8297):** gdy nie podano ani `provider`, ani `model`, pula
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) jest
-przeszukiwana w ustalonej
-kolejności priorytetów (fill-first) — dostawca z ograniczeniem szybkości, ale skonfigurowany, jest pomijany
-zamiast przerywania żądania, a możliwy do ponowienia/błąd nadrzędnej usługi związany z limitem
-(HTTP 429 zawsze; 402/403 w przypadku limitów bezpłatnych poziomu Firecrawl/Tavily/TinyFish —
-nie w przypadku Jina Reader i nigdy w przypadku zwykłego błędnego żądania 400) przechodzi do
-następnego niewypróbowanego dostawcy z dostępnymi poświadczeniami w czasie żądania. Gdy każdy dostawca w puli zostanie wyczerpany, punkt końcowy zwraca pojedynczy
-`429` (z nagłówkiem `Retry-After`) zamiast poprzedniego ogólnego `400`. Gdy żądany jest jawny `provider`, nie ma
-cichego rezerwowego użycia — dostawca jawnie wskazany, który jest ograniczony lub ulega awarii, zwraca własny błąd (`429`, jeśli obowiązuje ograniczenie szybkości, w przeciwnym razie status usługi nadrzędnej).
+`parallel-search` → `keenable-search`) jest
+przeszukiwana w ustalonej kolejności priorytetów (fill-first) — skonfigurowany dostawca objęty limitem szybkości jest pomijany
+zamiast przerywania żądania, a możliwy do ponowienia błąd upstreamu/przekroczenia limitu
+(zawsze HTTP 429; 402/403 w przypadku bezpłatnych poziomów Firecrawl/Tavily/TinyFish, w których takie kody oznaczają limit —
+nie dotyczy Jina Reader i nigdy zwykłego nieprawidłowego żądania 400) przechodzi do
+następnego, jeszcze niewypróbowanego dostawcy z poświadczeniami w czasie żądania. Gdy każdy dostawca w
+puli zostanie wyczerpany, endpoint zwraca pojedynczy
+`429` (z nagłówkiem `Retry-After`) zamiast wcześniejszego ogólnego `400`. Gdy jawnie żądany jest `provider`,
+nie ma cichego użycia rezerwowego — dostawca objęty limitem szybkości lub kończący się błędem jawnie przekazuje swój błąd (`429`, jeśli objęty limitem szybkości, w przeciwnym razie status upstreamu).
 
 ---
 
@@ -991,33 +1082,24 @@ uzupełnienie.
 
 ## Raportowanie limitów i problemów
 
-| Metoda | Ścieżka             | Opis                                                                                                    |
-| ------ | ------------------- | ------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Wstępna walidacja limitu dla kombinacji `provider` + `accountId` przed wydaniem zarejestrowanego klucza |
-| POST   | `/v1/issues/report` | Zgłoszenie do GitHub niepowodzenia wydania limitu/klucza (wymaga `GITHUB_ISSUES_REPO` + tokenu)         |
+| Metoda | Ścieżka             | Opis                                                                                                |
+| ------ | ------------------- | --------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Wstępna walidacja limitu dla `provider` + `accountId` przed wystawieniem zarejestrowanego klucza    |
+| POST   | `/v1/issues/report` | Zgłoszenie do GitHub niepowodzenia wystawienia limitu/klucza (wymaga `GITHUB_ISSUES_REPO` + tokenu) |
 
-**Uwierzytelnianie:** klucz API Bearer (`isAuthenticated`).
+**Uwierzytelnianie:** `/v1/quotas/check` przyjmuje klucz API Bearer (`isAuthenticated`). `/v1/issues/report` jest przeznaczone wyłącznie do zarządzania (`requireManagementAuth`), podobnie jak `/api/v1/registered-keys`: sesja pulpitu, lokalny token CLI lub klucz API z zakresem `manage`/`admin`; klucze API wyłącznie do wnioskowania otrzymują `403`.
 
 ### Odzyskiwanie sesji limitu (opcjonalne)
 
-Nestrumieniowe żądanie `POST /v1/chat/completions` lub `POST /v1/responses`, które kończy się
-terminalnym błędem limitu (`402`/`429`/`503`), którego treść informuje o wyczerpaniu limitu lub
-kredytów, może zostać odłożone i odtworzone później zamiast zwracać błąd. Wywołujący włącza tę
-opcję dla każdego żądania za pomocą trzech nagłówków:
+Żądanie `POST /v1/chat/completions` lub `POST /v1/responses` bez strumieniowania, które zakończy się terminalnym błędem limitu (`402`/`429`/`503`, którego treść informuje o wyczerpaniu limitu lub środków), może zostać wstrzymane i odtworzone później zamiast zwrócenia błędu. Wywołujący włącza tę funkcję dla każdego żądania za pomocą trzech nagłówków:
 
-| Nagłówek                     | Wartość                                                      |
-| ---------------------------- | ------------------------------------------------------------ |
-| `x-omniroute-quota-recovery` | `auto`                                                       |
-| `x-omniroute-session`        | identyfikator sesji, `[A-Za-z0-9._:-]{1,128}`                |
-| `x-omniroute-recovery-turn`  | identyfikator tury unikalny w obrębie sesji (ta sama reguła) |
+| Nagłówek                     | Wartość                                                     |
+| ---------------------------- | ----------------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                                      |
+| `x-omniroute-session`        | identyfikator sesji, `[A-Za-z0-9._:-]{1,128}`               |
+| `x-omniroute-recovery-turn`  | identyfikator tury unikalny w ramach sesji (ta sama reguła) |
 
-Kwalifikują się wyłącznie tury z `stream: false`, bez narzędzi, historii narzędzi ani
-`previous_response_id`, a także bez przypięcia `x-omniroute-connection`; ponadto musi być ustawione
-`STORAGE_ENCRYPTION_KEY` (żądanie jest przechowywane w postaci zaszyfrowanej przez maksymalnie 24 godziny). Odpowiedź ma wtedy status `202` i zawiera
-`recovery.poll`; można odpytywać `GET /v1/quota-recoveries/{id}` (`202` w toku, `200` z
-odzyskaną treścią po zakończeniu) albo anulować za pomocą `DELETE`. Bilety są widoczne wyłącznie dla
-klucza API, który je utworzył. Odtworzenie, którego wynik jest niepewny, kończy się stanem
-`needs_confirmation`, zamiast być wysłane dwukrotnie. Źródło: `src/lib/quota/quotaSessionRecovery.ts`.
+Kwalifikują się wyłącznie tury z `stream: false`, bez narzędzi, historii narzędzi ani `previous_response_id` oraz bez przypięcia `x-omniroute-connection`, a zmienna `STORAGE_ENCRYPTION_KEY` musi być ustawiona (żądanie jest przechowywane w postaci zaszyfrowanej przez maksymalnie 24 godziny). Odpowiedzią jest wtedy `202` z `recovery.poll`; odpytywanie `GET /v1/quota-recoveries/{id}` zwraca `202` w oczekiwaniu lub `200` z odzyskaną treścią po zakończeniu. Można też anulować za pomocą `DELETE`. Bilety są widoczne wyłącznie dla klucza API, który je utworzył. Odtworzenie, którego wynik jest niepewny, kończy się stanem `needs_confirmation`, zamiast wysłania żądania dwukrotnie. Źródło: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1750,17 +1832,21 @@ Subskrypcje wychodzących webhooków dla zdarzeń OmniRoute (zakończenie żąda
 
 ## Zarejestrowane klucze (automatyczne zarządzanie)
 
-Używane przez podsystem automatycznego zarządzania kluczami do wydawania i rotacji kluczy API względem dostawcy/konta bazowego, z dziennymi/godzinowymi limitami.
+Używane przez podsystem automatycznego zarządzania kluczami do wydawania i rotacji kluczy API względem dostawcy/konta zaplecza, z dziennymi/godzinowymi limitami.
 
-| Metoda | Ścieżka                               | Opis                                                                                                                                                                                                                               |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Lista zarejestrowanych kluczy (wyłącznie zamaskowany prefiks)                                                                                                                                                                      |
-| POST   | `/api/v1/registered-keys`             | Wydaje nowy zarejestrowany klucz — treść: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Zwraca klucz w postaci jawnej **tylko raz**. Zwraca `429` w przypadku odmowy z powodu limitu. |
-| GET    | `/api/v1/registered-keys/[id]`        | Pobiera metadane zarejestrowanego klucza (bez materiału klucza w postaci jawnej)                                                                                                                                                   |
-| DELETE | `/api/v1/registered-keys/[id]`        | Unieważnia zarejestrowany klucz                                                                                                                                                                                                    |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Jawny endpoint unieważniania (ten sam efekt co DELETE)                                                                                                                                                                             |
+| Method | Path                                  | Description                                                                                                                                                                                                             |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Lista zarejestrowanych kluczy (wyłącznie zamaskowany prefiks)                                                                                                                                                           |
+| POST   | `/api/v1/registered-keys`             | Wydaj nowy zarejestrowany klucz — treść: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Zwraca surowy klucz **tylko raz**. Zwraca `429` w przypadku odmowy z powodu limitu. |
+| GET    | `/api/v1/registered-keys/[id]`        | Pobierz metadane zarejestrowanego klucza (bez surowego materiału)                                                                                                                                                       |
+| DELETE | `/api/v1/registered-keys/[id]`        | Unieważnij zarejestrowany klucz                                                                                                                                                                                         |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Jawny endpoint unieważniania (ten sam efekt co DELETE)                                                                                                                                                                  |
+| GET    | `/api/v1/providers/[provider]/limits` | Odczytaj limity wydawania dostawcy                                                                                                                                                                                      |
+| PUT    | `/api/v1/providers/[provider]/limits` | Ustaw limity wydawania dostawcy — treść: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                        |
+| GET    | `/api/v1/accounts/[id]/limits`        | Odczytaj limity wydawania konta                                                                                                                                                                                         |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Ustaw limity wydawania konta — ta sama treść co w ścieżce dostawcy                                                                                                                                                      |
 
-**Uwierzytelnianie:** sesja/klucz API zarządzania (`requireManagementAuth`) — ta sama kontrola co w przypadku `/api/keys`: sesja panelu, lokalny token CLI lub klucz API z zakresem `manage`/`admin`; klucze API wyłącznie do wnioskowania otrzymują `403`. Zobacz także `/v1/quotas/check` i `/v1/issues/report`.
+**Uwierzytelnianie:** sesja/klucz API zarządzania (`requireManagementAuth`) — ta sama ochrona co w przypadku `/api/keys`: sesja pulpitu, lokalny token CLI lub klucz API z zakresem `manage`/`admin`; klucze API przeznaczone wyłącznie do wnioskowania otrzymują `403`. Zobacz także `/v1/quotas/check` i `/v1/issues/report`.
 
 ---
 

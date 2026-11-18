@@ -59,7 +59,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
             variant="ghost"
             size="sm"
             onClick={onClearPreferred}
-            className="shrink-0 text-xs font-medium text-text-muted"
+            className="shrink-0 text-xs text-text-muted"
           >
             {t("preferredConnectionsClear")}
           </Button>
@@ -92,7 +92,7 @@ const PreferredConnectionsSection = memo(function PreferredConnectionsSection({
                     size="sm"
                     aria-pressed={isPreferred}
                     onClick={() => onTogglePreferred(conn.id)}
-                    className="h-auto min-w-0 flex-1 justify-start gap-2 px-0 py-0 text-left text-xs font-normal"
+                    className="h-auto min-w-0 flex-1 justify-start gap-2 px-0 py-0 text-left text-xs"
                   >
                     <span
                       className={`w-5 h-5 rounded border flex items-center justify-center shrink-0 text-[10px] font-semibold ${
