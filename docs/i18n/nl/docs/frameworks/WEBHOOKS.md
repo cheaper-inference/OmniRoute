@@ -14,23 +14,24 @@ De dispatcher ondertekent elke aflevering met HMAC-SHA256, probeert opnieuw bij 
 fouten, houdt de afleveringsstatus per webhook bij en schakelt eindpunten die
 blijven mislukken automatisch uit.
 
-## Ondersteunde gebeurtenissen
+## Ondersteunde evenementen
 
-Het type `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, gebruikt door `src/lib/webhookDispatcher.ts`) modelleert momenteel precies vier gebeurtenissen:
+Het `WebhookEvent` type (`src/lib/webhooks/eventDescriptions.ts`, verbruikt door `src/lib/webhookDispatcher.ts`) modelleert momenteel acht gebeurtenissen:
 
-| Gebeurtenis         | Wordt geactiveerd wanneer                                        |
-| ------------------- | ---------------------------------------------------------------- |
-| `request.completed` | Een geproxiede aanvraag met succes wordt voltooid                |
-| `request.failed`    | Een geproxiede aanvraag na alle nieuwe pogingen/fallback mislukt |
-| `quota.exceeded`    | Een API-sleutel een budget-/quotalimiet overschrijdt             |
-| `test.ping`         | Synthetische gebeurtenis gebruikt door het testeindpunt          |
+| Evenement                 | Brandt wanneer                                                                                             |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Een proxyverzoek is succesvol voltooid                                                                     |
+| `request.failed`          | Een proxyed request mislukt immers retries/fallback                                                        |
+| `quota.exceeded`          | Een API sleutel overschrijdt een budget/quota drempel                                                      |
+| `proxy.set_aside`         | Een lid van de proxypool wordt na herhaalde weigeringen aan de kant gezet (alleen overgang)                |
+| `proxy.pool.exhausted`    | Elk lid van een proxypoolbereik wordt opzij gezet                                                          |
+| `provider.reset_redeemed` | Automatisch toepassen van bankresets, ingewisseld voor een resettegoed of de Claude wekelijkse sessiereset |
+| `provider.exhausted`      | Ieder account van een aanbieder is aan het afkoelen (maximaal één keer per aanbieder per 10 minuten)       |
+| `test.ping`               | Synthetische gebeurtenis gebruikt door het testeindpunt                                                    |
 
-Abonnementen accepteren de letterlijke waarde `"*"` om elke gebeurtenis te ontvangen. Onbekende
-gebeurtenisnamen in `events` worden tijdens de dispatch genegeerd.
+Abonnementen accepteren de letterlijke `"*"` om elk evenement te ontvangen. Onbekende gebeurtenisnamen in `events` worden tijdens verzending genegeerd.
 
-> Opmerking: de dispatcher-API is aangesloten, maar productie-aanroepen voor sommige
-> andere gebeurtenissen dan `test.ping` worden nog toegevoegd. Gebruik `grep dispatchEvent` om te zien
-> welke paden de dispatcher momenteel aanroepen in jouw release.
+> Let op: de coördinator API is aangesloten, maar productieoproeplocaties voor sommige niet-`test.ping` -evenementen komen nog steeds binnen. Controleer `grep dispatchEvent` om te zien welke paden momenteel de dispatcher in uw release aanroepen.
 
 ## Architectuur
 
@@ -124,25 +125,24 @@ De aflevergeschiedenis wordt opgeslagen in de speciale tabel `webhook_deliveries
 tellers in de rij van `webhooks`. Metadata over het type (Slack / Discord /
 Telegram / aangepaste payloadtransformaties) is toegevoegd door `070_webhooks_kind_metadata.sql`.
 
-## REST-API
+## REST API
 
-Alle endpoints vereisen beheer-authenticatie (`requireManagementAuth`).
+Voor alle eindpunten is beheerauthenticatie (`requireManagementAuth`) vereist.
 
-| Endpoint                        | Methode | Beschrijving                                     |
-| ------------------------------- | ------- | ------------------------------------------------ |
-| `/api/webhooks`                 | GET     | Webhooks weergeven (geheimen gemaskeerd)         |
-| `/api/webhooks`                 | POST    | Webhook maken                                    |
-| `/api/webhooks/[id]`            | GET     | Webhookdetails (volledig geheim)                 |
-| `/api/webhooks/[id]`            | PUT     | Velden bijwerken                                 |
-| `/api/webhooks/[id]`            | DELETE  | Verwijderen                                      |
-| `/api/webhooks/[id]/test`       | POST    | Een `test.ping` activeren (geen nieuwe pogingen) |
-| `/api/webhooks/[id]/deliveries` | GET     | Recente afleverpogingen voor één webhook         |
-| `/api/webhooks/validate-url`    | POST    | Voorafgaande URL-validatie (SSRF-beveiliging)    |
+| Eindpunt                        | Methode | Beschrijving                                   |
+| ------------------------------- | ------- | ---------------------------------------------- |
+| `/api/webhooks`                 | GET     | Webhooks weergeven (geheimen gemaskeerd)       |
+| `/api/webhooks`                 | POST    | Maak een webhook                               |
+| `/api/webhooks/[id]`            | GET     | Webhookdetail (volledig geheim)                |
+| `/api/webhooks/[id]`            | PUT     | Velden bijwerken                               |
+| `/api/webhooks/[id]`            | DELETE  | Verwijderen                                    |
+| `/api/webhooks/[id]/test`       | POST    | Vuur een `test.ping` af (geen nieuwe pogingen) |
+| `/api/webhooks/[id]/deliveries` | GET     | Recente bezorgpogingen voor één webhook        |
+| `/api/webhooks/validate-url`    | POST    | URL -validatie vóór de vlucht (SSRF bewaking)  |
 
-`GET /api/webhooks` maskeert het geheim als `<eerste 10 tekens>...` om lekken
-op overzichtspagina's te voorkomen. Gebruik de GET-aanvraag voor `[id]` wanneer u het geheim daadwerkelijk nodig hebt.
+`GET /api/webhooks` maskeert het geheim van `<first 10 chars>...` om lekken op vermeldingspagina's te voorkomen. Gebruik de `[id]` GET wanneer je het geheim echt nodig hebt.
 
-### Webhook maken
+### Maak een webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -152,12 +152,11 @@ curl -X POST http://localhost:20128/api/webhooks \
     "url": "https://hooks.slack.com/services/...",
     "secret": "whsec_my_shared_secret",
     "events": ["quota.exceeded", "request.failed"],
-    "description": "Slack-meldingen"
+    "description": "Slack alerts"
   }'
 ```
 
-Als `secret` wordt weggelaten, genereert de server een `whsec_<hex>`-geheim en retourneert
-dit in het antwoord.
+Als `secret` wordt weggelaten, genereert de server een `whsec_<hex>` geheim en retourneert dit in het antwoord.
 
 ### Webhook testen
 
@@ -166,8 +165,7 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Retourneert `{ delivered, status, error }`. Er worden geen nieuwe pogingen gedaan — handig om
-snel te controleren of de ontvanger de payload en handtekening accepteert.
+Retourneert `{ delivered, status, error }`. Er worden geen nieuwe pogingen ondernomen. — is handig om snel te valideren dat de ontvanger de payload en handtekening accepteert.
 
 ## Dashboard
 

@@ -14,23 +14,24 @@ O dispatcher assina cada entrega com HMAC-SHA256, efetua novas tentativas em cas
 falhas transitórias, monitoriza o estado das entregas por webhook e desativa automaticamente os endpoints que
 continuam a falhar.
 
-## Eventos suportados
+## Eventos Suportados
 
-O tipo `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, utilizado por `src/lib/webhookDispatcher.ts`) modela atualmente exatamente quatro eventos:
+O tipo `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, consumido por `src/lib/webhookDispatcher.ts`) modela actualmente oito eventos:
 
-| Evento              | Acionado quando                                               |
-| ------------------- | ------------------------------------------------------------- |
-| `request.completed` | Um pedido encaminhado é concluído com êxito                   |
-| `request.failed`    | Um pedido encaminhado falha após todas as tentativas/fallback |
-| `quota.exceeded`    | Uma chave de API ultrapassa um limite de orçamento/quota      |
-| `test.ping`         | Evento sintético utilizado pelo endpoint de teste             |
+| Evento                    | Incendeia quando                                                                                                          |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | Uma solicitação com proxy foi concluída com sucesso                                                                       |
+| `request.failed`          | Um pedido com proxy falha depois de tudo retries/fallback                                                                 |
+| `quota.exceeded`          | Uma chave API ultrapassa um limite budget/quota                                                                           |
+| `proxy.set_aside`         | Um membro do proxy pool é anulado após recusas repetidas (apenas transição)                                               |
+| `proxy.pool.exhausted`    | Cada membro de um âmbito de pool de proxy é reservado                                                                     |
+| `provider.reset_redeemed` | A aplicação automática de redefinições bancárias resgatou um crédito de reposição ou a reposição da sessão semanal Claude |
+| `provider.exhausted`      | Cada conta de um prestador está a arrefecer (no máximo uma vez por prestador a cada 10 minutos)                           |
+| `test.ping`               | Evento sintético utilizado pelo endpoint de teste                                                                         |
 
-As subscrições aceitam o literal `"*"` para receber todos os eventos. Os nomes de eventos
-desconhecidos em `events` são ignorados durante o envio.
+As assinaturas aceitam o literal `"*"` para receber todos os eventos. Os nomes de eventos desconhecidos em `events` são ignorados no momento do despacho.
 
-> Nota: a API do dispatcher está ligada, mas os pontos de chamada em produção para alguns dos
-> eventos que não são `test.ping` ainda estão a ser implementados. Consulte `grep dispatchEvent` para saber
-> que fluxos invocam atualmente o dispatcher na sua versão.
+> Nota: o despachante API está ligado, mas os locais de chamada de produção para alguns dos eventos não `test.ping` ainda estão a chegar. Verifique `grep dispatchEvent` para ver quais os caminhos que invocam atualmente o despachante na sua versão.
 
 ## Arquitetura
 
@@ -180,9 +181,9 @@ A página do painel em `/dashboard/webhooks` (consulte
 - Envio de teste com um clique
 - Alternância manual entre ativado/desativado
 
-## Exemplos de payloads
+## Exemplos de carga útil
 
-### request.completed
+### solicitação.concluída
 
 ```json
 {
@@ -201,7 +202,7 @@ A página do painel em `/dashboard/webhooks` (consulte
 }
 ```
 
-### test.ping
+### teste.ping
 
 ```json
 {
@@ -214,7 +215,7 @@ A página do painel em `/dashboard/webhooks` (consulte
 }
 ```
 
-As estruturas dos campos para eventos que não sejam `test.ping` são definidas pelos locais de chamada que os emitem; considere o objeto `data` compatível com versões futuras (adicione campos, não dependa da respetiva ausência).
+Os formatos de campo para eventos não-`test.ping` são definidos pelos locais de chamada que os emitem; tratar o objeto `data` como compatível com versões futuras (adicionar campos, não depender de ausência).
 
 ## Boas práticas
 

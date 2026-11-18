@@ -199,140 +199,152 @@ deskriptor kolom yang dikembalikan, sehingga tujuan baru tidak memerlukan peruba
 
 Kunci konfigurasi (`type: "bigquery"`):
 
-| Kunci                | Catatan                                                                          |
-| -------------------- | -------------------------------------------------------------------------------- |
-| `projectId`          | Project GCP yang menyimpan dataset                                               |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                  |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                  |
-| `location`           | Hanya digunakan saat dataset perlu dibuat (default `EU`)                         |
-| `serviceAccountJson` | Kunci akun layanan. Rahasia: dienkripsi saat disimpan, tidak pernah dikembalikan |
-| `autoCreate`         | Buat dataset dan tabel pada ekspor pertama (default `true`)                      |
+| Kunci                | Catatan                                                                                                             |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | Proyek GCP yang menyimpan dataset                                                                                   |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                     |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                     |
+| `location`           | Hanya digunakan saat dataset harus dibuat (default `EU`)                                                            |
+| `serviceAccountJson` | Kunci akun layanan. Rahasia: dienkripsi saat tidak digunakan, tidak pernah dikembalikan                             |
+| `autoCreate`         | Membuat dataset/tabel yang tidak ada; secara kondisional menambahkan kolom usage-evidence nullable (default `true`) |
 
-Akun layanan memerlukan `bigquery.tables.updateData` pada tabel tujuan, serta
-`bigquery.datasets.create` / `bigquery.tables.create` saat `autoCreate` diaktifkan.
+Akun layanan memerlukan `bigquery.tables.updateData` pada tabel target, serta
+`bigquery.datasets.create` / `bigquery.tables.create` saat `autoCreate` aktif.
+Memperbarui tabel yang sudah ada untuk menambahkan dua field usage-evidence nullable juga memerlukan
+`bigquery.tables.update`. Permission yang tidak tersedia akan menggagalkan ekspor tanpa memajukan kursor.
 
-Batch yang dikonfigurasi merupakan unit **kursor**, bukan unit HTTP: `send()` membaginya menjadi panggilan insertAll
-yang masing-masing berisi maksimal 500 baris, sehingga `batch_size` yang besar tidak akan melampaui batas permintaan BigQuery sebesar 10 MB.
-Status sementara (408/429/500/502/503/504) dicoba ulang hingga tiga kali dengan jeda
-eksponensial, menggunakan kembali insertIds yang sama; kegagalan autentikasi dan skema langsung memicu pengecualian pada percobaan pertama alih-alih
-menyia-nyiakan proses eksekusi.
+Batch yang dikonfigurasi adalah unit **kursor**, bukan unit HTTP: `send()` membaginya menjadi panggilan
+insertAll yang masing-masing berisi maksimal 500 baris, sehingga `batch_size` yang besar tidak akan
+memicu batas permintaan BigQuery sebesar 10 MB. Status sementara (408/429/500/502/503/504) dicoba
+ulang hingga tiga kali dengan backoff eksponensial, menggunakan kembali insertIds yang sama; kegagalan
+autentikasi dan skema langsung memunculkan error pada percobaan pertama, bukan menghabiskan proses.
 
-Tabel yang baru saja dibuat belum terlihat oleh endpoint streaming, yang akan memberikan respons
-404 selama beberapa detik. Respons 404 tersebut dicoba ulang, tetapi **hanya jika proses eksekusi ini yang membuat tabel tersebut** —
-tabel yang benar-benar tidak ada tetap langsung menyebabkan kegagalan. Perhatikan bahwa membuat ulang tabel dengan nama yang
-baru saja dihapus membuat BigQuery menolak penyisipan streaming selama beberapa menit; ini merupakan
-karakteristik penghapusan lalu pembuatan ulang, jadi sebaiknya gunakan nama tabel baru daripada menghapus dan menambahkan ulang tabel.
+Tabel yang baru saja dibuat belum langsung terlihat oleh endpoint streaming, yang akan menjawab
+404 selama beberapa detik. 404 tersebut dicoba ulang, tetapi **hanya ketika proses ini membuat tabel** —
+tabel yang benar-benar tidak ada tetap gagal dengan cepat. Perhatikan bahwa membuat ulang tabel dengan
+nama yang baru saja dihapus membuat BigQuery menolak insert streaming selama beberapa menit; ini adalah
+karakteristik proses hapus-lalu-buat-ulang, jadi lebih baik gunakan nama tabel baru daripada menghapus
+dan menambahkannya kembali.
 
-**Kegagalan sebagian diterima sebagai HTTP 200 dengan `insertErrors[]` yang tidak kosong.** Hal tersebut diperlakukan sebagai
-kegagalan dan memicu pengecualian, sehingga kursor tidak bergerak melewati baris yang tidak pernah
-diterima BigQuery; `tests/unit/log-export-bigquery.test.ts` memastikan perilaku ini.
+**Kegagalan sebagian diterima sebagai HTTP 200 dengan `insertErrors[]` yang tidak kosong.** Hal ini
+diperlakukan sebagai kegagalan dan memunculkan error, sehingga kursor tidak maju melewati baris yang
+tidak pernah diterima BigQuery; `tests/unit/log-export-bigquery.test.ts` menetapkan perilaku ini.
 
-Transport menggunakan REST biasa — assertion RS256 yang ditandatangani sendiri ditukar dengan token akses di
-`https://oauth2.googleapis.com/token`, lalu baris dikirim ke `tabledata.insertAll`. Tidak ada Google SDK yang
-disertakan. Token akses disimpan dalam cache di dalam proses untuk setiap pasangan (akun layanan, cakupan).
+Transportasinya adalah REST biasa — assertion RS256 yang ditandatangani sendiri ditukar dengan token akses di
+`https://oauth2.googleapis.com/token`, lalu baris dikirim ke `tabledata.insertAll`. Tidak ada Google SDK
+yang ditambahkan. Token akses di-cache dalam proses berdasarkan (akun layanan, scope).
 
-Tabel yang dibuat memiliki satu kolom untuk setiap bidang pada tab Logs ditambah `exported_at`, dan ditata sesuai
-cara log panggilan sebenarnya dikueri:
+Tabel yang dibuat membawa satu kolom untuk setiap field pada tab Logs ditambah `exported_at`, dan ditata
+untuk cara log panggilan sebenarnya dikueri:
 
-- **Dipartisi per hari berdasarkan `timestamp`**, sehingga kueri yang dibatasi berdasarkan tanggal hanya memindai hari-hari tersebut.
+- **Dipartisi berdasarkan hari pada `timestamp`**, sehingga kueri yang dibatasi berdasarkan tanggal hanya memindai hari-hari tersebut.
 - **Dikelompokkan berdasarkan `api_key_name`, `provider`, `model`, `status`** (dalam urutan tersebut), sehingga pemfilteran berdasarkan
-  siapa yang menjalankannya, ke mana panggilan dikirim, atau apakah panggilan gagal akan memangkas blok di dalam setiap partisi. BigQuery
-  mengizinkan maksimal empat kolom pengelompokan dan urutannya penting: filter pada `api_key_name` saja
-  memangkas blok, sedangkan filter pada `status` saja tidak.
-- **Retensi partisi opsional** melalui `partitionExpirationDays` (0 menyimpan semuanya), diterapkan
+  siapa yang menjalankannya, ke mana permintaan dikirim, atau apakah permintaan gagal akan memangkas blok di dalam setiap partisi. BigQuery
+  mengizinkan maksimal empat kolom pengelompokan dan urutannya penting: filter hanya pada `api_key_name`
+  akan memangkas blok, sedangkan filter hanya pada `status` tidak.
+- **Retensi partisi opsional** melalui `partitionExpirationDays` (0 mempertahankan semuanya), diterapkan
   saat tabel dibuat.
 
-Kedua pengaturan diterapkan saat pembuatan. Tabel yang sudah ada mempertahankan tata letaknya, jadi
-arahkan tujuan ke ID tabel baru jika Anda ingin menerapkannya.
+Kedua pengaturan tersebut diterapkan saat pembuatan. Tabel yang sudah ada mempertahankan tata letak
+yang dimilikinya, jadi arahkan tujuan ke ID tabel baru jika ingin menerapkannya.
 
-`tests/unit/log-export-bigquery.test.ts` memastikan pemeta dan skema tabel tetap
-selaras, sehingga kolom log panggilan baru tidak dapat dihilangkan secara diam-diam saat diekspor.
+`tests/unit/log-export-bigquery.test.ts` memastikan mapper dan skema tabel tetap sinkron, sehingga
+kolom log panggilan baru tidak dapat terhapus secara diam-diam saat diekspor.
 
-Batch dibagi berdasarkan **keduanya**, jumlah baris dan byte hasil serialisasi. Jumlah baris saja tidak cukup
-ketika payload diekspor: 500 baris yang memuat prompt dapat berukuran puluhan megabyte, dan insertAll
-menolak permintaan yang melebihi 10 MB. Potongan ditutup saat mencapai 500 baris atau 9 MB, mana yang tercapai lebih dahulu.
+Batch dibagi berdasarkan **jumlah baris dan byte yang diserialisasi**. Jumlah baris saja tidak cukup
+setelah payload diekspor: 500 baris yang membawa prompt dapat berukuran puluhan megabyte, dan insertAll
+menolak permintaan yang berukuran lebih dari 10 MB. Chunk ditutup pada 500 baris atau 9 MB, mana saja yang tercapai lebih dahulu.
 
 ---
 
 ## 5. Tujuan trace OTLP/HTTP
 
-Konfigurasi menggunakan `type: "otlp-http"`. Ini adalah ekspor terjadwal berbasis kursor atas
-log panggilan yang disimpan secara persisten, bukan sink peristiwa perutean langsung yang bersifat best-effort di
-`open-sse/services/routing/otel.ts`. Ekspor ini tidak membaca atau mengubah variabel lingkungan,
-timer, atau buffer sink tersebut. Mengaktifkan keduanya dapat menghasilkan dua jenis span yang independen;
-gunakan cakupan instrumentasi `omniroute.log-export` untuk membedakan span log panggilan ini.
+Konfigurasi menggunakan `type: "otlp-http"`. Ini adalah ekspor terjadwal berbasis kursor dari
+log panggilan yang dipersistenkan, bukan sink peristiwa routing live best-effort di
+`open-sse/services/routing/otel.ts`. Konfigurasi ini tidak membaca atau mengubah variabel
+lingkungan, timer, atau buffer sink tersebut. Mengaktifkan keduanya dapat menghasilkan dua
+jenis span independen; gunakan cakupan instrumentasi `omniroute.log-export` untuk
+membedakan span log panggilan ini.
 
-| Kunci                    | Nilai default / tujuan                                                             |
-| ------------------------ | ---------------------------------------------------------------------------------- |
-| `endpoint`               | URL trace HTTP(S) lengkap yang wajib diisi; akhiran `/v1/traces` tidak ditambahkan |
-| `headers`                | Baris `Name: value` atau objek JSON berisi string yang opsional; dienkripsi        |
-| `requestHeaderAllowlist` | Kosong (nonaktif); nama/awalan header klien yang akan direkam sebagai atribut span |
-| `serviceName`            | `omniroute`; resource `service.name`                                               |
-| `langfuseMapping`        | `false`; menambahkan atribut generasi/sesi/pengguna Langfuse                       |
-| `identity`               | `pseudonymous`, `keyName`, atau `none`                                             |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                            |
-| `timeoutMs`              | `30000` per percobaan HTTP                                                         |
-| `environment`            | Tidak diatur; `langfuse.environment` opsional                                      |
+| Key                      | Default / tujuan                                                                      |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| `endpoint`               | URL trace HTTP(S) lengkap yang wajib diisi; sufiks `/v1/traces` tidak ditambahkan     |
+| `headers`                | Baris `Name: value` opsional atau objek JSON berisi string; dienkripsi                |
+| `requestHeaderAllowlist` | Kosong (nonaktif); nama/prefiks header klien yang akan ditangkap sebagai atribut span |
+| `serviceName`            | `omniroute`; resource `service.name`                                                  |
+| `langfuseMapping`        | `false`; menambahkan atribut generation/session/user Langfuse                         |
+| `identity`               | `pseudonymous`, `keyName`, atau `none`                                                |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                               |
+| `timeoutMs`              | `30000` per percobaan HTTP                                                            |
+| `environment`            | Tidak disetel; `langfuse.environment` opsional                                        |
 
-Dasbor generik menampilkan kolom-kolom ini. `paths` menerima array API atau textarea
-berisi path persis yang dipisahkan oleh baris baru/koma. Embeddings, rerank, dan path lainnya
-dilewati kecuali diizinkan secara eksplisit. Baris yang dilewati tetap memajukan kursor; penghitung
-`exported`/`exportedTotal` milik runner yang ada menghitung baris sumber yang diproses, termasuk baris
-yang difilter, bukan span yang diterima. Pemfilteran dilakukan di proses anak, tanpa mengubah
-kontrak IPC/kursornya.
+Dasbor generik merender field-field ini. `paths` menerima array API atau textarea dengan
+path yang tepat dan dipisahkan oleh baris baru/koma. Embeddings, rerank, dan path lainnya
+dilewati kecuali diizinkan secara eksplisit. Baris yang dilewati tetap memajukan kursor;
+penghitung `exported`/`exportedTotal` milik runner yang ada menghitung baris sumber yang
+diproses, termasuk baris yang difilter, bukan span yang diterima. Pemfilteran dilakukan di
+child, tanpa mengubah kontrak IPC/kursor.
 
-Validasi URL menggunakan fungsi bantu `parseAndValidateNonMetadataUrl` yang tidak memerlukan DB dari
-`src/shared/network/outboundUrlGuard.ts`: kebijakan `block-metadata`. Kebijakan ini memiliki
-pemeriksaan metadata/protokol/kredensial tertanam tanpa syarat yang sama seperti validator webhook dengan
-URL privat diizinkan, tetapi sengaja mengizinkan target localhost/LAN tanpa pengesampingan
-flag fitur global. Hal ini memungkinkan endpoint Langfuse, Phoenix, Tempo, dan Collector
-yang dihosting sendiri, termasuk endpoint HTTP privat. Host metadata cloud selalu diblokir.
-Pengalihan tidak diikuti, sehingga collector tidak dapat mengalihkan kredensial ke host lain.
-Seperti penjaga URL leksikal yang ada, mekanisme ini tidak mengunci resolusi DNS; konfigurasikan hanya
-host yang dikendalikan operator. Utamakan HTTPS setiap kali endpoint tidak berada di jaringan tepercaya.
+Validasi URL menggunakan helper `parseAndValidateNonMetadataUrl` yang bebas DB dari
+`src/shared/network/outboundUrlGuard.ts`: kebijakan `block-metadata`. Helper ini memiliki
+pemeriksaan metadata/protokol/kredensial tertanam yang sama dan tidak bersyarat seperti
+validator webhook dengan URL privat yang diizinkan, tetapi sengaja mengizinkan target
+localhost/LAN tanpa override feature flag global. Hal ini memungkinkan endpoint Langfuse,
+Phoenix, Tempo, dan Collector yang di-hosting sendiri, termasuk endpoint HTTP privat.
+Host metadata cloud selalu diblokir. Pengalihan tidak diikuti, sehingga collector tidak
+dapat mengalihkan kredensial ke host lain. Seperti URL guard leksikal yang ada, helper ini
+tidak mengunci resolusi DNS; hanya konfigurasikan host yang dikendalikan operator.
+Utamakan HTTPS jika endpoint tidak berada di jaringan tepercaya.
 
 ### Payload dan pengiriman
 
-JSON OTLP/HTTP (`ExportTraceServiceRequest`, `Content-Type: application/json`) membawa satu
-span CLIENT per baris yang diizinkan, dengan nama sesuai path permintaan persisnya. Penamaan berdasarkan path membedakan
-Chat Completions, Responses, dan Messages tanpa menyertakan data model atau identitas dalam
-nama span. Atribut resource mencakup `service.name` dan `service.version` paket.
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) membawa satu
+span CLIENT untuk setiap baris yang diizinkan, yang diberi nama berdasarkan path permintaan
+tepatnya. Penamaan path membedakan Chat Completions, Responses, dan Messages tanpa
+menyertakan data model atau identitas dalam nama span. Atribut resource mencakup
+`service.name` dan `service.version` milik package.
 
-Pencatat percobaan chat normal (`open-sse/handlers/chatCore/attemptLogging.ts`) menulis
-`duration = Date.now() - startTime` saat selesai dan tidak menyediakan stempel waktu;
-`saveCallLogOperation` di `src/lib/usage/callLogs.ts` secara default menetapkan stempel waktu ke waktu penulisan
-(penyelesaian). Oleh karena itu, ekspor menetapkan akhir = stempel waktu baris dan awal = akhir − durasi
-(milidetik, dikonversi ke nanodetik desimal). Stempel waktu historis yang diberikan pemanggil
-juga dipertahankan sebagai waktu akhir; tidak ada pembeda awal/penyelesaian per baris.
-Durasi null menjadi nol. Stempel waktu yang tidak valid/tidak ada menyebabkan batch gagal, alih-alih membuat
-span nondeterministik. `ttftMs` dapat bernilai null dan dipetakan ke `omniroute.ttft_ms`.
+Logger percobaan chat normal (`open-sse/handlers/chatCore/attemptLogging.ts`) menulis
+`duration = Date.now() - startTime` saat penyelesaian dan tidak menyediakan timestamp;
+`saveCallLogOperation` di `src/lib/usage/callLogs.ts` menetapkan timestamp secara default ke
+waktu penulisan (penyelesaian). Karena itu, ekspor menetapkan end = timestamp baris dan
+start = end − duration (milidetik, dikonversi menjadi nanodetik desimal). Timestamp historis
+yang diberikan caller juga dipertahankan sebagai waktu end; tidak ada pembeda
+start/penyelesaian per baris. Duration null menjadi nol. Timestamp yang tidak valid/hilang
+menggagalkan batch, bukan membuat span yang nondeterministik. `ttftMs` dapat bernilai null
+dan dipetakan ke `omniroute.ttft_ms`.
 
-Atribut mencakup `gen_ai.operation.name="chat"`, penyedia, model yang diminta/model respons,
-token input/output, token pembacaan cache/pembuatan cache/penalaran yang opsional, status HTTP,
-combo, sumber cache, tag sesi, dan ID korelasi. Nilai integer OTLP dan stempel waktu
-berupa string desimal; string, boolean, dan angka pecahan menggunakan varian nilai OTLP
-aslinya. Span error memiliki status ERROR dan pesan status yang telah disanitasi. Rekaman
-kanonis tidak memiliki URL host upstream, sehingga `server.address` dihilangkan alih-alih secara keliru
-mengidentifikasi collector sebagai server model. Biaya tidak diekspor.
+Atribut mencakup `gen_ai.operation.name="chat"`, provider, model yang diminta/direspons,
+token input/output, token cache-read/cache-creation/reasoning opsional, status HTTP,
+combo, sumber cache, tag sesi, dan ID korelasi. Nilai integer OTLP dan timestamp berupa
+string desimal; string, boolean, dan angka pecahan menggunakan varian nilai OTLP
+native-nya. Span error memiliki status ERROR dan pesan status yang telah disanitasi.
+Record kanonis tidak memiliki URL host upstream, sehingga `server.address` dihilangkan
+daripada secara keliru mengidentifikasi collector sebagai server model. Biaya tidak
+diekspor.
 
-Hanya `includeBodies=true` yang memuat konten. Dengan `langfuseMapping=false`,
-`gen_ai.input.messages` / `gen_ai.output.messages` membawa JSON isi permintaan/respons
-yang telah disanitasi sebagaimana disimpan oleh OmniRoute (dikanonisasi jika dapat diurai), bukan array
-pesan semconv yang dibentuk ulang. Isi yang dipotong/bukan JSON tetap berupa teks mentah. Dengan `langfuseMapping=true`,
-isi hanya dikeluarkan sebagai `langfuse.observation.input` / `langfuse.observation.output`;
-atribut `gen_ai.*.messages` dihilangkan sehingga setiap isi dikirim satu kali. Kedua mode
-mewarisi `maxBodyBytes` dari jalur pemuatan yang ada;
+Hanya `includeBodies=true` yang melakukan hidrasi konten. Dengan
+`langfuseMapping=false`, `gen_ai.input.messages` / `gen_ai.output.messages` membawa JSON
+body permintaan/respons yang telah disanitasi seperti disimpan oleh OmniRoute
+(dikanonisasi jika dapat di-parse), bukan array messages semconv yang dibentuk ulang.
+Body yang dipotong/tidak berformat JSON tetap menjadi teks mentah. Dengan
+`langfuseMapping=true`, body hanya dikeluarkan sebagai
+`langfuse.observation.input` / `langfuse.observation.output`; atribut
+`gen_ai.*.messages` dihilangkan agar setiap body dikirim sekali. Kedua mode mewarisi
+`maxBodyBytes` dari jalur hidrasi yang ada;
 `omniroute.bodies_truncated=true` menandai pemotongan.
-Tidak ada snapshot pipeline tambahan atau pembacaan artefak yang belum disanitasi yang ditambahkan oleh tujuan ini;
-perekaman header permintaan opsional menggunakan snapshot klien yang telah dimuat sebagaimana dijelaskan di bawah.
-Gunakan interval tingkat menit seperti `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` saat mengekspor
-isi, alih-alih menumpuk antrean pekerjaan per jam.
+Tidak ada snapshot pipeline tambahan atau pembacaan artefak yang tidak disanitasi yang
+ditambahkan oleh tujuan ini; penangkapan header permintaan opsional menggunakan snapshot
+klien terhidrasi yang ada, seperti dijelaskan di bawah.
+Gunakan cadence tingkat menit seperti `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` saat
+mengekspor body, bukan mengakumulasi backlog per jam.
 
 ### Header permintaan klien opsional
 
-Perekaman header **nonaktif secara default**. Atur `requestHeaderAllowlist` dalam konfigurasi tujuan
-dan aktifkan **Ekspor prompt dan respons** (`includeBodies: true` pada tujuan).
-Daftar izin menerima array API atau textarea berisi nama yang dipisahkan oleh baris baru/koma:
+Penangkapan header **dinonaktifkan secara default**. Tetapkan `requestHeaderAllowlist` dalam
+konfigurasi tujuan dan aktifkan **Ekspor prompt dan respons**
+(`includeBodies: true` pada tujuan).
+Allowlist menerima array API atau textarea dengan nama yang dipisahkan oleh baris baru/koma:
 
 ```json
 {
@@ -340,77 +352,55 @@ Daftar izin menerima array API atau textarea berisi nama yang dipisahkan oleh ba
 }
 ```
 
-Nama dicocokkan secara persis tanpa membedakan huruf besar-kecil, kecuali jika satu `*` di akhir memilih prefiks
-nama header yang tidak kosong. `*` tanpa nama, wildcard di tengah, dan nama header HTTP yang tidak valid akan ditolak.
-Terdapat maksimal 64 selektor, masing-masing dengan nama/prefiks maksimal 256 byte ASCII.
-Pengaturan ini terpisah dari `headers`, yang mengautentikasi eksportir ke kolektor.
+Nama dicocokkan tanpa membedakan huruf besar-kecil dan secara tepat, kecuali satu `*` terminal memilih prefiks nama-header yang tidak kosong. `*` tunggal, wildcard yang disisipkan, dan nama header HTTP yang tidak valid ditolak.
+Ada paling banyak 64 selector, masing-masing dengan nama/prefiks sepanjang maksimal 256 byte ASCII.
+Pengaturan ini terpisah dari `headers`, yang mengautentikasi exporter ke collector.
 
-Perekaman hanya membaca `pipeline_client_request`, yang diisi dari `clientRawRequest`
-(atau `clientRequest` lama) pada pipeline terperinci yang disimpan. Perekaman tidak pernah menggunakan header permintaan penyedia sebagai cadangan.
-Pencatatan pipeline terperinci harus sudah diaktifkan saat permintaan direkam. Jika
-`includeBodies` dinonaktifkan, atau JSON snapshot klien hilang, rusak, atau terpotong, tidak ada atribut
-header yang dikeluarkan. Meningkatkan `maxBodyBytes` dapat mencegah pemotongan snapshot saat ekspor;
-tindakan ini tidak dapat memulihkan detail yang tidak pernah disimpan. Snapshot yang melebihi 1 MiB atau berisi lebih dari
-256 entri header diabaikan. Ekspor prompt/respons yang ada tetap aktif bersamaan dengan
-perekaman header; daftar izin tidak menyediakan mode hidrasi khusus header.
+Capture hanya membaca `pipeline_client_request`, yang diisi dari `clientRawRequest` (atau `clientRequest` lama) pada pipeline detail yang disimpan. Capture tidak pernah menggunakan header request provider sebagai fallback.
+Logging pipeline detail harus sudah diaktifkan saat request direkam. Jika `includeBodies` dinonaktifkan, atau JSON snapshot client tidak ada, rusak, atau terpotong, tidak ada atribut header yang dihasilkan. Meningkatkan `maxBodyBytes` dapat mencegah snapshot terpotong saat ekspor; peningkatan tersebut tidak dapat memulihkan detail yang tidak pernah disimpan. Snapshot yang berukuran lebih dari 1 MiB atau berisi lebih dari 256 entri header akan diabaikan. Ekspor prompt/respons yang ada tetap diaktifkan bersama capture header; allowlist tidak menyediakan mode hidrasi khusus header.
 
-Nilai yang dipilih menjadi array string OTLP `http.request.header.<full lowercase header name>`,
-bahkan untuk satu string. Misalnya, `X-OmniRoute-Meta-Team: example-team` menjadi
+Nilai yang dipilih menjadi array string OTLP `http.request.header.<full lowercase header name>`, bahkan untuk satu string. Misalnya, `X-OmniRoute-Meta-Team: example-team` menjadi
 `http.request.header.x-omniroute-meta-team` dengan
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Prefiks lengkap dipertahankan: ini adalah header biasa, tanpa penguraian bidang bisnis atau
-konversi metadata `omniroute.metadata.*` / Langfuse. `langfuseMapping` tidak mengubah semantik
-header. `User-Agent` bernilai tunggal yang dipilih juga menetapkan skalar standar
-`user_agent.original`. Koma dalam satu nilai tidak digunakan untuk memisahkan nilai. Varian huruf besar-kecil digabungkan sesuai urutan
-entri yang disimpan; varian mana pun yang tidak valid menyebabkan seluruh header tersebut dihilangkan. Atribut diurutkan berdasarkan nama dalam huruf kecil.
+Prefiks lengkap dipertahankan: ini adalah header biasa, tanpa parsing bidang bisnis atau konversi metadata `omniroute.metadata.*` / Langfuse. `langfuseMapping` tidak mengubah semantik header. `User-Agent` terpilih yang hanya memiliki satu nilai juga menetapkan scalar standar
+`user_agent.original`. Koma di dalam satu nilai tidak dipisahkan. Varian huruf besar-kecil digabungkan sesuai urutan entri yang disimpan; jika ada varian yang tidak valid, seluruh header tersebut dihilangkan. Atribut diurutkan berdasarkan nama huruf kecil.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, header kunci API, nama yang mengandung
-penanda auth/token/secret/password/credential, dan kredensial gateway internal selalu
-dikecualikan, meskipun dipilih atau disamarkan sebagian dalam penyimpanan. Pola kredensial yang diketahui menggunakan kembali
-pendeteksi kredensial bersama; penanda penyamaran dihilangkan, bukan diekspor sebagai nilai aman.
-Hanya string dan array string yang tidak kosong yang diterima; angka atau objek tidak dikonversi secara paksa.
-Nama yang tidak valid, kunci prototipe, karakter kontrol (kecuali tab horizontal), dan Unicode yang tidak valid
-diabaikan tanpa menggagalkan batch atau menampilkan isinya dalam pesan kesalahan.
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, header API-key, nama yang mengandung penanda auth/token/secret/password/credential, serta kredensial gateway internal selalu dikecualikan, meskipun dipilih atau sebagian disamarkan di penyimpanan. Pola kredensial yang dikenal menggunakan kembali detektor kredensial bersama; penanda redaksi dihilangkan, bukan diekspor sebagai nilai yang aman. Hanya string dan array string yang tidak kosong yang diterima; angka atau objek tidak dikonversi. Nama yang tidak valid, key prototipe, karakter kontrol (kecuali tab horizontal), dan Unicode yang cacat diabaikan tanpa menyebabkan batch gagal atau memantulkan isinya dalam error.
 
-Setiap span merekam maksimal 32 header, 16 nilai per header, 4096 byte UTF-8 per nilai,
-dan total 16384 byte UTF-8 untuk seluruh nama dan nilai header yang direkam. Header yang terlalu besar/tidak valid
-dihilangkan seluruhnya, bukan dipotong. Pemilihan merupakan keputusan privasi operator: nama yang tampak aman
-tetap dapat berisi data pribadi, dan batas/pendeteksi ini bukan alat pembersih PII serbaguna.
+Setiap span menangkap paling banyak 32 header, 16 nilai per header, 4096 byte UTF-8 per nilai, dan total 16384 byte UTF-8 untuk seluruh nama dan nilai header yang ditangkap. Header yang terlalu besar/tidak valid dihilangkan seluruhnya, bukan dipotong. Pemilihan adalah keputusan privasi operator: nama yang tampak aman tetap dapat berisi data pribadi, dan batas/detektor ini bukan pembersih PII umum.
 
 ### Batas pengiriman
 
-Permintaan dibatasi hingga 500 span dan 4 MiB JSON UTF-8, termasuk amplopnya.
-Ukuran setiap span yang diizinkan diperiksa sebelum permintaan pertama dari suatu batch kursor. Satu
-span yang lebih besar dari batas menyebabkan tidak ada bagian batch tersebut yang dikirim dan operasi gagal dengan panduan untuk menurunkan
-`maxBodyBytes`; span tersebut tidak dibuang secara diam-diam. Pemeriksaan awal hanya menyimpan referensi rekaman dan
-jumlah byte, serta membuang setiap span/JSON sementara; span dibangun ulang untuk potongan berukuran terbatas
-alih-alih menyimpan salinan kedua batch yang telah diserialisasi. HTTP 408/429/5xx, kegagalan jaringan, dan waktu tunggu habis mendapatkan maksimal
-tiga percobaan, dengan jeda eksponensial 250/500 ms. Detik atau tanggal HTTP pada `Retry-After`
-dapat memperpanjang jeda hingga 5 detik. Status lain langsung menyebabkan kegagalan. Penolakan parsial OTLP 2xx juga memicu pengecualian, bukan
-mengakui penerimaan span yang hilang; konfirmasi penerimaan kosong atau berupa JSON valid diterima, dengan
+Request dibatasi hingga 500 span dan 4 MiB JSON UTF-8, termasuk envelope.
+Setiap span yang diizinkan diperiksa ukurannya sebelum request pertama dari batch cursor. Span individual yang lebih besar dari batas tidak mengirimkan bagian apa pun dari batch tersebut dan gagal dengan panduan untuk menurunkan
+`maxBodyBytes`; span tersebut tidak diam-diam dihilangkan. Preflight hanya mempertahankan referensi record
+dan jumlah byte, serta membuang setiap span/JSON sementara; span dibuat ulang untuk chunk berbatas
+alih-alih menyimpan salinan serialisasi kedua dari batch. HTTP 408/429/5xx, kegagalan jaringan, dan timeout mendapatkan maksimal
+tiga percobaan, dengan exponential backoff 250/500 ms. Detik `Retry-After` atau tanggal HTTP
+dapat memperpanjang jeda hingga 5 detik. Status lainnya langsung gagal. Penolakan parsial OTLP 2xx juga menimbulkan error alih-alih
+mengakui span yang hilang; acknowledgement JSON yang kosong atau valid diterima, dengan
 batas pembacaan respons 64 KiB.
 
-Kesalahan hanya berisi fakta yang berasal dari eksportir: status HTTP, kelas percobaan ulang, jumlah percobaan dan jumlah span
-yang dikirim, atau teks tetap tentang konfirmasi penerimaan/kegagalan jaringan. Isi respons kolektor,
-jumlah keberhasilan parsial, dan header respons tidak pernah disalin ke kesalahan, log, atau
-dasbor. Batch yang gagal atau diterima sebagian tidak dikonfirmasi: tujuan menampilkan
-Gagal dengan status tersebut, kursor tetap berada pada batch terakhir yang telah dikonfirmasi, dan eksekusi berikutnya
-mengirim ulang baris yang sama. Status permanen terus menyebabkan kegagalan hingga kolektor atau konfigurasi
-diperbaiki. Gunakan log kolektor sendiri untuk detail respons. Ringkasan kesalahan log panggilan tetap menggunakan
-penyamaran terpisah.
-`prepare()` tidak menyediakan apa pun; Uji mengirim tepat `{"resourceSpans":[]}` melalui POST dan melaporkan
-status HTTP tanpa menulis span log panggilan.
+Error hanya berisi fakta yang dimiliki exporter: status HTTP, kelas retry, jumlah percobaan, dan jumlah span yang dikirim,
+atau teks tetap untuk kegagalan acknowledgement/jaringan. Body respons collector,
+jumlah partial-success, dan header respons tidak pernah disalin ke dalam error,
+log, atau dashboard. Batch yang gagal atau diterima sebagian tidak diakui: destination menampilkan status
+Failing tersebut, cursor tetap berada pada batch terakhir yang diakui, dan proses berikutnya
+mengirim ulang baris yang sama. Status permanen terus gagal sampai collector atau konfigurasi diperbaiki.
+Gunakan log milik collector untuk detail respons. Ringkasan error call-log tetap menggunakan redaksinya sendiri.
+`prepare()` tidak menyediakan apa pun; Test hanya mengirim `{"resourceSpans":[]}` dan melaporkan
+status HTTP tanpa menulis span call-log.
 
-ID trace dan ID span adalah 32/16 digit heksadesimal pertama dari SHA-256 atas
+ID trace dan ID span adalah masing-masing 32/16 digit heksadesimal pertama dari SHA-256 atas
 `"omniroute.trace\\0" + callLogId` dan `"omniroute.span\\0" + callLogId`. Pengiriman ulang membawa
-ID yang identik. Ini bukan jaminan deduplikasi: beberapa backend, termasuk ingest Langfuse
-v4, tidak melakukan deduplikasi span dengan ID yang sama. Crash atau kegagalan potongan parsial dapat
-mengirim ulang paling banyak satu batch kursor yang belum dikonfirmasi; seluruh batch tersebut dapat terduplikasi,
-bukan hanya potongan HTTP terakhirnya. Pilih ukuran batch kursor dengan mempertimbangkan kompromi tersebut.
+ID yang identik. Ini bukan jaminan deduplikasi: beberapa backend, termasuk ingestion Langfuse
+v4, tidak melakukan deduplikasi span dengan ID yang sama. Crash atau kegagalan chunk parsial dapat
+mengirim ulang paling banyak satu batch cursor yang belum diakui; seluruh batch tersebut dapat terduplikasi,
+bukan hanya chunk HTTP terakhirnya. Pilih ukuran batch cursor dengan mempertimbangkan trade-off tersebut.
 
 ### Contoh Langfuse
 
-Konfigurasikan bidang-bidang ini untuk instans Langfuse yang dihosting sendiri:
+Konfigurasikan bidang berikut untuk instance Langfuse yang di-host sendiri:
 
 ```json
 {
@@ -425,42 +415,43 @@ Konfigurasikan bidang-bidang ini untuk instans Langfuse yang dihosting sendiri:
 
 Buat nilai Authorization secara lokal sebagai Base64 dari string literal `public-key:secret-key`
 (misalnya dengan `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Jangan tempelkan kredensial asli ke log, tangkapan layar, atau laporan masalah. Pemetaan secara otomatis
-menetapkan `x-langfuse-ingestion-version: 4`; Authorization tetap diberikan melalui `headers`.
-Baik header maupun salt identitas yang dihasilkan menggunakan mekanisme bidang rahasia terenkripsi
-dan placeholder API yang sudah ada; `STORAGE_ENCRYPTION_KEY` wajib tersedia.
+Jangan menempelkan kredensial nyata ke dalam log, tangkapan layar, atau issue. Pemetaan tersebut secara otomatis
+menetapkan `x-langfuse-ingestion-version: 4`; Authorization tetap disediakan dalam `headers`.
+Baik header maupun salt identity yang dibuat menggunakan mekanisme bidang secret terenkripsi
+dan placeholder API yang ada; `STORAGE_ENCRYPTION_KEY` diperlukan.
 
 Pemetaan menambahkan jenis/model generasi, detail penggunaan JSON (input/output/total dan kunci
-cache yang tersedia), snapshot input/output JSON, level ERROR/DEFAULT, pesan status yang disanitasi,
-nama trace, ID sesi, lingkungan opsional, dan
-`langfuse.observation.metadata.<key>` yang dapat difilter untuk penyedia, model yang diminta, path, combo, sumber
-cache, dan status. `langfuse.observation.completion_start_time` berformat ISO 8601 pada
-waktu mulai + TTFT hanya jika TTFT diketahui dan berada dalam durasi. Tidak ada atribut biaya yang dikirim.
+cache yang tersedia), snapshot input/output JSON, level ERROR/DEFAULT, pesan status yang
+disanitasi, nama trace, id sesi, environment opsional, serta
+`langfuse.observation.metadata.<key>` yang dapat difilter untuk provider, model yang diminta, path, kombinasi, sumber
+cache, dan status. `langfuse.observation.completion_start_time` adalah ISO 8601 pada
+awal + TTFT hanya ketika TTFT diketahui dan berada dalam durasi. Tidak ada atribut biaya yang dikirim.
 
 Mode identitas berlaku untuk `langfuse.user.id`:
 
-- `pseudonymous` (default): HMAC-SHA256 dari ID internal kunci API dengan salt acak
-  32 byte per tujuan. Salt dibuat saat pembuatan jika belum ada, dienkripsi
-  sebagai `identitySalt`, tidak pernah dikembalikan, dan dipertahankan selama pengeditan. ID kunci mentah tidak pernah
-  dimasukkan ke atribut span. Membuat ulang/merotasi salt suatu tujuan akan mengubah identitas.
-- `keyName`: nama kunci API yang dikonfigurasi, yang sengaja mengungkap label operator tersebut.
-- `none`: tanpa ID pengguna. Tag sesi tetap diekspor jika ada; mode-mode ini tidak
-  menganonimkan konten prompt arbitrer atau label sesi/korelasi yang diberikan operator.
+- `pseudonymous` (default): HMAC-SHA256 dari id internal kunci API dengan salt 32 byte acak
+  per tujuan. Salt dibuat saat pembuatan jika tidak ada, dienkripsi sebagai `identitySalt`,
+  tidak pernah dikembalikan, dan dipertahankan selama pengeditan. Id kunci mentah tidak pernah
+  dimasukkan ke dalam atribut span. Membuat ulang/memutar salt tujuan akan mengubah identitas.
+- `keyName`: nama kunci API yang dikonfigurasi, dengan sengaja mengungkapkan label operator tersebut.
+- `none`: tanpa user id. Tag sesi tetap diekspor jika ada; mode ini tidak menganonimkan konten prompt
+  arbitrer atau label sesi/korelasi yang diberikan operator.
 
-### Memulai tanpa pengisian data historis
+### Memulai tanpa backfill
 
 Hanya saat pembuatan, aktifkan **Mulai dari posisi saat ini (lewati log yang ada)** atau teruskan
-`startFromCurrentPosition: true` di tingkat teratas payload API pembuatan. Ini menginisialisasi
-`cursor_row_id` ke rowid maksimum saat ini dari log panggilan yang masih disimpan menggunakan helper
-kursor yang ada, tanpa migrasi. Default-nya adalah false (kursor 0 dan pengisian ulang riwayat yang masih disimpan).
-Ini bukan pengaturan untuk mereset kursor saat pembaruan.
+`startFromCurrentPosition: true` pada tingkat teratas payload API create. Ini menginisialisasi
+`cursor_row_id` ke rowid maksimum log panggilan yang dipertahankan saat ini menggunakan helper cursor
+yang ada, tanpa migrasi. Nilai default-nya adalah false (cursor 0 dan backfill riwayat yang dipertahankan).
+Ini bukan pengaturan reset cursor saat pembaruan.
 
-Penambahan `ttftMs` bersama juga menambahkan kolom `ttft_ms` yang dapat bernilai null ke pemeta BigQuery
-dan skema tabel baru: pengujian skemanya mengharuskan setiap field rekaman kanonis memiliki
-kolom. Tabel yang ada tetap diekspor tanpa perubahan: `prepare()` membaca skema tabel dan
-hanya menghilangkan `ttft_ms` jika kolom tersebut tidak ada. Tambahkan kolom INT64 yang dapat bernilai null untuk mendapatkan TTFT
-pada eksekusi berikutnya, atau gunakan tabel baru. Tidak diperlukan PATCH, perubahan skema otomatis, maupun
-izin tambahan; semua field baris lainnya tetap menjalani pemeriksaan skema yang ketat.
+Penambahan `ttftMs` bersama juga menambahkan kolom nullable `ttft_ms` ke mapper BigQuery
+dan skema tabel baru: pengujian skema mengharuskan setiap bidang rekaman kanonis memiliki
+kolom. Tabel yang ada tetap mengekspor tanpa perubahan: `prepare()` membaca skema tabel
+dan hanya menghilangkan `ttft_ms` jika kolom tersebut tidak ada. Tambahkan kolom nullable INT64 untuk mendapatkan TTFT
+pada proses berikutnya, atau gunakan tabel baru. Kolom TTFT opsional tidak memicu pembaruan skema. Kolom bukti penggunaan
+mengikuti alur kompatibilitas bersyarat dan opt-in di bawah ini; bidang baris lainnya tetap menjalani
+pemeriksaan skema yang ketat.
 
 ---
 
@@ -489,11 +480,25 @@ Dua aturan untuk tujuan baru:
 
 - **Dasbor**: Integrasi → Ekspor log. Tambahkan tujuan, jalankan **Uji** untuk memeriksa kredensial
   tanpa menulis baris, lalu aktifkan.
-- **Antrean tertunda**: setiap kartu tujuan menampilkan baris yang tertunda dan kursor; `GET
-/api/log-export/status` mengembalikan angka yang sama beserta 20 eksekusi tugas terakhir.
-- **Tujuan yang gagal tidak menyebabkan tujuan lain gagal** — ringkasan eksekusi mencatat status
-  per tujuan di `last_status` / `last_error`, dan riwayat eksekusi tugas menyimpan agregatnya.
-- **Menghapus tujuan akan menghapus kursornya.** Menambahkannya kembali akan dimulai dari log
-  panggilan tertua yang masih disimpan, sehingga baris yang mungkin sudah dimiliki tujuan akan dikirim ulang. Di BigQuery, `insertId`
-  per baris hanya menangani hal itu dalam jendela deduplikasi BigQuery sendiri, jadi sebaiknya nonaktifkan
-  tujuan alih-alih menghapusnya.
+- **Backlog**: setiap kartu tujuan menampilkan baris yang tertunda dan kursor; `GET
+/api/log-export/status` mengembalikan angka yang sama ditambah 20 proses tugas terakhir.
+- **Tujuan yang gagal tidak menyebabkan tujuan lainnya gagal** — ringkasan proses mencatat status
+  per tujuan di `last_status` / `last_error`, dan riwayat proses tugas menyimpan agregatnya.
+- **Menghapus tujuan akan menghapus kursornya.** Menambahkannya kembali akan dimulai dari log panggilan
+  tersimpan yang paling lama, sehingga mengirim ulang baris yang mungkin sudah dimiliki tujuan tersebut.
+  Di BigQuery, `insertId` per baris hanya menangani hal ini dalam jendela deduplikasi BigQuery sendiri,
+  jadi sebaiknya nonaktifkan tujuan daripada menghapusnya.
+
+### Kompatibilitas skema bukti penggunaan
+
+Tabel BigQuery baru menyertakan `usage_evidence` yang dapat bernilai null (STRING berisi JSON) dan
+`usage_estimated` (BOOL). Dengan `autoCreate` diaktifkan, tabel yang sudah ada hanya dapat menerima
+kolom nullable yang hilang tersebut. Exporter mempertahankan seluruh skema yang ada, termasuk metadata
+field, dan mengirimkan PATCH bersyarat menggunakan etag yang dikembalikan. Perubahan skema secara
+bersamaan akan menggagalkan ekspor, bukan menimpanya; proses berikutnya akan membaca tabel kembali.
+
+Dengan `autoCreate` dinonaktifkan, tambahkan kolom-kolom ini sendiri sebelum mengekspor catatan
+dengan bukti penggunaan. Metadata skema/etag yang hilang atau pembaruan yang gagal juga mencegah
+penyisipan yang memuat bukti. Kursor ekspor tidak akan maju saat terjadi kegagalan tersebut, dan
+bukti tidak pernah dihapus secara diam-diam. Retensi log lokal tetap berlaku saat ekspor terblokir,
+jadi atasi kegagalan tersebut sebelum baris sumber yang dipertahankan kedaluwarsa.

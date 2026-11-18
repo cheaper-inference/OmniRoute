@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 कैप्चर `open-sse/handlers/chatCore.ts` (दो साइटों, दो `cacheReasoningFromAssistantMessage` कॉल साइटों पर) में होता है। स्कीमा जबरदस्ती के बाद लेकिन प्रेषण से पहले `open-sse/translator/index.ts` में रीप्ले होता है।
+
+टूल-कॉल प्रविष्टियाँ `buildToolCallCacheKey()` के अंतर्गत संग्रहीत की जाती हैं, जो अनुरोध दायरे और टूल कॉल आईडी का एक डाइजेस्ट है, इसलिए किसी अन्य API कुंजी या सत्र द्वारा उपयोग की जाने वाली समान आईडी प्रविष्टि का चयन नहीं करती है। दायरा `buildReasoningCacheScope()` से आता है: API कुंजी आईडी, साथ ही अनुरोध में एक होने पर सत्र कुंजी। इसलिए `tool_call_id` कॉलम और डैशबोर्ड उन प्रविष्टियों के लिए इस डाइजेस्ट को दिखाते हैं।
 
 सादा (गैर-टूल-कॉल) सहायक घुमावों को अलग तरह से कुंजीबद्ध किया जाता है: `buildAssistantMessageCacheKey()` उस मोड़ तक सत्र के दायरे और सामान्यीकृत ओपनएआई-प्रारूप प्रतिलेख को पचाता है, क्योंकि DeepSeek मौजूद होने के बाद `tools` को _हर_ पूर्व मोड़ के तर्क की आवश्यकता होती है। प्रतिक्रिया-एपीआई लक्ष्यों के लिए (उदाहरण के लिए `opencode-go/deepseek-v4-flash`, `/responses` पर रूट किया गया) अपस्ट्रीम बॉडी में `input` होता है, `messages` नहीं, इसलिए `translateRequest()` (`open-sse/translator/index.ts`) कॉलबैक विकल्प के माध्यम से पचने वाली पिवट ट्रांसक्रिप्ट की रिपोर्ट करता है और कैप्चर साइटें उसी ट्रांसक्रिप्ट को डाइजेस्ट करती हैं। रिस्पॉन्स रिप्ले पास हर स्रोत प्रारूप के लिए OpenAI पिवट पर चलता है, इसलिए Anthropic संदेश क्लाइंट (Claude → OpenAI → रिस्पॉन्स) भी दोबारा चलाए जाते हैं।
 

@@ -118,33 +118,10 @@ finale ; `http://localhost:3000` et `http://localhost:3000/` sont donc équivale
 même liste CSV peut être définie à l’exécution dans **Tableau de bord → Sécurité →
 Origines CORS autorisées**, sans redémarrage.
 
-## Clés d’API et sessions par cookie
+## clés API vs sessions de cookies
 
-- **Bearer / `x-api-key` (la surface d’inférence `/v1/*`) :** les navigateurs ne les
-  joignent jamais automatiquement. CORS ne constitue pas ici une barrière pertinente :
-  la clé d’API est la barrière. C’est pourquoi cette surface est volontairement
-  permissive, afin que les clients de navigateur et Electron puissent lire les réponses
-  auxquelles ils ont déjà droit.
-  Le renvoi assoupli de l’origine suit la clé validée, et non la simple présence de
-  l’en-tête : lorsque `REQUIRE_API_KEY=false` sert une requête de manière anonyme, sa
-  réponse réussie conserve la liste d’autorisation fermée par défaut. Les refus
-  d’authentification (401) restent lisibles afin que les clients puissent signaler une clé
-  révoquée ou mal saisie (#5242) : le 401 émis par le pipeline lui-même conserve le renvoi
-  de l’origine, et une route qui refuse elle-même la clé après que le pipeline l’a servie
-  comme anonyme (`/v1/models` et `/v1beta/models` lorsque l’authentification de gestion est
-  configurée, les routes limitées au propriétaire `/v1/files`, `/v1/batches`, `/v1/media`,
-  `/v1/session-leases` et les routes de candidats de l’auto-combo) ajoute le renvoi de
-  l’origine à ce 401 via `credentialRejectionHeaders()`. Le renvoi dépend de la présence
-  dans la requête d’un en-tête d’identifiants (`Authorization`, `x-api-key`,
-  `x-goog-api-key` ou le cookie `auth_token`), et non de celui que la route a vérifié ; il
-  n’est jamais associé à `Access-Control-Allow-Credentials`, et le corps est une enveloppe
-  d’erreur fixe. Les routes de gestion sous `/api/v1/` protégées par `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) n’ajoutent pas ce renvoi : avec `REQUIRE_API_KEY=false`, leurs réponses 401/403 ne sont
-  pas lisibles depuis une autre origine.
-- **Session par cookie (le tableau de bord) :** elle est protégée par le comportement
-  fermé par défaut **et** par l’absence de `Access-Control-Allow-Credentials` sur le
-  chemin partagé. N’incluez pas les origines de gestion ou du tableau de bord dans une
-  configuration permissive ; elles doivent rester strictement fermées par défaut.
+- **Bearer / `x-api-key` (la surface d'inférence `/v1/*` ) :** les navigateurs ne les attachent jamais automatiquement. CORS n'est pas une barrière significative ici — la clé API est la barrière — c'est pourquoi cette surface est intentionnellement permissive afin que les clients du navigateur et Electron puissent lire les réponses auxquelles ils ont déjà droit. L'écho détendu suit la clé validée, pas la simple présence de l'en-tête : lorsque `REQUIRE_API_KEY=false` répond anonymement à une requête, sa réponse réussie conserve la liste blanche fermée en cas d'échec. Les rejets d'authentification (401) restent lisibles afin que les clients puissent faire apparaître une clé révoquée ou mal saisie (#5242) : le propre 401 du pipeline conserve l'écho, et une route qui refuse la clé elle-même après que le pipeline l'a servie de manière anonyme (`/v1/models` et `/v1beta/models` avec l'authentification de gestion configurée, les routes candidates `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` et auto-combo) ajoutent l'écho à cela. 401 via `credentialRejectionHeaders()`. L'écho est saisi sur la requête portant un en-tête d'informations d'identification (`Authorization`, `x-api-key`, `x-goog-api-key` ou le cookie `auth_token` ), et non sur celui d'entre eux sur lequel la route a été vérifiée, et n'est jamais associé à `Access-Control-Allow-Credentials`; le corps est une enveloppe d’erreur fixe. Les routes de gestion sous `/api/v1/` gardées par `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) n'ajoutent pas d'écho : avec `REQUIRE_API_KEY=false` leur 401/403 n'est pas lisible d'origine croisée.
+- **Session cookie (le tableau de bord) :** protégé par le défaut de fermeture en cas de panne** et** par l'absence de `Access-Control-Allow-Credentials` sur le chemin partagé. Gardez les origines management/dashboard hors de toute configuration permissive ; ils doivent rester exactement fermés.
 
 ## Handshakes WebSocket (`/v1/responses`, `/v1/ws`)
 
