@@ -49,6 +49,12 @@ export function rowToCamel(row: unknown): JsonRecord | null {
       } catch {
         result[camelKey] = v;
       }
+    } else if (camelKey === "modelMap" && typeof v === "string") {
+      try {
+        result[camelKey] = JSON.parse(v);
+      } catch {
+        result[camelKey] = null;
+      }
     } else if (camelKey.endsWith("Json")) {
       // Convention: any column with a `_json` suffix is JSON-encoded TEXT.
       // Surface the parsed object under the friendlier name (key minus the

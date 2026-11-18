@@ -72,6 +72,13 @@ export interface ProviderConnectionView {
    * normalizes that map (fail-open) onto credentials at selection time.
    */
   rateLimitOverrides: ConnectionRateLimitOverrides | null;
+  modelMap: Record<string, string> | null;
+}
+
+function toModelMapOrNull(value: unknown): Record<string, string> | null {
+  return value && typeof value === "object" && !Array.isArray(value)
+    ? (value as Record<string, string>)
+    : null;
 }
 
 /**
@@ -122,6 +129,7 @@ export function toProviderConnection(value: unknown): ProviderConnectionView {
       rateLimitMaxConcurrent !== null && rateLimitMaxConcurrent > 0 ? rateLimitMaxConcurrent : null,
     quotaWindowThresholds,
     rateLimitOverrides,
+    modelMap: toModelMapOrNull(row.modelMap),
   };
 }
 

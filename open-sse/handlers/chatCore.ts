@@ -130,6 +130,10 @@ import {
   stripIncompatibleMessageContent,
 } from "../services/modelStrip.ts";
 import { echoModelInObject } from "../services/responseModelEcho.ts";
+import {
+  resolveConnectionMappedModel,
+  type ConnectionModelMap,
+} from "../services/connectionModelMap.ts";
 import { getUnsupportedParams, REGISTRY } from "../config/providerRegistry.ts";
 
 import { checkToolCallingRequiredButUnsupported } from "./chatCore/toolCallingRequiredCheck.ts";
@@ -808,6 +812,22 @@ async function handleChatCoreInner({
   );
   if (routedLifecycleError) return routedLifecycleError;
 
+  // Connection-level model mapping (sub2api port): if the selected connection has a modelMap,
+  // rewrite effectiveModel accordingly. The body is copied, never mutated: a fallback to another
+  // account reuses the caller's object and must start from the model the client asked for.
+  let connectionModelSource: string | undefined;
+  const connectionModelMap = (credentials as { modelMap?: ConnectionModelMap } | null | undefined)
+    ?.modelMap;
+  const mappedModel = resolveConnectionMappedModel(effectiveModel, connectionModelMap);
+  if (mappedModel !== effectiveModel) {
+    log?.info?.("MODEL_MAP", `Connection model mapping: ${effectiveModel} -> ${mappedModel}`);
+    connectionModelSource = effectiveModel;
+    effectiveModel = mappedModel;
+    if (body && typeof body === "object" && !Array.isArray(body)) {
+      body = { ...(body as Record<string, unknown>), model: mappedModel } as typeof body;
+    }
+  }
+
   // Effort-variant model ids: the Claude / Claude-Code model picker (e.g. VS Code's
   // "Effort" slider) advertises claude-...-{low,medium,high,xhigh,max}. Anthropic has
   // no such model, so the suffixed id 404s upstream. Strip it back to the real base id
@@ -1026,6 +1046,9 @@ async function handleChatCoreInner({
   let reasoningReplayHistory: unknown[] | null = null;
   // persistAttemptLogs extracted to chatCore/attemptLogging.ts (#3501); bind the per-request context
   // once so the 16 call sites keep passing only the per-attempt args (byte-identical).
+  // Assigned at dispatch below. Declared here because a cache hit logs through this closure first,
+  // when the upstream model is still `effectiveModel`.
+  let currentModel: typeof effectiveModel;
   const persistAttemptLogs = (args: PersistAttemptLogsArgs) => {
     if (isScopedGeminiCacheTarget && args.geminiPromptCache === undefined) {
       args.geminiPromptCache = buildCacheUsageLogMeta(
@@ -1041,6 +1064,7 @@ async function handleChatCoreInner({
       provider,
       connectionId,
       model,
+      actualModel: currentModel || effectiveModel || model,
       skillRequestId,
       detailedLoggingEnabled,
       reqLogger,
@@ -2771,7 +2795,7 @@ async function handleChatCoreInner({
   });
   // T5: track which models we've tried for intra-family fallback
   const triedModels = new Set<string>([effectiveModel]);
-  let currentModel = effectiveModel;
+  currentModel = effectiveModel;
 
   // Log start
   appendRequestLog({ model, provider, connectionId, status: "PENDING" }).catch(() => {});
@@ -3355,6 +3379,7 @@ async function handleChatCoreInner({
       clientRawRequest,
       comboStrategy,
       connectionId,
+      connectionModelSource,
       contextEditingEnabled,
       credentials,
       effectiveModel,
@@ -3446,6 +3471,7 @@ async function handleChatCoreInner({
       comboStrategy,
       compressionResponseMeta,
       connectionId,
+      connectionModelSource,
       contextEditingEnabled,
       copilotCompatibleReasoning,
       createErrorResult,
@@ -3494,6 +3520,7 @@ async function handleChatCoreInner({
       memoryOwnerId,
       memorySettings,
       model,
+      requestedModel,
       normalizeHeaders,
       normalizeUsage,
       onRequestSuccess,
@@ -3615,6 +3642,7 @@ async function handleChatCoreInner({
     memoryOwnerId,
     memorySettings,
     model,
+    requestedModel,
     onRequestSuccess,
     onStreamFailure,
     pendingConnId,

@@ -15,6 +15,33 @@ export const RENAMED_MIGRATION_COMPATIBILITY = [
     toVersion: "025",
     toName: "call_logs_summary_storage",
   },
+  // #18395 builds ran its two migrations as 237/238 (earlier heads; both slots are
+  // canonical base migrations now) and then 242/243. Move those rows to the timestamped
+  // files so the canonical 237/238 run and the PR files never re-run.
+  {
+    fromVersion: "237",
+    fromName: "connection_notes_model_map",
+    toVersion: "20261115225415",
+    toName: "connection_notes_model_map",
+  },
+  {
+    fromVersion: "238",
+    fromName: "usage_actual_model",
+    toVersion: "20261115225420",
+    toName: "usage_actual_model",
+  },
+  {
+    fromVersion: "242",
+    fromName: "connection_notes_model_map",
+    toVersion: "20261115225415",
+    toName: "connection_notes_model_map",
+  },
+  {
+    fromVersion: "243",
+    fromName: "usage_actual_model",
+    toVersion: "20261115225420",
+    toName: "usage_actual_model",
+  },
   // #20054 builds ran its two evidence migrations as 238/239 (earlier heads) and then
   // 239/240; all four slots are canonical base migrations now. Move those rows to the
   // timestamped files so the canonical 238-241 run and the evidence files never re-run.

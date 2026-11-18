@@ -52,8 +52,10 @@ import {
   withNullableMaxConcurrent,
   withNullableQuotaWindowThresholds,
   withNullableRateLimitOverrides,
+  withNullableNotesAndModelMap,
   normalizeBooleanColumn,
   sanitizeRateLimitOverrides,
+  requireSanitizedConnectionModelMap,
   serializeJsonField,
   toRecord,
   sanitizeQuotaWindowThresholds,
@@ -139,6 +141,17 @@ interface DbLike {
   transaction: <T>(fn: () => T) => () => T;
 }
 
+/** Nullable-column normalisation shared by every read/write path that returns a connection. */
+function withNullableConnectionColumns(row: JsonRecord, source: JsonRecord | null | undefined) {
+  return withNullableNotesAndModelMap(
+    withNullableRateLimitOverrides(
+      withNullableQuotaWindowThresholds(withNullableMaxConcurrent(row, source), source),
+      source
+    ),
+    source
+  );
+}
+
 // Real column set for provider_connections (must match the CREATE TABLE in
 // core.ts's SCHEMA_SQL). getProviderConnections()'s optional `columns`
 // projection is interpolated directly into the SELECT clause, so every
@@ -187,6 +200,8 @@ export const PROVIDER_CONNECTIONS_COLUMNS = new Set([
   "per_key_proxy_enabled",
   "quota_window_thresholds_json",
   "rate_limit_overrides_json",
+  "notes",
+  "model_map",
   "created_at",
   "updated_at",
   "synced_models_at",
@@ -281,13 +296,7 @@ export async function getRawProviderConnections(
   const rows = db.prepare(sql).all(params);
   return rows.map((r) => {
     const camelRow = rowToCamel(r);
-    return withNullableRateLimitOverrides(
-      withNullableQuotaWindowThresholds(
-        withNullableMaxConcurrent(cleanNulls(camelRow), camelRow),
-        camelRow
-      ),
-      camelRow
-    );
+    return withNullableConnectionColumns(cleanNulls(camelRow), camelRow);
   });
 }
 
@@ -325,15 +334,7 @@ export async function getProviderConnectionById(id: string) {
   if (!row) return null;
 
   const camelRow = rowToCamel(row);
-  return decryptConnectionFields(
-    withNullableRateLimitOverrides(
-      withNullableQuotaWindowThresholds(
-        withNullableMaxConcurrent(cleanNulls(camelRow), camelRow),
-        camelRow
-      ),
-      camelRow
-    )
-  );
+  return decryptConnectionFields(withNullableConnectionColumns(cleanNulls(camelRow), camelRow));
 }
 
 export interface ProviderConnectionDisplayMetadata {
@@ -767,6 +768,8 @@ export async function createProviderConnection(data: JsonRecord) {
     "quotaWindowThresholds",
     "rateLimitOverrides",
     "healthCheckInterval",
+    "notes",
+    "modelMap",
   ];
   for (const field of optionalFields) {
     if (data[field] !== undefined && data[field] !== null) {
@@ -804,6 +807,10 @@ export async function createProviderConnection(data: JsonRecord) {
     connection.rateLimitOverrides = result.sanitized;
   }
 
+  if ("modelMap" in connection) {
+    connection.modelMap = requireSanitizedConnectionModelMap(connection.modelMap);
+  }
+
   _insertConnectionRow(db, encryptConnectionFields({ ...connection }));
   const providerId = toStringOrNull(data.provider);
   if (providerId) {
@@ -812,13 +819,7 @@ export async function createProviderConnection(data: JsonRecord) {
   backupDbFile("pre-write");
   invalidateDbCache("connections"); // Bust connections read cache
 
-  const returnedConnection = withNullableRateLimitOverrides(
-    withNullableQuotaWindowThresholds(
-      withNullableMaxConcurrent(cleanNulls(connection), connection),
-      connection
-    ),
-    connection
-  );
+  const returnedConnection = withNullableConnectionColumns(cleanNulls(connection), connection);
 
   if (
     isMicrosoftDesignerWebRetiredProviderId(data.provider) ||
@@ -844,7 +845,7 @@ function _insertConnectionRow(db: DbLike, conn: JsonRecord) {
       expires_in, display_name, global_priority, default_model,
       token_type, consecutive_use_count, rate_limit_protection, last_used_at, "group", max_concurrent,
       proxy_enabled, per_key_proxy_enabled, quota_visible, quota_window_thresholds_json, rate_limit_overrides_json,
-      created_at, updated_at
+      notes, model_map, created_at, updated_at
     ) VALUES (
       @id, @provider, @authType, @name, @email, @priority, @isActive,
       @accessToken, @refreshToken, @expiresAt, @tokenExpiresAt,
@@ -855,7 +856,7 @@ function _insertConnectionRow(db: DbLike, conn: JsonRecord) {
       @expiresIn, @displayName, @globalPriority, @defaultModel,
       @tokenType, @consecutiveUseCount, @rateLimitProtection, @lastUsedAt, @group, @maxConcurrent,
       @proxyEnabled, @perKeyProxyEnabled, @quotaVisible, @quotaWindowThresholdsJson, @rateLimitOverridesJson,
-      @createdAt, @updatedAt
+      @notes, @modelMap, @createdAt, @updatedAt
     )
   `
   ).run({
@@ -904,6 +905,8 @@ function _insertConnectionRow(db: DbLike, conn: JsonRecord) {
     quotaVisible: normalizeBooleanColumn(conn.quotaVisible, true) ? 1 : 0,
     quotaWindowThresholdsJson: serializeJsonField(conn.quotaWindowThresholds),
     rateLimitOverridesJson: serializeJsonField(conn.rateLimitOverrides),
+    notes: typeof conn.notes === "string" ? conn.notes : null,
+    modelMap: serializeJsonField(conn.modelMap),
     createdAt: conn.createdAt,
     updatedAt: conn.updatedAt,
   });
@@ -959,6 +962,8 @@ function _buildUpdateConnectionRowParams(id: string, data: JsonRecord, now: unkn
     perKeyProxyEnabled: normalizeBooleanColumn(data.perKeyProxyEnabled, false) ? 1 : 0,
     quotaVisible: normalizeBooleanColumn(data.quotaVisible, true) ? 1 : 0,
     rateLimitOverridesJson: serializeJsonField(data.rateLimitOverrides),
+    notes: typeof data.notes === "string" ? data.notes : null,
+    modelMap: serializeJsonField(data.modelMap),
     lastPingAt: data.lastPingAt || null,
     lastPingedResetKey: data.lastPingedResetKey || null,
     updatedAt: now,
@@ -991,6 +996,8 @@ function _updateConnectionRow(db: DbLike, id: string, data: JsonRecord) {
       per_key_proxy_enabled = @perKeyProxyEnabled,
       quota_visible = @quotaVisible,
       rate_limit_overrides_json = @rateLimitOverridesJson,
+      notes = @notes,
+      model_map = @modelMap,
       last_ping_at = @lastPingAt,
       last_pinged_reset_key = @lastPingedResetKey,
       updated_at = @updatedAt
@@ -1093,6 +1100,9 @@ export async function updateProviderConnection(
   data: JsonRecord,
   opts?: ProviderConnectionUpdateOpts
 ) {
+  if ("modelMap" in data) {
+    data = { ...data, modelMap: requireSanitizedConnectionModelMap(data.modelMap) };
+  }
   const db = getDbInstance() as unknown as DbLike;
 
   // The incoming value only. A connection that already holds the password has
@@ -1153,13 +1163,7 @@ export async function updateProviderConnection(
   // callers of updateProviderConnection must never see enc:v1 metadata as the
   // usable console credentials (#16836).
   const returned = decryptConnectionFields({ ...merged });
-  const returnedConnection = withNullableRateLimitOverrides(
-    withNullableQuotaWindowThresholds(
-      withNullableMaxConcurrent(cleanNulls(returned), returned),
-      returned
-    ),
-    returned
-  );
+  const returnedConnection = withNullableConnectionColumns(cleanNulls(returned), returned);
 
   if (
     isMicrosoftDesignerWebRetiredProviderId(merged.provider) ||
