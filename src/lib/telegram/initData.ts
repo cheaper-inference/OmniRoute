@@ -12,7 +12,7 @@
  * directly unit-testable. Never trust the client-side `initData` alone —
  * verification MUST happen server-side.
  */
-import { createHmac, timingSafeEqual } from "node:crypto";
+import { createHash, createHmac, timingSafeEqual } from "node:crypto";
 
 export interface VerifyInitDataOptions {
   /**
@@ -75,6 +75,94 @@ export function parseInitData(initData: string): Record<string, string> {
   return out;
 }
 
+function parseAuthDate(data: Record<string, string>): number | null {
+  const authDate = Number.parseInt(data["auth_date"] ?? "", 10);
+  return Number.isFinite(authDate) && authDate > 0 ? authDate : null;
+}
+
+/** Freshness check on auth_date (unix seconds), bounded in both the past and the future. */
+function isAuthDateWithinBounds(
+  data: Record<string, string>,
+  maxAgeSec: number,
+  nowSec: number,
+  maxClockSkewSec: number | undefined
+): boolean {
+  if (maxAgeSec <= 0) return true;
+  const authDate = parseAuthDate(data);
+  if (authDate === null) return false;
+  if (nowSec - authDate > maxAgeSec) return false;
+  return authDate - nowSec <= (maxClockSkewSec ?? maxAgeSec);
+}
+
+function isReplayed(replayKey: string, nowSec: number): boolean {
+  sweepReplayCache(nowSec);
+  const existingExpiry = replayCache.get(replayKey);
+  return existingExpiry !== undefined && existingExpiry > nowSec;
+}
+
+/** Remember a verified replay key until its initData expires. */
+function rememberReplayKey(
+  replayKey: string,
+  data: Record<string, string>,
+  maxAgeSec: number,
+  nowSec: number
+): void {
+  const ttl = maxAgeSec > 0 ? maxAgeSec : 24 * 60 * 60;
+  const expiresAt = (parseAuthDate(data) ?? nowSec) + ttl;
+  if (replayCache.size >= MAX_REPLAY_CACHE_SIZE) {
+    sweepReplayCache(nowSec);
+    if (replayCache.size >= MAX_REPLAY_CACHE_SIZE) {
+      const firstKey = replayCache.keys().next().value;
+      if (firstKey) replayCache.delete(firstKey);
+    }
+  }
+  replayCache.set(replayKey, expiresAt);
+}
+
+function hasValidSignature(
+  data: Record<string, string>,
+  providedHash: string,
+  botToken: string
+): boolean {
+  // Rebuild the data-check string: sorted key=value pairs, excluding hash.
+  const pairs = Object.entries(data)
+    .filter(([k]) => k !== "hash")
+    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
+    .map(([k, v]) => `${k}=${v}`);
+
+  const dataCheckString = pairs.join("\n");
+
+  // secret_key = HMAC_SHA256(key="WebAppData", bot_token)
+  const secretKey = createHmac("sha256", "WebAppData").update(botToken).digest();
+
+  // expected_hash = HMAC_SHA256(secret_key, dataCheckString) hex
+  const expectedHash = createHmac("sha256", secretKey).update(dataCheckString).digest("hex");
+
+  const provided = Buffer.from(providedHash, "utf8");
+  const expected = Buffer.from(expectedHash, "utf8");
+  if (provided.length !== expected.length) return false;
+  return timingSafeEqual(provided, expected);
+}
+
+function resolveVerifyOptions(providedHash: string, options?: VerifyInitDataOptions) {
+  return {
+    now: options?.nowSec ?? Math.floor(Date.now() / 1000),
+    maxClockSkewSec: options?.maxClockSkewSec,
+    antiReplay: options?.antiReplay ?? false,
+    replayKey: options?.replayKey ?? providedHash,
+  };
+}
+
+/**
+ * Replay-cache key for a Mini App request: the initData hash plus a SHA-256 digest of the
+ * message. The cache is filled before the allowlist check, so the key must stay a fixed size
+ * instead of retaining the raw, unbounded message (#19833).
+ */
+export function buildMiniAppReplayKey(initDataHash: string, message: string): string {
+  const messageDigest = createHash("sha256").update(message, "utf8").digest("hex");
+  return `${initDataHash}:${messageDigest}`;
+}
+
 /**
  * Verify a Telegram WebApp initData string against the bot token.
  *
@@ -95,63 +183,16 @@ export function verifyInitData(
   const providedHash = data["hash"];
   if (!providedHash) return false;
 
-  const now = options?.nowSec ?? Math.floor(Date.now() / 1000);
+  const { now, maxClockSkewSec, antiReplay, replayKey } = resolveVerifyOptions(
+    providedHash,
+    options
+  );
+  if (!isAuthDateWithinBounds(data, maxAgeSec, now, maxClockSkewSec)) return false;
+  if (antiReplay && isReplayed(replayKey, now)) return false;
 
-  // Freshness check on auth_date (unix seconds) - bounds both past and future.
-  if (maxAgeSec > 0) {
-    const authDate = Number.parseInt(data["auth_date"] ?? "", 10);
-    if (!Number.isFinite(authDate) || authDate <= 0) return false;
-    // Check past expiration
-    if (now - authDate > maxAgeSec) return false;
-    // Check future expiration (clock skew tolerance)
-    const maxFutureSkew = options?.maxClockSkewSec ?? maxAgeSec;
-    if (authDate - now > maxFutureSkew) return false;
-  }
-
-  // Anti-replay check
-  const antiReplay = options?.antiReplay ?? false;
-  const replayKey = options?.replayKey ?? providedHash;
-  if (antiReplay) {
-    sweepReplayCache(now);
-    const existingExpiry = replayCache.get(replayKey);
-    if (existingExpiry !== undefined && existingExpiry > now) {
-      return false;
-    }
-  }
-
-  // Rebuild the data-check string: sorted key=value pairs, excluding hash.
-  const pairs = Object.entries(data)
-    .filter(([k]) => k !== "hash")
-    .sort(([a], [b]) => (a < b ? -1 : a > b ? 1 : 0))
-    .map(([k, v]) => `${k}=${v}`);
-
-  const dataCheckString = pairs.join("\n");
-
-  // secret_key = HMAC_SHA256(key="WebAppData", bot_token)
-  const secretKey = createHmac("sha256", "WebAppData").update(botToken).digest();
-
-  // expected_hash = HMAC_SHA256(secret_key, dataCheckString) hex
-  const expectedHash = createHmac("sha256", secretKey).update(dataCheckString).digest("hex");
-
-  const provided = Buffer.from(providedHash, "utf8");
-  const expected = Buffer.from(expectedHash, "utf8");
-  if (provided.length !== expected.length) return false;
-  if (!timingSafeEqual(provided, expected)) return false;
+  if (!hasValidSignature(data, providedHash, botToken)) return false;
 
   // Signature is valid. If anti-replay is active, store key until expiry.
-  if (antiReplay) {
-    const authDate = Number.parseInt(data["auth_date"] ?? "", 10);
-    const ttl = maxAgeSec > 0 ? maxAgeSec : 24 * 60 * 60;
-    const expiresAt = (Number.isFinite(authDate) && authDate > 0 ? authDate : now) + ttl;
-    if (replayCache.size >= MAX_REPLAY_CACHE_SIZE) {
-      sweepReplayCache(now);
-      if (replayCache.size >= MAX_REPLAY_CACHE_SIZE) {
-        const firstKey = replayCache.keys().next().value;
-        if (firstKey) replayCache.delete(firstKey);
-      }
-    }
-    replayCache.set(replayKey, expiresAt);
-  }
-
+  if (antiReplay) rememberReplayKey(replayKey, data, maxAgeSec, now);
   return true;
 }

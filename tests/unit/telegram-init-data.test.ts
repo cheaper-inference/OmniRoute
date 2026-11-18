@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
 
 import {
+  buildMiniAppReplayKey,
   clearInitDataReplayCache,
   parseInitData,
   verifyInitData,
@@ -167,5 +168,24 @@ test("verifyInitData supports custom replayKey to bind message and payload", () 
       replayKey: `${hash}:goodbye`,
     }),
     true
+  );
+});
+
+test("buildMiniAppReplayKey keeps the replay key a fixed size whatever the message length", () => {
+  // #19833 review: the replay cache is filled before the allowlist check, so the key must not
+  // retain the raw (unbounded) Mini App message.
+  const hash = "a".repeat(64);
+  const huge = "x".repeat(1_000_000);
+  const key = buildMiniAppReplayKey(hash, huge);
+
+  assert.ok(key.startsWith(`${hash}:`));
+  assert.equal(key.length, hash.length + 1 + 64);
+  assert.ok(!key.includes("xxxx"), "the raw message must not be part of the key");
+  assert.equal(key, buildMiniAppReplayKey(hash, huge), "same (hash, message) → same key");
+  assert.notEqual(key, buildMiniAppReplayKey(hash, `${huge}y`), "distinct messages stay distinct");
+  assert.notEqual(
+    key,
+    buildMiniAppReplayKey("b".repeat(64), huge),
+    "distinct initData stays distinct"
   );
 });

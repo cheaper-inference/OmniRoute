@@ -27,7 +27,7 @@ import {
   isTelegramUserAllowed,
   isTelegramWebhookSecretConfigured,
 } from "@/lib/telegram/config";
-import { verifyInitData, parseInitData } from "@/lib/telegram/initData";
+import { buildMiniAppReplayKey, verifyInitData, parseInitData } from "@/lib/telegram/initData";
 import { proxyChat } from "@/lib/telegram/chatProxy";
 import { formatTelegramGatewayError } from "@/lib/telegram/errorMessage";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
@@ -126,7 +126,7 @@ async function handleMiniAppRequest(initData: string, body: Record<string, unkno
   // cache on (hash, message) would 401 a user who sends the same short message twice.
   const antiReplay = process.env.TELEGRAM_INITDATA_ANTI_REPLAY === "true";
   const parsed = parseInitData(initData);
-  const replayKey = `${parsed.hash ?? ""}:${message}`;
+  const replayKey = buildMiniAppReplayKey(parsed.hash ?? "", message);
   if (!verifyInitData(initData, botToken, undefined, { antiReplay, replayKey })) {
     return NextResponse.json({ ok: false, error: "Invalid initData signature" }, { status: 401 });
   }
