@@ -43,13 +43,12 @@ export const REQUIRED_MACHINE_TOKEN_RUNTIME_FILES = Object.freeze([
   "node_modules/node-machine-id/index.js",
 ]);
 
-// Translated /docs pages (2026-11-03): the tarball carries the docs mirrors under dist/docs, and
-// the sanitizer that renders them imports jsdom, which npm installs as a declared dependency.
-// Either one missing and every translated page silently falls back to English.
-export const REQUIRED_DOCS_I18N_RUNTIME_FILES = Object.freeze([
-  "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md",
-  "node_modules/jsdom/package.json",
-]);
+// /docs runtime (2026-11-17): the npm package ships no translated docs mirrors. With them the
+// 3.8.54 tarball reached 206.1 MB and the registry answered 413, so npm installs serve /docs in
+// English. jsdom (the sanitizer behind translated pages) stays a declared dependency, and a
+// dist/docs/i18n tree in the installed package means the mirrors came back into the tarball.
+export const REQUIRED_DOCS_RUNTIME_FILES = Object.freeze(["node_modules/jsdom/package.json"]);
+export const FORBIDDEN_DOCS_RUNTIME_PATHS = Object.freeze(["dist/docs/i18n"]);
 
 /** Parse `npm pack --json` output into the generated tarball filename. */
 export function pickTarball(packJsonOutput) {
@@ -91,9 +90,15 @@ export function findMissingMachineTokenRuntimeFiles(packageRoot, exists = fs.exi
   );
 }
 
-export function findMissingDocsI18nRuntimeFiles(packageRoot, exists = fs.existsSync) {
-  return REQUIRED_DOCS_I18N_RUNTIME_FILES.filter(
+export function findMissingDocsRuntimeFiles(packageRoot, exists = fs.existsSync) {
+  return REQUIRED_DOCS_RUNTIME_FILES.filter(
     (relativePath) => !exists(path.join(packageRoot, relativePath))
+  );
+}
+
+export function findForbiddenDocsRuntimePaths(packageRoot, exists = fs.existsSync) {
+  return FORBIDDEN_DOCS_RUNTIME_PATHS.filter((relativePath) =>
+    exists(path.join(packageRoot, relativePath))
   );
 }
 
@@ -470,13 +475,19 @@ async function main() {
       );
     }
     log("installed package contains the node-machine-id runtime");
-    const missingDocsI18nFiles = findMissingDocsI18nRuntimeFiles(packageRoot);
-    if (missingDocsI18nFiles.length > 0) {
+    const missingDocsFiles = findMissingDocsRuntimeFiles(packageRoot);
+    if (missingDocsFiles.length > 0) {
       throw new Error(
-        `installed package is missing the translated-docs runtime contract: ${missingDocsI18nFiles.join(", ")}`
+        `installed package is missing the docs runtime contract: ${missingDocsFiles.join(", ")}`
       );
     }
-    log("installed package contains the translated docs mirrors and jsdom");
+    const forbiddenDocsPaths = findForbiddenDocsRuntimePaths(packageRoot);
+    if (forbiddenDocsPaths.length > 0) {
+      throw new Error(
+        `installed package carries translated docs mirrors the npm package must not ship: ${forbiddenDocsPaths.join(", ")}`
+      );
+    }
+    log("installed package contains jsdom and no translated docs mirrors");
 
     const port = pickPort();
     const dataDir = path.join(tmp, "data");
