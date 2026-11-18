@@ -444,30 +444,13 @@ export default function DefaultToolCard({
           const isWarning = note.type === "warning";
           const isError = note.type === "cloudCheck" && !cloudEnabled;
 
-          let bgClass = "bg-info/10 border-info/30";
-          let textClass = "text-info ";
-          let iconClass = "text-info";
-          let icon = "info";
-
-          if (isWarning) {
-            bgClass = "bg-warning/10 border-warning/30";
-            textClass = "text-warning ";
-            iconClass = "text-warning";
-            icon = "warning";
-          } else if (isError) {
-            bgClass = "bg-error/10 border-error/30";
-            textClass = "text-error ";
-            iconClass = "text-error";
-            icon = "error";
-          }
+          const variant = isWarning ? "warning" : isError ? "critical" : "info";
+          const icon = isWarning ? "warning" : isError ? "error" : "info";
 
           return (
-            <div key={index} className={`flex items-start gap-3 p-3 rounded-lg border ${bgClass}`}>
-              <Icon name={icon} size={18} className={iconClass} />
-              <p className={`text-sm ${textClass}`}>
-                {translateOrFallback(`guides.${toolId}.notes.${index}`, note.text)}
-              </p>
-            </div>
+            <Notice key={index} variant={variant} icon={icon}>
+              {translateOrFallback(`guides.${toolId}.notes.${index}`, note.text)}
+            </Notice>
           );
         })}
       </div>

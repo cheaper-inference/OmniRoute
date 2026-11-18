@@ -263,6 +263,21 @@ test("G: messages and warnings are the Notice adapter, not a tinted box", () => 
   assert.equal(offenders.length, 0, `use <Notice variant=…>:\n${where(offenders)}`);
 });
 
+test("G: no status tint and border pair is kept in a variable for a hand-made box", () => {
+  // The tag scan above cannot see a class that reaches the element through a variable.
+  const offenders = FILES.flatMap(({ file, source }) =>
+    source
+      .split("\n")
+      .map((text, i) => ({ file, line: i + 1, text }))
+      .filter((l) => /bg-(success|error|warning|info)\/10 border-\1\/\d+/.test(l.text))
+  );
+  assert.equal(
+    offenders.length,
+    0,
+    `use <Notice variant=…>:\n${offenders.map((o) => `${o.file}:${o.line}`).join("\n")}`
+  );
+});
+
 const CODE_BOX_EXCEPTIONS: Exception[] = [
   {
     file: "cli-code/components/DefaultToolCard.tsx",
