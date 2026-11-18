@@ -33,65 +33,83 @@ Minħabba li n-numru huwa stima:
 
 ---
 
-## Kif jiġu stmati l-ispejjeż
+## Kif huma stmati l-ispejjeż
 
-### Is-sors tal-ipprezzar
+### Is-sors tal-prezzijiet
 
-L-ispejjeż jiġu minn tabella tal-ipprezzar riżolta skont din l-ordni ta' preċedenza
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+L-ispejjeż jiġu mit-tabella tal-prezzijiet magħquda [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), f'din l-ordni ta' preċedenza (** l-ogħla l-ewwel** ):
 
-1. **Sovrastrutturi tal-utent** — prezzijiet li tissettja fid-dashboard / permezz ta' `PATCH /api/pricing`.
-2. **Ipprezzar estern sinkronizzat** — miksub mill-
-   `model_prices_and_context_window.json` pubbliku ta' LiteLLM meta s-sinkronizzazzjoni tkun attivata (maħżun fi namespace
-   `pricing_synced` separat sabiex qatt ma jissostitwixxi s-sovrastrutturi tiegħek).
-3. **Valuri predefiniti hardcoded** — inklużi ma' OmniRoute.
+1. **L-utent jinvalida** prezzijiet — stabbiliti fid-dashboard jew permezz ta ' `PATCH /api/pricing` (l-ispazju tal-isem `pricing` ).
+2. **sinkronizzazzjoni tal-mudelli.dev** prezzijiet — miġjuba minn `https://models.dev/api.json` (l-ispazju tal-isem `models_dev_pricing` ).
+3. **LiteLLM sync** prezzijiet — miġjuba mill `model_prices_and_context_window.json` pubbliku ta' LiteLLM(l-ispazju tal-isem `pricing_synced` ).
+4. **Defaults hardcoded** — rates mibgħuta fi [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Is-sinkronizzazzjoni tal-ipprezzar estern hija **opt-in**, diżattivata b'mod predefinit. Il-varjabbli tal-ambjent rilevanti
-(ara [`.env.example`](../../.env.example)):
+Għall-istess provider/model, valuri minn saffi ta' prijorità ogħla jissostitwixxu oqsma li jaqblu f'saffi aktar baxxi; oqsma assenti minn saff ta 'fuq xorta jistgħu jiġu minn saff t'isfel. L-ordni hija ffissata anke meta ż-żewġ xogħlijiet ta 'sinkronizzazzjoni indipendenti jaħdmu fl-istess ħin. `GET /api/pricing?includeSources=1` jirritorna `pricing` u `sourceMap`, li t-tikketti għal kull mudell tagħhom (`user`, `modelsDev`, `litellm`, `default`) jidentifikaw is-saff tal-ogħla prijorità li fih dak il-mudell.
 
-| Varjabbli tal-ambjent   | Valur predefinit | Għan                                                                             |
-| ----------------------- | ---------------- | -------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`          | Attiva s-sinkronizzazzjoni tal-ipprezzar ta' LiteLLM fl-isfond waqt l-istartjar. |
-| `PRICING_SYNC_INTERVAL` | `86400`          | Intervall tas-sinkronizzazzjoni f'**sekondi** (kuljum b'mod predefinit).         |
-| `PRICING_SYNC_SOURCES`  | `litellm`        | Lista ta' sorsi separati b'virgola (illum huwa appoġġjat biss `litellm`).        |
+**LiteLLM sync** huwa opt-in, diżattivat awtomatikament. Il-varjabbli ambjentali tiegħu (ara [`.env.example`](../../.env.example) ) huma:
+
+| Env var                 | Default   | Għan                                                                                        |
+| ----------------------- | --------- | ------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Ippermetti s-sinkronizzazzjoni tal-prezzijiet LiteLLM fl-isfond.                            |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Intervall ta' sinkronizzazzjoni f'sekondi (kuljum).                                         |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Għażla tas-sors għal din is-sinkronizzazzjoni biss; bħalissa `litellm` biss huwa appoġġjat. |
+
+**sinkronizzazzjoni tal-mudelli.dev** hija separata mis-sinkronizzazzjoni LiteLLM u hija wkoll diżattivata awtomatikament. Ippermettiha fis-Settings (models.dev sync) jew uża dawn il-varjabbli:
+
+| Env var                    | Default   | Għan                                                                                                                          |
+| -------------------------- | --------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(mitfi)_ | Unset isegwi l-toggle Settings; `1/true/on/yes` forzi mixgħul u `0/false/off/no` forzi off (anke jekk Settings jappermettih). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`   | Intervall ta' sinkronizzazzjoni default models.dev f'sekondi (kuljum).                                                        |
+
+`PRICING_SYNC_SOURCES` ma** le** enable models.dev; tikkontrolla biss is-sinkronizzazzjoni LiteLLM. It-tħassir ta' override tal-utent ma jikklerja l-ebda spazju tal-isem issinkronizzat; is-saff tal-prezzijiet disponibbli li jmiss isir effettiv. Għal mudell bla prezz, iċċekkja kemm is-sinkronizzazzjoni kif ukoll iż- `sourceMap` qabel iżżid override manwali.
 
 ### Il-formula tal-ispiża
 
-L-ispiża tiġi kkalkulata għal kull talba mill-għadd ta' tokens u mir-rati għal kull miljun token fi
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+L-ispiża hija kkalkulata għal kull talba mill-għadd ta' tokens u r-rati ta' kull miljun token [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- **Tokens tal-input** (mingħajr il-qari mill-cache u t-tokens tal-ħolqien tal-cache) × ir-rata `input`.
-- **Tokens moqrija mill-cache** × ir-rata `cached` (jekk ma tkunx disponibbli, tintuża r-rata tal-input).
-- **Tokens tal-ħolqien tal-cache** × ir-rata `cache_creation` (jekk ma tkunx disponibbli, tintuża r-rata tal-input).
-- **Tokens tal-output** × ir-rata `output`.
-- **Tokens tar-raġunament** × ir-rata `reasoning` (jekk ma tkunx disponibbli, tintuża r-rata tal-output).
+- **Tokens tad-dħul** (nieqes il-qari tal-cache u t-tokens tal-ħolqien tal-cache) rata × `input`.
+- **Tokens li jinqraw bil-cache** × `cached` rate (taqa' lura għar-rata tal-input).
+- **Tokens tal-ħolqien tal-cache** × `cache_creation` rate (taqa' lura għar-rata tal-input).
+- **Tokens tal-ħruġ** × `output` rata.
+- **Tokens tar-raġunament** × `reasoning` rate (taqa' lura għar-rata tal-output).
 
-Ir-rati kollha jiġu interpretati bħala USD għal kull 1,000,000 token. Livell ta' servizz Codex "fast"/"priority" jew
-"flex" japplika multiplikatur tal-ispiża (`getCodexFastCostMultiplier`) — pereżempju, flex
-jiġi ċċarġjat bi skont ta' 50% fuq it-tokens, muri bħala **ffrankar flex** fid-dashboard.
+Ir-rati kollha huma interpretati bħala USD għal kull 1,000,000 tokens. Saff ta' servizz Codex "mgħaġġel"/"prijoritarju" jew "flex" japplika multiplikatur tal-ispiża (`getCodexFastCostMultiplier`) — eż. flex jiġi ffatturat b'roħs simboliku ta' 50%, wiċċ bħala** tfaddil flex** fid-dashboard.
 
-L-ismijiet tal-mudelli jiġu normalizzati l-ewwel (prefissi tal-mogħdijiet tal-fornituri bħal `openai/` jew
-`accounts/fireworks/models/` jitneħħew) sabiex ringieli storiċi xorta jaqblu ma' prezz.
+L-ismijiet tal-mudelli huma normalizzati l-ewwel (prefissi tal-mogħdija tal-fornitur bħal `openai/` jew `accounts/fireworks/models/` huma mqaxxra) sabiex ringieli storiċi għadhom jaqblu ma 'prezz.
 
-### Kif jiġi rreġistrat l-infiq
+### Kif tiġi rreġistrata l-infiq
 
-- L-ispiża għal kull talba tiġi kkalkulata wara r-risposta u rreġistrata mingħajr stennija għar-riżultat sabiex
-  qatt ma żżid latenza għall-klijent. Il-konsum tal-kwota kondiviża jiġi skedat fit-tick li jmiss
-  tal-event loop permezz ta' [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- L-infiq tal-API keys jinżamm f'buffer u jintbagħat f'lottijiet mill-
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervall predefinit ta' 60s bejn kull flush,
-  buffer ta' 1,000 entrata). Jista' jiġi rregolat permezz ta':
+- L-ispiża għal kull talba tiġi kkalkulata mat-tlestija tat-talba. Il-konsum tal-kwota maqsuma huwa skedat fuq il-marka tal-loop tal-avveniment li jmiss permezz [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- L-infiq taċ-ċavetta API huwa buffered u mlaħalħa f'lottijiet mill- [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervall ta' flush default 60s, buffer ta' 1,000 dħul). Sintonizzabbli permezz ta':
 
-  | Varjabbli tal-ambjent               | Valur predefinit | Għan                                                 |
-  | ----------------------------------- | ---------------- | ---------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`          | Intervall tal-flush f'millisekondi.                  |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`           | Għadd massimu ta' entrati fil-buffer qabel il-flush. |
+  | Env var                             | Default | Għan                              |
+  | ----------------------------------- | ------- | --------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Aħsel intervall f'millisekondi.   |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Max buffered entrati qabel flush. |
 
-Iċ-ċifri tal-ispejjeż fid-dashboard **ma** jinqrawx minn ammont f'dollari maħżun għal kull ringiela — jiġu
-kkalkulati mill-ġdid dak il-ħin mill-għadd ta' tokens u mit-tabella attwali tal-ipprezzar kull darba li
-jitħaddem l-endpoint tal-analytics. Dan ifisser li l-korrezzjoni ta' prezz ħażin (u s-sinkronizzazzjoni mill-ġdid) taġġorna
-b'mod retroattiv l-istimi storiċi tal-ispejjeż.
+L-ispejjeż jippreferu ħlas eżatt irrapportat mill-fornitur (`provider_cost_usd`), imbagħad snapshot tat-talba bi prezz tal-katalgu (`calculated_cost_usd`), imbagħad token repricing mill-katalgu attwali. L-ispejjeż maħżuna ma jerġgħux jiġu ċċarġjati permezz tal-għadd tat-tokens tagħhom. Ringieli legacy ta' tokens biss għadhom jinbidlu meta jinbidel il-prezz tal-katalgu tagħhom.
+
+### OCR u embeddings
+
+- Talbiet `/v1/ocr` b'suċċess jużaw `usage_info.pages_processed` upstream , mhux il-firxa tal-paġna mitluba jew in-numru ta' oġġetti tal-paġna rritornati. L-istima hija paġni × `ocr_cost_per_page` (assoluta USD/page,** le** USD/million).
+- Talbiet b'annotazzjonijiet ta' dokument jew bounding-box jeħtieġu tariffa `ocr_cost_per_annotated_page` separata. Mingħajrha, l-ispiża tibqa 'mhux magħrufa; it-tariffa OCR ordinarja ma tkunx sostitwita fis-skiet.
+- LiteLLM sync jimmappa l-qasam `annotation_cost_per_page` upstream tiegħu `ocr_cost_per_annotated_page`, u jżomm il-valur USD/page assolut u l-entrati ta' annotazzjoni biss, inkluż żero espliċitu. Qasam kanoniku fornut jieħu preċedenza; valuri ta' alias invalidi huma injorati. L-overrides tal-prezzijiet tal-utenti jżommu l-prijorità normali tagħhom. Ara [ċ-ċwievet tal-prezzijiet OCR ta'LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- L-użu OCR jaħżen l-għadd tal-paġna, il-prezz tal-unità, l-ispiża USD ikkalkulata, iċ-ċavetta API u l-konnessjoni magħżula. Il-paġni qatt ma huma rappreżentati bħala tokens. Ir-reġistri tas-sejħiet fihom metadejta tal-kontijiet, mhux dokument URLs, PDF bytes jew test estratt.
+- Talbiet `/v1/embeddings` b'suċċess jirreġistraw ringiela ta' użu waħda għal kull lott fiżiku, inklużi lottijiet separati kompletati fl-istess millisekonda. It-tariffi rrapportati mill-fornitur jieħdu preċedenza fuq l-istimi tat-tokens; tgeżwir combo ma jżidux ħlas.
+- L-istorja tal-użu, l-Analitika tal-Ispejjeż, it-twieqi provider/account, il-limiti tal-infiq taċ-ċavetta tal-API, ir-reġistru tal-ispejjeż tat-talba u r-rollups tal-użu ta 'kuljum jinkludu dawn il-ħlasijiet. Iċ-ċwievet bla log iżommu l-kontabilità numerika mingħajr ma jżommu t-test tas-sors.
+- L-użu jew it-tariffi nieqsa huma** mhux magħruf** , mhux b'xejn: l-intestatura tal-ispiża tar-rispons titħalla barra, u l-politika eżistenti dwar l-użu bla prezz tapplika għal ċwievet API limitati. Ir-rati żero kkonfigurati b'mod espliċitu jibqgħu validi użu ta 'spiża żero.
+
+Din hija kontabilità bil-quddiem biss. Sejħiet OCR/embedding qodma li qatt ma kitbu storja tal-użu ma jistgħux jiġu rikostitwiti minn din il-migrazzjoni. L-istimi tal-katalgu huma stimi USD, mhux fattura, u ma jinkludux konverżjoni tal-munita, taxxa jew roħs.
+
+### Diskors u stampi
+
+- It-tentattivi b'suċċess `/v1/audio/transcriptions`, `/v1/audio/speech` u ta' ġenerazzjoni ta' immaġni jaqsmu kontabilità numerika. Sejħiet diretti u combo jġorru ċ-ċavetta API ta' min iċempel u l-konnessjoni magħżula; tgeżwir combo qatt ma jżid it-tieni debitu.
+- USD rapportata mill-fornitur tirbaħ fuq stima katalgu, inkluż ħlas żero espliċitu. OpenRouter's JSON `usage.cost` huwa normalizzat għal `cost_usd`. Inkella, tokens imkejla jużaw prezzijiet ta 'tokens, sekondi ta' traskrizzjoni jużaw prezzijiet kull sekonda, input tad-diskors juża għadd ta 'karattri Unicode, u immaġini bi prezz fiss jużaw in-numru attwalment ritornat, mhux l- `n` mitlub.
+- Binarju OpenRouter TTS m'għandux korp ta 'użu JSON. Wara li l-awdjo jitlesta jew min iċempel jikkanċella, OmniRoute jistaqsi l-ġenerazzjoni tiegħu ID fuq il-** l-istess** oriġini OpenRouter konfigurata. Talba EU qatt ma taqa' lura għall-oriġini globali. Din hija tfittxija delimitata, li tinqara biss; sinteżi ma terġax tiġi ppruvata għall-kontabilità. Ir-rekords tal-kontijiet jistgħu jidhru wara li l-awdjo jkun intemm: it-testijiet ta' tfittxija jerġgħu jibdew fl-isfond sa madwar 52 sekonda, inklużi l-iskadenzi tan-netwerk.
+- Matul dik il-ħarsa, ir-rispons tal-awdjo għandu `X-OmniRoute-Cost-Status: pending` u l-ebda header tal-ispiża tar-rispons. Il-ħlas finali tiegħu jidher fl-istorja tal-użu, l-analiżi u r-reġistru ewlieni wara r-rikonċiljazzjoni. Jekk il-metadata ma tkunx disponibbli, tintuża snapshot tat-tariffa kkonfigurat; inkella l-ispiża tibqa' mhux magħrufa.
+- Sekondi, karattri u għadd ta' immaġni għandhom oqsma separati tal-unità tal-kontijiet, qatt għadd ta' tokens foloz. Il-kontabilità żżomm biss użu numeriku, mhux test tad-diskors, traskrizzjonijiet jew bytes tal-immaġni. L-eżenzjonijiet eżistenti ta' immaġni bla prezz ma jinbidlux: tariffa ta' immaġini ġenwinament nieqsa ma tissakkarx ċavetta limitata ġdida, u r-rispons iħalli barra l-header tal-ispiża aktar milli tiddikjara s-sejħa ħielsa. Falliment fil-maħżen tal-prezzijiet xorta jżomm evidenza tal-użu għall-infurzar tal-falliment magħluq.
+
+Ebda charge speech/image storika hija ivvintata jew backfilled. Il-kontijiet tal-fornitur jibqa' r-referenza għall-fatturi u għal sejħiet li l-ħlas tagħhom ma kienx irrappurtat.
 
 ---
 
@@ -138,53 +156,50 @@ Iż-żona tal-Ispejjeż tinkludi wkoll (kollha taħt `/dashboard/costs/`):
 
 ---
 
-## Endpoints tal-API
+## API endpoints
 
-Dawn kollha jeħtieġu awtentikazzjoni tal-ġestjoni (loopback/JWT, permezz ta’ `requireManagementAuth`) sakemm
-ma jkunx indikat mod ieħor.
+Dawn kollha jeħtieġu awtorizzazzjoni tal-ġestjoni (loopback/JWT, via `requireManagementAuth`) sakemm ma jkunx innutat.
 
-### Analitika tal-użu u tal-ispejjeż
+### Użu u analiżi tal-ispejjeż
 
-| Metodu | Endpoint                 | Għan                                                                                                                                                                                |
-| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Analitika sħiħa tal-ispejjeż/użu: sommarju, xejra ta’ kuljum, skont il-fornitur/mudell/ċavetta tal-API/kont/livell. Query: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Użu tal-kwota għal kull fornitur matul iż-żmien. Query: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                                |
-| `GET`  | `/api/usage/history`     | Ringieli mhux ipproċessati tal-istorja tal-użu.                                                                                                                                     |
-| `GET`  | `/api/usage/call-logs`   | Reġistri tas-sejħiet għal kull talba (mudell, tokens, spiża, latenza, status).                                                                                                      |
-| `GET`  | `/api/usage/quota`       | Status tal-kwota tal-fornitur.                                                                                                                                                      |
-| `GET`  | `/api/usage/proxy-logs`  | Reġistri tat-talbiet tal-proxy.                                                                                                                                                     |
+| Metodu | Endpoint                 | Għan                                                                                                                                                                   |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Analitika cost/usage sħiħa: sommarju, xejra ta' kuljum, minn provider/model/API key/account/tier. Mistoqsija: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | L-użu tal-kwota għal kull fornitur matul iż-żmien. Mistoqsija: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                            |
+| `GET`  | `/api/usage/history`     | Ringieli tal-istorja tal-użu mhux ipproċessat.                                                                                                                         |
+| `GET`  | `/api/usage/call-logs`   | Reġistri tas-sejħiet għal kull talba (mudell, tokens, spiża, latency, status).                                                                                         |
+| `GET`  | `/api/usage/quota`       | Status tal-kwota tal-fornitur.                                                                                                                                         |
+| `GET`  | `/api/usage/proxy-logs`  | Reġistri tat-talbiet tal-prokura.                                                                                                                                      |
 
 ### Baġits
 
-| Metodu | Endpoint                 | Għan                                                                                                                    |
-| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Sommarju tal-ispejjeż + verifika tal-baġit għal ċavetta tal-API waħda (il-parametru tal-query `apiKeyId` huwa meħtieġ). |
-| `POST` | `/api/usage/budget`      | Issettja limiti ta’ kuljum/kull ġimgħa/kull xahar f’USD + limitu ta’ twissija għal ċavetta tal-API.                     |
-| `GET`  | `/api/usage/budget/bulk` | Sommarji tal-baġit bl-ingrossa fost iċ-ċwievet tal-API.                                                                 |
+| Metodu | Endpoint                 | Għan                                                                                                       |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Sommarju tal-ispiża + verifika tal-baġit għal ċavetta API waħda (param ta' mistoqsija `apiKeyId` meħtieġ). |
+| `POST` | `/api/usage/budget`      | Issettja daily/weekly/monthly USD limiti + limitu ta' twissija għal ċavetta API.                           |
+| `GET`  | `/api/usage/budget/bulk` | Sommarji tal-baġit bl-ingrossa madwar iċ-ċwievet API.                                                      |
 
-> L-API tal-baġit hija limitata għal kull **ċavetta tal-API** (`apiKeyId`). Il-limiti rritornati minn
-> `GET /api/usage/budget` jinkludu `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> `warningThreshold`, u t-totali kurrenti (`totalCostToday`, `totalCostMonth`, …).
+> Il-budget API huwa skoped per** ċavetta API** (`apiKeyId`). Il-limiti mibgħuta lura minn `GET /api/usage/budget` jinkludu `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold`, u t-totali kurrenti (`totalCostToday`, `totalCostMonth`, …).
 
 ### Ipprezzar
 
-| Metodu   | Endpoint                | Għan                                                                                                                       |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Ipprezzar magħqud attwali (tal-utent + sinkronizzat + predefinit). `?includeSources=1` biex tara s-sors għal kull entrata. |
-| `PATCH`  | `/api/pricing`          | Issostitwixxi l-ipprezzar għal `{ provider: { model: { input, output, cached, … } } }`.                                    |
-| `DELETE` | `/api/pricing`          | Irrisettja l-ipprezzar għall-valuri predefiniti (b’mod fakultattiv limitat permezz ta’ `?provider=&model=`).               |
-| `GET`    | `/api/pricing/defaults` | Uri r-rati predefiniti ta’ fallback għal kull miljun.                                                                      |
-| `GET`    | `/api/pricing/models`   | Ipprezzar organizzat skont il-mudell.                                                                                      |
-| `POST`   | `/api/pricing/sync`     | Attiva sinkronizzazzjoni manwali minn sorsi esterni (LiteLLM).                                                             |
-| `GET`    | `/api/pricing/sync`     | Status attwali tas-sinkronizzazzjoni.                                                                                      |
-| `DELETE` | `/api/pricing/sync`     | Ħassar id-data kollha tal-ipprezzar sinkronizzat.                                                                          |
+| Metodu   | Endpoint                | Għan                                                                                                                                                 |
+| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Ipprezzar f'erba' saffi magħquda (utent, models.dev, LiteLLM, defaults). `?includeSources=1` jirritorna `pricing` + `sourceMap`.                     |
+| `PATCH`  | `/api/pricing`          | Override prezzijiet għal `{ provider: { model: { input, output, cached, … } } }`.                                                                    |
+| `DELETE` | `/api/pricing`          | Neħħi l-overrides tal-prezz tal-utent (b'għażla b'ambitu ta' `?provider=&model=`); rati sinkronizzati jew defaults built-in jibqgħu bħala fallbacks. |
+| `GET`    | `/api/pricing/defaults` | Uri r-rati default per-1M fallback.                                                                                                                  |
+| `GET`    | `/api/pricing/models`   | Ipprezzar immarkat skond il-mudell.                                                                                                                  |
+| `POST`   | `/api/pricing/sync`     | Trigger sinkronizzazzjoni manwali minn sorsi esterni (LiteLLM).                                                                                      |
+| `GET`    | `/api/pricing/sync`     | L-istatus attwali tas-sinkronizzazzjoni.                                                                                                             |
+| `DELETE` | `/api/pricing/sync`     | Ipprezzar ċar issinkronizzat ma' LiteLLM biss (`pricing_synced`); data models.dev hija separata.                                                     |
 
-### Endpoints oħra rilevanti għall-ispejjeż
+### Punti finali oħra rilevanti għall-ispiża
 
-| Metodu | Endpoint                      | Għan                                                                                          |
-| ------ | ----------------------------- | --------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Total ta’ tokens ta’ mudelli bla ħlas, dawk użati dan ix-xahar, u l-bqija tal-kwota bla ħlas. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Użu għal pool ta’ kwota kondiviża.                                                            |
+| Metodu | Endpoint                      | Għan                                                                                  |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------------- |
+| `GET`  | `/api/free-tier/summary`      | Totali ta' token tal-mudell b'xejn, użati-dan ix-xahar, u allowance b'xejn li jifdal. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Użu għal pool ta' kwota maqsuma.                                                      |
 
 ---
 

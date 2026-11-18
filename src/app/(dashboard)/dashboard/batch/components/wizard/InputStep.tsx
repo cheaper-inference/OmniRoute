@@ -2,8 +2,8 @@
 
 import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import Icon from "@/shared/components/Icon";
 import SegmentedControl from "@/shared/components/SegmentedControl";
+import { FileDropZone, type FileRejection } from "@/shared/components/FileInput";
 import CsvMappingStep from "./CsvMappingStep";
 import type { WizardInput, WizardCsvMapping, WizardDestination } from "@/lib/batches/types";
 
@@ -39,8 +39,6 @@ interface InputStepProps {
 
 export default function InputStep({ input, onChange, destination }: InputStepProps) {
   const t = useTranslations("common");
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [isReading, setIsReading] = useState(false);
   // B-2b — synchronous stale-proof guard for concurrent drops/picks in the same
   // event-loop tick (React state lags behind dispatches within a tick).
@@ -94,27 +92,16 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
     }
   }
 
-  function handleFileInputChange(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (file) processFile(file);
-    // Reset input so same file can be re-picked
-    e.target.value = "";
-  }
-
-  function handleDrop(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) processFile(file);
-  }
-
-  function handleDragOver(e: React.DragEvent<HTMLDivElement>) {
-    e.preventDefault();
-    setIsDragging(true);
-  }
-
-  function handleDragLeave() {
-    setIsDragging(false);
+  function handleRejectedFiles(rejections: FileRejection[]) {
+    // The extension check is soft (validation flags a wrong file later), so a file the kit
+    // rejects only for its type is still read; extra files on this single-file zone are ignored.
+    // The kit reports rejections before the accepted files of the same drop: wait for the
+    // microtask so an accepted file, already reading by then, wins.
+    const wrongType = rejections.find((rejection) => rejection.reason === "type");
+    if (!wrongType) return;
+    queueMicrotask(() => {
+      if (!isReadingRef.current) void processFile(wrongType.file);
+    });
   }
 
   function handleCsvMappingChange(mapping: WizardCsvMapping) {
@@ -140,6 +127,7 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
     <div className="flex flex-col gap-6">
       {/* Kind toggle */}
       <SegmentedControl
+        semantics="radio"
         aria-label={t("wizardStep2Input")}
         className="self-start"
         value={isJsonl ? "jsonl" : "csv"}
@@ -151,44 +139,23 @@ export default function InputStep({ input, onChange, destination }: InputStepPro
       />
 
       {/* Drop zone — disabled while reading to prevent race (B-2) */}
-      <div
-        role="button"
-        tabIndex={isReading ? -1 : 0}
-        onDrop={handleDrop}
-        onDragOver={handleDragOver}
-        onDragLeave={handleDragLeave}
-        onClick={() => !isReading && fileInputRef.current?.click()}
-        onKeyDown={(e) => {
-          if (isReading) return;
-          if (e.key === "Enter" || e.key === " ") fileInputRef.current?.click();
-        }}
-        aria-disabled={isReading}
-        className={`rounded-xl border-2 border-dashed p-8 flex flex-col items-center gap-3 transition-colors
-          ${isReading ? "cursor-wait opacity-60 pointer-events-none" : "cursor-pointer"}
-          ${isDragging ? "border-accent bg-accent/10" : "border-border hover:border-accent/50"}`}
-      >
-        <Icon name="upload_file" size={30} className="text-text-muted" />
-        {isReading ? (
-          <span className="text-sm text-text-muted">{t("wizardInputReading")}</span>
-        ) : hasFile ? (
-          <div className="flex flex-col items-center gap-1">
-            <span className="text-sm text-text-main font-medium">{input.fileName}</span>
-            <span className="text-xs text-text-muted">
-              {isLargeFile ? t("wizardInputLargeFileLabel") : t("wizardInputReady")}
-            </span>
-          </div>
-        ) : (
-          <span className="text-sm text-text-muted">{t("wizardDropOrPick")}</span>
-        )}
-        {/* kit-exception: Native file picker, hidden behind the drop zone (the adapters have no file input). */}
-        <input
-          ref={fileInputRef}
-          type="file"
-          accept={acceptAttr}
-          className="hidden"
-          onChange={handleFileInputChange}
-        />
-      </div>
+      <FileDropZone
+        accept={acceptAttr}
+        disabled={isReading}
+        className={isReading ? "cursor-wait" : undefined}
+        dropLabel={
+          isReading ? t("wizardInputReading") : hasFile ? input.fileName : t("wizardDropOrPick")
+        }
+        description={
+          !isReading && hasFile
+            ? isLargeFile
+              ? t("wizardInputLargeFileLabel")
+              : t("wizardInputReady")
+            : undefined
+        }
+        onFilesChange={(files) => void processFile(files[0])}
+        onFilesRejected={handleRejectedFiles}
+      />
 
       {/* Large file warning */}
       {isLargeFile && (

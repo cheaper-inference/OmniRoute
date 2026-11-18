@@ -108,11 +108,11 @@ er ongemerkt drift ontstaat.
 
 ---
 
-## 1. CLI Code's Catalogus (27 tools)
+## 1. CLI Code's Catalogus (28 tools)
 
-Alle tools die in `/dashboard/cli-code` verschijnen. Degenen met `baseUrlSupport: none` zijn aangesloten via MITM of een handmatige handleiding in plaats van een aangepaste basis URL:
+Alle tools die in `/dashboard/cli-code` voorkomen. Degenen met `baseUrlSupport: none` zijn aangesloten via MITM of een handmatige handleiding in plaats van een aangepaste basis URL:
 
-| Identiteitskaart   | naam                       | leverancier         | baseUrlSupport | configType              | acpSpawnbaar |
+| Identiteitskaart   | naam                       | leverancier         | baseUrlSupport | configType              | acpSpawnable |
 | ------------------ | -------------------------- | ------------------- | -------------- | ----------------------- | ------------ |
 | claude             | Claude -code               | Anthropic           | vol            | omg                     | WAAR         |
 | codex              | OpenAI Codex CLI           | OpenAI              | vol            | aangepast               | WAAR         |
@@ -135,6 +135,7 @@ Alle tools die in `/dashboard/cli-code` verschijnen. Degenen met `baseUrlSupport
 | grok-build         | Grok Bouw                  | xAI                 | vol            | aangepast               | vals         |
 | verbrijzeling      | Verbrijzeling              | OSS (charme)        | vol            | aangepast               | vals         |
 | qwen               | Qwen -code                 | Alibaba             | vol            | gids                    | WAAR         |
+| openklappen        | OpenClaude                 | Gitlawb (OSS)       | vol            | gids                    | vals         |
 | zed                | Zed                        | Zed Industries      | vol            | gids                    | vals         |
 | cursor             | Cursor                     | Elke sfeer          | geen           | gids                    | vals         |
 | anti-zwaartekracht | Antigravity                | Google              | geen           | Mitm                    | vals         |
@@ -222,20 +223,20 @@ interface ToolBatchStatus {
 
 ## 6. Instellingenhandlers voor nieuwe tools
 
-Nieuwe tools met `configType: "custom"` hebben speciale API-routes voor instellingen:
+Nieuwe tools met `configType: "custom"` hebben speciale instellingen API -routes:
 
-| Route                                       | Tool                                                                               |
-| ------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                            |
-| `POST /api/cli-tools/jcode-settings`        | jcode (`--base-url`-vlag)                                                          |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, verouderd)                                          |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primair + synchronisatie met verouderde `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                              |
-| `POST /api/cli-tools/pi-settings`           | Pi-codeeragent                                                                     |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                              |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + speciale `.env`-sleutel)                      |
+| Route                                       | Hulpmiddel                                                                  |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                     |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url vlag)                                                     |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, erfenis)                                     |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primaire + oudere `~/.deepseek` synchronisatie) |
+| `POST /api/cli-tools/smelt-settings`        | Spiering                                                                    |
+| `POST /api/cli-tools/pi-settings`           | Pi-coderingsagent (`~/.pi/agent/models.json`, `providers.omniroute`)        |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                       |
+| `POST /api/cli-tools/qwen-settings`         | Qwen code (`~/.qwen/settings.json` + speciale `.env` sleutel)               |
 
-Alle routes gebruiken `sanitizeErrorMessage()` voor foutreacties (harde regel #12).
+Alle routes gebruiken `sanitizeErrorMessage()` voor foutreacties (harde regel nr. 12).
 
 ---
 
@@ -292,21 +293,21 @@ Volledige PT-BR- en EN-vertalingen worden meegeleverd. 39 andere locales vallen 
 
 ---
 
-## 9. Snel aan de slag
+## 9. Snelle start
 
-### Stap 1 — Verkrijg een OmniRoute-API-sleutel
+### Stap 1 — Verkrijg een OmniRoute API sleutel
 
-1. Open `/dashboard/api-manager` → **API-sleutel maken**
-2. Geef deze een naam (bijv. `cli-tools`) en selecteer alle machtigingen
-3. Kopieer de sleutel — je hebt deze nodig voor elke onderstaande CLI
+1. Open `/dashboard/api-manager` →** Maak API sleutel**
+2. Geef het een naam (bijvoorbeeld `cli-tools`) en selecteer alle rechten
+3. Kopieer de sleutel — Je hebt deze nodig voor elke CLI hieronder
 
-> Je sleutel ziet er als volgt uit: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Uw sleutel ziet er als volgt uit: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Stap 2 — Installeer CLI-tools
+### Stap 2 — Installeer CLI Tools
 
-Alle op npm gebaseerde tools vereisen Node.js 22.22.2+ of 24.x:
+Alle op NPM gebaseerde tools vereisen Node.js 22.22.2 + of 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -327,58 +328,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (te starten via `omniroute run gemini` → /v1beta-interface)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Gebaseerd op Rust
+cargo install smelt  # Rust-based
 
 # Pi coding agent
-# zie https://github.com/zechnerj/pi-coding-agent voor installatie
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# zie https://github.com/1jehuang/jcode voor installatie
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Stap 3 — Configureer via het dashboard
+### Stap 3 — Configureer via Dashboard
 
 1. Ga naar `http://localhost:20128/dashboard/cli-code`
-2. Zoek je tool in het raster
-3. Klik op de kaart om de detailpagina van de tool te openen
-4. Selecteer je API-sleutel en basis-URL
-5. Klik op **Configuratie toepassen** of kopieer het handmatige configuratiefragment
+2. Zoek uw gereedschap in het raster
+3. Klik op de kaart om de gereedschapsdetailpagina te openen
+4. Selecteer uw API sleutel en basis URL
+5. Klik** Configuratie toepassen** of kopieer het handmatige configuratiefragment
 
 ---
 
-### Stap 4 — Stel globale omgevingsvariabelen in
+### Stap 4 — Stel mondiale omgevingsvariabelen in
 
 ```bash
-# Universeel OmniRoute-eindpunt
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI leest GOOGLE_GEMINI_BASE_URL op het ROOT-niveau (de SDK voegt zelf /v1beta/... toe)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Vervang voor een **externe server** `localhost:20128` door het IP-adres of domein van de server,
-> bijv. `http://<your-server-ip>:20128`.
+> Voor een** externe server** vervang `localhost:20128` door de server IP of domein, bijvoorbeeld `http://<your-server-ip>:20128`.
 
 ---
 
-### Stap 4 — Configureer elke tool
+### Stap 4 — Configureer elk gereedschap
 
-#### Claude Code
+#### Claude -code
 
 ```bash
-# Maak ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -389,7 +389,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Gebruik de hoofd-URL van de uniforme Anthropic-gateway voor Claude Code. Voeg hier geen `/v1` toe.
+Gebruik de uniforme Anthropic -gatewayroot voor Claude code. Voeg hier geen `/v1` toe.
 
 **Test:** `claude "say hello"`
 
@@ -397,10 +397,7 @@ Gebruik de hoofd-URL van de uniforme Anthropic-gateway voor Claude Code. Voeg hi
 
 #### OpenAI Codex
 
-Moderne versies van Codex (v0.137+) lezen alleen `~/.codex/config.toml` — het oude
-`config.yaml` behoort tot de verouderde npm-CLI en wordt stilzwijgend genegeerd. De API-
-sleutel blijft in de omgevingsvariabele `OMNIROUTE_API_KEY` (`env_key`) en wordt nooit
-in het bestand geplaatst:
+Moderne Codex (v0.137 +) leest alleen `~/.codex/config.toml` — De oude `config.yaml` behoort tot de oude npm CLI en wordt stilzwijgend genegeerd. De API sleutel blijft in de `OMNIROUTE_API_KEY` omgevingsvariabele (`env_key`), nooit in het bestand:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -448,14 +445,44 @@ EOF
 
 **Test:** `opencode`
 
-> Gebruik `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> om denkvarianten te verzenden.
+> Gebruik `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` om denkvarianten te sturen.
 
 ---
 
-#### Cline (CLI of VS Code)
+#### Pi-codeeragent
 
-**CLI-modus:**
+Installeer het officiële Pi Coding Agent-pakket met `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi leest aangepaste providers van `~/.pi/agent/models.json`; stel `PI_CODING_AGENT_DIR` om de hele agentmap te verplaatsen. Het dashboard volgt die overschrijving. Pi ontdekt geen modellen van aangepaste eindpunten, dus schrijft OmniRoute het geselecteerde model in `models[]` met behulp van Pi's `openai-completions` API en het OmniRoute OpenAI-compatibele `/v1` eindpunt.
+
+In**CLI Tools → Pi** , kies een eindpunt, API sleutel en model, bekijk het voorbeeld van de provider en pas het vervolgens toe. De preview is een providerfragment: voeg `providers.omniroute` samen met uw bestaande `models.json` wanneer u Pi handmatig configureert, zodat andere providers en instellingen intact blijven.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi herlaadt `models.json` wanneer je `/model` opent. Test de geconfigureerde route met de provider-ID en model-ID die u hebt geselecteerd:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Referenties: [Pi-modellen en aangepaste providers](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi-omgevingsvariabelen](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi-installatie-instructies](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (CLI of VS -code)
+
+**CLI modus:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -467,16 +494,15 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code-modus:**
-Cline-extensie-instellingen → API-provider: `OpenAI Compatible` → Basis-URL: `http://localhost:20128/v1`
+**VS Codemodus:** Cline extensie-instellingen → API Provider: `OpenAI Compatible` → Basis URL: `http://localhost:20128/v1`
 
-Of gebruik het OmniRoute-dashboard → **CLI-tools → Cline → Configuratie toepassen**.
+Of gebruik het OmniRoute dashboard →**CLI Hulpmiddelen → Cline → Configuratie toepassen** .
 
 ---
 
-#### KiloCode (CLI of VS Code)
+#### KiloCode (CLI of VS -code)
 
-**CLI-modus:**
+**CLI modus:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
@@ -491,11 +517,11 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Of gebruik het OmniRoute-dashboard → **CLI-tools → KiloCode → Configuratie toepassen**.
+Of gebruik het OmniRoute dashboard →**CLI Hulpmiddelen → KiloCode → Configuratie toepassen** .
 
 ---
 
-#### Continue (VS Code-extensie)
+#### Doorgaan (VS -code-extensie)
 
 Bewerk `~/.continue/config.yaml`:
 
@@ -509,20 +535,20 @@ models:
     default: true
 ```
 
-Start VS Code opnieuw op na het bewerken.
+Start VS Code opnieuw na het bewerken.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Gebruik dit wanneer VS Code Insiders is geconfigureerd voor modellen met aangepaste eindpunten en je wilt dat OmniRoute zonder een aangepast headerveld werkt.
+Gebruik dit wanneer VS Code Insiders is geconfigureerd voor aangepaste eindpuntmodellen en u wilt dat OmniRoute werkt zonder een aangepast headerveld.
 
 **Aanbevolen locatie:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Voorbeeld met de getokeniseerde OmniRoute-alias:**
+**Voorbeeld met de tokenized OmniRoute -alias:**
 
 ```json
 [
@@ -546,27 +572,26 @@ Gebruik dit wanneer VS Code Insiders is geconfigureerd voor modellen met aangepa
 
 **Opmerkingen:**
 
-- Vervang `sk-your-omniroute-key` door een API-sleutel die in OmniRoute is aangemaakt.
-- Het veld `url` moet verwijzen naar `/api/v1/vscode/{token}/chat/completions`.
-- Het veld `modelsUrl` moet verwijzen naar `/api/v1/vscode/{token}/models`.
-- Geef de voorkeur aan de normale `/v1`-methode met een Bearer-header wanneer de client aangepaste headers ondersteunt.
-- In URL's ingesloten tokens zijn een compatibiliteitsoplossing en kunnen zichtbaar zijn in editorlogboeken of de geschiedenis van de proxy.
+- Vervang `sk-your-omniroute-key` door een API sleutel gemaakt in OmniRoute.
+- Het `url` veld moet naar `/api/v1/vscode/{token}/chat/completions` wijzen.
+- Het `modelsUrl` veld moet naar `/api/v1/vscode/{token}/models` wijzen.
+- Geef de voorkeur aan de normale `/v1` + Bearer-headerstroom wanneer de client aangepaste headers ondersteunt.
+- In URL's ingebedde tokens zijn een terugval op compatibiliteit en kunnen verschijnen in editorlogboeken of proxygeschiedenis.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Meld u aan bij uw AWS-/Kiro-account:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# De CLI gebruikt zijn eigen authenticatie — OmniRoute is niet nodig als backend voor Kiro CLI zelf.
-# Gebruik kiro-cli naast OmniRoute voor andere hulpprogramma's.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-Gebruik voor de desktopapp **Kiro IDE** het MITM-eindpunt dat door OmniRoute beschikbaar wordt gesteld
-onder `/dashboard/cli-tools → Kiro`.
+Voor de**Kiro IDE** desktop-app, gebruik dan het MITM eindpunt dat wordt weergegeven door OmniRoute onder `/dashboard/cli-tools → Kiro`.
 
 ---
 

@@ -97,7 +97,7 @@ describe("ModelRoutingSection", () => {
     const pattern = screen.getByLabelText(s.pattern) as HTMLInputElement;
     const combo = screen.getByLabelText(s.routeToCombo) as HTMLSelectElement;
     expect(pattern.tagName).toBe("INPUT");
-    expect(combo.className).toContain("ci-select-native");
+    expect(combo.className).toContain("ci-native-select__control");
     expect((screen.getByRole("button", { name: s.save }) as HTMLButtonElement).disabled).toBe(true);
 
     const results = await runAxe(document.body);

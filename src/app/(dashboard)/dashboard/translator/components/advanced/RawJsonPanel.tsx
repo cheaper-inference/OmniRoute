@@ -3,6 +3,7 @@
 // Direct module import: tests stub the barrel Button with a reduced prop set.
 import IconButton from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { cn } from "@/shared/utils/cn";
 
 import { useState, useCallback, useEffect, useMemo } from "react";
@@ -422,21 +423,13 @@ export default function RawJsonPanel({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Icon name="input" size={18} className="text-text-muted" />
-                      <h3 className="text-sm font-semibold text-text-main">
-                        {tr("input", "Input")}
-                      </h3>
+                      <h3 className="text-sm text-text-main">{tr("input", "Input")}</h3>
                       {detectedFormat && (
                         <Badge variant="info" size="sm" dot>
                           {FORMAT_META[detectedFormat]?.label ?? detectedFormat}
                         </Badge>
                       )}
-                      {detecting && (
-                        <Icon
-                          name="progress_activity"
-                          size={14}
-                          className="text-text-muted animate-spin"
-                        />
-                      )}
+                      {detecting && <Spinner size="xs" className="text-text-muted" />}
                     </div>
                     <div className="flex items-center gap-1">
                       <IconButton
@@ -493,7 +486,7 @@ export default function RawJsonPanel({
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-2">
                         <Icon name="hub" size={18} className="text-warning" />
-                        <h3 className="text-sm font-semibold text-text-main">
+                        <h3 className="text-sm text-text-main">
                           {tr("openaiIntermediatePanel", "OpenAI Intermediate")}
                         </h3>
                         <Badge variant="warning" size="sm">
@@ -537,9 +530,7 @@ export default function RawJsonPanel({
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-2">
                       <Icon name="output" size={18} className="text-text-muted" />
-                      <h3 className="text-sm font-semibold text-text-main">
-                        {tr("output", "Output")}
-                      </h3>
+                      <h3 className="text-sm text-text-main">{tr("output", "Output")}</h3>
                       {outputContent && (
                         <Badge variant="success" size="sm" dot>
                           {FORMAT_META[targetFormat]?.label ?? targetFormat}
@@ -582,7 +573,7 @@ export default function RawJsonPanel({
               <div className="p-4 space-y-3">
                 <div className="flex items-center gap-2">
                   <Icon name="library_books" size={18} className="text-primary" />
-                  <h3 className="text-sm font-semibold text-text-main">
+                  <h3 className="text-sm text-text-main">
                     {tr("exampleTemplates", "Example Templates")}
                   </h3>
                   <span className="text-xs text-text-muted">

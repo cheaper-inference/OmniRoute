@@ -1,1 +1,0 @@
-- **fix(cli):** preserve Windows global npm prefix and system Node directory resolution in Linux-built bundles ([#17234](https://github.com/diegosouzapw/OmniRoute/pull/17234))

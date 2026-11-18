@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
-import { AlertActions, AlertDescription, AlertTitle } from "@omniroute/ui-kit/alert";
+import { Alert } from "@omniroute/ui-kit/alert";
 import { Badge as KitBadge } from "@omniroute/ui-kit/badge";
 import { buttonVariants } from "@omniroute/ui-kit/button";
 import { StatusMatrix } from "@omniroute/ui-kit/metric-charts";
@@ -117,22 +117,15 @@ export default function StatusPage() {
         )}
 
         {!loading && error && (
-          // Kit alert parts without the dismiss control (the kit Alert always renders one).
-          <div
-            role="alert"
-            data-slot="alert"
-            data-variant="critical"
-            className="ci-alert ci-alert--critical"
-          >
-            <span className="ci-alert__icon">
-              <Icon name="error" size={20} />
-            </span>
-            <div className="ci-alert__body">
-              <AlertTitle>
-                <h2>{t("status.healthCheckFailed")}</h2>
-              </AlertTitle>
-              <AlertDescription>{error}</AlertDescription>
-              <AlertActions>
+          // Stays until a refresh gets an answer from the health endpoint.
+          <Alert
+            variant="critical"
+            dismissible={false}
+            icon={<Icon name="error" size={20} />}
+            title={<h2>{t("status.healthCheckFailed")}</h2>}
+            description={error}
+            actions={
+              <>
                 <Link
                   href="/offline"
                   className={buttonVariants({ variant: "outline", size: "sm" })}
@@ -145,9 +138,9 @@ export default function StatusPage() {
                 >
                   {t("status.maintenanceInfo")}
                 </Link>
-              </AlertActions>
-            </div>
-          </div>
+              </>
+            }
+          />
         )}
 
         {!loading && health && (

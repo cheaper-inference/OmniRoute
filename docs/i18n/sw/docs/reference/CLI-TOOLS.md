@@ -107,39 +107,40 @@ sehemu moja bila nyingine husababisha mkusanyiko wa majaribio kushindwa badala y
 
 ---
 
-## 1. Katalogi ya Msimbo wa CLI (zana 27)
+## 1. Katalogi ya Msimbo wa CLI (zana 28)
 
 Zana zote zinazoonekana katika `/dashboard/cli-code`. Zile zilizo na `baseUrlSupport: none` zimeunganishwa kupitia MITM au mwongozo wa mwongozo badala ya msingi maalum URL:
 
-| kitambulisho | jina                                | mchuuzi                 | msingiUrlSupport | configType    | acpSpawnable |
-| ------------ | ----------------------------------- | ----------------------- | ---------------- | ------------- | ------------ |
-| claude       | nambari Claude                      | Anthropic               | kamili           | env           | kweli        |
-| kodeksi      | OpenAI Codex CLI                    | OpenAI                  | kamili           | desturi       | kweli        |
-| zcode        | ZCode ( Mpango wa Usimbaji wa GLM ) | Z.ai                    | hakuna           | desturi       | uongo        |
-| cline        | Cline                               | OSS (zamani Claude Dev) | kamili           | desturi       | kweli        |
-| kilo         | Msimbo wa Kilo                      | Kilo-Org                | kamili           | desturi       | uongo        |
-| roo          | Msimbo wa Roo                       | Roo (OSS)               | kamili           | mwongozo      | uongo        |
-| endelea      | Endelea                             | endelea.dev             | kamili           | mwongozo      | uongo        |
-| msaidizi     | Msaidizi                            | OSS (P. Gauthier)       | kamili           | mwongozo      | kweli        |
-| ghushi       | ForgeCode                           | Antinomy HQ             | kamili           | desturi       | kweli        |
-| jcode        | jcode                               | 1 jehuang (OSS)         | kamili           | desturi       | uongo        |
-| deepseek-tui | DeepSeek TUI                        | Hunter Bown (OSS)       | kamili           | desturi       | uongo        |
-| codewhale    | CodeWhale                           | Hmbown (OSS)            | kamili           | desturi       | uongo        |
-| msimbo wazi  | OpenCode                            | Ajabu (zamani SST)      | kamili           | mwongozo      | kweli        |
-| droid        | Kiwanda cha Droid                   | Kiwanda AI              | sehemu           | mwongozo      | uongo        |
-| rubani       | GitHub Copilot CLI                  | GitHub/MS               | kamili           | desturi       | uongo        |
-| mshale-cli   | Cursor CLI                          | Mazingira yoyote        | sehemu           | mwongozo      | kweli        |
-| kunusa       | Smelt                               | leonardcser (OSS)       | kamili           | desturi       | uongo        |
-| pi           | Pi (pi-coding-wakala)               | M. Zechner (OSS)        | kamili           | desturi       | uongo        |
-| grok-kujenga | Grok Kujenga                        | xAI                     | kamili           | desturi       | uongo        |
-| kuponda      | Ponda                               | OSS (Habari)            | kamili           | desturi       | uongo        |
-| qwen         | nambari Qwen                        | Alibaba                 | kamili           | mwongozo      | kweli        |
-| zed          | Zed                                 | Zed Viwanda             | kamili           | mwongozo      | uongo        |
-| mshale       | Cursor                              | Mazingira yoyote        | hakuna           | mwongozo      | uongo        |
-| antigravity  | Antigravity                         | Google                  | hakuna           | mitm          | uongo        |
-| hermes       | Hermes                              | Utafiti wetu            | hakuna           | mwongozo      | uongo        |
-| kiro         | Kiro AI                             | Amazon                  | hakuna           | mitm          | uongo        |
-| desturi      | CLI maalum                          | —                       | kamili           | mjenzi maalum | uongo        |
+| kitambulisho | jina                                | mchuuzi                 | baseUrlSupport | configType    | acpSpawnable |
+| ------------ | ----------------------------------- | ----------------------- | -------------- | ------------- | ------------ |
+| claude       | nambari Claude                      | Anthropic               | kamili         | env           | kweli        |
+| kodeksi      | OpenAI Codex CLI                    | OpenAI                  | kamili         | desturi       | kweli        |
+| zcode        | ZCode ( Mpango wa Usimbaji wa GLM ) | Z.ai                    | hakuna         | desturi       | uongo        |
+| cline        | Cline                               | OSS (zamani Claude Dev) | kamili         | desturi       | kweli        |
+| kilo         | Msimbo wa Kilo                      | Kilo-Org                | kamili         | desturi       | uongo        |
+| roo          | Msimbo wa Roo                       | Roo (OSS)               | kamili         | mwongozo      | uongo        |
+| endelea      | Endelea                             | endelea.dev             | kamili         | mwongozo      | uongo        |
+| msaidizi     | Msaidizi                            | OSS (P. Gauthier)       | kamili         | mwongozo      | kweli        |
+| ghushi       | ForgeCode                           | Antinomy HQ             | kamili         | desturi       | kweli        |
+| jcode        | jcode                               | 1 jehuang (OSS)         | kamili         | desturi       | uongo        |
+| deepseek-tui | DeepSeek TUI                        | Hunter Bown (OSS)       | kamili         | desturi       | uongo        |
+| codewhale    | CodeWhale                           | Hmbown (OSS)            | kamili         | desturi       | uongo        |
+| msimbo wazi  | OpenCode                            | Ajabu (zamani SST)      | kamili         | mwongozo      | kweli        |
+| droid        | Kiwanda cha Droid                   | Kiwanda AI              | sehemu         | mwongozo      | uongo        |
+| rubani       | GitHub Copilot CLI                  | GitHub/MS               | kamili         | desturi       | uongo        |
+| mshale-cli   | Cursor CLI                          | Mazingira yoyote        | sehemu         | mwongozo      | kweli        |
+| kunusa       | Smelt                               | leonardcser (OSS)       | kamili         | desturi       | uongo        |
+| pi           | Pi (pi-coding-wakala)               | M. Zechner (OSS)        | kamili         | desturi       | uongo        |
+| grok-kujenga | Grok Kujenga                        | xAI                     | kamili         | desturi       | uongo        |
+| kuponda      | Ponda                               | OSS (Upendezi)          | kamili         | desturi       | uongo        |
+| qwen         | nambari Qwen                        | Alibaba                 | kamili         | mwongozo      | kweli        |
+| wazi         | OpenClaude                          | Gitlawb (OSS)           | kamili         | mwongozo      | uongo        |
+| zed          | Zed                                 | Zed Viwanda             | kamili         | mwongozo      | uongo        |
+| mshale       | Cursor                              | Mazingira yoyote        | hakuna         | mwongozo      | uongo        |
+| antigravity  | Antigravity                         | Google                  | hakuna         | mitm          | uongo        |
+| hermes       | Hermes                              | Utafiti wetu            | hakuna         | mwongozo      | uongo        |
+| kiro         | Kiro AI                             | Amazon                  | hakuna         | mitm          | uongo        |
+| desturi      | CLI maalum                          | —                       | kamili         | mjenzi maalum | uongo        |
 
 Zana zilizo na `baseUrlSupport: "partial"` zinaonyesha beji "⚠ Base URL parcial" kwenye kadi ya dashibodi.
 ---
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Vishughulikiaji vya Mipangilio kwa Zana Mpya
+## 6. Vishikizi vya Mipangilio kwa Zana Mpya
 
-Zana mpya zenye `configType: "custom"` zina njia mahususi za API ya mipangilio:
+Zana mpya zilizo na `configType: "custom"` zina njia maalum za mipangilio API :
 
-| Njia                                        | Zana                                                                          |
-| ------------------------------------------- | ----------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                       |
-| `POST /api/cli-tools/jcode-settings`        | jcode (alama ya --base-url)                                                   |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, ya zamani)                                     |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ya msingi + usawazishaji wa zamani `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                         |
-| `POST /api/cli-tools/pi-settings`           | Ajenti wa uandishi wa msimbo wa Pi                                            |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                         |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + ufunguo mahususi wa `.env`)              |
+| Njia                                        | Zana                                                                        |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                     |
+| `POST /api/cli-tools/jcode-settings`        | jcode ( bendera --base-url )                                                |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, urithi)                                      |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, usawazishaji wa msingi wa + `~/.deepseek` )     |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                       |
+| `POST /api/cli-tools/pi-settings`           | Wakala wa usimbaji wa Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Jenga (~/.grok/config.toml, `[model.omniroute]`)                       |
+| `POST /api/cli-tools/qwen-settings`         | msimbo wa Qwen (`~/.qwen/settings.json` + ufunguo maalum `.env` )           |
 
-Njia zote hutumia `sanitizeErrorMessage()` kwa majibu ya hitilafu (Kanuni Isiyobadilika #12).
+Njia zote hutumia `sanitizeErrorMessage()` kwa majibu ya makosa (Kanuni Ngumu #12).
 
 ---
 
@@ -291,21 +292,21 @@ Tafsiri kamili za PT-BR na EN zimetolewa. Lugha nyingine 39 hutumia EN kiotomati
 
 ---
 
-## 9. Kuanza Haraka
+## 9. Anza Haraka
 
-### Hatua ya 1 — Pata Ufunguo wa API wa OmniRoute
+### Hatua ya 1 — Pata Ufunguo wa OmniRoute API
 
-1. Fungua `/dashboard/api-manager` → **Unda Ufunguo wa API**
-2. Upe jina (k.m. `cli-tools`) na uchague ruhusa zote
-3. Nakili ufunguo — utauhitaji kwa kila CLI hapa chini
+1. Fungua `/dashboard/api-manager` →** Unda Ufunguo wa API**
+2. Ipe jina (km `cli-tools`) na uchague ruhusa zote
+3. Nakili ufunguo — utahitaji kwa kila CLI hapa chini
 
-> Ufunguo wako unaonekana hivi: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Ufunguo wako unaonekana kama: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Hatua ya 2 — Sakinisha Zana za CLI
+### Hatua ya 2 — Sakinisha Zana CLI
 
-Zana zote zinazotegemea npm zinahitaji Node.js 22.22.2+ au 24.x:
+Zana zote za npm zinahitaji Node.js 22.22.2 + au 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (inaweza kuzinduliwa kupitia `omniroute run gemini` → kiolesura cha /v1beta)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Inategemea Rust
+cargo install smelt  # Rust-based
 
-# Ajenti wa uwekaji msimbo wa Pi
-# tazama https://github.com/zechnerj/pi-coding-agent kwa maelekezo ya usakinishaji
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# tazama https://github.com/1jehuang/jcode kwa maelekezo ya usakinishaji
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
 ### Hatua ya 3 — Sanidi kupitia Dashibodi
 
-1. Nenda kwenye `http://localhost:20128/dashboard/cli-code`
-2. Tafuta zana yako kwenye gridi
+1. Nenda kwa `http://localhost:20128/dashboard/cli-code`
+2. Pata zana yako kwenye gridi ya taifa
 3. Bofya kadi ili kufungua ukurasa wa maelezo ya zana
-4. Chagua ufunguo wako wa API na URL ya msingi
-5. Bofya **Tekeleza Usanidi** au nakili kijisehemu cha usanidi wa moja kwa moja
+4. Chagua ufunguo wako API na msingi URL
+5. Bofya** Tekeleza Usanidi** au nakili kijisehemu cha usanidi mwongozo
 
 ---
 
-### Hatua ya 4 — Weka Vigeu vya Mazingira vya Jumla
+### Hatua ya 4 — Vigeu vya Mazingira Ulimwenguni
 
 ```bash
-# Kiunganishi cha Jumla cha OmniRoute
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI husoma GOOGLE_GEMINI_BASE_URL kwenye ROOT (SDK yake huongeza /v1beta/... yenyewe)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Kwa **seva ya mbali** badilisha `localhost:20128` na IP au kikoa cha seva,
-> k.m. `http://<your-server-ip>:20128`.
+> Kwa a** seva ya mbali** badilisha `localhost:20128` na seva IP au kikoa, kwa mfano `http://<your-server-ip>:20128`.
 
 ---
 
 ### Hatua ya 4 — Sanidi Kila Zana
 
-#### Claude Code
+#### nambari Claude
 
 ```bash
-# Unda ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,18 +388,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Tumia mzizi uliounganishwa wa lango la Anthropic kwa Claude Code. Usiongeze `/v1` hapa.
+Tumia mzizi uliounganishwa wa lango la Anthropic kwa Msimbo wa Claude. Usiambatishe `/v1` hapa.
 
-**Jaribio:** `claude "say hello"`
+**Mtihani:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-Codex ya kisasa (v0.137+) husoma `~/.codex/config.toml` pekee — faili ya zamani ya
-`config.yaml` ni ya CLI ya zamani ya npm na hupuuzwa kimya kimya. Ufunguo wa API
-hubaki katika kigeu cha mazingira cha `OMNIROUTE_API_KEY` (`env_key`), kamwe
-usiwekwe ndani ya faili:
+Codex ya kisasa (v0.137 +) inasoma `~/.codex/config.toml` tu — `config.yaml` ya zamani ni ya urithi wa npm CLI na inapuuzwa kimya kimya. Kitufe API hukaa katika utofauti wa mazingira `OMNIROUTE_API_KEY` (`env_key`), kamwe ndani ya faili:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -414,9 +411,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Marejeleo kamili (wasifu, `wire_api`, madirisha ya muktadha): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Rejea kamili (wasifu, `wire_api`, madirisha ya muktadha): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**Jaribio:** `codex "what is 2+2?"`
+**Mtihani:** `codex "what is 2+2?"`
 
 ---
 
@@ -445,16 +442,46 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**Jaribio:** `opencode`
+**Mtihani:** `opencode`
 
-> Tumia `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> kutuma vibadala vya kufikiri.
+> Tumia `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` kutuma anuwai za kufikiria.
 
 ---
 
-#### Cline (CLI au VS Code)
+#### Wakala wa Usimbaji wa Pi
 
-**Hali ya CLI:**
+Sakinisha kifurushi rasmi cha Wakala wa Usimbaji wa Pi na `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi husoma watoa huduma maalum kutoka `~/.pi/agent/models.json`; weka `PI_CODING_AGENT_DIR` kusogeza saraka nzima ya wakala. Dashibodi inafuata ubatilishaji huo. Pi haigundui miundo kutoka kwa sehemu maalum za mwisho, kwa hivyo OmniRoute huandika muundo uliochaguliwa katika `models[]` kwa kutumia `openai-completions` API ya Pi na sehemu ya mwisho ya OmniRoute OpenAI-patanifu `/v1`.
+
+Katika**CLI Zana → Pi** , chagua sehemu ya mwisho, ufunguo wa API na muundo, kagua onyesho la kuchungulia la mtoa huduma, kisha utumie. Onyesho la kukagua ni kipande cha mtoa huduma: unganisha `providers.omniroute` kwenye `models.json` yako iliyopo wakati wa kusanidi Pi mwenyewe ili watoa huduma wengine na mipangilio ibaki sawa.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi hupakia tena `models.json` unapofungua `/model`. Jaribu njia iliyosanidiwa kwa kitambulisho cha mtoa huduma na kitambulisho cha modeli ulichochagua:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Marejeleo: [Miundo ya Pi na watoa huduma maalum](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Vigeu vya mazingira vya Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [maagizo ya usakinishaji wa Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline ( msimbo CLI au VS )
+
+**hali ya CLI :**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -466,22 +493,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**Hali ya VS Code:**
-Mipangilio ya kiendelezi cha Cline → Mtoa API: `OpenAI Compatible` → URL ya Msingi: `http://localhost:20128/v1`
+**Njia ya msimbo wa VS :** mipangilio ya kiendelezi ya Cline → API huduma: `OpenAI Compatible` → Msingi URL: `http://localhost:20128/v1`
 
-Au tumia dashibodi ya OmniRoute → **Zana za CLI → Cline → Tekeleza Usanidi**.
+Au tumia OmniRoute dashibodi →**CLI → Cline → Tekeleza Usanidi** .
 
 ---
 
-#### KiloCode (CLI au VS Code)
+#### KiloCode ( msimbo CLI au VS )
 
-**Hali ya CLI:**
+**hali ya CLI :**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**Mipangilio ya VS Code:**
+**Mipangilio ya nambari VS :**
 
 ```json
 {
@@ -490,11 +516,11 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Au tumia dashibodi ya OmniRoute → **Zana za CLI → KiloCode → Tekeleza Usanidi**.
+Au tumia OmniRoute dashibodi →**CLI → KiloCode → Tekeleza Usanidi** .
 
 ---
 
-#### Continue (Kiendelezi cha VS Code)
+#### Endelea (VS Kiendelezi cha Msimbo)
 
 Hariri `~/.continue/config.yaml`:
 
@@ -508,20 +534,20 @@ models:
     default: true
 ```
 
-Anzisha upya VS Code baada ya kuhariri.
+Anzisha tena Msimbo VS baada ya kuhariri.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Tumia hii wakati VS Code Insiders imesanidiwa kwa miundo ya kiunganishi maalum na unataka OmniRoute ifanye kazi bila uga maalum wa kichwa.
+Tumia hii wakati VS Code Insiders imesanidiwa kwa miundo maalum ya mwisho na unataka OmniRoute ifanye kazi bila uga maalum wa kichwa.
 
 **Eneo linalopendekezwa:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Mfano unaotumia lakabu ya OmniRoute yenye tokeni:**
+**Mfano kwa kutumia jina la OmniRoute la ishara:**
 
 ```json
 [
@@ -545,27 +571,26 @@ Tumia hii wakati VS Code Insiders imesanidiwa kwa miundo ya kiunganishi maalum n
 
 **Vidokezo:**
 
-- Badilisha `sk-your-omniroute-key` na ufunguo wa API ulioundwa katika OmniRoute.
-- Sehemu ya `url` inapaswa kuelekeza kwenye `/api/v1/vscode/{token}/chat/completions`.
-- Sehemu ya `modelsUrl` inapaswa kuelekeza kwenye `/api/v1/vscode/{token}/models`.
-- Pendelea mtiririko wa kawaida wa `/v1` pamoja na kichwa cha Bearer wakati kiteja kinaauni vichwa maalum.
-- Tokeni zilizopachikwa kwenye URL ni njia mbadala ya uoanifu na zinaweza kuonekana katika kumbukumbu za kihariri au historia ya proksi.
+- Badilisha `sk-your-omniroute-key` na kitufe cha API kilichoundwa OmniRoute.
+- Sehemu ya `url` inapaswa kuelekeza kwa `/api/v1/vscode/{token}/chat/completions`.
+- Sehemu ya `modelsUrl` inapaswa kuelekeza kwa `/api/v1/vscode/{token}/models`.
+- Pendelea mtiririko wa kawaida wa kichwa cha `/v1` + mteja wakati mteja anatumia vichwa maalum.
+- Tokeni zilizopachikwa URL ni njia mbadala ya uoanifu na zinaweza kuonekana katika kumbukumbu za wahariri au historia ya seva mbadala.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Ingia katika akaunti yako ya AWS/Kiro:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI hutumia uthibitishaji wake wenyewe — OmniRoute haihitajiki kama mfumo wa nyuma wa Kiro CLI yenyewe.
-# Tumia kiro-cli pamoja na OmniRoute kwa zana nyingine.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-Kwa programu ya eneo-kazi ya **Kiro IDE**, tumia endpoint ya MITM inayotolewa na OmniRoute
-chini ya `/dashboard/cli-tools → Kiro`.
+Kwa ajili ya**Kiro IDE** programu ya desktop, tumia mwisho wa MITM uliofunuliwa na OmniRoute chini `/dashboard/cli-tools → Kiro`.
 
 ---
 

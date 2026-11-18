@@ -123,3 +123,35 @@ test("post-commit watchdog abort never performs an unsafe full replay", async ()
   assert.equal(reopened, 0, "visible output forbids transparent replay");
   assert.equal(finalized, 1, "usage/semaphore finalization remains exactly once");
 });
+
+test("watchdog recognizes Gemini candidates text and thought/tool protected phases", async () => {
+  let clock = 0;
+  let watchdogAborts = 0;
+  const geminiThought =
+    'data: {"candidates":[{"content":{"role":"model","parts":[{"text":"thinking","thought":true}]}}]}\n\n';
+  const geminiText =
+    'data: {"candidates":[{"content":{"role":"model","parts":[{"text":"hello world"}]},"finishReason":"STOP"}]}\n\n';
+  const initial = streamFrom([geminiThought, geminiThought, geminiText], (index) => {
+    clock = index * 1_000;
+  });
+  const stream = createRecoverableStream(initial, async () => null, {
+    finalize: () => {},
+    now: () => 0,
+    throughputWatchdog: {
+      enabled: true,
+      warmupMs: 0,
+      windowMs: 1_000,
+      minUsefulBytesPerSecond: 1,
+      minUsefulBytes: 1,
+      now: () => clock,
+    },
+    onWatchdogAbort: () => {
+      watchdogAborts += 1;
+    },
+  });
+
+  const result = await collect(stream);
+  assert.equal(result.error, null);
+  assert.equal(watchdogAborts, 0, "Gemini thought + text frames must not trip watchdog");
+  assert.equal(result.text, `${geminiThought}${geminiThought}${geminiText}`);
+});

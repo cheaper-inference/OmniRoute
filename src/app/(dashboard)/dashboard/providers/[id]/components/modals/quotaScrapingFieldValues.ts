@@ -29,6 +29,7 @@ export type QuotaScrapingFieldValues = {
   qwenCloudSecToken: string;
   volcConsoleCookie: string;
   xiaomiMimoConsoleCookie: string;
+  billingPortalUrl: string;
 };
 
 export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
@@ -39,9 +40,31 @@ export const EMPTY_QUOTA_SCRAPING_FIELDS: QuotaScrapingFieldValues = {
   qwenCloudSecToken: "",
   volcConsoleCookie: "",
   xiaomiMimoConsoleCookie: "",
+  billingPortalUrl: "",
 };
 
 export function assignQuotaScrapingProviderData(
+  provider: string | undefined,
+  values: QuotaScrapingFieldValues,
+  target: Record<string, unknown>
+) {
+  if (provider === "zed-hosted") {
+    assignZedHostedBillingPortalUrl(values, target);
+    return;
+  }
+  assignConsoleSessionProviderData(provider, values, target);
+}
+
+function assignZedHostedBillingPortalUrl(
+  values: QuotaScrapingFieldValues,
+  target: Record<string, unknown>
+) {
+  // Empty/absent leaves the stored link alone on the edit round-trip.
+  const link = values.billingPortalUrl?.trim();
+  if (link) target.billingPortalUrl = link;
+}
+
+function assignConsoleSessionProviderData(
   provider: string | undefined,
   values: QuotaScrapingFieldValues,
   target: Record<string, unknown>

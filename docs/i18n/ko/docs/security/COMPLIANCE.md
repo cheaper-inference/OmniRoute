@@ -13,53 +13,67 @@ OmniRoute는 관리 작업, 인증 이벤트, 제공자 자격 증명 수명 주
 
 ## 기록되는 항목
 
-### 관리 감사 이벤트(`audit_log`)
+### 관리자 감사 이벤트 (`audit_log`)
 
-`logAuditEvent({ action, actor, target, details, ... })`를 호출할 때마다 하나의 행이 생성됩니다. 작업 문자열은 `domain.verb`(또는 `domain.verb.outcome`) 패턴을 따릅니다. 소스 트리에서 확인된 작업 유형은 다음과 같습니다.
+`logAuditEvent({ action, actor, target, details, ... })` 호출마다 한 개의 행이 생성됩니다. 작업 문자열은 `domain.verb` (또는 `domain.verb.outcome`) 패턴을 따릅니다. 코드베이스에서 확인된 작업 유형은 다음과 같습니다.
 
-| 작업                                 | 소스                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| 작업                                 | 소스                                     |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-각 항목에는 `action`, `actor`(기본값은 `"system"`), `target`, `details`/`metadata`(JSON), `ip_address`, `resource_type`, `status`, `request_id`, `timestamp`가 기록됩니다. 민감한 키(`apiKey`, `accessToken`, `refreshToken`, `password`, `*token`/`*secret`/`*apikey`와 일치하는 모든 항목 등)는 행이 작성되기 전에 재귀적으로 `"[redacted]"`로 마스킹됩니다.
+각 항목에는 `action`, `actor` (기본값은 `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, `timestamp`가 기록됩니다. 민감한 키(`apiKey`, `accessToken`,
+`refreshToken`, `password`, `*token`/`*secret`/`*apikey`와 일치하는 모든 항목
+등)는 행이 기록되기 전에 재귀적으로 `"[redacted]"`로 삭제 처리됩니다.
 
-### MCP 도구 호출(`mcp_tool_audit`)
+`api_key.auth.touch` 행에는 요청 로그에 도달하지 않는 성공한 API 키 메타데이터 및 검색
+읽기(GET/HEAD)가 기록됩니다. 즉, 어떤 키가 언제 어떤 정규화된 경로를 읽었는지가
+기록되며, 최대 1,000개 행으로 통합되고 제한됩니다. `noLog`가 설정된 키와 환경 키는
+제외됩니다. 호출자의 IP 주소와 user-agent는
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` 기능 플래그가 활성화된 경우에만 추가됩니다
+(기본값은 비활성화).
 
-모든 MCP 도구 호출은 `open-sse/mcp-server/audit.ts`를 통해 행을 기록합니다. 스키마(`src/lib/db/migrations/002_mcp_a2a_tables.sql`에서 가져옴):
+### MCP 도구 호출 (`mcp_tool_audit`)
 
-| 열               | 참고 사항                            |
-| ---------------- | ------------------------------------ |
-| `id`             | 자동 증가                            |
-| `tool_name`      | MCP 도구 식별자                      |
-| `input_hash`     | 입력의 sha256(페이로드는 저장 안 함) |
-| `output_summary` | 짧게 잘린 요약                       |
-| `duration_ms`    | 경과 시간                            |
-| `api_key_id`     | 호출자(Nullable)                     |
-| `success`        | `1` / `0`                            |
-| `error_code`     | 실패 시 최종 오류 코드               |
-| `created_at`     | ISO 타임스탬프                       |
+모든 MCP 도구 호출은 `open-sse/mcp-server/audit.ts`를 통해 행을 기록합니다. 스키마는
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`에서 가져옵니다.
 
-### 요청/사용량 로그
+| 열               | 설명                                     |
+| ---------------- | ---------------------------------------- |
+| `id`             | 자동 증가                                |
+| `tool_name`      | MCP 도구 식별자                          |
+| `input_hash`     | 입력의 sha256 (페이로드는 저장되지 않음) |
+| `output_summary` | 짧게 잘린 요약                           |
+| `duration_ms`    | 실제 경과 시간                           |
+| `api_key_id`     | 호출자 (null 허용)                       |
+| `success`        | `1` / `0`                                |
+| `error_code`     | 실패 시 최종 오류 코드                   |
+| `created_at`     | ISO 타임스탬프                           |
 
-다음은 운영 원격 측정 데이터로, 엄밀히 말하면 관리 감사 데이터는 아니지만 동일한 보존 파이프라인을 공유합니다.
+### 요청 / 사용량 로그
+
+이는 운영 텔레메트리이며 엄밀한 의미의 관리자 감사 로그는 아니지만, 동일한
+보존 파이프라인을 공유합니다.
 
 - `usage_history` — 요청별 사용량 집계
-- `call_logs` — 요청별 전체 로그(행 수 제한 적용, 아래 참조)
-- `proxy_logs` — 프록시 트래픽 로그(행 수 제한 적용)
-- `request_detail_logs` — 레거시 상세 요청 로그(존재하는 경우 계속 정리됨)
+- `call_logs` — 요청별 전체 로그 (행 제한 적용, 아래 참조)
+- `proxy_logs` — 프록시 트래픽 로그 (행 제한 적용)
+- `request_detail_logs` — 레거시 상세 요청 로그 (존재하는 경우 계속 정리됨)
 
 ## 스토리지 스키마
 

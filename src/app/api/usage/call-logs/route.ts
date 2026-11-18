@@ -1,3 +1,5 @@
+import { liveUsageEvidence } from "@/lib/usage/storedUsageEvidence";
+import { isHttpLogError } from "@/shared/utils/upstreamHttp";
 import { NextResponse } from "next/server";
 export const dynamic = "force-dynamic";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
@@ -48,7 +50,7 @@ export function rowMatchesFilter(row: any, filter: Record<string, any>): boolean
   if (!filter) return true;
 
   if (filter.status === "error") {
-    if (!(Number(row?.status) >= 400 || Boolean(row?.error))) return false;
+    if (!isHttpLogError(row)) return false;
   } else if (filter.status === "ok") {
     if (!(Number(row?.status) >= 200 && Number(row?.status) < 300)) return false;
   } else if (
@@ -135,9 +137,13 @@ export function buildCallLogListRows({
   // Include active (in-flight) requests from the pending-by-id map
   // so they appear in the logs grid alongside persisted entries.
   const activeEntries: any[] = [];
+  const activePersistedIds = new Set<string>();
+  const persistedById = new Map(logs.map((log) => [log.id, log]));
   const persistedIds = new Set(logs.map((log: any) => log.id).filter(Boolean));
 
   for (const detail of pendingDetails) {
+    const persisted = persistedById.get(detail.persistedLogId);
+    if (persisted) activePersistedIds.add(persisted.id);
     activeEntries.push({
       id: detail.id,
       timestamp: new Date(detail.startedAt).toISOString(),
@@ -152,6 +158,7 @@ export function buildCallLogListRows({
       connectionId: detail.connectionId,
       duration: Math.max(0, now - detail.startedAt),
       tokens: detail.tokens || { in: 0, out: 0 },
+      ...liveUsageEvidence(detail.tokens),
       // In-memory details carry no added wait yet — null like "no wait".
       addedWaitMs: null,
       addedWaitCause: null,
@@ -164,6 +171,16 @@ export function buildCallLogListRows({
       error: null,
       correlationId: detail.correlationId || null,
       active: true,
+      // Retain DB filter metadata while the exact attempt is still active.
+      ...(persisted
+        ? {
+            ...persisted,
+            id: detail.id,
+            timestamp: new Date(detail.startedAt).toISOString(),
+            duration: Math.max(0, now - detail.startedAt),
+            active: true,
+          }
+        : {}),
       ...(detail.stale
         ? {
             stale: true,
@@ -177,7 +194,13 @@ export function buildCallLogListRows({
   const pendingIds = new Set(activeEntries.map((entry) => entry.id));
   const completedEntries: any[] = [];
   for (const detail of completedDetails) {
-    if (persistedIds.has(detail.id) || pendingIds.has(detail.id)) continue;
+    if (
+      persistedIds.has(detail.persistedLogId) ||
+      // Only legacy previews can use their public ID as the durable row identity.
+      (!detail.attemptGeneration && persistedIds.has(detail.id)) ||
+      pendingIds.has(detail.id)
+    )
+      continue;
     const completedAt = typeof detail.completedAt === "number" ? detail.completedAt : null;
     const duration =
       typeof detail.durationMs === "number" && Number.isFinite(detail.durationMs)
@@ -197,6 +220,7 @@ export function buildCallLogListRows({
       connectionId: detail.connectionId,
       duration,
       tokens: detail.tokens || { in: 0, out: 0 },
+      ...liveUsageEvidence(detail.tokens),
       // In-memory details carry no added wait yet — null like "no wait".
       addedWaitMs: null,
       addedWaitCause: null,
@@ -215,7 +239,11 @@ export function buildCallLogListRows({
     });
   }
 
-  return [...activeEntries, ...completedEntries, ...logs].sort((a, b) => {
+  return [
+    ...activeEntries,
+    ...completedEntries,
+    ...logs.filter((log) => !activePersistedIds.has(log.id)),
+  ].sort((a, b) => {
     // Active requests always on top
     const pa = rowPriority(a);
     const pb = rowPriority(b);
@@ -271,7 +299,7 @@ export async function GET(request: Request) {
     );
 
     const rows = buildCallLogListRows({
-      logs,
+      logs: logs.filter((row) => rowMatchesFilter(row, filter)),
       connections,
       providerDisplayNames,
       pendingDetails: getPendingById().values(),

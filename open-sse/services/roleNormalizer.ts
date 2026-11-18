@@ -257,12 +257,34 @@ export function normalizeSystemRole(
   );
   if (firstUserIdx >= 0) {
     const userMsg = nonSystemMessages[firstUserIdx];
-    const userContent = extractTextFromContent(userMsg.content);
-
-    nonSystemMessages[firstUserIdx] = {
-      ...userMsg,
-      content: `[System Instructions]\n${systemContent}\n\n[User Message]\n${userContent}`,
-    };
+    // Structure-preserving fold: when the first user message carries non-text
+    // content parts (images, tool payloads), flattening it to a text string
+    // would silently destroy every non-text part — on exactly the
+    // vision-capable models that need the fold. Prepend the system
+    // instructions as a leading text part instead of re-serializing the
+    // message. String-content and text-only array turns keep the historical
+    // flat fold (their wire shape is unchanged for string-only upstreams).
+    if (
+      Array.isArray(userMsg.content) &&
+      userMsg.content.some((part: { type?: string } | null | undefined) => part?.type !== "text")
+    ) {
+      nonSystemMessages[firstUserIdx] = {
+        ...userMsg,
+        content: [
+          {
+            type: "text",
+            text: `[System Instructions]\n${systemContent}\n\n[User Message]`,
+          },
+          ...userMsg.content,
+        ],
+      };
+    } else {
+      const userContent = extractTextFromContent(userMsg.content);
+      nonSystemMessages[firstUserIdx] = {
+        ...userMsg,
+        content: `[System Instructions]\n${systemContent}\n\n[User Message]\n${userContent}`,
+      };
+    }
   } else {
     // No user message found — insert as a user message at the beginning
     nonSystemMessages.unshift({

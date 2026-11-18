@@ -27,25 +27,76 @@ omniroute launch --profile glm52  # OmniRoute üzerinden glm/glm-5.2 kullanan Cl
 
 ## Claude Code bir ağ geçidine nasıl bağlanır?
 
-Claude Code, **Anthropic Messages API** ile iletişim kurar ve ortam değişkenleri
-aracılığıyla özel bir uç noktaya yönlendirilir (`--base-url` bayrağı yoktur):
+Claude Kodu konuşuyor**Anthropic Mesajlar API** ve ortam değişkenlerine sahip özel bir uç noktaya işaret edilir ( `--base-url` bayrağı yoktur):
 
 | Değişken                                     | Amaç                                                                                                     |
 | -------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Ağ geçidi kök URL'si (Claude Code sonuna `/v1/messages` ekler). **`/v1` son eki olmamalıdır.**           |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` olarak gönderilir — OmniRoute erişim belirtecinizi / API anahtarınızı kullanın |
-| `ANTHROPIC_API_KEY`                          | Alternatif: `x-api-key` olarak gönderilir. İkisi de ayarlanmışsa `ANTHROPIC_AUTH_TOKEN` önceliklidir     |
-| `ANTHROPIC_MODEL`                            | Belirli bir modeli zorunlu kılar (`/model` seçicisinin varsayılanını geçersiz kılar)                     |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → yerel `/model` seçicisi, `/v1/models` içindeki `claude*`/`anthropic*` modellerini listeler         |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Yanıt başına çıktı belirteçlerini sınırlar (ör. `65536`)                                                 |
+| `ANTHROPIC_BASE_URL`                         | Ağ geçidi kökü URL (Claude Kodu `/v1/messages` ekler).** `/v1` son eki yok.**                            |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — olarak gönderildi, OmniRoute erişim belirtecinizi/ API anahtarınızı kullanın |
+| `ANTHROPIC_API_KEY`                          | Alternatif: `x-api-key` olarak gönderilir. Her ikisi de tamamlanırsa `ANTHROPIC_AUTH_TOKEN` kazanır      |
+| `ANTHROPIC_MODEL`                            | Belirli bir modeli zorlayın ( `/model` seçici varsayılanını geçersiz kılar)                              |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → yerel `/model` seçici, `/v1/models` `claude*`/`anthropic*` modellerini listeler                    |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Yanıt başına çıkış belirteçlerinin üst sınırı (örn. `65536`)                                             |
 | `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Otomatik sıkıştırma için belirteç eşiği                                                                  |
 
-> Ortam değişkenleri **başlangıçta yalnızca bir kez** okunur — bunları değiştirdikten sonra Claude Code'u yeniden başlatın.
+> Env değişkenleri okunur** başlangıçta bir kez** — Claude Kodunu değiştirdikten sonra yeniden başlatın.
 
-`omniroute launch` bunların tümünü sizin için ayarlar: temel URL'yi ve belirteci
-etkin bağlamdan çözümler (böylece `omniroute connect <vps>` ve ardından
-`omniroute launch` doğrudan çalışır), sunucunun sistem durumunu denetler ve
-`claude` komutunu çalıştırır.
+Sabit bir dize yerine dönen bir kimlik bilgisi için `~/.claude/settings.json` `apiKeyHelper`, geçerli kimlik bilgisini stdout'a yazdıran bir komuta ayarlayın. Claude Code, çıktısını varsayılan olarak beş dakika boyunca önbelleğe alır (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` bunu geçersiz kılar) ve değeri hem `Authorization: Bearer` hem de `x-api-key` olarak gönderir. Komut dosyası kimlik bilgilerini yazdırmalı ve v2.1.227 + yardımcıyı başarısızlığa uğratan — başlığının yanında başka hiçbir şey basmamalıdır.
+
+Entra ID SSO şu şekilde çalışır: `scripts/cli/omniroute-sso.mjs token` API anahtarı yerine OmniRoute doğruladığı kısa ömürlü bir Entra erişim belirtecini yazdırır. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) bakın.
+
+`omniroute launch` bunların hepsini sizin için ayarlar: aktif bağlamdan temel URL + belirtecini çözer (böylece `omniroute connect <vps>` sonra `omniroute launch` çalışır), sunucunun durumunu kontrol eder ve `claude` komutunu çalıştırır.
+
+---
+
+## Kullanım ilişkilendirmesi: oturumlar ve projeler
+
+OmniRoute her API anahtarının isteklerini şu şekilde gruplandırır:** temsilci oturumları** ve hangi kayıtları** proje** her oturum üzerinde çalışıldı (`agent_sessions` tablosu), böylece kullanım ve maliyet ekip üyesi, proje ve oturum başına raporlanabilir.
+
+Herhangi bir istemci kurulumu olmadan kaydedilenler:
+
+| Alan    | Kaynak                                                                                                                                                        |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Oturum  | `x-claude-code-session-id` başlığı ( `metadata.user_id.session_id` ile aynı değer), oturum başına kararlı                                                     |
+| Proje   | `Primary working directory:` satırı Claude Kodu, kendi ortamına mesaj gönderir; `.claude/worktrees/` altındaki çalışma ağacı klasörleri depo adına çözümlenir |
+| Dal     | git durumundan `Current branch:` Claude Kodu ilk mesajla birlikte gönderilir                                                                                  |
+| Müşteri | `user-agent` (`claude-cli/<version>`)                                                                                                                         |
+
+Codex (`<environment_context><cwd>`) ve OpenCode (`x-opencode-session`) aynı şekilde tanınır. Tuşlar** kayıt yok** etkin yalnızca oturum kimliğini ve başlık tarafından sağlanan proje alanlarını korur; İstemden okunan hiçbir şey (yol, dal) saklanmaz.
+
+### Projeyi açıkça adlandırma (önerilir)
+
+Çalışma dizini makineler arasında farklılık gösterdiğinden aynı depo farklı yollarda görünebilir. Bunun yerine projeyi açıkça gönderin: Claude Code, `ANTHROPIC_CUSTOM_HEADERS` listelenen başlıkları her model isteğine ekler ve OmniRoute bunlardan ikisini okur:
+
+| Başlık                     | Değer                                                                          |
+| -------------------------- | ------------------------------------------------------------------------------ |
+| `x-omniroute-project`      | Proje adı, örneğin `omniroute`                                                 |
+| `x-omniroute-project-repo` | Normalleştirilmiş uzaktan kumanda, örneğin `github.com/diegosouzapw/OmniRoute` |
+
+Her ikisi de yalnızca atıfta bulunmak için okunur; hiçbir zaman yukarı akış sağlayıcısına iletilmezler.
+
+`ANTHROPIC_CUSTOM_HEADERS` başlangıçta bir kez okunur ve ayar dosyaları gerçek değerleri saklar; bu nedenle Claude Code başlatıldığında bunu hesaplayın. Bunu `~/.zshrc` veya `~/.bashrc` ekleyin ve `claude` proje klasöründen başlatmaya devam edin:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
+  else
+    name=$(basename "$PWD")                                # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` ifadesi, uzak URL gömülü tüm kimlik bilgilerini, sorgu dizesini ve parçalarını çıkarır ve zaten `ANTHROPIC_CUSTOM_HEADERS` bulunan başlıklar tutulur. IDE uzantıları Claude Code'u kabuğunuz olmadan başlatır, böylece oturumları çalışma dizinine geri döner.
 
 ---
 

@@ -299,11 +299,14 @@ class WreqTransportPool {
 
           const transport = await entry.pending;
           if (lease.released) throw new Error("wreq-js request lease was released before dispatch");
+          // "follow" stays the default, but a caller that pinned a redirect mode
+          // (e.g. "manual" to keep the SSRF guard the only dispatcher) is honored.
+          const redirectMode = (options.redirect as RequestRedirect | undefined) ?? "follow";
           return runtime.fetch(url, {
             method: options.method,
             headers: options.headers,
             body: options.body,
-            redirect: "follow",
+            redirect: redirectMode,
             timeout: options.timeoutMilliseconds,
             signal: options.signal,
             transport,

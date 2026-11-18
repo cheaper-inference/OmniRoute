@@ -13,17 +13,21 @@ UI/UX-ის, i18n-ის, CLI-ის, მონაცემთა ბაზი�
 
 ---
 
-## დეველოპმენტის გარემოს გამართვა
+## განვითარების გარემოს მომზადება
 
 ### წინაპირობები
 
 - **Node.js** `>=22.22.2 <23`, ან `>=24.0.0 <27` (რეკომენდებულია: 24 LTS)
 - **npm** 10+
 
-> **npm v11+-ის მომხმარებლები (Node 24+):** `npm install`-ის შემდეგ გადაამოწმეთ, რომ ნატიური მოდულები დაინსტალირდა:
-> `node -e "require('better-sqlite3')"`. თუ ის `MODULE_NOT_FOUND` შეცდომით დასრულდება,
+> **Windows Node 24-ით:** გამოიყენეთ მიმდინარე 24 LTS-ის პატჩ-რელიზი (მინიმუმ 24.20.0).
+> ადრინდელმა რელიზებმა შეიძლება წარმატებით დასრულებული ტესტების შემდეგ პროცესი შეწყვიტონ, როდესაც `--test-force-exit` პროცესს ხურავს. Node-ის [Windows libuv-ის შესწორება](https://github.com/nodejs/node/pull/61999) აგვარებს
+> ამ runtime-ის ავარიას; დატოვეთ ტესტის ასერტები და runner-ის გასვლის შემოწმებები ჩართული.
+
+> **npm v11+ მომხმარებლები (Node 24+):** `npm install`-ის შემდეგ გადაამოწმეთ, რომ native მოდულები დაინსტალირდა:
+> `node -e "require('better-sqlite3')"`. თუ შესრულება დასრულდა `MODULE_NOT_FOUND`-ით,
 > გაუშვით `npm approve-scripts better-sqlite3 && npm install`. იხილეთ
-> [პრობლემების მოგვარება](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> [პრობლემების აღმოფხვრა](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
@@ -41,88 +45,83 @@ npm install
 # შექმენით თქვენი .env შაბლონიდან
 cp .env.example .env
 
-# დააგენერირეთ საჭირო საიდუმლო მნიშვნელობები
+# საჭირო საიდუმლოებების გენერირება
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-დეველოპმენტისთვის ძირითადი ცვლადები:
+განვითარებისთვის საჭირო ძირითადი ცვლადები:
 
-| ცვლადი                 | დეველოპმენტის ნაგულისხმევი მნიშვნელობა | აღწერა                     |
-| ---------------------- | -------------------------------------- | -------------------------- |
-| `PORT`                 | `20128`                                | სერვერის პორტი             |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`               | ფრონტენდის საბაზისო URL    |
-| `JWT_SECRET`           | (დააგენერირეთ ზემოთ)                   | JWT-ის ხელმოწერის საიდუმლო |
-| `INITIAL_PASSWORD`     | `CHANGEME`                             | პირველი შესვლის პაროლი     |
-| `APP_LOG_LEVEL`        | `info`                                 | ჟურნალის დეტალურობის დონე  |
+| ცვლადი                 | განვითარების ნაგულისხმევი მნიშვნელობა | აღწერა                      |
+| ---------------------- | ------------------------------------- | --------------------------- |
+| `PORT`                 | `20128`                               | სერვერის პორტი              |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`              | frontend-ის საბაზისო URL    |
+| `JWT_SECRET`           | (generate above)                      | JWT-ის ხელმოწერის საიდუმლო  |
+| `INITIAL_PASSWORD`     | `CHANGEME`                            | პირველი შესვლის პაროლი      |
+| `APP_LOG_LEVEL`        | `info`                                | ლოგირების დეტალიზაციის დონე |
 
-### დაფის პარამეტრები
+### Dashboard-ის პარამეტრები
 
-დაფა გთავაზობთ ფუნქციების UI-გადამრთველებს, რომელთა კონფიგურაციაც გარემოს ცვლადების მეშვეობითაც შეიძლება:
+Dashboard უზრუნველყოფს UI-ის გადამრთველებს იმ ფუნქციებისთვის, რომელთა კონფიგურაციაც გარემოს ცვლადების მეშვეობით არის შესაძლებელი:
 
-| პარამეტრის მდებარეობა      | გადამრთველი              | აღწერა                                       |
-| -------------------------- | ------------------------ | -------------------------------------------- |
-| პარამეტრები → გაფართოებული | გამართვის რეჟიმი         | გამართვის მოთხოვნების ჟურნალების ჩართვა (UI) |
-| პარამეტრები → ზოგადი       | გვერდითი ზოლის ხილვადობა | გვერდითი ზოლის სექციების ჩვენება/დამალვა     |
+| პარამეტრის მდებარეობა | გადამრთველი        | აღწერა                                |
+| --------------------- | ------------------ | ------------------------------------- |
+| Settings → Advanced   | Debug Mode         | debug მოთხოვნების ლოგების ჩართვა (UI) |
+| Settings → General    | Sidebar Visibility | sidebar-ის სექციების ჩვენება/დამალვა  |
 
-ეს პარამეტრები მონაცემთა ბაზაში ინახება და ხელახლა გაშვების შემდეგაც ნარჩუნდება; დაყენების შემთხვევაში ისინი გარემოს ცვლადების ნაგულისხმევ მნიშვნელობებს ანაცვლებს.
+ეს პარამეტრები ინახება მონაცემთა ბაზაში და შენარჩუნდება გადატვირთვების შემდეგაც; დაყენების შემთხვევაში ისინი უპირატესობას ანიჭებს env var-ის ნაგულისხმევ მნიშვნელობებს.
 
 ### ლოკალურად გაშვება
 
 ```bash
-# დეველოპმენტის რეჟიმი (ცხელი გადატვირთვა)
+# განვითარების რეჟიმი (ცხელი გადატვირთვა)
 npm run dev
 
-# საწარმოო აგება
-npm run build    # next build → .build/next/, შემდეგ assembleStandalone → dist/
+# Production-ის build
+npm run build    # next build → .build/next/ შემდეგ assembleStandalone → dist/
 npm run start
 
-# სწრაფი, მხოლოდ ბექენდის/API-ის კომპილაცია კონტრიბუტორის ცვლილებებისთვის
+# სწრაფი backend/API-only კომპილაცია კონტრიბუტორის ცვლილებებისთვის
 npm run build:contributor
 
-# რელიზის აგება (სუფთა ხელახალი აგება + HEAD საკონტროლო მარკერი — აუცილებელია განთავსებისთვის)
-npm run build:release   # rm -rf .build dist && build + წერს dist/BUILD_SHA-ს
+# Release-ის build (გასუფთავებული rebuild + HEAD sentinel — საჭიროა deploy-ისთვის)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# პორტის გავრცელებული კონფიგურაცია
+# პორტის კონფიგურაციის გავრცელებული მაგალითი
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-კონტრიბუტორის აგება მხოლოდ კომპილაციის ვალიდაციას ასრულებს: ის არ აწყობს დამოუკიდებელ
-დისტრიბუციას და არც არასავალდებულო ნატიური პაკეტირების რესურსებს აგებს. გამოიყენეთ ჩვეულებრივი საწარმოო აგება, როდესაც
-გასავრცელებელი პაკეტის ვალიდაცია გჭირდებათ.
+კონტრიბუტორის build ახორციელებს მხოლოდ კომპილაციის ვალიდაციას: ის არ აწყობს standalone დისტრიბუციას და არ აგებს optional native packaging-ის აქტივებს. გამოიყენეთ production-ის ჩვეულებრივი build, როდესაც საჭიროა deploy-ისთვის გამზადებული bundle-ის ვალიდაცია.
 
-### აგების შედეგების სტრუქტურა
+### Build-ის შედეგის განლაგება
 
-| დირექტორია | შიგთავსი                                                                         | ვერსიების კონტროლშია |
-| ---------- | -------------------------------------------------------------------------------- | -------------------- |
-| `src/`     | აპლიკაციის საწყისი კოდი (TypeScript / TSX)                                       | დიახ                 |
-| `.build/`  | შუალედური ფაილები — `next build`-ის შედეგი (gitignored, `distDir = .build/next`) | არა                  |
-| `dist/`    | გასავრცელებელი პაკეტი — აწყობილია `assembleStandalone`-ის მიერ (gitignored)      | არა                  |
+| დირექტორია | შიგთავსი                                                                               | კონტროლდება ვერსიებში |
+| ---------- | -------------------------------------------------------------------------------------- | --------------------- |
+| `src/`     | აპლიკაციის წყარო (TypeScript / TSX)                                                    | დიახ                  |
+| `.build/`  | შუალედური ფაილები — `next build`-ის შედეგი (gitignored, `distDir = .build/next`)       | არა                   |
+| `dist/`    | deploy-ისთვის გამზადებული bundle — აწყობილია `assembleStandalone`-ის მიერ (gitignored) | არა                   |
 
-აგების კონვეიერი ერთ გავლას იყენებს:
+Build-ის pipeline ერთ გავლას მოიცავს:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (Next.js-ის შედეგი)
-  └─ assembleStandalone()                 (აკოპირებს standalone + static + public + ნატიურ რესურსებს)
-       └─ შედეგი: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (standalone + static + public + native assets-ის კოპირება)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` დამატებით ჯერ ორივე დირექტორიას ასუფთავებს და
-განთავსების მთლიანობის საკონტროლო მარკერის სახით წერს `dist/BUILD_SHA`-ს (= `git rev-parse --short HEAD`).
+`npm run build:release` დამატებით ჯერ ასუფთავებს ორივე დირექტორიას და წერს
+`dist/BUILD_SHA`-ს (= `git rev-parse --short HEAD`) deploy-ის მთლიანობის sentinel-ის სახით.
 
-`npm run build:contributor` მხოლოდ ბექენდის აგების პროფილს იყენებს. აგებისას ის დროებით ანაცვლებს
-დაფის UI-ფაილებს დროებითი ვერსიებით, ინარჩუნებს API-მარშრუტების დამმუშავებლებს და აგების შემდეგ თავდაპირველ ფაილებს
-აღადგენს. დაფის UI-ზე მოქმედი ცვლილებებისთვის ან რელიზის სრული
-ვალიდაციისთვის გამოიყენეთ `npm run build`; კონტრიბუტორის პროფილი რელიზის აგებას ვერ ჩაანაცვლებს.
+`npm run build:contributor` იყენებს backend-only build პროფილს. ის build-ის მიმდინარეობისას დროებით ქმნის dashboard-ის UI ფაილების stub-ებს, ინარჩუნებს API route handler-ებს და build-ის დასრულების შემდეგ აღადგენს თავდაპირველ ფაილებს. გამოიყენეთ `npm run build` dashboard-ის UI-ზე მოქმედი ცვლილებებისთვის ან სრული release-ის ვალიდაციისთვის; contributor პროფილი release build-ის შემცვლელი არ არის.
 
-> **VPS-ზე განთავსების შენიშვნა:** დისტანციური ასლის დირექტორია `/usr/lib/node_modules/omniroute/app/`
-> უცვლელია. განთავსების მექანიზმები `dist/`-ის შიგთავსს მასში `rsync`-ის მეშვეობით აკოპირებს.
-> შეიცვალა მხოლოდ რეპოზიტორიის შიგნით აგების შედეგის გზა (`app/` → `dist/`).
+> **VPS deploy-ის შენიშვნა:** დისტანციური image-ის დირექტორია `/usr/lib/node_modules/omniroute/app/`
+> უცვლელი რჩება. deploy-ის skills მასში `dist/`-ის შიგთავსს rsync-ით აკოპირებს.
+> შეიცვალა მხოლოდ რეპოზიტორიის build-ის შედეგის გზა (`app/` → `dist/`).
 
 ნაგულისხმევი URL-ები:
 
-- **დაფა**: `http://localhost:20128/dashboard`
+- **Dashboard**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -294,67 +293,67 @@ PR-ის გახსნამდე გამოიყენეთ
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # მართვის პანელის გვერდები (23 სექცია)
-│   ├── api/                # API მარშრუტები (51 დირექტორია)
-│   └── login/              # ავტორიზაციის გვერდები (.tsx)
-├── domain/                 # პოლიტიკების ძრავა (policyEngine, comboResolver, costRules და სხვ.)
-├── lib/                    # ძირითადი ბიზნესლოგიკა (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 პროტოკოლის სერვერი
-│   ├── acp/                # Agent Communication Protocol-ის რეესტრი
-│   ├── compliance/         # შესაბამისობის პოლიტიკების ძრავა
-│   ├── db/                 # SQLite-ის დომენური მოდულები + 130 მიგრაცია
-│   ├── memory/             # მუდმივი სასაუბრო მეხსიერება
-│   ├── oauth/              # OAuth-ის პროვაიდერები, სერვისები და დამხმარე საშუალებები
-│   ├── skills/             # გაფართოებადი უნარების ფრეიმვორკი
-│   ├── usage/              # გამოყენების აღრიცხვა და ღირებულების გამოთვლა
-│   └── localDb.ts          # მხოლოდ ხელახალი ექსპორტის შრე — აქ ლოგიკა არასოდეს დაამატოთ
-├── middleware/              # მოთხოვნების შუალედური პროგრამული უზრუნველყოფა (promptInjectionGuard)
-├── mitm/                   # MITM პროქსი (სერტიფიკატი, DNS, სამიზნე მარშრუტიზაცია)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React კომპონენტები (.tsx)
-│   ├── constants/          # პროვაიდერების განსაზღვრებები (329), MCP-ის ფარგლები, მარშრუტიზაციის 20 სტრატეგია
-│   ├── utils/              # ავტომატური ამომრთველი, სანიტაიზერი, ავტორიზაციის დამხმარე საშუალებები
-│   └── validation/         # Zod v4 სქემები
-└── sse/                    # SSE პროქსის კონვეიერი
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse სამუშაო სივრცე
-├── executors/              # 150 შემსრულებელი მოდული (შემსრულებელი კლასები + თითოეული პროვაიდერის დამხმარე საშუალებები)
-├── handlers/               # მოთხოვნების 11 დამმუშავებელი (ჩატი, პასუხები, ემბედინგები, სურათები და სხვ.)
-├── mcp-server/             # MCP სერვერი (110 უნიკალური ინსტრუმენტი, 3 ტრანსპორტი, 33 ფარგალი)
-├── services/               # ზედა დონის 178 სერვისი (combo, autoCombo, rateLimitManager და სხვ.)
-├── translator/             # ფორმატების გარდამქმნელები (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API-ის გარდამქმნელი
-└── utils/                  # 22 დამხმარე მოდული (ნაკადი, TLS, პროქსი, ჟურნალირება)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron-ის დესკტოპაპლიკაცია (მრავალპლატფორმული)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js-ის ტესტების გამშვები (1,574 სატესტო ფაილი)
-├── integration/            # ინტეგრაციული ტესტები
-├── e2e/                    # Playwright-ის ტესტები
-├── security/               # უსაფრთხოების ტესტები
-├── translator/             # გარდამქმნელისთვის სპეციფიკური ტესტები
-└── load/                   # დატვირთვის ტესტები
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # არქიტექტურული გადაწყვეტილებების ჩანაწერები
-├── architecture/            # სისტემის არქიტექტურა და მდგრადობა
-├── comparison/              # OmniRoute-ის შედარება ალტერნატივებთან
-├── compression/             # შეკუმშვის სახელმძღვანელოები და წესები
-├── dev/                     # შემუშავების სახელმძღვანელოები
-├── diagrams/                # არქიტექტურული დიაგრამები
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # მომხმარებლის სახელმძღვანელო, Docker, გამართვა, პრობლემების მოგვარება
-├── i18n/                    # README-ის ინტერნაციონალიზებული თარგმანები
-├── marketing/               # მარკეტინგული მასალები
-├── ops/                     # განთავსება, პროქსი, დაფარვა, გამოშვებები
-├── providers/               # პროვაიდერებისთვის სპეციფიკური დოკუმენტაცია
-├── reference/               # API ცნობარი, გარემოს ცვლადები, CLI ინსტრუმენტები, უფასო ტარიფები
-├── releases/                # გამოშვების შენიშვნები
-├── routing/                 # ავტომატური კომბინაციების ძრავა, მსჯელობის განმეორებითი გაშვება
-├── screenshots/             # მართვის პანელის ეკრანის ანაბეჭდები
-├── security/                # დამცავი მექანიზმები, შესაბამისობა, შეუმჩნევლობა, ტოკენები
-└── specs/                   # დიზაინის სპეციფიკაციები
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

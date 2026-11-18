@@ -7,6 +7,7 @@ import { PageHeader, SectionHeader } from "@omniroute/ui-kit/page-header";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { ConfirmModal } from "@/shared/components/Modal";
 import { AddWebhookWizard } from "./components/AddWebhookWizard";
 import { HowItWorksSidebar } from "./components/HowItWorksSidebar";
@@ -218,11 +219,7 @@ export function WebhooksPageClient() {
                     title={t("refresh")}
                     aria-label={t("refresh")}
                   >
-                    <Icon
-                      name="refresh"
-                      size={18}
-                      className={loading ? "animate-spin" : undefined}
-                    />
+                    {loading ? <Spinner decorative size="sm" /> : <Icon name="refresh" size={18} />}
                   </Button>
                 }
               />

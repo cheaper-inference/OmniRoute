@@ -107,7 +107,7 @@ OmniRoute කන්ටේනරය තුළ ක්‍රියාත්මක �
 
 ---
 
-## 1. CLI කේතයේ නාමාවලිය (මෙවලම් 27)
+## 1. CLI කේතයේ නාමාවලිය (මෙවලම් 28)
 
 `/dashboard/cli-code` හි දිස්වන සියලුම මෙවලම් . `baseUrlSupport: none` ඇති අය අභිරුචි පාදයක් වෙනුවට MITM හෝ අතින් මාර්ගෝපදේශයක් හරහා රැහැන්ගත කර ඇත URL
 
@@ -134,6 +134,7 @@ OmniRoute කන්ටේනරය තුළ ක්‍රියාත්මක �
 | grok-build    | Grok ගොඩනැගීම               | xAI                     | පූර්ණ          | චාරිත්රය        | බොරු         |
 | පොඩි කරනවා    | පොඩි කරන්න                  | OSS (චමත්)              | පූර්ණ          | චාරිත්රය        | බොරු         |
 | qwen          | Qwen කේතය                   | Alibaba                 | පූර්ණ          | මඟ පෙන්වීම      | ඇත්ත         |
+| විවෘත ක්ලෝඩ්  | OpenClaude                  | Gitlawb (OSS)           | පූර්ණ          | මඟ පෙන්වීම      | බොරු         |
 | zed           | Zed                         | Zed කර්මාන්ත            | පූර්ණ          | මඟ පෙන්වීම      | බොරු         |
 | කර්සරය        | Cursor                      | ඕනෑම ගෝලයක්             | කිසිවක් නැත    | මඟ පෙන්වීම      | බොරු         |
 | antigravity   | Antigravity                 | Google                  | කිසිවක් නැත    | mitm            | බොරු         |
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. නව මෙවලම් සඳහා සැකසුම් හසුරුවන්නන්
+## 6. නව මෙවලම් සඳහා සැකසුම් හසුරුවන්න
 
-`configType: "custom"` සහිත නව මෙවලම් සඳහා වෙන් කළ සැකසුම් API මාර්ග ඇත:
+`configType: "custom"` සමඟින් නව මෙවලම් සඳහා කැපවූ සැකසුම් API මාර්ග ඇත:
 
-| මාර්ගය                                      | මෙවලම                                                                   |
-| ------------------------------------------- | ----------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                 |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url සලකුණ)                                                |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, පැරණි)                                   |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ප්රධාන + පැරණි `~/.deepseek` සමමුහුර්තකරණය) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                   |
-| `POST /api/cli-tools/pi-settings`           | Pi කේතකරණ නියෝජිතයා                                                     |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                   |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + වෙන් කළ `.env` යතුර)               |
+| මාර්ගය                                      | මෙවලම                                                                      |
+| ------------------------------------------- | -------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                    |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url ධජය)                                                     |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, උරුමය)                                      |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, ප්‍රාථමික + උරුමය `~/.deepseek` සමමුහුර්තකරණය) |
+| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                      |
+| `POST /api/cli-tools/pi-settings`           | පයි කේතීකරණ නියෝජිතයා (`~/.pi/agent/models.json`, `providers.omniroute`)   |
+| `POST /api/cli-tools/grok-build-settings`   | Grok ගොඩනැගීම (~/.grok/config.toml, `[model.omniroute]`)                   |
+| `POST /api/cli-tools/qwen-settings`         | Qwen කේතය (`~/.qwen/settings.json` + කැප වූ `.env` යතුර)                   |
 
-සියලුම මාර්ග දෝෂ ප්රතිචාර සඳහා `sanitizeErrorMessage()` භාවිත කරයි (දැඩි රීතිය #12).
+සියලුම මාර්ග දෝෂ ප්‍රතිචාර සඳහා `sanitizeErrorMessage()` භාවිතා කරයි (දෘඪ රීතිය #12).
 
 ---
 
@@ -295,17 +296,17 @@ interface ToolBatchStatus {
 
 ### පියවර 1 — OmniRoute API යතුරක් ලබා ගන්න
 
-1. `/dashboard/api-manager` විවෘත කරන්න → **API යතුරක් සාදන්න**
-2. එයට නමක් ලබා දී (උදා. `cli-tools`) සියලු අවසර තෝරන්න
-3. යතුර පිටපත් කරගන්න — පහත සෑම CLI එකක් සඳහාම ඔබට එය අවශ්ය වේ
+1. `/dashboard/api-manager` → විවෘත කරන්න** API යතුර සාදන්න**
+2. එයට නමක් ලබා දෙන්න (උදා: `cli-tools`) සහ සියලු අවසර තෝරන්න
+3. පහත සෑම CLI සඳහාම ඔබට අවශ්‍ය — යතුර පිටපත් කරන්න
 
-> ඔබේ යතුර මෙලෙස පෙනේ: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> ඔබේ යතුර පෙනෙන්නේ: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
 ### පියවර 2 — CLI මෙවලම් ස්ථාපනය කරන්න
 
-npm මත පදනම් වන සියලු මෙවලම් සඳහා Node.js 22.22.2+ හෝ 24.x අවශ්ය වේ:
+සියලුම npm මත පදනම් වූ මෙවලම් සඳහා Node.js 22.22.2 + හෝ 24.x අවශ්‍ය වේ:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (`omniroute run gemini` හරහා දියත් කළ හැක → /v1beta මතුපිට)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rust මත පදනම් වේ
+cargo install smelt  # Rust-based
 
-# Pi කේතකරණ නියෝජිතයා
-# ස්ථාපනය සඳහා https://github.com/zechnerj/pi-coding-agent බලන්න
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# ස්ථාපනය සඳහා https://github.com/1jehuang/jcode බලන්න
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### පියවර 3 — උපකරණ පුවරුව හරහා වින්යාස කරන්න
+### පියවර 3 — උපකරණ පුවරුව හරහා වින්‍යාස කරන්න
 
 1. `http://localhost:20128/dashboard/cli-code` වෙත යන්න
-2. ජාලකය තුළ ඔබේ මෙවලම සොයන්න
+2. ජාලය තුළ ඔබේ මෙවලම සොයා ගන්න
 3. මෙවලම් විස්තර පිටුව විවෘත කිරීමට කාඩ්පත ක්ලික් කරන්න
-4. ඔබේ API යතුර සහ මූලික URL එක තෝරන්න
-5. **වින්යාසය යොදන්න** ක්ලික් කරන්න, නැතහොත් අතින් භාවිත කරන වින්යාස කොටස පිටපත් කරන්න
+4. ඔබේ API යතුර සහ URL පාදය තෝරන්න
+5. ක්ලික් කරන්න** වින්‍යාසය යොදන්න** නැතහොත් අත්පොත වින්‍යාස කොටස පිටපත් කරන්න
 
 ---
 
-### පියවර 4 — ගෝලීය පරිසර විචල්ය සකසන්න
+### පියවර 4 — ගෝලීය පරිසර විචල්‍ය සකසන්න
 
 ```bash
-# OmniRoute සාර්වත්රික අන්ත ලක්ෂ්යය
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI විසින් GOOGLE_GEMINI_BASE_URL මූලයෙන් කියවයි (එහි SDK එක විසින්ම /v1beta/... එකතු කරයි)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **දුරස්ථ සේවාදායකයක්** සඳහා `localhost:20128` වෙනුවට සේවාදායකයේ IP ලිපිනය හෝ වසම් නාමය යොදන්න,
-> උදා. `http://<your-server-ip>:20128`.
+> ඒ සඳහා** දුරස්ථ සේවාදායකය** `localhost:20128` සේවාදායකය IP හෝ වසම සමඟ ප්‍රතිස්ථාපනය කරන්න, උදා `http://<your-server-ip>:20128`.
 
 ---
 
-### පියවර 4 — එක් එක් මෙවලම වින්යාස කරන්න
+### පියවර 4 — සෑම මෙවලමක්ම වින්‍යාස කරන්න
 
-#### Claude Code
+#### Claude කේතය
 
 ```bash
-# ~/.claude/settings.json සාදන්න:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude Code සඳහා ඒකාබද්ධ Anthropic ද්වාර මූලය භාවිත කරන්න. මෙහිදී `/v1` අගට එක් නොකරන්න.
+Claude කේතය සඳහා ඒකාබද්ධ Anthropic ද්වාර මූල භාවිතා කරන්න. මෙහි `/v1` එකතු නොකරන්න.
 
 **පරීක්ෂණය:** `claude "say hello"`
 
@@ -396,9 +396,7 @@ Claude Code සඳහා ඒකාබද්ධ Anthropic ද්වාර මූ�
 
 #### OpenAI Codex
 
-නවීන Codex (v0.137+) කියවන්නේ `~/.codex/config.toml` පමණි — පැරණි
-`config.yaml` ගොනුව උරුම npm CLI එකට අයත් වන අතර එය කිසිදු දැනුම්දීමකින් තොරව නොසලකා හැරේ. API
-යතුර සැමවිටම ගොනුව තුළ නොව `OMNIROUTE_API_KEY` පරිසර විචල්යයේ (`env_key`) පවතී:
+නවීන Codex (v0.137 +) `~/.codex/config.toml` පමණක් — කියවන්නේ පැරණි `config.yaml` උරුමය npm CLI ට අයත් වන අතර නිහඬව නොසලකා හරිනු ලැබේ. API යතුර `OMNIROUTE_API_KEY` පරිසර විචල්‍යයේ පවතී (`env_key`), කිසි විටෙක ගොනුව තුළ නොවේ:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -413,7 +411,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-සම්පූර්ණ යොමුව (පැතිකඩ, `wire_api`, සන්දර්භ කවුළු): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+සම්පූර්ණ යොමු (පැතිකඩ, `wire_api`, සන්දර්භය කවුළු): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **පරීක්ෂණය:** `codex "what is 2+2?"`
 
@@ -446,14 +444,44 @@ EOF
 
 **පරීක්ෂණය:** `opencode`
 
-> චින්තන ප්රභේද යැවීමට `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> භාවිත කරන්න.
+> චින්තන ප්‍රභේද යැවීමට `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` භාවිත කරන්න.
 
 ---
 
-#### Cline (CLI හෝ VS Code)
+#### පයි කේතීකරණ නියෝජිතයා
 
-**CLI ප්රකාරය:**
+`npm install -g --ignore-scripts @earendil-works/pi-coding-agent` සමඟ නිල Pi කේතීකරණ නියෝජිත පැකේජය ස්ථාපනය කරන්න. Pi `~/.pi/agent/models.json` වෙතින් අභිරුචි සපයන්නන් කියවයි; සම්පූර්ණ නියෝජිත නාමාවලිය චලනය කිරීමට `PI_CODING_AGENT_DIR` සකසන්න. උපකරණ පුවරුව එම අභිබවා යාම අනුගමනය කරයි. Pi විසින් අභිරුචි අන්ත ලක්ෂ්‍ය වලින් ආකෘති සොයා නොගනී, එබැවින් OmniRoute Pi's `openai-completions` API සහ OmniRoute OpenAI-අනුකූල `/v1` අන්ත ලක්ෂ්‍යය භාවිතයෙන් තෝරාගත් ආකෘතිය `models[]` හි ලියයි.
+
+තුළ**CLI මෙවලම් → Pi** , අන්ත ලක්ෂ්‍යයක්, API යතුරක් සහ ආකෘතියක් තෝරන්න, සපයන්නාගේ පෙරදසුන සමාලෝචනය කරන්න, ඉන්පසු අයදුම් කරන්න. පෙරදසුන සපයන්නාගේ කොටසකි: Pi අතින් වින්‍යාස කිරීමේදී `providers.omniroute` ඔබගේ පවතින `models.json` වෙත ඒකාබද්ධ කරන්න එවිට අනෙකුත් සපයන්නන් සහ සැකසුම් නොවෙනස්ව පවතී.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+ඔබ `/model` විවෘත කරන විට Pi `models.json` නැවත පූරණය කරයි. ඔබ තෝරාගත් සැපයුම්කරුගේ හැඳුනුම්පත සහ ආකෘති හැඳුනුම්පත සමඟ වින්‍යාස කළ මාර්ගය පරීක්ෂා කරන්න:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+යොමු: [Pi ආකෘති සහ අභිරුචි සපයන්නන්](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi පරිසර විචල්‍යයන්](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi ස්ථාපන උපදෙස්](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (CLI හෝ VS කේතය)
+
+**CLI මාදිලිය:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -465,22 +493,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code ප්රකාරය:**
-Cline දිගුවේ සැකසුම් → API සපයන්නා: `OpenAI Compatible` → මූලික URL: `http://localhost:20128/v1`
+**VS කේත මාදිලිය:** Cline දිගු සැකසුම් → API සපයන්නා: `OpenAI Compatible` → පදනම URL: `http://localhost:20128/v1`
 
-නැතහොත් OmniRoute උපකරණ පුවරුව → **CLI මෙවලම් → Cline → වින්යාසය යොදන්න** භාවිත කරන්න.
+නැතහොත් OmniRoute උපකරණ පුවරුව → භාවිතා කරන්න**CLI මෙවලම් → Cline → වින්‍යාසය යොදන්න** .
 
 ---
 
-#### KiloCode (CLI හෝ VS Code)
+#### KiloCode (CLI හෝ VS කේතය)
 
-**CLI ප්රකාරය:**
+**CLI මාදිලිය:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code සැකසුම්:**
+**VS කේත සැකසුම්:**
 
 ```json
 {
@@ -489,11 +516,11 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-නැතහොත් OmniRoute උපකරණ පුවරුව → **CLI මෙවලම් → KiloCode → වින්යාසය යොදන්න** භාවිත කරන්න.
+නැතහොත් OmniRoute උපකරණ පුවරුව → භාවිතා කරන්න**CLI මෙවලම් → KiloCode → වින්‍යාසය යොදන්න** .
 
 ---
 
-#### Continue (VS Code දිගුව)
+#### ඉදිරියට යන්න (VS කේතය දිගුව)
 
 `~/.continue/config.yaml` සංස්කරණය කරන්න:
 
@@ -507,20 +534,20 @@ models:
     default: true
 ```
 
-සංස්කරණය කිරීමෙන් පසු VS Code නැවත ආරම්භ කරන්න.
+සංස්කරණය කිරීමෙන් පසු VS කේතය නැවත ආරම්භ කරන්න.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-VS Code Insiders අභිරුචි අන්ත ලක්ෂ්ය ආකෘති සඳහා වින්යාස කර ඇති විට සහ අභිරුචි ශීර්ෂ ක්ෂේත්රයක් නොමැතිව OmniRoute ක්රියා කරවීමට අවශ්ය විට මෙය භාවිත කරන්න.
+VS Code Insiders අභිරුචි අන්ත ලක්ෂ්‍ය ආකෘති සඳහා වින්‍යාස කර ඇති විට සහ ඔබට අභිරුචි ශීර්ෂ ක්ෂේත්‍රයක් නොමැතිව OmniRoute ක්‍රියා කිරීමට අවශ්‍ය විට මෙය භාවිතා කරන්න.
 
-**නිර්දේශිත පිහිටීම:**
+**නිර්දේශිත ස්ථානය:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**ටෝකනීකරණය කළ OmniRoute අන්වර්ථ නාමය භාවිත කරන උදාහරණය:**
+**සංකේතාත්මක OmniRoute අන්වර්ථය භාවිතා කිරීමේ උදාහරණය:**
 
 ```json
 [
@@ -544,27 +571,26 @@ VS Code Insiders අභිරුචි අන්ත ලක්ෂ්ය ආකෘ
 
 **සටහන්:**
 
-- `sk-your-omniroute-key` වෙනුවට OmniRoute තුළ සාදන ලද API යතුරක් යොදන්න.
-- `url` ක්ෂේත්රය `/api/v1/vscode/{token}/chat/completions` වෙත යොමු විය යුතුය.
-- `modelsUrl` ක්ෂේත්රය `/api/v1/vscode/{token}/models` වෙත යොමු විය යුතුය.
-- සේවාලාභියා අභිරුචි ශීර්ෂක සඳහා සහාය දක්වන විට සාමාන්ය `/v1` + Bearer ශීර්ෂක ප්රවාහය භාවිත කිරීම වඩාත් සුදුසුය.
-- URL තුළ අන්තර්ගත කළ ටෝකන ගැළපුම සඳහා වන විකල්ප ක්රමයක් වන අතර, ඒවා සංස්කාරක ලොග්වල හෝ ප්රොක්සි ඉතිහාසයේ දිස් විය හැක.
+- `sk-your-omniroute-key` වෙනුවට OmniRoute හි සාදන ලද API යතුරක් සමඟ ප්‍රතිස්ථාපනය කරන්න.
+- `url` ක්ෂේත්‍රය `/api/v1/vscode/{token}/chat/completions` වෙත යොමු විය යුතුය.
+- `modelsUrl` ක්ෂේත්‍රය `/api/v1/vscode/{token}/models` වෙත යොමු විය යුතුය.
+- සේවාලාභියා අභිරුචි ශීර්ෂ සඳහා සහය දක්වන විට සාමාන්‍ය `/v1` + Bearer ශීර්ෂ ප්‍රවාහයට කැමති වන්න.
+- URL-Embedded tokens යනු ගැළපුම් පසුබෑමක් වන අතර සංස්කාරක ලොගවල හෝ ප්‍රොක්සි ඉතිහාසයේ දිස් විය හැක.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# ඔබේ AWS/Kiro ගිණුමට පිවිසෙන්න:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI එක තමන්ගේම සත්යාපනය භාවිත කරයි — Kiro CLI සඳහාම පසුබිම් සේවාවක් ලෙස OmniRoute අවශ්ය නොවේ.
-# අනෙකුත් මෙවලම් සඳහා OmniRoute සමඟ kiro-cli භාවිත කරන්න.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-**Kiro IDE** ඩෙස්ක්ටොප් යෙදුම සඳහා, OmniRoute මඟින් නිරාවරණය කරන ලද MITM අන්ත ලක්ෂ්යය
-`/dashboard/cli-tools → Kiro` යටතේ භාවිත කරන්න.
+සඳහා**Kiro IDE** ඩෙස්ක්ටොප් යෙදුම, `/dashboard/cli-tools → Kiro` යටතේ OmniRoute මගින් නිරාවරණය වන MITM අන්ත ලක්ෂ්‍යය භාවිතා කරන්න.
 
 ---
 

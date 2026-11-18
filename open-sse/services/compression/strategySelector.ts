@@ -35,6 +35,7 @@ import {
 } from "./stackedStepCore.ts";
 import { resolveStepDetailConfig } from "./stepDetailConfig.ts";
 import { registerBuiltinCompressionEngines } from "./engines/index.ts";
+import { applyCcrProtocolInstruction } from "./engines/ccr/protocolInstruction.ts";
 import { getCompressionEngine, getEngineEntry } from "./engines/registry.ts";
 import { codexResponsesEngine } from "./engines/codexResponses/index.ts";
 import { applyOmniglyphSingleMode } from "./engines/omniglyphSingleMode.ts";
@@ -140,7 +141,7 @@ function resolveBasePlan(
     const fromHeader = planFromHeader(config, header, combos);
     if (fromHeader) {
       plan = fromHeader; // already tagged "request-header"
-      return applyLossyRequestPolicy(plan, header);
+      return applyLossyRequestPolicy(plan, header, config.stackedPipeline);
     }
   }
 
@@ -170,7 +171,7 @@ function resolveBasePlan(
     plan = withSource(derived, derived.mode === "off" ? "off" : "default");
   }
 
-  return applyLossyRequestPolicy(plan, header);
+  return applyLossyRequestPolicy(plan, header, config.stackedPipeline);
 }
 
 /**
@@ -915,7 +916,26 @@ function finalizeStackedResult(
   // T02 / H1 / #6480: honest aggregate inflation guard, gated on the loop-level `compressed`
   // flag so a pipeline where nothing ever advanced isn't mislabeled as a reverted fallback.
   // See `applyStackedInflationGuard` in `pipelineGuards.ts` for the full rationale.
-  return applyStackedInflationGuard(originalBody, currentBody, compressed, stats);
+  // The marker-protocol note is added only AFTER the guard (see withMarkerProtocolNote).
+  return withMarkerProtocolNote(
+    applyStackedInflationGuard(originalBody, currentBody, compressed, stats)
+  );
+}
+
+/**
+ * Marker-protocol post-pass (#8033), applied by `finalizeStackedResult` for the sync +
+ * async stacked runners: after every engine, the hard budget and the inflation guard,
+ * one leading system note explains any `[CCR retrieve hash=...]` / `[dedup:ref sha=...]`
+ * marker left in the final body (idempotent: a replayed prior note carrying the sentinel
+ * suppresses a second). The note is a protocol explanation, not a compression, so it runs
+ * AFTER the guard: its fixed size must never count against the inflation guard (on a
+ * small body the guard would otherwise revert the very compression the note explains),
+ * and the hard budget can never drop it. Stats describe the compression alone. When the
+ * guard reverted, only markers already in the original body are explained.
+ */
+function withMarkerProtocolNote(result: CompressionResult): CompressionResult {
+  const applied = applyCcrProtocolInstruction(result.body);
+  return applied.injected ? { ...result, body: applied.body } : result;
 }
 
 // ── Shared per-step helpers (used by the sync + async stacked loops; keep them in lockstep) ──

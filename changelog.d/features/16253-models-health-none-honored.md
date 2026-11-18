@@ -1,1 +1,0 @@
-- **feat(models-health):** report whether reasoning_effort none was honored per model on GET /v1/models/health ([#16253](https://github.com/diegosouzapw/OmniRoute/pull/16253)) — thanks @maxmad64bis

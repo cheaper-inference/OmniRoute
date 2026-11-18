@@ -71,9 +71,9 @@ describe("Sidebar disconnect notice", () => {
     expect(shutdown).not.toBeNull();
     act(() => shutdown.click());
     await flush();
-    const confirm = [...dialogs()[0].querySelectorAll("button")].find(
-      (b) => b.textContent?.trim() === "shutdown"
-    )!;
+    const confirm = [
+      ...document.body.querySelector('[role="alertdialog"]')!.querySelectorAll("button"),
+    ].find((b) => b.textContent?.trim() === "shutdown")!;
     await act(async () => confirm.click());
     await flush();
 

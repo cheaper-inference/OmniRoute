@@ -20,9 +20,14 @@ agus céimeanna réitigh.
 - **Node.js** `>=22.22.2 <23`, nó `>=24.0.0 <27` (molta: 24 LTS)
 - **npm** 10+
 
-> **Úsáideoirí npm v11+ (Node 24+):** Tar éis `npm install`, deimhnigh gur suiteáladh na modúil dhúchasacha:
+> **Windows le Node 24:** bain úsáid as an leagan paiste reatha de 24 LTS (24.20.0 ar a laghad).
+> Is féidir le leaganacha níos luaithe scor tar éis tástálacha rathúla nuair a dhúnann `--test-force-exit` an
+> próiseas. Réitíonn [socrú Windows libuv de chuid Node](https://github.com/nodejs/node/pull/61999) an
+> timpiste rite seo; coinnigh na dearbhuithe tástála agus na seiceálacha scoir den rithitheoir cumasaithe.
+
+> **Úsáideoirí npm v11+ (Node 24+):** Tar éis `npm install`, fíoraigh gur suiteáladh na modúil dhúchasacha:
 > `node -e "require('better-sqlite3')"`. Má theipeann air le `MODULE_NOT_FOUND`,
-> rith `npm approve-scripts better-sqlite3 && npm install`. Féach
+> rith `npm approve-scripts better-sqlite3 && npm install`. Féach ar
 > [Fabhtcheartú](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
@@ -48,81 +53,76 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Príomhathróga don fhorbairt:
 
-| Athróg                 | Réamhshocrú Forbartha    | Cur Síos                           |
-| ---------------------- | ------------------------ | ---------------------------------- |
-| `PORT`                 | `20128`                  | Port an fhreastalaí                |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Bun-URL don chomhéadan tosaigh     |
-| `JWT_SECRET`           | (gin thuas é)            | Rún sínithe JWT                    |
-| `INITIAL_PASSWORD`     | `CHANGEME`               | Pasfhocal don chéad logáil isteach |
-| `APP_LOG_LEVEL`        | `info`                   | Leibhéal mionsonraithe na logaí    |
+| Athróg                 | Réamhshocrú Forbartha    | Cur Síos                             |
+| ---------------------- | ------------------------ | ------------------------------------ |
+| `PORT`                 | `20128`                  | Port an fhreastalaí                  |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | BuntURL don chomhéadan tosaigh       |
+| `JWT_SECRET`           | (gin thuas)              | Rún sínithe JWT                      |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Focal faire don chéad logáil isteach |
+| `APP_LOG_LEVEL`        | `info`                   | Leibhéal mionsonraithe na logála     |
 
-### Socruithe na Deaise
+### Socruithe an Phainéil
 
-Soláthraíonn an deais scoránaigh UI do ghnéithe ar féidir iad a chumrú trí athróga timpeallachta freisin:
+Soláthraíonn an painéal scoránna Chomhéadain le haghaidh gnéithe ar féidir iad a chumrú trí athróga timpeallachta freisin:
 
-| Suíomh an tSocraithe   | Scorán                        | Cur Síos                                     |
-| ---------------------- | ----------------------------- | -------------------------------------------- |
-| Socruithe → Casta      | Mód Dífhabhtaithe             | Cumasaigh logaí iarratais dífhabhtaithe (UI) |
-| Socruithe → Ginearálta | Infheictheacht an Taobhbharra | Taispeáin/folaigh rannóga an taobhbharra     |
+| Suíomh an tSocraithe | Scorán                          | Cur Síos                                             |
+| -------------------- | ------------------------------- | ---------------------------------------------------- |
+| Settings → Advanced  | Mód Dífhabhtaithe               | Cumasaigh logaí iarratas dífhabhtaithe (Chomhéadain) |
+| Settings → General   | Infheictheacht an Bharra Taoibh | Taispeáin/folaigh rannóga an bharra taoibh           |
 
-Stóráiltear na socruithe seo sa bhunachar sonraí agus fanann siad ann thar atosuithe, agus sáraíonn siad réamhshocruithe na n-athróg timpeallachta nuair a shocraítear iad.
+Stóráiltear na socruithe seo sa bhunachar sonraí agus maireann siad thar atosuithe, rud a sháraíonn réamhshocruithe na n-athróg timpeallachta nuair a shocraítear iad.
 
-### Rith go Logánta
+### Rith go hÁitiúil
 
 ```bash
-# Mód forbartha (athluchtú te)
+# Mód forbartha (athlódáil te)
 npm run dev
 
-# Tógáil táirgthe
+# Tógáil táirgeachta
 npm run build    # next build → .build/next/ agus ansin assembleStandalone → dist/
 npm run start
 
-# Tiomsú tapa don inneall cúil/API amháin le haghaidh athruithe rannpháirtithe
+# Tiomsú tapa backend/API amháin le haghaidh athruithe rannpháirtithe
 npm run build:contributor
 
-# Tógáil eisiúna (atógáil ghlan + comhartha faire HEAD — riachtanach don imscaradh)
-npm run build:release   # rm -rf .build dist && tógáil + scríobhann sé dist/BUILD_SHA
+# Tógáil eisiúna (atógáil ghlan + comhartha HEAD — riachtanach don imscaradh)
+npm run build:release   # rm -rf .build dist agus build + scríobhann sé dist/BUILD_SHA
 
 # Cumraíocht choitianta poirt
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Déanann tógáil an rannpháirtí bailíochtú tiomsaithe amháin: ní chóimeálann sí an dáileadh
-neamhspleách ná ní thógann sí sócmhainní roghnacha pacáistithe dhúchasaigh. Úsáid an ghnáth-thógáil táirgthe nuair
-is gá duit an beartán inseolta a bhailíochtú.
+Déanann tógáil an rannpháirtí bailíochtú tiomsaithe amháin: ní chóimeálann sí an dáileadh neamhspleách ná ní thógann sí sócmhainní roghnacha pacáistithe dúchasacha. Bain úsáid as an ngnáththógáil táirgeachta nuair is gá duit an beart is féidir a sheoladh a bhailíochtú.
 
 ### Leagan Amach Aschur na Tógála
 
-| Eolaire   | Inneachar                                                                                        | Rianaithe |
-| --------- | ------------------------------------------------------------------------------------------------ | --------- |
-| `src/`    | Foinse an fheidhmchláir (TypeScript / TSX)                                                       | Tá        |
-| `.build/` | Comhaid idirmheánacha — aschur `next build` (á ligean thar ceal ag git, `distDir = .build/next`) | Níl       |
-| `dist/`   | Beartán inseolta — cóimeáilte ag `assembleStandalone` (á ligean thar ceal ag git)                | Níl       |
+| Comhadlann | Ábhar                                                                                   | Rianaithe |
+| ---------- | --------------------------------------------------------------------------------------- | --------- |
+| `src/`     | Foinse an fheidhmchláir (TypeScript / TSX)                                              | Tá        |
+| `.build/`  | Idirmheánacha — aschur `next build` (neamhshuimithe ag git, `distDir = .build/next`)    | Níl       |
+| `dist/`    | Beart is féidir a sheoladh — cóimeáilte ag `assembleStandalone` (neamhshuimithe ag git) | Níl       |
 
-Is aon phas amháin atá sa phíblíne tógála:
+Is pas aonair é píblíne na tógála:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (aschur Next.js)
-  └─ assembleStandalone()                 (cóipeálann sé standalone + static + public + sócmhainní dúchasacha)
-       └─ aschur: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (cóipeálann standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-Ina theannta sin, glanann `npm run build:release` an dá eolaire ar dtús agus scríobhann sé
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) mar chomhartha faire do shláine an imscartha.
+Glanann `npm run build:release` an dá chomhadlann ar dtús freisin agus scríobhann sé
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) mar chomhartha sláine imscartha.
 
-Úsáideann `npm run build:contributor` próifíl tógála don inneall cúil amháin. Cuireann sí stubanna sealadacha
-in ionad chomhaid UI na deaise le linn na tógála, coimeádann sí láimhseálaithe bealaí API, agus cuireann sí na comhaid bhunaidh ar ais
-tar éis na tógála. Úsáid `npm run build` le haghaidh athruithe a théann i bhfeidhm ar UI na deaise nó le haghaidh
-bailíochtú iomlán eisiúna; ní hionann próifíl an rannpháirtí agus tógáil eisiúna.
+Úsáideann `npm run build:contributor` próifíl tógála backend amháin. Cuireann sé comhaid Chomhéadain an phainéil ina n-ionad go sealadach agus é á thógáil, coinníonn sé láimhseálaithe ródanna API, agus cuireann sé na comhaid bhunaidh ar ais tar éis na tógála. Bain úsáid as `npm run build` le haghaidh athruithe a théann i bhfeidhm ar Chomhéadain an phainéil nó le haghaidh bailíochtú iomlán eisiúna; ní ionadach don tógáil eisiúna é próifíl an rannpháirtí.
 
-> **Nóta faoi imscaradh VPS:** níl aon athrú ar an eolaire íomhá cianda `/usr/lib/node_modules/omniroute/app/`.
-> Déanann na scileanna imscartha inneachar `dist/` a shioncronú isteach ann le rsync.
-> Níor athraíodh ach cosán aschur na tógála laistigh den stór (`app/` → `dist/`).
+> **Nóta maidir le himscaradh VPS:** níl aon athrú ar chomhadlann na híomhá cianda `/usr/lib/node_modules/omniroute/app/`.
+> Déanann na scileanna imscartha inneachar `dist/` a rsync inti.
+> Níor athraíodh ach cosán aschuir na tógála sa stór (`app/` → `dist/`).
 
 URLanna réamhshocraithe:
 
-- **Deais**: `http://localhost:20128/dashboard`
+- **Painéal**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -297,68 +297,68 @@ Féach `open-sse/utils/stream.ts` agus `open-sse/utils/streamHandler.ts` le hagh
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # App Router Next.js 16
-│   ├── (dashboard)/        # Leathanaigh an deais (23 rannán)
-│   ├── api/                # Bealaí API (51 chomhadlann)
-│   └── login/              # Leathanaigh fíordheimhnithe (.tsx)
-├── domain/                 # Inneall beartais (policyEngine, comboResolver, costRules, etc.)
-├── lib/                    # Croíloighic ghnó (.ts)
-│   ├── a2a/                # Freastalaí prótacail Agent-to-Agent v0.3
-│   ├── acp/                # Clárlann Agent Communication Protocol
-│   ├── compliance/         # Inneall beartais comhlíontachta
-│   ├── db/                 # Modúil fearainn SQLite + 130 aistriú
-│   ├── memory/             # Cuimhne chomhrá mharthanach
-│   ├── oauth/              # Soláthraithe, seirbhísí agus fóntais OAuth
-│   ├── skills/             # Creat scileanna insínte
-│   ├── usage/              # Rianú úsáide agus ríomh costas
-│   └── localDb.ts          # Ciseal ath-easpórtála amháin — ná cuir loighic anseo choíche
-├── middleware/              # Meánearraí iarratais (promptInjectionGuard)
-├── mitm/                   # Seachfhreastalaí MITM (teastas, DNS, ródú sprice)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Comhpháirteanna React (.tsx)
-│   ├── constants/          # Sainmhínithe soláthraithe (329), scóip MCP, 20 straitéis ródaithe
-│   ├── utils/              # Scoradán ciorcaid, sláintitheoir, cúntóirí fíordheimhnithe
-│   └── validation/         # Scéimeanna Zod v4
-└── sse/                    # Píblíne seachfhreastalaí SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Spás oibre @omniroute/open-sse
-├── executors/              # 150 modúl riteora (aicmí riteora + cúntóirí do gach soláthraí)
-├── handlers/               # 11 láimhseálaí iarratais (comhrá, freagraí, leabuithe, íomhánna, etc.)
-├── mcp-server/             # Freastalaí MCP (110 uirlis uathúil, 3 mheicníocht iompair, 33 scóip)
-├── services/               # 178 seirbhís ardleibhéil (combo, autoCombo, rateLimitManager, etc.)
-├── translator/             # Aistritheoirí formáide (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Claochladán API Responses
-└── utils/                  # 22 modúl fóntais (sruthú, TLS, seachfhreastalaí, logáil)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Aip deisce Electron (trasardán)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Riteoir tástálacha Node.js (1,574 comhad tástála)
-├── integration/            # Tástálacha comhtháthaithe
-├── e2e/                    # Tástálacha Playwright
-├── security/               # Tástálacha slándála
-├── translator/             # Tástálacha a bhaineann go sonrach leis an aistritheoir
-└── load/                   # Tástálacha ualaigh
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Taifid Chinntí Ailtireachta
-├── architecture/            # Ailtireacht agus athléimneacht an chórais
-├── comparison/              # OmniRoute i gcomparáid le roghanna malartacha
-├── compression/             # Treoracha agus rialacha comhbhrúite
-├── dev/                     # Treoracha forbartha
-├── diagrams/                # Léaráidí ailtireachta
-├── frameworks/              # MCP, A2A, OpenCode, Cuimhne, Scileanna
-├── guides/                  # Treoir úsáideora, Docker, cumraíocht, fabhtcheartú
-├── i18n/                    # Aistriúcháin idirnáisiúnaithe README
-├── marketing/               # Ábhair mhargaíochta
-├── ops/                     # Imscaradh, seachfhreastalaí, cumhdach, eisiúintí
-├── providers/               # Doiciméid a bhaineann go sonrach le soláthraithe
-├── reference/               # Tagairt API, athróga timpeallachta, uirlisí CLI, sraitheanna saor in aisce
-├── releases/                # Nótaí eisiúna
-├── routing/                 # Inneall uath-theaglama, athsheinm réasúnaíochta
-├── screenshots/             # Gabhálacha scáileáin den deais
-├── security/                # Ráillí cosanta, comhlíontacht, ceilteacht, comharthaí
-└── specs/                   # Sonraíochtaí dearaidh
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

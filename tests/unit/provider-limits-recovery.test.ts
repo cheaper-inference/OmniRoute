@@ -1210,3 +1210,35 @@ test("#17043: model-scoped quota evidence distinguishes a real block from a pred
     "claude-opus-5-5"
   ), true, "an inactive flag without refilled model quota is not positive evidence");
 });
+
+test("quota refresh keeps the auth error of an Antigravity account still awaiting Google verification", async () => {
+  // Google keeps reporting quota for an account blocked by 403 VALIDATION_REQUIRED, so usable
+  // quota is no evidence the block lifted: wiping the error made every blocked account flip
+  // back to "connected" right after a failed retest.
+  const created = await providersDb.createProviderConnection({
+    provider: "antigravity",
+    authType: "oauth",
+    accessToken: "ag-access-token",
+    refreshToken: "ag-refresh-token",
+    isActive: true,
+    testStatus: "error",
+    lastError: "Access denied",
+    lastErrorType: "upstream_auth_error",
+    errorCode: 403,
+    providerSpecificData: {
+      projectId: "proj-1",
+      verificationUrl: "https://accounts.google.com/v3/signin/continue?plt=AKgnsbtTEST",
+    },
+  });
+  const connectionId = (created as { id: string }).id;
+  const connection = await providersDb.getProviderConnectionById(connectionId);
+
+  await providerLimits.maybeClearRecoveredQuotaState(connection, {
+    quotas: { "gemini-3.5-flash-lite": { remainingPercentage: 100 } },
+  });
+  const after = await providersDb.getProviderConnectionById(connectionId);
+
+  assert.equal(after.testStatus, "error");
+  assert.equal(after.lastErrorType, "upstream_auth_error");
+  assert.equal(Number(after.errorCode), 403);
+});

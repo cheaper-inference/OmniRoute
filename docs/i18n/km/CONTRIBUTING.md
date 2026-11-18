@@ -13,15 +13,21 @@ UI/UX, i18n, CLI, មូលដ្ឋានទិន្នន័យ និង bui
 
 ---
 
-## ការរៀបចំសម្រាប់ការអភិវឌ្ឍ
+## ការរៀបចំបរិស្ថានអភិវឌ្ឍន៍
 
 ### តម្រូវការជាមុន
 
-- **Node.js** `>=22.22.2 <23` ឬ `>=24.0.0 <27` (បានណែនាំ៖ 24 LTS)
+- **Node.js** `>=22.22.2 <23`, ឬ `>=24.0.0 <27` (ណែនាំ៖ 24 LTS)
 - **npm** 10+
 
-> **សម្រាប់អ្នកប្រើ npm v11+ (Node 24+):** បន្ទាប់ពី `npm install` សូមផ្ទៀងផ្ទាត់ថាម៉ូឌុល native ត្រូវបានដំឡើង៖
-> `node -e "require('better-sqlite3')"`។ ប្រសិនបើវាបរាជ័យដោយមាន `MODULE_NOT_FOUND`សូមដំណើរការ`npm approve-scripts better-sqlite3 && npm install`។ សូមមើល
+> **Windows ជាមួយ Node 24៖** ប្រើ patch release បច្ចុប្បន្នរបស់ 24 LTS (យ៉ាងហោចណាស់ 24.20.0)។
+> Release ចាស់ៗអាចបញ្ឈប់ដំណើរការបន្ទាប់ពីការធ្វើតេស្តជោគជ័យ នៅពេល `--test-force-exit` បិទ
+> process។ [Windows libuv fix](https://github.com/nodejs/node/pull/61999) របស់ Node ដោះស្រាយ
+> runtime crash នេះ។ សូមរក្សាការអះអាងក្នុងការធ្វើតេស្ត និងការត្រួតពិនិត្យការចាកចេញរបស់ runner ឱ្យបានបើកដំណើរការ។
+
+> **អ្នកប្រើប្រាស់ npm v11+ (Node 24+)៖** បន្ទាប់ពី `npm install` សូមផ្ទៀងផ្ទាត់ថា native modules ត្រូវបានដំឡើង៖
+> `node -e "require('better-sqlite3')"`. ប្រសិនបើវាបរាជ័យដោយមាន `MODULE_NOT_FOUND`,
+> ដំណើរការ `npm approve-scripts better-sqlite3 && npm install`។ សូមមើល
 > [ការដោះស្រាយបញ្ហា](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module)។
 
 - **Git**
@@ -40,84 +46,84 @@ npm install
 # បង្កើត .env របស់អ្នកពីគំរូ
 cp .env.example .env
 
-# បង្កើត secret ដែលត្រូវការ
+# បង្កើត secrets ដែលត្រូវការ
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-អថេរសំខាន់ៗសម្រាប់ការអភិវឌ្ឍ៖
+អថេរសំខាន់ៗសម្រាប់ការអភិវឌ្ឍន៍៖
 
-| អថេរ                   | តម្លៃលំនាំដើមសម្រាប់ការអភិវឌ្ឍ | ការពិពណ៌នា                       |
-| ---------------------- | ------------------------------ | -------------------------------- |
-| `PORT`                 | `20128`                        | ច្រកម៉ាស៊ីនមេ                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`       | URL មូលដ្ឋានសម្រាប់ frontend     |
-| `JWT_SECRET`           | (បង្កើតខាងលើ)                  | secret សម្រាប់ចុះហត្ថលេខា JWT    |
-| `INITIAL_PASSWORD`     | `CHANGEME`                     | ពាក្យសម្ងាត់ចូលប្រើដំបូង         |
-| `APP_LOG_LEVEL`        | `info`                         | កម្រិតព័ត៌មានលម្អិតរបស់កំណត់ហេតុ |
+| អថេរ                   | តម្លៃលំនាំដើមសម្រាប់ការអភិវឌ្ឍន៍ | សេចក្ដីពិពណ៌នា                 |
+| ---------------------- | -------------------------------- | ------------------------------ |
+| `PORT`                 | `20128`                          | ច្រក server                    |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`         | URL មូលដ្ឋានសម្រាប់ frontend   |
+| `JWT_SECRET`           | (បង្កើតខាងលើ)                    | secret សម្រាប់ចុះហត្ថលេខា JWT  |
+| `INITIAL_PASSWORD`     | `CHANGEME`                       | ពាក្យសម្ងាត់សម្រាប់ការចូលដំបូង |
+| `APP_LOG_LEVEL`        | `info`                           | កម្រិតលម្អិតនៃ log             |
 
 ### ការកំណត់ផ្ទាំងគ្រប់គ្រង
 
-ផ្ទាំងគ្រប់គ្រងផ្តល់នូវប៊ូតុងបិទ/បើកក្នុង UI សម្រាប់មុខងារដែលអាចកំណត់រចនាសម្ព័ន្ធតាមរយៈអថេរបរិស្ថានផងដែរ៖
+ផ្ទាំងគ្រប់គ្រងផ្ដល់ toggle ក្នុង UI សម្រាប់មុខងារដែលអាចកំណត់តាមរយៈអថេរបរិស្ថានផងដែរ៖
 
-| ទីតាំងការកំណត់         | ប៊ូតុងបិទ/បើក      | ការពិពណ៌នា                              |
-| ---------------------- | ------------------ | --------------------------------------- |
-| ការកំណត់ → កម្រិតខ្ពស់ | របៀបបំបាត់កំហុស    | បើកកំណត់ហេតុសំណើសម្រាប់បំបាត់កំហុស (UI) |
-| ការកំណត់ → ទូទៅ        | ភាពមើលឃើញរបារចំហៀង | បង្ហាញ/លាក់ផ្នែកនានានៃរបារចំហៀង         |
+| ទីតាំងការកំណត់      | Toggle             | សេចក្ដីពិពណ៌នា              |
+| ------------------- | ------------------ | --------------------------- |
+| Settings → Advanced | Debug Mode         | បើក debug request logs (UI) |
+| Settings → General  | Sidebar Visibility | បង្ហាញ/លាក់ផ្នែក sidebar    |
 
-ការកំណត់ទាំងនេះត្រូវបានរក្សាទុកក្នុងមូលដ្ឋានទិន្នន័យ ហើយនៅតែមានបន្ទាប់ពីការចាប់ផ្តើមឡើងវិញ ដោយជំនួសតម្លៃលំនាំដើមរបស់អថេរបរិស្ថាននៅពេលកំណត់រួច។
+ការកំណត់ទាំងនេះត្រូវបានរក្សាទុកក្នុង database ហើយនៅតែមានបន្ទាប់ពីចាប់ផ្ដើមឡើងវិញ ដោយបដិសេធតម្លៃលំនាំដើមរបស់ env var នៅពេលបានកំណត់។
 
-### ការដំណើរការនៅលើម៉ាស៊ីនមូលដ្ឋាន
+### ដំណើរការក្នុងមូលដ្ឋាន
 
 ```bash
-# របៀបអភិវឌ្ឍ (ផ្ទុកឡើងវិញដោយស្វ័យប្រវត្តិ)
+# របៀបអភិវឌ្ឍន៍ (ផ្ទុកឡើងវិញដោយស្វ័យប្រវត្តិ)
 npm run dev
 
-# ការ build សម្រាប់ production
+# បង្កើត production
 npm run build    # next build → .build/next/ បន្ទាប់មក assembleStandalone → dist/
 npm run start
 
-# compile រហ័សសម្រាប់តែ backend/API សម្រាប់ការផ្លាស់ប្តូររបស់អ្នករួមចំណែក
+# Compile លឿនសម្រាប់ backend/API តែប៉ុណ្ណោះ សម្រាប់ការផ្លាស់ប្ដូររបស់អ្នកចូលរួម
 npm run build:contributor
 
-# ការ build សម្រាប់ release (build ឡើងវិញដោយសម្អាត + HEAD sentinel — តម្រូវឱ្យមានសម្រាប់ deploy)
-npm run build:release   # rm -rf .build dist && build + សរសេរ dist/BUILD_SHA
+# បង្កើត release (បង្កើតឡើងវិញស្អាត + HEAD sentinel — តម្រូវសម្រាប់ deploy)
+npm run build:release   # rm -rf .build dist ហើយ build + សរសេរ dist/BUILD_SHA
 
-# ការកំណត់ច្រកដែលប្រើជាទូទៅ
+# ការកំណត់ច្រកទូទៅ
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-ការ build សម្រាប់អ្នករួមចំណែកធ្វើការផ្ទៀងផ្ទាត់តែការចងក្រងប៉ុណ្ណោះ៖ វាមិនរៀបចំការចែកចាយ standalone
-ឬ build ធនធាន native packaging ស្រេចចិត្តទេ។ ប្រើការ build សម្រាប់ production ធម្មតា នៅពេល
-អ្នកត្រូវការផ្ទៀងផ្ទាត់ bundle ដែលអាចចែកចាយបាន។
+Contributor build ធ្វើការផ្ទៀងផ្ទាត់តែការចងក្រងប៉ុណ្ណោះ៖ វាមិន assemble standalone
+distribution ឬ build optional native packaging assets ទេ។ ប្រើ production build ធម្មតា នៅពេលអ្នក
+ត្រូវការផ្ទៀងផ្ទាត់ shippable bundle។
 
-### ប្លង់លទ្ធផលនៃការ Build
+### ប្លង់លទ្ធផល Build
 
-| ថតឯកសារ   | ខ្លឹមសារ                                                                  | ត្រូវបានតាមដាន |
-| --------- | ------------------------------------------------------------------------- | -------------- |
-| `src/`    | កូដប្រភពកម្មវិធី (TypeScript / TSX)                                       | បាទ            |
-| `.build/` | ឯកសារអន្តរកាល — លទ្ធផល `next build` (gitignored, `distDir = .build/next`) | ទេ             |
-| `dist/`   | bundle ដែលអាចចែកចាយបាន — រៀបចំដោយ `assembleStandalone` (gitignored)       | ទេ             |
+| ថត        | មាតិកា                                                                     | បានតាមដាន |
+| --------- | -------------------------------------------------------------------------- | --------- |
+| `src/`    | ប្រភពកម្មវិធី (TypeScript / TSX)                                           | បាទ/ចាស   |
+| `.build/` | ឯកសារកណ្ដាល — លទ្ធផល `next build` (gitignored, `distDir = .build/next`)    | ទេ        |
+| `dist/`   | bundle ដែលអាចដឹកជញ្ជូនបាន — assemble ដោយ `assembleStandalone` (gitignored) | ទេ        |
 
-ដំណើរការ build គឺជាការដំណើរការតែមួយជុំ៖
+បំពង់ Build ដំណើរការតែមួយជំហាន៖
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (លទ្ធផល Next.js)
-  └─ assembleStandalone()                 (ចម្លង standalone + static + public + ធនធាន native)
+  └─ assembleStandalone()                 (ចម្លង standalone + static + public + native assets)
        └─ លទ្ធផល៖ dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` ក៏សម្អាតថតទាំងពីរជាមុន ហើយសរសេរ
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ជា sentinel សម្រាប់ផ្ទៀងផ្ទាត់ភាពត្រឹមត្រូវនៃការ deploy។
+`npm run build:release` នឹងសម្អាតថតទាំងពីរជាមុនសិន ហើយសរសេរ
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ជា deploy integrity sentinel។
 
-`npm run build:contributor` ប្រើប្រូហ្វាល់ build សម្រាប់តែ backend។ វាបង្កើត stub ជាបណ្តោះអាសន្នសម្រាប់
-ឯកសារ UI របស់ផ្ទាំងគ្រប់គ្រងខណៈពេល build រក្សាទុក API route handlers និងស្ដារឯកសារដើមឡើងវិញ
-បន្ទាប់ពីការ build។ ប្រើ `npm run build` សម្រាប់ការផ្លាស់ប្តូរដែលប៉ះពាល់ដល់ UI របស់ផ្ទាំងគ្រប់គ្រង ឬសម្រាប់
-ការផ្ទៀងផ្ទាត់ release ពេញលេញ។ ប្រូហ្វាល់សម្រាប់អ្នករួមចំណែកមិនមែនជាការជំនួសការ build សម្រាប់ release ទេ។
+`npm run build:contributor` ប្រើ backend-only build profile។ វាប្ដូរ dashboard UI files ជាបណ្ដោះអាសន្ន
+ខណៈពេលកំពុង build រក្សាទុក API route handlers ហើយស្ដារឯកសារដើមឡើងវិញបន្ទាប់ពី build។ ប្រើ `npm run build`
+សម្រាប់ការផ្លាស់ប្ដូរដែលប៉ះពាល់ដល់ dashboard UI ឬសម្រាប់ full release validation; contributor profile
+មិនមែនជាការជំនួស release build ទេ។
 
-> **កំណត់ចំណាំអំពីការ deploy លើ VPS:** ថត image ពីចម្ងាយ `/usr/lib/node_modules/omniroute/app/`
-> មិនត្រូវបានផ្លាស់ប្តូរទេ។ ជំនាញ deploy ប្រើ rsync ដើម្បីចម្លងខ្លឹមសាររបស់ `dist/` ទៅក្នុងវា។
-> មានតែផ្លូវលទ្ធផល build នៅក្នុង repository ប៉ុណ្ណោះដែលបានផ្លាស់ប្តូរ (`app/` → `dist/`)។
+> **ចំណាំអំពី VPS deploy៖** remote image directory `/usr/lib/node_modules/omniroute/app/`
+> មិនត្រូវបានផ្លាស់ប្ដូរទេ។ deploy skills ធ្វើ rsync មាតិកានៃ `dist/` ទៅក្នុងវា។
+> មានតែ build output path ក្នុង repository ប៉ុណ្ណោះដែលបានផ្លាស់ទី (`app/` → `dist/`)។
 
 URL លំនាំដើម៖
 
@@ -298,67 +304,67 @@ production build គឺជាការទទួលខុសត្រូវរប
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ទំព័រ Dashboard (23 ផ្នែក)
-│   ├── api/                # ផ្លូវ API (51 ថត)
-│   └── login/              # ទំព័រផ្ទៀងផ្ទាត់អត្តសញ្ញាណ (.tsx)
-├── domain/                 # ម៉ាស៊ីនគោលការណ៍ (policyEngine, comboResolver, costRules ជាដើម)
-├── lib/                    # តក្កវិជ្ជាអាជីវកម្មស្នូល (.ts)
-│   ├── a2a/                # ម៉ាស៊ីនមេពិធីការ Agent-to-Agent v0.3
-│   ├── acp/                # បញ្ជីឈ្មោះ Agent Communication Protocol
-│   ├── compliance/         # ម៉ាស៊ីនគោលការណ៍អនុលោមភាព
-│   ├── db/                 # ម៉ូឌុលដែន SQLite + ការផ្ទេរទិន្នន័យ 130
-│   ├── memory/             # អង្គចងចាំការសន្ទនាអចិន្ត្រៃយ៍
-│   ├── oauth/              # អ្នកផ្តល់សេវា សេវាកម្ម និងឧបករណ៍ប្រើប្រាស់ OAuth
-│   ├── skills/             # ក្របខណ្ឌជំនាញដែលអាចពង្រីកបាន
-│   ├── usage/              # ការតាមដានការប្រើប្រាស់ និងការគណនាថ្លៃដើម
-│   └── localDb.ts          # ស្រទាប់នាំចេញឡើងវិញប៉ុណ្ណោះ — កុំបន្ថែមតក្កវិជ្ជានៅទីនេះ
-├── middleware/              # Middleware សំណើ (promptInjectionGuard)
-├── mitm/                   # ប្រូកស៊ី MITM (វិញ្ញាបនបត្រ, DNS, ការកំណត់ផ្លូវគោលដៅ)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # សមាសភាគ React (.tsx)
-│   ├── constants/          # និយមន័យអ្នកផ្តល់សេវា (329), វិសាលភាព MCP, យុទ្ធសាស្ត្រកំណត់ផ្លូវ 20
-│   ├── utils/              # ឧបករណ៍បំបែកសៀគ្វី, កម្មវិធីសម្អាត, ឧបករណ៍ជំនួយផ្ទៀងផ្ទាត់អត្តសញ្ញាណ
-│   └── validation/         # Schema Zod v4
-└── sse/                    # ខ្សែដំណើរការប្រូកស៊ី SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Workspace @omniroute/open-sse
-├── executors/              # ម៉ូឌុលប្រតិបត្តិ 150 (ថ្នាក់ប្រតិបត្តិ + ឧបករណ៍ជំនួយតាមអ្នកផ្តល់សេវានីមួយៗ)
-├── handlers/               # កម្មវិធីដោះស្រាយសំណើ 11 (ការជជែក, ការឆ្លើយតប, embeddings, រូបភាព ជាដើម)
-├── mcp-server/             # ម៉ាស៊ីនមេ MCP (ឧបករណ៍តែមួយគត់ 110, មធ្យោបាយដឹកជញ្ជូន 3, វិសាលភាព 33)
-├── services/               # សេវាកម្មកម្រិតកំពូល 178 (combo, autoCombo, rateLimitManager ជាដើម)
-├── translator/             # កម្មវិធីបកប្រែទ្រង់ទ្រាយ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # កម្មវិធីបម្លែង Responses API
-└── utils/                  # ម៉ូឌុលឧបករណ៍ប្រើប្រាស់ 22 (ស្ទ្រីម, TLS, ប្រូកស៊ី, ការកត់ត្រា)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # កម្មវិធីកុំព្យូទ័រលើតុ Electron (ឆ្លងវេទិកា)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # កម្មវិធីដំណើរការតេស្ត Node.js (ឯកសារតេស្ត 1,574)
-├── integration/            # តេស្តសមាហរណកម្ម
-├── e2e/                    # តេស្ត Playwright
-├── security/               # តេស្តសុវត្ថិភាព
-├── translator/             # តេស្តជាក់លាក់សម្រាប់កម្មវិធីបកប្រែ
-└── load/                   # តេស្តបន្ទុក
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # កំណត់ត្រាសេចក្តីសម្រេចចិត្តស្ថាបត្យកម្ម
-├── architecture/            # ស្ថាបត្យកម្មប្រព័ន្ធ និងភាពធន់
-├── comparison/              # OmniRoute ធៀបនឹងជម្រើសផ្សេងៗ
-├── compression/             # មគ្គុទ្ទេសក៍ និងច្បាប់បង្ហាប់
-├── dev/                     # មគ្គុទ្ទេសក៍អភិវឌ្ឍន៍
-├── diagrams/                # ដ្យាក្រាមស្ថាបត្យកម្ម
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # មគ្គុទ្ទេសក៍អ្នកប្រើប្រាស់, Docker, ការដំឡើង, ការដោះស្រាយបញ្ហា
-├── i18n/                    # ការបកប្រែ README ជាភាសាផ្សេងៗ
-├── marketing/               # សម្ភារៈទីផ្សារ
-├── ops/                     # ការដាក់ឱ្យប្រើប្រាស់, ប្រូកស៊ី, វិសាលភាពគ្របដណ្តប់, ការចេញផ្សាយ
-├── providers/               # ឯកសារជាក់លាក់តាមអ្នកផ្តល់សេវា
-├── reference/               # ឯកសារយោង API, អថេរបរិស្ថាន, ឧបករណ៍ CLI, កម្រិតប្រើប្រាស់ឥតគិតថ្លៃ
-├── releases/                # កំណត់សម្គាល់ការចេញផ្សាយ
-├── routing/                 # ម៉ាស៊ីន auto-combo, ការចាក់ដំណើរការហេតុផលឡើងវិញ
-├── screenshots/             # រូបថតអេក្រង់ Dashboard
-├── security/                # របាំងការពារ, អនុលោមភាព, ភាពសម្ងាត់, token
-└── specs/                   # លក្ខណៈបច្ចេកទេសនៃការរចនា
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

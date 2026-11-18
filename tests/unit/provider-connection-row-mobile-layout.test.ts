@@ -125,7 +125,7 @@ test("custom model add and edit forms share the two-column phone grid", () => {
 test("toggle thumb is vertically centred in its track", () => {
   // KEA-7886: Toggle renders the kit Switch, whose thumb is absolutely positioned in the track,
   // so "centred" is geometry: top === (track height - 2 × 1px border - thumb height) / 2, for
-  // the kit default and for the `.ci-switch--compact` extension in globals.css.
+  // the kit default and for the kit `sm` size that Toggle size="xs"|"sm" renders.
   const toggle = read("src/shared/components/Toggle.tsx");
   assert.match(toggle, /from "@omniroute\/ui-kit\/switch"/);
   assert.doesNotMatch(toggle, /"mt-0\.5"/);
@@ -133,9 +133,9 @@ test("toggle thumb is vertically centred in its track", () => {
     const at = css.indexOf(`${selector} {`);
     assert.ok(at > -1, `${selector} rule exists`);
     const rule = css.slice(at, css.indexOf("}", at));
-    const m = rule.match(new RegExp(`(?:^|[\\s;{])${prop}:\\s*([\\d.]+)rem`));
-    assert.ok(m, `${selector} sets ${prop} in rem`);
-    return Number(m![1]) * 16;
+    const m = rule.match(new RegExp(`(?:^|[\\s;{])${prop}:\\s*([\\d.]+)(rem|px)`));
+    assert.ok(m, `${selector} sets ${prop} in rem or px`);
+    return Number(m![1]) * (m![2] === "rem" ? 16 : 1);
   };
   const centred = (css: string, track: string, thumb: string) =>
     assert.equal(
@@ -144,10 +144,11 @@ test("toggle thumb is vertically centred in its track", () => {
     );
   centred(read("packages/ui-kit/src/ci-ui.css"), "  .ci-switch__track", "  .ci-switch__thumb");
   centred(
-    read("src/app/globals.css"),
-    ".ci-switch--compact .ci-switch__track",
-    ".ci-switch--compact .ci-switch__thumb"
+    read("packages/ui-kit/src/ci-ui.css"),
+    "  .ci-switch--size-sm .ci-switch__track",
+    "  .ci-switch--size-sm .ci-switch__thumb"
   );
+  assert.match(toggle, /size=\{size === "xs" \|\| size === "sm" \? "sm" : "default"\}/);
 });
 
 test("provider models use the symmetric AutoGrid", () => {
@@ -163,7 +164,7 @@ test("model card: icon + full name on top, copy pinned top-right, details below"
   const row = read(`${providerComponents}/ModelRow.tsx`);
   assert.match(row, /relative flex h-full w-full min-w-0 flex-col gap-1\.5/);
   assert.match(row, /<code className="min-w-0 break-all pt-px font-mono/);
-  assert.match(row, /<div className="flex min-w-0 items-center gap-2 pl-6">/);
+  assert.match(row, /<div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1 pl-6">/);
   assert.match(
     read(`${providerComponents}/ModelCompatPopover.tsx`),
     /<span className="hidden sm:inline">\{t\("compatButtonLabel"\)\}<\/span>/

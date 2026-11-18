@@ -32,96 +32,92 @@ Buƙatar Abokin Ciniki
 
 ## Yanayin Matsewa
 
-### Off
+### A kashe
 
-Babu matsewa da aka yi. Duk saƙonnin suna wucewa ba tare da canji ba.
+Ba a yi amfani da matsewa ba. Dukkan saƙonni suna wucewa ba tare da canji ba.
 
 ### Yanayin Lite (~15% tanadi, <1ms jinkiri)
 
-Yanayin da yafi aminci — babu canji na ma'ana, kawai tsabtace tsarawa:
+Yanayin da ya fi aminci — gyaran tsari. Rage sakamakon kayan aiki yana haifar da asara, saboda haka tsohuwar hanya
+(ba tare da `allow-lossy`, `engine:lite` ko zaɓin suna-haɗe ba) tana amfani da lite tare da
+`compressToolResults: false`: sakamakon kayan aiki na baya yana isa ga mai samarwa ba tare da canji ba.
 
-| Fasaha                   | Bayani                                                    |
-| ------------------------ | --------------------------------------------------------- |
-| `collapseWhitespace`     | Haɗa layukan fanko masu juna biye da sararin ƙarshen layi |
-| `dedupSystemPrompt`      | Cire saƙonnin tsarin da suka maimaita                     |
-| `compressToolResults`    | Matse fitar kayan aiki/aikace-aikace masu yalwa           |
-| `removeRedundantContent` | Cire umarni masu maimaitawa                               |
-| `replaceImageUrls`       | Gajarta URIs na bayanan hoto na base64                    |
+| Dabara                   | Bayani                                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Haɗa layukan da ba komai a jere da sararin da ke ƙarshen layi                                     |
+| `dedupSystemPrompt`      | Cire saƙonnin tsarin da suka maimaitu                                                             |
+| `compressToolResults`    | Takaita sakamakon kayan aiki na baya zuwa iyakar lite (mai haifar da asara: sai da izinin buƙata) |
+| `removeRedundantContent` | Cire umarnin da aka maimaita                                                                      |
+| `replaceImageUrls`       | Taƙaita bayanan hoton base64 na URI                                                               |
 
-**Yafi kyau ga:** Amfani koyaushe, ayyukan da suke buƙatar aminci sosai.
+**Mafi dacewa da:** Amfani na ko da yaushe, da ayyukan da aminci ke da matuƙar muhimmanci.
 
 ### Yanayin Standard (~30% tanadi)
 
-An samo wahayi daga [Caveman](https://github.com/JuliusBrussee/caveman) — yana cire kalmomin cika-gibi da maganganu masu yalwa yayin da yake kiyaye ma'ana:
+An samo wahayi daga [Caveman](https://github.com/JuliusBrussee/caveman) — yana cire kalmomin cike da jimlolin da suka yi tsawo yayin da yake kiyaye ma'ana:
 
-- Yana cire kalmomin cika-gibi ("please", "I think", "basically", "actually")
-- Yana taƙaita maganganu masu yalwa ("in order to" → "to", "as a result of" → "because")
-- Yana cire maganganun ladabi masu tsawaita magana ("Would you mind...", "If you could possibly...")
-- Dokokin regex 30+ da aka daidaita don saƙonnin shirye-shirye
+- Yana cire kalmomin cike ("don Allah", "Ina tsammani", "a taƙaice", "a zahiri")
+- Yana taƙaita jimloli masu tsawo ("domin" → "zuwa", "sakamakon" → "saboda")
+- Yana cire sassauta magana ta ladabi ("Za ka damu ne idan...", "Idan za ka iya yiwuwa...")
+- Dokokin regex sama da 30 da aka tsara don buƙatun shirye-shirye
 
-**Yafi kyau ga:** Ayyukan shirye-shirye na yau da kullum, ƙungiyoyi masu kula da kuɗi.
+**Mafi dacewa da:** Ayyukan shirye-shirye na yau da kullum, da ƙungiyoyin da ke kula da kuɗi.
 
 ### Yanayin Aggressive (~50% tanadi)
 
-Sarrafa tarihi mai wayo don zama masu tsawo:
+Gudanar da tari mai wayo don dogayen zaman aiki:
 
-- **Tsufa na Saƙo** — saƙonnin da suka tsufa suna matsewa a hankali
-- **Matsawar Sakamakon Kayan Aiki** — fitar kayan aiki masu tsawo ana guntawa ko ɓoyewa
-  (layuka na farko/ƙarshe, tace layukan da suka dace, matse maɓallan JSON)
-- **Masu Tsaron Cikakken Tsari** — yana tabbatar da cewa nau'ikan `tool_use` + `tool_result`
-  suna kasancewa daidai
-- **Sanin Tagar Mahalli** — yana mutunta iyakokin token na kowane samfuri
+- **Tsufar Saƙonni** — ana ƙara matse tsofaffin saƙonni a hankali
+- **Matsawar Sakamakon Kayan Aiki** — ana takaita ko ɓoye dogayen sakamakon kayan aiki (layukan farko/ƙarshe,
+  tace layukan da suka dace, da taƙaita maɓallan JSON)
+- **Kare Mutuncin Tsari** — yana tabbatar da cewa ma'auratan `tool_use` + `tool_result` suna nan daidaitattu
+- **Sanin Girman Mahallin** — yana mutunta iyakokin alamomin kowane samfurin
 
-**Yafi kyau ga:** Zama masu tsawo na gyara kura-kurai, manyan codebase.
+**Mafi dacewa da:** Zaman gyaran kurakurai masu tsawo, da manyan rumbunan lamba.
 
 ### Yanayin Ultra (~75% tanadi)
 
-Matsawar mafi girma don yanayi masu mahimmancin token:
+Matsawa mafi girma don yanayin da alamomi suke da matuƙar muhimmanci:
 
-- **Yankewa ta Heuristic** — yankewar token na rubutu bisa maki
-- **Kiyaye Tsari** — fenced code blocks, inline code, URLs da identifiers ana alanta su a
-  matsayin tombstone kuma ana sake haɗa su kamar yadda suke, ba a taɓa yankewarsu
-- **Matakin SLM na zaɓi** — ƙaramin samfurin gida zai iya tsarfa yankewar idan aka saita shi
-- Mai zaman kansa daga yanayin Aggressive: ba ya gudanar da tsufa na saƙo, matsawar
-  sakamakon kayan aiki ko mai taƙaitawa na madadin (kawai gazawar matakin SLM ce zata iya
-  tura wucewar madadin ta hanyar aggressive)
+- **Yanke Bisa Hasashe** — yanke alamomin rubutu bisa maki
+- **Kiyaye Tsari** — tubalan lamba masu shinge, lambar cikin layi, URLs da masu gano abubuwa
+  ana sanya su alamar riƙewa sannan a sake haɗa su ba tare da canji ba; ba a taɓa yanke su ba
+- **Matakin SLM na zaɓi** — ƙaramin samfurin gida zai iya gyara yankan idan an tsara shi
+- Mai zaman kansa daga Yanayin Aggressive: ba ya gudanar da tsufar saƙonni, matsawar sakamakon kayan aiki
+  ko taƙaitaccen madadin (rashin nasara kawai a matakin SLM zai iya tura aikin madadin ta aggressive)
 
-**Yafi kyau ga:** Lokacin da kake cika iyakokin mahallin akai-akai.
+**Mafi dacewa da:** Lokacin da kuke ci gaba da kai wa iyakokin mahallin.
 
-### Yanayin RTK (kewayon 60-90% na upstream)
+### Yanayin RTK (60-90% na iyakar upstream)
 
-An inganta yanayin RTK don fitar kayan aiki masu yalwa waɗanda ke bayyana a zaman wakilai masu shirye-shirye:
+An tsara yanayin RTK don dogayen sakamakon kayan aiki da ke bayyana a zaman wakilan shirye-shirye:
 
-- Yana gano nau'ikan umarni/fitarwa kamar `git status`, `git diff`, `git log`, masu gudanar
-  da gwaji, gina TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, rajistan
-  Docker, fitar infra, da fitar shell ta gama-gari
-- Yana amfani da fakitin tacewa na JSON daga `open-sse/services/compression/engines/rtk/filters/`
-- Yana shigo da tacewar RTK TOML schema v1 daga fayilolin `filters.toml` na aikin ko na duniya,
-  tare da tabbatar da gwajin inline da tsare-ƙofar amana ga fayilolin aikin
-- Yana zuwa da tacewa 56 da aka gina a ciki tare da samfuran tabbatarwa na inline
-- Yana cire jerin sarrafa ANSI, sandunan ci gaba, layuka masu maimaitawa, da hayaniya marar amfani
-- Yana kiyaye gazawa, kurakurai, gargaɗi, fayilolin da suka canza, taƙaitawa, da ƙarshen
-  fitarwa mai tsawo
-- Yana goyan bayan tacewar aikin da aka tsare da amana, tacewar duniya, da zaɓin dawo da
-  fitar ainihi da aka goge
+- Yana gano rukunin umarni/sakamako kamar `git status`, `git diff`, `git log`, masu gudanar da gwaje-gwaje,
+  gina TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/installs, rajistar Docker, sakamakon
+  kayan aikin gine-gine, da kuma sakamakon shell na gama-gari
+- Yana amfani da fakitin tace JSON daga `open-sse/services/compression/engines/rtk/filters/`
+- Yana shigo da matatun RTK TOML schema v1 daga fayilolin `filters.toml` na aiki ko na duniya, tare da ingancin
+  gwajin cikin layi da sarrafa amana ga fayilolin aikin
+- Yana ƙunshe da matatu 56 da aka gina a ciki tare da samfuran tabbatarwa cikin layi
+- Yana cire jerin sarrafa ANSI, sandunan ci gaba, layukan da suka maimaitu, da hayaniyar da ba ta buƙatar aiki
+- Yana kiyaye gazawa, kurakurai, gargaɗi, fayilolin da aka canja, taƙaitawa, da wutsiyar dogon sakamako
+- Yana goyan bayan matatun aikin da ake sarrafa amana, matatun duniya, da zaɓin dawo da ɗanyen sakamako da aka ɓoye
 
-**Yafi kyau ga:** Zaman wakilai tare da rubuce-rubucen fitarwa na shell, build, test, git, grep, da fayil.
+**Mafi dacewa da:** Zaman wakilai masu amfani da shell, gini, gwaji, git, grep, da rubuce-rubucen sakamakon fayiloli.
 
-### Yanayin Stacked (kewayon cancanta na 78-95%)
+### Yanayin Stacked (78-95% na iyakar da ta cancanta)
 
-Yanayin Stacked yana gudanar da injunan matsewa da yawa bisa tsari tabbatacce. Layin aikin tsoho shi ne:
+Yanayin Stacked yana gudanar da injunan matsawa da yawa cikin tsari tabbatacce. Tsohuwar bututun aiki ita ce:
 
 ```txt
 RTK -> Caveman
 ```
 
-Wannan tsari yana sa fitar terminal/kayan aiki ta kasance a taƙaice da farko, sannan yana amfani
-da taƙaitacciyar ma'ana ta Caveman ga sauran saƙon harshen halitta. Ana iya saita layukan aiki
-na Stacked a duniya ko ta hanyar combos na matsewa da aka sanya wa combos na jagora.
+Wannan tsari yana fara taƙaita sakamakon tashar/kayan aiki, sannan ya yi amfani da taƙaita ma'ana ta Caveman ga
+ragowar buƙatar rubutu ta halitta. Ana iya tsara bututun Stacked a duniya ko ta hanyar haɗin matsawa da aka
+sanya wa haɗin hanyoyin turawa.
 
-**Yafi kyau ga:** Mahallin gauraye tare da manyan rajistan kayan aiki da umarnin mutum ko taƙaitaccen mataimaki.
-
----
+**Mafi dacewa da:** Mahallin gauraye mai manyan rajistan ayyukan kayan aiki tare da umarnin mutane ko taƙaitawar mataimaki.
 
 ## Lissafin Tanadin Upstream
 
@@ -187,21 +183,21 @@ Tare da Stacked:       10K-2.5K token aka aika     (kewayon RTK+Caveman mai canc
 
 ---
 
-## Saitawa
+## Tsarawa
 
 ### Dashboard
 
 Je zuwa `Dashboard → Context & Cache`:
 
-- **Caveman** — zaɓin yanayi, fakitin harsuna, samfoti, da tsoffin saitunan gama-gari
-- **RTK** — samfotoin tace umarni, saitunan tsaro na RTK, da kundin matata
-- **Compression Combos** — jerin injuna masu suna da aka sanya wa haɗaɗɗun turawa
-- **Auto-Trigger Threshold** — kunna matsawa ta atomatik idan adadin token ya wuce iyakar da aka saita
+- **Caveman** — zaɓin yanayi, fakitin harshe, samfoti, da tsoffin saitunan duniya
+- **RTK** — samfotin tace umarni, saitunan tsaron RTK, da kundin tacewa
+- **Compression Combos** — bututun injuna masu suna da aka sanya wa haɗin routing
+- **Auto-Trigger Threshold** — kunna matsawa ta atomatik idan adadin tokens ya wuce ƙayyadadden mataki
 
-### Keɓantaccen Saiti na Kowane Combo
+### Sake-kebantawa ta kowane Combo
 
-A cikin `Dashboard → Context & Cache → Compression Combos`, sanya compression combo ga wani routing
-combo:
+A cikin `Dashboard → Context & Cache → Compression Combos`, sanya combo na matsawa ga
+combo na routing:
 
 ```txt
 Combo: "free-tier-fallback"
@@ -212,41 +208,49 @@ Combo: "free-tier-fallback"
     2. if/qwen3.8-max-preview
 ```
 
-Wannan yana ba ka damar amfani da matsawa mai jeri a kan masu samar da sabis na kyauta/na coding, yayin da kake riƙe yanayin lite a kan
-biyan kuɗi masu kuɗi.
+Wannan yana ba ka damar amfani da matsawa mai matakai a kan masu samar da sabis na kyauta/na
+coding, yayin da kake riƙe da yanayin lite a kan biyan kuɗi.
 
-Wannan aikin sanya "Per-Combo Override" wani iko ne daban da keɓantaccen saitin **yanayin matsawar routing-combo**
-(Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — tsarin bayanan filin
-yana kuma karɓar `rtk`, `stacked` da `omniglyph`) — wannan keɓantaccen saitin ba ya zaɓar wani jerin
-compression-combo mai suna; kawai yana saita filin `compressionMode` da
-`resolveCompressionPlan` ke dubawa. Ana iya saita shi ko dai a katin combo (`Dashboard → Combos`) ko kuma, tun daga
-#6760, ga kowane routing combo a cikin jerin "Assign to routing" da ke
-`Dashboard → Context & Cache → Compression Combos`, kusa da akwatin zaɓin sanya pipeline
-da aka bayyana a sama. Duk wuraren biyun suna adana canje-canje ta endpoint ɗin `PUT /api/combos/{id}` iri ɗaya.
+Wannan sanya **Per-Combo Override** ya bambanta da override na
+**routing-combo compression mode** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — tsarin
+filin yana kuma karɓar `rtk`, `stacked` da `omniglyph`) — wannan override ba ya zaɓar wani
+bututun compression-combo mai suna; kawai yana saita filin `compressionMode` da
+`resolveCompressionPlan` ke dubawa. Ana iya saita shi ko dai a kan katin combo
+(`Dashboard → Combos`) ko, tun daga #6760, ga kowane combo na routing a cikin jerin
+"Assign to routing" da ke cikin `Dashboard → Context & Cache → Compression Combos`, kusa da
+akwatunan zaɓin sanya bututu da aka bayyana a sama. Dukkan waɗannan wurare suna adanawa ta
+wurin endpoint ɗin `PUT /api/combos/{id}` iri ɗaya.
 
-### Keɓantaccen saiti na kowace buƙata
+### Override na kowace buƙata
 
-Aika request header na `x-omniroute-compression` don sauya tsarin matsawa ga buƙata guda.
-Shi ne mafi fifiko — yana rinjayar keɓantaccen saitin routing-combo, profile mai aiki,
-auto-trigger, da Default na panel. Ana yin biris da ƙimomin da ba a sani ba (ba a taɓa ƙin buƙatar ba), kuma
-babban maɓallin gama-gari har yanzu shi ke sarrafa komai: idan an kashe matsawa gaba ɗaya, header ba zai iya
-kunna ta ba. Ƙimomi:
+Aika taken buƙata `x-omniroute-compression` don override tsarin matsawa na buƙata guda ɗaya. Yana
+da fifiko mafi girma — yana rinjayar override na combo na routing, bayanin martaba mai aiki,
+auto-trigger, da Default na panel. Ana watsi da ƙimomin da ba a sani ba (ba a taɓa ƙin buƙatar ba),
+kuma babban maɓallin kunnawa na duniya har yanzu yana iko da komai: idan an kashe matsawa a
+duniya, taken ba zai iya kunna shi ba. Ƙimomi:
 
-| Ƙima          | Tasiri                                                                                                            |
-| ------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `off`         | Babu matsawa ga wannan buƙatar.                                                                                   |
-| `default`     | Default profile da aka samo daga panel (yana yin biris da active profile). Ana barin injunan lossy a kashe.       |
-| `safe`        | Daidai yake da rashin saka header: dedup da naɗe farin sarari kawai.                                              |
-| `allow-lossy` | Riƙe tsarin operator na wannan buƙatar, gami da taƙaitawa, matatan dacewa, da sake rubuta salo.                   |
-| `engine:<id>` | Inji guda idan an kunna shi, misali `engine:rtk`. Wannan shi ne zaɓin kunna injin ga kowace buƙata.               |
-| `<combo>`     | Combo mai suna, ana fara daidaita shi ta suna (ba tare da la’akari da manya ko ƙananan haruffa ba), sannan ta id. |
+| Ƙima          | Tasiri                                                                                                                            |
+| ------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `off`         | Babu matsawa ga wannan buƙatar.                                                                                                   |
+| `default`     | Bayanin martabar Default da panel ya samo (yana watsi da bayanin martaba mai aiki). Ana barin injunan da ke rasa bayanai a kashe. |
+| `safe`        | Daidai yake da rashin saka taken.                                                                                                 |
+| `allow-lossy` | Yana riƙe da tsarin ma'aikacin wannan buƙatar, har da taƙaitawa, matatun dacewa, da sake-rubuta salo.                             |
+| `engine:<id>` | Inji guda ɗaya idan an kunna shi, misali, `engine:rtk`. Wannan shi ne zaɓin kunna wannan injin don kowace buƙata.                 |
+| `<combo>`     | Combo mai suna, ana fara dacewa da suna (ba tare da la'akari da manya da ƙananan haruffa ba), sannan da id.                       |
 
-Ba tare da `allow-lossy`, `engine:<id>`, ko combo mai suna ba, ba a amfani da injunan lossy. Har yanzu
-buƙatar tana samun session dedup da naɗe farin sarari idan matsawa tana kunne.
+Ba tare da `allow-lossy`, `engine:<id>`, ko combo mai suna ba, ba a amfani da injunan da ke rasa
+bayanai. Lokacin da aka rage darajar Default, auto-trigger, ko override na routing mai rasa
+bayanai, OmniRoute yana riƙe da matakan da aka gane marasa rasa bayanai daga bututun da aka
+tsara mai matakai, cikin tsarin da aka tsara. Yana komawa zuwa `session-dedup → lite` ne kawai
+idan babu wani mataki marar rasa bayanai da aka tsara da ya tsira.
 
-Ana mayar da tsarin da aka yi amfani da shi a cikin response header na `X-OmniRoute-Compression: <mode>; source=<source>`,
-inda `<source>` yake ɗaya daga cikin `request-header`, `routing-override`, `active-profile`,
-`auto-trigger`, `default`, ko `off`.
+Samfotin **Effective pipeline** na Settings panel yana nuna tsarin da ake amfani da shi a al'ada.
+Lokacin da auto-trigger zai iya aiki, samfotin ɗaya yana kuma nuna tsarin da zai yi aiki bisa
+sharaɗi, domin daidaita panel da ƙudurin runtime da ba shi da header.
+
+Ana mayar da tsarin da aka yi amfani da shi a cikin taken amsar
+`X-OmniRoute-Compression: <mode>; source=<source>`, inda `<source>` yake ɗaya daga cikin
+`request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default`, ko `off`.
 
 ### API
 
@@ -259,12 +263,12 @@ curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# Yi samfotoin takamaiman payload na RTK/stacked
+# Duba takamaiman bayanan RTK/stacked
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# Jera fakitin matatan RTK
+# Jerin fakitin tace RTK
 curl http://localhost:20128/api/context/rtk/filters
 
 # Gwada RTK kai tsaye tare da metadata na umarni na zaɓi

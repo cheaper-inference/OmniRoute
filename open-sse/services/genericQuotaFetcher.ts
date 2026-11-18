@@ -16,7 +16,7 @@
  * tests) can discover which windows that provider exposes.
  */
 
-import { toNumberOrNull } from "@/shared/utils/numeric";
+import { toNumberOrNull } from "../utils/numeric.ts";
 
 import { hasOllamaPurchasedCredits } from "./ollamaPurchasedCredits.ts";
 import type { getUsageForProvider } from "./usage.ts";
@@ -327,7 +327,11 @@ export function convertUsageToQuotaInfo(
   const normalized = normalizeQuotaWindows(providerScopedWindows, context);
   const { percentUsed, resetAt } = aggregateGroupedQuotaValues(providerScopedWindows);
   const bootstrap = usageRecord.bootstrap as Record<string, unknown> | null | undefined;
-  const plan = [bootstrap?.organization_rate_limit_tier, usageRecord.plan]
+  const plan = [
+    bootstrap?.user_rate_limit_tier,
+    bootstrap?.organization_rate_limit_tier,
+    usageRecord.plan,
+  ]
     .filter((value): value is string => typeof value === "string")
     .map((value) => value.trim())
     .find((value) => value.length > 0);

@@ -17,7 +17,7 @@ import {
   mergeQwenCodeSettings,
   normalizeQwenCodeBaseUrl,
 } from "../../../src/shared/services/qwenCodeConfig.ts";
-import { resolveActiveContext } from "../contexts.mjs";
+import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { guardHostConfigTarget } from "../utils/config-home-guard.mjs";
 import { createPrompt, printError, printHeading, printInfo, printSuccess } from "../io.mjs";
 
@@ -43,8 +43,7 @@ export function resolveQwenTarget(opts = {}) {
   const apiKey =
     opts.apiKey ??
     opts["api-key"] ??
-    context?.accessToken ??
-    context?.apiKey ??
+    contextCredentialFor(context, root) ??
     process.env.OMNIROUTE_API_KEY ??
     "sk_omniroute";
 

@@ -1,0 +1,46 @@
+{
+  // Production-only type check. `tsc -p tsconfig.json` includes tests/ through
+  // `**/*.ts` and runs out of memory; this narrows to shipped code and finishes
+  // in about a minute.
+  //
+  // `next build` ignores type errors (next.config.mjs sets ignoreBuildErrors), so
+  // this program plus `npm run check:build-typecheck` (CI: ci.yml, quality.yml) is
+  // what actually checks this surface. The gate compares against
+  // config/quality/build-typecheck-baseline.json: the existing debt is frozen, not
+  // ignored, and must not grow.
+  //
+  // electron/**/*.d.ts is included on purpose. Without it the desktop ambient
+  // globals are missing and every electronAPI access becomes a phantom diagnostic.
+  //
+  // next-env.d.ts is deliberately absent: Next generates it, it is gitignored, and
+  // including a path that may not exist made the program differ between a fresh
+  // checkout and one that had run `next build`.
+  "extends": "./tsconfig.json",
+  "include": [
+    "electron/**/*.d.ts",
+    "src/**/*.ts",
+    "src/**/*.tsx",
+    "open-sse/**/*.ts",
+    "open-sse/**/*.tsx",
+    "packages/**/*.ts",
+    "packages/**/*.tsx",
+    "bin/**/*.ts",
+    "bin/**/*.tsx",
+    "scripts/**/*.ts",
+    "*.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "tests",
+    "**/*.test.ts",
+    "**/*.test.tsx",
+    "**/*.spec.ts",
+    "**/__tests__/**",
+    ".build",
+    ".next",
+    ".next-playwright",
+    ".claude",
+    ".scratch",
+    ".source"
+  ]
+}

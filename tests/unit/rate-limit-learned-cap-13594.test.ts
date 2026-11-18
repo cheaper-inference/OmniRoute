@@ -8,7 +8,7 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-learned-c
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 // Dynamic imports are required because DATA_DIR must be set before DB modules evaluate.
-await import("../../src/lib/db/core.ts");
+const core = await import("../../src/lib/db/core.ts");
 const rateLimitManager = await import("../../open-sse/services/rateLimitManager.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const requestCapModule = await import("../../open-sse/services/rateLimitManager/requestCap.ts");
@@ -54,7 +54,9 @@ test.beforeEach(async () => {
 
 test.after(async () => {
   await rateLimitManager.__resetRateLimitManagerForTests();
-  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true });
+  // Windows refuses to remove a directory holding an open SQLite file (EPERM).
+  core.resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
 test("parseRequestCapFromBody reads hard request caps from 429 bodies", () => {

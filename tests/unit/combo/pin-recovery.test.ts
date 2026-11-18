@@ -11,6 +11,7 @@ import {
   buildNoUpstreamResponseDiagnostics,
   buildEmptyComboTargetsPayload,
   formatPreDispatchExclusions,
+  resolveAllFailedTerminalReason,
 } from "../../../open-sse/services/combo/pinRecovery.ts";
 
 test("buildRecoveryHint: reasoning_budget_exhausted maps to switch-combo", () => {
@@ -184,4 +185,69 @@ test("formatPreDispatchExclusions: operator one-liner with remaining seconds whe
     ]),
     "openai/a: model_lockout (58s), claude/b: circuit_open"
   );
+});
+
+test("buildRecoveryHint: authentication_rejected maps to switch-combo with a reconnect hint (#18360)", () => {
+  const hint = buildRecoveryHint("authentication_rejected");
+  assert.equal(hint.action, "switch-combo");
+  assert.match(hint.next_step, /authentication/i);
+  assert.match(hint.next_step, /dashboard\/providers/);
+  assert.doesNotMatch(hint.next_step, /failed transiently/i);
+  // The response header keeps 128 chars; a longer hint loses its action.
+  assert.ok(hint.next_step.length <= 128, `hint is ${hint.next_step.length} chars`);
+  assert.equal("retry_after_seconds" in hint, false);
+});
+
+const AUTH_ERROR = "[502]: Upstream rejected token: Authorization Failed (invalid token)";
+
+test("resolveAllFailedTerminalReason: every outcome auth promotes to authentication_rejected (#18360)", () => {
+  const reason = resolveAllFailedTerminalReason({
+    observedFailure: true,
+    allObservedFailuresQuota: false,
+    comboErrors: [{ kind: "auth" }, { kind: "auth" }],
+    lastError: AUTH_ERROR,
+  });
+  assert.equal(reason, "authentication_rejected");
+  assert.equal(buildRecoveryHint(reason).action, "switch-combo");
+});
+
+test("resolveAllFailedTerminalReason: mixed auth and provider outcomes keep the raw error and retry hint", () => {
+  const reason = resolveAllFailedTerminalReason({
+    observedFailure: true,
+    allObservedFailuresQuota: false,
+    comboErrors: [{ kind: "auth" }, { kind: "provider" }],
+    lastError: AUTH_ERROR,
+  });
+  assert.equal(reason, AUTH_ERROR);
+  assert.equal(buildRecoveryHint(reason).action, "retry");
+});
+
+test("resolveAllFailedTerminalReason: an empty outcome list is never promoted to authentication_rejected", () => {
+  const reason = resolveAllFailedTerminalReason({
+    observedFailure: true,
+    allObservedFailuresQuota: false,
+    comboErrors: [],
+    lastError: AUTH_ERROR,
+  });
+  assert.equal(reason, AUTH_ERROR);
+});
+
+test("resolveAllFailedTerminalReason: auth outcomes without an observed failure are not promoted", () => {
+  const reason = resolveAllFailedTerminalReason({
+    observedFailure: false,
+    allObservedFailuresQuota: true,
+    comboErrors: [{ kind: "auth" }],
+    lastError: null,
+  });
+  assert.equal(reason, "all_models_failed");
+});
+
+test("resolveAllFailedTerminalReason: provider-only outcomes keep the raw error", () => {
+  const reason = resolveAllFailedTerminalReason({
+    observedFailure: true,
+    allObservedFailuresQuota: false,
+    comboErrors: [{ kind: "provider" }, { kind: "rate_limit" }],
+    lastError: "[503]: upstream unavailable",
+  });
+  assert.equal(reason, "[503]: upstream unavailable");
 });

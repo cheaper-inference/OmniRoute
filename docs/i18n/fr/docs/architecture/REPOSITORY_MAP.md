@@ -53,65 +53,65 @@ OmniRoute/
 
 ## Fichiers racine
 
-| Fichier                                     | Objectif                                                                                                    |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Page d’accueil marketing + démarrage rapide + matrice des fonctionnalités (voir aussi `llm.txt`)            |
-| **CHANGELOG.md**                            | Journal des modifications par version (généré automatiquement par la compétence `/version-bump-cc`)         |
-| **LICENSE**                                 | Texte de la licence MIT                                                                                     |
-| **CLAUDE.md**                               | Règles du projet pour les agents Claude Code (règles strictes, conventions, scénarios)                      |
-| **AGENTS.md**                               | Identique à CLAUDE.md, mais pour les agents IA autres que Claude (Codex, Cursor, etc.)                      |
-| **GEMINI.md**                               | Règles concises pour les agents basés sur Gemini (sous-ensemble de CLAUDE.md)                               |
-| **CONTRIBUTING.md**                         | Guide de contribution : configuration, commits conventionnels, tests, processus de PR                       |
-| **SECURITY.md**                             | Politique de signalement des vulnérabilités, versions prises en charge, modèle de menace                    |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — attentes relatives au comportement de la communauté                                  |
-| **llm.txt**                                 | Page d’accueil en texte brut optimisée pour les robots d’exploration LLM (SEO pour assistants IA)           |
-| **package.json**                            | Manifeste npm, scripts, dépendances, moteurs, seuil de couverture c8                                        |
-| **package-lock.json**                       | Arborescence des dépendances verrouillée                                                                    |
-| **tsconfig.json**                           | Configuration TypeScript racine                                                                             |
-| **tsconfig.typecheck-core.json**            | Configuration de vérification des types pour le cœur dans `src/`                                            |
-| **tsconfig.typecheck-noimplicit-core.json** | Vérification stricte des types (`noImplicitAny`)                                                            |
-| **tsconfig.tsbuildinfo**                    | Cache de compilation incrémentielle TS (ignoré par Git)                                                     |
-| **next.config.mjs**                         | Configuration de compilation Next.js 16 (sortie autonome)                                                   |
-| **next-env.d.ts**                           | Types d’environnement générés automatiquement par Next.js                                                   |
-| **eslint.config.mjs**                       | Configuration plate ESLint (règles par zone du projet)                                                      |
-| **prettier.config.mjs**                     | Règles de formatage Prettier                                                                                |
-| **postcss.config.mjs**                      | Configuration PostCSS pour le pipeline Tailwind/CSS                                                         |
-| **playwright.config.ts**                    | Configuration des tests E2E Playwright                                                                      |
-| **vitest.config.ts**                        | Configuration Vitest (suite par défaut)                                                                     |
-| **vitest.mcp.config.ts**                    | Configuration Vitest pour les suites du serveur MCP, d’autoCombo et de cache                                |
-| **sonar-project.properties**                | Configuration SonarQube/SonarCloud (qualité du code)                                                        |
-| **Dockerfile**                              | Build Docker multi-étapes (builder → runner-base → runner-cli)                                              |
-| **docker-compose.yml**                      | Compose de développement avec 4 profils (base, cli, host, cliproxyapi) + service annexe Redis               |
-| **docker-compose.prod.yml**                 | Compose de production (port 20130, Redis, volumes nommés)                                                   |
-| **.dockerignore**                           | Fichiers exclus du contexte Docker                                                                          |
-| **fly.toml**                                | Configuration de déploiement Fly.io (région `sin`, port 20128, volume /data)                                |
-| **.env.example**                            | Modèle de fichier d’environnement (copié automatiquement vers `.env` lors de la première installation)      |
-| **.gitignore**                              | Motifs d’exclusion Git                                                                                      |
-| **.npmignore**                              | Liste d’exclusion pour la publication npm                                                                   |
-| **.npmrc**                                  | Configuration npm (registre, politique de fichier de verrouillage)                                          |
-| **.node-version**                           | Version de Node épinglée (utilisée par les outils compatibles avec nvm)                                     |
-| **.nvmrc**                                  | Version de Node épinglée pour nvm                                                                           |
-| **eslint.complexity.config.mjs**            | Configuration ESLint pour le seuil progressif de complexité (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | Configuration ESLint pour les règles SonarJS (complexité cognitive / duplication)                           |
-| **source.config.ts**                        | Configuration source `defineDocs` de Fumadocs (alimente `.source/`)                                         |
-| **knip.json**                               | Configuration Knip — fichiers/exports/dépendances inutilisés (alimente le contrôle du code mort)            |
-| **stryker.conf.json**                       | Configuration des tests de mutation Stryker                                                                 |
-| **.size-limit.json**                        | Configuration du budget de taille des bundles pour size-limit                                               |
-| **promptfooconfig.yaml**                    | Configuration des évaluations promptfoo                                                                     |
-| **.gitleaks.toml**                          | Ensemble de règles d’analyse des secrets gitleaks                                                           |
-| **.zizmor.yml**                             | Configuration de l’analyse de sécurité des GitHub Actions par zizmor                                        |
-| **socket.yml**                              | Configuration de la chaîne d’approvisionnement Socket.dev                                                   |
-| **news.json**                               | Flux d’annonces v2 localisé ; l’élément de lancement de Radar est livré inactif                             |
-| **flake.nix** / **flake.lock**              | Définition et verrouillage du shell de développement Nix                                                    |
-| **.env**                                    | Secrets locaux (ignorés par git — générés à partir de `.env.example`)                                       |
+| Déposer                                     | But                                                                                                   |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **README.md**                               | Page de destination marketing Démarrage rapide + Matrice des fonctionnalités + (voir aussi `llm.txt`) |
+| **CHANGELOG.md**                            | Journal des modifications par version (généré automatiquement par la compétence `/version-bump-cc` )  |
+| **LICENSE**                                 | texte de licence MIT                                                                                  |
+| **CLAUDE.md**                               | Règles de projet pour les agents Claude Code (règles strictes, conventions, scénarios)                |
+| **AGENTS.md**                               | Identique à CLAUDE.md mais pour les agents AI non Claude (Codex, Cursor, etc.)                        |
+| **GEMINI.md**                               | Règles concises pour les agents basés sur Gemini (sous-ensemble de CLAUDE.md)                         |
+| **CONTRIBUTING.md**                         | Guide du contributeur : configuration, commits conventionnels, tests, flux PR                         |
+| **SECURITY.md**                             | Politique de reporting des vulnérabilités, versions prises en charge, modèle de menace                |
+| **CODE_OF_CONDUCT.md**                      | Contributeur Covenant attentes en matière de comportement de la communauté —                          |
+| **llm.txt**                                 | Atterrissage en texte brut optimisé pour les robots d'exploration LLM (SEO pour les assistants AI )   |
+| **package.json**                            | manifeste npm, scripts, dépendances, moteurs, porte de couverture c8                                  |
+| **package-lock.json**                       | Arbre de dépendance verrouillé                                                                        |
+| **tsconfig.json**                           | Configuration racine TypeScript                                                                       |
+| **tsconfig.typecheck-core.json**            | Configuration de vérification de type pour `src/` Core                                                |
+| **tsconfig.typecheck-noimplicit-core.json** | Vérification de type stricte (`noImplicitAny`)                                                        |
+| **tsconfig.tsbuildinfo**                    | cache de construction incrémentiel TS (gitignoré)                                                     |
+| **suivant.config.mjs**                      | configuration de build Next.js 16 (sortie autonome)                                                   |
+| **prochain-env.d.ts**                       | types d'environnement Next.js générés automatiquement                                                 |
+| **eslint.config.mjs**                       | ESLint flat config (règles par zone de projet)                                                        |
+| **plus jolie.config.mjs**                   | règles de formatage Prettier                                                                          |
+| **post-css.config.mjs**                     | configuration PostCSS pour le pipeline Tailwind/CSS                                                   |
+| **dramaturge.config.ts**                    | configuration de test Playwright E2E                                                                  |
+| **vite.config.ts**                          | configuration Vitest (suite par défaut)                                                               |
+| **vitest.mcp.config.ts**                    | configuration Vitest pour serveur MCP / autoCombo / suites de cache                                   |
+| **projet-sonar.propriétés**                 | configuration SonarQube/SonarCloud (qualité du code)                                                  |
+| **Fichier Docker**                          | Construction Docker en plusieurs étapes (constructeur → runner-base → runner-cli)                     |
+| **docker-compose.yml**                      | Dev compose avec 4 profils (base, cli, hôte, cliproxyapi) + redis side-car                            |
+| **docker-composer.prod.yml**                | Composition de production (port 20130, redis, volumes nommés)                                         |
+| **.dockerignore**                           | Fichiers exclus du contexte Docker                                                                    |
+| **fly.toml**                                | Configuration de déploiement Fly.io (région `sin`, port 20128, /volume de données)                    |
+| **.env.exemple**                            | Fichier env de modèle (copié automatiquement sur `.env` lors de la première installation)             |
+| **.gitignore**                              | Git ignore les modèles                                                                                |
+| **.npmignore**                              | npm publie la liste d'exclusion                                                                       |
+| **.npmrc**                                  | configuration npm (registre, politique de fichier de verrouillage)                                    |
+| **version .node**                           | Broche de version du nœud (utilisée par les outils compatibles NVM)                                   |
+| **.nvmrc**                                  | Broche de version du nœud pour NVM                                                                    |
+| **eslint.complexité.config.mjs**            | configuration ESLint pour le cliquet de complexité (`scripts/check/check-complexity.mjs --config`)    |
+| **eslint.sonarjs.config.mjs**               | configuration ESLint pour les règles SonarJS (complexité cognitive / duplication)                     |
+| **source.config.ts**                        | Configuration source Fumadocs `defineDocs` (flux `.source/`)                                          |
+| **knip.json**                               | Knip config — files/exports/deps inutilisé (alimente la porte de code mort)                           |
+| **attaquant.conf.mjs**                      | Configuration de test de mutation Stryker (calcule `tap.testFiles` à partir de `mutate`)              |
+| **.size-limit.json**                        | configuration du budget du bundle avec limite de taille                                               |
+| **promptfooconfig.yaml**                    | configuration d'évaluation promptfoo                                                                  |
+| **.gitleaks.toml**                          | Ensemble de règles d'analyse secrète de Gitleaks                                                      |
+| **.zizmor.yml**                             | configuration de zizmor GitHub-Actions security-lint                                                  |
+| **socket.yml**                              | Configuration de la chaîne d'approvisionnement Socket.dev                                             |
+| **news.json**                               | Flux d'annonces v2 localisées ; L'objet de lancement radar est livré inactif                          |
+| **flocon.nix** /** flocon.lock**            | Nix dev-shell définition + lock                                                                       |
+| **.env**                                    | Secrets locaux ( — gitignoré généré à partir de `.env.example`)                                       |
 
-> **Déplacés hors de la racine dans la v3.8.26 (désencombrement) :**
+> **Déplacé de la racine dans la v3.8.26 (désencombrement) :**
 >
-> - **→ `config/quality/` :** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, ainsi que le fichier généré `quality-metrics.json` (ignoré par git). Voir [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` et le `quality-metrics.json` généré (gitignored). Voir [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
-## `src/` — application Next.js
+## application `src/` — Next.js
 
 ```
 src/
@@ -135,26 +135,26 @@ src/
 └── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` — Routeur d'application (Next.js 16)
+### Routeur d'application `src/app/` — (Next.js 16)
 
 | Chemin                                                                       | But                                                                                                                                                                                                                                                                                                                       |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/api/v1/`                                                                | Public OpenAI-compat API (~ 25 sous-routes : chat, complétions, intégrations, fichiers, lots, audio, images, vidéos, musique, reclassement, modérations, recherche, ws, agents, comptes, fournisseurs, etc.)                                                                                                              |
 | `app/api/v1beta/`                                                            | Points de terminaison API de style Gemini                                                                                                                                                                                                                                                                                 |
-| `app/api/playground/`                                                        | Itinéraires Playground Studio : `improve-prompt/` (POST — réécriture d'invite LLM ), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — voir `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                              |
+| `app/api/playground/`                                                        | Itinéraires Playground Studio : `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — voir `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                   |
 | `app/api/` (non-v1)                                                          | routes Management/admin (répertoires ~ 60 : fournisseurs, combos, paramètres, mcp, a2a, évaluations, mémoire, compétences, webhooks, conformité, résilience, surveillance, tunnels, cli-tools, etc.)                                                                                                                      |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 routes (contrôle du serveur, agent state/DNS/mappings, contournement, cert, CA en amont). LOCAL_ONLY + SPAWN_CAPABLE. Voir `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                 |
 | `app/api/tools/traffic-inspector/`                                           | Inspecteur du trafic REST + WS API — 16 routes + (requêtes, sessions, hôtes, modes de capture, exportation, ws). LOCAL_ONLY + SPAWN_CAPABLE. Voir `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                              |
 | `app/a2a/`                                                                   | Point d'entrée A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                             |
 | `app/.well-known/agent.json/`                                                | Carte d'agent A2A (découverte)                                                                                                                                                                                                                                                                                            |
 | `app/(dashboard)/dashboard/`                                                 | Pages UI du tableau de bord (50 sections +, ~ 118 fichiers page.tsx : fournisseurs, combos, paramètres, mémoire, compétences, webhooks, évaluations, audit, lot, cache, coûts, santé, système, activité, etc.)                                                                                                            |
-| `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 onglets : Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — voir `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                          |
+| `app/(dashboard)/dashboard/search-tools/`                                    | Outils de recherche Studio UI (3 onglets : Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — voir `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                   |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plan 21) : `page.tsx` (shell à 3 onglets), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Page du tableau de bord AgentBridge : carte de serveur, 9 cartes d'agent, assistant de configuration, mappage de modèle, liste de contournement. i18n PT-BR + EN. Voir `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                  |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Page du tableau de bord AgentBridge Carte de serveur —, 9 cartes d'agent, assistant de configuration, mappage de modèle, liste de contournement. i18n PT-BR + EN. Voir `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                  |
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Page du tableau de bord de l'inspecteur de trafic — DevTools split, 7 onglets de détail, 4 bascules de mode de capture, enregistreur de session, colorisation du contexte. i18n PT-BR + EN. Voir `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                  |
 | `app/(dashboard)/dashboard/activity/`                                        | Page de flux d'activité (Groupe B) : `page.tsx` (serveur) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — voir `docs/architecture/MONITORING_SECTIONS.md`                                                                                                           |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Page de partage de quotas (Groupe B) : `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                        |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Page de configuration du plan du fournisseur (groupe B) : `page.tsx` + `ProviderPlanConfigClient.tsx` – dimensions de quota par remplacement de connexion                                                                                                                                                                 |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Page de configuration du plan du fournisseur (groupe B) : dimensions de quota `page.tsx` + `ProviderPlanConfigClient.tsx` — par remplacement de connexion                                                                                                                                                                 |
 | `app/docs/`                                                                  | Visionneuse de documentation intégrée (rendu `docs/*.md`)                                                                                                                                                                                                                                                                 |
 | `app/landing/`                                                               | Page de destination marketing                                                                                                                                                                                                                                                                                             |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Pages liées à l'authentification                                                                                                                                                                                                                                                                                          |
@@ -163,49 +163,49 @@ src/
 | `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Disposition racine, accueil, manifeste PWA, CSS global                                                                                                                                                                                                                                                                    |
 | `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Limites d'erreur                                                                                                                                                                                                                                                                                                          |
 
-### `src/lib/` — Bibliothèques principales (modules ~ 50)
+### Bibliothèques principales `src/lib/` — (modules ~ 50)
 
 | Module                                              | But                                                                                                                                                                                                                                                                                                                                |
 | --------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                              | gestionnaire de tâches du protocole A2A, compétences (5), streaming                                                                                                                                                                                                                                                                |
-| `acp/`                                              | Registre d'agent CLI (découverte locale CLI — voir `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                     |
+| `acp/`                                              | Registre des agents CLI (découverte locale CLI — voir `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                  |
 | `api/`                                              | Assistants API partagés (`requireManagementAuth`, validation)                                                                                                                                                                                                                                                                      |
 | `auth/`                                             | Session, hachage de mot de passe, validation de jeton                                                                                                                                                                                                                                                                              |
 | `batches/`                                          | OpenAI Lots gestionnaires API                                                                                                                                                                                                                                                                                                      |
 | `catalog/`                                          | Catalogue du fournisseur Validation Zod Résolution des capacités +                                                                                                                                                                                                                                                                 |
-| `cloudAgent/`                                       | Agents cloud (Codex Cloud, Devin, Jules) — voir `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                                   |
+| `cloudAgent/`                                       | Agents Cloud (Codex Cloud, Devin, Jules) — voir `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                                   |
 | `combos/`                                           | Aides à la réorganisation + à résolution combinée                                                                                                                                                                                                                                                                                  |
-| `audit/`                                            | Aides au flux d'activité : `highLevelActions.ts` (liste autorisée + `isHighLevelAction()`), `activityIcons.ts` (action → icon/verb map), `timeline.ts` (groupByDay/relativeTime) — voir `docs/architecture/MONITORING_SECTIONS.md`                                                                                                 |
-| `compliance/`                                       | Journal d'audit Audit du fournisseur + - voir `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                        |
+| `audit/`                                            | Aides au flux d'activités : `highLevelActions.ts` (liste autorisée + `isHighLevelAction()`), `activityIcons.ts` (action → icon/verb map), `timeline.ts` (groupByDay/relativeTime) — voir `docs/architecture/MONITORING_SECTIONS.md`                                                                                                |
+| `compliance/`                                       | Journal d'audit audit du fournisseur + — voir `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                        |
 | `compression/`                                      | Colle moteur à compression (les moteurs vivent en `open-sse/services/compression/`)                                                                                                                                                                                                                                                |
 | `config/`                                           | Aides à la configuration d'exécution                                                                                                                                                                                                                                                                                               |
 | `db/`                                               | 120 modules + de domaine DB migrations + 168 (passez toujours par ici pour SQLite)                                                                                                                                                                                                                                                 |
 | `quota/`                                            | Moteur de partage de quotas : `dimensions.ts` (types/Zod), `types.ts` ( interface QuotaStore ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — voir `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                            | Client de catalogue de modèles gratuits de radar : `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — voir `docs/frameworks/RADAR.md`                                                                                                                                    |
 | `display/`                                          | aides au formatage UI (coût, latence, etc.)                                                                                                                                                                                                                                                                                        |
-| `embeddings/`                                       | Assistants du service d'intégration                                                                                                                                                                                                                                                                                                |
+| `embeddings/`                                       | Assistants de service d'intégration                                                                                                                                                                                                                                                                                                |
 | `env/`                                              | Analyse des variables d'environnement validation +                                                                                                                                                                                                                                                                                 |
 | `evals/`                                            | Framework d'évaluation (suites, runner, runtime) — voir `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                 |
 | `guardrails/`                                       | masqueur PII, injection rapide, pont de vision — voir `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                |
 | `jobs/`                                             | Travaux en arrière-plan (de type cron)                                                                                                                                                                                                                                                                                             |
 | `memory/`                                           | Mémoire conversationnelle (SQLite FTS5 + sqlite-vec hybride RRF + Qdrant niveau 2) — voir `docs/frameworks/MEMORY.md`                                                                                                                                                                                                              |
 | `memory/embedding/`                                 | Couche d'intégration multi-sources : `index.ts` (résolveur), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                              |
-| `memory/vectorStore.ts`                             | wrapper sqlite-vec v0.1.9 — KNN brute-force + hybride RRF (FTS5 + vector, k = 60). Lazy-init, se dégrade gracieusement lorsque sqlite-vec n'est pas disponible. (plan 21)                                                                                                                                                          |
-| `memory/reindex.ts`                                 | `runReindexBatch()` — traite les mémoires avec `needs_reindex=1` en arrière-plan ; appelé par `POST /api/memory/reindex` et chemin de remplissage paresseux. (plan 21)                                                                                                                                                             |
+| `memory/vectorStore.ts`                             | sqlite-vec v0.1.9 wrapper — KNN force brute + hybride RRF (vecteur FTS5 +, k = 60). Lazy-init, se dégrade gracieusement lorsque sqlite-vec n'est pas disponible. (plan 21)                                                                                                                                                         |
+| `memory/reindex.ts`                                 | `runReindexBatch()` — traite les mémoires avec `needs_reindex=1` en arrière-plan ; appelé par `POST /api/memory/reindex` et chemin de remplissage paresseux. (plan 21)                                                                                                                                                             |
 | `monitoring/`                                       | Bilans de santé, émission de métriques                                                                                                                                                                                                                                                                                             |
 | `oauth/`                                            | flux OAuth/import pour 22 modules fournisseurs (agy, antigravity, claude, cline, codebuddy-cn, codex, curseur, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                        |
 | `plugins/`                                          | Registre des plugins                                                                                                                                                                                                                                                                                                               |
 | `promptCache/`                                      | Points d'arrêt du cache d'invite de style anthropique                                                                                                                                                                                                                                                                              |
-| `skills/`                                           | Cadre de compétences ( + marketplace intégré + SkillsSH) — voir `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                        |
+| `skills/`                                           | Cadre de compétences (marché + intégré + SkillsSH) — voir `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                              |
 | `playground/`                                       | Aides partagées de Playground Studio : `codeExport.ts` (générateur curl/Python/TS ), `promptImprover.ts` (constructeur de méta-invite), `streamMetrics.ts` ( TTFT/TPS pur), `types.ts` (tableau de prix) — voir `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                             |
-| `webhookDispatcher.ts`                              | Livraison de webhook HMAC — voir `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                     |
+| `webhookDispatcher.ts`                              | livraison de webhook HMAC — voir `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                     |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts`            | Gestionnaires de tunnels — voir `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                        |
 | `cloudSync.ts`, `initCloudSync.ts`                  | Synchronisation de l'état dans le cloud en option                                                                                                                                                                                                                                                                                  |
-| `localDb.ts`                                        | Baril de réexportation pour les modules de base de données (pas de logique - réexportations uniquement)                                                                                                                                                                                                                            |
+| `localDb.ts`                                        | Baril de réexportation pour les modules de base de données (pas de réexportation logique — uniquement)                                                                                                                                                                                                                             |
 | `cacheLayer.ts`, `idempotencyLayer.ts`              | Demander la mise en cache de l'idempotence +                                                                                                                                                                                                                                                                                       |
 | (~ 30 fichiers de niveau supérieur supplémentaires) | Aides spécialisées (logEnv, modelsDevSync, piiSanitizer, etc.)                                                                                                                                                                                                                                                                     |
 
-### `src/lib/db/` — Base de données (147 modules + 208 migrations)
+### Base de données `src/lib/db/` — (147 modules + 208 migrations)
 
 | Sous-répertoire           | But                                                                                                                                                                                                                 |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Composant du tableau de bord API: adaptateurs sur `packages/ui-kit` — voir `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: noms d'icônes utilisés par les écrans → Composants Lucide (`<Icon>`)                                |
-| `constants/providers.ts`         | **377 prestataires** avec validation Zod (source de vérité)                                                     |
+| `constants/providers.ts`         | **394 prestataires** avec validation Zod (source de vérité)                                                     |
 | `constants/cliTools.ts`          | Registre d'outils CLI externe                                                                                   |
-| `constants/routingStrategies.ts` | **20 stratégies de routage** avec des priorités                                                                 |
+| `constants/routingStrategies.ts` | **22 stratégies de routage** avec des priorités                                                                 |
 | `constants/publicApiRoutes.ts`   | Routes qui nécessitent une authentification du porteur (vs gestion)                                             |
 | `constants/upstreamHeaders.ts`   | Liste de refus d'en-tête pour les requêtes en amont                                                             |
 | `validation/schemas.ts`          | Schémas ~ 80 Zod (source unique de vérité pour les contrats API )                                               |
@@ -265,7 +265,7 @@ Espace de travail npm distinct (`@omniroute/open-sse`). Gère le traitement des 
 ```
 open-sse/
 ├── handlers/            # 16 fichiers (12 gestionnaires + 4 utilitaires) : chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
-├── executors/           # 150 modules d’exécution (classes étendant BaseExecutor + utilitaires propres à chaque fournisseur)
+├── executors/           # 163 modules d’exécution (classes étendant BaseExecutor + utilitaires propres à chaque fournisseur)
 ├── translator/          # Convertisseurs de formats (9 pour les requêtes, 9 pour les réponses, 9 utilitaires)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # Environ 80 modules de service (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
@@ -391,7 +391,7 @@ open-sse/
 
 ---
 
-## `docs/` — Documentation publique (7 fichiers racine + 17 sous-répertoires)
+## Documentation publique `docs/` — (7 fichiers racine + 17 sous-répertoires)
 
 ### Guides de haut niveau
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Intégrations CLI externes + OmniRoute CLI interne                                                  |
 | `I18N.md`                   | architecture i18n, ajout d'une langue, 67 locales                                                  |
 | `UNINSTALL.md`              | Nettoyer les étapes de désinstallation                                                             |
-| `PROVIDER_REFERENCE.md`     | **Généré automatiquement** catalogue de 377 fournisseurs (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Généré automatiquement** catalogue de 394 fournisseurs (regen: `npm run gen:provider-reference`) |
 
 ### Analyses approfondies du sous-système
 
@@ -427,7 +427,7 @@ open-sse/
 | `MEMORY.md`                                       | Système de mémoire (SQLite FTS5 + Qdrant)                                                       |
 | `EVALS.md`                                        | Cadre d'évaluation (suites, exécutions, rubriques)                                              |
 | `GUARDRAILS.md`                                   | masqueur PII, injection rapide, pont de vision                                                  |
-| `COMPLIANCE.md`                                   | Journal d'audit, conservation, désinscription de noLog                                          |
+| `COMPLIANCE.md`                                   | Journal d'audit, conservation, désinscription noLog                                             |
 | `WEBHOOKS.md`                                     | Livraison de webhooks signés HMAC                                                               |
 | `REASONING_REPLAY.md`                             | Cache memory/SQLite hybride pour `reasoning_content`                                            |
 | `AUTHZ_GUIDE.md`                                  | Pipeline d'autorisation (`classify` → `policies` → `enforce`)                                   |
@@ -460,11 +460,11 @@ open-sse/
 
 ### Sous-répertoires
 
-| Sous-répertoire       | But                                                                                                                                                                                                                          |
-| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Traductions de documents localisées (41 paramètres régionaux)                                                                                                                                                                |
-| `docs/screenshots/`   | Éléments d'image pour les guides                                                                                                                                                                                             |
-| `_tasks/superpowers/` | Plans/specs des superpuissances (`writing-plans`/`brainstorming`) recherche + — dépôt isolé, versionné séparément, gitignoré par l'arborescence principale. Voir CLAUDE.md → « Artefacts de planification et de recherche ». |
+| Sous-répertoire       | But                                                                                                                                                                                                                           |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Traductions de documents localisées (41 paramètres régionaux)                                                                                                                                                                 |
+| `docs/screenshots/`   | Éléments d'image pour les guides                                                                                                                                                                                              |
+| `_tasks/superpowers/` | Plans/specs des superpuissances (`writing-plans`/`brainstorming`) + recherche — un dépôt isolé, versionné séparément, gitignoré par l'arborescence principale. Voir CLAUDE.md → "Artefacts de planification et de recherche". |
 
 ---
 

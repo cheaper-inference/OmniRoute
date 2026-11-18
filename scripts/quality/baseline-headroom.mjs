@@ -198,6 +198,13 @@ export function buildManifest() {
         runAndMatch("scripts/check/check-open-sse-typecheck.mjs", /openSseTypecheckErrors=(\d+)/),
     },
     {
+      id: "buildTypecheck",
+      direction: "down",
+      baseline: () => sumTypecheckBaseline(readJson("build-typecheck-baseline.json")),
+      measure: () =>
+        runAndMatch("scripts/check/check-build-typecheck.mjs", /buildTypecheckErrors=(\d+)/),
+    },
+    {
       id: "cognitiveComplexity",
       direction: "down",
       baseline: () => val("cognitiveComplexity"),
@@ -221,6 +228,20 @@ export function buildManifest() {
       direction: "down",
       baseline: () => val("rtlPhysicalClasses"),
       measure: () => runAndMatch("scripts/check/check-rtl-ratchet.mjs", /rtlPhysicalClasses=(\d+)/),
+    },
+    {
+      id: "typeScaleSubFloorSizes",
+      direction: "down",
+      baseline: () => val("typeScaleSubFloorSizes"),
+      measure: () =>
+        runAndMatch("scripts/check/check-type-scale-ratchet.mjs", /typeScaleSubFloorSizes=(\d+)/),
+    },
+    {
+      id: "typeScaleFontBold",
+      direction: "down",
+      baseline: () => val("typeScaleFontBold"),
+      measure: () =>
+        runAndMatch("scripts/check/check-type-scale-ratchet.mjs", /typeScaleFontBold=(\d+)/),
     },
     {
       id: "typeCoveragePct",

@@ -4,91 +4,99 @@
 
 ---
 
-> **Ճշմարտության աղբյուրը՝** `electron/` աշխատանքային տարածք
-> **Վերջին թարմացումը՝** 2026-06-28 — v3.8.40
+> **Ճշմարտության աղբյուրը.** `electron/` աշխատանքային տարածք** Վերջին թարմացումը՝** 2026-06-28 — v3.8.40
 
-OmniRoute-ը տրամադրում է **Electron 41** + **electron-builder 26.10** հիմքով կառուցված միջպլատֆորմային աշխատասեղանի հավելված (Windows / macOS / Linux)։ Աշխատասեղանի հավելվածը գործարկում է Next.js-ի ինքնուրույն սերվերը որպես ենթապրոցես, `BrowserWindow`-ն ուղղորդում է դեպի այն և ավելացնում համակարգային սկուտեղ, ավտոմատ թարմացնող, IPC կամուրջ և զրոյական կազմաձևմամբ գաղտնիքների սկզբնարժեքավորում։
+OmniRoute առաքում է բազմպլատֆորմային աշխատասեղանի հավելված (Windows / macOS / Linux), որը կառուցված է**Electron 41** +** էլեկտրոնաշինարար 26.10** . Սեղանի հավելվածը ստեղծում է Next.js ինքնուրույն սերվերը որպես երեխա պրոցես, մատնանշում է `BrowserWindow` դրա վրա և ավելացնում է համակարգի սկուտեղ, ավտոմատ թարմացնող սարք, IPC կամուրջ և զրոյական կոնֆիգուրացիայի գաղտնի bootstrap:
 
 ## Ճարտարապետություն
 
 ```
-┌──────────────────────────────────────────────────────┐
-│ Electron-ի հիմնական պրոցեսը (electron/main.js)      │
-│ ├─ Մեկ օրինակի արգելափակում                          │
-│ ├─ Ենթապրոցես՝ Next.js-ի ինքնուրույն սերվեր          │
-│ │   (գործարկված Electron-ի Node միջավայրով)          │
-│ ├─ BrowserWindow → http://localhost:PORT             │
-│ ├─ Համակարգային սկուտեղ + համատեքստային ընտրացանկ    │
-│ ├─ Ավտոմատ թարմացում electron-updater-ի միջոցով     │
-│ ├─ Բովանդակության անվտանգության քաղաքականություն    │
-│ │   (աշխատաշրջանի վերնագրեր)                         │
-│ └─ Գաղտնիքների սկզբնարժեքավորում                     │
-│     (JWT / API_KEY_SECRET)                           │
-└──────────────────────────────────────────────────────┘
-            ↕ IPC կամուրջ (electron/preload.js)
-┌──────────────────────────────────────────────────────┐
-│ Արտապատկերիչ (Next.js-ի կառավարման վահանակ)          │
-│   window.electronAPI.* (contextIsolation)            │
-└──────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
+│ ├─ BrowserWindow → http://localhost:PORT     │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+└──────────────────────────────────────────────┘
+            ↕ IPC bridge (electron/preload.js)
+┌──────────────────────────────────────────────┐
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
+└──────────────────────────────────────────────┘
 ```
 
 ## Տարբերակներ
 
-Հաստատված է `electron/package.json`-ից՝
+Հաստատված է `electron/package.json` ից.
 
-| Փաթեթ              | Տարբերակ                                                                                |
-| ------------------ | --------------------------------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                                               |
-| `electron-builder` | `^26.15.3`                                                                              |
-| `electron-updater` | `^6.8.9`                                                                                |
-| `better-sqlite3`   | արմատային `^13.0.2` (Node-API-ի նախնական կառուցվածքներ՝ առանց Electron-ի վերակառուցման) |
-| Հավելվածի տարբերակ | `3.8.0`                                                                                 |
-| Հավելվածի id       | `online.omniroute.desktop`                                                              |
-| Արտադրանքի անուն   | `OmniRoute`                                                                             |
+| Փաթեթ               | Տարբերակ                                                                    |
+| ------------------- | --------------------------------------------------------------------------- |
+| `electron`          | `^43.4.1`                                                                   |
+| `electron-builder`  | `^26.15.3`                                                                  |
+| `electron-updater`  | `^6.8.9`                                                                    |
+| `better-sqlite3`    | root `^13.0.2` (Node-API-ն նախապես կառուցում է — ոչ Electron վերակառուցում) |
+| Հավելվածի տարբերակը | `3.8.0`                                                                     |
+| Հավելվածի ID        | `online.omniroute.desktop`                                                  |
+| Ապրանքի անվանումը   | `OmniRoute`                                                                 |
 
-## Սկրիպտներ (արմատային `package.json`)
+## Սցենարներ (արմատային `package.json`)
 
-| Սկրիպտ                            | Նպատակ                                                                                                          |
-| --------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Գործարկում է `npm run dev`, սպասում `localhost:20128`-ին և գործարկում Electron-ը                                |
-| `npm run electron:build`          | Կառուցում է Next.js-ը, ապա ընթացիկ ՕՀ-ի համար գործարկում `electron-builder`-ը                                   |
-| `npm run electron:build:win`      | Կառուցում է Windows-ի NSIS տեղադրիչը և դյուրակիր տարբերակը (x64)                                                |
-| `npm run electron:build:mac`      | Կառուցում է macOS-ի DMG-ը (Intel + Apple Silicon)                                                               |
-| `npm run electron:build:linux`    | Կառուցում է Linux-ի AppImage-ը և DEB-ը (x64 + arm64)                                                            |
-| `npm run electron:smoke:packaged` | Գործարկում է փաթեթավորված երկուական ֆայլը, ստուգում `/login`-ը HTTP 200 պատասխանի համար, ապա ավարտում աշխատանքը |
+| Սցենար                            | Նպատակը                                                                                       |
+| --------------------------------- | --------------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Սկսում է `npm run dev` + սպասում է `localhost:20128` + գործարկում է Electron                  |
+| `npm run electron:build`          | Կառուցում է Next.js, այնուհետև գործարկում է `electron-builder` ընթացիկ OS համար               |
+| `npm run electron:build:win`      | Կառուցում է Windows NSIS տեղադրող + շարժական (x64)                                            |
+| `npm run electron:build:mac`      | Կառուցում է macOS DMG (Intel + Apple Silicon)                                                 |
+| `npm run electron:build:linux`    | Կառուցում է Linux AppImage + DEB (x64 + arm64)                                                |
+| `npm run electron:smoke:packaged` | Գործարկում է փաթեթավորված երկուական և զննում `/login` HTTP 200-ի համար, այնուհետև անջատվում է |
 
-`electron/` աշխատանքային տարածքը նաև տրամադրում է՝
+`electron/` աշխատանքային տարածքը նաև բացահայտում է.
 
-- `npm run prepare:bundle` — գործարկում է `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — մեկ ճարտարապետության համար macOS-ի կառուցումներ
-- `npm run pack` — միայն պանակով կառուցում՝ տեղային փորձարկման համար (առանց տեղադրիչի)
+- `npm run prepare:bundle` — աշխատում `scripts/build/prepare-electron-standalone.mjs`
+- `npm run build:mac-x64` / `build:mac-arm64` — միաձույլ macOS կառուցում
+- `npm run pack` — գրացուցակ միայն տեղական փորձարկման համար (առանց տեղադրողի)
 
-## Թղթապանակների կառուցվածքը
+## Ընտրովի աշխատաժամանակի փաթեթներ
+
+Desktop build-ները կարող են հրապարակել կամընտիր գործարկման ժամանակի արխիվները իրենց տեղադրողների հետ մեկտեղ: Տեղադրված սերվերի ծանրաբեռնվածությունը պարունակում է `optional-packs.index.json` ( `resources/app` ի տակ Windows ում և Linux): `browser-runtime` մուտքի համար կարդացեք `packs[].tarball` և ներբեռնեք** հենց այդ ֆայլի անունը նույն թողարկումից** . Արխիվային անունները ներառում են SHA-256 digest; տարբեր կառուցումներ կարող են պահանջել տարբեր արխիվներ: Ներբեռնված ֆայլի անունը պահեք անփոփոխ:
+
+Պատճենեք տեղադրված հավելվածի ինդեքսը և ընտրված արխիվը մեկ գրացուցակի մեջ, այնուհետև օգտագործեք CLI նույն թողարկումից.
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` ցուցադրում է տեղադրման և հաստատման վիճակը, այլ ոչ թե արխիվի ֆայլի անունը: Միավորված ինդեքսն ընտրում է արխիվը: Տեղադրումը ստուգում է իր արխիվային ստուգման գումարը մինչ հանումը, իսկ փաթեթի ստուգման գումարները՝ նախքան տեղադրված փաթեթը փոխարինելը: Այն կարդում է տեղական ֆայլերը; այն չի ներբեռնում բացակայող արխիվները: Տեղադրվելուց հետո վերագործարկեք հավելվածը: Եթե թողարկումը չունի համապատասխան օբյեկտ, կամընտիր փաթեթը հասանելի չէ այդ թողարկման ակտիվների միջոցով:
+
+## Գրացուցակի դասավորություն
 
 ```
 electron/
-├── package.json              # Electron-ի կախվածություններ + electron-builder-ի կազմաձևում
-├── main.js                   # Հիմնական պրոցես (24 KB — տե՛ս ստորև բերված ծանոթագրությունները)
-├── preload.js                # contextBridge IPC կամուրջ
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI տիպեր
-├── README.md                 # Աշխատանքային տարածքի ներքին նշումներ
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder-ի ելքային տվյալներ (անտեսվում է git-ի կողմից)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Նախապատրաստում է .next/electron-standalone փաթեթը
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Կազմումից հետո արագ ստուգման թեստ
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Ե՛վ `main.js`-ը, և՛ `preload.js`-ը **CommonJS `.js` ֆայլեր են**, ոչ թե TypeScript։ Ռենդերերի
-կողմի տիպերի սահմանումները գտնվում են `electron/types.d.ts`-ում։
+`main.js` էլ, `preload.js` են**CommonJS `.js` ֆայլեր** , ոչ TypeScript. Renderer-ի կողմի մուտքագրումները ապրում են `electron/types.d.ts` ում:
 
 ## IPC կամուրջ (`preload.js`)
 
-Նախաբեռնման սկրիպտը `contextBridge`-ի միջոցով `window.electronAPI`-ում հասանելի է դարձնում թույլատրելի ցանկով սահմանափակված API՝
-`contextIsolation: true` և `nodeIntegration: false` կարգավորումներով։
+Նախաբեռնումը բացահայտում է API սպիտակ ցուցակը `window.electronAPI` ում, օգտագործելով `contextBridge` `contextIsolation: true` և `nodeIntegration: false` հետ:
 
 ```javascript
 const VALID_CHANNELS = {
@@ -107,159 +115,141 @@ const VALID_CHANNELS = {
 };
 ```
 
-Հասանելի դարձված մեթոդները՝
+Բացահայտված մեթոդներ.
 
-| Ռենդերերի կանչ                                                    | Տիպ                               |
-| ----------------------------------------------------------------- | --------------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                            |
-| `openExternal(url)`                                               | invoke                            |
-| `getDataDir()`                                                    | invoke                            |
-| `restartServer()`                                                 | invoke                            |
-| `getAppVersion()`                                                 | invoke                            |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                            |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                              |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (վերադարձնում է disposer) |
+| Արտադրողի զանգ                                                    | Տեսակ                            |
+| ----------------------------------------------------------------- | -------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | կանչել                           |
+| `openExternal(url)`                                               | կանչել                           |
+| `getDataDir()`                                                    | կանչել                           |
+| `restartServer()`                                                 | կանչել                           |
+| `getAppVersion()`                                                 | կանչել                           |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | կանչել                           |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | ուղարկել                         |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | ստանալ (վերադարձնում է տնօրինող) |
 
-Ընդունման օժանդակ ֆունկցիաները վերադարձնում են **disposer ֆունկցիա**՝
-`removeAllListeners`-ի վրա հիմնվելու փոխարեն։ Սա կանխում է իրադարձությունների մշակիչների կուտակումը, երբ React-ի բաղադրիչները
-կրկին մոնտաժվում են։
+Ընդունող օգնականները վերադառնում են ա** տնօրինող գործառույթ** `removeAllListeners` — վրա հենվելու փոխարեն սա կանխում է լսողի կուտակումը, երբ React բաղադրիչները վերամիավորվում են:
 
-## Սերվերի կենսացիկլը
+## Սերվերի կյանքի ցիկլը
 
-`main.js`-ը Next.js-ի ինքնուրույն փաթեթը գործարկում է անմիջապես Electron-ի Node
-կատարման միջավայրով՝ համակարգային Node-ի հետ բնիկ մոդուլների ABI անհամատեղելիությունից խուսափելու համար․
+`main.js` ստեղծում է Next.js առանձին փաթեթն ուղղակիորեն Electron Node-ի գործարկման ժամանակի հետ՝ խուսափելու տեղական մոդուլի ABI անհամապատասխանությունից համակարգի հանգույցի հետ:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-Կարևոր կետեր՝
+Առանձնահատկություններ.
 
-- `waitForServer()`-ը հարցումներ է ուղարկում URL-ին մինչև 30 վրկ՝ նախքան պատուհանը ցուցադրելը (սառը մեկնարկի ժամանակ դատարկ էկրան չի ցուցադրվում)։
-- `stdio: "pipe"`-ը որսում է stdout/stderr-ը․ պատրաստ լինելու արտահայտությունները (`Ready` / `listening`) IPC-ով ուղարկում են `server-status: running`։
-- `before-quit`-ը մինչև 5 վրկ սպասում է SIGTERM-ի միջոցով նրբորեն ավարտվելուն (WAL-ի վերահսկիչ կետի ստեղծմանը), ապա ուղարկում է SIGKILL։
-- Համակարգային դարակի պորտի փոխարկիչը (`20128`, `3000`, `8080`) կանգնեցնում և վերագործարկում է սերվերը, ապա վերաբեռնում BrowserWindow-ը։
+- `waitForServer()` ստուգում է URL մինչև 30 վրկ՝ նախքան պատուհանը ցուցադրելը (սառը մեկնարկի դեպքում դատարկ էկրան չկա):
+- `stdio: "pipe"` գրավում stdout/stderr; պատրաստ արտահայտությունները (`Ready` / `listening`) emit `server-status: running` over IPC.
+- `before-quit` սպասում է մինչև 5 վայրկյան նրբագեղ SIGTERM ին (WAL անցակետ), այնուհետև ուղարկում է SIGKILL:
+- Պորտի փոխարկիչը սկուտեղի մեջ (`20128`, `3000`, `8080`) դադարեցնում և վերագործարկում է սերվերը, այնուհետև վերաբեռնում է BrowserWindow ը:
 
-## Առանց կազմաձևման գաղտնիքների սկզբնարժեքավորում
+## Zero-config Secret Bootstrap
 
-Առաջին գործարկման ժամանակ հիմնական գործընթացն ավտոմատ կերպով գեներացնում և պահպանում է բացակայող գաղտնիքները.
+Առաջին գործարկման ժամանակ հիմնական գործընթացը ինքնաբերաբար ստեղծվում և պահպանում է բացակայող գաղտնիքները.
 
-| Գաղտնիք                  | Աղբյուր                                                                                                    |
-| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                                   |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (մերժում է, եթե գաղտնագրված հավատարմագրեր արդեն գոյություն ունեն) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                                   |
+| Գաղտնիք                  | Աղբյուր                                                                                                        |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                                       |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (հրաժարվում է, եթե գաղտնագրված հավատարմագրերն արդեն գոյություն ունեն) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                                       |
 
-Պահպանվում է `<DATA_DIR>/server.env`-ում։ `DATA_DIR`-ը որոշվում է հետևյալ կերպ.
+Համառել է `<DATA_DIR>/server.env`. `DATA_DIR` որոշում է.
 
-- Windows՝ `%APPDATA%\omniroute`
+- Windows: `%APPDATA%\omniroute`
 - Linux՝ `$XDG_CONFIG_HOME/omniroute` կամ `~/.omniroute`
-- macOS՝ `~/.omniroute`
+- macOS: `~/.omniroute`
 
-## Միջավայրի ֆայլի որոնում
+## Շրջակա միջավայրի ֆայլերի որոնում
 
-Սերվերը գործարկելուց առաջ հիմնական գործընթացը (`getPreferredEnvFilePath()`՝
-`electron/main.js`-ում) ընտրում է **մեկ** `.env` ֆայլ՝ գոյություն ունեցողներից առաջինը։
+Նախքան սերվերի ձվադրումը, ընտրվում է հիմնական գործընթացը (`getPreferredEnvFilePath()` in `electron/main.js`):** մեկ** `.env` ֆայլ. դրանցից առաջինը, որը գոյություն ունի:
 
-1. `$DATA_DIR/.env`, երբ `DATA_DIR`-ը սահմանված է այն միջավայրում, որից գործարկվել է հավելվածը։
-2. `<resolved DATA_DIR>/.env`՝ օգտագործելով վերոնշյալ նույն լռելյայն արժեքները՝ `%APPDATA%\omniroute\.env`
-   Windows-ում, `$XDG_CONFIG_HOME/omniroute/.env` կամ `~/.omniroute/.env`՝ Linux-ում և macOS-ում։
-3. `.env`՝ գործընթացի աշխատանքային պանակում։
+1. `$DATA_DIR/.env`, երբ `DATA_DIR` դրված է այն միջավայրում, որով գործարկվել է հավելվածը:
+2. `<resolved DATA_DIR>/.env`, օգտագործելով վերը նշված նույն լռելյայնները. `%APPDATA%\omniroute\.env` Windows ի վրա, `$XDG_CONFIG_HOME/omniroute/.env` կամ `~/.omniroute/.env` Linux և macOS վրա:
+3. `.env` գործընթացի աշխատանքային գրացուցակում:
 
-Հիմնական գործընթացը կարդում է միայն այդ ֆայլը․ հաջորդ թեկնածու ֆայլերը չեն միավորվում։ Այնուհետև
-սերվերի միջավայրը կառուցվում է հետևյալ առաջնահերթությամբ (ամենաբարձրը՝ առաջինը).
+Հիմնական գործընթացը կարդում է միայն այդ ֆայլը; Հետագայում թեկնածուները չեն միավորվում: Սերվերի միջավայրն այնուհետև կառուցվում է այս գերակայությամբ (առաջինը ամենաբարձրը).
 
-1. Electron գործընթացի միջավայրը (փոփոխականները, որոնք ժառանգվել են հավելվածը գործարկած միջավայրից)։
-2. Ընտրված `.env` ֆայլը։
-3. `<DATA_DIR>/server.env` (վերոնշյալ սկզբնարժեքավորման գաղտնիքները)։
+1. Electron գործընթացի միջավայրը (փոփոխականներ, որոնք ժառանգվել են այն ամենից, ինչ գործարկվել է հավելվածը):
+2. Ընտրված `.env` ֆայլը:
+3. `<DATA_DIR>/server.env` (վերևում գտնվող bootstrap գաղտնիքները):
 
-Գործընթացի միջավայրը պահպանվում է հավելվածի մեկնարկի պահին, ուստի հավելվածի աշխատանքի ընթացքում
-սահմանված համակարգային կամ օգտատիրոջ միջավայրի փոփոխականը (ներառյալ այն ժամանակ, երբ հավելվածը պատուհանը
-փակելուց հետո մնում է համակարգային սկուտեղում) չի հասնի սերվերին, մինչև հավելվածը լիովին չփակվի և
-չվերագործարկվի։ Գործարկման ժամանակ կիրառվող կարգավորումների համար, ինչպիսին է `CONTEXT_LENGTH_<PROVIDER>`-ը (տես
-[Միջավայրի փոփոխականներ․ յուրաքանչյուր մատակարարի համատեքստի երկարություն](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
-նախընտրեք `.env` ֆայլը, ապա լիովին փակեք հավելվածը (համակարգային սկուտեղից՝ **Դուրս գալ**) և վերագործարկեք այն։
+Գործընթացի միջավայրը ֆիքսվում է, երբ ծրագիրը մեկնարկում է, ուստի համակարգի կամ օգտատիրոջ միջավայրի փոփոխականը սահմանված է, երբ հավելվածն աշխատում է (ներառյալ այն, երբ այն նստում է սկուտեղի մեջ՝ պատուհանը փակելուց հետո) չի հասնում սերվերին, քանի դեռ հավելվածն ամբողջությամբ դուրս չի եկել և վերագործարկվել: Գործարկման ժամանակի կոճակների համար, ինչպիսին է `CONTEXT_LENGTH_<PROVIDER>` (տես [Environment Variables. Per-provider-ի համատեքստի երկարությունը](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), նախընտրեք `.env` ֆայլը, այնուհետև ամբողջությամբ դուրս գալ (սկուտեղ,** Դուրս գալ** ) և վերագործարկել:
 
-## Պատուհան և համակարգային սկուտեղ
+## Պատուհան և սկուտեղ
 
-- `BrowserWindow`՝ 1400×900 (նվազագույնը՝ 1024×700), `backgroundColor: "#0a0a0a"`։
-- macOS՝ `titleBarStyle: "hiddenInset"`, պատուհանի կառավարման կոճակները՝ `{ x: 16, y: 16 }` դիրքում։
-- Windows/Linux՝ համակարգային վերնագրագոտի։
-- Փակման կոճակը փոքրացնում է հավելվածը դեպի համակարգային սկուտեղ․ սկուտեղի ընտրացանկն ունի **Բացել OmniRoute-ը**, **Բացել կառավարման վահանակը** (արտաքին դիտարկիչում), **Սերվերի պորտ** ենթամենյուն, **Ստուգել թարմացումները**, **Դուրս գալ** տարրերը։
+- `BrowserWindow`՝ 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, լուսացույց `{ x: 16, y: 16 }`:
+- Windows/Linux: հայրենի վերնագրի տող:
+- Փակման կոճակը նվազագույնի է հասցնում սկուտեղին; սկուտեղի մենյուն ունի** Բացեք OmniRoute** ,** Բացեք վահանակը** (արտաքին զննարկիչ),** Սերվերի պորտ** ենթամենյու,** Ստուգեք թարմացումների համար** ,** Դուրս գալ** .
 
 ## Բովանդակության անվտանգության քաղաքականություն
 
-Սահմանվում է `session.defaultSession.webRequest.onHeadersReceived`-ի միջոցով։ Հատկանշական հրահանգներ.
+Սահմանել `session.defaultSession.webRequest.onHeadersReceived` միջոցով: Հատկանշական հրահանգներ.
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Մշակման ռեժիմը միայն `script-src`-ին ավելացնում է `'unsafe-eval'`
+- Dev ռեժիմն ավելացնում է `'unsafe-eval'` միայն `script-src` ին
 
 ## Ավտոմատ թարմացում
 
-Օգտագործում է `electron-updater`-ը՝ GitHub մատակարարով (`diegosouzapw/OmniRoute`)։
+Օգտագործում է `electron-updater` GitHub մատակարարի հետ (`diegosouzapw/OmniRoute`):
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Իրադարձությունները փոխանցվում են ցուցադրման գործընթացին `update-status` IPC-ի միջոցով՝
-  `checking`, `available`, `not-available`, `downloading` (`percent`-ով), `downloaded`, `error`
-- `installUpdate()`-ը դադարեցնում է սերվերը, ապա կանչում `autoUpdater.quitAndInstall()`-ը
-- Բաց է թողնվում մշակման ռեժիմում (`!app.isPackaged`)
+- Իրադարձությունները վերահասցեավորվել են մատուցողին `update-status` IPC միջոցով՝ `checking`, `available`, `not-available`, `downloading` ( `percent` ով), `downloaded`, `error`
+- `installUpdate()` սպանում է սերվերին, այնուհետև զանգում է `autoUpdater.quitAndInstall()`
+- Բաց թողնված է մշակման ռեժիմում (`!app.isPackaged`)
 
-## Կառուցման խողովակաշար
+## Կառուցել խողովակաշար
 
-1. `npm run build` → Next.js-ի standalone տարբերակը՝ `.next/standalone`-ում։
-2. `prepare-electron-standalone.mjs` → վերափաթեթավորում է `.next/electron-standalone`-ում և վերագրում է `server.js`-ի ու `required-server-files.json`-ի ներսում գտնվող բացարձակ ուղիները, որպեսզի փաթեթը հնարավոր լինի տեղափոխել։
-3. `electron-builder`-ը փաթեթավորում է `main.js`-ը, `preload.js`-ը, `node_modules`-ը և `extraResources: { ../.next/electron-standalone → app }`-ը։
+1. `npm run build` → Next.js ինքնուրույն է `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → վերափոխվում է `.next/electron-standalone` ի և վերագրում է բացարձակ ուղիները `server.js` + `required-server-files.json` ներսում, որպեսզի փաթեթը տեղափոխվի:
+3. `electron-builder` փաթեթներ `main.js`, `preload.js`, `node_modules` և `extraResources: { ../.next/electron-standalone → app }`:
 
-### Կառուցման թիրախներ
+### Կառուցեք թիրախներ
 
-| ՕՀ      | Թիրախներ                                     |
-| ------- | -------------------------------------------- |
-| Windows | NSIS տեղադրիչ + շարժական տարբերակ (x64)      |
-| macOS   | DMG (Intel + arm64, քաշել դեպի Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)                 |
+| OS      | Թիրախներ                                    |
+| ------- | ------------------------------------------- |
+| Windows | NSIS տեղադրող + շարժական (x64)              |
+| macOS   | DMG (Intel + arm64, քաշել դեպի հավելվածներ) |
+| Linux   | AppImage + DEB (x64 + arm64)                |
 
-NSIS-ի կարգավորումները՝ `oneClick: false`, թույլ է տալիս օգտատիրոջն ընտրել տեղադրման պանակը և ստեղծում է Desktop-ի ու Start-Menu-ի դյուրանցումներ։
+NSIS կարգավորումներ. `oneClick: false`, թույլ է տալիս օգտվողին ընտրել տեղադրման գրացուցակը, ստեղծել Desktop և Start-Menu դյուրանցումներ:
 
-## Փաթեթավորված կառուցման արագ ստուգում
+## Smoke Testing Packaged Build
 
 ```bash
 npm run electron:smoke:packaged
 ```
 
-`scripts/dev/smoke-electron-packaged.mjs`-ը՝
+`scripts/dev/smoke-electron-packaged.mjs`:
 
-- Ընթացիկ հարթակի համար ավտոմատ հայտնաբերում է փաթեթավորված գործարկվող ֆայլը `electron/dist-electron/`-ում։
-- Գործարկում է մեկուսացված `HOME`/`APPDATA`/`XDG_*` պանակներով, որպեսզի չփոփոխի մշակողի տվյալները։
-- 45 վրկ-ի ընթացքում պարբերաբար հարցումներ է ուղարկում `http://127.0.0.1:20128/login` հասցեին՝ սպասելով HTTP 200 պատասխանի։
-- stderr/stdout-ում հետևում է ճակատագրական սխալների ձևանմուշներին (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` և այլն)։
-- Պատրաստ լինելուց հետո սպասում է 2 վրկ կայուն աշխատանքի, ապա ուղարկում է SIGTERM և սպասում, մինչև պորտն ազատվի։
-- CI-ում ավտոմատ փոխանցում է `--no-sandbox --disable-gpu` (և `--disable-dev-shm-usage`՝ Linux-ում)։
+- Ավտոմատ կերպով հայտնաբերում է փաթեթավորված երկուականը `electron/dist-electron/` ում ընթացիկ պլատֆորմի համար:
+- Գործարկում է մեկուսացված `HOME`/`APPDATA`/`XDG_*` դիրեկտորիաներով, որպեսզի այն չդիպչի մշակողի տվյալներին:
+- Հարցումներ `http://127.0.0.1:20128/login` HTTP 200-ի համար 45 վ-ի ընթացքում:
+- Ժամացույցներ stderr/stdout ճակատագրական նախշերի համար (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, և այլն):
+- Պատրաստ լինելուց հետո սպասում է 2 վրկ կայուն աշխատանքի ժամանակ, այնուհետև թողարկում է SIGTERM և սպասում, որ նավահանգիստը ազատվի:
+- CI ում ավտոմատ անցնում է `--no-sandbox --disable-gpu` (և `--disable-dev-shm-usage` Linux ի վրա):
 
-Միջավայրի վերասահմանումներ՝ `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`։
+Env-ը գերագնահատում է՝ `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`:
 
 ## Կոդի ստորագրում
 
-`electron/package.json`-ը ստորագրման հավատարմագրերն ուղղակիորեն **չի** միացնում։ Դրանք միջավայրի փոփոխականների միջոցով փոխանցեք `electron-builder`-ին։
+`electron/package.json` անում** ոչ** մետաղալարով ստորագրման հավատարմագրերը ուղղակիորեն: Անցեք դրանք env vars-ի միջոցով `electron-builder`.
 
 ### macOS
 
 ```bash
-export APPLE_ID=<էլ․ հասցե>
-export APPLE_APP_SPECIFIC_PASSWORD=<գաղտնաբառ>
-export APPLE_TEAM_ID=<նույնացուցիչ>
+export APPLE_ID=<email>
+export APPLE_APP_SPECIFIC_PASSWORD=<password>
+export APPLE_TEAM_ID=<id>
 export CSC_LINK=path/to/cert.p12
-export CSC_KEY_PASSWORD=<վկայագրի-գաղտնաբառ>
+export CSC_KEY_PASSWORD=<cert-password>
 npm run electron:build:mac
 ```
 
@@ -267,38 +257,38 @@ npm run electron:build:mac
 
 ```bash
 export CSC_LINK=path/to/cert.pfx
-export CSC_KEY_PASSWORD=<վկայագրի-գաղտնաբառ>
+export CSC_KEY_PASSWORD=<cert-password>
 npm run electron:build:win
 ```
 
 ### Linux
 
-AppImage-ի ստորագրումը պարտադիր չէ․ ստորագրելու դեպքում սահմանեք `LINUX_GPG_KEY`։
+AppImage ստորագրումը կամընտիր է — սահմանված `LINUX_GPG_KEY` ստորագրման դեպքում:
 
-## Տարածում
+## Բաշխում
 
-Արտեֆակտները տեղադրվում են `electron/dist-electron/`-ում՝
+Արտեֆակտները վայրէջք են կատարում `electron/dist-electron/` ում.
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Թողարկումները հրապարակվում են GitHub Releases-ում (`diegosouzapw/OmniRoute`), որտեղ էլ `electron-updater`-ը ստուգում է նոր տարբերակների առկայությունը։
+Թողարկումները հրապարակվում են GitHub Releases (`diegosouzapw/OmniRoute`), որտեղ նաև `electron-updater` ստուգում է նոր տարբերակները:
 
-## Խնդիրների լուծում
+## Անսարքությունների վերացում
 
-| Ախտանիշ                                                                                | Լուծում                                                                                                                                                                                               |
-| -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'`՝ Electron-ի հիմնական տարբերակը թարմացնելուց հետո | better-sqlite3 v13-ը ներառում է Node-API-ի նախապես կառուցված ֆայլեր․ կրկին գործարկեք `npm install`-ը արմատային պանակում և `prepare:bundle`-ը (այն ստուգում է ընթացիկ հարթակի նախապես կառուցված ֆայլը) |
-| `ERR_DLOPEN_FAILED`՝ բնիկ մոդուլի համար                                                | Կրկին գործարկեք `prepare:bundle`-ը․ եթե ընթացիկ հարթակի համար Node-API-ի նախապես կառուցված ֆայլը բացակայում է, այն անմիջապես ընդհատվում է սխալով                                                      |
-| Linux-ում պատուհանը դատարկ է երևում                                                    | Համոզվեք, որ Next.js սերվերն իրականում կապվել է PORT-ին (ստուգեք `[Server]` մատյանները)                                                                                                               |
-| macOS-ի նոտարական վավերացումը կանգ է առնում                                            | Համոզվեք, որ `APPLE_*` փոփոխականներն արտահանված են, այլ ոչ թե պարզապես սահմանված են `.env`-ում                                                                                                        |
-| Windows SmartScreen-ի նախազգուշացում                                                   | Ստորագրեք EV վկայագրով, կամ օգտատերերը կարող են աջ սեղմել → «Միևնույն է գործարկել»                                                                                                                    |
-| Արագ ստուգումը ձախողվում է զբաղված պորտի պատճառով                                      | `electron:smoke:packaged`-ը գործարկելուց առաջ կանգնեցրեք 20128 պորտն օգտագործող ցանկացած տեղային մշակման սերվեր                                                                                       |
+| Ախտանիշ                                                           | Ուղղել                                                                                                                                                                              |
+| ----------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` հետո Electron հիմնական bump | better-sqlite3 v13-ը ուղարկում է Node-API-ն նախապես կառուցում է — նորից գործարկում `npm install` արմատից և `prepare:bundle` (այն հաստատում է ընթացիկ պլատֆորմի նախնական կառուցումը) |
+| `ERR_DLOPEN_FAILED` մայրենի մոդուլի համար                         | Վերագործարկեք `prepare:bundle` — այն արագորեն ձախողվում է, երբ առկա պլատֆորմի համար Node-API նախնական կառուցումը բացակայում է:                                                      |
+| Պատուհանը դատարկ է հայտնվում Linux ում                            | Հաստատեք Next.js սերվերը իրականում կապված է PORT ին (ստուգեք `[Server]` տեղեկամատյանները)                                                                                           |
+| macOS նոտարական կրպակներ                                          | Համոզվեք, որ `APPLE_*` vars արտահանվում են, ոչ միայն `.env` ում                                                                                                                     |
+| Windows SmartScreen նախազգուշացում                                | Մուտքագրեք EV cert-ով, կամ օգտատերերը աջ սեղմեք → «Համենայն դեպս գործարկել»                                                                                                         |
+| Ծխի թեստը ձախողվում է օգտագործման պորտի հետ                       | Նախքան `electron:smoke:packaged` գործարկելը դադարեցրեք 20128-ի ցանկացած տեղական մշակող սերվեր                                                                                       |
 
 ## Տես նաև
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - Աղբյուր՝ `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Օժանդակ սկրիպտներ՝ `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Օգնողներ՝ `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

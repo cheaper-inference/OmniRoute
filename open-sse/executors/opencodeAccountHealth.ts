@@ -27,13 +27,13 @@ export function markCooldown(
  * markSuccess, whose account-health reset must stay reserved for real successes.
  * Nothing is held unless PROXY_SKIP_RECENTLY_FAILED was on, so this costs no flag read.
  */
-export function noteResponseServed(account: ProxiedAccount): void {
-  if (hasProxyRefusals()) noteProxyServed(proxyEgressKey(account.proxy));
+export function noteResponseServed(account: ProxiedAccount, model?: string | null): void {
+  if (hasProxyRefusals()) noteProxyServed(proxyEgressKey(account.proxy), model);
 }
 
-export function markSuccess(account: ProxiedAccount): void {
+export function markSuccess(account: ProxiedAccount, model?: string | null): void {
   markAccountSuccess(account);
-  noteResponseServed(account);
+  noteResponseServed(account, model);
 }
 
 /**
@@ -42,7 +42,11 @@ export function markSuccess(account: ProxiedAccount): void {
  * account served; anything else keeps its history and only records that the proxy
  * carried a response.
  */
-export function markOutcome(account: ProxiedAccount, response: Response): void {
-  if (response.ok) markSuccess(account);
-  else noteResponseServed(account);
+export function markOutcome(
+  account: ProxiedAccount,
+  response: Response,
+  model?: string | null
+): void {
+  if (response.ok) markSuccess(account, model);
+  else noteResponseServed(account, model);
 }

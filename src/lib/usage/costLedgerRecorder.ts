@@ -1,3 +1,4 @@
+import { readUsageEvidence } from "./usageEvidence";
 /**
  * usage/costLedgerRecorder.ts — wire the per-request cost ledger into the
  * existing cost-recording call sites (RIC-741 / M3 D2).
@@ -16,7 +17,13 @@
 
 import { recordLedgerEntrySafe } from "@/lib/db/costLedger";
 import { getPricingForModel } from "@/lib/db/settings/pricing";
-import { getLoggedInputTokens, getLoggedOutputTokens, getReasoningTokens } from "./tokenAccounting";
+import {
+  getLoggedInputTokens,
+  getLoggedOutputTokens,
+  getPromptCacheCreationTokens,
+  getPromptCacheReadTokens,
+  getReasoningTokens,
+} from "./tokenAccounting";
 import { toNumber } from "@/shared/utils/numeric";
 
 export interface CostLedgerRecorderInput {
@@ -51,10 +58,13 @@ export async function recordLedgerFromCost(input: CostLedgerRecorderInput): Prom
 
     recordLedgerEntrySafe({
       apiKeyId: input.apiKeyId,
+      usageEvidence: readUsageEvidence(input.tokens),
       provider: input.provider || "unknown",
       model: input.model || "unknown",
       tokensInput: getLoggedInputTokens(input.tokens),
       tokensOutput: getLoggedOutputTokens(input.tokens),
+      tokensCacheRead: getPromptCacheReadTokens(input.tokens),
+      tokensCacheCreation: getPromptCacheCreationTokens(input.tokens),
       tokensReasoning: getReasoningTokens(input.tokens),
       unitPriceInput,
       unitPriceOutput,

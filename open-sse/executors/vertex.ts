@@ -1,7 +1,11 @@
 import { SignJWT, importPKCS8 } from "jose";
 import { BaseExecutor, ExecuteInput } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
-import { getVertexModelTransport, normalizeVertexModelId } from "../config/vertexModels.ts";
+import {
+  getVertexHost,
+  getVertexModelTransport,
+  normalizeVertexModelId,
+} from "../config/vertexModels.ts";
 
 interface ServiceAccount {
   type: string;
@@ -189,20 +193,6 @@ function buildExpressGeminiUrl(
   }
   const op = stream ? "streamGenerateContent?alt=sse&" : "generateContent?";
   return `https://aiplatform.googleapis.com/v1/publishers/google/models/${canonicalModel}:${op}key=${expressKey}`;
-}
-
-/**
- * Resolve the endpoint host for a project-scoped Vertex call.
- *
- * Multi-region endpoints use the representative-endpoint (`.rep.`) hostname form and MUST be
- * paired with their own location in the path (`aiplatform.eu.rep.googleapis.com` +
- * `locations/eu`); the host and location cannot be mixed. All other regions (and the `global`
- * location) keep the legacy global host, which is what this executor used before the EU routing
- * fix and is still correct for them.
- */
-function getVertexHost(region: string): string {
-  if (region === "eu") return "aiplatform.eu.rep.googleapis.com";
-  return "aiplatform.googleapis.com";
 }
 
 function buildProjectScopedVertexUrl(

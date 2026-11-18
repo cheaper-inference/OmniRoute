@@ -46,28 +46,32 @@ kompyuta yako                            OmniRoute ya mbali (VPS)
 
 ## Kuunganisha
 
-### Kwa nenosiri la usimamizi (uanzishaji)
+### Kwa kutumia nenosiri la usimamizi (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
 # Nenosiri la usimamizi la http://192.168.0.15:20128: ********
-# ✔ Imeunganishwa na http://192.168.0.15:20128 — muktadha '192.168.0.15' (upeo: admin)
+# ✔ Imeunganishwa kwenye http://192.168.0.15:20128 — muktadha '192.168.0.15' (scope: admin)
 ```
 
-Mtiririko wa nenosiri hutengeneza tokeni ya **admin** kwa chaguo-msingi (unalo nenosiri, kwa hiyo
-tayari una udhibiti kamili). Punguza upeo kwa `--scope`:
+Mtiririko wa nenosiri hutengeneza tokeni ya **admin** kwa chaguo-msingi (una nenosiri, kwa hivyo tayari una udhibiti kamili). Punguza scope kwa `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Chaguo: `--port <p>` (wakati host haina port), `--name <ctx>` (jina la muktadha),
-`--scope read|write|admin`. URL kamili inatumika kama ilivyo:
+Chaguo: `--port <p>` (wakati mwenyeji hana port), `--name <ctx>` (jina la muktadha),
+`--scope read|write|admin`. URL kamili hutumika kama ilivyo:
 `omniroute connect https://omni.example.com`.
 
-### Kwa tokeni iliyotengenezwa mapema
+Wakati seva imewezeshwa uthibitishaji wa vipengele viwili kwenye dashibodi (Mipangilio →
+Usalama), nenosiri pekee hukataliwa: CLI kisha huomba msimbo kutoka kwenye programu ya
+kithibitishaji (au msimbo wa kurejesha). Weka msimbo huo mapema kwa `--totp <code>` kwa
+matumizi yasiyoingiliana.
 
-Tengeneza tokeni yenye upeo kwenye dashibodi (au kwa `omniroute tokens create`) na
+### Kwa kutumia tokeni iliyotengenezwa awali
+
+Tengeneza tokeni yenye scope kwenye dashibodi (au kwa `omniroute tokens create`) na
 uibandike — hakuna nenosiri linalohitajika:
 
 ```bash
@@ -438,14 +442,14 @@ omniroute contexts remove 192-168-0-15 --yes   # futa muktadha wa ndani (hata uk
 
 ---
 
-## Endpoint za API (marejeleo)
+## Vituo vya API (rejeleo)
 
-| Mbinu  | Njia                  | Uthibitishaji         | Upeo                                |
-| ------ | --------------------- | --------------------- | ----------------------------------- |
-| POST   | `/api/cli/connect`    | nenosiri la usimamizi | — (ya umma, inalindwa kwa nenosiri) |
-| GET    | `/api/cli/whoami`     | token ya ufikiaji     | kusoma                              |
-| GET    | `/api/cli/tokens`     | token ya ufikiaji     | usimamizi                           |
-| POST   | `/api/cli/tokens`     | token ya ufikiaji     | usimamizi                           |
-| DELETE | `/api/cli/tokens/:id` | token ya ufikiaji     | usimamizi                           |
+| Mbinu  | Njia                  | Uthibitishaji                 | Wigo                                  |
+| ------ | --------------------- | ----------------------------- | ------------------------------------- |
+| POST   | `/api/cli/connect`    | nenosiri; 2FA ikiwa imewashwa | — (ya umma, inayolindwa kwa nenosiri) |
+| GET    | `/api/cli/whoami`     | tokeni ya ufikiaji            | kusoma                                |
+| GET    | `/api/cli/tokens`     | tokeni ya ufikiaji            | msimamizi                             |
+| POST   | `/api/cli/tokens`     | tokeni ya ufikiaji            | msimamizi                             |
+| DELETE | `/api/cli/tokens/:id` | tokeni ya ufikiaji            | msimamizi                             |
 
-Tazama [openapi.yaml](../openapi.yaml) kwa schema kamili.
+Tazama [openapi.yaml](../openapi.yaml) kwa miundo kamili.

@@ -1,8 +1,7 @@
 "use client";
 
 import Icon from "@/shared/components/Icon";
-
-import { useState, useEffect, useCallback, useMemo, Suspense } from "react";
+import { useState, useEffect, useCallback, useMemo } from "react";
 import {
   Badge,
   Card,
@@ -76,6 +75,7 @@ import HighlightableProviderCard from "./components/HighlightableProviderCard";
 import ProviderCountBadge from "./components/ProviderCountBadge";
 import ProviderSummaryCard from "./components/ProviderSummaryCard";
 import DeprecatedProviderBanner from "./components/DeprecatedProviderBanner";
+import ProvidersPageFrame from "./components/ProvidersPageFrame";
 import {
   buildCompactProviderEntriesForPage,
   getCompactProviderAuthType,
@@ -160,7 +160,6 @@ type ProviderBatchTestResults = {
 function getConnectionErrorTag(connection, t: ProviderMessageTranslator) {
   if (!connection) return null;
   if (connection.prefixShadowed?.code === "prefix_shadowed") return "prefix_shadowed";
-
   const explicitType = connection.lastErrorType;
   if (explicitType === "runtime_error") return providerText(t, "errorTypeRuntime", "Runtime");
   if (
@@ -971,9 +970,7 @@ function ProvidersPageContent() {
                 className={expirations.summary.expired > 0 ? "text-error" : "text-warning"}
               />
               <div className="flex-1">
-                <h3
-                  className={`font-semibold ${expirations.summary.expired > 0 ? "text-error" : "text-warning"}`}
-                >
+                <h3 className={expirations.summary.expired > 0 ? "text-error" : "text-warning"}>
                   {expirations.summary.expired > 0
                     ? t("expirationBannerExpired", { count: expirations.summary.expired })
                     : t("expirationBannerExpiringSoon", {
@@ -1353,9 +1350,7 @@ function ProvidersPageContent() {
                 />
                 {llmProviderEntries.length > 0 && (
                   <div className="flex flex-col gap-3">
-                    <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-                      {t("llmProviders")}
-                    </h3>
+                    <h3 className="text-xs uppercase text-text-muted">{t("llmProviders")}</h3>
                     <ProviderCardGrid>
                       {llmProviderEntries.map(
                         ({ providerId, provider, stats, displayAuthType, toggleAuthType }) => (
@@ -1886,9 +1881,9 @@ function ProvidersPageContent() {
 
 export default function ProvidersPage() {
   return (
-    <Suspense fallback={null}>
+    <ProvidersPageFrame>
       <ProvidersPageContent />
-    </Suspense>
+    </ProvidersPageFrame>
   );
 }
 

@@ -5,6 +5,8 @@
  * not on this account" advances. A different account may still serve it.
  */
 
+import { isAssistantPrefillUnsupportedError } from "./assistantPrefillError.ts";
+
 export const MODEL_ACCESS_DENIED_PATTERNS = [
   /\binvalid model\b/i,
   /\bmodel.*not.*(?:available|found|supported|accessible)\b/i,
@@ -24,6 +26,9 @@ export const MODEL_ACCESS_DENIED_PATTERNS = [
 export function isModelScoped400(errorText: string | null | undefined): boolean {
   const text = String(errorText || "");
   if (!text) return false;
+  // "This model does not support assistant message prefill" is a request-shape
+  // rejection, not a missing model — it must never lock the model.
+  if (isAssistantPrefillUnsupportedError(text)) return false;
   if (MODEL_ACCESS_DENIED_PATTERNS.some((pattern) => pattern.test(text))) return true;
   return (
     /\bmodel\b[\s\S]{0,80}?\b(?:not\s+supported|unsupported|unknown|unavailable)\b/i.test(text) ||

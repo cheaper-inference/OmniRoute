@@ -33,7 +33,10 @@ export function TableLoadingRegion({
       {loading ? (
         <div data-slot="table-loading-overlay" className="ci-table-loading-overlay">
           <div className="ci-table-loading-overlay__indicator">
-            {loadingIndicator ?? <BrandLoader variant="axis" intro={false} size={144} label={loadingLabel} />}
+            {loadingIndicator ?? <>
+              <BrandLoader variant="axis" intro={false} size={144} label={loadingLabel} />
+              <span className="ci-table-loading-overlay__label" aria-hidden="true">{loadingLabel}</span>
+            </>}
           </div>
         </div>
       ) : null}

@@ -1,0 +1,455 @@
+{
+  "endpoint_id": "fal-ai/ace-step",
+  "metadata": {
+    "display_name": "ACE Step",
+    "category": "text-to-audio",
+    "description": "Generate music with lyrics from text using ACE-Step",
+    "status": "active",
+    "tags": ["text-to-audio", "text-to-music"],
+    "updated_at": "2026-10-20T21:57:01.802Z",
+    "is_favorited": null,
+    "thumbnail_url": "https://v3b.fal.media/files/b/0a9f91b3/9VL1XeX8WQ9GzM0BA_gC7_MYE49kWH.png",
+    "model_url": "https://fal.run/fal-ai/ace-step",
+    "license_type": "commercial",
+    "date": "2025-05-08T21:47:06.754Z",
+    "group": {
+      "key": "ace-step",
+      "label": "Lyrics to Audio"
+    },
+    "highlighted": false,
+    "kind": "inference",
+    "pinned": false
+  },
+  "openapi": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Queue OpenAPI for fal-ai/ace-step",
+      "version": "1.0.0",
+      "description": "The OpenAPI schema for the fal-ai/ace-step queue.",
+      "x-fal-metadata": {
+        "endpointId": "fal-ai/ace-step",
+        "category": "text-to-audio",
+        "thumbnailUrl": "https://v3b.fal.media/files/b/0a9f91b3/9VL1XeX8WQ9GzM0BA_gC7_MYE49kWH.png",
+        "playgroundUrl": "https://fal.ai/models/fal-ai/ace-step",
+        "documentationUrl": "https://fal.ai/models/fal-ai/ace-step/api",
+        "about": "Generate audio from text using the ACE-Step model."
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Authorization",
+          "description": "Fal Key"
+        }
+      },
+      "schemas": {
+        "QueueStatus": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]
+            },
+            "request_id": {
+              "type": "string",
+              "description": "The request id."
+            },
+            "response_url": {
+              "type": "string",
+              "description": "The response url."
+            },
+            "status_url": {
+              "type": "string",
+              "description": "The status url."
+            },
+            "cancel_url": {
+              "type": "string",
+              "description": "The cancel url."
+            },
+            "logs": {
+              "type": "object",
+              "description": "The logs.",
+              "additionalProperties": true
+            },
+            "metrics": {
+              "type": "object",
+              "description": "The metrics.",
+              "additionalProperties": true
+            },
+            "queue_position": {
+              "type": "integer",
+              "description": "The queue position."
+            }
+          },
+          "required": ["status", "request_id"]
+        },
+        "AceStepInput": {
+          "type": "object",
+          "properties": {
+            "lyrics": {
+              "description": "Lyrics to be sung in the audio. If not provided or if [inst] or [instrumental] is the content of this field, no lyrics will be sung. Use control structures like [verse], [chorus] and [bridge] to control the structure of the song.",
+              "type": "string",
+              "default": "",
+              "title": "Lyrics"
+            },
+            "tags": {
+              "description": "Comma-separated list of genre tags to control the style of the generated audio. Can also be supplied as `prompt`.",
+              "examples": ["lofi, hiphop, drum and bass, trap, chill"],
+              "type": "string",
+              "title": "Tags"
+            },
+            "number_of_steps": {
+              "examples": [27],
+              "minimum": 3,
+              "type": "integer",
+              "default": 27,
+              "description": "Number of steps to generate the audio.",
+              "maximum": 60,
+              "title": "Number Of Steps"
+            },
+            "scheduler": {
+              "description": "Scheduler to use for the generation process.",
+              "enum": ["euler", "heun"],
+              "type": "string",
+              "default": "euler",
+              "examples": ["euler"],
+              "title": "Scheduler"
+            },
+            "granularity_scale": {
+              "examples": [10],
+              "minimum": -100,
+              "type": "integer",
+              "default": 10,
+              "description": "Granularity scale for the generation process. Higher values can reduce artifacts.",
+              "maximum": 100,
+              "title": "Granularity Scale"
+            },
+            "seed": {
+              "description": "Random seed for reproducibility. If not provided, a random seed will be used.",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Seed"
+            },
+            "guidance_interval_decay": {
+              "examples": [0],
+              "minimum": 0,
+              "type": "number",
+              "default": 0,
+              "description": "Guidance interval decay for the generation. Guidance scale will decay from guidance_scale to min_guidance_scale in the interval. 0.0 means no decay.",
+              "maximum": 1,
+              "title": "Guidance Interval Decay"
+            },
+            "minimum_guidance_scale": {
+              "examples": [3],
+              "minimum": 0,
+              "type": "number",
+              "default": 3,
+              "description": "Minimum guidance scale for the generation after the decay.",
+              "maximum": 200,
+              "title": "Minimum Guidance Scale"
+            },
+            "guidance_interval": {
+              "examples": [0.5],
+              "minimum": 0,
+              "type": "number",
+              "default": 0.5,
+              "description": "Guidance interval for the generation. 0.5 means only apply guidance in the middle steps (0.25 * infer_steps to 0.75 * infer_steps)",
+              "maximum": 1,
+              "title": "Guidance Interval"
+            },
+            "tag_guidance_scale": {
+              "examples": [5],
+              "minimum": 0,
+              "type": "number",
+              "default": 5,
+              "description": "Tag guidance scale for the generation.",
+              "maximum": 10,
+              "title": "Tag Guidance Scale"
+            },
+            "duration": {
+              "description": "The duration of the generated audio in seconds.",
+              "minimum": 5,
+              "type": "number",
+              "default": 60,
+              "maximum": 240,
+              "title": "Duration"
+            },
+            "lyric_guidance_scale": {
+              "examples": [1.5],
+              "minimum": 0,
+              "type": "number",
+              "default": 1.5,
+              "description": "Lyric guidance scale for the generation.",
+              "maximum": 10,
+              "title": "Lyric Guidance Scale"
+            },
+            "guidance_type": {
+              "description": "Type of CFG to use for the generation process.",
+              "enum": ["cfg", "apg", "cfg_star"],
+              "type": "string",
+              "default": "apg",
+              "examples": ["apg"],
+              "title": "Guidance Type"
+            },
+            "guidance_scale": {
+              "examples": [15],
+              "minimum": 0,
+              "type": "number",
+              "default": 15,
+              "description": "Guidance scale for the generation.",
+              "maximum": 200,
+              "title": "Guidance Scale"
+            }
+          },
+          "required": ["tags"],
+          "x-fal-order-properties": [
+            "tags",
+            "lyrics",
+            "duration",
+            "number_of_steps",
+            "seed",
+            "scheduler",
+            "guidance_type",
+            "granularity_scale",
+            "guidance_interval",
+            "guidance_interval_decay",
+            "guidance_scale",
+            "minimum_guidance_scale",
+            "tag_guidance_scale",
+            "lyric_guidance_scale"
+          ],
+          "title": "ACEStepTextToAudioRequest"
+        },
+        "AceStepOutput": {
+          "type": "object",
+          "properties": {
+            "lyrics": {
+              "description": "The lyrics used in the generation process.",
+              "examples": ["[inst]"],
+              "type": "string",
+              "title": "Lyrics"
+            },
+            "tags": {
+              "description": "The genre tags used in the generation process.",
+              "examples": ["lofi, hiphop, drum and bass, trap, chill"],
+              "type": "string",
+              "title": "Tags"
+            },
+            "audio": {
+              "description": "The generated audio file.",
+              "examples": [
+                {
+                  "url": "https://storage.googleapis.com/falserverless/example_outputs/ace-step-text-to-audio.wav"
+                }
+              ],
+              "$ref": "#/components/schemas/File"
+            },
+            "seed": {
+              "description": "The random seed used for the generation process.",
+              "examples": [42],
+              "type": "integer",
+              "title": "Seed"
+            }
+          },
+          "required": ["audio", "seed", "tags", "lyrics"],
+          "x-fal-order-properties": ["audio", "seed", "tags", "lyrics"],
+          "title": "ACEStepResponse"
+        },
+        "File": {
+          "type": "object",
+          "properties": {
+            "url": {
+              "description": "The URL where the file can be downloaded from.",
+              "type": "string",
+              "title": "Url"
+            },
+            "content_type": {
+              "description": "The mime type of the file.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "examples": ["image/png"],
+              "title": "Content Type"
+            },
+            "file_size": {
+              "description": "The size of the file in bytes.",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "examples": [4404019],
+              "title": "File Size"
+            },
+            "file_name": {
+              "description": "The name of the file. It will be auto-generated if not provided.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "examples": ["z9RV14K95DvU.png"],
+              "title": "File Name"
+            }
+          },
+          "required": ["url"],
+          "x-fal-order-properties": ["url", "content_type", "file_name", "file_size"],
+          "title": "File"
+        }
+      }
+    },
+    "paths": {
+      "/fal-ai/ace-step/requests/{request_id}/status": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            },
+            {
+              "name": "logs",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "description": "Whether to include logs (`1`) in the response or not (`0`)."
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/ace-step/requests/{request_id}/cancel": {
+        "put": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request was cancelled.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean",
+                        "description": "Whether the request was cancelled successfully."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/ace-step": {
+        "post": {
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AceStepInput"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/ace-step/requests/{request_id}": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Result of the request.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AceStepOutput"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "servers": [
+      {
+        "url": "https://queue.fal.run"
+      }
+    ],
+    "security": [
+      {
+        "apiKeyAuth": []
+      }
+    ]
+  }
+}

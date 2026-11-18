@@ -131,3 +131,64 @@ export function SortableProviderRow({
     </section>
   );
 }
+/**
+ * Sortable wrapper for the Full layout's collapsible provider sections. The
+ * caller places `handle` inside its own header (a `<summary>`); clicks on the
+ * grip are swallowed so grabbing it never toggles the section.
+ */
+export function SortableProviderBlock({
+  id,
+  label,
+  children,
+}: {
+  id: string;
+  label: string;
+  children: (handle: ReactNode) => ReactNode;
+}) {
+  const t = useTranslations("usage");
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    setActivatorNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id });
+  const handle = (
+    <Button
+      ref={setActivatorNodeRef}
+      variant="ghost"
+      size="icon-sm"
+      {...attributes}
+      {...listeners}
+      data-drag-handle
+      aria-label={`${t("healthDrag")}: ${label}`}
+      onClick={(event) => {
+        event.preventDefault();
+        event.stopPropagation();
+      }}
+      className="-ms-[6px] shrink-0 touch-none cursor-grab active:cursor-grabbing"
+    >
+      <Icon name="drag_indicator" size={15} />
+    </Button>
+  );
+  return (
+    <div
+      ref={setNodeRef}
+      data-provider={id}
+      data-dragging={isDragging || undefined}
+      style={{
+        transform: CSS.Transform.toString(
+          transform ? { ...transform, scaleX: 1, scaleY: 1 } : null
+        ),
+        transition,
+        position: "relative",
+        zIndex: isDragging ? 10 : undefined,
+      }}
+      className={isDragging ? "rounded-lg shadow-xl" : undefined}
+    >
+      {children(handle)}
+    </div>
+  );
+}

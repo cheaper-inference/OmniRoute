@@ -126,9 +126,145 @@ describe("ComboLiveStudio", () => {
       expect(container.textContent).toContain("priority");
     });
 
-    it("shows the outcome in the toolbar", () => {
+    it("shows the outcome in the run summary", () => {
       const container = mount(<ComboLiveStudio run={SAMPLE_RUN} />);
-      expect(container.querySelector("[data-testid='run-outcome']")?.textContent).toBe("succeeded");
+      // #18072: the outcome is a kit Stat now; its value slot carries the outcome text.
+      const outcome = container.querySelector("[data-testid='run-outcome']");
+      expect(outcome?.querySelector(".ci-stat__value")?.textContent).toBe("succeeded");
+    });
+
+    describe("live run summary on kit Stat (#18072)", () => {
+      function stats(container: HTMLElement) {
+        const row = container.querySelector<HTMLElement>("[data-testid='combo-live-stats']");
+        expect(row?.classList.contains("ci-stat-row")).toBe(true);
+        return Array.from(row!.querySelectorAll<HTMLElement>(".ci-stat")).map((stat) => ({
+          label: stat.querySelector(".ci-stat__label-text")?.textContent,
+          // Numbers count up through the kit NumberTicker, whose accessible name is the final
+          // value from the first render; text stats render their value directly.
+          value:
+            stat.querySelector(".ci-number-ticker")?.getAttribute("aria-label") ??
+            stat.querySelector(".ci-stat__value")?.textContent,
+          tone: Array.from(stat.classList).find((c) => c.startsWith("ci-stat--")),
+          format: stat.dataset.valueFormat,
+        }));
+      }
+
+      it("summarizes strategy, targets, failed attempts and outcome in a StatRow", () => {
+        const container = mount(<ComboLiveStudio run={SAMPLE_RUN} />);
+        expect(stats(container)).toEqual([
+          { label: "Strategy", value: "priority", tone: "ci-stat--default", format: "text" },
+          { label: "Targets", value: "3", tone: "ci-stat--default", format: "number" },
+          { label: "Failed attempts", value: "2", tone: "ci-stat--critical", format: "number" },
+          { label: "Outcome", value: "succeeded", tone: "ci-stat--positive", format: "text" },
+        ]);
+      });
+
+      describe("live counters (kit 0.0.115, #19620)", () => {
+        // The summary re-renders on every attempt event. Kit `Stat animateFrom="previous"`
+        // counts each new number from the one on screen; before it, the ticker restarted from
+        // 0 on every event, so the numbers were kept static on purpose.
+        let now = 0;
+        let frames: FrameRequestCallback[] = [];
+        const flushFrame = (at: number) => {
+          now = at;
+          const queue = frames;
+          frames = [];
+          act(() => {
+            for (const callback of queue) callback(now);
+          });
+        };
+        const startPendingTimers = () =>
+          act(() => {
+            vi.advanceTimersByTime(0);
+          });
+        const shown = (container: HTMLElement) =>
+          Array.from(
+            container.querySelectorAll<HTMLElement>(
+              "[data-testid='combo-live-stats'] .ci-number-ticker"
+            )
+          ).map((ticker) => ticker.textContent);
+
+        beforeEach(() => {
+          vi.useFakeTimers({ toFake: ["setTimeout", "clearTimeout"] });
+          now = 0;
+          frames = [];
+          vi.spyOn(performance, "now").mockImplementation(() => now);
+          vi.stubGlobal("requestAnimationFrame", (callback: FrameRequestCallback) => {
+            frames.push(callback);
+            return frames.length;
+          });
+          vi.stubGlobal("cancelAnimationFrame", () => {
+            frames = [];
+          });
+        });
+        afterEach(() => {
+          vi.useRealTimers();
+          vi.restoreAllMocks();
+          vi.unstubAllGlobals();
+        });
+
+        it("animates targets and failed attempts from the previous value, not from zero", () => {
+          const first: ComboRunModel = {
+            ...SAMPLE_RUN,
+            outcome: "running",
+            targets: SAMPLE_RUN.targets.slice(0, 2),
+          };
+          const container = document.createElement("div");
+          document.body.appendChild(container);
+          const root = createRoot(container);
+          mounted.push({ root, container });
+          act(() => root.render(<ComboLiveStudio run={first} />));
+          startPendingTimers();
+          flushFrame(0);
+          flushFrame(5000);
+          expect(shown(container)).toEqual(["2", "2"]);
+
+          // Next attempt event: a third target joins. The counters continue from 2.
+          const next: ComboRunModel = { ...first, targets: SAMPLE_RUN.targets };
+          act(() => root.render(<ComboLiveStudio run={next} />));
+          startPendingTimers();
+          expect(shown(container)).toEqual(["2", "2"]);
+          flushFrame(5000);
+          flushFrame(10000);
+          expect(shown(container)).toEqual(["3", "2"]);
+        });
+      });
+
+      it("marks an exhausted run critical and a run without failures neutral", () => {
+        const exhausted: ComboRunModel = {
+          ...SAMPLE_RUN,
+          strategy: "",
+          outcome: "exhausted",
+          targets: SAMPLE_RUN.targets.slice(0, 1),
+        };
+        const container = mount(<ComboLiveStudio run={exhausted} />);
+        expect(stats(container)).toEqual([
+          { label: "Strategy", value: "—", tone: "ci-stat--default", format: "text" },
+          { label: "Targets", value: "1", tone: "ci-stat--default", format: "number" },
+          { label: "Failed attempts", value: "1", tone: "ci-stat--critical", format: "number" },
+          { label: "Outcome", value: "exhausted", tone: "ci-stat--critical", format: "text" },
+        ]);
+        const running: ComboRunModel = {
+          ...SAMPLE_RUN,
+          outcome: "running",
+          targets: [{ ...SAMPLE_RUN.targets[2], state: "attempting" }],
+        };
+        const second = mount(<ComboLiveStudio run={running} />);
+        const [, , failed, outcome] = stats(second);
+        expect(failed).toMatchObject({ value: "0", tone: "ci-stat--default" });
+        // A run still in progress uses the kit warning tone (pending/running state, kit #189).
+        expect(outcome).toMatchObject({ value: "running", tone: "ci-stat--warning" });
+      });
+
+      it("hides the run summary in fleet mode and with no run", () => {
+        const empty = mount(<ComboLiveStudio run={null} />);
+        expect(empty.querySelector("[data-testid='combo-live-stats']")).toBeNull();
+        const container = mount(<ComboLiveStudio run={SAMPLE_RUN} comboEvents={[]} />);
+        act(() => {
+          (container.querySelector("[data-testid='mode-fleet']") as HTMLButtonElement).click();
+        });
+        expect(container.querySelector("[data-testid='combo-live-stats']")).toBeNull();
+      });
     });
 
     it("shows provider names from target nodes", () => {

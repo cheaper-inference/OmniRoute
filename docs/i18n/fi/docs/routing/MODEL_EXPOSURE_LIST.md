@@ -4,60 +4,47 @@
 
 ---
 
-> Käyttöön erikseen otettava, oletusarvoisesti pois käytöstä (`modelVisibilityAllowlist`- ja `modelVisibilityDenylist`-asetusten ollessa molemmat tyhjiä
-> `/v1/models`-luettelo JA kaikki `auto/*`-ehdokasjoukot säilyvät tavutasolla identtisinä). Tämä on
-> `hidePaidModels`-/`hideAutoCombos`-asetusten rinnakkaisasetus (`src/lib/db/settings.ts`) ylläpitäjille, jotka haluavat kuratoidun
-> malliluettelon kustannuksista riippumattomista syistä.
+> Ota käyttöön, oletuksena pois päältä (`modelVisibilityAllowlist`/`modelVisibilityDenylist` molemmat tyhjät jättävät `/v1/models` -luettelon AND jokainen `auto/*` -ehdokasvarastotavu-identtinen). `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) -sisarus operaattoreille, jotka haluavat kuratoidun malliluettelon syistä, joilla ei ole mitään tekemistä kustannusten kanssa.
 
 ## Miksi tämä on olemassa
 
-`hidePaidModels` vastaa kysymykseen ”onko tämä malli ilmainen?” ja `hideAutoCombos` kysymykseen ”pitäisikö virtuaalisia `auto/*`-tunnisteita
-ylipäätään mainostaa?” — kumpikaan ei anna ylläpitäjän kuratoida mielivaltaista mallien osajoukkoa
-(esim. näyttää täsmälleen ne mallit, jotka tietyn Claude Code- / OpenCode-asiakkaan tulisi nähdä,
-hinnoittelusta riippumatta). #11481 lisää tämän kahtena toisistaan riippumattomana, erikseen käyttöön otettavana merkkijonotaulukkoasetuksena.
+`hidePaidModels` vastaa "onko tämä malli ilmainen?" ja `hideAutoCombos` vastaa: "Pitäisikö `auto/*` -virtuaalitunnuksia mainostaa ollenkaan?" — ei myöskään anna operaattorin valita mielivaltaista mallien osajoukkoa (esim. esittämällä täsmälleen ne mallit, jotka tietyn Claude Code / OpenCode -asiakkaan pitäisi nähdä, hinnoittelusta riippumatta). #11481 lisää sen kahtena itsenäisenä, valinnaisena merkkijonotaulukkoasetuksena.
 
 ## Asetukset
 
-| Avain                      | Tyyppi     | Oletusarvo | Merkitys                                                                      |
-| -------------------------- | ---------- | ---------- | ----------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`       | Ehdokasta vastaavat merkinnät piilottavat sen luettelosta/ehdokasjoukosta.    |
-| `modelVisibilityAllowlist` | `string[]` | `[]`       | Kun tämä ei ole tyhjä, VAIN merkintöjä vastaavat ehdokkaat pysyvät näkyvissä. |
+| Avain                      | Tyyppi     | Oletus | Merkitys                                                                    |
+| -------------------------- | ---------- | ------ | --------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`   | Hakijaa vastaavat merkinnät piilottavat sen catalog/candidate poolista.     |
+| `modelVisibilityAllowlist` | `string[]` | `[]`   | Kun ne eivät ole tyhjiä, ehdokasta vastaavat ONLY merkinnät pysyvät esillä. |
 
-Molempiin voi lisätä enintään 500 merkintää, joista kukin voi sisältää enintään 200 merkkiä (Zod-validoitu tiedostossa
-`src/shared/validation/settingsSchemas.ts`). Merkintä on joko:
+Molemmat hyväksyvät enintään 500 merkintää, joista kukin on enintään 200 merkkiä (Zod-validoitu `src/shared/validation/settingsSchemas.ts`:ssa). Merkintä on joko:
 
-- tarkka luettelotunniste — `"gpt-4o"` (pelkkä mallitunniste) tai `"openai/gpt-4o"` (palveluntarjoajan etuliitteellä), tai
-- `*`/`?`-merkkejä käyttävä glob-malli — esim. `"openai/gpt-4*"` tai `"anthropic/*"` — joka ratkaistaan samalla
-  jaetulla `globToRegex()`-täsmäytyksellä (`src/shared/utils/globPattern.ts`), jota käytetään jo
-  `ModelRoutingSection`-osion mallikohtaisissa yhdistelmäkartoituksissa ja funktiossa `freeModels.ts::matchesOnlyPaidModels`.
+- tarkka luettelotunnus — `"gpt-4o"` (paljaan mallin tunnus) tai `"openai/gpt-4o"` (toimittajan etuliite) tai
+- glob-kuvio käyttäen `*`/`?` — esim. `"openai/gpt-4*"` tai `"anthropic/*"` — joka on ratkaistu saman jaetun `globToRegex()` sovittimen (`src/shared/utils/globPattern.ts`) kautta, jota `ModelRoutingSection`:n mallikohtaiset yhdistelmäkuvaukset ja `freeModels.ts::matchesOnlyPaidModels` jo käyttävät.
 
-Prioriteetti: estoluettelo tarkistetaan ensin (estetty merkintä on aina piilotettu, vaikka se
-vastaisi myös sallittujen luetteloa); kun sallittujen luettelo ei ole tyhjä, vain sitä vastaavat merkinnät säilyvät.
+Ensisijaisuus: estolista tarkistetaan ensin (kielletty merkintä on aina piilotettu, vaikka se vastaisi myös sallittujen luetteloa); kun sallittujen luettelo ei ole tyhjä, vain ne vastaavat merkinnät säilyvät.
 
-## Kaksi tarkistuspistettä yhden sijaan
+## Kaksi rikastuspistettä, ei yksi
 
-Kohdasta #6512 saatu oppi (pelkkä `hidePaidModels`-luettelosuodatin salli silti `auto/*`-reitityksen
-maksulliseen malliin, koska yhdistelmän ehdokasjoukko muodostettiin itsenäisesti) pätee tähän samalla tavalla.
-Täsmäytyspredikaattia `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kutsutaan
-MOLEMMISTA:
+Oppitunti numerosta #6512 ( `hidePaidModels` -only -luettelosuodatin antoi silti `auto/*` reitittää maksettuun malliin, koska yhdistelmäehdokkaiden joukko rakennettiin itsenäisesti) pätee tässä samalla tavalla. Vastaava predikaatti `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kutsutaan BOTH: stä :
 
-- `src/app/api/v1/models/catalog.ts` — itse `/v1/models`-luettelossa samoissa viidessä lähdekohtaisessa
-  tarkistuspisteessä, joita `shouldHidePaid()` jo rajaa (staattinen `PROVIDER_MODELS`, synkronoidut palveluntarjoajarivit,
-  mukautetut rivit, aliaksiin perustuvat rivit ja hallitut vararivit).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — kutsutaan
-  funktiosta `virtualFactory.ts::buildPreparedPool` heti vastaavan
-  `filterPaidOnlyCandidates()`-kutsun jälkeen, joten estettyä mallia ei voida koskaan valita myöskään `auto/*`-ehdokasjoukkoon.
+- `src/app/api/v1/models/catalog.ts` — itse `/v1/models` listaus, samoilla viidellä lähdekohtaisessa kuristuspisteessä `shouldHidePaid()` jo portteja (staattinen `PROVIDER_MODELS`, synkronoidut palveluntarjoajan rivit, mukautetut rivit, alias-tuetut rivit, hallitut vararivit).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — kutsui `virtualFactory.ts::buildPreparedPool` välittömästi vastaavan `filterPaidOnlyCandidates()` -kutsun jälkeen, joten estettyä mallia ei myöskään voida koskaan valita `auto/*` ehdokaspooliin.
 
-## Mitä EI suodateta
+## Mikä on NOT suodatettu
 
-Noudattaa `hideAutoCombos`-asetuksen nykyistä toimintaa: **eksplisiittisesti** lähetettyä mallitunnistetta (ei `auto/*`-reitityksen kautta
-eikä luettelosta löydettynä) koskaan estetä käsittelyyn välitettäessä — vain
-mainostaminen ja ehdokasjoukkoon kuuluminen suodatetaan. Tämä on riippumaton `hidePaidModels`-asetuksesta;
-ylläpitäjä voi haluta kuratoidun joukon kustannuksista riippumattomista syistä, joten molemmat
-asetukset koostuvat toisistaan riippumattomina JA-operaatiolla yhdistettyinä suodattimina samalla tavoin kuin nykyinen usean lipun yhdistelmä tiedostossa
-`catalog.ts`.
+Peilaa `hideAutoCombos` nykyistä käyttäytymistä: mallin tunnus lähetetty** nimenomaisesti** (ei `auto/*` kautta, eikä sitä löydy luettelon kautta) ei ole koskaan estetty lähetyksen yhteydessä. — vain advertisement/candidate-pool jäsenyys suodatetaan. Tämä on riippumaton `hidePaidModels`; operaattori voi haluta kuratoidun joukon syistä, joilla ei ole mitään tekemistä kustannusten kanssa, joten molemmat asetukset muodostavat itsenäisiä AND-ed-suodattimia, kuten `catalog.ts`:n nykyinen usean lipun koostumus.
 
-Asetusten vienti (`GET /api/settings/export-json`) sisältää molemmat taulukot sellaisinaan, kuten kaikki muutkin
-asetuskentät — toisin kuin `hidePaidModels`-asetuksen yhdistelmävaiheiden vientisuodattimessa, tässä ei ole uudelleenkäyttöönoton
-riskiä: vietyyn yhdistelmävaiheeseen upotettu estetty tunniste on ylläpitäjän oma eksplisiittinen reititysvalinta,
-eikä vientirajan tarvitse poistaa sitä.
+Asetusten vienti (`GET /api/settings/export-json`) sisältää molemmat taulukot sanatarkasti, kuten kaikki muutkin asetuskentät — toisin kuin `hidePaidModels`:n yhdistelmävaiheinen vientisuodatin, tässä ei ole uudelleenhydraation riskiä: vietyyn yhdistelmävaiheeseen upotettu estetty tunnus on operaattorin oma eksplisiittinen reititysvalinta, ei asia, jota vientirajan on poistettava.
+
+## Vain yhdistelmät -listaus (`exposeCombosOnly`)
+
+Erillinen boolean, oletuksena myös opt-in ja `false` käyttöönotoksille, joissa yhdistelmät ovat julkinen mallipinta ja toimittajat ovat vain taustajärjestelmiä. Kun se on `true`, julkinen listaus (`GET /v1/models`, `GET /v1` ja muut `getUnifiedModelsResponse()` lle rakennetut `/v1` -etsintäreitit ) säilyttää vain rivit `owned_by: "combo"`: user -komboilla sekä sisäänrakennetut `auto/*` -yhdistelmät (ellei `hideAutoCombos` piilota niitä). Se käyttää samaa rivitestiä kuin näppäinkohtainen `catalogScope: "combos"`, ja avaimen omat allow/deny/scope suodattimet ovat edelleen päällä.
+
+Ota se käyttöön** Asetukset → Reititys → Mallit API listaus** , tai `PATCH /api/settings {"exposeCombosOnly": true}` llä.
+
+Kuten yllä olevat luettelot, se muuttaa vain mainoksia:
+
+- eksplisiittinen `provider/model` -tunnus lähettää edelleen, ja `GET /v1/models/{id}` ratkaisee sen edelleen;
+- kojelaudan luetteloa (`GET /api/models/catalog`, mallivalitsijoiden käyttämä) ei kavenneta;
+- sitä ei peilata `auto/*` ehdokaspooleihin, joten `auto/*` -yhdistelmät säilyttävät täyden altaan.

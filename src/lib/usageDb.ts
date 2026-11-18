@@ -38,5 +38,11 @@ export { calculateCost } from "./usage/costCalculator";
 
 export { getUsageStats, buildActiveRequests } from "./usage/usageStats";
 
-export { saveCallLog, rotateCallLogs, getCallLogs, getCallLogById } from "./usage/callLogs";
+export {
+  saveCallLog,
+  saveUpstreamHttpAttempt,
+  rotateCallLogs,
+  getCallLogs,
+  getCallLogById,
+} from "./usage/callLogs";
 export { getCallLogFilterOptions } from "./usage/callLogFilterOptions";

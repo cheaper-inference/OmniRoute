@@ -25,9 +25,17 @@
 export function enforceThinkingTemperature(body: Record<string, unknown>): void {
   const thinking = body.thinking as Record<string, unknown> | undefined;
   if (thinking?.type === "enabled" || thinking?.type === "adaptive") {
-    body.temperature = 1;
-    if (body.top_p !== undefined) {
-      delete body.top_p;
+    // #18636: normalize only a sampling attempt the body actually carries. Pinning
+    // unconditionally re-adds `temperature` after an operator param filter or
+    // built-in strip rule removed it, and temperature-retired models then 400
+    // ("temperature is deprecated"); a body with neither sampling param must stay
+    // on Anthropic's "unset" branch. A lone top_p is still converted to the
+    // pinned branch (established behavior, see claude-code-parity tests).
+    if (body.temperature !== undefined || body.top_p !== undefined) {
+      body.temperature = 1;
+      if (body.top_p !== undefined) {
+        delete body.top_p;
+      }
     }
   }
 }
@@ -267,28 +275,36 @@ export function enforceCacheControlLimit(body: Record<string, unknown>): void {
   }
 }
 
-export function ensureCacheControlOnLastUserMessage(body: Record<string, unknown>): void {
+function cacheBreakpointCandidates(
+  body: Record<string, unknown>,
+  messages: Array<Record<string, unknown>>,
+  countTools: boolean
+): Array<Record<string, unknown>> {
+  const blocks: unknown[] = [];
+  if (Array.isArray(body.system)) blocks.push(...body.system);
+  if (countTools && Array.isArray(body.tools)) blocks.push(...body.tools);
+  for (const message of messages) {
+    if (Array.isArray(message.content)) blocks.push(...message.content);
+  }
+  return blocks as Array<Record<string, unknown>>;
+}
+
+/**
+ * `countTools` is for dispatches that send tool markers upstream. The native `claude` dispatch
+ * deletes them before sending, so only system and message markers survive there.
+ */
+export function ensureCacheControlOnLastUserMessage(
+  body: Record<string, unknown>,
+  { countTools = false }: { countTools?: boolean } = {}
+): void {
   const messages = body.messages as Array<Record<string, unknown>> | undefined;
   if (!Array.isArray(messages) || messages.length === 0) return;
 
-  const system = body.system as Array<Record<string, unknown>> | undefined;
-  let cacheControlCount = Array.isArray(system)
-    ? system.filter((block) => block.cache_control).length
-    : 0;
-  let hasFiveMinuteCacheControl = Array.isArray(system)
-    ? system.some(
-        (block) => (block.cache_control as Record<string, unknown> | undefined)?.ttl === "5m"
-      )
-    : false;
-
-  for (const message of messages) {
-    const content = message.content as Array<Record<string, unknown>> | undefined;
-    if (!Array.isArray(content)) continue;
-    cacheControlCount += content.filter((block) => block.cache_control).length;
-    hasFiveMinuteCacheControl ||= content.some(
-      (block) => (block.cache_control as Record<string, unknown> | undefined)?.ttl === "5m"
-    );
-  }
+  const candidates = cacheBreakpointCandidates(body, messages, countTools);
+  const cacheControlCount = candidates.filter((block) => block.cache_control).length;
+  const hasFiveMinuteCacheControl = candidates.some(
+    (block) => (block.cache_control as Record<string, unknown> | undefined)?.ttl === "5m"
+  );
 
   // Find the last user message
   for (let i = messages.length - 1; i >= 0; i--) {
@@ -307,9 +323,10 @@ export function ensureCacheControlOnLastUserMessage(body: Record<string, unknown
   }
 }
 
-/** Defaults missing TTLs to 1h until a 5m breakpoint; later defaults stay at 5m. */
+/** Defaults missing TTLs and keeps earlier breakpoints at 1h before a later 1h breakpoint. */
 export function normalizeCacheControlTtl(body: Record<string, unknown>): void {
   let hasFiveMinuteCacheControl = false;
+  const ephemeralCacheControls: Array<Record<string, unknown>> = [];
 
   const defaultMissingTtl = (block: Record<string, unknown> | null | undefined) => {
     const cc = block?.cache_control as Record<string, unknown> | undefined;
@@ -320,6 +337,10 @@ export function normalizeCacheControlTtl(body: Record<string, unknown>): void {
     } else if (cc.ttl === undefined) {
       cc.ttl = hasFiveMinuteCacheControl ? "5m" : "1h";
     }
+    if (cc.ttl === "1h") {
+      for (const earlier of ephemeralCacheControls) earlier.ttl = "1h";
+    }
+    ephemeralCacheControls.push(cc);
   };
 
   const tools = body.tools as Array<Record<string, unknown>> | undefined;

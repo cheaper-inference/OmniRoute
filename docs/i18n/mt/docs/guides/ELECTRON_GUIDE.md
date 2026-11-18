@@ -4,92 +4,99 @@
 
 ---
 
-> **Sors awtorevoli:** spazju tax-xogħol `electron/`
-> **Aġġornat l-aħħar:** 2026-06-28 — v3.8.40
+> **Sors tal-verità:** `electron/` workspace** Aġġornata l-aħħar:** 2026-06-28 — v3.8.40
 
-OmniRoute jipprovdi app tad-desktop għal diversi pjattaformi (Windows / macOS / Linux) mibnija fuq
-**Electron 41** + **electron-builder 26.10**. L-app tad-desktop tniedi s-server awtonomu ta’ Next.js
-bħala proċess sekondarju, tidderieġi `BrowserWindow` lejh, u żżid ikona fit-trej
-tas-sistema, aġġornatur awtomatiku, pont IPC, u inizjalizzazzjoni tas-sigrieti mingħajr konfigurazzjoni.
+OmniRoute jibgħat app tad-desktop fuq pjattaformi (Windows / macOS / Linux) mibnija fuq**Electron 41** +** il-bennej tal-elettroni 26.10** . L-app tad-desktop ibid is-server Next.js waħdu bħala proċess tifel, tipponta `BrowserWindow` lejha, u żżid trej tas-sistema, auto-updater, IPC bridge, u bootstrap sigriet zero-config.
 
 ## Arkitettura
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Proċess ewlieni ta’ Electron (electron/main.js) │
-│ ├─ Lock ta’ istanza waħda                    │
-│ ├─ Proċess sekondarju: server awtonomu ta’ Next.js │
-│ │   (imniedi bir-runtime Node ta’ Electron)  │
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ Trej tas-sistema + menu tal-kuntest       │
-│ ├─ Aġġornament awtomatiku permezz ta’ electron-updater │
-│ ├─ Politika tas-Sigurtà tal-Kontenut (headers tas-sessjoni) │
-│ └─ Inizjalizzazzjoni tas-sigrieti (JWT / API_KEY_SECRET) │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
 └──────────────────────────────────────────────┘
-            ↕ Pont IPC (electron/preload.js)
+            ↕ IPC bridge (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ Renderer (dashboard ta’ Next.js)             │
+│ Renderer (Next.js dashboard)                  │
 │   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
 ## Verżjonijiet
 
-Ikkonfermati minn `electron/package.json`:
+Ikkonfermat minn `electron/package.json`:
 
-| Pakkett            | Verżjoni                                                                       |
-| ------------------ | ------------------------------------------------------------------------------ |
-| `electron`         | `^43.4.1`                                                                      |
-| `electron-builder` | `^26.15.3`                                                                     |
-| `electron-updater` | `^6.8.9`                                                                       |
-| `better-sqlite3`   | root `^13.0.2` (prebuilds ta’ Node-API — ma jeħtieġ ebda rebuild ta’ Electron) |
-| Verżjoni tal-app   | `3.8.0`                                                                        |
-| ID tal-app         | `online.omniroute.desktop`                                                     |
-| Isem tal-prodott   | `OmniRoute`                                                                    |
+| Pakkett            | Verżjoni                                                  |
+| ------------------ | --------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                 |
+| `electron-builder` | `^26.15.3`                                                |
+| `electron-updater` | `^6.8.9`                                                  |
+| `better-sqlite3`   | root `^13.0.2` (Node-API prebuilds — no Electron rebuild) |
+| Verżjoni tal-app   | `3.8.0`                                                   |
+| App id             | `online.omniroute.desktop`                                |
+| Isem tal-prodott   | `OmniRoute`                                               |
 
-## Skripts (`package.json` tal-għerq)
+## Skripts (root `package.json`)
 
-| Skript                            | Għan                                                                               |
-| --------------------------------- | ---------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Jibda `npm run dev` + jistenna lil `localhost:20128` + iniedi Electron             |
-| `npm run electron:build`          | Jibni Next.js u mbagħad iħaddem `electron-builder` għas-sistema operattiva attwali |
-| `npm run electron:build:win`      | Jibni l-installatur NSIS ta’ Windows + verżjoni portabbli (x64)                    |
-| `npm run electron:build:mac`      | Jibni DMG ta’ macOS (Intel + Apple Silicon)                                        |
-| `npm run electron:build:linux`    | Jibni AppImage + DEB għal Linux (x64 + arm64)                                      |
-| `npm run electron:smoke:packaged` | Iniedi l-binarju ppakkjat u jittestja `/login` għal HTTP 200, imbagħad jagħlqu     |
+| Iskript                           | Għan                                                                     |
+| --------------------------------- | ------------------------------------------------------------------------ |
+| `npm run electron:dev`            | Tibda `npm run dev` + tistenna `localhost:20128` + tniedi Electron       |
+| `npm run electron:build`          | Jibni Next.js imbagħad runs `electron-builder` għall- OS kurrenti        |
+| `npm run electron:build:win`      | Jibni Windows NSIS installer + portabbli (x64)                           |
+| `npm run electron:build:mac`      | Jibni macOS DMG (Intel + Apple Silicon)                                  |
+| `npm run electron:build:linux`    | Tibni Linux AppImage + DEB (x64 + arm64)                                 |
+| `npm run electron:smoke:packaged` | Tniedi binarju ppakkjat u sondi `/login` għal HTTP 200, imbagħad jagħlaq |
 
 L-ispazju tax-xogħol `electron/` jesponi wkoll:
 
-- `npm run prepare:bundle` — iħaddem `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — builds ta’ macOS għal arkitettura waħda
-- `npm run pack` — build ta’ direttorju biss għall-ittestjar lokali (mingħajr installatur)
+- `npm run prepare:bundle` — runs `scripts/build/prepare-electron-standalone.mjs`
+- `npm run build:mac-x64` / `build:mac-arm64` — single-arch macOS builds
+- `npm run pack` — direttorju-bini biss għall-ittestjar lokali (l-ebda installatur)
 
-## Tqassim tad-Direttorji
+## Pakketti runtime fakultattivi
+
+Il-bini tad-desktop jistgħu jippubblikaw arkivji runtime fakultattivi flimkien mal-installaturi tagħhom. It-tagħbija tas-server installat fiha `optional-packs.index.json` (taħt `resources/app` fuq Windows u Linux). Għad-dħul `browser-runtime`, aqra `packs[].tarball` u niżżel** dak l-isem tal-fajl eżatt mill-istess rilaxx** . L-ismijiet tal-arkivji jinkludu SHA-256 digest; bini differenti jistgħu jeħtieġu arkivji differenti. Żomm l-isem tal-fajl imniżżel mhux mibdul.
+
+Ikkopja l-indiċi tal-app installata u l-arkivju magħżul f'direttorju wieħed, imbagħad uża ż- CLI mill-istess rilaxx:
+
+```bash
+omniroute packs list --source /path/to/packs
+omniroute packs install browser-runtime --source /path/to/packs
+```
+
+`packs list` juri l-istat tal-installazzjoni u l-verifika, mhux l-isem tal-fajl tal-arkivju. L-indiċi miġbura jagħżel l-arkivju. L-installazzjoni tivverifika s-checksum tal-arkivju tagħha qabel l-estrazzjoni u ċ-checksums tal-pakkett tagħha qabel tissostitwixxi pakkett installat. Huwa jaqra fajls lokali; ma tniżżel arkivji nieqsa. Ibda mill-ġdid l-applikazzjoni wara l-installazzjoni. Jekk ir-rilaxx ma jkollu l-ebda assi li jaqbel, il-pakkett fakultattiv mhux disponibbli permezz tal-assi ta' dak ir-rilaxx.
+
+## Tqassim tad-Direttorju
 
 ```
 electron/
-├── package.json              # Dipendenzi ta’ Electron + konfigurazzjoni ta’ electron-builder
-├── main.js                   # Proċess ewlieni (24 KB — ara l-annotazzjonijiet hawn taħt)
-├── preload.js                # Pont IPC ta’ contextBridge
-├── types.d.ts                # Tipi AppInfo / ServerStatus / ElectronAPI
-├── README.md                 # Noti fl-ispazju tax-xogħol
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # Output ta’ electron-builder (injorat minn git)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Jipprepara l-bundle .next/electron-standalone
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Test rapidu wara l-build
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Kemm `main.js` kif ukoll `preload.js` huma **fajls CommonJS `.js`**, mhux TypeScript. It-tipi
-tan-naħa tar-renderer jinsabu f’`electron/types.d.ts`.
+Kemm `main.js` u `preload.js` huma**CommonJS `.js`** , mhux TypeScript. It-typings min-naħa tar-renderer jgħixu `electron/types.d.ts`.
 
-## Pont IPC (`preload.js`)
+## IPC Bridge (`preload.js`)
 
-Il-preload jesponi API fuq lista bajda f’`window.electronAPI` bl-użu ta’ `contextBridge`
-b’`contextIsolation: true` u `nodeIntegration: false`.
+Il-preload jesponi API fil-lista bajda fuq `window.electronAPI` bl-użu ta' `contextBridge` `contextIsolation: true` u `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -110,58 +117,49 @@ const VALID_CHANNELS = {
 
 Metodi esposti:
 
-| Sejħa mir-renderer                                                | Tip                           |
-| ----------------------------------------------------------------- | ----------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                        |
-| `openExternal(url)`                                               | invoke                        |
-| `getDataDir()`                                                    | invoke                        |
-| `restartServer()`                                                 | invoke                        |
-| `getAppVersion()`                                                 | invoke                        |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                        |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                          |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (jirritorna disposer) |
+| Sejħa tar-renderer                                                | Tip                         |
+| ----------------------------------------------------------------- | --------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | jinvokaw                    |
+| `openExternal(url)`                                               | jinvokaw                    |
+| `getDataDir()`                                                    | jinvokaw                    |
+| `restartServer()`                                                 | jinvokaw                    |
+| `getAppVersion()`                                                 | jinvokaw                    |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | jinvokaw                    |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | ibgħat                      |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | jirċievi (jirċievi ritorni) |
 
-Il-funzjonijiet awżiljarji ta’ receive jirritornaw **funzjoni disposer** minflok ma jiddependu fuq
-`removeAllListeners` — dan jipprevjeni l-akkumulazzjoni ta’ listeners meta l-komponenti React
-jerġgħu jiġu mmuntati.
+Il-helpers jirċievu jirritornaw a** funzjoni tad-disponitur** aktar milli tiddependi fuq `removeAllListeners` — dan jipprevjeni l-akkumulazzjoni tas-semmiegħa meta l-komponenti React jerġgħu jarmaw.
 
 ## Ċiklu tal-Ħajja tas-Server
 
-`main.js` iniedi l-bundle standalone ta’ Next.js direttament bir-runtime Node ta’ Electron
-biex jevita nuqqas ta’ kompatibbiltà tal-ABI tal-moduli nattivi ma’ Node tas-sistema:
+`main.js` ikabbar il-pakkett Next.js standalone direttament mal-runtime Node Electron biex jevita nuqqas ta ABI tal-modulu nattiv man-Node tas-sistema:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
 Punti ewlenin:
 
-- `waitForServer()` jiċċekkja l-URL perjodikament sa 30 s qabel juri t-tieqa (l-ebda skrin vojt waqt startjar kiesaħ).
-- `stdio: "pipe"` jaqbad stdout/stderr; frażijiet ta’ tħejjija (`Ready` / `listening`) jibagħtu `server-status: running` permezz tal-IPC.
-- `before-quit` jistenna sa 5 s għal SIGTERM gradwali (punt ta’ kontroll WAL) u mbagħad jibgħat SIGKILL.
-- Is-selettur tal-port fit-trej (`20128`, `3000`, `8080`) iwaqqaf u jerġa’ jibda s-server, imbagħad jerġa’ jgħabbi l-BrowserWindow.
+- `waitForServer()` jeżamina l- URL sa 30 s qabel ma juri t-tieqa (l-ebda skrin vojt fuq startjar kiesaħ).
+- `stdio: "pipe"` jaqbad stdout/stderr; frażijiet lesti (`Ready` / `listening`) jarmu `server-status: running` fuq IPC.
+- `before-quit` jistenna sa 5 s għal SIGTERM graceful (WAL checkpoint ) imbagħad jibgħat SIGKILL.
+- Port switcher fit-trej (`20128`, `3000`, `8080`) jieqaf u jerġa 'jibda s-server, imbagħad jerġa' jgħabbi l- BrowserWindow.
 
-## Bootstrap tas-Sigrieti mingħajr Konfigurazzjoni
+## Bootstrap Sigriet Zero-config
 
-Mal-ewwel tnedija, il-proċess ewlieni jiġġenera u jippersisti awtomatikament is-sigrieti neqsin:
+Fl-ewwel tnedija, il-proċess ewlieni jiġġenera awtomatikament u jippersisti sigrieti nieqsa:
 
-| Sigriet                  | Sors                                                                                         |
-| ------------------------ | -------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                     |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (jirrifjuta jekk diġà jeżistu kredenzjali kriptati) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                     |
+| Sigriet                  | Sors                                                                                   |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                               |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (jirrifjuta jekk diġà jeżistu kreds kriptati) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                               |
 
-Jiġu ppersistiti f’`<DATA_DIR>/server.env`. `DATA_DIR` jiġi riżolt għal:
+Ippersistew biex `<DATA_DIR>/server.env`. `DATA_DIR` jirrisolvi:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` jew `~/.omniroute`
@@ -169,70 +167,61 @@ Jiġu ppersistiti f’`<DATA_DIR>/server.env`. `DATA_DIR` jiġi riżolt għal:
 
 ## Tfittxija tal-fajl tal-ambjent
 
-Qabel iniedi s-server, il-proċess ewlieni (`getPreferredEnvFilePath()` f’
-`electron/main.js`) jagħżel fajl `.env` **wieħed**: l-ewwel wieħed minn dawn li jeżisti.
+Qabel ma jbid is-server, il-proċess ewlieni (`getPreferredEnvFilePath()` `electron/main.js`) jagħżel** wieħed** `.env` file: l-ewwel wieħed minn dawn li jeżisti.
 
-1. `$DATA_DIR/.env`, meta `DATA_DIR` ikun issettjat fl-ambjent li minnu tnediet l-app.
-2. `<resolved DATA_DIR>/.env`, bl-użu tal-istess valuri predefiniti bħal hawn fuq: `%APPDATA%\omniroute\.env` fuq
-   Windows, `$XDG_CONFIG_HOME/omniroute/.env` jew `~/.omniroute/.env` fuq Linux u macOS.
-3. `.env` fid-direttorju tax-xogħol tal-proċess.
+1. `$DATA_DIR/.env`, meta `DATA_DIR` ikun issettjat fl-ambjent l-app kienet imnedija bih.
+2. `<resolved DATA_DIR>/.env`, billi tuża l-istess defaults bħal hawn fuq: `%APPDATA%\omniroute\.env` fuq Windows, `$XDG_CONFIG_HOME/omniroute/.env` jew `~/.omniroute/.env` fuq Linux u macOS.
+3. `.env` fid-direttorju tax-xoghol tal-process.
 
-Il-proċess ewlieni jaqra dak il-fajl biss; il-kandidati ta’ wara ma jiġux amalgamati miegħu. L-ambjent
-tas-server imbagħad jinbena b’din il-preċedenza (l-ogħla l-ewwel):
+Il-proċess ewlieni jaqra biss dak il-fajl; kandidati aktar tard ma jingħaqdux fihom. L-ambjent tas-server imbagħad jinbena b'din il-preċedenza (l-ogħla l-ewwel):
 
-1. L-ambjent tal-proċess Electron (varjabbli li jintirtu minn dak li nieda l-app).
+1. L-ambjent tal-proċess Electron (varjabbli li ntirtu minn dak kollu li nieda l-app).
 2. Il-fajl `.env` magħżul.
-3. `<DATA_DIR>/server.env` (is-sigrieti tal-bootstrap ta’ hawn fuq).
+3. `<DATA_DIR>/server.env` (is-sigrieti bootstrap hawn fuq).
 
-L-ambjent tal-proċess jiġi rreġistrat meta tibda l-app, għalhekk varjabbli tal-ambjent tas-sistema jew tal-utent
-issettjat waqt li l-app tkun qed taħdem (inkluż waqt li tkun fit-trej wara li tingħalaq it-tieqa tagħha)
-ma jasalx għand is-server sakemm l-app tingħalaq kompletament u terġa’ titnieda. Għal parametri tar-runtime
-bħal `CONTEXT_LENGTH_<PROVIDER>` (ara
-[Varjabbli tal-Ambjent: Tul tal-kuntest għal kull fornitur](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
-ippreferi l-fajl `.env`, imbagħad agħlaq kompletament (trej, **Oħroġ**) u erġa’ niedi.
+L-ambjent tal-proċess jinqabad meta tibda l-app, għalhekk issettjat varjabbli tal-ambjent tas-sistema jew tal-utent waqt li l-app tkun qed taħdem (inkluż waqt li tpoġġi fit-trej wara li tingħalaq it-tieqa tagħha) ma tilħaqx is-server sakemm l-app tinqata’ kompletament u terġa’ titnieda. Għal pumi tar-runtime bħal `CONTEXT_LENGTH_<PROVIDER>` (ara [Varjabbli tal-Ambjent: Tul tal-kuntest għal kull fornitur](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), ippreferi l-fajl `.env`, imbagħad nieqaf għal kollox (trej,** Nieqaf** ) u tniedi mill-ġdid.
 
 ## Tieqa u Trej
 
-- `BrowserWindow`: 1400×900 (minimu 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, il-buttuni tat-tieqa f’`{ x: 16, y: 16 }`.
-- Windows/Linux: bar nattiva tat-titlu.
-- Il-buttuna tal-għeluq timminimizza fit-trej; il-menu tat-trej għandu **Iftaħ OmniRoute**, **Iftaħ id-Dashboard** (brawżer estern), submenu **Port tas-Server**, **Iċċekkja għal Aġġornamenti**, **Oħroġ**.
+- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, traffic-light at `{ x: 16, y: 16 }`.
+- Windows/Linux: native title bar.
+- Il-buttuna Agħlaq timminimizza għat-trej; il-menu trej għandu** Miftu OmniRoute** ,** Iftaħ Dashboard** (browser estern),** Port tas-Server** sottomenu,** Iċċekkja għal Aġġornamenti** ,** Nieqaf** .
 
-## Politika tas-Sigurtà tal-Kontenut
+## Politika ta' Sigurtà tal-Kontenut
 
-Issettjata permezz ta’ `session.defaultSession.webRequest.onHeadersReceived`. Direttivi notevoli:
+Set via `session.defaultSession.webRequest.onHeadersReceived`. Direttivi notevoli:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Il-modalità tal-iżvilupp iżżid `'unsafe-eval'` ma’ `script-src` biss
+- Il-mod Dev iżid `'unsafe-eval'` ma' `script-src` biss
 
 ## Aġġornament awtomatiku
 
 Juża `electron-updater` mal-fornitur GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Avvenimenti mgħoddija lir-renderer permezz ta’ `update-status` IPC:
-  `checking`, `available`, `not-available`, `downloading` (b’`percent`), `downloaded`, `error`
-- `installUpdate()` iwaqqaf is-server u mbagħad isejjaħ `autoUpdater.quitAndInstall()`
-- Jinqabeż fil-modalità tal-iżvilupp (`!app.isPackaged`)
+- Avvenimenti mibgħuta lil min jirrendu permezz ta' `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (with `percent`), `downloaded`, `error`
+- `installUpdate()` joqtol is-server imbagħad isejjaħ `autoUpdater.quitAndInstall()`
+- Qabeż fil-modalità dev (`!app.isPackaged`)
 
-## Pipeline tal-Bini
+## Ibni Pipeline
 
-1. `npm run build` → Next.js standalone f’`.next/standalone`.
-2. `prepare-electron-standalone.mjs` → jerġa’ jqiegħed il-fajls f’`.next/electron-standalone` u jikteb mill-ġdid il-mogħdijiet assoluti ġewwa `server.js` + `required-server-files.json` sabiex il-pakkett ikun jista’ jiġi rilokat.
-3. `electron-builder` jippakkja `main.js`, `preload.js`, `node_modules`, u `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → Next.js standalone in `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → jerġa' jdaħħal `.next/electron-standalone` u jikteb mogħdijiet assoluti ġewwa `server.js` + `required-server-files.json` sabiex il-pakkett ikun rilokabbli.
+3. `electron-builder` pakketti `main.js`, `preload.js`, `node_modules`, u `extraResources: { ../.next/electron-standalone → app }`.
 
-### Miri tal-bini
+### Ibni miri
 
-| OS      | Miri                                             |
-| ------- | ------------------------------------------------ |
-| Windows | Installatur NSIS + portabbli (x64)               |
-| macOS   | DMG (Intel + arm64, iddreggja għal Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)                     |
+| OS      | Miri                                      |
+| ------- | ----------------------------------------- |
+| Windows | NSIS installer + portabbli (x64)          |
+| macOS   | DMG (Intel + arm64, drag-to-Applications) |
+| Linux   | AppImage + DEB (x64 + arm64)              |
 
-Settings ta’ NSIS: `oneClick: false`, jippermetti lill-utent jagħżel id-direttorju tal-installazzjoni, u joħloq shortcuts fuq id-Desktop u fil-menu Start.
+NSIS settings: `oneClick: false`, iħalli lill-utent jagħżel id-direttorju tal-installazzjoni, joħloq shortcuts tad-Desktop u tal-Menu tal-Ibda.
 
-## Ittestjar Bażiku tal-Bini Ppakkjat
+## Ittestjar tad-duħħan Ippakkjat Ibni
 
 ```bash
 npm run electron:smoke:packaged
@@ -240,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Jiskopri awtomatikament il-binarju ppakkjat f’`electron/dist-electron/` għall-pjattaforma attwali.
-- Iniedih b’direttorji iżolati ta’ `HOME`/`APPDATA`/`XDG_*` sabiex ma jmissx id-data tal-iżviluppatur.
-- Jivverifika ripetutament `http://127.0.0.1:20128/login` għal HTTP 200 fi żmien 45 s.
-- Jimmonitorja stderr/stdout għal mudelli fatali (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, eċċ.).
-- Jistenna 2 s ta’ eżekuzzjoni stabbli wara li jkun lest, imbagħad jibgħat SIGTERM u jistenna li l-port jinħeles.
-- Fis-CI, jgħaddi awtomatikament `--no-sandbox --disable-gpu` (u `--disable-dev-shm-usage` fuq Linux).
+- Skopri awtomatikament il-binarju ppakkjat `electron/dist-electron/` għall-pjattaforma attwali.
+- Tniedi b'direttorji iżolati `HOME`/`APPDATA`/`XDG_*` sabiex ma tmissx id-dejta tal-iżviluppatur.
+- Polls `http://127.0.0.1:20128/login` għal HTTP 200 fi żmien 45 s.
+- Arloġġi stderr/stdout għal mudelli fatali (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, eċċ.).
+- Jistenna 2 s ta 'runtime stabbli wara li jkun lest, imbagħad joħroġ SIGTERM u jistenna li l-port jinħeles.
+- CI, awtomatikament jgħaddi `--no-sandbox --disable-gpu` (u `--disable-dev-shm-usage` fuq Linux).
 
-Valuri alternattivi permezz tal-varjabbli tal-ambjent: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Env jegħleb: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## Iffirmar tal-Kodiċi
 
-`electron/package.json` **ma** jikkonfigurax il-kredenzjali tal-iffirmar direttament. Għaddihom permezz ta’ varjabbli tal-ambjent lil `electron-builder`:
+`electron/package.json` ma** le** kredenzjali tal-iffirmar tal-wajer direttament. Għaddihom permezz ta' env vars għal `electron-builder`:
 
 ### macOS
 
@@ -274,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-L-iffirmar ta’ AppImage huwa fakultattiv — issettja `LINUX_GPG_KEY` jekk trid tiffirmah.
+AppImage iffirmar huwa fakultattiv — sett `LINUX_GPG_KEY` jekk iffirmar.
 
 ## Distribuzzjoni
 
-L-artefatti jitqiegħdu f’`electron/dist-electron/`:
+Artifacts art fi `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Ir-rilaxxi jiġu ppubblikati fuq GitHub Releases (`diegosouzapw/OmniRoute`), li huwa wkoll fejn `electron-updater` jiċċekkja għal verżjonijiet ġodda.
+Ir-rilaxxi huma ppubblikati għal GitHub Releases (`diegosouzapw/OmniRoute`), li huwa wkoll fejn `electron-updater` jiċċekkja għal verżjonijiet ġodda.
 
-## Soluzzjoni tal-Problemi
+## Issolvi l-problemi
 
-| Sintomu                                                                     | Soluzzjoni                                                                                                                                                                |
-| --------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` wara aġġornament maġġuri ta’ Electron | better-sqlite3 v13 jinkludi binjiet lesti ta’ Node-API — erġa’ ħaddem `npm install` fl-għerq u `prepare:bundle` (dan jivverifika l-binja lesta għall-pjattaforma attwali) |
-| `ERR_DLOPEN_FAILED` għal modulu nattiv                                      | Erġa’ ħaddem `prepare:bundle` — dan jieqaf minnufih bi żball meta l-binja lesta ta’ Node-API għall-pjattaforma attwali tkun nieqsa                                        |
-| It-tieqa tidher vojta fuq Linux                                             | Ikkonferma li s-server Next.js effettivament intrabat ma’ PORT (iċċekkja l-logs ta’ `[Server]`)                                                                           |
-| In-notarizzazzjoni ta’ macOS tieqaf                                         | Kun żgur li l-varjabbli `APPLE_*` jiġu esportati, mhux biss issettjati f’`.env`                                                                                           |
-| Twissija ta’ Windows SmartScreen                                            | Iffirma b’ċertifikat EV, jew l-utenti jistgħu jikklikkjaw bil-lemin → "Ħaddem xorta waħda"                                                                                |
-| It-test bażiku jfalli minħabba li l-port qed jintuża                        | Waqqaf kwalunkwe server lokali tal-iżvilupp fuq 20128 qabel ma tħaddem `electron:smoke:packaged`                                                                          |
+| Sintomu                                                          | Waħħal                                                                                                                                            |
+| ---------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` wara Electron maġġuri bump | better-sqlite3 v13 ships Node-API prebuilds — re-run `npm install` fl-għerq u `prepare:bundle` (jivverifika l-prebuild għall-pjattaforma attwali) |
+| `ERR_DLOPEN_FAILED` għal modulu nattiv                           | Erġa' ħaddem `prepare:bundle` — ifalli malajr meta n-Node-API prebuild għall-pjattaforma attwali tkun nieqsa                                      |
+| Tieqa tidher vojta fuq Linux                                     | Ikkonferma Next.js server fil-fatt marbut ma PORT (iċċekkja `[Server]` logs)                                                                      |
+| macOS stands notarization                                        | Żgura li vars `APPLE_*` jiġu esportati, mhux biss `.env`                                                                                          |
+| Windows SmartScreen twissija                                     | Iffirma EV cert, jew l-utenti ikklikkja bil-lemin fuq → "Run anyway"                                                                              |
+| It-test tad-duħħan ifalli bil-port-in-use                        | Waqqaf kwalunkwe dev server lokali fuq 20128 qabel ma tħaddem `electron:smoke:packaged`                                                           |
 
-## Ara Wkoll
+## Ara wkoll
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - Sors: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Għodod ta’ għajnuna: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Helpers: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

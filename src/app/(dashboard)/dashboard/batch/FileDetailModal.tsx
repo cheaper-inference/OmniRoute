@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { Button } from "@/shared/components";
 import Badge from "@/shared/components/Badge";
 import Modal from "@/shared/components/Modal";
@@ -194,7 +195,7 @@ export default function FileDetailModal({
       {/* Related batches */}
       {relatedBatches.length > 0 && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-2">
+          <h3 className="text-[11px] uppercase text-text-muted mb-2">
             {t("batchFileUsedByCount", { count: relatedBatches.length })}
           </h3>
           <div className="space-y-1.5">
@@ -229,9 +230,7 @@ export default function FileDetailModal({
       {/* Contents */}
       <div className="flex-1 flex flex-col min-h-[300px]">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            {t("batchFilePreview")}
-          </h3>
+          <h3 className="text-xs uppercase text-text-muted">{t("batchFilePreview")}</h3>
           {contents && (
             <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5 text-xs">
               <Icon name={copied ? "check" : "content_copy"} size={14} />
@@ -247,7 +246,7 @@ export default function FileDetailModal({
               aria-label={t("loading")}
               className="absolute inset-0 flex items-center justify-center bg-bg/50 rounded-lg"
             >
-              <Icon name="progress_activity" size={32} className="animate-spin text-accent" />
+              <Spinner decorative size="lg" className="text-accent" />
             </div>
           ) : contents ? (
             <div className="h-full flex flex-col">

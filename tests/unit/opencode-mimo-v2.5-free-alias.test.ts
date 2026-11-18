@@ -34,12 +34,14 @@ test("opencode-zen registry advertises v2.6 flash and keeps the old id as an ali
   );
 });
 
-test("free-model catalog lists v2.6 flash instead of the deprecated id", () => {
-  assert.ok(
+test("the alias replacement does not grant client-restricted free eligibility", () => {
+  assert.equal(
     FREE_MODEL_BUDGETS.some(
       (entry) =>
         entry.provider === "opencode-zen" && entry.modelId === "opencode/mimo-v2.6-flash-free"
-    )
+    ),
+    false,
+    "a valid authenticated model is not a generic proxy free-tier grant"
   );
   assert.equal(
     FREE_MODEL_BUDGETS.some((entry) => entry.modelId === "opencode/mimo-v2.5-free"),

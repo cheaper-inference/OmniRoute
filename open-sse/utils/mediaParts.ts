@@ -4,7 +4,8 @@
  * and the combo compatibility filter (open-sse/) — the two previously kept
  * divergent copies (guardrail missed input_image; combo saw it).
  */
-export type MediaKind = "image" | "audio" | "video";
+import { inspectAttachmentPart, dataUriKind } from "./mediaAttachmentParts.ts";
+export type MediaKind = "image" | "audio" | "video" | "document" | "file";
 
 export interface MediaPart {
   kind: MediaKind;
@@ -53,7 +54,8 @@ export interface MediaPart {
      * may be "". Boolean callers (combo compatibility filter) count it;
      * ref-consuming callers (vision bridge) must skip empty refs.
      */
-    | "image_indicator";
+    | "image_indicator"
+    | "file_part";
 }
 
 const MAX_DEPTH = 8;
@@ -257,15 +259,12 @@ function inspectImageIndicators(
   return true;
 }
 
+/** Inspect nested message and tool content with bounded attachment traversal. */
 function inspect(value: unknown, ctx: DetectCtx, depth: number, path: (string | number)[]): void {
   if (ctx.found || depth > MAX_DEPTH || value == null) return;
   if (typeof value === "string") {
-    if (value.startsWith("data:image/")) {
-      pushPart(ctx, "image", value, "data_uri_string", depth, path);
-    }
-    if (value.startsWith("data:video/")) {
-      pushPart(ctx, "video", value, "data_uri_string", depth, path);
-    }
+    const kind = dataUriKind(value);
+    if (kind) pushPart(ctx, kind, value, "data_uri_string", depth, path);
     return;
   }
   if (Array.isArray(value)) {
@@ -278,6 +277,11 @@ function inspect(value: unknown, ctx: DetectCtx, depth: number, path: (string | 
   if (typeof value !== "object") return;
   const obj = value as Record<string, unknown>;
   const type = typeof obj.type === "string" ? obj.type : undefined;
+  const attachment = inspectAttachmentPart(obj);
+  if (attachment) {
+    pushPart(ctx, attachment.kind, attachment.ref, attachment.shape, depth, path);
+    return;
+  }
 
   if (inspectImageShapes(obj, type, ctx, depth, path)) return;
 

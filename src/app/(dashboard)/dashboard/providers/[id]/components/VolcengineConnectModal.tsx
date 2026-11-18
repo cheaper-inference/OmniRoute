@@ -2,7 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Button, Input, Modal } from "@/shared/components";
-import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 import { providerText, type ProviderMessageTranslator } from "../providerPageHelpers";
 import { extractErrorMessage } from "@/shared/utils/upstreamError";
 
@@ -457,7 +457,7 @@ export default function VolcengineConnectModal({
                     disabled={selectingIdentity}
                     loading={selectingIdentity}
                     onClick={() => handleSelectIdentity(option.index)}
-                    className="h-auto w-full justify-start whitespace-normal p-3 text-left font-normal"
+                    className="h-auto w-full justify-start whitespace-normal p-3 text-left"
                   >
                     {option.label}
                   </Button>
@@ -540,8 +540,8 @@ export default function VolcengineConnectModal({
         )}
 
         {showPolling && (
-          <div className="flex items-center gap-3 py-2">
-            <Icon name="progress_activity" size={16} className="animate-spin text-text-muted" />
+          <div role="status" className="flex items-center gap-3 py-2">
+            <Spinner decorative size="sm" className="text-text-muted" />
             <p className="text-sm text-text-muted">
               {phase === "submitting"
                 ? providerText(

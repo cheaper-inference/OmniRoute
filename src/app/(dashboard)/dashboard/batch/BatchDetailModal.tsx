@@ -6,8 +6,10 @@ import Icon from "@/shared/components/Icon";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useBatchActions } from "./components/useBatchActions";
 import { batchStatusTone } from "./components/batchStatusTone";
+import ProgressBarBicolor from "./components/ProgressBarBicolor";
 
 type BatchTranslator = ReturnType<typeof useTranslations>;
 
@@ -168,6 +170,7 @@ export default function BatchDetailModal({
     downloadHrefOutput,
     downloadHrefErrors,
   } = useBatchActions({ onRefresh: onActionDone, t });
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
 
   // ── Status flags ──────────────────────────────────────────────────────────────
   const isTerminal = ["completed", "failed", "cancelled", "expired"].includes(batch.status);
@@ -238,10 +241,12 @@ export default function BatchDetailModal({
                 size="sm"
                 onClick={async () => {
                   if (
-                    window.confirm(
-                      t("batchDetailActionRetry") +
-                        ` (${batch.requestCountsFailed} ${t("batchActionRetry")})?`
-                    )
+                    await requestConfirm({
+                      message:
+                        t("batchDetailActionRetry") +
+                        ` (${batch.requestCountsFailed} ${t("batchActionRetry")})?`,
+                      variant: "primary",
+                    })
                   ) {
                     const result = await retry({
                       id: batch.id,
@@ -266,7 +271,7 @@ export default function BatchDetailModal({
                 variant="warning"
                 size="sm"
                 onClick={async () => {
-                  if (window.confirm(t("batchDetailCancelConfirm"))) {
+                  if (await requestConfirm(t("batchDetailCancelConfirm"))) {
                     await cancel(batch.id);
                     onClose();
                   }
@@ -336,10 +341,7 @@ export default function BatchDetailModal({
               {completed} / {total} ({pct}%)
             </span>
           </div>
-          <div className="h-2 rounded-full bg-bg-alt overflow-hidden flex">
-            <div className="h-full bg-success transition-all" style={{ width: `${donePct}%` }} />
-            <div className="h-full bg-error transition-all" style={{ width: `${failedPct}%` }} />
-          </div>
+          <ProgressBarBicolor total={total} completed={completed} failed={failed} />
           <div className="flex gap-4 text-xs text-text-muted">
             <span>{t("batchCompletedCount", { count: completed })}</span>
             {failed > 0 && <span>{t("batchFailedCount", { count: failed })}</span>}
@@ -350,9 +352,7 @@ export default function BatchDetailModal({
 
       {/* Timestamps */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
-          {t("batchTimeline")}
-        </h3>
+        <h3 className="text-[11px] uppercase text-text-muted mb-3">{t("batchTimeline")}</h3>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-sm">
           {[
             { label: t("batchDetailCreated"), ts: batch.createdAt },
@@ -379,9 +379,7 @@ export default function BatchDetailModal({
 
       {/* Files */}
       <div>
-        <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
-          Files
-        </h3>
+        <h3 className="text-[11px] uppercase text-text-muted mb-3">Files</h3>
         <div className="space-y-2">
           {[
             {
@@ -444,9 +442,7 @@ export default function BatchDetailModal({
       {/* Usage */}
       {batch.usage && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
-            {t("batchTokenUsage")}
-          </h3>
+          <h3 className="text-[11px] uppercase text-text-muted mb-3">{t("batchTokenUsage")}</h3>
           <pre className="p-3 rounded-lg bg-bg-alt border border-border text-xs font-mono text-text-main overflow-x-auto">
             {JSON.stringify(batch.usage, null, 2)}
           </pre>
@@ -456,9 +452,7 @@ export default function BatchDetailModal({
       {/* Errors */}
       {batch.errors && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-error mb-3">
-            {t("errors")}
-          </h3>
+          <h3 className="text-[11px] uppercase text-error mb-3">{t("errors")}</h3>
           <pre className="p-3 rounded-lg bg-error/10 border border-error/20 text-xs font-mono text-error overflow-x-auto">
             {JSON.stringify(batch.errors, null, 2)}
           </pre>
@@ -468,9 +462,7 @@ export default function BatchDetailModal({
       {/* Metadata */}
       {batch.metadata && Object.keys(batch.metadata).length > 0 && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-3">
-            {t("batchMetadata")}
-          </h3>
+          <h3 className="text-[11px] uppercase text-text-muted mb-3">{t("batchMetadata")}</h3>
           <div className="space-y-1">
             {Object.entries(batch.metadata).map(([k, v]) => (
               <div
@@ -485,6 +477,7 @@ export default function BatchDetailModal({
           </div>
         </div>
       )}
+      {confirmDialog}
     </Modal>
   );
 }

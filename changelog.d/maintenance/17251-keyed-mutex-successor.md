@@ -1,1 +1,0 @@
-- **test(cursor):** Cover queued-successor lock preservation when keyed mutex cleanup precedes a third caller. ([#17251](https://github.com/diegosouzapw/OmniRoute/pull/17251)) — thanks @pacocartones

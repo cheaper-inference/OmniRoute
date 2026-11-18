@@ -23,7 +23,7 @@ const isAuthStatus = (status: number) => status === 401 || status === 403;
  */
 export async function fetchDashboardConnections<T = Record<string, unknown>>(
   timeoutMs?: number,
-  init: Pick<RequestInit, "method" | "cache"> = {}
+  init: Pick<RequestInit, "method" | "cache" | "signal"> = {}
 ): Promise<T[]> {
   let response = await fetchWithTimeout("/api/providers/client", { ...init, timeoutMs });
   if (isAuthStatus(response.status)) {

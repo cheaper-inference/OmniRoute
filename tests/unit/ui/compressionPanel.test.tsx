@@ -251,6 +251,35 @@ describe("CompressionPanel", () => {
     expect(preview?.textContent).toContain("session-dedup → lite");
     expect(preview?.textContent).not.toContain("rtk");
     expect(preview?.textContent).not.toContain("caveman");
+    expect(container.querySelector(`[data-testid="auto-trigger-pipeline-preview"]`)).toBeNull();
+  });
+
+  it("shows the configured safe subset for the conditional auto-trigger pipeline", async () => {
+    setupFetchMock({
+      autoTriggerTokens: 1,
+      autoTriggerMode: "aggressive",
+      stackedPipeline: [
+        { engine: "rtk", intensity: "standard" },
+        { engine: "headroom", config: { minRows: 20 } },
+        { engine: "lite" },
+      ],
+    });
+    const { default: CompressionPanel } =
+      await import("../../../src/app/(dashboard)/dashboard/context/settings/CompressionPanel");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mount(<CompressionPanel />);
+    });
+    await flush();
+
+    expect(container.querySelector(`[data-testid="derived-pipeline-preview"]`)).toBeTruthy();
+    const autoTriggerPreview = container.querySelector(
+      `[data-testid="auto-trigger-pipeline-preview"]`
+    );
+    expect(autoTriggerPreview).toBeTruthy();
+    expect(autoTriggerPreview?.textContent).toContain("headroom");
+    expect(autoTriggerPreview?.textContent).not.toContain("rtk");
   });
 
   async function renderPanel() {

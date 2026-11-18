@@ -15,11 +15,13 @@ import {
 import { createModelSyncTimings } from "@/lib/providerModels/modelSyncTimings";
 import { saveCallLog } from "@/lib/usage/callLogs";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
 import {
   buildModelSyncInternalHeaders,
   fetchModelSyncInternal,
   getModelSyncInternalBaseUrl,
   isModelSyncInternalRequest,
+  isModelSyncLocalSpawnDenied,
 } from "@/shared/services/modelSyncScheduler";
 import { autoSyncCodexProfilesFromLiveCatalog } from "@/lib/cli-helper/codexProfileAutoSync";
 import { autoSyncClaudeProfilesFromLiveCatalog } from "@/lib/cli-helper/claudeProfileAutoSync";
@@ -39,6 +41,7 @@ import {
   pruneStaleComboModelRefs,
 } from "@/lib/combos/staleModelPrune";
 import { logAuditEvent } from "@/lib/compliance/index";
+import { recordSyncedModelsForInbox } from "@/lib/newModelsInbox";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -118,6 +121,19 @@ async function readJsonResponse(response: Response): Promise<{
       parseError: "Invalid JSON response from /models",
     };
   }
+}
+
+/** The ids `after` holds and `before` lacks, in the order `after` lists them. */
+function modelIdsMissingFrom(before: unknown[], after: unknown[]): string[] {
+  const known = new Set(
+    before.map((model) => toNonEmptyString(asRecord(model).id)).filter(Boolean) as string[]
+  );
+  const ids: string[] = [];
+  for (const model of after) {
+    const id = toNonEmptyString(asRecord(model).id);
+    if (id && !known.has(id) && !ids.includes(id)) ids.push(id);
+  }
+  return ids;
 }
 
 function summarizeModelChanges(previousModels: unknown, nextModels: unknown) {
@@ -367,15 +383,25 @@ export async function selfFetchWithRetry(
 // fetchProviderModelsForSync — private orchestrator (uses selfFetchWithRetry)
 // ---------------------------------------------------------------------------
 
-async function fetchProviderModelsForSync(request: Request, connectionId: string) {
+async function fetchProviderModelsForSync(
+  request: Request,
+  connectionId: string,
+  mode: ManagedModelImportMode
+) {
   const safeOrigin = getModelSyncInternalBaseUrl();
   const modelsPath =
     `/api/providers/${encodeURIComponent(connectionId)}/models` +
     "?refresh=true&excludeCustom=true";
+  const peerLocality = request.headers.get(AUTHZ_HEADER_PEER_LOCALITY) || "remote";
+  const denyLocalSpawn = peerLocality !== "loopback" || isModelSyncLocalSpawnDenied(request);
+  // A scheduled sync reads the chat surface only. An explicit import ("merge")
+  // reads every surface: importManagedModels still keeps the synced list to chat
+  // models, and stores the models that serve only non-chat endpoints as imported
+  // rows, which is how a media-only provider's catalog reaches the dashboard.
   const headers = {
     cookie: request.headers.get("cookie") || "",
-    "x-omniroute-model-surface": "chat",
-    ...buildModelSyncInternalHeaders(),
+    ...(mode === "merge" ? {} : { "x-omniroute-model-surface": "chat" }),
+    ...buildModelSyncInternalHeaders({ denyLocalSpawn }),
   };
 
   const targetUrl = `${safeOrigin}${modelsPath}`;
@@ -391,7 +417,8 @@ async function fetchProviderModelsForSync(request: Request, connectionId: string
       getProviderModels(
         new Request(new URL(modelsPath, "http://localhost").href, {
           method: "GET",
-          headers,
+          // This direct call bypasses the pipeline that normally stamps trusted locality.
+          headers: { ...headers, [AUTHZ_HEADER_PEER_LOCALITY]: peerLocality },
         }),
         { params: { id: connectionId } }
       ),
@@ -479,6 +506,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       }
       const previous = await getSyncedAvailableModelsForConnection(logProvider, id);
       const synced = await replaceSyncedAvailableModelsForConnection(logProvider, id, discovered);
+      recordSyncedModelsForInbox(logProvider, synced);
       const prevIds = new Set(previous.map((m) => String(m.id)));
       const added = synced.filter((m) => !prevIds.has(String(m.id))).length;
       const removed = previous.filter(
@@ -515,6 +543,8 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
         syncedModels: synced.length,
         availableModelsCount: synced.length,
         modelChanges: { added, removed, total: added + removed },
+        addedModelIds: modelIdsMissingFrom(previous, synced),
+        removedModelIds: modelIdsMissingFrom(synced, previous),
         models: synced,
       });
     }
@@ -545,7 +575,7 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
     );
 
     const modelsRes = await timings.measure("discovery", () =>
-      fetchProviderModelsForSync(request, id)
+      fetchProviderModelsForSync(request, id, mode)
     );
 
     const duration = Date.now() - start;
@@ -658,6 +688,17 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       })
     );
 
+    recordSyncedModelsForInbox(logProvider, allFetchedModels);
+    if (freeFilterEmpty) {
+      // A free-only connection whose listing holds no free model has nothing
+      // callable. The report already cuts the stale snapshot
+      // (resolveEffectiveAvailableModels); the stored catalog must say the same,
+      // or routing and auto-combo pools keep serving the paid rows the
+      // discovery refresh stored as cached, non-free entries.
+      await timings.measure("free-filter-cut", () =>
+        replaceSyncedAvailableModelsForConnection(logProvider, id, [])
+      );
+    }
     const effectiveAvailableModels = resolveEffectiveAvailableModels(
       freeFilterEmpty,
       discoveredModels,
@@ -815,10 +856,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       });
     }
 
+    // What the import changed, by model id, across both stores it writes: the
+    // synced list and the imported custom rows.
+    const catalogBefore = [...previousSyncedAvailableModels, ...previousModels];
+    const catalogAfter = [...effectiveAvailableModels, ...persistedModels];
+
     return NextResponse.json({
       ok: true,
       provider: logProvider,
       mode,
+      source: modelSource,
+      ...(modelsData.intentional === true ? { intentional: true } : {}),
+      ...(modelWarning ? { warning: modelWarning } : {}),
+      addedModelIds: modelIdsMissingFrom(catalogBefore, catalogAfter),
+      removedModelIds: modelIdsMissingFrom(catalogAfter, catalogBefore),
       importFreeOnly,
       freeFilterEmpty,
       syncedModels: syncedModelsCount,
@@ -836,26 +887,30 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
       prunedComboRefs,
     });
   } catch (error: any) {
-    // Log error
-    await saveTimedCallLog({
-      method: "POST",
-      path: `/api/providers/${id}/sync-models`,
-      status: 500,
-      model: "model-sync",
-      provider: logProvider,
-      sourceFormat: "-",
-      connectionId: id,
-      duration: Date.now() - start,
-      error: error.message || "Sync failed",
-      requestType: "model-sync",
-      ...(channelLabel
-        ? {
-            responseBody: {
-              channel: channelLabel,
-            },
-          }
-        : {}),
-    }).catch(() => {});
+    // Keep the audit sink explicit for the call-scoped error-helper gate.
+    await timings
+      .measure("call-log", () =>
+        saveCallLog({
+          method: "POST",
+          path: `/api/providers/${id}/sync-models`,
+          status: 500,
+          model: "model-sync",
+          provider: logProvider,
+          sourceFormat: "-",
+          connectionId: id,
+          duration: Date.now() - start,
+          error: error.message || "Sync failed",
+          requestType: "model-sync",
+          ...(channelLabel
+            ? {
+                responseBody: {
+                  channel: channelLabel,
+                },
+              }
+            : {}),
+        })
+      )
+      .catch(() => {});
 
     return NextResponse.json(
       { error: sanitizeErrorMessage(error) || "Failed to sync models" },

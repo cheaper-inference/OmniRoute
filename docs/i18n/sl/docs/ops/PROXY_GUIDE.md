@@ -82,6 +82,18 @@ Tudi zunaj blokiranih regij so posredniški strežniki uporabni za:
 
 ---
 
+## Privzeto stanje posrednika za nove račune
+
+noter** Nastavitve → Proxy → Globalna konfiguracija** , uporabite** Privzeto omogoči proxy za nove povezave** da izberete začetno stanje posrednika za novo dodane račune ponudnika.
+
+Nova nastavitev nadzira začetno stanje proxyja na novo dodanih računov ponudnika. Ne spremeni obstoječih računov ali zamenja globalnega proxy stikala. Njegova začetna vrednost ohranja prejšnje vedenje. Enkrat ga izklopite, če želite v prihodnje ustvariti račune s privzeto onemogočenim proxyjem.
+
+Nastavitve so shranjene kot `defaultNewConnectionProxyEnabled` prek obstoječih nastavitev API. Ko ni nikoli shranjen, je privzeto nastavljen na `true`. Shranjevanje `false` začne veljati za naslednje nove račune brez ponovnega zagona. `POST /api/providers` sprejme neobvezno strogo logično `proxyEnabled`; eksplicitni `true` ali `false` ima prednost pred privzeto vrednostjo za ustvarjanje. Opustitev podvojenega računa ali ponovne povezave OAuth ohrani shranjeno stanje tega računa. Posamezne račune lahko pozneje še vedno omogočite ali onemogočite.
+
+Selektivni prenosi ponudnika uporabljajo privzeto vrednost ciljne namestitve za nove račune in ohranijo ciljno politiko pri zamenjavi obstoječih računov. Proxy preklopi niso prenosna polja za prenos. Obnovitev popolne varnostne kopije in zgodovinska selitev JSON/SQL ohranita obstoječo semantiko obnovitve, vključno s shranjenimi vrednostmi računa in privzetimi vrednostmi stare sheme; popolna obnovitev nastavitev lahko obnovi tudi to nastavitev.
+
+Ta preferenca ne dodeli posrednika ali ugotovi, da je ta zdrav ali v uporabi. Dejansko usmerjanje je še vedno odvisno od globalnega stikala proxy in ustrezne konfiguracije proxyja. Sintetični ponudniki brez vztrajnega računa, promet OAuth pred ustvarjanjem računa, posredniki environment/system in mreženje zunanjih ozadij so zunaj njegovega obsega.
+
 ## 4-stopenjski sistem posredniških strežnikov
 
 OmniRoute podpira konfiguracijo posredniških strežnikov na **štirih neodvisnih ravneh**, ki se razrešujejo po prednostnem vrstnem redu:

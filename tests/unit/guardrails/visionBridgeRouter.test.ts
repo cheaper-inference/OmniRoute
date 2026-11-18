@@ -398,3 +398,102 @@ test("getBestVisionModel — drops a cached selection once it becomes locked mid
     clearSelectionCache();
   }
 });
+
+// ── blocked no-auth provider exclusion ──────────────────────────────────────
+// Dispatch refuses a no-auth provider listed in blockedProviders BEFORE any
+// credential path, so a blocked provider that wins pool selection turns the
+// operator's block into a late 401 provider_not_configured instead of a
+// reroute. getVisionCapableModels() must skip such providers before the
+// per-model fan-out, via the deps.isBlockedNoAuthProvider injection point
+// (same DI rationale as hasUsableCredentials above).
+
+test("getBestVisionModel — drops a blocked no-auth provider even when its models look credentialed", async () => {
+  const provider = "__vision-bridge-blocked-test-1__";
+  const modelId = "synthetic-vision-model";
+  PROVIDER_MODELS[provider] = [
+    { id: modelId, name: "Synthetic Vision Model", supportsVision: true },
+  ];
+
+  try {
+    const model = await getBestVisionModel(
+      {},
+      {
+        // The blocked provider's models pass the credential check — the
+        // blocked check must exclude them anyway, because dispatch would
+        // refuse the provider outright.
+        hasUsableCredentials: async (id) => id.startsWith(`${provider}/`),
+        isBlockedNoAuthProvider: async (candidate) => candidate === provider,
+        getActiveSyncedCatalog: async () => ({ authoritative: false, models: [] }),
+      }
+    );
+    assert.equal(model, null, "a fully blocked pool must yield no candidate, not a blocked one");
+  } finally {
+    delete PROVIDER_MODELS[provider];
+  }
+});
+
+test("getBestVisionModel — picks an unblocked provider over a blocked one and never probes the blocked one's credentials", async () => {
+  const blockedProvider = "__vision-bridge-blocked-test-2__";
+  const openProvider = "__vision-bridge-blocked-test-3__";
+  const modelId = "synthetic-vision-model";
+  PROVIDER_MODELS[blockedProvider] = [
+    { id: modelId, name: "Blocked Vision Model", supportsVision: true },
+  ];
+  PROVIDER_MODELS[openProvider] = [
+    { id: modelId, name: "Open Vision Model", supportsVision: true },
+  ];
+
+  const credentialedModels: string[] = [];
+  try {
+    const model = await getBestVisionModel(
+      {},
+      {
+        hasUsableCredentials: async (id) => {
+          credentialedModels.push(id);
+          return id.startsWith(`${blockedProvider}/`) || id.startsWith(`${openProvider}/`);
+        },
+        isBlockedNoAuthProvider: async (candidate) => candidate === blockedProvider,
+        getActiveSyncedCatalog: async () => ({ authoritative: false, models: [] }),
+      }
+    );
+    assert.equal(model, `${openProvider}/${modelId}`);
+    assert.ok(
+      !credentialedModels.some((id) => id.startsWith(`${blockedProvider}/`)),
+      "the blocked provider must be skipped before the per-model credential fan-out"
+    );
+  } finally {
+    delete PROVIDER_MODELS[blockedProvider];
+    delete PROVIDER_MODELS[openProvider];
+  }
+});
+
+test("getBestVisionModel — drops a cached selection once its provider becomes blocked", async () => {
+  // The pick was cached while the provider was enabled; blocking mid-cache-
+  // window must invalidate it on revalidation, not keep serving it for the
+  // 60s selection TTL (a blocked pick re-creates the misleading 401 this
+  // suite exists to remove). Mirrors chatCore.ts's mid-window lockout flow.
+  const provider = "__vision-bridge-blocked-cache-test__";
+  const modelId = "synthetic-vision-model";
+  PROVIDER_MODELS[provider] = [
+    { id: modelId, name: "Synthetic Vision Model", supportsVision: true },
+  ];
+  let blocked = false;
+  const deps = {
+    hasUsableCredentials: async (id: string) => id.startsWith(`${provider}/`),
+    isBlockedNoAuthProvider: async () => blocked,
+    getActiveSyncedCatalog: async () => ({ authoritative: false, models: [] }),
+  };
+
+  try {
+    assert.equal(await getBestVisionModel({}, deps), `${provider}/${modelId}`);
+    blocked = true;
+    assert.equal(
+      await getBestVisionModel({}, deps),
+      null,
+      "a pick cached before the block must not survive cache revalidation"
+    );
+  } finally {
+    delete PROVIDER_MODELS[provider];
+    clearSelectionCache();
+  }
+});

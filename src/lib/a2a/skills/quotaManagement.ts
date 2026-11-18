@@ -6,19 +6,25 @@
  */
 
 import type { A2ATask, TaskArtifact } from "../taskManager";
+import {
+  buildSelfLoopHeaders,
+  UnsafeSelfLoopTargetError,
+  type A2ACallerContext,
+} from "../selfLoopAuth";
 import { normalizeQuotaResponse } from "@/shared/contracts/quota";
 import { resolveOmniRouteBaseUrl } from "@/shared/utils/resolveOmniRouteBaseUrl";
 
 const OMNIROUTE_BASE_URL = resolveOmniRouteBaseUrl();
-const OMNIROUTE_API_KEY = process.env.OMNIROUTE_API_KEY || "";
 
-async function quotaFetch(path: string): Promise<any> {
+async function quotaFetch(path: string, caller?: A2ACallerContext): Promise<any> {
   const url = `${OMNIROUTE_BASE_URL}${path}`;
-  const headers: Record<string, string> = {
-    "Content-Type": "application/json",
-    ...(OMNIROUTE_API_KEY ? { Authorization: `Bearer ${OMNIROUTE_API_KEY}` } : {}),
-  };
-  const res = await fetch(url, { headers, signal: AbortSignal.timeout(10000) });
+  const headers = buildSelfLoopHeaders(caller, OMNIROUTE_BASE_URL);
+  const res = await fetch(url, {
+    headers,
+    signal: AbortSignal.timeout(10000),
+    // Never follow a redirect while carrying the caller's API key.
+    redirect: "error",
+  });
   if (!res.ok) throw new Error(`API [${res.status}]`);
   return res.json();
 }
@@ -28,13 +34,22 @@ export interface QuotaManagementResult {
   metadata: Record<string, unknown>;
 }
 
-export async function executeQuotaManagement(task: A2ATask): Promise<QuotaManagementResult> {
+export async function executeQuotaManagement(
+  task: A2ATask,
+  caller?: A2ACallerContext
+): Promise<QuotaManagementResult> {
   const query = task.input.messages[task.input.messages.length - 1]?.content?.toLowerCase() || "";
 
   const [quotaRaw, combosRaw] = await Promise.allSettled([
-    quotaFetch("/api/usage/quota"),
-    quotaFetch("/api/combos"),
+    quotaFetch("/api/usage/quota", caller),
+    quotaFetch("/api/combos", caller),
   ]);
+
+  // Rejected sub-requests degrade to empty data, but a refused base URL means no
+  // call went out at all, and "0 providers" would read as a real answer.
+  if (quotaRaw.status === "rejected" && quotaRaw.reason instanceof UnsafeSelfLoopTargetError) {
+    throw quotaRaw.reason;
+  }
 
   const quota =
     quotaRaw.status === "fulfilled"
@@ -50,14 +65,26 @@ export async function executeQuotaManagement(task: A2ATask): Promise<QuotaManage
       : [];
   const providers = quota.providers;
 
-  const availableQuota = (provider: { quotaTotal: number | null; quotaUsed: number }) => {
-    if (provider.quotaTotal === null) return Number.POSITIVE_INFINITY;
+  // A null total means the quota is unknown, not unlimited.
+  const availableQuota = (provider: {
+    quotaTotal: number | null;
+    quotaUsed: number;
+  }): number | null => {
+    if (provider.quotaTotal === null) return null;
     return provider.quotaTotal - provider.quotaUsed;
   };
 
   // Query classification
   if (query.includes("ranking") || query.includes("most quota") || query.includes("best")) {
-    const sorted = [...providers].sort((a, b) => availableQuota(b) - availableQuota(a));
+    // Known amounts first (most available first); unknown amounts last.
+    const sorted = [...providers].sort((a, b) => {
+      const ra = availableQuota(a);
+      const rb = availableQuota(b);
+      if (ra === null && rb === null) return 0;
+      if (ra === null) return 1;
+      if (rb === null) return -1;
+      return rb - ra;
+    });
     return {
       artifacts: [
         {
@@ -65,10 +92,11 @@ export async function executeQuotaManagement(task: A2ATask): Promise<QuotaManage
           content: `**Quota Ranking (most available first):**\n${sorted
             .map((p, i) => {
               const remaining = availableQuota(p);
-              const remainingLabel =
-                remaining === Number.POSITIVE_INFINITY ? "unlimited" : remaining.toLocaleString();
+              const remainingLabel = remaining === null ? "unknown" : remaining.toLocaleString();
               const percentLabel =
-                p.quotaTotal === null ? "n/a" : `${Math.round(p.percentRemaining)}%`;
+                p.quotaTotal === null || p.percentRemaining === null
+                  ? "n/a"
+                  : `${Math.round(p.percentRemaining)}%`;
               return `${i + 1}. **${p.provider}** — ${remainingLabel} remaining (${percentLabel})`;
             })
             .join("\n")}`,
@@ -100,7 +128,7 @@ export async function executeQuotaManagement(task: A2ATask): Promise<QuotaManage
   // Default: general quota summary
   const totalUsed = providers.reduce((sum, p) => sum + (p.quotaUsed || 0), 0);
   const totalAvailable = providers.reduce((sum, p) => sum + (p.quotaTotal || 0), 0);
-  const warnings = providers.filter((p) => p.percentRemaining <= 10);
+  const warnings = providers.filter((p) => p.percentRemaining !== null && p.percentRemaining <= 10);
 
   return {
     artifacts: [

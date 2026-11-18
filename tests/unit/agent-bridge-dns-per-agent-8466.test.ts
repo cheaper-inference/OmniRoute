@@ -12,6 +12,13 @@
 import { test, mock, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const hostsFile =
+  os.platform() === "win32"
+    ? path.join(process.env.SystemRoot || "C:\\Windows", "System32", "drivers", "etc", "hosts")
+    : "/etc/hosts";
 
 afterEach(() => {
   mock.restoreAll();
@@ -20,7 +27,7 @@ afterEach(() => {
 test("FALSE NEGATIVE: Claude Code host correctly spoofed, no Antigravity host present -> dnsConfigured should be true when checked for claude-code", async () => {
   const realReadFileSync = fs.readFileSync.bind(fs);
   mock.method(fs, "readFileSync", (p: string, enc?: BufferEncoding) => {
-    if (p === "/etc/hosts") {
+    if (p === hostsFile) {
       // Claude Code target hosts = ["api.anthropic.com"] (src/mitm/targets/claudeCode.ts).
       // The user correctly spoofed it. No Antigravity host present at all.
       return "127.0.0.1 localhost\n127.0.0.1 api.anthropic.com\n::1 api.anthropic.com\n";
@@ -41,7 +48,7 @@ test("FALSE NEGATIVE: Claude Code host correctly spoofed, no Antigravity host pr
 test("FALSE POSITIVE: only a leftover Antigravity host is present, Claude Code host is missing -> dnsConfigured should be false when checked for claude-code", async () => {
   const realReadFileSync = fs.readFileSync.bind(fs);
   mock.method(fs, "readFileSync", (p: string, enc?: BufferEncoding) => {
-    if (p === "/etc/hosts") {
+    if (p === hostsFile) {
       // Leftover Antigravity entry from a previous setup. Claude Code's host
       // (api.anthropic.com) is NOT present.
       return "127.0.0.1 localhost\n127.0.0.1 daily-cloudcode-pa.googleapis.com\n";
@@ -66,8 +73,7 @@ test("no-agentId call sites: still Antigravity-only but Windows-aware (#8656)", 
     // (Windows-aware) instead of hardcoded /etc/hosts. Still Antigravity-only
     // semantics (checks all 4 Antigravity hosts), but reads the correct file.
     const pathStr = String(p);
-    const isHostsFile =
-      pathStr === "/etc/hosts" || pathStr.includes("System32\\drivers\\etc\\hosts");
+    const isHostsFile = pathStr === hostsFile;
     if (isHostsFile) {
       // Claude Code host spoofed, but NO Antigravity host present. The legacy
       // Antigravity-only check should still return false (unchanged semantics).
@@ -89,7 +95,7 @@ test("no-agentId call sites: still Antigravity-only but Windows-aware (#8656)", 
 test("diagnose route: threads ?agentId= query param through to getMitmStatus", async () => {
   const realReadFileSync = fs.readFileSync.bind(fs);
   mock.method(fs, "readFileSync", (p: string, enc?: BufferEncoding) => {
-    if (p === "/etc/hosts") {
+    if (p === hostsFile) {
       return "127.0.0.1 localhost\n127.0.0.1 api.anthropic.com\n::1 api.anthropic.com\n";
     }
     return realReadFileSync(p, enc);

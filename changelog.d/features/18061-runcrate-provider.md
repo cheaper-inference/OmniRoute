@@ -1,1 +1,0 @@
-- **feat(providers):** add Runcrate (`runcrate`), an OpenAI-compatible API-key provider (api.runcrate.ai) with six models ([#18061](https://github.com/diegosouzapw/OmniRoute/pull/18061)) — thanks @heydryft

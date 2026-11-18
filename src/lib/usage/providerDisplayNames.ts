@@ -28,9 +28,7 @@ function getProviderDisplayName(
   const rawProvider = toStringValue(provider, "unknown");
   // Configured node name wins; static catalog covers built-ins (e.g. codex →
   // "OpenAI Codex") the nodes table doesn't know about; raw id is the last resort.
-  return (
-    providerDisplayNames.get(rawProvider) || getProviderById(rawProvider)?.name || rawProvider
-  );
+  return providerDisplayNames.get(rawProvider) || getProviderById(rawProvider)?.name || rawProvider;
 }
 
 async function getProviderDisplayNames(): Promise<Map<string, string>> {
@@ -68,21 +66,26 @@ export interface ByProviderRow {
  * id to its configured display name.
  */
 export async function buildByProviderRows(
-  providerRows: Array<Record<string, unknown>>,
+  // Concrete row interfaces have no index signature, so they are not assignable to
+  // Record; widen once here instead of casting at every call site.
+  providerRows: object[],
   providerCostByProvider: Map<string, number>
 ): Promise<ByProviderRow[]> {
   const providerDisplayNames = await getProviderDisplayNames();
-  return providerRows.map((row) => ({
-    provider: getProviderDisplayName(row.provider, providerDisplayNames),
-    requests: Number(row.requests),
-    promptTokens: Number(row.promptTokens),
-    completionTokens: Number(row.completionTokens),
-    totalTokens: Number(row.totalTokens),
-    avgLatencyMs: Math.round(Number(row.avgLatencyMs)),
-    successRatePct:
-      Number(row.requests) > 0
-        ? Number((Number(row.successfulRequests) / Number(row.requests)) * 100).toFixed(2)
-        : 0,
-    cost: roundCost(providerCostByProvider.get(toStringValue(row.provider)) || 0),
-  }));
+  return providerRows.map((raw) => {
+    const row = raw as Record<string, unknown>;
+    return {
+      provider: getProviderDisplayName(row.provider, providerDisplayNames),
+      requests: Number(row.requests),
+      promptTokens: Number(row.promptTokens),
+      completionTokens: Number(row.completionTokens),
+      totalTokens: Number(row.totalTokens),
+      avgLatencyMs: Math.round(Number(row.avgLatencyMs)),
+      successRatePct:
+        Number(row.requests) > 0
+          ? Number((Number(row.successfulRequests) / Number(row.requests)) * 100).toFixed(2)
+          : 0,
+      cost: roundCost(providerCostByProvider.get(toStringValue(row.provider)) || 0),
+    };
+  });
 }

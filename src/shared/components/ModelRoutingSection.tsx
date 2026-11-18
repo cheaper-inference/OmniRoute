@@ -13,6 +13,7 @@ import { Skeleton } from "./Loading";
 import Select from "./Select";
 import Toggle from "./Toggle";
 import { matchesOnlyPaidModels } from "@/shared/utils/freeModels";
+import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 
 export interface ModelMapping {
   id: string;
@@ -32,6 +33,7 @@ interface Combo {
 export default function ModelRoutingSection({ combos: externalCombos }: { combos?: Combo[] } = {}) {
   const t = useTranslations("settings");
   const tCommon = useTranslations("common");
+  const { requestConfirm, confirmDialog } = useConfirmDialog();
   const [mappings, setMappings] = useState<ModelMapping[]>([]);
   const [internalCombos, setInternalCombos] = useState<Combo[]>([]);
   const [loading, setLoading] = useState(true);
@@ -148,7 +150,7 @@ export default function ModelRoutingSection({ combos: externalCombos }: { combos
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm(t("deleteRoutingRule"))) return;
+    if (!(await requestConfirm(t("deleteRoutingRule")))) return;
     try {
       await fetch(`/api/model-combo-mappings/${id}`, { method: "DELETE" });
       setMappings((prev) => prev.filter((m) => m.id !== id));
@@ -325,6 +327,7 @@ export default function ModelRoutingSection({ combos: externalCombos }: { combos
           ))}
         </div>
       )}
+      {confirmDialog}
     </Card>
   );
 }

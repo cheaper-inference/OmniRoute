@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## রুট ফাইলসমূহ
+## রুট ফাইল
 
 | ফাইল                                        | উদ্দেশ্য                                                                                |
 | ------------------------------------------- | --------------------------------------------------------------------------------------- |
-| **README.md**                               | মার্কেটিং ল্যান্ডিং পেজ + দ্রুত শুরু + ফিচার ম্যাট্রিক্স (`llm.txt`-ও দেখুন)            |
-| **CHANGELOG.md**                            | প্রতিটি রিলিজের পরিবর্তনলিপি (`/version-bump-cc` স্কিল দ্বারা স্বয়ংক্রিয়ভাবে তৈরি)    |
+| **README.md**                               | মার্কেটিং ল্যান্ডিং পেজ + দ্রুত শুরু + বৈশিষ্ট্য ম্যাট্রিক্স (এছাড়াও `llm.txt` দেখুন)  |
+| **CHANGELOG.md**                            | প্রতি-রিলিজ চেঞ্জলগ ( `/version-bump-cc` দক্ষতা দ্বারা স্বয়ংক্রিয়ভাবে তৈরি)           |
 | **LICENSE**                                 | MIT লাইসেন্সের পাঠ্য                                                                    |
-| **CLAUDE.md**                               | Claude Code এজেন্টদের জন্য প্রজেক্টের নিয়মাবলি (কঠোর নিয়ম, রীতিনীতি, পরিস্থিতি)       |
-| **AGENTS.md**                               | CLAUDE.md-এর অনুরূপ, তবে Claude-বহির্ভূত AI এজেন্টদের জন্য (Codex, Cursor ইত্যাদি)      |
-| **GEMINI.md**                               | Gemini-ভিত্তিক এজেন্টদের জন্য সংক্ষিপ্ত নিয়মাবলি (CLAUDE.md-এর উপসেট)                  |
-| **CONTRIBUTING.md**                         | অবদানকারীর নির্দেশিকা: সেটআপ, conventional commits, টেস্টিং, PR প্রক্রিয়া              |
-| **SECURITY.md**                             | দুর্বলতা রিপোর্ট করার নীতি, সমর্থিত সংস্করণ, থ্রেট মডেল                                 |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — কমিউনিটিতে আচরণের প্রত্যাশা                                      |
-| **llm.txt**                                 | LLM ক্রলারের জন্য অপ্টিমাইজ করা প্লেইন-টেক্সট ল্যান্ডিং পেজ (AI সহকারীর জন্য SEO)       |
+| **CLAUDE.md**                               | Claude কোড এজেন্টদের জন্য প্রকল্পের নিয়ম (কঠিন নিয়ম, নিয়ম, পরিস্থিতি)                |
+| **AGENTS.md**                               | CLAUDE.md মতোই কিন্তু নন-ক্লাউড AI এজেন্টদের জন্য (Codex, Cursor, ইত্যাদি)              |
+| **GEMINI.md**                               | মিথুন-ভিত্তিক এজেন্টদের জন্য সংক্ষিপ্ত নিয়ম ( CLAUDE.md এর উপসেট)                      |
+| **CONTRIBUTING.md**                         | অবদানকারী গাইড: সেটআপ, প্রচলিত প্রতিশ্রুতি, পরীক্ষা, PR প্রবাহ                          |
+| **SECURITY.md**                             | দুর্বলতা রিপোর্টিং নীতি, সমর্থিত সংস্করণ, হুমকি মডেল                                    |
+| **CODE_OF_CONDUCT.md**                      | অবদানকারী চুক্তি — সম্প্রদায় আচরণ প্রত্যাশা                                            |
+| **llm.txt**                                 | প্লেইন-টেক্সট ল্যান্ডিং LLM ক্রলারদের জন্য অপ্টিমাইজ করা হয়েছে ( AI সহকারীর জন্য SEO ) |
 | **package.json**                            | npm ম্যানিফেস্ট, স্ক্রিপ্ট, নির্ভরতা, ইঞ্জিন, c8 কভারেজ গেট                             |
-| **package-lock.json**                       | লক করা নির্ভরতা ট্রি                                                                    |
-| **tsconfig.json**                           | রুট TypeScript কনফিগ                                                                    |
-| **tsconfig.typecheck-core.json**            | `src/` কোরের জন্য টাইপচেক কনফিগ                                                         |
-| **tsconfig.typecheck-noimplicit-core.json** | কঠোর (`noImplicitAny`) টাইপচেক                                                          |
-| **tsconfig.tsbuildinfo**                    | TS ইনক্রিমেন্টাল বিল্ড ক্যাশ (gitignored)                                               |
-| **next.config.mjs**                         | Next.js 16 বিল্ড কনফিগারেশন (standalone আউটপুট)                                         |
-| **next-env.d.ts**                           | Next.js দ্বারা স্বয়ংক্রিয়ভাবে তৈরি env টাইপ                                           |
-| **eslint.config.mjs**                       | ESLint ফ্ল্যাট কনফিগ (প্রজেক্টের প্রতিটি অংশের জন্য নিয়ম)                              |
-| **prettier.config.mjs**                     | Prettier ফরম্যাটিং নিয়মাবলি                                                            |
-| **postcss.config.mjs**                      | Tailwind/CSS পাইপলাইনের জন্য PostCSS কনফিগ                                              |
-| **playwright.config.ts**                    | Playwright E2E টেস্ট কনফিগ                                                              |
-| **vitest.config.ts**                        | Vitest কনফিগ (ডিফল্ট স্যুট)                                                             |
-| **vitest.mcp.config.ts**                    | MCP সার্ভার / autoCombo / ক্যাশ স্যুটের জন্য Vitest কনফিগ                               |
-| **sonar-project.properties**                | SonarQube/SonarCloud কনফিগ (কোডের গুণমান)                                               |
-| **Dockerfile**                              | মাল্টি-স্টেজ Docker বিল্ড (builder → runner-base → runner-cli)                          |
-| **docker-compose.yml**                      | ৪টি প্রোফাইলসহ ডেভেলপমেন্ট compose (base, cli, host, cliproxyapi) + redis sidecar       |
-| **docker-compose.prod.yml**                 | প্রোডাকশন compose (পোর্ট 20130, redis, named volumes)                                   |
-| **.dockerignore**                           | Docker context থেকে বাদ দেওয়া ফাইল                                                     |
-| **fly.toml**                                | Fly.io ডিপ্লয়মেন্ট কনফিগ (অঞ্চল `sin`, পোর্ট 20128, /data ভলিউম)                       |
-| **.env.example**                            | env ফাইলের টেমপ্লেট (প্রথম ইনস্টলে স্বয়ংক্রিয়ভাবে `.env`-এ কপি করা হয়)               |
-| **.gitignore**                              | Git ignore প্যাটার্ন                                                                    |
-| **.npmignore**                              | npm publish-এর বর্জন তালিকা                                                             |
-| **.npmrc**                                  | npm কনফিগ (রেজিস্ট্রি, lockfile নীতি)                                                   |
-| **.node-version**                           | Node সংস্করণ পিন (nvm-সামঞ্জস্যপূর্ণ টুলে ব্যবহৃত)                                      |
-| **.nvmrc**                                  | nvm-এর জন্য Node সংস্করণ পিন                                                            |
-| **eslint.complexity.config.mjs**            | complexity ratchet-এর জন্য ESLint কনফিগ (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | SonarJS নিয়মের জন্য ESLint কনফিগ (cognitive complexity / duplication)                  |
-| **source.config.ts**                        | Fumadocs `defineDocs` সোর্স কনফিগ (`.source/`-এ তথ্য সরবরাহ করে)                        |
-| **knip.json**                               | Knip কনফিগ — অব্যবহৃত ফাইল/এক্সপোর্ট/নির্ভরতা (dead-code gate-এ তথ্য সরবরাহ করে)        |
-| **stryker.conf.json**                       | Stryker mutation-testing কনফিগ                                                          |
-| **.size-limit.json**                        | size-limit বান্ডেল বাজেট কনফিগারেশন                                                     |
-| **promptfooconfig.yaml**                    | promptfoo মূল্যায়ন কনফিগারেশন                                                          |
-| **.gitleaks.toml**                          | gitleaks গোপন তথ্য স্ক্যানের নিয়মাবলি                                                  |
-| **.zizmor.yml**                             | zizmor GitHub-Actions নিরাপত্তা লিন্ট কনফিগারেশন                                        |
+| **package-lock.json**                       | তালাবদ্ধ নির্ভরতা গাছ                                                                   |
+| **tsconfig.json**                           | রুট TypeScript কনফিগারেশন                                                               |
+| **tsconfig।typecheck-core.json**            | `src/` কোরের জন্য টাইপচেক কনফিগারেশন                                                    |
+| **tsconfig।typecheck-noimplicit-core.json** | কঠোর (`noImplicitAny`) টাইপচেক                                                          |
+| **tsconfig.tsbuildinfo**                    | TS ইনক্রিমেন্টাল বিল্ড ক্যাশে (gitigned)                                                |
+| **পরবর্তীconfig.mjs**                       | Next.js 16 বিল্ড কনফিগারেশন (স্বতন্ত্র আউটপুট)                                          |
+| **পরবর্তী পরিবেশ d.ts**                     | Next.js স্বয়ংক্রিয়ভাবে তৈরি করা env প্রকার                                            |
+| **eslint config.mjs**                       | ESLint ফ্ল্যাট কনফিগারেশন (প্রকল্প এলাকা প্রতি নিয়ম)                                   |
+| **সুন্দর config.mjs**                       | Prettier ফরম্যাটিং নিয়ম                                                                |
+| **পোস্টসিএসএস config.mjs**                  | Tailwind/CSS পাইপলাইনের জন্য PostCSS কনফিগারেশন                                         |
+| **নাট্যকার config.ts**                      | Playwright E2E পরীক্ষা কনফিগার                                                          |
+| **ভিটেস্ট config.ts**                       | Vitest কনফিগারেশন (ডিফল্ট স্যুট)                                                        |
+| **vitest.mcp.config.ts**                    | Vitest config সার্ভার / MCP / ক্যাশে স্যুটগুলির autoCombo                               |
+| **sonar-project.properties**                | SonarQube/SonarCloud কনফিগারেশন (কোড গুণমান)                                            |
+| **ডকারফাইল**                                | মাল্টি-স্টেজ Docker বিল্ড (নির্মাতা → রানার-বেস → রানার-cli)                            |
+| **docker-compose.yml**                      | 4টি প্রোফাইল (বেস, ক্লি, হোস্ট, ক্লিপ্রোক্সাপি) + redis sidecar সহ দেব রচনা করুন        |
+| **docker- রচনাprod.yml**                    | উত্পাদন রচনা (পোর্ট 20130, রেডিস, নামকৃত ভলিউম)                                         |
+| **.dockerignore**                           | ফাইলগুলি Docker প্রসঙ্গ থেকে বাদ দেওয়া হয়েছে৷                                         |
+| **fly.toml**                                | Fly.io ডিপ্লয়মেন্ট কনফিগারেশন (অঞ্চল `sin`, পোর্ট 20128, /ডেটা ভলিউম)                  |
+| **.env.example**                            | টেমপ্লেট env ফাইল (প্রথম ইনস্টলে `.env` তে স্বয়ংক্রিয়ভাবে অনুলিপি করা হয়েছে)         |
+| **.gitignore**                              | Git উপেক্ষা নিদর্শন                                                                     |
+| **.npmignore**                              | npm প্রকাশ বর্জনের তালিকা                                                               |
+| **.npmrc**                                  | npm কনফিগারেশন (রেজিস্ট্রি, লকফাইল নীতি)                                                |
+| **.নোড-সংস্করণ**                            | নোড সংস্করণ পিন (এনভিএম-সামঞ্জস্যপূর্ণ সরঞ্জাম দ্বারা ব্যবহৃত)                          |
+| **.nvmrc**                                  | এনভিএম-এর জন্য নোড সংস্করণ পিন                                                          |
+| **eslint.complexity.config.mjs**            | জটিলতা র্যাচেটের জন্য ESLint কনফিগারেশন (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | SonarJS নিয়মের জন্য ESLint কনফিগারেশন (জ্ঞানগত জটিলতা / নকল)                           |
+| **উৎস config.ts**                           | Fumadocs `defineDocs` সোর্স কনফিগারেশন (ফিড `.source/`)                                 |
+| **knip.json**                               | Knip config — অব্যবহৃত files/exports/deps (ডেড-কোড গেটকে ফিড করে)                       |
+| **স্ট্রাইকার conf.mjs**                     | স্ট্রাইকার মিউটেশন-টেস্টিং কনফিগারেশন ( `mutate` থেকে `tap.testFiles` গণনা করে)         |
+| **.size-limit.json**                        | আকার-সীমা বান্ডিল বাজেট কনফিগারেশন                                                      |
+| **promptfooconfig.yaml**                    | promptfoo eval কনফিগারেশন                                                               |
+| **.gitleaks.toml**                          | gitleaks গোপন-স্ক্যান নিয়ম সেট                                                         |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                              |
 | **socket.yml**                              | Socket.dev সাপ্লাই-চেইন কনফিগারেশন                                                      |
-| **news.json**                               | স্থানীয়কৃত v2 ঘোষণা ফিড; Radar চালুর আইটেমটি নিষ্ক্রিয় অবস্থায় সরবরাহ করা হয়        |
-| **flake.nix** / **flake.lock**              | Nix ডেভ-শেল সংজ্ঞা + লক                                                                 |
-| **.env**                                    | স্থানীয় গোপন তথ্য (gitignored — `.env.example` থেকে তৈরি)                              |
+| **news.json**                               | স্থানীয়কৃত v2 ঘোষণা ফিড; রাডার লঞ্চ আইটেম জাহাজ নিষ্ক্রিয়                             |
+| **flake.nix** /** flake.lock**              | নিক্স ডেভ-শেল সংজ্ঞা + লক                                                               |
+| **.env**                                    | স্থানীয় গোপনীয়তা (gitigned — `.env.example` থেকে উত্পন্ন)                             |
 
-> **v3.8.26-এ রুটের বাইরে সরানো হয়েছে (বিশৃঙ্খলা কমাতে):**
+> **v3.8.26-এ রুট থেকে সরানো হয়েছে (ডিক্লাটার):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, এবং তৈরি হওয়া `quality-metrics.json` (gitignored)। দেখুন [`## config/`](#config--static-configs--quality-gate-state)।
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, এবং জেনারেট করা `quality-metrics.json` (gitigned)। [`## config/`](#config--static-configs--quality-gate-state) দেখুন।
 
 ---
 
@@ -137,83 +137,83 @@ src/
 
 ### `src/app/` — অ্যাপ রাউটার (Next.js 16)
 
-| পথ                                                                           | উদ্দেশ্য                                                                                                                                                                                                                                                                                             |
-| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | পাবলিক ওপেনএআই-কম্প্যাট API (~ 25 উপ-রুট: চ্যাট, সমাপ্তি, এম্বেডিং, ফাইল, ব্যাচ, অডিও, ছবি, ভিডিও, সঙ্গীত, পুনর্বিন্যাস, মডারেশন, অনুসন্ধান, ws, এজেন্ট, অ্যাকাউন্ট, প্রদানকারী ইত্যাদি)                                                                                                             |
-| `app/api/v1beta/`                                                            | মিথুন-শৈলী API এন্ডপয়েন্ট                                                                                                                                                                                                                                                                           |
-| `app/api/playground/`                                                        | খেলার মাঠ স্টুডিও রুট: `improve-prompt/` (POST — LLM প্রম্পট রিরাইটার), `presets/` (GET তালিকা / POST তৈরি করুন), `presets/[id]/` (GET / PUT / DELETE) — `docs/frameworks/PLAYGROUND_STUDIO.md` দেখুন                                                                                                |
-| `app/api/` (অ-v1)                                                            | Management/admin রুট (~ 60 ডিরেক্টরি: প্রদানকারী, কম্বো, সেটিংস, mcp, a2a, evals, মেমরি, দক্ষতা, ওয়েবহুক, সম্মতি, স্থিতিস্থাপকতা, পর্যবেক্ষণ, টানেল, cli-টুল ইত্যাদি)                                                                                                                               |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12টি রুট (সার্ভার নিয়ন্ত্রণ, এজেন্ট state/DNS/mappings, বাইপাস, সার্টি, আপস্ট্রিম-সিএ)। LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` দেখুন।                                                                                                               |
-| `app/api/tools/traffic-inspector/`                                           | ট্রাফিক ইন্সপেক্টর REST + WS API — 16 + রুট (অনুরোধ, সেশন, হোস্ট, ক্যাপচার-মোড, এক্সপোর্ট, ws)। LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` দেখুন।                                                                                                                         |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 এন্ট্রি পয়েন্ট (`POST /a2a`)                                                                                                                                                                                                                                                       |
-| `app/.well-known/agent.json/`                                                | A2A এজেন্ট কার্ড (আবিষ্কার)                                                                                                                                                                                                                                                                          |
-| `app/(dashboard)/dashboard/`                                                 | ড্যাশবোর্ড UI পেজ (50 + বিভাগ, ~ 118 page.tsx ফাইল: প্রদানকারী, কম্বোস, সেটিংস, মেমরি, দক্ষতা, ওয়েবহুক, ইভাল, অডিট, ব্যাচ, ক্যাশে, খরচ, স্বাস্থ্য, সিস্টেম, কার্যকলাপ, ইত্যাদি)                                                                                                                     |
-| `app/(dashboard)/dashboard/search-tools/`                                    | অনুসন্ধান সরঞ্জাম স্টুডিও UI (3 ট্যাব: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — `docs/frameworks/SEARCH_TOOLS_STUDIO.md` দেখুন                                                                                                                                                 |
-| `app/(dashboard)/dashboard/memory/`                                          | মেমরি স্টুডিও (প্ল্যান 21): `page.tsx` (3-ট্যাব শেল), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), zqnetusE , zqnetuse `hooks/` |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge ড্যাশবোর্ড পৃষ্ঠা — সার্ভার কার্ড, 9 এজেন্ট কার্ড, সেটআপ উইজার্ড, মডেল ম্যাপিং, বাইপাস তালিকা। i18n PT-BR + EN। `docs/frameworks/AGENTBRIDGE.md` দেখুন।                                                                                                                                  |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | ট্রাফিক ইন্সপেক্টর ড্যাশবোর্ড পৃষ্ঠা — DevTools স্প্লিট, 7টি বিস্তারিত ট্যাব, 4টি ক্যাপচার মোড টগল, সেশন রেকর্ডার, প্রসঙ্গ কালারাইজেশন। i18n PT-BR + EN। `docs/frameworks/TRAFFIC_INSPECTOR.md` দেখুন।                                                                                               |
-| `app/(dashboard)/dashboard/activity/`                                        | কার্যকলাপ ফিড পৃষ্ঠা (গ্রুপ B): `page.tsx` (সার্ভার) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md` দেখুন                                                                                          |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | কোটা শেয়ারিং পৃষ্ঠা (গ্রুপ B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                          |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | প্রদানকারী পরিকল্পনা কনফিগার পৃষ্ঠা (গ্রুপ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — সংযোগ ওভাররাইড প্রতি কোটা মাত্রা                                                                                                                                                                        |
-| `app/docs/`                                                                  | এমবেডেড ডকুমেন্টেশন ভিউয়ার ( `docs/*.md` রেন্ডার করে)                                                                                                                                                                                                                                               |
-| `app/landing/`                                                               | মার্কেটিং ল্যান্ডিং পেজ                                                                                                                                                                                                                                                                              |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | প্রমাণ-সম্পর্কিত পৃষ্ঠা                                                                                                                                                                                                                                                                              |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP ত্রুটি পৃষ্ঠা                                                                                                                                                                                                                                                                                   |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status পেজ                                                                                                                                                                                                                                                                                    |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | রুট লেআউট, হোম, PWA ম্যানিফেস্ট, গ্লোবাল CSS                                                                                                                                                                                                                                                         |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | ত্রুটি সীমানা                                                                                                                                                                                                                                                                                        |
+| পথ                                                                           | উদ্দেশ্য                                                                                                                                                                                                                                                                                                          |
+| ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | পাবলিক ওপেনএআই-কম্প্যাট API (~ 25 উপ-রুট: চ্যাট, সমাপ্তি, এম্বেডিং, ফাইল, ব্যাচ, অডিও, ছবি, ভিডিও, সঙ্গীত, পুনর্বিন্যাস, মডারেশন, অনুসন্ধান, ws, এজেন্ট, অ্যাকাউন্ট, প্রদানকারী ইত্যাদি)                                                                                                                          |
+| `app/api/v1beta/`                                                            | মিথুন-শৈলী API এন্ডপয়েন্ট                                                                                                                                                                                                                                                                                        |
+| `app/api/playground/`                                                        | খেলার মাঠের স্টুডিও রুট: `improve-prompt/` (POST — LLM প্রম্পট রিরাইটার), `presets/` (GET তালিকা / POST তৈরি করুন), `presets/[id]/` (GET / PUT / DELETE) — দেখুন `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                           |
+| `app/api/` (non-v1)                                                          | Management/admin রুট (~ 60 ডিরেক্টরি: প্রদানকারী, কম্বো, সেটিংস, mcp, a2a, evals, মেমরি, দক্ষতা, ওয়েবহুক, সম্মতি, স্থিতিস্থাপকতা, পর্যবেক্ষণ, টানেল, cli-টুল ইত্যাদি)                                                                                                                                            |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 রুট (সার্ভার নিয়ন্ত্রণ, এজেন্ট state/DNS/mappings, বাইপাস, সার্টি, আপস্ট্রিম-সিএ)। LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/AGENTBRIDGE.md §7` দেখুন।                                                                                                                              |
+| `app/api/tools/traffic-inspector/`                                           | ট্রাফিক ইন্সপেক্টর REST + WS API — 16 + রুট (অনুরোধ, সেশন, হোস্ট, ক্যাপচার-মোড, রপ্তানি, ws)। LOCAL_ONLY + SPAWN_CAPABLE. `docs/frameworks/TRAFFIC_INSPECTOR.md §8` দেখুন।                                                                                                                                        |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 এন্ট্রি পয়েন্ট (`POST /a2a`)                                                                                                                                                                                                                                                                    |
+| `app/.well-known/agent.json/`                                                | A2A এজেন্ট কার্ড (আবিষ্কার)                                                                                                                                                                                                                                                                                       |
+| `app/(dashboard)/dashboard/`                                                 | ড্যাশবোর্ড UI পেজ (50 + বিভাগ, ~ 118 page.tsx ফাইল: প্রদানকারী, কম্বোস, সেটিংস, মেমরি, দক্ষতা, ওয়েবহুক, ইভাল, অডিট, ব্যাচ, ক্যাশে, খরচ, স্বাস্থ্য, সিস্টেম, কার্যকলাপ, ইত্যাদি)                                                                                                                                  |
+| `app/(dashboard)/dashboard/search-tools/`                                    | অনুসন্ধান সরঞ্জাম স্টুডিও UI (3 ট্যাব: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — দেখুন `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                              |
+| `app/(dashboard)/dashboard/memory/`                                          | মেমরি স্টুডিও (প্ল্যান 21): `page.tsx` (3-ট্যাব শেল), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/`,useEngineStatususeMemorySettings |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge ড্যাশবোর্ড পৃষ্ঠা — সার্ভার কার্ড, 9 এজেন্ট কার্ড, সেটআপ উইজার্ড, মডেল ম্যাপিং, বাইপাস তালিকা। i18n PT-BR + EN। `docs/frameworks/AGENTBRIDGE.md` দেখুন।                                                                                                                                               |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | ট্রাফিক ইন্সপেক্টর ড্যাশবোর্ড পৃষ্ঠা — DevTools বিভক্ত, 7টি বিস্তারিত ট্যাব, 4টি ক্যাপচার মোড টগল, সেশন রেকর্ডার, প্রসঙ্গ কালারাইজেশন। i18n PT-BR + EN। `docs/frameworks/TRAFFIC_INSPECTOR.md` দেখুন।                                                                                                             |
+| `app/(dashboard)/dashboard/activity/`                                        | কার্যকলাপ ফিড পৃষ্ঠা (গ্রুপ B): `page.tsx` (সার্ভার) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — দেখুন `docs/architecture/MONITORING_SECTIONS.md`                                                                                                       |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | কোটা শেয়ারিং পৃষ্ঠা (গ্রুপ বি): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                      |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | প্রদানকারী পরিকল্পনা কনফিগার পৃষ্ঠা (গ্রুপ B): `page.tsx` + `ProviderPlanConfigClient.tsx` — কোটা মাত্রা প্রতি সংযোগ ওভাররাইড                                                                                                                                                                                     |
+| `app/docs/`                                                                  | এমবেডেড ডকুমেন্টেশন ভিউয়ার ( `docs/*.md` রেন্ডার করে)                                                                                                                                                                                                                                                            |
+| `app/landing/`                                                               | মার্কেটিং ল্যান্ডিং পেজ                                                                                                                                                                                                                                                                                           |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | প্রমাণ-সম্পর্কিত পৃষ্ঠা                                                                                                                                                                                                                                                                                           |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP ত্রুটি পৃষ্ঠা                                                                                                                                                                                                                                                                                                |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status পেজ                                                                                                                                                                                                                                                                                                 |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | রুট লেআউট, হোম, PWA ম্যানিফেস্ট, গ্লোবাল CSS                                                                                                                                                                                                                                                                      |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | ত্রুটি সীমানা                                                                                                                                                                                                                                                                                                     |
 
-### `src/lib/` — মূল লাইব্রেরি (~ 50 মডিউল)
+### `src/lib/` — কোর লাইব্রেরি (~ 50 মডিউল)
 
-| মডিউল                                    | উদ্দেশ্য                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A প্রোটোকল টাস্ক ম্যানেজার, দক্ষতা (5), স্ট্রিমিং                                                                                                                                                                                                                                                                       |
-| `acp/`                                   | CLI এজেন্ট রেজিস্ট্রি (স্থানীয় CLI আবিষ্কার — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` দেখুন)                                                                                                                                                                                                                          |
-| `api/`                                   | ভাগ করা API সাহায্যকারী (`requireManagementAuth`, বৈধতা)                                                                                                                                                                                                                                                                  |
-| `auth/`                                  | সেশন, পাসওয়ার্ড হ্যাশিং, টোকেন যাচাইকরণ                                                                                                                                                                                                                                                                                  |
-| `batches/`                               | OpenAI ব্যাচ API হ্যান্ডলার                                                                                                                                                                                                                                                                                               |
-| `catalog/`                               | প্রদানকারীর ক্যাটালগ Zod বৈধতা + ক্ষমতা রেজোলিউশন                                                                                                                                                                                                                                                                         |
-| `cloudAgent/`                            | ক্লাউড এজেন্ট (Codex Cloud, Devin, Jules) — `docs/frameworks/CLOUD_AGENT.md` দেখুন                                                                                                                                                                                                                                        |
-| `combos/`                                | কম্বো রেজোলিউশন + পুনর্বিন্যাস সহায়ক                                                                                                                                                                                                                                                                                     |
-| `audit/`                                 | অ্যাক্টিভিটি ফিড সাহায্যকারী: `highLevelActions.ts` (অনুমোদিত + `isHighLevelAction()`), `activityIcons.ts` (অ্যাকশন → icon/verb মানচিত্র), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` দেখুন                                                                                     |
-| `compliance/`                            | অডিট লগ + প্রদানকারী নিরীক্ষা — `docs/security/COMPLIANCE.md` দেখুন                                                                                                                                                                                                                                                       |
-| `compression/`                           | কম্প্রেশন ইঞ্জিন আঠালো (ইঞ্জিন `open-sse/services/compression/` তে থাকে)                                                                                                                                                                                                                                                  |
-| `config/`                                | রানটাইম কনফিগারেশন সহায়ক                                                                                                                                                                                                                                                                                                 |
-| `db/`                                    | 120 + ডোমেইন DB মডিউল + 168 মাইগ্রেশন (সর্বদা SQLite এর জন্য এখানে যান)                                                                                                                                                                                                                                                   |
-| `quota/`                                 | কোটা শেয়ারিং ইঞ্জিন: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore ইন্টারফেস), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — দেখুন `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | রাডার ফ্রি-মডেল ক্যাটালগ ক্লায়েন্ট: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md` দেখুন                                                                                                                                        |
-| `display/`                               | UI ফরম্যাটিং সহায়ক (খরচ, লেটেন্সি, ইত্যাদি)                                                                                                                                                                                                                                                                              |
-| `embeddings/`                            | এমবেডিং সেবা সাহায্যকারী                                                                                                                                                                                                                                                                                                  |
-| `env/`                                   | Env পরিবর্তনশীল পার্সিং + বৈধতা                                                                                                                                                                                                                                                                                           |
-| `evals/`                                 | ইভাল ফ্রেমওয়ার্ক (স্যুট, রানার, রানটাইম) — `docs/frameworks/EVALS.md` দেখুন                                                                                                                                                                                                                                              |
-| `guardrails/`                            | PII masker, প্রম্পট ইনজেকশন, দৃষ্টি সেতু — `docs/security/GUARDRAILS.md` দেখুন                                                                                                                                                                                                                                            |
-| `jobs/`                                  | ব্যাকগ্রাউন্ড জব (ক্রন-এর মতো)                                                                                                                                                                                                                                                                                            |
-| `memory/`                                | কথোপকথন মেমরি (SQLite FTS5 + sqlite-vec হাইব্রিড RRF + Qdrant স্তর 2) — `docs/frameworks/MEMORY.md` দেখুন                                                                                                                                                                                                                 |
-| `memory/embedding/`                      | মাল্টি-সোর্স এম্বেডিং লেয়ার: `index.ts` (রেজোলভার), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (প্ল্যান 21)                                                                                                                                                                          |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN ব্রুট-ফোর্স + হাইব্রিড RRF (FTS5 + ভেক্টর, k = 60)। Lazy-init, sqlite-vec অনুপলব্ধ হলে শোভনীয়ভাবে হ্রাস পায়। (পরিকল্পনা 21)                                                                                                                                                             |
-| `memory/reindex.ts`                      | `runReindexBatch()` — ব্যাকগ্রাউন্ডে `needs_reindex=1` দিয়ে স্মৃতি প্রক্রিয়া করে; `POST /api/memory/reindex` এবং অলস-ব্যাকফিল পথ দ্বারা বলা হয়। (পরিকল্পনা 21)                                                                                                                                                         |
-| `monitoring/`                            | স্বাস্থ্য পরীক্ষা, মেট্রিক্স নির্গমন                                                                                                                                                                                                                                                                                      |
-| `oauth/`                                 | 22টি প্রদানকারী মডিউলের জন্য OAuth/import প্রবাহিত হয় (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimiroqe, , ওপেনকোড xai-oauth, জেড-হোস্টেড, জেড)                                                                |
-| `plugins/`                               | প্লাগইন রেজিস্ট্রি                                                                                                                                                                                                                                                                                                        |
-| `promptCache/`                           | নৃতাত্ত্বিক-শৈলী প্রম্পট ক্যাশে ব্রেকপয়েন্ট                                                                                                                                                                                                                                                                              |
-| `skills/`                                | স্কিল ফ্রেমওয়ার্ক (বিল্ট-ইন + মার্কেটপ্লেস + SkillsSH) — `docs/frameworks/SKILLS.md` দেখুন                                                                                                                                                                                                                               |
-| `playground/`                            | প্লেগ্রাউন্ড স্টুডিও শেয়ার্ড হেল্পার: `codeExport.ts` (curl/Python/TS জেনারেটর), `promptImprover.ts` (মেটা-প্রম্পট বিল্ডার), `streamMetrics.ts` (বিশুদ্ধ TTFT/TPS), `types.ts` (মূল্য সারণী) — `docs/frameworks/PLAYGROUND_STUDIO.md` দেখুন                                                                              |
-| `webhookDispatcher.ts`                   | HMAC ওয়েবহুক ডেলিভারি — `docs/frameworks/WEBHOOKS.md` দেখুন                                                                                                                                                                                                                                                              |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | টানেল ম্যানেজার - `docs/ops/TUNNELS_GUIDE.md` দেখুন                                                                                                                                                                                                                                                                       |
-| `cloudSync.ts`, `initCloudSync.ts`       | রাজ্যের ঐচ্ছিক ক্লাউড সিঙ্ক                                                                                                                                                                                                                                                                                               |
-| `localDb.ts`                             | ডিবি মডিউলগুলির জন্য ব্যারেল পুনরায় রপ্তানি করুন (কোন যুক্তি নেই - শুধুমাত্র পুনরায় রপ্তানি)                                                                                                                                                                                                                            |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | + idempotency ক্যাশিং অনুরোধ                                                                                                                                                                                                                                                                                              |
-| (~ আরো 30টি শীর্ষ-স্তরের ফাইল)           | বিশেষ সাহায্যকারী (logEnv, modelsDevSync, piiSanitizer, ইত্যাদি)                                                                                                                                                                                                                                                          |
+| মডিউল                                    | উদ্দেশ্য                                                                                                                                                                                                                                                                                                            |
+| ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A প্রোটোকল টাস্ক ম্যানেজার, দক্ষতা (5), স্ট্রিমিং                                                                                                                                                                                                                                                                 |
+| `acp/`                                   | CLI এজেন্ট রেজিস্ট্রি (স্থানীয় CLI আবিষ্কার — `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md` দেখুন)                                                                                                                                                                                                                    |
+| `api/`                                   | ভাগ করা API সাহায্যকারী (`requireManagementAuth`, বৈধতা)                                                                                                                                                                                                                                                            |
+| `auth/`                                  | সেশন, পাসওয়ার্ড হ্যাশিং, টোকেন যাচাইকরণ                                                                                                                                                                                                                                                                            |
+| `batches/`                               | OpenAI ব্যাচ API হ্যান্ডলার                                                                                                                                                                                                                                                                                         |
+| `catalog/`                               | প্রদানকারীর ক্যাটালগ Zod বৈধতা + ক্ষমতা রেজোলিউশন                                                                                                                                                                                                                                                                   |
+| `cloudAgent/`                            | ক্লাউড এজেন্ট (Codex Cloud, Devin, Jules) — দেখুন `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                  |
+| `combos/`                                | কম্বো রেজোলিউশন + পুনর্বিন্যাস সহায়ক                                                                                                                                                                                                                                                                               |
+| `audit/`                                 | অ্যাক্টিভিটি ফিড সাহায্যকারী: `highLevelActions.ts` (অনুমোদিত + `isHighLevelAction()`), `activityIcons.ts` (অ্যাকশন → icon/verb মানচিত্র), `timeline.ts` (groupByDay/relativeTime) — `docs/architecture/MONITORING_SECTIONS.md` দেখুন                                                                               |
+| `compliance/`                            | অডিট লগ + প্রদানকারী অডিট — `docs/security/COMPLIANCE.md` দেখুন                                                                                                                                                                                                                                                     |
+| `compression/`                           | কম্প্রেশন ইঞ্জিন আঠালো (ইঞ্জিনগুলি `open-sse/services/compression/` তে থাকে)                                                                                                                                                                                                                                        |
+| `config/`                                | রানটাইম কনফিগারেশন সহায়ক                                                                                                                                                                                                                                                                                           |
+| `db/`                                    | 120 + ডোমেইন DB মডিউল + 168 মাইগ্রেশন (সর্বদা SQLite এর জন্য এখানে যান)                                                                                                                                                                                                                                             |
+| `quota/`                                 | কোটা শেয়ারিং ইঞ্জিন: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore ইন্টারফেস), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | রাডার ফ্রি-মডেল ক্যাটালগ ক্লায়েন্ট: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — দেখুন `docs/frameworks/RADAR.md`                                                                                                                                  |
+| `display/`                               | UI ফরম্যাটিং সহায়ক (খরচ, লেটেন্সি, ইত্যাদি)                                                                                                                                                                                                                                                                        |
+| `embeddings/`                            | এমবেডিং সেবা সাহায্যকারী                                                                                                                                                                                                                                                                                            |
+| `env/`                                   | Env পরিবর্তনশীল পার্সিং + বৈধতা                                                                                                                                                                                                                                                                                     |
+| `evals/`                                 | ইভাল ফ্রেমওয়ার্ক (স্যুট, রানার, রানটাইম) — `docs/frameworks/EVALS.md` দেখুন                                                                                                                                                                                                                                        |
+| `guardrails/`                            | PII masker, প্রম্পট ইনজেকশন, ভিশন ব্রিজ — `docs/security/GUARDRAILS.md` দেখুন                                                                                                                                                                                                                                       |
+| `jobs/`                                  | ব্যাকগ্রাউন্ড জব (ক্রন-এর মতো)                                                                                                                                                                                                                                                                                      |
+| `memory/`                                | কথোপকথন মেমরি (SQLite FTS5 + sqlite-vec হাইব্রিড RRF + Qdrant স্তর 2) — দেখুন `docs/frameworks/MEMORY.md`                                                                                                                                                                                                           |
+| `memory/embedding/`                      | মাল্টি-সোর্স এম্বেডিং লেয়ার: `index.ts` (রেজোলভার), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (প্ল্যান 21)                                                                                                                                                                    |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN ব্রুট-ফোর্স + হাইব্রিড RRF (FTS5 + ভেক্টর, k = 60)। Lazy-init, sqlite-vec অনুপলব্ধ হলে শোভনীয়ভাবে হ্রাস পায়। (পরিকল্পনা 21)                                                                                                                                                       |
+| `memory/reindex.ts`                      | `runReindexBatch()` — ব্যাকগ্রাউন্ডে `needs_reindex=1` দিয়ে স্মৃতি প্রক্রিয়া করে; `POST /api/memory/reindex` এবং অলস-ব্যাকফিল পথ দ্বারা বলা হয়। (পরিকল্পনা 21)                                                                                                                                                   |
+| `monitoring/`                            | স্বাস্থ্য পরীক্ষা, মেট্রিক্স নির্গমন                                                                                                                                                                                                                                                                                |
+| `oauth/`                                 | 22টি প্রদানকারী মডিউলের জন্য OAuth/import প্রবাহিত হয় (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimiroqe, , ওপেনকোড xai-oauth, জেড-হোস্টেড, জেড)                                                          |
+| `plugins/`                               | প্লাগইন রেজিস্ট্রি                                                                                                                                                                                                                                                                                                  |
+| `promptCache/`                           | নৃতাত্ত্বিক-শৈলী প্রম্পট ক্যাশে ব্রেকপয়েন্ট                                                                                                                                                                                                                                                                        |
+| `skills/`                                | দক্ষতা ফ্রেমওয়ার্ক (বিল্ট-ইন + মার্কেটপ্লেস + SkillsSH) — দেখুন `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                        |
+| `playground/`                            | প্লেগ্রাউন্ড স্টুডিও শেয়ার্ড হেল্পার: `codeExport.ts` (curl/Python/TS জেনারেটর), `promptImprover.ts` (মেটা-প্রম্পট নির্মাতা), `streamMetrics.ts` (বিশুদ্ধ TTFT/TPS), `types.ts` (মূল্য নির্ধারণের টেবিল) — দেখুন `docs/frameworks/PLAYGROUND_STUDIO.md`                                                            |
+| `webhookDispatcher.ts`                   | HMAC ওয়েবহুক ডেলিভারি — `docs/frameworks/WEBHOOKS.md` দেখুন                                                                                                                                                                                                                                                        |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | টানেল ম্যানেজাররা — `docs/ops/TUNNELS_GUIDE.md` দেখুন                                                                                                                                                                                                                                                               |
+| `cloudSync.ts`, `initCloudSync.ts`       | রাজ্যের ঐচ্ছিক ক্লাউড সিঙ্ক                                                                                                                                                                                                                                                                                         |
+| `localDb.ts`                             | db মডিউলগুলির জন্য ব্যারেল পুনরায় রপ্তানি করুন (কোন যুক্তি — পুনরায় রপ্তানি নয়)                                                                                                                                                                                                                                  |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | + idempotency ক্যাশিং অনুরোধ                                                                                                                                                                                                                                                                                        |
+| (~ আরো 30টি শীর্ষ-স্তরের ফাইল)           | বিশেষ সাহায্যকারী (logEnv, modelsDevSync, piiSanitizer, ইত্যাদি)                                                                                                                                                                                                                                                    |
 
 ### `src/lib/db/` — ডেটাবেস (147 মডিউল + 208 মাইগ্রেশন)
 
-| সাবদির                    | উদ্দেশ্য                                                                                                                                                                        |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | WAL জার্নালিং সহ `getDbInstance()` singleton                                                                                                                                    |
-| `db/migrations/`          | সংস্করণযুক্ত SQL ফাইল (আদর্শ, লেনদেনমূলক)। `073_memory_vec.sql` `memory_vec_meta` + `needs_reindex` কলাম যোগ করে (প্ল্যান 21)।                                                  |
-| `db/playgroundPresets.ts` | খেলার মাঠ স্টুডিও প্রিসেটের জন্য CRUD মডিউল (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)      |
-| `db/memoryVec.ts`         | `memory_vec_meta` জন্য CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, ইত্যাদি (প্ল্যান 21)              |
-| `db/<domain>.ts`          | প্রতি ডোমেনে একটি মডিউল: প্রদানকারী, কম্বো, এপিকি, ব্যবহারকারী, সেশন, ব্যবহার, অডিট লগ, ওয়েবহুক, দক্ষতা, মেমরি_এন্ট্রি, ক্লাউড_এজেন্ট_টাস্ক, ইভাল* \* , যুক্তি_ক্যাশে, ইত্যাদি |
+| সাবদির                    | উদ্দেশ্য                                                                                                                                                                          |
+| ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `db/core.ts`              | WAL জার্নালিং সহ `getDbInstance()` singleton                                                                                                                                      |
+| `db/migrations/`          | সংস্করণযুক্ত SQL ফাইল (আদর্শ, লেনদেনমূলক)। `073_memory_vec.sql` `memory_vec_meta` + `needs_reindex` কলাম যোগ করে (প্ল্যান 21)।                                                    |
+| `db/playgroundPresets.ts` | খেলার মাঠ স্টুডিও প্রিসেটের জন্য CRUD মডিউল (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)        |
+| `db/memoryVec.ts`         | `memory_vec_meta` জন্য CRUD (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue`, ইত্যাদি (প্ল্যান 21)                |
+| `db/<domain>.ts`          | প্রতি ডোমেনে একটি মডিউল: প্রদানকারী, কম্বো, apiKeys, ব্যবহারকারী, সেশন, ব্যবহার, অডিট লগ, ওয়েবহুক, দক্ষতা, মেমরি_এন্ট্রি, ক্লাউড_এজেন্ট_টাস্ক, ইভাল* \* , যুক্তি_ক্যাশে, ইত্যাদি |
 
 ### `src/domain/`
 
@@ -232,7 +232,7 @@ src/
 
 | মডিউল    | উদ্দেশ্য                                                                                         |
 | -------- | ------------------------------------------------------------------------------------------------ |
-| `authz/` | অনুমোদন পাইপলাইন: `classify` → `policies` → `enforce` — `docs/architecture/AUTHZ_GUIDE.md` দেখুন |
+| `authz/` | অনুমোদন পাইপলাইন: `classify` → `policies` → `enforce` — দেখুন `docs/architecture/AUTHZ_GUIDE.md` |
 | `cors/`  | CORS কনফিগারেশন                                                                                  |
 | `auth/`  | সেশন মিডলওয়্যার                                                                                 |
 
@@ -240,17 +240,17 @@ src/
 
 | মডিউল                            | উদ্দেশ্য                                                                                                   |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `components/`                    | ড্যাশবোর্ড কম্পোনেন্ট API: অ্যাডাপ্টার ওভার `packages/ui-kit` — `docs/architecture/DESIGN_SYSTEM.md` দেখুন |
-| `constants/iconMap.ts`           | `ICON_MAP`: স্ক্রীন দ্বারা ব্যবহৃত আইকনের নাম → Lucide উপাদান (`<Icon>`)                                   |
-| `constants/providers.ts`         | **377 প্রদানকারী** Zod বৈধতা সহ (সত্যের উত্স)                                                              |
+| `components/`                    | ড্যাশবোর্ড কম্পোনেন্ট API: অ্যাডাপ্টার ওভার `packages/ui-kit` — দেখুন `docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`: স্ক্রিন দ্বারা ব্যবহৃত আইকনের নাম → Lucide উপাদান (`<Icon>`)                                   |
+| `constants/providers.ts`         | **394 প্রদানকারী** Zod বৈধতা সহ (সত্যের উত্স)                                                              |
 | `constants/cliTools.ts`          | বাহ্যিক CLI টুল রেজিস্ট্রি                                                                                 |
-| `constants/routingStrategies.ts` | **20টি রাউটিং কৌশল** অগ্রাধিকার সহ                                                                         |
-| `constants/publicApiRoutes.ts`   | যে রুটগুলির জন্য Bearer (বনাম ম্যানেজমেন্ট) auth প্রয়োজন৷                                                 |
+| `constants/routingStrategies.ts` | **22 রাউটিং কৌশল** অগ্রাধিকার সহ                                                                           |
+| `constants/publicApiRoutes.ts`   | যে রুটের জন্য Bearer (বনাম ম্যানেজমেন্ট) auth প্রয়োজন                                                     |
 | `constants/upstreamHeaders.ts`   | আপস্ট্রিম অনুরোধের জন্য হেডার অস্বীকৃত                                                                     |
 | `validation/schemas.ts`          | ~ 80 Zod স্কিমা ( API চুক্তির জন্য সত্যের একক উৎস)                                                         |
 | `validation/helpers.ts`          | Zod বৈধতা সহায়ক (`validateBody`, ইত্যাদি)                                                                 |
-| `types/`                         | শেয়ার্ড TS প্রকার                                                                                         |
-| `contracts/`                     | পাবলিক API চুক্তি ( `files:` `package.json` তে zqb ব্যবহার করে)                                            |
+| `types/`                         | শেয়ার করা TS প্রকার                                                                                       |
+| `contracts/`                     | Public API contracts (consumed by `files:` in `package.json`)                                              |
 | `utils/circuitBreaker.ts`        | প্রদানকারী সার্কিট ব্রেকার ( `docs/architecture/RESILIENCE_GUIDE.md` দেখুন)                                |
 | `utils/apiAuth.ts`               | API কী বৈধতা, সুযোগ যাচাই                                                                                  |
 | `utils/fetchTimeout.ts`          | আপস্ট্রিম আনার জন্য Timeout/abort মোড়ক                                                                    |
@@ -260,40 +260,40 @@ src/
 
 ## `open-sse/` — স্ট্রিমিং ইঞ্জিন ওয়ার্কস্পেস
 
-পৃথক npm ওয়ার্কস্পেস (`@omniroute/open-sse`)। অনুরোধ প্রক্রিয়াকরণ + প্রোভাইডার এক্সিকিউশন পরিচালনা করে।
+আলাদা npm ওয়ার্কস্পেস (`@omniroute/open-sse`)। + প্রদানকারীর এক্সিকিউশন প্রক্রিয়াকরণের অনুরোধ পরিচালনা করে।
 
 ```
 open-sse/
-├── handlers/            # ১৬টি ফাইল (১২টি হ্যান্ডলার + ৪টি হেল্পার): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search ইত্যাদি।
-├── executors/           # ১৫০টি এক্সিকিউটর মডিউল (BaseExecutor এক্সটেন্ড করা ক্লাস + প্রতি-প্রোভাইডার হেল্পার)
-├── translator/          # ফরম্যাট কনভার্টার (৯টি রিকোয়েস্ট, ৯টি রেসপন্স, ৯টি হেল্পার)
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
-├── services/            # ~৮০+টি সার্ভিস মডিউল (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM ইত্যাদি)
-├── mcp-server/          # MCP সার্ভার (১১০টি টুল, ৩টি ট্রান্সপোর্ট, ৩৩টি স্কোপ)
-├── config/              # প্রোভাইডার/মডেল রেজিস্ট্রি, হেডার কনফিগ, মডেল অ্যালিয়াস
-├── utils/               # TLS ক্লায়েন্ট, প্রক্সি fetch/dispatcher, নেটওয়ার্ক হেল্পার
-├── index.ts             # ওয়ার্কস্পেস এন্ট্রি
-├── package.json         # ওয়ার্কস্পেস ম্যানিফেস্ট
-├── tsconfig.json        # ওয়ার্কস্পেস TS কনফিগ
-└── types.d.ts           # ওয়ার্কস্পেস টাইপ ডিক্লারেশন
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| পাথ                         | উদ্দেশ্য                                                                            |
-| --------------------------- | ----------------------------------------------------------------------------------- |
-| `server.ts`                 | MCP সার্ভারের লাইফসাইকেল (stdio + HTTP ট্রান্সপোর্ট)                                |
-| `httpTransport.ts`          | HTTP Streamable + SSE ট্রান্সপোর্ট (`/api/mcp/sse`, `/api/mcp/stream`)              |
-| `audit.ts`                  | `mcp_tool_audit` টেবিলে অডিট লগিং                                                   |
-| `scopeEnforcement.ts`       | প্রতি-টুল স্কোপ যাচাইকরণ                                                            |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`-এ স্বাস্থ্যসংক্রান্ত হার্টবিট                 |
-| `descriptionCompressor.ts`  | কনটেক্সট সাশ্রয়ের জন্য টুলের বিবরণসংক্রান্ত মেটাডেটা কম্প্রেস করে                  |
-| `schemas/tools.ts`          | ৩৬টি বেস টুলের সংজ্ঞা + স্কোপ                                                       |
-| `tools/advancedTools.ts`    | উন্নত টুলের ইমপ্লিমেন্টেশন                                                          |
-| `tools/memoryTools.ts`      | ৩টি মেমরি টুল (অনুসন্ধান/যোগ/মুছে ফেলা)                                             |
-| `tools/skillTools.ts`       | ৪টি স্কিল টুল (তালিকা/সক্রিয়/এক্সিকিউট/এক্সিকিউশন)                                 |
-| `tools/compressionTools.ts` | ৫টি কম্প্রেশন টুল                                                                   |
-| `README.md`                 | অভ্যন্তরীণ MCP সার্ভার README (`docs/frameworks/MCP-SERVER.md` থেকে ক্রস-লিঙ্ক করা) |
+| পথ                          | উদ্দেশ্য                                                                          |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `server.ts`                 | MCP সার্ভার জীবনচক্র (stdio + HTTP পরিবহন)                                        |
+| `httpTransport.ts`          | HTTP স্ট্রিমেবল + SSE পরিবহন (`/api/mcp/sse`, `/api/mcp/stream`)                  |
+| `audit.ts`                  | `mcp_tool_audit` টেবিলে অডিট লগিং                                                 |
+| `scopeEnforcement.ts`       | প্রতি টুল সুযোগ বৈধতা                                                             |
+| `runtimeHeartbeat.ts`       | স্বাস্থ্য হার্টবিট `DATA_DIR/runtime/mcp-heartbeat.json`                          |
+| `descriptionCompressor.ts`  | প্রসঙ্গ সংরক্ষণ করতে টুল বর্ণনা মেটাডেটা সংকুচিত করুন                             |
+| `schemas/tools.ts`          | 36 বেস টুল সংজ্ঞা + স্কোপ                                                         |
+| `tools/advancedTools.ts`    | উন্নত টুল বাস্তবায়ন                                                              |
+| `tools/memoryTools.ts`      | 3টি মেমরি টুল (search/add/clear)                                                  |
+| `tools/skillTools.ts`       | 4টি দক্ষতার সরঞ্জাম (list/enable/execute/executions)                              |
+| `tools/compressionTools.ts` | 5 কম্প্রেশন টুল                                                                   |
+| `README.md`                 | অভ্যন্তরীণ MCP সার্ভার README ( `docs/frameworks/MCP-SERVER.md` থেকে ক্রস লিঙ্কড) |
 
 ---
 
@@ -402,32 +402,32 @@ open-sse/
 | `FEATURES.md`               | v3.8 হাইলাইট সহ বৈশিষ্ট্য ম্যাট্রিক্স                                                        |
 | `USER_GUIDE.md`             | শেষ-ব্যবহারকারীর ম্যানুয়াল (সেটআপ, মডেল, কম্বো, CLIs, অডিও, ইত্যাদি)                        |
 | `API_REFERENCE.md`          | প্রমাণীকরণ মডেল সহ API এন্ডপয়েন্ট রেফারেন্স                                                 |
-| `openapi.yaml`              | OpenAPI 3.0 spec (121 পথ)                                                                    |
+| `openapi.yaml`              | OpenAPI 3.0 spec (121 পাথ)                                                                   |
 | `SETUP_GUIDE.md`            | ইনস্টল করার পদ্ধতি (npm, npx, Docker, Electron, Termux, উৎস)                                 |
 | `ENVIRONMENT.md`            | সমস্ত env vars (~ 800 নথিভুক্ত, ~ 3,050 লাইন `.env.example`)                                 |
 | `TROUBLESHOOTING.md`        | সাধারণ ত্রুটি + v3.8.0 পরিচিত সমস্যা                                                         |
 | `RELEASE_CHECKLIST.md`      | সম্পূর্ণ রিলিজ প্রবাহ (দক্ষতা, হুস্কি, প্রচলিত প্রতিশ্রুতি, স্থাপন)                          |
 | `COVERAGE_PLAN.md`          | কভারেজ লক্ষ্য এবং বর্তমান অবস্থা                                                             |
-| `FREE_TIERS.md`             | কিউরেটেড ফ্রি-টায়ার প্রদানকারী (48 + ফ্রি + 11 OAuth)                                       |
+| `FREE_TIERS.md`             | কিউরেটেড ফ্রি-টায়ার প্রোভাইডার (48 + ফ্রি + 11 OAuth)                                       |
 | `CLI-TOOLS.md`              | বাহ্যিক CLI ইন্টিগ্রেশন + অভ্যন্তরীণ OmniRoute CLI                                           |
 | `I18N.md`                   | i18n আর্কিটেকচার, একটি ভাষা যোগ করা, 67টি লোকেল                                              |
 | `UNINSTALL.md`              | আনইনস্টল পদক্ষেপগুলি পরিষ্কার করুন                                                           |
-| `PROVIDER_REFERENCE.md`     | **স্বয়ংক্রিয়ভাবে তৈরি** 377 প্রদানকারীর ক্যাটালগ (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **স্বয়ংক্রিয়ভাবে তৈরি** 394 প্রদানকারীর ক্যাটালগ (regen: `npm run gen:provider-reference`) |
 
 ### সাবসিস্টেম গভীর-ডাইভ
 
 | ডক                                               | উদ্দেশ্য                                                                  |
 | ------------------------------------------------ | ------------------------------------------------------------------------- |
-| `MCP-SERVER.md`                                  | MCP সার্ভার: 110 টুল, 3 ট্রান্সপোর্ট, 33 স্কোপ, REST শেষ পয়েন্ট          |
+| `MCP-SERVER.md`                                  | MCP সার্ভার: 110টি টুল, 3টি পরিবহন, 33টি স্কোপ, REST শেষ পয়েন্ট          |
 | `A2A-SERVER.md`                                  | A2A v0.3: JSON-RPC, 6 দক্ষতা, REST সাহায্যকারী, এজেন্ট কার্ড              |
 | `AGENT_PROTOCOLS_GUIDE.md`                       | ইউনিফাইড গাইড: A2A বনাম ACP বনাম ক্লাউড এজেন্ট                            |
 | `CLOUD_AGENT.md`                                 | Codex Cloud / Devin / Jules অর্কেস্ট্রেশন                                 |
-| `SKILLS.md`                                      | স্কিল ফ্রেমওয়ার্ক (বিল্ট-ইন + মার্কেটপ্লেস + SkillsSH + স্যান্ডবক্স)     |
+| `SKILLS.md`                                      | দক্ষতা ফ্রেমওয়ার্ক (বিল্ট-ইন + মার্কেটপ্লেস + SkillsSH + স্যান্ডবক্স)    |
 | `RADAR.md`                                       | রাডার ফ্রি-মডেল ক্যাটালগ ওভারলে (`RADAR_ENABLED`, ডিফল্টরূপে বন্ধ)        |
 | `MEMORY.md`                                      | মেমরি সিস্টেম (SQLite FTS5 + Qdrant)                                      |
 | `EVALS.md`                                       | ইভাল ফ্রেমওয়ার্ক (স্যুট, রান, রুব্রিক্স)                                 |
 | `GUARDRAILS.md`                                  | PII masker, প্রম্পট ইনজেকশন, দৃষ্টি সেতু                                  |
-| `COMPLIANCE.md`                                  | অডিট লগ, ধারণ, নোলগ অপ্ট-আউট                                              |
+| `COMPLIANCE.md`                                  | অডিট লগ, ধরে রাখা, noLog অপ্ট-আউট                                         |
 | `WEBHOOKS.md`                                    | HMAC- স্বাক্ষরিত ওয়েবহুক বিতরণ                                           |
 | `REASONING_REPLAY.md`                            | `reasoning_content` এর জন্য হাইব্রিড memory/SQLite ক্যাশে                 |
 | `AUTHZ_GUIDE.md`                                 | অনুমোদন পাইপলাইন (`classify` → `policies` → `enforce`)                    |
@@ -460,11 +460,11 @@ open-sse/
 
 ### সাবডিরেক্টরি
 
-| সাবদির                | উদ্দেশ্য                                                                                                                                                                                          |
-| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | স্থানীয়কৃত ডক অনুবাদ (41 স্থানীয়)                                                                                                                                                               |
-| `docs/screenshots/`   | গাইড জন্য ইমেজ সম্পদ                                                                                                                                                                              |
-| `_tasks/superpowers/` | সুপারপাওয়ার থেকেPlans/specs (`writing-plans`/`brainstorming`) + গবেষণা — বিচ্ছিন্ন, পৃথকভাবে-সংস্করণযুক্ত রেপো, প্রধান গাছ দ্বারা উপেক্ষা করা। CLAUDE.md → "পরিকল্পনা ও গবেষণা শিল্পকর্ম" দেখুন। |
+| সাবদির                | উদ্দেশ্য                                                                                                                                                                                        |
+| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | স্থানীয়কৃত ডক অনুবাদ (41 স্থানীয়)                                                                                                                                                             |
+| `docs/screenshots/`   | গাইড জন্য ইমেজ সম্পদ                                                                                                                                                                            |
+| `_tasks/superpowers/` | সুপার পাওয়ার থেকেPlans/specs (`writing-plans`/`brainstorming`) + গবেষণা — বিচ্ছিন্ন, আলাদা-সংস্করণযুক্ত রেপো, প্রধান গাছ দ্বারা উপেক্ষা করা। CLAUDE.md → "পরিকল্পনা ও গবেষণা শিল্পকর্ম" দেখুন। |
 
 ---
 

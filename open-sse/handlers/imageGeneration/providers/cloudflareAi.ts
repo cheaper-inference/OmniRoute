@@ -17,7 +17,7 @@
 // (hard block) — no surprise billing. Get a Token + Account ID at
 // dash.cloudflare.com.
 
-import { saveCallLog } from "@/lib/usageDb";
+import { saveCallLog } from "../../imageResult.ts";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 
 interface CloudflareAiImageGenArgs {

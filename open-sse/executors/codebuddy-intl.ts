@@ -14,13 +14,7 @@ export function stableUuidFrom(key: string): string {
   const clockSeq = ((parseInt(hash.slice(16, 20), 16) & 0x3fff) | 0x8000)
     .toString(16)
     .padStart(4, "0");
-  return [
-    hash.slice(0, 8),
-    hash.slice(8, 12),
-    timeHigh,
-    clockSeq,
-    hash.slice(20, 32),
-  ].join("-");
+  return [hash.slice(0, 8), hash.slice(8, 12), timeHigh, clockSeq, hash.slice(20, 32)].join("-");
 }
 
 function readHeader(headers: Record<string, string> | Headers | unknown, name: string): string {
@@ -50,11 +44,55 @@ function writeHeader(
   obj[key || name] = value;
 }
 
+const CONVERSATION_HEADERS = [
+  "X-Conversation-ID",
+  "X-Conversation-Request-ID",
+  "X-Conversation-Message-ID",
+] as const;
+
+/** Headers carrying the caller's own session id (generic, Claude Code, opencode, Codex). */
+const CLIENT_SESSION_HEADERS = [
+  "x-session-id",
+  "x-claude-code-session-id",
+  "x-opencode-session",
+  "session_id",
+] as const;
+
+export interface ConversationHeaderOptions {
+  /** The inbound client request headers; their non-empty `X-Conversation-*` ids are kept. */
+  clientHeaders?: Record<string, string> | Headers | null;
+  /** The upstream account the request goes to; scopes session-derived conversation ids. */
+  connectionId?: string | null;
+}
+
+/**
+ * The caller's explicit session identity: a session header, else a body session field.
+ * Message text is deliberately NOT an identity — two unrelated chats that open with the
+ * same user message are different conversations.
+ */
+function clientSessionKey(clientHeaders: unknown, body: unknown): string | null {
+  for (const name of CLIENT_SESSION_HEADERS) {
+    const value = readHeader(clientHeaders, name);
+    if (value) return value;
+  }
+  const b = body && typeof body === "object" ? (body as Record<string, unknown>) : null;
+  for (const field of ["session_id", "prompt_cache_key", "conversation_id"]) {
+    const value = b?.[field];
+    if (typeof value === "string" && value.trim()) return value.trim();
+  }
+  return null;
+}
+
 /**
  * Attach the conversation-correlation family the gateway's channel verification
  * demands (HTTP 400 code 11128 "conversation id missing" without it). Values
  * that already exist and are non-empty are preserved, so a caller tracking its
- * own conversation keeps it; blank values count as absent.
+ * own conversation keeps it; blank values count as absent. Non-empty ids the
+ * client sent on the inbound request (`opts.clientHeaders`) are forwarded too.
+ *
+ * Without a client conversation id, the id is derived only from the client's
+ * explicit session identity, scoped to the upstream account (`opts.connectionId`);
+ * with none, every request gets a fresh id.
  *
  * All three of `X-Conversation-ID`, `X-Conversation-Request-ID` and
  * `X-Conversation-Message-ID` are required — verified A/B against the live
@@ -64,26 +102,17 @@ function writeHeader(
  */
 export function withConversationHeaders<T extends Record<string, string> | Headers>(
   headers: T,
-  body: unknown = null
+  body: unknown = null,
+  opts: ConversationHeaderOptions = {}
 ): T {
-  const b = body && typeof body === "object" ? (body as Record<string, unknown>) : null;
-  const sessionKey =
-    (typeof b?.session_id === "string" && b.session_id) ||
-    (typeof b?.prompt_cache_key === "string" && b.prompt_cache_key) ||
-    (typeof b?.conversation_id === "string" && b.conversation_id) ||
-    null;
+  for (const name of CONVERSATION_HEADERS) {
+    const supplied = readHeader(opts.clientHeaders, name);
+    if (supplied && !readHeader(headers, name)) writeHeader(headers, name, supplied);
+  }
 
-  const messages = Array.isArray(b?.messages) ? (b?.messages as Array<Record<string, unknown>>) : null;
-  const firstUser = messages ? messages.find((m) => m?.role === "user") : null;
-  const userText =
-    typeof firstUser?.content === "string"
-      ? firstUser.content
-      : Array.isArray(firstUser?.content)
-        ? (firstUser.content as Array<Record<string, unknown>>)
-            .map((part) => (part && typeof part.text === "string" ? part.text : ""))
-            .join("\n")
-        : "";
-  const conversationKey = sessionKey || (userText ? `cbai:${userText}` : null);
+  const sessionKey = clientSessionKey(opts.clientHeaders, body);
+  const conversationKey =
+    sessionKey && opts.connectionId ? `${opts.connectionId}:${sessionKey}` : sessionKey;
 
   if (!readHeader(headers, "X-Conversation-ID")) {
     writeHeader(
@@ -134,7 +163,10 @@ export class CodeBuddyIntlExecutor extends CodeBuddyBaseExecutor {
   ): Record<string, string> {
     const headers = super.buildHeaders(credentials, stream, clientHeaders, model, _health, body);
     try {
-      return withConversationHeaders(headers, body);
+      return withConversationHeaders(headers, body, {
+        clientHeaders,
+        connectionId: credentials?.connectionId,
+      });
     } catch (error) {
       const err = error as Error | undefined;
       throw new Error(

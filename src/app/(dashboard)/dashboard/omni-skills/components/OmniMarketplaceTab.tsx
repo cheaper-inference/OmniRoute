@@ -6,6 +6,7 @@ import Button from "@/shared/components/Button";
 import Input from "@/shared/components/Input";
 import { Card } from "@/shared/components";
 import type { SkillsProvider } from "@/lib/skills/providerSettings";
+import type { JSX } from "react";
 
 interface MarketplaceSkill {
   name: string;
@@ -142,7 +143,7 @@ export function OmniMarketplaceTab({
   return (
     <div className="grid gap-4">
       <Card>
-        <h3 className="font-semibold mb-2">{t("skillsMarketplace")}</h3>
+        <h3 className="mb-2">{t("skillsMarketplace")}</h3>
         <p className="text-sm text-text-muted mb-4">
           {t("activeProvider")}{" "}
           <span className="font-medium">
@@ -194,7 +195,7 @@ export function OmniMarketplaceTab({
             <Card key={skill.name}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold">{skill.name}</h4>
+                  <h4>{skill.name}</h4>
                   <p className="text-sm text-text-muted mt-1">{skill.description}</p>
                 </div>
                 <Button
@@ -216,7 +217,7 @@ export function OmniMarketplaceTab({
             <Card key={skill.id}>
               <div className="flex items-center justify-between">
                 <div>
-                  <h4 className="font-semibold">{skill.name}</h4>
+                  <h4>{skill.name}</h4>
                   <p className="text-sm text-text-muted mt-1">
                     {skill.source} · {skill.installs.toLocaleString()} {t("installs")}
                   </p>

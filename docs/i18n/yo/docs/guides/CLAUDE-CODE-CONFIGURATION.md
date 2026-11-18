@@ -25,26 +25,78 @@ omniroute launch --profile glm52  # Claude Code tó ń lo glm/glm-5.2 nípasẹ�
 
 ---
 
-## Bí Claude Code ṣe ń sopọ̀ mọ́ gateway kan
+## Bii koodu Claude ṣe sopọ si ẹnu-ọna kan
 
-Claude Code máa ń bá **Anthropic Messages API** sọ̀rọ̀, a sì máa ń darí rẹ̀ sí
-endpoint àkànṣe nípasẹ̀ àwọn environment variables (kò ní flag `--base-url`):
+Claude Code sọrọ awọn**Anthropic Awọn ifiranṣẹ API** ati pe o tọka si aaye ipari aṣa pẹlu awọn oniyipada ayika (ko ni asia `--base-url` ):
 
-| Variable                                     | Ìdí lílò                                                                                                     |
-| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| `ANTHROPIC_BASE_URL`                         | URL gbòǹgbò gateway (Claude Code máa ń fi `/v1/messages` kún un). **Má ṣe fi `/v1` sí ìkẹyìn.**              |
-| `ANTHROPIC_AUTH_TOKEN`                       | A máa ń rán án gẹ́gẹ́ bí `Authorization: Bearer …` — lo token ìwọlé / API key OmniRoute rẹ                     |
-| `ANTHROPIC_API_KEY`                          | Àṣàyàn mìíràn: a máa ń rán án gẹ́gẹ́ bí `x-api-key`. Tí àwọn méjèèjì bá wà, `ANTHROPIC_AUTH_TOKEN` ni yóò borí |
-| `ANTHROPIC_MODEL`                            | Fi dandan yan awoṣe pàtó kan (ó borí àṣàyàn àkọ́kọ́ ti `/model`)                                               |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → olùyan `/model` àbínibí máa ń ṣàkójọ àwọn awoṣe `claude*`/`anthropic*` láti `/v1/models`               |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Fi ààlà sí àwọn token àbájáde fún ìdáhùn kọ̀ọ̀kan (fún àpẹẹrẹ `65536`)                                         |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ààlà token fún ìkójọpọ̀ aládàáṣe                                                                              |
+| Ayípadà                                      | Idi                                                                                        |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `ANTHROPIC_BASE_URL`                         | Gbongbo ẹnu-ọna URL (koodu Claude ṣe afikun `/v1/messages`).** Ko si `/v1` suffix.**       |
+| `ANTHROPIC_AUTH_TOKEN`                       | Ti a firanṣẹ bi `Authorization: Bearer …` — lo ami wiwọle OmniRoute rẹ / bọtini API        |
+| `ANTHROPIC_API_KEY`                          | Yiyan: rán bi `x-api-key`. Ti o ba ti ṣeto mejeeji, AamiEye `ANTHROPIC_AUTH_TOKEN`         |
+| `ANTHROPIC_MODEL`                            | Fi ipa mu awoṣe kan pato (foju aiyipada `/model` picker)                                   |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → abinibi `/model` picker ṣe atokọ `claude*`/`anthropic*` awọn awoṣe lati `/v1/models` |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Awọn ami igbejade fila fun esi (fun apẹẹrẹ `65536`)                                        |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Ibalẹ àmi fun iwapọ-laifọwọyi                                                              |
 
-> A máa ń ka àwọn env vars **lẹ́ẹ̀kan ṣoṣo nígbà ìbẹ̀rẹ̀** — tún Claude Code bẹ̀rẹ̀ lẹ́yìn tí o bá yí wọn padà.
+> Env vars ti wa ni kika** lẹẹkan ni ibẹrẹ** — tun bẹrẹ koodu Claude lẹhin iyipada wọn.
 
-`omniroute launch` máa ń ṣètò gbogbo wọ̀nyí fún ọ: ó máa ń yanjú base URL + token
-láti inú àyíká tó ń ṣiṣẹ́ (nítorí náà `omniroute connect <vps>` lẹ́yìn náà `omniroute launch`
-yóò kàn ṣiṣẹ́), ó máa ń yẹ ìlera server wò, ó sì máa ń ṣiṣẹ́ `claude`.
+Fun iwe-ẹri ti o yiyi dipo okun ti o wa titi, ṣeto `apiKeyHelper` ni `~/.claude/settings.json` si aṣẹ ti o tẹ iwe-ẹri lọwọlọwọ si stdout. Kóòdù Claude ṣaṣe iṣelọpọ rẹ fun iṣẹju marun nipasẹ aiyipada (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` dojuti iyẹn) o si fi iye naa ranṣẹ ni mejeeji `Authorization: Bearer` ati `x-api-key`. Iwe afọwọkọ naa gbọdọ tẹjade iwe-ẹri ati pe ko si ohun miiran — asia lẹgbẹẹ rẹ kuna oluranlọwọ lori v2.1.227 +.
+
+Eyi ni bii Entra ID SSO ṣe n ṣiṣẹ: `scripts/cli/omniroute-sso.mjs token` ṣe atẹjade ami-iwọle wiwọle Entra igba diẹ ti OmniRoute jẹri dipo bọtini API kan. Wo [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` ṣeto gbogbo awọn wọnyi fun ọ: o ṣe ipinnu ipilẹ URL + tokini lati inu ipo ti nṣiṣe lọwọ (nitorinaa `omniroute connect <vps>` lẹhinna `omniroute launch` kan ṣiṣẹ), ilera-ṣayẹwo olupin, ati execs `claude`.
+
+---
+
+## Ifojusi lilo: awọn akoko ati awọn iṣẹ akanṣe
+
+awọn ẹgbẹ OmniRoute kọọkan awọn ibeere bọtini API sinu** awọn akoko aṣoju** ati igbasilẹ eyi ti** ise agbese** igba kọọkan ṣiṣẹ lori (tabili `agent_sessions` ), nitorina lilo ati idiyele le jẹ ijabọ fun ọmọ ẹgbẹ kan, fun iṣẹ akanṣe ati fun igba kan.
+
+Ohun ti o gbasilẹ laisi iṣeto alabara eyikeyi:
+
+| Aaye       | Orisun                                                                                                                                                |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Igba       | akọsori `x-claude-code-session-id` (iye kanna bi `metadata.user_id.session_id`), iduroṣinṣin fun igba kan                                             |
+| Ise agbese | Koodu `Primary working directory:` laini Claude nfiranṣẹ ni ifiranṣẹ ayika rẹ; awọn folda worktree labẹ `.claude/worktrees/` pinnu si orukọ ibi ipamọ |
+| Ẹka        | `Current branch:` lati ipo git koodu Claude firanṣẹ pẹlu ifiranṣẹ akọkọ                                                                               |
+| Onibara    | `user-agent` (`claude-cli/<version>`)                                                                                                                 |
+
+Codex (`<environment_context><cwd>`) ati OpenCode (`x-opencode-session`) jẹ idanimọ ni ọna kanna. Awọn bọtini pẹlu** ko si-log** ṣiṣẹ pa id igba nikan ati awọn aaye ise agbese ti a pese akọsori; ko si ohun ti o ka lati itọsi (ọna, ẹka) ti o fipamọ.
+
+### Sisọ orukọ iṣẹ akanṣe naa ni gbangba (a ṣeduro)
+
+Itọsọna iṣẹ naa yatọ laarin awọn ẹrọ, nitorinaa ibi ipamọ kanna le ṣafihan labẹ awọn ọna oriṣiriṣi. Firanṣẹ ise agbese na ni gbangba dipo: koodu Claude ṣafikun awọn akọle eyikeyi ti a ṣe akojọ si ni `ANTHROPIC_CUSTOM_HEADERS` si gbogbo ibeere awoṣe, ati OmniRoute ka meji ninu wọn:
+
+| Akọsori                    | Iye                                                                |
+| -------------------------- | ------------------------------------------------------------------ |
+| `x-omniroute-project`      | Orukọ iṣẹ akanṣe, fun apẹẹrẹ `omniroute`                           |
+| `x-omniroute-project-repo` | Latọna jijin deede, fun apẹẹrẹ `github.com/diegosouzapw/OmniRoute` |
+
+Mejeji ti wa ni nikan ka fun ikalara; wọn ko firanṣẹ siwaju si olupese ti oke.
+
+`ANTHROPIC_CUSTOM_HEADERS` ti ka ni ẹẹkan ni ibẹrẹ, ati awọn faili eto tọju awọn iye gidi, nitorinaa ṣe iṣiro rẹ nigbati koodu Claude ṣe ifilọlẹ. Ṣafikun eyi si `~/.zshrc` tabi `~/.bashrc` ki o tẹsiwaju `claude` lati inu folda iṣẹ akanṣe:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
+  else
+    name=$(basename "$PWD")                                # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+Awọn ila ikosile `sed` eyikeyi awọn iwe-ẹri, okun ibeere ati ajẹkù ti a fi sinu URL latọna jijin, ati awọn akọle tẹlẹ ni `ANTHROPIC_CUSTOM_HEADERS` wa ni ipamọ. awọn amugbooro IDE ṣe ifilọlẹ koodu Claude laisi ikarahun rẹ, nitorinaa awọn akoko wọn ṣubu pada si itọsọna iṣẹ.
 
 ---
 

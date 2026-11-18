@@ -595,13 +595,13 @@ describe("Models and Combos Catalog Page UI", () => {
 
     await click(query("button[data-testid='test-all-filtered-btn']"));
 
-    const dialog = document.querySelector('[role="dialog"]');
+    const dialog = document.querySelector('[role="alertdialog"]');
     expect(dialog).not.toBeNull();
     expect(dialog?.textContent).toContain("122");
     expect(testAll.calls).toHaveLength(0);
 
     await click(buttonByText("Start tests", dialog ?? container));
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('[role="alertdialog"]')).toBeNull();
     expect(testAll.calls).toHaveLength(2);
 
     const progress = query('[role="progressbar"]');
@@ -651,11 +651,11 @@ describe("Models and Combos Catalog Page UI", () => {
     await renderPage();
 
     await click(query("button[data-testid='test-all-filtered-btn']"));
-    const dialog = document.querySelector('[role="dialog"]');
+    const dialog = document.querySelector('[role="alertdialog"]');
     expect(dialog?.textContent).toContain("21");
 
     await click(buttonByText("Cancel", dialog ?? container));
-    expect(document.querySelector('[role="dialog"]')).toBeNull();
+    expect(document.querySelector('[role="alertdialog"]')).toBeNull();
     expect(fetchMock.mock.calls.some((call) => String(call[0]).includes("/api/combos/test"))).toBe(
       false
     );

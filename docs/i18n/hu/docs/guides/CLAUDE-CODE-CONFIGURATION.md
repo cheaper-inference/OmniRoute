@@ -25,26 +25,78 @@ omniroute launch --profile glm52  # Claude Code a glm/glm-5.2 használatával az
 
 ---
 
-## Hogyan kapcsolódik a Claude Code egy átjáróhoz
+## Hogyan csatlakozik Claude Code egy átjáróhoz
 
-A Claude Code az **Anthropic Messages API**-val kommunikál, és környezeti változókkal
-irányítható egy egyéni végpontra (nincs `--base-url` kapcsolója):
+Claude Code beszél a**Anthropic Üzenetek API** és egy egyéni végpontra mutat környezeti változókkal (nincs `--base-url` jelzője):
 
-| Változó                                      | Cél                                                                                                                    |
-| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | Az átjáró gyökér-URL-je (a Claude Code hozzáfűzi a `/v1/messages` útvonalat). **Ne legyen `/v1` utótag.**              |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` fejlécként küldi el — használja az OmniRoute hozzáférési tokenjét/API-kulcsát                |
-| `ANTHROPIC_API_KEY`                          | Alternatíva: `x-api-key` fejlécként küldi el. Ha mindkettő be van állítva, az `ANTHROPIC_AUTH_TOKEN` élvez elsőbbséget |
-| `ANTHROPIC_MODEL`                            | Egy adott modell kényszerítése (felülírja a `/model` választó alapértelmezését)                                        |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → a natív `/model` választó felsorolja a `/v1/models` végpont `claude*`/`anthropic*` modelljeit                    |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | A válaszonkénti kimeneti tokenek számának korlátozása (pl. `65536`)                                                    |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Tokenküszöb az automatikus tömörítéshez                                                                                |
+| Változó                                      | Cél                                                                                               |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Átjáró gyökér URL (Claude kód hozzáfűzi `/v1/messages`).** Nincs `/v1` utótag.**                  |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — néven elküldve használja a OmniRoute hozzáférési tokent / API kulcsot |
+| `ANTHROPIC_API_KEY`                          | Alternatív megoldás: `x-api-key` néven küldve. Ha mindkettő beáll, `ANTHROPIC_AUTH_TOKEN` nyer    |
+| `ANTHROPIC_MODEL`                            | Egy adott modell kényszerítése (felülbírálja a `/model` picker alapértelmezett értékét)           |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → a natív `/model` választó listázza `claude*`/`anthropic*` modelleket `/v1/models` ből       |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | Válaszonkénti kimeneti tokenek korlátozása (pl. `65536`)                                          |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | Token küszöbértéke az automatikus tömörítéshez                                                    |
 
-> A környezeti változók beolvasása **egyszer, az indításkor** történik — módosításuk után indítsa újra a Claude Code-ot.
+> Env vars beolvasott** egyszer indításkor** — indítsa újra Claude kódot, miután megváltoztatta őket.
 
-Az `omniroute launch` mindezeket beállítja: feloldja az alap-URL-t és a tokent
-az aktív kontextusból (így az `omniroute connect <vps>`, majd az `omniroute launch`
-egyszerűen működik), ellenőrzi a kiszolgáló állapotát, majd elindítja a `claude` folyamatot.
+Rögzített karakterlánc helyett forgó hitelesítő adatok esetén állítsa be `apiKeyHelper` `~/.claude/settings.json` -ben olyan parancsra, amely az aktuális hitelesítő adatot az stdout-ba nyomtatja. Claude Code alapértelmezés szerint öt percig gyorsítótárazza a kimenetét (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` ezt felülbírálja), és elküldi az értéket `Authorization: Bearer` és `x-api-key` értékben is. A szkriptnek ki kell nyomtatnia a hitelesítő adatokat, és semmi más — egy szalaghirdetést mellé, ami megbuktatja a segédprogramot a 2.1.227 + verzióban.
+
+Az Entra ID SSO így működik: `scripts/cli/omniroute-sso.mjs token` egy rövid életű Entra hozzáférési jogkivonatot nyomtat, amelyet OmniRoute ellenőriz a API kulcs helyett. Lásd: [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md).
+
+`omniroute launch` mindezeket beállítja: feloldja az alap URL + tokent az aktív környezetből (tehát `omniroute connect <vps>` majd `omniroute launch` csak működik), ellenőrzi a szerver állapotát, és végrehajtja `claude`.
+
+---
+
+## Használat hozzárendelése: munkamenetek és projektek
+
+OmniRoute az egyes API kulcsok kéréseit csoportosítja** ügynöki ülések** és rögzíti, amely** projekt** minden munkameneten dolgoztak (`agent_sessions` táblázat), így a használat és a költség csapattagonként, projektenként és munkamenetenként jelenthető.
+
+Mi kerül rögzítésre kliens beállítása nélkül:
+
+| Mező    | Forrás                                                                                                                                              |
+| ------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ülés    | `x-claude-code-session-id` fejléc (ugyanaz az érték, mint `metadata.user_id.session_id`), munkamenetenként stabil                                   |
+| Projekt | A `Primary working directory:` sor Claude kód a környezetében üzenetet küld; `.claude/worktrees/` alatti munkafa-mappák a lerakat nevére oldják fel |
+| Ág      | `Current branch:` a git állapotból. Claude kódot az első üzenettel küldi el                                                                         |
+| Ügyfél  | `user-agent` (`claude-cli/<version>`)                                                                                                               |
+
+Codex (`<environment_context><cwd>`) és OpenCode (`x-opencode-session`) azonos módon kerül felismerésre. Kulcsok** no-log** engedélyezve csak a munkamenet-azonosító és a fejléc által biztosított projektmezők megtartása; a promptból (útvonal, elágazás) nem kerül kiolvasásra semmi.
+
+### A projekt kifejezett elnevezése (ajánlott)
+
+A munkakönyvtár gépenként eltérő, így ugyanaz a lerakat különböző útvonalakon jelenhet meg. Ehelyett kifejezetten küldje el a projektet: Claude Code minden modellkéréshez hozzáadja `ANTHROPIC_CUSTOM_HEADERS` -ben felsorolt fejléceket, OmniRoute pedig kettőt olvas be közülük:
+
+| Fejléc                     | Érték                                                           |
+| -------------------------- | --------------------------------------------------------------- |
+| `x-omniroute-project`      | Projekt neve, pl `omniroute`                                    |
+| `x-omniroute-project-repo` | Normalizált távirányító, pl `github.com/diegosouzapw/OmniRoute` |
+
+Mindkettő csak forrásmegjelölés céljából olvasható; soha nem továbbítják az upstream szolgáltatóhoz.
+
+`ANTHROPIC_CUSTOM_HEADERS` a rendszer indításkor egyszer olvassa be, és a beállítási fájlok literális értékeket tárolnak, így Claude -kód indításakor számítják ki. Adja hozzá ezt `~/.zshrc` vagy `~/.bashrc`, és indítsa el `claude` a projekt mappájából:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
+  else
+    name=$(basename "$PWD")                                # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+A `sed` kifejezés eltávolítja a távoli URL be ágyazott hitelesítő adatokat, lekérdezési karakterláncot és töredéket, és `ANTHROPIC_CUSTOM_HEADERS` -ben már meglévő fejlécek megmaradnak. IDE kiterjesztések Claude kódot a shell nélkül indítják el, így a munkameneteik visszakerülnek a munkakönyvtárba.
 
 ---
 

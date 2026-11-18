@@ -6,6 +6,7 @@ import { afterEach, describe, expect, it, vi } from "vitest";
 import RtkContextPageClient from "@/app/(dashboard)/dashboard/context/rtk/RtkContextPageClient";
 import { rtkConfigSchema } from "@/shared/validation/compressionConfigSchemas";
 import { useNotificationStore } from "@/store/notificationStore";
+import { KIT_ALERT_DISMISS } from "./helpers/kitAlert";
 
 // next-intl echoes the key and any params, so labels and messages are their translation keys.
 // Keys from the settings namespace carry a "settings." prefix, so a test can tell which
@@ -22,8 +23,9 @@ vi.mock("next-intl", () => {
   };
 });
 
-vi.mock("@/shared/components", () => ({
-  SegmentedControl: ({
+// The page imports these adapters by subpath (not the barrel), so they are mocked there.
+vi.mock("@/shared/components/SegmentedControl", () => ({
+  default: ({
     options,
     onChange,
   }: {
@@ -38,7 +40,9 @@ vi.mock("@/shared/components", () => ({
       ))}
     </div>
   ),
-  Collapsible: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
+}));
+vi.mock("@/shared/components/Collapsible", () => ({
+  default: ({ children }: { children?: ReactNode }) => <div>{children}</div>,
 }));
 
 vi.mock("@/app/(dashboard)/dashboard/context/rtk/RtkLearnDiscoverCard", () => ({
@@ -310,6 +314,23 @@ afterEach(async () => {
   vi.restoreAllMocks();
   vi.useRealTimers();
   vi.unstubAllGlobals();
+});
+
+describe("RTK page master-switch banner", { timeout: 20_000 }, () => {
+  it("shows while the master switch is off, with no dismiss control", async () => {
+    startServer();
+    const serverFetch = globalThis.fetch;
+    vi.stubGlobal("fetch", async (input: RequestInfo | URL, init?: RequestInit) =>
+      new URL(String(input), "http://localhost").pathname === "/api/settings/compression"
+        ? new Response(JSON.stringify({ enabled: false }), { status: 200 })
+        : serverFetch(input, init)
+    );
+    await renderPage();
+
+    const banner = screen.getByText("masterSwitchOffAlert").closest('[data-slot="alert"]');
+    expect(banner).toBeTruthy();
+    expect(banner!.querySelector(KIT_ALERT_DISMISS)).toBeNull();
+  });
 });
 
 describe("RTK page config saves", { timeout: 20_000 }, () => {

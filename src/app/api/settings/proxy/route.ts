@@ -153,15 +153,64 @@ function normalizeProxyPayload(body: UpdateProxyConfigInput): UpdateProxyConfigI
   return normalized;
 }
 
+/** Cap on `?resolveIds=` entries: bounds one request's resolve fan-out. */
+const MAX_RESOLVE_IDS = 200;
+
+/**
+ * Parse the comma-separated `resolveIds` query value into a de-duplicated,
+ * capped id list. Returns null when the parameter is absent or empty so the
+ * request falls through to the existing single-resolve/full-config branches.
+ */
+function parseResolveIds(raw: string | null): string[] | null {
+  if (!raw) return null;
+  const ids = [
+    ...new Set(
+      raw
+        .split(",")
+        .map((value) => value.trim())
+        .filter(Boolean)
+    ),
+  ];
+  if (ids.length === 0) return null;
+  return ids.slice(0, MAX_RESOLVE_IDS);
+}
+
+/** Resolve every requested connection, mapping failures to `null`. */
+async function resolveProxyBatch(ids: string[]): Promise<Response> {
+  const results = await Promise.all(
+    ids.map(async (connectionId) => {
+      try {
+        const resolved = await resolveProxyForConnection(connectionId);
+        return [connectionId, resolved?.proxy ? resolved : null] as const;
+      } catch {
+        return [connectionId, null] as const;
+      }
+    })
+  );
+  return Response.json({ results: Object.fromEntries(results) });
+}
+
 /**
  * GET /api/settings/proxy — get proxy configuration
  * Optional query params: ?level=global|provider|combo|key&id=xxx
  * Or: ?resolve=connectionId to resolve effective proxy
+ * Or: ?resolveIds=id1,id2,... to resolve effective proxies for many connections
  */
 export async function GET(request: Request) {
   const authError = await requireManagementAuth(request);
   if (authError) return authError;
 
+  // Batch resolution runs before the config path so the dashboard can refresh
+  // every connection's badge in one request instead of one request per
+  // connection (that burst slowed both the UI and the shared proxy process).
+  const resolveIds = parseResolveIds(new URL(request.url).searchParams.get("resolveIds"));
+  if (resolveIds) return resolveProxyBatch(resolveIds);
+
+  return readProxyConfig(request);
+}
+
+/** Single-resolve, level-scoped and full-config reads. */
+async function readProxyConfig(request: Request): Promise<Response> {
   try {
     const { searchParams } = new URL(request.url);
     const level = searchParams.get("level");

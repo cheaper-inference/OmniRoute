@@ -56,25 +56,27 @@ for (const included of [false, true]) {
     );
   });
 
-  test(`nonstream Chat -> Responses preserves ${included} without changing token counts`, () => {
+  test(`nonstream Responses includes the whole context for cache-in-prompt ${included}`, () => {
     const converted = translateNonStreamingResponse(
       chatBody(input, included),
       FORMATS.OPENAI,
       FORMATS.OPENAI_RESPONSES
     );
     const result = sanitizeResponsesApiResponse(converted);
-    assert.equal(readPath(result, "usage", "input_tokens"), input);
+    assert.equal(readPath(result, "usage", "input_tokens"), 714029);
+    assert.equal(readPath(result, "usage", "total_tokens"), 714164);
+    assert.equal(readPath(converted, "usage", "prompt_tokens"), input);
     assert.equal(
       readPath(result, "usage", "input_tokens_details", "cache_creation_tokens"),
       713119
     );
     assert.equal(
       readPath(result, "usage", "input_tokens_details", "cache_creation_in_prompt"),
-      included
+      true
     );
   });
 
-  test(`stream Chat -> Responses preserves ${included} without changing token counts`, () => {
+  test(`stream Responses includes context and preserves internal cache-in-prompt ${included}`, () => {
     const state = initState(FORMATS.OPENAI_RESPONSES);
     const usage = chatBody(input, included).usage;
     const events: unknown[] = [];
@@ -104,10 +106,16 @@ for (const included of [false, true]) {
       .map((event) => record(event).data ?? event)
       .find((event) => record(event).type === "response.completed");
     assert.ok(terminal, "missing terminal Responses event");
-    assert.equal(readPath(terminal, "response", "usage", "input_tokens"), input);
+    assert.equal(readPath(terminal, "response", "usage", "input_tokens"), 714029);
+    assert.equal(readPath(terminal, "response", "usage", "total_tokens"), 714164);
+    assert.equal(readPath(state, "usage", "input_tokens"), input);
+    assert.equal(
+      readPath(state, "usage", "input_tokens_details", "cache_creation_in_prompt"),
+      included
+    );
     assert.equal(
       readPath(terminal, "response", "usage", "input_tokens_details", "cache_creation_in_prompt"),
-      included
+      true
     );
   });
 }
@@ -235,10 +243,11 @@ for (const included of [false, true]) {
     assert.equal(readPath(usage, "prompt_tokens_details", "cache_creation_in_prompt"), included);
   });
 
-  test(`Responses transform retains cache-in-prompt ${included}`, async () => {
+  test(`Responses transform includes the whole context for cache-in-prompt ${included}`, async () => {
     const usage = await streamUsage(chunks, createResponsesApiTransformStream());
-    assert.equal(usage.input_tokens, input);
-    assert.equal(readPath(usage, "input_tokens_details", "cache_creation_in_prompt"), included);
+    assert.equal(usage.input_tokens, 714029);
+    assert.equal(usage.total_tokens, 714164);
+    assert.equal(readPath(usage, "input_tokens_details", "cache_creation_in_prompt"), true);
   });
 }
 

@@ -1,8 +1,10 @@
 // @vitest-environment jsdom
 //
-// Fast regression guard for #10319 (live dashboard WS client never sends a
-// heartbeat ping, so the server's 35s inactivity sweep terminates a healthy,
-// idle-but-subscribed client). This is the cheap unit-ish check; the slow
+// Fast regression guard for #10319 (live dashboard WS client never sent a
+// heartbeat ping, so servers that refreshed liveness only from inbound messages
+// terminated a healthy, idle-but-subscribed client after 35s). The current server
+// counts only protocol pongs, which browsers send on their own; the hook keeps the
+// app ping for older servers. This is the cheap unit-ish check; the slow
 // end-to-end confirmation (real server, ~50s window) lives in
 // tests/integration/live-ws-heartbeat-keepalive.test.ts.
 import React, { act } from "react";

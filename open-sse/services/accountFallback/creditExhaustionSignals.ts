@@ -53,4 +53,13 @@ export const CREDITS_EXHAUSTED_SIGNALS = [
   "insufficient_user_quota",
   // "You have run out of funds" / "Account is out of funds".
   "out of funds",
+  // OpenAI grant credits: eligible ChatGPT Pro and Business subscriptions get
+  // monthly API credits that need no payment method, and requests fail with
+  // HTTP 429 `credit_balance_exhausted` once the balance is spent
+  // (developers.openai.com/api/docs/guides/chatgpt-api-credits). Listed
+  // separately from `insufficient_quota` because the response is not guaranteed
+  // to carry that type or message — a handler that surfaces only `error.code`
+  // would otherwise leave the account selected forever, since it cannot recover
+  // until someone buys credits.
+  "credit_balance_exhausted",
 ];

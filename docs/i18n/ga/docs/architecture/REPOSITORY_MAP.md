@@ -51,67 +51,67 @@ OmniRoute/
 
 ---
 
-## Fréamhchomhaid
+## Comhaid root
 
-| Comhad                                      | Cuspóir                                                                                              |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Leathanach tuirlingthe margaíochta + tús tapa + maitrís gnéithe (féach freisin `llm.txt`)            |
-| **CHANGELOG.md**                            | Loga athruithe de réir eisiúna (uathghinte ag an scil `/version-bump-cc`)                            |
-| **LICENSE**                                 | Téacs cheadúnas MIT                                                                                  |
-| **CLAUDE.md**                               | Rialacha tionscadail do ghníomhairí Claude Code (rialacha dochta, gnásanna, cásanna)                 |
-| **AGENTS.md**                               | Mar an gcéanna le CLAUDE.md ach do ghníomhairí AI nach Claude iad (Codex, Cursor, srl.)              |
-| **GEMINI.md**                               | Rialacha achomair do ghníomhairí bunaithe ar Gemini (fo-thacar de CLAUDE.md)                         |
-| **CONTRIBUTING.md**                         | Treoir do rannchuiditheoirí: socrú, tiomantais de réir coinbhinsiúin, tástáil, sreabhadh PR          |
-| **SECURITY.md**                             | Beartas tuairiscithe leochaileachtaí, leaganacha a dtacaítear leo, samhail bhagartha                 |
-| **CODE_OF_CONDUCT.md**                      | Cúnant Rannchuiditheoirí — ionchais maidir le hiompar pobail                                         |
-| **llm.txt**                                 | Leathanach tuirlingthe gnáth-théacs optamaithe do shníomhairí LLM (SEO do chúntóirí AI)              |
-| **package.json**                            | Lastliosta npm, scripteanna, spleáchais, innill, tairseach clúdaigh c8                               |
-| **package-lock.json**                       | Crann spleáchas faoi ghlas                                                                           |
-| **tsconfig.json**                           | Cumraíocht fhréamhach TypeScript                                                                     |
-| **tsconfig.typecheck-core.json**            | Cumraíocht seiceála cineáil do chroí `src/`                                                          |
-| **tsconfig.typecheck-noimplicit-core.json** | Seiceáil cineáil dhocht (`noImplicitAny`)                                                            |
-| **tsconfig.tsbuildinfo**                    | Taisce tógála incrimintí TS (gitignored)                                                             |
-| **next.config.mjs**                         | Cumraíocht tógála Next.js 16 (aschur neamhspleách)                                                   |
-| **next-env.d.ts**                           | Cineálacha timpeallachta uathghinte ag Next.js                                                       |
-| **eslint.config.mjs**                       | Cumraíocht chomhréidh ESLint (rialacha de réir limistéar tionscadail)                                |
-| **prettier.config.mjs**                     | Rialacha formáidithe Prettier                                                                        |
-| **postcss.config.mjs**                      | Cumraíocht PostCSS do phíblíne Tailwind/CSS                                                          |
-| **playwright.config.ts**                    | Cumraíocht tástála E2E Playwright                                                                    |
-| **vitest.config.ts**                        | Cumraíocht Vitest (foireann réamhshocraithe)                                                         |
-| **vitest.mcp.config.ts**                    | Cumraíocht Vitest d'fhreastalaí MCP / d'fhoirne autoCombo / taisce                                   |
-| **sonar-project.properties**                | Cumraíocht SonarQube/SonarCloud (cáilíocht cóid)                                                     |
-| **Dockerfile**                              | Tógáil Docker ilchéime (tógálaí → bonn riteora → CLI riteora)                                        |
-| **docker-compose.yml**                      | Cumadóireacht forbartha le 4 phróifíl (bonn, CLI, óstach, cliproxyapi) + taobhcharr redis            |
-| **docker-compose.prod.yml**                 | Cumadóireacht táirgthe (port 20130, redis, imleabhair ainmnithe)                                     |
-| **.dockerignore**                           | Comhaid eisiata ó chomhthéacs Docker                                                                 |
-| **fly.toml**                                | Cumraíocht imscartha Fly.io (réigiún `sin`, port 20128, imleabhar /data)                             |
-| **.env.example**                            | Comhad teimpléid timpeallachta (cóipeáiltear go huathoibríoch é go `.env` ar an gcéad suiteáil)      |
-| **.gitignore**                              | Patrúin neamhaird Git                                                                                |
-| **.npmignore**                              | Liosta eisiaimh foilseacháin npm                                                                     |
-| **.npmrc**                                  | Cumraíocht npm (clárlann, beartas glaschomhaid)                                                      |
-| **.node-version**                           | Leagan socraithe Node (úsáideann uirlisí atá comhoiriúnach le nvm é)                                 |
-| **.nvmrc**                                  | Leagan socraithe Node do nvm                                                                         |
-| **eslint.complexity.config.mjs**            | Cumraíocht ESLint don raicín castachta (`scripts/check/check-complexity.mjs --config`)               |
-| **eslint.sonarjs.config.mjs**               | Cumraíocht ESLint do rialacha SonarJS (castacht chognaíoch / dúbláil)                                |
-| **source.config.ts**                        | Cumraíocht fhoinse `defineDocs` Fumadocs (a chothaíonn `.source/`)                                   |
-| **knip.json**                               | Cumraíocht Knip — comhaid/easpórtálacha/spleáchais neamhúsáidte (a chothaíonn geata an chóid mharbh) |
-| **stryker.conf.json**                       | Cumraíocht tástála sócháin Stryker                                                                   |
-| **.size-limit.json**                        | Cumraíocht bhuiséad bheartáin size-limit                                                             |
-| **promptfooconfig.yaml**                    | Cumraíocht mheastóireachta promptfoo                                                                 |
-| **.gitleaks.toml**                          | Tacar rialacha gitleaks chun rúin a scanadh                                                          |
-| **.zizmor.yml**                             | Cumraíocht lintála slándála zizmor do GitHub Actions                                                 |
-| **socket.yml**                              | Cumraíocht slabhra soláthair Socket.dev                                                              |
-| **news.json**                               | Fotha logánaithe fógraí v2; seoltar mír lainseála Radar agus í neamhghníomhach                       |
-| **flake.nix** / **flake.lock**              | Sainmhíniú bhlaosc forbartha Nix + glaschomhad                                                       |
-| **.env**                                    | Rúin áitiúla (gitignored — ginte ó `.env.example`)                                                   |
+| Comhad                                      | Cuspóir                                                                                        |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **README.md**                               | Leathanach tuirlingthe margaíochta + tús sciobtha maitrís gné + (féach freisin `llm.txt`)      |
+| **CHANGELOG.md**                            | Logchomhad athraithe in aghaidh an scaoileadh (uathghinte ag scil `/version-bump-cc` )         |
+| **LICENSE**                                 | Téacs ceadúnas MIT                                                                             |
+| **CLAUDE.md**                               | Rialacha tionscadail le haghaidh gníomhairí Cód Claude (rialacha crua, coinbhinsiúin, cásanna) |
+| **AGENTS.md**                               | Mar an gcéanna le CLAUDE.md ach i gcás gníomhairí neamh-Claude AI (Codex, Cursor, etc.)        |
+| **GEMINI.md**                               | Rialacha beachta do ghníomhairí Gemini-bhunaithe ( fothacar de CLAUDE.md)                      |
+| **CONTRIBUTING.md**                         | Treoir do ranníocóirí: socrú, gealltanais thraidisiúnta, tástáil, sreabhadh PR                 |
+| **SECURITY.md**                             | Beartas tuairiscithe leochaileachta, leaganacha tacaithe, samhail bhagairt                     |
+| **CODE_OF_CONDUCT.md**                      | Ranníocóir Cúnant — iompar pobail ionchais                                                     |
+| **llm.txt**                                 | Tuirlingt gnáth-théacs optamaithe le haghaidh crawlers LLM (SEO do chúntóirí AI )              |
+| **package.json**                            | léiriú npm, scripteanna, spleáchais, innill, geata clúdaigh c8                                 |
+| **package-lock.json**                       | Crann spleáchais faoi ghlas                                                                    |
+| **tsconfig.json**                           | Íosluchtaigh root TypeScript config                                                            |
+| **tsconfig.typecheck-core.json**            | Typecheck config le haghaidh `src/` core                                                       |
+| **tsconfig.typecheck-noimplicit-core.json** | Seiceáil cineál docht (`noImplicitAny`).                                                       |
+| **tsconfig.tsbuildinfo**                    | taisce tógála incriminteach TS (gitgnored)                                                     |
+| **seo chugainn.config.mjs**                 | cumraíocht tógála Next.js 16 (aschur neamhspleách)                                             |
+| **seo chugainn-env.d.ts**                   | Next.js cineálacha env uathghinte                                                              |
+| **eislint.config.mjs**                      | ESLint flat config (rialacha de réir réimse an tionscadail)                                    |
+| **níos deise.config.mjs**                   | Rialacha formáidiú Prettier                                                                    |
+| **postas.config.mjs**                       | PostCSS config le haghaidh píblíne Tailwind/CSS                                                |
+| **drámadóir.config.ts**                     | Cumraíocht tástála Playwright E2E                                                              |
+| **vitest.config.ts**                        | Vitest config (sraith réamhshocraithe)                                                         |
+| **vitest.mcp.config.ts**                    | Vitest config le haghaidh seomraí freastalaí MCP / autoCombo / cache                           |
+| **maoine.sonraí-tionscadal**                | SonarQube/SonarCloud config (cáilíocht an chóid)                                               |
+| **Dockerfile**                              | Tógáil Docker ilchéime (tógálaí → runner-base → runner-cli)                                    |
+| **docker-compose.yml**                      | Cumadh Dev le 4 phróifíl (bonn, cli, óstach, cliproxyapi) + redis sidecar                      |
+| **docker-compose.prod.yml**                 | Cumadóireacht léirithe (port 20130, redis, imleabhair ainmnithe)                               |
+| **.dockerignore**                           | Comhaid eisiata ó chomhthéacs Docker                                                           |
+| **fly.toml**                                | Cumraíocht imscaradh Fly.io (réigiún `sin`, port 20128, / data toirte)                         |
+| **.env.sampla**                             | Comhad env teimpléad (uathchóipeáil chuig `.env` ar an gcéad suiteáil)                         |
+| **.gitnore**                                | Git neamhaird patrúin                                                                          |
+| **.npmignore**                              | npm liosta eisiatachta a fhoilsiú                                                              |
+| **.npmrc**                                  | npm config (clárlann, polasaí glaschomhaid)                                                    |
+| **.nóid-leagan**                            | Bioráin leagan nód (úsáidte ag uirlisí nvm-comhoiriúnach)                                      |
+| **.nvmrc**                                  | Leagan nód bioráin do nvm                                                                      |
+| **eslint.complexity.config.mjs**            | config ESLint don ratchet castachta (`scripts/check/check-complexity.mjs --config`)            |
+| **eslint.sonarjs.config.mjs**               | cumraíocht ESLint le haghaidh rialacha SonarJS (castacht chognaíoch / dúbailt)                 |
+| **foinse.config.ts**                        | Cumraíocht foinse Fumadocs `defineDocs` (fothaí `.source/`)                                    |
+| **knip.json**                               | Knip config — files/exports/deps neamhúsáidte (beathaíonn sé geata an chóid mharbh)            |
+| **stríocóir.conf.mjs**                      | Cumraíocht tástála sóchán Stryker (ríomhann `tap.testFiles` ó `mutate`)                        |
+| **.size-limit.json**                        | config buiséad beart teorainn méide                                                            |
+| **promptfooconfig.yaml**                    | cumraíocht eval promptfoo                                                                      |
+| **.gitleaks.toml**                          | gitleaks sraith rialacha scanadh rúnda                                                         |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                     |
+| **socket.yml**                              | Cumraíocht slabhra soláthair Socket.dev                                                        |
+| **news.json**                               | Fotha fógartha logánta v2; Radar seolta míreanna neamhghníomhacha                              |
+| **flake.nix** /** flake.glas**              | Nix dev-shell sainmhíniú + glas                                                                |
+| **.env**                                    | Rúin áitiúla ( — gitignored ginte ó `.env.example`)                                            |
 
-> **Bogtha amach as an bhfréamh in v3.8.26 (chun tranglam a laghdú):**
+> **Bogtha amach as an fhréamh in v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, agus an `quality-metrics.json` ginte (gitignored). Féach [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, agus an `quality-metrics.json` a ghintear (gitignered). Féach [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
-## `src/` — iarratas Next.js
+## feidhmchlár `src/` — Next.js
 
 ```
 src/
@@ -135,26 +135,26 @@ src/
 └── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` - Ródaire Aipe (Next.js 16)
+### Ródaire Feidhmchláir `src/app/` — (Next.js 16)
 
 | Conair                                                                       | Cuspóir                                                                                                                                                                                                                                                                                                                 |
 | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/api/v1/`                                                                | API poiblí OpenAI-compat (~ 25 fo-bhealaí: comhrá, críochnú, leabaithe, comhaid, baisceanna, fuaime, íomhánna, físeáin, ceol, athrangú, modhnuithe, cuardach, ws, gníomhairí, cuntais, soláthraithe, etc.)                                                                                                              |
-| `app/api/v1beta/`                                                            | Críochphointí zqa i stíl API                                                                                                                                                                                                                                                                                            |
-| `app/api/playground/`                                                        | Bealaí stiúideo Clós Súgartha: `improve-prompt/` (POST - athscríbhneoir pras LLM ), `presets/` (GET liosta / POST create), `presets/[id]/` (GET / PUT / DELETE) - féach `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                          |
-| `app/api/` (neamh-v1)                                                        | bealaí Management/admin (eolairí ~ 60: soláthraithe, combos, socruithe, mcp, a2a, evals, cuimhne, scileanna, cuacha gréasáin, comhlíonadh, athléimneacht, monatóireacht, tolláin, cli-uirlisí, etc.)                                                                                                                    |
+| `app/api/v1beta/`                                                            | Gemini-style API endpoints                                                                                                                                                                                                                                                                                              |
+| `app/api/playground/`                                                        | Clós Súgartha Bealaí stiúideo: `improve-prompt/` (POST — LLM athscríbhneoir pras), `presets/` ( liosta GET / POST cruthaigh), `presets/[id]/` (GET / PUT / DELETE) — féach `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                       |
+| `app/api/` (non-v1)                                                          | bealaí Management/admin (eolairí ~ 60: soláthraithe, combos, socruithe, mcp, a2a, evals, cuimhne, scileanna, cuacha gréasáin, comhlíonadh, athléimneacht, monatóireacht, tolláin, cli-uirlisí, etc.)                                                                                                                    |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 bealach (rialú freastalaí, gníomhaire state/DNS/mappings, seachbhóthar, deimhniú, in aghaidh an tsrutha-CA). LOCAL_ONLY + SPAWN_CAPABLE. Féach `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                           |
-| `app/api/tools/traffic-inspector/`                                           | Cigire Tráchta REST + WS API - 16 bealach + (iarratais, seisiúin, óstaigh, modhanna gabhála, onnmhairiú, ws). LOCAL_ONLY + SPAWN_CAPABLE. Féach `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                              |
+| `app/api/tools/traffic-inspector/`                                           | Cigire Tráchta REST + WS API — 16 bealach + (iarratais, seisiúin, óstaigh, modhanna gabhála, onnmhairiú, ws). LOCAL_ONLY + SPAWN_CAPABLE. Féach `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                              |
 | `app/a2a/`                                                                   | pointe iontrála A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                          |
 | `app/.well-known/agent.json/`                                                | Cárta Gníomhaire A2A (fionnachtain)                                                                                                                                                                                                                                                                                     |
 | `app/(dashboard)/dashboard/`                                                 | Leathanaigh an phainéil UI (50 rannán +, ~ 118 comhad page.tsx : soláthraithe, combos, socruithe, cuimhne, scileanna, webooks, evals, iniúchadh, baisce, taisce, costais, sláinte, córas, gníomhaíocht, etc.)                                                                                                           |
 | `app/(dashboard)/dashboard/search-tools/`                                    | Uirlisí Cuardaigh Stiúideo UI (3 chluaisín: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — féach `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                               |
 | `app/(dashboard)/dashboard/memory/`                                          | Stiúideo Cuimhne (plean 21): `page.tsx` (blaosc 3-tab), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge leathanach painéal — cárta freastalaí, 9 gcárta gníomhaire, draoi socraithe, mapáil samhail, liosta seachbhóthar. i18n PT-BR + EN. Féach `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                  |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Leathanach painéal Cigire Tráchta - DevTools, 7 gcluaisín sonraí, 4 scorán de mhodh gabhála, taifeadta seisiúin, dathú comhthéacs. i18n PT-BR + EN. Féach `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                       |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge painéal leathanach cárta freastalaí —, 9 cárta gníomhaire, draoi thus, mapáil samhail, liosta seachbhóthar. i18n PT-BR + EN. Féach `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                        |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Leathanach painéal Cigire Tráchta — DevTools split, 7 cluaisín sonraí, 4 scorán modh gabhála, taifeadta seisiúin, dathú comhthéacs. i18n PT-BR + EN. Féach `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                      |
 | `app/(dashboard)/dashboard/activity/`                                        | Leathanach fotha gníomhaíochta (Grúpa B): `page.tsx` (freastalaí) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — féach `docs/architecture/MONITORING_SECTIONS.md`                                                                                                |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Leathanach Comhroinnte Cuóta (Grúpa B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                     |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Leathanach cumraíochta an phlean soláthraí (Grúpa B): `page.tsx` + `ProviderPlanConfigClient.tsx` — toisí cuóta in aghaidh an naisc a shárú                                                                                                                                                                             |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Leathanach cumraíochta an phlean soláthraí (Grúpa B): toisí cuóta `page.tsx` + `ProviderPlanConfigClient.tsx` in aghaidh — naisc sáraithe                                                                                                                                                                               |
 | `app/docs/`                                                                  | Breathnóir doiciméadaithe leabaithe ( rindreáil `docs/*.md`)                                                                                                                                                                                                                                                            |
 | `app/landing/`                                                               | Leathanach tuirlingthe margaíochta                                                                                                                                                                                                                                                                                      |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Leathanaigh a bhaineann le hÚdar                                                                                                                                                                                                                                                                                        |
@@ -163,49 +163,49 @@ src/
 | `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Leagan amach fréamhacha, baile, léiriú PWA, CSS domhanda                                                                                                                                                                                                                                                                |
 | `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Teorainneacha earráide                                                                                                                                                                                                                                                                                                  |
 
-### `src/lib/` - leabharlanna lárnacha ( modúil ~ 50)
+### leabharlanna croí `src/lib/` — ( modúil ~ 50)
 
 | Modúl                                    | Cuspóir                                                                                                                                                                                                                                                                                                                          |
 | ---------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | A2A prótacal bainisteoir tasc, scileanna (5), sruthú                                                                                                                                                                                                                                                                             |
-| `acp/`                                   | CLI Clárlann Gníomhairí (fionnachtain CLI áitiúil — féach `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                            |
+| `acp/`                                   | CLI Clárlann Gníomhairí ( fionnachtain CLI áitiúil — féach `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                           |
 | `api/`                                   | Cúntóirí API roinnte (`requireManagementAuth`, bailíochtú)                                                                                                                                                                                                                                                                       |
 | `auth/`                                  | Seisiún, hashing pasfhocail, bailíochtú comharthaí                                                                                                                                                                                                                                                                               |
 | `batches/`                               | OpenAI Baisceanna láimhseálaithe API                                                                                                                                                                                                                                                                                             |
 | `catalog/`                               | Soláthraí catalóg Zod bailíochtú + taifeach cumais                                                                                                                                                                                                                                                                               |
-| `cloudAgent/`                            | Gníomhairí Cloud (Codex Cloud, Devin, Jules) — féach `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                            |
+| `cloudAgent/`                            | Gníomhairí Néal (Codex Cloud , Devin, Jules) — féach `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                            |
 | `combos/`                                | Cúntóirí athordú teaglama +                                                                                                                                                                                                                                                                                                      |
-| `audit/`                                 | Cúntóirí fotha gníomhaíochta: `highLevelActions.ts` (liosta ceadaithe + `isHighLevelAction()`), `activityIcons.ts` (léarscáil gníomhaíochta → icon/verb ), `timeline.ts` (groupByDay/relativeTime) — féach `docs/architecture/MONITORING_SECTIONS.md`                                                                            |
-| `compliance/`                            | Loga iniúchta iniúchadh soláthraí + — féach `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                        |
+| `audit/`                                 | Cúntóirí fotha gníomhaíochta: `highLevelActions.ts` (liosta ceadaithe + `isHighLevelAction()`), `activityIcons.ts` (mapa gníomh → icon/verb ), `timeline.ts` (groupByDay/relativeTime) — féach `docs/architecture/MONITORING_SECTIONS.md`                                                                                        |
+| `compliance/`                            | Loga iniúchta soláthraí + iniúchadh — féach `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                        |
 | `compression/`                           | Gliú innill chomhbhrú (cónaíonn na hinnill i `open-sse/services/compression/`)                                                                                                                                                                                                                                                   |
 | `config/`                                | Cúntóirí cumraíochta Runtime                                                                                                                                                                                                                                                                                                     |
 | `db/`                                    | 120 modúl + fearainn DB + 168 imirce (téigh anseo i gcónaí le haghaidh SQLite)                                                                                                                                                                                                                                                   |
 | `quota/`                                 | Inneall Comhroinnte Cuóta: `dimensions.ts` (types/Zod), `types.ts` ( comhéadan QuotaStore ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — féach `docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | Cliant catalóg múnla saor in aisce radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) - féach `docs/frameworks/RADAR.md`                                                                                                                                          |
+| `radar/`                                 | Cliant catalóg saor-mhúnla radar: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — féach `docs/frameworks/RADAR.md`                                                                                                                                                  |
 | `display/`                               | cúntóirí formáidithe UI (costas, latency, etc.)                                                                                                                                                                                                                                                                                  |
 | `embeddings/`                            | Cúntóirí seirbhíse leabaithe                                                                                                                                                                                                                                                                                                     |
 | `env/`                                   | Parsáil athróg env + bailíochtú                                                                                                                                                                                                                                                                                                  |
-| `evals/`                                 | Creat Eval (suites, rádala, runtime) - féach `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                          |
-| `guardrails/`                            | mascara PII, instealladh pras, droichead fís - féach `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                               |
+| `evals/`                                 | Creat eval (suites, rádala, runtime) — féach `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                          |
+| `guardrails/`                            | mascara PII, instealladh pras, droichead fís — féach `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                               |
 | `jobs/`                                  | Poist chúlra (cosúil le cron)                                                                                                                                                                                                                                                                                                    |
 | `memory/`                                | Cuimhne chomhrá (SQLite FTS5 + sqlite-vec hibrideach RRF + Qdrant sraith 2) — féach `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                  |
 | `memory/embedding/`                      | Ciseal leabaithe ilfhoinse: `index.ts` (réiteach), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plean 21)                                                                                                                                                                                     |
-| `memory/vectorStore.ts`                  | fillteán sqlite-vec v0.1.9 — KNN brute-force + hibrideach RRF (FTS5 + veicteoir, k = 60). Leisciúil-init, díghrádaíonn sé go galánta nuair nach bhfuil sqlite-vec ar fáil. (plean 21)                                                                                                                                            |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 cumhdach — KNN brute-force + hibrideach RRF (veicteora FTS5 +, k = 60). Leisciúil-init, díghrádaíonn sé go galánta nuair nach bhfuil sqlite-vec ar fáil. (plean 21)                                                                                                                                            |
 | `memory/reindex.ts`                      | `runReindexBatch()` — cuimhní a phróiseáil le `needs_reindex=1` sa chúlra; ar a dtugtar ag `POST /api/memory/reindex` agus cosán aislíonta leisciúil. (plean 21)                                                                                                                                                                 |
 | `monitoring/`                            | Seiceálacha sláinte, astú méadrachta                                                                                                                                                                                                                                                                                             |
 | `oauth/`                                 | sreabhann OAuth/import le haghaidh 22 modúl soláthraí (agy, antigravity, claude, cline, codebuddy-cn, codex, cúrsóir, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, trao-ed, xodai-ed, xodai-coding, kimi-coding, kiro, traoed, xodai-ed, xodai-cod zed)                |
 | `plugins/`                               | Clárlann breiseán                                                                                                                                                                                                                                                                                                                |
 | `promptCache/`                           | Brisphointí taisce pras ar stíl antraipeach                                                                                                                                                                                                                                                                                      |
 | `skills/`                                | Creat scileanna (tógtha i margadh + + SkillsSH) — féach `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                              |
-| `playground/`                            | Cúntóirí comhroinnte Stiúideo Clós Súgartha: `codeExport.ts` ( gineadóir curl/Python/TS ), `promptImprover.ts` (tógálaí meta-leid), `streamMetrics.ts` ( TTFT/TPS íon ), `types.ts` (tábla praghsanna) - féach `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                            |
-| `webhookDispatcher.ts`                   | seachadadh HMAC cuaille gréasáin — féach `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                           |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Bainisteoirí tolláin - féach `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                         |
+| `playground/`                            | Cúntóirí roinnte Clós Súgartha Stiúideo: `codeExport.ts` (gineadóir curl/Python/TS ), `promptImprover.ts` (tógálaí meta-leid), `streamMetrics.ts` ( TTFT/TPS íon), `types.ts` (tábla praghsanna) — féach `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                  |
+| `webhookDispatcher.ts`                   | seachadadh HMAC webhook — féach `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                    |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Bainisteoirí tolláin — féach `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                         |
 | `cloudSync.ts`, `initCloudSync.ts`       | Sioncronú scamall roghnach stáit                                                                                                                                                                                                                                                                                                 |
-| `localDb.ts`                             | Bairille ath-onnmhairithe do mhodúil db (gan aon loighic - ath-onnmhairí amháin)                                                                                                                                                                                                                                                 |
+| `localDb.ts`                             | Bairille ath-onnmhairithe do mhodúil db (gan aon athonnmhairí — amháin)                                                                                                                                                                                                                                                          |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Iarratas taisceadh + idempotency                                                                                                                                                                                                                                                                                                 |
 | (~ 30 comhad barrleibhéil sa bhreis)     | Cúntóirí speisialaithe (logEnv, modelsDevSync, piiSanitizer, etc.)                                                                                                                                                                                                                                                               |
 
-### `src/lib/db/` — Bunachar Sonraí (147 modúl + 208 ascnamh)
+### Bunachar Sonraí `src/lib/db/` — (147 modúl + 208 imirce)
 
 | Subdir                    | Cuspóir                                                                                                                                                                                                               |
 | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Comhpháirt painéal API: cuibheoirí thar `packages/ui-kit` — féach `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ainmneacha deilbhín a úsáideann na scáileáin → Comhpháirteanna Lucide (`<Icon>`)           |
-| `constants/providers.ts`         | **377 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                |
+| `constants/providers.ts`         | **394 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                |
 | `constants/cliTools.ts`          | Clár seachtrach CLI uirlisí                                                                            |
-| `constants/routingStrategies.ts` | **20 straitéis ródaithe** le tosaíochtaí                                                               |
+| `constants/routingStrategies.ts` | **22 straitéis ródaithe** le tosaíochtaí                                                               |
 | `constants/publicApiRoutes.ts`   | Bealaí óna dteastaíonn údar Iompróra (vs bainistíocht).                                                |
 | `constants/upstreamHeaders.ts`   | Liosta diúltaithe ceanntásc d'iarratais réamhtheachtacha                                               |
 | `validation/schemas.ts`          | scéimeanna ~ 80 Zod (foinse amháin fírinne le haghaidh conarthaí API )                                 |
@@ -265,7 +265,7 @@ Spás oibre npm ar leith (`@omniroute/open-sse`). Láimhseálann sé próiseáil
 ```
 open-sse/
 ├── handlers/            # 16 chomhad (12 láimhseálaí + 4 chúntóir): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, srl.
-├── executors/           # 150 modúl forghníomhaithe (aicmí a leathnaíonn BaseExecutor + cúntóirí in aghaidh an tsoláthraí)
+├── executors/           # 163 modúl forghníomhaithe (aicmí a leathnaíonn BaseExecutor + cúntóirí in aghaidh an tsoláthraí)
 ├── translator/          # Tiontairí formáide (9 n-iarratas, 9 bhfreagra, 9 gcúntóir)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ modúl seirbhíse (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, srl.)
@@ -391,7 +391,7 @@ open-sse/
 
 ---
 
-## `docs/` — Doiciméadúchán Poiblí (7 bhfréamhchomhad + 17 subdirs)
+## Doiciméadúchán Poiblí `docs/` — (7 bhfréamhchomhad + 17 subdirs)
 
 ### Treoracha barrleibhéil
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Comhtháthú CLI + Inmheánach OmniRoute CLI                                          |
 | `I18N.md`                   | i18n ailtireacht, ag cur teanga leis, 67 logán                                     |
 | `UNINSTALL.md`              | Glan na céimeanna díshuiteála                                                      |
-| `PROVIDER_REFERENCE.md`     | **Uathghinte** catalóg de 377 soláthraí (regen: `npm run gen:provider-reference`)  |
+| `PROVIDER_REFERENCE.md`     | **Uathghinte** catalóg de 394 soláthraí (regen: `npm run gen:provider-reference`)  |
 
 ### Tumadh domhain fochóras
 
@@ -427,7 +427,7 @@ open-sse/
 | `MEMORY.md`                                   | Córas cuimhne (SQLite FTS5 + Qdrant)                                                   |
 | `EVALS.md`                                    | Creat Eval (suiteálacha, ritheanna, rúibricí)                                          |
 | `GUARDRAILS.md`                               | mascara PII, instealladh pras, droichead fís                                           |
-| `COMPLIANCE.md`                               | Loga iniúchta, coinneáil, rogha an diúltaithe noLog                                    |
+| `COMPLIANCE.md`                               | Loga iniúchta, coinneáil, noLog an diúltaithe                                          |
 | `WEBHOOKS.md`                                 | Seachadadh cuaille gréasáin sínithe ag HMAC                                            |
 | `REASONING_REPLAY.md`                         | Taisce hibrideach memory/SQLite do `reasoning_content`                                 |
 | `AUTHZ_GUIDE.md`                              | Píblíne údaraithe (`classify` → `policies` → `enforce`)                                |
@@ -460,11 +460,11 @@ open-sse/
 
 ### Fochomhadlanna
 
-| Subdir                | Cuspóir                                                                                                                                                                                             |
-| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Aistriúcháin logánta doc (41 logán)                                                                                                                                                                 |
-| `docs/screenshots/`   | Sócmhainní íomhá le haghaidh treoracha                                                                                                                                                              |
-| `_tasks/superpowers/` | Plans/specs ó shárchumhachtaí (`writing-plans`/`brainstorming`) + research — repo scoite, leagan leithleach, gitignonaithe ag an bpríomhchrann. Féach CLAUDE.md → "Déantúsáin Phleanála & Taighde". |
+| Subdir                | Cuspóir                                                                                                                                                                                                   |
+| --------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | Aistriúcháin logánta doc (41 logán)                                                                                                                                                                       |
+| `docs/screenshots/`   | Sócmhainní íomhá le haghaidh treoracha                                                                                                                                                                    |
+| `_tasks/superpowers/` | Plans/specs ó superpowers (`writing-plans`/`brainstorming`) + taighde — scoite amach, repo ar leithligh-leaganacha, gitignonaithe ag an gcrann is mó. Féach CLAUDE.md → "Déantúsáin Phleanála & Taighde". |
 
 ---
 

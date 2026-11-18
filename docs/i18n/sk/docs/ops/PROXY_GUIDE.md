@@ -81,6 +81,18 @@ Proxy servery sú užitočné aj mimo blokovaných regiónov:
 
 ---
 
+## Predvolený stav servera proxy pre nové účty
+
+In** Nastavenia → Proxy → Globálna konfigurácia** , použite** Predvolene povoliť proxy pre nové pripojenia** vyberte počiatočný stav proxy novo pridaných účtov poskytovateľa.
+
+Nové nastavenie riadi počiatočný stav proxy novo pridaných účtov poskytovateľa. Nezmení existujúce účty ani nenahradí globálny prepínač proxy. Jeho počiatočná hodnota zachováva predchádzajúce správanie. Ak chcete vytvoriť budúce účty s predvolene zakázaným serverom proxy, raz ho vypnite.
+
+Predvoľba je uložená ako `defaultNewConnectionProxyEnabled` prostredníctvom existujúcich nastavení API. Keď sa neuloží, predvolene sa nastaví `true`. Uloženie `false` sa prejaví pri ďalších nových účtoch bez reštartu. `POST /api/providers` akceptuje voliteľné striktné booleovské `proxyEnabled`; explicitné `true` alebo `false` má prednosť pred predvoleným nastavením vytvorenia. Vynechanie duplicitného účtu alebo opätovné pripojenie OAuth zachová uložený stav tohto účtu. Jednotlivé účty je možné povoliť alebo zakázať aj neskôr.
+
+Selektívne prenosy poskytovateľov používajú predvolené nastavenia cieľovej inštalácie pre nové účty a zachovávajú politiku cieľa pri nahrádzaní existujúcich účtov. Prepínače proxy nie sú prenosné polia prenosu. Úplná obnova zálohy a historická migrácia JSON/SQL si zachovávajú svoju existujúcu sémantiku obnovy, vrátane uložených hodnôt účtov a predvolených nastavení starých schém; úplné obnovenie nastavení môže tiež obnoviť túto predvoľbu.
+
+Táto preferencia nepriraďuje proxy server ani neurčuje, že je v poriadku alebo sa používa. Skutočné smerovanie stále závisí od globálneho prepínača proxy a príslušnej konfigurácie proxy. Syntetickí poskytovatelia bez trvalého účtu, prevádzka OAuth pred vytvorením účtu, proxy servery environment/system a sieťovanie externých backendov sú mimo jej pôsobnosti.
+
 ## 4-úrovňový systém proxy
 
 OmniRoute podporuje konfiguráciu proxy na **štyroch nezávislých úrovniach**, ktoré sa vyhodnocujú podľa priority:

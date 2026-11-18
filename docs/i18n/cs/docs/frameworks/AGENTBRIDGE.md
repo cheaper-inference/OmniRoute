@@ -16,11 +16,11 @@ AgentBridge je MITM (Man-in-the-Middle) proxy OmniRoute, které zachytává prov
 
 ### Co je AgentBridge?
 
-Když agent IDE (např. GitHub Copilot, Cursor, Claude Code) zavolá API, připojí se přímo k poskytovateli AI upstream (OpenAI, Anthropic atd.). AgentBridge zachytí toto připojení transparentně na úrovni TLS – bez nutnosti jakékoli změny konfigurace agenta – a přepíše požadavek prostřednictvím OmniRoute.
+Když agent IDE (např. GitHub Copilot, Cursor, Claude Code) zavolá API, připojí se přímo k poskytovateli AI upstream (OpenAI, Anthropic atd.). AgentBridge zachytí toto připojení transparentně na úrovni TLS — bez nutnosti jakékoli změny konfigurace agenta — a přepíše požadavek prostřednictvím OmniRoute.
 
 To znamená, že můžete:
 
-- **Přesměrujte jakéhokoli agenta k libovolnému poskytovateli** : Copilot mluví s OpenAI? Přesměrujte jej na Anthropic Claude, Gemini nebo kteréhokoli z 377 poskytovatelů OmniRoute.
+- **Přesměrujte jakéhokoli agenta k libovolnému poskytovateli** : Copilot mluví s OpenAI? Přesměrujte jej na Anthropic Claude, Gemini nebo kteréhokoli z 394 poskytovatelů OmniRoute.
 - **Použít mapování modelu** : `gemini-3-flash` → `claude-sonnet-4.7` transparentně na úrovni obsluhy.
 - **Sledujte veškerý provoz agentů** : každá zachycená žádost je zveřejněna [dopravnímu inspektorovi](./TRAFFIC_INSPECTOR.md).
 - **Použijte odolnost OmniRoute** : kombinované směrování, jističe, záložní funkce a sledování nákladů fungují i pro provoz agentů IDE.
@@ -544,26 +544,26 @@ Základní cesta: `/api/tools/agent-bridge/`
 
 ---
 
-## §8 Plán vývoje
+## §8 Plán
 
-### Průzkum Trae
+### Trae vyšetřování
 
-Trae je relativně nový AI asistent pro programování. Před implementací handleru:
+Trae je relativně nový asistent kódování AI. Před implementací handleru:
 
-1. Identifikujte binární soubor/rozšíření v tržištích VS Code / JetBrains nebo samostatnou aplikaci
-2. Zachyťte provoz pomocí mitmproxy, abyste zjistili hostitele API a strukturu endpointů
-3. Určete mechanismus autentizace
-4. Na základě smluvních podmínek a zjistitelnosti API rozhodněte, zda pokračovat
+1. Identifikujte binary/extension na tržištích VS Code / JetBrains nebo jako samostatnou aplikaci
+2. Zachyťte provoz pomocí mitmproxy a objevte hostitele API a tvary koncových bodů
+3. Určete mechanismus ověřování
+4. Posuďte go/no-go na základě zjistitelnosti TOS a API
 
-Dokud nebude průzkum dokončen, karta Trae na řídicím panelu zobrazuje odznak „Probíhá průzkum“ s odkazem „Nahlásit životaschopnost“. Zástupný handler v `src/mitm/handlers/trae.ts` vyvolá strukturovanou chybu `Dosud neimplementováno`.
+Dokud vyšetřování neskončí, na kartě Trae na řídicím panelu se zobrazuje odznak „Vyšetřování“ s odkazem „Nahlásit životaschopnost“. Obslužný útržek na `src/mitm/handlers/trae.ts` vyvolá strukturovanou chybu `Not yet implemented`.
 
-### Agenti v backlogu (vyžadován MITM — bez podpory vlastní základní adresy URL)
+### Backlog agenti (MITM vyžaduje — žádná vlastní základní podpora URL )
 
-Následující nástroje ve svých aktuálních verzích nepodporují vlastní základní adresy URL, takže MITM je jedinou možností zachytávání. Posouzení životaschopnosti zatím nebylo dokončeno:
+Následující nástroje nepodporují vlastní základní URLs ve svých aktuálních verzích, takže MITM je jedinou cestou zachycení. Čeká se na posouzení životaschopnosti:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
+- **Amp** (zdrojový graf)
 - **Amazon Q / Kiro CLI** (AWS Bedrock — oddělené od Kiro IDE)
-- **Cowork** (desktopová aplikace Anthropic)
+- **Cowork** (Anthropic desktop)
 
-Poznámka: GitHub Copilot CLI ≥v1.0.19 podporuje `COPILOT_PROVIDER_BASE_URL` — pro tento nástroj použijte místo MITM přímou konfiguraci.
+Poznámka: GitHub Copilot CLI ≥ v1.0.19 podporuje `COPILOT_PROVIDER_BASE_URL` — použití přímé konfigurace místo MITM pro tento nástroj.

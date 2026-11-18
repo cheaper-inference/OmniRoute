@@ -120,16 +120,16 @@
 
 ## 📖 வழங்குநர் அமைப்பு
 
-CSV அல்லது JSON கோப்பிலிருந்து API-key இணைப்புகளை மொத்தமாகச் சேர்க்க, **கட்டுப்பாட்டுப் பலகம் → வழங்குநர்கள் → கோப்பிலிருந்து இறக்குமதி செய்** என்பதைப் பயன்படுத்தவும். நெடுவரிசைகள் நிலை சார்ந்தவை (`provider,name,apiKey,baseUrl,priority`); `provider` ஏற்கனவே நிர்வகிக்கப்படும் வழங்குநராகவோ இணக்கமான node ஆகவோ இருக்க வேண்டும். [CSV அல்லது JSON கோப்பிலிருந்து வழங்குநர்களை இறக்குமதி செய்தல்](../providers/CSV-IMPORT.md) என்பதைப் பார்க்கவும்.
+CSV அல்லது JSON கோப்பிலிருந்து API விசை இணைப்புகளை மொத்தமாகச் சேர்க்க, **Dashboard → Providers → Import from file** என்பதைப் பயன்படுத்தவும். நெடுவரிசைகள் நிலைவரிசைப்படி இருக்கும் (`provider,name,apiKey,baseUrl,priority`); `provider` ஏற்கனவே நிர்வகிக்கப்படும் வழங்குநராகவோ இணக்கமான முனையாகவோ இருக்க வேண்டும். [CSV அல்லது JSON கோப்பிலிருந்து வழங்குநர்களை இறக்குமதி செய்வது](../providers/CSV-IMPORT.md) என்பதைப் பார்க்கவும்.
 
 ### 🔐 சந்தா வழங்குநர்கள்
 
 #### Claude Code (Pro/Max)
 
 ```bash
-கட்டுப்பாட்டுப் பலகம் → வழங்குநர்கள் → Claude Code-ஐ இணைக்கவும்
-→ OAuth உள்நுழைவு → தானியங்கி token புதுப்பிப்பு
-→ 5 மணிநேர + வாராந்திர quota கண்காணிப்பு
+Dashboard → Providers → Connect Claude Code
+→ OAuth உள்நுழைவு → தானியங்கி டோக்கன் புதுப்பிப்பு
+→ 5-மணி + வாராந்திர ஒதுக்கீட்டு கண்காணிப்பு
 
 Models:
   cc/claude-opus-4-7
@@ -137,20 +137,21 @@ Models:
   cc/claude-haiku-4-5-20251001
 ```
 
-**சிறப்புக் குறிப்பு:** சிக்கலான பணிகளுக்கு Opus-ஐயும், வேகத்துக்கு Sonnet-ஐயும் பயன்படுத்தவும். OmniRoute ஒவ்வொரு model-க்கும் quota-வைக் கண்காணிக்கிறது!
+**சிறந்த உதவிக்குறிப்பு:** சிக்கலான பணிகளுக்கு Opus-ஐயும், வேகத்திற்காக Sonnet-ஐயும் பயன்படுத்தவும். OmniRoute ஒவ்வொரு மாதிரிக்கும் ஒதுக்கீட்டைக் கண்காணிக்கிறது!
 
-OmniRoute host-இல் browser இல்லையா? Claude Code-இல் உள்நுழைந்துள்ள எந்த இடத்திலும் `claude setup-token`-ஐ இயக்கி, ஓராண்டுக்கான token-ஐ **Setup Token** tab-இல் ஒட்டவும். [setup token உடன் Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) என்பதைப் பார்க்கவும்.
+OmniRoute வழங்கும் ஹோஸ்டில் உலாவி இல்லையா? Claude Code-இல் உள்நுழைந்துள்ள எந்த இடத்திலும் `claude setup-token` கட்டளையை இயக்கி, ஒரு வருட கால டோக்கனை **Setup Token** தாவலில் ஒட்டவும். [Setup token உடன் Claude Code](../providers/CLAUDE_CODE_SETUP_TOKEN.md) என்பதைப் பார்க்கவும்.
 
-Claude மற்றும் Claude Code-இணக்கமான routes, Opus மற்றும் Sonnet
-models-க்கான `max` thinking effort-ஐத் தக்கவைக்கின்றன. Haiku models `max` effort tier-ஐ ஏற்காது; எனவே OmniRoute அந்த
-request-ஐ upstream-க்கு அனுப்புவதற்கு முன், அதிக thinking budget-க்கு மாற்றுகிறது.
+Claude மற்றும் Claude Code-உடன் இணக்கமான வழித்தடங்கள், Opus மற்றும் Sonnet
+மாதிரிகளுக்கான `max` சிந்தனை முயற்சியை அப்படியே பாதுகாக்கின்றன. Haiku மாதிரிகள் `max`
+முயற்சி அடுக்கை ஏற்காது; எனவே OmniRoute அந்தக் கோரிக்கையை upstream-க்கு அனுப்புவதற்கு முன்
+அதை அதிக சிந்தனை பட்ஜெட்டாகத் தாழ்த்துகிறது.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-கட்டுப்பாட்டுப் பலகம் → வழங்குநர்கள் → Codex-ஐ இணைக்கவும்
+Dashboard → Providers → Connect Codex
 → OAuth உள்நுழைவு (port 1455)
-→ 5 மணிநேர + வாராந்திர மீட்டமைப்பு
+→ 5-மணி + வாராந்திர மீட்டமைப்பு
 
 Models:
   cx/gpt-5.5
@@ -162,7 +163,7 @@ Models:
 #### GitHub Copilot
 
 ```bash
-கட்டுப்பாட்டுப் பலகம் → வழங்குநர்கள் → GitHub-ஐ இணைக்கவும்
+Dashboard → Providers → Connect GitHub
 → GitHub வழியாக OAuth
 → மாதாந்திர மீட்டமைப்பு (மாதத்தின் 1ஆம் தேதி)
 
@@ -174,47 +175,67 @@ Models:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 மலிவான வழங்குநர்கள்
+**AI Credits (டோக்கன் அடிப்படையிலான கட்டணம்).** கணக்கிற்காக GitHub `credits_used`-ஐப்
+பதிவுசெய்யும்போது, வரம்பற்ற நிறுவனத் திட்டங்களிலும், Provider Limits அட்டையில் தற்போதைய
+கட்டணக் காலத்தில் பயன்படுத்தப்பட்ட கிரெடிட்களுடன் **AI Credits** வரிசை காட்டப்படும்.
+
+**உள்ளூர் AI Credits வரம்பு.** GitHub இணைப்பைத் திருத்தி, ஒவ்வொரு கட்டணக் காலத்திற்குமான
+**AI Credits limit per billing period** (`providerSpecificData.githubCreditLimit`) என்பதை
+அமைக்கவும். காலியாக விட்டால் அது முடக்கப்படும்; `0` என அமைத்தால் இணைப்பு எப்போதும்
+தவிர்க்கப்படும். கடைசியாகப் பெறப்பட்ட பயன்பாட்டு அளவீடு வரம்பை அடைந்திருந்தாலோ
+மீறியிருந்தாலோ, கணக்குத் தேர்வு அந்த இணைப்பைத் தவிர்த்து, quota-policy cutoff
+செயல்படுவது போலவே வழித்தடத்தை உங்கள் பிற இணைப்புகளுக்குத் திருப்பும். ஏற்கனவே
+காலமுறை ஒதுக்கீட்டு புதுப்பிப்பு சேகரிக்கும் பயன்பாட்டுத் தரவையே இந்தச் சரிபார்ப்பு
+படிக்கிறது — கோரிக்கை நடைபெறும் பாதையில் GitHub-ஐ அது ஒருபோதும் அழைக்காது — மேலும் இது
+திறந்த நிலையில் தோல்வியடையும்: காணாமல் போன அல்லது காலாவதியான அளவீடு (15 நிமிடங்களுக்கு
+மேல் பழையது, அல்லது ஏற்கனவே மீட்டமைக்கப்பட்ட கட்டணக் காலத்திலிருந்து வந்தது) இணைப்பைத்
+தடுக்காது. இது ஒரு உள்ளூர் பாதுகாப்பு நடவடிக்கை மட்டுமே; **உறுதிசெய்யப்பட்ட செலவுக்
+கூரை அல்ல**: GitHub அறிக்கையிடும் தாமதங்கள், புதுப்பிப்பு இடைவெளி, செயல்பாட்டிலுள்ள
+கோரிக்கைகள் மற்றும் OmniRoute-க்கு வெளியிலான பயன்பாடு ஆகியவற்றால் இந்த வரம்பை மீறலாம்.
+உறுதியான வரம்பிற்கு GitHub-இன் சொந்த செலவுக் கட்டுப்பாடுகளைப் பயன்படுத்தவும்.
+
+### 💰 குறைந்த விலை வழங்குநர்கள்
 
 #### GLM-4.7 (தினசரி மீட்டமைப்பு, $0.6/1M)
 
-1. பதிவு செய்க: [Zhipu AI](https://open.bigmodel.cn)
-2. Coding Plan-இலிருந்து API key-ஐப் பெறவும்
-3. கட்டுப்பாட்டுப் பலகம் → API Key-ஐச் சேர்: வழங்குநர்: `glm`, API Key: `your-key`
+1. பதிவு செய்யவும்: [Zhipu AI](https://open.bigmodel.cn)
+2. Coding Plan-இலிருந்து API விசையைப் பெறவும்
+3. Dashboard → Add API Key: Provider: `glm`, API Key: `your-key`
 
-**பயன்பாடு:** `glm/glm-4.7` — **சிறப்புக் குறிப்பு:** Coding Plan, 1/7 செலவில் 3× quota-வை வழங்குகிறது! தினமும் காலை 10:00 மணிக்கு மீட்டமைக்கப்படும்.
+**பயன்பாடு:** `glm/glm-4.7` — **சிறந்த உதவிக்குறிப்பு:** Coding Plan, 1/7 விலையில் 3× ஒதுக்கீட்டை வழங்குகிறது! தினமும் காலை 10:00 மணிக்கு மீட்டமைக்கப்படும்.
 
-#### MiniMax M2.1 (5 மணிநேர மீட்டமைப்பு, $0.20/1M)
+#### MiniMax M2.1 (5-மணி மீட்டமைப்பு, $0.20/1M)
 
-1. பதிவு செய்க: [MiniMax](https://www.minimax.io)
-2. API key-ஐப் பெறவும் → கட்டுப்பாட்டுப் பலகம் → API Key-ஐச் சேர்
+1. பதிவு செய்யவும்: [MiniMax](https://www.minimax.io)
+2. API விசையைப் பெறவும் → Dashboard → Add API Key
 
-**பயன்பாடு:** `minimax/MiniMax-M2.1` — **சிறப்புக் குறிப்பு:** நீண்ட context-க்கான (1M tokens) மிக மலிவான விருப்பம்!
+**பயன்பாடு:** `minimax/MiniMax-M2.1` — **சிறந்த உதவிக்குறிப்பு:** நீண்ட சூழலுக்கான குறைந்த விலைத் தேர்வு (1M டோக்கன்கள்)!
 
 #### Kimi K2 ($9/மாதம் நிலையான கட்டணம்)
 
-1. சந்தா செலுத்துக: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. API key-ஐப் பெறவும் → கட்டுப்பாட்டுப் பலகம் → API Key-ஐச் சேர்
+1. சந்தா பெறவும்: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
+2. API விசையைப் பெறவும் → Dashboard → Add API Key
 
-**பயன்பாடு:** `kimi/kimi-k2.5` — **சிறப்புக் குறிப்பு:** 10M tokens-க்கு நிலையான $9/மாதம் = நடைமுறைச் செலவு $0.90/1M!
+**பயன்பாடு:** `kimi/kimi-k2.5` — **சிறந்த உதவிக்குறிப்பு:** 10M டோக்கன்களுக்கு நிலையான $9/மாதம் = பயனுள்ள செலவு $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
-1. பதிவு செய்க: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Qianfan API key ஒன்றை உருவாக்கவும் → கட்டுப்பாட்டுப் பலகம் → API Key-ஐச் சேர்: வழங்குநர்: `qianfan`
+1. பதிவு செய்யவும்: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
+2. Qianfan API விசையை உருவாக்கவும் → Dashboard → Add API Key: Provider: `qianfan`
 
-**பயன்பாடு:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, அல்லது மற்றொரு Qianfan OpenAI-இணக்கமான model ID.
+**பயன்பாடு:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1`, அல்லது வேறு Qianfan OpenAI-உடன் இணக்கமான மாதிரி ID.
 
 ### 🆓 இலவச வழங்குநர்கள்
 
-அங்கீகாரம் தேவையற்ற இலவச வழங்குநர்களின் provider page-இல் **அங்கீகாரம் தேவையில்லை** என்பதற்கு அருகில் switch உள்ளது.
-அதை அணைப்பது அந்த வழங்குநரை முடக்கி, Providers configured/compact views-இலிருந்து அதை அகற்றி,
-அதன் models-ஐ `/v1/models`-இலிருந்து அகற்றும்.
+அங்கீகாரம் தேவையில்லாத இலவச வழங்குநர்களின் வழங்குநர் பக்கத்தில் **No authentication required**
+என்பதற்குப் பக்கத்தில் ஒரு சுவிட்ச் இருக்கும். அதை முடக்கினால் அந்த வழங்குநர் முடக்கப்பட்டு,
+Providers configured/compact காட்சிகளில் இருந்து அகற்றப்பட்டு, அதன் மாதிரிகள்
+`/v1/models`-இலிருந்தும் அகற்றப்படும்.
 
-#### Qoder (9 இலவச models)
+#### Qoder (9 இலவச மாதிரிகள்)
 
 ```bash
-கட்டுப்பாட்டுப் பலகம் → Qoder-ஐ இணைக்கவும் → OAuth உள்நுழைவு → அணுகல் தற்போதைய வழங்குநர் வரம்புகளுக்கு உட்பட்டது
+Dashboard → Connect Qoder → OAuth உள்நுழைவு → அணுகல் தற்போதைய வழங்குநர் வரம்புகளுக்கு உட்பட்டது
 
 Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
@@ -222,7 +243,7 @@ Models: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/
 #### Kiro (Claude இலவசம்)
 
 ```bash
-கட்டுப்பாட்டுப் பலகம் → Kiro-வை இணைக்கவும் → AWS Builder ID அல்லது Google/GitHub → ~50 credits/மாதம்
+Dashboard → Connect Kiro → AWS Builder ID அல்லது Google/GitHub → மாதத்திற்கு சுமார் 50 கிரெடிட்கள்
 
 Models: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -337,82 +358,82 @@ API விசை: [கட்டுப்பாட்டுப் பலகைய
 
 ---
 
-## 🚀 நிறுவல்
+## 🚀 வரிசைப்படுத்தல்
 
 ### உலகளாவிய npm நிறுவல் (பரிந்துரைக்கப்படுகிறது)
 
 ```bash
 npm install -g omniroute
 
-# உள்ளமைவு கோப்பகத்தை உருவாக்கவும்
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env கோப்பை உருவாக்கவும் (.env.example-ஐப் பார்க்கவும்)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# சேவையகத்தைத் தொடங்கவும்
+# Start server
 omniroute
-# அல்லது தனிப்பயன் போர்ட்டுடன்:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI ஆனது `~/.omniroute/.env` அல்லது `./.env`-இலிருந்து `.env`-ஐத் தானாக ஏற்றும்.
+CLI தானாகவே `~/.omniroute/.env` அல்லது `./.env` இலிருந்து `.env` ஏற்றுகிறது. வேலை செய்யும் கோப்பகத்தில் ஒரு `./.env` விசைகளின் குறுகிய அனுமதிப் பட்டியலை மட்டுமே அமைக்கலாம் (`REQUIRE_API_KEY`, லோக்கல், நேர மண்டலம் மற்றும் வண்ண அமைப்புகள், போர்ட்கள் அல்ல); மற்ற அனைத்தையும் `~/.omniroute/.env` இல் வைக்கவும். [CLI வெளியீட்டு ஒப்பந்தங்களைப்](CLI-LAUNCH-CONTRACTS.md#working-directory-env) பார்க்கவும்.
 
 ### தட்டு முறை
 
-கணினித் தட்டில் OmniRoute-ஐத் தொடங்கவும்:
+கணினி தட்டில் OmniRoute தொடங்கவும்:
 
 ```bash
 omniroute serve --tray
 ```
 
-சேவையகமும் தட்டும் தயாரானதும் கட்டளை நிறைவடையும்.
+சர்வர் மற்றும் தட்டு தயாரான பிறகு கட்டளை திரும்பும்.
 
-முனையம் இல்லாமலும் சேவையகம் தொடர்ந்து இயங்கும்.
+டெர்மினல் இல்லாமல் சர்வர் தொடர்கிறது.
 
-தட்டு முறை macOS, Windows மற்றும் வரைகலை Linux அமர்வுகளை ஆதரிக்கிறது. தட்டு முறை கட்டுப்பாட்டுப் பலகையைத் தானாகத் திறக்காது.
+தட்டு முறை macOS, Windows, மற்றும் வரைகலை Linux அமர்வுகளை ஆதரிக்கிறது. தட்டு பயன்முறை டாஷ்போர்டை தானாக திறக்காது.
 
-பின்வரும் செயல்களுக்கு தட்டு மெனுவைப் பயன்படுத்தவும்:
+இந்த செயல்களுக்கு தட்டு மெனுவைப் பயன்படுத்தவும்:
 
-- கட்டுப்பாட்டுப் பலகையைத் திறக்கவும்.
-- `/dashboard/logs`-ஐத் திறக்கவும்.
+- டாஷ்போர்டைத் திறக்கவும்.
+- `/dashboard/logs` திறக்கவும்.
 - தானியங்கு தொடக்கத்தை மாற்றவும்.
-- OmniRoute-ஐ நிறுத்தவும்.
+- OmniRoute நிறுத்துங்கள்.
 
-பின்வரும் விருப்பங்களுடன் `--tray`-ஐ இணைத்துப் பயன்படுத்த வேண்டாம்:
+இந்த விருப்பங்களுடன் `--tray` இணைக்க வேண்டாம்:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-இந்த முறைகளுக்கு வேறுபட்ட செயல்முறை உரிமை தேவைப்படுகிறது.
+இந்த முறைகளுக்கு வெவ்வேறு செயல்முறை உரிமை தேவை.
 
-அடுத்த கணினி உள்நுழைவின்போது தொடங்குவதை இயக்கவும்:
+அடுத்த இயந்திர உள்நுழைவில் தொடக்கத்தை இயக்கவும்:
 
 ```bash
 omniroute autostart enable
 ```
 
-தானியங்கு தொடக்கம் macOS, Windows மற்றும் வரைகலை Linux அமர்வுகளில் தட்டு முறையைப் பயன்படுத்தும். திரையற்ற Linux ஏற்கனவே உள்ள systemd பயனர் சேவையைப் பயன்படுத்தும்.
+தானியங்கு-தொடக்கம் macOS, Windows, மற்றும் வரைகலை Linux அமர்வுகளில் தட்டு பயன்முறையைப் பயன்படுத்துகிறது. Headless Linux ஏற்கனவே உள்ள systemd பயனர் சேவையைப் பயன்படுத்துகிறது.
 
-உள்நுழையும்போது தொடங்குவதை முடக்கவும்:
+உள்நுழைவில் தொடக்கத்தை முடக்கு:
 
 ```bash
 omniroute autostart disable
 ```
 
-### நிறுவல் நீக்கம்
+### நிறுவல் நீக்குகிறது
 
-OmniRoute இனி தேவையில்லாதபோது, முழுமையாக அகற்றுவதற்கு இரண்டு விரைவான ஸ்கிரிப்ட்களை வழங்குகிறோம்:
+உங்களுக்கு இனி OmniRoute தேவைப்படாதபோது, சுத்தமான அகற்றுதலுக்காக இரண்டு விரைவான ஸ்கிரிப்ட்களை நாங்கள் வழங்குகிறோம்:
 
-| கட்டளை                   | செயல்                                                                                                     |
-| ------------------------ | --------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | கணினிச் செயலியை அகற்றும், ஆனால் `~/.omniroute`-இல் உள்ள **உங்கள் DB மற்றும் உள்ளமைவுகளைத் தக்கவைக்கும்**. |
-| `npm run uninstall:full` | செயலியை அகற்றுவதுடன் **அனைத்து உள்ளமைவுகள், விசைகள் மற்றும் தரவுத்தளங்களை நிரந்தரமாக அழிக்கும்**.         |
+| கட்டளை                   | செயல்                                                                                                       |
+| ------------------------ | ----------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | கணினி பயன்பாட்டை நீக்குகிறது ஆனால்** உங்கள் DB மற்றும் கட்டமைப்புகளை வைத்திருக்கிறது** `~/.omniroute` இல்.  |
+| `npm run uninstall:full` | AND பயன்பாட்டை நிரந்தரமாக நீக்குகிறது** அனைத்து கட்டமைப்புகள், விசைகள் மற்றும் தரவுத்தளங்களை அழிக்கிறது** . |
 
-> குறிப்பு: இந்தக் கட்டளைகளை இயக்க, OmniRoute திட்டக் கோப்பகத்திற்குச் சென்று (அதை clone செய்திருந்தால்) அவற்றை இயக்கவும். மாற்றாக, உலகளாவிய முறையில் நிறுவியிருந்தால், `npm uninstall -g omniroute` என்பதை மட்டும் இயக்கலாம்.
+> குறிப்பு: இந்த கட்டளைகளை இயக்க, OmniRoute திட்ட கோப்புறைக்கு செல்லவும் (நீங்கள் அதை குளோன் செய்தால்) அவற்றை இயக்கவும். மாற்றாக, உலகளவில் நிறுவப்பட்டிருந்தால், நீங்கள் `npm uninstall -g omniroute` இயக்கலாம்.
 
-### VPS நிறுவல்
+### VPS வரிசைப்படுத்தல்
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -428,25 +449,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# அல்லது: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 நிறுவல் (குறைந்த நினைவகம்)
+### PM2 வரிசைப்படுத்தல் (குறைந்த நினைவகம்)
 
-குறைந்த RAM கொண்ட சேவையகங்களுக்கு, நினைவக வரம்பு விருப்பத்தைப் பயன்படுத்தவும்:
+வரையறுக்கப்பட்ட RAM கொண்ட சேவையகங்களுக்கு, நினைவக வரம்பு விருப்பத்தைப் பயன்படுத்தவும்:
 
 ```bash
-# 512MB வரம்புடன் (இயல்புநிலை)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# அல்லது தனிப்பயன் நினைவக வரம்புடன்
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# அல்லது ecosystem.config.js-ஐப் பயன்படுத்தி
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js`-ஐ உருவாக்கவும்:
+`ecosystem.config.js` உருவாக்கவும்:
 
 ```javascript
 module.exports = {
@@ -471,24 +492,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# படிமத்தை உருவாக்கவும் (இயல்புநிலை = codex/claude/droid முன்பே நிறுவப்பட்ட runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# எடுத்துச் செல்லக்கூடிய முறை (பரிந்துரைக்கப்படுகிறது)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI பைனரிகளுடன் ஹோஸ்ட்-ஒருங்கிணைந்த முறைக்கு, முதன்மை ஆவணங்களில் உள்ள Docker பகுதியைப் பார்க்கவும்.
+CLI பைனரிகளுடன் ஹோஸ்ட்-ஒருங்கிணைந்த பயன்முறைக்கு, முக்கிய ஆவணத்தில் Docker பகுதியைப் பார்க்கவும்.
 
-### Void Linux (xbps-src)
+### வெற்றிடமான Linux (xbps-src)
 
-Void Linux பயனர்கள் `xbps-src` குறுக்குத் தொகுப்பு கட்டமைப்பைப் பயன்படுத்தி OmniRoute-ஐ இயல்பாகத் தொகுப்பாக்கி நிறுவலாம். இது தேவையான `better-sqlite3` இயல்புநிலை பிணைப்புகளுடன் Node.js தனித்தியங்கும் உருவாக்கத்தையும் தானியங்குபடுத்துகிறது.
+வெற்றிடமான Linux பயனர்கள் `xbps-src` குறுக்கு-தொகுப்பு கட்டமைப்பைப் பயன்படுத்தி OmniRoute தொகுத்து நிறுவலாம். இது தேவையான `better-sqlite3` நேட்டிவ் பைண்டிங்குகளுடன் Node.js ஸ்டாண்டலோன் கட்டமைப்பை தானியக்கமாக்குகிறது.
 
 <details>
-<summary><b>xbps-src வார்ப்புருவைக் காண்க</b></summary>
+<summary><b>xbps-src டெம்ப்ளேட்டைப் பார்க்கவும்</b></summary>
 
 ```bash
-# 'omniroute'-க்கான வார்ப்புருக் கோப்பு
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -509,7 +530,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp-க்கான இலக்கு CPU கட்டமைப்பைத் தீர்மானிக்கவும்
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +539,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) அனைத்து சார்புகளையும் நிறுவவும் – ஸ்கிரிப்ட்களைத் தவிர்க்கவும்
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js தனித்தியங்கும் தொகுப்பை உருவாக்கவும்
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) நிலையான வளங்களைத் தனித்தியங்கும் தொகுப்புக்குள் நகலெடுக்கவும்
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 இயல்புநிலை பிணைப்பைத் தொகுக்கவும்
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) தொகுக்கப்பட்ட பிணைப்பைத் தனித்தியங்கும் தொகுப்புக்குள் வைக்கவும்
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) கட்டமைப்பு சார்ந்த sharp தொகுப்புகளை அகற்றவும்
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js நிலையான பகுப்பாய்வால் விடுபட்ட pino இயக்கநேரச் சார்புகளை நகலெடுக்கவும்:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +575,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# நிறுவலுக்குப் பிந்தைய hook மூலம் காலியான Next.js பயன்பாட்டு router அடைவுகள் அகற்றப்படுவதைத் தடுக்கவும்
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -580,51 +601,51 @@ post_install() {
 
 </details>
 
-### சூழல் மாறிகள்
+### சுற்றுச்சூழல் மாறிகள்
 
-| மாறி                                    | இயல்புநிலை                           | விளக்கம்                                                                                                                                               |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT கையொப்பமிடும் ரகசியம் (**உற்பத்திச் சூழலில் மாற்றவும்**)                                                                                           |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | முதல் உள்நுழைவுக்கான கடவுச்சொல்                                                                                                                        |
-| `DATA_DIR`                              | `~/.omniroute`                       | தரவுக் கோப்பகம் (தரவுத்தளம், பயன்பாடு, பதிவுகள்)                                                                                                       |
-| `PORT`                                  | கட்டமைப்பின் இயல்புநிலை              | சேவை போர்ட் (எடுத்துக்காட்டுகளில் `20128`)                                                                                                             |
-| `HOSTNAME`                              | கட்டமைப்பின் இயல்புநிலை              | பிணைப்பு ஹோஸ்ட் (Docker-இன் இயல்புநிலை `0.0.0.0`)                                                                                                      |
-| `NODE_ENV`                              | இயக்கநேர இயல்புநிலை                  | வரிசைப்படுத்தலுக்கு `production` என அமைக்கவும்                                                                                                         |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | முகப்புப்பலகையில் காட்டப்பட்டு சேவையகத்திற்கும் வெளிப்படுத்தப்படும் பொது அடிப்படை URL (மரபார்ந்த `BASE_URL`-ஐ மாற்றுகிறது)                             |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | கிளவுட் ஒத்திசைவு முனைப்புள்ளியின் அடிப்படை URL (மரபார்ந்த `CLOUD_URL`-ஐ மாற்றுகிறது)                                                                  |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | உருவாக்கப்பட்ட API விசைகளுக்கான HMAC ரகசியம்                                                                                                           |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*`-இல் Bearer API விசையைச் செயல்படுத்திக் கட்டாயப்படுத்தும்                                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | அங்கீகரிக்கப்பட்ட முகப்புப்பலகைப் பயனர்கள் கோரிக்கையின் பேரில் சேமிக்கப்பட்ட முழு API விசை மதிப்புகளைப் பார்க்க அனுமதிக்கும்                           |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | தற்காலிகச் சேமிப்பிலுள்ள வழங்குநர் வரம்புத் தரவுக்கான சேவையகப் புதுப்பிப்பு இடைவெளி; UI புதுப்பிப்புப் பொத்தான்கள் இன்னும் கைமுறை ஒத்திசைவைத் தூண்டும் |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | எழுதுதல்/இறக்குமதி/மீட்டமைப்புக்கு முன் தானியங்கு SQLite நகலெடுப்புகளை முடக்கும்; கைமுறை காப்புப்பிரதிகள் தொடர்ந்து செயல்படும்                         |
-| `APP_LOG_TO_FILE`                       | `true`                               | பயன்பாட்டு மற்றும் தணிக்கைப் பதிவு வெளியீட்டை வட்டில் சேமிக்கச் செயல்படுத்தும்                                                                         |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` அங்கீகார குக்கியை கட்டாயப்படுத்தும் (HTTPS ரிவர்ஸ் ப்ராக்ஸிக்குப் பின்னால்)                                                                   |
-| `CLOUDFLARED_BIN`                       | அமைக்கப்படவில்லை                     | நிர்வகிக்கப்பட்ட பதிவிறக்கத்திற்குப் பதிலாக ஏற்கனவே உள்ள `cloudflared` பைனரியைப் பயன்படுத்தும்                                                         |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | நிர்வகிக்கப்பட்ட Quick Tunnels-க்கான போக்குவரத்து (`http2`, `quic`, அல்லது `auto`)                                                                     |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MB-இல் Node.js ஹீப் வரம்பு                                                                                                                             |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | ப்ராம்ப்ட் தற்காலிகச் சேமிப்பின் அதிகபட்ச உள்ளீடுகள்                                                                                                   |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | அர்த்தவியல் தற்காலிகச் சேமிப்பின் அதிகபட்ச உள்ளீடுகள்                                                                                                  |
+| மாறி                                    | இயல்புநிலை               | விளக்கம்                                                                                                                                                        |
+| --------------------------------------- | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(தானாக உருவாக்கப்பட்ட)_ | JWT கையொப்பமிடும் இரகசிய — முதல் ஓட்டத்தில் தானாக உருவாக்கப்பட்டு `server.env` க்கு நீடித்தது; தரவு அடைவு இடைக்காலமாக இருக்கும்போது அதை வெளிப்படையாக அமைக்கவும் |
+| `INITIAL_PASSWORD`                      | _(அமைக்கப்படாதது)_       | முதல் உள்நுழைவு கடவுச்சொல். npm/source நிறுவல்கள் `CHANGEME` உடன் தொடங்குகின்றன: அதை மாற்றவும். அமைக்கப்படவில்லை: ஆன்போர்டிங் வழிகாட்டி                         |
+| `DATA_DIR`                              | `~/.omniroute`           | தரவு கோப்பகம் (db, பயன்பாடு, பதிவுகள்)                                                                                                                          |
+| `PORT`                                  | கட்டமைப்பு இயல்புநிலை    | சேவை துறைமுகம் (உதாரணங்களில்`20128` )                                                                                                                           |
+| `HOSTNAME`                              | கட்டமைப்பு இயல்புநிலை    | ஹோஸ்ட்டை பிணைக்கவும் (Docker இயல்புநிலை `0.0.0.0` க்கு)                                                                                                         |
+| `NODE_ENV`                              | இயக்க நேர இயல்புநிலை     | வரிசைப்படுத்த `production` அமைக்கவும்                                                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | பொது அடிப்படை URL டாஷ்போர்டில் தோன்றி சேவையகத்திற்கு வெளிப்பட்டது (மரபு `BASE_URL` மாற்றுகிறது)                                                                 |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | கிளவுட் ஒத்திசைவு எண்ட்பாயிண்ட் அடிப்படை URL (மரபு `CLOUD_URL` ஐ மாற்றுகிறது)                                                                                   |
+| `API_KEY_SECRET`                        | _(தானாக உருவாக்கப்பட்ட)_ | உருவாக்கப்பட்ட API விசைகளுக்கான HMAC ரகசியம் — முதல் இயக்கத்தில் தானாக உருவாக்கப்பட்டு `server.env` வரை நீடித்தது                                               |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` இல் Bearer API விசையைச் செயல்படுத்தவும்                                                                                                                 |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | அங்கீகரிக்கப்பட்ட டாஷ்போர்டு பயனர்கள் தேவைக்கேற்ப முழு சேமிக்கப்பட்ட API முக்கிய மதிப்புகளை வெளிப்படுத்த அனுமதிக்கவும்                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | தற்காலிகச் சேமிப்பு வழங்குநர் வரம்புகள் தரவுக்கான சேவையகப் பக்க புதுப்பிப்பு கேடன்ஸ்; UI புதுப்பிப்பு பொத்தான்கள் இன்னும் கைமுறை ஒத்திசைவைத் தூண்டுகின்றன       |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore க்கு முன் தானியங்கி SQLite ஸ்னாப்ஷாட்களை முடக்கு ; கைமுறை காப்புப்பிரதிகள் இன்னும் வேலை செய்கின்றன                                        |
+| `APP_LOG_TO_FILE`                       | `true`                   | பயன்பாடு மற்றும் தணிக்கை பதிவு வெளியீட்டை வட்டுக்கு இயக்குகிறது                                                                                                 |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth குக்கீயை கட்டாயப்படுத்தவும் ( HTTPS ரிவர்ஸ் ப்ராக்ஸிக்கு பின்னால்)                                                                                |
+| `CLOUDFLARED_BIN`                       | அமைக்கப்படவில்லை         | நிர்வகிக்கப்பட்ட பதிவிறக்கத்திற்குப் பதிலாக ஏற்கனவே உள்ள `cloudflared` பைனரியைப் பயன்படுத்தவும்                                                                 |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | நிர்வகிக்கப்படும் விரைவு சுரங்கங்களுக்கான போக்குவரத்து (`http2`, `quic`, அல்லது `auto`)                                                                         |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB இல்Node.js குவியல் வரம்பு                                                                                                                                    |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | அதிகபட்ச உடனடி கேச் உள்ளீடுகள்                                                                                                                                  |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | அதிகபட்ச சொற்பொருள் கேச் உள்ளீடுகள்                                                                                                                             |
 
-முழுமையான சூழல் மாறிக் குறிப்புக்கு, [README](../README.md)-ஐப் பார்க்கவும்.
+முழு சூழல் மாறி குறிப்புக்கு, [README](../README.md) ஐப் பார்க்கவும்.
 
 ---
 
-## 📊 கிடைக்கும் மாதிரிகள்
+## 📊 கிடைக்கக்கூடிய மாதிரிகள்
 
 <details>
-<summary><b>கிடைக்கும் அனைத்து மாதிரிகளையும் காண்க</b></summary>
+<summary><b>கிடைக்கக்கூடிய அனைத்து மாதிரிகளையும் காண்க</b></summary>
 
-> கீழுள்ள பட்டியல் v3.8.0-க்காக `open-sse/config/providerRegistry.ts`-இலிருந்து தொகுக்கப்பட்டது. கிளவுட் பட்டியல்கள் (Gemini, OpenRouter போன்றவை) டைனமிக்காக ஒத்திசைக்கப்படுகின்றன — முழு நேரடி பட்டியலுக்கு **Dashboard → Providers → [provider] → Available Models** ஐத் திறக்கவும் அல்லது `GET /api/models/catalog` ஐ அழைக்கவும்.
+> கீழேயுள்ள பட்டியல் v3.8.0-க்கான `open-sse/config/providerRegistry.ts` கோப்பிலிருந்து தேர்ந்தெடுக்கப்பட்டது. கிளவுட் பட்டியல்கள் (Gemini, OpenRouter போன்றவை) மாறும் விதத்தில் ஒத்திசைக்கப்படுகின்றன — முழுமையான நேரடி பட்டியலைப் பெற **டாஷ்போர்டு → வழங்குநர்கள் → [வழங்குநர்] → கிடைக்கக்கூடிய மாதிரிகள்** என்பதைத் திறக்கவும் அல்லது `GET /api/models/catalog` ஐ அழைக்கவும்.
 >
-> ஒரு வழங்குநரின் உள்ளமைக்கப்பட்ட பட்டியல் மாறிவிட்டால், நேரடி அப்ஸ்ட்ரீம் பட்டியலைப் பெற அந்தப் பக்கத்தில் உள்ள **Import from /models** ஐப் பயன்படுத்தவும் (அல்லது **Auto-Sync** ஐ இயக்கவும்). இது v3.8.50-இல் LLM7.io (`gemini-3.1-flash-lite`) மற்றும் UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ஆகியவற்றுக்கு சரிபார்க்கப்பட்டது; அதே சோதனைச் சுற்றில் Pollinations அநாமதேய அணுகல் அப்ஸ்ட்ரீம் வரம்புக்கு உட்பட்டதாகவே இருந்தது.
+> வழங்குநரின் உள்ளமைக்கப்பட்ட பட்டியல் மாறுபட்டிருந்தால், நேரடி upstream பட்டியலைப் பெற அந்தப் பக்கத்தில் **/models இலிருந்து இறக்குமதி செய்** என்பதைப் பயன்படுத்தவும் (அல்லது **தானியங்கு ஒத்திசைவு** என்பதை இயக்கவும்). இது LLM7.io (`gemini-3.1-flash-lite`) மற்றும் UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`) ஆகியவற்றுக்காக v3.8.50-ல் சரிபார்க்கப்பட்டது; அதே சோதனைச் சுற்றில் Pollinations-ன் அநாமதேய அணுகல் upstream வரம்புக்குள் இருந்தது.
 
 **Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ முயற்சி நிலைகள்: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ முயற்சி அடுக்குகள்: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — இலவச OAuth: **Dashboard → Providers → Kiro → Available Models** இல் காண்பிக்கப்படும் நேரடி பட்டியலைப் பயன்படுத்தவும். கிடைக்கும் தன்மை கணக்கு மற்றும் திட்டத்தைப் பொறுத்து மாறுபடும்.
+**Kiro (`kr/`)** — இலவச OAuth: **டாஷ்போர்டு → வழங்குநர்கள் → Kiro → கிடைக்கக்கூடிய மாதிரிகள்** என்பதன் கீழ் காட்டப்படும் நேரடி பட்டியலைப் பயன்படுத்தவும். கிடைக்கும் மாதிரிகள் கணக்கு மற்றும் திட்டத்தைப் பொறுத்தது.
 
 **Qoder (`if/`)** — இலவச OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -632,37 +653,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/மாதம் நிலையான கட்டணம் அல்லது பயன்பாட்டிற்கேற்ப: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/மாதம் நிலையான கட்டணம் அல்லது பயன்பாட்டின் அடிப்படையில்: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API விசை: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — மிக வேகமானது: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — அதிவேகம்: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
 **xAI (`xai/`)** — Grok நேட்டிவ்: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — EU-இல் ஹோஸ்ட் செய்யப்பட்டது: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — EU-வில் ஹோஸ்ட் செய்யப்பட்டது: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
 **Perplexity (`pplx/`)** — தேடல்-மேம்படுத்தப்பட்டது: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — திறந்த மூல: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (இலவசம்), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — வேகமான இன்ஃபரன்ஸ்: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — வேகமான inference: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — வேஃபர்-அளவு: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — RAG-மையம்: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — எண்டர்பிரைஸ்: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — நிறுவனப் பயன்பாடு: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Google-இலிருந்து API விசை வாரியாக நேரடியாக ஒத்திசைக்கப்படுகிறது — நிலையான பட்டியல் இல்லை. **Dashboard → Providers** இல் ஒரு விசையை இணைத்துவிட்டு, தற்போதைய பட்டியலை இறக்குமதி செய்ய **Available Models** ஐப் பயன்படுத்தவும் (எ.கா. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Google வழங்கும் API விசையின் அடிப்படையில் நேரடியாக ஒத்திசைக்கப்படுகிறது — நிலையான பட்டியல் இல்லை. **டாஷ்போர்டு → வழங்குநர்கள்** என்பதில் ஒரு விசையை இணைத்து, தற்போதைய பட்டியலை இறக்குமதி செய்ய **கிடைக்கக்கூடிய மாதிரிகள்** என்பதைப் பயன்படுத்தவும் (எ.கா. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**மற்ற இணக்கமான வழங்குநர்கள்** (தேர்ந்தெடுக்கப்பட்டவை): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` வழியாக), `azure-ai`, `openrouter` (பாஸ்த்ரூ பட்டியல்), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ஒவ்வொன்றும் `providerRegistry.ts`-இல் தனது சொந்த மாதிரி பட்டியலைப் பராமரிக்கிறது; வழங்குநர் `/models` எண்ட்பாயிண்ட்டை வெளிப்படுத்தும்போது தானாகவே ஒத்திசைக்கப்படலாம்.
+**பிற இணக்கமான வழங்குநர்கள்** (தேர்ந்தெடுக்கப்பட்டவை): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (`aws-bedrock` வழியாக), `azure-ai`, `openrouter` (passthrough பட்டியல்), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. ஒவ்வொன்றும் `providerRegistry.ts` இல் தனித்தனி மாதிரிப் பட்டியலைப் பராமரிக்கிறது; மேலும், வழங்குநர் `/models` endpoint-ஐ வழங்கினால் தானாக ஒத்திசைக்கப்படலாம்.
 
-**மாதிரி ID-கள் குறித்த குறிப்பு:** OmniRoute வழங்குநர்-நேட்டிவ் ID-களைப் பயன்படுத்துகிறது (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). சில ID-கள் புள்ளியிட்ட பதிப்புகளைக் கொண்டுள்ளன, ஏனெனில் அப்ஸ்ட்ரீம் API அவற்றை அவ்வாறே எதிர்பார்க்கிறது. ஏதேனும் மாதிரி மேலே பட்டியலிடப்படவில்லை என்றால், கிடைக்கும் தன்மையை உறுதிப்படுத்த `omniroute models --search <term>` ஐ இயக்கவும் அல்லது `GET /api/models/catalog` ஐ அணுகவும்.
+**மாதிரி ID-கள் குறித்த குறிப்பு:** OmniRoute வழங்குநரின் நேட்டிவ் ID-களைப் பயன்படுத்துகிறது (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). சில ID-களில் புள்ளியுடன் கூடிய பதிப்புகள் உள்ளன; upstream API அவற்றை எதிர்பார்ப்பதே அதற்குக் காரணம். மேலே மாதிரி பட்டியலிடப்படவில்லை என்றால், கிடைக்குமா என்பதை உறுதிப்படுத்த `omniroute models --search <term>` ஐ இயக்கவும் அல்லது `GET /api/models/catalog` ஐ அணுகவும்.
 
 </details>
 
@@ -693,7 +714,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 ### விருப்ப OpenAI-இணக்கமான வழங்குநர்கள்
 
-OpenAI API பேசும் எந்த நுழைவாயிலையும் (சுய-ஹோஸ்ட் செய்யப்பட்ட ப்ராக்ஸி, vLLM, மூன்றாம் தரப்பு திரட்டி) அதன் சொந்த வழங்குநர் முனையாகச் சேர்க்கலாம்:
+OpenAI API (ஒரு சுய-ஹோஸ்ட் செய்யப்பட்ட ப்ராக்ஸி, vLLM, மூன்றாம் தரப்பு திரட்டி) பேசும் எந்த நுழைவாயிலையும் அதன் சொந்த வழங்குநர் முனையாகச் சேர்க்கலாம்:
 
 1. **வழங்குநர்கள் → இணக்கமான OpenAI சேர்க்கவும்** .
 2. **பெயர்** : முனைக்கான காட்சி லேபிள்.
@@ -718,8 +739,8 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 இந்த விசைகள் இணைப்பின் `providerSpecificData` இல் செல்கின்றன (எடுத்துக்காட்டாக `PUT /api/providers/{id}` வழியாக):
 
-- `toolNameMaxLength` (முழு எண், 1–1024) — OpenAI அரட்டை வடிவ இணக்கமான இணைப்புகளுக்கு, அதன் நுழைவாயில் நீண்ட கருவிப் பெயர்களை நிராகரிக்கிறது. நீண்ட பெயர்கள் குறுகிய மாற்றுப்பெயர்களாக அனுப்பப்பட்டு பதிலில் மீட்டமைக்கப்படும்.
-- `quotaEndpoint` — கேட்வேயின் quota/credits எண்ட்பாயிண்ட், டேஷ்போர்டு கோட்டா ஸ்டிரிப் மற்றும் கோட்டா-அவேர் ரூட்டிங் ஆகியவற்றைப் படிக்கவும். OpenAI- மற்றும் Anthropic-compatible இணைப்புகள் இரண்டிலும் வேலை செய்கிறது; முழு வடிவம் `open-sse/services/usage/openaiCompatible.ts` இல் ஆவணப்படுத்தப்பட்டுள்ளது.
+- `toolNameMaxLength` (முழு எண், 1–1024) — OpenAI அரட்டை-வடிவ இணக்கமான இணைப்புகளின் நுழைவாயில் நீண்ட கருவி பெயர்களை நிராகரிக்கிறது. நீண்ட பெயர்கள் குறுகிய மாற்றுப்பெயர்களாக அனுப்பப்பட்டு பதிலில் மீட்டமைக்கப்படும். OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go மற்றும் மியூஸ் கோட் ஆகியவை ஏற்கனவே அமைப்பு இல்லாமல் 64 எழுத்துகளுக்கு மேல் பெயர்கள் உள்ளன. ஒரு இணைப்பு மதிப்பு Azure OpenAI / Azure AI Foundry இயல்புநிலையை மாற்றுகிறது (கடுமையான நுழைவாயிலுக்குப் பின்னால் உள்ள Azure இணைப்பு) மற்றும் தனிப்பயன் இணக்கமான முனைக்கான வரம்பை அமைக்கிறது; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go மற்றும் Muse Code ஆகியவை அவற்றின் பதிவேட்டில் வரம்பை வைத்து அதை புறக்கணிக்கின்றன.
+- `quotaEndpoint` — கேட்வேயின் quota/credits இறுதிப்புள்ளி, டாஷ்போர்டு கோட்டா ஸ்ட்ரிப் மற்றும் கோட்டா-அவேர் ரூட்டிங் ஆகியவற்றைப் படிக்கவும். OpenAI- மற்றும் Anthropic-compatible இணைப்புகள் இரண்டிலும் வேலை செய்கிறது; முழு வடிவம் `open-sse/services/usage/openaiCompatible.ts` இல் ஆவணப்படுத்தப்பட்டுள்ளது.
 
 ```json
 {
@@ -736,7 +757,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 ### சங்கிலி OmniRoute பியர்ஸ்
 
-மற்றொரு OmniRoute நுழைவாயிலை a ஆக சேர்க்கலாம்** தனிப்பயன் OpenAI- இணக்கமானது** வழங்குபவர். பியரின் `/v1` அடிப்படை URL மற்றும் அந்த பியர் வழங்கிய பிரத்யேக, குறைந்தபட்ச சலுகை API விசையைப் பயன்படுத்தவும்.
+மற்றொரு OmniRoute நுழைவாயிலை a ஆக சேர்க்கலாம்** தனிப்பயன் OpenAI- இணக்கமானது** வழங்குபவர். பியரின் `/v1` அடிப்படை URL மற்றும் அந்த பியர் வழங்கிய பிரத்யேக, குறைந்த சலுகை API விசையைப் பயன்படுத்தவும்.
 
 பரஸ்பர அல்லது மல்டி-ஹாப் சங்கிலிகளுக்கு, ஒவ்வொரு நுழைவாயிலிலும் தேர்வு செய்யும் லூப் கார்டை இயக்கவும்:
 
@@ -754,9 +775,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-வெளிப்படையாக அனுமதிக்கப்பட்ட peer URL க்கு அனுப்பப்படும் கோரிக்கைகள் மட்டுமே `X-OmniRoute-Peer-Trace` தலைப்பைப் பெறும். HTTP `508 Loop Detected` உடன் மீண்டும் மீண்டும் ID அல்லது தீர்ந்து போன ஹாப் பட்ஜெட்டை கேட்வே நிராகரிக்கிறது; சாதாரண அப்ஸ்ட்ரீம் வழங்குநர்கள் பியர் மெட்டாடேட்டாவைப் பெறுவதில்லை.
+வெளிப்படையாக அனுமதிக்கப்பட்ட peer URL க்கு அனுப்பப்படும் கோரிக்கைகள் மட்டுமே `X-OmniRoute-Peer-Trace` தலைப்பைப் பெறும். HTTP `508 Loop Detected` உடன் மீண்டும் மீண்டும் ID அல்லது தீர்ந்துபோன ஹாப் பட்ஜெட்டை ஒரு கேட்வே நிராகரிக்கிறது; சாதாரண அப்ஸ்ட்ரீம் வழங்குநர்கள் பியர் மெட்டாடேட்டாவைப் பெறுவதில்லை.
 
-பியர் சங்கிலி என்பது தரவுத்தள பிரதி அல்லது ஹோஸ்ட் தோல்வி அல்ல. ஒவ்வொரு நுழைவாயிலும் சுயாதீனமான SQLite நிலை, தற்காலிக சேமிப்புகள், ரேட் கவுண்டர்கள் மற்றும் அமர்வுகளை வைத்திருக்கிறது. active/passive அல்லது active/active கிடைப்பதற்கு ஆரோக்கியம் சரிபார்க்கப்பட்ட தலைகீழ் ப்ராக்ஸி அல்லது கிளையன்ட் தோல்வியைப் பயன்படுத்தவும், மேலும் ஒரு SQLite தரவுத்தளத்தை பல இயங்கும் OmniRoute நிகழ்வுகளில் ஏற்ற வேண்டாம்.
+பியர் சங்கிலி என்பது தரவுத்தள பிரதி அல்லது ஹோஸ்ட் தோல்வி அல்ல. ஒவ்வொரு நுழைவாயிலும் சுயாதீனமான SQLite நிலை, தற்காலிக சேமிப்புகள், வீத கவுண்டர்கள் மற்றும் அமர்வுகளை வைத்திருக்கிறது. active/passive அல்லது active/active கிடைப்பதற்கு ஆரோக்கியம் சரிபார்க்கப்பட்ட தலைகீழ் ப்ராக்ஸி அல்லது கிளையன்ட் தோல்வியைப் பயன்படுத்தவும், மேலும் ஒரு SQLite தரவுத்தளத்தை பல இயங்கும் OmniRoute நிகழ்வுகளில் ஏற்ற வேண்டாம்.
 
 ### அர்ப்பணிக்கப்பட்ட வழங்குநர் வழிகள்
 
@@ -816,9 +837,9 @@ curl http://localhost:20128/api/models/catalog
 
 ### LLM கேட்வே நுண்ணறிவு (கட்டம் 9)
 
-- **சொற்பொருள் கேச்** - ஸ்ட்ரீமிங் அல்லாத, வெப்பநிலை= 0 மறுமொழிகள் ( `X-OmniRoute-No-Cache: true` உடன் பைபாஸ்) தானியங்கு-கேச்கள்
-- **ஐடெம்போடென்சியைக் கோருங்கள்** — `Idempotency-Key` அல்லது `X-Request-Id` தலைப்பு வழியாக 5விக்குள் கோரிக்கைகளை நகலெடுக்கிறது
-- **முன்னேற்ற கண்காணிப்பு** — `X-OmniRoute-Progress: true` தலைப்பு வழியாக SSE `event: progress` நிகழ்வுகளைத் தேர்ந்தெடுக்கவும்
+- **சொற்பொருள் கேச்** — ஆட்டோ-கேச்கள் ஸ்ட்ரீமிங் அல்லாத, வெப்பநிலை= 0 பதில்கள் ( `X-OmniRoute-No-Cache: true` உடன் பைபாஸ்)
+- **ஐடெம்போடென்சியைக் கோருங்கள்** — `Idempotency-Key` அல்லது `X-Request-Id` தலைப்பு வழியாக 5 வினாடிகளுக்குள் கோரிக்கைகளை நகலெடுக்கிறது
+- **முன்னேற்ற கண்காணிப்பு** — தேர்வு SSE `event: progress` நிகழ்வுகள் `X-OmniRoute-Progress: true` தலைப்பு வழியாக
 
 ---
 
@@ -843,31 +864,31 @@ curl http://localhost:20128/api/models/catalog
 
 ### ரூட்டிங் உத்திகள்
 
-மூலம் கட்டமைக்கவும்** டாஷ்போர்டு → அமைப்புகள் → ரூட்டிங்** . டாஷ்போர்டு ஆறு அதிகம் பயன்படுத்தப்படும் உத்திகளை வெளிப்படுத்துகிறது; காம்போஸ் மற்றும் ஆட்டோ-ரவுட்டர் உள்நாட்டில் ஒரு பரந்த தொகுப்பை ஆதரிக்கின்றன.
+மூலம் கட்டமைக்கவும்** டாஷ்போர்டு → அமைப்புகள் → ரூட்டிங்** . டாஷ்போர்டு ஆறு அதிகம் பயன்படுத்தப்படும் உத்திகளை வெளிப்படுத்துகிறது; காம்போஸ் மற்றும் ஆட்டோ-ரௌட்டர் உள்நாட்டில் ஒரு பரந்த தொகுப்பை ஆதரிக்கிறது.
 
 **டாஷ்போர்டு-தெரியும் உத்திகள் (கணக்கு-நிலை ரூட்டிங்):**
 
-| உத்தி                                 | விளக்கம்                                                                                                                      |
-| ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
-| **முதலில் நிரப்பவும்**                | முன்னுரிமை வரிசையில் கணக்குகளைப் பயன்படுத்துகிறது - முதன்மைக் கணக்கு கிடைக்காத வரை அனைத்து கோரிக்கைகளையும் கையாளும்           |
-| **ரவுண்ட் ராபின்**                    | உள்ளமைக்கக்கூடிய ஒட்டும் வரம்புடன் அனைத்து கணக்குகளிலும் சுழற்சிகள் (இயல்புநிலை: ஒரு கணக்கிற்கு 3 அழைப்புகள்)                 |
-| **P2C (இரண்டு விருப்பங்களின் சக்தி)** | 2 சீரற்ற கணக்குகள் மற்றும் ஆரோக்கியமான ஒன்றிற்கான வழிகளைத் தேர்ந்தெடுக்கிறது - ஆரோக்கியம் பற்றிய விழிப்புணர்வுடன் சமநிலை சுமை |
-| **சீரற்ற**                            | ஃபிஷர்-யேட்ஸ் ஷஃபிளைப் பயன்படுத்தி ஒவ்வொரு கோரிக்கைக்கும் ஒரு கணக்கைத் தோராயமாகத் தேர்ந்தெடுக்கிறது                           |
-| **குறைவாக பயன்படுத்தப்பட்டது**        | பழைய `lastUsedAt` நேர முத்திரையுடன் கணக்கிற்கான வழிகள், போக்குவரத்தை சமமாக விநியோகிக்கின்றன                                   |
-| **செலவு உகந்ததாக உள்ளது**             | மிகக் குறைந்த முன்னுரிமை மதிப்புடன் கணக்கிற்கான வழிகள், குறைந்த விலை வழங்குநர்களுக்கு மேம்படுத்துதல்                          |
+| உத்தி                                 | விளக்கம்                                                                                                                             |
+| ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| **முதலில் நிரப்பவும்**                | முன்னுரிமை வரிசையில் கணக்குகளைப் பயன்படுத்துகிறது — முதன்மைக் கணக்கு கிடைக்காத வரை அனைத்து கோரிக்கைகளையும் கையாளும்                  |
+| **ரவுண்ட் ராபின்**                    | உள்ளமைக்கக்கூடிய ஒட்டும் வரம்புடன் அனைத்து கணக்குகளிலும் சுழற்சிகள் (இயல்புநிலை: ஒரு கணக்கிற்கு 3 அழைப்புகள்)                        |
+| **P2C (இரண்டு விருப்பங்களின் சக்தி)** | 2 சீரற்ற கணக்குகள் மற்றும் ஆரோக்கியமான ஒரு — இருப்புக்கான வழிகளைத் தேர்ந்தெடுத்து, ஆரோக்கியம் பற்றிய விழிப்புணர்வோடு சுமை ஏற்றுகிறது |
+| **சீரற்ற**                            | ஃபிஷர்-யேட்ஸ் ஷஃபிளைப் பயன்படுத்தி ஒவ்வொரு கோரிக்கைக்கும் ஒரு கணக்கைத் தோராயமாகத் தேர்ந்தெடுக்கிறது                                  |
+| **குறைவாக பயன்படுத்தப்பட்டது**        | பழைய `lastUsedAt` நேர முத்திரையுடன் கணக்கிற்கான வழிகள், போக்குவரத்தை சமமாக விநியோகிக்கின்றன                                          |
+| **செலவு உகந்ததாக உள்ளது**             | மிகக் குறைந்த முன்னுரிமை மதிப்புடன் கணக்கிற்கான வழிகள், குறைந்த விலை வழங்குநர்களுக்கு மேம்படுத்துதல்                                 |
 
-**மேம்பட்ட காம்போ மற்றும் ஆட்டோ உத்திகள்** (காம்போ ஒன்றுக்கு அல்லது `auto/*` முன்னொட்டுகள் வழியாக கட்டமைக்கக்கூடியது - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) பார்க்கவும்):
+**மேம்பட்ட காம்போ மற்றும் ஆட்டோ உத்திகள்** (ஒரு சேர்க்கைக்கு அல்லது `auto/*` முன்னொட்டுகள் — வழியாக கட்டமைக்கக்கூடியது [AUTO-COMBO.md](../routing/AUTO-COMBO.md) பார்க்கவும்):
 
-- `priority` - கண்டிப்பான ஒழுங்கு, ரவுண்ட் ராபின்கள் இல்லை
-- `weighted` - விகிதாசார போக்குவரத்து ஒரு மாதிரி எடைகளால் பிரிக்கப்படுகிறது
-- `fill-first` - வரம்புகள் வரும் வரை முதல் மாதிரியை வடிகட்டவும்
+- `priority` — கண்டிப்பான ஒழுங்கு, ரவுண்ட்-ராபின்கள் இல்லை
+- `weighted` — விகிதாசார ட்ராஃபிக் ஒவ்வொரு மாதிரி எடைகளால் பிரிக்கப்பட்டது
+- `fill-first` — வரம்புகள் வரும் வரை முதல் மாதிரியை வடிகட்டவும்
 - `round-robin` / `strict-random` / `random`
 - `p2c` (இரண்டு விருப்பங்களின் சக்தி)
 - `least-used` மற்றும் `cost-optimized`
-- `auto` - அனைத்து வேட்பாளர்களுக்கும் மதிப்பெண் உந்துதல்
-- `lkgp` (கடைசியாக அறியப்பட்ட நல்ல வழங்குநர்) — கடைசியாக வெற்றிகரமான வழங்குநருக்கு பின்கள், பின்னர் விதிகளுக்குத் திரும்பும்
-- `context-optimized` - மிகப்பெரிய இலவச சூழல் சாளரத்துடன் மாதிரியைத் தேர்ந்தெடுக்கிறது
-- `context-relay` — தொடர் திருப்பங்களுக்கான சங்கிலிகள் நீண்ட சூழல் மாதிரிகள்
+- `auto` — மதிப்பெண் அனைத்து வேட்பாளர்களிலும் இயக்கப்படுகிறது
+- `lkgp` (கடைசியாக அறியப்பட்ட நல்ல வழங்குநர்) — கடைசி வெற்றிகரமான வழங்குநருக்குப் பின், பின்னர் விதிகளுக்குத் திரும்பும்
+- `context-optimized` — மிகப்பெரிய இலவச சூழல் சாளரத்துடன் மாதிரியைத் தேர்ந்தெடுக்கிறது
+- `context-relay` — சங்கிலிகள் பின்தொடர்தல் திருப்பங்களுக்கான நீண்ட சூழல் மாதிரிகள்
 
 #### வெளிப்புற ஒட்டும் அமர்வு தலைப்பு
 
@@ -913,9 +934,9 @@ Chain: production-fallback
 
 பல வழங்குநர்களை இணைப்பதற்கும் அவர்களுக்கு இடையே OmniRoute இல் ரூட்டிங் செய்வதற்கும் எடுத்துக்காட்டு வடிவங்கள் இங்கே உள்ளன:
 
-#### 1. குறியீட்டு முகவர் சேர்க்கை: Cost/Speed ஃபால்பேக் உடன் உயர்-எண்ட் ரீசனிங்
+#### 1. குறியீட்டு முகவர் சேர்க்கை: Cost/Speed ஃபால்பேக் உடன் உயர்-இறுதி ரீசனிங்
 
-குறியீட்டு முகவர்களுக்கு ஏற்றது (OpenCode, Claude குறியீடு, Cursor, Cline). கோட்டா தீர்ந்துபோதல் அல்லது பிழைகள் ஏற்பட்டால், ஃபிரான்டியர் ரீசனிங் மாடல்களுக்கான ஆரம்ப வழிகள், வேகமான குறியீட்டு மாதிரிகளுக்குத் திரும்பும்.
+குறியீட்டு முகவர்களுக்கு ஏற்றது (OpenCode, Claude குறியீடு, Cursor, Cline). கோட்டா தீர்ந்துபோதல் அல்லது பிழைகள் ஏற்பட்டால், ஃபிரான்டியர் ரீசனிங் மாடல்களுக்கான வழிகள், வேகமான குறியீட்டு மாதிரிகளுக்குத் திரும்பும்.
 
 - **டாஷ்போர்டு** : Combos → புதிய Combo → பெயர்: `agent-coding` → வியூகம்: `Priority`
 - **மாதிரிகள்** :
@@ -974,32 +995,32 @@ omniroute combo create free-stack \
 
 OmniRoute ஐந்து கூறுகளுடன் வழங்குநர்-நிலை பின்னடைவை செயல்படுத்துகிறது:
 
-1. **வரிசை & வேகத்தைக் கோருங்கள்** - கணினி நிலை கோரிக்கை வடிவமைத்தல்:
-   - **நிமிடத்திற்கான கோரிக்கைகள் (RPM)** - ஒரு கணக்கிற்கு நிமிடத்திற்கு அதிகபட்ச கோரிக்கைகள்
-   - **கோரிக்கைகளுக்கு இடையிலான குறைந்தபட்ச நேரம்** - கோரிக்கைகளுக்கு இடையே மில்லி விநாடிகளில் குறைந்தபட்ச இடைவெளி
-   - **அதிகபட்ச ஒரே நேரத்தில் கோரிக்கைகள்** - ஒரு கணக்கிற்கு அதிகபட்ச ஒரே நேரத்தில் கோரிக்கைகள்
+1. **வரிசை & வேகத்தைக் கோருங்கள்** — கணினி-நிலை கோரிக்கை வடிவமைத்தல்:
+   - **நிமிடத்திற்கான கோரிக்கைகள் (RPM)** — ஒரு கணக்கிற்கு நிமிடத்திற்கு அதிகபட்ச கோரிக்கைகள்
+   - **கோரிக்கைகளுக்கு இடையிலான குறைந்தபட்ச நேரம்** — கோரிக்கைகளுக்கு இடையே மில்லி விநாடிகளில் குறைந்தபட்ச இடைவெளி
+   - **அதிகபட்ச ஒரே நேரத்தில் கோரிக்கைகள்** ஒரு கணக்கிற்கு — அதிகபட்ச ஒரே நேரத்தில் கோரிக்கைகள்
 
-2. **இணைப்பு கூல்டவுன்** — மீண்டும் முயற்சி செய்யக்கூடிய தோல்விகளுக்குப் பிறகு ஒற்றை இணைப்புக்கான அங்கீகார வகை உள்ளமைவு:
-   - **அடிப்படை கூல்டவுன்** — மீண்டும் முயற்சிக்கக்கூடிய அப்ஸ்ட்ரீம் தோல்விகளுக்கான இயல்புநிலை கூல்டவுன் சாளரம்
-   - **அப்ஸ்ட்ரீம் மீண்டும் முயற்சி குறிப்புகளைப் பயன்படுத்தவும்** - வழங்கப்படும் போது அதிகாரப்பூர்வ `Retry-After` அல்லது ரீசெட் குறிப்புகளை மதிக்கிறது
-   - **மேக்ஸ் பேக்ஆஃப் படிகள்** - தொடர்ச்சியான தோல்விகளுக்கான அதிகபட்ச அதிவேக பேக்ஆஃப் நிலை
+2. **இணைப்பு கூல்டவுன்** — மறுமுயற்சி தோல்விகளுக்குப் பிறகு ஒற்றை இணைப்புக்கான பெர்-ஆத்-வகை உள்ளமைவு:
+   - **அடிப்படை கூல்டவுன்** மீண்டும் முயற்சிக்கக்கூடிய அப்ஸ்ட்ரீம் தோல்விகளுக்கு — இயல்புநிலை கூல்டவுன் சாளரம்
+   - **அப்ஸ்ட்ரீம் மீண்டும் முயற்சி குறிப்புகளைப் பயன்படுத்தவும்** — அங்கீகரிக்கப்பட்ட `Retry-After` மதிக்கிறது அல்லது வழங்கப்படும் போது குறிப்புகளை மீட்டமைக்கிறது
+   - **மேக்ஸ் பேக்ஆஃப் படிகள்** — தொடர்ச்சியான தோல்விகளுக்கான அதிகபட்ச அதிவேக பேக்ஆஃப் நிலை
 
-3. **வழங்குநர் சர்க்யூட் பிரேக்கர்** — எண்ட்-டு-எண்ட் வழங்குநரின் தோல்விகளைக் கண்காணிக்கும், உள்ளமைக்கப்பட்ட எச்சரிக்கை வாசலில் தரம் தாழ்ந்த வழங்குநரைக் குறிக்கும், மேலும் உள்ளமைக்கப்பட்ட தோல்வி வரம்பை அடைந்ததும் பிரேக்கரைத் திறக்கும்:
-   - **சீரழிவு வாசல்** — `DEGRADED` நுழைவதற்கு முன் தொடர்ச்சியான வழங்குநர் தோல்விகள்
-   - **தோல்வி வரம்பு** — `OPEN` நுழைவதற்கு முன் தொடர்ச்சியான வழங்குநர் தோல்விகள்
-   - **காலக்கெடுவை மீட்டமைக்கவும்** - வழங்குநர் மீண்டும் சோதிக்கப்படுவதற்கு முன் நேர சாளரம்
-   - **CLOSED** (ஆரோக்கியமான) - கோரிக்கைகள் சாதாரணமாக வரும்
-   - **DEGRADED** - உயர்ந்த தோல்விகள் கண்காணிக்கப்படும்போதும் கோரிக்கைகள் தொடர்ந்து வருகின்றன
-   - **OPEN** - தொடர்ச்சியான தோல்விகளுக்குப் பிறகு வழங்குநர் தற்காலிகமாகத் தடுக்கப்பட்டார்
-   - **HALF_OPEN** - வழங்குநர் குணமடைந்துவிட்டாரா என்பதைச் சோதித்தல்
+3. **வழங்குநர் சர்க்யூட் பிரேக்கர்** — இறுதி முதல் இறுதி வழங்குநரின் தோல்விகளைக் கண்காணித்து, உள்ளமைக்கப்பட்ட எச்சரிக்கை வாசலில் ஒரு வழங்குநரைக் குறைக்கிறது, மேலும் கட்டமைக்கப்பட்ட தோல்வி வரம்பை அடைந்ததும் பிரேக்கரைத் திறக்கிறது:
+   - **சீரழிவு வாசல்** — `DEGRADED` இல் நுழைவதற்கு முன் தொடர்ச்சியான வழங்குநர் தோல்விகள்
+   - **தோல்வி வரம்பு** — `OPEN` இல் நுழைவதற்கு முன் தொடர்ச்சியான வழங்குநர் தோல்விகள்
+   - **காலக்கெடுவை மீட்டமைக்கவும்** வழங்குநர் மீண்டும் சோதிக்கப்படுவதற்கு முன் — நேர சாளரம்
+   - **CLOSED** (ஆரோக்கியமான) — கோரிக்கைகள் சாதாரணமாகப் பாயும்
+   - **DEGRADED** — உயர்ந்த தோல்விகள் கண்காணிக்கப்படும்போதும் கோரிக்கைகள் தொடர்ந்து வருகின்றன
+   - **OPEN** தொடர்ச்சியான தோல்விகளுக்குப் பிறகு — வழங்குநர் தற்காலிகமாகத் தடுக்கப்பட்டார்
+   - **HALF_OPEN** வழங்குநர் குணமடைந்து விட்டால் — சோதனை
 
    இணைப்பு-நோக்கிய `429` வீத வரம்புகள் இருக்கும்** இணைப்பு கூல்டவுன்** மற்றும் வழங்குனர் பிரேக்கரை நோக்கி எண்ண வேண்டாம்.
 
    வழங்குநர் பிரேக்கர் இயக்க நேர நிலை காட்டப்பட்டுள்ளது** டாஷ்போர்டு → ஆரோக்கியம்** மட்டுமே.
 
-4. **கூல்டவுனுக்காக காத்திருங்கள்** - ஒவ்வொரு கேண்டிடேட் இணைப்பும் ஏற்கனவே குளிர்ச்சியடைந்தால், OmniRoute ஆரம்ப கூல்டவுன் வரை காத்திருந்து அதே கிளையன்ட் கோரிக்கையை தானாக மீண்டும் முயற்சி செய்யலாம்.
+4. **கூல்டவுனுக்காக காத்திருங்கள்** — ஒவ்வொரு கேண்டிடேட் இணைப்பும் ஏற்கனவே குளிர்ச்சியடைந்து இருந்தால், OmniRoute ஆரம்ப கூல்டவுன் வரை காத்திருந்து அதே கிளையன்ட் கோரிக்கையை தானாக மீண்டும் முயற்சி செய்யலாம்.
 
-5. **விகித வரம்பு தானியங்கு-கண்டறிதல்** — அப்ஸ்ட்ரீம் வழங்குநர்கள் வெளிப்படையான காத்திருப்பு சாளரங்களை வழங்கும் போது, அமைப்பு இயக்கப்பட்டிருக்கும் போது அந்த குறிப்புகள் உள்ளூர் இணைப்பு கூல்டவுனை மீறும்.
+5. **விகித வரம்பு தானியங்கு-கண்டறிதல்** — அப்ஸ்ட்ரீம் வழங்குநர்கள் வெளிப்படையான காத்திருப்பு சாளரங்களைத் திருப்பித் தரும்போது, அமைப்பு இயக்கப்பட்டிருக்கும் போது, அந்த குறிப்புகள் உள்ளூர் இணைப்பு கூல்டவுனை மீறும்.
 
 **சார்பு உதவிக்குறிப்பு:** பயன்படுத்தவும்** ஆரோக்கியம்** செயலிழப்புக்குப் பிறகு நேரடி வழங்குநர் பிரேக்கர்களை ஆய்வு செய்து மீட்டமைப்பதற்கான பக்கம். பின்னடைவு பக்கம் உள்ளமைவை மட்டுமே மாற்றுகிறது.
 
@@ -1041,17 +1062,17 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 அமைப்புகள் பக்கம் ஒழுங்கமைக்கப்பட்டுள்ளது** 7 தாவல்கள்** எளிதான வழிசெலுத்தலுக்கு:
 
-| தாவல்          | உள்ளடக்கம்                                                                                                                                                                                      |
-| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **பொது**       | கணினி சேமிப்பக கருவிகள், இயல்புநிலை நடத்தை, எண்ட்பாயிண்ட் டன்னல் தெரிவுநிலை                                                                                                                     |
-| **தோற்றம்**    | தீம் கட்டுப்பாடுகள் (light/dark/system), பக்கப்பட்டியின் தெரிவுநிலை, Cloudflare/Tailscale/ngrok டன்னல் கார்டுகளுக்கான பேனல் நிலைமாற்றங்கள்                                                      |
-| **AI**         | சிந்தனை வரவு செலவுத் திட்டம் (பாஸ்த்ரூ / ஆட்டோ-ஸ்டிரிப் / தனிப்பயன் / அடாப்டிவ் — பார்க்க [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), குளோபல் சிஸ்டம் ப்ராம்ட், ப்ராம்ட் கேச் புள்ளிவிவரங்கள் |
-| **பாதுகாப்பு** | Login/Password அமைப்புகள், IP அணுகல் கட்டுப்பாடு, `/models` க்கான API அங்கீகாரம், வழங்குநரைத் தடுப்பது, உடனடி ஊசி பாதுகாப்பு                                                                    |
-| **ரூட்டிங்**   | உலகளாவிய ரூட்டிங் உத்தி (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), வைல்டு கார்டு மாடல் மாற்றுப்பெயர்கள், ஃபால்பேக் செயின்கள், காம்போ டீஃபால்ட்கள்                 |
-| **மீள்தன்மை**  | கோரிக்கை வரிசை, இணைப்பு கூல்டவுன், வழங்குநர் பிரேக்கர் கட்டமைப்பு மற்றும் குளிர்ச்சிக்காக காத்திருக்கும் நடத்தை                                                                                 |
-| **மேம்பட்டது** | உலகளாவிய ப்ராக்ஸி உள்ளமைவு (HTTP/SOCKS5), ஒவ்வொரு வழங்குநருக்கும் ப்ராக்ஸி மேலெழுதப்பட்டது                                                                                                      |
+| தாவல்          | உள்ளடக்கம்                                                                                                                                                                                |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **பொது**       | கணினி சேமிப்பக கருவிகள், இயல்புநிலை நடத்தை, எண்ட்பாயிண்ட் டன்னல் தெரிவுநிலை                                                                                                               |
+| **தோற்றம்**    | தீம் கட்டுப்பாடுகள் (light/dark/system), பக்கப்பட்டியின் தெரிவுநிலை, Cloudflare/Tailscale/ngrok டன்னல் கார்டுகளுக்கான பேனல் நிலைமாற்றங்கள்                                                |
+| **AI**         | சிந்தனை வரவுசெலவுத் திட்டம் (பாஸ்த்ரூ / ஆட்டோ-ஸ்டிரிப் / தனிப்பயன் / அடாப்டிவ் — பார்க்க [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), உலகளாவிய கணினி வரியில், உடனடி கேச் புள்ளிவிவரங்கள் |
+| **பாதுகாப்பு** | Login/Password அமைப்புகள், IP அணுகல் கட்டுப்பாடு, `/models` க்கான API அங்கீகாரம், வழங்குநரைத் தடுப்பது, உடனடி ஊசி பாதுகாப்பு                                                              |
+| **ரூட்டிங்**   | உலகளாவிய ரூட்டிங் உத்தி (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), வைல்டு கார்டு மாடல் மாற்றுப்பெயர்கள், ஃபால்பேக் செயின்கள், காம்போ டீஃபால்ட்கள்           |
+| **மீள்தன்மை**  | கோரிக்கை வரிசை, இணைப்பு கூல்டவுன், வழங்குநர் பிரேக்கர் கட்டமைப்பு மற்றும் குளிர்ச்சிக்காக காத்திருக்கும் நடத்தை                                                                           |
+| **மேம்பட்டது** | உலகளாவிய ப்ராக்ஸி உள்ளமைவு (HTTP/SOCKS5), ஒவ்வொரு வழங்குநருக்கும் ப்ராக்ஸி மேலெழுதப்பட்டது                                                                                                |
 
-பொது இனி படிக்க மட்டுமேயான பதிவு மற்றும் கேச் குறிப்புகளை நகல் எடுக்காது. தரவுத்தளத் தக்கவைப்பு மற்றும் தேர்வுமுறை அமைப்புகள் `/api/settings/database` மூலம் தொடரப்படுகின்றன; கையேடு கேச் கிளியரிங் `DELETE /api/cache` ஐப் பயன்படுத்துகிறது. கோரிக்கை மற்றும் ப்ராக்ஸி பதிவு வரிசை தொப்பிகள் `CALL_LOGS_TABLE_MAX_ROWS` மற்றும் `PROXY_LOGS_TABLE_MAX_ROWS` ஆல் கட்டுப்படுத்தப்படுகின்றன.
+பொது இனி படிக்க மட்டும் லாக்கிங் மற்றும் கேச் குறிப்புகள் நகல். தரவுத்தளத் தக்கவைப்பு மற்றும் தேர்வுமுறை அமைப்புகள் `/api/settings/database` மூலம் தொடரப்படுகின்றன; கையேடு கேச் கிளியரிங் `DELETE /api/cache` ஐப் பயன்படுத்துகிறது. கோரிக்கை மற்றும் ப்ராக்ஸி பதிவு வரிசை தொப்பிகள் `CALL_LOGS_TABLE_MAX_ROWS` மற்றும் `PROXY_LOGS_TABLE_MAX_ROWS` ஆல் கட்டுப்படுத்தப்படுகின்றன.
 
 ---
 
@@ -1062,7 +1083,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | தாவல்             | நோக்கம்                                                                                                      |
 | ----------------- | ------------------------------------------------------------------------------------------------------------ |
 | **பட்ஜெட்**       | daily/weekly/monthly பட்ஜெட்டுகள் மற்றும் நிகழ்நேர கண்காணிப்பு மூலம் API விசைக்கு செலவு வரம்புகளை அமைக்கவும் |
-| **விலை நிர்ணயம்** | மாதிரி விலை உள்ளீடுகளைப் பார்க்கவும் திருத்தவும் — ஒரு வழங்குநருக்கு 1K input/output டோக்கன்களுக்கான விலை    |
+| **விலை நிர்ணயம்** | ஒரு வழங்குநருக்கு 1K input/output டோக்கன்களுக்கான — விலை மாதிரி விலை உள்ளீடுகளைப் பார்க்கவும் திருத்தவும்    |
 
 ```bash
 # API: Set a budget
@@ -1080,7 +1101,7 @@ curl http://localhost:20128/api/usage/budget
 
 ### ஆடியோ டிரான்ஸ்கிரிப்ஷன்
 
-OmniRoute OpenAI-இணக்கமான இறுதிப்புள்ளி வழியாக ஆடியோ டிரான்ஸ்கிரிப்ஷனை ஆதரிக்கிறது:
+ஓபன்ஏஐ-இணக்கமான இறுதிப்புள்ளி வழியாக ஆடியோ டிரான்ஸ்கிரிப்ஷனைOmniRoute ஆதரிக்கிறது:
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1144,7 +1165,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 ஜீரோ-லேட்டன்சி காம்போ மேம்படுத்தல்கள் தேர்வு செய்யப்படுகின்றன. கிளம்பு** ஜீரோ-லேட்டன்சி மேம்படுத்தல்கள்** ரேசிங் ஃபால்பேக் இலக்குகள், TTFT வரலாற்றின் அடிப்படையிலான இலக்குகளைத் தவிர்ப்பது அல்லது பின்னடைவு கோரிக்கைகளை சுருக்குவது போன்றவற்றிலிருந்து இந்த தாமத அம்சங்களைத் தடுக்க முடக்கப்பட்டது; அதை செயல்படுத்துவது கட்டமைக்கப்பட்ட ஹெட்ஜிங், முன்கணிப்பு TTFT ஸ்கிப்ஸ் மற்றும் குறைந்த டெயில் லேட்டன்சிக்கு routing/request நம்பகத்தன்மையை வர்த்தகம் செய்ய ப்ராக்டிவ் ஃபால்பேக் சுருக்கத்தை அனுமதிக்கிறது.
 
-முடக்கு** ரீசனிங் டோக்கன் பஃபர்** அப்ஸ்ட்ரீம் வழங்குநர்களுக்கு கடுமையான `max_tokens` / `maxOutputTokens` வரம்புகள் தேவைப்படும்போது. இயக்கப்பட்டால், காம்போ ரூட்டிங் ஆனது, அறியப்பட்ட வெளியீட்டு தொப்பியைக் கொண்ட மாடல்களுக்கான காரண-மாடல் ஹெட்ரூமை மட்டுமே சேர்க்கிறது மற்றும் பாதுகாப்பான இடையக மதிப்பு அந்த தொப்பியை மீறும் போது கிளையன்ட் டோக்கன் வரம்பை மாற்றாது. கிளையன்ட் வரம்பு ஏற்கனவே அறியப்பட்ட தொப்பியை விட அதிகமாக இருந்தால், அப்ஸ்ட்ரீம் கோரிக்கையை அனுப்பும் முன், OmniRoute அதை அந்த தொப்பியுடன் இணைக்கிறது.
+முடக்கு** பகுத்தறிவு டோக்கன் பஃபர்** அப்ஸ்ட்ரீம் வழங்குநர்களுக்கு கடுமையான `max_tokens` / `maxOutputTokens` வரம்புகள் தேவைப்படும் போது. இயக்கப்பட்டால், காம்போ ரூட்டிங் ஆனது, அறியப்பட்ட வெளியீட்டு தொப்பியைக் கொண்ட மாடல்களுக்கான காரண-மாடல் ஹெட்ரூமை மட்டுமே சேர்க்கிறது மற்றும் பாதுகாப்பான இடையக மதிப்பு அந்த தொப்பியை மீறும் போது கிளையன்ட் டோக்கன் வரம்பை மாற்றாது. கிளையன்ட் வரம்பு ஏற்கனவே அறியப்பட்ட தொப்பியை விட அதிகமாக இருந்தால், அப்ஸ்ட்ரீம் கோரிக்கையை அனுப்பும் முன், OmniRoute அதை அந்த தொப்பியுடன் இணைக்கிறது.
 
 ---
 
@@ -1152,14 +1173,14 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 வழியாக அணுகலாம்** டாஷ்போர்டு → ஆரோக்கியம்** . 6 கார்டுகளுடன் நிகழ்நேர அமைப்பு ஆரோக்கிய கண்ணோட்டம்:
 
-| அட்டை                    | இது என்ன காட்டுகிறது                                                      |
-| ------------------------ | ------------------------------------------------------------------------- |
-| **கணினி நிலை**           | இயக்க நேரம், பதிப்பு, நினைவக பயன்பாடு, தரவு கோப்பகம்                      |
-| **வழங்குநர் ஆரோக்கியம்** | உலகளாவிய வழங்குநர் சர்க்யூட் பிரேக்கர் இயக்க நேர நிலை                     |
-| **விகித வரம்புகள்**      | மீதமுள்ள நேரத்தில் ஒரு கணக்கிற்கு செயலில் உள்ள இணைப்பு கூல்டவுன்கள்       |
-| **செயலில் பூட்டுதல்கள்** | செயலில் உள்ள மாதிரி-நோக்கிய லாக்அவுட்கள் மற்றும் தற்காலிக விலக்குகள்      |
-| **கையொப்ப கேச்**         | டியூப்ளிகேஷன் கேச் புள்ளிவிவரங்கள் (செயலில் உள்ள விசைகள், வெற்றி விகிதம்) |
-| **லேட்டன்சி டெலிமெட்ரி** | ஒரு வழங்குநருக்குp50/p95/p99 தாமதத் திரட்டல்                              |
+| அட்டை                     | இது என்ன காட்டுகிறது                                                      |
+| ------------------------- | ------------------------------------------------------------------------- |
+| **கணினி நிலை**            | இயக்க நேரம், பதிப்பு, நினைவக பயன்பாடு, தரவு கோப்பகம்                      |
+| **வழங்குபவர் ஆரோக்கியம்** | உலகளாவிய வழங்குநர் சர்க்யூட் பிரேக்கர் இயக்க நேர நிலை                     |
+| **விகித வரம்புகள்**       | மீதமுள்ள நேரத்தில் ஒரு கணக்கிற்கு செயலில் உள்ள இணைப்பு கூல்டவுன்கள்       |
+| **செயலில் பூட்டுதல்கள்**  | செயலில் உள்ள மாதிரி-நோக்கிய லாக்அவுட்கள் மற்றும் தற்காலிக விலக்குகள்      |
+| **கையொப்ப கேச்**          | டியூப்ளிகேஷன் கேச் புள்ளிவிவரங்கள் (செயலில் உள்ள விசைகள், வெற்றி விகிதம்) |
+| **லேட்டன்சி டெலிமெட்ரி**  | ஒரு வழங்குநருக்குp50/p95/p99 லேட்டன்சி ஒருங்கிணைப்பு                      |
 
 **சார்பு உதவிக்குறிப்பு:** உடல்நலம் பக்கம் ஒவ்வொரு 10 வினாடிக்கும் தானாகப் புதுப்பிக்கப்படும். எந்த வழங்குநர்கள் சிக்கல்களை எதிர்கொள்கிறார்கள் என்பதைக் கண்டறிய சர்க்யூட் பிரேக்கர் கார்டைப் பயன்படுத்தவும்.
 

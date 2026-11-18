@@ -53,7 +53,7 @@ test("buildCodexUsageQuotas surfaces the secondary code_review window", () => {
 test("buildCodexUsageQuotas reads review windows from additional_rate_limits", () => {
   const { quotas } = buildCodexUsageQuotas({
     rate_limit: {
-      primary_window: { used_percent: 10 },
+      primary_window: { used_percent: 10, limit_window_seconds: 18000 },
     },
     additional_rate_limits: [
       {
@@ -76,8 +76,8 @@ test("buildCodexUsageQuotas reads review windows from additional_rate_limits", (
 test("buildCodexUsageQuotas leaves review windows undefined when payload is silent", () => {
   const { quotas } = buildCodexUsageQuotas({
     rate_limit: {
-      primary_window: { used_percent: 10 },
-      secondary_window: { used_percent: 20 },
+      primary_window: { used_percent: 10, limit_window_seconds: 18000 },
+      secondary_window: { used_percent: 20, limit_window_seconds: 604800 },
     },
   });
 

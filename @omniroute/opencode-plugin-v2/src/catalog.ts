@@ -43,11 +43,13 @@ import {
   type OmniRouteRawModelEntry,
   applyEnrichment,
   buildCanonicalToAliasMap,
+  buildModelDisplayName,
   canonicalDedupSet,
   countFreeTierMatch,
   createLogger,
   defaultOmniRouteEnrichmentFetcher,
   defaultOmniRouteProvidersFetcher,
+  disambiguateDisplayNames,
   ensureV1Suffix,
   isUsableCombo,
   isUsableRawModelId,
@@ -114,7 +116,7 @@ export interface ResolvedOptions extends FreeOptions {
   logLevel?: LogLevel;
   startupDebug?: boolean;
   modelCacheTtlMs: number;
-  /** v1 parity: prefix the display name with the upstream provider label. */
+  /** Whether to render the editor in a trailing parenthesis (default true). */
   providerTag?: boolean;
   displayName?: string;
   apiFormat?: ApiFormatV2;
@@ -719,6 +721,7 @@ async function publishCombos(
         continue;
       }
       const mapped = mapComboToModelV2(combo, memberEntries, X, opts.baseURL, opts.apiFormat);
+      mapped.name = buildModelDisplayName({ rawId: mapped.name, isCombo: true });
       const comboEnrichment = lookupEnrichment(combo.id, enrichment, canonicalToAlias);
       applyEnrichment(mapped, comboEnrichment, {
         isCombo: true,
@@ -971,6 +974,10 @@ export async function collectCatalog(
       baseURL: opts.baseURL,
       apiFormat: opts.apiFormat,
     });
+    if (servedCombo) {
+      // From the raw id: the mapper's name already carries the provider prefix.
+      mapped.name = buildModelDisplayName({ rawId: entry.id, isCombo: true });
+    }
     const enrichmentEntry = lookupEnrichment(
       entry.id,
       enrichment,
@@ -978,7 +985,9 @@ export async function collectCatalog(
       entry.owned_by
     );
     applyEnrichment(mapped, enrichmentEntry, {
-      providerTag: opts.providerTag !== false,
+      isCombo: servedCombo,
+      rawModelId: entry.id,
+      providerTag: opts.providerTag,
     });
     const inferred = isInferredFree(entry.id, enrichmentEntry, opts, enrichment, canonicalToAlias);
     if (
@@ -1025,7 +1034,8 @@ export async function collectCatalog(
         entry.owned_by
       );
       applyEnrichment(mapped, restoreEnrichment, {
-        providerTag: opts.providerTag !== false,
+        rawModelId: entry.id,
+        providerTag: opts.providerTag,
       });
       const restoreInferred = isInferredFree(
         entry.id,
@@ -1090,7 +1100,19 @@ export async function collectCatalog(
       `[omniroute-v2] catalog refresh: served=${rawModels.length} default=${afterDefaultView} presets=${afterPresets} published=${published} unmatched-free=${freeUnmatched}`
     );
   };
+  // Same-named entries stay distinguishable: one disambiguation pass over
+  // the published set renames collisions with a route suffix. Local to
+  // this collect call — nothing survives the return.
+  const applyNameDisambiguation = (): void => {
+    const renamed = disambiguateDisplayNames(
+      [...collected].map(([id, entry]) => ({ id, name: entry.name }))
+    );
+    for (const [id, name] of renamed) {
+      collected.get(id)!.name = name;
+    }
+  };
   if (comboResult === undefined) {
+    applyNameDisambiguation();
     emitSummary(collected.size);
     return { entries: collected, counts: { models: modelCount, combos: 0 } };
   }
@@ -1106,6 +1128,7 @@ export async function collectCatalog(
     warnProviderMatchedNothing(providerFilter, warnedCombos, log);
   }
 
+  applyNameDisambiguation();
   emitSummary(collected.size);
   return {
     entries: collected,

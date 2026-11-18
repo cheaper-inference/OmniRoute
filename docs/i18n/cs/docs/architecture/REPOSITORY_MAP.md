@@ -51,67 +51,67 @@ OmniRoute/
 
 ---
 
-## Soubory v kořenovém adresáři
+## Kořenové soubory
 
-| Soubor                                      | Účel                                                                                                   |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
-| **README.md**                               | Marketingová vstupní stránka + rychlý start + matice funkcí (viz také `llm.txt`)                       |
-| **CHANGELOG.md**                            | Přehled změn pro jednotlivá vydání (automaticky generovaný pomocí dovednosti `/version-bump-cc`)       |
-| **LICENSE**                                 | Text licence MIT                                                                                       |
-| **CLAUDE.md**                               | Pravidla projektu pro agenty Claude Code (pevná pravidla, konvence, scénáře)                           |
-| **AGENTS.md**                               | Totéž jako CLAUDE.md, ale pro AI agenty jiné než Claude (Codex, Cursor atd.)                           |
-| **GEMINI.md**                               | Stručná pravidla pro agenty založené na Gemini (podmnožina CLAUDE.md)                                  |
-| **CONTRIBUTING.md**                         | Příručka pro přispěvatele: nastavení, konvenční commity, testování, postup PR                          |
-| **SECURITY.md**                             | Zásady hlášení zranitelností, podporované verze, model hrozeb                                          |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — očekávání ohledně chování v komunitě                                            |
-| **llm.txt**                                 | Textová vstupní stránka optimalizovaná pro crawlery LLM (SEO pro AI asistenty)                         |
-| **package.json**                            | Manifest npm, skripty, závislosti, běhová prostředí, limit pokrytí c8                                  |
-| **package-lock.json**                       | Uzamčený strom závislostí                                                                              |
-| **tsconfig.json**                           | Kořenová konfigurace TypeScriptu                                                                       |
-| **tsconfig.typecheck-core.json**            | Konfigurace kontroly typů pro jádro `src/`                                                             |
-| **tsconfig.typecheck-noimplicit-core.json** | Striktní kontrola typů (`noImplicitAny`)                                                               |
-| **tsconfig.tsbuildinfo**                    | Mezipaměť inkrementálního sestavení TS (ignorovaná Gitem)                                              |
-| **next.config.mjs**                         | Konfigurace sestavení Next.js 16 (samostatný výstup)                                                   |
-| **next-env.d.ts**                           | Automaticky generované typy prostředí Next.js                                                          |
-| **eslint.config.mjs**                       | Plochá konfigurace ESLint (pravidla pro jednotlivé oblasti projektu)                                   |
-| **prettier.config.mjs**                     | Pravidla formátování Prettier                                                                          |
-| **postcss.config.mjs**                      | Konfigurace PostCSS pro pipeline Tailwind/CSS                                                          |
-| **playwright.config.ts**                    | Konfigurace E2E testů Playwright                                                                       |
-| **vitest.config.ts**                        | Konfigurace Vitest (výchozí sada)                                                                      |
-| **vitest.mcp.config.ts**                    | Konfigurace Vitest pro server MCP / sady autoCombo / mezipaměti                                        |
-| **sonar-project.properties**                | Konfigurace SonarQube/SonarCloud (kvalita kódu)                                                        |
-| **Dockerfile**                              | Vícefázové sestavení Dockeru (builder → runner-base → runner-cli)                                      |
-| **docker-compose.yml**                      | Vývojová konfigurace Compose se 4 profily (base, cli, host, cliproxyapi) + pomocný kontejner Redis     |
-| **docker-compose.prod.yml**                 | Produkční konfigurace Compose (port 20130, Redis, pojmenované svazky)                                  |
-| **.dockerignore**                           | Soubory vyloučené z kontextu Dockeru                                                                   |
-| **fly.toml**                                | Konfigurace nasazení Fly.io (oblast `sin`, port 20128, svazek /data)                                   |
-| **.env.example**                            | Šablona souboru prostředí (při první instalaci automaticky zkopírovaná do `.env`)                      |
-| **.gitignore**                              | Vzory ignorovaných souborů Gitu                                                                        |
-| **.npmignore**                              | Seznam souborů vyloučených při publikování npm                                                         |
-| **.npmrc**                                  | Konfigurace npm (registr, zásady souboru lockfile)                                                     |
-| **.node-version**                           | Připnutí verze Node (používané nástroji kompatibilními s nvm)                                          |
-| **.nvmrc**                                  | Připnutí verze Node pro nvm                                                                            |
-| **eslint.complexity.config.mjs**            | Konfigurace ESLint pro postupné zpřísňování složitosti (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | Konfigurace ESLint pro pravidla SonarJS (kognitivní složitost / duplicita)                             |
-| **source.config.ts**                        | Konfigurace zdroje Fumadocs `defineDocs` (napájí `.source/`)                                           |
-| **knip.json**                               | Konfigurace Knip — nepoužité soubory/exporty/závislosti (podklad pro kontrolu mrtvého kódu)            |
-| **stryker.conf.json**                       | Konfigurace mutačního testování Stryker                                                                |
-| **.size-limit.json**                        | Konfigurace limitu velikosti balíčku size-limit                                                        |
-| **promptfooconfig.yaml**                    | Konfigurace vyhodnocování promptfoo                                                                    |
-| **.gitleaks.toml**                          | Sada pravidel gitleaks pro kontrolu tajných údajů                                                      |
-| **.zizmor.yml**                             | Konfigurace bezpečnostní kontroly GitHub Actions pomocí zizmor                                         |
-| **socket.yml**                              | Konfigurace zabezpečení dodavatelského řetězce Socket.dev                                              |
-| **news.json**                               | Lokalizovaný kanál oznámení v2; položka o spuštění Radaru je dodávána jako neaktivní                   |
-| **flake.nix** / **flake.lock**              | Definice vývojového shellu Nix + zámek                                                                 |
-| **.env**                                    | Místní tajné údaje (ignorováno systémem git — generováno z `.env.example`)                             |
+| Soubor                                      | Účel                                                                                           |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **README.md**                               | Marketingová vstupní stránka + rychlý start matice funkcí + (viz také `llm.txt`)               |
+| **CHANGELOG.md**                            | Protokol změn podle vydání (automaticky generovaný dovedností `/version-bump-cc` )             |
+| **LICENSE**                                 | text licence MIT                                                                               |
+| **CLAUDE.md**                               | Pravidla projektu pro agenty kódu Claude (pevná pravidla, konvence, scénáře)                   |
+| **AGENTS.md**                               | Stejné jako CLAUDE.md, ale pro jiné agenty AI než Claude (Codex, Cursor atd.)                  |
+| **GEMINI.md**                               | Stručná pravidla pro agenty založené na Gemini (podmnožina CLAUDE.md)                          |
+| **CONTRIBUTING.md**                         | Průvodce pro přispěvatele: nastavení, konvenční odevzdání, testování, tok PR                   |
+| **SECURITY.md**                             | Zásady hlášení zranitelnosti, podporované verze, model hrozeb                                  |
+| **CODE_OF_CONDUCT.md**                      | Přispěvatel Covenant — očekávání chování komunity                                              |
+| **llm.txt**                                 | Přistání ve formátu prostého textu optimalizované pro prohledávače LLM (SEO pro asistenty AI ) |
+| **package.json**                            | manifest npm, skripty, závislosti, motory, brána pokrytí c8                                    |
+| **package-lock.json**                       | Uzamčený strom závislostí                                                                      |
+| **tsconfig.json**                           | Kořenová konfigurace TypeScript                                                                |
+| **tsconfig.typecheck-core.json**            | Konfigurace kontroly typu pro jádro `src/`                                                     |
+| **tsconfig.typecheck-noimplicit-core.json** | Přísná (`noImplicitAny`) typová kontrola                                                       |
+| **tsconfig.tsbuildinfo**                    | TS mezipaměť přírůstkového sestavení (gitignorováno)                                           |
+| **další.config.mjs**                        | Konfigurace sestavení Next.js 16 (samostatný výstup)                                           |
+| **next-env.d.ts**                           | automaticky generované typy env Next.js                                                        |
+| **eslint.config.mjs**                       | ESLint flat config (pravidla pro oblast projektu)                                              |
+| **hezčí.config.mjs**                        | pravidla formátování Prettier                                                                  |
+| **postcss.config.mjs**                      | Konfigurace PostCSS pro potrubí Tailwind/CSS                                                   |
+| **dramatik.config.ts**                      | testovací konfigurace Playwright E2E                                                           |
+| **vitest.config.ts**                        | konfigurace Vitest (výchozí sada)                                                              |
+| **vitest.mcp.config.ts**                    | Konfigurace Vitest pro sady MCP server / autoCombo / cache                                     |
+| **sonar-projekt.vlastnosti**                | SonarQube/SonarCloud config (kvalita kódu)                                                     |
+| **Dockerfile**                              | Vícefázové sestavení Docker (tvůrce → runner-base → runner-cli)                                |
+| **docker-compose.yml**                      | Vývojář se skládá ze 4 profilů (base, cli, host, cliproxyapi) + redis sidecar                  |
+| **docker-compose.prod.yml**                 | Skládání produkce (port 20130, redis, pojmenované svazky)                                      |
+| **.dockerignore**                           | Soubory vyloučené z kontextu Docker                                                            |
+| **fly.toml**                                | Konfigurace nasazení Fly.io (region `sin`, port 20128, /objem dat)                             |
+| **.env.příklad**                            | Soubor env šablony (automaticky zkopírován do `.env` při první instalaci)                      |
+| **.gitignore**                              | Git ignoruje vzory                                                                             |
+| **.npmignore**                              | npm zveřejnit seznam vyloučení                                                                 |
+| **.npmrc**                                  | npm config (registr, zásada lockfile)                                                          |
+| **.uzel-verze**                             | Pin verze uzlu (používaný nástroji kompatibilními s nvm)                                       |
+| **.nvmrc**                                  | Pin verze uzlu pro nvm                                                                         |
+| **eslint.složitost.config.mjs**             | ESLint config pro složitost ratchet (`scripts/check/check-complexity.mjs --config`)            |
+| **eslint.sonarjs.config.mjs**               | konfigurace ESLint pro pravidla SonarJS (kognitivní složitost / duplikace)                     |
+| **zdroj.config.ts**                         | Zdrojová konfigurace Fumadocs `defineDocs` (zdroje `.source/`)                                 |
+| **knip.json**                               | Knip config — unused files/exports/deps (napájení brány mrtvého kódu)                          |
+| **stryker.conf.mjs**                        | Konfigurace pro testování mutace Stryker (počítá `tap.testFiles` ze `mutate`)                  |
+| **.size-limit.json**                        | velikost-limit bundle budget config                                                            |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                          |
+| **.gitleaks.toml**                          | sada pravidel tajného skenování gitleaks                                                       |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                     |
+| **socket.yml**                              | Konfigurace dodavatelského řetězce Socket.dev                                                  |
+| **news.json**                               | Lokalizovaný kanál oznámení v2; Radarové vypouštěcí lodě jsou neaktivní                        |
+| **vločka.nix** /** vločka.zámek**           | Nix dev-shell definice + zámek                                                                 |
+| **.env**                                    | Místní tajemství (gitignorované — generované z `.env.example`)                                 |
 
-> **Přesunuto z kořenového adresáře ve verzi v3.8.26 (pro zpřehlednění):**
+> **Přesunuto z kořenového adresáře ve verzi 3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` a generovaný soubor `quality-metrics.json` (ignorovaný systémem git). Viz [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` a vygenerované `quality-metrics.json` (gitignorováno). Viz [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
-## `src/` — aplikace Next.js
+## aplikace `src/` — Next.js
 
 ```
 src/
@@ -141,8 +141,8 @@ src/
 | ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/api/v1/`                                                                | Veřejné OpenAI-compat API (~ 25 dílčích tras: chat, dokončení, vložení, soubory, dávky, zvuk, obrázky, videa, hudba, přehodnocení, moderování, vyhledávání, ws, agenti, účty, poskytovatelé atd.)                                                                                                                     |
 | `app/api/v1beta/`                                                            | Koncové body API ve stylu Gemini                                                                                                                                                                                                                                                                                      |
-| `app/api/playground/`                                                        | Trasy Playground Studio: `improve-prompt/` (POST — LLM prompt rewriter), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — viz `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                       |
-| `app/api/` (jiná než v1)                                                     | Management/admin routes (adresáře ~ 60: poskytovatelé, komba, nastavení, mcp, a2a, evals, paměť, dovednosti, webhooky, soulad, odolnost, monitorování, tunely, cli-tools atd.)                                                                                                                                        |
+| `app/api/playground/`                                                        | Trasy Playground Studio: `improve-prompt/` (POST — LLM prompt přepisovač), `presets/` (GET seznam / POST vytvoření), `presets/[id]/` (GET / PUT / DELETE) — viz `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                |
+| `app/api/` (non-v1)                                                          | Management/admin routes (adresáře ~ 60: poskytovatelé, komba, nastavení, mcp, a2a, evals, paměť, dovednosti, webhooky, soulad, odolnost, monitorování, tunely, cli-tools atd.)                                                                                                                                        |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 cest (řízení serveru, agent state/DNS/mappings, bypass, cert, upstream-CA). LOCAL_ONLY + SPAWN_CAPABLE. Viz `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                                            |
 | `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 tras + (požadavky, relace, hostitelé, režimy zachycení, export, ws). LOCAL_ONLY + SPAWN_CAPABLE. Viz `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                                  |
 | `app/a2a/`                                                                   | vstupní bod A2A JSON-RPC 2.0 (`POST /a2a`)                                                                                                                                                                                                                                                                            |
@@ -150,11 +150,11 @@ src/
 | `app/(dashboard)/dashboard/`                                                 | Stránky UI řídicího panelu (50 sekcí +, soubory ~ 118 page.tsx : poskytovatelé, komba, nastavení, paměť, dovednosti, webhooky, hodnocení, audit, dávka, mezipaměť, náklady, zdraví, systém, aktivita atd.)                                                                                                            |
 | `app/(dashboard)/dashboard/search-tools/`                                    | Search Tools Studio UI (3 karty: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — viz `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                          |
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (plán 21): `page.tsx` (3kartový shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Stránka řídicího panelu AgentBridge — karta serveru, 9 karet agentů, průvodce nastavením, mapování modelu, seznam vynechaných položek. i18n PT-BR + EN. Viz `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                         |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Stránka řídicího panelu Traffic Inspector – rozdělení DevTools, 7 karet s podrobnostmi, 4 přepínače režimu snímání, záznam relace, vybarvení kontextu. i18n PT-BR + EN. Viz `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                   |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Stránka řídicího panelu AgentBridge karta serveru —, 9 karet agentů, průvodce nastavením, mapování modelu, seznam vynechaných položek. i18n PT-BR + EN. Viz `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                         |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Stránka řídicího panelu Traffic Inspector — rozdělení DevTools, 7 karet s podrobnostmi, 4 přepínače režimu snímání, záznam relace, zbarvení kontextu. i18n PT-BR + EN. Viz `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                    |
 | `app/(dashboard)/dashboard/activity/`                                        | Stránka zdroje aktivit (skupina B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — viz `docs/architecture/MONITORING_SECTIONS.md`                                                                                                          |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Stránka sdílení kvót (skupina B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                         |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Stránka konfigurace plánu poskytovatele (skupina B): `page.tsx` + `ProviderPlanConfigClient.tsx` – přepsání dimenzí kvóty na připojení                                                                                                                                                                                |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Stránka konfigurace plánu poskytovatele (skupina B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvótové dimenze na připojení přepsání                                                                                                                                                                              |
 | `app/docs/`                                                                  | Vestavěný prohlížeč dokumentace (vykresluje `docs/*.md`)                                                                                                                                                                                                                                                              |
 | `app/landing/`                                                               | Marketingová vstupní stránka                                                                                                                                                                                                                                                                                          |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Stránky související s ověřováním                                                                                                                                                                                                                                                                                      |
@@ -168,7 +168,7 @@ src/
 | Modul                                    | Účel                                                                                                                                                                                                                                                                                                                        |
 | ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `a2a/`                                   | správce úloh protokolu A2A, dovednosti (5), streamování                                                                                                                                                                                                                                                                     |
-| `acp/`                                   | Registr agentů CLI (místní objev CLI – viz `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                      |
+| `acp/`                                   | Registr agentů CLI (místní objev CLI — viz `docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`)                                                                                                                                                                                                                                      |
 | `api/`                                   | Sdílení pomocníci API (`requireManagementAuth`, ověření)                                                                                                                                                                                                                                                                    |
 | `auth/`                                  | Relace, hash hesla, ověření tokenu                                                                                                                                                                                                                                                                                          |
 | `batches/`                               | OpenAI Dávkové manipulátory API                                                                                                                                                                                                                                                                                             |
@@ -176,36 +176,36 @@ src/
 | `cloudAgent/`                            | Cloud Agents (Codex Cloud, Devin, Jules) — viz `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                             |
 | `combos/`                                | Pomocníci při změně pořadí + v kombinovaném rozlišení                                                                                                                                                                                                                                                                       |
 | `audit/`                                 | Pomocníci zdroje aktivit: `highLevelActions.ts` (seznam povolených + `isHighLevelAction()`), `activityIcons.ts` (mapa akce → icon/verb ), `timeline.ts` (groupByDay/relativeTime) — viz `docs/architecture/MONITORING_SECTIONS.md`                                                                                          |
-| `compliance/`                            | Protokol auditu audit poskytovatele + — viz `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                   |
+| `compliance/`                            | Audit log + provider audit — viz `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                              |
 | `compression/`                           | Lepidlo na kompresní motory (motory žijí v `open-sse/services/compression/`)                                                                                                                                                                                                                                                |
 | `config/`                                | Pomocníci pro konfiguraci za běhu                                                                                                                                                                                                                                                                                           |
 | `db/`                                    | 120 + doménových DB modulů + 168 migrací (pro SQLite vždy projděte zde)                                                                                                                                                                                                                                                     |
-| `quota/`                                 | Engine pro sdílení kvót: `dimensions.ts` (types/Zod), `types.ts` ( rozhraní QuotaStore ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` – viz `docs/routing/QUOTA_SHARE.md` |
+| `quota/`                                 | Engine pro sdílení kvót: `dimensions.ts` (types/Zod), `types.ts` ( rozhraní QuotaStore ), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — viz `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                 | Klient katalogu bezplatného modelu radaru: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — viz `docs/frameworks/RADAR.md`                                                                                                                                      |
 | `display/`                               | pomocníci pro formátování UI (cena, latence atd.)                                                                                                                                                                                                                                                                           |
 | `embeddings/`                            | Pomocníci služby vkládání                                                                                                                                                                                                                                                                                                   |
 | `env/`                                   | + validace analýzy proměnné Env                                                                                                                                                                                                                                                                                             |
 | `evals/`                                 | Eval framework (suites, runner, runtime) — viz `docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                   |
-| `guardrails/`                            | PII masker, rychlá injekce, zrakový most – viz `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                |
+| `guardrails/`                            | PII masker, rychlá injekce, můstek vidění — viz `docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                               |
 | `jobs/`                                  | Úlohy na pozadí (jako cron)                                                                                                                                                                                                                                                                                                 |
-| `memory/`                                | Konverzační paměť (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant tier 2) — viz `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                   |
+| `memory/`                                | Konverzační paměť (SQLite FTS5 + sqlite-vec hybridní RRF + Qdrant úroveň 2) — viz `docs/frameworks/MEMORY.md`                                                                                                                                                                                                               |
 | `memory/embedding/`                      | Vrstva pro vkládání z více zdrojů: `index.ts` (překladač), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plán 21)                                                                                                                                                                         |
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + vector, k = 60). Lazy-init, ladně degraduje, když sqlite-vec není k dispozici. (plán 21)                                                                                                                                                                   |
 | `memory/reindex.ts`                      | `runReindexBatch()` — zpracovává vzpomínky se `needs_reindex=1` na pozadí; volaná `POST /api/memory/reindex` a lazy-backfill path. (plán 21)                                                                                                                                                                                |
 | `monitoring/`                            | Zdravotní kontroly, emise metrik                                                                                                                                                                                                                                                                                            |
-| `oauth/`                                 | toky OAuth/import pro 22 modulů poskytovatelů (agy, antigravity, claude, cline, codebuddy-cn, codex, kurzor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, xenoqi, opendir. zed-hosted, zed)                                                                       |
+| `oauth/`                                 | toky OAuth/import pro 22 modulů poskytovatelů (agy, antigravity, claude, cline, codebuddy-cn, codex, kurzor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, traoqudera, opendir. zed-hosted, zed)                                                                   |
 | `plugins/`                               | Registr zásuvných modulů                                                                                                                                                                                                                                                                                                    |
 | `promptCache/`                           | Zarážky mezipaměti výzvy v antropickém stylu                                                                                                                                                                                                                                                                                |
-| `skills/`                                | Rámec dovedností (vestavěný + marketplace + SkillsSH) – viz `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                     |
+| `skills/`                                | Rámec dovedností (vestavěný + marketplace + SkillsSH) — viz `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                     |
 | `playground/`                            | Sdílení pomocníci Playground Studio: `codeExport.ts` (curl/Python/TS generátor), `promptImprover.ts` (meta-prompt builder), `streamMetrics.ts` (pure TTFT/TPS), `types.ts` (ceník) — viz `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                             |
-| `webhookDispatcher.ts`                   | HMAC webhook delivery — viz `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                   |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Správci tunelů – viz `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                            |
+| `webhookDispatcher.ts`                   | HMAC webhook dodání — viz `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                     |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Správci tunelů — viz `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                            |
 | `cloudSync.ts`, `initCloudSync.ts`       | Volitelná cloudová synchronizace stavu                                                                                                                                                                                                                                                                                      |
-| `localDb.ts`                             | Re-export barel pro db moduly (bez logiky – pouze reexporty)                                                                                                                                                                                                                                                                |
+| `localDb.ts`                             | Re-export barel pro db moduly (žádné logické reexporty — pouze)                                                                                                                                                                                                                                                             |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Požadavek na mezipaměť + idempotency                                                                                                                                                                                                                                                                                        |
-| (~ 30 dalších souborů nejvyšší úrovně)   | Specializovaní pomocníci (logEnv, modelsDevSync, piiSanitizer atd.)                                                                                                                                                                                                                                                         |
+| (~ 30 dalších souborů nejvyšší úrovně)   | Specializovaní pomocníci (logEnv, modelsDevSync, piiSanitizer, atd.)                                                                                                                                                                                                                                                        |
 
-### `src/lib/db/` — Databáze (147 modulů + 208 migrací)
+### Databáze `src/lib/db/` — (147 modulů migrace + 208)
 
 | Subdir                    | Účel                                                                                                                                                                                           |
 | ------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponenta palubní desky API: adaptéry přes `packages/ui-kit` — viz `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: názvy ikon používané obrazovkami → komponenty Lucide (`<Icon>`)                              |
-| `constants/providers.ts`         | **377 poskytovatelů** s ověřením Zod (zdroj pravdy)                                                      |
+| `constants/providers.ts`         | **394 poskytovatelů** s ověřením Zod (zdroj pravdy)                                                      |
 | `constants/cliTools.ts`          | Externí registr nástrojů CLI                                                                             |
-| `constants/routingStrategies.ts` | **20 směrovacích strategií** s prioritami                                                                |
+| `constants/routingStrategies.ts` | **22 směrovacích strategií** s prioritami                                                                |
 | `constants/publicApiRoutes.ts`   | Cesty, které vyžadují ověření nosiče (vs. management).                                                   |
 | `constants/upstreamHeaders.ts`   | Seznam odmítnutí záhlaví pro upstream požadavky                                                          |
 | `validation/schemas.ts`          | schémata ~ 80 Zod (jediný zdroj pravdy pro smlouvy API )                                                 |
@@ -265,7 +265,7 @@ Samostatný pracovní prostor npm (`@omniroute/open-sse`). Zajišťuje zpracová
 ```
 open-sse/
 ├── handlers/            # 16 souborů (12 obslužných rutin + 4 pomocné moduly): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search atd.
-├── executors/           # 150 modulů executorů (třídy rozšiřující BaseExecutor + pomocné moduly pro jednotlivé poskytovatele)
+├── executors/           # 163 modulů executorů (třídy rozšiřující BaseExecutor + pomocné moduly pro jednotlivé poskytovatele)
 ├── translator/          # Převodníky formátů (9 pro požadavky, 9 pro odpovědi, 9 pomocných modulů)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ modulů služeb (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM atd.)
@@ -391,7 +391,7 @@ open-sse/
 
 ---
 
-## `docs/` — Veřejná dokumentace (7 kořenových souborů + 17 podadresářů)
+## Veřejná dokumentace `docs/` — (7 kořenových souborů + 17 podadresářů)
 
 ### Průvodce na nejvyšší úrovni
 
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externí integrace CLI + Vnitřní OmniRoute CLI                                                  |
 | `I18N.md`                   | architektura i18n, přidání jazyka, 67 lokalit                                                  |
 | `UNINSTALL.md`              | Čisté kroky odinstalace                                                                        |
-| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalog 377 poskytovatelů (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automaticky generované** katalog 394 poskytovatelů (regen: `npm run gen:provider-reference`) |
 
 ### Subsystém hloubkové ponory
 
@@ -460,11 +460,11 @@ open-sse/
 
 ### Podadresáře
 
-| Subdir                | Účel                                                                                                                                                                                            |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Lokalizované překlady dokumentů (41 jazyků)                                                                                                                                                     |
-| `docs/screenshots/`   | Obrazové podklady pro průvodce                                                                                                                                                                  |
-| `_tasks/superpowers/` | Plans/specs od supervelmocí (`writing-plans`/`brainstorming`) + research — izolované, samostatně verzované repo, gitignorované hlavním stromem. Viz CLAUDE.md → "Plánování a výzkum artefaktů". |
+| Subdir                | Účel                                                                                                                                                                                             |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | Lokalizované překlady dokumentů (41 jazyků)                                                                                                                                                      |
+| `docs/screenshots/`   | Obrazové podklady pro průvodce                                                                                                                                                                   |
+| `_tasks/superpowers/` | Plans/specs ze superschopností (`writing-plans`/`brainstorming`) + výzkum — izolovaný, samostatně verzovaný repo, gitignorovaný hlavním stromem. Viz CLAUDE.md → "Plánování a výzkum artefaktů". |
 
 ---
 

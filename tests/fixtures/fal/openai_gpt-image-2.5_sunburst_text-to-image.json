@@ -1,0 +1,463 @@
+{
+  "endpoint_id": "openai/gpt-image-2.5/sunburst/text-to-image",
+  "metadata": {
+    "display_name": "GPT Image 2.5 Sunburst Text to Image",
+    "category": "text-to-image",
+    "description": "OpenAI's precision-focused image model, built for premium visual work, extra fidelity on intricate detail, in exchange for longer generation times.",
+    "status": "active",
+    "tags": ["realism", "typography", "stylized"],
+    "updated_at": "2026-09-11T19:34:21.150Z",
+    "is_favorited": null,
+    "thumbnail_url": "https://v3b.fal.media/files/b/0aa9a3c6/xpKm5FzsZBuvm2Bf8xY7W.jpg",
+    "model_url": "https://fal.run/openai/gpt-image-2.5/sunburst/text-to-image",
+    "license_type": "commercial",
+    "date": "2026-09-08T19:41:24.961Z",
+    "group": {
+      "key": "gpt-25",
+      "label": "Text to Image Sunburst"
+    },
+    "highlighted": false,
+    "kind": "inference",
+    "pinned": false
+  },
+  "openapi": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Queue OpenAPI for fal-ai/gpt-image-2.5-sunburst",
+      "version": "1.0.0",
+      "description": "The OpenAPI schema for the fal-ai/gpt-image-2.5-sunburst queue.",
+      "x-fal-metadata": {
+        "endpointId": "fal-ai/gpt-image-2.5-sunburst",
+        "playgroundUrl": "https://fal.ai/models/fal-ai/gpt-image-2.5-sunburst",
+        "documentationUrl": "https://fal.ai/models/fal-ai/gpt-image-2.5-sunburst/api",
+        "about": "Generate images with the selected GPT Image 2.5 model."
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Authorization",
+          "description": "Fal Key"
+        }
+      },
+      "schemas": {
+        "QueueStatus": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]
+            },
+            "request_id": {
+              "type": "string",
+              "description": "The request id."
+            },
+            "response_url": {
+              "type": "string",
+              "description": "The response url."
+            },
+            "status_url": {
+              "type": "string",
+              "description": "The status url."
+            },
+            "cancel_url": {
+              "type": "string",
+              "description": "The cancel url."
+            },
+            "logs": {
+              "type": "object",
+              "description": "The logs.",
+              "additionalProperties": true
+            },
+            "metrics": {
+              "type": "object",
+              "description": "The metrics.",
+              "additionalProperties": true
+            },
+            "queue_position": {
+              "type": "integer",
+              "description": "The queue position."
+            }
+          },
+          "required": ["status", "request_id"]
+        },
+        "GptImage25SunburstInput": {
+          "properties": {
+            "background": {
+              "enum": ["auto", "transparent", "opaque"],
+              "description": "Background for the generated image",
+              "default": "auto",
+              "title": "Background",
+              "type": "string"
+            },
+            "output_compression": {
+              "description": "Compression level from 0 to 100. Only supported when output_format is 'jpeg' or 'webp'.",
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "maximum": 100,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Output Compression"
+            },
+            "image_size": {
+              "description": "The size of the generated image. Supports preset names, explicit {width, height}, or 'auto' to let the model pick the best size. Concrete sizes must have both dimensions as multiples of 16, max edge 3840px, aspect ratio <= 3:1, total pixels between 655,360 and 8,294,400.",
+              "default": "landscape_4_3",
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ImageSize"
+                },
+                {
+                  "enum": [
+                    "square_hd",
+                    "square",
+                    "portrait_4_3",
+                    "portrait_16_9",
+                    "landscape_4_3",
+                    "landscape_16_9",
+                    "auto"
+                  ],
+                  "type": "string"
+                }
+              ],
+              "title": "Image Size"
+            },
+            "sync_mode": {
+              "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+              "default": false,
+              "title": "Sync Mode",
+              "type": "boolean"
+            },
+            "prompt": {
+              "maxLength": 32000,
+              "description": "The prompt for image generation",
+              "minLength": 1,
+              "title": "Prompt",
+              "examples": [
+                "create a realistic image taken with iphone at these coordinates 41\u00b043\u203232\u2033N 49\u00b056\u203249\u2033W 15 April 1912"
+              ],
+              "type": "string"
+            },
+            "num_images": {
+              "maximum": 10,
+              "description": "Number of images to generate",
+              "default": 1,
+              "minimum": 1,
+              "title": "Number of Images",
+              "examples": [1],
+              "type": "integer"
+            },
+            "enable_safety_checker": {
+              "description": "Authorized callers may set false to request relaxed screening.",
+              "default": true,
+              "title": "Enable Safety Checker",
+              "type": "boolean"
+            },
+            "quality": {
+              "type": "string",
+              "enum": ["auto", "low", "medium", "high", "xhigh", "max"],
+              "description": "Quality for the generated image. Higher settings increase detail, latency, and token usage. Use 'auto' to let the model choose.",
+              "default": "high",
+              "title": "Quality"
+            },
+            "output_format": {
+              "enum": ["jpeg", "png", "webp"],
+              "description": "Output format for the images",
+              "default": "png",
+              "title": "Output Format",
+              "type": "string"
+            }
+          },
+          "required": ["prompt"],
+          "description": "GPT Image 2.5 generation inputs, kept separate from GPT Image 2.",
+          "x-fal-order-properties": [
+            "prompt",
+            "image_size",
+            "background",
+            "quality",
+            "num_images",
+            "output_format",
+            "output_compression",
+            "sync_mode",
+            "enable_safety_checker"
+          ],
+          "title": "GPTImage25TextToImageRequest",
+          "type": "object"
+        },
+        "GptImage25SunburstOutput": {
+          "properties": {
+            "images": {
+              "examples": [
+                [
+                  {
+                    "width": 1024,
+                    "content_type": "image/png",
+                    "file_name": "EnWrO3XWjPE0nxBDpaQrj.png",
+                    "url": "https://v3b.fal.media/files/b/0a869129/EnWrO3XWjPE0nxBDpaQrj.png",
+                    "height": 1024
+                  }
+                ]
+              ],
+              "description": "The generated images.",
+              "title": "Images",
+              "items": {
+                "$ref": "#/components/schemas/ImageFile"
+              },
+              "type": "array"
+            }
+          },
+          "required": ["images"],
+          "x-fal-order-properties": ["images"],
+          "title": "ImageResponse",
+          "type": "object"
+        },
+        "ImageSize": {
+          "properties": {
+            "width": {
+              "exclusiveMinimum": 0,
+              "description": "The width of the generated image.",
+              "default": 512,
+              "title": "Width",
+              "maximum": 14142,
+              "type": "integer"
+            },
+            "height": {
+              "exclusiveMinimum": 0,
+              "description": "The height of the generated image.",
+              "default": 512,
+              "title": "Height",
+              "maximum": 14142,
+              "type": "integer"
+            }
+          },
+          "x-fal-order-properties": ["width", "height"],
+          "title": "ImageSize",
+          "type": "object"
+        },
+        "ImageFile": {
+          "properties": {
+            "file_size": {
+              "description": "The size of the file in bytes.",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "File Size",
+              "examples": [4404019]
+            },
+            "url": {
+              "description": "The URL where the file can be downloaded from.",
+              "title": "Url",
+              "type": "string"
+            },
+            "content_type": {
+              "description": "The mime type of the file.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Content Type",
+              "examples": ["image/png"]
+            },
+            "file_name": {
+              "description": "The name of the file. It will be auto-generated if not provided.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "File Name",
+              "examples": ["z9RV14K95DvU.png"]
+            },
+            "width": {
+              "description": "The width of the image",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Width"
+            },
+            "height": {
+              "description": "The height of the image",
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Height"
+            }
+          },
+          "required": ["url"],
+          "x-fal-order-properties": [
+            "url",
+            "content_type",
+            "file_name",
+            "file_size",
+            "width",
+            "height"
+          ],
+          "title": "ImageFile",
+          "type": "object"
+        }
+      }
+    },
+    "paths": {
+      "/fal-ai/gpt-image-2.5-sunburst/requests/{request_id}/status": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            },
+            {
+              "name": "logs",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "description": "Whether to include logs (`1`) in the response or not (`0`)."
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/gpt-image-2.5-sunburst/requests/{request_id}/cancel": {
+        "put": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request was cancelled.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean",
+                        "description": "Whether the request was cancelled successfully."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/gpt-image-2.5-sunburst": {
+        "post": {
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/GptImage25SunburstInput"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/gpt-image-2.5-sunburst/requests/{request_id}": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Result of the request.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/GptImage25SunburstOutput"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "servers": [
+      {
+        "url": "https://queue.fal.run"
+      }
+    ],
+    "security": [
+      {
+        "apiKeyAuth": []
+      }
+    ]
+  }
+}

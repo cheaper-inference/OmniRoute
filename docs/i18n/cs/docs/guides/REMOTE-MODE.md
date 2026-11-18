@@ -46,28 +46,33 @@ váš notebook                             vzdálený OmniRoute (VPS)
 
 ## Připojení
 
-### Pomocí hesla pro správu (počáteční nastavení)
+### S heslem pro správu (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Heslo pro správu serveru http://192.168.0.15:20128: ********
-# ✔ Připojeno k http://192.168.0.15:20128 — kontext '192.168.0.15' (rozsah: admin)
+# Heslo pro správu pro http://192.168.0.15:20128: ********
+# ✔ Připojeno k http://192.168.0.15:20128 — kontext „192.168.0.15“ (rozsah: admin)
 ```
 
-Postup s heslem ve výchozím nastavení vydá token s rozsahem **admin** (jelikož máte heslo,
-již máte úplnou kontrolu). Rozsah omezíte pomocí `--scope`:
+Tok při použití hesla ve výchozím nastavení vydá token **správce** (heslo máte,
+takže již máte plnou kontrolu). Rozsah můžete zmenšit pomocí `--scope`:
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Možnosti: `--port <p>` (pokud hostitel port neobsahuje), `--name <ctx>` (název kontextu),
+Možnosti: `--port <p>` (pokud hostitel žádný nemá), `--name <ctx>` (název kontextu),
 `--scope read|write|admin`. Úplná URL se použije beze změny:
 `omniroute connect https://omni.example.com`.
 
-### Pomocí předem vygenerovaného tokenu
+Když má server povolené dvoufaktorové ověřování řídicího panelu (Nastavení →
+Zabezpečení), samotné heslo je odmítnuto: CLI vás poté požádá o kód z
+autentizační aplikace (nebo o obnovovací kód). Pro neinteraktivní použití jej
+předejte předem pomocí `--totp <code>`.
 
-Vygenerujte token s omezeným rozsahem na řídicím panelu (nebo pomocí `omniroute tokens create`) a
+### S předem vygenerovaným tokenem
+
+Vygenerujte token s určeným rozsahem v řídicím panelu (nebo pomocí `omniroute tokens create`) a
 vložte jej — heslo není potřeba:
 
 ```bash
@@ -433,14 +438,14 @@ omniroute contexts remove 192-168-0-15 --yes   # odstraní místní kontext (i k
 
 ---
 
-## Koncové body API (referenční přehled)
+## Koncové body API (referenční)
 
-| Metoda | Trasa                 | Ověření          | Rozsah                       |
-| ------ | --------------------- | ---------------- | ---------------------------- |
-| POST   | `/api/cli/connect`    | heslo pro správu | — (veřejné, chráněné heslem) |
-| GET    | `/api/cli/whoami`     | přístupový token | čtení                        |
-| GET    | `/api/cli/tokens`     | přístupový token | správce                      |
-| POST   | `/api/cli/tokens`     | přístupový token | správce                      |
-| DELETE | `/api/cli/tokens/:id` | přístupový token | správce                      |
+| Metoda | Trasa                 | Ověření                      | Rozsah                       |
+| ------ | --------------------- | ---------------------------- | ---------------------------- |
+| POST   | `/api/cli/connect`    | heslo; 2FA, pokud je zapnuté | — (veřejný, chráněný heslem) |
+| GET    | `/api/cli/whoami`     | přístupový token             | read                         |
+| GET    | `/api/cli/tokens`     | přístupový token             | admin                        |
+| POST   | `/api/cli/tokens`     | přístupový token             | admin                        |
+| DELETE | `/api/cli/tokens/:id` | přístupový token             | admin                        |
 
 Úplná schémata najdete v souboru [openapi.yaml](../openapi.yaml).

@@ -24,13 +24,32 @@ import {
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 
 /** Convert the cached percentage/count fields with routing's existing converter. */
-function codexWindow(value: unknown) {
+function codexWindow(value: unknown, canonicalDuration?: number) {
   const window = convertUsageToQuotaInfo({ quotas: { window: value } }, { provider: "codex" })
     ?.windows?.window;
   if (!window) return undefined;
+  const measured = value && typeof value === "object" ? (value as Record<string, unknown>) : {};
   return {
     used_percent: window.percentUsed * 100,
     reset_at: window.resetAt ? Date.parse(window.resetAt) / 1000 : undefined,
+    // Canonical cache keys carry a known duration; neutral keys retain measured evidence only.
+    limit_window_seconds: canonicalDuration ?? measured.windowSeconds,
+  };
+}
+
+function codexCachedWindows(
+  quotas: Record<string, unknown>,
+  sessionKey: string,
+  weeklyKey: string
+) {
+  const neutralPrefix = sessionKey.replace(/session$/, "unknown_");
+  const known = [
+    codexWindow(quotas[sessionKey], 18000),
+    codexWindow(quotas[weeklyKey], 604800),
+  ].filter((window) => window !== undefined);
+  return {
+    primary_window: codexWindow(quotas[`${neutralPrefix}primary`]) ?? known.shift(),
+    secondary_window: codexWindow(quotas[`${neutralPrefix}secondary`]) ?? known.shift(),
   };
 }
 export function convertCachedUsageToQuotaInfo(
@@ -59,16 +78,14 @@ export function convertCachedUsageToQuotaInfo(
       rate_limit_reached_type: usage.rateLimitReachedType,
       rate_limit: {
         limit_reached: usage.limitReached ?? false,
-        primary_window: codexWindow(quotas.session),
-        secondary_window: codexWindow(quotas.weekly),
+        ...codexCachedWindows(quotas, "session", "weekly"),
       },
       additional_rate_limits: [
         {
           limit_name: CODEX_SPARK_DISPLAY_NAME,
           rate_limit: {
             limit_reached: usage.sparkLimitReached ?? false,
-            primary_window: codexWindow(quotas[CODEX_SPARK_QUOTA_SESSION]),
-            secondary_window: codexWindow(quotas[CODEX_SPARK_QUOTA_WEEKLY]),
+            ...codexCachedWindows(quotas, CODEX_SPARK_QUOTA_SESSION, CODEX_SPARK_QUOTA_WEEKLY),
           },
         },
       ],

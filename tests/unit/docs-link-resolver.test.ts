@@ -2,8 +2,10 @@ import { test } from "node:test";
 import assert from "node:assert/strict";
 import {
   resolveDocHref,
+  resolveDocImageSrc,
   normalizeDocsMarkdownLinks,
   GITHUB_REPO_BLOB_URL,
+  GITHUB_REPO_RAW_URL,
 } from "../../src/lib/docsLinkResolver.js";
 
 test("resolveDocHref: rewrites relative doc-to-doc links to extensionless Fumadocs paths", () => {
@@ -101,4 +103,41 @@ HTML link: <a href="../routing/AUTO-COMBO.md#scoring">Scoring</a>.
   assert.ok(out.includes('<a href="/docs/routing/AUTO-COMBO#scoring">Scoring</a>'));
   assert.ok(out.includes('[2]: /docs/frameworks/MCP-SERVER "MCP"'));
   assert.ok(out.includes('[1]: https://example.com "Example"'));
+});
+
+test("resolveDocImageSrc: loads repository images from the raw host, never the blob page", () => {
+  assert.equal(
+    resolveDocImageSrc("../diagrams/exported/request-pipeline.svg", "architecture/ARCHITECTURE.md"),
+    `${GITHUB_REPO_RAW_URL}/docs/diagrams/exported/request-pipeline.svg`
+  );
+  assert.equal(
+    resolveDocImageSrc("/docs/screenshots/01-providers.png", "guides/FEATURES.md"),
+    `${GITHUB_REPO_RAW_URL}/docs/screenshots/01-providers.png`
+  );
+  assert.equal(
+    resolveDocImageSrc("../../images/logo.png", "guides/FEATURES.md"),
+    `${GITHUB_REPO_RAW_URL}/images/logo.png`
+  );
+  assert.equal(resolveDocImageSrc("https://x.test/a.png", "guides/A.md"), "https://x.test/a.png");
+});
+
+test("normalizeDocsMarkdownLinks: rewrites markdown and HTML images", () => {
+  const out = normalizeDocsMarkdownLinks(
+    [
+      '![Pipeline](../diagrams/exported/a.svg "Pipeline")',
+      '<img alt="b" src="../diagrams/exported/b.svg" width="10">',
+      "![external](https://x.test/c.png)",
+    ].join("\n"),
+    "architecture/ARCHITECTURE.md"
+  );
+
+  assert.ok(
+    out.includes(`![Pipeline](${GITHUB_REPO_RAW_URL}/docs/diagrams/exported/a.svg "Pipeline")`)
+  );
+  assert.ok(
+    out.includes(
+      `<img alt="b" src="${GITHUB_REPO_RAW_URL}/docs/diagrams/exported/b.svg" width="10">`
+    )
+  );
+  assert.ok(out.includes("![external](https://x.test/c.png)"));
 });

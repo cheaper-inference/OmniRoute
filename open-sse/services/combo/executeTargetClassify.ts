@@ -12,6 +12,7 @@ import {
   isContentPolicyRefusalComboStopEnabled,
 } from "../../utils/error.ts";
 import { isContentPolicyRefusal } from "../../utils/contentPolicyError.ts";
+import { classifyProviderSafetyError } from "../../utils/providerSafety.ts";
 import { buildRedactedSummary } from "./comboErrorAggregation.ts";
 import type { ComboDiagnostics } from "../../utils/error.ts";
 import { formatExhaustedConnectionKey } from "./comboDiagFormat.ts";
@@ -144,12 +145,45 @@ export function handlePreContentStreamRetry(
   return true;
 }
 
+/**
+ * PROVIDER_SAFETY_STOPS_TERMINAL (#17049): classify a pre-content stream failure that is an
+ * explicit provider safety stop. A committed 200 stream hides the stop from the HTTP-level
+ * safety latch, so quality-rejection branches must end the combo instead of failing over.
+ */
+function classifyProviderSafetyStreamFailure(
+  quality: ResponseQualityResult
+): { status: number; code: string } | null {
+  const failure = quality.upstreamFailure;
+  if (!failure) return null;
+  return classifyProviderSafetyError({
+    status: failure.status,
+    code: failure.code,
+    type: failure.type,
+    message: failure.message,
+  });
+}
+
+export function isProviderSafetyStreamFailure(quality: ResponseQualityResult): boolean {
+  return classifyProviderSafetyStreamFailure(quality) !== null;
+}
+
 /** Protected-priority target whose upstream body failed quality validation. */
 export function qualityValidationFailure(quality: ResponseQualityResult): {
   ok: false;
   response: Response;
 } {
   const failure = quality.upstreamFailure;
+  const safety = classifyProviderSafetyStreamFailure(quality);
+  if (failure && safety) {
+    // Same public envelope as an HTTP-level stop, so the latch and clients see one shape.
+    return {
+      ok: false,
+      response: errorResponse(safety.status, failure.message || "Upstream request refused", {
+        code: safety.code,
+        type: "invalid_request_error",
+      }),
+    };
+  }
   if (failure && isContentPolicyRefusal(failure)) {
     return {
       ok: false,

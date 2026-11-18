@@ -1,1 +1,0 @@
-- **feat(oauth):** Route video generation, speech and transcription through the existing Grok Build OAuth connection, and image generation too when `GROK_SUBSCRIPTION_IMAGES_ENABLED` is on (same opt-in and request contract as the other Grok subscription image routes) ([#15305](https://github.com/diegosouzapw/OmniRoute/pull/15305)) — thanks @Kizuno18

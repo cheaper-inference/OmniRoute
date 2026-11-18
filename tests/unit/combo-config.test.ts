@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 const {
   resolveComboConfig,
+  resolveComboSetupConfig,
   getDefaultComboConfig,
   resolveComboTargetTimeoutMs,
   DEFAULT_COMBO_TARGET_TIMEOUT_MS,
@@ -11,7 +12,7 @@ const {
   resolveComboTargetTimeoutMsForCombo,
   resolveComboQueueDepth,
 } = await import("../../open-sse/services/comboConfig.ts");
-const { createComboSchema, updateComboDefaultsSchema } =
+const { createComboSchema, updateComboSchema, updateComboDefaultsSchema } =
   await import("../../src/shared/validation/schemas.ts");
 const { MAX_TIMER_TIMEOUT_MS } = await import("../../src/shared/utils/runtimeTimeouts.ts");
 const { ROUTING_STRATEGY_VALUES, INTERNAL_ROUTING_STRATEGY_VALUES } =
@@ -331,6 +332,93 @@ test("isComboCooldownWaitEligible engages for every strategy when the feature is
   for (const strategy of ALL_COMBO_STRATEGIES) {
     assert.equal(isComboCooldownWaitEligible(strategy, { enabled: true }), true);
     assert.equal(isComboCooldownWaitEligible(strategy, { enabled: false }), false);
+  }
+});
+
+test("only literal per-combo false opts out of global cooldown waiting for every strategy", () => {
+  const configs = [
+    undefined,
+    null,
+    {},
+    { comboCooldownWaitEnabled: undefined },
+    { comboCooldownWaitEnabled: true },
+    ...[null, 0, 1, "false", "true"].map((value) => ({ comboCooldownWaitEnabled: value })),
+  ];
+  for (const strategy of ALL_COMBO_STRATEGIES) {
+    for (const config of configs) {
+      assert.equal(isComboCooldownWaitEligible(strategy, { enabled: true }, config), true);
+      assert.equal(isComboCooldownWaitEligible(strategy, { enabled: false }, config), false);
+    }
+    assert.equal(
+      isComboCooldownWaitEligible(strategy, { enabled: true }, { comboCooldownWaitEnabled: false }),
+      false
+    );
+    assert.equal(
+      isComboCooldownWaitEligible(
+        strategy,
+        { enabled: false },
+        { comboCooldownWaitEnabled: false }
+      ),
+      false
+    );
+  }
+});
+
+test("combo cooldown opt-out survives create/update validation and config cascade", () => {
+  const config = { comboCooldownWaitEnabled: false };
+  const created = createComboSchema.parse({ name: "fail-fast", models: ["openai/gpt-4"], config });
+  const updated = updateComboSchema.parse({ config });
+  for (const parsed of [created, updated]) {
+    assert.equal(parsed.config?.comboCooldownWaitEnabled, false);
+    assert.equal(resolveComboSetupConfig(parsed, null).comboCooldownWaitEnabled, false);
+    assert.equal(
+      resolveComboConfig(parsed, { comboDefaults: { comboCooldownWaitEnabled: true } })
+        .comboCooldownWaitEnabled,
+      false
+    );
+  }
+  assert.equal("comboCooldownWaitEnabled" in getDefaultComboConfig(), false);
+});
+
+test("combo cooldown opt-out schema rejects string booleans on create and update", () => {
+  const config = { comboCooldownWaitEnabled: "false" };
+  assert.equal(
+    createComboSchema.safeParse({ name: "fail-fast", models: ["openai/gpt-4"], config }).success,
+    false
+  );
+  assert.equal(updateComboSchema.safeParse({ config }).success, false);
+});
+
+test("per-combo cooldown opt-out removes the wait-budget timeout floor, not explicit timeouts", () => {
+  const wait = { enabled: true, budgetMs: 300000 };
+  for (const strategy of ALL_COMBO_STRATEGIES) {
+    assert.equal(
+      resolveComboTargetTimeoutMsForCombo(
+        { comboCooldownWaitEnabled: false },
+        600000,
+        strategy,
+        wait
+      ),
+      DEFAULT_COMBO_TARGET_TIMEOUT_MS
+    );
+    assert.equal(
+      resolveComboTargetTimeoutMsForCombo(
+        { comboCooldownWaitEnabled: false, targetTimeoutMs: 45000 },
+        600000,
+        strategy,
+        wait
+      ),
+      45000
+    );
+    assert.equal(
+      resolveComboTargetTimeoutMsForCombo(
+        { comboCooldownWaitEnabled: true },
+        600000,
+        strategy,
+        wait
+      ),
+      300000 + COMBO_TARGET_TIMEOUT_WAIT_BUFFER_MS
+    );
   }
 });
 

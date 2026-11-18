@@ -171,8 +171,9 @@ export function resolvePlanValue(plan, providerSpecificData, providerId) {
     psd.tier,
     psd.accountTier,
     // Claude OAuth bootstrap: rate_limit_tier has the Max 5x/20x multiplier.
-    psd.organizationRateLimitTier,
+    // The account's own (seat) tier first: a Team org's base tier is not the seat's.
     psd.rateLimitTier,
+    psd.organizationRateLimitTier,
     psd.organizationType,
     // Codex OAuth bootstrap: chatgpt_plan_type is captured at import time
     // (src/lib/oauth/services/codexImport.ts) and is the only source of the
@@ -525,10 +526,13 @@ export function getBarColor(remainingPercentage: number): {
   };
 }
 
-export function formatCountdown(resetAt: string | null | undefined): string | null {
+export function formatCountdown(
+  resetAt: string | null | undefined,
+  now: number = Date.now()
+): string | null {
   if (!resetAt) return null;
   try {
-    const diff = new Date(resetAt).getTime() - Date.now();
+    const diff = new Date(resetAt).getTime() - now;
     if (diff <= 0) return null;
     const h = Math.floor(diff / 3_600_000);
     const m = Math.floor((diff % 3_600_000) / 60_000);
@@ -542,9 +546,11 @@ export function formatCountdown(resetAt: string | null | undefined): string | nu
   }
 }
 
-export function getNextResetSummary(quotas: any[] | undefined): string | null {
+export function getNextResetSummary(
+  quotas: any[] | undefined,
+  now: number = Date.now()
+): string | null {
   if (!quotas || quotas.length === 0) return null;
-  const now = Date.now();
   let soonest = Number.POSITIVE_INFINITY;
   let soonestIso: string | null = null;
   for (const q of quotas) {
@@ -556,7 +562,7 @@ export function getNextResetSummary(quotas: any[] | undefined): string | null {
       soonestIso = typeof q.resetAt === "string" ? q.resetAt : new Date(ts).toISOString();
     }
   }
-  return soonestIso ? formatCountdown(soonestIso) : null;
+  return soonestIso ? formatCountdown(soonestIso, now) : null;
 }
 
 function addQuotaModelIdVariants(out: Set<string>, provider: string, modelId: string) {

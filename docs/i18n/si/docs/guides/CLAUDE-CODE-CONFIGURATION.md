@@ -25,26 +25,78 @@ omniroute launch --profile glm52  # OmniRoute හරහා glm/glm-5.2 භාව
 
 ---
 
-## Claude Code ද්වාරයකට සම්බන්ධ වන ආකාරය
+## Claude කේතය ද්වාරයකට සම්බන්ධ වන ආකාරය
 
-Claude Code **Anthropic Messages API** සමඟ සන්නිවේදනය කරන අතර, පරිසර විචල්ය භාවිතයෙන් අභිරුචි
-අන්ත ලක්ෂ්යයක් වෙත යොමු කරනු ලැබේ (එයට `--base-url` සලකුණක් නොමැත):
+Claude කේතය කතා කරයි**Anthropic පණිවිඩ API** සහ පරිසර විචල්‍යයන් සහිත අභිරුචි අන්ත ලක්ෂ්‍යයකට යොමු කර ඇත (එයට `--base-url` ධජයක් නොමැත):
 
-| විචල්යය                                      | අරමුණ                                                                                                 |
-| -------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
-| `ANTHROPIC_BASE_URL`                         | ද්වාර මූල URL එක (Claude Code විසින් `/v1/messages` අගට එක් කරයි). **`/v1` උපසර්ගයක් නොතිබිය යුතුය.** |
-| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` ලෙස යවනු ලැබේ — ඔබේ OmniRoute ප්රවේශ ටෝකනය / API යතුර භාවිත කරන්න           |
-| `ANTHROPIC_API_KEY`                          | විකල්පය: `x-api-key` ලෙස යවනු ලැබේ. දෙකම සකසා ඇත්නම්, `ANTHROPIC_AUTH_TOKEN` ප්රමුඛ වේ                |
-| `ANTHROPIC_MODEL`                            | නිශ්චිත මාදිලියක් බලහත්කාරයෙන් භාවිත කරයි (`/model` තේරීම්කාරකයේ පෙරනිමිය අභිබවා යයි)                 |
-| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ස්වදේශීය `/model` තේරීම්කාරකය `/v1/models` වෙතින් `claude*`/`anthropic*` මාදිලි ලැයිස්තුගත කරයි |
-| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | එක් ප්රතිචාරයක ප්රතිදාන ටෝකන සීමා කරයි (උදා. `65536`)                                                 |
-| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ස්වයංක්රීය සංක්ෂිප්ත කිරීම සඳහා ටෝකන සීමාව                                                            |
+| විචල්ය                                       | අරමුණ                                                                                          |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ANTHROPIC_BASE_URL`                         | Gateway root URL (Claude කේතය `/v1/messages` එකතු කරයි).** `/v1` උපසර්ගයක් නැත.**              |
+| `ANTHROPIC_AUTH_TOKEN`                       | `Authorization: Bearer …` — ලෙස යවන ලද ඔබගේ OmniRoute ප්‍රවේශ ටෝකනය / API යතුර භාවිතා කරන්න    |
+| `ANTHROPIC_API_KEY`                          | විකල්ප: `x-api-key` ලෙස යවනු ලැබේ. දෙකම සෙට් උනොත් `ANTHROPIC_AUTH_TOKEN` දිනනවා               |
+| `ANTHROPIC_MODEL`                            | නිශ්චිත ආකෘතියක් බල කරන්න ( `/model` පිකර් පෙරනිමිය අභිබවා යයි)                                |
+| `CLAUDE_CODE_ENABLE_GATEWAY_MODEL_DISCOVERY` | `1` → ස්වදේශීය `/model` පිකර් `/v1/models` වෙතින් `claude*`/`anthropic*` ආකෘති ලැයිස්තුගත කරයි |
+| `CLAUDE_CODE_MAX_OUTPUT_TOKENS`              | ප්‍රතිචාරයකට කැප් ප්‍රතිදාන ටෝකන (උදා: `65536`)                                                |
+| `CLAUDE_CODE_AUTO_COMPACT_WINDOW`            | ස්වයං සංයුක්ත කිරීම සඳහා ටෝකන සීමාව                                                            |
 
-> පරිසර විචල්ය කියවනු ලබන්නේ **ආරම්භයේදී එක් වරක් පමණි** — ඒවා වෙනස් කිරීමෙන් පසු Claude Code නැවත ආරම්භ කරන්න.
+> Env vars කියවනු ලැබේ** ආරම්භයේදී වරක්** — ඒවා වෙනස් කිරීමෙන් පසු Claude කේතය නැවත ආරම්භ කරන්න.
 
-`omniroute launch` මේ සියල්ල ඔබ වෙනුවෙන් සකසයි: එය සක්රිය සන්දර්භයෙන් මූල URL එක + ටෝකනය
-විසඳා ගනී (එබැවින් `omniroute connect <vps>` පසු `omniroute launch`
-සෘජුවම ක්රියා කරයි), සේවාදායකයේ සෞඛ්ය පරීක්ෂා කර, `claude` ක්රියාත්මක කරයි.
+ස්ථාවර තන්තුවක් වෙනුවට භ්‍රමණය වන අක්තපත්‍රයක් සඳහා, වත්මන් අක්තපත්‍රය stdout වෙත මුද්‍රණය කරන විධානයකට `~/.claude/settings.json` හි `apiKeyHelper` සකසන්න. Claude කේතය පෙරනිමියෙන් මිනිත්තු පහක් එහි ප්‍රතිදානය හැඹිලි කරයි (`CLAUDE_CODE_API_KEY_HELPER_TTL_MS` එය අභිබවා යයි) සහ අගය `Authorization: Bearer` සහ `x-api-key` දෙකෙහිම යවයි. ස්ක්‍රිප්ටය අක්තපත්‍රය මුද්‍රණය කළ යුතු අතර වෙන කිසිවක් — එය සමඟ බැනරයක් v2.1.227 + හි සහායකයා අසමත් වේ.
+
+Entra ID SSO ක්‍රියා කරන ආකාරය මෙයයි: `scripts/cli/omniroute-sso.mjs token` API යතුරක් වෙනුවට OmniRoute සත්‍යාපනය කරන කෙටි කාලීන Entra ප්‍රවේශ ටෝකනයක් මුද්‍රණය කරයි. [`docs/security/ENTRA_SSO.md`](../security/ENTRA_SSO.md) බලන්න.
+
+`omniroute launch` ඔබට මේ සියල්ල සකසයි: එය සක්‍රිය සන්දර්භය වෙතින් URL + ටෝකනය නිරාකරණය කරයි (එබැවින් `omniroute connect <vps>` පසුව `omniroute launch` ක්‍රියා කරයි), සේවාදායකය සෞඛ්‍ය පරීක්ෂා කරයි, සහ `claude` execs .
+
+---
+
+## භාවිත ආරෝපණය: සැසි සහ ව්‍යාපෘති
+
+OmniRoute එක් එක් API යතුරේ ඉල්ලීම් කාණ්ඩ කරයි** නියෝජිත සැසි** සහ වාර්තා කරන** ව්යාපෘතිය** සෑම සැසියක්ම (`agent_sessions` වගුව) මත වැඩ කර ඇත, එබැවින් භාවිතය සහ පිරිවැය කණ්ඩායම් සාමාජිකයෙකුට, ව්‍යාපෘතියකට සහ සැසියකට වාර්තා කළ හැකිය.
+
+කිසිදු සේවාදායක සැකසුමකින් තොරව වාර්තා කර ඇති දේ:
+
+| ක්ෂේත්රය   | මූලාශ්රය                                                                                                                                  |
+| ---------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| සැසිය      | `x-claude-code-session-id` ශීර්ෂකය ( `metadata.user_id.session_id` ට සමාන අගයක් ), සැසියකට ස්ථායී                                         |
+| ව්යාපෘතිය  | `Primary working directory:` රේඛාව Claude කේතය එහි පාරිසරික පණිවිඩය යවයි; `.claude/worktrees/` යටතේ ඇති worktree ෆෝල්ඩර නිධි නාමයට විසඳයි |
+| ශාඛාව      | `Current branch:` git තත්ත්වයෙන් Claude කේතය පළමු පණිවිඩය සමඟ යවයි                                                                        |
+| සේවාදායකයා | `user-agent` (`claude-cli/<version>`)                                                                                                     |
+
+Codex (`<environment_context><cwd>`) සහ OpenCode (`x-opencode-session`) එකම ආකාරයකින් හඳුනා ගැනේ. සමඟ යතුරු** no-log** සැසි හැඳුනුම්පත සහ ශීර්ෂය සපයන ව්‍යාපෘති ක්ෂේත්‍ර පමණක් තබා ගැනීමට සක්‍රීය කර ඇත; විමසුමෙන් කියවන කිසිවක් (මාර්ගය, ශාඛාව) ගබඩා නොවේ.
+
+### ව්‍යාපෘතිය පැහැදිලිව නම් කිරීම (නිර්දේශිතයි)
+
+වැඩ කරන නාමාවලිය යන්ත්‍ර අතර වෙනස් වේ, එබැවින් එකම ගබඩාව විවිධ මාර්ග යටතේ පෙන්විය හැක. ඒ වෙනුවට ව්‍යාපෘතිය පැහැදිලිව යවන්න: Claude කේතය සෑම ආදර්ශ ඉල්ලීමකටම `ANTHROPIC_CUSTOM_HEADERS` හි ලැයිස්තුගත කර ඇති ඕනෑම ශීර්ෂයක් එක් කරයි, සහ OmniRoute ඒවායින් දෙකක් කියවයි:
+
+| ශීර්ෂකය                    | වටිනාකම                                                           |
+| -------------------------- | ----------------------------------------------------------------- |
+| `x-omniroute-project`      | ව්‍යාපෘතියේ නම, උදා: `omniroute`                                  |
+| `x-omniroute-project-repo` | සාමාන්‍යකරණය කළ දුරස්ථය, උදා: `github.com/diegosouzapw/OmniRoute` |
+
+දෙකම කියවන්නේ ආරෝපණය සඳහා පමණි; ඒවා කිසිවිටෙක උඩුගංගත සැපයුම්කරු වෙත යොමු නොකෙරේ.
+
+`ANTHROPIC_CUSTOM_HEADERS` ආරම්භයේදී එක් වරක් කියවන අතර, සැකසුම් ගොනු වචනාර්ථ අගයන් ගබඩා කරයි, එබැවින් Claude කේතය දියත් කරන විට එය ගණනය කරන්න. මෙය `~/.zshrc` හෝ `~/.bashrc` වෙත එකතු කර ව්‍යාපෘති ෆෝල්ඩරයෙන් `claude` ආරම්භ කරන්න:
+
+```bash
+claude() {
+  local common name repo
+  if common=$(git rev-parse --path-format=absolute --git-common-dir 2>/dev/null); then
+    case $common in
+      */.git) name=$(basename "$(dirname "$common")") ;;  # repository name, also in worktrees
+      *) name=$(basename "$common" .git) ;;                # bare repository (/srv/foo.git)
+    esac
+    repo=$(git remote get-url origin 2>/dev/null \
+      | sed -E 's#^[a-zA-Z][a-zA-Z0-9+.-]*://([^@/]*@)?##; s#^[^@/]+@([^:]+):#\1/#; s|[?#].*$||; s#\.git$##')
+  else
+    name=$(basename "$PWD")                                # not a git repository: folder name
+  fi
+  ANTHROPIC_CUSTOM_HEADERS="${ANTHROPIC_CUSTOM_HEADERS:+${ANTHROPIC_CUSTOM_HEADERS}
+}x-omniroute-project: ${name}${repo:+
+x-omniroute-project-repo: ${repo}}" command claude "$@"
+}
+```
+
+`sed` ප්‍රකාශනය දුරස්ථ URL තුළ කාවැදී ඇති ඕනෑම අක්තපත්‍ර, විමසුම් තන්තු සහ ඛණ්ඩනය ඉවත් කරන අතර දැනටමත් `ANTHROPIC_CUSTOM_HEADERS` හි ඇති ශීර්ෂයන් තබා ඇත. IDE දිගු ඔබේ කවචය නොමැතිව Claude කේතය දියත් කරයි, එබැවින් ඒවායේ සැසි නැවත ක්‍රියාකාරී නාමාවලියට වැටේ.
 
 ---
 

@@ -163,7 +163,7 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`に接続された 6
 | 健康レポート         | `health-report`      | プロバイダーごとにサーキット ブレーカー、クールダウン、ロックアウト状態を集約します                                                                                             | 健康、回復力               | 「すべてのプロバイダーの健康状態を表示」                 |
 | リスト機能           | `list-capabilities`  | 完全な 45 エントリのエージェント スキル カタログ (23 API + 21 CLI + 1 config) を、コンテキスト インジェクション用の生のSKILL.md URLsを含むマークダウン テーブルとして返します。 | カタログ、発見、スキル     | 「すべてのOmniRoute機能をリストする」                    |
 
-> エージェント カードは、ライブ 377 プロバイダー カタログと一致させておく必要があります。プロバイダー数とfree/no-authメタデータは、ランタイム レジストリから取得されます。
+> エージェント カードは、ライブ 394 プロバイダー カタログと一致させておく必要があります。プロバイダー数とfree/no-authメタデータは、ランタイム レジストリから取得されます。
 
 ### `list-capabilities`スキル詳細
 
@@ -182,56 +182,60 @@ OmniRoute `src/lib/a2a/taskExecution.ts::A2A_SKILL_HANDLERS`に接続された 6
 
 ## REST API（補助）
 
-JSON-RPC エンドポイント `/a2a` は、正式な A2A エントリーポイントです。以下の REST エンドポイントは、ダッシュボードや外部ツール向けの補助的なアクセスを提供します。
+JSON-RPC エンドポイント `/a2a` が正式な A2A エントリーポイントです。以下の REST エンドポイントは、ダッシュボードや外部ツール向けの補助的なアクセスを提供します。
 
-| エンドポイント               | メソッド | 説明                                                            | 認証                                         |
-| :--------------------------- | :------- | :-------------------------------------------------------------- | :------------------------------------------- |
-| `/api/a2a/status`            | GET      | サーバーのステータス、登録済みスキル                            | （公開）                                     |
-| `/api/a2a/tasks`             | GET      | フィルターを使用してタスクを一覧表示                            | 管理用                                       |
-| `/api/a2a/tasks/[id]`        | GET      | ID でタスクを取得                                               | 管理用                                       |
-| `/api/a2a/tasks/[id]/cancel` | POST     | 実行中のタスクをキャンセル                                      | 管理用                                       |
-| `/.well-known/agent.json`    | GET      | Agent Card（A2A ディスカバリー）                                | （公開、3600s キャッシュ）                   |
-| `/api/a2a/tasks`             | POST     | OmniConductor フリートへのインバウンド委任（Conductor PRD RF5） | Bearer と `OMNIROUTE_API_KEY` + `a2aEnabled` |
+| Endpoint                     | Method | Description                                                     | Auth                                                                                    |
+| :--------------------------- | :----- | :-------------------------------------------------------------- | :-------------------------------------------------------------------------------------- |
+| `/api/a2a/status`            | GET    | サーバーの状態、登録済みスキル                                  | （公開）                                                                                |
+| `/api/a2a/tasks`             | GET    | フィルター付きでタスクを一覧表示                                | 管理用認証または API キー（下記参照）                                                   |
+| `/api/a2a/tasks/[id]`        | GET    | ID でタスクを取得                                               | 管理用認証または API キー（下記参照）                                                   |
+| `/api/a2a/tasks/[id]/cancel` | POST   | 実行中のタスクをキャンセル                                      | 管理用認証または API キー（下記参照）                                                   |
+| `/.well-known/agent.json`    | GET    | エージェントカード（A2A ディスカバリー）                        | （公開、3600 秒間キャッシュ）                                                           |
+| `/api/a2a/tasks`             | POST   | OmniConductor フリートへのインバウンド委任（Conductor PRD RF5） | `GET` と同じ。`REQUIRE_API_KEY` がオフの場合は `OMNIROUTE_API_KEY` も必要；`a2aEnabled` |
 
-**インバウンド Conductor 委任（`POST /api/a2a/tasks`）：** 外部の A2A エージェントは、OmniRoute を介してコーディング作業を OmniConductor フリートに委任します。本文：`{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — 委任できるのは Conductor フリートのスキル（Agent Card で公開されているもの）のみです。フリートは git リポジトリ上で作業するため、`metadata.conductor.repo.url` は必須です。このルートは、サーバー側の `CONDUCTOR_ORCHESTRATOR_TOKEN`（フォールバックは `CONDUCTOR_HUB_TOKEN`）を使用して、ハブの `POST /v1/tasks` に変換し、`201 { conductor_task_id, state: "submitted" }` を返します。タスクの状態は SSE→A2A ミラー（RF1）を介して反映され、`GET /api/a2a/tasks?skill=conductor` で確認できます。
+`/api/a2a/tasks*` ルートを通過できるユーザーは、ログインおよび API キーの設定によって決まります。
 
----
+- `requireLogin=true`（デフォルト）の場合、ミドルウェアは管理用認証情報（ダッシュボードセッション、`manage` スコープの API キー、`oma_` アクセストークン）と `OMNIROUTE_API_KEY` のみを許可します。通常の推論キーでは `403` になります。`Authorization` ヘッダーでは、ミドルウェアは `OMNIROUTE_API_KEY` を `Bearer <key>` として指定した場合のみ受け付けます。キーのみを指定した場合や `Bearer` の後にタブを入れた場合は `401` になります。
+- `requireLogin=false`、またはオンボーディング前のループバックウィンドウの場合：`REQUIRE_API_KEY=true` では、有効な OmniRoute API キーまたは管理用認証情報が受け付けられ、匿名の呼び出し元は `401` になります。`REQUIRE_API_KEY` がオフの場合、ルートは公開されます。
+- `POST /api/a2a/tasks` では、`REQUIRE_API_KEY` がオフでその変数が設定されている場合、`Authorization` ヘッダーに `OMNIROUTE_API_KEY` も必要です。`x-api-key` などの他のヘッダーはここでは認証情報として扱われません。ログインがオフの場合、またはオンボーディング前は、`Bearer` プレフィックスの有無にかかわらずキーが受け付けられます。ログインがオンの場合、ミドルウェアを通過できるのは `Bearer <key>` の形式のみです。
+
+認証情報が必要な場合、`read` スコープの `oma_` トークンは `GET` に対してのみ機能します。
+
+**インバウンド Conductor 委任（`POST /api/a2a/tasks`）：** 外部の A2A エージェントは、OmniRoute を介して OmniConductor フリートにコーディング作業を委任します。本文：`{ skill: "conductor" | "conductor-cli-<profile>", messages: [{role, content}], metadata: { conductor: { repo: { url, base_ref? }, mode?, cli?, model? } } }` — 委任できるのは Conductor フリートのスキル（Agent Card で告知されているもの）のみです。`metadata.conductor.repo.url` は必須です（フリートは git リポジトリ上で作業します）。このルートは、サーバー側の `CONDUCTOR_ORCHESTRATOR_TOKEN`（フォールバックは `CONDUCTOR_HUB_TOKEN`）を使用してハブの `POST /v1/tasks` に変換し、`201 { conductor_task_id, state: "submitted" }` を返します。タスクの状態は SSE→A2A ミラー（RF1）経由で返され、`GET /api/a2a/tasks?skill=conductor` で確認できます。
 
 ## 新しいスキルの追加
 
 1. **スキルファイルを作成:** `src/lib/a2a/skills/<your-skill>.ts`
 
-   非同期関数 `(task: A2ATask) => Promise<{ artifacts, metadata }>` をエクスポートします。`smartRouting.ts` など、既存のスキルの形式に従ってください。
+   `(task: A2ATask, caller?: A2ACallerContext) => Promise<{ artifacts, metadata }>` という非同期関数をエクスポートします。`smartRouting.ts` などの既存スキルの形式に従ってください。スキルが HTTP 経由で OmniRoute にコールバックする場合は、`src/lib/a2a/selfLoopAuth.ts` の `buildSelfLoopHeaders(caller)` を使用してヘッダーを構築し、`OMNIROUTE_API_KEY` ではなく A2A 呼び出し元のキーで呼び出しが実行されるようにします。また、リダイレクトによってキーが送信されないよう、`fetch` に `redirect: "error"` を渡してください。ヘルパーはヘッダーのみを構築するため、各スキルでリダイレクトポリシーを設定します。解決されたベース URL が、プライベートネットワーク外の平文の http（ループバック、コンテナまたはサービス名、プライベートアドレスは使用可能）である場合、または認証情報を含む場合、キーを付与する代わりに `UnsafeSelfLoopTargetError` をスローします。そのため、拒否された呼び出しを握りつぶすスキルでは、このエラーを再スローする必要があります。
 
-2. **ハンドラーを登録:** `src/lib/a2a/taskExecution.ts` で、`A2A_SKILL_HANDLERS` にエントリを追加します。
+2. **ハンドラーを登録:** `src/lib/a2a/taskExecution.ts` の `A2A_SKILL_HANDLERS` にエントリを追加します。
 
    ```typescript
    export const A2A_SKILL_HANDLERS = {
      // ...既存のスキル
-     "your-skill": async (task) => {
+     "your-skill": async (task, caller) => {
        const skillModule = await import("./skills/yourSkill");
-       return skillModule.executeYourSkill(task);
+       return skillModule.executeYourSkill(task, caller);
      },
    };
    ```
 
-3. **Agent Card で公開:** `src/lib/a2a/agentCardMetadata.ts`（`/.well-known/agent.json` と `/.well-known/agent-card.json` で共有）で、`skills` 配列に以下を追加します。
+3. **Agent Card に公開:** `/.well-known/agent.json` および `/.well-known/agent-card.json` で共有される `src/lib/a2a/agentCardMetadata.ts` の `skills` 配列に追加します。
 
    ```json
    {
      "id": "your-skill",
-     "name": "Your Skill",
-     "description": "Brief, intent-focused description",
+     "name": "スキル名",
+     "description": "簡潔で意図に沿った説明",
      "tags": ["routing", "quota"],
-     "examples": ["Sample natural-language invocation"]
+     "examples": ["自然言語による呼び出しの例"]
    }
    ```
 
-4. **テストを作成:** `tests/unit/a2a-<your-skill>.test.ts`。正常系とエラー系を網羅してください。
+4. **テストを作成:** `tests/unit/a2a-<your-skill>.test.ts`。正常系とエラー系をカバーします。
 
-5. **ドキュメント化:** このファイルの `Available Skills` テーブルに新しいスキルを追加してください。
-
----
+5. このファイルの `Available Skills` テーブルに新しいスキルを**文書化**します。
 
 ## タスクの TTL
 

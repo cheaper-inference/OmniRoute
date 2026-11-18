@@ -79,4 +79,7 @@
 
 @layer base {
   :is(.ci-theme, .type-reading, .type-body) :is(strong, b) { font-weight: var(--ci-font-weight-semibold); }
+  /* An inner lang element would otherwise inherit the parent's computed
+     Switzer family; re-read the script-aware token from ci-tokens.css. */
+  :where(.ci-theme [lang]):is(:lang(ru), :lang(uk), :lang(be), :lang(bg), :lang(sr), :lang(mk), :lang(kk), :lang(ky), :lang(mn), :lang(tg), :lang(tt), :lang(ba), :lang(cv), :lang(el), :lang(vi), :lang(az), :lang(hy), :lang(ka)) { font-family: var(--ci-font-ui); }
 }

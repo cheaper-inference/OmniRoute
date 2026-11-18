@@ -122,13 +122,13 @@
 
 За групово добавяне на връзки с API ключове от CSV или JSON файл използвайте **Табло → Доставчици → Импортиране от файл**. Колоните са позиционни (`provider,name,apiKey,baseUrl,priority`); `provider` трябва вече да съществува като управляван доставчик или съвместим възел. Вижте [Импортиране на доставчици от CSV или JSON файл](../providers/CSV-IMPORT.md).
 
-### 🔐 Доставчици с абонамент
+### 🔐 Доставчици на абонаменти
 
 #### Claude Code (Pro/Max)
 
 ```bash
-Табло → Доставчици → Свързване на Claude Code
-→ Вход чрез OAuth → Автоматично опресняване на токена
+Табло → Доставчици → Свързване с Claude Code
+→ OAuth вход → Автоматично обновяване на токена
 → Проследяване на 5-часовата и седмичната квота
 
 Модели:
@@ -137,18 +137,20 @@
   cc/claude-haiku-4-5-20251001
 ```
 
-**Професионален съвет:** Използвайте Opus за сложни задачи, а Sonnet — за бързина. OmniRoute проследява квотата за всеки модел!
+**Професионален съвет:** Използвайте Opus за сложни задачи, а Sonnet за бързина. OmniRoute проследява квотата за всеки модел!
 
-Няма браузър на хоста на OmniRoute? Изпълнете `claude setup-token` навсякъде, където сте влезли в Claude Code, и поставете едногодишния токен в раздела **Токен за настройване**. Вижте [Claude Code с токен за настройване](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Няма браузър на хоста на OmniRoute? Изпълнете `claude setup-token` навсякъде, където сте влезли в Claude Code, и поставете едногодишния токен в раздела **Setup Token**. Вижте [Claude Code с setup token](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Маршрутите, съвместими с Claude и Claude Code, запазват нивото на усилие за разсъждение `max` за моделите Opus и Sonnet. Моделите Haiku не приемат нивото на усилие `max`, затова OmniRoute понижава тази заявка до висок бюджет за разсъждение, преди да я изпрати към доставчика.
+Маршрутите, съвместими с Claude и Claude Code, запазват усилието за мислене `max` за
+моделите Opus и Sonnet. Моделите Haiku не приемат нивото на усилие `max`, затова OmniRoute понижава
+тази заявка до висок бюджет за мислене, преди да я изпрати към upstream доставчика.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
-Табло → Доставчици → Свързване на Codex
-→ Вход чрез OAuth (порт 1455)
-→ Нулиране на всеки 5 часа и всяка седмица
+Табло → Доставчици → Свързване с Codex
+→ OAuth вход (порт 1455)
+→ 5-часово и седмично нулиране
 
 Модели:
   cx/gpt-5.5
@@ -160,9 +162,9 @@
 #### GitHub Copilot
 
 ```bash
-Табло → Доставчици → Свързване на GitHub
+Табло → Доставчици → Свързване с GitHub
 → OAuth чрез GitHub
-→ Месечно нулиране (на 1-во число от месеца)
+→ Месечно нулиране (на 1-во число)
 
 Модели:
   gh/gpt-5.5
@@ -172,55 +174,70 @@
   gh/gemini-3.1-pro-preview
 ```
 
+**AI кредити (таксуване въз основа на токени).** Когато GitHub отчете `credits_used` за
+акаунта, картата с ограниченията на доставчика показва ред **AI кредити** с
+изразходваните кредити през текущия разплащателен период, включително при неограничени планове за организации.
+
+**Локално ограничение за AI кредити.** Редактирайте връзка с GitHub и задайте **Лимит на AI кредитите за
+разплащателен период** (`providerSpecificData.githubCreditLimit`). Празната стойност го деактивира; `0`
+винаги пропуска връзката. Когато последното отчитане на използването е равно или надвишава лимита,
+изборът на акаунт пропуска тази връзка и маршрутизирането преминава към другите ви
+връзки, по същия начин като прекъсване съгласно политика за квоти. Проверката използва данните за използване,
+които периодичното обновяване на квотата вече събира — тя никога не извиква GitHub по пътя на заявката —
+и прилага отказоустойчив режим: липсващо или остаряло отчитане (по-старо от 15 минути или от
+вече нулиран разплащателен период) не блокира връзката. Това е локална защита, **а не гарантиран таван на разходите**:
+забавянията при отчитане от GitHub, интервалът на обновяване, заявките в процес на изпълнение и използването
+извън OmniRoute могат да го надхвърлят. За твърд лимит използвайте собствените контроли за разходи на GitHub.
+
 ### 💰 Евтини доставчици
 
-#### GLM-4.7 (Ежедневно нулиране, $0.6/1M)
+#### GLM-4.7 (ежедневно нулиране, $0.6/1M)
 
 1. Регистрирайте се: [Zhipu AI](https://open.bigmodel.cn)
-2. Вземете API ключ от Coding Plan
+2. Получете API ключ от Coding Plan
 3. Табло → Добавяне на API ключ: Доставчик: `glm`, API ключ: `your-key`
 
-**Използване:** `glm/glm-4.7` — **Професионален съвет:** Coding Plan предлага 3× по-голяма квота на 1/7 от цената! Нулира се ежедневно в 10:00 ч.
+**Използване:** `glm/glm-4.7` — **Професионален съвет:** Coding Plan предлага 3× по-голяма квота на 1/7 от цената! Нулиране всеки ден в 10:00 ч.
 
-#### MiniMax M2.1 (Нулиране на всеки 5 часа, $0.20/1M)
+#### MiniMax M2.1 (5-часово нулиране, $0.20/1M)
 
 1. Регистрирайте се: [MiniMax](https://www.minimax.io)
-2. Вземете API ключ → Табло → Добавяне на API ключ
+2. Получете API ключ → Табло → Добавяне на API ключ
 
 **Използване:** `minimax/MiniMax-M2.1` — **Професионален съвет:** Най-евтината опция за дълъг контекст (1M токена)!
 
-#### Kimi K2 ($9/месец фиксирана цена)
+#### Kimi K2 ($9/месец фиксирано)
 
 1. Абонирайте се: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
-2. Вземете API ключ → Табло → Добавяне на API ключ
+2. Получете API ключ → Табло → Добавяне на API ключ
 
-**Използване:** `kimi/kimi-k2.5` — **Професионален съвет:** Фиксирани $9/месец за 10M токена = ефективна цена от $0.90/1M!
+**Използване:** `kimi/kimi-k2.5` — **Професионален съвет:** Фиксирани $9/месец за 10M токена = ефективна цена $0.90/1M!
 
 #### Baidu Qianfan / ERNIE
 
 1. Регистрирайте се: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Създайте API ключ за Qianfan → Табло → Добавяне на API ключ: Доставчик: `qianfan`
+2. Създайте Qianfan API ключ → Табло → Добавяне на API ключ: Доставчик: `qianfan`
 
-**Използване:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` или друг идентификатор на модел на Qianfan, съвместим с OpenAI.
+**Използване:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` или друг OpenAI-съвместим идентификатор на модел на Qianfan.
 
 ### 🆓 БЕЗПЛАТНИ доставчици
 
-Безплатните доставчици без удостоверяване имат превключвател до **Не се изисква удостоверяване** на страницата си.
-Изключването му деактивира съответния доставчик, премахва го от конфигурирания и компактния изглед на „Доставчици“ и
+Безплатните доставчици без удостоверяване имат превключвател до **Не се изисква удостоверяване** на страницата си на доставчика.
+Изключването му деактивира доставчика, премахва го от изгледите „Конфигурирани доставчици“/„Компактен изглед“ и
 премахва моделите му от `/v1/models`.
 
 #### Qoder (9 БЕЗПЛАТНИ модела)
 
 ```bash
-Табло → Свързване на Qoder → Вход чрез OAuth → Достъпът зависи от текущите ограничения на доставчика
+Табло → Свързване с Qoder → OAuth вход → Достъпът зависи от текущите ограничения на доставчика
 
 Модели: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude БЕЗПЛАТНО)
+#### Kiro (БЕЗПЛАТЕН Claude)
 
 ```bash
-Табло → Свързване на Kiro → AWS Builder ID или Google/GitHub → ~50 кредита/месец
+Табло → Свързване с Kiro → AWS Builder ID или Google/GitHub → ~50 кредита/месец
 
 Модели: kr/claude-sonnet-4.5, kr/claude-haiku-4.5
 ```
@@ -335,28 +352,28 @@ codex "your prompt"
 
 ---
 
-## 🚀 Внедряване
+## Внедряване 🚀
 
-### Глобална инсталация чрез npm (препоръчително)
+### Глобално инсталиране на npm (препоръчително)
 
 ```bash
 npm install -g omniroute
 
-# Създаване на директорията за конфигурация
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Създаване на файла .env (вижте .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Стартиране на сървъра
+# Start server
 omniroute
-# Или със зададен порт:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI автоматично зарежда `.env` от `~/.omniroute/.env` или `./.env`.
+CLI автоматично зарежда `.env` от `~/.omniroute/.env` или `./.env`. `./.env` в работната директория може да зададе само кратък списък с разрешени ключове (`REQUIRE_API_KEY`, локал, часова зона и цветови настройки, а не портовете); поставете всичко останало в `~/.omniroute/.env`. Вижте [договорите за стартиране CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Режим в системната област
+### Режим на тава
 
 Стартирайте OmniRoute в системната област:
 
@@ -364,36 +381,36 @@ CLI автоматично зарежда `.env` от `~/.omniroute/.env` или
 omniroute serve --tray
 ```
 
-Командата приключва, след като сървърът и иконата в системната област са готови.
+Командата се връща, след като сървърът и треят са готови.
 
-Сървърът продължава да работи без терминала.
+Сървърът продължава без терминала.
 
-Режимът в системната област се поддържа в macOS, Windows и графични Linux сесии. Този режим не отваря таблото автоматично.
+Режимът на панела поддържа macOS, Windows и графични Linux сесии. Режимът на тава не отваря автоматично таблото.
 
-Използвайте менюто в системната област за следните действия:
+Използвайте менюто в областта за следните действия:
 
-- Отваряне на таблото.
-- Отваряне на `/dashboard/logs`.
+- Отворете таблото.
+- Отворете `/dashboard/logs`.
 - Промяна на автоматичното стартиране.
-- Спиране на OmniRoute.
+- Спрете OmniRoute.
 
-Не комбинирайте `--tray` със следните опции:
+Не комбинирайте `--tray` с тези опции:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Тези режими изискват различно управление на процесите.
+Тези режими изискват различна собственост върху процеса.
 
-Активирайте стартиране при следващото влизане в системата:
+Активиране на стартиране при следващото влизане в машината:
 
 ```bash
 omniroute autostart enable
 ```
 
-Автоматичното стартиране използва режима в системната област в macOS, Windows и графични Linux сесии. Linux без графична среда използва съществуващата потребителска услуга на systemd.
+Автоматичното стартиране използва режим на област на macOS, Windows и графични Linux сесии. Headless Linux използва съществуващата потребителска услуга systemd.
 
-Деактивирайте стартирането при влизане в системата:
+Деактивирайте стартирането при влизане:
 
 ```bash
 omniroute autostart disable
@@ -401,16 +418,16 @@ omniroute autostart disable
 
 ### Деинсталиране
 
-Когато OmniRoute вече не ви е необходим, предоставяме два бързи скрипта за пълно премахване:
+Когато вече не се нуждаете от OmniRoute, ние предоставяме два бързи скрипта за чисто премахване:
 
-| Команда                  | Действие                                                                                             |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Премахва системното приложение, но **запазва базата ви от данни и конфигурациите** в `~/.omniroute`. |
-| `npm run uninstall:full` | Премахва приложението И окончателно **изтрива всички конфигурации, ключове и бази от данни**.        |
+| командване               | Действие                                                                                       |
+| ------------------------ | ---------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Премахва системното приложение, но** запазва вашата DB и конфигурации** в `~/.omniroute`.      |
+| `npm run uninstall:full` | Премахва приложението AND за постоянно** изтрива всички конфигурации, ключове и бази данни** . |
 
-> Забележка: За да изпълните тези команди, отидете в папката на проекта OmniRoute (ако сте го клонирали) и ги стартирайте. Като алтернатива, ако е инсталиран глобално, можете просто да изпълните `npm uninstall -g omniroute`.
+> Забележка: За да изпълните тези команди, отидете до папката на проекта OmniRoute (ако сте го клонирали) и ги изпълнете. Като алтернатива, ако е инсталиран глобално, можете просто да стартирате `npm uninstall -g omniroute`.
 
-### Внедряване на VPS
+### Внедряване VPS
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -426,21 +443,21 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Или: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Внедряване с PM2 (малко памет)
+### Внедряване PM2 (малко памет)
 
-За сървъри с ограничена RAM използвайте опцията за ограничаване на паметта:
+За сървъри с ограничен RAM използвайте опцията за ограничаване на паметта:
 
 ```bash
-# С ограничение от 512MB (по подразбиране)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Или със зададено ограничение на паметта
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Или чрез ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -469,30 +486,30 @@ module.exports = {
 ### Docker
 
 ```bash
-# Изграждане на образа (по подразбиране = runner-cli с предварително инсталирани codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Преносим режим (препоръчително)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-За интегриран с хоста режим с CLI изпълними файлове вижте раздела за Docker в основната документация.
+За интегриран в хост режим с двоични файлове CLI вижте раздела Docker в основните документи.
 
-### Void Linux (xbps-src)
+### Невалиден Linux (xbps-src)
 
-Потребителите на Void Linux могат да пакетират и инсталират OmniRoute по нативен начин с помощта на рамката за кръстосана компилация `xbps-src`. Това автоматизира самостоятелното изграждане на Node.js заедно с необходимите нативни обвързвания на `better-sqlite3`.
+Потребителите на Void Linux могат да пакетират и инсталират OmniRoute естествено, като използват рамката за кръстосано компилиране `xbps-src`. Това автоматизира самостоятелното изграждане Node.js заедно с необходимите естествени свързвания `better-sqlite3`.
 
 <details>
-<summary><b>Преглед на шаблона за xbps-src</b></summary>
+<summary><b>Вижте шаблона xbps-src</b></summary>
 
 ```bash
-# Файл с шаблон за 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
 hostmakedepends="nodejs python3 make"
 depends="openssl"
-short_desc="Универсален AI шлюз с интелигентно маршрутизиране за множество доставчици на LLM"
+short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
@@ -507,7 +524,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Определяне на целевата процесорна архитектура за node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -516,29 +533,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Инсталиране на всички зависимости – без изпълнение на скриптове
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Изграждане на самостоятелния пакет на Next.js
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Копиране на статичните ресурси в самостоятелния пакет
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Компилиране на нативното обвързване на better-sqlite3
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Поставяне на компилираното обвързване в самостоятелния пакет
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Премахване на специфичните за архитектурата пакети на sharp
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Копиране на зависимостите на pino по време на изпълнение, пропуснати от статичния анализ на Next.js:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -552,7 +569,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Предотвратяване на премахването на празните директории на маршрутизатора на приложението Next.js от куката след инсталиране
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -580,49 +597,49 @@ post_install() {
 
 ### Променливи на средата
 
-| Променлива                              | Стойност по подразбиране             | Описание                                                                                                                                                                                  |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | Тайна за подписване на JWT (**променете в продукционна среда**)                                                                                                                           |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Парола за първоначално влизане                                                                                                                                                            |
-| `DATA_DIR`                              | `~/.omniroute`                       | Директория за данни (база данни, използване, регистрационни файлове)                                                                                                                      |
-| `PORT`                                  | по подразбиране за рамката           | Порт на услугата (`20128` в примерите)                                                                                                                                                    |
-| `HOSTNAME`                              | по подразбиране за рамката           | Хост за свързване (Docker използва по подразбиране `0.0.0.0`)                                                                                                                             |
-| `NODE_ENV`                              | по подразбиране за средата           | Задайте `production` при внедряване                                                                                                                                                       |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Публичен базов URL адрес, предоставен на таблото и достъпен за сървъра (заменя остарелия `BASE_URL`)                                                                                      |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Базов URL адрес на крайната точка за облачна синхронизация (заменя остарелия `CLOUD_URL`)                                                                                                 |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC тайна за генерираните API ключове                                                                                                                                                    |
-| `REQUIRE_API_KEY`                       | `false`                              | Изискване на Bearer API ключ за `/v1/*`                                                                                                                                                   |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Позволява на удостоверени потребители на таблото да разкриват при поискване пълните стойности на съхранените API ключове                                                                  |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Интервал на сървъра за опресняване на кешираните данни за ограниченията на доставчиците; бутоните за опресняване в потребителския интерфейс продължават да задействат ръчна синхронизация |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Деактивира автоматичните моментни снимки на SQLite преди запис, импортиране или възстановяване; ръчните архиви продължават да работят                                                     |
-| `APP_LOG_TO_FILE`                       | `true`                               | Активира записването на регистрационните файлове на приложението и одита на диска                                                                                                         |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Принудително използване на `Secure` бисквитка за удостоверяване (зад HTTPS обратен прокси сървър)                                                                                         |
-| `CLOUDFLARED_BIN`                       | не е зададено                        | Използва съществуващ двоичен файл `cloudflared` вместо управлявано изтегляне                                                                                                              |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Транспорт за управляваните бързи тунели (`http2`, `quic` или `auto`)                                                                                                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Ограничение на heap паметта на Node.js в MB                                                                                                                                               |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Максимален брой записи в кеша за подкани                                                                                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Максимален брой записи в семантичния кеш                                                                                                                                                  |
+| Променлива                              | По подразбиране                        | Описание                                                                                                                                                         |
+| --------------------------------------- | -------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(автоматично генериран)_              | JWT тайна за подписване — автоматично генерирана при първо изпълнение и персистирана до `server.env`; задайте го изрично, когато директорията с данни е ефимерна |
+| `INITIAL_PASSWORD`                      | _(незададено)_                         | Първа парола за влизане. npm/source инсталациите започват с `CHANGEME`: заменете го. Не е зададено: съветник за включване                                        |
+| `DATA_DIR`                              | `~/.omniroute`                         | Директория с данни (db, използване, регистрационни файлове)                                                                                                      |
+| `PORT`                                  | рамка по подразбиране                  | Сервизен порт (`20128` в примерите)                                                                                                                              |
+| `HOSTNAME`                              | рамка по подразбиране                  | Свързване на хост (Docker по подразбиране е `0.0.0.0`)                                                                                                           |
+| `NODE_ENV`                              | по подразбиране по време на изпълнение | Задайте `production` за внедряване                                                                                                                               |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`               | Публичната база URL се появява на таблото за управление и е изложена на сървъра (заменя наследеното `BASE_URL`)                                                  |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`                | Основна крайна точка за синхронизиране в облака URL (заменя наследеното `CLOUD_URL`)                                                                             |
+| `API_KEY_SECRET`                        | _(автоматично генериран)_              | HMAC тайна за генерирани API ключове — автоматично генерирани при първо изпълнение и запазени до `server.env`                                                    |
+| `REQUIRE_API_KEY`                       | `false`                                | Принудително носител API ключ на `/v1/*`                                                                                                                         |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                                | Позволете на удостоверените потребители на таблото за управление да разкриват пълните съхранени API ключови стойности при поискване                              |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                   | Честота на опресняване от страна на сървъра за кеширани данни за ограниченията на доставчика; UI бутоните за опресняване все още задействат ръчно синхронизиране |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                                | Деактивирайте автоматичните моментни снимки SQLite преди writes/import/restore; ръчните архиви все още работят                                                   |
+| `APP_LOG_TO_FILE`                       | `true`                                 | Разрешава извеждане на журнал на приложения и одит на диск                                                                                                       |
+| `AUTH_COOKIE_SECURE`                    | `false`                                | Принудителна бисквитка за удостоверяване на `Secure` (зад HTTPS обратен прокси)                                                                                  |
+| `CLOUDFLARED_BIN`                       | ненастроен                             | Използвайте съществуващ `cloudflared` двоичен файл вместо управлявано изтегляне                                                                                  |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                                | Транспорт за управлявани бързи тунели (`http2`, `quic` или `auto`)                                                                                               |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                                  | Node.js куп лимит в MB                                                                                                                                           |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                   | Максимални записи в кеша за подкани                                                                                                                              |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                  | Максимални семантични записи в кеша                                                                                                                              |
 
-За пълния списък с променливи на средата вижте [README](../README.md).
+За пълната справка на променливите на средата вижте [README](../README.md).
 
 ---
 
 ## 📊 Налични модели
 
 <details>
-<summary><b>Вижте всички налични модели</b></summary>
+<summary><b>Преглед на всички налични модели</b></summary>
 
 > Списъкът по-долу е подбран от `open-sse/config/providerRegistry.ts` за v3.8.0. Облачните каталози (Gemini, OpenRouter и др.) се синхронизират динамично — за пълния актуален каталог отворете **Табло → Доставчици → [доставчик] → Налични модели** или извикайте `GET /api/models/catalog`.
 >
-> Ако вграденият списък на даден доставчик е остарял, използвайте **Импортиране от /models** на тази страница (или активирайте **Автоматична синхронизация**), за да изтеглите актуалния upstream каталог. Това беше потвърдено във v3.8.50 за LLM7.io (`gemini-3.1-flash-lite`) и UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); анонимният достъп до Pollinations остана ограничен от upstream по време на същия тестов цикъл.
+> Ако вграденият списък на даден доставчик е остарял, използвайте **Импортиране от /models** на тази страница (или активирайте **Автоматична синхронизация**), за да изтеглите актуалния каталог от upstream. Това беше потвърдено във v3.8.50 за LLM7.io (`gemini-3.1-flash-lite`) и UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); анонимният достъп до Pollinations остана ограничен от upstream по време на същия тестови цикъл.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — OAuth за Pro/Max: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ нива на effort: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — OAuth за Plus/Pro: `cx/gpt-5.5` (+ нива на усилие: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — БЕЗПЛАТЕН OAuth: използвайте актуалния каталог, показан под **Табло → Доставчици → Kiro → Налични модели**. Наличността зависи от акаунта и плана.
+**Kiro (`kr/`)** — БЕЗПЛАТЕН OAuth: използвайте актуалния каталог, показан в **Табло → Доставчици → Kiro → Налични модели**. Наличността зависи от акаунта и плана.
 
 **Qoder (`if/`)** — БЕЗПЛАТЕН OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
@@ -630,37 +647,37 @@ post_install() {
 
 **MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/мес. фиксирана цена или според потреблението: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/мес. фиксирана такса или според употребата: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API ключ: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Изключително бърз: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Ултрабърз: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Нативен Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Grok native: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Хостван в ЕС: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Хостван в ЕС: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — С обогатено търсене: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — С разширено търсене: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
 **Together AI (`together/`)** — С отворен код: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (безплатен), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Бърз inference: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Бърза инференция: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Wafer-scale: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — В мащаб на wafer: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
 **Cohere (`cohere/`)** — Фокусиран върху RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Корпоративен: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — За предприятия: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Синхронизира се на живо за всеки API ключ от Google — няма статичен списък. Свържете ключ в **Табло → Доставчици**, след което използвайте **Налични модели**, за да импортирате актуалния каталог (напр. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: Синхронизира се в реално време за всеки API ключ от Google — няма статичен списък. Свържете ключ в **Табло → Доставчици**, след което използвайте **Налични модели**, за да импортирате текущия каталог (напр. `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Други съвместими доставчици** (подбрани): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (чрез `aws-bedrock`), `azure-ai`, `openrouter` (passthrough каталог), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Всеки поддържа собствен списък с модели в `providerRegistry.ts` и може да се синхронизира автоматично, когато доставчикът предоставя `/models` endpoint.
+**Други съвместими доставчици** (избрани): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (чрез `aws-bedrock`), `azure-ai`, `openrouter` (каталог passthrough), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Всеки поддържа собствен списък с модели в `providerRegistry.ts` и може да се синхронизира автоматично, когато доставчикът предоставя крайна точка `/models`.
 
-**Забележка относно ID-тата на моделите:** OmniRoute използва родните за доставчика ID-та (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Някои ID-та включват версии с точки, защото upstream API ги очаква точно в този вид. Ако даден модел не е посочен по-горе, изпълнете `omniroute models --search <term>` или отправете заявка към `GET /api/models/catalog`, за да потвърдите наличността.
+**Забележка относно идентификаторите на моделите:** OmniRoute използва идентификатори, специфични за доставчика (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Някои идентификатори включват версии с точки, тъй като така ги очаква upstream API. Ако даден модел не е посочен по-горе, изпълнете `omniroute models --search <term>` или извикайте `GET /api/models/catalog`, за да потвърдите наличността.
 
 </details>
 
@@ -686,7 +703,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 Бележки:
 
-- OpenRouter и OpenAI/Anthropic-compatible доставчиците се управляват от** Налични модели** само. Ръчното добавяне, импортиране и автоматично синхронизиране се намира в един и същ списък с налични модели, така че няма отделен раздел за персонализирани модели за тези доставчици.
+- OpenRouter и OpenAI/Anthropic-compatible доставчиците се управляват от** Налични модели** само. Ръчното добавяне, импортиране и автоматично синхронизиране на всичко попада в един и същ списък с налични модели, така че няма отделен раздел за персонализирани модели за тези доставчици.
 - The** Персонализирани модели** е предназначен за доставчици, които не излагат управлявани импортирания на наличния модел.
 
 ### Персонализирани OpenAI-съвместими доставчици
@@ -716,8 +733,8 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 Тези ключове влизат в `providerSpecificData` на връзката (например чрез `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (цяло число, 1–1024) — за връзки, съвместими с OpenAI чат формат, чийто шлюз отхвърля дълги имена на инструменти. По-дългите имена се изпращат като кратки псевдоними и се възстановяват в отговора.
-- `quotaEndpoint` — quota/credits крайната точка на шлюза, прочетена за лентата с квотите на таблото и маршрутизирането, съобразено с квотите. Работи както на връзки, съвместими с OpenAI, така и на Anthropic; пълната форма е документирана в `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (цяло число, 1–1024) — за връзки, съвместими с OpenAI чат формат, чийто шлюз отхвърля дълги имена на инструменти. По-дългите имена се изпращат като кратки псевдоними и се възстановяват в отговора. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go и Muse Code вече съдържат имена на псевдоними над 64 знака без настройка. Стойност на връзка замества Azure OpenAI / Azure AI Foundry по подразбиране (връзка на Azure зад по-строг шлюз) и задава лимита за персонализиран съвместим възел; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go и Muse Code запазват лимита си в регистъра и го игнорират.
+- `quotaEndpoint` — quota/credits крайната точка на шлюза, прочетете за лентата с квоти на таблото и маршрутизирането, съобразено с квоти. Работи както на връзки, съвместими с OpenAI, така и на Anthropic; пълната форма е документирана в `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -732,7 +749,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 }
 ```
 
-### Верижно свързване OmniRoute партньори
+### Верижно свързване OmniRoute Peers
 
 Друг OmniRoute шлюз може да бъде добавен като a** Персонализиран OpenAI-съвместим** доставчик. Използвайте базовия `/v1` URL на партньора и специален API ключ с най-малко привилегии, издаден от този партньор.
 
@@ -754,7 +771,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 Само заявки, изпратени до изрично включен в списъка с позволени peer URL получават `X-OmniRoute-Peer-Trace` заглавката. Шлюзът отхвърля повторен екземпляр ID или изчерпан бюджет за прескачане с HTTP `508 Loop Detected`; обикновените доставчици нагоре по веригата не получават партньорски метаданни.
 
-Верижното свързване на партньори не е репликация на база данни или преместване на хост при отказ. Всеки шлюз поддържа независимо състояние SQLite, кешове, броячи на скорост и сесии. Използвайте проверен обратен прокси или отказ на клиент за наличност active/passive или active/active и никога не монтирайте една SQLite база данни в множество работещи OmniRoute екземпляри.
+Верижното свързване на партньори не е репликация на база данни или преместване на хост при отказ. Всеки шлюз поддържа независимо SQLite състояние, кешове, броячи на скорост и сесии. Използвайте проверен обратен прокси или отказ на клиент за наличност active/passive или active/active и никога не монтирайте една SQLite база данни в множество работещи OmniRoute екземпляри.
 
 ### Специализирани маршрути на доставчик
 
@@ -784,7 +801,7 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
   -d '{"proxy":{"type":"socks5","host":"proxy.example.com","port":"1080"}}'
 ```
 
-**приоритет:** Специфичен за ключ → Комбиниран → Специфичен за доставчик → Глобална → среда.
+**приоритет:** Специфичен за ключ → Комбиниран → Специфичен за доставчик → Глобална среда →.
 
 ### Каталог на моделите API
 
@@ -814,9 +831,9 @@ curl http://localhost:20128/api/models/catalog
 
 ### LLM Gateway Intelligence (Фаза 9)
 
-- **Семантичен кеш** — Автоматично кешира непоточно предаване, температура = 0 отговори (байпас с `X-OmniRoute-No-Cache: true`)
-- **Искане за идемпотентност** — Дедупликира заявки в рамките на 5s чрез `Idempotency-Key` или `X-Request-Id` заглавка
-- **Проследяване на напредъка** — Включване на SSE `event: progress` събития чрез `X-OmniRoute-Progress: true` заглавка
+- **Семантичен кеш** — Автоматично кешира нестрийминг, температура = 0 отговори (байпас с `X-OmniRoute-No-Cache: true`)
+- **Искане за идемпотентност** — Дедупликира заявки в рамките на 5 s чрез `Idempotency-Key` или `X-Request-Id` заглавка
+- **Проследяване на напредъка** — Opt-in SSE `event: progress` събития чрез `X-OmniRoute-Progress: true` заглавка
 
 ---
 
@@ -827,7 +844,7 @@ curl http://localhost:20128/api/models/catalog
 | Режим               | Цел                                                                                                  |
 | ------------------- | ---------------------------------------------------------------------------------------------------- |
 | **Детска площадка** | Изберете source/target формати, поставете заявка и незабавно вижте преведения резултат               |
-| **Тестер за чат**   | Изпращайте чат съобщения на живо през проксито и проверявайте пълния цикъл request/response          |
+| **Чат тестер**      | Изпращайте чат съобщения на живо през проксито и проверявайте пълния цикъл request/response          |
 | **Тестова стенда**  | Изпълнете групови тестове в множество комбинации от формати, за да проверите правилността на превода |
 | **Монитор на живо** | Гледайте преводи в реално време, докато заявките преминават през проксито                            |
 
@@ -845,16 +862,16 @@ curl http://localhost:20128/api/models/catalog
 
 **Видими от таблото за управление стратегии (маршрутизиране на ниво акаунт):**
 
-| Стратегия                        | Описание                                                                                                         |
-| -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Първо попълнете**              | Използва акаунти в приоритетен ред — основният акаунт обработва всички заявки, докато стане недостъпен           |
-| **Round Robin**                  | Преминава през всички акаунти с конфигурируем лепкав лимит (по подразбиране: 3 обаждания на акаунт)              |
-| **P2C (Силата на двата избора)** | Избира 2 произволни акаунта и маршрути към по-здравословния — балансира натоварването с осъзнаването на здравето |
-| **Случаен**                      | Произволно избира акаунт за всяка заявка чрез разбъркване на Fisher-Yates                                        |
-| **Най-малко използван**          | Насочва към акаунта с най-стария `lastUsedAt` timestamp, разпределяйки трафика равномерно                        |
-| **Оптимизирани разходи**         | Маршрути към акаунта с най-ниска стойност на приоритет, оптимизиране за доставчици с най-ниска цена              |
+| Стратегия                        | Описание                                                                                                       |
+| -------------------------------- | -------------------------------------------------------------------------------------------------------------- |
+| **Първо попълнете**              | Използва акаунти в приоритетен ред — основният акаунт обработва всички заявки, докато стане недостъпен         |
+| **Round Robin**                  | Преминава през всички акаунти с конфигурируем лепкав лимит (по подразбиране: 3 обаждания на акаунт)            |
+| **P2C (Силата на двата избора)** | Избира 2 произволни акаунта и маршрути към по-здравословния — балансира натоварването с осъзнаване на здравето |
+| **Случаен**                      | Произволно избира акаунт за всяка заявка чрез разбъркване на Fisher-Yates                                      |
+| **Най-малко използван**          | Насочва към акаунта с най-стария `lastUsedAt` timestamp, разпределяйки трафика равномерно                      |
+| **Оптимизирани разходи**         | Маршрути към акаунта с най-ниска стойност на приоритет, оптимизиране за доставчици с най-ниска цена            |
 
-**Разширени комбо и автоматични стратегии** (конфигурируемо за комбо или чрез `auto/*` префикси — вижте [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Разширени комбо и автоматични стратегии** (конфигурируеми за комбо или чрез `auto/*` префикси — вижте [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — строг ред, никога кръгови
 - `weighted` — пропорционален трафик, разделен по тегла на модел
@@ -863,7 +880,7 @@ curl http://localhost:20128/api/models/catalog
 - `p2c` (Силата на двата избора)
 - `least-used` и `cost-optimized`
 - `auto` — управляван от резултатите за всички кандидати
-- `lkgp` (Последен известен добър доставчик) — свързва се към последния успешен доставчик, след което се връща към правилата
+- `lkgp` (Последен известен добър доставчик) — се закрепва към последния успешен доставчик, след което се връща към правилата
 - `context-optimized` — избира модела с най-големия свободен контекстен прозорец
 - `context-relay` — свързва модели с дълъг контекст за последващи завои
 
@@ -915,7 +932,7 @@ Chain: production-fallback
 
 Идеален за кодиращи агенти (OpenCode, Claude код, Cursor, Cline). Първоначално маршрути към гранични модели на разсъждение, връщане към модели за бързо кодиране при изчерпване на квотата или грешки.
 
-- **Табло за управление** : Комбота → Нова комбинация → Име: `agent-coding` → Стратегия: `Priority`
+- **Табло за управление** : Комбинации → Нова комбинация → Име: `agent-coding` → Стратегия: `Priority`
 - **Модели** :
   1. `claude/claude-sonnet-4-6` (първичен кодиращ агент)
   2. `openai/gpt-4o` (Вторичен резервен висок капацитет)
@@ -972,30 +989,30 @@ omniroute combo create free-stack \
 
 OmniRoute прилага устойчивост на ниво доставчик с пет компонента:
 
-1. **Заявка за опашка и темп** — Оформяне на заявка на системно ниво:
+1. **Заявка за опашка и темп** — Формиране на заявка на системно ниво:
    - **Заявки в минута (RPM)** — Максимален брой заявки на минута за акаунт
    - **Минимално време между заявките** — Минимален интервал в милисекунди между заявките
    - **Макс едновременни заявки** — Максимален брой едновременни заявки за акаунт
 
-2. **Време за изчакване на връзката** — Конфигурация на тип за удостоверяване за единична връзка след повторни грешки:
+2. **Време за изчакване на връзката** — Per-auth-тип конфигурация за единична връзка след повторни грешки:
    - **Основно изчакване** — Прозорец за изчакване по подразбиране за повторни грешки нагоре по веригата
    - **Използвайте съвети за повторен опит нагоре по веригата** — Почита авторитетни съвети `Retry-After` или нулиране, когато са предоставени
-   - **Максимални стъпки за отстъпка** — Максимално експоненциално ниво на забавяне при повтарящи се откази
+   - **Максимални стъпки за отстъпка** — Максимално експоненциално ниво на забавяне за повтарящи се повреди
 
-3. **Прекъсвач на доставчика** — Проследява повреди на доставчика от край до край, маркира доставчик с влошено качество при конфигурирания праг на предупреждение и отваря прекъсвача, когато се достигне конфигурираният праг на отказ:
-   - **Праг на разграждане** — Последователни откази на доставчик преди въвеждане `DEGRADED`
-   - **Праг на отказ** — Последователни откази на доставчик преди въвеждане `OPEN`
+3. **Прекъсвач на доставчика** — Проследява повреди на доставчика от край до край, маркира доставчик с понижено ниво на конфигурирания праг за предупреждение и отваря прекъсвача, когато бъде достигнат конфигурираният праг на повреда:
+   - **Праг на разграждане** — Последователни грешки на доставчика преди въвеждане `DEGRADED`
+   - **Праг на отказ** — Последователни грешки на доставчика преди въвеждане `OPEN`
    - **Нулиране на времето за изчакване** — Времеви прозорец преди доставчикът да бъде тестван отново
    - **CLOSED** (Здрав) — Заявките протичат нормално
-   - **DEGRADED** — Заявките продължават да текат, докато се проследяват повишени грешки
-   - **OPEN** — Доставчикът е временно блокиран след повтарящи се повреди
+   - **DEGRADED** — Заявките продължават да текат, докато се проследяват повишени повреди
+   - **OPEN** Доставчикът — е временно блокиран след повтарящи се повреди
    - **HALF_OPEN** — Тестване дали доставчикът се е възстановил
 
    Ограниченията за скоростта на `429` с обхват на връзката остават** Време за изчакване на връзката** и не се броят към прекъсвача на доставчика.
 
    Състоянието на прекъсвача на доставчика е показано на** Табло за управление → Health** само.
 
-4. **Изчакайте охлаждане** — Ако всяка кандидатска връзка вече се охлажда, OmniRoute може да изчака най-ранното охлаждане и автоматично да опита отново същата клиентска заявка.
+4. **Изчакайте охлаждане** — Ако всяка кандидатска връзка вече се охлажда, OmniRoute може да изчака най-ранното охлаждане и да опита отново същата клиентска заявка автоматично.
 
 5. **Автоматично откриване на ограничение на скоростта** — Когато доставчиците нагоре по веригата връщат изрични прозорци за изчакване, тези подсказки отменят изчакването на локалната връзка, когато настройката е активирана.
 
@@ -1043,8 +1060,8 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | ------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **генерал**        | Системни инструменти за съхранение, поведение по подразбиране, видимост на крайния тунел                                                                                                                                                           |
 | **Външен вид**     | Контроли на теми (light/dark/system), видимост на страничната лента, превключватели на панела за Cloudflare/Tailscale/ngrok тунелни карти                                                                                                          |
-| **AI**             | Бюджет за мислене (преминаване / автоматично премахване / персонализирано / адаптивно — вижте [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), глобална системна подкана, статистика на кеша на подкана                                               |
-| **сигурност**      | Login/Password настройки, IP контрол на достъпа, API auth за `/models`, блокиране на доставчика, защита срещу инжектиране                                                                                                                          |
+| **AI**             | Бюджет за мислене (преминаване / автоматично премахване / персонализиран / адаптивен — вижте [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), глобална системна подкана, статистика на кеша на подкана                                                |
+| **Сигурност**      | Login/Password настройки, IP контрол на достъпа, API auth за `/models`, блокиране на доставчика, защита срещу инжектиране                                                                                                                          |
 | **Маршрутизиране** | Стратегия за глобално маршрутизиране (Първо попълване / Round Robin / P2C / Случайно / Най-малко използвано / Оптимизирано по отношение на разходите), псевдоними на модели с заместващи символи, резервни вериги, комбо настройки по подразбиране |
 | **Устойчивост**    | Опашка за заявки, изчакване на връзката, конфигурация за прекъсване на доставчика и поведение на изчакване за разхлаждане                                                                                                                          |
 | **Разширено**      | Глобална конфигурация на прокси (HTTP/SOCKS5), замени на прокси за всеки доставчик                                                                                                                                                                 |
@@ -1057,10 +1074,10 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Достъп чрез** Табло → Разходи** .
 
-| Таб                | Цел                                                                                                            |
-| ------------------ | -------------------------------------------------------------------------------------------------------------- |
-| **Бюджет**         | Задайте лимити на разходите за API ключ с daily/weekly/monthly бюджети и проследяване в реално време           |
-| **Ценообразуване** | Преглеждайте и редактирайте записите за ценообразуване на модела — цена за 1K input/output токена на доставчик |
+| Таб                | Цел                                                                                                           |
+| ------------------ | ------------------------------------------------------------------------------------------------------------- |
+| **Бюджет**         | Задайте лимити на разходите за API ключ с daily/weekly/monthly бюджети и проследяване в реално време          |
+| **Ценообразуване** | Преглеждайте и редактирайте записите за ценообразуване на модел — цена за 1K input/output токени на доставчик |
 
 ```bash
 # API: Set a budget
@@ -1127,7 +1144,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 ### Комбинирани стратегии за балансиране
 
-Конфигуриране на балансиране за комбо в** Табло → Combos → Create/Edit → Стратегия** .
+Конфигуриране на балансиране за комбо** Табло → Combos → Create/Edit → Стратегия** .
 
 | Стратегия                                  | Описание                                                                         |
 | ------------------------------------------ | -------------------------------------------------------------------------------- |
@@ -1140,9 +1157,9 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 Могат да се задават глобални настройки по подразбиране** Табло за управление → Настройки → Маршрутизиране → Combo Defaults** . Времето за изчакване на комбинираната цел наследява по подразбиране времето за изчакване на текущата заявка. Използвайте** Целево изчакване (секунди)** на комбо по подразбиране или индивидуално комбо само когато по-кратък лимит за цел трябва да задейства по-бързо възстановяване.
 
-Комбинираните оптимизации с нулева латентност са включени. тръгвай** Оптимизации с нулева латентност** деактивиран, за да предотврати тези функции за латентност от състезателни резервни цели, прескачане на цели въз основа на TTFT история или компресиране на резервни заявки; разрешаването му позволява конфигурирано хеджиране, предсказуеми пропускания TTFT и проактивно резервно компресиране за обмен на routing/request прецизност за по-ниска латентност на опашката.
+Комбинираните оптимизации с нулева латентност са включени. тръгвай** Оптимизации с нулева латентност** деактивиран, за да предотврати тези функции за забавяне от състезателни резервни цели, прескачане на цели въз основа на TTFT история или компресиране на резервни заявки; разрешаването му позволява конфигурирано хеджиране, предсказуеми пропускания TTFT и проактивно резервно компресиране за обмен на routing/request прецизност за по-ниска латентност на опашката.
 
-Деактивиране** Буфер за токен за разсъждение** когато доставчиците нагоре по веригата изискват строги `max_tokens` / `maxOutputTokens` ограничения. Когато е активирано, комбинираното маршрутизиране само добавя свобода на модела на разсъждение за модели с известно ограничение на изхода и оставя лимита на токена на клиента непроменен, когато безопасната буферирана стойност би надхвърлила това ограничение. Ако ограничението на клиента вече е над известно ограничение, OmniRoute го ограничава до това ограничение, преди да изпрати заявката нагоре.
+Деактивиране** Буфер за токен за разсъждение** когато доставчиците нагоре по веригата изискват строги `max_tokens` / `maxOutputTokens` ограничения. Когато е активирано, комбинираното маршрутизиране само добавя свобода на модела на разсъждение за модели с известно ограничение на изхода и оставя лимита на токена на клиента непроменен, когато безопасната буферирана стойност би надхвърлила това ограничение. Ако лимитът на клиента вече е над известно ограничение, OmniRoute го ограничава до това ограничение, преди да изпрати заявката нагоре.
 
 ---
 

@@ -8,21 +8,26 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Thiết lập môi trường phát triển
+## Thiết lập phát triển
 
 ### Điều kiện tiên quyết
 
 - **Node.js** `>=22.22.2 <23`, hoặc `>=24.0.0 <27` (khuyến nghị: 24 LTS)
 - **npm** 10+
 
-> **Người dùng npm v11+ (Node 24+):** Sau khi chạy `npm install`, hãy xác minh rằng các mô-đun native đã được cài đặt:
-> `node -e "require('better-sqlite3')"`. Nếu lệnh thất bại với lỗi `MODULE_NOT_FOUND`,
+> **Windows với Node 24:** sử dụng bản vá 24 LTS hiện tại (ít nhất 24.20.0).
+> Các bản phát hành cũ hơn có thể kết thúc đột ngột sau khi kiểm thử thành công khi `--test-force-exit` đóng
+> tiến trình. [Bản sửa lỗi Windows libuv của Node](https://github.com/nodejs/node/pull/61999) khắc phục
+> lỗi crash thời gian chạy này; hãy giữ nguyên các assertion kiểm thử và kiểm tra thoát của runner.
+
+> **Người dùng npm v11+ (Node 24+):** Sau khi `npm install`, hãy xác minh các mô-đun native đã được cài đặt:
+> `node -e "require('better-sqlite3')"`. Nếu lệnh này thất bại với `MODULE_NOT_FOUND`,
 > hãy chạy `npm approve-scripts better-sqlite3 && npm install`. Xem
 > [Khắc phục sự cố](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Sao chép & Cài đặt
+### Sao chép và cài đặt
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -33,89 +38,86 @@ npm install
 ### Biến môi trường
 
 ```bash
-# Tạo tệp .env từ mẫu
+# Tạo .env từ mẫu
 cp .env.example .env
 
-# Tạo các khóa bí mật bắt buộc
+# Tạo các secret bắt buộc
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Các biến chính dành cho môi trường phát triển:
+Các biến chính cho quá trình phát triển:
 
 | Biến                   | Giá trị mặc định khi phát triển | Mô tả                       |
 | ---------------------- | ------------------------------- | --------------------------- |
 | `PORT`                 | `20128`                         | Cổng máy chủ                |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`        | URL cơ sở cho frontend      |
-| `JWT_SECRET`           | (tạo ở trên)                    | Khóa bí mật để ký JWT       |
+| `JWT_SECRET`           | (tạo ở trên)                    | Secret ký JWT               |
 | `INITIAL_PASSWORD`     | `CHANGEME`                      | Mật khẩu đăng nhập lần đầu  |
 | `APP_LOG_LEVEL`        | `info`                          | Mức độ chi tiết của nhật ký |
 
 ### Cài đặt bảng điều khiển
 
-Bảng điều khiển cung cấp các nút bật/tắt trên giao diện người dùng cho những tính năng cũng có thể được cấu hình thông qua biến môi trường:
+Bảng điều khiển cung cấp các nút chuyển đổi UI cho những tính năng cũng có thể được cấu hình thông qua các biến môi trường:
 
-| Vị trí cài đặt     | Nút bật/tắt                 | Mô tả                                  |
-| ------------------ | --------------------------- | -------------------------------------- |
-| Cài đặt → Nâng cao | Chế độ gỡ lỗi               | Bật nhật ký yêu cầu gỡ lỗi (giao diện) |
-| Cài đặt → Chung    | Khả năng hiển thị thanh bên | Hiển thị/ẩn các phần của thanh bên     |
+| Vị trí cài đặt      | Nút chuyển đổi     | Mô tả                           |
+| ------------------- | ------------------ | ------------------------------- |
+| Settings → Advanced | Debug Mode         | Bật nhật ký yêu cầu gỡ lỗi (UI) |
+| Settings → General  | Sidebar Visibility | Hiện/ẩn các phần của thanh bên  |
 
-Các cài đặt này được lưu trong cơ sở dữ liệu và duy trì qua các lần khởi động lại, đồng thời ghi đè các giá trị mặc định của biến môi trường khi được thiết lập.
+Các cài đặt này được lưu trong cơ sở dữ liệu và vẫn giữ nguyên sau khi khởi động lại, đồng thời ghi đè các giá trị mặc định của biến môi trường khi được thiết lập.
 
 ### Chạy cục bộ
 
 ```bash
-# Chế độ phát triển (tự động tải lại)
+# Chế độ phát triển (tải lại nóng)
 npm run dev
 
 # Bản dựng production
 npm run build    # next build → .build/next/ rồi assembleStandalone → dist/
 npm run start
 
-# Biên dịch nhanh chỉ dành cho backend/API đối với các thay đổi của người đóng góp
+# Biên dịch nhanh chỉ dành cho backend/API đối với các thay đổi của contributor
 npm run build:contributor
 
-# Bản dựng phát hành (dựng lại từ đầu + dấu kiểm tra HEAD — bắt buộc để triển khai)
+# Bản dựng phát hành (dựng lại sạch + sentinel HEAD — bắt buộc khi deploy)
 npm run build:release   # rm -rf .build dist && build + ghi dist/BUILD_SHA
 
-# Cấu hình cổng thường dùng
+# Cấu hình cổng phổ biến
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bản dựng dành cho người đóng góp chỉ thực hiện xác thực biên dịch: nó không đóng gói bản phân phối độc lập
-hoặc dựng các tài nguyên đóng gói native tùy chọn. Hãy sử dụng bản dựng production thông thường khi
-bạn cần xác thực gói có thể phát hành.
+Bản dựng dành cho contributor chỉ thực hiện kiểm tra biên dịch: bản dựng này không tập hợp
+bản phân phối standalone hoặc xây dựng các asset đóng gói native tùy chọn. Hãy sử dụng bản dựng production thông thường
+khi cần xác thực bundle có thể phát hành.
 
 ### Bố cục đầu ra bản dựng
 
-| Thư mục   | Nội dung                                                                          | Được theo dõi |
-| --------- | --------------------------------------------------------------------------------- | ------------- |
-| `src/`    | Mã nguồn ứng dụng (TypeScript / TSX)                                              | Có            |
-| `.build/` | Tệp trung gian — đầu ra của `next build` (bị git bỏ qua, `distDir = .build/next`) | Không         |
-| `dist/`   | Gói có thể phát hành — được tạo bởi `assembleStandalone` (bị git bỏ qua)          | Không         |
+| Thư mục   | Nội dung                                                                           | Được theo dõi |
+| --------- | ---------------------------------------------------------------------------------- | ------------- |
+| `src/`    | Mã nguồn ứng dụng (TypeScript / TSX)                                               | Có            |
+| `.build/` | Các tệp trung gian — đầu ra của `next build` (gitignored, `distDir = .build/next`) | Không         |
+| `dist/`   | Bundle có thể phát hành — được tập hợp bởi `assembleStandalone` (gitignored)       | Không         |
 
-Quy trình dựng chỉ gồm một lượt:
+Pipeline bản dựng chỉ gồm một lượt:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (đầu ra Next.js)
-  └─ assembleStandalone()                 (sao chép bản độc lập + tệp tĩnh + public + tài nguyên native)
-       └─ đầu ra: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (sao chép standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` còn dọn sạch cả hai thư mục trước tiên và ghi
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) làm dấu kiểm tra tính toàn vẹn khi triển khai.
+`npm run build:release` bổ sung việc dọn dẹp cả hai thư mục trước, sau đó ghi
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) làm sentinel kiểm tra tính toàn vẹn khi deploy.
 
-`npm run build:contributor` sử dụng cấu hình dựng chỉ dành cho backend. Nó tạm thời thay thế
-các tệp giao diện bảng điều khiển bằng tệp giả trong khi dựng, giữ nguyên các trình xử lý tuyến API và khôi phục các tệp gốc
-sau khi dựng. Hãy sử dụng `npm run build` cho những thay đổi ảnh hưởng đến giao diện bảng điều khiển hoặc để
-xác thực đầy đủ bản phát hành; cấu hình dành cho người đóng góp không thay thế cho bản dựng phát hành.
+`npm run build:contributor` sử dụng profile bản dựng chỉ dành cho backend. Profile này tạm thời thay thế các tệp UI của bảng điều khiển bằng stub trong quá trình xây dựng, giữ lại các trình xử lý route API và khôi phục các tệp ban đầu sau khi bản dựng hoàn tất. Hãy sử dụng `npm run build` cho các thay đổi ảnh hưởng đến UI bảng điều khiển hoặc để xác thực đầy đủ bản phát hành; profile dành cho contributor không thay thế cho bản dựng phát hành.
 
-> **Lưu ý khi triển khai VPS:** thư mục image từ xa `/usr/lib/node_modules/omniroute/app/`
-> không thay đổi. Các kỹ năng triển khai dùng rsync để đồng bộ nội dung của `dist/` vào thư mục đó.
-> Chỉ đường dẫn đầu ra bản dựng trong kho lưu trữ thay đổi (`app/` → `dist/`).
+> **Lưu ý khi deploy lên VPS:** thư mục image từ xa `/usr/lib/node_modules/omniroute/app/`
+> không thay đổi. Các skill deploy sẽ rsync nội dung của `dist/` vào thư mục này.
+> Chỉ đường dẫn đầu ra của bản dựng trong repository đã thay đổi (`app/` → `dist/`).
 
-Các URL mặc định:
+URL mặc định:
 
 - **Bảng điều khiển**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -293,68 +295,68 @@ Xem `open-sse/utils/stream.ts` và `open-sse/utils/streamHandler.ts` để biế
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # App Router của Next.js 16
-│   ├── (dashboard)/        # Các trang bảng điều khiển (23 phần)
-│   ├── api/                # Các tuyến API (51 thư mục)
-│   └── login/              # Các trang xác thực (.tsx)
-├── domain/                 # Công cụ chính sách (policyEngine, comboResolver, costRules, v.v.)
-├── lib/                    # Logic nghiệp vụ cốt lõi (.ts)
-│   ├── a2a/                # Máy chủ giao thức Agent-to-Agent v0.3
-│   ├── acp/                # Sổ đăng ký Agent Communication Protocol
-│   ├── compliance/         # Công cụ chính sách tuân thủ
-│   ├── db/                 # Các mô-đun miền SQLite + 130 bản di chuyển
-│   ├── memory/             # Bộ nhớ hội thoại liên tục
-│   ├── oauth/              # Các nhà cung cấp, dịch vụ và tiện ích OAuth
-│   ├── skills/             # Khung kỹ năng có thể mở rộng
-│   ├── usage/              # Theo dõi mức sử dụng và tính toán chi phí
-│   └── localDb.ts          # Chỉ là lớp tái xuất — tuyệt đối không thêm logic tại đây
-├── middleware/              # Phần mềm trung gian xử lý yêu cầu (promptInjectionGuard)
-├── mitm/                   # Proxy MITM (chứng chỉ, DNS, định tuyến đích)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Các thành phần React (.tsx)
-│   ├── constants/          # Định nghĩa nhà cung cấp (329), phạm vi MCP, 20 chiến lược định tuyến
-│   ├── utils/              # Bộ ngắt mạch, trình làm sạch, trình trợ giúp xác thực
-│   └── validation/         # Các lược đồ Zod v4
-└── sse/                    # Quy trình proxy SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Không gian làm việc @omniroute/open-sse
-├── executors/              # 150 mô-đun thực thi (các lớp thực thi + trình trợ giúp cho từng nhà cung cấp)
-├── handlers/               # 11 trình xử lý yêu cầu (trò chuyện, phản hồi, nhúng, hình ảnh, v.v.)
-├── mcp-server/             # Máy chủ MCP (110 công cụ độc nhất, 3 phương thức truyền tải, 33 phạm vi)
-├── services/               # 178 dịch vụ cấp cao nhất (combo, autoCombo, rateLimitManager, v.v.)
-├── translator/             # Trình chuyển đổi định dạng (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Trình chuyển đổi Responses API
-└── utils/                  # 22 mô-đun tiện ích (luồng, TLS, proxy, ghi nhật ký)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Ứng dụng máy tính Electron (đa nền tảng)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Trình chạy kiểm thử Node.js (1.574 tệp kiểm thử)
-├── integration/            # Kiểm thử tích hợp
-├── e2e/                    # Kiểm thử Playwright
-├── security/               # Kiểm thử bảo mật
-├── translator/             # Kiểm thử dành riêng cho trình chuyển đổi
-└── load/                   # Kiểm thử tải
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Hồ sơ quyết định kiến trúc
-├── architecture/            # Kiến trúc hệ thống và khả năng phục hồi
-├── comparison/              # OmniRoute so với các giải pháp thay thế
-├── compression/             # Hướng dẫn và quy tắc nén
-├── dev/                     # Hướng dẫn phát triển
-├── diagrams/                # Sơ đồ kiến trúc
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Hướng dẫn người dùng, Docker, thiết lập, khắc phục sự cố
-├── i18n/                    # Các bản dịch README được quốc tế hóa
-├── marketing/               # Tài liệu tiếp thị
-├── ops/                     # Triển khai, proxy, độ bao phủ, bản phát hành
-├── providers/               # Tài liệu dành riêng cho nhà cung cấp
-├── reference/               # Tài liệu tham khảo API, biến môi trường, công cụ CLI, gói miễn phí
-├── releases/                # Ghi chú phát hành
-├── routing/                 # Công cụ tổ hợp tự động, phát lại quá trình suy luận
-├── screenshots/             # Ảnh chụp màn hình bảng điều khiển
-├── security/                # Rào chắn bảo vệ, tuân thủ, chế độ ẩn, token
-└── specs/                   # Đặc tả thiết kế
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

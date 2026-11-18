@@ -6,6 +6,7 @@
 // session-id threading.
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { z } from "zod";
 import {
   getExecutionConnectionId,
   resolveExecutionCredentials,
@@ -190,4 +191,127 @@ test("Kimi Code k3 exposes its documented efforts from the offline policy before
     supportedThinkingEfforts: ["low", "high", "max"],
     defaultThinkingEffort: "max",
   });
+});
+
+const codexBase = {
+  ...base,
+  provider: "codex",
+  targetFormat: RESPONSES,
+  modelInfo: {
+    model: "gpt-5.6-sol",
+    supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
+    defaultThinkingEffort: "high",
+  },
+};
+
+function codexMetadata(requestBody?: Record<string, unknown>) {
+  const out = resolveExecutionCredentials({ ...codexBase, requestBody });
+  return z.record(z.string(), z.unknown()).parse(out.providerSpecificData._omnirouteCodexThinking);
+}
+
+const effortCarriers: Array<{
+  name: string;
+  body: Record<string, unknown>;
+  expected: string;
+}> = [
+  {
+    name: "Claude output_config",
+    body: { output_config: { effort: "medium" } },
+    expected: "medium",
+  },
+  { name: "nested OpenAI", body: { reasoning: { effort: "high" } }, expected: "high" },
+  { name: "flat OpenAI", body: { reasoning_effort: "low" }, expected: "low" },
+  {
+    name: "Claude over conflicting OpenAI carriers",
+    body: {
+      output_config: { effort: "medium" },
+      reasoning: { effort: "high" },
+      reasoning_effort: "low",
+    },
+    expected: "medium",
+  },
+  {
+    name: "nested over flat OpenAI",
+    body: { reasoning: { effort: "high" }, reasoning_effort: "low" },
+    expected: "high",
+  },
+];
+
+for (const { name, body, expected } of effortCarriers) {
+  test(`Codex metadata preserves ${name} effort (#18746)`, () => {
+    assert.equal(codexMetadata(body).requestedThinkingEffort, expected);
+  });
+}
+
+const unusableClaudeEfforts: Array<[string, unknown]> = [
+  ["undefined", undefined],
+  ["null", null],
+  ["empty", ""],
+  ["blank", "   "],
+  ["number", 42],
+  ["object", {}],
+  ["array", []],
+];
+
+for (const [name, value] of unusableClaudeEfforts) {
+  for (const carrier of ["nested", "flat"]) {
+    test(`unusable ${name} Claude effort retains ${carrier} original effort (#18746)`, () => {
+      const body = {
+        output_config: { effort: value },
+        ...(carrier === "nested"
+          ? { reasoning: { effort: "high" }, reasoning_effort: "low" }
+          : { reasoning_effort: "high" }),
+      };
+      assert.equal(codexMetadata(body).requestedThinkingEffort, "high");
+    });
+  }
+}
+
+test("empty Codex request omits own requestedThinkingEffort metadata (#18746)", () => {
+  assert.equal(Object.hasOwn(codexMetadata({}), "requestedThinkingEffort"), false);
+});
+
+test("missing Codex request retains catalog metadata without an effort property", () => {
+  assert.deepEqual(codexMetadata(), {
+    model: "gpt-5.6-sol",
+    supportedThinkingEfforts: ["low", "medium", "high", "xhigh"],
+    defaultThinkingEffort: "high",
+    resolvedThinkingEffort: undefined,
+  });
+});
+
+test("Codex metadata capture does not mutate input credentials or request", () => {
+  const credentials = { providerSpecificData: { requestDefaults: { reasoningEffort: "low" } } };
+  const requestBody = { output_config: { effort: "medium" } };
+  const originalCredentials = structuredClone(credentials);
+  const originalRequest = structuredClone(requestBody);
+  const out = resolveExecutionCredentials({ ...codexBase, credentials, requestBody });
+  assert.ok(Object.hasOwn(out.providerSpecificData, "_omnirouteCodexThinking"));
+  assert.deepEqual(credentials, originalCredentials);
+  assert.deepEqual(requestBody, originalRequest);
+});
+
+test("uncatalogued Codex model still carries the Claude effort without catalog fields (#18947)", () => {
+  const out = resolveExecutionCredentials({
+    ...codexBase,
+    modelInfo: null,
+    requestBody: { output_config: { effort: "medium" }, reasoning_effort: "low" },
+  });
+  assert.deepEqual(out.providerSpecificData._omnirouteCodexThinking, {
+    requestedThinkingEffort: "medium",
+  });
+});
+
+test("uncatalogued Codex model without any effort omits the metadata (#18947)", () => {
+  const out = resolveExecutionCredentials({ ...codexBase, modelInfo: null, requestBody: {} });
+  assert.equal(Object.hasOwn(out.providerSpecificData, "_omnirouteCodexThinking"), false);
+});
+
+test("non-Codex credentials never capture Codex effort metadata", () => {
+  const out = resolveExecutionCredentials({
+    ...codexBase,
+    provider: "openai",
+    requestBody: { output_config: { effort: "medium" } },
+  });
+  assert.deepEqual(out.providerSpecificData, { foo: "bar" });
 });

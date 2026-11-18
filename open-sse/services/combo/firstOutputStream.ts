@@ -19,12 +19,18 @@
  */
 import { COMBO_PER_MODEL_TIMEOUT_REASON } from "./comboAbortReasons.ts";
 import { sseChunkCarriesOutput } from "../../utils/sseOutputSignal.ts";
+import { createSSEDataLineNormalizer } from "../../utils/streamHelpers.ts";
+import {
+  createTransportReplayObserver,
+  inspectTransportReplayPayload,
+} from "./preContentTransportFailure.ts";
 
 /** Floor for the gate window, so a dispatch that ate the whole budget cannot abandon a live target. */
 const MIN_FIRST_OUTPUT_BUDGET_MS = 250;
 
 /** Give up accumulating at this size: a streaming body this far into silence is not answering. */
 const MAX_BUFFERED_CHARS = 64 * 1024;
+const MAX_PENDING_REPLAY_LINES = 256;
 
 /**
  * Why the gate stopped waiting.
@@ -38,7 +44,9 @@ const MAX_BUFFERED_CHARS = 64 * 1024;
 export type FirstOutputStallReason = "budget" | "cancelled" | "empty";
 
 export type FirstOutputResult =
-  { kind: "output"; response: Response } | { kind: "stalled"; reason: FirstOutputStallReason };
+  | { kind: "output"; response: Response }
+  | { kind: "reasoning"; response: Response; frameKind: string }
+  | { kind: "stalled"; reason: FirstOutputStallReason };
 
 /** True for SSE responses carrying a body, the only kind this gate inspects. */
 export function isEventStreamResponse(response: Response): boolean {
@@ -60,6 +68,52 @@ function carriesOutput(payload: string): boolean {
 }
 
 /**
+ * Claude-only upstream thinking activity. Structural block starts count even when empty;
+ * deltas count only when they carry a non-empty thinking/signature string. Injected thinking
+ * signatures add only `signature: ""` to an upstream start, which does not match a delta.
+ */
+function claudeThinkingFrameKind(payload: string): string | null {
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(payload.replace(/\n/g, " "));
+  } catch {
+    return null;
+  }
+  if (!isPlainRecord(parsed)) return null;
+  if (parsed.type === "content_block_start") return thinkingBlockStartKind(parsed.content_block);
+  if (parsed.type === "content_block_delta") return thinkingDeltaKind(parsed.delta);
+  return null;
+}
+
+function isPlainRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function thinkingBlockStartKind(block: unknown): string | null {
+  if (!block || typeof block !== "object") return null;
+  const blockType = (block as Record<string, unknown>).type;
+  return blockType === "thinking" || blockType === "redacted_thinking" ? blockType : null;
+}
+
+/** Field of a Claude delta that must be a non-empty string for the delta to count. */
+const THINKING_DELTA_FIELDS: Record<string, string> = {
+  thinking_delta: "thinking",
+  signature_delta: "signature",
+};
+
+function thinkingDeltaKind(delta: unknown): string | null {
+  if (!delta || typeof delta !== "object") return null;
+  const record = delta as Record<string, unknown>;
+  const deltaType = typeof record.type === "string" ? record.type : "";
+  const field = Object.hasOwn(THINKING_DELTA_FIELDS, deltaType)
+    ? THINKING_DELTA_FIELDS[deltaType]
+    : undefined;
+  if (!field) return null;
+  const text = record[field];
+  return typeof text === "string" && text.length > 0 ? deltaType : null;
+}
+
+/**
  * Incremental SSE reader that reports the first event carrying output.
  *
  * Owns the framing only: one event may span several `data:` lines (joined with `\n`), an event
@@ -71,9 +125,21 @@ export class SseOutputScanner {
   private pendingLine = "";
   private dataLines: string[] = [];
   private bufferedChars = 0;
+  private previousChunkEndedWithCr = false;
+  private reasoningKind: string | null = null;
+  private replayNormalizer = createSSEDataLineNormalizer();
+  private replayBufferedChars = 0;
+  private replayBufferedLines = 0;
+  private replayInspectionDisabled = false;
+  private replayOverflowed = false;
+  private replayEventType = "";
+
+  constructor(private readonly observeReplay?: () => void) {}
 
   /** Feed decoded text; true once an event has shown output. */
   push(text: string): boolean {
+    const previousCr = this.previousChunkEndedWithCr;
+    if (text.length > 0) this.previousChunkEndedWithCr = text.endsWith("\r");
     this.pendingLine += text;
     let start = 0;
     let index = 0;
@@ -95,7 +161,7 @@ export class SseOutputScanner {
         index += 1;
       }
       start = index;
-      if (this.consumeLine(line)) {
+      if (this.consumeLine(line, previousCr && index === 1 && code === 10)) {
         sawOutput = true;
         break;
       }
@@ -113,28 +179,122 @@ export class SseOutputScanner {
    * line is treated as "talking in a framing this reader does not know" rather than failed.
    */
   overflowedWithoutOutput(): boolean {
-    return this.bufferedChars > MAX_BUFFERED_CHARS;
+    const overflowed = this.bufferedChars > MAX_BUFFERED_CHARS;
+    if (overflowed) this.observeReplay?.();
+    return overflowed;
+  }
+
+  /** The kind of upstream reasoning progress found in the most recent push. */
+  reasoningActivity(): string | null {
+    const kind = this.reasoningKind;
+    this.reasoningKind = null;
+    return kind;
   }
 
   /** Evaluate whatever is left after the body closed without a trailing blank line. */
   flush(): boolean {
+    this.resetReplayFrame();
     if (this.dataLines.length === 0) return false;
     const payload = this.dataLines.join("\n");
     this.dataLines = [];
-    return payload.length > 0 && carriesOutput(payload);
+    const ready = payload.length > 0 && carriesOutput(payload);
+    const kind = ready || payload.length === 0 ? null : claudeThinkingFrameKind(payload);
+    if (ready) this.observeReplay?.();
+    else if (kind) this.reasoningKind = kind;
+    return ready;
   }
 
-  private consumeLine(line: string): boolean {
+  private consumeLine(line: string, splitCrLf = false): boolean {
+    if (!splitCrLf && !this.replayInspectionDisabled) {
+      try {
+        this.observeReplayLine(line);
+      } catch {
+        this.observeReplay?.();
+        this.resetReplayFrame();
+        this.replayInspectionDisabled = true;
+      }
+    }
     if (line === "") {
       const payload = this.dataLines.join("\n");
       this.dataLines = [];
-      return payload.length > 0 && carriesOutput(payload);
+      const ready = payload.length > 0 && carriesOutput(payload);
+      const kind = ready || payload.length === 0 ? null : claudeThinkingFrameKind(payload);
+      if (ready) this.observeReplay?.();
+      else if (kind) this.reasoningKind = kind;
+      return ready;
     }
     if (!line.startsWith("data:")) return false;
     const value = line.slice(5);
-    this.dataLines.push(value.startsWith(" ") ? value.slice(1) : value);
+    const data = value.startsWith(" ") ? value.slice(1) : value;
+    this.dataLines.push(data);
     return false;
   }
+
+  private resetReplayFrame(): void {
+    this.replayNormalizer = createSSEDataLineNormalizer();
+    this.replayBufferedChars = 0;
+    this.replayBufferedLines = 0;
+    this.replayOverflowed = false;
+    this.replayEventType = "";
+  }
+
+  private replayInspectionExceeded(): boolean {
+    return (
+      this.replayOverflowed ||
+      this.replayBufferedChars > MAX_BUFFERED_CHARS ||
+      this.replayBufferedLines > MAX_PENDING_REPLAY_LINES
+    );
+  }
+
+  private observeCompletedReplayLines(completed: string[]): void {
+    for (const normalized of completed) {
+      const trimmed = normalized.trim();
+      if (trimmed.startsWith("event:")) {
+        const type = trimmed.slice(6).trim();
+        this.replayEventType = type.length <= 64 ? type : "";
+      } else if (trimmed.startsWith("data:")) {
+        const result = inspectTransportReplayPayload(trimmed.slice(5).trim(), this.replayEventType);
+        if (result.veto) this.observeReplay?.();
+        if (result.consumed) this.replayEventType = "";
+      } else if (!trimmed) {
+        this.replayEventType = "";
+      }
+    }
+  }
+
+  private observeReplayLine(line: string): void {
+    if (!this.observeReplay) return;
+    this.replayBufferedChars += line.length + 1;
+    this.replayBufferedLines++;
+    if (this.replayInspectionExceeded()) {
+      // Incomplete inspection cannot authorize a new transport retry.
+      this.observeReplay();
+      this.resetReplayFrame();
+      this.replayOverflowed = line.trim().length > 0;
+      return;
+    }
+    // Use quality framing, including implicit field/comment flushes and invalid-JSON fallback.
+    const completed = this.replayNormalizer.normalize([line]);
+    this.observeCompletedReplayLines(completed);
+    if (completed.length > 0) {
+      const pending = this.replayNormalizer.hasPending();
+      this.replayBufferedChars = pending ? line.length + 1 : 0;
+      this.replayBufferedLines = pending ? 1 : 0;
+    }
+  }
+}
+
+type ChunkStep = { kind: "output"; frameKind: null } | { kind: "reasoning"; frameKind: string };
+
+/**
+ * Feed one decoded chunk to the scanner and report whether the gate can open: real output,
+ * upstream Claude thinking, or a buffer overflow (treated as output). Null keeps waiting.
+ */
+function scanChunk(scanner: SseOutputScanner, text: string): ChunkStep | null {
+  if (scanner.push(text)) return { kind: "output", frameKind: null };
+  const frameKind = scanner.reasoningActivity();
+  if (frameKind) return { kind: "reasoning", frameKind };
+  return scanner.overflowedWithoutOutput() ? { kind: "output", frameKind: null } : null;
 }
 
 /**
@@ -158,12 +318,13 @@ export async function awaitFirstOutput(
   const reader = peekBody.getReader();
 
   const decoder = new TextDecoder();
-  const scanner = new SseOutputScanner();
+  const scanner = new SseOutputScanner(createTransportReplayObserver(response));
   let timer: ReturnType<typeof setTimeout> | undefined;
 
-  const outcome = await new Promise<"output" | FirstOutputStallReason>((resolve) => {
+  let thinkingFrameKind: string | null = null;
+  const outcome = await new Promise<"output" | "reasoning" | FirstOutputStallReason>((resolve) => {
     let settled = false;
-    const finish = (value: "output" | FirstOutputStallReason) => {
+    const finish = (value: "output" | "reasoning" | FirstOutputStallReason) => {
       if (settled) return;
       settled = true;
       if (timer) clearTimeout(timer);
@@ -187,12 +348,10 @@ export async function awaitFirstOutput(
             return;
           }
           if (!value) continue;
-          if (scanner.push(decoder.decode(value, { stream: true }))) {
-            finish("output");
-            return;
-          }
-          if (scanner.overflowedWithoutOutput()) {
-            finish("output");
+          const step = scanChunk(scanner, decoder.decode(value, { stream: true }));
+          if (step) {
+            thinkingFrameKind = step.frameKind;
+            finish(step.kind);
             return;
           }
         }
@@ -209,6 +368,9 @@ export async function awaitFirstOutput(
   // awaited — a tee branch's cancel only settles once the sibling is cancelled too.
   void reader.cancel(COMBO_PER_MODEL_TIMEOUT_REASON).catch(() => undefined);
   if (outcome === "output") return { kind: "output", response };
+  if (outcome === "reasoning") {
+    return { kind: "reasoning", response, frameKind: thinkingFrameKind ?? "thinking" };
+  }
 
   if (outcome === "budget") {
     void response.body?.cancel(COMBO_PER_MODEL_TIMEOUT_REASON).catch(() => undefined);

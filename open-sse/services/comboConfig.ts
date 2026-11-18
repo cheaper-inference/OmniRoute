@@ -61,13 +61,15 @@ export const COMBO_TARGET_TIMEOUT_WAIT_BUFFER_MS = 10_000;
  *
  * `strategy` is retained in the signature for call-site clarity; eligibility is
  * strategy-agnostic (the wait path in combo.ts already uses the real model-lockout
- * reason for every strategy).
+ * reason for every strategy). Only literal per-combo false opts out; no config
+ * can enable waiting when the global feature is disabled.
  */
 export function isComboCooldownWaitEligible(
   _strategy: string,
-  comboCooldownWait: Pick<ComboCooldownWaitSettings, "enabled">
+  comboCooldownWait: Pick<ComboCooldownWaitSettings, "enabled">,
+  config?: Record<string, unknown> | null
 ): boolean {
-  return comboCooldownWait.enabled;
+  return comboCooldownWait.enabled && config?.comboCooldownWaitEnabled !== false;
 }
 
 /**
@@ -86,7 +88,7 @@ export function resolveComboTargetTimeoutMsForCombo(
   strategy: string,
   comboCooldownWait: Pick<ComboCooldownWaitSettings, "enabled" | "budgetMs">
 ): number {
-  const defaultTimeoutMs = isComboCooldownWaitEligible(strategy, comboCooldownWait)
+  const defaultTimeoutMs = isComboCooldownWaitEligible(strategy, comboCooldownWait, config)
     ? Math.max(
         DEFAULT_COMBO_TARGET_TIMEOUT_MS,
         comboCooldownWait.budgetMs + COMBO_TARGET_TIMEOUT_WAIT_BUFFER_MS
@@ -144,6 +146,7 @@ const DEFAULT_COMBO_CONFIG = {
   resetAwareWeeklyWeight: 0.65,
   resetAwareTieBandPercent: 5,
   resetAwareExhaustionGuardPercent: 10,
+  resetAwareNoQuotaFloor: 0.5,
   quotaWeightedFloorPercent: 1,
   // Historical default (predates #2417/#10217) — true. This value feeds TWO
   // independent mechanisms and must stay true-by-default for one of them:

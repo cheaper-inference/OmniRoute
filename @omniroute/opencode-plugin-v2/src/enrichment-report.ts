@@ -5,7 +5,7 @@ function consequenceOf(endpoint: string): string {
   if (endpoint.includes("/api/providers")) {
     return "the usable-provider filter is disabled for this refresh, so unprovisioned providers stay listed";
   }
-  return "model names, provider tags, canonical dedupe and pricing are degraded";
+  return "model names, provider labels, canonical dedupe and pricing are degraded";
 }
 
 /**

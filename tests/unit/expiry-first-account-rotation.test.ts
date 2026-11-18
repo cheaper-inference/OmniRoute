@@ -240,14 +240,22 @@ describe("expiry-first account rotation", () => {
         weekly: { percentUsed: 0.25, resetAt: new Date(NOW + 10 * HOUR).toISOString() },
       },
     };
-    const weighted = scoreExpiryFirstQuota(quota, config, NOW, {
+    const metrics = {
       capacityWeight: 2,
       burnFractionPerHourByWindow: { session: 0.1, weekly: 0.01 },
-    }).score;
+    };
+    const weighted = scoreExpiryFirstQuota(quota, config, NOW, metrics).score;
 
-    // Session: (50% - 10%/h × 1h) × 2 / 1h = 0.8.
-    // Weekly: (75% - 1%/h × 10h) × 2 / 10h = 0.13.
-    assert.ok(Math.abs(weighted - 0.8) < 1e-9);
+    // Weekly sets the deadline (#18541): min(50% usable, 75% - 1%/h × 10h) × 2 / 10h = 0.1.
+    // The session only caps usable; its own reset is not where quota is lost.
+    assert.ok(Math.abs(weighted - 0.1) < 1e-9, `expected 0.1, received ${weighted}`);
+
+    // With no weekly reset the session is the deadline: (50% - 10%/h × 1h) × 2 / 1h = 0.8.
+    const sessionOnlyDeadline = {
+      windows: { ...quota.windows, weekly: { percentUsed: 0.25, resetAt: null } },
+    };
+    const sessionScore = scoreExpiryFirstQuota(sessionOnlyDeadline, config, NOW, metrics).score;
+    assert.ok(Math.abs(sessionScore - 0.8) < 1e-9, `expected 0.8, received ${sessionScore}`);
   });
 
   it("applies Codex and Claude plan fields when ranking equal quota pressure", () => {
@@ -290,7 +298,8 @@ describe("expiry-first account rotation", () => {
       burnFractionPerHourByWindow: { session: 0.01, weekly: 0 },
     }).score;
 
-    assert.ok(Math.abs(score - 0.04) < 1e-9);
+    // The 5% left in the session caps the weekly window's 90%: 0.05 / 10h.
+    assert.ok(Math.abs(score - 0.005) < 1e-9, `expected 0.005, received ${score}`);
   });
 
   it("scores predicted waste with plan capacity and measured burn", () => {

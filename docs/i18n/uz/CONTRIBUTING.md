@@ -13,21 +13,25 @@ qamrovi va muvofiqlashtirish bosqichlari bilan bogʻlangan.
 
 ---
 
-## Ishlab chiqish muhitini sozlash
+## Ishlab chiqish muhiti
 
-### Dastlabki talablar
+### Talablar
 
-- **Node.js** `>=22.22.2 <23` yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, yoki `>=24.0.0 <27` (tavsiya etiladi: 24 LTS)
 - **npm** 10+
 
-> **npm v11+ foydalanuvchilari (Node 24+):** `npm install` buyrugʻidan soʻng mahalliy modullar oʻrnatilganini tekshiring:
-> `node -e "require('better-sqlite3')"`. Agar u `MODULE_NOT_FOUND` xatosi bilan bajarilmasa,
-> `npm approve-scripts better-sqlite3 && npm install` buyrugʻini ishga tushiring. Batafsil:
-> [Nosozliklarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
+> **Node 24 o‘rnatilgan Windows:** joriy 24 LTS patch versiyasidan foydalaning (kamida 24.20.0).
+> Oldingi versiyalar `--test-force-exit` jarayonni yopganidan keyin testlar muvaffaqiyatli
+> yakunlangan bo‘lsa ham, jarayonni to‘satdan to‘xtatishi mumkin. Node'ning [Windows libuv tuzatishi](https://github.com/nodejs/node/pull/61999)
+> ushbu runtime ishdan chiqishini bartaraf etadi; test tasdiqlarini va runner chiqish tekshiruvlarini yoqilgan holda qoldiring.
+
+> **npm v11+ foydalanuvchilari (Node 24+):** `npm install` dan so‘ng native modullar o‘rnatilganini tekshiring:
+> `node -e "require('better-sqlite3')"`. Agar u `MODULE_NOT_FOUND` xatosi bilan ishlamasa,
+> `npm approve-scripts better-sqlite3 && npm install` buyrug‘ini ishga tushiring. [Muammolarni bartaraf etish](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) bo‘limiga qarang.
 
 - **Git**
 
-### Klonlash va oʻrnatish
+### Klonlash va o‘rnatish
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,7 +39,7 @@ cd OmniRoute
 npm install
 ```
 
-### Muhit oʻzgaruvchilari
+### Muhit o‘zgaruvchilari
 
 ```bash
 # Shablondan .env faylingizni yarating
@@ -46,75 +50,76 @@ echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
 
-Ishlab chiqish uchun asosiy oʻzgaruvchilar:
+Ishlab chiqish uchun asosiy o‘zgaruvchilar:
 
-| Oʻzgaruvchi            | Ishlab chiqishdagi standart qiymat | Tavsif                          |
-| ---------------------- | ---------------------------------- | ------------------------------- |
-| `PORT`                 | `20128`                            | Server porti                    |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | Frontend uchun asosiy URL       |
-| `JWT_SECRET`           | (yuqorida yarating)                | JWT imzolash uchun maxfiy kalit |
-| `INITIAL_PASSWORD`     | `CHANGEME`                         | Birinchi kirish uchun parol     |
-| `APP_LOG_LEVEL`        | `info`                             | Jurnal tafsilotlari darajasi    |
+| O‘zgaruvchi            | Ishlab chiqishdagi standart qiymat | Tavsif                       |
+| ---------------------- | ---------------------------------- | ---------------------------- |
+| `PORT`                 | `20128`                            | Server porti                 |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`           | Frontend uchun asosiy URL    |
+| `JWT_SECRET`           | (yuqorida yarating)                | JWT imzolash maxfiy kaliti   |
+| `INITIAL_PASSWORD`     | `CHANGEME`                         | Birinchi kirish paroli       |
+| `APP_LOG_LEVEL`        | `info`                             | Jurnal batafsilligi darajasi |
 
 ### Boshqaruv paneli sozlamalari
 
-Boshqaruv paneli muhit oʻzgaruvchilari orqali ham sozlanishi mumkin boʻlgan funksiyalar uchun UI almashtirgichlarini taqdim etadi:
+Boshqaruv paneli muhit o‘zgaruvchilari orqali ham sozlanishi mumkin bo‘lgan funksiyalar uchun UI tugmalarini taqdim etadi:
 
-| Sozlama joylashuvi          | Almashtirgich                 | Tavsif                                                 |
-| --------------------------- | ----------------------------- | ------------------------------------------------------ |
-| Sozlamalar → Kengaytirilgan | Nosozliklarni tuzatish rejimi | Nosozliklarni tuzatish soʻrov jurnallarini yoqish (UI) |
-| Sozlamalar → Umumiy         | Yon panel koʻrinishi          | Yon panel boʻlimlarini koʻrsatish/yashirish            |
+| Sozlama joylashuvi          | Tugma                | Tavsif                                      |
+| --------------------------- | -------------------- | ------------------------------------------- |
+| Sozlamalar → Kengaytirilgan | Debug rejimi         | Debug so‘rov jurnallarini yoqish (UI)       |
+| Sozlamalar → Umumiy         | Yon panel ko‘rinishi | Yon panel bo‘limlarini ko‘rsatish/yashirish |
 
-Bu sozlamalar maʼlumotlar bazasida saqlanadi va qayta ishga tushirishlar orasida saqlanib qoladi; oʻrnatilganda ular muhit oʻzgaruvchilarining standart qiymatlarini bekor qiladi.
+Bu sozlamalar ma’lumotlar bazasida saqlanadi va qayta ishga tushirishlar orasida saqlanib qoladi; sozlanganida ular muhit o‘zgaruvchilaridagi standart qiymatlarni bekor qiladi.
 
-### Mahalliy muhitda ishga tushirish
+### Lokal ishga tushirish
 
 ```bash
-# Ishlab chiqish rejimi (avtomatik qayta yuklash)
+# Ishlab chiqish rejimi (hot reload)
 npm run dev
 
-# Ishlab chiqarish uchun yigʻish
-npm run build    # next build → .build/next/, keyin assembleStandalone → dist/
+# Production build
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Hissa qoʻshuvchilar oʻzgarishlari uchun faqat backend/API’ni tezkor kompilyatsiya qilish
+# Contributor o‘zgarishlari uchun backend/API-only tezkor kompilyatsiya
 npm run build:contributor
 
-# Reliz yigʻilishi (toza qayta yigʻish + HEAD nazorat belgisi — joylashtirish uchun talab qilinadi)
-npm run build:release   # rm -rf .build dist && build + dist/BUILD_SHA fayliga yozadi
+# Release build (toza qayta qurish + HEAD sentinel — deploy uchun talab qilinadi)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
-# Keng tarqalgan port sozlamasi
+# Portni sozlashning keng tarqalgan usuli
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Hissa qoʻshuvchilar yigʻilishi faqat kompilyatsiya tekshiruvini bajaradi: u mustaqil distributivni yigʻmaydi yoki ixtiyoriy mahalliy paketlash resurslarini yaratmaydi. Yetkazib beriladigan toʻplamni tekshirish kerak boʻlganda, odatiy ishlab chiqarish yigʻilishidan foydalaning.
+Contributor build faqat kompilyatsiya tekshiruvini amalga oshiradi: u standalone distributivini yig‘maydi yoki ixtiyoriy native packaging aktivlarini build qilmaydi. Yetkazib beriladigan to‘plamni tekshirish kerak bo‘lganda oddiy production build'dan foydalaning.
 
-### Yigʻish natijasi tuzilishi
+### Build chiqishi tuzilishi
 
-| Katalog   | Tarkibi                                                                                                        | Kuzatiladimi |
-| --------- | -------------------------------------------------------------------------------------------------------------- | ------------ |
-| `src/`    | Ilova manba kodi (TypeScript / TSX)                                                                            | Ha           |
-| `.build/` | Oraliq fayllar — `next build` natijasi (git tomonidan eʼtiborsiz qoldiriladi, `distDir = .build/next`)         | Yoʻq         |
-| `dist/`   | Yetkazib beriladigan toʻplam — `assembleStandalone` tomonidan yigʻiladi (git tomonidan eʼtiborsiz qoldiriladi) | Yoʻq         |
+| Katalog   | Tarkib                                                                               | Kuzatiladi |
+| --------- | ------------------------------------------------------------------------------------ | ---------- |
+| `src/`    | Ilova manba kodi (TypeScript / TSX)                                                  | Ha         |
+| `.build/` | Oraliq fayllar — `next build` chiqishi (gitignored, `distDir = .build/next`)         | Yo‘q       |
+| `dist/`   | Yetkazib beriladigan to‘plam — `assembleStandalone` tomonidan yig‘iladi (gitignored) | Yo‘q       |
 
-Yigʻish jarayoni bir bosqichda amalga oshiriladi:
+Build pipeline bir martalik o‘tishdan iborat:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (Next.js natijasi)
-  └─ assembleStandalone()                 (mustaqil fayllar + statik fayllar + ommaviy fayllar + mahalliy resurslarni nusxalaydi)
-       └─ natija: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js output)
+  └─ assembleStandalone()                 (copies standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` qoʻshimcha ravishda avval har ikkala katalogni tozalaydi va joylashtirish yaxlitligini tekshirish belgisi sifatida `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) faylini yozadi.
+`npm run build:release` qo‘shimcha ravishda avval ikkala katalogni tozalaydi va
+`dist/BUILD_SHA` fayliga (= `git rev-parse --short HEAD`) deploy yaxlitligi indikatori sifatida yozadi.
 
-`npm run build:contributor` faqat backend uchun moʻljallangan yigʻish profilidan foydalanadi. Yigʻish vaqtida u boshqaruv paneli UI fayllarini vaqtincha almashtiradi, API marshrut ishlov beruvchilarini saqlab qoladi va yigʻishdan soʻng asl fayllarni tiklaydi. Boshqaruv paneli UI’iga taʼsir qiladigan oʻzgarishlar yoki toʻliq reliz tekshiruvi uchun `npm run build` buyrugʻidan foydalaning; hissa qoʻshuvchi profili reliz yigʻilishini almashtirmaydi.
+`npm run build:contributor` backend-only build profilidan foydalanadi. Build jarayonida dashboard UI fayllarini vaqtincha stub bilan almashtiradi, API route handler'larini saqlab qoladi va build tugagach asl fayllarni tiklaydi. Dashboard UI'ga ta’sir qiladigan o‘zgarishlar yoki to‘liq release tekshiruvi uchun `npm run build` dan foydalaning; contributor profili release build o‘rnini bosa olmaydi.
 
-> **VPS’ga joylashtirish eslatmasi:** masofaviy obraz katalogi `/usr/lib/node_modules/omniroute/app/`
-> oʻzgarishsiz qoladi. Joylashtirish vositalari `dist/` tarkibini unga rsync orqali nusxalaydi.
-> Faqat repozitoriy ichidagi yigʻish natijasi yoʻli oʻzgardi (`app/` → `dist/`).
+> **VPS deploy qaydi:** masofaviy image katalogi `/usr/lib/node_modules/omniroute/app/`
+> o‘zgartirilmaydi. Deploy skills `dist/` tarkibini unga rsync qiladi.
+> Faqat repozitoriy ichidagi build chiqishi yo‘li o‘zgargan (`app/` → `dist/`).
 
-Standart URL’lar:
+Standart URL'lar:
 
 - **Boshqaruv paneli**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
@@ -288,72 +293,72 @@ Amalda qoʻllangan misollar uchun `open-sse/utils/stream.ts` va `open-sse/utils/
 
 ---
 
-## Loyiha tuzilmasi
+## Loyiha tuzilishi
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Boshqaruv paneli sahifalari (23 ta bo‘lim)
-│   ├── api/                # API marshrutlari (51 ta katalog)
-│   └── login/              # Autentifikatsiya sahifalari (.tsx)
-├── domain/                 # Siyosat mexanizmi (policyEngine, comboResolver, costRules va boshqalar)
-├── lib/                    # Asosiy biznes mantiqi (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokoli serveri
-│   ├── acp/                # Agent Communication Protocol reyestri
-│   ├── compliance/         # Muvofiqlik siyosati mexanizmi
-│   ├── db/                 # SQLite domen modullari + 130 ta migratsiya
-│   ├── memory/             # Doimiy suhbat xotirasi
-│   ├── oauth/              # OAuth provayderlari, xizmatlari va yordamchi vositalari
-│   ├── skills/             # Kengaytiriladigan ko‘nikmalar freymvorki
-│   ├── usage/              # Foydalanishni kuzatish va xarajatlarni hisoblash
-│   └── localDb.ts          # Faqat qayta eksport qilish qatlami — bu yerga hech qachon mantiq qo‘shmang
-├── middleware/              # So‘rov oraliq dasturi (promptInjectionGuard)
-├── mitm/                   # MITM proksi (sertifikat, DNS, maqsadli marshrutlash)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React komponentlari (.tsx)
-│   ├── constants/          # Provayder ta’riflari (329 ta), MCP qamrovlari, 20 ta marshrutlash strategiyasi
-│   ├── utils/              # O‘chirgich, tozalovchi, autentifikatsiya yordamchilari
-│   └── validation/         # Zod v4 sxemalari
-└── sse/                    # SSE proksi konveyeri
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse ish maydoni
-├── executors/              # 150 ta ijrochi modul (ijrochi sinflar + har bir provayder uchun yordamchilar)
-├── handlers/               # 11 ta so‘rov ishlovchisi (chat, javoblar, embeddinglar, tasvirlar va boshqalar)
-├── mcp-server/             # MCP serveri (110 ta noyob vosita, 3 ta transport, 33 ta qamrov)
-├── services/               # 178 ta yuqori darajadagi xizmat (combo, autoCombo, rateLimitManager va boshqalar)
-├── translator/             # Format tarjimonlari (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformeri
-└── utils/                  # 22 ta yordamchi modul (oqim, TLS, proksi, jurnallash)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron ish stoli ilovasi (ko‘p platformali)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js test bajaruvchisi (1 574 ta test fayli)
-├── integration/            # Integratsion testlar
-├── e2e/                    # Playwright testlari
-├── security/               # Xavfsizlik testlari
-├── translator/             # Tarjimonga xos testlar
-└── load/                   # Yuklama testlari
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Arxitektura qarorlari qaydlari
-├── architecture/            # Tizim arxitekturasi va barqarorligi
-├── comparison/              # OmniRoute va muqobillar taqqoslanishi
-├── compression/             # Siqish bo‘yicha qo‘llanmalar va qoidalar
-├── dev/                     # Ishlab chiqish bo‘yicha qo‘llanmalar
-├── diagrams/                # Arxitektura diagrammalari
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Foydalanuvchi qo‘llanmasi, Docker, sozlash, muammolarni bartaraf etish
-├── i18n/                    # Xalqarolashtirilgan README tarjimalari
-├── marketing/               # Marketing materiallari
-├── ops/                     # Joylashtirish, proksi, qamrov, relizlar
-├── providers/               # Provayderga xos hujjatlar
-├── reference/               # API ma’lumotnomasi, muhit o‘zgaruvchilari, CLI vositalari, bepul tariflar
-├── releases/                # Reliz qaydlari
-├── routing/                 # Avtomatik kombinatsiya mexanizmi, mulohazalarni takrorlash
-├── screenshots/             # Boshqaruv paneli skrinshotlari
-├── security/                # Himoya cheklovlari, muvofiqlik, yashirinlik, tokenlar
-└── specs/                   # Dizayn spetsifikatsiyalari
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

@@ -67,18 +67,21 @@ test("recordComboRequest: handles null model string gracefully", () => {
   assert.equal(Object.keys(metrics.byModel).length, 0, "should have no model entries");
 });
 
-test("recordComboRequest: tracks fallback count", () => {
+test("recordComboRequest: the fallback rate counts requests, not skipped targets", () => {
   resetAllComboMetrics();
-  recordComboRequest("combo-fb", "gpt-4", {
-    success: true,
-    latencyMs: 200,
-    fallbackCount: 2,
-  });
+  recordComboRequest("combo-fb", "gpt-4", { success: true, latencyMs: 200, fallbackCount: 2 });
+  recordComboRequest("combo-fb", "gpt-4", { success: false, latencyMs: 100, fallbackCount: 0 });
   const metrics = getComboMetrics("combo-fb");
   assert.ok(metrics);
-  assert.equal(metrics.totalFallbacks, 2, "should track 2 fallbacks");
-  // fallbackRate = (totalFallbacks / totalRequests) * 100 = (2/1) * 100 = 200
-  assert.equal(metrics.fallbackRate, 200, "fallback rate should be 200% (2 fallbacks on 1 request)");
+  assert.equal(metrics.totalFallbacks, 2, "skipped targets still add up");
+  assert.equal(metrics.totalRequests, 2);
+  assert.equal(metrics.successRate, 50, "one of the two requests failed");
+  assert.equal(metrics.skipsPerRequest, 1, "two skips across two requests is one per request");
+  assert.equal(
+    metrics.fallbackRate,
+    50,
+    "one request that skipped two targets is still one request that fell back"
+  );
 });
 
 // ─── getComboMetrics returns null for unknown combos ─────────────────────────

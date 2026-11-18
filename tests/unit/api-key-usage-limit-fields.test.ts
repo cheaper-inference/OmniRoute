@@ -42,16 +42,28 @@ test("a row is read from snake_case columns, falling back to the camelCase alias
       usage_limit_enabled: 1,
       daily_usage_limit_usd: "10",
       weekly_usage_limit_usd: 70,
+      five_hour_usage_limit_usd: "4.5",
     }),
-    { usageLimitEnabled: true, dailyUsageLimitUsd: 10, weeklyUsageLimitUsd: 70 }
+    {
+      usageLimitEnabled: true,
+      dailyUsageLimitUsd: 10,
+      weeklyUsageLimitUsd: 70,
+      fiveHourUsageLimitUsd: 4.5,
+    }
   );
   assert.deepEqual(
     parseApiKeyUsageLimitFields({
       usageLimitEnabled: true,
       dailyUsageLimitUsd: 2,
       weeklyUsageLimitUsd: null,
+      fiveHourUsageLimitUsd: 1,
     }),
-    { usageLimitEnabled: true, dailyUsageLimitUsd: 2, weeklyUsageLimitUsd: null }
+    {
+      usageLimitEnabled: true,
+      dailyUsageLimitUsd: 2,
+      weeklyUsageLimitUsd: null,
+      fiveHourUsageLimitUsd: 1,
+    }
   );
 });
 
@@ -61,6 +73,7 @@ test("an update carries a usage-limit change when any of the three fields is def
   assert.equal(hasUsageLimitUpdate({ usageLimitEnabled: false }), true);
   assert.equal(hasUsageLimitUpdate({ dailyUsageLimitUsd: null }), true);
   assert.equal(hasUsageLimitUpdate({ weeklyUsageLimitUsd: 0 }), true);
+  assert.equal(hasUsageLimitUpdate({ fiveHourUsageLimitUsd: null }), true);
 });
 
 test("an update appends one assignment and one parameter per field it carries", () => {
@@ -69,9 +82,15 @@ test("an update appends one assignment and one parameter per field it carries", 
     usageLimitEnabled?: number;
     dailyUsageLimitUsd?: number | null;
     weeklyUsageLimitUsd?: number | null;
+    fiveHourUsageLimitUsd?: number | null;
   } = {};
   appendUsageLimitUpdates(
-    { usageLimitEnabled: true, dailyUsageLimitUsd: "7.5", weeklyUsageLimitUsd: -3 },
+    {
+      usageLimitEnabled: true,
+      dailyUsageLimitUsd: "7.5",
+      weeklyUsageLimitUsd: -3,
+      fiveHourUsageLimitUsd: 2,
+    },
     updates,
     params
   );
@@ -79,11 +98,13 @@ test("an update appends one assignment and one parameter per field it carries", 
     "usage_limit_enabled = @usageLimitEnabled",
     "daily_usage_limit_usd = @dailyUsageLimitUsd",
     "weekly_usage_limit_usd = @weeklyUsageLimitUsd",
+    "five_hour_usage_limit_usd = @fiveHourUsageLimitUsd",
   ]);
   assert.deepEqual(params, {
     usageLimitEnabled: 1,
     dailyUsageLimitUsd: 7.5,
     weeklyUsageLimitUsd: null,
+    fiveHourUsageLimitUsd: 2,
   });
   appendUsageLimitUpdates({ usageLimitEnabled: 1 }, [], params);
   assert.equal(params.usageLimitEnabled, 0, "only the boolean true enables the limit");

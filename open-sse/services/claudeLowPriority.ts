@@ -109,6 +109,8 @@ export type ClaudeUsageLimitConfig = {
 
 export type ClaudeLowPriorityWait = {
   current: { sinceMs: number; attempts: number; nextTryAtMs: number } | null;
+  /** The session-limit reset already sent this request back once; never loop on it. */
+  limitResetUsed?: boolean;
 };
 
 export type ClaudeUsageLimitDecision =
@@ -553,6 +555,36 @@ export function observeClaudeLowPriorityResponse(
   return observeSuccessResponse(ctx, slowStatus);
 }
 
+/** The lane is already active: observe the response, or rejoin a raced sibling. */
+function handleActiveLaneResponse(
+  opts: {
+    key: string;
+    response: { status: number; headers: HeaderSource };
+    wait: ClaudeLowPriorityWait;
+    sentSlow?: boolean;
+    waitCeilingMs?: number;
+    random?: () => number;
+  },
+  now: number,
+  atWall: boolean
+): ClaudeUsageLimitDecision {
+  const { key, response, wait } = opts;
+  // Raced activation (see `sentSlow`): a header-less sibling's outcome is not lane
+  // telemetry. Re-send it on the lane if it hit the wall, otherwise ignore it.
+  if (opts.sentSlow === false) {
+    const rejoin = response.status === 429 && atWall;
+    return rejoin ? { kind: "retry", delayMs: 0, via: "low-priority-accepted" } : { kind: "none" };
+  }
+  return observeClaudeLowPriorityResponse(
+    key,
+    response,
+    wait,
+    now,
+    opts.random,
+    opts.waitCeilingMs
+  );
+}
+
 /**
  * One call per upstream response, from the Claude OAuth executor. Decides whether the
  * executor should retry the same account (`retry`) instead of surfacing the response.
@@ -567,6 +599,12 @@ export async function handleClaudeUsageLimitResponse(opts: {
   wait: ClaudeLowPriorityWait;
   /** Attempts the `/limit-reset` claim; resolves true when the 5h window was reset. */
   claimLimitReset?: () => Promise<boolean>;
+  /**
+   * Operator policy for the claim ("auto-apply banked resets"). Consulted only for a 5-hour
+   * wall: `true` claims (even with both per-account toggles off), `false` never claims, and
+   * `null` keeps the per-account `autoLimitReset` toggle. A throwing gate never claims.
+   */
+  limitResetGate?: () => Promise<boolean | null>;
   /**
    * Whether THIS request went out with `anthropic-usage-limit: slow`. Two requests on the
    * same connection can hit the wall together: the first one activates the lane, the second
@@ -588,28 +626,21 @@ export async function handleClaudeUsageLimitResponse(opts: {
   const atWall = isClaudeUsageWall(headers) || parseClaudeSlowOffer(headers) !== undefined;
 
   if (isClaudeLowPriorityActive(key, now)) {
-    // Raced activation (see `sentSlow`): a header-less sibling's outcome is not lane
-    // telemetry. Re-send it on the lane if it hit the wall, otherwise ignore it.
-    if (opts.sentSlow === false) {
-      const rejoin = response.status === 429 && atWall;
-      return rejoin
-        ? { kind: "retry", delayMs: 0, via: "low-priority-accepted" }
-        : { kind: "none" };
-    }
-    return observeClaudeLowPriorityResponse(
-      key,
-      response,
-      wait,
-      now,
-      opts.random,
-      opts.waitCeilingMs
-    );
+    return handleActiveLaneResponse(opts, now, atWall);
   }
 
-  const optedIn = config.lowPriorityMode || config.autoLimitReset;
+  // A present gate may opt the account in; it decides (or defers) inside shouldClaimLimitReset.
+  const optedIn =
+    config.lowPriorityMode || config.autoLimitReset || opts.limitResetGate !== undefined;
   if (response.status !== 429 || !optedIn || !atWall) return { kind: "none" };
 
-  if (await shouldClaimLimitReset(config, headers, opts.claimLimitReset)) {
+  // The reset grant is memoised for 60 s, so a wall that persists after a granted reset
+  // would otherwise be re-sent with zero delay until the memo expires.
+  if (
+    !wait.limitResetUsed &&
+    (await shouldClaimLimitReset(config, headers, opts.claimLimitReset, opts.limitResetGate))
+  ) {
+    wait.limitResetUsed = true;
     return { kind: "retry", delayMs: 0, via: "limit-reset" };
   }
 
@@ -624,17 +655,36 @@ export async function handleClaudeUsageLimitResponse(opts: {
 /**
  * Opt-in weekly session-limit reset, attempted before the slow lane. Only for a wall that
  * blames the 5-hour window (or names no window at all); a failing claim is never fatal.
+ * The optional gate overrides the per-account toggle unless it answers `null`.
  */
 async function shouldClaimLimitReset(
   config: ClaudeUsageLimitConfig,
   headers: HeaderSource,
-  claimLimitReset: (() => Promise<boolean>) | undefined
+  claimLimitReset: (() => Promise<boolean>) | undefined,
+  limitResetGate?: () => Promise<boolean | null>
 ): Promise<boolean> {
-  if (!config.autoLimitReset || !claimLimitReset) return false;
+  if (!claimLimitReset) return false;
+  if (!config.autoLimitReset && !limitResetGate) return false;
   const claim = parseClaudeRepresentativeClaim(headers);
   if (claim !== undefined && claim !== "five_hour") return false;
+  if (!(await isLimitResetAllowed(config, limitResetGate))) return false;
   try {
     return await claimLimitReset();
+  } catch {
+    return false;
+  }
+}
+
+/** Gate verdict, falling back to the per-account toggle on `null`; any gate error denies. */
+async function isLimitResetAllowed(
+  config: ClaudeUsageLimitConfig,
+  limitResetGate: (() => Promise<boolean | null>) | undefined
+): Promise<boolean> {
+  if (!limitResetGate) return config.autoLimitReset;
+  try {
+    const verdict = await limitResetGate();
+    if (verdict === null || verdict === undefined) return config.autoLimitReset;
+    return verdict === true;
   } catch {
     return false;
   }

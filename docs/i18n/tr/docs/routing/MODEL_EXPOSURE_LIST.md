@@ -4,64 +4,47 @@
 
 ---
 
-> Etkinleştirme isteğe bağlıdır ve varsayılan olarak kapalıdır (`modelVisibilityAllowlist`/`modelVisibilityDenylist` değerlerinin
-> ikisinin de boş olması, `/v1/models` kataloğunu VE her `auto/*` aday havuzunu bayt düzeyinde aynı bırakır).
-> Maliyetle ilgisi olmayan nedenlerle düzenlenmiş bir model listesi isteyen operatörler için
-> `hidePaidModels`/`hideAutoCombos` ayarlarının (`src/lib/db/settings.ts`) eşleniğidir.
+> Etkinleştirme, varsayılan olarak kapalıdır (`modelVisibilityAllowlist`/`modelVisibilityDenylist` her ikisi de boş, `/v1/models` kataloğu AND her `auto/*` aday havuzunun baytıyla aynı olmasını sağlar). Maliyetle hiçbir ilgisi olmayan nedenlerle seçilmiş bir model listesi isteyen operatörler için `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) kardeşi.
 
-## Bunun var olma nedeni
+## Bu neden var
 
-`hidePaidModels`, "bu model ücretsiz mi?" sorusunu; `hideAutoCombos` ise "`auto/*`
-sanal kimlikleri hiç duyurulmalı mı?" sorusunu yanıtlar — bunların hiçbiri, bir operatörün
-rastgele bir model alt kümesi oluşturmasına olanak tanımaz (ör. fiyatlandırmadan bağımsız olarak
-belirli bir Claude Code / OpenCode istemcisinin görmesi gereken modelleri tam olarak sunmak).
-#11481 bunu, birbirinden bağımsız ve isteğe bağlı iki dize dizisi ayarı olarak ekler.
+`hidePaidModels` "bu model ücretsiz mi?" diye yanıtlıyor ve `hideAutoCombos` yanıtları " `auto/*` sanal kimliklerinin reklamı yapılmalı mı?" — bir operatörün keyfi bir model alt kümesini seçmesine de izin vermez (örneğin, fiyatlandırmadan bağımsız olarak belirli bir Claude Code / OpenCode istemcisinin görmesi gereken modelleri tam olarak sunmak). #11481 bunu iki bağımsız, isteğe bağlı dize dizisi ayarı olarak ekler.
 
 ## Ayarlar
 
-| Anahtar                    | Tür        | Varsayılan | Anlamı                                                                |
-| -------------------------- | ---------- | ---------- | --------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`       | Bir adayla eşleşen girdiler, adayı katalogdan/aday havuzundan gizler. |
-| `modelVisibilityAllowlist` | `string[]` | `[]`       | Boş olmadığında, YALNIZCA bir adayla eşleşen girdiler görünür kalır.  |
+| Anahtar                    | Tip        | Varsayılan | Anlam                                                                |
+| -------------------------- | ---------- | ---------- | -------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`       | Bir adayla eşleşen girişler onu catalog/candidate havuzundan gizler. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`       | Boş olmadığında adayla eşleşen ONLY girişleri açıkta kalır.          |
 
-Her ikisi de en fazla 200 karakterden oluşan en fazla 500 girdi kabul eder
-(`src/shared/validation/settingsSchemas.ts` içinde Zod ile doğrulanır). Bir girdi şunlardan biridir:
+Her ikisi de her biri en fazla 200 karakterden oluşan 500'e kadar girişi kabul eder ( `src/shared/validation/settingsSchemas.ts` Zod onaylıdır). Bir giriş aşağıdakilerden biridir:
 
-- tam bir katalog kimliği — `"gpt-4o"` (yalın model kimliği) veya `"openai/gpt-4o"` (sağlayıcı önekli), ya da
-- `*`/`?` kullanan bir glob kalıbı — ör. `"openai/gpt-4*"` veya `"anthropic/*"` — `ModelRoutingSection`
-  bileşeninin model başına kombinasyon eşlemeleri ve `freeModels.ts::matchesOnlyPaidModels` tarafından
-  zaten kullanılan aynı ortak `globToRegex()` eşleştiricisi (`src/shared/utils/globPattern.ts`) aracılığıyla çözümlenir.
+- tam bir katalog kimliği — `"gpt-4o"` (çıplak model kimliği) veya `"openai/gpt-4o"` (sağlayıcı öneki) veya
+- `*`/`?` — kullanan bir glob deseni, örneğin `"openai/gpt-4*"` veya `"anthropic/*"` — `ModelRoutingSection` model başına birleşik eşlemeleri ve `freeModels.ts::matchesOnlyPaidModels` tarafından zaten kullanılan aynı paylaşılan `globToRegex()` eşleştirici (`src/shared/utils/globPattern.ts`) aracılığıyla çözümlenir.
 
-Öncelik: Önce engelleme listesi kontrol edilir (engellenen bir girdi, izin verme listesiyle de
-eşleşse bile her zaman gizlenir); izin verme listesi boş olmadığında yalnızca onunla eşleşen
-girdiler görünür kalır.
+Öncelik: Önce reddedilenler listesi kontrol edilir (reddedilen bir giriş, izin verilenler listesiyle eşleşse bile her zaman gizlenir); İzin verilenler listesi boş olmadığında yalnızca eşleştiği girişler hayatta kalır.
 
-## Bir değil, iki darboğaz noktası
+## Bir değil iki dar geçit
 
-#6512'den çıkarılan ders (yalnızca `hidePaidModels` kullanan bir katalog filtresi, kombinasyon
-aday havuzu bağımsız olarak oluşturulduğundan `auto/*` yönlendirmesinin ücretli bir modele
-gitmesine yine de izin veriyordu) burada da aynen geçerlidir. Eşleştirme koşulu
-`isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) ŞU İKİ yerde çağrılır:
+# #6512'den alınan ders (bir `hidePaidModels` -only katalog filtresi, birleşik aday havuzu bağımsız olarak oluşturulduğundan `auto/*` ücretli bir modele yönlendirilmesine hâlâ izin veriyor) burada da aynı şekilde geçerlidir. Eşleşen yüklem `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`), BOTH çağrılır:
 
-- `src/app/api/v1/models/catalog.ts` — `/v1/models` listesinin kendisinde, `shouldHidePaid()`
-  tarafından hâlihazırda denetlenen kaynak başına aynı 5 darboğaz noktasında (statik `PROVIDER_MODELS`,
-  eşitlenmiş sağlayıcı satırları, özel satırlar, takma ad destekli satırlar, yönetilen geri dönüş satırları).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` —
-  `virtualFactory.ts::buildPreparedPool` içinden, eşdeğer `filterPaidOnlyCandidates()`
-  çağrısından hemen sonra çağrılır; böylece engellenen bir model, bir `auto/*` aday havuzuna da
-  hiçbir zaman seçilemez.
+- `src/app/api/v1/models/catalog.ts` — `/v1/models` kendisi, kaynak başına aynı 5 geçiş noktasında listeleniyor `shouldHidePaid()` zaten kapılar (statik `PROVIDER_MODELS`, senkronize sağlayıcı satırları, özel satırlar, takma ad destekli satırlar, yönetilen geri dönüş satırları).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` —, eşdeğer `filterPaidOnlyCandidates()` çağrısından hemen sonra `virtualFactory.ts::buildPreparedPool` çağrılır, dolayısıyla reddedilen bir model hiçbir zaman `auto/*` aday havuzuna seçilemez.
 
-## Filtrelenmeyenler
+## NOT filtresi nedir?
 
-`hideAutoCombos` ayarının mevcut davranışını yansıtır: **açıkça** gönderilen bir model kimliği
-(`auto/*` üzerinden gönderilmeyen ve katalog listesi aracılığıyla keşfedilmeyen), yönlendirme
-sırasında hiçbir zaman engellenmez — yalnızca duyuru/aday havuzu üyeliği filtrelenir. Bu,
-`hidePaidModels` ayarından bağımsızdır; bir operatör maliyetle ilgisi olmayan nedenlerle
-düzenlenmiş bir küme isteyebilir. Bu nedenle her iki ayar da `catalog.ts` içindeki mevcut çoklu
-bayrak bileşiminde olduğu gibi bağımsız VE'lenen filtreler olarak birleşir.
+`hideAutoCombos` mevcut davranışını yansıtır: gönderilen bir model kimliği** açıkça** ( `auto/*` yoluyla değil ve katalog listesi aracılığıyla keşfedilmez) gönderim sırasında hiçbir zaman engellenmez — yalnızca advertisement/candidate-pool üyeliği filtrelenir. Bu `hidePaidModels` bağımsızdır; Bir operatör, maliyetle hiçbir ilgisi olmayan nedenlerden dolayı seçilmiş bir set isteyebilir, bu nedenle her iki ayar da `catalog.ts` mevcut çoklu bayrak kompozisyonuyla aynı şekilde bağımsız AND-ed filtreleri olarak oluşturulur.
 
-Ayarların dışa aktarımı (`GET /api/settings/export-json`), diğer tüm ayar alanlarında olduğu gibi
-her iki diziyi de olduğu gibi içerir — `hidePaidModels` ayarının kombinasyon adımı dışa aktarma
-filtresinden farklı olarak burada yeniden yükleme riski yoktur: dışa aktarılan bir kombinasyon
-adımına gömülü engellenmiş bir kimlik, operatörün kendi açık yönlendirme tercihidir; dışa aktarma
-sınırının kaldırması gereken bir şey değildir.
+Ayarları dışa aktarma (`GET /api/settings/export-json`), her iki diziyi de kelimesi kelimesine içerir, diğer tüm ayar alanları gibi —, `hidePaidModels` birleşik adımlı dışa aktarma filtresinin aksine, burada yeniden hidrasyon riski yoktur: dışa aktarılan bir birleşik adıma gömülü reddedilen kimlik, operatörün kendi açık yönlendirme seçimidir, dışa aktarma sınırının kaldırması gereken bir şey değildir.
+
+## Yalnızca kombinasyon listeleme (`exposeCombosOnly`)
+
+Kombinasyonların genel model yüzeyi ve sağlayıcıların yalnızca arka uç olduğu dağıtımlar için ayrı bir boolean, ayrıca varsayılan olarak isteğe bağlı ve `false`. `true` olduğunda, genel liste (`GET /v1/models`, `GET /v1` ve `getUnifiedModelsResponse()` üzerine inşa edilen diğer `/v1` keşif yolları) yalnızca `owned_by: "combo"`: kullanıcı kombinasyonları artı yerleşik `auto/*` kombinasyonlarını içeren satırları tutar ( `hideAutoCombos` bunları gizlemediği sürece). Anahtar başına `catalogScope: "combos"` ile aynı satır testini kullanır ve anahtarın kendi allow/deny/scope filtreleri hâlâ en üstte uygulanır.
+
+Aç/kapat** Ayarlar → Yönlendirme → Modeller API listesi** veya `PATCH /api/settings {"exposeCombosOnly": true}` ile.
+
+Yukarıdaki listeler gibi, yalnızca reklamı değiştirir:
+
+- açık bir `provider/model` kimliği yine de gönderilir ve `GET /v1/models/{id}` yine de bunu çözer;
+- gösterge tablosu kataloğu (model seçiciler tarafından kullanılan `GET /api/models/catalog`) daraltılmamış;
+- `auto/*` aday havuzlarına yansıtılmadığından `auto/*` kombinasyonları havuzlarının tamamını korur.

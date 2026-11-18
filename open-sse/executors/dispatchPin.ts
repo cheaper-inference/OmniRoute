@@ -21,7 +21,11 @@ import {
  */
 export function assertDispatchUrlAllowed(provider: string, url: string): void {
   if (!url) return;
-  if (isLocalProvider(provider) || isSelfHostedChatProvider(provider)) return;
+  if (isLocalProvider(provider) || isSelfHostedChatProvider(provider)) {
+    // Exempt from public-host checks, never from the cloud-metadata block.
+    parseAndValidateNonMetadataUrl(url);
+    return;
+  }
   if (getProviderValidationGuard() === "public-only") {
     parseAndValidatePublicUrl(url);
     return;
@@ -79,12 +83,24 @@ export function dispatchGuarded(
   init: RequestInit,
   credentials?: DispatchCredentials
 ): Promise<Response> {
+  // A caller that pinned a redirect mode (strict validation: "error") keeps it.
+  if (init.redirect) return dispatchOnce(provider, url, init, credentials, false);
+  return dispatchFollowingRedirects(provider, url, init, credentials);
+}
+
+function dispatchOnce(
+  provider: string,
+  url: string,
+  init: RequestInit,
+  credentials: DispatchCredentials | undefined,
+  isRedirectHop: boolean
+): Promise<Response> {
   const override = credentials?.providerSpecificData?.baseUrl;
   const guard = getProviderValidationGuard();
   if (
     guard === "none" ||
-    typeof override !== "string" ||
-    override.trim() === "" ||
+    // A redirect target is never a fixed registry host, so it is guarded like an override.
+    (!isRedirectHop && (typeof override !== "string" || override.trim() === "")) ||
     isLocalProvider(provider) ||
     isSelfHostedChatProvider(provider) ||
     !canGuardDirectConnection(provider, url)
@@ -92,4 +108,65 @@ export function dispatchGuarded(
     return fetch(url, init);
   }
   return fetch(url, { ...init, dispatcher: getGuardedDispatcher(guard) } as RequestInit);
+}
+
+const REDIRECT_STATUSES = new Set([301, 302, 303, 307, 308]);
+const MAX_REDIRECTS = 5;
+const CREDENTIAL_HEADER = /^(authorization|proxy-authorization|cookie)$|key|token|secret/i;
+const BODY_HEADERS = ["content-type", "content-length", "content-encoding", "content-language"];
+
+/** Request options for the next hop: drops credentials across origins, applies Fetch method rules. */
+function redirectHopOptions(
+  options: RequestInit,
+  status: number,
+  fromUrl: string,
+  toUrl: string
+): RequestInit {
+  const headers = new Headers(options.headers);
+  if (new URL(toUrl).origin !== new URL(fromUrl).origin) {
+    for (const name of [...headers.keys()]) {
+      if (CREDENTIAL_HEADER.test(name)) headers.delete(name);
+    }
+  }
+  const method = (options.method || "GET").toUpperCase();
+  const switchesToGet = status === 303 ? method !== "HEAD" : status <= 302 && method === "POST";
+  if (!switchesToGet) return { ...options, headers: Object.fromEntries(headers.entries()) };
+  for (const name of BODY_HEADERS) headers.delete(name);
+  return {
+    ...options,
+    method: "GET",
+    body: undefined,
+    headers: Object.fromEntries(headers.entries()),
+  };
+}
+
+/**
+ * Follows redirects by hand: an auto-followed redirect would reach a Location target
+ * that neither guard above ever saw, and on 307/308 forward the POST body and the key to it.
+ * Every hop gets the string guard and the connect-time guard; credential headers are dropped
+ * when the origin changes; method rules follow the Fetch standard.
+ */
+async function dispatchFollowingRedirects(
+  provider: string,
+  url: string,
+  init: RequestInit,
+  credentials: DispatchCredentials | undefined
+): Promise<Response> {
+  let currentUrl = url;
+  let options: RequestInit = { ...init, redirect: "manual" };
+  for (let hop = 0; ; hop++) {
+    const response = await dispatchOnce(provider, currentUrl, options, credentials, hop > 0);
+    // Status first: a non-redirect answer is returned as is, whatever its headers.
+    if (!REDIRECT_STATUSES.has(response.status)) return response;
+    const location = response.headers.get("location");
+    if (!location) return response;
+    void response.body?.cancel().catch(() => {});
+    if (hop >= MAX_REDIRECTS) {
+      throw new Error(`Provider dispatch stopped after ${MAX_REDIRECTS} redirects`);
+    }
+    const nextUrl = new URL(location, currentUrl).toString();
+    assertDispatchUrlAllowed(provider, nextUrl);
+    options = redirectHopOptions(options, response.status, currentUrl, nextUrl);
+    currentUrl = nextUrl;
+  }
 }

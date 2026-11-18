@@ -33,9 +33,8 @@ test("call-log drain waits for artifact metadata and summary commit", async () =
     responseBody: { committed: true },
   });
 
-  // The first cold spawn of the worker_threads artifact worker (loaded via tsx)
-  // takes seconds before queued artifact writes even start draining; the bound
-  // only fails a genuinely stuck drain (see CALL_LOG_SETTLE_TIMEOUT_MS).
+  // Allow for a cold worker start under load; this bound guards a stuck drain
+  // (see CALL_LOG_SETTLE_TIMEOUT_MS).
   assert.equal(await callLogs.waitForCallLogSaves(CALL_LOG_SETTLE_TIMEOUT_MS), true);
 
   const row = core

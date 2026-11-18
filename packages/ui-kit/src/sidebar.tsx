@@ -1,7 +1,7 @@
 "use client";
 
 import { cloneElement, createContext, forwardRef, isValidElement, useCallback, useContext, useEffect, useId, useMemo, useRef, useState, version as reactVersion } from "react";
-import type { ComponentProps, MouseEvent as ReactMouseEvent, MutableRefObject, ReactElement, ReactNode } from "react";
+import type { ComponentProps, ForwardedRef, MouseEvent as ReactMouseEvent, MutableRefObject, ReactElement, ReactNode } from "react";
 import { PanelLeft } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "./sheet";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
@@ -290,6 +290,40 @@ export function SidebarMenuButton({ className, isActive = false, tooltip, asChil
 export function SidebarMenuBadge({ className, ...props }: ComponentProps<"span">) {
   return <span data-slot="sidebar-menu-badge" className={cn("ci-sidebar__menu-badge", className)} {...props} />;
 }
+
+export interface SidebarActionProps extends ComponentProps<"button"> {
+  /** Hide until the row is hovered or focused; always visible on touch and while pressed/expanded. */
+  showOnHover?: boolean;
+  /** Render the single child (e.g. a DropdownMenuTrigger's button) with the action treatment. */
+  asChild?: boolean;
+}
+
+function renderSidebarAction(slot: string, base: string, { className, showOnHover = false, asChild = false, children, type = "button", ...props }: SidebarActionProps, ref: ForwardedRef<HTMLButtonElement>) {
+  const shared = { "data-slot": slot, "data-show-on-hover": showOnHover || undefined };
+  if (asChild && isValidElement(children)) {
+    const child = children as ReactElement<Record<string, unknown>>;
+    return cloneElement(child, { ...props, ...shared, ref, className: cn(base, className, child.props.className as string | undefined) });
+  }
+  return <button ref={ref} type={type} {...shared} className={cn(base, className)} {...props}>{children}</button>;
+}
+
+/**
+ * Icon action trailing a `SidebarMenuButton` (pin, overflow menu). Needs an `aria-label`.
+ * It sits where `SidebarMenuBadge` does, so use one or the other on an item.
+ */
+export const SidebarMenuAction = forwardRef<HTMLButtonElement, SidebarActionProps>(function SidebarMenuAction(props, ref) {
+  return renderSidebarAction("sidebar-menu-action", "ci-sidebar__menu-action", props, ref);
+});
+
+/**
+ * Icon action on a `SidebarGroup` header row. Needs an `aria-label`. Place it right after
+ * `SidebarGroupLabel`; its position assumes that label is the group's first child. Keep that
+ * label to short text with an optional icon: it renders as one ellipsized line.
+ */
+export const SidebarGroupAction = forwardRef<HTMLButtonElement, SidebarActionProps>(function SidebarGroupAction(props, ref) {
+  return renderSidebarAction("sidebar-group-action", "ci-sidebar__group-action", props, ref);
+});
+
 export function SidebarInset({ className, ...props }: ComponentProps<"main">) {
   return <main data-slot="sidebar-inset" className={cn("ci-sidebar-inset", className)} {...props} />;
 }

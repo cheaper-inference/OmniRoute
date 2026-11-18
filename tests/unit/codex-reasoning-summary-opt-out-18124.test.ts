@@ -61,7 +61,7 @@ test("#18124 Chat-translated models outside the list keep the defaulted summary 
   assert.equal(MARKER in wire, false);
 });
 
-test("#18124 native Responses gpt-6.1-sol (no translator marker) keeps summary and encrypted include", () => {
+test("#18124 native Responses gpt-6.1-sol (no translator marker) is forwarded as sent", () => {
   const wire = new CodexExecutor().transformRequest(
     "gpt-6.1-sol",
     {
@@ -73,8 +73,9 @@ test("#18124 native Responses gpt-6.1-sol (no translator marker) keeps summary a
     true,
     CTX
   ) as WireBody;
-  assert.equal(wire.reasoning?.summary, "auto");
-  assert.deepEqual(wire.include, ["reasoning.encrypted_content"]);
+  // Native Codex passthrough is not rewritten: no summary or include the client did not send.
+  assert.deepEqual(wire.reasoning, { effort: "high" });
+  assert.equal(wire.include, undefined);
 });
 
 test("#18124 the opt-out marker is dropped for non-Codex Responses targets", () => {

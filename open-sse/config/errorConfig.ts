@@ -75,9 +75,10 @@ export const COOLDOWN_MS = {
   transient: TRANSIENT_COOLDOWN_MS,
   requestNotAllowed: 5 * 1000,
   // Anthropic OAuth 403 "Request not allowed" (#12859): a per-request refusal
-  // on a healthy token. chatCore excludes the connection for requestRejected
-  // after the first refusal, requestRejectedRepeat after the second, and bans
-  // it on the third consecutive one (services/requestRejectedStreak.ts).
+  // on a healthy token. chatCore excludes the model for requestRejected after
+  // the first refusal, requestRejectedRepeat after the second, and a longer
+  // capped cooldown on the third consecutive one; it never bans the connection
+  // (services/requestRejectedStreak.ts).
   requestRejected: 5 * 60 * 1000,
   requestRejectedRepeat: 15 * 60 * 1000,
   rateLimit: 2 * 60 * 1000,

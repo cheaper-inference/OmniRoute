@@ -40,73 +40,83 @@ Bu sayı bir tahmin olduğundan:
 
 ---
 
-## Maliyetler nasıl tahmin edilir
+## Maliyetler nasıl tahmin ediliyor?
 
 ### Fiyatlandırma kaynağı
 
-Maliyetler, aşağıdaki öncelik sırasına göre çözümlenen bir fiyatlandırma tablosundan gelir
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Maliyetler [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts) birleştirilmiş fiyatlandırma tablosundan bu öncelik sırasına göre gelir (** önce en yüksek** ):
 
-1. **Kullanıcı geçersiz kılmaları** — gösterge panelinde / `PATCH /api/pricing`
-   aracılığıyla belirlediğiniz fiyatlar.
-2. **Senkronize edilmiş harici fiyatlandırma** — senkronizasyon etkinleştirildiğinde
-   LiteLLM'in herkese açık `model_prices_and_context_window.json` dosyasından alınır
-   (geçersiz kılmalarınızın üzerine hiçbir zaman yazmaması için ayrı bir
-   `pricing_synced` ad alanında saklanır).
-3. **Sabit kodlanmış varsayılanlar** — OmniRoute ile birlikte sunulur.
+1. **Kullanıcı geçersiz kılmaları** — fiyatları kontrol panelinde veya `PATCH /api/pricing` ( `pricing` ad alanı) aracılığıyla ayarlanır.
+2. **modeller.dev senkronizasyonu** — fiyatlandırması `https://models.dev/api.json` ( `models_dev_pricing` ad alanı) getirildi.
+3. **LiteLLM senkronizasyonu** — fiyatları, LiteLLM genel `model_prices_and_context_window.json` ( `pricing_synced` ad alanı) getirildi.
+4. **Sabit kodlanmış varsayılanlar** — oranları [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/) olarak gönderilir.
 
-Harici fiyatlandırma senkronizasyonu **isteğe bağlıdır** ve varsayılan olarak devre
-dışıdır. İlgili ortam değişkenleri
-([`.env.example`](../../.env.example) dosyasına bakın):
+Aynı provider/model için, yüksek öncelikli katmanlardan gelen değerler, alt katmanlardaki eşleşen alanların üzerine yazar; üst katmanda bulunmayan alanlar yine de alt katmandan gelebilir. Her iki bağımsız senkronizasyon işi aynı anda çalıştırıldığında bile sıra sabittir. `GET /api/pricing?includeSources=1`, model başına etiketleri (`user`, `modelsDev`, `litellm`, `default`) o modeli içeren en yüksek öncelikli katmanı tanımlayan `pricing` ve `sourceMap` döndürür.
 
-| Ortam değişkeni         | Varsayılan | Amaç                                                                         |
-| ----------------------- | ---------- | ---------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`    | Başlangıçta arka plan LiteLLM fiyatlandırma senkronizasyonunu etkinleştirir. |
-| `PRICING_SYNC_INTERVAL` | `86400`    | **Saniye** cinsinden senkronizasyon aralığı (varsayılan olarak günlük).      |
-| `PRICING_SYNC_SOURCES`  | `litellm`  | Virgülle ayrılmış kaynak listesi (şu anda yalnızca `litellm` desteklenir).   |
+**LiteLLM senkronizasyonu** isteğe bağlıdır, varsayılan olarak devre dışıdır. Ortam değişkenleri (bkz. [`.env.example`](../../.env.example) ):
+
+| Ortam değişkeni         | Varsayılan | Amaç                                                                                         |
+| ----------------------- | ---------- | -------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`    | Arka planda LiteLLM fiyatlandırma senkronizasyonunu etkinleştirin.                           |
+| `PRICING_SYNC_INTERVAL` | `86400`    | Saniye cinsinden senkronizasyon aralığı (günlük).                                            |
+| `PRICING_SYNC_SOURCES`  | `litellm`  | Yalnızca bu senkronizasyon için kaynak seçimi; şu anda yalnızca `litellm` desteklenmektedir. |
+
+**modeller.dev senkronizasyonu** LiteLLM senkronizasyonundan ayrıdır ve varsayılan olarak devre dışıdır. Bunu Ayarlar'da etkinleştirin (models.dev senkronizasyonu) veya şu değişkenleri kullanın:
+
+| Ortam değişkeni            | Varsayılan      | Amaç                                                                                                                      |
+| -------------------------- | --------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(ayarlanmadı)_ | Unset, Ayarlar geçişini takip eder; `1/true/on/yes` açılır ve `0/false/off/no` kapanır (Ayarlar bunu etkinleştirse bile). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`         | Varsayılan models.dev senkronizasyon aralığı saniye cinsinden (günlük).                                                   |
+
+`PRICING_SYNC_SOURCES` yapar** Olumsuz** models.dev'i etkinleştirin; yalnızca LiteLLM senkronizasyonunu kontrol eder. Kullanıcı geçersiz kılmayı silmek, senkronize edilen ad alanlarının ikisini de temizlemez; bir sonraki mevcut fiyatlandırma katmanı etkili olur. Fiyatlandırılmamış bir model için manuel geçersiz kılma eklemeden önce hem senkronizasyon ayarlarını hem de `sourceMap` kontrol edin.
 
 ### Maliyet formülü
 
-Maliyet, her istek için token sayılarından ve milyon token başına oranlardan
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-içindeki (`computeCostFromPricing` / `calculateCost`) hesaplanır:
+Maliyet, [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`) cinsinden jeton sayımlarından ve milyon başına jeton oranlarından istek başına hesaplanır:
 
-- **Girdi token'ları** (önbellek okumaları ve önbellek oluşturma token'ları çıkarıldıktan sonra) × `input` oranı.
-- **Önbellek okuma token'ları** × `cached` oranı (yoksa girdi oranı kullanılır).
-- **Önbellek oluşturma token'ları** × `cache_creation` oranı (yoksa girdi oranı kullanılır).
-- **Çıktı token'ları** × `output` oranı.
-- **Akıl yürütme token'ları** × `reasoning` oranı (yoksa çıktı oranı kullanılır).
+- **Giriş jetonları** (eksi önbellek okumaları ve önbellek oluşturma belirteçleri) × `input` oranı.
+- **Önbellek okuma belirteçleri** × `cached` oranı (giriş oranına geri döner).
+- **Önbellek oluşturma belirteçleri** × `cache_creation` oranı (giriş oranına geri döner).
+- **Çıkış jetonları** × `output` oranı.
+- **Muhakeme belirteçleri** × `reasoning` oranı (çıkış oranına geri döner).
 
-Tüm oranlar, 1.000.000 token başına USD olarak yorumlanır. Codex "fast"/"priority" veya
-"flex" hizmet katmanı bir maliyet çarpanı (`getCodexFastCostMultiplier`) uygular — örneğin
-flex, token maliyetinde %50 indirimle ücretlendirilir ve bu, gösterge panelinde
-**flex tasarrufu** olarak gösterilir.
+Tüm oranlar 1.000.000 token başına USD olarak yorumlanır. Bir Codex "hızlı"/"öncelikli" veya "esnek" hizmet katmanı bir maliyet çarpanı (`getCodexFastCostMultiplier`) uygular — örneğin flex %50 jeton indirimiyle faturalandırılır ve şu şekilde ortaya çıkar:** esnek tasarruf** kontrol panelinde.
 
-Model adları önce normalleştirilir (`openai/` veya `accounts/fireworks/models/` gibi
-sağlayıcı yolu önekleri kaldırılır); böylece geçmiş satırlar da bir fiyatla eşleşmeye
-devam eder.
+Önce model adları normalleştirilir ( `openai/` veya `accounts/fireworks/models/` gibi sağlayıcı yolu önekleri çıkarılır), böylece geçmiş satırlar hâlâ bir fiyatla eşleşir.
 
-### Harcamalar nasıl kaydedilir
+### Harcama nasıl kaydedilir?
 
-- İstek başına maliyet, yanıttan sonra hesaplanır ve istemciye hiçbir zaman gecikme
-  eklememesi için sonucu beklenmeden kaydedilir. Paylaşılan kota tüketimi, bir sonraki
-  olay döngüsü adımında [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts)
-  aracılığıyla zamanlanır.
-- API anahtarı harcamaları arabelleğe alınır ve
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tarafından toplu olarak
-  yazılır (varsayılan 60 saniyelik yazma aralığı, 1.000 girdilik arabellek).
-  Şunlarla ayarlanabilir:
+- İstek başına maliyet, istek tamamlandığında hesaplanır. Paylaşılan kota tüketimi [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts) aracılığıyla bir sonraki olay döngüsü işaretinde planlanır.
+- API anahtarı harcaması [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) tarafından toplu olarak arabelleğe alınır ve temizlenir (varsayılan 60 saniyelik temizleme aralığı, 1.000 girişli arabellek). Şu şekilde ayarlanabilir:
 
-  | Ortam değişkeni                     | Varsayılan | Amaç                                             |
-  | ----------------------------------- | ---------- | ------------------------------------------------ |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Milisaniye cinsinden arabelleği yazma aralığı.   |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Yazmadan önce arabellekte tutulacak azami girdi. |
+  | Ortam değişkeni                     | Varsayılan | Amaç                                                    |
+  | ----------------------------------- | ---------- | ------------------------------------------------------- |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`    | Milisaniye cinsinden yıkama aralığı.                    |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`     | Temizlemeden önce maksimum ara belleğe alınan girişler. |
 
-Gösterge panelindeki maliyet değerleri, satır başına saklanan bir dolar tutarından
-**okunmaz** — analiz uç noktası her çalıştığında token sayılarından ve geçerli
-fiyatlandırma tablosundan anlık olarak yeniden hesaplanır. Bu, hatalı bir fiyatı
-düzeltmenin (ve yeniden senkronize etmenin) geçmiş maliyet tahminlerini geriye dönük
-olarak güncelleyeceği anlamına gelir.
+Maliyetler, sağlayıcı tarafından bildirilen kesin bir ücreti (`provider_cost_usd`), ardından katalog fiyatlı bir istek anlık görüntüsünü (`calculated_cost_usd`) ve ardından mevcut katalogdan belirtecin yeniden fiyatlandırmasını tercih eder. Saklanan maliyetler, jeton sayımları aracılığıyla yeniden ücretlendirilmez. Yalnızca eski jeton satırları, katalog fiyatları değiştiğinde değişmeye devam eder.
+
+### OCR ve yerleştirmeler
+
+- Başarılı `/v1/ocr` istekleri, istenen sayfa aralığını veya döndürülen sayfa nesnelerinin sayısını değil, yukarı akış `usage_info.pages_processed` kullanır. Tahmin sayfa × `ocr_cost_per_page` (mutlak USD/page,** Olumsuz** USD/million).
+- Belge veya sınırlayıcı kutu açıklamaları içeren talepler ayrı bir `ocr_cost_per_annotated_page` tarifesi gerektirir. Onsuz maliyet bilinmiyor; sıradan OCR tarifesi sessizce ikame edilmez.
+- LiteLLM senkronizasyonu, mutlak USD/page değerini ve açık sıfır da dahil olmak üzere yalnızca açıklama girişlerini koruyarak yukarı akış `annotation_cost_per_page` alanını `ocr_cost_per_annotated_page` ile eşler. Sağlanan bir kanonik alan önceliklidir; geçersiz takma ad değerleri göz ardı edilir. Kullanıcı fiyatlandırmasını geçersiz kılma işlemleri normal önceliklerini korur. [LiteLLMOCR fiyatlandırma anahtarlarına](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking) bakın.
+- OCR kullanımı sayfa sayısını, birim fiyatı, hesaplanan USD maliyetini, API anahtarını ve seçilen bağlantıyı saklar. Sayfalar hiçbir zaman belirteç olarak temsil edilmez. Çağrı günlükleri belge URLs, PDF baytlarını veya çıkarılan metni değil, faturalandırma meta verilerini içerir.
+- Başarılı `/v1/embeddings` istekleri, aynı milisaniyede tamamlanan ayrı gruplar da dahil olmak üzere, fiziksel grup başına bir kullanım satırını kaydeder. Sağlayıcı tarafından bildirilen ücretler, jeton tahminlerine göre önceliklidir; Birleşik paketleyiciler ücret eklemez.
+- Kullanım geçmişi, Maliyet analizleri, provider/account pencereleri, API anahtarı harcama limitleri, istek-maliyet defteri ve günlük kullanım özetleri bu ücretleri içerir. Kayıt tutmayan anahtarlar, kaynak metni saklamadan sayısal hesaplamayı korur.
+- Eksik kullanım veya tarifeler** bilinmiyor** , ücretsiz değil: Yanıt maliyeti başlığı atlanır ve mevcut fiyatlandırılmamış kullanım politikası sınırlı API anahtarları için geçerlidir. Açıkça yapılandırılmış sıfır oranlar, geçerli sıfır maliyetli kullanım olarak kalır.
+
+Bu yalnızca ileriye dönük muhasebedir. Kullanım geçmişini hiç yazmayan eski OCR/embedding çağrıları bu geçişten yeniden oluşturulamaz. Katalog tahminleri USD tahminleridir, fatura değildir ve para birimi dönüştürmeyi, vergiyi veya indirimleri içermez.
+
+### Konuşma ve görüntüler
+
+- Başarılı `/v1/audio/transcriptions`, `/v1/audio/speech` ve görüntü oluşturma girişimleri sayısal hesaplamayı paylaşır. Doğrudan ve birleşik aramalar arayanın API anahtarını ve seçilen bağlantıyı taşır; birleşik sarmalayıcı asla ikinci bir borç eklemez.
+- Sağlayıcının bildirdiği USD, açık bir sıfır ücret dahil olmak üzere katalog tahminini kazandı. OpenRouterJSON `usage.cost` `cost_usd` normalleştirilir. Aksi takdirde, ölçülen belirteçler belirteç fiyatlarını kullanır, transkripsiyon saniyeleri saniye başına fiyatları kullanır, konuşma girişi Unicode karakter sayımlarını kullanır ve sabit fiyatlı görüntüler istenen `n` değil gerçekte döndürülen sayıyı kullanır.
+- İkili OpenRouter TTS JSON kullanım gövdesi yoktur. Ses tamamlandıktan veya arayan kişi iptal ettikten sonra OmniRoute, ID neslini sorgular.** Aynı** yapılandırılmış OpenRouter kökeni. Bir EU isteği asla global kaynağa geri dönmez. Bu sınırlı, salt okunur bir aramadır; Muhasebe için sentez yeniden denenmez. Faturalandırma kayıtları ses bittikten sonra görünebilir: yeniden arama denemeleri, ağ son tarihleri de dahil olmak üzere arka planda yaklaşık 52 saniyeye kadar çalışır.
+- Bu arama sırasında sesli yanıtta `X-OmniRoute-Cost-Status: pending` bulunur ve yanıt maliyeti başlığı yoktur. Nihai ücreti, mutabakat sonrasında kullanım geçmişinde, analizlerde ve ana defterde görünür. Meta veriler mevcut değilse yapılandırılmış bir tarife anlık görüntüsü kullanılır; aksi takdirde maliyet bilinmiyor.
+- Saniyeler, karakterler ve resim sayıları ayrı faturalandırma birimi alanlarına sahiptir; asla sahte jeton sayıları yoktur. Muhasebe, konuşma metnini, transkriptleri veya resim baytlarını değil, yalnızca sayısal kullanımı korur. Mevcut fiyatlandırılmamış görüntü muafiyetleri değişmemiştir: gerçekten eksik bir görüntü tarifesi, sınırlı bir anahtarı yeni kilitlemez ve yanıtta, çağrının ücretsiz olduğu bildirilmek yerine maliyet başlığı atlanır. Fiyatlandırma deposu hatası, arızalı kapatma uygulamasına ilişkin kullanım kanıtlarını hâlâ korur.
+
+Hiçbir tarihi speech/image şarjı icat edilmedi veya doldurulmadı. Sağlayıcı faturası, faturalar ve ücreti bildirilmeyen aramalar için referans olmaya devam ediyor.
 
 ---
 
@@ -143,50 +153,48 @@ Maliyetler alanı ayrıca aşağıdakileri de barındırır (tümü `/dashboard/
 
 ## API uç noktaları
 
-Aksi belirtilmedikçe bunların tümü yönetim kimlik doğrulaması gerektirir (loopback/JWT, `requireManagementAuth` aracılığıyla).
+Bunların tümü, belirtilmediği sürece yönetim kimlik doğrulaması (loopback/JWT, via `requireManagementAuth`) gerektirir.
 
-### Kullanım ve maliyet analitiği
+### Kullanım ve maliyet analizi
 
-| Yöntem | Uç nokta                 | Amaç                                                                                                                                                                    |
-| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Tam maliyet/kullanım analitiği: özet, günlük eğilim, sağlayıcı/model/API anahtarı/hesap/katman bazında. Sorgu: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Zaman içinde sağlayıcı başına kota kullanımı. Sorgu: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                       |
-| `GET`  | `/api/usage/history`     | Ham kullanım geçmişi satırları.                                                                                                                                         |
-| `GET`  | `/api/usage/call-logs`   | İstek başına çağrı günlükleri (model, token'lar, maliyet, gecikme, durum).                                                                                              |
-| `GET`  | `/api/usage/quota`       | Sağlayıcı kota durumu.                                                                                                                                                  |
-| `GET`  | `/api/usage/proxy-logs`  | Proxy istek günlükleri.                                                                                                                                                 |
+| Yöntem | Uç nokta                 | Amaç                                                                                                                                               |
+| ------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Tam cost/usage analitiği: özet, günlük trend, provider/model/API key/account/tier. Sorgu: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Zaman içinde sağlayıcı başına kota kullanımı. Sorgu: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                  |
+| `GET`  | `/api/usage/history`     | Ham kullanım geçmişi satırları.                                                                                                                    |
+| `GET`  | `/api/usage/call-logs`   | İstek başına çağrı kayıtları (model, belirteçler, maliyet, gecikme, durum).                                                                        |
+| `GET`  | `/api/usage/quota`       | Sağlayıcı kota durumu.                                                                                                                             |
+| `GET`  | `/api/usage/proxy-logs`  | Proxy istek günlükleri.                                                                                                                            |
 
 ### Bütçeler
 
 | Yöntem | Uç nokta                 | Amaç                                                                                            |
 | ------ | ------------------------ | ----------------------------------------------------------------------------------------------- |
 | `GET`  | `/api/usage/budget`      | Bir API anahtarı için maliyet özeti + bütçe kontrolü (`apiKeyId` sorgu parametresi gereklidir). |
-| `POST` | `/api/usage/budget`      | Bir API anahtarı için günlük/haftalık/aylık USD limitlerini ve uyarı eşiğini ayarlayın.         |
-| `GET`  | `/api/usage/budget/bulk` | API anahtarları genelinde toplu bütçe özetleri.                                                 |
+| `POST` | `/api/usage/budget`      | Bir API anahtarı için daily/weekly/monthly USD sınırlarını + uyarı eşiğini ayarlayın.           |
+| `GET`  | `/api/usage/budget/bulk` | API anahtarlarında toplu bütçe özetleri.                                                        |
 
-> Bütçe API'si her **API anahtarı** (`apiKeyId`) için ayrı kapsamlandırılır.
-> `GET /api/usage/budget` tarafından döndürülen limitler `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> bir `warningThreshold` ve güncel toplamları (`totalCostToday`, `totalCostMonth`, …) içerir.
+> Bütçe API kapsamı şu şekildedir:**API anahtarı** (`apiKeyId`). `GET /api/usage/budget` tarafından döndürülen sınırlar arasında `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` ve değişen toplamlar (`totalCostToday`, `totalCostMonth`,…) bulunur.
 
 ### Fiyatlandırma
 
-| Yöntem   | Uç nokta                | Amaç                                                                                                                                           |
-| -------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Geçerli birleştirilmiş fiyatlandırma (kullanıcı + senkronize edilmiş + varsayılanlar). Her girdinin kaynağını görmek için `?includeSources=1`. |
-| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` için fiyatlandırmayı geçersiz kılın.                                                   |
-| `DELETE` | `/api/pricing`          | Fiyatlandırmayı varsayılanlara sıfırlayın (isteğe bağlı olarak `?provider=&model=` ile kapsamlandırılır).                                      |
-| `GET`    | `/api/pricing/defaults` | 1 milyon başına varsayılan geri dönüş oranlarını gösterin.                                                                                     |
-| `GET`    | `/api/pricing/models`   | Modele göre anahtarlanmış fiyatlandırma.                                                                                                       |
-| `POST`   | `/api/pricing/sync`     | Harici kaynaklardan (LiteLLM) manuel senkronizasyon başlatın.                                                                                  |
-| `GET`    | `/api/pricing/sync`     | Geçerli senkronizasyon durumu.                                                                                                                 |
-| `DELETE` | `/api/pricing/sync`     | Senkronize edilmiş tüm fiyatlandırma verilerini temizleyin.                                                                                    |
+| Yöntem   | Uç nokta                | Amaç                                                                                                                                                                                       |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `GET`    | `/api/pricing`          | Birleştirilmiş dört katmanlı fiyatlandırma (kullanıcı, models.dev, LiteLLM, varsayılanlar). `?includeSources=1` `pricing` + `sourceMap` değerini döndürür.                                 |
+| `PATCH`  | `/api/pricing`          | `{ provider: { model: { input, output, cached, … } } }` için fiyatlandırmayı geçersiz kıl.                                                                                                 |
+| `DELETE` | `/api/pricing`          | Kullanıcı fiyatı geçersiz kılmalarını kaldırın (isteğe bağlı olarak `?provider=&model=` kapsamına alınır); senkronize edilmiş oranlar veya yerleşik varsayılanlar geri dönüş olarak kalır. |
+| `GET`    | `/api/pricing/defaults` | Varsayılan per-1M geri dönüş oranlarını göster.                                                                                                                                            |
+| `GET`    | `/api/pricing/models`   | Fiyatlandırma modele göre belirlenir.                                                                                                                                                      |
+| `POST`   | `/api/pricing/sync`     | Harici kaynaklardan (LiteLLM) manuel senkronizasyonu tetikleyin.                                                                                                                           |
+| `GET`    | `/api/pricing/sync`     | Mevcut senkronizasyon durumu.                                                                                                                                                              |
+| `DELETE` | `/api/pricing/sync`     | Yalnızca LiteLLM ile senkronize edilmiş fiyatlandırmayı temizle (`pricing_synced`); models.dev verileri ayrıdır.                                                                           |
 
 ### Maliyetle ilgili diğer uç noktalar
 
-| Yöntem | Uç Nokta                      | Amaç                                                                             |
-| ------ | ----------------------------- | -------------------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Ücretsiz model token toplamları, bu ay kullanılan miktar ve kalan ücretsiz kota. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Paylaşılan kota havuzunun kullanımı.                                             |
+| Yöntem | Uç nokta                      | Amaç                                                                           |
+| ------ | ----------------------------- | ------------------------------------------------------------------------------ |
+| `GET`  | `/api/free-tier/summary`      | Ücretsiz model token toplamları, bu ay kullanılanlar ve kalan ücretsiz ödenek. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Paylaşılan kota havuzu için kullanım.                                          |
 
 ---
 

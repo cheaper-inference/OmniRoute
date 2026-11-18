@@ -27,6 +27,11 @@ import {
 // routeGuard drags in server runtime (→ ioredis) that breaks the client/CLI build.
 import { isSpawnCapableBypassPrefix } from "@/shared/constants/spawnCapablePrefixes";
 import { isHttpUrl } from "@/shared/validation/schemas/misc";
+import {
+  BANKED_RESET_ACCOUNT_SCOPES,
+  BANKED_RESET_LIMITS,
+  BANKED_RESET_MODES,
+} from "@/shared/constants/bankedResetAutoApply";
 
 const signatureCacheModeValues = ["enabled", "bypass", "bypass-strict"] as const;
 
@@ -106,6 +111,59 @@ const transformObfuscateWordsSchema = z.object({
     .max(3)
     .optional(),
 });
+
+const bankedResetPercentSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.percentMax);
+const bankedResetHoursSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.hoursMax);
+const bankedResetMinutesSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.minutesMax);
+const bankedResetCapSchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.capMax);
+const bankedResetHourOfDaySchema = z.number().int().min(0).max(BANKED_RESET_LIMITS.hourOfDayMax);
+
+/**
+ * Opt-in auto-apply of banked resets (Codex reset credits, Claude banked grants, Claude
+ * weekly session reset). Every field is optional: the stored object is merged with the
+ * off-by-default values by mergeBankedResetAutoApplySettings (src/lib/usage/bankedResetPolicy.ts).
+ */
+export const bankedResetAutoApplySchema = z.object({
+  enabled: z.boolean().optional(),
+  mode: z.enum(BANKED_RESET_MODES).optional(),
+  creditTypes: z
+    .object({
+      codexCredits: z.boolean().optional(),
+      claudeCredits: z.boolean().optional(),
+      claudeSessionReset: z.boolean().optional(),
+    })
+    .optional(),
+  accountScope: z.enum(BANKED_RESET_ACCOUNT_SCOPES).optional(),
+  connections: z.record(z.string().max(100), z.boolean()).optional(),
+  sessionResetGuardMinutes: bankedResetMinutesSchema.optional(),
+  weeklyResetGuardHours: bankedResetHoursSchema.optional(),
+  weeklyFloorPercent: bankedResetPercentSchema.optional(),
+  expiringCreditHours: bankedResetHoursSchema.optional(),
+  expiringCreditMinUsedPercent: bankedResetPercentSchema.optional(),
+  poolHeadroomPercent: bankedResetPercentSchema.optional(),
+  maxPerAccountPerDay: bankedResetCapSchema.optional(),
+  maxPerDay: bankedResetCapSchema.optional(),
+  minSpacingMinutes: bankedResetMinutesSchema.optional(),
+  schedule: z
+    .object({
+      enabled: z.boolean().optional(),
+      startHourUtc: bankedResetHourOfDaySchema.optional(),
+      endHourUtc: bankedResetHourOfDaySchema.optional(),
+    })
+    .optional(),
+});
+
+/** Operator error rules accept a custom cooldown of up to 30 days. */
+const OPERATOR_ERROR_MAX_COOLDOWN_MS = 30 * 24 * 60 * 60 * 1000;
+const operatorErrorScopeSchema = z.enum(["model", "provider", "connection"]);
+const operatorErrorReasonSchema = z.enum([
+  "auth_error",
+  "quota_exhausted",
+  "rate_limit_exceeded",
+  "model_capacity",
+  "server_error",
+  "unknown",
+]);
 
 export const updateSettingsSchema = z.object({
   connectionTestPrompt: z.string().trim().min(1).max(CONNECTION_TEST_PROMPT_MAX_LENGTH).optional(),
@@ -302,7 +360,7 @@ export const updateSettingsSchema = z.object({
   codexServiceTier: z
     .object({
       enabled: z.boolean().optional(),
-      tier: z.enum(["default", "priority", "flex"]).optional(),
+      tier: z.enum(["default", "priority", "flex", "ultrafast"]).optional(),
       supportedModels: z.array(z.string().max(200)).max(200).optional(),
     })
     .optional(),
@@ -329,6 +387,26 @@ export const updateSettingsSchema = z.object({
   // until the operator flips a specific OAuth connection on from the settings UI.
   codexAutoPing: z
     .object({
+      connections: z.record(z.string().max(100), z.boolean()).optional(),
+    })
+    .optional(),
+  // Opt-in auto-apply of banked resets; off by default (see bankedResetAutoApplySchema).
+  bankedResetAutoApply: bankedResetAutoApplySchema.optional(),
+  // Opt-in auto-spend of Codex reset credits about to expire. `enabled` is the
+  // master switch (default false in src/lib/db/settings.ts); `connections` narrows
+  // it to specific provider_connections ids (key absent = every eligible Codex
+  // connection, empty map = nobody); `maxPerDay` caps redemptions per connection per calendar day and
+  // `horizonHours` sets how close to expiry a credit must be to be spendable.
+  codexSpendExpiringResetCredits: z
+    .object({
+      enabled: z.boolean().optional(),
+      horizonHours: z
+        .number()
+        .int()
+        .min(1)
+        .max(24 * 30)
+        .optional(),
+      maxPerDay: z.number().int().min(1).max(50).optional(),
       connections: z.record(z.string().max(100), z.boolean()).optional(),
     })
     .optional(),
@@ -367,28 +445,24 @@ export const updateSettingsSchema = z.object({
    * editing the catalog. Matches are plain case-insensitive SUBSTRINGS of the
    * error body (never RegExp) to keep the classification hot path ReDoS-safe.
    * Bounded to 50 rules total so a misconfigured setting cannot blow up the
-   * matcher.
+   * matcher. `status` and `match` are each optional (omitted = any) but a rule
+   * must set at least one of them; when both are set, both must match.
    */
   providerErrorRules: z
     .record(
       z.string().trim().min(1).max(100),
       z.array(
-        z.object({
-          status: z.number().int().min(100).max(599),
-          match: z.string().min(1).max(200),
-          scope: z.enum(["model", "provider", "connection"]),
-          reason: z
-            .enum([
-              "auth_error",
-              "quota_exhausted",
-              "rate_limit_exceeded",
-              "model_capacity",
-              "server_error",
-              "unknown",
-            ])
-            .optional(),
-          cooldownMs: z.number().int().min(0).max(86_400_000).optional(),
-        })
+        z
+          .object({
+            status: z.number().int().min(100).max(599).optional(),
+            match: z.string().min(1).max(200).optional(),
+            scope: operatorErrorScopeSchema,
+            reason: operatorErrorReasonSchema.optional(),
+            cooldownMs: z.number().int().min(0).max(OPERATOR_ERROR_MAX_COOLDOWN_MS).optional(),
+          })
+          .refine((rule) => rule.status !== undefined || rule.match !== undefined, {
+            message: "providerErrorRules: each rule needs a status, a match, or both",
+          })
       )
     )
     .optional()
@@ -401,6 +475,24 @@ export const updateSettingsSchema = z.object({
           message: `providerErrorRules: at most 50 rules total, got ${total}`,
         });
       }
+    }),
+  /**
+   * Opt-in per-provider catch-all cooldown for failures no operator rule and no
+   * built-in rule matched. Applies to 402/403/408/429/5xx only — request-shape
+   * 4xx errors and bare 401s keep their own handling. Absent = current behavior.
+   */
+  providerErrorDefaults: z
+    .record(
+      z.string().trim().min(1).max(100),
+      z.object({
+        cooldownMs: z.number().int().min(60_000).max(OPERATOR_ERROR_MAX_COOLDOWN_MS),
+        scope: operatorErrorScopeSchema.optional(),
+        reason: operatorErrorReasonSchema.optional(),
+      })
+    )
+    .optional()
+    .refine((value) => !value || Object.keys(value).length <= 100, {
+      message: "providerErrorDefaults: at most 100 providers",
     }),
   // #6168: global session-stickiness opt-out (per-combo config overrides this).
   disableSessionStickiness: z.boolean().optional(),
@@ -424,6 +516,12 @@ export const updateSettingsSchema = z.object({
   quotaVisibility: z
     .record(z.string().trim().min(1), z.object({ hidden: z.array(z.string()).max(500).optional() }))
     .optional(),
+  /**
+   * Per-operator provider group order on the Quota Tracker (drag-to-reorder).
+   * Display-only — never feeds routing priority. Ported from upstream
+   * decolua/9router#4920.
+   */
+  quotaProviderOrder: z.array(z.string().trim().min(1).max(64)).max(200).optional(),
   requestRetry: z.number().int().min(0).max(10).optional(),
   maxRetryIntervalSec: z.number().int().min(0).max(300).optional(),
   maxBodySizeMb: z
@@ -548,6 +646,9 @@ export const updateSettingsSchema = z.object({
   // Audio Bridge STT over Video Bridge audio extraction — defaults false
   // (Hard Rule #20). A request-side opt-in is required in addition to this.
   modalityBridgeVideoAudioTranscriptionEnabled: z.boolean().optional(),
+  // Independent retention and remote-read consent; both are off unless explicitly enabled.
+  modalityBridgeVideoDrilldownEnabled: z.boolean().optional(),
+  modalityBridgeVideoDrilldownRemoteEnabled: z.boolean().optional(),
   modalityBridgeCacheEnabled: z.boolean().optional(),
   modalityBridgeCacheTtlMinutes: z.number().int().min(1).max(1440).optional(),
   modalityBridgeCacheMaxEntries: z.number().int().min(10).max(5000).optional(),
@@ -578,6 +679,7 @@ export const updateSettingsSchema = z.object({
     .optional(),
   proxyEnabled: z.boolean().optional(),
   perKeyProxyEnabled: z.boolean().optional(),
+  defaultNewConnectionProxyEnabled: z.boolean().optional(),
   // CLIProxyAPI connection settings
   cliproxyapi_fallback_enabled: z.boolean().optional(),
   cliproxyapi_url: z.string().url().max(500).optional(),
@@ -602,6 +704,26 @@ export const updateSettingsSchema = z.object({
     )
     .optional(),
   cliproxyapi_fallback_codes: z.string().max(200).optional(),
+  // opencode server (the headless server of the opencode CLI, `opencode serve`).
+  // Empty = fall back to OPENCODE_SERVER_URL / http://127.0.0.1:4096. The
+  // executor interpolates this into fetch(`${url}/...`), so restrict to http(s)
+  // like headroomUrl above. There is intentionally NO setting for the CLI binary:
+  // it is resolved from the environment only (OPENCODE_SERVER_BIN), never from a
+  // DB value that the request path would hand to spawn().
+  opencode_server_url: z
+    .string()
+    .trim()
+    .pipe(
+      z.union([
+        z.literal(""),
+        z
+          .string()
+          .url()
+          .max(500)
+          .refine((value) => isHttpUrl(value), "must be an http(s) URL"),
+      ])
+    )
+    .optional(),
   // #7645: dedicated CLIProxyAPI credential. CLIProxyAPI requires its own
   // separately-configured `api-keys:` credential and rejects any other token
   // with 401 — without this field, the fallback/passthrough legs had no way
@@ -684,6 +806,8 @@ export const databaseSettingsSchema = z
       compressionCacheStats: z.number().int().min(1).max(365).optional(),
       xpAuditLog: z.number().int().min(1).max(365),
       compressionRunTelemetry: z.number().int().min(1).max(365).optional(),
+      // MiB, not days. 1 TiB is the ceiling.
+      mediaStoreMaxMb: z.number().int().min(1).max(1048576).optional(),
       autoCleanupEnabled: z.boolean(),
     }),
 

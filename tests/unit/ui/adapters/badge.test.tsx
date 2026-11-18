@@ -8,18 +8,19 @@ const { default: Badge } = await import("@/shared/components/Badge");
 afterEach(() => cleanup());
 
 describe("Badge adapter → kit Badge + tone", () => {
-  it("maps status variants to data-tone on an outline kit badge", () => {
+  it("maps status variants to kit tones on the borderless secondary badge", () => {
     for (const [variant, tone] of [
       ["success", "success"],
       ["warning", "warning"],
       ["error", "danger"],
       ["info", "info"],
-      ["primary", "primary"],
+      ["primary", "accent"],
     ] as const) {
       const { getByText, unmount } = render(<Badge variant={variant}>{variant}</Badge>);
       const el = getByText(variant);
       expect(el.className).toContain("ci-badge");
-      expect(el.className).toContain("ci-badge--outline");
+      expect(el.className).toContain("ci-badge--secondary");
+      expect(el.className).toContain(`ci-badge--tone-${tone}`);
       expect(el.getAttribute("data-tone")).toBe(tone);
       unmount();
     }

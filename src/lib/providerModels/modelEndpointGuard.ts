@@ -26,7 +26,8 @@ export type RequestedEndpoint =
   | "videos"
   | "music"
   | "audio-speech"
-  | "audio-transcriptions";
+  | "audio-transcriptions"
+  | "ocr";
 
 type TaggedModel = {
   supportedEndpoints?: readonly string[];
@@ -43,6 +44,7 @@ const ENDPOINT_ROUTE: Record<string, string> = {
   music: "/v1/music/generations",
   "audio-speech": "/v1/audio/speech",
   "audio-transcriptions": "/v1/audio/transcriptions",
+  ocr: "/v1/ocr",
 };
 
 function supportsRequestedEndpoint(supported: string[], requested: RequestedEndpoint): boolean {

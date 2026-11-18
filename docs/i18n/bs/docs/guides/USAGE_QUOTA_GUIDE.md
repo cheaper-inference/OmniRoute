@@ -41,29 +41,29 @@ Zahtjev ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ## Šta se bilježi
 
-Servis `usage.ts` bilježi **događaj potrošnje** za svaki zahtjev:
+Servis `usage.ts` bilježi **događaj korištenja** za svaki zahtjev:
 
 | Polje              | Tip     | Izvor                                                      |
 | ------------------ | ------- | ---------------------------------------------------------- |
-| `id`               | string  | UUID generisan prilikom bilježenja                         |
-| `apiKeyId`         | string  | API ključ koji je pokrenuo zahtjev                         |
+| `id`               | string  | UUID generisan pri bilježenju                              |
+| `apiKeyId`         | string  | API ključ kojim je pokrenut zahtjev                        |
 | `provider`         | string  | ID pružaoca (openai, anthropic itd.)                       |
 | `model`            | string  | ID modela (gpt-5, claude-opus-4-6 itd.)                    |
 | `comboId`          | string? | ID kombinacije ako je zahtjev usmjeren kroz kombinaciju    |
-| `promptTokens`     | number  | Iz odgovora nadređenog pružaoca                            |
-| `completionTokens` | number  | Iz odgovora nadređenog pružaoca                            |
+| `promptTokens`     | number  | Iz odgovora izvornog pružaoca                              |
+| `completionTokens` | number  | Iz odgovora izvornog pružaoca                              |
 | `cachedTokens`     | number  | Tokeni pronađeni u kešu (Anthropic keširanje upita itd.)   |
-| `totalTokens`      | number  | upit + odgovor                                             |
+| `totalTokens`      | number  | upit + dovršetak                                           |
 | `costUsd`          | number  | Izračunato na osnovu podataka o cijenama                   |
 | `latencyMs`        | number  | Ukupno trajanje zahtjeva                                   |
 | `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled` |
-| `errorClass`       | string? | Klasa greške ako status != success                         |
+| `errorClass`       | string? | Klasa greške ako status nije success                       |
 | `timestamp`        | string  | ISO 8601 UTC                                               |
-| `metadata`         | object  | Prilagođeni podaci koje je dodao dodatak                   |
+| `metadata`         | object  | Prilagođeni podaci koje ubacuje dodatak                    |
 
 ### Odakle dolaze tokeni
 
-Tokeni se izdvajaju iz odgovora nadređenog pružaoca u **rukovaocu odgovora**:
+Tokeni se izdvajaju iz odgovora izvornog pružaoca u **obrađivaču odgovora**:
 
 ```ts
 // Iz open-sse/handlers/chatCore.ts
@@ -75,15 +75,45 @@ const usage = response.usage || {
 };
 ```
 
-Za pružaoce koji ne vraćaju podatke o potrošnji (neki pružaoci koji koriste web-kolačiće), OmniRoute **procjenjuje** broj tokena koristeći heuristiku `~4 znaka po tokenu` (pogledajte `open-sse/services/autoCombo/pipelineRouter.ts`).
+Za pružaoce koji ne vraćaju podatke o korištenju (neki pružaoci koji koriste web kolačiće), OmniRoute **procjenjuje** tokene koristeći heuristiku `~4 chars per token` (pogledajte `open-sse/services/autoCombo/pipelineRouter.ts`).
 
 ### Keširani tokeni
 
-OmniRoute prati `cached_tokens` odvojeno od `prompt_tokens` zato što:
+OmniRoute prati `cached_tokens` odvojeno od `prompt_tokens` jer:
 
-- Anthropic keširanje upita naplaćuje keširane tokene po sniženoj cijeni (10% normalne cijene)
-- Neki pružaoci vraćaju `cache_read_input_tokens`, čiju cijenu treba obračunavati drugačije
+- Anthropic keširanje upita naplaćuje keširane tokene po sniženoj cijeni (10% uobičajene)
+- Neki pružaoci vraćaju `cache_read_input_tokens`, za koje treba obračunati drugačiju cijenu
 - Analitika može prikazati **stopu pogodaka keša** = `cached_tokens / prompt_tokens`
+
+### Dijagnostika kategorija upisa u keš
+
+Panel stanja keša upita na kontrolnoj ploči analitike razlikuje upise u keš
+s trajanjem od 5 minuta i 1 sata koje prijavljuje pružalac. Anthropicovi podaci
+`usage.cache_creation.ephemeral_5m_input_tokens` i
+`usage.cache_creation.ephemeral_1h_input_tokens` zadržavaju se tokom pretvaranja podataka o korištenju
+za odgovore sa strimingom i bez njega te se pohranjuju sa sažecima dnevnika poziva. Ukupan
+zbir upisa u keš ne dodaje se tim kategorijama drugi put.
+
+Pozivi koji imaju samo zbirni brojač upisa, uključujući starije zapise, imaju nepoznatu
+kategoriju. Kod djelimične raspodjele neraspoređeni ostatak ostaje nepoznat; nevažeći ili
+proturječni brojači se označavaju umjesto da im se prešutno dodijeli TTL. Oznake
+TTL-a na strani zahtjeva nisu dokaz naplaćene kategorije.
+
+Procjena upisa na panelu, izražena kao ekvivalent API troška, obuhvata samo prijavljene kategorije s poznatim cijenama, a ne
+cijeli zahtjev. Za izvorne cijene modela Claude/Anthropic koristi 1,25 puta
+ulaznu cijenu za upise s trajanjem od 5 minuta i dvostruku ulaznu cijenu za upise s trajanjem od 1 sata. Ako cijena
+nedostaje, označava se kao nedostupna, a ne kao nula. Cijene se bilježe pri evidentiranju svakog novog poziva;
+cijene historijskih zapisa ne obračunavaju se ponovo. Pretplatnički računi stoga mogu imati
+procjenu ekvivalentnog API troška bez nastanka tog iznosa kao novčanog troška ili potrošnje
+pretplatničke kvote. Postojeći obračuni kvota, budžeta i troškova prema tačnim podacima pružaoca ostaju nepromijenjeni.
+
+Ova dijagnostika koristi postojeći sažetak stanja keša s ograničenim obuhvatom i postojeća pravila
+čuvanja dnevnika poziva. Ne mijenja zadane TTL vrijednosti zahtjeva, usmjeravanje ni odabir računa.
+Bilježenje TTL-a koji je klijent zatražio naspram efektivnog izlaznog TTL-a na tački slanja
+pružaocu odgođeno je; ovaj panel prikazuje kategorije iz potvrda, a ne efektivni izlazni TTL.
+
+Implementacija: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` i `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -122,33 +152,33 @@ Za modele bez podataka o cijenama, OmniRoute koristi **procjenu troškova** na o
 
 ---
 
-## Agregiranje prema rasponu datuma
+## Agregacija po datumskom rasponu
 
-Modul `usageAnalytics.ts` izračunava kontrolne elemente nadzorne ploče iz neobrađenih podataka o korištenju. Podržava 7 vremenskih raspona:
+Modul `usageAnalytics.ts` izračunava vidžete kontrolne ploče iz sirovih podataka o korištenju. Podržava 7 vremenskih raspona:
 
 | Raspon   | Period                            | Slučaj upotrebe                            |
 | -------- | --------------------------------- | ------------------------------------------ |
-| `1d`     | Posljednja 24 sata                | Otkrivanje naglih satnih porasta troškova  |
+| `1d`     | Posljednja 24 sata                | Otkrivanje naglih skokova troškova po satu |
 | `7d`     | Posljednjih 7 dana                | Sedmični pregled                           |
 | `30d`    | Posljednjih 30 dana               | Mjesečni obračun                           |
-| `90d`    | Posljednjih 90 dana               | Tromjesečna analiza                        |
+| `90d`    | Posljednjih 90 dana               | Kvartalna analiza                          |
 | `ytd`    | Od 1. januara tekuće godine       | Praćenje godišnjeg budžeta                 |
-| `all`    | Cjelokupni period                 | Statistika za cjelokupni period korištenja |
-| `custom` | Korisnički definiran početak/kraj | Revizije, ad hoc upiti                     |
+| `all`    | Cjelokupni period                 | Statistika za cjelokupni period            |
+| `custom` | Korisnički definisan početak/kraj | Revizije, ad hoc upiti                     |
 
-### Izračunati kontrolni elementi nadzorne ploče
+### Izračunati vidžeti kontrolne ploče
 
-Za bilo koji raspon datuma, analitički sloj izračunava:
+Za bilo koji datumski raspon, analitički sloj izračunava:
 
-| Kontrolni element               | Opis                                                                  |
-| ------------------------------- | --------------------------------------------------------------------- |
-| **Kartice sa sažetkom**         | Ukupan broj zahtjeva, ukupni trošak, ukupni tokeni, stopa uspješnosti |
-| **Grafikon dnevnog trenda**     | Trošak + tokeni po danu, složeno prema modelu                         |
-| **Toplotna mapa aktivnosti**    | Mreža sat-u-danu × dan-u-sedmici, boja = broj zahtjeva                |
-| **Pregled po modelima**         | Kružni grafikon troškova po modelu                                    |
-| **Pregled po pružaocima**       | Stubičasti grafikon zahtjeva po pružaocu                              |
-| **Najkorišteniji API ključevi** | Tabela 10 najkorištenijih ključeva prema trošku                       |
-| **Analiza grešaka**             | Stopa grešaka tokom vremena, najčešće klase grešaka                   |
+| Vidžet                           | Opis                                                             |
+| -------------------------------- | ---------------------------------------------------------------- |
+| **Kartice sažetka**              | Ukupno zahtjeva, ukupni trošak, ukupno tokena, stopa uspješnosti |
+| **Grafikon dnevnog trenda**      | Trošak + tokeni po danu, naslagani po modelu                     |
+| **Toplotna mapa aktivnosti**     | Mreža sat u danu × dan u sedmici, boja = broj zahtjeva           |
+| **Pregled po modelima**          | Kružni grafikon troškova po modelu                               |
+| **Pregled po pružaocima usluga** | Trakasti grafikon zahtjeva po pružaocu usluga                    |
+| **Vodeći API ključevi**          | Tabela 10 vodećih ključeva prema trošku                          |
+| **Analiza grešaka**              | Stopa grešaka tokom vremena, najčešće klase grešaka              |
 
 ### Programski pristup
 
@@ -158,7 +188,7 @@ import { computeAnalytics } from "@/lib/usageAnalytics";
 const analytics = await computeAnalytics(
   history,              // zapisi historije korištenja
   "7d",                 // vremenski raspon: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // mapa veza pružalaca (connectionId → naziv računa)
+  connectionMap,        // mapa veza pružalaca usluga (connectionId → naziv računa)
   {
     startDate: "2025-01-01",  // opcionalno: za raspon "custom"
     endDate: "2025-06-01",   // opcionalno: za raspon "custom"
@@ -166,16 +196,16 @@ const analytics = await computeAnalytics(
 );
 
 console.log(analytics.summary.totalCost);   // 12.34 (centi)
-console.log(analytics.byModel[0]);           // { model, trošak, zahtjevi, tokeni upita, tokeni završetka }
+console.log(analytics.byModel[0]);           // { model, cost, requests, promptTokens, completionTokens }
 
 ---
 
-## Primjena kvota
+## Provođenje kvota
 
-Kvota po API ključu primjenjuje se na dva mjesta:
+Kvota po API ključu provodi se na dva mjesta:
 
 1. **Meko ograničenje** (`quotaWarnAt`): upozorenje na kontrolnoj ploči kada korištenje premaši prag
-2. **Čvrsto ograničenje** (`quotaLimit`): zahtjev se odbija s HTTP statusom 429 kada se ograničenje premaši
+2. **Tvrdo ograničenje** (`quotaLimit`): zahtjev se odbija uz HTTP 429 kada se ograničenje premaši
 
 ### Konfiguracija
 
@@ -188,34 +218,34 @@ await updateApiKey(keyId, {
 });
 ````
 
-### Tok primjene
+### Tok provođenja
 
 ```
-Zahtjev ──▶ quotaCheck()
+Request ──▶ quotaCheck()
               │
-              ├── Unutar ograničenja?  ──▶ dozvoli
+              ├── Within limit?  ──▶ allow
               │
-              └── Prekoračeno ograničenje?  ──▶ 429 Previše zahtjeva
-                                                 sa zaglavljem Retry-After
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
-### Snimci kvota
+### Snimci stanja kvota
 
 Tabela `quotaSnapshots` pohranjuje **historijsko stanje kvota** za analizu trendova:
 
 | Polje | Opis |
 | ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Ključ koji se prati |
-| `window` | "day" | "week" | "month" |
-| `used` | Trošak iskorišten u ovom periodu (centi) |
+| `window` | "dan" | "sedmica" | "mjesec" |
+| `used` | Trošak u ovom periodu (centi) |
 | `limit` | Ograničenje (centi) |
-| `resetAt` | Vrijeme resetovanja perioda |
-| `createdAt` | Vrijeme pravljenja snimka |
+| `resetAt` | Kada se period resetuje |
+| `createdAt` | Kada je snimak napravljen |
 
 Snimci se prave **pri svakom zahtjevu** čiji je trošak > 0 i koriste se za:
 
 - Prikaz trake napretka kvote na kontrolnoj ploči
-- Prikaz grafikona trendova kvote za 30 dana
+- Prikaz grafikona trenda kvote za 30 dana
 - Aktiviranje upozorenja kada se korištenje približi ograničenju
 
 ---
@@ -273,12 +303,7 @@ Odgovor:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -287,26 +312,26 @@ Odgovor:
 }
 ```
 
-### Upit analitike korištenja
+### Upiti za analitiku korištenja
 
 Podacima o korištenju pristupa se putem kontrolne ploče ili MCP alata, a ne putem direktnih REST krajnjih tačaka za izvoz. Dostupna analitika:
 
 - **`/api/usage/analytics`** — agregirane metrike korištenja (grupisanje prema modelu, pružaocu usluge, ključu)
 - **`/api/usage/quota`** — trenutno stanje kvote po API ključu
-- **`/api/usage/history`** — zapisnici historije zahtjeva
+- **`/api/usage/history`** — zapisi historije zahtjeva
 
 ---
 
 ## MCP alati
 
-Dva MCP alata izlažu podatke o korištenju agentima (pogledajte `open-sse/mcp-server/tools/`):
+Dva MCP alata omogućavaju agentima pristup podacima o korištenju (pogledajte `open-sse/mcp-server/tools/`):
 
 | Alat                    | Opis                                                       |
 | ----------------------- | ---------------------------------------------------------- |
 | `omniroute_cost_report` | Generiše izvještaj o troškovima po ključu za zadani period |
 | `omniroute_check_quota` | Vraća trenutno stanje kvote za API ključ                   |
 
-Primjer pozivanja od strane agenta:
+Primjer poziva agenta:
 
 ```json
 {
@@ -323,30 +348,30 @@ Podaci o korištenju rastu za ~1-10KB po zahtjevu. Pri velikom obimu to može bi
 
 ### Postavke zadržavanja
 
-Zadržavanje historije korištenja konfigurira se putem postavki baze podataka u korisničkom interfejsu ili putem `/api/settings/database`.
+Zadržavanje historije korištenja podešava se putem postavki baze podataka u korisničkom interfejsu ili putem `/api/settings/database`.
 
-Historija korištenja se prema zadanim postavkama čuva **90 dana**.
+Prema zadanim postavkama, historija korištenja zadržava se **90 dana**.
 
 ### Čišćenje
 
 Stare zapise čisti `src/lib/db/cleanup.ts`:
 
-- Pokreće ih pozadinski cron proces
-- Briše zapise iz `usage_history` koji su stariji od konfigurirane postavke zadržavanja `usageHistory`
+- Pokreće ga pozadinski cron proces
+- Briše zapise iz `usage_history` starije od perioda zadržavanja podešenog postavkom `usageHistory`
 
 ### Procjena prostora za pohranu
 
-| Stopa zahtjeva       | Pohrana za 30 dana | Pohrana za 90 dana |
+| Učestalost zahtjeva  | Pohrana za 30 dana | Pohrana za 90 dana |
 | -------------------- | ------------------ | ------------------ |
 | 100 zahtjeva/dan     | ~3MB               | ~9MB               |
 | 1,000 zahtjeva/dan   | ~30MB              | ~90MB              |
 | 10,000 zahtjeva/dan  | ~300MB             | ~900MB             |
 | 100,000 zahtjeva/dan | ~3GB               | ~9GB               |
 
-Za veoma veliki promet razmotrite:
+Za vrlo velik promet razmotrite:
 
-- Smanjenje perioda zadržavanja putem postavki baze podataka
-- Korištenje `aggregated_metrics` umjesto neobrađenih zapisa (samo za analitiku)
+- Skraćivanje perioda zadržavanja putem postavki baze podataka
+- Korištenje `aggregated_metrics` umjesto sirovih zapisa (samo za analitiku)
 
 ---
 
@@ -355,7 +380,7 @@ Za veoma veliki promet razmotrite:
 ### 1. Koristite odgovarajući model
 
 ```bash
-# Brzi odgovor — koristite jeftin + brz model
+# Brz odgovor — koristite jeftin + brz model
 curl -d '{"model":"auto/fast","messages":[...]}'
 
 # Složen zadatak — koristite kvalitetan model
@@ -364,20 +389,20 @@ curl -d '{"model":"auto/smart","messages":[...]}'
 
 ### 2. Omogućite keširanje
 
-Anthropic keširanje promptova omogućava uštedu od **90% za ponovljeni kontekst**:
+Anthropic keširanje promptova štedi **90% na ponovljenom kontekstu**:
 
 ```ts
 // Keširanje je automatsko — samo uključite isti veliki sistemski prompt
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
-  system: longSystemPrompt, // Automatski će biti keširano
+  system: longSystemPrompt, // Bit će automatski keširano
   messages: [{ role: "user", content: "..." }],
 });
 ```
 
 ### 3. Koristite kompresiju
 
-RTK + Caveman kompresija omogućava uštedu od **15-95% u sesijama s intenzivnim korištenjem alata**:
+RTK + Caveman kompresija štedi **15-95% u sesijama s intenzivnim korištenjem alata**:
 
 ```ts
 const config = {
@@ -390,7 +415,7 @@ const config = {
 
 ### 4. Postavite kvote po ključu
 
-Uvijek postavite `quotaLimit` kako biste spriječili nekontrolirane troškove:
+Uvijek postavite `quotaLimit` kako biste spriječili nekontrolisane troškove:
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Ograničenje od $10 mjesečno
@@ -398,7 +423,7 @@ await updateApiKey(keyId, { quotaLimit: 10_00 }); // Ograničenje od $10 mjeseč
 
 ### 5. Provjerite najveće potrošače
 
-Koristite kontrolnu ploču ili **`/api/usage/analytics`** za grupiranje prema API ključu i sortiranje prema trošku:
+Koristite kontrolnu ploču ili **`/api/usage/analytics`** za grupisanje po API ključu i sortiranje po trošku:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -412,23 +437,23 @@ GET /api/usage/analytics?groupBy=apiKey
 
 1. Provjerite **`/api/usage/analytics?groupBy=model`** — pronađite skupi model
 2. Provjerite **`/api/usage/analytics?groupBy=apiKey`** — pronađite velikog potrošača
-3. Provjerite jesu li podaci o cijenama ažurirani: `POST /api/pricing/sync`
+3. Provjerite jesu li podaci o cijenama ažurni: `POST /api/pricing/sync`
 
-### "Zapisi nedostaju"
+### "Nedostaju zapisi"
 
-- Provjerite postavke zadržavanja baze podataka u Kontrolna ploča → Baza podataka → Čišćenje — periodični zadatak čišćenja briše stare zapise (`src/lib/db/cleanup.ts`)
-- Provjerite postoje li greške u `src/lib/db/usage*.ts` — greške pri upisu u bazu podataka se bilježe, ali se ne prikazuju
-- Provjerite je li zahtjev zaista stigao do `chatCore` — provjerite kombinirano usmjeravanje
+- Provjerite postavke zadržavanja podataka u bazi pod Kontrolna ploča → Baza podataka → Čišćenje — stare zapise briše periodični zadatak čišćenja (`src/lib/db/cleanup.ts`)
+- Provjerite ima li grešaka u `src/lib/db/usage*.ts` — neuspjeli upisi u bazu podataka se evidentiraju, ali se ne prikazuju
+- Provjerite je li zahtjev zaista stigao do `chatCore` — provjerite kombinovano usmjeravanje
 
 ### "Kvota se ne primjenjuje"
 
-- Provjerite postavku `quotaLimit` ključa
+- Provjerite postavku `quotaLimit` za ključ
 - Provjerite je li `quotaWindow` ispravno postavljen
 - Potražite zapise `quotaSnapshots` — trebali bi se kreirati pri svakom zahtjevu
 
 ---
 
-## Također pogledajte
+## Pogledajte i
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Shema tabela korištenja
 - [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — varijable okruženja za sinhronizaciju cijena

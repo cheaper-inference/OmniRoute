@@ -107,39 +107,40 @@ omniroute setup-whycodes
 
 ---
 
-## 1. Каталог на кода на CLI (27 инструмента)
+## 1. Каталог на кода CLI (28 инструмента)
 
 Всички инструменти, които се появяват в `/dashboard/cli-code`. Тези с `baseUrlSupport: none` са свързани чрез MITM или ръчно ръководство вместо персонализирана база URL:
 
-| id              | име                           | продавач            | baseUrlSupport | configType          | acpSpawnable |
-| --------------- | ----------------------------- | ------------------- | -------------- | ------------------- | ------------ |
-| Клод            | Claude код                    | Anthropic           | пълен          | околна среда        | вярно        |
-| кодекс          | OpenAI Codex CLI              | OpenAI              | пълен          | обичай              | вярно        |
-| zcode           | ZCode (план за кодиране GLM ) | Z.ai                | няма           | обичай              | невярно      |
-| клин            | Cline                         | OSS (бивш Клод Дев) | пълен          | обичай              | вярно        |
-| килограм        | Кило код                      | Kilo-Org            | пълен          | обичай              | невярно      |
-| ру              | Ру кодекс                     | Ру (OSS)            | пълен          | ръководство         | невярно      |
-| продължи        | Продължи                      | continue.dev        | пълен          | ръководство         | невярно      |
-| помощник        | Помощник                      | OSS (П. Готие)      | пълен          | ръководство         | вярно        |
-| ковачница       | ForgeCode                     | Антиномия HQ        | пълен          | обичай              | вярно        |
-| jcode           | jcode                         | 1jehuang (OSS)      | пълен          | обичай              | невярно      |
-| deepseek-tui    | DeepSeek TUI                  | Хънтър Боун (OSS)   | пълен          | обичай              | невярно      |
-| кодов кит       | CodeWhale                     | Hmbown (OSS)        | пълен          | обичай              | невярно      |
-| отворен код     | OpenCode                      | Аномалия (бивш SST) | пълен          | ръководство         | вярно        |
-| дроид           | Фабричен дроид                | Фабрика AI          | частично       | ръководство         | невярно      |
-| втори пилот     | GitHub Copilot CLI            | GitHub/MS           | пълен          | обичай              | невярно      |
-| cursor-cli      | Cursor CLI                    | Anysphere           | частично       | ръководство         | вярно        |
-| миришеше        | миризма                       | leonardcser (OSS)   | пълен          | обичай              | невярно      |
-| пи              | Pi (pi-кодиращ агент)         | М. Зехнер (OSS)     | пълен          | обичай              | невярно      |
-| grok-изграждане | Grok Build                    | xAI                 | пълен          | обичай              | невярно      |
-| смачквам        | Смачкайте                     | OSS (чар)           | пълен          | обичай              | невярно      |
-| куен            | Qwen код                      | Alibaba             | пълен          | ръководство         | вярно        |
-| зед             | Zed                           | Zed Industries      | пълен          | ръководство         | невярно      |
-| курсор          | Cursor                        | Anysphere           | няма           | ръководство         | невярно      |
-| антигравитация  | Antigravity                   | Google              | няма           | митм                | невярно      |
-| хермес          | Хермес                        | Nous Research       | няма           | ръководство         | невярно      |
-| киро            | Kiro AI                       | Amazon              | няма           | митм                | невярно      |
-| обичай          | Персонализиран CLI            | —                   | пълен          | строител по поръчка | невярно      |
+| id              | име                              | продавач            | baseUrlSupport | configType          | acpSpawnable |
+| --------------- | -------------------------------- | ------------------- | -------------- | ------------------- | ------------ |
+| Клод            | Claude код                       | Anthropic           | пълен          | околна среда        | вярно        |
+| кодекс          | OpenAI Codex CLI                 | OpenAI              | пълен          | обичай              | вярно        |
+| zcode           | ZCode (план за кодиране на GLM ) | Z.ai                | няма           | обичай              | невярно      |
+| клин            | Cline                            | OSS (бивш Клод Дев) | пълен          | обичай              | вярно        |
+| килограм        | Кило код                         | Kilo-Org            | пълен          | обичай              | невярно      |
+| ру              | Ру кодекс                        | Ру (OSS)            | пълен          | ръководство         | невярно      |
+| продължи        | Продължи                         | continue.dev        | пълен          | ръководство         | невярно      |
+| помощник        | Помощник                         | OSS (П. Готие)      | пълен          | ръководство         | вярно        |
+| ковачница       | ForgeCode                        | Антиномия HQ        | пълен          | обичай              | вярно        |
+| jcode           | jcode                            | 1jehuang (OSS)      | пълен          | обичай              | невярно      |
+| deepseek-tui    | DeepSeek TUI                     | Хънтър Боун (OSS)   | пълен          | обичай              | невярно      |
+| кодов кит       | CodeWhale                        | Hmbown (OSS)        | пълен          | обичай              | невярно      |
+| отворен код     | OpenCode                         | Аномалия (бивш SST) | пълен          | ръководство         | вярно        |
+| дроид           | Фабричен дроид                   | Фабрика AI          | частично       | ръководство         | невярно      |
+| втори пилот     | GitHub Copilot CLI               | GitHub/MS           | пълен          | обичай              | невярно      |
+| cursor-cli      | Cursor CLI                       | Anysphere           | частично       | ръководство         | вярно        |
+| миришеше        | миризма                          | leonardcser (OSS)   | пълен          | обичай              | невярно      |
+| пи              | Pi (pi-кодиращ агент)            | М. Зехнер (OSS)     | пълен          | обичай              | невярно      |
+| grok-изграждане | Grok Build                       | xAI                 | пълен          | обичай              | невярно      |
+| смачквам        | Смачкайте                        | OSS (чар)           | пълен          | обичай              | невярно      |
+| куен            | Qwen код                         | Alibaba             | пълен          | ръководство         | вярно        |
+| опенклауд       | OpenClaude                       | Gitlawb (OSS)       | пълен          | ръководство         | невярно      |
+| зед             | Zed                              | Zed Industries      | пълен          | ръководство         | невярно      |
+| курсор          | Cursor                           | Anysphere           | няма           | ръководство         | невярно      |
+| антигравитация  | Antigravity                      | Google              | няма           | митм                | невярно      |
+| хермес          | Хермес                           | Nous Research       | няма           | ръководство         | невярно      |
+| киро            | Kiro AI                          | Amazon              | няма           | митм                | невярно      |
+| обичай          | Персонализиран CLI               | —                   | пълен          | строител по поръчка | невярно      |
 
 Инструментите с `baseUrlSupport: "partial"` показват значка „⚠ Base URL parcial“ в картата на таблото.
 ---
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Обработчици на настройки за нови инструменти
+## 6. Манипулатори на настройки за нови инструменти
 
-Новите инструменти с `configType: "custom"` имат специализирани API маршрути за настройки:
+Нови инструменти с `configType: "custom"` имат специални настройки API маршрути:
 
-| Маршрут                                     | Инструмент                                                                     |
-| ------------------------------------------- | ------------------------------------------------------------------------------ |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                        |
-| `POST /api/cli-tools/jcode-settings`        | jcode (флаг --base-url)                                                        |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, наследен)                                       |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, основен + наследена синхронизация с `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                          |
-| `POST /api/cli-tools/pi-settings`           | Агент за програмиране Pi                                                       |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                          |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + специализиран ключ в `.env`)              |
+| Маршрут                                     | Инструмент                                                                    |
+| ------------------------------------------- | ----------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                       |
+| `POST /api/cli-tools/jcode-settings`        | jcode (флаг --base-url )                                                      |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, наследство)                                    |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, основно + наследено `~/.deepseek` синхронизиране) |
+| `POST /api/cli-tools/smelt-settings`        | миризма                                                                       |
+| `POST /api/cli-tools/pi-settings`           | Pi кодиращ агент (`~/.pi/agent/models.json`, `providers.omniroute`)           |
+| `POST /api/cli-tools/grok-build-settings`   | Grok компилация (~/.grok/config.toml, `[model.omniroute]`)                    |
+| `POST /api/cli-tools/qwen-settings`         | Qwen код (`~/.qwen/settings.json` + специален `.env` ключ)                    |
 
-Всички маршрути използват `sanitizeErrorMessage()` за отговорите при грешка (Строго правило №12).
+Всички маршрути използват `sanitizeErrorMessage()` за отговори за грешки (твърдо правило #12).
 
 ---
 
@@ -291,21 +292,21 @@ interface ToolBatchStatus {
 
 ---
 
-## 9. Бързо начало
+## 9. Бърз старт
 
-### Стъпка 1 — Получаване на API ключ за OmniRoute
+### Стъпка 1 — Вземете OmniRoute API ключ
 
-1. Отворете `/dashboard/api-manager` → **Създаване на API ключ**
-2. Задайте му име (напр. `cli-tools`) и изберете всички разрешения
-3. Копирайте ключа — ще ви е необходим за всеки CLI по-долу
+1. Отворете `/dashboard/api-manager` →** Създайте API ключ**
+2. Дайте му име (напр. `cli-tools`) и изберете всички разрешения
+3. Копирайте ключа — който ще ви трябва за всеки CLI по-долу
 
 > Вашият ключ изглежда така: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Стъпка 2 — Инсталиране на CLI инструментите
+### Стъпка 2 — Инсталирайте CLI Tools
 
-Всички инструменти, базирани на npm, изискват Node.js 22.22.2+ или 24.x:
+Всички базирани на npm инструменти изискват Node.js 22.22.2 + или 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (може да бъде стартиран чрез `omniroute run gemini` → интерфейс /v1beta)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Базиран на Rust
+cargo install smelt  # Rust-based
 
-# Агент за програмиране Pi
-# вижте https://github.com/zechnerj/pi-coding-agent за инсталиране
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# вижте https://github.com/1jehuang/jcode за инсталиране
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Стъпка 3 — Конфигуриране чрез таблото за управление
+### Стъпка 3 — Конфигурирайте чрез таблото за управление
 
 1. Отидете на `http://localhost:20128/dashboard/cli-code`
-2. Намерете своя инструмент в решетката
+2. Намерете своя инструмент в мрежата
 3. Щракнете върху картата, за да отворите страницата с подробности за инструмента
-4. Изберете своя API ключ и базов URL адрес
-5. Щракнете върху **Прилагане на конфигурацията** или копирайте фрагмента за ръчно конфигуриране
+4. Изберете вашия API ключ и база URL
+5. Кликнете** Прилагане на конфигур** или копирайте фрагмента за ръчна конфигурация
 
 ---
 
-### Стъпка 4 — Задаване на глобални променливи на средата
+### Стъпка 4 — Задайте глобални променливи на средата
 
 ```bash
-# Универсална крайна точка на OmniRoute
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI прочита GOOGLE_GEMINI_BASE_URL в КОРЕНА (неговият SDK сам добавя /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> За **отдалечен сървър** заменете `localhost:20128` с IP адреса или домейна на сървъра,
-> напр. `http://<your-server-ip>:20128`.
+> За а** отдалечен сървър** заменете `localhost:20128` със сървъра IP или домейн, напр. `http://<your-server-ip>:20128`.
 
 ---
 
-### Стъпка 4 — Конфигуриране на всеки инструмент
+### Стъпка 4 — Конфигурирайте всеки инструмент
 
-#### Claude Code
+#### Claude код
 
 ```bash
-# Създайте ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,18 +388,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Използвайте корена на унифицирания шлюз на Anthropic за Claude Code. Не добавяйте `/v1` тук.
+Използвайте унифицирания Anthropic gateway root за Claude код. Не добавяйте `/v1` тук.
 
-**Тест:** `claude "say hello"`
+**тест:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-Съвременният Codex (v0.137+) прочита само `~/.codex/config.toml` — старият
-`config.yaml` принадлежи на наследения npm CLI и се игнорира без предупреждение. API
-ключът остава в променливата на средата `OMNIROUTE_API_KEY` (`env_key`) и никога
-във файла:
+Съвременният Codex (v0.137 +) чете `~/.codex/config.toml` само — старият `config.yaml` принадлежи към наследството npm CLI и се игнорира мълчаливо. Ключът API остава в променливата на средата `OMNIROUTE_API_KEY` (`env_key`), никога във файла:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -416,7 +413,7 @@ export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 
 Пълна справка (профили, `wire_api`, контекстни прозорци): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**Тест:** `codex "what is 2+2?"`
+**тест:** `codex "what is 2+2?"`
 
 ---
 
@@ -445,14 +442,44 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**Тест:** `opencode`
+**тест:** `opencode`
 
-> Използвайте `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`,
-> за да изпращате варианти с разсъждение.
+> Използвайте `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`, за да изпратите варианти на мислене.
 
 ---
 
-#### Cline (CLI или VS Code)
+#### Pi кодиращ агент
+
+Инсталирайте официалния пакет Pi Coding Agent с `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi чете персонализирани доставчици от `~/.pi/agent/models.json`; задайте `PI_CODING_AGENT_DIR` да премести цялата директория на агента. Таблото за управление следва тази отмяна. Pi не открива модели от персонализирани крайни точки, така че OmniRoute записва избрания модел в `models[]` използвайки `openai-completions` API на Pi и OmniRoute OpenAI-съвместимата `/v1` крайна точка.
+
+в**CLI Инструменти → Pi** , изберете крайна точка, API ключ и модел, прегледайте визуализацията на доставчика и след това приложете. Визуализацията е фрагмент от доставчик: обединете `providers.omniroute` в съществуващия си `models.json`, когато конфигурирате Pi ръчно, така че другите доставчици и настройки да останат непокътнати.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi презарежда `models.json` когато отворите `/model`. Тествайте конфигурирания маршрут с идентификатора на доставчика и модела, които сте избрали:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Референции: [Pi модели и персонализирани доставчици](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi променливи на средата](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi инструкции за инсталиране](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (код CLI или VS )
 
 **CLI режим:**
 
@@ -466,14 +493,13 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**Режим VS Code:**
-Настройки на разширението Cline → API Provider: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
+**Режим на VS код:** Cline разширение настройки → API доставчик: `OpenAI Compatible` → база URL: `http://localhost:20128/v1`
 
-Или използвайте таблото за управление на OmniRoute → **CLI инструменти → Cline → Прилагане на конфигурацията**.
+Или използвайте OmniRoute таблото за управление →**CLI Инструменти → Cline → Прилагане на конфигур** .
 
 ---
 
-#### KiloCode (CLI или VS Code)
+#### KiloCode (код CLI или VS )
 
 **CLI режим:**
 
@@ -481,7 +507,7 @@ EOF
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**Настройки на VS Code:**
+**VS код настройки:**
 
 ```json
 {
@@ -490,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Или използвайте таблото за управление на OmniRoute → **CLI инструменти → KiloCode → Прилагане на конфигурацията**.
+Или използвайте OmniRoute таблото за управление →**CLI Инструменти → KiloCode → Прилагане на конфигур** .
 
 ---
 
-#### Continue (разширение за VS Code)
+#### Продължете (разширение VS код)
 
-Редактирайте `~/.continue/config.yaml`:
+Редактиране `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -508,20 +534,20 @@ models:
     default: true
 ```
 
-Рестартирайте VS Code след редактирането.
+Рестартирайте VS кода след редактиране.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Използвайте това, когато VS Code Insiders е конфигуриран за модели с персонализирана крайна точка и искате OmniRoute да работи без персонализирано поле за заглавка.
+Използвайте това, когато VS Code Insiders е конфигуриран за персонализирани модели на крайни точки и искате OmniRoute да работи без персонализирано поле за заглавка.
 
 **Препоръчително местоположение:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Пример с използване на токенизиран псевдоним на OmniRoute:**
+**Пример с използване на токенизирания псевдоним OmniRoute :**
 
 ```json
 [
@@ -548,24 +574,23 @@ models:
 - Заменете `sk-your-omniroute-key` с API ключ, създаден в OmniRoute.
 - Полето `url` трябва да сочи към `/api/v1/vscode/{token}/chat/completions`.
 - Полето `modelsUrl` трябва да сочи към `/api/v1/vscode/{token}/models`.
-- Предпочитайте стандартния поток с `/v1` + Bearer заглавка, когато клиентът поддържа персонализирани заглавки.
-- Вградените в URL токени са резервен вариант за съвместимост и може да се появят в регистрационните файлове на редактора или в хронологията на прокси сървъра.
+- Предпочитайте нормалния поток на заглавката на `/v1` + Bearer, когато клиентът поддържа персонализирани заглавки.
+- Вградените в URL токени са резервен вариант за съвместимост и може да се показват в регистрационните файлове на редактора или в хронологията на прокси сървъра.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Влезте в своя AWS/Kiro акаунт:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI използва собствено удостоверяване — OmniRoute не е необходим като бекенд за самия Kiro CLI.
-# Използвайте kiro-cli заедно с OmniRoute за други инструменти.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-За настолното приложение **Kiro IDE** използвайте MITM крайната точка, предоставена от OmniRoute
-под `/dashboard/cli-tools → Kiro`.
+За**Kiro IDE** настолно приложение, използвайте MITM крайната точка, изложена от OmniRoute под `/dashboard/cli-tools → Kiro`.
 
 ---
 

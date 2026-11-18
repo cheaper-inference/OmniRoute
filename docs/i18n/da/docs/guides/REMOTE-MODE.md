@@ -44,14 +44,14 @@ din bærbare computer                     ekstern OmniRoute (VPS)
 
 ---
 
-## Opret forbindelse
+## Tilslutning
 
 ### Med administrationsadgangskoden (bootstrap)
 
 ```bash
 omniroute connect 192.168.0.15
-# Administrationsadgangskode til http://192.168.0.15:20128: ********
-# ✔ Forbundet til http://192.168.0.15:20128 — kontekst '192.168.0.15' (omfang: admin)
+# Administrationsadgangskode for http://192.168.0.15:20128: ********
+# ✔ Tilsluttet til http://192.168.0.15:20128 — kontekst '192.168.0.15' (omfang: admin)
 ```
 
 Adgangskodeflowet udsteder som standard et **admin**-token (du har adgangskoden, så
@@ -61,14 +61,19 @@ du har allerede fuld kontrol). Begræns omfanget med `--scope`:
 omniroute connect 192.168.0.15 --scope write
 ```
 
-Valgmuligheder: `--port <p>` (når værten ikke har nogen port), `--name <ctx>` (kontekstnavn),
-`--scope read|write|admin`. En fuld URL anvendes, som den er:
+Indstillinger: `--port <p>` (når værten ikke har en), `--name <ctx>` (kontekstnavn),
+`--scope read|write|admin`. En fuld URL anvendes som angivet:
 `omniroute connect https://omni.example.com`.
 
-### Med et forhåndsgenereret token
+Når serveren har aktiveret dashboardets tofaktorgodkendelse (Indstillinger →
+Sikkerhed), afvises adgangskoden alene: CLI'en beder derefter om koden fra
+godkendelsesappen (eller en gendannelseskode). Angiv den på forhånd med
+`--totp <code>` til ikke-interaktiv brug.
 
-Generér et afgrænset token i kontrolpanelet (eller med `omniroute tokens create`), og
-indsæt det — der kræves ingen adgangskode:
+### Med et forudgenereret token
+
+Generér et token med begrænset omfang i kontrolpanelet (eller med
+`omniroute tokens create`), og indsæt det — ingen adgangskode nødvendig:
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
@@ -453,12 +458,12 @@ omniroute contexts remove 192-168-0-15 --yes   # slet den lokale kontekst (selv 
 
 ## API-slutpunkter (reference)
 
-| Metode | Rute                  | Godkendelse            | Omfang                               |
-| ------ | --------------------- | ---------------------- | ------------------------------------ |
-| POST   | `/api/cli/connect`    | administrationskodeord | — (offentlig, beskyttet med kodeord) |
-| GET    | `/api/cli/whoami`     | adgangstoken           | læse                                 |
-| GET    | `/api/cli/tokens`     | adgangstoken           | administrator                        |
-| POST   | `/api/cli/tokens`     | adgangstoken           | administrator                        |
-| DELETE | `/api/cli/tokens/:id` | adgangstoken           | administrator                        |
+| Metode | Rute                  | Godkendelse                     | Omfang                              |
+| ------ | --------------------- | ------------------------------- | ----------------------------------- |
+| POST   | `/api/cli/connect`    | adgangskode; 2FA hvis aktiveret | — (offentlig, adgangskodebeskyttet) |
+| GET    | `/api/cli/whoami`     | adgangstoken                    | read                                |
+| GET    | `/api/cli/tokens`     | adgangstoken                    | admin                               |
+| POST   | `/api/cli/tokens`     | adgangstoken                    | admin                               |
+| DELETE | `/api/cli/tokens/:id` | adgangstoken                    | admin                               |
 
-Se [openapi.yaml](../openapi.yaml) for de komplette skemaer.
+Se [openapi.yaml](../openapi.yaml) for de fulde skemaer.

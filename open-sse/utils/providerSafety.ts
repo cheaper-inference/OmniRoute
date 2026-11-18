@@ -29,15 +29,21 @@ export interface ProviderSafetyInput {
   message?: unknown;
 }
 
+/** Account-health handling must not depend on the public error-projection flag. */
+export function isRequestScopedMisalignmentRefusal(input: ProviderSafetyInput): boolean {
+  return (
+    (input.status === 400 || input.status === 403) && input.code === "misalignment_policy_violation"
+  );
+}
+
 /**
- * Classify explicit protocol safety stops without inferring a private detector from prose.
- * Returns null unless PROVIDER_SAFETY_STOPS_TERMINAL is on, so every caller keeps its
- * existing handling by default.
+ * Match an explicit protocol safety stop by its structured fields, without inferring a
+ * private detector from prose. Independent of PROVIDER_SAFETY_STOPS_TERMINAL: account
+ * health decisions use it regardless of how the stop is routed.
  */
-export function classifyProviderSafetyError(
+export function matchProviderSafetyStop(
   input: ProviderSafetyInput
 ): { status: number; code: string } | null {
-  if (!isProviderSafetyStopsEnabled()) return null;
   let code = typeof input.code === "string" ? input.code : "";
   if (!PROVIDER_SAFETY_ERROR_CODES.has(code)) {
     if (
@@ -58,4 +64,50 @@ export function classifyProviderSafetyError(
   const status = input.status ?? (code === "misalignment_policy_violation" ? 403 : 400);
   if (status !== 400 && status !== 403) return null;
   return { status, code };
+}
+
+/**
+ * Classify explicit protocol safety stops for routing. Returns null unless
+ * PROVIDER_SAFETY_STOPS_TERMINAL is on, so every caller keeps its existing handling by default.
+ */
+export function classifyProviderSafetyError(
+  input: ProviderSafetyInput
+): { status: number; code: string } | null {
+  if (!isProviderSafetyStopsEnabled()) return null;
+  return matchProviderSafetyStop(input);
+}
+
+function parseErrorBody(body: unknown): Record<string, unknown> | null {
+  let value = body;
+  if (typeof value === "string") {
+    try {
+      value = JSON.parse(value);
+    } catch {
+      return null; // a non-JSON body cannot carry a structured safety code
+    }
+  }
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const record = value as Record<string, unknown>;
+  const error = record.error;
+  return error && typeof error === "object" && !Array.isArray(error)
+    ? (error as Record<string, unknown>)
+    : record;
+}
+
+/**
+ * True when an upstream error body (string or parsed) is an explicit provider safety stop
+ * for the given HTTP status. Flag-independent; used to keep request-scoped refusals out of
+ * account health state.
+ */
+export function isProviderSafetyRefusalBody(status: number, body: unknown): boolean {
+  const error = parseErrorBody(body);
+  if (!error) return false;
+  return (
+    matchProviderSafetyStop({
+      status,
+      code: error.code,
+      type: error.type,
+      message: error.message,
+    }) !== null
+  );
 }

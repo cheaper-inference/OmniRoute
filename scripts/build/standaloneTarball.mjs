@@ -179,19 +179,32 @@ export async function createTarGz(srcDir, outFile) {
 
 // ─── extraction ──────────────────────────────────────────────────────────────────
 
+/** Decompressed bytes held ahead of the extractor before the stream is paused. */
+export const READ_AHEAD_BYTES = 8 * 1024 * 1024;
+
 /**
  * Promise-based byte source over a gunzip stream. `read(n)` waits until `n`
- * bytes are buffered (or EOF); `readSome()` returns whatever is available, for
- * streaming large payloads into files without whole-file buffering.
+ * bytes are buffered (or EOF); `readSome(max)` returns up to `max` of whatever
+ * is available, for streaming large payloads into files without whole-file
+ * buffering.
+ *
+ * Chunks stay in a queue and reads hand out subarrays of them, so the cost per
+ * entry does not depend on how much is buffered. Gunzip outruns the extractor,
+ * which writes one file at a time; pausing it keeps the queue small on bundles
+ * of a hundred thousand entries.
  */
-class BlockSource {
+export class BlockSource {
   constructor(stream) {
-    this.buffer = Buffer.alloc(0);
+    this.stream = stream;
+    this.chunks = [];
+    this.buffered = 0;
     this.error = null;
     this.ended = false;
     this.waiter = null;
     stream.on("data", (chunk) => {
-      this.buffer = this.buffer.length === 0 ? chunk : Buffer.concat([this.buffer, chunk]);
+      this.chunks.push(chunk);
+      this.buffered += chunk.length;
+      if (this.buffered >= READ_AHEAD_BYTES) stream.pause();
       this.notify();
     });
     stream.on("end", () => {
@@ -212,15 +225,21 @@ class BlockSource {
     }
   }
 
-  readSome() {
+  take(max) {
+    const head = this.chunks[0];
+    const out = head.length > max ? head.subarray(0, max) : head;
+    if (out.length === head.length) this.chunks.shift();
+    else this.chunks[0] = head.subarray(max);
+    this.buffered -= out.length;
+    if (this.buffered < READ_AHEAD_BYTES && this.stream.isPaused()) this.stream.resume();
+    return out;
+  }
+
+  readSome(max = Infinity) {
     return new Promise((resolve, reject) => {
       const attempt = () => {
         if (this.error) return reject(this.error);
-        if (this.buffer.length > 0) {
-          const out = this.buffer;
-          this.buffer = Buffer.alloc(0);
-          return resolve(out);
-        }
+        if (this.chunks.length > 0) return resolve(this.take(max));
         if (this.ended) return resolve(null);
         this.waiter = attempt;
       };
@@ -228,28 +247,16 @@ class BlockSource {
     });
   }
 
-  unshift(buf) {
-    if (buf && buf.length > 0) this.buffer = Buffer.concat([buf, this.buffer]);
-  }
-
   async read(n) {
-    let acc = null;
+    const parts = [];
     let remaining = n;
     while (remaining > 0) {
-      const chunk = await this.readSome();
+      const chunk = await this.readSome(remaining);
       if (chunk === null) return null; // EOF before n bytes
-      if (chunk.length > remaining) {
-        acc = acc
-          ? Buffer.concat([acc, chunk.subarray(0, remaining)])
-          : chunk.subarray(0, remaining);
-        this.unshift(chunk.subarray(remaining));
-        remaining = 0;
-      } else {
-        acc = acc ? Buffer.concat([acc, chunk]) : chunk;
-        remaining -= chunk.length;
-      }
+      parts.push(chunk);
+      remaining -= chunk.length;
     }
-    return acc ?? Buffer.alloc(0);
+    return parts.length === 1 ? parts[0] : Buffer.concat(parts, n);
   }
 }
 
@@ -277,14 +284,12 @@ function checksumMatches(header) {
 async function copyN(reader, size, outStream) {
   let remaining = size;
   while (remaining > 0) {
-    const chunk = await reader.readSome();
+    const chunk = await reader.readSome(remaining);
     if (chunk === null) {
       throw new Error(`unexpected EOF after ${size - remaining} of ${size} bytes`);
     }
-    const take = chunk.length > remaining ? chunk.subarray(0, remaining) : chunk;
-    if (chunk.length > remaining) reader.unshift(chunk.subarray(remaining));
-    remaining -= take.length;
-    if (!outStream.write(take)) await once(outStream, "drain");
+    remaining -= chunk.length;
+    if (!outStream.write(chunk)) await once(outStream, "drain");
   }
 }
 
@@ -298,7 +303,16 @@ export async function extractTarGz(archiveFile, destDir) {
   const gunzip = createGunzip();
   src.pipe(gunzip);
   const reader = new BlockSource(gunzip);
+  try {
+    return await extractEntries(reader, gunzip, destDir);
+  } finally {
+    // A paused gunzip never reaches `end`, so it has to be closed explicitly.
+    src.destroy();
+    gunzip.destroy();
+  }
+}
 
+async function extractEntries(reader, gunzip, destDir) {
   const zeros = Buffer.alloc(BLOCK);
   let longName = null;
   let longLink = null;
@@ -381,7 +395,6 @@ export async function extractTarGz(archiveFile, destDir) {
     entries += 1;
   }
 
-  src.destroy();
   return { entries };
 }
 

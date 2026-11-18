@@ -1,4 +1,3 @@
-// @ts-nocheck
 import type { RefreshLogger } from "../shared.ts";
 import { refreshCodebuddyToken } from "./codebuddyShared.ts";
 

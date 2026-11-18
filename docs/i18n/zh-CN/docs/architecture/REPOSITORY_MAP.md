@@ -53,65 +53,65 @@ OmniRoute/
 
 ## 根文件
 
-| 文件                                        | 用途                                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------------------ |
-| **README.md**                               | 营销落地页 + 快速入门 + 功能矩阵（另请参阅 `llm.txt`）                         |
-| **CHANGELOG.md**                            | 各版本变更日志（由 `/version-bump-cc` 技能自动生成）                           |
-| **LICENSE**                                 | MIT 许可证文本                                                                 |
-| **CLAUDE.md**                               | Claude Code 智能体的项目规则（硬性规则、约定、场景）                           |
-| **AGENTS.md**                               | 与 CLAUDE.md 相同，但适用于非 Claude AI 智能体（Codex、Cursor 等）             |
-| **GEMINI.md**                               | 面向 Gemini 智能体的精简规则（CLAUDE.md 的子集）                               |
-| **CONTRIBUTING.md**                         | 贡献者指南：设置、约定式提交、测试、PR 流程                                    |
-| **SECURITY.md**                             | 漏洞报告政策、支持的版本、威胁模型                                             |
-| **CODE_OF_CONDUCT.md**                      | 贡献者公约——社区行为规范                                                       |
-| **llm.txt**                                 | 针对 LLM 爬虫优化的纯文本落地页（面向 AI 助手的 SEO）                          |
-| **package.json**                            | npm 清单、脚本、依赖项、引擎、c8 覆盖率门禁                                    |
-| **package-lock.json**                       | 锁定的依赖关系树                                                               |
-| **tsconfig.json**                           | 根 TypeScript 配置                                                             |
-| **tsconfig.typecheck-core.json**            | `src/` 核心代码的类型检查配置                                                  |
-| **tsconfig.typecheck-noimplicit-core.json** | 严格（`noImplicitAny`）类型检查                                                |
-| **tsconfig.tsbuildinfo**                    | TS 增量构建缓存（已被 git 忽略）                                               |
-| **next.config.mjs**                         | Next.js 16 构建配置（独立输出）                                                |
-| **next-env.d.ts**                           | Next.js 自动生成的环境类型                                                     |
-| **eslint.config.mjs**                       | ESLint 扁平配置（按项目区域划分规则）                                          |
-| **prettier.config.mjs**                     | Prettier 格式化规则                                                            |
-| **postcss.config.mjs**                      | Tailwind/CSS 流水线的 PostCSS 配置                                             |
-| **playwright.config.ts**                    | Playwright E2E 测试配置                                                        |
-| **vitest.config.ts**                        | Vitest 配置（默认测试套件）                                                    |
-| **vitest.mcp.config.ts**                    | MCP 服务器 / autoCombo / 缓存测试套件的 Vitest 配置                            |
-| **sonar-project.properties**                | SonarQube/SonarCloud 配置（代码质量）                                          |
-| **Dockerfile**                              | 多阶段 Docker 构建（builder → runner-base → runner-cli）                       |
-| **docker-compose.yml**                      | 包含 4 个配置集（base、cli、host、cliproxyapi）和 redis sidecar 的开发 compose |
-| **docker-compose.prod.yml**                 | 生产环境 compose（端口 20130、redis、命名卷）                                  |
-| **.dockerignore**                           | 从 Docker 上下文中排除的文件                                                   |
-| **fly.toml**                                | Fly.io 部署配置（区域 `sin`、端口 20128、/data 卷）                            |
-| **.env.example**                            | 环境文件模板（首次安装时自动复制到 `.env`）                                    |
-| **.gitignore**                              | Git 忽略模式                                                                   |
-| **.npmignore**                              | npm 发布排除列表                                                               |
-| **.npmrc**                                  | npm 配置（注册表、锁文件策略）                                                 |
-| **.node-version**                           | Node 版本锁定（由兼容 nvm 的工具使用）                                         |
-| **.nvmrc**                                  | nvm 的 Node 版本锁定                                                           |
-| **eslint.complexity.config.mjs**            | 复杂度棘轮的 ESLint 配置（`scripts/check/check-complexity.mjs --config`）      |
-| **eslint.sonarjs.config.mjs**               | SonarJS 规则（认知复杂度 / 重复）的 ESLint 配置                                |
-| **source.config.ts**                        | Fumadocs `defineDocs` 源配置（供 `.source/` 使用）                             |
-| **knip.json**                               | Knip 配置——未使用的文件/导出/依赖项（供死代码门禁使用）                        |
-| **stryker.conf.json**                       | Stryker 变异测试配置                                                           |
-| **.size-limit.json**                        | size-limit bundle 预算配置                                                     |
-| **promptfooconfig.yaml**                    | promptfoo 评估配置                                                             |
-| **.gitleaks.toml**                          | gitleaks 密钥扫描规则集                                                        |
-| **.zizmor.yml**                             | zizmor GitHub Actions 安全检查配置                                             |
-| **socket.yml**                              | Socket.dev 软件供应链配置                                                      |
-| **news.json**                               | 本地化的 v2 公告源；Radar 发布项默认处于未启用状态                             |
-| **flake.nix** / **flake.lock**              | Nix 开发 shell 定义和锁定文件                                                  |
-| **.env**                                    | 本地密钥（已被 git 忽略——从 `.env.example` 生成）                              |
+| 文件                                         | 目的                                                                             |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| **README.md**                                | 营销登陆页面+快速入门+功能矩阵（另请参阅`llm.txt`）                              |
+| **CHANGELOG.md**                             | 每个版本的变更日志（由`/version-bump-cc`技能自动生成）                           |
+| **LICENSE**                                  | MIT许可证文本                                                                    |
+| **CLAUDE.md**                                | Claude代码代理的项目规则（硬规则、约定、场景）                                   |
+| **AGENTS.md**                                | 与CLAUDE.md相同，但适用于非 Claude AI代理（Codex、 Cursor等）                    |
+| **GEMINI.md**                                | 基于 Gemini 的代理的简明规则（ CLAUDE.md的子集）                                 |
+| **CONTRIBUTING.md**                          | 贡献者指南：设置、常规提交、测试、 PR流程                                        |
+| **SECURITY.md**                              | 漏洞报告策略、支持版本、威胁模型                                                 |
+| **CODE_OF_CONDUCT**                          | 贡献者契约—社区行为期望                                                          |
+| **llm.txt**                                  | 针对LLM爬虫优化的纯文本登陆（SEO用于AI助手）                                     |
+| **package.json**                             | npm 清单、脚本、依赖项、引擎、c8 覆盖门                                          |
+| **package-lock.json**                        | 锁定的依赖树                                                                     |
+| **tsconfig.json**                            | 根TypeScript配置                                                                 |
+| **tsconfig。typecheck-core.json**            | `src/`核心的类型检查配置                                                         |
+| **tsconfig。typecheck-noimplicit-core.json** | 严格 (`noImplicitAny`) 类型检查                                                  |
+| **tsconfig.tsbuildinfo**                     | TS增量构建缓存（gitignored）                                                     |
+| **下一个。config.mjs**                       | Next.js 16 构建配置（独立输出）                                                  |
+| **下一个环境。d.ts**                         | Next.js自动生成的环境类型                                                        |
+| **埃斯林特。config.mjs**                     | ESLint平面配置（每个项目区域的规则）                                             |
+| **更漂亮。config.mjs**                       | Prettier格式规则                                                                 |
+| **后CSS。config.mjs**                        | Tailwind/CSS管道的PostCSS配置                                                    |
+| **剧作家。config.ts**                        | Playwright E2E测试配置                                                           |
+| **维泰斯特。config.ts**                      | Vitest配置（默认套件）                                                           |
+| **维泰斯特.mcp。config.ts**                  | MCP服务器 / autoCombo / 缓存套件的Vitest配置                                     |
+| **声纳项目.properties**                      | SonarQube/SonarCloud配置（代码质量）                                             |
+| **Dockerfile**                               | 多阶段Docker构建（构建器→ runner-base → runner-cli）                             |
+| **docker-compose.yml**                       | 开发人员使用 4 个配置文件（base、cli、host、cliproxyapi）进行组合+ redis sidecar |
+| **docker-compose。prod.yml**                 | 生产组合（端口 20130、redis、命名卷）                                            |
+| **.dockerignore**                            | 从Docker上下文中排除的文件                                                       |
+| **fly.toml**                                 | Fly.io 部署配置（区域`sin`，端口 20128，/数据量）                                |
+| **.env.example**                             | 模板环境文件（首次安装时自动复制到`.env` ）                                      |
+| **.gitignore**                               | Git 忽略模式                                                                     |
+| **.npmignore**                               | npm 发布排除列表                                                                 |
+| **.npmrc**                                   | npm 配置（注册表、锁定文件策略）                                                 |
+| **.node-版本**                               | 节点版本引脚（由 nvm 兼容工具使用）                                              |
+| **.nvmrc**                                   | nvm 的节点版本引脚                                                               |
+| **eslint.complexity。config.mjs**            | ESLint复杂性棘轮配置 (`scripts/check/check-complexity.mjs --config`)             |
+| **eslint.sonarjs。config.mjs**               | SonarJS规则的ESLint配置（认知复杂性/重复）                                       |
+| **来源。config.ts**                          | Fumadocs `defineDocs`源配置（提供`.source/`）                                    |
+| **knip.json**                                | Knip config —未使用的files/exports/deps （提供死代码门）                         |
+| **斯赛克。conf.mjs**                         | Stryker 突变测试配置（从`mutate`计算`tap.testFiles` ）                           |
+| **.size-limit.json**                         | 大小限制捆绑预算配置                                                             |
+| **promptfooconfig.yaml**                     | 提示foo评估配置                                                                  |
+| **.gitleaks.toml**                           | gitleaks 秘密扫描规则集                                                          |
+| **.zizmor.yml**                              | zizmor GitHub-Actions security-lint 配置                                         |
+| **socket.yml**                               | Socket.dev 供应链配置                                                            |
+| **news.json**                                | 本地化 v2 公告提要；雷达发射项目船舶处于非活动状态                               |
+| **弗莱克.尼克斯**/**片状锁**                 | Nix dev-shell 定义+锁                                                            |
+| **.env**                                     | 本地秘密（从`.env.example`生成的 gitignored — ）                                 |
 
-> **在 v3.8.26 中移出根目录（精简）：**
+> **在 v3.8.26 中移出了根（整理）：**
 >
-> - **→ `config/quality/`：** `quality-baseline.json`、`complexity-baseline.json`、`duplication-baseline.json`、`file-size-baseline.json`、`test-discovery-baseline.json`、`dependency-allowlist.json`、`.license-allowlist.json`，以及生成的 `quality-metrics.json`（已被 git 忽略）。请参阅 [`## config/`](#config--static-configs--quality-gate-state)。
+> - **→ `config/quality/`:** `quality-baseline.json`、 `complexity-baseline.json`、 `duplication-baseline.json`、 `file-size-baseline.json`、 `test-discovery-baseline.json`、 `dependency-allowlist.json`、 `.license-allowlist.json`和生成的`quality-metrics.json` （gitignored）。参见[`## config/`](#config--static-configs--quality-gate-state) 。
 
 ---
 
-## `src/` — Next.js应用程序
+## `src/` — Next.js应用
 
 ```
 src/
@@ -135,77 +135,77 @@ src/
 └── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` — 应用程序路由器 (Next.js 16)
+### `src/app/` —应用路由器 (Next.js 16)
 
-| 小路                                                                         | 目的                                                                                                                                                                                                                                                                                                                                    |
-| ---------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `app/api/v1/`                                                                | 公共 OpenAI-compat API （~ 25 条子路线：聊天、完成、嵌入、文件、批次、音频、图像、视频、音乐、重新排名、审核、搜索、ws、代理、帐户、提供者等）                                                                                                                                                                                          |
-| `app/api/v1beta/`                                                            | Gemini 风格的API端点                                                                                                                                                                                                                                                                                                                    |
-| `app/api/playground/`                                                        | Playground Studio 路线： `improve-prompt/` (POST — LLM提示符重写器)、 `presets/` (GET list / POST create)、 `presets/[id]/` (GET / PUT / DELETE) — 请参阅`docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                                         |
-| `app/api/` （非 v1）                                                         | Management/admin路由（~ 60 目录：提供者、组合、设置、mcp、a2a、evals、内存、技能、webhooks、合规性、弹性、监控、隧道、cli 工具等）                                                                                                                                                                                                      |
-| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 条路由（服务器控制、代理state/DNS/mappings、旁路、证书、上游 CA）。 LOCAL_ONLY + SPAWN_CAPABLE。参见`docs/frameworks/AGENTBRIDGE.md §7`。                                                                                                                                                                     |
-| `app/api/tools/traffic-inspector/`                                           | Traffic Inspector REST + WS API — 16 个+路由（请求、会话、主机、捕获模式、导出、ws）。 LOCAL_ONLY + SPAWN_CAPABLE。参见`docs/frameworks/TRAFFIC_INSPECTOR.md §8`。                                                                                                                                                                      |
-| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 入口点 (`POST /a2a`)                                                                                                                                                                                                                                                                                                   |
-| `app/.well-known/agent.json/`                                                | A2A代理卡（发现）                                                                                                                                                                                                                                                                                                                       |
-| `app/(dashboard)/dashboard/`                                                 | 仪表板UI页面（50 个+部分、 ~ 118 个page.tsx文件：提供程序、组合、设置、内存、技能、webhooks、评估、审计、批处理、缓存、成本、运行状况、系统、活动等）                                                                                                                                                                                   |
-| `app/(dashboard)/dashboard/search-tools/`                                    | 搜索工具 Studio UI （3 个选项卡： Search/Scrape/Compare + SearchConceptCard + ProviderCatalog） — 请参阅`docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                                        |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio（计划 21）： `page.tsx` （3-tab shell）、 `components/` （MemoryConceptCard、 MemoryEngineStatus、 EmbeddingSourceSelector、 EditMemoryModal、 RetrievePreview、 QdrantConfigCard、 RerankConfigCard）、 `components/tabs/` （MemoriesTab、 PlaygroundTab、 EngineTab）、 `hooks/` （useEngineStatus、useMemorySettings） |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge仪表板页面 — 服务器卡、9 个代理卡、设置向导、模型映射、旁路列表。 i18n PT-BR + EN。参见`docs/frameworks/AGENTBRIDGE.md`。                                                                                                                                                                                                    |
-| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector 仪表板页面 — DevTools拆分、7 个详细信息选项卡、4 个捕获模式切换、会话记录器、上下文着色。 i18n PT-BR + EN。参见`docs/frameworks/TRAFFIC_INSPECTOR.md`。                                                                                                                                                               |
-| `app/(dashboard)/dashboard/activity/`                                        | 活动提要页面（B 组）： `page.tsx` （服务器） + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — 参见`docs/architecture/MONITORING_SECTIONS.md`                                                                                                                                       |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | 配额分享页面（B组）： `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                                       |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | 提供者计划配置页面（B 组）： `page.tsx` + `ProviderPlanConfigClient.tsx` — 每个连接覆盖的配额维度                                                                                                                                                                                                                                       |
-| `app/docs/`                                                                  | 嵌入式文档查看器（呈现`docs/*.md`）                                                                                                                                                                                                                                                                                                     |
-| `app/landing/`                                                               | 营销登陆页面                                                                                                                                                                                                                                                                                                                            |
-| `app/login/`, `forgot-password/`, `forbidden/`                               | Auth相关页面                                                                                                                                                                                                                                                                                                                            |
-| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP错误页面                                                                                                                                                                                                                                                                                                                            |
-| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status页面                                                                                                                                                                                                                                                                                                                       |
-| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | 根布局、home、 PWA清单、全局CSS                                                                                                                                                                                                                                                                                                         |
-| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | 误差边界                                                                                                                                                                                                                                                                                                                                |
+| 小路                                                                         | 目的                                                                                                                                                                                                                                                                                                                                     |
+| ---------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `app/api/v1/`                                                                | 公共 OpenAI-compat API （~ 25 条子路线：聊天、完成、嵌入、文件、批次、音频、图像、视频、音乐、重新排名、审核、搜索、ws、代理、帐户、提供者等）                                                                                                                                                                                           |
+| `app/api/v1beta/`                                                            | Gemini 风格的API端点                                                                                                                                                                                                                                                                                                                     |
+| `app/api/playground/`                                                        | Playground Studio 路线： `improve-prompt/` (POST — LLM提示重写器)、 `presets/` (GET list / POST create)、 `presets/[id]/` (GET / PUT / DELETE) — see `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                                                              |
+| `app/api/` (non-v1)                                                          | Management/admin路由（~ 60 目录：提供者、组合、设置、mcp、a2a、evals、内存、技能、webhooks、合规性、弹性、监控、隧道、cli 工具等）                                                                                                                                                                                                       |
+| `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 条路由（服务器控制、代理state/DNS/mappings、旁路、证书、上游 CA）。 LOCAL_ONLY + SPAWN_CAPABLE。参见`docs/frameworks/AGENTBRIDGE.md §7`。                                                                                                                                                                      |
+| `app/api/tools/traffic-inspector/`                                           | 流量检查器REST + WS API — 16 +路由（请求、会话、主机、捕获模式、导出、ws）。 LOCAL_ONLY + SPAWN_CAPABLE。参见`docs/frameworks/TRAFFIC_INSPECTOR.md §8`。                                                                                                                                                                                 |
+| `app/a2a/`                                                                   | A2A JSON-RPC 2.0 入口点 (`POST /a2a`)                                                                                                                                                                                                                                                                                                    |
+| `app/.well-known/agent.json/`                                                | A2A代理卡（发现）                                                                                                                                                                                                                                                                                                                        |
+| `app/(dashboard)/dashboard/`                                                 | 仪表板UI页面（50 个+部分、 ~ 118 个page.tsx文件：提供程序、组合、设置、内存、技能、webhooks、评估、审计、批处理、缓存、成本、运行状况、系统、活动等）                                                                                                                                                                                    |
+| `app/(dashboard)/dashboard/search-tools/`                                    | 搜索工具 Studio UI （3 个选项卡： Search/Scrape/Compare + SearchConceptCard + ProviderCatalog） —参见`docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                                            |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio（计划 21）： `page.tsx` （3-tab shell）、 `components/` （MemoryConceptCard、 MemoryEngineStatus、 EmbeddingSourceSelector、 EditMemoryModal、 RetrievePreview、 QdrantConfigCard、 RerankConfigCard）、 `components/tabs/` （MemoriesTab、 PlaygroundTab、 EngineTab）、 `hooks/` （useEngineStatus、 useMemorySettings） |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge仪表板页面—服务器卡、9 个代理卡、设置向导、模型映射、旁路列表。 i18n PT-BR + EN。参见`docs/frameworks/AGENTBRIDGE.md`。                                                                                                                                                                                                       |
+| `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector 仪表板页面— DevTools拆分、7 个详细信息选项卡、4 个捕获模式切换、会话记录器、上下文着色。 i18n PT-BR + EN。参见`docs/frameworks/TRAFFIC_INSPECTOR.md`。                                                                                                                                                                 |
+| `app/(dashboard)/dashboard/activity/`                                        | 活动提要页面（B 组）： `page.tsx` （服务器） + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` —参见`docs/architecture/MONITORING_SECTIONS.md`                                                                                                                                         |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | 配额分享页面（B组）： `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                                        |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | 提供者计划配置页面（B 组）： `page.tsx` + `ProviderPlanConfigClient.tsx` —每个连接覆盖的配额维度                                                                                                                                                                                                                                         |
+| `app/docs/`                                                                  | 嵌入式文档查看器（呈现`docs/*.md`）                                                                                                                                                                                                                                                                                                      |
+| `app/landing/`                                                               | 营销登陆页面                                                                                                                                                                                                                                                                                                                             |
+| `app/login/`, `forgot-password/`, `forbidden/`                               | Auth相关页面                                                                                                                                                                                                                                                                                                                             |
+| `app/{400,401,403,408,429,500,502,503}/`                                     | HTTP错误页面                                                                                                                                                                                                                                                                                                                             |
+| `app/maintenance/`, `offline/`, `status/`, `privacy/`, `terms/`, `callback/` | Static/status页面                                                                                                                                                                                                                                                                                                                        |
+| `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | 根布局、home、 PWA清单、全局CSS                                                                                                                                                                                                                                                                                                          |
+| `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | 误差边界                                                                                                                                                                                                                                                                                                                                 |
 
-### `src/lib/` — 核心库（~ 50 个模块）
+### `src/lib/` —核心库（~ 50 个模块）
 
-| 模块                                     | 目的                                                                                                                                                                                                                                                                                                                  |
-| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`                                   | A2A协议任务管理器、技能（5）、流式传输                                                                                                                                                                                                                                                                                |
-| `acp/`                                   | CLI代理注册表（本地CLI发现 — 请参阅`docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`）                                                                                                                                                                                                                                       |
-| `api/`                                   | 共享API助手（`requireManagementAuth`、验证）                                                                                                                                                                                                                                                                          |
-| `auth/`                                  | 会话、密码哈希、令牌验证                                                                                                                                                                                                                                                                                              |
-| `batches/`                               | OpenAI批次API处理程序                                                                                                                                                                                                                                                                                                 |
-| `catalog/`                               | 提供者目录Zod验证+能力解析                                                                                                                                                                                                                                                                                            |
-| `cloudAgent/`                            | 云代理（Codex Cloud、 Devin、 Jules） — 请参阅`docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                        |
-| `combos/`                                | 组合解析+重新排序助手                                                                                                                                                                                                                                                                                                 |
-| `audit/`                                 | 活动提要助手： `highLevelActions.ts` （允许列表+ `isHighLevelAction()`）、 `activityIcons.ts` （操作→ icon/verb地图）、 `timeline.ts` (groupByDay/relativeTime) — 请参阅`docs/architecture/MONITORING_SECTIONS.md`                                                                                                    |
-| `compliance/`                            | 审核日志+提供者审核 — 参见`docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                               |
-| `compression/`                           | 压缩发动机胶（发动机住`open-sse/services/compression/`）                                                                                                                                                                                                                                                              |
-| `config/`                                | 运行时配置助手                                                                                                                                                                                                                                                                                                        |
-| `db/`                                    | 120 +域DB模块+ 168 迁移（对于SQLite始终通过此处）                                                                                                                                                                                                                                                                     |
-| `quota/`                                 | 配额共享引擎： `dimensions.ts` (types/Zod)、 `types.ts` (QuotaStore接口)、 `sqliteQuotaStore.ts`、 `redisQuotaStore.ts`、 `storeFactory.ts`、 `fairShare.ts`、 `burnRate.ts`、 `planResolver.ts`、 `planRegistry.ts`、 `saturationSignals.ts`、 `enforce.ts`、 `spendRecorder.ts` — 参见`docs/routing/QUOTA_SHARE.md` |
-| `radar/`                                 | 雷达自由模型目录客户端： `feedSchema.ts`、 `pinnedKeys.ts`、 `verify.ts`、 `sync.ts`、 `applyFeed.ts`、 `index.ts` (`getRadarCatalog()`) — 参见`docs/frameworks/RADAR.md`                                                                                                                                             |
-| `display/`                               | UI格式化助手（成本、延迟等）                                                                                                                                                                                                                                                                                          |
-| `embeddings/`                            | 嵌入服务助手                                                                                                                                                                                                                                                                                                          |
-| `env/`                                   | Env变量解析+验证                                                                                                                                                                                                                                                                                                      |
-| `evals/`                                 | Eval 框架（套件、运行程序、运行时）- 参见`docs/frameworks/EVALS.md`                                                                                                                                                                                                                                                   |
-| `guardrails/`                            | PII masker、提示注入、视觉桥 — 参见`docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                                      |
-| `jobs/`                                  | 后台作业（类似 cron）                                                                                                                                                                                                                                                                                                 |
-| `memory/`                                | 对话记忆（SQLite FTS5 + sqlite-vec 混合RRF + Qdrant第 2 层） - 参见`docs/frameworks/MEMORY.md`                                                                                                                                                                                                                        |
-| `memory/embedding/`                      | 多源嵌入层： `index.ts` （解析器）、 `remote.ts`、 `staticPotion.ts`、 `transformersLocal.ts`、 `cache.ts`、 `types.ts` （方案21）                                                                                                                                                                                    |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 包装器 — KNN暴力+混合RRF （FTS5 +向量，k = 60）。 Lazy-init，当 sqlite-vec 不可用时优雅地降级。 （计划21）                                                                                                                                                                                          |
-| `memory/reindex.ts`                      | `runReindexBatch()` — 在后台使用`needs_reindex=1`处理内存；由`POST /api/memory/reindex`和惰性回填路径调用。 （计划21）                                                                                                                                                                                                |
-| `monitoring/`                            | 健康检查、指标排放                                                                                                                                                                                                                                                                                                    |
-| `oauth/`                                 | 22 个提供者模块的OAuth/import流程（agy、antigravity、claude、cline、codebuddy-cn、codex、cursor、devin-desktop、ghe-copilot、github、gitlab-duo、grok-cli-oauth、grok-cli、kilocode、kimi-coding、kiro、openference、qoder、trae、xai-oauth、zed-hosted、zed）                                                        |
-| `plugins/`                               | 插件注册表                                                                                                                                                                                                                                                                                                            |
-| `promptCache/`                           | 人类风格的提示缓存断点                                                                                                                                                                                                                                                                                                |
-| `skills/`                                | 技能框架（内置+市场+ SkillsSH）—参见`docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                                       |
-| `playground/`                            | Playground Studio 共享助手： `codeExport.ts` （curl/Python/TS生成器）、 `promptImprover.ts` （元提示构建器）、 `streamMetrics.ts` （纯TTFT/TPS）、 `types.ts` （定价表）— 请参阅`docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                |
-| `webhookDispatcher.ts`                   | HMAC webhook 交付 — 参见`docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                 |
-| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | 隧道管理器 — 参见`docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                          |
-| `cloudSync.ts`, `initCloudSync.ts`       | 可选的状态云同步                                                                                                                                                                                                                                                                                                      |
-| `localDb.ts`                             | 重新导出数据库模块的桶（无逻辑 - 仅重新导出）                                                                                                                                                                                                                                                                         |
-| `cacheLayer.ts`, `idempotencyLayer.ts`   | 请求缓存+幂等性                                                                                                                                                                                                                                                                                                       |
-| （~ 30多个顶级文件）                     | 专门的助手（logEnv、modelsDevSync、piiSanitizer 等）                                                                                                                                                                                                                                                                  |
+| 模块                                     | 目的                                                                                                                                                                                                                                                                                                      |
+| ---------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `a2a/`                                   | A2A协议任务管理器、技能（5）、流式传输                                                                                                                                                                                                                                                                    |
+| `acp/`                                   | CLI代理注册表（本地CLI发现—参见`docs/frameworks/AGENT_PROTOCOLS_GUIDE.md`）                                                                                                                                                                                                                               |
+| `api/`                                   | 共享API助手（`requireManagementAuth`、验证）                                                                                                                                                                                                                                                              |
+| `auth/`                                  | 会话、密码哈希、令牌验证                                                                                                                                                                                                                                                                                  |
+| `batches/`                               | OpenAI批次API处理程序                                                                                                                                                                                                                                                                                     |
+| `catalog/`                               | 提供者目录Zod验证+能力解析                                                                                                                                                                                                                                                                                |
+| `cloudAgent/`                            | 云代理 (Codex Cloud、 Devin、 Jules) —参见`docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                |
+| `combos/`                                | 组合解析+重新排序助手                                                                                                                                                                                                                                                                                     |
+| `audit/`                                 | 活动提要助手： `highLevelActions.ts` （允许列表+ `isHighLevelAction()`）、 `activityIcons.ts` （操作→ icon/verb地图）、 `timeline.ts` (groupByDay/relativeTime) —请参阅`docs/architecture/MONITORING_SECTIONS.md`                                                                                         |
+| `compliance/`                            | 审核日志+提供者审核—参见`docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                     |
+| `compression/`                           | 压缩发动机胶（发动机住`open-sse/services/compression/`）                                                                                                                                                                                                                                                  |
+| `config/`                                | 运行时配置助手                                                                                                                                                                                                                                                                                            |
+| `db/`                                    | 120 +域DB模块+ 168 迁移（对于SQLite始终通过此处）                                                                                                                                                                                                                                                         |
+| `quota/`                                 | 配额共享引擎： `dimensions.ts` (types/Zod), `types.ts` (QuotaStore接口), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` —参见`docs/routing/QUOTA_SHARE.md` |
+| `radar/`                                 | 雷达自由模型目录客户端： `feedSchema.ts`、 `pinnedKeys.ts`、 `verify.ts`、 `sync.ts`、 `applyFeed.ts`、 `index.ts` (`getRadarCatalog()`) —参见`docs/frameworks/RADAR.md`                                                                                                                                  |
+| `display/`                               | UI格式化助手（成本、延迟等）                                                                                                                                                                                                                                                                              |
+| `embeddings/`                            | 嵌入服务助手                                                                                                                                                                                                                                                                                              |
+| `env/`                                   | Env变量解析+验证                                                                                                                                                                                                                                                                                          |
+| `evals/`                                 | Eval 框架（套件、运行器、运行时） —参见`docs/frameworks/EVALS.md`                                                                                                                                                                                                                                         |
+| `guardrails/`                            | PII masker、提示注入、视觉桥—参见`docs/security/GUARDRAILS.md`                                                                                                                                                                                                                                            |
+| `jobs/`                                  | 后台作业（类似 cron）                                                                                                                                                                                                                                                                                     |
+| `memory/`                                | 会话记忆（SQLite FTS5 + sqlite-vec 混合RRF + Qdrant第 2 层） —参见`docs/frameworks/MEMORY.md`                                                                                                                                                                                                             |
+| `memory/embedding/`                      | 多源嵌入层： `index.ts` （解析器）、 `remote.ts`、 `staticPotion.ts`、 `transformersLocal.ts`、 `cache.ts`、 `types.ts` （方案21）                                                                                                                                                                        |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 包装器— KNN暴力+混合RRF （FTS5 +向量，k = 60）。 Lazy-init，当 sqlite-vec 不可用时优雅地降级。 （计划21）                                                                                                                                                                               |
+| `memory/reindex.ts`                      | `runReindexBatch()` —在后台使用`needs_reindex=1`处理内存；由`POST /api/memory/reindex`和惰性回填路径调用。 （计划21）                                                                                                                                                                                     |
+| `monitoring/`                            | 健康检查、指标排放                                                                                                                                                                                                                                                                                        |
+| `oauth/`                                 | 22 个提供者模块的OAuth/import流程（agy、antigravity、claude、cline、codebuddy-cn、codex、cursor、devin-desktop、ghe-copilot、github、gitlab-duo、grok-cli-oauth、grok-cli、kilocode、kimi-coding、kiro、openference、qoder、trae、xai-oauth、zed-hosted、zed）                                            |
+| `plugins/`                               | 插件注册表                                                                                                                                                                                                                                                                                                |
+| `promptCache/`                           | 人类风格的提示缓存断点                                                                                                                                                                                                                                                                                    |
+| `skills/`                                | 技能框架（内置+市场+ SkillsSH） —参见`docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                          |
+| `playground/`                            | Playground Studio 共享助手： `codeExport.ts` （curl/Python/TS生成器）、 `promptImprover.ts` （元提示构建器）、 `streamMetrics.ts` （纯TTFT/TPS）、 `types.ts` （定价表） —参见`docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                      |
+| `webhookDispatcher.ts`                   | HMAC webhook 传递—参见`docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                       |
+| `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | 隧道管理者—见`docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                  |
+| `cloudSync.ts`, `initCloudSync.ts`       | 可选的状态云同步                                                                                                                                                                                                                                                                                          |
+| `localDb.ts`                             | 重新导出数据库模块的桶（仅无逻辑—重新导出）                                                                                                                                                                                                                                                               |
+| `cacheLayer.ts`, `idempotencyLayer.ts`   | 请求缓存+幂等性                                                                                                                                                                                                                                                                                           |
+| （~ 30多个顶级文件）                     | 专业助手（logEnv、 modelsDevSync、 piiSanitizer等）                                                                                                                                                                                                                                                       |
 
-### `src/lib/db/` — 数据库（147 个模块+ 208 个迁移）
+### `src/lib/db/` —数据库（147 个模块+ 208 个迁移）
 
 | 子目录                    | 目的                                                                                                                                                                 |
 | ------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -213,7 +213,7 @@ src/
 | `db/migrations/`          | 版本化的SQL文件（幂等、事务）。 `073_memory_vec.sql`增加`memory_vec_meta` + `needs_reindex`列（方案 21）。                                                           |
 | `db/playgroundPresets.ts` | Playground Studio 预设的CRUD模块（`listPlaygroundPresets`、 `getPlaygroundPreset`、 `createPlaygroundPreset`、 `updatePlaygroundPreset`、 `deletePlaygroundPreset`） |
 | `db/memoryVec.ts`         | CRUD for `memory_vec_meta` （active_dim、embedding_signature、last_reset_at、vec_loaded） + `markMemoryNeedsReindex`、 `getMemoryReindexQueue`等（计划 21）          |
-| `db/<domain>.ts`          | 每个域一个模块：providers、combos、apiKeys、users、sessions、usage、audit log、webhooks、skills、memory_entries、cloud_agent_tasks、evals* \* 、推理缓存等           |
+| `db/<domain>.ts`          | 每个域一个模块：providers、combos、 apiKeys、users、sessions、usage、audit log、webhooks、skills、memory_entries、cloud_agent_tasks、evals* \* 、推理缓存等          |
 
 ### `src/domain/`
 
@@ -230,31 +230,31 @@ src/
 
 ### `src/server/`
 
-| 模块     | 目的                                                                                    |
-| -------- | --------------------------------------------------------------------------------------- |
-| `authz/` | 授权管道： `classify` → `policies` → `enforce` — 参见`docs/architecture/AUTHZ_GUIDE.md` |
-| `cors/`  | CORS配置                                                                                |
-| `auth/`  | 会话中间件                                                                              |
+| 模块     | 目的                                                                                   |
+| -------- | -------------------------------------------------------------------------------------- |
+| `authz/` | 授权管道： `classify` → `policies` → `enforce` —参见`docs/architecture/AUTHZ_GUIDE.md` |
+| `cors/`  | CORS配置                                                                               |
+| `auth/`  | 会话中间件                                                                             |
 
 ### `src/shared/`
 
-| 模块                             | 目的                                                                                     |
-| -------------------------------- | ---------------------------------------------------------------------------------------- |
-| `components/`                    | 仪表板组件API： `packages/ui-kit`上的适配器 — 请参阅`docs/architecture/DESIGN_SYSTEM.md` |
-| `constants/iconMap.ts`           | `ICON_MAP`：屏幕使用的图标名称→ Lucide 组件 (`<Icon>`)                                   |
-| `constants/providers.ts`         | **377 提供者**通过Zod验证（事实来源）                                                    |
-| `constants/cliTools.ts`          | 外部CLI工具注册表                                                                        |
-| `constants/routingStrategies.ts` | **20种路由策略**有优先事项                                                               |
-| `constants/publicApiRoutes.ts`   | 需要承载（与管理）身份验证的路由                                                         |
-| `constants/upstreamHeaders.ts`   | 上游请求的标头拒绝列表                                                                   |
-| `validation/schemas.ts`          | ~ 80 Zod模式（ API合约的单一事实来源）                                                   |
-| `validation/helpers.ts`          | Zod验证助手（`validateBody`等）                                                          |
-| `types/`                         | 共享TS类型                                                                               |
-| `contracts/`                     | 公共API合约（由`package.json`中的`files:`使用）                                          |
-| `utils/circuitBreaker.ts`        | 提供者断路器（参见`docs/architecture/RESILIENCE_GUIDE.md`）                              |
-| `utils/apiAuth.ts`               | API密钥验证、范围检查                                                                    |
-| `utils/fetchTimeout.ts`          | 用于上游获取的Timeout/abort包装器                                                        |
-| `utils/releaseNotes.ts`          | 关闭v2/legacy公告解析器、本地化和ID解雇                                                  |
+| 模块                             | 目的                                                                                   |
+| -------------------------------- | -------------------------------------------------------------------------------------- |
+| `components/`                    | 仪表板组件API： `packages/ui-kit`上的适配器—请参阅`docs/architecture/DESIGN_SYSTEM.md` |
+| `constants/iconMap.ts`           | `ICON_MAP`：屏幕使用的图标名称→ Lucide 组件 (`<Icon>`)                                 |
+| `constants/providers.ts`         | **394 家提供者**通过Zod验证（事实来源）                                                |
+| `constants/cliTools.ts`          | 外部CLI工具注册表                                                                      |
+| `constants/routingStrategies.ts` | **22种路由策略**有优先事项                                                             |
+| `constants/publicApiRoutes.ts`   | 需要承载（与管理）身份验证的路由                                                       |
+| `constants/upstreamHeaders.ts`   | 上游请求的标头拒绝列表                                                                 |
+| `validation/schemas.ts`          | ~ 80 Zod模式（ API合约的单一事实来源）                                                 |
+| `validation/helpers.ts`          | Zod验证助手（`validateBody`等）                                                        |
+| `types/`                         | 共享TS类型                                                                             |
+| `contracts/`                     | 公共API合约（由`package.json`中的`files:`使用）                                        |
+| `utils/circuitBreaker.ts`        | 提供者断路器（参见`docs/architecture/RESILIENCE_GUIDE.md`）                            |
+| `utils/apiAuth.ts`               | API密钥验证、范围检查                                                                  |
+| `utils/fetchTimeout.ts`          | 用于上游获取的Timeout/abort包装器                                                      |
+| `utils/releaseNotes.ts`          | 关闭v2/legacy公告解析器、本地化和ID解雇                                                |
 
 ---
 
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 个文件（12 个处理器 + 4 个辅助模块）：chatCore、responsesHandler、embeddings、audio、image、video、music、rerank、moderations、search 等
-├── executors/           # 150 个执行器模块（扩展 BaseExecutor 的类 + 各提供者辅助模块）
+├── executors/           # 163 个执行器模块（扩展 BaseExecutor 的类 + 各提供者辅助模块）
 ├── translator/          # 格式转换器（9 个请求转换器、9 个响应转换器、9 个辅助模块）
 ├── transformer/         # Responses API ↔ Chat Completions（TransformStream）
 ├── services/            # 约 80+ 个服务模块（combo、accountFallback、autoCombo、reasoningCache、claude code/chatgpt stealth、modelDeprecation、taskAwareRouter、workflowFSM 等）
@@ -391,28 +391,28 @@ open-sse/
 
 ---
 
-## `docs/` — 公共文档（7 个根文件+ 17 个子目录）
+## `docs/` —公共文档（7 个根文件+ 17 个子目录）
 
 ### 顶级指南
 
-| 医生                        | 目的                                                                       |
-| --------------------------- | -------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | 高层架构、子系统图、仪表板表面                                             |
-| `CODEBASE_DOCUMENTATION.md` | 工程参考：目录、模块、约定                                                 |
-| `FEATURES.md`               | v3.8 亮点功能矩阵                                                          |
-| `USER_GUIDE.md`             | 最终用户手册（设置、模型、组合、 CLIs、音频等）                            |
-| `API_REFERENCE.md`          | 具有身份验证模型的API端点参考                                              |
-| `openapi.yaml`              | OpenAPI 3.0 规范（121 个路径）                                             |
-| `SETUP_GUIDE.md`            | 安装方法（npm、npx、 Docker、 Electron、Termux、源）                       |
-| `ENVIRONMENT.md`            | 所有环境变量（~ 800 记录， ~ 3,050 行`.env.example`）                      |
-| `TROUBLESHOOTING.md`        | 常见错误+ v3.8.0 已知问题                                                  |
-| `RELEASE_CHECKLIST.md`      | 完整的发布流程（技能、husky、常规提交、部署）                              |
-| `COVERAGE_PLAN.md`          | 覆盖目标和现状                                                             |
-| `FREE_TIERS.md`             | 精选的免费提供者（48 +免费+ 11 OAuth）                                     |
-| `CLI-TOOLS.md`              | 外部CLI集成+内部OmniRoute CLI                                              |
-| `I18N.md`                   | i18n 架构，添加语言，67 个语言环境                                         |
-| `UNINSTALL.md`              | 干净卸载步骤                                                               |
-| `PROVIDER_REFERENCE.md`     | **自动生成**377 个提供者的目录（regen： `npm run gen:provider-reference`） |
+| 医生                        | 目的                                                                     |
+| --------------------------- | ------------------------------------------------------------------------ |
+| `ARCHITECTURE.md`           | 高层架构、子系统图、仪表板表面                                           |
+| `CODEBASE_DOCUMENTATION.md` | 工程参考：目录、模块、约定                                               |
+| `FEATURES.md`               | v3.8 亮点功能矩阵                                                        |
+| `USER_GUIDE.md`             | 最终用户手册（设置、模型、组合、 CLIs、音频等）                          |
+| `API_REFERENCE.md`          | 具有身份验证模型的API端点参考                                            |
+| `openapi.yaml`              | OpenAPI 3.0 规范（121 个路径）                                           |
+| `SETUP_GUIDE.md`            | 安装方法（npm、npx、 Docker、 Electron、Termux、源）                     |
+| `ENVIRONMENT.md`            | 所有环境变量（~ 800 记录， ~ 3,050 行`.env.example`）                    |
+| `TROUBLESHOOTING.md`        | 常见错误+ v3.8.0 已知问题                                                |
+| `RELEASE_CHECKLIST.md`      | 完整的发布流程（技能、husky、常规提交、部署）                            |
+| `COVERAGE_PLAN.md`          | 覆盖目标和现状                                                           |
+| `FREE_TIERS.md`             | 精选的免费提供者（48 +免费+ 11 OAuth）                                   |
+| `CLI-TOOLS.md`              | 外部CLI集成+内部OmniRoute CLI                                            |
+| `I18N.md`                   | i18n 架构，添加语言，67 个语言环境                                       |
+| `UNINSTALL.md`              | 干净卸载步骤                                                             |
+| `PROVIDER_REFERENCE.md`     | **自动生成**394 家提供者目录（regen： `npm run gen:provider-reference`） |
 
 ### 子系统深入研究
 
@@ -427,7 +427,7 @@ open-sse/
 | `MEMORY.md`                                   | 内存系统（SQLite FTS5 + Qdrant）                      |
 | `EVALS.md`                                    | 评估框架（套件、运行、评分标准）                      |
 | `GUARDRAILS.md`                               | PII masker、即时注入、视觉桥                          |
-| `COMPLIANCE.md`                               | 审核日志、保留、noLog 选择退出                        |
+| `COMPLIANCE.md`                               | 审核日志、保留、 noLog选择退出                        |
 | `WEBHOOKS.md`                                 | HMAC 签名的 Webhook 交付                              |
 | `REASONING_REPLAY.md`                         | `reasoning_content`的混合memory/SQLite缓存            |
 | `AUTHZ_GUIDE.md`                              | 授权管道（`classify` → `policies` → `enforce`）       |
@@ -460,11 +460,11 @@ open-sse/
 
 ### 子目录
 
-| 子目录                | 目的                                                                                                                                            |
-| --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | 本地化文档翻译（41 个语言环境）                                                                                                                 |
-| `docs/screenshots/`   | 指南的图像资源                                                                                                                                  |
-| `_tasks/superpowers/` | 来自超级大国（`writing-plans`/`brainstorming`）的Plans/specs +研究 — 孤立的、单独版本的存储库，被主树忽略。参见CLAUDE.md → 《规划与研究工件》。 |
+| 子目录                | 目的                                                                                                                                     |
+| --------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `docs/i18n/`          | 本地化文档翻译（41 个语言环境）                                                                                                          |
+| `docs/screenshots/`   | 指南的图像资源                                                                                                                           |
+| `_tasks/superpowers/` | Plans/specs来自超级大国 (`writing-plans`/`brainstorming`) +研究—隔离的、单独版本的存储库，被主树忽略。参见CLAUDE.md → “规划和研究工件”。 |
 
 ---
 

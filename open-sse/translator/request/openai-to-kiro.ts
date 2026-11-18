@@ -907,6 +907,9 @@ export function buildKiroPayload(model, body, stream, credentials) {
   // so Kiro accepts the request instead of returning `Improperly formed
   // request`. This preserves tool-call history and is a no-op when body.tools
   // is already populated.
+  // The synthesized names are recorded because the client never declared them
+  // (#18675): the executor must not read a synthesized `tool_call` as a client tool.
+  let synthesizedToolNames: string[] = [];
   if (tools.length === 0) {
     const seen = new Set<string>();
     const synthesized: Array<Record<string, unknown>> = [];
@@ -941,6 +944,7 @@ export function buildKiroPayload(model, body, stream, credentials) {
     }
     if (synthesized.length > 0) {
       tools = synthesized;
+      synthesizedToolNames = [...seen];
     }
   }
 
@@ -980,6 +984,7 @@ export function buildKiroPayload(model, body, stream, credentials) {
       history: unknown[];
     };
     profileArn?: string;
+    _kiroSynthesizedToolNames?: Map<string, true>;
     inferenceConfig?: {
       maxTokens?: number;
       temperature?: number;
@@ -1053,6 +1058,11 @@ export function buildKiroPayload(model, body, stream, credentials) {
 
   if (profileArn) {
     payload.profileArn = profileArn;
+  }
+  // In-memory channel (Map, like `_toolNameMap`): survives post-translation compression and
+  // is dropped by the Kiro executor's transformRequest allowlist before the wire send.
+  if (synthesizedToolNames.length > 0) {
+    payload._kiroSynthesizedToolNames = new Map(synthesizedToolNames.map((n) => [n, true]));
   }
 
   if (maxTokens || temperature !== undefined || topP !== undefined) {

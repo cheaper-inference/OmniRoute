@@ -46,35 +46,35 @@ omniroute configure codex                # ← 根据远程目录写入本地 Co
 
 ## 连接
 
-### 使用管理密码（引导方式）
+### 使用管理密码（引导设置）
 
 ```bash
 omniroute connect 192.168.0.15
-# http://192.168.0.15:20128 的管理密码：********
+# 请输入 http://192.168.0.15:20128 的管理密码：********
 # ✔ 已连接到 http://192.168.0.15:20128 — 上下文 '192.168.0.15'（作用域：admin）
 ```
 
-默认情况下，密码流程会签发一个 **admin** 令牌（你持有密码，因此
-已经拥有完全控制权）。使用 `--scope` 缩小作用域：
+密码流程默认会生成一个**管理员**令牌（你持有密码，因此已经拥有完全控制权限）。使用 `--scope` 缩小权限范围：
 
 ```bash
 omniroute connect 192.168.0.15 --scope write
 ```
 
-选项：`--port <p>`（当主机中未包含端口时）、`--name <ctx>`（上下文名称）、
-`--scope read|write|admin`。完整 URL 会按原样使用：
+选项：`--port <p>`（主机未指定端口时使用）、`--name <ctx>`（上下文名称）、
+`--scope read|write|admin`。完整 URL 将按原样使用：
 `omniroute connect https://omni.example.com`。
+
+当服务器启用了控制面板双因素身份验证（设置 → 安全）时，仅使用密码会被拒绝：此时 CLI 会要求输入身份验证器应用中的验证码（或恢复码）。对于非交互式使用，可通过 `--totp <code>` 预先传入验证码。
 
 ### 使用预先生成的令牌
 
-在仪表板中生成一个具有作用域的令牌（或使用 `omniroute tokens create`），然后
-粘贴该令牌——无需密码：
+在控制面板中（或使用 `omniroute tokens create`）生成一个指定作用域的令牌，然后粘贴该令牌 — 无需密码：
 
 ```bash
 omniroute connect 192.168.0.15 --key oma_live_xxxxxxxx
 ```
 
-CLI 会通过 `GET /api/cli/whoami` 验证令牌，并将其保存为活动上下文。
+CLI 会通过 `GET /api/cli/whoami` 验证该令牌，并将其保存为活动上下文。
 
 ---
 
@@ -391,12 +391,12 @@ omniroute contexts remove 192-168-0-15 --yes   # 删除本地上下文（即使�
 
 ## API 端点（参考）
 
-| 方法   | 路由                  | 身份验证方式 | 权限范围                |
-| ------ | --------------------- | ------------ | ----------------------- |
-| POST   | `/api/cli/connect`    | 管理密码     | —（公开，但受密码保护） |
-| GET    | `/api/cli/whoami`     | 访问令牌     | read                    |
-| GET    | `/api/cli/tokens`     | 访问令牌     | admin                   |
-| POST   | `/api/cli/tokens`     | 访问令牌     | admin                   |
-| DELETE | `/api/cli/tokens/:id` | 访问令牌     | admin                   |
+| Method | Route                 | Auth               | Scope                 |
+| ------ | --------------------- | ------------------ | --------------------- |
+| POST   | `/api/cli/connect`    | 密码；启用时需 2FA | —（公开，受密码保护） |
+| GET    | `/api/cli/whoami`     | 访问令牌           | read                  |
+| GET    | `/api/cli/tokens`     | 访问令牌           | admin                 |
+| POST   | `/api/cli/tokens`     | 访问令牌           | admin                 |
+| DELETE | `/api/cli/tokens/:id` | 访问令牌           | admin                 |
 
-完整架构请参阅 [openapi.yaml](../openapi.yaml)。
+有关完整架构，请参阅 [openapi.yaml](../openapi.yaml)。

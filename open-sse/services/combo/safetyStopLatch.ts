@@ -7,7 +7,7 @@ import type { HandleComboChatOptions } from "./types.ts";
 type ComboInner = (options: HandleComboChatOptions) => Promise<Response>;
 
 /** True when a 400/403 target response carries an explicit provider safety stop. */
-async function isSafetyRejection(result: Response): Promise<boolean> {
+export async function isSafetyRejection(result: Response): Promise<boolean> {
   if (result.status !== 400 && result.status !== 403) return false;
   let parsed: unknown;
   try {
@@ -68,6 +68,10 @@ export async function runComboWithSafetyLatch(
   }
   if (safetyResponse) {
     response = safetyResponse;
+  }
+  // A stop delivered inside a committed 200 stream never reaches the per-target check
+  // above; the strategy ends the combo with the classified stop as its final response.
+  if (safetyResponse || (await isSafetyRejection(response))) {
     finishComboTrace(invocationId, { status: response.status, errorClass: "safety_rejection" });
   }
   return response;

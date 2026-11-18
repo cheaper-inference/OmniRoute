@@ -38,63 +38,81 @@ Deoarece valoarea este o estimare:
 
 ## Cum sunt estimate costurile
 
-### Sursa prețurilor
+### Sursa de stabilire a prețurilor
 
-Costurile provin dintr-un tabel de prețuri determinat în următoarea ordine de prioritate
-([`src/lib/pricingSync.ts`](../../src/lib/pricingSync.ts)):
+Costurile provin din tabelul de prețuri combinat în [`src/lib/db/settings/pricing.ts`](../../src/lib/db/settings/pricing.ts), în această ordine de prioritate (** cel mai înalt primul** ):
 
-1. **Suprascrieri ale utilizatorului** — prețurile pe care le setați în panoul de control / prin `PATCH /api/pricing`.
-2. **Prețuri externe sincronizate** — preluate din fișierul public
-   `model_prices_and_context_window.json` al LiteLLM atunci când sincronizarea este activată (stocate într-un spațiu de nume
-   separat, `pricing_synced`, astfel încât să nu suprascrie niciodată setările dumneavoastră).
-3. **Valori implicite predefinite** — incluse în OmniRoute.
+1. **Utilizatorul anulează** Prețurile — sunt stabilite în tabloul de bord sau prin `PATCH /api/pricing` (spațiul de nume `pricing` ).
+2. **modele.dev sincronizare** prețul — preluat de la `https://models.dev/api.json` (spațiul de nume `models_dev_pricing` ).
+3. **sincronizare LiteLLM** Prețurile — preluate din `model_prices_and_context_window.json` public al lui LiteLLM(spațiul de nume `pricing_synced` ).
+4. **Valori implicite codificate** tarifele — sunt expediate în [`src/shared/constants/pricing/`](../../src/shared/constants/pricing/).
 
-Sincronizarea prețurilor externe este **opțională** și dezactivată în mod implicit. Variabile de mediu relevante
-(consultați [`.env.example`](../../.env.example)):
+Pentru același provider/model, valorile din straturile cu prioritate mai mare suprascriu câmpurile care se potrivesc în straturile inferioare; câmpurile absente dintr-un strat superior pot proveni în continuare dintr-un strat inferior. Ordinea este fixată chiar și atunci când ambele joburi de sincronizare independente rulează în același timp. `GET /api/pricing?includeSources=1` returnează `pricing` și `sourceMap`, ale căror etichete per model (`user`, `modelsDev`, `litellm`, `default`) identifică stratul cu cea mai mare prioritate care conține modelul respectiv.
 
-| Variabilă de mediu      | Valoare implicită | Scop                                                                             |
-| ----------------------- | ----------------- | -------------------------------------------------------------------------------- |
-| `PRICING_SYNC_ENABLED`  | `false`           | Activează sincronizarea în fundal a prețurilor LiteLLM la pornire.               |
-| `PRICING_SYNC_INTERVAL` | `86400`           | Intervalul de sincronizare în **secunde** (implicit, zilnic).                    |
-| `PRICING_SYNC_SOURCES`  | `litellm`         | Lista de surse separată prin virgule (în prezent, doar `litellm` este acceptat). |
+**sincronizare LiteLLM** este opt-in, dezactivat implicit. Variabilele sale de mediu (vezi [`.env.example`](../../.env.example) ) sunt:
 
-### Formula de calcul al costului
+| Env var                 | Implicit  | Scop                                                                                           |
+| ----------------------- | --------- | ---------------------------------------------------------------------------------------------- |
+| `PRICING_SYNC_ENABLED`  | `false`   | Activați sincronizarea prețurilor LiteLLM în fundal.                                           |
+| `PRICING_SYNC_INTERVAL` | `86400`   | Interval de sincronizare în secunde (zilnic).                                                  |
+| `PRICING_SYNC_SOURCES`  | `litellm` | Selectarea sursei numai pentru această sincronizare; în prezent, doar `litellm` este acceptat. |
 
-Costul este calculat pentru fiecare solicitare pe baza numărului de tokenuri și a tarifelor per milion de tokenuri din
-[`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts)
-(`computeCostFromPricing` / `calculateCost`):
+**modele.dev sincronizare** este separat de sincronizarea LiteLLM și este, de asemenea, dezactivat implicit. Activați-l în Setări (models.dev sync) sau utilizați aceste variabile:
 
-- **Tokenuri de intrare** (minus citirile din cache și tokenurile de creare a cache-ului) × tariful `input`.
-- **Tokenuri citite din cache** × tariful `cached` (se utilizează tariful de intrare dacă acesta lipsește).
-- **Tokenuri de creare a cache-ului** × tariful `cache_creation` (se utilizează tariful de intrare dacă acesta lipsește).
-- **Tokenuri de ieșire** × tariful `output`.
-- **Tokenuri de raționament** × tariful `reasoning` (se utilizează tariful de ieșire dacă acesta lipsește).
+| Env var                    | Implicit       | Scop                                                                                                                                                 |
+| -------------------------- | -------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `MODELS_DEV_SYNC_ENABLED`  | _(dezactivat)_ | Dezactivat urmează comutatorul Setări; `1/true/on/yes` forțează activarea și `0/false/off/no` forțează dezactivarea (chiar dacă Setări o activează). |
+| `MODELS_DEV_SYNC_INTERVAL` | `86400`        | Intervalul de sincronizare modele implicite.dev în secunde (zilnic).                                                                                 |
 
-Toate tarifele sunt interpretate ca USD per 1.000.000 de tokenuri. Un nivel de serviciu Codex „fast”/„priority” sau
-„flex” aplică un multiplicator de cost (`getCodexFastCostMultiplier`) — de exemplu, flex
-este facturat cu o reducere de 50% pentru tokenuri, afișată drept **economii flex** în panoul de control.
+`PRICING_SYNC_SOURCES` face** nu** enable models.dev; controlează doar sincronizarea LiteLLM. Ștergerea unei înlocuiri de utilizator nu șterge nici spațiul de nume sincronizat; următorul nivel de preț disponibil devine efectiv. Pentru un model fără preț, verificați atât setările de sincronizare, cât și `sourceMap` înainte de a adăuga o modificare manuală.
 
-Numele modelelor sunt normalizate mai întâi (prefixele căilor furnizorilor, precum `openai/` sau
-`accounts/fireworks/models/`, sunt eliminate), astfel încât rândurile istorice să corespundă în continuare unui preț.
+### Formula costului
 
-### Cum sunt înregistrate cheltuielile
+Costul este calculat pe solicitare din numărul de jetoane și ratele pe milion de jetoane în [`src/lib/usage/costCalculator.ts`](../../src/lib/usage/costCalculator.ts) (`computeCostFromPricing` / `calculateCost`):
 
-- Costul per solicitare este calculat după răspuns și înregistrat asincron, fără a se aștepta finalizarea operației, astfel încât
-  să nu adauge niciodată latență pentru client. Consumul cotei partajate este programat în următoarea iterație a
-  buclei de evenimente prin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- Cheltuielile aferente cheilor API sunt stocate temporar și scrise în loturi de
-  [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (interval implicit de scriere de 60 s,
-  buffer de 1.000 de intrări). Configurabil prin:
+- **Jetoane de intrare** (minus citirile cache-ului și jetoanele de creare a memoriei cache) × `input` rate.
+- **Jetoane citite în cache** × `cached` rate (reduce la rata de intrare).
+- **Jetoane de creare a memoriei cache** × `cache_creation` rate (reduce la rata de intrare).
+- **Jetoane de ieșire** rata × `output`.
+- **Jetoane de raționament** × `reasoning` rate (reduce la rata de ieșire).
 
-  | Variabilă de mediu                  | Valoare implicită | Scop                                                 |
-  | ----------------------------------- | ----------------- | ---------------------------------------------------- |
-  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`           | Intervalul de scriere în milisecunde.                |
-  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`            | Numărul maxim de intrări stocate înainte de scriere. |
+Toate tarifele sunt interpretate ca USD pentru 1.000.000 de jetoane. Un nivel de serviciu Codex „rapid”/„prioritario” sau „flex” aplică un multiplicator de cost (`getCodexFastCostMultiplier`) — de exemplu, flex este facturat cu o reducere de 50%, care apare ca** economii flexibile** în tabloul de bord.
 
-Valorile costurilor din panoul de control **nu** sunt citite dintr-o sumă în dolari stocată pentru fiecare rând — acestea
-sunt recalculate dinamic pe baza numărului de tokenuri și a tabelului curent de prețuri de fiecare dată când
-este executat endpointul de analiză. Aceasta înseamnă că remedierea unui preț incorect (și resincronizarea)
-actualizează retroactiv estimările costurilor istorice.
+Numele modelelor sunt normalizate mai întâi (prefixele căii furnizorului, cum ar fi `openai/` sau `accounts/fireworks/models/` sunt eliminate), astfel încât rândurile istorice se potrivesc în continuare cu un preț.
+
+### Cum se înregistrează cheltuielile
+
+- Costul per cerere este calculat la finalizarea cererii. Consumul cotei partajate este programat la următoarea bifare a buclei de eveniment prin [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Cheltuielile cheii API sunt stocate în tampon și eliminate în loturi de [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (interval de spălare implicit de 60 de secunde, tampon de 1.000 de intrări). Reglabil prin:
+
+  | Env var                             | Implicit | Scop                                                   |
+  | ----------------------------------- | -------- | ------------------------------------------------------ |
+  | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Interval de spălare în milisecunde.                    |
+  | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Numărul maxim de intrări în tampon înainte de spălare. |
+
+Costurile preferă o taxă exactă raportată de furnizor (`provider_cost_usd`), apoi un instantaneu al cererii cu prețul de catalog (`calculated_cost_usd`), apoi reprecierea simbolului din catalogul actual. Costurile stocate nu sunt taxate din nou prin numărul de simboluri. Rândurile moștenite numai cu simboluri se schimbă în continuare când prețul lor de catalog se modifică.
+
+### OCR și înglobări
+
+- Solicitările `/v1/ocr` reușite folosesc `usage_info.pages_processed` în amonte, nu intervalul de pagini solicitat sau numărul de obiecte de pagină returnate. Estimarea este de pagini × `ocr_cost_per_page` ( USD/page absolut,** nu** USD/million).
+- Solicitările cu adnotări pentru documente sau casete de delimitare necesită un tarif `ocr_cost_per_annotated_page` separat. Fără el, costul rămâne necunoscut; tariful OCR obișnuit nu este înlocuit în tăcere.
+- LiteLLM sync mapează câmpul `annotation_cost_per_page` din amonte în `ocr_cost_per_annotated_page`, păstrând valoarea USD/page absolută și intrările numai pentru adnotări, inclusiv zero explicit. Un câmp canonic furnizat are prioritate; valorile de alias nevalide sunt ignorate. Modificarea prețurilor de utilizator își păstrează prioritatea normală. Consultați [cheile de prețuri OCR ale LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Utilizarea OCR stochează numărul de pagini, prețul unitar, costul USD calculat, cheia API și conexiunea selectată. Paginile nu sunt niciodată reprezentate ca simboluri. Jurnalele de apeluri conțin metadate de facturare, nu documentul URLs, PDF bytes sau text extras.
+- Solicitările `/v1/embeddings` reușite înregistrează un rând de utilizare per lot fizic, inclusiv loturi separate finalizate în aceeași milisecundă. Taxele raportate de furnizor au prioritate față de estimările indicative; ambalajele combinate nu adaugă o taxă.
+- Istoricul utilizării, analiza costurilor, ferestrele provider/account, limitele de cheltuieli pentru cheia API, registrul costuri-solicitare și cumulațiile zilnice de utilizare includ aceste taxe. Cheile fără jurnal păstrează contabilitatea numerică fără a păstra textul sursă.
+- Lipsesc utilizarea sau tarifele sunt** necunoscut** , nu este gratuit: antetul costului de răspuns este omis, iar politica de utilizare fără preț existentă se aplică cheilor API limitate. Tarifele zero configurate explicit rămân valabile pentru utilizare fără costuri.
+
+Aceasta este o contabilitate forward. Vechile apeluri OCR/embedding care nu au scris niciodată istoricul utilizării nu pot fi reconstruite din această migrare. Estimările de catalog sunt estimări USD, nu o factură și nu includ conversia valutară, taxele sau reducerile.
+
+### Discurs și imagini
+
+- Încercările reușite `/v1/audio/transcriptions`, `/v1/audio/speech` și de generare de imagini împărtășesc contabilitatea numerică. Apelurile directe și combinate poartă tasta API a apelantului și conexiunea selectată; un pachet combo nu adaugă niciodată un al doilea debit.
+- USD raportat de furnizor câștigă o estimare de catalog, inclusiv o taxă explicită zero. OpenRouter lui JSON `usage.cost` este normalizat la `cost_usd`. În caz contrar, jetoanele măsurate folosesc prețuri de simbol, secundele de transcriere folosesc prețuri pe secundă, introducerea vocală folosește numărătoarea de caractere Unicode, iar imaginile cu preț fix utilizează numărul returnat efectiv, nu `n` solicitat.
+- Binarul OpenRouter TTS nu are corp de utilizare JSON. După terminarea sunetului sau după ce apelantul se anulează, OmniRoute interogează generația sa ID pe** aceleaşi** originea OpenRouter configurată. O solicitare EU nu revine niciodată la originea globală. Aceasta este o căutare limitată, numai pentru citire; sinteza nu este reîncercată pentru contabilitate. Înregistrările de facturare pot apărea după terminarea sunetului: încercările de căutare se execută în fundal timp de până la aproximativ 52 de secunde, inclusiv termenele limită ale rețelei.
+- În timpul acelei căutări, răspunsul audio are `X-OmniRoute-Cost-Status: pending` și niciun antet pentru costul răspunsului. Taxa sa finală apare în istoricul utilizării, analize și registrul cheie după reconciliere. Dacă metadatele nu sunt disponibile, se utilizează un instantaneu de tarif configurat; altfel costul rămâne necunoscut.
+- Numărările de secunde, caractere și imagini au câmpuri separate pentru unități de facturare, niciodată numărătoare de simboluri false. Contabilitatea păstrează doar utilizarea numerică, nu textul vorbirii, transcrierile sau octeții de imagine. Scutirile existente pentru imagini fără preț sunt neschimbate: un tarif de imagine care lipsește cu adevărat nu blochează nou o cheie limitată, iar răspunsul omite antetul de cost în loc să declare apelul gratuit. Un eșec al magazinului de prețuri păstrează în continuare dovezile de utilizare pentru aplicarea în mod neînchis.
+
+Nicio taxă speech/image istorică nu este inventată sau completată. Facturarea furnizorului rămâne referința pentru facturi și pentru apelurile a căror taxă nu a fost raportată.
 
 ---
 
@@ -145,53 +163,50 @@ Zona Costuri găzduiește, de asemenea (toate sub `/dashboard/costs/`):
 
 ---
 
-## Endpointuri API
+## puncte finale API
 
-Toate acestea necesită autentificare de administrare (loopback/JWT, prin
-`requireManagementAuth`), dacă nu se specifică altfel.
+Toate acestea necesită autentificare de gestionare (loopback/JWT, prin `requireManagementAuth`) dacă nu este menționat.
 
-### Analize privind utilizarea și costurile
+### Analize de utilizare și costuri
 
-| Metodă | Endpoint                 | Scop                                                                                                                                                                                     |
-| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/analytics`   | Analize complete privind costurile/utilizarea: rezumat, tendință zilnică, după furnizor/model/cheie API/cont/nivel. Interogare: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
-| `GET`  | `/api/usage/utilization` | Utilizarea cotei per furnizor în timp. Interogare: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                                          |
-| `GET`  | `/api/usage/history`     | Rânduri cu istoricul brut al utilizării.                                                                                                                                                 |
-| `GET`  | `/api/usage/call-logs`   | Jurnale de apel per solicitare (model, tokenuri, cost, latență, stare).                                                                                                                  |
-| `GET`  | `/api/usage/quota`       | Starea cotei furnizorului.                                                                                                                                                               |
-| `GET`  | `/api/usage/proxy-logs`  | Jurnale ale solicitărilor proxy.                                                                                                                                                         |
+| Metodă | Punct final              | Scop                                                                                                                                                                    |
+| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/analytics`   | Analize complete cost/usage : rezumat, tendință zilnică, după provider/model/API key/account/tier. Interogare: `range`, `startDate`, `endDate`, `apiKeyIds`, `presets`. |
+| `GET`  | `/api/usage/utilization` | Utilizarea cotei per furnizor în timp. Interogare: `range` (`1h`/`24h`/`7d`/`30d`), `provider`.                                                                         |
+| `GET`  | `/api/usage/history`     | Rânduri brute din istoricul utilizării.                                                                                                                                 |
+| `GET`  | `/api/usage/call-logs`   | Jurnalele de apeluri la cerere (model, jetoane, cost, latență, stare).                                                                                                  |
+| `GET`  | `/api/usage/quota`       | Starea cotei furnizorului.                                                                                                                                              |
+| `GET`  | `/api/usage/proxy-logs`  | Jurnalele cererilor de proxy.                                                                                                                                           |
 
-### Bugete
+### Bugetele
 
-| Metodă | Endpoint                 | Scop                                                                                                                    |
-| ------ | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/usage/budget`      | Rezumatul costurilor + verificarea bugetului pentru o cheie API (parametrul de interogare `apiKeyId` este obligatoriu). |
-| `POST` | `/api/usage/budget`      | Stabilirea limitelor zilnice/săptămânale/lunare în USD + pragul de avertizare pentru o cheie API.                       |
-| `GET`  | `/api/usage/budget/bulk` | Rezumate de buget în bloc pentru mai multe chei API.                                                                    |
+| Metodă | Punct final              | Scop                                                                                                                   |
+| ------ | ------------------------ | ---------------------------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/usage/budget`      | Rezumatul costurilor Verificarea bugetului + pentru o cheie API (este necesar un parametru de interogare `apiKeyId` ). |
+| `POST` | `/api/usage/budget`      | Setați daily/weekly/monthly USD limits pragul de avertizare + pentru o cheie API.                                      |
+| `GET`  | `/api/usage/budget/bulk` | Rezumate bugetare în bloc pentru cheile API.                                                                           |
 
-> API-ul pentru bugete este delimitat per **cheie API** (`apiKeyId`). Limitele returnate de
-> `GET /api/usage/budget` includ `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`,
-> un `warningThreshold` și totalurile curente (`totalCostToday`, `totalCostMonth`, …).
+> Bugetul API este acoperit per**API** (`apiKeyId`). Limitele returnate de `GET /api/usage/budget` includ `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd`, a `warningThreshold` și totalurile curente (`totalCostToday`, `totalCostMonth`, …).
 
-### Tarifare
+### Prețuri
 
-| Metodă   | Endpoint                | Scop                                                                                                                                   |
-| -------- | ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------- |
-| `GET`    | `/api/pricing`          | Tarifarea combinată curentă (utilizator + sincronizată + valori implicite). `?includeSources=1` pentru a vedea sursa fiecărei intrări. |
-| `PATCH`  | `/api/pricing`          | Înlocuirea tarifării pentru `{ provider: { model: { input, output, cached, … } } }`.                                                   |
-| `DELETE` | `/api/pricing`          | Resetarea tarifării la valorile implicite (opțional, delimitată prin `?provider=&model=`).                                             |
-| `GET`    | `/api/pricing/defaults` | Afișarea tarifelor de rezervă implicite per 1M.                                                                                        |
-| `GET`    | `/api/pricing/models`   | Tarifare indexată după model.                                                                                                          |
-| `POST`   | `/api/pricing/sync`     | Declanșarea unei sincronizări manuale din surse externe (LiteLLM).                                                                     |
-| `GET`    | `/api/pricing/sync`     | Starea curentă a sincronizării.                                                                                                        |
-| `DELETE` | `/api/pricing/sync`     | Ștergerea tuturor datelor de tarifare sincronizate.                                                                                    |
+| Metodă   | Punct final             | Scop                                                                                                                                                                      |
+| -------- | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `GET`    | `/api/pricing`          | Prețuri îmbinate pe patru straturi (utilizator, models.dev, LiteLLM, valori prestabilite). `?includeSources=1` returnează `pricing` + `sourceMap`.                        |
+| `PATCH`  | `/api/pricing`          | Înlocuiți prețul pentru `{ provider: { model: { input, output, cached, … } } }`.                                                                                          |
+| `DELETE` | `/api/pricing`          | Eliminați suprascrierile de preț de utilizator (opțional, acoperite de `?provider=&model=`); ratele sincronizate sau valorile implicite încorporate rămân ca alternative. |
+| `GET`    | `/api/pricing/defaults` | Afișați ratele implicite de rezervă per-1M.                                                                                                                               |
+| `GET`    | `/api/pricing/models`   | Prețul stabilit în funcție de model.                                                                                                                                      |
+| `POST`   | `/api/pricing/sync`     | Declanșează o sincronizare manuală de la surse externe (LiteLLM).                                                                                                         |
+| `GET`    | `/api/pricing/sync`     | Starea curentă de sincronizare.                                                                                                                                           |
+| `DELETE` | `/api/pricing/sync`     | Ștergeți doar prețurile sincronizate cu LiteLLM (`pricing_synced`); datele model.dev sunt separate.                                                                       |
 
-### Alte endpointuri relevante pentru costuri
+### Alte efecte relevante pentru cost
 
-| Metodă | Endpoint                      | Scop                                                                                                        |
-| ------ | ----------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `GET`  | `/api/free-tier/summary`      | Totalul tokenurilor pentru modelele gratuite, numărul utilizat în această lună și alocarea gratuită rămasă. |
-| `GET`  | `/api/quota/pools/[id]/usage` | Utilizarea pentru un grup cu cotă partajată.                                                                |
+| Metodă | Punct final                   | Scop                                                                                               |
+| ------ | ----------------------------- | -------------------------------------------------------------------------------------------------- |
+| `GET`  | `/api/free-tier/summary`      | Totaluri de jetoane pentru modele gratuite, utilizate în această lună și alocația gratuită rămasă. |
+| `GET`  | `/api/quota/pools/[id]/usage` | Utilizare pentru un pool cu cotă partajată.                                                        |
 
 ---
 

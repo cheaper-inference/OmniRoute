@@ -1,5 +1,6 @@
 "use client";
 
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import { useId, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
@@ -216,20 +217,14 @@ export default function SearchForm({
 
       {/* Filters (collapsible) */}
       <div className="p-4 border-b border-border">
-        {/* kit-exception: Full-width disclosure header: stays a native <button> on kit tokens. */}
-        <button
-          type="button"
-          className="flex justify-between items-center w-full"
-          aria-expanded={showFilters}
-          onClick={() => setShowFilters(!showFilters)}
-        >
-          <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
-            {t("filters")}
-          </span>
-          <span className="text-text-muted text-xs">{showFilters ? "▼" : "▶"}</span>
-        </button>
-        {showFilters && (
-          <div className="mt-3 space-y-2">
+        <Disclosure open={showFilters} onOpenChange={setShowFilters}>
+          <DisclosureTrigger>
+            <span className="text-[10px] font-semibold text-text-muted uppercase tracking-wider">
+              {t("filters")}
+            </span>
+          </DisclosureTrigger>
+          {/* Unmounted while closed, as before: the filter values live in this form's state. */}
+          <DisclosureContent className="mt-3 space-y-2">
             <div className="flex gap-2">
               <Input
                 className="flex-1"
@@ -348,8 +343,8 @@ export default function SearchForm({
                 className="w-full"
               />
             </div>
-          </div>
-        )}
+          </DisclosureContent>
+        </Disclosure>
       </div>
 
       {/* Search button */}

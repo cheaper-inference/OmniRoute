@@ -114,7 +114,9 @@ declare module "yazl" {
   export class ZipFile {
     addFile(realPath: string, metadataPath: string): void;
     addBuffer(buffer: Buffer, metadataPath: string): void;
+    addEmptyDirectory(metadataPath: string, options?: Record<string, unknown>): void;
     end(options?: Record<string, unknown>, callback?: () => void): void;
+    on(event: string, listener: (...args: unknown[]) => void): this;
     outputStream: NodeJS.ReadableStream;
   }
 }

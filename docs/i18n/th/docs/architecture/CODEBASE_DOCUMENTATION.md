@@ -75,54 +75,54 @@ OmniRoute/
 
 ```
 src/
-├── app/                  หน้า App Router + เส้นทาง API
-├── lib/                  ไลบรารีหลัก (ฐานข้อมูล, การยืนยันตัวตน, OAuth, ทักษะ, หน่วยความจำ, …)
-├── domain/               เลเยอร์โดเมนบริสุทธิ์ (นโยบาย, การสำรอง, ค่าใช้จ่าย, การล็อกไม่ให้เข้าใช้, …)
-├── server/               โมดูลสำหรับเซิร์ฟเวอร์เท่านั้น (การให้สิทธิ์, CORS, การยืนยันตัวตน)
-├── shared/               ชนิดข้อมูล, ค่าคงที่, การตรวจสอบความถูกต้อง, สัญญา, ยูทิลิตี (ปลอดภัยสำหรับการใช้ข้ามขอบเขต)
-├── mitm/                 ตัวช่วยพร็อกซีแบบ Man-in-the-middle สำหรับการผสานรวม CLI
-├── models/               เมทาดาทา / การกำหนดนามแฝงของโมเดลภายในเครื่อง
-├── sse/                  ตัวจัดการ SSE แบบเดิมที่ยังอยู่ภายใต้ src/ (ไม่ใช่ open-sse/)
-├── store/                ที่เก็บสถานะฝั่งไคลเอนต์
-├── middleware/           ยูทิลิตีมิดเดิลแวร์ระดับเส้นทาง (ไม่ใช่มิดเดิลแวร์ส่วนกลางของ Next.js)
-├── scripts/              สคริปต์ภายในโครงสร้างที่โค้ดแอปสามารถนำเข้าได้
-├── types/                ชนิดข้อมูล TS แบบแอมเบียนต์และแบบใช้ร่วมกัน
-├── i18n/                 ชุดข้อมูลโลเคล
+├── app/                  หน้าของ App Router + เส้นทาง API
+├── lib/                  ไลบรารีหลัก (ฐานข้อมูล, การตรวจสอบสิทธิ์, OAuth, ทักษะ, หน่วยความจำ, …)
+├── domain/               ชั้นโดเมนล้วน (นโยบาย, ทางเลือกสำรอง, ค่าใช้จ่าย, การล็อกการเข้าถึง, …)
+├── server/               โมดูลเฉพาะเซิร์ฟเวอร์ (การตรวจสอบสิทธิ์, CORS, auth)
+├── shared/               ประเภท, ค่าคงที่, การตรวจสอบความถูกต้อง, สัญญา, ยูทิลิตี (ปลอดภัยสำหรับการใช้งานข้ามขอบเขต)
+├── mitm/                 ตัวช่วยพร็อกซีแบบคนกลางสำหรับการผสานรวมกับ CLI
+├── models/               ข้อมูลเมตาของโมเดลภายในเครื่อง / การกำหนดชื่อแฝง
+├── sse/                  ตัวจัดการ SSE เดิมที่ยังอยู่ภายใต้ src/ (ไม่ใช่ open-sse/)
+├── store/                ที่จัดเก็บสถานะฝั่งไคลเอนต์
+├── middleware/           ยูทิลิตีมิดเดิลแวร์ระดับเส้นทาง (ไม่ใช่มิดเดิลแวร์โกลบอลของ Next.js)
+├── scripts/              สคริปต์ภายในต้นไม้ที่โค้ดแอปนำเข้าได้
+├── types/                ประเภท TS แบบ Ambient และแบบใช้ร่วมกัน
+├── i18n/                 ชุดทรัพยากรภาษาท้องถิ่น
 ├── instrumentation.ts    ฮุก instrumentation ของ Next.js
 ├── instrumentation-node.ts
-└── proxy.ts              ตัวช่วยบูตสแตรปพร็อกซีระดับบนสุด
+└── proxy.ts              ตัวช่วยเริ่มต้นพร็อกซีระดับบนสุด
 ```
 
 ### 3.1 `src/app/` — App Router
 
-App Router เปิดให้ใช้งานทั้ง UI แดชบอร์ดและ HTTP API สาธารณะ/สำหรับการจัดการ
-**ไม่มีมิดเดิลแวร์ส่วนกลาง** — การดักจับดำเนินการแยกในแต่ละเส้นทาง
+App Router เปิดให้ใช้งานทั้ง UI แดชบอร์ดและ HTTP API สาธารณะ/สำหรับการจัดการ  
+**ไม่มีมิดเดิลแวร์โกลบอล** — การดักจับดำเนินการแยกตามเส้นทาง
 
 เซกเมนต์ระดับบนสุดภายใต้ `src/app/`:
 
-| พาธ                                                                           | วัตถุประสงค์                                    |
+| เส้นทาง                                                                       | วัตถุประสงค์                                    |
 | ----------------------------------------------------------------------------- | ----------------------------------------------- |
 | `api/`                                                                        | เส้นทาง HTTP API ทั้งหมด (ดูรายละเอียดด้านล่าง) |
 | `a2a/`                                                                        | เอนด์พอยต์ A2A JSON-RPC 2.0 (`POST /a2a`)       |
-| `.well-known/agent.json/`                                                     | เอกสารค้นหา A2A Agent Card                      |
+| `.well-known/agent.json/`                                                     | เอกสารการค้นหา A2A Agent Card                   |
 | `(dashboard)/`                                                                | UI แดชบอร์ด (กลุ่มเส้นทาง ไม่มีคำนำหน้า URL)    |
-| `auth/`, `login/`, `forgot-password/`, `callback/`                            | โฟลว์การยืนยันตัวตน                             |
+| `auth/`, `login/`, `forgot-password/`, `callback/`                            | โฟลว์การตรวจสอบสิทธิ์                           |
 | `landing/`                                                                    | หน้าการตลาด/หน้าเริ่มต้น                        |
 | `docs/`                                                                       | ตัวดูเอกสาร API แบบฝัง                          |
-| `status/`, `maintenance/`, `offline/`                                         | หน้าสถานะการดำเนินงาน                           |
-| `privacy/`, `terms/`                                                          | หน้าข้อมูลทางกฎหมาย                             |
+| `status/`, `maintenance/`, `offline/`                                         | หน้าการดำเนินงาน                                |
+| `privacy/`, `terms/`                                                          | หน้าข้อกำหนดทางกฎหมาย                           |
 | `400/`, `401/`, `403/`, `408/`, `429/`, `500/`, `502/`, `503/`                | หน้าข้อผิดพลาดแบบคงที่                          |
 | `error.tsx`, `global-error.tsx`, `not-found.tsx`, `forbidden/`, `loading.tsx` | ขอบเขตข้อผิดพลาด/การโหลดของเฟรมเวิร์ก           |
-| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | เชลล์ราก                                        |
+| `layout.tsx`, `page.tsx`, `globals.css`, `manifest.ts`                        | โครงเชลล์ระดับราก                               |
 
 #### 3.1.1 `src/app/(dashboard)/dashboard/` — หน้า UI
 
-`agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,
-`changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,
-`costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,
-`playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,
-`translator`, `usage`, `webhooks` รวมถึง `page.tsx`, `HomePageClient.tsx`,
-`BootstrapBanner.tsx` ที่ระดับราก
+`agents`, `analytics`, `api-manager`, `audit`, `auto-combo`, `batch`, `cache`,  
+`changelog`, `cli-tools`, `cloud-agents`, `combos`, `compression`, `context`,  
+`costs`, `endpoint`, `health`, `limits`, `logs`, `memory`, `onboarding`,  
+`playground`, `providers`, `search-tools`, `settings`, `skills`, `system`,  
+`translator`, `usage`, `webhooks` รวมถึง `page.tsx`, `HomePageClient.tsx` ระดับราก  
+และ `BootstrapBanner.tsx`
 
 #### 3.1.2 `src/app/api/` — กลุ่ม API ระดับบนสุด
 
@@ -177,49 +177,49 @@ src/app/api/
 ├── token-health/
 ├── translator/
 ├── tunnels/
-├── services/   การจัดการบริการแบบฝัง (9router, cliproxy) — LOCAL_ONLY
+├── services/   การจัดการบริการแบบฝังตัว (9router, cliproxy) — LOCAL_ONLY
 ├── upstream-proxy/
 ├── usage/
 ├── v1/         API สาธารณะที่เข้ากันได้กับ OpenAI
-├── v1beta/     ความเข้ากันได้ในรูปแบบ Gemini
+├── v1beta/     ความเข้ากันได้รูปแบบ Gemini
 ├── version-manager/
 └── webhooks/
 ```
 
-#### 3.1.2a `src/app/api/services/` — การจัดการบริการแบบฝัง
+#### 3.1.2a `src/app/api/services/` — การจัดการบริการแบบฝังตัว
 
-เส้นทางสำหรับติดตั้ง เริ่ม หยุด และตรวจสอบ 9Router และ CLIProxyAPI
-พาธทั้งหมดจัดอยู่ในประเภท **LOCAL_ONLY** (เฉพาะลูปแบ็กเท่านั้น กฎตายตัวข้อ #17) เนื่องจากสามารถ
-เรียกใช้ `npm install` และสร้างโปรเซสลูกได้
+เส้นทางสำหรับติดตั้ง เริ่มต้น หยุด และตรวจสอบ 9Router และ CLIProxyAPI  
+เส้นทางทั้งหมดจัดอยู่ในประเภท **LOCAL_ONLY** (ใช้ได้เฉพาะลูปแบ็กเท่านั้น ตามกฎเข้มงวดข้อ #17) เนื่องจากเส้นทางเหล่านี้  
+สามารถเรียกใช้ `npm install` และสร้างโพรเซสลูกได้
 
 ```
 src/app/api/services/
 ├── 9router/
 │   ├── _lib.ts             ตัวช่วย getOrInitSupervisor()
-│   ├── install/route.ts    POST — ติดตั้ง npm ผ่าน execFile
+│   ├── install/route.ts    POST — npm install ผ่าน execFile
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — ติดตั้งเวอร์ชันใหม่กว่าด้วย npm
-│   ├── rotate-key/route.ts POST — สร้างคีย์ API ใหม่ + รีสตาร์ต
-│   ├── status/route.ts     GET  — สถานะแบบสด + สถานะ DB + เมทาดาทาเวอร์ชัน
-│   └── auto-start/route.ts POST — สลับแฟล็ก auto_start
+│   ├── update/route.ts     POST — npm install เวอร์ชันใหม่กว่า
+│   ├── rotate-key/route.ts POST — สร้าง API key ใหม่ + รีสตาร์ต
+│   ├── status/route.ts     GET  — สถานะแบบเรียลไทม์ + สถานะใน DB + เมทาดาทาเวอร์ชัน
+│   └── auto-start/route.ts POST — สลับค่าแฟล็ก auto_start
 ├── cliproxy/
 │   ├── _lib.ts             ตัวช่วย getOrInitSupervisor()
-│   ├── install/route.ts    POST — ติดตั้ง npm
+│   ├── install/route.ts    POST — npm install
 │   ├── start/route.ts      POST — supervisor.start()
 │   ├── stop/route.ts       POST — supervisor.stop()
 │   ├── restart/route.ts    POST — supervisor.restart()
-│   ├── update/route.ts     POST — ติดตั้งเวอร์ชันใหม่กว่าด้วย npm
-│   ├── status/route.ts     GET  — สถานะแบบสด + สถานะ DB + เมทาดาทาเวอร์ชัน
-│   └── auto-start/route.ts POST — สลับแฟล็ก auto_start
+│   ├── update/route.ts     POST — npm install เวอร์ชันใหม่กว่า
+│   ├── status/route.ts     GET  — สถานะแบบเรียลไทม์ + สถานะใน DB + เมทาดาทาเวอร์ชัน
+│   └── auto-start/route.ts POST — สลับค่าแฟล็ก auto_start
 └── [name]/
-    └── logs/route.ts       GET  — ติดตามบันทึกแบบ SSE (ใช้ร่วมกันโดยทุกบริการ)
+    └── logs/route.ts       GET  — สตรีมบันทึกแบบ SSE (ใช้ร่วมกันโดยทุกบริการ)
 ```
 
-UI แดชบอร์ดที่สอดคล้องกัน:
+UI แดชบอร์ดที่เกี่ยวข้อง:
 `src/app/(dashboard)/dashboard/providers/services/` — หน้าสองแท็บ (CLIProxyAPI + 9Router)
-พร็อกซีย้อนกลับสำหรับ UI แบบฝังของ 9Router:
+รีเวิร์สพร็อกซีสำหรับ UI ที่ฝังอยู่ของ 9Router:
 `src/app/(dashboard)/dashboard/providers/services/[name]/embed/[[...path]]/route.ts`
 
 เจาะลึก: `docs/frameworks/EMBEDDED-SERVICES.md`
@@ -228,93 +228,93 @@ UI แดชบอร์ดที่สอดคล้องกัน:
 
 ```
 v1/
-├── accounts/[id]/                       ค้นหาบัญชี
-├── agents/tasks/[id]/, agents/tasks/    ปลายทางงานในรูปแบบ A2A
-├── api/                                 ตัวช่วย API ภายในที่เปิดให้ใช้งานภายใต้ v1/api
+├── accounts/[id]/                       การค้นหาบัญชี
+├── agents/tasks/[id]/, agents/tasks/    เอนด์พอยต์งานรูปแบบ A2A
+├── api/                                 ตัวช่วย API ภายในที่เปิดให้ใช้ภายใต้ v1/api
 ├── audio/{speech, transcriptions}/      TTS + STT
 ├── batches/[id]/{cancel}, batches/      OpenAI Batches API
-├── chat/completions/                    Chat Completions (ปลายทางหลัก)
-├── completions/                         การเติมข้อความแบบดั้งเดิม
+├── chat/completions/                    Chat Completions (เอนด์พอยต์หลัก)
+├── completions/                         การทำ completion ของข้อความแบบเดิม
 ├── embeddings/                          Embeddings
 ├── files/[id]/, files/                  Files API
-├── _helpers/                            ตัวช่วยเส้นทางที่ใช้ร่วมกัน (ไม่มี URL สาธารณะ)
-├── images/{edits, generations}/         สร้าง + แก้ไขรูปภาพ
-├── issues/                              ปลายทางตัวช่วยคัดแยกปัญหา
-├── management/{proxies}/                เส้นทางขอบเขตการจัดการภายใน v1
-├── messages/{count_tokens}/             ความเข้ากันได้กับข้อความรูปแบบ Anthropic
-├── models/                              รายการโมเดล (`route.ts`, `catalog.ts`)
-├── moderations/                         การตรวจสอบเนื้อหา
-├── music/                               สร้างเพลง
+├── _helpers/                            ตัวช่วยเราต์ที่ใช้ร่วมกัน (ไม่มี URL สาธารณะ)
+├── images/{edits, generations}/         การสร้าง + แก้ไขรูปภาพ
+├── issues/                              เอนด์พอยต์ตัวช่วยคัดแยกปัญหา
+├── management/{proxies}/                เราต์ที่กำหนดขอบเขตการจัดการภายใน v1
+├── messages/{count_tokens}/             ความเข้ากันได้ของข้อความรูปแบบ Anthropic
+├── models/                              การแสดงรายการโมเดล (`route.ts`, `catalog.ts`)
+├── moderations/                         การกลั่นกรอง
+├── music/                               การสร้างเพลง
 ├── providers/[provider]/                การดำเนินการแยกตามผู้ให้บริการ
 ├── quotas/{check}                       การตรวจสอบโควตา
 ├── registered-keys/                     การดูแลคีย์ที่ลงทะเบียน
 ├── rerank/                              การจัดอันดับใหม่
-├── responses/[...path]/                 OpenAI Responses API (รองรับทุกเส้นทาง)
-├── search/                              ค้นหาเว็บ
-├── videos/                              สร้างวิดีโอ
+├── responses/[...path]/                 OpenAI Responses API (จับทุกเส้นทาง)
+├── search/                              การค้นหาเว็บ
+├── videos/                              การสร้างวิดีโอ
 ├── ws/                                  บริดจ์ WebSocket
 └── route.ts                             ตัวจัดการดัชนี
 ```
 
-ไฟล์เส้นทางทุกไฟล์ใช้รูปแบบเดียวกัน:
+ไฟล์เราต์ทุกไฟล์ใช้รูปแบบเดียวกัน:
 
 ```
-เส้นทาง → CORS preflight → ตรวจสอบความถูกต้องของ body ด้วย Zod → การยืนยันตัวตนที่เป็นทางเลือก
-        → บังคับใช้นโยบายคีย์ API → มอบหมายให้ตัวจัดการ (open-sse)
+เราต์ → การเตรียมการ CORS → การตรวจสอบความถูกต้องของบอดีด้วย Zod → การตรวจสอบสิทธิ์แบบเลือกได้
+      → การบังคับใช้นโยบายคีย์ API → การมอบหมายให้ตัวจัดการ (open-sse)
 ```
 
-`v1beta/` คือพื้นผิวความเข้ากันได้ในรูปแบบ Gemini (ตัวห่อหุ้มแบบบางที่แปลงไปยัง
-ไปป์ไลน์ `open-sse/handlers/` เดียวกัน)
+`v1beta/` คือพื้นผิวความเข้ากันได้รูปแบบ Gemini (ตัวห่อบาง ๆ ที่แปลงข้อมูลเข้าสู่ไปป์ไลน์
+`open-sse/handlers/` เดียวกัน)
 
 ### 3.2 `src/lib/` — ไลบรารีหลัก
 
-ให้นำเข้าข้อมูล การซิงค์ OAuth สกิล หน่วยความจำ และอื่น ๆ ผ่านโมดูลเหล่านี้เสมอ
-ตารางจะจัดกลุ่มไดเรกทอรีจริงและไฟล์ระดับบนสุดที่สำคัญ
+ให้นำเข้าข้อมูล การซิงค์ OAuth สกิล หน่วยความจำ และอื่น ๆ ผ่านโมดูลเหล่านี้เสมอ ตารางนี้
+จัดกลุ่มไดเรกทอรีจริงและไฟล์ระดับบนสุดที่สำคัญ
 
-| โมดูล             | วัตถุประสงค์                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| ----------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `a2a/`            | เซิร์ฟเวอร์โปรโตคอล A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 ทักษะ: การวิเคราะห์ต้นทุน, รายงานสถานะ, การค้นหาผู้ให้บริการ, การจัดการโควตา, การกำหนดเส้นทางอัจฉริยะ, การแสดงรายการความสามารถ)                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `acp/`            | โปรโตคอลควบคุมเอเจนต์: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `api/`            | ตัวช่วย API ภายใน: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `auth/`           | `managementPassword.ts` (การรีเซ็ตรหัสผ่าน / การแฮช)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
-| `batches/`        | บริการ OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `catalog/`        | การซิงค์แค็ตตาล็อก OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `cloudAgent/`     | รีจิสทรี Cloud agent: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `combos/`         | ตัวช่วยสำหรับการแก้ไข Combo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `compliance/`     | การตรวจสอบ + การตรวจสอบผู้ให้บริการ: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `config/`         | ตัวเชื่อมการกำหนดค่ารันไทม์                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `db/`             | โมดูลโดเมน SQLite (ดู §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
-| `display/`        | ตัวช่วย UI/การแสดงผลที่ใช้โดยการตอบกลับ API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `embeddings/`     | รีจิสทรีบริการ Embedding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `env/`            | การโหลด Env + การตรวจสอบข้อมูลภายใน                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `evals/`          | รันไทม์สำหรับการประเมิน                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
-| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `jobs/`           | งานเบื้องหลัง (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `memory/`         | หน่วยความจำถาวร: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
-| `oauth/`          | โมดูลผู้ให้บริการ OAuth/การนำเข้า (22 รายการ): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed` รวมถึง `services/`, `utils/` และ `constants/oauth.ts`                                                                                                                                                                                                                                                                                             |
-| `plugins/`        | ตัวโหลดปลั๊กอิน (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
-| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `providerModels/` | วงจรการทำงานของโมเดลที่มีการจัดการ: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        |
-| `providers/`      | ตัวช่วยสำหรับผู้ให้บริการ: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `resilience/`     | `settings.ts` — การตั้งค่าสำหรับ circuit breaker, cooldown และ lockout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| `runtime/`        | การตรวจหาฟีเจอร์ของรันไทม์                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
-| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `services/`       | เฟรมเวิร์กบริการแบบฝังตัว: `ServiceSupervisor.ts` (ตัวควบคุมโพรเซสลูกแบบทั่วไป พร้อม operation lock, ring buffer และ health checker), `bootstrap.ts` (การลงทะเบียนระดับโพรเซสและการเริ่มต้นอัตโนมัติ), `registry.ts` (แมป tool → supervisor), `apiKey.ts` (ที่เก็บคีย์แบบ AES-256-GCM), `modelSync.ts` (การซิงค์โมเดลเป็นระยะ), `ringBuffer.ts` (บัฟเฟอร์บันทึกแบบวงกลมขนาด 5 MB), `healthCheck.ts` (โพรบตรวจสอบสถานะผ่าน HTTP), `types.ts`, `embedWsProxy.ts` (พร็อกซี WebSocket), `installers/{ninerouter,cliproxy}.ts` ดู `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                    |
-| `agentSkills/`    | แค็ตตาล็อกและตัวสร้าง Agent Skills: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → เขียนไปยัง `skills/{id}/SKILL.md`), `openapiParser.ts` (แยก REST endpoints จากข้อกำหนด OpenAPI), `cliRegistryParser.ts` (แยก CLI subcommands จาก bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport) ใช้งานโดย REST routes (`/api/agent-skills/*`), MCP tools (`omniroute_agent_skills_*`) และ A2A skill `list-capabilities` ดู [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) |
-| `skills/`         | เฟรมเวิร์ก Skill: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts` รวมถึง `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                         |
-| `spend/`          | `batchWriter.ts` (บัฟเฟอร์ write-behind)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
-| `sync/`           | `bundle.ts`, `tokens.ts` (Cloud Sync)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
-| `system/`         | ตัวช่วยระดับระบบ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `translator/`     | โค้ดเชื่อมตัวแปลระดับบนสุด (มอบหมายต่อไปยัง `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
-| `usage/`          | การบัญชีการใช้งาน: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
-| `versionManager/` | การอัปเดตอัตโนมัติ + ไฟล์ manifest เวอร์ชัน                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
-| `ws/`             | บริดจ์ WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
-| `zed-oauth/`      | ขั้นตอน OAuth ของโปรแกรมแก้ไข Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| โมดูล             | วัตถุประสงค์                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `a2a/`            | เซิร์ฟเวอร์โปรโตคอล A2A: `taskManager.ts`, `streaming.ts`, `taskExecution.ts`, `routingLogger.ts`, `skills/` (6 ทักษะ: การวิเคราะห์ต้นทุน, รายงานสถานะ, การค้นหาผู้ให้บริการ, การจัดการโควตา, การกำหนดเส้นทางอัจฉริยะ, list-capabilities)                                                                                                                                                                                                                                                                                                                                                                                                                                      |
+| `acp/`            | โปรโตคอลควบคุมเอเจนต์: `index.ts`, `manager.ts`, `registry.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `api/`            | ตัวช่วย API ภายใน: `requireManagementAuth.ts`, `requireCliToolsAuth.ts`, `errorResponse.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `auth/`           | `managementPassword.ts` (การรีเซ็ตรหัสผ่าน / การแฮช)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `batches/`        | บริการ OpenAI Batches API (`service.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `catalog/`        | การซิงค์แค็ตตาล็อก OpenRouter (`openrouterCatalog.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `cloudAgent/`     | รีจิสทรีเอเจนต์บนคลาวด์: `api.ts`, `baseAgent.ts`, `db.ts`, `index.ts`, `registry.ts`, `types.ts`, `agents/{codex, devin, jules}.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `combos/`         | ตัวช่วยการแก้ไข Combo                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `compliance/`     | การตรวจสอบและการตรวจสอบผู้ให้บริการ: `index.ts`, `providerAudit.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
+| `config/`         | การเชื่อมการกำหนดค่ารันไทม์                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `db/`             | โมดูลโดเมน SQLite (ดู §3.2.1)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `display/`        | ตัวช่วย UI/การแสดงผลที่ใช้โดยการตอบกลับของ API                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `embeddings/`     | รีจิสทรีบริการ Embedding                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       |
+| `env/`            | การโหลด Env และการตรวจสอบข้อมูลภายใน                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `evals/`          | รันไทม์ของการประเมิน                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `guardrails/`     | `piiMasker.ts`, `promptInjection.ts`, `visionBridge.ts`, `visionBridgeHelpers.ts`, `registry.ts`, `base.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `jobs/`           | งานเบื้องหลัง (`autoUpdate.ts`, …)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `memory/`         | หน่วยความจำถาวร: `store.ts`, `cache.ts`, `retrieval.ts`, `summarization.ts`, `extraction.ts`, `injection.ts`, `qdrant.ts`, `settings.ts`, `verify.ts`, `schemas.ts`, `types.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `monitoring/`     | `observability.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
+| `oauth/`          | โมดูลผู้ให้บริการ OAuth/การนำเข้า (22): `agy`, `antigravity`, `claude`, `cline`, `codebuddy-cn`, `codex`, `cursor`, `devin-desktop`, `ghe-copilot`, `github`, `gitlab-duo`, `grok-cli-oauth`, `grok-cli`, `kilocode`, `kimi-coding`, `kiro`, `openference`, `qoder`, `trae`, `xai-oauth`, `zed-hosted`, `zed` รวมถึง `services/`, `utils/` และ `constants/oauth.ts`                                                                                                                                                                                                                                                                                                            |
+| `plugins/`        | ตัวโหลดปลั๊กอิน (`index.ts`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   |
+| `promptCache/`    | `prefixAnalyzer.ts`, `index.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| `providerModels/` | การจัดการวงจรชีวิตโมเดล: `modelDiscovery.ts`, `managedModelImport.ts`, `managedAvailableModels.ts`, `cursorAgent.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           |
+| `providers/`      | ตัวช่วยสำหรับผู้ให้บริการ: `catalog.ts`, `validation.ts`, `imageValidation.ts`, `claudeExtraUsage.ts`, `codexConnectionDefaults.ts`, `codexFastTier.ts`, `webCookieAuth.ts`, `managedAvailableModels.ts`, `requestDefaults.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
+| `resilience/`     | `settings.ts` — การตั้งค่าสำหรับ circuit breaker, cooldown และ lockout                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `runtime/`        | การตรวจหาฟีเจอร์ของรันไทม์                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `search/`         | `executeWebSearch.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                          |
+| `services/`       | เฟรมเวิร์กบริการแบบฝัง: `ServiceSupervisor.ts` (ตัวควบคุมกระบวนการย่อยทั่วไปพร้อม operation lock, ring buffer และตัวตรวจสอบสถานะ), `bootstrap.ts` (การลงทะเบียนระดับกระบวนการและการเริ่มทำงานอัตโนมัติ), `registry.ts` (แผนผัง tool → supervisor), `apiKey.ts` (คลังเก็บคีย์ AES-256-GCM), `modelSync.ts` (การซิงค์โมเดลเป็นระยะ), `ringBuffer.ts` (บัฟเฟอร์บันทึกแบบวงกลมขนาด 5 MB), `healthCheck.ts` (การตรวจสอบสถานะผ่าน HTTP), `types.ts`, `embedWsProxy.ts` (พร็อกซี WebSocket), `installers/{ninerouter,cliproxy}.ts` ดู `docs/frameworks/EMBEDDED-SERVICES.md`                                                                                                          |
+| `agentSkills/`    | แค็ตตาล็อกและตัวสร้าง Agent Skills: `catalog.ts` (getCatalog/getSkillById/filterCatalog/computeCoverage), `generator.ts` (generateAgentSkills → เขียน `skills/{id}/SKILL.md`), `openapiParser.ts` (ดึงข้อมูล REST endpoint จากข้อกำหนด OpenAPI), `cliRegistryParser.ts` (ดึงข้อมูลคำสั่งย่อย CLI จาก bin/cli-registry), `schemas.ts` (Zod: AgentSkillSchema, SkillCoverageSchema, ListQuerySchema, GenerateBodySchema), `types.ts` (AgentSkill, SkillCoverage, SkillMarkdown, GeneratorReport) ใช้งานโดยเส้นทาง REST (`/api/agent-skills/*`), เครื่องมือ MCP (`omniroute_agent_skills_*`) และทักษะ A2A `list-capabilities` ดู [AGENT-SKILLS.md](../frameworks/AGENT-SKILLS.md) |
+| `skills/`         | เฟรมเวิร์กทักษะ: `registry.ts`, `executor.ts`, `interception.ts`, `injection.ts`, `sandbox.ts`, `custom.ts`, `hybrid.ts`, `builtins.ts`, `a2a.ts`, `providerSettings.ts`, `schemas.ts`, `skillssh.ts`, `types.ts` รวมถึง `builtin/browser.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                  |
+| `spend/`          | `batchWriter.ts` (บัฟเฟอร์แบบเขียนภายหลัง)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `sync/`           | `bundle.ts`, `tokens.ts` (การซิงค์บนคลาวด์)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    |
+| `system/`         | ตัวช่วยระดับระบบ                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `translator/`     | ตัวเชื่อมตัวแปลระดับบนสุด (มอบหมายการทำงานต่อไปยัง `open-sse/translator/`)                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                     |
+| `usage/`          | การจัดทำบัญชีการใช้งาน: `costCalculator.ts`, `tokenAccounting.ts`, `usageHistory.ts`, `aggregateHistory.ts`, `usageStats.ts`, `callLogs.ts`, `callLogArtifacts.ts`, `fetcher.ts`, `providerLimits.ts`, `migrations.ts`                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `versionManager/` | การอัปเดตอัตโนมัติ + แม니เฟสต์เวอร์ชัน                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         |
+| `ws/`             | บริดจ์ WebSocket                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               |
+| `zed-oauth/`      | โฟลว์ OAuth ของเครื่องมือแก้ไข Zed                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             |
 
 ไฟล์ระดับบนสุดใน `src/lib/`:
 
-- Barrel `localDb.ts` แบบเก่าถูกลบออกแล้ว — ผู้ใช้งานต้องนำเข้าโมดูล `src/lib/db/*` ที่ต้องการโดยตรง
+- ลบ barrel `localDb.ts` เดิมออกแล้ว — ผู้ใช้ควร import โมดูล `src/lib/db/*` ที่ต้องการโดยตรง
 - `proxyHealth.ts`, `proxyLogger.ts`, `tokenHealthCheck.ts`, `localHealthCheck.ts`
 - `apiBridgeServer.ts`, `cacheLayer.ts`, `semanticCache.ts`, `settingsCache.ts`
 - `cloudSync.ts`, `initCloudSync.ts`
@@ -328,14 +328,14 @@ v1/
 
 #### 3.2.1 `src/lib/db/`
 
-ฐานข้อมูล SQLite แบบ Singleton (`getDbInstance()` ใน `core.ts` พร้อมการทำเจอร์นัลแบบ WAL)
-**ห้ามเขียน SQL ดิบใน route หรือ handler โดยเด็ดขาด** — ให้ดำเนินการผ่านโมดูลเหล่านี้
+ฐานข้อมูล SQLite แบบ singleton (`getDbInstance()` ใน `core.ts` พร้อมการบันทึกแบบ WAL)
+**ห้ามเขียน SQL ดิบใน routes หรือ handlers** — ให้เรียกใช้โมดูลเหล่านี้แทน
 
-![ภาพรวมสคีมาฐานข้อมูล (ตารางหลักที่เลือก)](../diagrams/exported/db-schema-overview.svg)
+![ภาพรวมสคีมาฐานข้อมูล (ตารางแกนหลักที่เลือก)](../diagrams/exported/db-schema-overview.svg)
 
-> ที่มา: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
+> แหล่งที่มา: [diagrams/db-schema-overview.mmd](../diagrams/db-schema-overview.mmd)
 
-โมดูลโดเมน (แต่ละโมดูลดูแลหนึ่งตารางขึ้นไป): `apiKeys.ts`, `backup.ts`,
+โมดูลตามโดเมน (แต่ละโมดูลเป็นเจ้าของตารางอย่างน้อยหนึ่งตาราง): `apiKeys.ts`, `backup.ts`,
 `batches.ts`, `cleanup.ts`, `cliToolState.ts`, `combos.ts`,
 `commandCodeAuth.ts`, `compression.ts`, `compressionAnalytics.ts`,
 `compressionCacheStats.ts`, `compressionCombos.ts`, `compressionScheduler.ts`,
@@ -349,9 +349,10 @@ v1/
 `syncTokens.ts`, `tierConfig.ts`, `upstreamProxy.ts`, `versionManager.ts`,
 `webhooks.ts`
 
-`migrations/` มีไฟล์ `.sql` ที่กำหนดเวอร์ชันไว้ 168 ไฟล์ (ทำงานซ้ำได้อย่างปลอดภัยและเป็นแบบทรานแซกชัน) และจะถูกเรียกใช้โดย `migrationRunner.ts` ขณะบูต
+`migrations/` มีไฟล์ `.sql` ที่มีการกำหนดเวอร์ชันจำนวน 168 ไฟล์ (ทำงานซ้ำได้อย่างปลอดภัยและเป็นธุรกรรม) และ
+จะถูกเรียกใช้โดย `migrationRunner.ts` เมื่อเริ่มต้นระบบ
 
-ตารางที่สร้างขึ้นจาก migration ทั้งหมด (รวม 123 ตาราง):
+ตารางที่สร้างขึ้นตลอด migrations (รวมทั้งหมด 123 ตาราง):
 
 `a`, `account_key_limits`, `api_keys`, `batches`, `call_logs`,
 `combo_adaptation_state`, `combos`, `command_code_auth_sessions`,
@@ -367,180 +368,225 @@ v1/
 `routing_decisions`, `semantic_cache`, `session_account_affinity`,
 `skill_executions`, `skills`, `sync_tokens`, `tier_assignments`,
 `tier_config`, `upstream_proxy_config`, `usage_history`, `version_manager`,
-`webhooks` (รวมถึงตารางเสมือน FTS5 สำหรับการค้นหาหน่วยความจำ)
+`webhooks` (รวมถึงตารางเสมือน FTS5 สำหรับการค้นหา memory)
 
 ### 3.3 `src/domain/` — เลเยอร์โดเมน
 
-ตรรกะทางธุรกิจล้วน ๆ ไม่มี I/O โดย route และ handler จะนำเข้าไปใช้งาน
+บริการโดเมนและสัญญาสำหรับการประเมินผล โมดูลบางส่วนถูกเรียกใช้โดยเส้นทางคำขอที่ทำงานจริง ส่วนโมดูลอื่นยังคงเป็นสัญญาแบบ standalone อย่าสันนิษฐานว่าทั้งไดเรกทอรีนี้ไม่มี I/O หรือการเปลี่ยนแปลงทุกโมดูลจะส่งผลต่อการกำหนดเส้นทางในระบบจริง
 
-| ไฟล์                                       | วัตถุประสงค์                                       |
-| ------------------------------------------ | -------------------------------------------------- |
-| `policyEngine.ts`                          | ตัวแก้ไขนโยบายระดับบนสุด                           |
-| `fallbackPolicy.ts`                        | โครงสร้างการตัดสินใจสำหรับ fallback                |
-| `costRules.ts`                             | กฎการคำนวณต้นทุน                                   |
-| `lockoutPolicy.ts`                         | การตัดสินใจล็อกโมเดล                               |
-| `tagRouter.ts`                             | การกำหนดเส้นทางตามแท็ก                             |
-| `comboResolver.ts`                         | การแก้ไขคอมโบจากคำขอ → รายการเป้าหมาย              |
-| `connectionModelRules.ts`                  | ตัวกรองโมเดลแยกตามการเชื่อมต่อ                     |
-| `modelAvailability.ts`                     | การตรวจสอบความพร้อมใช้งานของโมเดล                  |
-| `degradation.ts`                           | การเปลี่ยนสถานะของโหมดลดระดับ                      |
-| `providerExpiration.ts`                    | การตรวจจับบัญชี/คีย์ที่หมดอายุ                     |
-| `quotaCache.ts`                            | การตัดสินใจโควตาที่แคชไว้                          |
-| `responses.ts`, `omnirouteResponseMeta.ts` | ตัวช่วยกำหนดโครงสร้างการตอบกลับ                    |
-| `configAudit.ts`                           | การตรวจสอบการเปลี่ยนแปลงการกำหนดค่า                |
-| `assessment/`                              | การประเมินโมเดล (ตาม RFC โดยนำไปใช้งานแล้วบางส่วน) |
-| `types.ts`                                 | ชนิดข้อมูลโดเมนที่ใช้ร่วมกัน                       |
+จุดเชื่อมต่อนโยบายที่ทำงานจริงคือ `src/shared/utils/apiKeyPolicy.ts` และ
+`src/sse/handlers/chat/resolvedModelPolicy.ts` การจัดการ combo และการแก้ไข target ที่ทำงานจริงใช้ `open-sse/services/combo.ts` สัญญา `policyEngine.ts` และ `comboResolver.ts` ที่ผ่านการทดสอบแล้ว รวมถึง `src/lib/container.ts` ไม่ใช่ส่วนที่เชื่อมต่อกับเส้นทางคำขอแชตที่ตรวจสอบไว้ ควรแยกสิ่งเหล่านี้ออกจากจุดเชื่อมต่อที่ใช้งานอยู่เมื่อวางแผนการเปลี่ยนแปลง routing
 
-### 3.4 `src/server/` — สำหรับเซิร์ฟเวอร์เท่านั้น
+| ไฟล์                                       | วัตถุประสงค์                              |
+| ------------------------------------------ | ----------------------------------------- |
+| `policyEngine.ts`                          | สัญญาสำหรับการประเมินนโยบายที่สงวนไว้     |
+| `fallbackPolicy.ts`                        | แผนผังการตัดสินใจสำหรับ fallback          |
+| `costRules.ts`                             | กฎการคำนวณต้นทุน                          |
+| `lockoutPolicy.ts`                         | การตัดสินใจล็อกโมเดล                      |
+| `tagRouter.ts`                             | การกำหนดเส้นทางตามแท็ก                    |
+| `comboResolver.ts`                         | สัญญาสำหรับการเลือก combo ที่สงวนไว้      |
+| `connectionModelRules.ts`                  | ตัวกรองโมเดลแยกตามการเชื่อมต่อ            |
+| `modelAvailability.ts`                     | การตรวจสอบความพร้อมใช้งานของโมเดล         |
+| `degradation.ts`                           | การเปลี่ยนผ่านเข้าสู่โหมดลดความสามารถ     |
+| `providerExpiration.ts`                    | การตรวจจับบัญชีหรือคีย์ที่หมดอายุ         |
+| `quotaCache.ts`                            | การตัดสินใจเกี่ยวกับโควตาที่แคชไว้        |
+| `responses.ts`, `omnirouteResponseMeta.ts` | ตัวช่วยจัดรูปแบบ response                 |
+| `configAudit.ts`                           | การตรวจสอบการเปลี่ยนแปลงคอนฟิก            |
+| `assessment/`                              | การประเมินโมเดล (ดำเนินการบางส่วนตาม RFC) |
+| `types.ts`                                 | ประเภทข้อมูลโดเมนที่ใช้ร่วมกัน            |
 
-ไม่สามารถนำเข้าจากคอมโพเนนต์ฝั่งไคลเอนต์ได้
+### 3.4 `src/server/` — เฉพาะเซิร์ฟเวอร์
+
+ไม่สามารถ import จากคอมโพเนนต์ฝั่งไคลเอ็นต์ได้
 
 ```
 server/
 ├── auth/loginGuard.ts
 ├── authz/
-│   ├── classify.ts        จำแนก route เป็นสาธารณะหรือสำหรับการจัดการ
-│   ├── assertAuth.ts      ตัวช่วยสำหรับการยืนยันเงื่อนไข
-│   ├── context.ts         บริบท authz แยกตามคำขอ
+│   ├── classify.ts        จัดประเภทเส้นทางเป็นสาธารณะเทียบกับการจัดการ
+│   ├── assertAuth.ts      ตัวช่วยยืนยันสิทธิ์
+│   ├── context.ts         บริบท authz ต่อคำขอ
 │   ├── headers.ts
 │   ├── pipeline.ts        ไปป์ไลน์ authz
-│   ├── policies/          นโยบายที่นำไปใช้จริง
+│   ├── policies/          นโยบายที่เป็นรูปธรรม
 │   └── types.ts
-└── cors/origins.ts        รายการต้นทางที่ CORS อนุญาต
+└── cors/origins.ts        รายการอนุญาตต้นทาง CORS
 ```
 
-### 3.5 `src/shared/` — ปลอดภัยสำหรับการใช้ร่วมกัน
+### 3.5 `src/shared/` — Safe-to-share
 
-แบ่งออกเป็นไดเรกทอรีย่อยตามหน้าที่เฉพาะ:
+แบ่งออกเป็นไดเรกทอรีย่อยที่มุ่งเน้นเฉพาะด้าน:
 
-- `constants/` — `providers.ts` (แค็ตตาล็อกผู้ให้บริการที่ตรวจสอบความถูกต้องด้วย Zod), `models.ts`,
+- `constants/` — `providers.ts` (แค็ตตาล็อกผู้ให้บริการที่ตรวจสอบด้วย Zod), `models.ts`,
   `modelSpecs.ts`, `modelCompat.ts`, `pricing.ts`, `cliTools.ts`,
   `cliCompatProviders.ts`, `routingStrategies.ts`, `comboConfigMode.ts`,
   `headers.ts`, `upstreamHeaders.ts` (รายการปฏิเสธ), `mcpScopes.ts`,
   `errorCodes.ts`, `publicApiRoutes.ts`, `batch.ts`, `batchEndpoints.ts`,
   `bodySize.ts`, `colors.ts`, `appConfig.ts`, `config.ts`,
-  `sidebarVisibility.ts`, `visionBridgeDefaults.ts`.
+  `sidebarVisibility.ts`, `visionBridgeDefaults.ts`
 - `validation/` — `schemas.ts` (สคีมา Zod ประมาณ 80 รายการ), `compressionConfigSchemas.ts`,
-  `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`.
+  `providerSchema.ts`, `settingsSchemas.ts`, `helpers.ts`
 - `contracts/` — สัญญา API สาธารณะที่เผยแพร่ไปยัง npm
 - `types/` — ประเภท TS ที่ใช้ร่วมกัน
 - `utils/` — `circuitBreaker.ts`, `apiAuth.ts`, `apiKey.ts`, `apiKeyPolicy.ts`,
   `api.ts`, `classify429.ts`, `cliCompat.ts`, `clipboard.ts`, `cloud.ts`, `cn.ts`,
-  `cors.ts`, `featureFlags.ts`,
-  `fetchTimeout.ts`, `formatting.ts`, `inputSanitizer.ts`, `logger.ts`,
-  `machine.ts`, `machineId.ts`, `maskEmail.ts`, `modelCatalogSearch.ts`,
-  `nodeRuntimeSupport.ts`, `parseApiKeys.ts`, `providerHints.ts`,
-  `providerModelAliases.ts`, `rateLimiter.ts`, `releaseNotes.ts`,
-  `a11yAudit.ts` รวมถึงฮุก/คอมโพเนนต์ของแดชบอร์ดภายใต้ `services/`, `network/`,
-  `middleware/`, `schemas/`, `hooks/`, `components/`
-- `components/` — API คอมโพเนนต์ของแดชบอร์ด (`index.tsx` ซึ่งเป็น barrel: `Button`, `Input`,
-  `Select`, `Modal`, `Card`, `DataTable`, …) พริมิทิฟเป็นอะแดปเตอร์ที่ครอบชุดเครื่องมือ
-  ที่รวมมากับโปรเจกต์ (`packages/ui-kit` ซึ่งนำเข้าผ่านพาธย่อยของคอมโพเนนต์ เช่น
-  `@omniroute/ui-kit/button`) เพื่อให้หน้าจอต่าง ๆ ยังคงใช้ import เดิม ขณะที่มาร์กอัป
-  เป็นของชุดเครื่องมือ เชลล์คือ `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
-  (`SidebarProvider`/`SidebarInset` ของชุดเครื่องมือ) พร้อมด้วย `Sidebar.tsx` และ `Header.tsx`; ไอคอนจะผ่าน
-  `Icon.tsx` และ `constants/iconMap.ts` ดู `docs/architecture/DESIGN_SYSTEM.md`
+  `cors.ts`, `featureFlags.ts`, `fetchTimeout.ts`, `formatting.ts`,
+  `inputSanitizer.ts`, `logger.ts`, `machine.ts`, `machineId.ts`, `maskEmail.ts`,
+  `modelCatalogSearch.ts`, `nodeRuntimeSupport.ts`, `parseApiKeys.ts`,
+  `providerHints.ts`, `providerModelAliases.ts`, `rateLimiter.ts`,
+  `releaseNotes.ts`, `a11yAudit.ts` รวมถึง hooks/components ของแดชบอร์ดภายใต้
+  `services/`, `network/`, `middleware/`, `schemas/`, `hooks/`, `components/`
+- `components/` — API ของคอมโพเนนต์แดชบอร์ด (barrel `index.tsx`: `Button`, `Input`,
+  `Select`, `Modal`, `Card`, `DataTable`, …) พร primitives เป็นอะแดปเตอร์บน
+  ชุดเครื่องมือที่ vendored (`packages/ui-kit` ซึ่งนำเข้าด้วย subpath ของคอมโพเนนต์ เช่น
+  `@omniroute/ui-kit/button`) ดังนั้นหน้าจอยังคงใช้การนำเข้าเดิม ขณะที่มาร์กอัปเป็นของ
+  ชุดเครื่องมือนี้ shell คือ `layouts/DashboardLayout.tsx` → `layouts/DashboardShell.tsx`
+  (`SidebarProvider`/`SidebarInset` ของชุดเครื่องมือ) ร่วมกับ `Sidebar.tsx` และ
+  `Header.tsx`; ไอคอนจะส่งผ่าน `Icon.tsx` และ `constants/iconMap.ts` ดู
+  `docs/architecture/DESIGN_SYSTEM.md`
 
 ---
 
-## 4. `open-sse/` — พื้นที่ทำงานของกลไกการสตรีม
+## 4. `open-sse/` — เวิร์กสเปซเอนจินการสตรีม
 
-แยกพื้นที่ทำงาน npm ที่เผยแพร่เป็น `@omniroute/open-sse` เป็นเจ้าของการประมวลผลคำขอ ผู้ดำเนินการ นักแปล บริการ หม้อแปลงไฟฟ้า และเซิร์ฟเวอร์ MCP
+เวิร์กสเปซ npm แยกต่างหากที่เผยแพร่ในชื่อ `@omniroute/open-sse` เป็นเจ้าของการ
+ประมวลผลคำขอ, executor, translator, service, transformer และเซิร์ฟเวอร์ MCP
 
 ```
 open-sse/
-├── index.ts                Public exports
-├── package.json            Workspace manifest
+├── index.ts                การส่งออกสาธารณะ
+├── package.json            ไฟล์กำหนดค่าเวิร์กสเปซ
 ├── tsconfig.json
 ├── types.d.ts
-├── config/                 Provider registries, header profiles, identity, …
-├── handlers/               Request handlers (chat, embeddings, audio, image, …)
-├── executors/              156 provider executor modules (executor classes + per-provider helpers)
-├── translator/             Format conversion (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
-├── transformer/            Responses API ↔ Chat Completions stream transformer
-├── services/               80+ service modules (combos, fallback, quotas, identity, …)
-├── utils/                  Streaming helpers, TLS client, AWS SigV4, proxy fetch, …
-└── mcp-server/             MCP server (3 transports, 33 scopes, 110 tools)
+├── config/                 รีจิสทรีของผู้ให้บริการ, โปรไฟล์เฮดเดอร์, ข้อมูลระบุตัวตน, …
+├── handlers/               ตัวจัดการคำขอ (แชต, embeddings, เสียง, รูปภาพ, …)
+├── executors/              โมดูล executor ของผู้ให้บริการ 170 รายการ (คลาส executor + ตัวช่วยเฉพาะผู้ให้บริการ)
+├── translator/             การแปลงรูปแบบ (OpenAI ↔ Claude ↔ Gemini ↔ Cursor ↔ Kiro)
+├── transformer/            ตัวแปลงสตรีม Responses API ↔ Chat Completions
+├── services/               โมดูล service มากกว่า 80 รายการ (การรวม, fallback, โควตา, ข้อมูลระบุตัวตน, …)
+├── utils/                  ตัวช่วยการสตรีม, ไคลเอ็นต์ TLS, AWS SigV4, proxy fetch, …
+└── mcp-server/             เซิร์ฟเวอร์ MCP (ทรานสปอร์ต 3 แบบ, สโคป 33 รายการ, ทูล 110 รายการ)
 ```
 
 ### 4.1 `open-sse/handlers/`
 
-| ตัวจัดการ               | วัตถุประสงค์                                                                      |
+| Handler                 | วัตถุประสงค์                                                                      |
 | ----------------------- | --------------------------------------------------------------------------------- |
-| `chatCore.ts`           | ไปป์ไลน์การแชทหลัก (แคช, การจำกัดอัตรา, การกำหนดเส้นทางคอมโบ, การส่งตัวดำเนินการ) |
-| `responsesHandler.ts`   | การตอบสนอง OpenAI จุดเริ่มต้น API                                                 |
-| `embeddings.ts`         | การฝัง                                                                            |
-| `imageGeneration.ts`    | การสร้างภาพ                                                                       |
-| `audioSpeech.ts`        | ข้อความเป็นคำพูด                                                                  |
-| `audioTranscription.ts` | คำพูดเป็นข้อความ                                                                  |
+| `chatCore.ts`           | ไปป์ไลน์แชตหลัก (แคช, จำกัดอัตรา, การกำหนดเส้นทางแบบรวม, การส่งต่อไปยัง executor) |
+| `responsesHandler.ts`   | จุดเริ่มต้นของ OpenAI Responses API                                               |
+| `embeddings.ts`         | Embeddings                                                                        |
+| `imageGeneration.ts`    | การสร้างรูปภาพ                                                                    |
+| `audioSpeech.ts`        | การแปลงข้อความเป็นเสียง                                                           |
+| `audioTranscription.ts` | การแปลงเสียงเป็นข้อความ                                                           |
 | `videoGeneration.ts`    | การสร้างวิดีโอ                                                                    |
-| `musicGeneration.ts`    | รุ่นดนตรี                                                                         |
+| `musicGeneration.ts`    | การสร้างเพลง                                                                      |
 | `rerank.ts`             | การจัดอันดับใหม่                                                                  |
 | `moderations.ts`        | การกลั่นกรอง                                                                      |
-| `search.ts`             | ค้นหาเว็บ                                                                         |
-| `sseParser.ts`          | ตัวแยกวิเคราะห์เหตุการณ์SSE                                                       |
-| `usageExtractor.ts`     | โทเค็นการดึงนับออกจากสตรีมต้นทาง                                                  |
-| `responseSanitizer.ts`  | ตัดเสียงรบกวนเฉพาะของผู้ให้บริการ                                                 |
-| `responseTranslator.ts` | กาวระหว่างการตอบสนองของผู้ให้บริการและเลเยอร์นักแปล                               |
+| `search.ts`             | การค้นหาเว็บ                                                                      |
+| `sseParser.ts`          | ตัวแยกวิเคราะห์เหตุการณ์ SSE                                                      |
+| `usageExtractor.ts`     | ดึงจำนวนโทเค็นจากสตรีมต้นทาง                                                      |
+| `responseSanitizer.ts`  | ลบข้อมูลรบกวนเฉพาะผู้ให้บริการ                                                    |
+| `responseTranslator.ts` | ตัวเชื่อมระหว่างการตอบกลับของผู้ให้บริการและเลเยอร์ translator                    |
 
 ### 4.2 `open-sse/executors/`
 
-โมดูลตัวดำเนินการระดับบนสุด 156 โมดูล (`*.ts` ลบ `base.ts`, `index.ts` และการทดสอบ - การนับ `npm run check:docs-counts` วัด) ทุกคลาสของตัวดำเนินการจะขยาย `BaseExecutor` (`base.ts`) โดยตรงหรือผ่าน `DefaultExecutor` หรือตัวเรียกทำงานอื่น โมดูลที่เหลือเป็นตัวช่วยต่อผู้ให้บริการ (สกีมาเครื่องมือ, อะแดปเตอร์ fetch/TTS, ตัวจัดการมุม) ผู้ดำเนินการได้แก่:
+โมดูล executor ระดับบนสุด 170 รายการ (`*.ts` ลบ `base.ts`, `index.ts` และการทดสอบ — จำนวนนี้
+วัดโดย `npm run check:docs-counts`) ทุกคลาส executor สืบทอดจาก `BaseExecutor` (`base.ts`)
+โดยตรงหรือผ่าน `DefaultExecutor` หรือ executor อื่น ส่วนโมดูลที่เหลือเป็น
+ตัวช่วยเฉพาะผู้ให้บริการ (สคีมาของทูล, อะแดปเตอร์ fetch/TTS, ตัวจัดการข้อผิดปกติ) Executor ประกอบด้วย:
 
-`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`, `chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`, `muse-spark-web`, `opencode`, `nlpcloud`, `perplexity-web`, `petals`, `pollinations`, `qoder`, `vertex`, `devin-desktop` บวก `claudeIdentity.ts` (ตัวช่วยระบุตัวตนที่ใช้ร่วมกัน) และ `index.ts` (รีจิสทรี)
+`antigravity`, `azure-openai`, `blackbox-web`, `cliproxyapi`,
+`chatgpt-web-codex`, `cloudflare-ai`, `codex`, `commandCode`, `cursor`, `default`, `devin-cli`,
+`muse-spark-web`, `nlpcloud`, `opencode`, `perplexity-web`, `petals`,
+`pollinations`, `qoder`, `vertex`, `devin-desktop`, รวมถึง `claudeIdentity.ts`
+(ตัวช่วยข้อมูลระบุตัวตนที่ใช้ร่วมกัน) และ `index.ts` (รีจิสทรี)
 
-> หมายเหตุ: ผู้ให้บริการที่ไม่ได้ระบุไว้ในที่นี้ให้บริการโดย `default.ts` โดยใช้ตัวดำเนินการทั่วไปที่เข้ากันได้กับ OpenAI แค็ตตาล็อกผู้ให้บริการแบบเต็ม (ผู้ให้บริการ 377 ราย) อยู่ใน `src/shared/constants/providers.ts`
+> หมายเหตุ: ผู้ให้บริการที่ไม่ได้แสดงไว้ที่นี่จะให้บริการโดย `default.ts` ซึ่งใช้ executor
+> ทั่วไปที่เข้ากันได้กับ OpenAI แค็ตตาล็อกผู้ให้บริการฉบับเต็ม (394 รายการ) อยู่ใน
+> `src/shared/constants/providers.ts`
 
 ### 4.3 `open-sse/translator/`
 
-การแปลแบบ Hub-and-spoke (OpenAI คือฮับ)
+การแปลแบบศูนย์กลางและแขนง (โดยมี OpenAI เป็นศูนย์กลาง)
 
-- **9 ขอนักแปล** (`translator/request/`): `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`, `gemini-to-openai`, `openai-responses`, `openai-to-claude`, `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`
-- **นักแปลคำตอบ 9 คน** (`translator/response/`): `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`, `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`
-- **ผู้ช่วย 9 คน** (`translator/helpers/`): `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`, `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper` รวมถึงการทดสอบตัวช่วย
-- **ตัวช่วยเรื่องรูปภาพ** (`translator/image/sizeMapper.ts`).
-- ระดับบนสุด: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`
+- **ตัวแปลคำขอ 9 รายการ** (`translator/request/`):
+  `antigravity-to-openai`, `claude-to-gemini`, `claude-to-openai`,
+  `gemini-to-openai`, `openai-responses`, `openai-to-claude`,
+  `openai-to-cursor`, `openai-to-gemini`, `openai-to-kiro`.
+- **ตัวแปลการตอบกลับ 9 รายการ** (`translator/response/`):
+  `claude-to-openai`, `cursor-to-openai`, `gemini-to-claude`, `gemini-to-openai`,
+  `kiro-to-openai`, `openai-responses`, `openai-to-antigravity`, `openai-to-claude`.
+- **ตัวช่วย 9 รายการ** (`translator/helpers/`):
+  `claudeHelper`, `geminiHelper`, `geminiToolsSanitizer`, `maxTokensHelper`,
+  `openaiHelper`, `responsesApiHelper`, `schemaCoercion`, `toolCallHelper` รวมถึง
+  การทดสอบตัวช่วย
+- **ตัวช่วยรูปภาพ** (`translator/image/sizeMapper.ts`).
+- ระดับบนสุด: `bootstrap.ts`, `formats.ts`, `registry.ts`, `index.ts`.
 
 ### 4.4 `open-sse/transformer/`
 
-- `responsesTransformer.ts` — `TransformStream` -based Responses API ↔ Chat Completions converter (ใช้โดยเส้นทาง `responses/` catch-all)
+- `responsesTransformer.ts` — ตัวแปลง Responses API ↔ Chat ที่ใช้ `TransformStream`
+  (ใช้โดย catch-all ของเส้นทาง `responses/`)
 
 ### 4.5 `open-sse/services/`
 
-ไฮไลท์ (รายการทั้งหมดภายใต้ `open-sse/services/`):
+รายการเด่น (รายการทั้งหมดอยู่ภายใต้ `open-sse/services/`):
 
-| กังวล                 | ไฟล์                                                                                                                                                                                                                                                     |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| การกำหนดเส้นทางแบบผสม | `combo.ts` (20 กลยุทธ์), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                       |
-| เครื่องยนต์ออโต้คอมโบ | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
-| ความยืดหยุ่น          | `accountFallback.ts` (ล็อคคูลดาวน์ + ), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                            |
-| โควต้า                | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
-| การแคช                | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
-| ปัญญาการกำหนดเส้นทาง  | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
-| การจัดการโมเดล        | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
-| การบีบอัด             | `compression/` - สายไฟเครื่องยนต์อัดเต็ม                                                                                                                                                                                                                 |
-| เซสชันโทเค็น +        | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
-| ระดับ / รายการ        | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
-| IP / เครือข่าย        | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
-| แบตช์                 | `batchProcessor.ts`                                                                                                                                                                                                                                      |
-| การใช้งาน             | `usage.ts`                                                                                                                                                                                                                                               |
+| ข้อกังวล                | ไฟล์                                                                                                                                                                                                                                                     |
+| ----------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| การกำหนดเส้นทาง Combo   | `combo.ts` (22 กลยุทธ์), `comboConfig.ts`, `comboMetrics.ts`, `comboManifestMetrics.ts`, `comboAgentMiddleware.ts`                                                                                                                                       |
+| เอนจิน Auto Combo       | `autoCombo/` — `engine.ts`, `scoring.ts`, `taskFitness.ts`, `virtualFactory.ts`, `modePacks.ts`, `autoPrefix.ts`, `persistence.ts`, `providerDiversity.ts`, `providerRegistryAccessor.ts`, `routerStrategy.ts`, `selfHealing.ts`, `index.ts`             |
+| ความยืดหยุ่น            | `accountFallback.ts` (ช่วงพัก + การล็อก), `errorClassifier.ts`, `requestRejectedStreak.ts`, `emergencyFallback.ts`, `rateLimitManager.ts`, `rateLimitSemaphore.ts`, `accountSemaphore.ts`, `accountSelector.ts`                                          |
+| โควตา                   | `quotaMonitor.ts`, `quotaPreflight.ts`, `bailianQuotaFetcher.ts`, `codexQuotaFetcher.ts`, `deepseekQuotaFetcher.ts`, `openrouterQuotaFetcher.ts`, `openrouterFreeWindow.ts`, `llmgatewayQuotaFetcher.ts`, `crofUsageFetcher.ts`, `antigravityCredits.ts` |
+| แคช                     | `reasoningCache.ts`, `searchCache.ts`, `signatureCache.ts`, `requestDedup.ts`                                                                                                                                                                            |
+| การกำหนดเส้นทางอัจฉริยะ | `intentClassifier.ts`, `taskAwareRouter.ts`, `backgroundTaskDetector.ts`, `volumeDetector.ts`, `wildcardRouter.ts`, `workflowFSM.ts`, `specificityDetector.ts`, `specificityRules.ts`, `specificityTypes.ts`                                             |
+| การจัดการโมเดล          | `modelCapabilities.ts`, `modelDeprecation.ts`, `modelFamilyFallback.ts`, `modelStrip.ts`, `model.ts`, `provider.ts`, `providerRequestDefaults.ts`, `providerCostData.ts`, `payloadRules.ts`                                                              |
+| การบีบอัด               | `compression/` — การเชื่อมต่อระบบเอนจินการบีบอัดทั้งหมด                                                                                                                                                                                                  |
+| โทเคน + เซสชัน          | `tokenRefresh.ts`, `sessionManager.ts`, `apiKeyRotator.ts`, `contextManager.ts`, `contextHandoff.ts`, `systemPrompt.ts`, `roleNormalizer.ts`, `responsesInputSanitizer.ts`, `toolSchemaSanitizer.ts`, `toolLimitDetector.ts`, `thinkingBudget.ts`        |
+| ระดับ / แมนนิเฟสต์      | `tierResolver.ts`, `tierConfig.ts`, `tierDefaults.json`, `tierTypes.ts`, `manifestAdapter.ts`                                                                                                                                                            |
+| IP / เครือข่าย          | `ipFilter.ts`, `webSearchFallback.ts`                                                                                                                                                                                                                    |
+| แบตช์                   | `batchProcessor.ts`                                                                                                                                                                                                                                      |
+| การใช้งาน               | `usage.ts`                                                                                                                                                                                                                                               |
 
 ### 4.6 `open-sse/mcp-server/`
 
-- **เครื่องมือที่ไม่ซ้ำใคร 110 รายการ** ต่อสายใน `server.ts` (45 canonical ในหน่วยความจำ `schemas/tools.ts` +, ทักษะ, ทักษะ GitHub, พูล, gamification, ปลั๊กอิน, Notion, Obsidian, local-corpus และโมดูลการบีบอัด - นับรวมกันโดย `countUniqueMcpTools`)
-- **3 การขนส่ง** : stdio, HTTP สตรีมได้, SSE
-- **33 ขอบเขต** บังคับใช้ที่รันไทม์ - รายการฐานใน `src/shared/constants/mcpScopes.ts` ชุดเต็มคือการรวมขอบเขตที่ประกาศโดยแต่ละโมดูลเครื่องมือ
-- ตารางตรวจสอบ: `mcp_tool_audit` (เติมโดย `audit.ts`)
-- ไฟล์: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`, `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`, `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts` รวมถึงการทดสอบภายใต้ `__tests__/`
-- ดู [MCP-SERVER.md](../frameworks/MCP-SERVER.md) สำหรับแค็ตตาล็อกเครื่องมือฉบับเต็ม
+- **เครื่องมือที่ไม่ซ้ำกัน 110 รายการ** เชื่อมต่อไว้ใน `server.ts` (45 รายการเป็นมาตรฐานใน `schemas/tools.ts` +
+  โมดูล memory, skills, GitHub-skills, pool, gamification, plugin, Notion, Obsidian,
+  local-corpus และ compression — นับรวมโดย `countUniqueMcpTools`)
+- **ทรานสปอร์ต 3 รูปแบบ**: stdio, HTTP Streamable, SSE
+- **สโคป 33 รายการ** ที่บังคับใช้ขณะรันไทม์ — รายการพื้นฐานอยู่ใน `src/shared/constants/mcpScopes.ts` และชุดทั้งหมดคือยูเนียนของสโคปที่ประกาศโดยแต่ละโมดูลเครื่องมือ
+- ตารางการตรวจสอบ: `mcp_tool_audit` (เติมข้อมูลโดย `audit.ts`)
+- ไฟล์: `server.ts`, `index.ts`, `httpTransport.ts`, `audit.ts`, `scopeEnforcement.ts`,
+  `runtimeHeartbeat.ts`, `descriptionCompressor.ts`, `schemas/{tools, a2a, audit, index}.ts`,
+  `tools/{advancedTools, compressionTools, memoryTools, skillTools}.ts`,
+  รวมถึงการทดสอบภายใต้ `__tests__/`
+- ดู [MCP-SERVER.md](../frameworks/MCP-SERVER.md) สำหรับแคตตาล็อกเครื่องมือทั้งหมด
 
 ### 4.7 `open-sse/config/`
 
-การลงทะเบียนผู้ให้บริการ (`providerRegistry.ts`, `providerModels.ts`, `providerHeaderProfiles.ts`) การลงทะเบียนโมเดลต่อรูปแบบ (`audioRegistry.ts`, `embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`, `musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`) ตัวช่วยระบุตัวตน (`codexIdentity.ts`, `codexInstructions.ts`, `anthropicHeaders.ts`, `antigravityModelAliases.ts` `antigravityUpstream.ts` `cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`) ตัวช่วยข้อมูลประจำตัว (`credentialLoader.ts`, `codexClient.ts`) และอะแดปเตอร์คลาวด์ (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`, `maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`, zqbf , `ollamaModels.ts`, `errorConfig.ts` `constants.ts` `registryUtils.ts`)
+รีจิสทรีของผู้ให้บริการ (`providerRegistry.ts`, `providerModels.ts`,
+`providerHeaderProfiles.ts`), รีจิสทรีโมเดลแยกตามรูปแบบ (`audioRegistry.ts`,
+`embeddingRegistry.ts`, `imageRegistry.ts`, `moderationRegistry.ts`,
+`musicRegistry.ts`, `rerankRegistry.ts`, `searchRegistry.ts`, `videoRegistry.ts`),
+ตัวช่วยด้านอัตลักษณ์ (`codexIdentity.ts`, `codexInstructions.ts`,
+`anthropicHeaders.ts`, `antigravityUpstream.ts`, `antigravityModelAliases.ts`,
+`cliFingerprints.ts`, `toolCloaking.ts`, `defaultThinkingSignature.ts`),
+ตัวช่วยด้านข้อมูลรับรอง (`credentialLoader.ts`, `codexClient.ts`) และ
+อะแดปเตอร์คลาวด์ (`azureAi.ts`, `bedrock.ts`, `datarobot.ts`, `glmProvider.ts`,
+`maritalk.ts`, `oci.ts`, `petals.ts`, `runway.ts`, `sap.ts`, `watsonx.ts`,
+`ollamaModels.ts`, `errorConfig.ts`, `constants.ts`, `registryUtils.ts`)
 
 ### 4.8 `open-sse/utils/`
 
-สตรีมมิ่งดั้งเดิมและผู้ช่วยเหลือผู้ให้บริการ: `stream.ts`, `streamHandler.ts`, `streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`, `sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts` `networkProxy.ts` `tlsClient.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`, `cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`, `comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`, `thinkTagParser.ts`, `usageTracking.ts`, `urlSanitize.ts`, `requestLogger.ts`, zqw , `progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`, `ollamaTransform.ts`
+พื้นฐานการสตรีมและตัวช่วยสำหรับผู้ให้บริการ: `stream.ts`, `streamHandler.ts`,
+`streamHelpers.ts`, `streamPayloadCollector.ts`, `streamReadiness.ts`,
+`sseHeartbeat.ts`, `proxyFetch.ts`, `proxyDispatcher.ts`, `tlsClient.ts`,
+`networkProxy.ts`, `awsSigV4.ts`, `cacheControlPolicy.ts`,
+`cursorChecksum.ts`, `cursorAgentProtobuf.ts`, `cursorVersionDetector.ts`,
+`comfyuiClient.ts`, `kieTask.ts`, `bypassHandler.ts`, `aiSdkCompat.ts`,
+`thinkTagParser.ts`, `urlSanitize.ts`, `usageTracking.ts`, `requestLogger.ts`,
+`progressTracker.ts`, `cors.ts`, `error.ts`, `logger.ts`, `sleep.ts`,
+`ollamaTransform.ts`.
 
 ---
 
@@ -664,87 +710,90 @@ bin/
 > แหล่งที่มา: [diagrams/request-pipeline.mmd](../diagrams/request-pipeline.mmd)
 
 ```
-คำขอจากไคลเอนต์
+คำขอจากไคลเอ็นต์
   → /v1/chat/completions (route.ts)
-     ตรวจสอบ CORS preflight
+     ตรวจสอบคำขอ CORS preflight
      การตรวจสอบความถูกต้องด้วย Zod (chatCompletionsSchema ใน shared/validation/schemas.ts)
      การยืนยันตัวตน (extractApiKey + isValidApiKey หรือ requireManagementAuth)
-     กลไกนโยบาย (src/server/authz/pipeline.ts)
-     มาตรการป้องกัน (ตัวปกปิด PII, การแทรกคำสั่งในพรอมต์, บริดจ์วิชัน)
+     การอนุญาตเส้นทาง (src/server/authz/pipeline.ts)
+     นโยบาย API key (src/shared/utils/apiKeyPolicy.ts; บังคับใช้กับเส้นทางที่เลือก)
+     Guardrails (ตัวปิดบัง PII, การตรวจจับ prompt injection, vision bridge)
   → handleChatCore() (open-sse/handlers/chatCore.ts)
-     ตรวจสอบแคช (แคชเชิงความหมาย + แคชการอ่าน)
+     ตรวจสอบแคช (semantic + read cache)
      จำกัดอัตรา (rateLimitManager, accountSemaphore)
-     การกำหนดเส้นทางแบบคอมโบ (หากโมเดลถูกแปลงเป็นคอมโบ)
-       comboResolver → วนซ้ำสำหรับแต่ละเป้าหมาย → handleSingleModel()
+     การกำหนดเส้นทาง Combo (หากโมเดลแก้ไขเป็น combo)
+       resolveComboTargets (open-sse/services/combo.ts) → การส่งต่อแยกตามเป้าหมาย
      translateRequest()  (open-sse/translator/request/*)
      getExecutor(providerId).execute()  (open-sse/executors/*)
-       ดึงข้อมูลจากต้นทาง → ลองใหม่/หน่วงเวลาเพิ่มขึ้นผ่าน accountFallback
+       ดึงข้อมูลจาก upstream → ลองใหม่/หน่วงเวลาถอยกลับผ่าน accountFallback
      translateResponse() (open-sse/translator/response/*)
-     สตรีม SSE หรือการตอบกลับแบบ JSON
+     สตรีม SSE หรือการตอบกลับ JSON
      หากเป็น Responses API: TransformStream ผ่าน open-sse/transformer/responsesTransformer.ts
   → การตรวจสอบการปฏิบัติตามข้อกำหนด (src/lib/compliance/)
-  → การตอบกลับไปยังไคลเอนต์
+  → การตอบกลับไปยังไคลเอ็นต์
 ```
 
-### สถานะรันไทม์ด้านความยืดหยุ่น (สามกลไก)
+### สถานะรันไทม์ด้านความทนทานต่อความล้มเหลว (สามกลไก)
 
-| กลไก                             | ขอบเขต                              | ตำแหน่ง                                                                                                    |
-| -------------------------------- | ----------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| เซอร์กิตเบรกเกอร์ของผู้ให้บริการ | ผู้ให้บริการทั้งหมด                 | `src/shared/utils/circuitBreaker.ts`, จัดเก็บถาวรใน `domain_circuit_breakers`                              |
-| ช่วงพักการเชื่อมต่อ              | หนึ่งบัญชี/คีย์                     | `markAccountUnavailable()` ใน `src/sse/services/auth.ts`; ใช้งานโดย `accountFallback.checkFallbackError()` |
-| การล็อกโมเดล                     | ผู้ให้บริการ + การเชื่อมต่อ + โมเดล | `open-sse/services/accountFallback.ts`, จัดเก็บถาวรใน `domain_lockout_state`                               |
+| กลไก                            | ขอบเขต                              | ตำแหน่ง                                                                                                 |
+| ------------------------------- | ----------------------------------- | ------------------------------------------------------------------------------------------------------- |
+| circuit breaker ของผู้ให้บริการ | ผู้ให้บริการทั้งหมด                 | `src/shared/utils/circuitBreaker.ts`, บันทึกถาวรใน `domain_circuit_breakers`                            |
+| ช่วงพักการเชื่อมต่อ             | บัญชี/คีย์หนึ่งรายการ               | `markAccountUnavailable()` ใน `src/sse/services/auth.ts`; ใช้โดย `accountFallback.checkFallbackError()` |
+| การล็อกเอาต์โมเดล               | ผู้ให้บริการ + การเชื่อมต่อ + โมเดล | `open-sse/services/accountFallback.ts`, บันทึกถาวรใน `domain_lockout_state`                             |
 
 ดู [RESILIENCE_GUIDE.md](./RESILIENCE_GUIDE.md) และส่วนเฉพาะใน
-[CLAUDE.md](../../CLAUDE.md)
+[CLAUDE.md](../../CLAUDE.md).
 
 ---
 
-## 10. วิธีร่วมพัฒนา
+## 10. วิธีมีส่วนร่วม
 
-### เพิ่มผู้ให้บริการรายใหม่
+### เพิ่มผู้ให้บริการใหม่
 
-1. ลงทะเบียนใน `src/shared/constants/providers.ts` (ตรวจสอบความถูกต้องด้วย Zod ขณะโหลด)
-2. เพิ่ม executor ใน `open-sse/executors/` หากต้องใช้ตรรกะแบบกำหนดเอง
-   (สืบทอดจาก `BaseExecutor`)
-3. เพิ่ม translator ใน `open-sse/translator/` หากผู้ให้บริการไม่รองรับรูปแบบ OpenAI
-4. หากใช้ OAuth ให้เพิ่มการกำหนดค่าภายใต้ `src/lib/oauth/providers/` และ
+1. ลงทะเบียนใน `src/shared/constants/providers.ts` (ตรวจสอบด้วย Zod เมื่อโหลด)
+2. เพิ่ม executor ใน `open-sse/executors/` หากจำเป็นต้องใช้ตรรกะแบบกำหนดเอง
+   (ขยายจาก `BaseExecutor`)
+3. เพิ่ม translator ใน `open-sse/translator/` หากไม่รองรับรูปแบบ OpenAI
+4. หากใช้ OAuth ให้เพิ่มการกำหนดค่าใน `src/lib/oauth/providers/` และ
    `src/lib/oauth/services/`
 5. ลงทะเบียนโมเดลใน `open-sse/config/providerRegistry.ts` (หรือ registry เฉพาะรูปแบบ
-   ภายใต้ `open-sse/config/`)
-6. เขียนการทดสอบภายใต้ `tests/unit/`
+   ใน `open-sse/config/`)
+6. เขียนการทดสอบใน `tests/unit/`
 
 ### เพิ่มเส้นทาง API ใหม่
 
 1. สร้าง `src/app/api/your-route/route.ts`
-2. ทำตามรูปแบบ: CORS → การตรวจสอบ body ด้วย Zod → การยืนยันตัวตน → การมอบหมายให้ handler
-3. หากมีโครงสร้างคำขอใหม่ ให้เพิ่ม Zod schema ใน `src/shared/validation/schemas.ts`
-4. หากมีไว้สำหรับการจัดการเท่านั้น ให้เพิ่ม path ลงใน `src/shared/constants/publicApiRoutes.ts`
-   (denylist สำหรับพื้นผิว public API)
-5. เพิ่มการทดสอบภายใต้ `tests/unit/`
+2. ทำตามรูปแบบ: CORS → การตรวจสอบ body ด้วย Zod → auth → การมอบหมายให้ handler
+3. หากเป็นรูปแบบคำขอใหม่: เพิ่ม Zod schema ใน `src/shared/validation/schemas.ts`
+4. หากใช้สำหรับการจัดการเท่านั้น: เพิ่ม path ลงใน `src/shared/constants/publicApiRoutes.ts`
+   (denylist สำหรับพื้นผิว API สาธารณะ)
+5. เพิ่มการทดสอบใน `tests/unit/`
 6. อัปเดต `docs/reference/API_REFERENCE.md` และ `docs/openapi.yaml`
 
 ### เพิ่มโมดูล DB ใหม่
 
-1. สร้าง `src/lib/db/yourModule.ts` และนำเข้า `getDbInstance()` จาก `./core.ts`
-2. ส่งออกฟังก์ชัน CRUD สำหรับโดเมนของคุณ
-3. หากมีตารางใหม่ ให้เพิ่ม migration ภายใต้ `src/lib/db/migrations/` โดยกำหนดหมายเลข
-   ตามลำดับ ทำให้รันซ้ำได้โดยให้ผลลัพธ์เดิม และทำงานภายใน transaction
-4. ผู้นำเข้าให้ใช้การนำเข้าโดยตรงจาก `@/lib/db/yourModule` (ไม่ใช้ barrel — เลเยอร์ re-export `localDb.ts` แบบเดิมถูกนำออกแล้ว)
-5. เพิ่มการทดสอบภายใต้ `tests/unit/`
+1. สร้าง `src/lib/db/yourModule.ts` และ import `getDbInstance()` จาก `./core.ts`
+2. Export ฟังก์ชัน CRUD สำหรับโดเมนของคุณ
+3. หากมีตารางใหม่: เพิ่ม migration ด้วย `npm run db:new-migration -- <description>` (เขียนลงใน
+   `src/lib/db/migrations/YYYYMMDDHHMMSS_<description>.sql`, UTC; ดู
+   `docs/ops/DATABASE_GUIDE.md`) โดยต้องทำงานซ้ำได้อย่างปลอดภัยและเป็น transactional
+4. Importer ใช้ direct imports จาก `@/lib/db/yourModule` (ไม่มี barrel — เลเยอร์ re-export
+   `localDb.ts` แบบเดิมถูกนำออกแล้ว)
+5. เพิ่มการทดสอบใน `tests/unit/`
 
-### เพิ่มเครื่องมือ MCP ใหม่
+### เพิ่ม MCP tool ใหม่
 
-1. เพิ่มคำจำกัดความของเครื่องมือภายใต้ `open-sse/mcp-server/tools/` (หรือขยาย
+1. เพิ่มคำจำกัดความของ tool ใน `open-sse/mcp-server/tools/` (หรือขยาย
    `open-sse/mcp-server/schemas/tools.ts`)
 2. กำหนด scope ที่เหมาะสมใน `src/shared/constants/mcpScopes.ts`
-3. ลงทะเบียนเครื่องมือใน `open-sse/mcp-server/server.ts`
-4. เพิ่มการทดสอบภายใต้ `open-sse/mcp-server/__tests__/`
+3. ลงทะเบียน tool ใน `open-sse/mcp-server/server.ts`
+4. เพิ่มการทดสอบใน `open-sse/mcp-server/__tests__/`
 5. อัปเดต [MCP-SERVER.md](../frameworks/MCP-SERVER.md)
 
-### เพิ่มทักษะ A2A ใหม่
+### เพิ่ม A2A skill ใหม่
 
-ดู [A2A-SERVER.md § การเพิ่มทักษะใหม่](../frameworks/A2A-SERVER.md) ทักษะอยู่ใน
-`src/lib/a2a/skills/` และลงทะเบียนผ่านตัวจัดการงาน A2A
+ดู [A2A-SERVER.md § Adding a New Skill](../frameworks/A2A-SERVER.md) โดย skill จะอยู่ใน
+`src/lib/a2a/skills/` และลงทะเบียนผ่าน A2A task manager
 
 ---
 

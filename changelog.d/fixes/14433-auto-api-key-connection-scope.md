@@ -1,1 +1,0 @@
-- **fix(auto):** constrain auto-combo candidate expansion, scoring, and fallback ordering to each API key's allowed provider connections, failing closed when the permitted active account set cannot be established.

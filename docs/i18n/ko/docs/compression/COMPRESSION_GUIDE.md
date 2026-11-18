@@ -32,92 +32,90 @@ OmniRoute는 요청이 업스트림 제공자에 도달하기 **전에 선제적
 
 ## 압축 모드
 
-### Off
+### 끄기
 
-압축이 적용되지 않습니다. 모든 메시지가 변경 없이 그대로 통과합니다.
+압축을 적용하지 않습니다. 모든 메시지가 변경 없이 전달됩니다.
 
-### Lite 모드 (~15% 절감, <1ms 지연)
+### Lite 모드 (~15% 절감, <1ms 지연 시간)
 
-가장 안전한 모드 — 의미 변화는 전혀 없이 형식 정리만 수행합니다:
+가장 안전한 모드 — 서식 정리입니다. 도구 결과 잘라내기는 손실이 발생하므로, 기본 경로
+(`allow-lossy`, `engine:lite` 또는 명명된 조합의 옵트인 없음)에서는
+`compressToolResults: false`로 Lite가 실행됩니다. 이전 도구 결과는 변경 없이 제공자에게 전달됩니다.
 
-| 기법                     | 설명                                   |
-| ------------------------ | -------------------------------------- |
-| `collapseWhitespace`     | 연속된 빈 줄과 줄 끝 공백을 병합합니다 |
-| `dedupSystemPrompt`      | 중복된 시스템 메시지를 제거합니다      |
-| `compressToolResults`    | 장황한 도구/함수 출력을 압축합니다     |
-| `removeRedundantContent` | 반복되는 지시문을 제거합니다           |
-| `replaceImageUrls`       | base64 이미지 데이터 URI를 단축합니다  |
+| 기법                     | 설명                                                                       |
+| ------------------------ | -------------------------------------------------------------------------- |
+| `collapseWhitespace`     | 연속된 빈 줄과 줄 끝 공백 병합                                             |
+| `dedupSystemPrompt`      | 중복 시스템 메시지 제거                                                    |
+| `compressToolResults`    | 이전 도구 결과를 Lite 한도까지 잘라냄 (손실 발생: 요청 옵트인 시에만 사용) |
+| `removeRedundantContent` | 반복되는 지침 제거                                                         |
+| `replaceImageUrls`       | base64 이미지 데이터 URI 단축                                              |
 
-**적합한 용도:** 상시 사용, 안전이 중요한 워크플로우.
+**적합한 용도:** 항상 켜두는 사용, 안전이 중요한 워크플로.
 
 ### Standard 모드 (~30% 절감)
 
-[Caveman](https://github.com/JuliusBrussee/caveman)에서 영감을 받은 모드 — 의미를 보존하면서 군더더기 단어와 장황한 표현을 제거합니다:
+[Caveman](https://github.com/JuliusBrussee/caveman)에서 영감을 받았으며, 의미를 유지하면서 불필요한 단어와 장황한 표현을 제거합니다.
 
-- 군더더기 단어 제거("please", "I think", "basically", "actually")
-- 장황한 구문을 간결하게 압축("in order to" → "to", "as a result of" → "because")
-- 정중한 완곡 표현 제거("Would you mind...", "If you could possibly...")
+- 불필요한 단어 제거 ("please", "I think", "basically", "actually")
+- 장황한 표현 압축 ("in order to" → "to", "as a result of" → "because")
+- 정중한 완곡 표현 제거 ("Would you mind...", "If you could possibly...")
 - 코딩 프롬프트에 맞게 조정된 30개 이상의 정규식 규칙
 
-**적합한 용도:** 일상적인 코딩 워크플로우, 비용에 민감한 팀.
+**적합한 용도:** 일상적인 코딩 워크플로, 비용을 중시하는 팀.
 
 ### Aggressive 모드 (~50% 절감)
 
-긴 세션을 위한 스마트 히스토리 관리:
+긴 세션을 위한 스마트한 기록 관리입니다.
 
-- **메시지 에이징** — 오래된 메시지가 점진적으로 압축됩니다
-- **도구 결과 압축** — 긴 도구 출력을 잘라내거나 생략합니다(첫/마지막 줄,
-  일치 줄 필터링, JSON 키 압축)
-- **구조적 무결성 가드** — `tool_use` + `tool_result` 쌍이 일관되게 유지되도록 보장합니다
-- **컨텍스트 윈도우 인식** — 모델별 토큰 한도를 준수합니다
+- **메시지 에이징** — 오래된 메시지를 점진적으로 압축
+- **도구 결과 압축** — 긴 도구 출력을 잘라내거나 생략 (처음/마지막 줄,
+  일치하는 줄 필터링, JSON 키 압축)
+- **구조적 무결성 보호** — `tool_use` + `tool_result` 쌍의 일관성 유지
+- **컨텍스트 윈도 인식** — 모델별 토큰 제한 준수
 
 **적합한 용도:** 장시간 디버깅 세션, 대규모 코드베이스.
 
 ### Ultra 모드 (~75% 절감)
 
-토큰이 중요한 시나리오를 위한 최대 압축:
+토큰이 중요한 시나리오를 위한 최대 압축입니다.
 
-- **휴리스틱 프루닝** — 점수 기반으로 산문 텍스트의 토큰을 프루닝합니다
-- **구조 보존** — 펜스 코드 블록, 인라인 코드, URL 및 식별자는 툼스톤 처리 후
-  원문 그대로 다시 연결되며, 절대 프루닝되지 않습니다
-- **선택적 SLM 계층** — 구성된 경우 소형 로컬 모델이 프루닝을 개선할 수 있습니다
-- Aggressive 모드와 독립적: 메시지 에이징, 도구 결과 압축, 폴백 요약기를 실행하지
-  않습니다(SLM 계층 실패 시에만 폴백 패스가 aggressive를 거쳐 라우팅될 수 있음)
+- **휴리스틱 가지치기** — 점수 기반으로 산문 토큰을 가지침
+- **구조 보존** — 펜스 코드 블록, 인라인 코드, URL 및 식별자는 무덤 처리 후 원문 그대로 다시 결합하며, 절대 가지치기하지 않음
+- **선택적 SLM 계층** — 구성된 경우 소형 로컬 모델이 가지치기를 개선할 수 있음
+- Aggressive 모드와 독립적으로 동작: 메시지 에이징, 도구 결과 압축 또는 대체 요약기를 실행하지 않음 (SLM 계층 실패 시에만 대체 처리가 Aggressive를 통해 라우팅될 수 있음)
 
-**적합한 용도:** 컨텍스트 한도에 반복적으로 도달하는 경우.
+**적합한 용도:** 컨텍스트 제한에 반복적으로 도달하는 경우.
 
-### RTK 모드 (60-90% 범위, 업스트림 기준)
+### RTK 모드 (업스트림 범위의 60-90%)
 
-RTK 모드는 코딩 에이전트 세션에 나타나는 장황한 도구 출력에 최적화되어 있습니다:
+RTK 모드는 코딩 에이전트 세션에 나타나는 장황한 도구 출력에 최적화되어 있습니다.
 
-- `git status`, `git diff`, `git log`, 테스트 러너, TypeScript/Vite/Webpack 빌드,
-  ESLint/Biome/Prettier, npm audit/install, Docker 로그, 인프라 출력 및 일반 셸 출력과
-  같은 명령/출력 클래스를 감지합니다
-- `open-sse/services/compression/engines/rtk/filters/`의 JSON 필터 팩을 적용합니다
-- 프로젝트 또는 전역 `filters.toml` 파일에서 RTK TOML 스키마 v1 필터를 가져오며, 인라인
-  테스트 검증 및 프로젝트 파일에 대한 신뢰 게이팅(trust-gating)을 적용합니다
-- 인라인 검증 샘플이 포함된 56개의 내장 필터를 제공합니다
-- ANSI 제어 시퀀스, 진행 표시줄, 반복되는 줄 및 조치 불가능한 노이즈를 제거합니다
-- 실패, 오류, 경고, 변경된 파일, 요약 및 긴 출력의 끝 부분을 보존합니다
-- 신뢰 게이트된 프로젝트 필터, 전역 필터 및 선택적인 마스킹된 원본 출력 복구를 지원합니다
+- `git status`, `git diff`, `git log`, 테스트 러너,
+  TypeScript/Vite/Webpack 빌드, ESLint/Biome/Prettier, npm 감사/설치, Docker 로그, 인프라
+  출력 및 일반 셸 출력과 같은 명령/출력 클래스를 감지
+- `open-sse/services/compression/engines/rtk/filters/`의 JSON 필터 팩 적용
+- 프로젝트 또는 전역 `filters.toml` 파일에서 RTK TOML 스키마 v1 필터를 가져오며, 인라인 테스트
+  검증 및 프로젝트 파일에 대한 신뢰 게이팅 지원
+- 인라인 확인 샘플이 포함된 기본 제공 필터 56개 제공
+- ANSI 제어 시퀀스, 진행률 표시줄, 반복되는 줄 및 실행 가능한 정보가 아닌 노이즈 제거
+- 실패, 오류, 경고, 변경된 파일, 요약 및 긴 출력의 끝부분 보존
+- 신뢰 게이팅된 프로젝트 필터, 전역 필터 및 선택적 비식별화 원시 출력 복구 지원
 
 **적합한 용도:** 셸, 빌드, 테스트, git, grep 및 파일 출력 트랜스크립트가 포함된 에이전트 세션.
 
-### Stacked 모드 (78-95% 범위, 적격 콘텐츠 기준)
+### Stacked 모드 (적용 가능 범위의 78-95%)
 
-Stacked 모드는 여러 압축 엔진을 결정적 순서로 실행합니다. 기본 파이프라인은 다음과 같습니다:
+Stacked 모드는 여러 압축 엔진을 결정적인 순서로 실행합니다. 기본 파이프라인은 다음과 같습니다.
 
 ```txt
 RTK -> Caveman
 ```
 
-이 순서는 터미널/도구 출력을 먼저 압축한 다음, 남은 자연어 프롬프트에 Caveman 의미 압축을
-적용합니다. Stacked 파이프라인은 전역으로 구성하거나 라우팅 콤보에 할당된 압축 콤보를 통해
-구성할 수 있습니다.
+이 순서를 사용하면 먼저 터미널/도구 출력이 간결해지고, 그다음 남은 자연어 프롬프트에
+Caveman의 의미 압축이 적용됩니다. Stacked 파이프라인은 전역으로 구성하거나 라우팅 조합에
+할당된 압축 조합을 통해 구성할 수 있습니다.
 
-**적합한 용도:** 대규모 도구 로그와 사람의 지시 또는 어시스턴트 요약이 혼합된 컨텍스트.
-
----
+**적합한 용도:** 대규모 도구 로그와 사람의 지침 또는 어시스턴트 요약이 함께 있는 혼합 컨텍스트.
 
 ## 업스트림 절감률 계산
 
@@ -177,42 +175,65 @@ Stacked 사용:           10K-2.5K 토큰 전송     (적용 가능한 RTK+Cavem
 
 - **Caveman** — 모드 선택, 언어 팩, 미리 보기 및 전역 기본값
 - **RTK** — 명령 필터 미리 보기, RTK 안전 설정 및 필터 카탈로그
-- **Compression Combos** — 라우팅 콤보에 할당되는 이름 있는 엔진 파이프라인
+- **Compression Combos** — 라우팅 콤보에 할당되는 이름이 지정된 엔진 파이프라인
 - **Auto-Trigger Threshold** — 토큰 수가 임계값을 초과하면 자동으로 압축 활성화
 
 ### 콤보별 재정의
 
-`Dashboard → Context & Cache → Compression Combos`에서 압축 콤보를 라우팅 콤보에 할당합니다.
+`Dashboard → Context & Cache → Compression Combos`에서 라우팅
+콤보에 압축 콤보를 할당합니다.
 
 ```txt
-콤보: "free-tier-fallback"
-  압축 콤보: "coding-agent-stack"
-  파이프라인: RTK -> Caveman
-  대상:
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
+  Pipeline: RTK -> Caveman
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-이렇게 하면 무료/코딩 제공자에는 스택형 압축을 사용하면서 유료 구독에는 라이트 모드를 유지할 수 있습니다.
+이를 통해 유료 구독에서는 라이트 모드를 유지하면서 무료/코딩 제공업체에서 스택형 압축을
+사용할 수 있습니다.
 
-이 "콤보별 재정의" 할당은 **라우팅 콤보 압축 모드** 재정의(Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — 이 필드의 스키마는 `rtk`, `stacked`, `omniglyph`도 허용함)와는 별개의 제어 기능입니다. 해당 재정의는 이름 있는 압축 콤보 파이프라인을 선택하지 않으며, `resolveCompressionPlan`에서 참조하는 `compressionMode` 필드만 설정합니다. 콤보 카드(`Dashboard → Combos`)에서 설정하거나, #6760부터는 위에서 설명한 파이프라인 할당 체크박스 바로 옆에 있는 `Dashboard → Context & Cache → Compression Combos`의 "Assign to routing" 목록에서 라우팅 콤보별로 설정할 수 있습니다. 두 화면 모두 동일한 `PUT /api/combos/{id}` 엔드포인트를 통해 설정을 저장합니다.
+이 "Per-Combo Override" 할당은 **routing-combo compression
+mode** 재정의(Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses — 필드의 스키마는
+`rtk`, `stacked` 및 `omniglyph`도 허용)와는 다른 제어 기능입니다. 후자의 재정의는 이름이 지정된
+compression-combo 파이프라인을 선택하지 않고, `resolveCompressionPlan`에서 참조하는
+`compressionMode` 필드만 설정합니다. 이 설정은 콤보 카드(`Dashboard → Combos`)에서 지정하거나,
+#6760부터는 위에서 설명한 파이프라인 할당 체크박스 바로 옆에 있는
+`Dashboard → Context & Cache → Compression Combos`의 "Assign to routing" 목록에서
+라우팅 콤보별로 지정할 수 있습니다. 두 UI 모두 동일한 `PUT /api/combos/{id}` 엔드포인트를
+통해 저장됩니다.
 
 ### 요청별 재정의
 
-단일 요청의 압축 계획을 재정의하려면 `x-omniroute-compression` 요청 헤더를 전송합니다. 이 헤더는 가장 높은 우선순위를 가지며 라우팅 콤보 재정의, 활성 프로필, 자동 트리거 및 패널의 Default 설정보다 우선합니다. 알 수 없는 값은 무시되며(요청이 거부되는 일은 없음), 전역 마스터 스위치는 여전히 모든 기능을 제어합니다. 압축이 전역적으로 꺼져 있으면 헤더로 압축을 켤 수 없습니다. 값은 다음과 같습니다.
+단일 요청의 압축 계획을 재정의하려면 `x-omniroute-compression` 요청 헤더를 전송합니다.
+이 헤더의 우선순위가 가장 높으므로 라우팅 콤보 재정의, 활성 프로필,
+자동 트리거 및 패널 Default보다 우선합니다. 알 수 없는 값은 무시되며(요청은 거부되지 않음),
+전역 마스터 스위치가 여전히 모든 기능을 제어합니다. 전역적으로 압축이 꺼져 있으면 헤더로
+압축을 활성화할 수 없습니다. 값:
 
-| 값            | 효과                                                                                                   |
-| ------------- | ------------------------------------------------------------------------------------------------------ |
-| `off`         | 이 요청에 압축을 적용하지 않습니다.                                                                    |
-| `default`     | 패널에서 파생된 Default 프로필입니다(활성 프로필 무시). 손실형 엔진은 비활성 상태로 유지됩니다.        |
-| `safe`        | 헤더를 생략한 경우와 동일합니다. 중복 제거와 공백 축소만 수행합니다.                                   |
-| `allow-lossy` | 요약, 관련성 필터 및 스타일 재작성을 포함해 이 요청의 운영자 계획을 유지합니다.                        |
-| `engine:<id>` | 활성화된 경우 단일 엔진을 사용합니다(예: `engine:rtk`). 해당 엔진을 요청별로 사용 설정하는 방식입니다. |
-| `<combo>`     | 이름 있는 콤보입니다. 먼저 이름을 대소문자 구분 없이 일치시키고, 그다음 id로 일치시킵니다.             |
+| 값            | 효과                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------- |
+| `off`         | 이 요청에 압축을 적용하지 않습니다.                                                               |
+| `default`     | 패널에서 파생된 Default 프로필(활성 프로필 무시)입니다. 손실 엔진은 비활성화된 상태로 유지됩니다. |
+| `safe`        | 헤더를 생략한 것과 동일합니다.                                                                    |
+| `allow-lossy` | 요약, 관련성 필터 및 스타일 재작성 등을 포함하여 이 요청의 연산자 계획을 유지합니다.              |
+| `engine:<id>` | 활성화된 경우 단일 엔진을 사용합니다(예: `engine:rtk`). 해당 엔진에 대한 요청별 옵트인입니다.     |
+| `<combo>`     | 이름으로 먼저 대소문자를 구분하지 않고 일치시킨 다음 ID로 일치시키는 이름이 지정된 콤보입니다.    |
 
-`allow-lossy`, `engine:<id>` 또는 이름 있는 콤보가 없으면 손실형 엔진은 적용되지 않습니다. 압축이 켜져 있으면 요청에는 계속해서 세션 중복 제거와 공백 축소가 적용됩니다.
+`allow-lossy`, `engine:<id>` 또는 이름이 지정된 콤보가 없으면 손실 엔진이 적용되지 않습니다. 손실
+Default, 자동 트리거 또는 라우팅 재정의가 하향 조정되면 OmniRoute는 구성된 스택형 파이프라인에서
+인식된 무손실 단계를 구성된 순서대로 유지합니다. 구성된 무손실 단계가 하나도 남지 않은 경우에만
+`session-dedup → lite`로 대체됩니다.
 
-적용된 계획은 `X-OmniRoute-Compression: <mode>; source=<source>` 응답 헤더에 반환됩니다. 여기서 `<source>`는 `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` 또는 `off` 중 하나입니다.
+Settings 패널의 **Effective pipeline** 미리 보기에는 일반적인 저장 상태 계획이 표시됩니다. 자동
+트리거를 실행할 수 있는 경우에는 동일한 미리 보기에 조건부 유효 파이프라인도 표시되므로 패널과
+헤더가 없는 런타임 확인 결과가 일치합니다.
+
+적용된 계획은 `X-OmniRoute-Compression: <mode>; source=<source>` 응답
+헤더로 반환되며, 여기서 `<source>`는 `request-header`, `routing-override`, `active-profile`,
+`auto-trigger`, `default` 또는 `off` 중 하나입니다.
 
 ### API
 
@@ -230,10 +251,10 @@ curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# RTK 필터 팩 목록 조회
+# RTK 필터 팩 나열
 curl http://localhost:20128/api/context/rtk/filters
 
-# 선택적 명령 메타데이터를 사용하여 RTK 직접 테스트
+# 선택적 명령 메타데이터와 함께 RTK 직접 테스트
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'
@@ -260,7 +281,7 @@ RTK 원시 출력 복구 기능은 데이터가 저장되기 전에 일반적인
 
 ## 압축 통계
 
-모든 압축된 요청에는 서버 로그에 통계가 포함됩니다:
+압축된 모든 요청에는 서버 로그에 통계가 포함됩니다:
 
 ```json
 {

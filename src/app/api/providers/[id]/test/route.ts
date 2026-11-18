@@ -12,6 +12,12 @@ import { getCliRuntimeStatus } from "@/shared/services/cliRuntime";
 import { buildQoderCliNotFoundHint } from "@omniroute/open-sse/services/qoderCliResolve.ts";
 // Use the shared open-sse token refresh with built-in dedup/race-condition cache
 import { getAccessToken, isPassiveCodex } from "@omniroute/open-sse/services/tokenRefresh.ts";
+import { isMuseDcaToken } from "@omniroute/open-sse/config/museCode.ts";
+import { redactVerificationUrls } from "@omniroute/open-sse/services/antigravityVerification.ts";
+import {
+  clearAntigravityVerificationUrl,
+  recordAntigravityVerificationUrl,
+} from "@omniroute/open-sse/handlers/chatCore/antigravityVerificationState.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import { saveCallLog } from "@/lib/usageDb";
 import { shouldHideLogs } from "@/lib/tokenHealthCheck";
@@ -49,7 +55,8 @@ export { classifyFailure, projectProviderRuntimeForPublicResponse } from "./publ
 // Match the API-key path's 30s timeout so a hung OAuth upstream cannot block the test queue.
 const OAUTH_TEST_TIMEOUT_MS = 30_000;
 
-import { CLI_RUNTIME_PROVIDER_MAP } from "./cliRuntimeProviderMap";
+import { CLI_RUNTIME_PROVIDER_MAP, hasQoderToken } from "./cliRuntimeProviderMap";
+import { testChatGptConnection } from "./chatgptTest";
 import { isOperatorDisabled } from "@/lib/providers/operatorDisable";
 import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 
@@ -57,19 +64,6 @@ import { getRequestPeerLocality } from "@/shared/utils/apiAuth";
 const providerConnectionTestBodySchema = z.object({
   validationModelId: z.string().max(500).optional(),
 });
-
-function hasQoderToken(connection: any): boolean {
-  if (typeof connection?.apiKey === "string" && connection.apiKey.trim().length > 0) return true;
-  const psd = connection?.providerSpecificData;
-  if (psd && typeof psd === "object") {
-    const pat =
-      (psd as Record<string, unknown>).personalAccessToken ??
-      (psd as Record<string, unknown>).pat ??
-      (psd as Record<string, unknown>).accessToken;
-    if (typeof pat === "string" && pat.trim().length > 0) return true;
-  }
-  return false;
-}
 
 // GHSA-jmq6-8j86-8xqj: getCliRuntimeStatus() spawns on the host (LOCAL_ONLY capability),
 // but these routes stay remote-reachable — only loopback/LAN callers and the scheduler probe.
@@ -212,6 +206,9 @@ async function refreshOAuthToken(connection: any) {
         const expiresAt = new Date(Date.now() + refreshed.expiresIn * 1000).toISOString();
         update.expiresAt = expiresAt;
         update.tokenExpiresAt = expiresAt;
+      } else if (provider === "muse-code" && refreshed.expiresAt === null) {
+        update.expiresAt = null;
+        update.tokenExpiresAt = null;
       } else {
         // Upstream returned neither expiresAt nor expiresIn. Persist a
         // conservative 30-minute expiry so a NULL expiresAt (treated as
@@ -254,6 +251,14 @@ async function refreshOAuthToken(connection: any) {
 function isTokenExpired(connection: any) {
   const expiresAtValue = connection.expiresAt || connection.tokenExpiresAt;
   if (!expiresAtValue) {
+    if (
+      connection.provider === "muse-code" &&
+      typeof connection.accessToken === "string" &&
+      connection.accessToken.trim() &&
+      !isMuseDcaToken(connection.accessToken)
+    ) {
+      return false;
+    }
     return typeof connection.refreshToken === "string" && connection.refreshToken.length > 0;
   }
   const expiresAt = new Date(expiresAtValue).getTime();
@@ -366,6 +371,7 @@ export async function testOAuthConnection(
   connection: any,
   timeoutMs: number = OAUTH_TEST_TIMEOUT_MS
 ) {
+  if (connection.provider === "chatgpt") return testChatGptConnection(connection);
   const config = OAUTH_TEST_CONFIG[connection.provider];
 
   if (!config) {
@@ -844,8 +850,20 @@ export async function testOAuthConnection(
     if (connection.provider === "antigravity" || connection.provider === "agy") {
       console.log(
         `[OAuthTest] ${connection.provider} probe returned HTTP ${res.status}:`,
-        bodyText.slice(0, 500)
+        redactVerificationUrls(bodyText).slice(0, 500)
       );
+      // The probe is the only place the dashboard Test and the hourly credential-health run
+      // see Google's raw 403, so keep its "verify your account" link for the Verify button.
+      if (res.status === 403) {
+        await recordAntigravityVerificationUrl({
+          provider: connection.provider,
+          connectionId: connection.id,
+          upstreamErrorBody: bodyText,
+          message: "",
+        }).catch(() => {
+          console.warn("[OAuthTest] Could not store the antigravity verification link");
+        });
+      }
     }
 
     // #13010: a Cloud Code envelope failure answers with its own JSON `error.message`.
@@ -924,6 +942,11 @@ async function testApiKeyConnection(connection: any, allowLocalSpawn = true) {
       apiKey: connection.apiKey,
       providerSpecificData: connection.providerSpecificData,
       allowLocalSpawn,
+      credentials: {
+        accessToken: connection.accessToken,
+        refreshToken: connection.refreshToken,
+        expiresAt: connection.expiresAt,
+      },
     })
   );
 
@@ -1121,6 +1144,18 @@ export async function testSingleConnection(
   });
   // Once persisted, same gate as the error state: a valid probe also closes a DEGRADED breaker.
   if (clearErrorState) clearTestedBreakers(provider, connectionId);
+  // A passing probe means Google lifted the "verify your account" challenge: drop the stored
+  // link so the Verify button and the pending-verification filter clear without waiting for
+  // the next successful chat request.
+  if (result.valid) {
+    await clearAntigravityVerificationUrl(
+      provider,
+      connectionId,
+      latest.providerSpecificData
+    ).catch(() => {
+      console.warn("[ConnectionTest] Could not clear the antigravity verification link");
+    });
+  }
 
   // Sync to cloud if token was refreshed
   if (result.refreshed) {

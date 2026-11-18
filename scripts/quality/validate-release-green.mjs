@@ -3,28 +3,21 @@
 //
 // "Release-green" pre-flight validator (Solution C).
 //
-// WHY: the full gate (ci.yml — unit shards, vitest, ratchets, package-artifact)
-// runs ONLY on the release PR (PR → main). PRs into release/** only get the
-// fast-gates (quality.yml: TIA-impacted tests + typecheck + lint checks). So
-// reds accumulate silently on the release branch and explode — in layers — at
-// release time. This script reproduces the release-equivalent validation against
-// the CURRENT working tree so the maintainer (or the nightly, Solution D) can see
-// the real state of the release branch at any time.
+// Diagnose an exact working tree with retained process evidence. Curated checks
+// distinguish hard failures from advisory drift. With --full-ci, the reviewed
+// static profile supplies each requirement's blocking policy, including gates
+// omitted by the curated subset. No failure is automatically contributor-owned,
+// and diagnosis never authorizes a baseline increase or merge.
 //
-// DESIGN — never blocking to contributors:
-//   • HARD checks (typecheck, lint errors, db-rules, public-creds, docs-all,
-//     unit, vitest, integration, optionally package-artifact) → a failure here is
-//     a real defect; exit 1.
-//   • DRIFT checks (eslint WARNINGS, cognitive-complexity, file-size, cyclomatic
-//     complexity, dead-code, type-coverage, compression-budget, openapi-coverage,
-//     pricing-freshness,
-//     workflow-lint/zizmor, codeql-ratchet) → ratchet drift accrued across the
-//     cycle is NOT a contributor's fault; it is reported and rebaselined by the
-//     maintainer at release. Drift NEVER changes the exit code, so wiring this as
-//     a check can never block anyone on drift.
+// GATE MODE (plan "derived numbers and texts resolved only at release", 2026-11-13): every HARD
+// item runs with OMNIROUTE_GATE_MODE=pr (unless the caller set the variable), so a HARD red
+// answers "did the base break?", never "is a derived number behind the live code?" — between
+// releases it is, by design. The strict comparison of every derived number with the live code is
+// the DRIFT item `derived-refresh` (`npm run release:refresh-derived -- --check`), which never
+// opens a base-red.
 //
 // SCOPE: this diagnoses the curated checks below and, with --full-ci, the static
-// commands extracted from selected CI jobs. It does not reproduce every workflow,
+// commands in config/quality/release-green-static-profile.json. It does not reproduce every workflow,
 // matrix, hosted scanner or merge-candidate gate. A local PASS is not merge admission.
 //
 // This script DIAGNOSES + REPORTS only (no auto-fix). The fix-to-green
@@ -36,11 +29,9 @@
 //     --with-build  also run check:pack-artifact (needs a dist/ build — slow)
 //     --quick       skip the slow unit + vitest + integration suites (drift + fast
 //                   gates only)
-//     --full-ci     ALSO run every static gate declared in ci.yml's gate jobs (lint,
-//                   quality-gate, quality-extended, docs-sync-strict, pr-test-policy) —
-//                   read straight from ci.yml so the set never drifts. Catches the whole
-//                   "static base-red" category the curated list missed (v3.8.46: 11 of 16
-//                   leaked reds). Pair with --quick for the fast "1 command, 0 CI layers" pass.
+//     --full-ci     run the versioned static argv inventory (including audit, mutation
+//                   and i18n). Reject missing/stale declarations before execution.
+//                   Hosted suites and remote checks still require separate evidence.
 //     --hermetic    scrub OMNIROUTE_API_KEY/OMNIROUTE_URL from gate env so live
 //                   tests self-skip exactly like CI (dev machines otherwise run
 //                   them against localhost and produce false-positive reds)
@@ -58,6 +49,8 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
 import { runGateProcess } from "./gate-process.mjs";
+import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
+import { loadFullCiProfile, staticGateOutcome } from "./release-green-static-profile.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
@@ -110,12 +103,15 @@ const INLINE_FAILURE_RE = /\berror TS\d+\b|\bAssertionError\b|\bError:|\bREGRESS
 /** Best-effort "first meaningful failure line" from captured command output. */
 export function firstFailureLine(out) {
   const lines = String(out || "")
+    .replace(/\u001b\[[0-9;]*m/g, "")
     .split("\n")
     .map((l) => l.trim())
     .filter(Boolean);
-  const hit = lines.find(
-    (l) => !GREEN_LINE_RE.test(l) && (LINE_START_FAILURE_RE.test(l) || INLINE_FAILURE_RE.test(l))
-  );
+  const summary = lines.findLastIndex((line) => /(?:failing tests:|Failed Tests \d+)/.test(line));
+  const terminal = summary >= 0 ? lines.slice(summary + 1) : lines;
+  const hit =
+    terminal.find((line) => LINE_START_FAILURE_RE.test(line)) ||
+    lines.find((line) => !GREEN_LINE_RE.test(line) && INLINE_FAILURE_RE.test(line));
   return (hit || lines[lines.length - 1] || "failed").slice(0, 200);
 }
 
@@ -205,7 +201,10 @@ export function evaluateEslintRun({ code, out }, warningBaseline) {
     ];
   }
   const parsed = parseEslintJson(out);
-  if (!parsed) {
+  let counts;
+  try {
+    counts = eslintMeasurementCounts(parsed);
+  } catch {
     return [
       {
         id: "lint",
@@ -220,7 +219,7 @@ export function evaluateEslintRun({ code, out }, warningBaseline) {
     ];
   }
 
-  const { errors, warnings } = eslintCounts(parsed);
+  const { errors, warnings } = counts;
   const warningDrift = isDrift(warnings, warningBaseline);
   return [
     {
@@ -349,15 +348,8 @@ function evaluateWorkflowRun({ code, out }) {
   };
 }
 
-// ─── --full-ci: reproduce the EXACT ci.yml gate set (P0, v3.8.46 post-mortem) ──
-//
-// WHY: the curated HARD/DRIFT lists above are a hand-maintained SUBSET. The v3.8.46
-// release leaked 11 static/gate base-reds (route-validation:t06, docs-counts --strict,
-// docs-symbols, bundle-size --ratchet, test-masking, …) that the pre-flight never ran
-// because they live only in the ci.yml gate JOBS, not in this script. --full-ci reads
-// ci.yml itself and runs every `npm run check:*` / `npm run lint` from those jobs, so the
-// set stays current as gates are added (no drift between this script and CI). One command
-// → zero CI layers for the whole static category.
+// Legacy extraction remains a discovery helper for callers/tests. Full execution
+// uses the reviewed argv manifest, never whitespace-split workflow shell.
 
 /** ci.yml jobs whose npm-run gate steps --full-ci reproduces locally. */
 export const FULL_CI_GATE_JOBS = [
@@ -413,7 +405,8 @@ export function curatedEquivalentId(scriptId) {
  * not cover). This only changes WHICH BUCKET a result is printed in — it never changes whether
  * a gate runs, nor whether it passed.
  */
-export function fullCiKindFor(scriptId, results) {
+export function fullCiKindFor(scriptId, results, declaredKind) {
+  if (["hard", "drift"].includes(declaredKind)) return declaredKind;
   const equivalent = curatedEquivalentId(scriptId);
   const curated = (results || []).find((r) => r.id === scriptId || r.id === equivalent);
   return curated?.kind ?? "hard";
@@ -708,6 +701,28 @@ const PACK_GATE_ENV = { OMNIROUTE_RELEASE_REF: "HEAD" };
  */
 const BUILD_GATE_ENV = { OMNIROUTE_BUILD_MEMORY_MB: "12288" };
 
+/**
+ * Gate mode of the HARD items (see the header): `pr` unless the caller already chose one —
+ * either in this process's environment (buildGateEnv passes it through) or in the per-gate env.
+ */
+export const HARD_GATE_MODE = "pr";
+export function withHardGateMode(extra, baseEnv = process.env) {
+  const env = { ...(extra || {}) };
+  const chosen = String(env.OMNIROUTE_GATE_MODE ?? baseEnv.OMNIROUTE_GATE_MODE ?? "").trim();
+  if (!chosen) env.OMNIROUTE_GATE_MODE = HARD_GATE_MODE;
+  return env;
+}
+
+/** True when package.json declares the npm script (a DRIFT item can report a missing one). */
+export function hasNpmScript(name, root = ROOT) {
+  try {
+    const pkg = JSON.parse(readFileSync(join(root, "package.json"), "utf8"));
+    return typeof pkg?.scripts?.[name] === "string";
+  } catch {
+    return false;
+  }
+}
+
 function buildGateEnv(extra) {
   const env = { ...process.env, FORCE_COLOR: "0", ...(extra || {}) };
   if (hermetic) for (const k of HERMETIC_SCRUB) delete env[k];
@@ -761,7 +776,10 @@ async function runPackArtifactGate(timeoutMs) {
   for (const step of steps) {
     const remaining = deadline - Date.now();
     if (remaining <= 0) return classifyRunError({ killed: true, signal: "SIGTERM" }, timeoutMs);
-    const result = await runAsync(step.cmd, step.args, { env: step.env, timeout: remaining });
+    const result = await runAsync(step.cmd, step.args, {
+      env: withHardGateMode(step.env),
+      timeout: remaining,
+    });
     out += result.out;
     if (result.code !== 0) return { code: result.code, out };
   }
@@ -777,7 +795,7 @@ async function runUnitShards(total, pool, timeout) {
   const results = await runPool(shards, pool, async (shard) => {
     const { code, out } = await runAsync(npmCmd, ["run", "test:unit:ci:shard"], {
       timeout,
-      env: { TEST_SHARD: `${shard}/${total}` },
+      env: withHardGateMode({ TEST_SHARD: `${shard}/${total}` }),
       label: `${npmCmd} run test:unit:ci:shard (TEST_SHARD=${shard}/${total})`,
     });
     return { shard, total, code, out };
@@ -817,7 +835,7 @@ async function main() {
 
   const hardCmd = async (id, label, cmd, cmdArgs, opts) => {
     announce(label);
-    const { code, out } = await run(cmd, cmdArgs, opts);
+    const { code, out } = await run(cmd, cmdArgs, { ...opts, env: withHardGateMode(opts?.env) });
     saveGateLog(id, out);
     record({
       id,
@@ -828,6 +846,8 @@ async function main() {
     });
   };
 
+  // Curated ratchets retain their diagnostic bucket here. The full profile overrides
+  // it with the applicable policy, and incomplete command receipts remain blocking.
   // Ratchet findings remain drift. Workflow auditing additionally requires explicit
   // measurement evidence: its exit 1 can also mean missing/broken scanner tooling.
   // ALL checks run regardless of earlier failures (the report is collected, not
@@ -850,6 +870,7 @@ async function main() {
   };
 
   process.stderr.write("🔎 Release-green validation (current working tree)\n\n");
+  let freshLintReport = null;
 
   await hardCmd("typecheck", "Typecheck (core)", npmCmd, ["run", "typecheck:core"]);
 
@@ -882,17 +903,55 @@ async function main() {
       // then the timeout text was misreported as invalid JSON. Keep a real upper bound, but
       // leave enough headroom for the same full-tree walk that completes immediately after it
       // under the complexity config on that runner.
-      { timeout: ESLINT_TIMEOUT_MS }
+      { timeout: ESLINT_TIMEOUT_MS, env: withHardGateMode() }
     );
     const { out } = lintRun;
     saveGateLog("lint", out);
     for (const result of evaluateEslintRun(lintRun, baselineValue("eslintWarnings"))) {
       record(result);
     }
+    if ([0, 1].includes(lintRun.code) && ["PASS", "FAIL"].includes(lintRun.receipt.outcome)) {
+      try {
+        const parsed = parseEslintJson(out);
+        eslintMeasurementCounts(parsed);
+        const path = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
+        writeFileSync(path, `${JSON.stringify(parsed)}\n`, { flag: "wx", mode: 0o600 });
+        freshLintReport = path;
+      } catch {
+        record({
+          id: "lint-measurement",
+          label: "Retain the current ESLint measurement",
+          kind: "hard",
+          ok: false,
+          detail: "no complete lint report retained for this execution",
+        });
+      }
+    }
   }
 
   await hardCmd("db-rules", "DB rules", npmCmd, ["run", "check:db-rules"]);
   await hardCmd("public-creds", "Public creds", npmCmd, ["run", "check:public-creds"]);
+  // Cheap static check first: two PRs can still pick the same timestamp, and a merge whose
+  // CI ran on an older base lands the duplicate. Its message names the files; the fresh run
+  // below only sees the runner's collision error. --base-latest-tag also compares the tree
+  // with the newest vX.Y.Z release tag in its history (deleted/renamed/edited migrations,
+  // out-of-order ones + the commutation check): push and schedule runs have no PR base, and a
+  // pair that does not commute can still land through a manual merge without a CI re-run.
+  await hardCmd(
+    "migration-numbering",
+    "Migration numbering (names, duplicates, legacy range, vs latest release tag)",
+    npmCmd,
+    ["run", "check:migration-numbering", "--", "--base-latest-tag"]
+  );
+  // Timestamped migrations (YYYYMMDDHHMMSS_…) no longer race for a number, so the real risk
+  // is an earlier-dated migration that depends on a later one: green alone in each PR, red
+  // on a fresh install once both land. Apply the whole set to an empty database, in order.
+  await hardCmd(
+    "migrations-fresh",
+    "Migrations: apply every migration to an empty database",
+    npmCmd,
+    ["run", "test:migrations:fresh"]
+  );
 
   // Complexity + cognitive (one ESLint walk; both still recorded as drift)
   {
@@ -928,7 +987,7 @@ async function main() {
       timeout: 60 * 1000,
     });
     const { code, out } = await run(npmCmd, ["run", "check:test-masking"], {
-      env: { GITHUB_BASE_REF: "main" },
+      env: withHardGateMode({ GITHUB_BASE_REF: "main" }),
     });
     saveGateLog("test-masking", out);
     record({
@@ -977,6 +1036,28 @@ async function main() {
     ["run", "check:pricing-freshness"],
     "touched within 90 days"
   );
+
+  // Derived numbers vs the live code — the strict view the HARD items no longer take (they run
+  // in pr mode, see the header). Between releases the base is behind the code by design, so a
+  // finding here is refreshed by the release (or the nightly derived-refresh PR), never a
+  // base-red. Reported as skipped while the refresh script is not in the tree.
+  if (hasNpmScript("release:refresh-derived")) {
+    await driftCmd(
+      "derived-refresh",
+      "Derived numbers vs live code (release:refresh-derived --check)",
+      npmCmd,
+      ["run", "release:refresh-derived", "--", "--check"],
+      "every derived number matches the live code"
+    );
+  } else {
+    record({
+      id: "derived-refresh",
+      label: "Derived numbers vs live code (release:refresh-derived --check)",
+      kind: "drift",
+      ok: true,
+      detail: "skipped: the release:refresh-derived script is not in this tree",
+    });
+  }
 
   // Docs sync + fabricated-docs (strict) is a real-defect gate (invented env vars /
   // routes, i18n mirror drift) — HARD.
@@ -1088,7 +1169,7 @@ async function main() {
             id: "unit",
             label: `Unit tests (ci.yml's ${unitShards} shards, ${unitPool} at a time — ~13min per shard on a hosted runner)`,
             run: (timeout) => runUnitShards(unitShards, unitPool, timeout),
-            // Per shard. ci.yml gives a shard 25 min including setup; 40 min still turns a
+            // Per shard. ci.yml gives a shard 35 min including setup; 40 min still turns a
             // stuck SQLite handle (zero progress forever) into a visible failure.
             timeout: 40 * 60 * 1000,
           }
@@ -1123,7 +1204,18 @@ async function main() {
         id: "pack-artifact",
         label: "Package artifact (npm pack policy)",
         run: runPackArtifactGate,
-        timeout: 20 * 60 * 1000,
+        // Covers build:cli + check:pack-artifact. Measured 2026-10-31 on an idle runner and a
+        // stationary tip: next build compiles silently for ~12 min, keeps printing, and the old
+        // 20 min ceiling killed it on every scheduled run. 40 min still turns a genuine hang
+        // into a visible failure (same reasoning as the integration ceiling above).
+        // Measured 2026-11-02: build:cli took 2237 s and 2372 s on two sweeps of the same day and
+        // check:pack-artifact about 150 s, so the 40 min ceiling left seconds of headroom and
+        // killed the second run. 60 min restored the margin for a while.
+        // Measured 2026-11-05: build:cli now takes about 52 min and check:pack-artifact about
+        // 8 min. Run 42038590490 hit the shared 60 min deadline mid-pack (52.1 + 7.9) and the
+        // green run before it passed by 40 s (51.4 + 7.9). 90 min restores real headroom; a
+        // genuine hang still fails.
+        timeout: 90 * 60 * 1000,
       });
     }
     // With --suites-from only the build lane is left for this slot.
@@ -1133,7 +1225,7 @@ async function main() {
       announce(g.label);
       const result = await (g.run
         ? g.run(g.timeout)
-        : runAsync(npmCmd, g.args, { timeout: g.timeout, env: g.env }));
+        : runAsync(npmCmd, g.args, { timeout: g.timeout, env: withHardGateMode(g.env) }));
       slowResults.push(result);
       saveGateLog(g.id, result.out);
       record({
@@ -1166,8 +1258,11 @@ async function main() {
         });
       } else {
         announce(bootLabel);
+        // Packs and installs the real tarball, so it scales with the package: the translated
+        // docs mirrors (#18869) added 8,885 files, and 15 minutes stopped being enough.
         const { code, out } = await runAsync(npmCmd, ["run", "check:pack-boot"], {
-          timeout: 15 * 60 * 1000,
+          timeout: 40 * 60 * 1000,
+          env: withHardGateMode(),
         });
         saveGateLog("pack-boot", out);
         record({
@@ -1192,44 +1287,87 @@ async function main() {
     });
   }
 
-  // --full-ci: run every static gate declared in ci.yml's gate jobs (superset of the
-  // curated HARD list above). Combine with --quick to run ONLY these + drift ratchets
-  // (skip the slow suites) — the "1 command, 0 CI layers" pre-flight for the static category.
+  // --full-ci executes the reviewed static argv profile and rejects drift in modeled
+  // workflow requirements. It does not interpret workflow shell or replace hosted lanes.
   if (FULL_CI) {
     let gates = [];
     try {
-      gates = extractCiGates(readFileSync(join(ROOT, ".github/workflows/ci.yml"), "utf8"));
+      gates = loadFullCiProfile(ROOT);
     } catch (err) {
       record({
         id: "full-ci-extract",
-        label: "full-ci: parse .github/workflows/ci.yml",
+        label: "full-ci: validate explicit static profile",
         kind: "hard",
         ok: false,
-        detail: `could not read/parse ci.yml: ${err?.message || err}`,
+        detail: `invalid full static profile: ${err?.message || err}`,
       });
     }
     const already = new Set(results.map((r) => r.id));
-    process.stderr.write(`\n──── full-ci gates from ci.yml (${gates.length}) ────\n`);
+    let metricsCollected = false;
+    process.stderr.write(`\n──── full-ci explicit static gates (${gates.length}) ────\n`);
     for (const g of gates) {
+      const prior = results.find((result) => result.id === curatedEquivalentId(g.id));
+      // A declared required gate upgrades an old curated drift bucket; it never downgrades a
+      // curated hard result (for example incomplete workflow-audit evidence).
+      if (prior && g.kind === "hard") prior.kind = "hard";
       // Skip a gate the curated pass already ran with the same id (avoid double-running lint).
       if (already.has(g.id)) continue;
-      const { code, out } = await run(npmCmd, g.args, {
-        env: g.env,
+      const collectsMetrics = g.args[1] === "quality:collect";
+      const checksMetrics = g.args[1] === "quality:ratchet";
+      if ((collectsMetrics && !freshLintReport) || (checksMetrics && !metricsCollected)) {
+        record({
+          id: g.id,
+          label: `${g.job} → npm ${g.args.join(" ")}`,
+          kind: "hard",
+          ok: false,
+          evidenceState: "INCOMPLETE",
+          detail: collectsMetrics
+            ? "current ESLint measurement unavailable; metrics were not collected"
+            : "current metrics collection incomplete; ratchet was not evaluated",
+        });
+        continue;
+      }
+      // HARD here means the bucket the result lands in; only HARD gates switch to pr mode.
+      const hardGate = fullCiKindFor(g.id, results, g.kind) === "hard";
+      const gateEnv = {
+        ...g.env,
+        ...(collectsMetrics ? { ESLINT_RESULTS_JSON: freshLintReport } : {}),
+      };
+      const { code, out, receipt } = await run(npmCmd, g.args, {
+        env: hardGate ? withHardGateMode(gateEnv) : gateEnv,
         timeout: fullCiTimeoutFor(g.id),
       });
       saveGateLog(`fullci-${g.id.replace(/[^a-z0-9]+/gi, "-")}`, out);
+      const outcome = staticGateOutcome(code, out, receipt.outcome);
+      if (collectsMetrics) metricsCollected = outcome.ok;
       record({
         id: g.id,
-        label: `ci.yml:${g.job} → npm ${g.args.join(" ")}`,
-        // Respect the curated classification when the curated pass already ran an equivalent
-        // gate under a different id — otherwise the same ratchet is reported as a HARD failure
-        // here AND as drift above, in one self-contradicting verdict.
+        label: `${g.job} → npm ${g.args.join(" ")}`,
+        // Workflow auditing additionally requires explicit scanner measurement evidence;
+        // every other gate follows the declared profile policy and its command receipt.
         ...(g.id === "check:workflows"
-          ? evaluateWorkflowRun({ code, out })
+          ? (() => {
+              const workflow = evaluateWorkflowRun({ code, out });
+              const incomplete = outcome.evidenceState === "INCOMPLETE";
+              return {
+                kind: workflow.kind === "hard" ? "hard" : fullCiKindFor(g.id, results, g.kind),
+                ok: workflow.ok && outcome.ok,
+                evidenceState: incomplete ? "INCOMPLETE" : workflow.evidenceState,
+                detail: incomplete
+                  ? "required measurement incomplete; inspect gate log"
+                  : workflow.detail,
+              };
+            })()
           : {
-              kind: fullCiKindFor(g.id, results),
-              ok: code === 0,
-              detail: code === 0 ? "pass" : firstFailureLine(out),
+              kind: fullCiKindFor(g.id, results, g.kind),
+              ok: outcome.ok,
+              evidenceState: outcome.evidenceState,
+              detail:
+                outcome.evidenceState === "INCOMPLETE"
+                  ? "required measurement incomplete; inspect gate log"
+                  : outcome.ok
+                    ? "pass"
+                    : firstFailureLine(out),
             }),
       });
     }
@@ -1251,13 +1389,15 @@ async function main() {
   const { releaseGreen, hardFailures, drift } = computeVerdict(results);
 
   process.stderr.write("\n──────── verdict ────────\n");
-  process.stderr.write(`HARD failures (block — real defects): ${hardFailures.length}\n`);
+  process.stderr.write(
+    `HARD failures (blocking requirements or incomplete evidence): ${hardFailures.length}\n`
+  );
   hardFailures.forEach((r) => process.stderr.write(`  ❌ ${r.label}: ${r.detail}\n`));
-  process.stderr.write(`Ratchet drift (non-blocking — rebaseline at release): ${drift.length}\n`);
+  process.stderr.write(`Advisory drift in this profile: ${drift.length}\n`);
   drift.forEach((r) => process.stderr.write(`  🟡 ${r.label}: ${r.detail}\n`));
   process.stderr.write(
     releaseGreen
-      ? "\n✅ RELEASE-GREEN (no hard failures). Any drift above is rebaselined at release, not a contributor concern.\n"
+      ? "\n✅ RELEASE-GREEN for this observer profile. Advisory debt remains visible; candidate admission requires every applicable check.\n"
       : "\n❌ NOT release-green — inspect execution evidence and compare the exact base before attributing a failure to a contributor.\n"
   );
 

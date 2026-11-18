@@ -107,7 +107,7 @@ vienai saskarnei, bet ne pārējām, testu komplekts neizdodas, nevis ļauj neat
 
 ---
 
-## 1. CLI koda katalogs (27 rīki)
+## 1. CLI koda katalogs (28 rīki)
 
 Visi rīki, kas parādās `/dashboard/cli-code`. Tie, kuriem ir `baseUrlSupport: none` ir savienoti ar MITM vai manuālo ceļvedi, nevis pielāgotu bāzes URL:
 
@@ -134,6 +134,7 @@ Visi rīki, kas parādās `/dashboard/cli-code`. Tie, kuriem ir `baseUrlSupport:
 | grok-būvēt       | Grok Build                  | xAI                       | pilns          | pasūtījuma           | viltus       |
 | simpātiju        | Sasmalciniet                | OSS (šarms)               | pilns          | pasūtījuma           | viltus       |
 | qwen             | Qwen kods                   | Alibaba                   | pilns          | ceļvedis             | taisnība     |
+| openclaude       | OpenClaude                  | Gitlawb (OSS)             | pilns          | ceļvedis             | viltus       |
 | zed              | Zed                         | Zed Industries            | pilns          | ceļvedis             | viltus       |
 | kursors          | Cursor                      | Jebkura sfēra             | neviens        | ceļvedis             | viltus       |
 | antigravitācija  | Antigravity                 | Google                    | neviens        | mitm                 | viltus       |
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Iestatījumu apstrādātāji jaunajiem rīkiem
+## 6. Iestatījumu apstrādātāji jauniem rīkiem
 
-Jaunajiem rīkiem ar `configType: "custom"` ir īpaši iestatījumu API maršruti:
+Jaunajiem rīkiem ar `configType: "custom"` ir īpaši iestatījumi API maršrutiem:
 
-| Maršruts                                    | Rīks                                                                          |
-| ------------------------------------------- | ----------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                       |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url karodziņš)                                                  |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, mantotais)                                     |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primārais + mantotā `~/.deepseek` sinhronizācija) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                         |
-| `POST /api/cli-tools/pi-settings`           | Pi programmēšanas aģents                                                      |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                         |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + īpaša `.env` atslēga)                    |
+| Maršruts                                    | Rīks                                                                        |
+| ------------------------------------------- | --------------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                     |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url karogs)                                                   |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, mantojums)                                   |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primārā + mantotā `~/.deepseek` sinhronizācija) |
+| `POST /api/cli-tools/smelt-settings`        | Smaka                                                                       |
+| `POST /api/cli-tools/pi-settings`           | Pi kodēšanas aģents (`~/.pi/agent/models.json`, `providers.omniroute`)      |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                       |
+| `POST /api/cli-tools/qwen-settings`         | Qwen kods (`~/.qwen/settings.json` + īpaša `.env` atslēga)                  |
 
-Visi maršruti kļūdu atbildēm izmanto `sanitizeErrorMessage()` (stingrais noteikums Nr. 12).
+Visos maršrutos kļūdu atbildēm tiek izmantots `sanitizeErrorMessage()` (Cietais noteikums Nr. 12).
 
 ---
 
@@ -291,21 +292,21 @@ Ir nodrošināti pilni PT-BR un EN tulkojumi. 39 citām lokalizācijām automāt
 
 ---
 
-## 9. Ātrā darba sākšana
+## 9. Ātrā palaišana
 
-### 1. darbība — iegūstiet OmniRoute API atslēgu
+### 1. darbība — Iegūstiet OmniRoute API atslēgu
 
-1. Atveriet `/dashboard/api-manager` → **Izveidot API atslēgu**
+1. Atveriet `/dashboard/api-manager` →** Izveidojiet API atslēgu**
 2. Piešķiriet tai nosaukumu (piemēram, `cli-tools`) un atlasiet visas atļaujas
-3. Nokopējiet atslēgu — tā būs nepieciešama katram tālāk norādītajam CLI
+3. Kopējiet atslēgu — kas jums būs nepieciešama katram tālāk norādītajam CLI
 
 > Jūsu atslēga izskatās šādi: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### 2. darbība — instalējiet CLI rīkus
+### 2. darbība — Instalējiet CLI rīkus
 
-Visiem uz npm balstītajiem rīkiem ir nepieciešams Node.js 22.22.2+ vai 24.x:
+Visiem uz npm balstītiem rīkiem ir nepieciešama Node.js 22.22.2 + vai 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,58 +327,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (palaižams ar `omniroute run gemini` → /v1beta saskarne)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Balstīts uz Rust
+cargo install smelt  # Rust-based
 
-# Pi programmēšanas aģents
-# instalēšanas norādījumus skatiet vietnē https://github.com/zechnerj/pi-coding-agent
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# instalēšanas norādījumus skatiet vietnē https://github.com/1jehuang/jcode
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### 3. darbība — konfigurējiet informācijas panelī
+### 3. darbība — Konfigurējiet, izmantojot informācijas paneli
 
-1. Atveriet `http://localhost:20128/dashboard/cli-code`
-2. Režģī atrodiet savu rīku
-3. Noklikšķiniet uz kartītes, lai atvērtu rīka detalizēto lapu
-4. Atlasiet savu API atslēgu un bāzes URL
-5. Noklikšķiniet uz **Lietot konfigurāciju** vai nokopējiet manuālās konfigurācijas fragmentu
+1. Iet uz `http://localhost:20128/dashboard/cli-code`
+2. Atrodiet savu rīku režģī
+3. Noklikšķiniet uz kartītes, lai atvērtu rīka informācijas lapu
+4. Izvēlieties savu API atslēgu un pamata URL
+5. Noklikšķiniet** Lietot konfigurāciju** vai kopējiet manuālās konfigurācijas fragmentu
 
 ---
 
-### 4. darbība — iestatiet globālos vides mainīgos
+### 4. darbība — Iestatiet globālos vides mainīgos
 
 ```bash
-# OmniRoute universālais galapunkts
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI nolasa GOOGLE_GEMINI_BASE_URL SAKNES līmenī (tā SDK pats pievieno /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **Attālam serverim** aizstājiet `localhost:20128` ar servera IP adresi vai domēnu,
-> piemēram, `http://<your-server-ip>:20128`.
+> Par a** attālais serveris** aizstājiet `localhost:20128` ar serveri IP vai domēnu, piemēram, `http://<your-server-ip>:20128`.
 
 ---
 
-### 4. darbība — konfigurējiet katru rīku
+### 4. darbība — Konfigurējiet katru rīku
 
-#### Claude Code
+#### Claude kods
 
 ```bash
-# Izveidojiet ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Claude Code vajadzībām izmantojiet vienotās Anthropic vārtejas saknes adresi. Šeit nepievienojiet `/v1`.
+Claude kodam izmantojiet vienoto Anthropic vārtejas sakni. Šeit nepievienojiet `/v1`.
 
 **Pārbaude:** `claude "say hello"`
 
@@ -396,10 +396,7 @@ Claude Code vajadzībām izmantojiet vienotās Anthropic vārtejas saknes adresi
 
 #### OpenAI Codex
 
-Mūsdienu Codex (v0.137+) nolasa tikai `~/.codex/config.toml` — vecais
-`config.yaml` pieder mantotajam npm CLI un tiek bez brīdinājuma ignorēts. API
-atslēga paliek vides mainīgajā `OMNIROUTE_API_KEY` (`env_key`), nevis
-failā:
+Mūsdienu Codex (v0.137 +) nolasa tikai `~/.codex/config.toml` — vecais `config.yaml` pieder mantotajam npm CLI un tiek klusi ignorēts. Taustiņš API paliek `OMNIROUTE_API_KEY` vides mainīgajā (`env_key`), nekad nav failā:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -447,12 +444,42 @@ EOF
 
 **Pārbaude:** `opencode`
 
-> Izmantojiet `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`,
-> lai nosūtītu domāšanas variantus.
+> Izmantojiet `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`, lai nosūtītu domāšanas variantus.
 
 ---
 
-#### Cline (CLI vai VS Code)
+#### Pi kodēšanas aģents
+
+Instalējiet oficiālo Pi kodēšanas aģenta pakotni ar `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi nolasa pielāgotus pakalpojumu sniedzējus no `~/.pi/agent/models.json`; iestatiet `PI_CODING_AGENT_DIR`, lai pārvietotu visu aģenta direktoriju. Informācijas panelis seko šai ignorēšanai. Pi neatklāj modeļus no pielāgotajiem galapunktiem, tāpēc OmniRoute ieraksta atlasīto modeli `models[]`, izmantojot Pi `openai-completions` API un OmniRoute OpenAI saderīgo `/v1` galapunktu.
+
+In**CLI Tools → Pi** , izvēlieties beigu punktu, API atslēgu un modeli, pārskatiet nodrošinātāja priekšskatījumu un pēc tam lietojiet. Priekšskatījums ir nodrošinātāja fragments: apvienojiet `providers.omniroute` ar esošo `models.json`, konfigurējot Pi manuāli, lai citi pakalpojumu sniedzēji un iestatījumi paliktu neskarti.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi atkārtoti ielādē `models.json` kad atverat `/model`. Pārbaudiet konfigurēto maršrutu ar atlasīto pakalpojumu sniedzēja ID un modeļa ID:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Atsauces: [Pi modeļi un pielāgoti pakalpojumu sniedzēji](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi vides mainīgie](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi instalēšanas norādījumi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (CLI vai VS kods)
 
 **CLI režīms:**
 
@@ -466,14 +493,13 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code režīms:**
-Cline paplašinājuma iestatījumi → API nodrošinātājs: `OpenAI Compatible` → Bāzes URL: `http://localhost:20128/v1`
+**VS koda režīms:** Cline paplašinājuma iestatījumi → API Pakalpojumu sniedzējs: `OpenAI Compatible` → Pamatne URL: `http://localhost:20128/v1`
 
-Vai izmantojiet OmniRoute informācijas paneli → **CLI rīki → Cline → Lietot konfigurāciju**.
+Vai arī izmantojiet OmniRoute informācijas paneli →**CLI Tools → Cline → Apply Config** .
 
 ---
 
-#### KiloCode (CLI vai VS Code)
+#### KiloCode (CLI vai VS kods)
 
 **CLI režīms:**
 
@@ -481,7 +507,7 @@ Vai izmantojiet OmniRoute informācijas paneli → **CLI rīki → Cline → Lie
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code iestatījumi:**
+**VS koda iestatījumi:**
 
 ```json
 {
@@ -490,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Vai izmantojiet OmniRoute informācijas paneli → **CLI rīki → KiloCode → Lietot konfigurāciju**.
+Vai arī izmantojiet OmniRoute informācijas paneli →**CLI Tools → KiloCode → Apply Config** .
 
 ---
 
-#### Continue (VS Code paplašinājums)
+#### Turpināt (VS koda paplašinājums)
 
-Rediģējiet `~/.continue/config.yaml`:
+Rediģēt `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -508,13 +534,13 @@ models:
     default: true
 ```
 
-Pēc rediģēšanas restartējiet VS Code.
+Pēc rediģēšanas restartējiet VS kodu.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Izmantojiet šo iespēju, ja VS Code Insiders ir konfigurēts pielāgotu galapunktu modeļiem un vēlaties, lai OmniRoute darbotos bez pielāgota galvenes lauka.
+Izmantojiet to, ja VS Code Insiders ir konfigurēts pielāgotiem galapunktu modeļiem un vēlaties, lai OmniRoute darbotos bez pielāgota galvenes lauka.
 
 **Ieteicamā atrašanās vieta:**
 
@@ -545,27 +571,26 @@ Izmantojiet šo iespēju, ja VS Code Insiders ir konfigurēts pielāgotu galapun
 
 **Piezīmes:**
 
-- Aizstājiet `sk-your-omniroute-key` ar OmniRoute izveidotu API atslēgu.
-- Laukam `url` jānorāda uz `/api/v1/vscode/{token}/chat/completions`.
-- Laukam `modelsUrl` jānorāda uz `/api/v1/vscode/{token}/models`.
-- Ja klients atbalsta pielāgotas galvenes, dodiet priekšroku parastajai `/v1` plūsmai ar Bearer galveni.
-- URL iegultie tokeni ir saderības rezerves risinājums, un tie var parādīties redaktora žurnālos vai starpniekservera vēsturē.
+- Aizstāt `sk-your-omniroute-key` ar API atslēgu, kas izveidota OmniRoute.
+- `url` laukam jānorāda uz `/api/v1/vscode/{token}/chat/completions`.
+- `modelsUrl` laukam jānorāda uz `/api/v1/vscode/{token}/models`.
+- Dodiet priekšroku parastajai `/v1` + nesēja galvenes plūsmai, ja klients atbalsta pielāgotas galvenes.
+- URL iegultās pilnvaras ir saderības rezerves, un tās var parādīties redaktora žurnālos vai starpniekservera vēsturē.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Piesakieties savā AWS/Kiro kontā:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI izmanto savu autentifikāciju — OmniRoute nav nepieciešams kā aizmugursistēma pašam Kiro CLI.
-# Izmantojiet kiro-cli kopā ar OmniRoute citiem rīkiem.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-**Kiro IDE** darbvirsmas lietotnei izmantojiet OmniRoute nodrošināto MITM galapunktu,
-kas atrodas sadaļā `/dashboard/cli-tools → Kiro`.
+Par**Kiro IDE** darbvirsmas lietotnē izmantojiet MITM galapunktu, ko OmniRoute atklāj zem `/dashboard/cli-tools → Kiro`.
 
 ---
 

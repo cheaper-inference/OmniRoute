@@ -107,41 +107,42 @@ isang surface nang wala sa iba, mabibigo ang suite sa halip na tahimik na magkar
 
 ---
 
-## 1. Katalogo ng CLI Code (27 tool)
+## 1. CLI Code's Catalog (28 tool)
 
-Lahat ng tool na lumalabas sa `/dashboard/cli-code`. Ang mga may `baseUrlSupport: none` ay ikinokonekta sa pamamagitan ng MITM o manu-manong gabay sa halip na custom na base URL:
+Lahat ng mga tool na lumalabas sa `/dashboard/cli-code`. Ang mga may `baseUrlSupport: none` ay naka-wire sa MITM o isang manu-manong gabay sa halip na isang custom na base URL:
 
-| id           | name                    | vendor                  | baseUrlSupport | configType     | acpSpawnable |
-| ------------ | ----------------------- | ----------------------- | -------------- | -------------- | ------------ |
-| claude       | Claude Code             | Anthropic               | full           | env            | true         |
-| codex        | OpenAI Codex CLI        | OpenAI                  | full           | custom         | true         |
-| zcode        | ZCode (GLM Coding Plan) | Z.ai                    | none           | custom         | false        |
-| cline        | Cline                   | OSS (dating Claude Dev) | full           | custom         | true         |
-| kilo         | Kilo Code               | Kilo-Org                | full           | custom         | false        |
-| roo          | Roo Code                | Roo (OSS)               | full           | guide          | false        |
-| continue     | Continue                | continue.dev            | full           | guide          | false        |
-| aider        | Aider                   | OSS (P. Gauthier)       | full           | guide          | true         |
-| forge        | ForgeCode               | Antinomy HQ             | full           | custom         | true         |
-| jcode        | jcode                   | 1jehuang (OSS)          | full           | custom         | false        |
-| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)       | full           | custom         | false        |
-| codewhale    | CodeWhale               | Hmbown (OSS)            | full           | custom         | false        |
-| opencode     | OpenCode                | Anomaly (dating SST)    | full           | guide          | true         |
-| droid        | Factory Droid           | Factory AI              | partial        | guide          | false        |
-| copilot      | GitHub Copilot CLI      | GitHub/MS               | full           | custom         | false        |
-| cursor-cli   | Cursor CLI              | Anysphere               | partial        | guide          | true         |
-| smelt        | Smelt                   | leonardcser (OSS)       | full           | custom         | false        |
-| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)        | full           | custom         | false        |
-| grok-build   | Grok Build              | xAI                     | full           | custom         | false        |
-| crush        | Crush                   | OSS (Charm)             | full           | custom         | false        |
-| qwen         | Qwen Code               | Alibaba                 | full           | guide          | true         |
-| zed          | Zed                     | Zed Industries          | full           | guide          | false        |
-| cursor       | Cursor                  | Anysphere               | none           | guide          | false        |
-| antigravity  | Antigravity             | Google                  | none           | mitm           | false        |
-| hermes       | Hermes                  | Nous Research           | none           | guide          | false        |
-| kiro         | Kiro AI                 | Amazon                  | none           | mitm           | false        |
-| custom       | Custom CLI              | —                       | full           | custom-builder | false        |
+| id           | pangalan                | nagtitinda          | baseUrlSupport | configType     | acpSpawnable |
+| ------------ | ----------------------- | ------------------- | -------------- | -------------- | ------------ |
+| claude       | Claude Code             | Anthropic           | puno na        | env            | totoo        |
+| codex        | OpenAI Codex CLI        | OpenAI              | puno na        | kaugalian      | totoo        |
+| zcode        | ZCode (GLM Coding Plan) | Z.ai                | wala           | kaugalian      | mali         |
+| cline        | Cline                   | OSS (ex-Claude Dev) | puno na        | kaugalian      | totoo        |
+| kilo         | Kilo Code               | Kilo-Org            | puno na        | kaugalian      | mali         |
+| roo          | Roo Code                | Roo (OSS)           | puno na        | gabay          | mali         |
+| magpatuloy   | Magpatuloy              | magpatuloy.dev      | puno na        | gabay          | mali         |
+| katulong     | Aider                   | OSS (P. Gauthier)   | puno na        | gabay          | totoo        |
+| huwad        | ForgeCode               | Antinomy HQ         | puno na        | kaugalian      | totoo        |
+| jcode        | jcode                   | 1jehuang (OSS)      | puno na        | kaugalian      | mali         |
+| deepseek-tui | DeepSeek TUI            | Hunter Bown (OSS)   | puno na        | kaugalian      | mali         |
+| codewhale    | CodeWhale               | Hmbown (OSS)        | puno na        | kaugalian      | mali         |
+| opencode     | OpenCode                | Anomalya (ex-SST)   | puno na        | gabay          | totoo        |
+| droid        | Factory Droid           | Pabrika AI          | bahagyang      | gabay          | mali         |
+| copilot      | GitHub Copilot CLI      | GitHub/MS           | puno na        | kaugalian      | mali         |
+| cursor-cli   | Cursor CLI              | Anysphere           | bahagyang      | gabay          | totoo        |
+| naamoy       | Naamoy                  | leonardcser (OSS)   | puno na        | kaugalian      | mali         |
+| pi           | Pi (pi-coding-agent)    | M. Zechner (OSS)    | puno na        | kaugalian      | mali         |
+| grok-build   | Grok Build              | xAI                 | puno na        | kaugalian      | mali         |
+| crush        | Crush                   | OSS (Kaakit-akit)   | puno na        | kaugalian      | mali         |
+| qwen         | Qwen Code               | Alibaba             | puno na        | gabay          | totoo        |
+| openclaude   | OpenClaude              | Gitlawb (OSS)       | puno na        | gabay          | mali         |
+| zed          | Zed                     | Zed Industriya      | puno na        | gabay          | mali         |
+| cursor       | Cursor                  | Anysphere           | wala           | gabay          | mali         |
+| antigravity  | Antigravity             | Google              | wala           | mitm           | mali         |
+| hermes       | Hermes                  | Nous Research       | wala           | gabay          | mali         |
+| kiro         | Kiro AI                 | Amazon              | wala           | mitm           | mali         |
+| kaugalian    | Custom CLI              | —                   | puno na        | custom-builder | mali         |
 
-Ang mga tool na may `baseUrlSupport: "partial"` ay nagpapakita ng badge na "⚠ Bahagyang Base URL" sa card ng dashboard.
+Ang mga tool na may `baseUrlSupport: "partial"` ay nagpapakita ng badge na "⚠ Base URL parcial" sa dashboard card.
 ---
 
 ## 2. CLI Agents Catalog (11 tool)
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Mga Settings Handler para sa mga Bagong Tool
+## 6. Mga Tagapangasiwa ng Mga Setting para sa Mga Bagong Tool
 
-Ang mga bagong tool na may `configType: "custom"` ay may mga nakalaang settings API route:
+Ang mga bagong tool na may `configType: "custom"` ay may nakalaang mga setting ng mga ruta API :
 
-| Route                                       | Tool                                                                   |
-| ------------------------------------------- | ---------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                |
-| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flag)                                                |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                                 |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, pangunahin + legacy na `~/.deepseek` sync) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                  |
-| `POST /api/cli-tools/pi-settings`           | Pi coding agent                                                        |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                  |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + nakalaang `.env` key)             |
+| Ruta                                        | Tool                                                                 |
+| ------------------------------------------- | -------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                              |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flag)                                              |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                               |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, pangunahing + legacy `~/.deepseek` sync) |
+| `POST /api/cli-tools/smelt-settings`        | Naamoy                                                               |
+| `POST /api/cli-tools/pi-settings`           | Pi coding agent (`~/.pi/agent/models.json`, `providers.omniroute`)   |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + dedicated `.env` key)           |
 
-Ginagamit ng lahat ng route ang `sanitizeErrorMessage()` para sa mga tugon sa error (Mahigpit na Panuntunan #12).
+Gumagamit ang lahat ng ruta `sanitizeErrorMessage()` para sa mga tugon ng error (Mahirap na Panuntunan #12).
 
 ---
 
@@ -291,21 +292,21 @@ May ibinigay na kumpletong salin sa PT-BR at EN. Awtomatikong gumagamit ng EN bi
 
 ---
 
-## 9. Mabilisang Pagsisimula
+## 9. Mabilis na Pagsisimula
 
 ### Hakbang 1 — Kumuha ng OmniRoute API Key
 
-1. Buksan ang `/dashboard/api-manager` → **Gumawa ng API Key**
-2. Bigyan ito ng pangalan (hal. `cli-tools`) at piliin ang lahat ng pahintulot
+1. Buksan ang `/dashboard/api-manager` →** Lumikha ng API Key**
+2. Bigyan ito ng pangalan (hal. `cli-tools`) at piliin ang lahat ng mga pahintulot
 3. Kopyahin ang key — kakailanganin mo ito para sa bawat CLI sa ibaba
 
-> Ganito ang hitsura ng iyong key: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Ang iyong susi ay mukhang: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Hakbang 2 — I-install ang mga CLI Tool
+### Hakbang 2 — Mag-install ng CLI Tools
 
-Nangangailangan ang lahat ng tool na nakabatay sa npm ng Node.js 22.22.2+ o 24.x:
+Ang lahat ng mga tool na nakabatay sa npm ay nangangailangan ng Node.js 22.22.2 + o 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,49 +327,48 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (maaaring ilunsad sa pamamagitan ng `omniroute run gemini` → /v1beta surface)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Nakabatay sa Rust
+cargo install smelt  # Rust-based
 
 # Pi coding agent
-# tingnan ang https://github.com/zechnerj/pi-coding-agent para sa pag-install
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# tingnan ang https://github.com/1jehuang/jcode para sa pag-install
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Hakbang 3 — I-configure sa Pamamagitan ng Dashboard
+### Hakbang 3 — I-configure sa pamamagitan ng Dashboard
 
 1. Pumunta sa `http://localhost:20128/dashboard/cli-code`
 2. Hanapin ang iyong tool sa grid
-3. I-click ang card upang buksan ang pahina ng detalye ng tool
+3. I-click ang card para buksan ang page ng detalye ng tool
 4. Piliin ang iyong API key at base URL
-5. I-click ang **Ilapat ang Config** o kopyahin ang snippet ng manual na config
+5. I-click** Ilapat ang Config** o kopyahin ang manu-manong config snippet
 
 ---
 
-### Hakbang 4 — Itakda ang mga Global Environment Variable
+### Hakbang 4 — Magtakda ng Global Environment Variables
 
 ```bash
-# Universal Endpoint ng OmniRoute
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Binabasa ng Gemini CLI ang GOOGLE_GEMINI_BASE_URL sa ROOT (ang SDK nito mismo ang nagdaragdag ng /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Para sa isang **remote server**, palitan ang `localhost:20128` ng IP o domain ng server,
-> hal. `http://<your-server-ip>:20128`.
+> Para sa isang** malayong server** palitan `localhost:20128` ng server IP o domain, hal `http://<your-server-ip>:20128`.
 
 ---
 
@@ -377,7 +377,7 @@ export GEMINI_API_KEY="sk-your-omniroute-key"
 #### Claude Code
 
 ```bash
-# Gumawa ng ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,18 +388,15 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Gamitin ang pinag-isang root ng Anthropic gateway para sa Claude Code. Huwag idagdag ang `/v1` dito.
+Gamitin ang pinag-isang Anthropic gateway root para sa Claude Code. Huwag idagdag `/v1` dito.
 
-**Subukan:** `claude "say hello"`
+**Pagsubok:** `claude "say hello"`
 
 ---
 
 #### OpenAI Codex
 
-Ang modernong Codex (v0.137+) ay nagbabasa lamang ng `~/.codex/config.toml` — ang lumang
-`config.yaml` ay para sa legacy npm CLI at tahimik na binabalewala. Nananatili ang API
-key sa `OMNIROUTE_API_KEY` environment variable (`env_key`), at hindi kailanman
-sa loob ng file:
+Ang modernong Codex (v0.137 +) ay nagbabasa `~/.codex/config.toml` lamang — ang lumang `config.yaml` ay kabilang sa legacy npm CLI at tahimik na hindi pinapansin. Ang API key ay nananatili sa `OMNIROUTE_API_KEY` environment variable (`env_key`), hindi kailanman sa loob ng file:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -414,9 +411,9 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Kumpletong sanggunian (mga profile, `wire_api`, mga context window): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Buong sanggunian (mga profile, `wire_api`, mga window ng konteksto): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
-**Subukan:** `codex "what is 2+2?"`
+**Pagsubok:** `codex "what is 2+2?"`
 
 ---
 
@@ -445,10 +442,40 @@ mkdir -p ~/.config/opencode && cat > ~/.config/opencode/opencode.json << EOF
 EOF
 ```
 
-**Subukan:** `opencode`
+**Pagsubok:** `opencode`
 
-> Gamitin ang `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> upang magpadala ng mga thinking variant.
+> Gamitin `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` upang magpadala ng mga variant ng pag-iisip.
+
+---
+
+#### Ahente ng Pi Coding
+
+I-install ang opisyal na Pi Coding Agent package na may `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Binabasa ng Pi ang mga custom na provider mula sa `~/.pi/agent/models.json`; itakda ang `PI_CODING_AGENT_DIR` upang ilipat ang buong direktoryo ng ahente. Sinusundan ng dashboard ang override na iyon. Hindi natutuklasan ng Pi ang mga modelo mula sa mga custom na endpoint, kaya isinusulat OmniRoute ang napiling modelo sa `models[]` gamit ang `openai-completions` API ng Pi at ang OmniRoute OpenAI-compatible `/v1` endpoint.
+
+Sa**CLI Tools → Pi** , pumili ng endpoint, API key, at modelo, suriin ang preview ng provider, pagkatapos ay ilapat. Ang preview ay isang fragment ng provider: pagsamahin ang `providers.omniroute` sa iyong umiiral nang `models.json` kapag manu-manong kino-configure ang Pi upang manatiling buo ang ibang mga provider at setting.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Nire-reload ng Pi `models.json` kapag binuksan mo `/model`. Subukan ang na-configure na ruta gamit ang provider id at model id na iyong pinili:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Mga Sanggunian: [Mga modelo ng Pi at custom na provider](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Mga variable ng kapaligiran ng Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Mga tagubilin sa pag-install ng Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 
@@ -466,10 +493,9 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code mode:**
-Mga setting ng Cline extension → API Provider: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
+**VS Code mode:** Cline extension settings → API Provider: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
 
-O gamitin ang OmniRoute dashboard → **CLI Tools → Cline → Ilapat ang Config**.
+O gamitin ang OmniRoute dashboard →**CLI Tools → Cline → Ilapat ang Config** .
 
 ---
 
@@ -490,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-O gamitin ang OmniRoute dashboard → **CLI Tools → KiloCode → Ilapat ang Config**.
+O gamitin ang OmniRoute dashboard →**CLI Tools → KiloCode → Ilapat ang Config** .
 
 ---
 
-#### Continue (VS Code Extension)
+#### Magpatuloy (VS Code Extension)
 
-I-edit ang `~/.continue/config.yaml`:
+I-edit `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -508,20 +534,20 @@ models:
     default: true
 ```
 
-I-restart ang VS Code pagkatapos mag-edit.
+I-restart VS Code pagkatapos mag-edit.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Gamitin ito kapag naka-configure ang VS Code Insiders para sa mga custom endpoint model at gusto mong gumana ang OmniRoute nang walang custom header field.
+Gamitin ito kapag VS Code Insiders ay na-configure para sa mga custom na modelo ng endpoint at gusto mong gumana OmniRoute nang walang custom na field ng header.
 
 **Inirerekomendang lokasyon:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Halimbawa gamit ang naka-tokenize na OmniRoute alias:**
+**Halimbawa gamit ang tokenized OmniRoute alias:**
 
 ```json
 [
@@ -543,29 +569,28 @@ Gamitin ito kapag naka-configure ang VS Code Insiders para sa mga custom endpoin
 ]
 ```
 
-**Mga tala:**
+**Mga Tala:**
 
-- Palitan ang `sk-your-omniroute-key` ng API key na ginawa sa OmniRoute.
-- Dapat nakaturo ang field na `url` sa `/api/v1/vscode/{token}/chat/completions`.
-- Dapat nakaturo ang field na `modelsUrl` sa `/api/v1/vscode/{token}/models`.
-- Piliin ang karaniwang daloy na `/v1` + Bearer header kapag sinusuportahan ng client ang mga custom header.
-- Ang mga token na naka-embed sa URL ay fallback para sa compatibility at maaaring lumitaw sa mga log ng editor o history ng proxy.
+- Palitan `sk-your-omniroute-key` ng API key na ginawa sa OmniRoute.
+- Ang `url` field ay dapat tumuro sa `/api/v1/vscode/{token}/chat/completions`.
+- Ang `modelsUrl` field ay dapat tumuro sa `/api/v1/vscode/{token}/models`.
+- Mas gusto ang normal `/v1` + Bearer header flow kapag sinusuportahan ng kliyente ang mga custom na header.
+- Ang mga token na naka-embed sa URL ay isang fallback sa compatibility at maaaring lumabas sa mga log ng editor o kasaysayan ng proxy.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Mag-log in sa iyong AWS/Kiro account:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# Gumagamit ang CLI ng sarili nitong auth — hindi kailangan ang OmniRoute bilang backend para mismo sa Kiro CLI.
-# Gamitin ang kiro-cli kasabay ng OmniRoute para sa iba pang mga tool.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-Para sa desktop app na **Kiro IDE**, gamitin ang MITM endpoint na inilalantad ng OmniRoute
-sa ilalim ng `/dashboard/cli-tools → Kiro`.
+Para sa**Kiro IDE** desktop app, gamitin ang MITM endpoint na inilantad ng OmniRoute sa ilalim ng `/dashboard/cli-tools → Kiro`.
 
 ---
 

@@ -165,6 +165,14 @@ export function claude(plan: number, sonnet = plan) {
     seven_day_sonnet: { utilization: 100 - sonnet, resets_at: resetAt },
   });
 }
+/** Account with no open session or weekly window: `claudeQuota.ts` documents both as `null`. */
+export function claudeScopedOnly(sonnet: number) {
+  return normalizeClaudeUsageQuotas({
+    five_hour: null,
+    seven_day: null,
+    seven_day_sonnet: { utilization: 100 - sonnet, resets_at: resetAt },
+  });
+}
 export async function openrouter(balance: number, free = balance) {
   const syntheticConnectionId = `synthetic-openrouter-${balance}-${free}`;
   correctFromRateLimitHeaders(`conn:${syntheticConnectionId}`, {

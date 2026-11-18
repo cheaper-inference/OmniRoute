@@ -51,67 +51,67 @@ OmniRoute/
 
 ---
 
-## File root
+## File akar
 
-| File                                        | Tujuan                                                                                        |
+| Mengajukan                                  | Tujuan                                                                                        |
 | ------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| **README.md**                               | Halaman arahan pemasaran + panduan mulai cepat + matriks fitur (lihat juga `llm.txt`)         |
-| **CHANGELOG.md**                            | Log perubahan per rilis (dibuat otomatis oleh skill `/version-bump-cc`)                       |
-| **LICENSE**                                 | Teks lisensi MIT                                                                              |
-| **CLAUDE.md**                               | Aturan proyek untuk agen Claude Code (aturan wajib, konvensi, skenario)                       |
-| **AGENTS.md**                               | Sama seperti CLAUDE.md, tetapi untuk agen AI non-Claude (Codex, Cursor, dll.)                 |
-| **GEMINI.md**                               | Aturan ringkas untuk agen berbasis Gemini (subset dari CLAUDE.md)                             |
-| **CONTRIBUTING.md**                         | Panduan kontributor: penyiapan, conventional commits, pengujian, alur PR                      |
+| **README.md**                               | Halaman arahan pemasaran + mulai cepat matriks fitur + (lihat juga `llm.txt`)                 |
+| **CHANGELOG.md**                            | Changelog per rilis (dihasilkan secara otomatis oleh keterampilan `/version-bump-cc` )        |
+| **LICENSE**                                 | teks lisensi MIT                                                                              |
+| **CLAUDE.md**                               | Aturan proyek untuk agen Kode Claude (aturan keras, konvensi, skenario)                       |
+| **AGENTS.md**                               | Sama seperti CLAUDE.md tetapi untuk agen AI non-Claude (Codex, Cursor, dll.)                  |
+| **GEMINI.md**                               | Aturan ringkas untuk agen berbasis Gemini (bagian dari CLAUDE.md)                             |
+| **CONTRIBUTING.md**                         | Panduan kontributor: penyiapan, penerapan konvensional, pengujian, aliran PR                  |
 | **SECURITY.md**                             | Kebijakan pelaporan kerentanan, versi yang didukung, model ancaman                            |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — ekspektasi perilaku komunitas                                          |
-| **llm.txt**                                 | Halaman arahan teks biasa yang dioptimalkan untuk crawler LLM (SEO untuk asisten AI)          |
-| **package.json**                            | Manifes npm, skrip, dependensi, engine, gerbang cakupan c8                                    |
-| **package-lock.json**                       | Pohon dependensi yang dikunci                                                                 |
-| **tsconfig.json**                           | Konfigurasi TypeScript utama                                                                  |
-| **tsconfig.typecheck-core.json**            | Konfigurasi pemeriksaan tipe untuk inti `src/`                                                |
-| **tsconfig.typecheck-noimplicit-core.json** | Pemeriksaan tipe ketat (`noImplicitAny`)                                                      |
-| **tsconfig.tsbuildinfo**                    | Cache build inkremental TS (diabaikan oleh git)                                               |
-| **next.config.mjs**                         | Konfigurasi build Next.js 16 (keluaran mandiri)                                               |
-| **next-env.d.ts**                           | Tipe env yang dibuat otomatis oleh Next.js                                                    |
-| **eslint.config.mjs**                       | Konfigurasi datar ESLint (aturan per area proyek)                                             |
-| **prettier.config.mjs**                     | Aturan pemformatan Prettier                                                                   |
-| **postcss.config.mjs**                      | Konfigurasi PostCSS untuk pipeline Tailwind/CSS                                               |
-| **playwright.config.ts**                    | Konfigurasi pengujian E2E Playwright                                                          |
-| **vitest.config.ts**                        | Konfigurasi Vitest (suite default)                                                            |
-| **vitest.mcp.config.ts**                    | Konfigurasi Vitest untuk server MCP / suite autoCombo / cache                                 |
-| **sonar-project.properties**                | Konfigurasi SonarQube/SonarCloud (kualitas kode)                                              |
-| **Dockerfile**                              | Build Docker multi-tahap (builder → runner-base → runner-cli)                                 |
-| **docker-compose.yml**                      | Compose pengembangan dengan 4 profil (base, cli, host, cliproxyapi) + sidecar redis           |
-| **docker-compose.prod.yml**                 | Compose produksi (port 20130, redis, volume bernama)                                          |
-| **.dockerignore**                           | File yang dikecualikan dari konteks Docker                                                    |
-| **fly.toml**                                | Konfigurasi deployment Fly.io (region `sin`, port 20128, volume /data)                        |
-| **.env.example**                            | Templat file env (disalin otomatis ke `.env` saat instalasi pertama)                          |
-| **.gitignore**                              | Pola pengabaian Git                                                                           |
-| **.npmignore**                              | Daftar pengecualian publikasi npm                                                             |
-| **.npmrc**                                  | Konfigurasi npm (registry, kebijakan lockfile)                                                |
-| **.node-version**                           | Pin versi Node (digunakan oleh alat yang kompatibel dengan nvm)                               |
-| **.nvmrc**                                  | Pin versi Node untuk nvm                                                                      |
-| **eslint.complexity.config.mjs**            | Konfigurasi ESLint untuk ratchet kompleksitas (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | Konfigurasi ESLint untuk aturan SonarJS (kompleksitas kognitif / duplikasi)                   |
-| **source.config.ts**                        | Konfigurasi sumber `defineDocs` Fumadocs (mengisi `.source/`)                                 |
-| **knip.json**                               | Konfigurasi Knip — file/ekspor/dependensi yang tidak digunakan (mengisi gerbang dead-code)    |
-| **stryker.conf.json**                       | Konfigurasi pengujian mutasi Stryker                                                          |
-| **.size-limit.json**                        | Konfigurasi anggaran ukuran bundle size-limit                                                 |
-| **promptfooconfig.yaml**                    | Konfigurasi evaluasi promptfoo                                                                |
-| **.gitleaks.toml**                          | Kumpulan aturan pemindaian rahasia gitleaks                                                   |
-| **.zizmor.yml**                             | Konfigurasi lint keamanan GitHub Actions zizmor                                               |
-| **socket.yml**                              | Konfigurasi rantai pasok Socket.dev                                                           |
-| **news.json**                               | Feed pengumuman v2 yang dilokalkan; item peluncuran Radar disertakan dalam keadaan nonaktif   |
-| **flake.nix** / **flake.lock**              | Definisi dev-shell Nix + lock                                                                 |
-| **.env**                                    | Rahasia lokal (diabaikan git — dibuat dari `.env.example`)                                    |
+| **CODE_OF_CONDUCT.md**                      | Kontributor Kovenan — ekspektasi perilaku komunitas                                           |
+| **llm.txt**                                 | Pendaratan teks biasa dioptimalkan untuk perayap LLM (SEO untuk asisten AI )                  |
+| **package.json**                            | manifes npm, skrip, dependensi, mesin, gerbang cakupan c8                                     |
+| **package-lock.json**                       | Pohon ketergantungan terkunci                                                                 |
+| **tsconfig.json**                           | Konfigurasi root TypeScript                                                                   |
+| **tsconfig.typecheck-core.json**            | Konfigurasi periksa ketik untuk inti `src/`                                                   |
+| **tsconfig.typecheck-noimplicit-core.json** | Pemeriksaan ketik yang ketat (`noImplicitAny`).                                               |
+| **tsconfig.tsbuildinfo**                    | TS build cache tambahan (gitignored)                                                          |
+| **Berikutnya.config.mjs**                   | konfigurasi build Next.js 16 (output mandiri)                                                 |
+| **lingkungan berikutnya.d.ts**              | Next.js tipe env yang dihasilkan secara otomatis                                              |
+| **eslint.config.mjs**                       | ESLint flat config (aturan per area proyek)                                                   |
+| **lebih cantik.config.mjs**                 | aturan pemformatan Prettier                                                                   |
+| **postcss.config.mjs**                      | konfigurasi PostCSS untuk pipa Tailwind/CSS                                                   |
+| **dramawan.config.ts**                      | konfigurasi pengujian Playwright E2E                                                          |
+| **kunjungan.config.ts**                     | konfigurasi Vitest (rangkaian default)                                                        |
+| **vitest.mcp.config.ts**                    | konfigurasi Vitest untuk server MCP / autoCombo / suite cache                                 |
+| **proyek-sonar.properti**                   | SonarQube/SonarCloud config (kualitas kode)                                                   |
+| **file buruh pelabuhan**                    | Pembuatan Docker multi-tahap (pembuat → runner-base → runner-cli)                             |
+| **docker-compose.yml**                      | Dev menulis dengan 4 profil (base, cli, host, cliproxyapi) + redis sidecar                    |
+| **komposisi buruh pelabuhan.prod.yml**      | Komposisi produksi (port 20130, redis, bernama volume)                                        |
+| **.dockerignore**                           | File dikecualikan dari konteks Docker                                                         |
+| **fly.toml**                                | Konfigurasi penerapan Fly.io (wilayah `sin`, port 20128, /volume data)                        |
+| **.env.contoh**                             | File env template (disalin otomatis ke `.env` pada instalasi pertama)                         |
+| **.gitignore**                              | Git mengabaikan pola                                                                          |
+| **.npmignore**                              | npm mempublikasikan daftar pengecualian                                                       |
+| **.npmrc**                                  | npm config (registrasi, kebijakan lockfile)                                                   |
+| **.node-version**                           | Pin versi node (digunakan oleh alat yang kompatibel dengan nvm)                               |
+| **.nvmrc**                                  | Pin versi node untuk nvm                                                                      |
+| **eslint.kompleksitas.config.mjs**          | konfigurasi ESLint untuk ratchet kompleksitas (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | konfigurasi ESLint untuk aturan SonarJS (kompleksitas/duplikasi kognitif)                     |
+| **sumber.config.ts**                        | Konfigurasi sumber `defineDocs` Fumadocs (umpan `.source/`)                                   |
+| **knip.json**                               | Knip config — files/exports/deps yang tidak digunakan (mengumpankan gerbang kode mati)        |
+| **penyerang.conf.mjs**                      | Konfigurasi pengujian mutasi Stryker (menghitung `tap.testFiles` dari `mutate`)               |
+| **.size-limit.json**                        | konfigurasi anggaran bundel batas ukuran                                                      |
+| **promptfooconfig.yaml**                    | konfigurasi promptfoo eval                                                                    |
+| **.gitleaks.toml**                          | kumpulan aturan pemindaian rahasia gitleaks                                                   |
+| **.zizmor.yml**                             | zizmor GitHub-Actions konfigurasi serat keamanan                                              |
+| **socket.yml**                              | Konfigurasi rantai pasokan Socket.dev                                                         |
+| **news.json**                               | Umpan pengumuman v2 yang dilokalkan; Barang peluncuran radar dikirimkan tidak aktif           |
+| **serpihan.nix** /** serpihan.kunci**       | Kunci + definisi nix dev-shell                                                                |
+| **.env**                                    | Rahasia lokal (gitignored — dihasilkan dari `.env.example`)                                   |
 
-> **Dipindahkan dari root pada v3.8.26 (perapian):**
+> **Dipindahkan dari root di v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, dan `quality-metrics.json` yang dihasilkan (diabaikan git). Lihat [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, dan `quality-metrics.json` yang dihasilkan (gitignored). Lihat [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
-## `src/` — aplikasi Next.js
+## aplikasi `src/` — Next.js
 
 ```
 src/
@@ -135,7 +135,7 @@ src/
 └── proxy.ts             # HTTP-proxy entry shim
 ```
 
-### `src/app/` — Router Aplikasi (Next.js 16)
+### `src/app/` — Aplikasi Router (Next.js 16)
 
 | Jalur                                                                        | Tujuan                                                                                                                                                                                                                                                                                                              |
 | ---------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -149,8 +149,8 @@ src/
 | `app/.well-known/agent.json/`                                                | Kartu Agen A2A (penemuan)                                                                                                                                                                                                                                                                                           |
 | `app/(dashboard)/dashboard/`                                                 | Halaman dasbor UI (50 bagian +, ~ 118 file page.tsx : penyedia, kombo, pengaturan, memori, keterampilan, webhook, evaluasi, audit, batch, cache, biaya, kesehatan, sistem, aktivitas, dll.)                                                                                                                         |
 | `app/(dashboard)/dashboard/search-tools/`                                    | Alat Pencarian Studio UI (3 tab: Search/Scrape/Compare + SearchConceptCard + ProviderCatalog) — lihat `docs/frameworks/SEARCH_TOOLS_STUDIO.md`                                                                                                                                                                      |
-| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (paket 21): `page.tsx` (3 tab shell), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
-| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | halaman dasbor AgentBridge — kartu server, 9 kartu agen, wizard pengaturan, pemetaan model, daftar bypass. i18n PT-BR + EN. Lihat `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                 |
+| `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (paket 21): `page.tsx` (shell 3-tab), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatus, useMemorySettings) |
+| `app/(dashboard)/dashboard/tools/agent-bridge/`                              | halaman dasbor AgentBridge kartu server —, 9 kartu agen, wizard pengaturan, pemetaan model, daftar bypass. i18n PT-BR + EN. Lihat `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                 |
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Halaman dasbor Traffic Inspector — DevTools split, 7 tab detail, 4 tombol mode pengambilan, perekam sesi, pewarnaan konteks. i18n PT-BR + EN. Lihat `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                         |
 | `app/(dashboard)/dashboard/activity/`                                        | Halaman umpan aktivitas (Grup B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — lihat `docs/architecture/MONITORING_SECTIONS.md`                                                                                                        |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Halaman Pembagian Kuota (Grup B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                       |
@@ -163,7 +163,7 @@ src/
 | `app/layout.tsx`, `page.tsx`, `manifest.ts`, `globals.css`                   | Tata letak root, beranda, manifes PWA, CSS global                                                                                                                                                                                                                                                                   |
 | `app/error.tsx`, `global-error.tsx`, `not-found.tsx`, `loading.tsx`          | Batasan kesalahan                                                                                                                                                                                                                                                                                                   |
 
-### `src/lib/` — Pustaka inti (~ 50 modul)
+### `src/lib/` — Perpustakaan inti (~ 50 modul)
 
 | Modul                                    | Tujuan                                                                                                                                                                                                                                                                                                                       |
 | ---------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -176,7 +176,7 @@ src/
 | `cloudAgent/`                            | Agen Cloud (Codex Cloud, Devin, Jules) — lihat `docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                              |
 | `combos/`                                | Resolusi kombo + menyusun ulang pembantu                                                                                                                                                                                                                                                                                     |
 | `audit/`                                 | Pembantu umpan aktivitas: `highLevelActions.ts` (daftar yang diizinkan + `isHighLevelAction()`), `activityIcons.ts` (tindakan → icon/verb map), `timeline.ts` (groupByDay/relativeTime) — lihat `docs/architecture/MONITORING_SECTIONS.md`                                                                                   |
-| `compliance/`                            | Audit log audit penyedia + — lihat `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                             |
+| `compliance/`                            | Audit log + penyedia audit — lihat `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                             |
 | `compression/`                           | Lem mesin kompresi (mesin hidup di `open-sse/services/compression/`)                                                                                                                                                                                                                                                         |
 | `config/`                                | Pembantu konfigurasi runtime                                                                                                                                                                                                                                                                                                 |
 | `db/`                                    | 120 + domain DB modul + 168 migrasi (selalu buka di sini untuk SQLite)                                                                                                                                                                                                                                                       |
@@ -190,22 +190,22 @@ src/
 | `jobs/`                                  | Pekerjaan latar belakang (seperti cron)                                                                                                                                                                                                                                                                                      |
 | `memory/`                                | Memori percakapan (SQLite FTS5 + sqlite-vec hybrid RRF + Qdrant tier 2) — lihat `docs/frameworks/MEMORY.md`                                                                                                                                                                                                                  |
 | `memory/embedding/`                      | Lapisan penyematan multi-sumber: `index.ts` (resolver), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (rencana 21)                                                                                                                                                                          |
-| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF ( vektor FTS5 +, k = 60). Lazy-init, terdegradasi dengan baik ketika sqlite-vec tidak tersedia. (rencana 21)                                                                                                                                                        |
+| `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 pembungkus — KNN brute-force + hybrid RRF ( vektor FTS5 +, k = 60). Lazy-init, terdegradasi dengan baik ketika sqlite-vec tidak tersedia. (rencana 21)                                                                                                                                                     |
 | `memory/reindex.ts`                      | `runReindexBatch()` — memproses kenangan dengan `needs_reindex=1` di latar belakang; dipanggil oleh `POST /api/memory/reindex` dan jalur pengisian ulang yang malas. (rencana 21)                                                                                                                                            |
 | `monitoring/`                            | Pemeriksaan kesehatan, emisi metrik                                                                                                                                                                                                                                                                                          |
 | `oauth/`                                 | OAuth/import mengalir untuk 22 modul penyedia (agy, antigravity, claude, cline, codebuddy-cn, codex, kursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, openference, qoder, trae, xai-oauth, zed-hosted, zed)                                                    |
 | `plugins/`                               | Registri plugin                                                                                                                                                                                                                                                                                                              |
 | `promptCache/`                           | Breakpoint cache cepat bergaya antropis                                                                                                                                                                                                                                                                                      |
 | `skills/`                                | Kerangka kerja keterampilan (pasar + bawaan + SkillsSH) — lihat `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                  |
-| `playground/`                            | Pembantu bersama Playground Studio: `codeExport.ts` ( generator curl/Python/TS ), `promptImprover.ts` (pembuat meta-prompt), `streamMetrics.ts` ( TTFT/TPS murni), `types.ts` (tabel harga) — lihat `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                   |
-| `webhookDispatcher.ts`                   | pengiriman webhook HMAC — lihat `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                |
+| `playground/`                            | Playground Studio berbagi pembantu: `codeExport.ts` ( generator curl/Python/TS ), `promptImprover.ts` (pembuat meta-prompt), `streamMetrics.ts` ( TTFT/TPS murni), `types.ts` (tabel harga) — lihat `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                   |
+| `webhookDispatcher.ts`                   | HMAC pengiriman webhook — lihat `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Manajer terowongan — lihat `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                       |
 | `cloudSync.ts`, `initCloudSync.ts`       | Sinkronisasi cloud negara opsional                                                                                                                                                                                                                                                                                           |
-| `localDb.ts`                             | Ekspor ulang barel untuk modul db (tidak ada logika — hanya ekspor ulang)                                                                                                                                                                                                                                                    |
+| `localDb.ts`                             | Ekspor ulang barel untuk modul db (tidak ada logika — ekspor ulang saja)                                                                                                                                                                                                                                                     |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Minta cache idempotensi +                                                                                                                                                                                                                                                                                                    |
 | (~ 30 lebih banyak file tingkat atas)    | Pembantu khusus (logEnv, modelsDevSync, piiSanitizer, dll.)                                                                                                                                                                                                                                                                  |
 
-### `src/lib/db/` — Basis data (147 modul + 208 migrasi)
+### `src/lib/db/` — Database (147 modul + 208 migrasi)
 
 | Subdir                    | Tujuan                                                                                                                                                                              |
 | ------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -242,12 +242,12 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | Komponen dasbor API: adaptor melalui `packages/ui-kit` — lihat `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nama ikon yang digunakan oleh layar → Komponen Lucide (`<Icon>`)                        |
-| `constants/providers.ts`         | **377 penyedia** dengan validasi Zod (sumber kebenaran)                                             |
+| `constants/providers.ts`         | **394 penyedia** dengan validasi Zod (sumber kebenaran)                                             |
 | `constants/cliTools.ts`          | Registri alat CLI eksternal                                                                         |
-| `constants/routingStrategies.ts` | **20 strategi perutean** dengan prioritas                                                           |
+| `constants/routingStrategies.ts` | **22 strategi perutean** dengan prioritas                                                           |
 | `constants/publicApiRoutes.ts`   | Rute yang memerlukan autentikasi Pembawa (vs manajemen).                                            |
 | `constants/upstreamHeaders.ts`   | Daftar penolakan header untuk permintaan upstream                                                   |
-| `validation/schemas.ts`          | skema ~ 80 Zod (satu-satunya sumber kebenaran untuk kontrak API )                                   |
+| `validation/schemas.ts`          | skema ~ 80 Zod (satu sumber kebenaran untuk kontrak API )                                           |
 | `validation/helpers.ts`          | pembantu validasi Zod (`validateBody`, dll.)                                                        |
 | `types/`                         | Jenis TS bersama                                                                                    |
 | `contracts/`                     | Kontrak API publik (digunakan oleh `files:` di `package.json`)                                      |
@@ -265,7 +265,7 @@ Workspace npm terpisah (`@omniroute/open-sse`). Menangani pemrosesan permintaan 
 ```
 open-sse/
 ├── handlers/            # 16 file (12 handler + 4 helper): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, dll.
-├── executors/           # 150 modul eksekutor (kelas yang memperluas BaseExecutor + helper per penyedia)
+├── executors/           # 163 modul eksekutor (kelas yang memperluas BaseExecutor + helper per penyedia)
 ├── translator/          # Konverter format (9 permintaan, 9 respons, 9 helper)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ modul layanan (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, dll.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrasi CLI eksternal + OmniRoute CLI internal                                          |
 | `I18N.md`                   | arsitektur i18n, menambahkan bahasa, 67 lokal                                             |
 | `UNINSTALL.md`              | Bersihkan langkah-langkah uninstall                                                       |
-| `PROVIDER_REFERENCE.md`     | **Dibuat secara otomatis** katalog 377 penyedia (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Dibuat secara otomatis** katalog 394 penyedia (regen: `npm run gen:provider-reference`) |
 
 ### Penyelaman mendalam subsistem
 
@@ -427,7 +427,7 @@ open-sse/
 | `MEMORY.md`                                  | Sistem memori (SQLite FTS5 + Qdrant)                                               |
 | `EVALS.md`                                   | Kerangka evaluasi (suite, run, rubrik)                                             |
 | `GUARDRAILS.md`                              | PII masker, injeksi cepat, jembatan penglihatan                                    |
-| `COMPLIANCE.md`                              | Log audit, retensi, penolakan noLog                                                |
+| `COMPLIANCE.md`                              | Log audit, retensi, noLog opt-out                                                  |
 | `WEBHOOKS.md`                                | Pengiriman webhook bertanda tangan HMAC                                            |
 | `REASONING_REPLAY.md`                        | Cache memory/SQLite hibrid untuk `reasoning_content`                               |
 | `AUTHZ_GUIDE.md`                             | Saluran otorisasi (`classify` → `policies` → `enforce`)                            |
@@ -460,11 +460,11 @@ open-sse/
 
 ### Subdirektori
 
-| Subdir                | Tujuan                                                                                                                                                                                                         |
-| --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `docs/i18n/`          | Terjemahan dokumen yang dilokalkan (41 lokal)                                                                                                                                                                  |
-| `docs/screenshots/`   | Aset gambar untuk panduan                                                                                                                                                                                      |
-| `_tasks/superpowers/` | Plans/specs dari negara adidaya (`writing-plans`/`brainstorming`) penelitian + — repo yang terisolasi dan berversi terpisah, diabaikan oleh pohon utama. Lihat CLAUDE.md → "Perencanaan & Artefak Penelitian". |
+| Subdir                | Tujuan                                                                                                                                                                                                 |
+| --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `docs/i18n/`          | Terjemahan dokumen yang dilokalkan (41 lokal)                                                                                                                                                          |
+| `docs/screenshots/`   | Aset gambar untuk panduan                                                                                                                                                                              |
+| `_tasks/superpowers/` | Plans/specs dari negara adidaya (`writing-plans`/`brainstorming`) + penelitian — terisolasi, repo berversi terpisah, diabaikan oleh pohon utama. Lihat CLAUDE.md → "Perencanaan & Artefak Penelitian". |
 
 ---
 

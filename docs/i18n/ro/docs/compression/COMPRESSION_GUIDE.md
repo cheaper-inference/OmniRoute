@@ -30,86 +30,88 @@ Solicitarea clientului
 
 ---
 
-## Moduri de compresie
+## Moduri de comprimare
 
-### Off
+### Dezactivat
 
-Nicio compresie aplicată. Toate mesajele trec neschimbate.
+Nu se aplică nicio comprimare. Toate mesajele sunt transmise nemodificate.
 
 ### Modul Lite (~15% economii, latență <1 ms)
 
-Cel mai sigur mod — zero modificări semantice, doar curățarea formatării:
+Cel mai sigur mod — curățarea formatării. Trunchierea rezultatelor instrumentelor implică pierderi, astfel încât ruta implicită (fără optarea `allow-lossy`, `engine:lite` sau a unei combinații denumite) rulează lite cu
+`compressToolResults: false`: rezultatele anterioare ale instrumentelor ajung la furnizor nemodificate.
 
-| Tehnică                  | Descriere                                                           |
-| ------------------------ | ------------------------------------------------------------------- |
-| `collapseWhitespace`     | Îmbină liniile goale consecutive și spațiile de la finalul liniilor |
-| `dedupSystemPrompt`      | Elimină mesajele de sistem duplicate                                |
-| `compressToolResults`    | Comprimă ieșirile prolixe ale uneltelor/funcțiilor                  |
-| `removeRedundantContent` | Elimină instrucțiunile repetate                                     |
-| `replaceImageUrls`       | Scurtează URI-urile de date base64 ale imaginilor                   |
+| Tehnică                  | Descriere                                                                                                                  |
+| ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
+| `collapseWhitespace`     | Combină liniile goale consecutive și spațiile de la sfârșitul liniilor                                                     |
+| `dedupSystemPrompt`      | Elimină mesajele de sistem duplicate                                                                                       |
+| `compressToolResults`    | Trunchiază rezultatele anterioare ale instrumentelor la limita lite (cu pierderi: doar cu optarea explicită a solicitării) |
+| `removeRedundantContent` | Elimină instrucțiunile repetate                                                                                            |
+| `replaceImageUrls`       | Scurtează URI-urile de date ale imaginilor codificate în base64                                                            |
 
-**Ideal pentru:** Utilizare permanentă, fluxuri de lucru în care siguranța este critică.
+**Recomandat pentru:** Utilizare permanentă, fluxuri de lucru critice pentru siguranță.
 
 ### Modul Standard (~30% economii)
 
-Inspirat de [Caveman](https://github.com/JuliusBrussee/caveman) — elimină cuvintele de umplutură și formulările prolixe, păstrând sensul:
+Inspirat de [Caveman](https://github.com/JuliusBrussee/caveman) — elimină cuvintele de umplutură și formulările verbose, păstrând sensul:
 
-- Elimină cuvintele de umplutură ("please", "I think", "basically", "actually")
-- Condensează expresiile prolixe ("in order to" → "to", "as a result of" → "because")
-- Elimină ocolirile politicoase ("Would you mind...", "If you could possibly...")
-- Peste 30 de reguli regex ajustate pentru prompturi de programare
+- Elimină cuvintele de umplutură („please”, „I think”, „basically”, „actually”)
+- Condensează formulările verbose („in order to” → „to”, „as a result of” → „because”)
+- Elimină exprimările politicoase ezitante („Would you mind...”, „If you could possibly...”)
+- Peste 30 de reguli regex optimizate pentru solicitări de programare
 
-**Ideal pentru:** Fluxuri de lucru zilnice de programare, echipe atente la costuri.
+**Recomandat pentru:** Fluxuri zilnice de dezvoltare, echipe atente la costuri.
 
 ### Modul Aggressive (~50% economii)
 
 Gestionare inteligentă a istoricului pentru sesiuni lungi:
 
 - **Îmbătrânirea mesajelor** — mesajele mai vechi sunt comprimate progresiv
-- **Comprimarea rezultatelor uneltelor** — ieșirile lungi ale uneltelor sunt trunchiate sau elidate (primele/ultimele linii, filtrarea liniilor care se potrivesc, compactarea cheilor JSON)
-- **Protecții de integritate structurală** — asigură că perechile `tool_use` + `tool_result` rămân coerente
-- **Conștientizarea ferestrei de context** — respectă limitele de tokeni ale fiecărui model
+- **Comprimarea rezultatelor instrumentelor** — rezultatele lungi sunt trunchiate sau elidate (primele/ultimele linii,
+  filtrarea liniilor potrivite, compactarea cheilor JSON)
+- **Gărzi pentru integritatea structurală** — asigură păstrarea consecvenței perechilor `tool_use` + `tool_result`
+- **Conștientizarea ferestrei de context** — respectă limitele de tokeni pentru fiecare model
 
-**Ideal pentru:** Sesiuni extinse de depanare, baze de cod mari.
+**Recomandat pentru:** Sesiuni extinse de depanare, baze de cod voluminoase.
 
 ### Modul Ultra (~75% economii)
 
-Compresie maximă pentru scenarii în care tokenii sunt critici:
+Comprimare maximă pentru scenarii critice din punct de vedere al numărului de tokeni:
 
 - **Eliminare euristică** — eliminarea tokenilor din proză pe baza unui scor
-- **Păstrarea structurii** — blocurile de cod delimitate, codul inline, URL-urile și identificatorii sunt marcate cu tombstone-uri și reasamblate verbatim, niciodată eliminate
+- **Păstrarea structurii** — blocurile de cod delimitate, codul inline, URL-urile și identificatorii sunt marcate și reasamblate textual, fără a fi vreodată eliminate
 - **Nivel SLM opțional** — un model local mic poate rafina eliminarea atunci când este configurat
-- Independent de modul Aggressive: nu execută îmbătrânirea mesajelor, compresia rezultatelor uneltelor sau rezumarea de rezervă (doar un eșec al nivelului SLM poate direcționa o trecere de rezervă prin aggressive)
+- Independent de modul Aggressive: nu execută îmbătrânirea mesajelor, comprimarea rezultatelor instrumentelor sau sumarizatorul de rezervă (doar o eroare la nivelul SLM poate direcționa o trecere de rezervă prin aggressive)
 
-**Ideal pentru:** Când atingi în mod repetat limitele de context.
+**Recomandat pentru:** Situațiile în care limitele de context sunt atinse în mod repetat.
 
-### Modul RTK (interval upstream de 60-90%)
+### Modul RTK (interval upstream de 60–90%)
 
-Modul RTK este optimizat pentru ieșirile prolixe ale uneltelor care apar în sesiunile agenților de programare:
+Modul RTK este optimizat pentru rezultatele verbose ale instrumentelor care apar în sesiunile agenților de programare:
 
-- Detectează clase de comenzi/ieșiri precum `git status`, `git diff`, `git log`, rulatoare de teste, build-uri TypeScript/Vite/Webpack, ESLint/Biome/Prettier, npm audit/instalări, jurnale Docker, ieșiri de infrastructură și ieșiri generice de shell
+- Detectează clase de comenzi/rezultate precum `git status`, `git diff`, `git log`, executori de teste,
+  compilări TypeScript/Vite/Webpack, ESLint/Biome/Prettier, audituri/instalări npm, jurnale Docker, rezultate de infrastructură
+  și rezultate generice de shell
 - Aplică pachete de filtre JSON din `open-sse/services/compression/engines/rtk/filters/`
-- Importă filtre din schema RTK TOML v1 din fișiere `filters.toml` de proiect sau globale, cu validare prin teste inline și control de încredere (trust-gating) pentru fișierele de proiect
-- Se livrează cu 56 de filtre încorporate, cu mostre de verificare inline
-- Elimină secvențele de control ANSI, barele de progres, liniile repetate și zgomotul neacționabil
-- Păstrează eșecurile, erorile, avertismentele, fișierele modificate, rezumatele și finalul ieșirilor lungi
-- Acceptă filtre de proiect cu control de încredere, filtre globale și recuperarea opțională a ieșirilor brute mascate
+- Importă filtre de schemă TOML RTK v1 din fișierele `filters.toml` ale proiectului sau globale, cu validare prin teste inline și controlul încrederii pentru fișierele proiectului
+- Include 56 de filtre integrate cu mostre de verificare inline
+- Elimină secvențele de control ANSI, barele de progres, liniile repetate și zgomotul care nu necesită acțiune
+- Păstrează eșecurile, erorile, avertismentele, fișierele modificate, rezumatele și partea finală a rezultatelor lungi
+- Acceptă filtre de proiect controlate prin încredere, filtre globale și recuperarea opțională a rezultatelor brute redactate
 
-**Ideal pentru:** Sesiuni de agent cu transcrieri de shell, build, teste, git, grep și ieșiri de fișiere.
+**Recomandat pentru:** Sesiuni de agenți cu transcrieri de shell, compilări, teste, git, grep și rezultate de fișiere.
 
-### Modul Stacked (interval eligibil de 78-95%)
+### Modul Stacked (interval eligibil de 78–95%)
 
-Modul Stacked rulează mai multe motoare de compresie într-o ordine deterministă. Pipeline-ul implicit este:
+Modul Stacked rulează mai multe motoare de comprimare într-o ordine deterministă. Conducta implicită este:
 
 ```txt
 RTK -> Caveman
 ```
 
-Această ordine menține mai întâi compactă ieșirea terminalului/uneltelor, apoi aplică condensarea semantică Caveman asupra promptului rămas în limbaj natural. Pipeline-urile Stacked pot fi configurate global sau prin combo-uri de compresie atribuite combo-urilor de rutare.
+Această ordine păstrează mai întâi rezultatele terminalului/instrumentelor într-o formă compactă, apoi aplică condensarea semantică Caveman promptului în limbaj natural rămas. Conductele Stacked pot fi configurate global sau prin combinații de comprimare atribuite combinațiilor de rutare.
 
-**Ideal pentru:** Context mixt cu jurnale mari de unelte, plus instrucțiuni umane sau rezumate ale asistentului.
-
----
+**Recomandat pentru:** Contexte mixte cu jurnale voluminoase ale instrumentelor și instrucțiuni umane sau rezumate ale asistentului.
 
 ## Calculul economiilor din sursele din amonte
 
@@ -179,67 +181,92 @@ Cu Stacked:          10K-2.5K tokeni trimiși    (interval eligibil RTK+Caveman 
 
 ### Tablou de bord
 
-Navigați la `Tablou de bord → Context și cache`:
+Navigați la `Dashboard → Context & Cache`:
 
-- **Caveman** — selectarea modului, pachete lingvistice, previzualizare și valori implicite globale
-- **RTK** — previzualizarea filtrului de comenzi, setările de siguranță RTK și catalogul de filtre
-- **Combinații de compresie** — fluxuri de motoare denumite, atribuite combinațiilor de rutare
-- **Prag de declanșare automată** — activează automat compresia atunci când numărul de tokenuri depășește pragul
+- **Caveman** — selectarea modului, pachete de limbă, previzualizare și valori implicite globale
+- **RTK** — previzualizarea filtrării comenzilor, setările de siguranță RTK și catalogul de filtre
+- **Compression Combos** — pipeline-uri de motor denumite, atribuite combinațiilor de rutare
+- **Auto-Trigger Threshold** — activează automat comprimarea când numărul de tokenuri depășește pragul
 
-### Suprascriere pentru fiecare combinație
+### Suprascriere per combinație
 
-În `Tablou de bord → Context și cache → Combinații de compresie`, atribuiți o combinație de compresie unei combinații de rutare:
+În `Dashboard → Context & Cache → Compression Combos`, atribuiți o combinație de comprimare unei
+combinații de rutare:
 
 ```txt
-Combinație: "free-tier-fallback"
-  Combinație de compresie: "coding-agent-stack"
-  Flux: RTK -> Caveman
-  Ținte:
+Combo: "free-tier-fallback"
+  Compression Combo: "coding-agent-stack"
+  Pipeline: RTK -> Caveman
+  Targets:
     1. if/kimi-k2.7-code
     2. if/qwen3.8-max-preview
 ```
 
-Aceasta vă permite să utilizați compresia stivuită pentru furnizorii gratuiți/de programare, păstrând în același timp modul lite pentru abonamentele cu plată.
+Astfel puteți utiliza comprimarea în stivă pentru furnizorii gratuiți/de programare, păstrând în
+același timp modul lite pentru abonamentele plătite.
 
-Această atribuire „Suprascriere pentru fiecare combinație” este un control diferit de suprascrierea **modului de compresie al combinației de rutare** (Implicit/Dezactivat/Lite/Standard/Agresiv/Ultra/Răspunsuri Codex — schema câmpului acceptă, de asemenea, `rtk`, `stacked` și `omniglyph`) — această suprascriere nu selectează un flux denumit de combinație de compresie; doar setează câmpul `compressionMode` consultat de `resolveCompressionPlan`. Acesta poate fi setat fie pe cardul combinației (`Tablou de bord → Combinații`), fie, începând cu #6760, pentru fiecare combinație de rutare din lista „Atribuire rutării” de la `Tablou de bord → Context și cache → Combinații de compresie`, chiar lângă caseta de selectare pentru atribuirea fluxului documentată mai sus. Ambele interfețe persistă datele prin același endpoint `PUT /api/combos/{id}`.
+Această atribuire de tip „Suprascriere per combinație” este un control diferit de suprascrierea
+**modului de comprimare al combinației de rutare** (Default/Off/Lite/Standard/Aggressive/Ultra/Codex Responses —
+schema câmpului acceptă, de asemenea, `rtk`, `stacked` și `omniglyph`) — această suprascriere nu
+selectează un pipeline de comprimare denumit; setează doar câmpul `compressionMode`, consultat de
+`resolveCompressionPlan`. Poate fi setată fie pe cardul combinației (`Dashboard → Combos`), fie,
+începând cu #6760, per combinație de rutare în lista „Atribuire rutării” din
+`Dashboard → Context & Cache → Compression Combos`, chiar lângă caseta de selectare pentru
+atribuirea pipeline-ului documentată mai sus. Ambele interfețe persistă prin același endpoint
+`PUT /api/combos/{id}`.
 
-### Suprascriere pentru fiecare solicitare
+### Suprascriere per solicitare
 
-Trimiteți antetul de solicitare `x-omniroute-compression` pentru a suprascrie planul de compresie pentru o singură solicitare. Acesta are cea mai mare prioritate — prevalează asupra suprascrierii combinației de rutare, profilului activ, declanșării automate și valorii Implicit din panou. Valorile necunoscute sunt ignorate (solicitarea nu este respinsă niciodată), iar comutatorul principal global continuă să controleze totul: când compresia este dezactivată global, antetul nu o poate activa. Valori:
+Trimiteți antetul de solicitare `x-omniroute-compression` pentru a suprascrie planul de comprimare
+pentru o singură solicitare. Acesta are cea mai mare prioritate — prevalează asupra suprascrierii
+combinației de rutare, profilului activ, declanșării automate și valorii implicite din panou.
+Valorile necunoscute sunt ignorate (solicitarea nu este niciodată respinsă), iar comutatorul
+principal global are în continuare prioritate: când comprimarea este dezactivată global, antetul
+nu o poate activa. Valori:
 
-| Valoare       | Efect                                                                                                                                    |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| `off`         | Fără compresie pentru această solicitare.                                                                                                |
-| `default`     | Profilul Implicit derivat din panou (ignoră profilul activ). Motoarele cu pierderi rămân dezactivate.                                    |
-| `safe`        | La fel ca omiterea antetului: doar deduplicare și compactarea spațiilor albe.                                                            |
-| `allow-lossy` | Păstrează planul operatorului pentru această solicitare, inclusiv rezumatele, filtrele de relevanță și rescrierile de stil.              |
-| `engine:<id>` | Un singur motor, când este activat, de exemplu `engine:rtk`. Aceasta este activarea explicită a motorului pentru solicitarea respectivă. |
-| `<combo>`     | O combinație denumită, identificată mai întâi după nume (fără a ține cont de majuscule și minuscule), apoi după id.                      |
+| Valoare       | Efect                                                                                                                                 |
+| ------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `off`         | Fără comprimare pentru această solicitare.                                                                                            |
+| `default`     | Profilul Default derivat din panou (ignoră profilul activ). Motoarele cu pierderi rămân dezactivate.                                  |
+| `safe`        | La fel ca atunci când antetul este omis.                                                                                              |
+| `allow-lossy` | Păstrează planul de operator al acestei solicitări, inclusiv rezumatele, filtrele de relevanță și rescrierile de stil.                |
+| `engine:<id>` | Un singur motor când este activat, de exemplu `engine:rtk`. Aceasta este activarea explicită per solicitare pentru motorul respectiv. |
+| `<combo>`     | O combinație denumită, identificată mai întâi după nume (fără diferențiere între litere mari și mici), apoi după id.                  |
 
-Fără `allow-lossy`, `engine:<id>` sau o combinație denumită, motoarele cu pierderi nu sunt aplicate. Solicitarea beneficiază în continuare de deduplicarea sesiunii și de compactarea spațiilor albe atunci când compresia este activată.
+Fără `allow-lossy`, `engine:<id>` sau o combinație denumită, motoarele cu pierderi nu sunt aplicate.
+Când o valoare Default, o declanșare automată sau o suprascriere de rutare cu pierderi este
+retrogradată, OmniRoute păstrează pașii fără pierderi recunoscuți din pipeline-ul în stivă
+configurat, în ordinea configurată. Revine la `session-dedup → lite` numai atunci când niciun pas
+fără pierderi configurat nu rămâne disponibil.
 
-Planul aplicat este returnat în antetul de răspuns `X-OmniRoute-Compression: <mode>; source=<source>`, unde `<source>` este una dintre valorile `request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` sau `off`.
+Previzualizarea **Effective pipeline** din panoul Settings afișează planul obișnuit în starea
+implicită. Când poate rula o declanșare automată, aceeași previzualizare afișează și pipeline-ul
+efectiv condiționat, astfel încât panoul și rezoluția runtime fără antet să rămână sincronizate.
+
+Planul aplicat este returnat în antetul de răspuns
+`X-OmniRoute-Compression: <mode>; source=<source>`, unde `<source>` este una dintre valorile
+`request-header`, `routing-override`, `active-profile`, `auto-trigger`, `default` sau `off`.
 
 ### API
 
 ```bash
-# Obțineți setările de compresie
+# Obține setările de comprimare
 curl http://localhost:20128/api/settings/compression
 
-# Actualizați setările de compresie
+# Actualizează setările de comprimare
 curl -X PUT http://localhost:20128/api/settings/compression \
   -H "Content-Type: application/json" \
   -d '{"defaultMode":"stacked","autoTriggerMode":"stacked","autoTriggerTokens":32000}'
 
-# Previzualizați o sarcină utilă RTK/stacked specifică
+# Previzualizează un payload RTK/stacked specific
 curl -X POST http://localhost:20128/api/compression/preview \
   -H "Content-Type: application/json" \
   -d '{"mode":"rtk","messages":[{"role":"tool","content":"npm test output here"}]}'
 
-# Listați pachetele de filtre RTK
+# Listează pachetele de filtre RTK
 curl http://localhost:20128/api/context/rtk/filters
 
-# Testați RTK direct, cu metadate opționale despre comandă
+# Testează direct RTK cu metadate opționale despre comandă
 curl -X POST http://localhost:20128/api/context/rtk/test \
   -H "Content-Type: application/json" \
   -d '{"command":"npm test","text":"FAIL tests/example.test.ts\nError: boom"}'

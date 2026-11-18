@@ -181,6 +181,26 @@ function recordFailure(
 }
 
 /**
+ * Count one failed refresh against the breaker key for `provider`, for callers that gate
+ * their own attempts with isProviderBlocked instead of running through refreshWithRetry.
+ */
+export function recordRefreshFailure(
+  provider: string,
+  options?: TokenRefreshBreakerOptions,
+  log: RefreshLoggerLike | null = null
+) {
+  const effective = resolveBreakerOptions(options);
+  const key = breakerKey(provider, options?.connectionId, effective.scope);
+  recordFailure(key, effective.failureThreshold, effective.cooldownMs, log);
+}
+
+/** Reset the breaker key for `provider` after a successful refresh. */
+export function recordRefreshSuccess(provider: string, options?: TokenRefreshBreakerOptions) {
+  const { scope } = resolveBreakerOptions(options);
+  recordSuccess(breakerKey(provider, options?.connectionId, scope));
+}
+
+/**
  * Execute a function with a timeout.
  */
 async function withTimeout<T>(fn: () => Promise<T>, timeoutMs: number): Promise<T | null> {
@@ -246,7 +266,7 @@ export async function refreshWithRetry(
         if (result === NO_REFRESH_NEEDED) return null;
         log?.warn?.(
           "TOKEN_REFRESH",
-          `Unrecoverable refresh error for ${key}: ${result.error} — skipping retries`
+          `Unrecoverable refresh error for ${key}: ${(result as { error?: string }).error} — skipping retries`
         );
         return result;
       }

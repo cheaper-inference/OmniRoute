@@ -10,6 +10,7 @@ const { shardCountFromCi } = await import("../../../scripts/quality/validate-rel
 const { suiteResult } = await import("../../../scripts/ci/release-green-suite.mjs");
 
 type Job = {
+  env?: Record<string, string>;
   needs?: string | string[];
   if?: string;
   "runs-on"?: string;
@@ -56,6 +57,23 @@ test("the hosted suite matrix has exactly ci.yml's unit and integration shards p
   }
 });
 
+test("hosted suites run in pr gate mode, like every HARD item of the observer", () => {
+  // Plan "derived numbers and texts resolved only at release" (2026-11-13): a HARD red answers
+  // "did the base break?", never "is a derived value behind?". validate-release-green gives its
+  // own HARD gates OMNIROUTE_GATE_MODE=pr (withHardGateMode); these hosted suites feed the same
+  // verdict through --suites-from, so they take the same mode. Without it a scheduled run
+  // resolves to release mode and the release-only locale-parity tests (key parity with en.json)
+  // fail on every key a feature PR adds to en.json: unit-1/unit-4 on 2026-11-16.
+  // main-suites feeds main-green the same way.
+  for (const name of ["suites", "main-suites"]) {
+    const job = workflow.jobs[name];
+    assert.equal(job.env?.OMNIROUTE_GATE_MODE, "pr", `${name} runs in pr mode`);
+    for (const step of job.steps ?? []) {
+      assert.equal(step.env?.OMNIROUTE_GATE_MODE, undefined, `${name}: no per-step override`);
+    }
+  }
+});
+
 test("suites run hosted on the resolved commit and only outside push", () => {
   const suites = workflow.jobs.suites;
   assert.equal(suites["runs-on"], "ubuntu-latest");
@@ -96,11 +114,42 @@ test("the slot validation waits for the suites, reads their results and still ru
   assert.equal(checkout?.env?.SWEEP_SHA, "${{ needs.resolve-target.outputs.sha }}");
 });
 
-test("main-green keeps its own local sweep (main runs main's copy of the validator)", () => {
+test("main-green consumes hosted suites run on main's resolved commit", () => {
   const job = workflow.jobs["main-green"];
-  assert.equal(job.needs, undefined);
+  assert.deepEqual(job.needs, ["resolve-target", "resolve-main", "main-suites"]);
+  assert.match(job.if ?? "", /^\$\{\{ !cancelled\(\) && /);
   const validate = (job.steps ?? []).find((s) => s.run?.includes("validate-release-green.mjs"));
-  assert.doesNotMatch(validate?.run ?? "", /--suites-from/);
+  assert.match(validate?.run ?? "", /MODE="--with-build --full-ci --suites-from suite-results"/);
+  assert.match(validate?.run ?? "", /MODE="--quick"/);
+  assert.match(validate?.run ?? "", /--suites-workflow-sha "\$GITHUB_WORKFLOW_SHA"/);
+  const download = (job.steps ?? []).find((s) => s.uses?.startsWith("actions/download-artifact@"));
+  assert.equal(download?.with?.pattern, "main-green-suite-${{ github.run_attempt }}-*");
+
+  const suites = workflow.jobs["main-suites"];
+  assert.equal(suites["runs-on"], "ubuntu-latest");
+  assert.deepEqual(
+    suites.strategy?.matrix?.include,
+    workflow.jobs.suites.strategy?.matrix?.include
+  );
+  const checkout = suites.steps?.find((s) => s.uses?.startsWith("actions/checkout@"));
+  assert.equal(checkout?.with?.ref, "${{ needs.resolve-main.outputs.sha }}");
+  const runtime = suites.steps?.find((s) => s.uses?.startsWith("actions/setup-node@"));
+  assert.equal(runtime?.with?.["node-version"], "${{ needs.resolve-target.outputs.node-version }}");
+  const mainRuntime = (job.steps ?? []).find((s) => s.uses?.startsWith("actions/setup-node@"));
+  assert.equal(
+    mainRuntime?.with?.["node-version"],
+    "${{ needs.resolve-target.outputs.node-version || '24' }}"
+  );
+});
+
+test("main-green stays on main when resolve-main produced no commit", () => {
+  const steps = workflow.jobs["main-green"].steps ?? [];
+  const checkout = steps.find((s) => s.uses?.startsWith("actions/checkout@"));
+  // An empty ref makes actions/checkout use the workflow's own ref, i.e. the release tip.
+  assert.equal(
+    checkout?.with?.ref,
+    "${{ github.event_name == 'push' && github.sha || needs.resolve-main.outputs.sha || 'main' }}"
+  );
 });
 
 test("a suite job reports its name, exit code and first failure line", () => {

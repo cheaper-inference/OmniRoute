@@ -2,6 +2,7 @@
 
 import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
+import { Spinner } from "@/shared/components/Loading";
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
@@ -144,11 +145,7 @@ export default function CallbackPage() {
         {status === "processing" && (
           <>
             <div className="size-16 mx-auto mb-4 rounded-full bg-bg-subtle flex items-center justify-center">
-              <Icon
-                name="progress_activity"
-                size={30}
-                className="text-text-muted animate-spin motion-reduce:animate-none"
-              />
+              <Spinner size="lg" label={t("processing")} className="text-text-muted" />
             </div>
             <h1 className="ci-heading text-xl mb-2">{t("processing")}</h1>
             <p className="text-text-muted">{t("pleaseWait")}</p>

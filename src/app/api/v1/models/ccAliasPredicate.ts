@@ -28,12 +28,27 @@ export interface CcAliasGateSnapshot {
   global: boolean;
   providers: Map<string, "on" | "off">;
   models: Map<string, "on" | "off">; // key `${providerId}/${modelId}`
+  /**
+   * #18517: compatible-provider prefix -> node id. The dashboard toggle saves the
+   * setting under the provider page's route id (the node id), while catalog entries
+   * carry the node's public prefix, so both keys are checked for such entries.
+   */
+  providerNodeIdsByPrefix?: Record<string, string>;
 }
 
 const COMBO_PROVIDER_KEY = "combo";
 
 function settingFor(map: Map<string, "on" | "off">, key: string): CcAliasSetting {
   return map.get(key) ?? null;
+}
+
+/** First non-null setting across the candidate keys, in order. */
+function firstSetting(map: Map<string, "on" | "off">, keys: string[]): CcAliasSetting {
+  for (const key of keys) {
+    const setting = settingFor(map, key);
+    if (setting !== null) return setting;
+  }
+  return null;
 }
 
 /**
@@ -64,8 +79,14 @@ export function buildCcAliasPredicate(
 
     const providerId = id.slice(0, slashIndex);
     const modelId = id.slice(slashIndex + 1);
-    const provider = settingFor(snapshot.providers, providerId);
-    const model = settingFor(snapshot.models, `${providerId}/${modelId}`);
+    // The public prefix is checked first, so a row keyed by it keeps winning.
+    const nodeId = snapshot.providerNodeIdsByPrefix?.[providerId];
+    const providerKeys = nodeId && nodeId !== providerId ? [providerId, nodeId] : [providerId];
+    const provider = firstSetting(snapshot.providers, providerKeys);
+    const model = firstSetting(
+      snapshot.models,
+      providerKeys.map((key) => `${key}/${modelId}`)
+    );
     return resolveCcAliasEnabled({ model, provider, global: snapshot.global });
   };
 }

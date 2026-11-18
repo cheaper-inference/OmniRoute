@@ -6,11 +6,13 @@
  * Scoped to `kimi-coding` / `kimi-coding-apikey`. A suffix is stripped only when the id
  * is not itself a registry id and the remaining base is a registry id or a spec alias
  * of one (`kimi-k3` → wire `k3`). Cursor's genuine `kimi-k3-high` never qualifies: it
- * belongs to another provider.
+ * belongs to another provider. A bare spec alias has `effort: null`: dispatch can still
+ * normalize its wire id, while reasoning intent must not infer an effort suffix.
  */
 
 import { getProviderModels } from "../config/providerModels.ts";
 import { KIMI_CODING_WIRE_MODEL_ALIASES } from "../config/providers/registry/kimi/coding/runtime.ts";
+import { isKimiK31Model } from "./kimiK31.ts";
 
 const KIMI_CODING_PROVIDERS = new Set(["kimi-coding", "kimi-coding-apikey"]);
 const KIMI_CODING_PREFIXES = new Set(["kimi-coding", "kimi-coding-apikey", "kmc", "kmca"]);
@@ -21,11 +23,11 @@ const EFFORT_SUFFIXES = ["medium", "high", "none", "low", "max"] as const;
 
 export type KimiCodingEffortSuffix = (typeof EFFORT_SUFFIXES)[number];
 
-/** Split `<base>-<effort>` into the provider's wire base id; null when it is not a variant. */
+/** Resolve a wire alias or effort variant; bare aliases have no inferred effort. */
 export function splitKimiCodingEffortVariant(
   provider: string | null | undefined,
   modelId: string
-): { wireModel: string; effort: KimiCodingEffortSuffix } | null {
+): { wireModel: string; effort: KimiCodingEffortSuffix | null } | null {
   if (!provider || !KIMI_CODING_PROVIDERS.has(provider) || typeof modelId !== "string") {
     return null;
   }
@@ -38,6 +40,12 @@ export function splitKimiCodingEffortVariant(
       ? modelId.slice(slash + 1)
       : modelId;
   if (registryIds.has(bareId)) return null;
+
+  const bareLower = bareId.toLowerCase();
+  if (isKimiK31Model(bareLower)) {
+    const wireModel = KIMI_CODING_WIRE_MODEL_ALIASES[bareLower];
+    if (wireModel && registryIds.has(wireModel)) return { wireModel, effort: null };
+  }
 
   for (const effort of EFFORT_SUFFIXES) {
     const suffix = `-${effort}`;

@@ -15,6 +15,8 @@ export interface ProxyTransition {
   kind: ProxyTransitionKind;
   periodMs: number;
   until: number;
+  /** Set when the refusal is scoped to one model. Absent means the whole egress. */
+  model?: string;
 }
 
 export type ProxyTransitionListener = (transition: ProxyTransition) => void;
@@ -28,6 +30,8 @@ export interface SharedRefusalStore {
   slowServes: SlowServe[];
   listeners: Set<ProxyTransitionListener>;
   listenerKeys: Map<string, ProxyTransitionListener>;
+  /** True once any entry was written with a model. Lets model-less readers skip the scan. */
+  modelScopedSeen?: boolean;
 }
 
 export type RefusalState = { streak: number; until: number; seq: number };

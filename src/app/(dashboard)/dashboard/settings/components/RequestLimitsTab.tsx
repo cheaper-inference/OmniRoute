@@ -145,6 +145,7 @@ export default function RequestLimitsTab() {
             </span>
           )}
         </div>
+        <p className="text-xs text-text-muted">{t("requestBodyLimitChatHint")}</p>
         {message && (
           <p
             role={message.type === "success" ? "status" : "alert"}

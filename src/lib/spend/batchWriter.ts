@@ -1,4 +1,5 @@
 import { batchSaveCostEntries } from "@/lib/db/domainState";
+import { getProcessStore } from "@/shared/utils/processSingleton";
 
 export interface BufferedCostEntry {
   apiKeyId: string;
@@ -185,7 +186,10 @@ export class SpendBatchWriter {
   }
 }
 
-export const spendBatchWriter = new SpendBatchWriter();
+// One writer per process (#18678). Next bundles instrumentation (graceful shutdown) apart from the
+// API routes (which record costs); a module-scope instance split in two, and the SIGTERM
+// flush emptied a writer the routes never wrote to, losing up to a flush interval of spend.
+export const spendBatchWriter = getProcessStore("spendBatchWriter", () => new SpendBatchWriter());
 
 export function startSpendBatchWriter() {
   spendBatchWriter.start();

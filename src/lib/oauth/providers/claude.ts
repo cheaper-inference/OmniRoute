@@ -33,6 +33,8 @@ async function fetchClaudeBootstrap(accessToken) {
       organization_name: acct.organization_name || null,
       organization_type: acct.organization_type || null,
       organization_rate_limit_tier: acct.organization_rate_limit_tier || null,
+      user_rate_limit_tier: acct.user_rate_limit_tier || null,
+      seat_tier: acct.seat_tier || null,
     };
   } catch {
     return null;
@@ -191,6 +193,8 @@ export const claude = {
     if (bs.organization_type) providerSpecificData.organizationType = bs.organization_type;
     if (bs.organization_rate_limit_tier)
       providerSpecificData.organizationRateLimitTier = bs.organization_rate_limit_tier;
+    if (bs.user_rate_limit_tier) providerSpecificData.rateLimitTier = bs.user_rate_limit_tier;
+    if (bs.seat_tier) providerSpecificData.seatTier = bs.seat_tier;
     if (plan) providerSpecificData.plan = plan;
 
     const result: any = {

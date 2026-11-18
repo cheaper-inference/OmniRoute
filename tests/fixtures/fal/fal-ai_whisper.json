@@ -1,0 +1,621 @@
+{
+  "endpoint_id": "fal-ai/whisper",
+  "openapi": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Queue OpenAPI for fal-ai/whisper",
+      "version": "1.0.0",
+      "description": "The OpenAPI schema for the fal-ai/whisper queue.",
+      "x-fal-metadata": {
+        "endpointId": "fal-ai/whisper",
+        "category": "speech-to-text",
+        "thumbnailUrl": "https://storage.googleapis.com/falserverless/gallery/whisper.jpg",
+        "playgroundUrl": "https://fal.ai/models/fal-ai/whisper",
+        "documentationUrl": "https://fal.ai/models/fal-ai/whisper/api",
+        "about": "Generate"
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Authorization",
+          "description": "Fal Key"
+        }
+      },
+      "schemas": {
+        "QueueStatus": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]
+            },
+            "request_id": {
+              "type": "string",
+              "description": "The request id."
+            },
+            "response_url": {
+              "type": "string",
+              "description": "The response url."
+            },
+            "status_url": {
+              "type": "string",
+              "description": "The status url."
+            },
+            "cancel_url": {
+              "type": "string",
+              "description": "The cancel url."
+            },
+            "logs": {
+              "type": "object",
+              "description": "The logs.",
+              "additionalProperties": true
+            },
+            "metrics": {
+              "type": "object",
+              "description": "The metrics.",
+              "additionalProperties": true
+            },
+            "queue_position": {
+              "type": "integer",
+              "description": "The queue position."
+            }
+          },
+          "required": ["status", "request_id"]
+        },
+        "WhisperInput": {
+          "properties": {
+            "batch_size": {
+              "title": "Batch Size",
+              "maximum": 64,
+              "default": 64,
+              "minimum": 1,
+              "type": "integer",
+              "examples": [64]
+            },
+            "prompt": {
+              "default": "",
+              "description": "Prompt to use for generation. Defaults to an empty string.",
+              "type": "string",
+              "title": "Prompt"
+            },
+            "num_speakers": {
+              "examples": [null],
+              "title": "Num Speakers",
+              "description": "\n            Number of speakers in the audio file. Defaults to null.\n            If not provided, the number of speakers will be automatically\n            detected.\n        ",
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "diarize": {
+              "default": false,
+              "description": "Whether to diarize the audio file. Defaults to false. Setting to true will add costs proportional to diarization inference time.",
+              "type": "boolean",
+              "title": "Diarize"
+            },
+            "chunk_level": {
+              "title": "Chunk Level",
+              "default": "segment",
+              "description": "Level of the chunks to return. Either none, segment or word. `none` would imply that all of the audio will be transcribed without the timestamp tokens, we suggest to switch to `none` if you are not satisfied with the transcription quality, since it will usually improve the quality of the results. Switching to `none` will also provide minor speed ups in the transcription due to less amount of generated tokens. Notice that setting to none will produce **a single chunk with the whole transcription**.",
+              "enum": ["none", "segment", "word"],
+              "type": "string"
+            },
+            "audio_url": {
+              "title": "Audio Url",
+              "description": "URL of the audio file to transcribe. Supported formats: mp3, mp4, mpeg, mpga, m4a, wav or webm.",
+              "type": "string",
+              "examples": [
+                "https://storage.googleapis.com/falserverless/model_tests/whisper/dinner_conversation.mp3"
+              ]
+            },
+            "language": {
+              "title": "Language",
+              "description": "\n        Language of the audio file. If set to null, the language will be\n        automatically detected. Defaults to null.\n\n        If translate is selected as the task, the audio will be translated to\n        English, regardless of the language selected.\n        ",
+              "anyOf": [
+                {
+                  "enum": [
+                    "af",
+                    "am",
+                    "ar",
+                    "as",
+                    "az",
+                    "ba",
+                    "be",
+                    "bg",
+                    "bn",
+                    "bo",
+                    "br",
+                    "bs",
+                    "ca",
+                    "cs",
+                    "cy",
+                    "da",
+                    "de",
+                    "el",
+                    "en",
+                    "es",
+                    "et",
+                    "eu",
+                    "fa",
+                    "fi",
+                    "fo",
+                    "fr",
+                    "gl",
+                    "gu",
+                    "ha",
+                    "haw",
+                    "he",
+                    "hi",
+                    "hr",
+                    "ht",
+                    "hu",
+                    "hy",
+                    "id",
+                    "is",
+                    "it",
+                    "ja",
+                    "jw",
+                    "ka",
+                    "kk",
+                    "km",
+                    "kn",
+                    "ko",
+                    "la",
+                    "lb",
+                    "ln",
+                    "lo",
+                    "lt",
+                    "lv",
+                    "mg",
+                    "mi",
+                    "mk",
+                    "ml",
+                    "mn",
+                    "mr",
+                    "ms",
+                    "mt",
+                    "my",
+                    "ne",
+                    "nl",
+                    "nn",
+                    "no",
+                    "oc",
+                    "pa",
+                    "pl",
+                    "ps",
+                    "pt",
+                    "ro",
+                    "ru",
+                    "sa",
+                    "sd",
+                    "si",
+                    "sk",
+                    "sl",
+                    "sn",
+                    "so",
+                    "sq",
+                    "sr",
+                    "su",
+                    "sv",
+                    "sw",
+                    "ta",
+                    "te",
+                    "tg",
+                    "th",
+                    "tk",
+                    "tl",
+                    "tr",
+                    "tt",
+                    "uk",
+                    "ur",
+                    "uz",
+                    "vi",
+                    "yi",
+                    "yo",
+                    "zh"
+                  ],
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "task": {
+              "title": "Task",
+              "default": "transcribe",
+              "description": "Task to perform on the audio file. Either transcribe or translate.",
+              "enum": ["transcribe", "translate"],
+              "type": "string"
+            }
+          },
+          "required": ["audio_url"],
+          "title": "WhisperInput",
+          "type": "object",
+          "x-fal-order-properties": [
+            "audio_url",
+            "task",
+            "language",
+            "diarize",
+            "chunk_level",
+            "batch_size",
+            "prompt",
+            "num_speakers"
+          ]
+        },
+        "WhisperOutput": {
+          "properties": {
+            "diarization_segments": {
+              "items": {
+                "$ref": "#/components/schemas/DiarizationSegment"
+              },
+              "title": "Diarization Segments",
+              "description": "Speaker diarization segments of the audio file. Only present if diarization is enabled.",
+              "type": "array"
+            },
+            "chunks": {
+              "title": "Chunks",
+              "description": "Timestamp chunks of the audio file",
+              "anyOf": [
+                {
+                  "items": {
+                    "$ref": "#/components/schemas/WhisperChunk"
+                  },
+                  "type": "array"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "inferred_languages": {
+              "items": {
+                "enum": [
+                  "af",
+                  "am",
+                  "ar",
+                  "as",
+                  "az",
+                  "ba",
+                  "be",
+                  "bg",
+                  "bn",
+                  "bo",
+                  "br",
+                  "bs",
+                  "ca",
+                  "cs",
+                  "cy",
+                  "da",
+                  "de",
+                  "el",
+                  "en",
+                  "es",
+                  "et",
+                  "eu",
+                  "fa",
+                  "fi",
+                  "fo",
+                  "fr",
+                  "gl",
+                  "gu",
+                  "ha",
+                  "haw",
+                  "he",
+                  "hi",
+                  "hr",
+                  "ht",
+                  "hu",
+                  "hy",
+                  "id",
+                  "is",
+                  "it",
+                  "ja",
+                  "jw",
+                  "ka",
+                  "kk",
+                  "km",
+                  "kn",
+                  "ko",
+                  "la",
+                  "lb",
+                  "ln",
+                  "lo",
+                  "lt",
+                  "lv",
+                  "mg",
+                  "mi",
+                  "mk",
+                  "ml",
+                  "mn",
+                  "mr",
+                  "ms",
+                  "mt",
+                  "my",
+                  "ne",
+                  "nl",
+                  "nn",
+                  "no",
+                  "oc",
+                  "pa",
+                  "pl",
+                  "ps",
+                  "pt",
+                  "ro",
+                  "ru",
+                  "sa",
+                  "sd",
+                  "si",
+                  "sk",
+                  "sl",
+                  "sn",
+                  "so",
+                  "sq",
+                  "sr",
+                  "su",
+                  "sv",
+                  "sw",
+                  "ta",
+                  "te",
+                  "tg",
+                  "th",
+                  "tk",
+                  "tl",
+                  "tr",
+                  "tt",
+                  "uk",
+                  "ur",
+                  "uz",
+                  "vi",
+                  "yi",
+                  "yo",
+                  "zh"
+                ],
+                "type": "string"
+              },
+              "title": "Inferred Languages",
+              "description": "List of languages that the audio file is inferred to be. Defaults to null.",
+              "type": "array"
+            },
+            "text": {
+              "title": "Text",
+              "description": "Transcription of the audio file",
+              "type": "string",
+              "examples": [
+                "Mar\u00eda, \u00bfqu\u00e9 cenamos hoy? No s\u00e9, \u00bfqu\u00e9 cenamos? \u00bfCenamos pollo frito o pollo asado o algo? Mejor a la plancha, quiero una salada. A la plancha, vale. Y hacemos una ensalada con tomate y esas cosas. Vale. Pues eso lo hacemos, \u00bfvale? Venga, vale."
+              ]
+            }
+          },
+          "required": ["text", "inferred_languages", "diarization_segments"],
+          "title": "WhisperOutput",
+          "type": "object",
+          "x-fal-order-properties": ["text", "chunks", "inferred_languages", "diarization_segments"]
+        },
+        "DiarizationSegment": {
+          "properties": {
+            "timestamp": {
+              "minItems": 2,
+              "type": "array",
+              "title": "Timestamp",
+              "description": "Start and end timestamp of the segment",
+              "prefixItems": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "number"
+                }
+              ],
+              "maxItems": 2
+            },
+            "speaker": {
+              "title": "Speaker",
+              "description": "Speaker ID of the segment",
+              "type": "string"
+            }
+          },
+          "required": ["timestamp", "speaker"],
+          "title": "DiarizationSegment",
+          "type": "object",
+          "x-fal-order-properties": ["timestamp", "speaker"]
+        },
+        "WhisperChunk": {
+          "properties": {
+            "timestamp": {
+              "minItems": 2,
+              "type": "array",
+              "title": "Timestamp",
+              "description": "Start and end timestamp of the chunk",
+              "prefixItems": [
+                {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                {
+                  "anyOf": [
+                    {
+                      "type": "number"
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                }
+              ],
+              "maxItems": 2
+            },
+            "speaker": {
+              "title": "Speaker",
+              "description": "Speaker ID of the chunk. Only present if diarization is enabled.",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ]
+            },
+            "text": {
+              "title": "Text",
+              "description": "Transcription of the chunk",
+              "type": "string"
+            }
+          },
+          "required": ["timestamp", "text"],
+          "title": "WhisperChunk",
+          "type": "object",
+          "x-fal-order-properties": ["timestamp", "text", "speaker"]
+        }
+      }
+    },
+    "paths": {
+      "/fal-ai/whisper/requests/{request_id}/status": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            },
+            {
+              "name": "logs",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "description": "Whether to include logs (`1`) in the response or not (`0`)."
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/whisper/requests/{request_id}/cancel": {
+        "put": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request was cancelled.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean",
+                        "description": "Whether the request was cancelled successfully."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/whisper": {
+        "post": {
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WhisperInput"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/whisper/requests/{request_id}": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Result of the request.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/WhisperOutput"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "servers": [
+      {
+        "url": "https://queue.fal.run"
+      }
+    ],
+    "security": [
+      {
+        "apiKeyAuth": []
+      }
+    ]
+  }
+}

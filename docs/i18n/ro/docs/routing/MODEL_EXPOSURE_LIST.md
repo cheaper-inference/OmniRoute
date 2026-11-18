@@ -4,66 +4,47 @@
 
 ---
 
-> Funcționalitate opt-in, dezactivată implicit (dacă `modelVisibilityAllowlist`/`modelVisibilityDenylist`
-> sunt ambele goale, catalogul `/v1/models` ȘI fiecare grup de candidați `auto/*` rămân identice
-> la nivel de octet). O funcționalitate înrudită cu `hidePaidModels`/`hideAutoCombos`
-> (`src/lib/db/settings.ts`) pentru operatorii care doresc o listă de modele atent selecționată
-> din motive care nu au legătură cu costul.
+> Opt-in, off în mod implicit (`modelVisibilityAllowlist`/`modelVisibilityDenylist` ambele goale lasă catalogul `/v1/models` AND fiecare grup de candidat `auto/*` identic pentru octeți). Un frate al lui `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) pentru operatorii care doresc o listă de modele curată din motive care nu au nicio legătură cu costul.
 
-## De ce există această funcționalitate
+## De ce există asta
 
-`hidePaidModels` răspunde la întrebarea „este acest model gratuit?”, iar `hideAutoCombos` răspunde
-la întrebarea „ar trebui promovate în vreun fel ID-urile virtuale `auto/*`?” — niciuna dintre ele
-nu permite unui operator să selecteze un subset arbitrar de modele (de exemplu, să prezinte exact
-modelele pe care ar trebui să le vadă un anumit client Claude Code / OpenCode, indiferent de preț).
-#11481 adaugă această posibilitate prin două setări independente, opt-in, de tip matrice de șiruri.
+`hidePaidModels` răspunde „este acest model gratuit?” iar `hideAutoCombos` răspunde „ar trebui să se facă publicitate `auto/*` id-urile virtuale?” — nici nu permite unui operator să organizeze un subset arbitrar de modele (de exemplu, prezentând exact modelele pe care un anumit cod Claude / client OpenCode ar trebui să le vadă, independent de preț). #11481 adaugă asta ca două setări independente, opt-in pentru matrice de șiruri.
 
 ## Setări
 
-| Cheie                      | Tip        | Valoare implicită | Semnificație                                                                         |
-| -------------------------- | ---------- | ----------------- | ------------------------------------------------------------------------------------ |
-| `modelVisibilityDenylist`  | `string[]` | `[]`              | Intrările care corespund unui candidat îl ascund din catalog/grupul de candidați.    |
-| `modelVisibilityAllowlist` | `string[]` | `[]`              | Când lista nu este goală, rămân expuse NUMAI intrările care corespund unui candidat. |
+| Cheie                      | Tip        | Implicit | Sens                                                                              |
+| -------------------------- | ---------- | -------- | --------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`     | Intrările care se potrivesc unui candidat îl ascund din grupul catalog/candidate. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`     | Când nu sunt goale, intrările ONLY care se potrivesc unui candidat rămân expuse.  |
 
-Ambele acceptă până la 500 de intrări, fiecare cu cel mult 200 de caractere (validate prin Zod în
-`src/shared/validation/settingsSchemas.ts`). O intrare este fie:
+Ambele acceptă până la 500 de intrări de până la 200 de caractere fiecare (validate Zod în `src/shared/validation/settingsSchemas.ts`). O intrare este fie:
 
-- un ID exact din catalog — `"gpt-4o"` (ID de model simplu) sau `"openai/gpt-4o"` (prefixat cu furnizorul), fie
-- un șablon glob care utilizează `*`/`?` — de exemplu, `"openai/gpt-4*"` sau `"anthropic/*"` — interpretat prin
-  același mecanism comun de potrivire `globToRegex()` (`src/shared/utils/globPattern.ts`), utilizat deja de
-  mapările combinațiilor per model din `ModelRoutingSection` și de `freeModels.ts::matchesOnlyPaidModels`.
+- un ID exact de catalog — `"gpt-4o"` (ID model de bază) sau `"openai/gpt-4o"` (prefix de furnizor) sau
+- un model global care utilizează `*`/`?` — de exemplu, `"openai/gpt-4*"` sau `"anthropic/*"` — rezolvat prin același potrivire `globToRegex()` partajat (`src/shared/utils/globPattern.ts`) deja folosit de mapările combinate per-model ale `ModelRoutingSection` și `freeModels.ts::matchesOnlyPaidModels`.
 
-Precedență: lista de interdicții este verificată prima (o intrare interzisă este întotdeauna ascunsă,
-chiar dacă se potrivește și cu lista de permisiuni); când lista de permisiuni nu este goală, sunt
-păstrate numai intrările care se potrivesc cu aceasta.
+Precedență: lista de respingere este verificată mai întâi (o intrare refuzată este întotdeauna ascunsă, chiar dacă se potrivește și cu lista de permise); când lista permisă nu este goală, supraviețuiesc doar intrările cu care se potrivește.
 
-## Două puncte de control, nu unul singur
+## Două puncte de sufocare, nu unul
 
-Lecția din #6512 (un filtru de catalog bazat exclusiv pe `hidePaidModels` permitea în continuare
-ca `auto/*` să direcționeze către un model cu plată, deoarece grupul de candidați al combinației
-era construit independent) se aplică identic și aici. Predicatul de potrivire
-`isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) este apelat din AMBELE:
+Lecția de la #6512 (un filtru de catalog `hidePaidModels` -only încă permite `auto/*` să direcționeze către un model plătit, deoarece grupul de candidati combo a fost construit independent) se aplică în mod identic aici. Predicatul potrivit `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) este numit din BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — lista `/v1/models` propriu-zisă, în aceleași 5 puncte de control
-  pentru fiecare sursă pe care `shouldHidePaid()` le filtrează deja (`PROVIDER_MODELS` statice,
-  rânduri de furnizori sincronizate, rânduri personalizate, rânduri bazate pe aliasuri, rânduri
-  de rezervă gestionate).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — apelată
-  din `virtualFactory.ts::buildPreparedPool`, imediat după apelul echivalent
-  `filterPaidOnlyCandidates()`, astfel încât un model interzis să nu poată fi selectat niciodată
-  nici într-un grup de candidați `auto/*`.
+- `src/app/api/v1/models/catalog.ts` — lista `/v1/models` în sine, la aceleași 5 puncte de sufocare per sursă `shouldHidePaid()` deja porți ( `PROVIDER_MODELS` static , rânduri de furnizor sincronizate, rânduri personalizate, rânduri susținute de alias, rânduri de rezervă gestionate).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — apelat de la `virtualFactory.ts::buildPreparedPool`, imediat după apelul `filterPaidOnlyCandidates()` echivalent, astfel încât nici un model refuzat nu poate fi selectat niciodată într-un grup de candidati `auto/*`.
 
-## Ce NU este filtrat
+## Ce este NOT filtrat
 
-Urmează comportamentul existent al `hideAutoCombos`: un ID de model trimis **explicit** (nu prin
-`auto/*` și care nu a fost descoperit prin lista catalogului) nu este blocat niciodată la expediere
-— este filtrată numai promovarea/apartenența la grupul de candidați. Această funcționalitate este
-independentă de `hidePaidModels`; un operator poate dori un set atent selecționat din motive care
-nu au legătură cu costul, astfel încât ambele setări se compun ca filtre independente conectate
-prin ȘI, la fel ca în compunerea existentă a mai multor indicatori din `catalog.ts`.
+Oglindește comportamentul existent al lui `hideAutoCombos`: un ID de model trimis** explicit** (nu prin `auto/*`, și nu este descoperit prin listarea catalogului) nu este niciodată blocat la expediere — numai apartenența advertisement/candidate-pool este filtrată. Acesta este independent de `hidePaidModels`; un operator poate dori un set organizat din motive care nu au nimic de-a face cu costul, astfel încât ambele setări compun ca filtre AND-ed independente, la fel ca compoziția multi-steag existentă în `catalog.ts`.
 
-Exportul setărilor (`GET /api/settings/export-json`) include ambele matrice ca atare, ca orice alt
-câmp de setări — spre deosebire de filtrul de export pentru pașii combinației al `hidePaidModels`,
-aici nu există niciun risc de rehidratare: un ID interzis încorporat într-un pas al combinației
-exportate reprezintă alegerea explicită de rutare a operatorului, nu ceva ce trebuie eliminat la
-limita de export.
+Exportul setărilor (`GET /api/settings/export-json`) include ambele matrice text, la fel ca orice alt câmp de setări —, spre deosebire de filtrul de export în etape combinate al lui `hidePaidModels`, nu există niciun risc de rehidratare aici: un ID refuzat încorporat într-un pas combinat exportat este alegerea explicită de rutare a operatorului, nu ceva ce granița de export trebuie să fie eliminată.
+
+## Listare numai pentru combinații (`exposeCombosOnly`)
+
+Un boolean separat, de asemenea opt-in și `false` în mod implicit, pentru implementările în care combo-urile sunt suprafața modelului public, iar furnizorii sunt doar backend-uri. Când este `true`, lista publică (`GET /v1/models`, `GET /v1`, și celelalte rute de descoperire `/v1` construite pe `getUnifiedModelsResponse()`) păstrează numai rândurile cu `owned_by: "combo"`: combo de utilizator plus combo-urile `auto/*` încorporate (cu excepția cazului în care `hideAutoCombos` le ascunde). Folosește același test de rând ca și `catalogScope: "combos"` per-cheie, iar filtrele allow/deny/scope ale unei chei încă se aplică deasupra.
+
+Comutați-l** Setări → Rutare → Modele API listare** , sau cu `PATCH /api/settings {"exposeCombosOnly": true}`.
+
+Ca și listele de mai sus, schimbă doar reclamele:
+
+- un id `provider/model` explicit încă trimite, iar `GET /v1/models/{id}` încă îl rezolvă;
+- catalogul tabloului de bord (`GET /api/models/catalog`, folosit de selecționarii de modele) nu este restrâns;
+- nu este reflectat în pool-urile de candidați `auto/*`, așa că combo-urile `auto/*` își păstrează întregul pool.

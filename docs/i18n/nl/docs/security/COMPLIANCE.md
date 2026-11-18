@@ -11,55 +11,74 @@ OmniRoute registreert beheeracties, authenticatiegebeurtenissen, wijzigingen in 
 
 De implementatie bevindt zich in `src/lib/compliance/index.ts` (T-43 — "Compliancecontroles") en `src/lib/compliance/providerAudit.ts`. Audit-schrijfbewerkingen genereren nooit een fout: bij elke fout wordt de aanroep stilzwijgend genegeerd, zodat auditlogging de verwerking van het hoofdverzoek niet kan verstoren.
 
-## Wat wordt gelogd
+## Wat Er Wordt Gelogd
 
 ### Administratieve auditgebeurtenissen (`audit_log`)
 
-Elke aanroep van `logAuditEvent({ action, actor, target, details, ... })` levert één rij op. Actietekenreeksen volgen een patroon van `domain.verb` (of `domain.verb.outcome`). In de broncode bevestigde actietypen zijn onder meer:
+Elke aanroep van `logAuditEvent({ action, actor, target, details, ... })` produceert
+één rij. Actiereeksen volgen een patroon van `domain.verb` (of
+`domain.verb.outcome`). Bevestigde actietypen in de codebase zijn:
 
-| Actie                                | Bron                                    |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Actie                                | Bron                                     |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Elke vermelding bevat `action`, `actor` (standaard `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id` en `timestamp`. Gevoelige sleutels (`apiKey`, `accessToken`, `refreshToken`, `password`, alles wat overeenkomt met `*token`/`*secret`/`*apikey`, enz.) worden recursief geredigeerd tot `"[redacted]"` voordat de rij wordt weggeschreven.
+Elke invoer legt `action`, `actor` (standaard `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id` en `timestamp` vast. Gevoelige sleutels (`apiKey`, `accessToken`,
+`refreshToken`, `password`, alles wat overeenkomt met `*token`/`*secret`/`*apikey`,
+enzovoort) worden recursief geredigeerd naar `"[redacted]"` voordat de rij wordt
+geschreven.
 
-### MCP-toolaanroepen (`mcp_tool_audit`)
+Rijen met `api_key.auth.touch` leggen geslaagde API-sleutelmetagegevens en
+discovery-reads (GET/HEAD) vast die het requestlog nooit bereiken: welke sleutel,
+wanneer en het genormaliseerde pad, samengevoegd en beperkt tot maximaal 1.000
+rijen. Sleutels met `noLog` en de omgevingssleutel worden overgeslagen. Het
+IP-adres en de user-agent van de aanroeper worden alleen toegevoegd wanneer de
+featureflag `API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` is ingeschakeld (standaard
+uitgeschakeld).
 
-Elke aanroep van een MCP-tool schrijft een rij via `open-sse/mcp-server/audit.ts`. Schema (uit `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+### Aanroepen van MCP-tools (`mcp_tool_audit`)
 
-| Kolom            | Opmerkingen                                 |
-| ---------------- | ------------------------------------------- |
-| `id`             | automatisch ophogend                        |
-| `tool_name`      | identificatie van de MCP-tool               |
-| `input_hash`     | sha256 van invoer (geen payload opgeslagen) |
-| `output_summary` | korte, ingekorte samenvatting               |
-| `duration_ms`    | verstreken tijd                             |
-| `api_key_id`     | aanroeper (kan null zijn)                   |
-| `success`        | `1` / `0`                                   |
-| `error_code`     | definitieve foutcode bij mislukking         |
-| `created_at`     | ISO-tijdstempel                             |
+Elke aanroep van een MCP-tool schrijft een rij via
+`open-sse/mcp-server/audit.ts`. Schema (uit
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
-### Verzoek-/gebruikslogboeken
+| Kolom            | Opmerkingen                                    |
+| ---------------- | ---------------------------------------------- |
+| `id`             | automatisch opgehoogd                          |
+| `tool_name`      | MCP-toolidentifier                             |
+| `input_hash`     | sha256 van de invoer (geen payload opgeslagen) |
+| `output_summary` | korte, afgekorte samenvatting                  |
+| `duration_ms`    | verstreken tijd                                |
+| `api_key_id`     | aanroeper (kan leeg zijn)                      |
+| `success`        | `1` / `0`                                      |
+| `error_code`     | terminale foutcode bij een fout                |
+| `created_at`     | ISO-tijdstempel                                |
 
-Dit zijn operationele telemetriegegevens (niet strikt administratieve auditgegevens), maar ze gebruiken dezelfde retentiepijplijn:
+### Request- en gebruikslogs
 
-- `usage_history` — samengevoegde gebruiksgegevens per verzoek
-- `call_logs` — volledig logboek per verzoek (onderworpen aan een rijlimiet, zie hieronder)
-- `proxy_logs` — logboek van proxyverkeer (onderworpen aan een rijlimiet)
-- `request_detail_logs` — verouderd gedetailleerd verzoeklogboek (wordt nog steeds opgeschoond indien aanwezig)
+Dit zijn operationele telemetrie (geen strikt administratieve audit), maar ze
+delen dezelfde bewaarpijplijn:
+
+- `usage_history` — gebruiksoverzicht per request
+- `call_logs` — volledig log per request (onderworpen aan een rijlimiet, zie hieronder)
+- `proxy_logs` — proxyverkeerlog (onderworpen aan een rijlimiet)
+- `request_detail_logs` — legacy gedetailleerd requestlog (wordt nog steeds opgeschoond indien aanwezig)
 
 ## Opslagschema
 

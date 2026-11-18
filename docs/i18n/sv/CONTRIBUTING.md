@@ -8,14 +8,19 @@ Thank you for your interest in contributing! This guide covers everything you ne
 
 ---
 
-## Utvecklingsmiljö
+## Utvecklingskonfiguration
 
 ### Förutsättningar
 
-- **Node.js** `>=22.22.2 <23` eller `>=24.0.0 <27` (rekommenderat: 24 LTS)
+- **Node.js** `>=22.22.2 <23`, eller `>=24.0.0 <27` (rekommenderas: 24 LTS)
 - **npm** 10+
 
-> **För användare av npm v11+ (Node 24+):** Efter `npm install`, verifiera att de systemspecifika modulerna har installerats:
+> **Windows med Node 24:** använd den aktuella 24 LTS-korrigeringsversionen (minst 24.20.0).
+> Äldre versioner kan avslutas efter lyckade tester när `--test-force-exit` stänger
+> processen. Node:s [Windows libuv-korrigering](https://github.com/nodejs/node/pull/61999) åtgärdar
+> denna krasch i runtime; behåll testkontrollerna och kontrollerna av körarens avslut aktiverade.
+
+> **Användare av npm v11+ (Node 24+):** Efter `npm install` ska du verifiera att inbyggda moduler har installerats:
 > `node -e "require('better-sqlite3')"`. Om kommandot misslyckas med `MODULE_NOT_FOUND`,
 > kör `npm approve-scripts better-sqlite3 && npm install`. Se
 > [Felsökning](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
@@ -36,7 +41,7 @@ npm install
 # Skapa din .env från mallen
 cp .env.example .env
 
-# Generera nödvändiga hemligheter
+# Generera obligatoriska hemligheter
 echo "JWT_SECRET=$(openssl rand -base64 48)" >> .env
 echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 ```
@@ -48,76 +53,76 @@ Viktiga variabler för utveckling:
 | `PORT`                 | `20128`                      | Serverport                       |
 | `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`     | Bas-URL för frontend             |
 | `JWT_SECRET`           | (generera ovan)              | Hemlighet för JWT-signering      |
-| `INITIAL_PASSWORD`     | `CHANGEME`                   | Lösenord vid första inloggningen |
+| `INITIAL_PASSWORD`     | `CHANGEME`                   | Lösenord för första inloggningen |
 | `APP_LOG_LEVEL`        | `info`                       | Detaljnivå för loggning          |
 
-### Inställningar i kontrollpanelen
+### Inställningar för instrumentpanelen
 
-Kontrollpanelen innehåller reglage för funktioner som även kan konfigureras via miljövariabler:
+Instrumentpanelen innehåller UI-reglage för funktioner som även kan konfigureras via miljövariabler:
 
-| Inställningens plats      | Reglage               | Beskrivning                               |
-| ------------------------- | --------------------- | ----------------------------------------- |
-| Inställningar → Avancerat | Felsökningsläge       | Aktivera felsökningsloggar för anrop (UI) |
-| Inställningar → Allmänt   | Sidofältets synlighet | Visa/dölj avsnitt i sidofältet            |
+| Inställningens plats | Reglage            | Beskrivning                                    |
+| -------------------- | ------------------ | ---------------------------------------------- |
+| Settings → Advanced  | Debug Mode         | Aktivera felsökningsloggar för begäranden (UI) |
+| Settings → General   | Sidebar Visibility | Visa/dölj avsnitt i sidofältet                 |
 
-Dessa inställningar lagras i databasen och finns kvar efter omstarter. När de har angetts åsidosätter de miljövariablernas standardvärden.
+Dessa inställningar lagras i databasen och finns kvar efter omstarter. När de har angetts åsidosätter de standardvärdena för miljövariablerna.
 
-### Köra lokalt
+### Kör lokalt
 
 ```bash
 # Utvecklingsläge (automatisk omladdning)
 npm run dev
 
 # Produktionsbygge
-npm run build    # next build → .build/next/ och därefter assembleStandalone → dist/
+npm run build    # next build → .build/next/ then assembleStandalone → dist/
 npm run start
 
-# Snabb kompilering enbart av backend/API för bidragsgivares ändringar
+# Snabb backend-/API-kompilering för bidragsgivares ändringar
 npm run build:contributor
 
-# Versionsbygge (ren ombyggnad + HEAD-kontrollmarkör — krävs för driftsättning)
-npm run build:release   # rm -rf .build dist && bygger + skriver dist/BUILD_SHA
+# Releasebygge (ren ombyggnad + HEAD-sentinell — krävs för driftsättning)
+npm run build:release   # rm -rf .build dist && build + writes dist/BUILD_SHA
 
 # Vanlig portkonfiguration
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Bygget för bidragsgivare utför endast kompileringsvalidering: det skapar inte den fristående
-distributionen och bygger inte heller valfria systemspecifika paketeringsresurser. Använd det vanliga produktionsbygget när
-du behöver validera det leveransklara paketet.
+Bidragsgivarbygget utför validering som endast omfattar kompilering: det sammanställer inte
+den fristående distributionen och bygger inte valfria inbyggda paketeringstillgångar. Använd
+det vanliga produktionsbygget när du behöver validera det leveransklara paketet.
 
-### Katalogstruktur för byggutdata
+### Layout för byggutdata
 
-| Katalog   | Innehåll                                                                              | Versionshanterad |
-| --------- | ------------------------------------------------------------------------------------- | ---------------- |
-| `src/`    | Applikationens källkod (TypeScript / TSX)                                             | Ja               |
-| `.build/` | Mellanresultat — utdata från `next build` (ignoreras av Git, `distDir = .build/next`) | Nej              |
-| `dist/`   | Leveransklart paket — sammanställt av `assembleStandalone` (ignoreras av Git)         | Nej              |
+| Katalog   | Innehåll                                                                   | Versionshanterad |
+| --------- | -------------------------------------------------------------------------- | ---------------- |
+| `src/`    | Programmets källkod (TypeScript / TSX)                                     | Ja               |
+| `.build/` | Mellanresultat — `next build`-utdata (gitignored, `distDir = .build/next`) | Nej              |
+| `dist/`   | Leveransklart paket — sammanställt av `assembleStandalone` (gitignored)    | Nej              |
 
-Byggprocessen utförs i ett enda steg:
+Byggprocessen består av ett enda steg:
 
 ```
 npm run build
-  └─ next build → .build/next/standalone  (utdata från Next.js)
-  └─ assembleStandalone()                 (kopierar fristående paket + statiska filer + offentliga filer + systemspecifika resurser)
-       └─ utdata: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ next build → .build/next/standalone  (Next.js-utdata)
+  └─ assembleStandalone()                 (kopierar standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
 `npm run build:release` rensar dessutom båda katalogerna först och skriver
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en kontrollmarkör för driftsättningens integritet.
+`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) som en integritetssentinell för driftsättning.
 
-`npm run build:contributor` använder byggprofilen enbart för backend. Den ersätter tillfälligt
-kontrollpanelens UI-filer med stubbar under bygget, behåller API-rutthanterarna och återställer originalfilerna
-efter bygget. Använd `npm run build` för ändringar som påverkar kontrollpanelens UI eller för fullständig
-versionsvalidering; bidragsgivarprofilen ersätter inte versionsbygget.
+`npm run build:contributor` använder backendens enda byggprofil. Den ersätter tillfälligt
+filer för instrumentpanelens UI med stubbar under bygget, behåller API-routarnas hanterare
+och återställer originalfilerna efter bygget. Använd `npm run build` för ändringar som påverkar
+instrumentpanelens UI eller för fullständig releasevalidering; bidragsgivarprofilen ersätter inte releasebygget.
 
-> **Anmärkning om driftsättning på VPS:** fjärrbildens katalog `/usr/lib/node_modules/omniroute/app/`
-> är oförändrad. Driftsättningsverktygen använder rsync för att synkronisera innehållet i `dist/` till den.
-> Endast sökvägen för byggutdata i kodförrådet har ändrats (`app/` → `dist/`).
+> **Obs! om VPS-driftsättning:** den fjärranslutna bildkatalogen `/usr/lib/node_modules/omniroute/app/`
+> är oförändrad. Driftsättningsfärdigheterna rsync:ar innehållet i `dist/` till den.
+> Endast byggutdatasökvägen i projektet flyttades (`app/` → `dist/`).
 
 Standard-URL:er:
 
-- **Kontrollpanel**: `http://localhost:20128/dashboard`
+- **Instrumentpanel**: `http://localhost:20128/dashboard`
 - **API**: `http://localhost:20128/v1`
 
 ---
@@ -289,72 +294,72 @@ Se `open-sse/utils/stream.ts` och `open-sse/utils/streamHandler.ts` för tilläm
 
 ---
 
-## Projektstruktur
+## Projektets struktur
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Kontrollpanelsidor (23 sektioner)
-│   ├── api/                # API-rutter (51 kataloger)
-│   └── login/              # Autentiseringssidor (.tsx)
-├── domain/                 # Policymotor (policyEngine, comboResolver, costRules osv.)
-├── lib/                    # Central affärslogik (.ts)
-│   ├── a2a/                # Server för Agent-to-Agent v0.3-protokollet
-│   ├── acp/                # Register för Agent Communication Protocol
-│   ├── compliance/         # Policymotor för regelefterlevnad
-│   ├── db/                 # SQLite-domänmoduler + 130 migreringar
-│   ├── memory/             # Beständigt konversationsminne
-│   ├── oauth/              # OAuth-leverantörer, tjänster och verktyg
-│   ├── skills/             # Utbyggbart färdighetsramverk
-│   ├── usage/              # Användningsspårning och kostnadsberäkning
-│   └── localDb.ts          # Endast lager för återexport — lägg aldrig till logik här
-├── middleware/              # Middleware för begäranden (promptInjectionGuard)
-├── mitm/                   # MITM-proxy (certifikat, DNS, målroutning)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React-komponenter (.tsx)
-│   ├── constants/          # Leverantörsdefinitioner (329), MCP-omfattningar, 20 routningsstrategier
-│   ├── utils/              # Kretsbrytare, sanerare, autentiseringshjälpare
-│   └── validation/         # Zod v4-scheman
-└── sse/                    # SSE-proxypipeline
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse-arbetsyta
-├── executors/              # 150 exekveringsmoduler (exekveringsklasser + leverantörsspecifika hjälpare)
-├── handlers/               # 11 begärandehanterare (chatt, svar, inbäddningar, bilder osv.)
-├── mcp-server/             # MCP-server (110 unika verktyg, 3 transporter, 33 omfattningar)
-├── services/               # 178 tjänster på toppnivå (combo, autoCombo, rateLimitManager osv.)
-├── translator/             # Formatöversättare (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Transformerare för Responses API
-└── utils/                  # 22 verktygsmoduler (strömning, TLS, proxy, loggning)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron-skrivbordsapp (plattformsoberoende)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js-testkörare (1 574 testfiler)
-├── integration/            # Integrationstester
-├── e2e/                    # Playwright-tester
-├── security/               # Säkerhetstester
-├── translator/             # Översättarspecifika tester
-└── load/                   # Belastningstester
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Arkitekturbeslutsdokument
-├── architecture/            # Systemarkitektur och motståndskraft
-├── comparison/              # OmniRoute jämfört med alternativ
-├── compression/             # Komprimeringsguider och regler
-├── dev/                     # Utvecklingsguider
-├── diagrams/                # Arkitekturdiagram
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Användarguide, Docker, konfiguration, felsökning
-├── i18n/                    # Internationaliserade README-översättningar
-├── marketing/               # Marknadsföringsmaterial
-├── ops/                     # Driftsättning, proxy, täckning, utgåvor
-├── providers/               # Leverantörsspecifik dokumentation
-├── reference/               # API-referens, miljövariabler, CLI-verktyg, kostnadsfria nivåer
-├── releases/                # Versionsinformation
-├── routing/                 # Automatisk kombinationsmotor, återuppspelning av resonemang
-├── screenshots/             # Skärmbilder av kontrollpanelen
-├── security/                # Skyddsräcken, regelefterlevnad, smygläge, token
-└── specs/                   # Designspecifikationer
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
@@ -395,22 +400,22 @@ Skriv enhetstester i `tests/unit/` som minst omfattar:
 
 ---
 
-## Checklista för pull request
+## Dra checklista för begäran
 
-- [ ] Testerna godkänns (`npm test`)
-- [ ] Lintningen godkänns (`npm run lint`)
+- [ ] Tester godkända (`npm test`)
+- [ ] Linting pass (`npm run lint`)
 - [ ] Bygget lyckas (`npm run build`)
-- [ ] TypeScript-typer har lagts till för nya publika funktioner och gränssnitt
+- [ ] TypeScript typer har lagts till för nya offentliga funktioner och gränssnitt
 - [ ] Inga hårdkodade hemligheter eller reservvärden
-- [ ] Publika autentiseringsuppgifter för uppströmskällor bäddas in via `resolvePublicCred()` (se [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), aldrig som literaler
-- [ ] Felsvar hanteras via `buildErrorBody()` / `sanitizeErrorMessage()` — inga råa stackspårningar i svarskroppar (se [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Skalkommandon (`exec` / `spawn`) skickar körtidsvärden via `env`, inte via stränginterpolering
-- [ ] Alla indata valideras med Zod-scheman
-- [ ] Ett **fragment** för ändringsloggen har lagts till under `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` för användarsynliga ändringar (se [`changelog.d/README.md`](./changelog.d/README.md)) — redigera **inte** `CHANGELOG.md` direkt; fragmenten sammanställs vid lansering och orsakar aldrig konflikter mellan pull requests
-- [ ] Dokumentationen har uppdaterats (om tillämpligt)
-- [ ] Inga nya CodeQL-/Secret-Scanning-varningar har skapats, eller så har var och en avfärdats med en teknisk motivering som hänvisar till relevant dokument under `docs/security/`
-- [ ] Rutter som startar underordnade processer (`/api/mcp/`, `/api/cli-tools/runtime/`) har klassificerats som `isLocalOnlyPath()` i `src/server/authz/routeGuard.ts` — se [Hård regel nr 15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Inga `Co-authored-by`-trailrar för AI/botar i commit-meddelanden (Hård regel nr 16) — mänskliga medarbetare vars arbete återanvänds krediteras med vanliga `Co-authored-by: Name <email>`-trailrar
+- [ ] Offentliga uppströmsuppgifter inbäddade via `resolvePublicCred()` (se [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ), aldrig som bokstavliga
+- [ ] Felsvar leder genom `buildErrorBody()` / `sanitizeErrorMessage()` — inga råa stackspår i svarskroppar (se [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) )
+- [ ] Skalkommandon (`exec` / `spawn`) skickar körtidsvärden via `env`, inte via stränginterpolation
+- [ ] Alla ingångar validerade med Zod scheman
+- [ ] Ändringslogg** fragment** läggs till under `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` för användarvända ändringar (se [`changelog.d/README.md`](./changelog.d/README.md) ) — do** inte** redigera `CHANGELOG.md` direkt; fragment aggregeras vid releasetidpunkten och kommer aldrig i konflikt mellan PRs
+- [ ] Dokumentationen uppdaterad (om tillämpligt)
+- [ ] Inga nya CodeQL / Secret-Scanning-varningar öppnade, eller var och en avvisades med teknisk motivering som hänvisar till relevant `docs/security/` dokument
+- [ ] Rutter som skapar underordnade processer (`/api/mcp/`, `/api/cli-tools/runtime/`) klassificerade som `isLocalOnlyPath()` i `src/server/authz/routeGuard.ts` — se [hård regel #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Inga AI/bot `Co-authored-by` trailers i commit-meddelanden (Hard Rule #16) — mänskliga kollaboratörer vars arbete återanvänds krediteras med standard `Co-authored-by: Name <email>` -trailers
 
 ---
 

@@ -12,6 +12,7 @@ const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const usageLimits = await import("../../src/lib/usage/apiKeyUsageLimits.ts");
+const { EMERGENCY_FALLBACK_CONFIG } = await import("../../open-sse/services/emergencyFallback.ts");
 
 const NOW = Date.parse("2026-06-19T20:00:00.000Z");
 
@@ -110,6 +111,30 @@ test("control: a priced model routed at the same tokens does NOT trip fail-close
   assert.equal(status.dailySpentUsd, 1);
   assert.equal(status.dailyHasUnpricedUsage, false);
   assert.equal(status.dailyExceeded, false);
+});
+
+test("#18418: a served emergency fallback (free NVIDIA default) does not fail a USD-limited key closed", async () => {
+  const { created, metadata } = await makeMeteredKey();
+
+  await usageHistory.saveRequestUsage({
+    provider: EMERGENCY_FALLBACK_CONFIG.provider,
+    model: EMERGENCY_FALLBACK_CONFIG.model,
+    apiKeyId: created.id,
+    apiKeyName: "Budget Alias Key",
+    tokens: { input: 1_000_000, output: 1_000_000 },
+    success: true,
+    timestamp: "2026-06-19T12:00:00.000Z",
+  });
+
+  const status = await usageLimits.getApiKeyUsageLimitStatus(
+    { ...metadata, allowedConnections: null },
+    { now: () => NOW }
+  );
+
+  assert.equal(status.dailySpentUsd, 0, "the free fallback model costs $0");
+  assert.equal(status.dailyHasUnpricedUsage, false, "the fallback model must have a pricing row");
+  assert.equal(status.dailyExceeded, false);
+  assert.equal(status.weeklyExceeded, false);
 });
 
 test("USAGE_LIMIT_IGNORE_UNPRICED=true: unpriced usage counts as $0 instead of failing the quota closed", async () => {

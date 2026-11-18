@@ -2,6 +2,7 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { KIT_ALERT_DISMISS } from "./helpers/kitAlert";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -453,6 +454,13 @@ describe("EngineConfigPage", () => {
     const settingsLink = container.querySelector('a[href="/dashboard/context/settings"]');
     expect(settingsLink).not.toBeNull();
     expect(container.textContent).toContain("Compression Settings");
+
+    // The pointer is permanent page guidance, so the notice offers no way to close it.
+    const notice = container
+      .querySelector('[data-testid="panel-pointer-notice"]')
+      ?.closest('[data-slot="alert"]');
+    expect(notice).toBeTruthy();
+    expect(notice!.querySelector(KIT_ALERT_DISMISS)).toBeNull();
   });
 
   it("INVARIANT #1: handleSave writes the detailed sub-object to settings/compression, never PUTs combos/default", async () => {
@@ -573,6 +581,34 @@ describe("EngineConfigPage", () => {
     // Component should still be mounted (not crashed)
     expect(container).toBeTruthy();
     expect(container.parentNode).toBeTruthy();
+  });
+
+  it("keeps the settings load error on screen with no dismiss control", async () => {
+    setupFetchMock();
+    const answerWithFixtures = vi.mocked(globalThis.fetch).getMockImplementation()!;
+    vi.mocked(globalThis.fetch).mockImplementation(async (input, init) =>
+      input.toString().includes("/api/settings/compression")
+        ? new Response(JSON.stringify({ error: "unavailable" }), { status: 500 })
+        : answerWithFixtures(input, init)
+    );
+
+    const { EngineConfigPage } =
+      await import("../../../src/shared/components/compression/EngineConfigPage");
+
+    let container!: HTMLElement;
+    await act(async () => {
+      container = mountInContainer(<EngineConfigPage engineId="headroom" />);
+    });
+    await act(async () => {
+      await new Promise((resolve) => setTimeout(resolve, 0));
+    });
+
+    // Only a successful reload may clear it: the form behind it is showing defaults.
+    const error = container.querySelector('[data-slot="alert"][data-variant="critical"]');
+    expect(error).not.toBeNull();
+    expect(error!.getAttribute("role")).toBe("alert");
+    expect(error!.textContent).toContain("Failed to load the saved settings");
+    expect(error!.querySelector(KIT_ALERT_DISMISS)).toBeNull();
   });
 
   it("loads and saves the Lite proactive truncation switch with emergency-trim copy", async () => {

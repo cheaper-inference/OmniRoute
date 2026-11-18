@@ -2,6 +2,7 @@
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
 import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import { KIT_ALERT_DISMISS } from "./helpers/kitAlert";
 
 const containers: HTMLElement[] = [];
 const roots: Array<{ unmount: () => void }> = [];
@@ -201,9 +202,11 @@ describe("NamedCombosManager when the settings GET fails", () => {
     await clickAllRetryButtons(container);
 
     expect(container.textContent).not.toContain("Failed To Load");
-    expect(
-      container.querySelector('[data-testid="compression-master-switch-warning"]')
-    ).toBeTruthy();
+    const warning = container.querySelector('[data-testid="compression-master-switch-warning"]');
+    expect(warning).toBeTruthy();
+    // It stays until the master switch is on, so it offers no way to close it.
+    expect(warning!.getAttribute("role")).toBe("alert");
+    expect(warning!.querySelector(KIT_ALERT_DISMISS)).toBeNull();
     expect(container.querySelector('[data-testid="active-badge-c2"]')).toBeTruthy();
   });
 

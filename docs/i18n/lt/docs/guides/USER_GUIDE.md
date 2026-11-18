@@ -118,9 +118,9 @@ Prieiga per: WhatsApp, Telegram, Slack, Discord, iMessage, Signal...
 
 ---
 
-## 📖 Teikėjų konfigūravimas
+## 📖 Teikėjo sąranka
 
-Norėdami masiškai pridėti API rakto ryšius iš CSV arba JSON failo, naudokite **Valdymo skydas → Teikėjai → Importuoti iš failo**. Stulpeliai nustatomi pagal jų poziciją (`provider,name,apiKey,baseUrl,priority`); `provider` jau turi egzistuoti kaip valdomas teikėjas arba suderinamas mazgas. Žr. [Teikėjų importavimas iš CSV arba JSON failo](../providers/CSV-IMPORT.md).
+Norėdami masiškai pridėti API rakto ryšius iš CSV arba JSON failo, naudokite **Valdymo skydas → Teikėjai → Importuoti iš failo**. Stulpeliai yra poziciniai (`provider,name,apiKey,baseUrl,priority`); `provider` jau turi egzistuoti kaip valdomas teikėjas arba suderinamas mazgas. Žr. [Teikėjų importavimas iš CSV arba JSON failo](../providers/CSV-IMPORT.md).
 
 ### 🔐 Prenumeratos teikėjai
 
@@ -129,7 +129,7 @@ Norėdami masiškai pridėti API rakto ryšius iš CSV arba JSON failo, naudokit
 ```bash
 Valdymo skydas → Teikėjai → Prijungti Claude Code
 → OAuth prisijungimas → Automatinis prieigos rakto atnaujinimas
-→ 5 valandų ir savaitinės kvotos stebėjimas
+→ 5 valandų + savaitinės kvotos stebėjimas
 
 Modeliai:
   cc/claude-opus-4-7
@@ -137,20 +137,20 @@ Modeliai:
   cc/claude-haiku-4-5-20251001
 ```
 
-**Profesionalo patarimas:** sudėtingoms užduotims naudokite Opus, o kai svarbus greitis – Sonnet. OmniRoute stebi kiekvieno modelio kvotą!
+**Profesionalo patarimas:** sudėtingoms užduotims naudokite Opus, o greičiui – Sonnet. OmniRoute stebi kiekvieno modelio kvotą!
 
-OmniRoute pagrindiniame kompiuteryje nėra naršyklės? Paleiskite `claude setup-token` bet kur, kur prisijungta prie Claude Code, ir įklijuokite vienus metus galiojantį prieigos raktą skirtuke **Sąrankos prieigos raktas**. Žr. [Claude Code naudojimas su sąrankos prieigos raktu](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
+Neturite naršyklės OmniRoute pagrindiniame kompiuteryje? Bet kur, kur esate prisijungę prie Claude Code, paleiskite `claude setup-token` ir įklijuokite vienerius metus galiojantį prieigos raktą į **Sąrankos prieigos rakto** skirtuką. Žr. [Claude Code su sąrankos prieigos raktu](../providers/CLAUDE_CODE_SETUP_TOKEN.md).
 
-Claude ir su Claude Code suderinami maršrutai išsaugo `max` samprotavimo pastangų lygį Opus ir Sonnet
-modeliams. Haiku modeliai nepriima `max` pastangų lygio, todėl prieš siųsdama užklausą pirminiam
-teikėjui OmniRoute sumažina jį iki didelio samprotavimo biudžeto.
+Su Claude ir Claude Code suderinami maršrutai išsaugo `max` mąstymo pastangų lygį Opus ir Sonnet
+modeliams. Haiku modeliai nepriima `max` pastangų lygio, todėl OmniRoute prieš siųsdama užklausą į
+aukštesnį lygį pakeičia ją į didelio mąstymo biudžetą.
 
 #### OpenAI Codex (Plus/Pro)
 
 ```bash
 Valdymo skydas → Teikėjai → Prijungti Codex
 → OAuth prisijungimas (prievadas 1455)
-→ Nustatymas iš naujo kas 5 valandas ir kas savaitę
+→ 5 valandų + savaitinis nustatymas iš naujo
 
 Modeliai:
   cx/gpt-5.5
@@ -164,7 +164,7 @@ Modeliai:
 ```bash
 Valdymo skydas → Teikėjai → Prijungti GitHub
 → OAuth per GitHub
-→ Nustatymas iš naujo kas mėnesį (1-ąją mėnesio dieną)
+→ Mėnesinis nustatymas iš naujo (kiekvieno mėnesio 1 d.)
 
 Modeliai:
   gh/gpt-5.5
@@ -174,42 +174,58 @@ Modeliai:
   gh/gemini-3.1-pro-preview
 ```
 
-### 💰 Pigūs teikėjai
+**AI kreditai (žetonais pagrįstas atsiskaitymas).** Kai GitHub pateikia paskyros
+`credits_used`, teikėjo apribojimų kortelėje rodoma eilutė **AI kreditai** su per
+dabartinį atsiskaitymo laikotarpį sunaudotų kreditų skaičiumi, taip pat neribotuose organizacijų planuose.
 
-#### GLM-4.7 (nustatymas iš naujo kasdien, $0.6/1M)
+**Vietinis AI kreditų limitas.** Redaguokite GitHub ryšį ir nustatykite **AI kreditų limitą vienam
+atsiskaitymo laikotarpiui** (`providerSpecificData.githubCreditLimit`). Tuščia reikšmė jį išjungia; `0`
+visada praleidžia ryšį. Kai paskutinis naudojimo rodmuo yra lygus limitui arba jį viršija,
+renkantis paskyrą šis ryšys praleidžiamas, o maršrutizavimas pereina prie kitų jūsų ryšių,
+taip pat, kaip ir pasiekus kvotos politikos ribą. Tikrinimui naudojami naudojimo duomenys,
+kuriuos jau surenka periodinis kvotos atnaujinimas — užklausos metu į GitHub niekada
+nesikreipiama — be to, taikomas saugus atsarginis elgesys: trūkstamas arba pasenęs rodmuo
+(senesnis nei 15 minučių arba iš jau iš naujo nustatyto atsiskaitymo laikotarpio) ryšio
+neblokuoja. Tai yra vietinė apsaugos priemonė, **o ne garantuota išlaidų riba**: dėl GitHub
+ataskaitų vėlavimo, atnaujinimo intervalo, vykdomų užklausų ir naudojimo ne OmniRoute aplinkoje
+ši riba gali būti viršyta. Jei reikia griežtos ribos, naudokite pačios GitHub išlaidų valdiklius.
+
+### 💰 Nebrangūs teikėjai
+
+#### GLM-4.7 (kasdienis nustatymas iš naujo, $0.6/1M)
 
 1. Užsiregistruokite: [Zhipu AI](https://open.bigmodel.cn)
 2. Gaukite API raktą iš Coding Plan
-3. Valdymo skydas → Pridėti API raktą: Teikėjas: `glm`, API raktas: `your-key`
+3. Valdymo skydas → Pridėti API raktą: teikėjas: `glm`, API raktas: `your-key`
 
-**Naudojimas:** `glm/glm-4.7` — **Profesionalo patarimas:** Coding Plan suteikia 3 kartus didesnę kvotą už 7 kartus mažesnę kainą! Kvota nustatoma iš naujo kasdien 10:00 val.
+**Naudojimas:** `glm/glm-4.7` — **Profesionalo patarimas:** Coding Plan suteikia 3× didesnę kvotą už 1/7 kainos! Nustatymas iš naujo kasdien 10:00.
 
 #### MiniMax M2.1 (nustatymas iš naujo kas 5 val., $0.20/1M)
 
 1. Užsiregistruokite: [MiniMax](https://www.minimax.io)
 2. Gaukite API raktą → Valdymo skydas → Pridėti API raktą
 
-**Naudojimas:** `minimax/MiniMax-M2.1` — **Profesionalo patarimas:** pigiausias variantas ilgam kontekstui (1M žetonų)!
+**Naudojimas:** `minimax/MiniMax-M2.1` — **Profesionalo patarimas:** pigiausias pasirinkimas ilgam kontekstui (1 mln. žetonų)!
 
-#### Kimi K2 (fiksuotas $9/mėn. mokestis)
+#### Kimi K2 ($9/mėn. fiksuota kaina)
 
 1. Užsiprenumeruokite: [Moonshot AI](https://platform.kimi.ai?aff=omniroute)
 2. Gaukite API raktą → Valdymo skydas → Pridėti API raktą
 
-**Naudojimas:** `kimi/kimi-k2.5` — **Profesionalo patarimas:** fiksuotas $9/mėn. mokestis už 10M žetonų = faktinė $0.90/1M kaina!
+**Naudojimas:** `kimi/kimi-k2.5` — **Profesionalo patarimas:** fiksuota $9/mėn. kaina už 10 mln. žetonų = $0.90/1 mln. faktinė kaina!
 
 #### Baidu Qianfan / ERNIE
 
 1. Užsiregistruokite: [Baidu AI Cloud Qianfan](https://cloud.baidu.com/product/wenxinworkshop)
-2. Sukurkite Qianfan API raktą → Valdymo skydas → Pridėti API raktą: Teikėjas: `qianfan`
+2. Sukurkite Qianfan API raktą → Valdymo skydas → Pridėti API raktą: teikėjas: `qianfan`
 
-**Naudojimas:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` arba kitas su OpenAI suderinamas Qianfan modelio ID.
+**Naudojimas:** `qianfan/ernie-5.1`, `qianfan/ernie-x1.1` arba kitas su Qianfan suderinamas OpenAI modelio ID.
 
 ### 🆓 NEMOKAMI teikėjai
 
-Teikėjų, kuriems nereikia autentifikavimo, puslapyje šalia **Autentifikavimas nereikalingas** yra jungiklis.
-Jį išjungus teikėjas išjungiamas, pašalinamas iš sukonfigūruotų ir glaustų Teikėjų rodinių, o
-jo modeliai pašalinami iš `/v1/models`.
+Teikėjų puslapyje šalia **Autentifikavimas nereikalingas** yra jungiklis, skirtas nemokamiems teikėjams be autentifikavimo.
+Jį išjungus, teikėjas išjungiamas, pašalinamas iš sukonfigūruotų / glaustų teikėjų rodinių,
+o jo modeliai pašalinami iš `/v1/models`.
 
 #### Qoder (9 NEMOKAMI modeliai)
 
@@ -219,7 +235,7 @@ Valdymo skydas → Prijungti Qoder → OAuth prisijungimas → Prieigai taikomi 
 Modeliai: if/qwen3.8-max-preview, if/qwen3.7-max, if/qwen3.7-plus, if/kimi-k3, if/kimi-k2.7-code, if/glm-5.2, if/deepseek-v4-pro, if/deepseek-v4-flash, if/minimax-m3
 ```
 
-#### Kiro (Claude NEMOKAMAI)
+#### Kiro (NEMOKAMAS Claude)
 
 ```bash
 Valdymo skydas → Prijungti Kiro → AWS Builder ID arba Google/GitHub → ~50 kreditų per mėnesį
@@ -337,82 +353,82 @@ Modelis: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Diegimas
+## 🚀 diegimas
 
-### Visuotinis diegimas naudojant npm (rekomenduojama)
+### Visuotinis npm diegimas (rekomenduojama)
 
 ```bash
 npm install -g omniroute
 
-# Sukurkite konfigūracijos katalogą
+# Create config directory
 mkdir -p ~/.omniroute
 
-# Sukurkite .env failą (žr. .env.example)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Paleiskite serverį
+# Start server
 omniroute
-# Arba naudodami pasirinktinį prievadą:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI automatiškai įkelia `.env` iš `~/.omniroute/.env` arba `./.env`.
+CLI automatiškai įkelia `.env` iš `~/.omniroute/.env` arba `./.env`. Darbiniame kataloge esantis `./.env` gali nustatyti tik trumpą leidžiamųjų klavišų sąrašą (`REQUIRE_API_KEY`, lokalę, laiko juostos ir spalvų parametrus, o ne prievadus); visa kita sudėkite į `~/.omniroute/.env`. Žr. [CLI paleidimo sutartis](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
-### Sistemos dėklo režimas
+### Dėklo režimas
 
-Paleiskite OmniRoute sistemos dėkle:
+Sistemos dėkle paleiskite OmniRoute :
 
 ```bash
 omniroute serve --tray
 ```
 
-Komanda baigia darbą, kai serveris ir sistemos dėklo programa yra paruošti.
+Komanda grįžta, kai serveris ir dėklas yra paruošti.
 
-Serveris toliau veikia be terminalo.
+Serveris dirba be terminalo.
 
-Sistemos dėklo režimas palaikomas macOS, Windows ir grafinėse Linux sesijose. Sistemos dėklo režimas automatiškai neatidaro valdymo skydelio.
+Dėklo režimas palaiko macOS, Windows ir grafines Linux sesijas. Dėklo režimu prietaisų skydelis neatsidaro automatiškai.
 
-Naudokite sistemos dėklo meniu šiems veiksmams:
+Naudokite dėklo meniu šiems veiksmams:
 
-- Atidaryti valdymo skydelį.
-- Atidaryti `/dashboard/logs`.
-- Keisti automatinio paleidimo nustatymą.
-- Sustabdyti OmniRoute.
+- Atidarykite prietaisų skydelį.
+- Atidarykite `/dashboard/logs`.
+- Keisti automatinį paleidimą.
+- Sustabdyk OmniRoute.
 
-Nenaudokite `--tray` kartu su šiomis parinktimis:
+Nederinkite `--tray` su šiomis parinktimis:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Šiems režimams reikalingas skirtingas procesų valdymas.
+Šie režimai reikalauja skirtingo proceso nuosavybės.
 
-Įjunkite paleidimą kito prisijungimo prie kompiuterio metu:
+Įgalinti paleidimą kitą kartą prisijungus prie kompiuterio:
 
 ```bash
 omniroute autostart enable
 ```
 
-Automatinis paleidimas naudoja sistemos dėklo režimą macOS, Windows ir grafinėse Linux sesijose. Linux sistemose be grafinės aplinkos naudojama esama systemd naudotojo paslauga.
+Automatinis paleidimas naudoja dėklo režimą macOS, Windows ir grafinėse Linux seansuose. Headless Linux naudoja esamą systemd vartotojo paslaugą.
 
-Išjunkite paleidimą prisijungimo metu:
+Išjungti paleidimą prisijungus:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Šalinimas
+### Pašalinama
 
-Kai OmniRoute nebebus reikalingas, švariam pašalinimui pateikiame du sparčiuosius scenarijus:
+Kai jums nebereikia OmniRoute, pateikiame du greitus scenarijus švariam pašalinimui:
 
-| Komanda                  | Veiksmas                                                                                       |
-| ------------------------ | ---------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Pašalina sistemos programą, bet **išsaugo jūsų DB ir konfigūracijas** kataloge `~/.omniroute`. |
-| `npm run uninstall:full` | Pašalina programą IR visam laikui **ištrina visas konfigūracijas, raktus ir duomenų bazes**.   |
+| komandą                  | Veiksmas                                                                                         |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `npm run uninstall`      | Pašalina sistemos programą, bet** išlaiko jūsų DB ir konfigūracijas** `~/.omniroute`.            |
+| `npm run uninstall:full` | Programa AND pašalinama visam laikui** ištrina visas konfigūracijas, raktus ir duomenų bazes** . |
 
-> Pastaba: norėdami vykdyti šias komandas, eikite į OmniRoute projekto aplanką (jei jį klonavote) ir paleiskite jas. Arba, jei įdiegėte visuotinai, galite tiesiog paleisti `npm uninstall -g omniroute`.
+> Pastaba: Norėdami paleisti šias komandas, eikite į OmniRoute projekto aplanką (jei jį klonavote) ir paleiskite jas. Arba, jei įdiegta visame pasaulyje, galite tiesiog paleisti `npm uninstall -g omniroute`.
 
-### Diegimas VPS serveryje
+### VPS diegimas
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -428,25 +444,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Arba: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### Diegimas naudojant PM2 (mažai atminties)
+### PM2 diegimas (maža atmintis)
 
-Serveriuose, kuriuose yra mažai RAM, naudokite atminties apribojimo parinktį:
+Serveriams su ribotu RAM naudokite atminties limito parinktį:
 
 ```bash
-# Su 512 MB apribojimu (numatytasis)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Arba su pasirinktiniu atminties apribojimu
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Arba naudojant ecosystem.config.js
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-Sukurkite `ecosystem.config.js`:
+Sukurti `ecosystem.config.js`:
 
 ```javascript
 module.exports = {
@@ -471,24 +487,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Sukurkite atvaizdą (numatytasis = runner-cli su iš anksto įdiegtais codex/claude/droid)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Perkeliamasis režimas (rekomenduojama)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Apie su pagrindine sistema integruotą režimą su CLI dvejetainiais failais žr. pagrindinės dokumentacijos Docker skyrių.
+Norėdami sužinoti apie pagrindinio kompiuterio integruotą režimą su CLI dvejetainiais failais, žr. pagrindinių dokumentų skyrių Docker.
 
-### Void Linux (xbps-src)
+### Tuščia Linux (xbps-src)
 
-Void Linux naudotojai gali sukurti OmniRoute paketą ir įdiegti jį sistemoje naudodami `xbps-src` kryžminio kompiliavimo sistemą. Ji automatizuoja savarankiško Node.js paketo kūrimą kartu su reikalingomis savosiomis `better-sqlite3` susiejimo bibliotekomis.
+Tuščios Linux vartotojai gali supakuoti ir įdiegti OmniRoute savaime, naudodami `xbps-src` kryžminio kompiliavimo sistemą. Tai automatizuoja atskirą Node.js kūrimą kartu su reikiamais `better-sqlite3` savaisiais įrišimais.
 
 <details>
-<summary><b>Peržiūrėti xbps-src šabloną</b></summary>
+<summary><b>Peržiūrėkite xbps-src šabloną</b></summary>
 
 ```bash
-# „omniroute“ šablono failas
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -509,7 +525,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# Nustatykite tikslinės CPU architektūrą, skirtą node-gyp
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -518,29 +534,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Įdiekite visas priklausomybes – praleiskite scenarijus
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Sukurkite savarankišką Next.js paketą
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Nukopijuokite statinius išteklius į savarankišką paketą
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) Sukompiliuokite savąją better-sqlite3 susiejimo biblioteką
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Įdėkite sukompiliuotą susiejimo biblioteką į savarankišką paketą
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Pašalinkite konkrečioms architektūroms skirtus sharp paketus
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Nukopijuokite pino vykdymo priklausomybes, kurių neįtraukė Next.js statinė analizė:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -554,7 +570,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Neleiskite diegimo užbaigimo procedūrai pašalinti tuščių Next.js programos maršruto parinktuvo katalogų
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -582,87 +598,87 @@ post_install() {
 
 ### Aplinkos kintamieji
 
-| Kintamasis                              | Numatytoji reikšmė                   | Aprašymas                                                                                                                                      |
-| --------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT pasirašymo paslaptis (**pakeiskite gamybinėje aplinkoje**)                                                                                 |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | Pirmojo prisijungimo slaptažodis                                                                                                               |
-| `DATA_DIR`                              | `~/.omniroute`                       | Duomenų katalogas (DB, naudojimo duomenys, žurnalai)                                                                                           |
-| `PORT`                                  | sistemos numatytoji reikšmė          | Paslaugos prievadas (pavyzdžiuose – `20128`)                                                                                                   |
-| `HOSTNAME`                              | sistemos numatytoji reikšmė          | Susiejimo pagrindinis kompiuteris (Docker numatytoji reikšmė – `0.0.0.0`)                                                                      |
-| `NODE_ENV`                              | vykdymo aplinkos numatytoji reikšmė  | Diegdami nustatykite `production`                                                                                                              |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Viešasis bazinis URL, rodomas valdymo skydelyje ir pateikiamas serveriui (pakeičia senąjį `BASE_URL`)                                          |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Debesijos sinchronizavimo galinio taško bazinis URL (pakeičia senąjį `CLOUD_URL`)                                                              |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | HMAC paslaptis sugeneruotiems API raktams                                                                                                      |
-| `REQUIRE_API_KEY`                       | `false`                              | Reikalauti Bearer API rakto maršrutams `/v1/*`                                                                                                 |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Leisti autentifikuotiems valdymo skydelio naudotojams pareikalavus parodyti visas išsaugotas API raktų reikšmes                                |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Talpykloje saugomų teikėjų apribojimų duomenų atnaujinimo serveryje dažnis; UI atnaujinimo mygtukai vis tiek paleidžia rankinį sinchronizavimą |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Išjungti automatines SQLite momentines kopijas prieš rašymą, importavimą ar atkūrimą; rankinės atsarginės kopijos vis tiek veikia              |
-| `APP_LOG_TO_FILE`                       | `true`                               | Įjungia programos ir audito žurnalų rašymą į diską                                                                                             |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | Priverstinai naudoti `Secure` autentifikavimo slapuką (už HTTPS atvirkštinio tarpinio serverio)                                                |
-| `CLOUDFLARED_BIN`                       | nenustatyta                          | Naudoti esamą `cloudflared` dvejetainį failą vietoje valdomo atsisiuntimo                                                                      |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Valdomų sparčiųjų tunelių transportas (`http2`, `quic` arba `auto`)                                                                            |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js kaupo apribojimas MB                                                                                                                   |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Didžiausias užklausų talpyklos įrašų skaičius                                                                                                  |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Didžiausias semantinės talpyklos įrašų skaičius                                                                                                |
+| Kintamasis                              | Numatytoji                      | Aprašymas                                                                                                                                                      |
+| --------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(automatiškai sugeneruota)_    | JWT pasirašymo paslaptis — automatiškai sugeneruota pirmą kartą paleidus ir išliko iki `server.env`; aiškiai nustatyti, kai duomenų katalogas yra trumpalaikis |
+| `INITIAL_PASSWORD`                      | _(nustatyta)_                   | Pirmasis prisijungimo slaptažodis. npm/source diegimas prasideda `CHANGEME`: pakeiskite jį. Atšaukta: priėmimo vedlys                                          |
+| `DATA_DIR`                              | `~/.omniroute`                  | Duomenų katalogas (db, naudojimas, žurnalai)                                                                                                                   |
+| `PORT`                                  | numatytosios sistemos           | Aptarnavimo prievadas (`20128` pavyzdžiuose)                                                                                                                   |
+| `HOSTNAME`                              | numatytosios sistemos           | Susieti pagrindinį kompiuterį (Docker numatytasis `0.0.0.0`)                                                                                                   |
+| `NODE_ENV`                              | vykdymo laikas pagal nutylėjimą | Nustatyti `production` diegimui                                                                                                                                |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`        | Viešas bazinis URL pateiktas prietaisų skydelyje ir rodomas serveryje (pakeičia seną `BASE_URL`)                                                               |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`         | Debesų sinchronizavimo pabaigos taško bazė URL (pakeičia seną `CLOUD_URL`)                                                                                     |
+| `API_KEY_SECRET`                        | _(automatiškai sugeneruota)_    | HMAC paslaptis sugeneruotiems API raktams — automatiškai sugeneruojama pirmą kartą ir išliko `server.env`                                                      |
+| `REQUIRE_API_KEY`                       | `false`                         | Įgalinkite nešiklio API klavišą `/v1/*`                                                                                                                        |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                         | Leiskite autentifikuotiems prietaisų skydelio naudotojams pareikalavus atskleisti visas išsaugotas API raktų reikšmes                                          |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                            | Talpykloje saugomų teikėjo apribojimų duomenų atnaujinimo dažnis serverio pusėje; UI atnaujinimo mygtukai vis tiek suaktyvina rankinį sinchronizavimą          |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                         | Išjungti automatines SQLite momentines nuotraukas prieš writes/import/restore; rankinės atsarginės kopijos vis dar veikia                                      |
+| `APP_LOG_TO_FILE`                       | `true`                          | Įgalina programos ir audito žurnalo išvestį į diską                                                                                                            |
+| `AUTH_COOKIE_SECURE`                    | `false`                         | Priverstinis `Secure` autentifikavimo slapukas (už HTTPS atvirkštinio tarpinio serverio)                                                                       |
+| `CLOUDFLARED_BIN`                       | nenustatyta                     | Naudokite esamą `cloudflared` dvejetainį failą, o ne valdomą atsisiuntimą                                                                                      |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                         | Valdomų greitųjų tunelių transportavimas (`http2`, `quic` arba `auto`)                                                                                         |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                           | Node.js krūvos riba MB                                                                                                                                         |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                            | Maksimalus greitas talpyklos įrašas                                                                                                                            |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                           | Maksimalus semantinės talpyklos įrašų skaičius                                                                                                                 |
 
-Visą aplinkos kintamųjų žinyną rasite [README](../README.md).
+Visą aplinkos kintamojo nuorodą rasite [README](../README.md).
 
 ---
 
-## 📊 Galimi modeliai
+## 📊 Prieinami modeliai
 
 <details>
-<summary><b>Peržiūrėti visus galimus modelius</b></summary>
+<summary><b>Peržiūrėti visus prieinamus modelius</b></summary>
 
-> Žemiau pateiktas sąrašas sudarytas iš `open-sse/config/providerRegistry.ts`, skirtas v3.8.0. Debesų katalogai (Gemini, OpenRouter ir kt.) sinchronizuojami dinamiškai — norėdami pamatyti visą tiesioginį katalogą, atidarykite **Valdymo skydas → Teikėjai → [teikėjas] → Galimi modeliai** arba iškvieskite `GET /api/models/catalog`.
+> Toliau pateiktas sąrašas sudarytas pagal `open-sse/config/providerRegistry.ts`, skirtą v3.8.0. Debesijos katalogai („Gemini“, „OpenRouter“ ir kt.) sinchronizuojami dinamiškai — norėdami peržiūrėti visą tiesioginį katalogą, atidarykite **Dashboard → Providers → [provider] → Available Models** arba iškvieskite `GET /api/models/catalog`.
 >
-> Jei teikėjo integruotas sąrašas paseno, tame puslapyje naudokite **Importuoti iš /models** (arba įjunkite **Automatinį sinchronizavimą**), kad atsiųstumėte tiesioginį pirminį katalogą. Tai patvirtinta v3.8.50 versijoje su LLM7.io (`gemini-3.1-flash-lite`) ir UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); Pollinations anoniminė prieiga to paties testavimo metu išliko apribota pirminio šaltinio.
+> Jei teikėjo integruotasis sąrašas paseno, tame puslapyje naudokite **Import from /models** (arba įjunkite **Auto-Sync**), kad gautumėte tiesioginį pirminio teikėjo katalogą. Tai buvo patikrinta v3.8.50 versijoje su LLM7.io (`gemini-3.1-flash-lite`) ir UncloseAI (`solidrust/Hermes-3-Llama-3.1-8B-AWQ`); to paties bandymų etapo metu anoniminė Pollinations prieiga išliko apribota pirminio teikėjo.
 
-**Claude Code (`cc/`)** — Pro/Max OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
+**Claude Code (`cc/`)** — „Pro/Max“ OAuth: `cc/claude-opus-4-8`, `cc/claude-opus-4-7`, `cc/claude-opus-4-6`, `cc/claude-opus-4-5-20251101`, `cc/claude-sonnet-4-6`, `cc/claude-sonnet-4-5-20250929`, `cc/claude-haiku-4-5-20251001`
 
-**Codex (`cx/`)** — Plus/Pro OAuth: `cx/gpt-5.5` (+ pastangų lygiai: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
+**Codex (`cx/`)** — „Plus/Pro“ OAuth: `cx/gpt-5.5` (+ pastangų lygiai: `gpt-5.5-xhigh`, `gpt-5.5-high`, `gpt-5.5-medium`, `gpt-5.5-low`), `cx/gpt-5.4`, `cx/gpt-5.4-mini`, `cx/gpt-5.3-codex`, `cx/gpt-5.3-codex-spark`
 
 **GitHub Copilot (`gh/`)** — OAuth: `gh/gpt-5.5`, `gh/gpt-5.4`, `gh/gpt-5.4-mini`, `gh/gpt-5-mini`, `gh/gpt-5.3-codex`, `gh/claude-opus-4.7`, `gh/claude-opus-4.6`, `gh/claude-opus-4-5-20251101`, `gh/claude-sonnet-4.6`, `gh/claude-sonnet-4.5`, `gh/claude-haiku-4.5`, `gh/gemini-3.1-pro-preview`, `gh/gemini-3-flash-preview`, `gh/oswe-vscode-prime`
 
-**Kiro (`kr/`)** — NEMOKAMAS OAuth: naudokite tiesioginį katalogą, rodomą **Valdymo skydas → Teikėjai → Kiro → Galimi modeliai**. Prieinamumas priklauso nuo paskyros ir plano.
+**Kiro (`kr/`)** — NEMOKAMAS OAuth: naudokite tiesioginį katalogą, rodomą skiltyje **Dashboard → Providers → Kiro → Available Models**. Prieinamumas priklauso nuo paskyros ir plano.
 
 **Qoder (`if/`)** — NEMOKAMAS OAuth: `if/qwen3.8-max-preview`, `if/qwen3.7-max`, `if/qwen3.7-plus`, `if/kimi-k3`, `if/kimi-k2.7-code`, `if/glm-5.2`, `if/deepseek-v4-pro`, `if/deepseek-v4-flash`, `if/minimax-m3`
 
-**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — $0.2–0.6/1M: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
+**GLM (`glm/`, `glm-cn/`, `zai/`, `glmt/`)** — 0,2–0,6 USD / 1 mln.: `glm/glm-5.1`, `glm/glm-5`, `glm/glm-5-turbo`, `glm/glm-4.7`, `glm/glm-4.7-flash`, `glm/glm-4.6`, `glm/glm-4.6v`, `glm/glm-4.5`, `glm/glm-4.5v`, `glm/glm-4.5-air`
 
-**MiniMax (`minimax/`, `minimax-cn/`)** — $0.2/1M: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
+**MiniMax (`minimax/`, `minimax-cn/`)** — 0,2 USD / 1 mln.: `minimax/MiniMax-M2.7`, `minimax/MiniMax-M2.7-highspeed`, `minimax/MiniMax-M2.5`, `minimax/MiniMax-M2.5-highspeed`
 
-**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — $9/mėn. fiksuota kaina arba mokėjimas pagal naudojimą: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
+**Kimi (`kimi/`, `kimi-coding/`, `kimi-coding-apikey/`)** — 9 USD per mėnesį arba pagal naudojimą: `kimi/kimi-k2.6`, `kimi/kimi-k2.5`
 
 **DeepSeek (`ds/`)** — API raktas: `ds/deepseek-v4-pro`, `ds/deepseek-v4-flash`
 
-**Groq (`groq/`)** — Ypač greitas: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
+**Groq (`groq/`)** — Itin spartus: `groq/llama-3.3-70b-versatile`, `groq/meta-llama/llama-4-maverick-17b-128e-instruct`, `groq/qwen/qwen3-32b`, `groq/openai/gpt-oss-120b`
 
-**xAI (`xai/`)** — Grok tiesiogiai: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
+**xAI (`xai/`)** — Savitasis Grok: `xai/grok-4.3`, `xai/grok-4.20-multi-agent-0309`, `xai/grok-4.20-0309-reasoning`, `xai/grok-4.20-0309-non-reasoning`
 
-**Mistral (`mistral/`)** — Talpinama ES: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/devstral-latest`, `mistral/codestral-latest`
+**Mistral (`mistral/`)** — Priglobiamas ES: `mistral/mistral-large-latest`, `mistral/mistral-medium-3-5`, `mistral/mistral-small-latest`, `mistral/codestral-latest`
 
-**Perplexity (`pplx/`)** — Papildyta paieška: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
+**Perplexity (`pplx/`)** — Papildytas paieška: `pplx/sonar-deep-research`, `pplx/sonar-reasoning-pro`, `pplx/sonar-pro`, `pplx/sonar`
 
-**Together AI (`together/`)** — Atvirojo kodo: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (nemokama), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
+**Together AI (`together/`)** — Atvirojo kodo: `together/meta-llama/Llama-3.3-70B-Instruct-Turbo-Free` (nemokamas), `together/meta-llama/Llama-Vision-Free`, `together/deepseek-ai/DeepSeek-R1-Distill-Llama-70B-Free`, `together/deepseek-ai/DeepSeek-R1`, `together/Qwen/Qwen3-235B-A22B`, `together/meta-llama/Llama-4-Maverick-17B-128E-Instruct-FP8`
 
-**Fireworks AI (`fireworks/`)** — Greita inferencija: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
+**Fireworks AI (`fireworks/`)** — Spartusis išvedimas: `fireworks/accounts/fireworks/models/kimi-k2p6`, `fireworks/accounts/fireworks/models/minimax-m2p7`, `fireworks/accounts/fireworks/models/qwen3p6-plus`, `fireworks/accounts/fireworks/models/glm-5p1`, `fireworks/accounts/fireworks/models/deepseek-v4-pro`
 
-**Cerebras (`cerebras/`)** — Plokštės (wafer) mastelio: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
+**Cerebras (`cerebras/`)** — Vafelinio mastelio: `cerebras/zai-glm-4.7`, `cerebras/gpt-oss-120b`
 
-**Cohere (`cohere/`)** — Orientuota į RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
+**Cohere (`cohere/`)** — Orientuotas į RAG: `cohere/command-a-reasoning-08-2025`, `cohere/command-a-vision-07-2025`, `cohere/command-a-03-2025`, `cohere/command-r-08-2024`
 
-**NVIDIA NIM (`nvidia/`)** — Įmonėms: `nvidia/z-ai/glm-5.1`, `nvidia/minimaxai/minimax-m2.7`, `nvidia/google/gemma-4-31b-it`, `nvidia/mistralai/mistral-small-4-119b-2603`, `nvidia/mistralai/mistral-large-3-675b-instruct-2512`, `nvidia/qwen/qwen3.5-397b-a17b`, `nvidia/deepseek-ai/deepseek-v4-pro`, `nvidia/openai/gpt-oss-120b`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`
+**NVIDIA NIM (`nvidia/`)** — Įmonėms: `nvidia/google/gemma-4-31b-it`, `nvidia/nvidia/nemotron-3.5-super-vl-120b-a12b`, `nvidia/nvidia/nemotron-3-ultra-550b-a55b`, `nvidia/nvidia/nemotron-3.5-lightning-30b-a3b`
 
 **Baidu Qianfan (`qianfan/`)** — ERNIE: `qianfan/ernie-5.1`, `qianfan/ernie-5.0-thinking-latest`, `qianfan/ernie-x1.1`
 
 **Ollama Cloud (`ollama-cloud/`)**: `ollama-cloud/deepseek-v4-pro`, `ollama-cloud/deepseek-v4-flash`, `ollama-cloud/kimi-k2.6`, `ollama-cloud/glm-5.1`, `ollama-cloud/minimax-m2.7`, `ollama-cloud/gemma4:31b`, `ollama-cloud/qwen3.5:397b`
 
-**Gemini (Google Cloud `gemini/`)**: Sinchronizuojama tiesiogiai pagal API raktą iš Google — statinio sąrašo nėra. Prijunkite raktą **Valdymo skydas → Teikėjai**, tada naudokite **Galimi modeliai**, kad importuotumėte dabartinį katalogą (pvz., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
+**Gemini (Google Cloud `gemini/`)**: sinchronizuojamas tiesiogiai pagal API raktą iš Google — statinio sąrašo nėra. Prijunkite raktą skiltyje **Dashboard → Providers**, tada naudokite **Available Models**, kad importuotumėte dabartinį katalogą (pvz., `gemini/gemini-3-pro`, `gemini/gemini-3-flash`).
 
-**Kiti suderinami teikėjai** (atrinkti): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (per `aws-bedrock`), `azure-ai`, `openrouter` (perduodamas katalogas), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kiekvienas palaiko savo modelių sąrašą faile `providerRegistry.ts` ir gali būti automatiškai sinchronizuojamas, kai teikėjas atskleidžia `/models` galinį tašką.
+**Kiti suderinami teikėjai** (atrinkti): `cohere`, `databricks`, `snowflake`, `together`, `vertex`, `alibaba`, `alibaba-cn`, `bedrock` (per `aws-bedrock`), `azure-ai`, `openrouter` (perduodamasis katalogas), `siliconflow`, `hyperbolic`, `huggingface`, `featherless-ai`, `cloudflare-ai`, `scaleway`, `deepinfra`, `vercel-ai-gateway`, `bazaarlink`, `friendliai`, `nous-research`, `reka`, `volcengine`, `ai21`, `gigachat`. Kiekvienas iš jų tvarko savo modelių sąrašą faile `providerRegistry.ts`; sąrašas gali būti automatiškai sinchronizuojamas, kai teikėjas pateikia `/models` galinį punktą.
 
-**Pastaba dėl modelių ID:** OmniRoute naudoja teikėjų vietinius ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Kai kuriuose ID yra taškinių versijų, nes būtent taip jų tikisi pirminė API. Jei modelio nėra aukščiau pateiktame sąraše, paleiskite `omniroute models --search <term>` arba iškvieskite `GET /api/models/catalog`, kad patvirtintumėte prieinamumą.
+**Pastaba apie modelių ID:** OmniRoute naudoja teikėjų savituosius ID (`claude-opus-4-8`, `gpt-5.5`, `glm-5.1`, `MiniMax-M2.7`, `kimi-k2.5`, `grok-4.20-0309-reasoning`). Kai kuriuose ID yra taškais atskirtų versijų, nes taip jų reikalauja pirminio teikėjo API. Jei modelis pirmiau nepateiktas, paleiskite `omniroute models --search <term>` arba iškvieskite `GET /api/models/catalog`, kad patvirtintumėte jo prieinamumą.
 
 </details>
 
@@ -693,7 +709,7 @@ Pastabos:
 
 ### Pasirinktiniai su OpenAI suderinami teikėjai
 
-Bet kokį šliuzą, kuris kalba OpenAI API (savarankiškai priglobtas tarpinis serveris, vLLM, trečiosios šalies kaupiklis), galima pridėti kaip savo teikėjo mazgą:
+Bet kokį šliuzą, kuris kalba OpenAI API (savarankiškai priglobtas tarpinis serveris, vLLM, trečiosios šalies kaupiklis), galima pridėti kaip atskirą teikėjo mazgą:
 
 1. **Teikėjai → Pridėti OpenAI Suderinamas** .
 2. **Vardas** : mazgo rodymo etiketė.
@@ -718,8 +734,8 @@ Pasirinkite atskirą priešdėlį (`mygw`, `acme-proxy`). Jei užklausos tinkint
 
 Šie klavišai patenka į ryšio `providerSpecificData` (pavyzdžiui, per `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (sveikasis skaičius, 1–1024) – su OpenAI pokalbių formatu suderinamoms jungtims, kurių šliuzas atmeta ilgus įrankių pavadinimus. Ilgesni vardai siunčiami kaip trumpi slapyvardžiai ir atkuriami atsakyme.
-- `quotaEndpoint` – šliuzo quota/credits galinis taškas, skaitomas prietaisų skydelio kvotos juostoje ir kvotą žinančiame maršrute. Veikia su OpenAI ir Anthropic suderinamomis jungtimis; visa forma užfiksuota `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (sveikasis skaičius, 1–1024) — skirtas su OpenAI pokalbių formatu suderinamoms jungtims, kurių šliuzas atmeta ilgus įrankių pavadinimus. Ilgesni vardai siunčiami kaip trumpi slapyvardžiai ir atkuriami atsakyme. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ir Muse Code jau yra daugiau nei 64 simbolių slapyvardžiai be jokio nustatymo. Ryšio reikšmė pakeičia Azure OpenAI / Azure AI Foundry numatytąjį nustatymą (Azure ryšį už griežtesnio šliuzo) ir nustato tinkinto suderinamo mazgo ribą; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ir Muse Code laikosi savo registro limito ir jo nepaiso.
+- `quotaEndpoint` — šliuzo quota/credits galinis taškas, skaitykite prietaisų skydelio kvotų juostą ir kvotą žinantį maršrutą. Veikia su OpenAI ir Anthropic suderinamomis jungtimis; visa forma yra dokumentuota `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -736,7 +752,7 @@ Pasirinkite atskirą priešdėlį (`mygw`, `acme-proxy`). Jei užklausos tinkint
 
 ### Grandininis OmniRoute Peers
 
-Kitas OmniRoute šliuzas gali būti pridėtas kaip a** Pasirinktinis su OpenAI suderinamas** teikėjas. Naudokite lygiavertės programos `/v1` bazę URL ir tam skirtą, mažiausią privilegiją turintį API raktą, išduotą to bendraamžio.
+Kitas OmniRoute šliuzas gali būti pridėtas kaip a** Pasirinktinis su OpenAI suderinamas** teikėjas. Naudokite lygiavertės programos `/v1` bazę URL ir tam skirtą, mažiausių privilegijų API raktą, išduotą to bendraamžio.
 
 Abipusėms arba kelių šuolių grandinėms įjunkite pasirinkimo kilpos apsaugą kiekviename šliuze:
 
@@ -754,9 +770,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Tik užklausos, išsiųstos aiškiai įtrauktam lygiaverčiui URL sąrašui, gauna `X-OmniRoute-Peer-Trace` antraštę. Šliuzas atmeta kartotinį ID egzempliorių arba išnaudotą šuolio biudžetą su HTTP `508 Loop Detected`; įprasti tiekėjai negauna lygiaverčių metaduomenų.
+Tik užklausos, išsiųstos aiškiai įtrauktam lygiaverčiui URL sąrašui, gauna `X-OmniRoute-Peer-Trace` antraštę. Šliuzas atmeta kartotinį ID egzempliorių arba išnaudotą šuolio biudžetą su HTTP `508 Loop Detected`; paprasti tiekėjai negauna lygiaverčių metaduomenų.
 
-Bendradarbiavimo grandinė nėra duomenų bazės replikacija ar pagrindinio kompiuterio perkėlimas. Kiekvienas šliuzas išlaiko nepriklausomą SQLite būseną, talpyklas, tarifų skaitiklius ir seansus. Norėdami nustatyti active/passive arba active/active pasiekiamumą, naudokite patikrintą atvirkštinį tarpinį serverį arba kliento perjungimą ir niekada nejunkite vienos SQLite duomenų bazės į kelis veikiančius OmniRoute egzempliorius.
+Bendradarbiavimo grandinė nėra duomenų bazės replikacija ar pagrindinio kompiuterio perkėlimas. Kiekvienas šliuzas išlaiko nepriklausomą SQLite būseną, talpyklas, tarifų skaitiklius ir seansus. Norėdami nustatyti active/passive arba active/active pasiekiamumą, naudokite patikrintą atvirkštinio tarpinio serverio arba kliento perjungimą ir niekada nejunkite vienos SQLite duomenų bazės į kelis veikiančius OmniRoute egzempliorius.
 
 ### Dedikuotų paslaugų teikėjų maršrutai
 
@@ -804,7 +820,7 @@ Pateikiami modeliai, sugrupuoti pagal teikėją ir tipus (`chat`, `embedding`, `
 
 ### Cloudflare greitasis tunelis
 
-- Galima įsigyti** Prietaisų skydelis → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
+- Galima įsigyti** Prietaisų skydelio → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
 - Sukuria laikiną `https://*.trycloudflare.com` URL, kuris persiunčia į dabartinį su OpenAI suderinamą `/v1` galinį tašką
 - Pirmiausia įgalinti įdiegia `cloudflared` tik tada, kai reikia; vėliau paleidžiant iš naujo pakartotinai naudoja tą patį valdomą dvejetainį failą
 - Greitieji tuneliai nėra automatiškai atkuriami iš naujo paleidus OmniRoute arba konteinerį; prireikus vėl įjunkite juos iš prietaisų skydelio
@@ -816,8 +832,8 @@ Pateikiami modeliai, sugrupuoti pagal teikėją ir tipus (`chat`, `embedding`, `
 
 ### LLM Gateway Intelligence“ (9 etapas)
 
-- **Semantinė talpykla** - Automatiškai talpykloje neperduodama, temperatūra = 0 (apeiti naudojant `X-OmniRoute-No-Cache: true`)
-- **Prašyti Idempotencijos** — Per 5 sek. per `Idempotency-Key` arba `X-Request-Id` antraštę panaikina užklausų dublikatus
+- **Semantinė talpykla** — automatiškai talpina ne srautu, temperatūra = 0 atsakymų (apeiti naudojant `X-OmniRoute-No-Cache: true`)
+- **Prašyti Idempotencijos** — per 5 sek. per `Idempotency-Key` arba `X-Request-Id` antraštę panaikina užklausų dublikatus
 - **Pažangos stebėjimas** — Pasirinkite SSE `event: progress` įvykius per `X-OmniRoute-Progress: true` antraštę
 
 ---
@@ -849,25 +865,25 @@ Konfigūruoti per** Prietaisų skydelis → Nustatymai → Maršrutas** . Prieta
 
 | strategija                         | Aprašymas                                                                                                   |
 | ---------------------------------- | ----------------------------------------------------------------------------------------------------------- |
-| **Pirmiausia užpildykite**         | Naudoja paskyras prioritetine tvarka – pagrindinė paskyra apdoroja visas užklausas, kol jos nepasiekiamos   |
+| **Pirmiausia užpildykite**         | Naudoja paskyras prioritetine tvarka — pagrindinė paskyra apdoroja visas užklausas, kol jos nepasiekiamos   |
 | **Apvalus Robinas**                | Pereina per visas paskyras su konfigūruojamu fiksavimo limitu (numatytasis: 3 skambučiai vienoje paskyroje) |
-| **P2C (dviejų pasirinkimų galia)** | Atsitiktinai pasirenka 2 paskyras ir kelius į sveikesnę – subalansuoja apkrovą ir sveikatos suvokimą        |
+| **P2C (dviejų pasirinkimų galia)** | Pasirenka 2 — paskyras ir maršrutus į sveikesnę                                                             |
 | **Atsitiktinis**                   | Atsitiktinai pasirenka paskyrą kiekvienai užklausai naudodamas Fisher-Yates shuffle                         |
 | **Mažiausiai naudotas**            | Maršrutai į paskyrą su seniausia `lastUsedAt` laiko žyma, tolygiai paskirstant srautą                       |
-| **Optimizuotos išlaidos**          | Maršrutai į paskyrą, kurios prioriteto vertė yra mažiausia, optimizuojama pigiausių paslaugų teikėjams      |
+| **Optimizuotos išlaidos**          | Maršrutai į paskyrą, kurios prioriteto vertė yra mažiausia, optimizuojama mažiausios kainos teikėjams       |
 
-**Išplėstinės kombinuotos ir automatinės strategijos** (konfigūruojama kombinacijoje arba naudojant `auto/*` priešdėlius – žr. [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Išplėstinės kombinuotos ir automatinės strategijos** (konfigūruojama kombinacijoje arba naudojant `auto/*` priešdėlius — žr. [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - griežta tvarka, niekada nevyksta
-- `weighted` – proporcingas srautas, padalytas pagal kiekvieno modelio svorius
-- `fill-first` - ištuštinkite pirmąjį modelį, kol pasieks ribos
+- `priority` — griežta tvarka, niekada nevyksta
+- `weighted` — proporcingas srautas, padalytas pagal modelio svorius
+- `fill-first` — nusausinkite pirmąjį modelį, kol nepasieks ribos
 - `round-robin` / `strict-random` / `random`
 - `p2c` (dviejų pasirinkimų galia)
 - `least-used` ir `cost-optimized`
-- `auto` – visų kandidatų rezultatas
-- `lkgp` (Paskutinis žinomas geras teikėjas) – prisega prie paskutinio sėkmingo teikėjo, tada grįžta prie taisyklių
-- `context-optimized` – pasirenka modelį su didžiausiu laisvo konteksto langu
-- `context-relay` – sujungia ilgo konteksto modelius tolesniems posūkiams
+- `auto` — rezultatas priklauso nuo visų kandidatų
+- `lkgp` (paskutinis žinomas geras teikėjas) — prisega prie paskutinio sėkmingo teikėjo, tada grįžta prie taisyklių
+- `context-optimized` — pasirenka modelį su didžiausiu laisvo konteksto langu
+- `context-relay` — grandines ilgo konteksto modeliai tolesniems posūkiams
 
 #### Išorinė lipni seanso antraštė
 
@@ -877,7 +893,7 @@ Dėl išorinių seansų giminingumo (pvz., Claude Code/Codex agentai už atvirk�
 X-Session-Id: your-session-key
 ```
 
-OmniRoute taip pat priima `x_session_id` ir grąžina galiojantį seanso raktą `X-OmniRoute-Session-Id`.
+OmniRoute taip pat priima `x_session_id` ir grąžina efektyvų seanso raktą `X-OmniRoute-Session-Id`.
 
 Jei naudojate Nginx ir siunčiate pabraukimo formos antraštes, įgalinkite:
 
@@ -975,29 +991,29 @@ Konfigūruoti per** Prietaisų skydelis → Nustatymai → Atsparumas** .
 OmniRoute įgyvendina teikėjo lygio atsparumą su penkiais komponentais:
 
 1. **Prašyti eilės ir tempo** — Sistemos lygio užklausos formavimas:
-   - **Užklausos per minutę (RPM)** – Maksimalus užklausų skaičius per minutę vienoje paskyroje
+   - **Užklausos per minutę (RPM)** — Maksimalus užklausų skaičius per minutę vienoje paskyroje
    - **Minimalus laikas tarp užklausų** — Minimalus tarpas tarp užklausų milisekundėmis
-   - **Maksimalus vienu metu vykstančių užklausų skaičius** — Didžiausias užklausų skaičius vienu metu vienoje paskyroje
+   - **Maksimalus vienu metu vykstančių užklausų skaičius** — Maksimalus užklausų skaičius vienu metu vienoje paskyroje
 
-2. **Ryšio vėsinimas** — Autentiškumo tipo konfigūracija vienam ryšiui po pakartotinai bandomų gedimų:
-   - **Bazinis aušinimas** — Numatytasis atvėsimo langas, skirtas pakartotiniam gedimui prieš srovę
-   - **Naudokite prieš srovę bandyti dar kartą patarimus** — Gerbiamos autoritetingos `Retry-After` arba iš naujo nustatomos užuominos, kai jos pateikiamos
+2. **Ryšio vėsinimas** — Per-auth tipo konfigūracija vienam ryšiui po pakartotinai bandomų gedimų:
+   - **Bazinis aušinimas** — Numatytasis atvėsimo langas, skirtas pakartotinai bandomiems gedimams prieš srautą
+   - **Naudokite prieš srovę bandyti dar kartą patarimus** — Gerbia autoritetingas `Retry-After` arba iš naujo nustatytas užuominas
    - **Maks. atsitraukimo žingsniai** — Maksimalus eksponentinis atsitraukimo lygis pasikartojantiems gedimams
 
-3. **Tiekėjo grandinės pertraukiklis** – Stebi tiekėjo gedimus iki galo, pažymi teikėją, kuris pablogėjo iki sukonfigūruoto įspėjimo slenksčio, ir atidaro pertraukiklį, kai pasiekiamas sukonfigūruotas gedimo slenkstis:
+3. **Tiekėjo grandinės pertraukiklis** — seka galutinio tiekėjo triktis, pažymi teikėją, kuris pablogėjo iki sukonfigūruoto įspėjimo slenksčio, ir atidaro pertraukiklį, kai pasiekiamas sukonfigūruotas gedimo slenkstis:
    - **Degradacijos slenkstis** — Iš eilės teikėjo gedimai prieš įeinant į `DEGRADED`
    - **Nesėkmės slenkstis** — Iš eilės teikėjo gedimai prieš įeinant į `OPEN`
-   - **Iš naujo nustatyti skirtąjį laiką** — Laiko intervalas, kol teikėjas bus išbandytas dar kartą
-   - **CLOSED** (Sveikas) – užklausos vyksta įprastai
-   - **DEGRADED** — Užklausos vis dar teikiamos, kol stebimi didesni gedimai
-   - **OPEN** — Teikėjas laikinai blokuojamas po pasikartojančių gedimų
-   - **HALF_OPEN** — Tikrinama, ar paslaugų teikėjas atsigavo
+   - **Iš naujo nustatyti skirtąjį laiką** — Laiko langas, kol teikėjas bus išbandytas dar kartą
+   - **CLOSED** (Sveikas) — Užklausos vyksta normaliai
+   - **DEGRADED** — Užklausos vis tiek vyksta, kol stebimi didesni gedimai
+   - **OPEN** — teikėjas laikinai blokuojamas po pasikartojančių gedimų
+   - **HALF_OPEN** — Tikrinama, ar teikėjas atsigavo
 
    Ryšio apimties `429` normos ribos išlieka** Ryšio vėsinimas** ir neįskaičiuojami į teikėjo pertraukiklį.
 
    Rodoma teikėjo pertraukiklio vykdymo būsena** Prietaisų skydelis → Health** tik.
 
-4. **Palaukite atvėsimo** — Jei kiekvienas potencialus ryšys jau atvėsęs, OmniRoute gali palaukti anksčiausio atšalimo ir automatiškai pakartoti tą patį kliento užklausą.
+4. **Palaukite atvėsimo** — Jei kiekvienas potencialus ryšys jau atvėso, OmniRoute gali laukti anksčiausio atšalimo ir automatiškai pakartotinai bandyti tą pačią kliento užklausą.
 
 5. **Normos ribos automatinis aptikimas** — Kai tiekėjai grąžina aiškų laukimo langus, šios užuominos nepaiso vietinio ryšio atvėsimo, kai nustatymas įgalintas.
 
@@ -1045,10 +1061,10 @@ Nustatymų puslapis suskirstytas į** 7 skirtukai** kad būtų lengviau naršyti
 | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Generolas**  | Sistemos saugojimo įrankiai, numatytasis elgesys, galutinio taško tunelio matomumas                                                                                                                                                   |
 | **Išvaizda**   | Temos valdikliai (light/dark/system), šoninės juostos matomumas, skydelio perjungimai Cloudflare/Tailscale/ngrok tunelinėms kortelėms                                                                                                 |
-| **AI**         | Mąstomas biudžetas (pereinamoji / automatinė juostelė / tinkintas / adaptyvus – žr. [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), pasaulinė sistemos raginimas, sparčios talpyklos statistika                                         |
+| **AI**         | Mąstomas biudžetas (pereinamoji / automatinė juostelė / tinkintas / adaptyvus — žr. [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), pasaulinė sistemos raginimas, greita talpyklos statistika                                           |
 | **Saugumas**   | Login/Password nustatymai, IP prieigos valdymas, API autentifikavimas `/models`, teikėjo blokavimas, greito įpurškimo apsauga                                                                                                         |
 | **Maršrutas**  | Visuotinė maršruto parinkimo strategija (Fill First / Round Robin / P2C / Atsitiktinis / Mažiausiai naudojamas / Optimizuota kaina), pakaitos simbolių modelio slapyvardžiai, atsarginės grandinės, kombinuoti numatytieji nustatymai |
-| **Atsparumas** | Užklausa dėl eilės, ryšio atvėsimo, teikėjo pertraukiklio konfigūracijos ir laukimo, kol atvėsimas                                                                                                                                    |
+| **Atsparumas** | Prašyti eilės, ryšio atvėsimo, teikėjo pertraukiklio konfigūracijos ir laukimo, kol atvėsimas                                                                                                                                         |
 | **Išplėstinė** | Visuotinė tarpinio serverio konfigūracija (HTTP/SOCKS5), tarpinio serverio nepaisymas pagal teikėją                                                                                                                                   |
 
 Bendra nebedubliuoja tik skaitymo registravimo ir talpyklos pastabų. Duomenų bazės saugojimo ir optimizavimo nustatymai išlieka per `/api/settings/database`; rankinis talpyklos išvalymas naudoja `DELETE /api/cache`. Užklausų ir tarpinio serverio žurnalo eilučių viršutines ribas valdo `CALL_LOGS_TABLE_MAX_ROWS` ir `PROXY_LOGS_TABLE_MAX_ROWS`.
@@ -1059,10 +1075,10 @@ Bendra nebedubliuoja tik skaitymo registravimo ir talpyklos pastabų. Duomenų b
 
 Prieiga per** Prietaisų skydelio → išlaidos** .
 
-| Skirtukas     | Tikslas                                                                                                             |
-| ------------- | ------------------------------------------------------------------------------------------------------------------- |
-| **Biudžetas** | Nustatykite išlaidų limitus vienam API raktui naudodami daily/weekly/monthly biudžetus ir stebėjimą realiuoju laiku |
-| **Kainodara** | Peržiūrėkite ir redaguokite modelio kainodaros įrašus – kaina už 1 tūkst. input/output žetonų vienam teikėjui       |
+| Skirtukas     | Tikslas                                                                                                               |
+| ------------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Biudžetas** | Nustatykite išlaidų limitus vienam API raktui naudodami daily/weekly/monthly biudžetus ir stebėjimą realiuoju laiku   |
+| **Kainodara** | Peržiūrėkite ir redaguokite modelio kainodaros įrašus — kaina už 1 tūkst. input/output prieigos raktų vienam teikėjui |
 
 ```bash
 # API: Set a budget
@@ -1142,9 +1158,9 @@ Konfigūruokite derinį balansavimą** Prietaisų skydelis → Combos → Create
 
 Galima nustatyti visuotinius kombinuotus numatytuosius nustatymus** Dashboard → Settings → Routing → Combo Numatytieji nustatymai** . Pagal numatytuosius nustatymus kombinuoti tiksliniai skirtieji laikotarpiai paveldi dabartinį užklausos skirtąjį laiką. Naudokite** Tikslinis skirtasis laikas (sekundėmis)** naudojant numatytuosius kombinuotus nustatymus arba atskirą derinį tik tada, kai trumpesnė tikslinė riba turėtų suaktyvinti greitesnį atsarginį režimą.
 
-Nulinės delsos derinio optimizavimas yra pasirenkamas. Palikti** Nulinės delsos optimizavimas** išjungta, kad šios delsos funkcijos negalėtų lenktyniauti su atsarginiais tikslais, praleisti taikinius pagal TTFT istoriją arba suspausti atsarginių užklausų; Įgalinus jį, galima sukonfigūruoti apsidraudimą, nuspėjamą TTFT praleidimą ir aktyvų atsarginį glaudinimą, kad būtų galima pakeisti routing/request tikslumą ir sumažinti uodegos delsą.
+Nulinės delsos derinio optimizavimas yra pasirenkamas. Palikti** Nulinės delsos optimizavimas** išjungta, kad šios delsos funkcijos negalėtų lenktyniauti su atsarginiais tikslais, praleisti taikinius pagal TTFT istoriją arba suspausti atsarginių užklausų; Įgalinus jį galima sukonfigūruoti apsidraudimą, nuspėjamą TTFT praleidimą ir aktyvų atsarginį glaudinimą, kad būtų galima pakeisti routing/request tikslumą ir sumažinti uodegos delsą.
 
-Išjungti** Samprotavimo prieigos rakto buferis** kai tiekėjai reikalauja griežtų `max_tokens` / `maxOutputTokens` apribojimų. Kai įjungta, kombinuotasis maršrutas prideda tik modelių, kurių išvesties riba yra žinoma, samprotavimo modelio laisvumą ir palieka kliento prieigos rakto ribą nepakitusią, kai saugi buferio vertė viršytų šią ribą. Jei kliento riba jau viršija žinomą viršutinę ribą, OmniRoute sumažina ją iki tos ribos prieš siųsdama užklausą prieš srovę.
+Išjungti** Samprotavimo prieigos rakto buferis** kai tiekėjai reikalauja griežtų `max_tokens` / `maxOutputTokens` apribojimų. Kai įjungta, kombinuotasis maršruto parinkimas prideda tik modelių, kurių išvesties riba yra žinoma, samprotavimo modelio laisvumą ir palieka kliento prieigos rakto ribą nepakitusią, kai saugi buferio vertė viršytų šią ribą. Jei kliento riba jau viršija žinomą viršutinę ribą, OmniRoute sumažina ją iki tos ribos prieš siųsdama užklausą prieš srovę.
 
 ---
 
@@ -1157,7 +1173,7 @@ Prieiga per** Prietaisų skydelis → Health** . Sistemos būklės apžvalga rea
 | **Sistemos būsena**        | Veikimo laikas, versija, atminties naudojimas, duomenų katalogas     |
 | **Teikėjo sveikata**       | Pasaulinio teikėjo grandinės pertraukiklio vykdymo būsena            |
 | **Kainos ribos**           | Aktyvūs ryšio atvėsimai vienoje paskyroje su likusiu laiku           |
-| **Aktyvūs blokavimai**     | Aktyvūs modelio blokavimai ir laikini išskyrimai                     |
+| **Aktyvūs užraktai**       | Aktyvūs modelio blokavimai ir laikini išskyrimai                     |
 | **Parašo talpykla**        | Dubliavimo talpyklos statistika (aktyvūs raktai, pataikymo rodiklis) |
 | **Latencijos telemetrija** | p50/p95/p99 delsos agregacija vienam teikėjui                        |
 

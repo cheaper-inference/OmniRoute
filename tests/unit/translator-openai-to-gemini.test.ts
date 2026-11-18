@@ -1,5 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+
+const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-gemini-translator-"));
+process.env.DATA_DIR = TEST_DATA_DIR;
 
 const { openaiToAntigravityRequest, openaiToCloudCodeGeminiRequest, openaiToGeminiRequest } =
   await import("../../open-sse/translator/request/openai-to-gemini.ts");
@@ -16,6 +22,13 @@ const {
 const { ANTIGRAVITY_DEFAULT_SYSTEM } = await import("../../open-sse/config/constants.ts");
 const { clearGeminiThoughtSignatures } =
   await import("../../open-sse/services/geminiThoughtSignatureStore.ts");
+
+const { resetDbInstance } = await import("../../src/lib/db/core.ts");
+
+test.after(() => {
+  resetDbInstance();
+  fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+});
 
 type UnknownRecord = Record<string, unknown>;
 type GeminiTools = NonNullable<ReturnType<typeof openaiToGeminiRequest>["tools"]>;
@@ -1050,6 +1063,65 @@ test("OpenAI -> Antigravity Claude path sanitizes tool names for Gemini schema",
   assert.equal(toolResultBlock.name, sanitizedToolName);
   assert.deepEqual(toolResultBlock.response, { result: '{"ok":true}' });
 });
+
+for (const [model, effort] of [
+  ["claude-opus-5-5-high", "high"],
+  ["claude-opus-5-5-medium", "medium"],
+  ["claude-sonnet-4-6", "high"],
+  ["claude-opus-4-6-thinking", "high"],
+]) {
+  for (const [name, reasoning] of [
+    ["reasoning effort", { reasoning_effort: effort }],
+    ["absent reasoning", {}],
+    ["disabled reasoning", { reasoning_effort: "none" }],
+    ["zero thinking budget", { thinking: { type: "enabled", budget_tokens: 0 } }],
+  ] as const) {
+    test(`OpenAI -> Antigravity ${model} omits implicit output limits with ${name}`, () => {
+      const result = openaiToAntigravityRequest(
+        model,
+        { messages: [{ role: "user", content: "Hello" }], ...reasoning },
+        false
+      );
+      const generationConfig = result.request.generationConfig;
+      assert.ok(generationConfig);
+      assert.equal(generationConfig.maxOutputTokens, undefined);
+      assert.equal(generationConfig.thinkingConfig, undefined);
+    });
+  }
+}
+
+for (const [name, limits] of [
+  ["max_tokens", { max_tokens: null }],
+  ["max_completion_tokens", { max_completion_tokens: null }],
+  ["each limit", { max_tokens: null, max_completion_tokens: null }],
+] as const) {
+  // `null` is how many OpenAI-compatible clients serialize "no limit".
+  test(`OpenAI -> Antigravity Claude omits the output limit when ${name} is null`, () => {
+    const result = openaiToAntigravityRequest(
+      "claude-opus-5-5-high",
+      { messages: [{ role: "user", content: "Hello" }], ...limits, reasoning_effort: "high" },
+      false
+    );
+    assert.equal(result.request.generationConfig.maxOutputTokens, undefined);
+    assert.equal(result.request.generationConfig.thinkingConfig, undefined);
+  });
+}
+
+for (const [name, limits, expected] of [
+  ["max_tokens", { max_tokens: 2048 }, 2048],
+  ["max_completion_tokens", { max_completion_tokens: 4096 }, 4096],
+  ["max_tokens precedence", { max_tokens: 321, max_completion_tokens: 654 }, 321],
+] as const) {
+  test(`OpenAI -> Antigravity Claude preserves explicit ${name} without thinking`, () => {
+    const result = openaiToAntigravityRequest(
+      "claude-opus-5-5-high",
+      { messages: [{ role: "user", content: "Hello" }], ...limits, reasoning_effort: "none" },
+      false
+    );
+    assert.equal(result.request.generationConfig.maxOutputTokens, expected);
+    assert.equal(result.request.generationConfig.thinkingConfig, undefined);
+  });
+}
 
 test("OpenAI -> Antigravity Claude path applies output cap and strips thinkingConfig", () => {
   // For Claude on Antigravity, applyAntigravityGenerationDefaults must bump

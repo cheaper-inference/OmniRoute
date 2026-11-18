@@ -13,21 +13,26 @@ UI/UX, i18n, CLI, βάση δεδομένων και build/deploy στα συμ�
 
 ---
 
-## Ρύθμιση Περιβάλλοντος Ανάπτυξης
+## Ρύθμιση ανάπτυξης
 
 ### Προαπαιτούμενα
 
 - **Node.js** `>=22.22.2 <23`, ή `>=24.0.0 <27` (συνιστάται: 24 LTS)
 - **npm** 10+
 
-> **Χρήστες npm v11+ (Node 24+):** Μετά το `npm install`, επαληθεύστε ότι εγκαταστάθηκαν τα εγγενή αρθρώματα:
+> **Windows με Node 24:** χρησιμοποιήστε την τρέχουσα έκδοση ενημέρωσης του 24 LTS (τουλάχιστον 24.20.0).
+> Οι παλαιότερες εκδόσεις μπορούν να τερματίσουν μετά την επιτυχή ολοκλήρωση των δοκιμών, όταν το `--test-force-exit` κλείνει τη
+> διεργασία. Η [διόρθωση του Windows libuv](https://github.com/nodejs/node/pull/61999) αντιμετωπίζει
+> αυτήν την κατάρρευση κατά την εκτέλεση· διατηρήστε ενεργοποιημένους τους ελέγχους assertions των δοκιμών και εξόδου του runner.
+
+> **Χρήστες npm v11+ (Node 24+):** Μετά την εκτέλεση του `npm install`, επαληθεύστε ότι εγκαταστάθηκαν οι εγγενείς λειτουργικές μονάδες:
 > `node -e "require('better-sqlite3')"`. Αν αποτύχει με `MODULE_NOT_FOUND`,
 > εκτελέστε `npm approve-scripts better-sqlite3 && npm install`. Δείτε την ενότητα
 > [Αντιμετώπιση προβλημάτων](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module).
 
 - **Git**
 
-### Κλωνοποίηση & Εγκατάσταση
+### Κλωνοποίηση και εγκατάσταση
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -35,7 +40,7 @@ cd OmniRoute
 npm install
 ```
 
-### Μεταβλητές Περιβάλλοντος
+### Μεταβλητές περιβάλλοντος
 
 ```bash
 # Δημιουργήστε το .env από το πρότυπο
@@ -48,77 +53,78 @@ echo "API_KEY_SECRET=$(openssl rand -hex 32)" >> .env
 
 Βασικές μεταβλητές για την ανάπτυξη:
 
-| Μεταβλητή              | Προεπιλογή Ανάπτυξης       | Περιγραφή                         |
-| ---------------------- | -------------------------- | --------------------------------- |
-| `PORT`                 | `20128`                    | Θύρα διακομιστή                   |
-| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128`   | Βασικό URL για το frontend        |
-| `JWT_SECRET`           | (δημιουργήστε το παραπάνω) | Μυστικό υπογραφής JWT             |
-| `INITIAL_PASSWORD`     | `CHANGEME`                 | Κωδικός πρόσβασης πρώτης σύνδεσης |
-| `APP_LOG_LEVEL`        | `info`                     | Επίπεδο λεπτομέρειας καταγραφής   |
+| Μεταβλητή              | Προεπιλογή ανάπτυξης     | Περιγραφή                               |
+| ---------------------- | ------------------------ | --------------------------------------- |
+| `PORT`                 | `20128`                  | Θύρα διακομιστή                         |
+| `NEXT_PUBLIC_BASE_URL` | `http://localhost:20128` | Βασικό URL για το frontend              |
+| `JWT_SECRET`           | (δημιουργήστε παραπάνω)  | Μυστικό υπογραφής JWT                   |
+| `INITIAL_PASSWORD`     | `CHANGEME`               | Κωδικός πρόσβασης πρώτης σύνδεσης       |
+| `APP_LOG_LEVEL`        | `info`                   | Επίπεδο λεπτομέρειας αρχείων καταγραφής |
 
-### Ρυθμίσεις Πίνακα Ελέγχου
+### Ρυθμίσεις πίνακα ελέγχου
 
-Ο πίνακας ελέγχου παρέχει διακόπτες διεπαφής χρήστη για λειτουργίες που μπορούν επίσης να διαμορφωθούν μέσω μεταβλητών περιβάλλοντος:
+Ο πίνακας ελέγχου παρέχει διακόπτες UI για λειτουργίες που μπορούν επίσης να ρυθμιστούν μέσω μεταβλητών περιβάλλοντος:
 
-| Θέση Ρύθμισης                 | Διακόπτης                       | Περιγραφή                                                           |
-| ----------------------------- | ------------------------------- | ------------------------------------------------------------------- |
-| Ρυθμίσεις → Για προχωρημένους | Λειτουργία εντοπισμού σφαλμάτων | Ενεργοποίηση αρχείων καταγραφής αιτημάτων εντοπισμού σφαλμάτων (UI) |
-| Ρυθμίσεις → Γενικά            | Ορατότητα πλαϊνής γραμμής       | Εμφάνιση/απόκρυψη ενοτήτων της πλαϊνής γραμμής                      |
+| Τοποθεσία ρύθμισης  | Διακόπτης          | Περιγραφή                                                     |
+| ------------------- | ------------------ | ------------------------------------------------------------- |
+| Settings → Advanced | Debug Mode         | Ενεργοποίηση αρχείων καταγραφής αιτημάτων αποσφαλμάτωσης (UI) |
+| Settings → General  | Sidebar Visibility | Εμφάνιση/απόκρυψη ενοτήτων πλευρικής γραμμής                  |
 
-Αυτές οι ρυθμίσεις αποθηκεύονται στη βάση δεδομένων και διατηρούνται μεταξύ επανεκκινήσεων, παρακάμπτοντας τις προεπιλογές των μεταβλητών περιβάλλοντος όταν έχουν οριστεί.
+Αυτές οι ρυθμίσεις αποθηκεύονται στη βάση δεδομένων και διατηρούνται μετά από επανεκκινήσεις, παρακάμπτοντας τις προεπιλογές των μεταβλητών περιβάλλοντος όταν ορίζονται.
 
-### Τοπική Εκτέλεση
+### Τοπική εκτέλεση
 
 ```bash
-# Λειτουργία ανάπτυξης (αυτόματη επαναφόρτωση)
+# Λειτουργία ανάπτυξης (hot reload)
 npm run dev
 
 # Build παραγωγής
-npm run build    # next build → .build/next/ και έπειτα assembleStandalone → dist/
+npm run build    # next build → .build/next/ και στη συνέχεια assembleStandalone → dist/
 npm run start
 
-# Γρήγορη μεταγλώττιση μόνο του backend/API για αλλαγές συνεισφερόντων
+# Γρήγορη μεταγλώττιση μόνο backend/API για αλλαγές συνεισφερόντων
 npm run build:contributor
 
-# Build έκδοσης (καθαρό rebuild + δείκτης HEAD — απαιτείται για την ανάπτυξη)
-npm run build:release   # rm -rf .build dist && build + εγγραφή του dist/BUILD_SHA
+# Build έκδοσης (καθαρή ανακατασκευή + sentinel HEAD — απαιτείται για ανάπτυξη)
+npm run build:release   # rm -rf .build dist και στη συνέχεια build + εγγραφή dist/BUILD_SHA
 
-# Συνήθης διαμόρφωση θύρας
+# Συνήθης ρύθμιση θύρας
 PORT=20128 NEXT_PUBLIC_BASE_URL=http://localhost:20128 npm run dev
 ```
 
-Το build συνεισφερόντων εκτελεί επικύρωση μόνο μέσω μεταγλώττισης: δεν συναρμολογεί την αυτόνομη
-διανομή ούτε δημιουργεί προαιρετικούς εγγενείς πόρους πακεταρίσματος. Χρησιμοποιήστε το κανονικό build παραγωγής όταν
-χρειάζεται να επικυρώσετε το πακέτο που προορίζεται για διανομή.
+Το build συνεισφέροντα εκτελεί επικύρωση μόνο μεταγλώττισης: δεν συναρμολογεί την αυτόνομη
+διανομή ούτε δημιουργεί προαιρετικά εγγενή στοιχεία συσκευασίας. Χρησιμοποιήστε το κανονικό build
+παραγωγής όταν χρειάζεται να επικυρώσετε το πακέτο που είναι έτοιμο για αποστολή.
 
-### Διάταξη Εξόδου Build
+### Διάταξη εξόδου build
 
-| Κατάλογος | Περιεχόμενα                                                                                | Παρακολουθείται |
-| --------- | ------------------------------------------------------------------------------------------ | --------------- |
-| `src/`    | Πηγαίος κώδικας εφαρμογής (TypeScript / TSX)                                               | Ναι             |
-| `.build/` | Ενδιάμεσα αρχεία — έξοδος του `next build` (αγνοείται από το git, `distDir = .build/next`) | Όχι             |
-| `dist/`   | Πακέτο προς διανομή — συναρμολογείται από το `assembleStandalone` (αγνοείται από το git)   | Όχι             |
+| Κατάλογος | Περιεχόμενα                                                                           | Παρακολουθείται |
+| --------- | ------------------------------------------------------------------------------------- | --------------- |
+| `src/`    | Πηγαίος κώδικας εφαρμογής (TypeScript / TSX)                                          | Ναι             |
+| `.build/` | Ενδιάμεσα αρχεία — έξοδος `next build` (gitignored, `distDir = .build/next`)          | Όχι             |
+| `dist/`   | Πακέτο έτοιμο για αποστολή — συναρμολογείται από το `assembleStandalone` (gitignored) | Όχι             |
 
-Η ροή εργασίας του build εκτελείται σε ένα μόνο πέρασμα:
+Η διαδικασία build εκτελείται σε ένα μόνο πέρασμα:
 
 ```
 npm run build
   └─ next build → .build/next/standalone  (έξοδος Next.js)
-  └─ assembleStandalone()                 (αντιγράφει τα standalone + static + public + εγγενείς πόρους)
-       └─ έξοδος: dist/                   (server.js, .next/static/, public/, node_modules/)
+  └─ assembleStandalone()                 (αντιγράφει standalone + static + public + native assets)
+       └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-Το `npm run build:release` καθαρίζει επιπλέον πρώτα και τους δύο καταλόγους και εγγράφει το
-`dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ως δείκτη ακεραιότητας ανάπτυξης.
+Το `npm run build:release` καθαρίζει επιπλέον πρώτα και τους δύο καταλόγους και γράφει
+το `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) ως sentinel ακεραιότητας ανάπτυξης.
 
-Το `npm run build:contributor` χρησιμοποιεί το προφίλ build μόνο για το backend. Αντικαθιστά προσωρινά με stub
-τα αρχεία UI του πίνακα ελέγχου κατά τη διάρκεια του build, διατηρεί τους χειριστές διαδρομών API και επαναφέρει τα αρχικά αρχεία
-μετά το build. Χρησιμοποιήστε το `npm run build` για αλλαγές που επηρεάζουν το UI του πίνακα ελέγχου ή για πλήρη
-επικύρωση έκδοσης· το προφίλ συνεισφερόντων δεν αντικαθιστά το build έκδοσης.
+Το `npm run build:contributor` χρησιμοποιεί το προφίλ build μόνο backend. Αντικαθιστά προσωρινά
+τα αρχεία UI του πίνακα ελέγχου κατά τη δημιουργία, διατηρεί τους handlers διαδρομών API
+και επαναφέρει τα αρχικά αρχεία μετά το build. Χρησιμοποιήστε το `npm run build` για αλλαγές
+που επηρεάζουν το UI του πίνακα ελέγχου ή για πλήρη επικύρωση έκδοσης· το προφίλ συνεισφέροντα
+δεν αντικαθιστά το build έκδοσης.
 
-> **Σημείωση ανάπτυξης σε VPS:** ο απομακρυσμένος κατάλογος εικόνας `/usr/lib/node_modules/omniroute/app/`
-> παραμένει αμετάβλητος. Οι δεξιότητες ανάπτυξης συγχρονίζουν μέσω rsync τα περιεχόμενα του `dist/` σε αυτόν.
-> Άλλαξε μόνο η διαδρομή εξόδου του build εντός του αποθετηρίου (`app/` → `dist/`).
+> **Σημείωση για ανάπτυξη VPS:** ο απομακρυσμένος κατάλογος εικόνας `/usr/lib/node_modules/omniroute/app/`
+> παραμένει αμετάβλητος. Τα skills ανάπτυξης συγχρονίζουν μέσω rsync τα περιεχόμενα του `dist/` σε αυτόν.
+> Μετακινήθηκε μόνο η διαδρομή εξόδου build μέσα στο αποθετήριο (`app/` → `dist/`).
 
 Προεπιλεγμένα URL:
 
@@ -293,67 +299,67 @@ npm run test:combo:live:vps:failover     # προσθέτει ένα πραγμ�
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Σελίδες πίνακα ελέγχου (23 ενότητες)
-│   ├── api/                # Διαδρομές API (51 κατάλογοι)
-│   └── login/              # Σελίδες ελέγχου ταυτότητας (.tsx)
-├── domain/                 # Μηχανή πολιτικών (policyEngine, comboResolver, costRules, κ.λπ.)
-├── lib/                    # Βασική επιχειρησιακή λογική (.ts)
-│   ├── a2a/                # Διακομιστής πρωτοκόλλου Agent-to-Agent v0.3
-│   ├── acp/                # Μητρώο Agent Communication Protocol
-│   ├── compliance/         # Μηχανή πολιτικών συμμόρφωσης
-│   ├── db/                 # Αρθρώματα τομέα SQLite + 130 μεταναστεύσεις
-│   ├── memory/             # Μόνιμη μνήμη συνομιλιών
-│   ├── oauth/              # Πάροχοι, υπηρεσίες και βοηθητικά εργαλεία OAuth
-│   ├── skills/             # Επεκτάσιμο πλαίσιο δεξιοτήτων
-│   ├── usage/              # Παρακολούθηση χρήσης και υπολογισμός κόστους
-│   └── localDb.ts          # Μόνο επίπεδο επανεξαγωγής — μην προσθέτετε ποτέ λογική εδώ
-├── middleware/              # Ενδιάμεσο λογισμικό αιτημάτων (promptInjectionGuard)
-├── mitm/                   # Διακομιστής μεσολάβησης MITM (πιστοποιητικό, DNS, δρομολόγηση προορισμού)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Στοιχεία React (.tsx)
-│   ├── constants/          # Ορισμοί παρόχων (329), εμβέλειες MCP, 20 στρατηγικές δρομολόγησης
-│   ├── utils/              # Αυτόματος διακόπτης κυκλώματος, εξυγιαντής, βοηθητικά εργαλεία ελέγχου ταυτότητας
-│   └── validation/         # Σχήματα Zod v4
-└── sse/                    # Ροή διακομιστή μεσολάβησης SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Χώρος εργασίας @omniroute/open-sse
-├── executors/              # 150 αρθρώματα εκτέλεσης (κλάσεις εκτέλεσης + βοηθητικά εργαλεία ανά πάροχο)
-├── handlers/               # 11 χειριστές αιτημάτων (συνομιλία, αποκρίσεις, ενσωματώσεις, εικόνες, κ.λπ.)
-├── mcp-server/             # Διακομιστής MCP (110 μοναδικά εργαλεία, 3 μεταφορές, 33 εμβέλειες)
-├── services/               # 178 υπηρεσίες ανώτατου επιπέδου (combo, autoCombo, rateLimitManager, κ.λπ.)
-├── translator/             # Μετατροπείς μορφών (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Μετασχηματιστής Responses API
-└── utils/                  # 22 αρθρώματα βοηθητικών εργαλείων (ροή, TLS, διακομιστής μεσολάβησης, καταγραφή)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Εφαρμογή επιφάνειας εργασίας Electron (πολλαπλών πλατφορμών)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Εκτελεστής δοκιμών Node.js (1,574 αρχεία δοκιμών)
-├── integration/            # Δοκιμές ενσωμάτωσης
-├── e2e/                    # Δοκιμές Playwright
-├── security/               # Δοκιμές ασφαλείας
-├── translator/             # Δοκιμές ειδικά για τον μετατροπέα
-└── load/                   # Δοκιμές φόρτου
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Αρχεία Αποφάσεων Αρχιτεκτονικής
-├── architecture/            # Αρχιτεκτονική συστήματος και ανθεκτικότητα
-├── comparison/              # OmniRoute έναντι εναλλακτικών
-├── compression/             # Οδηγοί και κανόνες συμπίεσης
-├── dev/                     # Οδηγοί ανάπτυξης
-├── diagrams/                # Διαγράμματα αρχιτεκτονικής
-├── frameworks/              # MCP, A2A, OpenCode, Μνήμη, Δεξιότητες
-├── guides/                  # Οδηγός χρήστη, Docker, ρύθμιση, αντιμετώπιση προβλημάτων
-├── i18n/                    # Διεθνοποιημένες μεταφράσεις README
-├── marketing/               # Υλικό μάρκετινγκ
-├── ops/                     # Ανάπτυξη, διακομιστής μεσολάβησης, κάλυψη, εκδόσεις
-├── providers/               # Τεκμηρίωση ειδική για κάθε πάροχο
-├── reference/               # Αναφορά API, μεταβλητές περιβάλλοντος, εργαλεία CLI, δωρεάν βαθμίδες
-├── releases/                # Σημειώσεις έκδοσης
-├── routing/                 # Μηχανή αυτόματων συνδυασμών, επανάληψη συλλογισμού
-├── screenshots/             # Στιγμιότυπα οθόνης πίνακα ελέγχου
-├── security/                # Προστατευτικά όρια, συμμόρφωση, απόκρυψη, διακριτικά
-└── specs/                   # Προδιαγραφές σχεδιασμού
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

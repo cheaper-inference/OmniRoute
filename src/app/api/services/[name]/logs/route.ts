@@ -12,6 +12,7 @@
  */
 
 import type { NextRequest } from "next/server";
+import { createBoundedEventStream } from "@/lib/api/boundedEventStream";
 import { getSupervisor } from "@/lib/services/registry";
 import { createErrorResponse } from "@/lib/api/errorResponse";
 import type { LogLine } from "@/lib/services/types";
@@ -84,51 +85,25 @@ export async function GET(request: NextRequest, { params }: { params: Promise<{ 
   const buffer = supervisor.getRingBuffer();
   const signal = request.signal;
 
-  const stream = new ReadableStream({
-    start(controller) {
-      if (signal.aborted) {
-        controller.close();
-        return;
-      }
-
-      const applyFilter = (line: LogLine) =>
-        filterLower === null || line.line.toLowerCase().includes(filterLower);
-
-      // Send initial snapshot
-      const snapshot = buffer.snapshot().filter(applyFilter).slice(-tail);
-      controller.enqueue(sseChunk("snapshot", snapshot));
-
-      // Subscribe to live events
+  const applyFilter = (line: LogLine) =>
+    filterLower === null || line.line.toLowerCase().includes(filterLower);
+  const stream = createBoundedEventStream(
+    signal,
+    (sink) => {
       const unsubscribe = buffer.subscribe((line) => {
-        if (!applyFilter(line)) return;
-        try {
-          controller.enqueue(sseChunk("log", line));
-        } catch {
-          // controller closed — subscriber will be removed on abort
-        }
+        if (applyFilter(line)) sink.send(sseChunk("log", line));
       });
-
-      // Heartbeat
+      sink.onCleanup(unsubscribe);
       const heartbeatTimer = setInterval(() => {
-        try {
-          controller.enqueue(sseChunk("heartbeat", {}));
-        } catch {
-          clearInterval(heartbeatTimer);
-        }
+        sink.send(sseChunk("heartbeat", {}));
       }, HEARTBEAT_MS);
-
-      // Cleanup on client disconnect
-      signal.addEventListener("abort", () => {
-        clearInterval(heartbeatTimer);
-        unsubscribe();
-        try {
-          controller.close();
-        } catch {
-          // already closed
-        }
-      });
+      sink.onCleanup(() => clearInterval(heartbeatTimer));
     },
-  });
+    () => {
+      const snapshot = buffer.snapshot().filter(applyFilter).slice(-tail);
+      return `event: snapshot\ndata: ${JSON.stringify(snapshot)}\n\n`;
+    }
+  );
 
   return new Response(stream, {
     headers: {

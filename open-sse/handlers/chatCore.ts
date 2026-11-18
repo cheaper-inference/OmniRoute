@@ -1,10 +1,15 @@
+import type {
+  HttpAttemptSelection,
+  HttpAttemptRejectionSlot,
+} from "../utils/providerHttpAttempts.ts";
 import { finalizeTranslatedRequest } from "./chatCore/translatedRequestFinalize.ts";
-import { isPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
+import { isPassiveCodex, adoptPassiveCodex } from "../services/tokenRefresh/passiveCodex.ts";
+import { enforceResponsesToolHistory } from "../translator/helpers/responsesToolHistory.ts";
 import {
   injectMemoryAndSkills,
   mergeInjectedFallbackOwnerNames,
 } from "./chatCore/memorySkillsInjection.ts";
-import { resolveChatCoreRequestSetup } from "./chatCore/requestSetup.ts";
+import { resolveChatCoreRequestSetup, resolveClientEchoModel } from "./chatCore/requestSetup.ts";
 import { shouldSkipNativeCodexReactiveCompaction } from "./chatCore/nativeCodexCompaction.ts";
 import {
   normalizeOpenAICompatibleTools,
@@ -27,7 +32,10 @@ export {
   relocateDirectiveOnlyMessages,
 } from "./chatCore/claudeSystemRole.ts";
 import { checkIdempotencyCache } from "./chatCore/idempotency.ts";
-import { acquireTurnExecution, createTurnInProgressResult } from "./chatCore/turnExecutionGuard.ts";
+import {
+  acquireTurnExecutionWithWait,
+  createTurnInProgressResult,
+} from "./chatCore/turnExecutionGuard.ts";
 import { checkSemanticCache, isSemanticCacheEnabled } from "./chatCore/semanticCache.ts";
 import { checkLifecycle, resolveLifecycle } from "./chatCore/modelLifecyclePolicy.ts";
 import {
@@ -146,6 +154,7 @@ import {
 } from "@/shared/utils/featureFlags.ts";
 import { resolveNoAuthEchoModel } from "./chatCore/noAuthEchoModel.ts";
 import { toPositiveInteger } from "../services/reasoningTokenBuffer.ts";
+import { buildReasoningCacheScope } from "../services/reasoningCache.ts";
 import {
   buildErrorBody,
   createErrorResult,
@@ -173,9 +182,11 @@ import { buildCacheUsageLogMeta } from "./chatCore/cacheUsageMeta.ts";
 
 import { resolveExecutionCredentials as resolveExecutionCredentialsFor } from "./chatCore/executionCredentials.ts";
 import { createExecutorResolver } from "./chatCore/executorProxy.ts";
+import { resolveChatExecutor } from "./chatCore/searchProviderRejection.ts";
 import { normalizeClaudeUpstreamMessages as normalizeClaudeUpstreamMessagesFor } from "./chatCore/claudeUpstreamMessages.ts";
 import {
   persistAttemptLogs as persistAttemptLogsFor,
+  drainUpstreamHttpAttempts,
   type PersistAttemptLogsArgs,
 } from "./chatCore/attemptLogging.ts";
 import { stageTrace } from "./chatCore/stageTrace.ts";
@@ -191,6 +202,7 @@ import { getKimiTemporaryRateLimitResetAt } from "./chatCore/kimiQuotaRecovery.t
 import {
   getCallLogPipelineCaptureStreamChunks,
   getCallLogPipelineMaxSizeBytes,
+  resolveCallLogPipelineEnabled,
 } from "@/lib/logEnv";
 import { logAuditEvent } from "@/lib/compliance";
 import { emit } from "@/lib/events/eventBus";
@@ -202,6 +214,7 @@ import {
   appendRequestLog,
   capturePendingRequestOwner,
 } from "@/lib/usageDb";
+import { getPendingById } from "@/lib/usage/usageHistory";
 import {
   finalizePendingScope,
   initialPendingBody,
@@ -218,6 +231,7 @@ import { isCompressionExcluded } from "../services/compression/exclusions.ts";
 import {
   defaultComboForRequest,
   isBuiltinStackedPipeline,
+  shouldRunResolvedPipeline,
   type RuntimeCompressionCombo,
 } from "./chatCore/compressionComboPredicates.ts";
 import { mergeCompressionComboIntoConfig } from "./chatCore/compressionComboConfig.ts";
@@ -237,6 +251,7 @@ import { runPluginOnResponseHook } from "./chatCore/pluginOnResponse.ts";
 import { applyPostTranslationCompression } from "./chatCore/postTranslationCompression.ts";
 import { isJsonRecord } from "./chatCore/nonStreamingResponseParse.ts";
 import { recordNonStreamingUsageStats } from "./chatCore/nonStreamingUsageStats.ts";
+import { resolveUsageAgentContext } from "./chatCore/agentContext.ts";
 import { getModelNormalizeToolCallId, getModelPreserveOpenAIDeveloperRole } from "@/lib/db/models";
 import { extractSessionAffinityKey } from "@/sse/services/auth";
 import { createManagedLeaseFence } from "./chatCore/managedLeaseFence.ts";
@@ -280,6 +295,7 @@ import {
   shouldDeferAntigravityQuotaStateToCaller,
 } from "../services/accountFallback.ts";
 import { saveIdempotencyWithConfiguredWindow } from "@/lib/idempotencyLayer";
+import { hasMintedPiiTokens } from "../utils/piiTokenVault.ts";
 
 import { computeRequestHash, shouldDeduplicate } from "../services/requestDedup.ts";
 import {
@@ -297,7 +313,10 @@ import type {
   CompressionPipelineStep,
   CompressionResult,
 } from "../services/compression/types.ts";
-import type { CachingDetectionContext } from "../services/compression/cachingAware.ts";
+import {
+  mustKeepOpenCodeHistoryVerbatim,
+  type CachingDetectionContext,
+} from "../services/compression/cachingAware.ts";
 import { runLiveZoneCompression } from "./chatCore/liveZoneCompression.ts";
 import { prepareWebSearchFallbackBody } from "../services/webSearchFallback.ts";
 import { prepareWebFetchFallbackBody } from "../services/webFetchInterception.ts";
@@ -307,6 +326,21 @@ import { generateRequestId } from "@/shared/utils/requestId";
 import { isLocalStreamLifecycleError } from "@/shared/utils/circuitBreaker";
 import { shouldIsolateProbeFailures } from "@/shared/utils/probeOrigin";
 import { writeTerminalStatus } from "@/shared/utils/terminalStatus";
+import {
+  captureCodexConnectionFence,
+  captureCodexConnectionOwnerFence,
+  adoptCodexConnectionFence,
+  runWithCodexConnectionFence,
+  bindCodexResponseFence,
+  getCodexOperationFence,
+  isCodexConnectionFenceCurrent,
+  StaleCodexOperationError,
+  type CodexConnectionFence,
+} from "../services/codexAccount/fences.ts";
+import {
+  adoptCommittedCodexRefresh,
+  persistCodexRefresh,
+} from "../services/codexAccount/refreshPersistence.ts";
 import { handleToolCallExecution } from "@/lib/skills/interception";
 import { buildClaudeCodeBridgeBody } from "./chatCore/claudeCodeBridgeBody.ts";
 import { setGeminiThoughtSignatureMode } from "../services/geminiThoughtSignatureStore.ts";
@@ -344,11 +378,76 @@ type VideoBridgeLogParam = { observed: boolean; redaction: VideoBridgeLogRedacti
 // extractSystemRoleMessages extracted to chatCore/claudeSystemRole.ts (#3501); re-exported above so
 // existing importers (e.g. tests/unit/system-role-extraction.test.ts) keep resolving it from here.
 export async function handleChatCore(args: Parameters<typeof handleChatCoreInner>[0]) {
-  // one implicit resilience store per attempt (combo legs each run
-  // handleChatCore, so each leg gets its own isolated store).
-  return withResilienceActionsContext([args], (forwarded) => handleChatCoreInner(forwarded));
+  // One immutable owner snapshot for this invocation, including delayed stream callbacks.
+  let fence: CodexConnectionFence | null = null;
+  try {
+    if (args.modelInfo?.provider === "codex") {
+      if (isPassiveCodex("codex")) {
+        const credentials = args.credentials ?? {};
+        fence = captureCodexConnectionOwnerFence(credentials, args.connectionId);
+        const adopted = await adoptPassiveCodex(credentials);
+        fence = adoptCodexConnectionFence(fence, credentials, adopted, args.connectionId);
+        if (args.credentials) Object.assign(args.credentials, adopted);
+      } else {
+        fence = captureCodexConnectionFence(args.credentials ?? {}, args.connectionId);
+      }
+    }
+  } catch (error) {
+    if (error instanceof StaleCodexOperationError)
+      return createErrorResult(409, error.message, null, error.code);
+    throw error;
+  }
+  return runWithCodexConnectionFence(fence, async () => {
+    const result = await withResilienceActionsContext([args], (forwarded) =>
+      handleChatCoreInner(forwarded)
+    );
+    if (result?.response) bindCodexResponseFence(result.response, fence);
+    return result;
+  });
 }
 
+async function readLatestRefreshToken(connectionId: string): Promise<string | null> {
+  const latest = await getProviderConnectionById(connectionId);
+  return typeof latest?.refreshToken === "string" ? latest.refreshToken : null;
+}
+
+function adoptRefreshedCodexCredentials({
+  provider,
+  refreshFence,
+  targetCredentials,
+  credentials,
+  newCredentials,
+}: {
+  provider: string;
+  refreshFence: CodexConnectionFence | null;
+  targetCredentials: Record<string, unknown>;
+  credentials: Record<string, unknown>;
+  newCredentials: Record<string, unknown>;
+}): "passive" | "committed" | "stale" | null {
+  const passive = isPassiveCodex(provider);
+  if (passive) {
+    try {
+      adoptCodexConnectionFence(refreshFence, targetCredentials, {
+        ...targetCredentials,
+        ...newCredentials,
+      });
+    } catch (error) {
+      if (error instanceof StaleCodexOperationError) return "stale";
+      throw error;
+    }
+  } else {
+    if (!refreshFence) return null;
+    // Every mutex waiter adopts the same durable version instead of writing again.
+    if (!adoptCommittedCodexRefresh(newCredentials, refreshFence)) {
+      throw new StaleCodexOperationError();
+    }
+  }
+  Object.assign(targetCredentials, newCredentials);
+  Object.assign(credentials, newCredentials);
+  return passive ? "passive" : "committed";
+}
+
+/** Process a chat request through admission, translation, dispatch, and response handling. */
 async function handleChatCoreInner({
   body,
   modelInfo,
@@ -391,6 +490,7 @@ async function handleChatCoreInner({
   // the model-bound `body` itself is never touched.
   videoBridgeLog = undefined,
   fallbackAttempts = undefined,
+  requestUpstreamStartTimeoutMs = undefined,
   forcedConnectionId = null, // #14116: caller's pinned/requested connection, vs credentials.connectionId below
   allowedConnections = null, // routing allowlist; in-request account rotation must stay inside it
   previousResponseResumed = undefined, // rehydrated-continuation flag from chat.ts; noted below, no semantics.
@@ -421,6 +521,10 @@ async function handleChatCoreInner({
   // (chatCore/memoryExtraction.ts::runMemoryExtractionGate).
   const videoBridgeObserved: boolean =
     (videoBridgeLog as VideoBridgeLogParam | undefined)?.observed === true;
+  // Reversible PII vault: tokens minted for this request resolve only inside it, so memory and
+  // the idempotency / semantic cache writes are skipped. Read here, while the request scope is
+  // live; the streaming tail runs after it.
+  const piiTokensMinted = hasMintedPiiTokens();
   // resume flag from chat.ts, noted under the attempt store opened above.
   notePreviousResponseResumed(previousResponseResumed);
   const resilienceSettings = resolveResilienceSettings(cachedSettings);
@@ -512,7 +616,9 @@ async function handleChatCoreInner({
     payload?: unknown,
     maxDepth = 3
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
+  let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
+  const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, apiKeyInfo);
   // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps
   // the fire-and-forget save + computes latencyMs, so the call sites stay byte-identical.
   const persistFailureUsage = (
@@ -534,6 +640,7 @@ async function handleChatCoreInner({
         latencyMs: Date.now() - startTime,
         endpoint: endpointPath,
         cpaAuthIndex: readCpaAuthIndex(providerResponse),
+        agentContext,
         aggregate: aggregate ?? undefined,
       })
     ).catch(() => {});
@@ -580,7 +687,11 @@ async function handleChatCoreInner({
     return idempotencyHit;
   }
 
-  const turnExecution = acquireTurnExecution(idempotencyKey);
+  const turnExecution = await acquireTurnExecutionWithWait(idempotencyKey, {
+    log,
+    traceId,
+    signal: clientRawRequest?.signal ?? null,
+  });
   if (turnExecution.acquired === false) {
     const duplicate = createTurnInProgressResult(turnExecution.retryCount);
     log?.warn?.(
@@ -591,6 +702,7 @@ async function handleChatCoreInner({
   }
   const releaseTurnExecution = turnExecution.release;
   let turnExecutionHandedOffToStream = false;
+  let drainUnpersistedHttpAttempts = () => {};
 
   // Preserve chatCore's canonical formatting while the guarded body remains byte-stable.
   // prettier-ignore
@@ -761,6 +873,8 @@ async function handleChatCoreInner({
       correlationId,
       sessionTag: conversationId || null,
     }) || generateRequestId();
+  // Capture before any await: retries can reuse the public preview ID.
+  const pendingRequestGeneration = getPendingById().get(pendingRequestId)?.attemptGeneration;
   const pendingRequestOwner = pendingConnId
     ? capturePendingRequestOwner(pendingRequestId)
     : undefined;
@@ -862,20 +976,19 @@ async function handleChatCoreInner({
   // `opencode-zen/nemotron-3-ultra-free`) is not recognized by the client on `--resume`.
   const isClaudeCodeClient = isClaudeCodeOriginatedHeaders(clientRawRequest?.headers);
 
+  const clientEchoModel = resolveClientEchoModel(clientRawRequest?.body, requestedModel);
   let echoModel =
     (settings.echoRequestedModelName === true || isCodexResponsesEcho || isClaudeCodeClient) &&
-    typeof requestedModel === "string" &&
-    requestedModel
-      ? requestedModel
+    typeof clientEchoModel === "string" &&
+    clientEchoModel
+      ? clientEchoModel
       : null;
   // Auto-echo the listing-valid form for bare requests to noAuth catalog
   // providers so clients validating response.model against /v1/models don't warn.
   echoModel = resolveNoAuthEchoModel(requestedModel, provider) ?? echoModel;
-  const detailedLoggingEnabled =
-    !noLogEnabled &&
-    (settings.call_log_pipeline_enabled === true ||
-      settings.call_log_pipeline_enabled === "1" ||
-      settings.call_log_pipeline_enabled === "true");
+  // Same resolver as isDetailedLoggingEnabled(): ENABLE_REQUEST_LOGS first, then
+  // the stored value parsed the way the dashboard parses it (#17998).
+  const detailedLoggingEnabled = !noLogEnabled && resolveCallLogPipelineEnabled(settings);
   const capturePipelineStreamChunks =
     detailedLoggingEnabled && getCallLogPipelineCaptureStreamChunks();
   const skillRequestId = generateRequestId();
@@ -902,9 +1015,10 @@ async function handleChatCoreInner({
         )) || null;
   const pipelineSessionId = explicitSessionIdHeader || skillRequestId;
   const reasoningReplaySessionKey = sessionAffinityKey || explicitSessionIdHeader;
-  const reasoningCacheScope = reasoningReplaySessionKey
-    ? `api-key:${String(apiKeyInfo?.id ?? "local")}\x1f${String(reasoningReplaySessionKey)}`
-    : null;
+  const reasoningCacheScope = buildReasoningCacheScope(
+    apiKeyInfo?.id,
+    reasoningReplaySessionKey ? String(reasoningReplaySessionKey) : null
+  );
   // Normalized OpenAI transcript the reasoning replay pass digested for a
   // Responses-API target (reported by translateRequest). A Responses body has
   // `input`, not `messages`, so the replay-cache write side would otherwise digest
@@ -923,6 +1037,7 @@ async function handleChatCoreInner({
     }
     return persistAttemptLogsFor(args, {
       traceId,
+      httpAttempts: providerRequestCapture.httpAttempts,
       provider,
       connectionId,
       model,
@@ -930,6 +1045,7 @@ async function handleChatCoreInner({
       detailedLoggingEnabled,
       reqLogger,
       pendingRequestId,
+      pendingRequestGeneration,
       clientRawRequest,
       requestedModel,
       credentials,
@@ -1077,6 +1193,14 @@ async function handleChatCoreInner({
     videoTranscriptSensitive: videoBridgeObserved,
   };
   const providerRequestCapture = createPreparedRequestLogger(reqLogger, pendingScope);
+  drainUnpersistedHttpAttempts = drainUpstreamHttpAttempts.bind(null, {
+    httpAttempts: providerRequestCapture.httpAttempts,
+    correlationId,
+    traceId,
+    noLogEnabled: Boolean(noLogEnabled),
+    apiKeyInfo: apiKeyInfo ? { id: apiKeyInfo.id, name: apiKeyInfo.name } : null,
+    comboName: typeof comboName === "string" ? comboName : null,
+  });
   // 0. Log client raw request (before format conversion) — redacts video transcript
   // cues in the logged copy only; see videoBridgeSnapshotRedaction.ts.
   logClientRawRequestRedacted(reqLogger, clientRawRequest, videoBridgeObserved);
@@ -1219,6 +1343,9 @@ async function handleChatCoreInner({
   // reactive and last-resort compaction passes. Otherwise an operator selecting
   // "off" still has large histories rewritten by trim_tools/purify_history.
   let reactiveContextCompactionEnabled = false;
+  // Keep automatic-prefix-cached OpenCode history intact during the proactive pass.
+  // Last-resort compaction at the concrete context ceiling remains enabled.
+  let protectOpenCodePrefix = false;
   // Native Codex history stays out of reactive/last-resort compaction unless the default-off
   // NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED flag opts in (#16632; fails closed).
   const skipNativeCodexReactiveCompaction = shouldSkipNativeCodexReactiveCompaction(
@@ -1319,6 +1446,7 @@ async function handleChatCoreInner({
       }
       let compressionComboKey = comboName ?? null;
       let compressionComboApplied = false;
+      let defaultCompressionComboApplied = false;
       // Combo → config merge extracted to chatCore/compressionComboConfig.ts (chatCore slice 2).
       const applyCompressionComboConfig = (
         compressionCombo: RuntimeCompressionCombo | null,
@@ -1475,6 +1603,7 @@ async function handleChatCoreInner({
             { config, header: compressionHeader, combos: namedCombos }
           );
           if (applyCompressionComboConfig(defaultCompressionCombo)) {
+            defaultCompressionComboApplied = true;
             log?.debug?.(
               "COMPRESSION",
               `Default compression combo applied: ${defaultCompressionCombo?.id}`
@@ -1574,6 +1703,8 @@ async function handleChatCoreInner({
         }
       );
       const mode = compressionPlan.mode as CompressionConfig["defaultMode"];
+      // Configured mode for analytics when a policy wrapped it (lite as a one-step stacked plan).
+      const reportedMode = mode === "stacked" ? compressionPlan.reportedMode : undefined;
       if (adaptiveTelemetry && adaptiveTelemetry.fit === false) {
         log?.warn?.(
           "COMPRESSION",
@@ -1588,8 +1719,13 @@ async function handleChatCoreInner({
       if (
         mode === "stacked" &&
         compressionPlan.stackedPipeline.length > 0 &&
-        !compressionComboApplied &&
-        !config.compressionComboId
+        shouldRunResolvedPipeline({
+          comboApplied: compressionComboApplied,
+          comboIsDefault: defaultCompressionComboApplied,
+          comboIdConfigured: Boolean(config.compressionComboId),
+          adaptiveStagesApplied:
+            (adaptiveTelemetry as { stagesApplied: string[] } | null)?.stagesApplied.length ?? 0,
+        })
       ) {
         config = {
           ...config,
@@ -1609,6 +1745,9 @@ async function handleChatCoreInner({
           connectionCacheOverride,
         };
         const compressionConfig = resolveCacheAwareConfig(config, compressionInputBody, cacheCtx);
+        // #18787: keep the upstream cacheable prefix untouched until a stable
+        // live-zone baseline exists; subsequent requests can still compress new tool outputs.
+        protectOpenCodePrefix = mustKeepOpenCodeHistoryVerbatim(compressionInputBody, cacheCtx);
         const compressionPrincipalId = apiKeyInfo?.id ? String(apiKeyInfo.id) : undefined;
         const compressionOptions = {
           model: effectiveModel,
@@ -1655,14 +1794,31 @@ async function handleChatCoreInner({
             targetFormat === FORMATS.OPENAI_RESPONSES) &&
           !(sourceFormat === FORMATS.CLAUDE && targetFormat === FORMATS.CLAUDE)
         ) {
-          runPostTranslationCompression = (input) =>
+          const compressTranslated = (input: Record<string, unknown>) =>
             applyCompressionAsync(input, mode, {
               ...compressionOptions,
               compressionStage: "post-translation" as const,
             });
+          // #18787: post-translation engines also need a separate frozen prefix.
+          // Keep their cache key distinct from the pre-translation live-zone entry.
+          runPostTranslationCompression = protectOpenCodePrefix
+            ? (input) =>
+                runLiveZoneCompression({
+                  compressionInputBody: input,
+                  clientHeaders: clientRawRequest?.headers,
+                  provider,
+                  getCurrentConnectionId,
+                  compressionPrincipalId,
+                  mode: `${mode}:post-translation`,
+                  effectiveModel,
+                  compressionConfig,
+                  preserveRawPrefixOnMiss: true,
+                  runCompression: compressTranslated,
+                })
+            : compressTranslated;
         }
         let result: CompressionResult;
-        if (compressionConfig.liveZone?.enabled === true) {
+        if (compressionConfig.liveZone?.enabled === true || protectOpenCodePrefix) {
           // Live-zone lane extracted to chatCore/liveZoneCompression.ts (chatCore slice 2).
           result = await runLiveZoneCompression({
             compressionInputBody,
@@ -1673,6 +1829,7 @@ async function handleChatCoreInner({
             mode,
             effectiveModel,
             compressionConfig,
+            preserveRawPrefixOnMiss: protectOpenCodePrefix,
             runCompression,
           });
         } else {
@@ -1715,6 +1872,7 @@ async function handleChatCoreInner({
               effectiveServiceTier,
               comboName,
               mode,
+              reportedMode,
               compressionComboId: config.compressionComboId,
               skillRequestId,
               cavemanOutputModeApplied,
@@ -1736,6 +1894,7 @@ async function handleChatCoreInner({
                 effectiveServiceTier,
                 comboName,
                 mode,
+                reportedMode,
                 compressionComboId: config.compressionComboId,
                 skillRequestId,
                 cavemanOutputModeApplied,
@@ -1756,6 +1915,7 @@ async function handleChatCoreInner({
               mode,
               stats: result.stats,
               connectionCacheOverride,
+              isFeatureFlagEnabled,
               log,
             });
             log?.info?.(
@@ -1892,6 +2052,7 @@ async function handleChatCoreInner({
     if (
       reactiveContextCompactionEnabled &&
       !skipNativeCodexReactiveCompaction &&
+      !protectOpenCodePrefix &&
       estimatedTokens > threshold
     ) {
       log?.info?.(
@@ -2141,18 +2302,16 @@ async function handleChatCoreInner({
         ...options,
         provider,
         sourceFormat,
-        // #16236: in-place mid-conversation system turns are opt-in AND need the client's beta.
-        clientAnthropicBeta: getHeaderValueCaseInsensitive(
-          clientRawRequest?.headers ?? null,
-          "anthropic-beta"
-        ),
-        isMidConversationSystemEnabled: () =>
-          isFeatureFlagEnabled("ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM"),
+        // #16236: in-place mid-conversation system turns are a per-connection opt-in.
+        providerSpecificData: credentials?.providerSpecificData,
       },
       log
     );
 
   try {
+    if (sourceFormat === FORMATS.OPENAI_RESPONSES) {
+      enforceResponsesToolHistory(body as Record<string, unknown>);
+    }
     if (nativeResponsesPassthrough) {
       translatedBody = stampNativeResponsesPassthroughBody(
         applyReasoningRuleDirective(body, "openai-responses") as Record<string, unknown>,
@@ -2206,6 +2365,7 @@ async function handleChatCoreInner({
         effectiveModel,
         targetFormat,
         preserveCacheControl,
+        connectionCacheOverride,
         normalizeClaudeUpstreamMessages,
         applyReasoningRuleDirective,
         log,
@@ -2358,19 +2518,35 @@ async function handleChatCoreInner({
   // Request tool metadata, Kiro/Claude tool dispatch fixes, the response tool-name map, the
   // upstream model id, the previous_response_id policy and the Codex effort guard: extracted to
   // chatCore/translatedRequestFinalize.ts (chatCore slice 2).
-  const finalizedRequest = finalizeTranslatedRequest({
-    translatedBody,
-    body,
-    provider,
-    alias,
-    effectiveModel,
-    sourceFormat,
-    targetFormat,
-    isClaudePassthrough,
-    credentials,
-    previousResponseIdMode: settings.responsesPreviousResponseIdMode,
-    log,
-  });
+  let finalizedRequest: ReturnType<typeof finalizeTranslatedRequest>;
+  try {
+    finalizedRequest = finalizeTranslatedRequest({
+      translatedBody,
+      body,
+      provider,
+      alias,
+      effectiveModel,
+      sourceFormat,
+      targetFormat,
+      isClaudePassthrough,
+      credentials,
+      previousResponseIdMode: settings.responsesPreviousResponseIdMode,
+      log,
+    });
+  } catch (error) {
+    // Final continuation policy can invalidate otherwise valid source history.
+    // Release this request's owner before invoking fallible error/plugin handling.
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestOwner ?? pendingRequestId);
+    return await buildRequestTranslationErrorResult({
+      error,
+      traceId,
+      body,
+      model,
+      provider,
+      apiKeyInfo,
+      log,
+    });
+  }
   translatedBody = finalizedRequest.translatedBody;
   const { requestToolIdentityMap, toolNameMap } = finalizedRequest;
 
@@ -2416,14 +2592,8 @@ async function handleChatCoreInner({
     log,
   });
 
-  // Resolve executor with optional upstream proxy (CLIProxyAPI) routing.
-  // mode="native" (default): returns the native executor unchanged.
-  // mode="cliproxyapi": returns the CLIProxyAPI executor instead.
-  // mode="fallback": returns a wrapper that tries native first, falls back to CLIProxyAPI on 5xx/network errors.
-
-  // #6339: pass the resolved connection's providerSpecificData so a per-connection
-  // cliproxyapiMode="claude-native" override can deep-route this single connection
-  // through CLIProxyAPI regardless of the provider-level upstream_proxy_config mode.
+  // Resolve executor with optional upstream proxy routing. The native / cliproxyapi / dario /
+  // fallback modes and the #6339 per-connection override live in chatCore/executorProxy.ts.
   const resolveExecutorWithProxy = createExecutorResolver(log, credentials, validationExecutorFence);
 
   // === Quota Share enforcement PRE-hook (B/F7) + G2 combo soft penalty ===
@@ -2457,8 +2627,12 @@ async function handleChatCoreInner({
       return createErrorResult(400, msg, null, fit.terminalReason, "invalid_request_error");
     }
   }
-  // Get executor for this provider (with optional upstream proxy routing)
-  const executor = await resolveExecutorWithProxy(provider);
+  // Get the executor; a search-only provider gets the typed 400 on every chat route (#17858)
+  const { executor, rejected } = await resolveChatExecutor(resolveExecutorWithProxy, provider, log);
+  if (rejected) {
+    trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestId);
+    return rejected;
+  }
   const getExecutionCredentials = () => {
     const executionCredentials = withApiKeyCodexServiceMode(
       provider,
@@ -2504,12 +2678,21 @@ async function handleChatCoreInner({
   });
 
   const dedupRequestBody = { ...translatedBody, model: `${provider}/${model}`, stream };
-  const dedupEnabled = shouldDeduplicate(dedupRequestBody);
-  // Namespaced by the calling API key: dedup hands the SAME response object to
-  // every joiner, so a shared hash across keys is a cross-principal response
-  // leak (GHSA-6c7w-56xp-wpc6).
+  // A request-scoped deadline changes the executor contract; never let it
+  // join, or be joined by, an ordinary request through in-flight deduplication.
+  const dedupEnabled =
+    requestUpstreamStartTimeoutMs === undefined && shouldDeduplicate(dedupRequestBody);
+  // Namespace ordinary dedup by both API key and selected provider connection:
+  // cross-key reuse leaks principal responses, while cross-connection reuse can
+  // silently serve a pinned request using another account. Keyless requests
+  // still deduplicate when their connection matches. Rotation within a single
+  // execution is constrained by the first-attempt-only allowDedup policy.
   const dedupHash = dedupEnabled
-    ? computeRequestHash(dedupRequestBody, apiKeyInfo?.id, trustedEffortContext)
+    ? computeRequestHash(
+        dedupRequestBody,
+        `${apiKeyInfo?.id ?? ""}:${getCurrentConnectionId() ?? ""}`,
+        trustedEffortContext
+      )
     : null;
 
   const toolDisclosure = resolveToolDisclosureConfig(settings);
@@ -2546,6 +2729,7 @@ async function handleChatCoreInner({
     resilienceSettings,
     settings,
     skipUpstreamRetry,
+    requestUpstreamStartTimeoutMs,
     stream,
     streamController,
     targetFormat,
@@ -2569,8 +2753,10 @@ async function handleChatCoreInner({
   };
   const executeProviderRequest = (
     modelToCall: string = effectiveModel,
-    allowDedup: boolean = false
-  ) => executeProviderRequestLeaf(executeProviderRequestDeps, modelToCall, allowDedup);
+    allowDedup: boolean = false,
+    _policy?: { allowAccountRotation?: boolean },
+    rejection?: HttpAttemptRejectionSlot
+  ) => executeProviderRequestLeaf(executeProviderRequestDeps, modelToCall, allowDedup, rejection);
 
   // Snapshot + message count helpers extracted to chatCore/providerRequestRegistration.ts
   // (chatCore slice 2).
@@ -2655,6 +2841,7 @@ async function handleChatCoreInner({
 
   let credentialRefreshPersistRan = false;
   const hadStreamOptions =
+    provider !== "codex" &&
     targetFormat === FORMATS.OPENAI_RESPONSES &&
     translatedBody &&
     typeof translatedBody === "object" &&
@@ -2677,28 +2864,29 @@ async function handleChatCoreInner({
     }
 
     const targetCredentials = (currentCreds || credentials || {}) as Record<string, unknown>;
+    const refreshFence = provider === "codex" ? (getCodexOperationFence(String(targetCredentials.connectionId || connectionId || "")) ?? captureCodexConnectionFence(targetCredentials)) : null;
     const attemptedRefreshToken =
       typeof targetCredentials?.refreshToken === "string" ? targetCredentials.refreshToken : null;
     credentialRefreshPersistRan = false;
-    const persistFn = onCredentialsRefreshed
+    const persistFn = refreshFence && !isPassiveCodex(provider)
       ? async (refreshResult: Record<string, unknown>) => {
+          await persistCodexRefresh(refreshResult, refreshFence);
           credentialRefreshPersistRan = true;
-          Object.assign(targetCredentials, refreshResult);
-          Object.assign(credentials, refreshResult);
-          await onCredentialsRefreshed(refreshResult);
         }
-      : undefined;
+      : onCredentialsRefreshed && provider !== "codex"
+        ? async (refreshResult: Record<string, unknown>) => {
+            credentialRefreshPersistRan = true;
+            Object.assign(targetCredentials, refreshResult);
+            Object.assign(credentials, refreshResult);
+            await onCredentialsRefreshed(refreshResult);
+          }
+        : undefined;
 
     const casConnectionId =
       typeof targetCredentials?.connectionId === "string"
         ? targetCredentials.connectionId.trim()
         : "";
-    const casReread = casConnectionId
-      ? async () => {
-          const latest = await getProviderConnectionById(casConnectionId);
-          return typeof latest?.refreshToken === "string" ? latest.refreshToken : null;
-        }
-      : null;
+    const casReread = casConnectionId ? () => readLatestRefreshToken(casConnectionId) : null;
 
     const newCredentials = (await refreshWithRetry(
       () =>
@@ -2719,6 +2907,18 @@ async function handleChatCoreInner({
     )) as null | Record<string, unknown>;
 
     if (newCredentials?.accessToken || newCredentials?.copilotToken) {
+      const adoption = adoptRefreshedCodexCredentials({
+        provider,
+        refreshFence,
+        targetCredentials,
+        credentials,
+        newCredentials,
+      });
+      if (adoption === "stale") return null;
+      if (adoption) {
+        if (adoption === "committed") credentialRefreshPersistRan = true;
+        return newCredentials;
+      }
       log?.info?.("TOKEN", `${provider?.toUpperCase()} | refreshed`);
       if (!credentialRefreshPersistRan) {
         Object.assign(targetCredentials, newCredentials);
@@ -2789,6 +2989,8 @@ async function handleChatCoreInner({
     }
     const persistentMessage = projectRetainedProviderFailureMessage(message, videoBridgeObserved);
     const errorConnectionId = getCurrentConnectionId() || connectionId;
+    const failureFence = errorConnectionId ? getCodexOperationFence(errorConnectionId) : null;
+    if (failureFence && !isCodexConnectionFenceCurrent(failureFence)) return;
     if (errorConnectionId && errorType) {
       try {
         if (
@@ -3056,9 +3258,11 @@ async function handleChatCoreInner({
             suffix: "trying other accounts",
           });
         } else if (errorType === PROVIDER_ERROR_TYPES.REQUEST_REJECTED) {
-          // Per-request refusal (#12859): growing cooldown, streak → banned.
+          // Per-request refusal (#12859): growing MODEL-scoped cooldown. Never a ban.
           await handleRequestRejectedFailure({
             connectionId: errorConnectionId,
+            provider,
+            targetModel,
             statusCode,
             message: persistentMessage,
           });
@@ -3155,6 +3359,7 @@ async function handleChatCoreInner({
       credentials,
       effectiveModel,
       executeRefreshCredentials,
+      forcedConnectionId,
       executor,
       getCurrentConnectionId,
       getExecutionCredentials,
@@ -3206,6 +3411,7 @@ async function handleChatCoreInner({
       pipelineRecovered = streamingOutcome.carry.pipelineRecovered;
       providerHeaders = streamingOutcome.carry.providerHeaders;
       providerResponse = streamingOutcome.carry.providerResponse;
+      upstreamHttpSelection = streamingOutcome.carry.upstreamHttpSelection;
       providerUrl = streamingOutcome.carry.providerUrl;
     }
     if (streamingOutcome && streamingOutcome.response) return streamingOutcome.response;
@@ -3214,6 +3420,7 @@ async function handleChatCoreInner({
   // Non-streaming response
   if (!stream) {
     const nonStreamingOutcome = await runNonStreamingResponse({
+      agentContext,
       reportSignatureFailure,
       geminiPromptCacheMode,
       isScopedGeminiCacheTarget,
@@ -3221,6 +3428,7 @@ async function handleChatCoreInner({
       apiKeyInfo,
       allowedConnections,
       appendRequestLog,
+      forcedConnectionId,
       applyProviderFailureClassification,
       assertManagedLeaseFence,
       attachCompressionUsageReceiptAfterAnalytics,
@@ -3311,6 +3519,7 @@ async function handleChatCoreInner({
       reqLogger,
       requestToolIdentityMap,
       resolveReportedServiceTier,
+      piiTokensMinted,
       runMemoryExtractionGate,
       runPluginOnResponseHook,
       sanitizeErrorMessage,
@@ -3356,6 +3565,8 @@ async function handleChatCoreInner({
   }
 
   const streamingTailOutcome = await runStreamingTail({
+    agentContext,
+    upstreamHttpSelection,
     geminiPromptCacheMode,
     isScopedGeminiCacheTarget,
     tokensCompressed,
@@ -3411,6 +3622,7 @@ async function handleChatCoreInner({
     pendingRequestOwner,
     persistAttemptLogs,
     persistFailureUsage,
+    piiTokensMinted,
     pipelineSessionId,
     provider,
     providerHeaders,
@@ -3442,6 +3654,9 @@ async function handleChatCoreInner({
   return streamingTailOutcome.result;
   } finally {
     if (!turnExecutionHandedOffToStream) {
+      try {
+        drainUnpersistedHttpAttempts();
+      } catch {}
       releaseTurnExecution();
     }
   }

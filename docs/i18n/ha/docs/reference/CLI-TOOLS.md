@@ -107,11 +107,11 @@ hanya guda ba tare da sauran ba zai sa test suite ɗin ya gaza maimakon ya karka
 
 ---
 
-## 1. Catalog na CLI Code (kayan aikin 27)
+## 1. Catalog na CLI Code (kayan aikin 28)
 
 Duk kayan aikin da suka bayyana a cikin `/dashboard/cli-code`. Wadanda ke da `baseUrlSupport: none` ana yin waya ta hanyar MITM ko jagorar jagora maimakon tushen URL na al'ada:
 
-| id               | suna                       | mai sayarwa             | baseUrlSupport | configTpe      | acpSpawnable |
+| id               | suna                       | mai sayarwa             | baseUrlSupport | configType     | acpSpawnable |
 | ---------------- | -------------------------- | ----------------------- | -------------- | -------------- | ------------ |
 | claude           | Claude Code                | Anthropic               | cika           | env            | gaskiya      |
 | codex            | OpenAI Codex CLI           | OpenAI                  | cika           | al'ada         | gaskiya      |
@@ -134,6 +134,7 @@ Duk kayan aikin da suka bayyana a cikin `/dashboard/cli-code`. Wadanda ke da `ba
 | grok-gina        | Grok Gina                  | xAI                     | cika           | al'ada         | karya        |
 | murkushe         | Murkushe                   | OSS (Charm)             | cika           | al'ada         | karya        |
 | qwan             | Qwen Code                  | Alibaba                 | cika           | jagora         | gaskiya      |
+| budewa           | OpenClaude                 | Gitlawb (OSS)           | cika           | jagora         | karya        |
 | zed              | Zed                        | Zed Industries          | cika           | jagora         | karya        |
 | siginan kwamfuta | Cursor                     | Kowane yanki            | babu           | jagora         | karya        |
 | antigravity      | Antigravity                | Google                  | babu           | mitm           | karya        |
@@ -219,22 +220,22 @@ interface ToolBatchStatus {
 
 ---
 
-## 6. Masu Gudanar da Saituna don Sabbin Kayan Aiki
+## 6. Masu Gudanar da Saituna don Sabbin Kayan aiki
 
-Sabbin kayan aiki masu `configType: "custom"` suna da keɓaɓɓun hanyoyin API na saituna:
+Sabbin kayan aikin tare da `configType: "custom"` sun keɓanta hanyoyin API :
 
-| Hanya                                       | Kayan Aiki                                                               |
-| ------------------------------------------- | ------------------------------------------------------------------------ |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                  |
-| `POST /api/cli-tools/jcode-settings`        | jcode (alamar --base-url)                                                |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, tsohon tsari)                             |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, na farko + daidaitawar tsohon `~/.deepseek`) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                    |
-| `POST /api/cli-tools/pi-settings`           | Wakilin rubuta lamba na Pi                                               |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                    |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + keɓaɓɓen maɓallin `.env`)           |
+| Hanya                                       | Kayan aiki                                                           |
+| ------------------------------------------- | -------------------------------------------------------------------- |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                              |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url flag)                                              |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, legacy)                               |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, primary + legacy `~/.deepseek` sync)     |
+| `POST /api/cli-tools/smelt-settings`        | Narke                                                                |
+| `POST /api/cli-tools/pi-settings`           | Wakilin lambar Pi (`~/.pi/agent/models.json`, `providers.omniroute`) |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Gina (~/.grok/config.toml, `[model.omniroute]`)                 |
+| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + sadaukar da maɓallin `.env` )   |
 
-Duk hanyoyin suna amfani da `sanitizeErrorMessage()` don martanin kurakurai (Doka Mai Tsauri #12).
+Duk hanyoyin suna amfani da `sanitizeErrorMessage()` don amsa kuskure (Hard Dokokin #12).
 
 ---
 
@@ -291,21 +292,21 @@ An samar da cikakkun fassarorin PT-BR da EN. Sauran locales 39 suna komawa zuwa 
 
 ---
 
-## 9. Farawa Cikin Sauri
+## 9. Saurin Farawa
 
-### Mataki na 1 — Sami OmniRoute API Key
+### Mataki na 1 — Samu maɓallin OmniRoute API
 
-1. Buɗe `/dashboard/api-manager` → **Ƙirƙiri API Key**
-2. Ba shi suna (misali `cli-tools`) sannan zaɓi dukkan izini
-3. Kwafi maɓallin — za ka buƙace shi don kowane CLI da ke ƙasa
+1. Bude `/dashboard/api-manager` →** Ƙirƙiri maɓallin API**
+2. Ba shi suna (misali `cli-tools`) kuma zaɓi duk izini
+3. Kwafi maɓallin — da kuke buƙata don kowane CLI da ke ƙasa
 
-> Maɓallinka yana kama da haka: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
+> Makullin ku yayi kama da: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Mataki na 2 — Shigar da Kayan Aikin CLI
+### Mataki 2 — Shigar da kayan aikin CLI
 
-Duk kayan aikin da suka dogara da npm suna buƙatar Node.js 22.22.2+ ko 24.x:
+Duk kayan aikin tushen npm suna buƙatar Node.js 22.22.2 + ko 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -326,35 +327,35 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (ana iya ƙaddamar da shi ta `omniroute run gemini` → /v1beta surface)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Wanda aka gina da Rust
+cargo install smelt  # Rust-based
 
-# Wakilin coding na Pi
-# duba https://github.com/zechnerj/pi-coding-agent don yadda ake shigarwa
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# duba https://github.com/1jehuang/jcode don yadda ake shigarwa
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Mataki na 3 — Saita ta Dashboard
+### Mataki 3 — Sanya ta hanyar Dashboard
 
 1. Je zuwa `http://localhost:20128/dashboard/cli-code`
-2. Nemo kayan aikinka a cikin grid
-3. Danna katin don buɗe shafin cikakkun bayanan kayan aikin
-4. Zaɓi API key da base URL naka
-5. Danna **Aiwatar da Saiti** ko kwafi snippet na saitin hannu
+2. Nemo kayan aikin ku a cikin grid
+3. Danna katin don buɗe shafin dalla-dalla na kayan aiki
+4. Zaɓi maɓallin API ku da tushen URL
+5. Danna** Aiwatar da Config** ko kwafi snippet na tsarin aikin hannu
 
 ---
 
-### Mataki na 4 — Saita Global Environment Variables
+### Mataki na 4 — Saita Canjin Muhalli na Duniya
 
 ```bash
 # OmniRoute Universal Endpoint
@@ -362,22 +363,21 @@ export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI yana karanta GOOGLE_GEMINI_BASE_URL a ROOT (SDK ɗinsa yana haɗa /v1beta/... da kansa)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> Don **uwar garken nesa**, maye gurbin `localhost:20128` da IP ko domain na uwar garken,
-> misali `http://<your-server-ip>:20128`.
+> Za a** uwar garken nesa** maye gurbin `localhost:20128` da uwar garken IP ko yanki, misali `http://<your-server-ip>:20128`.
 
 ---
 
-### Mataki na 4 — Saita Kowane Kayan Aiki
+### Mataki na 4 — Sanya Kowane Kayan aiki
 
 #### Claude Code
 
 ```bash
-# Ƙirƙiri ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -388,7 +388,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Yi amfani da tushen unified Anthropic gateway don Claude Code. Kada ka ƙara `/v1` a nan.
+Yi amfani da tushen tushen ƙofar Anthropic ɗaya don lambar Claude. Kar a saka `/v1` anan.
 
 **Gwaji:** `claude "say hello"`
 
@@ -396,10 +396,7 @@ Yi amfani da tushen unified Anthropic gateway don Claude Code. Kada ka ƙara `/v
 
 #### OpenAI Codex
 
-Codex na zamani (v0.137+) yana karanta `~/.codex/config.toml` kawai — tsohon
-`config.yaml` na legacy npm CLI ne kuma ana yin watsi da shi ba tare da sanarwa ba. API
-key yana kasancewa a cikin environment variable `OMNIROUTE_API_KEY` (`env_key`), ba
-a cikin fayil ɗin ba:
+Codex na zamani (v0.137 +) yana karanta `~/.codex/config.toml` kawai — tsohon `config.yaml` yana cikin gadon npm CLI kuma an yi watsi da shi shiru. Maɓallin API yana tsayawa a cikin ma'aunin yanayin `OMNIROUTE_API_KEY` (`env_key`), ba zai taɓa cikin fayil ɗin ba:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -414,7 +411,7 @@ EOF
 export OMNIROUTE_API_KEY="sk-your-omniroute-key"
 ```
 
-Cikakken bayani (profiles, `wire_api`, context windows): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
+Cikakken bayani (bayanin martaba, `wire_api`, windows mahallin): [CODEX-CLI-CONFIGURATION.md](../guides/CODEX-CLI-CONFIGURATION.md).
 
 **Gwaji:** `codex "what is 2+2?"`
 
@@ -447,14 +444,44 @@ EOF
 
 **Gwaji:** `opencode`
 
-> Yi amfani da `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`
-> don aika thinking variants.
+> Yi amfani da `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high` don aika bambance-bambancen tunani.
+
+---
+
+#### Pi Codeing Agent
+
+Shigar da fakitin Pi Coding Agent na hukuma tare da `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi yana karanta masu samar da al'ada daga `~/.pi/agent/models.json`; saita `PI_CODING_AGENT_DIR` don matsar da dukan directory directory. Dashboard ɗin yana biye da wannan abin. Pi baya gano samfura daga wuraren ƙarshe na al'ada, don haka OmniRoute yana rubuta ƙirar da aka zaɓa a cikin `models[]` ta amfani da Pi's `openai-completions` API da OmniRoute OpenAI mai dacewa da ƙarshen `/v1`.
+
+A ciki**CLI Tools → Pi** , zaɓi wurin ƙarshe, maɓallin API, da samfuri, bitar samfotin mai samarwa, sannan a yi amfani da shi. Samfuran juzu'in mai bayarwa ne: haɗa `providers.omniroute` cikin `models.json` da kake da shi lokacin da kake saita Pi da hannu don sauran masu samarwa da saitunan su kasance cikakke.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi yana sake loda `models.json` lokacin da ka buɗe `/model`. Gwada hanyar da aka tsara tare da id na mai bayarwa da kuma samfurin id ɗin da kuka zaɓa:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Nassoshi: [Samfuran Pi da masu samar da al'ada](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Matsalolin muhalli Pi](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi shigar da umarni](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
 
 ---
 
 #### Cline (CLI ko VS Code)
 
-**Yanayin CLI:**
+**yanayin CLI :**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -466,22 +493,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**Yanayin VS Code:**
-Saitunan extension na Cline → API Provider: `OpenAI Compatible` → Base URL: `http://localhost:20128/v1`
+**VS Code:** saitunan tsawo Cline → API Mai bayarwa: `OpenAI Compatible` → URL: `http://localhost:20128/v1`
 
-Ko yi amfani da dashboard na OmniRoute → **Kayan Aikin CLI → Cline → Aiwatar da Saiti**.
+Ko yi amfani da dashboard ɗin OmniRoute →**CLI Tools → Cline → da Kanfigare** .
 
 ---
 
 #### KiloCode (CLI ko VS Code)
 
-**Yanayin CLI:**
+**yanayin CLI :**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**Saitunan VS Code:**
+**VS Code settings:**
 
 ```json
 {
@@ -490,13 +516,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Ko yi amfani da dashboard na OmniRoute → **Kayan Aikin CLI → KiloCode → Aiwatar da Saiti**.
+Ko yi amfani da dashboard ɗin OmniRoute →**CLI Tools → KiloCode → da Kanfigare** .
 
 ---
 
-#### Continue (VS Code Extension)
+#### Ci gaba ( Tsawo lambar VS )
 
-Gyara `~/.continue/config.yaml`:
+Edita `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -508,20 +534,20 @@ models:
     default: true
 ```
 
-Sake kunna VS Code bayan gyarawa.
+Sake kunna lambar VS bayan gyarawa.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Yi amfani da wannan lokacin da aka saita VS Code Insiders don custom endpoint models kuma kana son OmniRoute ya yi aiki ba tare da custom header field ba.
+Yi amfani da wannan lokacin da aka saita VS Code Insiders don ƙirar ƙarshen ƙarshen al'ada kuma kuna son OmniRoute yayi aiki ba tare da filin taken al'ada ba.
 
-**Wurin da ake ba da shawara:**
+**Wurin da aka ba da shawarar:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Misali ta amfani da sunan laƙabi na OmniRoute mai token:**
+**Misali ta yin amfani da alamar laƙabin OmniRoute :**
 
 ```json
 [
@@ -545,27 +571,26 @@ Yi amfani da wannan lokacin da aka saita VS Code Insiders don custom endpoint mo
 
 **Bayanan kula:**
 
-- Sauya `sk-your-omniroute-key` da maɓallin API da aka ƙirƙira a OmniRoute.
-- Ya kamata filin `url` ya nuna zuwa `/api/v1/vscode/{token}/chat/completions`.
-- Ya kamata filin `modelsUrl` ya nuna zuwa `/api/v1/vscode/{token}/models`.
-- Fi son tsarin `/v1` na yau da kullum tare da taken Bearer idan manhajar abokin ciniki tana goyon bayan takamaiman takardu.
-- Token ɗin da aka saka a cikin URL hanya ce ta madadin dacewa kuma yana iya bayyana a rajistan ayyukan edita ko tarihin proxy.
+- Sauya `sk-your-omniroute-key` da maɓallin API da aka ƙirƙira a cikin OmniRoute.
+- Filin `url` yakamata yayi nuni zuwa `/api/v1/vscode/{token}/chat/completions`.
+- Filin `modelsUrl` yakamata yayi nuni zuwa `/api/v1/vscode/{token}/models`.
+- Fi son kwararan kai na yau da kullun `/v1` + Bearer lokacin da abokin ciniki ke goyan bayan masu kai na al'ada.
+- Alamu masu kunshe da URL koma baya ne masu dacewa kuma suna iya fitowa a cikin rajistan ayyukan edita ko tarihin wakili.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Shiga cikin asusun AWS/Kiro naka:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI yana amfani da nasa tsarin tantancewa — ba a buƙatar OmniRoute a matsayin backend na Kiro CLI kansa.
-# Yi amfani da kiro-cli tare da OmniRoute don sauran kayan aiki.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-Don manhajar tebur ta **Kiro IDE**, yi amfani da endpoint na MITM da OmniRoute ya samar
-a ƙarƙashin `/dashboard/cli-tools → Kiro`.
+Domin**Kiro IDE** aikace-aikacen tebur, yi amfani da ƙarshen MITM wanda aka fallasa ta OmniRoute ƙarƙashin `/dashboard/cli-tools → Kiro`.
 
 ---
 

@@ -105,7 +105,7 @@ ning lipu `--model` sidumise. Kõrvalekallete kontroll
 kasutajaliidese kataloog ja kõik tarbijaliidesed püsivad sünkroonis — ühele
 liidesele ilma teisteta lisatud siht põhjustab testikomplekti nurjumise, mitte märkamatu kõrvalekalde.
 
-## 1. CLI koodi kataloog (27 tööriista)
+## 1. CLI koodi kataloog (28 tööriista)
 
 Kõik `/dashboard/cli-code` kuvatavad tööriistad. Need, millel on `baseUrlSupport: none` ühendatakse kohandatud baasi URL asemel läbi MITM või käsitsi juhiku:
 
@@ -132,6 +132,7 @@ Kõik `/dashboard/cli-code` kuvatavad tööriistad. Need, millel on `baseUrlSupp
 | grok-ehitama      | Grok Build                  | xAI                     | täis           | kohandatud            | vale         |
 | purustada         | Purustama                   | OSS (võlu)              | täis           | kohandatud            | vale         |
 | qwen              | Qwen kood                   | Alibaba                 | täis           | juhend                | tõsi         |
+| openclaude        | OpenClaude                  | Gitlawb (OSS)           | täis           | juhend                | vale         |
 | zed               | Zed                         | Zed Industries          | täis           | juhend                | vale         |
 | kursor            | Cursor                      | Suvaline sfäär          | mitte ühtegi   | juhend                | vale         |
 | antigravitatsioon | Antigravity                 | Google                  | mitte ühtegi   | mitm                  | vale         |
@@ -219,20 +220,20 @@ interface ToolBatchStatus {
 
 ## 6. Uute tööriistade seadete töötlejad
 
-Uutel tööriistadel, millel on `configType: "custom"`, on spetsiaalsed seadete API-marsruudid:
+Uutel `configType: "custom"` tööriistadel on spetsiaalsed seaded API marsruudid:
 
-| Marsruut                                    | Tööriist                                                                           |
-| ------------------------------------------- | ---------------------------------------------------------------------------------- |
-| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                            |
-| `POST /api/cli-tools/jcode-settings`        | jcode (lipp --base-url)                                                            |
-| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, pärandlahendus)                                     |
-| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, peamine + pärandkataloogi `~/.deepseek` sünkroonimine) |
-| `POST /api/cli-tools/smelt-settings`        | Smelt                                                                              |
-| `POST /api/cli-tools/pi-settings`           | Pi programmeerimisagent                                                            |
-| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                              |
-| `POST /api/cli-tools/qwen-settings`         | Qwen Code (`~/.qwen/settings.json` + spetsiaalne `.env`-võti)                      |
+| Marsruut                                    | Tööriist                                                                 |
+| ------------------------------------------- | ------------------------------------------------------------------------ |
+| `POST /api/cli-tools/forge-settings`        | ForgeCode (.forge.toml)                                                  |
+| `POST /api/cli-tools/jcode-settings`        | jcode (--base-url lipp)                                                  |
+| `POST /api/cli-tools/deepseek-tui-settings` | DeepSeek TUI (OPENAI_BASE_URL, pärand)                                   |
+| `POST /api/cli-tools/codewhale-settings`    | CodeWhale (OPENAI_BASE_URL, esmane + pärand `~/.deepseek` sünkroonimine) |
+| `POST /api/cli-tools/smelt-settings`        | Lõhn                                                                     |
+| `POST /api/cli-tools/pi-settings`           | Pi kodeeriv agent (`~/.pi/agent/models.json`, `providers.omniroute`)     |
+| `POST /api/cli-tools/grok-build-settings`   | Grok Build (~/.grok/config.toml, `[model.omniroute]`)                    |
+| `POST /api/cli-tools/qwen-settings`         | Qwen kood (`~/.qwen/settings.json` + spetsiaalne `.env` võti)            |
 
-Kõik marsruudid kasutavad veavastuste jaoks funktsiooni `sanitizeErrorMessage()` (range reegel nr 12).
+Kõik marsruudid kasutavad veavastusteks `sanitizeErrorMessage()` (kõva reegel nr 12).
 
 ---
 
@@ -289,21 +290,21 @@ Täielikud PT-BR- ja EN-tõlked on olemas. Ülejäänud 39 lokaati kasutavad aut
 
 ---
 
-## 9. Kiirjuhend
+## 9. Kiirstart
 
-### Samm 1 — Hankige OmniRoute'i API-võti
+### 1. samm — Hankige OmniRoute API võti
 
-1. Avage `/dashboard/api-manager` → **Loo API-võti**
+1. Avage `/dashboard/api-manager` →** Looge API võti**
 2. Andke sellele nimi (nt `cli-tools`) ja valige kõik õigused
-3. Kopeerige võti — vajate seda iga alltoodud CLI jaoks
+3. Kopeerige võti — mida vajate iga alloleva CLI jaoks
 
 > Teie võti näeb välja selline: `sk-xxxxxxxxxxxxxxxx-xxxxxxxxx`
 
 ---
 
-### Samm 2 — Installige CLI-tööriistad
+### 2. samm — Installige CLI Tools
 
-Kõik npm-il põhinevad tööriistad nõuavad Node.js-i versiooni 22.22.2+ või 24.x:
+Kõik npm-põhised tööriistad nõuavad Node.js 22.22.2 + või 24.x:
 
 ```bash
 # Claude Code (Anthropic)
@@ -324,58 +325,57 @@ npm install -g kilocode
 # Qwen Code
 npm install -g @qwen-code/qwen-code
 
-# Google Gemini CLI (käivitatav käsuga `omniroute run gemini` → /v1beta-liides)
+# Google Gemini CLI (launchable via `omniroute run gemini` → /v1beta surface)
 npm install -g @google/gemini-cli
 
 # Aider
 pip install aider-chat
 
 # Smelt
-cargo install smelt  # Rustil põhinev
+cargo install smelt  # Rust-based
 
-# Pi kodeerimisagent
-# installimiseks vaadake https://github.com/zechnerj/pi-coding-agent
+# Pi coding agent
+npm install -g --ignore-scripts @earendil-works/pi-coding-agent
 
 # jcode
-# installimiseks vaadake https://github.com/1jehuang/jcode
+# see https://github.com/1jehuang/jcode for install
 ```
 
 ---
 
-### Samm 3 — Seadistage juhtpaneeli kaudu
+### Samm 3 — Konfigureerige armatuurlaua kaudu
 
-1. Minge aadressile `http://localhost:20128/dashboard/cli-code`
-2. Leidke ruudustikust oma tööriist
-3. Tööriista üksikasjalehe avamiseks klõpsake kaardil
-4. Valige oma API-võti ja baas-URL
-5. Klõpsake nuppu **Rakenda konfiguratsioon** või kopeerige käsitsi seadistamise koodilõik
+1. Mine `http://localhost:20128/dashboard/cli-code`
+2. Leidke võrgustikust oma tööriist
+3. Tööriista üksikasjade lehe avamiseks klõpsake kaardil
+4. Valige oma API võti ja põhi URL
+5. Klõpsake** Rakenda konfiguratsioon** või kopeerige käsitsi konfiguratsiooni fragment
 
 ---
 
-### Samm 4 — Määrake globaalsed keskkonnamuutujad
+### 4. samm — Määrake globaalsed keskkonnamuutujad
 
 ```bash
-# OmniRoute'i universaalne lõpp-punkt
+# OmniRoute Universal Endpoint
 export OPENAI_BASE_URL="http://localhost:20128/v1"
 export OPENAI_API_KEY="sk-your-omniroute-key"
 export ANTHROPIC_BASE_URL="http://localhost:20128"
 export ANTHROPIC_AUTH_TOKEN="sk-your-omniroute-key"
-# Gemini CLI loeb GOOGLE_GEMINI_BASE_URL-i JUURTASEMEL (selle SDK lisab ise /v1beta/...)
+# Gemini CLI reads GOOGLE_GEMINI_BASE_URL at the ROOT (its SDK appends /v1beta/... itself)
 export GOOGLE_GEMINI_BASE_URL="http://localhost:20128"
 export GEMINI_API_KEY="sk-your-omniroute-key"
 ```
 
-> **Kaugserveri** puhul asendage `localhost:20128` serveri IP-aadressi või domeeniga,
-> nt `http://<your-server-ip>:20128`.
+> a** kaugserver** asenda `localhost:20128` serveriga IP või domeeniga, nt `http://<your-server-ip>:20128`.
 
 ---
 
-### Samm 4 — Seadistage iga tööriist
+### Samm 4 — Konfigureerige iga tööriist
 
-#### Claude Code
+#### Claude kood
 
 ```bash
-# Looge ~/.claude/settings.json:
+# Create ~/.claude/settings.json:
 mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 {
   "env": {
@@ -386,7 +386,7 @@ mkdir -p ~/.claude && cat > ~/.claude/settings.json << EOF
 EOF
 ```
 
-Kasutage Claude Code'i jaoks ühtse Anthropicu lüüsi juuraadressi. Ärge lisage siin lõppu `/v1`.
+Kasutage Claude koodi jaoks ühtset Anthropic lüüsi juurt. Ärge lisage `/v1` d.
 
 **Test:** `claude "say hello"`
 
@@ -394,10 +394,7 @@ Kasutage Claude Code'i jaoks ühtse Anthropicu lüüsi juuraadressi. Ärge lisag
 
 #### OpenAI Codex
 
-Kaasaegne Codex (v0.137+) loeb ainult faili `~/.codex/config.toml` — vana
-`config.yaml` kuulub pärand-npm-CLI-le ja seda eiratakse vaikimisi. API-võti
-jääb keskkonnamuutujasse `OMNIROUTE_API_KEY` (`env_key`), mitte kunagi
-faili sisse:
+Kaasaegne Codex (v0.137 +) loeb `~/.codex/config.toml` ainult — vana `config.yaml` kuulub pärandfaili npm CLI ja seda ignoreeritakse vaikselt. Klahv API jääb `OMNIROUTE_API_KEY` keskkonnamuutujasse (`env_key`), mitte kunagi faili sees:
 
 ```bash
 mkdir -p ~/.codex && cat > ~/.codex/config.toml << EOF
@@ -445,13 +442,44 @@ EOF
 
 **Test:** `opencode`
 
-> Mõtlemisvariantide saatmiseks kasutage käsku `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`.
+> Mõttevariantide saatmiseks kasutage `opencode run "your prompt" --model omniroute/claude-sonnet-4-5-thinking --variant high`.
 
 ---
 
-#### Cline (CLI või VS Code)
+#### Pi kodeerimisagent
 
-**CLI-režiim:**
+Installige ametlik Pi kodeerimisagendi pakett koos `npm install -g --ignore-scripts @earendil-works/pi-coding-agent`. Pi loeb kohandatud pakkujaid `~/.pi/agent/models.json` st; seadke `PI_CODING_AGENT_DIR` kogu agendikataloogi teisaldamiseks. Armatuurlaud järgib seda alistamist. Pi ei avasta kohandatud lõpp-punktidest mudeleid, seega kirjutab OmniRoute valitud mudeli `models[]` -sse, kasutades Pi `openai-completions` API ja OmniRoute OpenAI-ga ühilduvat `/v1` lõpp-punkti.
+
+sisse**CLI Tööriistad → Pi** , valige lõpp-punkt, API -võti ja mudel, vaadake üle pakkuja eelvaade ja seejärel rakendage. Eelvaade on pakkuja fragment: ühendage `providers.omniroute` oma olemasoleva `models.json` kui konfigureerite Pi käsitsi, nii et teised pakkujad ja sätted jäävad puutumata.
+
+```json
+{
+  "$schema": "https://pi.dev/schemas/models.schema.json",
+  "providers": {
+    "omniroute": {
+      "baseUrl": "http://localhost:20128/v1",
+      "api": "openai-completions",
+      "apiKey": "sk-your-omniroute-key",
+      "omnirouteManaged": true,
+      "models": [{ "id": "auto/best-coding", "name": "auto/best-coding" }]
+    }
+  }
+}
+```
+
+Pi laadib `models.json` uuesti, kui avate `/model`. Testige konfigureeritud marsruuti valitud pakkuja ID ja mudeli ID abil:
+
+```bash
+pi --provider omniroute --model auto/best-coding --print "Reply with a short greeting."
+```
+
+Viited: [Pi mudelid ja kohandatud pakkujad](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/models.md), [Pi keskkonnamuutujad](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/docs/environment-variables.md), [Pi installijuhised](https://github.com/earendil-works/pi/blob/main/packages/coding-agent/README.md).
+
+---
+
+#### Cline (CLI või VS kood)
+
+**CLI režiim:**
 
 ```bash
 mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
@@ -463,22 +491,21 @@ mkdir -p ~/.cline/data && cat > ~/.cline/data/globalState.json << EOF
 EOF
 ```
 
-**VS Code'i režiim:**
-Cline'i laienduse seaded → API pakkuja: `OpenAI Compatible` → Baas-URL: `http://localhost:20128/v1`
+**VS koodirežiim:** Cline laienduse seaded → API Pakkuja: `OpenAI Compatible` → Põhi URL: `http://localhost:20128/v1`
 
-Või kasutage OmniRoute'i juhtpaneeli → **CLI-tööriistad → Cline → Rakenda konfiguratsioon**.
+Või kasutage OmniRoute armatuurlauda →**CLI Tööriistad → Cline → Rakenda konfiguratsioon** .
 
 ---
 
-#### KiloCode (CLI või VS Code)
+#### KiloCode (CLI või VS kood)
 
-**CLI-režiim:**
+**CLI režiim:**
 
 ```bash
 kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 ```
 
-**VS Code'i seaded:**
+**VS koodi seaded:**
 
 ```json
 {
@@ -487,13 +514,13 @@ kilocode --api-base http://localhost:20128/v1 --api-key sk-your-omniroute-key
 }
 ```
 
-Või kasutage OmniRoute'i juhtpaneeli → **CLI-tööriistad → KiloCode → Rakenda konfiguratsioon**.
+Või kasutage OmniRoute armatuurlauda →**CLI Tööriistad → KiloCode → Rakenda konfiguratsioon** .
 
 ---
 
-#### Continue (VS Code'i laiendus)
+#### Jätka (VS koodilaiend)
 
-Muutke faili `~/.continue/config.yaml`:
+Redigeeri `~/.continue/config.yaml`:
 
 ```yaml
 models:
@@ -505,20 +532,20 @@ models:
     default: true
 ```
 
-Pärast muutmist taaskäivitage VS Code.
+Pärast redigeerimist taaskäivitage VS kood.
 
 ---
 
 #### VS Code Insiders (`chatLanguageModels.json`)
 
-Kasutage seda juhul, kui VS Code Insiders on seadistatud kohandatud lõpp-punkti mudelite jaoks ja soovite, et OmniRoute töötaks ilma kohandatud päiseväljata.
+Kasutage seda, kui VS Code Insiders on konfigureeritud kohandatud lõpp-punkti mudelite jaoks ja soovite, et OmniRoute töötaks ilma kohandatud päiseväljata.
 
 **Soovitatav asukoht:**
 
 - Linux: `~/.config/Code - Insiders/User/chatLanguageModels.json`
 - Windows: `%APPDATA%/Code - Insiders/User/chatLanguageModels.json`
 
-**Näide tokeniseeritud OmniRoute'i aliase kasutamisest:**
+**Näide tokeniseeritud OmniRoute aliase kasutamisest:**
 
 ```json
 [
@@ -542,27 +569,26 @@ Kasutage seda juhul, kui VS Code Insiders on seadistatud kohandatud lõpp-punkti
 
 **Märkused:**
 
-- Asendage `sk-your-omniroute-key` OmniRoute'is loodud API-võtmega.
-- Väli `url` peaks osutama aadressile `/api/v1/vscode/{token}/chat/completions`.
-- Väli `modelsUrl` peaks osutama aadressile `/api/v1/vscode/{token}/models`.
-- Kui klient toetab kohandatud päiseid, eelistage tavapärast `/v1` + Bearer-päise lahendust.
-- URL-i manustatud tokenid on ühilduvuse varulahendus ning võivad ilmuda redaktori logides või puhverserveri ajaloos.
+- Asendage `sk-your-omniroute-key` OmniRoute loodud API klahviga.
+- `url` väli peaks osutama `/api/v1/vscode/{token}/chat/completions`.
+- `modelsUrl` väli peaks osutama `/api/v1/vscode/{token}/models`.
+- Kui klient toetab kohandatud päiseid, eelistage tavalist `/v1` + kandja päise voogu.
+- URL-i manustatud märgid on ühilduvuse tagavara ja võivad ilmuda redaktori logides või puhverserveri ajaloos.
 
 ---
 
 #### Kiro CLI (Amazon)
 
 ```bash
-# Logige sisse oma AWS-i/Kiro kontole:
+# Login to your AWS/Kiro account:
 kiro-cli login
 
-# CLI kasutab oma autentimist — OmniRoute'i pole Kiro CLI enda taustsüsteemina vaja.
-# Kasutage kiro-cli-d koos OmniRoute'iga teiste tööriistade jaoks.
+# The CLI uses its own auth — OmniRoute is not needed as backend for Kiro CLI itself.
+# Use kiro-cli alongside OmniRoute for other tools.
 kiro-cli status
 ```
 
-**Kiro IDE** töölauarakenduse puhul kasutage OmniRoute'i pakutavat MITM-lõpp-punkti,
-mille leiate jaotisest `/dashboard/cli-tools → Kiro`.
+jaoks**Kiro IDE** töölauarakenduses kasutage MITM lõpp-punkti, mille OmniRoute paljastab `/dashboard/cli-tools → Kiro` all.
 
 ---
 

@@ -1,5 +1,6 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { getEventListeners } from "node:events";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -13,6 +14,7 @@ const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const { resetDbInstance } = await import("../../src/lib/db/core.ts");
 
 const SAFETY_TIMEOUT_MS = 31_337;
+const SET_RETRY_DELAY_MS = 60_000;
 
 function makeLog() {
   const warnings: string[] = [];
@@ -30,14 +32,22 @@ function makeLog() {
 async function withControlledSafetyTimer(
   run: (clock: {
     fireSafetyTimers(): void;
+    fireRetryTimers(): void;
+    waitForRetryTimer(): Promise<void>;
+    activeRetryCount(): number;
+    createdRetryCount(): number;
     activeCount(): number;
     clearedCount(): number;
     createdCount(): number;
-  }) => Promise<void>
+  }) => Promise<void>,
+  controlledRetryDelayMs?: number
 ): Promise<void> {
   const originalSetTimeout = globalThis.setTimeout;
   const originalClearTimeout = globalThis.clearTimeout;
   const safetyTimers = new Map<ReturnType<typeof setTimeout>, () => void>();
+  const retryTimers = new Map<ReturnType<typeof setTimeout>, () => void>();
+  let retryTimerStarted: (() => void) | undefined;
+  let retryTimersCreated = 0;
   let safetyTimersCreated = 0;
   let safetyTimersCleared = 0;
 
@@ -52,6 +62,17 @@ async function withControlledSafetyTimer(
       safetyTimersCreated += 1;
       return safetyHandle;
     }
+    if (
+      controlledRetryDelayMs !== undefined &&
+      (delay === controlledRetryDelayMs || (controlledRetryDelayMs === 0 && delay === 1))
+    ) {
+      const retryHandle = { unref() {} } as unknown as ReturnType<typeof setTimeout>;
+      retryTimers.set(retryHandle, () => callback(...args));
+      retryTimersCreated += 1;
+      retryTimerStarted?.();
+      retryTimerStarted = undefined;
+      return retryHandle;
+    }
     return originalSetTimeout(callback, delay, ...args);
   }) as typeof setTimeout;
   globalThis.clearTimeout = ((handle: ReturnType<typeof setTimeout>) => {
@@ -59,6 +80,7 @@ async function withControlledSafetyTimer(
       safetyTimersCleared += 1;
       return;
     }
+    if (retryTimers.delete(handle)) return;
     originalClearTimeout(handle);
   }) as typeof clearTimeout;
 
@@ -68,6 +90,23 @@ async function withControlledSafetyTimer(
         const pending = [...safetyTimers.entries()];
         safetyTimers.clear();
         for (const [, callback] of pending) callback();
+      },
+      fireRetryTimers() {
+        const pending = [...retryTimers.values()];
+        retryTimers.clear();
+        for (const callback of pending) callback();
+      },
+      waitForRetryTimer() {
+        if (retryTimers.size > 0) return Promise.resolve();
+        return new Promise<void>((resolve) => {
+          retryTimerStarted = resolve;
+        });
+      },
+      activeRetryCount() {
+        return retryTimers.size;
+      },
+      createdRetryCount() {
+        return retryTimersCreated;
       },
       activeCount() {
         return safetyTimers.size;
@@ -296,7 +335,7 @@ test(
             comboTimeoutMs: SAFETY_TIMEOUT_MS,
             maxRetries: 0,
             maxSetRetries: 1,
-            setRetryDelayMs: 60_000,
+            setRetryDelayMs: SET_RETRY_DELAY_MS,
           },
         },
         handleSingleModel: async () => {
@@ -315,6 +354,8 @@ test(
       });
 
       await started;
+      await clock.waitForRetryTimer();
+      assert.equal(clock.activeRetryCount(), 1);
       const activeDuringDelay = clock.activeCount();
       clock.fireSafetyTimers();
       controller.abort();
@@ -326,6 +367,8 @@ test(
         "a completed set must release its timer before the retry delay"
       );
       assert.equal(response.status, 499);
+      assert.equal(clock.activeRetryCount(), 0);
+      assert.equal(getEventListeners(controller.signal, "abort").length, 0);
       assert.equal(dispatches, 1);
       assert.equal(clock.createdCount(), 1);
       assert.equal(clock.clearedCount(), 1);
@@ -334,6 +377,163 @@ test(
         log.warnings.filter((message) => /loop safety timeout.*reached/i.test(message)).length,
         0
       );
-    });
+    }, SET_RETRY_DELAY_MS);
   }
 );
+
+function startSetRetryRequest({
+  name,
+  controller,
+  failedSets = 1,
+  maxSetRetries = 1,
+  delayMs = SET_RETRY_DELAY_MS,
+  onRetry = () => {},
+}: {
+  name: string;
+  controller: AbortController;
+  failedSets?: number;
+  maxSetRetries?: number;
+  delayMs?: number;
+  onRetry?: () => void;
+}) {
+  let dispatches = 0;
+  return {
+    dispatchCount: () => dispatches,
+    response: handleComboChat({
+      body: { messages: [{ role: "user", content: name }] },
+      combo: {
+        name: `timer-cleanup-${name}`,
+        strategy: "priority",
+        models: [{ model: `synthetic-${name}/model` }],
+        config: {
+          targetTimeoutMs: 0,
+          comboTimeoutMs: SAFETY_TIMEOUT_MS,
+          maxRetries: 0,
+          maxSetRetries,
+          setRetryDelayMs: delayMs,
+        },
+      },
+      handleSingleModel: async () => {
+        dispatches += 1;
+        return new Response(
+          JSON.stringify(
+            dispatches <= failedSets
+              ? { error: { message: "synthetic upstream unavailable" } }
+              : { choices: [{ message: { content: "ok" } }] }
+          ),
+          {
+            status: dispatches <= failedSets ? 502 : 200,
+            headers: { "content-type": "application/json" },
+          }
+        );
+      },
+      signal: controller.signal,
+      log: {
+        ...makeLog(),
+        info(_tag: string, message: string) {
+          if (message.includes("retrying set")) onRetry();
+        },
+      },
+      settings: {},
+      allCombos: [],
+    }),
+  };
+}
+
+test("pre-abort at the set retry boundary skips the retry timer", { timeout: 5000 }, async (t) => {
+  for (const delayMs of [SET_RETRY_DELAY_MS, 0]) {
+    await t.test(`delay ${delayMs}`, () =>
+      withControlledSafetyTimer(async (clock) => {
+        const controller = new AbortController();
+        let reachedBoundary!: () => void;
+        const boundary = new Promise<void>((resolve) => {
+          reachedBoundary = resolve;
+        });
+        const request = startSetRetryRequest({
+          name: `pre-abort-${delayMs}`,
+          controller,
+          delayMs,
+          onRetry() {
+            controller.abort();
+            reachedBoundary();
+          },
+        });
+
+        await boundary;
+        try {
+          assert.equal(clock.createdRetryCount(), 0, "pre-abort must not arm a retry timer");
+          assert.equal((await request.response).status, 499);
+          assert.equal(request.dispatchCount(), 1);
+          assert.equal(clock.activeCount(), 0);
+          assert.equal(getEventListeners(controller.signal, "abort").length, 0);
+        } finally {
+          clock.fireRetryTimers();
+          await request.response;
+        }
+      }, delayMs)
+    );
+  }
+});
+
+test("expired set retry waits release their abort listeners", { timeout: 5000 }, async (t) => {
+  for (const outcome of ["success", "exhaustion"]) {
+    await t.test(outcome, () =>
+      withControlledSafetyTimer(async (clock) => {
+        const controller = new AbortController();
+        const request = startSetRetryRequest({
+          name: `wait-expiry-${outcome}`,
+          controller,
+          failedSets: outcome === "success" ? 2 : 3,
+          maxSetRetries: 2,
+        });
+
+        for (let retry = 0; retry < 2; retry++) {
+          await clock.waitForRetryTimer();
+          assert.equal(request.dispatchCount(), retry + 1, "dispatch must wait for timer expiry");
+          assert.equal(clock.activeCount(), 0, "no set safety timer runs during the retry delay");
+          clock.fireRetryTimers();
+        }
+        const response = await request.response;
+        assert.equal(response.status, outcome === "success" ? 200 : 502);
+        assert.equal(request.dispatchCount(), 3);
+        assert.equal(clock.createdRetryCount(), 2);
+        assert.equal(clock.activeRetryCount(), 0);
+        assert.equal(clock.activeCount(), 0);
+        assert.equal(
+          getEventListeners(controller.signal, "abort").length,
+          0,
+          "completed waits must leave no request abort listeners"
+        );
+      }, SET_RETRY_DELAY_MS)
+    );
+  }
+});
+
+test("zero-delay set retry yields to queued cancellation", { timeout: 5000 }, async () => {
+  await withControlledSafetyTimer(async (clock) => {
+    const controller = new AbortController();
+    let cancelled!: () => void;
+    const cancellation = new Promise<void>((resolve) => {
+      cancelled = resolve;
+    });
+    const request = startSetRetryRequest({
+      name: "zero-delay-cancel",
+      controller,
+      delayMs: 0,
+      onRetry() {
+        setImmediate(() => {
+          controller.abort();
+          cancelled();
+        });
+      },
+    });
+
+    await cancellation;
+    assert.equal((await request.response).status, 499);
+    assert.equal(request.dispatchCount(), 1);
+    assert.equal(clock.createdRetryCount(), 1, "even zero delay must yield to a timer turn");
+    assert.equal(clock.activeRetryCount(), 0, "cancellation must clear the retry timer");
+    assert.equal(clock.activeCount(), 0);
+    assert.equal(getEventListeners(controller.signal, "abort").length, 0);
+  }, 0);
+});

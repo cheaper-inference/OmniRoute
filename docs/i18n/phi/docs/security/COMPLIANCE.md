@@ -11,55 +11,72 @@ Itinatala ng OmniRoute ang mga administratibong pagkilos, kaganapan sa authentic
 
 Matatagpuan ang implementasyon sa `src/lib/compliance/index.ts` (T-43 — "Mga Kontrol sa Compliance") at `src/lib/compliance/providerAudit.ts`. Hindi kailanman nagta-throw ang mga audit write: kapag may anumang pagkabigo, tahimik na binabalewala ang call upang hindi masira ng audit logging ang pangunahing daloy ng request.
 
-## Ano ang Itinatala
+## Ano ang Naitatala
 
-### Mga administratibong kaganapan sa audit (`audit_log`)
+### Mga event sa administrative audit (`audit_log`)
 
-Ang bawat call sa `logAuditEvent({ action, actor, target, details, ... })` ay lumilikha ng isang row. Sinusunod ng mga action string ang pattern na `domain.verb` (o `domain.verb.outcome`). Kabilang sa mga nakumpirmang uri ng action sa source tree ang:
+Ang bawat tawag sa `logAuditEvent({ action, actor, target, details, ... })` ay gumagawa ng
+isang row. Ang mga string ng action ay sumusunod sa pattern na
+`domain.verb` (o `domain.verb.outcome`). Kabilang sa mga nakumpirmang uri ng action sa tree ang:
 
-| Action                               | Pinagmulan                              |
-| ------------------------------------ | --------------------------------------- |
-| `auth.login.success`                 | `src/app/api/auth/login/route.ts`       |
-| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`       |
-| `auth.login.error`                   | `src/app/api/auth/login/route.ts`       |
-| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`       |
-| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`       |
-| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`      |
-| `provider.credentials.created`       | `src/app/api/providers/route.ts`        |
-| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`   |
-| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`        |
-| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`      |
-| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts` |
-| `compliance.cleanup`                 | `src/lib/compliance/index.ts`           |
+| Action                               | Source                                   |
+| ------------------------------------ | ---------------------------------------- |
+| `auth.login.success`                 | `src/app/api/auth/login/route.ts`        |
+| `auth.login.failed`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.locked`                  | `src/app/api/auth/login/route.ts`        |
+| `auth.login.error`                   | `src/app/api/auth/login/route.ts`        |
+| `auth.login.misconfigured`           | `src/app/api/auth/login/route.ts`        |
+| `auth.login.setup_required`          | `src/app/api/auth/login/route.ts`        |
+| `auth.logout.success`                | `src/app/api/auth/logout/route.ts`       |
+| `provider.credentials.created`       | `src/app/api/providers/route.ts`         |
+| `provider.credentials.updated`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.revoked`       | `src/app/api/providers/[id]/route.ts`    |
+| `provider.credentials.batch_revoked` | `src/app/api/providers/route.ts`         |
+| `sync.token.created`                 | `src/app/api/sync/tokens/route.ts`       |
+| `sync.token.revoked`                 | `src/app/api/sync/tokens/[id]/route.ts`  |
+| `compliance.cleanup`                 | `src/lib/compliance/index.ts`            |
+| `api_key.auth.touch`                 | `src/server/authz/policies/clientApi.ts` |
 
-Kinukuha ng bawat entry ang `action`, `actor` (na nagde-default sa `"system"`), `target`, `details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`, `request_id`, at `timestamp`. Ang mga sensitibong key (`apiKey`, `accessToken`, `refreshToken`, `password`, anumang tumutugma sa `*token`/`*secret`/`*apikey`, atbp.) ay nire-redact nang recursive bilang `"[redacted]"` bago isulat ang row.
+Kinukuha ng bawat entry ang `action`, `actor` (naka-default sa `"system"`), `target`,
+`details`/`metadata` (JSON), `ip_address`, `resource_type`, `status`,
+`request_id`, at `timestamp`. Ang mga sensitibong key (`apiKey`, `accessToken`,
+`refreshToken`, `password`, anumang tumutugma sa `*token`/`*secret`/`*apikey`,
+at iba pa) ay nirerecursively na nire-redact sa `"[redacted]"` bago maisulat ang row.
 
-### Mga call sa MCP tool (`mcp_tool_audit`)
+Itinatala ng mga row na `api_key.auth.touch` ang matagumpay na metadata ng API key at mga
+read para sa discovery (GET/HEAD) na hindi kailanman umaabot sa request log: kung aling
+key, kailan, at ang normalized na path, na pinagsasama-sama at nililimitahan sa 1,000 row.
+Nilalaktawan ang mga key na may `noLog` at ang environment key. Idinaragdag lamang ang IP address
+at user-agent ng tumatawag kapag naka-on ang feature flag na
+`API_KEY_AUDIT_CLIENT_DETAILS_ENABLED` (naka-off bilang default).
 
-Ang bawat invocation ng MCP tool ay nagsusulat ng isang row sa pamamagitan ng `open-sse/mcp-server/audit.ts`. Schema (mula sa `src/lib/db/migrations/002_mcp_a2a_tables.sql`):
+### Mga tawag sa MCP tool (`mcp_tool_audit`)
+
+Ang bawat invocation ng MCP tool ay nagsusulat ng row sa pamamagitan ng
+`open-sse/mcp-server/audit.ts`. Schema (mula sa
+`src/lib/db/migrations/002_mcp_a2a_tables.sql`):
 
 | Column           | Mga tala                                     |
 | ---------------- | -------------------------------------------- |
-| `id`             | awtomatikong nag-i-increment                 |
+| `id`             | awtomatikong pagtaas                         |
 | `tool_name`      | identifier ng MCP tool                       |
 | `input_hash`     | sha256 ng input (walang payload na iniimbak) |
 | `output_summary` | maikli at pinutol na buod                    |
-| `duration_ms`    | kabuuang oras                                |
-| `api_key_id`     | tumatawag (maaaring null)                    |
+| `duration_ms`    | aktuwal na lumipas na oras                   |
+| `api_key_id`     | tumatawag (nullable)                         |
 | `success`        | `1` / `0`                                    |
 | `error_code`     | terminal error code kapag nabigo             |
 | `created_at`     | ISO timestamp                                |
 
 ### Mga log ng request / paggamit
 
-Ang mga ito ay operational telemetry (hindi mahigpit na admin audit), ngunit ginagamit ng mga ito ang parehong retention pipeline:
+Ito ay operational telemetry (hindi mahigpit na admin audit) ngunit gumagamit ng parehong
+pipeline ng retention:
 
-- `usage_history` — pinagsama-samang paggamit kada request
-- `call_logs` — kumpletong log kada request (napapailalim sa limitasyon sa dami ng row, tingnan sa ibaba)
-- `proxy_logs` — log ng proxy traffic (napapailalim sa limitasyon sa dami ng row)
-- `request_detail_logs` — legacy na detalyadong log ng request (pinu-prune pa rin kung mayroon)
+- `usage_history` — pinagsama-samang paggamit sa bawat request
+- `call_logs` — kumpletong log sa bawat request (may limitasyon sa bilang ng row, tingnan sa ibaba)
+- `proxy_logs` — log ng trapiko ng proxy (may limitasyon sa bilang ng row)
+- `request_detail_logs` — legacy na detalyadong log ng request (nililinis pa rin kung naroroon)
 
 ## Schema ng Storage
 

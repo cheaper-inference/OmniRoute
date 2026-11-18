@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "./Icon";
+import { Spinner } from "./Loading";
 import Modal from "./Modal";
 import Button from "./Button";
 import { copyToClipboard } from "@/shared/utils/clipboard";
@@ -151,9 +152,9 @@ export default function KiroSocialOAuthModal({
         {step === "loading" && (
           <div className="text-center py-6">
             <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
-              <Icon name="progress_activity" size={30} className="text-primary animate-spin" />
+              <Spinner size="lg" label={t("initializing")} />
             </div>
-            <h3 className="text-lg font-semibold mb-2">{t("initializing")}</h3>
+            <h3 className="text-lg mb-2">{t("initializing")}</h3>
             <p className="text-sm text-text-muted">{t("settingUp", { providerName })}</p>
           </div>
         )}
@@ -163,7 +164,7 @@ export default function KiroSocialOAuthModal({
             <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
               <Icon name="open_in_browser" size={30} className="text-primary animate-pulse" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">{t("openIncognito")}</h3>
+            <h3 className="text-lg mb-2">{t("openIncognito")}</h3>
             <p className="text-sm text-text-muted mb-3">{t("incognitoDescription")}</p>
             {authUrl && (
               <div className="mb-4">
@@ -192,11 +193,14 @@ export default function KiroSocialOAuthModal({
             {userCode && (
               <div className="mb-4">
                 <p className="text-xs text-text-muted mb-1">{t("verificationCode")}</p>
-                <p className="font-mono text-2xl font-bold tracking-widest">{userCode}</p>
+                <p className="font-mono text-2xl font-semibold tracking-widest">{userCode}</p>
               </div>
             )}
-            <div className="flex items-center justify-center gap-2 text-sm text-text-muted">
-              <Icon name="progress_activity" size={16} className="animate-spin" />
+            <div
+              role="status"
+              className="flex items-center justify-center gap-2 text-sm text-text-muted"
+            >
+              <Spinner decorative size="sm" />
               {t("waiting")}
             </div>
             <div className="mt-6">
@@ -212,7 +216,7 @@ export default function KiroSocialOAuthModal({
             <div className="size-16 mx-auto mb-4 rounded-full bg-success/10 flex items-center justify-center">
               <Icon name="check_circle" size={30} className="text-success" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">{t("successTitle")}</h3>
+            <h3 className="text-lg mb-2">{t("successTitle")}</h3>
             <p className="text-sm text-text-muted mb-4">
               {t("successMessage", { providerLabel, providerName })}
             </p>
@@ -227,7 +231,7 @@ export default function KiroSocialOAuthModal({
             <div className="size-16 mx-auto mb-4 rounded-full bg-error/10 flex items-center justify-center">
               <Icon name="error" size={30} className="text-error" />
             </div>
-            <h3 className="text-lg font-semibold mb-2">{t("errorTitle")}</h3>
+            <h3 className="text-lg mb-2">{t("errorTitle")}</h3>
             <p className="text-sm text-error mb-4">{error}</p>
             <div className="flex gap-2">
               <Button onClick={handleClose} variant="ghost" fullWidth>

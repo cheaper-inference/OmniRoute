@@ -1,0 +1,364 @@
+{
+  "endpoint_id": "fal-ai/any-llm",
+  "openapi": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Queue OpenAPI for fal-ai/any-llm",
+      "version": "1.0.0",
+      "description": "The OpenAPI schema for the fal-ai/any-llm queue.",
+      "x-fal-metadata": {
+        "endpointId": "fal-ai/any-llm",
+        "category": "llm",
+        "thumbnailUrl": "https://fal.media/files/kangaroo/r7VxCWmYSAHuyZ8gow5-9_c1afdfb6e70d4ac8a4157d16369984b5.jpg",
+        "playgroundUrl": "https://fal.ai/models/fal-ai/any-llm",
+        "documentationUrl": "https://fal.ai/models/fal-ai/any-llm/api",
+        "about": "Run any large language model with fal, powered by [OpenRouter](https://openrouter.ai)."
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Authorization",
+          "description": "Fal Key"
+        }
+      },
+      "schemas": {
+        "QueueStatus": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]
+            },
+            "request_id": {
+              "type": "string",
+              "description": "The request id."
+            },
+            "response_url": {
+              "type": "string",
+              "description": "The response url."
+            },
+            "status_url": {
+              "type": "string",
+              "description": "The status url."
+            },
+            "cancel_url": {
+              "type": "string",
+              "description": "The cancel url."
+            },
+            "logs": {
+              "type": "object",
+              "description": "The logs.",
+              "additionalProperties": true
+            },
+            "metrics": {
+              "type": "object",
+              "description": "The metrics.",
+              "additionalProperties": true
+            },
+            "queue_position": {
+              "type": "integer",
+              "description": "The queue position."
+            }
+          },
+          "required": ["status", "request_id"]
+        },
+        "AnyLlmInput": {
+          "properties": {
+            "max_tokens": {
+              "description": "This sets the upper limit for the number of tokens the model can generate in response. It won\u2019t produce more than this limit. The maximum value is the context length minus the prompt length.",
+              "anyOf": [
+                {
+                  "minimum": 1,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Max Tokens"
+            },
+            "temperature": {
+              "description": "This setting influences the variety in the model\u2019s responses. Lower values lead to more predictable and typical responses, while higher values encourage more diverse and less common responses. At 0, the model always gives the same response for a given input.",
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "maximum": 2,
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Temperature"
+            },
+            "reasoning": {
+              "description": "Should reasoning be the part of the final answer.",
+              "default": false,
+              "title": "Reasoning",
+              "type": "boolean"
+            },
+            "system_prompt": {
+              "description": "System prompt to provide context or instructions to the model",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "System Prompt"
+            },
+            "model": {
+              "enum": [
+                "deepseek/deepseek-r1",
+                "deepseek/deepseek-v3.1-terminus",
+                "anthropic/claude-sonnet-4.5",
+                "anthropic/claude-haiku-5.5",
+                "anthropic/claude-3.7-sonnet",
+                "anthropic/claude-3.5-sonnet",
+                "anthropic/claude-3-5-haiku",
+                "anthropic/claude-3-haiku",
+                "google/gemini-pro-1.5",
+                "google/gemini-flash-1.5",
+                "google/gemini-flash-1.5-8b",
+                "google/gemini-2.0-flash-001",
+                "google/gemini-2.5-flash",
+                "google/gemini-2.5-flash-lite",
+                "google/gemini-2.5-pro",
+                "meta-llama/llama-3.2-1b-instruct",
+                "meta-llama/llama-3.2-3b-instruct",
+                "meta-llama/llama-3.1-8b-instruct",
+                "meta-llama/llama-3.1-70b-instruct",
+                "openai/gpt-oss-120b",
+                "openai/gpt-4o-mini",
+                "openai/gpt-4o",
+                "openai/gpt-4.1",
+                "openai/o3",
+                "openai/gpt-5-chat",
+                "openai/gpt-5-mini",
+                "openai/gpt-5-nano",
+                "meta-llama/llama-4-maverick",
+                "meta-llama/llama-4-scout",
+                "moonshotai/kimi-k2.5"
+              ],
+              "description": "Name of the model to use. Premium models are charged at 10x the rate of standard models, they include: openai/o3, openai/gpt-5-chat, openai/gpt-4o, google/gemini-pro-1.5, anthropic/claude-3.5-sonnet, anthropic/claude-sonnet-4.5, deepseek/deepseek-v3.1-terminus, meta-llama/llama-3.2-90b-vision-instruct, google/gemini-2.5-pro, anthropic/claude-haiku-5.5, deepseek/deepseek-r1, anthropic/claude-3.7-sonnet, openai/gpt-4.1, anthropic/claude-3-5-haiku.",
+              "default": "google/gemini-2.5-flash-lite",
+              "title": "Model",
+              "examples": ["google/gemini-2.5-flash"],
+              "type": "string"
+            },
+            "priority": {
+              "enum": ["throughput", "latency"],
+              "description": "Throughput is the default and is recommended for most use cases. Latency is recommended for use cases where low latency is important.",
+              "default": "latency",
+              "title": "Priority",
+              "type": "string"
+            },
+            "prompt": {
+              "description": "Prompt to be used for the chat completion",
+              "title": "Prompt",
+              "examples": ["What is the meaning of life?"],
+              "type": "string"
+            }
+          },
+          "required": ["prompt"],
+          "x-fal-order-properties": [
+            "prompt",
+            "system_prompt",
+            "reasoning",
+            "priority",
+            "temperature",
+            "max_tokens",
+            "model"
+          ],
+          "title": "ChatInput",
+          "type": "object"
+        },
+        "AnyLlmOutput": {
+          "properties": {
+            "output": {
+              "description": "Generated output",
+              "title": "Output",
+              "examples": [
+                "The meaning of life is subjective and depends on individual perspectives."
+              ],
+              "type": "string"
+            },
+            "partial": {
+              "description": "Whether the output is partial",
+              "default": false,
+              "title": "Partial",
+              "type": "boolean"
+            },
+            "reasoning": {
+              "description": "Generated reasoning for the final answer",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Model Reasoning"
+            },
+            "error": {
+              "description": "Error message if an error occurred",
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Error"
+            }
+          },
+          "required": ["output"],
+          "x-fal-order-properties": ["output", "reasoning", "partial", "error"],
+          "title": "ChatOutput",
+          "type": "object"
+        }
+      }
+    },
+    "paths": {
+      "/fal-ai/any-llm/requests/{request_id}/status": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            },
+            {
+              "name": "logs",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "description": "Whether to include logs (`1`) in the response or not (`0`)."
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/any-llm/requests/{request_id}/cancel": {
+        "put": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request was cancelled.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean",
+                        "description": "Whether the request was cancelled successfully."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/any-llm": {
+        "post": {
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AnyLlmInput"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/any-llm/requests/{request_id}": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Result of the request.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/AnyLlmOutput"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "servers": [
+      {
+        "url": "https://queue.fal.run"
+      }
+    ],
+    "security": [
+      {
+        "apiKeyAuth": []
+      }
+    ]
+  }
+}
