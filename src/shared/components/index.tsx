@@ -65,6 +65,11 @@ export { SkillsConceptCard } from "./SkillsConceptCard";
 // InlineCode: the chip for a model id, an env var, a flag or a path inside text. A command or
 // URL the reader copies is `CodePreview showHeader={false}` (./CodePreview, imported by path).
 export { InlineCode } from "@omniroute/ui-kit/inline-code";
+// ItemList / Item: a short list of rows (title, description, leading mark, meta, actions), in
+// place of bordered <div>s drawn by hand inside a `.map(`. `variant="divided"` for a list inside
+// a Card, `density="compact"` for 36px rows; `onActivate` or `asChild` make the whole row one
+// control. Three columns or more is a Table.
+export { ItemList, Item } from "@omniroute/ui-kit/item-list";
 
 // Layouts
 export * from "./layouts";
