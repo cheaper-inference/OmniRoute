@@ -466,12 +466,11 @@ export class CliproxyapiExecutor extends BaseExecutor {
           )
         : JSON.stringify(value);
 
-    let response = await fetch(url, {
-      method: "POST",
-      headers,
-      body: serializeWire(transformedBody),
-      signal: combinedSignal,
-    });
+    let response = await this.dispatchRequest(
+      url,
+      { method: "POST", headers, body: serializeWire(transformedBody), signal: combinedSignal },
+      input.credentials
+    );
 
     // #14629: this override never calls super.execute(). The retry must use
     // the same serializer so the in-memory tool maps never reach the wire.
@@ -482,7 +481,8 @@ export class CliproxyapiExecutor extends BaseExecutor {
       model: input.model,
       body: transformedBody,
       fetchOptions: { method: "POST", headers, signal: combinedSignal },
-      fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+      fetchFn: (fetchUrl, fetchOpts) =>
+        this.dispatchRequest(fetchUrl, fetchOpts, input.credentials),
       serializeBody: serializeWire,
       log: input.log,
     });
@@ -496,7 +496,8 @@ export class CliproxyapiExecutor extends BaseExecutor {
       model: input.model,
       body: transformedBody,
       fetchOptions: { method: "POST", headers, signal: combinedSignal },
-      fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+      fetchFn: (fetchUrl, fetchOpts) =>
+        this.dispatchRequest(fetchUrl, fetchOpts, input.credentials),
       serializeBody: serializeWire,
       strippedFields: new Set(),
       log: input.log,

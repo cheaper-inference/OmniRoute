@@ -24,19 +24,21 @@ Ammo odatiy mijozlar (Cursor, Cline, Roo Code, OpenAI SDK) `reasoning_content` q
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Suratga olish `open-sse/handlers/chatCore.ts` da (ikkita sayt, ikkita `cacheReasoningFromAssistantMessage` qo'ng'iroq saytida) sodir bo'ladi. Takrorlash sxemani majburlashdan keyin, lekin jo'natishdan oldin `open-sse/translator/index.ts` da sodir bo'ladi.
+
+Asbob qo'ng'iroqlari yozuvlari `buildToolCallCacheKey()` ostida saqlanadi, so'rov doirasi va asbob chaqiruvi identifikatori, shuning uchun boshqa API kaliti yoki sessiyasi tomonidan ishlatiladigan bir xil identifikator yozuvni tanlamaydi. Qo'llanish doirasi `buildReasoningCacheScope()` dan keladi: API kalit identifikatori va so'rovda mavjud bo'lganda sessiya kaliti. Shuning uchun `tool_call_id` ustuni va asboblar paneli ushbu yozuvlar uchun bu dayjestni ko'rsatadi.
 
 Yordamchining oddiy (asbobdan foydalanilmagan) burilishlari boshqacha kalitlanadi: `buildAssistantMessageCacheKey()` seans doirasini va shu burilishgacha normallashtirilgan OpenAI formatidagi transkriptni hazm qiladi, chunki DeepSeek `tools` mavjud bo‘lgandan keyin _har bir oldingi burilishning asoslanishini talab qiladi. Responses-API maqsadlari uchun (masalan, `opencode-go/deepseek-v4-flash`, `/responses` ga yo'naltirilgan) yuqori oqim tanasi `input` emas, `messages` ni olib yuradi, shuning uchun `translateRequest()` (`open-sse/translator/index.ts`) qayta qo'ng'iroq opsiyasi orqali hazm qilingan pivot transkripti haqida xabar beradi va suratga olish saytlari xuddi shu transkriptni hazm qiladi. Javoblarni takrorlash o'tish har bir manba formati uchun OpenAI pivotida ishlaydi, shuning uchun Anthropic Messages mijozlari (Claude → OpenAI → Responses) ham takrorlanadi.
 

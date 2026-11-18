@@ -30,7 +30,7 @@ export default function ProviderQuotaVisibilityToggle({
         onClick={() => onToggle(!visible)}
         aria-pressed={visible}
         aria-label={actionLabel}
-        className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+        className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
           visible
             ? "bg-info/15 text-info hover:bg-info/25"
             : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
