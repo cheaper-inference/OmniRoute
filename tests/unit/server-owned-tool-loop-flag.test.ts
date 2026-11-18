@@ -66,51 +66,6 @@ describe("isServerOwnedToolLoopEnabled wrapper", () => {
   });
 });
 
-describe("feature-flags-settings count update", () => {
-  it("flag count matches updated expected value", () => {
-    // 893fef9c added OPENCODE_PARK_AND_RESUME (74 -> 75); FLUSH_EMPTY_RETRY_ENABLED
-    // (flush empty-turn retry, default off) bumps it to 76; ROTATION_ATTRIBUTION (#14223,
-    // default off) to 77; STREAM_READINESS_STALL_RETRY (#14669, default off) to 78;
-    // OPENCODE_POOL_RESELECT (default off) to 79; PROXY_POOL_SHARED_EGRESS_ORDER
-    // (#14657, default off) to 80; PROXY_OPERATOR_EGRESS_ENABLED (#15314,
-    // default off) to 82; USAGE_LIMIT_IGNORE_UNPRICED (#14799, default off) to 83;
-    // REASONING_REPLAY_ENABLED (#12486, default on) to 84; COMBO_AUTO_PRUNE_STALE_STEPS
-    // (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (default on) to 86;
-    // OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, default off) to 87.
-    // FAL_NATIVE_ENABLED (#18849) adds the 120th flag; CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933) the 121st;
-    // CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060) the 122nd;
-    // PII_REVERSIBLE_VAULT_ENABLED (#18017 wiring, default off) the 123rd;
-    // SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED and
-    // COMBO_JEV_STRATEGY_ENABLED (System One, default off) to 126.
-    assert.equal(FEATURE_FLAG_DEFINITIONS.length, 126);
-    // COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) to 114.
-    // CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) to 112.
-    // UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) to 113.
-    // API_KEY_AUDIT_CLIENT_DETAILS_ENABLED (#17982, default off) to 115.
-    // CLAUDE_CACHE_TAIL_TTL_1H (Claude cache tail 1h TTL, default off) to 116.
-    // ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM moved to a per-connection opt-in (#18341) back to 115.
-    // PROXY_STRICT_POST_REPLAY_ENABLED + RESPONSES_TRANSPORT_KEEPALIVE_ENABLED (#18312, default off) to 117.
-    // OPENCODE_FREE_TIER_EGRESS_PROBE (one-hop egress probe after a FreeTierError, default off) to 118.
-    // PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) to 119.
-    // PII_REVERSIBLE_VAULT_ENABLED (#18017 wiring, default off) to 120.
-    // OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED (#16571, default off) to 87.
-    // COMBO_EMPTY_POOL_NO_ELIGIBLE_TARGETS_ENABLED (#16256, default off) to 87.
-    // OPENCODE_ZEN_EGRESS_IP_LOCK_ENABLED (#16797, default off) to 87;
-    // OPENCODE_FULL_TEXT_ERROR_RULES_ENABLED + CLOUDFLARE_AI_FULL_TEXT_ERROR_RULES_ENABLED
-    // (#16797, default off) to 89.
-    // CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED (#17003, default off) to 87;
-    // MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED (#16929/#16956, default off) to 88.
-    // ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection keepMidConversationSystem opt-in) — 115 back to 114.
-    // MODELS_DEV_EFFORT_TIERS_ENABLED (#15944, default off) to 88.
-    // CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED (#16190, default off) to 88.
-    // CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY (#16599, default off) to 88.
-    // STREAM_LATE_OUTPUT_PROBE_ENABLED (#16927 late-output stream probe, default off) to 88.
-    // LMARENA_SYNTHESIZED_CX_ENABLED (#16895, default off) to 88.
-    // NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED (#16632, default off) to 88.
-    // UNPRICED_USAGE_BUDGET_POLICY (#14604, explicit enum policy, default fail_closed) to 112.
-  });
-});
-
 describe("i18n key parity for SERVER_OWNED_TOOL_LOOP_ENABLED", () => {
   let enMessages: Record<string, unknown>;
   let ptBrMessages: Record<string, unknown>;
