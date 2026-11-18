@@ -48,16 +48,14 @@ function LinkCard({ label, url, icon, prompt }: LinkCardProps): JSX.Element {
           <span className="text-xs font-semibold text-text-main">{label}</span>
           <Button
             variant="ghost"
-            size="sm"
+            size="2xs"
+            tone={copied ? undefined : "muted"}
             onClick={() => void handleCopy()}
-            className={cn(
-              "h-6 shrink-0 gap-1 px-1.5 text-[10px]",
-              copied ? "bg-success/10 text-success" : "text-text-muted hover:text-text-main"
-            )}
+            className={cn("shrink-0", copied && "bg-success/10 text-success")}
             title={t("copyUrl")}
             aria-label={`${t("copyUrl")} ${label}`}
           >
-            <Icon name={copied ? "check" : "content_copy"} size={11} />
+            <Icon name={copied ? "check" : "content_copy"} size={14} />
             {copied ? "✓" : t("copyUrl")}
           </Button>
         </div>

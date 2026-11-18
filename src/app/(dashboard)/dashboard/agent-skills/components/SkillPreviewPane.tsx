@@ -88,9 +88,9 @@ export function SkillPreviewPane({
             <Button
               variant="ghost"
               size="icon-sm"
+              tone="muted"
               onClick={onRefresh}
               disabled={loading}
-              className="text-text-muted hover:text-text-main"
               aria-label={t("refresh")}
             >
               {loading ? <Spinner decorative size="xs" /> : <Icon name="refresh" size={14} />}
@@ -99,9 +99,9 @@ export function SkillPreviewPane({
           <Button
             variant="ghost"
             size="icon-sm"
+            tone="muted"
             onClick={() => void handleCopyRawUrl()}
             disabled={!skillId}
-            className="text-text-muted hover:text-text-main"
             title={t("copyUrl")}
             aria-label={t("copyUrl")}
           >

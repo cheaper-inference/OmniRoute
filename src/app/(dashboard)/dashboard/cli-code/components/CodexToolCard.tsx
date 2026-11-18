@@ -552,10 +552,10 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                     <Button
                       variant="ghost"
                       size="icon-sm"
+                      tone="muted"
                       onClick={() => setCustomBaseUrl("")}
                       title={t("resetToDefault")}
                       aria-label={t("resetToDefault")}
-                      className="text-text-muted hover:text-primary"
                     >
                       <Icon name="restart_alt" size={14} />
                     </Button>
@@ -836,10 +836,9 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                           </span>
                           <Button
                             variant="secondary"
-                            size="sm"
+                            size="2xs"
                             onClick={() => handleActivateProfile(p.id)}
                             disabled={activatingProfile === p.id}
-                            className="h-6 px-2 text-[10px]"
                           >
                             {activatingProfile === p.id ? "..." : t("activate")}
                           </Button>
@@ -906,10 +905,9 @@ openai_base_url = "${getEffectiveBaseUrl()}"
                           </span>
                           <Button
                             variant="secondary"
-                            size="sm"
+                            size="2xs"
                             onClick={() => handleRestoreBackup(b.id)}
                             disabled={restoringBackup === b.id}
-                            className="h-6 px-2 text-[10px]"
                           >
                             {restoringBackup === b.id ? "..." : t("restore")}
                           </Button>

@@ -64,8 +64,7 @@ export function ChatBubble({ turn, onClick, isCurrent }: ChatBubbleProps) {
         {isSystem && (
           <Button
             variant="ghost"
-            size="sm"
-            className="h-auto min-h-0 px-1.5 py-0 text-xs"
+            size="2xs"
             aria-expanded={!collapsed}
             onClick={(e) => {
               e.stopPropagation();

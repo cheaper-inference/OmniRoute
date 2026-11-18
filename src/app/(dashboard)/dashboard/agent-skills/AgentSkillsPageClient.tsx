@@ -274,14 +274,13 @@ export function AgentSkillsPageClient(): JSX.Element {
               key={cat}
               variant="outline"
               size="sm"
+              tone={filter === cat ? undefined : "muted"}
               aria-pressed={filter === cat}
               onClick={() => setFilter(cat)}
               data-testid={`filter-${cat}`}
               className={cn(
                 "text-xs",
-                filter === cat
-                  ? "bg-primary/10 text-primary border-primary/30"
-                  : "text-text-muted hover:text-text-main"
+                filter === cat && "bg-primary/10 text-primary border-primary/30"
               )}
             >
               {cat === "all"

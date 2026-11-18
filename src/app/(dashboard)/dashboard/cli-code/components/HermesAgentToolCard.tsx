@@ -417,9 +417,8 @@ export default function HermesAgentToolCard({
                   <Button
                     key={modelValue}
                     variant="outline"
-                    size="sm"
+                    size="2xs"
                     onClick={() => applyToAll(modelValue)}
-                    className="h-6 px-2 text-xs"
                     title={t("hermesApplyModelToAll", { model: modelValue })}
                   >
                     {modelValue}

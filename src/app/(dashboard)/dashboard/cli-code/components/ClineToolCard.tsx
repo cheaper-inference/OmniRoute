@@ -431,9 +431,10 @@ export default function ClineToolCard({
                     <Button
                       variant="ghost"
                       size="sm"
+                      tone="muted"
                       aria-expanded={showBackups}
                       onClick={() => setShowBackups(!showBackups)}
-                      className="gap-2 px-0 text-sm text-text-muted hover:text-text-main"
+                      className="gap-2 px-0 text-sm"
                     >
                       <Icon
                         name="chevron_right"

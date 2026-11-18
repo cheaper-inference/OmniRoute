@@ -644,10 +644,9 @@ export default function GrokBuildToolCard({
                       </span>
                       <Button
                         variant="secondary"
-                        size="sm"
+                        size="2xs"
                         disabled={restoringBackup === backup.id}
                         onClick={() => void restoreBackup(backup.id)}
-                        className="h-6 px-2 text-[10px]"
                       >
                         {restoringBackup === backup.id ? "..." : t("restore")}
                       </Button>

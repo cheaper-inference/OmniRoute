@@ -271,7 +271,7 @@ export function SkillInspectorPane({
                 <span className="text-xs font-mono text-text-muted">{item.value}</span>
               </div>
             ))}
-            <Button variant="outline" size="sm" fullWidth className="mt-3 text-xs text-text-muted">
+            <Button variant="outline" size="sm" tone="muted" fullWidth className="mt-3 text-xs">
               {t("runTestPlaceholder")}
             </Button>
           </div>
@@ -285,18 +285,18 @@ export function SkillInspectorPane({
             key={mode}
             variant="outline"
             size="sm"
+            tone={effectiveMode === mode ? undefined : "muted"}
             onClick={() => onSetMode(skill.id, mode)}
             aria-label={t("setModeAria", { mode })}
             aria-pressed={effectiveMode === mode}
             className={cn(
               "flex-1 text-xs",
-              effectiveMode === mode
-                ? mode === "on"
+              effectiveMode === mode &&
+                (mode === "on"
                   ? "border-success text-success bg-success/10"
                   : mode === "auto"
                     ? "border-warning text-warning bg-warning/10"
-                    : "border-error text-error bg-error/10"
-                : "text-text-muted"
+                    : "border-error text-error bg-error/10")
             )}
           >
             {mode === "on" ? t("onMode") : mode === "auto" ? t("autoMode") : t("offMode")}

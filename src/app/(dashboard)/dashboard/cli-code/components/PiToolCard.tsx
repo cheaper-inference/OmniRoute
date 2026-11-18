@@ -510,12 +510,7 @@ function PiBackupRow({ t, backup, restoringBackup, onRestore }) {
 function PiBackupsSection({ t, backups, restoringBackup, onRestore, showBackups, setShowBackups }) {
   return (
     <div className="border-t border-border pt-3 mt-1">
-      <Button
-        variant="ghost"
-        size="sm"
-        className="text-text-muted"
-        onClick={() => setShowBackups(!showBackups)}
-      >
+      <Button variant="ghost" size="sm" tone="muted" onClick={() => setShowBackups(!showBackups)}>
         <Icon
           name="chevron_right"
           size={16}
