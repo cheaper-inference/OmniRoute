@@ -7,6 +7,7 @@ import { readTestImpactMap } from "./build-test-impact-map.mjs";
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const HUB_RE =
   /(setupPolyfill|tsconfig|package\.json|package-lock\.json|\.env|vitest\.config|stryker\.conf)/;
+const SHARED_TEST_RE = /^tests\/(?:_helpers|_setup)\//;
 // A changed file counts as a "run-it" test ONLY if it is a node:test unit file the TIA
 // step can actually run via `node --test` — i.e. it mirrors the `npm run test:unit` glob.
 // This EXCLUDES vitest files (`.test.tsx`, `tests/unit/autoCombo/**`), e2e and integration
@@ -23,7 +24,9 @@ const TEST_RE = new RegExp(
 export function selectImpacted({ changed, map }) {
   const out = new Set();
   for (const f of changed) {
-    if (HUB_RE.test(f)) return ["__RUN_ALL__"];
+    if (f === "__RUN_ALL__" || HUB_RE.test(f) || SHARED_TEST_RE.test(f)) {
+      return ["__RUN_ALL__"];
+    }
     if (TEST_RE.test(f)) {
       out.add(f);
       continue;
@@ -53,19 +56,53 @@ export function changedFilesFromStdin(text) {
     .filter(Boolean);
 }
 
+// Keep both sides of renames and deleted sources: their surviving consumers still
+// need tests. Deleted/renamed-away test files themselves cannot be run. Git quotes
+// unusual paths in this line protocol; ambiguity must broaden the selection.
+export function changedFilesFromNameStatus(text) {
+  const changed = new Set();
+  const validPath = (file) =>
+    typeof file === "string" &&
+    file.length > 0 &&
+    !/["\\\x00-\x1f]/.test(file) &&
+    !file.startsWith("/") &&
+    !file.split("/").some((part) => part === ".." || part === ".");
+  const add = (file, removed) => {
+    if (!removed || !TEST_RE.test(file) || SHARED_TEST_RE.test(file)) changed.add(file);
+  };
+  for (const line of String(text || "").split(/\r?\n/)) {
+    if (!line) continue;
+    const [status, ...files] = line.split("\t");
+    const paired = /^[RC][0-9]{1,3}$/.test(status) && Number(status.slice(1)) <= 100;
+    if (
+      (!paired && !/^[AMDT]$/.test(status)) ||
+      files.length !== (paired ? 2 : 1) ||
+      !files.every(validPath)
+    )
+      return ["__RUN_ALL__"];
+    if (paired) {
+      add(files[0], status.startsWith("R"));
+      add(files[1], false);
+    } else {
+      add(files[0], status === "D");
+    }
+  }
+  return [...changed];
+}
+
 function changedFiles() {
+  if (process.argv.includes("--stdin-name-status")) {
+    return changedFilesFromNameStatus(fs.readFileSync(0, "utf8"));
+  }
   if (process.argv.includes("--stdin")) return changedFilesFromStdin(fs.readFileSync(0, "utf8"));
   const baseRef = process.env.GITHUB_BASE_REF;
   const baseTarget = process.env.GITHUB_BASE_SHA || (baseRef ? `origin/${baseRef}` : "HEAD~1");
   const stdout = execFileSync(
     "git",
-    ["diff", "--name-only", "--diff-filter=ACMR", `${baseTarget}...HEAD`],
-    { cwd: ROOT, encoding: "utf8" }
+    ["diff", "--name-status", "--find-renames", `${baseTarget}...HEAD`],
+    { cwd: ROOT, encoding: "utf8", timeout: 30000, maxBuffer: 16 * 1024 * 1024 }
   );
-  return stdout
-    .split("\n")
-    .map((s) => s.trim())
-    .filter(Boolean);
+  return changedFilesFromNameStatus(stdout);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
