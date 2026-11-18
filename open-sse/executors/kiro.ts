@@ -379,17 +379,19 @@ export class KiroExecutor extends BaseExecutor {
 
   buildHeaders(credentials: ProviderCredentials, stream = true) {
     void stream;
-    const headers: Record<string, string> = {
-      ...this.config.headers,
-      "Amz-Sdk-Request": "attempt=1; max=3",
-      "Amz-Sdk-Invocation-Id": uuidv4(),
-      "x-amzn-bedrock-cache-control": "enable",
-      "anthropic-beta": "prompt-caching-2024-07-31",
-    };
-
-    if (isKiroV3Protocol(credentials)) {
-      Object.assign(headers, getKiroV3RuntimeHeaders());
-    }
+    // The CLI 3.x runtime rejects the legacy CodeWhisperer header set (notably
+    // X-Amz-Target and Accept) even when the body is already in v3 shape, so the
+    // v3 path starts from the captured kiro-cli headers instead of merging into
+    // the legacy provider defaults.
+    const headers: Record<string, string> = isKiroV3Protocol(credentials)
+      ? getKiroV3RuntimeHeaders()
+      : {
+          ...this.config.headers,
+          "Amz-Sdk-Request": "attempt=1; max=3",
+          "Amz-Sdk-Invocation-Id": uuidv4(),
+          "x-amzn-bedrock-cache-control": "enable",
+          "anthropic-beta": "prompt-caching-2024-07-31",
+        };
 
     const authMethod =
       typeof credentials.providerSpecificData?.authMethod === "string"

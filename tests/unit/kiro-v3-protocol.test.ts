@@ -24,84 +24,62 @@ test("isKiroV3Protocol is opt-in and never defaults on", () => {
   assert.equal(isKiroV3Protocol(V3_CREDENTIALS), true);
 });
 
-test("toKiroV3Payload converts the legacy Kiro payload to the CLI 3.x wire shape", () => {
+test("toKiroV3Payload keeps the camelCase CLI 3.x wire shape", () => {
   const legacy = {
     conversationState: {
-      chatTriggerType: "MANUAL",
       conversationId: "conv-123",
       currentMessage: {
-        userInputMessage: {
-          content: "hello",
-          modelId: "claude-haiku-4.5",
-          origin: "AI_EDITOR",
-          userInputMessageContext: {
-            tools: [
-              {
-                toolSpecification: {
-                  name: "lookup",
-                  description: "Find a thing",
-                  inputSchema: { json: { type: "object" } },
-                },
-              },
-            ],
-            toolResults: [{ toolUseId: "tu-1", status: "success", content: [{ text: "ok" }] }],
-          },
-        },
+        userInputMessage: { content: "hello", modelId: "claude-haiku-4.5" },
       },
       history: [
         { userInputMessage: { content: "earlier", modelId: "claude-haiku-4.5" } },
-        { assistantResponseMessage: { content: "sure", toolUses: [{ toolUseId: "tu-1" }] } },
+        { assistantResponseMessage: { content: "sure" } },
       ],
     },
     profileArn: "arn:aws:codewhisperer:us-east-1:123:profile/x",
     inferenceConfig: { maxTokens: 5 },
-    additionalModelRequestFields: { output_config: { effort: "high" } },
   };
 
   const v3 = toKiroV3Payload(legacy);
-  assert.deepEqual(Object.keys(v3).sort(), [
-    "agent_continuation_id",
-    "conversation_id",
-    "history",
-    "user_input_message",
-  ]);
-  assert.equal(v3.conversation_id, "conv-123");
-  assert.equal(v3.agent_continuation_id, null);
+  assert.deepEqual(Object.keys(v3).sort(), ["conversationState", "profileArn"]);
+  assert.equal(v3.profileArn, legacy.profileArn);
+  assert.equal("user_input_message" in v3, false);
+  assert.equal("conversation_id" in v3, false);
 
-  const current = v3.user_input_message as Record<string, unknown>;
+  const state = v3.conversationState as Record<string, unknown>;
+  assert.equal(state.conversationId, "conv-123");
+  assert.equal(state.chatTriggerType, "MANUAL");
+  assert.equal(state.agentTaskType, "vibe");
+  assert.deepEqual(state.history, legacy.conversationState.history);
+
+  const current = (state.currentMessage as Record<string, unknown>).userInputMessage as Record<
+    string,
+    unknown
+  >;
   assert.equal(current.content, "hello");
-  assert.equal(current.model_id, "claude-haiku-4.5");
-  assert.equal(current.images, null);
-  assert.equal(current.user_intent, null);
-
-  const context = current.user_input_message_context as Record<string, unknown>;
-  assert.ok(context.env_state);
-  assert.equal(context.git_state, null);
-  const tools = context.tools as Array<Record<string, unknown>>;
-  assert.ok(tools[0].ToolSpecification, "tools use the capitalized ToolSpecification key");
-  const toolSpec = tools[0].ToolSpecification as Record<string, unknown>;
-  assert.deepEqual(toolSpec.input_schema, { json: { type: "object" } });
-  const results = context.tool_results as Array<Record<string, unknown>>;
-  assert.equal(results[0].tool_use_id, "tu-1");
-  assert.equal("toolUseId" in results[0], false);
-
-  const history = v3.history as Array<Record<string, unknown>>;
-  assert.equal(history.length, 2);
-  const userTurn = history[0].UserInputMessage as Record<string, unknown>;
-  assert.equal(userTurn.content, "earlier");
-  const assistantTurn = history[1].AssistantResponseMessage as Record<string, unknown>;
-  assert.deepEqual(assistantTurn.tool_uses, [{ tool_use_id: "tu-1" }]);
+  assert.equal(current.modelId, "claude-haiku-4.5");
+  assert.equal(current.origin, "KIRO_CLI");
 });
 
 test("getKiroV3RuntimeHeaders matches the captured kiro-cli 3.4.0 inference headers", () => {
   const headers = getKiroV3RuntimeHeaders();
+  assert.equal(
+    headers["X-Amz-Target"],
+    "AmazonCodeWhispererStreamingService.GenerateAssistantResponse"
+  );
+  assert.equal(headers["Content-Type"], "application/x-amz-json-1.0");
+  assert.equal(headers.Accept, "*/*");
   assert.match(headers["User-Agent"], /md\/appVersion-3\.4\.0 app\/AmazonQ-For-CLI$/);
   assert.match(headers["X-Amz-User-Agent"], /app\/AmazonQ-For-CLI$/);
-  assert.equal(headers["Content-Type"], "application/x-amz-json-1.0");
+  assert.equal(headers["X-Amzn-Kiro-Attempt"], "1;max=3");
   assert.equal(headers["X-Amzn-Kiro-Fallback"], "0;max=0");
+  assert.equal(headers["Amz-Sdk-Request"], "attempt=1; max=3");
+  assert.ok(headers["Amz-Sdk-Invocation-Id"]);
+  assert.equal("anthropic-beta" in headers, false);
+  assert.equal("x-amzn-bedrock-cache-control" in headers, false);
 });
 
-test("KiroExecutor posts v3 payloads to the branded runtime root", async () => {
+test("KiroExecutor posts CLI-style payloads to the branded runtime root", async () => {
   const executor = new KiroExecutor();
   const originalFetch = globalThis.fetch;
   const calls: Array<{ url: string; init: RequestInit }> = [];
@@ -138,13 +116,19 @@ test("KiroExecutor posts v3 payloads to the branded runtime root", async () => {
     assert.equal(calls[0].url, "https://runtime.us-east-1.kiro.dev/");
 
     const sentHeaders = calls[0].init.headers as Record<string, string>;
-    assert.equal(sentHeaders["X-Amzn-Kiro-Fallback"], "0;max=0");
+    assert.equal(
+      sentHeaders["X-Amz-Target"],
+      "AmazonCodeWhispererStreamingService.GenerateAssistantResponse"
+    );
+    assert.equal(sentHeaders.Accept, "*/*");
     assert.match(sentHeaders["User-Agent"], /appVersion-3\.4\.0/);
+    assert.equal("anthropic-beta" in sentHeaders, false);
+    assert.equal("x-amzn-bedrock-cache-control" in sentHeaders, false);
 
     const sentBody = JSON.parse(String(calls[0].init.body));
-    assert.equal(sentBody.conversation_id, "conv-456");
-    assert.equal(sentBody.user_input_message.content, "hi");
-    assert.equal("conversationState" in sentBody, false);
+    assert.equal(sentBody.conversationState.conversationId, "conv-456");
+    assert.equal(sentBody.conversationState.currentMessage.userInputMessage.content, "hi");
+    assert.equal("user_input_message" in sentBody, false);
   } finally {
     globalThis.fetch = originalFetch;
   }
