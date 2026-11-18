@@ -1,0 +1,1 @@
+- Pin affected glob and minimatch dependencies in the standalone OpenCode v2 development and CI toolchain to 14.0.3 and 11.0.4, including nested copies. Preserve the plugin and host API versions; the installed OpenCode host continues to supply its own dependency tree.
