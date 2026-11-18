@@ -99,7 +99,7 @@ export function ContextWindowOverrideField({
           placeholder={t("contextWindowOverridePlaceholder")}
           title={t("contextWindowOverrideHint")}
           aria-label={t("contextWindowOverrideLabel")}
-          className="h-6 min-h-0 w-28 px-1.5 text-[11px]"
+          className="h-6 min-h-0 w-28 px-1.5 text-2xs"
         />
         <Button
           variant="ghost"

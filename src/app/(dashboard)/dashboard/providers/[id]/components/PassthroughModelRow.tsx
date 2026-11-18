@@ -182,7 +182,7 @@ export default function PassthroughModelRow({
           {fullModel}
         </code>
         {onSetAlias && (
-          <span className="flex min-w-0 items-center text-[9px] gap-1">
+          <span className="flex min-w-0 items-center text-3xs gap-1">
             {editing ? (
               <KitInput
                 ref={inputRef}
@@ -194,11 +194,11 @@ export default function PassthroughModelRow({
                 onKeyDown={handleKeyDown}
                 placeholder={providerText(t, "aliasInputPlaceholder", "alias name")}
                 aria-label={providerText(t, "aliasInputPlaceholder", "alias name")}
-                className="h-5 min-h-0 w-24 px-1 text-[9px]"
+                className="h-5 min-h-0 w-24 px-1 text-3xs"
               />
             ) : (
               <span
-                className={`truncate text-[9px] italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
+                className={`truncate text-3xs italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
                 onClick={startEditing}
                 title={
                   alias

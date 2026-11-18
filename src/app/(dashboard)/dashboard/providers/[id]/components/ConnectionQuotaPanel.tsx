@@ -280,7 +280,7 @@ export default function ConnectionQuotaPanel({
         )}
         {refreshControl}
         {updatedAgo && !refreshing ? (
-          <span className="text-[11px] text-text-muted/70">{updatedAgo}</span>
+          <span className="text-2xs text-text-muted/70">{updatedAgo}</span>
         ) : null}
         {hasDetails && (
           <Button
@@ -344,7 +344,7 @@ export default function ConnectionQuotaPanel({
                 >
                   {renderUsedText(row)}
                   {countdown ? (
-                    <span className="block text-[10px] opacity-70">
+                    <span className="block text-3xs opacity-70">
                       {t("quotaResetIn", { time: countdown })}
                     </span>
                   ) : null}

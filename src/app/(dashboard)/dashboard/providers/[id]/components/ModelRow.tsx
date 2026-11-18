@@ -398,7 +398,7 @@ export default function ModelRow({
           />
         )}
         {onSetAlias && (
-          <span className="flex min-w-0 flex-1 basis-16 items-center text-[10px] gap-1">
+          <span className="flex min-w-0 flex-1 basis-16 items-center text-3xs gap-1">
             {editing ? (
               <KitInput
                 ref={inputRef}
@@ -410,11 +410,11 @@ export default function ModelRow({
                 onKeyDown={handleKeyDown}
                 placeholder={providerText(t, "aliasInputPlaceholder", "alias name")}
                 aria-label={providerText(t, "aliasInputPlaceholder", "alias name")}
-                className="h-5 min-h-0 w-24 px-1 text-[9px]"
+                className="h-5 min-h-0 w-24 px-1 text-3xs"
               />
             ) : (
               <span
-                className={`min-w-0 truncate text-[10px] italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
+                className={`min-w-0 truncate text-3xs italic cursor-pointer hover:text-primary transition-colors ${alias ? "text-primary/80" : "text-text-muted/70"}`}
                 onClick={startEditing}
                 title={
                   alias

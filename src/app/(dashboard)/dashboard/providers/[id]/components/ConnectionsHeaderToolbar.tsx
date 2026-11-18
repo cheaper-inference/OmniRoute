@@ -158,7 +158,7 @@ export default function ConnectionsHeaderToolbar({
                     )
               }
             />
-            <span className="text-[11px] text-text-muted/70">
+            <span className="text-2xs text-text-muted/70">
               {preferClaudeCodeForUnprefixedClaudeModels
                 ? providerText(t, "toggleOnShort", "On")
                 : providerText(t, "toggleOffShort", "Off")}

@@ -96,7 +96,9 @@ export default function OpencodeServerSettingsCard() {
           <Icon name="terminal" size={20} className="text-warning" />
         </div>
         <div>
-          <h3 className="text-sm">{t("opencodeServerConnection")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("opencodeServerConnection")}
+          </h3>
           <p className="text-xs text-text-muted">{t("opencodeServerConnectionDescription")}</p>
         </div>
       </div>
@@ -116,7 +118,7 @@ export default function OpencodeServerSettingsCard() {
             placeholder={DEFAULT_URL}
             disabled={saving}
           />
-          <p className="text-[11px] text-text-muted mt-1">{t("opencodeServerUrlHint")}</p>
+          <p className="text-xs text-text-muted mt-1">{t("opencodeServerUrlHint")}</p>
         </div>
       </div>
     </Card>

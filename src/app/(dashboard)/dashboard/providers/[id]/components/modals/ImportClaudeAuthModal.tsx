@@ -725,14 +725,14 @@ export function ApplyClaudeAuthModal({
     <Modal isOpen={isOpen} title={title} onClose={onClose}>
       <div className="flex flex-col gap-4">
         <div>
-          <div className="text-xs uppercase text-text-muted mb-1">{targetLabel}</div>
+          <div className="ci-eyebrow mb-1">{targetLabel}</div>
           <code className="block rounded bg-bg-subtle px-2 py-1.5 text-xs font-mono text-text-main">
             ~/.claude/.credentials.json
           </code>
           <p className="mt-1 text-xs text-text-muted">{t("providerDetailPathAutoDetected")}</p>
         </div>
         <div>
-          <div className="text-xs uppercase text-text-muted mb-1">{backupLabel}</div>
+          <div className="ci-eyebrow mb-1">{backupLabel}</div>
           <code className="block rounded bg-bg-subtle px-2 py-1.5 text-xs font-mono text-text-main">
             {"~/.claude/credentials-{timestamp}.bak"}
           </code>

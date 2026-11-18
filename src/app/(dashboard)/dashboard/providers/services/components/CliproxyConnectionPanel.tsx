@@ -89,7 +89,9 @@ export function CliproxyConnectionPanel() {
           <Icon name="swap_horiz" size={20} />
         </div>
         <div>
-          <h3 className="text-sm">{t("fallbackRouting")}</h3>
+          <h3 className="ci-heading" data-size="sm">
+            {t("fallbackRouting")}
+          </h3>
           <p className="text-xs text-text-muted">{t("fallbackRoutingDescription")}</p>
         </div>
       </div>

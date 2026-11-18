@@ -497,7 +497,7 @@ export default function ModelCompatPopover({
         >
           <div className="shrink-0 border-b-2 border-border bg-bg-subtle px-3 py-2.5">
             <p className="text-xs font-semibold text-text-main">{t("compatAdjustmentsTitle")}</p>
-            <p className="text-[11px] text-text-muted mt-1 leading-relaxed">
+            <p className="text-xs text-text-muted mt-1 leading-relaxed">
               {t("compatProtocolHint")}
             </p>
           </div>
@@ -541,7 +541,7 @@ export default function ModelCompatPopover({
 
             {/* Param filters — model-level block/allow (#6625) */}
             <div className="mt-4 space-y-2.5">
-              <p className="block text-[11px] font-semibold text-text-main">
+              <p className="block text-2xs font-semibold text-text-main">
                 {providerText(t, "compatParamFiltersLabel", "Param Filters")}
               </p>
               <div>
@@ -554,9 +554,9 @@ export default function ModelCompatPopover({
                   placeholder={t("compatBlockedParamsPlaceholder")}
                   aria-label={t("compatBlockedParamsPlaceholder")}
                   disabled={disabled}
-                  className="mb-1 font-mono text-[11px]"
+                  className="mb-1 font-mono text-2xs"
                 />
-                <p className="text-[10px] text-text-muted">
+                <p className="text-xs text-text-muted">
                   {providerText(
                     t,
                     "compatBlockedParamsHint",
@@ -584,9 +584,9 @@ export default function ModelCompatPopover({
                   placeholder={t("compatAllowedParamsPlaceholder")}
                   aria-label={t("compatAllowedParamsPlaceholder")}
                   disabled={disabled}
-                  className="mb-1 font-mono text-[11px]"
+                  className="mb-1 font-mono text-2xs"
                 />
-                <p className="text-[10px] text-text-muted">
+                <p className="text-xs text-text-muted">
                   {providerText(
                     t,
                     "compatAllowedParamsHint",
@@ -597,14 +597,18 @@ export default function ModelCompatPopover({
             </div>
 
             <div className="mt-4 rounded-lg border-2 border-border bg-bg-subtle p-3">
-              <p className="block text-[11px] font-semibold text-text-main mb-1">
+              <p className="block text-2xs font-semibold text-text-main mb-1">
                 {t("compatUpstreamHeadersLabel")}
               </p>
-              <p className="text-[11px] text-text-muted mb-3 leading-relaxed">
+              <p className="text-xs text-text-muted mb-3 leading-relaxed">
                 {t("compatUpstreamHeadersHint")}
               </p>
               <div className="space-y-2">
-                <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-1.5 items-end text-[10px] font-medium uppercase tracking-wide text-text-muted px-0.5">
+                <div
+                  className="ci-eyebrow grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-1.5 items-end px-0.5"
+                  data-size="3xs"
+                  data-weight="medium"
+                >
                   <span>{t("compatUpstreamHeaderName")}</span>
                   <span className="col-span-1">{t("compatUpstreamHeaderValue")}</span>
                   <span className="w-8 shrink-0" aria-hidden />

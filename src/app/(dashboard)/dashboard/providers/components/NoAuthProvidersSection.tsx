@@ -145,7 +145,7 @@ export default function NoAuthProvidersSection({
       </ProviderCardGrid>
       {blockedEntries.length > 0 && (
         <div className="flex flex-col gap-2">
-          <p className="text-xs font-medium uppercase tracking-wide text-text-muted">
+          <p className="ci-eyebrow" data-weight="medium">
             {t("disabled")}
           </p>
           <ProviderCardGrid>

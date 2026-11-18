@@ -102,7 +102,7 @@ export default function ModelEndpointTagsEditor({
   }
   return (
     <div
-      className="inline-flex max-w-full flex-wrap items-center gap-1 text-[10px]"
+      className="inline-flex max-w-full flex-wrap items-center gap-1 text-3xs"
       data-testid="model-endpoint-capabilities"
     >
       {effective.map((endpoint) => (

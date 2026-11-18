@@ -181,3 +181,59 @@ test('A: a badge in a chart colour uses tone="chart-N"', () => {
     .map(({ file, line }) => `${file}:${line}`);
   assert.deepEqual(offenders, []);
 });
+
+// ── F. Typography: size tokens, eyebrow labels, card headings ───────────────────────────────
+
+/** `file:line` of every line of the area that matches, minus comment lines. */
+function lineHits(re: RegExp): string[] {
+  const out: string[] = [];
+  for (const { file, source } of SOURCES) {
+    source.split("\n").forEach((text, i) => {
+      if (re.test(text) && !/^\s*(\/\/|\*|\{\/\*)/.test(text)) out.push(`${file}:${i + 1}`);
+    });
+  }
+  return out;
+}
+
+test("F: no pixel font size at or under 12px; labels use text-2xs / text-3xs, text uses text-xs", () => {
+  assert.deepEqual(lineHits(/(?<![\w-])!?text-\[(\d|1[0-2])(\.\d+)?px\]/), []);
+});
+
+// A hand-made eyebrow: `uppercase` on a plain element. Badges keep `uppercase` as a modifier.
+const EYEBROW_KEPT: Kept[] = [
+  {
+    file: "[id]/components/ModelComboBadge.tsx",
+    marker: 'href="/dashboard/combos"',
+    reason: "Link pill kept by hand (see PILLS_KEPT); its label is part of the pill.",
+  },
+];
+
+test("F: uppercase labels are the kit ci-eyebrow, with data-size / data-weight", () => {
+  const tags = ["span", "div", "p", "dt", "h1", "h2", "h3", "h4", "h5", "a", "Link", "label"];
+  const { offenders, stale } = audit(
+    tags.flatMap((name) => openingTags(name)),
+    (tag) => /(?<![\w:-])uppercase(?![\w-])/.test(tag),
+    EYEBROW_KEPT
+  );
+  assert.deepEqual(offenders, [], 'use className="ci-eyebrow" (it sets the case, ink and size)');
+  assert.deepEqual(stale, [], "stale EYEBROW_KEPT entries: remove them");
+  const sized = lineHits(
+    /ci-eyebrow[^"]*(?<![\w:-])(text-(xs|sm|2xs|3xs)|tracking-\w+|uppercase)(?![\w-])/
+  );
+  assert.deepEqual(sized, [], "size an eyebrow with data-size, not with a utility");
+});
+
+test("F: h3 and h4 card headings take their size from ci-heading data-size", () => {
+  const offenders = ["h3", "h4"]
+    .flatMap((name) => openingTags(name))
+    .filter(({ tag }) => /(?<![\w:-])text-(xs|sm|base|lg|xl|2xl)(?![\w-])/.test(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], 'use className="ci-heading" data-size="sm|md|lg"');
+  // The phone rules of globals.css select `main :is(h1, h2):not([class*="ci-"])`: a kit class on
+  // a page or section title would switch them off, so h1 and h2 keep their utilities.
+  const titles = ["h1", "h2"]
+    .flatMap((name) => openingTags(name))
+    .filter(({ tag }) => /ci-heading|ci-eyebrow/.test(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(titles, []);
+});

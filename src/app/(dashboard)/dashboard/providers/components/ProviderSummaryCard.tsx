@@ -269,7 +269,7 @@ export default function ProviderSummaryCard({
                 <span>{cat.label}</span>
                 {/* Full-opacity muted ink: the old opacity-70 "/total" fell to 3.28:1 on the kit
                     button (axe color-contrast, F4). */}
-                <span className="text-[11px] text-text-muted">
+                <span className="text-2xs text-text-muted">
                   {cat.stat.configured}
                   <span>/{cat.stat.total}</span>
                 </span>
@@ -279,7 +279,7 @@ export default function ProviderSummaryCard({
         </div>
 
         <div className="border-t border-border pt-3 flex flex-wrap items-center gap-2 [&>button]:grow [&>button]:justify-center sm:[&>button]:grow-0">
-          <span className="text-[11px] font-medium uppercase tracking-wide text-text-muted mr-1">
+          <span className="ci-eyebrow mr-1" data-size="2xs" data-weight="medium">
             {providerText(t, "filterByMedia", "Media")}
           </span>
           {SERVICE_KIND_CHIPS.map((chip) => {

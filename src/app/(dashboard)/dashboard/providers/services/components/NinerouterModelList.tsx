@@ -114,7 +114,9 @@ export function NinerouterModelList() {
             <Icon name="list" size={20} />
           </div>
           <div>
-            <h3 className="text-sm">{t("availableModels")}</h3>
+            <h3 className="ci-heading" data-size="sm">
+              {t("availableModels")}
+            </h3>
             <p className="text-xs text-text-muted">
               {loading ? t("modelsLoading") : t("modelsDiscovered", { count: models.length })}
             </p>

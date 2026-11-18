@@ -79,7 +79,7 @@ export default function ModelOutputTokenEditor({ modelId, value, saving, onSave,
           }
           if (event.key === "Escape") setEditing(false);
         }}
-        className="h-6 min-h-0 w-24 px-1.5 text-[11px]"
+        className="h-6 min-h-0 w-24 px-1.5 text-2xs"
       />
       <Button
         variant="ghost"
@@ -99,9 +99,7 @@ export default function ModelOutputTokenEditor({ modelId, value, saving, onSave,
         aria-label={providerText(t, "cancel", "Cancel")}
         onClick={() => setEditing(false)}
       />
-      <span className="basis-full text-[10px] text-text-muted">
-        {t("maxOutputTokenOverrideHint")}
-      </span>
+      <span className="basis-full text-xs text-text-muted">{t("maxOutputTokenOverrideHint")}</span>
     </span>
   );
 }

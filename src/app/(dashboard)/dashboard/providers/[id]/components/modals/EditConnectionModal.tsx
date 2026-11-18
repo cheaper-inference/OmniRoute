@@ -1515,7 +1515,7 @@ export default function EditConnectionModal({
                     </span>
                     {health && (
                       <span
-                        className="text-[10px] text-text-muted whitespace-nowrap"
+                        className="text-3xs text-text-muted whitespace-nowrap"
                         title={statusLabel}
                       >
                         {health.failures}x
@@ -1586,7 +1586,7 @@ export default function EditConnectionModal({
                       <div className="flex items-center gap-1">
                         {health && (
                           <span
-                            className="text-[10px] text-text-muted whitespace-nowrap"
+                            className="text-3xs text-text-muted whitespace-nowrap"
                             title={statusLabel}
                           >
                             {health.failures}x

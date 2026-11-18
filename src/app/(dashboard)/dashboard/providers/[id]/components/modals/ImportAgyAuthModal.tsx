@@ -510,7 +510,7 @@ function BulkStagedList({ entries }: { entries: AgyBulkEntry[] }) {
             {e.parseError ? (
               <span className="text-error text-xs">{e.parseError}</span>
             ) : (
-              <span className="text-success text-[11px]">{t("agyImportValid")}</span>
+              <span className="text-success text-2xs">{t("agyImportValid")}</span>
             )}
           </div>
         ))}
