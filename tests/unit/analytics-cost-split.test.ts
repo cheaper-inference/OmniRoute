@@ -121,3 +121,30 @@ test("the split always adds up to the cost the summary already shows", () => {
     }
   }
 });
+
+test("the split prices summed rows without the per-request long-context tier (#19429)", async () => {
+  const { computeCostFromPricing } = await import("../../src/lib/usage/costCalculator.ts");
+  const pricing = {
+    fixture: {
+      "fixture-model": {
+        input: 1,
+        output: 5,
+        cached: 0.1,
+        long_context: { threshold: 100_000, input: 5, output: 25, cached: 0.5 },
+      },
+    },
+  };
+  // An analytics row sums many requests, so its 150k input must not trip the tier.
+  const row = {
+    provider: "fixture",
+    model: "fixture-model",
+    promptTokens: 150_000,
+    completionTokens: 1_000,
+  };
+  const split = splitUsageRowCost(row, pricing, {}, (m) => m, computeCostFromPricing);
+  const cost = computeUsageRowCost(row, pricing, {}, (m) => m, computeCostFromPricing);
+  near(cost, 0.155);
+  near(split.total, cost);
+  near(split.estimated, 0.155);
+  assert.equal(split.reported, 0);
+});

@@ -300,6 +300,8 @@ export function splitUsageRowCost(
     model,
     serviceTier,
     flatRateAsZero,
+    // Same as computeUsageRowCost: analytics rows sum many requests (#19429).
+    aggregatedTokens: true,
   });
   return { total: rawStoredCost + estimated, reported: rawStoredCost, estimated };
 }
