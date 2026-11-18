@@ -169,3 +169,49 @@ test("still caches a normal, valid completion response", () => {
   );
   assert.equal(stored.length, 1, "valid completion response must be cached");
 });
+
+test("does not cache a Responses API refusal part (output[].content[].type === refusal)", () => {
+  const refusal = {
+    object: "response",
+    status: "completed",
+    output: [
+      {
+        type: "message",
+        role: "assistant",
+        content: [{ type: "refusal", refusal: "I'm sorry, but I can't help with that." }],
+      },
+    ],
+  };
+  assert.equal(isRefusalOrUnavailableCompletion(refusal), true);
+
+  const stored: unknown[] = [];
+  storeSemanticCacheResponse(
+    {
+      enabled: true,
+      body: { input: "unsafe prompt", temperature: 0 },
+      headers: undefined,
+      translatedResponse: refusal,
+      model: "gpt-4o",
+      usage: { input_tokens: 8, output_tokens: 9 },
+    },
+    makeDeps(stored)
+  );
+  assert.equal(stored.length, 0, "a Responses API refusal part must not be cached");
+});
+
+test("a Responses API output_text answer is not treated as a refusal", () => {
+  assert.equal(
+    isRefusalOrUnavailableCompletion({
+      object: "response",
+      status: "completed",
+      output: [
+        {
+          type: "message",
+          role: "assistant",
+          content: [{ type: "output_text", text: "Paris is the capital of France." }],
+        },
+      ],
+    }),
+    false
+  );
+});

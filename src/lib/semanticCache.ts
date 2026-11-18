@@ -711,71 +711,64 @@ export function isTruncatedStreamBody(streamBody: unknown): boolean {
   return false;
 }
 
+type JsonObject = Record<string, unknown>;
+
+function asJsonObject(value: unknown): JsonObject | null {
+  return value && typeof value === "object" ? (value as JsonObject) : null;
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.length > 0;
+}
+
+/** Push the non-empty `text` of every object part in a content array. */
+function collectPartTexts(content: unknown, parts: string[]): void {
+  if (!Array.isArray(content)) return;
+  for (const item of content) {
+    const text = asJsonObject(item)?.text;
+    if (isNonEmptyString(text)) parts.push(text);
+  }
+}
+
+/** Chat Completions choice: `choices[].text` plus `choices[].message.content` (string or parts). */
+function collectChoiceTexts(choice: unknown, parts: string[]): void {
+  const c = asJsonObject(choice);
+  if (!c) return;
+  if (isNonEmptyString(c.text)) parts.push(c.text);
+  const msg = asJsonObject(c.message);
+  if (!msg) return;
+  if (isNonEmptyString(msg.content)) parts.push(msg.content);
+  else collectPartTexts(msg.content, parts);
+}
+
+function joinedOrNull(parts: string[]): string | null {
+  return parts.length > 0 ? parts.join(" ") : null;
+}
+
 /**
  * Extract assistant completion text across OpenAI, Claude, and Responses payload formats.
  */
 export function extractCompletionText(response: unknown): string {
-  if (!response || typeof response !== "object") return "";
-  const r = response as Record<string, unknown>;
+  const r = asJsonObject(response);
+  if (!r) return "";
 
   // 1. OpenAI Chat Completions: choices[].message.content or choices[].text
+  const chatParts: string[] = [];
   if (Array.isArray(r.choices)) {
-    const parts: string[] = [];
-    for (const choice of r.choices) {
-      if (!choice || typeof choice !== "object") continue;
-      const c = choice as Record<string, unknown>;
-      if (typeof c.text === "string" && c.text) {
-        parts.push(c.text);
-      }
-      if (c.message && typeof c.message === "object") {
-        const msg = c.message as Record<string, unknown>;
-        if (typeof msg.content === "string" && msg.content) {
-          parts.push(msg.content);
-        } else if (Array.isArray(msg.content)) {
-          for (const item of msg.content) {
-            if (item && typeof item === "object") {
-              const p = item as Record<string, unknown>;
-              if (typeof p.text === "string" && p.text) parts.push(p.text);
-            }
-          }
-        }
-      }
-    }
-    if (parts.length > 0) return parts.join(" ");
+    for (const choice of r.choices) collectChoiceTexts(choice, chatParts);
   }
 
   // 2. Claude format: content[].text
-  if (Array.isArray(r.content)) {
-    const parts: string[] = [];
-    for (const item of r.content) {
-      if (item && typeof item === "object") {
-        const p = item as Record<string, unknown>;
-        if (typeof p.text === "string" && p.text) parts.push(p.text);
-      }
-    }
-    if (parts.length > 0) return parts.join(" ");
-  }
+  const claudeParts: string[] = [];
+  collectPartTexts(r.content, claudeParts);
 
   // 3. Responses API format: output[].content[].text
+  const responsesParts: string[] = [];
   if (Array.isArray(r.output)) {
-    const parts: string[] = [];
-    for (const item of r.output) {
-      if (item && typeof item === "object") {
-        const out = item as Record<string, unknown>;
-        if (Array.isArray(out.content)) {
-          for (const sub of out.content) {
-            if (sub && typeof sub === "object") {
-              const p = sub as Record<string, unknown>;
-              if (typeof p.text === "string" && p.text) parts.push(p.text);
-            }
-          }
-        }
-      }
-    }
-    if (parts.length > 0) return parts.join(" ");
+    for (const item of r.output) collectPartTexts(asJsonObject(item)?.content, responsesParts);
   }
 
-  return "";
+  return joinedOrNull(chatParts) ?? joinedOrNull(claudeParts) ?? joinedOrNull(responsesParts) ?? "";
 }
 
 export const UPSTREAM_REFUSAL_OR_UNAVAILABLE_PATTERNS = [
@@ -788,34 +781,48 @@ export const UPSTREAM_REFUSAL_OR_UNAVAILABLE_PATTERNS = [
   /\b(?:deprecated|retired|discontinued|decommissioned|no longer (?:available|supported))[\s\S]{0,40}?\bmodel\b/i,
 ];
 
+function hasRefusalText(value: JsonObject | null): boolean {
+  const refusal = value?.refusal;
+  return typeof refusal === "string" && refusal.trim().length > 0;
+}
+
+/** Chat Completions refusal: `content_filter` finish or a `refusal` on the choice or its message. */
+function isRefusalChoice(choice: unknown): boolean {
+  const c = asJsonObject(choice);
+  if (!c) return false;
+  return (
+    c.finish_reason === "content_filter" ||
+    hasRefusalText(c) ||
+    hasRefusalText(asJsonObject(c.message))
+  );
+}
+
+/** Responses API refusal: an `output[].content[]` part typed `refusal` (its text sits in `refusal`). */
+function isRefusalOutputItem(item: unknown): boolean {
+  const content = asJsonObject(item)?.content;
+  if (!Array.isArray(content)) return false;
+  return content.some((part) => {
+    const p = asJsonObject(part);
+    return p?.type === "refusal" || hasRefusalText(p);
+  });
+}
+
 /**
  * Returns true if the response is an upstream refusal, content filter block, or
  * permanent obsolescence notice returned with HTTP 200 (#19619). Such responses must
  * never be stored in semantic cache, preventing stale refusals from being served.
  */
 export function isRefusalOrUnavailableCompletion(response: unknown): boolean {
-  if (!response || typeof response !== "object") return false;
-  const r = response as Record<string, unknown>;
+  const r = asJsonObject(response);
+  if (!r) return false;
 
-  // Explicit OpenAI refusal or content filter
-  if (Array.isArray(r.choices)) {
-    for (const choice of r.choices) {
-      if (!choice || typeof choice !== "object") continue;
-      const c = choice as Record<string, unknown>;
-      if (c.finish_reason === "content_filter") return true;
-      if (typeof c.refusal === "string" && c.refusal.trim().length > 0) return true;
-      if (c.message && typeof c.message === "object") {
-        const msg = c.message as Record<string, unknown>;
-        if (typeof msg.refusal === "string" && msg.refusal.trim().length > 0) return true;
-      }
-    }
-  }
-
-  // Claude-format refusal stop reason
+  // Explicit refusals: OpenAI choice/content filter, Responses refusal part, Claude stop reason.
+  if (Array.isArray(r.choices) && r.choices.some(isRefusalChoice)) return true;
+  if (Array.isArray(r.output) && r.output.some(isRefusalOutputItem)) return true;
   if (r.stop_reason === "refusal") return true;
 
-  const text = extractCompletionText(response);
-  if (!text) return false;
-
-  return UPSTREAM_REFUSAL_OR_UNAVAILABLE_PATTERNS.some((pattern) => pattern.test(text));
+  const text = extractCompletionText(r);
+  return (
+    text !== "" && UPSTREAM_REFUSAL_OR_UNAVAILABLE_PATTERNS.some((pattern) => pattern.test(text))
+  );
 }
