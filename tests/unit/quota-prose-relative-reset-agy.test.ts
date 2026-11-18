@@ -26,7 +26,6 @@ import {
   checkFallbackError,
   parseRetryFromErrorText,
   recordModelLockoutFailure,
-  RetryHintProvenance,
   retryHintBypassesMaxCooldownMs,
 } from "../../open-sse/services/accountFallback.ts";
 import { DEFAULT_MODEL_LOCKOUT_SETTINGS } from "../../src/lib/resilience/modelLockoutSettings.ts";
@@ -35,7 +34,6 @@ const QUOTA_RESET_76H =
   "[429]: Individual quota reached. Contact your administrator to enable overages. Resets in 76h25m43s.";
 const QUOTA_RESET_5H =
   "[429]: Individual quota reached. Contact your administrator to enable overages. Resets in 5h.";
-const MAX_MS = 30 * 24 * 60 * 60 * 1000; // 30 days
 
 test("relative prose reset parses to the full window", () => {
   assert.equal(

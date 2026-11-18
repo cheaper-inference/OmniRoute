@@ -28,6 +28,7 @@ const {
   getProviderProfile,
   shouldDeferAntigravityQuotaStateToCaller,
 } = await import("../../open-sse/services/accountFallback.ts");
+import { DEFAULT_MODEL_LOCKOUT_SETTINGS } from "../../src/lib/resilience/modelLockoutSettings.ts";
 
 import {
   classify429,
@@ -229,8 +230,13 @@ test("core-owned Antigravity quota state applies the same provenance-aware cap",
     profileOverride: profile,
   });
   assert.equal(bodyResult.failureCount, 1);
+  // #20343: a relative-prose window ("Resets in 131h") is honored up to the
+  // dedicated prose ceiling (6h default), NOT clamped back to the generic 30m
+  // maxCooldownMs — that clamp was the 30-minute relock loop — and not the raw
+  // 131h, which would park the model for five days across an early reset.
   assert.ok(
-    bodyResult.cooldownMs > maxCooldownMs - 5_000 && bodyResult.cooldownMs <= maxCooldownMs
+    bodyResult.cooldownMs > DEFAULT_MODEL_LOCKOUT_SETTINGS.quotaProseMaxCooldownMs - 5_000 &&
+      bodyResult.cooldownMs <= DEFAULT_MODEL_LOCKOUT_SETTINGS.quotaProseMaxCooldownMs
   );
 
   const headerResult = await recordCoreOwnedAntigravityQuotaState({
