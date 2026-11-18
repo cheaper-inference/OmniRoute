@@ -33,7 +33,9 @@ test("getWebdavClientIp extracts IP from x-forwarded-for, x-real-ip or socket", 
     headers: { "x-forwarded-for": "203.0.113.195, 70.41.3.18" },
     socket: { remoteAddress: "127.0.0.1" },
   } as unknown as http.IncomingMessage;
-  assert.equal(getWebdavClientIp(reqXff), "203.0.113.195");
+  // Behind a trusted proxy the client is the right-most hop that is not a proxy; the left-most
+  // entries are whatever the client itself sent.
+  assert.equal(getWebdavClientIp(reqXff), "70.41.3.18");
 
   const reqXRealIp = {
     headers: { "x-real-ip": "198.51.100.42" },
@@ -107,4 +109,27 @@ test("window expiration resets count if lockout threshold was not reached", () =
   // A new failure starts count at 1 instead of reaching 6
   const next = recordWebdavAuthFailure(ip, pastWindow);
   assert.equal(next.allowed, true);
+});
+
+test("a direct client cannot pick its own rate-limit key with forwarding headers", () => {
+  // A public peer that is not a trusted proxy writes X-Forwarded-For / X-Real-IP itself.
+  const spoofed = {
+    headers: { "x-forwarded-for": "198.51.100.7", "x-real-ip": "198.51.100.8" },
+    socket: { remoteAddress: "203.0.113.50" },
+  } as unknown as http.IncomingMessage;
+  assert.equal(getWebdavClientIp(spoofed), "203.0.113.50");
+});
+
+test("rotating X-Forwarded-For from one direct client still reaches the lockout", () => {
+  const t0 = 2_000_000;
+  let last = { allowed: true } as { allowed: boolean; retryAfter?: number };
+  for (let i = 1; i <= WEBDAV_AUTH_MAX_FAILURES; i++) {
+    const req = {
+      headers: { "x-forwarded-for": `198.51.100.${i}` },
+      socket: { remoteAddress: "203.0.113.51" },
+    } as unknown as http.IncomingMessage;
+    last = recordWebdavAuthFailure(getWebdavClientIp(req), t0 + i * 100);
+  }
+  assert.equal(last.allowed, false, "the peer is locked out whatever header it sends");
+  assert.equal(checkWebdavRateLimit("203.0.113.51", t0 + 2_000).allowed, false);
 });

@@ -24,6 +24,7 @@ import path from "node:path";
 import { createDecipheriv, scryptSync, createHash, timingSafeEqual } from "node:crypto";
 import { createRequire } from "node:module";
 import os from "node:os";
+import { resolveClientIp } from "./peer-stamp.mjs";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Constants
@@ -269,23 +270,22 @@ export function normalizeWebdavClientIp(ip) {
 }
 
 /**
- * Extract client IP from a Node.js HTTP request.
+ * Client address used as the rate-limit key for a Node.js HTTP request.
+ *
+ * Forwarding headers are believed only when the TCP peer is a trusted proxy (loopback, a
+ * private-network proxy, a Cloudflare edge or OMNIROUTE_TRUSTED_PROXIES), via the same
+ * `resolveClientIp` the server uses everywhere else. A direct client can write X-Forwarded-For
+ * itself, so it is keyed by its connection address; otherwise rotating that header would reset
+ * the failure counter on every attempt.
  *
  * @param {import("node:http").IncomingMessage} req
  * @returns {string}
  */
 export function getWebdavClientIp(req) {
   if (!req) return "unknown";
-  const xForwardedFor = req.headers?.["x-forwarded-for"];
-  if (typeof xForwardedFor === "string") {
-    const first = xForwardedFor.split(",")[0].trim();
-    if (first) return normalizeWebdavClientIp(first);
-  }
-  const xRealIp = req.headers?.["x-real-ip"];
-  if (typeof xRealIp === "string" && xRealIp.trim()) {
-    return normalizeWebdavClientIp(xRealIp);
-  }
-  return normalizeWebdavClientIp(req.socket?.remoteAddress);
+  const peer = req.socket?.remoteAddress;
+  if (!peer) return "unknown";
+  return normalizeWebdavClientIp(resolveClientIp(req.headers || {}, peer) || peer);
 }
 
 /**
