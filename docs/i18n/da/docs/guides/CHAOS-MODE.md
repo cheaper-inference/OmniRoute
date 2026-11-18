@@ -46,23 +46,21 @@ påvirkes aldrig af den.
 
 ## Opsætning
 
-1. Åbn **Dashboard → Chaos Mode** (`/dashboard/chaos`).
-2. Slå den **til** — Chaos Mode leveres **deaktiveret som standard** (`enabled: false` i
-   `src/lib/chaos/chaosConfig.ts`). Når den er deaktiveret, svarer `POST /api/chaos/run` med
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. Vælg deltagerne og standardindstillingerne (gemmes permanent pr. instans via indstillingslageret):
+1. Åben** Dashboard → Chaos Mode** (`/dashboard/chaos`).
+2. Vend den** på** — Chaos Mode-skibe** deaktiveret som standard** (`enabled: false` i `src/lib/chaos/chaosConfig.ts`). Mens de er deaktiveret, svarer `POST /api/chaos/run` `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Vælg deltagerne og standardindstillingerne (vedvarende pr. instans via indstillingsbutikken):
 
-   | Felt                | Betydning                                                           | Standard / grænser                    |
-   | ------------------- | ------------------------------------------------------------------- | ------------------------------------- |
-   | `enabled`           | Hovedkontakt                                                        | `false`                               |
-   | `defaultMode`       | `parallel` eller `collaborative` (se nedenfor)                      | `parallel`                            |
-   | `providerOverrides` | Deltagelse pr. udbyder (`providerId`, valgfri `modelId`, `enabled`) | tom = alle aktive udbydere, maks. 200 |
-   | `systemPrompt`      | Tilsidesættelse af den indbyggede Chaos-systemprompt                | valgfri, maks. 10.000 tegn            |
-   | `timeoutMs`         | Maksimal tid pr. modelkald                                          | `120000` (5.000–600.000)              |
-   | `maxTokens`         | `max_tokens` pr. modelkald                                          | `4096` (256–128.000)                  |
+   | Felt                | Mening                                                              | Standard / grænser                   |
+   | ------------------- | ------------------------------------------------------------------- | ------------------------------------ |
+   | `enabled`           | Hovedafbryder                                                       | `false`                              |
+   | `defaultMode`       | `parallel` eller `collaborative` (se nedenfor)                      | `parallel`                           |
+   | `providerOverrides` | Deltagelse pr. udbyder (`providerId`, valgfri `modelId`, `enabled`) | tomme = hver aktive udbyder, max 200 |
+   | `systemPrompt`      | Tilsidesæt for den indbyggede Chaos-systemprompt                    | valgfrit, max 10.000 tegn            |
+   | `timeoutMs`         | Max tid pr. modelopkald                                             | `120000` (5 000–600 000)             |
+   | `maxTokens`         | `max_tokens` pr model opkald                                        | `4096` (256–128 000)                 |
 
-4. Kør en **test fra selve siden** — resultatpanelet viser hver udbyders svar,
-   status og varighed.
+4. Giv hver deltagende udbyder en** model** . En udbyders model er `modelId` for dens aktiverede tilsidesættelse på siden Chaos Mode (den vinder), ellers** standardmodel** af dens forbindelse. Et udbyder-id bruges aldrig som modelnavn. En udbyder med ingen af dem** ikke kaldet** : det vises i resultaterne som `status: "error"` med beskeden _"Ingen model sat for denne udbyder. Indstil en model for det på Chaos Mode-siden eller en standardmodel på forbindelsen."_ og en tom `modelId`, mens de andre udbydere kører normalt. Hvis ingen valgt udbyder har en model, mislykkes kørslen før enhver opstrømsanmodning med _"Ingen udbyder har et modelsæt. …"_ (HTTP 500 på begge endepunkter).
+5. Kør a** test fra selve siden** — resultatpanelet viser hver udbyders svar, status og varighed.
 
 ## Kørselstilstande
 
@@ -74,27 +72,24 @@ påvirkes aldrig af den.
 
 ## API
 
-### `POST /api/chaos/run` — dashboard-session
+### `POST /api/chaos/run` — dashboard session
 
-Cookie-godkendt (administrationssessionen — se
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); bruges af dashboard-siden.
+Cookie-godkendt (administrationssessionen — se [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); bruges af dashboard-siden.
 
 ```jsonc
-// brødtekst
+// body
 {
-  "task": "Compare approaches to X", // påkrævet
-  "providers": ["glm", "kimi"], // valgfrit filter
-  "mode": "parallel", // valgfri — tilsidesætter defaultMode
-  "systemPrompt": "…", // valgfri tilsidesættelse
-  "maxTokens": 4096, // valgfri tilsidesættelse
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
-### `POST /api/skills/collect/chaos` — API-nøgle
+### `POST /api/skills/collect/chaos` — API nøgle
 
-Bearer-token-variant til eksterne kaldere. Nøglen skal have **Chaos Mode-tilladelsen**
-(`chaosModeEnabled`), som er **slået fra som standard** — aktivér den for hver nøgle under
-**Dashboard → API Manager → rediger nøgle → tilladelser → Chaos Mode**. Samme brødtekst som ovenfor.
+Bærer-token-variant til eksterne opkaldere. Nøglen skal bære** Chaos Mode tilladelse** (`chaosModeEnabled`), hvilket er** slået fra som standard** — aktivere det pr. nøgle ind** Dashboard → API Manager → edit key → tilladelser → Chaos Mode** . Samme krop som ovenfor.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Begge endpoints returnerer den samme struktur:
+Begge endepunkter returnerer den samme form:
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ Begge endpoints returnerer den samme struktur:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // kun i collaborative-tilstand
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## Fejlfinding
 
-- **`400 Chaos Mode is not enabled`** — se trin 2 ovenfor: Den globale kontakt er slået fra.
-- **API-nøglen afvises på `/api/skills/collect/chaos`** — nøglen mangler den nøglespecifikke
-  `chaosModeEnabled`-tilladelse (slået fra som standard; dette er en indstilling, ikke en fejl).
-- **En forventet udbyder mangler i resultaterne** — kontrollér `providerOverrides` på
-  Chaos Mode-siden (en deaktiveret tilsidesættelse udelukker udbyderen), og kontrollér, om udbyderforbindelsen er
-  aktiv.
+- **`400 Chaos Mode is not enabled`** — trin 2 ovenfor: den globale kontakt er slukket.
+- **API nøgle bliver afvist på `/api/skills/collect/chaos`** — nøglen mangler per-key `chaosModeEnabled` tilladelsen (deaktiveret som standard; dette er en indstilling, ikke en fejl).
+- **En udbyder viser `No model set for this provider`** — indstillede sin model på siden Chaos Mode eller en standardmodel på sin forbindelse (se Opsætning, trin 4).
+- **En udbyder, du forventede, mangler i resultaterne** — kontroller `providerOverrides` på siden Chaos Mode (en deaktiveret tilsidesættelse udelukker det), og om udbyderforbindelsen er aktiv.

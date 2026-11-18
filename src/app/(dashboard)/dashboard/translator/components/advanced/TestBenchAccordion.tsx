@@ -4,6 +4,7 @@ import Icon from "@/shared/components/Icon";
 
 import { useState, useEffect, useMemo } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Collapsible from "@/shared/components/Collapsible";
 import { Card, Button, Select, Badge } from "@/shared/components";
 import Input from "@/shared/components/Input";
@@ -291,7 +292,7 @@ function TestBenchContent() {
           <div className="p-4">
             <div className="flex items-center justify-between mb-3">
               <div className="flex items-center gap-3">
-                <h3 className="text-sm font-semibold text-text-main">{t("compatibilityReport")}</h3>
+                <h3 className="text-sm text-text-main">{t("compatibilityReport")}</h3>
                 <Badge
                   variant={
                     compatibility >= 80 ? "success" : compatibility >= 50 ? "warning" : "error"
@@ -310,13 +311,13 @@ function TestBenchContent() {
                 </span>
               </div>
             </div>
-            {/* Progress bar */}
-            <div className="w-full h-2 bg-bg-subtle rounded-full overflow-hidden">
-              <div
-                className="h-full bg-gradient-to-r from-success to-success rounded-full transition-all duration-500"
-                style={{ width: `${compatibility}%` }}
-              />
-            </div>
+            <Progress
+              aria-label={t("compatibilityReport")}
+              aria-valuetext={`${compatibility}%`}
+              value={compatibility}
+              tone="success"
+              animate={false}
+            />
           </div>
         </Card>
       )}

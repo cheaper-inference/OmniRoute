@@ -4,10 +4,20 @@
 
 ---
 
-Los fallos se clasifican antes de tomar decisiones sobre los reintentos.
+Los fallos se clasifican antes de tomar decisiones sobre reintentos.
 
-Los fallos transitorios, como los tiempos de espera agotados, los errores de red, los límites de frecuencia y las respuestas 5xx del proveedor, pueden activar la conmutación por error. Los errores de autenticación, los errores de permisos, las solicitudes no válidas, los modelos no disponibles y los fallos desconocidos no se reintentan a ciegas.
+Las fallas transitorias, como tiempos de espera, errores de red, límites de velocidad y respuestas 5xx del proveedor, pueden conmutar por error. La cuota o el crédito agotado (una cuota 429 o 402 Pago requerido) nunca se vuelve a intentar con el mismo proveedor, pero sí conmuta por error a otro, cuya cuota es independiente. Los errores de autenticación, errores de permisos, solicitudes no válidas, modelos no disponibles y fallas desconocidas no se reintentan a ciegas.
 
-La política predeterminada entre proveedores permite hasta tres intentos con proveedores, reintenta cuando se alcanzan límites de frecuencia o se agota el tiempo de espera y mantiene la deshabilitación administrativa separada del estado temporal del circuito.
+La política predeterminada entre proveedores permite hasta tres intentos de proveedores, límites de velocidad de reintentos y tiempos de espera, conmutación por error cuando se agota la cuota y mantiene la inhabilitación administrativa separada del estado del circuito temporal.
 
-Los estados del circuito son `closed`, `open` y `half_open`. Un período de enfriamiento programa una prueba acotada; si la prueba tiene éxito, el circuito se cierra y, si falla, vuelve a abrirse.
+## donde se aplica
+
+- **combos** conmutación por error entre sus objetivos de acuerdo con la propia estrategia y configuración del combo.
+- **Una identificación de modelo simple** (sin prefijo `provider/` ) que ofrecen varios proveedores activos, sin una combinación de ese nombre exacto, se envía primero a las selecciones de inferencia del proveedor. Si ese intento falla de la manera en que la política falla, la misma solicitud se envía al siguiente proveedor activo que proporciona la identificación. La respuesta lleva `x-omniroute-fallback-attempts` con el número de proveedores probados antes del que respondió.
+  - Cada suplente se autoriza exactamente como si la inferencia lo hubiera elegido. Un objetivo que la clave API bloquea o no admite se omite sin una llamada ascendente, y el cliente obtiene el error ascendente real, no un rechazo de política para un objetivo al que nunca nombró.
+  - Sólo una respuesta fallida continúa: nada falla después del primer byte transmitido.
+  - El cambio de modelo de emergencia se aplica solo después de que todos los proveedores del modelo solicitado hayan fallado.
+  - Una solicitud anclada a una conexión (`x-omniroute-connection`) permanece en ella.
+  - Una identificación con prefijo (`provider/model`) nunca se redirige a otro proveedor.
+
+Los estados del circuito son `closed`, `open` y `half_open`. Un tiempo de reutilización programa una sonda limitada; una sonda exitosa cierra el circuito y una sonda fallida lo vuelve a abrir.

@@ -29,70 +29,61 @@ wijzigingstype aan de bijbehorende contracten, gerichte controles en CI-dekking.
 6. **Leg bewijs vast.** Vermeld in het PR-sjabloon de uitgevoerde opdrachten, elk toegevoegd of gewijzigd testbestand,
    migraties of feature flags en eventuele validatie die alleen in CI wordt uitgevoerd en nog in behandeling is.
 
-## Standaardpaden per wijzigingstype
+## Gouden paden per wijzigingstype
 
-De onderstaande opdrachten zijn minimale gerichte controles en geven geen toestemming om een test over te slaan die rechtstreeks betrekking heeft op het
-gedrag dat je hebt gewijzigd.
+De onderstaande opdrachten zijn minimale gerichte controles, geen toestemming om een test over te slaan die rechtstreeks betrekking heeft op het gedrag dat u hebt gewijzigd.
 
-### Provider
+### Aanbieder
 
 **Contracten**
 
-- Providerdefinitie in `src/shared/constants/providers/` en de samenstelling ervan in
-  `src/shared/constants/providers.ts`.
-- Modellen en mogelijkheden in `open-sse/config/providerRegistry.ts` of de daaruit geëxtraheerde registerbestanden.
-- Selectie van executor/translator, configuratie van OAuth of API-sleutels, dashboardassets en gegenereerde
-  providerreferentie, indien van toepassing.
-- Openbare inloggegevens moeten `resolvePublicCred()` gebruiken; foutreacties moeten de gedeelde helpers voor
-  opgeschoonde fouten gebruiken. Zie `docs/security/PUBLIC_CREDS.md` (git; niet gecompileerd naar `/docs`) en
-  [Error Sanitization](../security/ERROR_SANITIZATION.md).
+- Providerdefinitie in `src/shared/constants/providers/` en de samenstelling ervan in `src/shared/constants/providers.ts`.
+- Modellen en mogelijkheden in `open-sse/config/providerRegistry.ts` of de uitgepakte registerbestanden.
+- Executor/translator -selectie, OAuth of API-sleutelconfiguratie en dashboardmiddelen. Leg de opnieuw gegenereerde `docs/reference/PROVIDER_REFERENCE.md` of README diagrammen niet vast: de release-vernieuwing herschrijft ze (`check:pr-derived-paths` faalt in een functie PR die ze draagt).
+- Openbare inloggegevens moeten `resolvePublicCred()` gebruiken; Foutreacties moeten de gedeelde opgeschoonde fouthelpers gebruiken. Zie `docs/security/PUBLIC_CREDS.md` (git; niet gecompileerd in `/docs`) en [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Gerichte cyclus**
+**Gefocuste lus**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # wanneer de catalogus verandert; commit de gegenereerde diff
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Test ook elke betrokken aanvraagfamilie: chat, Responses, afbeeldingen, embeddings, audio of video.
-Beoordeel gegenereerde catalogus- en golden diffs als contractwijzigingen; accepteer ze niet klakkeloos.
+Test ook elke betrokken verzoekfamilie: chat, reacties, afbeeldingen, insluitingen, audio of video. Beoordeel de gegenereerde catalogus en gouden diffs als contractwijzigingen plaatsvinden; accepteer ze niet blindelings.
 
 ### Routering
 
 **Contracten**
 
-- Openbare strategiewaarden en UI-metadata in `src/shared/constants/routingStrategies.ts`.
-- Dispatch en volgorde onder `open-sse/services/combo.ts` en `open-sse/services/combo/`.
-- Combinatieschema's, persistentie, weerbaarheidstoestand, modelmogelijkheden en API-/UI-besturingselementen.
-- [Auto-Combo Engine](../routing/AUTO-COMBO.md) en documentatie over weerbaarheid wanneer het gedrag verandert.
+- Waarden van publieke strategie en UI -metagegevens in `src/shared/constants/routingStrategies.ts`.
+- Verzending en bestellen onder `open-sse/services/combo.ts` en `open-sse/services/combo/`.
+- Comboschema's, doorzettingsvermogen, veerkrachtstatus, modelmogelijkheden en API/UI controles.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) en veerkrachtdocumentatie wanneer gedrag verandert.
 
-**Gerichte cyclus**
+**Gefocuste lus**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # wijzigingen in strategie of dispatch
-npm run check:known-symbols      # wijzigingen in strategieregistratie
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Gebruik lokaal deterministische tests met nagebootste upstreams. Live rooktests voor combo's vereisen inloggegevens en zijn
-handmatig; ze zijn geen vervanging voor CI.
+Gebruik lokaal deterministische mock-upstream-tests. Voor live combo-rook zijn inloggegevens vereist en zijn handmatig, geen CI vervangers.
 
 ### UI / UX
 
 **Contracten**
 
-- Grenzen van Next.js-routes/-pagina's en gedeelde componenten onder `src/app/` en
-  `src/shared/components/`.
-- API-responsstructuren, laad-/lege-/fouttoestanden, gedrag voor toetsenbord- en schermlezers,
-  responsieve lay-out, thema's en uitbreiding van locales.
-- Engelse UI-bronteksten in `src/i18n/messages/en.json`; codeer nieuwe gebruikersgerichte tekst niet hard.
+- Next.js route/page en gedeelde componentgrenzen onder `src/app/` en `src/shared/components/`.
+- API -antwoordvormen, loading/empty/error statussen, toetsenbord- en schermlezergedrag, responsieve lay-out, thema's en locale-uitbreiding.
+- Engelse UI bronreeksen in `src/i18n/messages/en.json`; geen nieuwe, op de gebruiker gerichte kopie hardcoderen.
 
-**Gerichte cyclus**
+**Gefocuste lus**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Voer de app uit voor interactieve of visuele wijzigingen en controleer zowel smalle als brede viewports. CI voert de
-productiebuild en bredere suites uit; visueel gedrag vereist nog steeds een gerichte componenttest, Playwright-test
-of gedocumenteerde handmatige controle die bij de wijziging past.
+Voer de app uit voor interactie of visuele veranderingen en controleer zowel smalle als brede kijkvensters. CI beheert de productiebuild en bredere suites; visueel gedrag heeft nog steeds een gerichte component, Playwright, of een gedocumenteerde handmatige controle nodig die past bij de verandering.
 
-### i18n
+### ik18n
 
 **Contracten**
 
-- `src/i18n/messages/en.json` is de UI-bron; `config/i18n.json` is de bron voor locales.
-- CLI-catalogi staan afzonderlijk onder `bin/cli/locales/`.
-- Behoud ICU-placeholders en -tags exact. Vertaal geen product-/provider-/modelnamen,
-  protocol- en headernamen, opdrachten, code-/JSON-identifiers, URL's, omgevingsvariabelen of
-  beschermde termen zoals `OmniRoute`, `OAuth`, `MCP` en `A2A`. De huidige bronlijst is
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` is de UI bron; `config/i18n.json` is de locale bron.
+- CLI catalogi leven afzonderlijk onder `bin/cli/locales/`.
+- Bewaar ICU plaatsaanduidingen en tags exact. Vertaal geen product/provider/model namen, protocol- en headernamen, opdrachten, code/JSON identifiers, URLs, omgevingsvariabelen of beschermde termen zoals `OmniRoute`, `OAuth`, `MCP` en `A2A`. De huidige bronnenlijst is `scripts/i18n/glossary/protected-terms.json`.
 
-**Gerichte cyclus**
+Een feature PR bewerkt alleen `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); de andere landinstellingen worden één keer per release aangevuld door de releasevernieuwing of een vertaalgolf (`docs/guides/I18N.md` → "Feature PRs touch `en.json` only"). `npm run check:pr-derived-paths` faalt in een functie PR die een andere localecatalogus bewerkt.
+
+**Gefocuste lus**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # wanneer CLI-teksten/-catalogi veranderen
 npm run lint
 ```
 
-Dit is begeleiding voor het bestaande systeem, geen uitnodiging om de tooling of het sleutelmodel ervan uit te breiden.
-Houd i18n-patches chirurgisch terwijl het vervangende systeem wordt ontworpen. Voer geen vertaalopdrachten uit
-die externe services aanroepen, tenzij de taak expliciet gegenereerde vertalingen vereist en
-je de resulterende diff hebt beoordeeld.
+Zonder `--mode=pr` draaien deze poorten lokaal in de releasemodus en rapporteren ze elke sleutel die de cyclus heeft toegevoegd of herschreven in `en.json`; dat is het werk van de release-vernieuwing, niet dat van jouw PR.
+
+Dit is een leidraad voor het bestaande systeem, geen uitnodiging om de tooling of het sleutelmodel ervan uit te breiden. Houd i18n-patches chirurgisch terwijl het vervangingssysteem wordt ontworpen. Voer geen vertaalopdrachten uit die externe services aanroepen, tenzij de taak expliciet gegenereerde vertalingen vereist en u de resulterende diff hebt bekeken.
 
 ### CLI
 
 **Contracten**
 
-- Openbare opdrachten en vlaggen in `bin/cli/`, gegenereerde API-opdrachten, afsluitcodes, stdout/stderr en
-  JSON-uitvoerstructuren, configuratie-/omgevingsgedrag en verpakte bestanden.
-- Gebruikersgerichte CLI-teksten moeten de CLI-i18n-laag gebruiken en de `en`-/`pt-BR`-catalogi synchroon houden.
-- Behoud Node als de ondersteunde runtime en handhaaf het contract van de gepubliceerde binary.
+- Openbare opdrachten en vlaggen in `bin/cli/`, gegenereerde API -opdrachten, exitcodes, stdout/stderr en JSON uitvoervormen, config/environment -gedrag en verpakte bestanden.
+- CLI -gebruikersgerichte tekenreeksen moeten de CLI i18n-laag gebruiken (`t()` sleutels die bestaan in `bin/cli/locales/en.json`). Een feature PR bewerkt alleen `en.json`; `pt-BR` en de andere landinstellingen zijn bij release voltooid.
+- Behoud Node als de ondersteunde runtime en het gepubliceerde binaire contract.
 
-**Gerichte cyclus**
+**Gefocuste lus**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # wijzigingen aan de gegenereerde/gebundelde CLI
-npm run check:pack-policy     # wijzigingen aan het pakketoppervlak
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Gebruik de exacte opdracht in een tijdelijke gegevensmap wanneer het gedrag afhankelijk is van parsering, bestanden of de
-afsluitstatus. CI voert de bredere controles van pakketartefacten en het ecosysteem uit.
+Gebruik de exacte opdracht in een tijdelijke gegevensmap wanneer het gedrag afhangt van het parseren, bestanden of de afsluitstatus. CI voert de bredere pakketartefact- en ecosysteemcontroles uit.
 
 ### Database
 
 **Contracten**
 
-- Domeinmodules onder `src/lib/db/`; importeer specifieke modules rechtstreeks (de oude herexportlaag `localDb.ts` is verwijderd).
-- Genummerde, idempotente SQL-migraties onder `src/lib/db/migrations/`, transactieveiligheid, upgradegedrag,
-  indexen en elke aanroeper die door het schema wordt beïnvloed.
-- Routes en handlers voeren nooit rechtstreeks onbewerkte SQL uit.
+- Domeinmodules onder `src/lib/db/`; importeer specifieke modules rechtstreeks (de oude `localDb.ts` -herexportlaag is verwijderd).
+- Genummerde, idempotente SQL -migraties onder `src/lib/db/migrations/`, transactieveiligheid, upgradegedrag, indexen en elke beller die door het schema wordt beïnvloed.
+- Routes en handlers geven nooit rechtstreeks ruwe SQL uit.
 
-**Gerichte cyclus**
+**Gefocuste lus**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Test bij het toevoegen van een migratie zowel een nieuwe database als een upgrade vanaf het vorige schema. Databasetests
-moeten handles sluiten en tijdens het opschonen `resetDbInstance()` aanroepen. Voer `npm run test:bun:db` alleen uit wanneer
-het best-effortpad van de Bun-adapter verandert; Node blijft leidend.
+Test zowel een nieuwe database als een upgrade van het eerdere schema wanneer u een migratie toevoegt. Databasetests moeten de handvatten sluiten en `resetDbInstance()` aanroepen tijdens het opschonen. Voer `npm run test:bun:db` alleen uit als het best-effort Bun adapterpad verandert; Node blijft gezaghebbend.
 
-### Build / implementatie
+### Bouwen / implementeren
 
 **Contracten**
 
-- Root- en workspace-manifesten/lockfile, `scripts/build/`, zelfstandige Next.js-assemblage, pakketinhoud van `dist/`,
-  Electron-platformmetadata, CI-workflows en implementatiesentinels.
-- Ondersteunde Node-versiebereiken en het expliciet toegestane gebruik van Bun in `CLAUDE.md` moeten intact blijven.
-- Buildartefacten blijven onvermeld in versiebeheer; beleid voor afhankelijkheden, licenties, workflows en pakketten is van toepassing.
+- Root- en werkruimte manifests/lockfile, `scripts/build/`, Next.js standalone assemblage, `dist/` pakketinhoud, Electron platformmetagegevens, CI -workflows en implementatiewachters.
+- Ondersteunde knooppuntbereiken en het Bun -gebruik op de toegestane lijst in `CLAUDE.md` moeten intact blijven.
+- Bouwartefacten blijven onopgemerkt; afhankelijkheids-, licentie-, workflow- en pakketbeleid zijn van toepassing.
 
-**Gerichte cyclus**
+**Gefocuste lus**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # wijzigingen aan afhankelijkheden of het lockfile
-npm run check:pack-policy      # wijzigingen aan het gepubliceerde pakketoppervlak
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Gebruik `npm run build` lokaal alleen wanneer de wijziging invloed heeft op compilatie, zelfstandige assemblage, assets
-of runtimebundeling. Gebruik `npm run build:release` alleen voor release-/implementatievalidatie. De build van CI is
-het definitieve platformoverstijgende signaal; platformspecifieke Electron-wijzigingen vereisen de bijbehorende gerichte build
-of bewijs van een rooktest.
+Gebruik `npm run build` alleen lokaal als de wijziging van invloed is op compilatie, zelfstandige montage, activa of runtimebundeling. Gebruik `npm run build:release` alleen voor release/deploy validatie. de build van CI is het laatste platformonafhankelijke signaal; platformspecifieke Electron -veranderingen hebben het bijpassende gerichte bouw- of rookbewijs nodig.
 
 ## Ontwikkelaarsscripts voor een gedeelde machine
 

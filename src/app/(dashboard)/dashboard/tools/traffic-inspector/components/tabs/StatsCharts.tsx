@@ -15,6 +15,7 @@ interface StatsChartsProps {
 
 export default function StatsCharts({ requests }: StatsChartsProps) {
   const t = useTranslations("trafficInspector");
+  const tc = useTranslations("common");
 
   const statusDist = requests.reduce<Record<string, number>>((acc, r) => {
     const key = typeof r.status === "number" ? `${Math.floor(r.status / 100)}xx` : String(r.status);
@@ -56,6 +57,7 @@ export default function StatsCharts({ requests }: StatsChartsProps) {
             data={latencyData}
             series={[{ key: LATENCY_KEY, label: t("statsLatency"), color: "var(--color-chart-2)" }]}
             valueFormatter={formatLatency}
+            unavailableLabel={tc("notAvailable")}
             height={160}
           />
         </div>
