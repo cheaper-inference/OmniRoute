@@ -9,18 +9,26 @@ export function normalizeModel(model) {
 }
 
 function consent(headers) {
-  const entry = Object.entries(headers ?? {}).find(
+  // Exactly one header name may match, case-insensitively; a second spelling
+  // (even "0") voids consent instead of letting the first one win.
+  const matches = Object.entries(headers ?? {}).filter(
     ([key]) => key.toLowerCase() === "x-open-design-cross-family"
   );
-  return entry?.[1] === "1" ||
-    (Array.isArray(entry?.[1]) && entry[1].length === 1 && entry[1][0] === "1");
+  if (matches.length !== 1) return false;
+  const value = matches[0][1];
+  return value === "1" || (Array.isArray(value) && value.length === 1 && value[0] === "1");
 }
 
 function lookup(models, model) {
   const key = normalizeModel(model);
   const entry = models instanceof Map ? models.get(key) : models?.[key];
-  return entry && typeof entry.family === "string" && entry.family.length > 0 &&
-    Number.isFinite(entry.tier) && entry.tier >= 0 ? entry : null;
+  return entry &&
+    typeof entry.family === "string" &&
+    entry.family.length > 0 &&
+    Number.isFinite(entry.tier) &&
+    entry.tier >= 0
+    ? entry
+    : null;
 }
 
 function stopped(requested, crossFamilyConsent, reason) {
@@ -39,7 +47,12 @@ function stopped(requested, crossFamilyConsent, reason) {
  * ask must be a trusted host callback, never a client request-body field.
  */
 export async function authorizeFallback({
-  requested, candidate, models, headers, sameModelRetries = 0, ask,
+  requested,
+  candidate,
+  models,
+  headers,
+  sameModelRetries = 0,
+  ask,
 }) {
   const approvedCrossFamily = consent(headers);
   const source = lookup(models, requested);
@@ -49,12 +62,20 @@ export async function authorizeFallback({
   if (source.family !== target.family && !approvedCrossFamily) {
     return stopped(requested, false, "cross_family_consent_required");
   }
-  if (requested === candidate && sameModelRetries >= 1) {
+  // Compare normalized ids so a run prefix or effort suffix cannot buy another retry.
+  if (normalizeModel(requested) === normalizeModel(candidate) && sameModelRetries >= 1) {
     return stopped(requested, approvedCrossFamily, "same_model_retry_exhausted");
   }
   if (typeof ask !== "function") return stopped(requested, approvedCrossFamily, "ask_required");
+  // A rejected Ask fails closed; it must not fall through to an unapproved hop.
+  let answer;
+  try {
+    answer = await ask({ requested, candidate, source, target });
+  } catch {
+    return stopped(requested, approvedCrossFamily, "ask_failed");
+  }
   // Approval must be the exact allow value, not a truthy string such as "deny".
-  if (await ask({ requested, candidate, source, target }) !== "allow") {
+  if (answer !== "allow") {
     return stopped(requested, approvedCrossFamily, "ask_denied");
   }
   return { allowed: true, modelId: candidate, cross_family_consent: approvedCrossFamily };
