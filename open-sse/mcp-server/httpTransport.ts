@@ -400,6 +400,12 @@ const MODERN_PROTOCOL_FLOOR = "2026-07-28";
 const PROTOCOL_DATE = /^\d{4}-\d{2}-\d{2}$/;
 const V2_ENDPOINT = "/api/mcp/v2";
 
+/** The modern revision a request asks for, or null when these transports should serve it. */
+function requestedModernRevision(request: Request): string | null {
+  const requested = (request.headers.get("mcp-protocol-version") ?? "").trim();
+  return PROTOCOL_DATE.test(requested) && requested >= MODERN_PROTOCOL_FLOOR ? requested : null;
+}
+
 /**
  * The 2025-era transports answer a modern `MCP-Protocol-Version` with the SDK's
  * bare version list ("Unsupported protocol version: 2026-07-28 (supported
@@ -412,8 +418,8 @@ const V2_ENDPOINT = "/api/mcp/v2";
  * junk still falls through to the SDK's own validation, unchanged.
  */
 export async function modernProtocolPointer(request: Request): Promise<Response | null> {
-  const requested = (request.headers.get("mcp-protocol-version") ?? "").trim();
-  if (!PROTOCOL_DATE.test(requested) || requested < MODERN_PROTOCOL_FLOOR) return null;
+  const requested = requestedModernRevision(request);
+  if (!requested) return null;
 
   // Echo the request id when we can. Without it a client cannot match the error
   // to its call and may report the pointer as a protocol violation.
@@ -449,8 +455,13 @@ export async function modernProtocolPointer(request: Request): Promise<Response 
  * Used by the Next.js route at /api/mcp/stream.
  */
 export async function handleMcpStreamableHTTP(request: Request): Promise<Response> {
-  const pointer = await modernProtocolPointer(request);
-  if (pointer) return pointer;
+  // The header check stays synchronous: awaiting it for every request would defer the
+  // transport by a tick, and the idle sweep could reap a session whose request has
+  // already arrived but is not yet counted as in flight.
+  if (requestedModernRevision(request)) {
+    const pointer = await modernProtocolPointer(request);
+    if (pointer) return pointer;
+  }
   return protectMcpSseResponse(request, await handleStreamableRequest(request));
 }
 
@@ -465,8 +476,10 @@ interface RpcRequest {
  * and POST for messages (the Streamable HTTP transport supports both patterns).
  */
 export async function handleMcpSSE(request: Request): Promise<Response> {
-  const pointer = await modernProtocolPointer(request);
-  if (pointer) return pointer;
+  if (requestedModernRevision(request)) {
+    const pointer = await modernProtocolPointer(request);
+    if (pointer) return pointer;
+  }
   if (request.method === "POST") {
     try {
       const body = await request.clone().json();
