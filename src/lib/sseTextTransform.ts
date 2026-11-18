@@ -1,6 +1,7 @@
 import { transformStreamWithCancel } from "../../open-sse/utils/cancelableTransformStream.ts";
 import { resolveStreamIndices } from "./streamIndices";
 import { createResponsesSseText } from "./responsesSseText";
+import { IN_PLACE_METADATA_KEYS } from "./sseMetadataKeys";
 export type FieldCategory = "content" | "reasoning" | "toolArgs" | "partialJson";
 
 // Keys that always map to a fixed category, regardless of where they appear in the chunk.
@@ -119,15 +120,6 @@ function claudeStreamedPaths(json: any): ClaudeStreamedPath[] {
 // `redacted_thinking` block are opaque blobs the client sends back verbatim).
 const CLAUDE_OPAQUE_KEYS = new Set(["tool_use_id", "encrypted_index"]);
 
-// Metadata keys that still carry values worth masking: the usage provenance body and the cost
-// figures can hold a credential-shaped string, and skipping them outright emitted it verbatim.
-// They are redacted where they stand, never buffered.
-export const IN_PLACE_METADATA_KEYS = new Set([
-  "usage_evidence",
-  "tokens_per_second",
-  "cost_in_usd_ticks",
-]);
-
 // Redact every other string of a Claude frame in place (search results, citations, tool
 // input), without touching the buffers. The coverage matches the generic walker: a metadata
 // key skips a string value only, and any object or array under it is still walked, because
@@ -135,7 +127,7 @@ export const IN_PLACE_METADATA_KEYS = new Set([
 function redactClaudeFrameStrings(
   obj: any,
   streamed: ClaudeStreamedPath[],
-  redact: (text: string, path: string, metadata: boolean) => string,
+  redact: (text: string, path: string, metadata: boolean, key: string) => string,
   path = "",
   inMetadata = false
 ): void {
@@ -149,8 +141,8 @@ function redactClaudeFrameStrings(
     const metadata = inMetadata || IN_PLACE_METADATA_KEYS.has(key);
     if (typeof obj[key] !== "string")
       redactClaudeFrameStrings(obj[key], streamed, redact, childPath, metadata);
-    else if (metadata) obj[key] = redact(obj[key], childPath, true);
-    else if (classifyField(key) !== null) obj[key] = redact(obj[key], childPath, false);
+    else if (metadata) obj[key] = redact(obj[key], childPath, true, key);
+    else if (classifyField(key) !== null) obj[key] = redact(obj[key], childPath, false, key);
   }
 }
 
@@ -414,7 +406,24 @@ export function createSseTextTransform(
           // keyed by path. Sharing the answer buffers is what spliced usage provenance into
           // replies; snapshotting them in place is what let a credential split across frames
           // through. The window keeps the split covered, and the path keeps the tail out of
-          // the reply.
+          // the reply. Without a window (the PII transform), the value is masked in place, and
+          // a label `classifyField` excludes (provider, model, id) passes through untouched,
+          // as it did before the window existed.
+          const redactMetadataString = (
+            val: string,
+            childPath: string,
+            key: string,
+            parentKey: string,
+            compositeKey: string
+          ): string => {
+            metadataTouched = true;
+            if (opts?.metadataProcessor)
+              return opts.metadataProcessor(val, childPath, isStopSignal);
+            if (!IN_PLACE_METADATA_KEYS.has(key) && classifyField(key, parentKey) === null)
+              return val;
+            return processor(val, "content", false, compositeKey, true);
+          };
+
           const sanitizeObject = (
             obj: any,
             currentChoiceIdx = 0,
@@ -437,16 +446,15 @@ export function createSseTextTransform(
             const isArray = Array.isArray(obj);
 
             for (const key of Object.keys(obj)) {
+              // Every ancestor joins the path, so `usage_evidence.x` and
+              // `usage.usage_evidence.x` never share one window.
+              const childPath = path ? `${path}/${key}` : key;
               if (inMetadata) {
-                const childPath = path ? `${path}/${key}` : key;
-                if (typeof obj[key] === "string") {
-                  obj[key] = opts?.metadataProcessor
-                    ? opts.metadataProcessor(obj[key], childPath, isStopSignal)
-                    : processor(obj[key], "content", false, "0_0", true);
-                  metadataTouched = true;
-                } else if (typeof obj[key] === "object") {
-                  sanitizeObject(obj[key], choiceIdx, toolIdx, key, true, childPath);
-                }
+                const value = obj[key];
+                if (typeof value === "string")
+                  obj[key] = redactMetadataString(value, childPath, key, parentKey, compositeKey);
+                else if (typeof value === "object")
+                  sanitizeObject(value, choiceIdx, toolIdx, key, true, childPath);
                 continue;
               }
               if (typeof obj[key] === "string") {
@@ -468,13 +476,8 @@ export function createSseTextTransform(
                   // A metadata key normally passes through untouched, but the usage provenance
                   // and cost keys can carry a credential. They take their own window, keyed by
                   // path, so a value split across frames still redacts without joining the reply.
-                  if (IN_PLACE_METADATA_KEYS.has(key)) {
-                    const childPath = path ? `${path}/${key}` : key;
-                    obj[key] = opts?.metadataProcessor
-                      ? opts.metadataProcessor(val, childPath, isStopSignal)
-                      : processor(val, "content", false, compositeKey, true);
-                    metadataTouched = true;
-                  }
+                  if (IN_PLACE_METADATA_KEYS.has(key))
+                    obj[key] = redactMetadataString(val, childPath, key, parentKey, compositeKey);
                   continue;
                 }
                 if (field === "toolArgs" || field === "partialJson") {
@@ -505,7 +508,6 @@ export function createSseTextTransform(
                 // verbatim, so null there means "leave it alone", not "redact it".
                 const opaque = key === "data" && parentKey === "reasoning_details";
                 if (!opaque && IN_PLACE_METADATA_KEYS.has(key)) {
-                  const childPath = path ? `${path}/${key}` : key;
                   sanitizeObject(obj[key], choiceIdx, toolIdx, key, true, childPath);
                   continue;
                 }
@@ -515,7 +517,7 @@ export function createSseTextTransform(
                   toolIdx,
                   isArray ? parentKey : key,
                   false,
-                  path
+                  childPath
                 );
               }
             }
@@ -543,10 +545,15 @@ export function createSseTextTransform(
                 isSnapshot
               );
             }
-            redactClaudeFrameStrings(json, streamed, (text, childPath, metadata) =>
-              opts?.metadataProcessor && metadata
-                ? opts.metadataProcessor(text, childPath, isStopSignal)
-                : processor(text, "content", false, compositeKey, true)
+            // The block index scopes a metadata window, so two blocks never share one.
+            redactClaudeFrameStrings(
+              json,
+              streamed,
+              (text, childPath, metadata, key) =>
+                metadata
+                  ? redactMetadataString(text, childPath, key, "", compositeKey)
+                  : processor(text, "content", false, compositeKey, true),
+              typeof json.index === "number" ? `block/${json.index}` : ""
             );
             return touched;
           };
@@ -563,13 +570,15 @@ export function createSseTextTransform(
             sanitizeObject(json, 0, 0);
           }
 
-          if (!matched && !metadataTouched) {
+          if (!matched) {
             // Normal state for control-only chunks (closing frame, usage-only frame): not a
-            // sanitizer fault, so keep it out of the warn level (#18047).
-            console.debug(
-              "[SSE-TRANSFORM] No string fields sanitized in SSE JSON chunk. Keys:",
-              Object.keys(json).slice(0, 5).join(", ")
-            );
+            // sanitizer fault, so keep it out of the warn level (#18047). A metadata-only frame
+            // is not content either: it must never become the envelope the flush writes into.
+            if (!metadataTouched)
+              console.debug(
+                "[SSE-TRANSFORM] No string fields sanitized in SSE JSON chunk. Keys:",
+                Object.keys(json).slice(0, 5).join(", ")
+              );
           } else {
             lastContentJson = json;
             // New content after an earlier stop-signal flush (e.g. a thinking block closed
