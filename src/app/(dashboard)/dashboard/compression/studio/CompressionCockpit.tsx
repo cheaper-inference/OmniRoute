@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { NodeTypes } from "@xyflow/react";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { FlowCanvas } from "@/shared/components/flow/FlowCanvas";
@@ -217,11 +218,7 @@ export function CompressionCockpit({ run: runProp }: CompressionCockpitProps) {
           <span className="text-xs font-semibold" style={{ color: "var(--orch-status-success)" }}>
             −{run.savingsPercent.toFixed(1)}%
           </span>
-          {isComplete && view === "canvas" && (
-            <span className="text-[10px] px-1.5 py-0.5 rounded border border-border text-text-muted">
-              {t("replayDone")}
-            </span>
-          )}
+          {isComplete && view === "canvas" && <Badge size="sm">{t("replayDone")}</Badge>}
         </div>
       </div>
 

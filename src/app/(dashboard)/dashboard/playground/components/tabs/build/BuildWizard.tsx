@@ -1,6 +1,7 @@
 "use client";
 
 import Textarea from "@/shared/components/Textarea";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { cn } from "@/shared/utils/cn";
@@ -236,12 +237,14 @@ export default function BuildWizard({
 
             <div className="ml-auto flex items-center gap-2 text-[11px] text-text-muted">
               {includesTools && toolsBuilder.tools.length > 0 && (
-                <span className="px-1.5 py-0.5 rounded bg-primary/10 text-primary">
+                <Badge size="sm" variant="primary">
                   {toolsBuilder.tools.length} tool{toolsBuilder.tools.length !== 1 ? "s" : ""}
-                </span>
+                </Badge>
               )}
               {includesJson && structuredOutput.enabled && (
-                <span className="px-1.5 py-0.5 rounded bg-success/10 text-success">JSON mode</span>
+                <Badge size="sm" variant="success">
+                  JSON mode
+                </Badge>
               )}
             </div>
           </div>

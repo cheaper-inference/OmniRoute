@@ -3,6 +3,7 @@
 import type { CompressionRunModel, CompressionEngineStep } from "./compressionFlowModel";
 import { useTranslations } from "next-intl";
 import { Progress } from "@omniroute/ui-kit/progress";
+import Badge from "@/shared/components/Badge";
 
 // ── Helpers ───────────────────────────────────────────────────────────────
 
@@ -40,9 +41,9 @@ function StepRow({ step, maxTokens }: { step: CompressionEngineStep; maxTokens: 
           {step.engine}
         </span>
         {skipped && (
-          <span className="ml-1.5 text-[10px] text-text-muted bg-bg-subtle px-1 rounded">
+          <Badge size="sm" className="ml-1.5">
             {t("skipped")}
-          </span>
+          </Badge>
         )}
       </div>
 

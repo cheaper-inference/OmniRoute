@@ -61,16 +61,10 @@ export default function ResultsPanel({
   const t = useTranslations("search");
   const [showJson, setShowJson] = useState(false);
 
-  const getScoreColor = (score: number) => {
-    if (score >= 0.9) return "text-success";
-    if (score >= 0.7) return "text-warning";
-    return "text-error";
-  };
-
-  const getScoreBg = (score: number) => {
-    if (score >= 0.9) return "bg-success-bg";
-    if (score >= 0.7) return "bg-warning-bg";
-    return "bg-error-bg";
+  const getScoreVariant = (score: number) => {
+    if (score >= 0.9) return "success";
+    if (score >= 0.7) return "warning";
+    return "error";
   };
 
   const editorTheme =
@@ -171,11 +165,13 @@ export default function ResultsPanel({
                   {i + 1}. {r.title}
                 </span>
                 {r.score != null && (
-                  <span
-                    className={`text-[10px] px-2 py-0.5 rounded-md ml-2 whitespace-nowrap ${getScoreBg(r.score)} ${getScoreColor(r.score)}`}
+                  <Badge
+                    size="sm"
+                    variant={getScoreVariant(r.score)}
+                    className="ml-2 whitespace-nowrap"
                   >
                     {r.score.toFixed(2)}
-                  </span>
+                  </Badge>
                 )}
               </div>
               <a

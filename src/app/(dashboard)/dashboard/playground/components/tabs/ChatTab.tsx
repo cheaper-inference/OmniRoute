@@ -1,6 +1,7 @@
 "use client";
 
 import Textarea from "@/shared/components/Textarea";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
@@ -379,13 +380,9 @@ export default function ChatTab({ configState, onMetricsUpdate }: ChatTabProps) 
           <Icon name="chat" size={16} />
           <span className="font-medium">{t("tabChat")}</span>
           {responseStatus !== null && (
-            <span
-              className={`px-1.5 py-0.5 rounded text-[10px] font-medium ${
-                responseStatus < 400 ? "bg-success-bg text-success" : "bg-error-bg text-error"
-              }`}
-            >
+            <Badge size="sm" variant={responseStatus < 400 ? "success" : "error"}>
               {responseStatus}
-            </span>
+            </Badge>
           )}
           {responseDuration !== null && <span>{responseDuration}ms</span>}
         </div>

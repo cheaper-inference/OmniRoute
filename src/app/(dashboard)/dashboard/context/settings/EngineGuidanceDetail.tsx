@@ -47,7 +47,7 @@ export default function EngineGuidanceDetail({
             size="sm"
             variant="success"
             data-testid={`engine-safe-default-${id}`}
-            className="text-[10px] uppercase tracking-wider"
+            className="uppercase tracking-wider"
           >
             {t("compressionGuidanceSafeDefault")}
           </Badge>

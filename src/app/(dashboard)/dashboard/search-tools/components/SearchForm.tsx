@@ -5,10 +5,10 @@ import { useId, useState } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
+import { ScopeChip } from "@omniroute/ui-kit/scope-chip";
 // Button/Select stay on the barrel (the search-tab test mocks it); the newly used adapters are
 // imported from their own modules.
 import { Button, Select } from "@/shared/components";
-import Badge from "@/shared/components/Badge";
 import Input from "@/shared/components/Input";
 import Textarea from "@/shared/components/Textarea";
 import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
@@ -278,17 +278,14 @@ export default function SearchForm({
               {includeDomains.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {includeDomains.map((d) => (
-                    <Badge key={d} size="sm" variant="primary">
+                    <ScopeChip
+                      key={d}
+                      tone="success"
+                      removeLabel={`${tc("delete")}: ${d}`}
+                      onRemove={() => removeDomain(d, "include")}
+                    >
                       {d}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        icon="close"
-                        className="size-4 min-h-4 p-0"
-                        aria-label={`${tc("delete")}: ${d}`}
-                        onClick={() => removeDomain(d, "include")}
-                      />
-                    </Badge>
+                    </ScopeChip>
                   ))}
                 </div>
               )}
@@ -315,17 +312,14 @@ export default function SearchForm({
               {excludeDomains.length > 0 && (
                 <div className="flex flex-wrap gap-1 mt-1">
                   {excludeDomains.map((d) => (
-                    <Badge key={d} size="sm" variant="error">
+                    <ScopeChip
+                      key={d}
+                      tone="danger"
+                      removeLabel={`${tc("delete")}: ${d}`}
+                      onRemove={() => removeDomain(d, "exclude")}
+                    >
                       {d}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        icon="close"
-                        className="size-4 min-h-4 p-0"
-                        aria-label={`${tc("delete")}: ${d}`}
-                        onClick={() => removeDomain(d, "exclude")}
-                      />
-                    </Badge>
+                    </ScopeChip>
                   ))}
                 </div>
               )}

@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import { Spinner } from "@/shared/components/Loading";
 import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
@@ -111,12 +112,9 @@ function ProviderCard({
       {item.searchTypes && item.searchTypes.length > 0 && (
         <div className="mt-1.5 flex flex-wrap gap-1">
           {item.searchTypes.map((t) => (
-            <span
-              key={t}
-              className="text-[9px] px-1.5 py-0.5 rounded bg-bg-alt text-text-muted border border-border"
-            >
+            <Badge key={t} size="sm">
               {t}
-            </span>
+            </Badge>
           ))}
         </div>
       )}
@@ -124,12 +122,9 @@ function ProviderCard({
       {item.fetchFormats && item.fetchFormats.length > 0 && (
         <div className="mt-1.5 flex flex-wrap gap-1">
           {item.fetchFormats.map((f) => (
-            <span
-              key={f}
-              className="text-[9px] px-1.5 py-0.5 rounded bg-bg-alt text-text-muted border border-border"
-            >
+            <Badge key={f} size="sm">
               {f}
-            </span>
+            </Badge>
           ))}
         </div>
       )}

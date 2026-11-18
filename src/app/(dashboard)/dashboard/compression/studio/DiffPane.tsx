@@ -34,7 +34,7 @@ export function DiffPane({ segments, preservedBlocks }: DiffPaneProps) {
       {preservedBlocks.length > 0 && (
         <div className="mt-3 flex flex-wrap gap-1" data-testid="diff-preserved">
           {preservedBlocks.map((b, i) => (
-            <Badge key={i} size="sm" className="border-chart-3/50 text-[10px]">
+            <Badge key={i} size="sm" tone="chart-3">
               {b.kind}: {b.preview.slice(0, 40)}
             </Badge>
           ))}
