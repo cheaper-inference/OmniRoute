@@ -274,3 +274,34 @@ test("A2/A: settings chips are ScopeChip and pills are Badge", () => {
     .map(({ file, attrs }) => `${file}: ${attrs.className}`);
   assert.deepEqual(pills, []);
 });
+
+// E — tables: a table framed by its card is `variant="plain"`, a dense one takes `density`
+// instead of padding and text-size classes on each cell, a numeric column is `numeric`, and a
+// numbered paginator is the shared `Pager`.
+test("A2/E: settings tables use the kit table props, not per-cell classes", () => {
+  assert.deepEqual(
+    hits(/containerClassName="[^"]*rounded-none border-0/).map(
+      ({ file, line }) => `${file}:${line}`
+    ),
+    []
+  );
+  assert.equal(elements(["Table"]).filter(({ attrs }) => attrs.variant === "plain").length, 7);
+
+  const cells = elements(["TableHead", "TableCell"]);
+  const classed = (pattern: RegExp) =>
+    cells
+      .filter(({ attrs }) => pattern.test(attrs.className ?? ""))
+      .map(({ file, line, attrs }) => `${file}:${line}: ${attrs.className}`);
+  // Alignment by physical side: `numeric` (end-aligned, tabular figures) mirrors in RTL.
+  assert.deepEqual(classed(/\btext-(right|left)\b/), []);
+  // Padding and row height come from the table `density`.
+  assert.deepEqual(classed(/(^|[\s"`])(p[xytbse]?-\d|h-\d)/), []);
+  assert.ok(cells.filter(({ attrs }) => "numeric" in attrs).length >= 9);
+  assert.ok(elements(["Table"]).filter(({ attrs }) => attrs.density === "compact").length >= 4);
+});
+
+test("A2/E: the free pool pager is the shared Pager", () => {
+  const freePool = FILES.find(({ file }) => file === "components/proxy/FreePoolTab.tsx")!.text;
+  assert.match(freePool, /<Pager\b/);
+  assert.doesNotMatch(freePool, /buildPageRange|MAX_VISIBLE_PAGES|"ellipsis"/);
+});

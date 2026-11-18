@@ -339,16 +339,16 @@ export default function GlobalConfigTab() {
         {results && results.length > 0 && (
           <Table
             scrollbarLabel={t("bulkHealthcheck")}
-            containerClassName="rounded-none border-0"
+            variant="plain"
+            density="compact"
             maxHeight="16rem"
             scrollLabel={t("bulkHealthcheck")}
-            className="text-xs"
           >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("healthcheckStatus")}</TableHead>
                 <TableHead>{t("healthcheckProxyUrl")}</TableHead>
-                <TableHead className="text-right">{t("healthcheckLatency")}</TableHead>
+                <TableHead numeric>{t("healthcheckLatency")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -372,7 +372,7 @@ export default function GlobalConfigTab() {
                     )}
                   </TableCell>
                   <TableCell className="font-mono truncate max-w-xs">{r.proxyUrl}</TableCell>
-                  <TableCell className="text-right text-text-muted">
+                  <TableCell numeric className="text-text-muted">
                     {r.latencyMs !== null ? `${r.latencyMs}ms` : "—"}
                   </TableCell>
                 </TableRow>

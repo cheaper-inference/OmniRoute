@@ -773,11 +773,7 @@ export default function ProxyRegistryManager({
         ) : items.length === 0 ? (
           <EmptyState icon="dns" title={t("noProxies")} />
         ) : (
-          <Table
-            scrollbarLabel={t("title")}
-            scrollLabel={t("title")}
-            containerClassName="rounded-none border-0"
-          >
+          <Table scrollbarLabel={t("title")} scrollLabel={t("title")} variant="plain">
             <TableHeader>
               <TableRow>
                 <TableHead className="w-8">
@@ -1302,7 +1298,7 @@ export default function ProxyRegistryManager({
               scrollbarLabel={t("bulkImportTitle")}
               maxHeight="12rem"
               scrollLabel={t("bulkImportTitle")}
-              className="text-xs"
+              density="compact"
             >
               <TableHeader>
                 <TableRow>

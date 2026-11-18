@@ -1035,14 +1035,14 @@ function ProviderSection({
           <Table
             scrollbarLabel={t("modelPricing")}
             scrollLabel={t("modelPricing")}
-            className="text-sm"
-            containerClassName="rounded-none border-0"
+            variant="plain"
+            density="compact"
           >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("model")}</TableHead>
                 {PRICING_FIELDS.map((field) => (
-                  <TableHead key={field} className="w-24 text-right">
+                  <TableHead key={field} numeric className="w-24">
                     {t(FIELD_LABEL_KEYS[field])}
                   </TableHead>
                 ))}
@@ -1085,7 +1085,7 @@ function ModelRow({
 
   return (
     <TableRow className="group">
-      <TableCell className="py-1.5">
+      <TableCell>
         <div className="flex items-center gap-2">
           <span
             className={`w-1.5 h-1.5 rounded-full ${hasPricing ? "bg-success" : "bg-text-muted/30"}`}
@@ -1105,7 +1105,7 @@ function ModelRow({
         </div>
       </TableCell>
       {PRICING_FIELDS.map((field) => (
-        <TableCell key={field} className="px-2 py-1.5">
+        <TableCell key={field}>
           <NumberInput
             step={0.01}
             precision={6}
