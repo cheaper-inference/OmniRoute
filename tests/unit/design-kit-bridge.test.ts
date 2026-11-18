@@ -436,10 +436,11 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
     "engine savings>=15 / running = warning"
   );
   assert.ok(engine.includes('"var(--orch-status-muted)"'), "engine no-savings = muted token");
-  assert.ok(
-    engine.includes("flowColorAlpha("),
-    "engine glow uses color-mix, not a hex alpha suffix"
-  );
+  // The frame is the kit FlowNode: its tone is the same ramp as a kit status, and the halo of a
+  // running step is the kit's (`active`), so the node draws no glow of its own.
+  assert.match(engine, /<FlowNode\b/, "engine frame is the kit FlowNode");
+  assert.match(engine, /active=\{running\}/, "a running engine step is the active FlowNode");
+  assert.ok(!engine.includes("boxShadow"), "engine draws no hand-made glow");
   assert.ok(!engine.includes("#f59e0b40"), "the 8-bit alpha suffix is gone (invalid on a var())");
 
   // Waterfall inspector: same ramp + the skipped/idle state + the total savings.
@@ -452,7 +453,11 @@ test("every flow surface expresses state with --orch-status-* tokens; categorica
   // Cockpit header + IoNode savings readout.
   assert.ok(cockpit.includes('"var(--orch-status-success)"'), "cockpit savings = success token");
   assert.ok(!cockpit.includes('"#22c55e"'), "cockpit hardcodes no success hex");
-  assert.ok(io.includes('"var(--orch-status-success)"'), "IoNode savings = success token");
+  assert.match(
+    io,
+    /status=\{hasSavings \? "success" : undefined\}/,
+    "IoNode savings = the kit success tone of its FlowNode"
+  );
 
   // Categorical palettes (not state) ride the kit chart tokens, never hex (KEA-7886, P8).
   assert.ok(
