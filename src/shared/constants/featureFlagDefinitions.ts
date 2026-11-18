@@ -1,6 +1,7 @@
 import type { FeatureFlagDefinition } from "./featureFlagTypes";
 import { SEARCH_FEATURE_FLAG_DEFINITIONS } from "./searchFeatureFlagDefinitions";
 import { FAL_NATIVE_ENABLED_FLAG } from "./featureFlagDefinitionsFal";
+import { CATALOG_PRICING_FIELD_MERGE_FLAG } from "./featureFlagDefinitionsCatalogPricing";
 import { CODE_ASSIST_LEGACY_TIER_FLAG } from "./featureFlagDefinitionsCodeAssist";
 import { SYSTEM_ONE_FEATURE_FLAG_DEFINITIONS } from "./featureFlagDefinitionsSystemOne";
 import {
@@ -1116,18 +1117,7 @@ export const FEATURE_FLAG_DEFINITIONS: FeatureFlagDefinition[] = [
     requiresRestart: false,
     warningLevel: "info",
   },
-  {
-    key: "CATALOG_PRICING_FIELD_MERGE_ENABLED",
-    label: "Catalog Pricing Field Merge",
-    description:
-      "Show /v1/models pricing the way cost tracking resolves it. Off by default: the catalog uses the first source that prices the model (models.dev, then LiteLLM, then built-in defaults) and omits user and synced reasoning rates. On: fields merge per field with defaults below LiteLLM below models.dev below user overrides, and reasoning rates are listed, so a model can show fields its top source does not price.",
-    descriptionI18nKey: "featureFlagCatalogPricingFieldMergeEnabledDescription",
-    category: "runtime",
-    defaultValue: "false",
-    type: "boolean",
-    requiresRestart: false,
-    warningLevel: "info",
-  },
+  CATALOG_PRICING_FIELD_MERGE_FLAG,
 
   // ──────────────── CLI (5) ────────────────
   {
