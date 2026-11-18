@@ -6,6 +6,7 @@ import type { CSSProperties } from "react";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Button } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Input from "@/shared/components/Input";
 import NumberInput from "@/shared/components/NumberInput";
 import Select from "@/shared/components/Select";
@@ -18,6 +19,7 @@ import { brandTintVars } from "@omniroute/ui-kit/brand-tint";
 import Checkbox from "@/shared/components/Checkbox";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 import Badge from "@/shared/components/Badge";
+import Notice from "@/shared/components/Notice";
 
 /**
  * GitHub Copilot Configuration Generator
@@ -225,28 +227,19 @@ export default function CopilotToolCard({
         <div className="mt-6 pt-6 border-t border-border">
           <div className="flex flex-col gap-5">
             {/* Info box */}
-            <div className="flex items-start gap-3 p-3 bg-info/10 border border-info/30 rounded-lg">
-              <Icon name="info" size={18} className="text-info" />
-              <div className="text-sm text-info">
-                <p className="font-medium">{t("copilotConfigGenerator")}</p>
-                <p className="mt-1 text-xs opacity-80">
-                  {t("copilotGeneratorDescriptionPrefix")}{" "}
-                  <code className="px-1 py-0.5 rounded bg-bg-subtle">chatLanguageModels.json</code>{" "}
-                  {t("copilotGeneratorDescriptionSuffix")}
-                </p>
-              </div>
-            </div>
+            <Notice variant="info" icon="info" title={t("copilotConfigGenerator")}>
+              {t("copilotGeneratorDescriptionPrefix")}{" "}
+              <InlineCode>chatLanguageModels.json</InlineCode>{" "}
+              {t("copilotGeneratorDescriptionSuffix")}
+            </Notice>
 
             {/* Version compatibility warning */}
-            <div className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
-              <Icon name="warning" size={18} className="text-warning" />
-              <p className="text-xs text-warning">
-                {t.rich("copilotCompatibilityWarning", {
-                  vscode: (chunks) => <strong>{chunks}</strong>,
-                  copilot: (chunks) => <strong>{chunks}</strong>,
-                })}
-              </p>
-            </div>
+            <Notice variant="warning" icon="warning">
+              {t.rich("copilotCompatibilityWarning", {
+                vscode: (chunks) => <strong>{chunks}</strong>,
+                copilot: (chunks) => <strong>{chunks}</strong>,
+              })}
+            </Notice>
 
             {/* Step 2: API Key (if cloud enabled) */}
             {cloudEnabled && apiKeys?.length > 0 && (
@@ -318,10 +311,9 @@ export default function CopilotToolCard({
                   <span>{t("loadingModels")}</span>
                 </div>
               ) : availableModels.length === 0 && allModels.length === 0 ? (
-                <div className="flex items-center gap-2 p-3 bg-warning/10 border border-warning/30 rounded-lg">
-                  <Icon name="warning" size={18} className="text-warning" />
-                  <p className="text-sm text-warning">{t("noActiveProviders")}</p>
-                </div>
+                <Notice variant="warning" icon="warning">
+                  {t("noActiveProviders")}
+                </Notice>
               ) : (
                 <CheckboxGroup
                   aria-label={t("copilotSelectModels", {
@@ -411,9 +403,7 @@ export default function CopilotToolCard({
                 <div className="mt-3 p-3 bg-bg-subtle rounded-lg border border-border">
                   <p className="text-xs text-text-muted">
                     <span className="font-medium text-text-main">{t("copilotPasteInto")} </span>
-                    <code className="px-1 py-0.5 rounded bg-bg-subtle">
-                      ~/.config/Code/User/chatLanguageModels.json
-                    </code>
+                    <InlineCode>~/.config/Code/User/chatLanguageModels.json</InlineCode>
                   </p>
                   <p className="text-xs text-text-muted mt-1">{t("copilotReloadInstruction")}</p>
                 </div>

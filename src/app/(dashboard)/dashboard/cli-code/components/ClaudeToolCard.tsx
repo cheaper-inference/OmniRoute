@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback } from "react";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import ProviderIcon from "@/shared/components/ProviderIcon";
@@ -18,6 +19,8 @@ import {
 } from "@/shared/services/claudeCliConfig";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Notice from "@/shared/components/Notice";
+import CodePreview from "@/shared/components/CodePreview";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
 
@@ -351,61 +354,67 @@ export default function ClaudeToolCard({
 
           {!checkingClaude && claudeStatus && !cliReady && (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/30 rounded-lg">
-                <Icon name="warning" className="text-warning" />
-                <div className="flex-1">
-                  <p className="font-medium text-warning">
-                    {claudeStatus.installed
-                      ? t("cliNotRunnable", { tool: "Claude" })
-                      : t("cliNotInstalled", { tool: "Claude" })}
-                  </p>
-                  <p className="text-sm text-text-muted">
-                    {claudeStatus.installed
-                      ? t("cliFoundFailedHealthcheck", {
-                          tool: "Claude",
-                          reason: claudeStatus.reason ? ` (${claudeStatus.reason})` : "",
-                        })
-                      : t("installCliPrompt", { tool: "Claude" })}
-                  </p>
-                </div>
-                <div className="flex items-center gap-2">
-                  {/*
-                    Always surface Manual Config even when the CLI is not
-                    detected locally — typical of remote OmniRoute
-                    deployments where the CLI lives on the user's machine,
-                    not on the server. Upstream report: #589.
-                  */}
-                  <Button variant="ghost" size="sm" onClick={() => setShowManualConfigModal(true)}>
-                    <Icon name="content_copy" size={18} className="mr-1" />
-                    {t("manualConfig")}
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowInstallGuide(!showInstallGuide)}
-                  >
-                    <Icon
-                      name={showInstallGuide ? "expand_less" : "help"}
-                      size={18}
-                      className="mr-1"
-                    />
-                    {showInstallGuide ? t("hide") : t("howToInstall")}
-                  </Button>
-                </div>
-              </div>
+              <Notice
+                variant="warning"
+                layout="inline"
+                icon="warning"
+                title={
+                  claudeStatus.installed
+                    ? t("cliNotRunnable", { tool: "Claude" })
+                    : t("cliNotInstalled", { tool: "Claude" })
+                }
+                actions={
+                  <>
+                    {/*
+                      Always surface Manual Config even when the CLI is not
+                      detected locally — typical of remote OmniRoute
+                      deployments where the CLI lives on the user's machine,
+                      not on the server. Upstream report: #589.
+                    */}
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowManualConfigModal(true)}
+                    >
+                      <Icon name="content_copy" size={18} className="mr-1" />
+                      {t("manualConfig")}
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowInstallGuide(!showInstallGuide)}
+                    >
+                      <Icon
+                        name={showInstallGuide ? "expand_less" : "help"}
+                        size={18}
+                        className="mr-1"
+                      />
+                      {showInstallGuide ? t("hide") : t("howToInstall")}
+                    </Button>
+                  </>
+                }
+              >
+                {claudeStatus.installed
+                  ? t("cliFoundFailedHealthcheck", {
+                      tool: "Claude",
+                      reason: claudeStatus.reason ? ` (${claudeStatus.reason})` : "",
+                    })
+                  : t("installCliPrompt", { tool: "Claude" })}
+              </Notice>
               {showInstallGuide && (
                 <div className="p-4 bg-surface border border-border rounded-lg">
                   <h4 className="mb-3">{t("installationGuide")}</h4>
                   <div className="space-y-3 text-sm">
                     <div>
                       <p className="text-text-muted mb-1">{t("platforms")}</p>
-                      <code className="block px-3 py-2 bg-bg-subtle rounded font-mono text-xs">
-                        npm install -g @anthropic-ai/claude-code
-                      </code>
+                      <CodePreview
+                        showHeader={false}
+                        variant="surface"
+                        code="npm install -g @anthropic-ai/claude-code"
+                      />
                     </div>
                     <p className="text-text-muted">
-                      {t("afterInstallationRun")}{" "}
-                      <code className="px-1 bg-bg-subtle rounded">claude</code> {t("toVerify")}
+                      {t("afterInstallationRun")} <InlineCode>claude</InlineCode> {t("toVerify")}
                     </p>
                   </div>
                 </div>
@@ -534,12 +543,12 @@ export default function ClaudeToolCard({
               <ClaudeGatewayOnboardingBlock baseUrl={getEffectiveBaseUrl()} />
 
               {message && (
-                <div
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+                <Notice
+                  variant={message.type === "success" ? "success" : "critical"}
+                  icon={message.type === "success" ? "check_circle" : "error"}
                 >
-                  <Icon name={message.type === "success" ? "check_circle" : "error"} size={14} />
-                  <span>{message.text}</span>
-                </div>
+                  {message.text}
+                </Notice>
               )}
 
               <div className="flex items-center gap-2">

@@ -544,12 +544,8 @@ export default function RuntimePageClient() {
       {/* Header */}
       <PageHeader
         compact
-        title={
-          <span className="inline-flex items-center gap-2">
-            <Icon name="bolt" size={24} className="text-primary" />
-            {t("title")}
-          </span>
-        }
+        icon={<Icon name="bolt" className="text-primary" />}
+        title={t("title")}
         description={t("description")}
         actions={
           <>

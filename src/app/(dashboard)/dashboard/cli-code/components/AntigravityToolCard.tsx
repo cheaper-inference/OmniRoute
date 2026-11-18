@@ -11,6 +11,7 @@ import ProviderIcon from "@/shared/components/ProviderIcon";
 import { CANONICAL_EFFORT_VALUES } from "@/shared/reasoning/effortStandardization";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Notice from "@/shared/components/Notice";
 
 // Reasoning-effort override per Antigravity model row (ported from upstream
 // decolua/9router#2584). Empty value ("") means "Default" — preserve whatever
@@ -330,10 +331,9 @@ export default function AntigravityToolCard({
           </div>
 
           {message?.type === "error" && (
-            <div className="flex items-center gap-2 px-2 py-1.5 rounded text-xs bg-error/10 text-error">
-              <Icon name="error" size={14} />
-              <span>{message.text}</span>
-            </div>
+            <Notice variant="critical" icon="error">
+              {message.text}
+            </Notice>
           )}
 
           {/* When running: API Key + Model Mappings */}
@@ -479,10 +479,9 @@ export default function AntigravityToolCard({
         size="sm"
       >
         <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
-            <Icon name="warning" size={20} className="text-warning" />
-            <p className="text-xs text-text-muted">{t("sudoPasswordHint")}</p>
-          </div>
+          <Notice variant="warning" icon="warning">
+            {t("sudoPasswordHint")}
+          </Notice>
 
           <Input
             type="password"
@@ -495,12 +494,12 @@ export default function AntigravityToolCard({
           />
 
           {message && (
-            <div
-              className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+            <Notice
+              variant={message.type === "success" ? "success" : "critical"}
+              icon={message.type === "success" ? "check_circle" : "error"}
             >
-              <Icon name={message.type === "success" ? "check_circle" : "error"} size={14} />
-              <span>{message.text}</span>
-            </div>
+              {message.text}
+            </Notice>
           )}
 
           <div className="flex items-center justify-end gap-2">

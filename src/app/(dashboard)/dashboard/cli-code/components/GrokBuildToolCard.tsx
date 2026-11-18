@@ -15,6 +15,7 @@ import { cn } from "@/shared/utils/cn";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Notice from "@/shared/components/Notice";
 
 const SETTINGS_ENDPOINT = "/api/cli-tools/grok-build-settings";
 const PRESETS_KEY = "omniroute.grokBuildEndpointPresets";
@@ -405,20 +406,17 @@ export default function GrokBuildToolCard({
           )}
 
           {!checking && status && !cliReady && (
-            <div className="flex items-center gap-3 rounded-lg border border-warning/30 bg-warning/10 p-4">
-              <Icon name="warning" className="text-warning" />
-              <div>
-                <p className="font-medium text-warning">
-                  {status.installed
-                    ? t("cliNotRunnable", { tool: "Grok Build" })
-                    : t("cliNotInstalled", { tool: "Grok Build" })}
-                </p>
-                <p className="text-sm text-text-muted">
-                  Direct Apply needs the Grok Build CLI on this computer. Manual Config stays
-                  available.
-                </p>
-              </div>
-            </div>
+            <Notice
+              variant="warning"
+              icon="warning"
+              title={
+                status.installed
+                  ? t("cliNotRunnable", { tool: "Grok Build" })
+                  : t("cliNotInstalled", { tool: "Grok Build" })
+              }
+            >
+              Direct Apply needs the Grok Build CLI on this computer. Manual Config stays available.
+            </Notice>
           )}
 
           {status?.config?.model?.base_url && (
@@ -572,12 +570,12 @@ export default function GrokBuildToolCard({
           ))}
 
           {message && (
-            <p
-              role="status"
-              className={`rounded px-2 py-1.5 text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+            <Notice
+              variant={message.type === "success" ? "success" : "critical"}
+              icon={message.type === "success" ? "check_circle" : "error"}
             >
               {message.text}
-            </p>
+            </Notice>
           )}
 
           <div className="flex flex-wrap items-center gap-2">

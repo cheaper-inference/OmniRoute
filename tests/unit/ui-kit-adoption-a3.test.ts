@@ -211,3 +211,99 @@ test("A: a Badge takes its text size from the kit", () => {
   );
   assert.equal(offenders.length, 0, `drop the text size class:\n${where(offenders)}`);
 });
+
+// ── G. Small pieces: Notice, InlineCode, CodePreview, IconChip, PageHeader icon ──────────────
+
+/** A status colour used as the fill of a box: `bg-success/10`, `bg-warning-bg`… */
+const STATUS_FILL = /(?<![\w:-])bg-(?:success|error|warning|info)(?:\/\d+|-bg)(?![\w-])/;
+const BOX_RADIUS = /(?<![\w:-])rounded(?:-[a-z]+)?(?![\w-])/;
+const BOX_PADDING = /(?<![\w:-])p[xy]?-\d/;
+
+const TINTED_BOX_EXCEPTIONS: Exception[] = [
+  {
+    file: "tools/agent-bridge/components/AgentBridgeMaintenanceCard.tsx",
+    marker: 'role="group"',
+    reason: "Inline confirm cluster (question plus Yes/No buttons), not a message.",
+  },
+  {
+    file: "tools/agent-bridge/components/AgentCard.tsx",
+    marker: 'role="group"',
+    reason: "Inline confirm cluster (question plus Yes/No buttons), not a message.",
+  },
+  {
+    file: "tools/traffic-inspector/components/session/SessionRecorderBar.tsx",
+    marker: 'data-testid="session-recorder-bar"',
+    reason: "Recorder toolbar with its controls; the tint is the recording state (e2e selector).",
+  },
+  {
+    file: "tools/traffic-inspector/components/chat/ToolCallBlock.tsx",
+    marker: "bg-warning-bg",
+    reason: "Tool-call block of a conversation transcript: content, not a notice.",
+  },
+  {
+    file: "tools/traffic-inspector/components/chat/ToolResultBlock.tsx",
+    marker: "bg-success-bg",
+    reason: "Tool-result block of a conversation transcript: content, not a notice.",
+  },
+  {
+    file: "tools/traffic-inspector/components/RequestStreamingList.tsx",
+    marker: "bg-info-bg",
+    reason: "Filter strip glued to the top of the request list (no radius), with its clear button.",
+  },
+];
+
+test("G: messages and warnings are the Notice adapter, not a tinted box", () => {
+  const offenders = openingTags("div|p|span").filter(
+    (t) =>
+      STATUS_FILL.test(t.tag) &&
+      BOX_RADIUS.test(t.tag) &&
+      BOX_PADDING.test(t.tag) &&
+      !isException(TINTED_BOX_EXCEPTIONS, t)
+  );
+  assert.equal(offenders.length, 0, `use <Notice variant=…>:\n${where(offenders)}`);
+});
+
+const CODE_BOX_EXCEPTIONS: Exception[] = [
+  {
+    file: "cli-code/components/DefaultToolCard.tsx",
+    marker: "flex-1 px-3 py-2",
+    reason:
+      "Command with a copy button that goes through copyToClipboard (execCommand fallback on " +
+      "plain-HTTP origins). The kit CodePreview copies with navigator.clipboard only.",
+  },
+];
+
+test("G: code chips are InlineCode and one-line commands are the headerless CodePreview", () => {
+  const offenders = openingTags("code").filter(
+    (t) =>
+      /(?<![\w:-])bg-[a-z]/.test(t.tag) &&
+      BOX_RADIUS.test(t.tag) &&
+      !isException(CODE_BOX_EXCEPTIONS, t)
+  );
+  assert.equal(offenders.length, 0, `use InlineCode / CodePreview:\n${where(offenders)}`);
+});
+
+const ICON_SQUARE_EXCEPTIONS: Exception[] = [
+  {
+    file: "tools/agent-bridge/components/SetupWizard.tsx",
+    marker: "i < stepIndex",
+    reason: "Step marker of the wizard: it shows the step number until the step is done.",
+  },
+];
+
+test("G: an icon in a tinted square is the IconChip adapter", () => {
+  const offenders = openingTags("div|span").filter(
+    (t) =>
+      /(?<![\w:-])bg-[a-z]/.test(t.tag) &&
+      BOX_RADIUS.test(t.tag) &&
+      /justify-center/.test(t.tag) &&
+      /(?<![\w:-])(?:size-\d+|h-\d+ w-\d+|w-\d+ h-\d+)(?![\w-])/.test(t.tag) &&
+      !isException(ICON_SQUARE_EXCEPTIONS, t)
+  );
+  assert.equal(offenders.length, 0, `use <IconChip tone=… size=…>:\n${where(offenders)}`);
+});
+
+test("G: a PageHeader takes its icon in the icon prop, not inside the title", () => {
+  const offenders = openingTags("PageHeader").filter((t) => /title=\{\s*</.test(t.tag));
+  assert.equal(offenders.length, 0, `pass icon={…} and a text title:\n${where(offenders)}`);
+});

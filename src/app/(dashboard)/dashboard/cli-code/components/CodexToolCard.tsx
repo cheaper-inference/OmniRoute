@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import CliStatusBadge from "./CliStatusBadge";
@@ -16,6 +17,8 @@ import { CODEX_DEFAULT_MODELS } from "./codexToolOptions";
 import { cn } from "@/shared/utils/cn";
 import Checkbox from "@/shared/components/Checkbox";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Notice from "@/shared/components/Notice";
+import CodePreview from "@/shared/components/CodePreview";
 
 export default function CodexToolCard({
   tool,
@@ -454,56 +457,58 @@ openai_base_url = "${getEffectiveBaseUrl()}"
 
           {!checkingCodex && codexStatus && !cliReady && (
             <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/30 rounded-lg">
-                <Icon name="warning" className="text-warning" />
-                <div className="flex-1">
-                  <p className="font-medium text-warning">
-                    {codexStatus.installed
-                      ? t("cliNotRunnable", { tool: "Codex" })
-                      : t("cliNotInstalled", { tool: "Codex" })}
-                  </p>
-                  <p className="text-sm text-text-muted">
-                    {codexStatus.installed
-                      ? t("cliFoundFailedHealthcheck", {
-                          tool: "Codex",
-                          reason: codexStatus.reason ? ` (${codexStatus.reason})` : "",
-                        })
-                      : t("installCodexPrompt")}
-                  </p>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowInstallGuide(!showInstallGuide)}
-                >
-                  <Icon
-                    name={showInstallGuide ? "expand_less" : "help"}
-                    size={18}
-                    className="mr-1"
-                  />
-                  {showInstallGuide ? t("hide") : t("howToInstall")}
-                </Button>
-              </div>
+              <Notice
+                variant="warning"
+                layout="inline"
+                icon="warning"
+                title={
+                  codexStatus.installed
+                    ? t("cliNotRunnable", { tool: "Codex" })
+                    : t("cliNotInstalled", { tool: "Codex" })
+                }
+                actions={
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setShowInstallGuide(!showInstallGuide)}
+                    >
+                      <Icon
+                        name={showInstallGuide ? "expand_less" : "help"}
+                        size={18}
+                        className="mr-1"
+                      />
+                      {showInstallGuide ? t("hide") : t("howToInstall")}
+                    </Button>
+                  </>
+                }
+              >
+                {codexStatus.installed
+                  ? t("cliFoundFailedHealthcheck", {
+                      tool: "Codex",
+                      reason: codexStatus.reason ? ` (${codexStatus.reason})` : "",
+                    })
+                  : t("installCodexPrompt")}
+              </Notice>
               {showInstallGuide && (
                 <div className="p-4 bg-surface border border-border rounded-lg">
                   <h4 className="mb-3">{t("installationGuide")}</h4>
                   <div className="space-y-3 text-sm">
                     <div>
                       <p className="text-text-muted mb-1">{t("platforms")}</p>
-                      <code className="block px-3 py-2 bg-bg-subtle rounded font-mono text-xs">
-                        npm install -g @openai/codex
-                      </code>
+                      <CodePreview
+                        showHeader={false}
+                        variant="surface"
+                        code="npm install -g @openai/codex"
+                      />
                     </div>
                     <p className="text-text-muted">
-                      {t("afterInstallationRun")}{" "}
-                      <code className="px-1 bg-bg-subtle rounded">codex</code> {t("toVerify")}
+                      {t("afterInstallationRun")} <InlineCode>codex</InlineCode> {t("toVerify")}
                     </p>
                     <div className="pt-2 border-t border-border">
                       <p className="text-text-muted text-xs">
-                        {t("codexAuthNotePrefix")}{" "}
-                        <code className="px-1 bg-bg-subtle rounded">~/.codex/auth.json</code>{" "}
-                        {t("codexAuthNoteMiddle")}{" "}
-                        <code className="px-1 bg-bg-subtle rounded">OPENAI_API_KEY</code>.{" "}
+                        {t("codexAuthNotePrefix")} <InlineCode>~/.codex/auth.json</InlineCode>{" "}
+                        {t("codexAuthNoteMiddle")} <InlineCode>OPENAI_API_KEY</InlineCode>.{" "}
                         {t("codexAuthNoteSuffix")}
                       </p>
                     </div>
@@ -737,21 +742,24 @@ openai_base_url = "${getEffectiveBaseUrl()}"
               </div>
 
               {message && (
-                <div
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : message.type === "warning" ? "bg-warning/10 text-warning" : "bg-error/10 text-error"}`}
+                <Notice
+                  variant={
+                    message.type === "success"
+                      ? "success"
+                      : message.type === "warning"
+                        ? "warning"
+                        : "critical"
+                  }
+                  icon={
+                    message.type === "success"
+                      ? "check_circle"
+                      : message.type === "warning"
+                        ? "warning"
+                        : "error"
+                  }
                 >
-                  <Icon
-                    name={
-                      message.type === "success"
-                        ? "check_circle"
-                        : message.type === "warning"
-                          ? "warning"
-                          : "error"
-                    }
-                    size={14}
-                  />
-                  <span>{message.text}</span>
-                </div>
+                  {message.text}
+                </Notice>
               )}
 
               <div className="flex items-center gap-2">

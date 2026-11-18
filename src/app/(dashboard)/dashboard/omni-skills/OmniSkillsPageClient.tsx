@@ -17,6 +17,7 @@ import { OmniSandboxTab } from "./components/OmniSandboxTab";
 import { OmniMarketplaceTab } from "./components/OmniMarketplaceTab";
 import type { OmniSkill } from "./components/OmniSkillCard";
 import type { JSX } from "react";
+import Notice from "@/shared/components/Notice";
 
 interface Execution {
   id: string;
@@ -348,15 +349,12 @@ export function OmniSkillsPageClient(): JSX.Element {
           </Button>
         </div>
         {installStatus && (
-          <div
-            className={`mt-3 p-3 rounded-lg text-sm ${
-              installStatus.type === "success"
-                ? "bg-success/10 text-success"
-                : "bg-error/10 text-error"
-            }`}
+          <Notice
+            variant={installStatus.type === "success" ? "success" : "critical"}
+            className="mt-3"
           >
             {installStatus.message}
-          </div>
+          </Notice>
         )}
       </Modal>
     </div>

@@ -17,6 +17,8 @@ import { DEFAULT_DISPLAY_BASE_URL } from "@/shared/hooks";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 import Badge from "@/shared/components/Badge";
+import IconChip from "@/shared/components/IconChip";
+import Notice from "@/shared/components/Notice";
 
 interface ModelOption {
   value: string;
@@ -132,9 +134,9 @@ export default function CustomCliCard({
         {...cardToggleProps(isExpanded, onToggle)}
       >
         <div className="flex min-w-0 items-center gap-3">
-          <div className="size-8 rounded-lg flex items-center justify-center shrink-0 bg-success/10 text-success">
-            <Icon name={tool.icon || "terminal"} size={20} />
-          </div>
+          <IconChip tone="success" size="sm" className="shrink-0">
+            <Icon name={tool.icon || "terminal"} />
+          </IconChip>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
               <h3 className="text-sm">{tool.name}</h3>
@@ -154,36 +156,30 @@ export default function CustomCliCard({
 
       {isExpanded && (
         <div className="mt-6 pt-6 border-t border-border space-y-5">
-          <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
-            <Icon name="tips_and_updates" size={18} className="text-success" />
-            <div className="text-sm text-success">
-              <p className="font-medium">
-                {translateOrFallback("customCliBuilderTitle", "OpenAI-compatible CLI builder")}
-              </p>
-              <p className="mt-1 text-xs opacity-90">
-                {translateOrFallback(
-                  "customCliBuilderDescription",
-                  "Generate env vars and JSON snippets for any CLI or SDK that accepts an OpenAI-compatible base URL, API key, and model ID."
-                )}
-              </p>
-            </div>
-          </div>
+          <Notice
+            variant="success"
+            icon="tips_and_updates"
+            title={translateOrFallback("customCliBuilderTitle", "OpenAI-compatible CLI builder")}
+          >
+            {translateOrFallback(
+              "customCliBuilderDescription",
+              "Generate env vars and JSON snippets for any CLI or SDK that accepts an OpenAI-compatible base URL, API key, and model ID."
+            )}
+          </Notice>
 
           {!hasActiveProviders && (
-            <div className="flex items-start gap-3 p-3 bg-warning/10 border border-warning/30 rounded-lg">
-              <Icon name="warning" size={18} className="text-warning" />
-              <div>
-                <p className="text-sm font-medium text-warning">
-                  {translateOrFallback("noActiveProviders", "No active providers")}
-                </p>
-                <p className="text-xs text-warning/80">
-                  {translateOrFallback(
-                    "customCliNoModels",
-                    "Connect at least one provider to populate the model selectors."
-                  )}
-                </p>
-              </div>
-            </div>
+            <Notice
+              variant="warning"
+              icon="warning"
+              title={translateOrFallback("noActiveProviders", "No active providers")}
+            >
+              <p className="text-xs text-warning/80">
+                {translateOrFallback(
+                  "customCliNoModels",
+                  "Connect at least one provider to populate the model selectors."
+                )}
+              </p>
+            </Notice>
           )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">

@@ -6,6 +6,7 @@ import Icon from "@/shared/components/Icon";
 import Button from "@/shared/components/Button";
 import { cn } from "@/shared/utils/cn";
 import type { JSX } from "react";
+import IconChip from "@/shared/components/IconChip";
 
 // SSR-safe origin via useSyncExternalStore.
 // Server snapshot returns "" (avoids hydration mismatch).
@@ -40,9 +41,9 @@ function LinkCard({ label, url, icon, prompt }: LinkCardProps): JSX.Element {
 
   return (
     <div className="flex-1 flex items-start gap-3 rounded-lg border border-border bg-bg-subtle p-3 min-w-0">
-      <div className="flex items-center justify-center size-8 rounded-lg bg-primary/10 shrink-0">
-        <Icon name={icon} size={16} className="text-primary" />
-      </div>
+      <IconChip tone="accent" size="sm" className="shrink-0">
+        <Icon name={icon} />
+      </IconChip>
       <div className="flex-1 min-w-0">
         <div className="flex items-center justify-between gap-1 mb-1">
           <span className="text-xs font-semibold text-text-main">{label}</span>

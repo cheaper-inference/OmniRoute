@@ -4,9 +4,11 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { useTranslations } from "next-intl";
 import Icon from "@/shared/components/Icon";
 import { Card, Button, ModelSelectModal } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
 import Badge from "@/shared/components/Badge";
+import Notice from "@/shared/components/Notice";
 
 interface Role {
   id: string;
@@ -483,12 +485,9 @@ export default function HermesAgentToolCard({
                   {/* Right cluster: model name + status badge + actions (pushed to the right) */}
                   <div className="flex items-center gap-2 shrink-0">
                     {displayedModel ? (
-                      <code
-                        className="px-1.5 py-0.5 rounded bg-bg-subtle font-mono text-text-main text-[10px] max-w-[200px] truncate"
-                        title={displayedModel}
-                      >
+                      <InlineCode className="max-w-[200px] truncate" title={displayedModel}>
                         {displayedModel}
-                      </code>
+                      </InlineCode>
                     ) : (
                       <span className="text-text-muted text-[10px]">—</span>
                     )}
@@ -538,10 +537,9 @@ export default function HermesAgentToolCard({
 
           {/* Message (standard colored info bar like other cards) */}
           {message && (
-            <div className="flex items-center gap-2 px-2 py-1.5 rounded text-xs bg-success/10 text-success">
-              <Icon name="check_circle" size={14} />
-              <span>{message}</span>
-            </div>
+            <Notice variant="success" icon="check_circle">
+              {message}
+            </Notice>
           )}
 
           {/* Action row — primary Apply + right spacer for future actions */}

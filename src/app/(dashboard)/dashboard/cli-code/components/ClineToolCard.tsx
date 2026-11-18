@@ -4,6 +4,7 @@ import { useState, useEffect, useRef, useCallback, useId } from "react";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Card, Button, ModelSelectModal, ManualConfigModal } from "@/shared/components";
+import { InlineCode } from "@omniroute/ui-kit/inline-code";
 import Input from "@/shared/components/Input";
 import Select from "@/shared/components/Select";
 import ProviderIcon from "@/shared/components/ProviderIcon";
@@ -13,6 +14,7 @@ import { Field } from "@omniroute/ui-kit/field";
 import { DEFAULT_DISPLAY_BASE_URL } from "@/shared/hooks";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Notice from "@/shared/components/Notice";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
 
@@ -307,18 +309,12 @@ export default function ClineToolCard({
                   </p>
                   {clineStatus.commandPath && (
                     <p className="text-xs text-text-muted">
-                      {t("binary")}:{" "}
-                      <code className="px-1 py-0.5 rounded bg-bg-subtle">
-                        {clineStatus.commandPath}
-                      </code>
+                      {t("binary")}: <InlineCode>{clineStatus.commandPath}</InlineCode>
                     </p>
                   )}
                   {clineStatus.globalStatePath && (
                     <p className="text-xs text-text-muted">
-                      {t("configPathShort")}:{" "}
-                      <code className="px-1 py-0.5 rounded bg-bg-subtle">
-                        {clineStatus.globalStatePath}
-                      </code>
+                      {t("configPathShort")}: <InlineCode>{clineStatus.globalStatePath}</InlineCode>
                     </p>
                   )}
                 </div>
@@ -328,18 +324,14 @@ export default function ClineToolCard({
                 <>
                   {/* Current config info */}
                   {configStatus === "configured" && (
-                    <div className="flex items-start gap-3 p-3 bg-success/10 border border-success/30 rounded-lg">
-                      <Icon name="check_circle" size={18} className="text-success" />
-                      <div className="flex flex-col gap-1">
-                        <p className="text-sm text-success">
-                          {t("omnirouteConfiguredOpenAiCompatible")}
-                        </p>
-                        <p className="text-xs text-text-muted">
-                          {t("provider")}: <strong>openai</strong> • {t("model")}:{" "}
-                          <strong>{clineStatus.settings?.openAiModelId || "—"}</strong>
-                        </p>
-                      </div>
-                    </div>
+                    <Notice
+                      variant="success"
+                      icon="check_circle"
+                      title={t("omnirouteConfiguredOpenAiCompatible")}
+                    >
+                      {t("provider")}: <strong>openai</strong> • {t("model")}:{" "}
+                      <strong>{clineStatus.settings?.openAiModelId || "—"}</strong>
+                    </Notice>
                   )}
 
                   {/* Model selection */}
@@ -415,15 +407,12 @@ export default function ClineToolCard({
 
                   {/* Message */}
                   {message && (
-                    <div
-                      className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+                    <Notice
+                      variant={message.type === "success" ? "success" : "critical"}
+                      icon={message.type === "success" ? "check_circle" : "error"}
                     >
-                      <Icon
-                        name={message.type === "success" ? "check_circle" : "error"}
-                        size={16}
-                      />
-                      <span>{message.text}</span>
-                    </div>
+                      {message.text}
+                    </Notice>
                   )}
 
                   {/* Backups section */}

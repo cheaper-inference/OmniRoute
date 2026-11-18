@@ -12,6 +12,7 @@ import { useTranslations } from "next-intl";
 import ProviderIcon from "@/shared/components/ProviderIcon";
 import { cn } from "@/shared/utils/cn";
 import { CARD_TOGGLE_CLASS, cardToggleProps } from "./cardToggle";
+import Notice from "@/shared/components/Notice";
 
 const CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL;
 
@@ -349,24 +350,22 @@ export default function DroidToolCard({
           )}
 
           {!checkingDroid && droidStatus && !cliReady && (
-            <div className="flex items-center gap-3 p-4 bg-warning/10 border border-warning/30 rounded-lg">
-              <Icon name="warning" className="text-warning" />
-              <div className="flex-1">
-                <p className="font-medium text-warning">
-                  {droidStatus.installed
-                    ? t("cliNotRunnable", { tool: "Factory Droid" })
-                    : t("cliNotInstalled", { tool: "Factory Droid" })}
-                </p>
-                <p className="text-sm text-text-muted">
-                  {droidStatus.installed
-                    ? t("cliFoundFailedHealthcheck", {
-                        tool: "Factory Droid",
-                        reason: droidStatus.reason ? ` (${droidStatus.reason})` : "",
-                      })
-                    : t("installCliPrompt", { tool: "Factory Droid" })}
-                </p>
-              </div>
-            </div>
+            <Notice
+              variant="warning"
+              icon="warning"
+              title={
+                droidStatus.installed
+                  ? t("cliNotRunnable", { tool: "Factory Droid" })
+                  : t("cliNotInstalled", { tool: "Factory Droid" })
+              }
+            >
+              {droidStatus.installed
+                ? t("cliFoundFailedHealthcheck", {
+                    tool: "Factory Droid",
+                    reason: droidStatus.reason ? ` (${droidStatus.reason})` : "",
+                  })
+                : t("installCliPrompt", { tool: "Factory Droid" })}
+            </Notice>
           )}
 
           {!checkingDroid && cliReady && (
@@ -514,12 +513,12 @@ export default function DroidToolCard({
               </div>
 
               {message && (
-                <div
-                  className={`flex items-center gap-2 px-2 py-1.5 rounded text-xs ${message.type === "success" ? "bg-success/10 text-success" : "bg-error/10 text-error"}`}
+                <Notice
+                  variant={message.type === "success" ? "success" : "critical"}
+                  icon={message.type === "success" ? "check_circle" : "error"}
                 >
-                  <Icon name={message.type === "success" ? "check_circle" : "error"} size={14} />
-                  <span>{message.text}</span>
-                </div>
+                  {message.text}
+                </Notice>
               )}
 
               <div className="flex items-center gap-2">

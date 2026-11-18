@@ -15,6 +15,8 @@ import {
   type DiagnoseResult,
 } from "@/lib/inspector/agentBridgeMaintenanceApi";
 import type { AgentBridgeConfig, ImportResult } from "@/lib/inspector/configPortability";
+import Notice from "@/shared/components/Notice";
+import IconChip from "@/shared/components/IconChip";
 
 interface AgentBridgeMaintenanceCardProps {
   /** A crash left DNS spoof / CA / system proxy behind → surface the repair banner. */
@@ -194,9 +196,9 @@ export function AgentBridgeMaintenanceCard({
     <>
       <Card padding="none" className="overflow-hidden">
         <div className="flex items-center gap-3 px-5 py-4">
-          <div className="rounded-control bg-bg-subtle p-2 text-text-main">
-            <Icon name="build" size={20} />
-          </div>
+          <IconChip>
+            <Icon name="build" />
+          </IconChip>
           <div>
             <h2 className="ci-heading text-sm">
               {t("maintenanceTitle") || "Maintenance & Diagnostics"}
@@ -365,10 +367,9 @@ export function AgentBridgeMaintenanceCard({
         size="sm"
       >
         <div className="flex flex-col gap-4">
-          <div className="flex items-start gap-3 rounded-control border border-warning/30 bg-warning-bg p-3">
-            <Icon name="warning" size={20} className="text-warning" />
-            <p className="text-xs text-text-muted">{tCli("sudoPasswordHint")}</p>
-          </div>
+          <Notice variant="warning" icon="warning">
+            {tCli("sudoPasswordHint")}
+          </Notice>
 
           <Input
             type="password"
