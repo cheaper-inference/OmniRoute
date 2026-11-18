@@ -20,14 +20,16 @@
 
 ## Metode Instalasi
 
-### npm (direkomendasikan)
+### npm (disarankan)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dasbor terbuka di `http://localhost:20128` dan URL dasar API adalah `http://localhost:20128/v1`.
+Dasbor terbuka di `http://localhost:20128` dan basis API URL adalah `http://localhost:20128/v1`.
+
+> **pengguna npm:** Jika npm memperingatkan bahwa skrip instalasi diblokir (misalnya, `omniroute`, `better-sqlite3`), lihat [Memecahkan masalah — npm install-scripts Blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,9 +38,9 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Pengguna pnpm:** flag `--allow-build` diperlukan untuk mengaktifkan skrip build native bagi `better-sqlite3` dan `@swc/core`. Perintah `pnpm approve-builds -g` tidak didukung untuk instalasi global pada pnpm v11.
+> **pengguna pnpm:** flag `--allow-build` diperlukan untuk mengaktifkan skrip build asli untuk `better-sqlite3` dan `@swc/core`. Perintah `pnpm approve-builds -g` tidak didukung untuk instalasi global pada pnpm v11.
 
-### Arch Linux (AUR)
+### Lengkungan Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
@@ -54,30 +56,30 @@ npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Catatan Windows:** Secara default, OmniRoute menggunakan `%APPDATA%\omniroute` ketika direktori lama `%USERPROFILE%\.omniroute` tidak tersedia. Atur `DATA_DIR` untuk memilih lokasi direktori data yang berbeda.
+> **catatan Windows :** Secara default, OmniRoute menggunakan `%APPDATA%\omniroute` ketika direktori `%USERPROFILE%\.omniroute` lama tidak ada. Atur `DATA_DIR` untuk memilih lokasi direktori data yang berbeda.
 
-> **Catatan:** `npm install` secara otomatis menghasilkan `.env` dari `.env.example` saat pertama kali dijalankan. Instalasi berikutnya tidak akan menimpa `.env` yang sudah ada, sehingga penyesuaian tetap dipertahankan. Untuk menginisialisasi ulang, hapus `.env` sebelum menjalankannya kembali.
+> **Catatan:** `npm install` secara otomatis menghasilkan `.env` dari `.env.example` saat pertama kali dijalankan. Penginstalan berikutnya tidak akan menimpa `.env` yang sudah ada, sehingga penyesuaian tetap dipertahankan. Untuk melakukan seed ulang, hapus `.env` sebelum menjalankannya kembali.
 
 ### Docker
 
-Lihat [Panduan Docker](./DOCKER_GUIDE.md) untuk penyiapan Docker lengkap, termasuk profil Compose dan HTTPS Caddy.
+Lihat [Panduan Docker](./DOCKER_GUIDE.md) untuk pengaturan Docker lengkap termasuk profil Tulis dan Caddy HTTPS.
 
 ### Aplikasi Desktop (Electron)
 
-OmniRoute menyediakan pembungkus desktop yang dibuat dengan Electron 41 + electron-builder 26.10. Skrip yang tersedia (root ruang kerja):
+OmniRoute mengirimkan pembungkus desktop yang dibangun di atas Electron 41 + electron-builder 26.10. Skrip yang tersedia (root ruang kerja):
 
 ```bash
-npm run electron:dev          # Jalankan desktop dengan hot-reload
-npm run electron:build        # Build untuk OS saat ini (terdeteksi otomatis)
-npm run electron:build:win    # Penginstal Windows (NSIS + portabel)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Uji smoke build yang telah dikemas
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Rilis penginstal desktop dilampirkan pada GitHub Releases. Untuk pembahasan mendalam lengkap mengenai Electron (penandatanganan, bridge IPC, distro), lihat [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(dibuat pada tahap berikutnya)_.
+Rilis penginstal desktop dilampirkan pada Rilis GitHub. Untuk penyelaman mendalam Electron selengkapnya (penandatanganan, jembatan IPC, distro), lihat [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Server headless (CI/otomatisasi)
+### Server tanpa kepala (CI/automation)
 
 Untuk penyiapan tanpa pengawasan (Docker, Kubernetes, CI), gunakan:
 
@@ -86,27 +88,27 @@ omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Jika digabungkan dengan variabel lingkungan (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, dan sebagainya), ini memungkinkan Anda menjalankan instans OmniRoute yang sepenuhnya dapat dikendalikan melalui skrip.
+Dikombinasikan dengan env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, dll.), ini memungkinkan Anda menjalankan instance OmniRoute yang sepenuhnya dapat skrip.
 
-### Opsi CLI
+### CLI Pilihan
 
-| Perintah                | Deskripsi                                                              |
-| ----------------------- | ---------------------------------------------------------------------- |
-| `omniroute`             | Mulai server (`PORT=20128`, API dan dasbor pada port yang sama)        |
-| `omniroute setup`       | Orientasi CLI terpandu untuk kata sandi dan penyedia pertama           |
-| `omniroute doctor`      | Jalankan pemeriksaan kesehatan lokal tanpa memulai server              |
-| `omniroute providers`   | Temukan, tampilkan, validasi, dan uji penyedia dari CLI                |
-| `omniroute config`      | Konfigurasi alat CLI — tampilkan, dapatkan, atur, validasi konfigurasi |
-| `omniroute status`      | Dasbor status offline — versi, DB, alat, konfigurasi                   |
-| `omniroute logs`        | Streaming log penggunaan dari API (mendukung `--follow`)               |
-| `omniroute update`      | Periksa atau terapkan pembaruan OmniRoute                              |
-| `omniroute provider`    | Kelola koneksi penyedia — tambah, tampilkan, hapus, uji, default       |
-| `omniroute --port 3000` | Atur port kanonis/API ke 3000                                          |
-| `omniroute --mcp`       | Mulai server MCP (transport stdio)                                     |
-| `omniroute --no-open`   | Jangan buka browser secara otomatis                                    |
-| `omniroute --help`      | Tampilkan bantuan                                                      |
+| Memerintah              | Keterangan                                                           |
+| ----------------------- | -------------------------------------------------------------------- |
+| `omniroute`             | Mulai server (`PORT=20128`, API dan dashboard pada port yang sama)   |
+| `omniroute setup`       | Orientasi CLI yang dipandu untuk kata sandi dan penyedia pertama     |
+| `omniroute doctor`      | Jalankan pemeriksaan kesehatan lokal tanpa memulai server            |
+| `omniroute providers`   | Temukan, daftar, validasi, dan uji penyedia dari CLI                 |
+| `omniroute config`      | konfigurasi alat CLI daftar —, dapatkan, setel, validasi konfigurasi |
+| `omniroute status`      | Dasbor status offline versi —, DB, alat, konfigurasi                 |
+| `omniroute logs`        | Streaming log penggunaan dari API (mendukung `--follow`)             |
+| `omniroute update`      | Periksa atau terapkan pembaruan OmniRoute                            |
+| `omniroute provider`    | Kelola koneksi penyedia — tambahkan, daftar, hapus, uji, default     |
+| `omniroute --port 3000` | Setel port canonical/API ke 3000                                     |
+| `omniroute --mcp`       | Mulai server MCP (stdio transport)                                   |
+| `omniroute --no-open`   | Jangan membuka browser secara otomatis                               |
+| `omniroute --help`      | Tunjukkan bantuan                                                    |
 
-Penyiapan headless dapat dibuat menjadi skrip dengan flag atau variabel lingkungan:
+Penyiapan tanpa kepala dapat dibuat skripnya dengan flag atau variabel lingkungan:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -219,8 +221,12 @@ npm run test:protocols:e2e
 
 **Kode Claude :**
 
+Claude Kode terhubung melalui HTTP, yang mana `omniroute --mcp` (stdio) tidak dimulai. Transportasi HTTP dinonaktifkan secara default: aktifkan terlebih dahulu di server yang sedang berjalan. Saat login dasbor diaktifkan, permintaan tanpa kredensial akan mendapat `401`, jadi teruskan kunci API yang berisi `mcp:connect` (atau `manage`); kunci tanpa `manage`/`admin` juga memerlukan cakupan masing-masing alat (lihat [cakupan alat MCP Server → MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**

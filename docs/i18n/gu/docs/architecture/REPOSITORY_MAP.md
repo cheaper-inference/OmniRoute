@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## રૂટ ફાઇલો
+## રુટ ફાઇલો
 
-| ફાઇલ                                        | હેતુ                                                                               |
-| ------------------------------------------- | ---------------------------------------------------------------------------------- |
-| **README.md**                               | માર્કેટિંગ લેન્ડિંગ પેજ + ઝડપી શરૂઆત + સુવિધા મેટ્રિક્સ (`llm.txt` પણ જુઓ)         |
-| **CHANGELOG.md**                            | દરેક રિલીઝનો ચેન્જલૉગ (`/version-bump-cc` સ્કિલ દ્વારા આપમેળે જનરેટ થયેલ)          |
-| **LICENSE**                                 | MIT લાઇસન્સનો ટેક્સ્ટ                                                              |
-| **CLAUDE.md**                               | Claude Code એજન્ટ્સ માટે પ્રોજેક્ટના નિયમો (કડક નિયમો, પ્રણાલિકાઓ, પરિસ્થિતિઓ)     |
-| **AGENTS.md**                               | CLAUDE.md જેવું જ, પરંતુ બિન-Claude AI એજન્ટ્સ માટે (Codex, Cursor વગેરે)          |
-| **GEMINI.md**                               | Gemini-આધારિત એજન્ટ્સ માટે સંક્ષિપ્ત નિયમો (CLAUDE.mdનો ઉપસમૂહ)                    |
-| **CONTRIBUTING.md**                         | યોગદાનકર્તા માર્ગદર્શિકા: સેટઅપ, પરંપરાગત કમિટ્સ, પરીક્ષણ, PR પ્રવાહ               |
-| **SECURITY.md**                             | નબળાઈની જાણ કરવાની નીતિ, સપોર્ટેડ વર્ઝન્સ, જોખમ મોડેલ                              |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — સમુદાયના વર્તન અંગેની અપેક્ષાઓ                              |
-| **llm.txt**                                 | LLM ક્રૉલર્સ માટે ઑપ્ટિમાઇઝ કરેલું સાદું-ટેક્સ્ટ લેન્ડિંગ પેજ (AI સહાયકો માટે SEO) |
-| **package.json**                            | npm મેનિફેસ્ટ, સ્ક્રિપ્ટ્સ, ડિપેન્ડન્સીઝ, એન્જિન્સ, c8 કવરેજ ગેટ                   |
-| **package-lock.json**                       | લૉક કરેલું ડિપેન્ડન્સી ટ્રી                                                        |
-| **tsconfig.json**                           | રૂટ TypeScript કૉન્ફિગ                                                             |
-| **tsconfig.typecheck-core.json**            | `src/` કોર માટે ટાઇપચેક કૉન્ફિગ                                                    |
-| **tsconfig.typecheck-noimplicit-core.json** | કડક (`noImplicitAny`) ટાઇપચેક                                                      |
-| **tsconfig.tsbuildinfo**                    | TS ઇન્ક્રિમેન્ટલ બિલ્ડ કૅશ (gitignored)                                            |
-| **next.config.mjs**                         | Next.js 16 બિલ્ડ કૉન્ફિગરેશન (સ્ટૅન્ડઅલોન આઉટપુટ)                                  |
-| **next-env.d.ts**                           | Next.js દ્વારા આપમેળે જનરેટ થયેલા env ટાઇપ્સ                                       |
-| **eslint.config.mjs**                       | ESLint ફ્લૅટ કૉન્ફિગ (પ્રોજેક્ટના દરેક ક્ષેત્ર માટેના નિયમો)                       |
-| **prettier.config.mjs**                     | Prettier ફૉર્મેટિંગ નિયમો                                                          |
-| **postcss.config.mjs**                      | Tailwind/CSS પાઇપલાઇન માટે PostCSS કૉન્ફિગ                                         |
-| **playwright.config.ts**                    | Playwright E2E પરીક્ષણ કૉન્ફિગ                                                     |
-| **vitest.config.ts**                        | Vitest કૉન્ફિગ (ડિફૉલ્ટ સ્યુટ)                                                     |
-| **vitest.mcp.config.ts**                    | MCP સર્વર / autoCombo / કૅશ સ્યુટ્સ માટે Vitest કૉન્ફિગ                            |
-| **sonar-project.properties**                | SonarQube/SonarCloud કૉન્ફિગ (કોડ ગુણવત્તા)                                        |
-| **Dockerfile**                              | મલ્ટિ-સ્ટેજ Docker બિલ્ડ (બિલ્ડર → રનર-બેઝ → રનર-CLI)                              |
-| **docker-compose.yml**                      | 4 પ્રોફાઇલ્સ (બેઝ, CLI, હોસ્ટ, cliproxyapi) + redis સાઇડકાર સાથે ડેવ compose       |
-| **docker-compose.prod.yml**                 | પ્રોડક્શન compose (પોર્ટ 20130, redis, નામિત વૉલ્યુમ્સ)                            |
-| **.dockerignore**                           | Docker કૉન્ટેક્સ્ટમાંથી બાકાત રાખેલી ફાઇલો                                         |
-| **fly.toml**                                | Fly.io ડિપ્લોયમેન્ટ કૉન્ફિગ (રીજન `sin`, પોર્ટ 20128, /data વૉલ્યુમ)               |
-| **.env.example**                            | ટેમ્પલેટ env ફાઇલ (પ્રથમ ઇન્સ્ટૉલ વખતે `.env`માં આપમેળે કૉપિ થાય છે)               |
-| **.gitignore**                              | Git ઇગ્નોર પેટર્ન્સ                                                                |
-| **.npmignore**                              | npm પ્રકાશન બાકાત સૂચિ                                                             |
-| **.npmrc**                                  | npm કૉન્ફિગ (રજિસ્ટ્રી, લૉકફાઇલ નીતિ)                                              |
-| **.node-version**                           | Node વર્ઝન પિન (nvm-સુસંગત ટૂલ્સ દ્વારા ઉપયોગમાં લેવાય છે)                         |
-| **.nvmrc**                                  | nvm માટે Node વર્ઝન પિન                                                            |
-| **eslint.complexity.config.mjs**            | જટિલતા રૅચેટ માટે ESLint કૉન્ફિગ (`scripts/check/check-complexity.mjs --config`)   |
-| **eslint.sonarjs.config.mjs**               | SonarJS નિયમો માટે ESLint કૉન્ફિગ (જ્ઞાનાત્મક જટિલતા / ડુપ્લિકેશન)                 |
-| **source.config.ts**                        | Fumadocs `defineDocs` સોર્સ કૉન્ફિગ (`.source/`ને ફીડ કરે છે)                      |
-| **knip.json**                               | Knip કૉન્ફિગ — બિનઉપયોગી ફાઇલો/એક્સપોર્ટ્સ/ડિપેન્ડન્સીઝ (ડેડ-કોડ ગેટને ફીડ કરે છે) |
-| **stryker.conf.json**                       | Stryker મ્યુટેશન-ટેસ્ટિંગ કૉન્ફિગ                                                  |
-| **.size-limit.json**                        | size-limit બંડલ બજેટ કૉન્ફિગ                                                       |
-| **promptfooconfig.yaml**                    | promptfoo મૂલ્યાંકન કૉન્ફિગ                                                        |
-| **.gitleaks.toml**                          | gitleaks ગુપ્ત-માહિતી સ્કૅન નિયમસંગ્રહ                                             |
-| **.zizmor.yml**                             | zizmor GitHub-Actions સુરક્ષા-લિન્ટ કૉન્ફિગ                                        |
-| **socket.yml**                              | Socket.dev સપ્લાય-ચેઇન કૉન્ફિગ                                                     |
-| **news.json**                               | સ્થાનિકીકૃત v2 જાહેરાત ફીડ; Radar લૉન્ચ આઇટમ નિષ્ક્રિય સ્થિતિમાં શિપ થાય છે        |
-| **flake.nix** / **flake.lock**              | Nix ડેવ-શેલ વ્યાખ્યા + લૉક                                                         |
-| **.env**                                    | સ્થાનિક ગુપ્ત માહિતી (gitignored — `.env.example`માંથી જનરેટ કરેલી)                |
+| ફાઈલ                                        | હેતુ                                                                                |
+| ------------------------------------------- | ----------------------------------------------------------------------------------- |
+| **README.md**                               | માર્કેટિંગ લેન્ડિંગ પેજ + ક્વિક સ્ટાર્ટ + ફીચર મેટ્રિક્સ ( `llm.txt` પણ જુઓ)        |
+| **CHANGELOG.md**                            | પ્રતિ-પ્રકાશન ચેન્જલોગ ( `/version-bump-cc` કૌશલ્ય દ્વારા સ્વતઃ જનરેટ)              |
+| **LICENSE**                                 | MIT લાયસન્સ ટેક્સ્ટ                                                                 |
+| **CLAUDE.md**                               | Claude કોડ એજન્ટો માટે પ્રોજેક્ટ નિયમો (સખત નિયમો, સંમેલનો, દૃશ્યો)                 |
+| **AGENTS.md**                               | CLAUDE.md જેમ જ પરંતુ નોન-ક્લાઉડ AI એજન્ટો (Codex, Cursor, વગેરે) માટે              |
+| **GEMINI.md**                               | જેમિની-આધારિત એજન્ટો માટે સંક્ષિપ્ત નિયમો ( CLAUDE.md નો સબસેટ)                     |
+| **CONTRIBUTING.md**                         | ફાળો આપનાર માર્ગદર્શિકા: સેટઅપ, પરંપરાગત કમિટ, પરીક્ષણ, PR ફ્લો                     |
+| **SECURITY.md**                             | નબળાઈ રિપોર્ટિંગ નીતિ, સપોર્ટેડ વર્ઝન, ધમકી મોડલ                                    |
+| **CODE_OF_CONDUCT.md**                      | ફાળો આપનાર કરાર — સમુદાય વર્તન અપેક્ષાઓ                                             |
+| **llm.txt**                                 | LLM ક્રોલર્સ માટે સાદા-ટેક્સ્ટ લેન્ડિંગ ઑપ્ટિમાઇઝ ( AI સહાયકો માટેSEO )             |
+| **package.json**                            | npm મેનિફેસ્ટ, સ્ક્રિપ્ટ્સ, ડિપેન્ડન્સી, એન્જિન, c8 કવરેજ ગેટ                       |
+| **package-lock.json**                       | લૉક કરેલ અવલંબન વૃક્ષ                                                               |
+| **tsconfig.json**                           | રુટ TypeScript રૂપરેખા                                                              |
+| **tsconfig.typecheck-core.json**            | `src/` કોર માટે રૂપરેખા તપાસો                                                       |
+| **tsconfig.typecheck-noimplicit-core.json** | કડક (`noImplicitAny`) ટાઇપચેક                                                       |
+| **tsconfig.tsbuildinfo**                    | TS ઇન્ક્રીમેન્ટલ બિલ્ડ કેશ (ગીટ ઇગ્નોર કરેલ)                                        |
+| **આગળ config.mjs**                          | Next.js 16 બિલ્ડ રૂપરેખાંકન (એકલોન આઉટપુટ)                                          |
+| **આગામી-env.d.ts**                          | Next.js ઓટો-જનરેટેડ env પ્રકારો                                                     |
+| **એસ્લિન્ટ config.mjs**                     | ESLint ફ્લેટ રૂપરેખા (પ્રોજેક્ટ વિસ્તાર દીઠ નિયમો)                                  |
+| **સુંદર config.mjs**                        | Prettier ફોર્મેટિંગ નિયમો                                                           |
+| **પોસ્ટસીએસએસ.config.mjs**                  | Tailwind/CSS પાઇપલાઇન માટેPostCSS રૂપરેખા                                           |
+| **નાટ્યકાર.config.ts**                      | Playwright E2E ટેસ્ટ રૂપરેખા                                                        |
+| **વિટેસ્ટ config.ts**                       | Vitest રૂપરેખા (ડિફોલ્ટ સ્યુટ)                                                      |
+| **vitest.mcp.config.ts**                    | Vitest રૂપરેખા MCP સર્વર / autoCombo / કેશ સ્યુટ્સ માટે                             |
+| **sonar-project.properties**                | SonarQube/SonarCloud રૂપરેખા (કોડ ગુણવત્તા)                                         |
+| **ડોકરફાઈલ**                                | મલ્ટી-સ્ટેજ Docker બિલ્ડ (બિલ્ડર → રનર-બેઝ → રનર-cli)                               |
+| **docker-compose.yml**                      | દેવે 4 પ્રોફાઇલ્સ (બેઝ, ક્લિ, હોસ્ટ, ક્લિપ્રોક્સીપી) + redis sidecar સાથે કંપોઝ કરો |
+| **ડોકર-કંપોઝ.prod.yml**                     | ઉત્પાદન કંપોઝ (પોર્ટ 20130, રેડિસ, નામવાળી વોલ્યુમો)                                |
+| **.dockerignore**                           | ફાઇલોને Docker સંદર્ભમાંથી બાકાત રાખવામાં આવી છે                                    |
+| **fly.toml**                                | Fly.io ડિપ્લોયમેન્ટ રૂપરેખા (પ્રદેશ `sin`, પોર્ટ 20128, /ડેટા વોલ્યુમ)              |
+| **.env.example**                            | ટેમ્પલેટ env ફાઇલ (પ્રથમ ઇન્સ્ટોલ પર `.env` પર સ્વતઃ કૉપિ કરેલ)                     |
+| **.gitignore**                              | ગિટ પેટર્નને અવગણો                                                                  |
+| **.npmignore**                              | npm બાકાત યાદી પ્રકાશિત કરો                                                         |
+| **.npmrc**                                  | npm રૂપરેખા (રજિસ્ટ્રી, લોકફાઈલ નીતિ)                                               |
+| **.નોડ-સંસ્કરણ**                            | નોડ વર્ઝન પિન (એનવીએમ-સુસંગત સાધનો દ્વારા ઉપયોગમાં લેવાય છે)                        |
+| **.nvmrc**                                  | nvm માટે નોડ વર્ઝન પિન                                                              |
+| **eslint.complexity.config.mjs**            | જટિલતા રેચેટ માટેESLint રૂપરેખા (`scripts/check/check-complexity.mjs --config`)     |
+| **eslint.sonarjs.config.mjs**               | SonarJS નિયમો માટેESLint રૂપરેખા (જ્ઞાનાત્મક જટિલતા / ડુપ્લિકેશન)                   |
+| **સ્ત્રોત config.ts**                       | Fumadocs `defineDocs` સ્ત્રોત રૂપરેખા (ફીડ્સ `.source/`)                            |
+| **knip.json**                               | Knip config — નહિ વપરાયેલ files/exports/deps (ડેડ-કોડ ગેટને ફીડ કરે છે)             |
+| **સ્ટ્રાઈકર conf.mjs**                      | સ્ટ્રાઈકર મ્યુટેશન-ટેસ્ટિંગ રૂપરેખા ( `mutate` માંથી `tap.testFiles` ગણતરી કરે છે)  |
+| **.size-limit.json**                        | કદ-મર્યાદા બંડલ બજેટ રૂપરેખા                                                        |
+| **promptfooconfig.yaml**                    | promptfoo eval રૂપરેખા                                                              |
+| **.gitleaks.toml**                          | gitleaks ગુપ્ત-સ્કેન નિયમો                                                          |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                          |
+| **socket.yml**                              | Socket.dev સપ્લાય-ચેન રૂપરેખા                                                       |
+| **news.json**                               | સ્થાનિકીકરણ v2 જાહેરાત ફીડ; રડાર લોન્ચ આઇટમ જહાજો નિષ્ક્રિય                         |
+| **flake.nix** /** flake.lock**              | નિક્સ દેવ-શેલ વ્યાખ્યા + લોક                                                        |
+| **.env**                                    | સ્થાનિક રહસ્યો ( `.env.example` માંથી જનરેટ થયેલ gitigned — )                       |
 
-> **v3.8.26માં રૂટની બહાર ખસેડવામાં આવ્યું (અવ્યવસ્થા ઘટાડવા માટે):**
+> **v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, અને જનરેટ કરેલી `quality-metrics.json` (gitignored). [`## config/`](#config--static-configs--quality-gate-state) જુઓ.
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, અને જનરેટ કરેલ `quality-metrics.json` (gitigned). [`## config/`](#config--static-configs--quality-gate-state) જુઓ.
 
 ---
 
@@ -201,7 +201,7 @@ src/
 | `webhookDispatcher.ts`                   | HMAC વેબહૂક ડિલિવરી — જુઓ `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                            |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | ટનલ મેનેજરો — `docs/ops/TUNNELS_GUIDE.md` જુઓ                                                                                                                                                                                                                                                                      |
 | `cloudSync.ts`, `initCloudSync.ts`       | રાજ્યનું વૈકલ્પિક ક્લાઉડ સિંક                                                                                                                                                                                                                                                                                      |
-| `localDb.ts`                             | ડીબી મોડ્યુલો માટે બેરલને ફરીથી નિકાસ કરો (ફક્ત કોઈ તર્ક — પુન: નિકાસ નહીં)                                                                                                                                                                                                                                        |
+| `localDb.ts`                             | ડીબી મોડ્યુલ્સ માટે બેરલ ફરીથી નિકાસ કરો (ફક્ત કોઈ તર્ક — પુન: નિકાસ નહીં)                                                                                                                                                                                                                                         |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | કેશીંગ + idempotency માટે વિનંતી કરો                                                                                                                                                                                                                                                                               |
 | (~ 30 વધુ ઉચ્ચ-સ્તરની ફાઇલો)             | વિશિષ્ટ સહાયકો (logEnv, modelsDevSync, piiSanitizer, વગેરે)                                                                                                                                                                                                                                                        |
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------- |
 | `components/`                    | ડેશબોર્ડ ઘટક API: `packages/ui-kit` — એડેપ્ટર જુઓ `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: સ્ક્રીનો દ્વારા ઉપયોગમાં લેવાતા આઇકોન નામો → લ્યુસાઇડ ઘટકો (`<Icon>`)      |
-| `constants/providers.ts`         | **381 પ્રદાતાઓ** Zod માન્યતા સાથે (સત્યનો સ્ત્રોત)                                     |
+| `constants/providers.ts`         | **394 પ્રદાતાઓ** Zod માન્યતા સાથે (સત્યનો સ્ત્રોત)                                     |
 | `constants/cliTools.ts`          | બાહ્ય CLI ટૂલ રજિસ્ટ્રી                                                                |
-| `constants/routingStrategies.ts` | **20 રૂટીંગ વ્યૂહરચના** પ્રાથમિકતાઓ સાથે                                               |
+| `constants/routingStrategies.ts` | **22 રૂટીંગ વ્યૂહરચના** પ્રાથમિકતાઓ સાથે                                               |
 | `constants/publicApiRoutes.ts`   | રૂટ્સ કે જેને બેરર (વિ મેનેજમેન્ટ) ઓથની જરૂર હોય છે                                    |
 | `constants/upstreamHeaders.ts`   | અપસ્ટ્રીમ વિનંતીઓ માટે હેડર નામંજૂર                                                    |
 | `validation/schemas.ts`          | ~ 80 Zod સ્કીમા ( API કોન્ટ્રાક્ટ માટે સત્યનો એક જ સ્ત્રોત)                            |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 ફાઇલો (12 હેન્ડલર + 4 સહાયક): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search વગેરે.
-├── executors/           # 150 એક્ઝિક્યુટર મોડ્યુલો (BaseExecutor ને વિસ્તૃત કરતા ક્લાસ + દરેક પ્રદાતા માટેના સહાયક)
+├── executors/           # 163 એક્ઝિક્યુટર મોડ્યુલો (BaseExecutor ને વિસ્તૃત કરતા ક્લાસ + દરેક પ્રદાતા માટેના સહાયક)
 ├── translator/          # ફોર્મેટ કન્વર્ટર (9 વિનંતી, 9 પ્રતિસાદ, 9 સહાયક)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ સર્વિસ મોડ્યુલો (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM વગેરે)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | બાહ્ય CLI એકીકરણ + આંતરિક OmniRoute CLI                                      |
 | `I18N.md`                   | i18n આર્કિટેક્ચર, એક ભાષા ઉમેરીને, 67 લોકેલ                                  |
 | `UNINSTALL.md`              | અનઇન્સ્ટોલ કરવાના પગલાં સાફ કરો                                              |
-| `PROVIDER_REFERENCE.md`     | **ઓટો-જનરેટ** 381 પ્રદાતાઓની સૂચિ ( regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ઓટો-જનરેટ** 394 પ્રદાતાઓની સૂચિ ( regen: `npm run gen:provider-reference`) |
 
 ### સબસિસ્ટમ ડીપ-ડાઈવ્સ
 

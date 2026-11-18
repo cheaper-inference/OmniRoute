@@ -24,7 +24,7 @@ export default function OAuthWaitingStep({
       <div className="size-16 mx-auto mb-4 rounded-full bg-primary/10 flex items-center justify-center">
         <Spinner size="lg" label={waitingLabel} />
       </div>
-      <h3 className="text-lg font-semibold mb-2">{waitingLabel}</h3>
+      <h3 className="text-lg mb-2">{waitingLabel}</h3>
       <p className="text-sm text-text-muted mb-2">{completeAuthLabel}</p>
       <p className="text-xs text-text-muted mb-4 opacity-70">{popupClosedHint}</p>
       <Button variant="ghost" onClick={onManualInput}>

@@ -16,21 +16,22 @@ Slack, PagerDuty, Datadog, 내부 알림 서비스 또는 모든 HTTP 수신기�
 
 ## 지원되는 이벤트
 
-`WebhookEvent` 타입(`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts`에서 사용)은 현재 정확히 네 가지 이벤트를 모델링합니다.
+`WebhookEvent` 유형(`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` 에서 사용)은 현재 8개의 이벤트를 모델링합니다.
 
-| 이벤트              | 발생 조건                                     |
-| ------------------- | --------------------------------------------- |
-| `request.completed` | 프록시된 요청이 성공적으로 완료될 때          |
-| `request.failed`    | 모든 재시도/폴백 후 프록시된 요청이 실패할 때 |
-| `quota.exceeded`    | API 키가 예산/할당량 임계값을 초과할 때       |
-| `test.ping`         | 테스트 엔드포인트에서 사용하는 합성 이벤트    |
+| 이벤트                    | 다음과 같은 경우에 발생합니다.                                                     |
+| ------------------------- | ---------------------------------------------------------------------------------- |
+| `request.completed`       | 프록시 요청이 성공적으로 완료되었습니다.                                           |
+| `request.failed`          | 모든 retries/fallback 이후 프록시 요청이 실패합니다.                               |
+| `quota.exceeded`          | API 키가 budget/quota 임계값을 초과합니다.                                         |
+| `proxy.set_aside`         | 반복된 거부 후 프록시 풀 구성원이 따로 설정됩니다(전환만 해당).                    |
+| `proxy.pool.exhausted`    | 프록시 풀 범위의 모든 구성원은 별도로 설정됩니다.                                  |
+| `provider.reset_redeemed` | 자동 적용 은행 재설정은 재설정 크레딧 또는 Claude 주간 세션 재설정을 사용했습니다. |
+| `provider.exhausted`      | 공급자의 모든 계정이 냉각 중입니다(공급자당 최대 10분마다 한 번).                  |
+| `test.ping`               | 테스트 엔드포인트에서 사용되는 합성 이벤트                                         |
 
-구독 시 리터럴 `"*"`를 지정하면 모든 이벤트를 수신할 수 있습니다. `events`에 있는
-알 수 없는 이벤트 이름은 디스패치 시 무시됩니다.
+구독은 모든 이벤트를 수신하기 위해 문자 그대로 `"*"` 허용합니다. `events` 의 알 수 없는 이벤트 이름은 전달 시 무시됩니다.
 
-> 참고: 디스패처 API는 연결되어 있지만, 일부 `test.ping` 이외 이벤트의 프로덕션
-> 호출 지점은 아직 추가 중입니다. 현재 릴리스에서 어떤 경로가 디스패처를 호출하는지
-> 확인하려면 `grep dispatchEvent`를 실행하세요.
+> 참고: 디스패처 API 연결되어 있지만 `test.ping` 아닌 일부 이벤트에 대한 프로덕션 호출 사이트는 여전히 시작 중입니다. 현재 릴리스에서 디스패처를 호출하는 경로를 확인하려면 `grep dispatchEvent` 확인하세요.
 
 ## 아키텍처
 

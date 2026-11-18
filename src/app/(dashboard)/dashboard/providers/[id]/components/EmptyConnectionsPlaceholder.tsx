@@ -5,6 +5,7 @@ import Icon from "@/shared/components/Icon";
 
 // Phase 1t.6 extraction — Issue #3501
 import { Button } from "@/shared/components";
+import ChatGptSignInButton from "@/shared/components/ChatGptSignInButton";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
 
 interface CommandCodeAuthState {
@@ -31,6 +32,26 @@ interface EmptyConnectionsPlaceholderProps {
   onOpenImportGemini: () => void;
   onOpenImportGrokCli: () => void;
   t: ProviderMessageTranslator;
+}
+
+/** ChatGPT connects only through the official sign-in button; every other provider adds a row. */
+function PrimaryAddButton({
+  providerId,
+  providerSupportsPat,
+  onClick,
+  t,
+}: {
+  providerId: string;
+  providerSupportsPat: boolean;
+  onClick: () => void;
+  t: ProviderMessageTranslator;
+}) {
+  if (providerId === "chatgpt") return <ChatGptSignInButton opensDialog onClick={onClick} />;
+  return (
+    <Button icon="add" onClick={onClick}>
+      {providerSupportsPat ? "Add PAT" : t("addConnection")}
+    </Button>
+  );
 }
 
 export default function EmptyConnectionsPlaceholder({
@@ -102,9 +123,12 @@ function EmptyConnectionsActions({
         </>
       ) : (
         <>
-          <Button icon="add" onClick={() => gateConnectionFlow(openPrimaryAddFlow)}>
-            {providerSupportsPat ? "Add PAT" : t("addConnection")}
-          </Button>
+          <PrimaryAddButton
+            providerId={providerId}
+            providerSupportsPat={providerSupportsPat}
+            onClick={() => gateConnectionFlow(openPrimaryAddFlow)}
+            t={t}
+          />
           {providerId === "qoder" && (
             <Button variant="secondary" onClick={() => gateConnectionFlow(onOpenOAuthModal)}>
               Experimental OAuth

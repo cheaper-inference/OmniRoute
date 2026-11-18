@@ -24,13 +24,13 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
@@ -38,7 +38,9 @@ Turn N+1 (client sends follow-up):
 
 ਕੈਪਚਰ `open-sse/handlers/chatCore.ts` (ਦੋ ਸਾਈਟਾਂ, ਦੋ `cacheReasoningFromAssistantMessage` ਕਾਲ ਸਾਈਟਾਂ 'ਤੇ) ਵਿੱਚ ਹੁੰਦਾ ਹੈ। ਰੀਪਲੇਅ `open-sse/translator/index.ts` ਵਿੱਚ ਸਕੀਮਾ ਜ਼ਬਰਦਸਤੀ ਤੋਂ ਬਾਅਦ ਪਰ ਡਿਸਪੈਚ ਤੋਂ ਪਹਿਲਾਂ ਹੁੰਦਾ ਹੈ।
 
-ਪਲੇਨ (ਗੈਰ-ਟੂਲ-ਕਾਲ) ਸਹਾਇਕ ਮੋੜਾਂ ਨੂੰ ਵੱਖਰੇ ਤਰੀਕੇ ਨਾਲ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ: `buildAssistantMessageCacheKey()` ਸੈਸ਼ਨ ਸਕੋਪ ਨੂੰ ਹਜ਼ਮ ਕਰਦਾ ਹੈ ਅਤੇ ਉਸ ਮੋੜ ਤੱਕ ਸਧਾਰਣ ਓਪਨਏਆਈ-ਫਾਰਮੈਟ ਟ੍ਰਾਂਸਕ੍ਰਿਪਟ ਨੂੰ ਹਜ਼ਮ ਕਰਦਾ ਹੈ, ਕਿਉਂਕਿ DeepSeek ਇੱਕ ਵਾਰ `tools` ਮੌਜੂਦ ਹੋਣ 'ਤੇ _Every_ ਪੂਰਵ ਮੋੜ ਦੇ ਤਰਕ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਜਵਾਬਾਂ-API ਟੀਚਿਆਂ ਲਈ (ਉਦਾਹਰਨ ਲਈ `opencode-go/deepseek-v4-flash`, `/responses` ਨੂੰ ਰਾਊਟ ਕੀਤਾ ਗਿਆ) ਅੱਪਸਟ੍ਰੀਮ ਬਾਡੀ `input` ਨੂੰ ਲੈ ਕੇ ਜਾਂਦੀ ਹੈ, `messages` ਨਹੀਂ, ਇਸਲਈ `translateRequest()` (`open-sse/translator/index.ts`) ਇੱਕ ਕਾਲਬੈਕ ਵਿਕਲਪ ਦੁਆਰਾ ਹਜ਼ਮ ਕੀਤੇ ਗਏ ਪਿਵਟ ਟ੍ਰਾਂਸਕ੍ਰਿਪਟ ਦੀ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ ਅਤੇ ਕੈਪਚਰ ਸਾਈਟਾਂ ਉਸੇ ਟ੍ਰਾਂਸਕ੍ਰਿਪਟ ਨੂੰ ਹਜ਼ਮ ਕਰਦੀਆਂ ਹਨ। ਜਵਾਬਾਂ ਦਾ ਰੀਪਲੇਅ ਪਾਸ ਹਰ ਸਰੋਤ ਫਾਰਮੈਟ ਲਈ OpenAI ਪੀਵੋਟ 'ਤੇ ਚੱਲਦਾ ਹੈ, ਇਸਲਈ Anthropic ਸੁਨੇਹੇ ਕਲਾਇੰਟਸ (Claude → OpenAI → ਜਵਾਬ) ਨੂੰ ਵੀ ਰੀਪਲੇਅ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+ਟੂਲ-ਕਾਲ ਐਂਟਰੀਆਂ ਨੂੰ `buildToolCallCacheKey()` ਦੇ ਅਧੀਨ ਸਟੋਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ, ਬੇਨਤੀ ਦੇ ਸਕੋਪ ਦਾ ਇੱਕ ਡਾਇਜੈਸਟ ਅਤੇ ਟੂਲ ਕਾਲ ਆਈਡੀ, ਇਸਲਈ ਕਿਸੇ ਹੋਰ API ਕੁੰਜੀ ਜਾਂ ਸੈਸ਼ਨ ਦੁਆਰਾ ਵਰਤੀ ਜਾਂਦੀ ਉਹੀ ਆਈਡੀ ਐਂਟਰੀ ਦੀ ਚੋਣ ਨਹੀਂ ਕਰਦੀ ਹੈ। ਸਕੋਪ `buildReasoningCacheScope()` ਤੋਂ ਆਉਂਦਾ ਹੈ: API ਕੁੰਜੀ id, ਨਾਲ ਹੀ ਸੈਸ਼ਨ ਕੁੰਜੀ ਜਦੋਂ ਬੇਨਤੀ ਵਿੱਚ ਇੱਕ ਹੋਵੇ। ਇਸ ਲਈ `tool_call_id` ਕਾਲਮ ਅਤੇ ਡੈਸ਼ਬੋਰਡ ਉਹਨਾਂ ਐਂਟਰੀਆਂ ਲਈ ਇਹ ਡਾਇਜੈਸਟ ਦਿਖਾਉਂਦੇ ਹਨ।
+
+ਪਲੇਨ (ਗੈਰ-ਟੂਲ-ਕਾਲ) ਸਹਾਇਕ ਮੋੜਾਂ ਨੂੰ ਵੱਖਰੇ ਤਰੀਕੇ ਨਾਲ ਜੋੜਿਆ ਜਾਂਦਾ ਹੈ: `buildAssistantMessageCacheKey()` ਸੈਸ਼ਨ ਸਕੋਪ ਨੂੰ ਹਜ਼ਮ ਕਰਦਾ ਹੈ ਅਤੇ ਉਸ ਮੋੜ ਤੱਕ ਸਧਾਰਣ ਓਪਨਏਆਈ-ਫਾਰਮੈਟ ਟ੍ਰਾਂਸਕ੍ਰਿਪਟ ਨੂੰ ਹਜ਼ਮ ਕਰਦਾ ਹੈ, ਕਿਉਂਕਿ DeepSeek ਇੱਕ ਵਾਰ `tools` ਮੌਜੂਦ ਹੋਣ 'ਤੇ _every_ ਪੂਰਵ ਮੋੜ ਦੇ ਤਰਕ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ। ਜਵਾਬਾਂ-API ਟੀਚਿਆਂ ਲਈ (ਉਦਾਹਰਨ ਲਈ `opencode-go/deepseek-v4-flash`, `/responses` ਨੂੰ ਰਾਊਟ ਕੀਤਾ ਗਿਆ) ਅੱਪਸਟ੍ਰੀਮ ਬਾਡੀ `input` ਨੂੰ ਲੈ ਕੇ ਜਾਂਦੀ ਹੈ, `messages` ਨਹੀਂ, ਇਸਲਈ `translateRequest()` (`open-sse/translator/index.ts`) ਇੱਕ ਕਾਲਬੈਕ ਵਿਕਲਪ ਦੁਆਰਾ ਹਜ਼ਮ ਕੀਤੇ ਗਏ ਪਿਵਟ ਟ੍ਰਾਂਸਕ੍ਰਿਪਟ ਦੀ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ ਅਤੇ ਕੈਪਚਰ ਸਾਈਟਾਂ ਉਸੇ ਟ੍ਰਾਂਸਕ੍ਰਿਪਟ ਨੂੰ ਹਜ਼ਮ ਕਰਦੀਆਂ ਹਨ। ਜਵਾਬਾਂ ਦਾ ਰੀਪਲੇਅ ਪਾਸ ਹਰ ਸਰੋਤ ਫਾਰਮੈਟ ਲਈ OpenAI ਪੀਵੋਟ 'ਤੇ ਚੱਲਦਾ ਹੈ, ਇਸਲਈ Anthropic ਸੁਨੇਹੇ ਕਲਾਇੰਟਸ (Claude → OpenAI → ਜਵਾਬ) ਨੂੰ ਵੀ ਰੀਪਲੇਅ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
 
 ## ਸਟੋਰੇਜ — ਹਾਈਬ੍ਰਿਡ ਮੈਮੋਰੀ + SQLite
 

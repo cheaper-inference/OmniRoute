@@ -22,7 +22,8 @@ import { parseToolCallsFromText, serializeToolsToPrompt } from "../translator/we
 
 type JsonRecord = Record<string, unknown>;
 
-const CHATGPT_WEB_PAGE_URL = "https://chatgpt.com/?temporary-chat=true";
+/** The page every clean-room turn runs on: ChatGPT's temporary chat, which keeps no history. */
+export const CHATGPT_WEB_PAGE_URL = "https://chatgpt.com/?temporary-chat=true";
 const MAX_PROMPT_BYTES = 4 * 1024 * 1024;
 /**
  * ChatGPT Web rejects a single composer submission that is too large ("The message you

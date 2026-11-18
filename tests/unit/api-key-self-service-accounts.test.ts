@@ -202,7 +202,8 @@ test("labels mask email-like account names and keep custom names", async () => {
 
   const masked = labels.get("conn-a") ?? "";
   assert.equal(masked.includes("john.doe"), false);
-  assert.equal(masked.includes("example.com"), false);
+  // Stricter than checking for the whole domain: no fragment of its name may survive the mask.
+  assert.equal(masked.includes("example"), false);
   assert.match(masked, /^joh\*+@\*+com$/);
   assert.equal(labels.get("conn-b"), "Team Codex");
   const emailOnly = labels.get("conn-c") ?? "";

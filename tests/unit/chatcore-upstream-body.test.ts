@@ -988,3 +988,67 @@ test("Codex attempts preserve caller-owned nested history with configured rules"
     resetPayloadRulesConfigForTests();
   }
 });
+
+// #18912: canonical `effort` also derives a `reasoning` object, the Responses envelope.
+// api.openai.com Chat Completions only documents `reasoning_effort`, so dropping `effort`
+// alone would trade "Unknown parameter: 'effort'" for "Unknown parameter: 'reasoning'".
+async function outboundOpenAIChat(provider: string, model: string, extra: object) {
+  const translatedBody = translateRequest(
+    FORMATS.OPENAI,
+    FORMATS.OPENAI,
+    model,
+    { model, messages: [{ role: "user", content: "Reply with OK" }], stream: false, ...extra },
+    false,
+    null,
+    provider
+  ) as Record<string, unknown>;
+  return prepareUpstreamBody({
+    translatedBody,
+    modelToCall: model,
+    provider,
+    targetFormat: FORMATS.OPENAI,
+    credentials: { apiKey: "x" },
+  });
+}
+
+test("#18912 canonical effort reaches OpenAI Chat Completions as reasoning_effort alone", async () => {
+  const out = await outboundOpenAIChat("openai", "gpt-6.1-terra", { effort: "high" });
+  assert.equal("effort" in out, false);
+  assert.equal("reasoning" in out, false);
+  assert.equal(out.reasoning_effort, "high");
+});
+
+test("#18912 a client reasoning.effort is folded onto reasoning_effort for OpenAI Chat", async () => {
+  const out = await outboundOpenAIChat("openai", "gpt-5.4", {
+    effort: "high",
+    reasoning: { effort: "low", summary: "auto" },
+  });
+  assert.equal("reasoning" in out, false);
+  assert.equal(out.reasoning_effort, "low");
+});
+
+test("#18912 explicit reasoning_effort outranks reasoning.effort on OpenAI Chat", async () => {
+  const out = await outboundOpenAIChat("openai", "gpt-5.4", {
+    reasoning_effort: "medium",
+    reasoning: { effort: "low" },
+  });
+  assert.equal("reasoning" in out, false);
+  assert.equal(out.reasoning_effort, "medium");
+});
+
+test("#18912 providers that accept the reasoning object keep it", async () => {
+  const out = await outboundOpenAIChat("openrouter", "openai/gpt-5.4", { effort: "high" });
+  assert.deepEqual(out.reasoning, { effort: "high" });
+  assert.equal(out.reasoning_effort, "high");
+});
+
+test("#18912 OpenAI Responses targets keep the reasoning object", async () => {
+  const out = await prepareUpstreamBody({
+    translatedBody: { model: "gpt-5.5-pro", input: "hi", reasoning: { effort: "high" } },
+    modelToCall: "gpt-5.5-pro",
+    provider: "openai",
+    targetFormat: FORMATS.OPENAI_RESPONSES,
+    credentials: { apiKey: "x" },
+  });
+  assert.deepEqual(out.reasoning, { effort: "high" });
+});

@@ -11,6 +11,8 @@ import ModelLockoutCard from "./ModelLockoutCard";
 import TokenRefreshBreakerCard, { type TokenRefreshBreakerValue } from "./TokenRefreshBreakerCard";
 import { NumberField, BooleanField } from "./ResilienceFields";
 import { throwIfResilienceSaveFailed } from "./resilienceSaveError";
+import PreferredAccountFailoverCard from "./PreferredAccountFailoverCard";
+import type { PreferredAccountFailoverSettings } from "@/lib/resilience/settings/types";
 import AntigravityTimingTelemetryCard, {
   type AntigravityTimingTelemetryValue,
 } from "./AntigravityTimingTelemetryCard";
@@ -68,6 +70,7 @@ export type ProviderCooldownSettings = {
 };
 
 type ResilienceResponse = {
+  preferredAccountFailover?: PreferredAccountFailoverSettings;
   antigravityTimingTelemetry?: AntigravityTimingTelemetryValue;
   requestQueue: RequestQueueSettings;
   connectionCooldown: {
@@ -88,6 +91,7 @@ type ResilienceResponse = {
 
 function toResilienceResponse(json: ResilienceResponse): ResilienceResponse {
   return {
+    preferredAccountFailover: json.preferredAccountFailover,
     antigravityTimingTelemetry: json.antigravityTimingTelemetry,
     requestQueue: json.requestQueue,
     connectionCooldown: json.connectionCooldown,
@@ -148,7 +152,7 @@ function ProfileColumn({
     <div className="rounded-xl border border-border bg-bg-subtle p-4">
       <div className="mb-4 flex items-center gap-2">
         <Icon name={icon} size={16} className="text-primary" />
-        <h3 className="text-sm font-semibold uppercase tracking-wide text-text-main">{title}</h3>
+        <h3 className="text-sm uppercase text-text-main">{title}</h3>
       </div>
       <div className="space-y-3">{children}</div>
     </div>
@@ -214,7 +218,7 @@ function RequestQueueCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="speed" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceRequestQueueTitle")}</h2>
+            <h2 className="text-lg">{t("resilienceRequestQueueTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceRequestQueueScope")}
@@ -482,7 +486,7 @@ function ConnectionCooldownCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="timer_off" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceConnectionCooldownTitle")}</h2>
+            <h2 className="text-lg">{t("resilienceConnectionCooldownTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceConnectionCooldownScope")}
@@ -611,7 +615,7 @@ function ProviderBreakerCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="electrical_services" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceProviderBreakerTitle")}</h2>
+            <h2 className="text-lg">{t("resilienceProviderBreakerTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceProviderBreakerScope")}
@@ -669,7 +673,7 @@ function WaitForCooldownCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="hourglass_top" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceWaitForCooldownTitle")}</h2>
+            <h2 className="text-lg">{t("resilienceWaitForCooldownTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceWaitForCooldownScope")}
@@ -771,7 +775,7 @@ function ComboCooldownWaitCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           <Icon name="timer" size={20} className="text-primary" />
-          <h2 className="text-lg font-bold">{title}</h2>
+          <h2 className="text-lg">{title}</h2>
         </div>
         <ActionRow
           editing={editing}
@@ -883,7 +887,7 @@ function QuotaShareConcurrencyLimitCard({
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="flex items-center gap-2">
           <Icon name="filter_list" size={20} className="text-primary" />
-          <h2 className="text-lg font-bold">{title}</h2>
+          <h2 className="text-lg">{title}</h2>
         </div>
         <ActionRow
           editing={editing}
@@ -951,7 +955,7 @@ export function ProviderCooldownCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="timer" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceProviderCooldownTitle")}</h2>
+            <h2 className="text-lg">{t("resilienceProviderCooldownTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceProviderCooldownScope")}
@@ -1062,7 +1066,7 @@ function CredentialHealthCheckCard({
         <div className="space-y-2">
           <div className="flex items-center gap-2">
             <Icon name="health_and_safety" size={20} className="text-primary" />
-            <h2 className="text-lg font-bold">{t("resilienceCredentialHealthTitle")}</h2>
+            <h2 className="text-lg">{t("resilienceCredentialHealthTitle")}</h2>
           </div>
           <SectionDescription
             scope={t("resilienceCredentialHealthScope")}
@@ -1219,6 +1223,15 @@ export default function ResilienceTab() {
   return (
     <div className="space-y-6">
       <AutoDisableCard />
+      {data.preferredAccountFailover && (
+        <PreferredAccountFailoverCard
+          value={data.preferredAccountFailover}
+          saving={savingSection === "preferredAccountFailover"}
+          onSave={(preferredAccountFailover) =>
+            savePatch("preferredAccountFailover", { preferredAccountFailover })
+          }
+        />
+      )}
       {data.antigravityTimingTelemetry && (
         <AntigravityTimingTelemetryCard
           value={data.antigravityTimingTelemetry}

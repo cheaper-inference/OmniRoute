@@ -125,7 +125,7 @@ function OverviewGroupHeader({
               : DISPLAY_COLORS[worst?.kind || "empty"],
         }}
       />
-      <h3 className="break-words text-sm font-semibold">{label}</h3>
+      <h3 className="break-words text-sm">{label}</h3>
       <span className="text-xs text-text-muted">{t("accountsCount", { count })}</span>
       <HealthCounts accounts={accounts} />
     </>
@@ -262,7 +262,7 @@ function OverviewHeader({
   return (
     <>
       <div className="flex flex-wrap items-center gap-[10px] border-b border-border px-[18px] py-[14px]">
-        <h2 className="text-[15px] font-semibold">{t("healthTitle")}</h2>
+        <h2 className="text-[15px]">{t("healthTitle")}</h2>
         <span className="min-w-0 text-xs text-text-muted">
           {t("healthAccountHint")} ·{" "}
           {t("healthRuntimeObserved", { time: relative(oldest("runtimeObservedAt")) })} ·{" "}
@@ -396,7 +396,7 @@ function OverviewDetails({
       )}
       {selectedAccount && (
         <div id={`${id}-details`} className="max-w-2xl space-y-2">
-          <h4 className="text-sm font-medium text-text-main">
+          <h4 className="text-sm text-text-main">
             {label(selectedAccount.connection)} · {t("columnDetails")}
           </h4>
           {renderCard(selectedAccount.connection)}
