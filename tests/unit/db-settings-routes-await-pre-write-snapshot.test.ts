@@ -31,11 +31,16 @@ async function withRoutineBackupsOn<T>(fn: () => Promise<T>): Promise<T> {
     argv: [...process.argv],
     execArgv: [...process.execArgv],
     env: process.env.NODE_ENV,
+    testContext: process.env.NODE_TEST_CONTEXT,
+    jestWorker: process.env.JEST_WORKER_ID,
     now: Date.now,
   };
   const offset = DAY_MS * 2 * ++probeNumber;
   delete process.env.DISABLE_SQLITE_AUTO_BACKUP;
   process.env.NODE_ENV = "production";
+  // The node:test child marker and a Jest worker id also mark a test run.
+  delete process.env.NODE_TEST_CONTEXT;
+  delete process.env.JEST_WORKER_ID;
   process.argv.splice(0, process.argv.length, process.execPath, "/opt/app/server.js");
   process.execArgv.length = 0;
   Date.now = () => saved.now() + offset;
@@ -47,6 +52,10 @@ async function withRoutineBackupsOn<T>(fn: () => Promise<T>): Promise<T> {
     process.execArgv.push(...saved.execArgv);
     if (saved.env === undefined) delete process.env.NODE_ENV;
     else process.env.NODE_ENV = saved.env;
+    if (saved.testContext === undefined) delete process.env.NODE_TEST_CONTEXT;
+    else process.env.NODE_TEST_CONTEXT = saved.testContext;
+    if (saved.jestWorker === undefined) delete process.env.JEST_WORKER_ID;
+    else process.env.JEST_WORKER_ID = saved.jestWorker;
     process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
   }
 }

@@ -62,9 +62,7 @@ export function ChatGptPlanNotice({ connected = false }: { connected?: boolean }
       <div className="flex min-w-0 flex-1 items-start gap-3">
         <ChatGptMark />
         <div className="min-w-0 space-y-1">
-          <h3 className="font-medium text-text-main">
-            {t(connected ? "chatgptUsingPlan" : "chatgptUsePlan")}
-          </h3>
+          <h3 className="text-text-main">{t(connected ? "chatgptUsingPlan" : "chatgptUsePlan")}</h3>
           <p className="text-sm text-text-muted">{t("chatgptPlanDescription")}</p>
         </div>
       </div>
@@ -106,7 +104,7 @@ export function ChatGptUsageSummary({
     <div className="min-w-0 space-y-3 p-3">
       {limitReached && <ChatGptUsageLimitNotice />}
       <Card padding="sm" className="min-w-0">
-        <h3 className="font-medium text-text-main">{t("chatgptLocalUsage")}</h3>
+        <h3 className="text-text-main">{t("chatgptLocalUsage")}</h3>
         <p className="mt-2 text-xs text-text-muted">{t("chatgptLocalUsageDescription")}</p>
         <dl className="my-4 grid grid-cols-3 gap-2 border-y border-border py-4">
           {(
@@ -168,7 +166,7 @@ export function ChatGptPlanWelcome({ onDismiss }: { onDismiss: () => void }) {
   return (
     <Card padding="lg" className="mx-auto max-w-md space-y-5 text-center">
       <ChatGptMark large />
-      <h3 className="text-xl font-medium text-text-main">{t("chatgptWelcomeTitle")}</h3>
+      <h3 className="text-xl text-text-main">{t("chatgptWelcomeTitle")}</h3>
       <p className="text-sm leading-relaxed text-text-muted">{t("chatgptWelcomeDescription")}</p>
       <Button size="lg" fullWidth onClick={onDismiss}>
         {t("chatgptGotIt")}

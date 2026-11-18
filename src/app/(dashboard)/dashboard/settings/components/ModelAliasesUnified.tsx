@@ -183,7 +183,7 @@ export default function ModelAliasesUnified() {
           <Icon name="swap_horiz" size={20} />
         </div>
         <div className="flex-1">
-          <h3 className="text-lg font-semibold">
+          <h3 className="text-lg">
             {translateOrFallback(t, "modelAliasesTitle", "Model Aliases")}
           </h3>
           <p className="text-sm text-text-muted">

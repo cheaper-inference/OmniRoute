@@ -46,23 +46,21 @@ vairāku modeļu izpildes saskarne, nevis maršrutēšanas stratēģija: tā nek
 
 ## Iestatīšana
 
-1. Atveriet **Informācijas panelis → Haosa režīms** (`/dashboard/chaos`).
-2. **Ieslēdziet** to — Haosa režīms pēc noklusējuma tiek piegādāts **atspējots** (`enabled: false` failā
-   `src/lib/chaos/chaosConfig.ts`). Kamēr tas ir atspējots, `POST /api/chaos/run` atbild ar
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. Izvēlieties dalībniekus un noklusējuma iestatījumus (katrai instancei tie tiek saglabāti iestatījumu krātuvē):
+1. Atvērt** Informācijas paneļa → Chaos režīms** (`/dashboard/chaos`).
+2. Pagrieziet to** ieslēgts** — Chaos Mode kuģi** pēc noklusējuma atspējots** (`enabled: false` in `src/lib/chaos/chaosConfig.ts`). Kamēr tas ir atspējots, `POST /api/chaos/run` atbild `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Izvēlieties dalībniekus un noklusējuma iestatījumus (pastāv katrā gadījumā, izmantojot iestatījumu veikalu):
 
-   | Lauks               | Nozīme                                                                             | Noklusējums / ierobežojumi                                     |
-   | ------------------- | ---------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-   | `enabled`           | Galvenais slēdzis                                                                  | `false`                                                        |
-   | `defaultMode`       | `parallel` vai `collaborative` (skatiet tālāk)                                     | `parallel`                                                     |
-   | `providerOverrides` | Katra pakalpojumu sniedzēja dalība (`providerId`, neobligāts `modelId`, `enabled`) | tukšs = katrs aktīvais pakalpojumu sniedzējs, ne vairāk kā 200 |
-   | `systemPrompt`      | Iebūvētās Haosa režīma sistēmas uzvednes aizstāšana                                | neobligāts, ne vairāk kā 10 000 rakstzīmju                     |
-   | `timeoutMs`         | Maksimālais viena modeļa izsaukuma ilgums                                          | `120000` (5 000–600 000)                                       |
-   | `maxTokens`         | `max_tokens` katram modeļa izsaukumam                                              | `4096` (256–128 000)                                           |
+   | Lauks               | Nozīme                                                                      | Noklusējums / ierobežojumi                    |
+   | ------------------- | --------------------------------------------------------------------------- | --------------------------------------------- |
+   | `enabled`           | Galvenais slēdzis                                                           | `false`                                       |
+   | `defaultMode`       | `parallel` vai `collaborative` (skatiet tālāk)                              | `parallel`                                    |
+   | `providerOverrides` | Katra nodrošinātāja dalība (`providerId`, pēc izvēles `modelId`, `enabled`) | tukšs = katrs aktīvais nodrošinātājs, max 200 |
+   | `systemPrompt`      | Ignorēt iebūvēto Chaos sistēmas uzvedni                                     | pēc izvēles, ne vairāk kā 10 000 rakstzīmes   |
+   | `timeoutMs`         | Maksimālais laiks vienam modeļa zvanam                                      | `120000` (5 000–600 000)                      |
+   | `maxTokens`         | `max_tokens` par modeli zvanu                                               | `4096` (256–128 000)                          |
 
-4. Palaidiet **testu pašā lapā** — rezultātu panelī tiek parādīta katra pakalpojumu sniedzēja atbilde,
-   statuss un ilgums.
+4. Sniedziet katram iesaistītajam pakalpojumu sniedzējam a** modelis** . Pakalpojumu sniedzēja modelis ir tā iespējotās ignorēšanas `modelId` lapā Haosa režīms (tas uzvar), pretējā gadījumā** noklusējuma modelis** no tā savienojuma. Pakalpojumu sniedzēja ID nekad netiek izmantots kā modeļa nosaukums. Pakalpojumu sniedzējs, kuram nav ne viena, ne otra** nav zvanīts** : rezultātos tas tiek rādīts kā `status: "error"` ar ziņojumu _"Šim pakalpojumu sniedzējam nav iestatīts modelis. Iestatiet tam modeli Haosa režīma lapā vai noklusējuma modeli savienojumam."_ un tukšu `modelId`, kamēr citi pakalpojumu sniedzēji darbojas normāli. Ja nevienam atlasītajam nodrošinātājam nav modeļa, izpilde neizdodas pirms jebkura augšupēja pieprasījuma ar _"Nevienam nodrošinātājam nav iestatīts modelis. …"_ (HTTP 500 abos galapunktos).
+5. Palaist a** pārbaudi no pašas lapas** — rezultātu panelī ir redzama katra pakalpojumu sniedzēja atbilde, statuss un ilgums.
 
 ## Izpildes režīmi
 
@@ -76,25 +74,22 @@ vairāku modeļu izpildes saskarne, nevis maršrutēšanas stratēģija: tā nek
 
 ### `POST /api/chaos/run` — informācijas paneļa sesija
 
-Autentificēts ar sīkfailu (pārvaldības sesija — skatiet
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); to izmanto informācijas paneļa lapa.
+Sīkdatņu autentifikācija (pārvaldības sesija — sk. [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); izmanto informācijas paneļa lapa.
 
 ```jsonc
-// pieprasījuma pamatteksts
+// body
 {
-  "task": "Compare approaches to X", // obligāts
-  "providers": ["glm", "kimi"], // neobligāts filtrs
-  "mode": "parallel", // neobligāts — aizstāj defaultMode
-  "systemPrompt": "…", // neobligāta aizstāšana
-  "maxTokens": 4096, // neobligāta aizstāšana
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
 ### `POST /api/skills/collect/chaos` — API atslēga
 
-Bearer marķiera variants ārējiem izsaucējiem. Atslēgai jābūt piešķirtai **Haosa režīma atļaujai**
-(`chaosModeEnabled`), kas pēc noklusējuma ir **izslēgta** — iespējojiet to katrai atslēgai atsevišķi sadaļā
-**Informācijas panelis → API pārvaldnieks → rediģēt atslēgu → atļaujas → Haosa režīms**. Pieprasījuma pamatteksts ir tāds pats kā iepriekš.
+Nesēja marķiera variants ārējiem zvanītājiem. Atslēgai jānēsā** Haosa režīma atļauja** (`chaosModeEnabled`), kas ir** izslēgts pēc noklusējuma** — iespējojiet to katram ievades taustiņam** Informācijas panelis → API pārvaldnieks → rediģēšanas atslēga → atļaujas → haosa režīms** . Tāds pats ķermenis kā iepriekš.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Abi galapunkti atgriež vienādas struktūras datus:
+Abi galapunkti atgriež tādu pašu formu:
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ Abi galapunkti atgriež vienādas struktūras datus:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // tikai collaborative režīmā
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## Problēmu novēršana
 
-- **`400 Chaos Mode is not enabled`** — skatiet iepriekš minēto 2. darbību: globālais slēdzis ir izslēgts.
-- **API atslēga tiek noraidīta galapunktā `/api/skills/collect/chaos`** — atslēgai nav piešķirta atsevišķās atslēgas
-  `chaosModeEnabled` atļauja (pēc noklusējuma tā ir izslēgta; tas ir iestatījums, nevis kļūda).
-- **Rezultātos trūkst gaidītā pakalpojumu sniedzēja** — pārbaudiet `providerOverrides` Haosa režīma
-  lapā (atspējota aizstāšana to izslēdz), kā arī to, vai pakalpojumu sniedzēja savienojums ir
-  aktīvs.
+- **`400 Chaos Mode is not enabled`** — 2. darbība iepriekš: globālais slēdzis ir izslēgts.
+- **API atslēga tiek noraidīta pakalpojumā `/api/skills/collect/chaos`** — atslēgai trūkst katras atslēgas `chaosModeEnabled` atļaujas (pēc noklusējuma izslēgta; tas ir iestatījums, nevis kļūda).
+- **Pakalpojumu sniedzējs parāda `No model set for this provider`** — iestatīja savu modeli Haosa režīma lapā vai noklusējuma modeli tā savienojumam (skatiet Iestatīšana, 4. darbība).
+- **Rezultātos trūkst jūsu gaidītā pakalpojumu sniedzēja** — pārbaudiet `providerOverrides` lapā Haosa režīms (atspējota ignorēšana to izslēdz) un vai pakalpojumu sniedzēja savienojums ir aktīvs.
