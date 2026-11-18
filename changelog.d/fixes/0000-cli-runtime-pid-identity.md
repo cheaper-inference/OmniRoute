@@ -1,0 +1,1 @@
+- **fix(cli):** identify Node, nodejs and Bun processes by their application script even when the runtime is installed inside an OmniRoute directory, preventing stop from signaling an unrelated process.
