@@ -433,10 +433,10 @@ async function computeAnalyticsResponse(
         !includeFlatRateEstimates,
         pricingContext
       );
-      // Keyed by model name alone (not provider) — the table renders one row per
-      // model, so the same model served via multiple provider connections/accounts
-      // must be merged here rather than producing duplicate `key={m.model}` rows.
-      const key = short;
+      // Keyed by provider + normalized model name so multi-provider deployments
+      // retain separate per-provider rows while same-provider raw spelling
+      // variants (e.g. prefixed vs unprefixed, #7535) still merge cleanly.
+      const key = `${provider}:${short}`;
       const existing = modelMap.get(key) || {
         model: short,
         provider,
@@ -469,7 +469,9 @@ async function computeAnalyticsResponse(
 
     const byModel = Array.from(modelMap.values())
       .map((row) => ({
-        ...cachedInput.byModel.find((item) => normalizeModelName(item.model) === row.model),
+        ...(cachedInput.byProviderModel?.get(
+          `${String(row.provider || "unknown").toLowerCase()}:${normalizeModelName(row.model).toLowerCase()}`
+        ) ?? cachedInput.byModel.find((item) => normalizeModelName(item.model) === row.model)),
         model: row.model,
         provider: row.provider,
         rawModel: row.rawModel,

@@ -7,6 +7,7 @@ export type CachedInputMeasurement = {
 };
 
 type MeasurementRow = {
+  provider?: string;
   model?: string;
   cachedInputTokens: number | null;
   cachedInputTokensComplete: number;
@@ -15,7 +16,11 @@ type MeasurementRow = {
 export function getCachedInputAnalytics(
   options: BuildUnifiedSourceOptions,
   normalizeModel: (model: string) => string = (model) => model
-): { summary: CachedInputMeasurement; byModel: Array<CachedInputMeasurement & { model: string }> } {
+): {
+  summary: CachedInputMeasurement;
+  byModel: Array<CachedInputMeasurement & { model: string }>;
+  byProviderModel: Map<string, CachedInputMeasurement>;
+} {
   const { unifiedSource, unifiedParams } = buildUnifiedSource(options);
   const db = getDbInstance();
   const columns = `SUM(cached_input_tokens) as cachedInputTokens,
@@ -40,6 +45,25 @@ export function getCachedInputAnalytics(
     existing.cachedInputTokensComplete &&= Boolean(row.cachedInputTokensComplete);
     models.set(model, existing);
   }
+  const providerRows = db
+    .prepare(
+      `SELECT provider, model, ${columns} FROM ${unifiedSource} AS _u GROUP BY provider, model`
+    )
+    .all(unifiedParams) as MeasurementRow[];
+  const byProviderModel = new Map<string, CachedInputMeasurement>();
+  for (const row of providerRows) {
+    const provider = (row.provider ?? "unknown").toLowerCase();
+    const model = normalizeModel((row.model ?? "unknown").toLowerCase());
+    const key = `${provider}:${model}`;
+    const existing = byProviderModel.get(key) ?? {
+      cachedInputTokens: null,
+      cachedInputTokensComplete: !filteredHistoryMissing,
+    };
+    if (row.cachedInputTokens !== null)
+      existing.cachedInputTokens = (existing.cachedInputTokens ?? 0) + row.cachedInputTokens;
+    existing.cachedInputTokensComplete &&= Boolean(row.cachedInputTokensComplete);
+    byProviderModel.set(key, existing);
+  }
   return {
     summary: {
       cachedInputTokens: summary?.cachedInputTokens ?? null,
@@ -47,6 +71,7 @@ export function getCachedInputAnalytics(
         !filteredHistoryMissing && Boolean(summary?.cachedInputTokensComplete ?? true),
     },
     byModel: Array.from(models.values()),
+    byProviderModel,
   };
 }
 

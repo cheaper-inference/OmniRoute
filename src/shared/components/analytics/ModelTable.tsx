@@ -106,7 +106,9 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
         </TableHeader>
         <TableBody>
           {sorted.map((m, i) => (
-            <TableRow key={String(m.model ?? i)}>
+            <TableRow
+              key={m.provider ? `${m.provider}:${String(m.model ?? i)}` : String(m.model ?? i)}
+            >
               <TableCell className="px-4 py-2.5">
                 <div className="flex items-center gap-2">
                   <span
