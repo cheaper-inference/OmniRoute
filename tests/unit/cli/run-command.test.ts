@@ -283,3 +283,29 @@ test("buildRunPlan for Oh My Pi never double-prefixes an already-prefixed model"
   assert.deepEqual(args.slice(0, 2), ["--model", "omniroute/glm/glm-5.2"]);
   assert.equal(args.filter((arg) => arg === "--model").length, 1);
 });
+
+test("auth preview follows each target's own credential rules (ANTHROPIC_AUTH_TOKEN only)", async () => {
+  const saved = {
+    ANTHROPIC_AUTH_TOKEN: process.env.ANTHROPIC_AUTH_TOKEN,
+    OMNIROUTE_API_KEY: process.env.OMNIROUTE_API_KEY,
+  };
+  process.env.ANTHROPIC_AUTH_TOKEN = "sk_anthropic_only_private";
+  delete process.env.OMNIROUTE_API_KEY;
+  try {
+    const opts = { baseUrl: "http://localhost:20128" };
+    // Codex never reads ANTHROPIC_AUTH_TOKEN: it launches with the no-auth sentinel.
+    const codex = await buildRunPlan("codex", opts);
+    assert.equal(codex.authSource, "none");
+    // Claude does fall back to ANTHROPIC_AUTH_TOKEN, so the preview names it.
+    const claude = await buildRunPlan("claude", opts);
+    assert.equal(claude.authSource, "env");
+    for (const plan of [codex, claude]) {
+      assert.equal(JSON.stringify(plan).includes("sk_anthropic_only_private"), false);
+    }
+  } finally {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
+});

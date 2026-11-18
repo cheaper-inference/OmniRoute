@@ -186,29 +186,92 @@ const providers = await listProviders();
 
 ## 迁移
 
-OmniRoute 在 `src/lib/db/migrations/` 中使用**带版本且幂等的迁移**。每个迁移都是一个独立的 SQL 文件，命名格式为 `NNN_description.sql`。
+OmniRoute使用**版本化、幂等迁移**在`src/lib/db/migrations/`.每个迁移都是一个SQL文件。两种命名格式并存； `_omniroute_migrations`中记录的版本是数字前缀。
 
 ### 迁移命名
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| 格式                                                 | 例子                                 | 用于                                                                                            |
+| ---------------------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` （正好 3 位数字）              | `241_seen_models.sql`                | 旧系列`001`–`241`。当时间戳格式登陆时冻结（`240`和`241`就在它之前合并）：没有新文件获得序列号。 |
+| `YYYYMMDDHHMMSS_description.sql` （14 位数字， UTC） | `20261113120000_add_usage_index.sql` | 自 2026 年 11 月 13 日起创建的每个迁移。                                                        |
+
+为什么改变：对于连续编号，并行PRs选择相同的下一个编号，除了一个编号外，所有编号都必须在合并之前重新编号。 UTC时间戳为每个PR提供了自己的版本。
+
+时间戳格式规则（由`npm run check:migration-numbering`强制执行，与`scripts/check/lib/migrationNaming.mjs`中的生成器共享）：
+
+- 时间戳是真实的UTC日期和时间，不早于`20261113000000`且不超过未来10分钟。
+- 描述为小写`snake_case`以字母开头（`a-z`、 `0-9`、单词之间单个`_` ），最多 80 个字符。
+- 具有相同时间戳的两个文件是重复的。
+- 无间隙规则仅适用于旧系列：从`001`到`241`每个数字都必须存在，除了已知的间隙`026`、 `055`和`121`。删除`241` （或任何旧文件）会使门失败。 `001`和`241`永远不能添加到`KNOWN_GAPS`名单中。带时间戳的文件永远不会产生间隙。
+- `src/lib/db/migrations/`中的每个条目都必须是具有有效小写`.sql`名称的常规文件。目录、符号链接、 `.SQL`或`.sql.bak`文件、隐藏文件或带有空格的名称都无法通过该门，因为运行程序会默默地跳过它或在启动时崩溃。
+
+**申请订单。**运行程序按前缀的数值排序，而不是按文本排序：首先是旧的`001`–`241`文件，然后是按时间戳顺序的带时间戳的文件，然后是使用`OMNIROUTE_EXTRA_MIGRATIONS_DIRS`注册的任何命名空间目录（例如`ee-001`等版本）。挂起的迁移是其版本不在`_omniroute_migrations`中的任何文件，因此从旧分支迁移到新分支之后合并的迁移仍然适用于现有数据库。
+
+**时间戳是创建顺序，而不是合并顺序。**如果您的迁移依赖于由迁移创建的表或列**较新的**时间戳（例如，来自首先合并的另一个PR数据库），新的数据库将首先运行您的数据库并失败。当您的PR仍然打开时，使用`npm run db:new-migration`重新生成文件名，以便它获得更新的时间戳，或使其独立。 `npm run test:migrations:fresh`将每个迁移应用到一个空数据库并捕获它。
+
+### 合并的迁移永远不会被删除或重命名
+
+一旦迁移文件位于发布分支或`main`上，它就已经在同源数据库和开发人员数据库、 VPS安装和企业同步中运行。从此：
+
+- **切勿删除它。**全新安装将丢失其架构，而升级的数据库则保留其架构。
+- **永远不要重命名它。** `_omniroute_migrations`中的版本将不再与文件匹配，因此每个已应用该版本的数据库都将再次运行它。然后，非幂等SQL会复制数据或停止启动。
+- **需要不同的架构吗？**使用`npm run db:new-migration`创建新的迁移。
+
+重命名仅对于尚未合并的文件是安全的，这就是门的提示所指的情况。发布标签在这里不会改变任何内容：每次推送到`release/v*`分支都会发布Docker `:next`映像并在同源、 VPS安装和企业同步上运行，因此在任何`vX.Y.Z`标签存在之前，合并迁移已在真实数据库上运行。每次删除基本文件（无论是否已标记）都会失败。
+
+- **恢复合并的迁移。**删除文件的`git revert`会失败。保留文件并在新迁移中撤消其架构： `npm run db:new-migration -- <description>`、 `DROP TABLE IF EXISTS`、 `DROP INDEX IF EXISTS`等。升级后的新数据库将以相同的架构结束。
+- **接受的重命名是：兼容性条目和相同的内容。**如果合并的文件必须移动（例如，两个合并的文件共享时间戳并且运行程序因版本冲突而停止），请重命名后一个文件而不触及其SQL并将`{ fromVersion, fromName, toVersion, toName }`添加到`src/lib/db/migrationRunner/constants.ts`中的`RENAMED_MIGRATION_COMPATIBILITY` 。应用旧版本的数据库会移动其`_omniroute_migrations`行，而不是再次运行该文件。无论新的时间戳是什么，门都会对此类重命名发出警告，并始终对其运行交换检查：全新安装将文件应用到新位置，升级的数据库则不会，因此请选择靠近旧时间戳的新时间戳。如果内容发生更改（新迁移中仍会发生架构更改），或者条目的目标文件不在磁盘上，则门将导致重命名失败。
+- **切勿在同一时间戳内重命名。**保留时间戳并仅更改描述的重命名会失败，无论有或没有条目。对于`toVersion`等于`fromVersion`的条目，运行程序将删除旧的`_omniroute_migrations`行，并将该文件再次应用于已运行该文件的每个数据库。如果没有条目，运行程序将仅跟踪版本：它会跳过这些数据库上的文件（新内容永远不会在那里运行）并在每次启动时记录重新编号错误。使用另一个时间戳加上兼容性条目，或保留名称。
+- **该门检查重命名的文件是否不会再次运行。**对于每个覆盖的重命名，门将新文件名传递给`--must-not-apply`进行交换检查。检查使用真实的运行程序启动升级的数据库，如果运行程序再次应用该文件（例如，因为条目的版本或名称错误，或者因为门的文本解析器读取`constants.ts`与TypeScript不同），门会失败并显示`migration renomeada rodaria de novo`并要求您检查条目的旧版本和新版本和名称。
+
+### 大门与基地检查什么
+
+在拉取请求和合并队列运行时， `npm run check:migration-numbering`将磁盘上的`src/lib/db/migrations/`与基本分支上的相同目录进行比较。基数按此顺序为： `--base-latest-tag`、 `--base <ref>`、 `MIGRATION_BASE_REF`变量，或者，当`GITHUB_EVENT_NAME`为`pull_request`、 `pull_request_target`或`merge_group`时，合并提交的第一个父级、事件负载的`merge_group.base_sha`或`git merge-base HEAD origin/$GITHUB_BASE_REF`。在没有可解析基础的拉取请求或合并队列运行中，门会失败。在没有`--base` CI之外，它会打印`comparação com a base: pulada (sem --base)`并跳过这些规则。
+
+`--base-latest-tag`与`HEAD`历史记录中的最新版本标签（按 semver 顺序的`vX.Y.Z` ；nightlies 等后缀标签不算在内）进行比较，规则与`--base`相同。 Release-Green (`scripts/quality/validate-release-green.mjs`) 以这种方式运行门，因为推送和计划运行没有拉取请求基础，并且合并可以在没有新的CI运行的情况下落地。由于历史记录中没有发布标签，门会失败；运行`git fetch --tags` （在CI中， `actions/checkout`和`fetch-depth: 0`带来标签）。
+
+| 拉取请求的更改                                                            | 结果                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 基地上存在的文件被重命名，带有`RENAMED_MIGRATION_COMPATIBILITY`条目       | **警告**如果内容相同，并且无论新时间戳如何，换向检查都会运行；如果新位置更改了最终架构（撤消重命名，或在通勤时选择另一个新时间戳），或者运行程序在升级的数据库上再次应用重命名的文件，则该操作会失败。**失败**如果内容发生变化。 |
+| 基地上存在的文件被重命名，保留其时间戳（仅描述发生变化）                  | **失败**，有或没有条目：跑步者将再次应用它（带有条目）或按版本跳过它（没有条目）。使用另一个时间戳加上兼容性条目，或保留名称。                                                                                                   |
+| 基础上存在的文件被删除，或在没有条目的情况下重命名                        | **失败**，无论文件是否在发布标签中。要撤消它，请使用`git checkout <base> -- src/lib/db/migrations/<file>`恢复文件；要恢复其架构，请使用`DROP ... IF EXISTS`添加新的迁移。                                                        |
+| 基地上存在的文件具有不同的内容                                            | **警告**（ GitHub操作中的`::warning`注释），并且运行换向检查。如果编辑更改了最终架构，则会失败，因为升级的数据库不会再次应用编辑的文件：将更改放入新的迁移中。无害的编辑（评论， `IF NOT EXISTS`）仅发出警告。                   |
+| 添加带时间戳的文件，其时间戳不比基础的最新时间戳更新                      | 运行换向检查，如下所述。                                                                                                                                                                                                         |
+| 旧格式`NNN_`文件添加了一个数字，位于基地最新的旧格式文件下方              | **失败**，即使`KNOWN_GAPS`在同一个拉取请求中进行编辑：旧系列已冻结，请使用`npm run db:new-migration`创建迁移。接受高于基地最新文件（ `release/v*`到`main`拉取请求）的旧格式文件。                                                |
+| 无序、编辑或重命名的文件包含`INSERT`、 `UPDATE`、 `DELETE`或`REPLACE`语句 | **警告**：交换检查不会比较数据，因此请检查升级后的数据库和新数据库应用它的顺序是否会更改结果。                                                                                                                                   |
+
+一次交换检查会将无序、已编辑和重命名的文件一起覆盖。
+
+交换检查（`scripts/check/migration-commutation.ts`）使用实际安装路径构建两个临时数据库：一个**升级版**一个（使用基本迁移启动，然后使用拉取请求的迁移在同一文件上再次启动）和一个**新鲜的**一个（通过拉取请求的迁移启动一次）。它比较结果模式：表和列（忽略列顺序）、 UNIQUE / PRIMARY KEY和FOREIGN KEY约束、每个表的规范化`CREATE TABLE`文本（涵盖CHECK约束、排序规则、生成的列和表选项）、索引、触发器和视图。不比较行数据。如果它们匹配，门就会打印出文件无序，但会通勤并通过。如果它们不同，则门会失败，并显示差异和情况提示：对于无序文件，使用`npm run db:new-migration`重新生成其名称，这是安全的，因为文件尚未合并；对于已编辑的基础文件，恢复基础内容并将更改放入新的迁移中；对于重命名的文件，撤消重命名或在其通勤处选择另一个新时间戳，切勿使用其他名称的相同时间戳。如果检查本身无法运行，则CI中的门会失败，并且仅在本地发出警告。对于已编辑的基本文件，升级的数据库是使用该文件的基本内容构建的，并且第二次引导会跳过它，因为它的版本已被记录。对于重命名的文件，升级后的数据库是使用旧名称下的文件构建的，第二次启动时将其`_omniroute_migrations`行移动到兼容性条目，而不是再次运行；门通过`--must-not-apply`传递新名称，因此如果第二次启动应用它，检查将失败。如果拉取请求迁移无法应用于升级的路径，即在每次基础迁移之后（无论是否在全新安装时也失败），gate 会报告`migration do PR não aplica`并要求您针对基础的当前架构修复SQL ；如果文件依赖于具有较晚时间戳的另一个拉取请求迁移，请使用`npm run db:new-migration`重新生成其名称。
+
+要在本地运行相同的比较，请显式传递基数，例如`npm run check:migration-numbering -- --base origin/<base-branch>`或`npm run check:migration-numbering -- --base-latest-tag`来与最新版本进行比较。
+
+### 转换 Open PR的`NNN`迁移
+
+在切换之前打开的拉取请求可能仍然携带顺序文件，例如`242_add_widgets.sql`。 `241`以上的旧数字被拒绝，因此在合并之前将其转换：
+
+1. **使用生成器重命名文件，保留描述。**运行`npm run db:new-migration -- <same description>`获取新名称，将SQL移入其中，然后删除旧的`NNN_`文件。描述必须保持相同：下面的兼容性条目与之匹配。
+2. **如果持久数据库运行旧版本，请添加兼容性条目。**如果保留的任何数据库（同源、 VPS、贡献者自己的安装）使用`NNN_`文件运行PR的构建，请将`{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }`添加到`src/lib/db/migrationRunner/constants.ts`中的`RENAMED_MIGRATION_COMPATIBILITY` 。这是**`237`到`241`所需**：这些槽现在保存规范的`237_usage_history_calculated_cost.sql`、 `238_codex_connection_fences.sql`、 `239_call_logs_pending_detail_index.sql`、 `240_provider_node_custom_json_config.sql`和`241_seen_models.sql`，如果没有该条目，这样的数据库将永远跳过规范迁移并再次运行转换后的迁移。当目标是时间戳时，它也适用于保持空的槽，例如`242`。如有疑问，请添加该条目。将其添加到数组中的位置并不重要：当一个条目的目标槽仍然保留另一个条目移走的行时（例如`237`持有PR行，而较旧的`usage_history_calculated_cost`行等待移入`237`），运行程序会让该条目等待，直到槽空闲。只有真正的冲突，例如没有条目移动的行所持有的槽，或者交换槽的两个条目，才会停止`Cannot reconcile ...`的引导。
+3. **保持SQL幂等**（`CREATE TABLE IF NOT EXISTS`、 `CREATE INDEX IF NOT EXISTS`、 `INSERT OR IGNORE`），因为转换后的迁移可能会遇到其架构已存在的数据库。
+4. **移动版本键控的特殊情况。**如果PR在`isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) 或`OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`) 中添加了旧编号的情况，请将密钥更改为新时间戳。
+
+`tests/unit/db/codex-fence-migration-rename.test.ts`是重命名迁移测试的工作示例。
+
+### 向后移植到切换前的分支
+
+切勿将`YYYYMMDDHHMMSS_`文件挑选或反向移植到交换机之前的分支（例如较旧的`release/v*`分支）。那里的运行程序将文件名排序为文本，因此带时间戳的文件将在新数据库上的`201_`和`202_`之间运行，而那里的旧门不理解 14 位前缀。在这样的分支上，将更改写入该分支自己的下一个`NNN_`文件，幂等，因此当带时间戳的版本稍后到达时，它是一个无操作。
 
 ### 迁移如何运行
 
-启动时，`migrationRunner.ts` 会：
+启动时， `migrationRunner.ts`：
 
-1. 如果 `_omniroute_migrations` 表不存在，则创建该表
+1. 如果`_omniroute_migrations`表不存在则创建
 2. 查询已应用的迁移
-3. 按顺序应用所有新迁移，每个迁移都在一个事务中执行
-4. 记录每个已应用的迁移及其时间戳
+3. 按顺序应用任何新迁移，每个迁移都在一个事务中
+4. 记录每个应用的迁移和时间戳
 
 ```ts
-// src/lib/db/migrationRunner.ts（简化版）
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### 幂等性
 
-迁移必须是**幂等的**——运行两次时，第二次应不执行任何操作：
+迁移必须是**幂等的**—运行它们两次应该是无操作：
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-应充分使用 `IF NOT EXISTS`、`IF EXISTS` 和 `OR IGNORE` / `OR REPLACE` 子句。
+自由使用`IF NOT EXISTS`、 `IF EXISTS`和`OR IGNORE` / `OR REPLACE`子句。
 
-### 添加新迁移
+### 添加新的迁移
 
-1. **确定下一个编号**：`ls src/lib/db/migrations/ | tail -1`
-2. **创建文件**：`NNN_my_change.sql`
-3. **使用安全的 DDL**：`CREATE TABLE IF NOT EXISTS`、`ALTER TABLE ... ADD COLUMN`
-4. **谨慎回填数据**：使用 `UPDATE ... WHERE ...` 处理现有行
-5. **在副本上测试**：切勿在生产环境中运行未经测试的迁移
+1. **使用生成器创建文件**: `npm run db:new-migration -- <description>` （例如`npm run db:new-migration -- add combo priority`）。它使用当前UTC时间和注释标头写入`src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` ，如果采用该时间戳则向前移动一秒，并且永远不会覆盖文件。不要手动选择号码。
+2. **使用安全DDL** ： `CREATE TABLE IF NOT EXISTS`、 `CREATE INDEX IF NOT EXISTS`、 `ALTER TABLE ... ADD COLUMN`
+3. **仔细回填数据**：使用`UPDATE ... WHERE ...`处理现有行
+4. **检查顺序和命名**： `npm run test:migrations:fresh` （空数据库上的所有迁移）和`npm run check:migration-numbering`
+5. **在副本上测试**：永远不要在生产环境中运行未经测试的迁移
 
-示例：
+例子：
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **向后不兼容的更改**（例如删除列）处理起来较为棘手。OmniRoute 不支持降级——迁移一旦应用，架构更改便是永久性的。请据此做好规划。
+> **向后不兼容的更改**（例如，删除列）很棘手。 OmniRoute NOT是否支持降级—一旦应用迁移，架构更改是永久性的。相应地计划。
 
 ---
 
@@ -405,24 +468,25 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ## 性能调优
 
-### WAL 模式
+### WAL模式
 
-默认启用 WAL。对于高写入负载，请考虑：
+WAL默认启用。对于高写入工作负载，请考虑：
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- 每 1000 页执行一次检查点操作
-PRAGMA journal_size_limit = 67108864;  -- WAL 上限为 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute不设置`journal_size_limit`。检查点将WAL帧移动到主文件中，但WAL文件保持其最大分配大小。 `OMNIROUTE_WAL_GUARD_MAX_MB`守卫仅警告并运行`wal_checkpoint(RESTART)`；它不是磁盘大小上限。
 
 ### 索引
 
-用于提升性能的关键索引（由迁移自动创建）：
+性能关键指标（由迁移自动创建）：
 
-- `idx_models_provider` — 按提供者查找模型
-- `idx_combo_targets_combo_id` — 展开组合目标
-- `idx_usage_history_api_key_timestamp` — 使用情况分析
-- `idx_quota_snapshots_api_key_window` — 配额跟踪
-- `idx_call_logs_timestamp` — 调用日志查询
+- 按提供者查找`idx_models_provider` —模型
+- `idx_combo_targets_combo_id` —组合目标扩展
+- `idx_usage_history_api_key_timestamp` —使用情况分析
+- `idx_quota_snapshots_api_key_window` —配额跟踪
+- `idx_call_logs_timestamp` —通话记录查询
 
 要添加新索引，请创建迁移：
 
@@ -431,24 +495,24 @@ PRAGMA journal_size_limit = 67108864;  -- WAL 上限为 64MB
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### 内存映射 I/O
+### 内存映射I/O
 
-对于非常大的数据库（>10GB），可以通过 SQLite pragma 调整内存映射：
+对于非常大的数据库（> 10GB），可以通过SQLite pragma 调整内存映射：
 
 ```sql
--- 通过 SQLite pragma 设置（在 core.ts 或运行时中调整）
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### 压缩
+### 压实
 
-长期运行的 OmniRoute 实例可受益于偶尔执行 `VACUUM`：
+长期运行的OmniRoute实例受益于偶尔的`VACUUM`：
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-每月在低流量时段运行一次。（WAL 模式可减少此操作的必要性，但无法完全消除。）
+在低流量时段每月运行一次。 （WAL模式减少了这种需求，但并没有消除它。）
 
 ---
 
@@ -556,7 +620,7 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 
 ---
 
-## 常见操作
+## 常用操作
 
 ### 检查表
 
@@ -564,7 +628,7 @@ sqlite3 ~/.omniroute/storage.sqlite "PRAGMA wal_checkpoint(TRUNCATE);"
 sqlite3 ~/.omniroute/storage.sqlite "SELECT * FROM api_keys LIMIT 5;"
 ```
 
-### 统计所有表中的行数
+### 计算所有表中的行数
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite <<EOF
@@ -572,20 +636,20 @@ SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%';
 EOF
 ```
 
-### 重置（清除）所有数据
+### 重置（擦除）所有数据
 
 ```bash
-# 首先停止 OmniRoute
+# Stop OmniRoute first
 omniroute stop
 
-# 删除数据库文件
+# Delete the DB file
 rm ~/.omniroute/storage.sqlite*
 
-# 重新启动（将重新创建空数据库）
+# Restart (will recreate empty DB)
 omniroute
 ```
 
-如需进行**选择性**重置（保留提供者，清除使用记录）：
+对于一个**选择性的**重置（保留提供程序，擦除使用情况）：
 
 ```bash
 DELETE FROM usage_history WHERE timestamp < datetime('now', '-30 day');
@@ -593,7 +657,7 @@ DELETE FROM call_logs WHERE timestamp < datetime('now', '-30 day');
 DELETE FROM proxy_logs WHERE timestamp < datetime('now', '-30 day');
 ```
 
-### 导出单个表
+### 导出单表
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite <<EOF

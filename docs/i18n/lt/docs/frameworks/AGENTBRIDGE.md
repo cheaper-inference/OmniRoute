@@ -20,7 +20,7 @@ Kai IDE agentas (pvz., GitHub Copilot, Cursor, Claude kodas) atlieka API skambut
 
 Tai reiškia, kad galite:
 
-- **Peradresuokite bet kurį agentą bet kuriam teikėjui** : Copilot kalbi su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini arba bet kurį iš OmniRoute 381 teikėjų.
+- **Peradresuokite bet kurį agentą bet kuriam teikėjui** : Copilot kalbi su OpenAI? Nukreipkite jį į Anthropic Claude, Gemini arba bet kurį iš OmniRoute 394 teikėjų.
 - **Taikykite modelių atvaizdus** : `gemini-3-flash` → `claude-sonnet-4.7` skaidriai prižiūrėtojo lygyje.
 - **Stebėkite visą agento srautą** : kiekvienas perimtas prašymas paskelbiamas [eismo inspektoriui](./TRAFFIC_INSPECTOR.md).
 - **Taikykite OmniRoute atsparumą** : kombinuotas maršruto parinkimas, grandinės pertraukikliai, atsarginės dalys ir išlaidų stebėjimo darbai, skirti IDE agentų srautui.
@@ -547,22 +547,22 @@ Išsamios OpenAPI schemos: `docs/openapi.yaml` → žyma `AgentBridge`.
 
 ### Trae tyrimas
 
-Trae yra palyginti naujas DI programavimo asistentas. Prieš įgyvendinant apdorojimo modulį:
+Trae yra palyginti naujas AI kodavimo asistentas. Prieš įdiegiant tvarkyklę:
 
-1. Identifikuoti vykdomąjį failą / plėtinį VS Code / JetBrains prekyvietėse arba kaip atskirą programą
-2. Perimti srautą naudojant mitmproxy, kad būtų nustatyti API serveriai ir galinių taškų struktūros
-3. Nustatyti autentifikavimo mechanizmą
-4. Įvertinti, ar tęsti, atsižvelgiant į naudojimo sąlygas ir API aptinkamumą
+1. Identifikuokite binary/extension VS kodo / JetBrains prekyvietėse arba kaip atskirą programą
+2. Užfiksuokite srautą naudodami mitmproxy, kad atrastumėte API pagrindinius kompiuterius ir galinių taškų formas
+3. Nustatykite autentifikavimo mechanizmą
+4. Įvertinkite go/no-go pagal TOS ir API aptinkamumą
 
-Kol tyrimas nebaigtas, Trae kortelėje valdymo skydelyje rodoma žyma „Tiriama“ su nuoroda „Pranešti apie perspektyvumą“. Apdorojimo modulio ruošinys faile `src/mitm/handlers/trae.ts` pateikia struktūrizuotą klaidą `Dar neįgyvendinta`.
+Kol tyrimas nebus baigtas, Trae kortelėje prietaisų skydelyje rodomas ženklelis „Tiriamas“ su nuoroda „Pranešti apie gyvybingumą“. `src/mitm/handlers/trae.ts` prižiūrėtojo stuburas pateikia struktūrizuotą `Not yet implemented` klaidą.
 
-### Laukiantys agentai (būtinas MITM — nėra tinkinto bazinio URL palaikymo)
+### Atsilikimo agentai (reikia MITM — nėra pasirinktinio bazinio URL palaikymo)
 
-Toliau nurodyti įrankiai dabartinėse versijose nepalaiko tinkintų bazinių URL, todėl MITM yra vienintelis srauto perėmimo būdas. Perspektyvumo vertinimas dar neatliktas:
+Šie įrankiai nepalaiko pasirinktinės bazės URLs dabartinėse versijose, todėl MITM yra vienintelis perėmimo kelias. Laukiama gyvybingumo įvertinimo:
 
 - **Windsurf** (Codeium/Cognition)
-- **Amp** (Sourcegraph)
-- **Amazon Q / Kiro CLI** (AWS Bedrock — atskirai nuo Kiro IDE)
-- **Cowork** (Anthropic darbalaukio programa)
+- **Amp** (Šaltinio grafikas)
+- **Amazon Q / Kiro CLI** (AWS pamatinė uoliena — atskirta nuo Kiro IDE)
+- **Bendradarbis** (Anthropic darbalaukis)
 
-Pastaba: GitHub Copilot CLI ≥v1.0.19 palaiko `COPILOT_PROVIDER_BASE_URL` — šiam įrankiui vietoje MITM naudokite tiesioginę konfigūraciją.
+Pastaba: GitHub Copilot CLI ≥ v1.0.19 palaiko `COPILOT_PROVIDER_BASE_URL` — naudokite tiesioginę konfigūraciją, o ne MITM tam įrankiui.

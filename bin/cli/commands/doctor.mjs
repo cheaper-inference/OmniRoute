@@ -99,16 +99,29 @@ function resolveMigrationsDir(rootDir) {
   return candidates.find((candidate) => fs.existsSync(candidate)) || null;
 }
 
+// Numeric order of the digit prefix, mirroring the runner's compareMigrationVersions():
+// legacy `NNN_` files and timestamped `YYYYMMDDHHMMSS_` files share the directory, and as
+// text `20261113120000_x.sql` would list before `235_y.sql`. Arbitrary precision (no
+// Number), file name as the tie-break. Kept local: this file runs under plain node.
+function compareMigrationFileNames(a, b) {
+  const left = a.version.replace(/^0+(?=\d)/, "");
+  const right = b.version.replace(/^0+(?=\d)/, "");
+  if (left.length !== right.length) return left.length < right.length ? -1 : 1;
+  if (left !== right) return left < right ? -1 : 1;
+  if (a.file === b.file) return 0;
+  return a.file < b.file ? -1 : 1;
+}
+
 function readMigrationFiles(migrationsDir) {
   if (!migrationsDir) return [];
   return fs
     .readdirSync(migrationsDir)
     .filter((file) => /^\d+_.+\.sql$/.test(file))
-    .sort()
     .map((file) => {
       const [, version, name] = file.match(/^(\d+)_(.+)\.sql$/) || [];
       return { version, name, file };
-    });
+    })
+    .sort(compareMigrationFileNames);
 }
 
 async function checkDatabase(dbPath, rootDir) {

@@ -42,6 +42,10 @@ import {
   type RateLimitedCredentials,
 } from "@/app/api/v1/_shared/rateLimit";
 
+import { runWebEndpointCombo } from "@/lib/combos/webEndpointCombo";
+import { getSettings } from "@/lib/db/settings";
+import type { z } from "zod";
+
 const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "POST, OPTIONS",
   "Access-Control-Allow-Headers": "*",
@@ -313,11 +317,35 @@ export async function POST(request: Request) {
 
   // Enforce API key policies. GHSA-3w2r: provider credentials (and the
   // fallback walk) stay inside the key's connection scope, as in chat.
-  const scope = await enforceApiKeyPolicyWithScope(request, "web-fetch");
+  const scope = await enforceApiKeyPolicyWithScope(request, body.model || "web-fetch");
   if (scope.rejection) return scope.rejection;
 
+  if (body.model) {
+    return runWebEndpointCombo({
+      name: body.model,
+      endpoint: "web-fetch",
+      request,
+      body,
+      policy: scope.policy,
+      allowedConnections: scope.allowedConnections,
+      settings: await getSettings(),
+      dispatch: (provider, allowedConnections) =>
+        executeWebFetchBody(
+          { ...body, model: undefined, provider: provider as WebFetchProviderId },
+          allowedConnections
+        ),
+    });
+  }
+  return executeWebFetchBody(body, scope.allowedConnections);
+}
+
+/** Execute a validated page-fetch body through a direct provider or named combo. */
+async function executeWebFetchBody(
+  body: z.infer<typeof v1WebFetchSchema>,
+  allowedConnections: string[] | null
+): Promise<Response> {
   // Resolve provider + credentials (explicit provider never falls back; #8297)
-  const target = await resolveWebFetchTarget(body.provider, scope.allowedConnections);
+  const target = await resolveWebFetchTarget(body.provider, allowedConnections);
   if (!target.ok) return target.response;
 
   log.info("WEB_FETCH", `${target.provider} | ${body.url} | format=${body.format}`);
@@ -338,7 +366,7 @@ export async function POST(request: Request) {
     target.credentials,
     !target.isExplicit,
     target.tried,
-    scope.allowedConnections
+    allowedConnections
   );
 
   if (poolExhausted) {

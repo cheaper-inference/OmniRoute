@@ -30,7 +30,14 @@ function isBlank(value) {
   return value === undefined || value === null || String(value).trim() === "";
 }
 
-function toAuthSource(targetOpts, baseUrl) {
+/**
+ * Where the credential a plan launches with comes from. `authToken` is the
+ * credential the target's own resolver returned, so a variable that target
+ * never reads (Codex ignores ANTHROPIC_AUTH_TOKEN) is not reported as the
+ * source of a launch that actually gets the no-auth sentinel.
+ */
+function toAuthSource(targetOpts, baseUrl, authToken) {
+  if (isBlank(authToken)) return "none";
   const explicit =
     !isBlank(targetOpts.token) || !isBlank(targetOpts.apiKey) || !isBlank(targetOpts["api-key"]);
   if (explicit) return "option";
@@ -144,7 +151,7 @@ async function buildClaudePlan(rawOpts, args = []) {
     args: spawnArgs,
     model: merged.model || undefined,
     envDiff: envPreview(process.env, env),
-    authSource: toAuthSource(rawOpts, baseUrl),
+    authSource: toAuthSource(rawOpts, baseUrl, authToken),
     commandDisplay: describeCommand(commandSpec.command, commandSpec.shell),
   };
 }
@@ -178,7 +185,7 @@ async function buildCodexPlan(rawOpts, args = []) {
     args: spawnArgs,
     model: merged.model || undefined,
     envDiff: envPreview(process.env, env),
-    authSource: toAuthSource(rawOpts, baseUrl),
+    authSource: toAuthSource(rawOpts, baseUrl, authToken),
     commandDisplay: describeCommand(commandSpec.command, commandSpec.shell),
     providerArgs,
     profileArgs,
@@ -356,7 +363,7 @@ async function buildGenericPlan(target, rawOpts, args = []) {
     args: quoteShellArgsForSpawn(fullArgs, process.platform, commandSpec.shell),
     model: model || undefined,
     envDiff: envPreview(process.env, env),
-    authSource: toAuthSource(rawOpts, baseUrl),
+    authSource: toAuthSource(rawOpts, baseUrl, authToken),
     commandDisplay: describeCommand(commandSpec.command, commandSpec.shell),
     modelArgs,
     configOverlay:

@@ -6,11 +6,11 @@
 
 ## Leochaileachtaí a Thuairisciú
 
-Má aimsíonn tú leochaileacht slándála in OmniRoute, tuairiscigh í ar bhealach freagrach:
+Má aimsíonn tú leochaileacht slándála in OmniRoute, tuairiscigh go freagrach é le do thoil:
 
-1. **NÁ HOSCAIL** saincheist phoiblí GitHub
-2. Úsáid [Comhairleoirí Slándála GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Cuir san áireamh: cur síos, céimeanna atáirgthe, agus an tionchar féideartha
+1. **DO NOT** saincheist GitHub poiblí a oscailt
+2. Úsáid [GitHub Comhairleoirí Slándála](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Cuir san áireamh: cur síos, céimeanna atáirgeadh, agus tionchar féideartha
 
 ## Amlíne Freagartha
 
@@ -29,25 +29,14 @@ Má aimsíonn tú leochaileacht slándála in OmniRoute, tuairiscigh í ar bheal
 | 3.7.x   | ✅ Slándáil                                         |
 | < 3.7.0 | ❌ Gan tacaíocht                                    |
 
-## Fuinneog tacaíochta LTS (v3.9.x)
+## fuinneog tacaíochta LTS (v3.9.x)
 
-Tar éis 3.8.59, is é **3.9.0** an chéad leagan eile, lena n-osclaítear an líne tacaíochta fadtéarmaí ar an
-mbrainse `stable/v3` (féach [`ROADMAP.md`](ROADMAP.md) → "Céim 3 — v3.9.0 LTS").
+Tar éis 3.8.59 is é an chéad leagan eile** 3.9.0** , a osclaíonn an líne tacaíochta fadtéarmach ar an mbrainse `stable/v3` (féach [`ROADMAP.md`](ROADMAP.md) → "Céim 3 — v3.9.0 LTS").
 
-- **An méid a fhaigheann `stable/v3`:** ceartúcháin fabhtanna, paistí slándála agus nuashonruithe soláthraithe. Cuirtear
-  gnéithe nua leis an gcainéal v4; tugtar tús áite don chobhsaíocht sa líne LTS. Fanann `npm install omniroute`
-  (an dist-tag `latest`) ar v3 ar feadh thimthriall iomlán v4.
-- **Fad na fuinneoige:** faigheann `stable/v3` **ceartúcháin slándála agus ceartúcháin ar aischéimnithe criticiúla ar feadh
-  12 mhí tar éis eisiúint 3.9.0, nó go dtí 90 lá tar éis v4.0.0 a fhoilsiú mar `latest` —
-  cibé acu is déanaí**. Déantar an dáta deiridh a eascraíonn as sin a thaifeadadh i nótaí eisiúna 3.9.0 agus in
-  [`ROADMAP.md`](ROADMAP.md) nuair a dhéantar an eisiúint.
-- **Leochaileacht sa líne LTS a thuairisciú:** úsáid an cainéal céanna agus a úsáidtear le haghaidh aon leagain eile —
-  [Comhairleach Slándála GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) príobháideach,
-  agus ná húsáid saincheist phoiblí riamh. Luaigh cén leagan a ndearna tú tástáil air (mar shampla `3.9.2`); cuirtear ceartúcháin i bhfeidhm ar
-  `stable/v3` agus cuirtear ar aghaidh chuig v4 iad.
-- **Bonnlíne slándála tráth eisiúna LTS:** déantar staid tomhaiste an scanóra, cosaint bealaigh agus
-  cruthúnais maidir le dintiúir phoiblí a thaifeadadh in
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Cad a fhaigheann `stable/v3` :** ceartúcháin fhabht, paistí slándála agus nuashonruithe soláthraithe. Téann gnéithe nua chuig an gcainéal v4; tá an líne LTS cobhsaíocht-an chéad. Fanann `npm install omniroute` (an `latest` dist-tag) ar v3 le linn timthriall iomlán v4.
+- **Fad fuinneoige:** Faigheann `stable/v3`** socruithe slándála agus aischéimnithe criticiúla ar feadh 12 mhí tar éis an gearrtha 3.9.0, nó go dtí 90 lá tar éis v4.0.0 a fhoilsiú mar `latest` — cibé acu is déanaí** . Taifeadtar an dáta deiridh mar thoradh air sna nótaí scaoileadh 3.9.0 agus i [`ROADMAP.md`](ROADMAP.md) nuair a tharlaíonn an gearradh.
+- **Leochaileacht a thuairisciú sa líne LTS :** cainéal céanna le haon leagan eile — a private [GitHub Security Advisory](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), nach ceist phoiblí í riamh. Abair cén leagan a ndearna tú tástáil air (mar shampla `3.9.2`); socraíonn sé talamh ar `stable/v3` agus cuirtear ar aghaidh chuig v4.
+- **Bunlíne slándála ag an gearrtha LTS :** déantar staid an scanóir tomhaiste, an garda bealaigh agus na cruthúnais maidir le creidiúint phoiblí a thaifeadadh in [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 

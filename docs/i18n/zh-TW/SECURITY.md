@@ -4,13 +4,13 @@
 
 ---
 
-## 回報漏洞
+## 報告漏洞
 
-如果您在 OmniRoute 中發現安全漏洞，請以負責任的方式回報：
+如果您發現OmniRoute中存在安全漏洞，請負責任地回報：
 
-1. **請勿**建立公開的 GitHub issue
-2. 使用 [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. 請包含：說明、重現步驟及潛在影響
+1. **DO NOT**公開GitHub問題
+2. 使用[GitHub安全公告](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. 包括：描述、複製步驟和潛在影響
 
 ## 回應時程
 
@@ -29,25 +29,14 @@
 | 3.7.x   | ✅ 安全性支援                                 |
 | < 3.7.0 | ❌ 不支援                                     |
 
-## LTS 支援期間（v3.9.x）
+## LTS支援視窗 (v3.9.x)
 
-3.8.59 之後的下一個版本是 **3.9.0**，此版本會在
-`stable/v3` 分支上開啟長期支援產品線（請參閱 [`ROADMAP.md`](ROADMAP.md) →「Phase 3 — v3.9.0 LTS」）。
+3.8.59之後的下一個版本是**3.9.0** ，在`stable/v3`分支上打開長期支撐線（參見[`ROADMAP.md`](ROADMAP.md) → “第3階段— v3.9.0 LTS”）。
 
-- **`stable/v3` 會接收的內容：**錯誤修正、安全性修補程式及提供者更新。新
-  功能會進入 v4 頻道；LTS 產品線會優先考量穩定性。在整個 v4 週期中，`npm install omniroute`
-  （`latest` dist-tag）都會維持在 v3。
-- **支援期間：**`stable/v3` 會在 **3.9.0 發布後的 12 個月內，或 v4.0.0 以 `latest` 發布後的
-  90 天內，持續接收安全性修正與重大迴歸問題修正——
-  以較晚者為準**。最終的結束日期會在 3.9.0 發布時記錄於其版本資訊及
-  [`ROADMAP.md`](ROADMAP.md) 中。
-- **回報 LTS 產品線中的漏洞：**使用與其他版本相同的管道——
-  私密的 [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)，
-  絕不可使用公開 issue。請註明您測試的版本（例如 `3.9.2`）；修正會套用至
-  `stable/v3`，並向前移植至 v4。
-- **LTS 發布時的安全性基準：**經量測的掃描器狀態、路由防護及
-  公開憑證證明會記錄於
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md)。
+- **`stable/v3`收到什麼：**錯誤修復、安全性修補程式和提供者更新。新功能進入v4通道； LTS線是穩定第一的。 `npm install omniroute` （ `latest` dist-tag）在整個 v4 週期中保留在 v3 上。
+- **窗口持續時間：** `stable/v3`收到**3.9.0 版本削減後 12 個月內的安全修復和關鍵回歸，或 v4.0.0 發佈為`latest` —後 90 天（以較晚者為準）** 。最終的結束日期記錄在 3.9.0 發行說明中以及削減發生時的[`ROADMAP.md`](ROADMAP.md)中。
+- **回報LTS行的漏洞：**與其他版本相同的頻道—是私人[GitHub安全建議](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)，絕非公開問題。說出您測試的版本（例如`3.9.2`）；修復了`stable/v3`上的問題並向前移植到 v4。
+- **LTS削減時的安全基線：**測量的掃描器狀態、路由保護和公共憑證證明記錄在[`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) 。
 
 ---
 

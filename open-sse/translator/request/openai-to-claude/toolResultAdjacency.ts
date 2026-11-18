@@ -9,33 +9,38 @@ type ClaudeMessage = {
 // send intervening user text before a later role:"tool" message, so repair the
 // ordering here while preserving unmatched output for the Claude-format pass.
 export function enforceToolResultAdjacency(messages: ClaudeMessage[]): ClaudeMessage[] {
-  const assistantByToolUseId = indexAssistantToolUses(messages);
+  const assistantsByToolUseId = indexAssistantToolUses(messages);
   const resultsByAssistant = new Map<ClaudeMessage, ClaudeContentBlock[]>();
   const strippedMessages: ClaudeMessage[] = [];
 
   for (const msg of messages) {
-    stripAndCollectToolResults(msg, assistantByToolUseId, resultsByAssistant, strippedMessages);
+    stripAndCollectToolResults(msg, assistantsByToolUseId, resultsByAssistant, strippedMessages);
   }
 
   return insertAdjacentToolResults(strippedMessages, resultsByAssistant);
 }
 
-function indexAssistantToolUses(messages: ClaudeMessage[]): Map<string, ClaudeMessage> {
-  const assistantByToolUseId = new Map<string, ClaudeMessage>();
+// A tool_use id is only unique within one assistant turn (agent sessions reuse
+// ids across turns), so every occurrence is queued in arrival order and each
+// tool_result consumes the oldest assistant that still lacks a result for it.
+function indexAssistantToolUses(messages: ClaudeMessage[]): Map<string, ClaudeMessage[]> {
+  const assistantsByToolUseId = new Map<string, ClaudeMessage[]>();
   for (const msg of messages) {
     if (msg.role !== "assistant" || !Array.isArray(msg.content)) continue;
     for (const block of msg.content) {
-      if (block.type === "tool_use" && block.id && !assistantByToolUseId.has(String(block.id))) {
-        assistantByToolUseId.set(String(block.id), msg);
-      }
+      if (block.type !== "tool_use" || !block.id) continue;
+      const id = String(block.id);
+      const queue = assistantsByToolUseId.get(id);
+      if (queue) queue.push(msg);
+      else assistantsByToolUseId.set(id, [msg]);
     }
   }
-  return assistantByToolUseId;
+  return assistantsByToolUseId;
 }
 
 function stripAndCollectToolResults(
   msg: ClaudeMessage,
-  assistantByToolUseId: Map<string, ClaudeMessage>,
+  assistantsByToolUseId: Map<string, ClaudeMessage[]>,
   resultsByAssistant: Map<ClaudeMessage, ClaudeContentBlock[]>,
   strippedMessages: ClaudeMessage[]
 ): void {
@@ -51,7 +56,7 @@ function stripAndCollectToolResults(
       continue;
     }
 
-    if (!collectMatchedToolResult(block, assistantByToolUseId, resultsByAssistant)) {
+    if (!collectMatchedToolResult(block, assistantsByToolUseId, resultsByAssistant)) {
       const toolUseId = typeof block.tool_use_id === "string" ? block.tool_use_id : "";
       const serialized =
         typeof block.content === "string"
@@ -71,11 +76,11 @@ function stripAndCollectToolResults(
 
 function collectMatchedToolResult(
   block: ClaudeContentBlock,
-  assistantByToolUseId: Map<string, ClaudeMessage>,
+  assistantsByToolUseId: Map<string, ClaudeMessage[]>,
   resultsByAssistant: Map<ClaudeMessage, ClaudeContentBlock[]>
 ): boolean {
   const toolUseId = typeof block.tool_use_id === "string" ? block.tool_use_id : "";
-  const assistant = toolUseId ? assistantByToolUseId.get(toolUseId) : undefined;
+  const assistant = toolUseId ? assistantsByToolUseId.get(toolUseId)?.shift() : undefined;
   if (!assistant) return false;
 
   const grouped = resultsByAssistant.get(assistant) ?? [];
