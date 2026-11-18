@@ -27,6 +27,10 @@ const WORKER_SRC = join(ROOT, "open-sse", "services", "compression", "compressio
 // Packages the worker imports that also reach the standalone tree through the
 // Next.js server trace, because the app itself imports them on its main path.
 const TRACED_BY_NEXT_SERVER = new Set([
+  // better-sqlite3 is statically imported by the app's DB drivers, so Next's
+  // server trace ships its JS; only its native build/prebuilds need the
+  // separate NATIVE_ASSET_ENTRIES rows already present in assembleStandalone.mjs.
+  "better-sqlite3",
   "bcryptjs",
   "pino",
   "playwright",
