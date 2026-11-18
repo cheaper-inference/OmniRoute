@@ -15,12 +15,12 @@ on:
     types: [checks_requested]
   workflow_dispatch:
 
-  # A description edit on a Mergify queue draft (Mergify writes its queue summary there, and
-  # the Blacksmith app appends its footer, ~4 edits in the first 30 s) gets its own group and
-  # skips the matrix: in the shared group it cancelled the candidate's real run, and Mergify
-  # dequeued the PR on the cancelled checks ("checks interrupted", #18853/#18858 on 2026-11-03).
+# A title/body edit does not change the candidate. Give it a separate run group
+# so it cannot cancel the code-validation run, and a distinct skipped gate name.
+# Use GitHub's changes object, including a null/empty previous body. A base
+# retarget or an edit without a recognized changes object still runs admission.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && format('-queue-edit-{0}', github.run_id) || '' }}
+  group: ${{ github.workflow }}-${{ github.ref }}${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) && format('-metadata-edit-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -38,7 +38,7 @@ jobs:
   # path filters share existence reasons: code / docs / i18n / workflow.
   changes:
     name: Change Classification
-    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
+    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) }}
     runs-on: ubuntu-latest
     outputs:
       # Match the official Mergify App and both repository IDs from GitHub's
@@ -607,9 +607,9 @@ jobs:
   admission-verdict:
     # Only requested candidates receive the required check name. An ordinary draft
     # deliberately skips its producer jobs and must not create a failed admission.
-    # Classifier failures still reach the gate; queue metadata edits keep their own name.
-    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / Quality (queue-draft edit)' || (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Gate / Quality' || 'Admission not requested / Quality' }}
-    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
+    # Classifier failures still reach the gate; metadata-only edits keep their own name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) && 'Gate / Quality (PR metadata edit)' || (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Gate / Quality' || 'Admission not requested / Quality' }}
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:

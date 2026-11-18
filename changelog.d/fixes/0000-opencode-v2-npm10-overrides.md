@@ -1,0 +1,1 @@
+- Keep the OpenCode v2 standalone glob and minimatch security overrides selected when npm 10 re-evaluates resolved dependencies, preserving the patched pins and existing host versions.

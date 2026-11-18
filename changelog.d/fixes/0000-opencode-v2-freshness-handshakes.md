@@ -1,0 +1,1 @@
+OpenCode v2 catalog freshness tests now await publication and optional snapshot completion instead of fixed sleeps. Controlled write barriers verify that elapsed timer time cannot certify a completed refresh, while preserving the checks for new models, exactly one reload, unchanged catalogs, and non-overlapping refreshes.
