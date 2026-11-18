@@ -621,6 +621,19 @@ export function getProviderProfile(provider: string): ProviderProfile {
   return buildProviderProfile(category);
 }
 
+/**
+ * Model-lockout settings for a lockout about to be recorded. A settings read failure falls back
+ * to the resolver defaults (as getRuntimeProviderProfile does) so the lock is still recorded.
+ */
+async function getRuntimeModelLockoutSettings() {
+  try {
+    const { getCachedSettings } = await import("@/lib/db/readCache");
+    return resolveModelLockoutSettings(await getCachedSettings());
+  } catch {
+    return resolveModelLockoutSettings(null);
+  }
+}
+
 export async function getRuntimeProviderProfile(provider: string | null | undefined) {
   try {
     const { getCachedSettings } = await import("@/lib/db/readCache");
@@ -682,8 +695,7 @@ export async function recordCoreOwnedAntigravityQuotaState({
 }) {
   const profile = profileOverride ?? (await getRuntimeProviderProfile(provider));
   const fallback = checkFallbackError(status, errorText, 0, model, provider, headers, profile);
-  const { getCachedSettings } = await import("@/lib/db/readCache");
-  const mlSettings = resolveModelLockoutSettings(await getCachedSettings());
+  const mlSettings = await getRuntimeModelLockoutSettings();
   const lockout = recordModelLockoutFailure(
     provider,
     connectionId,
@@ -894,6 +906,34 @@ export function selectLockoutCooldownMs(
   return settings.useExponentialBackoff ? 0 : settings.baseCooldownMs;
 }
 
+function positiveMsOrNull(value: unknown): number | null {
+  return typeof value === "number" && value > 0 ? value : null;
+}
+
+/**
+ * The ceiling an exact cooldown is clamped to depends on where it came from (#20343):
+ * relative quota prose ("Resets in 76h25m43s") is honored up to the dedicated prose
+ * ceiling (6h default) — never the full 76h, never the 30m relock loop; an authoritative
+ * upstream reset is honored exactly; anything else is capped at maxCooldownMs.
+ */
+function clampExactCooldownMs(
+  exactCooldownMs: number,
+  maxCooldownMs: number | null,
+  options: {
+    quotaProseMaxCooldownMs?: number;
+    exactCooldownIsRelativeProseReset?: boolean;
+    exactCooldownIsUpstreamReset?: boolean;
+  }
+): number {
+  if (options.exactCooldownIsRelativeProseReset === true) {
+    const ceiling = positiveMsOrNull(options.quotaProseMaxCooldownMs) ?? maxCooldownMs;
+    return ceiling !== null ? Math.min(exactCooldownMs, ceiling) : exactCooldownMs;
+  }
+  if (maxCooldownMs !== null && !options.exactCooldownIsUpstreamReset)
+    return Math.min(exactCooldownMs, maxCooldownMs);
+  return exactCooldownMs;
+}
+
 export function recordModelLockoutFailure(
   provider: string,
   connectionId: string,
@@ -973,27 +1013,10 @@ export function recordModelLockoutFailure(
   // honored — EXCEPT an authoritative parsed upstream reset (#6863, e.g. Antigravity
   // "Resets in 92h27m28s"), which the upstream told us to wait and must be honored
   // exactly, never clamped down to maxCooldownMs.
-  const maxCooldownMs =
-    typeof options.maxCooldownMs === "number" && options.maxCooldownMs > 0
-      ? options.maxCooldownMs
-      : null;
-  const quotaProseMaxCooldownMs =
-    typeof options.quotaProseMaxCooldownMs === "number" && options.quotaProseMaxCooldownMs > 0
-      ? options.quotaProseMaxCooldownMs
-      : null;
+  const maxCooldownMs = positiveMsOrNull(options.maxCooldownMs);
   const cooldownMs =
     typeof options.exactCooldownMs === "number" && options.exactCooldownMs > 0
-      ? options.exactCooldownIsRelativeProseReset === true
-        ? // Relative prose: honor the window up to the dedicated prose ceiling
-          // (6h default) — never the full 76h, never the 30m relock loop.
-          quotaProseMaxCooldownMs !== null
-          ? Math.min(options.exactCooldownMs, quotaProseMaxCooldownMs)
-          : maxCooldownMs !== null
-            ? Math.min(options.exactCooldownMs, maxCooldownMs)
-            : options.exactCooldownMs
-        : maxCooldownMs !== null && !options.exactCooldownIsUpstreamReset
-          ? Math.min(options.exactCooldownMs, maxCooldownMs)
-          : options.exactCooldownMs
+      ? clampExactCooldownMs(options.exactCooldownMs, maxCooldownMs, options)
       : Math.min(
           getScaledCooldown(
             baseCooldownMs,

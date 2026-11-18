@@ -173,3 +173,77 @@ test("a generic body hint stays clamped to maxCooldownMs (30m relock loop preser
   );
   assert.equal(res.cooldownMs, MAX_30M);
 });
+
+test("a cached Claude reset is not reclassified as relative prose (combo path)", async () => {
+  const { applyComboTargetExhaustion } =
+    await import("../../open-sse/services/combo/targetExhaustion.ts");
+  const { __clearForTests: clearQuotaCache, setQuotaCache } =
+    await import("../../src/domain/quotaCache.ts");
+  clearQuotaCache();
+  setQuotaCache(
+    "claude-prose",
+    "claude",
+    {},
+    {
+      "weekly Fable (7d)": {
+        remainingPercentage: 0,
+        resetAt: new Date(Date.now() + 120_000).toISOString(),
+        claudeQuota: {
+          kind: "weekly_scoped",
+          active: true,
+          severity: "critical",
+          scopeKey: "model:fable",
+          modelId: "claude-fable-5-1",
+          modelDisplayName: "Fable",
+        },
+      },
+    }
+  );
+  const log = { info() {}, warn() {}, error() {}, debug() {} };
+  const failure = applyComboTargetExhaustion(
+    {
+      kind: "model",
+      executionKey: "ek",
+      modelStr: "claude/claude-fable-5-1",
+      provider: "claude",
+      providerId: null,
+      connectionId: "claude-prose",
+    } as Parameters<typeof applyComboTargetExhaustion>[0],
+    {
+      result: { status: 429, headers: new Headers() },
+      // The body also carries a relative countdown, but the cached reset is what gets locked.
+      fallbackResult: {
+        reason: "quota_exhausted",
+        cooldownMs: 5 * HOUR,
+        retryHintSource: "body_relative_countdown",
+      },
+      errorText: "This request would exceed your account's rate limit. Please try again later.",
+      rawModel: "claude-fable-5-1",
+      isTokenLimitBreach: false,
+      allAccountsRateLimited: false,
+      requestScopedFailure: false,
+      sets: {
+        exhaustedProviders: new Set<string>(),
+        exhaustedConnections: new Set<string>(),
+        transientRateLimitedProviders: new Set<string>(),
+      },
+      log,
+      tag: "COMBO",
+      exhaustedLogLevel: "info" as const,
+    }
+  );
+  clearQuotaCache();
+  assert.ok((failure.modelScopedClaudeCooldownMs ?? 0) > 0, "the cached reset is selected");
+  assert.equal(failure.lockoutHintVerified, true);
+  assert.equal(failure.lockoutHintIsRelativeProse, false);
+});
+
+test("the settings schema rejects a prose ceiling the resolver would silently raise", async () => {
+  const { updateSettingsSchema } = await import("../../src/shared/validation/settingsSchemas.ts");
+  const parse = (quotaProseMaxCooldownMs: number) =>
+    updateSettingsSchema.safeParse({ modelLockout: { quotaProseMaxCooldownMs } }).success;
+  // Outside the test process the resolver floors this setting at 60,000 ms.
+  assert.equal(parse(30_000), false);
+  assert.equal(parse(60_000), true);
+  assert.equal(parse(24 * HOUR), true);
+});

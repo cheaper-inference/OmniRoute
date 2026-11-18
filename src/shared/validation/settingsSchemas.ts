@@ -748,10 +748,12 @@ export const updateSettingsSchema = z.object({
         .min(5000, "Must be at least 5,000ms")
         .max(3600000, "Must be at most 3,600,000ms (1 h)")
         .optional(),
+      // Same floor as resolveModelLockoutSettings applies outside tests (60 s): a lower
+      // accepted value would be silently raised.
       quotaProseMaxCooldownMs: z
         .number()
         .int()
-        .min(5000, "Must be at least 5,000ms")
+        .min(60000, "Must be at least 60,000ms (1 min)")
         .max(86400000, "Must be at most 86,400,000ms (24 h)")
         .optional(),
       maxBackoffSteps: z

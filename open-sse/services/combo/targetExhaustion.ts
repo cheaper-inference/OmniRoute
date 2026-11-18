@@ -239,7 +239,11 @@ function deriveTargetFailure(
     // combo call sites must tell recordModelLockoutFailure apart from
     // header/RetryInfo hints, which stay clamped to maxCooldownMs or honored
     // exactly respectively.
-    lockoutHintIsRelativeProse: opts.fallbackResult.retryHintSource === "body_relative_countdown",
+    // A cached Claude reset is what gets locked when present, so the body's countdown never
+    // decides its ceiling.
+    lockoutHintIsRelativeProse:
+      modelScopedClaudeCooldownMs === null &&
+      opts.fallbackResult.retryHintSource === "body_relative_countdown",
   };
 }
 

@@ -3261,8 +3261,10 @@ export async function markAccountUnavailable(
           // dedicated quotaProseMaxCooldownMs (6h) instead of the generic 30m
           // maxCooldownMs — same bounded-ceiling treatment as the Antigravity
           // core-owned path in accountFallback.ts.
+          // A cached Claude reset stays authoritative even when the body also has a countdown.
           exactCooldownIsRelativeProseReset:
             exactCooldownMs === upstreamCooldownMs &&
+            !hasClaudeScopedReset &&
             fallbackResult.retryHintSource === "body_relative_countdown",
         }
       );
