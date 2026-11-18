@@ -34,6 +34,23 @@ function releaseGateWhenNoScopeCooldown(id: string, data: RecordValue | null): v
   unblockAccount({ provider: "codex", accountKey: id });
 }
 
+/**
+ * Open the in-memory semaphore gate of a connection whose persisted quota
+ * state was just cleared as recovered. The Codex gate is shared by both
+ * scopes, so a scope cooldown still parked on the row keeps it closed.
+ */
+export function releaseRecoveredAccountGate(connection: {
+  id: string;
+  provider: string;
+  providerSpecificData?: RecordValue;
+}): void {
+  if (connection.provider === "codex") {
+    releaseGateWhenNoScopeCooldown(connection.id, toRecord(connection.providerSpecificData));
+    return;
+  }
+  unblockAccount({ provider: connection.provider, accountKey: connection.id });
+}
+
 /** Atomic, account-scoped release. Credentials and terminal account states are untouched. */
 export async function clearCodexAccountCooldown(id: string, scope: Scope = "codex") {
   const data = mutate(id, (next) => clearScope(next, scope));
