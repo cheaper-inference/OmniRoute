@@ -9,6 +9,7 @@ import {
   Checkbox,
   Input,
   Modal,
+  NumberInput,
   SegmentedControl,
   Select,
   Textarea,
@@ -583,7 +584,8 @@ export default function AddApiKeyModal({
             {openRouterPreset.input}
             {freeModelsToggle}
             <Textarea
-              className="min-h-[140px] resize-y font-mono text-sm"
+              mono
+              className="min-h-[140px] resize-y text-sm"
               placeholder={
                 isCloudflare
                   ? "name1|account-id-1|cf-token-1\nname2|account-id-2|cf-token-2"
@@ -593,18 +595,12 @@ export default function AddApiKeyModal({
               onChange={(e) => setBulkText(e.target.value)}
             />
             <div className="flex items-end gap-4 flex-wrap">
-              <Input
-                type="number"
+              <NumberInput
                 label={t("priorityLabel")}
                 min={1}
                 max={100}
                 value={formData.priority}
-                onChange={(e) =>
-                  setFormData({
-                    ...formData,
-                    priority: Number.parseInt(e.target.value) || 1,
-                  })
-                }
+                onValueChange={(value) => setFormData({ ...formData, priority: value || 1 })}
                 className="w-auto min-w-0"
                 inputClassName="w-20"
               />
@@ -1112,13 +1108,11 @@ export default function AddApiKeyModal({
               onChange={(e) => setFormData({ ...formData, validationModelId: e.target.value })}
               hint={t("validationModelIdHint")}
             />
-            <Input
+            <NumberInput
               label={t("priorityLabel")}
-              type="number"
+              min={1}
               value={formData.priority}
-              onChange={(e) =>
-                setFormData({ ...formData, priority: Number.parseInt(e.target.value) || 1 })
-              }
+              onValueChange={(value) => setFormData({ ...formData, priority: value || 1 })}
             />
             {usesBaseUrl && (
               <Input

@@ -401,12 +401,12 @@ export function DarioAccountPanel() {
             <p className="text-xs text-text-muted">{t("loginStep2")}</p>
             <div className="flex flex-wrap items-center gap-2">
               <Input
+                mono
                 placeholder={t("codePlaceholder")}
                 aria-label={t("codePlaceholder")}
                 value={codeInput}
                 onChange={(e) => setCodeInput(e.target.value)}
                 className="min-w-[180px] flex-1"
-                inputClassName="font-mono"
               />
               <Button
                 size="sm"

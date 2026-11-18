@@ -546,6 +546,7 @@ export default function ModelCompatPopover({
               </p>
               <div>
                 <KitInput
+                  mono
                   type="text"
                   size="sm"
                   value={blockText}
@@ -554,7 +555,7 @@ export default function ModelCompatPopover({
                   placeholder={t("compatBlockedParamsPlaceholder")}
                   aria-label={t("compatBlockedParamsPlaceholder")}
                   disabled={disabled}
-                  className="mb-1 font-mono text-2xs"
+                  className="mb-1 text-2xs"
                 />
                 <p className="text-xs text-text-muted">
                   {providerText(
@@ -576,6 +577,7 @@ export default function ModelCompatPopover({
               </div>
               <div>
                 <KitInput
+                  mono
                   type="text"
                   size="sm"
                   value={allowText}
@@ -584,7 +586,7 @@ export default function ModelCompatPopover({
                   placeholder={t("compatAllowedParamsPlaceholder")}
                   aria-label={t("compatAllowedParamsPlaceholder")}
                   disabled={disabled}
-                  className="mb-1 font-mono text-2xs"
+                  className="mb-1 text-2xs"
                 />
                 <p className="text-xs text-text-muted">
                   {providerText(
@@ -619,13 +621,15 @@ export default function ModelCompatPopover({
                     className="grid grid-cols-[minmax(0,1fr)_minmax(0,1fr)_auto] gap-1.5 items-center"
                   >
                     <Input
+                      mono
+                      size="sm"
                       value={row.name}
                       onChange={(e) => updateHeaderRow(row.id, { name: e.target.value })}
                       onBlur={onHeaderFieldBlur}
                       disabled={disabled}
                       placeholder={t("compatUpstreamHeaderNamePlaceholder")}
                       className="gap-0 min-w-0"
-                      inputClassName="h-9 py-1.5 px-2 text-xs font-mono"
+                      inputClassName="px-2 text-xs"
                       autoComplete="off"
                     />
                     <div
@@ -648,8 +652,9 @@ export default function ModelCompatPopover({
                         }}
                         disabled={disabled}
                         placeholder={t("compatUpstreamHeaderValuePlaceholder")}
+                        size="sm"
                         className="gap-0 min-w-0"
-                        inputClassName="h-9 py-1.5 px-2 text-xs"
+                        inputClassName="px-2 text-xs"
                         autoComplete="off"
                         spellCheck={false}
                       />

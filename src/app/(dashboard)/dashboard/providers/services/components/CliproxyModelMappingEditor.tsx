@@ -179,7 +179,8 @@ export function CliproxyModelMappingEditor() {
       )}
 
       <Textarea
-        className="min-h-[120px] resize-y font-mono text-xs"
+        mono
+        className="min-h-[120px] resize-y"
         error={!isValid && rawText !== EMPTY_MAPPING}
         value={rawText}
         onChange={(e) => {

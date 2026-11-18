@@ -401,12 +401,12 @@ function SingleSourceInput({ single }: { single: ReturnType<typeof useSingleImpo
       </SegmentedPanel>
       <SegmentedPanel value="paste">
         <Textarea
+          mono
           rows={5}
           aria-label={t("agyImportPasteJson")}
           value={single.pasteText}
           onChange={(e) => single.onPaste(e.target.value)}
           placeholder={SINGLE_PLACEHOLDER}
-          className="font-mono text-xs"
         />
       </SegmentedPanel>
     </SegmentedTabs>
@@ -482,12 +482,12 @@ function BulkSourceInput({ bulk }: { bulk: ReturnType<typeof useBulkImport> }) {
       </SegmentedPanel>
       <SegmentedPanel value="paste">
         <Textarea
+          mono
           rows={5}
           aria-label={t("agyImportPasteJsonArray")}
           value={bulk.pasteText}
           onChange={(e) => bulk.onPaste(e.target.value)}
           placeholder={BULK_PLACEHOLDER}
-          className="font-mono text-xs"
         />
       </SegmentedPanel>
     </SegmentedTabs>

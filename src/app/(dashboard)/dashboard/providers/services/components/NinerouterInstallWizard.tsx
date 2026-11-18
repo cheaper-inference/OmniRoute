@@ -9,7 +9,8 @@ import Icon from "@/shared/components/Icon";
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Card, Input } from "@/shared/components";
+import { Button, Card, Input, NumberInput } from "@/shared/components";
+import { numberToText, textToNumber } from "../../numberFieldText";
 import { useServiceStatus } from "../hooks/useServiceStatus";
 
 const NAME = "9router";
@@ -73,13 +74,12 @@ export function NinerouterInstallWizard() {
           disabled={installing}
         />
 
-        <Input
+        <NumberInput
           id="ninerouter-port"
-          type="number"
           label={t("servicePort")}
           hint={t("servicePortHint")}
-          value={port}
-          onChange={(e) => setPort(e.target.value)}
+          value={textToNumber(port)}
+          onValueChange={(value) => setPort(numberToText(value))}
           min={1024}
           max={65535}
           disabled={installing}

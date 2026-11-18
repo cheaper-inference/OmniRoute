@@ -457,11 +457,11 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
                   }
                 >
                   <Textarea
+                    mono
                     id="claude-import-single-paste"
                     value={singlePasteText}
                     onChange={(e) => setSinglePasteText(e.target.value)}
                     rows={6}
-                    className="font-mono text-xs"
                     placeholder='{ "claudeAiOauth": { ... } }'
                   />
                 </Field>
@@ -574,6 +574,7 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
                       : "Paste an array of objects: [{ json, name?, email? }, ...]"}
                   </p>
                   <Textarea
+                    mono
                     value={bulkPasteText}
                     onChange={(e) => handleBulkPasteChange(e.target.value)}
                     rows={6}
@@ -582,7 +583,6 @@ export function ImportClaudeAuthModal({ onClose, onSuccess }: ImportClaudeAuthMo
                         ? t("claudeImportBulkModePaste")
                         : "Paste JSON array"
                     }
-                    className="font-mono text-xs"
                     placeholder="[{ ... }, { ... }]"
                   />
                 </div>

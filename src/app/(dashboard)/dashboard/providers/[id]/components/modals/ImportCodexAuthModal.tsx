@@ -402,12 +402,13 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
                   label={t("codexImportPasteLabel") || "Paste the JSON content"}
                 >
                   <Textarea
+                    mono
                     id="codex-import-single-paste"
                     value={singlePasteText}
                     onChange={(e) => handleSinglePasteChange(e.target.value)}
                     rows={7}
                     placeholder='{ "auth_mode": "chatgpt", ... }'
-                    className="resize-none font-mono text-xs"
+                    className="resize-none"
                   />
                 </Field>
               </SegmentedPanel>
@@ -512,12 +513,13 @@ export function ImportCodexAuthModal({ onClose, onSuccess }: ImportCodexAuthModa
               {/* Paste mode */}
               <SegmentedPanel value="paste" className="flex flex-col gap-2">
                 <Textarea
+                  mono
                   value={bulkPasteText}
                   onChange={(e) => handleBulkPasteChange(e.target.value)}
                   rows={7}
                   aria-label={t("codexImportBulkModePaste") || "Paste list"}
                   placeholder={'[{ "auth_mode": "chatgpt", ... }, ...]'}
-                  className="resize-none font-mono text-xs"
+                  className="resize-none"
                 />
                 <p className="text-xs text-text-muted">
                   {t("codexImportBulkPasteHint") || "JSON array or multiple JSONs separated by ---"}

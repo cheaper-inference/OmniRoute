@@ -237,3 +237,41 @@ test("F: h3 and h4 card headings take their size from ci-heading data-size", () 
     .map(({ file, line }) => `${file}:${line}`);
   assert.deepEqual(titles, []);
 });
+
+// ── D. Fields: kit sizes, mono, NumberInput, FileTrigger ────────────────────────────────────
+
+const fieldTags = () =>
+  ["Input", "KitInput", "Textarea", "NumberInput"].flatMap((name) => openingTags(name));
+
+test("D: code fields use the `mono` prop; font-mono does nothing on an input or textarea", () => {
+  const offenders = fieldTags()
+    .filter(({ tag }) => /(?<![\w:-])font-mono(?![\w-])/.test(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], "use the mono prop");
+});
+
+test("D: a field takes its height from the kit `size`, not from h-8 / h-9 classes", () => {
+  const offenders = openingTags("Input")
+    .filter(({ tag }) => /inputClassName="[^"]*(?<![\w:-])h-(8|9|10)(?![\w-])/.test(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(offenders, [], 'use size="xs" (32px) or size="sm" (36px)');
+});
+
+test("D: numbers are typed in the NumberInput adapter, not in type=number fields", () => {
+  assert.deepEqual(lineHits(/type=["']number["']/), []);
+});
+
+test("D: a button that picks a file is wrapped in the kit FileTrigger", () => {
+  // No hidden native input clicked through a ref, raw or through the Input adapter.
+  const raw = openingTags("input")
+    .filter(({ tag }) => /type="file"/.test(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(raw, [], "raw <input type=file> in the providers area");
+  const hidden = openingTags("Input")
+    .filter(({ tag }) => /type="file"/.test(tag) && /className="[^"]*\bhidden\b/.test(tag))
+    .map(({ file, line }) => `${file}:${line}`);
+  assert.deepEqual(hidden, []);
+  assert.deepEqual(lineHits(/\.current\?\.click\(\)/), [], "open the picker with FileTrigger");
+  assert.deepEqual(lineHits(/kit-exception:.*file input/i), []);
+  assert.ok(openingTags("FileTrigger").length >= 3);
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useTranslations } from "next-intl";
 import { Alert } from "@omniroute/ui-kit/alert";
 import {
@@ -11,7 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
-import { Button, Checkbox, Input, Modal, Select } from "@/shared/components";
+import { Button, Checkbox, FileTrigger, Modal, Select } from "@/shared/components";
 
 interface OAuthExportImportModalProps {
   isOpen: boolean;
@@ -83,7 +83,6 @@ export function OAuthExportImportModal({
   onClose,
   onImported,
 }: OAuthExportImportModalProps) {
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [fileName, setFileName] = useState("");
   const [provider, setProvider] = useState("antigravity");
   const [accounts, setAccounts] = useState<Record<string, unknown>[]>([]);
@@ -100,7 +99,6 @@ export function OAuthExportImportModal({
     setPreview([]);
     setParseError("");
     setOutcome(null);
-    if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const handleFile = async (file: File) => {
@@ -235,28 +233,18 @@ export function OAuthExportImportModal({
             <option value="antigravity">antigravity</option>
             <option value="agy">agy</option>
           </Select>
-          <Input
-            ref={fileInputRef}
-            type="file"
+          {/* A file the picker filter would hide is read too: the parser says what is wrong. */}
+          <FileTrigger
             aria-label={t("oauthExportFileAria")}
             disabled={importing}
             accept=".json,application/json"
-            tabIndex={-1}
-            className="hidden"
-            onChange={(e) => {
-              const file = e.target.files?.[0];
-              if (file) void handleFile(file);
-            }}
-          />
-          <Button
-            size="sm"
-            variant="secondary"
-            icon="upload_file"
-            disabled={importing}
-            onClick={() => fileInputRef.current?.click()}
+            onFilesChange={(files) => void handleFile(files[0])}
+            onFilesRejected={(rejected) => void handleFile(rejected[0].file)}
           >
-            {t("oauthExportChoose")}
-          </Button>
+            <Button size="sm" variant="secondary" icon="upload_file" disabled={importing}>
+              {t("oauthExportChoose")}
+            </Button>
+          </FileTrigger>
           {fileName && <span className="text-xs text-text-muted font-mono">{fileName}</span>}
         </div>
 
