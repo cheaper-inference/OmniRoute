@@ -9,6 +9,7 @@ import {
   extendDeepSeekEffortValues,
 } from "@/shared/reasoning/effortStandardization";
 import { knownReasoningEffortTiers } from "@/lib/modelsDevSync/transform";
+import { isAntigravityTierSuffixedModel } from "@/lib/modelMetadataRegistry";
 import { resolveModelDisplayName } from "@/shared/utils/modelDisplayName";
 
 export interface CustomModelEntry {
@@ -270,10 +271,13 @@ export function getThinkingCapabilityFields(
           modelId,
           extendCodexGpt56EffortValues(providerId, modelId, CANONICAL_EFFORT_VALUES)
         );
+  const antigravityTierSuffixed = isAntigravityTierSuffixedModel(providerId, modelId);
   const advertiseTiers =
     supportsThinking &&
     !declaredNone &&
-    (hasDeclaredTiers || syncedEfforts || !skipCanonicalEffortFallback);
+    (hasDeclaredTiers ||
+      Boolean(syncedEfforts) ||
+      (!skipCanonicalEffortFallback && !antigravityTierSuffixed));
   return {
     thinking: supportsThinking,
     supportsThinking,

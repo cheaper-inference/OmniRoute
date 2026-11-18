@@ -1,0 +1,1 @@
+- **catalog:** Omit generic `effort_tiers` synthesis on Antigravity (`antigravity` / `agy`) tier-suffixed model IDs ending in `-low`, `-medium`, or `-high` in both `enrichCatalogModelEntry` and `getThinkingCapabilityFields` when no explicit/synced tiers exist ([#20435](https://github.com/cheaper-inference/OmniRoute/issues/20435)).
