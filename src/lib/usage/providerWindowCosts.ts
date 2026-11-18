@@ -39,7 +39,7 @@ interface AggregatedUsageCostRow {
   reasoningTokens: number;
   totalTokens: number;
   lastUsed: string | null;
-  /** Sum of provider-reported exact costs (`provider_cost_usd`) in the group. */
+  /** Sum of provider-reported costs or catalogue snapshots in the group. */
   storedCost: number;
   /** Token sums of the group's rows WITHOUT a reported cost — the only priceable ones. */
   costPromptTokens: number;
@@ -331,13 +331,13 @@ function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCo
         COALESCE(SUM(tokens_reasoning), 0) as reasoningTokens,
         COALESCE(SUM(tokens_input + tokens_output), 0) as totalTokens,
         MAX(timestamp) as lastUsed,
-        COALESCE(SUM(provider_cost_usd), 0) as storedCost,
-        SUM(CASE WHEN provider_cost_usd IS NULL THEN 1 ELSE 0 END) as unreportedRequests,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_input ELSE 0 END), 0) as costPromptTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_output ELSE 0 END), 0) as costCompletionTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_read ELSE 0 END), 0) as costCacheReadTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as costCacheCreationTokens,
-        COALESCE(SUM(CASE WHEN provider_cost_usd IS NULL THEN tokens_reasoning ELSE 0 END), 0) as costReasoningTokens
+        COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) as storedCost,
+        SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN 1 ELSE 0 END) as unreportedRequests,
+        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_input ELSE 0 END), 0) as costPromptTokens,
+        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_output ELSE 0 END), 0) as costCompletionTokens,
+        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_read ELSE 0 END), 0) as costCacheReadTokens,
+        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_cache_creation ELSE 0 END), 0) as costCacheCreationTokens,
+        COALESCE(SUM(CASE WHEN COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN tokens_reasoning ELSE 0 END), 0) as costReasoningTokens
       FROM usage_history
       WHERE ${filter.whereSql}
       GROUP BY
@@ -351,7 +351,7 @@ function fetchAggregatedUsageRows(filter: UsageHistoryFilter): AggregatedUsageCo
         COALESCE(tokens_cache_read, 0),
         COALESCE(tokens_cache_creation, 0),
         COALESCE(tokens_reasoning, 0),
-        provider_cost_usd IS NULL
+        COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL
       ORDER BY totalTokens DESC
       `
     )

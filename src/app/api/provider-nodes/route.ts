@@ -12,6 +12,7 @@ import { isCcCompatibleProviderEnabled } from "@/shared/utils/featureFlags";
 import { createProviderNodeSchema, paginationSchema } from "@/shared/validation/schemas";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { validateProviderNodeBaseUrl } from "./urlGuard";
+import { resolveCustomJsonNodeConfig } from "./customJsonNode";
 
 const OPENAI_COMPATIBLE_DEFAULTS = {
   baseUrl: "https://api.openai.com/v1",
@@ -146,6 +147,7 @@ export async function POST(request) {
       chatPath,
       modelsPath,
       customHeaders,
+      customJson,
       iconUrl,
       dailyQuotaResetTimezone,
       dailyQuotaResetHour,
@@ -186,9 +188,14 @@ export async function POST(request) {
     if (nodeType === "openai-compatible") {
       const resolvedName = (name || "").trim();
       const resolvedPrefix = (prefix || "").trim();
-      const resolvedBaseUrl = (baseUrl || OPENAI_COMPATIBLE_DEFAULTS.baseUrl).trim();
+      // Custom JSON API nodes take a complete endpoint URL — never the OpenAI default.
+      const resolvedBaseUrl = (
+        baseUrl || (apiType === "custom-json" ? "" : OPENAI_COMPATIBLE_DEFAULTS.baseUrl)
+      ).trim();
       const baseUrlError = validateProviderNodeBaseUrl(resolvedBaseUrl);
       if (baseUrlError) return baseUrlError;
+      const customJsonNode = resolveCustomJsonNodeConfig(apiType, customJson, resolvedBaseUrl);
+      if (customJsonNode.error) return customJsonNode.error;
 
       const node = await createProviderNode({
         id: `${OPENAI_COMPATIBLE_PREFIX}${apiType}-${idSuffix}`,
@@ -201,6 +208,7 @@ export async function POST(request) {
         modelsPath: modelsPath || null,
         iconUrl: iconUrl?.trim() || null,
         customHeaders: customHeaders || null,
+        customJsonConfig: customJsonNode.config,
         dailyQuotaResetTimezone: dailyQuotaResetTimezone?.trim() || null,
         dailyQuotaResetHour:
           dailyQuotaResetHour === 0 || dailyQuotaResetHour != null ? dailyQuotaResetHour : null,

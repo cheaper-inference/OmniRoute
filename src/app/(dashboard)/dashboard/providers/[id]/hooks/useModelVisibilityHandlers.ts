@@ -166,10 +166,15 @@ export function useModelVisibilityHandlers({
               Array.isArray(c.supportedEndpoints) && (c.supportedEndpoints as unknown[]).length
                 ? c.supportedEndpoints
                 : ["chat"],
+            // Keep an unset flag unset (JSON drops undefined) so a provider-level
+            // runtime default (mistral, #19338) is not pinned to false by an edit
+            // of an unrelated compat flag.
             normalizeToolCallId:
               patch.normalizeToolCallId !== undefined
                 ? patch.normalizeToolCallId
-                : Boolean(c.normalizeToolCallId),
+                : Object.prototype.hasOwnProperty.call(c, "normalizeToolCallId")
+                  ? Boolean(c.normalizeToolCallId)
+                  : undefined,
             preserveOpenAIDeveloperRole:
               patch.preserveOpenAIDeveloperRole !== undefined
                 ? patch.preserveOpenAIDeveloperRole

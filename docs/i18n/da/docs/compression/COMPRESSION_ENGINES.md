@@ -97,129 +97,81 @@ den ikke kan nå. Idempotens håndhæves ved at scanne meddelelseshistorikken ef
 før indsættelse, så requests med flere ture (som afspiller tidligere meddelelser igen) ikke ophober
 noten én gang pr. tur.
 
-## Caveman
+## Hulemand
 
-Caveman-tilstand fokuserer på semantisk kondensering af almindelig prosa:
+Caveman-tilstand fokuserer på semantisk kondensering af normal prosa:
 
-- bevarer kodeblokke, URL'er, JSON, stier og strukturerede data
-- fjerner fyldord, forbehold, gentagen kontekst og omstændelige forbindelsesformuleringer
-- understøtter sprogspecifikke filregelsæt i `open-sse/services/compression/rules/`
-- er fortsat tilgængelig via de ældre tilstande `standard`, `aggressive` og `ultra`
+- bevarer kodeblokke, URLs, JSON, stier og strukturerede data
+- fjerner fyldstof, afdækning, gentagen kontekst og verbose bindende frasering
+- understøtter sprogbevidste filregelpakker i `open-sse/services/compression/rules/`
+- forbliver tilgængelig gennem de ældre tilstande `standard`, `aggressive` og `ultra`
 
-Dashboardplaceringen er `Dashboard -> Kontekst og cache -> Caveman`.
+Instrumentbrættets overflade er `Dashboard -> Context & Cache -> Caveman`.
 
-Caveman-projektet rapporterer `~75%` færre outputtokens, `65%` gennemsnitlig outputbesparelse i benchmarks
-med et interval på `22-87%` samt et værktøj til inputkomprimering på `~46%`. OmniRoute bruger Cavemans tal for
-inputkomprimering ved dokumentation af kombinerede prompt-/kontekstbesparelser; Cavemans outputtilstand er fortsat
-en separat funktion til styring af svaradfærd.
+Caveman upstream rapporterer `~75%` færre output-tokens, `65%` gennemsnitlige outputbesparelser i benchmarks med et `22-87%` område og et `~46%` input-komprimeringsværktøj. OmniRoute bruger Caveman input-side-nummeret, når de dokumenterer stablede prompt/context besparelser; Caveman-outputtilstand forbliver en separat respons-adfærdsfunktion.
 
 ## RTK
 
-RTK-tilstand fokuserer på output fra kommandoer og værktøjer:
+RTK tilstand fokuserer på kommando- og værktøjsoutput:
 
-- registrerer outputklasser såsom `git status`, `git branch`, `git diff`, Vitest/Jest/Pytest,
-  Cargo-/Go-tests, TypeScript-/Vite-/Webpack-builds, ESLint, npm-audits/-installationer, Docker-logfiler,
-  shell-kommandoerne `find`/`grep`, stack traces og generiske logfiler
-- anvender 49 JSON-filtre fra `open-sse/services/compression/engines/rtk/filters/`
-- understøtter den deklarative pipeline i RTK-stil: fjernelse af ANSI, erstatning, tidlig afslutning ved outputmatch,
-  fjernelse/bevarelse af linjer, afkortning pr. linje, afkortning efter start/slutning/maksimalt antal linjer samt fallback ved tomt output
-- understøtter tillidsbegrænsede projektfiltre i `.rtk/filters.json` og globale filtre i
-  `DATA_DIR/rtk/filters.json`
-- fjerner ANSI-sekvenser, fremskridtsstøj, gentagne linjer og unødvendig standardtekst
-- bevarer handlingsrelevante fejl, advarsler, oversigter, ændrede filer og afsluttende kontekst
-- kan valgfrit bevare redigeret råoutput til gendannelse/fejlfinding via godkendte administrationsruter
+- registrerer outputklasser såsom `git status`, `git branch`, `git diff`, Vitest/Jest/Pytest, Cargo/Go tests, TypeScript/Vite/Webpack builds, ESLint, npm audit/installs, Docker logs, shell `find`/`grep`, stack traces og generiske logfiler
+- anvender 49 JSON -filtre fra `open-sse/services/compression/engines/rtk/filters/`
+- understøtter den deklarative pipeline i RTK-stil: ANSI stripping, replace, match-output kortslutning, strip/keep linjer, per-line trunkering, head/tail/max-line trunkering og on-empty fallback
+- understøtter trust-gated projektfiltre i `.rtk/filters.json` og globale filtre i `DATA_DIR/rtk/filters.json`
+- stripper ANSI sekvenser, fremskridtsstøj, gentagne linjer og uhensigtsmæssig kedelplade
+- bevarer handlingsbare fejl, advarsler, oversigter, ændrede filer og halekontekst
+- kan valgfrit beholde redigeret rå output for recovery/debugging gennem autentificerede administrationsruter
 
-Dashboardplaceringen er `Dashboard -> Kontekst og cache -> RTK`.
+Instrumentbrættets overflade er `Dashboard -> Context & Cache -> RTK`.
 
-Driftsoplysninger om brugerdefinerede filtre, tillid, verificering og gendannelse af råoutput findes i
-[`RTK_COMPRESSION.md`](./RTK_COMPRESSION.md).
+Driftsdetaljer for brugerdefinerede filtre, tillid, verifikation og gendannelse af rå-output live i [`RTK_COMPRESSION.md`](./RTK_COMPRESSION.md).
 
-RTK-projektet rapporterer besparelser på `60-90%` ved komprimering af kommandooutput. Eksemplet i projektets README viser en
-30-minutters Claude Code-session, der reduceres fra `~118,000` tokens til `~23,900`, svarende til en besparelse på `79.7%`.
+RTK upstream rapporterer `60-90%` besparelser for kommando-output-komprimering. Dens README eksempel viser en 30-minutters Claude Code-session, der går fra `~118,000` tokens til `~23,900`, eller `79.7%` gemt.
 
 ## LLMLingua-2 (semantisk beskæring)
 
-LLMLingua-2-tilstand udfører **semantisk tokenbeskæring** af prosa ved hjælp af en lille ONNX-tokenklassifikator
-som supplement til de regelbaserede Caveman- og RTK-motorer:
+LLMLingua-2 tilstand udføres** semantisk token beskæring** om prosa ved hjælp af en lille ONNX token-klassificering, der komplementerer de regelbaserede Caveman- og RTK -motorer:
 
-- komprimerer kun prosa i ikke-systemmeddelelser; indhegnede kodeblokke og andre bevarede
-  konstruktioner ændres aldrig
-- kører `@atjsh/llmlingua-2`-backenddelen (ONNX via `@huggingface/transformers`) i en
-  worker-tråd, så modelinferens aldrig blokerer anmodningens event loop
-- kan **kombineres** (`stackPriority` 35): I en kombineret pipeline kører den efter de
-  strukturelle motorer (CCR, session-dedup, headroom, Caveman), men før `ultra`, da
-  semantisk beskæring er mest effektiv på tekst, der allerede er strukturelt komprimeret — f.eks.
-  `rtk -> caveman -> llmlingua`
-- **fortsætter uden fejl ved enhver fejl** (manglende valgfrie afhængigheder, start af worker, modelindlæsning, inferens
-  eller timeout) → den oprindelige tekst returneres uændret, aldrig en fejl
+- komprimerer kun prosa i ikke-systemmeddelelser; indhegnede kodeblokke og andre bevarede konstruktioner ændres aldrig
+- kører `@atjsh/llmlingua-2` backend (ONNX via `@huggingface/transformers`) i en arbejdstråd, så modelinferens blokerer aldrig anmodningshændelsesløkken
+- er** stabelbar** (`stackPriority` 35): i en stablet pipeline kører den efter de strukturelle motorer (CCR, session-dedup, headroom, Caveman) men før `ultra`, da semantisk beskæring er mest effektiv på allerede strukturelt komprimeret tekst — f.eks. `rtk -> caveman -> llmlingua`
+- **fejl-åbner ved enhver fejl** (mangler valgfri deps, worker spawn, model load, inferens eller timeout) → den originale tekst returneres uændret, aldrig en fejl
 
-Motorplacering: `open-sse/services/compression/engines/llmlingua/`. Dashboardplaceringen
-er `Dashboard -> Kontekst og cache -> LLMLingua`.
+Motorplacering: `open-sse/services/compression/engines/llmlingua/`. Instrumentbrættets overflade er `Dashboard -> Context & Cache -> LLMLingua`.
 
 ### Modeller
 
-Standardmodellen er **TinyBERT** (`atjsh/llmlingua-2-js-tinybert-meetingbank`, ~57 MB,
-hurtig). En **BERT-base**-model med højere nøjagtighed (`Arcoldd/llmlingua4j-bert-base-onnx`,
-~710 MB) er tilgængelig via motorens konfigurationsfelt `model`. `@huggingface/transformers`
-downloader den valgte model efter behov fra HuggingFace Hub til
-`${DATA_DIR}/models/llmlingua` ved det første kald (`modelStore.ts`); en tilsidesættelse med konfigurationsfeltet `modelPath`
-peger i stedet på en lokal kopi (offline-/air-gapped-installationer).
+Standardmodellen er**TinyBERT** (`atjsh/llmlingua-2-js-tinybert-meetingbank`, ~ 57 MB, hurtig). En højere nøjagtighed** BERT-base** model (`Arcoldd/llmlingua4j-bert-base-onnx`, ~ 710 MB) er tilgængelig via motorkonfigurationsfeltet `model`. `@huggingface/transformers` downloader den valgte model dovent fra HuggingFace Hub til `${DATA_DIR}/models/llmlingua` ved det første opkald (`modelStore.ts`); en `modelPath` -konfigurationstilsidesættelse peger den på en lokal kopi i stedet for (offline/installationer uden luft).
 
-### Valgfrie afhængigheder og installation efter behov
+### Valgfri afhængigheder og on-demand installation
 
-LLMLinguas runtime-peer-stack, der kan beskæres, er **valgfri**. To pakker er angivet som
-`optionalDependencies` i `package.json` og holdes **eksterne** af produktionsbuildet
-(`scripts/build/prepublish.ts` inkluderer dem ikke i bundtet):
+Den beskærbare LLMLingua runtime peer-stack er** valgfri** . To pakker er erklæret som `optionalDependencies` i `package.json` og opbevares** ydre** af produktionsbygningen (`scripts/build/prepublish.ts` bundter dem ikke):
 
-| Pakke                | Version (fastlåst) | Bemærkninger                               |
-| -------------------- | ------------------ | ------------------------------------------ |
-| `@atjsh/llmlingua-2` | `2.0.5`            | Indgangspakke; angiver de øvrige som peers |
-| `js-tiktoken`        | `^1.0.20`          | Tokenizer                                  |
+| Pakke                | Version (pin) | Noter                                             |
+| -------------------- | ------------- | ------------------------------------------------- |
+| `@atjsh/llmlingua-2` | `2.0.5`       | Indgangspakke; erklærer de andre som jævnaldrende |
+| `js-tiktoken`        | `^1.0.20`     | Tokenizer                                         |
 
-`@huggingface/transformers` er fastlåst til `^4.2.0` (deles med den lokale embeddings-sti og
-spores også ind i standalone-bundtet); `@atjsh/llmlingua-2@2.0.5` bruger den som peer med
-`"^3.5.2 || ^4.0.0"`, så både Transformers.js v3 og v4 understøttes. Siden 2.0.4
-kræver `@atjsh/llmlingua-2` ikke længere `@tensorflow/tfjs`, hvilket fjernede den største enkeltstående
-komponent (TensorFlow.js) fra SLM-stakken. Kun de to ovenstående pakker er SLM-peers, der kan beskæres.
-En almindelig `npm install` (udvikling) installerer automatisk den valgfrie stack, medmindre valgfrie
-afhængigheder udelades.
+`@huggingface/transformers` er fastgjort til `^4.2.0` (delt med den lokale indlejringssti og spores også ind i det selvstændige bundt); `@atjsh/llmlingua-2@2.0.5` peer på det med `"^3.5.2 || ^4.0.0"`, så både Transformers.js v3 og v4 er understøttet. Siden 2.0.4 kræver `@atjsh/llmlingua-2` ikke længere `@tensorflow/tfjs`, hvilket fjernede den største enkeltbidragyder (TensorFlow.js) fra SLM stakken. Kun de to ovenstående pakker kan beskæres SLM peers. En standard `npm install` (dev) installerer den valgfri stak automatisk, medmindre valgfrie afhængigheder udelades.
 
-**Hvorfor efter behov:** Den npm-udgivne pakke, standalone-bundtet og Docker-imaget
-leveres **uden** disse afhængigheder for at forblive kompakte. Når de mangler, mislykkes workerens
-afhængighedskontrol (en `@atjsh/llmlingua-2`-resolve-test i `worker.ts`), og motoren
-**fortsætter lydløst uden fejl** — valg af LLMLingua har ingen effekt (teksten returneres uændret, og ingen
-fejl logges). Installér den valgfrie stack for at aktivere den i et beskåret miljø:
+**Hvorfor on-demand:** den npm-publicerede pakke, den selvstændige pakke og Docker -billedskibet** uden** disse deps for at forblive slanke. Når de er fraværende, svigter arbejderens afhængighedsport (en `@atjsh/llmlingua-2` resolve probe i `worker.ts`), og motoren** fejl-åbner lydløst** — at vælge LLMLingua bliver en no-op (tekst returneres uændret, ingen fejl logget). For at aktivere den i et beskåret miljø skal du installere den valgfri stak:
 
 ```bash
-# fastlås til de versioner, der er angivet i package.json optionalDependencies
+# pin to the versions declared in package.json optionalDependencies
 npm install @atjsh/llmlingua-2@2.0.5 js-tiktoken
 ```
 
-Fjernelsen af `@tensorflow/tfjs` (2.0.4+) eliminerer den tidligere dominerende komponent på ~800 MB
-— det resterende lagerforbrug består af transformers.js- og onnxruntime-node-runtimes
-samt TinyBERT-modellen (~57 MB), der downloades ved første brug (ikke via npm).
+`@tensorflow/tfjs` fjernelsen (2.0.4 +) eliminerer den tidligere dominerende ~ 800 MB bidragyder — det resterende fodaftryk er transformers.js + onnxruntime-node runtimes, plus TinyBERT modellen (~ 57 MB) downloadet ved første brug (ikke via npm).
 
-For hvert miljø:
+Per miljø:
 
-- **Udvikling / `npm install`** — installeres automatisk, medmindre du angav `--omit=optional`
-  (eller `--no-optional`). Ingen handling nødvendig.
-- **Global npm (`npm i -g omniroute`) / selvstændig installation** — kør installationskommandoen ovenfor i
-  den installerede pakkemappe, eller geninstaller uden at udelade valgfrie afhængigheder.
-- **Docker** — tilføj installationskommandoen i et afledt image-lag; det publicerede image
-  leveres bevidst i en minimal udgave.
-- **VPS (PM2)** — installer i appens `node_modules`, og genstart derefter processen, så
-  worker-processen kontrollerer gate-funktionen igen.
-- **Ubearbejdet selvstændig Next-installation (`npm run build` → `.build/next/standalone/server.js`)** — det
-  selvstændige trace indeholder HVERKEN worker-processen eller de valgfrie afhængigheder, så motoren
-  går lydløst over i fail-open-tilstand. `scripts/build/colocate-standalone.mjs` tilføjer begge dele igen (worker-esbuild +
-  lukning af valgfrie afhængigheder i det selvstændige træ); det køres automatisk via npm-hooket
-  `postbuild` efter hvert build. Idempotent og fejltolerant, når afhængigheder mangler.
+- **Dev / `npm install`** — installeres automatisk, medmindre du har bestået `--omit=optional` (eller `--no-optional`). Ingen handling nødvendig.
+- **Global npm (`npm i -g omniroute`) / standalone** — kør installeringskommandoen ovenfor inde i den installerede pakkemappe, eller geninstaller uden at udelade valgfri deps.
+- **Docker** — tilføje installationskommandoen i et afledt billedlag; det offentliggjorte billede er slankt af designet.
+- **VPS (PM2)** — installer i appens `node_modules`, og genstart derefter processen, så arbejderen undersøger porten igen.
+- **Raw Next selvstændig (`npm run build` → `.build/next/standalone/server.js`)** — den selvstændige sporing sendes NEITHER arbejderen eller de valgfrie deps, så motoren stille fejl-åbner. `scripts/build/colocate-standalone.mjs` genanvender begge (worker esbuild + optional-dep lukning i det selvstændige træ); den kører automatisk via `postbuild` npm hook efter hver build. Idempotent, fejl-blød, når deps er fraværende.
 
-**Kontrollér, at den er aktiv:** Når LLMLingua er valgt, reduceres rigtig prosa faktisk (motoren
-holder op med at gå i fail-open-tilstand), og den første anmodning udløser download af modellen til
-`${DATA_DIR}/models/llmlingua`. Gate-funktionen undersøger med vilje kun `@atjsh/llmlingua-2` —
-de øvrige peer-afhængigheder er udelukkende ESM-baserede, og `require.resolve` udløser en fejl for dem, selv når de er til stede — så
-worker-processen går stadig i fail-open-tilstand, hvis en peer-afhængighed reelt mangler på `import()`-tidspunktet.
+**Bekræft, at den er aktiv:** med LLMLingua valgt, krymper ægte prosa faktisk (motoren stopper med at åbne fejl), og den første anmodning udløser modeldownload til `${DATA_DIR}/models/llmlingua`. Porten sonderer med vilje kun `@atjsh/llmlingua-2` — de andre peers er ESM-only og `require.resolve` kaster på dem, selv når de er til stede — så arbejderen stadig fejl-åbner, hvis nogen peer virkelig mangler på `import()` tidspunktet.
 
 ## Stablede pipelines
 
@@ -293,16 +245,16 @@ Filteret anvendes kun på nyttelaster med værktøjsresultater, hvis `type` er `
 
 ---
 
-## Komprimeringskombinationer
+## Kompressionskombinationer
 
-Komprimeringskombinationer er navngivne komprimeringsprofiler, der kan tildeles routingkombinationer:
+Kompressionskombinationer er navngivne kompressionsprofiler, der kan tildeles til routingkombinationer:
 
-- `compression_combos`: gemmer tilstand, pipeline, RTK-konfiguration, sprogkonfiguration og standardmarkør
-- `compression_combo_assignments`: knytter en komprimeringskombination til en routingkombination
-- runtime-integrationen finder en tildelt komprimeringskombination før generiske kombinationstilsidesættelser
-- analyser inkluderer `compression_combo_id` og `engine`
+- `compression_combos`: gemmer tilstand, pipeline, RTK config, sprog config og standardmarkør
+- `compression_combo_assignments`: kortlægger en kompressionskombination til en routingkombination
+- Runtime-integration løser en tildelt kompressionskombination, før generisk kombination tilsidesætter
+- analyser omfatter `compression_combo_id` og `engine`
 
-Placering i dashboardet: `Dashboard -> Kontekst og cache -> Komprimeringskombinationer`.
+Dashboard overflade: `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Forudsætninger / operatørvejledning (CCR & session-dedup)
 
@@ -331,7 +283,7 @@ Tre vagter holder den holdbare tier afgrænset — en blok forbliver kun hukomme
 2. runtime er en cloud runtime (ingen lokal disk);
 3. `COMPRESSION_CCR_DURABLE_STORE=false`.
 
-Så "blokken forsvandt" er ikke en generel genstartshistorie: en sub-512 KB blok på en lokal, ikke-sky-runtime overlever en genstart via det holdbare niveau, indtil dens TTL løber tør. Se [miljøreference](../reference/ENVIRONMENT.md) for variablen.
+Så "blokken forsvandt" er ikke en generel genstartshistorie: en sub-512 KB blok på en lokal, ikke-sky-runtime overlever en genstart via det varige niveau, indtil dets TTL løber tør, forudsat at dens holdbare skrivning lykkedes. Denne skrivning er den bedste indsats og løber af forespørgselsstien: den slettes, mens 1.000 varige skrivninger allerede afventer, en SQLite skrivefejl logges (`[ccr] durable persist failed`) og forsøges ikke igen, og et nedbrud før den udskudte skrivning kører, mister den også. Sådan en blok forbliver kun i hukommelsen og er væk efter en genstart. Se [miljøreference](../reference/ENVIRONMENT.md) for variablen.
 
 ### De to markører
 
@@ -346,7 +298,7 @@ Så "blokken forsvandt" er ikke en generel genstartshistorie: en sub-512 KB blok
 
 - **Nøgle (stdio):** en stdio-opkalder har ingen identitet pr. anmodning, så den godkendes med `OMNIROUTE_API_KEY` (indstillet i MCP -serverens `env`). Uden den er den, der ringer, anonym, og værktøjer, der kræver en rektor, kan forringes.
 - **`tools[]` er injektionsforudsætningen.** CCR retrieve-protokol-instruktionen (#8033) injiceres** kun** når anmodningens annoncerede `tools[]` beviser, at klienten faktisk kan nå `omniroute_ccr_retrieve`. Matchet er et efterfølgende segment-match afgrænset af en separator (`__`, `.`, `/`, `:`) — aldrig en blottet understreng — så et navneinddelt navn som `mcp__gateway__omniroute_ccr_retrieve` tæller stadig. En fraværende eller ikke-matchende `tools[]` betyder, at instruktionen er _ikke_ injiceret, designmæssigt.
-- **`codemode:false` (OpenCode klienter).** OpenCode er som standard kodetilstand, som kun annoncerer dets oprindelige værktøjer til modellen og** gør ikke** sæt MCP værktøjer på den oprindelige `tools[]` liste. Indstil `codemode: false` på MCP serverposten, så `omniroute_ccr_*` værktøjerne annonceres. Dette er en** klient** indstilling, ikke en OmniRoute. Den får ikke CCR instruktionen injiceret endnu: OpenCode navngiver et værktøj `<server>_<tool>`, så en server kaldet `omniroute` eksponerer `omniroute_omniroute_ccr_retrieve`, og `_` er ikke en af de matchede separatorer.
+- **`codemode:false` (OpenCode klienter).** OpenCode er som standard kodetilstand, som kun annoncerer dets oprindelige værktøjer til modellen og** gør ikke** sæt MCP værktøjer på den oprindelige `tools[]` liste. Indstil `codemode: false` på MCP serverposten, så `omniroute_ccr_*` værktøjerne annonceres. Dette er en** klient** indstilling, ikke en OmniRoute. OpenCode navngiver et værktøj `<server>_<tool>`, så en server kaldet `omniroute` afslører `omniroute_omniroute_ccr_retrieve`; `_` er en af de matchede separatorer, så CCR instruktionen injiceres under det navn, når en anmodning bærer en CCR markør.
 - **Rektorer.** Opbevaring og hentning er isoleret pr. godkendt principal (pr. API nøgle). En nøgle ser kun sine egne blokke.
 
 ### Omfang pr. værktøj
@@ -366,12 +318,12 @@ Et manglende omfang returnerer en**MCP værktøj fejl resultat** (`isError: true
 
 ### Klientmatrix
 
-| Klient            | Transportere                              | Konfiguration til brug                                                                                                                                                                                                                                     | `tools[]` annonceret? (→ CCR instruktion indsprøjtet)                                                                                                                                                      |
-| ----------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Claude kode       | streambar-http                            | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                          | Ja — MCP-kompatibel; injiceret.                                                                                                                                                                            |
-| Cursor / Cline    | `stdio`** eller** `streamable-http`       | stdio: `omniroute --mcp` med `OMNIROUTE_API_KEY` i `env`; eller en ekstern MCP indgang, der peger på `http://localhost:20128/api/mcp/stream` (se [Installationsvejledning → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Ja — reklamerer for `omniroute_ccr_*` værktøjerne.                                                                                                                                                         |
-| OpenCode          | streambar-http                            | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` plus `codemode: false`                                                                                                                                                            | Værktøjer annonceret kun med `codemode: false`; instruktionen er stadig ikke injiceret, fordi `omniroute_omniroute_ccr_retrieve` ikke stemmer overens (se [Klientforudsætninger](#client-prerequisites) ). |
-| OpenAI-kompatibel | OpenAI-kompatibel HTTP (chatafslutninger) | standard chat-afslutningsklient mod det OpenAI-kompatible slutpunkt                                                                                                                                                                                        | **Aldrig** — en almindelig OpenAI-kompatibel opkalder bliver aldrig bedt om at ringe til værktøjet, og instruktionen injiceres ikke.                                                                       |
+| Klient            | Transportere                              | Konfiguration til brug                                                                                                                                                                                                                                     | `tools[]` annonceret? (→ CCR instruktion indsprøjtet)                                                                                                                   |
+| ----------------- | ----------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude kode       | streambar-http                            | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                          | Ja — MCP-kompatibel; injiceret.                                                                                                                                         |
+| Cursor / Cline    | `stdio`** eller** `streamable-http`       | stdio: `omniroute --mcp` med `OMNIROUTE_API_KEY` i `env`; eller en ekstern MCP indgang, der peger på `http://localhost:20128/api/mcp/stream` (se [Installationsvejledning → MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Ja — reklamerer for `omniroute_ccr_*` værktøjerne.                                                                                                                      |
+| OpenCode          | streambar-http                            | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` plus `codemode: false`                                                                                                                                                            | Værktøjer annonceret kun med `codemode: false`; derefter injiceret og navngivet `omniroute_omniroute_ccr_retrieve` (se [Klientforudsætninger](#client-prerequisites) ). |
+| OpenAI-kompatibel | OpenAI-kompatibel HTTP (chatafslutninger) | standard chat-afslutningsklient mod det OpenAI-kompatible slutpunkt                                                                                                                                                                                        | **Aldrig** — en almindelig OpenAI-kompatibel opkalder bliver aldrig bedt om at ringe til værktøjet, og instruktionen injiceres ikke.                                    |
 
 ### Hentningsgrænser og paginering
 
@@ -387,11 +339,11 @@ Brug `mode:"lines"` med `start`/`end` til at gå en lang blok i sider i stedet f
 
 ### Navngivning af værktøj
 
-Hentningsværktøjet hedder i øjeblikket `omniroute_ccr_retrieve` ( `omniroute_` præfikset er en dateret løsning for kryds-servernavnekollisioner). Et renere afgrænset suffiksværktøjsnavn og en rettelse for MCP JSON resultater trunkeret midtstreng spores som opstrøms opfølgninger; denne side dokumenterer kun den aktuelle, afsendte adfærd.
+Hentningsværktøjet hedder i øjeblikket `omniroute_ccr_retrieve` ( `omniroute_` præfikset er en dateret løsning til kollisioner med navne på tværs af servere). Et renere afgrænset suffiksværktøjsnavn og en rettelse for MCP JSON resultater trunkeret midtstreng spores som opstrøms opfølgninger; denne side dokumenterer kun den aktuelle, afsendte adfærd.
 
 ### Sessions livscyklus
 
-Streambare-HTTP-sessioner går i tomgang, og serveren høster dem; det inaktive vindue er indstillet af `OMNIROUTE_MCP_SESSION_IDLE_MS` (standard 5 minutter; refereret ved navn, ikke en hårdkodet værdi, så denne side driver ikke, når den ændres). Symptomet på en inaktiv session er en HTTP 404 med `Unknown Mcp-Session-Id` — midlet er at genoprette forbindelsen eller genstarte sessionen,** ikke** for at rotere en nøgle, ændre et omfang eller omdøbe et værktøj.
+Streambare HTTP-sessioner går i tomgang, og serveren høster dem; det inaktive vindue er indstillet af `OMNIROUTE_MCP_SESSION_IDLE_MS` (standard 5 minutter; refereret ved navn, ikke en hårdkodet værdi, så denne side driver ikke, når den ændres). Symptomet på en inaktiv session er en HTTP 404 med `Unknown Mcp-Session-Id` — midlet er at genoprette forbindelsen eller genstarte sessionen,** ikke** for at rotere en tast, ændre et omfang eller omdøbe et værktøj.
 
 ## API-grænseflade
 
@@ -476,7 +428,7 @@ præfikser osv.).
 
 ## Validering
 
-De fokuserede porte til dette område er:
+De fokuserede porte for dette område er:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts
