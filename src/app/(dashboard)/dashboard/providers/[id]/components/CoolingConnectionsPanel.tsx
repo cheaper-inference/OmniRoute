@@ -91,7 +91,7 @@ function ClearCooldownButton(props: ClearCooldownButtonProps) {
   return (
     <Button
       variant="outline"
-      size="sm"
+      size="2xs"
       data-testid={`clear-cooldown-${connectionId}`}
       disabled={clearing}
       onClick={() => onClearCooldown(connectionId)}
@@ -100,7 +100,6 @@ function ClearCooldownButton(props: ClearCooldownButtonProps) {
         "clearConnectionCooldownTitle",
         "Clear the cooldown now — use when the quota has already refreshed upstream"
       )}
-      className="h-6 min-h-0 rounded px-2 text-xs"
     >
       {clearing
         ? providerText(t, "clearConnectionCooldownInProgress", "Clearing…")

@@ -128,13 +128,13 @@ export default function ModelEndpointTagsEditor({
       </span>
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="icon-2xs"
+        tone="muted"
         icon="edit"
         onClick={beginEdit}
         disabled={saving}
         title={t("endpointCapabilitiesEdit")}
         aria-label={t("endpointCapabilitiesEdit")}
-        className="size-6 min-h-6 rounded text-text-muted"
       />
       {editing && (
         <div className="flex w-full flex-wrap items-center gap-1 rounded border border-border p-1">

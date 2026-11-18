@@ -556,9 +556,9 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
                 {provider.subscriptionRisk === true && (
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
                     icon="info"
-                    className="size-5 text-warning"
+                    className="text-warning"
                     title={t("riskNotice.tooltip")}
                     aria-label={t("riskNotice.tooltip")}
                     aria-haspopup="dialog"
@@ -672,12 +672,11 @@ const ProviderCard = forwardRef<ProviderCardHandle, ProviderCardProps>(function 
                 )}
                 {isLlmProvider && (
                   <Button
-                    size="sm"
+                    size="2xs"
                     variant="outline"
                     icon="play_arrow"
                     onClick={handleTestClick}
                     title={tp("expandTest")}
-                    className="h-6 gap-0.5 px-2 text-[11px]"
                   >
                     {tp("testLabel")}
                   </Button>

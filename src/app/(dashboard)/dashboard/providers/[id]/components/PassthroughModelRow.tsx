@@ -265,12 +265,12 @@ export default function PassthroughModelRow({
           {onToggleHidden && testStatus === "error" && (
             <Button
               variant="ghost"
-              size="sm"
+              size="2xs"
               icon="block"
               loading={!!togglingHidden}
               onClick={() => onToggleHidden(modelId, true)}
               disabled={togglingHidden}
-              className="h-6 min-h-0 gap-1 rounded px-1 text-[11px] text-error"
+              className="text-error"
               title={providerText(
                 t,
                 "blacklistModelTooltip",
@@ -288,9 +288,9 @@ export default function PassthroughModelRow({
           )}
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon-2xs"
+            tone="muted"
             onClick={() => onCopy(fullModel, `model-${modelId}`)}
-            className="size-6 min-h-6 rounded text-text-muted"
             title={t("copyModel")}
             aria-label={t("copyModel")}
           >
@@ -299,10 +299,19 @@ export default function PassthroughModelRow({
           {onTestModel && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon-2xs"
+              tone="muted"
               onClick={() => onTestModel(modelId, fullModel)}
               disabled={testingModel}
-              className={`size-6 min-h-6 rounded ${testStatus === "ok" ? "text-success" : testStatus === "quota" ? "text-warning" : testStatus === "error" ? "text-error" : "text-text-muted"}`}
+              className={
+                testStatus === "ok"
+                  ? "text-success"
+                  : testStatus === "quota"
+                    ? "text-warning"
+                    : testStatus === "error"
+                      ? "text-error"
+                      : undefined
+              }
               title={
                 testingModel
                   ? t("testingModel")
@@ -342,11 +351,12 @@ export default function PassthroughModelRow({
           {onToggleHidden && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon-2xs"
+              tone="muted"
               icon={isHidden ? "visibility_off" : "visibility"}
               onClick={() => onToggleHidden(modelId, !isHidden)}
               disabled={togglingHidden}
-              className="size-6 min-h-6 rounded text-text-muted aria-disabled:opacity-40"
+              className="aria-disabled:opacity-40"
               title={
                 isHidden
                   ? providerText(t, "showModel", "Show model")
@@ -376,10 +386,9 @@ export default function PassthroughModelRow({
           {onDeleteAlias && (
             <Button
               variant="destructive-ghost"
-              size="icon-sm"
+              size="icon-2xs"
               icon="delete"
               onClick={onDeleteAlias}
-              className="size-6 min-h-6 rounded"
               title={t("removeModel")}
               aria-label={t("removeModel")}
             />

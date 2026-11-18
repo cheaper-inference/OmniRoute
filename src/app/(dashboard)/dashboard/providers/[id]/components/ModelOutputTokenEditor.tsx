@@ -46,11 +46,11 @@ export default function ModelOutputTokenEditor({ modelId, value, saving, onSave,
         {onSave && (
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon-2xs"
+            tone="muted"
             icon="output"
             aria-label={t("maxOutputTokenOverrideLabel")}
             title={t("maxOutputTokenOverrideLabel")}
-            className="size-6 min-h-6 rounded text-text-muted"
             onClick={() => {
               setDraft(typeof value === "number" ? String(value) : "");
               setEditing(true);
@@ -83,22 +83,20 @@ export default function ModelOutputTokenEditor({ modelId, value, saving, onSave,
       />
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="icon-2xs"
         icon="check"
         disabled={saving}
         title={providerText(t, "save", "Save")}
         aria-label={providerText(t, "save", "Save")}
-        className="size-6 min-h-6 rounded"
         onClick={() => void save()}
       />
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="icon-2xs"
         icon="close"
         disabled={saving}
         title={providerText(t, "cancel", "Cancel")}
         aria-label={providerText(t, "cancel", "Cancel")}
-        className="size-6 min-h-6 rounded"
         onClick={() => setEditing(false)}
       />
       <span className="basis-full text-[10px] text-text-muted">

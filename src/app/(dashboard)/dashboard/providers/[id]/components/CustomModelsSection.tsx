@@ -622,10 +622,10 @@ export default function CustomModelsSection({
                     </code>
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="icon-2xs"
+                      tone="muted"
                       icon={copied === copyKey ? "check" : "content_copy"}
                       onClick={() => onCopy(fullModel, copyKey)}
-                      className="size-6 min-h-6 rounded text-text-muted"
                       title={t("copyModel")}
                       aria-label={t("copyModel")}
                     />
@@ -886,10 +886,10 @@ export default function CustomModelsSection({
                 <div className="flex shrink-0 items-center gap-1">
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
+                    tone="muted"
                     icon="edit"
                     onClick={() => beginEdit(model)}
-                    className="size-6 min-h-6 rounded text-text-muted"
                     title={t("edit")}
                     aria-label={t("edit")}
                   />
@@ -922,21 +922,22 @@ export default function CustomModelsSection({
                   />
                   <Button
                     variant="ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
+                    tone="muted"
                     icon={model.isHidden ? "visibility_off" : "visibility"}
                     onClick={() => handleToggleHidden(model.id!, !model.isHidden)}
                     disabled={togglingModelId === model.id}
-                    className="size-6 min-h-6 rounded text-text-muted aria-disabled:opacity-50"
+                    className="aria-disabled:opacity-50"
                     title={model.isHidden ? t("unhideModel") : t("hideModel")}
                     aria-label={model.isHidden ? t("unhideModel") : t("hideModel")}
                   />
                   {hasSyncedBase && (
                     <Button
                       variant="ghost"
-                      size="icon-sm"
+                      size="icon-2xs"
                       icon="restart_alt"
                       onClick={() => handleResetToUpstreamDefaults(model.id!)}
-                      className="size-6 min-h-6 rounded text-warning hover:bg-warning-bg"
+                      className="text-warning hover:bg-warning-bg"
                       title={providerText(
                         t,
                         "resetToUpstreamDefaults",
@@ -951,10 +952,9 @@ export default function CustomModelsSection({
                   )}
                   <Button
                     variant="destructive-ghost"
-                    size="icon-sm"
+                    size="icon-2xs"
                     icon="delete"
                     onClick={() => handleRemove(model.id!)}
-                    className="size-6 min-h-6 rounded"
                     title={t("removeCustomModel")}
                     aria-label={t("removeCustomModel")}
                   />

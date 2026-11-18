@@ -475,9 +475,10 @@ export default function ModelCompatPopover({
         <Button
           size="sm"
           variant="outline"
+          tone="muted"
           icon="tune"
           disabled={disabled}
-          className="gap-1.5 px-1.5 text-xs text-text-muted sm:px-2.5"
+          className="gap-1.5 px-1.5 text-xs sm:px-2.5"
           title={t("compatAdjustmentsTitle")}
           aria-label={compact ? t("compatAdjustmentsTitle") : undefined}
         >
@@ -652,6 +653,7 @@ export default function ModelCompatPopover({
                     <Button
                       variant="outline"
                       size="icon-sm"
+                      tone="muted"
                       icon="close"
                       disabled={
                         disabled ||
@@ -660,7 +662,7 @@ export default function ModelCompatPopover({
                       onClick={() => removeHeaderRow(row.id)}
                       title={t("compatUpstreamRemoveRow")}
                       aria-label={t("compatUpstreamRemoveRow")}
-                      className="size-9 min-h-9 shrink-0 rounded-lg text-text-muted hover:bg-error/10 hover:text-error"
+                      className="size-9 min-h-9 shrink-0 rounded-lg hover:bg-error/10 hover:text-error"
                     />
                   </div>
                 ))}

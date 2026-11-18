@@ -183,10 +183,10 @@ export default function ConnectionQuotaPanel({
   const refreshControl = onRefresh ? (
     <Button
       variant="ghost"
-      size="icon-sm"
+      size="icon-2xs"
+      tone="muted"
       onClick={onRefresh}
       disabled={refreshing}
-      className="size-6 min-h-6 rounded text-text-muted"
       title={t("quotaRefresh")}
       aria-label={t("quotaRefresh")}
     >
@@ -285,11 +285,11 @@ export default function ConnectionQuotaPanel({
         {hasDetails && (
           <Button
             variant="ghost"
-            size="icon-sm"
+            size="icon-2xs"
+            tone="muted"
             icon={expanded ? "expand_less" : "expand_more"}
             aria-expanded={expanded}
             onClick={() => setExpanded((v) => !v)}
-            className="size-6 min-h-6 rounded text-text-muted"
             title={t("quotaDetails")}
             aria-label={t("quotaDetails")}
           />

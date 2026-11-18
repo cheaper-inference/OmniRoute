@@ -372,10 +372,11 @@ export default function ModelRow({
       </div>
       <Button
         variant="ghost"
-        size="icon-sm"
+        size="icon-2xs"
+        tone="muted"
         icon={copied === `model-${model.id}` ? "check" : "content_copy"}
         onClick={() => onCopy(fullModel, `model-${model.id}`)}
-        className="absolute right-2 top-2 rounded p-0.5 size-6 min-h-6 text-text-muted"
+        className="absolute right-2 top-2"
         title={t("copyModel")}
         aria-label={t("copyModel")}
       />
@@ -427,12 +428,12 @@ export default function ModelRow({
           {onToggleHidden && testStatus === "error" && (
             <Button
               variant="ghost"
-              size="sm"
+              size="2xs"
               icon="block"
               loading={!!togglingHidden}
               onClick={() => onToggleHidden(model.id, true)}
               disabled={togglingHidden}
-              className="h-6 min-h-0 gap-1 rounded px-1 text-[11px] text-error"
+              className="text-error"
               title={providerText(
                 t,
                 "blacklistModelTooltip",
@@ -448,10 +449,19 @@ export default function ModelRow({
           {onTestModel && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon-2xs"
+              tone="muted"
               onClick={() => onTestModel(model.id, fullModel)}
               disabled={testingModel}
-              className={`size-6 min-h-6 rounded ${testStatus === "ok" ? "text-success" : testStatus === "quota" ? "text-warning" : testStatus === "error" ? "text-error" : "text-text-muted"}`}
+              className={
+                testStatus === "ok"
+                  ? "text-success"
+                  : testStatus === "quota"
+                    ? "text-warning"
+                    : testStatus === "error"
+                      ? "text-error"
+                      : undefined
+              }
               title={
                 testingModel
                   ? t("testingModel")
@@ -491,11 +501,11 @@ export default function ModelRow({
           {onToggleHidden && (
             <Button
               variant="ghost"
-              size="icon-sm"
+              size="icon-2xs"
+              tone="muted"
               icon={isHidden ? "visibility_off" : "visibility"}
               onClick={() => onToggleHidden(model.id, !isHidden)}
               disabled={togglingHidden}
-              className="size-6 min-h-6 rounded text-text-muted"
               title={
                 isHidden
                   ? providerText(t, "showModel", "Show model")

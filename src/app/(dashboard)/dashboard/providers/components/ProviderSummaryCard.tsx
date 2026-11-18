@@ -186,9 +186,10 @@ export default function ProviderSummaryCard({
               <Button
                 variant="ghost"
                 size="icon-sm"
+                tone="muted"
                 icon="close"
                 onClick={() => setSearchQuery("")}
-                className="absolute right-1 top-1/2 -translate-y-1/2 text-text-muted"
+                className="absolute right-1 top-1/2 -translate-y-1/2"
                 aria-label={tc("clear")}
               />
             )}
@@ -206,9 +207,10 @@ export default function ProviderSummaryCard({
               <Button
                 variant="ghost"
                 size="icon-sm"
+                tone="muted"
                 icon="close"
                 onClick={() => setModelSearchQuery("")}
-                className="absolute right-1 top-1/2 -translate-y-1/2 text-text-muted"
+                className="absolute right-1 top-1/2 -translate-y-1/2"
                 aria-label={tc("clear")}
               />
             )}
@@ -300,8 +302,9 @@ export default function ProviderSummaryCard({
             <Button
               size="sm"
               variant="ghost"
+              tone="muted"
               onClick={() => onServiceKindChange(null)}
-              className="text-text-muted underline-offset-2 hover:underline"
+              className="underline-offset-2 hover:underline"
             >
               {providerText(t, "clearMediaFilter", "Clear")}
             </Button>

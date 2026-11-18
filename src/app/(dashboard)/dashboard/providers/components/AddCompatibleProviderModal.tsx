@@ -443,7 +443,8 @@ export default function AddCompatibleProviderModal({
         <Button
           variant="ghost"
           size="sm"
-          className="self-start gap-1 px-1 text-text-muted"
+          tone="muted"
+          className="self-start gap-1 px-1"
           onClick={() => setShowAdvanced(!showAdvanced)}
           aria-expanded={showAdvanced}
           aria-controls={advancedId}
