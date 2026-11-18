@@ -3,6 +3,7 @@ import { CORS_HEADERS, handleCorsOptions } from "@/shared/utils/cors";
 import { buildErrorBody } from "@omniroute/open-sse/utils/error";
 import { listPlugins } from "@/lib/db/plugins";
 import { pluginManager } from "@/lib/plugins/manager";
+import { PluginInstallSourceError } from "@/lib/plugins/installSource";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { z } from "zod";
 
@@ -40,10 +41,12 @@ export async function GET(request: NextRequest) {
 }
 
 /**
- * POST /api/plugins — Install a plugin from a local path
+ * POST /api/plugins — Install a plugin from a local path inside the plugin sources
+ * directory. Installing (and possibly activating) code is never anonymous, so the
+ * management credential is required even when login is disabled.
  */
 export async function POST(request: NextRequest) {
-  const authError = await requireManagementAuth(request);
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
   if (authError) return authError;
   let body: unknown;
   try {
@@ -55,10 +58,13 @@ export async function POST(request: NextRequest) {
     );
   }
   const schema = z.object({
-    path: z.string().min(1).regex(/^\/[^]*$/, "Path must be absolute").refine(
-      (p) => !p.includes("\0") && !p.includes(".."),
-      "Path must not contain traversal patterns or null bytes"
-    ),
+    path: z
+      .string()
+      .min(1)
+      .refine(
+        (p) => !p.includes("\0") && !p.includes(".."),
+        "Path must not contain traversal patterns or null bytes"
+      ),
   });
 
   const parsed = schema.safeParse(body);
@@ -70,12 +76,22 @@ export async function POST(request: NextRequest) {
   }
 
   try {
-    const plugin = await pluginManager.install(parsed.data.path);
+    const plugin = await pluginManager.installFromLocalSource(parsed.data.path);
     return NextResponse.json(
       { plugin: formatPlugin(plugin) },
       { status: 201, headers: CORS_HEADERS }
     );
   } catch (err: unknown) {
+    if (err instanceof PluginInstallSourceError) {
+      console.warn("[plugins] Refused plugin install source:", err.message);
+      return NextResponse.json(
+        buildErrorBody(
+          400,
+          "Plugin path must be an existing directory inside the plugin sources directory"
+        ),
+        { status: 400, headers: CORS_HEADERS }
+      );
+    }
     console.error("[plugins] Failed to install plugin:", err);
     return NextResponse.json(buildErrorBody(400, "Failed to install plugin"), {
       status: 400,

@@ -94,7 +94,7 @@ loopback-only — `/api/plugins` and `/api/plugins/` are listed in
 | Endpoint                         | Method | Description                                         |
 | -------------------------------- | ------ | --------------------------------------------------- |
 | `/api/plugins`                   | GET    | List installed plugins (optional `?status=` filter) |
-| `/api/plugins`                   | POST   | Install a plugin from an absolute local path        |
+| `/api/plugins`                   | POST   | Install a plugin from the plugin sources directory  |
 | `/api/plugins/scan`              | POST   | Scan the plugin directory and register new plugins  |
 | `/api/plugins/marketplace`       | GET    | List marketplace catalog entries                    |
 | `/api/plugins/[name]`            | GET    | Get installed plugin details                        |
@@ -123,10 +123,20 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-The `path` must be **absolute** and may not contain `..` traversal segments or
-null bytes (enforced by Zod). The source directory must contain a valid
-`plugin.json` (or be a parent of one). On success the response is `201` with the
-installed plugin row.
+The `path` must be an **absolute** path to a directory **inside the plugin
+sources directory**: `plugin-sources` next to the plugin root, so
+`~/.omniroute/plugin-sources/` by default, or `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/`
+when that variable is set (`getPluginSourcesDir()` in
+`src/lib/plugins/installSource.ts`). Copy or clone the plugin there first. The
+install is refused with `400` when the path contains `..` or a null byte, lies
+outside that directory, resolves outside it through a symlink, contains a symlink
+whose target is outside it, or when the directory does not exist. The source
+directory must contain a valid `plugin.json` (or be a parent of one). On success
+the response is `201` with the installed plugin row.
+
+Unlike the other plugin routes, this one requires the management credential (a
+dashboard session or a manage-scoped API key) even when login is disabled
+(`requireLogin=false`): installing code is never an anonymous action.
 
 ### Browse the marketplace
 
@@ -248,6 +258,10 @@ silently falls back to the built-in seed registry and logs a warning.
 - **Env allowlist** — the child receives only an allowlisted set of environment
   variables; the broader set is only granted when the manifest requests the
   `env` permission.
+- **Install source containment** — `POST /api/plugins` only reads from the plugin
+  sources directory (see "Install from a local path"): the path is canonicalized
+  with `realpath`, must stay strictly inside that directory, and a source tree
+  carrying a symlink that escapes it is refused before anything is copied.
 - **Path containment** — install/upgrade/uninstall assert that the plugin
   directory and `manifest.main` resolve **within** the managed plugin root
   before any copy or recursive delete (guards against tampered DB paths and

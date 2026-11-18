@@ -1,0 +1,1 @@
+- **fix(security):** `POST /api/plugins` now installs only from the `plugin-sources` directory next to the plugin root (canonicalized with `realpath`, symlinks escaping it refused, fail closed) and requires the management credential even when login is disabled
