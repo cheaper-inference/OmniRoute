@@ -5,7 +5,8 @@
  * questions (`noul`, `choice`, `score`). Response: `{ model, answers, usage }`
  * passthrough with calibrated probabilities. Models: `typesafe/jev-*` or bare
  * `jev-*` aliases (native api.typesafe.ai), `openrouter/<vendor>/<model>` for
- * OpenRouter-hosted decisions models. GET lists decisions-capable models.
+ * OpenRouter-hosted decisions models, `cloudflare-ai/<jev|clef|clef-flash>` (or
+ * `cf/`) for Cloudflare Workers AI. GET lists decisions-capable models.
  *
  * Not a chat endpoint — decisions models never join chat pickers or combos.
  */

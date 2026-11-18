@@ -169,10 +169,16 @@ test("pinned scope keeps the cross-account and unavailable-owner guards", () => 
     () => claimMuseSession(scope, structuredClone(adoptionBody), [accountA, accountB], accountB.id),
     /differs/
   );
+  // A present owner that is cooling down keeps the session (the caller then answers 429);
+  // only a missing owner forces another account.
+  assert.equal(
+    claimMuseSession(scope, structuredClone(adoptionBody), [{ ...accountA, unavailable: true }])
+      .connectionId,
+    accountA.id
+  );
   assert.throws(
-    () =>
-      claimMuseSession(scope, structuredClone(adoptionBody), [{ ...accountA, unavailable: true }]),
-    /unavailable/
+    () => claimMuseSession(scope, structuredClone(adoptionBody), [accountB]),
+    /differs|unavailable/
   );
   assert.equal(
     claimMuseSession(scope, structuredClone(adoptionBody), [accountA]).connectionId,

@@ -129,6 +129,21 @@ describe("compact model names", () => {
     assert.equal(m.name, "🆓 Nvidia - Nemotron 3 Ultra");
   });
 
+  it("keeps a free marker carried on the provider prefix (CodeRabbit R4)", () => {
+    assert.equal(
+      buildModelDisplayName({
+        rawId: "cf/open-m",
+        enrichmentName: "[Free] Cloudflare - Open Model",
+      }),
+      "🆓 Cloudflare - Open Model"
+    );
+    const m = applyEnrichment(model("cf/open-m", "cf/open-m"), {
+      name: "[Free] Cloudflare - Open Model",
+      providerDisplayName: "Cloudflare",
+    });
+    assert.equal(m.name, "🆓 Cloudflare - Open Model");
+  });
+
   it("uses a suffix marker for free entries and none otherwise", () => {
     const free = buildModelDisplayName({
       rawId: "opencode-go/beam-free",

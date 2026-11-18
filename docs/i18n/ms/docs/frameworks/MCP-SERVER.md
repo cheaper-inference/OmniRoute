@@ -20,6 +20,8 @@ Atau melalui pengangkutan terbuka:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -144,7 +146,7 @@ Cursor, Cline dan klien MCP yang serasi.
 | `omniroute_rtk_discover`            | `read:compression`  | Temui bunyi yang berulang dalam sampel keluaran RTK ikut serta                                                               |
 | `omniroute_rtk_learn`               | `read:compression`  | Hasilkan draf penapis RTK yang boleh disemak daripada sampel ikut serta                                                      |
 
-entri CCR menggunakan stor dua peringkat: peringkat dalam memori yang panas disandarkan, pada masa jalan bukan awan tempatan, oleh peringkat SQLite yang tahan lama (`ccr_blocks`, dihidupkan secara lalai) supaya satu blok bertahan dalam pengusiran atau dimulakan semula sehingga TTL kehabisan — kecuali blok melebihi 512 KB dan masa jalan awan sahaja, yang kekal memori-only. Setiap blok dihadkan kepada 2 MiB, setiap prinsipal kepada 16 MiB, dan kedai global kepada 64 MiB. Entri lalai kepada TTL 24 jam (maksimum tujuh hari). Pendapatan penuh MCP terhad kepada 256 KiB; blok yang lebih besar kekal tersedia melalui mod julat dan grep. Penyimpanan, pengambilan semula, penyenaraian, pemeriksaan, pemadaman dan statistik diasingkan oleh prinsipal kunci API yang disahkan. Rekod audit mengandungi cincangan dan metadata saiz, bukan kandungan. Butiran menghadap operator (dua penanda, prasyarat pelanggan, `codemode:false`, skop setiap alat, penomboran dan matriks diagnostik) hidup dalam [Enjin Mampatan → Prasyarat / panduan pengendali](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+entri CCR menggunakan stor dua peringkat: peringkat dalam memori yang panas disandarkan, pada masa jalan bukan awan tempatan, oleh peringkat SQLite yang tahan lama (`ccr_blocks`, dihidupkan secara lalai) supaya satu blok bertahan dalam pengusiran atau dimulakan semula sehingga TTL kehabisan — kecuali menyekat melebihi 512 KB, masa jalan awan, dan `COMPRESSION_CCR_DURABLE_STORE=false` kekal memori. Tulisan yang tahan lama adalah usaha terbaik: ia digugurkan sementara 1,000 tulisan sedang menunggu, dan penulisan SQLite yang gagal dilog, tidak dicuba semula, supaya sekatan itu hilang semasa dimulakan semula. Setiap blok dihadkan kepada 2 MiB, setiap prinsipal kepada 16 MiB dan kedai global kepada 64 MiB. Entri lalai kepada TTL 24 jam (maksimum tujuh hari). Pendapatan MCP penuh adalah terhad kepada 256 KiB; blok yang lebih besar kekal tersedia melalui mod julat dan grep. Penyimpanan, pengambilan semula, penyenaraian, pemeriksaan, pemadaman dan statistik diasingkan oleh prinsipal kunci API yang disahkan. Rekod audit mengandungi cincangan dan metadata saiz, bukan kandungan. Butiran menghadap operator (dua penanda, prasyarat pelanggan, `codemode:false`, skop setiap alat, penomboran dan matriks diagnostik) hidup dalam [Enjin Mampatan → Prasyarat / panduan pengendali](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` melaporkan pemampatan perihalan MCP secara berasingan di bawah `analytics.mcpDescriptionCompression`. Nilai tersebut ialah anggaran saiz metadata untuk perihalan boleh senarai MCP (`tools`, `prompts`, `resources` dan `resourceTemplates`); ia bukan resit penggunaan pembekal dan ditandakan dengan `source: "mcp_metadata_estimate"`.
 
@@ -159,7 +161,7 @@ Tingkah laku utama:
 - Teks besar yang dipotong keras (> 50,000 aksara) dengan petunjuk navigasi
 - Penjimatan yang dijangkakan:** 60–80%** pada muatan syot kilat penyemak imbas
 
-Konfigurasi: `compression.mcpAccessibility` dalam tetapan global (penghijrahan 056). Pelaksanaan: `open-sse/services/compression/engines/mcpAccessibility/`. Dokumen penuh: [Enjin Mampatan — MCP Penapis Pokok Kebolehcapaian](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Konfigurasi: `compression.mcpAccessibility` dalam tetapan global (migrasi 056). Pelaksanaan: `open-sse/services/compression/engines/mcpAccessibility/`. Dokumen penuh: [Enjin Mampatan — MCP Penapis Pokok Kebolehcapaian](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
 Lihat [Enjin Mampatan](../compression/COMPRESSION_ENGINES.md) dan [Mampatan RTK](../compression/RTK_COMPRESSION.md) untuk model mampatan masa jalan di sebalik alatan ini.
 

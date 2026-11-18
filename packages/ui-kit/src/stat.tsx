@@ -4,7 +4,8 @@ import { InfoTooltip } from "./info-tooltip";
 import { cn } from "./lib/utils";
 import { NumberTicker } from "./number-ticker";
 
-export type StatTone = "default" | "positive" | "critical";
+export type StatTone = "default" | "positive" | "critical" | "warning";
+export type StatAnimateFrom = "zero" | "previous";
 export type StatFormat = "number" | "compact" | "currency" | "percent" | "text";
 export type StatLabelVariant = "default" | "eyebrow";
 
@@ -31,6 +32,11 @@ interface StatBaseProps extends ComponentProps<"div"> {
   animationDuration?: number;
   /** Optional NumberTicker viewport behavior override. */
   animateOnView?: boolean;
+  /**
+   * Where an animated number counts from when the value changes. `"zero"` (default) recounts
+   * from 0 every time; `"previous"` counts from the number on screen, for live counters.
+   */
+  animateFrom?: StatAnimateFrom;
 }
 
 /** Text summaries use the same card structure with wrapping, compact typography.
@@ -66,6 +72,7 @@ export function Stat({
   animate = false,
   animationDuration,
   animateOnView,
+  animateFrom = "zero",
   ...props
 }: StatProps) {
   const baseId = useId();
@@ -103,6 +110,7 @@ export function Stat({
             locale={locale}
             duration={animationDuration}
             animateOnView={animateOnView}
+            from={animateFrom === "previous" ? "previous" : undefined}
           />
         ) : (
           rendered

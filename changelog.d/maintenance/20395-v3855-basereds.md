@@ -1,0 +1,1 @@
+- **fix(i18n):** the UI keys the v3.8.55 derived refresh left as `__MISSING__:<en>` markers (1,782 values in 65 locales) are translated, and the 8 `falNative` strings that showed a bare `__MISSING__` in every non-English UI now read in each language. The release-refresh real-plan tests no longer depend on numbers that repeat the migration count by coincidence in the live README.

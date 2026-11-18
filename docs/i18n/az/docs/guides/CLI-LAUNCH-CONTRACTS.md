@@ -1,0 +1,59 @@
+# Shared CLI launch and configuration contracts (Azərbaycan dili)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇹 [am](../../../am/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇦 [bs](../../../bs/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇩🇰 [da](../../../da/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇩🇪 [de](../../../de/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇬🇷 [el](../../../el/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇸 [es](../../../es/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇪 [et](../../../et/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇱 [he](../../../he/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇩 [id](../../../id/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇹 [it](../../../it/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇭 [km](../../../km/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇲 [my](../../../my/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇴 [no](../../../no/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [or](../../../or/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇰 [si](../../../si/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [te](../../../te/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇭 [th](../../../th/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLI-LAUNCH-CONTRACTS.md)
+
+---
+
+Neytral `config/cli-tools-manifest.json` müqaviləsi kanonik IDs, ləqəblər, ikili namizədlər, quraşdırma reseptləri, model arqumentləri və imkanları elan edir. `bin/cli/cli-manifest.mjs` -dəki sadə Node adapteri və `src/shared/constants/cliIntegrationManifest.ts` -dəki TypeScript adapteri eyni faylı oxuyur. İş vaxtı, kataloq, konfiqurasiya, tamamlama, generatorlar və arxa uçun qeydiyyatı `tests/unit/cli/cli-manifest-drift.test.ts` tərəfindən birlikdə yoxlanılır. Kataloqlaşdırılmaq o demək deyil ki, alət işə salına və ya konfiqurasiya edilə bilər. Xüsusilə, 5dive yalnız konfiqurasiya olaraq qalır.
+
+## Uşaq mühiti və həyat dövrü
+
+`omniroute run`, `omniroute launch` və `omniroute launch-codex` OS/terminal uyğunluğu icazəli siyahısını miras alır və seçilmiş hədəfin etimadnaməsini daxil edir. Əlaqəsiz provayder və verilənlər bazası sirləri standart olaraq miras alınmır. `--inherit-env` açıq şəkildə tam valideyn-mühit mirası bərpa edir; onu yalnız seçilmiş üçüncü tərəf prosesi həmin dəyərləri aldıqda istifadə edin. Bu, OS qum qutusu deyil, ətraf mühitin filtrasiyasıdır: proses hələ də zəng edənin fayl sistemi icazələri ilə işləyir.
+
+Kəsmə və bitirmə siqnalları uşağa ötürülür. Başlatıcı müvəqqəti konfiqurasiyanı silməzdən əvvəl uşağın yaxın hadisəsini gözləyir. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` məcburi dayandırmadan əvvəl güzəşt müddətini idarə edir (defolt 5000 millisaniyə).
+
+## Gemini davamlı quraşdırma
+
+```bash
+omniroute setup-gemini --remote https://omni.example --model provider/model --yes
+omniroute configure gemini --model provider/model --yes
+omniroute run gemini --model provider/model --dry-run --json
+```
+
+İlk iki əmr bu maşını seçilmiş yerli və ya uzaq server üçün konfiqurasiya edir. Quraşdırma əlaqəsiz JSON parametrlərini qoruyur, Gemini API açarı auth seçir və son nöqtəni və etimadnaməni şəxsi `.gemini/.env` faylına yazır. Onun üzərinə yazmaq əvəzinə etibarsız JSON imtina edir. Son nöqtə URLs daxil edilmiş etimadnamələri, sorğu parametrləri və ya fraqmentləri olmayan HTTP(S) olmalıdır. Quru rejimdə etimadnamə dəyərləri deyil, yolları çap edir.
+
+`GEMINI_CLI_HOME` və ya `--gemini-home` davamlı ev kökünü seçir. Faktiki `run gemini` öz müvəqqəti evini yaradır və sonradan silir. Heç bir rejim Gemini-nin iş sahəsi-etibar yoxlamalarından yan keçmir.
+
+## Codex profilləri
+
+`configure codex` bir model və onun OmniRoute provayderinin son nöqtəsi ilə özəl `<name>.config.toml` yazır. Etibarnamələr `OMNIROUTE_API_KEY` vasitəsilə istinad edilir, heç vaxt daxil edilmir. Başlatma əmri seçilmiş modeli `model_providers` daxilində deyil, yuxarı səviyyəli `model` düyməsinə təyin edir.
+
+Ayrı-ayrı profil faylları cari sənədləşdirilmiş Codex müqaviləsidir; `codex --profile <name>` ilə seçildikdə istifadəçi konfiqurasiyasını üst-üstə qoyurlar. [Rəsmi profil arayışına](https://learn.chatgpt.com/docs/config-file/config-advanced#profiles) və [OmniRoute Codex bələdçisinə](./CODEX-CLI-CONFIGURATION.md) baxın.
+
+## Hermetik əmrin icrası
+
+Açıq `DATA_DIR` ilə `OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV=1` parametri başlanğıcın standart istifadəçi məlumat kataloqunun etimadnamə mühitinə düşməsinin qarşısını alır. Bu, təcrid olunmuş testlər üçün faydalıdır. O, digər açıq şəkildə seçilmiş mühit fayllarını deaktiv etmir.
+
+## İş kataloqu `.env`
+
+CLI `.env` fayllarını bu ardıcıllıqla oxuyur və açarı təyin edən ilk fayl qalib gəlir: açıq `DATA_DIR`, standart məlumat kataloqu, cari işçi kataloqu, sonra paket kataloqu. Shell dəyişənləri həmişə qalib gəlir.
+
+İşçi kataloq başqasına aid ola bilər (klonlaşdırılmış repozitoriya, paketdən çıxarılmamış arxiv) və `omniroute serve` CLI mühitini serverə və serverin işlədiyi hər alətə ötürür. Beləliklə, orada bir `.env` yalnız `bin/cli/utils/untrustedCwdEnv.mjs` sadalanan bu düymələri təyin edə bilər:
+
+| Açar                            | Qəbul edilmiş dəyərlər                                                             |
+| ------------------------------- | ---------------------------------------------------------------------------------- |
+| `REQUIRE_API_KEY`               | `true`, `1` və ya `yes` istənilən halda, serverin aktiv kimi qəbul etdiyi dəyərlər |
+| `LANG`, `LC_ALL`, `LC_MESSAGES` | 64 hərf, rəqəm, `_`, `.`, `@` və ya `-`                                            |
+| `LANGUAGE`                      | eyni, üstəgəl `:`                                                                  |
+| `TZ`                            | `/` ilə başlamayan 64 hərf, rəqəm, `_`, `+`, `-` və ya `/`                         |
+| `NO_COLOR`, `FORCE_COLOR`       | 16 hərf və rəqəmə qədər                                                            |
+
+`REQUIRE_API_KEY` qəbul etdiyi hər bir dəyər çeki işə salır, ona görə də fayl çeki özü söndürə bilməz. Bununla belə, nəticəyə qərar vermir: server ətraf mühitdən əvvəl verilənlər bazasında saxlanılan `REQUIRE_API_KEY` ləğvini oxuyur, API düyməsi olmadan bütün interfeyslərdə dinləmə haqqında başlanğıc xəbərdarlığı yalnız mühiti oxuyur. `false` nin saxlanmış ləğvi ilə `REQUIRE_API_KEY=true` işçi qovluğu API açıq qoyur və bu xəbərdarlığı gizlədir. `TZ` qaydası POSIX dan daha dardır: `.`, `:`, `,` və `<>` rədd edir, ona görə də `:Area/City` forması və `EST5EDT,M3.2.0,M11.1.0` kimi qaydaları qabıqda və ya `<DATA_DIR>/.env`-da təyin edilməlidir.
+
+Adlar böyük hərflə tam uyğun olmalıdır. İstənilən digər sətir, yoxlanışı keçməyən dəyər və sadə ASCII hərfləri, rəqəmləri və `_` olmayan ad (məsələn NUL baytı və ya oxşar hərfi olan) atlanır. CLI təyin edə bilmədiyi düymələri adlandıran və iqnor etdiyi icazə verilən düymələri adlandıran bir xəbərdarlıq çap edir, hər birində nəyi dəyişdirmək lazımdır (`TZ (expected a zone name such as Europe/Berlin)`, `lang (write the name as LANG)`). Heç biri dəyərləri çap etmir. Bu mesajlardakı fayl yolları və `.env` yolu `omniroute doctor` hesabatları nəzarət və ya bidi simvollarını ehtiva etdikdə qaçırılır. İşçi kataloq məlumat kataloqu və ya paket kataloqu olduqda məhdudiyyət tətbiq edilmir.
+
+`PORT`, `API_PORT` və `DASHBOARD_PORT` siyahıda yoxdur. Daha yüksək prioritetli mənbədən URL bazası olmadan, CLI `localhost:<PORT>` ilə danışır və orada dinləyənlər CLI-nin API açarını, kontekst işarəsini və yerli serverin geri döngədən idarəetmə zəngləri üçün qəbul etdiyi CLI maşın işarəsini (`x-omniroute-cli-token`, bax [CLI_TOKEN.md](../security/CLI_TOKEN.md) ) alır. İş qovluğundan olan port həmin fayla dinləyicini seçməyə imkan verəcək, buna görə də portları qabıqda, `<DATA_DIR>/.env` də və ya bir (`serve`, `launch`, `run`) olan əmrlərin `--port` seçimi ilə təyin edin.
+
+Parserin `export` sintaksisi yoxdur. `export LD_PRELOAD=...` kimi sətir `export LD_PRELOAD` dəyişənini adlandırır; işçi qovluğundan atlanır və digər `.env` fayllarında heç bir şey oxumayan həmin hərfi adı təyin edir.
+
+CLI kontekstin saxlanmış işarəsini (giriş nişanı və ya köhnə API açarı) yalnız həmin kontekstin öz mənşəyi ilə cütləşdirir: sxem, host və port, `URL.origin` ilə müqayisədə. Bu, CLI-nin HTTP müştərisi (`--base-url`, `OMNIROUTE_BASE_URL`, `omniroute connect <new-url>`) vasitəsilə edilən sorğulara və başqa alətin konfiqurasiyasına əsas URL və açarı yazan `launch`, `launch codex`, `configure` və `setup-*` əmrlərinə aiddir. `--remote` ilə başqa serverə işarə etdikdə, onlar açıq `--api-key` və ya `OMNIROUTE_API_KEY` istifadə edirlər, əgər biri quraşdırılıbsa və kontekst nişanı yoxdur. Müqayisə dəqiqdir, ona görə də `localhost` və `127.0.0.1` və ya arxada nöqtəsi olan və ya olmayan host müxtəlif serverlər kimi sayılır və kontekst nişanı əldə etmir. İstifadəçi məlumatı, tərs xətt və ya boşluq olan URL heç vaxt uyğun gəlmir, çünki digər URL təhlilçiləri (məsələn, Python-un `urllib` və `httpx`) ondan fərqli hostu oxuya bilər. Sorğular üçün CLI özünü göndərir, bu çek yalnız sxem və səlahiyyəti əhatə edir, buna görə də yolda və ya sorğuda boşluq olan id işarəni saxlayır.

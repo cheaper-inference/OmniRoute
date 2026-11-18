@@ -242,7 +242,7 @@ test("compat overrides ignore invalid protocol keys and can be fully removed aga
   assert.deepEqual(overrides[0].upstreamHeaders, { "X-Test": "enabled" });
 
   modelsDb.mergeModelCompatOverride("openai", "gpt-4.1-mini", {
-    normalizeToolCallId: false,
+    normalizeToolCallId: null,
     preserveOpenAIDeveloperRole: null,
     isHidden: null,
     upstreamHeaders: null,

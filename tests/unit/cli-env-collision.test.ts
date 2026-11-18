@@ -29,7 +29,7 @@ function runCli(
   extraEnv: Record<string, string> = {}
 ) {
   const cleanEnv = { ...process.env };
-  for (const key of ["OMNIROUTE_BASE_URL", "PORT", "STORAGE_ENCRYPTION_KEY"]) {
+  for (const key of ["OMNIROUTE_BASE_URL", "PORT", "REQUIRE_API_KEY", "STORAGE_ENCRYPTION_KEY"]) {
     delete cleanEnv[key];
   }
   return spawnSync("node", [BIN, "env", "show", "--json"], {
@@ -78,10 +78,12 @@ test("a key each file declares once says nothing", () => {
       path.join(dirs.dataDir, ".env"),
       "OMNIROUTE_BASE_URL=https://data.example/v1\n"
     );
-    fs.writeFileSync(path.join(dirs.cwd, ".env"), "PORT=34567\n");
+    // REQUIRE_API_KEY is a key the working-directory .env may still set (PORT no
+    // longer is: it would pick which local listener gets the CLI's credentials).
+    fs.writeFileSync(path.join(dirs.cwd, ".env"), "REQUIRE_API_KEY=true\n");
 
     const stderr = runCli(dirs).stderr ?? "";
-    assert.ok(!/OMNIROUTE_BASE_URL|PORT/.test(stderr), `nothing to report: ${stderr}`);
+    assert.ok(!/OMNIROUTE_BASE_URL|REQUIRE_API_KEY/.test(stderr), `nothing to report: ${stderr}`);
   } finally {
     fs.rmSync(dirs.tmp, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
