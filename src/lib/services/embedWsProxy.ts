@@ -228,7 +228,9 @@ async function proxyUpgrade(req: IncomingMessage, socket: net.Socket, head: Buff
   // Authorize before anything else: an unauthorized caller learns nothing about
   // the registered services and never gets a tunnel carrying the service key.
   const verdict = await authorizeEmbedWsUpgrade(req);
-  if (!verdict.allow) {
+  // `=== false`, not `!verdict.allow`: the production build program is not strict, and
+  // only the equality check narrows the verdict union there.
+  if (verdict.allow === false) {
     writeError(socket, verdict.status, verdict.message);
     return;
   }
