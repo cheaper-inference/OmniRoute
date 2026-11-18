@@ -1,0 +1,1 @@
+- **feat(providers):** Generate images with MiniMax H3 Image and H3 Image Highspeed through the international and China API connections.

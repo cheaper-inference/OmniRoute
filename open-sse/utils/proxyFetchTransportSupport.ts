@@ -1,3 +1,8 @@
+import {
+  MINIMAX_H3_GLOBAL_URL,
+  MINIMAX_H3_TIMEOUT_MS,
+  MINIMAX_H3_CN_URL,
+} from "../config/providers/registry/minimax/imageModels.ts";
 import { Agent } from "undici";
 import type { ConnectGuardMode } from "./connectGuardDispatcher.ts";
 import tlsClient, { type TlsFetchOptions } from "./tlsClient.ts";
@@ -296,6 +301,23 @@ export function isWreqProxySupported(proxyUrl: string): boolean {
   } catch {
     return false;
   }
+}
+
+/** Slow, billable image generation POSTs require a long deadline and a single send. */
+export function singleAttemptImageTimeoutMs(
+  input: RequestInfo | URL,
+  targetUrl: string,
+  options: FetchWithDispatcherOptions
+): number {
+  const method =
+    options.method ??
+    (typeof Request !== "undefined" && input instanceof Request ? input.method : "GET");
+  if (method.toUpperCase() !== "POST") return 0;
+  if (targetUrl === MINIMAX_H3_GLOBAL_URL || targetUrl === MINIMAX_H3_CN_URL)
+    return MINIMAX_H3_TIMEOUT_MS;
+  return isDedicatedCodexImageRequest(input, targetUrl, options)
+    ? codexImageResponseStartTimeoutMs()
+    : 0;
 }
 
 /** Dedicated Codex Images calls are slow, chargeable, and must never be replayed. */

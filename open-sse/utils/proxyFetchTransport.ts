@@ -4,6 +4,7 @@ import { withPayloadTraffic, type TrafficRecorderOverride } from "./proxyTraffic
 import {
   createProxyDispatcher,
   getDedicatedCodexImageProxyDispatcher,
+  getDedicatedCodexImageDispatcher,
   getProxyRetryDispatcher,
   buildVercelRelayHeaders,
   isRelayType,
@@ -19,7 +20,7 @@ import { tryTlsSend, isTlsSendEligible } from "./proxyFetchTlsTransport.ts";
 import {
   getEffectiveSignal,
   isDedicatedCodexImageRequest,
-  codexImageResponseStartTimeoutMs,
+  singleAttemptImageTimeoutMs,
   canResendAfterTransportError,
   requestHasNonReplayableBody,
   tagProxyUnreachable,
@@ -126,9 +127,9 @@ function relayRequest(config: RelayConfig, target: string, options: RequestInit)
   return { url: `https://${config.host}`, headers };
 }
 
-function relayTimeout(url: string): Error {
+function relayTimeout(url: string, timeoutMs: number): Error {
   const error = new Error(
-    `[ProxyFetch] Relay timed out after ${RELAY_FETCH_TIMEOUT_MS}ms (${proxyUrlForLogs(url)})`
+    `[ProxyFetch] Relay timed out after ${timeoutMs}ms (${proxyUrlForLogs(url)})`
   ) as Error & { code: string; errorCode: string; statusCode: number };
   error.code = "RELAY_TIMEOUT";
   error.errorCode = "relay_timeout";
@@ -145,12 +146,15 @@ async function sendRelay(
   target: string
 ): Promise<Response> {
   const request = relayRequest(config, target, options);
-  const dedicatedCodexImageRequest = isDedicatedCodexImageRequest(input, target, options);
-  const max = requestHasNonReplayableBody(input, options) || dedicatedCodexImageRequest ? 1 : 2;
+  const imageTimeout = singleAttemptImageTimeoutMs(input, target, options);
+  // Preserve the existing short relay deadline for the Codex route.
+  const longRelay = imageTimeout > 0 && !isDedicatedCodexImageRequest(input, target, options);
+  const timeoutMs = longRelay ? imageTimeout : RELAY_FETCH_TIMEOUT_MS;
+  const max = requestHasNonReplayableBody(input, options) || imageTimeout ? 1 : 2;
   let lastError: unknown;
   for (let attempt = 0; attempt < max; attempt++) {
     const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), RELAY_FETCH_TIMEOUT_MS);
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     const onAbort = () => controller.abort();
     options.signal?.addEventListener("abort", onAbort, { once: true });
     try {
@@ -162,11 +166,23 @@ async function sendRelay(
         ...options,
         headers: request.headers,
         duplex: "half",
-        dispatcher: attempt === 0 ? RELAY_POOL_AGENT : RELAY_RETRY_AGENT,
+        dispatcher: longRelay
+          ? getDedicatedCodexImageDispatcher(timeoutMs)
+          : attempt === 0
+            ? RELAY_POOL_AGENT
+            : RELAY_RETRY_AGENT,
         signal: controller.signal,
       });
     } catch (error) {
-      validateRelayRetry(error, controller.signal, options.signal, request.url, attempt, max);
+      validateRelayRetry(
+        error,
+        controller.signal,
+        options.signal,
+        request.url,
+        attempt,
+        max,
+        timeoutMs
+      );
       if (!canResendAfterTransportError(input, options, error)) throw error;
       lastError = error;
       await new Promise((resolve) => setTimeout(resolve, RETRY_BACKOFF_MS));
@@ -184,9 +200,10 @@ function validateRelayRetry(
   caller: AbortSignal | null | undefined,
   url: string,
   attempt: number,
-  max: number
+  max: number,
+  timeoutMs: number
 ): void {
-  if (signal.aborted && caller?.aborted !== true) throw relayTimeout(url);
+  if (signal.aborted && caller?.aborted !== true) throw relayTimeout(url, timeoutMs);
   if (caller?.aborted) throw error;
   if (attempt !== 0 || max <= 1 || !isProxyTransportFailure(error)) throw error;
 }
@@ -215,12 +232,11 @@ async function sendProxyAttempt(
   deps: ProxyFetchDeps,
   proxyUrl: string,
   trafficProxy: unknown,
-  dedicatedCodexImageRequest: boolean,
+  imageTimeout: number,
   attempt: number
 ): Promise<Response> {
   const meteredFetch = withPayloadTraffic(rawUndici(deps), trafficProxy, deps.recordTraffic);
-  const imageTimeout = dedicatedCodexImageRequest ? codexImageResponseStartTimeoutMs() : 0;
-  return dedicatedCodexImageRequest
+  return imageTimeout
     ? await directFetchWithBoundedResponseStart(
         input,
         {
@@ -246,8 +262,8 @@ async function sendProxy(
   target: string,
   source: string
 ): Promise<Response> {
-  const dedicatedCodexImageRequest = isDedicatedCodexImageRequest(input, target, options);
-  const max = requestHasNonReplayableBody(input, options) || dedicatedCodexImageRequest ? 1 : 2;
+  const imageTimeout = singleAttemptImageTimeoutMs(input, target, options);
+  const max = requestHasNonReplayableBody(input, options) || imageTimeout ? 1 : 2;
   let lastError: unknown;
   for (let attempt = 0; attempt < max; attempt++) {
     try {
@@ -257,7 +273,7 @@ async function sendProxy(
         deps,
         proxyUrl,
         trafficProxy,
-        dedicatedCodexImageRequest,
+        imageTimeout,
         attempt
       );
       recordProxiedSuccess(proxyUrl, target);

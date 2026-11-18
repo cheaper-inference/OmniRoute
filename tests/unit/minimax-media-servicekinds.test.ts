@@ -11,7 +11,7 @@ import assert from "node:assert/strict";
 // the registries (single source of truth) and unions it with declared serviceKinds.
 //
 // MiniMax was the flagged case: its international endpoint serves TTS/video/music/image,
-// the China variant (minimax-cn) has no media registry entries.
+// the China variant serves image generation.
 
 const { getRegistryMediaKinds, resolveProviderServiceKinds, REGISTRY_MEDIA_KINDS } =
   await import("../../open-sse/config/mediaServiceKinds.ts");
@@ -22,8 +22,8 @@ test("minimax (international) derives image/tts/video/music from the registries"
   assert.deepEqual(kinds, ["image", "music", "tts", "video"]);
 });
 
-test("minimax-cn derives no media kinds (China endpoint has no media registry entries)", () => {
-  assert.deepEqual(getRegistryMediaKinds("minimax-cn"), []);
+test("minimax-cn derives image generation from its regional image registry", () => {
+  assert.deepEqual(getRegistryMediaKinds("minimax-cn"), ["image"]);
 });
 
 test("representative media providers derive the expected kinds", () => {
