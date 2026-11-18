@@ -520,7 +520,8 @@ export type ComboStepAccountDetails = {
 export type ComboStepAccountLabels = {
   pinned?: string;
   dynamic?: string;
-  restricted?: string;
+  /** A function receives the number of allowed accounts, for a "{count} restricted" message. */
+  restricted?: string | ((count: number) => string);
   allActive?: string;
   legacy?: string;
   comboRef?: string;
@@ -537,12 +538,18 @@ export function getComboStepAccountDetails(
     providerId?: unknown;
     alias?: unknown;
     prefix?: unknown;
-    connections?: Array<{ id?: string | null; label?: string | null }>;
+    connections?: Array<
+      { id?: string | null; label?: string | null } & ComboEligibleConnectionLike
+    >;
   }> = [],
   options: ComboStepAccountOptions = {}
 ): ComboStepAccountDetails {
   const formatLabel = options.formatConnectionLabel || ((label: string) => label);
   const labels = options.labels || {};
+  const restrictedLabel = (count: number) =>
+    typeof labels.restricted === "function"
+      ? labels.restricted(count)
+      : labels.restricted || `${count} restricted`;
 
   if (!isRecord(entry)) {
     return {
@@ -612,7 +619,7 @@ export function getComboStepAccountDetails(
         const raw = toTrimmedString(match?.label) || `acct ${id.slice(0, 8)}`;
         return formatLabel(raw);
       });
-      const restrictedPrefix = labels.restricted || `${allowed.length} restricted`;
+      const restrictedPrefix = restrictedLabel(allowed.length);
       return {
         type: "dynamic-restricted",
         summary: `${dynamicPrefix} · ${restrictedPrefix}: ${names.join(", ")}`,
@@ -623,7 +630,8 @@ export function getComboStepAccountDetails(
       };
     }
 
-    const allNames = connections.map((c) => {
+    const active = connections.filter(isEligibleActiveConnection);
+    const allNames = active.map((c) => {
       const raw = toTrimmedString(c.label) || toTrimmedString(c.id) || "account";
       return formatLabel(raw);
     });
@@ -631,15 +639,15 @@ export function getComboStepAccountDetails(
     return {
       type: "dynamic-all",
       summary:
-        connections.length > 0
-          ? `${dynamicPrefix} · ${allActivePrefix} (${connections.length})`
+        active.length > 0
+          ? `${dynamicPrefix} · ${allActivePrefix} (${active.length})`
           : `${dynamicPrefix} · ${allActivePrefix}`,
       tooltip:
-        connections.length > 0
-          ? `Dynamic account using all ${connections.length} active account(s) in pool:\n${allNames.map((n) => `• ${n}`).join("\n")}`
+        active.length > 0
+          ? `Dynamic account using all ${active.length} active account(s) in pool:\n${allNames.map((n) => `• ${n}`).join("\n")}`
           : "Dynamic account using all active accounts in pool",
       accountNames: allNames,
-      totalPoolCount: connections.length,
+      totalPoolCount: active.length,
     };
   }
 
@@ -679,7 +687,7 @@ export function getComboStepAccountDetails(
       const raw = toTrimmedString(match?.label) || `acct ${id.slice(0, 8)}`;
       return formatLabel(raw);
     });
-    const restrictedPrefix = labels.restricted || `${allowed.length} restricted`;
+    const restrictedPrefix = restrictedLabel(allowed.length);
     return {
       type: "dynamic-restricted",
       summary: `${dynamicPrefix} · ${restrictedPrefix}: ${names.join(", ")}`,
@@ -691,7 +699,8 @@ export function getComboStepAccountDetails(
   }
 
   if (entry.providerId || matchedProvider) {
-    const allNames = connections.map((c) => {
+    const active = connections.filter(isEligibleActiveConnection);
+    const allNames = active.map((c) => {
       const raw = toTrimmedString(c.label) || toTrimmedString(c.id) || "account";
       return formatLabel(raw);
     });
@@ -699,15 +708,15 @@ export function getComboStepAccountDetails(
     return {
       type: "dynamic-all",
       summary:
-        connections.length > 0
-          ? `${dynamicPrefix} · ${allActivePrefix} (${connections.length})`
+        active.length > 0
+          ? `${dynamicPrefix} · ${allActivePrefix} (${active.length})`
           : `${dynamicPrefix} · ${allActivePrefix}`,
       tooltip:
-        connections.length > 0
-          ? `Dynamic account using all ${connections.length} active account(s) in pool:\n${allNames.map((n) => `• ${n}`).join("\n")}`
+        active.length > 0
+          ? `Dynamic account using all ${active.length} active account(s) in pool:\n${allNames.map((n) => `• ${n}`).join("\n")}`
           : "Dynamic account using all active accounts in pool",
       accountNames: allNames,
-      totalPoolCount: connections.length,
+      totalPoolCount: active.length,
     };
   }
 
@@ -717,4 +726,35 @@ export function getComboStepAccountDetails(
     tooltip: null,
     accountNames: [],
   };
+}
+
+/** Account-scope fields of a step; an edit replaces them together (cleared ones are omitted). */
+const STEP_ACCOUNT_SCOPE_KEYS = ["connectionId", "label", "allowedConnectionIds"] as const;
+
+/**
+ * The step that replaces `prevStep` after an in-place edit: the new provider/model/account scope
+ * from `updatedStep`, with the previous weight and every unrelated setting (id, tags, …) kept.
+ */
+export function mergeEditedComboStep<T extends Record<string, unknown>>(
+  prevStep: T,
+  updatedStep: ComboModelStep
+): Record<string, unknown> {
+  const rest: Record<string, unknown> = { ...prevStep };
+  for (const key of STEP_ACCOUNT_SCOPE_KEYS) delete rest[key];
+  const prevWeight = typeof prevStep.weight === "number" ? prevStep.weight : undefined;
+  return { ...rest, ...updatedStep, weight: prevWeight ?? updatedStep.weight ?? 0 };
+}
+
+/**
+ * Where the step under edit sits after `next` replaced `prev`, found by identity: a drag, sort,
+ * add or removal elsewhere moves it; removing the step itself ends the edit (null).
+ */
+export function remapEditingStepIndex<T>(
+  prev: readonly T[],
+  next: readonly T[],
+  editingIndex: number | null
+): number | null {
+  if (editingIndex === null || editingIndex < 0 || editingIndex >= prev.length) return null;
+  const index = next.indexOf(prev[editingIndex]);
+  return index === -1 ? null : index;
 }

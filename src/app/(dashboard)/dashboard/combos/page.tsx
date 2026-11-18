@@ -87,7 +87,9 @@ import {
   hasExactModelStepDuplicate,
   isEligibleActiveConnection,
   isIntelligentBuilderStrategy,
+  mergeEditedComboStep,
   parseQualifiedModel,
+  remapEditingStepIndex,
   resolveComboBuilderProviderId,
   type ComboBuilderStage,
 } from "@/lib/combos/builderDraft";
@@ -3270,15 +3272,8 @@ function ComboFormModal({
       return;
     }
 
-    const prevStep = models[editingStepIndex];
-    const mergedStep = {
-      ...prevStep,
-      ...updatedStep,
-      weight: prevStep.weight ?? updatedStep.weight ?? 0,
-    };
-
     const nextModels = [...models];
-    nextModels[editingStepIndex] = mergedStep;
+    nextModels[editingStepIndex] = mergeEditedComboStep(models[editingStepIndex], updatedStep);
     setModels(nextModels);
     setEditingStepIndex(null);
     setBuilderError("");
@@ -3293,6 +3288,15 @@ function ComboFormModal({
     setBuilderConnectionId(COMBO_BUILDER_AUTO_CONNECTION);
     setBuilderAllowedConnectionIds([]);
     setBuilderError("");
+  };
+
+  // A drag, sort, add or deselect can move the step under edit, or remove it: follow it by
+  // identity so Update never overwrites a different step.
+  const followEditedStep = (prev, next) => {
+    if (editingStepIndex === null) return;
+    const nextIndex = remapEditingStepIndex(prev, next, editingStepIndex);
+    if (nextIndex === null) handleCancelEditStep();
+    else if (nextIndex !== editingStepIndex) setEditingStepIndex(nextIndex);
   };
 
   const handleAddManualModel = () => {
@@ -3395,11 +3399,14 @@ function ComboFormModal({
         // Single-user modal; rapid double-add while fetch is in flight is low-probability.
         const sorted = await sortComboStepsByScore(added, rankings);
         setModels(sorted);
+        followEditedStep(currentModels, sorted);
       } catch {
         setModels(added);
       }
     } else {
-      setModels(sortComboStepsSync(added, currentMethod as "provider" | "name"));
+      const sorted = sortComboStepsSync(added, currentMethod as "provider" | "name");
+      setModels(sorted);
+      followEditedStep(currentModels, sorted);
     }
     setBuilderError("");
   };
@@ -3428,7 +3435,9 @@ function ComboFormModal({
     const value =
       typeof model?.value === "string" ? model.value : typeof model === "string" ? model : "";
     if (!value) return;
-    setModels(models.filter((m) => m.model !== value));
+    const next = models.filter((m) => m.model !== value);
+    setModels(next);
+    followEditedStep(models, next);
     setBuilderError("");
   };
 
@@ -3453,13 +3462,17 @@ function ComboFormModal({
         // racing this batch is low-probability single-user; last write wins.
         const sorted = await sortComboStepsByScore(next as ComboStep[], rankings);
         setModels(sorted as typeof next);
+        followEditedStep(currentModels, sorted);
       } catch {
         setModels(next);
       }
     } else {
-      setModels(
-        sortComboStepsSync(next as ComboStep[], currentMethod as "provider" | "name") as typeof next
-      );
+      const sorted = sortComboStepsSync(
+        next as ComboStep[],
+        currentMethod as "provider" | "name"
+      ) as typeof next;
+      setModels(sorted);
+      followEditedStep(currentModels, sorted);
     }
     setBuilderError("");
   };
@@ -3468,6 +3481,7 @@ function ComboFormModal({
     const next = computeBatchDeselectModelSteps(models, toRemove);
     if (next === models) return;
     setModels(next);
+    followEditedStep(models, next);
     setBuilderError("");
   };
 
@@ -3630,11 +3644,13 @@ function ComboFormModal({
         const snapshot = (modelsRef.current ?? models) as ComboStep[];
         const sorted = await sortComboStepsByScore(snapshot, rankings);
         setModels(sorted as typeof models);
+        followEditedStep(snapshot, sorted);
       } catch {
         // Keep previous models; same silent-fallback precedent as load path.
       }
       return;
     }
+    followEditedStep(models, sortComboStepsSync(models as ComboStep[], next));
     setModels((prev) => sortComboStepsSync(prev as ComboStep[], next) as typeof prev);
   };
 
@@ -3670,6 +3686,7 @@ function ComboFormModal({
     const [moved] = newModels.splice(fromIndex, 1);
     newModels.splice(dropIndex, 0, moved);
     setModels(newModels);
+    followEditedStep(models, newModels);
     setDragIndex(null);
     setDragOverIndex(null);
   };
@@ -4447,11 +4464,13 @@ function ComboFormModal({
                           "builderDynamicAccountShort",
                           "Dynamic account"
                         ),
-                        restricted: getI18nOrFallback(
-                          t,
-                          "builderRestrictedAccountsCount",
-                          "Restricted to"
-                        ),
+                        restricted: (count) =>
+                          getI18nOrFallback(
+                            t,
+                            "builderRestrictedAccountsCount",
+                            `${count} restricted`,
+                            { count }
+                          ),
                         allActive: getI18nOrFallback(
                           t,
                           "builderAllActiveAccounts",
@@ -4615,6 +4634,7 @@ function ComboFormModal({
                         <Button
                           variant="ghost"
                           size="icon-sm"
+                          disabled={entry.kind === "combo-ref"}
                           onClick={() => handleStartEditStep(index)}
                           className={
                             isEditingThisStep
@@ -5637,11 +5657,13 @@ function ComboFormModal({
                             "builderDynamicAccountShort",
                             "Dynamic account"
                           ),
-                          restricted: getI18nOrFallback(
-                            t,
-                            "builderRestrictedAccountsCount",
-                            "Restricted to"
-                          ),
+                          restricted: (count) =>
+                            getI18nOrFallback(
+                              t,
+                              "builderRestrictedAccountsCount",
+                              `${count} restricted`,
+                              { count }
+                            ),
                           allActive: getI18nOrFallback(
                             t,
                             "builderAllActiveAccounts",
