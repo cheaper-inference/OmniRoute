@@ -1,0 +1,1 @@
+- **fix(executors):** scope the glm stream-readiness verdict to event-stream responses — a JSON answer to a stream request (upstream ignored the `stream` flag) no longer fails with 502 STREAM_EARLY_EOF ([#20283](https://github.com/cheaper-inference/OmniRoute/pull/20283)) — thanks @jjxyxsjr
