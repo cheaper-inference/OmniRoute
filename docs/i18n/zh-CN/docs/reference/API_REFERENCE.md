@@ -788,51 +788,138 @@ POST /v1/providers/{provider}/images/generations
 
 Web/搜索提供者抽象层（Tavily、Brave、Exa、Serper 等）。
 
-| 方法 | 路径                   | 描述                                                               |
-| ---- | ---------------------- | ------------------------------------------------------------------ |
-| GET  | `/v1/search`           | 列出已配置的搜索提供者及其功能                                     |
-| POST | `/v1/search`           | 运行搜索查询 — 请求正文由 `v1SearchSchema` 验证，支持缓存/合并请求 |
-| GET  | `/v1/search/analytics` | 按提供者统计命中/延迟/缓存数据                                     |
+| 方法 | 路径                   | 描述                                                             |
+| ---- | ---------------------- | ---------------------------------------------------------------- |
+| GET  | `/v1/search`           | 列出已配置的搜索提供者及其功能                                   |
+| POST | `/v1/search`           | 执行搜索查询 — 请求体由 `v1SearchSchema` 验证，支持缓存/请求合并 |
+| GET  | `/v1/search/analytics` | 按提供者统计命中数/延迟/缓存数据                                 |
 
 **身份验证：** Bearer API 密钥（`extractApiKey` + `isValidApiKey`）。搜索策略通过 `enforceApiKeyPolicy` 强制执行。
 
-**自动选择：** 未提供 `provider` 时，首先运行已配置连接中最便宜的提供者，下一家最便宜的提供者作为故障转移。免费的最终备用提供者（`duckduckgo-free`）仅在没有其他提供者配置时使用。自托管的 SearXNG 一旦其连接存储了真实的 `baseUrl`（而不是目录默认值 `http://localhost:8888/search`），就会被视为已配置：随后它会作为 $0 提供者排在带密钥的提供者之前，并以最便宜的带密钥提供者作为故障转移，包括 SearXNG 返回 400、401、403 或 404 时。无效的 `http(s)` URL 或指向云元数据地址的 `baseUrl` 不计入配置。存储了令牌的 SearXNG 连接仅在使用 `https://` 或回环 `http://` 时按此方式排序。对于远程的纯 `http://`，它永远不会作为故障转移提供者，而会保持为最终备用提供者，仅在没有其他提供者配置或按名称请求时使用，因此在这两种情况下都会以明文发送令牌。
+### 命名的搜索/抓取组合
 
-### Exa 和 Tavily 的 `provider_options`
+`POST /v1/search` 和 `POST /v1/web/fetch` 都接受将 `model` 作为已保存的组合名称。
+使用 `model` 或显式的 `provider` 二者之一；同时发送两者将返回 `400`。
+如果两者都未提供，则现有的自动提供者选择行为保持不变。
 
-Exa 和 Tavily 从命名空间容器中读取提供者专属字段：
-`provider_options.exa`（或 `provider_options["exa-search"]`）以及 `provider_options.tavily`
-（或 `provider_options["tavily-search"]`）。只有下面列出的键会被转发。每个键都会根据
-`open-sse/handlers/search/providerOptionsPassthrough.ts` 中各自的 Zod schema 进行检查，类型错误的键会被丢弃。其他任何键都会被忽略，包括身份验证、基础 URL、`stream` 和 `outputSchema`。其他提供者使用的扁平键（`cx`、`depth` 等）保持原有行为。
+即使连接的提供者没有 LLM 模型列表，组合构建器及其添加模型目录也会公开这些提供者的原生 Web 操作条目。
+Serper 显示 **Web 搜索**；Tavily 显示 **Web 搜索 / 页面提取**，而仅支持抓取的提供者显示 **页面提取**。
+按通常方式选择条目和账户。单个 Tavily 条目同时服务于两个 Web 端点；
+这些操作条目不会添加到仅聊天客户端选择器或聊天模型探测中。
 
-| 提供者 | 顶层字段                                                                                                                                                                                                                                                                                                                                                                  | 嵌套                                                                                                                                |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------- |
-| Exa    | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（扁平基本类型）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`，合并到默认值 `{ text: true, highlights: true }` 之上 |
-| Tavily | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                   |
+例如，创建一个名为 `shared-free` 的 **priority** 组合，并设置以下有序目标：
 
-通用字段始终具有优先权：`query`、`max_results`、`filters`（域名）、`country`，以及从 `search_type` 推导出的主题。在 Exa 中，`search_type: "news"` 会保留 `category: "news"`。Tavily 还接受 `search_type: "finance"`（`topic: "finance"`）。
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-Firecrawl 搜索费用按返回结果每 10 条开始的区块记录，每个区块收费 $0.002（2 个积分），每次调用至少记录一个区块（[Firecrawl 计费](https://docs.firecrawl.dev/billing)）：返回 11 条结果的费用为 $0.004。
+然后在每个界面上使用相同的名称：
 
-通用的 `time_range` 现在会传递给两个提供者：Exa 获取 `startPublishedDate`（ISO 时间戳），Tavily 获取 `start_date`（`YYYY-MM-DD`）。`provider_options` 中显式指定的日期会覆盖映射后的日期。
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Exa 结果会在 `provider_raw` 中保留 `id`、`highlights`（每一条高亮，而不只是用作 `snippet` 的第一条）、`highlight_scores`、`summary`、`subpages`、`entities` 和 `extras`。Tavily 结果会保留 `images` 和 `favicon`。
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-Linkup 搜索费用为：`depth` 为 `fast` 和 `standard` 时收费 $0.005，`deep` 时收费 $0.05（[Linkup 定价](https://docs.linkup.so/pages/documentation/development/pricing)），无论 `depth` 来自 `provider_options` 还是连接设置。
+搜索会依次考虑 Tavily 和 Serper；抓取会依次考虑 Tavily 和 Jina Reader；
+聊天会跳过专用的搜索/抓取提供者，并考虑 OpenAI。兼容性来自搜索/抓取执行器注册表，
+而不是来自模型名称中的文字。筛选先于凭据选择和分发，并且不会修改已保存的组合。
 
-Exa `type: "lite"`（Exa 3.0）接受的字段集合更小，设置任何其他字段都会导致整个请求被拒绝。对于 lite，在调用前会丢弃 `additionalQueries`、`systemPrompt` 以及除 `text` 和 `highlights` 之外的所有 `contents` 键。已弃用的 `subpages`、`subpageTarget`、`highlights.numSentences` 和 `highlights.highlightsPerUrl` 不再转发。
+非聊天功能路由支持 `priority`、`fill-first`、`round-robin`、`weighted`、
+`random`、`strict-random`、`least-used` 和 `p2c`。仅聊天的合成策略（例如
+`fusion`、`pipeline` 和 `context-relay`）会在非聊天路由上被拒绝，而不会被静默应用于搜索或生成媒体。
+现有组合引擎负责有序回退，包括上游配额失败，并保留步骤 ID、账户固定、每步账户允许列表、嵌套引用、
+调用方连接/配额范围以及组合访问策略。结果保留其原生的搜索/抓取架构，包括实际使用的提供者；
+`X-OmniRoute-Combo-Trace` 用于标识路由决策。未知组合返回 `404`；未激活的组合以及不包含兼容目标的组合返回 `400`。
 
-成本核算采用扁平注册表 `costPerQuery`，但 Exa 除外，它遵循 Exa 自身的定价：对于 `auto`（以及旧版的 `fast`），每次调用收费 $0.007；对于 `lite`（以及旧版的 `instant`），每次调用收费 $0.004，这些费用包含 10 个结果；每增加一个结果收费 $0.001；设置 `contents.summary` 时，每个返回的结果收费 $0.001。Tavily 的计费记录为：`search_depth` 为 `basic`、`fast` 和 `ultra-fast` 时计 1 个积分（$0.008），为 `advanced` 时计 2 个积分（$0.016）（[Tavily API 积分](https://docs.tavily.com/documentation/api-credits)）。使用
-`auto_parameters: true` 的调用如果 Tavily 将其升级为 advanced，仍记录为 1 个积分。
+每次组合尝试都使用一个显式提供者。它无法绕过组合，调用组合背后的原生自动提供者池。
+显式提供者请求保留现有的单提供者行为。直接针对专用搜索/抓取提供者的聊天请求会返回可操作的 JSON `400`，
+而不是回退到 OpenAI 风格的执行器。
+
+### 特定功能的组合路由
+
+已保存的组合可以包含一个 `routes` 对象，其键表示 API 功能。每个路由拥有自己的目标列表、策略和运行时配置。
+顶层的 `models`、`strategy` 和 `config` 仍然是兼容旧版本的聊天计划；不包含 `routes` 的旧组合继续保持原有行为。
+
+支持的路由键包括 `chat`、`search`、`web-fetch`、`embeddings`、`rerank`、`images`、
+`image-edits`、`videos`、`music`、`ocr`、`audio-speech`、`audio-transcriptions`、
+`audio-translations` 和 `audio-generation`。端点投影发生在凭据选择、评分或分发之前。
+嵌套组合引用会为同一功能选择子组合的路由。
+
+`POST /v1/music/generations` 和 `POST /v1/ocr` 接受 `model` 中的组合名称。
+原生兼容 ElevenLabs 的 `POST /v1/music` 也接受 `model_id` 中的组合名称，但该原生端点上的每个可用目标都必须是 ElevenLabs 音乐模型，
+以保留其二进制响应契约。`POST /v1/sound-generation` 在 `model_id` 中接受 `audio-generation` 组合，但同样受原生二进制约束。
+对于异构音乐提供者，请使用 `/v1/music/generations`。
+
+**自动选择：** 未提供 `provider` 时，首先运行已配置连接中最便宜的提供者，下一家最便宜的提供者作为故障转移。
+免费的最终备用提供者（`duckduckgo-free`）仅在没有配置其他提供者时使用。当自托管 SearXNG 的连接存储了真实的 `baseUrl`（而不是目录默认值 `http://localhost:8888/search`）时，
+它会被视为已配置：随后它将作为 $0 提供者排在带密钥的提供者之前，最便宜的带密钥提供者作为故障转移，
+即使 SearXNG 返回 400、401、403 或 404 也是如此。不符合有效 `http(s)` URL 格式或指向云元数据地址的 `baseUrl` 不会被视为已配置。
+仅当 SearXNG 连接使用 `https://` 或回环 `http://` 时，存储令牌的 SearXNG 连接才会按此方式排序。
+对于远程纯 `http://`，它永远不会作为故障转移提供者，而会保持为最终备用提供者；仅在未配置其他提供者或按名称请求时使用，
+因此在这两种情况下确实会以明文发送令牌。
+
+### Exa 和 Tavily `provider_options`
+
+Exa 和 Tavily 从命名空间对象中读取特定于提供者的字段：
+`provider_options.exa`（或 `provider_options["exa-search"]`）和 `provider_options.tavily`
+（或 `provider_options["tavily-search"]`）。只有下面列出的键会被转发。每个键都会在
+`open-sse/handlers/search/providerOptionsPassthrough.ts` 中根据其各自的 Zod schema
+进行检查，类型错误的键会被丢弃。任何其他键都会被忽略，包括身份验证、基础 URL、
+`stream` 和 `outputSchema`。其他提供者使用的扁平键（`cx`、`depth` 等）仍按原方式工作。
+
+| 提供者 | 顶层字段                                                                                                                                                                                                                                                                                                                                                                  | 嵌套                                                                                                                               |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------- |
+| Exa    | `type`、`category`、`userLocation`、`moderation`、`additionalQueries`、`objective`、`systemPrompt`、`compliance`（扁平基本类型）、`startPublishedDate`、`endPublishedDate`                                                                                                                                                                                                | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` 合并到默认值 `{ text: true, highlights: true }` 之上 |
+| Tavily | `search_depth`、`chunks_per_source`、`time_range`、`start_date`、`end_date`、`include_published_date`、`filter_by_published_date`、`include_answer`、`include_raw_content`、`include_images`、`include_image_descriptions`、`include_favicon`、`include_domains_mode`、`language`、`filter_by_language`、`auto_parameters`、`exact_match`、`include_usage`、`safe_search` | —                                                                                                                                  |
+
+通用字段始终具有更高优先级：`query`、`max_results`、`filters`（域名）、`country`，以及
+从 `search_type` 派生的主题。在 Exa 中，`search_type: "news"` 会保留
+`category: "news"`。Tavily 还接受 `search_type: "finance"`（`topic: "finance"`）。
+
+Firecrawl 搜索费用按每开始一个包含 10 个返回结果的区块计费，每个区块收费 $0.002（2
+个 credits），且每次调用至少计费一个区块
+（[Firecrawl 计费](https://docs.firecrawl.dev/billing)）：返回 11 个结果的费用为 $0.004。
+
+通用的 `time_range` 现在会传递给两个提供者：Exa 获取 `startPublishedDate`（ISO
+时间戳），Tavily 获取 `start_date`（`YYYY-MM-DD`）。`provider_options` 中显式指定的
+日期会覆盖映射得到的日期。
+
+Exa 结果会在 `provider_raw` 中保留 `id`、`highlights`（每个 highlight，而不仅是作为
+`snippet` 使用的第一个）、`highlight_scores`、`summary`、`subpages`、`entities` 和
+`extras`。Tavily 结果会保留 `images` 和 `favicon`。
+
+Linkup 搜索费用为：`depth` 为 `fast` 和 `standard` 时收费 $0.005，`deep` 时收费
+$0.05（[Linkup 定价](https://docs.linkup.so/pages/documentation/development/pricing)），
+无论 `depth` 来自 `provider_options` 还是连接设置。
+
+Exa `type: "lite"`（Exa 3.0）接受的字段集合较小，只要设置了任何其他字段，就会拒绝
+整个请求。对于 lite，在调用前会丢弃 `additionalQueries`、`systemPrompt` 以及除
+`text` 和 `highlights` 之外的所有 `contents` 键。不再转发已弃用的 `subpages`、
+`subpageTarget`、`highlights.numSentences` 和 `highlights.highlightsPerUrl`。
+
+费用核算使用扁平注册表 `costPerQuery`，但 Exa 例外：其费用遵循 Exa 自身的定价：
+`auto`（以及旧版 `fast`）每次调用 $0.007，或 `lite`（以及旧版 `instant`）每次调用
+$0.004，涵盖 10 个结果；每增加一个结果收费 $0.001；设置
+`contents.summary` 时，每个返回结果收费 $0.001。Tavily 的 `search_depth` 为
+`basic`、`fast` 和 `ultra-fast` 时按 1 个 credit（$0.008）记录，`advanced` 时按
+2 个 credits（$0.016）记录（[Tavily API credits](https://docs.tavily.com/documentation/api-credits)）。
+如果调用设置了 `auto_parameters: true`，但 Tavily 将其升级为 advanced，仍按 1 个
+credit 记录。
 
 ---
 
 ## Web Fetch API
 
-通过配置的 Web 抓取提供者（Firecrawl、Jina
-Reader、Tavily Extract、TinyFish Fetch、Nimble Extract、Parallel Extract）从 URL 提取内容。
+通过已配置的 Web Fetch 提供者（Firecrawl、Jina
+Reader、Tavily Extract、TinyFish Fetch、Nimble Extract、Parallel Extract、Keenable Fetch）从 URL 提取内容。
 
-Parallel Extract（`parallel-search`，使用与 Parallel Search 相同的 API 密钥）仅返回 Markdown — 任何其他 `format` 都会返回 `400` — 并将内容限制为 100,000 个字符。当目标页面本身无法被提取时，上游会在 HTTP 200 响应中报告该情况；OmniRoute 会将其作为 `422` 及固定消息返回。
+Parallel Extract（`parallel-search`，与 Parallel Search 使用相同的 API 密钥）仅返回 Markdown — 任何其他 `format` 都会返回 `400`，内容上限为 100,000 个字符。当目标页面本身无法提取时，上游会在 HTTP 200 响应中报告该情况；OmniRoute 会将其以固定消息作为 `422` 返回。
+
+Keenable Fetch（`keenable-search`）同样仅返回 Markdown（任何其他 `format` 都会返回 `400`），内容上限为 100,000 个字符。无需密钥即可使用：显式指定 `provider: "keenable-search"` 的请求在没有连接配置时，会使用 Keenable 的免密钥端点（按 IP 限流）。配置密钥后仅会解除这些限制；自动选择仅在配置了密钥时才会使用 Keenable。
 
 | 方法 | 路径            | 描述                                               |
 | ---- | --------------- | -------------------------------------------------- |
@@ -840,9 +927,10 @@ Parallel Extract（`parallel-search`，使用与 Parallel Search 相同的 API �
 
 **身份验证：** Bearer API 密钥（`extractApiKey` + `isValidApiKey`）。通过 `enforceApiKeyPolicy` 强制执行策略。
 
-**配额感知回退（#8297）：** 未显式指定 `provider` 时，会按照固定优先级顺序遍历池
-（`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`）（优先填充）— 已配置但受速率限制的提供者会被跳过，而不是使请求提前结束；可重试的/配额相关的上游失败（HTTP 429 始终如此；对于 Firecrawl/Tavily/TinyFish 的配额型免费层，402/403 也如此 — Jina Reader 除外，普通的 400 错误请求也绝不会如此）会在请求时继续尝试下一个尚未尝试且已配置凭据的提供者。当池中的所有提供者都耗尽时，端点会返回单个 `429`（带有 `Retry-After` 标头），而不是此前通用的 `400`。显式请求 `provider` 时，**不会**静默回退 — 受速率限制或失败的显式提供者会返回其自身的错误（受速率限制时为 `429`，否则为上游状态）。
+命名组合使用上述 [`model` 路由契约](#named-searchfetch-combinations)，同时保留特定于 Fetch 的选项和响应。
+
+**配额感知回退（#8297）：** 当未提供 `provider` 或 `model` 时，池中的提供者（`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search` → `keenable-search`）将按照固定的优先级顺序（填充优先）依次处理 — 已配置但受到速率限制的提供者会被跳过，而不会使请求提前结束；可重试的/上游配额错误（HTTP 429 始终如此；对于 Firecrawl/Tavily/TinyFish 的配额型免费层，402/403 也属于此类 — Jina Reader 除外，普通的 400 错误请求则绝不属于此类）会在请求时继续尝试下一个尚未尝试且已配置凭据的提供者。当池中的所有提供者都耗尽时，端点会返回单个 `429`（并带有 `Retry-After` 标头），而不是之前的通用 `400`。当显式请求 `provider` 时，**不会**进行静默回退 — 受到速率限制或发生故障的显式提供者会返回其自身的错误（受到速率限制时为 `429`，否则为上游状态码）。
 
 ---
 
@@ -903,24 +991,24 @@ CLI 会将 `base_url + /responses` 升级为 WebSocket，OmniRoute 再将其隧�
 
 ## 配额与问题报告
 
-| 方法 | 路径                | 描述                                                                  |
-| ---- | ------------------- | --------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | 在签发已注册密钥之前，预先验证 `provider` + `accountId` 的配额        |
-| POST | `/v1/issues/report` | 将配额/密钥签发失败报告到 GitHub（需要 `GITHUB_ISSUES_REPO` + token） |
+| 方法 | 路径                | 描述                                                                 |
+| ---- | ------------------- | -------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | 在签发已注册密钥之前，预验证 `provider` + `accountId` 的配额         |
+| POST | `/v1/issues/report` | 将配额/密钥签发失败报告到 GitHub（需要 `GITHUB_ISSUES_REPO` + 令牌） |
 
-**身份验证：**Bearer API 密钥（`isAuthenticated`）。
+**身份验证：** `/v1/quotas/check` 接受 Bearer API 密钥（`isAuthenticated`）。`/v1/issues/report` 仅限管理操作（`requireManagementAuth`），与 `/api/v1/registered-keys` 相同：仪表板会话、本地 CLI 令牌，或具有 `manage`/`admin` 作用域的 API 密钥；仅推理 API 密钥会得到 `403`。
 
 ### 配额会话恢复（选择启用）
 
-非流式 `POST /v1/chat/completions` 或 `POST /v1/responses` 如果因终止性配额错误而失败（`402`/`429`/`503`，且响应正文表明配额或额度已耗尽），可以将请求暂存并稍后重放，而不是直接返回错误。调用方可以在每个请求中通过以下三个标头选择启用：
+非流式 `POST /v1/chat/completions` 或 `POST /v1/responses` 如果因终端配额错误（`402`/`429`/`503`，且其正文表明配额或额度已耗尽）而失败，可以将请求暂存并稍后重放，而不是直接返回错误。调用方可通过以下三个标头按请求选择启用：
 
 | 标头                         | 值                                |
 | ---------------------------- | --------------------------------- |
 | `x-omniroute-quota-recovery` | `auto`                            |
 | `x-omniroute-session`        | 会话 ID，`[A-Za-z0-9._:-]{1,128}` |
-| `x-omniroute-recovery-turn`  | 会话内唯一的回合 ID（相同规则）   |
+| `x-omniroute-recovery-turn`  | 在会话内唯一的轮次 ID（相同规则） |
 
-只有满足以下条件的回合才符合要求：`stream: false`、没有工具、工具历史记录或 `previous_response_id`，且没有设置 `x-omniroute-connection` 固定连接；此外还必须设置 `STORAGE_ENCRYPTION_KEY`（请求会以加密形式存储最多 24 小时）。响应随后为 `202`，并包含 `recovery.poll`；可以轮询 `GET /v1/quota-recoveries/{id}`（待处理时返回 `202`，完成时返回包含恢复后正文的 `200`），也可以使用 `DELETE` 取消。工单仅对创建它的 API 密钥可见。如果重放结果不确定，则会进入 `needs_confirmation` 状态，而不会发送两次。来源：`src/lib/quota/quotaSessionRecovery.ts`。
+只有不包含工具、工具历史记录或 `previous_response_id`，且没有 `x-omniroute-connection` 固定连接的 `stream: false` 轮次才符合条件，并且必须设置 `STORAGE_ENCRYPTION_KEY`（请求会以加密形式存储最多 24 小时）。随后响应为 `202`，其中包含 `recovery.poll`；可轮询 `GET /v1/quota-recoveries/{id}`（等待中时为 `202`，完成后返回恢复后的正文并为 `200`），也可以使用 `DELETE` 取消。工单仅对创建它的 API 密钥可见。如果重放的结果不确定，则会进入 `needs_confirmation` 状态，而不会发送两次。来源：`src/lib/quota/quotaSessionRecovery.ts`。
 
 ---
 
@@ -1553,10 +1641,10 @@ GET /api/telemetry/summary
 ## 预算
 
 ```bash
-# Get budget status for all API keys
+# 获取所有 API 密钥的预算状态
 GET /api/usage/budget
 
-# Set or update a budget
+# 设置或更新预算
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1570,7 +1658,7 @@ Content-Type: application/json
 }
 ```
 
-> **模式注释**(`setBudgetSchema`): `apiKeyId`为必填项； `dailyLimitUsd`、 `weeklyLimitUsd`或`monthlyLimitUsd`中至少之一必须大于零。可选字段： `warningThreshold` (0–1)、 `resetInterval` (`daily` | `weekly` | `monthly`)、 `resetTime` (`HH:MM`)。旧版`{keyId, limit, period}`形状返回`400 Bad Request`。
+> **架构说明**（`setBudgetSchema`）：必须提供 `apiKeyId`；`dailyLimitUsd`、`weeklyLimitUsd` 或 `monthlyLimitUsd` 中至少有一个必须大于零。可选字段：`warningThreshold`（0–1）、`resetInterval`（`daily` | `weekly` | `monthly`）、`resetTime`（`HH:MM`）。旧版 `{keyId, limit, period}` 格式会返回 `400 Bad Request`。
 
 ## 令牌限制
 
@@ -1651,17 +1739,21 @@ DELETE /api/usage/token-limits?id=tl-abc
 
 ## 已注册密钥（自动管理）
 
-由自动密钥管理子系统使用，用于针对后端提供者/账户签发和轮换 API 密钥，并设置每日/每小时配额。
+供自动密钥管理子系统使用，用于针对后端提供者/账户签发和轮换 API 密钥，并设置每日/每小时配额。
 
-| Method | Path                                  | Description                                                                                                                                                            |
+| 方法   | 路径                                  | 描述                                                                                                                                                                   |
 | ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | 列出已注册密钥（仅显示掩码后的前缀）                                                                                                                                   |
+| GET    | `/api/v1/registered-keys`             | 列出已注册的密钥（仅显示经过掩码处理的前缀）                                                                                                                           |
 | POST   | `/api/v1/registered-keys`             | 签发新的已注册密钥 — 请求体：`{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`。原始密钥仅返回**一次**。配额拒绝时返回 `429`。 |
-| GET    | `/api/v1/registered-keys/[id]`        | 获取已注册密钥的元数据（不包含原始密钥内容）                                                                                                                           |
-| DELETE | `/api/v1/registered-keys/[id]`        | 撤销已注册密钥                                                                                                                                                         |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | 显式撤销端点（效果与 `DELETE` 相同）                                                                                                                                   |
+| GET    | `/api/v1/registered-keys/[id]`        | 获取已注册密钥的元数据（不包含原始密钥材料）                                                                                                                           |
+| DELETE | `/api/v1/registered-keys/[id]`        | 撤销已注册的密钥                                                                                                                                                       |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | 显式撤销端点（效果与 DELETE 相同）                                                                                                                                     |
+| GET    | `/api/v1/providers/[provider]/limits` | 读取提供者的签发上限                                                                                                                                                   |
+| PUT    | `/api/v1/providers/[provider]/limits` | 设置提供者的签发上限 — 请求体：`{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                 |
+| GET    | `/api/v1/accounts/[id]/limits`        | 读取账户的签发上限                                                                                                                                                     |
+| PUT    | `/api/v1/accounts/[id]/limits`        | 设置账户的签发上限 — 请求体与提供者路由相同                                                                                                                            |
 
-**身份验证：**管理会话/API 密钥（`requireManagementAuth`）— 与 `/api/keys` 使用相同的保护机制：仪表板会话、本地 CLI 令牌，或具有 `manage`/`admin` 作用域的 API 密钥；仅推理 API 密钥将获得 `403`。另请参阅 `/v1/quotas/check` 和 `/v1/issues/report`。
+**身份验证：** 管理会话/API 密钥（`requireManagementAuth`）— 与 `/api/keys` 使用相同的守卫：仪表板会话、本地 CLI 令牌，或具有 `manage`/`admin` 作用域的 API 密钥；仅用于推理的 API 密钥会获得 `403`。另请参阅 `/v1/quotas/check` 和 `/v1/issues/report`。
 
 ---
 
@@ -1785,21 +1877,21 @@ curl -X DELETE http://localhost:20128/api/resilience/model-cooldowns \
 
 ## MCP 服务器
 
-OmniRoute 内置了一个模型上下文协议服务器，支持 3 种传输方式（stdio、SSE、streamable-http）和作用域限定的工具。下面的控制面板端点读取状态/审计数据，并代理 HTTP 传输。
+OmniRoute 内置了一个 Model Context Protocol 服务器，支持 3 种传输方式（stdio、SSE、streamable-http）和具有作用域的工具。下面的仪表板端点用于读取状态/审计数据，并代理 HTTP 传输。
 
-| 方法   | 路径                   | 描述                                                                                         | -------------------- |
-| ------ | ---------------------- | -------------------------------------------------------------------------------------------- | -------------------- |
-| GET    | `/api/mcp/status`      | 心跳、传输方式、在线状态、上次调用、热门工具、24 小时成功率                                  |
-| GET    | `/api/mcp/tools`       | MCP 工具列表，包含 `name`、`description`、`scopes`、`phase`、`auditLevel`、`sourceEndpoints` |
-| GET    | `/api/mcp/sse`         | 为 SSE 传输打开 SSE 流（如果 MCP 已禁用或传输方式不匹配，则返回 `503`）                      |
-| POST   | `/api/mcp/sse`         | 在 SSE 传输上发送 JSON-RPC 帧                                                                |
-| GET    | `/api/mcp/stream`      | 打开 Streamable HTTP 传输的 SSE 端（服务器发起的消息）                                       |
-| POST   | `/api/mcp/stream`      | 在 Streamable HTTP 传输上发送 JSON-RPC 帧                                                    |
-| DELETE | `/api/mcp/stream`      | 结束 Streamable HTTP 会话                                                                    |
-| GET    | `/api/mcp/audit`       | 查询审计日志 — `?limit=`、`?offset=`、`?tool=`、`?success=true                               | false`、`?apiKeyId=` |
-| GET    | `/api/mcp/audit/stats` | 汇总审计统计信息（总数、成功率、平均持续时间、热门工具）                                     |
+| 方法 | 路径 | 描述 |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| GET | `/api/mcp/status` | 心跳、传输方式、在线状态、上次调用、热门工具、24 小时成功率 |
+| GET | `/api/mcp/tools` | 列出 MCP 工具，包括 `name`、`description`、`scopes`、`phase`、`auditLevel`、`sourceEndpoints` |
+| GET | `/api/mcp/sse` | 打开 SSE 传输的 SSE 流（如果 MCP 已禁用或传输方式不匹配，则返回 `503`） |
+| POST | `/api/mcp/sse` | 在 SSE 传输上发送 JSON-RPC 帧 |
+| GET | `/api/mcp/stream` | 打开 Streamable HTTP 传输的 SSE 端（服务器发起的消息） |
+| POST | `/api/mcp/stream` | 在 Streamable HTTP 传输上发送 JSON-RPC 帧 |
+| DELETE | `/api/mcp/stream` | 结束 Streamable HTTP 会话 |
+| GET | `/api/mcp/audit` | 查询审计日志 — `?limit=`、`?offset=`、`?tool=`、`?success=true                                | false`、`?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | 汇总审计统计信息（总数、成功率、平均耗时、热门工具） |
 
-**身份验证：**`sse`/`stream` 传输遵循 MCP 专用身份验证接口（带有 `mcp` 作用域的 Bearer API 密钥）；`status`/`tools`/`audit*` 路由可从控制面板读取（除能够访问控制面板主机外，无需额外身份验证）。
+**身份验证：**`sse`/`stream` 传输遵循 MCP 专用身份验证接口（具有 `mcp` 作用域的 Bearer API 密钥）；`status`/`tools`/`audit*` 路由可从仪表板读取（除能够访问仪表板主机外，无需额外身份验证）。
 
 > 两种 HTTP 传输均受 `settings.mcpEnabled` 和 `settings.mcpTransport` 控制 — 传输方式不匹配时返回 `400`，MCP 禁用时返回 `503`。
 

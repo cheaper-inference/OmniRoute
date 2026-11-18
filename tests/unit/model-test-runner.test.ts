@@ -358,11 +358,12 @@ test("resolveModelTestTimeoutMs gives ChatGPT Web checks up to 90 seconds", () =
 });
 
 test("ChatGPT Web Clean Room is eligible for an explicit model test", async () => {
-  const { shouldSkipWebSessionModelTest } = await import("../../src/lib/api/modelTestRunner.ts");
+  const { chatProbeLeavesNoConversation } =
+    await import("../../src/lib/providers/chatProbePolicy.ts");
 
-  assert.equal(shouldSkipWebSessionModelTest("chatgpt-web"), false);
-  assert.equal(shouldSkipWebSessionModelTest(" CHATGPT-WEB "), false);
-  assert.equal(shouldSkipWebSessionModelTest("deepseek-web"), true);
+  assert.equal(await chatProbeLeavesNoConversation("chatgpt-web"), true);
+  assert.equal(await chatProbeLeavesNoConversation(" CHATGPT-WEB "), true);
+  assert.equal(await chatProbeLeavesNoConversation("deepseek-web"), false);
 });
 
 // ---------------------------------------------------------------------------

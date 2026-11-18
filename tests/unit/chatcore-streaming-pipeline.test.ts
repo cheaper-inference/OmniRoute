@@ -146,13 +146,13 @@ test("credential gate off by default → chain unchanged", () => {
   assert.deepEqual(log, ["pii-flag", "heartbeat"]);
 });
 
-test("credential gate on → credential transform runs after pii, before heartbeat", () => {
+test("credential gate on → credential transform runs before pii, before heartbeat", () => {
   const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
   assembleStreamingPipeline(
     baseArgs({ credentialRedactionEnabled: true, credentialDisabledGuardrails: [] }),
     deps
   );
-  assert.deepEqual(log, ["pii-flag", "credential-flag", "heartbeat"]);
+  assert.deepEqual(log, ["credential-flag", "pii-flag", "heartbeat"]);
 });
 
 test("credential opt-out → credential transform skipped", () => {
@@ -176,7 +176,7 @@ test("credential gate off → credential transform skipped", () => {
   assert.deepEqual(log, ["pii-flag", "heartbeat"]);
 });
 
-test("explicit pii transform plus credential gate → explicit pii then credential", () => {
+test("explicit pii transform plus credential gate → credential then explicit pii", () => {
   const { deps, log } = makeDeps({ isFeatureFlagEnabled: () => true });
   const explicit = () => ({ __tag: "pii-explicit" });
   assembleStreamingPipeline(
@@ -187,10 +187,10 @@ test("explicit pii transform plus credential gate → explicit pii then credenti
     }),
     deps
   );
-  assert.deepEqual(log, ["pii-explicit", "credential-flag", "heartbeat"]);
+  assert.deepEqual(log, ["credential-flag", "pii-explicit", "heartbeat"]);
 });
 
-test("full chain order with credential: pii → credential → progress → heartbeat → echo", () => {
+test("full chain order with credential: credential → pii → progress → heartbeat → echo", () => {
   const { deps, log } = makeDeps({
     isFeatureFlagEnabled: () => true,
     wantsProgress: () => true,
@@ -203,7 +203,7 @@ test("full chain order with credential: pii → credential → progress → hear
     }),
     deps
   );
-  assert.deepEqual(log, ["pii-flag", "credential-flag", "progress", "heartbeat", "echo"]);
+  assert.deepEqual(log, ["credential-flag", "pii-flag", "progress", "heartbeat", "echo"]);
 });
 
 test("pipeline assembly creates performance mark and measure entries", () => {

@@ -4,13 +4,13 @@
 
 ---
 
-## Bayar da Rahoton Raunukan Tsaro
+## Bayar da Lalacewar
 
-Idan ka gano wani raunin tsaro a OmniRoute, da fatan za ka bayar da rahotonsa cikin alhaki:
+Idan kun gano raunin tsaro a cikin OmniRoute, da fatan za a ba da rahoto cikin kulawa:
 
-1. **KADA KA** buɗe batun GitHub na jama'a
-2. Yi amfani da [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Haɗa da: bayani, matakan sake haifar da matsalar, da tasirin da ka iya faruwa
+1. **DO NOT** bude batun GitHub na jama'a
+2. Yi amfani da [shawarwarin Tsaro GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Haɗa: bayanin, matakan haifuwa, da yuwuwar tasiri
 
 ## Jadawalin Amsa
 
@@ -29,25 +29,14 @@ Idan ka gano wani raunin tsaro a OmniRoute, da fatan za ka bayar da rahotonsa ci
 | 3.7.x   | ✅ Tsaro                                         |
 | < 3.7.0 | ❌ Ba a tallafawa                                |
 
-## Wa’adin tallafin LTS (v3.9.x)
+## taga goyon bayan LTS (v3.9.x)
 
-Bayan 3.8.59, sigar da ke biye ita ce **3.9.0**, wadda ke buɗe layin tallafi na dogon lokaci a reshen
-`stable/v3` (duba [`ROADMAP.md`](ROADMAP.md) → "Mataki na 3 — v3.9.0 LTS").
+Bayan 3.8.59 na gaba sigar ita ce** 3.9.0** , wanda ke buɗe layin tallafi na dogon lokaci akan reshen `stable/v3` (duba [`ROADMAP.md`](ROADMAP.md) → "Mataki na 3 — v3.9.0 LTS").
 
-- **Abin da `stable/v3` ke karɓa:** gyaran kurakurai, facin tsaro da sabuntawar masu samarwa. Sabbin
-  fasaloli suna zuwa tashar v4; layin LTS yana fifita kwanciyar hankali. `npm install omniroute`
-  (`latest` dist-tag) zai ci gaba da kasancewa a v3 a duk tsawon zagayen v4.
-- **Tsawon wa’adi:** `stable/v3` yana karɓar **gyaran tsaro da gyaran munanan matsalolin da suka sake bayyana har
-  tsawon watanni 12 bayan fitar da 3.9.0, ko kuma har kwanaki 90 bayan an wallafa v4.0.0 a matsayin `latest` —
-  duk wanda ya fi zuwa daga baya**. Za a rubuta ranar ƙarshe da aka samu a bayanan fitarwar 3.9.0 da kuma a cikin
-  [`ROADMAP.md`](ROADMAP.md) lokacin da fitarwar ta gudana.
-- **Kai rahoton raunin tsaro a layin LTS:** a yi amfani da tasha ɗaya da kowace siga —
-  [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) na sirri,
-  ba batun jama’a ba. Faɗi sigar da ka gwada (misali `3.9.2`); gyare-gyaren suna shiga
-  `stable/v3` sannan a tura su gaba zuwa v4.
-- **Matsayin tushen tsaro lokacin fitar da LTS:** ana rubuta yanayin na’urar bincike da aka auna, da hujjojin
-  kariyar hanya da na bayanan shaidar shiga na jama’a a cikin
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Abin da `stable/v3` ke karba:** gyare-gyaren kwaro, facin tsaro da sabuntawar masu badawa. Sabbin fasali suna zuwa tashar v4; layin LTS shine kwanciyar hankali-na farko. `npm install omniroute` (tag dist-tag na `latest` ) yana tsayawa akan v3 yayin duk zagayen v4.
+- **Tsawon lokacin taga:** `stable/v3` karba** gyare-gyaren tsaro da koma baya mai mahimmanci na watanni 12 bayan yanke 3.9.0, ko har zuwa kwanaki 90 bayan an buga v4.0.0 a matsayin `latest` — kowane daga baya.** . An rubuta sakamakon ƙarshen kwanan watan a cikin bayanan sakin 3.9.0 kuma a cikin [`ROADMAP.md`](ROADMAP.md) lokacin da yanke ya faru.
+- **Bayar da lahani a cikin layin LTS :** tashar guda ɗaya da kowane sigar — mai zaman kansa [GitHub Shawarar Tsaro](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), ba batun jama'a ba. Faɗi wace sigar da kuka gwada (misali `3.9.2`); yana gyara ƙasa akan `stable/v3` kuma ana tura su gaba zuwa v4.
+- **Tushen tsaro a yanke LTS :** Jihar na'urar daukar hoto da aka auna, gadin hanya da hujjojin shaidar jama'a an rubuta su a cikin [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 

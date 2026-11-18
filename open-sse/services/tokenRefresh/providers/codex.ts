@@ -3,6 +3,7 @@
 // provenance notes (ported idea from KooshaPari's PR #7338, redone on tip).
 import { PROVIDERS, OAUTH_ENDPOINTS } from "../../../config/constants.ts";
 import { runWithProxyContext } from "../../../utils/proxyFetch.ts";
+import { sanitizeErrorMessage } from "../../../utils/errorSanitization.ts";
 import { buildFormParams } from "../shared.ts";
 import { isPassiveCodex } from "../passiveCodex.ts";
 
@@ -91,7 +92,8 @@ export async function refreshCodexToken(refreshToken, log, proxyConfig: unknown 
 
       log?.error?.("TOKEN_REFRESH", "Failed to refresh Codex token", {
         status: response.status,
-        error: errorText,
+        // The OAuth server can echo the refresh token or client secret back in its error body.
+        error: sanitizeErrorMessage(errorText),
       });
       return null;
     }

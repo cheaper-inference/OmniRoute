@@ -1,4 +1,4 @@
-// README strategies grid (18 of the 20 combo routing strategies, one animated tile each) in the
+// README strategies grid (18 of the 22 combo routing strategies, one animated tile each) in the
 // Cheaper Inference UI Kit style (KEA-6307). The output is committed as
 // docs/diagrams/strategies-grid.svg; tests/unit/docs/readme-strategies-grid-svg.test.ts fails
 // when the committed file no longer matches this generator, so a stale picture cannot ship.
@@ -8,13 +8,16 @@
 // Every tile is rendered from the TILES data below (name, caption, four target slots, the
 // request dots and their windows); STRATEGIES_GRID_COPY (derived from it) is both the drawn text
 // and what the outlining step shapes. The "16-factor" claim stays in <text> because
-// scripts/check/check-docs-counts-sync.mjs reads it from the raw file. The grid shows 18 of the
-// 20 strategies by design — the README table next to it carries cache-optimized and
-// quota-weighted; do not add or remove tiles here.
+// scripts/check/check-docs-counts-sync.mjs reads it from the raw file; the factor count comes
+// from the facts snapshot (./readmeFacts.mjs). The strategy total (22) stays literal: the title
+// names the strategies the grid leaves out, so it is curated together with TILES. The grid
+// shows 18 of the 22 strategies by design — the README table next to it carries
+// cache-optimized, quota-weighted, expiry-first and jev; do not add or remove tiles here.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, afterKicker } from "./readme-diagram-theme.mjs";
+import { RF } from "./readmeFacts.mjs";
 
 // Slot geometry inside a 173 × 158 tile: the request leaves (26,79), the four targets sit at
 // SLOT_Y; tracks end at the slot edge, dots stop just before it.
@@ -201,7 +204,7 @@ const TILES = [
   },
   {
     name: "auto",
-    caption: "live 16-factor scoring",
+    caption: `live ${RF.scoringFactors}-factor scoring`,
     dur: 3.6,
     tracks: ["", "solid", "", ""],
     picks: [1],
@@ -246,7 +249,7 @@ const TILES = [
 ];
 
 export const STRATEGIES_GRID_COPY = {
-  kicker: ["COMBO ROUTING · 18 OF 20 STRATEGY FLOWS"],
+  kicker: ["COMBO ROUTING · 18 OF 22 STRATEGY FLOWS"],
   legend: [
     "● request → ▮ targets — each tile animates the path its strategy takes · ",
     "green outline = the pick",
@@ -342,7 +345,7 @@ export async function renderStrategiesGrid() {
     svgOpen({
       viewBox: "0 0 1200 644",
       title:
-        "Animated examples for 18 of OmniRoute's 20 combo routing strategies. The cache-optimized and quota-weighted strategies are documented in the adjacent routing table.",
+        "Animated examples for 18 of OmniRoute's 22 combo routing strategies. The cache-optimized, quota-weighted, expiry-first and jev strategies are documented in the adjacent routing table.",
       desc: "Animated grid of 18 routing-strategy tiles; static tracks show each flow on the first frame while a small dot repeatedly travels the path each illustrated strategy takes. Light and dark follow the viewer's color scheme.",
     }) +
       gridDefs("sg-grid") +

@@ -47,6 +47,7 @@ import {
   useSaveQuotaWindowThresholds,
 } from "./useConfirmedAvailabilityChange";
 import { useCachedQuotaPolling } from "./useCachedQuotaPolling";
+import { useQuotaClock } from "./useQuotaClock";
 import { useAutomaticQuotaRequests } from "./useAutomaticQuotaRequests";
 import CodexResetCreditsModal from "./CodexResetCreditsModal";
 import { useVisibleQuotaData } from "./useVisibleQuotaData";
@@ -220,10 +221,23 @@ function FilterChip({
   );
 }
 
+/**
+ * SIWC exposes usage management in ChatGPT settings, not a quota polling API; automatic
+ * requests also wait until a live request is allowed.
+ */
+function skipsQuotaFetch(
+  provider: string,
+  automatic: boolean | undefined,
+  canRequestLive: () => boolean
+): boolean {
+  return provider === "chatgpt" || (automatic === true && !canRequestLive());
+}
+
 export default function ProviderLimits({
   showFilters = true,
   autoRefreshInterval = 0,
 }: ProviderLimitsProps) {
+  const clockNow = useQuotaClock();
   const t = useTranslations("usage");
   const tr = useCallback(
     (key: string, fallback: string, values?: UsageTranslationValues) =>
@@ -421,7 +435,7 @@ export default function ProviderLimits({
       provider: string,
       options: { force?: boolean; automatic?: boolean } = {}
     ) => {
-      if (options.automatic && !canRequestLive()) return;
+      if (skipsQuotaFetch(provider, options.automatic, canRequestLive)) return;
       const force = options?.force === true;
       const now = Date.now();
       const lastFetch = lastFetchTimeRef.current[connectionId] || 0;
@@ -570,7 +584,7 @@ export default function ProviderLimits({
       connections.filter(
         (conn) =>
           isProviderQuotaVisible(conn) &&
-          supportsProviderQuota(conn.provider, conn) &&
+          (conn.provider === "chatgpt" || supportsProviderQuota(conn.provider, conn)) &&
           (conn.authType === "oauth" || conn.authType === "apikey")
       ),
     [connections]
@@ -799,7 +813,7 @@ export default function ProviderLimits({
           const pct = q.unlimited
             ? 100
             : Math.round(q.remainingPercentage ?? calculatePercentage(q.used, q.total));
-          const cd = formatCountdown(q.resetAt);
+          const cd = formatCountdown(q.resetAt, clockNow);
           const tone = getQuotaToneClasses(pct);
           return (
             <span
@@ -840,7 +854,7 @@ export default function ProviderLimits({
       <Card padding="lg">
         <div className="text-center py-12">
           <Icon name="cloud_off" size={64} className="opacity-15" />
-          <h3 className="mt-4 text-lg font-semibold text-text-main">{t(emptyCard.title)}</h3>
+          <h3 className="mt-4 text-lg text-text-main">{t(emptyCard.title)}</h3>
           <p className="mt-2 text-sm text-text-muted max-w-[400px] mx-auto">{t(emptyCard.hint)}</p>
         </div>
       </Card>
@@ -852,7 +866,7 @@ export default function ProviderLimits({
       {/* Header */}
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          <h2 className="text-lg font-semibold text-text-main m-0">{t("providerLimits")}</h2>
+          <h2 className="text-lg text-text-main m-0">{t("providerLimits")}</h2>
           <span className="text-[13px] text-text-muted">
             {t("accountsCount", { count: visibleConnections.length })}
             {visibleConnections.length !== sortedConnections.length &&

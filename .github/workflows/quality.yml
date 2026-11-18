@@ -5,7 +5,9 @@ on:
     # release/** pushes are covered by the PR run of each change plus Release-Green on the
     # merged combination (see ci.yml for the 2026-10-18 measurement); the per-push run here
     # only ever queued hosted slots and was cancelled by the next merge.
-    branches: [main]
+    # omni-queue/** (2026-11-13): omni-queue merge-queue candidates run the full profile, like
+    # merge_group (see ci.yml).
+    branches: [main, "omni-queue/**"]
   pull_request:
     branches: [main, "release/**"]
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft, edited]
@@ -39,6 +41,17 @@ jobs:
     if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
     runs-on: ubuntu-latest
     outputs:
+      # Match the official Mergify App and both repository IDs from GitHub's
+      # event. A contributor-controlled branch prefix alone grants no exception.
+      queueCandidate: >-
+        ${{ github.event_name == 'pull_request' && github.event.pull_request.draft == true &&
+            github.event.pull_request.user.id == 37929162 &&
+            github.event.pull_request.user.login == 'mergify[bot]' &&
+            github.event.pull_request.user.type == 'Bot' &&
+            startsWith(github.head_ref, 'mergify/merge-queue/') &&
+            github.event.repository.id > 0 &&
+            github.event.pull_request.head.repo.id == github.event.repository.id &&
+            github.event.pull_request.base.repo.id == github.event.repository.id }}
       code: ${{ steps.classify.outputs.code }}
       docs: ${{ steps.classify.outputs.docs }}
       i18n: ${{ steps.classify.outputs.i18n }}
@@ -46,20 +59,30 @@ jobs:
       testsOnly: ${{ steps.classify.outputs.testsOnly }}
       # Exposure only (one-CI-policy step 1, RFC #8084): no job depends on it yet.
       domains: ${{ steps.classify.outputs.domains }}
+      # omni-queue candidate base (the merge_group.base_sha of a push to omni-queue/**);
+      # empty on every other event.
+      candidateBase: ${{ steps.candidate.outputs.BASE_SHA }}
+      # "self" on an omni-queue base-check candidate (the bare base), "trailer" on a batch.
+      candidateSource: ${{ steps.candidate.outputs.SOURCE }}
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
           fetch-depth: 0
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
       - name: Validate gate inventory
         run: npm run check:gate-manifest
+      # Same as ci.yml: a new omni-queue/** branch has no usable github.event.before.
+      - name: Resolve the omni-queue candidate base
+        id: candidate
+        if: startsWith(github.ref, 'refs/heads/omni-queue/')
+        run: node scripts/merge-queue/candidate-base.mjs >> "$GITHUB_OUTPUT"
       - name: Validate recurring free catalog evidence
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+          BASE_SHA: ${{ steps.candidate.outputs.BASE_SHA || github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
         run: npm run check:free-catalog-evidence
       - id: classify
         env:
@@ -91,10 +114,14 @@ jobs:
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && (needs.changes.outputs.docs == 'true' || needs.changes.outputs.code == 'true')) }}
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          # Depth 2: on a pull_request the checkout is GitHub's merge commit, and its first
+          # parent is the base the PR was merged onto. check:docs-counts (inside check:docs-all)
+          # runs in `pr` mode on feature PRs and diffs the managed numbers against that base.
+          fetch-depth: 2
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -104,7 +131,15 @@ jobs:
           cache: ${{ github.event_name == 'pull_request' }}
       # One walk of src/app/api for openapi-routes + docs-symbols (both still fail independently).
       - run: npm run check:api-docs-refs
+      # Plan 2026-11-13 (derived numbers are written at release): on a feature PR the counts gate
+      # judges only the managed numbers the PR itself edited (diff against BASE_SHA, or the merge
+      # commit's first parent when the base moved), never a base that is behind the live code by
+      # design. Push and dispatch on main or release/v* keep the strict release comparison; a
+      # dispatch on a feature branch runs in pr mode (no PR to diff: content invariants only).
       - name: Docs accuracy (fabricated-docs + i18n mirrors, strict)
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          OMNIROUTE_GATE_MODE: ${{ github.event_name == 'workflow_dispatch' && github.ref_name != 'main' && !startsWith(github.ref_name, 'release/v') && 'pr' || '' }}
         run: npm run check:docs-all
 
   fast-gates:
@@ -137,11 +172,11 @@ jobs:
       API_KEY_SECRET: ci-lint-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           fetch-depth: 0
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -204,7 +239,7 @@ jobs:
         run: bash scripts/ci/install-workflow-scanners.sh
       - name: Forgotten sibling tests (advisory)
         env:
-          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          GITHUB_BASE_SHA: ${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}
         run: |
           node scripts/quality/build-test-impact-map.mjs
           node scripts/check/check-forgotten-sibling-tests.mjs \
@@ -213,7 +248,7 @@ jobs:
           cat forgotten-sibling-tests.md >> "$GITHUB_STEP_SUMMARY"
       - name: Upload forgotten sibling report
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: forgotten-sibling-tests
           path: |
@@ -232,8 +267,15 @@ jobs:
           # #8522: base-relative file-size mode on PR events — inherited drift (base
           # already over frozen cap) must not red an innocent PR. Unset on
           # workflow_dispatch (no PR base) → absolute comparison.
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          # omni-queue/** candidates: the candidate base, so every base-relative gate below
+          # judges the batch like a PR (a drifted base must not red every candidate).
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}
+          # Other checks may use this local ref; OpenAPI reads immutable event commits.
           BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
+          # External-state gates of this loop ("externalState" in
+          # config/quality/release-green-static-profile.json: the OSV database), advisory on an
+          # omni-queue candidate only. Empty on every other event: they block as before.
+          EXTERNAL_STATE_GATES: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') && 'vuln-ratchet' || '' }}
         run: |
           set -uo pipefail
           gates=(
@@ -302,13 +344,24 @@ jobs:
           echo "::endgroup::"
           # #10134: TS7 zero-new-diagnostics ratchet — folded into this non-fail-fast
           # loop (never a separate blocking step) so an earlier red gate cannot abort
-          # the job and mask it (#8542 mechanism). PR-only: the base-relative
-          # comparison needs the PR base SHA (empty on workflow_dispatch).
+          # the job and mask it (#8542 mechanism). PRs and omni-queue candidates only:
+          # the base-relative comparison needs a base SHA (empty on workflow_dispatch).
           if [ -n "${PR_BASE_SHA:-}" ]; then
             echo "::group::check:ts7-diagnostics-ratchet"
             npm run check:ts7-diagnostics-ratchet -- --base-ref "$PR_BASE_SHA" || failed+=("ts7-diagnostics-ratchet")
             echo "::endgroup::"
           fi
+          # A failed gate named in EXTERNAL_STATE_GATES (filled on an omni-queue candidate only)
+          # is a warning there, not a failed gate.
+          counted=()
+          for g in "${failed[@]}"; do
+            if [[ " ${EXTERNAL_STATE_GATES:-} " == *" $g "* ]]; then
+              echo "::warning::check:$g failed (external state, advisory on an omni-queue candidate)"
+            else
+              counted+=("$g")
+            fi
+          done
+          failed=("${counted[@]}")
           if (( ${#failed[@]} )); then
             printf '::error::%d gate(s) failed: %s\n' "${#failed[@]}" "${failed[*]}"
             exit 1
@@ -344,7 +397,21 @@ jobs:
       - name: Impacted unit tests (TIA subset; blocking)
         env:
           GITHUB_BASE_REF: ${{ github.base_ref }}
+          # omni-queue/** candidates: select against the batch base, not HEAD~1.
+          GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
+          CANDIDATE_SOURCE: ${{ needs.changes.outputs.candidateSource }}
         run: |
+          # omni-queue base-check (the bare base, its own base): a base-relative selection is
+          # empty, so a test that fails in a red batch's subset could never fail here and the
+          # queue's base-red comparison (same check, same test) would blame the batch. Run the
+          # whole unit suite instead.
+          if [ "${CANDIDATE_SOURCE:-}" = "self" ]; then
+            echo "__OMNI_QUEUE_BASE_CHECK__" > tia-selection.txt
+            echo "TIA selection: omni-queue base-check — full unit suite" >> "$GITHUB_STEP_SUMMARY"
+            RC=0
+            npm run test:unit:ci || RC=$?
+            exit $RC
+          fi
           git fetch --no-tags origin "$GITHUB_BASE_REF" || true
           # The advisory sibling-test step generates the same map earlier in this job.
           [ -f config/quality/test-impact-map.json ] || node scripts/quality/build-test-impact-map.mjs
@@ -395,7 +462,7 @@ jobs:
       # audited against ci.yml test-unit failures on the same commit (gate moves need this data).
       - name: Upload TIA selection (shadow evidence)
         if: always()
-        uses: actions/upload-artifact@v7
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: tia-selection
           path: tia-selection.txt
@@ -416,7 +483,8 @@ jobs:
     name: No new ESLint warnings
     needs: changes
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || startsWith(github.head_ref, 'mergify/merge-queue/')) && needs.changes.outputs.code == 'true') }}
-    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && github.event_name != 'merge_group' && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
+    # omni-queue/** candidates contain fork code: never on the self-hosted pool.
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && github.event_name != 'merge_group' && !startsWith(github.ref, 'refs/heads/omni-queue/') && !startsWith(github.head_ref, 'omni-queue/') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-light"]')) || 'ubuntu-latest' }}
     # 2026-08-30: a cold full lint with the eslint-plugin-react-hooks 7 compiler rules is
     # killed on the 7 GB hosted runner without a message (status null → exit 1, the
     # JSON never written); the box lints it in ~12 min with the heap below.
@@ -427,10 +495,10 @@ jobs:
       contents: read
       security-events: read
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
           node-version: ${{ env.CI_NODE_VERSION }}
@@ -471,9 +539,11 @@ jobs:
         run: node scripts/quality/check-quality-ratchet.mjs --allow-missing --require-tighten
       # CodeQL alerts ratchet — same semantics as ci.yml quality-gate: exits 1 ONLY
       # on a real regression (open alerts > baseline in quality-baseline.json);
-      # a measurement failure (gh/auth/api) self-skips with exit 0.
+      # a measurement failure (gh/auth/api) self-skips with exit 0. External state (the
+      # repository's open alerts): advisory on an omni-queue candidate, like ci.yml.
       - name: CodeQL alerts ratchet (blocking)
         run: npm run check:codeql-ratchet
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Append ratchet summary
@@ -511,19 +581,25 @@ jobs:
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
+      # omni-queue/** candidates compare against their batch base (no `needs: changes` here:
+      # this job must keep running on a queue-draft edit run).
+      - name: Resolve the omni-queue candidate base
+        id: candidate
+        if: startsWith(github.ref, 'refs/heads/omni-queue/')
+        run: node scripts/merge-queue/candidate-base.mjs >> "$GITHUB_OUTPUT"
       - name: CHANGELOG integrity (nenhum bullet da base pode sumir no merge-result)
+        env:
+          CHANGELOG_BASE_REF: ${{ steps.candidate.outputs.BASE_SHA }}
         run: npm run check:changelog-integrity
       - name: Agent-skills generator sync (SKILL.md gerado ≡ catálogo)
         run: npm run check:agent-skills-sync
 
   admission-verdict:
-    # A queue-draft edit run must not leave a check named "Gate / Quality" on the draft: Mergify
-    # read that skipped check as a finished non-success and dequeued the PR (#18961 on
-    # 2026-11-04) before the real run reported. Every other run keeps the exact name.
-    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / Quality (queue-draft edit)' || 'Gate / Quality' }}
-    # Runs on every candidate; only a Mergify queue-draft description edit skips it (see the
-    # workflow concurrency note): that draft is never what branch protection merges.
-    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
+    # Only requested candidates receive the required check name. An ordinary draft
+    # deliberately skips its producer jobs and must not create a failed admission.
+    # Classifier failures still reach the gate; queue metadata edits keep their own name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / Quality (queue-draft edit)' || (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Gate / Quality' || 'Admission not requested / Quality' }}
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:

@@ -106,6 +106,8 @@ describe("resilience/settings normalize split-guard", () => {
       "credentialHealthCheck",
       // Opt-in latency term for p2c account selection (weight 0 = off).
       "p2cLatency",
+      // Opt-in preferred-account timeout fallback section.
+      "preferredAccountFailover",
       "providerBreaker",
       "providerCooldown",
       "providerQuotaOverrides",

@@ -46,23 +46,21 @@ kelių modelių vykdymo sąsaja, o ne maršruto parinkimo strategija: ji niekada
 
 ## Sąranka
 
-1. Atidarykite **Valdymo skydelis → Chaoso režimas** (`/dashboard/chaos`).
-2. **Įjunkite** jį — pagal numatytuosius nustatymus Chaoso režimas pateikiamas **išjungtas** (`enabled: false`
-   faile `src/lib/chaos/chaosConfig.ts`). Kol jis išjungtas, `POST /api/chaos/run` grąžina
-   `400 — "Chaoso režimas neįjungtas. Įjunkite jį pasirinkę Valdymo skydelis → Chaoso režimas."`.
-3. Pasirinkite dalyvius ir numatytąsias reikšmes (kiekvienam egzemplioriui jos išsaugomos nustatymų saugykloje):
+1. Atidaryti** Prietaisų skydelis → Chaos Mode** (`/dashboard/chaos`).
+2. Pasukite jį** įjungta** — Chaos Mode laivai** pagal numatytuosius nustatymus išjungtas** (`enabled: false` `src/lib/chaos/chaosConfig.ts`). Kai išjungta, `POST /api/chaos/run` atsako `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Pasirinkite dalyvius ir numatytuosius nustatymus (išliko kiekvienam atvejui nustatymų parduotuvėje):
 
-   | Laukas              | Reikšmė                                                                         | Numatytoji reikšmė / ribos                           |
-   | ------------------- | ------------------------------------------------------------------------------- | ---------------------------------------------------- |
-   | `enabled`           | Pagrindinis jungiklis                                                           | `false`                                              |
-   | `defaultMode`       | `parallel` arba `collaborative` (žr. toliau)                                    | `parallel`                                           |
-   | `providerOverrides` | Kiekvieno teikėjo dalyvavimas (`providerId`, pasirenkamas `modelId`, `enabled`) | tuščia = kiekvienas aktyvus teikėjas, daugiausia 200 |
-   | `systemPrompt`      | Integruotos Chaoso sistemos užklausos pakeitimas                                | pasirenkama, daugiausia 10 000 simbolių              |
-   | `timeoutMs`         | Ilgiausia vieno modelio iškvietimo trukmė                                       | `120000` (5 000–600 000)                             |
-   | `maxTokens`         | `max_tokens` kiekvienam modelio iškvietimui                                     | `4096` (256–128 000)                                 |
+   | Laukas              | Reikšmė                                                                          | Numatytasis / ribos                              |
+   | ------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------ |
+   | `enabled`           | Pagrindinis jungiklis                                                            | `false`                                          |
+   | `defaultMode`       | `parallel` arba `collaborative` (žr. toliau)                                     | `parallel`                                       |
+   | `providerOverrides` | Kiekvieno teikėjo dalyvavimas (`providerId`, pasirinktinai `modelId`, `enabled`) | tuščias = kiekvienas aktyvus teikėjas, maks. 200 |
+   | `systemPrompt`      | Integruotos Chaos sistemos raginimo nepaisymas                                   | neprivaloma, daugiausia 10 000 simbolių          |
+   | `timeoutMs`         | Maksimalus vieno modelio skambučio laikas                                        | `120000` (5 000–600 000)                         |
+   | `maxTokens`         | `max_tokens` už modelio skambutį                                                 | `4096` (256–128 000)                             |
 
-4. Paleiskite **testą pačiame puslapyje** — rezultatų skydelyje rodomas kiekvieno teikėjo atsakymas,
-   būsena ir trukmė.
+4. Suteikite kiekvienam dalyvaujančiam teikėjui a** modelis** . Teikėjo modelis yra jo įjungto nepaisymo Chaoso režimo puslapyje `modelId` (jis laimi), kitu atveju** numatytasis modelis** jo ryšio. Teikėjo ID niekada nenaudojamas kaip modelio pavadinimas. Tiekėjas, neturintis nei vieno, nei kito** nepaskambino** : rezultatuose jis rodomas kaip `status: "error"` su pranešimu _"Šiam teikėjui nenustatytas modelis. Puslapyje Chaos Mode nustatykite modelį arba numatytąjį ryšio modelį."_ ir tuščias `modelId`, o kiti teikėjai veikia įprastai. Jei nė vienas pasirinktas teikėjas neturi modelio, paleidimas nepavyksta prieš bet kokią ankstesnę užklausą su _"Nė vienas teikėjas nenustatė modelio..."_ (HTTP 500 abiejuose galutiniuose taškuose).
+5. Paleisti a** testą iš paties puslapio** — rezultatų skydelyje rodomas kiekvieno teikėjo atsakymas, būsena ir trukmė.
 
 ## Vykdymo režimai
 
@@ -74,36 +72,33 @@ kelių modelių vykdymo sąsaja, o ne maršruto parinkimo strategija: ji niekada
 
 ## API
 
-### `POST /api/chaos/run` — valdymo skydelio sesija
+### `POST /api/chaos/run` — prietaisų skydelio sesija
 
-Autentifikuojama slapuku (valdymo sesija — žr.
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); naudojama valdymo skydelio puslapyje.
+Slapukų autentifikavimas (valdymo sesija — žr. [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); naudojamas prietaisų skydelio puslapyje.
 
 ```jsonc
-// užklausos turinys
+// body
 {
-  "task": "Palyginkite X sprendimo būdus", // privaloma
-  "providers": ["glm", "kimi"], // pasirenkamas filtras
-  "mode": "parallel", // pasirenkama — pakeičia defaultMode
-  "systemPrompt": "…", // pasirenkamas pakeitimas
-  "maxTokens": 4096, // pasirenkamas pakeitimas
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
 ### `POST /api/skills/collect/chaos` — API raktas
 
-Išoriniams klientams skirtas variantas su prieigos rakto autentifikavimu. Raktui turi būti suteiktas **Chaoso režimo leidimas**
-(`chaosModeEnabled`), kuris pagal numatytuosius nustatymus yra **išjungtas** — įjunkite jį kiekvienam raktui atskirai:
-**Valdymo skydelis → API tvarkytuvė → redaguoti raktą → leidimai → Chaoso režimas**. Užklausos turinys toks pats kaip pirmiau.
+Nešinio žetono variantas išoriniams skambintojams. Raktas turi neštis** Chaoso režimo leidimas** (`chaosModeEnabled`), kuris yra** išjungtas pagal numatytuosius nustatymus** — įgalinkite jį kiekvienam raktui** Prietaisų skydelis → API tvarkyklė → redagavimo klavišas → leidimai → chaoso režimas** . Tas pats kūnas kaip aukščiau.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"task":"Palyginkite X sprendimo būdus","mode":"parallel"}'
+  -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Abu galiniai taškai grąžina tokios pačios struktūros atsakymą:
+Abu galiniai taškai grąžina tą pačią formą:
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ Abu galiniai taškai grąžina tokios pačios struktūros atsakymą:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // tik collaborative režimu
+  "summary": "…", // collaborative mode only
 }
 ```
 
-## Trikčių diagnostika
+## Trikčių šalinimas
 
-- **`400 Chaos Mode is not enabled`** — žr. 2 veiksmą pirmiau: bendrasis jungiklis išjungtas.
-- **API raktas atmetamas naudojant `/api/skills/collect/chaos`** — raktui nesuteiktas individualus
-  `chaosModeEnabled` leidimas (pagal numatytuosius nustatymus jis išjungtas; tai nustatymas, o ne klaida).
-- **Rezultatuose nėra teikėjo, kurį tikėjotės matyti** — Chaoso režimo puslapyje patikrinkite `providerOverrides`
-  (išjungtas pakeitimas pašalina teikėją) ir įsitikinkite, kad teikėjo ryšys yra
-  aktyvus.
+- **`400 Chaos Mode is not enabled`** — 2 veiksmas aukščiau: visuotinis jungiklis išjungtas.
+- **API raktas atmetamas `/api/skills/collect/chaos`** — raktui trūksta vieno klavišo `chaosModeEnabled` leidimo (išjungta pagal numatytuosius nustatymus; tai yra nustatymas, o ne klaida).
+- **Teikėjas rodo `No model set for this provider`** — nustatė savo modelį Chaoso režimo puslapyje arba numatytąjį savo ryšio modelį (žr. Sąranka, 4 veiksmas).
+- **Rezultatuose trūksta teikėjo, kurio tikėjotės** — patikrinkite `providerOverrides` chaoso režimo puslapyje (išjungtas nepaisymas jo neįtraukia) ir ar aktyvus teikėjo ryšys.

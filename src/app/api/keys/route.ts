@@ -3,9 +3,20 @@ import {
   getApiKeys,
   getApiKeysCount,
   createApiKey,
+  createApiKeyFromPolicy,
   updateApiKeyPermissions,
 } from "@/lib/db/apiKeys";
+import { getKeyTemplateRefStatus } from "@/lib/db/keyTemplates";
+import { createKeyFromPolicySchema } from "@/shared/validation/schemas/keyTemplates";
+import type { CreateKeyFromPolicyResponse, KeyTemplatePolicy } from "@/shared/types/keyTemplates";
+import {
+  NO_STORE_HEADERS,
+  templateFailure,
+  templateJson,
+  validationError,
+} from "@/lib/api/keyTemplateHttp";
 import { getApiKeySelfServiceSettings } from "@/lib/db/apiKeySelfServiceSettings";
+
 import { getConsistentMachineId } from "@/shared/utils/machineId";
 import { syncKeysToCloudIfEnabled } from "@/lib/api/keyCloudSync";
 import { createKeySchema } from "@/shared/validation/schemas";
@@ -89,6 +100,46 @@ export async function GET(request: Request) {
   }
 }
 
+/**
+ * POST /api/keys with `{ name, policy, templateRef? }`: the submitted policy is final
+ * (never re-merged with a stored template). The key and every related row are written in
+ * one transaction, so a failure leaves no key behind and no secret is ever returned for it.
+ */
+async function createKeyFromPolicy(request: Request, body: unknown) {
+  const parsed = createKeyFromPolicySchema.safeParse(body);
+  if (!parsed.success) return validationError(parsed.error);
+  const { name, templateRef } = parsed.data;
+  const submitted = parsed.data.policy as KeyTemplatePolicy;
+  const scopes = normalizeSelfServiceScopesForCreate(submitted.key.scopes);
+  const policy: KeyTemplatePolicy = { ...submitted, key: { ...submitted.key, scopes } };
+
+  const scopeAuthError = await requireCredentialForManagementScopedKey(request, scopes);
+  if (scopeAuthError) return scopeAuthError;
+
+  try {
+    const machineId = await getConsistentMachineId();
+    const created = await createApiKeyFromPolicy(name, machineId, policy, {
+      enforceReferences: true,
+      ...(templateRef && { templateRef }),
+    });
+    void syncKeysToCloudIfEnabled();
+    const response: CreateKeyFromPolicyResponse = {
+      key: created.key,
+      id: created.id,
+      name: created.name,
+      machineId: created.machineId,
+      policy,
+      expiresAt: created.expiresAt,
+      ...(templateRef && {
+        templateRef: { ...templateRef, status: getKeyTemplateRefStatus(templateRef) },
+      }),
+    };
+    return templateJson(response, 201);
+  } catch (error) {
+    return templateFailure(error, "Error creating key from policy");
+  }
+}
+
 // POST /api/keys - Create new API key
 export async function POST(request) {
   const authError = await requireManagementAuth(request);
@@ -96,6 +147,10 @@ export async function POST(request) {
 
   try {
     const body = await request.json();
+
+    if (body && typeof body === "object" && !Array.isArray(body) && "policy" in body) {
+      return await createKeyFromPolicy(request, body);
+    }
 
     // Zod validation
     const validation = validateBody(createKeySchema, body);
@@ -170,7 +225,8 @@ export async function POST(request) {
         compressionEnabled: true,
         cacheDefaultMode: "legacy",
       },
-      { status: 201 }
+      // One-time secret: never cacheable.
+      { status: 201, headers: NO_STORE_HEADERS }
     );
   } catch (error) {
     log.error("keys", "Error creating key", error);

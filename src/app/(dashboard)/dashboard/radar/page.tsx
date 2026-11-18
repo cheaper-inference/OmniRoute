@@ -395,7 +395,7 @@ export default function RadarPage() {
             <Card>
               <div className="mx-auto flex max-w-5xl flex-col items-center gap-6 py-8 text-center">
                 <Icon name="radar" size={36} className="text-primary" />
-                <h2 className="text-xl font-semibold">{t("activateTitle")}</h2>
+                <h2 className="text-xl">{t("activateTitle")}</h2>
                 <p className="max-w-2xl text-text-muted">{t("activateDescription")}</p>
 
                 <RadarAccessExplainer />
@@ -536,7 +536,7 @@ export default function RadarPage() {
               )}
 
               <div>
-                <h3 className="text-lg font-semibold mb-3">{t("campaignsTitle")}</h3>
+                <h3 className="text-lg mb-3">{t("campaignsTitle")}</h3>
                 {referrals.campaigns.length === 0 ? (
                   <Card>
                     <p className="text-text-muted text-center py-6">
