@@ -399,8 +399,9 @@ async function handleAssemblyAITranscription(providerConfig, file, modelId, toke
 async function handleGladiaTranscription(providerConfig, file, modelId, token) {
   const authHeaders = buildAuthHeaders(providerConfig, token);
 
-  // Step 1: Upload the audio file (multipart/form-data)
-  const { body: uploadBody, contentType: uploadCT } = await buildMultipartBody(file, {});
+  // Step 1: Upload the audio file (multipart/form-data). Gladia reads the file from the
+  // "audio" field; any other name is a 400 "Missing audio file".
+  const { body: uploadBody, contentType: uploadCT } = await buildMultipartBody(file, {}, "audio");
   const uploadRes = await fetch("https://api.gladia.io/v2/upload", {
     method: "POST",
     headers: { ...authHeaders, "Content-Type": uploadCT },
@@ -973,14 +974,27 @@ async function pollSpeechmaticsJob(jobUrl, authHeaders) {
  * the requested transcription options. Streaming (real-time WebSocket) mode is
  * out of scope for v1 — this handler only implements batch (REST) transcription.
  */
-async function handleSpeechmaticsTranscription(providerConfig, file, modelId, token) {
+async function handleSpeechmaticsTranscription(
+  providerConfig,
+  file,
+  modelId,
+  token,
+  formData?: FormData
+) {
   const authHeaders = buildAuthHeaders(providerConfig, token);
   const baseUrl = providerConfig.baseUrl.replace(/\/$/, "");
 
-  // Step 1: submit the job — multipart body with "data_file" (audio) + "config" (JSON)
+  // Step 1: submit the job — multipart body with "data_file" (audio) + "config" (JSON).
+  // Speechmatics rejects a config without transcription_config.language; "auto" asks it
+  // to identify the language when the request names none.
+  const requestedLanguage = formData?.get("language");
+  const language =
+    typeof requestedLanguage === "string" && requestedLanguage.trim()
+      ? requestedLanguage.trim()
+      : "auto";
   const config = JSON.stringify({
     type: "transcription",
-    transcription_config: { operating_point: speechmaticsOperatingPoint(modelId) },
+    transcription_config: { language, operating_point: speechmaticsOperatingPoint(modelId) },
   });
   const { body, contentType } = await buildMultipartBody(file, { config }, "data_file");
 
@@ -1207,7 +1221,7 @@ export async function handleAudioTranscription({
   }
 
   if (providerConfig.format === "speechmatics") {
-    return handleSpeechmaticsTranscription(providerConfig, file, modelId, token);
+    return handleSpeechmaticsTranscription(providerConfig, file, modelId, token, formData);
   }
 
   if (providerConfig.format === "openrouter-stt") {

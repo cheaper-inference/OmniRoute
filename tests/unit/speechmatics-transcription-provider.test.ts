@@ -130,6 +130,43 @@ test("handleAudioTranscription returns an error when Speechmatics rejects the jo
   }
 });
 
+for (const [label, requested, expected] of [
+  ["defaults to automatic language identification", null, "auto"],
+  ["passes the requested language", " pt ", "pt"],
+] as const) {
+  test(`Speechmatics job config ${label}`, async () => {
+    const originalFetch = globalThis.fetch;
+    let submitted: Record<string, unknown> | null = null;
+
+    globalThis.fetch = (async (url: string, options: RequestInit = {}) => {
+      if (String(url) === "https://asr.api.speechmatics.com/v2/jobs") {
+        const body = new TextDecoder().decode(options.body as Uint8Array);
+        const config = /name="config"\r\n\r\n(.*?)\r\n/.exec(body)?.[1];
+        submitted = JSON.parse(config || "null");
+        // The live API rejects a job whose transcription_config has no language.
+        return new Response(JSON.stringify({ error: "Job rejected" }), { status: 400 });
+      }
+      throw new Error(`Unexpected URL: ${String(url)}`);
+    }) as typeof fetch;
+
+    try {
+      const formData = new FormData();
+      formData.append("model", "speechmatics/enhanced");
+      formData.append("file", buildFile("abc", "clip.wav", "audio/wav"));
+      if (requested !== null) formData.append("language", requested);
+
+      await handleAudioTranscription({ formData, credentials: { apiKey: "sm-key" } });
+
+      assert.deepEqual(submitted, {
+        type: "transcription",
+        transcription_config: { language: expected, operating_point: "enhanced" },
+      });
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
+  });
+}
+
 test("handleAudioTranscription requires credentials for Speechmatics", async () => {
   const formData = new FormData();
   formData.append("model", "speechmatics/enhanced");
