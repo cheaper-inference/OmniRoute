@@ -4,10 +4,20 @@
 
 ---
 
-Qayta urinish haqidagi qarorlar qabul qilinishidan oldin nosozliklar tasniflanadi.
+Qayta urinish qarorlari qabul qilinishidan oldin muvaffaqiyatsizliklar tasniflanadi.
 
-Vaqt tugashi, tarmoq xatolari, tezlik cheklovlari va provayderning 5xx javoblari kabi vaqtinchalik nosozliklarda boshqa provayderga oʻtilishi mumkin. Autentifikatsiya xatolari, ruxsat xatolari, notoʻgʻri soʻrovlar, mavjud boʻlmagan modellar va nomaʼlum nosozliklarda koʻr-koʻrona qayta urinilmaydi.
+Vaqtinchalik uzilishlar, tarmoq xatolari, tarif cheklovlari va provayderning 5xx javoblari kabi vaqtinchalik nosozliklar ishlamay qolishi mumkin. Tugagan kvota yoki kredit (429-kvota yoki 402-to'lov talab qilinadi) hech qachon bir xil provayderda qayta tekshirilmaydi, lekin kvotasi alohida bo'lgan boshqa provayderga o'tib ketmaydi. Autentifikatsiya xatolari, ruxsat berish xatolari, noto'g'ri so'rovlar, mavjud bo'lmagan modellar va noma'lum nosozliklar ko'r-ko'rona qayta tekshirilmaydi.
 
-Provayderlararo standart siyosat koʻpi bilan uchta provayderga urinish imkonini beradi, tezlik cheklovlari va vaqt tugashi holatlarida qayta urinadi hamda maʼmuriy oʻchirib qoʻyishni zanjirning vaqtinchalik holatidan alohida saqlaydi.
+Standart provayderlar o‘rtasidagi siyosat provayderning uchtagacha urinishlariga ruxsat beradi, tezlik chegaralarini va kutish vaqtini takrorlaydi, tugatilgan kvotada muvaffaqiyatsizlikka uchraydi va ma’muriy o‘chirib qo‘yishni vaqtinchalik sxema holatidan ajratib turadi.
 
-Zanjir holatlari: `closed`, `open` va `half_open`. Sovish davri cheklangan tekshiruvni rejalashtiradi; muvaffaqiyatli tekshiruv zanjirni yopadi, muvaffaqiyatsiz tekshiruv esa uni qayta ochadi.
+## Qaerda amal qiladi
+
+- **Kombolar** Komboning o'z strategiyasi va sozlamalariga ko'ra maqsadlari o'rtasida o'tish.
+- **Yalang'och model identifikatori** ( `provider/` prefiksi yo'q) bir nechta faol provayderlar xizmat ko'rsatadigan, aniq nomning kombinatsiyasi bo'lmagan holda, birinchi navbatda provayder xulosasiga yuboriladi. Agar bu urinish siyosatning uzilishi bilan muvaffaqiyatsiz bo'lsa, xuddi shu so'rov identifikatorga xizmat ko'rsatadigan keyingi faol provayderga yuboriladi. Javob `x-omniroute-fallback-attempts` ko'rinishida javob bergandan oldin sinab ko'rilgan provayderlar soniga ega.
+  - Har bir muqobil xuddi xulosa uni tanlagandek vakolatga ega. API tugmachasi blokirovka qilgan yoki tan olmagan maqsad yuqori oqim qo'ng'irog'isiz o'tkazib yuboriladi va mijoz hech qachon nomlanmagan maqsad uchun siyosat rad etilishini emas, balki haqiqiy yuqori oqim xatosini oladi.
+  - Faqat muvaffaqiyatsiz javob davom etadi: birinchi oqim baytidan keyin hech narsa bajarilmaydi.
+  - Favqulodda zaxira modelini almashtirish faqat so'ralgan modelning har bir provayderi muvaffaqiyatsizlikka uchraganidan keyin qo'llaniladi.
+  - Ulanishga (`x-omniroute-connection`) mahkamlangan so'rov unda qoladi.
+  - Prefiksli identifikator (`provider/model`) hech qachon boshqa provayderga yo'naltirilmaydi.
+
+O'chirish holatlari `closed`, `open` va `half_open` dir. Sovutish vaqti chegaralangan zondni rejalashtiradi; muvaffaqiyatli zond zanjirni yopadi va muvaffaqiyatsiz zond uni qayta ochadi.

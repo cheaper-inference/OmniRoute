@@ -36,9 +36,7 @@ export default function AuthCallbackPage() {
   if (!callback.siwc) return <CallbackPage />;
   return (
     <main className="mx-auto max-w-xl space-y-5 p-8">
-      <h1 className="ci-heading text-2xl font-semibold text-text-main">
-        {t("continueToDashboard")}
-      </h1>
+      <h1 className="ci-heading text-2xl text-text-main">{t("continueToDashboard")}</h1>
       {callback.link ? (
         <>
           <p>{t("confirmDashboard")}</p>

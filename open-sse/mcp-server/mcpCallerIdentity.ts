@@ -18,7 +18,7 @@
  * isolation intact: a different key → a different id → a miss; no key → undefined
  * → the anonymous (`__anon__`) bucket, which only matches unauthenticated stores.
  */
-import { getMcpHttpAuthHeadersForInternalFetch } from "./httpAuthContext.ts";
+import { getMcpHttpAuthHeadersForInternalFetch, hasMcpHttpAuthContext } from "./httpAuthContext.ts";
 
 type ApiKeyLookup = (rawKey: string) => Promise<{ id?: string | number | null } | null>;
 
@@ -75,7 +75,9 @@ export async function resolveMcpCallerApiKeyId(): Promise<string | undefined> {
   const fromHeaders = await resolvePrincipalFromHeaders(getMcpHttpAuthHeadersForInternalFetch());
   if (fromHeaders !== undefined) return fromHeaders;
 
-  // 2. Fallback: env var (stdio transport, no HTTP context)
+  // 2. Fallback: env var, for stdio only. An HTTP caller whose key is not in the
+  // forwarded headers (x-goog-api-key, for one) must not become the env-key principal.
+  if (hasMcpHttpAuthContext()) return undefined;
   return resolvePrincipalFromEnv();
 }
 

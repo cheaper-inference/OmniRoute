@@ -133,10 +133,17 @@ test(
     fs.mkdirSync(core.DB_BACKUPS_DIR, { recursive: true });
     await db.backup(backupPath);
 
-    core.resetDbInstance();
-    fs.writeFileSync(`${core.SQLITE_FILE}-wal`, "STALE-WAL-MARKER");
-    fs.writeFileSync(`${core.SQLITE_FILE}-shm`, "STALE-SHM-MARKER");
-    fs.writeFileSync(`${core.SQLITE_FILE}-journal`, "STALE-JOURNAL-MARKER");
+    // restoreDbBackup snapshots the live database first, so the live database must be open
+    // and readable then. Close it and leave stale sidecars right after that snapshot, which
+    // is the state the sidecar cleanup has to handle.
+    const liveBackup = db.backup.bind(db);
+    db.backup = async (destination: string) => {
+      await liveBackup(destination);
+      core.resetDbInstance();
+      fs.writeFileSync(`${core.SQLITE_FILE}-wal`, "STALE-WAL-MARKER");
+      fs.writeFileSync(`${core.SQLITE_FILE}-shm`, "STALE-SHM-MARKER");
+      fs.writeFileSync(`${core.SQLITE_FILE}-journal`, "STALE-JOURNAL-MARKER");
+    };
 
     await backupDb.restoreDbBackup(backupId);
 

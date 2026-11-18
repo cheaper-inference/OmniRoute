@@ -46,24 +46,21 @@ trafikinizə heç vaxt təsir etmir.
 
 ## Quraşdırma
 
-1. **İdarə paneli → Chaos Mode** (`/dashboard/chaos`) bölməsini açın.
-2. Onu **aktivləşdirin** — Chaos Mode standart olaraq **deaktivdir** (`enabled: false`,
-   `src/lib/chaos/chaosConfig.ts` faylında). Deaktiv olduğu müddətdə `POST /api/chaos/run`
-   sorğusuna `400 — "Chaos Mode aktiv deyil. Onu İdarə paneli → Chaos Mode bölməsində aktivləşdirin."`
-   cavabı verilir.
-3. İştirakçıları və standart parametrləri seçin (parametrlər yaddaşı vasitəsilə hər instansiya üçün saxlanılır):
+1. Açıq** İdarə paneli → Xaos rejimi** (`/dashboard/chaos`).
+2. Çevir** haqqında** — Chaos Mode gəmiləri** default olaraq qeyri-aktivdir** (`enabled: false` -də `src/lib/chaos/chaosConfig.ts`). Əlil olduqda, `POST /api/chaos/run` `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."` cavabını verir.
+3. İştirakçıları və defoltları seçin (parametrlər mağazası vasitəsilə hər nüsxədə saxlanılır):
 
-   | Sahə                | Mənası                                                                       | Standart / limitlər                       |
-   | ------------------- | ---------------------------------------------------------------------------- | ----------------------------------------- |
-   | `enabled`           | Əsas keçid                                                                   | `false`                                   |
-   | `defaultMode`       | `parallel` və ya `collaborative` (aşağıya baxın)                             | `parallel`                                |
-   | `providerOverrides` | Hər provayder üzrə iştirak (`providerId`, isteğe bağlı `modelId`, `enabled`) | boş = bütün aktiv provayderlər, maks. 200 |
-   | `systemPrompt`      | Daxili Chaos sistem promptu üçün əvəzləmə                                    | isteğe bağlı, maks. 10 000 simvol         |
-   | `timeoutMs`         | Hər model çağırışı üçün maksimum vaxt                                        | `120000` (5 000–600 000)                  |
-   | `maxTokens`         | Hər model çağırışı üçün `max_tokens`                                         | `4096` (256–128 000)                      |
+   | Sahə                | Mənası                                                                     | Defolt / limitlər                       |
+   | ------------------- | -------------------------------------------------------------------------- | --------------------------------------- |
+   | `enabled`           | Master keçid                                                               | `false`                                 |
+   | `defaultMode`       | `parallel` və ya `collaborative` (aşağıya bax)                             | `parallel`                              |
+   | `providerOverrides` | Hər provayderin iştirakı (`providerId`, isteğe bağlı `modelId`, `enabled`) | boş = hər aktiv provayder, maksimum 200 |
+   | `systemPrompt`      | Daxili Xaos sistemi sorğusu üçün ləğv edin                                 | isteğe bağlı, maksimum 10 000 simvol    |
+   | `timeoutMs`         | Hər model zəngi üçün maksimum vaxt                                         | `120000` (5 000–600 000)                |
+   | `maxTokens`         | modelə görə `max_tokens`                                                   | `4096` (256–128 000)                    |
 
-4. **Testi birbaşa səhifədən başladın** — nəticələr panelində hər provayderin cavabı,
-   statusu və müddəti göstərilir.
+4. Hər bir iştirakçı provayderə a** model** . Provayderin modeli onun Chaos Mode səhifəsində aktivləşdirilmiş ləğvinin `modelId` (qalibdir), əks halda** standart model** onun əlaqəsindən. Provayder id heç vaxt model adı kimi istifadə edilmir. Heç biri olmayan bir provayder** çağırılmayıb** : nəticələrdə _"Bu provayder üçün heç bir model qurulmayıb. Xaos Modu səhifəsində onun üçün model və ya bağlantıda standart model təyin edin."_ və boş `modelId` mesajı ilə `status: "error"` kimi görünür, digər provayderlər isə normal işləyir. Heç bir seçilmiş provayderin modeli yoxdursa, _"Heç bir provayderdə model dəsti yoxdur. …"_ (hər iki son nöqtədə HTTP 500) ilə hər hansı yuxarı sorğudan əvvəl icra uğursuz olur.
+5. Çalışın a** səhifənin özündən test edin** — nəticələr paneli hər bir provayderin cavabını, statusunu və müddətini göstərir.
 
 ## İcra rejimləri
 
@@ -77,34 +74,31 @@ trafikinizə heç vaxt təsir etmir.
 
 ### `POST /api/chaos/run` — idarə paneli sessiyası
 
-Kuki ilə autentifikasiya olunur (idarəetmə sessiyası —
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) sənədinə baxın); idarə paneli səhifəsi tərəfindən istifadə edilir.
+Kuki ilə təsdiqlənmiş (idarəetmə sessiyası — bax [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); tablosuna səhifə tərəfindən istifadə olunur.
 
 ```jsonc
-// sorğu gövdəsi
+// body
 {
-  "task": "X üçün yanaşmaları müqayisə et", // tələb olunur
-  "providers": ["glm", "kimi"], // isteğe bağlı filtr
-  "mode": "parallel", // isteğe bağlı — defaultMode parametrini əvəz edir
-  "systemPrompt": "…", // isteğe bağlı əvəzləmə
-  "maxTokens": 4096, // isteğe bağlı əvəzləmə
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
 ### `POST /api/skills/collect/chaos` — API açarı
 
-Xarici çağıranlar üçün Bearer token variantı. Açar **Chaos Mode icazəsinə**
-(`chaosModeEnabled`) malik olmalıdır; bu icazə **standart olaraq deaktivdir** — onu hər açar üçün
-**İdarə paneli → API meneceri → açarı redaktə et → icazələr → Chaos Mode** bölməsində aktivləşdirin. Sorğu gövdəsi yuxarıdakı ilə eynidir.
+Xarici zəng edənlər üçün daşıyıcı-token variantı. Açar onu daşımalıdır** Xaos rejimi icazəsi** (`chaosModeEnabled`), yəni** default olaraq söndürülür** — hər düyməni daxil edin** İdarə paneli → API Meneceri → redaktə açarı → icazələri → Xaos rejimi** . Yuxarıdakı ilə eyni bədən.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"task":"X üçün yanaşmaları müqayisə et","mode":"parallel"}'
+  -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Hər iki endpoint eyni strukturlu cavab qaytarır:
+Hər iki son nöqtə eyni formanı qaytarır:
 
 ```jsonc
 {
@@ -123,15 +117,13 @@ Hər iki endpoint eyni strukturlu cavab qaytarır:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // yalnız collaborative rejimində
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## Problemlərin aradan qaldırılması
 
-- **`400 Chaos Mode is not enabled`** — yuxarıdakı 2-ci addıma baxın: qlobal keçid deaktivdir.
-- **API açarı `/api/skills/collect/chaos` endpoint-ində rədd edilir** — açarda hər açar üzrə
-  `chaosModeEnabled` icazəsi yoxdur (standart olaraq deaktivdir; bu, xəta deyil, parametrdir).
-- **Gözlədiyiniz provayder nəticələrdə yoxdur** — Chaos Mode səhifəsindəki `providerOverrides`
-  parametrini (deaktiv edilmiş əvəzləmə onu istisna edir) və provayder bağlantısının
-  aktiv olub-olmadığını yoxlayın.
+- **`400 Chaos Mode is not enabled`** — yuxarıda 2-ci addım: qlobal açar söndürülüb.
+- **API açarı `/api/skills/collect/chaos`-də rədd edilir** — açarda hər düymə üçün `chaosModeEnabled` icazəsi yoxdur (defolt olaraq söndürülür; bu, xəta deyil, parametrdir).
+- **Provayder `No model set for this provider` göstərir** — öz modelini Chaos Mode səhifəsində və ya onun bağlantısı üzrə defolt modeli təyin edin (bax: Quraşdırma, addım 4).
+- **Nəticələrdə gözlədiyiniz provayder yoxdur** — Xaos Rejimi səhifəsində `providerOverrides` yoxlayın (əlil edilmiş ləğv onu istisna edir) və provayder bağlantısının aktiv olub olmadığını yoxlayın.

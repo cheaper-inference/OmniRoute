@@ -308,6 +308,10 @@ ENV OMNIROUTE_MIGRATIONS_DIR=/app/migrations
 # it explicitly. The HEALTHCHECK CMD references it as `node healthcheck.mjs`.
 COPY --chown=node:node --from=builder /app/scripts/dev/healthcheck.mjs ./healthcheck.mjs
 
+# Next.js standalone tracing omits the root LICENSE, so the published image shipped
+# without the license text. Copy it explicitly.
+COPY --chown=node:node --from=builder /app/LICENSE ./LICENSE
+
 # Every COPY above hands its files to the baked-in `node` non-root user
 # (UID/GID 1000) at copy time. Do NOT add a `RUN chown -R node:node /app`
 # afterwards: in the overlay filesystem changing ownership rewrites every file

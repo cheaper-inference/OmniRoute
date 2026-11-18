@@ -4,10 +4,20 @@
 
 ---
 
-Il-fallimenti jiġu kklassifikati qabel ma jittieħdu d-deċiżjonijiet dwar it-tentattivi mill-ġdid.
+Il-fallimenti huma kklassifikati qabel ma jittieħdu deċiżjonijiet mill-ġdid.
 
-Fallimenti temporanji bħal skadenzi tal-ħin, żbalji tan-network, limiti tar-rata, u risposti 5xx mill-fornitur jistgħu jgħaddu għal fornitur ieħor. Żbalji ta’ awtentikazzjoni, żbalji ta’ permessi, talbiet invalidi, mudelli mhux disponibbli, u fallimenti mhux magħrufa ma jiġux ippruvati mill-ġdid mingħajr distinzjoni.
+Fallimenti temporanji bħal timeouts, żbalji tan-netwerk, limiti tar-rata, u risponsi tal-fornitur 5xx jistgħu jfallu. Kwota jew kreditu eżawriti (kwota 429, jew 402 Ħlas Meħtieġ) qatt ma jerġgħu jiġu ppruvati fuq l-istess fornitur iżda ma jgħaddux għal ieħor, li l-kwota tiegħu hija separata. Żbalji ta' awtentikazzjoni, żbalji ta' permess, talbiet invalidi, mudelli mhux disponibbli, u fallimenti mhux magħrufa ma jerġgħux jiġu ppruvati bl-addoċċ.
 
-Il-politika awtomatika bejn il-fornituri tippermetti sa tliet tentattivi mal-fornituri, terġa’ tipprova fil-każ ta’ limiti tar-rata u skadenzi tal-ħin, u żżomm id-diżattivazzjoni amministrattiva separata mill-istat temporanju taċ-ċirkwit.
+Il-politika default bejn il-fornituri tippermetti sa tliet tentattivi tal-fornitur, jerġgħu jippruvaw limiti tar-rata u timeouts, ifalli fuq kwota eżawrita, u żżomm id-diżabilitazzjoni amministrattiva separata mill-istat temporanju taċ-ċirkwit.
 
-L-istati taċ-ċirkwit huma `closed`, `open`, u `half_open`. Perjodu ta’ stennija jiskeda sonda limitata; sonda li tirnexxi tagħlaq iċ-ċirkwit, filwaqt li sonda li tfalli terġa’ tiftaħ iċ-ċirkwit.
+## Fejn japplika
+
+- **Combos** fail over bejn il-miri tagħhom skont l-istrateġija u s-settings tal-combo stess.
+- **Mudell vojt id** (l-ebda prefiss `provider/` ) li jservu diversi fornituri attivi, bl-ebda kombo ta 'dak l-isem eżatt, jintbagħat l-ewwel lill-pikletti tal-inferenza tal-fornitur. Jekk dak it-tentattiv ifalli b'mod li l-politika tfalli, l-istess talba tintbagħat lill-fornitur attiv li jmiss li jservi l-id. Ir-rispons iġorr `x-omniroute-fallback-attempts` man-numru ta 'fornituri ppruvati qabel dak li wieġeb.
+  - Kull sostitut huwa awtorizzat eżatt bħallikieku l-inferenza kienet qabadha. Mira li ċ-ċavetta API timblokka jew ma tammettix tinqabeż mingħajr sejħa upstream, u l-klijent jieħu l-iżball reali upstream, mhux rifjut ta 'politika għal mira li qatt ma semmiet.
+  - Risposta falluta biss timxi 'l quddiem: xejn ma jfalli wara l-ewwel byte streamed.
+  - It-tpartit ta' mudell ta' riżerva ta' emerġenza japplika biss wara li kull fornitur tal-mudell mitlub ikun falla.
+  - Talba imqabbda ma’ konnessjoni (`x-omniroute-connection`) tibqa’ fuqha.
+  - Id prefissat (`provider/model`) qatt ma tinbidel lejn fornitur ieħor.
+
+L-istati taċ-ċirkwit huma `closed`, `open`, u `half_open`. A cooldown iskedi sonda bounded; sonda ta 'suċċess tagħlaq iċ-ċirkwit u sonda li falliet terġa' tiftaħha.
