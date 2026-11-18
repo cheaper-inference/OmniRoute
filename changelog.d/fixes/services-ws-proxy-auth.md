@@ -1,0 +1,1 @@
+- **fix(security):** the embedded-services WebSocket proxy now authorizes every upgrade like the HTTP embed route (loopback peer, dashboard Origin, dashboard session or management-scope key) before it opens a tunnel with the service credential, and service bootstrap no longer starts a service with a fallback credential when its key cannot be loaded

@@ -624,7 +624,12 @@ This proxy:
 - Rewrites HTML responses to inject `<base href>` and normalize absolute paths (`/foo` → `/dashboard/.../embed/foo`)
 
 WebSocket upgrades for the embedded dashboard are handled by a companion server on a
-dedicated port (see `src/lib/services/embedWsProxy.ts`).
+dedicated port (see `src/lib/services/embedWsProxy.ts`). Every upgrade is authorized
+before the tunnel opens, with the same rules as the HTTP embed route: the peer must be
+loopback with no reverse-proxy forwarding header, a browser `Origin` must be a dashboard
+origin (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` extend the loopback
+defaults), and the caller needs a dashboard session or a management-scope API key unless
+dashboard login is disabled.
 
 **Security:** The embed proxy routes are classified under `LOCAL_ONLY_API_PREFIXES`
 and can only be reached from loopback. An attacker who obtains a JWT via a

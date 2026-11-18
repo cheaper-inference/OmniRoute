@@ -13,8 +13,15 @@
  *   - Target host is always 127.0.0.1 and port comes from the registry — never
  *     from user input. No SSRF risk.
  *   - Server binds to 127.0.0.1 only (loopback) unless EMBED_WS_PROXY_HOST
- *     is set explicitly. The OmniRoute LOCAL_ONLY rule is enforced at the
- *     dashboard layer; the proxy itself is loopback-only as defence-in-depth.
+ *     (or LIVE_WS_HOST) is set explicitly.
+ *   - Every upgrade is authorized before the tunnel opens
+ *     (authorizeEmbedWsUpgrade), with the same decision as the HTTP embed route
+ *     (LOCAL_ONLY + management auth, Hard Rule #17): the TCP peer must be
+ *     loopback with no reverse-proxy hop header, a browser Origin must be one of
+ *     the dashboard origins, and the caller must hold a dashboard session or a
+ *     management-scope API key (unless dashboard login is disabled). A rejected
+ *     upgrade never reaches the service, so the injected service credential is
+ *     only ever sent on behalf of an authorized caller. Errors fail closed.
  *   - Max 50 concurrent connections per service. The 51st request receives 503.
  *   - Idle timeout: 5 minutes without any data → both sockets are destroyed.
  *   - Hop-by-hop headers cookie/authorization/origin are stripped from the
@@ -27,6 +34,13 @@ import type { IncomingMessage } from "node:http";
 
 import { getSupervisor } from "./registry";
 import { getOrCreateApiKey } from "./apiKey";
+import { getApiKeyMetadata } from "@/lib/db/apiKeys";
+import { hasProxyHopHeader } from "@/server/authz/proxyHeaders";
+import { isLoopbackHost } from "@/server/authz/routeGuard";
+import { isOriginAllowed } from "@/server/ws/liveServerAllowList";
+import { hasManageScope } from "@/shared/constants/managementScopes";
+import { isAuthRequired, isDashboardSessionAuthenticated } from "@/shared/utils/apiAuth";
+import { extractApiKey, isValidApiKey } from "@/sse/services/auth";
 import {
   attachRequestStreamGuards,
   installProcessCrashGuard,
@@ -129,7 +143,96 @@ function buildUpstreamHeaders(rawHeaders: string[], port: number, apiKey: string
   return lines;
 }
 
+export type EmbedWsUpgradeVerdict =
+  | { allow: true; via: "anonymous" | "dashboard_session" | "management_key" }
+  | { allow: false; status: number; message: string };
+
+function deny(status: number, message: string): EmbedWsUpgradeVerdict {
+  return { allow: false, status, message };
+}
+
+/** True when the upgrade's real TCP peer is this machine and no proxy hop relayed it. */
+function isLocalUpgradePeer(req: IncomingMessage): boolean {
+  if (hasProxyHopHeader(req.headers)) return false;
+  return isLoopbackHost(req.socket?.remoteAddress ?? null);
+}
+
+/**
+ * A browser always sends Origin on a WebSocket upgrade; it must be one of the
+ * dashboard origins (same allow-list as the Live dashboard socket:
+ * LIVE_WS_ALLOWED_ORIGINS / LIVE_WS_ALLOWED_HOSTS on top of the loopback
+ * defaults). A client without Origin is not a browser page; it still has to be
+ * local and authenticated.
+ */
+function isUpgradeOriginAllowed(origin: string | string[] | undefined): boolean {
+  if (origin === undefined) return true;
+  if (typeof origin !== "string" || origin.length === 0) return false;
+  return isOriginAllowed(origin, process.env);
+}
+
+function toHeaders(headers: IncomingMessage["headers"]): Headers {
+  const out = new Headers();
+  for (const [name, value] of Object.entries(headers)) {
+    if (typeof value === "string") out.set(name, value);
+    else if (Array.isArray(value)) {
+      out.set(name, value.join(name.toLowerCase() === "cookie" ? "; " : ", "));
+    }
+  }
+  return out;
+}
+
+/**
+ * Decide whether an upgrade may open a tunnel. Mirrors the management policy the
+ * HTTP embed route (`/dashboard/providers/services/<name>/embed/`) goes through:
+ * loopback only, then anonymous when dashboard login is off, otherwise a
+ * dashboard session or an API key with a management scope. Header-only
+ * credentials; a URL-borne token never counts.
+ */
+export async function authorizeEmbedWsUpgrade(
+  req: IncomingMessage
+): Promise<EmbedWsUpgradeVerdict> {
+  if (!isLocalUpgradePeer(req)) {
+    return deny(403, "The embedded service WebSocket proxy only accepts local connections");
+  }
+  if (!isUpgradeOriginAllowed(req.headers.origin)) {
+    return deny(403, "Origin not allowed");
+  }
+
+  const authRequest = {
+    url: "http://127.0.0.1/dashboard/providers/services/embed-ws",
+    method: "GET",
+    headers: toHeaders(req.headers),
+  };
+
+  try {
+    if (!(await isAuthRequired(authRequest, { loopback: true }))) {
+      return { allow: true, via: "anonymous" };
+    }
+    if (await isDashboardSessionAuthenticated(authRequest)) {
+      return { allow: true, via: "dashboard_session" };
+    }
+    const apiKey = extractApiKey(authRequest, { allowUrl: false });
+    if (apiKey && (await isValidApiKey(apiKey))) {
+      const meta = await getApiKeyMetadata(apiKey);
+      if (meta && hasManageScope(meta.scopes ?? [])) {
+        return { allow: true, via: "management_key" };
+      }
+    }
+    return apiKey ? deny(403, "Invalid management token") : deny(401, "Authentication required");
+  } catch {
+    return deny(503, "Authentication backend unavailable");
+  }
+}
+
 async function proxyUpgrade(req: IncomingMessage, socket: net.Socket, head: Buffer): Promise<void> {
+  // Authorize before anything else: an unauthorized caller learns nothing about
+  // the registered services and never gets a tunnel carrying the service key.
+  const verdict = await authorizeEmbedWsUpgrade(req);
+  if (!verdict.allow) {
+    writeError(socket, verdict.status, verdict.message);
+    return;
+  }
+
   const rawUrl = req.url ?? "/";
   const match = PATH_RE.exec(rawUrl.split("?")[0]);
 
@@ -245,13 +348,13 @@ export function resolveEmbedWsHost(): string {
  * Start the embed WebSocket proxy server.
  * Idempotent — safe to call multiple times.
  */
-export function initEmbedWsProxy(): void {
+export function initEmbedWsProxy(): http.Server | undefined {
   // Safety net: a client aborting a connection can emit `Error: aborted`/
   // ECONNRESET on the request stream; without this the single missed listener
   // becomes an uncaughtException that kills the server. Benign aborts are
   // swallowed; genuine errors still crash loudly (#fix-dev-server-aborted).
   installProcessCrashGuard();
-  if (globalThis.__omnirouteEmbedWsStarted) return;
+  if (globalThis.__omnirouteEmbedWsStarted) return undefined;
 
   const host = resolveEmbedWsHost();
   const port = parseInt(process.env.EMBED_WS_PROXY_PORT ?? String(DEFAULT_PORT), 10);
@@ -284,6 +387,8 @@ export function initEmbedWsProxy(): void {
     globalThis.__omnirouteEmbedWsStarted = true;
     console.log(`[EmbedWsProxy] Listening on ${host}:${port}`);
   });
+
+  return server;
 }
 
 // ─── Exported for testing ────────────────────────────────────────────────────
