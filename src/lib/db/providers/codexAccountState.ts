@@ -4,6 +4,7 @@ import { getDbInstance, rowToCamel } from "../core";
 import { invalidateDbCache } from "../readCache";
 import { toRecord } from "./columns";
 import { mayWriteCodexConnection } from "../codexConnectionFences";
+import { unblockAccount } from "@omniroute/open-sse/services/accountSemaphore.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -255,6 +256,7 @@ export function liftCodexScopeCooldownOnHeadroom(id: string, scope: "codex" | "s
   if (!hasCodexScopeCooldown(id, scope)) return false;
 
   backupDbFile("pre-write");
+  let gateReleasable = false;
   const wrote = db.transaction(() => {
     if (!mayWriteCodexConnection(id)) return false;
     const existing = db
@@ -292,6 +294,7 @@ export function liftCodexScopeCooldownOnHeadroom(id: string, scope: "codex" | "s
     const nextSources = omitEmptyRecord(currentSources);
     if (nextCooldowns) nextPsd.codexScopeRateLimitedUntil = nextCooldowns;
     else delete nextPsd.codexScopeRateLimitedUntil;
+    gateReleasable = !nextCooldowns;
     if (nextSources) nextPsd.codexScopeRateLimitSource = nextSources;
     else delete nextPsd.codexScopeRateLimitSource;
 
@@ -319,6 +322,9 @@ export function liftCodexScopeCooldownOnHeadroom(id: string, scope: "codex" | "s
   // Codex-scope cooldown/exhaustion keys only — routing metadata the
   // /v1/models builder never reads.
   if (wrote) invalidateDbCache("connections", id, { skipModelCatalog: true });
+  // The quota 429 also blocked the in-memory account gate; release it with
+  // the last scope cooldown.
+  if (wrote && gateReleasable) unblockAccount({ provider: "codex", accountKey: id });
   return wrote;
 }
 

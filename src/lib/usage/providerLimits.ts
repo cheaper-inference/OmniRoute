@@ -46,6 +46,7 @@ import {
   withClaudeResetCreditCount,
 } from "@omniroute/open-sse/services/claudeResetCreditCount.ts";
 import { cooldownUntilMs } from "@omniroute/open-sse/services/accountFallback.ts";
+import { unblockAccount } from "@omniroute/open-sse/services/accountSemaphore.ts";
 import { rotationGroupFor } from "@omniroute/open-sse/services/refreshSerializer.ts";
 import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import {
@@ -602,6 +603,13 @@ function clearRecoveredClaudeQuotaModelLocks(connectionId: string, usage: JsonRe
   }
 }
 
+function hasParkedCodexScopeCooldown(connection: ProviderConnectionLike): boolean {
+  if (connection.provider !== "codex") return false;
+  const psd = isRecord(connection.providerSpecificData) ? connection.providerSpecificData : {};
+  const cooldowns = psd.codexScopeRateLimitedUntil;
+  return isRecord(cooldowns) && Object.keys(cooldowns).length > 0;
+}
+
 export async function maybeClearRecoveredQuotaState(
   connection: ProviderConnectionLike,
   usage: JsonRecord
@@ -664,6 +672,13 @@ export async function maybeClearRecoveredQuotaState(
   } catch (dbError) {
     console.warn("[ProviderLimits] Failed to clear recovered quota state:", dbError);
     return connection;
+  }
+
+  // The quota 429 that wrote this state also blocked the connection's
+  // in-memory semaphore gate; the recovered state must reopen it. A Codex
+  // scope cooldown still parked on the row keeps the gate closed.
+  if (cleared && !hasParkedCodexScopeCooldown(connection)) {
+    unblockAccount({ provider: connection.provider, accountKey: connection.id });
   }
 
   if (cleared && verifiedResetRecovery) {
