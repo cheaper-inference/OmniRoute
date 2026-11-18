@@ -86,6 +86,9 @@ export const asciiDigits = (text) =>
  * extractors cover some mirrors directly, e.g. the README mirrors' database row). `mirrorText`
  * then holds the plan's result, and each such change counts as one occurrence of the matching
  * source change already carried — so the remaining occurrences are carried, not double-counted.
+ * An explicit matching claimId lets independently located mirror edits prove completion even
+ * when the source also has unrelated historical values with the same digits. Numeric equality
+ * alone never supplies that proof; partial or duplicate claim evidence remains manual.
  *
  * @param {{ sourceBefore: string, changes: Array<{label:string, from:string, to:string}>, mirrorText: string, alreadyApplied?: Array<{from:string, to:string}> }} args
  * @returns {{ content: string, replaced: number, manual: Array<{ label: string, detail: string }> }}
@@ -98,20 +101,40 @@ export function propagateChangesToMirror({
 }) {
   const manual = [];
   const covered = new Map(); // "from→to" (ASCII digits) → occurrences the plan already rewrote
+  const coveredClaims = new Map();
+  const claimKey = (id, from, to) => JSON.stringify([id, asciiDigits(from), asciiDigits(to)]);
   for (const c of alreadyApplied) {
     const key = `${asciiDigits(c.from)}\u2192${asciiDigits(c.to)}`;
     covered.set(key, (covered.get(key) ?? 0) + 1);
+    if (typeof c.claimId === "string" && c.claimId) {
+      const claim = claimKey(c.claimId, c.from, c.to);
+      coveredClaims.set(claim, (coveredClaims.get(claim) ?? 0) + 1);
+    }
   }
   const groups = new Map();
   for (const c of changes) {
     const from = String(c.from);
     const to = String(c.to);
     if (from === to) continue;
-    if (!groups.has(from)) groups.set(from, { from, tos: new Set(), labels: new Set(), n: 0 });
+    if (!groups.has(from))
+      groups.set(from, {
+        from,
+        tos: new Set(),
+        labels: new Set(),
+        n: 0,
+        claims: new Map(),
+        unbound: false,
+      });
     const g = groups.get(from);
     g.tos.add(to);
     g.labels.add(c.label);
     g.n++;
+    if (typeof c.claimId === "string" && c.claimId) {
+      const key = claimKey(c.claimId, from, to);
+      g.claims.set(key, (g.claims.get(key) ?? 0) + 1);
+    } else {
+      g.unbound = true;
+    }
   }
 
   const spans = []; // { start, end, to }
@@ -151,6 +174,20 @@ export function propagateChangesToMirror({
     const inSource = findNumberOccurrences(sourceBefore, g.from);
     const inMirror = findNumberOccurrences(mirrorText, g.from);
     const done = covered.get(`${g.from}\u2192${to}`) ?? 0;
+    // These edits already passed the same typed claim locator in the source and
+    // mirror. Nothing remains to relay; leave every other occurrence untouched.
+    const claimComplete =
+      !g.unbound &&
+      g.claims.size > 0 &&
+      [...g.claims].every(([key, count]) => coveredClaims.get(key) === count);
+    if (claimComplete) continue;
+    if (done > 0 && g.claims.size > 0) {
+      manual.push({
+        label,
+        detail: `"${g.from}" → "${to}": mirror claim evidence is partial or inconsistent — not carried`,
+      });
+      continue;
+    }
     if (inSource.length !== g.n || inMirror.length + done !== inSource.length) {
       manual.push({
         label,

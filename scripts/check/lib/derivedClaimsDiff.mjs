@@ -186,7 +186,13 @@ export function planRewritesForChecks(checks, readFile) {
         for (const detail of notes) manual.push({ path: file, label: check.label, detail });
         if (edits.length) {
           if (!perFile.has(file)) perFile.set(file, { before: content, edits: [] });
-          perFile.get(file).edits.push(...edits.map((e) => ({ ...e, label: check.label })));
+          perFile.get(file).edits.push(
+            ...edits.map((e) => ({
+              ...e,
+              label: check.label,
+              ...(check.claimId ? { claimId: check.claimId } : {}),
+            }))
+          );
         }
         continue;
       }
@@ -217,6 +223,7 @@ export function planRewritesForChecks(checks, readFile) {
         .sort((a, b) => a.start - b.start)
         .map((e) => ({
           label: e.label,
+          ...(e.claimId ? { claimId: e.claimId } : {}),
           from: before.slice(e.start, e.end),
           to: e.to,
           index: e.start,

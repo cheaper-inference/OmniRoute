@@ -578,9 +578,10 @@ function numericPlan(expected, opts) {
 }
 
 /** A check over a numeric claim pattern, wired for the release, PR and refresh views. */
-function numericClaimCheck({ label, actual, docKey, strict = true, files, claim }) {
+function numericClaimCheck({ label, claimId, actual, docKey, strict = true, files, claim }) {
   return {
     label,
+    ...(claimId ? { claimId } : {}),
     actual,
     docKey,
     strict,
@@ -747,6 +748,7 @@ function assembleChecks(facts) {
     },
     numericClaimCheck({
       label: "DB migrations count",
+      claimId: "database-migrations",
       actual: migrations,
       docKey: "migrations",
       files: ["README.md"],

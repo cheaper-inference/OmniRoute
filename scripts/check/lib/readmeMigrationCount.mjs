@@ -81,6 +81,7 @@ export function buildReadmeMigrationChecks(root, actual) {
   return [
     {
       label: "DB migrations count (README mirrors)",
+      claimId: "database-migrations",
       actual,
       docKey: "migrations",
       strict: true,
