@@ -232,8 +232,9 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   // opencode-server (#16995) registers id "opencode-server" plus the distinct alias "ocs" —
   // two more (444 -> 446).
   // Replicate, Cerebrium, Hetzner and Grokified (#19206) add four distinct prefixes (+4: 446 -> 450).
-  // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 450.
-  assert.equal(RESERVED_PREFIX_COUNT, 450);
+  // InfCode (#18820) registers id "inf-code" and alias "infc" — two more (450 -> 452).
+  // Measured on the merged tree: RESERVED_PROVIDER_PREFIXES.size = 452.
+  assert.equal(RESERVED_PREFIX_COUNT, 452);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("opencode-server"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("ocs"), true);
   for (const id of ["replicate", "cerebrium", "hetzner", "grokified"]) {
@@ -249,6 +250,8 @@ test("shared set size includes live REGISTRY and retired Designer + Felo + Qwen 
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("megabrain"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("mb"), true);
   assert.equal(RESERVED_PROVIDER_PREFIXES.has("chatgpt"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("inf-code"), true);
+  assert.equal(RESERVED_PROVIDER_PREFIXES.has("infc"), true);
 });
 
 test("notrack-web registry id and alias stay reserved", () => {

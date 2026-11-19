@@ -21,6 +21,10 @@ import {
   GROK_BUILD_TOKEN_URL,
 } from "@omniroute/open-sse/config/grokBuild.ts";
 import {
+  resolveInfCodeAuthBase,
+  secureInfCodeUrl,
+} from "@omniroute/open-sse/config/infCodeUrls.ts";
+import {
   MINIMAX_CODE_AUDIENCE,
   MINIMAX_CODE_SCOPE,
   resolveMinimaxCodeAccountBase,
@@ -204,6 +208,31 @@ export const OPENFERENCE_CONFIG = {
   scope: "openid profile email model:invoke offline_access",
   codeChallengeMethod: "S256",
   loopbackPort: 56123,
+  callbackPath: "/callback",
+  callbackHost: "127.0.0.1",
+};
+
+// InfCode (Token Infinity) OAuth — Authorization Code Flow with PKCE.
+// Endpoints verified live 2026-11-02 against the Tokfinity.infcode v2.8.0
+// VS Code extension. The client id is a public PKCE client (no secret).
+// Env-overridable so private instances (infone-*.tokensinfinity.com) work; an
+// override must be https (http only on loopback) — see open-sse/config/infCodeUrls.ts.
+const INF_CODE_BASE = resolveInfCodeAuthBase();
+
+export const INF_CODE_CONFIG = {
+  clientId: resolvePublicCred("infcode_id", "INF_CODE_OAUTH_CLIENT_ID"),
+  authorizeUrl: secureInfCodeUrl(
+    process.env.INF_CODE_OAUTH_AUTHORIZE_URL,
+    `${INF_CODE_BASE}/infcode/login`
+  ),
+  tokenUrl: secureInfCodeUrl(
+    process.env.INF_CODE_OAUTH_TOKEN_URL,
+    `${INF_CODE_BASE}/acode/v1/login_by_authcode`
+  ),
+  userinfoUrl: `${INF_CODE_BASE}/acode/v1/userinfo`,
+  scope: "profile",
+  codeChallengeMethod: "S256",
+  loopbackPort: 56124,
   callbackPath: "/callback",
   callbackHost: "127.0.0.1",
 };
@@ -621,6 +650,7 @@ export const PROVIDERS = {
   GROK_CLI: "grok-cli",
   XAI_OAUTH: "xai-oauth",
   OPENFERENCE: "openference",
+  INF_CODE: "inf-code",
   RENDERHOUR: "renderhour",
   ZED: "zed",
   ZED_HOSTED: "zed-hosted",
