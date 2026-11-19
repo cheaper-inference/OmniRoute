@@ -135,7 +135,15 @@ async function packageMatrix(t, scenario = "valid") {
     if (scenario === "wrong-cache-binding" && index === 2) binding.candidateSha = "b".repeat(40);
     await writeFile(join(cacheDirectory, "producer.json"), JSON.stringify(binding));
     const payload = { code: value.code, map: JSON.stringify(value.map) };
-    await writeFile(join(cache, `17950-${"a".repeat(40)}`), JSON.stringify(payload));
+    const interrupted = '{"code":';
+    const neededEntry = scenario === "interrupted-required-cache" && index === 2;
+    await writeFile(
+      join(cache, `17950-${"a".repeat(40)}`),
+      neededEntry ? interrupted : JSON.stringify(payload)
+    );
+    if (scenario === "interrupted-unrelated-cache" && index === 2) {
+      await writeFile(join(cache, `17950-${"b".repeat(40)}`), interrupted);
+    }
     if (scenario === "ambiguous-cache" && index === 2) {
       const different = generated(sourceRoot, { differentBody: true });
       await writeFile(
@@ -203,8 +211,19 @@ test("tsx generated evidence binds original code and map bytes to the producer a
   );
 });
 
+test("an interrupted tsx cache write cannot block complete generated coverage evidence", async (t) => {
+  const options = await packageMatrix(t, "interrupted-unrelated-cache");
+  const evidence = options.manifests[1].transformEvidence;
+  assert.equal(evidence.scannedEntries, 2);
+  assert.equal(evidence.invalidJsonEntries, 1);
+  assert.equal(evidence.entries.length, 1);
+  const prepared = await prepareCoverageShards(options);
+  assert.ok(prepared.layoutProjection.projectedScriptSamples > 0);
+});
+
 for (const [scenario, reason] of [
   ["missing-cache", "generated-evidence-missing"],
+  ["interrupted-required-cache", "generated-evidence-missing"],
   ["same-size-body", "generated-body-differs"],
   ["ambiguous-cache", "generated-evidence-ambiguous"],
   ["unrecognized-banner", "unrecognized-banner"],

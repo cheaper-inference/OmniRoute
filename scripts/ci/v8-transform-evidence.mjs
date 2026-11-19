@@ -50,13 +50,14 @@ async function bytesOf(path) {
   return bytes;
 }
 
-function parsePayload(bytes) {
+function parsePayload(bytes, { allowInvalidJson = false } = {}) {
   let payload;
   let map;
   try {
     payload = JSON.parse(bytes.toString("utf8"));
-    map = typeof payload.map === "string" ? JSON.parse(payload.map) : payload.map;
-  } catch {
+    map = typeof payload?.map === "string" ? JSON.parse(payload.map) : payload?.map;
+  } catch (error) {
+    if (allowInvalidJson && error instanceof SyntaxError) return null;
     incomplete("invalid-json");
   }
   if (
@@ -164,10 +165,17 @@ export async function packTransformEvidence({
   const entries = [];
   const seen = new Set();
   let scannedBytes = 0;
+  let invalidJsonEntries = 0;
   for (const name of names) {
     const bytes = await bytesOf(join(cacheDirectory, name));
     scannedBytes += bytes.length;
-    const value = parsePayload(bytes);
+    // tsx writes its cache asynchronously. An interrupted local write is a
+    // cache miss. Projection still requires verified proof for every layout it changes.
+    const value = parsePayload(bytes, { allowInvalidJson: true });
+    if (!value) {
+      invalidJsonEntries++;
+      continue;
+    }
     const sourcePath = mappedSource(value.map, producer.sourceRoot);
     const source = sourceFiles.get(sourcePath);
     if (!source) continue;
@@ -197,6 +205,7 @@ export async function packTransformEvidence({
     payloadBytes: entries.reduce((sum, entry) => sum + entry.payloadBytes, 0),
     scannedEntries: names.length,
     scannedBytes,
+    invalidJsonEntries,
     limits: { maxEntryBytes: MAX_ENTRY_BYTES, maxEntries: MAX_ENTRIES },
   };
 }
