@@ -624,7 +624,9 @@ export async function executeProviderRequest(
                             clientResponseFormat,
                             onCredentialsRefreshed: fencedCredentialsRefreshed,
                             skipUpstreamRetry,
-                            accountFailoverAvailable,
+                            // Same-account recovery cannot switch accounts, so a 503 here keeps
+                            // the executor's wait-and-retry instead of failing the reopen.
+                            accountFailoverAvailable: false,
                             contextEditing: { enabled: contextEditingEnabled },
                             correlationId,
                           });

@@ -173,4 +173,25 @@ test("hasAlternateAntigravityAccount: only an eligible, different account counts
     rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
   });
   assert.equal(await hasAlternateAntigravityAccount(base), false);
+  // A sibling credential selection would never pick (expired, banned, out of credits)
+  // does not count either, so the request keeps waiting on its only usable account.
+  await providersDb.updateProviderConnection(b.id, { rateLimitedUntil: null });
+  assert.equal(await hasAlternateAntigravityAccount(base), true);
+  for (const testStatus of ["expired", "banned", "credits_exhausted"]) {
+    await providersDb.updateProviderConnection(b.id, { testStatus });
+    assert.equal(await hasAlternateAntigravityAccount(base), false, testStatus);
+  }
+});
+
+test("same-account stream recovery never hands a 503 back for account failover", () => {
+  // runUpstreamStream reopens the stream on the SAME account; it has no account fallback,
+  // so a capacity 503 there must keep the executor's wait-and-retry.
+  const source = fs.readFileSync(
+    path.join(import.meta.dirname, "../../open-sse/handlers/chatCore/executeProviderRequest.ts"),
+    "utf8"
+  );
+  const start = source.indexOf("const runUpstreamStream = async (");
+  assert.ok(start > 0, "runUpstreamStream must exist");
+  const block = source.slice(start, source.indexOf("executor.execute({", start) + 1200);
+  assert.match(block, /accountFailoverAvailable: false,/);
 });

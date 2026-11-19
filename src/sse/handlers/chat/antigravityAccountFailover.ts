@@ -3,10 +3,12 @@ import {
   isAccountUnavailable,
   isModelLocked,
 } from "@omniroute/open-sse/services/accountFallback.ts";
+import { isTerminalConnectionStatus } from "@/sse/services/auth";
 
 type ConnectionRow = {
   id?: unknown;
   rateLimitedUntil?: string | null;
+  testStatus?: string | null;
 };
 
 export type AntigravityFailoverInput = {
@@ -49,6 +51,8 @@ export async function hasAlternateAntigravityAccount(
     const id = typeof row.id === "string" ? row.id : "";
     if (!id || id === input.connectionId || excluded.has(id)) return false;
     if (allowed && !allowed.has(id)) return false;
+    // Credential selection never picks an expired/banned/credits-exhausted account.
+    if (isTerminalConnectionStatus({ testStatus: row.testStatus ?? null })) return false;
     if (isAccountUnavailable(row.rateLimitedUntil)) return false;
     return !isModelLocked("antigravity", id, input.model);
   });
