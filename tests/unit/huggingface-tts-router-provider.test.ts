@@ -101,6 +101,29 @@ test("voice and response_format reach the deepinfra route when the caller sets t
   }
 });
 
+test("speed reaches the deepinfra route and an ogg request is sent as opus", async () => {
+  const { calls, restore } = stubFetch();
+  try {
+    await handleAudioSpeech({
+      body: {
+        model: "huggingface/hexgrad/Kokoro-82M",
+        input: "voice note",
+        response_format: "ogg",
+        speed: 1.25,
+      },
+      credentials: { apiKey: TOKEN },
+    });
+    assert.deepEqual(calls[0].body, {
+      model: "hexgrad/Kokoro-82M",
+      input: "voice note",
+      response_format: "opus",
+      speed: 1.25,
+    });
+  } finally {
+    restore();
+  }
+});
+
 test("a custom Hugging Face model id keeps the hf-inference route", async () => {
   const { calls, restore } = stubFetch();
   try {

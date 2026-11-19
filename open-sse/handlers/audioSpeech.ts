@@ -462,7 +462,10 @@ async function handleHuggingFaceRouterProviderSpeech(providerConfig, body, model
   const routerOrigin = new URL(providerConfig.baseUrl).origin;
   const payload: Record<string, unknown> = { model: modelId, input: body.input };
   if (body.voice) payload.voice = body.voice;
-  if (body.response_format) payload.response_format = body.response_format;
+  if (body.response_format) {
+    payload.response_format = normalizeSpeechResponseFormat(body.response_format);
+  }
+  if (typeof body.speed === "number") payload.speed = body.speed;
 
   const res = await fetch(`${routerOrigin}/${HF_ROUTER_TTS_PROVIDER}/v1/openai/audio/speech`, {
     method: "POST",
