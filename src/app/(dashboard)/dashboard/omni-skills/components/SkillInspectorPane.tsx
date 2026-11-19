@@ -128,7 +128,7 @@ export function SkillInspectorPane({
       <div className="px-4 pt-4 pb-2 border-b border-border">
         <div className="flex items-center gap-2 mb-1">
           <Icon name="auto_fix_high" size={18} className="text-primary" />
-          <h3 className="font-semibold text-text-main text-sm">{skill.name}</h3>
+          <h3 className="text-text-main text-sm">{skill.name}</h3>
         </div>
         <p className="text-xs text-text-muted line-clamp-2">{skill.description}</p>
         <div className="flex items-center gap-1.5 mt-1.5">
@@ -207,10 +207,12 @@ export function SkillInspectorPane({
             ) : executions.length === 0 ? (
               <div className="text-xs text-text-muted text-center py-6">{t("noExecutions")}</div>
             ) : (
+              // The inspector pane's border is the frame around this table (#19620).
               <Table
                 className="text-xs"
                 aria-label={t("executionsTab")}
                 scrollbarLabel={t("executionsTab")}
+                containerClassName="rounded-none border-0"
               >
                 <TableHeader>
                   <TableRow>

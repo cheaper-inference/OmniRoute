@@ -18,16 +18,18 @@
 
 ---
 
-## Ụzọ Nwụnye
+## Wụnye Ụzọ
 
-### npm (a tụrụ aro)
+### npm (atụ aro)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dashboard ga-emeghe na `http://localhost:20128`, ebe URL ntọala API bụ `http://localhost:20128/v1`.
+Dashboard na-emepe na `http://localhost:20128` na API base URL bụ `http://localhost:20128/v1`.
+
+> **ndị ọrụ npm:** Ọ bụrụ npm dọrọ aka ná ntị na egbochiri scripts wụnye (dịka, `omniroute`, `better-sqlite3`), lee [Nchọpụta nsogbu — npm](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Ndị ọrụ pnpm:** ọkọlọtọ `--allow-build` dị mkpa iji mee ka skripụ build nke sistemụ maka `better-sqlite3` na `@swc/core` rụọ ọrụ. A naghị akwado iwu `pnpm approve-builds -g` maka nrụnye global na pnpm v11.
+> **Ndị ọrụ pnpm:** a chọrọ ọkọlọtọ `--allow-build` iji mee ka script wuo obodo maka `better-sqlite3` na `@swc/core`. Anaghị akwado iwu `pnpm approve-builds -g` maka nrụnye zuru ụwa ọnụ na pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[Ngwugwu AUR](https://aur.archlinux.org/packages/omniroute-bin) na-etinye OmniRoute ma na-enye ọrụ onye ọrụ systemd.
+[Ngwungwu AUR](https://aur.archlinux.org/packages/omniroute-bin) na-etinye OmniRoute ma na-enye ọrụ onye ọrụ sistemụ.
 
-### Site na Source
+### Site na Isi Iyi
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Ihe ndetu maka Windows:** Na ndabara, OmniRoute na-eji `%APPDATA%\omniroute` mgbe ndekọ ochie `%USERPROFILE%\.omniroute` adịghị. Tọọ `DATA_DIR` iji họrọ ebe ndekọ data ọzọ.
+> **Windows :** Na ndabara, OmniRoute na-eji `%APPDATA%\omniroute` mgbe akwụkwọ ndekọ aha `%USERPROFILE%\.omniroute` anọghị. Tọọ `DATA_DIR` ka ịhọrọ ebe ndekọ data dị iche.
 
-> **Ihe ndetu:** `npm install` na-emepụta `.env` na-akpaghị aka site na `.env.example` mgbe a na-agba ya nke mbụ. Nrụnye ndị na-esote agaghị edegharị `.env` dị adị, ya mere a ga-echekwa mgbanwe ahaziri iche. Iji malitegharịa ya site na ntọala mbụ, hichapụ `.env` tupu ịgba ya ọzọ.
+> **Mara:** `npm install` akpaaka na-ewepụta `.env` site na `.env.example` na ọsọ mbụ. Nrụnye ndị na-esote agaghị edegharị `.env` dị adị, ya mere a na-echekwa nhazi nhazi. Iji nwetaghachi mkpụrụ, hichapụ `.env` tupu ịmalitegharịa.
 
 ### Docker
 
-Lee [Nduzi Docker](./DOCKER_GUIDE.md) maka nhazi Docker zuru ezu, gụnyere profaịlụ Compose na Caddy HTTPS.
+Hụ [ntuziaka Docker](./DOCKER_GUIDE.md) maka ntọlite Docker zuru ezu gụnyere depụta profaịlụ na Caddy HTTPS.
 
 ### Ngwa Desktop (Electron)
 
-OmniRoute nwere wrapper desktop e wuru na Electron 41 + electron-builder 26.10. Skripụ ndị dị (na mgbọrọgwụ workspace):
+OmniRoute na-ebugharị ihe mkpuchi desktọpụ wuru na Electron 41 + eletrọn-ewu 26.10. Ederede dị (mgbọrọgwụ ebe ọrụ):
 
 ```bash
-npm run electron:dev          # Gbaa desktop nwere hot-reload
-npm run electron:build        # Mee build maka OS dị ugbu a (a na-achọpụta ya na-akpaghị aka)
-npm run electron:build:win    # Installer Windows (NSIS + portable)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Mee smoke-test nke build e tinyere na ngwugwu
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-A na-etinye mwepụta installer desktop na GitHub Releases. Maka nkọwa zuru ezu banyere Electron (mbinye aka, IPC bridge, distros), lee [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(e mepụtara n’oge ọzọ)_.
+Mwepụta nke ihe nrụnye desktọpụ na-agbakwunyere na mwepụta GitHub. Maka mmiri miri emi Electron zuru ezu (mbinye aka, àkwà mmiri IPC, distros), lee [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Sava na-enweghị interface (CI/automation)
+### Ihe nkesa enweghị isi (CI/automation)
 
-Maka nhazi anaghị achọ onye na-elekọta ya (Docker, Kubernetes, CI), jiri:
+Maka ntọlite anaghị ele anya (Docker, Kubernetes, CI), jiri:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Mgbe ejikọtara nke a na env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, wdg.), ọ na-enye gị ohere ịmalite instance OmniRoute nke enwere ike iji skripụ chịkwaa kpamkpam.
+Ejikọtara ya na env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, wdg), nke a na-enye gị ohere ịtụgharị ihe atụ OmniRoute n'ụzọ zuru oke.
 
-### Nhọrọ CLI
+### CLI Nhọrọ
 
-| Iwu                     | Nkọwa                                                          |
-| ----------------------- | -------------------------------------------------------------- |
-| `omniroute`             | Malite sava (`PORT=20128`, API na dashboard n’otu ọdụ ụzọ ahụ) |
-| `omniroute setup`       | Nduzi mbido CLI maka okwuntughe na provider mbụ                |
-| `omniroute doctor`      | Mee nyocha ahụike mpaghara n’amaliteghị sava                   |
-| `omniroute providers`   | Chọpụta, depụta, nyochaa, ma nwalee providers site na CLI      |
-| `omniroute config`      | Nhazi ngwaọrụ CLI — depụta, nweta, tọọ, ma nyochaa configs     |
-| `omniroute status`      | Dashboard ọnọdụ offline — ụdị, DB, ngwaọrụ, config             |
-| `omniroute logs`        | Zipụ logs ojiji site na API (na-akwado `--follow`)             |
-| `omniroute update`      | Lelee ma ọ bụ tinye mmelite OmniRoute                          |
-| `omniroute provider`    | Jikwaa njikọ provider — tinye, depụta, wepụ, nwalee, ndabara   |
-| `omniroute --port 3000` | Tọọ ọdụ ụzọ canonical/API ka ọ bụrụ 3000                       |
-| `omniroute --mcp`       | Malite sava MCP (stdio transport)                              |
-| `omniroute --no-open`   | Emeghela browser na-akpaghị aka                                |
-| `omniroute --help`      | Gosi enyemaka                                                  |
+| Iwu                     | Nkọwa                                                                  |
+| ----------------------- | ---------------------------------------------------------------------- |
+| `omniroute`             | Malite ihe nkesa (`PORT=20128`, API na dashboard n'otu ọdụ ụgbọ mmiri) |
+| `omniroute setup`       | Ntuziaka CLI onboarding maka paswọọdụ na onye na-eweta mbụ             |
+| `omniroute doctor`      | Gbaa nyocha ahụike mpaghara na-amaliteghị ihe nkesa                    |
+| `omniroute providers`   | Chọpụta, depụta, kwado ma nwalee ndị na-eweta CLI                      |
+| `omniroute config`      | CLI ngwá ọrụ nhazi ndepụta —, nweta, setịpụ, kwado configs             |
+| `omniroute status`      | Ụdị dashboard na-anọghị n'ịntanetị —, DB, ngwaọrụ, nhazi               |
+| `omniroute logs`        | Ndekọ ojiji sitere na API (na-akwado `--follow`)                       |
+| `omniroute update`      | Lelee maka ma ọ bụ tinye mmelite OmniRoute                             |
+| `omniroute provider`    | Jikwaa njikọ ndị na-eweta — tinye, depụta, wepụ, nwale, ndabara        |
+| `omniroute --port 3000` | Tọọ ọdụ ụgbọ mmiri canonical/API ka ọ bụrụ 3000                        |
+| `omniroute --mcp`       | Malite ihe nkesa MCP (ụgbọ njem stdio)                                 |
+| `omniroute --no-open`   | Emepela ihe nchọgharị akpaghị aka                                      |
+| `omniroute --help`      | Gosi enyemaka                                                          |
 
-Enwere ike iji ọkọlọtọ ma ọ bụ environment variables dee skripụ maka nhazi na-enweghị interface:
+Enwere ike iji ọkọlọtọ ma ọ bụ mgbanwe gburugburu dee ntọala enweghị isi:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Gbaa diagnostics mpaghara n’emegheghị dashboard:
+Gbaa nyocha mpaghara na-emegheghị dashboard:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Jikwaa providers site na SSH ma ọ bụ skripụ n’emegheghị dashboard:
+Jikwaa ndị na-eweta site na SSH ma ọ bụ scripts na-emegheghị dashboard:
 
 ```bash
 omniroute providers available
@@ -226,13 +228,17 @@ npm run test:protocols:e2e
 
 **Claude :**
 
+Koodu Claude jikọtara n'elu HTTP, nke `omniroute --mcp` (stdio) anaghị ebido. Ụgbọ njem HTTP agbanyụrụ na ndabara: buru ụzọ mee ya na sava na-agba ọsọ. Mgbe agbanyere nbanye dashboard, arịrịọ na-enweghị nzere na-enweta `401`, yabụ nyefee igodo API nke jide `mcp:connect` (ma ọ bụ `manage`); igodo na-enweghị `manage`/`admin` chọkwara oke ngwa ọrụ ọ bụla (lee [MCP Server → MCP scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-Tinye na ntọala MCP gị (stdio, jiri igodo mee ka onye na-akpọ oku nwee onye isi):
+Tinye na ntọala MCP gị (stdio, jiri igodo ka onye na-akpọ oku nwee onye isi):
 
 ```json
 {
@@ -253,7 +259,7 @@ Ma ọ bụ, mgbe `mcpTransport` bụ `streamable-http` (tọọ ya na `/dashboa
 
 Igodo ahụ na-eme njem dị ka `Authorization: Bearer <api-key>` (lee [MCP Server → ohere dịpụrụ adịpụ](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) maka ndị ọbịa dịpụrụ adịpụ; igodo dịpụrụ adịpụ chọrọ `mcp:connect` gbakwunyere read/write scopes ya).
 
-**Akwụkwọ MCP zuru ezu:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 ngwaọrụ, IDE configs, Python/TS/Go ahịa. Onye na-arụ ọrụ maka mkpakọ CCR/dedup ngwaọrụ (akara akara, ihe ndị a chọrọ, oghere nke ngwaọrụ ọ bụla, pagination iweghachi, nchọpụta nchọpụta): [Mkpakọ Engines → Prerequisites / onye ọrụ ntuziaka](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+**Akwụkwọ MCP zuru ezu:** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 ngwaọrụ, IDE configs, Python/TS/Go ahịa. Onye na-arụ ọrụ maka mkpakọ CCR/dedup ngwaọrụ (akara akara, ihe achọrọ, oghere nke ngwaọrụ ọ bụla, pagination iweghachi, nchọpụta nchọpụta): [Mkpakọ Engines → Prerequisites / onye ọrụ ntuziaka](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 ### Ntọala A2A (Protocol onye nnọchite anya na onye nnọchi anya)
 
