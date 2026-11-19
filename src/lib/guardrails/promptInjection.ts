@@ -305,15 +305,25 @@ export async function evaluatePromptInjectionWithClassifier(
     { pattern: "semantic_classifier", severity, match: "" } as Detection,
   ];
   const result = { ...decision.result, detections, flagged: true };
-  const blocked = getMode(options) === "block" && shouldBlock(detections, getThreshold(options));
+  const mode = getMode(options);
+  const blocked = mode === "block" && shouldBlock(detections, getThreshold(options));
+  const summary = detections.map((d) => ({ pattern: d.pattern, severity: d.severity }));
   if (blocked) {
     emitGuardrailLog(
       getLogger(options, context),
       "warn",
       "Request blocked by prompt injection guard",
       {
-        detections: detections.map((d) => ({ pattern: d.pattern, severity: d.severity })),
+        detections: summary,
       }
+    );
+  } else if (mode === "log" || (mode === "warn" && severity === "high")) {
+    // The same warn/log policy as evaluatePromptInjection, on the detections the classifier added.
+    emitGuardrailLog(
+      getLogger(options, context),
+      mode === "log" ? "info" : "warn",
+      "Prompt injection guard flagged request",
+      { detections: summary, pii: result.piiDetections.length }
     );
   }
   return { blocked, result };

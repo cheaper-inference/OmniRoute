@@ -125,7 +125,11 @@ async function askService(url: string, text: string, doFetch: FetchLike): Promis
       body: JSON.stringify({ text }),
       signal: controller.signal,
     });
-    if (!response.ok) return null;
+    if (!response.ok) {
+      // Release the connection: an unread error body holds it until garbage collection.
+      await response.body?.cancel();
+      return null;
+    }
     const risk = ((await response.json()) as { risk?: unknown })?.risk;
     return typeof risk === "number" && risk >= 0 && risk <= 1 ? risk : null;
   } catch {
