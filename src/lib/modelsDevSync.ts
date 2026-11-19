@@ -177,7 +177,35 @@ function isPlainObject(value: unknown): value is Record<string, unknown> {
 function isUsableCatalog(data: unknown): data is ModelsDevData {
   if (!isPlainObject(data)) return false;
   const providers = Object.values(data);
-  return providers.every(isPlainObject) && providers.some((p) => isPlainObject(p.models));
+  return (
+    providers.every(isPlainObject) &&
+    providers.some((p) => isPlainObject(p.models) && Object.keys(p.models).length > 0)
+  );
+}
+
+/**
+ * Read the body as UTF-8 text, counting bytes as they arrive. Returns null as soon as the count
+ * crosses MAX_CATALOG_BYTES (the reader is cancelled), so an undeclared or understated length
+ * never buffers the whole body.
+ */
+async function readCatalogText(response: Response): Promise<string | null> {
+  const body = response.body;
+  if (!body) return "";
+  const reader = body.getReader();
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+    total += value.byteLength;
+    if (total > MAX_CATALOG_BYTES) {
+      await reader.cancel().catch(() => undefined);
+      return null;
+    }
+    chunks.push(value);
+  }
+  return Buffer.concat(chunks).toString("utf8");
 }
 
 /**
@@ -206,8 +234,8 @@ export async function fetchModelsDev(signal?: AbortSignal): Promise<ModelsDevDat
   if (Number(response.headers.get("content-length")) > MAX_CATALOG_BYTES) {
     throw new Error("models.dev response too large");
   }
-  const text = await response.text();
-  if (text.length > MAX_CATALOG_BYTES) throw new Error("models.dev response too large");
+  const text = await readCatalogText(response);
+  if (text === null) throw new Error("models.dev response too large");
   let data: unknown;
   try {
     data = JSON.parse(text);

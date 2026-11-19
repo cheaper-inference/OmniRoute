@@ -119,3 +119,42 @@ test("an expired cache revalidates with If-None-Match and a 304 keeps the data",
   await mod.fetchModelsDev();
   assert.equal(sent.length, 2, "a 304 renews the cache window");
 });
+
+test("a catalog whose providers list no models is rejected", async () => {
+  for (const body of [{ openai: { models: {} } }, { openai: { models: {} }, x: { models: {} } }]) {
+    const mod = await importFresh("guard-empty-models");
+    globalThis.fetch = (async () => json(body)) as typeof fetch;
+    await assert.rejects(() => mod.fetchModelsDev(), /unusable catalog/, JSON.stringify(body));
+  }
+});
+
+test("the byte cap counts UTF-8 bytes, not string length", async () => {
+  const mod = await importFresh("guard-size-utf8");
+  // 6 Mi three-byte characters: 18 MiB on the wire, 6 Mi UTF-16 units as a string.
+  const big = "€".repeat(6 * 1024 * 1024);
+  globalThis.fetch = (async () => new Response(big, { status: 200 })) as typeof fetch;
+
+  await assert.rejects(() => mod.fetchModelsDev(), /too large/);
+});
+
+test("an undeclared oversized body is cancelled while streaming, not buffered whole", async () => {
+  const mod = await importFresh("guard-size-stream");
+  const chunk = new Uint8Array(1024 * 1024).fill(0x20);
+  let pulled = 0;
+  let cancelled = false;
+  const stream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      pulled += 1;
+      if (pulled > 64) controller.close();
+      else controller.enqueue(chunk);
+    },
+    cancel() {
+      cancelled = true;
+    },
+  });
+  globalThis.fetch = (async () => new Response(stream, { status: 200 })) as typeof fetch;
+
+  await assert.rejects(() => mod.fetchModelsDev(), /too large/);
+  assert.equal(cancelled, true, "the reader must be cancelled once the cap is crossed");
+  assert.ok(pulled <= 18, `read ${pulled} MiB of a 64 MiB body`);
+});
