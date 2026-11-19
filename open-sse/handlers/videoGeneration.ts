@@ -1070,6 +1070,8 @@ async function handleRunwayVideoGeneration({
 
       if (!taskResponse.ok) {
         const errorText = await readErrorTextWithinCap(taskResponse);
+        // The capped read swallows its own failure, an abort included: re-check the signal.
+        if (signal?.aborted) return abortedVideoResult();
         if (log) {
           log.error(
             "VIDEO",
@@ -1227,7 +1229,26 @@ async function handleHaiperVideoGeneration({
     }).catch(() => {});
     return { success: false, status: res.status, error: errorText };
   }
-  const { job_id } = await readJsonWithinCap(res);
+  let job_id: unknown;
+  try {
+    ({ job_id } = await readJsonWithinCap(res));
+  } catch (err) {
+    // An over-cap (or unparsable) submission answer is a provider failure, not a rejection.
+    saveCallLog({
+      method: "POST",
+      path: "/v1/videos/generations",
+      status: 502,
+      model: `${provider}/${model}`,
+      provider,
+      duration: Date.now() - startTime,
+      error: err.message,
+    }).catch(() => {});
+    return {
+      success: false,
+      status: 502,
+      error: sanitizeErrorMessage(err) || "Video provider error",
+    };
+  }
   const deadline = Date.now() + 300000;
   while (Date.now() < deadline) {
     const status = await pollJsonAfter(

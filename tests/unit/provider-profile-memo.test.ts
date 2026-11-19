@@ -10,6 +10,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 
+const PREVIOUS_DATA_DIR = process.env.DATA_DIR;
 const DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-profile-memo-"));
 process.env.DATA_DIR = DATA_DIR;
 
@@ -19,6 +20,8 @@ const { getRuntimeProviderProfile } = await import("../../open-sse/services/acco
 
 test.after(() => {
   core.resetDbInstance();
+  if (PREVIOUS_DATA_DIR === undefined) delete process.env.DATA_DIR;
+  else process.env.DATA_DIR = PREVIOUS_DATA_DIR;
   fs.rmSync(DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
