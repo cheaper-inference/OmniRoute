@@ -177,3 +177,39 @@ test("#20294 hydrateTaskRoutingConfig restores targetModels and excludedModels f
   assert.deepEqual(config.targetModels, ["auto/dev"]);
   assert.deepEqual(config.excludedModels, ["codestral"]);
 });
+
+test("#20294 without scoping (unset or empty lists) every model is still routed and counted", () => {
+  const codingBody = {
+    messages: [{ role: "user", content: "write a python function to calculate fibonacci" }],
+  };
+  const models = ["auto/dev", "codestral", "openai/gpt-4o-mini", "combo/primary"];
+
+  for (const scope of [
+    { targetModels: undefined, excludedModels: undefined },
+    { targetModels: [], excludedModels: [] },
+  ]) {
+    resetTaskRoutingStats();
+    setTaskRoutingConfig(scope);
+    for (const model of models) {
+      assert.deepEqual(applyTaskAwareRouting(model, codingBody), {
+        model: "auto/coding",
+        taskType: "coding",
+        wasRouted: true,
+      });
+    }
+    const { stats } = getTaskRoutingConfig();
+    assert.equal(stats.detected, models.length);
+    assert.equal(stats.routed, models.length);
+  }
+
+  // A pre-#20294 persisted config (no scoping keys) hydrates without adding any scope.
+  setTaskRoutingConfig({ targetModels: undefined, excludedModels: undefined });
+  const hydrated = hydrateTaskRoutingConfig({
+    taskRouting: JSON.stringify({ enabled: true, detectionEnabled: true }),
+  });
+  assert.equal(hydrated, true);
+  const config = getTaskRoutingConfig();
+  assert.equal(config.targetModels, undefined);
+  assert.equal(config.excludedModels, undefined);
+  assert.equal(applyTaskAwareRouting("codestral", codingBody).wasRouted, true);
+});
