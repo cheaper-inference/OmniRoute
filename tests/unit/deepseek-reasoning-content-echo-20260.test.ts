@@ -96,3 +96,34 @@ test("DefaultExecutor preserves existing authentic reasoning_content on deepseek
   assert.ok(assistantTurn);
   assert.equal(assistantTurn!.reasoning_content, "Authentic thinking steps here...");
 });
+
+test("DefaultExecutor does not inject reasoning_content on the deepseek Claude alternate format", () => {
+  // A DeepSeek connection on the Anthropic-compatible alternate sends Claude messages:
+  // thinking travels as content blocks there, so the OpenAI-only field must stay off.
+  const executor = new DefaultExecutor("deepseek");
+  const body = {
+    model: "deepseek-flash",
+    max_tokens: 1024,
+    stream: false,
+    messages: [
+      { role: "user", content: [{ type: "text", text: "read a.txt" }] },
+      {
+        role: "assistant",
+        content: [{ type: "tool_use", id: "toolu_1", name: "read_file", input: { path: "a.txt" } }],
+      },
+      {
+        role: "user",
+        content: [{ type: "tool_result", tool_use_id: "toolu_1", content: "hello" }],
+      },
+    ],
+  };
+
+  const transformed = executor.transformRequest("deepseek-flash", body, false, {
+    apiKey: "sk-deepseek-test",
+    providerSpecificData: { targetFormat: "claude" },
+  }) as { messages: Array<Record<string, unknown>> };
+
+  const assistantTurn = transformed.messages.find((m) => m.role === "assistant");
+  assert.ok(assistantTurn);
+  assert.equal(Object.prototype.hasOwnProperty.call(assistantTurn, "reasoning_content"), false);
+});
