@@ -7,6 +7,8 @@ import {
   mintDashboardSessionToken,
   DASHBOARD_SESSION_COOKIE,
   getDashboardJwtSecret,
+  dashboardSessionMaxAgeSeconds,
+  DASHBOARD_SESSION_DEFAULT_MAX_AGE_SECONDS,
 } from "@/shared/utils/dashboardSessionToken";
 import { generateRequestId } from "../../shared/utils/requestId";
 import {
@@ -167,6 +169,8 @@ async function refreshDashboardSessionIfNeeded(
     }
     const exp = typeof payload.exp === "number" ? payload.exp : null;
     if (!exp) return;
+    // DASHBOARD_SESSION_MAX_AGE_HOURS shortens the session: an absolute cap, so no sliding refresh.
+    if (dashboardSessionMaxAgeSeconds() < DASHBOARD_SESSION_DEFAULT_MAX_AGE_SECONDS) return;
 
     const now = Math.floor(Date.now() / 1000);
     const refreshWindowSeconds = 7 * 24 * 60 * 60;
