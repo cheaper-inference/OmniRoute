@@ -1,3 +1,4 @@
+import type { UsageEvidence } from "../usage/usageEvidence";
 /**
  * Log export — the destination contract.
  *
@@ -23,6 +24,10 @@ import type { ZodType } from "zod";
  * and secret-redacted, and rows written under a `noLog` API key carry none.
  */
 export interface LogExportRecord {
+  usageEvidence?: UsageEvidence | null;
+  usageProvenance?: string | null;
+  estimated?: boolean;
+  costEstimated?: boolean;
   id: string;
   timestamp: string | null;
   method: string | null;

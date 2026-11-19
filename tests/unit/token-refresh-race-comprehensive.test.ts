@@ -127,11 +127,18 @@ test("Fix D: staleness fallback returns absolute expiresAt, not raw expiresIn", 
 
 test("Fix D: src/sse wrapper prefers expiresAt over expiresIn when recomputing", async () => {
   const src = await read("src/sse/services/tokenRefresh.ts");
-  // The recompute block in checkAndRefreshToken
+  // The shared merge helper still prefers absolute expiry in the proactive refresh path.
   assert.match(
     src,
-    /expiresAt:\s*newCredentials\.expiresAt\s*\?\s*newCredentials\.expiresAt/,
-    "checkAndRefreshToken must prefer the absolute expiresAt before falling back to expiresIn arithmetic"
+    /updatedCredentials = mergeProactiveRefreshCredentials\(\s*updatedCredentials,\s*newCredentials,/,
+    "checkAndRefreshToken must merge the actual refreshed credentials through the shared helper"
+  );
+  const helperStart = src.indexOf("function mergeProactiveRefreshCredentials(");
+  assert.ok(helperStart >= 0, "proactive refresh merge helper must exist");
+  assert.match(
+    src.slice(helperStart, src.indexOf("async function checkAndRefreshTokenInner", helperStart)),
+    /expiresAt:\s*refreshed\.expiresAt\s*\?\s*refreshed\.expiresAt\s*:\s*resolveExpiryWithoutAbsolute\(refreshed,\s*credentials\.expiresAt\)/,
+    "checkAndRefreshToken must prefer absolute expiry, then preserve relative or explicit non-expiry semantics"
   );
 });
 

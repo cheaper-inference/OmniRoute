@@ -172,7 +172,11 @@ export default function A2aAuditTab() {
         ) : data.tasks.length === 0 ? (
           <EmptyState icon="device_hub" title={t("a2aNoTasks")} />
         ) : (
-          <Table scrollbarLabel={t("a2aAudit")} className="min-w-[760px] text-left">
+          <Table
+            scrollbarLabel={t("a2aAudit")}
+            scrollLabel={t("a2aAudit")}
+            className="min-w-[760px] text-left"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("timestamp")}</TableHead>

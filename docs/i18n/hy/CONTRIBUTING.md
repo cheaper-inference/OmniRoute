@@ -292,72 +292,72 @@ npm run test:combo:live:vps:failover     # ավելացնում է իրական 
 
 ---
 
-## Նախագծի կառուցվածքը
+## Ծրագրի կառուցվածքը
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # Կառավարման վահանակի էջեր (23 բաժին)
-│   ├── api/                # API երթուղիներ (51 պանակ)
-│   └── login/              # Նույնականացման էջեր (.tsx)
-├── domain/                 # Քաղաքականությունների շարժիչ (policyEngine, comboResolver, costRules և այլն)
-├── lib/                    # Հիմնական բիզնես տրամաբանություն (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 արձանագրության սերվեր
-│   ├── acp/                # Agent Communication Protocol գրանցամատյան
-│   ├── compliance/         # Համապատասխանության քաղաքականությունների շարժիչ
-│   ├── db/                 # SQLite տիրույթի մոդուլներ + 130 միգրացիա
-│   ├── memory/             # Զրույցների մշտական հիշողություն
-│   ├── oauth/              # OAuth մատակարարներ, ծառայություններ և օգտակար գործիքներ
-│   ├── skills/             # Ընդլայնելի հմտությունների հենք
-│   ├── usage/              # Օգտագործման հետագծում և արժեքի հաշվարկ
-│   └── localDb.ts          # Միայն վերաարտահանման շերտ — երբեք այստեղ տրամաբանություն մի ավելացրեք
-├── middleware/              # Հարցումների միջնաշերտ (promptInjectionGuard)
-├── mitm/                   # MITM պրոքսի (վկայագիր, DNS, նպատակակետի երթուղավորում)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React բաղադրիչներ (.tsx)
-│   ├── constants/          # Մատակարարների սահմանումներ (329), MCP տիրույթներ, երթուղավորման 20 ռազմավարություն
-│   ├── utils/              # Շղթայի անջատիչ, մաքրիչ, նույնականացման օժանդակ գործիքներ
-│   └── validation/         # Zod v4 սխեմաներ
-└── sse/                    # SSE պրոքսի մշակման շղթա
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse աշխատանքային տարածք
-├── executors/              # 150 կատարող մոդուլ (կատարող դասեր + յուրաքանչյուր մատակարարի օժանդակ գործիքներ)
-├── handlers/               # Հարցումների 11 մշակիչ (զրույց, պատասխաններ, ներդրումներ, պատկերներ և այլն)
-├── mcp-server/             # MCP սերվեր (110 եզակի գործիք, 3 փոխանցման եղանակ, 33 տիրույթ)
-├── services/               # Վերին մակարդակի 178 ծառայություն (combo, autoCombo, rateLimitManager և այլն)
-├── translator/             # Ձևաչափերի փոխարկիչներ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API փոխակերպիչ
-└── utils/                  # 22 օգտակար մոդուլ (հոսք, TLS, պրոքսի, գրանցամատյանի վարում)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron աշխատասեղանի հավելված (բազմահարթակ)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js թեստերի գործարկիչ (1,574 թեստային ֆայլ)
-├── integration/            # Ինտեգրացիոն թեստեր
-├── e2e/                    # Playwright թեստեր
-├── security/               # Անվտանգության թեստեր
-├── translator/             # Փոխարկիչին հատուկ թեստեր
-└── load/                   # Բեռնվածության թեստեր
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Ճարտարապետական որոշումների գրառումներ
-├── architecture/            # Համակարգի ճարտարապետություն և դիմակայունություն
-├── comparison/              # OmniRoute-ն ընդդեմ այլընտրանքների
-├── compression/             # Սեղմման ուղեցույցներ և կանոններ
-├── dev/                     # Մշակման ուղեցույցներ
-├── diagrams/                # Ճարտարապետական գծապատկերներ
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Օգտագործողի ուղեցույց, Docker, կարգավորում, խնդիրների լուծում
-├── i18n/                    # README-ի միջազգայնացված թարգմանություններ
-├── marketing/               # Մարքեթինգային նյութեր
-├── ops/                     # Տեղակայում, պրոքսի, ծածկույթ, թողարկումներ
-├── providers/               # Մատակարարներին հատուկ փաստաթղթեր
-├── reference/               # API տեղեկատու, միջավայրի փոփոխականներ, CLI գործիքներ, անվճար մակարդակներ
-├── releases/                # Թողարկումների նշումներ
-├── routing/                 # Auto-combo շարժիչ, դատողության վերարտադրում
-├── screenshots/             # Կառավարման վահանակի էկրանակադրեր
-├── security/                # Պաշտպանիչ սահմանափակումներ, համապատասխանություն, աննկատություն, թոքեններ
-└── specs/                   # Նախագծման տեխնիկական բնութագրեր
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
