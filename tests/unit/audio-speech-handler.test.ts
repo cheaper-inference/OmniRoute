@@ -869,3 +869,67 @@ test("handleAudioSpeech returns a 500 when the provider request throws", async (
     globalThis.fetch = originalFetch;
   }
 });
+
+test("handleAudioSpeech sends ollama-local the Phonon defaults with a stub fetch", async () => {
+  const originalFetch = globalThis.fetch;
+  const calls: Array<{ url: string; body: Record<string, unknown> }> = [];
+
+  globalThis.fetch = async (url, options = {}) => {
+    calls.push({ url: String(url), body: JSON.parse(String(options.body || "{}")) });
+    return new Response(new Uint8Array([1, 2, 3]), {
+      status: 200,
+      headers: { "Content-Type": "audio/wav" },
+    });
+  };
+
+  try {
+    const response = await handleAudioSpeech({
+      body: { model: "ollama-local/phonon", input: "Hello from Ollama." },
+      credentials: {},
+    });
+
+    assert.equal(response.status, 200);
+    assert.equal(calls.length, 1);
+    assert.equal(calls[0].url, "http://localhost:11434/v1/audio/speech");
+    assert.deepEqual(calls[0].body, {
+      model: "phonon",
+      input: "Hello from Ollama.",
+      voice: "default",
+      response_format: "wav",
+    });
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
+test("handleAudioSpeech keeps pcm for ollama-local and rejects flac without calling Ollama", async () => {
+  const originalFetch = globalThis.fetch;
+  const calls: string[] = [];
+
+  globalThis.fetch = async (url) => {
+    calls.push(String(url));
+    return new Response(new Uint8Array([1, 2, 3]), {
+      status: 200,
+      headers: { "Content-Type": "audio/L16" },
+    });
+  };
+
+  try {
+    const pcm = await handleAudioSpeech({
+      body: { model: "ollama-local/phonon", input: "x", response_format: "pcm" },
+      credentials: {},
+    });
+    assert.equal(pcm.status, 200);
+    const pcmCall = calls.length;
+    assert.equal(pcmCall, 1);
+
+    const flac = await handleAudioSpeech({
+      body: { model: "ollama-local/phonon", input: "x", response_format: "flac" },
+      credentials: {},
+    });
+    assert.equal(flac.status, 400);
+    assert.equal(calls.length, pcmCall, "flac must not reach Ollama");
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
