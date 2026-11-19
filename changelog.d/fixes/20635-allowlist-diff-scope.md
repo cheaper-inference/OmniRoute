@@ -1,0 +1,1 @@
+- **test(quality):** scope gate exemptions to the verified PR base and refuse any registry growth ([#20635](https://github.com/cheaper-inference/OmniRoute/pull/20635)) — thanks @maxmad64bis

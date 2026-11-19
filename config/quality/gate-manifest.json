@@ -219,6 +219,12 @@
       "disposition": "separately-invoked"
     },
     {
+      "name": "check:gate-exemptions",
+      "command": "node scripts/quality/gate-manifest.mjs --exemptions",
+      "disposition": "pr-dependent",
+      "scope": "Validate the exemption registry, the non-growing ratchet and the diff-scope wiring against the PR base."
+    },
+    {
       "name": "check:doc-code-parity",
       "command": "node scripts/check/check-doc-code-parity.mjs",
       "disposition": "pr-dependent",

@@ -24,6 +24,7 @@ import {
   isSpawnCapableSource,
   type TransitiveSpawnRoute,
 } from "./lib/spawnImportGraph.ts";
+import { enforceDiffScope } from "./lib/allowlist.mjs";
 
 // Inline stale-allowlist helper (mirrors scripts/check/lib/allowlist.mjs).
 // The TypeScript gate cannot import the .mjs helper directly; keep this in sync.
@@ -433,6 +434,11 @@ async function main(): Promise<void> {
     liveInfraModules(cwd),
     "route-guard-membership/transitive-spawn-infra"
   );
+  enforceDiffScope({
+    allowlist: Object.keys(KNOWN_UNCLASSIFIED_SOURCE_SPAWN),
+    liveViolations: [...spawnCapableFiles, ...transitive.map((t) => t.route)],
+    gateName: "check-route-guard-membership",
+  });
 
   // Find spawn-capable routes outside SPAWN_CAPABLE_ROUTE_ROOTS that are not classified
   // local-only and not in the source-spawn allowlist.
@@ -478,7 +484,7 @@ async function main(): Promise<void> {
   }
 
   if (failed) process.exit(1);
-  if (process.exitCode === 1) return; // stale entries already logged
+  if (process.exitCode) return; // stale entries or a refused base already logged
 
   console.log(
     `[route-guard-membership] OK — ` +
@@ -492,7 +498,7 @@ async function main(): Promise<void> {
   // Explicit exit: importing routeGuard.ts pulls in runtime settings, which opens
   // the SQLite DB and starts a background health-check timer that would otherwise
   // keep the process alive. The gate's work is done — exit cleanly.
-  process.exit(0);
+  process.exit(process.exitCode ?? 0);
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {

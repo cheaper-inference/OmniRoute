@@ -4,6 +4,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { chmodSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { fileURLToPath } from "node:url";
 import { load } from "js-yaml";
 import {
   PROOF_KEY,
@@ -12,7 +13,7 @@ import {
   preuvesDuDiff,
 } from "../../scripts/check/check-doc-code-parity.mjs";
 
-const ROOT = new URL("../..", import.meta.url).pathname;
+const ROOT = fileURLToPath(new URL("../..", import.meta.url));
 const SCRIPT = join(ROOT, "scripts/quality/ci-alert-volume.sh");
 const ALIASES = [
   "check:doc-code-parity",
@@ -120,7 +121,8 @@ test("7. four aliases in both registries with identical commands", () => {
     assert.equal(entry.command, pkg.scripts[name], `command parity ${name}`);
     assert.equal(entry.disposition, "pr-dependent", `disposition ${name}`);
   }
-  assert.equal(manifest.aliases.length, 167);
+  // One more pr-dependent alias wires the exemption registry gate (167 -> 168).
+  assert.equal(manifest.aliases.length, 168);
 });
 
 test("8. no base-dependent alias is in any profile", () => {

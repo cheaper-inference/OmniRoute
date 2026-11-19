@@ -227,6 +227,11 @@ jobs:
         env:
           BASE: ${{ needs.changes.outputs.candidateBase || github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
         run: npm run check:error-helper
+      - name: check:gate-exemptions with PR base scope
+        if: github.event_name == 'pull_request'
+        env:
+          BASE: ${{ needs.changes.outputs.candidateBase || github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+        run: npm run check:gate-exemptions
       - name: Migration numbering and commutation
         # Runs even if an earlier gate in this job failed: it is the check that keeps a
         # migration from being re-applied or skipped on a user's database.

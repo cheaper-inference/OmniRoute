@@ -10,7 +10,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
 import * as yaml from "js-yaml";
-import { reportStaleEntries } from "./lib/allowlist.mjs";
+import { enforceDiffScope, reportStaleEntries } from "./lib/allowlist.mjs";
 import { apiRoot, collectApiRouteUrlPaths } from "./lib/apiRoutes.mjs";
 
 const ROOT = process.cwd();
@@ -61,6 +61,11 @@ export function runOpenapiRoutesCheck(opts = {}) {
 
   const liveOrphans = findSpecPathsWithoutRoute(specPaths, implPaths);
   const stale = reportStaleEntries(KNOWN_STALE_SPEC, liveOrphans, "openapi-routes");
+  enforceDiffScope({
+    allowlist: KNOWN_STALE_SPEC,
+    liveViolations: liveOrphans,
+    gateName: "openapi-routes",
+  });
   const orphans = liveOrphans.filter((p) => !KNOWN_STALE_SPEC.has(p));
 
   const parts = [];
@@ -94,7 +99,7 @@ function main() {
   const result = runOpenapiRoutesCheck();
   if (result.ok) console.log(result.message);
   else console.error(result.message);
-  process.exit(result.exitCode);
+  process.exit(Math.max(result.exitCode, process.exitCode ?? 0));
 }
 
 if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();

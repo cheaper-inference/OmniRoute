@@ -19,7 +19,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { assertNoStale } from "./lib/allowlist.mjs";
+import { assertNoStale, enforceDiffScope } from "./lib/allowlist.mjs";
 
 const cwd = process.cwd();
 
@@ -165,6 +165,10 @@ function main() {
   // 6A.8: stale-allowlist enforcement.
   // Compute all live violations WITHOUT the allowlist, then check for stale entries.
   const liveViolationKeys = new Set();
+  // Same violations as {id, file} records so the diff scope knows which file a
+  // known credential reappeared in. The canonical ids stay identical to the
+  // strings above, so stale enforcement is unchanged.
+  const scopedViolations = [];
   for (const rel of scannedFiles) {
     const src = fs.readFileSync(path.join(cwd, rel), "utf8");
     for (const v of findLiteralCreds(src, new Set(), rel)) {
@@ -174,11 +178,19 @@ function main() {
       const lineNo = lineMatch ? lineMatch[1] : "?";
       const valMatch = v.match(/"([^"]+)"$/);
       const val = valMatch ? valMatch[1] : v;
-      liveViolationKeys.add(`${rel}:${lineNo}:${val}`);
+      const key = `${rel}:${lineNo}:${val}`;
+      liveViolationKeys.add(key);
       liveViolationKeys.add(val); // also track plain value for backward compat
+      scopedViolations.push({ id: key, file: rel });
+      scopedViolations.push({ id: val, file: rel });
     }
   }
   assertNoStale(KNOWN_LITERAL_CREDS, liveViolationKeys, "check-public-creds");
+  enforceDiffScope({
+    allowlist: KNOWN_LITERAL_CREDS,
+    liveViolations: scopedViolations,
+    gateName: "check-public-creds",
+  });
 
   const allMisses = [];
   for (const rel of scannedFiles) {
