@@ -149,6 +149,111 @@ curl http://localhost:20128/api/usage/model-latency-stats \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
+### GET /api/log-export/types
+
+List log-export destination types
+
+Returns every registered destination type with the config field descriptors the dashboard renders its form from. Adding a destination type needs no UI change.
+
+```bash
+curl http://localhost:20128/api/log-export/types \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/log-export/destinations
+
+List log-export destinations
+
+Secrets are redacted; a stored secret is returned as the literal `__stored__`.
+
+```bash
+curl http://localhost:20128/api/log-export/destinations \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/log-export/destinations
+
+Create a log-export destination
+
+The config object is validated against the destination type's own schema. Secret keys declared by the type are encrypted at rest and never echoed back.
+
+```bash
+curl -X POST http://localhost:20128/api/log-export/destinations \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/log-export/destinations/{id}
+
+Read one log-export destination
+
+```bash
+curl http://localhost:20128/api/log-export/destinations/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### PUT /api/log-export/destinations/{id}
+
+Update a log-export destination
+
+Sending `__stored__` for a secret keeps the stored credential. The destination type is immutable after creation.
+
+```bash
+curl -X PUT http://localhost:20128/api/log-export/destinations/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### DELETE /api/log-export/destinations/{id}
+
+Delete a log-export destination
+
+Removes the destination and its export cursor.
+
+```bash
+curl -X DELETE http://localhost:20128/api/log-export/destinations/{id} \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/log-export/destinations/{id}/test
+
+Test a log-export destination
+
+Probes credentials and reachability without writing rows. A failed probe is reported as 200 with `ok: false` and an operator-facing reason.
+
+```bash
+curl -X POST http://localhost:20128/api/log-export/destinations/{id}/test \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/log-export/destinations/{id}/run
+
+Run a log-export destination now
+
+Drains pending call logs into this destination using the same cursor semantics as the hourly job.
+
+```bash
+curl -X POST http://localhost:20128/api/log-export/destinations/{id}/run \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/log-export/status
+
+Log-export scheduler status
+
+Cron expression, recent job runs, and the per-destination backlog.
+
+```bash
+curl http://localhost:20128/api/log-export/status \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
 ### GET /api/usage/budget/bulk
 
 GET usage › budget › bulk
