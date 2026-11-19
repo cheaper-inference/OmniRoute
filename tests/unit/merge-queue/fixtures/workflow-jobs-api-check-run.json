@@ -1,0 +1,393 @@
+{
+  "_source": "GET /repos/{owner}/{repo}/actions/runs/{run_id}/jobs?filter=all, captured 2026-11-19 in the queue's private rehearsal repository (rehearsal R3-e); owner/repo rewritten to acme/widgets, nothing else changed. variantA: the jobs of the candidate's CI push run; the last entry is a check run created through POST /check-runs with a workflow token (conclusion failure), which GitHub lists among the run's jobs. variantB: the jobs of the candidate's Quality Gates push run; the last entry is such a check run named Gate / CI (conclusion success).",
+  "variantA": {
+    "total_count": 4,
+    "jobs": [
+      {
+        "id": 135315688024,
+        "run_id": 44451315023,
+        "workflow_name": "CI",
+        "head_branch": "omni-queue/release-v0.0.1/b38-0d1e8ae46040",
+        "run_url": "https://api.github.com/repos/acme/widgets/actions/runs/44451315023",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVtqPo88AAAAfgXGKWA",
+        "head_sha": "0d1e8ae460401ca5fa91d535bed2ba7bf316c37e",
+        "url": "https://api.github.com/repos/acme/widgets/actions/jobs/135315688024",
+        "html_url": "https://github.com/acme/widgets/actions/runs/44451315023/job/135315688024",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-19T03:25:24Z",
+        "started_at": "2026-11-19T03:25:25Z",
+        "completed_at": "2026-11-19T03:25:30Z",
+        "name": "Toy unit (1/1)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-19T03:25:26Z",
+            "completed_at": "2026-11-19T03:25:26Z"
+          },
+          {
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-19T03:25:26Z",
+            "completed_at": "2026-11-19T03:25:28Z"
+          },
+          {
+            "name": "Toy unit tests",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-19T03:25:28Z",
+            "completed_at": "2026-11-19T03:25:28Z"
+          },
+          {
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-19T03:25:28Z",
+            "completed_at": "2026-11-19T03:25:28Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-19T03:25:28Z",
+            "completed_at": "2026-11-19T03:25:28Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/acme/widgets/check-runs/135315688024",
+        "labels": ["ubuntu-latest"],
+        "runner_id": 1000004932,
+        "runner_name": "GitHub Actions 1000004932",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 135315688376,
+        "run_id": 44451315023,
+        "workflow_name": "CI",
+        "head_branch": "omni-queue/release-v0.0.1/b38-0d1e8ae46040",
+        "run_url": "https://api.github.com/repos/acme/widgets/actions/runs/44451315023",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVtqPo88AAAAfgXGLuA",
+        "head_sha": "0d1e8ae460401ca5fa91d535bed2ba7bf316c37e",
+        "url": "https://api.github.com/repos/acme/widgets/actions/jobs/135315688376",
+        "html_url": "https://github.com/acme/widgets/actions/runs/44451315023/job/135315688376",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-19T03:25:24Z",
+        "started_at": "2026-11-19T03:25:25Z",
+        "completed_at": "2026-11-19T03:25:29Z",
+        "name": "Toy flaky (1/1)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-19T03:25:26Z",
+            "completed_at": "2026-11-19T03:25:26Z"
+          },
+          {
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-19T03:25:26Z",
+            "completed_at": "2026-11-19T03:25:28Z"
+          },
+          {
+            "name": "Toy flaky test",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-19T03:25:28Z",
+            "completed_at": "2026-11-19T03:25:28Z"
+          },
+          {
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-19T03:25:28Z",
+            "completed_at": "2026-11-19T03:25:28Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-19T03:25:28Z",
+            "completed_at": "2026-11-19T03:25:28Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/acme/widgets/check-runs/135315688376",
+        "labels": ["ubuntu-latest"],
+        "runner_id": 1000004933,
+        "runner_name": "GitHub Actions 1000004933",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 135315732091,
+        "run_id": 44451315023,
+        "workflow_name": "CI",
+        "head_branch": "omni-queue/release-v0.0.1/b38-0d1e8ae46040",
+        "run_url": "https://api.github.com/repos/acme/widgets/actions/runs/44451315023",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVtqPo88AAAAfgXI2ew",
+        "head_sha": "0d1e8ae460401ca5fa91d535bed2ba7bf316c37e",
+        "url": "https://api.github.com/repos/acme/widgets/actions/jobs/135315732091",
+        "html_url": "https://github.com/acme/widgets/actions/runs/44451315023/job/135315732091",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-19T03:25:30Z",
+        "started_at": "2026-11-19T03:25:32Z",
+        "completed_at": "2026-11-19T03:25:37Z",
+        "name": "Gate / CI",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-19T03:25:33Z",
+            "completed_at": "2026-11-19T03:25:33Z"
+          },
+          {
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-19T03:25:33Z",
+            "completed_at": "2026-11-19T03:25:35Z"
+          },
+          {
+            "name": "Toy test suite",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-19T03:25:35Z",
+            "completed_at": "2026-11-19T03:25:35Z"
+          },
+          {
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-19T03:25:35Z",
+            "completed_at": "2026-11-19T03:25:35Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-19T03:25:35Z",
+            "completed_at": "2026-11-19T03:25:35Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/acme/widgets/check-runs/135315732091",
+        "labels": ["ubuntu-latest"],
+        "runner_id": 1000004936,
+        "runner_name": "GitHub Actions 1000004936",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 135316037303,
+        "run_id": 44451315023,
+        "workflow_name": "CI",
+        "head_branch": "omni-queue/release-v0.0.1/b38-0d1e8ae46040",
+        "run_url": "https://api.github.com/repos/acme/widgets/actions/runs/44451315023",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVtqPo88AAAAfgXbetw",
+        "head_sha": "0d1e8ae460401ca5fa91d535bed2ba7bf316c37e",
+        "url": "https://api.github.com/repos/acme/widgets/actions/jobs/135316037303",
+        "html_url": "https://github.com/acme/widgets/runs/135316037303",
+        "status": "completed",
+        "conclusion": "failure",
+        "created_at": "2026-11-19T03:26:18Z",
+        "started_at": "2026-11-19T03:26:18Z",
+        "completed_at": "2026-11-19T03:26:18Z",
+        "name": "Gate / CI",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/acme/widgets/check-runs/135316037303",
+        "labels": [],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      }
+    ]
+  },
+  "variantB": {
+    "total_count": 3,
+    "jobs": [
+      {
+        "id": 135390245141,
+        "run_id": 44474070353,
+        "workflow_name": "Quality Gates",
+        "head_branch": "omni-queue/release-v0.0.1/b39-0dfd1f8a5d33",
+        "run_url": "https://api.github.com/repos/acme/widgets/actions/runs/44474070353",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVtqPo88AAAAfheMxFQ",
+        "head_sha": "0dfd1f8a5d33c738266c482b3a7d6a7707c4c9af",
+        "url": "https://api.github.com/repos/acme/widgets/actions/jobs/135390245141",
+        "html_url": "https://github.com/acme/widgets/actions/runs/44474070353/job/135390245141",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-19T06:42:01Z",
+        "started_at": "2026-11-19T06:42:03Z",
+        "completed_at": "2026-11-19T06:42:07Z",
+        "name": "Gate / Quality",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-19T06:42:04Z",
+            "completed_at": "2026-11-19T06:42:04Z"
+          },
+          {
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-19T06:42:04Z",
+            "completed_at": "2026-11-19T06:42:05Z"
+          },
+          {
+            "name": "Toy quality gate",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-19T06:42:05Z",
+            "completed_at": "2026-11-19T06:42:05Z"
+          },
+          {
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-19T06:42:05Z",
+            "completed_at": "2026-11-19T06:42:05Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-19T06:42:05Z",
+            "completed_at": "2026-11-19T06:42:06Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/acme/widgets/check-runs/135390245141",
+        "labels": ["ubuntu-latest"],
+        "runner_id": 1000007346,
+        "runner_name": "GitHub Actions 1000007346",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 135390245419,
+        "run_id": 44474070353,
+        "workflow_name": "Quality Gates",
+        "head_branch": "omni-queue/release-v0.0.1/b39-0dfd1f8a5d33",
+        "run_url": "https://api.github.com/repos/acme/widgets/actions/runs/44474070353",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVtqPo88AAAAfheMyKw",
+        "head_sha": "0dfd1f8a5d33c738266c482b3a7d6a7707c4c9af",
+        "url": "https://api.github.com/repos/acme/widgets/actions/jobs/135390245419",
+        "html_url": "https://github.com/acme/widgets/actions/runs/44474070353/job/135390245419",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-19T06:42:01Z",
+        "started_at": "2026-11-19T06:42:03Z",
+        "completed_at": "2026-11-19T06:49:10Z",
+        "name": "Merge integrity (changelog + generated skills)",
+        "steps": [
+          {
+            "name": "Set up job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 1,
+            "started_at": "2026-11-19T06:42:04Z",
+            "completed_at": "2026-11-19T06:42:05Z"
+          },
+          {
+            "name": "Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 2,
+            "started_at": "2026-11-19T06:42:05Z",
+            "completed_at": "2026-11-19T06:42:07Z"
+          },
+          {
+            "name": "Toy merge integrity",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 3,
+            "started_at": "2026-11-19T06:42:07Z",
+            "completed_at": "2026-11-19T06:49:07Z"
+          },
+          {
+            "name": "Post Run actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 6,
+            "started_at": "2026-11-19T06:49:07Z",
+            "completed_at": "2026-11-19T06:49:07Z"
+          },
+          {
+            "name": "Complete job",
+            "status": "completed",
+            "conclusion": "success",
+            "number": 7,
+            "started_at": "2026-11-19T06:49:07Z",
+            "completed_at": "2026-11-19T06:49:07Z"
+          }
+        ],
+        "check_run_url": "https://api.github.com/repos/acme/widgets/check-runs/135390245419",
+        "labels": ["ubuntu-latest"],
+        "runner_id": 1000007347,
+        "runner_name": "GitHub Actions 1000007347",
+        "runner_group_id": 0,
+        "runner_group_name": "GitHub Actions"
+      },
+      {
+        "id": 135390632363,
+        "run_id": 44474070353,
+        "workflow_name": "Quality Gates",
+        "head_branch": "omni-queue/release-v0.0.1/b39-0dfd1f8a5d33",
+        "run_url": "https://api.github.com/repos/acme/widgets/actions/runs/44474070353",
+        "run_attempt": 1,
+        "node_id": "CR_kwDOVtqPo88AAAAfhekZqw",
+        "head_sha": "0dfd1f8a5d33c738266c482b3a7d6a7707c4c9af",
+        "url": "https://api.github.com/repos/acme/widgets/actions/jobs/135390632363",
+        "html_url": "https://github.com/acme/widgets/runs/135390632363",
+        "status": "completed",
+        "conclusion": "success",
+        "created_at": "2026-11-19T06:42:59Z",
+        "started_at": "2026-11-19T06:42:59Z",
+        "completed_at": "2026-11-19T06:42:59Z",
+        "name": "Gate / CI",
+        "steps": [],
+        "check_run_url": "https://api.github.com/repos/acme/widgets/check-runs/135390632363",
+        "labels": [],
+        "runner_id": null,
+        "runner_name": null,
+        "runner_group_id": null,
+        "runner_group_name": null
+      }
+    ]
+  }
+}
