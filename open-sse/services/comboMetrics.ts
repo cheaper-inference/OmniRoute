@@ -472,6 +472,32 @@ export function getComboMetrics(comboName: string): ComboMetricsView | null {
 }
 
 /**
+ * Read one target entry without copying the whole combo view (hot routing path).
+ * Same shape as getComboMetrics(name).byTarget[executionKey]; undefined when absent.
+ */
+export function getComboTargetMetric(
+  comboName: string,
+  executionKey: string
+): ComboTargetMetricsView | undefined {
+  const byTarget = metrics.get(comboName)?.byTarget;
+  return byTarget && Object.hasOwn(byTarget, executionKey)
+    ? toMetricView(byTarget[executionKey])
+    : undefined;
+}
+
+/**
+ * Read one model entry without copying the whole combo view (hot routing path).
+ * Same shape as getComboMetrics(name).byModel[modelStr]; undefined when absent.
+ */
+export function getComboModelMetric(
+  comboName: string,
+  modelStr: string
+): ModelMetricsView | undefined {
+  const byModel = metrics.get(comboName)?.byModel;
+  return byModel && Object.hasOwn(byModel, modelStr) ? toMetricView(byModel[modelStr]) : undefined;
+}
+
+/**
  * Get metrics for all combos.
  * @returns {Object} Map of comboName → metrics
  */

@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## ძირეული ფაილები
+## Root ფაილები
 
-| ფაილი                                       | დანიშნულება                                                                                                        |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **README.md**                               | მარკეტინგული საწყისი გვერდი + სწრაფი დაწყება + ფუნქციების მატრიცა (იხ. ასევე `llm.txt`)                            |
-| **CHANGELOG.md**                            | თითოეული გამოშვების ცვლილებების ჟურნალი (ავტომატურად გენერირდება `/version-bump-cc` უნარით)                        |
-| **LICENSE**                                 | MIT ლიცენზიის ტექსტი                                                                                               |
-| **CLAUDE.md**                               | პროექტის წესები Claude Code აგენტებისთვის (მკაცრი წესები, შეთანხმებები, სცენარები)                                 |
-| **AGENTS.md**                               | იგივე, რაც CLAUDE.md, მაგრამ არა-Claude AI აგენტებისთვის (Codex, Cursor და სხვ.)                                   |
-| **GEMINI.md**                               | მოკლე წესები Gemini-ზე დაფუძნებული აგენტებისთვის (CLAUDE.md-ის ქვესიმრავლე)                                        |
-| **CONTRIBUTING.md**                         | კონტრიბუტორის სახელმძღვანელო: გამართვა, conventional commits, ტესტირება, PR-ის პროცესი                             |
-| **SECURITY.md**                             | მოწყვლადობების შეტყობინების პოლიტიკა, მხარდაჭერილი ვერსიები, საფრთხეების მოდელი                                    |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — საზოგადოებაში ქცევის მოლოდინები                                                             |
-| **llm.txt**                                 | LLM-კრაულერებისთვის ოპტიმიზებული ტექსტური საწყისი გვერდი (SEO AI ასისტენტებისთვის)                                 |
-| **package.json**                            | npm მანიფესტი, სკრიპტები, დამოკიდებულებები, ძრავები, c8 დაფარვის ზღვარი                                            |
-| **package-lock.json**                       | ჩაკეტილი დამოკიდებულებების ხე                                                                                      |
-| **tsconfig.json**                           | ძირეული TypeScript კონფიგურაცია                                                                                    |
-| **tsconfig.typecheck-core.json**            | ტიპების შემოწმების კონფიგურაცია `src/` ბირთვისთვის                                                                 |
-| **tsconfig.typecheck-noimplicit-core.json** | მკაცრი (`noImplicitAny`) ტიპების შემოწმება                                                                         |
-| **tsconfig.tsbuildinfo**                    | TS-ის ინკრემენტული აგების კეში (იგნორირებულია git-ის მიერ)                                                         |
-| **next.config.mjs**                         | Next.js 16-ის აგების კონფიგურაცია (დამოუკიდებელი გამომავალი)                                                       |
-| **next-env.d.ts**                           | Next.js-ის მიერ ავტომატურად გენერირებული გარემოს ტიპები                                                            |
-| **eslint.config.mjs**                       | ESLint-ის ბრტყელი კონფიგურაცია (წესები პროექტის თითოეული არეალისთვის)                                              |
-| **prettier.config.mjs**                     | Prettier-ის ფორმატირების წესები                                                                                    |
-| **postcss.config.mjs**                      | PostCSS-ის კონფიგურაცია Tailwind/CSS კონვეიერისთვის                                                                |
-| **playwright.config.ts**                    | Playwright-ის E2E ტესტების კონფიგურაცია                                                                            |
-| **vitest.config.ts**                        | Vitest-ის კონფიგურაცია (ნაგულისხმევი ნაკრები)                                                                      |
-| **vitest.mcp.config.ts**                    | Vitest-ის კონფიგურაცია MCP სერვერის / autoCombo / კეშის ნაკრებებისთვის                                             |
-| **sonar-project.properties**                | SonarQube/SonarCloud-ის კონფიგურაცია (კოდის ხარისხი)                                                               |
-| **Dockerfile**                              | მრავალეტაპიანი Docker აგება (builder → runner-base → runner-cli)                                                   |
-| **docker-compose.yml**                      | დეველოპმენტის compose 4 პროფილით (base, cli, host, cliproxyapi) + redis sidecar                                    |
-| **docker-compose.prod.yml**                 | საწარმოო compose (პორტი 20130, redis, სახელდებული ტომები)                                                          |
-| **.dockerignore**                           | Docker-ის კონტექსტიდან გამორიცხული ფაილები                                                                         |
-| **fly.toml**                                | Fly.io-ზე განთავსების კონფიგურაცია (რეგიონი `sin`, პორტი 20128, /data ტომი)                                        |
-| **.env.example**                            | გარემოს ფაილის შაბლონი (პირველი ინსტალაციისას ავტომატურად კოპირდება `.env`-ში)                                     |
-| **.gitignore**                              | Git-ის იგნორირების ნიმუშები                                                                                        |
-| **.npmignore**                              | npm-ში გამოქვეყნებისას გამოსარიცხი ფაილების სია                                                                    |
-| **.npmrc**                                  | npm-ის კონფიგურაცია (რეესტრი, lockfile-ის პოლიტიკა)                                                                |
-| **.node-version**                           | Node-ის ვერსიის ფიქსაცია (გამოიყენება nvm-თან თავსებადი ხელსაწყოების მიერ)                                         |
-| **.nvmrc**                                  | Node-ის ვერსიის ფიქსაცია nvm-ისთვის                                                                                |
-| **eslint.complexity.config.mjs**            | ESLint-ის კონფიგურაცია სირთულის ეტაპობრივი ზღვრისთვის (`scripts/check/check-complexity.mjs --config`)              |
-| **eslint.sonarjs.config.mjs**               | ESLint-ის კონფიგურაცია SonarJS-ის წესებისთვის (კოგნიტიური სირთულე / დუბლირება)                                     |
-| **source.config.ts**                        | Fumadocs-ის `defineDocs` წყაროს კონფიგურაცია (ამარაგებს `.source/`-ს)                                              |
-| **knip.json**                               | Knip-ის კონფიგურაცია — გამოუყენებელი ფაილები/ექსპორტები/დამოკიდებულებები (ამარაგებს მკვდარი კოდის კონტროლის ეტაპს) |
-| **stryker.conf.json**                       | Stryker-ის მუტაციური ტესტირების კონფიგურაცია                                                                       |
-| **.size-limit.json**                        | size-limit-ის ბანდლის ბიუჯეტის კონფიგურაცია                                                                        |
-| **promptfooconfig.yaml**                    | promptfoo-ს შეფასების კონფიგურაცია                                                                                 |
-| **.gitleaks.toml**                          | gitleaks-ის საიდუმლოებების სკანირების წესების ნაკრები                                                              |
-| **.zizmor.yml**                             | zizmor-ის GitHub Actions-ის უსაფრთხოების ლინტინგის კონფიგურაცია                                                    |
-| **socket.yml**                              | Socket.dev-ის მიწოდების ჯაჭვის კონფიგურაცია                                                                        |
-| **news.json**                               | ლოკალიზებული v2 განცხადებების არხი; Radar-ის გაშვების ჩანაწერი თავდაპირველად არააქტიურია                           |
-| **flake.nix** / **flake.lock**              | Nix-ის დეველოპერული გარსის განსაზღვრება + დაბლოკვის ფაილი                                                          |
-| **.env**                                    | ლოკალური საიდუმლოებები (gitignored — გენერირდება `.env.example`-დან)                                               |
+| ფაილი                                       | მიზანი                                                                                         |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **README.md**                               | მარკეტინგული სადესანტო გვერდი + სწრაფი დაწყება + მახასიათებლების მატრიცა (იხ. ასევე `llm.txt`) |
+| **CHANGELOG.md**                            | თითო გამოშვების ცვლილებების ჟურნალი (ავტომატურად გენერირებული `/version-bump-cc` უნარით)       |
+| **LICENSE**                                 | MIT ლიცენზიის ტექსტი                                                                           |
+| **CLAUDE.md**                               | პროექტის წესები Claude Code აგენტებისთვის (მყარი წესები, კონვენციები, სცენარები)               |
+| **AGENTS.md**                               | იგივეა, რაც CLAUDE.md, მაგრამ არა-კლოდ AI აგენტებისთვის (Codex, Cursor და ა.შ.)                |
+| **GEMINI.md**                               | ლაკონური წესები ტყუპებზე დაფუძნებული აგენტებისთვის ( CLAUDE.md ს ქვეჯგუფი)                     |
+| **CONTRIBUTING.md**                         | დამხმარე სახელმძღვანელო: დაყენება, ჩვეულებრივი ჩადენები, ტესტირება, PR flow                    |
+| **SECURITY.md**                             | დაუცველობის მოხსენების პოლიტიკა, მხარდაჭერილი ვერსიები, საფრთხის მოდელი                        |
+| **CODE_OF_CONDUCT.md**                      | კონტრიბუტორის შეთანხმება — საზოგადოების ქცევის მოლოდინები                                      |
+| **llm.txt**                                 | უბრალო ტექსტური დაშვება ოპტიმიზირებულია LLM მცოცავებისთვის (SEO AI ასისტენტებისთვის)           |
+| **package.json**                            | npm მანიფესტი, სკრიპტები, დამოკიდებულებები, ძრავები, c8 დაფარვის კარი                          |
+| **package-lock.json**                       | ჩაკეტილი დამოკიდებულების ხე                                                                    |
+| **tsconfig.json**                           | Root TypeScript კონფიგურაცია                                                                   |
+| **tsconfig.typecheck-core.json**            | Typecheck კონფიგურაცია `src/` ბირთვისთვის                                                      |
+| **tsconfig.typecheck-noimplicit-core.json** | მკაცრი (`noImplicitAny`) ტიპის შემოწმება                                                       |
+| **tsconfig.tsbuildinfo**                    | TS დამატებითი აშენების ქეში (გაიგნორირებულია)                                                  |
+| **შემდეგი.config.mjs**                      | Next.js 16 build კონფიგურაცია (დამოუკიდებელი გამომავალი)                                       |
+| **შემდეგი-შურ.d.ts**                        | Next.js ავტომატურად გენერირებული env ტიპები                                                    |
+| **ესლინტი.config.mjs**                      | ESLint ბინა კონფიგურაცია (წესები პროექტის ზონაში)                                              |
+| **უფრო ლამაზი.config.mjs**                  | Prettier ფორმატირების წესები                                                                   |
+| **postcss.config.mjs**                      | PostCSS კონფიგურაცია Tailwind/CSS მილსადენისთვის                                               |
+| **დრამატურგი.config.ts**                    | Playwright E2E ტესტის კონფიგურაცია                                                             |
+| **ვიტესტი.config.ts**                       | Vitest კონფიგურაცია (ნაგულისხმევი კომპლექტი)                                                   |
+| **vitest.mcp.config.ts**                    | Vitest კონფიგურაცია MCP სერვერისთვის / autoCombo / ქეშის კომპლექტებისთვის                      |
+| **სონარ-პროექტი.თვისებები**                 | SonarQube/SonarCloud კონფიგურაცია (კოდის ხარისხი)                                              |
+| **Dockerfile**                              | მრავალსაფეხურიანი Docker build (builder → runner-base → runner-cli)                            |
+| **docker-compose.yml**                      | Dev compose 4 პროფილით (base, cli, host, cliproxyapi) + redis sidecar                          |
+| **დოკერ-შედგენა.prod.yml**                  | წარმოების შედგენა (პორტი 20130, რედის, დასახელებული ტომები)                                    |
+| **.dockerignore**                           | ფაილები გამორიცხულია Docker კონტექსტიდან                                                       |
+| **fly.toml**                                | Fly.io განლაგების კონფიგურაცია (რეგიონი `sin`, პორტი 20128, /მონაცემთა მოცულობა)               |
+| **.env.მაგალითი**                           | შაბლონი env ფაილი (ავტომატური კოპირება `.env` ში პირველი ინსტალაციისას)                        |
+| **.გიგინორე**                               | Git იგნორირება შაბლონები                                                                       |
+| **.npmignore**                              | npm აქვეყნებს გამორიცხვის სიას                                                                 |
+| **.npmrc**                                  | npm კონფიგურაცია (რეესტრი, ჩაკეტილი ფაილების პოლიტიკა)                                         |
+| **.კვანძი-ვერსია**                          | კვანძის ვერსიის პინი (გამოიყენება nvm-თან თავსებადი ხელსაწყოებით)                              |
+| **.nvmrc**                                  | კვანძის ვერსიის პინი nvm-სთვის                                                                 |
+| **eslint.სირთულის.config.mjs**              | ESLint კონფიგურაცია სირთულის გამორთვისთვის (`scripts/check/check-complexity.mjs --config`)     |
+| **ესლინტ.სონარჯს.config.mjs**               | ESLint კონფიგურაცია SonarJS წესებისთვის (შემეცნებითი სირთულე / დუბლირება)                      |
+| **წყარო.config.ts**                         | Fumadocs `defineDocs` წყაროს კონფიგურაცია (იკვებება `.source/`)                                |
+| **knip.json**                               | Knip config — გამოუყენებელი files/exports/deps (იკვებება მკვდარი კოდის კარიბჭით)               |
+| **სტრაიკერი.conf.mjs**                      | Stryker მუტაციის ტესტირების კონფიგურაცია (გამოითვლება `tap.testFiles` `mutate` დან)            |
+| **.size-limit.json**                        | ზომის ლიმიტის პაკეტის ბიუჯეტის კონფიგურაცია                                                    |
+| **promptfooconfig.yaml**                    | promptfoo eval კონფიგურაცია                                                                    |
+| **.gitleaks.toml**                          | gitleaks საიდუმლო სკანირების წესების ნაკრები                                                   |
+| **.zizmor.yml**                             | zizmor GitHub-Actions უსაფრთხოების-lint კონფიგურაცია                                           |
+| **socket.yml**                              | Socket.dev მიწოდების ჯაჭვის კონფიგურაცია                                                       |
+| **news.json**                               | ლოკალიზებული v2 განცხადების არხი; რადარის გაშვების ელემენტი უმოქმედოა                          |
+| **ფანტელი.ნიქს** /** ფანტელი.ჩაკეტვა**      | Nix dev-shell განმარტება + lock                                                                |
+| **.შური**                                   | ადგილობრივი საიდუმლოებები (გაიგნორირებული — გამომუშავებული `.env.example` დან)                 |
 
-> **v3.8.26-ში ძირეული დირექტორიიდან გადატანილია (მოწესრიგების მიზნით):**
+> **გადატანილია root-დან v3.8.26-ში (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` და გენერირებული `quality-metrics.json` (gitignored). იხილეთ [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` და გენერირებული `quality-metrics.json` (გაიგნორირებულია). იხილეთ [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -201,7 +201,7 @@ src/
 | `webhookDispatcher.ts`                   | HMAC webhook მიწოდება — იხილეთ `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                   |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | გვირაბის მენეჯერები — ხედავენ `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                      |
 | `cloudSync.ts`, `initCloudSync.ts`       | სურვილისამებრ ღრუბლოვანი მდგომარეობის სინქრონიზაცია                                                                                                                                                                                                                                                                            |
-| `localDb.ts`                             | ლულის ხელახალი ექსპორტი db მოდულებისთვის (არ არის ლოგიკური — მხოლოდ რეექსპორტი)                                                                                                                                                                                                                                                |
+| `localDb.ts`                             | ლულის ხელახალი ექსპორტი db მოდულებისთვის (არა ლოგიკური — მხოლოდ რეექსპორტი)                                                                                                                                                                                                                                                    |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | მოითხოვეთ ქეშირების + idempotency                                                                                                                                                                                                                                                                                              |
 | (~ კიდევ 30 უმაღლესი დონის ფაილი)        | სპეციალიზებული დამხმარეები (logEnv, modelsDevSync, piiSanitizer და ა.შ.)                                                                                                                                                                                                                                                       |
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------- |
 | `components/`                    | დაფის კომპონენტი API: ადაპტერები `packages/ui-kit` — ზე იხილეთ `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ეკრანის მიერ გამოყენებული ხატების სახელები → Lucide კომპონენტები (`<Icon>`)             |
-| `constants/providers.ts`         | **381 პროვაიდერი** Zod დადასტურებით (სიმართლის წყარო)                                               |
+| `constants/providers.ts`         | **394 პროვაიდერი** Zod დადასტურებით (სიმართლის წყარო)                                               |
 | `constants/cliTools.ts`          | გარე CLI ინსტრუმენტის რეესტრი                                                                       |
-| `constants/routingStrategies.ts` | **20 მარშრუტიზაციის სტრატეგია** პრიორიტეტებით                                                       |
+| `constants/routingStrategies.ts` | **22 მარშრუტიზაციის სტრატეგია** პრიორიტეტებით                                                       |
 | `constants/publicApiRoutes.ts`   | მარშრუტები, რომლებიც საჭიროებენ Bearer (მმართველობის წინააღმდეგ) ავტორიზაციას                       |
 | `constants/upstreamHeaders.ts`   | ზედა ნაკადის მოთხოვნების სათაურის უარყოფა                                                           |
 | `validation/schemas.ts`          | ~ 80 Zod სქემები (სიმართლის ერთი წყარო API კონტრაქტებისთვის)                                        |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 ფაილი (12 დამმუშავებელი + 4 დამხმარე): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search და სხვ.
-├── executors/           # 150 შემსრულებელი მოდული (კლასები, რომლებიც აფართოებენ BaseExecutor-ს + თითოეული პროვაიდერის დამხმარეები)
+├── executors/           # 163 შემსრულებელი მოდული (კლასები, რომლებიც აფართოებენ BaseExecutor-ს + თითოეული პროვაიდერის დამხმარეები)
 ├── translator/          # ფორმატის კონვერტერები (9 მოთხოვნისთვის, 9 პასუხისთვის, 9 დამხმარე)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ სერვისის მოდული (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM და სხვ.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | გარე CLI ინტეგრაციები + შიდა OmniRoute CLI                                                       |
 | `I18N.md`                   | i18n არქიტექტურა, ენის დამატება, 67 ლოკალი                                                       |
 | `UNINSTALL.md`              | დეინსტალაციის ნაბიჯების გასუფთავება                                                              |
-| `PROVIDER_REFERENCE.md`     | **ავტომატურად გენერირებული** 381 პროვაიდერის კატალოგი (რეგენი: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **ავტომატურად გენერირებული** 394 პროვაიდერის კატალოგი (რეგენი: `npm run gen:provider-reference`) |
 
 ### ღრმა ჩაყვინთვის ქვესისტემა
 
