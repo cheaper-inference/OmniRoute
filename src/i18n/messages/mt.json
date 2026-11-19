@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Neħħi ċ-ċavetta"
   },
   "plugins": {
+    "privilegesWarningTitle": "Il-plugins jaħdmu bi privileġġi sħaħ",
+    "privilegesWarningBody": "Plugin jaħdem bħala proċess Node.js regolari bl-istess aċċess bħal OmniRoute: jista’ jaqra fajls, iħaddem programmi u juża n-netwerk, ikunu xi jkunu l-permessi li jiddikjara l-manifest tiegħu. Installa biss plugins li tafda.",
     "title": "Plugins",
     "description": "Installa u mmaniġġja plugins biex testendi l-funzjonalità ta’ OmniRoute",
     "loading": "Qed jitgħabbew il-plugins...",
