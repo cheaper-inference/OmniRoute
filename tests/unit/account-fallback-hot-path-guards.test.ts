@@ -29,12 +29,14 @@ test("isModelLocked still sees a lock once one exists", () => {
   assert.equal(isModelLocked("openai", "conn-1", "gpt-4o"), false);
 });
 
+// Uncapped, these inputs take over 10 s; capped, well under 200 ms. 1000 ms keeps that signal
+// without failing on a loaded shared runner.
 test("a 100 KB error text is classified in bounded time", () => {
   const started = performance.now();
   checkFallbackError(400, "context ".repeat(12_500), 0, "gpt-4o", "openai");
   checkFallbackError(400, "max ".repeat(25_000), 0, "gpt-4o", "openai");
   const elapsedMs = performance.now() - started;
-  assert.ok(elapsedMs < 150, `classification took ${Math.round(elapsedMs)} ms`);
+  assert.ok(elapsedMs < 1000, `classification took ${Math.round(elapsedMs)} ms`);
 });
 
 test("a context-overflow signal at the head or the tail of a long text still matches", () => {
@@ -97,5 +99,5 @@ test("a 100 KB JSON-looking body is classified in bounded time", () => {
   const started = performance.now();
   checkFallbackError(400, `{"error":"${"context ".repeat(12_500)}"}`, 0, "gpt-4o", "openai");
   const elapsedMs = performance.now() - started;
-  assert.ok(elapsedMs < 150, `classification took ${Math.round(elapsedMs)} ms`);
+  assert.ok(elapsedMs < 1000, `classification took ${Math.round(elapsedMs)} ms`);
 });
