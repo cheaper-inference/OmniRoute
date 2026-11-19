@@ -1,1 +1,0 @@
-- **fix(security):** an HTTP 400 parks a connection as `credits_exhausted` only when the structured error code is a credit code or the provider documents a message-only 400 credit form (`command-code`, `bai`, `openai-compatible-*`), so a credit phrase echoed from the request no longer takes a shared connection out of rotation
