@@ -1,0 +1,1 @@
+- **chore:** the MIT `LICENSE` copyright line names Cheaper Inference and credits the creator, Diego Souza ([#20664](https://github.com/cheaper-inference/OmniRoute/pull/20664))

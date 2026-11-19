@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Noņemt atslēgu"
   },
   "plugins": {
+    "privilegesWarningTitle": "Spraudņi darbojas ar pilnām privilēģijām",
+    "privilegesWarningBody": "Spraudnis darbojas kā parasts Node.js process ar tādu pašu piekļuvi kā OmniRoute: tas var lasīt failus, palaist programmas un izmantot tīklu neatkarīgi no tā manifestā norādītajām atļaujām. Instalējiet tikai spraudņus, kuriem uzticaties.",
     "title": "Spraudņi",
     "description": "Instalējiet un pārvaldiet spraudņus, lai paplašinātu OmniRoute funkcionalitāti",
     "loading": "Notiek spraudņu ielāde...",

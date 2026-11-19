@@ -186,6 +186,23 @@ function buildSpawnArgsFactory(
   return () => cliproxySpawnArgs(cfg.port, apiKey);
 }
 
+/**
+ * The service's own credential (API key / admin token), "" when it needs none,
+ * or null when it cannot be loaded. A null key means the service is not started:
+ * a guessable stand-in would be worse than no service, and the on-demand
+ * /api/services/<tool>/* path reports the key error to the operator.
+ */
+async function loadServiceApiKey(cfg: ServiceEntry): Promise<string | null> {
+  if (!cfg.needsApiKey) return "";
+  try {
+    return await getOrCreateApiKey(cfg.tool);
+  } catch (err: unknown) {
+    const msg = err instanceof Error ? err.message : String(err);
+    console.warn(`[Services] Not supervising ${cfg.tool}: its API key is unavailable. ${msg}`);
+    return null;
+  }
+}
+
 export async function bootstrapEmbeddedServices(): Promise<void> {
   for (const cfg of SERVICES) {
     if (getSupervisor(cfg.tool)) continue;
@@ -193,9 +210,8 @@ export async function bootstrapEmbeddedServices(): Promise<void> {
     const row = await getVersionManagerTool(cfg.tool);
     if (!row || row.status === "not_installed") continue;
 
-    const apiKey = cfg.needsApiKey
-      ? await getOrCreateApiKey(cfg.tool).catch(() => "placeholder")
-      : "";
+    const apiKey = await loadServiceApiKey(cfg);
+    if (apiKey === null) continue;
     // CLIProxyAPI's generated key is management-only; /v1/models uses its dedicated data-plane key.
     const modelSyncApiKey =
       cfg.tool === "cliproxy"

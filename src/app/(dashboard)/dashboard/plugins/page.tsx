@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { Alert } from "@omniroute/ui-kit/alert";
 import { Card, Button, EmptyState } from "@/shared/components";
 import Badge from "@/shared/components/Badge";
+import Icon from "@/shared/components/Icon";
 import { useNotificationStore } from "@/store/notificationStore";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
 import { useTranslations } from "next-intl";
@@ -111,6 +113,13 @@ export default function PluginsPage() {
             {scanning ? t("scanning") : t("scanForPlugins")}
           </Button>
         }
+      />
+      <Alert
+        variant="warning"
+        dismissible={false}
+        icon={<Icon name="warning" size={18} />}
+        title={t("privilegesWarningTitle")}
+        description={t("privilegesWarningBody")}
       />
       {plugins.length === 0 ? (
         <EmptyState title={t("noPlugins")} description={t("noPluginsDescription")} />

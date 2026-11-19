@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Ліміт має бути додатним цілим числом.",
     "error": "Помилка: {message}",
     "serverOffline": "Сервер OmniRoute відключено. Запустіть: omniroute serve",
     "authRequired": "Потрібна автентифікація. Встановіть OMNIROUTE_API_KEY або виконайте: omniroute setup",
