@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
-ග්‍රහණය කිරීම සිදු වන්නේ `open-sse/handlers/chatCore.ts` (අඩවි දෙකක්, `cacheReasoningFromAssistantMessage` ඇමතුම් අඩවි දෙකේදී). නැවත ධාවනය `open-sse/translator/index.ts` හි ක්‍රම බලහත්කාරයෙන් පසුව නමුත් යැවීමට පෙර සිදු වේ.
+ග්‍රහණය කිරීම සිදු වන්නේ `open-sse/handlers/chatCore.ts` (අඩවි දෙකක්, `cacheReasoningFromAssistantMessage` ඇමතුම් අඩවි දෙකේදී). නැවත ධාවනය සිදුවන්නේ `open-sse/translator/index.ts` හි යෝජනා ක්‍රම බලකිරීමෙන් පසුව නමුත් යැවීමට පෙරය.
+
+මෙවලම්-ඇමතුම් ඇතුළත් කිරීම් `buildToolCallCacheKey()` යටතේ ගබඩා කර ඇත, ඉල්ලීම් විෂය පථයේ සහ මෙවලම් ඇමතුම් හැඳුනුම්පතෙහි සංග්‍රහයක්, එබැවින් වෙනත් API යතුරක් හෝ සැසියක් භාවිතා කරන එකම id ප්‍රවේශය තෝරා නොගනී. විෂය පථය පැමිණෙන්නේ `buildReasoningCacheScope()`: API යතුරු හැඳුනුම්පත සහ ඉල්ලීමට එකක් ඇති විට සැසි යතුර. `tool_call_id` තීරුව සහ උපකරණ පුවරුව එම ඇතුළත් කිරීම් සඳහා මෙම සංග්‍රහය පෙන්වයි.
 
 සරල (මෙවලම්-ඇමතුම් නොවන) සහකාර හැරීම් වෙනස් ලෙස යතුරු කර ඇත: `buildAssistantMessageCacheKey()` එම වාරය දක්වා සැසි විෂය පථය සහ සාමාන්‍යකරණය කළ OpenAI-ආකෘති පිටපත දිරවයි, මන්ද DeepSeek `tools` පවතින විට _every_ පෙර හැරීමේ තර්කනය අවශ්‍ය වන බැවිනි. ප්‍රතිචාර-API ඉලක්ක සඳහා (උදාහරණයක් ලෙස `opencode-go/deepseek-v4-flash`, `/responses` වෙත යොමු කර ඇත ) උඩුගංගත සිරුර `messages` නොව `input` දරයි, එබැවින් `translateRequest()` (`open-sse/translator/index.ts`) එය ආපසු කැඳවීමේ විකල්පය හරහා දිරවන ලද විවර්තන පිටපත වාර්තා කරන අතර ග්‍රහණ අඩවි එම පිටපතම දිරවයි. ප්‍රතිචාර නැවත ධාවනය කිරීමේ අවසර පත්‍රය සෑම මූලාශ්‍ර ආකෘතියක් සඳහාම OpenAI විවර්තනය මත ක්‍රියාත්මක වේ, එබැවින් Anthropic පණිවිඩ සේවාලාභීන් (Claude → OpenAI → ප්‍රතිචාර) ද නැවත ධාවනය වේ.
 
