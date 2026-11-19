@@ -1200,6 +1200,27 @@ async function deliverHaiperVideo({ videoUrl, model, provider, startTime, signal
   };
 }
 
+/** Log an unreadable Haiper submission answer and turn it into a 502 handler result. */
+function haiperSubmissionReadFailure(
+  err: Error,
+  { provider, model, startTime }: { provider: string; model: string; startTime: number }
+) {
+  saveCallLog({
+    method: "POST",
+    path: "/v1/videos/generations",
+    status: 502,
+    model: `${provider}/${model}`,
+    provider,
+    duration: Date.now() - startTime,
+    error: err.message,
+  }).catch(() => {});
+  return {
+    success: false,
+    status: 502,
+    error: sanitizeErrorMessage(err) || "Video provider error",
+  };
+}
+
 async function handleHaiperVideoGeneration({
   model,
   provider,
@@ -1234,20 +1255,7 @@ async function handleHaiperVideoGeneration({
     ({ job_id } = await readJsonWithinCap(res));
   } catch (err) {
     // An over-cap (or unparsable) submission answer is a provider failure, not a rejection.
-    saveCallLog({
-      method: "POST",
-      path: "/v1/videos/generations",
-      status: 502,
-      model: `${provider}/${model}`,
-      provider,
-      duration: Date.now() - startTime,
-      error: err.message,
-    }).catch(() => {});
-    return {
-      success: false,
-      status: 502,
-      error: sanitizeErrorMessage(err) || "Video provider error",
-    };
+    return haiperSubmissionReadFailure(err, { provider, model, startTime });
   }
   const deadline = Date.now() + 300000;
   while (Date.now() < deadline) {
