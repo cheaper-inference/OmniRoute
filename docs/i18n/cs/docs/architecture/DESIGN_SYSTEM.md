@@ -16,46 +16,193 @@
 > písmem Inter pro cyrilici, řečtinu a vietnamštinu a pouze pod `html[dir="rtl"]` písmem Vazirmatn pro arabské písmo.
 > Každá ikona je glyf Lucide.
 
-## 1. Kde věci žijí
+## 1. Kde se co nachází
 
-- **Kit.** `packages/ui-kit/src` je bajt po bajtu kopie upstream `src/` v odevzdání připojeném v `packages/ui-kit/UPSTREAM.md` (což také zaznamenává licenční oprávnění); `PATCHES.md` uvádí místní opravy (žádné). Spotřebovává se jako zdroj bez sestavení: `next.config.mjs` jej transpiluje a `tsconfig.json` mapuje `@omniroute/ui-kit` → `packages/ui-kit/src` a `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` (`vitest.config.ts` a `vitest.mcp.config.ts` nesou stejný alias). Importujte součást sady po její podcestě (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nikdy ne přes hlaveň `@omniroute/ui-kit` : hlaveň vtáhne každou součást (včetně sběrače data) do každého importéra. Sada stylů vstupuje přes `src/app/globals.css` (`@import "../../packages/ui-kit/src/ci-styles.css"`, úplný list: jádro `ci-ui.css` plus každá rodina vzorů).
-- **Tokeny.** `packages/ui-kit/src/ci-tokens.css` deklaruje tokeny `--ci-*` ; `src/app/globals.css` je spojuje se staršími názvy OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`, `--table-*`, `--orch-status-*`, `--color-fd-*`), takže stávající nástroje `var(--color-*)` a Tailwind nadále fungují. Nový kód používá nástroje Tailwind (`bg-surface`, `text-text-muted`, `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) nebo třídy kitů — nikdy hexovou hodnotu (`tests/unit/design-kit-bridge.test.ts` vynucuje most). `text-primary` se rozlišuje na `--color-primary-ink` až `--text-color-primary`, takže primární text zůstává čitelný, zatímco `bg-primary`/`border-primary` si zachovává povrch s akcentem: v edicích je to `--ci-color-accent-active` sady (hluboce měděné `#99562f` ve světle, měděné zvýraznění ve tmě); pod Classic, lime-800 ve světlé a limetkový akcent ve tmě. Série grafů používají `--color-chart-1` … `--color-chart-8`, každý s textově bezpečným `--color-chart-N-ink` a neprůhledným odstínem čipu `--color-chart-N-subtle`, přiřazeným v pořadí série sad (`ciChartSeriesOrder`).
-- **Témata.** `<html className="ci-theme">` (`src/app/layout.tsx`) přihlásí dokument do motivu sady. Preference je `light`, `dark` nebo `system` (`THEME_CONFIG.defaultTheme = "system"` v `src/shared/constants/appConfig.ts`; `system` následuje `prefers-color-scheme`). `applyTheme()` v `src/store/themeStore.ts` (zrcadlené pomocí `THEME_BOOT_SCRIPT`, vložené v `src/app/layout.tsx`, které běží před hydratací) nastaví `data-theme="dark"|"light"` a společně přepne třídu `.dark` na `<html>`. Sada tmavých žetonů sady je klíčována na `data-theme="dark"` (`packages/ui-kit/src/ci-tokens.css`); Vlastní temné přepisy OmniRoute(blok `.dark` v `globals.css`) a starší klíč utilit Tailwind `dark:` ve třídě `.dark`. Neexistují žádné přednastavení barev zvýraznění: zvýraznění vždy pochází ze sady a přetrvávající přednastavení ze starší sestavy se při načtení obchodu zruší.
-- **Palety.** Dva, oba ze sady (`src/shared/constants/appearancePalette.ts`): `editions`, výchozí a `classic`. Editions je atribut `data-ci-appearance="editions"` sady na `<html>`, který `ci-editions.css` (import `ci-ui.css`) kombinuje se `data-theme`; Klasická je absence atributu. Server s kořenovým rozložením vykresluje atribut, takže návštěvník, který nemá nic uloženého (nebo nemá JS), dostane vydání na každém povrchu řídicího panelu —, přihlášení, `/status`, chybových stránek, `/docs` a PWA. Volba je zachována vedle motivu ve stejném obchodě `theme` (`palette`, `setPalette()`, `applyPalette()` v `src/store/themeStore.ts`) a aplikována před malováním pomocí `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, vložené do `<head>` rozvržení), které odstraní atribut pouze tehdy, když je uložená paleta `"classic"`; `src/app/global-error.tsx`, mimo kořenové rozvržení, jej použije ze stejného úložiště. Nevkládejte `data-ci-appearance` na žádný jiný prvek: sada se shoduje s `html:root:has([data-ci-appearance="editions"])`, takže jeden potomek by přehodil celý dokument. Varianta Editions `data-ci-editions-variant="landing"` je určena pro marketingové stránky, nikoli pro řídicí panel. Chrom prohlížeče: server vykresluje výchozí edice v `viewport.themeColor` (jedna značka na `prefers-color-scheme`) a webový manifest — `PWA_THEME_COLORS` v `src/shared/constants/pwaThemeColors.ts`, jediné zrcadlo edic `--ci-color-background` (`#f3f1e9` / `#11120f`), připnuté k `ci-editions.css` pomocí `tests/unit/pwa-theme-colors.test.ts`. Živé `<meta name="theme-color">` pak následuje uloženou paletu a režim: `THEME_BOOT_SCRIPT` přepíše značky před malováním a akce tematického obchodu to dělají při každé změně (`resolveThemeColor()` / `applyThemeColor()` v `src/shared/utils/themeColorMeta.ts`, přičemž `CLASSIC_PAGE_BACKGROUND` se čte ze `ciTokens` sady). Explicitní téma light/dark nastaví každý tag na tento režim; `system` zachovává jednu barvu na schéma. Manifest zůstává edice: je načten jednou za instalaci, bez preference. Monako čte své barvy ze sondy (`monacoKitTheme.ts`); pod Editions čtení sondy převrátí kořenový `data-theme` na jeden synchronní průchod, protože sada řeší Editions light/dark z kořenového adresáře.
-- **Komponenty (adaptéry).** `src/shared/components/index.tsx` zachovává komponentu OmniRoute API (stejné názvy, výchozí exporty a rekvizity) a primitiva za ní jsou adaptéry nad sadou: formuláře (`Button`, `Input` `Loading` `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), překryvy a zpětná vazba (`Modal`,`ConfirmModal`, `Tooltip`,`InfoTooltip`, `EmptyState`), struktura (`Collapsible` `PresetSlider` `CollapsibleSection`, `NotificationToast`, `SegmentedControl`, `Breadcrumbs`) a tabulky (`DataTable`, `FilterBar`, `ColumnToggle`, `Avatar`, `FilterPills`). Adaptér importuje komponentu sady podcestou a namapuje na ni starší rekvizity — například `Button variant="primary"` je tlačítko `default` sady (`--ci-button-primary-*`: inverzní plocha ve světle, zvýraznění s inkoustem `--ci-color-accent-foreground` ve tmě), `danger` je `destructive` a `warning` je tlačítko `warning` sady. Stavové varianty `Badge` jsou tóny sady a `Select` se `<option>` children vykreslí sadu `NativeSelect`. `tests/unit/ui/adapters/*.test.tsx` pin každého adaptéru.
-- **Shell.** `src/app/(dashboard)/layout.tsx` vykreslí `DashboardLayout`, což vykreslí `src/shared/components/layouts/DashboardShell.tsx`: sada `SidebarProvider` / `Sidebar` / `SidebarInset` (`packages/ui-kit/src/sidebar.tsx`) s navigační logikou OmniRoute v `src/shared/components/Sidebar.tsx`. Odkaz „přeskočit na obsah“ na `#main-content` je prvním zaměřeným prvkem. `src/shared/components/Header.tsx` obsahuje sadu `SidebarTrigger` (jediný přepínač bočního panelu shellu), `ProductSwitcher` Keak a otvírač palet příkazů; zobrazuje název trasy pouze v případě, že uvnitř `#main-content` není namontována žádná sada `PageHeader` (`.ci-page-header`), takže stránka s vlastním `PageHeader` má jediné `h1`. `src/shared/components/CommandPalette.tsx` je sada `Dialog`.
-- **ikony.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) překládá název (slovníček symbolů materiálu, který obrazovky používají) přes `ICON_MAP` (`src/shared/constants/iconMap.ts`) na lucidní glyf. Písmo a balíček Material Symbols jsou pryč: název chybějící na mapě vykreslí neutrální zástupný glyf (`data-icon-missing="true"`) a zaprotokoluje varování konzole mimo produkci. `npm run gen:icon-map` vytiskne používané názvy, které na mapě chybí (`tests/unit/icon-map-coverage.test.ts` selže u jakéhokoli jména bez ikony Lucide; `tests/unit/icon-map-object-values.test.ts` pokrývá názvy uložené ve vyhledávacích objektech); `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` přepíše doslovný rozsah `<span className="material-symbols-outlined">` na `<Icon>`.
-- **Značka.** `src/shared/components/OmniRouteLogo.tsx` zabalí sadu: výchozí exportní `OmniRouteLogo` vykreslí `ProductIcon product="omniroute" variant="glyph"` (inline SVG, `basePath` -safe) a `OmniRouteLockup` vykreslí `ProductLockup product="omniroute"` (dostupný název "Keak OmniRoute") nebo pro operátory s bílým štítkem jejich vlastní `name`/`logoSrc`. Cíle pro přepínání produktů žijí v `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`). Samostatné obrazovky — `src/app/login/page.tsx`, `src/app/status/page.tsx`, `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` a `src/shared/components/ErrorPageScaffold.tsx` — ukazují zablokování; `tests/unit/brand-pages-static.test.ts` to hlídá.
+- **Kit.** `packages/ui-kit/src` je bajt po bajtu stejnou kopií upstreamového `src/` z commitu uvedeného v
+  `packages/ui-kit/UPSTREAM.md` (který také zaznamenává licenční oprávnění); `PATCHES.md` uvádí lokální
+  záplaty (žádné). Používá se jako zdrojový kód bez sestavení: `next.config.mjs` jej transpileuje a
+  `tsconfig.json` mapuje `@omniroute/ui-kit` → `packages/ui-kit/src` a `@omniroute/ui-kit/*` →
+  `packages/ui-kit/src/*` (stejný alias obsahují také `vitest.config.ts` a `vitest.mcp.config.ts`). Komponentu
+  kitu importujte přes její podcestu (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), nikdy
+  přes barrel `@omniroute/ui-kit`: barrel načítá každou komponentu (včetně výběru data) do každého importujícího
+  modulu. Styly kitu se načítají přes `src/app/globals.css`
+  (`@import "../../packages/ui-kit/src/ci-styles.css"`, kompletní stylesheet: základní `ci-ui.css` a všechny
+  rodiny vzorů).
+- **Tokeny.** `packages/ui-kit/src/ci-tokens.css` deklaruje tokeny `--ci-*`; `src/app/globals.css`
+  je propojuje se staršími názvy OmniRoute (`--color-*`, `--radius-*`, `--font-sans`/`--font-mono`,
+  `--table-*`, `--orch-status-*`, `--color-fd-*`), takže stávající použití `var(--color-*)` a utility
+  Tailwindu nadále fungují. Nový kód používá utility Tailwindu (`bg-surface`, `text-text-muted`,
+  `border-border`, `text-success`, `bg-success-bg`, `bg-chart-1`…) nebo třídy kitu — nikdy hexadecimální
+  hodnotu (`tests/unit/design-kit-bridge.test.ts` toto propojení vynucuje). `text-primary` se přes
+  `--text-color-primary` vyhodnocuje na `--color-primary-ink`, takže primární text zůstává čitelný, zatímco
+  `bg-primary`/`border-primary` zachovávají akcentní plochu: v režimu Editions je to
+  `--ci-color-accent-active` kitu (hluboká měděná `#99562f` ve světlém režimu, měděný akcent v tmavém);
+  v režimu Classic lime-800 ve světlém režimu a limetkový akcent v tmavém. Řady grafů používají
+  `--color-chart-1` … `--color-chart-8`, přičemž každá má textově bezpečný `--color-chart-N-ink` a neprůhledný
+  odstín štítku `--color-chart-N-subtle`, přiřazené podle pořadí řad kitu (`ciChartSeriesOrder`).
+- **Motivy.** `<html className="ci-theme">` (`src/app/layout.tsx`) přepíná dokument na motiv kitu.
+  Preference může být `light`, `dark` nebo `system` (`THEME_CONFIG.defaultTheme = "system"` v
+  `src/shared/constants/appConfig.ts`; `system` se řídí `prefers-color-scheme`). `applyTheme()` v
+  `src/store/themeStore.ts` (zrcadlené pomocí `THEME_BOOT_SCRIPT`, vloženého přímo do `src/app/layout.tsx`,
+  které se spouští před hydratací) nastavuje `data-theme="dark"|"light"` a současně přepíná třídu `.dark` na
+  `<html>`. Sada tmavých tokenů kitu je navázána na `data-theme="dark"`
+  (`packages/ui-kit/src/ci-tokens.css`); vlastní tmavé přepisy OmniRoute (blok `.dark` v `globals.css`) a
+  starší utility Tailwindu `dark:` jsou navázány na třídu `.dark`. Předvolby barvy akcentu neexistují:
+  akcent vždy pochází z kitu a uložená předvolba ze staršího sestavení se při načtení store zahodí.
+- **Palety.** Dvě, obě z kitu (`src/shared/constants/appearancePalette.ts`): `editions`, výchozí, a
+  `classic`. Editions je atribut `data-ci-appearance="editions"` kitu na `<html>`, který
+  `ci-editions.css` (importovaný přes `ci-ui.css`) kombinuje s `data-theme`; Classic znamená nepřítomnost
+  tohoto atributu. Kořenové rozvržení vykresluje atribut na serveru, takže návštěvník, který nemá nic uložené
+  (nebo nemá JavaScript), dostane Editions na všech plochách — dashboardu, přihlášení, `/status`,
+  chybových stránkách, `/docs` i v PWA. Volba se ukládá vedle motivu ve stejném store `theme`
+  (`palette`, `setPalette()`, `applyPalette()` v `src/store/themeStore.ts`) a před vykreslením ji aplikuje
+  `THEME_BOOT_SCRIPT` (`src/shared/utils/themeBootScript.ts`, vložený do `<head>` rozvržení), který atribut
+  odstraní pouze tehdy, když je uložená paleta `"classic"`; `src/app/global-error.tsx`, který leží mimo kořenové
+  rozvržení, ji aplikuje ze stejného store. `data-ci-appearance` nevkládejte na žádný jiný element: kit jej
+  vyhodnocuje pomocí `html:root:has([data-ci-appearance="editions"])`, takže jediný potomek by přepnul celý
+  dokument. Varianta Editions `data-ci-editions-variant="landing"` je určena pro marketingové stránky, nikoli
+  pro dashboard. Vzhled prohlížeče: server vykresluje výchozí paletu Editions v `viewport.themeColor`
+  (jeden tag pro každý `prefers-color-scheme`) a ve webovém manifestu — `PWA_THEME_COLORS` v
+  `src/shared/constants/pwaThemeColors.ts`, jediné zrcadlo `--ci-color-background` Editions
+  (`#f3f1e9` / `#11120f`), připnuté k `ci-editions.css` pomocí
+  `tests/unit/pwa-theme-colors.test.ts`. Živý `<meta name="theme-color">` se pak řídí uloženou paletou a
+  režimem: `THEME_BOOT_SCRIPT` přepisuje tagy před vykreslením a akce store motivu to provádějí při každé
+  změně (`resolveThemeColor()` / `applyThemeColor()` v `src/shared/utils/themeColorMeta.ts`, s
+  `CLASSIC_PAGE_BACKGROUND` načteným z `ciTokens` kitu). Explicitní světlý/tmavý motiv nastaví každý tag na
+  daný režim; `system` zachovává jednu barvu pro každý režim. Manifest zůstává v paletě Editions: načte se
+  jednou při instalaci, bez preference. Monaco načítá své barvy ze sondy (`monacoKitTheme.ts`);
+  v režimu Editions čtení sondy na jeden synchronní průchod přepne kořenový `data-theme`, protože kit
+  vyhodnocuje světlý/tmavý režim Editions z kořene.
+- **Komponenty (adaptéry).** `src/shared/components/index.tsx` zachovává API komponent OmniRoute (stejné
+  názvy, výchozí exporty a props) a primitivní komponenty za ním jsou adaptéry nad kitem: formuláře
+  (`Button`, `Input`, `Textarea`, `Checkbox`, `Select`, `Toggle`, `Badge`, `Card`), překryvy a zpětná vazba
+  (`Modal`/`ConfirmModal`, `Tooltip`/`InfoTooltip`, `NotificationToast`, `EmptyState`, `Loading`),
+  struktura (`Collapsible`, `CollapsibleSection`, `SegmentedControl`, `Breadcrumbs`, `Avatar`) a tabulky
+  (`DataTable`, `FilterBar`, `ColumnToggle`, `FilterPills`, `PresetSlider`). Adaptér importuje komponentu kitu
+  přes podcestu a mapuje na ni starší props — například `Button variant="primary"` je tlačítko kitu
+  `default` (`--ci-button-primary-*`: inverzní plocha ve světlém režimu, akcent s inkoustem
+  `--ci-color-accent-foreground` v tmavém), `danger` je `destructive` a `warning` je tlačítko kitu
+  `warning`. Varianty stavů `Badge` jsou tóny kitu a `Select` s potomky `<option>` vykresluje kitový
+  `NativeSelect`.
+  Dva adaptéry se importují podle cesty, nikoli z indexu: `InteractiveTableRow`
+  (`src/shared/components/InteractiveTableRow.tsx`), kitový `TableRow`, který přijímá `onActivate` a
+  `selected` a reaguje na Tab, Enter a mezerník, a `CodePreview`
+  (`src/shared/components/CodePreview.tsx`), blok kódu kitu s přeloženými popisky pro kopírování.
+  `tests/unit/ui/adapters/*.test.tsx` zajišťují každý adaptér.
+- **Shell.** `src/app/(dashboard)/layout.tsx` vykresluje `DashboardLayout`, který vykresluje
+  `src/shared/components/layouts/DashboardShell.tsx`: `SidebarProvider` / `Sidebar` /
+  `SidebarInset` ze sady (`packages/ui-kit/src/sidebar.tsx`) s navigační logikou OmniRoute v
+  `src/shared/components/Sidebar.tsx`. Odkaz „přejít k obsahu“ na `#main-content` je prvním prvkem,
+  na který lze přejít fokusem. `src/shared/components/Header.tsx` obsahuje `SidebarTrigger` ze sady
+  (jediný přepínač postranního panelu shellu), `ProductSwitcher` Keak a otvírač palety příkazů;
+  název routy zobrazuje pouze tehdy, když uvnitř `#main-content` není připojena žádná komponenta sady
+  `PageHeader` (`.ci-page-header`), takže stránka s vlastním `PageHeader` má jediný prvek `h1`.
+  `src/shared/components/CommandPalette.tsx` je `Dialog` ze sady.
+- **Ikony.** `<Icon name="material_name">` (`src/shared/components/Icon.tsx`) řeší název
+  (slovník Material Symbols používaný obrazovkami) prostřednictvím `ICON_MAP`
+  (`src/shared/constants/iconMap.ts`) na glyf Lucide. Písmo a balíček Material Symbols byly odstraněny:
+  název chybějící v mapě vykreslí neutrální zástupný glyf (`data-icon-missing="true"`) a mimo produkci
+  zapíše varování do konzole. `npm run gen:icon-map` vypíše používané názvy, které v mapě chybějí
+  (`tests/unit/icon-map-coverage.test.ts` selže u každého názvu bez ikony Lucide;
+  `tests/unit/icon-map-object-values.test.ts` pokrývá názvy uložené ve vyhledávacích objektech);
+  `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` přepíše literální
+  `<span className="material-symbols-outlined">` na `<Icon>`.
+- **Značka.** `src/shared/components/OmniRouteLogo.tsx` obaluje sadu: výchozí export `OmniRouteLogo`
+  vykresluje `ProductIcon product="omniroute" variant="glyph"` (vložené SVG bezpečné vůči `basePath`)
+  a `OmniRouteLockup` vykresluje `ProductLockup product="omniroute"` (s přístupným názvem „Keak OmniRoute“)
+  nebo u operátorů s vlastní značkou jejich vlastní `name`/`logoSrc`. Cíle přepínače produktů jsou
+  definovány v `src/shared/constants/keakProducts.ts` (`KEAK_PRODUCT_LINKS`, `KEAK_ACTIVE_PRODUCT`).
+  Samostatné obrazovky — `src/app/login/page.tsx`, `src/app/status/page.tsx`,
+  `src/app/maintenance/page.tsx`, `src/app/offline/page.tsx`, `src/app/not-found.tsx` a
+  `src/shared/components/ErrorPageScaffold.tsx` — zobrazují lockup; `tests/unit/brand-pages-static.test.ts`
+  jeho použití vynucuje.
 
 ## 2. Pravidla
 
-1. Tokeny, nikdy doslovy. Výjimky ponechané záměrně: vždy tmavý konzolový terminál a `STATUS_HEX` (`src/shared/constants/statusColors.ts`), vyřešené hex zrcadlo palety stavu sady pro volající, kteří potřebují doslovný hex. Kategorické palety již nejsou výjimkou: jezdí na osmi žetonech grafu sady (`--color-chart-1..8`, plus `-ink`/`-subtle`), v pořadí sérií sady, přes `src/shared/utils/categoricalPalette.ts` a pro směrovací strategie `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; ReactFlow hrany a orchestrační plátno čtou proměnné `--orch-status-*` s ohledem na téma (`src/shared/components/flow/edgeStyles.ts`).
-2. Nikdy neopravujte `packages/ui-kit/src` ručně: synchronizujte se `scripts/dev/sync-ui-kit.sh <commit>`; brána pre-commit `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) selže na jakémkoli bajtu, který se liší od připnutého upstream commitu (přeskočí s varováním, když upstream klon, `UI_KIT_CLONE` nebo `_references/cheaper-inference-ui-kit`, chybí). Když v sadě něco chybí, vyřešte to v adaptéru nebo na obrazovce a požádejte o to proti proudu.
-3. Výchozí text sady je angličtina (`label = "Loading"`, `loadingLabel = "Loading table"`…) — předává přeložené řetězce ze `useTranslations(...)` kdykoli komponenta sady vykresluje text.
-4. Tailwind utilities vítězí nad třídami komponent sady (sada deklaruje `@layer theme, base, components, utilities` a její pravidla žijí v `components`) — používá nástroje pro rozmístění a rozvržení, ne pro přebarvování komponent sady.
-5. Nadpisy: `.ci-heading` pro názvy stránek a oddílů; `.ci-dashboard-display` pouze pro velký, řídce zobrazený text, jako je stavový kód chybové stránky. Oba používají Switzer.
-6. `tests/unit/dashboard-kit-sweep.test.ts` chrání přijetí sady: ne Rozpětí ligatury pod `src/app` nebo `src/shared/components`; ve stromu řídicího panelu (`src/app/(dashboard)` a `src/shared/components`) žádné surové `<select>`, `<textarea>` nebo `<table>` a žádné ručně rolované `role="dialog"` mimo uvedené výjimky (nativní větev adaptéru `Select`, `RequestLoggerDetail`); každý nezpracovaný `<button>` nebo `<input>` potřebuje komentář obsahující `kit-exception:` (s důvodem) končící maximálně 3 řádky nad ním; odstíny palet a varianty `dark:` pouze v souborech, které test uvádí.
-7. Před PR (snímky obrazovky) ověřte obě témata a výřez 390 px; `tests/e2e/a11y.spec.ts` běží sekera.
+1. Vždy používejte tokeny, nikdy literály. Výjimky jsou záměrně zachovány: vždy tmavý terminál konzole a
+   `STATUS_HEX` (`src/shared/constants/statusColors.ts`), zrcadlo palety stavů kitu s vyřešenými hexadecimálními
+   hodnotami pro volající, kteří potřebují literální hexadecimální hodnotu. Kategorické palety už nejsou
+   výjimkou: používají osm tokenů grafů kitu (`--color-chart-1..8`, plus `-ink`/`-subtle`) v pořadí
+   sérií kitu prostřednictvím `src/shared/utils/categoricalPalette.ts` a pro strategie routování
+   prostřednictvím `src/app/(dashboard)/dashboard/combos/strategyPalette.ts`; hrany ReactFlow a
+   orchestration canvas čtou proměnné `--orch-status-*` zohledňující motiv
+   (`src/shared/components/flow/edgeStyles.ts`).
+2. Nikdy ručně neupravujte `packages/ui-kit/src`: synchronizujte pomocí `scripts/dev/sync-ui-kit.sh <commit>`;
+   kontrola před commitem `npm run check:ui-kit-snapshot` (`.husky/pre-commit`) selže při jakémkoli bajtu,
+   který se liší od připnutého upstream commitu (při absenci upstream klonu,
+   `UI_KIT_CLONE` nebo `_references/cheaper-inference-ui-kit` kontrolu přeskočí s varováním). Pokud kitu
+   něco chybí, obejděte to v adaptéru nebo na obrazovce a požádejte upstream o doplnění.
+3. Výchozí texty kitu jsou v angličtině (`label = "Loading"`, `loadingLabel = "Loading table"`…) — vždy,
+   když komponenta kitu vykresluje text, předejte přeložené řetězce z `useTranslations(...)`.
+4. Utility Tailwindu mají přednost před třídami komponent kitu (kit deklaruje
+   `@layer theme, base, components, utilities` a jeho pravidla jsou v `components`) — utility používejte
+   pro mezery a rozvržení, nikoli k přebarvování komponent kitu. Výjimkou je typografie:
+   `packages/ui-kit/src/ci-typography.css` se importuje mimo všechny vrstvy, takže jeho pravidla pro tagy mají
+   přednost před utilitami. Třídy pro tloušťku písma, `tracking-*` a `leading-*` nemají žádný účinek na
+   `h1`–`h6`, třídy pro tloušťku písma a `tracking-*` nemají žádný účinek na buňky tabulek a tloušťka písma
+   nemá žádný účinek na tlačítka
+   (`tests/unit/dead-typography-classes.test.ts` je tam odmítá); `font-mono` nemá žádný účinek na
+   `th`, `td`, `button`, `input` a `textarea`. Utility pro velikost, barvu a `uppercase` se stále uplatňují.
+5. Nadpisy: `.ci-heading` pro názvy stránek a sekcí; `.ci-dashboard-display` pouze pro velký, řídký
+   zobrazovaný text, například stavový kód chybové stránky. Obojí používá Switzer.
+6. `tests/unit/dashboard-kit-sweep.test.ts` kontroluje používání kitu: pod `src/app` ani
+   `src/shared/components` nesmí být žádný span s ligaturou Material; ve stromu dashboardu
+   (`src/app/(dashboard)` a `src/shared/components`) nesmí být žádný nativní `<select>`, `<textarea>` ani
+   `<table>` a žádný ručně vytvořený `role="dialog"` mimo uvedené výjimky (nativní větev adaptéru
+   `Select`, `RequestLoggerDetail`); každý nativní `<button>` nebo `<input>` tam musí mít komentář obsahující
+   `kit-exception:` (s odůvodněním), který končí nejvýše 3 řádky nad ním; odstíny palety a varianty
+   `dark:` jsou povoleny pouze v souborech uvedených v testu.
+7. Před pull requestem ověřte oba motivy a viewport o šířce 390 px (pomocí screenshotů);
+   `tests/e2e/a11y.spec.ts` spouští axe.
+8. Barevná utilita musí pojmenovávat token bloku `@theme` v `src/app/globals.css`: název, který tam není
+   (`text-text`, `bg-bg-muted`, `text-danger`…), negeneruje žádné CSS a prvek si zachová zděděnou barvu
+   (`tests/unit/theme-color-classes.test.ts`). Třída `card` neexistuje: použijte adaptér `Card`
+   (`tests/unit/no-bare-card-class.test.ts`). Text v barvě grafu používá `text-chart-N-ink`;
+   `text-chart-N` je určeno pro ikony a tahy
+   (`tests/unit/chart-ink-for-text.test.ts`). Průsvitná barva se vytváří pomocí `color-mix`, nikdy
+   připojením hexadecimální alfy k hodnotě, která může být `var()`
+   (`tests/unit/color-alpha-concatenation.test.ts`).
+9. Tabulky: každý kit `Table` předává `scrollLabel`, název oblasti posouvání, a
+   `scrollbarLabel`, pokud vykresluje trvalý posuvník
+   (`tests/unit/kit-tables-have-accessible-name.test.ts`). Klikatelný řádek je
+   `InteractiveTableRow` s `onActivate`, nikdy `<TableRow onClick>`
+   (`tests/unit/table-row-click-needs-keyboard.test.ts`). Tabulka uvnitř karty nebo uvnitř libovolného
+   rámečku odstraní vlastní rámeček pomocí `containerClassName="rounded-none border-0"`
+   (`tests/unit/datatable-not-framed-inside-card.test.ts`).
+10. Lišta zobrazující množství je kit `Progress` nebo má `role="progressbar"` s názvem a hodnotou, pokud ji
+    lišta kitu nedokáže vykreslit (`tests/unit/progress-bars-have-semantics.test.ts`). Nabídky,
+    popovery a tooltipy pocházejí z kitu (`Popover`, `SearchableSelect`, adaptér `Tooltip`), nikoli
+    z absolutně umístěného panelu otevíraného lokálním stavem
+    (`tests/unit/hand-positioned-overlays.test.ts`).
+11. V adaptéru `Input` určuje `className` styl obálky pole; třída určená pro ovládací prvek patří do
+    `inputClassName` (`tests/unit/input-adapter-classname-destination.test.ts`).
 
 ## 3. Přidání obrazovky
 
-1. Otevřete stránku kitovou hlavičkou `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` uvnitř
-   dashboardu) — titulek, popis a `actions`. Hlavička shellu pak zahodí vlastní titulek.
-2. Stavte ovládací prvky z `@/shared/components` (adaptéry) a používejte komponenty kitu podle subpath
-   tam, kde adaptér neexistuje (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`,
+1. Otevřete stránku s kit `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` uvnitř
+   řídicího panelu) — titulkem, popisem a `actions`. Záhlaví shellu poté odstraní vlastní titulek a
+   pod 1024 px se skryje, takže route bez `PageHeader` nemá na telefonu žádný titulek
+   (`tests/unit/dashboard-page-header-coverage.test.ts`). Segment cesty, který nemá vlastní stránku,
+   patří do `ROUTE_PREFIXES_WITHOUT_PAGE` v `src/shared/utils/breadcrumbTrail.ts`, takže jeho drobeček je
+   text, nikoli nefunkční odkaz (`tests/unit/breadcrumb-trail-routes.test.ts`).
+2. Sestavujte ovládací prvky z `@/shared/components` (adaptéry) a tam, kde adaptér neexistuje, používejte
+   komponenty kitu podle podcesty (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`,
    `RadioGroup`, `Slider`…).
-3. Ikony: `<Icon name="…" />`. Nový název patří do `ICON_MAP` se sémanticky odpovídající Lucide
-   komponentou; `npm run gen:icon-map` vypíše názvy, které stále chybí.
-4. Barvy: sémantické utility (`text-success`, `bg-warning-bg`, `border-border`…) a
-   `var(--color-chart-N)` pro série grafů; žádné hex hodnoty a žádné varianty `dark:`, které jen
-   opakují barvu.
-5. Text: každý řetězec, včetně popisků, které předáváte komponentám kitu, pochází z `useTranslations`.
-   Nové klíče patří do `src/i18n/messages/en.json`, `pt-BR.json` a `vi.json` (vietnamský paritní test
-   připíná každý anglický klíč); ostatní locale vyplní synchronizace i18n.
-6. Před PR spusťte hlídače: `tests/unit/dashboard-kit-sweep.test.ts`,
+3. Ikony: `<Icon name="…" />`. Nový název přidejte do `ICON_MAP` se sémanticky odpovídající
+   komponentou Lucide; `npm run gen:icon-map` vypíše názvy, které stále chybí.
+4. Barvy: používejte sémantické utility (`text-success`, `bg-warning-bg`, `border-border`…) a
+   `var(--color-chart-N)` pro řady grafu; nepoužívejte hexadecimální hodnoty ani varianty `dark:`,
+   které pouze opakují stejnou barvu.
+5. Text: každý řetězec, včetně popisků předávaných komponentám kitu, pochází z `useTranslations`. Nové
+   klíče přidávejte pouze do `src/i18n/messages/en.json`; aktualizace při vydání doplní ostatní lokalizace
+   (`tests/_helpers/localeParityMode.ts` popisuje oba režimy). Test, který připojuje skutečný
+   neanglický katalog, sestavuje své zprávy stejně jako runtime pomocí `deepMergeFallback` z
+   `src/i18n/request.ts`, takže klíč, který je zatím pouze v angličtině, se použije jako záložní namísto
+   vyvolání chyby.
+6. Před PR spusťte kontrolní mechanismy: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
    `npm run check:dashboard-typecheck` (jediná kontrola, která zachytí duplicitní import v `iconMap.ts`),
-   `npm run check:ui-icu` a vlastní testy obrazovky.
+   `npm run check:ui-icu`, kontrolní mechanismy uvedené v pravidlech 4 a 8–11 a vlastní testy obrazovky.
 
 ## 4. Přidání nebo změna adaptéru
 
@@ -83,48 +230,53 @@ Pracovní postup používá dvě tajemství:
 
 `scripts/dev/sync-ui-kit.sh <commit|latest> [clone]` zkopíruje upstream `src/` při tomto odevzdání (`latest` = nejnovější tag `v*` ) do `packages/ui-kit/src`, použije jedinou povolenou transformaci (vypustí příponu `.js` z relativních importů) a nastaví verzi pracovního prostoru v `packages/ui-kit/package.json` a `package-lock.json` na upstream. Poté: zkontrolujte `git diff packages/ui-kit`, proveďte vizuální předání poskytovatelů, nastavení, komba, použití a koncového bodu v obou tématech, spusťte `npm run check:ui-kit-snapshot` a `npm run test:vitest:ui` a otevřete PR pomocí upstream changelogu.
 
-## 6. Diagramy v README
+## 6. Diagramy README
 
-Dvanáct diagramů vložených v kořenovém souboru `README.md` (`docs/diagrams/*.svg`) představuje kit aplikovaný na statický
-obrázek a jsou generovány, nikoli kresleny ručně: 13 generátorových souborů v `scripts/docs/gen-readme-*.mjs`
-(dvanáct diagramů plus spouštěcí soubor `gen-readme-diagrams.mjs`) a 12 testů aktuálnosti v
-`tests/unit/docs/readme-*-svg.test.ts`, jeden pro každý diagram, z nichž každý bajtově porovnává zapsaný soubor s výstupem
-jeho generátoru (úloha `test-unit`).
+Dvanáct diagramů, které kořenový `README.md` vkládá (`docs/diagrams/*.svg`), tvoří sadu aplikovanou na statický
+obrázek a jsou generovány, nikoli ručně kresleny: 13 generátorových souborů v `scripts/docs/gen-readme-*.mjs`
+(dvanáct diagramů plus ovladač `gen-readme-diagrams.mjs`) a 12 testů zastaralosti v
+`tests/unit/docs/readme-*-svg.test.ts`, jeden pro každý diagram, přičemž každý porovnává bajt po bajtu
+committovaný soubor s výstupem jeho generátoru (úloha `test-unit`).
 
-- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` přebírá paletu Editions (výchozí vzhled) z
-  `packages/ui-kit/src/ci-editions.css` (shodu s tímto souborem hlídá
+- **Tokeny.** `scripts/docs/readme-diagram-theme.mjs` kopíruje paletu Editions (výchozí vzhled) z
+  `packages/ui-kit/src/ci-editions.css` (proti tomuto souboru je připnuta testem
   `tests/unit/docs/readme-diagram-theme.test.ts`, který také kontroluje WCAG AA pro každou barvu textu na každém
-  povrchu v obou schématech; jedinou výjimkou je světlá varianta `warn`, což je varovná barva kitu ztmavená o 10 %, protože
-  hodnota kitu má na plátně kontrast 4,46:1) a definuje textové role na typografické škále kitu (`ci-tokens.css`): Switzer s tloušťkami používanými kitem (400/500/600, titulkové písmo s tloušťkou 500) a prostrkáním pro
-  vše kromě rolí kódu (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), které
-  používají IBM Plex Mono a jsou určeny pouze pro příkazy, adresy URL, identifikátory a obrazovky terminálu.
-  Hodnoty světlého schématu jsou v `:root`, hodnoty tmavého schématu za `prefers-color-scheme: dark` uvnitř souboru, takže každý
-  obrázek na GitHubu používá schéma diváka.
-- **Písma.** Markdown na GitHubu neobsahuje žádné CSS a proxy camo blokuje všechna externí načítání, takže typografie kitu
-  musí být součástí souboru. `scripts/docs/readme-outline.mjs`, poslední krok každého generátoru, vytvaruje role
-  písma Switzer pomocí HarfBuzz a vykreslí je jako vektorové obrysy (cesty `<defs>` a prvky `<use>`), přičemž šipky
-  a geometrické symboly, které Switzer neobsahuje, vykreslí podle jeho vlastních metrik. Používejte obrysy, nikdy vložené písmo: licence písma Switzer
-  (`packages/ui-kit/src/fonts/FFL.txt`) zakazuje bez písemného souhlasu vytváření podmnožin a převod formátu
-  a povoluje vektorové kresby, proto znovu nezavádějte `@font-face` pro Switzer ani URI `data:`. Jediným
-  písmem ponechaným v souboru je podmnožina IBM Plex Mono s licencí OFL pro obsah, který zůstává skutečným textem kódu
-  (`scripts/docs/readme-fonts.mjs`), sestavená z těchto znaků; pokud nelze některý glyf vložit, dojde k chybě.
-- **Regenerování.** `npm run docs:readme-diagrams` přepíše všech dvanáct souborů v pořadí uvedeném v README a pro každý
-  soubor vypíše jeden řádek s jeho velikostí. Jednotlivý generátor lze spustit také samostatně (`node scripts/docs/gen-readme-<name>.mjs`;
-  `free-tier-budget` vyžaduje `node --import tsx/esm`, protože jeho údaje pocházejí z aktivního zavaděče katalogu v
-  `open-sse/config/freeModelCatalog.ts`; důsledek změny katalogu pro CI je popsán v
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Generátor a SVG zapište do commitu společně.
-- **Ověření.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` vykreslí soubor způsobem, jakým jej poskytuje GitHub
-  (značka `<img>`, direktiva camo `Content-Security-Policy`, `image/svg+xml`), pořídí snímek ve světlém i tmavém režimu
-  a vypíše počet požadavků stránky na externí písma (musí být 0).
-- **Limit.** Méně než 200 KB na soubor (ověřuje to každý test aktuálnosti); 500 KB je pevný limit pro libovolný obrázek
-  v README (pravidlo validátoru studia SVG).
-- **Text beze změn, počty z kontrolní brány.** Rebranding změnil typografii a paletu, nikoli slova: každý generátor
-  uchovává text svého diagramu v konstantě `*_COPY` (nebo jej sestavuje z aktivního katalogu), která slouží jak jako
-  vykreslený text, tak jako vstup kroku převodu na obrysy. Kanonické hodnoty zůstávají v uzlech `<text>` (po
-  převedení na obrysy jsou neviditelné, `fill-opacity:0`) a čte je `check:docs-counts`
-  (`scripts/check/check-docs-counts-sync.mjs`); testy aktuálnosti diagramů, které tato brána kontroluje, spouštějí
-  její validátory také nad vygenerovaným souborem, takže pokud se údaj odchýlí od kódu, test selže — opravte
-  zdroj, který brána čte, nikdy číslo v generátoru.
+  povrchu v obou schématech; jedinou výjimkou je světlá `warn`, což je barva varování sady ztmavená o 10 %,
+  protože hodnota sady má na plátně kontrast 4.46:1) a definuje textové role na typografické škále sady
+  (`ci-tokens.css`): Switzer v tloušťkách sady (400/500/600, display v 500) a tracking pro vše s výjimkou
+  rolí kódu (`.cmd`, `.term`, `.term-lg`, `.mono`, `.mono-sm`, `.mono-xs`), které používají IBM Plex Mono a jsou
+  určeny pouze pro příkazy, URL, identifikátory a terminálové obrazovky.
+  Světlé hodnoty jsou ve `:root`, tmavé hodnoty za `prefers-color-scheme: dark`, uvnitř souboru, takže každý
+  obrázek na GitHubu následuje schéma uživatele.
+- **Fonty.** GitHub Markdown nepřenáší žádné CSS a proxy camo blokuje každé externí načtení, takže typografie sady
+  musí být součástí souboru. `scripts/docs/readme-outline.mjs`, poslední krok každého generátoru, tvaruje role
+  Switzer pomocí HarfBuzz a vykresluje je jako vektorové obrysy (`<defs>` paths a `<use>`), přičemž šipky a
+  geometrické symboly, které Switzer neobsahuje, kreslí podle vlastních metrik. Obrysy, nikdy vložený font:
+  licence Switzer (`packages/ui-kit/src/fonts/FFL.txt`) zakazuje podmnožiny a převod formátů bez písemného
+  souhlasu a povoluje vektorové kresby, proto znovu nezavádějte `@font-face` Switzer ani URI `data:`. Jediným
+  fontem, který v souboru zůstává, je podmnožina IBM Plex Mono s licencí OFL pro to, co zůstává skutečným
+  textem kódu (`scripts/docs/readme-fonts.mjs`), sestavená z těchto znaků; každý glyph, který nelze vložit,
+  vyvolá chybu.
+- **Regenerace.** `npm run docs:readme-diagrams` přepíše všech dvanáct diagramů v pořadí README a pro každý
+  soubor vypíše jeden řádek s jeho velikostí. Jeden generátor lze spustit také samostatně
+  (`node scripts/docs/gen-readme-<name>.mjs`; `free-tier-budget` potřebuje `node --import tsx/esm`, protože
+  jeho údaje pocházejí z živého loaderu katalogu v `open-sse/config/freeModelCatalog.ts`; důsledek změny
+  katalogu pro CI je uveden v `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict`). Generátor a SVG
+  committujte společně.
+  Zastaralé SVG selže v režimu release; ve feature PR posuzuje `npm run check:generated-artifacts` pouze SVG,
+  které PR upravuje (`docs/architecture/QUALITY_GATES.md` → „Generované soubory a odvozené baseline“).
+- **Ověření.** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` vykreslí soubor způsobem, jakým jej
+  poskytuje GitHub (značka `<img>`, `Content-Security-Policy` camo, `image/svg+xml`), pořídí světlý a tmavý
+  snímek a oznámí externí požadavky na fonty, které stránka provedla (musí jich být 0).
+- **Limit.** Méně než 200 KB na soubor (každý test zastaralosti to ověřuje); 500 KB je pevný limit pro každý
+  obrázek README (pravidlo validátoru SVG studia).
+- **Kopírujte beze změn, počty přebírejte z kontroly.** Rebranding změnil typografii a paletu, nikoli slova:
+  každý generátor obsahuje text svého diagramu v konstantě `*_COPY` (nebo jej sestavuje z živého katalogu),
+  která je zároveň vykresleným textem i vstupem kroku tvorby obrysů. Kanonické údaje zůstávají v uzlech
+  `<text>` (po vytvoření obrysů jsou neviditelné, `fill-opacity:0`) a čte je
+  `check:docs-counts` (`scripts/check/check-docs-counts-sync.mjs`); testy zastaralosti diagramů, které kontrolují
+  počty, také spouštějí jeho validátory nad vygenerovaným souborem, takže údaj, který se odchýlí od kódu,
+  způsobí selhání testu — opravujte zdroj, který kontrola čte, nikdy číslo v generátoru.
 
 ## 7. Rejstřík odkazů
 

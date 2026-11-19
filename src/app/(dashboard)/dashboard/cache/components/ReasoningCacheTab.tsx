@@ -9,6 +9,7 @@ import {
   TableHeader,
   TableRow,
 } from "@omniroute/ui-kit/table";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
@@ -232,7 +233,7 @@ export default function ReasoningCacheTab() {
             {t("reasoningCache")}
           </SectionBadge>
           <div>
-            <h2 className="text-lg font-semibold text-text-main">{t("reasoningCache")}</h2>
+            <h2 className="text-lg text-text-main">{t("reasoningCache")}</h2>
             <p className="mt-1 max-w-3xl text-sm text-text-muted">{t("reasoningCacheDesc")}</p>
           </div>
         </div>
@@ -270,14 +271,14 @@ export default function ReasoningCacheTab() {
           label={t("reasoningReplays")}
           value={stats.replays.toLocaleString()}
           sub={t("reasoningBehaviorReplay")}
-          accent="text-chart-2"
+          accent="text-chart-2-ink"
         />
         <StatCard
           icon="text_fields"
           label={t("reasoningCharsCached")}
           value={formatChars(stats.totalChars)}
           sub={`${stats.totalChars.toLocaleString()} chars`}
-          accent="text-chart-4"
+          accent="text-chart-4-ink"
         />
         <StatCard
           icon="error_outline"
@@ -292,11 +293,12 @@ export default function ReasoningCacheTab() {
       {providerEntries.length > 0 && (
         // Plain sections: the cache page's Card is the only frame around these tables (#19620).
         <div>
-          <h3 className="text-sm font-medium text-text-main">{t("reasoningByProvider")}</h3>
+          <h3 className="text-sm text-text-main">{t("reasoningByProvider")}</h3>
           <Table
             className="text-sm"
             containerClassName="mt-3 rounded-none border-0"
             scrollbarLabel={t("reasoningByProvider")}
+            scrollLabel={t("reasoningByProvider")}
           >
             <TableHeader>
               <TableRow>
@@ -314,23 +316,22 @@ export default function ReasoningCacheTab() {
                     : "0.0";
                 return (
                   <TableRow key={prov}>
-                    <TableCell className="font-medium text-text-main">{prov}</TableCell>
+                    <TableCell className="text-text-main">{prov}</TableCell>
                     <TableCell className="tabular-nums text-text-main">
                       {d.entries.toLocaleString()}
                     </TableCell>
-                    <TableCell className="tabular-nums text-chart-4">
+                    <TableCell className="tabular-nums text-chart-4-ink">
                       {formatChars(d.chars)}
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <div className="h-2 w-20 overflow-hidden rounded-full bg-border/60">
-                          <div
-                            className="h-full rounded-full bg-chart-1"
-                            style={{
-                              width: `${Math.min(parseFloat(share), 100)}%`,
-                            }}
-                          />
-                        </div>
+                        <Progress
+                          className="w-20"
+                          aria-label={`${prov}: ${t("tableShare")}`}
+                          aria-valuetext={`${share}%`}
+                          value={parseFloat(share)}
+                          animate={false}
+                        />
                         <span className="text-xs font-semibold tabular-nums text-text-main">
                           {share}%
                         </span>
@@ -347,11 +348,12 @@ export default function ReasoningCacheTab() {
       {/* By Model */}
       {modelEntries.length > 0 && (
         <div>
-          <h3 className="text-sm font-medium text-text-main">{t("reasoningByModel")}</h3>
+          <h3 className="text-sm text-text-main">{t("reasoningByModel")}</h3>
           <Table
             className="text-sm"
             containerClassName="mt-3 rounded-none border-0"
             scrollbarLabel={t("reasoningByModel")}
+            scrollLabel={t("reasoningByModel")}
           >
             <TableHeader>
               <TableRow>
@@ -366,14 +368,14 @@ export default function ReasoningCacheTab() {
                 const avgChars = d.entries > 0 ? Math.round(d.chars / d.entries) : 0;
                 return (
                   <TableRow key={mdl}>
-                    <TableCell className="font-medium text-text-main">{mdl}</TableCell>
+                    <TableCell className="text-text-main">{mdl}</TableCell>
                     <TableCell className="tabular-nums text-text-main">
                       {d.entries.toLocaleString()}
                     </TableCell>
-                    <TableCell className="tabular-nums text-chart-2">
+                    <TableCell className="tabular-nums text-chart-2-ink">
                       {avgChars.toLocaleString()}
                     </TableCell>
-                    <TableCell className="tabular-nums text-chart-4">
+                    <TableCell className="tabular-nums text-chart-4-ink">
                       {formatChars(d.chars)}
                     </TableCell>
                   </TableRow>
@@ -387,7 +389,7 @@ export default function ReasoningCacheTab() {
       {/* Recent Entries */}
       <div>
         <div className="mb-4 flex flex-col gap-1">
-          <h3 className="text-sm font-medium text-text-main">{t("reasoningRecentEntries")}</h3>
+          <h3 className="text-sm text-text-main">{t("reasoningRecentEntries")}</h3>
           <p className="text-sm text-text-muted">{t("reasoningCacheDesc")}</p>
         </div>
 
@@ -434,7 +436,7 @@ export default function ReasoningCacheTab() {
                       >
                         {entry.model}
                       </TableCell>
-                      <TableCell className="tabular-nums text-chart-4">
+                      <TableCell className="tabular-nums text-chart-4-ink">
                         {entry.charCount.toLocaleString()}
                       </TableCell>
                       <TableCell className="text-text-muted">{timeAgo(entry.createdAt)}</TableCell>
@@ -486,7 +488,7 @@ export default function ReasoningCacheTab() {
                             </span>
                             <span>
                               {t("reasoningChars")}:{" "}
-                              <span className="text-chart-4">
+                              <span className="text-chart-4-ink">
                                 {entry.charCount.toLocaleString()}
                               </span>
                             </span>
@@ -504,7 +506,7 @@ export default function ReasoningCacheTab() {
 
       {/* Behavior Info */}
       <div className="rounded-xl border border-border bg-bg-subtle p-5">
-        <h3 className="text-sm font-medium text-text-main">{t("reasoningBehavior")}</h3>
+        <h3 className="text-sm text-text-main">{t("reasoningBehavior")}</h3>
         <div className="mt-4 grid gap-3">
           <InfoRow icon="info">{t("reasoningBehaviorCapture")}</InfoRow>
           <InfoRow icon="info">{t("reasoningBehaviorReplay")}</InfoRow>
