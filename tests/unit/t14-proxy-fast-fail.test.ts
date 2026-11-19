@@ -52,7 +52,7 @@ test("#5109: concurrent proxy reachability checks share one TCP probe", async ()
   }
 });
 
-test("#5109: transient unreachable results use a short negative cache", async () => {
+test("#5109: transient unreachable results use a short negative cache", async (t) => {
   const proxyUrl = "http://127.0.0.1:1081";
   invalidateProxyHealth(proxyUrl);
 
@@ -62,16 +62,19 @@ test("#5109: transient unreachable results use a short negative cache", async ()
     return probeCount > 1;
   });
 
+  let clock = 1_000_000;
+  t.mock.method(Date, "now", () => clock);
   try {
     assert.equal(await isProxyReachable(proxyUrl, 120, 5), false);
     assert.equal(getCachedProxyHealth(proxyUrl), false);
 
-    await new Promise((resolve) => setTimeout(resolve, 15));
+    clock += 6;
 
     assert.equal(await isProxyReachable(proxyUrl, 120, 5), true);
     assert.equal(getCachedProxyHealth(proxyUrl), true);
     assert.equal(probeCount, 2, "failed probes must not poison the proxy for 30 seconds");
   } finally {
+    t.mock.restoreAll();
     __setProxyHealthTcpCheckForTesting(null);
     invalidateProxyHealth(proxyUrl);
   }
