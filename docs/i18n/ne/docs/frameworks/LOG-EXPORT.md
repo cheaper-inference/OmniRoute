@@ -199,140 +199,105 @@ BigQuery कार्यान्वयनले यो सर्त पहि�
 
 कन्फिगरेसन कुञ्जीहरू (`type: "bigquery"`):
 
-| कुञ्जी               | टिप्पणीहरू                                                                         |
-| -------------------- | ---------------------------------------------------------------------------------- |
-| `projectId`          | डेटासेट रहेको GCP परियोजना                                                         |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                    |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                    |
-| `location`           | डेटासेट सिर्जना गर्नुपर्दा मात्र प्रयोग हुन्छ (पूर्वनिर्धारित `EU`)                |
-| `serviceAccountJson` | सेवा-खाता कुञ्जी। गोप्य: भण्डारणमा इन्क्रिप्ट गरिएको हुन्छ, कहिल्यै फिर्ता दिइँदैन |
-| `autoCreate`         | पहिलो निर्यातमा डेटासेट र तालिका सिर्जना गर्ने (पूर्वनिर्धारित `true`)             |
+| Key                  | Notes                                                                                                            |
+| -------------------- | ---------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | डेटासेट राख्ने GCP project                                                                                       |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                  |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                  |
+| `location`           | डेटासेट सिर्जना गर्नुपर्ने अवस्थामा मात्र प्रयोग हुन्छ (पूर्वनिर्धारित `EU`)                                     |
+| `serviceAccountJson` | Service-account कुञ्जी। गोप्य: स्थिर अवस्थामा इन्क्रिप्ट गरिएको, कहिल्यै फिर्ता गरिँदैन                          |
+| `autoCreate`         | हराइरहेको डेटासेट/टेबल सिर्जना गर्ने; nullable usage-evidence स्तम्भहरू सर्तअनुसार थप्ने (पूर्वनिर्धारित `true`) |
 
-सेवा खातालाई लक्षित तालिकामा `bigquery.tables.updateData` चाहिन्छ, साथै
-`autoCreate` सक्रिय हुँदा `bigquery.datasets.create` / `bigquery.tables.create` पनि चाहिन्छ।
+Service account लाई लक्षित टेबलमा `bigquery.tables.updateData` आवश्यक हुन्छ, साथै
+`autoCreate` सक्रिय हुँदा `bigquery.datasets.create` / `bigquery.tables.create` पनि आवश्यक हुन्छ।
+पहिल्यै रहेको टेबलमा दुईवटा nullable usage-evidence field थप्न `bigquery.tables.update` पनि
+आवश्यक हुन्छ। अनुमति हराएमा export असफल हुन्छ र यसको cursor अगाडि बढ्दैन।
 
-कन्फिगर गरिएको ब्याच **कर्सर** एकाइ हो, HTTP एकाइ होइन: `send()` ले यसलाई बढीमा 500 पङ्क्ति भएका insertAll
-कलहरूमा विभाजन गर्छ, त्यसैले ठूलो `batch_size` ले पनि BigQuery को 10 MB अनुरोध सीमा नाघ्न सक्दैन।
-अस्थायी स्थिति कोडहरू (408/429/500/502/503/504) मा उही insertIds पुनः प्रयोग गर्दै, प्रत्येक पटक प्रतीक्षा अवधि घाताङ्कीय रूपमा बढाएर
-तीन पटकसम्म पुनः प्रयास गरिन्छ; प्रमाणीकरण र स्किमा विफलताहरूमा भने रन खेर फाल्नुको सट्टा
-पहिलो प्रयासमै त्रुटि फ्याँकिन्छ।
+कन्फिगर गरिएको batch HTTP एकाइ होइन, **cursor** एकाइ हो: `send()` ले यसलाई बढीमा 500
+row भएका insertAll call हरूमा विभाजन गर्छ, त्यसैले ठूलो `batch_size` ले BigQuery को 10 MB request
+सीमा पार्न सक्दैन। अस्थायी status (408/429/500/502/503/504) लाई exponential
+backoff सहित बढीमा तीन पटक पुनःप्रयास गरिन्छ र उही insertIds पुनःप्रयोग गरिन्छ; auth र schema
+सम्बन्धी असफलतामा run अनावश्यक रूपमा खर्च नगरी पहिलो प्रयासमै त्रुटि फ्याँकिन्छ।
 
-भर्खरै सिर्जना गरिएको तालिका स्ट्रिमिङ एन्डपोइन्टमा अझै देखिँदैन, जसले केही सेकेन्डसम्म
-404 प्रतिक्रिया दिन्छ। त्यो 404 मा पुनः प्रयास गरिन्छ, तर **यस रनले नै तालिका सिर्जना गरेको अवस्थामा मात्र** —
-साँच्चिकै अनुपस्थित तालिकाको हकमा भने तुरुन्तै विफल हुन्छ। हालै मेटाइएको नाममै
-तालिका पुनः सिर्जना गर्दा BigQuery ले केही मिनेटसम्म स्ट्रिमिङ इन्सर्टहरू अस्वीकार गर्छ भन्ने कुरा ध्यान दिनुहोस्; यो
-मेटाएर फेरि सिर्जना गर्ने प्रक्रियाको विशेषता हो, त्यसैले तालिका हटाएर फेरि थप्नुभन्दा नयाँ तालिका नाम प्रयोग गर्नुहोस्।
+भर्खरै सिर्जना गरिएको टेबल streaming endpoint मा तुरुन्तै देखिँदैन, जसले केही सेकेन्डसम्म
+404 जवाफ दिन्छ। त्यो 404 मा पुनःप्रयास गरिन्छ, तर **यो run ले टेबल सिर्जना गरेको अवस्थामा मात्र** —
+वास्तवमै हराइरहेको टेबलमा तुरुन्तै असफल हुन्छ। हालसालै मेटाइएको टेबलको नाममा पुनः टेबल
+सिर्जना गर्दा BigQuery ले केही मिनेटसम्म streaming inserts अस्वीकार गर्छ भन्ने कुरा ध्यान दिनुहोस्;
+यो delete-then-recreate को विशेषता हो, त्यसैले टेबल हटाएर पुनः थप्नुको सट्टा नयाँ टेबल नाम
+प्रयोग गर्नु राम्रो हुन्छ।
 
-**आंशिक विफलता खाली नभएको `insertErrors[]` सहित HTTP 200 का रूपमा आउँछ।** यसलाई
-विफलता मानिन्छ र त्रुटि फ्याँकिन्छ, जसले BigQuery ले कहिल्यै स्वीकार नगरेका पङ्क्तिहरू पार गरेर कर्सर
-अगाडि बढ्न रोक्छ; `tests/unit/log-export-bigquery.test.ts` ले यो व्यवहार सुनिश्चित गर्छ।
+**आंशिक असफलता HTTP 200 सँग non-empty `insertErrors[]` का रूपमा आउँछ।** यसलाई
+असफलता मानेर त्रुटि फ्याँकिन्छ, जसले BigQuery ले स्वीकार नगरेका row हरूभन्दा अगाडि cursor
+बढ्नबाट रोक्छ; `tests/unit/log-export-bigquery.test.ts` ले यस व्यवहारलाई सुनिश्चित गर्छ।
 
-ट्रान्सपोर्ट साधारण REST हो — स्वहस्ताक्षरित RS256 असर्शनलाई
-`https://oauth2.googleapis.com/token` मा पहुँच टोकनसँग साटिन्छ, त्यसपछि पङ्क्तिहरू `tabledata.insertAll` मा पठाइन्छन्। कुनै Google SDK
-समावेश गरिँदैन। पहुँच टोकनहरू प्रत्येक (सेवा खाता, स्कोप) का लागि प्रक्रियाभित्र क्यास गरिन्छन्।
+Transport plain REST हो — self-signed RS256 assertion लाई
+`https://oauth2.googleapis.com/token` मा access token का लागि साटिन्छ, त्यसपछि row हरू
+`tabledata.insertAll` मा पठाइन्छ। कुनै Google SDK समावेश गरिँदैन। Access token हरूलाई
+process भित्र (service account, scope) अनुसार cache गरिन्छ।
 
-सिर्जना गरिएको तालिकामा Logs ट्याबको प्रत्येक फिल्डका लागि एउटा स्तम्भका साथै `exported_at` हुन्छ, र कल लगहरूमा
-वास्तवमा कसरी क्वेरी गरिन्छ भन्नेअनुसार यसको संरचना बनाइन्छ:
+सिर्जना गरिएको टेबलमा Logs-tab का प्रत्येक field का लागि एउटा column र `exported_at` हुन्छ, र
+वास्तवमा call logs कसरी query गरिन्छ भन्नेअनुसार यसको संरचना तयार गरिएको हुन्छ:
 
-- **`timestamp` मा दिनअनुसार विभाजित**, त्यसैले मितिले सीमित गरिएको क्वेरीले ती दिनहरू मात्र स्क्यान गर्छ।
-- **`api_key_name`, `provider`, `model`, `status` अनुसार क्लस्टर गरिएको** (यही क्रममा), त्यसैले
-  कसले चलायो, कहाँ पठाइयो वा विफल भयो कि भएन भन्ने आधारमा फिल्टर गर्दा प्रत्येक पार्टिसनभित्रका अनावश्यक ब्लकहरू हटाइन्छन्। BigQuery
-  ले बढीमा चारवटा क्लस्टरिङ स्तम्भ अनुमति दिन्छ र क्रम महत्त्वपूर्ण हुन्छ: `api_key_name` मात्रको फिल्टरले
-  ब्लकहरू हटाउँछ, तर `status` मात्रको फिल्टरले हटाउँदैन।
-- **वैकल्पिक पार्टिसन अवधारण अवधि** `partitionExpirationDays` मार्फत (0 ले सबै राख्छ), जुन
-  तालिका सिर्जना हुँदा लागू हुन्छ।
+- **`timestamp` मा day-partitioned**, त्यसैले मितिद्वारा सीमित गरिएको query ले ती दिनहरू मात्र scan गर्छ।
+- **`api_key_name`, `provider`, `model`, `status` द्वारा clustered** (यसै क्रममा), त्यसैले
+  कसले चलायो, कहाँ पठाइयो वा असफल भयो कि भएन भनेर filter गर्दा प्रत्येक partition भित्रका
+  block हरू prune हुन्छन्। BigQuery ले बढीमा चारवटा clustering column अनुमति दिन्छ र क्रम
+  महत्त्वपूर्ण हुन्छ: `api_key_name` मा मात्र गरिएको filter ले prune गर्छ, `status` मा मात्र गरिएको
+  filter ले गर्दैन।
+- `partitionExpirationDays` मार्फत **वैकल्पिक partition retention** (0 ले सबै कुरा राख्छ),
+  टेबल सिर्जना गर्दा लागू हुन्छ।
 
-दुवै सेटिङ सिर्जनाको समयमा लागू हुन्छन्। विद्यमान तालिकाले आफ्नो पहिलेकै संरचना कायम राख्छ, त्यसैले
-यी सेटिङ अपनाउन चाहनुहुन्छ भने गन्तव्यलाई नयाँ तालिका id मा निर्दिष्ट गर्नुहोस्।
+दुवै सेटिङ सिर्जना गर्ने समयमा मात्र लागू हुन्छन्। पहिल्यै रहेको टेबलले त्यसमा पहिल्यै भएको
+layout नै राख्छ, त्यसैले यी सेटिङ अपनाउन चाहनुहुन्छ भने गन्तव्यलाई नयाँ table id तर्फ
+निर्देश गर्नुहोस्।
 
-`tests/unit/log-export-bigquery.test.ts` ले म्यापर र तालिकाको स्किमा सधैँ एकअर्कासँग मेल खाने सुनिश्चित गर्छ,
-ताकि निर्यात गर्दा कुनै नयाँ कल-लग स्तम्भ चुपचाप छुट्न नसकोस्।
+`tests/unit/log-export-bigquery.test.ts` ले mapper र table schema एकआपसमा सुसंगत रहेको
+सुनिश्चित गर्छ, त्यसैले नयाँ call-log column पठाउने क्रममा चुपचाप छुट्न सक्दैन।
 
-ब्याचहरूलाई पङ्क्ति सङ्ख्या र सिरियलाइज गरिएका बाइटहरू **दुवै** का आधारमा टुक्र्याइन्छ। पेलोडहरू निर्यात हुन थालेपछि
-पङ्क्ति सङ्ख्या मात्र पर्याप्त हुँदैन: प्रम्प्टहरू भएका 500 पङ्क्तिहरूको आकार दसौँ मेगाबाइट हुन सक्छ, र insertAll
-ले 10 MB भन्दा ठूलो अनुरोध अस्वीकार गर्छ। टुक्राहरू 500 पङ्क्ति वा 9 MB मध्ये जुन सीमा पहिले पुग्छ, त्यहीँ बन्द हुन्छन्।
+Batch हरू **row count र serialised bytes दुवै** का आधारमा विभाजन गरिन्छ। payload हरू export
+गरिएपछि row count मात्र पर्याप्त हुँदैन: prompt बोकेका 500 row को आकार दसौँ megabytes हुन
+सक्छ, र insertAll ले 10 MB भन्दा ठूलो request अस्वीकार गर्छ। Chunk हरू 500 row वा 9 MB,
+जुन पहिले पुग्छ, त्यहीँ बन्द हुन्छन्।
 
 ---
 
-## 5. OTLP/HTTP ट्रेस गन्तव्य
+## ५. OTLP/HTTP ट्रेस गन्तव्य
 
-कन्फिगरेसनले `type: "otlp-http"` प्रयोग गर्छ। यो स्थायी रूपमा भण्डारण गरिएका कल लगहरूको निर्धारित, कर्सर-आधारित निर्यात हो,
-`open-sse/services/routing/otel.ts` मा रहेको सक्दो प्रयासमा चल्ने प्रत्यक्ष राउटिङ-इभेन्ट सिंक होइन।
-यसले उक्त सिंकका वातावरण चरहरू, टाइमरहरू वा बफरहरू पढ्दैन वा परिवर्तन गर्दैन।
-दुवै सक्षम गर्दा दुई स्वतन्त्र प्रकारका स्प्यानहरू उत्पन्न हुन सक्छन्;
-यी कल-लग स्प्यानहरू छुट्याउन `omniroute.log-export` इन्स्ट्रुमेन्टेसन स्कोप प्रयोग गर्नुहोस्।
+कन्फिगरेसनले `type: "otlp-http"` प्रयोग गर्छ। यो persisted call logs को scheduled, cursor-backed export हो, `open-sse/services/routing/otel.ts` मा रहेको best-effort live routing-event sink होइन। यसले उक्त sink का environment variables, timers वा buffers पढ्दैन वा परिवर्तन गर्दैन। दुवै सक्षम गर्दा spans का दुई स्वतन्त्र प्रकार उत्पन्न हुन सक्छन्; यी call-log spans छुट्याउन `omniroute.log-export` instrumentation scope प्रयोग गर्नुहोस्।
 
-| कुञ्जी                   | पूर्वनिर्धारित मान / उद्देश्य                                                      |
-| ------------------------ | ---------------------------------------------------------------------------------- |
-| `endpoint`               | पूर्ण HTTP(S) ट्रेस URL अनिवार्य; `/v1/traces` प्रत्यय थपिँदैन                     |
-| `headers`                | वैकल्पिक `Name: value` लाइनहरू वा स्ट्रिङहरूको JSON अब्जेक्ट; इन्क्रिप्ट गरिएको    |
-| `requestHeaderAllowlist` | खाली (बन्द); स्प्यान विशेषताका रूपमा सङ्कलन गरिने क्लाइन्ट हेडरका नामहरू/उपसर्गहरू |
-| `serviceName`            | `omniroute`; रिसोर्सको `service.name`                                              |
-| `langfuseMapping`        | `false`; Langfuse का generation/session/user विशेषताहरू थप्छ                       |
-| `identity`               | `pseudonymous`, `keyName`, वा `none`                                               |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                            |
-| `timeoutMs`              | `30000` प्रति HTTP प्रयास                                                          |
-| `environment`            | सेट नगरिएको; वैकल्पिक `langfuse.environment`                                       |
+| Key                      | Default / purpose                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------- |
+| `endpoint`               | आवश्यक पूर्ण HTTP(S) traces URL; `/v1/traces` suffix थपिँदैन                          |
+| `headers`                | वैकल्पिक `Name: value` lines वा strings को JSON object; encrypted                     |
+| `requestHeaderAllowlist` | खाली (बन्द); span attributes का रूपमा capture गर्नुपर्ने client header names/prefixes |
+| `serviceName`            | `omniroute`; resource `service.name`                                                  |
+| `langfuseMapping`        | `false`; Langfuse generation/session/user attributes थप्छ                             |
+| `identity`               | `pseudonymous`, `keyName`, वा `none`                                                  |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                               |
+| `timeoutMs`              | प्रत्येक HTTP प्रयासका लागि `30000`                                                   |
+| `environment`            | सेट नगरिएको; वैकल्पिक `langfuse.environment`                                          |
 
-सामान्य ड्यासबोर्डले यी फिल्डहरू देखाउँछ। `paths` ले API एरे वा न्यूलाइन/अल्पविरामले छुट्याइएका
-ठ्याक्कै पथहरू भएको टेक्स्टएरिया स्वीकार गर्छ। स्पष्ट रूपमा अनुमति नदिइएसम्म embeddings, rerank र अन्य पथहरू
-छोडिन्छन्। छोडिएका पङ्क्तिहरूले पनि कर्सर अगाडि बढाउँछन्; विद्यमान
-रनरका `exported`/`exportedTotal` काउन्टरहरूले स्वीकार गरिएका स्प्यानहरूको सट्टा फिल्टर गरिएका
-पङ्क्तिहरूसहित प्रशोधन गरिएका स्रोत पङ्क्तिहरू गन्छन्। फिल्टरिङ चाइल्डमा गरिन्छ, यसको
-IPC/कर्सर सम्झौता परिवर्तन नगरी।
+सामान्य dashboard ले यी fields render गर्छ। `paths` ले API array वा newline/commas द्वारा छुट्याइएका exact paths भएको textarea स्वीकार गर्छ। Embeddings, rerank र अन्य paths स्पष्ट रूपमा अनुमति नदिइएसम्म skip गरिन्छन्। Skip गरिएका rows ले cursor अगाडि बढाउन जारी राख्छन्; विद्यमान runner का `exported`/`exportedTotal` counters ले स्वीकार गरिएका spans होइन, filter गरिएका rows समेत समेटिएका processed source rows गणना गर्छन्। Filtering child मा गरिन्छ, यसको IPC/cursor contract परिवर्तन नगरी।
 
-URL प्रमाणीकरणले `src/shared/network/outboundUrlGuard.ts` को DB-रहित `parseAndValidateNonMetadataUrl` हेल्पर
-प्रयोग गर्छ: अर्थात् `block-metadata` नीति। यसमा निजी URL हरूलाई अनुमति दिइएको webhook भ्यालिडेटरमा जस्तै
-बिनासर्त मेटाडेटा/प्रोटोकल/एम्बेड गरिएका क्रेडेन्सियल जाँचहरू हुन्छन्,
-तर यसले जानाजानी विश्वव्यापी फिचर-फ्ल्याग ओभरराइडबिनै localhost/LAN लक्ष्यहरूलाई अनुमति दिन्छ।
-यसले निजी HTTP एन्डपोइन्टहरूसहित स्व-होस्ट गरिएका Langfuse, Phoenix, Tempo र Collector
-एन्डपोइन्टहरू प्रयोग गर्न दिन्छ। क्लाउड-मेटाडेटा होस्टहरू सधैँ रोकिएका हुन्छन्।
-रिडाइरेक्टहरू पछ्याइँदैनन्, त्यसैले कलेक्टरले क्रेडेन्सियलहरू अर्को होस्टमा रिडाइरेक्ट गर्न सक्दैन।
-विद्यमान लेक्सिकल URL गार्डजस्तै, यसले DNS रिजोलुसन पिन गर्दैन; सञ्चालकको नियन्त्रणमा रहेका
-होस्टहरू मात्र कन्फिगर गर्नुहोस्। एन्डपोइन्ट विश्वसनीय नेटवर्कमा नभएमा HTTPS लाई प्राथमिकता दिनुहोस्।
+URL validation ले `src/shared/network/outboundUrlGuard.ts` बाट DB-free `parseAndValidateNonMetadataUrl` helper प्रयोग गर्छ: `block-metadata` policy। यसमा webhook validator का जस्तै unconditional metadata/protocol/embedded-credential checks हुन्छन्, private URLs opt-in गरिएका हुन्छन्, तर global feature-flag override बिना localhost/LAN targets लाई जानाजानी अनुमति दिइन्छ। यसले self-hosted Langfuse, Phoenix, Tempo र Collector endpoints, private HTTP endpoints समेत, प्रयोग गर्न अनुमति दिन्छ। Cloud-metadata hosts सधैँ block गरिन्छन्। Redirects follow गरिँदैनन्, त्यसैले collector ले credentials लाई फरक host मा redirect गर्न सक्दैन। विद्यमान lexical URL guard जस्तै, यसले DNS resolution pin गर्दैन; operator-controlled hosts मात्र configure गर्नुहोस्। Endpoint trusted network मा नभएको अवस्थामा HTTPS प्रयोग गर्न प्राथमिकता दिनुहोस्।
 
-### पेलोड र डेलिभरी
+### Payload र delivery
 
-OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) ले अनुमति दिइएको प्रत्येक पङ्क्तिका लागि
-त्यसको ठ्याक्कै अनुरोध पथको नाम भएको एउटा CLIENT स्प्यान बोक्छ। पथअनुसार नाम राख्दा
-स्प्यानको नाममा मोडेल वा पहिचानसम्बन्धी डेटा समावेश नगरी Chat Completions, Responses र Messages छुट्टिन्छन्।
-रिसोर्स विशेषताहरूमा `service.name` र प्याकेजको `service.version` समावेश हुन्छन्।
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) ले प्रत्येक अनुमति दिइएको row का लागि एउटा CLIENT span पठाउँछ, जसको नाम exact request path द्वारा राखिन्छ। Path naming ले span name मा model वा identity data समावेश नगरी Chat Completions, Responses र Messages छुट्याउँछ। Resource attributes मा `service.name` र package को `service.version` समावेश हुन्छन्।
 
-सामान्य च्याट प्रयास लगर (`open-sse/handlers/chatCore/attemptLogging.ts`) ले काम पूरा हुँदा
-`duration = Date.now() - startTime` लेख्छ र टाइमस्ट्याम्प उपलब्ध गराउँदैन;
-`src/lib/usage/callLogs.ts` मा रहेको `saveCallLogOperation` ले पूर्वनिर्धारित रूपमा टाइमस्ट्याम्पलाई लेखिएको
-(पूरा भएको) समय बनाउँछ। त्यसैले निर्यातले अन्त्य = पङ्क्तिको टाइमस्ट्याम्प र सुरुआत = अन्त्य − अवधि
-(मिलिसेकेन्ड, दशमलव नानोसेकेन्डमा रूपान्तरित) सेट गर्छ। कलरले उपलब्ध गराएका ऐतिहासिक टाइमस्ट्याम्पहरू
-पनि अन्त्य समयका रूपमा कायम राखिन्छन्; प्रत्येक पङ्क्तिमा सुरुआत/समापन छुट्याउने सूचक हुँदैन।
-null अवधि शून्य हुन्छ। अमान्य/हराएका टाइमस्ट्याम्पहरूले अनिर्धारित स्प्यानहरू बनाउनुको सट्टा
-ब्याच असफल गराउँछन्। `ttftMs` null हुन सक्छ र `omniroute.ttft_ms` मा म्याप हुन्छ।
+सामान्य chat attempt logger (`open-sse/handlers/chatCore/attemptLogging.ts`) ले completion हुँदा `duration = Date.now() - startTime` लेख्छ र timestamp उपलब्ध गराउँदैन; `src/lib/usage/callLogs.ts` मा रहेको `saveCallLogOperation` ले timestamp लाई write (completion) time मा default गर्छ। त्यसैले export ले end लाई row timestamp र start लाई end − duration का रूपमा सेट गर्छ (milliseconds लाई decimal nanoseconds मा रूपान्तरण गरेर)। Caller-supplied historical timestamps पनि end time का रूपमा सुरक्षित राखिन्छन्; प्रत्येक row का लागि start/completion छुट्याउने कुनै discriminator छैन। Null duration शून्यमा परिणत हुन्छ। Invalid/missing timestamps ले गैर-निश्चयात्मक spans सिर्जना गर्नुको सट्टा batch असफल बनाउँछन्। `ttftMs` nullable हुन्छ र `omniroute.ttft_ms` मा map हुन्छ।
 
-विशेषताहरूमा `gen_ai.operation.name="chat"`, प्रदायक, अनुरोध गरिएको/प्रतिक्रियामा आएको मोडेल,
-इनपुट/आउटपुट टोकनहरू, वैकल्पिक क्यास-पठन/क्यास-सिर्जना/रिजनिङ टोकनहरू, HTTP स्थिति,
-कम्बो, क्यास स्रोत, सेसन ट्याग र सहसम्बन्ध ID समावेश हुन्छन्। पूर्णाङ्क OTLP मानहरू र टाइमस्ट्याम्पहरू
-दशमलव स्ट्रिङ हुन्छन्; स्ट्रिङ, बुलियन र भिन्नात्मक सङ्ख्याहरूले आफ्नै मूल OTLP मान
-प्रकारहरू प्रयोग गर्छन्। त्रुटि स्प्यानहरूमा ERROR स्थिति र संवेदनशील विवरण हटाइएको स्थिति सन्देश हुन्छ।
-क्यानोनिकल रेकर्डमा अपस्ट्रिम होस्ट URL हुँदैन, त्यसैले कलेक्टरलाई गलत रूपमा
-मोडेल सर्भर भनेर चिनाउनुको सट्टा `server.address` हटाइन्छ। लागत निर्यात गरिँदैन।
+Attributes मा `gen_ai.operation.name="chat"`, provider, requested/response model, input/output tokens, वैकल्पिक cache-read/cache-creation/reasoning tokens, HTTP status, combo, cache source, session tag र correlation id समावेश हुन्छन्। Integer OTLP values र timestamps decimal strings हुन्छन्; strings, booleans र fractional numbers ले आफ्ना native OTLP value variants प्रयोग गर्छन्। Error spans को status ERROR हुन्छ र status message sanitized हुन्छ। Canonical record मा upstream host URL हुँदैन, त्यसैले collector लाई model server का रूपमा गलत पहिचान नगर्न `server.address` omit गरिन्छ। Cost export गरिँदैन।
 
-`includeBodies=true` हुँदा मात्र सामग्री लोड गरिन्छ। `langfuseMapping=false` हुँदा,
-`gen_ai.input.messages` / `gen_ai.output.messages` मा पुनःसंरचित semconv
-सन्देश एरे होइन, OmniRoute ले भण्डारण गरेअनुसारको संवेदनशील विवरण हटाइएको अनुरोध/प्रतिक्रिया
-बडी JSON (पार्स गर्न सकिने भए क्यानोनिकल बनाइएको) हुन्छ। काटिएका/गैर-JSON बडीहरू कच्चा पाठकै रूपमा रहन्छन्। `langfuseMapping=true` हुँदा,
-बडीहरू `langfuse.observation.input` / `langfuse.observation.output` का रूपमा मात्र पठाइन्छन्;
-प्रत्येक बडी एक पटक मात्र पठाउन `gen_ai.*.messages` विशेषताहरू हटाइन्छन्। दुवै मोडले
-विद्यमान हाइड्रेसन पथबाट `maxBodyBytes` प्राप्त गर्छन्;
-`omniroute.bodies_truncated=true` ले काटिएको जनाउँछ।
-यस गन्तव्यले कुनै अतिरिक्त पाइपलाइन स्न्यापसट वा संवेदनशील विवरण नहटाइएका आर्टिफ्याक्ट पठनहरू थप्दैन;
-वैकल्पिक अनुरोध-हेडर सङ्कलनले तल वर्णन गरिएको विद्यमान हाइड्रेट गरिएको क्लाइन्ट स्न्यापसट प्रयोग गर्छ।
-बडीहरू निर्यात गर्दा घण्टाभरिको काम थुपार्नुको सट्टा
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` जस्तो मिनेट-स्तरीय आवृत्ति प्रयोग गर्नुहोस्।
+`includeBodies=true` हुँदा मात्र content hydrate गरिन्छ। `langfuseMapping=false` हुँदा, `gen_ai.input.messages` / `gen_ai.output.messages` ले OmniRoute ले store गरेको sanitized request/response body JSON बोक्छन् (parse गर्न मिल्ने अवस्थामा canonicalized), re-shaped semconv messages array होइन। Clipped/non-JSON bodies raw text कै रूपमा रहन्छन्। `langfuseMapping=true` हुँदा bodies केवल `langfuse.observation.input` / `langfuse.observation.output` का रूपमा emit गरिन्छन्; प्रत्येक body एकपटक मात्र पठाइयोस् भनेर `gen_ai.*.messages` attributes omit गरिन्छन्। दुवै modes ले विद्यमान hydration path बाट `maxBodyBytes` inherit गर्छन्; clipping चिनाउन `omniroute.bodies_truncated=true` सेट हुन्छ।
+यस destination ले कुनै अतिरिक्त pipeline snapshots वा unsanitized artifact reads थप्दैन; वैकल्पिक request-header capture ले तल वर्णन गरिएको विद्यमान hydrated client snapshot प्रयोग गर्छ।
+Bodies export गर्दा hourly backlog जम्मा गर्नुको सट्टा
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` जस्तो minute-level cadence प्रयोग गर्नुहोस्।
 
-### वैकल्पिक क्लाइन्ट अनुरोध हेडरहरू
+### वैकल्पिक client request headers
 
-हेडर सङ्कलन **पूर्वनिर्धारित रूपमा बन्द हुन्छ**। गन्तव्य कन्फिगरेसनमा `requestHeaderAllowlist` सेट गर्नुहोस्
-र **प्रम्प्ट र प्रतिक्रियाहरू निर्यात गर्नुहोस्** सक्षम गर्नुहोस् (गन्तव्यमा `includeBodies: true`)।
-अनुमति सूचीले API एरे वा न्यूलाइन/अल्पविरामले छुट्याइएका नामहरू भएको टेक्स्टएरिया स्वीकार गर्छ:
+Header capture **पूर्वनिर्धारित रूपमा बन्द** हुन्छ। Destination config मा `requestHeaderAllowlist` सेट गर्नुहोस् र **प्रम्प्ट र प्रतिक्रियाहरू निर्यात गर्नुहोस्** सक्षम गर्नुहोस् (destination मा `includeBodies: true`)।
+Allowlist ले API array वा newline/comma-separated names भएको textarea स्वीकार गर्छ:
 
 ```json
 {
@@ -340,77 +305,82 @@ null अवधि शून्य हुन्छ। अमान्य/हर�
 }
 ```
 
-नामहरूमा ठूला र साना अक्षरको भेद नगरी ठ्याक्कै मिलान गरिन्छ, तर अन्त्यमा रहेको एउटै `*` ले खाली नभएको
-हेडर-नामको उपसर्ग चयन गर्छ। एक्लो `*`, बीचमा रहेका वाइल्डकार्ड र अमान्य HTTP हेडर नामहरू अस्वीकार गरिन्छन्।
-बढीमा 64 चयनकर्ता हुन सक्छन्, र प्रत्येकको नाम/उपसर्ग बढीमा 256 ASCII बाइटको हुन सक्छ।
-यो सेटिङ `headers` भन्दा अलग हो, जसले कलेक्टरसमक्ष एक्सपोर्टरको प्रमाणीकरण गर्छ।
+नामहरू case-insensitive र ठ्याक्कै मिल्नुपर्छ, जबसम्म अन्त्यमा रहेको एकल `*` ले गैर-रिक्त
+header-name prefix चयन गर्दैन। खाली `*`, बीचमा रहेका wildcards र अमान्य HTTP header नामहरू
+अस्वीकार गरिन्छन्। बढीमा 64 वटा selector हुन सक्छन्, र प्रत्येक selector को नाम/prefix बढीमा
+256 ASCII bytes को हुन सक्छ।
+यो सेटिङ `headers` बाट अलग हो, जसले exporter लाई collector समक्ष authenticate गर्छ।
 
-क्याप्चरले `pipeline_client_request` मात्र पढ्छ, जुन सुरक्षित गरिएको विस्तृत पाइपलाइनको
-`clientRawRequest` (वा पुरानो `clientRequest`) बाट भरिन्छ। यसले विकल्पका रूपमा प्रदायकका अनुरोध हेडरहरू कहिल्यै प्रयोग गर्दैन।
-अनुरोध रेकर्ड गर्दा विस्तृत पाइपलाइन लगिङ सक्षम गरिएको हुनुपर्छ।
-`includeBodies` अक्षम भएमा, वा क्लाइन्ट-स्न्यापसट JSON हराएको, बिग्रिएको वा काटिएको भएमा, कुनै हेडर
-एट्रिब्युटहरू उत्सर्जन गरिँदैनन्। `maxBodyBytes` बढाउँदा निर्यातको समयमा स्न्यापसट काटिनबाट बचाउन सकिन्छ;
-यसले कहिल्यै सुरक्षित नगरिएको विवरण पुनर्स्थापित गर्न सक्दैन। 1 MiB भन्दा ठूलो वा
-256 भन्दा बढी हेडर प्रविष्टिहरू भएको स्न्यापसट बेवास्ता गरिन्छ। विद्यमान प्रम्प्ट/प्रतिक्रिया निर्यात हेडर क्याप्चरसँगै
-सक्षम रहन्छ; अनुमति सूचीले हेडर-मात्र हाइड्रेसन मोड प्रदान गर्दैन।
+Capture ले केवल `pipeline_client_request` पढ्छ, जुन सुरक्षित गरिएको detailed pipeline को
+`clientRawRequest` (वा legacy `clientRequest`) बाट भरिएको हुन्छ। यसले provider request
+headers मा कहिल्यै fallback गर्दैन।
+Request रेकर्ड गरिँदा detailed pipeline logging सक्षम गरिएको हुनुपर्छ। `includeBodies` disabled
+भएमा, वा client-snapshot JSON हराएको, बिग्रिएको वा काटिएको भएमा, कुनै header attributes
+उत्पन्न हुँदैनन्। `maxBodyBytes` बढाउँदा export-time snapshot clipping रोक्न सकिन्छ;
+तर कहिल्यै सुरक्षित नगरिएको detail पुनर्स्थापित गर्न सकिँदैन। 1 MiB भन्दा ठूलो वा
+256 भन्दा बढी header entries भएको snapshot लाई बेवास्ता गरिन्छ। विद्यमान prompt/response
+export header capture सँगै सक्षम रहन्छ; allowlist ले headers-only hydration mode प्रदान गर्दैन।
 
-चयन गरिएका मानहरू `http.request.header.<full lowercase header name>` OTLP स्ट्रिङ एरे बन्छन्,
-एउटै स्ट्रिङ भए पनि। उदाहरणका लागि, `X-OmniRoute-Meta-Team: example-team`
-`http.request.header.x-omniroute-meta-team` बन्छ र यसको मान
+चयन गरिएका values हरू `http.request.header.<full lowercase header name>` OTLP string arrays
+बन्छन्, एउटै string भए पनि। उदाहरणका लागि, `X-OmniRoute-Meta-Team: example-team` ले
+`http.request.header.x-omniroute-meta-team` बनाउँछ, जसको मान
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}` हुन्छ।
-पूरा उपसर्ग जस्ताको तस्तै राखिन्छ: यी सामान्य हेडरहरू हुन्, जसमा व्यावसायिक-फिल्ड पार्सिङ वा
-`omniroute.metadata.*` / Langfuse मेटाडाटा रूपान्तरण हुँदैन। `langfuseMapping` ले हेडरको
-अर्थ परिवर्तन गर्दैन। चयन गरिएको एकल-मान भएको `User-Agent` ले मानक स्केलर
-`user_agent.original` पनि सेट गर्छ। एउटै मानभित्रका अल्पविरामका आधारमा मान छुट्याइँदैन। ठूला/साना अक्षरका भिन्न रूपहरू सुरक्षित
-प्रविष्टिको क्रममा गाभिन्छन्; कुनै पनि अमान्य रूपले त्यो सम्पूर्ण हेडर हटाउँछ। एट्रिब्युटहरू साना अक्षरमा लेखिएको नामअनुसार क्रमबद्ध गरिन्छन्।
+पूरा prefix सुरक्षित रहन्छ: यी साधारण headers हुन्, business-field parsing वा
+`omniroute.metadata.*` / Langfuse metadata conversion हुँदैन। `langfuseMapping` ले header
+semantics परिवर्तन गर्दैन। चयन गरिएको single-valued `User-Agent` ले standard scalar
+`user_agent.original` पनि सेट गर्छ। एउटै value भित्रका commas विभाजन गरिँदैनन्। Case variants
+सुरक्षित गरिएको entry order मा merge हुन्छन्; कुनै invalid variant भएमा त्यो पूरा header
+हटाइन्छ। Attributes lowercase नामअनुसार क्रमबद्ध हुन्छन्।
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-key हेडरहरू, auth/token/secret/password/credential
-चिन्हहरू समावेश भएका नामहरू, र आन्तरिक गेटवे क्रेडेन्सियलहरू सधैँ
-बहिष्कृत गरिन्छन्, चयन गरिएका वा भण्डारणमा आंशिक रूपमा लुकाइएका भए पनि। ज्ञात क्रेडेन्सियल ढाँचाहरूले
-साझा क्रेडेन्सियल पहिचानकर्ता पुनः प्रयोग गर्छन्; लुकाइएको जनाउने चिन्हहरू हटाइन्छन्, सुरक्षित मानका रूपमा निर्यात गरिँदैनन्।
-स्ट्रिङ र खाली नभएका स्ट्रिङ एरे मात्र स्वीकार गरिन्छन्; सङ्ख्या वा अब्जेक्टलाई जबर्जस्ती रूपान्तरण गरिँदैन।
-अमान्य नामहरू, प्रोटोटाइप कुञ्जीहरू, नियन्त्रण क्यारेक्टरहरू (तेर्सो ट्याबबाहेक) र त्रुटिपूर्ण Unicode
-लाई ब्याच असफल नपारी वा त्रुटिहरूमा तिनको सामग्री नदेखाई बेवास्ता गरिन्छ।
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-key headers, auth/token/secret/password/credential
+markers भएका नामहरू, र internal gateway credentials सधैँ excluded हुन्छन्, चयन गरिएका वा
+storage मा आंशिक रूपमा masked भए पनि। परिचित credential patterns ले shared credential
+detector पुनः प्रयोग गर्छन्; redaction markers हटाइन्छन्, safe values का रूपमा export गरिँदैनन्।
+Strings र nonempty string arrays मात्र स्वीकार गरिन्छन्; numbers वा objects लाई coerce गरिँदैन।
+Invalid names, prototype keys, control characters (horizontal tab बाहेक) र malformed Unicode लाई
+batch fail नगरी वा तिनको content errors मा प्रतिबिम्बित नगरी बेवास्ता गरिन्छ।
 
-प्रत्येक स्प्यानले बढीमा 32 हेडर, प्रति हेडर 16 मान, प्रति मान 4096 UTF-8 बाइट,
-र क्याप्चर गरिएका हेडर नाम तथा मानहरूमा जम्मा 16384 UTF-8 बाइट क्याप्चर गर्छ। अति ठूला/अमान्य हेडरहरू
-पूरै हटाइन्छन्, काटिँदैनन्। चयन अपरेटरको गोपनीयतासम्बन्धी निर्णय हो: सुरक्षित देखिने नामहरूमा
-पनि व्यक्तिगत डेटा हुन सक्छ, र यी सीमा/पहिचानकर्ताहरू सामान्य PII हटाउने साधन होइनन्।
+प्रत्येक span ले बढीमा 32 headers, प्रत्येक header का 16 values, प्रत्येक value का
+4096 UTF-8 bytes, र captured header names तथा values का जम्मा 16384 UTF-8 bytes
+समेट्न सक्छ। आकार नाघेका/अमान्य headers लाई पूरै हटाइन्छ, काटिँदैन। Selection operator को
+privacy decision हो: सुरक्षित देखिने नामहरूमा पनि व्यक्तिगत data हुन सक्छ, र यी सीमाहरू/
+detectors सामान्य PII scrubber होइनन्।
 
-### डेलिभरी सीमाहरू
+### Delivery limits
 
-अनुरोधहरू एनभलपसहित 500 स्प्यान र 4 MiB UTF-8 JSON मा सीमित छन्।
-कर्सर ब्याचको पहिलो अनुरोधअघि प्रत्येक अनुमति प्राप्त स्प्यानको आकार जाँचिन्छ। सीमाभन्दा ठूलो कुनै एक
-स्प्यान भएमा त्यस ब्याचको कुनै पनि भाग पठाइँदैन र `maxBodyBytes`
-घटाउने मार्गदर्शनसहित असफल हुन्छ; यसलाई चुपचाप हटाइँदैन। पूर्व-जाँचले रेकर्ड सन्दर्भ र
-बाइट गणना मात्र राख्छ र प्रत्येक अस्थायी स्प्यान/JSON हटाउँछ; ब्याचको दोस्रो सिरियलाइज गरिएको प्रतिलिपि राख्नुको सट्टा
-सीमित खण्डहरूका लागि स्प्यानहरू पुनर्निर्माण गरिन्छन्। HTTP 408/429/5xx, नेटवर्क विफलता र टाइमआउटमा बढीमा
-तीन प्रयास गरिन्छन्, 250/500 ms को घातीय ब्याकअफसहित। `Retry-After` सेकेन्ड वा HTTP मितिहरूले
-ढिलाइलाई बढीमा 5 सेकेन्डसम्म लम्ब्याउन सक्छन्। अन्य स्टाटसहरूमा तुरुन्तै असफल हुन्छ। OTLP 2xx आंशिक अस्वीकृतिले पनि
-हराएको स्प्यानलाई स्वीकृत भएको जनाउनुको सट्टा त्रुटि उत्पन्न गर्छ; खाली वा मान्य JSON प्राप्ति-पुष्टिहरू स्वीकार गरिन्छन्, र
-प्रतिक्रिया पढ्ने सीमा 64 KiB हुन्छ।
+Requests बढीमा 500 spans र 4 MiB UTF-8 JSON मा सीमित हुन्छन्, envelope सहित।
+Cursor batch को पहिलो request अघि प्रत्येक allowed span को size जाँच गरिन्छ। सीमाभन्दा ठूलो
+individual span ले त्यस batch को कुनै भाग पठाउँदैन र `maxBodyBytes` घटाउन निर्देशनसहित
+fail हुन्छ; यसलाई चुपचाप drop गरिँदैन। Preflight ले record references र byte counts मात्र
+राख्छ, प्रत्येक temporary span/JSON हटाउँछ; batch को दोस्रो serialized copy memory मा नराखी
+bounded chunks का लागि spans पुनर्निर्माण गरिन्छ। HTTP 408/429/5xx, network failures र timeouts मा
+बढीमा तीन attempts हुन्छन्, 250/500 ms exponential backoff सहित। `Retry-After` seconds वा HTTP dates
+ले delay लाई 5 seconds सम्म बढाउन सक्छन्। अन्य statuses तुरुन्त fail हुन्छन्। OTLP 2xx partial
+rejection ले पनि throw गर्छ, हराएको span लाई acknowledge गर्नुको सट्टा; empty वा valid JSON
+acknowledgements स्वीकार गरिन्छन्, response-read cap 64 KiB सहित।
 
-त्रुटिहरूमा एक्सपोर्टरकै तथ्यहरू मात्र हुन्छन्: HTTP स्टाटस, पुनःप्रयास वर्ग, प्रयास र पठाइएका स्प्यानका
-गणना, वा प्राप्ति-पुष्टि/नेटवर्क विफलतासम्बन्धी निश्चित शब्दावली। कलेक्टरका प्रतिक्रिया बडीहरू,
-आंशिक-सफलता गणना र प्रतिक्रिया हेडरहरू त्रुटि, लग वा
-ड्यासबोर्डमा कहिल्यै प्रतिलिपि गरिँदैनन्। असफल वा आंशिक रूपमा स्वीकार गरिएको ब्याचको प्राप्ति-पुष्टि गरिँदैन: गन्तव्यले
-त्यो स्टाटससहित असफल भइरहेको देखाउँछ, कर्सर अन्तिम प्राप्ति-पुष्टि भएको ब्याचमै रहन्छ, र अर्को रनले
-उही पङ्क्तिहरू पुनः पठाउँछ। कलेक्टर वा कन्फिगरेसन
-सच्याइएनसम्म स्थायी स्टाटसहरूमा असफलता जारी रहन्छ। प्रतिक्रियाको विवरणका लागि कलेक्टरकै लगहरू प्रयोग गर्नुहोस्। कल-लग त्रुटि सारांशहरूले
-आफ्नो छुट्टै गोप्य विवरण लुकाउने प्रक्रिया कायम राख्छन्।
-`prepare()` ले कुनै व्यवस्था गर्दैन; परीक्षणले ठ्याक्कै `{"resourceSpans":[]}` पोस्ट गर्छ र
-कल-लग स्प्यानहरू नलेखी HTTP स्टाटस रिपोर्ट गर्छ।
+Errors मा exporter-owned facts मात्र हुन्छन्: HTTP status, retry class, attempts र sent span
+counts, वा fixed acknowledgement/network failure wording। Collector response bodies,
+partial-success counts र response headers errors, logs वा dashboard मा कहिल्यै copy गरिँदैनन्।
+Failed वा partially accepted batch acknowledge गरिँदैन: destination ले त्यस status सहित
+Failing देखाउँछ, cursor अन्तिम acknowledged batch मा रहन्छ, र अर्को run ले उही rows पुनः पठाउँछ।
+Permanent statuses ले collector वा configuration ठीक नगरिएसम्म failing नै राख्छन्। Response
+details का लागि collector का आफ्नै logs प्रयोग गर्नुहोस्। Call-log error summaries ले तिनको
+छुट्टै redaction कायम राख्छ।
+`prepare()` ले केही provision गर्दैन; Test ले ठ्याक्कै `{"resourceSpans":[]}` post गर्छ र
+call-log spans लेखिन नदिई HTTP status report गर्छ।
 
-ट्रेस आइडी र स्प्यान आइडी क्रमशः
-`"omniroute.trace\\0" + callLogId` र `"omniroute.span\\0" + callLogId` को SHA-256 का पहिलो 32/16 हेक्स अङ्क हुन्। पुनः पठाउँदा
-उही आइडीहरू समावेश हुन्छन्। यो डुप्लिकेट हटाइने प्रत्याभूति होइन: Langfuse
-v4 इन्जेसनसहित केही ब्याकएन्डहरूले उही आइडी भएका स्प्यानहरूको डुप्लिकेट हटाउँदैनन्। क्र्यास वा आंशिक खण्ड विफलताले
-बढीमा प्राप्ति-पुष्टि नभएको एउटा कर्सर ब्याच पुनः पठाउन सक्छ; अन्तिम HTTP खण्ड मात्र नभई
-त्यो सम्पूर्ण ब्याच दोहोरिन सक्छ। यो लाभ-हानिलाई ध्यानमा राखेर कर्सर ब्याचको आकार छान्नुहोस्।
+Trace ids र span ids क्रमशः
+`"omniroute.trace\\0" + callLogId` र `"omniroute.span\\0" + callLogId` माथि गरिएको SHA-256 का
+पहिला 32/16 hex digits हुन्। Re-sends मा उही ids हुन्छन्। यो deduplication guarantee होइन:
+Langfuse v4 ingestion लगायत केही backends ले समान-id spans लाई deduplicate गर्दैनन्। Crash वा
+partial chunk failure ले बढीमा acknowledge नभएको एउटा cursor batch पुनः पठाउन सक्छ; त्यो
+सम्पूर्ण batch duplicate हुन सक्छ, यसको अन्तिम HTTP chunk मात्र होइन। यो tradeoff ध्यानमा राखी
+cursor batch size चयन गर्नुहोस्।
 
-### Langfuse उदाहरण
+### Langfuse example
 
-आफैँ होस्ट गरिएको Langfuse इन्स्ट्यान्सका लागि यी फिल्डहरू कन्फिगर गर्नुहोस्:
+Self-hosted Langfuse instance का लागि यी fields configure गर्नुहोस्:
 
 ```json
 {
@@ -423,44 +393,48 @@ v4 इन्जेसनसहित केही ब्याकएन्डह
 }
 ```
 
-Authorization मानलाई स्थानीय रूपमा शाब्दिक `public-key:secret-key`
-स्ट्रिङको Base64 का रूपमा बनाउनुहोस् (उदाहरणका लागि `Buffer.from(publicKey + ":" + secretKey).toString("base64")` प्रयोग गरेर)।
-वास्तविक क्रेडेन्सियलहरू लग, स्क्रिनसट वा इस्युहरूमा पेस्ट नगर्नुहोस्। म्यापिङले स्वचालित रूपमा
-`x-langfuse-ingestion-version: 4` सेट गर्छ; Authorization अझै पनि `headers` मा उपलब्ध गराइन्छ।
-हेडरहरू र उत्पन्न गरिएको पहिचान साल्ट दुवैले विद्यमान इन्क्रिप्ट गरिएको गोप्य-फिल्ड
-संयन्त्र र API प्लेसहोल्डरहरू प्रयोग गर्छन्; `STORAGE_ENCRYPTION_KEY` आवश्यक छ।
+Authorization value स्थानीय रूपमा literal `public-key:secret-key`
+string को Base64 बनाएर तयार गर्नुहोस् (उदाहरणका लागि
+`Buffer.from(publicKey + ":" + secretKey).toString("base64")` प्रयोग गरेर)।
+वास्तविक credentials logs, screenshots वा issues मा paste नगर्नुहोस्। Mapping ले स्वचालित रूपमा
+`x-langfuse-ingestion-version: 4` सेट गर्छ; Authorization भने अझै `headers` मा supply गर्नुपर्छ।
+Headers र generated identity salt दुवैले विद्यमान encrypted secret-field mechanism र API
+placeholders प्रयोग गर्छन्; `STORAGE_ENCRYPTION_KEY` आवश्यक छ।
 
-म्यापिङले जेनेरेसन प्रकार/मोडेल, JSON प्रयोग विवरणहरू (इनपुट/आउटपुट/कुल र उपलब्ध
-क्यास कुञ्जीहरू), JSON इनपुट/आउटपुट स्न्यापसटहरू, ERROR/DEFAULT स्तर, संवेदनशील जानकारी हटाइएको स्थिति सन्देश,
-ट्रेस नाम, सेसन आइडी, वैकल्पिक वातावरण र प्रदायक, अनुरोध गरिएको मोडेल, पथ, कम्बो, क्यास
-स्रोत र स्थितिका लागि फिल्टर गर्न मिल्ने `langfuse.observation.metadata.<key>` थप्छ।
-TTFT ज्ञात भएको र अवधिभित्र परेको अवस्थामा मात्र `langfuse.observation.completion_start_time`
-सुरुवात + TTFT को ISO 8601 समय हुन्छ। कुनै पनि लागत एट्रिब्युट पठाइँदैन।
+म्यापिङले generation type/model, JSON usage विवरणहरू (input/output/total र उपलब्ध
+cache keys), JSON input/output snapshots, ERROR/DEFAULT level, sanitized status message,
+trace name, session id, provider, requested model, path, combo, cache
+source र status का लागि वैकल्पिक environment र filterable
+`langfuse.observation.metadata.<key>` थप्छ। `langfuse.observation.completion_start_time` मा
+सुरुवातको समय + TTFT लाई ISO 8601 ढाँचामा राखिन्छ, तर TTFT ज्ञात भएको र अवधि भित्र परेको
+अवस्थामा मात्र। कुनै cost attributes पठाइँदैन।
 
-पहिचान मोडहरू `langfuse.user.id` मा लागू हुन्छन्:
+Identity modes `langfuse.user.id` मा लागू हुन्छन्:
 
-- `pseudonymous` (पूर्वनिर्धारित): प्रत्येक गन्तव्यका लागि छुट्टै अनियमित
-  32-बाइट साल्ट प्रयोग गरी API कुञ्जीको आन्तरिक आइडीको HMAC-SHA256। साल्ट नभएमा सिर्जना गर्दा उत्पन्न गरिन्छ,
-  `identitySalt` का रूपमा इन्क्रिप्ट गरिन्छ, कहिल्यै फिर्ता दिइँदैन र सम्पादन गर्दा कायम राखिन्छ। कच्चा कुञ्जी आइडीहरू कहिल्यै
-  स्प्यान एट्रिब्युटहरूमा राखिँदैनन्। गन्तव्यको साल्ट पुनः सिर्जना गर्दा/फेर्दा पहिचानहरू परिवर्तन हुन्छन्।
-- `keyName`: कन्फिगर गरिएको API कुञ्जीको नाम, जसले जानाजानी उक्त अपरेटर लेबल प्रकट गर्छ।
-- `none`: कुनै प्रयोगकर्ता आइडी हुँदैन। सेसन ट्यागहरू उपस्थित भएमा अझै पनि निर्यात गरिन्छन्; यी मोडहरूले
-  स्वेच्छिक प्रम्प्ट सामग्री वा अपरेटरले उपलब्ध गराएका सेसन/सहसम्बन्ध लेबलहरूलाई अज्ञात बनाउँदैनन्।
+- `pseudonymous` (default): API key को internal id लाई random
+  प्रति-destination 32-byte salt प्रयोग गरी HMAC-SHA256 गरिन्छ। Salt सिर्जना गर्दा
+  अनुपस्थित भए उत्पन्न गरिन्छ, `identitySalt` का रूपमा encrypted गरिन्छ, कहिल्यै
+  फिर्ता गरिँदैन, र सम्पादनका क्रममा कायम रहन्छ। Raw key ids लाई span attributes मा
+  कहिल्यै राखिँदैन। Destination को salt पुनः सिर्जना वा rotate गर्दा identities परिवर्तन हुन्छन्।
+- `keyName`: कन्फिगर गरिएको API key name, जसले operator label जानाजानी खुलासा गर्छ।
+- `none`: कुनै user id हुँदैन। उपलब्ध हुँदा session tags अझै export गरिन्छन्; यी modes ले
+  arbitrary prompt content वा operator-supplied session/correlation labels लाई anonymize गर्दैनन्।
 
-### ब्याकफिल नगरी सुरु गर्ने
+### Backfill बिना सुरु गर्ने
 
-सिर्जना गर्दा मात्र, **हालको स्थानबाट सुरु गर्नुहोस् (विद्यमान लगहरू छोड्नुहोस्)** सक्षम गर्नुहोस् वा
-सिर्जना गर्ने API पेलोडको शीर्ष तहमा `startFromCurrentPosition: true` पठाउनुहोस्। यसले विद्यमान कर्सर
-सहायकहरू प्रयोग गरेर, माइग्रेसन नगरी, `cursor_row_id` लाई हाल कायम राखिएका कल-लगहरूको अधिकतम rowid मा
-प्रारम्भ गर्छ। पूर्वनिर्धारित मान false हो (कर्सर 0 र कायम राखिएको इतिहासको ब्याकफिल)।
-यो अद्यावधिक गर्दा कर्सर रिसेट गर्ने सेटिङ होइन।
+सिर्जना गर्दा मात्र **हालको position बाट सुरु गर्नुहोस् (अवस्थित logs छोड्नुहोस्)** enable गर्नुहोस् वा
+create API payload को top level मा `startFromCurrentPosition: true` पास गर्नुहोस्। यसले
+कुनै migration बिना विद्यमान cursor helpers प्रयोग गरेर
+`cursor_row_id` लाई हाल कायम रहेको call-log rowid को अधिकतम मानमा initialize गर्छ। Default false
+हो (cursor 0 र retained-history backfill)। यो update-time cursor reset setting होइन।
 
-साझा `ttftMs` थपले BigQuery म्यापर
-र नयाँ तालिकाको स्किमामा null हुन सक्ने `ttft_ms` स्तम्भ पनि थप्छ: यसको स्किमा परीक्षणले प्रत्येक मानक रेकर्ड फिल्डका लागि
-एउटा स्तम्भ हुनुपर्ने माग गर्छ। विद्यमान तालिकाहरूले कुनै परिवर्तनबिना निर्यात जारी राख्छन्: `prepare()` ले तालिकाको स्किमा पढ्छ र
-त्यो स्तम्भ नभएको अवस्थामा `ttft_ms` मात्र छोड्छ। अर्को रनमा TTFT प्राप्त गर्न null हुन सक्ने INT64 स्तम्भ
-थप्नुहोस्, वा नयाँ तालिका प्रयोग गर्नुहोस्। कुनै PATCH, स्वचालित स्किमा परिवर्तन वा अतिरिक्त
-अनुमति आवश्यक पर्दैन; अन्य सबै पङ्क्ति फिल्डहरूमा कडा स्किमा जाँच कायम रहन्छ।
+साझा `ttftMs` addition ले BigQuery mapper र new-table schema मा nullable `ttft_ms` column पनि थप्छ:
+यसको schema test मा प्रत्येक canonical record field का लागि column हुनैपर्ने हुन्छ। Existing tables ले
+अपरिवर्तित रूपमा export गर्न जारी राख्छन्: `prepare()` ले table schema पढ्छ र त्यो column
+अनुपस्थित हुँदा मात्र `ttft_ms` हटाउँछ। अर्को run मा TTFT प्राप्त गर्न nullable INT64 column थप्नुहोस्,
+वा नयाँ table प्रयोग गर्नुहोस्। Optional TTFT column ले schema update trigger गर्दैन। Usage-evidence columns
+तलको conditional, opt-in compatibility flow पालना गर्छन्; अन्य row fields ले strict
+schema checking कायम राख्छन्।
 
 ---
 
@@ -485,15 +459,31 @@ TTFT ज्ञात भएको र अवधिभित्र परेक�
 
 ---
 
-## 7. यसलाई सञ्चालन गर्ने
+## ७. सञ्चालन
 
-- **ड्यासबोर्ड**: एकीकरणहरू → लग निर्यात। गन्तव्य थप्नुहोस्, पङ्क्तिहरू नलेखी प्रमाण-पत्रहरू जाँच्न **परीक्षण** चलाउनुहोस्,
-  त्यसपछि यसलाई सक्षम गर्नुहोस्।
-- **बाँकी कार्यभार**: प्रत्येक गन्तव्य कार्डले बाँकी पङ्क्तिहरू र कर्सर देखाउँछ; `GET
-/api/log-export/status` ले तिनै तथ्याङ्कका साथै पछिल्ला 20 कार्य सञ्चालनहरूको विवरण फर्काउँछ।
-- **एउटा गन्तव्यको विफलताले अरूलाई विफल बनाउँदैन** — सञ्चालन सारांशले प्रत्येक गन्तव्यको
-  स्थिति `last_status` / `last_error` मा अभिलेख गर्छ, र कार्य सञ्चालन इतिहासले समग्र विवरण राख्छ।
-- **गन्तव्य मेटाउँदा त्यसको कर्सर पनि मेटिन्छ।** यसलाई पुनः थप्दा सुरक्षित राखिएको सबैभन्दा पुरानो
-  कल लगबाट सुरु हुन्छ, जसले गन्तव्यमा पहिल्यै हुन सक्ने पङ्क्तिहरू फेरि पठाउँछ। BigQuery मा प्रत्येक पङ्क्तिको
-  `insertId` ले BigQuery कै डुप्लिकेट हटाउने समयावधिभित्र मात्र त्यसलाई सम्हाल्छ, त्यसैले
-  गन्तव्य मेटाउनुभन्दा असक्षम पार्नुलाई प्राथमिकता दिनुहोस्।
+- **ड्यासबोर्ड**: Integrations → Log export। गन्तव्य थप्नुहोस्, प्रमाणहरू जाँच गर्न **Test** चलाउनुहोस्
+  पङ्क्तिहरू नलेखी, त्यसपछि यसलाई सक्षम गर्नुहोस्।
+- **ब्याकलग**: प्रत्येक गन्तव्य कार्डले बाँकी पङ्क्तिहरू र कर्सर देखाउँछ; `GET
+/api/log-export/status` ले अन्तिम २० कार्य सञ्चालनसहित उही तथ्याङ्कहरू फर्काउँछ।
+- **एउटा असफल गन्तव्यले अरूलाई असफल बनाउँदैन** — सञ्चालनको सारांशले प्रत्येक गन्तव्यको
+  स्थिति `last_status` / `last_error` मा रेकर्ड गर्छ, र कार्य सञ्चालन इतिहासले समग्र स्थिति
+  राख्छ।
+- **गन्तव्य मेटाउँदा त्यसको कर्सर मेटिन्छ।** त्यसलाई पुनः थप्दा सबैभन्दा पुरानो सुरक्षित
+  कल लगबाट सुरु हुन्छ, जसले गन्तव्यमा पहिले नै रहेका पङ्क्तिहरू पुनः पठाउन सक्छ। BigQuery मा
+  प्रति-पङ्क्तिको `insertId` ले BigQuery को आफ्नै डि-डुप्लिकेसन अवधिभित्र मात्र यसलाई सम्हाल्छ,
+  त्यसैले गन्तव्य मेटाउनुभन्दा असक्षम गर्नु उपयुक्त हुन्छ।
+
+### प्रयोग-प्रमाण स्किमा अनुकूलता
+
+नयाँ BigQuery तालिकाहरूमा nullable `usage_evidence` (JSON समावेश गर्ने STRING) र
+`usage_estimated` (BOOL) समावेश हुन्छन्। `autoCreate` सक्षम हुँदा, विद्यमान तालिकाले यी
+नभएका nullable स्तम्भहरू मात्र प्राप्त गर्न सक्छ। एक्सपोर्टरले field metadata सहितको
+सम्पूर्ण विद्यमान स्किमा सुरक्षित राख्छ र फर्काइएको etag प्रयोग गरी ससर्त PATCH पठाउँछ।
+समकालीन स्किमा परिवर्तनले त्यसलाई अधिलेखन गर्नुको सट्टा एक्सपोर्ट असफल बनाउँछ; अर्को
+सञ्चालनले तालिका पुनः पढ्छ।
+
+`autoCreate` असक्षम हुँदा, प्रयोग-प्रमाणसहितका रेकर्डहरू एक्सपोर्ट गर्नुअघि यी स्तम्भहरू
+आफैं थप्नुहोस्। स्किमा/etag मेटाडाटा हराइरहेको वा अद्यावधिक असफल भएको अवस्थामा पनि
+प्रमाणसहितका insert हरू रोकिन्छन्। यस्तो असफलतामा एक्सपोर्ट कर्सर अगाडि बढ्दैन र प्रमाण
+कहिल्यै चुपचाप हटाइँदैन। एक्सपोर्ट अवरुद्ध रहँदा स्थानीय लग अवधारण लागू भइरहन्छ, त्यसैले
+स्रोतका सुरक्षित पङ्क्तिहरूको म्याद समाप्त हुनुअघि असफलता समाधान गर्नुहोस्।

@@ -3,6 +3,8 @@ import assert from "node:assert";
 import fs from "node:fs";
 import path from "node:path";
 
+import { localeParityOptions } from "../_helpers/localeParityMode.ts";
+
 function flatten(obj: Record<string, unknown>, prefix = ""): Record<string, unknown> {
   const out: Record<string, unknown> = {};
   for (const k of Object.keys(obj)) {
@@ -43,7 +45,9 @@ describe("i18n pt-BR integrity", () => {
   // i18n-ui-coverage CI gate is a percentage threshold (80%) so it stayed
   // green at 93.8% coverage despite the gap. This asserts full key parity
   // so a future drift fails loudly instead of silently degrading coverage.
-  it("should contain every key present in en.json (no drift, #6695)", () => {
+  // Since 2026-11-13 a release-mode assertion: feature PRs add keys to en.json only and the
+  // release refresh completes pt-BR (tests/_helpers/localeParityMode.ts).
+  it("should contain every key present in en.json (no drift, #6695)", localeParityOptions(), () => {
     const enPath = path.resolve("src/i18n/messages/en.json");
     const ptPath = path.resolve("src/i18n/messages/pt-BR.json");
     const en = JSON.parse(fs.readFileSync(enPath, "utf8"));

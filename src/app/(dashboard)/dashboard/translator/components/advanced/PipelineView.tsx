@@ -247,7 +247,7 @@ export default function PipelineView({
                       >
                         {/* Step number circle */}
                         <div
-                          className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold shrink-0 ${statusNumberClass(step.status)}`}
+                          className={`flex items-center justify-center w-7 h-7 rounded-full text-xs font-semibold shrink-0 ${statusNumberClass(step.status)}`}
                           aria-hidden="true"
                         >
                           {step.status === "error" ? "!" : i + 1}

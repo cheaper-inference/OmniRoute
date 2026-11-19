@@ -31,77 +31,61 @@ muudatuse tüübi selle lepingute, sihitud kontrollide ja CI-katvusega.
    testifailid, migratsioonid või funktsioonilipud ning kõik pooleliolevad kontrollid, mida tehakse
    ainult CI-s.
 
-## Põhiteed muudatuse tüübi järgi
+## Kuldsed teed muutuste tüübi järgi
 
-Allolevad käsud on minimaalsed sihitud kontrollid, mitte luba jätta vahele test, mis katab otseselt
-teie muudetud käitumist.
+Allolevad käsud on minimaalsed keskendunud kontrollid, mitte luba jätta vahele test, mis hõlmab otseselt teie muudetud käitumist.
 
-### Teenusepakkuja
+### Pakkuja
 
 **Lepingud**
 
-- Teenusepakkuja definitsioon kataloogis `src/shared/constants/providers/` ja selle kooste failis
-  `src/shared/constants/providers.ts`.
-- Mudelid ja võimekused failis `open-sse/config/providerRegistry.ts` või sellest eraldatud registrifailides.
-- Käituri/tõlkija valik, OAuth-i või API-võtme konfiguratsioon, töölaua varad ja vajaduse korral
-  genereeritud teenusepakkujate viitedokument.
-- Avalikud autentimisandmed peavad kasutama funktsiooni `resolvePublicCred()`; veavastused peavad
-  kasutama ühiseid puhastatud veateadete abifunktsioone. Vaadake `docs/security/PUBLIC_CREDS.md`
-  (git; seda ei kompileerita kataloogi `/docs`) ja dokumenti
-  [Vigade puhastamine](../security/ERROR_SANITIZATION.md).
+- Pakkuja määratlus `src/shared/constants/providers/` ja selle koostis `src/shared/constants/providers.ts`.
+- Mudelid ja võimalused `open-sse/config/providerRegistry.ts` või selle ekstraktitud registrifailides.
+- Executor/translator valik, OAuth või API-võtme konfiguratsioon ja armatuurlaua varad. Ärge rakendage uuesti genereeritud `docs/reference/PROVIDER_REFERENCE.md` või README -diagramme: väljalaske värskendamine kirjutab need ümber (`check:pr-derived-paths` ebaõnnestub neid kandvas funktsioonis PR ).
+- Avalikud volikirjad peavad kasutama `resolvePublicCred()`; veavastused peavad kasutama jagatud puhastatud veaabistajaid. Vaadake jaotisi `docs/security/PUBLIC_CREDS.md` (git; ei ole kompileeritud `/docs`) ja [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Sihitud tsükkel**
+**Fokuseeritud silmus**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # kui kataloog muutub; kandke genereeritud erinevus sisse
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Testige ka iga mõjutatud päringuperet: vestlus, Responses, pildid, manused, heli või video.
-Vaadake genereeritud kataloogi ja etalonide erinevused üle lepingumuudatustena; ärge kinnitage neid
-pimesi.
+Testige ka kõiki mõjutatud päringuperekondi: vestlust, vastuseid, pilte, manuseid, heli või videot. Kontrollige loodud kataloogi ja kuldseid erinevusi lepingumuudatuste korral; ära võta neid pimesi vastu.
 
 ### Marsruutimine
 
 **Lepingud**
 
-- Avalikud strateegiaväärtused ja kasutajaliidese metaandmed failis
-  `src/shared/constants/routingStrategies.ts`.
-- Edastamine ja järjestamine failis `open-sse/services/combo.ts` ning kataloogis
-  `open-sse/services/combo/`.
-- Kombinatsioonide skeemid, püsivus, tõrkekindluse olek, mudelite võimekused ning API/kasutajaliidese
-  juhtelemendid.
-- [Automaatse kombineerimise mootor](../routing/AUTO-COMBO.md) ja tõrkekindluse dokumentatsioon,
-  kui käitumine muutub.
+- Avaliku strateegia väärtused ja UI metaandmed `src/shared/constants/routingStrategies.ts`.
+- Ärasaatmine ja tellimine `open-sse/services/combo.ts` ja `open-sse/services/combo/` all .
+- Kombineeritud skeemid, püsivus, vastupidavuse olek, mudeli võimalused ja API/UI juhtnupud.
+- [Auto-Combo mootori](../routing/AUTO-COMBO.md) ja vastupidavuse dokumentatsioon käitumise muutumisel.
 
-**Sihitud tsükkel**
+**Fokuseeritud silmus**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strateegia või edastamise muudatused
-npm run check:known-symbols      # strateegia registreerimise muudatused
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Kasutage kohalikult deterministlikke, jäljendatud ülesvooluteenusega teste. Reaalsete kombinatsioonide
-suitsutestid nõuavad autentimisandmeid ja on käsitsi käivitatavad, mitte CI-testide asendajad.
+Kasutage kohapeal deterministlikke pilkavaid ülesvoolu teste. Reaalajas kombineeritud suitsud nõuavad mandaati ja on käsitsi, mitte CI asendajad.
 
-### Kasutajaliides / kasutajakogemus
+### UI / UX
 
 **Lepingud**
 
-- Next.js-i marsruudi/lehe ja ühiskomponentide piirid kataloogides `src/app/` ja
-  `src/shared/components/`.
-- API vastuste kujud, laadimise/tühja oleku/vea olekud, klaviatuuri ja ekraanilugeri kasutus,
-  kohanduv paigutus, kujundusteemad ning lokaatide laiendamine.
-- Ingliskeelsed kasutajaliidese lähtetekstid failis `src/i18n/messages/en.json`; ärge kodeerige uut
-  kasutajale kuvatavat teksti otse lähtekoodi.
+- Next.js route/page ja jagatud komponentide piirid `src/app/` ja `src/shared/components/` all.
+- API vastuse kujundid, loading/empty/error olekud, klaviatuuri ja ekraanilugeja käitumine, tundlik paigutus, teemastamine ja lokaadi laiendamine.
+- Inglise UI allika stringid `src/i18n/messages/en.json`; Ärge kodeerige uut kasutajale suunatud koopiat.
 
-**Sihitud tsükkel**
+**Fokuseeritud silmus**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -110,70 +94,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Käivitage rakendus interaktsiooni- või visuaalsete muudatuste korral ning kontrollige nii kitsaid kui
-ka laiu vaatealasid. CI käivitab tootmisversiooni koostamise ja ulatuslikumad testikomplektid;
-visuaalne käitumine vajab siiski muudatusele sobivat sihitud komponenditesti, Playwrighti testi või
-dokumenteeritud käsitsi kontrolli.
+Käivitage rakendus interaktsiooni või visuaalsete muudatuste tegemiseks ja kontrollige nii kitsaid kui ka laiuvaid vaateporte. CI haldab tootmiskomplekti ja laiemaid sviite; visuaalne käitumine vajab siiski fokuseeritud komponenti Playwright või muudatusele vastavat dokumenteeritud käsitsi kontrollimist.
 
 ### i18n
 
 **Lepingud**
 
-- `src/i18n/messages/en.json` on kasutajaliidese lähtefail; `config/i18n.json` on lokaatide lähtefail.
-- CLI kataloogid asuvad eraldi kataloogis `bin/cli/locales/`.
-- Säilitage ICU kohatäited ja sildid täpselt. Ärge tõlkige toote-, teenusepakkuja- või mudelinimesid,
-  protokolli- ja päisenimesid, käske, koodi/JSON-i identifikaatoreid, URL-e, keskkonnamuutujaid ega
-  kaitstud termineid, nagu `OmniRoute`, `OAuth`, `MCP` ja `A2A`. Praegune lähteloend asub failis
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` on UI allikas; `config/i18n.json` on lokaadi allikas.
+- CLI kataloogid asuvad eraldi `bin/cli/locales/` all.
+- Säilitage ICU kohahoidjad ja sildid täpselt. Ärge tõlkige product/provider/model nimesid, protokollide ja päiste nimesid, käske, code/JSON identifikaatoreid, URLs, keskkonnamuutujaid ega kaitstud termineid, nagu `OmniRoute`, `OAuth`, `MCP` ja `A2A`. Praegune allikate loend on `scripts/i18n/glossary/protected-terms.json`.
 
-**Sihitud tsükkel**
+Funktsioon PR redigeerib ainult `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); teised lokaadid täidetakse üks kord väljalaske kohta väljalaske värskendamise või tõlkelainega (`docs/guides/I18N.md` → "Ainult funktsioon PRs touch `en.json` "). `npm run check:pr-derived-paths` ebaõnnestub funktsiooni PR, mis redigeerib teist lokaadikataloogi.
+
+**Fokuseeritud silmus**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # kui CLI tekstid/kataloogid muutuvad
 npm run lint
 ```
 
-See on olemasoleva süsteemi juhend, mitte kutse laiendada selle tööriistu või võtmemudelit.
-Hoidke i18n-i paigad täpselt piiritletuna, kuni asendussüsteemi kavandatakse. Ärge käivitage väliseid
-teenuseid kasutavaid tõlkekäske, välja arvatud juhul, kui ülesanne nõuab sõnaselgelt genereeritud
-tõlkeid ja olete saadud erinevuse üle vaadanud.
+Ilma `--mode=pr` töötavad need väravad kohapeal vabastusrežiimis ja annavad aru igast tsüklist lisatud või ümberkirjutatud võtmest `en.json` s; see on väljalaske värskendamise töö, mitte teie PR.
+
+See on juhis olemasoleva süsteemi jaoks, mitte üleskutse selle tööriistade või võtmemudeli laiendamiseks. Hoidke i18n plaastrid asendussüsteemi projekteerimise ajal kirurgilistena. Ärge käivitage välisteenuseid kutsuvaid tõlkekäske, välja arvatud juhul, kui ülesanne nõuab selgesõnaliselt loodud tõlkeid ja te olete sellest tuleneva erinevuse üle vaadanud.
 
 ### CLI
 
 **Lepingud**
 
-- Avalikud käsud ja lipud kataloogis `bin/cli/`, genereeritud API-käsud, väljumiskoodid, stdout/stderr ja
-  JSON-väljundi struktuurid, konfiguratsiooni-/keskkonnakäitumine ning pakendatud failid.
-- CLI kasutajale kuvatavad sõned peavad kasutama CLI i18n-kihti ning hoidma `en`/`pt-BR` kataloogid sünkroonis.
-- Säilitage Node toetatud käituskeskkonnana ja avaldatud binaarliidese leping.
+- Avalikud käsud ja lipud `bin/cli/`, loodud API -käsud, väljumiskoodid, stdout/stderr ja JSON -väljundi kujundid, config/environment -käitumine ja pakendatud failid.
+- CLI kasutajale suunatud stringid peavad kasutama CLI i18n kihti (`t()` klahvid, mis eksisteerivad `bin/cli/locales/en.json`). Funktsioon PR muudab ainult `en.json`; `pt-BR` ja teised lokaadid valmivad väljalaskmisel.
+- Säilitage sõlm toetatud käituskeskkonnana ja avaldatud kahendlepinguna.
 
-**Fookustatud tsükkel**
+**Fokuseeritud silmus**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # genereeritud/pakendatud CLI muudatused
-npm run check:pack-policy     # paketipinna muudatused
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Kui käitumine sõltub parsimisest, failidest või väljumisolekust, kasutage täpset käsku ajutises
-andmekataloogis. CI teeb laiemad paketi artefakti- ja ökosüsteemikontrollid.
+Kasutage täpset käsku ajutises andmekataloogis, kui käitumine sõltub sõelumisest, failidest või väljumisolekust. CI teostab laiemat paketti artefaktide ja ökosüsteemide kontrolli.
 
 ### Andmebaas
 
 **Lepingud**
 
-- Domeenimoodulid asuvad kataloogis `src/lib/db/`; importige konkreetsed moodulid otse (vana `localDb.ts` reeksportimise kiht eemaldati).
-- Nummerdatud idempotentsed SQL-migratsioonid kataloogis `src/lib/db/migrations/`, tehinguohutus, uuendamise
-  käitumine, indeksid ja kõik skeemist mõjutatud väljakutsujad.
-- Marsruudid ja töötlejad ei käivita kunagi toorest SQL-i otse.
+- Domeenimoodulid `src/lib/db/` all; importida konkreetseid mooduleid otse (vana `localDb.ts` re-ekspordi kiht eemaldati).
+- Nummerdatud, idempotentsed SQL migratsioonid `src/lib/db/migrations/` alla, tehingute ohutus, täienduskäitumine, indeksid ja kõik helistajad, mida skeem mõjutab.
+- Marsruudid ja käitlejad ei väljasta kunagi töötlemata SQL otse.
 
-**Fookustatud tsükkel**
+**Fokuseeritud silmus**
 
 ```bash
 npm run check:migration-numbering
@@ -183,33 +160,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Migratsiooni lisamisel testige nii värsket andmebaasi kui ka eelmiselt skeemilt uuendamist. Andmebaasitestid
-peavad puhastamise ajal sulgema ressursipidemed ja kutsuma välja `resetDbInstance()`. Käivitage `npm run test:bun:db` ainult siis,
-kui parima võimaliku toe põhimõttel töötava Bun-adapteri tee muutub; Node jääb määravaks.
+Migratsiooni lisamisel testige nii värsket andmebaasi kui ka varasemat skeemi täiendamist. Andmebaasi testid peavad puhastamise ajal sulgema käepidemed ja kutsuma `resetDbInstance()`. Käivitage `npm run test:bun:db` ainult siis, kui muutub parima Bun -adapteri tee; Sõlm jääb autoriteetseks.
 
-### Koostamine / juurutamine
+### Ehitage / juurutage
 
 **Lepingud**
 
-- Juur- ja tööruumi manifestid/lukustusfail, `scripts/build/`, Next.js-i autonoomne komplekteerimine, `dist/`
-  paketi sisu, Electroni platvormi metaandmed, CI töövood ning juurutuse kontrolltähised.
-- Toetatud Node'i versioonivahemikud ja failis `CLAUDE.md` lubatud Bun-i kasutus peavad säilima.
-- Koostamisartefakte ei lisata versioonihaldusse; rakenduvad sõltuvuste, litsentside, töövoogude ja pakettide reeglid.
+- Juur- ja tööruum manifests/lockfile, `scripts/build/`, Next.js iseseisev koost, `dist/` paketi sisu, Electron platvormi metaandmed, CI töövood ja juurutamise valvurid.
+- Toetatud sõlmede vahemikud ja lubatud Bun -kasutus `CLAUDE.md` peavad jääma puutumatuks.
+- Ehitusartefaktid jäävad jälgimata; kehtivad sõltuvuse, litsentsi, töövoo ja paketipoliitikad.
 
-**Fookustatud tsükkel**
+**Fokuseeritud silmus**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # sõltuvuse või lukustusfaili muudatused
-npm run check:pack-policy      # avaldatud paketipinna muudatused
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Kasutage `npm run build` lokaalselt ainult siis, kui muudatus mõjutab kompileerimist, autonoomset komplekteerimist, varasid
-või käitusaegset pakendamist. Kasutage `npm run build:release` ainult väljalaske/juurutuse valideerimiseks. CI koostamine on
-lõplik platvormideülene signaal; platvormipõhised Electroni muudatused vajavad vastavat fookustatud koostamist
-või suitsutesti tõendit.
+Kasutage `npm run build` kohapeal ainult siis, kui muudatus mõjutab kompileerimist, eraldiseisvat kokkupanekut, varasid või käitusaegset komplekteerimist. Kasutage `npm run build:release` ainult release/deploy valideerimiseks. CI ehitus on lõplik platvormideülene signaal; platvormipõhised Electron muudatused vajavad vastavat keskendunud ehitust või suitsutõendeid.
 
 ## Arendaja skriptid ühiskasutatava masina jaoks
 

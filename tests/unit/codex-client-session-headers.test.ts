@@ -18,7 +18,12 @@ import {
 } from "../../open-sse/config/codexTurnState.ts";
 
 const SESSION = "ses_client-session_01:turn.2";
-const ALIASES = ["x-opencode-session-id", "x-session-affinity", "X-Session-Id"];
+const ALIASES = [
+  "x-opencode-session-id",
+  "x-session-affinity",
+  "X-Session-Id",
+  "X-Claude-Code-Session-Id",
+];
 const credentialsFor = (mode: CodexFingerprintMode = "session") => ({
   accessToken: "synthetic-oauth-token",
   connectionId: "synthetic-connection-a",

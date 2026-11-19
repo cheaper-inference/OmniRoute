@@ -70,6 +70,8 @@ export interface DatabaseSettings {
     compressionCacheStats: number;
     xpAuditLog: number;
     compressionRunTelemetry: number;
+    /** Total size cap of the stored generated media, in MiB. The env MEDIA_STORE_MAX_MB wins. */
+    mediaStoreMaxMb: number;
     autoCleanupEnabled: boolean;
   };
 
@@ -165,6 +167,7 @@ export const DEFAULT_DATABASE_SETTINGS: Omit<DatabaseSettings, "location" | "sta
     compressionCacheStats: 30,
     xpAuditLog: 30,
     compressionRunTelemetry: 30,
+    mediaStoreMaxMb: 2048,
     autoCleanupEnabled: true,
   },
   aggregation: {
