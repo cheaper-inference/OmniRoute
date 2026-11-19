@@ -47,7 +47,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 పునఃప్రారంభించిన తర్వాత, ఇప్పటికే ఉన్న OpenAI-అనుకూల మరియు Anthropic-అనుకూల విధానాలకు అదనంగా డ్యాష్బోర్డ్లో **Add Claude Code Compatible** ఎంపిక కనిపిస్తుంది.
