@@ -3,23 +3,23 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b2",
+    "batchId": "b3",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b2-f6acc51b3eed",
-    "candidateSha": "f6acc51b3eedd601dd5c47ef036169a26f002bee",
+    "candidateRef": "omni-queue/release-v3.8.55/b3-ed3affcf3805",
+    "candidateSha": "ed3affcf38053cd514ca57f521e282dd8d9aba7f",
     "baseSha": "3de17c8a2a32b104319166a3679d3b5c60911317",
-    "treeSha": "0d55544e76808002734d2de717a4ab835bf6eeb6",
+    "treeSha": "63a1fc5a42561d7954653b122eb00311770334dd",
     "prs": [
       {
-        "n": 20630,
-        "head": "393a8a45d89ba2ceb6d8d8331350193173ec0a65",
-        "title": "fix(dashboard): clear the payload section copied-state timer on unmount",
+        "n": 20632,
+        "head": "86fe1955c24483918ecc1c70be041bd05755e6b4",
+        "title": "fix(ci): count only real workflow jobs in the omni-queue verdict",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-19T15:24:12Z"
+        "labeledAt": "2026-11-19T15:36:39Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-19T15:34:19.060Z",
+    "startedAt": "2026-11-19T16:42:45.319Z",
     "attempts": 0,
     "bisect": null
   },
@@ -39,11 +39,13 @@
     }
   ],
   "shadow": {
-    "processed": {}
+    "processed": {
+      "20630": "393a8a45d89ba2ceb6d8d8331350193173ec0a65"
+    }
   },
   "counters": {
-    "batchSeq": 2,
-    "ciRuns": 3,
+    "batchSeq": 3,
+    "ciRuns": 4,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 1,
@@ -176,7 +178,42 @@
         "20630": "2026-11-19T15:24:12Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44556139104"
+    },
+    {
+      "at": "2026-11-19T16:42:16.439Z",
+      "type": "checks-green",
+      "batchId": "b2",
+      "prs": [
+        20630
+      ],
+      "sha": "f6acc51b3eedd601dd5c47ef036169a26f002bee",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44569016721"
+    },
+    {
+      "at": "2026-11-19T16:42:25.009Z",
+      "type": "would-land",
+      "batchId": "b2",
+      "prs": [
+        20630
+      ],
+      "sha": "f6acc51b3eedd601dd5c47ef036169a26f002bee",
+      "detail": "shadow mode: would merge-ff onto 3de17c8a2a32",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44569016721"
+    },
+    {
+      "at": "2026-11-19T16:42:47.801Z",
+      "type": "batch-started",
+      "batchId": "b3",
+      "prs": [
+        20632
+      ],
+      "sha": "ed3affcf38053cd514ca57f521e282dd8d9aba7f",
+      "detail": "1 PR(s) on 3de17c8a2a32; window 6",
+      "labeledAt": {
+        "20632": "2026-11-19T15:36:39Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44569016721"
     }
   ],
-  "updatedAt": "2026-11-19T16:35:45.102Z"
+  "updatedAt": "2026-11-19T16:42:49.333Z"
 }
