@@ -96,10 +96,14 @@ test("Claude Fable 5.2 has native 1M context and adaptive-only thinking", () => 
 });
 
 test("Claude Fable 5.2 strips unsupported sampling parameters", () => {
-  for (const providerId of ["anthropic", "claude"] as const) {
-    const unsupported = getUnsupportedParams(providerId, MODEL_ID);
+  for (const [providerId, modelId] of [
+    ["anthropic", MODEL_ID],
+    ["claude", MODEL_ID],
+    ["bedrock", BEDROCK_MODEL_ID],
+  ] as const) {
+    const unsupported = getUnsupportedParams(providerId, modelId);
     for (const param of ["temperature", "top_p", "top_k"]) {
-      assert.ok(unsupported.includes(param), `${providerId}/${MODEL_ID} must strip ${param}`);
+      assert.ok(unsupported.includes(param), `${providerId}/${modelId} must strip ${param}`);
     }
   }
 });
