@@ -282,30 +282,36 @@ export async function injectMemoryAndSkills({
     // Memory builtins and registered Skills are only executed by the
     // non-streaming server-owned tool loop; stream clients execute tools
     // client-side, so we skip injection for stream requests.
+    let skillsLoaded = true;
     try {
       await skillRegistry.loadFromDatabase(memoryOwnerId);
     } catch (skillsErr) {
       // Skills are optional extras: a failed load (one corrupt row) must not fail the request.
+      // The registry may still hold an earlier load's entries (a removed or changed skill), so
+      // this request injects no custom skill; client and memory tools are left as they are.
+      skillsLoaded = false;
       log?.debug?.(
         "SKILLS",
         `Skills load skipped: ${skillsErr instanceof Error ? skillsErr.message : String(skillsErr)}`
       );
     }
     const existingTools = Array.isArray(body.tools) ? body.tools : [];
-    const { tools: mergedTools, injectedNames } = injectSkillsWithMetadata({
-      provider: getSkillsProviderForFormat(sourceFormat),
-      existingTools,
-      apiKeyId: memoryOwnerId,
-      model: typeof effectiveModel === "string" ? effectiveModel : undefined,
-      sourceFormat,
-      targetFormat,
-      backgroundReason,
-      messages: Array.isArray(body.messages)
-        ? body.messages
-        : Array.isArray(body.input)
-          ? body.input
-          : undefined,
-    });
+    const { tools: mergedTools, injectedNames } = !skillsLoaded
+      ? { tools: existingTools, injectedNames: [] as string[] }
+      : injectSkillsWithMetadata({
+          provider: getSkillsProviderForFormat(sourceFormat),
+          existingTools,
+          apiKeyId: memoryOwnerId,
+          model: typeof effectiveModel === "string" ? effectiveModel : undefined,
+          sourceFormat,
+          targetFormat,
+          backgroundReason,
+          messages: Array.isArray(body.messages)
+            ? body.messages
+            : Array.isArray(body.input)
+              ? body.input
+              : undefined,
+        });
 
     if (mergedTools.length > existingTools.length) {
       body = {

@@ -74,6 +74,41 @@ test("a corrupt skill row does not make the injection reject", async () => {
   assert.deepEqual(result.body.messages, body.messages, "the request still goes through");
 });
 
+// A failed load leaves the previous load's entries in the registry: those may describe a removed
+// or changed skill, so the request must not advertise them. Client tools still go through.
+test("a failed skill load injects no cached skill and keeps the client's tools", async (t) => {
+  await updateSettings({ memoryEnabled: true, memoryMaxTokens: 2000, skillsEnabled: true });
+  invalidateMemorySettingsCache();
+  resetSkillsRegistry();
+  await skillRegistry.register({
+    name: "stale-skill",
+    version: "1.0.0",
+    description: "cached before the failed load",
+    schema: { input: {}, output: {} },
+    handler: "h",
+    enabled: true,
+    apiKeyId: "key-stale",
+    mode: "on",
+  } as unknown as Parameters<typeof skillRegistry.register>[0]);
+  t.mock.method(skillRegistry, "loadFromDatabase", async () => {
+    throw new Error("database is locked");
+  });
+  const clientTool = { type: "function", function: { name: "client_tool", parameters: {} } };
+  const body = {
+    model: "gpt-4o",
+    messages: [{ role: "user", content: "hi" }],
+    tools: [clientTool],
+  };
+  const result = await call(body, "key-stale");
+  assert.deepEqual(result.injectedCustomSkillNames, [], "no skill from the stale cache");
+  const names = (result.body.tools as Array<{ function?: { name?: string } }>).map(
+    (tool) => tool.function?.name
+  );
+  assert.ok(names.includes("client_tool"), "the client's tool is kept");
+  assert.ok(!names.some((name) => String(name).includes("stale")), JSON.stringify(names));
+  resetSkillsRegistry();
+});
+
 // Automatic prefix caching (OpenAI, Codex, Azure) needs a byte-identical prefix from token 0:
 // a per-query memory text at messages[0] misses the cache on every turn.
 test("OpenAI memory injection leaves the prefix of the conversation untouched", async () => {
