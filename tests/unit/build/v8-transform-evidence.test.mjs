@@ -119,6 +119,10 @@ async function packageMatrix(t, scenario = "valid") {
       differentBody: scenario === "same-size-body" && index === 2,
       unrecognizedBanner: scenario === "unrecognized-banner" && index === 2,
     });
+    if (scenario === "wrong-raw-source" && index === 2) {
+      const rawMap = Object.values(value.raw["source-map-cache"])[0].data;
+      rawMap.sourcesContent = ["export const value = null;\n"];
+    }
     await writeFile(join(inputDirectory, "coverage-1.json"), JSON.stringify(value.raw));
     const binding = {
       schemaVersion: 1,
@@ -143,6 +147,13 @@ async function packageMatrix(t, scenario = "valid") {
     );
     if (scenario === "interrupted-unrelated-cache" && index === 2) {
       await writeFile(join(cache, `17950-${"b".repeat(40)}`), interrupted);
+    }
+    if (scenario === "wrong-unused-cached-source" && index === 2) {
+      const staleMap = { ...value.map, sourcesContent: ["export const value = null;\n"] };
+      await writeFile(
+        join(cache, `17950-${"b".repeat(40)}`),
+        JSON.stringify({ code: value.code, map: JSON.stringify(staleMap) })
+      );
     }
     if (scenario === "ambiguous-cache" && index === 2) {
       const different = generated(sourceRoot, { differentBody: true });
@@ -219,6 +230,22 @@ test("an interrupted tsx cache write cannot block complete generated coverage ev
   assert.equal(evidence.entries.length, 1);
   const prepared = await prepareCoverageShards(options);
   assert.ok(prepared.layoutProjection.projectedScriptSamples > 0);
+});
+
+test("an unused transform with a different source cannot replace the measured proof", async (t) => {
+  const options = await packageMatrix(t, "wrong-unused-cached-source");
+  const evidence = options.manifests[1].transformEvidence;
+  assert.equal(evidence.mismatchedSourceEntries, 1);
+  assert.equal(evidence.entries.length, 1);
+  const prepared = await prepareCoverageShards(options);
+  assert.ok(prepared.layoutProjection.projectedScriptSamples > 0);
+});
+
+test("V8 evidence refuses an embedded source different from the candidate Git blob", async (t) => {
+  await assert.rejects(
+    packageMatrix(t, "wrong-raw-source"),
+    /V8_EVIDENCE_INCOMPLETE:generated-evidence-embedded-source \(src\/branch.ts\)/
+  );
 });
 
 for (const [scenario, reason] of [
