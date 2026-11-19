@@ -1,1 +1,0 @@
-- **feat(providers):** Claude refusals can return the safeguard explanation as assistant text, behind the default-off `CLAUDE_REFUSAL_EXPLANATION_ENABLED` environment flag, for streaming and non-streaming responses.
