@@ -1,8 +1,9 @@
 /**
  * A client that disconnects (HTTP 499) did not break the provider. Combo health
- * must keep that row in the request count but not count it as a failure, so
- * aborted calls stop pulling a healthy combo and its targets below the
- * degraded thresholds. Real provider errors (5xx) must still lower the rate.
+ * must keep that row in the request count but leave it out of the success rate
+ * (neither a success nor a failure), so aborted calls neither pull a healthy
+ * combo and its targets below the degraded thresholds nor hide real provider
+ * errors (5xx), which must still lower the rate.
  */
 
 import test from "node:test";
@@ -60,11 +61,28 @@ async function seed(statuses: number[]) {
 
 test("499 client aborts do not lower combo or target success rate", async () => {
   const { performance, target } = await seed([200, 200, 200, 499, 499, 502]);
-  // 3 ok + 2 aborts are not provider failures; only the 502 is.
+  // The 2 aborts are neither successes nor failures: the rate is 3 ok out of the 4 judged calls.
   assert.equal(performance.totalRequests, 6, "aborts stay in the request count");
-  assert.equal(performance.successRate, 0.8333);
+  assert.equal(performance.successRate, 0.75);
   assert.equal(target?.requests, 6);
-  assert.equal(target?.successRate, 83);
+  assert.equal(target?.successRate, 75);
+});
+
+test("many client aborts do not hide provider errors", async () => {
+  const { performance, target } = await seed([200, 502, 499, 499, 499, 499, 499, 499, 499, 499]);
+  // Counting the 8 aborts as successes would report 90% and hide a 1-in-2 provider failure rate.
+  assert.equal(performance.totalRequests, 10);
+  assert.equal(performance.successRate, 0.5);
+  assert.equal(target?.requests, 10);
+  assert.equal(target?.successRate, 50);
+});
+
+test("a window of only client aborts reports no provider fault", async () => {
+  const { performance, target } = await seed([499, 499, 499, 499, 499]);
+  assert.equal(performance.totalRequests, 5);
+  assert.equal(performance.successRate, 1);
+  assert.equal(target?.requests, 5);
+  assert.equal(target?.successRate, 100);
 });
 
 test("provider errors still lower the success rate", async () => {
