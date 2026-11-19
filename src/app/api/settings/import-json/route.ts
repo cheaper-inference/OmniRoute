@@ -21,9 +21,23 @@ const settingsKeySchema = updateSettingsSchema.partial();
  * re-auth, and the dashboard session state (`sessionsValidAfter`, `revokedDashboardSessions`).
  */
 function stripSecurityImpactingSettings(settings: object): Record<string, unknown> {
-  const safeSettings: Record<string, unknown> = { ...settings };
-  for (const key of IMPORT_STRIPPED_SETTINGS_KEYS) {
-    delete safeSettings[key];
+  const stripped = new Set<string>(IMPORT_STRIPPED_SETTINGS_KEYS);
+  const safeSettings: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(settings)) {
+    if (stripped.has(key)) continue;
+    // Spread and `Object.assign` route this key through the `__proto__` setter on
+    // whichever engine compiles the copy, and the key is then lost before the
+    // migration ever sees it. Keep it an own property here.
+    if (key === "__proto__") {
+      Object.defineProperty(safeSettings, key, {
+        value,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+      continue;
+    }
+    safeSettings[key] = value;
   }
   return safeSettings;
 }
@@ -37,6 +51,19 @@ function dropInvalidSettings(settings: Record<string, unknown>) {
   const valid: Record<string, unknown> = {};
   const ignoredKeys: string[] = [];
   for (const [key, value] of Object.entries(settings)) {
+    // `__proto__` is an own settings key that the (`.strict()`) PATCH schema does
+    // not declare, so the parse below reports it as unrecognized and it would be
+    // dropped as invalid. Store it as an own property: a bracket assignment runs
+    // the `__proto__` setter and turns the row into the object's prototype.
+    if (key === "__proto__") {
+      Object.defineProperty(valid, key, {
+        value,
+        enumerable: true,
+        writable: true,
+        configurable: true,
+      });
+      continue;
+    }
     // Old backups store the Codex tier as a bare boolean. PATCH no longer accepts it, but
     // resolveCodexGlobalFastServiceTier still reads it, so keep it.
     if (key === "codexServiceTier" && typeof value === "boolean") {
