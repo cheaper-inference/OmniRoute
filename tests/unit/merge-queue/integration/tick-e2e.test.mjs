@@ -16,7 +16,7 @@ import {
   parseQueueTrailers,
   stateFilePath,
 } from "../../../../scripts/merge-queue/contracts.mjs";
-import { main } from "../../../../scripts/merge-queue/tick.mjs";
+import { FOREIGN_CHECKS_DETAIL, main } from "../../../../scripts/merge-queue/tick.mjs";
 import {
   BOT_LOGIN,
   LAND_TOKEN,
@@ -494,6 +494,69 @@ scenario("a status an App posts on the candidate SHA never decides its verdict",
   assert.equal(w.events("checks-red").length, 0);
   assert.equal(w.state().paused, null);
 });
+
+scenario(
+  "a check run a workflow token files in the candidate's own suite, which GitHub lists among the run's jobs, never decides its verdict",
+  async (t) => {
+    const w = await createQueueWorld(t, { mode: "live" });
+    w.seedGreenBase(); // the tip the queue landed: a red batch of one blames its PR
+    w.openPr(2, { "pr-2.txt": "change 2\n" });
+    const foreign = () =>
+      w
+        .events("error")
+        .filter((e) => String(e.detail).startsWith(FOREIGN_CHECKS_DETAIL))
+        .map((e) => [e.batchId, e.detail]);
+
+    // A green candidate with a forged `Gate / CI` failure in its CI run's suite: it lands.
+    await approvedPrs(w, [1]);
+    await w.tick();
+    const green = w.state().inFlight;
+    w.runCi(green.candidateSha, green.candidateRef);
+    const failure = w.forgeCheckRun(green.candidateSha, green.candidateRef, {
+      conclusion: "failure",
+    });
+    const run = w.fake.workflowRuns.find((r) => r.check_suite_id === failure.check_suite.id);
+    await w.tick();
+    assert.ok(
+      w.fake.jobListings.some((l) => l.runId === run.id),
+      "the jobs of the run that holds it were listed (and it with them)"
+    );
+    assert.equal(w.baseTip(), green.candidateSha, "the forged failure took nothing out");
+    assert.equal(w.events("checks-red").length, 0);
+    assert.equal(w.events("culprit-found").length, 0);
+    assert.deepEqual(foreign(), [
+      [green.batchId, `${FOREIGN_CHECKS_DETAIL}: \`Gate / CI\` (app \`github-actions\`)`],
+    ]);
+
+    // A red candidate with a forged `Gate / CI` success in the SAME suite as its real failed
+    // `Gate / CI`, later and with a higher id (what a re-run looks like): it stays red.
+    w.culprits.add(2);
+    assert.equal((await w.label(2)).action, "approved");
+    w.clock.advance(w.config.batch.maxWaitMinutes);
+    await w.tick();
+    const red = w.state().inFlight;
+    assert.deepEqual(nums(red.prs), [2]);
+    w.runCi(red.candidateSha, red.candidateRef);
+    const realGate = w.fake.checkRuns
+      .get(red.candidateSha)
+      .find((r) => r.name === "Gate / CI" && !r.not_a_job);
+    assert.equal(realGate.conclusion, "failure");
+    const success = w.forgeCheckRun(red.candidateSha, red.candidateRef, { conclusion: "success" });
+    assert.equal(success.check_suite.id, realGate.check_suite.id, "the same suite");
+    assert.ok(success.id > realGate.id, "a higher id");
+    await w.tick();
+    assert.equal(w.baseTip(), green.candidateSha, "the red candidate never landed");
+    assert.deepEqual(landStatuses(w, red.candidateSha), [], "never blessed");
+    assert.deepEqual(
+      w.events("culprit-found").map((e) => e.prs),
+      [[2]]
+    );
+    assert.deepEqual(foreign().at(-1), [
+      red.batchId,
+      `${FOREIGN_CHECKS_DETAIL}: \`Gate / CI\` (app \`github-actions\`)`,
+    ]);
+  }
+);
 
 scenario(
   "scenario 3 (shadow): would-land, base intact, the next tick does not recompose",
