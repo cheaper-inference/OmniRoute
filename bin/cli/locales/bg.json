@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Ограничението трябва да е положително цяло число.",
     "error": "Грешка: {message}",
     "serverOffline": "Сървърът OmniRoute е офлайн. Стартирайте с: omniroute serve",
     "authRequired": "Необходима е автентикация. Задайте OMNIROUTE_API_KEY или изпълнете: omniroute setup",
