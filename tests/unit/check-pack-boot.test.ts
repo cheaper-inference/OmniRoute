@@ -1,25 +1,37 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { createHmac } from "node:crypto";
-import { existsSync, mkdtempSync, readFileSync, rmSync } from "node:fs";
+import { existsSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import {
   REQUIRED_SQLJS_RUNTIME_FILES,
   REQUIRED_MACHINE_TOKEN_RUNTIME_FILES,
-  REQUIRED_DOCS_I18N_RUNTIME_FILES,
+  FORBIDDEN_DOCS_RUNTIME_PATHS,
+  REQUIRED_DOCS_RUNTIME_FILES,
   pickTarball,
   evaluateBoot,
   pickPort,
   findMissingSqlJsRuntimeFiles,
   findMissingMachineTokenRuntimeFiles,
-  findMissingDocsI18nRuntimeFiles,
+  findForbiddenDocsRuntimePaths,
+  findMissingDocsRuntimeFiles,
   evaluateMachineTokenAuth,
   evaluateSqlJsRoundTrip,
   evaluateRestartPersistence,
   derivePackagedCliToken,
+  PACKED_TARBALL_ENV,
+  resolvePrebuiltTarballOption,
+  readTarballManifest,
+  verifyPrebuiltTarball,
+  obtainTarball,
 } from "../../scripts/check/check-pack-boot.mjs";
+import {
+  makeFakeRoot,
+  makeFixtureTarball,
+  runGateWithNpmShim,
+} from "../helpers/packedTarballGate.ts";
 
 // WS1.2 (T1, v3.8.49 quality plan) — pure-function guards for the tarball boot-smoke
 // gate that kills the #7065 class (published artifact crashes on every boot because a
@@ -85,19 +97,33 @@ test("installed package contract requires sql.js metadata, entrypoint, and WASM"
   );
 });
 
-test("installed package contract requires the translated docs mirrors and jsdom", () => {
-  const present = new Set(REQUIRED_DOCS_I18N_RUNTIME_FILES.map((file) => path.join("/pkg", file)));
+test("installed package contract requires jsdom and no translated docs mirrors", () => {
+  // 2026-11-17: the npm package no longer ships docs/i18n (the 3.8.54 tarball hit npm's 413).
+  assert.deepEqual([...REQUIRED_DOCS_RUNTIME_FILES], ["node_modules/jsdom/package.json"]);
+  assert.deepEqual([...FORBIDDEN_DOCS_RUNTIME_PATHS], ["dist/docs/i18n"]);
+
+  // jsdom is a declared dependency, so npm places it at <packageRoot>/node_modules.
+  const present = new Set([path.join("/pkg", "node_modules/jsdom/package.json")]);
   assert.deepEqual(
-    findMissingDocsI18nRuntimeFiles("/pkg", (file) => present.has(file)),
+    findMissingDocsRuntimeFiles("/pkg", (file) => present.has(file)),
+    []
+  );
+  assert.deepEqual(
+    findForbiddenDocsRuntimePaths("/pkg", (file) => present.has(file)),
     []
   );
 
-  // jsdom is a declared dependency, so npm places it at <packageRoot>/node_modules.
   present.delete(path.join("/pkg", "node_modules/jsdom/package.json"));
-  present.delete(path.join("/pkg", "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md"));
   assert.deepEqual(
-    findMissingDocsI18nRuntimeFiles("/pkg", (file) => present.has(file)),
-    ["dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md", "node_modules/jsdom/package.json"]
+    findMissingDocsRuntimeFiles("/pkg", (file) => present.has(file)),
+    ["node_modules/jsdom/package.json"]
+  );
+
+  // The mirrors coming back into the tarball fails the smoke.
+  present.add(path.join("/pkg", "dist/docs/i18n"));
+  assert.deepEqual(
+    findForbiddenDocsRuntimePaths("/pkg", (file) => present.has(file)),
+    ["dist/docs/i18n"]
   );
 });
 
@@ -292,5 +318,179 @@ test("derivePackagedCliToken derives the token against the server's DATA_DIR sal
     else process.env.OMNIROUTE_CLI_SALT = savedCliSalt;
     rmSync(dataDir, { recursive: true, force: true });
     rmSync(otherDataDir, { recursive: true, force: true });
+  }
+});
+
+// ─── Prebuilt tarball (pack once per publish) ─────────────────────────────────────
+//
+// The v3.8.54 publish packed the same dist/ four times per attempt (this gate,
+// check:install-upgrade, the stage-npm hand-off and GitHub Packages) at 13–36 min each on
+// the shared self-hosted runner. The workflow now packs once and passes the file through
+// --tarball / OMNIROUTE_PACKED_TARBALL; these tests pin that a given tarball is validated
+// and installed WITHOUT packing, and that a wrong or missing one is refused.
+
+function runGate(cwd: string, args: string[], env: Record<string, string> = {}) {
+  return runGateWithNpmShim(SCRIPT_PATH, cwd, args, env);
+}
+
+test("resolvePrebuiltTarballOption: --tarball wins over the env, env is the fallback, none → null", () => {
+  assert.equal(PACKED_TARBALL_ENV, "OMNIROUTE_PACKED_TARBALL");
+  assert.equal(
+    resolvePrebuiltTarballOption(["--tarball", "/a.tgz"], { OMNIROUTE_PACKED_TARBALL: "/b.tgz" }),
+    "/a.tgz"
+  );
+  assert.equal(
+    resolvePrebuiltTarballOption([], { OMNIROUTE_PACKED_TARBALL: " /b.tgz " }),
+    "/b.tgz"
+  );
+  assert.equal(resolvePrebuiltTarballOption([], {}), null);
+  assert.equal(resolvePrebuiltTarballOption([], { OMNIROUTE_PACKED_TARBALL: "  " }), null);
+  assert.throws(() => resolvePrebuiltTarballOption(["--tarball"], {}), /needs a path/);
+  assert.throws(() => resolvePrebuiltTarballOption(["--tarball", "--from"], {}), /needs a path/);
+});
+
+test("obtainTarball with a matching prebuilt tarball returns it and never packs", () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "pack-boot-prebuilt-"));
+  try {
+    const tarball = makeFixtureTarball(dir, { name: "omniroute", version: "3.8.55" });
+    assert.deepEqual(readTarballManifest(tarball), { name: "omniroute", version: "3.8.55" });
+    let packCalls = 0;
+    const result = obtainTarball({
+      root: dir,
+      destDir: dir,
+      prebuilt: path.relative(process.cwd(), tarball),
+      expectedName: "omniroute",
+      expectedVersion: "3.8.55",
+      pack: () => {
+        packCalls += 1;
+        return '[{"filename":"should-not-happen.tgz"}]';
+      },
+    });
+    assert.equal(packCalls, 0, "a given tarball must not be packed again");
+    assert.deepEqual(result, { tarball, packed: false });
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("obtainTarball without a prebuilt tarball packs exactly once (local behavior unchanged)", () => {
+  const calls: Array<[string, string]> = [];
+  const result = obtainTarball({
+    root: "/repo",
+    destDir: "/work",
+    prebuilt: null,
+    expectedName: "omniroute",
+    expectedVersion: "3.8.55",
+    pack: (cwd: string, dest: string) => {
+      calls.push([cwd, dest]);
+      return '[{"filename":"omniroute-3.8.55.tgz"}]';
+    },
+  });
+  assert.deepEqual(calls, [["/repo", "/work"]]);
+  assert.deepEqual(result, { tarball: path.join("/work", "omniroute-3.8.55.tgz"), packed: true });
+});
+
+test("a prebuilt tarball with the wrong version or name is refused, without packing", () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "pack-boot-mismatch-"));
+  try {
+    const stale = makeFixtureTarball(dir, { name: "omniroute", version: "3.8.54" }, "stale.tgz");
+    const renamed = makeFixtureTarball(
+      dir,
+      { name: "@cheaper-inference/omniroute", version: "3.8.55" },
+      "renamed.tgz"
+    );
+    const pack = () => {
+      throw new Error("must not pack");
+    };
+    assert.throws(
+      () =>
+        obtainTarball({
+          root: dir,
+          destDir: dir,
+          prebuilt: stale,
+          expectedName: "omniroute",
+          expectedVersion: "3.8.55",
+          pack,
+        }),
+      /version "3\.8\.54" \(expected "3\.8\.55"\)/
+    );
+    assert.throws(
+      () =>
+        obtainTarball({
+          root: dir,
+          destDir: dir,
+          prebuilt: renamed,
+          expectedName: "omniroute",
+          expectedVersion: "3.8.55",
+          pack,
+        }),
+      /name "@cheaper-inference\/omniroute" \(expected "omniroute"\)/
+    );
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("a missing or non-tarball prebuilt file is refused", () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "pack-boot-missing-"));
+  try {
+    const expected = { expectedName: "omniroute", expectedVersion: "3.8.55" };
+    assert.throws(
+      () => verifyPrebuiltTarball(path.join(dir, "nope.tgz"), expected),
+      /prebuilt tarball not found: .*nope\.tgz/
+    );
+    const notTar = path.join(dir, "garbage.tgz");
+    writeFileSync(notTar, "not a tarball");
+    assert.throws(() => verifyPrebuiltTarball(notTar, expected), /not an npm tarball/);
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
+});
+
+test("gate run: a missing OMNIROUTE_PACKED_TARBALL fails fast and packs nothing", () => {
+  const root = makeFakeRoot({ name: "omniroute", version: "3.8.55" });
+  try {
+    const run = runGate(root, [], { [PACKED_TARBALL_ENV]: path.join(root, "absent.tgz") });
+    assert.equal(run.status, 1, run.stdout + run.stderr);
+    assert.match(run.stderr, /prebuilt tarball not found/);
+    assert.doesNotMatch(run.stdout, /packing v/);
+    assert.deepEqual(run.npmCalls, [], "no npm command may run before the tarball is validated");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("gate run: --tarball with a mismatched version fails fast and packs nothing", () => {
+  const root = makeFakeRoot({ name: "omniroute", version: "3.8.55" });
+  try {
+    const stale = makeFixtureTarball(root, { name: "omniroute", version: "3.8.54" }, "stale.tgz");
+    const run = runGate(root, ["--tarball", stale]);
+    assert.equal(run.status, 1, run.stdout + run.stderr);
+    assert.match(run.stderr, /does not match \.\/package\.json: version "3\.8\.54"/);
+    assert.doesNotMatch(run.stdout, /packing v/);
+    assert.deepEqual(run.npmCalls, []);
+  } finally {
+    rmSync(root, { recursive: true, force: true });
+  }
+});
+
+test("gate run: a matching prebuilt tarball is installed as-is, never repacked, never deleted", () => {
+  const root = makeFakeRoot({ name: "omniroute", version: "3.8.55" });
+  try {
+    const tarball = makeFixtureTarball(root, { name: "omniroute", version: "3.8.55" }, "one.tgz");
+    const run = runGate(root, [], { [PACKED_TARBALL_ENV]: tarball });
+    // The shimmed install creates nothing, so the install-contract check fails — AFTER the
+    // gate asked npm to install exactly the file it was handed, and nothing else.
+    assert.equal(run.status, 1, run.stdout + run.stderr);
+    assert.match(run.stdout, /using prebuilt tarball .*one\.tgz \(v3\.8\.55\) — not packing/);
+    assert.doesNotMatch(run.stdout, /packing v/);
+    assert.equal(run.npmCalls.length, 1, run.npmCalls.join("\n"));
+    assert.match(run.npmCalls[0], /^install -g --prefix \S+ /);
+    assert.ok(run.npmCalls[0].endsWith(` ${tarball}`), run.npmCalls[0]);
+    assert.ok(!run.npmCalls.some((c) => c.startsWith("pack")), "must not run npm pack");
+    assert.match(run.stderr, /sql\.js runtime contract/);
+    assert.equal(existsSync(tarball), true, "the shared tarball must survive the gate's cleanup");
+  } finally {
+    rmSync(root, { recursive: true, force: true });
   }
 });

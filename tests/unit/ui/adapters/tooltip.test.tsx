@@ -1,5 +1,7 @@
 // @vitest-environment jsdom
 import React from "react";
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import { afterEach, describe, expect, it } from "vitest";
 
@@ -54,13 +56,49 @@ describe("Tooltip adapters → kit Tooltip (Radix)", () => {
     expect(bare.closest(".ci-tooltip")).toBeNull();
   });
 
-  it("InfoTooltip renders an info icon with the text as accessible name", async () => {
+  it("InfoTooltip is the kit InfoTooltip: a short translated name, the text as its description", async () => {
     render(<InfoTooltip text="More about this" />);
-    const trigger = screen.getByRole("button", { name: "More about this" });
-    expect(trigger.querySelector("svg.oi-icon")).not.toBeNull();
+    const trigger = screen.getByRole("button", { name: "More information" });
+    expect(trigger.className).toContain("ci-info-tooltip__trigger");
+    expect(trigger.getAttribute("type")).toBe("button");
+    expect(trigger.querySelector("svg")).not.toBeNull();
+    // The help text is no longer the button's name: a screen reader heard it twice.
+    expect(screen.queryByRole("button", { name: "More about this" })).toBeNull();
     fireEvent.focus(trigger);
     await act(async () => {});
-    expect((await screen.findByRole("tooltip")).textContent).toContain("More about this");
+    const tooltip = await screen.findByRole("tooltip");
+    expect(tooltip.textContent).toContain("More about this");
+    expect(trigger.getAttribute("aria-describedby")).toBe(tooltip.id);
+  });
+
+  it("InfoTooltip keeps the adapter API (className on the trigger) and takes a label, a side and rich text", async () => {
+    render(
+      <InfoTooltip
+        text={<b>Rich help</b>}
+        label="About the hit rate"
+        side="bottom"
+        className="ms-1"
+      />
+    );
+    const trigger = screen.getByRole("button", { name: "About the hit rate" });
+    expect(trigger.className).toContain("ci-info-tooltip__trigger");
+    expect(trigger.className).toContain("ms-1");
+    fireEvent.focus(trigger);
+    await act(async () => {});
+    await screen.findByRole("tooltip");
+    const content = document.querySelector<HTMLElement>("[data-slot=tooltip-content]")!;
+    expect(content.getAttribute("data-side")).toBe("bottom");
+    expect(content.querySelector("b")?.textContent).toBe("Rich help");
+  });
+
+  it("the InfoTooltip adapter draws no button of its own (the kit-exception is gone)", () => {
+    const source = readFileSync(
+      join(process.cwd(), "src/shared/components/InfoTooltip.tsx"),
+      "utf8"
+    );
+    expect(source).toMatch(/from "@omniroute\/ui-kit\/info-tooltip"/);
+    expect(source).not.toMatch(/<button\b/);
+    expect(source).not.toMatch(/kit-exception:/);
   });
 
   it("wraps a disabled trigger in a focusable span so hover and focus still open the tooltip", async () => {

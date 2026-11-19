@@ -85,18 +85,10 @@ eşleştirilir; dolayısıyla `http://localhost:3000` ile
 zamanında **Kontrol Paneli → Güvenlik → İzin Verilen CORS Origin'leri** bölümünden
 ayarlanabilir.
 
-## API anahtarları ile çerez oturumlarının karşılaştırması
+## API anahtarları ve çerez oturumları
 
-- **Bearer / `x-api-key` (`/v1/*` çıkarım yüzeyi):** tarayıcılar bunları hiçbir
-  zaman otomatik olarak eklemez. CORS burada anlamlı bir engel değildir — engel
-  API anahtarıdır — bu nedenle söz konusu yüzey, tarayıcı ve Electron
-  istemcilerinin zaten erişim hakkına sahip oldukları yanıtları okuyabilmesi için
-  bilinçli olarak izin verici tutulur.
-  Gevşetilmiş origin yansıtma, header'ın salt varlığını değil doğrulanmış anahtarı esas alır: `REQUIRE_API_KEY=false` bir isteği anonim olarak sunduğunda, başarılı yanıtı varsayılan olarak erişimi reddeden izin listesine tabi kalır. Kimlik doğrulama retleri (401) okunabilir kalır; böylece istemciler iptal edilmiş veya yanlış yazılmış bir anahtarı kullanıcıya gösterebilir (#5242): pipeline'ın kendi 401 yanıtı origin yansıtmayı korur ve pipeline isteği anonim olarak sunduktan sonra anahtarı kendisi reddeden bir route (yönetim kimlik doğrulaması yapılandırılmışken `/v1/models` ve `/v1beta/models`, sahibe özgü `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ve auto-combo aday route'ları) bu 401 yanıtına origin yansıtmayı `credentialRejectionHeaders()` aracılığıyla ekler. Origin yansıtma, route'un bunlardan hangisini denetlediğine değil, isteğin bir kimlik bilgisi header'ı (`Authorization`, `x-api-key`, `x-goog-api-key` veya `auth_token` cookie'si) taşımasına bağlıdır ve hiçbir zaman `Access-Control-Allow-Credentials` ile birlikte gönderilmez; gövde sabit bir hata zarfıdır. `/api/v1/` altında `requireManagementAuth()` ile korunan yönetim route'ları (`/api/v1/management/*`, `/api/v1/registered-keys`) origin yansıtma eklemez: `REQUIRE_API_KEY=false` iken bu route'ların 401/403 yanıtları origin'ler arası okunamaz.
-- **Çerez oturumu (kontrol paneli):** güvenli biçimde kapalı varsayılan ayar
-  **ve** paylaşılan yolda `Access-Control-Allow-Credentials` bulunmamasıyla
-  korunur. Yönetim/kontrol paneli origin'lerini izin verici yapılandırmalardan
-  uzak tutun; bunlar kesinlikle güvenli biçimde kapalı kalmalıdır.
+- **Taşıyıcı / `x-api-key` ( `/v1/*` çıkarım yüzeyi):** tarayıcılar bunları asla otomatik olarak eklemez. CORS burada anlamlı bir engel değildir — API anahtarı — engelidir ve bu nedenle bu yüzey kasıtlı olarak izin vericidir, böylece tarayıcı ve Electron istemcileri zaten yetki sahibi oldukları yanıtları okuyabilirler. Rahat yankı, yalnızca başlığın varlığını değil, doğrulanmış anahtarı takip eder: `REQUIRE_API_KEY=false` bir isteği anonim olarak sunduğunda, başarılı yanıtı, başarısız şekilde kapatılmış izin verilenler listesini korur. Kimlik doğrulama redleri (401), istemcilerin iptal edilmiş veya yanlış yazılmış bir anahtarı (#5242) ortaya çıkarabilmesi için okunabilir kalır: boru hattının kendi 401'i yankıyı korur ve boru hattı ona anonim olarak hizmet ettikten sonra anahtarın kendisini reddeden bir rota (yönetim kimlik doğrulaması yapılandırılmış `/v1/models` ve `/v1beta/models`, sahip kapsamlı `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ve otomatik açılan aday rotalar), yankıyı bu 401'e şununla ekler: `credentialRejectionHeaders()`. Eko, rotanın hangisini kontrol ettiği değil, bir kimlik bilgisi başlığı (`Authorization`, `x-api-key`, `x-goog-api-key` veya `auth_token` çerezi) taşıyan istek üzerine anahtarlanır ve hiçbir zaman `Access-Control-Allow-Credentials` ile eşleştirilmez; gövde sabit bir hata zarfıdır. `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) tarafından korunan `/api/v1/` altındaki yönetim yolları yankıyı eklemez: `REQUIRE_API_KEY=false` ile 401/403 çapraz kökenden okunamaz.
+- **Çerez oturumu (kontrol paneli):** başarısızlıkla kapatılmış varsayılan tarafından korunuyor** Ve** paylaşılan yolda `Access-Control-Allow-Credentials` bulunmaması nedeniyle. management/dashboard kökenlerini izin verilen herhangi bir yapılandırmanın dışında tutun; tam olarak arıza durumunda kapalı kalmaları gerekir.
 
 ## WebSocket handshake'leri (`/v1/responses`, `/v1/ws`)
 

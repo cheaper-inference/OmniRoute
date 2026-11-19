@@ -464,7 +464,7 @@ export default function BudgetTab() {
       <Card className="p-5">
         <div className="flex items-start justify-between gap-3 mb-4">
           <div>
-            <h2 className="text-xl font-semibold flex items-center gap-2">
+            <h2 className="text-xl flex items-center gap-2">
               <Icon name="account_balance_wallet" size={22} className="text-primary" />
               {t("budgetPageTitle")}
             </h2>
@@ -683,7 +683,16 @@ function KpiBlock({
   );
 }
 
-function ProgressBarTinyColored({ value, max }: { value: number; max: number }) {
+function ProgressBarTinyColored({
+  value,
+  max,
+  label,
+}: {
+  value: number;
+  max: number;
+  /** Accessible name of the bar: the budget row it measures. */
+  label: string;
+}) {
   const pct = max > 0 ? Math.min((value / max) * 100, 100) : 0;
   // Same four steps as before, on the status tokens (100 % danger, 80 % alerting, 50 % warning).
   const color =
@@ -695,7 +704,14 @@ function ProgressBarTinyColored({ value, max }: { value: number; max: number }) 
           ? STATUS_META.warning.dot
           : STATUS_META.safe.dot;
   return (
-    <div className="w-full h-1 rounded-sm bg-surface-2 overflow-hidden">
+    <div
+      role="progressbar"
+      aria-label={label}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-valuenow={Math.round(pct)}
+      className="w-full h-1 rounded-sm bg-surface-2 overflow-hidden"
+    >
       <div className="h-full" style={{ width: `${pct}%`, background: color }} />
     </div>
   );
@@ -775,7 +791,7 @@ function BudgetRow({
           variant="ghost"
           onClick={onToggleExpand}
           aria-expanded={isExpanded}
-          className="block h-auto min-h-0 min-w-0 p-0 text-left font-normal hover:bg-transparent"
+          className="block h-auto min-h-0 min-w-0 p-0 text-left hover:bg-transparent"
         >
           <div className="text-[13px] font-semibold text-text-main truncate">
             {row.name || row.id}
@@ -800,7 +816,7 @@ function BudgetRow({
           </span>
           {(daily > 0 || monthly > 0) && (
             <div className="w-14">
-              <ProgressBarTinyColored value={usedPct} max={100} />
+              <ProgressBarTinyColored value={usedPct} max={100} label={row.name || row.id} />
             </div>
           )}
         </div>
@@ -882,11 +898,9 @@ function BudgetRowExpanded({
   return (
     <div className="px-12 py-4 bg-bg-subtle/30 border-t border-border space-y-4">
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-        <div className="rounded-md border border-border/40 bg-bg-base/30 p-3">
+        <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
-              {t("budgetProjection")}
-            </h4>
+            <h4 className="text-[11px] uppercase text-text-muted">{t("budgetProjection")}</h4>
             <span className="text-[10px] text-text-muted">{t("budgetLinearExtrapolation")}</span>
           </div>
           <div className="flex items-baseline gap-3">
@@ -913,11 +927,9 @@ function BudgetRowExpanded({
           </div>
         </div>
 
-        <div className="rounded-md border border-border/40 bg-bg-base/30 p-3">
+        <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
           <div className="flex items-center justify-between mb-2">
-            <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted">
-              {t("budgetCostBreakdown30d")}
-            </h4>
+            <h4 className="text-[11px] uppercase text-text-muted">{t("budgetCostBreakdown30d")}</h4>
             <span className="text-[10px] text-text-muted">{t("budgetByProvider")}</span>
           </div>
           {breakdown === undefined ? (
@@ -929,7 +941,14 @@ function BudgetRowExpanded({
               {breakdown.slice(0, 5).map((b) => (
                 <div key={b.provider} className="flex items-center gap-2 text-[11px]">
                   <span className="font-medium text-text-main w-24 truncate">{b.provider}</span>
-                  <div className="flex-1 h-1.5 rounded-sm bg-surface-2 overflow-hidden">
+                  <div
+                    role="progressbar"
+                    aria-label={b.provider}
+                    aria-valuemin={0}
+                    aria-valuemax={100}
+                    aria-valuenow={Math.round(Math.min(b.pct, 100))}
+                    className="flex-1 h-1.5 rounded-sm bg-surface-2 overflow-hidden"
+                  >
                     <div
                       className="h-full bg-primary rounded-sm"
                       style={{ width: `${Math.min(b.pct, 100)}%` }}
@@ -948,10 +967,8 @@ function BudgetRowExpanded({
         </div>
       </div>
 
-      <div className="rounded-md border border-border/40 bg-bg-base/30 p-3">
-        <h4 className="text-[11px] uppercase tracking-wide font-semibold text-text-muted mb-3">
-          {t("budgetLimits")}
-        </h4>
+      <div className="rounded-md border border-border/40 bg-bg-subtle/30 p-3">
+        <h4 className="text-[11px] uppercase text-text-muted mb-3">{t("budgetLimits")}</h4>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-3 mb-3">
           <Input
             label={t("budgetDailyDollar")}

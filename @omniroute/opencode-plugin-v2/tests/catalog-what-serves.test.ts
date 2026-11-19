@@ -988,10 +988,13 @@ describe("disambiguation stays unique across groups", () => {
       { id: "b/m", owned_by: "b", context_length: 1000 },
       { id: "c/keep", owned_by: "c", context_length: 1000 },
     ]);
+    // One shared provider label, so the raw names really collide across groups:
+    // `P - X` twice (renamed by route to `P - X (a)` / `P - X (b)`) and a kept
+    // `P - X (a)` that the first route rename lands on.
     const enrichment = new Map([
-      ["a/m", { name: "X" }],
-      ["b/m", { name: "X" }],
-      ["c/keep", { name: "X (a)" }],
+      ["a/m", { name: "X", providerDisplayName: "P" }],
+      ["b/m", { name: "X", providerDisplayName: "P" }],
+      ["c/keep", { name: "X (a)", providerDisplayName: "P" }],
     ]);
     const collected = await collectCatalog(
       { ...baseOpts, enrichment },
@@ -1003,6 +1006,12 @@ describe("disambiguation stays unique across groups", () => {
       collected.entries.get("omniroute/c/keep")?.name,
     ];
     for (const name of names) assert.ok(name, "every entry keeps a published name");
+    assert.notEqual(names[0], "P - X", "the shared name is disambiguated by route");
+    assert.notEqual(names[1], "P - X", "the shared name is disambiguated by route");
+    assert.ok(
+      names.includes("P - X (a)"),
+      `the cross-group collision on P - X (a) is reached: ${JSON.stringify(names)}`
+    );
     assert.equal(
       new Set(names).size,
       3,

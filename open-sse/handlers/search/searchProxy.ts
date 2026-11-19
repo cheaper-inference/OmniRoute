@@ -10,6 +10,7 @@
 
 import { saveCallLog } from "@/lib/usageDb";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
+import { readResponseTextWithinCap } from "../../utils/responseBodyCap.ts";
 import { formatSearchProviderFailure } from "./providerFailure.ts";
 import { fetchWithCheckedRedirects, isRegistryEndpoint } from "./redirectGuard.ts";
 import type { SearchUrlGuard } from "./baseUrl.ts";
@@ -29,6 +30,9 @@ import {
 export function saveSearchCallLog(entry: Record<string, unknown>): Promise<void> {
   return saveCallLog(entry);
 }
+
+/** A search page is small (SearXNG about 1 MiB); a larger body is a fault or an attack. */
+const SEARCH_MAX_BODY_BYTES = 4 * 1024 * 1024;
 
 export const SEARCH_COOLDOWN_STATUSES = new Set([
   HTTP_STATUS.PAYMENT_REQUIRED,
@@ -280,10 +284,10 @@ export async function executeProviderFetch(
         { guard: p.guard }
       )
     );
-    clearTimeout(timer);
-
+    // The timer also bounds the body read; the catch below clears it on failure.
     if (!response.ok) {
-      const errorText = await response.text();
+      const errorText = await readResponseTextWithinCap(response, SEARCH_MAX_BODY_BYTES);
+      clearTimeout(timer);
       if (log) {
         log.error("SEARCH", `${config.id} error ${response.status}: ${errorText.slice(0, 200)}`);
       }
@@ -320,7 +324,8 @@ export async function executeProviderFetch(
       };
     }
 
-    const data = await response.json();
+    const data = JSON.parse(await readResponseTextWithinCap(response, SEARCH_MAX_BODY_BYTES));
+    clearTimeout(timer);
     const normalized = normalize(config.id, data, query, searchType);
     const results = normalized.results.slice(0, maxResults);
     const duration = Date.now() - startTime;
