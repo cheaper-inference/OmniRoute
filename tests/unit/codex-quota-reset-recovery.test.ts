@@ -297,6 +297,18 @@ test("slow pre-reset poll cannot replace newer accepted post-reset routing evide
   await usage.fetchAndPersistProviderLimits(connection.id, "manual");
   assert.equal(cache.getQuotaCache(connection.id)!.quotas.weekly.remainingPercentage, 95);
 });
+test("a slow poll cannot clear a 429 exhaustion recorded after it was dispatched", async () => {
+  const connection = await seed(5);
+  codexUsage.setCodexUsageFetchForTests(async () => {
+    calls++;
+    await new Promise((resolve) => setTimeout(resolve, 5));
+    // Inference hits a 429 while the usage poll is still in flight.
+    cache.markAccountExhaustedFrom429(connection.id, "codex");
+    return response(5);
+  });
+  await usage.fetchAndPersistProviderLimits(connection.id, "manual");
+  assert.equal(cache.getQuotaCache(connection.id)!.exhausted, true);
+});
 test("a timed-out older poll cannot overwrite a newer persisted provider-limits read", async () => {
   const connection = await seed();
   const limitsDb = await import("../../src/lib/db/providerLimits.ts");

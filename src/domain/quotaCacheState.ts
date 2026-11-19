@@ -126,7 +126,9 @@ export function isStaleCodexReading(
     provider === "codex" &&
     observedAt !== undefined &&
     prior !== null &&
-    ((prior.completeAt ?? 0) > observedAt ||
+    // fetchedAt covers entries with no windows, such as a 429 exhaustion mark.
+    (prior.fetchedAt > observedAt ||
+      (prior.completeAt ?? 0) > observedAt ||
       Object.values(prior.quotas).some((quota) => (quota.observedAt ?? 0) > observedAt))
   );
 }
