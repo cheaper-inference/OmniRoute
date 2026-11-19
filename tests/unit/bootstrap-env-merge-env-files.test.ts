@@ -35,6 +35,8 @@ function withLayout(fn) {
     delete process.env[key];
   }
   process.env.HOME = home;
+  // os.homedir() reads USERPROFILE on Windows, so it must point at the temporary home too.
+  process.env.USERPROFILE = home;
   process.env.DATA_DIR = dataDir;
   process.chdir(cwd);
   try {
