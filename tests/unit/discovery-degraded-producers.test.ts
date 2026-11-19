@@ -188,6 +188,33 @@ test("the vertex producer reports the missing credential, the rejected key and t
   assert.equal(rejected.error, "HTTP 500");
   assert.equal("failure" in rejected, false);
 
+  // Every publisher list failed: report the HTTP status, not an empty catalog (#18790).
+  const publishersDown = await bodyOf(
+    await maybeHandleVertexModelDiscovery(
+      stubOptions("vertex", { apiKey: "", accessToken: "vertex-bearer-token" })
+    )
+  );
+  assert.equal(publishersDown.degraded, true);
+  assert.equal(publishersDown.error, "HTTP 500");
+  assert.equal("failure" in publishersDown, false);
+
+  // An org policy that blocks the host (constraints/gcp.restrictEndpointUsage) answers 403. Only
+  // the status is reported; the upstream text never reaches the response.
+  globalThis.fetch = async () =>
+    Response.json(
+      { error: { status: "PERMISSION_DENIED", message: "constraints/gcp.restrictEndpointUsage" } },
+      { status: 403 }
+    );
+  const policyDenied = await bodyOf(
+    await maybeHandleVertexModelDiscovery(
+      stubOptions("vertex", { apiKey: "", accessToken: "vertex-bearer-token" })
+    )
+  );
+  assert.equal(policyDenied.degraded, true);
+  assert.equal(policyDenied.error, "HTTP 403");
+  assert.doesNotMatch(JSON.stringify(policyDenied), /restrictEndpointUsage/);
+
+  globalThis.fetch = async () => Response.json({ publisherModels: [] });
   const emptyCatalog = await bodyOf(
     await maybeHandleVertexModelDiscovery(
       stubOptions("vertex", { apiKey: "", accessToken: "vertex-bearer-token" })

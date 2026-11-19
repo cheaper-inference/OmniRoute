@@ -53,61 +53,61 @@ OmniRoute/
 
 ## ルートファイル
 
-| ファイル                                    | 目的                                                                                            |
-| ------------------------------------------- | ----------------------------------------------------------------------------------------------- |
-| **README.md**                               | マーケティング用ランディングページ + クイックスタート + 機能マトリクス（`llm.txt` も参照）      |
-| **CHANGELOG.md**                            | リリースごとの変更履歴（`/version-bump-cc` スキルによる自動生成）                               |
-| **LICENSE**                                 | MIT ライセンスの本文                                                                            |
-| **CLAUDE.md**                               | Claude Code エージェント向けのプロジェクトルール（厳格なルール、規約、シナリオ）                |
-| **AGENTS.md**                               | CLAUDE.md の非 Claude AI エージェント向け版（Codex、Cursor など）                               |
-| **GEMINI.md**                               | Gemini ベースのエージェント向けの簡潔なルール（CLAUDE.md のサブセット）                         |
-| **CONTRIBUTING.md**                         | コントリビューターガイド：セットアップ、Conventional Commits、テスト、PR フロー                 |
-| **SECURITY.md**                             | 脆弱性の報告ポリシー、サポート対象バージョン、脅威モデル                                        |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — コミュニティで期待される行動                                             |
-| **llm.txt**                                 | LLM クローラー向けに最適化されたプレーンテキストのランディングページ（AI アシスタント向け SEO） |
-| **package.json**                            | npm マニフェスト、スクリプト、依存関係、エンジン、c8 カバレッジゲート                           |
-| **package-lock.json**                       | ロックされた依存関係ツリー                                                                      |
-| **tsconfig.json**                           | ルート TypeScript 設定                                                                          |
-| **tsconfig.typecheck-core.json**            | `src/` コア用の型チェック設定                                                                   |
-| **tsconfig.typecheck-noimplicit-core.json** | 厳格な（`noImplicitAny`）型チェック                                                             |
-| **tsconfig.tsbuildinfo**                    | TS インクリメンタルビルドキャッシュ（gitignore 対象）                                           |
-| **next.config.mjs**                         | Next.js 16 のビルド設定（スタンドアロン出力）                                                   |
-| **next-env.d.ts**                           | Next.js が自動生成する環境型定義                                                                |
-| **eslint.config.mjs**                       | ESLint フラット設定（プロジェクト領域ごとのルール）                                             |
-| **prettier.config.mjs**                     | Prettier のフォーマットルール                                                                   |
-| **postcss.config.mjs**                      | Tailwind/CSS パイプライン用の PostCSS 設定                                                      |
-| **playwright.config.ts**                    | Playwright E2E テスト設定                                                                       |
-| **vitest.config.ts**                        | Vitest 設定（デフォルトスイート）                                                               |
-| **vitest.mcp.config.ts**                    | MCP サーバー / autoCombo / キャッシュスイート用の Vitest 設定                                   |
-| **sonar-project.properties**                | SonarQube/SonarCloud 設定（コード品質）                                                         |
-| **Dockerfile**                              | マルチステージ Docker ビルド（builder → runner-base → runner-cli）                              |
-| **docker-compose.yml**                      | 4 つのプロファイル（base、cli、host、cliproxyapi）+ redis サイドカーを含む開発用 compose        |
-| **docker-compose.prod.yml**                 | 本番環境用 compose（ポート 20130、redis、名前付きボリューム）                                   |
-| **.dockerignore**                           | Docker コンテキストから除外されるファイル                                                       |
-| **fly.toml**                                | Fly.io デプロイ設定（リージョン `sin`、ポート 20128、/data ボリューム）                         |
-| **.env.example**                            | 環境ファイルのテンプレート（初回インストール時に `.env` へ自動コピー）                          |
-| **.gitignore**                              | Git の無視パターン                                                                              |
-| **.npmignore**                              | npm 公開時の除外リスト                                                                          |
-| **.npmrc**                                  | npm 設定（レジストリ、ロックファイルポリシー）                                                  |
-| **.node-version**                           | Node の固定バージョン（nvm 互換ツールで使用）                                                   |
-| **.nvmrc**                                  | nvm 用の Node 固定バージョン                                                                    |
-| **eslint.complexity.config.mjs**            | 複雑度ラチェット用の ESLint 設定（`scripts/check/check-complexity.mjs --config`）               |
-| **eslint.sonarjs.config.mjs**               | SonarJS ルール用の ESLint 設定（認知的複雑度 / 重複）                                           |
-| **source.config.ts**                        | Fumadocs の `defineDocs` ソース設定（`.source/` への入力）                                      |
-| **knip.json**                               | Knip 設定 — 未使用のファイル / エクスポート / 依存関係（デッドコードゲートへの入力）            |
-| **stryker.conf.json**                       | Stryker ミューテーションテスト設定                                                              |
-| **.size-limit.json**                        | size-limit バンドル予算設定                                                                     |
-| **promptfooconfig.yaml**                    | promptfoo 評価設定                                                                              |
-| **.gitleaks.toml**                          | gitleaks シークレットスキャンルールセット                                                       |
-| **.zizmor.yml**                             | zizmor GitHub Actions セキュリティリント設定                                                    |
-| **socket.yml**                              | Socket.dev サプライチェーン設定                                                                 |
-| **news.json**                               | ローカライズされた v2 お知らせフィード。Radar のリリース項目は非アクティブな状態で提供          |
-| **flake.nix** / **flake.lock**              | Nix 開発シェル定義とロック                                                                      |
-| **.env**                                    | ローカルシークレット（gitignore 対象 — `.env.example` から生成）                                |
+| ファイル                                     | 目的                                                                                        |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| **README.md**                                | マーケティング ランディング ページ+クイック スタート+機能マトリックス ( `llm.txt`も参照)    |
+| **CHANGELOG.md**                             | リリースごとの変更ログ ( `/version-bump-cc`スキルによって自動生成)                          |
+| **LICENSE**                                  | MITライセンステキスト                                                                       |
+| **CLAUDE.md**                                | Claudeコード エージェントのプロジェクト ルール (厳密なルール、規約、シナリオ)               |
+| **AGENTS.md**                                | CLAUDE.mdと同じですが、非クロードAIエージェント (Codex、 Cursorなど) 用です。               |
+| **GEMINI.md**                                | Gemini ベースのエージェントの簡潔なルール ( CLAUDE.mdのサブセット)                          |
+| **CONTRIBUTING.md**                          | 寄稿者ガイド: セットアップ、従来のコミット、テスト、 PRフロー                               |
+| **SECURITY.md**                              | 脆弱性報告ポリシー、サポートされているバージョン、脅威モデル                                |
+| **CODE_OF_CONDUCT**                          | 寄稿者 Covenant —コミュニティの行動に対する期待                                             |
+| **llm.txt**                                  | LLMクローラー用に最適化されたプレーンテキストのランディング ( AIアシスタント用のSEO )       |
+| **package.json**                             | npm マニフェスト、スクリプト、依存関係、エンジン、c8 カバレッジ ゲート                      |
+| **package-lock.json**                        | ロックされた依存関係ツリー                                                                  |
+| **tsconfig.json**                            | ルートTypeScript構成                                                                        |
+| **tsconfig。typecheck-core.json**            | `src/`コアの Typecheck 構成                                                                 |
+| **tsconfig。typecheck-noimplicit-core.json** | 厳密な (`noImplicitAny`) 型チェック                                                         |
+| **tsconfig.tsbuildinfo**                     | TS増分ビルド キャッシュ (gitignored)                                                        |
+| **次。config.mjs**                           | Next.js 16 ビルド構成 (スタンドアロン出力)                                                  |
+| **次の環境。d.ts**                           | Next.js自動生成された環境タイプ                                                             |
+| **エスリント。config.mjs**                   | ESLint flat config (プロジェクトエリアごとのルール)                                         |
+| **より美しい。config.mjs**                   | Prettierフォーマット規則                                                                    |
+| **ポストCSS。config.mjs**                    | Tailwind/CSSパイプラインのPostCSS config                                                    |
+| **劇作家。config.ts**                        | Playwright E2Eテスト構成                                                                    |
+| **ビテスト。config.ts**                      | Vitest config (デフォルト スイート)                                                         |
+| **vitest.mcp。config.ts**                    | MCPサーバー / autoCombo / キャッシュ スイートのVitest config                                |
+| **ソナープロジェクトのプロパティ**           | SonarQube/SonarCloud config (コード品質)                                                    |
+| **Dockerfile**                               | マルチステージDockerビルド (ビルダー→ランナーベース→ランナー-cli)                           |
+| **docker-compose.yml**                       | 4 つのプロファイル (base、cli、host、cliproxyapi) で開発者が作成する+ redis サイドカー      |
+| **ドッカー構成。prod.yml**                   | 本番構成 (ポート 20130、redis、名前付きボリューム)                                          |
+| **.dockerignore**                            | Dockerコンテキストから除外されたファイル                                                    |
+| **fly.toml**                                 | Fly.io デプロイメント構成 (リージョン`sin`、ポート 20128、/data ボリューム)                 |
+| **.env.example**                             | テンプレート環境ファイル (最初のインストール時に`.env`に自動コピーされます)                 |
+| **.gitignore**                               | Git 無視パターン                                                                            |
+| **.npmignore**                               | npm パブリッシュ除外リスト                                                                  |
+| **.npmrc**                                   | npm config (レジストリ、ロックファイルポリシー)                                             |
+| **.node-version**                            | ノードのバージョン ピン (nvm 互換ツールで使用)                                              |
+| **.nvmrc**                                   | nvm のノード バージョン ピン                                                                |
+| **eslint.複雑さ。config.mjs**                | 複雑さラチェットのESLint config (`scripts/check/check-complexity.mjs --config`)             |
+| **eslint.sonarjs。config.mjs**               | SonarJSルールのESLint config (認知の複雑さ / 重複)                                          |
+| **ソース。config.ts**                        | Fumadocs `defineDocs`ソース構成 (フィード`.source/`)                                        |
+| **knip.json**                                | Knip config —未使用のfiles/exports/deps (デッドコード ゲートにフィード)                     |
+| **ストライカー。conf.mjs**                   | Stryker 突然変異テスト構成 ( `mutate`から`tap.testFiles`計算)                               |
+| **.size-limit.json**                         | サイズ制限バンドル予算構成                                                                  |
+| **promptfooconfig.yaml**                     | プロンプトフの評価設定                                                                      |
+| **.gitleaks.toml**                           | gileaks シークレットスキャン ルールセット                                                   |
+| **.zizmor.yml**                              | zizmor GitHub-Actions セキュリティ-lint 構成                                                |
+| **socket.yml**                               | Socket.dev サプライチェーン構成                                                             |
+| **news.json**                                | ローカライズされた v2 アナウンス フィード。レーダー発射アイテムは非アクティブで出荷されます |
+| **フレークニクス**/**フレークロック**        | Nix dev-shell 定義+ロック                                                                   |
+| **.env**                                     | ローカル シークレット ( `.env.example`から生成された gitignored — )                         |
 
-> **v3.8.26 でルート外へ移動（整理）：**
+> **v3.8.26 ではルートから移動されました (整理整頓):**
 >
-> - **→ `config/quality/`：** `quality-baseline.json`、`complexity-baseline.json`、`duplication-baseline.json`、`file-size-baseline.json`、`test-discovery-baseline.json`、`dependency-allowlist.json`、`.license-allowlist.json`、および生成される `quality-metrics.json`（gitignore 対象）。[`## config/`](#config--static-configs--quality-gate-state)を参照してください。
+> - **→ `config/quality/`:** `quality-baseline.json`、 `complexity-baseline.json`、 `duplication-baseline.json`、 `file-size-baseline.json`、 `test-discovery-baseline.json`、 `dependency-allowlist.json`、 `.license-allowlist.json`、および生成された`quality-metrics.json` (gitignored)。 [`## config/`](#config--static-configs--quality-gate-state)を参照してください。
 
 ---
 
@@ -154,7 +154,7 @@ src/
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector ダッシュボード ページ— DevTools分割、7 つの詳細タブ、4 つのキャプチャ モード切り替え、セッション レコーダー、コンテキストの色付け。 i18n PT-BR + EN。 `docs/frameworks/TRAFFIC_INSPECTOR.md`を参照してください。                                                                                                 |
 | `app/(dashboard)/dashboard/activity/`                                        | アクティビティ フィード ページ (グループ B): `page.tsx` (サーバー) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`参照                                                                                                            |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | クォータ共有ページ (グループ B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                                       |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | プロバイダー プランの構成ページ (グループ B): `page.tsx` + `ProviderPlanConfigClient.tsx` —接続オーバーライドごとのクォータ ディメンション                                                                                                                                                                                         |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | プロバイダー プランの構成ページ (グループ B): `page.tsx` + `ProviderPlanConfigClient.tsx` —接続ごとのクォータ ディメンション オーバーライド                                                                                                                                                                                        |
 | `app/docs/`                                                                  | 埋め込みドキュメント ビューア ( `docs/*.md`をレンダリング)                                                                                                                                                                                                                                                                         |
 | `app/landing/`                                                               | マーケティングのランディング ページ                                                                                                                                                                                                                                                                                                |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | 認証関連ページ                                                                                                                                                                                                                                                                                                                     |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | `components/`                    | ダッシュボードコンポーネントAPI: `packages/ui-kit`上のアダプター— `docs/architecture/DESIGN_SYSTEM.md`を参照 |
 | `constants/iconMap.ts`           | `ICON_MAP`: 画面で使用されるアイコン名→ Lucide コンポーネント (`<Icon>`)                                     |
-| `constants/providers.ts`         | **380のプロバイダー**Zod検証あり (信頼できる情報源)                                                          |
+| `constants/providers.ts`         | **394 プロバイダー**Zod検証あり (信頼できる情報源)                                                           |
 | `constants/cliTools.ts`          | 外部CLIツール レジストリ                                                                                     |
-| `constants/routingStrategies.ts` | **20 のルーティング戦略**優先順位を付けて                                                                    |
+| `constants/routingStrategies.ts` | **22 のルーティング戦略**優先順位を付けて                                                                    |
 | `constants/publicApiRoutes.ts`   | ベアラー (管理ではなく) 認証が必要なルート                                                                   |
 | `constants/upstreamHeaders.ts`   | アップストリームリクエストのヘッダー拒否リスト                                                               |
 | `validation/schemas.ts`          | ~ 80 Zodスキーマ ( APIコントラクトの信頼できる唯一の情報源)                                                  |
@@ -258,42 +258,42 @@ src/
 
 ---
 
-## `open-sse/` — ストリーミングエンジンワークスペース
+## `open-sse/` —ストリーミング エンジン ワークスペース
 
-独立した npm ワークスペース（`@omniroute/open-sse`）。リクエスト処理とプロバイダー実行を担当します。
+個別の npm ワークスペース (`@omniroute/open-sse`)。リクエスト処理+プロバイダーの実行を処理します。
 
 ```
 open-sse/
-├── handlers/            # 16ファイル（12個のハンドラー + 4個のヘルパー）：chatCore、responsesHandler、embeddings、audio、image、video、music、rerank、moderations、searchなど
-├── executors/           # 150個のエグゼキューターモジュール（BaseExecutorを拡張するクラス + プロバイダーごとのヘルパー）
-├── translator/          # フォーマットコンバーター（リクエスト用9個、レスポンス用9個、ヘルパー9個）
-├── transformer/         # Responses API ↔ Chat Completions（TransformStream）
-├── services/            # 約80以上のサービスモジュール（combo、accountFallback、autoCombo、reasoningCache、claude code/chatgpt stealth、modelDeprecation、taskAwareRouter、workflowFSMなど）
-├── mcp-server/          # MCPサーバー（110個のツール、3種類のトランスポート、33個のスコープ）
-├── config/              # プロバイダー／モデルレジストリ、ヘッダー設定、モデルエイリアス
-├── utils/               # TLSクライアント、プロキシfetch／dispatcher、ネットワークヘルパー
-├── index.ts             # ワークスペースエントリ
-├── package.json         # ワークスペースマニフェスト
-├── tsconfig.json        # ワークスペースのTS設定
-└── types.d.ts           # ワークスペースの型宣言
+├── handlers/            # 16 files (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
+├── executors/           # 163 executor modules (classes extending BaseExecutor + per-provider helpers)
+├── translator/          # Format converters (9 request, 9 response, 9 helpers)
+├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
+├── services/            # ~80+ service modules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
+├── mcp-server/          # MCP server (110 tools, 3 transports, 33 scopes)
+├── config/              # Provider/model registries, header config, model aliases
+├── utils/               # TLS client, proxy fetch/dispatcher, network helpers
+├── index.ts             # Workspace entry
+├── package.json         # Workspace manifest
+├── tsconfig.json        # Workspace TS config
+└── types.d.ts           # Workspace type declarations
 ```
 
 ### `open-sse/mcp-server/`
 
-| パス                        | 目的                                                                     |
-| --------------------------- | ------------------------------------------------------------------------ |
-| `server.ts`                 | MCPサーバーのライフサイクル（stdio + HTTPトランスポート）                |
-| `httpTransport.ts`          | HTTP Streamable + SSEトランスポート（`/api/mcp/sse`、`/api/mcp/stream`） |
-| `audit.ts`                  | `mcp_tool_audit`テーブルへの監査ログ記録                                 |
-| `scopeEnforcement.ts`       | ツールごとのスコープ検証                                                 |
-| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`へのヘルスハートビート              |
-| `descriptionCompressor.ts`  | コンテキストを節約するためのツール説明メタデータの圧縮                   |
-| `schemas/tools.ts`          | 36個の基本ツール定義 + スコープ                                          |
-| `tools/advancedTools.ts`    | 高度なツールの実装                                                       |
-| `tools/memoryTools.ts`      | 3個のメモリツール（検索／追加／クリア）                                  |
-| `tools/skillTools.ts`       | 4個のスキルツール（一覧／有効化／実行／実行履歴）                        |
-| `tools/compressionTools.ts` | 5個の圧縮ツール                                                          |
-| `README.md`                 | 内部MCPサーバーREADME（`docs/frameworks/MCP-SERVER.md`から相互リンク）   |
+| パス                        | 目的                                                                             |
+| --------------------------- | -------------------------------------------------------------------------------- |
+| `server.ts`                 | MCPサーバーのライフサイクル (stdio + HTTPトランスポート)                         |
+| `httpTransport.ts`          | HTTPストリーミング可能な+ SSEトランスポート (`/api/mcp/sse`、 `/api/mcp/stream`) |
+| `audit.ts`                  | `mcp_tool_audit`テーブルへの監査ログ                                             |
+| `scopeEnforcement.ts`       | ツールごとのスコープ検証                                                         |
+| `runtimeHeartbeat.ts`       | `DATA_DIR/runtime/mcp-heartbeat.json`へのヘルス ハートビート                     |
+| `descriptionCompressor.ts`  | ツール説明メタデータを圧縮してコンテキストを保存する                             |
+| `schemas/tools.ts`          | 36 の基本ツール定義+スコープ                                                     |
+| `tools/advancedTools.ts`    | 高度なツールの実装                                                               |
+| `tools/memoryTools.ts`      | 3 つのメモリ ツール (search/add/clear)                                           |
+| `tools/skillTools.ts`       | 4つのスキルツール（list/enable/execute/executions）                              |
+| `tools/compressionTools.ts` | 5つの圧縮ツール                                                                  |
+| `README.md`                 | 内部MCPサーバーREADME ( `docs/frameworks/MCP-SERVER.md`からクロスリンク)         |
 
 ---
 
@@ -395,24 +395,24 @@ open-sse/
 
 ### トップレベルのガイド
 
-| ドクター                    | 目的                                                                            |
-| --------------------------- | ------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | 高レベルのアーキテクチャ、サブシステム マップ、ダッシュボードの表面             |
-| `CODEBASE_DOCUMENTATION.md` | エンジニアリングリファレンス: ディレクトリ、モジュール、規約                    |
-| `FEATURES.md`               | v3.8 のハイライトを含む機能マトリックス                                         |
-| `USER_GUIDE.md`             | エンドユーザーマニュアル (セットアップ、モデル、コンボ、 CLIs、オーディオなど)  |
-| `API_REFERENCE.md`          | 認証モデルを使用したAPIエンドポイント参照                                       |
-| `openapi.yaml`              | OpenAPI 3.0 仕様 (121 パス)                                                     |
-| `SETUP_GUIDE.md`            | インストール方法 (npm、npx、 Docker、 Electron、Termux、source)                 |
-| `ENVIRONMENT.md`            | すべての環境変数 (~ 800 文書化、 ~ 3,050 行`.env.example`)                      |
-| `TROUBLESHOOTING.md`        | 一般的なエラー+ v3.8.0 の既知の問題                                             |
-| `RELEASE_CHECKLIST.md`      | 完全なリリース フロー (スキル、ハスキー、従来のコミット、デプロイ)              |
-| `COVERAGE_PLAN.md`          | 対象範囲の目標と現状                                                            |
-| `FREE_TIERS.md`             | 厳選された無料利用枠プロバイダー (48 +無料+ 11 OAuth)                           |
-| `CLI-TOOLS.md`              | 外部CLI統合+内部OmniRoute CLI                                                   |
-| `I18N.md`                   | i18n アーキテクチャ、言語の追加、67 ロケール                                    |
-| `UNINSTALL.md`              | クリーンなアンインストール手順                                                  |
-| `PROVIDER_REFERENCE.md`     | **自動生成**380 プロバイダーのカタログ (再生: `npm run gen:provider-reference`) |
+| ドクター                    | 目的                                                                              |
+| --------------------------- | --------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | 高レベルのアーキテクチャ、サブシステム マップ、ダッシュボードの表面               |
+| `CODEBASE_DOCUMENTATION.md` | エンジニアリングリファレンス: ディレクトリ、モジュール、規約                      |
+| `FEATURES.md`               | v3.8 のハイライトを含む機能マトリックス                                           |
+| `USER_GUIDE.md`             | エンドユーザーマニュアル (セットアップ、モデル、コンボ、 CLIs、オーディオなど)    |
+| `API_REFERENCE.md`          | 認証モデルを使用したAPIエンドポイント参照                                         |
+| `openapi.yaml`              | OpenAPI 3.0 仕様 (121 パス)                                                       |
+| `SETUP_GUIDE.md`            | インストール方法 (npm、npx、 Docker、 Electron、Termux、source)                   |
+| `ENVIRONMENT.md`            | すべての環境変数 (~ 800 文書化、 ~ 3,050 行`.env.example`)                        |
+| `TROUBLESHOOTING.md`        | 一般的なエラー+ v3.8.0 の既知の問題                                               |
+| `RELEASE_CHECKLIST.md`      | 完全なリリース フロー (スキル、ハスキー、従来のコミット、デプロイ)                |
+| `COVERAGE_PLAN.md`          | 対象範囲の目標と現状                                                              |
+| `FREE_TIERS.md`             | 厳選された無料利用枠プロバイダー (48 +無料+ 11 OAuth)                             |
+| `CLI-TOOLS.md`              | 外部CLI統合+内部OmniRoute CLI                                                     |
+| `I18N.md`                   | i18n アーキテクチャ、言語の追加、67 ロケール                                      |
+| `UNINSTALL.md`              | クリーンなアンインストール手順                                                    |
+| `PROVIDER_REFERENCE.md`     | **自動生成**394 プロバイダーのカタログ (再生成: `npm run gen:provider-reference`) |
 
 ### サブシステムの詳細
 
@@ -432,7 +432,7 @@ open-sse/
 | `REASONING_REPLAY.md`                       | `reasoning_content`用のハイブリッドmemory/SQLiteキャッシュ                      |
 | `AUTHZ_GUIDE.md`                            | 認可パイプライン (`classify` → `policies` → `enforce`)                          |
 | `RESILIENCE_GUIDE.md`                       | サーキットブレーカー+クールダウン+モデル ロックアウト                           |
-| `docs/security/STEALTH_GUIDE.md` (git のみ) | TLSフィンガープリント (JA3/JA4)、 ClaudeコードCCH、 MITM cert                   |
+| `docs/security/STEALTH_GUIDE.md` (git のみ) | TLSフィンガープリンティング (JA3/JA4)、 ClaudeコードCCH、 MITM cert             |
 | `AUTO-COMBO.md`                             | オートコンボエンジン (16 要素スコアリング、6 モードパック、仮想ファクトリー)    |
 
 ### 圧縮

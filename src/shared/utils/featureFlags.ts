@@ -520,6 +520,40 @@ export function isOpencodePoolReselectEnabled(): boolean {
   }
 }
 
+/**
+ * SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED (#16676, default off): /v1/systemone serves the
+ * cloudflare-ai/* decisions models. Fail-closed: an unreadable flag store keeps them refused.
+ */
+export function isSystemOneCloudflareBackendEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/** Default-off boolean flag that fails closed when the flag store cannot be read. */
+function isDefaultOffFlagEnabled(key: string): boolean {
+  try {
+    return isFeatureFlagEnabled(key);
+  } catch (error) {
+    console.error(
+      `[featureFlags] Failed to resolve ${key}, defaulting to disabled:`,
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/** SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED (#14667, default off): /v1/systemone serves ollama-local/*. */
+export function isSystemOneOllamaLocalBackendEnabled(): boolean {
+  return isDefaultOffFlagEnabled("SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED");
+}
+
 /** OPENCODE_FREE_TIER_EGRESS_PROBE (default off): probe one other proxy after a FreeTierError. */
 export function isOpencodeFreeTierEgressProbeEnabled(): boolean {
   try {
@@ -643,6 +677,23 @@ export function isImageGenerationLongJobsEnabled(): boolean {
   } catch (error) {
     console.error(
       "[featureFlags] Failed to resolve IMAGE_GENERATION_LONG_JOBS, defaulting to disabled:",
+      error instanceof Error ? error.message : error
+    );
+    return false;
+  }
+}
+
+/**
+ * Fal native gateway (#18849). Opt-in: off keeps the /v1/fal routes unavailable and every Fal
+ * compatibility request on its established shape.
+ * Fail closed: an unreadable flag store keeps the pre-flag behavior (disabled).
+ */
+export function isFalNativeEnabled(): boolean {
+  try {
+    return isFeatureFlagEnabled("FAL_NATIVE_ENABLED");
+  } catch (error) {
+    console.error(
+      "[featureFlags] Failed to resolve FAL_NATIVE_ENABLED, defaulting to disabled:",
       error instanceof Error ? error.message : error
     );
     return false;

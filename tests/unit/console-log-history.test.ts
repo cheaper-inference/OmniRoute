@@ -97,6 +97,16 @@ test("history rejects path/cursor abuse and requires management auth before disk
   }
 });
 
+test("filesystem failures return the same sanitized error object as query failures", async () => {
+  fs.mkdirSync(logPath);
+  const response = await get();
+  assert.equal(response.status, 500);
+  const body = await response.json();
+  assert.equal(typeof body.error.message, "string");
+  assert.equal(body.error.message, "Failed to read logs.");
+  assert.doesNotMatch(JSON.stringify(body), /at \/|storage\.sqlite|Invalid application log file/);
+});
+
 test("history never reads symlink rotations or leaks old credential strings", async () => {
   const elsewhere = path.join(dir, "not-a-log.json");
   fs.writeFileSync(elsewhere, line("outside marker"));

@@ -31,19 +31,19 @@
 
 `connection` ルールは、早期ルールが選択されず、具体的なプロバイダー接続がすでに選択されている場合にのみ評価されます。このルールで変更できるのは effort と budget のみです。
 
-## Effort と Budget
+## 労力と予算
 
-`sourceEffort` は `any`、`missing`、`none`、`low`、`medium`、`high`、`xhigh`、`max`、および `ultra` を受け付けます。`missing` は、リクエストに個別の effort、thinking トグル、thinking budget のいずれも含まれていないことを意味します。したがって、budget のみのシグナルは `any` によってのみマッチします。
+`sourceEffort` 、 `any`、 `missing`、 `none`、 `low`、 `medium`、 `high`、 `xhigh`、 `max`、および`ultra`を受け入れます。 `missing` 、リクエストに個別の作業、思考の切り替え、または思考の予算が含まれていないことを意味します。したがって、バジェットのみの信号は`any`によってのみ照合されます。
 
-`effortMode` には 3 つのバリエーションがあります。
+`effortMode`は 3 つのバリエーションがあります。
 
-- `inherit` はクライアントの effort を維持しつつ、モデルまたはコンボの変更を許可します。
-- `default` は、明示的な推論シグナルが存在しない場合にのみ `targetEffort` を設定します。
-- `force` は、個別の effort を `targetEffort` に置き換えます。
+- `inherit` 、モデルやコンボの変更を許可しながら、クライアントの労力を維持します。
+- `default` 、明示的な推論信号が存在しない場合にのみ`targetEffort`を設定します。
+- `force`離散労力を`targetEffort`に置き換えます。
 
-これとは独立して、`budgetAction` には `preserve`、`remove`、または `set` を指定できます。`none` を指定した `force` は、認識されているすべての effort および budget フィールドを削除します。`none` と `set` の組み合わせは無効です。
+独立して、 `budgetAction` `preserve`、 `remove`、または`set`になります。 `force`と`none`は、認識されたすべての工数フィールドと予算フィールドを削除してから、 `reasoning_effort: "none"`を設定します。これは、フィールドが存在しない場合に一部のプロバイダーが思考をオンにするためです。リテラル`none`拒否するプロバイダーは、 `open-sse/executors/base/reasoningEffort.ts`のディスパッチ時に調整されます。コマンド コードは、応答形式のリクエスト ( `messages`のない`input` ) を除き、これを`low`にマップし、 `none`を保持します。 Cloudflare Workers AI (`cloudflare-ai`) では、 `none`を拒否するモデル (gpt-oss、qwen3.8、 nemotron-3、 glm-4.7-flash) は`low`を取得します。他のワーカーAIモデルは`none`を保持します。エフォートが存在しないとモデルのデフォルト層が実行されるため、フィールドを削除することはできません。 `none`と`set`は無効です。
 
-既知の非互換モデルを対象とするリクエストは、アップストリーム呼び出しの前に拒否されます。コンボターゲットの場合、互換性のないエントリは削除されます。エントリが 1 つも残らない場合、リクエストはステータス `400` を返します。不明なケイパビリティデータがある場合は警告が生成され、ルールはアクティブなまま維持されます。
+互換性がないことがわかっているモデルをターゲットとするリクエストは、アップストリーム呼び出しの前に拒否されます。コンボ ターゲットの場合、互換性のないエントリは削除されます。何も残っていない場合、リクエストはステータス`400`を返します。不明な機能データにより警告が生成され、ルールはアクティブなままになります。
 
 ## セキュリティとトランスポート
 

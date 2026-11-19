@@ -1,4 +1,5 @@
 import { randomUUID } from "crypto";
+import { falSelectionEndpoint, isLegacyFalEndpoint } from "../config/falEndpoint.ts";
 /** Image generation handler for POST /v1/images/generations (OpenAI-compatible). */
 
 import {
@@ -39,7 +40,7 @@ import {
   extractComfyOutputFiles,
   resolveComfyUiBaseUrl,
 } from "../utils/comfyuiClient.ts";
-import { fetchUntrustedRemoteImage } from "@/shared/network/remoteImageFetch";
+import { fetchUntrustedRemoteImage } from "../utils/remoteMediaFetch.ts";
 import {
   FetchTimeoutError,
   fetchWithTimeout,
@@ -66,17 +67,16 @@ import { buildXaiImageRequest } from "./imageGeneration/providers/xaiImage.ts";
 import { handleMaxaiImageGeneration } from "./imageGeneration/providers/maxaiImage.ts";
 import { handleAdobeFireflyImageGeneration } from "./imageGeneration/providers/adobeFirefly.ts";
 import { handleSyntxImageGeneration } from "./imageGeneration/providers/syntx.ts";
-import {
-  geminiInlineImagePart,
-  geminiReferenceImageError,
-} from "./imageGeneration/providers/geminiInline.ts";
+import * as geminiInline from "./imageGeneration/providers/geminiInline.ts";
 import { handleAlibabaImageGeneration } from "./imageGeneration/providers/alibabaImage.ts";
 import { handleAiHordeImageGeneration } from "./imageGeneration/providers/aihorde.ts";
 import * as codexImages from "./imageGeneration/providers/codexImages.ts";
 import { handleZenmuxImageGeneration } from "./imageGeneration/providers/zenmux.ts";
 import { handleMuseImageGeneration } from "./imageGeneration/providers/museImage.ts";
+import { handleM365ImageGeneration } from "./imageGeneration/providers/m365Image.ts";
 import { handleGeminiAiImageGeneration } from "./imageGeneration/providers/geminiAiStudio.ts";
 import { handleBlackForestLabsImageGeneration } from "./imageGeneration/providers/blackForestLabs.ts";
+import { handleRenderhourImageGeneration } from "./imageGeneration/providers/renderhour.ts";
 import {
   fanOutSingleImageCalls,
   IMAGE_FANOUT_MAX_N,
@@ -396,6 +396,8 @@ const FAL_PRESET_SIZES = {
  * @param {object} options.credentials - Provider credentials { apiKey, accessToken }
  * @param {object} options.log - Logger
  * @param {string} [options.resolvedProvider] - Pre-resolved provider ID (from route layer custom model resolution)
+ * @param {function} [options.onCredentialsRefreshed] - Persists credentials a provider refreshed
+ *   while serving the request (a rotated OAuth refresh token); providers that refresh call it.
  * @param {string|null} [options.peerLocality] - Trusted "loopback"|"lan"|"remote" verdict
  *   forwarded from `AUTHZ_HEADER_PEER_LOCALITY` (src/server/authz/headers.ts). Only consumed by
  *   spawn-capable providers (e.g. cursor-agent-image) to enforce Hard Rules #15/#17 without
@@ -412,6 +414,10 @@ export async function handleImageGeneration({
   // #16260 — IMAGE_GENERATION_LONG_JOBS, injected by the routes (the flag lives in src/):
   // `{ resolveTimeoutMs }` for the OpenAI-compatible path. Null keeps the default behavior.
   longJobs = null,
+  // FAL_NATIVE_ENABLED, injected by the routes (the flag lives in src/). Null keeps the
+  // established Fal request shape; a preparer selects the schema-driven native path.
+  prepareFalInput = null,
+  onCredentialsRefreshed = undefined,
 }) {
   // Retirement guards: the retired-provider sets hold bare provider ids only, so testing
   // the `<provider>/` prefix (or the whole model when it carries no slash) covers both the
@@ -531,6 +537,7 @@ export async function handleImageGeneration({
       signal,
       generateOne: (taskBody) =>
         handleImageGeneration({
+          prepareFalInput,
           body: taskBody,
           credentials,
           log,
@@ -555,6 +562,19 @@ export async function handleImageGeneration({
       credentials,
       log,
       signal,
+    });
+  }
+
+  if (providerConfig.format === "m365-image") {
+    return handleM365ImageGeneration({
+      model,
+      provider,
+      body,
+      credentials,
+      log,
+      signal,
+      onCredentialsRefreshed,
+      deps: { saveCallLog },
     });
   }
 
@@ -646,12 +666,14 @@ export async function handleImageGeneration({
 
   if (providerConfig.format === "fal-ai") {
     return handleFalAIImageGeneration({
+      prepareFalInput,
       model,
       provider,
       providerConfig,
       body,
       credentials,
       log,
+      signal,
     });
   }
 
@@ -663,6 +685,18 @@ export async function handleImageGeneration({
       body,
       credentials,
       log,
+    });
+  }
+
+  if (providerConfig.format === "renderhour-image") {
+    return handleRenderhourImageGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
     });
   }
 
@@ -814,6 +848,7 @@ export async function handleImageGeneration({
       body,
       credentials,
       log,
+      signal,
     });
   }
 
@@ -1200,19 +1235,11 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
     });
   }
 
-  const referenceError = geminiReferenceImageError(body);
-  if (referenceError) {
-    return saveImageErrorResult({
-      provider,
-      model,
-      status: 400,
-      startTime,
-      error: referenceError,
-      requestBody: logRequestBody,
-    });
+  const refs = geminiInline.buildGeminiImageUserParts(body, promptText);
+  if ("error" in refs) {
+    const err = { provider, model, status: 400, startTime, requestBody: logRequestBody };
+    return saveImageErrorResult({ ...err, error: refs.error, retryable: false });
   }
-
-  const inlineImage = geminiInlineImagePart(body);
   const antigravityBody = {
     project: projectId,
     requestId: `image_gen/${Date.now()}/${randomUUID()}/0`,
@@ -1220,7 +1247,7 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
       contents: [
         {
           role: "user",
-          parts: [...(inlineImage ? [inlineImage] : []), { text: promptText }],
+          parts: refs.parts,
         },
       ],
       generationConfig: {
@@ -1247,7 +1274,7 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
     const promptPreview = promptText.slice(0, 60);
     log.info(
       "IMAGE",
-      `antigravity/${model} (gemini) | prompt: "${promptPreview}..." | ${aspectRatio} ${imageSize ?? "default"}`
+      `antigravity/${model} (gemini) | prompt: "${promptPreview}..." | ${aspectRatio} ${imageSize ?? "default"} | refs: ${refs.referenceCount}`
     );
   }
 
@@ -1284,19 +1311,11 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
     const data = await response.json();
     const responseBody = data.response || data;
 
-    // Extract image data from Antigravity's wrapped Gemini response.
-    const images = [];
-    const candidates = responseBody.candidates || [];
-    for (const candidate of candidates) {
-      const parts = candidate.content?.parts || [];
-      for (const part of parts) {
-        if (part.inlineData) {
-          images.push({
-            b64_json: part.inlineData.data,
-            revised_prompt: parts.find((p) => p.text)?.text || promptText,
-          });
-        }
-      }
+    // Extract image data from Antigravity's wrapped Gemini response; text-only answers fail.
+    const extracted = geminiInline.extractGeminiImageResults(responseBody, promptText);
+    if (extracted.error) {
+      const err = { provider, model, status: 502, startTime, requestBody: logRequestBody };
+      return saveImageErrorResult({ ...err, error: sanitizeErrorMessage(extracted.error) });
     }
 
     saveCallLog({
@@ -1308,14 +1327,14 @@ async function handleGeminiImageGeneration({ model, providerConfig, body, creden
       duration: Date.now() - startTime,
       tokens: { prompt_tokens: 0, completion_tokens: 0 },
       requestBody: logRequestBody,
-      responseBody: { images_count: images.length },
+      responseBody: { images_count: extracted.images.length },
     }).catch(() => {});
 
     return {
       success: true,
       data: {
         created: Math.floor(Date.now() / 1000),
-        data: images,
+        data: extracted.images,
       },
     };
   } catch (err) {
@@ -1742,18 +1761,20 @@ export async function handleOpenRouterImageEdit({
 }
 
 async function handleFalAIImageGeneration({
+  prepareFalInput,
   model,
   provider,
   providerConfig,
   body,
   credentials,
   log,
+  signal,
 }) {
   const startTime = Date.now();
   const token = credentials.apiKey || credentials.accessToken;
-  const falModel = model.startsWith("fal-ai/") ? model : `fal-ai/${model}`;
+  let falModel = model.startsWith("fal-ai/") ? model : `fal-ai/${model}`;
   const { imageUrl, imageUrls } = extractImageInputs(body);
-  const upstreamBody: Record<string, unknown> = {
+  let upstreamBody: Record<string, unknown> = {
     prompt: body.prompt,
     sync_mode: body.sync_mode ?? true,
   };
@@ -1797,14 +1818,29 @@ async function handleFalAIImageGeneration({
   }
 
   try {
-    const response = await fetch(`${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`, {
+    if (prepareFalInput) {
+      falModel = falSelectionEndpoint(model);
+      if (!isLegacyFalEndpoint(model) || body.fal_input !== undefined) {
+        upstreamBody = await prepareFalInput(
+          falModel,
+          falCompatibilityBody(body, imageUrls),
+          credentials,
+          signal
+        );
+      }
+    }
+    const url = `${providerConfig.baseUrl.replace(/\/$/, "")}/${falModel}`;
+    const request = {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         Authorization: `Key ${token}`,
       },
       body: JSON.stringify(upstreamBody),
-    });
+    };
+    const response = prepareFalInput
+      ? await fetchWithTimeout(url, { ...request, signal, redirect: "error" })
+      : await fetch(url, request);
 
     if (!response.ok) {
       const errorText = await response.text();
@@ -1821,7 +1857,9 @@ async function handleFalAIImageGeneration({
     }
 
     const payload = await response.json();
-    const images = await normalizeProviderImagePayload(payload, body, log, "b64_json");
+    // The native path honors an explicit `url`; the established path always returns base64.
+    const defaultFormat = prepareFalInput && body.response_format === "url" ? "url" : "b64_json";
+    const images = await normalizeProviderImagePayload(payload, body, log, defaultFormat);
     return saveImageSuccessResult({
       provider,
       model,
@@ -1836,11 +1874,20 @@ async function handleFalAIImageGeneration({
     return saveImageErrorResult({
       provider,
       model,
-      status: 502,
+      status: /Invalid fal input|Unsupported fal|(?:This|A) fal endpoint/.test(String(err.message))
+        ? 400
+        : 502,
       startTime,
       error: `Image provider error: ${sanitizeErrorMessage((err as Error).message || err)}`,
     });
   }
+}
+
+/** References reach the schema adapter once, under the name it maps per endpoint. */
+function falCompatibilityBody(body, imageUrls) {
+  if (imageUrls.length === 0) return body;
+  const { image: _image, image_url: _imageUrl, imageUrls: _camelCase, ...rest } = body;
+  return { ...rest, image_urls: imageUrls };
 }
 
 async function handleStabilityAIImageGeneration({

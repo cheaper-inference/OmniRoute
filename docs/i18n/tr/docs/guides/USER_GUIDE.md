@@ -340,65 +340,65 @@ Model: cc/claude-opus-4-7
 
 ---
 
-## 🚀 Dağıtım
+## 🚀 Dağıtımı
 
 ### Global npm kurulumu (Önerilen)
 
 ```bash
 npm install -g omniroute
 
-# Yapılandırma dizinini oluşturun
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env dosyasını oluşturun (.env.example dosyasına bakın)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Sunucuyu başlatın
+# Start server
 omniroute
-# Veya özel bir port ile:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI, `.env` dosyasını `~/.omniroute/.env` veya `./.env` konumundan otomatik olarak yükler.
+CLI `.env` `~/.omniroute/.env` veya `./.env` otomatik olarak yükler. Çalışma dizinindeki bir `./.env` anahtarların yalnızca kısa bir izin verilenler listesini (`REQUIRE_API_KEY`, yerel ayar, saat dilimi ve renk ayarları, bağlantı noktaları değil) ayarlayabilir; geri kalan her şeyi `~/.omniroute/.env` koyun. [CLI lansman sözleşmelerine](CLI-LAUNCH-CONTRACTS.md#working-directory-env) bakın.
 
-### Sistem tepsisi modu
+### Tepsi modu
 
-OmniRoute'u sistem tepsisinde başlatın:
+Sistem tepsisinde OmniRoute başlatın:
 
 ```bash
 omniroute serve --tray
 ```
 
-Komut, sunucu ve sistem tepsisi hazır olduktan sonra tamamlanır.
+Komut, sunucu ve tepsi hazır olduktan sonra geri döner.
 
-Sunucu, terminal olmadan çalışmaya devam eder.
+Sunucu terminal olmadan devam eder.
 
-Sistem tepsisi modu macOS, Windows ve grafiksel Linux oturumlarını destekler. Sistem tepsisi modu kontrol panelini otomatik olarak açmaz.
+Tepsi modu macOS, Windows ve grafiksel Linux oturumlarını destekler. Tepsi modu kontrol panelini otomatik olarak açmaz.
 
-Şu işlemler için sistem tepsisi menüsünü kullanın:
+Şu işlemler için tepsi menüsünü kullanın:
 
-- Kontrol panelini açma.
-- `/dashboard/logs` sayfasını açma.
-- Otomatik başlatma ayarını değiştirme.
-- OmniRoute'u durdurma.
+- Kontrol panelini açın.
+- `/dashboard/logs` açın.
+- Otomatik başlatmayı değiştirin.
+- OmniRoute durdur.
 
-`--tray` seçeneğini şu seçeneklerle birlikte kullanmayın:
+`--tray` şu seçeneklerle birleştirmeyin:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Bu modlar farklı işlem sahipliği gerektirir.
+Bu modlar farklı süreç sahipliği gerektirir.
 
-Bir sonraki makine oturum açılışında başlatmayı etkinleştirin:
+Bir sonraki makine oturum açma işleminde başlatmayı etkinleştirin:
 
 ```bash
 omniroute autostart enable
 ```
 
-Otomatik başlatma, macOS, Windows ve grafiksel Linux oturumlarında sistem tepsisi modunu kullanır. Başsız Linux, mevcut systemd kullanıcı hizmetini kullanır.
+Otomatik başlatma macOS, Windows ve grafiksel Linux oturumlarında tepsi modunu kullanır. Başsız Linux mevcut systemd kullanıcı hizmetini kullanır.
 
-Oturum açılışında başlatmayı devre dışı bırakın:
+Oturum açma sırasında başlatmayı devre dışı bırakın:
 
 ```bash
 omniroute autostart disable
@@ -406,14 +406,14 @@ omniroute autostart disable
 
 ### Kaldırma
 
-OmniRoute'a artık ihtiyacınız kalmadığında, temiz bir kaldırma işlemi için iki hızlı betik sunuyoruz:
+Artık OmniRoute ihtiyacınız kalmadığında, temiz bir kaldırma işlemi için iki hızlı komut dosyası sunuyoruz:
 
-| Komut                    | İşlem                                                                                                        |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `npm run uninstall`      | Sistem uygulamasını kaldırır ancak `~/.omniroute` içindeki **veritabanınızı ve yapılandırmalarınızı korur**. |
-| `npm run uninstall:full` | Uygulamayı kaldırır VE **tüm yapılandırmaları, anahtarları ve veritabanlarını kalıcı olarak siler**.         |
+| Emretmek                 | Aksiyon                                                                                                   |
+| ------------------------ | --------------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Sistem uygulamasını kaldırır ancak** DB ve konfigürasyonlarınızı korur** `~/.omniroute`.                  |
+| `npm run uninstall:full` | AND uygulamasını kalıcı olarak kaldırır** tüm konfigürasyonları, anahtarları ve veritabanlarını siler** . |
 
-> Not: Bu komutları çalıştırmak için OmniRoute proje klasörüne gidin (projeyi klonladıysanız) ve komutları çalıştırın. Alternatif olarak, global olarak kurduysanız yalnızca `npm uninstall -g omniroute` komutunu çalıştırabilirsiniz.
+> Not: Bu komutları çalıştırmak için OmniRoute proje klasörüne gidin (klonladıysanız) ve çalıştırın. Alternatif olarak, genel olarak kuruluysa `npm uninstall -g omniroute` komutunu çalıştırabilirsiniz.
 
 ### VPS Dağıtımı
 
@@ -431,25 +431,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Veya: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
 ### PM2 Dağıtımı (Düşük Bellek)
 
-Sınırlı RAM'e sahip sunucular için bellek sınırı seçeneğini kullanın:
+Sınırlı RAM sahip sunucular için bellek sınırı seçeneğini kullanın:
 
 ```bash
-# 512MB sınırıyla (varsayılan)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Veya özel bir bellek sınırıyla
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Veya ecosystem.config.js kullanarak
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js` dosyasını oluşturun:
+`ecosystem.config.js` oluştur:
 
 ```javascript
 module.exports = {
@@ -474,24 +474,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# İmajı derleyin (varsayılan = codex/claude/droid önceden yüklenmiş runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Taşınabilir mod (önerilen)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI ikili dosyalarıyla ana sistemle entegre mod için ana belgelerdeki Docker bölümüne bakın.
+CLI ikili dosyalarıyla ana makineyle tümleşik mod için ana belgelerdeki Docker bölümüne bakın.
 
-### Void Linux (xbps-src)
+### Geçersiz Linux (xbps-src)
 
-Void Linux kullanıcıları, `xbps-src` çapraz derleme çerçevesini kullanarak OmniRoute'u yerel olarak paketleyip kurabilir. Bu işlem, gerekli `better-sqlite3` yerel bağlamalarıyla birlikte bağımsız Node.js derlemesini otomatikleştirir.
+Void Linux kullanıcıları, `xbps-src` çapraz derleme çerçevesini kullanarak OmniRoute yerel olarak paketleyebilir ve yükleyebilir. Bu, gerekli `better-sqlite3` yerel bağlamalarıyla birlikte Node.js bağımsız yapısını otomatikleştirir.
 
 <details>
 <summary><b>xbps-src şablonunu görüntüle</b></summary>
 
 ```bash
-# 'omniroute' için şablon dosyası
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -512,7 +512,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp için hedef CPU mimarisini belirle
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -521,29 +521,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Tüm bağımlılıkları kur – betikleri atla
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Bağımsız Next.js paketini derle
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Statik varlıkları bağımsız pakete kopyala
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 yerel bağlamasını derle
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Derlenen bağlamayı bağımsız pakete yerleştir
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Mimariye özgü sharp paketlerini kaldır
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js statik analizinin dahil etmediği pino çalışma zamanı bağımlılıklarını kopyala:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -557,7 +557,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Boş Next.js uygulama yönlendiricisi dizinlerinin kurulum sonrası kancası tarafından kaldırılmasını önle
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -585,30 +585,30 @@ post_install() {
 
 ### Ortam Değişkenleri
 
-| Değişken                                | Varsayılan                           | Açıklama                                                                                                                                                           |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT imzalama gizli anahtarı (**üretim ortamında değiştirin**)                                                                                                      |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | İlk oturum açma parolası                                                                                                                                           |
-| `DATA_DIR`                              | `~/.omniroute`                       | Veri dizini (veritabanı, kullanım verileri, günlükler)                                                                                                             |
-| `PORT`                                  | framework varsayılanı                | Hizmet portu (örneklerde `20128`)                                                                                                                                  |
-| `HOSTNAME`                              | framework varsayılanı                | Bağlanılacak ana makine (Docker varsayılan olarak `0.0.0.0` kullanır)                                                                                              |
-| `NODE_ENV`                              | çalışma zamanı varsayılanı           | Dağıtım için `production` olarak ayarlayın                                                                                                                         |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | Kontrol panelinde gösterilen ve sunucuya sağlanan genel temel URL (eski `BASE_URL` değişkeninin yerini alır)                                                       |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Bulut eşitleme uç noktasının temel URL'si (eski `CLOUD_URL` değişkeninin yerini alır)                                                                              |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Oluşturulan API anahtarları için HMAC gizli anahtarı                                                                                                               |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` üzerinde Bearer API anahtarını zorunlu kılar                                                                                                               |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Kimliği doğrulanmış kontrol paneli kullanıcılarının, saklanan API anahtarlarının tam değerlerini isteğe bağlı görmesini sağlar                                     |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Önbelleğe alınmış Sağlayıcı Limitleri verilerinin sunucu tarafında yenilenme sıklığı; kullanıcı arayüzündeki yenileme düğmeleri manuel eşitlemeyi yine de tetikler |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Yazma/içe aktarma/geri yükleme öncesindeki otomatik SQLite anlık görüntülerini devre dışı bırakır; manuel yedeklemeler çalışmaya devam eder                        |
-| `APP_LOG_TO_FILE`                       | `true`                               | Uygulama ve denetim günlüğü çıktısının diske yazılmasını etkinleştirir                                                                                             |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` kimlik doğrulama çerezini zorunlu kılar (HTTPS ters proxy arkasında)                                                                                      |
-| `CLOUDFLARED_BIN`                       | ayarlanmamış                         | Yönetilen indirme yerine mevcut bir `cloudflared` ikili dosyasını kullanır                                                                                         |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | Yönetilen Hızlı Tüneller için aktarım protokolü (`http2`, `quic` veya `auto`)                                                                                      |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | MB cinsinden Node.js yığın bellek sınırı                                                                                                                           |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | İstem önbelleğindeki azami girdi sayısı                                                                                                                            |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Anlamsal önbellekteki azami girdi sayısı                                                                                                                           |
+| Değişken                                | Varsayılan                      | Tanım                                                                                                                                            |
+| --------------------------------------- | ------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(otomatik olarak oluşturulan)_ | JWT imzalama sırrı — ilk çalıştırmada otomatik olarak oluşturulur ve `server.env` kalıcı olur; veri dizini geçici olduğunda açıkça ayarlayın     |
+| `INITIAL_PASSWORD`                      | _(ayarlanmadı)_                 | İlk giriş şifresi. npm/source kurulumları `CHANGEME` ile başlar: değiştirin. Ayarlanmadı: katılım sihirbazı                                      |
+| `DATA_DIR`                              | `~/.omniroute`                  | Veri dizini (db, kullanım, günlükler)                                                                                                            |
+| `PORT`                                  | çerçeve varsayılanı             | Servis portu (örneklerde `20128` )                                                                                                               |
+| `HOSTNAME`                              | çerçeve varsayılanı             | Ana makineyi bağlayın (Docker varsayılan olarak `0.0.0.0`)                                                                                       |
+| `NODE_ENV`                              | çalışma zamanı varsayılanı      | Dağıtım için `production` ayarlayın                                                                                                              |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`        | Genel taban URL kontrol paneline çıktı ve sunucuya sunuldu (eski `BASE_URL` yerini aldı)                                                         |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`         | Bulut senkronizasyonu uç noktası tabanı URL (eski `CLOUD_URL` yerine geçer)                                                                      |
+| `API_KEY_SECRET`                        | _(otomatik olarak oluşturulan)_ | oluşturulan API anahtarları için HMAC sırrı — ilk çalıştırmada otomatik olarak oluşturulur ve `server.env` kalıcı olur                           |
+| `REQUIRE_API_KEY`                       | `false`                         | `/v1/*` Taşıyıcı API anahtarını zorunlu kıl                                                                                                      |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                         | Kimliği doğrulanmış kontrol paneli kullanıcılarının talep üzerine depolanan API anahtar değerlerinin tamamını ortaya çıkarmasına izin ver        |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                            | Önbelleğe alınmış Sağlayıcı Sınırları verileri için sunucu tarafı yenileme temposu; UI yenileme düğmeleri hala manuel senkronizasyonu tetikliyor |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                         | writes/import/restore önce otomatik SQLite anlık görüntülerini devre dışı bırakın; manuel yedeklemeler hala çalışıyor                            |
+| `APP_LOG_TO_FILE`                       | `true`                          | Diske uygulama ve denetim günlüğü çıktısını etkinleştirir                                                                                        |
+| `AUTH_COOKIE_SECURE`                    | `false`                         | `Secure` kimlik doğrulama çerezini zorla ( HTTPS ters proxy'nin arkasında)                                                                       |
+| `CLOUDFLARED_BIN`                       | ayarsız                         | Yönetilen indirme yerine mevcut `cloudflared` ikili programını kullanın                                                                          |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                         | Yönetilen Hızlı Tüneller için aktarım (`http2`, `quic` veya `auto`)                                                                              |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                           | MBNode.js yığın sınırı                                                                                                                           |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                            | Maksimum istem önbellek girişleri                                                                                                                |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                           | Maksimum anlamsal önbellek girişi                                                                                                                |
 
-Ortam değişkenlerinin tam listesi için [README](../README.md) dosyasına bakın.
+Ortam değişkeni referansının tamamı için [README](../README.md) bakın.
 
 ---
 
@@ -719,9 +719,9 @@ Farklı bir önek seçin (`mygw`, `acme-proxy`). Özel bir düğüme yapılan is
 
 #### Bağlantı başına ağ geçidi seçenekleri
 
-Bu anahtarlar bir bağlantının `providerSpecificData` gider (örneğin `PUT /api/providers/{id}` aracılığıyla):
+Bu anahtarlar bir bağlantının `providerSpecificData` gider (örneğin `PUT /api/providers/{id}` yoluyla):
 
-- `toolNameMaxLength` (tamsayı, 1–1024) — ağ geçidinin uzun araç adlarını reddettiği OpenAI sohbet biçimiyle uyumlu bağlantılar için. Daha uzun adlar kısa takma adlar olarak gönderilir ve yanıtta geri yüklenir.
+- `toolNameMaxLength` (tamsayı, 1–1024) —, ağ geçidinin uzun araç adlarını reddettiği OpenAI sohbet formatı uyumlu bağlantılar için. Daha uzun adlar kısa takma adlar olarak gönderilir ve yanıtta geri yüklenir. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ve Muse Code zaten ayar olmadan 64 karakterin üzerinde takma adlara sahiptir. Bir bağlantı değeri, Azure OpenAI / Azure AI Foundry varsayılanının (daha katı bir ağ geçidinin arkasındaki bir Azure bağlantısı) yerini alır ve özel uyumlu bir düğüm için sınırı belirler; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ve Muse Code kayıt defteri sınırlarını korur ve bunu yok sayar.
 - `quotaEndpoint` — ağ geçidinin quota/credits uç noktası, kontrol paneli kota şeridi ve kotaya duyarlı yönlendirme için okunur. Hem OpenAI hem de Antropik uyumlu bağlantılarda çalışır; tam şekil `open-sse/services/usage/openaiCompatible.ts` belgelenmiştir.
 
 ```json
@@ -737,7 +737,7 @@ Bu anahtarlar bir bağlantının `providerSpecificData` gider (örneğin `PUT /a
 }
 ```
 
-### OmniRoute Akranlarını Zincirleme
+### OmniRoute Akranlarını Zincirlemek
 
 Başka bir OmniRoute ağ geçidi şu şekilde eklenebilir:** Özel OpenAI uyumlu** sağlayıcı. Eşin `/v1` tabanı URL ve bu eş tarafından verilen özel, en az ayrıcalıklı API anahtarını kullanın.
 
@@ -819,9 +819,9 @@ Sağlayıcıya göre türlerle (`chat`, `embedding`, `image`) gruplandırılmı�
 
 ### LLM Ağ Geçidi İstihbaratı (Faz 9)
 
-- **Anlamsal Önbellek** — Akış dışı, sıcaklık = 0 yanıtlarını otomatik olarak önbelleğe alır ( `X-OmniRoute-No-Cache: true` ile bypass)
+- **Anlamsal Önbellek** — Akış dışı, sıcaklık = 0 yanıtlarını otomatik olarak önbelleğe alır ( `X-OmniRoute-No-Cache: true` ile atlama)
 - **Bağımsızlık Talebi** — `Idempotency-Key` veya `X-Request-Id` başlığı aracılığıyla istekleri 5 saniye içinde tekilleştirir
-- **İlerleme Takibi** — `X-OmniRoute-Progress: true` başlığı aracılığıyla SSE `event: progress` etkinliklerini etkinleştirme
+- **İlerleme Takibi** — `X-OmniRoute-Progress: true` başlığı aracılığıyla SSE `event: progress` olaylarını etkinleştirme
 
 ---
 
@@ -852,25 +852,25 @@ Sağlayıcıya göre türlerle (`chat`, `embedding`, `image`) gruplandırılmı�
 
 | Strateji                    | Tanım                                                                                                        |
 | --------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Önce Doldur**             | Hesapları öncelik sırasına göre kullanır; birincil hesap, kullanılamayana kadar tüm istekleri yönetir        |
+| **Önce Doldur**             | Hesapları öncelik sırasına göre kullanır — birincil hesabı, kullanılamayana kadar tüm istekleri yönetir      |
 | **Yuvarlak Robin**          | Yapılandırılabilir bir sabit limitle tüm hesaplar arasında geçiş yapar (varsayılan: hesap başına 3 çağrı)    |
-| **P2C (İki Seçimin Gücü)**  | Rastgele 2 hesap seçer ve daha sağlıklı olana yönlendirir; yükü sağlık farkındalığıyla dengeler              |
+| **P2C (İki Seçimin Gücü)**  | Rastgele 2 hesap seçer ve daha sağlıklı olana yönlendirir — yükünü sağlık bilinciyle dengeler                |
 | **Rastgele**                | Fisher-Yates karıştırmayı kullanarak her istek için rastgele bir hesap seçer                                 |
 | **En Az Kullanılan**        | Trafiği eşit şekilde dağıtarak en eski `lastUsedAt` zaman damgasına sahip hesaba yönlendirir                 |
 | **Maliyet Optimize Edildi** | En düşük maliyetli sağlayıcılar için optimizasyon yaparak en düşük öncelik değerine sahip hesaba yönlendirir |
 
-**Gelişmiş kombo ve otomatik stratejiler** (kombo başına veya `auto/*` önekleri aracılığıyla yapılandırılabilir - bkz. [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Gelişmiş kombo ve otomatik stratejiler** (kombo başına veya `auto/*` önekleri aracılığıyla yapılandırılabilir — bkz. [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - katı düzen, asla bir kez deneme yapılmaz
-- `weighted` — orantılı trafiğin model başına ağırlıklara bölünmesi
-- `fill-first` — sınırlara ulaşılıncaya kadar ilk modeli boşaltın
+- `priority` — katı düzen, asla bir kez deneme yapılmaz
+- `weighted` — orantılı trafiğin model başına ağırlığa bölünmesi
+- `fill-first` — limitlere ulaşana kadar ilk modeli boşaltın
 - `round-robin` / `strict-random` / `random`
 - `p2c` (İki Seçimin Gücü)
 - `least-used` ve `cost-optimized`
 - `auto` — tüm adaylar genelinde puan odaklı
-- `lkgp` (Bilinen Son İyi Sağlayıcı) — son başarılı sağlayıcıya sabitlenir, ardından kurallara geri döner
-- `context-optimized` — en büyük serbest içerik penceresine sahip modeli seçer
-- `context-relay` — takip dönüşleri için uzun bağlamlı modelleri zincirler
+- `lkgp` (Bilinen Son İyi Sağlayıcı) —, son başarılı sağlayıcıya sabitlenir ve ardından kurallara geri döner
+- `context-optimized` — en büyük serbest içerik penceresine sahip modeli seçiyor
+- `context-relay` — takip dönüşleri için uzun bağlamlı modelleri zincirliyor
 
 #### Harici Sabit Oturum Başlığı
 
@@ -984,27 +984,27 @@ OmniRoute sağlayıcı düzeyinde esnekliği beş bileşenle uygular:
 
 2. **Bağlantı Bekleme Süresi** — Yeniden denenebilir hatalardan sonra tek bir bağlantı için kimlik doğrulama türü başına yapılandırma:
    - **Temel Bekleme Süresi** — Yeniden denenebilir yukarı akış hataları için varsayılan bekleme süresi penceresi
-   - **Yukarı Akış Yeniden Deneme İpuçlarını Kullan** — Yetkili `Retry-After` onurlandırır veya sağlandığında ipuçlarını sıfırlar
+   - **Yukarı Akış Yeniden Deneme İpuçlarını Kullan** — Sağlandığında yetkili `Retry-After` veya sıfırlama ipuçlarını onurlandırır
    - **Maksimum Geri Alma Adımları** — Tekrarlanan arızalar için maksimum üstel geri çekilme düzeyi
 
-3. **Sağlayıcı Devre Kesici** — Uçtan uca sağlayıcı arızalarını izler, yapılandırılmış uyarı eşiğinde performansı düşen bir sağlayıcıyı işaretler ve yapılandırılmış hata eşiğine ulaşıldığında kesiciyi açar:
+3. **Sağlayıcı Devre Kesici** — Uçtan uca sağlayıcı hatalarını izler, yapılandırılmış uyarı eşiğinde performansı düşen bir sağlayıcıyı işaretler ve yapılandırılmış hata eşiğine ulaşıldığında kesiciyi açar:
    - **Bozunma Eşiği** — `DEGRADED` girmeden önce ardışık sağlayıcı hataları
    - **Arıza Eşiği** — `OPEN` girmeden önce ardışık sağlayıcı hataları
-   - **Zaman Aşımını Sıfırla** — Sağlayıcının tekrar test edilmesinden önceki zaman penceresi
+   - **Zaman Aşımını Sıfırla** — Sağlayıcının tekrar test edilmesinden önceki zaman aralığı
    - **CLOSED** (Sağlıklı) — İstekler normal şekilde akıyor
-   - **DEGRADED** — Yükseltilmiş arızalar takip edilirken istekler akışı devam ediyor
-   - **OPEN** — Tekrarlanan arızalardan sonra sağlayıcı geçici olarak engellenir
-   - **HALF_OPEN** — Sağlayıcının iyileşip iyileşmediğinin test edilmesi
+   - **DEGRADED** — Yükseltilmiş hatalar izlenirken istekler hâlâ akmaya devam ediyor
+   - **OPEN** — Sağlayıcısı tekrarlanan hatalardan sonra geçici olarak engellenir
+   - **HALF_OPEN** — Sağlayıcının iyileşip iyileşmediğini test etme
 
    Bağlantı kapsamlı `429` ücret sınırları devam ediyor** Bağlantı Bekleme Süresi** ve sağlayıcı kesiciye doğru saymayın.
 
    Sağlayıcı kesici çalışma zamanı durumu şu şekilde gösterilir:** Kontrol Paneli → Sağlık** sadece.
 
-4. **Bekleme Süresini Bekleyin** — Her aday bağlantı zaten soğuyorsa OmniRoute, en erken bekleme süresini bekleyebilir ve aynı istemci isteğini otomatik olarak yeniden deneyebilir.
+4. **Bekleme Süresini Bekleyin** — Her aday bağlantı zaten soğuyorsa, OmniRoute en erken bekleme süresini bekleyebilir ve aynı istemci isteğini otomatik olarak yeniden deneyebilir.
 
-5. **Hız Sınırı Otomatik Algılama** — Yukarı akış sağlayıcıları açık bekleme pencereleri döndürdüğünde, bu ipuçları, ayar etkinleştirildiğinde yerel bağlantının bekleme süresini geçersiz kılar.
+5. **Hız Sınırı Otomatik Algılama** — Yukarı akış sağlayıcıları açık bekleme pencereleri döndürdüğünde, bu ipuçları, ayar etkinleştirildiğinde yerel bağlantı bekleme süresini geçersiz kılar.
 
-**Profesyonel İpucu:** Kullan** Sağlık** Bir kesinti sonrasında canlı sağlayıcı kesicilerini incelemek ve sıfırlamak için sayfa. Dayanıklılık sayfası yalnızca yapılandırmayı değiştirir.
+**Profesyonel İpucu:** Şunu kullanın:** Sağlık** Bir kesinti sonrasında canlı sağlayıcı kesicilerini incelemek ve sıfırlamak için sayfa. Dayanıklılık sayfası yalnızca yapılandırmayı değiştirir.
 
 ---
 
@@ -1044,15 +1044,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Ayarlar sayfası şu şekilde düzenlenmiştir:** 7 sekme** kolay gezinme için:
 
-| Sekme            | İçindekiler                                                                                                                                                                                                   |
-| ---------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Genel**        | Sistem depolama araçları, varsayılan davranış, Uç nokta tüneli görünürlüğü                                                                                                                                    |
-| **Dış görünüş**  | Tema kontrolleri (light/dark/system), kenar çubuğu görünürlüğü, Cloudflare/Tailscale/ngrok tünel kartları için panel geçişleri                                                                                |
-| **AI**           | Düşünme bütçesi (geçiş / otomatik şerit / özel / uyarlanabilir - bkz. [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), küresel sistem istemi, istem önbellek istatistikleri                                      |
-| **Güvenlik**     | Login/Password ayarları, IP Erişim Kontrolü, `/models` için API kimlik doğrulaması, Sağlayıcı Engelleme, istem enjeksiyon koruması                                                                            |
-| **Yönlendirme**  | Genel yönlendirme stratejisi (İlk Doldur / Sıralı Sıralama / P2C / Rastgele / En Az Kullanılan / Maliyet Optimize Edilmiş), joker karakter modeli takma adları, geri dönüş zincirleri, birleşik varsayılanlar |
-| **Dayanıklılık** | İstek kuyruğu, bağlantı bekleme süresi, sağlayıcı kesici yapılandırması ve bekleme süresi davranışı                                                                                                           |
-| **Gelişmiş**     | Genel proxy yapılandırması (HTTP/SOCKS5), sağlayıcı başına proxy geçersiz kılmaları                                                                                                                           |
+| Sekme            | İçindekiler                                                                                                                                                                                                     |
+| ---------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Genel**        | Sistem depolama araçları, varsayılan davranış, Uç nokta tüneli görünürlüğü                                                                                                                                      |
+| **Dış görünüş**  | Tema kontrolleri (light/dark/system), kenar çubuğu görünürlüğü, Cloudflare/Tailscale/ngrok tünel kartları için panel geçişleri                                                                                  |
+| **AI**           | Düşünme bütçesi (geçiş / otomatik şerit / özel / uyarlanabilir — bkz. [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), küresel sistem istemi, istem önbellek istatistikleri                                        |
+| **Güvenlik**     | Login/Password ayarları, IP Erişim Kontrolü, `/models` için API kimlik doğrulaması, Sağlayıcı Engelleme, istem enjeksiyon koruması                                                                              |
+| **Yönlendirme**  | Küresel yönlendirme stratejisi (İlk Doldur / Sıralı Sıralama / P2C / Rastgele / En Az Kullanılan / Maliyet Optimize Edilmiş), joker karakter modeli takma adları, geri dönüş zincirleri, birleşik varsayılanlar |
+| **Dayanıklılık** | İstek kuyruğu, bağlantı bekleme süresi, sağlayıcı kesici yapılandırması ve bekleme süresi davranışı                                                                                                             |
+| **Gelişmiş**     | Genel proxy yapılandırması (HTTP/SOCKS5), sağlayıcı başına proxy geçersiz kılmaları                                                                                                                             |
 
 General artık salt okunur günlük kaydını ve önbellek notlarını çoğaltmıyor. Veritabanı saklama ve optimizasyon ayarları `/api/settings/database` aracılığıyla sürdürülür; manuel önbellek temizleme `DELETE /api/cache` kullanır. İstek ve proxy günlük satırı sınırları `CALL_LOGS_TABLE_MAX_ROWS` ve `PROXY_LOGS_TABLE_MAX_ROWS` tarafından kontrol edilir.
 
@@ -1062,10 +1062,10 @@ General artık salt okunur günlük kaydını ve önbellek notlarını çoğaltm
 
 Şununla erişim:** Kontrol Paneli → Maliyetleri** .
 
-| Sekme             | Amaç                                                                                                               |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **Bütçe**         | daily/weekly/monthly bütçeleri ve gerçek zamanlı izleme ile API anahtarı başına harcama sınırlarını belirleyin     |
-| **Fiyatlandırma** | Model fiyatlandırma girişlerini görüntüleyin ve düzenleyin - sağlayıcı başına 1K input/output token başına maliyet |
+| Sekme             | Amaç                                                                                                                |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Bütçe**         | daily/weekly/monthly bütçeleri ve gerçek zamanlı izleme ile API anahtarı başına harcama sınırlarını belirleyin      |
+| **Fiyatlandırma** | Sağlayıcı başına 1K input/output token başına — maliyeti model fiyatlandırma girişlerini görüntüleyin ve düzenleyin |
 
 ```bash
 # API: Set a budget
@@ -1147,7 +1147,7 @@ Genel kombo varsayılanları şurada ayarlanabilir:** Kontrol Paneli → Ayarlar
 
 Sıfır gecikmeli birleşik optimizasyonlar isteğe bağlıdır. Ayrılmak** Sıfır gecikmeli optimizasyonlar** bu gecikme özelliklerinin geri dönüş hedefleriyle yarışmasını, TTFT geçmişine dayalı hedefleri atlamasını veya geri dönüş isteklerini sıkıştırmasını önlemek için devre dışı bırakıldı; etkinleştirilmesi, yapılandırılmış korunmaya, tahmine dayalı TTFT atlamalarına ve routing/request doğruluğunu daha düşük kuyruk gecikmesi karşılığında değiştirmek için proaktif geri dönüş sıkıştırmasına olanak tanır.
 
-Devre dışı bırakmak** Akıl yürütme belirteci arabelleği** yukarı akış sağlayıcıları katı `max_tokens` / `maxOutputTokens` sınırlarına ihtiyaç duyduğunda. Etkinleştirildiğinde, birleşik yönlendirme yalnızca bilinen çıkış sınırına sahip modeller için akıl yürütme modeli boşluğunu ekler ve güvenli ara belleğe alınmış değer bu sınırı aştığında istemci belirteci sınırını değiştirmeden bırakır. İstemci sınırı zaten bilinen bir sınırın üzerindeyse OmniRoute, yukarı akış isteğini göndermeden önce bunu bu sınıra sıkıştırır.
+Devre dışı bırakmak** Akıl yürütme belirteci arabelleği** yukarı akış sağlayıcıları katı `max_tokens` / `maxOutputTokens` sınırlarına ihtiyaç duyduğunda. Etkinleştirildiğinde, birleşik yönlendirme yalnızca bilinen çıkış sınırına sahip modeller için akıl yürütme modeli boşluğunu ekler ve güvenli ara belleğe alınmış değer bu sınırı aştığında istemci belirteci sınırını değiştirmeden bırakır. İstemci limiti zaten bilinen bir limitin üzerindeyse OmniRoute, yukarı akış isteğini göndermeden önce limiti bu limite sıkıştırır.
 
 ---
 
@@ -1155,14 +1155,14 @@ Devre dışı bırakmak** Akıl yürütme belirteci arabelleği** yukarı akış
 
 Şununla erişim:** Kontrol Paneli → Sağlık** . 6 kartla gerçek zamanlı sistem sağlığına genel bakış:
 
-| Kart                    | Ne Gösteriyor?                                                              |
-| ----------------------- | --------------------------------------------------------------------------- |
-| **Sistem Durumu**       | Çalışma süresi, sürüm, bellek kullanımı, veri dizini                        |
-| **Sağlayıcı Sağlığı**   | Genel sağlayıcı devre kesici çalışma zamanı durumu                          |
-| **Hız Limitleri**       | Hesap başına aktif bağlantı bekleme süreleri ve kalan süre                  |
-| **Aktif Kilitlemeler**  | Etkin model kapsamlı kilitlemeler ve geçici hariç tutmalar                  |
-| **İmza Önbelleği**      | Veri tekilleştirme önbellek istatistikleri (etkin anahtarlar, isabet oranı) |
-| **Gecikme Telemetrisi** | Sağlayıcı başına p50/p95/p99 gecikme toplamı                                |
+| Kart                    | Ne Gösteriyor?                                                         |
+| ----------------------- | ---------------------------------------------------------------------- |
+| **Sistem Durumu**       | Çalışma süresi, sürüm, bellek kullanımı, veri dizini                   |
+| **Sağlayıcı Sağlığı**   | Genel sağlayıcı devre kesici çalışma zamanı durumu                     |
+| **Oran Limitleri**      | Hesap başına aktif bağlantı bekleme süreleri ve kalan süre             |
+| **Aktif Kilitlemeler**  | Etkin model kapsamlı kilitlemeler ve geçici hariç tutmalar             |
+| **İmza Önbelleği**      | Tekilleştirme önbellek istatistikleri (etkin anahtarlar, isabet oranı) |
+| **Gecikme Telemetrisi** | Sağlayıcı başına p50/p95/p99 gecikme toplamı                           |
 
 **Profesyonel İpucu:** Sağlık sayfası her 10 saniyede bir otomatik olarak yenilenir. Hangi sağlayıcıların sorun yaşadığını belirlemek için devre kesici kartını kullanın.
 

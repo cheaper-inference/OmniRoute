@@ -38,24 +38,19 @@ ma ha na-akwado ndakọrịta `any` ma ọ bụ `all`.
 A na-enyocha iwu `connection` naanị mgbe ọ nweghị iwu mbụ meriri ma ahọrọlarị provider connection
 doro anya. Ọ nwere ike ịgbanwe naanị effort na budget.
 
-## Effort na Budget
+## Mgbalị na mmefu ego
 
-`sourceEffort` na-anabata `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, na
-`ultra`. `missing` pụtara na request ahụ enweghị ma discrete effort, thinking toggle,
-ma ọ bụ thinking budget. Ya mere, naanị `any` na-adaba na mgbaàmà nwere naanị budget.
+`sourceEffort` na-anabata `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, na `ultra`. `missing` pụtara na arịrịọ ahụ enweghị mbọ pụrụiche ma ọ bụ ntụgharị echiche ma ọ bụ mmefu ego iche echiche. Ya mere, mgbama naanị mmefu ego dabara na naanị `any`.
 
 `effortMode` nwere ụdị atọ:
 
-- `inherit` na-edobe client effort ma ka na-ekwe ka model ma ọ bụ combo gbanwee.
-- `default` na-edobe `targetEffort` naanị mgbe enweghị mgbaàmà reasoning akọwapụtara nke ọma.
-- `force` na-eji `targetEffort` dochie discrete effort.
+- `inherit` na-eme ka onye ahịa na-agba mbọ ka ọ na-ekwe ka ihe nlereanya ma ọ bụ ngwakọta gbanwee.
+- `default` na-edobe `targetEffort` naanị mgbe enweghị mgbama echiche doro anya dị.
+- `force` jiri `targetEffort` dochie mgbalị pụrụ iche.
 
-N'adabereghị na nke ahụ, `budgetAction` nwere ike ịbụ `preserve`, `remove`, ma ọ bụ `set`. `force` ya na `none` na-ewepụ
-fields niile a na-amata nke effort na budget. `none` ya na `set` adịghị mma.
+N'onwe ya, `budgetAction` nwere ike ịbụ `preserve`, `remove`, ma ọ bụ `set`. `force` na `none` na-ewepụ mgbalị niile a ma ama na mpaghara mmefu ego, wee tọọ `reasoning_effort: "none"`, n'ihi na ụfọdụ ndị na-enye ọrụ na-atụgharị uche mgbe ubi ahụ na-anọghị. A na-edozi ndị na-enye ndị na-ajụ `none` nkịtị na ezipụ na `open-sse/executors/base/reasoningEffort.ts`. Usoro iwu maapụ ya na `low`, ewezuga na arịrịọ ụdị azịza (`input` na-enweghị `messages`), ebe ọ na-edobe `none`. Na Cloudflare Ndị ọrụ AI (`cloudflare-ai`), ụdị ndị na-ajụ `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) nweta `low`; Ndị ọrụ ndị ọzọ AI ụdị na-edebe `none`. Ịtụba ogige ahụ abụghị nhọrọ ebe ahụ, n'ihi na mbọ na-adịghị na-eme ọkwa ndabara nke ihe nlereanya ahụ. `none` yana `set` adịghị mma.
 
-A na-ajụ requests na-ezubere models amaara na ha adabaghị tupu upstream call. Maka combo
-targets, a na-ewepụ entries ndị na-adabaghị; ọ bụrụ na ọ dịghị nke fọdụrụ, request ahụ na-eweghachi status `400`.
-Data ikike a na-amaghị na-emepụta ịdọ aka ná ntị ma hapụ iwu ahụ ka ọ nọgide n'ọrụ.
+Ajụjụ a na-ezubere iche ụdị ama ama na-adakọghị tupu oku na-aga elu. Maka ebumnuche ngwakọta, ewepụrụ ndenye na-adakọghị; ọ bụrụ na ọ nweghị nke fọdụrụ, arịrịọ ahụ na-eweghachi ọkwa `400`. Data ikike amaghi ama na-ewepụta ịdọ aka ná ntị wee hapụ iwu ahụ n'ọrụ.
 
 ## Nchekwa na Transports
 

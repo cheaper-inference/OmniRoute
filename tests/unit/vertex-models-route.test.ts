@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { isUrlHost } from "../../open-sse/utils/urlHost.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-vertex-model-routes-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -24,6 +25,7 @@ async function seedVertexConnection(options: {
   apiKey?: string;
   accessToken?: string;
   projectId?: string;
+  region?: string;
 }): Promise<{ id: string }> {
   return providersDb.createProviderConnection({
     provider: "vertex",
@@ -34,7 +36,10 @@ async function seedVertexConnection(options: {
     projectId: options.projectId,
     isActive: true,
     testStatus: "active",
-    providerSpecificData: { autoFetchModels: true },
+    providerSpecificData: {
+      autoFetchModels: true,
+      ...(options.region ? { region: options.region } : {}),
+    },
   });
 }
 
@@ -194,7 +199,7 @@ test("Vertex Service Account discovery merges Gemini and all partner transport c
   globalThis.fetch = async (url) => {
     const calledUrl = String(url);
     calledUrls.push(calledUrl);
-    if (calledUrl.includes("generativelanguage.googleapis.com")) {
+    if (isUrlHost(calledUrl, "generativelanguage.googleapis.com")) {
       return Response.json({
         models: [
           {
@@ -287,7 +292,7 @@ test("Vertex Service Account keeps usable xAI results when Gemini listing is blo
   const connection = await seedVertexConnection({ accessToken: "ya29.vertex-xai-only" });
   globalThis.fetch = async (url) => {
     const calledUrl = String(url);
-    if (calledUrl.includes("generativelanguage.googleapis.com")) {
+    if (isUrlHost(calledUrl, "generativelanguage.googleapis.com")) {
       return Response.json({ error: { status: "PERMISSION_DENIED" } }, { status: 403 });
     }
     if (calledUrl.includes("/publishers/xai/models")) {
@@ -306,4 +311,73 @@ test("Vertex Service Account keeps usable xAI results when Gemini listing is blo
   assert.ok(body.models.some((model: { id?: string }) => model.id === "xai/grok-4.6"));
   assert.equal(body.catalogMode, "live_vertex_catalog");
   assert.equal(body.warning, undefined);
+});
+
+// #18790: an org policy that pins the EU regional endpoint (restrictEndpointUsage) denies the
+// global host, so publisher discovery must use the same host the executor uses for the region.
+test("Vertex Service Account discovery lists publishers on the EU regional host for region eu", async () => {
+  const connection = await seedVertexConnection({
+    accessToken: "ya29.vertex-eu-pinned",
+    region: "eu",
+  });
+  const publisherUrls: string[] = [];
+  globalThis.fetch = async (url) => {
+    const calledUrl = String(url);
+    if (isUrlHost(calledUrl, "generativelanguage.googleapis.com")) {
+      return Response.json({ error: { status: "PERMISSION_DENIED" } }, { status: 403 });
+    }
+    if (!calledUrl.includes("/v1beta1/publishers/")) return Response.json({});
+    publisherUrls.push(calledUrl);
+    if (!calledUrl.startsWith("https://aiplatform.eu.rep.googleapis.com/")) {
+      return Response.json({ error: { status: "PERMISSION_DENIED" } }, { status: 403 });
+    }
+    if (calledUrl.includes("/publishers/anthropic/models") && !calledUrl.includes("pageToken")) {
+      return Response.json({
+        publisherModels: [{ name: "publishers/anthropic/models/claude-sonnet-4-6" }],
+        nextPageToken: "page-2",
+      });
+    }
+    if (calledUrl.includes("/publishers/anthropic/models")) {
+      return Response.json({
+        publisherModels: [{ name: "publishers/anthropic/models/claude-opus-4-6" }],
+      });
+    }
+    return Response.json({ publisherModels: [] });
+  };
+
+  const response = await callRoute(connection.id);
+  const body = await response.json();
+
+  assert.equal(response.status, 200);
+  assert.equal(body.source, "api");
+  assert.ok(body.models.some((model: { id?: string }) => model.id === "claude-sonnet-4-6"));
+  assert.ok(body.models.some((model: { id?: string }) => model.id === "claude-opus-4-6"));
+  assert.ok(publisherUrls.some((url) => url.includes("pageToken=page-2")));
+  assert.ok(
+    publisherUrls.every((url) => url.startsWith("https://aiplatform.eu.rep.googleapis.com/"))
+  );
+});
+
+test("Vertex Service Account discovery keeps the global host for single-region connections", async () => {
+  const connection = await seedVertexConnection({
+    accessToken: "ya29.vertex-us-central1",
+    region: "us-central1",
+  });
+  const publisherUrls: string[] = [];
+  globalThis.fetch = async (url) => {
+    const calledUrl = String(url);
+    if (calledUrl.includes("/v1beta1/publishers/")) publisherUrls.push(calledUrl);
+    if (calledUrl.includes("/publishers/anthropic/models")) {
+      return Response.json({
+        publisherModels: [{ name: "publishers/anthropic/models/claude-sonnet-4-6" }],
+      });
+    }
+    return Response.json({ publisherModels: [] });
+  };
+
+  const response = await callRoute(connection.id);
+
+  assert.equal(response.status, 200);
+  assert.ok(publisherUrls.length > 0);
+  assert.ok(publisherUrls.every((url) => url.startsWith("https://aiplatform.googleapis.com/")));
 });

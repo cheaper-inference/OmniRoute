@@ -1,0 +1,296 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Queue OpenAPI for fal-ai/fast-lcm-diffusion/realtime",
+    "version": "1.0.0",
+    "description": "The OpenAPI schema for the fal-ai/fast-lcm-diffusion/realtime queue.",
+    "x-fal-metadata": {
+      "endpointId": "fal-ai/fast-lcm-diffusion/realtime",
+      "playgroundUrl": "https://fal.ai/models/fal-ai/fast-lcm-diffusion/realtime",
+      "documentationUrl": "https://fal.ai/models/fal-ai/fast-lcm-diffusion/realtime/api",
+      "websocketUrl": "wss://fal.run/fal-ai/fast-lcm-diffusion/realtime"
+    }
+  },
+  "components": {
+    "securitySchemes": {
+      "apiKeyAuth": {
+        "type": "apiKey",
+        "in": "header",
+        "name": "Authorization",
+        "description": "Fal Key"
+      }
+    },
+    "schemas": {
+      "QueueStatus": {
+        "type": "object",
+        "properties": {
+          "status": {
+            "type": "string",
+            "enum": ["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]
+          },
+          "request_id": {
+            "type": "string",
+            "description": "The request id."
+          },
+          "response_url": {
+            "type": "string",
+            "description": "The response url."
+          },
+          "status_url": {
+            "type": "string",
+            "description": "The status url."
+          },
+          "cancel_url": {
+            "type": "string",
+            "description": "The cancel url."
+          },
+          "logs": {
+            "type": "object",
+            "description": "The logs.",
+            "additionalProperties": true
+          },
+          "metrics": {
+            "type": "object",
+            "description": "The metrics.",
+            "additionalProperties": true
+          },
+          "queue_position": {
+            "type": "integer",
+            "description": "The queue position."
+          }
+        },
+        "required": ["status", "request_id"]
+      },
+      "FastLcmDiffusionRealtimeInput": {
+        "type": "object",
+        "properties": {
+          "sync_mode": {
+            "description": "If `True`, the media will be returned as a data URI and the output data won't be available in the request history.",
+            "type": "boolean",
+            "default": true,
+            "title": "Sync Mode"
+          },
+          "format": {
+            "description": "The format of the generated image.",
+            "title": "Format",
+            "type": "string",
+            "default": "jpeg",
+            "enum": ["jpeg", "png"]
+          },
+          "negative_prompt": {
+            "description": "\n            The negative prompt to use. Use it to address details that you don't want\n            in the image. This could be colors, objects, scenery and even the small details\n            (e.g. moustache, blurry, low resolution).\n        ",
+            "examples": ["cartoon, illustration, animation. face. male, female", "ugly, deformed"],
+            "type": "string",
+            "default": "",
+            "title": "Negative Prompt"
+          },
+          "num_images": {
+            "description": "The number of images to generate.",
+            "minimum": 1,
+            "type": "integer",
+            "default": 1,
+            "maximum": 8,
+            "title": "Num Images"
+          },
+          "seed": {
+            "description": "\n            The same seed and the same prompt given to the same version of Stable Diffusion\n            will output the same image every time.\n        ",
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "default": null,
+            "title": "Seed"
+          },
+          "num_inference_steps": {
+            "description": "The number of inference steps to perform.",
+            "minimum": 1,
+            "type": "integer",
+            "default": 6,
+            "maximum": 32,
+            "title": "Num Inference Steps"
+          },
+          "request_id": {
+            "description": "\n            An id bound to a request, can be used with response to identify the request\n            itself.\n        ",
+            "type": "string",
+            "default": "",
+            "title": "Request Id"
+          },
+          "image_size": {
+            "description": "The size of the generated image.",
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ImageSize"
+              },
+              {
+                "type": "string",
+                "enum": [
+                  "square_hd",
+                  "square",
+                  "portrait_4_3",
+                  "portrait_16_9",
+                  "landscape_4_3",
+                  "landscape_16_9"
+                ]
+              }
+            ],
+            "default": "square_hd",
+            "title": "Image Size"
+          },
+          "safety_checker_version": {
+            "description": "The version of the safety checker to use. v1 is the default CompVis safety checker. v2 uses a custom ViT model.",
+            "title": "Safety Checker Version",
+            "type": "string",
+            "default": "v1",
+            "enum": ["v1", "v2"]
+          },
+          "prompt": {
+            "description": "The prompt to use for generating the image. Be as descriptive as possible for best results.",
+            "examples": ["Self-portrait oil painting, a beautiful cyborg with golden hair, 8k."],
+            "type": "string",
+            "title": "Prompt"
+          },
+          "enable_safety_checker": {
+            "description": "If set to true, the safety checker will be enabled.",
+            "type": "boolean",
+            "default": true,
+            "title": "Enable Safety Checker"
+          },
+          "enable_prompt_expansion": {
+            "description": "If set to true, the prompt will be expanded with additional prompts.",
+            "type": "boolean",
+            "default": false,
+            "title": "Enable Prompt Expansion"
+          },
+          "guidance_scale": {
+            "description": "\n            The CFG (Classifier Free Guidance) scale is a measure of how close you want\n            the model to stick to your prompt when looking for a related image to show you.\n        ",
+            "minimum": 0,
+            "type": "number",
+            "default": 1.5,
+            "maximum": 20,
+            "title": "Guidance scale (CFG)"
+          }
+        },
+        "required": ["prompt"],
+        "x-fal-order-properties": [
+          "prompt",
+          "negative_prompt",
+          "image_size",
+          "num_inference_steps",
+          "seed",
+          "guidance_scale",
+          "sync_mode",
+          "num_images",
+          "enable_safety_checker",
+          "safety_checker_version",
+          "enable_prompt_expansion",
+          "format",
+          "request_id"
+        ],
+        "title": "TextToImageLCMInput"
+      },
+      "FastLcmDiffusionRealtimeOutput": {
+        "type": "object",
+        "properties": {
+          "seed": {
+            "description": "\n            Seed of the generated Image. It will be the same value of the one passed in the\n            input or the randomly generated that was used in case none was passed.\n        ",
+            "type": "integer",
+            "title": "Seed"
+          },
+          "request_id": {
+            "description": "\n            An id bound to a request, can be used with response to identify the request\n            itself.\n        ",
+            "type": "string",
+            "default": "",
+            "title": "Request Id"
+          },
+          "has_nsfw_concepts": {
+            "description": "Whether the generated images contain NSFW concepts.",
+            "items": {
+              "type": "boolean"
+            },
+            "type": "array",
+            "title": "Has Nsfw Concepts"
+          },
+          "images": {
+            "description": "The generated image files info.",
+            "items": {
+              "$ref": "#/components/schemas/RawImage"
+            },
+            "type": "array",
+            "title": "Images"
+          },
+          "timings": {
+            "title": "Timings",
+            "type": "object",
+            "additionalProperties": {
+              "type": "number"
+            }
+          }
+        },
+        "required": ["images", "timings", "seed", "has_nsfw_concepts"],
+        "title": "RealtimeOutput"
+      },
+      "ImageSize": {
+        "type": "object",
+        "properties": {
+          "height": {
+            "description": "The height of the generated image.",
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "default": 512,
+            "maximum": 14142,
+            "title": "Height"
+          },
+          "width": {
+            "description": "The width of the generated image.",
+            "exclusiveMinimum": 0,
+            "type": "integer",
+            "default": 512,
+            "maximum": 14142,
+            "title": "Width"
+          }
+        },
+        "title": "ImageSize"
+      },
+      "RawImage": {
+        "type": "object",
+        "properties": {
+          "content_type": {
+            "type": "string",
+            "default": "image/jpeg",
+            "title": "Content Type"
+          },
+          "height": {
+            "type": "integer",
+            "title": "Height"
+          },
+          "width": {
+            "type": "integer",
+            "title": "Width"
+          },
+          "content": {
+            "type": "string",
+            "format": "binary",
+            "title": "Content"
+          }
+        },
+        "required": ["content", "width", "height"],
+        "title": "RawImage"
+      }
+    }
+  },
+  "paths": {},
+  "servers": [
+    {
+      "url": "https://queue.fal.run"
+    }
+  ],
+  "security": [
+    {
+      "apiKeyAuth": []
+    }
+  ]
+}

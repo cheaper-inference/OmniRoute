@@ -64,7 +64,7 @@ export default function CachePerformance({
       <div data-testid="cache-performance" className="p-5 flex flex-col gap-4">
         {/* Header */}
         <div className="flex items-center justify-between">
-          <h2 className="font-medium text-sm">{t("performanceTitle")}</h2>
+          <h2 className="text-sm">{t("performanceTitle")}</h2>
         </div>
 
         {/* Error state */}

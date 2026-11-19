@@ -1,3 +1,4 @@
+import { mergeUsageEvidence } from "./usageEvidence.ts";
 /**
  * Shared per-line drain for translate-mode flush.
  *
@@ -11,6 +12,7 @@
  * normalizer clears `buffer` when it produces the tail).
  */
 import { parseSSELine } from "./streamHelpers.ts";
+import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 import { extractUsage, sanitizeUsagePayloadForRequest } from "./usageTracking.ts";
 import { normalizeArrayContentChunk } from "./arrayContentDelta.ts";
 import { markToolFinish } from "../services/sessionManager.ts";
@@ -45,6 +47,11 @@ function mergeUsage(state: { usage?: unknown }, extracted: unknown): void {
   }
   const current = state.usage as Record<string, number>;
   const incoming = extracted as Record<string, number>;
+  Object.assign(
+    current,
+    { usage_evidence: mergeUsageEvidence(current, extracted) },
+    mergeCacheCreationFields(current, extracted)
+  );
   if (incoming.prompt_tokens > 0) current.prompt_tokens = incoming.prompt_tokens;
   if (incoming.completion_tokens > 0) current.completion_tokens = incoming.completion_tokens;
   if (incoming.total_tokens > 0) current.total_tokens = incoming.total_tokens;

@@ -13,6 +13,7 @@ import { vertexGenerateVideo } from "../executors/vertexMedia.ts";
 import { handleGoogleFlowVideoGeneration } from "./videoGeneration/googleFlowHandler.ts";
 import { handleDeepinfraVideoGeneration } from "./videoGeneration/deepinfraHandler.ts";
 import { handleLeonardoVideoGeneration } from "./videoGeneration/leonardoHandler.ts";
+import { handleRenderhourVideoGeneration } from "./videoGeneration/renderhourHandler.ts";
 import { handleDashscopeVideoGeneration } from "./videoGeneration/dashscopeHandler.ts";
 import { handleMinimaxVideoGeneration } from "./videoGeneration/minimaxHandler.ts";
 import { handleNovitaVideoGeneration } from "./videoGeneration/novitaHandler.ts";
@@ -192,6 +193,7 @@ export async function handleVideoGeneration({
   resolvedProvider = null,
   // #16372 — route-injected media sink (owner + public origin) for auth-gated job results.
   mediaSink = undefined,
+  prepareFalInput = null,
   signal = null,
 }) {
   if (signal?.aborted) return abortedVideoResult();
@@ -300,7 +302,16 @@ export async function handleVideoGeneration({
   }
 
   if (providerConfig.format === "fal-ai-video") {
-    return handleFalVideoGeneration({ model, provider, providerConfig, body, credentials, log });
+    return handleFalVideoGeneration({
+      prepareFalInput,
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+    });
   }
 
   if (providerConfig.format === "google-flow") {
@@ -326,6 +337,19 @@ export async function handleVideoGeneration({
 
   if (providerConfig.format === "kie-video") {
     return handleKieVideoGeneration({ model, provider, providerConfig, body, credentials, log });
+  }
+
+  if (providerConfig.format === "renderhour-video") {
+    return handleRenderhourVideoGeneration({
+      model,
+      provider,
+      providerConfig,
+      body,
+      credentials,
+      log,
+      signal,
+      recordCall: recordVideoJobCall,
+    });
   }
 
   if (providerConfig.format === "runwayml") {

@@ -7,6 +7,8 @@
  * provider knowledge here so discovery, import, and catalog projection agree.
  */
 
+import { isDecisionsOnlyProvider } from "../config/decisionsProviders.ts";
+
 export type ModelEndpointKind =
   "chat" | "image" | "video" | "embedding" | "rerank" | "non-chat" | "unknown";
 
@@ -113,6 +115,11 @@ export function getModelEndpointDecision(
   supportedEndpoints?: readonly string[]
 ): ModelEndpointDecision {
   const explicit = classifyExplicitEndpoints(supportedEndpoints);
+  // Decisions-only providers (TypeSafe Jev, #14498) are never chat models, even
+  // when a stored row carries the synthetic `["chat"]` default.
+  if (isDecisionsOnlyProvider(provider)) {
+    return { kind: "non-chat", chatSelectable: false, reason: "provider-policy" };
+  }
   if (provider?.trim().toLowerCase() === "openrouter") {
     // Unconditional, unlike the OpenAI branch below: there is no "batch"
     // endpoint name an upstream could declare alongside a chat one, and the
@@ -155,6 +162,20 @@ export function declaresOnlyNonChatEndpoints(supportedEndpoints: unknown): boole
     (endpoint): endpoint is string => typeof endpoint === "string"
   );
   return classifyExplicitEndpoints(endpoints)?.chatSelectable === false;
+}
+
+/**
+ * True when the provider's own policy excludes the model from every endpoint
+ * OmniRoute serves (OpenRouter's Batch-API-only `:batch` variants). Unlike a
+ * provider-policy media decision (an OpenAI image, video or embedding model),
+ * such a model must not be imported on any surface.
+ */
+export function isProviderExcludedModel(
+  provider: string | null | undefined,
+  model: EndpointAwareModel
+): boolean {
+  const decision = getModelEndpointDecision(provider, model.id, model.supportedEndpoints);
+  return decision.reason === "provider-policy" && decision.kind === "non-chat";
 }
 
 export function isChatSelectableModel(

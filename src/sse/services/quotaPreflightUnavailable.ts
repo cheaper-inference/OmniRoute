@@ -19,15 +19,22 @@ function quotaPreflightUnavailableUntil(resetAt?: string | null): string {
 export async function markQuotaPreflightAccountUnavailable(
   provider: string,
   connectionId: string,
-  preflight: { quotaPercent?: number; resetAt?: string | null },
+  preflight: { quotaPercent?: number; resetAt?: string | null; reason?: string },
   requestedModel: string | null
-): Promise<string> {
+): Promise<string | null> {
+  if (preflight.reason === "quota_unavailable") {
+    // Unknown is not exhausted: the request skips this account, but nothing is
+    // persisted, so a timed-out quota read cannot lock a healthy account for 5 minutes.
+    return null;
+  }
+
   const unavailableUntil = quotaPreflightUnavailableUntil(preflight.resetAt ?? null);
   if (provider === "codex" && requestedModel?.trim()) {
     await persistCodexChildCooldown({
       connectionId,
       model: requestedModel,
       rateLimitedUntil: unavailableUntil,
+      source: "quota_preflight",
     });
     return unavailableUntil;
   }

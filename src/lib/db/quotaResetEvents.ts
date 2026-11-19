@@ -42,6 +42,9 @@ interface QuotaSnapshotWindowRow {
   createdAt: string | null;
 }
 
+/** Reset events are recorded for weekly windows only (`isPrimaryWeeklyWindow`). */
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+
 export interface ProviderQuotaWindowStart {
   windowStartIso: string;
   source: "recorded_reset_event" | "observed_snapshot_reset";
@@ -135,6 +138,34 @@ function getLatestSnapshotObservation(
   }
 }
 
+/**
+ * When a weekly window that restarted ahead of its schedule began: by the time the reset was
+ * observed, and no later than one week before its new reset (a poll sees a reset after it
+ * happened). This covers a window restarted early (a reset the account redeems upstream) and
+ * a rolling window nobody has used yet, whose reset time slides forward with the clock.
+ */
+function earlyWindowStart(observedAt: string, newResetIso: string): string {
+  const latestStartMs = Date.parse(newResetIso) - WEEK_MS;
+  return Number.isFinite(latestStartMs) && latestStartMs < Date.parse(observedAt)
+    ? new Date(latestStartMs).toISOString()
+    : observedAt;
+}
+
+/**
+ * When a window whose reset time moved forward began. On a scheduled rollover the previous
+ * window ended at its reset time, so the new one began there (polls see it later). Otherwise
+ * the previous reset time is still in the future and the window restarted ahead of schedule.
+ */
+function movedWindowStart(
+  previousResetIso: string,
+  observedAt: string,
+  newResetIso: string
+): string {
+  return Date.parse(previousResetIso) <= Date.parse(observedAt)
+    ? previousResetIso
+    : earlyWindowStart(observedAt, newResetIso);
+}
+
 export function recordProviderQuotaResetEventIfChanged(input: ResetEventInput): void {
   if (!input.connectionId || !input.windowKey || !isPrimaryWeeklyWindow(input.windowKey)) return;
 
@@ -164,7 +195,9 @@ export function recordProviderQuotaResetEventIfChanged(input: ResetEventInput): 
 
   if (!resetMovedForward && !resetObservedWithinSameResetAt) return;
 
-  const windowStartedAt = resetMovedForward ? previousResetIso : observedAt;
+  const windowStartedAt = resetMovedForward
+    ? movedWindowStart(previousResetIso, observedAt, currentResetIso)
+    : observedAt;
 
   try {
     const db = getDbInstance() as unknown as DbLike;
@@ -209,8 +242,9 @@ export function hasObservedClaudeQuotaResetAfter(
   if (!connectionId || !Number.isFinite(afterMs) || afterMs > nowMs) return false;
   try {
     const db = getDbInstance() as unknown as DbLike;
-    const rows = db.prepare<{ observedAt: string }>(
-      `SELECT observed_at AS observedAt FROM provider_quota_reset_events
+    const rows = db
+      .prepare<{ observedAt: string }>(
+        `SELECT observed_at AS observedAt FROM provider_quota_reset_events
        WHERE connection_id = ? AND LOWER(provider) = 'claude'
          -- Only the global weekly window can prove that the account-wide 429
          -- recovered. A model-specific Opus/Haiku weekly refill is insufficient.
@@ -220,7 +254,8 @@ export function hasObservedClaudeQuotaResetAfter(
          AND new_remaining_percentage > 0
          AND observed_at > ? AND observed_at <= ?
        ORDER BY observed_at DESC, id DESC LIMIT 1`
-    ).all(connectionId, new Date(afterMs).toISOString(), new Date(nowMs).toISOString());
+      )
+      .all(connectionId, new Date(afterMs).toISOString(), new Date(nowMs).toISOString());
     return rows.some((row) => {
       const time = Date.parse(row.observedAt);
       return Number.isFinite(time) && time > afterMs && time <= nowMs;
@@ -229,6 +264,20 @@ export function hasObservedClaudeQuotaResetAfter(
     if (error instanceof Error && error.message.includes("no such table")) return false;
     throw error;
   }
+}
+
+/**
+ * A recorded window start. A start after its own observation can only come from a version that
+ * dated an early-restarted window from the previous, still future, reset time; such a row is
+ * read with the rule that records it now.
+ */
+function recordedWindowStartIso(row: ResetEventWindowRow): string | null {
+  const startedAt = parseResetIso(row.windowStartedAt);
+  const observedAt = parseResetIso(row.observedAt);
+  const resetsAt = parseResetIso(row.windowResetsAt);
+  if (!startedAt || !observedAt || !resetsAt || Date.parse(startedAt) <= Date.parse(observedAt))
+    return startedAt;
+  return earlyWindowStart(observedAt, resetsAt);
 }
 
 function getRecordedQuotaWindowStartIso(
@@ -262,9 +311,7 @@ function getRecordedQuotaWindowStartIso(
       .all({ connectionId, nowIso });
 
     for (const row of rows) {
-      if (resetDay(row.windowResetsAt) === targetDay) {
-        return parseResetIso(row.windowStartedAt);
-      }
+      if (resetDay(row.windowResetsAt) === targetDay) return recordedWindowStartIso(row);
     }
     return null;
   } catch (error: unknown) {
@@ -331,6 +378,10 @@ function getObservedQuotaWindowStartIso(
   }
 }
 
+/**
+ * When the weekly window that resets at `targetResetAtIso` began, from the recorded reset
+ * events or, failing those, the snapshot history.
+ */
 export function getProviderQuotaWindowStart(
   connectionId: string,
   targetResetAtIso: string,
@@ -361,6 +412,7 @@ export function getProviderQuotaWindowStart(
   return { windowStartIso: recordedIso!, source: "recorded_reset_event" };
 }
 
+/** `getProviderQuotaWindowStart` as an ISO timestamp, or null when the start is unknown. */
 export function getProviderQuotaWindowStartIso(
   connectionId: string,
   targetResetAtIso: string,

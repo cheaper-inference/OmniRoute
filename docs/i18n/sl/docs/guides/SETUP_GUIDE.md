@@ -18,7 +18,7 @@
 
 ---
 
-## Načini namestitve
+## Metode namestitve
 
 ### npm (priporočeno)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Nadzorna plošča se odpre na naslovu `http://localhost:20128`, osnovni URL API-ja pa je `http://localhost:20128/v1`.
+Nadzorna plošča se odpre na `http://localhost:20128` in osnova API URL je `http://localhost:20128/v1`.
+
+> **uporabniki npm:** Če npm opozori, da so bili namestitveni skripti blokirani (npr. `omniroute`, `better-sqlite3`), glejte [Odpravljanje težav z blokiranimi namestitvenimi skripti — npm](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Uporabniki pnpm:** zastavica `--allow-build` je potrebna za omogočanje izvornih graditvenih skriptov za `better-sqlite3` in `@swc/core`. Ukaz `pnpm approve-builds -g` ni podprt za globalne namestitve v pnpm v11.
+> **pnpm uporabniki:** zastavica `--allow-build` je potrebna za omogočanje izvornih gradbenih skriptov za `better-sqlite3` in `@swc/core`. Ukaz `pnpm approve-builds -g` ni podprt za globalne namestitve na pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,39 +47,39 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[Paket AUR](https://aur.archlinux.org/packages/omniroute-bin) namesti OmniRoute in zagotovi uporabniško storitev systemd.
+[Paket AUR](https://aur.archlinux.org/packages/omniroute-bin) namesti OmniRoute in nudi uporabniško storitev systemd.
 
-### Iz izvorne kode
+### Iz vira
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Opomba za Windows:** OmniRoute privzeto uporablja `%APPDATA%\omniroute`, kadar starejši imenik `%USERPROFILE%\.omniroute` ni prisoten. Nastavite `DATA_DIR`, če želite izbrati drugo lokacijo podatkovnega imenika.
+> **Windows opomba:** OmniRoute privzeto uporablja `%APPDATA%\omniroute`, ko podedovani imenik `%USERPROFILE%\.omniroute` ni prisoten. Nastavite `DATA_DIR`, da izbere drugo lokacijo podatkovnega imenika.
 
-> **Opomba:** `npm install` ob prvem zagonu samodejno ustvari `.env` iz `.env.example`. Pri naslednjih namestitvah obstoječa datoteka `.env` ne bo prepisana, zato se prilagoditve ohranijo. Če jo želite znova ustvariti iz predloge, pred ponovnim zagonom izbrišite `.env`.
+> **Opomba:** `npm install` samodejno ustvari `.env` iz `.env.example` ob prvem zagonu. Naslednje namestitve ne bodo prepisale obstoječega `.env`, zato se prilagoditve ohranijo. Za ponovno sejanje izbrišite `.env` pred ponovnim zagonom.
 
 ### Docker
 
-Za celotno nastavitev okolja Docker, vključno s profili Compose in HTTPS prek Caddyja, si oglejte [Vodnik za Docker](./DOCKER_GUIDE.md).
+Za celotno nastavitev Docker, vključno s profili Compose in Caddy HTTPS, si oglejte [vodnik Docker](./DOCKER_GUIDE.md).
 
 ### Namizna aplikacija (Electron)
 
-OmniRoute vključuje namizni ovoj, izdelan z Electron 41 in electron-builder 26.10. Razpoložljivi skripti (korenski imenik delovnega prostora):
+OmniRoute pošilja ovoj za namizje, zgrajen na Electron 41 + electron-builder 26.10. Razpoložljivi skripti (koren delovnega prostora):
 
 ```bash
-npm run electron:dev          # Zaženi namizno aplikacijo s sprotnim ponovnim nalaganjem
-npm run electron:build        # Izdelaj za trenutni operacijski sistem (samodejno zaznan)
-npm run electron:build:win    # Namestitveni program za Windows (NSIS + prenosna različica)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Izvedi osnovni preizkus zapakirane gradnje
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Izdaje namiznih namestitvenih programov so priložene izdajam na GitHubu. Za podroben pregled Electron (podpisovanje, most IPC, distribucije) si oglejte [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(ustvarjeno v poznejši fazi)_.
+Izdaje namiznih namestitvenih programov so priložene izdajam GitHub. Za celoten potop Electron (podpisovanje, most IPC, distribucije) glejte [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Brezglavi strežnik (CI/avtomatizacija)
+### Brezglavi strežnik (CI/automation)
 
 Za nenadzorovane nastavitve (Docker, Kubernetes, CI) uporabite:
 
@@ -86,27 +88,27 @@ omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-V kombinaciji s spremenljivkami okolja (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` itd.) lahko tako zaženete primerek OmniRoute, ki ga je mogoče v celoti upravljati s skripti.
+V kombinaciji s spremenljivkami env (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` itd.) vam to omogoča, da zavrtite primerek OmniRoute ki ga je mogoče v celoti skriptirati.
 
 ### Možnosti CLI
 
-| Ukaz                    | Opis                                                                        |
-| ----------------------- | --------------------------------------------------------------------------- |
-| `omniroute`             | Zažene strežnik (`PORT=20128`, API in nadzorna plošča na istih vratih)      |
-| `omniroute setup`       | Vodena začetna nastavitev CLI za geslo in prvega ponudnika                  |
-| `omniroute doctor`      | Izvede lokalna preverjanja zdravja brez zagona strežnika                    |
-| `omniroute providers`   | Odkrije, izpiše, preveri in preizkusi ponudnike prek CLI-ja                 |
-| `omniroute config`      | Konfiguracija orodja CLI — izpis, pridobivanje, nastavljanje in preverjanje |
-| `omniroute status`      | Nadzorna plošča stanja brez povezave — različica, DB, orodja, konfiguracija |
-| `omniroute logs`        | Pretaka dnevnike uporabe iz API-ja (podpira `--follow`)                     |
-| `omniroute update`      | Preveri ali uporabi posodobitve OmniRoute                                   |
-| `omniroute provider`    | Upravlja povezave ponudnikov — dodajanje, izpis, odstranitev, preizkus      |
-| `omniroute --port 3000` | Nastavi kanonična vrata/vrata API-ja na 3000                                |
-| `omniroute --mcp`       | Zažene strežnik MCP (prenos stdio)                                          |
-| `omniroute --no-open`   | Ne odpre brskalnika samodejno                                               |
-| `omniroute --help`      | Prikaže pomoč                                                               |
+| Ukaz                    | Opis                                                                                  |
+| ----------------------- | ------------------------------------------------------------------------------------- |
+| `omniroute`             | Zagon strežnika (`PORT=20128`, API in nadzorna plošča na istih vratih)                |
+| `omniroute setup`       | Vodeno uvajanje CLI za geslo in prvega ponudnika                                      |
+| `omniroute doctor`      | Zaženite lokalne zdravstvene preglede brez zagona strežnika                           |
+| `omniroute providers`   | Odkrijte, naštejte, potrdite in preizkusite ponudnike iz CLI                          |
+| `omniroute config`      | konfiguracija orodja CLI seznam —, pridobivanje, nastavitev, preverjanje konfiguracij |
+| `omniroute status`      | Nadzorna plošča stanja brez povezave različica —, DB, orodja, konfiguracija           |
+| `omniroute logs`        | Pretakanje dnevnikov uporabe iz API (podpira `--follow`)                              |
+| `omniroute update`      | Preverite ali uporabite posodobitve OmniRoute                                         |
+| `omniroute provider`    | Upravljanje povezav ponudnika — dodaj, seznam, odstrani, preizkusi, privzeto          |
+| `omniroute --port 3000` | Nastavite vrata canonical/API na 3000                                                 |
+| `omniroute --mcp`       | Zaženi strežnik MCP (stdio transport)                                                 |
+| `omniroute --no-open`   | Ne odpiraj samodejno brskalnika                                                       |
+| `omniroute --help`      | Pokaži pomoč                                                                          |
 
-Brezglavo nastavitev je mogoče skriptirati z zastavicami ali spremenljivkami okolja:
+Nastavitev brez glave je mogoče skriptirati z zastavicami ali spremenljivkami okolja:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Upravljajte ponudnike prek SSH-ja ali skriptov, ne da bi odprli nadzorno ploščo:
+Upravljajte ponudnike iz SSH ali skriptov brez odpiranja nadzorne plošče:
 
 ```bash
 omniroute providers available
@@ -191,41 +193,45 @@ Za podrobno konfiguracijo posameznih orodij (Claude Code, Codex CLI, Cursor, Cli
 
 ---
 
-## Nastavitev protokolov (MCP + A2A)
+## Nastavitev protokola (MCP + A2A)
 
 ### Nastavitev MCP (Model Context Protocol)
 
-Zaženite prenos MCP v načinu stdio:
+Zaženite transport MCP v načinu stdio:
 
 ```bash
 omniroute --mcp
 ```
 
-Priporočen postopek preverjanja:
+Priporočen potek preverjanja:
 
 ```bash
-# 1. Zaženite strežnik MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Iz svojega odjemalca MCP pokličite:
-omniroute_get_health        # Vrne naj stanje sistema
-omniroute_list_combos       # Vrne naj aktivne kombinacije
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Ali zaženite celoten paket E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
 #### Konfiguracija odjemalca MCP
 
-**Claude Code:**
+**koda Claude :**
+
+Koda Claude se poveže prek HTTP, ki pa `omniroute --mcp` (stdio) ne zažene. Prenos HTTP je privzeto izklopljen: najprej ga omogočite na delujočem strežniku. Ko je omogočena prijava na nadzorno ploščo, zahteva brez poverilnice dobi `401`, zato posredujte ključ API, ki vsebuje `mcp:connect` (ali `manage`); ključ brez `manage`/`admin` potrebuje tudi obseg vsakega orodja (glejte [obseg orodja MCP Server → MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-Dodajte v svoje nastavitve MCP:
+Dodajte svojim nastavitvam MCP (stdio, s ključem, da ima klicatelj glavnega):
 
 ```json
 {
@@ -233,31 +239,38 @@ Dodajte v svoje nastavitve MCP:
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Celotna dokumentacija MCP:** [README strežnika MCP](../../open-sse/mcp-server/README.md) — 110 orodij, konfiguracije IDE ter odjemalci Python/TS/Go.
+Ali pa, ko je `mcpTransport` `streamable-http` (nastavite ga na `/dashboard/mcp` ali z `omniroute mcp enable --transport streamable-http`), usmerite vnos odjemalčevega oddaljenega strežnika MCP na `http://localhost:20128/api/mcp/stream`.
 
-### Nastavitev A2A (protokol med agenti)
+Ključ potuje kot `Authorization: Bearer <api-key>` (glejte [oddaljeni dostop MCP →](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) za oddaljene gostitelje; oddaljeni ključ potrebuje `mcp:connect` in njegove obsege read/write ).
 
-Preverite kartico agenta:
+**Celotna dokumentacija MCP :** [strežnik MCP README](../../open-sse/mcp-server/README.md) — 110 orodja, konfiguracije IDE, odjemalci Python/TS/Go. Referenca operaterja za orodja za stiskanje CCR/dedup (označevalci, predpogoji, obsegi po orodjih, paginacija pri iskanju, diagnostika): [Predpogoji za kompresijske motorje → / vodnik za uporabnika](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Nastavitev A2A (protokol agent-agent)
+
+Preverite agentsko kartico:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Pošljite opravilo:
+Pošlji nalogo:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Podaj mi kratek povzetek kvote."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Celotna dokumentacija A2A:** [README strežnika A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, veščine, pretočno pošiljanje in življenjski cikel opravil.
+**Celotna dokumentacija A2A :** [A2A strežnik README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, spretnosti, pretakanje, življenjski cikel nalog.
 
 ---
 
@@ -316,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Predloga za Void Linux (xbps-src)
+## Predloga Void Linux (xbps-src).
 
-Uporabniki distribucije Void Linux lahko izdelajo izvorni paket z uporabo `xbps-src`. Ta blok shranite kot `srcpkgs/omniroute/template`:
+Za uporabnike Void Linux lahko ustvarite izvorni paket z uporabo `xbps-src`. Shranite ta blok kot `srcpkgs/omniroute/template`:
 
 ```bash
-# Datoteka predloge za 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Za vsako izdajo znova ustvarite kontrolno vsoto z:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

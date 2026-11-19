@@ -140,17 +140,17 @@ Parametrlər → Security bölməsindən qeydiyyata alınır; operator onu aktiv
   3. Settings → Security → Disable bölməsində parolu daxil edin və kod sahəsini boş saxlayın. `POST /api/auth/mfa/disable` yalnız dəyişən təyin edildikdə və sorğu hostdan gəldikdə `code` olmadan gövdəni qəbul edir; buna baxmayaraq, hələ də dashboard sessiyasını və cari parolu tələb edir və `auth.mfa.disabled` hadisəsi, `secondFactor: "recovery_switch"` ilə auditə yazılır.
   4. `OMNIROUTE_DISABLE_MFA` dəyişənini ləğv edin, serveri yenidən başladın və lazım gələrsə yenidən qeydiyyatdan keçin.
 
-## Marşrut sinifləri
+## Marşrut Dərsləri
 
-`src/server/authz/types.ts` üç sinif təyin edir; deterministik şəkildə təsnif edilə bilməyən hər marşrut `MANAGEMENT`-ə düşür.
+`src/server/authz/types.ts` üç sinfi müəyyən edir; deterministik olaraq təsnif edilə bilməyən hər hansı bir marşrut `MANAGEMENT`-ə qayıdır.
 
-| Sinif        | Təsvir                                                                                                                                                 | Tələb olunan autentifikasiya                                        |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------- |
-| `PUBLIC`     | Açıq şəkildə təhlükəsiz marşrutlar — giriş, çıxış, status, başlatma, sağlamlıq və quraşdırmanın ilkin endpoint-ləri.                                   | Yoxdur                                                              |
-| `CLIENT_API` | Model xidmət endpoint-ləri — `/api/v1/*`, `/api/v1beta/*` və ləqəblər: `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Effektiv `REQUIRE_API_KEY` funksiya bayrağı aktivdirsə Bearer açarı |
-| `MANAGEMENT` | İdarəetmə paneli səhifələri, parametrlər, provayderlər, açarlar, admin və diaqnostika endpoint-ləri.                                                   | İdarəetmə paneli sessiyası VƏ YA `manage` əhatəli Bearer            |
+| Sinif        | Təsvir                                                                                                                                                            | Auth tələb olunur                                                          |
+| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------- |
+| `PUBLIC`     | Açıq şəkildə təhlükəsiz marşrutlar — giriş, çıxış, status, sağlamlıq, onboarding bootstrap.                                                                       | Heç biri                                                                   |
+| `CLIENT_API` | Modelə xidmət edən son nöqtələr — `/api/v1/*`, `/api/v1beta/*`, üstəgəl `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*` ləqəbləri. | Effektiv `REQUIRE_API_KEY` funksiyası bayrağı aktiv olduqda daşıyıcı açarı |
+| `MANAGEMENT` | İdarə paneli səhifələri, parametrlər, provayderlər, açarlar, admin və diaqnostika son nöqtələri.                                                                  | `manage` əhatə dairəsi ilə idarə paneli sessiyası OR Taşıyıcısı            |
 
-Bəzi `MANAGEMENT` əməliyyatları **yalnız operator üçündür**: `manage` açarı kifayət etmir. Saxlanılan etimadnamələrin ixracı (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), canlı məlumatların üzərinə ehtiyat nüsxəsinin bərpası (`dryRun=true` daxil olmaqla `POST /api/db-backups/import`, identifikatora görə bərpa `POST /api/db-backups` və `POST /api/settings/import-json`) və bərpa nöqtələrinin məhv edilməsi (`DELETE /api/db-backups` təmizləməsi və `PATCH /api/db-backups`, çünki saxladığı saxlama müddəti hər ehtiyat nüsxəsindən sonrakı avtomatik təmizləməni idarə edir) idarəetmə paneli sessiyası, yerli CLI subyekti və ya söndürülmüş giriş tələb edir. Sinxronizasiya tokeni vermək (`POST /api/sync/tokens`) və `admin` CLI giriş tokeni vermək (`POST /api/cli/tokens`) bütün giriş rejimlərində idarəetmə paneli sessiyası və ya yerli CLI subyekti tələb edir. İstənilən əhatəli API açarları və `oma_` giriş tokenləri operator etimadnaməsi deyil: tələb olunduqda `403` alırlar. Yoxlama `src/lib/api/operatorCredential.ts`-dədir (`resolveOperatorCredential()` / `requireOperatorCredential()`). Giriş parametrlərinin dəyişdirilməsi də yalnız operator üçündür: parol mövcud olduqdan sonra `POST /api/settings/require-login` (idarəetmə parolunu təyin etmək / `requireLogin`-i dəyişmək) yalnız bu etimadnamələri qəbul edir — ilk quraşdırma bootstrap pəncərəsi (hələ parol yoxdursa) dəyişməz qalır — və idarəetmə paneli sessiyası parolu əvəz etmək üçün `currentPassword` göndərməlidir (yoxdursa və ya səhvdirsə `403`, `settings.update_failed` kimi audit olunur). Yerli CLI və girişi söndürülmüş instansiya bərpa yolunu saxlayır və parolu onsuz təyin edə bilər, çünki ikisi də məlumat qovluğuna sahib olan hosta bağlıdır.
+Bir neçə `MANAGEMENT` hərəkətləri var** yalnız operator üçün** : bir `manage` açarı kifayət deyil. Saxlanılan etimadnamələrin ixracı (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), canlı verilənlər üzərində ehtiyat nüsxəsini bərpa etmək (`POST /api/db-backups/import` daxil olmaqla `dryRun=true`, id ilə `POST /api/db-backups` bərpa, `POST /api/settings/import-json`), bərpa nöqtələrini məhv etmək (`DELETE /api/db-backups` təmizləmə və `PATCH /api/db-backups`, çünki onun saxlanması davam edir) hər bir avtomatik geri silmə seansını idarə edir və ya hər bir yerli CLI seansı tələb edir. giriş deaktivdir. Sinxronizasiya nişanının (`POST /api/sync/tokens`) verilməsi və `admin` CLI giriş nişanının (`POST /api/cli/tokens`) çıxarılması hər giriş rejimində tablosuna sessiya və ya yerli CLI mövzusu tələb edir. İstənilən əhatə dairəsinin API açarları və `oma_` giriş nişanları operatorun etimadnaməsi deyil: onlar tələb olunan zaman `403` alırlar. Çek `src/lib/api/operatorCredential.ts` -da yaşayır (`resolveOperatorCredential()` / `requireOperatorCredential()`). Giriş parametrlərinin dəyişdirilməsi də yalnız operator üçündür: `POST /api/settings/require-login` (idarəetmə parolunu təyin edin / `requireLogin` ni dəyişdirin) parol mövcud olduqdan sonra yalnız həmin etimadnaməsini qəbul edir — ilk işə salınan yükləmə pəncərəsi (hələ parol yoxdur) dəyişməz — və tablosuna sessiya parolu əvəz etmək üçün `currentPassword` göndərməlidir (`403` yoxlandıqda və ya səhv `settings.update_failed`). Yerli CLI və giriş deaktiv edilmiş nümunə bərpa yolunu saxlayır və onsuz parol təyin edə bilər, çünki hər ikisi məlumat kataloquna sahib olan hosta bağlıdır.
 
 ## Boru kəməri
 
@@ -183,51 +183,47 @@ Uğurlu siyasət `kind ∈ { client_api_key, dashboard_session, management_key, 
 
 ## İctimai marşrutların siyahısı
 
-`src/shared/constants/publicApiRoutes.ts` açıq icazə siyahısını dəqiq müəyyən edir:
+`src/shared/constants/publicApiRoutes.ts` açıq icazə siyahısıdır:
 
-Siyahı **formaya** görə bölünüb və bu bölgü təhlükəsizlik baxımından vacibdir (GHSA-74g9-q8f6-793h): prefiks
-`startsWith()` ilə uyğunlaşdırılır, buna görə də başlanğıc simvollarını paylaşan bütün qonşu yollarla da uyğunlaşır.
-`/api/usage/om-usage` prefiks kimi `/api/usage/om-usage<anything>` yolunu PUBLIC olaraq işarələyir və Next bunu
-`/api/usage/[connectionId]` marşrutuna yönləndirir — öz autentifikasiyası olmayan işləyici.
+Siyahı bölünür** forma** , və bölünmə yükdaşıyıcıdır (GHSA-74g9-q8f6-793h): prefiks `startsWith()` ilə uyğunlaşdırılır, buna görə də o, aparıcı simvollarını paylaşan hər bir qonşu yola uyğun gəlir. `/api/usage/om-usage` prefiks olaraq `/api/usage/om-usage<anything>` PUBLIC ilə işarələnir və Next bunu öz authu olmayan bir işləyicini `/api/usage/[connectionId]` — həll edir.
 
 ```ts
-// Həqiqi alt ağaclar. Hər bir giriş "/" ilə bitməlidir (vahid testi ilə təsdiqlənir).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // classify-də CLIENT_API kimi qəbul edilir, "autentifikasiyasız ictimai" kimi yox
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Yalnız sonundakı slash olub-olmamasından asılı olmayaraq DƏQİQ uyğunlaşdırılan tək marşrutlar.
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // qoşulma seçilmiş TOTP üçün girişin 2-ci addımı; MFA gözləməsində olan cookie tələb olunur
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// CORS origin məhdudiyyətinin yumşaldılmasını da tətbiq edən yalnız oxuma üçün tək marşrutlar.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// CORS məhdudiyyətinin yumşaldılması TƏTBİQ OLUNMAYAN yalnız oxuma üçün tək marşrut.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Yalnız oxuma üçün olan marşrutlar yalnız təhlükəsiz metodlar üçün ictimaidir. Qeyd: `classifyRoute()` `/api/v1/*` və `/api/v1beta/*` marşrutlarını PUBLIC ehtiyat variantından çıxarır — bunlar həmişə `CLIENT_API` olur, buna görə Bearer açarı siyasəti yenə tətbiq edilir.
+Yalnız oxumaq üçün nəzərdə tutulan marşrutlar ictimaidir** yalnız** təhlükəsiz üsullar üçün. Qeyd: `classifyRoute()` `/api/v1/*` və `/api/v1beta/*` PUBLIC aşağı — dən istisna edir, onlar həmişə `CLIENT_API` dir, ona görə də Daşıyıcı-açar siyasəti hələ də qüvvədədir.
 
 ## Yeni marşrutun əlavə edilməsi
 
@@ -303,15 +299,15 @@ müəyyən etdikdən sonra işləyir. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` olmad�
 (`src/lib/accessTokens/scopes.ts`) tərəfindən dərəcələndirilir. Bu dərəcə yalnız giriş tokeni
 etimadnaməsinə tətbiq olunur. Baxın: [İdarəetmə autentifikasiyası](../guides/MANAGEMENT-AUTH.md).
 
-## Autentifikasiya tələbi açarı
+## Auth tələb olunan keçid
 
-`src/shared/utils/apiAuth.ts`-dəki `isAuthRequired()` sorğu üçün **hər hansı** autentifikasiyanın tətbiq olunub-olunmayacağını müəyyən edir:
+`src/shared/utils/apiAuth.ts` -də `isAuthRequired()` qərar verir** hər hansı** sorğu üçün auth tətbiq edilir:
 
-- `settings.requireLogin === false` → autentifikasiya qlobal olaraq söndürülür, lakin həmişə qorunan təbəqə ([Marşrut Qoruma Təbəqələri](../security/ROUTE_GUARD_TIERS.md)) və qəbul edilən etimadnaməni verən çağırışlar istisnadır. Bunlar girişin aktiv olduğu zamankı ilə eyni etimadnaməni tələb edir: sinxronizasiya tokenləri vermək, istənilən əhatədə CLI giriş tokenləri vermək və `manage`/`admin` əhatəli API açarı yaratmaq, bu əhatəni açara vermək və ya belə açarı yenidən yaratmaq/göstərmək (`src/lib/api/requireManagementAuth.ts`-dəki `requireCredentialForManagementScopedKey()`). Inference üçün açarlar açıq qalır.
-- İdarəetmə parolu yoxdur **və** `INITIAL_PASSWORD` mühit dəyişəni yoxdur → bootstrap rejimi: quraşdırma sehrbazına və loopback sorğularına icazə verilir, lakin xarici şəbəkə sorğuları hələ də etimadnamə tələb edir.
-- İstənilən verilənlər bazası xətası → bağlı şəkildə uğursuz olur (təhlükəsiz defolt).
+- `settings.requireLogin === false` → auth qlobal olaraq qeyri-aktivdir, hər zaman qorunan səviyyə ( [Marşrut Mühafizəsi Səviyyələrinə](../security/ROUTE_GUARD_TIERS.md) baxın) və onun qəbul etdiyi etimadnaməni ötürən zənglər istisna olmaqla, giriş zamanı olduğu kimi eyni etimadnaməyə ehtiyac duyur: sinxronizasiya nişanlarının verilməsi, CLI giriş nişanlarının hər hansı bir əhatə dairəsində buraxılması və API açarının yaradılması, bir `manage` əhatə dairəsi və ya belə bir açarın bərpası və ya aşkarlanması (`admin` `src/lib/api/requireManagementAuth.ts` `requireCredentialForManagementScopedKey()` ). Yalnız nəticə çıxaran düymələr açıq qalır. Qorunan funksiya bayrağının yazılması (`REQUIRE_API_KEY`, digər Təhlükəsizlik bayraqları və [Xüsusiyyət Bayraqlarında](../reference/FEATURE_FLAGS.md#rest-api) sadalanan SSRF / TLS / MCP əhatə dairəsi / sandbox bayraqları ) və PII maskalanma parametrlərini (`PUT /api/settings/pii`) saxlamaq üçün də etimadnamə tələb olunur.
+- Heç bir parol konfiqurasiya olunmayıb** və** no `INITIAL_PASSWORD` env var → bootstrap rejimi onboarding sehrbazına və geri dönmə sorğularına imkan verir, lakin açıq şəbəkə sorğuları hələ də etimadnaməyə ehtiyac duyur. İstisna: qorunan xüsusiyyət bayrağının yazılması və PII maskalama parametrlərinin (`PUT /api/settings/pii`) saxlanması hətta geri dönmədən də etimadnaməyə ehtiyac duyur, ona görə də geri dönmə burada kifayət deyil.
+- İstənilən DB xətası → bağlana bilmir (defolt olaraq təhlükəsiz).
 
-Müştəri API açarının tətbiqi birbaşa `process.env.REQUIRE_API_KEY` oxumaq yerinə `src/shared/utils/featureFlags.ts`-dəki `isRequireApiKeyEnabled()`-dən istifadə edir. Bu yerləşdirilmiş instansiyalar üçün vacibdir: İdarəetmə Paneli → Funksiya Bayraqlarında `REQUIRE_API_KEY`-i dəyişdirmək DB üzərində override saxlayır və `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` və bu köməkçini paylaşan digər müştəri API autentifikasiya yoxlamalarına dərhal təsir edir. Funksiya bayrağı anbarı oxuna bilmirsə, müştəri API autentifikasiyası bağlı şəkildə uğursuz olur və açar tələb edir.
+Müştəri API açarının tətbiqi birbaşa `process.env.REQUIRE_API_KEY` oxunuşu deyil, `src/shared/utils/featureFlags.ts`-də `isRequireApiKeyEnabled()` istifadə edir. Bu yerləşdirilmiş nümunələr üçün vacibdir: İdarə Paneli → Xüsusiyyət Bayraqlarında `REQUIRE_API_KEY` dəyişdirilməsi DB ləğvini saxlayır və dərhal `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` və bu köməkçini paylaşan digər müştəri-API doğrulama yoxlamalarına təsir edir. Funksiya bayraq anbarı oxuna bilmirsə, müştəri API auth bağlanması uğursuz olur və açar tələb olunur.
 
 ## Uyğunluğu pozan dəyişiklik — v3.8.0
 

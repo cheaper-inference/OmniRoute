@@ -176,6 +176,7 @@ test("static mistral rows carry the ids and windows of Mistral's model cards", (
     "ministral-8b-latest": 262144,
     "ministral-3b-latest": 262144,
     "voxtral-small-latest": 32768,
+    "labs-leanstral-1-5-1": 262144,
   });
   // Retired by Mistral: pixtral-large on 2026-05-31, devstral-latest on 2026-07-31
   // (#18755 / #18792); the ids would only answer an upstream error.

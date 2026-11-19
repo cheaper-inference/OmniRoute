@@ -1,3 +1,4 @@
+import { transformStreamWithCancel } from "./cancelableTransformStream.ts";
 /**
  * @file sseHeartbeat.ts
  * @description Mid-stream SSE heartbeat transform (comment / Anthropic ping / OpenAI chunk).
@@ -178,7 +179,7 @@ export function createSseHeartbeatTransform({
     intervalId = undefined;
   };
 
-  return new TransformStream<Uint8Array, Uint8Array>({
+  return transformStreamWithCancel<Uint8Array, Uint8Array>({
     start(controller) {
       intervalId = globalThis.setInterval(() => {
         if (signal?.aborted) {

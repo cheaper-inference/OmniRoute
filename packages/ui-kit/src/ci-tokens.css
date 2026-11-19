@@ -376,6 +376,9 @@
   /* Badge tone="accent" text: the accent ink, except where it falls under 4.5:1 on the
      translucent accent tint over the muted surface (Editions light darkens it). */
   --ci-badge-accent-ink: var(--ci-color-accent-ink);
+  /* Button variant="destructive-ghost" text: the danger ink, except where it falls under 4.5:1
+     on the muted surface (Editions light darkens it). */
+  --ci-button-danger-ghost-fg: var(--ci-color-danger);
   --ci-button-primary-bg: var(--ci-color-surface-inverse);
   --ci-button-primary-fg: var(--ci-color-text-inverse);
   --ci-button-primary-hover: var(--ci-neutral-800);

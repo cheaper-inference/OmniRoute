@@ -31,7 +31,7 @@ import {
   type ProviderProfile,
 } from "../accountFallback.ts";
 import { PRE_SCREEN_CONCURRENCY } from "../comboConfig.ts";
-import { getQuotaFetcher } from "../quotaPreflight.ts";
+import { getQuotaFetcher, isCodexPaidCreditsBacked, type QuotaInfo } from "../quotaPreflight.ts";
 import { getCircuitBreaker } from "../../../src/shared/utils/circuitBreaker";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { MAX_RR_COUNTERS, rrCounters } from "./rrState.ts";
@@ -45,6 +45,8 @@ import {
   scoreResetAwareQuota,
   getResetAwareRemainingPercent,
   getResetWindowRemainingMs,
+  resolveExpiryFirstConfig,
+  scoreExpiryFirstQuota,
   type QuotaFetchCacheConfig,
 } from "./quotaScoring.ts";
 import { secureRandomFloat, secureRandomInt } from "../../../src/shared/utils/secureRandom.ts";
@@ -54,11 +56,14 @@ import { resolvePlanCapacity } from "./quotaPlanCapacity.ts";
 import { isRecord } from "./comboData.ts";
 import { getInflight, incrementInflight } from "./quotaShareInflight.ts";
 import { preferAntigravityConnectionsWithStoredProject } from "../antigravityProjectPersist.ts";
-import { getQuotaFetchScope } from "../antigravityQuotaFamily.ts";
+import { getQuotaFetchScope, quotaWindowNamesForScope } from "../antigravityQuotaFamily.ts";
+import { getCodexQuotaWindowFilterForModel } from "../../config/codexQuotaScopes.ts";
 import {
   getQuotaSnapshotFetchedAt,
   getQuotaWeightedRemainingPercent,
   isQuotaExhaustedForRequest,
+  getQuotaCache,
+  isQuotaRefusalMarked,
 } from "../../../src/domain/quotaCache.ts";
 
 /**
@@ -306,7 +311,11 @@ async function scoreQuotaAwareTargets<TScore extends object>({
   connectionById: Map<string, Record<string, unknown>>;
   expandedTargets: ResolvedComboTarget[];
   log: { warn?: (...args: unknown[]) => void };
-  scoreQuota: (quota: unknown, target: ResolvedComboTarget) => TScore;
+  scoreQuota: (
+    quota: unknown,
+    target: ResolvedComboTarget,
+    connection?: Record<string, unknown>
+  ) => TScore;
 }): Promise<Array<{ target: ResolvedComboTarget; index: number } & TScore>> {
   const quotaPromises = new Map<string, Promise<unknown>>();
 
@@ -317,10 +326,10 @@ async function scoreQuotaAwareTargets<TScore extends object>({
       let quota: unknown = null;
       const provider = getResetAwareProvider(target);
       const fetcher = provider ? getQuotaFetcher(provider) : null;
+      const connection = target.connectionId ? connectionById.get(target.connectionId) : undefined;
       if (fetcher && provider && target.connectionId) {
         const quotaKey = `${provider}:${target.connectionId}:${getQuotaFetchScope(provider, target.modelStr)}`;
         if (!quotaPromises.has(quotaKey)) {
-          const connection = connectionById.get(target.connectionId);
           quotaPromises.set(
             quotaKey,
             fetchResetAwareQuotaWithCache({
@@ -339,7 +348,7 @@ async function scoreQuotaAwareTargets<TScore extends object>({
         quota = await quotaPromises.get(quotaKey)!;
       }
 
-      return { target, index, ...scoreQuota(quota, target) };
+      return { target, index, ...scoreQuota(quota, target, connection) };
     }
   );
 }
@@ -644,6 +653,145 @@ export async function orderTargetsByResetWindow(
   );
 }
 
+type CachedQuotaRow = {
+  remainingPercentage?: number;
+  resetAt?: string | null;
+  fractionReported?: boolean;
+};
+
+/**
+ * Local coercion for a cached remaining-percentage value. open-sse must not
+ * import from src/, so this mirrors src/shared/utils/numeric.ts `toNumber(v, NaN)`:
+ * numbers pass through, non-empty strings are parsed, anything else is NaN.
+ * Non-finite results are rejected by the caller's Number.isFinite guard.
+ */
+function coerceRemainingPercent(v: unknown): number {
+  if (typeof v === "number") return v;
+  if (typeof v === "string" && v.trim().length > 0) return Number(v.trim());
+  return Number.NaN;
+}
+
+/**
+ * Model-scoped quota view for one combo target. Mirrors the conversion in
+ * buildConnectionQuotaWindowsView but (a) filters windows to the family the
+ * requested model actually spends — the same scoping the health gate applies —
+ * and (b) skips windows whose fraction upstream never reported
+ * (fractionReported === false), which are unknown, NOT exhausted.
+ * Returns null when nothing usable remains, so the caller can tell "no
+ * telemetry" apart from "telemetry says empty".
+ */
+export function buildScopedExpiryQuotaView(
+  connectionId: string,
+  provider: string | null | undefined,
+  modelStr: string | null | undefined
+): Record<string, unknown> | null {
+  const quotas = (getQuotaCache(connectionId) as { quotas?: Record<string, CachedQuotaRow> } | null)
+    ?.quotas;
+  if (!quotas) return null;
+
+  let names = quotaWindowNamesForScope(Object.keys(quotas), {
+    provider,
+    requestedModel: modelStr,
+  });
+  if (provider === "codex") {
+    const filter = getCodexQuotaWindowFilterForModel(modelStr);
+    if (filter) names = names.filter(filter);
+    // Codex reserve_* display-only rows never reach the cache, so no extra
+    // filter is needed here.
+  }
+
+  const windows: Record<string, { percentUsed: number; resetAt: string | null }> = {};
+  for (const name of names) {
+    const quota = quotas[name];
+    if (quota?.fractionReported === false) continue; // unknown, not exhausted
+    const remainingPercent = coerceRemainingPercent(quota?.remainingPercentage);
+    if (!Number.isFinite(remainingPercent)) continue;
+    windows[name.toLowerCase()] = {
+      percentUsed: Math.min(1, Math.max(0, 1 - remainingPercent / 100)),
+      resetAt:
+        typeof quota?.resetAt === "string" && quota.resetAt.trim().length > 0
+          ? quota.resetAt
+          : null,
+    };
+  }
+  return Object.keys(windows).length > 0 ? { windows } : null;
+}
+
+/**
+ * Orders combo targets for `expiry-first`: the account whose quota is closest
+ * to being thrown away goes first. Quota source is the domain quota cache only
+ * — no fetcher calls, no network I/O, no TTL knobs; staleness is owned by
+ * whatever populates the cache, the same trust the provider-level strategy and
+ * the dashboard already place in it.
+ */
+export async function orderTargetsByExpiryFirst(
+  targets: ResolvedComboTarget[],
+  comboName: string,
+  configSource: Record<string, unknown> | null | undefined,
+  log: { warn?: (...args: unknown[]) => void },
+  apiKeyAllowedConnectionIds?: string[] | null
+) {
+  if (targets.length === 0) return targets;
+
+  // Reuse the expander for its filtering only (isActive / testStatus /
+  // allowlist / rate-limit / quota-exhaustion). Its connectionById map carries
+  // full connection records, giving the projection each target's provider.
+  const { connectionById, expandedTargets } = await expandTargetsByQuotaAwareConnections(
+    targets,
+    comboName,
+    log,
+    apiKeyAllowedConnectionIds
+  );
+  if (expandedTargets.length === 0) return expandedTargets;
+
+  const expiryConfig = resolveExpiryFirstConfig(configSource);
+  // One `now` anchor per ordering pass, matching the reset-window sibling.
+  const now = Date.now();
+
+  const scoredTargets = expandedTargets.map((target, index) => {
+    const connection = target.connectionId ? connectionById.get(target.connectionId) : undefined;
+    // connectionById only fills for providers with a registered quota fetcher;
+    // the step's own provider string carries the same scope otherwise.
+    const provider =
+      connection && typeof connection.provider === "string"
+        ? connection.provider
+        : target.provider || null;
+    return {
+      target,
+      index,
+      score: target.connectionId
+        ? scoreExpiryFirstQuota(
+            buildScopedExpiryQuotaView(target.connectionId, provider, target.modelStr),
+            expiryConfig,
+            now
+          ).score
+        : 0,
+    };
+  });
+
+  scoredTargets.sort((a, b) => {
+    if (b.score !== a.score) return b.score - a.score;
+    return a.index - b.index;
+  });
+
+  const bestScore = scoredTargets[0]?.score ?? 0;
+  if (bestScore <= 0) {
+    // Everything scored zero — keep the expanded (priority) order, no
+    // rotation. Matches the provider level.
+    return expandedTargets;
+  }
+  // Relative tie band: the score is a rate (usable/hours), not a 0-1 value, so
+  // an absolute band would silently disable rotation at high urgency and tie
+  // the whole pool at low urgency. The score > 0 guard keeps exhausted /
+  // no-telemetry targets out of the rotation even at tieBandPercent = 100.
+  const tiedTargets = scoredTargets.filter(
+    (entry) => entry.score > 0 && (bestScore - entry.score) / bestScore <= expiryConfig.tieBand
+  );
+  return rotateLeadingTies(scoredTargets, tiedTargets, `expiry-first:${comboName}`).map(
+    (entry) => entry.target
+  );
+}
+
 /**
  * Lazily resolve getSaturation from the cross-workspace quota module. Kept as a
  * dynamic import (matching chatCore's `@/lib/quota/saturationSignals` import) so
@@ -766,12 +914,20 @@ export async function orderTargetsByHeadroom(
   }
 }
 
-type QuotaWeightedScored = {
+export type QuotaWeightedScored = {
   target: ResolvedComboTarget;
   index: number;
   score: number;
   remainingPercent: number;
   capacity?: number;
+  /**
+   * Codex opted into paid credits and the balance can absorb this request.
+   * A used-up subscription window does not make such a target dead: the
+   * preflight already lets it through, so ordering must not drop it either.
+   */
+  paidCreditsBacked?: boolean;
+  /** Credit balance behind a paid-credits target, used as its draw weight. */
+  paidCreditsBalance?: number | null;
 };
 
 function scoreQuotaWeighted(
@@ -798,8 +954,24 @@ function scoreQuotaWeighted(
   };
 }
 
-function getQuotaWeightedDrawWeight(entry: QuotaWeightedScored): number {
+/**
+ * Draw weight for a credit-backed target whose subscription window is spent,
+ * or null when the entry does not qualify. A spent window scores 0, which would
+ * collapse a credit-backed pool into a uniform draw; the balance is the only
+ * capacity signal left.
+ */
+function paidCreditsDrawWeight(entry: QuotaWeightedScored): number | null {
+  if (entry.paidCreditsBacked !== true) return null;
+  if (entry.remainingPercent > 0) return null;
+  const balance = entry.paidCreditsBalance;
+  if (typeof balance !== "number" || !Number.isFinite(balance)) return 1;
+  return balance > 0 ? balance : 1;
+}
+
+export function getQuotaWeightedDrawWeight(entry: QuotaWeightedScored): number {
   const load = getInflight(entry.target.connectionId ?? "");
+  const creditsWeight = paidCreditsDrawWeight(entry);
+  if (creditsWeight !== null) return creditsWeight / (1 + load);
   // Only pace entries carry capacity; leftover retains its exact historical divisor.
   if (entry.capacity !== undefined) {
     return Math.max(0, entry.score) / (1 + load / entry.capacity);
@@ -837,6 +1009,11 @@ function sortByScoreThenIndex(a: QuotaWeightedScored, b: QuotaWeightedScored): n
   return a.index - b.index;
 }
 
+function sortByDrawWeightThenIndex(a: QuotaWeightedScored, b: QuotaWeightedScored): number {
+  const difference = getQuotaWeightedDrawWeight(b) - getQuotaWeightedDrawWeight(a);
+  return difference !== 0 ? difference : a.index - b.index;
+}
+
 function resolveQuotaWeightedFloor(
   configSource: Record<string, unknown> | null | undefined
 ): number {
@@ -849,6 +1026,60 @@ function resolveQuotaWeightedFloor(
       ? Number(configured)
       : Number.NaN;
   return Number.isFinite(raw) ? Math.max(0, Math.min(100, raw)) : 1;
+}
+
+/**
+ * Quota-weighted score for one target, carrying the paid-credits facts the
+ * ordering needs. Kept out of the orderer so its body stays readable.
+ */
+function scoreQuotaWeightedWithCredits(
+  quota: unknown,
+  target: ResolvedComboTarget,
+  connection: Record<string, unknown> | undefined,
+  config: Parameters<typeof scoreQuotaWeighted>[2],
+  scoring: Parameters<typeof scoreQuotaWeighted>[3],
+  scoreNow: number
+): Omit<QuotaWeightedScored, "target" | "index"> {
+  const credits = (quota as Pick<QuotaInfo, "paidCredits"> | null)?.paidCredits;
+  return {
+    ...scoreQuotaWeighted(quota, target, config, scoring, scoreNow),
+    paidCreditsBacked: isCodexPaidCreditsBacked(
+      getResetAwareProvider(target),
+      connection?.providerSpecificData,
+      target.modelStr,
+      credits
+    ),
+    paidCreditsBalance: credits?.balance ?? null,
+  };
+}
+
+/**
+ * The live snapshot outranks the freshly-scored fetch on two counts: a 402
+ * recorded against this connection zeroes it, and an observation older than the
+ * staleness bound is not confident enough to sit in the A pool. The balance
+ * comes from a cached fetch, so a later upstream refusal outranks it too.
+ */
+function overlayQuotaSnapshot<
+  T extends {
+    target: { connectionId?: string | null; modelStr: string };
+    remainingPercent: number;
+    paidCreditsBacked?: boolean;
+  },
+>(scored: T[]): (T & { stale: boolean })[] {
+  const now = Date.now();
+  return scored.map((entry) => {
+    const connectionId = entry.target.connectionId ?? "";
+    const marked = connectionId
+      ? getQuotaWeightedRemainingPercent(connectionId, entry.target.modelStr)
+      : null;
+    const fetchedAt = connectionId ? getQuotaSnapshotFetchedAt(connectionId) : null;
+    return {
+      ...entry,
+      remainingPercent: marked === 0 ? 0 : entry.remainingPercent,
+      paidCreditsBacked: entry.paidCreditsBacked === true && !isQuotaRefusalMarked(connectionId),
+      stale: fetchedAt !== null && now - fetchedAt > QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS,
+    };
+  });
 }
 
 export async function orderTargetsByQuotaWeighted(
@@ -890,34 +1121,31 @@ export async function orderTargetsByQuotaWeighted(
     connectionById,
     expandedTargets: liveTargets,
     log,
-    scoreQuota: (quota, target) => scoreQuotaWeighted(quota, target, config, scoring, scoreNow),
+    scoreQuota: (quota, target, connection) =>
+      scoreQuotaWeightedWithCredits(quota, target, connection, config, scoring, scoreNow),
   });
 
-  // The live snapshot outranks the freshly-scored fetch on two counts: a 402
-  // recorded against this connection zeroes it, and an observation older than
-  // the staleness bound is not confident enough to sit in the A pool.
-  const now = Date.now();
-  const withSnapshot = scoredTargets.map((entry) => {
-    const connectionId = entry.target.connectionId ?? "";
-    const marked = connectionId
-      ? getQuotaWeightedRemainingPercent(connectionId, entry.target.modelStr)
-      : null;
-    const fetchedAt = connectionId ? getQuotaSnapshotFetchedAt(connectionId) : null;
-    return {
-      ...entry,
-      remainingPercent: marked === 0 ? 0 : entry.remainingPercent,
-      stale: fetchedAt !== null && now - fetchedAt > QUOTA_WEIGHTED_MAX_SNAPSHOT_AGE_MS,
-    };
-  });
+  const withSnapshot = overlayQuotaSnapshot(scoredTargets);
 
+  // A used-up subscription window drops a target only when nothing can absorb
+  // the request. Codex accounts with paid credits still serve it, and the
+  // preflight already lets them through — dropping them here is what turned a
+  // credit-backed combo into "no executable targets". They stay out of A and B
+  // because paid credits are the last resort: their weight is a balance, which
+  // would win any draw against a score, whatever the floor or staleness. Every
+  // other provider keeps the old behaviour: a spent window drops it.
   const eligible = withSnapshot.filter((entry) => entry.remainingPercent > 0);
+  const creditsOnly = withSnapshot.filter(
+    (entry) => entry.remainingPercent <= 0 && entry.paidCreditsBacked
+  );
   const floor = resolveQuotaWeightedFloor(configSource);
   const hasRoom = (entry: (typeof eligible)[number]) =>
     floor === 0 ? true : entry.remainingPercent > floor;
   // A holds only connections we both believe have room AND observed recently.
   const poolA = eligible.filter((entry) => hasRoom(entry) && !entry.stale);
   const poolB = eligible.filter((entry) => !hasRoom(entry) || entry.stale);
-  const selected = poolA.length > 0 ? poolA : poolB;
+  const fromCredits = poolA.length === 0 && poolB.length === 0;
+  const selected = fromCredits ? creditsOnly : poolA.length > 0 ? poolA : poolB;
   if (selected.length === 0) return [];
 
   const weights = selected.map(getQuotaWeightedDrawWeight);
@@ -939,9 +1167,10 @@ export async function orderTargetsByQuotaWeighted(
   const unusedSelected = selected
     .filter((_, i) => i !== pickIndex)
     .slice()
-    .sort(sortByScoreThenIndex);
+    .sort(fromCredits ? sortByDrawWeightThenIndex : sortByScoreThenIndex);
   const fromA = poolA.length > 0;
   const unusedB = fromA ? poolB.slice().sort(sortByScoreThenIndex) : [];
+  const unusedCredits = fromCredits ? [] : creditsOnly.slice().sort(sortByDrawWeightThenIndex);
 
-  return [winner, ...unusedSelected, ...unusedB].map((entry) => entry.target);
+  return [winner, ...unusedSelected, ...unusedB, ...unusedCredits].map((entry) => entry.target);
 }

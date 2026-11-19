@@ -82,6 +82,18 @@ Net ir užblokuotiems regionams nepriklausančiose vietovėse tarpiniai serveria
 
 ---
 
+## Numatytoji tarpinio serverio būsena naujoms paskyroms
+
+Į** Nustatymai → Proxy → Visuotinė konfigūracija** , naudoti** Įgalinti tarpinį serverį pagal numatytuosius nustatymus naujiems ryšiams** norėdami pasirinkti pradinę naujai pridėtų teikėjo paskyrų tarpinio serverio būseną.
+
+Naujasis nustatymas valdo pradinę naujai pridėtų teikėjo paskyrų tarpinio serverio būseną. Tai nekeičia esamų paskyrų ir nepakeičia visuotinio tarpinio serverio jungiklio. Jo pradinė vertė išsaugo ankstesnį elgesį. Vieną kartą išjunkite, kad ateityje sukurtumėte paskyras su pagal numatytuosius nustatymus išjungtu tarpiniu serveriu.
+
+Nuostata išsaugoma kaip `defaultNewConnectionProxyEnabled` per esamus nustatymus API. Numatytoji reikšmė yra `true` kai niekada neišsaugota. Išsaugomas `false` galioja paskesnėms naujoms paskyroms nepaleidžiant iš naujo. `POST /api/providers` priima pasirenkamą griežtą loginį `proxyEnabled`; aiškus `true` arba `false` turi viršenybę prieš numatytąjį kūrimo nustatymą. Pasikartojančios paskyros praleidimas arba OAuth Reconnect“ išsaugo tos paskyros išsaugotą būseną. Vėliau asmenines paskyras vis tiek galima įjungti arba išjungti.
+
+Atrankiniai teikėjo perkėlimai naudoja numatytosios paskirties vietos diegimo nustatymus naujoms paskyroms ir išsaugo paskirties politiką, kai pakeičiamos esamos paskyros. Tarpinio serverio perjungikliai nėra nešiojami perdavimo laukai. Visiškas atsarginės kopijos atkūrimas ir istorinis JSON/SQL perkėlimas išlaiko esamą atkūrimo semantiką, įskaitant išsaugotas paskyros vertes ir senos schemos numatytuosius nustatymus; visiškas nustatymų atkūrimas taip pat gali atkurti šią nuostatą.
+
+Ši nuostata nepriskiria įgaliotojo serverio ir nenustato, kad jis yra sveikas arba naudojamas. Faktinis maršruto parinkimas vis tiek priklauso nuo visuotinio tarpinio serverio jungiklio ir taikomos tarpinio serverio konfigūracijos. Sintetiniai paslaugų teikėjai be nuolatinės paskyros, OAuth srautas prieš sukuriant paskyrą, environment/system tarpiniai serveriai ir išorinių užpakalinių sistemų tinklai nepatenka į jo taikymo sritį.
+
 ## 4 lygių tarpinių serverių sistema
 
 OmniRoute palaiko tarpinių serverių konfigūraciją **keturiose nepriklausomose srityse**, kurios tikrinamos prioriteto tvarka:

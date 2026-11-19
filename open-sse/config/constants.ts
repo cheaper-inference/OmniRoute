@@ -22,6 +22,10 @@ export const FETCH_TIMEOUT_MS = upstreamTimeouts.fetchTimeoutMs;
 // idle for this duration. Override with STREAM_IDLE_TIMEOUT_MS env var.
 export const STREAM_IDLE_TIMEOUT_MS = upstreamTimeouts.streamIdleTimeoutMs;
 
+// Responses clients: how long a finish_reason waits for a trailing usage chunk before
+// response.completed is sent anyway (shared by the transformer and the live SSE stream).
+export const RESPONSES_DEFERRED_COMPLETION_GRACE_MS = 3000;
+
 // Grace period (ms) a client-disconnect finalization waits for the stream's own
 // completion bookkeeping to land before persisting a 499. See #9653 — a client
 // that closes right after reading a fully-completed SSE stream can otherwise
@@ -61,6 +65,8 @@ export const STREAM_READINESS_MAX_TIMEOUT_MS = upstreamTimeouts.streamReadinessM
 // headers are returned. Keep it shared so executor, core normalization and
 // account fallback detection cannot drift.
 export const ANTIGRAVITY_PRE_RESPONSE_TIMEOUT_CODE = "ANTIGRAVITY_PRE_RESPONSE_TIMEOUT";
+// A trusted caller shortened this request only; do not cool shared provider accounts.
+export const REQUEST_SCOPED_UPSTREAM_TIMEOUT_CODE = "REQUEST_SCOPED_UPSTREAM_TIMEOUT";
 
 // Heartbeat interval for synthetic SSE keepalive emission toward the downstream
 // client (Capy, Claude Code, OpenAI SDK, etc). Keeps strict proxies from
@@ -164,6 +170,11 @@ export const OAUTH_ENDPOINTS = {
     token: "https://openference.com/oauth/token",
     auth: "https://openference.com/app/oauth/authorize",
     clientId: resolvePublicCred("openference_id"),
+  },
+  renderhour: {
+    token: "https://renderhour.com/api/oauth/token",
+    auth: "https://renderhour.com/oauth/authorize",
+    clientId: resolvePublicCred("renderhour_id"),
   },
 };
 

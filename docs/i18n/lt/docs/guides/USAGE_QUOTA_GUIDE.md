@@ -38,31 +38,31 @@ Užklausa ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 ---
 
-## Kas įrašoma
+## Kas registruojama
 
-`usage.ts` paslauga kiekvienai užklausai užfiksuoja **naudojimo įvykį**:
+Paslauga `usage.ts` užfiksuoja kiekvienos užklausos **naudojimo įvykį**:
 
-| Laukas             | Tipas   | Šaltinis                                                       |
-| ------------------ | ------- | -------------------------------------------------------------- |
-| `id`               | string  | Įrašymo metu sugeneruotas UUID                                 |
-| `apiKeyId`         | string  | Užklausą inicijavęs API raktas                                 |
-| `provider`         | string  | Teikėjo ID (openai, anthropic ir kt.)                          |
-| `model`            | string  | Modelio ID (gpt-5, claude-opus-4-6 ir kt.)                     |
-| `comboId`          | string? | Derinio ID, jei užklausa nukreipta per derinį                  |
-| `promptTokens`     | number  | Iš pirminio teikėjo atsako                                     |
-| `completionTokens` | number  | Iš pirminio teikėjo atsako                                     |
-| `cachedTokens`     | number  | Podėlio atitikties žetonai (Anthropic užklausų podėlis ir kt.) |
-| `totalTokens`      | number  | užklausa + užbaigimas                                          |
-| `costUsd`          | number  | Apskaičiuota pagal kainodaros duomenis                         |
-| `latencyMs`        | number  | Bendra užklausos trukmė nuo pradžios iki pabaigos              |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`     |
-| `errorClass`       | string? | Klaidos klasė, jei būsena != success                           |
-| `timestamp`        | string  | ISO 8601 UTC                                                   |
-| `metadata`         | object  | Papildinio įterpti pasirinktiniai duomenys                     |
+| Laukas             | Tipas   | Šaltinis                                                   |
+| ------------------ | ------- | ---------------------------------------------------------- |
+| `id`               | string  | Registruojant sugeneruotas UUID                            |
+| `apiKeyId`         | string  | API raktas, kuriuo inicijuota užklausa                     |
+| `provider`         | string  | Teikėjo ID (openai, anthropic ir kt.)                      |
+| `model`            | string  | Modelio ID (gpt-5, claude-opus-4-6 ir kt.)                 |
+| `comboId`          | string? | Derinio ID, jei užklausa nukreipta per derinį              |
+| `promptTokens`     | number  | Iš teikėjo atsakymo                                        |
+| `completionTokens` | number  | Iš teikėjo atsakymo                                        |
+| `cachedTokens`     | number  | Podėlyje rasti žetonai (Anthropic užklausų podėlis ir kt.) |
+| `totalTokens`      | number  | Užklausos ir atsakymo žetonų suma                          |
+| `costUsd`          | number  | Apskaičiuota pagal kainodaros duomenis                     |
+| `latencyMs`        | number  | Visa užklausos vykdymo trukmė                              |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled` |
+| `errorClass`       | string? | Klaidos klasė, jei būsena nėra sėkminga                    |
+| `timestamp`        | string  | ISO 8601 UTC                                               |
+| `metadata`         | object  | Pasirinktiniai įskiepio įterpti duomenys                   |
 
 ### Iš kur gaunami žetonai
 
-Žetonai išgaunami iš pirminio teikėjo atsako **atsako apdorojimo programoje**:
+Žetonai išgaunami iš teikėjo atsakymo **atsakymo apdorojimo modulyje**:
 
 ```ts
 // Iš open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-Kai teikėjai naudojimo duomenų negrąžina (kai kurie žiniatinklio slapukais pagrįsti teikėjai), OmniRoute **apytiksliai apskaičiuoja** žetonų skaičių taikydama `~4 chars per token` euristiką (žr. `open-sse/services/autoCombo/pipelineRouter.ts`).
+Teikėjams, kurie negrąžina naudojimo duomenų (kai kuriems slapukais pagrįstiems žiniatinklio teikėjams), OmniRoute **apytiksliai apskaičiuoja** žetonų skaičių pagal `~4 chars per token` euristiką (žr. `open-sse/services/autoCombo/pipelineRouter.ts`).
 
 ### Podėlyje esantys žetonai
 
 OmniRoute seka `cached_tokens` atskirai nuo `prompt_tokens`, nes:
 
-- Taikant Anthropic užklausų podėlį, už podėlyje esančius žetonus taikomas mažesnis tarifas (10 % įprasto tarifo)
+- Anthropic užklausų podėlyje esantiems žetonams taiko mažesnį tarifą (10 % įprasto tarifo)
 - Kai kurie teikėjai grąžina `cache_read_input_tokens`, kuriems turėtų būti taikoma kitokia kaina
-- Analizėje galima parodyti **podėlio atitikties rodiklį** = `cached_tokens / prompt_tokens`
+- Analitikoje galima rodyti **radimo podėlyje rodiklį** = `cached_tokens / prompt_tokens`
+
+### Įrašymo į podėlį pakopų diagnostika
+
+Analitikos suvestinės užklausų podėlio būklės skydelyje atskiriami teikėjo nurodyti
+5 minučių ir 1 valandos įrašymai į podėlį. Anthropic laukai
+`usage.cache_creation.ephemeral_5m_input_tokens` ir
+`usage.cache_creation.ephemeral_1h_input_tokens` išsaugomi konvertuojant srautinių ir
+nesrautinių atsakymų naudojimo duomenis ir saugomi su iškvietimų žurnalo suvestinėmis. Bendras
+įrašymo į podėlį kiekis į šias kategorijas antrą kartą neįtraukiamas.
+
+Iškvietimų, kuriuose yra tik bendras įrašymo skaitiklis, įskaitant senesnius įrašus, pakopa
+laikoma nežinoma. Jei suskirstymas dalinis, nepriskirtas likutis lieka nežinomas; netinkami ar
+prieštaringi skaitikliai pažymimi, užuot jiems tyliai priskyrus TTL. Užklausos pusėje esantys
+TTL žymekliai nėra apmokestintos pakopos įrodymas.
+
+Skydelyje pateikiamas API ekvivalento įrašymo kainos įvertis apima tik nurodytas pakopas, kurių kainos žinomos, o ne
+visą užklausą. Taikant savąją Claude/Anthropic modelių kainodarą, 5 minučių įrašymams naudojamas 1,25 karto
+didesnis įvesties tarifas, o 1 valandos įrašymams – dvigubas įvesties tarifas. Jei
+kainodaros nėra, kaina laikoma neprieinama, o ne nuline. Kainos užfiksuojamos registruojant kiekvieną naują iškvietimą;
+istorinių įrašų kainos neperskaičiuojamos. Todėl prenumeratos paskyroms gali būti pateiktas
+API ekvivalento įvertis, nors tokia suma nėra išleidžiama pinigais ir neatimama iš prenumeratos
+kvotos. Esami kvotų, biudžeto ir tikslių teikėjo sąnaudų skaičiavimai nesikeičia.
+
+Ši diagnostika naudoja esamą ribotos apimties podėlio būklės suvestinę ir iškvietimų žurnalo
+saugojimo mechanizmą. Ji nekeičia numatytųjų užklausų TTL reikšmių, maršruto parinkimo ar paskyros pasirinkimo.
+Kliento prašomo TTL ir faktiškai siunčiamo TTL fiksavimas siuntimo teikėjui
+taške atidėtas; šis skydelis rodo apskaitos pakopas, o ne faktiškai siunčiamą TTL.
+
+Įgyvendinimas: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` ir `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -123,31 +153,31 @@ Modeliams, kurių kainodaros duomenų nėra, OmniRoute **apytiksliai apskaičiuo
 
 ## Agregavimas pagal datų intervalą
 
-`usageAnalytics.ts` modulis apskaičiuoja suvestinės valdiklių duomenis iš neapdorotų naudojimo duomenų. Jis palaiko 7 laikotarpius:
+Modulis `usageAnalytics.ts` apskaičiuoja valdymo skydelio valdiklių duomenis iš neapdorotų naudojimo duomenų. Jis palaiko 7 laiko intervalus:
 
-| Intervalas | Laikotarpis                           | Naudojimo paskirtis                 |
-| ---------- | ------------------------------------- | ----------------------------------- |
-| `1d`       | Pastarosios 24 valandos               | Valandinių išlaidų šuolių aptikimas |
-| `7d`       | Pastarosios 7 dienos                  | Savaitinė apžvalga                  |
-| `30d`      | Pastarosios 30 dienų                  | Mėnesinis atsiskaitymas             |
-| `90d`      | Pastarosios 90 dienų                  | Ketvirtinė analizė                  |
-| `ytd`      | Nuo einamųjų metų sausio 1 d.         | Metinio biudžeto stebėjimas         |
-| `all`      | Visas laikotarpis                     | Viso laikotarpio statistika         |
-| `custom`   | Naudotojo nurodyta pradžia ir pabaiga | Auditai, vienkartinės užklausos     |
+| Intervalas | Laikotarpis                            | Naudojimo atvejis                   |
+| ---------- | -------------------------------------- | ----------------------------------- |
+| `1d`       | Pastarosios 24 valandos                | Valandinių išlaidų šuolių aptikimas |
+| `7d`       | Pastarosios 7 dienos                   | Savaitinė apžvalga                  |
+| `30d`      | Pastarosios 30 dienų                   | Mėnesinis sąskaitų išrašymas        |
+| `90d`      | Pastarosios 90 dienų                   | Ketvirtinė analizė                  |
+| `ytd`      | Nuo einamųjų metų sausio 1 d.          | Metinio biudžeto stebėjimas         |
+| `all`      | Visas laikotarpis                      | Viso laikotarpio statistika         |
+| `custom`   | Naudotojo nustatyta pradžia ir pabaiga | Auditai, vienkartinės užklausos     |
 
-### Apskaičiuojami suvestinės valdikliai
+### Apskaičiuojami valdymo skydelio valdiklių duomenys
 
-Bet kuriam datų intervalui analizės sluoksnis apskaičiuoja:
+Bet kuriam datų intervalui analitikos sluoksnis apskaičiuoja:
 
-| Valdiklis                      | Aprašymas                                                                           |
-| ------------------------------ | ----------------------------------------------------------------------------------- |
-| **Suvestinės kortelės**        | Bendras užklausų skaičius, visos išlaidos, bendras žetonų skaičius, sėkmės rodiklis |
-| **Dienos tendencijų diagrama** | Išlaidos ir žetonai per dieną, sugrupuoti pagal modelį                              |
-| **Aktyvumo šilumos žemėlapis** | Paros valandos × savaitės dienos tinklelis, spalva = užklausų skaičius              |
-| **Suskirstymas pagal modelį**  | Skritulinė išlaidų pagal modelį diagrama                                            |
-| **Suskirstymas pagal teikėją** | Stulpelinė užklausų pagal teikėją diagrama                                          |
-| **Populiariausi API raktai**   | 10 didžiausių išlaidų raktų lentelė                                                 |
-| **Klaidų analizė**             | Klaidų dažnis per laiką, dažniausios klaidų klasės                                  |
+| Valdiklis                        | Aprašymas                                                                             |
+| -------------------------------- | ------------------------------------------------------------------------------------- |
+| **Suvestinės kortelės**          | Bendras užklausų skaičius, bendros išlaidos, bendras žetonų skaičius, sėkmės rodiklis |
+| **Dienos tendencijų diagrama**   | Dienos išlaidos ir žetonai, sukrauti pagal modelį                                     |
+| **Aktyvumo šilumos žemėlapis**   | Paros valandų × savaitės dienų tinklelis, spalva = užklausų skaičius                  |
+| **Pasiskirstymas pagal modelį**  | Skritulinė išlaidų pagal modelį diagrama                                              |
+| **Pasiskirstymas pagal teikėją** | Stulpelinė užklausų pagal teikėją diagrama                                            |
+| **Pagrindiniai API raktai**      | 10 daugiausia išlaidų sugeneravusių raktų lentelė                                     |
+| **Klaidų analizė**               | Klaidų dažnis laikui bėgant, dažniausios klaidų klasės                                |
 
 ### Programinė prieiga
 
@@ -156,15 +186,15 @@ import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
   history,              // naudojimo istorijos įrašai
-  "7d",                 // laikotarpis: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // teikėjų ryšių žemėlapis (connectionId → paskyros pavadinimas)
+  "7d",                 // laiko intervalas: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
+  connectionMap,        // teikėjo ryšių atvaizdis (connectionId → paskyros pavadinimas)
   {
     startDate: "2025-01-01",  // neprivaloma: intervalui "custom"
     endDate: "2025-06-01",   // neprivaloma: intervalui "custom"
   }
 );
 
-console.log(analytics.summary.totalCost);   // 12.34 (centai)
+console.log(analytics.summary.totalCost);   // 12.34 (centais)
 console.log(analytics.byModel[0]);           // { model, cost, requests, promptTokens, completionTokens }
 
 ---
@@ -173,8 +203,8 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 Kiekvieno API rakto kvota taikoma dviejose vietose:
 
-1. **Minkštoji riba** (`quotaWarnAt`): valdymo skydelyje rodomas įspėjimas, kai naudojimas viršija ribinę vertę
-2. **Griežtoji riba** (`quotaLimit`): ją viršijus užklausa atmetama su HTTP 429
+1. **Įspėjimo riba** (`quotaWarnAt`): įspėjimas valdymo skydelyje, kai naudojimas viršija slenkstį
+2. **Griežtoji riba** (`quotaLimit`): viršijus ribą, užklausa atmetama su HTTP 429
 
 ### Konfigūracija
 
@@ -187,35 +217,35 @@ await updateApiKey(keyId, {
 });
 ````
 
-### Kvotos taikymo eiga
+### Taikymo eiga
 
 ```
 Užklausa ──▶ quotaCheck()
-               │
-               ├── Neviršija ribos?  ──▶ leisti
-               │
-               └── Viršija ribą?  ──▶ 429 Per daug užklausų
-                                      su Retry-After antrašte
+              │
+              ├── Neviršija ribos?  ──▶ leisti
+              │
+              └── Viršija ribą?  ──▶ 429 Too Many Requests
+                                   su Retry-After antrašte
 ```
 
-### Kvotų momentinės kopijos
+### Kvotų būsenos momentinės kopijos
 
 Lentelėje `quotaSnapshots` saugoma **istorinė kvotų būsena**, skirta tendencijų analizei:
 
 | Laukas | Aprašymas |
-| ----------- | ---------------------------------------- | ------ | ------- |
+| ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Stebimas raktas |
 | `window` | "day" | "week" | "month" |
-| `used` | Per šį laikotarpį panaudota suma (centais) |
+| `used` | Šio laikotarpio išlaidos (centais) |
 | `limit` | Riba (centais) |
-| `resetAt` | Kada laikotarpis nustatomas iš naujo |
-| `createdAt` | Kada buvo sukurta momentinė kopija |
+| `resetAt` | Kada laikotarpis pradedamas iš naujo |
+| `createdAt` | Kada buvo padaryta momentinė kopija |
 
-Momentinės kopijos sukuriamos **su kiekviena užklausa**, kurios kaina yra > 0, ir naudojamos:
+Momentinės kopijos daromos **kiekvienos užklausos metu**, kai išlaidos > 0, ir naudojamos:
 
-- Kvotos eigos juostai valdymo skydelyje pateikti
-- 30 dienų kvotos tendencijų diagramoms rodyti
-- Įspėjimams suaktyvinti, kai naudojimas artėja prie ribos
+- Kvotos eigos juostai valdymo skydelyje atvaizduoti
+- 30 dienų kvotų tendencijų diagramoms rodyti
+- Įspėjimams siųsti, kai naudojimas artėja prie ribos
 
 ---
 
@@ -272,12 +302,7 @@ Atsakymas:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -288,9 +313,9 @@ Atsakymas:
 
 ### Naudojimo analitikos užklausos
 
-Naudojimo duomenys pasiekiami per valdymo skydelį arba MCP įrankius, o ne per tiesioginio REST eksportavimo galinius taškus. Pasiekiama analitika:
+Naudojimo duomenys pasiekiami per valdymo skydelį arba MCP įrankius, o ne per tiesioginius REST eksporto galinius taškus. Prieinama analitika:
 
-- **`/api/usage/analytics`** — apibendrinti naudojimo rodikliai (grupuojami pagal modelį, teikėją arba raktą)
+- **`/api/usage/analytics`** — apibendrintos naudojimo metrikos (grupuojamos pagal modelį, teikėją, raktą)
 - **`/api/usage/quota`** — dabartinė kiekvieno API rakto kvotos būsena
 - **`/api/usage/history`** — užklausų istorijos žurnalai
 
@@ -300,10 +325,10 @@ Naudojimo duomenys pasiekiami per valdymo skydelį arba MCP įrankius, o ne per 
 
 Du MCP įrankiai suteikia agentams prieigą prie naudojimo duomenų (žr. `open-sse/mcp-server/tools/`):
 
-| Įrankis                 | Aprašymas                                                          |
-| ----------------------- | ------------------------------------------------------------------ |
-| `omniroute_cost_report` | Sugeneruoja kiekvieno rakto nurodyto laikotarpio išlaidų ataskaitą |
-| `omniroute_check_quota` | Grąžina dabartinę API rakto kvotos būseną                          |
+| Įrankis                 | Aprašymas                                                            |
+| ----------------------- | -------------------------------------------------------------------- |
+| `omniroute_cost_report` | Sugeneruoja kiekvieno rakto išlaidų ataskaitą už nurodytą laikotarpį |
+| `omniroute_check_quota` | Grąžina dabartinę API rakto kvotos būseną                            |
 
 Agento iškvietimo pavyzdys:
 
@@ -318,7 +343,7 @@ Agento iškvietimo pavyzdys:
 
 ## Saugojimas ir valymas
 
-Naudojimo duomenų apimtis padidėja maždaug 1–10 KB su kiekviena užklausa. Dideliu mastu tai gali būti reikšminga.
+Kiekviena užklausa padidina naudojimo duomenų apimtį ~1-10KB. Esant dideliam mastui, tai gali sudaryti reikšmingą kiekį.
 
 ### Saugojimo nustatymai
 
@@ -330,22 +355,22 @@ Pagal numatytuosius nustatymus naudojimo istorija saugoma **90 dienų**.
 
 Senus įrašus išvalo `src/lib/db/cleanup.ts`:
 
-- Paleidžiama foninio cron proceso
-- Iš `usage_history` pašalinami įrašai, senesni nei sukonfigūruotas `usageHistory` saugojimo laikotarpis
+- Paleidžiamas foninio cron proceso
+- Ištrina iš `usage_history` įrašus, senesnius nei sukonfigūruotame `usageHistory` saugojimo nustatyme nurodytas laikotarpis
 
-### Saugyklos apimties įvertinimas
+### Saugyklos poreikio įvertinimas
 
-| Užklausų dažnis            | Saugykla per 30 dienų | Saugykla per 90 dienų |
-| -------------------------- | --------------------- | --------------------- |
-| 100 užklausų per dieną     | ~3 MB                 | ~9 MB                 |
-| 1 000 užklausų per dieną   | ~30 MB                | ~90 MB                |
-| 10 000 užklausų per dieną  | ~300 MB               | ~900 MB               |
-| 100 000 užklausų per dieną | ~3 GB                 | ~9 GB                 |
+| Užklausų dažnis     | Saugykla 30 dienų | Saugykla 90 dienų |
+| ------------------- | ----------------- | ----------------- |
+| 100 užkl./dieną     | ~3MB              | ~9MB              |
+| 1,000 užkl./dieną   | ~30MB             | ~90MB             |
+| 10,000 užkl./dieną  | ~300MB            | ~900MB            |
+| 100,000 užkl./dieną | ~3GB              | ~9GB              |
 
 Esant labai dideliam srautui, apsvarstykite galimybę:
 
 - Sutrumpinti saugojimo laikotarpį duomenų bazės nustatymuose
-- Vietoje neapdorotų įrašų naudoti `aggregated_metrics` (tik analitikai)
+- Naudoti `aggregated_metrics` vietoj neapdorotų įrašų (tik analitikai)
 
 ---
 
@@ -354,19 +379,19 @@ Esant labai dideliam srautui, apsvarstykite galimybę:
 ### 1. Naudokite tinkamą modelį
 
 ```bash
-# Greitas atsakymas — naudokite pigų ir spartų modelį
+# Greitas atsakymas — naudokite pigų ir greitą modelį
 curl -d '{"model":"auto/fast","messages":[...]}'
 
 # Sudėtinga užduotis — rinkitės kokybę
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
-### 2. Įjunkite podėliavimą
+### 2. Įjunkite podėlį
 
-„Anthropic“ raginimų podėliavimas leidžia sutaupyti **90 % pasikartojančio konteksto išlaidų**:
+Anthropic užklausų podėlis leidžia sutaupyti **90% pakartotinai naudojamo konteksto išlaidų**:
 
 ```ts
-// Podėliavimas vyksta automatiškai — tiesiog įtraukite tą patį didelį sistemos raginimą
+// Podėlis veikia automatiškai — tiesiog įtraukite tą pačią ilgą sistemos instrukciją
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
   system: longSystemPrompt, // Bus automatiškai įrašyta į podėlį
@@ -376,7 +401,7 @@ const response = await openai.chat({
 
 ### 3. Naudokite glaudinimą
 
-RTK ir „Caveman“ glaudinimas leidžia sutaupyti **15–95 % daug įrankių naudojančiose sesijose**:
+RTK + Caveman glaudinimas leidžia sutaupyti **15-95% išlaidų seansuose, kuriuose intensyviai naudojami įrankiai**:
 
 ```ts
 const config = {
@@ -389,15 +414,15 @@ const config = {
 
 ### 4. Nustatykite kiekvieno rakto kvotas
 
-Visada nustatykite `quotaLimit`, kad išvengtumėte nekontroliuojamų išlaidų:
+Visada nustatykite `quotaLimit`, kad išlaidos nekontroliuojamai neaugtų:
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // 10 USD per mėnesį riba
 ```
 
-### 5. Audituokite didžiausius vartotojus
+### 5. Patikrinkite daugiausia išteklių sunaudojančius naudotojus
 
-Naudokite skydelį arba **`/api/usage/analytics`**, kad sugrupuotumėte pagal API raktą ir surikiuotumėte pagal išlaidas:
+Naudokite valdymo skydelį arba **`/api/usage/analytics`**, kad sugrupuotumėte pagal API raktą ir surikiuotumėte pagal išlaidas:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -410,27 +435,27 @@ GET /api/usage/analytics?groupBy=apiKey
 ### „Išlaidos didesnės nei tikėtasi“
 
 1. Patikrinkite **`/api/usage/analytics?groupBy=model`** — raskite brangų modelį
-2. Patikrinkite **`/api/usage/analytics?groupBy=apiKey`** — raskite daugiausia išteklių naudojantį vartotoją
-3. Patikrinkite, ar kainodaros duomenys yra atnaujinti: `POST /api/pricing/sync`
+2. Patikrinkite **`/api/usage/analytics?groupBy=apiKey`** — raskite daug išteklių sunaudojantį naudotoją
+3. Įsitikinkite, kad kainodaros duomenys yra atnaujinti: `POST /api/pricing/sync`
 
 ### „Trūksta įrašų“
 
-- Skiltyje Skydelis → Duomenų bazė → Valymas patikrinkite DB saugojimo nustatymus — senus įrašus pašalina periodinė valymo užduotis (`src/lib/db/cleanup.ts`)
-- Patikrinkite, ar `src/lib/db/usage*.ts` nėra klaidų — DB rašymo triktys registruojamos žurnale, tačiau nėra pateikiamos naudotojui
-- Patikrinkite, ar užklausa iš tikrųjų pasiekė `chatCore` — patikrinkite kombinuotąjį maršruto parinkimą
+- Patikrinkite DB saugojimo nuostatas skiltyje Valdymo skydelis → Duomenų bazė → Valymas — senus įrašus ištrina periodinė valymo užduotis (`src/lib/db/cleanup.ts`)
+- Patikrinkite, ar nėra klaidų `src/lib/db/usage*.ts` — DB įrašymo klaidos registruojamos žurnale, bet nerodomos
+- Įsitikinkite, kad užklausa iš tikrųjų pasiekė `chatCore` — patikrinkite kombinuotą maršrutizavimą
 
 ### „Kvota netaikoma“
 
-- Patikrinkite rakto `quotaLimit` nustatymą
-- Patikrinkite, ar `quotaWindow` nustatytas tinkamai
-- Ieškokite `quotaSnapshots` įrašų — jie turėtų būti sukuriami kiekvienai užklausai
+- Patikrinkite rakto `quotaLimit` nuostatą
+- Įsitikinkite, kad `quotaWindow` nustatyta tinkamai
+- Ieškokite `quotaSnapshots` įrašų — jie turėtų būti kuriami su kiekviena užklausa
 
 ---
 
 ## Taip pat žr.
 
-- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Naudojimo lentelių schema
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — kainodaros sinchronizavimo aplinkos kintamieji
+- [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Naudojimo duomenų lentelių schema
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Kainodaros sinchronizavimo aplinkos kintamieji
 - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Kaip `auto/fast`, `auto/cheap` sumažina išlaidas
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — Išsamus `/api/usage/*` žinynas
 - Šaltinis: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

@@ -1,0 +1,532 @@
+{
+  "endpoint_id": "alibaba/wan-3.0/reference-to-video",
+  "metadata": {
+    "display_name": "Wan 3.0",
+    "category": "video-to-video",
+    "description": "Wan 3.0 is the latest generation AI video model, delivering enhanced motion smoothness, superior scene fidelity, and greater visual coherence.",
+    "status": "active",
+    "tags": ["stylized", "transform", "lipsync"],
+    "updated_at": "2026-10-20T22:08:25.620Z",
+    "is_favorited": null,
+    "thumbnail_url": "https://v3b.fal.media/files/b/0aa4e980/FY0Yw0B-_KVknj6qtv5sp.jpg",
+    "model_url": "https://fal.run/alibaba/wan-3.0/reference-to-video",
+    "license_type": "commercial",
+    "date": "2026-08-03T23:56:31.060Z",
+    "group": {
+      "key": "Wan30",
+      "label": "Reference to Video"
+    },
+    "highlighted": false,
+    "kind": "inference",
+    "pinned": false
+  },
+  "openapi": {
+    "openapi": "3.1.0",
+    "info": {
+      "title": "Queue OpenAPI for fal-ai/wan-3/reference-to-video",
+      "version": "1.0.0",
+      "description": "The OpenAPI schema for the fal-ai/wan-3/reference-to-video queue.",
+      "x-fal-metadata": {
+        "endpointId": "fal-ai/wan-3/reference-to-video",
+        "category": "image-to-video",
+        "thumbnailUrl": "https://v3b.fal.media/files/b/0aa4e980/FY0Yw0B-_KVknj6qtv5sp.jpg",
+        "playgroundUrl": "https://fal.ai/models/fal-ai/wan-3/reference-to-video",
+        "documentationUrl": "https://fal.ai/models/fal-ai/wan-3/reference-to-video/api",
+        "about": "Generate a video from reference images, videos, audio, a document or a page."
+      }
+    },
+    "components": {
+      "securitySchemes": {
+        "apiKeyAuth": {
+          "type": "apiKey",
+          "in": "header",
+          "name": "Authorization",
+          "description": "Fal Key"
+        }
+      },
+      "schemas": {
+        "QueueStatus": {
+          "type": "object",
+          "properties": {
+            "status": {
+              "type": "string",
+              "enum": ["IN_QUEUE", "IN_PROGRESS", "COMPLETED"]
+            },
+            "request_id": {
+              "type": "string",
+              "description": "The request id."
+            },
+            "response_url": {
+              "type": "string",
+              "description": "The response url."
+            },
+            "status_url": {
+              "type": "string",
+              "description": "The status url."
+            },
+            "cancel_url": {
+              "type": "string",
+              "description": "The cancel url."
+            },
+            "logs": {
+              "type": "object",
+              "description": "The logs.",
+              "additionalProperties": true
+            },
+            "metrics": {
+              "type": "object",
+              "description": "The metrics.",
+              "additionalProperties": true
+            },
+            "queue_position": {
+              "type": "integer",
+              "description": "The queue position."
+            }
+          },
+          "required": ["status", "request_id"]
+        },
+        "Wan3ReferenceToVideoInput": {
+          "properties": {
+            "file_url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "File Url",
+              "description": "Document URL to base the video on. Requires enable_thinking=true."
+            },
+            "resolution": {
+              "enum": ["480p", "720p", "1080p"],
+              "title": "Resolution",
+              "type": "string",
+              "description": "Output video resolution tier.",
+              "default": "1080p"
+            },
+            "seed": {
+              "anyOf": [
+                {
+                  "minimum": 0,
+                  "maximum": 2147483647,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Seed"
+            },
+            "duration": {
+              "anyOf": [
+                {
+                  "minimum": 2,
+                  "maximum": 30,
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Duration",
+              "description": "Output duration in seconds. Set to null for smart duration, which lets the model pick a length from the prompt and reference media.",
+              "default": 5
+            },
+            "enable_safety_checker": {
+              "type": "boolean",
+              "title": "Enable Safety Checker",
+              "description": "Enable content moderation for input and output. Disabling it requires account authorization; unauthorized requests are always checked.",
+              "default": true
+            },
+            "reference_video_urls": {
+              "maxItems": 5,
+              "title": "Reference Video Urls",
+              "description": "Up to 5 reference video URLs totaling at most 15 seconds. Each clip must be at least 16 fps. Input video duration is billed in addition to output duration.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "reference_audio_urls": {
+              "maxItems": 5,
+              "title": "Reference Audio Urls",
+              "description": "Up to 5 reference audio URLs totaling at most 15 seconds.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "prompt": {
+              "anyOf": [
+                {
+                  "maxLength": 20000,
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Prompt",
+              "description": "Text prompt directing how the reference media is used. Reference media can be addressed positionally, e.g. 'the subject in Image 1 walks past Video 1'."
+            },
+            "enable_prompt_expansion": {
+              "type": "boolean",
+              "title": "Enable Prompt Expansion",
+              "description": "Enable intelligent prompt rewriting. Disabling it can save roughly 20-60 seconds of latency but is likely to degrade generation quality.",
+              "default": true
+            },
+            "audio": {
+              "type": "boolean",
+              "title": "Audio",
+              "description": "Include generated audio.",
+              "default": true
+            },
+            "enable_thinking": {
+              "type": "boolean",
+              "title": "Enable Thinking",
+              "description": "Enable enhanced reasoning before generation.",
+              "default": false
+            },
+            "web_url": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Web Url",
+              "description": "Public webpage URL to base the video on. Requires enable_thinking=true. Only pages that do not require login can be read."
+            },
+            "reference_image_urls": {
+              "maxItems": 10,
+              "title": "Reference Image Urls",
+              "description": "Up to 10 reference image URLs.",
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            "aspect_ratio": {
+              "enum": ["adaptive", "16:9", "4:3", "1:1", "3:4", "9:16"],
+              "title": "Aspect Ratio",
+              "type": "string",
+              "description": "Output aspect ratio, or adaptive selection.",
+              "default": "adaptive"
+            }
+          },
+          "title": "Wan30ReferenceToVideoInput",
+          "x-fal-order-properties": [
+            "prompt",
+            "resolution",
+            "aspect_ratio",
+            "duration",
+            "audio",
+            "enable_prompt_expansion",
+            "enable_thinking",
+            "seed",
+            "enable_safety_checker",
+            "reference_image_urls",
+            "reference_video_urls",
+            "reference_audio_urls",
+            "file_url",
+            "web_url"
+          ],
+          "type": "object"
+        },
+        "Wan3ReferenceToVideoOutput": {
+          "properties": {
+            "video": {
+              "description": "The generated video file.",
+              "$ref": "#/components/schemas/VideoFile"
+            },
+            "duration": {
+              "title": "Duration",
+              "description": "Generated video duration in seconds.",
+              "type": "number"
+            },
+            "seed": {
+              "title": "Seed",
+              "description": "The seed used for generation.",
+              "type": "integer"
+            },
+            "actual_prompt": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Actual Prompt"
+            }
+          },
+          "required": ["video", "seed", "duration"],
+          "title": "Wan30Output",
+          "x-fal-order-properties": ["video", "seed", "duration", "actual_prompt"],
+          "type": "object"
+        },
+        "VideoFile": {
+          "properties": {
+            "file_size": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "examples": [4404019],
+              "description": "The size of the file in bytes.",
+              "title": "File Size"
+            },
+            "width": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Width",
+              "description": "The width of the video"
+            },
+            "duration": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Duration",
+              "description": "The duration of the video"
+            },
+            "file_name": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "examples": ["z9RV14K95DvU.png"],
+              "description": "The name of the file. It will be auto-generated if not provided.",
+              "title": "File Name"
+            },
+            "content_type": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "examples": ["image/png"],
+              "description": "The mime type of the file.",
+              "title": "Content Type"
+            },
+            "num_frames": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Num Frames",
+              "description": "The number of frames in the video"
+            },
+            "fps": {
+              "anyOf": [
+                {
+                  "type": "number"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Fps",
+              "description": "The FPS of the video"
+            },
+            "url": {
+              "title": "Url",
+              "description": "The URL where the file can be downloaded from.",
+              "type": "string"
+            },
+            "height": {
+              "anyOf": [
+                {
+                  "type": "integer"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Height",
+              "description": "The height of the video"
+            }
+          },
+          "required": ["url"],
+          "title": "VideoFile",
+          "x-fal-order-properties": [
+            "url",
+            "content_type",
+            "file_name",
+            "file_size",
+            "width",
+            "height",
+            "fps",
+            "duration",
+            "num_frames"
+          ],
+          "type": "object"
+        }
+      }
+    },
+    "paths": {
+      "/fal-ai/wan-3/reference-to-video/requests/{request_id}/status": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            },
+            {
+              "name": "logs",
+              "in": "query",
+              "required": false,
+              "schema": {
+                "type": "number",
+                "description": "Whether to include logs (`1`) in the response or not (`0`)."
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/wan-3/reference-to-video/requests/{request_id}/cancel": {
+        "put": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "The request was cancelled.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "type": "object",
+                    "properties": {
+                      "success": {
+                        "type": "boolean",
+                        "description": "Whether the request was cancelled successfully."
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/wan-3/reference-to-video": {
+        "post": {
+          "requestBody": {
+            "required": true,
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Wan3ReferenceToVideoInput"
+                }
+              }
+            }
+          },
+          "responses": {
+            "200": {
+              "description": "The request status.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/QueueStatus"
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "/fal-ai/wan-3/reference-to-video/requests/{request_id}": {
+        "get": {
+          "parameters": [
+            {
+              "name": "request_id",
+              "in": "path",
+              "required": true,
+              "schema": {
+                "type": "string",
+                "description": "Request ID"
+              }
+            }
+          ],
+          "responses": {
+            "200": {
+              "description": "Result of the request.",
+              "content": {
+                "application/json": {
+                  "schema": {
+                    "$ref": "#/components/schemas/Wan3ReferenceToVideoOutput"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "servers": [
+      {
+        "url": "https://queue.fal.run"
+      }
+    ],
+    "security": [
+      {
+        "apiKeyAuth": []
+      }
+    ]
+  }
+}

@@ -31,32 +31,11 @@ osv yoki Trivy yangi oshkor qilingan CVE tufayli qizil rangga aylanganda, yechim
 
 Ikkala darvoza ham vosita mavjud bo'lmaganda yoki o'lchov muvaffaqiyatsiz bo'lganda (osv-scanner PATH da emas, osv.dev/tarmoqqa ulanib bo'lmaydi, noto'g'ri JSON) **muloyimlik bilan O'TKAZIB YUBORADI** (exit 0) — **o'lchov** muvaffaqiyatsizligi hech qachon bloklamaydi, faqat **o'lchangan** regressiya bloklaydi.
 
-## Ma'lum qilingan qabul qilingan xatarlar
+## Nafaqaga chiqqan qaramlik xavfi
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Ildiz blokirovka fayli endi `extract-zip` yoki unga bog'liqlik chekkasini o'z ichiga olmaydi. Bu #14482 da kuzatilgan avval qabul qilingan `promptfoo` → `@openai/codex-security` → `extract-zip` zanjirini bekor qiladi. `tests/unit/extract-zip-14482-exposure.test.ts` regressiya tekshiruvlari uning qayta kiritilishini rad etadi va ishlab chiqarish kodeksidan importga taqiqni saqlab qoladi.
 
-`extract-zip@2.0.1` ikkita tuzatilmagan yuqori xavfli symlink-traversal maslahatlarini o'z ichiga oladi.
-Yuqoridagi CVE Variance tuzatishining "yuqori oqimda tuzatish yo'q" bo'limiga ko'ra, bu
-**qabul qilingan xatar**, ko'tarilish emas:
-
-- **Zanjir:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  `package-lock.json` orqali tasdiqlangan — butun bog'liqlik daraxtidagi faqat bitta paket
-  (`@openai/codex-security`) `extract-zip`ni e'lon qiladi va faqat bitta paket
-  (`promptfoo`) `@openai/codex-security`ni e'lon qiladi.
-- **Zanjirning hech bir joyida tuzatilgan versiya mavjud emas.** `extract-zip@2.0.1` (2020 yilda nashr etilgan) paketning yakuniy versiyasi — u qo'llab-quvvatlanmaydi. `@openai/codex-security`ning
-  joriy npm-latest (`0.1.29`) hali ham `extract-zip@2.0.1`ni tortadi.
-- **Ishlab chiqarishdan erishib bo'lmaydi.** `promptfoo` faqat devDependency (hech qachon `dependencies` ostida ko'rsatilmagan) va `src/`, `open-sse/` yoki `bin/` ostidagi hech qanday fayl
-  `extract-zip` npm paketini import qilmaydi — OmniRoute'ning o'z `extractZip()` yordamchisi
-  (`src/lib/versionManager/binaryManager.ts:93`) mahalliy `unzip`/`tar`ga murojaat qiladi
-  va bog'liq emas. `@openai/codex-security` ham extract-zip'ning onEntry callback'i ustiga o'zining symlink-traversal himoyasini o'rnatadi.
-- **`package.json` `overrides` orqali `extract-zip`ni alias qilmang** — yagona maqbul
-  o'rnini bosuvchi Electron-org-internal bo'lib, `@openai/codex-security`ning o'z onEntry/defaultDirMode/defaultFileMode tekshiruvlari bilan API-mos kelmaydi;
-  uni bekor qilish ushbu paketning xavfsizlik tekshiruvlarini jimjit buzadi.
-- **Boshlang'ich:** o'lchangan osv `vulnCount` (3) allaqachon muzlatilgan
-  `config/quality/quality-baseline.json` boshlang'ich chizig'idan (27) ancha past — hech qanday o'zgarish kerak emas.
-- **Regressiya himoyasi:** `tests/unit/extract-zip-14482-exposure.test.ts` zanjirni va yuqoridagi ishlab chiqarishga import qilinmaslik invariantini tasdiqlaydi; agar ikkalasidan biri
-  buzilsa (masalan, kelajakdagi PR `extract-zip`ni ishlab chiqarishdan erishish mumkin qilsa), CI muvaffaqiyatsiz tugaydi.
-- **Kuzatuv:** #14482 masalasi.
+Joriy qaramlikni ta'mirlash, shuningdek, Azure identifikatorining MSAL mijozi va get-uri'ning FTP mijozi bilan moslikni bekor qilishni ham qamrab oladi. Azure tokenini olish va FTP olish nazorat ostidagi transportlar bilan sinovdan o'tkaziladi; har ikkala OpenCode paketi ham o'z qurish va test to'plamlarini ishga tushiradi. Ro'yxatga olish kitobi bo'yicha maslahat raqamlari bir vaqtning o'zida o'lchovdir va blokirovka qilingan fayldan keyin o'zgarishi mumkin.
 
 ## Qoldiq: Scorecard maslahati → blokirovka qilish
 

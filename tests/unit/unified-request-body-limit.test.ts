@@ -91,7 +91,7 @@ test("without a saved limit the LLM routes keep 50 MiB, whatever the env default
   assert.equal(settings.savedMaxBodySizeMb, null, "the seeded default does not count as saved");
   assert.equal(getBodySizeLimit("/api/v1/responses", settings), 50 * MIB);
   assert.equal(getBodySizeLimit("/api/v1/chat/completions", settings), 50 * MIB);
-  assert.equal(getBodySizeLimit("/api/v1/messages", settings), 3 * MIB);
+  assert.equal(getBodySizeLimit("/api/v1/messages", settings), 50 * MIB);
 
   const aboveEnvDefault = 3 * MIB + 1;
   const accepted = await admit(

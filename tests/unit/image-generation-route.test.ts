@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import dns from "node:dns";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-image-route-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -235,6 +236,7 @@ test("v1 image models GET exposes current Codex image models and hides inactive 
       "codex/gpt-5.6-luna-image",
       "codex/gpt-image-2.5-flare",
       "codex/gpt-image-2.5-sunburst",
+      "codex/gpt-image-2.6-sunburst",
       "codex/gpt-image-2",
     ]
   );
@@ -243,8 +245,12 @@ test("v1 image models GET exposes current Codex image models and hides inactive 
   assert.ok(!ids.some((id: string) => id.startsWith("xai/")));
 });
 
-test("v1 image generation POST accepts promptless requests for image-only models", async () => {
+test("v1 image generation POST accepts promptless requests for image-only models", async (t) => {
   await seedConnection("topaz", { apiKey: "topaz-key" });
+  t.mock.method(dns.promises, "lookup", async (hostname) => {
+    assert.equal(hostname, "example.com");
+    return [{ address: "93.184.216.34", family: 4 }];
+  });
 
   const mockFetchImpl = async (url, options: RequestInit = {}) => {
     const stringUrl = String(url);

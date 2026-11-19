@@ -357,110 +357,110 @@ Model: cc/claude-opus-4-7
 
 ## 🚀 Yerləşdirmə
 
-### Qlobal npm quraşdırması (Tövsiyə olunur)
+### Qlobal npm quraşdırma (tövsiyə olunur)
 
 ```bash
 npm install -g omniroute
 
-# Konfiqurasiya qovluğunu yaradın
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env faylını yaradın (.env.example faylına baxın)
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# Serveri başladın
+# Start server
 omniroute
-# Yaxud xüsusi portla:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI `.env` faylını avtomatik olaraq `~/.omniroute/.env` və ya `./.env` yolundan yükləyir.
+CLI avtomatik olaraq `.env` `~/.omniroute/.env` və ya `./.env` dən yükləyir. İş qovluğundakı `./.env` açarların yalnız qısa icazəli siyahısını təyin edə bilər (`REQUIRE_API_KEY`, yerli, saat qurşağı və rəng parametrləri, portlar deyil); qalan hər şeyi `~/.omniroute/.env` a qoyun. [CLI işə salma müqavilələrinə](CLI-LAUNCH-CONTRACTS.md#working-directory-env) baxın.
 
-### Sistem treyi rejimi
+### Tabla rejimi
 
-OmniRoute-u sistem treyində başladın:
+Sistem tepsisinde OmniRoute başlayın:
 
 ```bash
 omniroute serve --tray
 ```
 
-Server və sistem treyi hazır olduqdan sonra əmr tamamlanır.
+Server və tray hazır olduqdan sonra əmr geri qayıdır.
 
-Server terminal olmadan işləməyə davam edir.
+Server terminal olmadan davam edir.
 
-Sistem treyi rejimi macOS, Windows və qrafik Linux sessiyalarını dəstəkləyir. Sistem treyi rejimi idarəetmə panelini avtomatik açmır.
+Tray rejimi macOS, Windows və qrafik Linux seanslarını dəstəkləyir. Tabla rejimi idarə panelini avtomatik açmır.
 
-Aşağıdakı əməliyyatlar üçün sistem treyi menyusundan istifadə edin:
+Bu hərəkətlər üçün tray menyusundan istifadə edin:
 
-- İdarəetmə panelini açmaq.
-- `/dashboard/logs` səhifəsini açmaq.
-- Avtomatik başlanğıcı dəyişdirmək.
-- OmniRoute-u dayandırmaq.
+- İdarə panelini açın.
+- `/dashboard/logs` açın.
+- Avtomatik başlanğıcı dəyişdirin.
+- Dayan OmniRoute.
 
-`--tray` seçimini aşağıdakı seçimlərlə birlikdə istifadə etməyin:
+`--tray` bu seçimlərlə birləşdirməyin:
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-Bu rejimlər fərqli proses sahibliyi tələb edir.
+Bu rejimlər müxtəlif proses sahibliyini tələb edir.
 
-Kompüterə növbəti giriş zamanı başlanğıcı aktivləşdirin:
+Növbəti maşın girişində başlanğıcı aktivləşdirin:
 
 ```bash
 omniroute autostart enable
 ```
 
-Avtomatik başlanğıc macOS, Windows və qrafik Linux sessiyalarında sistem treyi rejimindən istifadə edir. Qrafik interfeyssiz Linux mövcud systemd istifadəçi xidmətindən istifadə edir.
+Avtomatik işə salma macOS, Windows və qrafik Linux seanslarında tray rejimindən istifadə edir. Başsız Linux mövcud systemd istifadəçi xidmətindən istifadə edir.
 
-Giriş zamanı başlanğıcı deaktiv edin:
+Giriş zamanı başlanğıcı söndürün:
 
 ```bash
 omniroute autostart disable
 ```
 
-### Silinmə
+### Silinir
 
-OmniRoute-a artıq ehtiyacınız olmadıqda, təmiz silinmə üçün iki sürətli skript təqdim edirik:
+Artıq OmniRoute ehtiyacınız olmadıqda, təmiz silmək üçün iki sürətli skript təqdim edirik:
 
-| Əmr                      | Əməliyyat                                                                                                           |
-| ------------------------ | ------------------------------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Sistem tətbiqini silir, lakin `~/.omniroute` daxilindəki **verilənlər bazanızı və konfiqurasiyalarınızı saxlayır**. |
-| `npm run uninstall:full` | Tətbiqi silir VƏ **bütün konfiqurasiyaları, açarları və verilənlər bazalarını** həmişəlik **silir**.                |
+| Əmr                      | Fəaliyyət                                                                                          |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `npm run uninstall`      | Sistem tətbiqini silir, lakin** DB və konfiqurasiyalarınızı saxlayır** `~/.omniroute`.             |
+| `npm run uninstall:full` | AND tətbiqini həmişəlik silir** bütün konfiqurasiyaları, açarları və verilənlər bazasını silir** . |
 
-> Qeyd: Bu əmrləri icra etmək üçün OmniRoute layihə qovluğuna keçin (əgər onu klonlamısınızsa) və əmrləri orada icra edin. Alternativ olaraq, qlobal şəkildə quraşdırılıbsa, sadəcə `npm uninstall -g omniroute` əmrini icra edə bilərsiniz.
+> Qeyd: Bu əmrləri yerinə yetirmək üçün OmniRoute layihə qovluğuna keçin (əgər onu klonlamısınızsa) və onları işə salın. Alternativ olaraq, əgər qlobal olaraq quraşdırılıbsa, sadəcə olaraq `npm uninstall -g omniroute` işlədə bilərsiniz.
 
-### VPS-də yerləşdirmə
+### VPS Yerləşdirmə
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
-export JWT_SECRET="dəyişdirilməli-təhlükəsiz-məxfi-açarınız"
-export INITIAL_PASSWORD="parolunuz"
+export JWT_SECRET="your-secure-secret-change-this"
+export INITIAL_PASSWORD="your-password"
 export DATA_DIR="/var/lib/omniroute"
 export PORT="20128"
 export HOSTNAME="0.0.0.0"
 export NODE_ENV="production"
 export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
-export API_KEY_SECRET="son-nöqtə-proksi-api-açarının-məxfi-dəyəri"
+export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# Yaxud: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 ilə yerləşdirmə (Az yaddaş)
+### PM2 Yerləşdirmə (Aşağı Yaddaş)
 
-Məhdud RAM-a malik serverlər üçün yaddaş limiti seçimindən istifadə edin:
+Məhdud RAM olan serverlər üçün yaddaş limiti seçimindən istifadə edin:
 
 ```bash
-# 512MB limitlə (standart)
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# Yaxud xüsusi yaddaş limiti ilə
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# Yaxud ecosystem.config.js istifadə edərək
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
@@ -476,8 +476,8 @@ module.exports = {
       env: {
         NODE_ENV: "production",
         OMNIROUTE_MEMORY_MB: "512",
-        JWT_SECRET: "məxfi-açarınız",
-        INITIAL_PASSWORD: "parolunuz",
+        JWT_SECRET: "your-secret",
+        INITIAL_PASSWORD: "your-password",
       },
       node_args: "--max-old-space-size=512",
       max_memory_restart: "300M",
@@ -489,24 +489,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# Təsviri qurun (standart = codex/claude/droid əvvəlcədən quraşdırılmış runner-cli)
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# Portativ rejim (tövsiyə olunur)
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI binar faylları ilə hosta inteqrasiya olunmuş rejim üçün əsas sənədlərdəki Docker bölməsinə baxın.
+CLI binaries ilə host-inteqrasiya edilmiş rejim üçün əsas sənədlərdə Docker bölməsinə baxın.
 
-### Void Linux (xbps-src)
+### Boş Linux (xbps-src)
 
-Void Linux istifadəçiləri `xbps-src` çarpaz kompilyasiya infrastrukturu vasitəsilə OmniRoute-u yerli paket kimi hazırlayıb quraşdıra bilərlər. Bu, tələb olunan `better-sqlite3` yerli bağlamaları ilə birlikdə müstəqil Node.js yığımını avtomatlaşdırır.
+Void Linux istifadəçiləri `xbps-src` cross-kompilyasiya çərçivəsindən istifadə edərək OmniRoute yerli olaraq paketləyə və quraşdıra bilərlər. Bu, tələb olunan `better-sqlite3` yerli bağlamaları ilə birlikdə Node.js müstəqil qurulmasını avtomatlaşdırır.
 
 <details>
 <summary><b>xbps-src şablonuna baxın</b></summary>
 
 ```bash
-# 'omniroute' üçün şablon faylı
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -527,7 +527,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp üçün hədəf CPU arxitekturasını müəyyən edin
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -536,29 +536,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) Bütün asılılıqları quraşdırın – skriptləri ötürün
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js müstəqil paketini yığın
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) Statik resursları müstəqil paketə köçürün
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 yerli bağlamasını kompilyasiya edin
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) Kompilyasiya edilmiş bağlamanı müstəqil paketə yerləşdirin
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) Arxitekturaya xas sharp paketlərini silin
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js statik təhlilinin buraxdığı pino icra mühiti asılılıqlarını köçürün:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -572,7 +572,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# Quraşdırmadan sonrakı əməliyyatın boş Next.js tətbiq marşrutlaşdırıcısı qovluqlarını silməsinin qarşısını alın
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -598,32 +598,32 @@ post_install() {
 
 </details>
 
-### Mühit dəyişənləri
+### Ətraf Mühit Dəyişənləri
 
-| Dəyişən                                 | Defolt                               | Təsvir                                                                                                                                                       |
-| --------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT imzalama sirri (**produksiya mühitində dəyişdirin**)                                                                                                     |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | İlk giriş parolu                                                                                                                                             |
-| `DATA_DIR`                              | `~/.omniroute`                       | Məlumat qovluğu (verilənlər bazası, istifadə məlumatları, jurnallar)                                                                                         |
-| `PORT`                                  | freymvorkun defolt dəyəri            | Xidmət portu (nümunələrdə `20128`)                                                                                                                           |
-| `HOSTNAME`                              | freymvorkun defolt dəyəri            | Bağlanılacaq host (Docker üçün defolt dəyər `0.0.0.0`-dır)                                                                                                   |
-| `NODE_ENV`                              | icra mühitinin defolt dəyəri         | Yerləşdirmə üçün `production` olaraq təyin edin                                                                                                              |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | İdarə panelində göstərilən və serverə təqdim olunan ümumi baza URL-i (köhnə `BASE_URL` dəyişənini əvəz edir)                                                 |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | Bulud sinxronizasiya son nöqtəsinin baza URL-i (köhnə `CLOUD_URL` dəyişənini əvəz edir)                                                                      |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | Yaradılan API açarları üçün HMAC sirri                                                                                                                       |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` üçün Bearer API açarını məcburi edin                                                                                                                 |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | Autentifikasiya olunmuş idarə paneli istifadəçilərinə saxlanılan API açarlarının tam dəyərlərini sorğu əsasında göstərməyə icazə verin                       |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | Keşlənmiş Provayder Limitləri məlumatlarının server tərəfində yenilənmə intervalı; interfeysdəki yeniləmə düymələri yenə də əl ilə sinxronizasiyanı başladır |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | Yazma/idxal/bərpa əməliyyatlarından əvvəl avtomatik SQLite anlıq görüntülərini deaktiv edin; əl ilə ehtiyat nüsxələmə işləməyə davam edir                    |
-| `APP_LOG_TO_FILE`                       | `true`                               | Tətbiq və audit jurnallarının diskə yazılmasını aktivləşdirir                                                                                                |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` autentifikasiya kukisini məcburi edin (HTTPS əks proksisinin arxasında)                                                                             |
-| `CLOUDFLARED_BIN`                       | təyin edilməyib                      | İdarə olunan endirmə əvəzinə mövcud `cloudflared` binar faylından istifadə edin                                                                              |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | İdarə olunan Sürətli Tunellər üçün nəqliyyat protokolu (`http2`, `quic` və ya `auto`)                                                                        |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js üçün MB ilə heap yaddaş limiti                                                                                                                       |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | Prompt keşindəki maksimum qeyd sayı                                                                                                                          |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | Semantik keşdəki maksimum qeyd sayı                                                                                                                          |
+| Dəyişən                                 | Defolt                   | Təsvir                                                                                                                                                             |
+| --------------------------------------- | ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(avtomatik yaradılan)_  | JWT imzalama sirri — ilk işə salındıqda avtomatik olaraq yaradıldı və `server.env` ə qədər davam etdi; məlumat kataloqu efemer olduqda onu açıq şəkildə təyin edin |
+| `INITIAL_PASSWORD`                      | _(ayarlanmadı)_          | İlk giriş parolu. npm/source quraşdırmaları `CHANGEME` ilə başlayır: onu dəyişdirin. Ayarlanmadı: işə başlama sehrbazı                                             |
+| `DATA_DIR`                              | `~/.omniroute`           | Məlumat kataloqu (db, istifadə, qeydlər)                                                                                                                           |
+| `PORT`                                  | çərçivə standartı        | Xidmət portu (nümunələrdə `20128` )                                                                                                                                |
+| `HOSTNAME`                              | çərçivə standartı        | Hostu bağlayın (Docker defolt olaraq `0.0.0.0`)                                                                                                                    |
+| `NODE_ENV`                              | iş vaxtı standartı       | Yerləşdirmə üçün `production` təyin edin                                                                                                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | İctimai baza URL tablosuna çıxdı və serverə məruz qaldı (miras `BASE_URL` əvəz edir)                                                                               |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | Bulud sinxronizasiyasının son nöqtəsi bazası URL (irsi `CLOUD_URL` ni əvəz edir)                                                                                   |
+| `API_KEY_SECRET`                        | _(avtomatik yaradılan)_  | yaradılan API açarları üçün HMAC sirri — ilk işə salındıqda avtomatik yaradıldı və `server.env` a qədər davam etdi                                                 |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` də Taşıyıcı API açarını tətbiq edin                                                                                                                        |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | Təsdiqlənmiş idarə paneli istifadəçilərinə tələb olunduqda tam saxlanan API açar dəyərlərini aşkar etməyə icazə verin                                              |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Keşlənmiş Provayder Limitləri datası üçün server tərəfində yeniləmə kadansı; UI yeniləmə düymələri hələ də əl ilə sinxronizasiyanı işə salır                       |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore dən əvvəl avtomatik SQLite snapshotlarını söndürün; əl ilə ehtiyat nüsxələri hələ də işləyir                                                 |
+| `APP_LOG_TO_FILE`                       | `true`                   | Tətbiq və audit jurnalının diskə çıxışını təmin edir                                                                                                               |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth kukisini məcbur edin ( HTTPS tərs proxy-nin arxasında)                                                                                               |
+| `CLOUDFLARED_BIN`                       | təyin olunmadı           | İdarə olunan endirmə əvəzinə mövcud `cloudflared` binarını istifadə edin                                                                                           |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | İdarə olunan Sürətli Tunellər üçün nəqliyyat (`http2`, `quic` və ya `auto`)                                                                                        |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB-də Node.js yığın limiti                                                                                                                                         |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | Maksimum tez keş girişləri                                                                                                                                         |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | Maksimum semantik keş girişləri                                                                                                                                    |
 
-Mühit dəyişənlərinin tam siyahısı üçün [README](../README.md) faylına baxın.
+Tam mühit dəyişəninə istinad üçün [README](../README.md) baxın.
 
 ---
 
@@ -711,7 +711,7 @@ Qeydlər:
 
 ### Xüsusi OpenAI-a uyğun provayderlər
 
-OpenAI API danışan hər hansı bir şlüz (özünü idarə edən proksi, vLLM, üçüncü tərəf aqreqatoru) öz provayder nodu kimi əlavə edilə bilər:
+OpenAI API dilində danışan hər hansı bir şlüz (öz-özünə yerləşdirilən proksi, vLLM, üçüncü tərəf aqreqatoru) öz provayder nodu kimi əlavə edilə bilər:
 
 1. **Provayderlər → Əlavə et OpenAI Uyğundur** .
 2. **ad** : node üçün ekran etiketi.
@@ -736,8 +736,8 @@ Fərqli bir prefiks seçin (`mygw`, `acme-proxy`). Fərdi noda sorğular daxili 
 
 Bu düymələr əlaqənin `providerSpecificData` daxil olur (məsələn, `PUT /api/providers/{id}` vasitəsilə):
 
-- `toolNameMaxLength` (integer, 1–1024) — şluz uzun alət adlarını rədd edən OpenAI chat formatına uyğun bağlantılar üçün. Daha uzun adlar qısa ləqəb kimi göndərilir və cavabda bərpa olunur.
-- `quotaEndpoint` — şlüzün quota/credits son nöqtəsi, tablosuna kvota zolağı və kvotadan xəbərdar marşrutlaşdırma üçün oxuyun. Həm OpenAI, həm də Antropik uyğunluqlar üzərində işləyir; tam forma `open-sse/services/usage/openaiCompatible.ts` sənədləşdirilib.
+- `toolNameMaxLength` (tam ədəd, 1–1024) şluz uzun alət adlarını rədd edən OpenAI chat formatına uyğun bağlantılar üçün —. Daha uzun adlar qısa ləqəb kimi göndərilir və cavabda bərpa olunur. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go və Muse Code artıq heç bir parametr olmadan 64 simvoldan artıq ləqəb adlandırır. Bağlantı dəyəri Azure OpenAI / Azure AI Foundry defoltunu (daha sərt şlüz arxasında Azure bağlantısı) əvəz edir və fərdi uyğun node üçün limit təyin edir; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go və Muse Code öz reyestr limitini saxlayır və ona məhəl qoymur.
+- `quotaEndpoint` — şlüzün quota/credits son nöqtəsi, idarə paneli kvota zolağı və kvotadan xəbərdar marşrutlaşdırma üçün oxuyun. Həm OpenAI, həm də Antropik uyğunluqlar üzərində işləyir; tam forma `open-sse/services/usage/openaiCompatible.ts` ilə sənədləşdirilmişdir.
 
 ```json
 {
@@ -774,11 +774,11 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 Yalnız açıq şəkildə icazə verilən həmyaşıd URL -ya göndərilən sorğular `X-OmniRoute-Peer-Trace` başlığını alır. Şlüz təkrar ID nümunəsini və ya HTTP `508 Loop Detected` ilə tükənmiş hop büdcəsini rədd edir; adi upstream provayderlər həmyaşıd metadata qəbul etmirlər.
 
-Peer zəncirləmə verilənlər bazası replikasiyası və ya hostun əvəzlənməsi deyil. Hər bir şlüz müstəqil SQLite vəziyyətini, keşləri, tarif sayğaclarını və sessiyaları saxlayır. active/passive və ya active/active mövcudluğu üçün sağlamlığı yoxlanılmış əks proksi və ya müştəri əvəzetməsindən istifadə edin və heç vaxt bir SQLite verilənlər bazasını çoxsaylı işləyən OmniRoute instansiyalarına quraşdırmayın.
+Peer zəncirləmə verilənlər bazası replikasiyası və ya hostun əvəzlənməsi deyil. Hər bir şlüz müstəqil SQLite vəziyyətini, keşləri, tarif sayğaclarını və sessiyaları saxlayır. active/passive və ya active/active əlçatanlığı üçün sağlamlığı yoxlanılmış əks proksi və ya müştəri əvəzetməsindən istifadə edin və heç vaxt bir SQLite verilənlər bazasını çoxsaylı işləyən OmniRoute instansiyalarına quraşdırmayın.
 
 ### Xüsusi Provayder Marşrutları
 
-Sorğuları modelin təsdiqi ilə birbaşa xüsusi provayderə yönləndirin:
+Sorğuları birbaşa modelin təsdiqi ilə müəyyən bir provayderə yönləndirin:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -786,7 +786,7 @@ POST http://localhost:20128/v1/providers/openai/embeddings
 POST http://localhost:20128/v1/providers/fireworks/images/generations
 ```
 
-Provayder prefiksi yoxdursa, avtomatik əlavə edilir. Uyğun olmayan modellər `400` qaytarır.
+Təchizatçı prefiksi yoxdursa, avtomatik əlavə edilir. Uyğun olmayan modellər `400` qaytarır.
 
 ### Şəbəkə Proksi Konfiqurasiyası
 
@@ -834,7 +834,7 @@ Provayder tərəfindən növlərə görə qruplaşdırılmış modelləri qaytar
 
 ### LLM Gateway Intelligence (Mərhələ 9)
 
-- **Semantik keş** — Axın olmayan avtomatik keşlər, temperatur = 0 cavabları ( `X-OmniRoute-No-Cache: true` ilə keçin)
+- **Semantik keş** — Avtomatik keşlər axınsız, temperatur = 0 cavab ( `X-OmniRoute-No-Cache: true` ilə keçin)
 - **Qüsursuzluğu tələb edin** — `Idempotency-Key` və ya `X-Request-Id` başlığı vasitəsilə 5 saniyə ərzində sorğuları təkrarlayır
 - **Tərəqqi İzləmə** — `X-OmniRoute-Progress: true` başlığı vasitəsilə SSE `event: progress` hadisələrini daxil edin
 
@@ -863,29 +863,29 @@ vasitəsilə daxil olmaq** Dashboard → Translator** . Sazlayın və OmniRoute 
 
 vasitəsilə konfiqurasiya edin** İdarə paneli → Parametrləri → Marşrutlaşdırma** . İdarə paneli ən çox istifadə edilən altı strategiyanı nümayiş etdirir; kombinasiyalar və avtomatik marşrutlaşdırıcı daxili olaraq daha geniş dəsti dəstəkləyir.
 
-**Paneldə görünən strategiyalar (hesab səviyyəli marşrutlaşdırma):**
+**İdarə panelində görünən strategiyalar (hesab səviyyəsində marşrutlaşdırma):**
 
-| Strategiya                 | Təsvir                                                                                                           |
-| -------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Əvvəlcə doldurun**       | Hesabları prioritet qaydada istifadə edir — əsas hesab əlçatan olmayana qədər bütün sorğuları idarə edir         |
-| **Dəyirmi Robin**          | Konfiqurasiya edilə bilən yapışqan limiti olan bütün hesablar arasında dövrə vurur (defolt: hər hesaba 3 zəng)   |
-| **P2C (İki Seçim Gücü)**   | 2 təsadüfi hesab və daha sağlam olana marşrut seçir — yükü sağlamlıq haqqında məlumatlandırma ilə balanslaşdırır |
-| **Təsadüfi**               | Fisher-Yates shuffle istifadə edərək hər sorğu üçün təsadüfi hesab seçir                                         |
-| **Az İstifadə Edilib**     | Trafiki bərabər paylayan ən köhnə `lastUsedAt` vaxt damğası olan hesaba marşrutlar                               |
-| **Xərc optimallaşdırılıb** | Ən aşağı qiymətli provayderlər üçün optimallaşdırılaraq, ən aşağı prioritet dəyəri olan hesaba marşrutlar        |
+| Strategiya                    | Təsvir                                                                                                             |
+| ----------------------------- | ------------------------------------------------------------------------------------------------------------------ |
+| **Əvvəlcə doldurun**          | Prioritet qaydasında hesablardan istifadə edir — əsas hesab əlçatan olmayana qədər bütün sorğuları idarə edir      |
+| **Dəyirmi Robin**             | Konfiqurasiya edilə bilən yapışqan limiti olan bütün hesablar arasında dövrə vurur (defolt: hər hesaba 3 zəng)     |
+| **P2C (İki Seçim Gücü)**      | 2 təsadüfi hesab və daha sağlam birinə gedən marşrut seçir — sağlamlıq haqqında məlumatlılıqla yükü balanslaşdırır |
+| **Təsadüfi**                  | Fisher-Yates shuffle istifadə edərək hər sorğu üçün təsadüfi hesab seçir                                           |
+| **Az İstifadə Edilib**        | Trafiki bərabər paylayan ən köhnə `lastUsedAt` vaxt damğası olan hesaba marşrutlar                                 |
+| **Xərclər optimallaşdırılıb** | Ən aşağı qiymətli provayderlər üçün optimallaşdırılaraq, ən aşağı prioritet dəyəri olan hesaba marşrutlar          |
 
-**Qabaqcıl kombo və avtomatik strategiyalar** (kombo və ya `auto/*` prefiksləri vasitəsilə konfiqurasiya edilə bilər - [AUTO-COMBO.md](../routing/AUTO-COMBO.md) baxın):
+**Qabaqcıl kombo və avtomatik strategiyalar** (kombo və ya `auto/*` prefiksləri vasitəsilə konfiqurasiya edilə bilər — bax [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` - ciddi nizam-intizam, heç vaxt round-robins
-- `weighted` — hər model çəkilərinə görə mütənasib trafik bölünməsi
-- `fill-first` — limitlər çatana qədər ilk modeli boşaltın
+- `priority` — ciddi nizam, heç vaxt round-robins
+- `weighted` — proporsional trafik hər model çəkilərinə görə bölünür
+- `fill-first` — ilk modeli limitlərə çatana qədər boşaltın
 - `round-robin` / `strict-random` / `random`
 - `p2c` (İki Seçim Gücü)
 - `least-used` və `cost-optimized`
-- `auto` - bütün namizədlər arasında hesaba əsaslanan
-- `lkgp` (Son Bilinən Yaxşı Provayder) — sonuncu uğurlu provayderə işarə edir, sonra qaydalara qayıdır
+- `auto` — bütün namizədlər arasında hesaba əsaslanan
+- `lkgp` (Son Bilinən Yaxşı Provayder) — sonuncu uğurlu provayderə bağlanır, sonra qaydalara qayıdır
 - `context-optimized` — ən böyük pulsuz kontekst pəncərəsi olan modeli seçir
-- `context-relay` — təqib növbələri üçün uzun kontekstli modelləri zəncirləyir
+- `context-relay` — zəncirləri təqib növbələri üçün uzun kontekstli modellər
 
 #### Xarici Yapışqan Sessiya Başlığı
 
@@ -903,7 +903,7 @@ Nginx istifadə edirsinizsə və alt xətt başlıqlarını göndərirsinizsə, 
 underscores_in_headers on;
 ```
 
-#### Wildcard Model ləqəbləri
+#### Wildcard Model Təxəllüsü
 
 Model adlarını dəyişdirmək üçün joker nümunələr yaradın:
 
@@ -929,7 +929,7 @@ Chain: production-fallback
 
 ### Ümumi Provayder Kombinasiyaları və Marşrut Nümunələri
 
-Çoxsaylı provayderləri birləşdirmək və OmniRoute da onlar arasında marşrutlaşdırma üçün nümunə nümunələri:
+Budur OmniRoute-da çoxlu provayderləri birləşdirmək və onlar arasında marşrutlaşdırma üçün nümunə nümunələri:
 
 #### 1. Kodlaşdırma Agent Kombo: Cost/Speed Fallback ilə yüksək səviyyəli düşünmə
 
@@ -978,7 +978,7 @@ omniroute combo create free-stack \
 
 Təsvirin anlaşılması və kodun yaradılmasını əhatə edən iş axınları üçün yüksək sürətli mətn generasiyası ilə xüsusi görmə modellərinin qoşalaşdırılması.
 
-- **Nümunə** : İlk olaraq görmə qabiliyyətinə malik modelləri, sonuncu isə yüksək məhsuldarlığa malik text/code modelini siyahıya alan `Priority` kombinatı.
+- **Nümunə** : Görmə qabiliyyətinə malik modelləri ilk, ən son isə yüksək məhsuldarlığa malik text/code modelini siyahıya alan `Priority` kombinatı.
 - **Modellər** :
   1. `gemini/gemini-2.5-pro` (Güclü image/multimodal anlama)
   2. `openai/gpt-4o` (Balanslı görmə və alət istifadəsi)
@@ -993,31 +993,31 @@ vasitəsilə konfiqurasiya edin** İdarə paneli → Parametrləri → Dayanıql
 OmniRoute beş komponentlə provayder səviyyəsində davamlılığı həyata keçirir:
 
 1. **Sorğu Növbəsi və Pacing** — Sistem səviyyəsində sorğunun formalaşdırılması:
-   - **Dəqiqədə sorğular (RPM)** — Hər hesab üçün dəqiqədə maksimum sorğular
+   - **Dəqiqədə sorğular (RPM)** — Hər hesab üçün dəqiqədə maksimum sorğu
    - **Sorğular Arasında Min Vaxt** — Sorğular arasında millisaniyələrdə minimum boşluq
-   - **Maksimum Paralel Sorğular** — Hesab başına maksimum eyni vaxtda sorğular
+   - **Maksimum Paralel Sorğular** — Hesab üzrə maksimum eyni vaxtda sorğular
 
-2. **Bağlantının soyudulması** — Yenidən sınaqdan keçirilə bilən uğursuzluqlardan sonra tək qoşulma üçün hər autent tipli konfiqurasiya:
+2. **Bağlantının soyudulması** — Yenidən sınaqdan keçirilə bilən uğursuzluqlardan sonra tək bir əlaqə üçün autentlik tipli konfiqurasiya:
    - **Baza soyutma** — Yenidən cəhd edilə bilən yuxarı axın uğursuzluqları üçün defolt soyutma pəncərəsi
-   - **Upstream Retry göstərişlərindən istifadə edin** — Nüfuzlu `Retry-After` ya hörmət edir və ya təqdim edildikdə göstərişləri sıfırlayır
+   - **Upstream Retry göstərişlərindən istifadə edin** — nüfuzlu `Retry-After` qiymətləndirir və ya təqdim edildikdə göstərişləri sıfırlayır
    - **Maksimum geri çəkilmə addımları** — Təkrarlanan uğursuzluqlar üçün maksimum eksponensial geriləmə səviyyəsi
 
-3. **Təchizatçı Circuit Breaker** — Təchizatçı xətalarını izləyir, konfiqurasiya edilmiş xəbərdarlıq həddində zəifləmiş provayderi qeyd edir və konfiqurasiya edilmiş uğursuzluq həddinə çatdıqda açarı açır:
-   - **Deqradasiya həddi** — `DEGRADED` daxil olmamışdan əvvəl ardıcıl provayder uğursuzluqları
-   - **Uğursuzluq həddi** — `OPEN` daxil olmamışdan əvvəl ardıcıl provayder uğursuzluqları
-   - **Vaxt aşımını sıfırlayın** — Provayderin yenidən sınaqdan keçirilməsinə qədər vaxt pəncərəsi
+3. **Təchizatçı Circuit Breaker** — provayder xətalarını izləyir, konfiqurasiya edilmiş xəbərdarlıq həddinə çatmış provayderi qeyd edir və konfiqurasiya edilmiş uğursuzluq həddinə çatdıqda açarı açır:
+   - **Deqradasiya həddi** — Ardıcıl provayder `DEGRADED` girməzdən əvvəl uğursuzluqlar
+   - **Uğursuzluq həddi** — Ardıcıl provayder `OPEN` girməzdən əvvəl uğursuzluqlar
+   - **Vaxt aşımını sıfırlayın** — Provayder yenidən sınaqdan keçirilməzdən əvvəl vaxt pəncərəsi
    - **CLOSED** (Sağlam) — Sorğular normal şəkildə axır
    - **DEGRADED** — Yüksək uğursuzluqlar izlənilərkən sorğular hələ də axır
-   - **OPEN** — Təkrar uğursuzluqlardan sonra provayder müvəqqəti olaraq bloklanır
-   - **HALF_OPEN** — Provayderin bərpa olub-olmadığını yoxlamaq
+   - **OPEN** — Provayderi təkrar uğursuzluqlardan sonra müvəqqəti olaraq bloklanır
+   - **HALF_OPEN** — Provayderin bərpa edilib-edilməməsi sınağı
 
    Qoşulma əhatəli `429` tarif limitləri qalır** Bağlantının soyudulması** və provayderi pozan tərəfə saymayın.
 
    Provayder kəsicisinin işləmə vaxtı vəziyyəti göstərilir** Dashboard → Health** yalnız.
 
-4. **Soğutma müddətini gözləyin** — Əgər hər bir namizəd bağlantısı artıq soyuyursa, OmniRoute ən erkən soyumağı gözləyə və avtomatik olaraq eyni müştəri sorğusunu təkrar sınaya bilər.
+4. **Soğutma müddətini gözləyin** — Əgər hər bir namizəd bağlantısı artıq soyuyursa, OmniRoute ən erkən soyumağı gözləyə və eyni müştəri sorğusunu avtomatik olaraq təkrarlaya bilər.
 
-5. **Rate Limit Avtomatik Aşkarlanması** — Yuxarı provayderlər açıq gözləmə pəncərələrini qaytardıqda, parametr aktivləşdirildikdə, bu göstərişlər yerli əlaqənin soyumasını ləğv edir.
+5. **Rate Limit Avtomatik Aşkarlanması** — Yuxarı provayderlər açıq-aşkar gözləmə pəncərələrini qaytardıqda, parametr aktivləşdirildikdə həmin göstərişlər yerli əlaqənin soyudulma müddətini ləğv edir.
 
 **Pro İpucu:** istifadə edin** Sağlamlıq** fasilədən sonra canlı provayder açarlarını yoxlamaq və sıfırlamaq üçün səhifə. Resilience səhifəsi yalnız konfiqurasiyanı dəyişir.
 
@@ -1064,7 +1064,7 @@ Parametrlər səhifəsi təşkil olunub** 7 nişan** asan naviqasiya üçün:
 | **General**         | Sistem saxlama vasitələri, defolt davranış, Son nöqtə tunelinin görünməsi                                                                                                                                    |
 | **Görünüş**         | Mövzu nəzarətləri (light/dark/system), yan panel görünməsi, Cloudflare/Tailscale/ngrok tunel kartları üçün panel keçidləri                                                                                   |
 | **AI**              | Düşüncə büdcəsi (keçid / avtomatik zolaq / xüsusi / adaptiv — bax [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), qlobal sistem xəbərdarlığı, operativ keş statistikası                                        |
-| **Təhlükəsizlik**   | Login/Password parametrləri, IP Giriş Nəzarəti, `/models` üçün API auth, Provayderin Bloklanması, operativ injection mühafizəsi                                                                              |
+| **Təhlükəsizlik**   | Login/Password parametrləri, IP Giriş Nəzarəti, `/models` üçün API auth, Provayderin Bloklanması, tez injection mühafizəsi                                                                                   |
 | **Marşrutlaşdırma** | Qlobal marşrutlaşdırma strategiyası (Birinci Doldur / Dəyirmi Robin / P2C / Təsadüfi / Ən Az İstifadə Edilmiş / Xərcləri Optimize Edilmiş), joker model ləqəbləri, ehtiyat zəncirlər, kombinasiya defoltları |
 | **Dözümlülük**      | Sorğu növbəsi, əlaqənin soyudulması, provayder kəsici konfiqurasiyası və soyuma müddətini gözləmə davranışı                                                                                                  |
 | **Qabaqcıl**        | Qlobal proksi konfiqurasiyası (HTTP/SOCKS5), hər provayder üçün proksi ləğv edilir                                                                                                                           |
@@ -1080,7 +1080,7 @@ vasitəsilə daxil olmaq** Dashboard → Xərcləri** .
 | Tab                | Məqsəd                                                                                                |
 | ------------------ | ----------------------------------------------------------------------------------------------------- |
 | **Büdcə**          | daily/weekly/monthly büdcələri və real vaxt izləmə ilə API açarı üçün xərcləmə limitlərini təyin edin |
-| **Qiymətləndirmə** | Model qiymət qeydlərinə baxın və redaktə edin - provayderə görə 1K input/output tokeninin dəyəri      |
+| **Qiymətləndirmə** | Provayderə görə 1K input/output token üçün — dəyəri model qiymət qeydlərinə baxın və redaktə edin     |
 
 ```bash
 # API: Set a budget
@@ -1158,11 +1158,11 @@ Hər kombo balansını konfiqurasiya edin** Dashboard → Combos → Create/Edit
 | **Az İstifadə Edilib**      | Ən az son sorğu ilə modelə marşrutlar (kombo metriklərdən istifadə edir)       |
 | **Xərc-Optimallaşdırılmış** | Ən ucuz mövcud modelə marşrutlar (qiymət cədvəlindən istifadə edir)            |
 
-Qlobal kombinasiya standartları quraşdırıla bilər** Dashboard → Parametrləri → Routing → Combo Defolt** . Qarışıq hədəf vaxt aşımları defolt olaraq cari sorğu fasiləsini miras alır. istifadə edin** Hədəf fasiləsi (saniyə)** kombo defoltlarında və ya fərdi komboda yalnız hədəf başına daha qısa limit daha sürətli geri dönməyə səbəb olduqda.
+Qlobal kombinasiya standartları quraşdırıla bilər** Dashboard → Parametrləri → Routing → Combo Defolt** . Qarışıq hədəf fasilələri defolt olaraq cari sorğu fasiləsini miras alır. istifadə edin** Hədəf fasiləsi (saniyə)** kombo defoltlarında və ya fərdi komboda yalnız hədəf başına daha qısa limit daha sürətli geri dönməyə səbəb olduqda.
 
 Sıfır gecikmə kombo optimallaşdırmaları daxil edilir. tərk et** Sıfır gecikmə optimallaşdırmaları** bu gecikmə funksiyalarının ehtiyat hədəflərlə yarışmasının, TTFT tarixçəsinə əsaslanan hədəflərin atlanmasının və ya geri qaytarma sorğularının sıxılmasının qarşısını almaq üçün deaktiv edilib; onu aktivləşdirmək konfiqurasiya edilmiş hedcinq, proqnozlaşdırılan TTFT atlamaları və aşağı quyruq gecikməsi üçün routing/request sədaqəti ilə ticarət etmək üçün proaktiv geri sıxılmaya imkan verir.
 
-Deaktiv edin** Əsaslandırma nişanı buferi** yuxarı axın provayderləri ciddi `max_tokens` / `maxOutputTokens` məhdudiyyətləri tələb etdikdə. Aktivləşdirildikdə, birləşmiş marşrutlaşdırma yalnız məlum çıxış qapağı olan modellər üçün əsaslandırma modelinin boşluğunu əlavə edir və təhlükəsiz bufer edilmiş dəyər həmin həddi keçdikdə müştəri nişanı limitini dəyişməz qoyur. Müştəri limiti artıq məlum həddən artıqdırsa, OmniRoute yuxarı sorğunu göndərməzdən əvvəl onu həmin həddə qədər sıxır.
+Deaktiv edin** Əsaslandırma nişanı buferi** yuxarı axın provayderləri ciddi `max_tokens` / `maxOutputTokens` məhdudiyyətləri tələb etdikdə. Aktivləşdirildikdə, kombo marşrutlaşdırma yalnız məlum çıxış qapağı olan modellər üçün əsaslandırma modelinin boşluqlarını əlavə edir və təhlükəsiz bufer edilmiş dəyər həmin həddi keçdikdə müştəri nişanı limitini dəyişməz qoyur. Müştəri limiti artıq məlum həddən artıqdırsa, OmniRoute yuxarı sorğu göndərməzdən əvvəl onu həmin qapaqla sıxışdırır.
 
 ---
 
@@ -1174,7 +1174,7 @@ vasitəsilə daxil olmaq** Dashboard → Health** . 6 kartla real vaxt sistem sa
 | ------------------------- | ---------------------------------------------------------------- |
 | **Sistem Vəziyyəti**      | İş vaxtı, versiya, yaddaş istifadəsi, məlumat kataloqu           |
 | **Provayder Sağlamlığı**  | Qlobal provayderin dövrə açarının işləmə vaxtı vəziyyəti         |
-| **Məzənnə Limitləri**     | Qalan vaxtla hesab üzrə aktiv əlaqənin soyudulması               |
+| **Məzənnə Limitləri**     | Qalan vaxtla hesab başına aktiv əlaqənin soyudulması             |
 | **Aktiv Lokautlar**       | Aktiv model əhatəli lokavtlar və müvəqqəti istisnalar            |
 | **İmza Keşi**             | Təkmilləşdirmə keş statistikası (aktiv düymələr, vuruş dərəcəsi) |
 | **Gecikmə telemetriyası** | hər provayder üçün p50/p95/p99 gecikmə aqreqasiyası              |

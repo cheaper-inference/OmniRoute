@@ -53,61 +53,61 @@ OmniRoute/
 
 ## Saknes faili
 
-| File                                        | Mērķis                                                                                              |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Mārketinga sākumlapa + ātrā darba sākšana + funkciju matrica (skatiet arī `llm.txt`)                |
-| **CHANGELOG.md**                            | Katra laidiena izmaiņu žurnāls (automātiski ģenerē `/version-bump-cc` prasme)                       |
-| **LICENSE**                                 | MIT licences teksts                                                                                 |
-| **CLAUDE.md**                               | Projekta noteikumi Claude Code aģentiem (stingrie noteikumi, konvencijas, scenāriji)                |
-| **AGENTS.md**                               | Tas pats, kas CLAUDE.md, bet AI aģentiem, kas nav Claude (Codex, Cursor u.c.)                       |
-| **GEMINI.md**                               | Īsi noteikumi Gemini aģentiem (CLAUDE.md apakškopa)                                                 |
-| **CONTRIBUTING.md**                         | Līdzstrādnieku rokasgrāmata: iestatīšana, standartizētie komiti, testēšana, PR process              |
-| **SECURITY.md**                             | Ievainojamību ziņošanas politika, atbalstītās versijas, apdraudējumu modelis                        |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — prasības kopienas dalībnieku uzvedībai                                       |
-| **llm.txt**                                 | Vienkārša teksta sākumlapa, kas optimizēta LLM rāpuļprogrammām (SEO AI asistentiem)                 |
-| **package.json**                            | npm manifests, skripti, atkarības, dzinēji, c8 pārklājuma slieksnis                                 |
-| **package-lock.json**                       | Fiksēts atkarību koks                                                                               |
-| **tsconfig.json**                           | Saknes TypeScript konfigurācija                                                                     |
-| **tsconfig.typecheck-core.json**            | Tipu pārbaudes konfigurācija `src/` kodolam                                                         |
-| **tsconfig.typecheck-noimplicit-core.json** | Stingrā (`noImplicitAny`) tipu pārbaude                                                             |
-| **tsconfig.tsbuildinfo**                    | TS inkrementālās būvēšanas kešatmiņa (git to ignorē)                                                |
-| **next.config.mjs**                         | Next.js 16 būvēšanas konfigurācija (savrupa izvade)                                                 |
-| **next-env.d.ts**                           | Next.js automātiski ģenerētie vides tipi                                                            |
-| **eslint.config.mjs**                       | ESLint vienotā konfigurācija (noteikumi katrai projekta daļai)                                      |
-| **prettier.config.mjs**                     | Prettier formatēšanas noteikumi                                                                     |
-| **postcss.config.mjs**                      | PostCSS konfigurācija Tailwind/CSS apstrādes konveijeram                                            |
-| **playwright.config.ts**                    | Playwright pilnās plūsmas testu konfigurācija                                                       |
-| **vitest.config.ts**                        | Vitest konfigurācija (noklusējuma testu kopa)                                                       |
-| **vitest.mcp.config.ts**                    | Vitest konfigurācija MCP servera / autoCombo / kešatmiņas testu kopām                               |
-| **sonar-project.properties**                | SonarQube/SonarCloud konfigurācija (koda kvalitāte)                                                 |
-| **Dockerfile**                              | Vairākposmu Docker būvējums (builder → runner-base → runner-cli)                                    |
-| **docker-compose.yml**                      | Izstrādes compose konfigurācija ar 4 profiliem (base, cli, host, cliproxyapi) + redis blakusserviss |
-| **docker-compose.prod.yml**                 | Produkcijas compose konfigurācija (ports 20130, redis, nosauktie sējumi)                            |
-| **.dockerignore**                           | No Docker konteksta izslēgtie faili                                                                 |
-| **fly.toml**                                | Fly.io izvietošanas konfigurācija (reģions `sin`, ports 20128, /data sējums)                        |
-| **.env.example**                            | Vides faila veidne (pirmajā instalēšanas reizē automātiski tiek kopēta uz `.env`)                   |
-| **.gitignore**                              | Git ignorēšanas šabloni                                                                             |
-| **.npmignore**                              | No npm publicēšanas izslēdzamo failu saraksts                                                       |
-| **.npmrc**                                  | npm konfigurācija (reģistrs, bloķēšanas faila politika)                                             |
-| **.node-version**                           | Fiksēta Node versija (izmanto ar nvm saderīgi rīki)                                                 |
-| **.nvmrc**                                  | Fiksēta Node versija rīkam nvm                                                                      |
-| **eslint.complexity.config.mjs**            | ESLint konfigurācija sarežģītības slieksnim (`scripts/check/check-complexity.mjs --config`)         |
-| **eslint.sonarjs.config.mjs**               | ESLint konfigurācija SonarJS noteikumiem (kognitīvā sarežģītība / dublēšanās)                       |
-| **source.config.ts**                        | Fumadocs `defineDocs` avota konfigurācija (nodrošina datus `.source/`)                              |
-| **knip.json**                               | Knip konfigurācija — neizmantotie faili/eksporti/atkarības (nodrošina neizmantotā koda pārbaudi)    |
-| **stryker.conf.json**                       | Stryker mutāciju testēšanas konfigurācija                                                           |
-| **.size-limit.json**                        | size-limit komplekta apjoma budžeta konfigurācija                                                   |
-| **promptfooconfig.yaml**                    | promptfoo novērtēšanas konfigurācija                                                                |
-| **.gitleaks.toml**                          | gitleaks noslēpumu skenēšanas kārtulu kopa                                                          |
-| **.zizmor.yml**                             | zizmor GitHub Actions drošības lintēšanas konfigurācija                                             |
-| **socket.yml**                              | Socket.dev piegādes ķēdes konfigurācija                                                             |
-| **news.json**                               | Lokalizēta v2 paziņojumu plūsma; Radar palaišanas vienums tiek piegādāts neaktīvs                   |
-| **flake.nix** / **flake.lock**              | Nix izstrādes čaulas definīcija un fiksācijas fails                                                 |
-| **.env**                                    | Lokālie noslēpumi (git ignorēti — ģenerēti no `.env.example`)                                       |
+| Fails                                       | Mērķis                                                                                               |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| **README.md**                               | Mārketinga galvenā lapa + Quick Start + līdzekļu matrica (skatiet arī `llm.txt`)                     |
+| **CHANGELOG.md**                            | Izmaiņu žurnāls katrā laidienā (automātiski ģenerēts, izmantojot `/version-bump-cc` prasmes)         |
+| **LICENSE**                                 | MIT licences teksts                                                                                  |
+| **CLAUDE.md**                               | Projekta noteikumi Claude Code aģentiem (stingri noteikumi, konvencijas, scenāriji)                  |
+| **AGENTS.md**                               | Tas pats, kas CLAUDE.md, bet ne-Kloda AI aģentiem (Codex, Cursor utt.)                               |
+| **GEMINI.md**                               | Īsi noteikumi aģentiem, kuru pamatā ir Dvīņi ( CLAUDE.md apakškopa)                                  |
+| **CONTRIBUTING.md**                         | Līdzautora rokasgrāmata: iestatīšana, parastās saistības, testēšana, PR plūsma                       |
+| **SECURITY.md**                             | Ievainojamības ziņošanas politika, atbalstītās versijas, draudu modelis                              |
+| **CODE_OF_CONDUCT.md**                      | Līdzstrādnieku pakta — kopienas uzvedības cerības                                                    |
+| **llm.txt**                                 | Vienkārša teksta piezemēšanās optimizēta LLM rāpuļprogrammām (SEO AI palīgiem)                       |
+| **package.json**                            | npm manifests, skripti, atkarības, dzinēji, c8 pārklājuma vārti                                      |
+| **package-lock.json**                       | Bloķēts atkarību koks                                                                                |
+| **tsconfig.json**                           | Saknes TypeScript konfigurācija                                                                      |
+| **tsconfig.typecheck-core.json**            | Typecheck konfigurācija `src/` kodolam                                                               |
+| **tsconfig.typecheck-noimplicit-core.json** | Stingra (`noImplicitAny`) tipa pārbaude                                                              |
+| **tsconfig.tsbuildinfo**                    | TS pakāpeniska veidošanas kešatmiņa (gitignorēta)                                                    |
+| **nākamais.config.mjs**                     | Next.js 16 build konfigurācija (savrupa izeja)                                                       |
+| **next-env.d.ts**                           | Next.js automātiski ģenerēti env veidi                                                               |
+| **eslints.config.mjs**                      | ESLint flat config (noteikumi katrai projekta zonai)                                                 |
+| **smukāk.config.mjs**                       | Prettier formatēšanas noteikumi                                                                      |
+| **postcss.config.mjs**                      | PostCSS konfigurācija Tailwind/CSS cauruļvadam                                                       |
+| **dramaturgs.config.ts**                    | Playwright E2E testa konfigurācija                                                                   |
+| **vitest.config.ts**                        | Vitest config (noklusējuma komplekts)                                                                |
+| **vitest.mcp.config.ts**                    | Vitest konfigurācija MCP servera / autoCombo / kešatmiņas komplektiem                                |
+| **sonārs-projekts.īpašības**                | SonarQube/SonarCloud konfigurācija (koda kvalitāte)                                                  |
+| **Dockerfile**                              | Daudzpakāpju Docker uzbūve (builder → runner-base → runner-cli)                                      |
+| **docker-compose.yml**                      | Izstrādātāja komponēšana ar 4 profiliem (bāze, cli, saimniekdators, cliproxyapi) + redis blakusvāģis |
+| **dokeris-komponēt.prod.yml**               | Produkcijas sacerēšana (port 20130, redis, nosauktie sējumi)                                         |
+| **.docker ignorēt**                         | Faili ir izslēgti no Docker konteksta                                                                |
+| **fly.toml**                                | Fly.io izvietošanas konfigurācija (reģions `sin`, ports 20128, /data apjoms)                         |
+| **.env.example**                            | Veidnes env fails (pirmās instalēšanas reizē automātiski kopēts uz `.env` )                          |
+| **.gitignore**                              | Git ignorēt modeļus                                                                                  |
+| **.npmignore**                              | npm publicēt izslēgšanas sarakstu                                                                    |
+| **.npmrc**                                  | npm konfigurācija (reģistrs, bloķēšanas faila politika)                                              |
+| **.node-version**                           | Mezgla versijas tapa (izmanto ar nvm saderīgiem rīkiem)                                              |
+| **.nvmrc**                                  | Mezgla versijas tapa nvm                                                                             |
+| **eslint.sarežģītība.config.mjs**           | ESLint konfigurācija sarežģītības sprūdratam (`scripts/check/check-complexity.mjs --config`)         |
+| **eslint.sonarjs.config.mjs**               | ESLint konfigurācija SonarJS noteikumiem (kognitīvā sarežģītība / dublēšanās)                        |
+| **avots.config.ts**                         | Fumadocs `defineDocs` avota konfigurācija (plūsmas `.source/`)                                       |
+| **knip.json**                               | Knip config — unused files/exports/deps (pavada mirušā koda vārtus)                                  |
+| **uzbrucējs.conf.mjs**                      | Stryker mutāciju testēšanas konfigurācija (aprēķina `tap.testFiles` no `mutate`)                     |
+| **.size-limit.json**                        | lieluma ierobežojuma komplekta budžeta konfigurācija                                                 |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                                |
+| **.gitleaks.toml**                          | gitleaks slepenās skenēšanas noteikumu kopa                                                          |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint konfigurācija                                                    |
+| **socket.yml**                              | Socket.dev piegādes ķēdes konfigurācija                                                              |
+| **news.json**                               | Lokalizēta v2 paziņojumu plūsma; Radara palaišanas vienums tiek piegādāts neaktīvs                   |
+| **pārslu.nix** /** pārslu.slēdzene**        | Nix dev-shell definīcijas + slēdzene                                                                 |
+| **.env**                                    | Vietējie noslēpumi (gitignorētais — kas ģenerēts no `.env.example`)                                  |
 
-> **Pārvietots no saknes versijā v3.8.26 (sakārtošana):**
+> **Pārvietots no saknes versijā v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` un ģenerētais `quality-metrics.json` (git ignorēts). Skatiet sadaļu [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` un ģenerētais `quality-metrics.json` (gitignorēts). Skatiet [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -153,7 +153,7 @@ src/
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge informācijas paneļa lapa — servera karte, 9 aģentu kartes, iestatīšanas vednis, modeļa kartēšana, apiešanas saraksts. i18n PT-BR + EN. Skatīt `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                              |
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Satiksmes inspektora informācijas paneļa lapa — DevTools sadalīta, 7 detaļu cilnes, 4 tveršanas režīma pārslēgi, sesijas ierakstītājs, konteksta krāsošana. i18n PT-BR + EN. Skatīt `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                              |
 | `app/(dashboard)/dashboard/activity/`                                        | Darbību plūsmas lapa (B grupa): `page.tsx` (serveris) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — skatīt `docs/architecture/MONITORING_SECTIONS.md`                                                                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotas koplietošanas lapa (B grupa): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                         |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotu koplietošanas lapa (B grupa): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                          |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Pakalpojumu sniedzēja plāna konfigurācijas lapa (B grupa): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvotas izmēri vienai savienojuma ignorēšanai                                                                                                                                                                    |
 | `app/docs/`                                                                  | Iegultais dokumentācijas skatītājs (renderē `docs/*.md`)                                                                                                                                                                                                                                                                 |
 | `app/landing/`                                                               | Mārketinga galvenā lapa                                                                                                                                                                                                                                                                                                  |
@@ -200,7 +200,7 @@ src/
 | `playground/`                            | Playground Studio kopīgie palīgi: `codeExport.ts` (curl/Python/TS ģenerators), `promptImprover.ts` (meta-prompt veidotājs), `streamMetrics.ts` (pure TTFT/TPS), `types.ts` (cenu tabula) — skatīt `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                              |
 | `webhookDispatcher.ts`                   | HMAC webhook piegāde — skatiet `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                                          |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | Tuneļu pārvaldnieki — skatiet `docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                             |
-| `cloudSync.ts`, `initCloudSync.ts`       | Neobligāta stāvokļa mākoņa sinhronizācija                                                                                                                                                                                                                                                                                             |
+| `cloudSync.ts`, `initCloudSync.ts`       | Izvēles stāvokļa mākoņa sinhronizācija                                                                                                                                                                                                                                                                                                |
 | `localDb.ts`                             | Atkārtoti eksportēt barelu db moduļiem (tikai bez loģikas — reeksporta)                                                                                                                                                                                                                                                               |
 | `cacheLayer.ts`, `idempotencyLayer.ts`   | Pieprasīt kešatmiņu + idempotency                                                                                                                                                                                                                                                                                                     |
 | (~ vēl 30 augstākā līmeņa faili)         | Specializētie palīgi (logEnv, modelsDevSync, piiSanitizer utt.)                                                                                                                                                                                                                                                                       |
@@ -209,7 +209,7 @@ src/
 
 | Apakšdir                  | Mērķis                                                                                                                                                                                                                          |
 | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `db/core.ts`              | `getDbInstance()` singleton ar WAL journaling                                                                                                                                                                                   |
+| `db/core.ts`              | `getDbInstance()` singleton ar WAL žurnālu                                                                                                                                                                                      |
 | `db/migrations/`          | Versionēti SQL faili (idempotents, transakciju). `073_memory_vec.sql` pievieno `memory_vec_meta` + `needs_reindex` kolonnu (21. plāns).                                                                                         |
 | `db/playgroundPresets.ts` | CRUD modulis Playground Studio sākotnējiem iestatījumiem (`listPlaygroundPresets`, `getPlaygroundPreset`, `createPlaygroundPreset`, `updatePlaygroundPreset`, `deletePlaygroundPreset`)                                         |
 | `db/memoryVec.ts`         | CRUD `memory_vec_meta` (active_dim, embedding_signature, last_reset_at, vec_loaded) + `markMemoryNeedsReindex`, `getMemoryReindexQueue` u.c. (21. plāns)                                                                        |
@@ -242,15 +242,15 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Informācijas paneļa komponents API: `packages/ui-kit` adapteri — skatiet `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonu nosaukumi , ko izmanto ekrāni → Lucide komponenti (`<Icon>`)                                |
-| `constants/providers.ts`         | **380 pakalpojumu sniedzēji** ar Zod apstiprinājumu (patiesības avots)                                        |
+| `constants/providers.ts`         | **394 pakalpojumu sniedzēji** ar Zod apstiprinājumu (patiesības avots)                                        |
 | `constants/cliTools.ts`          | Ārējais CLI rīku reģistrs                                                                                     |
-| `constants/routingStrategies.ts` | **20 maršrutēšanas stratēģijas** ar prioritātēm                                                               |
+| `constants/routingStrategies.ts` | **22 maršrutēšanas stratēģijas** ar prioritātēm                                                               |
 | `constants/publicApiRoutes.ts`   | Maršruti, kuriem nepieciešama nesēja (pret vadību) autentifikācija                                            |
 | `constants/upstreamHeaders.ts`   | Augšupējo pieprasījumu galvenes noraidīšanas saraksts                                                         |
 | `validation/schemas.ts`          | ~ 80 Zod shēmas (viens patiesības avots API līgumiem)                                                         |
 | `validation/helpers.ts`          | Zod validācijas palīgi (`validateBody` utt.)                                                                  |
 | `types/`                         | Koplietojamie TS veidi                                                                                        |
-| `contracts/`                     | Publiskie API līgumi (patērē `files:` in `package.json`)                                                      |
+| `contracts/`                     | Publiskie API līgumi ( `files:` patērē `package.json`)                                                        |
 | `utils/circuitBreaker.ts`        | Pakalpojumu sniedzēja ķēdes pārtraucējs (skatiet `docs/architecture/RESILIENCE_GUIDE.md`)                     |
 | `utils/apiAuth.ts`               | API atslēgas validācija, tvēruma pārbaude                                                                     |
 | `utils/fetchTimeout.ts`          | Timeout/abort iesaiņojumi augšup pa straumi                                                                   |
@@ -265,7 +265,7 @@ Atsevišķa npm darbvieta (`@omniroute/open-sse`). Apstrādā pieprasījumus un 
 ```
 open-sse/
 ├── handlers/            # 16 faili (12 apstrādātāji + 4 palīgmoduļi): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search u.c.
-├── executors/           # 150 izpildītāju moduļi (klases, kas paplašina BaseExecutor, + katram nodrošinātājam paredzēti palīgmoduļi)
+├── executors/           # 163 izpildītāju moduļi (klases, kas paplašina BaseExecutor, + katram nodrošinātājam paredzēti palīgmoduļi)
 ├── translator/          # Formātu pārveidotāji (9 pieprasījumu, 9 atbilžu, 9 palīgmoduļi)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ pakalpojumu moduļi (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM u.c.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Ārējās CLI integrācijas + Iekšējās OmniRoute CLI                                                      |
 | `I18N.md`                   | i18n arhitektūra, pievienojot valodu, 67 lokalizācijas                                                |
 | `UNINSTALL.md`              | Notīriet atinstalēšanas darbības                                                                      |
-| `PROVIDER_REFERENCE.md`     | **Automātiski ģenerēts** 380 pakalpojumu sniedzēju katalogs (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automātiski ģenerēts** 394 pakalpojumu sniedzēja katalogs (regen: `npm run gen:provider-reference`) |
 
 ### Apakšsistēmas dziļi niršana
 

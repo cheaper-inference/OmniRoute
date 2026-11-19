@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Fréamhchomhaid
+## Comhaid root
 
-| Comhad                                      | Cuspóir                                                                                              |
-| ------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Leathanach tuirlingthe margaíochta + tús tapa + maitrís gnéithe (féach freisin `llm.txt`)            |
-| **CHANGELOG.md**                            | Loga athruithe de réir eisiúna (uathghinte ag an scil `/version-bump-cc`)                            |
-| **LICENSE**                                 | Téacs cheadúnas MIT                                                                                  |
-| **CLAUDE.md**                               | Rialacha tionscadail do ghníomhairí Claude Code (rialacha dochta, gnásanna, cásanna)                 |
-| **AGENTS.md**                               | Mar an gcéanna le CLAUDE.md ach do ghníomhairí AI nach Claude iad (Codex, Cursor, srl.)              |
-| **GEMINI.md**                               | Rialacha achomair do ghníomhairí bunaithe ar Gemini (fo-thacar de CLAUDE.md)                         |
-| **CONTRIBUTING.md**                         | Treoir do rannchuiditheoirí: socrú, tiomantais de réir coinbhinsiúin, tástáil, sreabhadh PR          |
-| **SECURITY.md**                             | Beartas tuairiscithe leochaileachtaí, leaganacha a dtacaítear leo, samhail bhagartha                 |
-| **CODE_OF_CONDUCT.md**                      | Cúnant Rannchuiditheoirí — ionchais maidir le hiompar pobail                                         |
-| **llm.txt**                                 | Leathanach tuirlingthe gnáth-théacs optamaithe do shníomhairí LLM (SEO do chúntóirí AI)              |
-| **package.json**                            | Lastliosta npm, scripteanna, spleáchais, innill, tairseach clúdaigh c8                               |
-| **package-lock.json**                       | Crann spleáchas faoi ghlas                                                                           |
-| **tsconfig.json**                           | Cumraíocht fhréamhach TypeScript                                                                     |
-| **tsconfig.typecheck-core.json**            | Cumraíocht seiceála cineáil do chroí `src/`                                                          |
-| **tsconfig.typecheck-noimplicit-core.json** | Seiceáil cineáil dhocht (`noImplicitAny`)                                                            |
-| **tsconfig.tsbuildinfo**                    | Taisce tógála incrimintí TS (gitignored)                                                             |
-| **next.config.mjs**                         | Cumraíocht tógála Next.js 16 (aschur neamhspleách)                                                   |
-| **next-env.d.ts**                           | Cineálacha timpeallachta uathghinte ag Next.js                                                       |
-| **eslint.config.mjs**                       | Cumraíocht chomhréidh ESLint (rialacha de réir limistéar tionscadail)                                |
-| **prettier.config.mjs**                     | Rialacha formáidithe Prettier                                                                        |
-| **postcss.config.mjs**                      | Cumraíocht PostCSS do phíblíne Tailwind/CSS                                                          |
-| **playwright.config.ts**                    | Cumraíocht tástála E2E Playwright                                                                    |
-| **vitest.config.ts**                        | Cumraíocht Vitest (foireann réamhshocraithe)                                                         |
-| **vitest.mcp.config.ts**                    | Cumraíocht Vitest d'fhreastalaí MCP / d'fhoirne autoCombo / taisce                                   |
-| **sonar-project.properties**                | Cumraíocht SonarQube/SonarCloud (cáilíocht cóid)                                                     |
-| **Dockerfile**                              | Tógáil Docker ilchéime (tógálaí → bonn riteora → CLI riteora)                                        |
-| **docker-compose.yml**                      | Cumadóireacht forbartha le 4 phróifíl (bonn, CLI, óstach, cliproxyapi) + taobhcharr redis            |
-| **docker-compose.prod.yml**                 | Cumadóireacht táirgthe (port 20130, redis, imleabhair ainmnithe)                                     |
-| **.dockerignore**                           | Comhaid eisiata ó chomhthéacs Docker                                                                 |
-| **fly.toml**                                | Cumraíocht imscartha Fly.io (réigiún `sin`, port 20128, imleabhar /data)                             |
-| **.env.example**                            | Comhad teimpléid timpeallachta (cóipeáiltear go huathoibríoch é go `.env` ar an gcéad suiteáil)      |
-| **.gitignore**                              | Patrúin neamhaird Git                                                                                |
-| **.npmignore**                              | Liosta eisiaimh foilseacháin npm                                                                     |
-| **.npmrc**                                  | Cumraíocht npm (clárlann, beartas glaschomhaid)                                                      |
-| **.node-version**                           | Leagan socraithe Node (úsáideann uirlisí atá comhoiriúnach le nvm é)                                 |
-| **.nvmrc**                                  | Leagan socraithe Node do nvm                                                                         |
-| **eslint.complexity.config.mjs**            | Cumraíocht ESLint don raicín castachta (`scripts/check/check-complexity.mjs --config`)               |
-| **eslint.sonarjs.config.mjs**               | Cumraíocht ESLint do rialacha SonarJS (castacht chognaíoch / dúbláil)                                |
-| **source.config.ts**                        | Cumraíocht fhoinse `defineDocs` Fumadocs (a chothaíonn `.source/`)                                   |
-| **knip.json**                               | Cumraíocht Knip — comhaid/easpórtálacha/spleáchais neamhúsáidte (a chothaíonn geata an chóid mharbh) |
-| **stryker.conf.json**                       | Cumraíocht tástála sócháin Stryker                                                                   |
-| **.size-limit.json**                        | Cumraíocht bhuiséad bheartáin size-limit                                                             |
-| **promptfooconfig.yaml**                    | Cumraíocht mheastóireachta promptfoo                                                                 |
-| **.gitleaks.toml**                          | Tacar rialacha gitleaks chun rúin a scanadh                                                          |
-| **.zizmor.yml**                             | Cumraíocht lintála slándála zizmor do GitHub Actions                                                 |
-| **socket.yml**                              | Cumraíocht slabhra soláthair Socket.dev                                                              |
-| **news.json**                               | Fotha logánaithe fógraí v2; seoltar mír lainseála Radar agus í neamhghníomhach                       |
-| **flake.nix** / **flake.lock**              | Sainmhíniú bhlaosc forbartha Nix + glaschomhad                                                       |
-| **.env**                                    | Rúin áitiúla (gitignored — ginte ó `.env.example`)                                                   |
+| Comhad                                      | Cuspóir                                                                                        |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **README.md**                               | Leathanach tuirlingthe margaíochta + tús sciobtha maitrís gné + (féach freisin `llm.txt`)      |
+| **CHANGELOG.md**                            | Logchomhad athraithe in aghaidh an scaoileadh (uathghinte ag scil `/version-bump-cc` )         |
+| **LICENSE**                                 | Téacs ceadúnas MIT                                                                             |
+| **CLAUDE.md**                               | Rialacha tionscadail le haghaidh gníomhairí Cód Claude (rialacha crua, coinbhinsiúin, cásanna) |
+| **AGENTS.md**                               | Mar an gcéanna le CLAUDE.md ach i gcás gníomhairí neamh-Claude AI (Codex, Cursor, etc.)        |
+| **GEMINI.md**                               | Rialacha beachta do ghníomhairí Gemini-bhunaithe ( fothacar de CLAUDE.md)                      |
+| **CONTRIBUTING.md**                         | Treoir do ranníocóirí: socrú, gealltanais thraidisiúnta, tástáil, sreabhadh PR                 |
+| **SECURITY.md**                             | Beartas tuairiscithe leochaileachta, leaganacha tacaithe, samhail bhagairt                     |
+| **CODE_OF_CONDUCT.md**                      | Ranníocóir Cúnant — iompar pobail ionchais                                                     |
+| **llm.txt**                                 | Tuirlingt gnáth-théacs optamaithe le haghaidh crawlers LLM (SEO do chúntóirí AI )              |
+| **package.json**                            | léiriú npm, scripteanna, spleáchais, innill, geata clúdaigh c8                                 |
+| **package-lock.json**                       | Crann spleáchais faoi ghlas                                                                    |
+| **tsconfig.json**                           | Íosluchtaigh root TypeScript config                                                            |
+| **tsconfig.typecheck-core.json**            | Typecheck config le haghaidh `src/` core                                                       |
+| **tsconfig.typecheck-noimplicit-core.json** | Seiceáil cineál docht (`noImplicitAny`).                                                       |
+| **tsconfig.tsbuildinfo**                    | taisce tógála incriminteach TS (gitgnored)                                                     |
+| **seo chugainn.config.mjs**                 | cumraíocht tógála Next.js 16 (aschur neamhspleách)                                             |
+| **seo chugainn-env.d.ts**                   | Next.js cineálacha env uathghinte                                                              |
+| **eislint.config.mjs**                      | ESLint flat config (rialacha de réir réimse an tionscadail)                                    |
+| **níos deise.config.mjs**                   | Rialacha formáidiú Prettier                                                                    |
+| **postas.config.mjs**                       | PostCSS config le haghaidh píblíne Tailwind/CSS                                                |
+| **drámadóir.config.ts**                     | Cumraíocht tástála Playwright E2E                                                              |
+| **vitest.config.ts**                        | Vitest config (sraith réamhshocraithe)                                                         |
+| **vitest.mcp.config.ts**                    | Vitest config le haghaidh seomraí freastalaí MCP / autoCombo / cache                           |
+| **maoine.sonraí-tionscadal**                | SonarQube/SonarCloud config (cáilíocht an chóid)                                               |
+| **Dockerfile**                              | Tógáil Docker ilchéime (tógálaí → runner-base → runner-cli)                                    |
+| **docker-compose.yml**                      | Cumadh Dev le 4 phróifíl (bonn, cli, óstach, cliproxyapi) + redis sidecar                      |
+| **docker-compose.prod.yml**                 | Cumadóireacht léirithe (port 20130, redis, imleabhair ainmnithe)                               |
+| **.dockerignore**                           | Comhaid eisiata ó chomhthéacs Docker                                                           |
+| **fly.toml**                                | Cumraíocht imscaradh Fly.io (réigiún `sin`, port 20128, / data toirte)                         |
+| **.env.sampla**                             | Comhad env teimpléad (uathchóipeáil chuig `.env` ar an gcéad suiteáil)                         |
+| **.gitnore**                                | Git neamhaird patrúin                                                                          |
+| **.npmignore**                              | npm liosta eisiatachta a fhoilsiú                                                              |
+| **.npmrc**                                  | npm config (clárlann, polasaí glaschomhaid)                                                    |
+| **.nóid-leagan**                            | Bioráin leagan nód (úsáidte ag uirlisí nvm-comhoiriúnach)                                      |
+| **.nvmrc**                                  | Leagan nód bioráin do nvm                                                                      |
+| **eslint.complexity.config.mjs**            | config ESLint don ratchet castachta (`scripts/check/check-complexity.mjs --config`)            |
+| **eslint.sonarjs.config.mjs**               | cumraíocht ESLint le haghaidh rialacha SonarJS (castacht chognaíoch / dúbailt)                 |
+| **foinse.config.ts**                        | Cumraíocht foinse Fumadocs `defineDocs` (fothaí `.source/`)                                    |
+| **knip.json**                               | Knip config — files/exports/deps neamhúsáidte (beathaíonn sé geata an chóid mharbh)            |
+| **stríocóir.conf.mjs**                      | Cumraíocht tástála sóchán Stryker (ríomhann `tap.testFiles` ó `mutate`)                        |
+| **.size-limit.json**                        | config buiséad beart teorainn méide                                                            |
+| **promptfooconfig.yaml**                    | cumraíocht eval promptfoo                                                                      |
+| **.gitleaks.toml**                          | gitleaks sraith rialacha scanadh rúnda                                                         |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                     |
+| **socket.yml**                              | Cumraíocht slabhra soláthair Socket.dev                                                        |
+| **news.json**                               | Fotha fógartha logánta v2; Radar seolta míreanna neamhghníomhacha                              |
+| **flake.nix** /** flake.glas**              | Nix dev-shell sainmhíniú + glas                                                                |
+| **.env**                                    | Rúin áitiúla ( — gitignored ginte ó `.env.example`)                                            |
 
-> **Bogtha amach as an bhfréamh in v3.8.26 (chun tranglam a laghdú):**
+> **Bogtha amach as an fhréamh in v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, agus an `quality-metrics.json` ginte (gitignored). Féach [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json`, agus an `quality-metrics.json` a ghintear (gitignered). Féach [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -141,7 +141,7 @@ src/
 | ---------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `app/api/v1/`                                                                | API poiblí OpenAI-compat (~ 25 fo-bhealaí: comhrá, críochnú, leabaithe, comhaid, baisceanna, fuaime, íomhánna, físeáin, ceol, athrangú, modhnuithe, cuardach, ws, gníomhairí, cuntais, soláthraithe, etc.)                                                                                                              |
 | `app/api/v1beta/`                                                            | Gemini-style API endpoints                                                                                                                                                                                                                                                                                              |
-| `app/api/playground/`                                                        | Clós Súgartha Bealaí stiúideo: `improve-prompt/` (POST — LLM pras athscríbhneoir), `presets/` ( liosta GET / POST cruthaigh), `presets/[id]/` (GET / PUT / DELETE) — féach `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                       |
+| `app/api/playground/`                                                        | Clós Súgartha Bealaí stiúideo: `improve-prompt/` (POST — LLM athscríbhneoir pras), `presets/` ( liosta GET / POST cruthaigh), `presets/[id]/` (GET / PUT / DELETE) — féach `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                       |
 | `app/api/` (non-v1)                                                          | bealaí Management/admin (eolairí ~ 60: soláthraithe, combos, socruithe, mcp, a2a, evals, cuimhne, scileanna, cuacha gréasáin, comhlíonadh, athléimneacht, monatóireacht, tolláin, cli-uirlisí, etc.)                                                                                                                    |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 bealach (rialú freastalaí, gníomhaire state/DNS/mappings, seachbhóthar, deimhniú, in aghaidh an tsrutha-CA). LOCAL_ONLY + SPAWN_CAPABLE. Féach `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                           |
 | `app/api/tools/traffic-inspector/`                                           | Cigire Tráchta REST + WS API — 16 bealach + (iarratais, seisiúin, óstaigh, modhanna gabhála, onnmhairiú, ws). LOCAL_ONLY + SPAWN_CAPABLE. Féach `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                              |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | `components/`                    | Comhpháirt painéal API: cuibheoirí thar `packages/ui-kit` — féach `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ainmneacha deilbhín a úsáideann na scáileáin → Comhpháirteanna Lucide (`<Icon>`)           |
-| `constants/providers.ts`         | **380 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                |
+| `constants/providers.ts`         | **394 soláthraí** le bailíochtú Zod (foinse na fírinne)                                                |
 | `constants/cliTools.ts`          | Clár seachtrach CLI uirlisí                                                                            |
-| `constants/routingStrategies.ts` | **20 straitéis ródaithe** le tosaíochtaí                                                               |
+| `constants/routingStrategies.ts` | **22 straitéis ródaithe** le tosaíochtaí                                                               |
 | `constants/publicApiRoutes.ts`   | Bealaí óna dteastaíonn údar Iompróra (vs bainistíocht).                                                |
 | `constants/upstreamHeaders.ts`   | Liosta diúltaithe ceanntásc d'iarratais réamhtheachtacha                                               |
 | `validation/schemas.ts`          | scéimeanna ~ 80 Zod (foinse amháin fírinne le haghaidh conarthaí API )                                 |
@@ -265,7 +265,7 @@ Spás oibre npm ar leith (`@omniroute/open-sse`). Láimhseálann sé próiseáil
 ```
 open-sse/
 ├── handlers/            # 16 chomhad (12 láimhseálaí + 4 chúntóir): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, srl.
-├── executors/           # 150 modúl forghníomhaithe (aicmí a leathnaíonn BaseExecutor + cúntóirí in aghaidh an tsoláthraí)
+├── executors/           # 163 modúl forghníomhaithe (aicmí a leathnaíonn BaseExecutor + cúntóirí in aghaidh an tsoláthraí)
 ├── translator/          # Tiontairí formáide (9 n-iarratas, 9 bhfreagra, 9 gcúntóir)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ modúl seirbhíse (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, srl.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Comhtháthú CLI + Inmheánach OmniRoute CLI                                          |
 | `I18N.md`                   | i18n ailtireacht, ag cur teanga leis, 67 logán                                     |
 | `UNINSTALL.md`              | Glan na céimeanna díshuiteála                                                      |
-| `PROVIDER_REFERENCE.md`     | **Uathghinte** catalóg de 380 soláthraí (regen: `npm run gen:provider-reference`)  |
+| `PROVIDER_REFERENCE.md`     | **Uathghinte** catalóg de 394 soláthraí (regen: `npm run gen:provider-reference`)  |
 
 ### Tumadh domhain fochóras
 

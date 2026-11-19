@@ -39,6 +39,15 @@ export type CostCalculationOptions = {
    * `provider` to be set.
    */
   flatRateAsZero?: boolean;
+  /**
+   * When true, the token counts are a SUM over many requests (e.g. the GROUP BY
+   * rows of usage analytics), so the per-request long-context pricing tier is
+   * skipped: the summed input would falsely trip its threshold (#19429).
+   * Trade-off: a genuine single long-context request inside such a sum is then
+   * billed at the base rates, since the sum cannot tell the cases apart.
+   * Not to be confused with the row-level `isAggregated` (rollup) field.
+   */
+  aggregatedTokens?: boolean;
 };
 
 /**
@@ -155,7 +164,7 @@ export function getPricingLookupModels(provider: string, model: string): string[
 }
 
 /** Pricing row for (provider, model), trying {@link getPricingLookupModels} in order. */
-async function resolvePricingRow(provider: string, model: string) {
+export async function resolvePricingRow(provider: string, model: string) {
   const { getPricingForModel } = await import("@/lib/db/settings");
   for (const key of getPricingLookupModels(provider, model)) {
     const pricing = await getPricingForModel(provider, key);
@@ -255,7 +264,7 @@ export function computeCostFromPricing(
   // never a cost basis: pricing them would bill the request a second time.
   if (isCreditMeteredProvider(options.provider)) return 0;
   const inputTokens = tokens.input ?? tokens.prompt_tokens ?? tokens.input_tokens ?? 0;
-  const rates = applyLongContextTier(pricing, inputTokens);
+  const rates = options.aggregatedTokens ? pricing : applyLongContextTier(pricing, inputTokens);
   const inputPrice = toNumber(rates.input, 0);
   const cachedPrice = toNumber(rates.cached, inputPrice);
   const outputPrice = toNumber(rates.output, 0);

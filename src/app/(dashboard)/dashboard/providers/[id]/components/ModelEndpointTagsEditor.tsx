@@ -3,10 +3,8 @@
 import { Button, Checkbox } from "@/shared/components";
 
 import { useState } from "react";
-import {
-  normalizeModelSupportedEndpoints,
-  type ModelSupportedEndpoint,
-} from "@/shared/constants/modelSupportedEndpoints";
+import { type ModelSupportedEndpoint } from "@/shared/constants/modelSupportedEndpoints";
+import { resolveModelEndpointDisplay } from "@/shared/utils/modelEndpointDisplay";
 
 const OPTIONS: ModelSupportedEndpoint[] = [
   "chat",
@@ -43,19 +41,22 @@ export default function ModelEndpointTagsEditor({
   onChanged,
   t,
 }: Props) {
-  const effective = supportedEndpoints?.length
-    ? normalizeModelSupportedEndpoints(supportedEndpoints)
-    : ["chat"];
+  const { endpoints: effective, source: displaySource } = resolveModelEndpointDisplay(
+    provider,
+    modelId,
+    supportedEndpoints,
+    endpointCapabilitySource
+  );
   const [editing, setEditing] = useState(false);
   const [selection, setSelection] = useState<string[]>(effective);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const provenance =
-    endpointCapabilitySource === "operator"
+    displaySource === "operator"
       ? t("endpointCapabilitiesOperator")
-      : endpointCapabilitySource === "inferred"
+      : displaySource === "inferred"
         ? t("endpointCapabilitiesInferred")
-        : endpointCapabilitySource === "declared"
+        : displaySource === "declared"
           ? t("endpointCapabilitiesDeclared")
           : t("endpointCapabilitiesDefaulted");
 

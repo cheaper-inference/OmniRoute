@@ -152,17 +152,17 @@ kunna shi (`src/server/auth/dashboardMfa.ts`).
      kundin duba-audit a matsayin `auth.mfa.disabled` tare da `secondFactor: "recovery_switch"`.
   4. Cire saitin `OMNIROUTE_DISABLE_MFA`, sake kunnawa, sannan a sake yin rajista idan ya zama dole.
 
-## Nau'ikan Route
+## Azuzuwan hanya
 
-`src/server/authz/types.ts` yana bayyana azuzuwa uku; duk route da ba za a iya rarraba shi da tabbaci ba yana komawa zuwa `MANAGEMENT`.
+`src/server/authz/types.ts` ta bayyana aji uku; duk wata hanya da ba za a iya rarraba ta ta faɗuwa zuwa `MANAGEMENT` ba.
 
-| Aji          | Bayani                                                                                                                                                         | Tabbatarwar da ake buƙata                                           |
-| ------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
-| `PUBLIC`     | Hanyoyi masu aminci a bayyane: shiga, fita, matsayi, init, health, bootstrap na onboarding.                                                                    | Babu                                                                |
-| `CLIENT_API` | Ƙarshen hidimar samfuri: `/api/v1/*`, `/api/v1beta/*`, tare da sunayen madadin `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Bearer key idan feature flag na `REQUIRE_API_KEY` mai aiki ya kunna |
-| `MANAGEMENT` | Shafukan dashboard, saituna, masu bayarwa, maɓalli, ƙarshen admin da bincike.                                                                                  | Zaman dashboard KO Bearer mai iyakar `manage`                       |
+| Class        | Bayani                                                                                                                                            | Ana buƙatar tabbaci                                                                       |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `PUBLIC`     | Tsare-tsare amintattun hanyoyin shiga — shiga, fita, matsayi, lafiya, hawan takalmin jirgi.                                                       | Babu                                                                                      |
+| `CLIENT_API` | Ƙarshen sabis na samfur — `/api/v1/*`, `/api/v1beta/*`, da laƙabi `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Maɓallin mai ɗaukar hoto lokacin da aka kunna alamar fasalin `REQUIRE_API_KEY` mai tasiri |
+| `MANAGEMENT` | Shafukan dashboard, saituna, masu samarwa, maɓallai, gudanarwa da ƙarshen bincike.                                                                | Dashboard zaman OR Bearer tare da iyakar `manage`                                         |
 
-Wasu ayyukan `MANAGEMENT` **na operator ne kawai**: maɓallin `manage` bai isa ba. Fitar da credentials da aka adana (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), mayar da backup a kan live data (`POST /api/db-backups/import` har da `dryRun=true`, `POST /api/db-backups` restore ta id, `POST /api/settings/import-json`), da lalata wuraren mayarwa (`DELETE /api/db-backups` cleanup, da `PATCH /api/db-backups` domin retention ɗin da yake ajiyewa shi ne ke tafiyar da pruning na atomatik bayan kowane backup) suna buƙatar zaman dashboard, asusun CLI na gida, ko shiga da aka kashe. Bayar da sync token (`POST /api/sync/tokens`) da ƙirƙirar `admin` CLI access token (`POST /api/cli/tokens`) suna buƙatar zaman dashboard ko asusun CLI na gida a kowane yanayin shiga. Maɓallan API na kowane iyaka da `oma_` access tokens ba credentials na operator ba ne: suna samun `403` duk lokacin da ake buƙatar ɗaya. Ana duba haka a `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Canza saitunan shiga ma na operator ne kawai: `POST /api/settings/require-login` (saita kalmar sirrin gudanarwa / kunna ko kashe `requireLogin`) yana karɓar waɗannan credentials ne kawai da zarar kalmar sirri ta wanzu. Taga bootstrap na farkon gudu (babu kalmar sirri tukuna) ba ta canzawa, kuma zaman dashboard dole ne ya aika `currentPassword` don maye gurbin kalmar sirri (`403` idan ba ta nan ko ba daidai ba ce, kuma ana rubuta ta a matsayin `settings.update_failed`). CLI na gida da instance mai shiga da aka kashe suna riƙe hanyar dawowa kuma suna iya saita kalmar sirri ba tare da ita ba, domin dukkansu an ɗaure su da host ɗin da ke mallakar data directory.
+Ayyukan `MANAGEMENT` kaɗan ne** ma'aikaci-kawai** : maɓallin `manage` bai isa ba. Ana fitar da bayanan da aka adana (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), maido da ajiyar ajiya akan bayanan rayuwa (`POST /api/db-backups/import` ciki har da `dryRun=true`, `POST /api/db-backups` mayar da id, `POST /api/settings/import-json`), lalata wuraren dawo da (`DELETE /api/db-backups` cleanup, da `PATCH /api/db-backups` saboda riƙewar da yake ci gaba da tafiyar da pruning ta atomatik bayan kowane madadin) yana buƙatar zaman dashboard, batun da CLI a iya cirewa na gida. Bayar da alamar daidaitawa (`POST /api/sync/tokens`) da ƙaddamar da alamar samun damar CLI `admin` (`POST /api/cli/tokens`) na buƙatar zaman dashboard ko batun CLI na gida a kowane yanayin shiga. maɓallan API na kowane yanki da alamun samun damar `oma_` ba fa'idodin aiki bane: suna samun `403` duk lokacin da ake buƙata ɗaya. Duban yana zaune a cikin `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Canza saitunan shiga ma'aikaci ne kawai: `POST /api/settings/require-login` (saitin kalmar sirrin gudanarwa / kunna `requireLogin`) yana karɓar waɗannan takaddun shaida kawai sau ɗaya kalmar sirri ta wanzu — taga bootstrap na farko (ba kalmar sirri ba tukuna) ba canzawa — kuma zaman dashboard dole ne ya aika `currentPassword` don maye gurbin kalmar sirri (`403` lokacin da ya ɓace ko kuskure, duba shi azaman `settings.update_failed`). CLI na gida da misali tare da nakasassun shiga suna kiyaye hanyar dawowa kuma suna iya saita kalmar sirri ba tare da shi ba, tunda duka biyun suna daure ga mai watsa shiri wanda ya mallaki kundin bayanan.
 
 ## Bututu
 
@@ -193,51 +193,49 @@ Kowane ajin hanya yana da manufa a cikin `src/server/authz/policies/`:
 
 Manufar nasara tana mayar da `AuthSubject` da `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Masu kula da ƙasa za su iya karanta ta ta `assertAuth(request, "CLIENT_API")` a cikin `src/server/authz/assertAuth.ts` maimakon sake gudanar da dabaru na gaskiya.
 
-## Jerin Hanyoyin Jama'a
+## Jerin Hanyoyi na Jama'a
 
-`src/shared/constants/publicApiRoutes.ts` shi ne jerin izinin da aka fayyace:
+`src/shared/constants/publicApiRoutes.ts` shine fiyayyen lissafin izini:
 
-An raba jerin bisa **tsari**, kuma wannan rabawar tana da muhimmiyar rawa (GHSA-74g9-q8f6-793h): ana daidaita prefix ta amfani da `startsWith()`, don haka yana kuma dacewa da kowace hanya makwabta da ke raba haruffan farkonta.
-`/api/usage/om-usage` a matsayin prefix yana sanya `/api/usage/om-usage<anything>` PUBLIC, kuma Next yana warware hakan zuwa `/api/usage/[connectionId]` — handler da ba shi da nasa tantancewar izini.
+An raba lissafin ta** siffa** , kuma tsaga yana ɗaukar kaya (GHSA-74g9-q8f6-793h): prefix yana daidaita da `startsWith()`, don haka kuma ya dace da kowace hanya da ke kusa da raba manyan haruffa. `/api/usage/om-usage` a matsayin prefix mai alamar `/api/usage/om-usage<anything>` PUBLIC, kuma Na gaba yana warware wannan don `/api/usage/[connectionId]` — mai sarrafa wanda ba shi da nasa.
 
 ```ts
-// Rukunonin hanyoyi na gaske. Kowane abu DOLE ne ya ƙare da "/" (gwajin unit yana tabbatar da hakan).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // ana ɗaukarsa CLIENT_API a cikin classify, ba "no-auth public" ba
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Hanyoyi guda ɗaya, ana daidaita su EXACTLY (tare da ko ba tare da slash na ƙarshe ba).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // mataki na 2 na login don TOTP da aka zaɓa; yana buƙatar kukin MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Hanyoyi guda ɗaya masu karantawa kawai waɗanda kuma suke amfani da sassaucin origin na CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Hanya guda ɗaya mai karantawa kawai BA tare da sassaucin CORS ba.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Hanyoyin karantawa kawai na jama'a ne **kawai** ga hanyoyin da ba su da haɗari. Lura: `classifyRoute()` yana cire `/api/v1/*` da `/api/v1beta/*` daga faɗuwar PUBLIC — waɗannan koyaushe `CLIENT_API` ne, saboda haka manufar maɓallin Bearer tana ci gaba da aiki.
+Hanyoyin karantawa kawai jama'a ne** kawai** don hanyoyin aminci. Lura: `classifyRoute()` ta keɓe `/api/v1/*` da `/api/v1beta/*` daga faɗuwar PUBLIC ta hanyar — waɗanda koyaushe suke `CLIENT_API` don haka har yanzu manufar maɓalli mai ɗaukar nauyi tana aiki.
 
 ## Ƙara Sabuwar Hanya
 
@@ -309,15 +307,15 @@ Yana kashe sai dai idan `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
 `read` / `write` / `admin` akan alamomin `oma_live_…`, an jera su ta `scopeSatisfies`
 (`src/lib/accessTokens/scopes.ts`). Wannan matsayi yana aiki ne kawai ga takardar shaidar alamar shiga. Duba [Tabbatar da Gudanarwa](../guides/MANAGEMENT-AUTH.md).
 
-## Maɓallin Buƙatar Tabbatarwa
+## Auth Bukatar Canji
 
-`isAuthRequired()` a cikin `src/shared/utils/apiAuth.ts` ne ke yanke shawara ko ana tilasta **kowane** tabbatarwa ga buƙata:
+`isAuthRequired()` a `src/shared/utils/apiAuth.ts` ya yanke shawarar ko** kowane** Ana aiwatar da auth don buƙatu:
 
-- `settings.requireLogin === false` → an kashe tabbatarwa gaba ɗaya, sai dai matakin kariya koyaushe (duba [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) da kiran da ke ba da takardar shaidar da yake karɓa, waɗanda ke buƙatar takardar shaida ɗaya kamar yadda ake yi lokacin da shiga ke kunne: bayar da sync tokens, ƙirƙirar CLI access tokens a kowane iyaka, da ƙirƙirar maɓallin API mai iyakar `manage`/`admin`, ba da wannan iyaka ga maɓalli, ko sake samar ko nuna irin wannan maɓalli (`requireCredentialForManagementScopedKey()` a `src/lib/api/requireManagementAuth.ts`). Maɓallan inference kawai suna zama a buɗe.
-- Babu kalmar sirri da aka saita **kuma** babu env var na `INITIAL_PASSWORD` → yanayin bootstrap: yana barin onboarding wizard da buƙatun loopback, amma buƙatun hanyar sadarwa da aka fallasa har yanzu suna buƙatar takardun shaida.
-- Duk kuskuren DB → yana gazawa a rufe (secure-by-default).
+- `settings.requireLogin === false` → auth naƙasasshe ne a duk duniya, in ban da matakin kariya koyaushe (duba [Tiers Guard Route](../security/ROUTE_GUARD_TIERS.md) ) da kuma kiran da ke ba da takaddun shaidar da yake karɓa, waɗanda ke buƙatar shaidar daidai da yadda ake shiga: ba da alamun daidaitawa, Mingin CLI samun damar shiga a kowane fage, da ƙirƙirar maɓallin API, ko ba da ikon `manage` da ikon `admin`. sabuntawa ko bayyana irin wannan maɓalli (`requireCredentialForManagementScopedKey()` a cikin `src/lib/api/requireManagementAuth.ts`). Maɓallai-kawai suna buɗewa. Rubuta tuta mai kariya (`REQUIRE_API_KEY`, sauran tutocin Tsaro, da tutocin SSRF / TLS / MCP-scope / sandbox da aka jera a cikin [Tutocin Feature](../reference/FEATURE_FLAGS.md#rest-api) ) da adana saitunan abin rufe fuska PII (`PUT /api/settings/pii`) suma suna buƙatar takaddun shaida.
+- Babu kalmar sirri da aka saita** kuma** babu `INITIAL_PASSWORD` env var → yanayin bootstrap yana ba da damar mayen hawan hawa da buƙatun madauki, amma buƙatun hanyar sadarwa da aka fallasa har yanzu suna buƙatar takaddun shaida. Banbanci: rubuta tutar sifa mai kariya da adana saitunan rufe fuska PII (`PUT /api/settings/pii`) suna buƙatar takaddun shaida ko da daga madauki, don haka madauki da kanta bai isa ba a can.
+- Duk wani kuskuren DB → ya kasa rufe (amintacce-by-default).
 
-Tilasta maɓallin API na abokin ciniki yana amfani da `isRequireApiKeyEnabled()` a `src/shared/utils/featureFlags.ts`, ba karanta `process.env.REQUIRE_API_KEY` kai tsaye ba. Wannan yana da muhimmanci ga instances da aka tura: canza `REQUIRE_API_KEY` a Dashboard → Feature Flags yana adana DB override kuma nan take yana shafar `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, da sauran duba tabbatarwar client-API da ke raba wannan mataimaki. Idan ba a iya karanta feature flag store ba, tabbatarwar client API tana gazawa a rufe kuma tana buƙatar maɓalli.
+Ƙaddamar da maɓallin API abokin ciniki yana amfani da `isRequireApiKeyEnabled()` a cikin `src/shared/utils/featureFlags.ts`, ba karanta `process.env.REQUIRE_API_KEY` kai tsaye ba. Wannan yana da mahimmanci ga al'amuran da aka tura: jujjuya `REQUIRE_API_KEY` a cikin Dashboard → Feature Tutoci yana adana DB wuce gona da iri kuma nan da nan ya shafi `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*`, da sauran abokin ciniki-API auth checks da ke raba wannan mataimaki. Idan ba a iya karanta kantin sayar da tuta, abokin ciniki API auth ya kasa rufe kuma yana buƙatar maɓalli.
 
 ## Sauyin da ke Karya Daidaituwa — v3.8.0
 

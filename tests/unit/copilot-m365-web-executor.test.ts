@@ -1,4 +1,5 @@
 import test from "node:test";
+import { EventEmitter } from "node:events";
 import assert from "node:assert/strict";
 
 import {
@@ -7,38 +8,33 @@ import {
 } from "../../open-sse/executors/copilot-m365-web.ts";
 import { encodeFrame } from "../../open-sse/executors/copilot-m365-frames.ts";
 
-type Listener = (...args: unknown[]) => void;
-
-class MockM365WebSocket {
+class MockM365WebSocket extends EventEmitter {
   static instances: MockM365WebSocket[] = [];
   static mode: "success" | "error" = "success";
 
   sent: string[] = [];
   closed = false;
-  listeners = new Map<string, Listener[]>();
+  readyState = 0;
 
   constructor(
     public url: string,
     public options: unknown
   ) {
+    super();
     MockM365WebSocket.instances.push(this);
     queueMicrotask(() => {
+      if (this.readyState !== 0) return;
       if (MockM365WebSocket.mode === "error") {
         this.emit("error", new Error("upstream transport failed\nstack line"));
         return;
       }
+      this.readyState = 1;
       this.emit("open");
     });
   }
 
-  on(event: string, listener: Listener): this {
-    const listeners = this.listeners.get(event) ?? [];
-    listeners.push(listener);
-    this.listeners.set(event, listeners);
-    return this;
-  }
-
   send(data: string): void {
+    assert.equal(this.readyState, 1, "cannot send unless the socket is OPEN");
     this.sent.push(String(data));
     // #10718 — a single socket write may carry multiple \x1e-terminated frames
     // (the chat invocation and its Metrics follow-up ride together).
@@ -65,7 +61,9 @@ class MockM365WebSocket {
             encodeFrame({
               type: 1,
               target: "update",
-              arguments: [{ messages: [{ text: "In progress...", messageType: "Progress", author: "bot" }] }],
+              arguments: [
+                { messages: [{ text: "In progress...", messageType: "Progress", author: "bot" }] },
+              ],
             }) +
               encodeFrame({
                 type: 1,
@@ -77,7 +75,11 @@ class MockM365WebSocket {
                 target: "update",
                 arguments: [{ messages: [{ text: "pong", author: "bot" }], isLastUpdate: true }],
               }) +
-              encodeFrame({ type: 2, invocationId: "0", item: { messages: [] } }) +
+              encodeFrame({
+                type: 2,
+                invocationId: "0",
+                item: { messages: [], result: { value: "Success" } },
+              }) +
               encodeFrame({ type: 3, invocationId: "0" })
           )
         );
@@ -86,13 +88,20 @@ class MockM365WebSocket {
   }
 
   close(): void {
+    if (this.readyState >= 2) return;
     this.closed = true;
+    this.readyState = 2;
+    setImmediate(() => {
+      this.readyState = 3;
+      this.emit("close", 1000, Buffer.alloc(0));
+    });
   }
 
-  emit(event: string, ...args: unknown[]): void {
-    for (const listener of this.listeners.get(event) ?? []) {
-      listener(...args);
-    }
+  terminate(): void {
+    if (this.readyState === 3) return;
+    this.closed = true;
+    this.readyState = 3;
+    setImmediate(() => this.emit("close", 1006, Buffer.alloc(0)));
   }
 }
 
@@ -146,7 +155,9 @@ test("CopilotM365WebExecutor streams OpenAI SSE chunks from accumulated M365 upd
       .filter((line) => line.startsWith("data: ") && line !== "data: [DONE]");
     const payloads = dataLines.map((line) => JSON.parse(line.slice("data: ".length)));
     const deltas = payloads.map((payload) => payload.choices?.[0]?.delta?.content).filter(Boolean);
-    const finishReasons = payloads.map((payload) => payload.choices?.[0]?.finish_reason).filter(Boolean);
+    const finishReasons = payloads
+      .map((payload) => payload.choices?.[0]?.finish_reason)
+      .filter(Boolean);
 
     assert.deepEqual(deltas, ["po", "ng"]);
     assert.deepEqual(finishReasons, ["stop"]);
@@ -157,7 +168,7 @@ test("CopilotM365WebExecutor streams OpenAI SSE chunks from accumulated M365 upd
   }
 });
 
-test("CopilotM365WebExecutor sanitizes WebSocket error SSE payloads", async () => {
+test("CopilotM365WebExecutor returns typed HTTP failure before SSE content without raw diagnostics", async () => {
   MockM365WebSocket.instances = [];
   MockM365WebSocket.mode = "error";
   const restore = __setCopilotM365WebSocketForTesting(
@@ -168,8 +179,11 @@ test("CopilotM365WebExecutor sanitizes WebSocket error SSE payloads", async () =
     const result = await executor.execute(makeInput(true));
     const body = await readBody(result.response);
 
-    assert.match(body, /data: /);
-    assert.match(body, /upstream transport failed/);
+    // HTTP is not committed before content; routers must see the actual failure status.
+    assert.equal(result.response.status, 502);
+    assert.equal(result.response.headers.get("Content-Type"), "application/json");
+    assert.equal(JSON.parse(body).error.code, "m365_socket_error");
+    assert.doesNotMatch(body, /upstream transport failed/);
     assert.doesNotMatch(body, /stack line/);
     assert.doesNotMatch(body, /\nstack/);
   } finally {

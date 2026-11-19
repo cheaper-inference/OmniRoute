@@ -16,7 +16,7 @@ import type { HttpAttemptSelection } from "../../utils/providerHttpAttempts.ts";
 import { ensureStreamReadiness, type StreamReadinessResult } from "../../utils/streamReadiness.ts";
 import { isRegisteredFeatureFlagEnabled } from "../../utils/registeredFeatureFlag.ts";
 import { isPublicProviderSafetyCode } from "../../utils/providerSafety.ts";
-import { maybeConvertJsonBodyToSse } from "./jsonBodyToSse.ts";
+import { convertJsonBodyWithinCap } from "./jsonBodyToSse.ts";
 
 type LoggerLike = {
   warn?: (...args: unknown[]) => void;
@@ -96,7 +96,7 @@ async function dispatchRetryLeg(
   }
   const retryResponse = retryResult?.response;
   if (!retryResponse) return { ...empty, retryResult };
-  const prepared = await maybeConvertJsonBodyToSse(retryResponse, {
+  const { response: prepared } = await convertJsonBodyWithinCap(retryResponse, {
     log: args.log,
     provider: args.provider,
     model: args.model,

@@ -58,7 +58,11 @@ export function normalizeUpstreamRequestParams({
 
   // Chat clients may send stream_options.include_usage, but OpenAI Responses
   // upstreams (including Azure AI Foundry /responses) reject stream_options.
-  if (targetFormat === FORMATS.OPENAI_RESPONSES && "stream_options" in translatedBody) {
+  if (
+    provider !== "codex" &&
+    targetFormat === FORMATS.OPENAI_RESPONSES &&
+    "stream_options" in translatedBody
+  ) {
     delete translatedBody.stream_options;
   }
 

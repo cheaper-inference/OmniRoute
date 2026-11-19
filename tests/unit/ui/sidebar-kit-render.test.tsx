@@ -87,6 +87,28 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     expect(navEl.querySelectorAll("svg.oi-icon").length).toBeGreaterThan(5);
   });
 
+  // #19066: subgroup headers ("Compression Context") were hand-made disclosure buttons; they are
+  // the kit Disclosure now, with the same compact row and the panel wired by the kit.
+  it("renders subgroups as kit Disclosures that mount their links only while open", async () => {
+    const user = userEvent.setup();
+    render(<Harness />);
+    const navEl = await screen.findByRole("navigation", { name: "Main navigation" });
+    await user.click(within(navEl).getByRole("button", { name: "OmniProxy", exact: true }));
+    const group = within(navEl).getByRole("button", { name: "Compression Context" });
+    expect(group.getAttribute("data-slot")).toBe("disclosure-trigger");
+    expect(group.className).toContain("text-xs");
+    expect(group.getAttribute("aria-expanded")).toBe("false");
+    const panel = document.getElementById(group.getAttribute("aria-controls")!)!;
+    expect(panel.getAttribute("data-slot")).toBe("disclosure-content");
+    expect(panel.hidden).toBe(true);
+    expect(within(navEl).queryByRole("link", { name: "Caveman" })).toBeNull();
+    await user.click(group);
+    expect(group.getAttribute("aria-expanded")).toBe("true");
+    expect(panel.hidden).toBe(false);
+    expect(panel.contains(within(navEl).getByRole("link", { name: "Caveman" }))).toBe(true);
+    expect(group.closest("[data-slot=sidebar-menu-item]")).not.toBeNull();
+  });
+
   it("puts the search at the top of SidebarContent, sticky above the scrolling nav (spec §3.7)", async () => {
     render(<Harness />);
     const navEl = await screen.findByRole("navigation", { name: "Main navigation" });
@@ -149,10 +171,24 @@ describe("Sidebar rendered with the kit Sidebar family", () => {
     render(<Harness />);
     const navEl = await screen.findByRole("navigation", { name: "Main navigation" });
     await user.click(within(navEl).getByRole("button", { name: "OmniProxy", exact: true }));
-    await user.click(within(navEl).getAllByRole("button", { name: "Pin item" })[0]);
+    // The pin is the kit SidebarMenuAction: it places itself at the row's inline end and pads the
+    // row (no classes of ours), and a pin that is off only shows on row hover or focus.
+    const pin = within(navEl).getAllByRole("button", { name: "Pin item" })[0];
+    expect(pin.getAttribute("data-slot")).toBe("sidebar-menu-action");
+    expect(pin.className).toContain("ci-sidebar__menu-action");
+    expect(pin.className).not.toMatch(/\babsolute\b|\bend-1\b|opacity-0/);
+    expect(pin.getAttribute("data-show-on-hover")).toBe("true");
+    const row = pin.closest("[data-slot=sidebar-menu-item]")!;
+    expect(row.className).not.toContain("group/nav-item");
+    expect(row.querySelector("[data-slot=sidebar-menu-button]")!.className).not.toContain("pe-8");
+    await user.click(pin);
     expect(within(navEl).getByRole("button", { name: "Pinned", exact: true })).not.toBeNull();
     expect(JSON.parse(localStorage.getItem("sidebar-pinned-items")!).length).toBe(1);
-    await user.click(within(navEl).getAllByRole("button", { name: "Unpin item" })[0]);
+    // A pin that is on stays visible.
+    const unpin = within(navEl).getAllByRole("button", { name: "Unpin item" })[0];
+    expect(unpin.getAttribute("data-slot")).toBe("sidebar-menu-action");
+    expect(unpin.hasAttribute("data-show-on-hover")).toBe(false);
+    await user.click(unpin);
     expect(within(navEl).queryByRole("button", { name: "Pinned", exact: true })).toBeNull();
     expect(JSON.parse(localStorage.getItem("sidebar-pinned-items")!)).toEqual([]);
   });

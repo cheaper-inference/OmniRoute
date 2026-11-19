@@ -53,61 +53,61 @@ OmniRoute/
 
 ## 根文件
 
-| 文件                                        | 用途                                                                           |
-| ------------------------------------------- | ------------------------------------------------------------------------------ |
-| **README.md**                               | 营销落地页 + 快速入门 + 功能矩阵（另请参阅 `llm.txt`）                         |
-| **CHANGELOG.md**                            | 各版本变更日志（由 `/version-bump-cc` 技能自动生成）                           |
-| **LICENSE**                                 | MIT 许可证文本                                                                 |
-| **CLAUDE.md**                               | Claude Code 智能体的项目规则（硬性规则、约定、场景）                           |
-| **AGENTS.md**                               | 与 CLAUDE.md 相同，但适用于非 Claude AI 智能体（Codex、Cursor 等）             |
-| **GEMINI.md**                               | 面向 Gemini 智能体的精简规则（CLAUDE.md 的子集）                               |
-| **CONTRIBUTING.md**                         | 贡献者指南：设置、约定式提交、测试、PR 流程                                    |
-| **SECURITY.md**                             | 漏洞报告政策、支持的版本、威胁模型                                             |
-| **CODE_OF_CONDUCT.md**                      | 贡献者公约——社区行为规范                                                       |
-| **llm.txt**                                 | 针对 LLM 爬虫优化的纯文本落地页（面向 AI 助手的 SEO）                          |
-| **package.json**                            | npm 清单、脚本、依赖项、引擎、c8 覆盖率门禁                                    |
-| **package-lock.json**                       | 锁定的依赖关系树                                                               |
-| **tsconfig.json**                           | 根 TypeScript 配置                                                             |
-| **tsconfig.typecheck-core.json**            | `src/` 核心代码的类型检查配置                                                  |
-| **tsconfig.typecheck-noimplicit-core.json** | 严格（`noImplicitAny`）类型检查                                                |
-| **tsconfig.tsbuildinfo**                    | TS 增量构建缓存（已被 git 忽略）                                               |
-| **next.config.mjs**                         | Next.js 16 构建配置（独立输出）                                                |
-| **next-env.d.ts**                           | Next.js 自动生成的环境类型                                                     |
-| **eslint.config.mjs**                       | ESLint 扁平配置（按项目区域划分规则）                                          |
-| **prettier.config.mjs**                     | Prettier 格式化规则                                                            |
-| **postcss.config.mjs**                      | Tailwind/CSS 流水线的 PostCSS 配置                                             |
-| **playwright.config.ts**                    | Playwright E2E 测试配置                                                        |
-| **vitest.config.ts**                        | Vitest 配置（默认测试套件）                                                    |
-| **vitest.mcp.config.ts**                    | MCP 服务器 / autoCombo / 缓存测试套件的 Vitest 配置                            |
-| **sonar-project.properties**                | SonarQube/SonarCloud 配置（代码质量）                                          |
-| **Dockerfile**                              | 多阶段 Docker 构建（builder → runner-base → runner-cli）                       |
-| **docker-compose.yml**                      | 包含 4 个配置集（base、cli、host、cliproxyapi）和 redis sidecar 的开发 compose |
-| **docker-compose.prod.yml**                 | 生产环境 compose（端口 20130、redis、命名卷）                                  |
-| **.dockerignore**                           | 从 Docker 上下文中排除的文件                                                   |
-| **fly.toml**                                | Fly.io 部署配置（区域 `sin`、端口 20128、/data 卷）                            |
-| **.env.example**                            | 环境文件模板（首次安装时自动复制到 `.env`）                                    |
-| **.gitignore**                              | Git 忽略模式                                                                   |
-| **.npmignore**                              | npm 发布排除列表                                                               |
-| **.npmrc**                                  | npm 配置（注册表、锁文件策略）                                                 |
-| **.node-version**                           | Node 版本锁定（由兼容 nvm 的工具使用）                                         |
-| **.nvmrc**                                  | nvm 的 Node 版本锁定                                                           |
-| **eslint.complexity.config.mjs**            | 复杂度棘轮的 ESLint 配置（`scripts/check/check-complexity.mjs --config`）      |
-| **eslint.sonarjs.config.mjs**               | SonarJS 规则（认知复杂度 / 重复）的 ESLint 配置                                |
-| **source.config.ts**                        | Fumadocs `defineDocs` 源配置（供 `.source/` 使用）                             |
-| **knip.json**                               | Knip 配置——未使用的文件/导出/依赖项（供死代码门禁使用）                        |
-| **stryker.conf.json**                       | Stryker 变异测试配置                                                           |
-| **.size-limit.json**                        | size-limit bundle 预算配置                                                     |
-| **promptfooconfig.yaml**                    | promptfoo 评估配置                                                             |
-| **.gitleaks.toml**                          | gitleaks 密钥扫描规则集                                                        |
-| **.zizmor.yml**                             | zizmor GitHub Actions 安全检查配置                                             |
-| **socket.yml**                              | Socket.dev 软件供应链配置                                                      |
-| **news.json**                               | 本地化的 v2 公告源；Radar 发布项默认处于未启用状态                             |
-| **flake.nix** / **flake.lock**              | Nix 开发 shell 定义和锁定文件                                                  |
-| **.env**                                    | 本地密钥（已被 git 忽略——从 `.env.example` 生成）                              |
+| 文件                                         | 目的                                                                             |
+| -------------------------------------------- | -------------------------------------------------------------------------------- |
+| **README.md**                                | 营销登陆页面+快速入门+功能矩阵（另请参阅`llm.txt`）                              |
+| **CHANGELOG.md**                             | 每个版本的变更日志（由`/version-bump-cc`技能自动生成）                           |
+| **LICENSE**                                  | MIT许可证文本                                                                    |
+| **CLAUDE.md**                                | Claude代码代理的项目规则（硬规则、约定、场景）                                   |
+| **AGENTS.md**                                | 与CLAUDE.md相同，但适用于非 Claude AI代理（Codex、 Cursor等）                    |
+| **GEMINI.md**                                | 基于 Gemini 的代理的简明规则（ CLAUDE.md的子集）                                 |
+| **CONTRIBUTING.md**                          | 贡献者指南：设置、常规提交、测试、 PR流程                                        |
+| **SECURITY.md**                              | 漏洞报告策略、支持版本、威胁模型                                                 |
+| **CODE_OF_CONDUCT**                          | 贡献者契约—社区行为期望                                                          |
+| **llm.txt**                                  | 针对LLM爬虫优化的纯文本登陆（SEO用于AI助手）                                     |
+| **package.json**                             | npm 清单、脚本、依赖项、引擎、c8 覆盖门                                          |
+| **package-lock.json**                        | 锁定的依赖树                                                                     |
+| **tsconfig.json**                            | 根TypeScript配置                                                                 |
+| **tsconfig。typecheck-core.json**            | `src/`核心的类型检查配置                                                         |
+| **tsconfig。typecheck-noimplicit-core.json** | 严格 (`noImplicitAny`) 类型检查                                                  |
+| **tsconfig.tsbuildinfo**                     | TS增量构建缓存（gitignored）                                                     |
+| **下一个。config.mjs**                       | Next.js 16 构建配置（独立输出）                                                  |
+| **下一个环境。d.ts**                         | Next.js自动生成的环境类型                                                        |
+| **埃斯林特。config.mjs**                     | ESLint平面配置（每个项目区域的规则）                                             |
+| **更漂亮。config.mjs**                       | Prettier格式规则                                                                 |
+| **后CSS。config.mjs**                        | Tailwind/CSS管道的PostCSS配置                                                    |
+| **剧作家。config.ts**                        | Playwright E2E测试配置                                                           |
+| **维泰斯特。config.ts**                      | Vitest配置（默认套件）                                                           |
+| **维泰斯特.mcp。config.ts**                  | MCP服务器 / autoCombo / 缓存套件的Vitest配置                                     |
+| **声纳项目.properties**                      | SonarQube/SonarCloud配置（代码质量）                                             |
+| **Dockerfile**                               | 多阶段Docker构建（构建器→ runner-base → runner-cli）                             |
+| **docker-compose.yml**                       | 开发人员使用 4 个配置文件（base、cli、host、cliproxyapi）进行组合+ redis sidecar |
+| **docker-compose。prod.yml**                 | 生产组合（端口 20130、redis、命名卷）                                            |
+| **.dockerignore**                            | 从Docker上下文中排除的文件                                                       |
+| **fly.toml**                                 | Fly.io 部署配置（区域`sin`，端口 20128，/数据量）                                |
+| **.env.example**                             | 模板环境文件（首次安装时自动复制到`.env` ）                                      |
+| **.gitignore**                               | Git 忽略模式                                                                     |
+| **.npmignore**                               | npm 发布排除列表                                                                 |
+| **.npmrc**                                   | npm 配置（注册表、锁定文件策略）                                                 |
+| **.node-版本**                               | 节点版本引脚（由 nvm 兼容工具使用）                                              |
+| **.nvmrc**                                   | nvm 的节点版本引脚                                                               |
+| **eslint.complexity。config.mjs**            | ESLint复杂性棘轮配置 (`scripts/check/check-complexity.mjs --config`)             |
+| **eslint.sonarjs。config.mjs**               | SonarJS规则的ESLint配置（认知复杂性/重复）                                       |
+| **来源。config.ts**                          | Fumadocs `defineDocs`源配置（提供`.source/`）                                    |
+| **knip.json**                                | Knip config —未使用的files/exports/deps （提供死代码门）                         |
+| **斯赛克。conf.mjs**                         | Stryker 突变测试配置（从`mutate`计算`tap.testFiles` ）                           |
+| **.size-limit.json**                         | 大小限制捆绑预算配置                                                             |
+| **promptfooconfig.yaml**                     | 提示foo评估配置                                                                  |
+| **.gitleaks.toml**                           | gitleaks 秘密扫描规则集                                                          |
+| **.zizmor.yml**                              | zizmor GitHub-Actions security-lint 配置                                         |
+| **socket.yml**                               | Socket.dev 供应链配置                                                            |
+| **news.json**                                | 本地化 v2 公告提要；雷达发射项目船舶处于非活动状态                               |
+| **弗莱克.尼克斯**/**片状锁**                 | Nix dev-shell 定义+锁                                                            |
+| **.env**                                     | 本地秘密（从`.env.example`生成的 gitignored — ）                                 |
 
-> **在 v3.8.26 中移出根目录（精简）：**
+> **在 v3.8.26 中移出了根（整理）：**
 >
-> - **→ `config/quality/`：** `quality-baseline.json`、`complexity-baseline.json`、`duplication-baseline.json`、`file-size-baseline.json`、`test-discovery-baseline.json`、`dependency-allowlist.json`、`.license-allowlist.json`，以及生成的 `quality-metrics.json`（已被 git 忽略）。请参阅 [`## config/`](#config--static-configs--quality-gate-state)。
+> - **→ `config/quality/`:** `quality-baseline.json`、 `complexity-baseline.json`、 `duplication-baseline.json`、 `file-size-baseline.json`、 `test-discovery-baseline.json`、 `dependency-allowlist.json`、 `.license-allowlist.json`和生成的`quality-metrics.json` （gitignored）。参见[`## config/`](#config--static-configs--quality-gate-state) 。
 
 ---
 
@@ -174,12 +174,12 @@ src/
 | `batches/`                               | OpenAI批次API处理程序                                                                                                                                                                                                                                                                                     |
 | `catalog/`                               | 提供者目录Zod验证+能力解析                                                                                                                                                                                                                                                                                |
 | `cloudAgent/`                            | 云代理 (Codex Cloud、 Devin、 Jules) —参见`docs/frameworks/CLOUD_AGENT.md`                                                                                                                                                                                                                                |
-| `combos/`                                | 组合解决+重新排序助手                                                                                                                                                                                                                                                                                     |
+| `combos/`                                | 组合解析+重新排序助手                                                                                                                                                                                                                                                                                     |
 | `audit/`                                 | 活动提要助手： `highLevelActions.ts` （允许列表+ `isHighLevelAction()`）、 `activityIcons.ts` （操作→ icon/verb地图）、 `timeline.ts` (groupByDay/relativeTime) —请参阅`docs/architecture/MONITORING_SECTIONS.md`                                                                                         |
 | `compliance/`                            | 审核日志+提供者审核—参见`docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                     |
 | `compression/`                           | 压缩发动机胶（发动机住`open-sse/services/compression/`）                                                                                                                                                                                                                                                  |
 | `config/`                                | 运行时配置助手                                                                                                                                                                                                                                                                                            |
-| `db/`                                    | 120 +域DB模块+ 168 迁移（ SQLite始终通过此处）                                                                                                                                                                                                                                                            |
+| `db/`                                    | 120 +域DB模块+ 168 迁移（对于SQLite始终通过此处）                                                                                                                                                                                                                                                         |
 | `quota/`                                 | 配额共享引擎： `dimensions.ts` (types/Zod), `types.ts` (QuotaStore接口), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` —参见`docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                 | 雷达自由模型目录客户端： `feedSchema.ts`、 `pinnedKeys.ts`、 `verify.ts`、 `sync.ts`、 `applyFeed.ts`、 `index.ts` (`getRadarCatalog()`) —参见`docs/frameworks/RADAR.md`                                                                                                                                  |
 | `display/`                               | UI格式化助手（成本、延迟等）                                                                                                                                                                                                                                                                              |
@@ -197,7 +197,7 @@ src/
 | `plugins/`                               | 插件注册表                                                                                                                                                                                                                                                                                                |
 | `promptCache/`                           | 人类风格的提示缓存断点                                                                                                                                                                                                                                                                                    |
 | `skills/`                                | 技能框架（内置+市场+ SkillsSH） —参见`docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                          |
-| `playground/`                            | Playground Studio 共享助手： `codeExport.ts` （curl/Python/TS生成器）、 `promptImprover.ts` （元提示生成器）、 `streamMetrics.ts` （纯TTFT/TPS）、 `types.ts` （定价表） —参见`docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                      |
+| `playground/`                            | Playground Studio 共享助手： `codeExport.ts` （curl/Python/TS生成器）、 `promptImprover.ts` （元提示构建器）、 `streamMetrics.ts` （纯TTFT/TPS）、 `types.ts` （定价表） —参见`docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                      |
 | `webhookDispatcher.ts`                   | HMAC webhook 传递—参见`docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                       |
 | `cloudflaredTunnel.ts`, `ngrokTunnel.ts` | 隧道管理者—见`docs/ops/TUNNELS_GUIDE.md`                                                                                                                                                                                                                                                                  |
 | `cloudSync.ts`, `initCloudSync.ts`       | 可选的状态云同步                                                                                                                                                                                                                                                                                          |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------- |
 | `components/`                    | 仪表板组件API： `packages/ui-kit`上的适配器—请参阅`docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`：屏幕使用的图标名称→ Lucide 组件 (`<Icon>`)                                 |
-| `constants/providers.ts`         | **380 家提供者**通过Zod验证（事实来源）                                                |
+| `constants/providers.ts`         | **394 家提供者**通过Zod验证（事实来源）                                                |
 | `constants/cliTools.ts`          | 外部CLI工具注册表                                                                      |
-| `constants/routingStrategies.ts` | **20种路由策略**有优先事项                                                             |
+| `constants/routingStrategies.ts` | **22种路由策略**有优先事项                                                             |
 | `constants/publicApiRoutes.ts`   | 需要承载（与管理）身份验证的路由                                                       |
 | `constants/upstreamHeaders.ts`   | 上游请求的标头拒绝列表                                                                 |
 | `validation/schemas.ts`          | ~ 80 Zod模式（ API合约的单一事实来源）                                                 |
@@ -265,7 +265,7 @@ src/
 ```
 open-sse/
 ├── handlers/            # 16 个文件（12 个处理器 + 4 个辅助模块）：chatCore、responsesHandler、embeddings、audio、image、video、music、rerank、moderations、search 等
-├── executors/           # 150 个执行器模块（扩展 BaseExecutor 的类 + 各提供者辅助模块）
+├── executors/           # 163 个执行器模块（扩展 BaseExecutor 的类 + 各提供者辅助模块）
 ├── translator/          # 格式转换器（9 个请求转换器、9 个响应转换器、9 个辅助模块）
 ├── transformer/         # Responses API ↔ Chat Completions（TransformStream）
 ├── services/            # 约 80+ 个服务模块（combo、accountFallback、autoCombo、reasoningCache、claude code/chatgpt stealth、modelDeprecation、taskAwareRouter、workflowFSM 等）
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | 外部CLI集成+内部OmniRoute CLI                                            |
 | `I18N.md`                   | i18n 架构，添加语言，67 个语言环境                                       |
 | `UNINSTALL.md`              | 干净卸载步骤                                                             |
-| `PROVIDER_REFERENCE.md`     | **自动生成**380 家提供者目录（regen： `npm run gen:provider-reference`） |
+| `PROVIDER_REFERENCE.md`     | **自动生成**394 家提供者目录（regen： `npm run gen:provider-reference`） |
 
 ### 子系统深入研究
 

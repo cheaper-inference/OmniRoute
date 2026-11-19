@@ -19,6 +19,7 @@
  */
 import { test } from "node:test";
 import assert from "node:assert/strict";
+import { useDirectMockHosts } from "../helpers/directMockHosts.ts";
 import { proxyFetch } from "../../open-sse/utils/proxyFetch.ts";
 import { getDefaultDispatcher, getRetryDispatcher } from "../../open-sse/utils/proxyDispatcher.ts";
 
@@ -28,7 +29,8 @@ function undErrSocket(): Error {
   return err;
 }
 
-test("#4252 a transient socket failure retries on a FRESH (no-keep-alive) dispatcher, not the pooled one", async () => {
+test("#4252 a transient socket failure retries on a FRESH (no-keep-alive) dispatcher, not the pooled one", async (t) => {
+  useDirectMockHosts(t, "provider.example.test");
   const dispatchersUsed: unknown[] = [];
   let undiciCalls = 0;
   let nativeCalls = 0;
@@ -46,7 +48,7 @@ test("#4252 a transient socket failure retries on a FRESH (no-keep-alive) dispat
     new Response("native-should-not-fire", { status: 200 });
 
   const res = await proxyFetch(
-    "https://integrate.api.nvidia.com/v1/chat/completions",
+    "https://provider.example.test/v1/chat/completions",
     { method: "POST" },
     { undiciFetch: mockUndici, nativeFetch: mockNative }
   );

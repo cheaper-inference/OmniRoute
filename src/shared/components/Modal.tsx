@@ -85,11 +85,26 @@ const SIZES = {
   full: WIDE,
 } as const;
 
+// A menu item leaves the DOM as soon as its menu closes, so it cannot take focus back. The kit
+// DropdownMenu (Radix) labels its content with the trigger's id: climb to the trigger that
+// opened the menu (and past submenu triggers, which unmount with their parent menu).
+function menuTriggerFor(element: HTMLElement): HTMLElement {
+  let target = element;
+  for (let depth = 0; depth < 5; depth += 1) {
+    const menu = target.closest<HTMLElement>('[role="menu"][aria-labelledby]');
+    const trigger = menu && document.getElementById(menu.getAttribute("aria-labelledby") ?? "");
+    if (!trigger || trigger === target) break;
+    target = trigger;
+  }
+  return target;
+}
+
 // The element focused right now, unless it is <body> (nothing to return to).
 function currentFocus(): HTMLElement | null {
   if (typeof document === "undefined") return null;
   const active = document.activeElement;
-  return active instanceof HTMLElement && active !== document.body ? active : null;
+  if (!(active instanceof HTMLElement) || active === document.body) return null;
+  return menuTriggerFor(active);
 }
 
 // Initial focus, the focus trap, Escape, body scroll lock and the aria-labelledby
@@ -152,8 +167,7 @@ export default function Modal({
         className={cn("p-0 max-h-[calc(100vh-3rem)]", SIZES[size], className)}
         style={inlineMaxWidth ? { maxWidth: inlineMaxWidth } : undefined}
         onOpenAutoFocus={() => {
-          const active = document.activeElement;
-          openerRef.current = renderOpener ?? (active instanceof HTMLElement ? active : null);
+          openerRef.current = renderOpener ?? currentFocus();
         }}
         onCloseAutoFocus={(e) => {
           e.preventDefault();

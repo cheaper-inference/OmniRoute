@@ -19,11 +19,14 @@ omniroute --mcp
 Eller via åpen SS-transport:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
-HTTP transportene (`sse` / `streamable-http`, servert i prosess av dashbordserveren) er av som standard og var tidligere kun vekslende fra `/dashboard/mcp` siden. Fra og med v3.8.51 har CLI paritet:
+HTTP transportene (`sse` / `streamable-http`, servert i prosess av dashbordserveren) er av som standard og var tidligere kun vekslende fra `/dashboard/mcp` siden. Fra v3.8.51 har CLI paritet:
 
 ```bash
 omniroute mcp status                                  # enabled/online, transport, tool count
@@ -142,7 +145,7 @@ Se [MCP Client Configuration](../guides/SETUP_GUIDE.md#mcp-client-configuration)
 | `omniroute_rtk_discover`            | `read:compression`  | Oppdag tilbakevendende støy i opt-in RTK -utgangsprøver                                                                                     |
 | `omniroute_rtk_learn`               | `read:compression`  | Generer et utkast til RTK -filter som kan gjennomgås fra eksempler på opt-in                                                                |
 
-CCR oppføringer er kun i minnet og forsvinner ved omstart. Hver blokk er begrenset til 2 MiB, hver hovedstol til 16 MiB, og den globale butikken til 64 MiB. Oppføringer er standard til en 24-timers TTL (maksimalt syv dager). Full MCP henting er begrenset til 256 KiB; større blokker forblir tilgjengelige gjennom ranged- og grep-modusene. Lagring, henting, oppføring, inspeksjon, sletting og statistikk isoleres av den autentiserte API-nøkkelen. Revisjonsposter inneholder hash- og størrelsesmetadata, aldri innhold.
+CCR -oppføringer bruker en to-lags butikk: et varmt nivå i minnet støttet, på lokale ikke-sky-kjøretider, av et holdbart SQLite lag (`ccr_blocks`, på som standard), slik at en blokk overlever utkastelse eller en omstart til dens TTL går tom — bortsett fra blokkerer over 512 KB, som forblir `COMPRESSION_CCR_DURABLE_STORE=false` kjøretider, som forblir skyg-på. Den varige skrivingen er beste innsats: den blir droppet mens 1000 skrivinger allerede venter, og en mislykket SQLite skriving blir logget, ikke forsøkt på nytt, slik at blokken går tapt ved omstart. Hver blokk er begrenset til 2 MiB, hver hovedstol til 16 MiB, og den globale butikken til 64 MiB. Oppføringer er som standard en 24-timers TTL (maksimalt syv dager). Full MCP henting er begrenset til 256 KiB; større blokker forblir tilgjengelige gjennom ranged- og grep-modusene. Lagring, henting, oppføring, inspeksjon, sletting og statistikk isoleres av den autentiserte API-nøkkelen. Revisjonsposter inneholder hash- og størrelsesmetadata, aldri innhold. Operatørvendte detaljer (de to markørene, klientforutsetninger, `codemode:false`, per-verktøy-omfang, paginering og en diagnostisk matrise) finnes i [Compression Engines → Prerequisites / operatørveiledning](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` rapporterer MCP -beskrivelseskomprimering separat under `analytics.mcpDescriptionCompression`. Disse verdiene er metadatastørrelsesestimater for MCP listebare beskrivelser (`tools`, `prompts`, `resources` og `resourceTemplates`); de er ikke leverandørbrukskvitteringer og er merket med `source: "mcp_metadata_estimate"`.
 

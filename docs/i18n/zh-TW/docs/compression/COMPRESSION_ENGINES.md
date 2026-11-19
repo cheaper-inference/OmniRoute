@@ -279,6 +279,95 @@ open-sse/services/compression/engines/mcpAccessibility/
 
 儀表板位置：`Dashboard -> Context & Cache -> Compression Combos`。
 
+## 先決條件／操作員指南（CCR 與 session-dedup）
+
+CCR（`ccr`）和 `session-dedup` 會取代或省略文字，並留下**標記**。本節是操作員參考資料，說明如何連接用戶端、讀取兩個標記，以及擷取或診斷被省略的內容。每個引擎的運作機制已在上文說明；本節則是「要如何執行」的層級。
+
+### 傳輸與端點
+
+提供 CCR 工具的 MCP 伺服器可以透過三種方式存取。預設基底 URL 是 `http://localhost:20128`（`OMNIROUTE_BASE_URL`）：
+
+| 傳輸方式                        | URL／命令                               | 備註                                                                                                                       |
+| ------------------------------- | --------------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Streamable HTTP（用戶端，建議） | `http://localhost:20128/api/mcp/stream` | 目前 MCP 用戶端使用的端點。                                                                                                |
+| 舊版 SSE 單例                   | `http://localhost:20128/api/mcp/sse`    | 較舊的單例傳輸方式。它會**關閉** streamable 工作階段；請對 `/api/mcp/stream` 使用 `streamable-http` 用戶端，而不是此端點。 |
+| stdio                           | `omniroute --mcp`                       | 用於會產生此程序的 IDE MCP 設定。沒有 `--dev` 旗標；`omniroute --mcp` 是 stdio 進入點。                                    |
+
+### 儲存層級（重新啟動後仍會保留的內容）
+
+CCR 是**雙層**儲存區，而非僅儲存在記憶體中：
+
+- **熱記憶體層** — 每個區塊上限為 2 MiB、每個主體上限為 16 MiB、全域上限為 64 MiB。項目的預設 TTL 為 24 小時（最長 7 天）。從記憶體進行完整 MCP 擷取的上限為 256 KiB；更大的內容仍可透過範圍／ grep 模式存取。
+- **持久 SQLite 層**（`ccr_blocks`、`COMPRESSION_CCR_DURABLE_STORE`，預設開啟）— 支援記憶體層，因此區塊在 LRU 淘汰、重新啟動，或擷取要求落到另一個執行個體時仍能保留。資料列會保留區塊的 TTL，因此超過 TTL 的區塊會從兩個層級中一併消失。
+
+三個防護機制會限制持久層的大小 — 在以下情況下，區塊只會保留在記憶體中：
+
+1. 區塊超過 **512 KB**（`MAX_DURABLE_BLOCK_BYTES`）；
+2. 執行環境是雲端執行環境（沒有本機磁碟）；
+3. `COMPRESSION_CCR_DURABLE_STORE=false`。
+
+因此，「區塊消失了」並不一定是重新啟動所造成的：只要持久化寫入成功，本機、非雲端執行環境中的小於 512 KB 區塊，就會透過持久層在重新啟動後保留，直到 TTL 到期為止。該寫入採盡力而為方式，且不在要求路徑上執行：當已有 1,000 個持久化寫入處於待處理狀態時，新的寫入會被捨棄；SQLite 寫入錯誤會被記錄（`[ccr] durable persist failed`）但不會重試；如果在延遲寫入執行前發生損毀，也會遺失該區塊。這類區塊會維持僅存在記憶體中的狀態，並在重新啟動後消失。請參閱[環境參考](../reference/ENVIRONMENT.md)以了解該變數。
+
+### 兩個標記
+
+| 標記                                  | 含義                                                                                               | 模型應採取的動作                                                                                                                     |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `[CCR retrieve hash=<24hex> chars=N]` | 大型區塊已使用內容定址方式儲存。                                                                   | 使用**原封不動複製的 24 位十六進位雜湊**呼叫 `omniroute_ccr_retrieve`，以取回原始文字。                                              |
+| `[dedup:ref sha=…]`                   | `session-dedup` 已省略同一工作階段較早回合中已傳送的文字。這是**刻意的回溯參照**，不是遺失或錯誤。 | **不要**呼叫任何工具，也**不要**嘗試「重建」該文字。文字的首次出現才是標準副本；目前回合永遠不會被重寫，而是在之後的回合中進行去重。 |
+
+`[dedup:ref]` 回溯參照是刻意的通訊協定決策 — 不會進行傳送前重建。請將其視為「這段完全相同的文字稍早已在此工作階段中傳送過」。
+
+### 用戶端先決條件
+
+- **金鑰 (stdio)：** stdio 呼叫端不攜帶每個要求的身分，因此會使用 `OMNIROUTE_API_KEY`（設定於 MCP 伺服器的 `env` 中）進行驗證。若沒有此金鑰，呼叫端會是匿名的，需要主體的工具可能會降級。
+- **`tools[]` 是注入的前置條件。** 只有當要求所宣告的 `tools[]` 證明用戶端確實能夠存取 `omniroute_ccr_retrieve` 時，才會注入 CCR 擷取協定指示 (#8033)。比對採用以分隔符號（`__`、`.`、`/`、`:`）界定的尾端區段比對——絕不採用單純的子字串比對——因此像 `mcp__gateway__omniroute_ccr_retrieve` 這類具命名空間的名稱仍會被計入。缺少或不相符的 `tools[]` 表示不會注入該指示，這是設計上的行為。
+- **`codemode:false`（OpenCode 用戶端）。** OpenCode 預設使用 Code Mode，只會向模型宣告其原生工具，**不會**將 MCP 工具放入原生的 `tools[]` 清單。請在 MCP 伺服器項目上設定 `codemode: false`，讓 `omniroute_ccr_*` 工具被宣告。這是**用戶端**設定，不是 OmniRoute 設定。OpenCode 將工具命名為 `<server>_<tool>`，因此名為 `omniroute` 的伺服器會公開 `omniroute_omniroute_ccr_retrieve`；`_` 是比對的分隔符號之一，因此當要求攜帶 CCR 標記時，CCR 指示會以該名稱注入。
+- **主體。** 儲存與擷取會依經過驗證的主體（每個 API 金鑰）隔離。每個金鑰只能看見自己的區塊。
+
+### 每個工具的範圍
+
+對於狹義範圍的 HTTP/SSE 呼叫端，範圍強制執行一律開啟。`omniroute_` CCR 工具需要：
+
+| 工具                     | 範圍                |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+缺少範圍會傳回**MCP 工具錯誤結果**（`isError: true`，而不是 HTTP 403——`403 LOCAL_ONLY` 是獨立的迴路位址路由守衛驗證）：`Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` 最小化的遠端金鑰可以持有 `mcp:connect`（授權 `/api/mcp/` 僅限本機的例外路徑），以及其所需的特定讀取/寫入範圍。
+
+### 用戶端矩陣
+
+| 用戶端            | 傳輸方式                                  | 使用的設定                                                                                                                                                                                                               | 是否宣告 `tools[]`？（→ 注入 CCR 指示）                                                                                                            |
+| ----------------- | ----------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude Code       | streamable-http                           | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                        | 是——具備 MCP 能力；會注入。                                                                                                                        |
+| Cursor / Cline    | `stdio` **或** `streamable-http`          | stdio：在 `env` 中設定 `OMNIROUTE_API_KEY` 的 `omniroute --mcp`；或指向 `http://localhost:20128/api/mcp/stream` 的遠端 MCP 項目（請參閱 [設定指南 → MCP 用戶端設定](../guides/SETUP_GUIDE.md#mcp-client-configuration)） | 是——宣告 `omniroute_ccr_*` 工具。                                                                                                                  |
+| OpenCode          | streamable-http                           | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`，以及 `codemode: false`                                                                                                                         | 只有在 `codemode: false` 時才會宣告工具；接著會注入，名稱為 `omniroute_omniroute_ccr_retrieve`（請參閱 [用戶端前置條件](#client-prerequisites)）。 |
+| OpenAI-compatible | OpenAI-compatible HTTP (chat completions) | 使用標準聊天完成用戶端連線至 OpenAI-compatible 端點                                                                                                                                                                      | **永遠不會**——純 OpenAI-compatible 呼叫端永遠不會被告知要呼叫該工具，也不會注入該指示。                                                            |
+
+### 擷取限制與分頁
+
+MCP 工具文字結果會在 `mcpAccessibility.maxTextChars` 附近截斷（預設為 `50000`）。區塊的 `full` 擷取上限為 256 KiB——**不存在無限制的完整擷取**。當區塊的 `chars=N` 很大時，請改用分頁，而不要提取整個區塊：
+
+- 經驗法則：**`chars > 40000` → 使用 `mode`**，絕不要使用不帶參數的 full。
+- `mode:"grep"`——逐行比對 regex `pattern`，最多 1,000 個相符行（`unique: true` 會移除重複項），最適合「找出我需要的那一行」。
+- `mode:"lines"`——以 1 為索引的行範圍；需要同時提供 `start` 和 `end`。
+- `mode:"head"` / `mode:"tail"`——前/後 `n` 行。
+- `mode:"stats"`——提供行數、字元數與位元組數，不包含本文內容。
+
+使用帶有 `start`/`end` 的 `mode:"lines"`，以分頁方式逐步讀取長區塊，而不要一次要求整個區塊。
+
+### 工具命名
+
+目前 retrieve 工具的名稱為 `omniroute_ccr_retrieve`（`omniroute_` 前綴是為了解決跨伺服器名稱衝突而採用的過時權宜方案）。更簡潔的有界後綴工具名稱，以及修正 MCP JSON 結果在字串中途遭截斷的問題，已列為上游後續工作；本頁僅記錄目前已發布的行為。
+
+### 工作階段生命週期
+
+Streamable-HTTP 工作階段在閒置後會逾時，伺服器也會清理這些工作階段；閒置時間視窗由 `OMNIROUTE_MCP_SESSION_IDLE_MS` 設定（預設為 5 分鐘；此處以名稱引用，而非硬式編碼值，因此即使其值變更，本頁內容也不會過時）。閒置後遭清理的工作階段會出現 HTTP 404，並顯示 `Unknown Mcp-Session-Id` — 解決方法是重新連線或重新啟動工作階段，**而不是**輪替金鑰、變更範圍或重新命名工具。
+
 ## API 介面
 
 | 路由                                   | 用途                                         |
@@ -353,7 +442,7 @@ open-sse/services/compression/engines/mcpAccessibility/
 
 ## 驗證
 
-此區域的重點關卡為：
+此區域的專注閘門如下：
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

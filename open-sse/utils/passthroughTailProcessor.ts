@@ -35,6 +35,7 @@ export type PassthroughTailProcessorContext = {
   sanitizeUsagePayload: (payload: unknown) => boolean;
   setPassthroughResponsesId: (value: string) => void;
   setUsage: (value: unknown) => void;
+  mergeCacheCreationUsage: (value: unknown) => void;
   addTotalContentLength: (value: number) => void;
   appendPassthroughContent: (value: string) => void;
   appendPassthroughReasoning: (value: string) => void;
@@ -191,19 +192,13 @@ function handleResponsesTailPayload(
     context.setPassthroughResponsesCurrentFunctionCallKey(null);
   }
 
-  // #18600 — restore provider tool-name aliases (and #7936 identities) on the
-  // remaining tail event shapes: `output_item.added` and the
-  // `response.incomplete`/`response.failed`/`response.done` and cancellation snapshots.
-  // The output-item done and completed branches above restored their own copies.
-  if (
-    parsed.type === "response.output_item.added" ||
-    parsed.type === "response.incomplete" ||
-    parsed.type === "response.failed" ||
-    parsed.type === "response.done" ||
-    parsed.type === "response.cancelled" ||
-    parsed.type === "response.canceled"
-  ) {
-    responsesIdentityRestored = context.restoreResponsesToolNames(parsed);
+  // #18600 — restore provider tool-name aliases (and #7936 identities) on every other tail
+  // event too: argument events, output_item.added, and the tools/tool_choice that any
+  // response object echoes. The branches above restored their own copies; the helper is
+  // idempotent, so a restoration they made is kept rather than overwritten.
+  if (typeof parsed.type === "string") {
+    responsesIdentityRestored =
+      context.restoreResponsesToolNames(parsed) || responsesIdentityRestored;
   }
 
   const textualToolCallBackfilled =
@@ -336,6 +331,7 @@ export function processBufferedPassthroughLine(
     if (context.sanitizeUsagePayload(parsed)) {
       output = `data: ${JSON.stringify(parsed)}\n\n`;
     }
+    context.mergeCacheCreationUsage(extractUsage(parsed));
     const parsedType = typeof parsed.type === "string" ? parsed.type : "";
     const isResponses = parsedType.startsWith("response.");
     const isClaude = context.isClaudeEventPayload(parsed);

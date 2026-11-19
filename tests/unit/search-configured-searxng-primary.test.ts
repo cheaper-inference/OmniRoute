@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { isUrlHost } from "../../open-sse/utils/urlHost.ts";
 
 /**
  * An operator who stores a SearXNG connection with a real base URL has a $0 self-hosted
@@ -66,7 +67,7 @@ function mockFetch(searxngStatus = 200, searxngBase = SEARXNG_URL, braveStatus =
         { status: 200, headers: { "content-type": "application/json" } }
       );
     }
-    if (u.includes("api.search.brave.com")) {
+    if (isUrlHost(u, "api.search.brave.com")) {
       if (braveStatus !== 200) return new Response("upstream down", { status: braveStatus });
       return new Response(
         JSON.stringify({

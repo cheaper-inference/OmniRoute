@@ -3,6 +3,7 @@
  * Converts streaming chunks from Chat Completions to Responses API events
  */
 import { register } from "../registry.ts";
+import { cacheCreationFields, mergeCacheCreationFields } from "../../utils/cacheWriteUsage.ts";
 import { FORMATS } from "../formats.ts";
 import { appendToolCallArgumentDelta } from "../../utils/toolCallArguments.ts";
 import { translatorToolCallLifecycle } from "./openai-responses/toolCallLifecycle.ts";
@@ -136,46 +137,64 @@ function escapeJsonStringValues(json: string, escapeState: JsonStringEscapeState
   return result;
 }
 
+/** Models that over-escape a tab in tool call arguments (#12831). */
+const DOUBLE_ESCAPED_TAB_MODEL = /gpt-5\.6-luna/i;
+
+/** Scan state of fixDoubleEscapedTabs for one tool call, kept across fragments. */
+interface DoubleEscapedTabState {
+  inString: boolean;
+  /** Backslashes read inside a string but not yet written ("", "\\" or "\\\\"). */
+  held: string;
+}
+
+/**
+ * Feed one character to the held backslashes of fixDoubleEscapedTabs.
+ * `held` is "\\" or "\\\\". `out` is what to write now; when `consumed` is false the
+ * character itself still has to be scanned by the caller.
+ */
+function stepHeldBackslashes(
+  held: string,
+  ch: string
+): { held: string; out: string; consumed: boolean } {
+  if (held === "\\\\") {
+    // `\\t` collapses to the tab escape; any other char releases the escaped backslash.
+    if (ch === "t") return { held: "", out: "\\t", consumed: true };
+    return { held: "", out: "\\\\", consumed: false };
+  }
+  if (ch === "\\") return { held: "\\\\", out: "", consumed: true };
+  return { held: "", out: "\\" + ch, consumed: true };
+}
+
 /**
  * Collapse double-escaped tab sequences inside JSON string values.
- * Some providers (e.g. gpt-5.6-luna-xhigh, #12831) over-escape a tab when
- * emitting tool call argument JSON: instead of the single valid JSON escape
- * `\t` (backslash + t), they emit `\\t` (backslash + backslash + t) inside
- * the string value. JSON.parse then decodes that to a literal two-character
- * `\t` text (backslash followed by the letter t) instead of an actual tab
- * character, which breaks consumers (e.g. editor patches) expecting real
- * tabs. This only rewrites the over-escaped form and leaves an
- * already-correct single escape untouched.
+ * gpt-5.6-luna (#12831) sometimes writes `\\t` (an escaped backslash, then `t`) where it
+ * means the JSON tab escape `\t`. Only call this for those models: for every other model
+ * `\\t` is a valid backslash followed by `t` (Windows paths, LaTeX, regex).
+ * Arguments arrive in arbitrary fragments, so the scan state persists in `tabState` and a
+ * trailing backslash is held back until the next fragment shows what follows it.
  */
-function fixDoubleEscapedTabs(json: string): string {
+function fixDoubleEscapedTabs(json: string, tabState: DoubleEscapedTabState): string {
   let result = "";
-  let inString = false;
+  let { inString, held } = tabState;
 
-  for (let i = 0; i < json.length; i++) {
-    const ch = json[i];
-
-    if (inString && ch === "\\" && json[i + 1] === "\\" && json[i + 2] === "t") {
-      result += "\\t";
-      i += 2;
-      continue;
+  for (const ch of json) {
+    if (held) {
+      const step = stepHeldBackslashes(held, ch);
+      held = step.held;
+      result += step.out;
+      if (step.consumed) continue;
     }
 
-    // Inside a string, leave any other escape sequence untouched.
     if (inString && ch === "\\") {
-      result += ch + (json[i + 1] ?? "");
-      i++;
+      held = "\\";
       continue;
     }
-
-    if (ch === '"') {
-      result += ch;
-      inString = !inString;
-      continue;
-    }
-
+    if (ch === '"') inString = !inString;
     result += ch;
   }
 
+  tabState.inString = inString;
+  tabState.held = held;
   return result;
 }
 
@@ -189,31 +208,45 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
   }
 
   // Normalize usage from any chunk so response.completed has Responses token fields.
+  // Keep it in state.responsesUsage: stream.ts fills state.usage first and billing reads
+  // cost_usd and the flat cache/reasoning counters from it, so only fill state.usage when
+  // no caller did. A zero or empty usage placeholder is skipped, so the finish chunk
+  // still waits for the real trailing usage.
   if (chunk.usage) {
     const u = chunk.usage;
     const input_tokens = u.input_tokens ?? u.prompt_tokens ?? 0;
     const output_tokens = u.output_tokens ?? u.completion_tokens ?? 0;
-    const cacheDetails = resolveResponsesCacheUsageDetails(u);
-    const rawReasoning =
-      u.output_tokens_details?.reasoning_tokens ?? u.completion_tokens_details?.reasoning_tokens;
-    const reasoningTokens =
-      typeof rawReasoning === "number" && Number.isFinite(rawReasoning) ? rawReasoning : 0;
+    if (input_tokens + output_tokens > 0) {
+      const cacheFields = mergeCacheCreationFields(state.usage, u);
+      const cacheDetails = resolveResponsesCacheUsageDetails({ ...u, ...cacheFields });
+      const flatCached = u.cached_tokens ?? u.cache_read_input_tokens ?? u.prompt_cache_hit_tokens;
+      const rawReasoning =
+        u.output_tokens_details?.reasoning_tokens ??
+        u.completion_tokens_details?.reasoning_tokens ??
+        u.reasoning_tokens;
+      const reasoningTokens =
+        typeof rawReasoning === "number" && Number.isFinite(rawReasoning) ? rawReasoning : 0;
 
-    state.usage = {
-      // Exact provider-reported cost and its credit provenance; billing reads them.
-      ...(u.provider_credits !== undefined && { provider_credits: u.provider_credits }),
-      ...(u.cost_in_usd_ticks !== undefined && { cost_in_usd_ticks: u.cost_in_usd_ticks }),
-      input_tokens,
-      input_tokens_details: {
-        cached_tokens: 0,
-        ...(cacheDetails || {}),
-      },
-      output_tokens,
-      output_tokens_details: {
-        reasoning_tokens: reasoningTokens,
-      },
-      total_tokens: u.total_tokens ?? input_tokens + output_tokens,
-    };
+      const ownsSharedUsage = !state.usage || state.usage === state.responsesUsage;
+      state.responsesUsage = {
+        ...cacheFields,
+        // Exact provider-reported cost and its credit provenance; billing reads them.
+        ...(u.provider_credits !== undefined && { provider_credits: u.provider_credits }),
+        ...(u.cost_in_usd_ticks !== undefined && { cost_in_usd_ticks: u.cost_in_usd_ticks }),
+        input_tokens,
+        input_tokens_details: {
+          cached_tokens:
+            typeof flatCached === "number" && Number.isFinite(flatCached) ? flatCached : 0,
+          ...(cacheDetails || {}),
+        },
+        output_tokens,
+        output_tokens_details: {
+          reasoning_tokens: reasoningTokens,
+        },
+        total_tokens: u.total_tokens ?? input_tokens + output_tokens,
+      };
+      if (ownsSharedUsage) state.usage = state.responsesUsage;
+    }
   }
 
   // OpenRouter errors can carry empty choices or a finish_reason:"error" choice.
@@ -239,7 +272,7 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     // #6906: a deferred finish_reason (awaitingTrailingUsage, see below) completes here —
     // the trailing usage-only chunk (choices: [], usage: {...}) is what real
     // stream_options.include_usage=true upstreams send after finish_reason (see the
-    // "READ THIS" block in stream.ts); state.usage was already captured above.
+    // "READ THIS" block in stream.ts); state.responsesUsage was already captured above.
     if (state.awaitingTrailingUsage && !state.completedSent) {
       const { events, emit } = createEventEmitter(state);
       sendCompleted(state, emit);
@@ -363,7 +396,9 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
       closeReasoning(state, emit);
     }
     const msgIdx = state.reasoningId ? state.reasoningIndex + 1 : idx;
-    closeMessage(state, emit, msgIdx);
+    // A post-tool-call message lives at its relocated index (msgIndexAlias);
+    // close it there, or later text would append to it across this call.
+    closeMessage(state, emit, aliasedMessageIndex(state, msgIdx));
     for (const tc of delta.tool_calls) {
       emitToolCall(state, emit, tc);
     }
@@ -377,7 +412,7 @@ export function openaiToOpenAIResponsesResponse(chunk, state) {
     for (const i in state.funcCallIds) closeToolCall(state, emit, i);
     // #6906: usage already captured (same chunk or earlier) completes now; otherwise
     // defer for a trailing usage-only chunk, handled above and in flushEvents().
-    if (state.usage) {
+    if (state.responsesUsage) {
       sendCompleted(state, emit);
     } else {
       state.awaitingTrailingUsage = true;
@@ -504,10 +539,30 @@ function nextFreeMessageIndex(state, requestedIdx) {
   return candidate;
 }
 
-function emitTextContent(state, emit, idx, content) {
-  if (state.msgItemDone[idx]) {
+// The requested index and the index the message item actually lives at can
+// differ: post-tool-call text is re-homed (below), and a tool call may already
+// hold the requested index. Remember the relocation per requested index so
+// later deltas for the SAME logical message reuse it — without the alias every
+// delta re-ran the relocation scan and opened yet another message item.
+function resolveMessageIndex(state, requestedIdx) {
+  let idx = aliasedMessageIndex(state, requestedIdx);
+  if (
+    state.msgItemDone[idx] ||
+    (!state.msgItemAdded[idx] && state.funcAllocatedOutputIndexes?.[idx])
+  ) {
     idx = nextFreeMessageIndex(state, idx);
+    (state.msgIndexAlias ??= {})[requestedIdx] = idx;
   }
+  return idx;
+}
+
+// Where the message requested at `requestedIdx` actually lives (see above).
+function aliasedMessageIndex(state, requestedIdx) {
+  return state.msgIndexAlias?.[requestedIdx] ?? requestedIdx;
+}
+
+function emitTextContent(state, emit, idx, content) {
+  idx = resolveMessageIndex(state, idx);
   if (!state.msgItemAdded[idx]) {
     state.msgItemAdded[idx] = true;
     const msgId = `msg_${state.responseId}_${idx}`;
@@ -667,10 +722,45 @@ function emitToolCallAdded(state, emit, idx, outputIndex, terminal = false) {
   }
 }
 
+// Allocate a tool call's output_index ONCE per upstream index and reuse it for
+// the whole lifecycle. The base is recomputed from live message state, so a
+// message opened or relocated after the call's first delta used to shift the
+// close-time index away from the added-time index (clients keying items by
+// output_index see the identity change mid-flight). Also never land on an
+// index a message item already holds.
+function allocateToolOutputIndex(state, tcIdx) {
+  if (!state.funcOutputIndex) state.funcOutputIndex = {};
+  if (state.funcOutputIndex[tcIdx] === undefined) {
+    let candidate = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
+    while (state.msgItemAdded[candidate]) candidate += 1;
+    state.funcOutputIndex[tcIdx] = candidate;
+  }
+  return state.funcOutputIndex[tcIdx];
+}
+
+// Reuse the index the call was announced at (allocateToolOutputIndex); the
+// fallback covers states built before any emitToolCall ran.
+function announcedToolOutputIndex(state, tcIdx) {
+  return (
+    state.funcOutputIndex?.[tcIdx] ??
+    toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx)
+  );
+}
+
+// Only DOUBLE_ESCAPED_TAB_MODEL needs the repair; its scan state lives per tool call index.
+function repairDoubleEscapedTabs(state, tcIdx, rawArgs: string): string {
+  if (!DOUBLE_ESCAPED_TAB_MODEL.test(state.model || "")) return rawArgs;
+  if (!state.funcArgsTabState) state.funcArgsTabState = {};
+  if (!state.funcArgsTabState[tcIdx]) {
+    state.funcArgsTabState[tcIdx] = { inString: false, held: "" };
+  }
+  return fixDoubleEscapedTabs(rawArgs, state.funcArgsTabState[tcIdx]);
+}
+
 function emitToolCall(state, emit, tc) {
   const tcIdx = tc.index ?? 0;
   const lifecycle = translatorToolCallLifecycle(state);
-  const outputIndex = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
+  const outputIndex = allocateToolOutputIndex(state, tcIdx);
   // Record every allocated tool-call output_index so a post-close text
   // relocation (nextFreeMessageIndex) can never collide with it.
   if (!state.funcAllocatedOutputIndexes) state.funcAllocatedOutputIndexes = {};
@@ -691,6 +781,7 @@ function emitToolCall(state, emit, tc) {
     delete state.funcItemAdded[tcIdx];
     delete state.funcItemDone[tcIdx];
     delete state.funcArgsEscapeState?.[tcIdx];
+    delete state.funcArgsTabState?.[tcIdx];
     lifecycle.reset(tcIdx);
   }
 
@@ -712,10 +803,8 @@ function emitToolCall(state, emit, tc) {
     if (!state.funcArgsEscapeState[tcIdx]) {
       state.funcArgsEscapeState[tcIdx] = createJsonStringEscapeState();
     }
-    const sanitized = escapeJsonStringValues(
-      fixDoubleEscapedTabs(tc.function.arguments),
-      state.funcArgsEscapeState[tcIdx]
-    );
+    const rawArgs = repairDoubleEscapedTabs(state, tcIdx, tc.function.arguments);
+    const sanitized = escapeJsonStringValues(rawArgs, state.funcArgsEscapeState[tcIdx]);
     const nextArgs = appendToolCallArgumentDelta(existingArgs, sanitized);
     const emittedDelta = nextArgs.slice(existingArgs.length);
     state.funcArgsBuf[tcIdx] = nextArgs;
@@ -731,11 +820,19 @@ function emitToolCall(state, emit, tc) {
   }
 }
 
+// The final arguments of a closing tool call. A truncated stream can end inside an
+// escape, so the backslashes fixDoubleEscapedTabs still holds are written back first.
+function finalToolCallArgs(state, idx): string {
+  const heldTab = state.funcArgsTabState?.[idx]?.held;
+  if (heldTab) state.funcArgsBuf[idx] = (state.funcArgsBuf[idx] || "") + heldTab;
+  return state.funcArgsBuf[idx] || "{}";
+}
+
 function closeToolCall(state, emit, idx, recordAsCompleted = true) {
   const callId = state.funcCallIds[idx];
   if (callId && !state.funcItemDone[idx]) {
-    const normalizedIndex = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, idx);
-    const args = state.funcArgsBuf[idx] || "{}";
+    const normalizedIndex = announcedToolOutputIndex(state, idx);
+    const args = finalToolCallArgs(state, idx);
     emitToolCallAdded(state, emit, idx, normalizedIndex, true);
     const selection = translatorToolCallLifecycle(state).get(idx)!;
     const isCustomTool = selection.custom;
@@ -863,9 +960,9 @@ function sendCompleted(state, emit) {
       response.model = state.model;
     }
 
-    if (state.usage) {
+    if (state.responsesUsage) {
       // Preserve upstream accounting in state; expose the full context only to Responses clients.
-      response.usage = normalizeResponsesContextUsage(state.usage);
+      response.usage = normalizeResponsesContextUsage(state.responsesUsage);
     }
 
     const eventType = finalizeResponsesTerminalStatus(response, state.finishReason, !!upstreamErr);
@@ -1249,8 +1346,9 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
     const trackedEntry = callId ? map?.get(callId) : undefined;
     // Some upstreams (e.g. Codex) send the complete payload only in output_item.done,
     // with no preceding output_item.added at all — there is no tracked entry to read an
-    // index from.
-    const entry = trackedEntry || { index: null, argsBuffer: "", deferred: false };
+    // index from. Nothing was emitted for such a call yet, so treat it as deferred: the
+    // single chunk below must carry the id/type/name header together with the arguments.
+    const entry = trackedEntry || { index: null, argsBuffer: "", deferred: true };
 
     const buffered = entry.argsBuffer || "";
     const toolName = normalizeToolName(item.name);
@@ -1455,6 +1553,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
           : 0);
 
       state.usage = {
+        ...mergeCacheCreationFields(state.usage, responseUsage),
         ...(responseUsage.provider_credits !== undefined && {
           provider_credits: responseUsage.provider_credits,
         }),
@@ -1468,7 +1567,7 @@ function openaiResponsesToOpenAIResponseStream(chunk, state) {
 
       // Add prompt_tokens_details if cache tokens exist
       if (cacheReadTokens > 0 || cacheCreationTokens > 0) {
-        state.usage.prompt_tokens_details = {};
+        state.usage.prompt_tokens_details = { ...cacheCreationFields(state.usage) };
         if (cacheReadTokens > 0) {
           state.usage.prompt_tokens_details.cached_tokens = cacheReadTokens;
         }

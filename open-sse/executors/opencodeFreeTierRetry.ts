@@ -1,3 +1,4 @@
+import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import type { default as BaseExecutorType } from "./base.ts";
 import {
   configuredPlaceholderToolNames,
@@ -66,7 +67,7 @@ async function readRefusalBody(
   log: ExecutorLog
 ): Promise<string | null> {
   try {
-    const text = await first.response.clone().text();
+    const text = await readResponseTextWithinCap(first.response.clone());
     return isOwnToolsRetryableRefusal(status, text) ? text : null;
   } catch {
     log?.debug?.("OPENCODE", "body read failed on free-tier retry check");

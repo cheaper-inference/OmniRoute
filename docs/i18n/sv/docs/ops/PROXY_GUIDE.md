@@ -81,6 +81,18 @@ Proxyservrar är användbara även utanför blockerade regioner:
 
 ---
 
+## Standard proxystatus för nya konton
+
+I** Inställningar → Proxy → Global konfiguration** , använda** Aktivera proxy som standard för nya anslutningar** för att välja det ursprungliga proxyläget för nyligen tillagda leverantörskonton.
+
+Den nya inställningen styr det initiala proxytillståndet för nyligen tillagda leverantörskonton. Det ändrar inte befintliga konton eller ersätter den globala proxyswitchen. Dess initiala värde bevarar det tidigare beteendet. Stäng av den en gång för att skapa framtida konton med proxy inaktiverad som standard.
+
+Inställningen lagras som `defaultNewConnectionProxyEnabled` genom de befintliga inställningarna API. Den har som standard `true` när den aldrig sparas. Att spara `false` träder i kraft för efterföljande nya konton utan omstart. `POST /api/providers` accepterar en valfri strikt boolesk `proxyEnabled`; en explicit `true` eller `false` har företräde framför skapandets standard. Utelämnande av ett dubblettkonto eller OAuth -återanslutning bevarar kontots lagrade tillstånd. Individuella konton kan fortfarande aktiveras eller inaktiveras efteråt.
+
+Selektiva leverantörsöverföringar använder destinationsinstallationens standard för nya konton och behåller destinationspolicyn när befintliga konton ersätts. Proxyomkopplare är inte bärbara överföringsfält. Fullständig säkerhetskopieringsåterställning och historisk JSON/SQL -migrering behåller sin befintliga återställningssemantik, inklusive sparade kontovärden och äldre schemastandarder; en fullständig återställning av inställningar kan också återställa denna inställning.
+
+Denna inställning tilldelar inte en proxy eller fastställer att en är frisk eller används. Faktisk routing beror fortfarande på den globala proxyswitchen och tillämplig proxykonfiguration. Syntetiska leverantörer utan ett beständigt konto, OAuth trafik innan kontot skapades, environment/system proxyer och externa backends nätverk ligger utanför dess räckvidd.
+
 ## Proxysystem med 4 nivåer
 
 OmniRoute stöder proxykonfiguration på **fyra oberoende nivåer**, som matchas i prioritetsordning:

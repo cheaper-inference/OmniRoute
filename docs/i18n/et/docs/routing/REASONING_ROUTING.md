@@ -38,24 +38,19 @@ ning need toetavad vastendamist režiimis `any` või `all`.
 Reeglit `connection` hinnatakse ainult siis, kui ükski varajane reegel ei võitnud ja konkreetne teenusepakkuja ühendus on
 juba valitud. See võib muuta ainult pingutustaset ja eelarvet.
 
-## Pingutustase ja eelarve
+## Jõupingutus ja eelarve
 
-`sourceEffort` aktsepteerib väärtusi `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` ja
-`ultra`. `missing` tähendab, et päring ei sisalda eraldiseisvat pingutustaset, mõtlemise lülitit
-ega mõtlemise eelarvet. Seetõttu vastendatakse ainult eelarve signaal üksnes väärtusega `any`.
+`sourceEffort` aktsepteerib `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max` ja `ultra`. `missing` tähendab, et taotlus ei sisalda diskreetset pingutust ega mõtlemise lülitit ega eelarvet. Seetõttu sobib ainult eelarvesignaalile ainult `any`.
 
-Väljal `effortMode` on kolm varianti:
+`effortMode` on kolm varianti:
 
-- `inherit` säilitab kliendi pingutustaseme, võimaldades samal ajal mudelit või kombinatsiooni muuta.
-- `default` määrab `targetEffort` ainult siis, kui otsest põhjendussignaali pole.
-- `force` asendab eraldiseisva pingutustaseme väärtusega `targetEffort`.
+- `inherit` hoiab kliendi vaeva, võimaldades samas mudelil või kombinatsioonil muutuda.
+- `default` määrab `targetEffort` ainult siis, kui selget arutlussignaali pole.
+- `force` asendab diskreetse pingutuse `targetEffort`.
 
-Sellest sõltumatult võib `budgetAction` olla `preserve`, `remove` või `set`. `force` koos väärtusega `none` eemaldab
-kõik tuvastatud pingutustaseme- ja eelarveväljad. `none` koos väärtusega `set` ei ole lubatud.
+Sõltumatult võib `budgetAction` olla `preserve`, `remove` või `set`. `force` koos `none` eemaldab kõik tunnustatud jõu- ja eelarveväljad ning seejärel määrab `reasoning_effort: "none"`, sest mõned pakkujad lülitavad välja puudumisel mõtlemise sisse. Pakkujaid, kes keelduvad sõnasõnalisest `none` kohandatakse saatmisel `open-sse/executors/base/reasoningEffort.ts`. Käsukood seostab selle `low` ga, välja arvatud vastusekujuliste päringute puhul (`input` ilma `messages`), kus see säilitab `none`. Rakenduses Cloudflare Workers AI (`cloudflare-ai`) saavad `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) tagasilükkavad mudelid `low`; muud töötajad AI mudelid hoiavad `none`. Välja kukutamine ei ole seal valik, sest puuduv pingutus käivitab mudeli vaiketaseme. `none` koos `set` on kehtetu.
 
-Teadaolevalt ühildumatutele mudelitele suunatud päringud lükatakse enne ülesvoolupäringut tagasi. Kombinatsiooni
-sihtmärkide puhul eemaldatakse ühildumatud kirjed; kui ühtegi ei jää alles, tagastab päring oleku `400`.
-Tundmatud võimekusandmed tekitavad hoiatuse ja reegel jääb aktiivseks.
+Teadaolevaid ühildumatuid mudeleid sihtivad taotlused lükatakse tagasi enne ülesvoolukutset. Kombineeritud sihtmärkide puhul eemaldatakse ühildumatud kirjed; kui ühtegi järele ei jää, tagastab päring oleku `400`. Tundmatud võimete andmed annavad hoiatuse ja jätavad reegli aktiivseks.
 
 ## Turvalisus ja transpordid
 

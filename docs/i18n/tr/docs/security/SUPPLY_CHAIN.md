@@ -48,27 +48,11 @@ Her iki geçit de araç yoksa veya ölçüm başarısız olursa (osv-scanner PAT
 osv.dev/ağ erişilemez, geçersiz JSON) **zarifçe ATLAR** (çıkış 0) — bir
 **ölçüm** hatası asla engellemez, yalnızca **ölçülen** bir gerileme engeller.
 
-## Bilinen Kabul Edilmiş Riskler
+## Emekli bağımlılık riski
 
-### extract-zip 2.0.1 — GHSA-7pqw-9j4j-h8q3 / GHSA-jmr9-qjv8-65gv (#14482)
+Kök kilit dosyası, sabitlenmiş Promptfoo geliştirme aracının yükseltilmesinden sonra artık `extract-zip` veya ona bir bağımlılık kenarı içermiyor. Bu, #14482 içinde izlenen daha önce kabul edilen `promptfoo` → `@openai/codex-security` → `extract-zip` zincirini kullanımdan kaldırır. `tests/unit/extract-zip-14482-exposure.test.ts` regresyon kontrolleri, yeniden uygulanmasını reddeder ve üretim kodundan ithalat yasağını korur.
 
-`extract-zip@2.0.1` iki adet yamalanmamış yüksek önem dereceli sembolik bağlantı geçişi danışmanlığı içermektedir.
-Yukarıdaki CVE Varyans çözümünün "üst akım düzeltmesi yok" dalına göre, bu bir **kabul edilmiş risktir**, bir yükseltme değildir:
-
-- **Zincir:** `promptfoo` (devDependency) → `@openai/codex-security` → `extract-zip@2.0.1`.
-  `package-lock.json` aracılığıyla doğrulandı — tüm bağımlılık ağacında tam olarak bir paket (`@openai/codex-security`) `extract-zip`'i bildiriyor ve tam olarak bir paket (`promptfoo`) `@openai/codex-security`'yi bildiriyor.
-- **Zincirin hiçbir yerinde sabit bir sürüm mevcut değil.** `extract-zip@2.0.1` (2020'de yayınlandı) paketin son sürümüdür — bakımı yapılmamaktadır. `@openai/codex-security`'nin
-  mevcut npm-latest (`0.1.29`) hala `extract-zip@2.0.1`'i çekiyor.
-- **Üretimden ulaşılamaz.** `promptfoo` yalnızca devDependency'dir (asla `dependencies` altında listelenmez) ve `src/`, `open-sse/` veya `bin/` altındaki hiçbir dosya
-  `extract-zip` npm paketini içe aktarmaz — OmniRoute'un kendi `extractZip()` yardımcısı
-  (`src/lib/versionManager/binaryManager.ts:93`) yerel `unzip`/`tar`'a kabuk komutu gönderir ve ilgisizdir. `@openai/codex-security` ayrıca extract-zip'in onEntry geri çağrısının üzerine kendi sembolik bağlantı geçişi korumasını da gönderir.
-- `package.json` `overrides` aracılığıyla `extract-zip`'i takma ad olarak **kullanmayın** — tek uygun
-  yerine geçen Electron-org-internal'dır ve `@openai/codex-security`'nin kendi onEntry/defaultDirMode/defaultFileMode kontrolleriyle API uyumlu değildir;
-  onu geçersiz kılmak, o paketin güvenlik kontrollerini sessizce bozacaktır.
-- **Temel:** ölçülen osv `vulnCount` (3) zaten dondurulmuş
-  `config/quality/quality-baseline.json` temelinin (27) oldukça altındadır — mandal değişikliğine gerek yoktur.
-- **Regresyon koruması:** `tests/unit/extract-zip-14482-exposure.test.ts` zinciri ve yukarıdaki üretim dışı içe aktarma değişmezini doğrular; eğer bunlardan herhangi biri bozulursa (örneğin, gelecekteki bir PR `extract-zip`'i üretimden erişilebilir hale getirirse) CI'yi başarısız kılar.
-- **Takip:** sorun #14482.
+Mevcut bağımlılık onarımı aynı zamanda Azure kimliğinin MSAL istemcisine ve get-uri'nin FTP istemcisine yönelik uyumluluk geçersiz kılmalarını da kapsar. Azure belirteci alımı ve FTP alımı, kontrollü aktarımlarla test edilmiştir; her iki OpenCode paketi de kendi derleme ve test paketlerini çalıştırır. Kayıt defteri tavsiye sayımları belirli bir zamanda yapılan ölçümlerdir ve kilit dosyası kaydedildikten sonra değişebilir.
 
 ## Bekleyenler: Scorecard danışmanlığı → engelleme
 
