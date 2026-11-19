@@ -236,6 +236,71 @@ test("the real CLI keeps native coverage through the clean-environment launcher"
   assert.equal(launches, 1);
 });
 
+test("the standalone media MCP and tsx share native coverage coordinates", async (t) => {
+  const fixture = await mkdtemp(join(tmpdir(), "media-mcp-native-coverage-"));
+  t.after(() => rm(fixture, { recursive: true, force: true }));
+  const mediaEntry = "scripts/cli/omniroute-media-mcp.mjs";
+  const media = new URL(mediaEntry, root).href;
+  const sanitizer = new URL("open-sse/utils/errorSanitization.ts", root).href;
+
+  async function record(mode, args) {
+    const coverage = join(fixture, mode);
+    await mkdir(coverage);
+    execFileSync(process.execPath, args, {
+      cwd: root,
+      env: {
+        ...process.env,
+        NODE_OPTIONS: mode === "native" ? "" : `--import=${preload.href}`,
+        NODE_V8_COVERAGE: coverage,
+      },
+      input: "",
+      stdio: "pipe",
+      timeout: 90_000,
+    });
+    const files = (await readdir(coverage)).filter((file) => file.endsWith(".json"));
+    return Promise.all(
+      files.map(async (file) => JSON.parse(await readFile(join(coverage, file), "utf8")))
+    );
+  }
+
+  const nativeReports = await record("native", [mediaEntry]);
+  const nativeProcess = nativeReports.find((report) =>
+    report.result.some(({ url }) => url === media)
+  );
+  assert.ok(nativeProcess, "the standalone media process must emit coverage on stdin EOF");
+  const sources = nativeProcess.result.filter(
+    ({ url }) => url.startsWith(root.href) && url.endsWith(".ts") && !url.includes("/node_modules/")
+  );
+  assert.ok(sources.length > 1 && sources.some(({ url }) => url === sanitizer));
+
+  const imports = sources.map(({ url }) => `await import(${JSON.stringify(url)});`).join("\n");
+  const tsxReports = await record("tsx", [
+    "--import",
+    "tsx/esm",
+    "--input-type=module",
+    "--eval",
+    imports,
+  ]);
+  const tsxProcess = tsxReports.find((report) =>
+    report.result.some(({ url }) => url === sanitizer)
+  );
+  assert.ok(tsxProcess, "the tsx caller must exercise the same sanitizer");
+
+  const coordinates = ({ functions }) =>
+    functions.map(({ functionName, ranges: [{ startOffset, endOffset }] }) => [
+      functionName,
+      startOffset,
+      endOffset,
+    ]);
+  for (const native of sources) {
+    const caller = tsxProcess.result.find(({ url }) => url === native.url);
+    assert.ok(caller, native.url);
+    assert.equal(Boolean(nativeProcess["source-map-cache"]?.[native.url]), false, native.url);
+    assert.equal(Boolean(tsxProcess["source-map-cache"]?.[native.url]), false, native.url);
+    assert.deepEqual(coordinates(caller), coordinates(native), native.url);
+  }
+});
+
 test("migration schema boots retain the native layout for the shared data paths module", async (t) => {
   const fixture = await mkdtemp(join(tmpdir(), "migration-native-coverage-"));
   t.after(() => rm(fixture, { recursive: true, force: true }));

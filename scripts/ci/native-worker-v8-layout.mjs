@@ -29,8 +29,8 @@ const tsxImport = ["tsx/esm", "tsx"].find((name) =>
 );
 
 if (process.env.NODE_V8_COVERAGE && !isInternalThread) {
-  // The real worker has execArgv: [] and keeps Node's native TypeScript path.
-  // Use that same source layout for these files when the caller uses tsx.
+  // Node loads the worker and standalone MCP dependencies as native TypeScript.
+  // Keep their source layout in callers instrumented through tsx too.
   const nativeSources = new Set(
     [
       "src/lib/usage/callLogArtifactWorker.ts",
@@ -39,6 +39,11 @@ if (process.env.NODE_V8_COVERAGE && !isInternalThread) {
       "src/lib/logEnv.ts",
       "src/lib/db/booleanSetting.ts",
       "src/shared/constants/callLogSizeLimitMarkers.ts",
+      "open-sse/utils/errorSanitization.ts",
+      "open-sse/utils/errorPathRedaction.ts",
+      "open-sse/utils/credentialPatterns.ts",
+      "open-sse/utils/providerSafety.ts",
+      "open-sse/utils/registeredFeatureFlag.ts",
     ].map((file) => fileURLToPath(new URL(`../../${file}`, import.meta.url)))
   );
   const { extensions } = createRequire(import.meta.url);
