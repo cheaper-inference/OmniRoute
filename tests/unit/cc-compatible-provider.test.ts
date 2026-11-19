@@ -780,17 +780,11 @@ test("handleChatCore preserves client cache markers for Claude Code requests to 
     type: "ephemeral",
     ttl: "5m",
   });
-  // The system block above carries an explicit 5m cache_control, which trips the
-  // 5m breakpoint in normalizeCacheControlTtl (#10684: "defaults missing ttl to
-  // 5m after a 5m breakpoint", sections are processed tools -> system ->
-  // messages). So this user message's client marker, sent with no ttl, defaults
-  // to 5m rather than 1h. #10684 updated claude-code-parity.test.ts /
-  // chatcore-translation-paths.test.ts for this but missed this assertion,
-  // leaving it a base-red on release/v3.8.50.
-  assert.deepEqual(calls[0].body.messages[0].content[0].cache_control, {
-    type: "ephemeral",
-    ttl: "5m",
-  });
+  // This user message's client marker was sent with no ttl. normalizeCacheControlTtl
+  // only raises earlier markers to 1h when a later one states 1h; it never
+  // materialises a ttl the client omitted (Anthropic's implicit 5m), so the marker
+  // reaches the provider byte-for-byte as the client wrote it.
+  assert.deepEqual(calls[0].body.messages[0].content[0].cache_control, { type: "ephemeral" });
   assert.deepEqual(calls[0].body.messages[1].content[0].cache_control, {
     type: "ephemeral",
     ttl: "10m",

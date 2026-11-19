@@ -1438,7 +1438,9 @@ test("chatCore dispatches a Claude Code agent body to anthropic with no in-place
     call.body.system.some((block: { text?: string }) => block.text === "environment update"),
     true
   );
-  assert.deepEqual(call.body.messages[2].content[0].cache_control, { type: "ephemeral" });
+  // The client already placed its own breakpoint (on the tool), so the working-set
+  // turn is left unmarked — a proxy-added marker there moves the cached edge every turn.
+  assert.equal(call.body.messages[2].content[0].cache_control, undefined);
   assert.deepEqual(call.body.tools[0].cache_control, { type: "ephemeral" });
 });
 
@@ -1489,18 +1491,14 @@ for (const model of ["claude-opus-5", "claude-fable-5", "claude-fable-5-1"]) {
       call.body.messages.map((message: { role: string }) => message.role),
       ["user", "assistant", "system", "user"]
     );
-    assert.deepEqual(call.body.messages[2].content[0].cache_control, {
-      type: "ephemeral",
-      ttl: "5m",
-    });
+    // An untagged client marker keeps its implicit 5m TTL byte-for-byte.
+    assert.deepEqual(call.body.messages[2].content[0].cache_control, { type: "ephemeral" });
     assert.equal(
       call.body.system.some((block: { text?: string }) => block.text === "compact continuation"),
       false
     );
-    assert.deepEqual(call.body.messages[3].content[0].cache_control, {
-      type: "ephemeral",
-      ttl: "5m",
-    });
+    // Client-managed breakpoints are not supplemented on the working-set turn.
+    assert.equal(call.body.messages[3].content[0].cache_control, undefined);
   });
 }
 test("chatCore keeps Claude normalization for non-Claude-Code Claude passthrough", async () => {
@@ -1735,14 +1733,12 @@ test("chatCore preserves cache_control automatically for Claude Code single-mode
   assert.equal(hasCacheControl(call.body), true);
   // system[0] and system[1] are now the billing line and sentinel injected by base.ts for Claude Code
   assert.deepEqual(call.body.system[2].cache_control, { type: "ephemeral", ttl: "5m" });
-  assert.deepEqual(call.body.messages[0].content[0].cache_control, {
-    type: "ephemeral",
-    ttl: "5m",
-  });
+  // The client sent this marker with no ttl; it reaches the provider as written.
+  assert.deepEqual(call.body.messages[0].content[0].cache_control, { type: "ephemeral" });
   // base.ts executor explicitly strips cache_control from tools for Claude Code clients
   assert.equal(call.body.tools[0].cache_control, undefined);
 });
-test("chatCore advances a message cache breakpoint for native Claude Code requests", async () => {
+test("chatCore leaves the working-set turn unmarked when a native Claude Code request carries its own breakpoints", async () => {
   await settingsDb.updateSettings({ alwaysPreserveClientCache: "auto" });
   invalidateCacheControlSettingsCache();
 
@@ -1793,10 +1789,11 @@ test("chatCore advances a message cache breakpoint for native Claude Code reques
     responseFormat: "claude",
   });
 
-  assert.deepEqual(call.body.messages[2].content[0].cache_control, {
-    type: "ephemeral",
-    ttl: "5m",
-  });
+  // The client marked the boundary it wants (first turn); adding one on the latest
+  // turn would move the cached edge every turn onto content the next request never
+  // re-reads. A marker-less body still gets the rescue (claude-passthrough-cache-wiring).
+  assert.deepEqual(call.body.messages[0].content[0].cache_control, { type: "ephemeral" });
+  assert.equal(call.body.messages[2].content[0].cache_control, undefined);
   assert.equal(call.body.tools[0].cache_control, undefined);
 });
 test("chatCore auto cache policy becomes false for nondeterministic combos", async () => {
@@ -1883,13 +1880,10 @@ test("chatCore disables raw Claude passthrough when cache preservation is off an
     ),
     true
   );
-  // Cache preservation is on for native Claude, so cache markers are intact. This PR:
-  // an omitted TTL now defaults to "5m" once a "5m" boundary breakpoint (the system
-  // block above) has already appeared, instead of always defaulting to "1h".
-  assert.deepEqual(call.body.messages[0].content[0].cache_control, {
-    type: "ephemeral",
-    ttl: "5m",
-  });
+  // Cache preservation is on for native Claude, so cache markers are intact. An omitted
+  // TTL stays omitted (Anthropic's implicit 5m): materialising it would be a marker set
+  // the client never sent, and therefore a prompt-cache miss.
+  assert.deepEqual(call.body.messages[0].content[0].cache_control, { type: "ephemeral" });
   // Tools disable flag is applied
   assert.equal("_disableToolPrefix" in call.body, false);
 });

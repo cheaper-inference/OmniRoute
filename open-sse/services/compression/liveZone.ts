@@ -82,20 +82,29 @@ function digest(value: unknown): string | null {
  * the live zone never hit, and the whole history was recompressed — which wiped
  * the provider's prefix cache on every turn.
  */
-function stripCacheControl(value: unknown): unknown {
-  if (Array.isArray(value)) return value.map(stripCacheControl);
-  if (value && typeof value === "object") {
+function stripCacheControl(value: unknown, ancestors: Set<object> = new Set()): unknown {
+  if (!value || typeof value !== "object") return value;
+  // A cycle is non-serializable, exactly as JSON.stringify reports it; callers treat it as a miss.
+  if (ancestors.has(value)) throw new TypeError("Converting circular structure to JSON");
+  ancestors.add(value);
+  try {
+    if (Array.isArray(value)) return value.map((item) => stripCacheControl(item, ancestors));
     const out: Record<string, unknown> = {};
     for (const [key, child] of Object.entries(value as Record<string, unknown>)) {
-      if (key !== "cache_control") out[key] = stripCacheControl(child);
+      if (key !== "cache_control") out[key] = stripCacheControl(child, ancestors);
     }
     return out;
+  } finally {
+    ancestors.delete(value);
   }
-  return value;
 }
 
 function digestForPrefixMatch(value: unknown): string | null {
-  return digest(stripCacheControl(value));
+  try {
+    return digest(stripCacheControl(value));
+  } catch {
+    return null;
+  }
 }
 
 function cloneItems(items: unknown[]): unknown[] | null {
@@ -528,7 +537,11 @@ function restoreFrozenPrefix(rawItems: unknown[], previous: LiveZoneEntry): unkn
   }
   // Stored items keep the breakpoint they had on their own turn; the client moves it every turn.
   // Replaying stale markers piles them up past Anthropic's 4-block limit (HTTP 400).
-  return frozenPrefix.map((item, index) => withClientCacheControl(item, rawItems[index]));
+  try {
+    return frozenPrefix.map((item, index) => withClientCacheControl(item, rawItems[index]));
+  } catch {
+    return null;
+  }
 }
 
 /** `transformed` with every cache_control removed, then re-placed where `raw` has one. */
