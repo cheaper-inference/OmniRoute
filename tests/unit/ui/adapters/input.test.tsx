@@ -66,6 +66,32 @@ describe("Input adapter → kit Field + Input", () => {
     expect(marker?.getAttribute("aria-hidden")).toBe("true");
   });
 
+  it("className lands on the Field wrapper and inputClassName on the <input>, never crossed", () => {
+    const { getByLabelText } = render(
+      <Input id="u" label="URL" className="flex-1 md:col-span-2" inputClassName="text-xs" />
+    );
+    const input = getByLabelText("URL");
+    const field = input.closest<HTMLElement>("[data-slot=field]")!;
+    expect(field.className).toContain("ci-field");
+    expect(field.className).toContain("flex-1");
+    expect(field.className).toContain("md:col-span-2");
+    expect(field.className).not.toContain("text-xs");
+    expect(input.className).toContain("ci-input");
+    expect(input.className).toContain("text-xs");
+    expect(input.className).not.toContain("flex-1");
+    expect(input.className).not.toContain("md:col-span-2");
+  });
+
+  it("inputClassName reaches the <input> inside the icon shell too, not the shell", () => {
+    const { container } = render(<Input icon="search" className="w-64" inputClassName="text-xs" />);
+    const input = container.querySelector("input")!;
+    const shell = container.querySelector<HTMLElement>(".ci-input-shell")!;
+    expect(input.className).toContain("text-xs");
+    expect(shell.className).not.toContain("text-xs");
+    expect(shell.className).not.toContain("w-64");
+    expect(container.querySelector<HTMLElement>("[data-slot=field]")!.className).toContain("w-64");
+  });
+
   it("forwards a ref to the native <input>", () => {
     const ref = React.createRef<HTMLInputElement>();
     render(<Input id="q" aria-label="Query" ref={ref} />);

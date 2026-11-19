@@ -11,6 +11,7 @@ import {
   normalizePull,
   normalizeStatus,
   normalizeTimelineEvent,
+  normalizeWorkflowJob,
   parseLinkHeader,
   retryDelayMs,
 } from "../../../scripts/merge-queue/github.mjs";
@@ -401,6 +402,52 @@ test("does not retry a plain 403 or a 404", async (t) => {
   assert.deepEqual(sleeps, []);
 });
 
+test("the error of an answer the client classified as a rate limit is marked rateLimited; others are not", async (t) => {
+  const { fake, gh } = await setup(t, {}, { nowMs: () => 1_000_000, maxRetries: 1 });
+  fake.addPull({ number: 4 });
+  const rejected = async () => {
+    try {
+      await gh.getPull(4);
+    } catch (error) {
+      assert.ok(error instanceof GitHubError);
+      return error;
+    }
+    throw new Error("expected a rejection");
+  };
+  // A secondary limit whose text never says "rate limit": the Retry-After header classifies it.
+  fake.inject({
+    path: "/pulls/4",
+    status: 403,
+    body: { message: "You have triggered an abuse detection mechanism." },
+    headers: { "retry-after": "900" },
+    times: 5,
+  });
+  let error = await rejected();
+  assert.equal(error.rateLimited, true, "a wait over the cap");
+  // The primary limit, retried until the attempts run out.
+  fake.injections.length = 0;
+  fake.inject({
+    path: "/pulls/4",
+    status: 403,
+    body: { message: "quota" },
+    headers: { "x-ratelimit-remaining": "0", "x-ratelimit-reset": "1001" },
+    times: 5,
+  });
+  error = await rejected();
+  assert.equal(error.rateLimited, true, "retries exhausted");
+  // A plain 403, a 404 and a 502 are not rate limits.
+  for (const [status, message] of [
+    [403, "Resource not accessible by integration"],
+    [404, "Not Found"],
+    [502, "Bad Gateway"],
+  ]) {
+    fake.injections.length = 0;
+    fake.inject({ path: "/pulls/4", status, body: { message }, times: 5 });
+    error = await rejected();
+    assert.equal(error.rateLimited, undefined, `${status} ${message}`);
+  }
+});
+
 test("retries network errors", async (t) => {
   const fake = await startFakeGitHub({ token: TOKEN });
   t.after(() => fake.close());
@@ -684,17 +731,27 @@ test("mergePull gives up after maxRetries of unconfirmed 5xx", async (t) => {
   assert.equal(fake.pulls.get(34).merged, false);
 });
 
-test("a hung request times out and is retried as a network error", async (t) => {
-  // 1 s, not 100 ms: on a loaded machine the retried (fast) request must not time out too.
-  const { fake, gh, sleeps, logs } = await setup(t, {}, { requestTimeoutMs: 1000 });
-  fake.addPull({ number: 35, title: "slow" });
-  fake.inject({ method: "GET", path: "/pulls/35", status: 200, body: {}, delayMs: 10_000 });
-  const started = Date.now();
-  assert.equal((await gh.getPull(35)).title, "slow");
-  assert.ok(Date.now() - started < 5000, "the stalled response did not hold the client");
-  assert.deepEqual(sleeps, [1000]);
-  assert.ok(logs.some((l) => /timed out after 1000 ms/.test(l)));
-});
+// The stalled response is held for 10 minutes. The client times out after 1 s and asks again;
+// the answer of that second request (title "slow": the stalled one has no title) arriving in less
+// than half the stall can only come from the client giving up on the first. Nothing in this bound
+// depends on how loaded the machine is: it fails only if the client waits for the stalled answer.
+// A client that does wait fails the test at the test's own 2-minute timeout instead of 10 minutes.
+const STALL_MS = 600_000;
+test(
+  "a hung request times out and is retried as a network error",
+  { timeout: 120_000 },
+  async (t) => {
+    // 1 s, not 100 ms: on a loaded machine the retried (fast) request must not time out too.
+    const { fake, gh, sleeps, logs } = await setup(t, {}, { requestTimeoutMs: 1000 });
+    fake.addPull({ number: 35, title: "slow" });
+    fake.inject({ method: "GET", path: "/pulls/35", status: 200, body: {}, delayMs: STALL_MS });
+    const started = Date.now();
+    assert.equal((await gh.getPull(35)).title, "slow");
+    assert.ok(Date.now() - started < STALL_MS / 2, "the stalled response did not hold the client");
+    assert.deepEqual(sleeps, [1000]);
+    assert.ok(logs.some((l) => /timed out after 1000 ms/.test(l)));
+  }
+);
 
 test("a request that keeps timing out fails with GitHubError status 0", async (t) => {
   const { fake, gh } = await setup(t, {}, { requestTimeoutMs: 50, maxRetries: 1 });
@@ -990,6 +1047,90 @@ test("listMatchingBranches strips refs/heads/ and deleteBranch guards the prefix
   await gh.deleteBranch("omni-queue/release-v3.8.54/b1-0123456789ab"); // already gone: ok
 });
 
+test("listWorkflowRuns by head_sha follows every page and carries the workflow and suite ids and the event", async (t) => {
+  const { fake, gh } = await setup(t);
+  for (let i = 0; i < 130; i++) {
+    fake.addWorkflowRun({
+      headSha: i % 2 ? sha("head") : sha("other"),
+      headBranch: "feature-1",
+      event: i % 4 === 3 ? "workflow_dispatch" : "pull_request",
+      checkSuiteId: 9000 + i,
+      workflowId: 300 + (i % 4),
+    });
+  }
+  fake.maxPerPage = 20; // 65 runs of that head: four pages
+  const from = fake.requests.length;
+  const runs = await gh.listWorkflowRuns({ headSha: sha("head") });
+  assert.equal(runs.length, 65);
+  assert.ok(runs.every((run) => run.headSha === sha("head")));
+  assert.deepEqual(
+    runs
+      .slice(0, 2)
+      .map(({ workflowId, checkSuiteId, event }) => ({ workflowId, checkSuiteId, event })),
+    [
+      { workflowId: 301, checkSuiteId: 9001, event: "pull_request" },
+      { workflowId: 303, checkSuiteId: 9003, event: "workflow_dispatch" },
+    ]
+  );
+  const pages = fake.requests.slice(from).filter((r) => r.path === "/actions/runs");
+  assert.equal(pages.length, 4);
+  assert.ok(pages.every((r) => r.query.head_sha === sha("head")));
+  // without workflow_id in the payload: null (an unknown workflow keeps its suite current)
+  fake.addWorkflowRun({ headSha: sha("bare"), checkSuiteId: 1 });
+  assert.equal((await gh.listWorkflowRuns({ headSha: sha("bare") }))[0].workflowId, null);
+  // without an event in the payload: "" (a run of unknown event supersedes nothing)
+  fake.workflowRuns.push({ id: 99_999, head_sha: sha("eventless"), check_suite_id: 2 });
+  assert.equal((await gh.listWorkflowRuns({ headSha: sha("eventless") }))[0].event, "");
+});
+
+test("listWorkflowRunJobs lists every attempt's jobs (filter=all, every page) with the id of each job's check run", async (t) => {
+  const { fake, gh } = await setup(t);
+  const runs = [];
+  for (let i = 0; i < 45; i++) {
+    runs.push(fake.addCheckRun(sha("cand"), { name: `Job ${i}`, suiteId: 4242 }));
+  }
+  // POST /check-runs with a workflow token: in the same suite, no job of the run.
+  const planted = fake.addCheckRun(sha("cand"), { name: "Gate / CI", suiteId: 4242, job: false });
+  const run = fake.addWorkflowRun({
+    headSha: sha("cand"),
+    headBranch: "omni-queue/x",
+    checkSuiteId: 4242,
+  });
+  fake.maxPerPage = 20;
+  const from = fake.requests.length;
+  const jobs = await gh.listWorkflowRunJobs(run.id);
+  assert.equal(jobs.length, 45);
+  assert.deepEqual(
+    jobs.map((j) => j.checkRunId),
+    runs.map((r) => r.id)
+  );
+  assert.ok(!jobs.some((j) => j.checkRunId === planted.id));
+  assert.deepEqual(Object.keys(jobs[0]).sort(), [
+    "checkRunId",
+    "conclusion",
+    "id",
+    "name",
+    "runAttempt",
+    "runId",
+    "status",
+  ]);
+  const pages = fake.requests.slice(from).filter((r) => r.path === `/actions/runs/${run.id}/jobs`);
+  assert.equal(pages.length, 3, "every page");
+  assert.equal(pages[0].query.filter, "all", "every attempt");
+  await assert.rejects(gh.listWorkflowRunJobs(0), /invalid workflow run id/);
+  await assert.rejects(gh.listWorkflowRunJobs(987654), /404/);
+});
+
+test("normalizeWorkflowJob reads the check run id from check_run_url, null when there is none", () => {
+  const job = (url) =>
+    normalizeWorkflowJob({ id: 1, run_id: 2, run_attempt: 2, check_run_url: url });
+  assert.equal(job("https://api.github.com/repos/o/r/check-runs/399444496").checkRunId, 399444496);
+  assert.equal(job(undefined).checkRunId, null);
+  assert.equal(job("https://api.github.com/repos/o/r/check-runs/").checkRunId, null);
+  assert.equal(job("https://api.github.com/repos/o/r/check-runs/12/x").checkRunId, null);
+  assert.equal(job("https://api.github.com/repos/o/r/check-runs/12").runAttempt, 2);
+});
+
 test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts inputs", async (t) => {
   const { fake, gh } = await setup(t);
   fake.workflowRuns.push(
@@ -1002,6 +1143,8 @@ test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts
       head_sha: sha("a"),
       head_branch: "release/v3.8.54",
       event: "push",
+      run_attempt: 2,
+      workflow_id: 234399967,
     },
     {
       id: 2,
@@ -1024,7 +1167,9 @@ test("listWorkflowRuns filters and unwraps workflow_runs; dispatchWorkflow posts
       headSha: sha("a"),
       headBranch: "release/v3.8.54",
       event: "push",
+      workflowId: 234399967,
       checkSuiteId: null,
+      runAttempt: 2,
     },
   ]);
   await gh.dispatchWorkflow("omni-queue.yml", "main", { base: "release/v3.8.54", action: "pause" });
@@ -1065,6 +1210,35 @@ test("listWorkflowRuns: push runs of one ref and SHA, each with its check suite 
   assert.equal(query.event, "push");
 });
 
+test("rerunFailedJobs posts rerun-failed-jobs for one workflow run; listWorkflowRuns reads its attempt", async (t) => {
+  const { fake, gh } = await setup(t);
+  const head = sha("candidate");
+  const ref = "omni-queue/release-v3.8.54/b7-0123456789ab";
+  const run = fake.addWorkflowRun({ headSha: head, headBranch: ref, conclusion: "failure" });
+  const [before] = await gh.listWorkflowRuns({ branch: ref, headSha: head, event: "push" });
+  assert.equal(before.runAttempt, 1);
+  assert.equal(await gh.rerunFailedJobs(run.id), undefined);
+  const post = fake.requests.filter((r) => r.method === "POST");
+  assert.deepEqual(
+    post.map((r) => r.path),
+    [`/actions/runs/${run.id}/rerun-failed-jobs`]
+  );
+  assert.deepEqual(fake.reruns, [run.id]);
+  const [after] = await gh.listWorkflowRuns({ branch: ref, headSha: head, event: "push" });
+  assert.equal(after.runAttempt, 2, "the next attempt of the same run");
+  assert.equal(after.status, "queued");
+  assert.equal(after.conclusion, null);
+  // GitHub's refusals reach the caller as GitHubError: running already (403), unknown run (404)
+  await assert.rejects(gh.rerunFailedJobs(run.id), (error) => error.status === 403);
+  await assert.rejects(gh.rerunFailedJobs(run.id + 999), (error) => error.status === 404);
+  // a malformed id never reaches the API
+  const sent = fake.requests.length;
+  for (const id of [0, -1, 1.5, "7", null, undefined]) {
+    await assert.rejects(gh.rerunFailedJobs(id), /rerunFailedJobs: invalid workflow run id/);
+  }
+  assert.equal(fake.requests.length, sent);
+});
+
 test("rulesets CRUD", async (t) => {
   const { gh } = await setup(t);
   const created = await gh.createRuleset({ name: "release", enforcement: "active" });
@@ -1076,4 +1250,47 @@ test("rulesets CRUD", async (t) => {
     (await gh.listRulesets()).map((r) => r.id),
     [created.id]
   );
+});
+
+test("getBranchRules: path, pagination, normalization", async (t) => {
+  const { fake, gh } = await setup(t, { maxPerPage: 2 });
+  const branch = "omni-queue/release-v3.8.54/b1-0123456789ab";
+  const raw = (type, id) => ({
+    type,
+    ruleset_source_type: "Repository",
+    ruleset_source: "acme/widget",
+    ruleset_id: id,
+    parameters: {},
+  });
+  fake.branchRules.set(branch, [
+    raw("creation", 11),
+    raw("update", 11),
+    raw("deletion", 11),
+    raw("non_fast_forward", 11),
+    raw("pull_request", 12),
+  ]);
+  assert.deepEqual(await gh.getBranchRules(branch), [
+    { type: "creation", rulesetId: 11 },
+    { type: "update", rulesetId: 11 },
+    { type: "deletion", rulesetId: 11 },
+    { type: "non_fast_forward", rulesetId: 11 },
+    { type: "pull_request", rulesetId: 12 },
+  ]);
+  const pages = fake.requests.filter((r) => r.path.startsWith("/rules/branches/"));
+  assert.equal(pages.length, 3, "every page is read");
+  assert.ok(pages.every((r) => r.method === "GET"));
+  // The branch name is encoded segment by segment: its slashes stay path separators.
+  assert.ok(pages.every((r) => r.path === `/rules/branches/${branch}`));
+  assert.deepEqual(
+    pages.map((r) => r.query.page ?? "1"),
+    ["1", "2", "3"]
+  );
+
+  // A segment with a character that needs escaping is escaped, the separators are not.
+  fake.requests.length = 0;
+  await gh.getBranchRules("omni-queue/odd name");
+  assert.equal(fake.requests[0].path, "/rules/branches/omni-queue/odd%20name");
+
+  // No rule applies to a name: an empty list, not an error.
+  assert.deepEqual(await gh.getBranchRules("feature/x"), []);
 });

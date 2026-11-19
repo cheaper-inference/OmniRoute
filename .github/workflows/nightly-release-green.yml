@@ -134,6 +134,10 @@ jobs:
       JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
+      # Same gate mode as the observer's own HARD gates (withHardGateMode in
+      # validate-release-green.mjs): these results feed its verdict through --suites-from.
+      # Release-mode assertions (e.g. locale key parity) belong to the release cut.
+      OMNIROUTE_GATE_MODE: "pr"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
@@ -473,6 +477,10 @@ jobs:
       JWT_SECRET: ci-nightly-secret-with-sufficient-length-for-validation
       API_KEY_SECRET: ci-nightly-api-key-secret-long
       DISABLE_SQLITE_AUTO_BACKUP: "true"
+      # Same gate mode as the observer's own HARD gates (withHardGateMode in
+      # validate-release-green.mjs): these results feed its verdict through --suites-from.
+      # Release-mode assertions (e.g. locale key parity) belong to the release cut.
+      OMNIROUTE_GATE_MODE: "pr"
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
