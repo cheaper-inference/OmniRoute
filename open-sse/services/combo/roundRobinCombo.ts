@@ -7,7 +7,6 @@ import {
   getRuntimeProviderProfile,
   hasPerModelQuota,
   isModelLocked,
-  recordProviderFailure,
   recordProviderSuccess,
 } from "../accountFallback.ts";
 import {
@@ -97,7 +96,6 @@ import {
 } from "./agenticStallFailover.ts";
 import { holdAttemptResponse } from "./truncatedStreamFailover.ts";
 import {
-  TRANSIENT_FOR_SEMAPHORE,
   MAX_FALLBACK_WAIT_MS,
   classifyQualityFailure,
   COMBO_LOOP_SAFETY_TIMEOUT_MS,
@@ -113,7 +111,6 @@ import {
   isLocalQueueCapacityErrorBody,
   isLocalProcessPressureResponse,
   isProviderCircuitOpenResult,
-  shouldRecordProviderBreakerFailure,
   toRecordedTarget,
   getExhaustedTargetSkipReason,
   requestScopedReplayKey,
@@ -158,6 +155,7 @@ import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
 import { resolveTargetTokenLimit } from "./targetTokenLimit.ts";
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
+import { recordRoundRobinFailureTracking } from "./roundRobinBreaker.ts";
 
 /**
  * Handle round-robin combo: each request goes to the next model in circular order.
@@ -1288,53 +1286,28 @@ export async function handleRoundRobinCombo({
             );
           }
 
-          const nextRrTarget =
-            offset + 1 < modelCount ? filteredTargets[rrTargetIndexAt(offset + 1)] : undefined;
-          const sameProviderNext =
-            typeof nextRrTarget?.provider === "string" && nextRrTarget.provider === provider;
-          if (
-            provider &&
-            provider !== "unknown" &&
-            shouldRecordProviderBreakerFailure({
-              isStreamReadinessFailure,
-              isStreamEarlyEof,
-              trackStreamReadinessInCircuitBreaker: Boolean(
-                config.trackStreamReadinessInCircuitBreaker
-              ),
-              status: result.status,
-              sameProviderNext,
-              skipProviderBreaker: fallbackResult.skipProviderBreaker,
-              requestScopedFailure: scopedFailure,
-              error: errorText,
-              isProxyUnreachable: structuredError?.code === "proxy_unreachable",
-              providerCircuitOpen: isProviderCircuitOpenResult(result, errorText),
-            }) &&
-            !isDraining()
-          ) {
-            const isQueueTimeout =
-              errorText.includes("RATE_LIMIT_QUEUE_TIMEOUT") ||
-              errorText.includes("RATE_LIMIT_QUEUE_WEDGED");
-            recordProviderFailure(provider, log, targetWithConnection.connectionId, profile, {
-              isQueueTimeout,
-              isNetworkError: structuredError?.code === "proxy_unreachable",
-              providerProbeSettled: isProviderProbeResponse(result),
-            });
-          }
-
-          if (
-            (!isStreamReadinessFailure || config.trackStreamReadinessInCircuitBreaker === true) &&
-            !isTokenLimitBreach &&
-            !scopedFailure &&
-            TRANSIENT_FOR_SEMAPHORE.includes(result.status) &&
-            (targetCooldownMs > 0 || isStreamReadinessFailure)
-          ) {
-            const rrCooldownMs = targetCooldownMs > 0 ? targetCooldownMs : 5000;
-            semaphore.markRateLimited(semaphoreKey, rrCooldownMs);
-            log.warn(
-              "COMBO-RR",
-              `${modelStr} error ${result.status}, cooldown ${rrCooldownMs}ms`
-            );
-          }
+          recordRoundRobinFailureTracking({
+            provider,
+            nextProvider:
+              offset + 1 < modelCount
+                ? filteredTargets[rrTargetIndexAt(offset + 1)]?.provider
+                : undefined,
+            isStreamReadinessFailure,
+            isStreamEarlyEof,
+            trackStreamReadiness: Boolean(config.trackStreamReadinessInCircuitBreaker),
+            result,
+            skipProviderBreaker: fallbackResult.skipProviderBreaker,
+            requestScopedFailure: scopedFailure,
+            isTokenLimitBreach,
+            errorText,
+            structuredErrorCode: structuredError?.code,
+            connectionId: targetWithConnection.connectionId,
+            profile,
+            targetCooldownMs,
+            semaphoreKey,
+            modelStr,
+            log,
+          });
 
           if (isAllAccountsRateLimited) {
             log.info(

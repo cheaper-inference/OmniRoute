@@ -111,6 +111,11 @@ test("comboConfig enables trackStreamReadinessInCircuitBreaker via combo config,
     assert.equal(getDefaultComboConfig().trackStreamReadinessInCircuitBreaker, true);
     assert.equal(resolveComboConfig({}, {}).trackStreamReadinessInCircuitBreaker, true);
     assert.equal(resolveComboSetupConfig({}, null).trackStreamReadinessInCircuitBreaker, true);
+    assert.equal(
+      resolveComboSetupConfig({ config: { trackStreamReadinessInCircuitBreaker: undefined } }, null)
+        .trackStreamReadinessInCircuitBreaker,
+      true
+    );
   });
 
   withEnv("false", () => {
@@ -305,5 +310,13 @@ test("round-robin combo records provider breaker failure on stream readiness tim
   await withEnv("true", async () => {
     await runRoundRobin("rr-readiness-optout", false);
     assert.equal(getCircuitBreaker("glm").getStatus().failureCount, 0);
+  });
+
+  resetAllCircuitBreakers();
+
+  // Env opt-in (true) applies when settings are absent and combo flag is undefined.
+  await withEnv("true", async () => {
+    await runRoundRobin("rr-readiness-env-on", undefined);
+    assert.equal(getCircuitBreaker("glm").getStatus().failureCount, 1);
   });
 });
