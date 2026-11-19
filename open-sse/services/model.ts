@@ -331,8 +331,12 @@ async function getActiveSyncedProvidersForModel(modelId: string) {
     const providers = (await getActiveProvidersWithSyncedModel(modelId))
       .map(resolveProviderAlias)
       .filter((provider): provider is string => typeof provider === "string");
-    if (syncedProvidersCache.size >= SYNCED_PROVIDERS_CACHE_MAX) syncedProvidersCache.clear();
-    syncedProvidersCache.set(modelId, providers);
+    // A write can land while this lookup awaits the query; a concurrent lookup may then already
+    // have moved the map to the new version. Only cache a result read under the current version.
+    if (getModelCatalogCacheVersion() === version) {
+      if (syncedProvidersCache.size >= SYNCED_PROVIDERS_CACHE_MAX) syncedProvidersCache.clear();
+      syncedProvidersCache.set(modelId, providers);
+    }
     return providers;
   } catch {
     return [];
