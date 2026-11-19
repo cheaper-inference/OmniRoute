@@ -25,7 +25,7 @@ import {
   statSync,
   writeFileSync,
 } from "node:fs";
-import { dirname, join } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { runBuildTool } from "./buildToolRunner.mjs";
 import { computeDependencyClosure } from "./colocateOptionals.mjs";
@@ -34,9 +34,14 @@ const ROOT = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 // STANDALONE defaults to the real build output; OMNIROUTE_STANDALONE_DIR or
 // NEXT_DIST_DIR overrides it so tests and custom-distDir builds drive
 // co-location against the right standalone tree without touching live paths.
-const STANDALONE = process.env.OMNIROUTE_STANDALONE_DIR
-  ? process.env.OMNIROUTE_STANDALONE_DIR
-  : join(ROOT, process.env.NEXT_DIST_DIR || join(".build", "next"), "standalone");
+// resolve() keeps an absolute NEXT_DIST_DIR absolute, matching the build's
+// path.resolve() in build-next-isolated.mjs.
+export function resolveStandaloneDir(env = process.env, root = ROOT) {
+  return env.OMNIROUTE_STANDALONE_DIR
+    ? env.OMNIROUTE_STANDALONE_DIR
+    : resolve(root, env.NEXT_DIST_DIR || join(".build", "next"), "standalone");
+}
+const STANDALONE = resolveStandaloneDir();
 
 const CALL_LOG_WORKER_REL = join("src", "lib", "usage", "callLogArtifactWorker.js");
 const CALL_LOG_WORKER_SRC = join(ROOT, "src", "lib", "usage", "callLogArtifactWorker.ts");
