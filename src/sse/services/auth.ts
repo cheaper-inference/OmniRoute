@@ -372,6 +372,19 @@ function getCachedQuotaResetAt(connectionId: string): string | null {
   if (!entry?.quotas) return null;
   return getEarliestFutureDate(Object.values(entry.quotas).map((quota) => quota.resetAt));
 }
+/**
+ * #18664 / #20083: whether a connection the selection filtered out would serve again once its
+ * model lockout ends. A model-locked one would; one excluded for this fallback retry would too,
+ * unless it is also in an account cooldown (the exclusion check runs before that filter).
+ */
+function canWaitOutModelLockout(
+  filterStatus: string | undefined,
+  connection: { rateLimitedUntil?: string | null }
+): boolean {
+  if (filterStatus === "modelLocked") return true;
+  return filterStatus === "excluded" && !isAccountUnavailable(connection.rateLimitedUntil);
+}
+
 function isRetryableModelLockoutReason(reason: unknown): boolean {
   return typeof reason === "string" && reason.length > 0
     ? !NON_RETRYABLE_MODEL_LOCKOUT_REASONS.has(reason)
@@ -1844,10 +1857,9 @@ export async function getProviderCredentials(
       // exclusion set (status === "excluded") that carry a retryable model lockout.
       const earliestModelLockout = requestedModel
         ? connections
-            .filter((connection) => {
-              const status = connectionFilterStatus.get(connection.id);
-              return status === "modelLocked" || status === "excluded";
-            })
+            .filter((connection) =>
+              canWaitOutModelLockout(connectionFilterStatus.get(connection.id), connection)
+            )
             .map((connection) => {
               const lockout = getModelLockoutInfo(provider, connection.id, requestedModel);
               return lockout &&

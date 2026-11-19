@@ -104,9 +104,9 @@ test("an account in fallback exclusion set with short retryable model lockout re
   exhaustWeekly(exhausted.id, weeklyReset);
   fallback.lockModel("claude", healthy.id, MODEL, "unknown", 5_000);
 
-  // During fallback retry, healthy account is passed in excludedConnectionIds
+  // During the fallback retry the account that just failed is passed in excludeConnectionIds.
   const result = await auth.getProviderCredentials("claude", null, null, MODEL, {
-    excludedConnectionIds: new Set([healthy.id]),
+    excludeConnectionIds: [healthy.id],
   });
 
   assert.equal(result.allRateLimited, true);
@@ -119,4 +119,25 @@ test("an account in fallback exclusion set with short retryable model lockout re
     retryMs > 0 && retryMs <= 5_000,
     `retryAfter should be the lockout end, got ${retryMs}ms`
   );
+});
+
+test("an excluded account still in an account cooldown is not reported as a short model cooldown (#20083)", async () => {
+  const exhausted = await seedClaude("claude-20083-exhausted-cooldown");
+  const cooling = await seedClaude("claude-20083-account-cooldown");
+  const weeklyReset = new Date(Date.now() + 60 * 60 * 60_000).toISOString();
+  exhaustWeekly(exhausted.id, weeklyReset);
+  fallback.lockModel("claude", cooling.id, MODEL, "unknown", 5_000);
+  // The account itself is cooling down for an hour: it cannot serve when the lockout ends.
+  await providersDb.updateProviderConnection(cooling.id, {
+    rateLimitedUntil: new Date(Date.now() + 60 * 60_000).toISOString(),
+  });
+
+  const result = await auth.getProviderCredentials("claude", null, null, MODEL, {
+    excludeConnectionIds: [cooling.id],
+  });
+
+  assert.equal(result.allRateLimited, true);
+  assert.notEqual(result.cooldownScope, "model");
+  assert.equal(result.retryAfter, weeklyReset);
+  assert.equal(String(result.lastError).includes("exhausted their quota"), true);
 });
