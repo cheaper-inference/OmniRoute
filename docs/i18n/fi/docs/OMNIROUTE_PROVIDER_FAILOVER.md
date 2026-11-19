@@ -4,10 +4,20 @@
 
 ---
 
-Virheet luokitellaan ennen uudelleenyrityspäätösten tekemistä.
+Epäonnistuminen luokitellaan ennen uudelleenyrityspäätösten tekemistä.
 
-Tilapäisten virheiden, kuten aikakatkaisujen, verkkovirheiden, nopeusrajoitusten ja palveluntarjoajan 5xx-vastausten, yhteydessä voidaan siirtyä käyttämään toista palveluntarjoajaa. Todennusvirheitä, käyttöoikeusvirheitä, virheellisiä pyyntöjä, käytöstä poistettuja malleja ja tuntemattomia virheitä ei yritetä sokeasti uudelleen.
+Ohimenevät viat, kuten aikakatkaisut, verkkovirheet, nopeusrajoitukset ja palveluntarjoajan 5xx-vastaukset, voivat epäonnistua. Loppuun käytettyä kiintiötä tai hyvitystä (kiintiö 429 tai 402 maksu vaaditaan) ei koskaan yritetä uudelleen samalla palveluntarjoajalla, vaan se siirtyy toiseen, jonka kiintiö on erillinen. Todennusvirheitä, lupavirheitä, virheellisiä pyyntöjä, ei-käytettäviä malleja ja tuntemattomia virheitä ei yritetä uudelleen sokeasti.
 
-Palveluntarjoajien välisen oletuskäytännön mukaan palveluntarjoajia voidaan yrittää enintään kolme kertaa, nopeusrajoitusten ja aikakatkaisujen yhteydessä yritetään uudelleen ja hallinnollinen käytöstä poistaminen pidetään erillään piirin tilapäisestä tilasta.
+Oletusarvoinen palveluntarjoajien välinen käytäntö sallii enintään kolme palveluntarjoajan yritystä, yrittää uudelleen nopeusrajoituksia ja aikakatkaisuja, epäonnistuu kiintiön lopussa ja pitää järjestelmänvalvojan eston erillään tilapäisestä piiritilasta.
 
-Piirin tilat ovat `closed`, `open` ja `half_open`. Jäähdytysjakson jälkeen ajoitetaan rajattu koepyyntö; onnistunut koepyyntö sulkee piirin ja epäonnistunut avaa sen uudelleen.
+## Missä sitä sovelletaan
+
+- **Yhdistelmät** epäonnistua kohteidensa välillä yhdistelmän oman strategian ja asetusten mukaisesti.
+- **Paljas mallitunnus** (ei `provider/` etuliitettä), jota useat aktiiviset palveluntarjoajat palvelevat ilman saman nimen yhdistelmää, lähetetään ensin palveluntarjoajan päättelyvalimiin. Jos tämä yritys epäonnistuu tavalla, jolla käytäntö epäonnistuu, sama pyyntö lähetetään seuraavalle aktiiviselle palveluntarjoajalle, joka palvelee tunnusta. Vastauksessa on `x-omniroute-fallback-attempts`, jossa on ennen vastaajaa yrittäneiden tarjoajien lukumäärä.
+  - Jokainen varajäsen on valtuutettu täsmälleen ikään kuin johtopäätös olisi valinnut sen. Kohde, jonka API -näppäin estää tai ei hyväksy, ohitetaan ilman ylävirran puhelua, ja asiakas saa todellisen ylävirran virheen, ei käytäntöjen hylkäämistä kohteelle, jota se ei koskaan nimeänyt.
+  - Vain epäonnistunut vastaus siirtyy eteenpäin: mikään ei epäonnistu ensimmäisen suoratoistotavun jälkeen.
+  - Varamallin vaihto hätätilanteessa on voimassa vain, kun jokainen pyydetyn mallin toimittaja on epäonnistunut.
+  - Yhteyteen kiinnitetty pyyntö (`x-omniroute-connection`) pysyy siinä.
+  - Etuliitettyä tunnusta (`provider/model`) ei koskaan reititetä uudelleen toiselle palveluntarjoajalle.
+
+Piirin tilat ovat `closed`, `open` ja `half_open`. Jäähdytys ajoittaa rajoitetun luotain; onnistunut anturi sulkee piirin ja epäonnistunut anturi avaa sen uudelleen.
