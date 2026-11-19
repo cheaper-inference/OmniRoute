@@ -178,16 +178,26 @@ export function setParamFilterConfig(provider: string, config: ProviderParamFilt
 
 /**
  * Delete the param filter config for a provider.
- * Resets to no filtering for that provider. Cleans up both canonical and alias keys (#20295).
+ * Resets to no filtering for that provider. Cleans up the canonical key and every stored
+ * alias key that resolves to it (#20295).
  */
 export function deleteParamFilterConfig(provider: string): void {
   const normalizedKey = toNormalizedString(provider);
   if (!normalizedKey) return;
   const canonical = resolveProviderId(normalizedKey);
 
+  // Legacy rows may sit under an alias key (e.g. "cc"): drop every stored key that
+  // resolves to the same provider, or loadAllConfigs() would map it back after a reset.
+  const keys = new Set([canonical, normalizedKey]);
+  for (const key of Object.keys(readNamespace(NAMESPACE))) {
+    if (resolveProviderId(key) === canonical) keys.add(key);
+  }
+
   const db = getDbInstance();
-  const stmt = db.prepare("DELETE FROM key_value WHERE namespace = ? AND (key = ? OR key = ?)");
-  stmt.run(NAMESPACE, canonical, normalizedKey);
+  const stmt = db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?");
+  db.transaction(() => {
+    for (const key of keys) stmt.run(NAMESPACE, key);
+  })();
   bumpCacheGeneration();
 }
 

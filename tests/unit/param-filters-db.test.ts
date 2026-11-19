@@ -108,6 +108,26 @@ test("provider alias (e.g. 'cc') resolves to canonical provider ('claude') (#202
   }
 });
 
+test("deleteParamFilterConfig via the canonical id removes a legacy alias row (#20295)", () => {
+  // Pre-#20295 databases stored filters under the alias key (e.g. "cc").
+  core
+    .getDbInstance()
+    .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+    .run(
+      "provider_param_filters",
+      "cc",
+      JSON.stringify({ block: ["top_p"], allow: [], autoLearn: false })
+    );
+  // Any write invalidates the in-memory cache so the seeded row is read back.
+  deleteParamFilterConfig("cache-bump-20295");
+  assert.deepEqual(getParamFilterConfig("claude")?.block, ["top_p"]);
+
+  deleteParamFilterConfig("claude");
+
+  assert.equal(getParamFilterConfig("claude"), null);
+  assert.equal(getParamFilterConfig("cc"), null);
+});
+
 test("deleteParamFilterConfig is a no-op for unconfigured provider", () => {
   deleteParamFilterConfig("nothing-here");
 });
