@@ -42,7 +42,8 @@ vi.mock("fumadocs-ui/mdx", () => ({ default: { a: (props: object) => <a {...prop
 
 // Hoisted above PAGES, but only read when the page calls getPage().
 const englishPage = (title: string, slug: string[], toc: unknown[] = []) => ({
-  file: { path: `${slug.join("/")}.md` },
+  // fumadocs 16 pages carry the file as `path` (relative to docs/); there is no `file` (#20642).
+  path: `${slug.join("/")}.md`,
   data: {
     title,
     toc,
