@@ -24,19 +24,21 @@ Toda tipični odjemalci (Cursor, Cline, Roo Code, OpenAI SDK) odstranijo `reason
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Zajem poteka v `open-sse/handlers/chatCore.ts` (dve mesti, na dveh klicnih mestih `cacheReasoningFromAssistantMessage` ). Ponovno predvajanje se zgodi v `open-sse/translator/index.ts` po prisili sheme, vendar pred pošiljanjem.
+
+Vnosi klica orodja so shranjeni pod `buildToolCallCacheKey()`, povzetkom obsega zahteve in ID-ja klica orodja, tako da isti ID, ki ga uporablja drug ključ API ali seja, ne izbere vnosa. Obseg izvira iz `buildReasoningCacheScope()`: ID ključa API in ključ seje, če ga ima zahteva. Stolpec `tool_call_id` in nadzorna plošča torej prikazujeta ta izvleček za te vnose.
 
 Navadni (brez klica orodja) zavoji pomočnika so vneseni drugače: `buildAssistantMessageCacheKey()` prebavi obseg seje in normaliziran prepis v formatu OpenAI do tega zavoja, ker DeepSeek zahteva obrazložitev _vsakega_ prejšnjega zavoja, ko je `tools` prisoten. Za cilje Responses-API (na primer `opencode-go/deepseek-v4-flash`, usmerjen v `/responses`) telo navzgor nosi `input`, ne `messages`, tako da `translateRequest()` (`open-sse/translator/index.ts`) poroča o vrtilnem prepisu, ki ga je prebavil prek možnosti povratnega klica, in mesta za zajemanje prebavijo ta isti prepis. Prepustnica za predvajanje odgovorov se izvaja na vrtišču OpenAI za vsako izvorno obliko, tako da se ponovno predvajajo tudi odjemalci sporočil Anthropic (odzivi Claude → OpenAI → ).
 

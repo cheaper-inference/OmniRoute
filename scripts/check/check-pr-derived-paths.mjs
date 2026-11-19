@@ -33,6 +33,7 @@
  * origin/release/v<package.json version> — first that resolves. No resolvable base → SKIP.
  */
 
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import process from "node:process";
@@ -212,6 +213,73 @@ export function evaluateDerivedPaths({ files, branch, families }) {
   return { violations, allowed };
 }
 
+/** Exact bytes of `file` at `ref` (null when it does not exist there). */
+function gitShow(cwd, ref, file) {
+  try {
+    return execFileSync("git", ["show", `${ref}:${file}`], {
+      cwd,
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "ignore"],
+      maxBuffer: 256 << 20,
+    });
+  } catch {
+    return null;
+  }
+}
+
+// --- Orphan cleanup ----------------------------------------------------------------------------
+// Deleting a translation of a document that no longer exists is cleanup, not a derived copy:
+// keeping the mirror would leave a translation with no source, and nothing ever regenerates it.
+// So a PR may, on any branch:
+//   - delete docs/i18n/<locale>/<doc> when <doc> does not exist in the PR's head;
+//   - edit .i18n-state.json only to drop the `sources` entries of such documents.
+// Any other change to those files is judged by the families as usual (2026-11-18, #20144).
+export const ORPHAN_MIRROR = /^docs\/i18n\/[^/]+\/(.+)$/;
+export const I18N_STATE = ".i18n-state.json";
+
+/**
+ * Files of `files` that are pure orphan cleanup (see above).
+ * A file counts only when the merge base had it and the head does not, so it needs a resolved
+ * diff base (an explicit --files list never qualifies).
+ * @param {{ files: string[], existsAtHead: (path: string) => boolean,
+ *   readBase: (path: string) => string | null, readHead: (path: string) => string | null }} io
+ * @returns {Set<string>}
+ */
+export function orphanCleanupFiles({ files, existsAtHead, readBase, readHead }) {
+  const out = new Set();
+  for (const file of files) {
+    const m = ORPHAN_MIRROR.exec(file);
+    if (m && readBase(file) !== null && !existsAtHead(file) && !existsAtHead(m[1])) out.add(file);
+  }
+  if (files.includes(I18N_STATE)) {
+    let base = null;
+    let head = null;
+    try {
+      base = JSON.parse(readBase(I18N_STATE) ?? "null");
+      head = JSON.parse(readHead(I18N_STATE) ?? "null");
+    } catch {
+      base = null;
+    }
+    const sourcesOf = (state) =>
+      state && typeof state.sources === "object" ? state.sources : null;
+    const b = sourcesOf(base);
+    const h = sourcesOf(head);
+    const sameOutside =
+      base &&
+      head &&
+      JSON.stringify({ ...base, sources: null }) === JSON.stringify({ ...head, sources: null });
+    if (b && h && sameOutside) {
+      const onlyDrops =
+        Object.keys(h).every((k) => k in b && JSON.stringify(h[k]) === JSON.stringify(b[k])) &&
+        Object.keys(b)
+          .filter((k) => !(k in h))
+          .every((k) => !existsAtHead(k));
+      if (onlyDrops && Object.keys(b).length > Object.keys(h).length) out.add(I18N_STATE);
+    }
+  }
+  return out;
+}
+
 function parseArgs(argv) {
   const value = (name) => {
     const hit = argv.find((arg) => arg.startsWith(`--${name}=`));
@@ -260,6 +328,7 @@ export function main(argv = process.argv.slice(2), env = process.env, cwd = ROOT
 
   let files;
   let baseLabel;
+  let diffBase = null;
   if (opts.files) {
     files = readFileList(opts.files);
     baseLabel = `--files=${opts.files}`;
@@ -273,9 +342,30 @@ export function main(argv = process.argv.slice(2), env = process.env, cwd = ROOT
     }
     files = listChangedFiles(base.sha, { cwd, includeWorktree: !env.CI });
     baseLabel = `${base.ref} @ ${base.sha.slice(0, 10)}`;
+    diffBase = base.sha;
   }
 
-  const { violations, allowed } = evaluateDerivedPaths({ files, branch, families });
+  const orphans = orphanCleanupFiles({
+    files,
+    existsAtHead: (p) => fs.existsSync(path.join(cwd, p)),
+    readBase: (p) => (diffBase ? gitShow(cwd, diffBase, p) : null),
+    readHead: (p) => {
+      try {
+        return fs.readFileSync(path.join(cwd, p), "utf8");
+      } catch {
+        return null;
+      }
+    },
+  });
+  const judged = files.filter((f) => !orphans.has(f));
+  const { violations, allowed } = evaluateDerivedPaths({ files: judged, branch, families });
+  if (orphans.size) {
+    allowed.push({
+      family: "orphan-cleanup",
+      reason: "orphan-cleanup",
+      files: [...orphans].sort(),
+    });
+  }
   const payload = {
     ok: violations.length === 0,
     mode: info,
@@ -288,7 +378,7 @@ export function main(argv = process.argv.slice(2), env = process.env, cwd = ROOT
   if (violations.length === 0) {
     const notes = allowed.map(
       (a) =>
-        `${TAG}   allowed ${a.family}: ${a.files.length} file(s) (${a.reason === "writer" ? `writer branch ${branch}` : "derived-only PR"})`
+        `${TAG}   allowed ${a.family}: ${a.files.length} file(s) (${a.reason === "writer" ? `writer branch ${branch}` : a.reason === "orphan-cleanup" ? "mirrors and state entries of documents this PR's head no longer has" : "derived-only PR"})`
     );
     emit(opts, payload, [
       `${TAG} PASS — ${describeGateMode(info)}; ${files.length} changed file(s) vs ${baseLabel}; ${families.length} famil${families.length === 1 ? "y" : "ies"} checked.`,
