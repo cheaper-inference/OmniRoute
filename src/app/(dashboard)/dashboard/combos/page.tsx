@@ -1068,14 +1068,16 @@ function CombosPageContent() {
       ),
     [combos, activeFilter, searchEnabled, comboSearch]
   );
+  const comboPaginationKey = (search: string) => `${activeFilter}|${searchEnabled ? search : ""}`;
   const {
     page: visibleComboPage,
     setPage: setComboPage,
+    showPageForFilter: showComboPageForFilter,
     pageCount: comboPageCount,
     pageItems: pagedCombos,
     pageStart: comboPageStart,
     pageEnd: comboPageEnd,
-  } = useComboPagination(filteredCombos, `${activeFilter}|${searchEnabled ? comboSearch : ""}`);
+  } = useComboPagination(filteredCombos, comboPaginationKey(comboSearch));
   const visibleCombos = reorderingAllCombos ? combos : pagedCombos;
   const selectedIntelligentCombo = useMemo(() => {
     if (intelligentCombos.length === 0) return null;
@@ -1370,7 +1372,10 @@ function CombosPageContent() {
       router.replace(buildUnfilteredCombosHref(searchParams.toString()), { scroll: false });
     }
     setReorderingAllCombos(false);
-    setComboPage(findComboPage(nextCombos, comboId));
+    // A list search can hide the created card: clear it, and select the page under the
+    // cleared key in the same step so the search reset does not send the list to page 1.
+    setComboSearch("");
+    showComboPageForFilter(findComboPage(nextCombos, comboId), comboPaginationKey(""));
     scrollToComboCardWhenRendered(comboId);
   };
 

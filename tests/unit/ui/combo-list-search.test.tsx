@@ -117,6 +117,59 @@ describe("ComboListToolbar search input", () => {
   });
 });
 
+describe("revealing a created combo under an active search", () => {
+  beforeEach(() => {
+    (
+      globalThis as typeof globalThis & { IS_REACT_ACT_ENVIRONMENT?: boolean }
+    ).IS_REACT_ACT_ENVIRONMENT = true;
+  });
+
+  it("clears the search and keeps the created combo's page instead of page 1", async () => {
+    const { useComboPagination } =
+      await import("@/app/(dashboard)/dashboard/combos/useComboPagination");
+    const items = Array.from({ length: 30 }, (_, index) => ({ id: `c-${index + 1}` }));
+    let reveal: (() => void) | null = null;
+    let seenPage = 0;
+    function Harness() {
+      const [search, setSearch] = React.useState("fast");
+      const { page, showPageForFilter } = useComboPagination(items, `all|${search}`);
+      seenPage = page;
+      reveal = () => {
+        setSearch("");
+        showPageForFilter(2, "all|");
+      };
+      return null;
+    }
+    const container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    await act(async () => {
+      root.render(<Harness />);
+    });
+    expect(seenPage).toBe(1);
+    await act(async () => {
+      reveal?.();
+    });
+    expect(seenPage).toBe(2);
+    await act(async () => {
+      root.unmount();
+    });
+    container.remove();
+  });
+
+  it("the page clears the search before it selects the created combo's page", async () => {
+    const fs = await import("node:fs");
+    const path = await import("node:path");
+    const page = fs.readFileSync(
+      path.resolve(__dirname, "../../../src/app/(dashboard)/dashboard/combos/page.tsx"),
+      "utf8"
+    );
+    expect(page).toMatch(
+      /setComboSearch\(""\);\s*showComboPageForFilter\(findComboPage\(nextCombos, comboId\), comboPaginationKey\(""\)\);/
+    );
+  });
+});
+
 describe("combos page wiring", () => {
   it("enables the box only with ?search=1 and searches the strategy-filtered list", async () => {
     const fs = await import("node:fs");

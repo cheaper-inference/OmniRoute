@@ -688,10 +688,16 @@ async function resolveModelByProviderInference(modelId: string, extendedContext:
     const active = providers.filter((p) => activeProviders.has(p));
     const subscriptions = active.filter((p) => getProviderCategory(p) === "oauth");
     if (subscriptions.length === 1 && active.length > 1) {
+      // The other active candidates still serve this id: keep them as failover targets,
+      // like the auto-pick path below, so a subscription quota or outage can fall back.
+      const failoverTargets = active
+        .filter((p) => p !== subscriptions[0])
+        .map((p) => `${p}/${resolveInferredProviderModel(p, modelId)}`);
       return {
         provider: subscriptions[0],
         model: resolveInferredProviderModel(subscriptions[0], modelId),
         extendedContext,
+        ...(failoverTargets.length > 0 ? { failoverTargets } : {}),
       };
     }
   }

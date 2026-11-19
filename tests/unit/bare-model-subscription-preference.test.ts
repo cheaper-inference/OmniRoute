@@ -65,6 +65,15 @@ test("flag on: the subscription provider wins over the api-key provider", async 
   assert.equal(info.model, SHARED_MODEL);
 });
 
+test("flag on: the api-key provider stays available as a failover target", async () => {
+  process.env[FLAG] = "true";
+  await seedSyncedModel("codex", "oauth");
+  await seedSyncedModel("openai", "apikey");
+  const info = await getModelInfoCore(SHARED_MODEL, null);
+  assert.equal(info.provider, "codex");
+  assert.deepEqual(info.failoverTargets, [`openai/${SHARED_MODEL}`]);
+});
+
 test("flag on: an explicit provider prefix still wins", async () => {
   process.env[FLAG] = "true";
   await seedSyncedModel("codex", "oauth");

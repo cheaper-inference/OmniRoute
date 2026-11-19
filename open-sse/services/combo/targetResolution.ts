@@ -1053,10 +1053,14 @@ export async function resolveComboTargetPipeline(
   );
 
   // Opt-in per-combo call budget (config.budgetCalls + budgetWindowMs): over the budget
-  // the combo is withheld and this request runs on its first target only.
+  // the combo is withheld and this request runs on its first target only. The #6238
+  // compat-rejected recovery tier is withheld too, so it cannot dispatch a target the
+  // budget excluded.
+  let compatRejectedTargets = continuity.compatRejectedTargets;
   if (chargeComboCallBudget(combo.name, config as Record<string, unknown>)) {
     log.info("COMBO", `Combo "${combo.name}" is over its call budget; using the first target only`);
     orderedTargets = orderedTargets.slice(0, 1);
+    compatRejectedTargets = [];
   }
 
   // Parallel pre-screen: check provider profiles and model availability for all targets
@@ -1074,6 +1078,6 @@ export async function resolveComboTargetPipeline(
     sticky: continuity.sticky,
     preScreenMap,
     quotaShareRelease,
-    compatRejectedTargets: continuity.compatRejectedTargets,
+    compatRejectedTargets,
   };
 }
