@@ -173,6 +173,26 @@ export function getLearnedStrippedFields(provider: string, model: string | undef
   return [...entry.fields];
 }
 
+/**
+ * Delete every stripped field from a request body in place: top-level names directly, and
+ * `messages.*.<name>` from rebuilt copies of the message entries (the caller's objects stay
+ * untouched, since combo fallback reuses them).
+ */
+export function dropStrippedFields(body: unknown, strippedFields: ReadonlySet<string>): void {
+  if (strippedFields.size === 0 || !body || typeof body !== "object") return;
+  const record = body as Record<string, unknown>;
+  const msgFields = [...strippedFields].filter((f) => f.startsWith("messages.*."));
+  for (const f of strippedFields) if (!f.startsWith("messages.*.")) delete record[f];
+  if (msgFields.length > 0 && Array.isArray(record.messages)) {
+    record.messages = record.messages.map((m) => {
+      if (!m || typeof m !== "object") return m;
+      const copy = { ...(m as Record<string, unknown>) };
+      for (const f of msgFields) delete copy[f.slice("messages.*.".length)];
+      return copy;
+    });
+  }
+}
+
 /** @internal tests only: forget everything learned so far. */
 export function __clearLearnedStrippedFieldsForTests(): void {
   learnedFields.clear();

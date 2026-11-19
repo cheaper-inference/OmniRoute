@@ -80,3 +80,12 @@ test("an unsafe session id is not used as a cache key", async () => {
   });
   assert.equal(body.prompt_cache_key, WORKSPACE);
 });
+
+test("an empty session_id does not hide the caller's conversation_id", async () => {
+  const conversation = "conv-caller-owned-1";
+  const body = await captureUpstream({
+    clientHeaders: { "x-claude-code-session-id": CLAUDE_SESSION_A },
+    body: { session_id: "", conversation_id: conversation },
+  });
+  assert.equal(body.prompt_cache_key, conversation);
+});

@@ -17,6 +17,8 @@ const NO_SYSTEM_MODELS = [
   "mistral.mistral-7b-instruct-v0:2",
   "mistral.mixtral-8x7b-instruct-v0:1",
   "us.mistral.mixtral-8x7b-instruct-v0:1",
+  "arn:aws:bedrock:us-east-1::foundation-model/amazon.titan-text-express-v1",
+  "arn:aws:bedrock:us-east-1::foundation-model/mistral.mistral-7b-instruct-v0:2",
 ];
 
 test("a model without system-prompt support gets the system text folded into the first user turn", () => {
@@ -52,6 +54,7 @@ test("models that accept a system block keep it", () => {
     "mistral.mistral-large-2402-v1:0",
     "amazon.nova-pro-v1:0",
     "meta.llama3-1-70b-instruct-v1:0",
+    "arn:aws:bedrock:us-east-1::foundation-model/amazon.nova-pro-v1:0",
   ]) {
     const payload = openAIToBedrockConverse(model, { messages });
     assert.deepEqual(payload.system, [{ text: "Answer in French." }], model);

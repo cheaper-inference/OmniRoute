@@ -158,6 +158,7 @@ import {
 } from "../services/learnedMaxTokensCaps.ts";
 import {
   applyFieldDowngradeRecovery,
+  dropStrippedFields,
   getLearnedStrippedFields,
 } from "./base/fieldDowngradeRecovery.ts";
 import { applyAdvisorUndecryptableRecovery } from "./base/advisorRecovery.ts";
@@ -1018,19 +1019,7 @@ export class BaseExecutor {
       }
       // Fields an upstream already rejected with a 400 in this execute() stay stripped
       // on a re-run or fallback URL; strippedFields blocks a second strip-and-retry.
-      if (strippedFields.size > 0 && transformedBody && typeof transformedBody === "object") {
-        const record = transformedBody as Record<string, unknown>;
-        const msgFields = [...strippedFields].filter((f) => f.startsWith("messages.*."));
-        for (const f of strippedFields) if (!f.startsWith("messages.*.")) delete record[f];
-        if (msgFields.length > 0 && Array.isArray(record.messages)) {
-          record.messages = record.messages.map((m) => {
-            if (!m || typeof m !== "object") return m;
-            const copy = { ...(m as Record<string, unknown>) };
-            for (const f of msgFields) delete copy[f.slice("messages.*.".length)];
-            return copy;
-          });
-        }
-      }
+      dropStrippedFields(transformedBody, strippedFields);
 
       // Re-synchronize skills beta with the finalized transformed body (#14200):
       syncSkillsBeta(headers, this.provider, transformedBody, usesClaudeCodeProtocol);
@@ -1528,6 +1517,8 @@ export class BaseExecutor {
         // at this final dispatch point — the single chokepoint every Claude
         // routing mode (grouped/raw/combo) and the native passthrough share,
         // before fingerprinting and CCH signing serialize the body.
+        // The Claude Code thinking injection above can re-add a stripped field: drop it again.
+        dropStrippedFields(transformedBody, strippedFields);
         if (this.provider === "claude" || this.provider === "anthropic" || usesClaudeCodeProtocol) {
           finalizeClaudeBodyConstraints(transformedBody as Record<string, unknown>);
         }

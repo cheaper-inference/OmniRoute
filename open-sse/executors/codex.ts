@@ -881,7 +881,8 @@ export class CodexExecutor extends BaseExecutor {
       sessionBody &&
       typeof sessionBody === "object" &&
       !normalizeCodexSessionId(sessionBody.prompt_cache_key) &&
-      !normalizeCodexSessionId(sessionBody.session_id ?? sessionBody.conversation_id)
+      !normalizeCodexSessionId(sessionBody.session_id) &&
+      !normalizeCodexSessionId(sessionBody.conversation_id)
     ) {
       nextInput.body = { ...sessionBody, prompt_cache_key: claudeCodeSession };
     }
@@ -1327,9 +1328,10 @@ export class CodexExecutor extends BaseExecutor {
     const promptCacheKey = normalizeCodexSessionId(body?.prompt_cache_key);
     if (promptCacheKey) return promptCacheKey;
 
-    // Prefer per-session identifiers from the client request body
-    const sessionId = body?.session_id ?? body?.conversation_id;
-    const normalizedSessionId = normalizeCodexSessionId(sessionId);
+    // Prefer per-session identifiers from the client request body; an empty or unsafe
+    // session_id must not hide a valid conversation_id.
+    const normalizedSessionId =
+      normalizeCodexSessionId(body?.session_id) || normalizeCodexSessionId(body?.conversation_id);
     if (normalizedSessionId) {
       return normalizedSessionId;
     }

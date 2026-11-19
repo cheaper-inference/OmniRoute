@@ -91,3 +91,40 @@ test("a 400 that does not name a field teaches nothing", async () => {
   await send("learn-model-e");
   assert.equal(bodies[0]?.includes('"verbosity"'), true);
 });
+
+test("a learned field stays out after the Claude thinking header injects it", async () => {
+  const bodies = stub((body) =>
+    body.includes('"thinking"')
+      ? new Response('{"error":"this model does not support thinking"}', { status: 400 })
+      : new Response("{}", { status: 200 })
+  );
+  const sendClaude = () =>
+    new DefaultExecutor("claude").execute({
+      model: "learn-claude-thinking",
+      body: {
+        model: "learn-claude-thinking",
+        messages: [{ role: "user", content: "hi" }],
+        max_tokens: 1,
+      },
+      stream: false,
+      // A Claude OAuth token takes the native Claude Code path, where the header applies.
+      credentials: {
+        accessToken: "sk-ant-oat-learn-claude-token",
+        connectionId: "learn-claude",
+        providerSpecificData: {},
+      },
+      // The header injects `thinking` after the learned-field strip has already run.
+      clientHeaders: { "x-omniroute-thinking": "adaptive" },
+    } as never);
+
+  const first = await sendClaude();
+  assert.equal(first.response.status, 200);
+  bodies.length = 0;
+  const second = await sendClaude();
+  assert.equal(second.response.status, 200);
+  assert.deepEqual(
+    bodies.map((b) => b.includes('"thinking"')),
+    [false],
+    "the learned field must not come back with the injected thinking block"
+  );
+});

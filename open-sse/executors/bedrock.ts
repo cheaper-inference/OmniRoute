@@ -516,12 +516,13 @@ function toolConfigFromOpenAI(tools, toolChoice): ToolConfiguration | undefined 
 }
 
 // Converse model ids that reject a `system` block ("This model doesn't support system
-// messages"). Data, not logic: add an entry when Bedrock rejects another family.
+// messages"). Data, not logic: add an entry when Bedrock rejects another family. The name may
+// follow a region prefix (`us.`) or an ARN path (`...:foundation-model/`).
 const BEDROCK_NO_SYSTEM_MODEL_PATTERNS: readonly RegExp[] = [
-  /(^|\.)amazon\.titan-text/i,
-  /(^|\.)cohere\.command(-light)?-text/i,
-  /(^|\.)mistral\.mistral-7b-instruct/i,
-  /(^|\.)mistral\.mixtral-8x7b-instruct/i,
+  /(^|[./])amazon\.titan-text/i,
+  /(^|[./])cohere\.command(-light)?-text/i,
+  /(^|[./])mistral\.mistral-7b-instruct/i,
+  /(^|[./])mistral\.mixtral-8x7b-instruct/i,
 ];
 
 // Fold the system text into the first user turn instead of sending a block the model rejects.
