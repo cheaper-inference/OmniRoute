@@ -1,6 +1,10 @@
 import assert from "node:assert/strict";
 import fs from "node:fs/promises";
 import test from "node:test";
+import {
+  supportsManagedCliNpmPolicy,
+  buildManagedCliNpmManifest,
+} from "../../src/lib/cliTools/managedCliNpmPolicy.mjs";
 
 test("local installs do not use the unsupported command-line allow-scripts option", async () => {
   const source = await fs.readFile(
@@ -9,9 +13,6 @@ test("local installs do not use the unsupported command-line allow-scripts optio
   );
   assert.ok(!source.includes("--allow-scripts="));
 });
-
-const { supportsManagedCliNpmPolicy, buildManagedCliNpmManifest } =
-  await import("../../src/lib/cliTools/managedCliNpmPolicy.mjs");
 
 test("policy enforcement requires reviewed stable npm versions", () => {
   for (const version of ["11.18.0", "11.21.3", "12.0.0", "12.2.3\n"]) {
