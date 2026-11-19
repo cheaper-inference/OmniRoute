@@ -298,68 +298,68 @@ Skatiet `open-sse/utils/stream.ts` un `open-sse/utils/streamHandler.ts`, lai iep
 
 ```
 src/                        # TypeScript (.ts / .tsx)
-├── app/                    # Next.js 16 lietotņu maršrutētājs
-│   ├── (dashboard)/        # Informācijas paneļa lapas (23 sadaļas)
-│   ├── api/                # API maršruti (51 direktorijs)
-│   └── login/              # Autentifikācijas lapas (.tsx)
-├── domain/                 # Politiku dzinis (policyEngine, comboResolver, costRules u.c.)
-├── lib/                    # Biznesa pamatloģika (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokola serveris
-│   ├── acp/                # Agent Communication Protocol reģistrs
-│   ├── compliance/         # Atbilstības politiku dzinis
-│   ├── db/                 # SQLite domēna moduļi un 130 migrācijas
-│   ├── memory/             # Pastāvīgā sarunu atmiņa
-│   ├── oauth/              # OAuth nodrošinātāji, pakalpojumi un utilītas
-│   ├── skills/             # Paplašināms prasmju ietvars
-│   ├── usage/              # Lietojuma uzskaite un izmaksu aprēķināšana
-│   └── localDb.ts          # Tikai atkārtota eksporta slānis — nekad nepievienojiet šeit loģiku
-├── middleware/              # Pieprasījumu starpprogrammatūra (promptInjectionGuard)
-├── mitm/                   # MITM starpniekserveris (sertifikāti, DNS, mērķu maršrutēšana)
+├── app/                    # Next.js 16 App Router
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React komponenti (.tsx)
-│   ├── constants/          # Nodrošinātāju definīcijas (329), MCP tvērumi, 20 maršrutēšanas stratēģijas
-│   ├── utils/              # Ķēdes pārtraucējs, sanitizētājs, autentifikācijas palīgfunkcijas
-│   └── validation/         # Zod v4 shēmas
-└── sse/                    # SSE starpniekservera konveijers
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse darbvieta
-├── executors/              # 150 izpildītāju moduļi (izpildītāju klases un katra nodrošinātāja palīgfunkcijas)
-├── handlers/               # 11 pieprasījumu apstrādātāji (tērzēšana, atbildes, iegultnes, attēli u.c.)
-├── mcp-server/             # MCP serveris (110 unikāli rīki, 3 transporti, 33 tvērumi)
-├── services/               # 178 augstākā līmeņa pakalpojumi (combo, autoCombo, rateLimitManager u.c.)
-├── translator/             # Formātu tulkotāji (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API pārveidotājs
-└── utils/                  # 22 utilītu moduļi (straumēšana, TLS, starpniekserveris, žurnalēšana)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron darbvirsmas lietotne (vairākplatformu)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js testu izpildītājs (1 574 testu faili)
-├── integration/            # Integrācijas testi
-├── e2e/                    # Playwright testi
-├── security/               # Drošības testi
-├── translator/             # Tulkotājam specifiski testi
-└── load/                   # Slodzes testi
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Arhitektūras lēmumu ieraksti
-├── architecture/            # Sistēmas arhitektūra un noturība
-├── comparison/              # OmniRoute salīdzinājums ar alternatīvām
-├── compression/             # Saspiešanas rokasgrāmatas un noteikumi
-├── dev/                     # Izstrādes rokasgrāmatas
-├── diagrams/                # Arhitektūras diagrammas
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # Lietotāja rokasgrāmata, Docker, iestatīšana, problēmu novēršana
-├── i18n/                    # Internacionalizēti README tulkojumi
-├── marketing/               # Mārketinga materiāli
-├── ops/                     # Izvietošana, starpniekserveris, pārklājums, laidieni
-├── providers/               # Nodrošinātājiem specifiska dokumentācija
-├── reference/               # API uzziņas, vides mainīgie, CLI rīki, bezmaksas līmeņi
-├── releases/                # Laidienu piezīmes
-├── routing/                 # Automātisko kombināciju dzinis, spriešanas atkārtota atskaņošana
-├── screenshots/             # Informācijas paneļa ekrānuzņēmumi
-├── security/                # Aizsargmehānismi, atbilstība, maskēšana, marķieri
-└── specs/                   # Projektējuma specifikācijas
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
@@ -400,22 +400,22 @@ Uzrakstiet vienību testus direktorijā `tests/unit/`, kas aptver vismaz:
 
 ---
 
-## Pull Request kontrolsaraksts
+## Pull Request Checklist
 
-- [ ] Testi ir sekmīgi (`npm test`)
-- [ ] Lintēšana ir sekmīga (`npm run lint`)
-- [ ] Būvēšana ir sekmīga (`npm run build`)
-- [ ] Jaunajām publiskajām funkcijām un saskarnēm ir pievienoti TypeScript tipi
-- [ ] Nav nekodētu noslēpumu vai atkāpšanās vērtību
-- [ ] Publiskie augšupstraumes akreditācijas dati ir iegulti, izmantojot `resolvePublicCred()` (skatiet [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md)), un nekad nav norādīti kā literāļi
-- [ ] Kļūdu atbildes tiek apstrādātas, izmantojot `buildErrorBody()` / `sanitizeErrorMessage()` — atbilžu pamattekstā nav neapstrādātu steka izsekojumu (skatiet [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md))
-- [ ] Čaulas komandas (`exec` / `spawn`) izpildlaika vērtības nodod, izmantojot `env`, nevis virkņu interpolāciju
-- [ ] Visas ievades ir validētas, izmantojot Zod shēmas
-- [ ] Lietotājam redzamajām izmaiņām sadaļā `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` ir pievienots izmaiņu žurnāla **fragments** (skatiet [`changelog.d/README.md`](./changelog.d/README.md)) — **nerediģējiet** `CHANGELOG.md` tieši; fragmenti tiek apkopoti laidiena izveides laikā un nekad nerada konfliktus starp PR
-- [ ] Dokumentācija ir atjaunināta (ja attiecināms)
-- [ ] Nav izveidots neviens jauns CodeQL / Secret-Scanning brīdinājums, vai arī katrs brīdinājums ir noraidīts ar tehnisku pamatojumu, atsaucoties uz attiecīgo `docs/security/` dokumentu
-- [ ] Maršruti, kas palaiž bērnprocesus (`/api/mcp/`, `/api/cli-tools/runtime/`), failā `src/server/authz/routeGuard.ts` ir klasificēti kā `isLocalOnlyPath()` — skatiet [Stingro noteikumu Nr. 15](docs/security/ROUTE_GUARD_TIERS.md)
-- [ ] Izpildes ziņojumos nav AI/robotu `Co-authored-by` nobeiguma rindu (Stingrais noteikums Nr. 16) — cilvēki, kuru darbs tiek atkārtoti izmantots, tiek norādīti ar standarta `Co-authored-by: Name <email>` nobeiguma rindām
+- [ ] Pārbaudes nokārtotas (`npm test`)
+- [ ] Šķērsošanas caurlaides (`npm run lint`)
+- [ ] Būvēšana ir veiksmīga (`npm run build`)
+- [ ] TypeScript veidi pievienoti jaunām publiskām funkcijām un saskarnēm
+- [ ] Nav šifrētu noslēpumu vai rezerves vērtību
+- [ ] Publiskie augšupējie akreditācijas dati, kas iegulti, izmantojot `resolvePublicCred()` (skatiet [`docs/security/PUBLIC_CREDS.md`](./docs/security/PUBLIC_CREDS.md) ), nekad kā burti
+- [ ] Kļūdu atbildes virzās caur `buildErrorBody()` / `sanitizeErrorMessage()` — atbildes ķermeņos nav neapstrādātas steka pēdas (skatiet [`docs/security/ERROR_SANITIZATION.md`](./docs/security/ERROR_SANITIZATION.md) )
+- [ ] Shell komandas (`exec` / `spawn`) nodod izpildlaika vērtības , izmantojot `env`, nevis virknes interpolāciju
+- [ ] Visas ievades ir apstiprinātas ar Zod shēmām
+- [ ] Izmaiņu žurnāls** fragments** pievienots zem `changelog.d/{features|fixes|maintenance}/<PR>-<slug>.md` lietotājam paredzētām izmaiņām (sk. [`changelog.d/README.md`](./changelog.d/README.md) ) — do** nē** rediģēt `CHANGELOG.md` tieši; fragmenti tiek apkopoti izlaišanas laikā un nekad nav pretrunā starp PRs
+- [ ] Dokumentācija atjaunināta (ja piemērojama)
+- [ ] Nav atvērts neviens jauns CodeQL /Slepenās meklēšanas brīdinājums vai katrs no tiem ir noraidīts ar tehnisku pamatojumu, atsaucoties uz attiecīgo `docs/security/` dokumentu
+- [ ] Maršruti , kas rada bērnu procesus (`/api/mcp/`, `/api/cli-tools/runtime/`) , kas klasificēti kā `isLocalOnlyPath()` in `src/server/authz/routeGuard.ts` — skatiet [cieto noteikumu #15](docs/security/ROUTE_GUARD_TIERS.md)
+- [ ] Nav AI/bot `Co-authored-by` piekabju saistību ziņojumos (Hard Rule #16) — līdzstrādniekiem, kuru darbs tiek atkārtoti izmantots, tiek piešķirti standarta `Co-authored-by: Name <email>` piekabes
 
 ---
 
