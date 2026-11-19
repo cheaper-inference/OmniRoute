@@ -75,6 +75,8 @@ async function promote(options: {
   maxPriceMultiplier?: unknown;
   clampPriceMultiplierToOne?: boolean;
   accountPreferences?: Record<string, "preferred" | "normal" | "reserve" | "excluded">;
+  budgetCap?: number;
+  estimatedInputTokens?: number;
 }) {
   return promoteNewestGenerationTargets({
     orderedTargets: options.orderedTargets as never,
@@ -82,6 +84,8 @@ async function promote(options: {
     maxPriceMultiplier: options.maxPriceMultiplier,
     clampPriceMultiplierToOne: options.clampPriceMultiplierToOne ?? false,
     accountPreferences: options.accountPreferences,
+    budgetCap: options.budgetCap,
+    estimatedInputTokens: options.estimatedInputTokens,
     getPricing: pricingFrom(options.pricing ?? {}),
   });
 }
@@ -298,6 +302,41 @@ describe("promoteNewestGenerationTargets", () => {
       "codex/gpt-6.2-sol",
       "codex/gpt-6-sol",
     ]);
+  });
+
+  it("never promotes an open-circuit newer candidate ahead of a healthy older candidate", async () => {
+    const result = await promote({
+      orderedTargets: [target("codex", "codex/gpt-6-sol"), target("codex", "codex/gpt-6.2-sol")],
+      candidates: [
+        candidate("codex", "codex/gpt-6-sol", { circuitBreakerState: "CLOSED" }),
+        candidate("codex", "codex/gpt-6.2-sol", { circuitBreakerState: "OPEN" }),
+      ],
+      pricing: FLAT_PRICING,
+    });
+    expect(result.promoted).toBe(false);
+    expect(result.orderedTargets.map((entry) => entry.modelStr)).toEqual([
+      "codex/gpt-6-sol",
+      "codex/gpt-6.2-sol",
+    ]);
+  });
+
+  it("never promotes a target exceeding budgetCap ahead of an affordable selected target", async () => {
+    const result = await promote({
+      orderedTargets: [target("codex", "codex/gpt-6-sol"), target("codex", "codex/gpt-6.2-sol")],
+      candidates: [
+        candidate("codex", "codex/gpt-6-sol", { costPer1MTokens: 2 }),
+        candidate("codex", "codex/gpt-6.2-sol", { costPer1MTokens: 20 }),
+      ],
+      pricing: {
+        "codex/gpt-6-sol": { input: 2, output: 2 },
+        "codex/gpt-6.2-sol": { input: 20, output: 20 },
+      },
+      maxPriceMultiplier: 20,
+      budgetCap: 0.005,
+      estimatedInputTokens: 1000,
+    });
+    expect(result.promoted).toBe(false);
+    expect(result.orderedTargets[0].modelStr).toBe("codex/gpt-6-sol");
   });
 });
 

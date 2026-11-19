@@ -46,7 +46,7 @@ import { failClosedAutoConfig } from "./failClosedPool";
 import {
   filterSubscriptionOnlyCandidates,
   orderPoolByRung,
-  resolveCandidateRung,
+  partitionCandidateByRung,
   type LadderOptions,
   type LadderRung,
 } from "./subscriptionLadder";
@@ -1083,13 +1083,30 @@ function applySubscriptionLadder(
     tier === "subscription"
       ? filterSubscriptionOnlyCandidates(effectivePool, ladderOptions)
       : orderPoolByRung(effectivePool, ladderOptions);
-  // Annotate each surviving candidate with the rung it landed on. Newest-generation
-  // promotion buckets by rung, so a newer generation on a paid rung can never jump
-  // ahead of an older generation the operator already pays for.
-  const rungAnnotated = ordered.map((candidate) => {
-    const rung = resolveCandidateRung(candidate, ladderOptions);
-    return rung ? { ...candidate, ladderRung: rung } : candidate;
-  });
+  // Annotate each surviving candidate with the rung it landed on (splitting any
+  // multi-connection candidate that spans multiple billing classes). Newest-
+  // generation promotion buckets by rung, so a newer generation on a paid rung
+  // can never jump ahead of an older generation the operator already pays for.
+  const rungAnnotated: VirtualAutoComboCandidate[] =
+    tier === "subscription"
+      ? ordered.map((candidate) => ({ ...candidate, ladderRung: "subscription" }))
+      : ordered.flatMap((candidate) => {
+          const partitions = partitionCandidateByRung(candidate, ladderOptions);
+          if (partitions.length === 0) return [];
+          return partitions.map(({ candidate: partitioned, rung }) => ({
+            ...partitioned,
+            ladderRung: rung,
+          }));
+        });
+  if (tier === "thrifty") {
+    rungAnnotated.sort((a, b) => {
+      const aRung = a.ladderRung;
+      const bRung = b.ladderRung;
+      if (!aRung || !bRung || aRung === bRung) return 0;
+      const order = ["subscription", "keyless", "free", "cheap", "premium"] as const;
+      return order.indexOf(aRung) - order.indexOf(bRung);
+    });
+  }
   recordAutoDroppedCandidates(
     tier === "subscription" ? traceInvocationId : undefined,
     effectivePool,

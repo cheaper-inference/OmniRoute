@@ -16,7 +16,11 @@
  * here, so `auto/<family>` detection and newest-generation parsing share ONE
  * canonical table instead of two that can drift.
  */
-import { MODEL_FAMILY_PREFIXES, parseModelGeneration } from "./modelGeneration";
+import {
+  isProviderQualifiedKimiModel,
+  MODEL_FAMILY_PREFIXES,
+  parseModelGeneration,
+} from "./modelGeneration";
 
 export type ModelFamily =
   | "glm"
@@ -26,6 +30,9 @@ export type ModelFamily =
   | "gemma"
   | "llama"
   | "gemini"
+  | "gemini-carbon"
+  | "gemini-neon"
+  | "gemini-hydrogen"
   | "kimi"
   | "qwen"
   | "deepseek"
@@ -47,6 +54,9 @@ export const MODEL_FAMILIES: readonly ModelFamily[] = [
   "gemma",
   "llama",
   "gemini",
+  "gemini-carbon",
+  "gemini-neon",
+  "gemini-hydrogen",
   "kimi",
   "qwen",
   "deepseek",
@@ -75,6 +85,9 @@ const FAMILY_ID_PATTERNS = MODEL_FAMILY_PREFIXES as ReadonlyArray<{
  * tier key. Claude tiers need no entry — their base family IS the tier.
  */
 const TIER_SCOPED_FAMILIES: ReadonlySet<ModelFamily> = new Set<ModelFamily>([
+  "gemini-carbon",
+  "gemini-neon",
+  "gemini-hydrogen",
   "gpt-astra",
   "gpt-sol",
 ]);
@@ -146,12 +159,7 @@ export function buildFamilyCandidateFilter(
     if (detectModelFamily(candidate.model) === family) return true;
     // Coding OAuth/API-key and web share bare k3-family ids. Do not classify an
     // unrelated provider's k3 (or other models on these providers) as Kimi.
-    const bareModel = candidate.model.slice(candidate.model.lastIndexOf("/") + 1);
-    return (
-      family === "kimi" &&
-      ["kimi-coding", "kimi-coding-apikey", "kimi-web"].includes(candidate.provider) &&
-      /^k3(?:$|[.-])/.test(bareModel.toLowerCase())
-    );
+    return family === "kimi" && isProviderQualifiedKimiModel(candidate.provider, candidate.model);
   };
 }
 

@@ -43,6 +43,10 @@ export interface NewestGenerationPromotionInput {
   clampPriceMultiplierToOne: boolean;
   /** Optional per-combo account tier preferences; preferred/normal/reserve tiers never cross. */
   accountPreferences?: AccountPreferences;
+  /** Optional per-request budget cap in USD; over-budget targets never outrank affordable ones. */
+  budgetCap?: number;
+  /** Estimated input tokens used for `budgetCap` comparison (matches `resolveAutoStrategy`). */
+  estimatedInputTokens?: number;
   getPricing: PricingLookup;
 }
 
@@ -70,11 +74,23 @@ function providerAndModel(target: ResolvedComboTarget): { provider: string; mode
  */
 function healthGroup(candidate: AutoProviderCandidate | undefined): string {
   if (!candidate) return "healthy";
-  if (candidate.quotaCutoffBlocked === true) return "blocked";
+  if (candidate.quotaCutoffBlocked === true || candidate.circuitBreakerState === "OPEN") {
+    return "blocked";
+  }
   if (candidate.statusPenalty || candidate.quotaSoftPenalty || candidate.quotaUnreadable) {
     return "penalised";
   }
   return "healthy";
+}
+
+function isOverBudgetCap(
+  candidate: AutoProviderCandidate | undefined,
+  budgetCap: number | undefined,
+  estimatedInputTokens: number | undefined
+): boolean {
+  if (!candidate || !budgetCap || budgetCap <= 0) return false;
+  const tokens = estimatedInputTokens && estimatedInputTokens > 0 ? estimatedInputTokens : 1000;
+  return (candidate.costPer1MTokens * tokens) / 1_000_000 > budgetCap;
 }
 
 export async function promoteNewestGenerationTargets(
@@ -104,14 +120,18 @@ export async function promoteNewestGenerationTargets(
   const hasAccountPreferences =
     !!input.accountPreferences && Object.keys(input.accountPreferences).length > 0;
   const describe = (target: ResolvedComboTarget): NewestGenerationCandidate | null => {
-    const generation = parseModelGeneration(target.modelStr);
-    if (!generation) return null;
     const { provider, model } = providerAndModel(target);
+    const generation = parseModelGeneration(target.modelStr, provider);
+    if (!generation) return null;
+    const candidate = byExecutionKey.get(target.executionKey);
     const prefRank = hasAccountPreferences
       ? `|pref=${accountPreferenceRank(target.connectionId, input.accountPreferences!)}`
       : "";
+    const budgetTag = isOverBudgetCap(candidate, input.budgetCap, input.estimatedInputTokens)
+      ? "|over-budget"
+      : "";
     return {
-      bucket: `${target.ladderRung ?? DEFAULT_RUNG}|${healthGroup(byExecutionKey.get(target.executionKey))}${prefRank}`,
+      bucket: `${target.ladderRung ?? DEFAULT_RUNG}|${healthGroup(candidate)}${prefRank}${budgetTag}`,
       tierFamilyKey: generation.tierFamilyKey,
       version: generation.version,
       stabilityRank: generation.stabilityRank,

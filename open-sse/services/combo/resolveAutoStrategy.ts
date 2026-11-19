@@ -667,6 +667,8 @@ export async function resolveAutoStrategyOrder(
           maxPriceMultiplier: autoSettings.autoNewestMaxPriceMultiplier,
           clampPriceMultiplierToOne: preserveRungOrder,
           accountPreferences,
+          budgetCap,
+          estimatedInputTokens,
           getPricing: getPricingForModel,
         });
         if (promotion.promoted) {

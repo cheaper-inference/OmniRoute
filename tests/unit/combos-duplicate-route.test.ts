@@ -21,6 +21,7 @@ const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const combosDb = await import("../../src/lib/db/combos.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
 
 // Route loaded AFTER env is set
 const duplicateRoute = await import("../../src/app/api/combos/duplicate/route.ts");
@@ -296,4 +297,30 @@ test("POST /api/combos/duplicate error responses do not contain stack traces", a
   const body = await res.json();
 
   assert.ok(!JSON.stringify(body).includes("at "), "error response must not leak stack traces");
+});
+
+test("POST /api/combos/duplicate preserves tier on family:tier routes like auto/gpt-sol:subscription", async () => {
+  await settingsDb.updateSettings({ requireLogin: false });
+  // Even with a connected openai apikey provider, auto/gpt-sol:subscription must
+  // keep its subscription tier and fail closed (422) rather than widening to the
+  // non-subscription gpt-sol pool.
+  const conn = await providersDb.createProviderConnection({
+    provider: "openai",
+    authType: "apikey",
+    name: "OpenAI Paid",
+    apiKey: "sk-test-paid-only",
+    defaultModel: "gpt-6-sol",
+    isActive: true,
+  });
+  try {
+    const req = makePostRequest("http://localhost/api/combos/duplicate", {
+      name: "auto/gpt-sol:subscription",
+    });
+    const res = await duplicateRoute.POST(req as never);
+    const body = await res.json();
+    assert.equal(res.status, 422);
+    assert.match(String(body.error || ""), /No connected providers\/models match/i);
+  } finally {
+    await providersDb.deleteProviderConnection(conn.id);
+  }
 });

@@ -345,6 +345,33 @@ describe("promoteNewestGenerationsInOrder", () => {
     expect(blockedEvents).toEqual(["gpt-6.2-sol:multiplier"]);
   });
 
+  it("isolates Gemini 4 carbon/neon/argon/hydrogen tiers and detects provider-qualified kimi k3", () => {
+    expect(parseModelGeneration("gemini-4-carbon")?.tierFamilyKey).toBe("gemini-carbon");
+    expect(parseModelGeneration("gemini-4-neon")?.tierFamilyKey).toBe("gemini-neon");
+    expect(parseModelGeneration("gemini-4-argon")?.tierFamilyKey).toBe("gemini-argon");
+    expect(parseModelGeneration("gemini-4-hydrogen")?.tierFamilyKey).toBe("gemini-hydrogen");
+
+    // Different Gemini 4 tiers must never cross-promote inside auto/gemini.
+    expect(
+      promote(["gemini-4-hydrogen", "gemini-4-neon", "gemini-4-carbon", "gemini-4.5-carbon"])
+    ).toEqual(["gemini-4-hydrogen", "gemini-4-neon", "gemini-4.5-carbon", "gemini-4-carbon"]);
+
+    // Kimi bare k3 / k3.1-pro only resolve on kimi-coding / kimi-coding-apikey / kimi-web.
+    expect(parseModelGeneration("kimi-coding/k3.1-pro")).toMatchObject({
+      tierFamilyKey: "kimi",
+      version: [3, 1],
+    });
+    expect(parseModelGeneration("k3.1-pro", "kimi-coding")).toMatchObject({
+      tierFamilyKey: "kimi",
+      version: [3, 1],
+    });
+    expect(parseModelGeneration("openai/k3.1-pro")).toBeNull();
+    expect(promote(["kimi-coding/k3", "kimi-coding/k3.1-pro"])).toEqual([
+      "kimi-coding/k3.1-pro",
+      "kimi-coding/k3",
+    ]);
+  });
+
   it("returns the input order untouched when nothing can be promoted", () => {
     expect(promote(["glm-5.2"])).toEqual(["glm-5.2"]);
     expect(promote(["glm-5.2", "qwen3-max"])).toEqual(["glm-5.2", "qwen3-max"]);

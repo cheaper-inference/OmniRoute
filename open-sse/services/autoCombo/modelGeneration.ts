@@ -100,11 +100,28 @@ export const GPT_TIER_KEYWORDS: ReadonlyArray<{ key: string; keyword: string }> 
 
 /** Gemini capability tiers, most specific first (`flash-lite` before `flash`). */
 export const GEMINI_TIER_KEYWORDS: ReadonlyArray<{ key: string; keyword: string }> = [
+  { key: "gemini-carbon", keyword: "carbon" },
+  { key: "gemini-neon", keyword: "neon" },
+  { key: "gemini-argon", keyword: "argon" },
+  { key: "gemini-hydrogen", keyword: "hydrogen" },
   { key: "gemini-flash-lite", keyword: "flash-lite" },
   { key: "gemini-flash", keyword: "flash" },
   { key: "gemini-pro", keyword: "pro" },
-  { key: "gemini-hydrogen", keyword: "hydrogen" },
 ];
+
+/** Providers whose bare `k3` / `k3.1-*` ids belong to the `kimi` family. */
+export const KIMI_BARE_PROVIDERS: ReadonlySet<string> = new Set([
+  "kimi-coding",
+  "kimi-coding-apikey",
+  "kimi-web",
+]);
+
+/** True when a provider+model pair uses Kimi's provider-qualified bare `k3` id. */
+export function isProviderQualifiedKimiModel(provider: string, modelId: string): boolean {
+  if (!KIMI_BARE_PROVIDERS.has(provider)) return false;
+  const bare = bareModelId(modelId).toLowerCase();
+  return /^k3(?:$|[.-])/.test(bare);
+}
 
 /**
  * Families whose tier is already encoded in the base family name (Claude tiers are
@@ -152,9 +169,17 @@ function bareModelId(modelId: string): string {
   return modelId.includes("/") ? modelId.slice(modelId.lastIndexOf("/") + 1) : modelId;
 }
 
-/** Base family for a bare model id, or `null` when no prefix rule matches. */
-export function detectBaseFamily(modelId: string | null | undefined): string | null {
+/** Base family for a bare or provider-qualified model id, or `null` when unmatched. */
+export function detectBaseFamily(
+  modelId: string | null | undefined,
+  provider?: string | null
+): string | null {
   if (typeof modelId !== "string" || modelId.trim().length === 0) return null;
+  const qualifiedProvider =
+    provider?.trim() || (modelId.includes("/") ? modelId.slice(0, modelId.indexOf("/")) : "");
+  if (qualifiedProvider && isProviderQualifiedKimiModel(qualifiedProvider, modelId)) {
+    return "kimi";
+  }
   const bare = bareModelId(modelId);
   for (const { family, pattern } of MODEL_FAMILY_PREFIXES) {
     if (pattern.test(bare)) return family;
@@ -208,10 +233,11 @@ function tierFamilyKeyFor(
  * no version token) so callers can leave those candidates in score order.
  */
 export function parseModelGeneration(
-  modelId: string | null | undefined
+  modelId: string | null | undefined,
+  provider?: string | null
 ): ParsedModelGeneration | null {
   if (typeof modelId !== "string" || modelId.trim().length === 0) return null;
-  const baseFamily = detectBaseFamily(modelId);
+  const baseFamily = detectBaseFamily(modelId, provider);
   if (!baseFamily) return null;
 
   // Strip Bedrock/router `:0` invocation suffix before tokenizing (`claude-sonnet-4-v1:0`).

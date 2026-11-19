@@ -21,6 +21,7 @@ import {
   AUTO_FAMILY_IDS,
   MODEL_FAMILIES,
 } from "../../../open-sse/services/autoCombo/modelFamily";
+import { partitionCandidateByRung } from "../../../open-sse/services/autoCombo/subscriptionLadder";
 
 // First-touch DB migrations run once per worker and can exceed vitest's 5s
 // default in a cold thread. auto/glm then materializes a ~50-candidate cartesian
@@ -117,6 +118,9 @@ describe("detectModelFamily (pure)", () => {
       "auto/claude-sonnet",
       "auto/deepseek",
       "auto/gemini",
+      "auto/gemini-carbon",
+      "auto/gemini-hydrogen",
+      "auto/gemini-neon",
       "auto/gemma",
       "auto/glm",
       "auto/gpt",
@@ -503,5 +507,60 @@ describe("tier-scoped families and family:tier composition", () => {
       category: "coding",
       tier: "fast",
     });
+  });
+
+  it("auto/gemini-carbon, auto/gemini-neon and auto/gemini-hydrogen isolate tiers while auto/gemini keeps all Gemini models", () => {
+    const allGemini = buildFamilyCandidateFilter("gemini");
+    const carbon = buildFamilyCandidateFilter("gemini-carbon");
+    const neon = buildFamilyCandidateFilter("gemini-neon");
+    const hydrogen = buildFamilyCandidateFilter("gemini-hydrogen");
+
+    for (const model of [
+      "gemini-4-carbon",
+      "gemini-4-neon",
+      "gemini-4-hydrogen",
+      "gemini-3.8-flash",
+    ]) {
+      assert.equal(allGemini({ provider: "gemini", model }), true, model);
+    }
+    assert.equal(carbon({ provider: "gemini", model: "gemini-4-carbon" }), true);
+    assert.equal(carbon({ provider: "gemini", model: "gemini-4-neon" }), false);
+    assert.equal(neon({ provider: "gemini", model: "gemini-4-neon" }), true);
+    assert.equal(neon({ provider: "gemini", model: "gemini-4-carbon" }), false);
+    assert.equal(hydrogen({ provider: "gemini", model: "gemini-4-hydrogen" }), true);
+    assert.equal(hydrogen({ provider: "gemini", model: "gemini-4-neon" }), false);
+  });
+
+  it("partitions a mixed subscription + metered thrifty candidate by rung so metered connections never land on the subscription rung", () => {
+    const partitioned = partitionCandidateByRung(
+      {
+        provider: "claude",
+        model: "claude-opus-5-5",
+        connectionId: null,
+        allowedConnectionIds: ["conn-apikey", "conn-oauth"],
+      },
+      {
+        enabled: true,
+        admitUnknownQuota: true,
+        maxStateAgeMs: 60_000,
+        resolveAuthType: (id) => (id === "conn-oauth" ? "oauth" : "apikey"),
+        resolveEconomicTier: () => "premium",
+        resolveFreeAccessState: () => ({
+          status: "AVAILABLE",
+          remainingFreeAllowance: 50,
+          checkedAt: new Date().toISOString(),
+        }),
+      }
+    );
+    assert.deepEqual(
+      partitioned.map((entry) => ({
+        rung: entry.rung,
+        allowedConnectionIds: entry.candidate.allowedConnectionIds,
+      })),
+      [
+        { rung: "subscription", allowedConnectionIds: ["conn-oauth"] },
+        { rung: "premium", allowedConnectionIds: ["conn-apikey"] },
+      ]
+    );
   });
 });

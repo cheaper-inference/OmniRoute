@@ -336,6 +336,57 @@ export function resolveCandidateRung(
 }
 
 /**
+ * Partition a `LadderCandidate` by the exact rung of each usable connection so
+ * a single candidate spanning mixed billing classes (e.g. a subscription OAuth
+ * account and a metered API key on the same provider/model) cannot dispatch a
+ * metered connection inside a `subscription` bucket.
+ */
+export function partitionCandidateByRung<T extends LadderCandidate>(
+  candidate: T,
+  options: LadderOptions
+): Array<{ candidate: T; rung: LadderRung }> {
+  if (!options.enabled) return [];
+  const connectionIds = candidate.connectionId
+    ? [candidate.connectionId]
+    : (candidate.allowedConnectionIds ?? []);
+  if (connectionIds.length === 0) return [];
+
+  const byRung = new Map<LadderRung, string[]>();
+  for (const connectionId of connectionIds) {
+    const rung = assignRung(
+      candidate,
+      {
+        provider: candidate.provider,
+        authType: options.resolveAuthType(connectionId),
+        connectionId,
+      },
+      options
+    );
+    if (QUOTA_BEARING_RUNGS.has(rung)) {
+      const state = options.resolveFreeAccessState(candidate.provider, connectionId);
+      if (!isQuotaUsable(state, options)) continue;
+    } else if (isRungBudgetExhausted(rung, options)) {
+      continue;
+    }
+    const existing = byRung.get(rung);
+    if (existing) existing.push(connectionId);
+    else byRung.set(rung, [connectionId]);
+  }
+
+  const entries = [...byRung.entries()].sort(([a], [b]) => rungIndex(a) - rungIndex(b));
+  if (entries.length === 0) return [];
+  if (entries.length === 1) {
+    const [rung, ids] = entries[0];
+    return [{ candidate: withVerifiedConnections(candidate, ids).candidate, rung }];
+  }
+  return entries.map(([rung, ids]) => ({
+    candidate:
+      candidate.connectionId !== null ? candidate : { ...candidate, allowedConnectionIds: ids },
+    rung,
+  }));
+}
+
+/**
  * `auto/subscription` — the strict grouping. Keeps only candidates servable by
  * a plan-included connection whose overage is a documented hard stop, with
  * live quota headroom verified per connection.
