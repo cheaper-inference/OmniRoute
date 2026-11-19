@@ -4,7 +4,10 @@ import type {
 } from "../../utils/providerHttpAttempts.ts";
 import { isPassiveCodex, recordRejectedToken } from "../../services/tokenRefresh/passiveCodex.ts";
 import type { ChatCoreErrorResult, ProviderLegUsage } from "@/lib/skills/toolLoopTypes.ts";
-import type { getProviderCredentials } from "@/sse/services/auth.ts";
+import type {
+  getProviderCredentials,
+  getProviderCredentialsWithQuotaPreflight,
+} from "@/sse/services/auth.ts";
 import type { updateFromHeaders, updateFromResponseBody } from "../../services/rateLimitManager.ts";
 import type { writeTerminalStatus } from "@/shared/utils/terminalStatus.ts";
 import type { updateProviderConnection } from "@/lib/db/providers.ts";
@@ -93,11 +96,23 @@ export interface PipelineConnectionContext {
   assertManagedLeaseFence: (connectionId: string) => void;
   getProviderCredentials: typeof getProviderCredentials;
   /**
+   * Quota-preflight-aware selector used for the Codex 429 in-request rotation (#18425),
+   * so the replacement account is chosen with the same quota cutoff as primary selection.
+   * Falls back to `getProviderCredentials` when not wired.
+   */
+  getProviderCredentialsWithQuotaPreflight?: typeof getProviderCredentialsWithQuotaPreflight;
+  /**
    * Connection allowlist the request was routed under (API key allowlist ∩ combo
    * step allowlist ∩ quota pool). Account rotation must stay inside it; null means
    * the request carried no constraint.
    */
   allowedConnections?: string[] | null;
+  /**
+   * Called with the connection the pipeline is about to rotate to. Returning false keeps the
+   * current upstream error instead of rotating (e.g. the key's Quota Share cap for that
+   * connection's pool is used up). Absent: every rotation is admitted.
+   */
+  admitRotation?: (nextConnectionId: string) => Promise<boolean>;
   refreshCredentials?: (
     credentials: Record<string, unknown>
   ) => Promise<Record<string, unknown> | null>;
@@ -514,12 +529,33 @@ export async function runProviderExecutionPipeline(
         }
         await state.onClearSessionAffinity?.({ failedConnectionId: failedId });
       }
-      const nextCreds = await connection
-        .getProviderCredentials("codex", null, allowedConnections, wire.currentModel, {
-          excludeConnectionIds: [...excludedIds],
-        })
-        .catch(() => null);
-      if (nextCreds && !nextCreds.allRateLimited && nextCreds.connectionId) {
+      // Both arms stay direct `connection.*` calls so the hard-lease credential
+      // inventory (tests/unit/hard-session-lease-bypass-inventory.test.ts) keeps
+      // seeing this rotation site; an aliased selector would hide it.
+      const codexFailoverOptions = { excludeConnectionIds: [...excludedIds] };
+      const nextCreds = await (
+        connection.getProviderCredentialsWithQuotaPreflight
+          ? connection.getProviderCredentialsWithQuotaPreflight(
+              "codex",
+              null,
+              allowedConnections,
+              wire.currentModel,
+              codexFailoverOptions
+            )
+          : connection.getProviderCredentials(
+              "codex",
+              null,
+              allowedConnections,
+              wire.currentModel,
+              codexFailoverOptions
+            )
+      ).catch(() => null);
+      if (
+        nextCreds &&
+        !nextCreds.allRateLimited &&
+        nextCreds.connectionId &&
+        (await connection.admitRotation?.(String(nextCreds.connectionId))) !== false
+      ) {
         await state.onAuditAccountRotation?.({
           action: "codex.account_rotation",
           failedConnectionId: failedId,
@@ -551,7 +587,12 @@ export async function runProviderExecutionPipeline(
             excludeConnectionIds: [...excludedIds],
           })
           .catch(() => null);
-        if (nextCreds && !nextCreds.allRateLimited && nextCreds.connectionId) {
+        if (
+          nextCreds &&
+          !nextCreds.allRateLimited &&
+          nextCreds.connectionId &&
+          (await connection.admitRotation?.(String(nextCreds.connectionId))) !== false
+        ) {
           connection.replaceCredentials(nextCreds as Record<string, unknown>);
           antigravityByopRotationPending = true;
           continue;

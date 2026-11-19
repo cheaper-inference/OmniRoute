@@ -35,62 +35,32 @@ npm run test:e2e           # neprivaloma, bet rekomenduojama
 /capture-release-evidences-cc
 ```
 
-## npm patikimas publikavimas (numatytasis nuo v3.8.51) — pagal užklausą etapinis, tiesioginis kaip atsarginis variantas
+## npm Patikimas leidimas (numatytasis nuo 3.8.51) — surengtas pagal užklausą, tiesioginis kaip atsarginis
 
-`npm-publish.yml` pagal numatytąją nuostatą publikuoja per **npm patikimą publikavimą (OIDC)**:
-užduotis `stage-npm` (vykdoma GitHub infrastruktūroje) iškeičia GitHub id-token į trumpalaikį npm
-prisijungimo duomenį, skirtą tam vykdymui — saugyklos paslaptyse nėra ilgalaikio npm prieigos rakto,
-nereikia 2FA raginimo, o kilmės patvirtinimas pridedamas.
-Tai yra npm dabar leidžiamas apėjimo būdas, kai prieigos raktai, praleidžiantys 2FA, šalinami;
-jis atkuria visiškai automatinį procesą, kurį projektas turėjo iki v3.8.48, kartu išlaikydamas
-WS1.3 garantiją (nutekintas prieigos raktas negali publikuoti savarankiškai — jokio rakto nėra).
+`npm-publish.yml` skelbia per** npm patikima leidyba (OIDC)** pagal numatytuosius nustatymus: `stage-npm` užduotis (priglobta „github“) pakeičia GitHub id-žetoną į trumpalaikį npm kredencialą, skirtą tos — metu. Tai yra apeiti npm sankcijas dabar, kai žetonai, kurie praleidžia 2FA, yra panaikinami; jis atkuria visiškai automatinį srautą, kurį projektas turėjo iki v3.8.48, išlaikant WS1.3 garantiją (nutekėjęs prieigos raktas negali paskelbti vien — nėra prieigos rakto).
 
-**Vienkartinė sąranka (savininkui):** npmjs.com → paketas `omniroute` → Settings → _Trusted
-Publisher_ → GitHub: savininkas `diegosouzapw`, saugykla `OmniRoute`, darbo eiga `npm-publish.yml`
-(aplinka: nėra). Kol tai nesukonfigūruota, automatinis veiksmas baigiasi klaida `ENEEDAUTH`:
-paleiskite iš naujo su `publish_mode=staged` (žr. toliau) arba `direct`.
+**Vienkartinė sąranka (savininkas):** npmjs.com → paketas `omniroute` → Nustatymai → _Trusted Publisher_ → GitHub: savininkas `diegosouzapw`, repo `OmniRoute`, workflow `npm-publish.yml` (aplinka: nėra). Kol tai neegzistuoja, automatinis veiksmas nepavyksta naudojant `ENEEDAUTH`: iš naujo išsiųsti naudojant `publish_mode=staged` (žemiau) arba `direct`.
 
-### Etapinis publikavimas (pagal užklausą — `publish_mode=staged`)
+### Pakopinis leidimas (pagal užklausą — `publish_mode=staged`)
 
-npm publikavimo darbo eiga daugiau nepublikuoja tiesiogiai: ji paleidžia supakuotą tarball
-(`check:pack-boot`), tada vykdo `npm stage publish` — tiksliai tie patys baitai patalpinami
-registre, tačiau jų **negalima įdiegti**, kol savininkas nepatvirtina. Žmogaus atliekama 2FA
-patikra perkelta PO patvirtinimo, o ne prieš jį.
+npm-publish darbo eiga nebeskelbia tiesiogiai: ji paleidžia supakuotą tarbalą (`check:pack-boot`) ir paleidžia `npm stage publish` — tikslius baitus, įrašytus registre,** neįrengiamas** kol savininkas patvirtins. Žmogaus 2FA vartai persikėlė AFTER įrodymą, o ne prieš jį.
 
-**Savininko veiksmai darbo eigai sėkmingai pasibaigus:**
+**Savininko srautas po darbo eigos tampa žalias:**
 
-1. `npm stage list omniroute` — raskite etapo ID (jis taip pat pateikiamas darbo eigos suvestinėje).
-2. Patikrinkite etapui paruoštus baitus (rekomenduojama): `npm stage download <id>`, tada įdiekite
-   atsisiųstą tarball į laikiną prefiksą ir jį paleiskite (`npm run check:pack-boot` CI aplinkoje
-   automatizuoja tą patį pakavimo → diegimo → paleidimo patikrinimą).
-3. `npm stage approve <id>` — 2FA raginimas IR YRA publikavimas. `npm stage reject <id>` atmeta.
-4. Apsauga po publikavimo: tikrintuvas po publikavimo (v3.8.49 plano WS1.4) švariajame konteineryje
-   iš viešojo registro įdiegia paskelbtą versiją ir ją paleidžia.
+1. `npm stage list omniroute` — suraskite etapo ID (taip pat atspausdintas darbo eigos suvestinėje).
+2. Patikrinkite pakopinius baitus (rekomenduojama): `npm stage download <id>`, tada įdiekite atsisiųstą tarbalą į laikinąjį priešdėlį ir paleiskite jį (`npm run check:pack-boot` automatizuoja tą patį paketą → install → įkrovos verdiktą CI).
+3. `npm stage approve <id>` — 2FA raginimas IS paskelbti. `npm stage reject <id>` išmeta.
+4. Tinklas po paskelbimo: patvirtinimo priemonė po paskelbimo (v3.8.49 plano WS1.4) įdiegia paskelbtą versiją iš viešojo registro į švarų konteinerį ir ją paleidžia.
 
-**Avarinis atsarginis variantas:** `workflow_dispatch` su `publish_mode=direct` atkuria
-senąjį tiesioginį `npm publish` (naudokite tik jei pats etapinis publikavimas veikia netinkamai;
-užfiksuokite priežastį).
+**Avarinis atsarginis atšaukimas:** `workflow_dispatch` su `publish_mode=direct` atkuria senąjį tiesioginį `npm publish` (naudokite tik tuo atveju, jei pati inscenizacija veikia netinkamai; įrašykite kodėl).
 
-**Vienkartinis sustiprinimas (savininkui, npmjs.com):** sukonfigūruokite Trusted Publisher,
-skirtą `omniroute`, tik etapinėje veiksenoje, kad nutekintas ilgalaikis prieigos raktas negalėtų
-tiesiogiai vykdyti `npm publish` iš jokios vietos — CI gali tik paruošti etapą; paskelbti gali tik
-savininkas, naudodamas 2FA.
+**Vienkartinis grūdinimas (savininkas, npmjs.com):** sukonfigūruokite patikimą leidėją `omniroute` tik etapo režimu, kad nutekėjęs ilgalaikis prieigos raktas negalėtų `npm publish` tiesiogiai iš bet kurios — CI gali tik paleisti; tik savininko 2FA leidimai.
 
-**Sugadinto artefakto veiksmų planas (nepakitęs):** numatytoji reakcija —
-`npm deprecate omniroute@<bad> "<reason> — use <fixed>"` (trunka kelias minutes, galima atšaukti);
-`npm unpublish` naudokite tik per 72 val. laikotarpį, kai nėra priklausomų paketų, ir niekada ne kaip
-pirmą veiksmą. Docker: niekada neperrašykite versijos žymos — atšaukimas atliekamas nukreipiant
-`latest` į paskutinį tinkamą maišos identifikatorių.
+**Sugedusių artefaktų knygelė (nepakeista):** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` kaip numatytasis refleksas (minutės, grįžtamasis); `npm unpublish` tik 72h/no-dependents lange ir niekada kaip pirmasis žingsnis. Docker: niekada neperrašykite versijos žymos. — atšaukimas nukreipia `latest` į paskutinį gerą santrauką.
 
-**Docker Hub `latest` (privaloma kiekvienam stabilios SemVer versijos publikavimui):**
-`docker-publish` darbo eiga turi pažymėti **ir** `X.Y.Z`, **ir**, kai
-`should-promote-latest.sh` patvirtina, kad tai aukščiausia stabili SemVer versija, `:latest`
-tuo **pačiu maišos identifikatoriumi**. Užduočiai pasibaigus: Hub `latest` maišos identifikatorius
-turi sutapti su naujosios SemVer versijos maišos identifikatoriumi, o `last_updated` turi būti
-atnaujintas. Nepalikite `:latest`, nurodančio senesnę versiją, kai leidimo pastabose aprašomi
-pataisymai, esantys tik git. Compose greitosios pradžios pavyzdžiai naudoja `:latest`;
-GitOps turėtų ir toliau fiksuoti `X.Y.Z`. Žr.
-[Docker leidimo kanalai](../guides/DOCKER_GUIDE.md#release-channels) ir #10317.
+**Docker Hub `latest` (reikalingas kiekviename stabiliame SemVer publikacijoje):** `docker-publish` darbo eiga turi būti pažymėta** tiek** `X.Y.Z` ir, kai `should-promote-latest.sh` sutinka, tai yra didžiausias stabilus SemVer, `:latest` su** tas pats santrauka** . Po darbo: „Hub `latest` santrauka prilygsta naujai SemVer santraukai ir `last_updated` perkelta. Nepalikite `:latest` senesnės versijos versijoje, o laidos pastabose kalbama apie pataisymus, kurie egzistuoja tik „git“. Sukurti greitas pradžias naudoti `:latest`; GitOps turėtų nuolat prisegti `X.Y.Z`. Žr. [Docker išleidimo kanalus](../guides/DOCKER_GUIDE.md#release-channels) ir #10317.
+
+**Docker Hub“ organizacijos saugykla (`cheaperinference/omniroute`):** Docker Hub negali perkelti saugyklos tarp vardų erdvių, todėl `diegosouzapw/omniroute` išsaugo savo ištraukimo istoriją ir kiekvieną leidimą, o `mirror-org-dockerhub` užduotis `docker-publish` nukopijuoja kiekvieną išleistą versiją (ir `:latest` kai paaukštinama) iš `ghcr.io/cheaper-inference/omniroute` į organizacijos saugyklą. Tam reikia `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` paslapčių; be jų darbas lieka žalias su įspėjimu „Docker Hub org veidrodis praleistas“, o kiti registrai skelbiami įprastai. Jei norite vėliau ten paskelbti išleistą versiją, paleiskite** Veiksmai → Veidrodinis Docker vaizdas į Docker Hub organizaciją → Paleisti darbo eigą** su `version=X.Y.Z` (ir `promote_latest` aukščiausios stabilios versijos atveju): jis kopijuoja esamus vaizdus, be perstatymo.
 
 ## Spartusis karštųjų pataisų kelias (žyma `hotfix`)
 
@@ -116,209 +86,205 @@ matricą be jokios žymos.
 
 ## Išsamus kontrolinis sąrašas
 
-### Prieš leidimą
+### Išankstinis leidimas
 
-- [ ] Visi šiam leidimui skirti PR sujungti į `release/vX.Y.0`
-- [ ] Visi atviri šios versijos Linear / problemų elementai uždaryti arba perkelti į kitą etapą
-- [ ] `release/vX.Y.0` šakos CI patikros sėkmingos
-- [ ] Kode nėra `TODO(release)` žymų: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker bazinis atvaizdas atnaujintas (šiuo metu `node:24.15.0-trixie-slim`)
+- [ ] Visi PRs skirti šiam leidimui, yra sujungti su `release/vX.Y.0`
+- [ ] Visi šios versijos atidaryti Linear/issue elementai yra uždaryti arba perkelti į kitą etapą
+- [ ] CI žalia ant `release/vX.Y.0` šakos
+- [ ] Kode nėra `TODO(release)` žymeklių: `grep -r "TODO(release)" src/ open-sse/`
+- [ ] Docker pagrindinis vaizdas atnaujintas (šiuo metu `node:24.15.0-trixie-slim`)
 
 ### Versija ir pakeitimų žurnalas
 
-- [ ] Paleisti `/version-bump-cc <patch|minor|major>` (Claude Code įgūdis)
-  - Atnaujina versijas `package.json`, `electron/package.json`
-  - Iš naujo sugeneruoja `CHANGELOG.md` pagal git įrašus nuo paskutinės žymos
+- [ ] Vykdykite `/version-bump-cc <patch|minor|major>` (Claude kodo įgūdis)
+  - Nelygumai `package.json`, `electron/package.json`
+  - Atkuria `CHANGELOG.md` iš git įsipareigojimų nuo paskutinės žymos
   - Atnaujina README.md ženklelius
-- [ ] Rankiniu būdu peržiūrėti CHANGELOG.md ir, jei reikia, sutvarkyti įrašų pranešimus
-- [ ] Užtikrinti, kad naujausio semver skyriaus versija faile `CHANGELOG.md` sutaptų su `package.json` versija
-- [ ] Palikti `## [Unreleased]` kaip pirmą pakeitimų žurnalo skyrių būsimiems darbams
-- [ ] Atnaujinti `docs/openapi.yaml` → `info.version` turi sutapti su `package.json` versija
+- [ ] Rankiniu būdu peržiūrėkite CHANGELOG.md ir, jei reikia, išvalykite įsipareigojimo pranešimus
+- [ ] Įsitikinkite, kad naujausia `CHANGELOG.md` semver dalis atitinka `package.json` versiją
+- [ ] Laikykite `## [Unreleased]` kaip pirmąją pakeitimų žurnalo skiltį būsimiems darbams
+- [ ] Atnaujinti `docs/openapi.yaml` → `info.version` turi būti lygus `package.json` versijai
 
 ### Kodo kokybė
 
-- [ ] `npm run lint` — 0 klaidų (įspėjimai jau buvo anksčiau)
-- [ ] `npm run typecheck:core` — be klaidų
-- [ ] `npm run typecheck:noimplicit:core` — be klaidų (griežtas režimas)
-- [ ] `npm run check:cycles:ratchet` — neviršija fiksuotos `metrics.cycles` ribos (atskira `check:cycles` komanda baigiama kodu 1 aptikus bet kokį ciklą, #15281)
-- [ ] `npm run check:any-budget:t11` — neviršija limito
-- [ ] `npm run check:route-validation:t06` — be klaidų
-- [ ] `npm run check:node-runtime` — tenkinama minimali palaikomos vykdymo aplinkos versija (`>=22.22.2 <23`, `>=24.0.0 <27`, pagal `SUPPORTED_NODE_RANGE`, esantį `src/shared/utils/nodeRuntimeSupport.ts`; suderinta su `package.json` `engines`)
+- [ ] `npm run lint` — 0 klaidų (įspėjimai yra iš anksto)
+- [ ] `npm run typecheck:core` — švarus
+- [ ] `npm run typecheck:noimplicit:core` — švarus (griežtas)
+- [ ] `npm run check:cycles:ratchet` — užšalusiose `metrics.cycles` lubose (be `check:cycles` išeina 1 bet kuriame cikle, #15281)
+- [ ] `npm run check:any-budget:t11` — neviršija biudžeto
+- [ ] `npm run check:route-validation:t06` — švarus
+- [ ] `npm run check:node-runtime` — palaikomos vykdymo trukmės grindys (`>=22.22.2 <23`, `>=24.0.0 <27`, per `SUPPORTED_NODE_RANGE` in `src/shared/utils/nodeRuntimeSupport.ts`; suderinta su `package.json` `engines`)
 
 ### Testavimas
 
-- [ ] `npm run test:unit` — sėkmingas
-- [ ] `npm run test:vitest` — sėkmingas (MCP serveris, autoCombo, podėlis)
-- [ ] `npm run test:coverage` — tenkinama 60/60/60/60 riba (sakiniai / eilutės / funkcijos / šakos)
-- [ ] `npm run test:integration` — sėkmingas (jei pakeitimai susiję su DB / apdorojimo funkcijomis)
-- [ ] `npm run test:combo:matrix` — sėkmingas (kombinuotųjų strategijų matrica: deterministiškai patvirtina visų 19 viešų maršruto parinkimo strategijų pasirinkimo sprendimus; paleisti keičiant kombinuotąjį maršruto parinkimą, strategijos nustatymą arba atsarginę logiką)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **neprivalomas / rankinis** (valdomas tikros išorinės sistemos bazinis testas; iš VPS `root@192.168.0.15` gauna tik skaitomą DB momentinę kopiją; kreipiasi į tikrus teikėjus ir naudoja kreditus; niekada nevykdomas CI; be aktyvinimo sąlygos korektiškai praleidžiamas)
-- [ ] `npm run test:combo:live:vps` — **neprivalomas / rankinis** (3-iojo etapo VPS bazinis testas tikroje aplinkoje: 7 HTTP scenarijai su veikiančiu `.15` serveriu naudojant paprastą Node ESM; reikalinga `ssh root@192.168.0.15`; sukuria ir pašalina tik `__live_test__*` kombinacijas; kreipiasi į tikrus teikėjus; niekada nevykdomas CI)
-- [ ] `npm run test:e2e` — sėkmingas (UI pakeitimams)
-- [ ] `npm run test:protocols:e2e` — sėkmingas (MCP / A2A pakeitimams)
-- [ ] `npm run test:ecosystem` — sėkmingas
+- [ ] `npm run test:unit` — pass
+- [ ] `npm run test:vitest` — leidimas (MCP serveris, autoCombo, talpykla)
+- [ ] `npm run test:coverage` — vartai 60/60/60/60 patenkinti (statements/lines/functions/branches)
+- [ ] `npm run test:integration` — leidimas (jei pakeitimų, palieskite DB / tvarkytojai)
+- [ ] `npm run test:combo:matrix` — pass (kombinuotos strategijos matrica: deterministiškai įrodo visų 22 viešųjų maršrutų parinkimo strategijų pasirinkimo sprendimus; paleidžiama palietus kombinuotą maršrutą, strategijos sprendimą arba atsarginę logiką)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` —**optional/manual** (vartuojami realūs dūmai prieš srovę; gaunamas tik skaitomas DB momentinis vaizdas iš VPS `root@192.168.0.15`; pasiekia tikrus teikėjus, kainuoja kreditus; niekada neveikia CI; praleidžia švariai be vartų)
+- [ ] `npm run test:combo:live:vps` —**optional/manual** (Phase-3 VPS live smoke: 7 HTTP scenarijai prieš tiesioginį `.15` serverį per paprastą mazgą ESM; reikia `ssh root@192.168.0.15`; creates/deletes tik `__live_test__*` derinius; pasiekia tikrus teikėjus; niekada neveikia CI)
+- [ ] `npm run test:e2e` — leidimas (UI pakeitimai)
+- [ ] `npm run test:protocols:e2e` — leidimas (MCP/A2A pakeitimai)
+- [ ] `npm run test:ecosystem` — pass
 
-### Kabliai (patvirtinti Husky)
+### Kabliukai (patvirtinti Husky)
 
-Husky kabliai yra `.husky/` ir vykdomi automatiškai atliekant git operacijas.
+Husky kabliukai gyvena `.husky/` ir automatiškai paleidžiami atliekant git operacijas.
 
-- **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** greitos deterministinės patikros — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktyvinta 2026-06-13). Sąmoningai neįtraukia `test:unit` (lėtas; jį vykdo CI `test-unit` užduotis).
-  - Prieš siunčiant leidimo šakas, rankiniu būdu paleisti `npm run test:unit`.
+- **išankstinis įsipareigojimas:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
+- **išankstinis paspaudimas:** greitieji deterministiniai vartai — `npm run check:any-budget:t11 && npm run check:tracked-artifacts` (aktyvuotas 2026-06-13). Tyčia neįtraukia `test:unit` (lėtas; apima CI `test-unit` užduotis).
+  - Prieš stumdami atlaisvinimo šakas, paleiskite `npm run test:unit` rankiniu būdu.
 
-Jei kablio patikra nepavyksta: ištaisyti pagrindinę problemą, neapeiti jos naudojant `--no-verify`.
+Jei kabliukas nepavyksta: išspręskite pagrindinę problemą, neapeikite naudodami `--no-verify`.
 
-### Standartizuoti įrašai
+### Įprasti įsipareigojimai
 
-Visi į leidimą įtraukiami įrašai turi atitikti formatą `type(scope): subject`.
+Visi su leidimu susiję įsipareigojimai turi atitikti `type(scope): subject` formatą.
 
-**Leistini tipai:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**Tinkami tipai:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
-**Leistinos sritys:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
+**Galiojančios apimties:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker` `executors` `ci` `authz` `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `translator`, `domain`
 
-Nesuderinami pakeitimai: pridėti `BREAKING CHANGE:` poraštę arba `!` po srities (pvz., `feat(api)!: drop /v0`).
+Neveikiantys pakeitimai: po apimties pridėkite `BREAKING CHANGE:` poraštę arba `!` (pvz., `feat(api)!: drop /v0`).
 
 ### Dokumentacija
 
-- [ ] `npm run check:docs-sync` sėkmingas (automatiškai paleidžiamas prieš įrašą)
-- [ ] `npm run check:docs-all` sėkmingas (bendra patikra: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` baigiamas kodu 0 — kodo ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` aplinkos sutartis nepažeista
-- [ ] `npm run check:doc-links` baigiamas kodu 0 — po struktūros pertvarkymo nėra neveikiančių vidinių Markdown nuorodų
-- [ ] `docs/architecture/ARCHITECTURE.md` peržiūrėtas dėl saugyklos / vykdymo aplinkos neatitikimų
-- [ ] `docs/guides/TROUBLESHOOTING.md` peržiūrėtas dėl aplinkos kintamųjų ir veikimo neatitikimų
-- [ ] Jei pakeistas `.env.example`: atnaujintas `docs/reference/ENVIRONMENT.md`
-- [ ] Jei nauja funkcija turi UI: ji paminėta `docs/guides/USER_GUIDE.md`
-- [ ] Jei nauja funkcija turi API: atnaujinti `docs/reference/API_REFERENCE.md` ir `docs/openapi.yaml`
-- [ ] Jei nauja funkcija yra modulis: yra atskiras `docs/<MODULE>.md`
-- [ ] Jei tai nesuderinamas pakeitimas: `docs/guides/TROUBLESHOOTING.md` yra perkėlimo pastaba
+- [ ] `npm run check:docs-sync` leidimai (automatinis paleidimas iš anksto patvirtinus)
+- [ ] `npm run check:docs-all` leidimai (skėtis: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync` išeina 0 — kodas ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` env sutartis nepažeista
+- [ ] `npm run check:doc-links` išeina 0 — po restruktūrizavimo nėra sugadintų vidinių kainų mažinimo nuorodų
+- [ ] `docs/architecture/ARCHITECTURE.md` įvertino storage/runtime drift
+- [ ] `docs/guides/TROUBLESHOOTING.md` peržiūrėta dėl env var ir veiklos dreifo
+- [ ] Jei `.env.example` pasikeitė: `docs/reference/ENVIRONMENT.md` atnaujinta
+- [ ] Jei nauja funkcija turi UI: `docs/guides/USER_GUIDE.md` ją mini
+- [ ] Jei naujoje funkcijoje yra API: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` atnaujinta
+- [ ] Jei nauja funkcija yra modulis: yra skirta `docs/<MODULE>.md`
+- [ ] Jei pakeitimas sulaužomas: `docs/guides/TROUBLESHOOTING.md` turi perėjimo pastabą
 
 ### i18n
 
-- [ ] `npm run i18n:check` baigiamas kodu 0 — vertimų būsena (`.i18n-state.json`) sinchronizuota su šaltinio dokumentais (griežtu režimu nėra pakitusių šaltinių; įspėjimo režimo pranešimai priimtini paskutinės minutės dokumentacijos pataisoms, tačiau prieš kuriant žymą rezultatas turi būti 0)
-- [ ] `npm run i18n:check-ui-coverage` baigiamas kodu 0 — kiekviena UI lokalė pasiekia arba viršija 80 % aprėpties ribą
-- [ ] `npm run i18n:sync-ui:dry` praneša apie 0 trūkstamų raktų visose 66 tikslinėse lokalėse (kiekvienoje lokalėje, išskyrus šaltinio `en`)
-- [ ] Jei pakeisti angliški šaltinio dokumentai, prieš kuriant žymą paleisti `npm run i18n:run` (faile `.env` reikalingas `OMNIROUTE_TRANSLATION_API_KEY`)
-- [ ] Vertimų papildymus galima atidėti kitam leidimui, jei jie nedideli (pažymėti CHANGELOG)
+- [ ] `npm run i18n:check` išeina iš 0 — vertimo būsenos (`.i18n-state.json`) sinchronizuodamas su šaltinio dokumentais (griežtuoju režimu nėra nukrypusių šaltinių; įspėjimo režimo patarimas yra priimtinas, kai dokumentai pataisyti paskutinę minutę, tačiau prieš priskiriant žymą turi būti 0)
+- [ ] `npm run i18n:check-ui-coverage` išeina iš 0 — kiekvienos UI lokalės 80 % aprėpties ribose arba virš jos
+- [ ] `npm run i18n:sync-ui:dry` praneša apie 0 trūkstamų raktų visose 66 tikslinėse lokalėse (kiekvienoje lokalėje, išskyrus `en` šaltinį)
+- [ ] Jei pasikeitė šaltinio anglų kalbos dokumentai, prieš pažymėdami paleiskite `npm run i18n:run` (reikia `OMNIROUTE_TRANSLATION_API_KEY` `.env`)
+- [ ] Vertimo įnašas gali būti atidėtas kitam leidimui, jei jis yra nedidelis (kūrinys CHANGELOG)
 
-### Duomenų bazės migracijos
+### Duomenų bazių perkėlimas
 
-- [ ] Jei `src/lib/db/migrations/` yra naujų failų:
-  - [ ] Kiekviena migracija yra idempotentinė (`CREATE TABLE IF NOT EXISTS` ir pan.)
-  - [ ] Migracijos vykdomos transakcijose
-  - [ ] Numeracija teisinga (sekoje nėra tarpų)
-- [ ] Išbandyti švariame diegime: pašalinti `~/.omniroute/omniroute.db` ir paleisti `npm run dev`
-- [ ] Išbandyti esamame diegime: sukurti atsarginę DB kopiją, paleisti migraciją ir patikrinti schemą
-- [ ] WAL failai (`-wal`, `-shm`) tinkamai apdorojami, jei migracija perrašo lenteles
+- [ ] Jei `src/lib/db/migrations/` turi naujų failų:
+  - [ ] Kiekviena migracija yra idempotenta (`CREATE TABLE IF NOT EXISTS` ir kt.)
+  - [ ] Perkėlimai, susiję su sandoriais
+  - [ ] Teisingai sunumeruota (nėra tarpų iš eilės)
+- [ ] Išbandykite naują diegimą: ištrinkite `~/.omniroute/omniroute.db` ir paleiskite `npm run dev`
+- [ ] Išbandykite esamą diegimą: sukurkite atsarginę kopiją DB, paleiskite perkėlimą, patikrinkite schemą
+- [ ] WAL failai (`-wal`, `-shm`) tvarkomi teisingai , jei perkėlimas perrašo lenteles
 
-### Paslaugų teikėjų katalogas (tikrinamas su „Zod“)
+### Teikėjų katalogas (patvirtinta Zod)
 
-- [ ] `src/shared/constants/providers.ts` „Zod“ schema yra tinkama įkėlimo metu
-  - [ ] Visi paslaugų teikėjai turi privalomus laukus (`id`, `label`, `kind` ir kt.)
-  - [ ] Naujiems nemokamiems paslaugų teikėjams nurodytas `freeNote`
-  - [ ] OAuth paslaugų teikėjų `oauthConfig` užregistruota faile `src/lib/oauth/constants/oauth.ts`
-- [ ] Jei pridėtas naujas paslaugų teikėjas: atitinkama vykdyklė kataloge `open-sse/executors/`
-- [ ] Jei naudojamas ne „OpenAI“ formatas: keitiklis kataloge `open-sse/translator/`
-- [ ] Modeliai užregistruoti faile `open-sse/config/providerRegistry.ts`
-- [ ] Vienetų testai kataloge `tests/unit/` apima paslaugų teikėjų klasifikavimą ir maršruto parinkimą
+- [ ] `src/shared/constants/providers.ts` Zod schema galioja įkėlimo metu
+  - [ ] Visi teikėjai turi privalomus laukus (`id`, `label`, `kind` ir kt.)
+  - [ ] `freeNote` numatyta naujiems nemokamiems teikėjams
+  - [ ] OAuth teikėjai turi `oauthConfig` registruotą `src/lib/oauth/constants/oauth.ts`
+- [ ] Jei pridėtas naujas teikėjas: atitinkamas vykdytojas `open-sse/executors/`
+- [ ] Jei ne OpenAI formatas: vertėjas `open-sse/translator/`
+- [ ] Modeliai registruoti `open-sse/config/providerRegistry.ts`
+- [ ] Vienetų testai `tests/unit/` apima teikėjų klasifikaciją ir maršrutą
 
-### Darbalaukio programa („Electron“)
+### Stalinis kompiuteris (Electron)
 
-Jei pakeistas `electron/`:
+Jei `electron/` pasikeitė:
 
-- [ ] `npm run electron:smoke:packaged` įvykdomas sėkmingai
-- [ ] Sukompiliuotos versijos išbandytos bent vienai iš `:win`, `:mac`, `:linux` platformų
-- [ ] Kodo pasirašymo sertifikatų galiojimas nėra pasibaigęs (jei pasirašoma)
-- [ ] `electron/package.json` versija sutampa su šakniniu `package.json`
-- [ ] Automatinio atnaujinimo kanalo rodyklė atnaujinta, jei leidžiama į `stable`
+- [ ] `npm run electron:smoke:packaged` praeina
+- [ ] Konstrukcijos išbandytos bent vienam iš `:win`, `:mac`, `:linux`
+- [ ] Kodo pasirašymo sertifikatų galiojimo laikas nepasibaigęs (jei pasirašoma)
+- [ ] `electron/package.json` versija atitinka root `package.json`
+- [ ] Automatinio atnaujinimo kanalo rodyklė atnaujinta, jei išleidžiama į `stable`
 
-### Kompiliavimo išdėstymas
+### Sukurti išdėstymą
 
-Saugykloje naudojami trys atskiri išvesties katalogai — niekada jų nesumaišykite:
+Saugykla naudoja tris skirtingus išvesties katalogus — niekada jų nemaišykite:
 
-| Katalogas | Paskirtis                                                          | Sekamas?        |
-| --------- | ------------------------------------------------------------------ | --------------- |
-| `src/`    | Programos šaltinis („TypeScript“ / TSX)                            | Taip            |
-| `.build/` | Tarpiniai kompiliavimo failai — `next build` išvestis (`distDir`)  | Ne (gitignored) |
-| `dist/`   | Platinamas npm paketas — surenkamas naudojant `assembleStandalone` | Ne (gitignored) |
+| Katalogas | Tikslas                                                 | Stebimi?       |
+| --------- | ------------------------------------------------------- | -------------- |
+| `src/`    | Programos šaltinis (TypeScript / TSX)                   | Taip           |
+| `.build/` | Sukurti tarpinius — `next build` išvestį (`distDir`)    | Ne (nepaisoma) |
+| `dist/`   | Siunčiamas npm paketas — surinktas `assembleStandalone` | Ne (nepaisoma) |
 
-> **Pastaba operatoriui:** nuotolinio VPS atvaizdo katalogas lieka `/usr/lib/node_modules/omniroute/app/`.
-> Pasikeitė tik **saugykloje esanti** kompiliavimo išvestis (`app/` → `dist/`). Diegimo įgūdžiai su `rsync`
-> nukopijuoja `dist/` turinį į nuotolinį `app/` katalogą — VPS kelių keisti nereikia.
+> **Operatoriaus pastaba:** nuotolinis VPS vaizdų katalogas išlieka `/usr/lib/node_modules/omniroute/app/`. Tik** in-repo** kūrimo išvestis perkelta (`app/` → `dist/`). Diegdami įgūdžius rsync `dist/` turinį nuotoliniame `app/` dir — nereikia keisti VPS kelio.
 
-**Vieno kompiliavimo eiga:**
+**Vienos konstrukcijos srautas:**
 
 ```
 npm run build:release
-  └─ rm -rf .build dist          (išvalymas)
-  └─ next build → .build/next/   (tarpiniai failai)
-  └─ assembleStandalone          (nukopijuoja standalone + static + public + natives → dist/)
-  └─ writes dist/BUILD_SHA       (HEAD kontrolinis žymuo)
+  └─ rm -rf .build dist          (clean)
+  └─ next build → .build/next/   (intermediates)
+  └─ assembleStandalone          (copies standalone + static + public + natives → dist/)
+  └─ writes dist/BUILD_SHA       (HEAD sentinel)
 ```
 
-Diegdami NEPALEISKITE `npm run build`, o po jo atskiros komandos `npm run build:cli` — naudokite
-`npm run build:release`, kuri viena komanda atlieka švarų perkompiliavimą ir sukuria kontrolinį žymenį.
+Ar NOT paleiskite `npm run build` o po to atskirą `npm run build:cli` skirtą — diegti, naudokite `npm run build:release` kuris atlieka švarų + sentinel atstatymą viena komanda.
 
-### Artefakto tikrinimas
+### Artefaktų patvirtinimas
 
-- [ ] `npm run build:release` įvykdomas sėkmingai ir `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] `npm run check:pack-artifact` rezultatas švarus — nėra `app.__qa_backup`, `scripts/scratch`, `package-lock.json` ar kitų vietinių liekanų
-- [ ] Po kompiliavimo egzistuoja `dist/server.js`
-- [ ] Pasirinktinis vietinis supakuotos vykdymo aplinkos greitasis testas: `npm run dev:candidate -- validate` po `npm run dev:candidate -- build` paleidžia supakuotą tarball izoliuotame `DATA_DIR` ir patikrina `/api/health` bei `/v1/models` (žr. [Rekomenduojamą indėlio eigą](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop))
+- [ ] `npm run build:release` pavyksta ir `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact` clean — be `app.__qa_backup`, `scripts/scratch`, `package-lock.json` ar kitų vietinių likučių
+- [ ] `dist/server.js` egzistuoja po sukūrimo
+- [ ] Pasirenkamas vietinis supakuotas vykdymo laikas: `npm run dev:candidate -- validate` po to, kai `npm run dev:candidate -- build` paleidžia supakuotą tarballą izoliuotame `DATA_DIR` ir patikrina `/api/health` + `/v1/models` (žr. [indėlį Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) )
 
-### Žymų kūrimas ir leidimas
+### Žymėjimas ir išleidimas
 
-- [ ] Paleiskite `/generate-release-cc` („Claude Code“ įgūdį):
+- [ ] Vykdykite `/generate-release-cc` (Claude kodo įgūdis):
   - Sukuria žymą `vX.Y.Z`
-  - Išsiunčia žymą ir šaką
-  - Sukuria „GitHub Release“ su pakeitimų žurnalo turiniu
-  - Prideda „Electron“ diegimo programas (jei jos sukompiliuotos)
-- [ ] Arba atlikite rankiniu būdu:
+  - Stumia žymą ir šaką
+  - Atidaro GitHub leidimą su pakeitimų žurnalo korpusu
+  - Pritvirtina Electron montuotojus (jei jie pastatyti)
+- [ ] Arba rankiniu būdu:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
   gh release create vX.Y.Z --notes-from-tag
   ```
 
-### Diegimas
+### Dislokuoti
 
-Diegimo įgūdžiai naudoja supaprastintą `rsync` eigą — be `npm pack` ir be `npm i -g`:
+Naudodami lengvą rsync srautą naudokite įgūdžius — no `npm pack`, no `npm i -g`:
 
-- [ ] Naudokite paskirties vietą atitinkantį diegimo įgūdį:
+- [ ] Naudokite diegimo įgūdžius, atitinkančius tikslą:
   - `/deploy-vps-local-cc` — vietinis VPS (192.168.0.15)
-  - `/deploy-vps-akamai-cc` — „Akamai“ VPS (69.164.221.35)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — abu
-- [ ] Prieš diegdami patvirtinkite, kad `dist/BUILD_SHA` == `git rev-parse --short HEAD`
-- [ ] Kompiliavimas turi būti vykdomas ten, kur `node_modules` yra tikras katalogas (pagrindinėje darbinėje kopijoje arba darbo medyje, kuriame paleistas `npm ci` — NE darbo medyje su simboline nuoroda)
-- [ ] Atlikite įdiegtos versijos greitąjį testą:
-  - Atidarykite `/dashboard/health` → patikrinkite, ar versijos eilutė atitinka leidimą
-  - Išsiųskite `/v1/chat/completions` užklausą žinomam paslaugų teikėjui
+- [ ] Prieš įdiegdami, patvirtinkite `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] Sukūrimas turi būti vykdomas ten, kur `node_modules` yra tikra (pagrindinė patikra arba `npm ci`'d worktree — NOT simbolinis darbo medis)
+- [ ] Dūmų bandymo įdiegtas pavyzdys:
+  - Atidaryti `/dashboard/health` → patikrinti versijos eilutė atitinka leidimą
+  - Vykdykite `/v1/chat/completions` užklausą prieš žinomą teikėją
   - Patikrinkite, ar `/api/monitoring/health` grąžina `CLOSED` grandinės pertraukiklius
-  - Patvirtinkite, kad MCP transportai atsako (`/mcp` HTTP, `/mcp-sse` SSE)
+  - Patvirtinkite MCP transports atsakymą (`/mcp` HTTP, `/mcp-sse` SSE)
 
-### Po leidimo
+### Po išleidimo
 
-- [ ] Paleiskite `/capture-release-evidences-cc` („Claude Code“ įgūdį)
-  - Užfiksuoja naujų funkcijų WebP ekrano kopijas ir įrašus
-  - Prideda juos prie leidimo pastabų / tinklaraščio įrašo
-- [ ] Atnaujinkite „GitHub Discussions“ / „Discord“ paskelbdami pranešimą apie leidimą
-- [ ] Sukurkite kitos versijos etapą
-- [ ] Jei tai kritiškai svarbu: prisekite diskusiją arba paskelbkite įraše `news.json`, kad būtų rodoma programos reklamjuostė
+- [ ] Vykdykite `/capture-release-evidences-cc` (Claude kodo įgūdis)
+  - Užfiksuoja WebP screenshots/recordings naujų funkcijų
+  - Pridedama prie išleidimo pastabų / tinklaraščio įrašo
+- [ ] Atnaujinkite GitHub Discussions / Discord su pranešimu apie išleidimą
+- [ ] Atidarykite kitos versijos etapą
+- [ ] Jei kritiška: prisegkite diskusiją arba įrašą `news.json` kad gautumėte reklamjuostę programoje
 
-### „Radar“ viešo paleidimo kontroliniai kriterijai
+### Radaro viešojo paleidimo vartai
 
-„Radar“ pranešimas sąmoningai įtrauktas su `active: false`. Aktyvinimas yra atskiras
-pakeitimas, atliekamas tik pateikus kiekvieno toliau nurodyto punkto įrodymus:
+„Radaro“ pranešimas yra sąmoningai susijęs su `active: false`. Aktyvinimas yra atskiras pakeitimas po to, kai įrodomas kiekvienas toliau nurodytas elementas:
 
-- [ ] Visi susieti „Radar“ PR yra sujungti, o leidimo viršūnės CI yra sėkmingas
-- [ ] Įdiekite ir greitai išbandykite OSS „Radar“ maršrutus, kai `RADAR_ENABLED` pagal numatytąją nuostatą vis dar išjungtas
-- [ ] Greitai išbandykite `GET /planos`, `/termos`, `/privacidade` ir `/reembolso` nurodytame „Radar“ prieglobos serveryje
-- [ ] Privačioje paslaugoje užregistruokite operatoriaus tapatybę / kontaktinius duomenis / adresą ir savininko patvirtintą teisinę peržiūrą
-- [ ] Tik testavimo režimu išbandykite „Stripe Checkout“ ir pasirašytą webhook
-- [ ] Išbandykite vieno šifruoto operacinio el. laiško pristatymą naudojant patvirtintą siuntėją / domeną
-- [ ] Įrodykite atsarginės kopijos atkūrimą ir atlikite vieną prižiūrimą tyrimo vykdymą su ribotu biudžetu
-- [ ] Prieš priimdami aukojimo įrodymus patvirtinkite BRL/PIX peržiūros politiką
-- [ ] Viešą „Checkout“ įjunkite tik įvykdę ankstesnius kontrolinius kriterijus, tada aktyvinkite naują `news.json` ID
-- [ ] Patikrinkite, ar pradžios puslapio reklamjuostėje naudojamas lokalizuotas tekstas ir ar naujas ID vėl parodomas atmetus senesnį ID
+- [ ] Visi sukrauti radaro PRs yra sujungti, o atleidimo antgalis CI yra žalias
+- [ ] Įdiekite ir dūminkite OSS radaro maršrutus, kai pagal numatytuosius nustatymus `RADAR_ENABLED` vis dar išjungtas
+- [ ] Rūkykite `GET /planos`, `/termos`, `/privacidade` ir `/reembolso` pavadintame radaro pagrindiniame kompiuteryje
+- [ ] Įrašų operatorius identity/contact/address ir savininko patvirtinta teisinė peržiūra privačioje paslaugoje
+- [ ] Atlikite pratimą „Stripe Checkout“ ir pasirašytą „Webhook“ tik bandomuoju režimu
+- [ ] Atlikite vieną šifruotą operacijos el. pašto pristatymą naudodami patvirtintą sender/domain
+- [ ] Įrodykite atsarginės kopijos atkūrimą ir vieną prižiūrimą, riboto biudžeto tyrimą
+- [ ] Prieš priimdami donorystės įrodymus, patvirtinkite BRL/PIX peržiūros politiką
+- [ ] Įgalinkite viešą patikrą tik po ankstesnių vartų, tada suaktyvinkite naująjį `news.json` ID
+- [ ] Patikrinkite, ar pagrindiniame reklamjuostėse naudojama lokalizuota kopija ir, atmetus senesnį ID, vėl pasirodys naujas ID
 
 ## Įterptųjų paslaugų bazinis patikrinimas (v3.8.4+)
 
