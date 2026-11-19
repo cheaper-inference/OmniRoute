@@ -1232,7 +1232,7 @@ const listAlternateCandidates = async (
 
 // #20452: a stale shim must not hide a working binary later on PATH.
 const healthcheckWithFallthrough = async (
-  command: string | undefined,
+  command: string | null | undefined,
   commandPath: string | null | undefined,
   env: Record<string, string | undefined>,
   healthTimeout: number
