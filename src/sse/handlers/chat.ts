@@ -180,6 +180,7 @@ import {
   filterReasoningCombo,
 } from "./reasoningRouting";
 import { createVirtualAutoCombo, resolveAutoRoutingState } from "./autoRouting";
+import { applyPromptTagRouting } from "@omniroute/open-sse/services/promptTagRouting.ts";
 import { dispatchWithProviderFailover } from "./chat/providerFailover.ts";
 import { getComboFailureLogError } from "./comboFailureLogging";
 import {
@@ -1090,6 +1091,21 @@ async function handleChatImplementation(
   resolvedModelStr = reasoningRouting.modelStr;
   reasoningDecision = reasoningRouting.reasoningDecision;
   requestRoutingTags = reasoningRouting.requestRoutingTags;
+
+  // Prompt-level combo tags (#20706): a leading `[tag]` on the newest user message
+  // that carries one selects the routing combo. Explicit model ids win, and a tag can
+  // never widen the API key's allowed combos.
+  const promptTag = applyPromptTagRouting(body, {
+    combos: (await getCombosCachedForChat()).map((candidate) => candidate.name),
+    allowedCombos: apiKeyInfo?.allowedCombos ?? null,
+  });
+  if (promptTag.combo) {
+    log.info("PROMPT-TAG", `[${promptTag.tag}] -> combo "${promptTag.combo}"`);
+    resolvedModelStr = `combo/${promptTag.combo}`;
+    body = { ...body, model: resolvedModelStr };
+  } else if (promptTag.tag) {
+    log.debug("PROMPT-TAG", `[${promptTag.tag}] ignored (${promptTag.reason})`);
+  }
 
   const autoRouting = await resolveAutoRoutingState(resolvedModelStr);
   if (autoRouting.response) return autoRouting.response;
