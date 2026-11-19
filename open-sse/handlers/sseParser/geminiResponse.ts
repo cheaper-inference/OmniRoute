@@ -45,17 +45,19 @@ function stripZeroWidth(value: unknown): unknown {
  * Detect the `[Tool call: name]\nArguments: {...}` textual convention some
  * Gemini/Antigravity models emit instead of a native functionCall part.
  */
-function tryParseTextualToolCall(text: string): { name: string; args: unknown } | null {
+function tryParseTextualToolCall(
+  text: string
+): { name: string; args: unknown; prefix: string } | null {
   const normalized = stripObfuscationZeroWidth(text);
   const match = normalized.match(
-    /^[\s\S]*?\[Tool call:\s*([^\]\n]+)\]\s*\nArguments:\s*([\s\S]+?)\s*$/
+    /^([\s\S]*?)\[Tool call:\s*([^\]\n]+)\]\s*\nArguments:\s*([\s\S]+?)\s*$/
   );
   if (!match) return null;
-  const name = match[1]?.trim();
-  const rawArgs = match[2]?.trim();
+  const name = match[2]?.trim();
+  const rawArgs = match[3]?.trim();
   if (!name || !rawArgs) return null;
   try {
-    return { name, args: stripZeroWidth(JSON.parse(rawArgs)) };
+    return { name, args: stripZeroWidth(JSON.parse(rawArgs)), prefix: match[1] ?? "" };
   } catch {
     return null;
   }
@@ -376,7 +378,8 @@ export function parseSSEToGeminiResponse(
   const joinedToolCall = tryParseTextualToolCall(acc.textContent);
   if (joinedToolCall) {
     pushTextualToolCall(joinedToolCall, acc);
-    acc.textContent = "";
+    // Only the marker and its arguments are the call: prose before the marker stays content.
+    acc.textContent = joinedToolCall.prefix.trim() ? joinedToolCall.prefix.trimEnd() : "";
   }
 
   if (!acc.sawContent && acc.toolCalls.length === 0) return null;

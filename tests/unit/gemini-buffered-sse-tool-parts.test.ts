@@ -49,6 +49,21 @@ test("a textual tool call split over several SSE parts becomes one tool call", (
   assert.equal(isTruncatedStreamBody(body), false);
 });
 
+test("prose before a split textual tool call is kept as content", () => {
+  const raw =
+    textEvent("Let me check the weather.\n") +
+    textEvent("[Tool call: get_wea") +
+    textEvent('ther]\nArguments: {"city"') +
+    textEvent(`: "Oslo"}`, "STOP");
+
+  const body = parseSSEToGeminiResponse(raw, "gemini-2.5-flash") as unknown as Body;
+
+  const message = body.choices[0].message;
+  assert.equal(message.tool_calls?.length, 1);
+  assert.equal(message.tool_calls?.[0].function.name, "get_weather");
+  assert.equal(message.content, "Let me check the weather.");
+});
+
 test("plain text parts that are not a tool call stay text", () => {
   const raw = textEvent("Hello ") + textEvent("world", "STOP");
 
