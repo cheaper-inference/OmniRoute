@@ -269,8 +269,8 @@ silently falls back to the built-in seed registry and logs a warning.
   opt-in tamper-detection, **not** a security boundary: it does not limit what
   a loaded plugin can do.
 - **No client credentials in hooks** — the context passed to `onRequest`,
-  `onResponse` and `onError` has the `authorization`, `x-api-key` and
-  `proxy-authorization` headers removed, and the API key record carries no key
+  `onResponse` and `onError` has the `authorization`, `x-api-key`,
+  `proxy-authorization` and `cookie` headers removed, and the API key record carries no key
   value (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)

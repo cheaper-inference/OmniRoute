@@ -87,8 +87,8 @@ onRequest: (ctx) => {
 | `timestamp`  | `number`                  | Request timestamp           |
 | `apiKeyInfo` | `object` (optional)       | API key metadata (see note) |
 
-The context never carries the client's credentials: the `authorization`, `x-api-key` and
-`proxy-authorization` headers are removed (any casing), and `apiKeyInfo` keeps the key's
+The context never carries the client's credentials: the `authorization`, `x-api-key`,
+`proxy-authorization` and `cookie` headers are removed (any casing), and `apiKeyInfo` keeps the key's
 metadata (such as `id`, `name` and `scopes`) but not the key value or its fingerprint
 (`redactPluginContext()` in `src/lib/plugins/hooks.ts`). This applies to `onRequest`,
 `onResponse` and `onError`.

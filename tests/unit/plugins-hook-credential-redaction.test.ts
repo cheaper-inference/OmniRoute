@@ -1,7 +1,7 @@
 // Plugin hooks must not receive the client's credentials. A plugin is third-party code
 // running as a plain Node child process, so whatever the hook context carries is fully
 // readable by it. The request headers handed to onRequest/onResponse/onError must not
-// include `authorization`, `x-api-key` or `proxy-authorization` (any casing), and the
+// include `authorization`, `x-api-key`, `proxy-authorization` or `cookie` (any casing), and the
 // API key record must not carry the key itself — only its id/name/scopes-style metadata.
 import { test, afterEach } from "node:test";
 import assert from "node:assert/strict";
@@ -16,13 +16,14 @@ const { runPluginOnRequestHook } =
 const { loadPlugin } = await import("../../src/lib/plugins/loader.ts");
 
 const SECRET = "sk-client-secret-value-0001";
-const CREDENTIAL_HEADERS = ["authorization", "x-api-key", "proxy-authorization"];
+const CREDENTIAL_HEADERS = ["authorization", "x-api-key", "proxy-authorization", "cookie"];
 
 function clientHeaders(): Record<string, string> {
   return {
     Authorization: `Bearer ${SECRET}`,
     "X-Api-Key": SECRET,
     "proxy-authorization": `Basic ${SECRET}`,
+    Cookie: `auth_token=${SECRET}; theme=dark`,
     "x-trace-id": "trace-123",
     "content-type": "application/json",
   };

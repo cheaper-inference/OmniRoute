@@ -246,6 +246,8 @@ const CREDENTIAL_HEADER_NAMES: ReadonlySet<string> = new Set([
   "authorization",
   "x-api-key",
   "proxy-authorization",
+  // The dashboard session token travels in a cookie.
+  "cookie",
 ]);
 
 /** API key record fields that carry the key itself or a fingerprint of it. */
@@ -260,7 +262,7 @@ function omitFields(
 
 /**
  * Copy of a hook context without the client's credentials: drops the `authorization`,
- * `x-api-key` and `proxy-authorization` headers (any casing) and the key value/fingerprint
+ * `x-api-key`, `proxy-authorization` and `cookie` headers (any casing) and the key value/fingerprint
  * from the API key record. The input is never mutated.
  */
 function redactPluginContext<T extends PluginContext>(ctx: T): T {
