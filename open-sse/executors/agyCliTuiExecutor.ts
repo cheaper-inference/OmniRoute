@@ -4,14 +4,16 @@
  * Three transports drive the same `agy` binary:
  *
  *   http  the Antigravity web endpoint (the default, unchanged)
- *   acp   agy's Agent Client Protocol (its own PR)
+ *   acp   agy's Agent Client Protocol (agyCliExecutor.ts)
  *   tui   agy driven as a person would drive it, through a pseudo-terminal
  *
  * `tui` exists because agy's interactive mode is the only mode where a few
  * behaviours (its own tool loop against the real filesystem, background tasks it
  * keeps running between turns) are actually exercised. It is opt-in per
  * connection or per deployment, never the default: a typo must not move traffic
- * onto a path that needs a CLI installed and signed in.
+ * onto a path that needs a CLI installed and signed in. Which transport a request
+ * takes, and where `agy` is, are decided once for both CLI transports:
+ * `resolveAgyTransport` (agyCliExecutor.ts) and `findAgyBinary` (agyCliPlatform.ts).
  *
  * Modal scope is deliberately the last user turn. agy keeps the conversation
  * itself (`--conversation`), so replaying the history into the prompt would
@@ -28,37 +30,7 @@ import path from "node:path";
 import { buildErrorBody } from "../utils/error.ts";
 import { runAgyTuiTurn, AgyTuiTurnError } from "../services/agyTuiRunner.ts";
 import { tuiRuntimeUnsupported } from "../services/agyTuiHooks.ts";
-import type { ProviderCredentials } from "./base.ts";
-
-export type AgyTransport = "http" | "tui";
-
-/**
- * Which transport this request should take.
- *
- * HTTP is the default and the answer for anything unclear. The connection's own
- * `providerSpecificData.transport` wins over the environment, so one account can
- * be moved without restating the deployment-wide default.
- *
- * `acp` is recognised so a value written by the ACP transport (#20315) is not
- * silently downgraded to HTTP here: it stays "http" only because this branch
- * does not carry the ACP path, and the executor reports that plainly instead of
- * pretending the request went out over a transport it never used.
- */
-export function resolveAgyTransport(
-  credentials: ProviderCredentials,
-  env: NodeJS.ProcessEnv = process.env
-): AgyTransport {
-  const settings = credentials?.providerSpecificData;
-  const record =
-    settings && typeof settings === "object" ? (settings as Record<string, unknown>) : null;
-  const perConnection = record?.transport;
-  if (typeof perConnection === "string") return transportOf(perConnection);
-  return transportOf(env.AGY_CLI_TRANSPORT || "");
-}
-
-function transportOf(value: string): AgyTransport {
-  return value.trim().toLowerCase() === "tui" ? "tui" : "http";
-}
+import { findAgyBinary } from "../services/agyCliPlatform.ts";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return value !== null && typeof value === "object" && !Array.isArray(value);
@@ -96,36 +68,6 @@ export function tuiConversationKey(body: unknown): string | null {
   // would send `--conversation` a value it cannot resolve.
   if (typeof declared === "string" && /^[0-9a-fA-F-]{36}$/.test(declared)) return declared;
   return null;
-}
-
-/** Where the machine keeps an `agy`, or null. */
-export function findAgyBinary(env: NodeJS.ProcessEnv = process.env): string | null {
-  const marked = env.AGY_PATH?.trim();
-  if (marked && isExecutableFile(marked)) return path.resolve(marked);
-  const platform = process.platform;
-  const separator = platform === "win32" ? ";" : ":";
-  const names = platform === "win32" ? ["agy.exe", "agy.cmd"] : ["agy"];
-  for (const directory of (env.PATH || "").split(separator)) {
-    const clean = directory.replace(/^"|"$/g, "").trim();
-    if (!clean) continue;
-    for (const name of names) {
-      // Resolved, because the runner only spawns an absolute path.
-      const candidate = path.resolve(clean, name);
-      if (isExecutableFile(candidate)) return candidate;
-    }
-  }
-  return null;
-}
-
-function isExecutableFile(file: string): boolean {
-  try {
-    if (!fs.statSync(file).isFile()) return false;
-    // A non-executable `agy` early on PATH must not shadow a working one later.
-    if (process.platform !== "win32") fs.accessSync(file, fs.constants.X_OK);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 /**
@@ -208,6 +150,16 @@ export type AgyTuiExecutorRequest = {
 };
 
 /**
+ * What a turn reaches outside this process for. Production uses the real ones;
+ * a test swaps them so it never finds the host's own agy, spawns `script` or
+ * writes the operator's `~/.gemini` hook file.
+ */
+export type AgyTuiExecutorDeps = {
+  findBinary?: () => string | null;
+  runTurn?: typeof runAgyTuiTurn;
+};
+
+/**
  * Drive one completion through agy's interactive mode.
  *
  * Missing pieces of the environment (no POSIX pseudo-terminal, no `agy` on the
@@ -216,9 +168,11 @@ export type AgyTuiExecutorRequest = {
  * request pipeline.
  */
 export async function executeViaAgyTui(
-  request: AgyTuiExecutorRequest
+  request: AgyTuiExecutorRequest,
+  deps: AgyTuiExecutorDeps = {}
 ): Promise<{ response: Response; url: string }> {
   const { model, body, stream, signal } = request;
+  const { findBinary = () => findAgyBinary(), runTurn = runAgyTuiTurn } = deps;
 
   // A request with no user turn is the caller's mistake on any host, so it is
   // reported as one rather than as the host's missing capability.
@@ -242,7 +196,7 @@ export async function executeViaAgyTui(
     };
   }
 
-  const executable = findAgyBinary();
+  const executable = findBinary();
   if (!executable) {
     return {
       response: tuiErrorResponse(
@@ -256,7 +210,7 @@ export async function executeViaAgyTui(
   }
 
   try {
-    const result = await runAgyTuiTurn({
+    const result = await runTurn({
       executable,
       conversationId: tuiConversationKey(body),
       prompt,

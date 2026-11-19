@@ -189,7 +189,13 @@ export function ownAgyPath(
   return path.posix.join(data, "omniroute-agy-cli", "agy");
 }
 
-/** The first candidate that exists and is executable, or null. */
+/**
+ * The first candidate that exists and is executable, or null.
+ *
+ * Shared by the `acp` and `tui` transports. The path is resolved, because both
+ * spawn agy from a working directory of their own, where a relative PATH entry
+ * would name another file.
+ */
 export function findAgyBinary(
   env: NodeJS.ProcessEnv = process.env,
   home: string = os.homedir(),
@@ -197,10 +203,12 @@ export function findAgyBinary(
 ): string | null {
   for (const candidate of agyCandidates(env, home, platform)) {
     try {
-      const stat = fs.statSync(candidate);
-      if (stat.isFile()) return candidate;
+      if (!fs.statSync(candidate).isFile()) continue;
+      // A non-executable `agy` early on PATH must not shadow a working one later.
+      if (platform !== "win32") fs.accessSync(candidate, fs.constants.X_OK);
+      return path.resolve(candidate);
     } catch {
-      /* not there; keep looking */
+      /* not there, or not runnable; keep looking */
     }
   }
   return null;

@@ -1,7 +1,10 @@
 // The pseudo-terminal shim: how agy is started, and what its environment may not
 // inherit. Nothing here spawns agy; the command line and the env are the contract.
 import assert from "node:assert/strict";
-import { describe, it } from "node:test";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
+import { after, describe, it } from "node:test";
 
 import { childEnv, ptyCommand } from "../../open-sse/services/agyTuiPty.ts";
 import { AgyTuiUnsupportedError, AgyTuiTerminal } from "../../open-sse/services/agyTuiPty.ts";
@@ -53,6 +56,11 @@ describe("agyTuiPty — the command", () => {
 });
 
 describe("agyTuiPty — a child that fails", () => {
+  // An empty folder as the child's PATH: even if the missing cwd below ever
+  // existed, the host's `script` (and so its agy) could not be started.
+  const emptyPath = fs.mkdtempSync(path.join(os.tmpdir(), "agy-tui-pty-test-"));
+  after(() => fs.rmSync(emptyPath, { recursive: true, force: true }));
+
   it("records a spawn failure as the child having gone, instead of throwing it", async () => {
     // A missing cwd makes the spawn fail asynchronously with an "error" event;
     // unheard, that event would be thrown and take the whole process down.
@@ -60,6 +68,7 @@ describe("agyTuiPty — a child that fails", () => {
       executable: "/nonexistent/agy",
       args: [],
       cwd: "/nonexistent-omniroute-agy-tui-cwd",
+      env: { PATH: emptyPath },
       platform: "linux",
     });
     const deadline = Date.now() + 5_000;

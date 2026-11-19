@@ -83,7 +83,7 @@ test("ownAgyPath keeps the bridge's copy out of a user's install", () => {
   );
 });
 
-test("findAgyBinary returns the first candidate that exists, or null", () => {
+test("findAgyBinary returns the first candidate that exists and runs, or null", () => {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-find-"));
   const platform = process.platform;
   const name = platform === "win32" ? "agy.exe" : "agy";
@@ -96,7 +96,8 @@ test("findAgyBinary returns the first candidate that exists, or null", () => {
     assert.equal(findAgyBinary(env, home, platform), null);
     const file = path.join(home, ".local", "bin", name);
     fs.mkdirSync(path.dirname(file), { recursive: true });
-    fs.writeFileSync(file, "");
+    // Executable, as an installed agy is: discovery skips a file it cannot run.
+    fs.writeFileSync(file, "", { mode: 0o755 });
     assert.equal(findAgyBinary(env, home, platform), file);
   } finally {
     fs.rmSync(dir, { recursive: true, force: true });
