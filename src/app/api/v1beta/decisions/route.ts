@@ -59,7 +59,7 @@ async function postHandler(request: Request) {
   const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
   if (scope.rejection) return scope.rejection;
 
-  const resolvedProvider = body.model.startsWith("vertex/") ? "vertex" : "gemini";
+  const resolvedProvider = "gemini";
   const credentials = await getProviderCredentialsWithQuotaPreflight(
     resolvedProvider,
     null,
@@ -79,7 +79,7 @@ async function postHandler(request: Request) {
     return rateLimitedProviderResponse(resolvedProvider, credentials);
   }
 
-  const response = await handleGeminiDecisions(body, credentials, request.signal);
+  const response = await handleGeminiDecisions({ ...body, model }, credentials, request.signal);
   if (response?.ok) {
     await clearRecoveredProviderState(credentials as Record<string, unknown>);
   }
