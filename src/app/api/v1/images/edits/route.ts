@@ -220,6 +220,7 @@ async function handleSyntxEditRequest(params: {
 
 /** Reference/prompt payload an edit dispatch needs, shared by single + combo paths. */
 interface ImageEditContext {
+  controls: EditInput["controls"];
   options?: Record<string, unknown>;
   prompt: string;
   size: string | null;
@@ -331,6 +332,7 @@ async function dispatchImageEditTarget(
     }
     const editImage = () =>
       handleCodexImageEdit({
+        controls: ctx.controls,
         provider: parsed.provider,
         model: parsed.model,
         providerConfig,
@@ -431,6 +433,7 @@ async function dispatchImageEditTarget(
 
   if (providerConfig?.id === "openrouter") {
     return (await handleOpenRouterImageEdit({
+      controls: ctx.controls,
       provider: parsed.provider,
       model: parsed.model,
       baseUrl: providerConfig.baseUrl,
@@ -456,6 +459,7 @@ async function dispatchImageEditTarget(
     };
   }
   return (await handleOpenAIImageEdit({
+    controls: ctx.controls,
     provider: customProviderId,
     model: customModel,
     credentials: credentials as never,
@@ -665,6 +669,7 @@ async function postHandler(request: Request, _context?: unknown) {
           : null;
       return executeImageEditCombo(fullModel, {
         options: input.options,
+        controls: input.controls,
         prompt,
         size,
         responseFormat,
@@ -824,6 +829,7 @@ async function postHandler(request: Request, _context?: unknown) {
         ),
         () =>
           handleCodexImageEdit({
+            controls: input.controls,
             provider: parsed.provider,
             model: parsed.model,
             providerConfig,
@@ -988,6 +994,7 @@ async function postHandler(request: Request, _context?: unknown) {
       editAccounting(accounting, parsed.provider, parsed.model, credentials),
       () =>
         handleOpenRouterImageEdit({
+          controls: input.controls,
           provider: parsed.provider,
           model: parsed.model,
           baseUrl: providerConfig.baseUrl,
@@ -1141,6 +1148,7 @@ async function postHandler(request: Request, _context?: unknown) {
     ),
     () =>
       handleOpenAIImageEdit({
+        controls: input.controls,
         provider: customProviderId,
         model: customModel,
         credentials: credentials as {

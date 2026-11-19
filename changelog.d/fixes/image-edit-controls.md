@@ -1,0 +1,1 @@
+- Image edits now forward explicit quality and background controls to Codex, custom OpenAI-compatible providers, and OpenRouter.
