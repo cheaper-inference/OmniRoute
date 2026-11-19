@@ -142,7 +142,16 @@ export function createSourceMapLayoutProjector() {
   const transformations = new Map();
   let projectedScriptSamples = 0;
   return {
-    project({ script, cache, originUrl, sourcePath, sourceIdentity, generatedProofs = [] }) {
+    project({
+      script,
+      cache,
+      originUrl,
+      sourcePath,
+      sourceIdentity,
+      generatedProofs = [],
+      shard,
+      rawInput,
+    }) {
       if (
         typeof sourcePath !== "string" ||
         !sourcePath ||
@@ -160,6 +169,7 @@ export function createSourceMapLayoutProjector() {
           identity: structuredClone(sourceIdentity),
           roots: roots(script.functions),
           generatedProofs: structuredClone(generatedProofs),
+          firstObservation: { shard, rawInput, producerProofs: generatedProofs.length },
         });
         return null;
       }
@@ -207,6 +217,9 @@ export function createSourceMapLayoutProjector() {
       // The caller applies this only after all scripts in the raw sample have
       // read their original cache. Multiple script IDs can share the same URL.
       return [...prior.cache.lineLengths];
+    },
+    firstObservation(sourcePath) {
+      return canonical.get(sourcePath)?.firstObservation;
     },
     summary() {
       return {

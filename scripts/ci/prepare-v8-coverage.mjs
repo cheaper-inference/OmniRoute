@@ -155,6 +155,15 @@ function verifyEmbeddedSources(data, origin, target, sources, exclude) {
   }
 }
 
+function parseCoverage(bytes, shard, rawInput) {
+  try {
+    return JSON.parse(bytes.toString("utf8"));
+  } catch (cause) {
+    const detail = JSON.stringify({ shard, rawInput, bytes: bytes.length });
+    throw new Error(`V8_EVIDENCE_INCOMPLETE:invalid-raw-json ${detail}`, { cause });
+  }
+}
+
 function validateCoverage(data) {
   if (!data || !Array.isArray(data.result)) throw new Error("Invalid V8 coverage result");
   for (const script of data.result) {
@@ -279,7 +288,7 @@ export async function packCoverageShard(options) {
       const path = join(input, name);
       await regular(path);
       const bytes = await readFile(path);
-      const data = JSON.parse(bytes.toString("utf8"));
+      const data = parseCoverage(bytes, options.shard, name);
       validateCoverage(data);
       const referenced = new Set();
       visitPaths(data, sourceRoot, sourceRoot, tree, (path) => referenced.add(path));
@@ -462,7 +471,7 @@ export async function prepareCoverageShards(options) {
       const bytes = await decompress(packed, { maxOutputLength: item.bytes });
       if (bytes.length !== item.bytes || hash(bytes) !== item.sha256)
         throw new Error("Raw coverage hash mismatch");
-      const data = JSON.parse(bytes.toString("utf8"));
+      const data = parseCoverage(bytes, `${item.index}/${total}`, item.name);
       validateCoverage(data);
       verifyEmbeddedSources(data, item.origin, sourceRoot, verifiedSources, exclude);
       const maps = new Map();
@@ -522,6 +531,8 @@ export async function prepareCoverageShards(options) {
             sourcePath: path,
             sourceIdentity: verifiedSources.get(path),
             generatedProofs: originals[index].generatedProofs,
+            shard: item.index,
+            rawInput: item.name,
           });
           if (lineLengths) cacheUpdates.set(path, lineLengths);
         } catch (error) {
@@ -531,6 +542,7 @@ export async function prepareCoverageShards(options) {
             shard: item.index,
             rawInput: item.name,
             producerProofs: originals[index].generatedProofs.length,
+            firstObservation: layouts.firstObservation(path),
           });
           throw new Error(`${error.message} ${detail}`, { cause: error });
         }
