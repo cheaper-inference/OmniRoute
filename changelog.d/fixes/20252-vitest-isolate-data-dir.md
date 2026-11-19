@@ -1,1 +1,0 @@
-- **fix(mcp):** `npm run test:vitest` no longer writes MCP audit rows into the developer's `~/.omniroute/storage.sqlite`: both Vitest configs run with a throwaway `DATA_DIR`, and the MCP audit refuses the home database in a test context without `DATA_DIR` (opt back in with `OMNIROUTE_ALLOW_DEFAULT_DATA_DIR=1`) ([#20252](https://github.com/cheaper-inference/OmniRoute/pull/20252))

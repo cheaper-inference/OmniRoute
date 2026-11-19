@@ -184,31 +184,94 @@ Cikakken jerin teburori ~30+ yana cikin `src/lib/db/migrations/`.
 
 ---
 
-## Ƙaurace-ƙaurace
+## Hijira
 
-OmniRoute yana amfani da **ƙaurace-ƙaurace masu sigogi kuma masu maimaita aiki ba tare da illa ba** a cikin `src/lib/db/migrations/`. Kowace ƙaura fayil ɗin SQL guda ɗaya ce mai suna `NNN_description.sql`.
+OmniRoute yana amfani** sigar, ƙaura masu ƙarfi** a `src/lib/db/migrations/`. Kowane ƙaura fayil SQL ɗaya ne. Tsarin suna guda biyu suna tare; sigar da aka rubuta a `_omniroute_migrations` ita ce prefix na lamba.
 
-### Sanya Sunan Ƙaura
+### Hijira Suna
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Tsarin                                             | Misali                               | An yi amfani da shi don                                                                                                                                       |
+| -------------------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (daidai lambobi 3)           | `241_seen_models.sql`                | Tsohon jerin `001`–`241`. Daskararre lokacin da tsarin timestamp ya sauka (`240` da `241` sun haɗe daf da shi): babu sabon fayil ɗin da ke samun lambar jeri. |
+| `YYYYMMDDHHMMSS_description.sql` (lambobi 14, UTC) | `20261113120000_add_usage_index.sql` | Kowane ƙaura da aka ƙirƙira daga 2026-11-13 akan.                                                                                                             |
 
-### Yadda Ake Gudanar da Ƙaurace-ƙaurace
+Me yasa aka canza: tare da lambobi masu jere, layi ɗaya PRs ya zaɓi lamba ɗaya ta gaba kuma duk sai ɗaya dole ne a sake lamba kafin haɗawa. Tambarin lokaci na UTC yana ba kowane PR sigar sa.
 
-A lokacin farawa, `migrationRunner.ts`:
+Dokokin tsarin tambarin lokaci (wanda `npm run check:migration-numbering` ya tilasta , wanda aka raba tare da janareta a cikin `scripts/check/lib/migrationNaming.mjs`):
 
-1. Yana ƙirƙirar teburin `_omniroute_migrations` idan babu shi
-2. Yana bincika ƙaurace-ƙauracen da aka riga aka aiwatar
-3. Yana aiwatar da duk sabbin ƙaurace-ƙaurace bisa tsari, kowannensu a cikin transaction
-4. Yana rubuta kowace ƙaura da aka aiwatar tare da timestamp
+- Tambarin lokaci shine ainihin UTC kwanan wata da lokaci, bai wuce `20261113000000` ba kuma bai wuce mintuna 10 ba nan gaba.
+- Bayanin shine ƙananan haruffan `snake_case` waɗanda ke farawa da harafi (`a-z`, `0-9`, `_` ɗaya tsakanin kalmomi), aƙalla haruffa 80.
+- Fayiloli biyu masu tambarin lokaci iri ɗaya kwafi ne.
+- Ka'idar rashin rata ta shafi tsohuwar jerin: kowace lamba daga `001` zuwa `241` dole ne ta kasance, sai dai sanann gibin `026`, `055` da `121`. Share `241` (ko kowane tsohon fayil) ya kasa gate. `001` da `241` ba za a taɓa ƙara su cikin jerin izinin `KNOWN_GAPS` ba. Fayilolin da aka yiwa alama ba su taɓa haifar da tazara ba.
+- Kowane shigarwa a cikin `src/lib/db/migrations/` dole ne ya zama fayil na yau da kullun tare da ingantaccen sunan `.sql` ƙarami. A directory, symlink, fayil `.SQL` ko `.sql.bak`, boye fayil ko wani suna tare da sarari ya kasa gate gate, saboda mai gudu zai tsallake shi shiru ko ya fadi a boot.
+
+**Aiwatar da oda.** Mai gudu yana tsara ta ƙimar lambobi na prefix, ba ta hanyar rubutu ba: tsoffin fayilolin `001`–`241` na farko, sannan fayilolin lokutan da aka buga a tsarin timestamp, sannan duk kundayen adireshi da aka yi rajista da `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (sifuna kamar `ee-001`). Hijira mai jiran gado shine kowane fayil wanda sigarsa baya cikin `_omniroute_migrations`, don haka ƙaura daga tsohon reshe wanda ke haɗuwa bayan sabon wanda har yanzu yana aiki akan bayanan da ake dasu.
+
+**Tambarin lokaci shine tsarin halitta, ba tsari na hadewa ba.** Idan ƙauranku ya dogara da tebur ko ginshiƙi wanda ƙaura ya ƙirƙira tare da a** sabo** timestamp (misali, daya daga wani PR wanda ya fara hadewa), sabobin bayanan bayanai zai fara gudanar da naku kuma ya kasa. Yayin da PR ɗinku yana buɗewa, sake sabunta sunan fayil tare da `npm run db:new-migration` don samun sabon tambarin lokaci, ko mai da shi mai zaman kansa. `npm run test:migrations:fresh` yana amfani da kowane ƙaura zuwa rumbun adana bayanai mara komai kuma ya kama wannan.
+
+### Ba a taɓa Sharewa ko Sake suna ba
+
+Da zarar fayil ɗin ƙaura yana kan reshen saki ko `main`, ya riga ya gudana akan bayanan homolog da masu haɓakawa, akan shigarwar VPS da kuma cikin daidaitawar Kasuwanci. Daga nan:
+
+- **Kar a taɓa share shi.** Sabbin shigarwa za su rasa tsarin sa yayin da ingantaccen bayanan bayanai ke kiyaye shi.
+- **Kar a sake suna.** Sigar a cikin `_omniroute_migrations` ba za ta ƙara yin daidai da fayil ba, don haka duk bayanan da aka riga aka yi amfani da shi zai sake gudanar da shi. SQL mara ƙarfi sannan ya kwafi bayanai ko dakatar da boot ɗin.
+- **Kuna buƙatar tsari daban?** Ƙirƙiri sabon ƙaura tare da `npm run db:new-migration`.
+
+Sake suna yana da aminci ga fayil ɗin da ba a haɗa shi ba tukuna, wanda shine yanayin alamun ƙofar. Alamar saki ba ta canza kome ba a nan: kowane turawa zuwa reshen `release/v*` yana buga hoton Docker `:next` kuma yana aiki akan homolog, VPS installs da sync na Enterprise, don haka ƙaura ta haɗu ta gudana akan ainihin bayanan bayanai kafin kowane alamar `vX.Y.Z` ta wanzu. Ƙofar ta gaza kowane cire fayil ɗin tushe, mai alama ko a'a.
+
+- **Mayar da ƙaura mai hade.** `git revert` mai goge fayil din ya kasa gate. Ajiye fayil ɗin kuma gyara tsarinsa a cikin sabon ƙaura: `npm run db:new-migration -- <description>`, tare da `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` da sauransu. Abubuwan haɓakawa da sabobin bayanan bayanai sannan su ƙare da tsari iri ɗaya.
+- **Wanda aka sake suna: shigarwar dacewa da abun ciki iri ɗaya.** Idan fayil ɗin da aka haɗa dole ne ya motsa (misali, fayilolin da aka haɗa biyu suna raba tambarin lokaci kuma mai gudu ya tsaya tare da karon sigar), sake suna na baya ba tare da taɓa SQL ba kuma ƙara `{ fromVersion, fromName, toVersion, toName }` zuwa `RENAMED_MIGRATION_COMPATIBILITY` a cikin `src/lib/db/migrationRunner/constants.ts`. Ma'ajin bayanai da suka yi amfani da tsohuwar sigar suna samun motsin layin `_omniroute_migrations` nasu maimakon sake gudanar da fayil ɗin. Ƙofar tana yin kashedi game da irin wannan sake suna kuma koyaushe tana gudanar da rajistan commutation akansa, ko wane sabon tambarin lokaci: sabobin shigarwa yana amfani da fayil ɗin a sabon matsayinsa, ingantaccen bayanan bayanai ba sa, don haka ɗauki sabon tambarin lokaci kusa da tsohon. Ƙofar ta kasa sake suna idan abun ciki ya canza (canjin tsari har yanzu yana cikin sabon ƙaura), ko kuma idan fayil ɗin manufa na shigarwa baya kan faifai.
+- **Kar a taɓa sake suna a cikin tambarin lokaci guda.** Sake suna wanda ke riƙe tambarin lokaci kuma yana canza bayanin kawai ya gaza gate ɗin, tare da ko ba tare da shigarwa ba. Tare da shigarwa wanda `toVersion` yayi daidai da `fromVersion`, mai gudu yana share tsohuwar jeren `_omniroute_migrations` kuma ya sake amfani da fayil ɗin akan kowane rumbun adana bayanai da ya riga ya sarrafa shi. Ba tare da shigarwa ba, mai gudu yana bin sigar kawai: yana tsallake fayil ɗin akan waɗancan ma'ajin bayanai (sabon abun ciki baya gudana a wurin) kuma yana yin rajistar kuskuren sake lamba akan kowane taya. Yi amfani da wani tambarin lokaci tare da shigarwar dacewa, ko kiyaye sunan.
+- **Ƙofar ta duba cewa fayil ɗin da aka sake masa suna baya gudu.** Ga kowane sake suna da aka rufe, ƙofar ta wuce sabon sunan fayil zuwa rajistan canji tare da `--must-not-apply`. Chek ɗin yana ƙaddamar da bayanan da aka haɓaka tare da mai gudu na gaske, kuma idan mai gudu ya sake yin amfani da wannan fayil ɗin (misali, saboda shigarwar yana da sigar da ba daidai ba ko suna, ko kuma saboda fassarar rubutun gate ɗin ya karanta `constants.ts` daban da TypeScript), ƙofar ta kasa tare da `migration renomeada rodaria de novo` kuma tana tambayarka ka duba shigarwar tsoho da sababbin sigogin da sunayen.
+
+### Abin da Ƙofar ke dubawa a kan Tushen
+
+A kan buƙatun ja da kuma haɗa jerin gwano, `npm run check:migration-numbering` tana kwatanta `src/lib/db/migrations/` akan faifai tare da directory iri ɗaya akan reshen tushe. Tushen shine, a cikin wannan tsari: `--base-latest-tag`, `--base <ref>`, madaidaicin `MIGRATION_BASE_REF`, ko, lokacin da `GITHUB_EVENT_NAME` shine `pull_request`, `pull_request_target` ko `merge_group`, iyayen farko na haɗakarwa, `merge_group.base_sha` na abin da aka biya, ko `git merge-base HEAD origin/$GITHUB_BASE_REF`. A cikin buƙatun ja ko haɗa jerin gwano ba tare da wani tushe mai iya warwarewa ƙofar ta gaza. A wajen CI ba tare da `--base` ba yana buga `comparação com a base: pulada (sem --base)` kuma ya tsallake waɗannan ƙa'idodi.
+
+`--base-latest-tag` ya kwatanta da sabuwar alamar saki (`vX.Y.Z` a cikin tsari na semver; suffixed tags kamar daren dare ba sa ƙidaya) wanda ke cikin tarihin `HEAD`, tare da ƙa'idodi iri ɗaya da `--base`. Saki-Green (`scripts/quality/validate-release-green.mjs`) yana gudanar da ƙofar ta wannan hanya, saboda turawa da shirye-shiryen gudu ba su da tushen buƙatun ja kuma haɗuwa na iya ƙasa ba tare da sabon gudu CI ba. Ba tare da alamar sakin ba a cikin tarihin ƙofar ta gaza; gudu `git fetch --tags` (a cikin CI, `actions/checkout` tare da `fetch-depth: 0` ya kawo tags).
+
+| Canja akan buƙatar ja                                                                                            | Sakamako                                                                                                                                                                                                                                                                                                                                                                |
+| ---------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fayil ɗin da ke kan tushe an sake masa suna, tare da shigarwar `RENAMED_MIGRATION_COMPATIBILITY`                 | **Gargadi** idan abun ciki iri ɗaya ne, kuma duban motsi yana gudanar da kowane sabon tambarin lokaci; ya gaza idan sabon matsayi ya canza tsarin ƙarshe (gyara sake suna, ko zaɓi wani sabon tambarin lokaci inda yake tafiya) ko kuma idan mai gudu zai sake amfani da fayil ɗin da aka sake masa suna akan ingantaccen bayanai.** Ya kasa** idan abun ciki ya canza. |
+| Fayil ɗin da ke kan tushe ana sake masa suna yana kiyaye tambarin sa (kawai bayanin yana canzawa)                | **Ya kasa** , tare da ko ba tare da shigarwa ba: mai gudu zai sake amfani da shi (tare da shigarwa) ko tsallake shi ta sigar (ba tare da ɗaya ba). Yi amfani da wani tambarin lokaci tare da shigarwar dacewa, ko kiyaye sunan.                                                                                                                                         |
+| Ana share fayil ɗin da ke kan tushe, ko an sake masa suna ba tare da shigarwa ba                                 | **Ya kasa** , ko fayil ɗin yana cikin alamar saki ko a'a. Don soke shi, mayar da fayil ɗin tare da `git checkout <base> -- src/lib/db/migrations/<file>`; don mayar da tsarinsa, ƙara sabon ƙaura tare da `DROP ... IF EXISTS`.                                                                                                                                         |
+| Fayil ɗin da ke kan tushe yana da abun ciki daban-daban                                                          | **Gargadi** (a `::warning` annotation a cikin GitHub Actions), kuma duban motsi yana gudana. Yana kasawa idan gyaran ya canza tsari na ƙarshe, saboda ingantaccen bayanan bayanai ba sa sake amfani da fayil ɗin da aka gyara: sanya canjin a cikin sabon ƙaura. Gyara mara lahani ( sharhi, `IF NOT EXISTS`) yayi gargaɗi kawai.                                       |
+| Ana ƙara fayil ɗin rikodi tare da tambarin lokaci wanda bai fi sabon tushe ba                                    | Yana gudanar da binciken motsi, wanda aka kwatanta a ƙasa.                                                                                                                                                                                                                                                                                                              |
+| Ana ƙara tsohuwar fayil ɗin `NNN_` mai lamba tare da lamba a ƙasan sabuwar fayil ɗin tsohuwar tsarin tushe       | **Ya kasa** , ko da an gyara `KNOWN_GAPS` a cikin buƙatun ja iri ɗaya: tsohuwar jerin an daskare, ƙirƙirar ƙaura tare da `npm run db:new-migration`. Fayilolin tsofaffin fayiloli sama da sabuwar tushe (buƙatun cire `release/v*` zuwa `main` ) ana karɓa.                                                                                                             |
+| Fayil ɗin da ba a yi oda ba, gyara ko sake masa suna ya ƙunshi `INSERT`, `UPDATE`, `DELETE` ko `REPLACE` kalamai | **Gargadi** : cak ɗin commutation baya kwatanta bayanai, don haka duba ko tsarin da aka inganta da sabbin ma'ajin bayanai ya canza sakamakon.                                                                                                                                                                                                                           |
+
+Gudun guda ɗaya na rajistan tafiye-tafiye ya ƙunshi bayanan da ba a yi oda ba, waɗanda aka gyara da fayilolin da aka sake suna tare.
+
+Binciken commutation (`scripts/check/migration-commutation.ts`) yana gina rumbun adana bayanai na wucin gadi biyu tare da ainihin hanyar shigarwa: an** inganta** daya (boot tare da ƙaura na tushe, sannan sake yin boot akan wannan fayil ɗin tare da ƙaurawar buƙatar ja) da** sabo** daya (boot ɗaya tare da ƙaurawar buƙatar ja). Yana kwatanta makircin da aka samu: Tables da ginshiƙai (ba kula da odar shafi), UNIQUE / PRIMARY KEY da FOREIGN KEY ƙuntatawa, daidaitaccen rubutun `CREATE TABLE` na kowane tebur (wanda ke rufe iyakokin CHECK, tarawa, ginshiƙai da aka ƙirƙira da zaɓuɓɓukan tebur), fihirisa, jawowa da ra'ayoyi. Ba a kwatanta bayanan jere ba. Idan sun yi daidai, ƙofar ta buga cewa fayil ɗin ba shi da tsari amma yana tafiya, ya wuce. Idan sun bambanta, ƙofar ta kasa tare da bambanci da alamar shari'ar: don fayil ɗin da ba a ba da izini ba, sake sabunta sunansa tare da `npm run db:new-migration`, wanda yake da aminci saboda fayil ɗin ba a haɗa shi ba tukuna; don fayil ɗin tushe da aka gyara, mayar da abun ciki na tushe kuma sanya canji a cikin sabon ƙaura; don fayil ɗin da aka sake suna, soke sake suna ko ɗauki wani sabon tambarin lokaci inda yake tafiya, ba tare da wani suna ba. Idan cak ɗin kanta ba zai iya gudana ba, ƙofar ta kasa a CI kuma tana yin gargaɗi kawai a cikin gida. Don fayil ɗin tushe da aka gyara, an gina ma'aunin bayanan da aka haɓaka tare da abun ciki na tushe na wannan fayil ɗin, kuma taya na biyu ya tsallake shi saboda an riga an rubuta sigar sa. Don fayil ɗin da aka sake suna, an gina bayanan da aka inganta tare da fayil ɗin a ƙarƙashin tsohon sunansa, kuma taya na biyu yana motsa layin `_omniroute_migrations` ta hanyar shigarwar dacewa maimakon sake kunna shi; Ƙofar ta wuce sabon suna tare da `--must-not-apply`, don haka cak ɗin ya kasa idan boot na biyu ya yi amfani da shi. Idan gudun hijirar buƙatun ya kasa aiki akan hanyar da aka ɗaukaka, wato, bayan kowace ƙaura ta tushe (ko ita ma ta gaza akan sabon shigar da ita), ƙofar ta yi rahoton `migration do PR não aplica` kuma tana buƙatar ka gyara SQL daidai da tsarin tushen yanzu; idan fayil ɗin ya dogara da wani ƙaura na buƙatar ja tare da tambarin lokaci na gaba, sabunta sunansa tare da `npm run db:new-migration`.
+
+Don gudanar da kwatance iri ɗaya a cikin gida, wuce tushe a sarari, misali `npm run check:migration-numbering -- --base origin/<base-branch>`, ko `npm run check:migration-numbering -- --base-latest-tag` don kwatanta da sabon saki.
+
+### Mayar da Buɗe PR's `NNN` Hijira
+
+Buƙatun ja da aka buɗe kafin sauyawa na iya har yanzu ɗaukar fayil na jeri kamar `242_add_widgets.sql`. Tsoffin lambobi sama da `241` an ƙi, don haka juya su kafin haɗawa:
+
+1. **Sake suna fayil ɗin tare da janareta, kiyaye bayanin.** Gudu `npm run db:new-migration -- <same description>` don samun sabon suna, matsar da SQL a ciki, kuma share tsohon fayil ɗin `NNN_`. Dole ne bayanin ya kasance iri ɗaya: shigarwar dacewa a ƙasa yayi daidai da shi.
+2. **Ƙara shigarwar dacewa idan bayanan bayanai na dindindin ya gudana tsohuwar lamba.** Idan kowane bayanan da aka adana (homolog, a VPS, shigarwar mai ba da gudummawa kansa) ya gudanar da ginin PR tare da fayil ɗin `NNN_`, ƙara `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` zuwa `RENAMED_MIGRATION_COMPATIBILITY` a cikin `src/lib/db/migrationRunner/constants.ts`. Wannan shine** ake buƙata don `237` zuwa `241`** : waɗannan ramummuka yanzu suna riƙe da canonical `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` da `241_seen_models.sql`, kuma ba tare da shigarwa ba irin wannan rumbun adana bayanai ya tsallake ƙaura na canonical har abada kuma yana sake gudanar da wanda ya tuba. Hakanan yana aiki don ramin da ke zama babu komai, kamar `242`, lokacin da wurin zama tambarin lokaci. Lokacin da ake shakka, ƙara shigarwar. Inda kuka ƙara shi a cikin tsararru ba kome ba: lokacin da ramin maƙasudin shigarwa har yanzu yana riƙe da jere cewa wata shigarwa ta motsa (misali `237` yana riƙe da layin PR yayin da tsohuwar jeren `usage_history_calculated_cost` ke jira don matsawa cikin `237`), mai gudu yana barin shigarwar ta jira har sai ramin ya kasance kyauta. Rikici na gaske kawai, kamar ramin da aka riƙe ta jere babu motsin shigarwa, ko shigarwar guda biyu waɗanda ke musanya ramummuka, yana dakatar da taya tare da `Cannot reconcile ...`.
+3. **Rike SQL idem mai ƙarfi** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), saboda ƙauran da aka canza zai iya haɗuwa da bayanan bayanai inda tsarinsa ya riga ya kasance.
+4. **Matsar da lokuta na musamman masu maɓalli.** Idan PR ta ƙara ƙara don tsohuwar lambarsa a `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) ko a cikin `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), canza maɓalli zuwa sabon tambarin lokaci.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` misalin aiki ne na gwaji don ƙaura mai suna.
+
+### Komawa zuwa Reshe Kafin Sauyawa
+
+Kada a taɓa ɗauka ko mayar da fayil ɗin `YYYYMMDDHHMMSS_` baya zuwa reshe wanda ya riga ya canza (misali tsohuwar reshen `release/v*` ). Mai gudu a wurin yana tsara sunayen fayil azaman rubutu, don haka fayil ɗin da aka rubuta lokaci zai gudana tsakanin `201_` da `202_` akan sabon ma'ajin bayanai, kuma tsohuwar ƙofar da ke wurin ba ta fahimtar prefixes mai lamba 14. A kan irin wannan reshe, rubuta canjin azaman fayil ɗin `NNN_` na gaba na reshe, idempotent, don haka babu-op lokacin da sigar zamani ta zo daga baya.
+
+### Yadda Hijira ke Gudu
+
+A farawa, `migrationRunner.ts`:
+
+1. Ƙirƙirar tebur `_omniroute_migrations` idan babu
+2. Tambayoyi don ƙaura da aka riga aka yi
+3. Ana aiwatar da kowane sabon ƙaura cikin tsari, kowanne a cikin ma'amala
+4. Yi rikodin kowane ƙaura da aka yi amfani da shi tare da tambarin lokaci
 
 ```ts
-// src/lib/db/migrationRunner.ts (an sauƙaƙa)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -223,9 +286,9 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 }
 ```
 
-### Maimaita Aiki Ba Tare da Illa Ba
+### Rashin ƙarfi
 
-Dole ne ƙaurace-ƙaurace su kasance **masu maimaita aiki ba tare da illa ba** — gudanar da su sau biyu bai kamata ya haifar da wani aiki ba:
+Dole ne hijira ta kasance** mai iko** — gudanar da su sau biyu ya zama babu-op:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Yi amfani da sassan `IF NOT EXISTS`, `IF EXISTS`, da `OR IGNORE` / `OR REPLACE` sosai.
+Yi amfani da `IF NOT EXISTS`, `IF EXISTS`, da `OR IGNORE` / `OR REPLACE` jumlar kyauta.
 
-### Ƙara Sabuwar Ƙaura
+### Ƙara Sabuwar Hijira
 
-1. **Gano lamba ta gaba**: `ls src/lib/db/migrations/ | tail -1`
-2. **Ƙirƙiri fayil ɗin**: `NNN_my_change.sql`
-3. **Yi amfani da DDL mai aminci**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Cika tsofaffin bayanai a hankali**: yi amfani da `UPDATE ... WHERE ...` don sarrafa layukan da suke akwai
-5. **Gwada a kan kwafi**: kada a taɓa gudanar da ƙaurace-ƙauracen da ba a gwada ba a production
+1. **Ƙirƙiri fayil ɗin tare da janareta** : `npm run db:new-migration -- <description>` (misali `npm run db:new-migration -- add combo priority`). Yana rubuta `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` tare da lokacin UTC na yanzu da maɓallin sharhi, yana matsar gaba ɗaya daƙiƙa ɗaya idan an ɗauki wannan tambarin lokaci, kuma baya sake rubuta fayil ɗin. Kar a ɗauki lamba da hannu.
+2. **Yi amfani da aminci DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Cika bayanai a hankali** : yi amfani da `UPDATE ... WHERE ...` don sarrafa layuka da ke akwai
+4. **Duba oda da suna** : `npm run test:migrations:fresh` (duk ƙaura akan rumbun adana bayanai) da `npm run check:migration-numbering`
+5. **Gwaji akan kwafi** : kar a taɓa gudanar da ƙaura marasa gwaji akan samarwa
 
 Misali:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Canje-canjen da ba su dace da sigogin baya ba** (misali, goge columns) suna da sarƙaƙiya. OmniRoute BA YA goyon bayan downgrade — da zarar an aiwatar da ƙaura, canjin schema ɗin zai zama na dindindin. Yi shiri bisa haka.
+> **Canje-canje na baya-mara jituwa** (misali, faduwa ginshiƙai) suna da wayo. OmniRoute yana goyan bayan NOT rage darajar — da zarar an yi ƙaura, canjin tsari na dindindin. Tsara yadda ya kamata.
 
 ---
 
@@ -403,52 +466,53 @@ Wannan yana amfani da API na ajiyar kwafi ta kan layi na SQLite — babu matsala
 
 ---
 
-## Daidaita Aiki
+## Tuning Performance
 
-### Yanayin WAL
+### WAL Mode
 
-Ana kunna WAL ta tsohuwa. Don ayyukan da ke yawan rubutu, yi la’akari da:
+WAL yana kunna ta tsohuwa. Don manyan ayyuka na rubutu, la'akari:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Yi checkpoint bayan kowane shafi 1000
-PRAGMA journal_size_limit = 67108864;  -- Iyakar WAL ta 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute baya saita `journal_size_limit`. Wurin bincike yana motsa firam ɗin WAL zuwa babban fayil, amma fayil ɗin WAL yana riƙe girman girman sa. Mai gadin `OMNIROUTE_WAL_GUARD_MAX_MB` yayi kashedi da gudu `wal_checkpoint(RESTART)`; ba hular girman faifai ba ce.
 
 ### Fihirisa
 
-Muhimman fihirisa don ingantaccen aiki (migrations ne ke ƙirƙirar su ta atomatik):
+Maɓallin maɓalli don yin aiki ( ƙaura ta ƙirƙira ta atomatik):
 
-- `idx_models_provider` — nemo samfura bisa provider
-- `idx_combo_targets_combo_id` — faɗaɗa combo target
-- `idx_usage_history_api_key_timestamp` — nazarin amfani
-- `idx_quota_snapshots_api_key_window` — bin diddigin quota
-- `idx_call_logs_timestamp` — tambayoyin rajistar kira
+- `idx_models_provider` — samfurin duba ta mai bayarwa
+- `idx_combo_targets_combo_id` — combo manufa fadada
+- `idx_usage_history_api_key_timestamp` — amfani analytics
+- `idx_quota_snapshots_api_key_window` — kwatance tracking
+- `idx_call_logs_timestamp` — kira log queries
 
-Don ƙara sabon fihirisa, ƙirƙiri migration:
+Don ƙara sabon fihirisar, ƙirƙiri ƙaura:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O Mai Amfani da Taswirar Ƙwaƙwalwa
+### Ƙwaƙwalwar taswira I/O
 
-Ga manyan ma’ajiyar bayanai sosai (>10GB), ana iya daidaita memory mapping ta hanyar SQLite pragma:
+Don manyan bayanai (> 10GB), ana iya daidaita taswirar ƙwaƙwalwar ajiya ta hanyar SQLite pragma:
 
 ```sql
--- Saita ta SQLite pragma (daidaita a core.ts ko runtime)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Matsewa
+### Ƙarfafawa
 
-OmniRoute instances da ke aiki na dogon lokaci suna amfana daga gudanar da `VACUUM` lokaci-lokaci:
+Misalin OmniRoute masu tsayi suna amfana daga `VACUUM` lokaci-lokaci:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Gudanar da shi kowane wata a lokutan ƙarancin zirga-zirga. (Yanayin WAL yana rage buƙatar hakan, amma ba ya kawar da ita gaba ɗaya.)
+Gudu kowane wata a lokacin taga masu ƙarancin zirga-zirga. (Yanayin WAL yana rage buƙata, amma baya kawar da shi.)
 
 ---
 

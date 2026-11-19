@@ -33,11 +33,15 @@ export function splitHalves(prs) {
 
 /**
  * Start bisecting a red batch of size > 1.
+ * `hang`: the batch went red with a job timeout on every attempt (a suspected hanging test). The
+ * tick then does not retry a segment whose job times out again: every retry would cost a full
+ * timeout for a failure that already repeated. advanceBisection keeps the flag.
  * @param {PrRef[]} batch
  * @param {string} rootBatchId
+ * @param {{hang?: boolean}} [options]
  * @returns {BisectState}   segments = splitHalves(batch), steps = 0
  */
-export function startBisection(batch, rootBatchId) {
+export function startBisection(batch, rootBatchId, { hang = false } = {}) {
   if (typeof rootBatchId !== "string" || !rootBatchId) {
     throw new Error("startBisection: rootBatchId is required");
   }
@@ -47,6 +51,7 @@ export function startBisection(batch, rootBatchId) {
     culprits: [],
     landed: [],
     steps: 0,
+    hang: Boolean(hang),
   };
 }
 

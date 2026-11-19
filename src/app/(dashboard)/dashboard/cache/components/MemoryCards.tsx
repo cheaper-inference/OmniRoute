@@ -26,7 +26,7 @@ function StatCard({
   label,
   value,
   sub,
-  valueClass = "text-text",
+  valueClass = "text-text-main",
 }: {
   icon: string;
   label: string;
