@@ -14,6 +14,7 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const auth = await import("../../src/sse/services/auth.ts");
+const quotaCache = await import("../../src/domain/quotaCache.ts");
 const { parseMaxActiveAccounts } = await import("../../src/sse/services/maxActiveAccounts.ts");
 
 const FLAG = "PROVIDER_MAX_ACTIVE_ACCOUNTS";
@@ -109,4 +110,38 @@ test("another provider's limit does not apply", async () => {
   const seen = new Set<string>();
   for (let i = 0; i < 9; i++) seen.add(String(await pick()));
   assert.deepEqual([...seen].sort(), [...ids].sort());
+});
+
+test("Codex: a credit-only account is held back before the cap picks the active one", async () => {
+  process.env[FLAG] = "codex=1";
+  const resetAt = new Date(Date.now() + 120_000).toISOString();
+  const seedCodex = (name: string, priority: number, providerSpecificData: object) =>
+    providersDb.createProviderConnection({
+      provider: "codex",
+      authType: "oauth",
+      name,
+      email: `${name}@example.invalid`,
+      accessToken: `at-${name}`,
+      isActive: true,
+      testStatus: "active",
+      priority,
+      providerSpecificData,
+    });
+  const paid = await seedCodex("paid-credits", 1, {
+    allowPaidCredits: true,
+    quotaPreflightEnabled: false,
+  });
+  const subscription = await seedCodex("subscription", 2, {});
+  // The paid account's subscription quota is spent: it could only run on paid credits.
+  quotaCache.setQuotaCache(paid.id, "codex", {
+    session: { used: 100, total: 100, remainingPercentage: 0, resetAt },
+  });
+  try {
+    const r = (await auth.getProviderCredentials("codex", null, null, "gpt-5.5")) as {
+      connectionId?: string;
+    } | null;
+    assert.equal(r?.connectionId, subscription.id, "subscription quota is used before credits");
+  } finally {
+    quotaCache.__clearForTests();
+  }
 });

@@ -11,11 +11,16 @@ export function isTierSpilloverEnabled(): boolean {
   return /^(1|true|yes|on)$/i.test(process.env.OMNIROUTE_TIER_SPILLOVER?.trim() ?? "");
 }
 
-/** Return the connection to use instead of the top tier, or null to keep fill-first. */
+/**
+ * Return the connection to use instead of the top tier, or null to keep fill-first. The spill
+ * goes to the next priority tier only. With `penaltyOf` (the opt-in failure-window penalty),
+ * an account with fewer recent failures wins before headroom is compared.
+ */
 export function pickTierSpillover<T extends { priority?: number | null }>(
   connections: T[],
   headroomOf: (connection: T) => number | null,
-  thresholdPercent = DEFAULT_THRESHOLD_PERCENT
+  thresholdPercent = DEFAULT_THRESHOLD_PERCENT,
+  penaltyOf?: (connection: T) => number
 ): T | null {
   const priorityOf = (c: T) => c.priority || 999;
   const topPriority = Math.min(...connections.map(priorityOf));
@@ -27,13 +32,18 @@ export function pickTierSpillover<T extends { priority?: number | null }>(
     return headroom !== null && headroom <= thresholdPercent;
   });
   if (!saturated) return null;
+  const nextPriority = Math.min(...rest.map(priorityOf));
   let best: T | null = null;
   let bestHeadroom = -1;
+  let bestPenalty = Number.POSITIVE_INFINITY;
   for (const c of rest) {
+    if (priorityOf(c) !== nextPriority) continue;
     const headroom = headroomOf(c) ?? 100;
-    if (headroom > bestHeadroom) {
+    const penalty = penaltyOf ? penaltyOf(c) : 0;
+    if (penalty < bestPenalty || (penalty === bestPenalty && headroom > bestHeadroom)) {
       best = c;
       bestHeadroom = headroom;
+      bestPenalty = penalty;
     }
   }
   return best;

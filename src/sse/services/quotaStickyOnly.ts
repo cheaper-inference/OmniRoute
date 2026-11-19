@@ -2,6 +2,7 @@
 // An account with a cached quota window at or above that used-% keeps serving sessions
 // already pinned to it, so they finish on a warm prompt cache, while new sessions move to
 // other accounts. Needs session affinity on. If every candidate is that full, nothing is held back.
+import { getCodexQuotaWindowFilterForModel } from "@omniroute/open-sse/config/codexQuotaScopes.ts";
 import { getQuotaCache, getQuotaWindowStatus } from "@/domain/quotaCache";
 import { getSessionAccountAffinity } from "@/lib/db/sessionAccountAffinity";
 import { resolveSessionAffinityConnection } from "@/lib/db/sessionAffinity/accountIdentity";
@@ -12,10 +13,16 @@ function stickyOnlyUsedPercent(): number {
   return Number.isFinite(n) && n >= 1 && n <= 99 ? n : 0;
 }
 
-function isNearLimit(connectionId: string, usedPercent: number): boolean {
+function isNearLimit(
+  connectionId: string,
+  usedPercent: number,
+  windowFilter?: (windowName: string) => boolean
+): boolean {
   const windows = Object.keys(getQuotaCache(connectionId)?.quotas ?? {});
   return windows.some(
-    (name) => getQuotaWindowStatus(connectionId, name, usedPercent)?.reachedThreshold
+    (name) =>
+      (!windowFilter || windowFilter(name)) &&
+      getQuotaWindowStatus(connectionId, name, usedPercent)?.reachedThreshold
   );
 }
 
@@ -24,7 +31,8 @@ export function applyStickyOnly<T extends { id: string }>(
   provider: string,
   sessionKey: string | null | undefined,
   ttlMs: number,
-  affinityRecord?: SessionAccountAffinityRecord | null
+  affinityRecord?: SessionAccountAffinityRecord | null,
+  requestedModel?: string | null
 ): T[] {
   const usedPercent = stickyOnlyUsedPercent();
   // Without session affinity no running session can be recognised, so there is nothing to keep.
@@ -36,6 +44,11 @@ export function applyStickyOnly<T extends { id: string }>(
         ? getSessionAccountAffinity(sessionKey, provider, ttlMs)
         : null;
   const pinnedId = resolveSessionAffinityConnection(record, candidates, provider)?.id;
-  const open = candidates.filter((c) => c.id === pinnedId || !isNearLimit(c.id, usedPercent));
+  // Codex keeps Spark and text quota apart: only the windows of the requested model count.
+  const windowFilter =
+    provider === "codex" ? getCodexQuotaWindowFilterForModel(requestedModel) : undefined;
+  const open = candidates.filter(
+    (c) => c.id === pinnedId || !isNearLimit(c.id, usedPercent, windowFilter)
+  );
   return open.length > 0 ? open : candidates;
 }

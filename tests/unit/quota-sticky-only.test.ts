@@ -15,6 +15,8 @@ const settingsDb = await import("../../src/lib/db/settings.ts");
 const affinityDb = await import("../../src/lib/db/sessionAccountAffinity.ts");
 const { setQuotaCache } = await import("../../src/domain/quotaCache.ts");
 const auth = await import("../../src/sse/services/auth.ts");
+const { applyStickyOnly } = await import("../../src/sse/services/quotaStickyOnly.ts");
+const { CODEX_SPARK_QUOTA_SESSION } = await import("../../open-sse/config/codexQuotaScopes.ts");
 
 const FLAG = "OMNIROUTE_QUOTA_STICKY_ONLY_USED_PERCENT";
 const TTL = 60_000;
@@ -113,4 +115,28 @@ test("does nothing when session affinity is off", async () => {
   await settingsDb.updateSettings({ sessionAffinityTtlMs: 0 });
   const [a] = await seed([5, 80]);
   assert.equal(await pick("s-new"), a);
+});
+
+test("Codex: only the quota windows of the requested model count", () => {
+  const resetAt = new Date(Date.now() + 600_000).toISOString();
+  const window = (left: number) => ({
+    used: 100 - left,
+    total: 100,
+    remainingPercentage: left,
+    resetAt,
+  });
+  // a: Spark quota nearly gone, text quota healthy. b: both healthy.
+  setQuotaCache("codex-a", "codex", {
+    session: window(80),
+    [CODEX_SPARK_QUOTA_SESSION]: window(5),
+  });
+  setQuotaCache("codex-b", "codex", {
+    session: window(80),
+    [CODEX_SPARK_QUOTA_SESSION]: window(80),
+  });
+  const candidates = [{ id: "codex-a" }, { id: "codex-b" }];
+  const ids = (model: string) =>
+    applyStickyOnly(candidates, "codex", null, TTL, null, model).map((c) => c.id);
+  assert.deepEqual(ids("gpt-5.5"), ["codex-a", "codex-b"], "text sessions ignore Spark quota");
+  assert.deepEqual(ids("gpt-5.3-codex-spark"), ["codex-b"], "Spark sessions still skip a");
 });

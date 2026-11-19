@@ -100,6 +100,16 @@ test("markAccountUnavailable counts a 500 but not a 429, 401 or 503", async () =
   assert.equal(fw.getFailureWindowSteps(conn.id, MODEL), 1);
 });
 
+test("markAccountUnavailable does not count a 500 classified as an internal defect", async () => {
+  process.env[FLAG] = "true";
+  const conn = await seed(1);
+  // An executor contract violation surfaces as a plain 500 but is OmniRoute's own bug.
+  await auth.markAccountUnavailable(conn.id, 500, "x", "openai", MODEL, null, {
+    structuredError: { code: "executor_contract_violation" },
+  });
+  assert.equal(fw.getFailureWindowSteps(conn.id, MODEL), 0);
+});
+
 test("flag unset: nothing is counted and fill-first keeps its order (unchanged default)", async () => {
   const a = await seed(1);
   await seed(2);

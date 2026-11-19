@@ -66,6 +66,7 @@ import {
 import { buildConnectionConcurrencyFields } from "./connectionConcurrencyFields.ts"; // #13700
 import { getConnectionErrorPenalty, getConnectionRecencyPenalty } from "./p2cScoreTerms.ts";
 import {
+  getFailureWindowSteps,
   isFailureWindowPenaltyEnabled,
   recordWindowedFailure,
   sortByFailureWindow,
@@ -1893,19 +1894,22 @@ export async function getProviderCredentials(
       };
     }
 
-    const subscriptionFirst = holdBackCodexCreditOnlyAccounts(
-      provider,
-      applyMaxActiveAccounts(
+    // Credit-only Codex accounts are held back before the active-account cap, so the cap never
+    // keeps a paid-credit account while an account with subscription quota is a reserve.
+    const subscriptionFirst = applyMaxActiveAccounts(
+      holdBackCodexCreditOnlyAccounts(
+        provider,
         applyStickyOnly(
           withQuota,
           provider,
           options.sessionKey,
           sessionAffinityTtlMs,
-          affinityRecord
+          affinityRecord,
+          requestedModel
         ),
-        provider
+        requestedModel
       ),
-      requestedModel
+      provider
     );
     const policyValidLeaseCandidates = options._leaseCandidateIds
       ? subscriptionFirst.filter((candidate) => options._leaseCandidateIds!.includes(candidate.id))
@@ -1962,6 +1966,8 @@ export async function getProviderCredentials(
       : undefined;
     let selectedByApiKeyPreference = false;
     let preferredFallbackAvailable = false;
+    // Set when the opt-in tier spillover moved fill-first off a saturated top tier.
+    let spilledToPriority: number | null = null;
     if (!connection && options.preferredConnectionIds?.length) {
       const preferred = pickPreferredConnection(
         allOrderedConnections,
@@ -2190,10 +2196,18 @@ export async function getProviderCredentials(
       // Default: fill-first (already sorted by priority in getProviderConnections)
       connection = orderedConnections[0];
       if (isTierSpilloverEnabled()) {
-        connection =
-          pickTierSpillover(orderedConnections, (c) =>
-            getConnectionQuotaHeadroomPercent(provider, c, requestedModel)
-          ) ?? connection;
+        const spill = pickTierSpillover(
+          orderedConnections,
+          (c) => getConnectionQuotaHeadroomPercent(provider, c, requestedModel),
+          undefined,
+          isFailureWindowPenaltyEnabled()
+            ? (c) => getFailureWindowSteps(c.id, requestedModel)
+            : undefined
+        );
+        if (spill) {
+          connection = spill;
+          spilledToPriority = spill.priority || 999;
+        }
       }
     }
 
@@ -2207,10 +2221,14 @@ export async function getProviderCredentials(
       const isPriorityStrategy =
         strategy === "fill-first" || strategy === "priority" || strategy === "cost-optimized";
       const maxAllowedPriority = isPriorityStrategy ? selectedPriority : selectedPriority + 1;
+      // A tier spillover left the saturated tier on purpose: a peer must not pull it back.
+      const minAllowedPriority = spilledToPriority ?? Number.NEGATIVE_INFINITY;
       const moreAvailablePeer = [...orderedConnections]
         .filter(
           (candidate) =>
-            candidate.authType === "oauth" && (candidate.priority || 999) <= maxAllowedPriority
+            candidate.authType === "oauth" &&
+            (candidate.priority || 999) <= maxAllowedPriority &&
+            (candidate.priority || 999) >= minAllowedPriority
         )
         .sort(
           (a, b) =>
@@ -2931,8 +2949,14 @@ export async function markAccountUnavailable(
     }
 
     // Opt-in windowed failure penalty: count attributable server failures only. Quota, rate
-    // limit, credential and capacity (503/529) outcomes have their own cooldown paths.
-    if (status >= 500 && status !== 503 && status !== 529) {
+    // limit, credential and capacity (503/529) outcomes have their own cooldown paths, and a
+    // failure classified as ours or as request-scoped (shouldFallback: false) is not the account's.
+    if (
+      status >= 500 &&
+      status !== 503 &&
+      status !== 529 &&
+      fallbackResult.shouldFallback !== false
+    ) {
       recordWindowedFailure(connectionId, model);
     }
 

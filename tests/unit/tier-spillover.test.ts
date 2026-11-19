@@ -12,6 +12,7 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const auth = await import("../../src/sse/services/auth.ts");
 const quotaCache = await import("../../src/domain/quotaCache.ts");
+const occupancy = await import("../../open-sse/services/oauthSessionOccupancy.ts");
 const { pickTierSpillover } = await import("../../src/sse/services/tierSpillover.ts");
 
 const FLAG = "OMNIROUTE_TIER_SPILLOVER";
@@ -37,6 +38,7 @@ async function seed(priority: number, remainingPercentage: number) {
 test.beforeEach(() => {
   delete process.env[FLAG];
   quotaCache.__clearForTests();
+  occupancy._clearOAuthSessionOccupancyForTest();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });
@@ -63,6 +65,36 @@ test("pickTierSpillover: stays in the top tier until every member is near satura
   assert.equal(pickTierSpillover([top("a"), top("b")], headroom({ a: 1, b: 2 }), 20), null);
 });
 
+test("pickTierSpillover: spills to the next tier only, never past it", () => {
+  const list = [
+    { id: "p1", priority: 1 },
+    { id: "p2", priority: 2 },
+    { id: "p3", priority: 3 },
+  ];
+  const headroom = { p1: 10, p2: 50, p3: 90 } as Record<string, number>;
+  assert.equal(pickTierSpillover(list, (c) => headroom[c.id], 20)?.id, "p2");
+});
+
+test("pickTierSpillover: with a failure penalty, fewer recent failures win before headroom", () => {
+  const list = [
+    { id: "top", priority: 1 },
+    { id: "failing", priority: 2 },
+    { id: "healthy", priority: 2 },
+  ];
+  const headroom = { top: 10, failing: 90, healthy: 50 } as Record<string, number>;
+  const steps = { failing: 2 } as Record<string, number>;
+  assert.equal(pickTierSpillover(list, (c) => headroom[c.id], 20)?.id, "failing");
+  assert.equal(
+    pickTierSpillover(
+      list,
+      (c) => headroom[c.id],
+      20,
+      (c) => steps[c.id] ?? 0
+    )?.id,
+    "healthy"
+  );
+});
+
 test("flag unset: fill-first keeps the saturated top tier (unchanged default)", async () => {
   const a = await seed(1, 10);
   await seed(2, 90);
@@ -85,4 +117,41 @@ test("flag on: a top tier with room is not left", async () => {
   await seed(2, 90);
   const selected = await auth.getProviderCredentials("claude", null, null, MODEL);
   assert.equal(selected?.connectionId, a.id);
+});
+
+test("flag on: the OAuth peer adjustment does not pull a spilled request back to the saturated tier", async () => {
+  process.env[FLAG] = "true";
+  const resetAt = new Date(Date.now() + 3 * 24 * 60 * 60_000).toISOString();
+  const seedOAuth = async (priority: number, remainingPercentage: number) => {
+    const connection = await providersDb.createProviderConnection({
+      provider: "claude",
+      authType: "oauth",
+      name: `spill-oauth-${priority}`,
+      email: `spill-oauth-${priority}@example.invalid`,
+      accessToken: `at-${priority}`,
+      refreshToken: `rt-${priority}`,
+      expiresAt: new Date(Date.now() + 3_600_000).toISOString(),
+      isActive: true,
+      testStatus: "active",
+    });
+    // createProviderConnection renumbers priority on insert, so the tier is written directly.
+    core
+      .getDbInstance()
+      .prepare("UPDATE provider_connections SET priority = ? WHERE id = ?")
+      .run(priority, connection.id);
+    quotaCache.setQuotaCache(connection.id, "claude", {
+      session: { remainingPercentage, resetAt },
+    });
+    return connection;
+  };
+  const a = await seedOAuth(1, 10);
+  const b = await seedOAuth(2, 80);
+  // b already serves another session, so a looks "more available" to the peer adjustment.
+  occupancy.reserveOAuthSession(b.id, "other-session");
+  const selected = await auth.getProviderCredentials("claude", null, null, MODEL, {
+    sessionKey: "new-session",
+    reserveOAuthSession: true,
+  });
+  assert.notEqual(a.id, b.id);
+  assert.equal(selected?.connectionId, b.id);
 });
