@@ -124,14 +124,18 @@ export function buildSubscriptionQuotaFallback(
 const WEEKLY_QUOTA_COOLDOWN_MS = 24 * 60 * 60 * 1000; // 24 hours
 
 // Opt-in (QUOTA_MONTHLY_TEXT_COOLDOWN=1): named monthly cap wording ("monthly quota limit
-// exceeded", "monthly usage limit reached") gets the same long cooldown as the weekly cap.
-// A bare "monthly" is not a marker; it must sit next to quota/usage/limit wording.
+// exceeded", "monthly usage limit reached", "you have reached your monthly usage limit") gets
+// the same long cooldown as the weekly cap. A bare "monthly" is not a marker; it must sit next
+// to quota/usage/limit wording, with the exhaustion word before or after it.
+const MONTHLY_CAP_AFTER =
+  /\bmonthly\b[^.]{0,40}\b(?:quota|usage|limit)\b[^.]{0,40}\b(?:exceeded|reached|exhausted|used up)\b/;
+const MONTHLY_CAP_BEFORE =
+  /\b(?:exceeded|reached|exhausted|used up)\b[^.]{0,40}\bmonthly\b[^.]{0,40}\b(?:quota|usage|limit)\b/;
+
 function isMonthlyCapText(lower: string): boolean {
   return (
     process.env.QUOTA_MONTHLY_TEXT_COOLDOWN === "1" &&
-    /\bmonthly\b[^.]{0,40}\b(?:quota|usage|limit)\b[^.]{0,40}\b(?:exceeded|reached|exhausted|used up)\b/.test(
-      lower
-    )
+    (MONTHLY_CAP_AFTER.test(lower) || MONTHLY_CAP_BEFORE.test(lower))
   );
 }
 

@@ -10,6 +10,10 @@ const FLAG = "QUOTA_MONTHLY_TEXT_COOLDOWN";
 const DAY_MS = 24 * 60 * 60 * 1000;
 const MONTHLY_BODY = "token plan person monthly quota limit exceeded";
 
+// The disabled-path test must not inherit the flag from the environment.
+test.beforeEach(() => {
+  delete process.env[FLAG];
+});
 test.afterEach(() => {
   delete process.env[FLAG];
 });
@@ -39,6 +43,19 @@ test("flag on: a stated reset in days wins over the 24 h fallback", () => {
   );
   assert.equal(r.reason, RateLimitReason.QUOTA_EXHAUSTED);
   assert.equal(r.cooldownMs, 5 * DAY_MS);
+});
+
+test("flag on: the exhaustion word may come before the monthly cap", () => {
+  process.env[FLAG] = "1";
+  const r = checkFallbackError(
+    429,
+    "You have reached your monthly usage limit",
+    0,
+    null,
+    "qianfan"
+  );
+  assert.equal(r.reason, RateLimitReason.QUOTA_EXHAUSTED);
+  assert.equal(r.cooldownMs, DAY_MS);
 });
 
 test("flag on: unrelated text that merely contains 'monthly' keeps the short cooldown", () => {
