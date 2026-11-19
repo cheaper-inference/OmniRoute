@@ -80,8 +80,28 @@ test("codex 502 on one model locks only that model — sibling gpt-5* models sta
 test("codex lockModel with reason model_not_found locks only the missing model, leaving sibling Codex models unlocked (#20622)", () => {
   lockModel("codex", CONN, "gpt-5.5-codex", "model_not_found", 60_000);
   assert.equal(isModelLocked("codex", CONN, "gpt-5.5-codex"), true, "missing model is locked");
-  assert.equal(isModelLocked("codex", CONN, "gpt-5.4"), false, "sibling Codex model stays unlocked");
+  assert.equal(
+    isModelLocked("codex", CONN, "gpt-5.4"),
+    false,
+    "sibling Codex model stays unlocked"
+  );
   assert.equal(isModelLocked("cx", CONN, "gpt-5.4"), false, "alias spelling agrees");
+});
+
+test("codex model_not_found for a model named like a quota scope does not lock that scope (#20622)", () => {
+  for (const missing of ["codex", "spark"]) {
+    clearAllModelLockouts();
+    lockModel("codex", CONN, missing, "model_not_found", 60_000);
+    assert.equal(isModelLocked("codex", CONN, missing), true, `${missing} itself is locked`);
+    assert.equal(isModelLocked("codex", CONN, "gpt-5.4"), false, `${missing}: codex scope free`);
+    assert.equal(
+      isModelLocked("codex", CONN, "gpt-5.3-codex-spark"),
+      false,
+      `${missing}: spark scope free`
+    );
+    recordModelLockoutFailure("codex", CONN, missing, "model_not_found", 403, 60_000);
+    assert.equal(isModelLocked("codex", CONN, "gpt-5.4"), false, `${missing}: failure path too`);
+  }
 });
 
 test("codex 429 on one model still locks the whole quota scope (unchanged)", () => {
