@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Informācijas panelis tiek atvērts adresē `http://localhost:20128`, un API bāzes URL ir `http://localhost:20128/v1`.
+Informācijas panelis tiek atvērts pie `http://localhost:20128`, un API bāzes URL ir `http://localhost:20128/v1`.
+
+> **npm lietotāji:** Ja npm brīdina, ka instalēšanas skripti ir bloķēti (piemēram, `omniroute`, `better-sqlite3`), skatiet [sadaļu Problēmu novēršana — npm instalācijas skripti ir bloķēti](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm lietotājiem:** karodziņš `--allow-build` ir nepieciešams, lai iespējotu `better-sqlite3` un `@swc/core` vietējos būvēšanas skriptus. Komanda `pnpm approve-builds -g` netiek atbalstīta globālām instalācijām ar pnpm v11.
+> **pnpm lietotāji:** `--allow-build` karodziņš ir nepieciešams, lai iespējotu `better-sqlite3` un `@swc/core` vietējos veidošanas skriptus. Komanda `pnpm approve-builds -g` netiek atbalstīta globālajām instalācijām pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR pakotne](https://aur.archlinux.org/packages/omniroute-bin) instalē OmniRoute un nodrošina systemd lietotāja servisu.
+[AUR pakotne](https://aur.archlinux.org/packages/omniroute-bin) instalē OmniRoute un nodrošina sistēmas lietotāja pakalpojumu.
 
-### No pirmkoda
+### No avota
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Piezīme Windows lietotājiem:** pēc noklusējuma OmniRoute izmanto `%APPDATA%\omniroute`, ja mantotais direktorijs `%USERPROFILE%\.omniroute` nepastāv. Iestatiet `DATA_DIR`, lai izvēlētos citu datu direktorija atrašanās vietu.
+> **Windows piezīme:** Pēc noklusējuma OmniRoute izmanto `%APPDATA%\omniroute`, ja nav mantotā `%USERPROFILE%\.omniroute` direktorija. Iestatiet `DATA_DIR`, lai izvēlētos citu datu direktorija atrašanās vietu.
 
-> **Piezīme:** pirmajā palaišanas reizē `npm install` automātiski ģenerē `.env` no `.env.example`. Turpmākās instalēšanas nepārrakstīs esošu `.env`, tāpēc pielāgojumi tiks saglabāti. Lai to ģenerētu no jauna, pirms atkārtotas palaišanas izdzēsiet `.env`.
+> **Piezīme:** `npm install` automātiski ģenerē `.env` no `.env.example` pirmajā palaišanas reizē. Turpmākās instalēšanas nepārrakstīs esošu `.env`, tāpēc pielāgojumi tiek saglabāti. Lai atkārtoti iesētu, pirms atkārtotas palaišanas izdzēsiet `.env`.
 
 ### Docker
 
-Pilnīgu Docker iestatīšanas aprakstu, tostarp Compose profilus un Caddy HTTPS, skatiet [Docker rokasgrāmatā](./DOCKER_GUIDE.md).
+Skatiet [Docker rokasgrāmatu](./DOCKER_GUIDE.md), lai iegūtu pilnīgu Docker iestatīšanu, tostarp Compose profilus un Caddy HTTPS.
 
 ### Darbvirsmas lietotne (Electron)
 
-OmniRoute ietver darbvirsmas ietvarprogrammu, kas veidota ar Electron 41 + electron-builder 26.10. Pieejamie skripti (darbvietas saknē):
+OmniRoute piegādā darbvirsmas iesaiņojumu, kas balstīts uz Electron 41 + elektronu veidotāju 26.10. Pieejamie skripti (darbvietas sakne):
 
 ```bash
-npm run electron:dev          # Palaist darbvirsmas lietotni ar automātisku pārlādi
-npm run electron:build        # Būvēt pašreizējai OS (automātiski noteiktai)
-npm run electron:build:win    # Windows instalētājs (NSIS + portatīvā versija)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Veikt pakotās būvējuma versijas dūmu testu
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Darbvirsmas instalētāju laidieni ir pievienoti GitHub laidieniem. Pilnīgu un padziļinātu Electron aprakstu (parakstīšana, IPC tilts, distributīvi) skatiet [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(izveidots vēlākā posmā)_.
+Darbvirsmas instalētāju laidieni ir pievienoti GitHub laidieniem. Pilnu Electron dziļo niršanu (parakstīšana, IPC tilts, izplatīšana) skatiet [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Bezgalvas serveris (CI/automatizācija)
+### Serveris bez galvas (CI/automation)
 
-Bezuzraudzības iestatīšanai (Docker, Kubernetes, CI) izmantojiet:
+Neuzraudzītiem iestatījumiem (Docker, Kubernetes, CI) izmantojiet:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Apvienojot to ar vides mainīgajiem (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` u.c.), varat palaist pilnībā skriptējamu OmniRoute instanci.
+Apvienojumā ar env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` u.c.), tas ļauj izveidot pilnībā skriptējamu OmniRoute gadījumu.
 
 ### CLI opcijas
 
-| Komanda                 | Apraksts                                                                                            |
-| ----------------------- | --------------------------------------------------------------------------------------------------- |
-| `omniroute`             | Palaist serveri (`PORT=20128`, API un informācijas panelis vienā portā)                             |
-| `omniroute setup`       | Vadīta CLI sākotnējā iestatīšana parolei un pirmajam nodrošinātājam                                 |
-| `omniroute doctor`      | Veikt lokālas veselības pārbaudes, nepalaižot serveri                                               |
-| `omniroute providers`   | Atklāt, uzskaitīt, validēt un testēt nodrošinātājus no CLI                                          |
-| `omniroute config`      | CLI rīka konfigurācija — uzskaitīt, iegūt, iestatīt un validēt konfigurācijas                       |
-| `omniroute status`      | Bezsaistes statusa panelis — versija, DB, rīki un konfigurācija                                     |
-| `omniroute logs`        | Straumēt lietojuma žurnālus no API (atbalsta `--follow`)                                            |
-| `omniroute update`      | Pārbaudīt vai lietot OmniRoute atjauninājumus                                                       |
-| `omniroute provider`    | Pārvaldīt nodrošinātāju savienojumus — pievienot, uzskaitīt, noņemt, testēt un iestatīt noklusējumu |
-| `omniroute --port 3000` | Iestatīt kanonisko/API portu uz 3000                                                                |
-| `omniroute --mcp`       | Palaist MCP serveri (stdio transports)                                                              |
-| `omniroute --no-open`   | Automātiski neatvērt pārlūkprogrammu                                                                |
-| `omniroute --help`      | Parādīt palīdzību                                                                                   |
+| Komanda                 | Apraksts                                                                                  |
+| ----------------------- | ----------------------------------------------------------------------------------------- |
+| `omniroute`             | Sākt serveri (`PORT=20128`, API un informācijas panelis vienā portā)                      |
+| `omniroute setup`       | Vadīta CLI ieviešana parolei un pirmajam nodrošinātājam                                   |
+| `omniroute doctor`      | Palaidiet vietējās veselības pārbaudes, nestartējot serveri                               |
+| `omniroute providers`   | Atklājiet, uzskaitiet, apstipriniet un pārbaudiet pakalpojumu sniedzējus no CLI           |
+| `omniroute config`      | CLI rīku konfigurācija — saraksts, iegūt, iestatīt, apstiprināt konfigurācijas            |
+| `omniroute status`      | Bezsaistes statusa informācijas paneļa — versija, DB, rīki, konfigurācija                 |
+| `omniroute logs`        | Straumējiet lietojuma žurnālus no API (atbalsta `--follow`)                               |
+| `omniroute update`      | Pārbaudiet vai lietojiet OmniRoute atjauninājumus                                         |
+| `omniroute provider`    | Pārvaldīt pakalpojumu sniedzēja savienojumus —, uzskaitīt, noņemt, pārbaudīt, noklusējuma |
+| `omniroute --port 3000` | Iestatiet canonical/API portu uz 3000                                                     |
+| `omniroute --mcp`       | Sākt MCP serveri (stdio transport)                                                        |
+| `omniroute --no-open`   | Neatveriet pārlūkprogrammu automātiski                                                    |
+| `omniroute --help`      | Parādiet palīdzību                                                                        |
 
-Bezgalvas iestatīšanu var skriptēt, izmantojot karodziņus vai vides mainīgos:
+Iestatījumu bez galvas var skriptēt ar karodziņiem vai vides mainīgajiem:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Veiciet lokālo diagnostiku, neatverot informācijas paneli:
+Palaidiet vietējo diagnostiku, neatverot informācijas paneli:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Pārvaldiet nodrošinātājus, izmantojot SSH vai skriptus un neatverot informācijas paneli:
+Pārvaldiet pakalpojumu sniedzējus no SSH vai skriptiem, neatverot informācijas paneli:
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **Claude kods:**
 
+Claude kods savieno, izmantojot HTTP, kas `omniroute --mcp` (stdio) nesākas. HTTP transportēšana pēc noklusējuma ir izslēgta: vispirms iespējojiet to darbošajā serverī. Kad ir iespējota pieteikšanās informācijas panelī, pieprasījums bez akreditācijas datiem saņem `401`, tāpēc nododiet API taustiņu, kurā ir `mcp:connect` (vai `manage`); arī atslēgai bez `manage`/`admin` ir nepieciešams katra rīka tvērums (skatiet [MCP Server → MCP rīku tvērumi](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
@@ -253,7 +259,7 @@ Vai arī, ja `mcpTransport` ir `streamable-http` (iestatiet to uz `/dashboard/mc
 
 Atslēga pārvietojas kā `Authorization: Bearer <api-key>` (skatiet [sadaļu MCP Server → Attālā piekļuve](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) attāliem saimniekiem; attālajai atslēgai ir nepieciešams `mcp:connect` un tā read/write tvērumi).
 
-**Pilna MCP dokumentācija:** [MCP serveris README](../../open-sse/mcp-server/README.md) — 110 rīki, IDE konfigurācijas, Python/TS/Go klienti. Operatora atsauce uz saspiešanas CCR/dedup rīkiem (marķieri, priekšnosacījumi, katra rīka tvērumi, izguves lappušu šķirošana, diagnostika): [Compression Engines → Priekšnosacījumi / operatora rokasgrāmata](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+**Pilna MCP dokumentācija:** [MCP serveris README](../../open-sse/mcp-server/README.md) — 110 rīki, IDE konfigurācijas, Python/TS/Go klienti. Operatora atsauce uz saspiešanas CCR/dedup rīkiem (marķieri, priekšnosacījumi, katra rīka tvērumi, izguves lappušu maiņa, diagnostika): [Compression Engines → Priekšnosacījumi / operatora rokasgrāmata](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 ### A2A iestatīšana (aģenta-aģenta protokols)
 

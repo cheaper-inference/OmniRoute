@@ -1,3 +1,4 @@
+import { ESTIMATED_USAGE_SQL, UNKNOWN_USAGE_SQL } from "../usageEvidenceAggregates";
 /**
  * db/usageAnalytics/sources.ts — Pure SQL source-string builders for usage analytics.
  *
@@ -126,7 +127,7 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
           tokens_input,
           tokens_output,
           tokens_cache_read,
-          COALESCE(tokens_cache_read, 0) as cached_input_tokens,
+          tokens_cache_read as cached_input_tokens,
           tokens_cache_creation,
           tokens_reasoning,
           service_tier,
@@ -137,6 +138,9 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
           api_key_id,
           api_key_name,
           ${RAW_COST_COLUMNS},
+          CASE WHEN tokens_cache_read IS NULL THEN 1 ELSE 0 END as cached_input_unknown_requests,
+          ${ESTIMATED_USAGE_SQL} as estimated_requests,
+          ${UNKNOWN_USAGE_SQL} as unknown_evidence_requests,
           0 as is_aggregated,
           1 as requests
         FROM usage_history
@@ -160,6 +164,9 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
           NULL as api_key_id,
           NULL as api_key_name,
           ${SUMMARY_COST_COLUMNS},
+          COALESCE(cached_input_unknown_requests, CASE WHEN total_cache_read_tokens IS NULL THEN total_requests ELSE 0 END) as cached_input_unknown_requests,
+          COALESCE(estimated_requests, 0) as estimated_requests,
+          COALESCE(unknown_evidence_requests, total_requests, 0) as unknown_evidence_requests,
           1 as is_aggregated,
           total_requests as requests
         FROM daily_usage_summary
@@ -169,10 +176,13 @@ export function buildUnifiedSource(opts: BuildUnifiedSourceOptions): UnifiedSour
           timestamp, provider, model,
           tokens_input, tokens_output,
           tokens_cache_read, tokens_cache_creation, tokens_reasoning,
-          COALESCE(tokens_cache_read, 0) as cached_input_tokens,
+          tokens_cache_read as cached_input_tokens,
           service_tier, success, latency_ms,
           connection_id, account_key, api_key_id, api_key_name,
           ${RAW_COST_COLUMNS},
+          CASE WHEN tokens_cache_read IS NULL THEN 1 ELSE 0 END as cached_input_unknown_requests,
+          ${ESTIMATED_USAGE_SQL} as estimated_requests,
+          ${UNKNOWN_USAGE_SQL} as unknown_evidence_requests,
           0 as is_aggregated,
           1 as requests
         FROM usage_history

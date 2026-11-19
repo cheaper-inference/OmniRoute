@@ -843,68 +843,173 @@ null-ejer nægtes alle kaldere, der ikke er sessioner (hent, slet, annuller og k
 
 ---
 
-## Søg API
+## Search-API
 
-Web/search -udbyderabstraktion (Tavily, Brave, Exa, Serper osv.).
+Abstraktion for web-/søgeudbydere (Tavily, Brave, Exa, Serper osv.).
 
-| Metode | Sti                    | Beskrivelse                                                                                   |
-| ------ | ---------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/search`           | Liste konfigurerede søgeudbyderes + funktioner                                                |
-| POST   | `/v1/search`           | Kør en søgeforespørgsel — body valideret af `v1SearchSchema`, understøtter caching/coalescing |
-| GET    | `/v1/search/analytics` | hit/latency/cache -statistikker pr. udbyder                                                   |
+| Method | Path                   | Description                                                                                      |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/search`           | Vis konfigurerede søgeudbydere + funktioner                                                      |
+| POST   | `/v1/search`           | Kør en søgeforespørgsel — body valideres af `v1SearchSchema`, understøtter caching/sammenlægning |
+| GET    | `/v1/search/analytics` | Statistik for antal resultater, svartid og cache pr. udbyder                                     |
 
-**Auth:** Bærer API nøgle (`extractApiKey` + `isValidApiKey`). Søgepolitik håndhæves via `enforceApiKeyPolicy`.
+**Godkendelse:** Bearer-API-nøgle (`extractApiKey` + `isValidApiKey`). Søgepolitikken håndhæves via `enforceApiKeyPolicy`.
 
-**Automatisk valg:** uden `provider` kører den billigste udbyder med en konfigureret forbindelse først, og den næstbilligste er failover. Gratis sidste udvej-udbydere (`duckduckgo-free`) bruges kun, når intet andet er konfigureret. En selv-hostet SearXNG tæller som konfigureret, når dens forbindelse lagrer en rigtig `baseUrl` (ikke katalogets standard `http://localhost:8888/search`): den rangerer derefter som en $0-udbyder foran de nøglede, med den billigste nøgleudbyder som failover, inklusive når SearXNG svarer 400, 401, 403 eller 404. A `baseUrl`, der ikke er a `http(s)` URL punkter cloud-metadata-adresse tæller ikke. En SearXNG forbindelse, der gemmer et token, rangerer kun på denne måde over `https://` eller loopback `http://`. Over remote plain `http://` er det aldrig en failover og forbliver en sidste udvej, der kun bruges, når ingen anden udbyder er konfigureret, eller når det anmodes om ved navn, så det sender tokenet i klartekst i disse to tilfælde.
+### Navngivne søge-/hentekombinationer
 
-### Exa og Tavily `provider_options`
+Både `POST /v1/search` og `POST /v1/web/fetch` accepterer `model` som navnet på en gemt kombination.
+Brug enten `model` eller en eksplicit `provider`; hvis begge sendes, returneres `400`.
+Uden nogen af felterne forbliver den eksisterende automatiske udvælgelse af udbyder uændret.
 
-Exa og Tavily læser udbyderspecifikke felter fra en pose med navneafstand: `provider_options.exa` (eller `provider_options["exa-search"]`) og `provider_options.tavily` (eller `provider_options["tavily-search"]`). Kun nedenstående nøgler videresendes. Hver enkelt kontrolleres mod sit eget Zod skema i `open-sse/handlers/search/providerOptionsPassthrough.ts`, og en nøgle med den forkerte type droppes. Enhver anden nøgle ignoreres, inklusive auth, base URL, `stream` og `outputSchema`. De flade nøgler, der bruges af andre udbydere (`cx`, `depth`, ...) fungerer som før.
+Både Combo Builder og kataloget Add Model viser indbyggede poster for webhandlinger
+for tilsluttede udbydere, også når de ikke har nogen LLM-modelliste. Serper viser **Web search**;
+Tavily viser **Web search / Page extraction**, og udbydere, der kun kan hente, viser **Page extraction**.
+Vælg posten og kontoen som normalt. En enkelt Tavily-post dækker begge web-endpoints;
+disse handlingsposter føjes ikke til klientvælgere, der kun gælder chat, eller til chatmodelprober.
 
-| Udbyder | Felter på øverste niveau                                                                                                                                                                                                                                                                                                                                                  | Indlejret                                                                                                                                  |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flade primitiver), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` fusionerede over standard `{ text: true, highlights: true }` |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
+Opret f.eks. en **priority**-kombination med navnet `shared-free` med disse mål i den angivne rækkefølge:
 
-De generiske felter vinder altid: `query`, `max_results`, `filters` (domæner), `country` og emnet afledt af `search_type`. På Exa beholder `search_type: "news"` `category: "news"`. Tavily accepterer også `search_type: "finance"` (`topic: "finance"`).
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-Firecrawl-søgningsomkostninger registreres pr. startet blok af 10 returnerede resultater, til $0,002 (2 kreditter) en blokering og mindst én blokering pr. opkald ( [Firecrawl-fakturering](https://docs.firecrawl.dev/billing) ): 11 resultater koster $0,004.
+Brug derefter det samme navn på hver overflade:
 
-Den generiske `time_range` når nu begge udbydere: Exa får `startPublishedDate` (ISO timestamp) og Tavily får `start_date` (`YYYY-MM-DD`). En eksplicit dato i `provider_options` tilsidesætter den tilknyttede.
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Exa-resultater beholder `id`, `highlights` (hver fremhævning, ikke kun den første brugt som `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` og `extras` i `provider_raw`. Tavily resultater holder `images` og `favicon`.
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-Linkup-søgningsomkostninger er registreret til $0,005 for `depth` `fast` og `standard` og $0,05 for `deep` ( [Linkup-prissætning](https://docs.linkup.so/pages/documentation/development/pricing) ), uanset om `depth` kommer fra `provider_options` eller forbindelsens indstillinger.
+Søgning overvejer Tavily og derefter Serper; hentning overvejer Tavily og derefter Jina Reader;
+chat springer de dedikerede søge-/henteudbydere over og overvejer OpenAI. Kompatibiliteten
+kommer fra registrene for søge-/henteudførelse, ikke fra ord i et modelnavn.
+Filtrering sker før valg af legitimationsoplysninger og afsendelse og redigerer aldrig den gemte kombination.
 
-Exa `type: "lite"` (Exa 3.0) accepterer et mindre sæt felter og afviser hele anmodningen, når et hvilket som helst andet felt er indstillet. For lite slettes `additionalQueries`, `systemPrompt` og hver `contents` -tast undtagen `text` og `highlights` før opkaldet. De forældede `subpages`, `subpageTarget`, `highlights.numSentences` og `highlights.highlightsPerUrl` videresendes ikke længere.
+Ikke-chat-funktionsruter understøtter `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` og `p2c`. Chat-eksklusive syntesestrategier som
+`fusion`, `pipeline` og `context-relay` afvises på ikke-chat-ruter i stedet for at blive
+anvendt stiltiende på søgning eller genererede medier.
+Den eksisterende kombinationsmotor håndterer ordnet fallback, herunder kvotafejl fra upstream,
+og bevarer trin-id'er, kontolåsninger, tilladelseslister for konti pr. trin, indlejrede referencer,
+forbindelses-/kvoteomfang for kaldere samt politikken for adgang til kombinationer. Resultaterne bevarer deres oprindelige
+søge-/henteskema, herunder den faktiske udbyder; `X-OmniRoute-Combo-Trace` identificerer
+routingbeslutningen. Ukendte kombinationer returnerer `404`; inaktive kombinationer og kombinationer
+uden kompatible mål returnerer `400`.
 
-Omkostningsregnskab er det flade register `costPerQuery` undtagen Exa, som følger Exas egen prissætning: $0,007 pr. opkald for `auto` (og den gamle `fast`) eller $0,004 for `lite` (og den ældre `instant`), der dækker 10 resultater; $0,001 for hvert yderligere resultat; og $0,001 pr. returneret resultat, når `contents.summary` er indstillet. Tavily er registreret til 1 kredit ($0,008) for `search_depth` `basic`, `fast` og `ultra-fast` og 2 kreditter ($0,016) for `advanced` ( [Tavily API credits](https://docs.tavily.com/documentation/api-credits) ). Et opkald med `auto_parameters: true`, som Tavily opgraderer til avanceret, optages stadig med 1 kredit.
+Hvert forsøg med en kombination bruger én eksplicit udbyder. Den kan ikke på egen hånd kalde den indbyggede automatiske
+udbyderpulje bag kombinationen. Forespørgsler med en eksplicit udbyder bevarer deres eksisterende adfærd med én udbyder.
+Direkte chatforespørgsler, der målretter dedikerede søge-/henteudbydere, returnerer en handlingsanvisende JSON-`400`
+i stedet for at falde igennem til en executor i OpenAI-stil.
 
----
+### Funktionsspecifikke kombinationsruter
+
+Gemte kombinationer kan indeholde et `routes`-objekt, hvis nøgler er API-funktioner. Hver rute ejer
+sin målliste, strategi og runtime-konfiguration. `models`, `strategy` og `config` på øverste niveau
+forbliver den bagudkompatible Chat-plan; gamle kombinationer uden `routes` fortsætter med at fungere uændret.
+
+De understøttede rutenøgler er `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` og `audio-generation`. Endpoint-projektion sker før valg af legitimationsoplysninger,
+scoring eller afsendelse. Indlejrede kombinationsreferencer vælger underkombinationens rute for den samme funktion.
+
+`POST /v1/music/generations` og `POST /v1/ocr` accepterer et kombinationsnavn i `model`. Det indbyggede
+ElevenLabs-kompatible `POST /v1/music` accepterer også et kombinationsnavn i `model_id`, men alle anvendelige
+mål på dette indbyggede endpoint skal være ElevenLabs-musikmodeller, så den binære svarkontrakt
+bevares. `POST /v1/sound-generation` accepterer en `audio-generation`-kombination i `model_id` under
+den samme begrænsning for indbygget binært svar. Brug `/v1/music/generations` til heterogene musikudbydere.
+
+**Automatisk udvælgelse:** uden `provider` kører den billigste udbyder med en konfigureret forbindelse
+først, og den næstbilligste er failover. Gratis fallback-udbydere (`duckduckgo-free`) bruges kun,
+når intet andet er konfigureret. En selvhostet SearXNG tæller som konfigureret, når forbindelsen
+gemmer en reel `baseUrl` (ikke katalogets standardværdi `http://localhost:8888/search`): den
+rangeres derefter som en udbyder til $0 foran udbydere med nøgler, med den billigste udbyder med nøgle som failover,
+også når SearXNG svarer med 400, 401, 403 eller 404. En `baseUrl`, der ikke er en gyldig `http(s)`-URL,
+eller som peger på en cloud-metadataadresse, tæller ikke. En SearXNG-forbindelse, der gemmer et token,
+rangeres kun sådan over `https://` eller loopback-`http://`. Over ekstern almindelig `http://` er den aldrig failover
+og forbliver en sidste udvej; den bruges kun, når ingen anden udbyder er konfigureret, eller når
+den anmodes ved navn, så den i disse to tilfælde sender tokenet i klartekst.
+
+### Exa- og Tavily-`provider_options`
+
+Exa og Tavily læser providerspecifikke felter fra en navneområdespecifik samling:
+`provider_options.exa` (eller `provider_options["exa-search"]`) og `provider_options.tavily`
+(eller `provider_options["tavily-search"]`). Kun nøglerne nedenfor videresendes. Hver nøgle
+valideres mod sit eget Zod-skema i `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+og en nøgle med den forkerte type fjernes. Alle andre nøgler ignoreres, herunder auth, base-URL,
+`stream` og `outputSchema`. De flade nøgler, der bruges af andre providere (`cx`, `depth` ...),
+fungerer som før.
+
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flade primitiver), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` flettes oven på standarden `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                           |
+
+De generiske felter vinder altid: `query`, `max_results`, `filters` (domæner), `country` og det
+emne, der udledes af `search_type`. På Exa bevarer `search_type: "news"` `category: "news"`.
+Tavily accepterer også `search_type: "finance"` (`topic: "finance"`).
+
+Omkostningen ved Firecrawl-søgning registreres pr. påbegyndt blok med 10 returnerede resultater
+til $0.002 (2 credits) pr. blok og mindst én blok pr. kald
+([Firecrawl-fakturering](https://docs.firecrawl.dev/billing)): 11 resultater koster $0.004.
+
+Det generiske `time_range` når nu begge providere: Exa får `startPublishedDate` (ISO-tidsstempel),
+og Tavily får `start_date` (`YYYY-MM-DD`). En eksplicit dato i `provider_options`
+tilsidesætter den tilknyttede dato.
+
+Exa-resultater bevarer `id`, `highlights` (alle highlights, ikke kun den første, der bruges som
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` og `extras` i
+`provider_raw`. Tavily-resultater bevarer `images` og `favicon`.
+
+Omkostningen ved Linkup-søgning registreres til $0.005 for `depth` `fast` og `standard` og $0.05 for
+`deep` ([Linkup-priser](https://docs.linkup.so/pages/documentation/development/pricing)),
+uanset om `depth` kommer fra `provider_options` eller forbindelsens indstillinger.
+
+Exa `type: "lite"` (Exa 3.0) accepterer et mindre sæt felter og afviser hele anmodningen,
+hvis et andet felt er angivet. For lite fjernes `additionalQueries`, `systemPrompt` og alle
+`contents`-nøgler undtagen `text` og `highlights`, før kaldet foretages. De forældede
+`subpages`, `subpageTarget`, `highlights.numSentences` og `highlights.highlightsPerUrl` videresendes
+ikke længere.
+
+Omkostningsregnskabet bruger det flade register `costPerQuery`, undtagen for Exa, som følger Exas
+egne priser: $0.007 pr. kald for `auto` (og den ældre `fast`) eller $0.004 for `lite` (og den
+ældre `instant`), hvilket dækker 10 resultater; $0.001 for hvert yderligere resultat; og $0.001 pr.
+returneret resultat, når `contents.summary` er angivet. Tavily registreres til 1 credit ($0.008) for
+`search_depth` `basic`, `fast` og `ultra-fast` og 2 credits ($0.016) for `advanced`
+([Tavily API-credits](https://docs.tavily.com/documentation/api-credits)). Et kald med
+`auto_parameters: true`, som Tavily opgraderer til advanced, registreres stadig til 1 credit.
 
 ## Web Fetch API
 
-Udtræk indhold fra en URL via en konfigureret web-fetch-udbyder (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Hent indhold fra en URL via en konfigureret web-fetch-udbyder (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, samme API-nøgle som Parallel Search) returnerer kun Markdown — alle andre `format`-værdier giver en `400` — og begrænser indholdet til 100.000 tegn. Når selve målsiden ikke kan udtrækkes, rapporterer upstream dette i et HTTP 200-svar; OmniRoute viser det som en `422` med en fast meddelelse.
+Parallel Extract (`parallel-search`, samme API-nøgle som Parallel Search) returnerer kun Markdown — enhver anden `format` giver en `400` — og begrænser indholdet til 100.000 tegn. Når selve målsiden ikke kan udtrækkes, rapporterer upstream-tjenesten det i et HTTP 200-svar; OmniRoute eksponerer det som en `422` med en fast meddelelse.
 
-| Metode | Sti             | Beskrivelse                                              |
+Keenable Fetch (`keenable-search`) returnerer også kun Markdown (enhver anden `format` giver en `400`) og begrænser indholdet til 100.000 tegn. Den fungerer uden en nøgle: en eksplicit `provider: "keenable-search"`-anmodning uden en forbindelse bruger Keenables nøglefri endpoint (ratebegrænsninger pr. IP). En konfigureret nøgle ophæver kun disse begrænsninger; automatisk valg bruger kun Keenable, når en nøgle er konfigureret.
+
+| Method | Path            | Description                                              |
 | ------ | --------------- | -------------------------------------------------------- |
 | POST   | `/v1/web/fetch` | Hent/scrap en URL — body valideres af `v1WebFetchSchema` |
 
 **Godkendelse:** Bearer API-nøgle (`extractApiKey` + `isValidApiKey`). Politikken håndhæves via `enforceApiKeyPolicy`.
 
-**Kvotebevidst fallback (#8297):** Når der ikke er angivet nogen eksplicit `provider`, gennemløbes puljen
+Navngivne kombinationer bruger [`model`-routingkontrakten](#named-searchfetch-combinations)
+ovenfor, samtidig med at fetch-specifikke indstillinger og svar bevares.
+
+**Kvotebevidst fallback (#8297):** når hverken `provider` eller `model` er angivet, gennemløbes puljen
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) i fast
-prioritetsrækkefølge (først tilgængelige) — en hastighedsbegrænset, men konfigureret udbyder springes over
-i stedet for at afkorte forespørgslen, og en genforsøgsbar/upstream-fejl relateret til kvoten
-(HTTP 429 altid; 402/403 for Firecrawl/Tavily/TinyFish-kvotestile på gratis niveauer —
-ikke for Jina Reader og aldrig for en almindelig 400-fejlanmodning) går videre til
-den næste uprøvede udbyder med legitimationsoplysninger på forespørgselstidspunktet. Når alle udbydere i
-puljen er opbrugt, returnerer endpointet en enkelt `429` (med en `Retry-After`-header)
-i stedet for den tidligere generiske `400`. Når der anmodes om en eksplicit `provider`, er der **ingen** lydløs fallback — en hastighedsbegrænset eller fejlende eksplicit udbyder viser sin egen fejl (`429` ved hastighedsbegrænsning, ellers upstream-statussen).
+`parallel-search` → `keenable-search`) i fast
+prioritetsrækkefølge (fill-first) — en ratebegrænset, men konfigureret udbyder springes over
+i stedet for at afbryde anmodningen, og en genforsøgsbar upstream-fejl/kvotefejl
+(HTTP 429 altid; 402/403 for Firecrawl/Tavily/TinyFish-kvotestil på gratis niveauer —
+ikke for Jina Reader og aldrig ved en almindelig 400-bad request) går videre til den
+næste uprøvede udbyder med legitimationsoplysninger på anmodningstidspunktet. Når alle udbydere i
+puljen er opbrugt, returnerer endpointet en enkelt `429` (med en `Retry-After`-
+header) i stedet for den tidligere generiske `400`. Når der anmodes om en eksplicit `provider`, er der **ingen** lydløs fallback — en ratebegrænset eller fejlende eksplicit udbyder viser sin egen fejl (`429` ved ratebegrænsning, ellers upstream-statussen).
 
 ---
 
@@ -982,18 +1087,21 @@ fuldførelsen.
 
 ## Rapportering af kvoter og problemer
 
-| Metode | Sti                 | Beskrivelse                                                                                   |
-| ------ | ------------------- | --------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Forudvalider kvoten for en `provider` + `accountId`, før en registreret nøgle udstedes        |
-| POST   | `/v1/issues/report` | Rapportér en fejl ved kvote-/nøgleudstedelse til GitHub (kræver `GITHUB_ISSUES_REPO` + token) |
+| Metode | Sti                 | Beskrivelse                                                                                      |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/quotas/check`  | Forhåndsvalider kvoten for en `provider` + `accountId`, før en registreret nøgle udstedes        |
+| POST   | `/v1/issues/report` | Rapportér en fejl ved udstedelse af kvote/nøgle til GitHub (kræver `GITHUB_ISSUES_REPO` + token) |
 
-**Godkendelse:** Bearer API-nøgle (`isAuthenticated`).
+**Godkendelse:** `/v1/quotas/check` accepterer en Bearer-API-nøgle (`isAuthenticated`). `/v1/issues/report` er
+kun til administration (`requireManagementAuth`), ligesom `/api/v1/registered-keys`: en
+dashboard-session, det lokale CLI-token eller en API-nøgle med `manage`-/`admin`-scope; API-nøgler, der kun
+må bruges til inferens, får `403`.
 
-### Gendannelse af kvotesession (tilvælgelse)
+### Gendannelse af kvotesession (valgfrit)
 
-En ikke-streamende `POST /v1/chat/completions` eller `POST /v1/responses`, der mislykkes med
-en terminal kvotefejl (`402`/`429`/`503` hvis body'en angiver, at kvoten eller kreditterne er opbrugt),
-kan parkeres og afspilles senere i stedet for at returnere fejlen. Klienten tilvælger dette pr. anmodning med tre headers:
+En ikke-streamende `POST /v1/chat/completions` eller `POST /v1/responses`, der mislykkes med en
+terminal kvotefejl (`402`/`429`/`503` hvis brødteksten angiver, at kvoten eller kreditterne er opbrugt),
+kan parkeres og afspilles senere i stedet for at returnere fejlen. Den, der kalder API'et, tilvælger dette pr. anmodning med tre headers:
 
 | Header                       | Værdi                                            |
 | ---------------------------- | ------------------------------------------------ |
@@ -1001,13 +1109,12 @@ kan parkeres og afspilles senere i stedet for at returnere fejlen. Klienten tilv
 | `x-omniroute-session`        | sessions-id, `[A-Za-z0-9._:-]{1,128}`            |
 | `x-omniroute-recovery-turn`  | turn-id, unikt inden for sessionen (samme regel) |
 
-Kun `stream: false`-turns uden værktøjer, værktøjshistorik eller `previous_response_id` og uden
-en `x-omniroute-connection`-fastlåsning er kvalificerede, og `STORAGE_ENCRYPTION_KEY` skal være angivet
-(anmodningen gemmes krypteret i op til 24 timer). Svaret er derefter `202` med
-`recovery.poll`; afvent med `GET /v1/quota-recoveries/{id}` (`202` mens den afventer, `200` med det
-gendannede body, når den er færdig), eller annullér med `DELETE`. Billetter er kun synlige for den API-nøgle,
-der oprettede dem. En afspilning, hvis resultat er usikkert, afsluttes i `needs_confirmation`
-i stedet for at blive sendt to gange. Kilde: `src/lib/quota/quotaSessionRecovery.ts`.
+Kun turns med `stream: false`, uden værktøjer, værktøjshistorik eller `previous_response_id`, og uden
+`x-omniroute-connection`-binding er kvalificerede, og `STORAGE_ENCRYPTION_KEY` skal være angivet (anmodningen
+gemmes krypteret i op til 24 timer). Svaret er derefter `202` med
+`recovery.poll`; afstem med `GET /v1/quota-recoveries/{id}` (`202`, mens den afventer, `200` med den
+gendannede brødtekst, når den er fuldført), eller annullér med `DELETE`. Billetter er kun synlige for den API-nøgle, der oprettede dem. En afspilning, hvis resultat er usikkert, afsluttes i
+`needs_confirmation` i stedet for at blive sendt to gange. Kilde: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1750,17 +1857,21 @@ Udgående webhook-abonnementer for OmniRoute-hændelser (fuldførelse af anmodni
 
 ## Registrerede nøgler (automatisk administration)
 
-Bruges af undersystemet til automatisk nøgleadministration til at udstede og rotere API-nøgler mod en underliggende udbyder/konto med daglige og timelige kvoter.
+Bruges af undersystemet til automatisk nøgleadministration til at udstede og rotere API-nøgler over for en bagvedliggende udbyder/konto med daglige/timebaserede kvoter.
 
-| Metode | Sti                                   | Beskrivelse                                                                                                                                                                                                              |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Vis registrerede nøgler (kun maskeret præfiks)                                                                                                                                                                           |
-| POST   | `/api/v1/registered-keys`             | Udsted en ny registreret nøgle — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerer den rå nøgle **én gang**. Returnerer `429` ved afvisning på grund af kvote. |
-| GET    | `/api/v1/registered-keys/[id]`        | Hent en registreret nøgles metadata (ingen rå nøgledata)                                                                                                                                                                 |
-| DELETE | `/api/v1/registered-keys/[id]`        | Tilbagekald en registreret nøgle                                                                                                                                                                                         |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicit slutpunkt til tilbagekaldelse (samme effekt som DELETE)                                                                                                                                                        |
+| Metode | Sti                                   | Beskrivelse                                                                                                                                                                                                                   |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Vis registrerede nøgler (kun maskeret præfiks)                                                                                                                                                                                |
+| POST   | `/api/v1/registered-keys`             | Udsted en ny registreret nøgle — brødtekst: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Returnerer den rå nøgle **én gang**. Returnerer `429` ved afvisning på grund af kvote. |
+| GET    | `/api/v1/registered-keys/[id]`        | Hent metadata for en registreret nøgle (ingen rå nøgledata)                                                                                                                                                                   |
+| DELETE | `/api/v1/registered-keys/[id]`        | Tilbagekald en registreret nøgle                                                                                                                                                                                              |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Eksplicit slutpunkt til tilbagekaldelse (samme effekt som DELETE)                                                                                                                                                             |
+| GET    | `/api/v1/providers/[provider]/limits` | Læs udbyderens udstedelsesgrænser                                                                                                                                                                                             |
+| PUT    | `/api/v1/providers/[provider]/limits` | Angiv udbyderens udstedelsesgrænser — brødtekst: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                      |
+| GET    | `/api/v1/accounts/[id]/limits`        | Læs kontoens udstedelsesgrænser                                                                                                                                                                                               |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Angiv kontoens udstedelsesgrænser — samme brødtekst som udbyderruten                                                                                                                                                          |
 
-**Godkendelse:** administrationssession/API-nøgle (`requireManagementAuth`) — samme kontrol som `/api/keys`: en dashboardsession, det lokale CLI-token eller en API-nøgle med `manage`-/`admin`-scope; API-nøgler, der kun bruges til inferens, får `403`. Se også `/v1/quotas/check` og `/v1/issues/report`.
+**Godkendelse:** administrationssession/API-nøgle (`requireManagementAuth`) — den samme beskyttelse som `/api/keys`: en dashboardsession, det lokale CLI-token eller en API-nøgle med `manage`/`admin`-omfang; API-nøgler, der kun bruges til inferens, får `403`. Se også `/v1/quotas/check` og `/v1/issues/report`.
 
 ---
 

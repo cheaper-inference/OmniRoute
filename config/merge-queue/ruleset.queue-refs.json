@@ -1,0 +1,19 @@
+{
+  "_comment": "omni-queue ruleset template for the queue's OWN refs (docs/ops/OMNI_QUEUE.md): the state branch and the candidate branches. Applied by scripts/merge-queue/apply-ruleset.mjs --kind queue-refs, which fills the App bypass actor_id from --app-id. Only the queue's GitHub App may create, update or delete these refs; nobody can rewrite their history. Keys starting with '_' are stripped before the REST call. The candidate pattern is omni-queue/**/* and must stay so: in GitHub's ruleset patterns a trailing ** matches ONE path segment only, and candidate refs have two (omni-queue/<base>/<batchId>-<sha12>), so omni-queue/** left them unprotected (measured against GitHub on 2026-11-15).",
+  "name": "omni-queue refs protection",
+  "target": "branch",
+  "enforcement": "active",
+  "conditions": {
+    "ref_name": {
+      "include": ["refs/heads/omni-queue-state", "refs/heads/omni-queue/**/*"],
+      "exclude": []
+    }
+  },
+  "rules": [
+    { "type": "creation" },
+    { "type": "update" },
+    { "type": "deletion" },
+    { "type": "non_fast_forward" }
+  ],
+  "bypass_actors": [{ "actor_id": null, "actor_type": "Integration", "bypass_mode": "always" }]
+}
