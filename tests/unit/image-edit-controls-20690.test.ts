@@ -153,3 +153,37 @@ test("a file supplied as a multipart edit control is malformed", async () => {
   assert.match(await response.text(), /quality/);
   assert.equal(calls, 0);
 });
+
+test("malformed controls stop a mixed combo before its Firefly fallback", async () => {
+  await createCombo({
+    name: "firefly-fallback",
+    strategy: "priority",
+    models: [targets.openrouter.model, "adobe-firefly/flux-2"],
+  });
+  await createProviderConnection({
+    provider: "adobe-firefly",
+    authType: "apikey",
+    name: "firefly",
+    apiKey:
+      "eyJhbGciOiJSUzI1NiJ9." +
+      Buffer.from(
+        JSON.stringify({
+          user_id: "test@AdobeID",
+          type: "access_token",
+          client_id: "clio-playground-web",
+        })
+      ).toString("base64url") +
+      "." +
+      "x".repeat(40),
+    isActive: true,
+  });
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    return Response.json({}, { status: 400 });
+  };
+  const response = await POST(jsonRequest("firefly-fallback", { quality: false }));
+  assert.equal(calls, 0);
+  assert.equal(response.status, 400);
+  assert.match(await response.text(), /Invalid image edit quality/);
+});

@@ -235,6 +235,10 @@ interface ImageEditContext {
   accounting: EditAccountingBase;
 }
 
+function usesOpenAIEditControls(config: ReturnType<typeof getImageProvider> | null) {
+  return !config || config.format === "codex-responses" || config.id === "openrouter";
+}
+
 /** A combo target that resolved to an edit-capable provider/node. */
 interface EditComboTarget {
   modelStr: string;
@@ -536,6 +540,17 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
     );
   }
 
+  // A malformed client control must not become a target-local error and trigger fallback.
+  if (
+    "error" in ctx.controls &&
+    editTargets.some(
+      ({ providerConfig }) =>
+        usesOpenAIEditControls(providerConfig) || providerConfig?.format === "adobe-firefly-image"
+    )
+  ) {
+    return errorResponse(ctx.controls.status, ctx.controls.error);
+  }
+
   const orderedTargets = orderCapabilityTargets({
     comboName,
     endpoint: "image-edits",
@@ -715,6 +730,9 @@ async function postHandler(request: Request, _context?: unknown) {
 
   const parsed = parseImageModel(resolvedModel);
   const providerConfig = parsed.provider ? getImageProvider(parsed.provider) : null;
+  if ("error" in input.controls && usesOpenAIEditControls(providerConfig)) {
+    return errorResponse(input.controls.status, input.controls.error);
+  }
   const prepareFalInput = getFalCompatibilityPreparer();
   const falNative = prepareFalInput !== null;
   // Firefly nano/gpt-image, fal edit models and Antigravity Gemini image accept multiple
