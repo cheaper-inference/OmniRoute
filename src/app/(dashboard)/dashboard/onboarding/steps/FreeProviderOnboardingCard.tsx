@@ -98,7 +98,7 @@ export function FreeProviderOnboardingCard() {
   return (
     <section className="space-y-3 rounded-xl border border-primary/20 bg-primary/5 p-4">
       <div>
-        <h3 className="text-sm font-semibold text-text-main">{t("title")}</h3>
+        <h3 className="text-sm text-text-main">{t("title")}</h3>
         <p className="mt-1 text-xs leading-relaxed text-text-muted">{t("description")}</p>
       </div>
 
@@ -112,7 +112,7 @@ export function FreeProviderOnboardingCard() {
             label={<span className="text-xs font-medium text-text-main">{provider.name}</span>}
             description={
               <>
-                <span className="block text-[11px] leading-relaxed text-warning">
+                <span className="block text-xs leading-relaxed text-warning">
                   {provider.caution}
                 </span>
                 <a

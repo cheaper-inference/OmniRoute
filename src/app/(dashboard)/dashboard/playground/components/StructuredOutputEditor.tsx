@@ -67,7 +67,7 @@ export default function StructuredOutputEditor({ structuredOutput }: StructuredO
       <div className="flex items-center justify-between">
         <div className="flex flex-col gap-0.5">
           <span className="text-xs font-medium text-text-main">{t("jsonMode")}</span>
-          <span className="text-[11px] text-text-muted">{t("jsonModeDescription")}</span>
+          <span className="text-xs text-text-muted">{t("jsonModeDescription")}</span>
         </div>
         <Toggle
           size="sm"

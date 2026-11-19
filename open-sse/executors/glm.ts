@@ -540,12 +540,16 @@ export class GlmExecutor extends DefaultExecutor {
     let response: Response;
     try {
       this.assertOutboundUrlAllowed(url); // GHSA-4f49: glm has its own fetch path
-      response = await fetch(url, {
-        method: "POST",
-        headers,
-        body: JSON.stringify(transformedBody),
-        signal: combinedSignal || undefined,
-      });
+      response = await this.dispatchRequest(
+        url,
+        {
+          method: "POST",
+          headers,
+          body: JSON.stringify(transformedBody),
+          signal: combinedSignal || undefined,
+        },
+        input.credentials
+      );
     } finally {
       if (timeoutId) clearTimeout(timeoutId);
     }
@@ -560,7 +564,8 @@ export class GlmExecutor extends DefaultExecutor {
         model: input.model,
         body: transformedBody,
         fetchOptions: { method: "POST", headers, signal: combinedSignal || undefined },
-        fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+        fetchFn: (fetchUrl, fetchOpts) =>
+          this.dispatchRequest(fetchUrl, fetchOpts, input.credentials),
         log: input.log,
       });
       response = recovery.response;
@@ -572,7 +577,8 @@ export class GlmExecutor extends DefaultExecutor {
         model: input.model,
         body: transformedBody,
         fetchOptions: { method: "POST", headers, signal: combinedSignal || undefined },
-        fetchFn: (fetchUrl, fetchOpts) => fetch(fetchUrl, fetchOpts),
+        fetchFn: (fetchUrl, fetchOpts) =>
+          this.dispatchRequest(fetchUrl, fetchOpts, input.credentials),
         serializeBody: (value) => JSON.stringify(value),
         strippedFields: new Set<string>(),
         log: input.log,

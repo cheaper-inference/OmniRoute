@@ -1,1 +1,0 @@
-- **fix(resilience):** Honor the configured absolute heap threshold in the history-aware pressure sampler so sustained pressure reaches the existing recovery and opt-in self-restart policies. Threshold defaults, explicit null overrides and recovery hysteresis are unchanged ([#18305](https://github.com/cheaper-inference/OmniRoute/pull/18305)) — thanks @aldoeliacim

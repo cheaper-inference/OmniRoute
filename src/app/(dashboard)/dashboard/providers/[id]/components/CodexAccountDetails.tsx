@@ -66,7 +66,7 @@ export default function CodexAccountDetails({ pool }: CodexAccountDetailsProps) 
           .map((child) => (
             <div
               key={child.key.scope}
-              className="rounded-md border border-border/50 bg-background/60 px-2.5 py-2 text-xs"
+              className="rounded-md border border-border/50 bg-bg/60 px-2.5 py-2 text-xs"
             >
               <div className="flex items-center justify-between gap-2">
                 <span className="font-medium">Codex</span>
@@ -83,7 +83,7 @@ export default function CodexAccountDetails({ pool }: CodexAccountDetailsProps) 
                 <span>7d: {formatQuota(child.quota.windows["7d"], t("codexPoolUsed"))}</span>
               </div>
               {limited && child.cooldown.rateLimitedUntil ? (
-                <div className="mt-1 text-[11px] text-warning">
+                <div className="mt-1 text-xs text-warning">
                   {t("codexPoolUntil", {
                     value: new Intl.DateTimeFormat(locale, {
                       dateStyle: "short",
