@@ -240,3 +240,19 @@ test("csvToJsonl: empty CSV string → Zod throws (min(1) violation)", () => {
     csvToJsonl({ csv: "", mapping: DEFAULT_MAPPING, defaults: DEFAULT_DEFAULTS })
   );
 });
+
+test("csvToJsonl keeps record offsets through mixed line endings and escaped quotes", () => {
+  const csv = 'id,prompt\r\nr1,plain\r\n\r\n"r,2","line one\r\n""second"" line"\rr3,last\n';
+  const result = make(csv);
+  assert.equal(result.rowsParsed, 3);
+  assert.equal(result.rowsSkipped, 0);
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(
+    parseLines(result.jsonl).map((row) => [row.custom_id, row.body.messages[0].content]),
+    [
+      ["r1", "plain"],
+      ["r,2", 'line one\r\n"second" line'],
+      ["r3", "last"],
+    ]
+  );
+});

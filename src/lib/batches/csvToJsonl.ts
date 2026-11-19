@@ -8,6 +8,8 @@ import { csvToJsonlInputSchema, type CsvToJsonlInput } from "./schemas";
  * Does NOT strip BOM — callers should strip before invoking if needed.
  */
 function parseCsvRow(line: string): string[] {
+  if (!line.includes('"')) return line.split(",");
+
   const out: string[] = [];
   let buf = "";
   let inQuotes = false;
@@ -48,34 +50,28 @@ function parseCsvRow(line: string): string[] {
  */
 function splitLines(s: string, limit = Infinity): string[] {
   const out: string[] = [];
-  let buf = "";
+  let start = 0;
   let inQuotes = false;
   for (let i = 0; i < s.length; i++) {
     const ch = s[i];
     if (ch === '"') {
       if (inQuotes && s[i + 1] === '"') {
-        // Escaped quote inside quoted field: add both and advance
-        buf += '""';
         i++;
         continue;
       }
       inQuotes = !inQuotes;
-      buf += ch;
       continue;
     }
     if ((ch === "\n" || ch === "\r") && !inQuotes) {
-      if (ch === "\r" && s[i + 1] === "\n") i++;
-      if (buf.length > 0) out.push(buf);
+      if (i > start) out.push(s.slice(start, i));
       if (out.length >= limit) return out;
-      buf = "";
-      continue;
+      if (ch === "\r" && s[i + 1] === "\n") i++;
+      start = i + 1;
     }
-    buf += ch;
   }
-  if (buf.length > 0) out.push(buf);
+  if (start < s.length) out.push(s.slice(start));
   return out;
 }
-
 /** Read the first logical CSV record using the same parser as batch conversion. */
 export function parseCsvHeaders(csv: string): string[] {
   const firstLine = splitLines(csv.replace(/^\uFEFF/, ""), 1)[0];
