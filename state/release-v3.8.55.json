@@ -3,64 +3,70 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b1",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b1-bb946ced17fd",
-    "candidateSha": "bb946ced17fddc311cc45d045d3d324d9e85d2a9",
+    "batchId": "basecheck-cc59ad70b2e9",
+    "kind": "base-check",
+    "candidateRef": "omni-queue/release-v3.8.55/basecheck-cc59ad70b2e9",
+    "candidateSha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
     "baseSha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
-    "treeSha": "30d37979abb14ad257216dff45f301791890f221",
-    "prs": [
-      {
-        "n": 20553,
-        "head": "aa82b3592fc18940747a97fe5df3c0689b8fc061",
-        "title": "fix(security): keep caller SearXNG base URL public-only and token-free",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-19T07:29:09Z"
-      },
-      {
-        "n": 20565,
-        "head": "ba4384c8eca24ac9c950c63af09bae28fa1ffc6f",
-        "title": "fix(security): opt-in block of 198.18.0.0/15 in the strict outbound guard",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-19T07:29:12Z"
-      },
-      {
-        "n": 20561,
-        "head": "55ff31fcd72e0df7471631c1286ec88e06c741b4",
-        "title": "fix(security): check Quota Share caps on in-request account rotation",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-19T07:29:14Z"
-      },
-      {
-        "n": 20566,
-        "head": "7bf875933003ff7c42d6dfcae4741007ef17937e",
-        "title": "fix(security): keep client credentials out of plugin hooks and document plugin privileges",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-19T07:29:17Z"
-      },
-      {
-        "n": 20567,
-        "head": "da1ad875b579721aa5f6c92c78a8a5fd775471a1",
-        "title": "fix(security): require a structured credit code before a 400 parks a connection",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-19T07:29:20Z"
-      }
-    ],
+    "treeSha": null,
+    "prs": [],
     "stage": "testing",
-    "startedAt": "2026-11-19T07:47:20.577Z",
+    "startedAt": "2026-11-19T08:46:23.492Z",
     "attempts": 0,
     "bisect": null,
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b1-bb946ced17fd",
-      "requestedAt": "2026-11-19T08:20:09.712Z",
-      "afterMs": 1795076381000,
-      "runIds": [
-        44482317677
+    "pendingRed": {
+      "batchId": "b1",
+      "candidateSha": "bb946ced17fddc311cc45d045d3d324d9e85d2a9",
+      "prs": [
+        {
+          "n": 20553,
+          "head": "aa82b3592fc18940747a97fe5df3c0689b8fc061",
+          "title": "fix(security): keep caller SearXNG base URL public-only and token-free",
+          "author": "diegosouzapw",
+          "labeledAt": "2026-11-19T07:29:09Z"
+        },
+        {
+          "n": 20565,
+          "head": "ba4384c8eca24ac9c950c63af09bae28fa1ffc6f",
+          "title": "fix(security): opt-in block of 198.18.0.0/15 in the strict outbound guard",
+          "author": "diegosouzapw",
+          "labeledAt": "2026-11-19T07:29:12Z"
+        },
+        {
+          "n": 20561,
+          "head": "55ff31fcd72e0df7471631c1286ec88e06c741b4",
+          "title": "fix(security): check Quota Share caps on in-request account rotation",
+          "author": "diegosouzapw",
+          "labeledAt": "2026-11-19T07:29:14Z"
+        },
+        {
+          "n": 20566,
+          "head": "7bf875933003ff7c42d6dfcae4741007ef17937e",
+          "title": "fix(security): keep client credentials out of plugin hooks and document plugin privileges",
+          "author": "diegosouzapw",
+          "labeledAt": "2026-11-19T07:29:17Z"
+        },
+        {
+          "n": 20567,
+          "head": "da1ad875b579721aa5f6c92c78a8a5fd775471a1",
+          "title": "fix(security): require a structured credit code before a 400 parks a connection",
+          "author": "diegosouzapw",
+          "labeledAt": "2026-11-19T07:29:20Z"
+        }
       ],
-      "jobs": [
-        "Gate / CI",
-        "Unit Tests (6/8)"
-      ]
+      "signatures": [
+        {
+          "check": "Gate / CI",
+          "key": "",
+          "infra": false
+        },
+        {
+          "check": "Unit Tests",
+          "key": "",
+          "infra": false
+        }
+      ],
+      "bisect": null
     }
   },
   "baseChecks": [],
@@ -69,7 +75,7 @@
   },
   "counters": {
     "batchSeq": 1,
-    "ciRuns": 1,
+    "ciRuns": 2,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 1,
@@ -128,7 +134,37 @@
       "sha": "bb946ced17fddc311cc45d045d3d324d9e85d2a9",
       "detail": "re-running the failed jobs of b1 once (Gate / CI, Unit Tests (6/8)) before a base check",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44486661826"
+    },
+    {
+      "at": "2026-11-19T08:46:23.492Z",
+      "type": "checks-red",
+      "batchId": "b1",
+      "prs": [
+        20553,
+        20565,
+        20561,
+        20566,
+        20567
+      ],
+      "sha": "bb946ced17fddc311cc45d045d3d324d9e85d2a9",
+      "detail": "Gate / CI, Unit Tests (6/8)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44490384814"
+    },
+    {
+      "at": "2026-11-19T08:46:31.524Z",
+      "type": "base-check-started",
+      "batchId": "basecheck-cc59ad70b2e9",
+      "prs": [
+        20553,
+        20565,
+        20561,
+        20566,
+        20567
+      ],
+      "sha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
+      "detail": "b1 red on a base with no verdict: testing the bare base",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44490384814"
     }
   ],
-  "updatedAt": "2026-11-19T08:20:32.342Z"
+  "updatedAt": "2026-11-19T08:46:56.012Z"
 }
