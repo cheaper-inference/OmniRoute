@@ -14,6 +14,9 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
+const tracker = await import("../../open-sse/services/combo/toolRejectionTracker.ts");
+const { resolveComboTargetPipeline } =
+  await import("../../open-sse/services/combo/targetResolution.ts");
 
 const FLAG = "OMNIROUTE_TOOL_REJECTION_DEFER";
 const log = { info() {}, warn() {}, error() {}, debug() {} };
@@ -109,10 +112,6 @@ test("flag on: a served tool request clears earlier rejections", async () => {
   for (let n = 4; n <= 5; n++) await send(bad, good, n, true);
   assert.deepEqual(await send(bad, good, 6, true), [bad, good], "count restarted after the serve");
 });
-
-const tracker = await import("../../open-sse/services/combo/toolRejectionTracker.ts");
-const { resolveComboTargetPipeline } =
-  await import("../../open-sse/services/combo/targetResolution.ts");
 
 const toolBody = (n: number) => ({
   messages: [{ role: "user", content: `tracker request ${n}` }],
