@@ -57,15 +57,37 @@ export function exactValuePattern(): RegExp | null {
   return pattern;
 }
 
+/**
+ * Replace every listed value. All occurrences are found in the original text and overlapping
+ * ones are merged first: a single global replace would consume one value and leave the part of
+ * an overlapping value outside it in clear (`correct horse` + `horse battery staple`).
+ */
 export function redactExactValues(text: string): { text: string; count: number } {
-  if (!pattern) return { text, count: 0 };
+  if (!values.length) return { text, count: 0 };
+  const spans: Array<[number, number]> = [];
+  for (const value of values) {
+    for (let at = text.indexOf(value); at !== -1; at = text.indexOf(value, at + 1)) {
+      spans.push([at, at + value.length]);
+    }
+  }
+  if (!spans.length) return { text, count: 0 };
+  spans.sort((a, b) => a[0] - b[0] || b[1] - a[1]);
+  const parts: string[] = [];
+  let kept = 0;
   let count = 0;
-  pattern.lastIndex = 0;
-  const redacted = text.replace(pattern, () => {
+  let [start, end] = spans[0];
+  for (const [nextStart, nextEnd] of spans.slice(1)) {
+    if (nextStart < end) {
+      end = Math.max(end, nextEnd);
+      continue;
+    }
+    parts.push(text.slice(kept, start), EXACT_VALUE_PLACEHOLDER);
     count++;
-    return EXACT_VALUE_PLACEHOLDER;
-  });
-  return { text: redacted, count };
+    kept = end;
+    [start, end] = [nextStart, nextEnd];
+  }
+  parts.push(text.slice(kept, start), EXACT_VALUE_PLACEHOLDER, text.slice(end));
+  return { text: parts.join(""), count: count + 1 };
 }
 
 /** Start of the longest buffer suffix that begins a listed value, or undefined. */

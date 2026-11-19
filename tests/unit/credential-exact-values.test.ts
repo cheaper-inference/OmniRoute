@@ -69,6 +69,13 @@ test("a regex metacharacter in a value is matched literally", () => {
   assert.equal(redactCredentials("x aXbbbcccdefgh y").modified, false);
 });
 
+test("overlapping listed values are masked together, leaving no part of either visible", () => {
+  setCredentialExactValues(["correct horse", "horse battery staple"].join("\n"));
+  const r = redactCredentials(`say ${SECRET} now`);
+  assert.equal(r.text, "say [REDACTED:exact_value] now");
+  assert.equal(r.text.includes("battery"), false);
+});
+
 test("the settings schema rejects a value shorter than 10 characters", () => {
   assert.equal(
     updateSettingsSchema.safeParse({ credentialExactValues: `${SECRET}\nshort` }).success,
