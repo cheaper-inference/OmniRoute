@@ -556,6 +556,8 @@ export interface EnrichmentDisplayContext {
   rawModelId?: string;
   /** Whether to render the editor in a trailing parenthesis (default true). */
   providerTag?: boolean;
+  /** Drop the provider prefix from the name: the publication provider carries it. */
+  omitProvider?: boolean;
 }
 
 /**
@@ -574,7 +576,9 @@ export function applyEnrichment(
   enrichment: OmniRouteEnrichmentEntry | undefined,
   context: EnrichmentDisplayContext = {}
 ): ModelV2 {
-  if (!enrichment) return model;
+  // Prefix omission depends on the caller's alias decision, not on whether the
+  // pricing overlay answered: run it even when enrichment is unavailable.
+  if (!enrichment && context.omitProvider !== true) return model;
   const rawModelId =
     typeof context.rawModelId === "string" && context.rawModelId.length > 0
       ? context.rawModelId
@@ -583,9 +587,9 @@ export function applyEnrichment(
   // its id. Without a raw id from the caller (the /api/combos pass) that is the
   // model's own id, else the builder gets nothing and renders `combo - `.
   const hasEnrichmentName =
-    typeof enrichment.name === "string" && enrichment.name.trim().length > 0;
+    typeof enrichment?.name === "string" && enrichment.name.trim().length > 0;
   const nameSourceId = rawModelId || (hasEnrichmentName ? "" : model.id);
-  let providerDisplayName = enrichment.providerDisplayName;
+  let providerDisplayName = enrichment?.providerDisplayName;
   if (
     (!providerDisplayName || providerDisplayName.trim().length === 0) &&
     typeof rawModelId === "string" &&
@@ -595,21 +599,22 @@ export function applyEnrichment(
   }
   const built = buildModelDisplayName({
     rawId: nameSourceId,
-    enrichmentName: enrichment.name,
-    providerAlias: enrichment.providerAlias,
+    enrichmentName: enrichment?.name,
+    providerAlias: enrichment?.providerAlias,
     providerDisplayName,
     providerTag: context.providerTag,
-    isFree: enrichment.freeType !== undefined,
-    freeType: enrichment.freeType,
-    monthlyTokens: enrichment.monthlyTokens,
-    creditTokens: enrichment.creditTokens,
+    omitProvider: context.omitProvider,
+    isFree: enrichment?.freeType !== undefined,
+    freeType: enrichment?.freeType,
+    monthlyTokens: enrichment?.monthlyTokens,
+    creditTokens: enrichment?.creditTokens,
     isCombo: context.isCombo,
     isAutoCombo: context.isAutoCombo,
   });
   if (built.trim().length > 0) {
     model.name = built;
   }
-  if (enrichment.pricing) {
+  if (enrichment?.pricing) {
     if (typeof enrichment.pricing.input === "number") {
       model.cost.input = enrichment.pricing.input;
     }

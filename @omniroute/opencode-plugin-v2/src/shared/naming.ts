@@ -238,6 +238,8 @@ export interface ModelDisplayNameParams {
   creditTokens?: number;
   /** Whether this is a combo entry (`combo - <slug>`, no free icon). */
   isCombo?: boolean;
+  /** Drop the provider prefix from the name: the provider carries it already. */
+  omitProvider?: boolean;
   /** Whether this is an auto combo entry. */
   isAutoCombo?: boolean;
   /** Auto combo variant. */
@@ -311,10 +313,8 @@ export function buildModelDisplayName(params: ModelDisplayNameParams): string {
     provider = params.providerDisplayName.trim();
   }
 
-  const rawBase =
-    params.enrichmentName && params.enrichmentName.trim().length > 0
-      ? params.enrichmentName
-      : params.rawId;
+  const hasEnrichmentName = !!params.enrichmentName && params.enrichmentName.trim().length > 0;
+  const rawBase = hasEnrichmentName ? params.enrichmentName : params.rawId;
 
   // Split off a leading provider prefix (`Provider - rest`) when present.
   let work = rawBase.trim();
@@ -351,7 +351,13 @@ export function buildModelDisplayName(params: ModelDisplayNameParams): string {
 
   // Free markers.
   const { text: cleanedModel, wasFree } = stripFreeMarkers(work);
-  const model = cleanedModel.length > 0 ? cleanedModel : work;
+  let model = cleanedModel.length > 0 ? cleanedModel : work;
+  // When the publication provider already carries the upstream name, a label
+  // built from the raw id would repeat it; drop only the leading route segment.
+  if (params.omitProvider && !hasEnrichmentName) {
+    const slash = model.indexOf("/");
+    if (slash > 0) model = model.slice(slash + 1);
+  }
   const isFree = !!params.isFree || wasFree || prefixWasFree;
 
   if (
@@ -362,7 +368,8 @@ export function buildModelDisplayName(params: ModelDisplayNameParams): string {
     editor = "";
 
   const freePrefix = isFree ? "🆓 " : "";
-  const head = provider.length > 0 ? `${provider}${PROVIDER_TAG_SEPARATOR}` : "";
+  const head =
+    provider.length > 0 && !params.omitProvider ? `${provider}${PROVIDER_TAG_SEPARATOR}` : "";
   let name = `${freePrefix}${head}${model}`;
   if (editor && params.providerTag !== false) name = `${name} (${editor})`;
   if (isFree && params.freeType) {

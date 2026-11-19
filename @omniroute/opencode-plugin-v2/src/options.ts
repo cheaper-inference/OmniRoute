@@ -93,6 +93,10 @@ const pluginOptionsSchema = z
     // Inference telemetry is off by default: the host must opt in before the
     // plugin touches the sdk domain at all.
     telemetry: z.boolean().default(false),
+    // Publish one provider per upstream alias instead of a single OmniRoute
+    // provider. Off by default: existing `omniroute/...` references keep
+    // resolving and the published catalog stays byte-for-byte unchanged.
+    publishPerProvider: z.boolean().default(false),
     apiFormat: apiFormatSchema.optional(),
   })
   .strict();
@@ -194,6 +198,7 @@ export function toResolvedOptions(parsed: PluginOptions): ResolvedOptions {
     freshWindowDays: parsed.freshWindowDays,
     usageMemory: parsed.usageMemory,
     enrichment: parsed.enrichment,
+    publishPerProvider: parsed.publishPerProvider,
   };
 }
 
