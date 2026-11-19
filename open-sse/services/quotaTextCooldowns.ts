@@ -156,8 +156,15 @@ export function buildWeeklyQuotaFallback(
     typeof parsedResetMs === "number" && parsedResetMs > 0
       ? parsedResetMs
       : WEEKLY_QUOTA_COOLDOWN_MS;
-  const isIso =
-    parseIsoDateTimeResetMs(errorStr, MAX_WEEKLY_QUOTA_COOLDOWN_MS, nowMs, provider) !== null;
+  // Provenance follows the selected hint: a "resets in N days" countdown wins over an ISO
+  // instant in parseDayGranularityResetMs and must stay capped by maxCooldownMs.
+  const isoResetMs = parseIsoDateTimeResetMs(
+    errorStr,
+    MAX_WEEKLY_QUOTA_COOLDOWN_MS,
+    nowMs,
+    provider
+  );
+  const isIso = isoResetMs !== null && isoResetMs === parsedResetMs;
   return {
     shouldFallback: true,
     cooldownMs,

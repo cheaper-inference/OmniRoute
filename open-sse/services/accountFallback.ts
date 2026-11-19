@@ -1572,16 +1572,44 @@ export function parseRetryAfterFromBody(responseBody: unknown): {
 // parseDelayString now lives in ./retryAfterJson.ts (shared with parseRetryHintFromJsonBody's
 // Gemini RetryInfo.retryDelay parsing, #7940) — see the import at the top of this file.
 
+type DetailedRetryHint = { retryAfterMs: number; provenance: RetryHintProvenance };
+
+/**
+ * Relative "XhYmZs" countdown prose ("reset after 1h2m", "will reset after 30m",
+ * Antigravity / Cloud Code "Resets in 164h27m24s"). Returns `undefined` when no phrase
+ * matched, so the caller keeps looking; a matched phrase returns its duration (or null).
+ */
+function parseRelativeCountdownProseMs(msg: string): number | null | undefined {
+  for (const re of [RESETS_AFTER_RE, WILL_RESET_AFTER_RE, RESETS_IN_RE]) {
+    const match = re.exec(msg);
+    if (match?.[1] || match?.[2] || match?.[3]) return computeDurationMs(match);
+  }
+  return undefined;
+}
+
+/** Gemini phrasing: "Please retry in 54.472178091s" (fractional seconds). */
+function parseRetryInSecondsMs(msg: string): number | null {
+  const retryInSecMatch = RETRY_IN_SEC_RE.exec(msg);
+  if (!retryInSecMatch?.[1]) return null;
+  const sec = Number.parseFloat(retryInSecMatch[1]);
+  if (!Number.isFinite(sec) || sec <= 0) return null;
+  return Math.min(Math.round(sec * 1000), MAX_PROVIDER_COOLDOWN_MS);
+}
+
+function bodyHint(retryAfterMs: number | null): DetailedRetryHint | null {
+  return retryAfterMs !== null ? { retryAfterMs, provenance: "body" } : null;
+}
+
 export function parseDetailedRetryFromErrorText(
   errorText: unknown,
   provider?: string | null,
   nowMs: number = Date.now()
-): { retryAfterMs: number; provenance: RetryHintProvenance } | null {
+): DetailedRetryHint | null {
   if (!errorText || typeof errorText !== "string") return null;
   const msg: string = String(errorText);
   // A Google PerDay quota violation outlives its seconds-scale RetryInfo.
   if (hasGoogleDailyQuotaViolation(msg)) {
-    return { retryAfterMs: googleDailyQuotaCooldownMs({ nowMs }), provenance: "body" };
+    return bodyHint(googleDailyQuotaCooldownMs({ nowMs }));
   }
 
   const detailedJsonHint = parseDetailedRetryHintFromJsonBody(msg, MAX_PROVIDER_COOLDOWN_MS);
@@ -1600,10 +1628,7 @@ export function parseDetailedRetryFromErrorText(
   // MAX_PROVIDER_COOLDOWN_MS, mirroring the JSON RetryInfo.retryDelay cap (#7940).
   const pleaseRetryMs = parseDelayString(PLEASE_RETRY_RE.exec(msg)?.[1]);
   if (pleaseRetryMs !== null && pleaseRetryMs > 0) {
-    return {
-      retryAfterMs: Math.min(pleaseRetryMs, MAX_SHORT_RETRY_HINT_MS),
-      provenance: "body",
-    };
+    return bodyHint(Math.min(pleaseRetryMs, MAX_SHORT_RETRY_HINT_MS));
   }
 
   // Issue #2321 / #14479 / #20281: parse embedded absolute ISO retry timestamps.
@@ -1613,48 +1638,15 @@ export function parseDetailedRetryFromErrorText(
     return { retryAfterMs: isoMs, provenance: "body_iso_reset" };
   }
 
-  const match = RESETS_AFTER_RE.exec(msg);
-  if (match?.[1] || match?.[2] || match?.[3]) {
-    const dur = computeDurationMs(match);
-    return dur !== null ? { retryAfterMs: dur, provenance: "body" } : null;
-  }
+  const countdownMs = parseRelativeCountdownProseMs(msg);
+  if (countdownMs !== undefined) return bodyHint(countdownMs);
 
-  // Variant without "reset after": "will reset after XhYmZs"
-  const altMatch = WILL_RESET_AFTER_RE.exec(msg);
-  if (altMatch?.[1] || altMatch?.[2] || altMatch?.[3]) {
-    const dur = computeDurationMs(altMatch);
-    return dur !== null ? { retryAfterMs: dur, provenance: "body" } : null;
-  }
+  const retryInSecMs = parseRetryInSecondsMs(msg);
+  if (retryInSecMs !== null) return bodyHint(retryInSecMs);
 
-  // Antigravity / Cloud Code phrasing: "Resets in 164h27m24s".
-  const resetsInMatch = RESETS_IN_RE.exec(msg);
-  if (resetsInMatch?.[1] || resetsInMatch?.[2] || resetsInMatch?.[3]) {
-    const dur = computeDurationMs(resetsInMatch);
-    return dur !== null ? { retryAfterMs: dur, provenance: "body" } : null;
-  }
-
-  // Gemini phrasing: "Please retry in 54.472178091s" (fractional seconds).
-  const retryInSecMatch = RETRY_IN_SEC_RE.exec(msg);
-  if (retryInSecMatch?.[1]) {
-    const sec = Number.parseFloat(retryInSecMatch[1]);
-    if (Number.isFinite(sec) && sec > 0) {
-      return {
-        retryAfterMs: Math.min(Math.round(sec * 1000), MAX_PROVIDER_COOLDOWN_MS),
-        provenance: "body",
-      };
-    }
-  }
-
-  const dayResetMs = parseDayGranularityResetMs(msg, MAX_PROVIDER_COOLDOWN_MS, nowMs, provider);
-  if (dayResetMs !== null) {
-    const isIso = parseIsoDateTimeResetMs(msg, MAX_PROVIDER_COOLDOWN_MS, nowMs, provider) !== null;
-    return {
-      retryAfterMs: dayResetMs,
-      provenance: isIso ? "body_iso_reset" : "body",
-    };
-  }
-
-  return null;
+  // The ISO branch above already returned for any absolute timestamp, so a day-granularity
+  // hint here is a relative countdown or a year-less date: capped `body` provenance.
+  return bodyHint(parseDayGranularityResetMs(msg, MAX_PROVIDER_COOLDOWN_MS, nowMs, provider));
 }
 
 // T07: parse retry time from error text body with combined "XhYmZs" format.

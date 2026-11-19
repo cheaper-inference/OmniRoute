@@ -11,6 +11,7 @@ import {
   getModelLockoutInfo,
   clearAllModelLockouts,
 } from "../../open-sse/services/accountFallback.ts";
+import { buildWeeklyQuotaFallback } from "../../open-sse/services/quotaTextCooldowns.ts";
 
 // Regression test for #20281:
 // On subscription-quota 429s whose upstream reset time is stated in error body prose
@@ -176,4 +177,34 @@ test("recordModelLockoutFailure clamps relative prose countdown to maxCooldownMs
   } finally {
     Date.now = realNow;
   }
+});
+
+test("an impossible calendar date in ISO reset prose is rejected, not exempted (#20281)", () => {
+  // Date.parse rolls 2026-11-31 over to 2026-12-01: honoring it would exempt a
+  // ~16-day lock from the operator's maxCooldownMs cap.
+  const invalidDate =
+    "Usage limit reached for 5 hour. Your limit will reset at 2026-11-31T07:02:00.000Z";
+  const detailed = parseDetailedRetryFromErrorText(invalidDate, "zai", NOW);
+  assert.notEqual(detailed?.provenance, "body_iso_reset");
+  assert.equal(parseRetryFromErrorText(invalidDate, "zai", NOW), null);
+});
+
+test("weekly fallback keeps capped provenance when a relative day countdown is selected (#20281)", () => {
+  // parseDayGranularityResetMs prefers the "resets in N days" countdown; the ISO
+  // instant elsewhere in the text must not relabel that relative duration.
+  const mixed =
+    "Weekly quota exhausted. Resets in 7 days. Your limit will reset at 2026-11-15T07:02:00.000Z";
+  const fallback = buildWeeklyQuotaFallback(mixed, NOW, "zai");
+  assert.ok(fallback, "expected a weekly quota fallback");
+  assert.equal(fallback.quotaResetHintMs, 7 * 24 * 3600 * 1000);
+  assert.equal(fallback.retryHintSource, "body");
+  assert.equal(retryHintBypassesMaxCooldownMs(fallback.retryHintSource), false);
+});
+
+test("weekly fallback marks a selected ISO reset as body_iso_reset (#20281)", () => {
+  const isoOnly = "Weekly quota exhausted. Your limit will reset at 2026-11-15T07:02:00.000Z";
+  const fallback = buildWeeklyQuotaFallback(isoOnly, NOW, "zai");
+  assert.ok(fallback, "expected a weekly quota fallback");
+  assert.equal(fallback.quotaResetHintMs, EXPECTED_WAIT_MS);
+  assert.equal(fallback.retryHintSource, "body_iso_reset");
 });
