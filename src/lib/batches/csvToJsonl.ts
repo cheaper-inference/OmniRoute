@@ -49,8 +49,6 @@ function parseCsvRow(line: string): string[] {
  * Handles CRLF and LF; does not collapse multiple empty lines.
  */
 function splitLines(s: string, limit = Infinity): string[] {
-  if (limit === Infinity && !s.includes('"')) return s.split(/\r\n?|\n/).filter(Boolean);
-
   const out: string[] = [];
   let start = 0;
   let inQuotes = false;
@@ -74,6 +72,11 @@ function splitLines(s: string, limit = Infinity): string[] {
   if (start < s.length) out.push(s.slice(start));
   return out;
 }
+
+function splitCompleteCsv(csv: string): string[] {
+  return csv.includes('"') ? splitLines(csv) : csv.split(/\r\n?|\n/).filter(Boolean);
+}
+
 /** Read the first logical CSV record using the same parser as batch conversion. */
 export function parseCsvHeaders(csv: string): string[] {
   const firstLine = splitLines(csv.replace(/^\uFEFF/, ""), 1)[0];
@@ -167,7 +170,7 @@ export function csvToJsonl(rawInput: CsvToJsonlInput): {
   const input = csvToJsonlInputSchema.parse(rawInput);
   // Strip UTF-8 BOM if present so the first header cell parses cleanly
   const normalizedCsv = input.csv.replace(/^﻿/, "");
-  const lines = splitLines(normalizedCsv);
+  const lines = splitCompleteCsv(normalizedCsv);
 
   if (lines.length < 2) {
     return {
