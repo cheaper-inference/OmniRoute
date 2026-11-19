@@ -97,10 +97,19 @@ export function matchesModelCatalogQuery(query: string, target: ModelCatalogTarg
   ].filter(Boolean);
 
   const regex = parseRegexQuery(query);
-  if (regex) return haystacks.some((value) => regex.test(value));
+  if (regex) {
+    // The original text, not the lowercased haystacks: explicit flags without `i` are case-sensitive.
+    const originals = [target.modelId, target.modelName, target.alias]
+      .map((value) => (typeof value === "string" ? value.trim() : ""))
+      .concat(getModelCatalogSourceSearchText(target.source))
+      .filter(Boolean);
+    return originals.some((value) => regex.test(value));
+  }
 
   const tokens = normalizedQuery.split(/\s+/);
   const excluded = tokens.filter((t) => t.length > 1 && t.startsWith("!")).map((t) => t.slice(1));
+  // Without a `!` token the query is the plain substring it always was, inner spaces included.
+  if (excluded.length === 0) return haystacks.some((value) => value.includes(normalizedQuery));
   if (excluded.some((term) => haystacks.some((value) => value.includes(term)))) return false;
 
   const included = tokens.filter((t) => !(t.length > 1 && t.startsWith("!")));

@@ -38,3 +38,14 @@ test("queries without an operator keep the old behaviour", () => {
   assert.equal(matchesModelCatalogQuery("-pro", { modelId: "x/a-flash" }), false);
   assert.equal(matchesModelCatalogQuery("!", { modelId: "x/a!b" }), true);
 });
+
+test("a regex with explicit flags is matched against the original catalog text", () => {
+  // No `i` flag: case-sensitive, so it must see "GPT", not a lowercased copy.
+  assert.equal(matchesModelCatalogQuery("/GPT/u", gpt), true);
+  assert.equal(matchesModelCatalogQuery("/^\\S+$/", { modelId: "x/no-spaces" }), true);
+});
+
+test("a plain query keeps its inner whitespace", () => {
+  const spaced = { modelId: "x/a", modelName: "Claude  Sonnet" };
+  assert.equal(matchesModelCatalogQuery("claude  sonnet", spaced), true);
+});
