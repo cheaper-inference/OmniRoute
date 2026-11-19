@@ -326,7 +326,11 @@ export default function ComplianceTab() {
         ) : visibleEntries.length === 0 ? (
           <EmptyState icon="policy" title={t("noEvents")} />
         ) : (
-          <Table scrollbarLabel={t("title")} className="min-w-[1040px] text-left">
+          <Table
+            scrollbarLabel={t("title")}
+            scrollLabel={t("title")}
+            className="min-w-[1040px] text-left"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("timestamp")}</TableHead>

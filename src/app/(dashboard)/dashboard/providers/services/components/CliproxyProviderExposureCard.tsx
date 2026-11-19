@@ -60,7 +60,7 @@ export function CliproxyProviderExposureCard() {
           <Icon name="hub" size={20} />
         </div>
         <div>
-          <h3 className="font-medium text-sm">{t("title")}</h3>
+          <h3 className="text-sm">{t("title")}</h3>
           <p className="text-xs text-text-muted">
             {t.rich("description", { prefix: renderPrefix })}
           </p>

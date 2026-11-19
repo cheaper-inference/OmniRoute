@@ -19,7 +19,7 @@ export function HowItWorksSidebar({ t, showCustomNote }: HowItWorksSidebarProps)
 
   return (
     <aside className="space-y-4 rounded-xl border border-border bg-surface p-5">
-      <h3 className="flex items-center gap-2 text-sm font-semibold text-text-main">
+      <h3 className="flex items-center gap-2 text-sm text-text-main">
         <Icon name="info" size={18} className="text-primary" />
         {t("howItWorks.title")}
       </h3>

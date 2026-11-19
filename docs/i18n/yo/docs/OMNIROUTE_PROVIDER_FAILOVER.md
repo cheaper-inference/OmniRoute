@@ -4,10 +4,20 @@
 
 ---
 
-Àwọn ìkùnà ni a máa ń pín sí ẹ̀ka kí a tó ṣe ìpinnu láti tún gbìyànjú.
+Awọn ikuna ti wa ni ipin ṣaaju ṣiṣe awọn ipinnu atunwi.
 
-Àwọn ìkùnà fún ìgbà díẹ̀ bíi àkókò dídúró tí ó parí, àṣìṣe nẹ́tíwọ́ọ̀kì, ààlà ìwọ̀n ìbéèrè, àti àwọn ìdáhùn 5xx láti ọ̀dọ̀ olupèsè lè yí padà sí olupèsè mìíràn. Àwọn àṣìṣe ìfàṣẹsí, àṣìṣe ìyọ̀ǹda, àwọn ìbéèrè tí kò bófin mu, àwọn àwòṣe tí kò sí nílẹ̀, àti àwọn ìkùnà tí a kò mọ̀ ni a kì í tún gbìyànjú lásán láìṣàyẹ̀wò.
+Awọn ikuna igba diẹ gẹgẹbi awọn akoko ipari, awọn aṣiṣe netiwọki, awọn opin oṣuwọn, ati awọn idahun 5xx olupese le kuna lori. Opin tabi kirẹditi ti o rẹwẹsi (ipin kan 429, tabi 402 Isanwo Ti a beere) ko tun gbiyanju rara lori olupese kanna ṣugbọn o kuna si ekeji, eyiti ipin rẹ jẹ lọtọ. Awọn aṣiṣe ijẹrisi, awọn aṣiṣe igbanilaaye, awọn ibeere ti ko tọ, awọn awoṣe ti ko si, ati awọn ikuna aimọ ko tun gbiyanju ni afọju.
 
-Ìlànà àìyípadà fún lílo ọ̀pọ̀ olupèsè fàyè gba tó ìgbìyànjú olupèsè mẹ́ta, ó tún máa ń gbìyànjú fún ààlà ìwọ̀n ìbéèrè àti àkókò dídúró tí ó parí, ó sì ya pípa iṣẹ́ dúró nípasẹ̀ ìṣàkóso sọ́tọ̀ kúrò ní ipò àyíká fún ìgbà díẹ̀.
+Ilana olupese alailewu gba laaye si awọn igbiyanju olupese mẹta, tun ṣe awọn opin oṣuwọn ati awọn akoko ipari, kuna lori ipin ti o rẹwẹsi, ati pe o tọju alaabo iṣakoso lọtọ si ipo iyika igba diẹ.
 
-Àwọn ipò àyíká ni `closed`, `open`, àti `half_open`. Àkókò ìsinmi máa ń ṣètò àyẹ̀wò tí a fi ààlà sí; àyẹ̀wò tí ó ṣàṣeyọrí máa ń ti àyíká náà pa, àyẹ̀wò tí ó kùnà sì máa ń tún un ṣí.
+## Ibi ti o kan
+
+- **Awọn akojọpọ** kuna laarin awọn ibi-afẹde wọn ni ibamu si ilana ati eto ti ara konbo.
+- **A si igboro awoṣe id** (ko si `provider/` ìpele) ti ọpọlọpọ awọn olupese ti nṣiṣe lọwọ ṣiṣẹ, laisi konbo ti orukọ gangan yẹn, ni akọkọ ti a firanṣẹ si awọn iyan itọkasi olupese. Ti igbiyanju yẹn ba kuna ni ọna ti eto imulo naa kuna lori, ibeere kanna ni a firanṣẹ si olupese ti nṣiṣẹ atẹle ti o nṣe iranṣẹ id. Idahun naa gbe `x-omniroute-fallback-attempts` pẹlu nọmba awọn olupese ti gbiyanju ṣaaju ọkan ti o dahun.
+  - Omiiran kọọkan ni a fun ni aṣẹ ni pato bi ẹnipe itọkasi ti gbe e. Ibi-afẹde awọn bulọọki bọtini API tabi ko gba jẹ fo laisi ipe ti oke kan, ati pe alabara gba aṣiṣe ti oke gidi, kii ṣe ijusile eto imulo fun ibi-afẹde kan ti ko darukọ rara.
+  - Idahun ti o kuna nikan n tẹsiwaju: ko si ohun ti o kuna lẹhin baiti ṣiṣan akọkọ.
+  - Awoṣe swap ipadabọ pajawiri kan nikan lẹhin gbogbo olupese ti awoṣe ti o beere ti kuna.
+  - Ibeere ti a fi si asopọ (`x-omniroute-connection`) duro lori rẹ.
+  - id (`provider/model`) ti a ti sọ tẹlẹ ko jẹ tun ọna si olupese miiran.
+
+Awọn ipinlẹ ayika jẹ `closed`, `open`, ati `half_open`. A cooldown iṣeto a didi ibere; iwadii aṣeyọri tilekun iyika naa ati pe iwadii ti o kuna yoo tun ṣii.

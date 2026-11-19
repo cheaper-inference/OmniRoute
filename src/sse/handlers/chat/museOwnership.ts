@@ -9,9 +9,11 @@
  */
 
 import { getProviderConnections } from "@/lib/db/providers";
+import { museScopeHasRecordedItems, readMuseOwnershipValue } from "@/lib/db/museSessionOwnership";
 import { isMusePolicyRefusal } from "@omniroute/open-sse/services/musePolicyRefusal.ts";
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
 import * as log from "../../utils/logger";
+import { markProviderBoundResponse } from "./providerBoundResponse.ts";
 import {
   MuseOwnershipError,
   MUSE_EMPTY_RESPONSE_RETRY_DELAYS_MS,
@@ -19,6 +21,7 @@ import {
   claimMuseSession,
   museClaimCandidates,
   museEmptyResponseRetryDelayMs,
+  bodyCarriesBoundContinuation,
   museSessionScopeFor,
   recordMuseOutput,
   usesMuseOAuthOwnership,
@@ -34,6 +37,9 @@ type Cred = {
   providerSpecificData?: { accountId?: string } | null;
 };
 type Creds = Cred | { allRateLimited?: boolean; allExpired?: boolean } | null | undefined;
+
+/** Re-exported so the chat handler imports one Muse module and both use the same predicate. */
+export { bodyCarriesBoundContinuation };
 
 export type MuseOwner = {
   scope: string;
@@ -95,9 +101,31 @@ export async function claimMuseOwner(args: ClaimArgs): Promise<MuseOwner | Respo
     const owner = claimMuseSession(scope, args.body, candidates, args.forcedConnectionId);
     return { scope, ...owner, emptyRetries: 0, emptyOriginal: null };
   } catch (error) {
-    if (error instanceof MuseOwnershipError) return errorResponse(error.status, error.message);
+    if (error instanceof MuseOwnershipError)
+      return markProviderBoundResponse(errorResponse(error.status, error.message));
     throw error;
   }
+}
+
+/**
+ * True when this request already belongs to a Muse session: an owner record or replayable
+ * history exists for its scope. Such a request must not be replayed on another provider,
+ * so provider failover is pinned. A Muse API-key install has no OAuth ownership at all and
+ * keeps the unpinned behavior.
+ */
+export async function museSessionIsOwned(args: {
+  body: Record<string, unknown>;
+  headers: unknown;
+  apiKeyId: string | null;
+}): Promise<boolean> {
+  const connections = toMuseConnectionRows(
+    await getProviderConnections({ provider: "muse-code", isActive: true })
+  );
+  const oauthAccounts = connections.filter((item) => item.authType === "oauth").length;
+  if (oauthAccounts === 0) return false;
+  const scope = museSessionScopeFor(args.body, args.headers, args.apiKeyId, oauthAccounts);
+  if (!scope) return false;
+  return Boolean(readMuseOwnershipValue(`session:${scope}`)) || museScopeHasRecordedItems(scope);
 }
 
 /**
@@ -113,9 +141,11 @@ export function museOwnerUnavailable(owner: MuseOwner, credentials: Creds): Resp
     typeof credentials.connectionId === "string" &&
     credentials.connectionId !== owner.connectionId;
   return selectedAnother
-    ? errorResponse(
-        503,
-        "Muse session owner is unavailable; cross-account continuation is forbidden."
+    ? markProviderBoundResponse(
+        errorResponse(
+          503,
+          "Muse session owner is unavailable; cross-account continuation is forbidden."
+        )
       )
     : null;
 }
@@ -150,7 +180,8 @@ export function bindMuseOwner(
     return null;
   } catch (error) {
     onFailure();
-    if (error instanceof MuseOwnershipError) return errorResponse(error.status, error.message);
+    if (error instanceof MuseOwnershipError)
+      return markProviderBoundResponse(errorResponse(error.status, error.message));
     throw error;
   }
 }

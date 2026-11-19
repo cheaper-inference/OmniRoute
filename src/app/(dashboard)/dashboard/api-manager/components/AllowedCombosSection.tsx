@@ -65,7 +65,7 @@ function ComboOptionRow({
       aria-pressed={isSelected}
       onClick={() => onToggle(combo.name)}
       className={cn(
-        "w-full justify-start gap-2 text-left text-xs font-normal",
+        "w-full justify-start gap-2 text-left text-xs",
         isSelected ? "bg-primary/10 text-text-main" : "text-text-muted"
       )}
     >
