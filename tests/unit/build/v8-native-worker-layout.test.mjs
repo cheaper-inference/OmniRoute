@@ -135,6 +135,107 @@ test("without the preload, tsx and the worker still exhibit distinct layouts", a
   assert.notEqual(parent.functions[0].ranges[0].endOffset, native.functions[0].ranges[0].endOffset);
 });
 
+test("CLI JavaScript coverage keeps the Node layout with an explicit tsx preload", async (t) => {
+  const directory = await mkdtemp(join(tmpdir(), "native-cli-coverage-"));
+  t.after(() => rm(directory, { recursive: true, force: true }));
+  const entry = new URL("bin/cli/utils/cliToken.mjs", root).href;
+  const dependency = new URL("bin/cli/data-dir.mjs", root).href;
+  const query = `${entry}?coverage-fixture=1`;
+  const imports = `await import(${JSON.stringify(entry)}); await import(${JSON.stringify(query)});`;
+
+  async function record(mode, args, code) {
+    const coverage = join(directory, mode);
+    await mkdir(coverage);
+    execFileSync(process.execPath, [...args, "--input-type=module", "--eval", code], {
+      cwd: root,
+      env: {
+        PATH: process.env.PATH,
+        DATA_DIR: directory,
+        NODE_ENV: "test",
+        NODE_OPTIONS: mode === "native" ? "" : `--import=${preload.href}`,
+        NODE_V8_COVERAGE: coverage,
+      },
+      stdio: "pipe",
+      timeout: 60_000,
+    });
+    const samples = new Map();
+    for (const file of await readdir(coverage)) {
+      if (!file.endsWith(".json")) continue;
+      const report = JSON.parse(await readFile(join(coverage, file), "utf8"));
+      for (const script of report.result) {
+        if (script.url !== entry && script.url !== query && script.url !== dependency) continue;
+        assert.equal(Boolean(report["source-map-cache"]?.[script.url]), false, script.url);
+        assert.equal(samples.has(script.url), false, script.url);
+        samples.set(script.url, script.functions);
+      }
+    }
+    assert.equal(samples.size, 3, `${mode} must cover the CLI modules and the query alias`);
+    return samples;
+  }
+
+  const native = await record("native", [], imports);
+  assert.deepEqual(await record("native-preload", [], imports), native);
+  assert.deepEqual(await record("early", ["--import", "tsx/esm"], imports), native);
+});
+
+test("the real CLI keeps native coverage through the clean-environment launcher", async (t) => {
+  const coverage = await mkdtemp(join(tmpdir(), "clean-cli-coverage-"));
+  t.after(() => rm(coverage, { recursive: true, force: true }));
+  execFileSync(
+    process.execPath,
+    [
+      "--import",
+      "tsx/esm",
+      "--input-type=module",
+      "--eval",
+      `
+        import assert from "node:assert/strict";
+        import { BIN, cleanEnv, layout, rm, runCli } from "./tests/_helpers/cliCwdEnvHarness.ts";
+        const fixture = layout();
+        try {
+          const env = cleanEnv(fixture.home);
+          assert.equal(env.NODE_OPTIONS, undefined);
+          const result = await runCli(BIN, ["--help"], fixture.cwd, env);
+          assert.equal(result.code, 0, result.stderr);
+        } finally {
+          rm(fixture.tmp);
+        }
+      `,
+    ],
+    {
+      cwd: root,
+      env: {
+        ...process.env,
+        NODE_OPTIONS: `--import=${preload.href}`,
+        NODE_V8_COVERAGE: coverage,
+        OMNIROUTE_CI_SYNC_TSX_CACHE: coverage,
+      },
+      stdio: "pipe",
+      timeout: 90_000,
+    }
+  );
+  const cli = new URL("bin/omniroute.mjs", root).href;
+  const token = new URL("bin/cli/utils/cliToken.mjs", root);
+  let launches = 0;
+  for (const file of await readdir(coverage)) {
+    if (!file.endsWith(".json")) continue;
+    const report = JSON.parse(await readFile(join(coverage, file), "utf8"));
+    if (!report.result.some((script) => script.url === cli)) continue;
+    launches++;
+    assert.ok(report.result.some((script) => script.url === preload.href));
+    assert.ok(
+      report.result.some(
+        (script) => script.url === new URL("scripts/ci/native-cli-v8-tsx.mjs", root).href
+      )
+    );
+    const script = report.result.find((sample) => sample.url === token.href);
+    assert.ok(script, "the CLI's imports contribute native coverage");
+    assert.equal(Boolean(report["source-map-cache"]?.[token.href]), false);
+    assert.equal(script.functions[0].ranges[0].endOffset, (await readFile(token, "utf8")).length);
+  }
+  assert.equal(launches, 1);
+});
+
 test("migration schema boots retain the native layout for the shared data paths module", async (t) => {
   const fixture = await mkdtemp(join(tmpdir(), "migration-native-coverage-"));
   t.after(() => rm(fixture, { recursive: true, force: true }));
