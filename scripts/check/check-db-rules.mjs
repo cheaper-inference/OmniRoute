@@ -13,7 +13,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { assertNoStale } from "./lib/allowlist.mjs";
+import { assertNoStale, enforceDiffScope } from "./lib/allowlist.mjs";
 
 const cwd = process.cwd();
 const API_DIR = path.join(cwd, "src/app/api");
@@ -124,6 +124,11 @@ function main() {
   const scanFiles = collectSqlScanFiles();
   const liveRawSql = findRawSql(scanFiles, new Set());
   assertNoStale(EXTERNAL_DB_ALLOWED, liveRawSql, "check-db-rules:raw-sql");
+  enforceDiffScope({
+    allowlist: EXTERNAL_DB_ALLOWED,
+    liveViolations: liveRawSql,
+    gateName: "check-db-rules",
+  });
 
   const rawSql = findRawSql(scanFiles);
   if (rawSql.length) {

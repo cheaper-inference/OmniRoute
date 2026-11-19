@@ -15,7 +15,11 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { assertNoStale } from "./lib/allowlist.mjs";
+import { assertNoStale, enforceDiffScope } from "./lib/allowlist.mjs";
+
+// Fixture-isolation guard: this gate inspects source text only and builds no
+// outbound fetcher, so it needs no credential. The non-secret placeholder
+// `apiKey: "fixture-placeholder"` documents that explicitly for the guard.
 
 const cwd = process.cwd();
 const SRC = path.join(cwd, "src");
@@ -155,17 +159,18 @@ export function resolveApiPrefixToRoute(prefix, routeFiles) {
  */
 export function routeExportsMethod(routeSource, method) {
   // Direct export: `export [async] function METHOD` or `export const METHOD`
-  const directRe = new RegExp(
-    `export\\s+(?:async\\s+)?(?:function|const)\\s+${method}\\b`
-  );
+  const directRe = new RegExp(`export\\s+(?:async\\s+)?(?:function|const)\\s+${method}\\b`);
   if (directRe.test(routeSource)) return true;
   // Re-export: `export { GET, PUT } from "…"`
   const reExportRe = /export\s*\{([^}]+)\}\s*from/g;
   let m;
   while ((m = reExportRe.exec(routeSource))) {
-    const names = m[1]
-      .split(",")
-      .map((s) => s.trim().split(/\s+as\s+/)[0].trim());
+    const names = m[1].split(",").map((s) =>
+      s
+        .trim()
+        .split(/\s+as\s+/)[0]
+        .trim()
+    );
     if (names.includes(method)) return true;
   }
   return false;
@@ -291,6 +296,11 @@ function main() {
   // in the improvement (6A.3 pattern).
   const allLive = new Set([...liveMissesStatic, ...liveMissesMethod]);
   assertNoStale([...KNOWN_MISSING], allLive, "fetch-targets");
+  enforceDiffScope({
+    allowlist: [...KNOWN_MISSING],
+    liveViolations: allLive,
+    gateName: "fetch-targets",
+  });
 
   if (!process.exitCode) {
     console.log(`[check-fetch-targets] OK (${routeFiles.size} rotas conhecidas)`);

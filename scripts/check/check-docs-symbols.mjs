@@ -19,7 +19,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
-import { reportStaleEntries } from "./lib/allowlist.mjs";
+import { enforceDiffScope, reportStaleEntries } from "./lib/allowlist.mjs";
 import { collectApiRouteFiles } from "./lib/apiRoutes.mjs";
 
 const ROOT = process.cwd();
@@ -201,6 +201,11 @@ export function runDocsSymbolsCheck(opts = {}) {
   const allMisses = findStaleDocApiRefs(docPathsByFile, routeFiles, new Set());
   const liveMissPaths = allMisses.map((m) => m.split(" → ")[1]);
   const stale = reportStaleEntries(KNOWN_STALE_DOC_REFS, liveMissPaths, "check-docs-symbols");
+  const scope = enforceDiffScope({
+    allowlist: KNOWN_STALE_DOC_REFS,
+    liveViolations: liveMissPaths,
+    gateName: "check-docs-symbols",
+  });
   const misses = findStaleDocApiRefs(docPathsByFile, routeFiles, KNOWN_STALE_DOC_REFS);
 
   const parts = [];
@@ -220,8 +225,14 @@ export function runDocsSymbolsCheck(opts = {}) {
         ` confirmar que é drift pré-existente real.`
     );
   }
-  if (parts.length) {
-    return { ok: false, exitCode: 1, message: parts.join("\n") };
+  // A refused base (exitCode 2) must survive the structured result: main()
+  // calls process.exit(result.exitCode), which would otherwise mask it.
+  if (parts.length || scope.exitCode) {
+    return {
+      ok: false,
+      exitCode: Math.max(1, scope.exitCode ?? 0),
+      message: parts.join("\n") || "[check-docs-symbols] base scope refused",
+    };
   }
   return {
     ok: true,
