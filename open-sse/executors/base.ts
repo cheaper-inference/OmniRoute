@@ -1886,9 +1886,14 @@ export class BaseExecutor {
 
         // A recovery retry sent a newer body than the first one reported here.
         if (lastSentBody !== null && lastSentBody !== bodyString) {
+          // The advisor recovery replaces transformedBody with a spread copy that lacks the map.
+          const dispatchedToolNameMap = (serializedBody as Record<string, unknown> | null)
+            ?._toolNameMap;
           serializedBody = parseSerializedBody(lastSentBody);
           // The reverse tool-name map is non-enumerable, so the re-parse drops it (#4307).
-          const liveToolNameMap = (transformedBody as Record<string, unknown> | null)?._toolNameMap;
+          const liveToolNameMap =
+            (transformedBody as Record<string, unknown> | null)?._toolNameMap ??
+            dispatchedToolNameMap;
           if (
             liveToolNameMap instanceof Map &&
             liveToolNameMap.size > 0 &&
