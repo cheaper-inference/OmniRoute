@@ -77,8 +77,9 @@ describe("Modal width", () => {
     expect(css).toMatch(/\.ci-dialog\[data-size="wide"\] \{ max-width:36rem; \}/);
     expect(css).toMatch(/\.ci-dialog:where\(\[data-size="lg"\]\) \{ max-width: 48rem; \}/);
     expect(css).toMatch(/\.ci-dialog:where\(\[data-size="xl"\]\) \{ max-width: 64rem; \}/);
+    // Each height in vh, then in dvh: the visible viewport on a phone, vh where dvh is unknown (kit #319).
     expect(css).toMatch(
-      /\.ci-dialog:where\(\[data-size="full"\]\) \{ max-width: none; height: calc\(100vh - 3rem\); max-height: calc\(100vh - 3rem\); \}/
+      /\.ci-dialog:where\(\[data-size="full"\]\) \{ max-width: none; height: calc\(100vh - 3rem\); height: calc\(100dvh - 3rem\); max-height: calc\(100vh - 3rem\); max-height: calc\(100dvh - 3rem\); \}/
     );
   });
 
