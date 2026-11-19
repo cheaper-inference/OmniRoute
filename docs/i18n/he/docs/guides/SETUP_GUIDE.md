@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-לוח הבקרה נפתח בכתובת `http://localhost:20128`, וכתובת הבסיס של ה-API היא `http://localhost:20128/v1`.
+לוח המחוונים נפתח ב- `http://localhost:20128` ובסיס API URL הוא `http://localhost:20128/v1`.
+
+> **משתמשי npm:** אם npm מזהירה שסקריפטים של התקנה נחסמו (למשל, `omniroute`, `better-sqlite3`), ראה [פתרון בעיות — npm install-scripts חסומים](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **למשתמשי pnpm:** הדגל `--allow-build` נדרש כדי לאפשר סקריפטים מקוריים של בנייה עבור `better-sqlite3` ו-`@swc/core`. הפקודה `pnpm approve-builds -g` אינה נתמכת בהתקנות גלובליות ב-pnpm v11.
+> **משתמשי pnpm:** דגל `--allow-build` נדרש כדי לאפשר סקריפטים של בנייה מקורית עבור `better-sqlite3` ו- `@swc/core`. הפקודה `pnpm approve-builds -g` אינה נתמכת עבור התקנות גלובליות ב-pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[חבילת AUR](https://aur.archlinux.org/packages/omniroute-bin) מתקינה את OmniRoute ומספקת שירות משתמש של systemd.
+[חבילת AUR](https://aur.archlinux.org/packages/omniroute-bin) מתקינה OmniRoute ומספקת שירות משתמש מערכתי.
 
-### מקוד המקור
+### מתוך מקור
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **הערה עבור Windows:** כברירת מחדל, OmniRoute משתמש ב-`%APPDATA%\omniroute` כאשר התיקייה הישנה `%USERPROFILE%\.omniroute` אינה קיימת. הגדירו את `DATA_DIR` כדי לבחור מיקום אחר עבור תיקיית הנתונים.
+> **הערה Windows :** כברירת מחדל, OmniRoute משתמש ב- `%APPDATA%\omniroute` כאשר ספריית `%USERPROFILE%\.omniroute` מדור קודם אינה קיימת. הגדר `DATA_DIR` לבחור מיקום אחר של ספריית נתונים.
 
-> **הערה:** `npm install` יוצר אוטומטית את `.env` מתוך `.env.example` בהפעלה הראשונה. התקנות עתידיות לא ידרסו קובץ `.env` קיים, ולכן ההתאמות האישיות נשמרות. כדי לאתחל אותו מחדש, מחקו את `.env` לפני הפעלה חוזרת.
+> **פֶּתֶק:** `npm install` מייצר אוטומטית `.env` מ- `.env.example` בהפעלה הראשונה. התקנות עוקבות לא יחליפו `.env` קיים, כך שההתאמות האישיות נשמרות. כדי לראות מחדש, מחק `.env` לפני הפעלה מחדש.
 
 ### Docker
 
-עיינו ב[מדריך Docker](./DOCKER_GUIDE.md) לקבלת הוראות התקנה מלאות עבור Docker, כולל פרופילים של Compose ו-HTTPS באמצעות Caddy.
+עיין [במדריך Docker](./DOCKER_GUIDE.md) להגדרת Docker מלאה, כולל פרופילי חיבור ו-Caddy HTTPS.
 
-### יישום שולחן עבודה (Electron)
+### אפליקציית שולחן עבודה (Electron)
 
-OmniRoute כולל מעטפת שולחן עבודה המבוססת על Electron 41 ועל electron-builder 26.10. הסקריפטים הזמינים (בשורש סביבת העבודה):
+OmniRoute שולחת מעטפת שולחנית הבנויה על Electron 41 + electron-builder 26.10. סקריפטים זמינים (שורש סביבת עבודה):
 
 ```bash
-npm run electron:dev          # הפעלת יישום שולחן העבודה עם טעינה מחדש בזמן אמת
-npm run electron:build        # בנייה עבור מערכת ההפעלה הנוכחית (מזוהה אוטומטית)
-npm run electron:build:win    # תוכנית התקנה עבור Windows (NSIS + גרסה ניידת)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # בדיקת עשן של הבנייה הארוזה
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-גרסאות של תוכניות ההתקנה לשולחן העבודה מצורפות למהדורות GitHub. להסבר מעמיק ומלא על Electron (חתימה, גשר IPC והפצות), ראו [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(נוצר בשלב מאוחר יותר)_.
+מהדורות של מתקיני שולחן העבודה מצורפות ל- GitHub Releases. לצלילה המלאה Electron (חתימה, גשר IPC, distros), ראה [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### שרת ללא ממשק גרפי (CI/אוטומציה)
+### שרת ללא ראש (CI/automation)
 
-עבור התקנות ללא התערבות (Docker, Kubernetes, CI), השתמשו ב:
+עבור הגדרות ללא השגחה (Docker, Kubernetes, CI), השתמש ב:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-בשילוב עם משתני סביבה (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` וכו'), הדבר מאפשר להפעיל מופע OmniRoute שניתן לשלוט בו באופן מלא באמצעות סקריפטים.
+בשילוב עם env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, וכו'), זה מאפשר לך לסובב מופע OmniRoute שניתן לסקריפט מלא.
 
 ### אפשרויות CLI
 
-| פקודה                   | תיאור                                                           |
-| ----------------------- | --------------------------------------------------------------- |
-| `omniroute`             | הפעלת השרת (`PORT=20128`, ה-API ולוח הבקרה באותה יציאה)         |
-| `omniroute setup`       | תהליך קליטה מודרך ב-CLI להגדרת סיסמה וספק ראשון                 |
-| `omniroute doctor`      | הפעלת בדיקות תקינות מקומיות מבלי להפעיל את השרת                 |
-| `omniroute providers`   | גילוי, הצגה, אימות ובדיקת ספקים דרך ה-CLI                       |
-| `omniroute config`      | הגדרת כלי CLI — הצגה, קבלה, הגדרה ואימות של תצורות              |
-| `omniroute status`      | לוח מצב לא מקוון — גרסה, מסד נתונים, כלים ותצורה                |
-| `omniroute logs`        | הזרמת יומני שימוש מה-API (תומך ב-`--follow`)                    |
-| `omniroute update`      | בדיקה או החלה של עדכוני OmniRoute                               |
-| `omniroute provider`    | ניהול חיבורי ספקים — הוספה, הצגה, הסרה, בדיקה והגדרת ברירת מחדל |
-| `omniroute --port 3000` | הגדרת היציאה הראשית/יציאת ה-API ל-3000                          |
-| `omniroute --mcp`       | הפעלת שרת MCP (תעבורת stdio)                                    |
-| `omniroute --no-open`   | מניעת פתיחה אוטומטית של הדפדפן                                  |
-| `omniroute --help`      | הצגת עזרה                                                       |
+| פְּקוּדָה               | תֵאוּר                                                |
+| ----------------------- | ----------------------------------------------------- |
+| `omniroute`             | התחל שרת (`PORT=20128`, API ולוח מחוונים באותה יציאה) |
+| `omniroute setup`       | כניסה מודרכת CLI עבור סיסמה וספק ראשון                |
+| `omniroute doctor`      | הפעל בדיקות תקינות מקומיות מבלי להפעיל את השרת        |
+| `omniroute providers`   | גלה, רשום, אמת ובדוק ספקים מ- CLI                     |
+| `omniroute config`      | תצורת כלי CLI — רשימת, קבל, הגדר, אימות הגדרות        |
+| `omniroute status`      | לוח המחוונים במצב לא מקוון — גרסת, DB, כלים, תצורה    |
+| `omniroute logs`        | זרם יומני שימוש מה- API (תומך ב- `--follow`)          |
+| `omniroute update`      | בדוק או החל עדכוני OmniRoute                          |
+| `omniroute provider`    | נהל חיבורי ספקים — הוסף, רשום, הסר, בדוק, ברירת מחדל  |
+| `omniroute --port 3000` | הגדר את יציאת canonical/API ל-3000                    |
+| `omniroute --mcp`       | הפעל את שרת MCP (תעבורת stdio)                        |
+| `omniroute --no-open`   | אל תפתח אוטומטית את הדפדפן                            |
+| `omniroute --help`      | הצג עזרה                                              |
 
-ניתן להפוך את ההתקנה ללא ממשק גרפי לאוטומטית באמצעות דגלים או משתני סביבה:
+ניתן לכתוב הגדרה ללא ראש עם דגלים או משתני סביבה:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-הפעילו אבחון מקומי מבלי לפתוח את לוח הבקרה:
+הפעל אבחון מקומי מבלי לפתוח את לוח המחוונים:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-נהלו ספקים באמצעות SSH או סקריפטים מבלי לפתוח את לוח הבקרה:
+נהל ספקים מ- SSH או סקריפטים מבלי לפתוח את לוח המחוונים:
 
 ```bash
 omniroute providers available
@@ -226,13 +228,17 @@ npm run test:protocols:e2e
 
 **קוד Claude :**
 
+Claude Code מתחבר דרך HTTP, אשר `omniroute --mcp` (stdio) לא מתחיל. תעבורת HTTP כבויה כברירת מחדל: תחילה הפעל אותה בשרת הפועל. כאשר התחברות ללוח המחוונים מופעלת, בקשה ללא אישור מקבל `401`, אז העבר מפתח API שמחזיק `mcp:connect` (או `manage`); מפתח ללא `manage`/`admin` גם צריך את ההיקף של כל כלי (ראה [MCP Server → MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-הוסף להגדרות MCP שלך (stdio, עם המפתח כך שלמתקשר תהיה מנהלת):
+הוסף להגדרות MCP שלך (stdio, עם המפתח כך שלמתקשר יהיה מנהל):
 
 ```json
 {
@@ -251,7 +257,7 @@ claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
 
 לחלופין, כאשר `mcpTransport` הוא `streamable-http` (הגדר אותו על `/dashboard/mcp` או עם `omniroute mcp enable --transport streamable-http`), כוון את כניסת שרת MCP המרוחק של הלקוח אל `http://localhost:20128/api/mcp/stream`.
 
-המפתח עובר כ- `Authorization: Bearer <api-key>` (ראה [MCP Server → גישה מרחוק](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) למארחים מרוחקים; מפתח מרוחק צריך `mcp:connect` בתוספת היקפי read/write שלו).
+המפתח עובר כמו `Authorization: Bearer <api-key>` (ראה [MCP Server → גישה מרחוק](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) עבור מארחים מרוחקים; מפתח מרוחק צריך `mcp:connect` בתוספת היקפי read/write שלו).
 
 **תיעוד מלא MCP :** [MCP Server README](../../open-sse/mcp-server/README.md) — 110 כלים, IDE configs, Python/TS/Go clients. הפניה למפעיל עבור כלי הדחיסה CCR/dedup (סממנים, דרישות מוקדמות, היקפי לכל כלי, עימוד אחזור, אבחון): [מנועי דחיסה → דרישות מוקדמות / מדריך למפעיל](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
