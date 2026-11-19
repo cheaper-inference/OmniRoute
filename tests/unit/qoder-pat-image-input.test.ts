@@ -15,7 +15,8 @@ const core = await import("../../src/lib/db/core.ts");
 const { createProviderConnection, deleteProviderConnectionsByProvider } =
   await import("../../src/lib/db/providers.ts");
 const { QoderExecutor } = await import("../../open-sse/executors/qoder.ts");
-const { hasQoderImageParts } = await import("../../open-sse/services/qoderCapabilities.ts");
+const { hasQoderImageParts, requiresQoderHttpTransport } =
+  await import("../../open-sse/services/qoderCapabilities.ts");
 
 // Built from parts: a literal token-shaped string would trip secret scanners.
 const PAT = ["pt", "image", "fixture"].join("-");
@@ -61,6 +62,32 @@ test("image parts are found in messages and in Responses-style input, plain text
   assert.equal(hasQoderImageParts({ messages: [{ role: "user", content: "hello" }] }), false);
   assert.equal(hasQoderImageParts(null), false);
   assert.equal(hasQoderImageParts({ messages: [null, "x", { content: null }] }), false);
+});
+
+test("an image nested in a Claude tool_result needs the HTTP transport even without tools", () => {
+  const body = {
+    messages: [
+      {
+        role: "user",
+        content: [
+          {
+            type: "tool_result",
+            tool_use_id: "toolu_1",
+            content: [
+              { type: "text", text: "screenshot" },
+              { type: "image", source: { type: "base64", media_type: "image/png", data: "AAAA" } },
+            ],
+          },
+        ],
+      },
+    ],
+  };
+  assert.equal(hasQoderImageParts(body), true);
+  // chat.ts passes this predicate as requireToolCalling, which drops PAT connections.
+  assert.equal(requiresQoderHttpTransport(body), true);
+  const textOnly = structuredClone(body);
+  textOnly.messages[0].content[0].content = [{ type: "text", text: "screenshot" }];
+  assert.equal(requiresQoderHttpTransport(textOnly), false);
 });
 
 test("PAT executor rejects image input with a 400 before it launches the local CLI", async () => {

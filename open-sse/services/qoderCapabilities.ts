@@ -20,6 +20,17 @@ export function qoderSupportsCallerTools(credentials: QoderCredentials): boolean
 /** Image parts as the Chat Completions, Responses and Claude-style content arrays name them. */
 const QODER_IMAGE_PART_TYPES = new Set(["image_url", "input_image", "image"]);
 
+/** A Claude `tool_result` can carry image blocks in its nested `content` array. */
+function isQoderImagePart(part: unknown): boolean {
+  const record = part as Record<string, unknown> | null;
+  if (QODER_IMAGE_PART_TYPES.has(String(record?.type))) return true;
+  return (
+    record?.type === "tool_result" &&
+    Array.isArray(record.content) &&
+    record.content.some(isQoderImagePart)
+  );
+}
+
 /** The qodercli prompt is text only, so an image part cannot reach the model on a PAT connection. */
 export function hasQoderImageParts(body: unknown): boolean {
   if (!body || typeof body !== "object") return false;
@@ -29,12 +40,7 @@ export function hasQoderImageParts(body: unknown): boolean {
       Array.isArray(turns) &&
       turns.some((turn) => {
         const content = (turn as Record<string, unknown> | null)?.content;
-        return (
-          Array.isArray(content) &&
-          content.some((part) =>
-            QODER_IMAGE_PART_TYPES.has(String((part as Record<string, unknown> | null)?.type))
-          )
-        );
+        return Array.isArray(content) && content.some(isQoderImagePart);
       })
   );
 }
