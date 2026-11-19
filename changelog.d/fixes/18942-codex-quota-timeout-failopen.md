@@ -1,1 +1,0 @@
-- **quota:** A Codex quota lookup that times out no longer locks a healthy account for 5 minutes: the last recent snapshot is reused unless its window is exhausted or has reset, and with no usable snapshot a paid-credit account is only skipped for that request, with no cooldown. The 8s timeout can be tuned with `CODEX_QUOTA_FETCH_TIMEOUT_MS`

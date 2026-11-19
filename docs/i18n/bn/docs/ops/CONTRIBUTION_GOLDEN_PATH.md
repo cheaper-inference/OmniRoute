@@ -29,70 +29,61 @@
 6. **প্রমাণ নথিভুক্ত করুন।** PR template-এ চালানো commands, যোগ বা পরিবর্তন করা প্রতিটি test file,
    migrations বা feature flags, এবং এখনও pending থাকা CI-only validation তালিকাভুক্ত করুন।
 
-## পরিবর্তনের ধরন অনুযায়ী আদর্শ পথ
+## পরিবর্তনের ধরন দ্বারা সোনালী পথ
 
-নিচের commands হলো ন্যূনতম নির্দিষ্ট checks; এগুলো আপনার পরিবর্তিত আচরণ সরাসরি cover করে এমন
-test বাদ দেওয়ার অনুমতি নয়।
+নীচের কমান্ডগুলি হল ন্যূনতম ফোকাস করা চেক, আপনার পরিবর্তিত আচরণ সরাসরি কভার করে এমন একটি পরীক্ষা এড়িয়ে যাওয়ার অনুমতি নয়।
 
-### Provider
+### প্রদানকারী
 
-**Contracts**
+**চুক্তি**
 
-- `src/shared/constants/providers/`-এ Provider definition এবং
-  `src/shared/constants/providers.ts`-এ এর composition।
-- `open-sse/config/providerRegistry.ts` বা এর extracted registry files-এ models এবং capabilities।
-- প্রযোজ্য ক্ষেত্রে Executor/translator selection, OAuth বা API-key configuration, dashboard assets, এবং generated
-  provider reference।
-- Public credentials-এ অবশ্যই `resolvePublicCred()` ব্যবহার করতে হবে; error responses-এ shared sanitized
-  error helpers ব্যবহার করতে হবে। `docs/security/PUBLIC_CREDS.md` (git; `/docs`-এ compile করা হয় না) এবং
-  [Error Sanitization](../security/ERROR_SANITIZATION.md) দেখুন।
+- `src/shared/constants/providers/` তে প্রদানকারীর সংজ্ঞা এবং `src/shared/constants/providers.ts` এ এর রচনা।
+- `open-sse/config/providerRegistry.ts` বা এর নিষ্কাশিত রেজিস্ট্রি ফাইলগুলিতে মডেল এবং ক্ষমতা।
+- Executor/translator নির্বাচন, OAuth বা API-কী কনফিগারেশন এবং ড্যাশবোর্ড সম্পদ। পুনরুত্থিত `docs/reference/PROVIDER_REFERENCE.md` বা README ডায়াগ্রামগুলিকে প্রতিশ্রুতিবদ্ধ করবেন না: রিলিজ রিফ্রেশ তাদের পুনর্লিখন করে (`check:pr-derived-paths` একটি বৈশিষ্ট্য PR ব্যর্থ করে যা তাদের বহন করে)।
+- পাবলিক শংসাপত্র অবশ্যই `resolvePublicCred()` ব্যবহার করবে; ত্রুটি প্রতিক্রিয়া শেয়ার করা স্যানিটাইজড ত্রুটি সাহায্যকারী ব্যবহার করা আবশ্যক. `docs/security/PUBLIC_CREDS.md` দেখুন (git; `/docs` এ কম্পাইল করা হয়নি) এবং [ত্রুটি স্যানিটাইজেশন](../security/ERROR_SANITIZATION.md) ।
 
-**নির্দিষ্ট loop**
+**ফোকাসড লুপ**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # catalog পরিবর্তিত হলে; generated diff commit করুন
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-প্রভাবিত প্রতিটি request family-ও test করুন: chat, Responses, images, embeddings, audio, বা video।
-Generated catalog এবং golden diffs-কে contract changes হিসেবে review করুন; যাচাই না করে সেগুলো গ্রহণ করবেন না।
+এছাড়াও প্রতিটি প্রভাবিত অনুরোধ পরিবার পরীক্ষা করুন: চ্যাট, প্রতিক্রিয়া, ছবি, এম্বেডিং, অডিও, বা ভিডিও। চুক্তির পরিবর্তন হিসাবে জেনারেট করা ক্যাটালগ এবং সোনালী পার্থক্য পর্যালোচনা করুন; তাদের অন্ধভাবে গ্রহণ করবেন না।
 
-### Routing
+### রাউটিং
 
-**Contracts**
+**চুক্তি**
 
-- `src/shared/constants/routingStrategies.ts`-এ public strategy values এবং UI metadata।
-- `open-sse/services/combo.ts` এবং `open-sse/services/combo/`-এর অধীনে dispatch এবং ordering।
-- Combo schemas, persistence, resilience state, model capabilities, এবং API/UI controls।
-- আচরণ পরিবর্তিত হলে [Auto-Combo Engine](../routing/AUTO-COMBO.md) এবং resilience documentation।
+- `src/shared/constants/routingStrategies.ts` এ পাবলিক কৌশল মান এবং UI মেটাডেটা।
+- `open-sse/services/combo.ts` এবং `open-sse/services/combo/` এর অধীনে প্রেরণ এবং অর্ডার করা।
+- কম্বো স্কিমা, অধ্যবসায়, স্থিতিস্থাপক অবস্থা, মডেল ক্ষমতা এবং API/UI নিয়ন্ত্রণ।
+- [অটো-কম্বো ইঞ্জিন](../routing/AUTO-COMBO.md) এবং স্থিতিস্থাপকতা ডকুমেন্টেশন যখন আচরণ পরিবর্তন হয়।
 
-**নির্দিষ্ট loop**
+**ফোকাসড লুপ**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strategy বা dispatch পরিবর্তন
-npm run check:known-symbols      # strategy registration পরিবর্তন
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-স্থানীয়ভাবে deterministic mocked-upstream tests ব্যবহার করুন। Live combo smokes-এর জন্য credentials প্রয়োজন এবং এগুলো
-manual; CI-এর বিকল্প নয়।
+স্থানীয়ভাবে ডিটারমিনিস্টিক মকড-আপস্ট্রিম পরীক্ষা ব্যবহার করুন। লাইভ কম্বো স্মোকের জন্য শংসাপত্রের প্রয়োজন হয় এবং এটি ম্যানুয়াল, CI বিকল্প নয়।
 
 ### UI / UX
 
-**Contracts**
+**চুক্তি**
 
-- `src/app/` এবং
-  `src/shared/components/`-এর অধীনে Next.js route/page এবং shared component boundaries।
-- API response shapes, loading/empty/error states, keyboard এবং screen-reader behavior,
-  responsive layout, theming, এবং locale expansion।
-- `src/i18n/messages/en.json`-এ English UI source strings; নতুন user-facing copy hard-code করবেন না।
+- Next.js route/page এবং `src/app/` এবং `src/shared/components/` অধীনে ভাগ করা উপাদান সীমানা।
+- API প্রতিক্রিয়া আকার, loading/empty/error অবস্থা, কীবোর্ড এবং স্ক্রিন-রিডার আচরণ, প্রতিক্রিয়াশীল বিন্যাস, থিমিং এবং লোকেল সম্প্রসারণ।
+- `src/i18n/messages/en.json` এ ইংরেজি UI সোর্স স্ট্রিং; নতুন ব্যবহারকারী-মুখী অনুলিপি হার্ড-কোড করবেন না।
 
-**নির্দিষ্ট loop**
+**ফোকাসড লুপ**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Interaction বা visual পরিবর্তনের জন্য app চালান এবং narrow ও wide উভয় viewport পরীক্ষা করুন। CI
-production build এবং বিস্তৃত suites চালায়; visual behavior-এর জন্য এখনও পরিবর্তনটির উপযোগী একটি নির্দিষ্ট component, Playwright,
-বা নথিভুক্ত manual check প্রয়োজন।
+মিথস্ক্রিয়া বা ভিজ্যুয়াল পরিবর্তনের জন্য অ্যাপটি চালান এবং সংকীর্ণ এবং প্রশস্ত উভয় ভিউপোর্ট পরীক্ষা করুন। CI প্রোডাকশন বিল্ড এবং বিস্তৃত স্যুট চালায়; চাক্ষুষ আচরণের জন্য এখনও একটি ফোকাসড কম্পোনেন্ট, Playwright বা পরিবর্তনের জন্য উপযুক্ত নথিভুক্ত ম্যানুয়াল চেক প্রয়োজন।
 
 ### i18n
 
-**Contracts**
+**চুক্তি**
 
-- `src/i18n/messages/en.json` হলো UI source; `config/i18n.json` হলো locale source।
-- CLI catalogs আলাদাভাবে `bin/cli/locales/`-এর অধীনে থাকে।
-- ICU placeholders এবং tags হুবহু সংরক্ষণ করুন। Product/provider/model names,
-  protocol এবং header names, commands, code/JSON identifiers, URLs, environment variables, বা
-  `OmniRoute`, `OAuth`, `MCP`, এবং `A2A`-এর মতো protected terms অনুবাদ করবেন না। বর্তমান source list হলো
-  `scripts/i18n/glossary/protected-terms.json`।
+- `src/i18n/messages/en.json` হল UI উৎস; `config/i18n.json` হল লোকেল উৎস।
+- CLI ক্যাটালগ `bin/cli/locales/` অধীনে আলাদাভাবে বাস করে।
+- ICU স্থানধারক এবং ট্যাগ সঠিকভাবে সংরক্ষণ করুন। product/provider/model নাম, প্রোটোকল এবং হেডারের নাম, কমান্ড, code/JSON শনাক্তকারী, URLs, এনভায়রনমেন্ট ভেরিয়েবল, বা সুরক্ষিত পদ যেমন `OmniRoute`, `OAuth`, `MCP`, এবং `A2A` অনুবাদ করবেন না। বর্তমান উৎস তালিকা হল `scripts/i18n/glossary/protected-terms.json`।
 
-**নির্দিষ্ট loop**
+একটি বৈশিষ্ট্য PR শুধুমাত্র `src/i18n/messages/en.json` সম্পাদনা করে (CLI: `bin/cli/locales/en.json`); অন্যান্য লোকেলগুলি একবার রিলিজ রিফ্রেশ বা অনুবাদ তরঙ্গ দ্বারা সম্পূর্ণ হয় (`docs/guides/I18N.md` → "ফিচার PRs স্পর্শ `en.json` শুধুমাত্র")। `npm run check:pr-derived-paths` একটি PR বৈশিষ্ট্য ব্যর্থ করে যা অন্য লোকেল ক্যাটালগ সম্পাদনা করে।
+
+**ফোকাসড লুপ**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # CLI strings/catalogs পরিবর্তিত হলে
 npm run lint
 ```
 
-এটি বিদ্যমান system-এর জন্য guidance, এর tooling বা key model সম্প্রসারণের আমন্ত্রণ নয়।
-Replacement system design করার সময় i18n patches সীমিত ও সুনির্দিষ্ট রাখুন। Task-এ স্পষ্টভাবে generated translations প্রয়োজন না হলে এবং
-ফলস্বরূপ diff review না করে থাকলে external services ব্যবহার করে এমন translation
-commands চালাবেন না।
+`--mode=pr` ব্যতীত এই গেটগুলি স্থানীয়ভাবে রিলিজ মোডে চলে এবং `en.json` এ চক্র যোগ করা বা পুনরায় লেখা প্রতিটি কী রিপোর্ট করে; এটি রিলিজ রিফ্রেশের কাজ, আপনার PR এর নয়।
+
+এটি বিদ্যমান সিস্টেমের জন্য নির্দেশিকা, এটির টুলিং বা কী মডেল প্রসারিত করার আমন্ত্রণ নয়। প্রতিস্থাপন সিস্টেমটি ডিজাইন করার সময় i18n প্যাচগুলি সার্জিক্যাল রাখুন। অনুবাদ কমান্ডগুলি চালাবেন না যেগুলি বহিরাগত পরিষেবাগুলিকে কল করে যদি না টাস্কের জন্য স্পষ্টভাবে তৈরি করা অনুবাদের প্রয়োজন হয় এবং আপনি ফলাফলের পার্থক্যটি পর্যালোচনা করেন৷
 
 ### CLI
 
-**Contracts**
+**চুক্তি**
 
-- `bin/cli/`-এর পাবলিক কমান্ড ও ফ্ল্যাগ, জেনারেট করা API কমান্ড, এক্সিট কোড, stdout/stderr ও
-  JSON আউটপুটের কাঠামো, কনফিগ/এনভায়রনমেন্টের আচরণ এবং প্যাকেজে অন্তর্ভুক্ত ফাইলসমূহ।
-- CLI-এর ব্যবহারকারীমুখী স্ট্রিংগুলোকে অবশ্যই CLI i18n স্তর ব্যবহার করতে হবে এবং `en`/`pt-BR` ক্যাটালগ সমন্বিত রাখতে হবে।
-- সমর্থিত রানটাইম হিসেবে Node এবং প্রকাশিত বাইনারি কনট্র্যাক্ট অক্ষুণ্ণ রাখুন।
+- `bin/cli/` এ পাবলিক কমান্ড এবং পতাকা, জেনারেট করা API কমান্ড, এক্সিট কোড, stdout/stderr এবং JSON আউটপুট আকার, config/environment আচরণ এবং প্যাকেজ করা ফাইল।
+- CLI ব্যবহারকারী-মুখী স্ট্রিংগুলিকে অবশ্যই CLI i18n স্তর ব্যবহার করতে হবে ( `bin/cli/locales/en.json` তে বিদ্যমান `t()` কী)। একটি বৈশিষ্ট্য PR শুধুমাত্র `en.json` সম্পাদনা করে; `pt-BR` এবং অন্যান্য লোকেল রিলিজের সময় সম্পন্ন হয়।
+- সমর্থিত রানটাইম এবং প্রকাশিত বাইনারি চুক্তি হিসাবে নোড সংরক্ষণ করুন।
 
-**কেন্দ্রভিত্তিক লুপ**
+**ফোকাসড লুপ**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # জেনারেট করা/বান্ডেল করা CLI পরিবর্তন
-npm run check:pack-policy     # প্যাকেজ-সারফেসের পরিবর্তন
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-যখন আচরণ পার্সিং, ফাইল বা এক্সিট স্ট্যাটাসের ওপর নির্ভর করে, তখন একটি অস্থায়ী ডেটা ডিরেক্টরিতে হুবহু কমান্ডটি ব্যবহার করুন।
-CI প্যাকেজ আর্টিফ্যাক্ট ও ইকোসিস্টেমের আরও বিস্তৃত যাচাই সম্পাদন করে।
+যখন আচরণ পার্সিং, ফাইল বা প্রস্থান অবস্থার উপর নির্ভর করে তখন একটি অস্থায়ী ডেটা ডিরেক্টরিতে সঠিক কমান্ডটি ব্যবহার করুন। CI বিস্তৃত প্যাকেজ আর্টিফ্যাক্ট এবং ইকোসিস্টেম পরীক্ষা করে।
 
-### ডেটাবেস
+### ডাটাবেস
 
-**কনট্র্যাক্টসমূহ**
+**চুক্তি**
 
-- `src/lib/db/`-এর অধীনে থাকা ডোমেইন মডিউলসমূহ; নির্দিষ্ট মডিউল সরাসরি ইমপোর্ট করুন (পুরোনো `localDb.ts` রি-এক্সপোর্ট স্তরটি সরিয়ে ফেলা হয়েছে)।
-- `src/lib/db/migrations/`-এর অধীনে সংখ্যাযুক্ত, আইডেমপোটেন্ট SQL মাইগ্রেশন, ট্রানজ্যাকশনের নিরাপত্তা, আপগ্রেডের
-  আচরণ, ইনডেক্স এবং স্কিমা দ্বারা প্রভাবিত প্রতিটি কলার।
-- রুট ও হ্যান্ডলার কখনোই সরাসরি র-ফর্মের SQL চালায় না।
+- `src/lib/db/` অধীনে ডোমেন মডিউল; নির্দিষ্ট মডিউল সরাসরি আমদানি করুন (পুরানো `localDb.ts` পুনরায় রপ্তানি স্তর সরানো হয়েছে)।
+- সংখ্যাযুক্ত, `src/lib/db/migrations/` অধীনে অদম্য SQL স্থানান্তর, লেনদেনের নিরাপত্তা, আপগ্রেড আচরণ, সূচীপত্র এবং স্কিমা দ্বারা প্রভাবিত প্রতিটি কলার।
+- রুট এবং হ্যান্ডলাররা সরাসরি কাঁচা SQL জারি করে না।
 
-**কেন্দ্রভিত্তিক লুপ**
+**ফোকাসড লুপ**
 
 ```bash
 npm run check:migration-numbering
@@ -173,32 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-মাইগ্রেশন যোগ করার সময় নতুন ডেটাবেস এবং আগের স্কিমা থেকে আপগ্রেড—উভয়ই পরীক্ষা করুন। ডেটাবেস টেস্টগুলোকে
-অবশ্যই হ্যান্ডল বন্ধ করতে হবে এবং ক্লিনআপের সময় `resetDbInstance()` কল করতে হবে। কেবল best-effort Bun অ্যাডাপ্টার পাথ পরিবর্তিত হলে
-`npm run test:bun:db` চালান; Node-ই প্রামাণ্য হিসেবে বহাল থাকবে।
+একটি নতুন ডাটাবেস পরীক্ষা করুন এবং একটি মাইগ্রেশন যোগ করার সময় পূর্বের স্কিমা থেকে আপগ্রেড করুন। ডাটাবেস পরীক্ষা অবশ্যই হ্যান্ডলগুলি বন্ধ করতে হবে এবং পরিষ্কারের সময় `resetDbInstance()` কল করতে হবে। `npm run test:bun:db` চালান শুধুমাত্র যখন সেরা-প্রচেষ্টা Bun অ্যাডাপ্টারের পথ পরিবর্তন হয়; নোড কর্তৃত্বপূর্ণ থাকে।
 
-### বিল্ড / ডিপ্লয়
+### নির্মাণ / স্থাপন
 
-**কনট্র্যাক্টসমূহ**
+**চুক্তি**
 
-- রুট ও ওয়ার্কস্পেস ম্যানিফেস্ট/লকফাইল, `scripts/build/`, Next.js স্ট্যান্ডঅ্যালোন অ্যাসেম্বলি, `dist/`
-  প্যাকেজের বিষয়বস্তু, Electron প্ল্যাটফর্ম মেটাডেটা, CI ওয়ার্কফ্লো এবং ডিপ্লয়মেন্ট সেন্টিনেল।
-- সমর্থিত Node রেঞ্জ এবং `CLAUDE.md`-এ অনুমোদিত তালিকাভুক্ত Bun ব্যবহার অক্ষুণ্ণ রাখতে হবে।
-- বিল্ড আর্টিফ্যাক্ট আনট্র্যাকড থাকবে; ডিপেন্ডেন্সি, লাইসেন্স, ওয়ার্কফ্লো এবং প্যাকেজ-সংক্রান্ত নীতি প্রযোজ্য।
+- রুট এবং ওয়ার্কস্পেস manifests/lockfile, `scripts/build/`, Next.js স্বতন্ত্র সমাবেশ, `dist/` প্যাকেজ বিষয়বস্তু, Electron প্ল্যাটফর্ম মেটাডেটা, CI ওয়ার্কফ্লো, এবং স্থাপনার সেন্টিনেল।
+- সমর্থিত নোড রেঞ্জ এবং `CLAUDE.md` এ অনুমোদিত-তালিকাভুক্ত Bun ব্যবহার অক্ষত থাকতে হবে।
+- বিল্ড আর্টিফ্যাক্ট আনট্র্যাক থাকা; নির্ভরতা, লাইসেন্স, কর্মপ্রবাহ এবং প্যাকেজ নীতি প্রযোজ্য।
 
-**কেন্দ্রভিত্তিক লুপ**
+**ফোকাসড লুপ**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # ডিপেন্ডেন্সি বা লকফাইলের পরিবর্তন
-npm run check:pack-policy      # প্রকাশিত প্যাকেজ সারফেসের পরিবর্তন
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-কেবল পরিবর্তনটি কম্পাইলেশন, স্ট্যান্ডঅ্যালোন অ্যাসেম্বলি, অ্যাসেট বা রানটাইম বান্ডলিংকে প্রভাবিত করলেই স্থানীয়ভাবে `npm run build` ব্যবহার করুন।
-কেবল রিলিজ/ডিপ্লয় যাচাইয়ের জন্য `npm run build:release` ব্যবহার করুন। CI-এর বিল্ডই চূড়ান্ত ক্রস-প্ল্যাটফর্ম সংকেত; প্ল্যাটফর্ম-নির্দিষ্ট Electron পরিবর্তনের জন্য সংশ্লিষ্ট কেন্দ্রভিত্তিক বিল্ড
-বা স্মোক-টেস্টের প্রমাণ প্রয়োজন।
+স্থানীয়ভাবে `npm run build` ব্যবহার করুন শুধুমাত্র যখন পরিবর্তনটি সংকলন, স্বতন্ত্র সমাবেশ, সম্পদ, বা রানটাইম বান্ডলিংকে প্রভাবিত করে। শুধুমাত্র release/deploy বৈধতার জন্য `npm run build:release` ব্যবহার করুন। CI এর বিল্ড চূড়ান্ত ক্রস-প্ল্যাটফর্ম সংকেত; প্ল্যাটফর্ম-নির্দিষ্ট Electron পরিবর্তনের জন্য ম্যাচিং ফোকাসড বিল্ড বা স্মোক প্রমাণ প্রয়োজন।
 
 ## শেয়ার্ড মেশিনের জন্য ডেভেলপার স্ক্রিপ্ট
 

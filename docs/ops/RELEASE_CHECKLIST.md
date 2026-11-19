@@ -89,6 +89,17 @@ build while release notes talk about fixes that only exist on git. Compose
 quickstarts use `:latest`; GitOps should keep pinning `X.Y.Z`. See
 [Docker release channels](../guides/DOCKER_GUIDE.md#release-channels) and #10317.
 
+**Docker Hub organization repository (`cheaperinference/omniroute`):** Docker Hub cannot
+move a repository between namespaces, so `diegosouzapw/omniroute` keeps its pull history
+and every release, and the `mirror-org-dockerhub` job of `docker-publish` copies each
+released version (and `:latest` when promoted) from `ghcr.io/cheaper-inference/omniroute`
+to the organization repository. It needs the `DOCKERHUB_ORG_USERNAME` /
+`DOCKERHUB_ORG_TOKEN` secrets; without them the job stays green with a "Docker Hub org
+mirror skipped" warning and the other registries publish normally. To publish a released
+version there later, run **Actions → Mirror Docker image to the Docker Hub org → Run
+workflow** with `version=X.Y.Z` (and `promote_latest` for the highest stable version): it
+copies the existing images, no rebuild.
+
 ## Hotfix Fast-Lane (label `hotfix`)
 
 A PR labeled `hotfix` skips the heavy CI matrix (9-shard E2E, coverage ratchet,
