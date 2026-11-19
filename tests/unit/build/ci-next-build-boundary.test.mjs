@@ -126,6 +126,7 @@ function archive(t, { tamper = false, missing = false, links = false } = {}) {
     NEXT_BUILD_PRODUCER_RESULT: "success",
     NEXT_BUILD_QUEUE_BASE: "",
     NEXT_BUILD_PYTHON: "python3",
+    MSYS: "",
     PATH: `${join(workspace, "bin")}:${process.env.PATH}`,
   };
   const manifest = `${JSON.stringify({
@@ -332,6 +333,17 @@ test("Next boundary controls retain all consumers, Windows advisory, queue isola
     build.env.OMNIROUTE_USE_TURBOPACK,
     /!startsWith\(github\.ref, 'refs\/heads\/omni-queue\/'\)/
   );
+});
+
+test("the Electron Windows extraction requires native symbolic links", () => {
+  const electron = workflow.jobs["electron-package-smoke"];
+  const extract = electron.steps.find((step) => step.name === "Extract Next.js build artifact");
+  assert.equal(extract.shell, "bash");
+  assert.equal(
+    extract.env.MSYS,
+    "${{ runner.os == 'Windows' && 'winsymlinks:nativestrict' || '' }}"
+  );
+  assert.match(extract.run, /tar -xzf .*\nnode .* consume /);
 });
 
 test("one producer binds immutable artifact IDs and retained consumption evidence for all consumers", () => {
