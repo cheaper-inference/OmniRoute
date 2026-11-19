@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Poista avain"
   },
   "plugins": {
+    "privilegesWarningTitle": "Laajennukset toimivat kaikilla oikeuksilla",
+    "privilegesWarningBody": "Plugin toimii tavallisena Node.js prosessina, jolla on samat käyttöoikeudet kuin OmniRoute: se voi lukea tiedostoja, suorittaa ohjelmia ja käyttää verkkoa, riippumatta sen luettelon ilmoittamista luvista. Asenna vain laajennuksia, joihin luotat.",
     "title": "Lisäosat",
     "description": "Asenna ja hallitse OmniRouten toimintoja laajentavia lisäosia",
     "loading": "Ladataan lisäosia...",

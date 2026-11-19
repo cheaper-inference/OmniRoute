@@ -59,7 +59,11 @@
 //                       next attempt (run_attempt + 1, status "queued", conclusion null) and 201
 //   fake.jobListings [{runId, filter}]       recorded GET /actions/runs/:id/jobs calls; the jobs are
 //                       the check runs of the run's suite (every attempt), each with its
-//                       check_run_url, except a check run added with addCheckRun `job: false`
+//                       check_run_url, its html_url …/actions/runs/<run>/job/<id> and a runner
+//                       (none when skipped or queued). A check run added with addCheckRun
+//                       `job: false` (created through POST /check-runs) is listed too, as GitHub
+//                       lists it (measured 2026-11-19): html_url …/runs/<id>, no runner, no
+//                       labels, no steps; with `listedInJobs: false` the listing leaves it out
 //   fake.merges      [{number, body}]          recorded PUT /pulls/:n/merge calls
 //   fake.mergeResponses Map<number, {status, body}>  override the default merge behavior
 //   fake.rulesets    Map<id, ruleset>
@@ -240,6 +244,7 @@ export async function startFakeGitHub(options = {}) {
       output = { title: null, summary: null, text: null },
       htmlUrl,
       job = true,
+      listedInJobs = true,
     } = input;
     if (!fake.checkSuites.has(sha)) fake.checkSuites.set(sha, []);
     const suites = fake.checkSuites.get(sha);
@@ -267,9 +272,11 @@ export async function startFakeGitHub(options = {}) {
       app: { slug: appSlug },
       check_suite: { id: suite.id },
       output,
-      // false: created through POST /check-runs, no job of any workflow run (GET .../jobs never
-      // lists it); not a field GitHub sends, the client ignores it
+      // false: created through POST /check-runs, no job of any workflow run (GET .../jobs lists
+      // it in the shape GitHub gives such a check run, or not at all with listedInJobs false);
+      // not fields GitHub sends, the client ignores them
       ...(job ? {} : { not_a_job: true }),
+      ...(job || listedInJobs ? {} : { not_listed_in_jobs: true }),
     };
     if (!fake.checkRuns.has(sha)) fake.checkRuns.set(sha, []);
     fake.checkRuns.get(sha).push(run);
@@ -850,20 +857,40 @@ export async function startFakeGitHub(options = {}) {
         const run = fake.workflowRuns.find((r) => r.id === Number(id));
         if (!run) return notFound();
         fake.jobListings.push({ runId: run.id, filter: req.query.filter ?? null });
-        // Every check run of the run's suite is a job of it (every attempt), except one created
-        // through POST /check-runs (addCheckRun `job: false`).
+        // Every check run of the run's suite is listed (every attempt), in the shape GitHub
+        // gives it: a job of the run (its id is its check run's id), or one created through
+        // POST /check-runs (addCheckRun `job: false`), listed by GitHub all the same.
         const jobs = [];
         for (const runs of fake.checkRuns.values()) {
           for (const cr of runs) {
-            if (cr.check_suite?.id !== run.check_suite_id || cr.not_a_job) continue;
+            if (cr.check_suite?.id !== run.check_suite_id || cr.not_listed_in_jobs) continue;
+            const forged = Boolean(cr.not_a_job);
+            const ran = !forged && cr.status !== "queued" && cr.conclusion !== "skipped";
+            const runnerId = ran ? 1_000_000_000 + cr.id : null;
             jobs.push({
-              id: 80_000_000 + cr.id,
+              id: cr.id,
               run_id: run.id,
+              workflow_name: run.name,
+              head_branch: run.head_branch,
               run_attempt: run.run_attempt ?? 1,
-              name: cr.name,
+              head_sha: run.head_sha,
+              html_url: forged
+                ? `https://github.com/${owner}/${repo}/runs/${cr.id}`
+                : `https://github.com/${owner}/${repo}/actions/runs/${run.id}/job/${cr.id}`,
               status: cr.status,
               conclusion: cr.conclusion,
+              started_at: cr.started_at,
+              completed_at: cr.completed_at,
+              name: cr.name,
+              steps: ran
+                ? [{ name: "Set up job", status: "completed", conclusion: "success" }]
+                : [],
               check_run_url: `https://api.github.com/repos/${owner}/${repo}/check-runs/${cr.id}`,
+              labels: forged ? [] : ["ubuntu-latest"],
+              runner_id: runnerId,
+              runner_name: ran ? `GitHub Actions ${runnerId}` : null,
+              runner_group_id: ran ? 0 : null,
+              runner_group_name: ran ? "GitHub Actions" : null,
             });
           }
         }

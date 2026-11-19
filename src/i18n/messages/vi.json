@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Xóa khóa"
   },
   "plugins": {
+    "privilegesWarningTitle": "Plugin chạy với đầy đủ đặc quyền",
+    "privilegesWarningBody": "Một plugin chạy như một quy trình Node.js thông thường có cùng quyền truy cập như OmniRoute: nó có thể đọc tệp, chạy chương trình và sử dụng mạng, bất kỳ quyền nào mà bảng kê khai của nó khai báo. Chỉ cài đặt các plugin mà bạn tin tưởng.",
     "title": "Plugin",
     "description": "Cài đặt và quản lý các plugin để mở rộng chức năng của OmniRoute",
     "loading": "Đang tải các plugin...",

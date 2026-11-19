@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "പരിധി ഒരു പോസിറ്റീവ് പൂർണ്ണസംഖ്യയായിരിക്കണം.",
     "error": "പിശക്: {message}",
     "serverOffline": "OmniRoute സെർവർ ഓഫ്ലൈനാണ്. ഇത് ആരംഭിക്കാൻ: omniroute serve",
     "authRequired": "പ്രാമാണീകരണം ആവശ്യമാണ്. OMNIROUTE_API_KEY സജ്ജമാക്കുക അല്ലെങ്കിൽ പ്രവർത്തിപ്പിക്കുക: omniroute setup",

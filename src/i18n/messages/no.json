@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Fjern nøkkel"
   },
   "plugins": {
+    "privilegesWarningTitle": "Plugins kjører med fulle rettigheter",
+    "privilegesWarningBody": "En plugin kjører som en vanlig Node.js prosess med samme tilgang som OmniRoute: den kan lese filer, kjøre programmer og bruke nettverket, uansett hvilke tillatelser manifestet erklærer. Installer kun plugins du stoler på.",
     "title": "Programtillegg",
     "description": "Installer og administrer programtillegg som utvider funksjonaliteten i OmniRoute",
     "loading": "Laster inn programtillegg...",
