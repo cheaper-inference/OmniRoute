@@ -33,6 +33,13 @@ test("modelDisplayName drops release-date stamps instead of merging them into th
   assert.equal(modelDisplayName("gpt-5-mini-2025-08-07"), "GPT-5 Mini");
 });
 
+test("modelDisplayName only drops two-digit YYYY-MM-DD triplets, not single-digit versions", () => {
+  // "2025-1-2" is not a YYYY-MM-DD release date, so its digits stay in the name.
+  assert.notEqual(modelDisplayName("model-2025-1-2"), "Model");
+  assert.match(modelDisplayName("model-2025-1-2"), /^Model 2025\.1/);
+  assert.match(modelDisplayName("model-2025-01-2"), /^Model 2025\.01/);
+});
+
 test("modelDisplayName names from the last path segment of a routed id", () => {
   assert.equal(modelDisplayName("cmc/deepseek/deepseek-v4.1-flash"), "DeepSeek V4.1 Flash");
   assert.equal(modelDisplayName("cmc/z-ai/glm-5.3-flash"), "GLM 5.3 Flash");

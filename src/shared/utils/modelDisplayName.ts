@@ -48,8 +48,8 @@ const DATE_TOKEN = /^(19|20)\d{6}$/;
 
 /** Dash-separated date triplet tokens ("2025-08-07"). */
 const YEAR_TOKEN = /^(19|20)\d{2}$/;
-const MONTH_TOKEN = /^(0?[1-9]|1[0-2])$/;
-const DAY_TOKEN = /^(0?[1-9]|[12]\d|3[01])$/;
+const MONTH_TOKEN = /^(0[1-9]|1[0-2])$/;
+const DAY_TOKEN = /^(0[1-9]|[12]\d|3[01])$/;
 
 function isDateTriplet(tokens: string[], index: number): boolean {
   return (
