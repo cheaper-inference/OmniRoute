@@ -627,23 +627,24 @@ async function handleChatCoreInner({
   ): EffectiveServiceTier | null => resolveReportedServiceTierFor(provider, payload, maxDepth);
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
-  // Per-key no-log flag OR the per-request `x-omniroute-no-log` header. The
-  // full five-tier decision (global + connection + per-model) is resolved
-  // AFTER background-redirect / Copilot-auto / lifecycle have finalized the
-  // model (see recompute below), so the per-model flag applies to the model
-  // actually routed to, not the requested alias.
+  // Per-request `x-omniroute-no-log` header, per-key no-log flag, per-model,
+  // per-connection and global settings, OR-combined. The full decision is
+  // resolved AFTER background-redirect / Copilot-auto / lifecycle have
+  // finalized the model (see recompute below), so the per-model flag applies
+  // to the model actually routed to, not the requested alias.
   const settingsForNoLog = cachedSettings ?? (await getCachedSettings());
   let noLogEnabled = false;
   let agentContext = null;
   const resolveNoLogDecision = () => {
+    // Most specific rung first: request > key > model > connection > global.
     noLogEnabled = resolveNoLogEnabled({
-      apiKeyInfo,
       headers: clientRawRequest?.headers ?? null,
-      globalNoLog: isGlobalNoLogEnabled(settingsForNoLog),
+      apiKeyInfo,
+      modelNoLog: getModelNoLog(provider || "", model || "", sourceFormat),
       connectionNoLog:
         (credentials?.providerSpecificData as Record<string, unknown> | null | undefined)?.noLog ===
         true,
-      modelNoLog: getModelNoLog(provider || "", model || "", sourceFormat),
+      globalNoLog: isGlobalNoLogEnabled(settingsForNoLog),
     });
     agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, {
       noLog: noLogEnabled,

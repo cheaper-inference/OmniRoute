@@ -69,15 +69,16 @@ export function isGlobalNoLogEnabled(settings: unknown): boolean {
 /**
  * Resolve the effective no-log decision for one request.
  *
- * Precedence (any true wins — monotonic, never un-logged by a lower tier):
- *   1. per-API-key `no_log` flag (true = withhold)
- *   2. per-request `x-omniroute-no-log` header (true = withhold)
- *   3. global `noLogPayloads` / `loggingEnabled` settings (default true = log
- *      payloads; false on either alias = withhold globally)
+ * Precedence (any true wins — monotonic, never un-logged by a lower tier),
+ * listed most specific first:
+ *   1. per-request `x-omniroute-no-log` header (true = withhold)
+ *   2. per-API-key `no_log` flag (true = withhold)
+ *   3. per-model flag `getModelNoLog(...)` (true = withhold;
+ *      undefined = unset, falls through)
  *   4. per-connection `providerSpecificData.noLog` (true = withhold;
  *      false = allow logging unless another tier disables it)
- *   5. per-model flag `getModelNoLog(...)` (true = withhold;
- *      undefined = unset, falls through)
+ *   5. global `noLogPayloads` / `loggingEnabled` settings (default true = log
+ *      payloads; false on either alias = withhold globally)
  *
  * The first two originals are kept as a positional overload so existing
  * callers/tests are untouched; the new tiered call passes an options object.
@@ -142,12 +143,15 @@ function resolveTieredNoLog(
   opts: TieredNoLogSource,
   _headers: Record<string, unknown> | Headers | null | undefined
 ): boolean {
+  // Listed most specific first, matching the doc comment above. The OR is
+  // monotonic, so the order affects neither the result nor the cost: every
+  // tier is already resolved by the caller before this runs.
   return (
-    opts.apiKeyInfo?.noLog === true ||
     isNoLogRequested(opts.headers ?? null) ||
-    opts.globalNoLog === true ||
+    opts.apiKeyInfo?.noLog === true ||
+    opts.modelNoLog === true ||
     opts.connectionNoLog === true ||
-    opts.modelNoLog === true
+    opts.globalNoLog === true
   );
 }
 
