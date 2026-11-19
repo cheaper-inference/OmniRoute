@@ -10,6 +10,7 @@
  * - Degraded stubs are refused: a row with no stored usage evidence, or with unknown input, output
  *   or cached-token counts, would be charged its cached tokens at the full input rate.
  * - Price lookup goes through `priceAt(provider, model, timestamp)` with the row's own timestamp.
+ *   Passes run one at a time within a process (see runRepriceJob).
  *   shortcut: the tip keeps no dated price history, so the default ignores the timestamp and returns
  *   today's row; upgrade by passing a dated lookup once prices carry effective dates.
  *
@@ -97,7 +98,22 @@ function priceRow(row: LedgerRow, pricing: NonNullable<PricingRow>): number {
   );
 }
 
-export async function runRepriceJob(options: RepriceOptions = {}): Promise<RepriceResult> {
+let activeRepriceRun: Promise<unknown> = Promise.resolve();
+
+/**
+ * Runs one repricing pass after any earlier pass in this process has settled. A pass awaits the
+ * price lookup between reading the cursor and storing it, so two overlapping passes (for example
+ * a `restart` started while another pass is pricing) would let the older pass store a stale
+ * cursor and count writes that changed nothing. Serializing keeps each pass on a committed
+ * cursor. It does not coordinate separate server processes.
+ */
+export function runRepriceJob(options: RepriceOptions = {}): Promise<RepriceResult> {
+  const run = activeRepriceRun.then(() => runRepricePass(options));
+  activeRepriceRun = run.catch(() => undefined);
+  return run;
+}
+
+async function runRepricePass(options: RepriceOptions): Promise<RepriceResult> {
   const batchSize = Math.max(1, Math.min(options.batchSize ?? 200, 1000));
   const maxBatches = Math.max(1, options.maxBatches ?? 20);
   const priceAt = options.priceAt ?? defaultPriceAt;

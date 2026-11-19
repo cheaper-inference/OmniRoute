@@ -163,3 +163,45 @@ test("flag on: the endpoint runs the job and reports the cursor", async () => {
   assert.equal(body.done, true);
   assert.equal(body.state.repricedTotal, 1);
 });
+
+test("flag on: a POST with no body runs with the defaults; malformed JSON is still a 400", async () => {
+  process.env.OMNIROUTE_USAGE_REPRICE_JOB_ENABLED = "true";
+  seed("2026-03-01T00:00:00.000Z");
+  const empty = await route.POST(
+    new Request("http://localhost/api/usage/reprice", { method: "POST" })
+  );
+  assert.equal(empty.status, 200);
+  assert.equal((await empty.json()).repriced, 1);
+  const malformed = await route.POST(
+    new Request("http://localhost/api/usage/reprice", { method: "POST", body: "{not json" })
+  );
+  assert.equal(malformed.status, 400);
+});
+
+test("flag off: the 404 body uses the shared error envelope", async () => {
+  const response = await post();
+  assert.equal(response.status, 404);
+  const body = await response.json();
+  assert.equal(body.error.message, "Not found");
+  assert.equal(typeof body.error.type, "string");
+});
+
+test("overlapping passes run one at a time: a restart cannot double-count a stale pass", async () => {
+  seed("2026-03-01T00:00:00.000Z");
+  seed("2026-03-02T00:00:00.000Z");
+  const slow = async () => {
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    return { input: 2, output: 10 };
+  };
+  const fast = async () => ({ input: 2, output: 10 });
+  const [first, second] = await Promise.all([
+    job.runRepriceJob({ priceAt: slow }),
+    job.runRepriceJob({ priceAt: fast, restart: true }),
+  ]);
+  assert.equal(first.repriced + second.repriced, 2, "each row is priced by exactly one pass");
+  assert.equal(second.scanned, 0, "the restart pass starts after the first pass committed");
+  assert.ok(
+    amounts().every((r) => r.amount > 0),
+    "every row priced"
+  );
+});

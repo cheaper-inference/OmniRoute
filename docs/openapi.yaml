@@ -4834,10 +4834,12 @@ paths:
       summary: Run the repricing job
       description: |
         Prices never-priced `request_cost_ledger` rows (stored with no cost and no unit prices)
-        from the stored cursor, in batches, each at its own timestamp. Rows whose stored usage
-        evidence is missing or has unknown input, output or cached-token counts are refused.
-        Call again while `done` is false. Opt-in: answers 404 unless
-        `OMNIROUTE_USAGE_REPRICE_JOB_ENABLED` is on.
+        from the stored cursor, in batches. Each row's timestamp is passed to the price lookup,
+        but the default lookup keeps no dated price history and uses today's pricing row, so
+        after a price change older rows are estimated at the current rate. Rows whose stored
+        usage evidence is missing or has unknown input, output or cached-token counts are
+        refused. The body is optional; every option has a default. Call again while `done` is
+        false. Opt-in: answers 404 unless `OMNIROUTE_USAGE_REPRICE_JOB_ENABLED` is on.
       requestBody:
         required: false
         content:

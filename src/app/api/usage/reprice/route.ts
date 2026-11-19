@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { buildErrorBody } from "@omniroute/open-sse/utils/error.ts";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
 import { getRepriceState, isRepriceJobEnabled, runRepriceJob } from "@/lib/usage/repriceLedger";
@@ -20,7 +21,7 @@ const repriceBodySchema = z
   })
   .strict();
 
-const notFound = () => NextResponse.json({ error: "Not found" }, { status: 404 });
+const notFound = () => NextResponse.json(buildErrorBody(404, "Not found"), { status: 404 });
 
 export async function GET(request: Request) {
   const authError = await requireManagementAuth(request);
@@ -30,7 +31,9 @@ export async function GET(request: Request) {
     return NextResponse.json(getRepriceState());
   } catch (error) {
     console.error("Error reading reprice state:", error);
-    return NextResponse.json({ error: "Failed to read reprice state" }, { status: 500 });
+    return NextResponse.json(buildErrorBody(500, "Failed to read reprice state"), {
+      status: 500,
+    });
   }
 }
 
@@ -39,9 +42,11 @@ export async function POST(request: Request) {
   if (authError) return authError;
   if (!isRepriceJobEnabled()) return notFound();
 
+  // Every option has a default, so the body is optional: an empty body runs with the defaults.
   let rawBody: unknown;
   try {
-    rawBody = await request.json();
+    const text = await request.text();
+    rawBody = text.trim() === "" ? {} : JSON.parse(text);
   } catch {
     return NextResponse.json(
       {
@@ -61,6 +66,6 @@ export async function POST(request: Request) {
     return NextResponse.json(await runRepriceJob(validation.data));
   } catch (error) {
     console.error("Error running reprice job:", error);
-    return NextResponse.json({ error: "Failed to run reprice job" }, { status: 500 });
+    return NextResponse.json(buildErrorBody(500, "Failed to run reprice job"), { status: 500 });
   }
 }
