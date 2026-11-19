@@ -35,7 +35,22 @@ const MIRROR_REFRESH_INPUTS = [
   "TRANSLATION_SHA",
 ];
 
-function runFixture(t, { ci = [], mirror = [], runtime = [], envExample = "", envDoc = "" } = {}) {
+const ATOMIC_COVERAGE_INPUTS = ["OMNIROUTE_CI_SYNC_TSX_CACHE", "TMPDIR"];
+const NATIVE_COVERAGE_INPUTS = ["NODE_V8_COVERAGE"];
+const COVERAGE_INPUTS = [...ATOMIC_COVERAGE_INPUTS, ...NATIVE_COVERAGE_INPUTS];
+
+function runFixture(
+  t,
+  {
+    ci = [],
+    mirror = [],
+    atomic = [],
+    native = [],
+    runtime = [],
+    envExample = "",
+    envDoc = "",
+  } = {}
+) {
   const root = mkdtempSync(join(tmpdir(), "omniroute env contract "));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const checker = join(root, "scripts/check/check-env-doc-sync.mjs");
@@ -44,6 +59,8 @@ function runFixture(t, { ci = [], mirror = [], runtime = [], envExample = "", en
   for (const [path, names] of [
     ["scripts/quality/fixture-context.mjs", ci],
     ["scripts/i18n/mirror-refresh-safety.mjs", mirror],
+    ["scripts/ci/atomic-tsx-cache.mjs", atomic],
+    ["scripts/ci/native-worker-v8-layout.mjs", native],
     ["src/runtimeFixture.ts", runtime],
   ]) {
     const target = join(root, path);
@@ -98,6 +115,39 @@ test("an unclassified mirror input stays visible to the gate", (t) => {
   const result = runFixture(t, { mirror: ["UNKNOWN_MIRROR_INPUT"] });
   assert.equal(result.status, 1);
   assert.match(result.stdout, /- UNKNOWN_MIRROR_INPUT(?:\r?\n|$)/);
+});
+
+test("coverage inputs are scoped to their own producer helpers", (t) => {
+  const result = runFixture(t, {
+    atomic: ATOMIC_COVERAGE_INPUTS,
+    native: NATIVE_COVERAGE_INPUTS,
+  });
+  assert.equal(result.status, 0, result.stdout);
+});
+
+for (const location of ["ci", "runtime"]) {
+  test(`coverage input names still require documentation in ${location} code`, (t) => {
+    const result = runFixture(t, {
+      atomic: ATOMIC_COVERAGE_INPUTS,
+      native: NATIVE_COVERAGE_INPUTS,
+      [location]: COVERAGE_INPUTS,
+    });
+    assert.equal(result.status, 1);
+    for (const name of COVERAGE_INPUTS) {
+      assert.match(result.stdout, new RegExp(`- ${name}(?:\\r?\\n|$)`));
+    }
+  });
+}
+
+test("a coverage helper still reports unclassified inputs and keys owned by another helper", (t) => {
+  const unknown = "OMNIROUTE_CI_UNKNOWN_COVERAGE_INPUT";
+  const result = runFixture(t, {
+    atomic: [...ATOMIC_COVERAGE_INPUTS, ...NATIVE_COVERAGE_INPUTS],
+    native: [...NATIVE_COVERAGE_INPUTS, unknown],
+  });
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /- NODE_V8_COVERAGE(?:\r?\n|$)/);
+  assert.match(result.stdout, new RegExp(`- ${unknown}(?:\\r?\\n|$)`));
 });
 
 test("existing runner context remains classified", (t) => {
