@@ -140,41 +140,63 @@ aider, continue.dev, copilot, avante, codecompanion
 
 ---
 
-## Antigravity ስውርነት
+## Antigravity Stealth
 
-የAntigravity ጥያቄዎች የጠሪውን ጽሑፍ ባይት-በ-ባይት እንዳለ ያቆያሉ። OmniRoute የIDE ደንበኛን ለመምሰል በprompt ውስጥ ዜሮ-ስፋት ያላቸውን ቁምፊዎች አያስገባም፣ ወይም መሣሪያዎችን እንደገና አይሰይም/አያስገባም።
+Antigravity ጠይቋል የደዋይ ጽሑፍ ባይት-ባይት እንዲቆይ። OmniRoute የ IDE ደንበኛን ለመምሰል ዜሮ-ስፋት ቁምፊዎችን ወደ ጥያቄዎች ወይም rename/inject መሳሪያዎች ውስጥ አያስገባውም።
 
 ### `antigravityHeaderScrub.ts`
 
-ከማስተላለፉ በፊት የStainless SDK ምልክቶችን (`x-stainless-lang`፣ `x-stainless-package-version`፣ `x-stainless-os`፣ `x-stainless-arch`፣ `x-stainless-runtime`፣ `x-stainless-runtime-version`፣ `x-stainless-timeout`፣ `x-stainless-retry-count`፣ `x-stainless-helper-method`) ያስወግዳል።
+ስቴፕስ የማይዝግ SDK ማርከሮች (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) ከማስተላለፋችን በፊት።
 
-### ⚠️ አደጋ፦ `ANTIGRAVITY_CREDITS=always` (መለያ ለእገዳ በከፍተኛ ሁኔታ የተጋለጠበት ነጥብ)
+### ⚠️ ስጋት `ANTIGRAVITY_CREDITS=always` (የመለያ የተከለከለ ትኩስ ቦታ)
 
-`ANTIGRAVITY_CREDITS=always` (በ`open-sse/executors/antigravity.ts` ጥቅም ላይ የሚውል) የGoogle ነፃ-ደረጃ ኮታ እንዲገድባቸው ከመፍቀድ ይልቅ **እያንዳንዱን** ጥያቄ በAntigravity AI Credit Overages (የሚከፈልባቸው የGoogle ክሬዲቶች) በኩል ያስተላልፋል። ይህ እንደ ባህሪ ተመዝግቧል፣ ነገር ግን ይህ **በብዛት የምናየው ብቸኛው የToS ጥሰት ሪፖርት ነው** — በርካታ የGoogle Ultra መለያዎች `=always`ን ተጠቅመው ለጥቂት ሰዓታት ከሠሩ በኋላ `403 / "service disabled for ToS violation" / insufficient_quota` በሚል ታግደዋል።
+`ANTIGRAVITY_CREDITS=always` (በ `open-sse/executors/antigravity.ts` የሚበላ) መንገዶች** እያንዳንዱ** የ Google ነፃ ደረጃ የኮታ በር ነገሮችን ከመፍቀድ ይልቅ በ Antigravity AI ክሬዲት Overages (የተከፈለ Google ክሬዲት) ይጠይቁ። ይህ እንደ ባህሪ ተመዝግቧል፣ ግን ነው።** የምናየው ብቸኛው በጣም የተለመደው የ ToS ጥሰት ሪፖርት** — multiple Google Ultra መለያዎች በ `403 / "service disabled for ToS violation" / insufficient_quota` ለጥቂት ሰዓታት ከሮጡ በኋላ በ `=always` ታግደዋል።
 
-የወደላይ አገልግሎት ማስፈጸሚያው በ**Google በኩል** ነው፤ OmniRoute ሊከላከለው የሚችለው ነገር አይደለም። የenv var ስሙ እና ነባር ሰነዶቹ ለማብራት አስተማማኝ ቅንብር እንደሆነ ያስመስሉታል፤ ግን አይደለም።
+ወደላይ ያለው ማስፈጸሚያ በርቷል።**Google ጎን** , OmniRoute ምንም ነገር መከላከል አይችልም. የ env var ስም እና አሁን ያሉት ሰነዶች ለመገልበጥ ደህንነቱ የተጠበቀ ኖብ እንዲመስል ያደርጉታል; አይደለም.
 
-**ይህ ከነፃ-ደረጃ-ብቻ አጠቃቀም ይልቅ የብልሹ አጠቃቀም ማወቂያን በበለጠ ጥብቅነት የሚቀሰቅሰው ለምንድን ነው፦**
+**ይህ ለምንድነው ከነጻ-ደረጃ-ብቻ አጠቃቀም ይልቅ አላግባብ መጠቀምን ፈልጎ ማግኘትን ይበልጥ ጨካኝ ያደርገዋል፡**
 
-- በአንድ የGoogle መለያ ላይ የሚደረግ ቀጣይነት ያለው ራስ-ሰር ወጪ፣ የነፃ ደረጃ ኮታውን ደርሶ ከሚቆም አጠቃቀም በተለየ ሁኔታ ምልክት ይደረግበታል።
-- የክሬዲት ትርፍ አጠቃቀም የተመን ጣሪያ የለውም፤ ስለዚህ በስህተት የተዋቀረ ደንበኛ በደቂቃዎች ውስጥ በርካታ መቶ USD ሊያወጣ እና የAPI-key ዳግም ሽያጭ ወይም የbot ትራፊክ ሊመስል ይችላል።
-- ከተመሳሳይ ውጫዊ IP በትይዩ የክሬዲት ትርፍ አጠቃቀምን የሚጠቀሙ በርካታ የOmniRoute ተጠቃሚዎች ምልክቱን ያጠናክራሉ።
+- ቀጣይነት ያለው አውቶማቲክ ወጪ በአንድ Google መለያ ባንዲራዎች ላይ ከነጻ-ደረጃ ሂት-ኮታ-እና-ማቆሚያዎች በተለየ።
+- የክሬዲት ኦቨርጅኖች ምንም የጣራ ጣሪያ የላቸውም፣ ስለዚህ የተሳሳተ ውቅረት ያለው ደንበኛ በደቂቃ ውስጥ በብዙ መቶ USD ውስጥ ሊቃጠል እና የኤፒአይ-ቁልፍ ዳግም ሽያጭ ወይም የቦት ትራፊክ ሊመስል ይችላል።
+- በርካታ OmniRoute ተጠቃሚዎች ከተመሳሳይ ውጫዊ IP በትይዩ ከመጠን ያለፈ ክሬዲቶችን ሲመቱ ምልክቱን ያዋህዳል።
 
-**የሚመከር አቋም፦**
+**የሚመከር አቀማመጥ፡-**
 
-1. ኦፕሬተሩ የሚከፈልበትን ክሬዲት እና የመለያ ማስፈጸሚያ አደጋ በግልጽ ካልተቀበለ በስተቀር፣ ነባሪውን `ANTIGRAVITY_CREDITS=off` እንዳለ ያቆዩ። `retry` መጀመሪያ መደበኛውን ጥያቄ ይልካል፣ እና ብቁ የኮታ 429 ከተመለሰ በኋላ ቢበዛ አንድ ጊዜ ክሬዲቶችን ያስገባል፤ `always` ደግሞ በመጀመሪያው ጥያቄ ላይ ክሬዲቶችን ያስገባል።
-2. አንድን የAntigravity መለያ ከማጨናነቅ ይልቅ **ጭነቱን በAuto-Combo በኩል በአቅራቢዎች መካከል ያሰራጩ** (`model: "auto"` ወይም `kr/glm/etc`-combo)።
-3. **ለእያንዳንዱ ግንኙነት የRPM ገደቦችን ያዘጋጁ**፤ ይህን በAntigravity አቅራቢው ማስተካከያ ገጽ ውስጥ ያድርጉ (Dashboard → Providers → Antigravity → ግንኙነት → የተመን ገደብ)። ለቀጣይነት ያለው አጠቃቀም 30–60 RPM ሊደገፍ የሚችል ከፍተኛ ገደብ ነው።
-4. **የተረጋጋ፣ በኦፕሬተሩ የሚቆጣጠር የወደላይ አገልግሎት አውታረ መረብን ይጠቀሙ**፣ እና አንድን መለያ ተዛማጅነት በሌላቸው ተጠቃሚዎች ወይም የሥራ ጭነቶች መካከል ከማጋራት ይቆጠቡ።
-5. **ከታገዱ**፦ Google የላከውን ትክክለኛ `quota_exceeded` / `service disabled` ምላሽ አካል በመጠቀም፣ በ`support.google.com` → "Restore Workspace/Account access" በኩል ይግባኝ ይጠይቁ። መለያው እንደሚመለስ ዋስትና የለም።
+1. ኦፕሬተሩ የተከፈለ የብድር እና የመለያ ማስፈጸሚያ አደጋን በግልጽ ካልተቀበለ በስተቀር ነባሪውን `ANTIGRAVITY_CREDITS=off` አቆይ። `retry` በመጀመሪያ መደበኛውን ጥያቄ ይልካል እና ከተገቢው ኮታ 429 በኋላ ክሬዲቶችን በአንድ ጊዜ ያስገባል። `always` በመጀመሪያው ጥያቄ ላይ ክሬዲቶችን ያስገባል።
+2. **በራስ-ኮምቦ በኩል ጭነት በአቅራቢዎች ላይ ያሰራጩ** (`model: "auto"` ወይም `kr/glm/etc` -combo) ነጠላ Antigravity መለያ ከማሟላት ይልቅ።
+3. **በግንኙነት RPM ገደቦችን ያቀናብሩ** በ Antigravity አቅራቢው አርትዕ ገጽ (ዳሽቦርድ → አቅራቢዎች → Antigravity → ግንኙነት → ተመን ገደብ)። 30–60 RPM ለዘለቄታው ጥቅም ላይ ሊውል የሚችል ከፍተኛ ገደብ ነው።
+4. **የተረጋጋ፣ በዋኝ ቁጥጥር የሚደረግበት የላይኛው አውታረ መረብ ተጠቀም** እና በማይዛመዱ ተጠቃሚዎች ወይም የስራ ጫናዎች ላይ አንድ መለያ ከማጋራት ይቆጠቡ።
+5. **ከተከለከለ** ይግባኝ በ `support.google.com` → " Workspace/Account መዳረሻን እነበረበት መልስ" በትክክለኛው `quota_exceeded` / `service disabled` ምላሽ አካል Google ተልኳል። መልሶ ማቋቋም ዋስትና የለውም።
 
-የአካባቢ ማጣቀሻው የእያንዳንዱን የክሬዲት ሁነታ የመለያ እና የወጪ አንድምታዎች ይመዘግባል።
+የአካባቢ ማመሳከሪያ ሂሳቡን ይመዘግባል እና የእያንዳንዱን የክሬዲት ሁነታ አንድምታ ያሳልፋል።
 
-የሚነኩ ነጥቦች፦
+#### `=always` ብቻ አይደለም Antigravity OAuth ራውቲንግ በአጠቃላይ
 
-- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`ን ያነባል
-- `src/lib/oauth/providers/antigravity.ts` — የማረጋገጫ መረጃ ማገናኛ
-- የመጀመሪያው የክስተት ሪፖርት፦ ውይይት [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+እገዳዎቹ በክሬዲት ትርፍ ላይ ብቻ የተገደቡ አይደሉም። በኖቬምበር 2026 (#19223, #19266) ውስጥ ያሉ ሪፖርቶች በ `antigravity` እና `agy` (Antigravity CLI) አቅራቢዎች በኩል በሚዘዋወሩበት ጊዜ የታገዱ በርካታ Google መለያዎችን ይገልፃሉ፡-
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+ሁለቱም አቅራቢዎች በ Antigravity ምርት OAuth ክፍለ ጊዜ ያረጋግጣሉ፣ይህም የዳሽቦርዱ ስጋት ማስታወቂያ ("ይህ አቅራቢ የእርስዎን ይፋዊ ምርት session/OAuth ይጠቀማል፣ ለ proxy/router አጠቃቀም ያልተፈቀደ) ግንኙነት ከመጨመሩ በፊት ያስጠነቅቃል። ከላይ ከተጠቀሱት ምክሮች ውስጥ የትኛውም ቢሆን ያንን አጠቃቀም አይፈቀድም; አንድ መለያ ምን ያህል ትራፊክ እንደሚቀንስ ብቻ ይቀንሳሉ.
+
+**ለ Gemini ሞዴሎች የተፈቀደ API በይነገጾች** Google እንደ ተራ የኤፒአይ ቁልፍ አቅራቢዎች በሚደግፈው APIs በኩል OmniRoute Gemini ፕሮግራማዊ መዳረሻን ይሰጣል
+
+| የአቅራቢ መታወቂያ | ዳሽቦርድ ስም                | ምስክርነት                                                                 |
+| ----------- | ----------------------- | ---------------------------------------------------------------------- |
+| `gemini`    | Gemini (Google AI ስቱዲዮ) | Gemini API ቁልፍ ከ Google AI ስቱዲዮ (ነፃ ደረጃ ይገኛል)                          |
+| `vertex`    | Vertex AI               | የአገልግሎት መለያ JSON፣ OAuth መዳረሻ token ወይም Vertex Express API ቁልፍ (Gemini) |
+
+እነዚህ አቅራቢዎች ከ Antigravity ምርት ክፍለ ጊዜ በተለየ የ Google ጉዳዮችን ለ API መዳረሻ ይጠቀማሉ። እያንዳንዱን አጠቃቀሙን አያሟሉም ወይም የማስፈጸም አደጋን አያስወግዱም: እያንዳንዱ በራሱ ደንቦች የሚመራ ነው, ይህም ኦፕሬተሩ መሰማራታቸውን ማረጋገጥ አለበት. ለምሳሌ፣ [Gemini API ተጨማሪ የአገልግሎት ውል](https://ai.google.dev/gemini-api/terms) የሚፈቅደው API ደንበኞች በአውሮፓ የኢኮኖሚ አካባቢ፣ ስዊዘርላንድ ወይም ዩናይትድ ኪንግደም ላሉ ተጠቃሚዎች ሲደርሱ የሚከፈልባቸው አገልግሎቶችን ብቻ ነው፣ እና ወደ ላልተከፈለ አገልግሎት የተላከ ይዘት Google ምርቶችን ለማሻሻል ጥቅም ላይ ሊውል ይችላል። Vertex AI በምትኩ በ Google ክላውድ ውል ስር ነው የሚወድቀው ( [አገልግሎት ልዩ ውሎች](https://cloud.google.com/terms/service-terms) )። የዋጋ አሰጣጥ እና ኮታዎች ከ Antigravity የደንበኝነት ምዝገባ ይልቅ እነዚያን API ውሎች ይከተላሉ።
+
+ከላይ የተገለጹትን Antigravity እገዳዎች ለማስወገድ የሚፈልጉ ኦፕሬተሮች አጠቃቀማቸው ከአገልግሎት አቅራቢው ጋር የሚስማማ መሆኑን ካረጋገጡ በኋላ በ `antigravity` / `agy` ፈንታ ከእነዚህ አቅራቢዎች በአንዱ በኩል Gemini ትራፊክን ማምራት አለባቸው።
+
+የንክኪ ነጥቦች፡-
+
+- `open-sse/executors/antigravity.ts` — `process.env.ANTIGRAVITY_CREDITS`
+- `src/lib/oauth/providers/antigravity.ts` — ምስክርነት የቧንቧ
+- ዋናው የክስተት ዘገባ፡ የውይይት [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

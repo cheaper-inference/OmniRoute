@@ -265,6 +265,56 @@ test("pre-flight reports pricing freshness as drift, not as a hard failure", asy
   );
 });
 
+test("migration-numbering and migrations-fresh are HARD gates, numbering first", async () => {
+  const fs = await import("node:fs");
+  const src = fs.readFileSync(
+    new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
+    "utf8"
+  );
+  // Timestamped migrations can depend on a later-dated one; only a fresh-install run of the
+  // whole set catches it, and it has to block the release (it runs in --quick as well).
+  assert.match(
+    src,
+    /hardCmd\(\s*"migrations-fresh"[\s\S]*?"run",\s*"test:migrations:fresh"/,
+    "migrations-fresh must run test:migrations:fresh as a HARD gate"
+  );
+  assert.doesNotMatch(src, /driftCmd\(\s*"migrations-fresh"/);
+  // The static numbering gate runs as a HARD step right before it (cheaper, clearer message
+  // for a duplicated timestamp than the runner's collision error inside the fresh run).
+  assert.match(
+    src,
+    /hardCmd\(\s*"migration-numbering"[\s\S]*?"run",\s*"check:migration-numbering"/,
+    "migration-numbering must run check:migration-numbering as a HARD gate"
+  );
+  assert.doesNotMatch(src, /driftCmd\(\s*"migration-numbering"/);
+  // Push/schedule runs have no PR base: the step compares the tree with the newest release
+  // tag instead, so a non-commuting pair that landed by a manual merge is still caught.
+  assert.match(
+    src,
+    /hardCmd\(\s*"migration-numbering"[\s\S]*?\["run",\s*"check:migration-numbering",\s*"--",\s*"--base-latest-tag"\]/,
+    "migration-numbering must compare with the latest release tag (--base-latest-tag)"
+  );
+  const numberingAt = src.search(/hardCmd\(\s*"migration-numbering"/);
+  const freshAt = src.search(/hardCmd\(\s*"migrations-fresh"/);
+  assert.ok(
+    numberingAt !== -1 && numberingAt < freshAt,
+    "migration-numbering must run before migrations-fresh"
+  );
+  const pkg = JSON.parse(
+    fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8")
+  ) as { scripts: Record<string, string> };
+  assert.match(
+    pkg.scripts["check:migration-numbering"] ?? "",
+    /scripts\/check\/check-migration-numbering\.mjs/,
+    "check:migration-numbering must run the numbering gate"
+  );
+  assert.match(
+    pkg.scripts["test:migrations:fresh"] ?? "",
+    /tests\/unit\/db\/migrations-fresh-database\.test\.ts/,
+    "test:migrations:fresh must run the fresh-database migration test"
+  );
+});
+
 test("pre-flight --hermetic scrubs the live-test trigger vars (2026-07-05 false-positive fix)", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(
@@ -685,7 +735,7 @@ test("one gate can never land in BOTH verdict buckets of the same report (#9985)
   );
 });
 
-test("the --full-ci loop classifies from the curated results, not a hardcoded kind (#9985)", async () => {
+test("the --full-ci loop uses the declared policy and keeps curated buckets consistent", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(
     new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
@@ -693,8 +743,8 @@ test("the --full-ci loop classifies from the curated results, not a hardcoded ki
   );
   assert.match(
     src,
-    /kind:\s*fullCiKindFor\(g\.id,\s*results\)/,
-    "--full-ci must classify each ci.yml gate through fullCiKindFor()"
+    /kind:\s*fullCiKindFor\(g\.id,\s*results,\s*g\.kind\)/,
+    "--full-ci must classify using the reviewed static policy"
   );
 });
 
@@ -806,4 +856,88 @@ test("--suites-from replaces the local suite lanes and keeps only the build on t
   // the webpack build gets the docker-publish heap instead of build-next-isolated's 8192 MB
   assert.match(src, /const BUILD_GATE_ENV = \{ OMNIROUTE_BUILD_MEMORY_MB: "12288" \};/);
   assert.match(src, /args: \["run", "build:cli"\], env: BUILD_GATE_ENV/);
+});
+
+// ─── Gate modes (plan "derived numbers resolved only at release", 2026-11-13) ───────────────
+
+test("HARD items run in pr gate mode unless the caller already chose one", () => {
+  const withMode = mod.withHardGateMode as (
+    extra?: Record<string, string>,
+    baseEnv?: Record<string, string | undefined>
+  ) => Record<string, string>;
+  assert.equal(mod.HARD_GATE_MODE, "pr");
+  assert.deepEqual(withMode(undefined, {}), { OMNIROUTE_GATE_MODE: "pr" });
+  assert.deepEqual(withMode({ TEST_SHARD: "1/8" }, {}), {
+    TEST_SHARD: "1/8",
+    OMNIROUTE_GATE_MODE: "pr",
+  });
+  // explicit per-gate value wins
+  assert.deepEqual(withMode({ OMNIROUTE_GATE_MODE: "release" }, {}), {
+    OMNIROUTE_GATE_MODE: "release",
+  });
+  // a value in the validator's own environment is inherited by the child, not overridden
+  assert.deepEqual(withMode({ GITHUB_BASE_REF: "main" }, { OMNIROUTE_GATE_MODE: "release" }), {
+    GITHUB_BASE_REF: "main",
+  });
+  // blank counts as unset
+  assert.deepEqual(withMode(undefined, { OMNIROUTE_GATE_MODE: "  " }), {
+    OMNIROUTE_GATE_MODE: "pr",
+  });
+});
+
+test("every HARD command of the pre-flight goes through withHardGateMode; drift ones do not", async () => {
+  const fs = await import("node:fs");
+  const src = fs.readFileSync(
+    new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
+    "utf8"
+  );
+  const hardCmd = src.slice(
+    src.indexOf("const hardCmd = async"),
+    src.indexOf("const driftCmd = async")
+  );
+  assert.match(
+    hardCmd,
+    /run\(cmd, cmdArgs, \{ \.\.\.opts, env: withHardGateMode\(opts\?\.env\) \}\)/
+  );
+  const driftCmd = src.slice(
+    src.indexOf("const driftCmd = async"),
+    src.indexOf('process.stderr.write("🔎')
+  );
+  assert.doesNotMatch(driftCmd, /withHardGateMode/, "drift items keep the strict (release) view");
+  for (const wiring of [
+    /env: withHardGateMode\(\{ GITHUB_BASE_REF: "main" \}\)/, // test-masking
+    /env: withHardGateMode\(\{ TEST_SHARD: `\$\{shard\}\/\$\{total\}` \}\)/, // unit shards
+    /runAsync\(npmCmd, g\.args, \{ timeout: g\.timeout, env: withHardGateMode\(g\.env\) \}\)/, // lanes
+    /env: withHardGateMode\(step\.env\)/, // package artifact
+    /"check:pack-boot"\][\s\S]{0,80}env: withHardGateMode\(\)/, // tarball boot
+    /hardGate = fullCiKindFor\(g\.id, results, g\.kind\) === "hard"/, // --full-ci bucket
+    /env: hardGate \? withHardGateMode\(gateEnv\) : gateEnv/, // --full-ci, HARD bucket only
+  ]) {
+    assert.match(src, wiring);
+  }
+});
+
+test("derived-refresh is a DRIFT item running release:refresh-derived --check, skipped when absent", async () => {
+  const fs = await import("node:fs");
+  const src = fs.readFileSync(
+    new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
+    "utf8"
+  );
+  assert.match(
+    src,
+    /driftCmd\(\s*"derived-refresh",[\s\S]*?\["run", "release:refresh-derived", "--", "--check"\]/
+  );
+  assert.doesNotMatch(src, /hardCmd\(\s*"derived-refresh"/, "never a base-red");
+  assert.match(
+    src,
+    /if \(hasNpmScript\("release:refresh-derived"\)\) \{[\s\S]*?\} else \{\s*record\(\{\s*id: "derived-refresh",[\s\S]*?kind: "drift",\s*ok: true,\s*detail: "skipped: /
+  );
+  // The derived item sits with the other drift items, before the HARD docs gate.
+  assert.ok(src.indexOf('"derived-refresh"') < src.indexOf('hardCmd("docs-all"'));
+  assert.ok(src.indexOf('"pricing-freshness"') < src.indexOf('"derived-refresh"'));
+
+  const hasNpmScript = mod.hasNpmScript as (name: string, root?: string) => boolean;
+  assert.equal(hasNpmScript("check:docs-all"), true);
+  assert.equal(hasNpmScript("no-such-script-for-release-green"), false);
+  assert.equal(hasNpmScript("check:docs-all", "/nonexistent-root-for-release-green"), false);
 });

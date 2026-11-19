@@ -18,7 +18,7 @@
 
 ---
 
-## Kurulum Yöntemleri
+## Yükleme Yöntemleri
 
 ### npm (önerilen)
 
@@ -27,25 +27,27 @@ npm install -g omniroute
 omniroute
 ```
 
-Kontrol paneli `http://localhost:20128` adresinde açılır ve API temel URL'si `http://localhost:20128/v1` olur.
+Kontrol paneli `http://localhost:20128` açılır ve API tabanı URL `http://localhost:20128/v1`.
 
-### pnpm
+> **npm kullanıcıları:** Npm, yükleme komut dosyalarının engellendiğine dair uyarıda bulunursa (örneğin, `omniroute`, `better-sqlite3`), [bkz. — npm kurulum komut dosyalarının engellendiği sorun](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) giderme.
+
+### ppmpm
 
 ```bash
 pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/core
 omniroute
 ```
 
-> **pnpm kullanıcıları:** `better-sqlite3` ve `@swc/core` için yerel derleme betiklerini etkinleştirmek üzere `--allow-build` bayrağı gereklidir. `pnpm approve-builds -g` komutu, pnpm v11'de genel kurulumlar için desteklenmez.
+> **pnpm kullanıcıları:** `better-sqlite3` ve `@swc/core` için yerel derleme komut dosyalarını etkinleştirmek için `--allow-build` bayrağı gereklidir. pnpm v11'deki genel kurulumlar için `pnpm approve-builds -g` komutu desteklenmez.
 
-### Arch Linux (AUR)
+### Kemer Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR paketi](https://aur.archlinux.org/packages/omniroute-bin), OmniRoute'u kurar ve bir systemd kullanıcı hizmeti sağlar.
+[AUR paketi](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute yükler ve bir systemd kullanıcı hizmeti sağlar.
 
 ### Kaynaktan
 
@@ -54,59 +56,59 @@ npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows notu:** Eski `%USERPROFILE%\.omniroute` dizini mevcut değilse OmniRoute varsayılan olarak `%APPDATA%\omniroute` dizinini kullanır. Farklı bir veri dizini konumu seçmek için `DATA_DIR` değişkenini ayarlayın.
+> **Windows notu:** Varsayılan olarak OmniRoute, eski `%USERPROFILE%\.omniroute` dizini mevcut olmadığında `%APPDATA%\omniroute` kullanır. Farklı bir veri dizini konumu seçmek için `DATA_DIR` ayarlayın.
 
-> **Not:** `npm install`, ilk çalıştırmada `.env.example` dosyasından otomatik olarak `.env` oluşturur. Sonraki kurulumlar mevcut bir `.env` dosyasının üzerine yazmaz; böylece özelleştirmeler korunur. Yeniden oluşturmak için komutu tekrar çalıştırmadan önce `.env` dosyasını silin.
+> **Not:** `npm install` ilk çalıştırmada `.env.example` `.env` otomatik olarak oluşturur. Sonraki kurulumlar mevcut `.env` üzerine yazılmayacak, dolayısıyla özelleştirmeler korunacaktır. Yeniden tohumlamak için yeniden çalıştırmadan önce `.env` silin.
 
 ### Docker
 
-Compose profilleri ve Caddy HTTPS dahil eksiksiz Docker kurulumu için [Docker Kılavuzu](./DOCKER_GUIDE.md) belgesine bakın.
+Compose profilleri ve Caddy HTTPS dahil Docker kurulumunun tamamı için [Docker Kılavuzuna](./DOCKER_GUIDE.md) bakın.
 
 ### Masaüstü Uygulaması (Electron)
 
-OmniRoute, Electron 41 + electron-builder 26.10 üzerine kurulu bir masaüstü sarmalayıcısıyla birlikte gelir. Kullanılabilir betikler (çalışma alanı kökü):
+OmniRoute Electron 41 + elektron oluşturucu 26.10 üzerine kurulu bir masaüstü paketleyici gönderir. Kullanılabilir komut dosyaları (çalışma alanı kökü):
 
 ```bash
-npm run electron:dev          # Masaüstü uygulamasını çalışırken yeniden yüklemeyle çalıştır
-npm run electron:build        # Geçerli işletim sistemi için derle (otomatik algılanır)
-npm run electron:build:win    # Windows yükleyicisi (NSIS + taşınabilir)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Paketlenmiş derlemeye duman testi uygula
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Masaüstü yükleyicilerinin sürümleri GitHub Releases sayfasına eklenir. Electron hakkında ayrıntılı bilgi (imzalama, IPC köprüsü, dağıtımlar) için [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) belgesine bakın _(daha sonraki bir aşamada oluşturuldu)_.
+Masaüstü yükleyicilerin sürümleri GitHub Sürümlerine eklenmiştir. Tam Electron ayrıntılı incelemesi için (imzalama, IPC köprüsü, dağıtımlar), bkz. [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Başsız sunucu (CI/otomasyon)
+### Başsız sunucu (CI/automation)
 
-Gözetimsiz kurulumlar (Docker, Kubernetes, CI) için şunları kullanın:
+Katılımsız kurulumlar için (Docker, Kubernetes, CI) şunu kullanın:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Ortam değişkenleriyle (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` vb.) birlikte kullanıldığında bu, tamamen betiklerle yönetilebilen bir OmniRoute örneği başlatmanıza olanak tanır.
+Env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` vb.) ile birleştirildiğinde bu, tamamen komut dosyası oluşturulabilir bir OmniRoute örneğini döndürmenize olanak tanır.
 
 ### CLI Seçenekleri
 
-| Komut                   | Açıklama                                                                              |
+| Emretmek                | Tanım                                                                                 |
 | ----------------------- | ------------------------------------------------------------------------------------- |
-| `omniroute`             | Sunucuyu başlat (`PORT=20128`, API ve kontrol paneli aynı portta)                     |
-| `omniroute setup`       | Parola ve ilk sağlayıcı için rehberli CLI başlangıç kurulumu                          |
-| `omniroute doctor`      | Sunucuyu başlatmadan yerel sistem durumu denetimlerini çalıştır                       |
-| `omniroute providers`   | Sağlayıcıları CLI üzerinden keşfet, listele, doğrula ve test et                       |
-| `omniroute config`      | CLI aracı yapılandırması — yapılandırmaları listele, al, ayarla ve doğrula            |
-| `omniroute status`      | Çevrimdışı durum paneli — sürüm, DB, araçlar ve yapılandırma                          |
-| `omniroute logs`        | API'den kullanım günlüklerini akışla (`--follow` desteklenir)                         |
-| `omniroute update`      | OmniRoute güncellemelerini denetle veya uygula                                        |
-| `omniroute provider`    | Sağlayıcı bağlantılarını yönet — ekle, listele, kaldır, test et ve varsayılanı ayarla |
-| `omniroute --port 3000` | Standart/API portunu 3000 olarak ayarla                                               |
-| `omniroute --mcp`       | MCP sunucusunu başlat (stdio aktarımı)                                                |
+| `omniroute`             | Sunucuyu başlatın (`PORT=20128`, API ve gösterge tablosu aynı bağlantı noktasında)    |
+| `omniroute setup`       | Şifre ve ilk sağlayıcı için rehberli CLI katılımı                                     |
+| `omniroute doctor`      | Sunucuyu başlatmadan yerel durum denetimlerini çalıştırın                             |
+| `omniroute providers`   | CLI sağlayıcılarını keşfedin, listeleyin, doğrulayın ve test edin                     |
+| `omniroute config`      | CLI aracı yapılandırması — listesi, yapılandırmaları alma, ayarlama, doğrulama        |
+| `omniroute status`      | Çevrimdışı durum kontrol paneli — sürümü, DB, araçlar, yapılandırma                   |
+| `omniroute logs`        | Kullanım günlüklerini API yayınlayın ( `--follow` destekler)                          |
+| `omniroute update`      | OmniRoute güncellemelerini kontrol edin veya uygulayın                                |
+| `omniroute provider`    | Sağlayıcı bağlantılarını yönetin — ekleme, listeleme, kaldırma, test etme, varsayılan |
+| `omniroute --port 3000` | canonical/API bağlantı noktasını 3000 olarak ayarlayın                                |
+| `omniroute --mcp`       | MCP sunucusunu başlatın (stdio aktarımı)                                              |
 | `omniroute --no-open`   | Tarayıcıyı otomatik olarak açma                                                       |
 | `omniroute --help`      | Yardımı göster                                                                        |
 
-Başsız kurulum, bayraklar veya ortam değişkenleri kullanılarak betikleştirilebilir:
+Başsız kurulum, bayraklar veya ortam değişkenleriyle kodlanabilir:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Kontrol panelini açmadan yerel tanılamaları çalıştırın:
+Kontrol panelini açmadan yerel tanılamayı çalıştırın:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Kontrol panelini açmadan sağlayıcıları SSH veya betikler üzerinden yönetin:
+Kontrol panelini açmadan sağlayıcıları SSH veya komut dosyalarından yönetin:
 
 ```bash
 omniroute providers available
@@ -219,8 +221,12 @@ npm run test:protocols:e2e
 
 **Claude Kodu:**
 
+Claude Kodu, `omniroute --mcp` (stdio)'nun başlamadığı HTTP üzerinden bağlanır. HTTP aktarımı varsayılan olarak kapalıdır: önce onu çalışan sunucuda etkinleştirin. Kontrol panelinde oturum açma etkinleştirildiğinde, kimlik bilgisi olmayan bir istek `401` alır, bu nedenle `mcp:connect` (veya `manage`) içeren bir API anahtarı iletin; `manage`/`admin` bir anahtar aynı zamanda her aracın kapsamına da ihtiyaç duyar (bkz [MCP Sunucusu → MCP araç kapsamları](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**

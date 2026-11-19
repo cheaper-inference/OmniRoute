@@ -130,7 +130,7 @@ export default function NoAuthProviderControls({
       size="sm"
       icon="vpn_lock"
       onClick={onConfigureProviderProxy}
-      className={`h-auto min-h-0 gap-1 rounded px-2 py-1 text-xs font-medium ${
+      className={`h-auto min-h-0 gap-1 rounded px-2 py-1 text-xs ${
         host
           ? "bg-warning/15 text-warning hover:bg-warning/25"
           : "bg-bg-subtle text-text-muted/50 hover:bg-bg-subtle hover:text-text-muted"

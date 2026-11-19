@@ -1,11 +1,13 @@
 /**
- * 2026-11-03 (owner decision): npm and Docker installs serve the translated /docs pages
- * (#18699), so both ship the docs mirrors the route reads and nothing else from docs/i18n.
+ * 2026-11-03 (owner decision): Docker installs serve the translated /docs pages (#18699), so the
+ * image ships the docs mirrors the route reads and nothing else from docs/i18n. npm shipped them
+ * too until 2026-11-17, when they pushed the 3.8.54 tarball to 206.1 MB and the registry
+ * answered 413 (owner decision: npm installs serve /docs in English).
  *
- * One rule (scripts/build/docsMirrorRuntime.mjs) decides what that is. This file pins it to
- * source.config.ts, to the npm pack policy, and to .dockerignore, checked against the real
- * docs/i18n tree, and checks that jsdom (the sanitizer behind every translated page) is a
- * runtime dependency an npm install actually gets.
+ * One rule (scripts/build/docsMirrorRuntime.mjs) decides what the runtime mirrors are. This file
+ * pins it to source.config.ts and to .dockerignore, checked against the real docs/i18n tree,
+ * checks that the npm pack policy keeps every docs/i18n file out, and checks that jsdom (the
+ * sanitizer behind every translated page) is a runtime dependency.
  */
 import test from "node:test";
 import assert from "node:assert/strict";
@@ -22,10 +24,13 @@ import {
   APP_STAGING_ALLOWED_EXACT_PATHS,
   APP_STAGING_ALLOWED_PATH_MATCHERS,
   APP_STAGING_ALLOWED_PATH_PREFIXES,
+  APP_STAGING_REMOVAL_PATHS,
   PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
   PACK_ARTIFACT_ALLOWED_PATH_MATCHERS,
   PACK_ARTIFACT_ALLOWED_PATH_PREFIXES,
+  PACK_ARTIFACT_MAX_PACKED_BYTES,
   PACK_ARTIFACT_REQUIRED_PATHS,
+  exceedsPackedSizeBudget,
   findUnexpectedArtifactPaths,
 } from "../../scripts/build/pack-artifact-policy.ts";
 import { resolveSafeI18nSectionDir } from "../../src/lib/docsI18nPath.ts";
@@ -128,7 +133,12 @@ test("every shipped mirror is a file the route's path guard resolves to", () => 
   }
 });
 
-test("the npm pack policy allows the runtime mirrors under dist/ and nothing else in docs/i18n", () => {
+test("the npm pack policy keeps every docs/i18n file out of dist/", () => {
+  assert.ok(
+    APP_STAGING_REMOVAL_PATHS.includes("docs/i18n"),
+    "prepublish must drop the whole docs/i18n tree from the staged dist/"
+  );
+
   const stagedI18n = ALL_I18N_FILES;
   const unexpectedStaged = findUnexpectedArtifactPaths(stagedI18n, {
     exactPaths: APP_STAGING_ALLOWED_EXACT_PATHS,
@@ -138,8 +148,8 @@ test("the npm pack policy allows the runtime mirrors under dist/ and nothing els
   });
   assert.deepEqual(
     stagedI18n.filter((file) => !unexpectedStaged.includes(file)),
-    RUNTIME_MIRRORS,
-    "prepublish's staging prune must keep exactly the runtime mirrors"
+    [],
+    "prepublish's staging prune must keep no docs/i18n file"
   );
 
   const packed = ALL_I18N_FILES.map((file) => `dist/${file}`);
@@ -150,7 +160,8 @@ test("the npm pack policy allows the runtime mirrors under dist/ and nothing els
   });
   assert.deepEqual(
     packed.filter((file) => !unexpectedPacked.includes(file)),
-    RUNTIME_MIRRORS.map((file) => `dist/${file}`)
+    [],
+    "check:pack-artifact must reject any docs/i18n file in the tarball"
   );
 
   // The tarball root never carries mirrors: only dist/ does.
@@ -164,10 +175,21 @@ test("the npm pack policy allows the runtime mirrors under dist/ and nothing els
   );
 });
 
-test("the pack gate fails when the mirrors vanish from the tarball", () => {
-  const sample = "dist/docs/i18n/pt-BR/docs/getting-started/QUICK-START.md";
-  assert.ok(PACK_ARTIFACT_REQUIRED_PATHS.includes(sample));
-  assert.ok(RUNTIME_MIRRORS.includes(sample.slice("dist/".length)));
+test("the pack gate no longer requires a docs mirror in the tarball", () => {
+  assert.deepEqual(
+    PACK_ARTIFACT_REQUIRED_PATHS.filter((required) => required.startsWith("dist/docs/i18n/")),
+    []
+  );
+});
+
+test("the pack gate fails a tarball over the packed-size budget", () => {
+  // npm rejected 3.8.54 (206.1 MB packed) with E413; 3.8.53 (193.6 MB) went through.
+  assert.ok(PACK_ARTIFACT_MAX_PACKED_BYTES < 193_600_000);
+  assert.equal(exceedsPackedSizeBudget(206_100_000), true);
+  assert.equal(exceedsPackedSizeBudget(PACK_ARTIFACT_MAX_PACKED_BYTES + 1), true);
+  assert.equal(exceedsPackedSizeBudget(PACK_ARTIFACT_MAX_PACKED_BYTES), false);
+  assert.equal(exceedsPackedSizeBudget(110_000_000), false);
+  assert.equal(exceedsPackedSizeBudget(Number.NaN), false);
 });
 
 test("the .dockerignore helper follows Docker's last-match-wins and parent-directory rules", () => {

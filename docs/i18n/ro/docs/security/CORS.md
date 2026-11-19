@@ -118,30 +118,8 @@ repornire.
 
 ## Chei API vs sesiuni bazate pe cookie-uri
 
-- **Bearer / `x-api-key` (suprafața de inferență `/v1/*`):** browserele nu atașează
-  niciodată automat aceste valori. CORS nu reprezintă o barieră relevantă aici — cheia API este
-  bariera — motiv pentru care această suprafață este intenționat permisivă, astfel încât clienții pentru browser și
-  Electron să poată citi răspunsurile la care au deja dreptul.
-  Ecoul relaxat urmează cheia validată, nu simpla prezență a antetului: când
-  `REQUIRE_API_KEY=false` servește o solicitare în mod anonim, răspunsul reușit păstrează
-  lista de permisiuni fail-closed. Respingerile de autentificare (401) rămân lizibile,
-  astfel încât clienții să poată semnala o cheie revocată sau tastată greșit (#5242):
-  propriul 401 al pipeline-ului păstrează ecoul, iar o rută care refuză ea însăși cheia
-  după ce pipeline-ul a servit solicitarea ca anonimă (`/v1/models` și `/v1beta/models`
-  cu autentificarea de management configurată, rutele limitate la proprietar
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` și rutele candidate
-  auto-combo) adaugă ecoul la acel 401 prin `credentialRejectionHeaders()`. Ecoul depinde
-  de faptul că solicitarea poartă un antet de credențiale (`Authorization`, `x-api-key`,
-  `x-goog-api-key` sau cookie-ul `auth_token`), nu de care dintre ele a verificat ruta,
-  și nu este niciodată asociat cu `Access-Control-Allow-Credentials`; corpul este un plic
-  de eroare fix. Rutele de management de sub `/api/v1/` protejate de
-  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`) nu
-  adaugă ecoul: cu `REQUIRE_API_KEY=false`, răspunsurile lor 401/403 nu pot fi citite de
-  pe altă origine.
-- **Sesiune bazată pe cookie-uri (tabloul de bord):** protejată de valoarea implicită care blochează accesul **și**
-  de absența `Access-Control-Allow-Credentials` pe traseul comun. Nu includeți
-  originile de administrare/ale tabloului de bord în nicio configurație permisivă; acestea trebuie să rămână strict
-  blocate în mod implicit.
+- **Bearer / `x-api-key` (suprafața de inferență `/v1/*`):** browserele nu le atașează niciodată automat. CORS nu reprezintă o barieră relevantă aici — cheia API este bariera — motiv pentru care această suprafață este în mod intenționat permisivă, astfel încât clienții din browser și Electron să poată citi răspunsurile la care au deja dreptul. Ecoul relaxat urmează cheia validată, nu simpla prezență a antetului: atunci când `REQUIRE_API_KEY=false` servește anonim o cerere, răspunsul său reușit păstrează lista de permisiuni cu închidere implicită. Respingerile de autentificare (401) rămân lizibile, astfel încât clienții să poată semnala o cheie revocată sau introdusă greșit (#5242): răspunsul 401 generat de propriul pipeline păstrează ecoul, iar o rută care refuză cheia însăși după ce pipeline-ul a servit-o anonim (`/v1/models` și `/v1beta/models` cu autentificarea de management configurată, rutele cu acces limitat la proprietar `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` și rutele candidate auto-combo) adaugă ecoul la acel 401 prin `credentialRejectionHeaders()`. Ecoul este determinat de faptul că cererea conține un antet de autentificare (`Authorization`, `x-api-key`, `x-goog-api-key` sau cookie-ul `auth_token`), nu de care dintre acestea a verificat ruta, și nu este asociat niciodată cu `Access-Control-Allow-Credentials`; corpul este un pachet de eroare fix. Rutele de management din `/api/v1/` protejate de `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) nu adaugă ecoul: cu `REQUIRE_API_KEY=false`, răspunsurile lor 401/403 nu pot fi citite de pe alte origini.
+- **Sesiunea bazată pe cookie (tabloul de bord):** protejată de comportamentul implicit cu închidere implicită **și** de absența `Access-Control-Allow-Credentials` pe calea partajată. Păstrați originile de management/tablou de bord în afara oricărei configurații permisive; acestea trebuie să rămână strict cu închidere implicită.
 
 ## Handshake-uri WebSocket (`/v1/responses`, `/v1/ws`)
 
