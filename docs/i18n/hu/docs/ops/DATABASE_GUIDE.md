@@ -186,29 +186,92 @@ A több mint 30 táblát tartalmazó teljes lista a `src/lib/db/migrations/` kö
 
 ## Migrációk
 
-Az OmniRoute **verziózott, idempotens migrációkat** használ a `src/lib/db/migrations/` könyvtárban. Minden migráció egyetlen SQL-fájl, amelynek neve `NNN_description.sql` formátumú.
+OmniRoute használ** verziójú, idempotens migrációk** a `src/lib/db/migrations/`. Minden áttelepítés egyetlen SQL fájl. Két elnevezési formátum létezik egymás mellett; a `_omniroute_migrations` ben rögzített verzió a numerikus előtag.
 
-### A migrációk elnevezése
+### Migrációs elnevezés
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Formátum                                            | Példa                                | Használt                                                                                                                                                        |
+| --------------------------------------------------- | ------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (pontosan 3 számjegy)         | `241_seen_models.sql`                | A régi sorozat `001`–`241`. Lefagyott, amikor az időbélyeg formátuma leszállt (`240` és `241` közvetlenül előtte egyesült): egyetlen új fájl sem kap sorszámot. |
+| `YYYYMMDDHHMMSS_description.sql` (14 számjegy, UTC) | `20261113120000_add_usage_index.sql` | Minden 2026-11-13 óta létrehozott migráció.                                                                                                                     |
 
-### A migrációk futtatása
+Miért a változás? Sorozatszámok esetén a párhuzamos PRs ugyanazt a következő számot választotta, és egy kivételével mindegyiket újra kellett számozni, mielőtt egyesítette volna. A UTC időbélyeg minden PR megadja a saját verzióját.
 
-Indításkor a `migrationRunner.ts`:
+Az időbélyeg formátumának szabályai ( `npm run check:migration-numbering` által kényszerítve, megosztva a generátorral `scripts/check/lib/migrationNaming.mjs` ben):
 
-1. Létrehozza az `_omniroute_migrations` táblát, ha az még nem létezik
-2. Lekérdezi a már alkalmazott migrációkat
-3. Sorrendben alkalmazza az új migrációkat, mindegyiket külön tranzakcióban
-4. Időbélyeggel rögzíti az egyes alkalmazott migrációkat
+- Az időbélyeg egy valódi UTC dátum és idő, nem korábban, mint `20261113000000` és legfeljebb 10 perccel a jövőben.
+- A leírás kisbetűs `snake_case` betűvel kezdődően (`a-z`, `0-9`, egyetlen `_` a szavak között), legfeljebb 80 karakter.
+- Két azonos időbélyeggel rendelkező fájl duplikált.
+- A hézagmentesség szabály csak a régi sorozatokra vonatkozik: `001` tól `241` minden számnak léteznie kell, kivéve a `026`, `055` és `121` ismert réseket. `241` (vagy bármely régi fájl) törlése meghiúsítja a kaput. `001` és `241` soha nem adható hozzá a `KNOWN_GAPS` engedélyezési listához. Az időbélyegzett fájlok soha nem hoznak létre hézagot.
+- `src/lib/db/migrations/` minden bejegyzésének normál fájlnak kell lennie érvényes kisbetűs `.sql` névvel. Egy könyvtár, egy szimbolikus hivatkozás, egy `.SQL` vagy `.sql.bak` fájl, egy rejtett fájl vagy egy szóközt tartalmazó név tönkreteszi a kaput, mert a futó csendben kihagyja, vagy rendszerindításkor összeomlik.
+
+**Rendelés alkalmazása.** A futtató az előtag numerikus értéke szerint rendez, nem szöveg szerint: először a régi `001`–`241` fájlok, majd az időbélyegzett fájlok időbélyegző sorrendben, majd a `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` -vel regisztrált névteres könyvtárak (olyan verziók, mint `ee-001`). Függőben lévő áttelepítés minden olyan fájl, amelynek verziója nem `_omniroute_migrations` formátumban van, így a régebbi ágból származó áttelepítés, amely egy újabb után egyesül, továbbra is érvényes a meglévő adatbázisokra.
+
+**Az időbélyeg a létrehozási sorrend, nem az összevonási sorrend.** Ha az áttelepítés egy olyan táblától vagy oszloptól függ, amelyet az a** újabb** időbélyegző (például egy másik PR ból, amely először egyesült), egy friss adatbázis először a tiéd fut, és meghiúsul. Amíg PR még nyitva van, állítsa újra a fájlnevet `npm run db:new-migration` -vel, hogy újabb időbélyeget kapjon, vagy tegye függetlenné. `npm run test:migrations:fresh` minden migrációt egy üres adatbázisra alkalmaz, és ezt elkapja.
+
+### Az egyesített migrációt soha nem törölték vagy nevezik át
+
+Ha egy áttelepítési fájl egy kiadási ágon vagy `main` van, már futott homológ- és fejlesztői adatbázisokon, VPS telepítéseken és a vállalati szinkronizálásban. Onnantól kezdve:
+
+- **Soha ne törölje.** A friss telepítések elveszítenék a sémáját, míg a frissített adatbázisok megtartják.
+- **Soha ne nevezd át.** A `_omniroute_migrations` -ban lévő verzió már nem egyezne egy fájllal, így minden adatbázis, amely már alkalmazta, újra futtatná. A nem idempotens SQL ezután megkettőzi az adatokat, vagy leállítja a rendszerindítást.
+- **Más sémára van szüksége?** Hozzon létre egy új migrációt `npm run db:new-migration` segítségével.
+
+Az átnevezés csak olyan fájl esetén biztonságos, amely még nincs összevonva, erre utalnak a kapu tippjei. A kiadási címke itt semmit sem változtat: minden egyes `release/v*` ágnak történő leküldés közzéteszi a Docker `:next` képfájlt, és homologon, VPS telepítéseken és Enterprise sync-en fut, így az egyesített migráció valós adatbázisokon futott, mielőtt bármilyen `vX.Y.Z` címke létezett volna. A kapu meghiúsítja az alapfájl minden eltávolítását, akár címkézett, akár nem.
+
+- **Egyesített áttelepítés visszaállítása.** A fájlt törlő `git revert` meghibásodik a kapun. Tartsa meg a fájlt, és vonja vissza a sémáját egy új áttelepítésben: `npm run db:new-migration -- <description>`, `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` és így tovább. A frissített és friss adatbázisok ezután ugyanazzal a sémával végződnek.
+- **Az egyetlen elfogadott átnevezés: kompatibilitási bejegyzés és azonos tartalom.** Ha egy egyesített fájlnak el kell költöznie (például két egyesített fájlnak van egy időbélyegzője, és a futó verzióütközéssel áll le), nevezze át a későbbi fájlt anélkül, hogy megérintené SQL ját, és adja hozzá `{ fromVersion, fromName, toVersion, toName }` `RENAMED_MIGRATION_COMPATIBILITY` `src/lib/db/migrationRunner/constants.ts`-ben. A régi verziót alkalmazó adatbázisok `_omniroute_migrations` sorát áthelyezik ahelyett, hogy újra futtatnák a fájlt. A gate figyelmeztet az ilyen átnevezésre, és mindig lefuttatja rajta a kommutációs ellenőrzést, bármilyen legyen is az új időbélyeg: a friss telepítések az új helyen alkalmazzák a fájlt, a frissített adatbázisok nem, ezért válassz egy új időbélyeget a régi közelében. A kapu nem tudja átnevezni, ha a tartalom megváltozott (a sémamódosítás továbbra is megtörténik az új áttelepítés során), vagy ha a bejegyzés célfájlja nincs a lemezen.
+- **Soha ne nevezze át ugyanazon az időbélyegzőn belül.** Az időbélyegzőt őrző és csak a leírást módosító átnevezés meghiúsítja a kaput, akár bejegyzéssel, akár anélkül. Egy olyan bejegyzésnél, amelynek `toVersion` megegyezik `fromVersion`, a futó törli a régi `_omniroute_migrations` sort, és újra alkalmazza a fájlt minden adatbázisban, amelyen már futott. Bejegyzés nélkül a futtató csak a verziót követi nyomon: kihagyja a fájlt azokban az adatbázisokban (az új tartalom ott soha nem fut), és minden rendszerindításkor naplóz egy újraszámozási hibát. Használjon másik időbélyeget és egy kompatibilitási bejegyzést, vagy tartsa meg a nevet.
+- **A kapu ellenőrzi, hogy az átnevezett fájl nem fut-e újra.** Minden lefedett átnevezésnél a kapu átadja az új fájlnevet a kommutációs ellenőrzésnek `--must-not-apply` segítségével. Az ellenőrzés elindítja a frissített adatbázist a valódi futtatóval, és ha a futtató újra alkalmazza a fájlt (például azért, mert a bejegyzésnek rossz a verziója vagy a neve, vagy mert a kapu szövegelemzője `constants.ts` eltérően olvassa be TypeScript től), a kapu meghiúsul `migration renomeada rodaria de novo` vel, és kéri, hogy ellenőrizze a bejegyzés régi és új verzióit és nevét.
+
+### Amit a kapu ellenőrzi a bázissal szemben
+
+Lehívási kérés és egyesítési sor futtatásakor `npm run check:migration-numbering` összehasonlítja a lemezen lévő `src/lib/db/migrations/` az alapág azonos könyvtárával. Az alap a következő sorrendben: `--base-latest-tag`, `--base <ref>`, a `MIGRATION_BASE_REF` változó, vagy ha `GITHUB_EVENT_NAME` értéke `pull_request`, `pull_request_target` vagy `merge_group`, az összevonási véglegesítés első szülője, az esemény hasznos terhelésének `merge_group.base_sha` vagy `git merge-base HEAD origin/$GITHUB_BASE_REF`. Feloldható bázis nélküli lehívási kérelem vagy összevonási sor futtatásakor a kapu meghibásodik. CI kívül `--base` nélkül kiírja `comparação com a base: pulada (sem --base)`, és kihagyja ezeket a szabályokat.
+
+`--base-latest-tag` összehasonlítja a legújabb kiadású címkével (`vX.Y.Z` féloldali sorrendben; az utótagú címkék, például az éjszakai nadrágok nem számítanak), amely `HEAD` történetében szerepel, ugyanazokkal a szabályokkal, mint `--base`. A Release-Green (`scripts/quality/validate-release-green.mjs`) így futtatja a kaput, mert a push és ütemezett futtatásoknak nincs lekérési bázisuk, és az összevonás friss CI futás nélkül is leszállhat. Ha nincs kiadási címke az előzményekben, a kapu meghibásodik; futtassa `git fetch --tags` ( CI ban `actions/checkout` és `fetch-depth: 0` hozza a címkéket).
+
+| Változás a lehívási kérelemben                                                                                          | Eredmény                                                                                                                                                                                                                                                                                                                                                                              |
+| ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Az alapon létező fájlt átnevezzük egy `RENAMED_MIGRATION_COMPATIBILITY` bejegyzéssel                                    | **Figyelmeztetés** ha a tartalom azonos, és a kommutációs ellenőrzés az új időbélyegtől függetlenül fut; ez meghiúsul, ha az új pozíció megváltoztatja a végső sémát (visszavonja az átnevezést, vagy kiválaszt egy másik új időbélyeget, ahol ingázik), vagy ha a futtató újra alkalmazza az átnevezett fájlt egy frissített adatbázison.** Sikertelen** ha a tartalom megváltozott. |
+| Az alapon létező fájlt átnevezzük az időbélyeg megtartásával (csak a leírás változik)                                   | **Sikertelen** , bejegyzéssel vagy anélkül: a futó újra alkalmazná (a bejegyzéssel), vagy verziónként kihagyná (egy nélkül). Használjon másik időbélyeget és egy kompatibilitási bejegyzést, vagy tartsa meg a nevet.                                                                                                                                                                 |
+| A bázison létező fájl törlődik, vagy bejegyzés nélkül átnevezi                                                          | **Sikertelen** , függetlenül attól, hogy a fájl egy kiadási címkében van-e vagy sem. A visszavonáshoz állítsa vissza a fájlt a `git checkout <base> -- src/lib/db/migrations/<file>`; a séma visszaállításához adjon hozzá egy új áttelepítést `DROP ... IF EXISTS` segítségével.                                                                                                     |
+| A bázison létező fájl eltérő tartalommal rendelkezik                                                                    | **Figyelmeztetés** (a `::warning` megjegyzés GitHub Actions-ben), és a kommutációs ellenőrzés lefut. Sikertelen, ha a szerkesztés megváltoztatja a végső sémát, mert a frissített adatbázisok nem alkalmazzák újra a szerkesztett fájlt: tegye a módosítást egy új áttelepítésbe. Az ártalmatlan szerkesztés (egy megjegyzés, `IF NOT EXISTS`) csak figyelmeztet.                     |
+| Az időbélyegzett fájl nem újabb időbélyeggel kerül hozzáadásra, mint az alap legújabb verziója                          | Lefuttatja az alább leírt kommutációs ellenőrzést.                                                                                                                                                                                                                                                                                                                                    |
+| A rendszer hozzáad egy régi formátumú `NNN_` fájlt egy számmal az alap legújabb, régi formátumú fájlja alá              | **Sikertelen** , akkor is, ha `KNOWN_GAPS` ugyanabban a lehívási kérelemben van szerkesztve: a régi sorozat lefagyott, hozza létre a migrációt `npm run db:new-migration`-vel. A régi formátumú fájlok az alap legújabb fájlja felett (a `release/v*` től `main` tartó lekérési kérés) elfogadhatók.                                                                                  |
+| Egy nem megfelelő, szerkesztett vagy átnevezett fájl `INSERT`, `UPDATE`, `DELETE` vagy `REPLACE` utasításokat tartalmaz | **Figyelmeztetés** : a kommutációs ellenőrzés nem hasonlítja össze az adatokat, ezért ellenőrizze, hogy a frissített és friss adatbázisok alkalmazásának sorrendje megváltoztatja-e az eredményt.                                                                                                                                                                                     |
+
+A kommutáció-ellenőrzés egy futtatása egyszerre fedi le az elromlott, a szerkesztett és az átnevezett fájlokat.
+
+A kommutációs ellenőrzés (`scripts/check/migration-commutation.ts`) két ideiglenes adatbázist épít fel a valós telepítési útvonallal: an** frissítve** egy (indítás az alap áttelepítésekkel, majd újraindítás ugyanarról a fájlról a lekérési kérés költöztetésével) és egy** friss** one (egy rendszerindítás a lekérési kérelem migrációjával). Összehasonlítja a kapott sémákat: táblák és oszlopok (az oszlopsorrend figyelmen kívül hagyásával), UNIQUE / PRIMARY KEY és FOREIGN KEY megszorítások, az egyes táblák normalizált `CREATE TABLE` szövege (amely lefedi CHECK megszorításokat, leválogatásokat, generált oszlopokat és táblázatbeállításokat), indexek, triggerek és nézetek. A soradatok nem kerülnek összehasonlításra. Ha egyeznek, a kapu kiírja, hogy a fájl nem működik, de ingázik, és átmegy. Ha eltérnek, a kapu meghibásodik a különbséggel, és egy tippet az esetre: egy soron kívüli fájl esetén generálja újra a nevét `npm run db:new-migration`-val, ami biztonságos, mert a fájl még nincs egyesítve; szerkesztett alapfájl esetén állítsa vissza az alaptartalmat, és helyezze át a módosítást egy új áttelepítésbe; átnevezett fájl esetén vonja vissza az átnevezést, vagy válasszon másik új időbélyeget, ahol az ingázik, soha ne használja ugyanazt az időbélyeget egy másik névvel. Ha maga az ellenőrzés nem fut le, a kapu meghiúsul CI ban, és csak helyileg figyelmeztet. Szerkesztett alapfájl esetén a frissített adatbázis az adott fájl alap tartalmával épül fel, és a második rendszerindítás kihagyja, mert a verziója már rögzítve van. Átnevezett fájl esetén a frissített adatbázis a fájl régi nevén épül fel, és a második rendszerindító `_omniroute_migrations` sorát a kompatibilitási bejegyzésen keresztül mozgatja ahelyett, hogy újra futtatná; a kapu átadja az új nevet `--must-not-apply`-lel, így az ellenőrzés sikertelen, ha a második rendszerindítás alkalmazza. Ha a lekérési kérés áttelepítése nem érvényesül a frissített útvonalon, azaz minden alap áttelepítés után (függetlenül attól, hogy az új telepítésnél is meghiúsul, vagy sem), a kapu jelenti `migration do PR não aplica`, és kéri, hogy javítsa ki a SQL az alap jelenlegi sémájához képest; ha a fájl egy másik lekérési kérés áttelepítésétől függ egy későbbi időbélyeggel, állítsa újra a nevét `npm run db:new-migration`-val.
+
+Ugyanennek az összehasonlításnak a helyben történő futtatásához adja át kifejezetten az alapot, például `npm run check:migration-numbering -- --base origin/<base-branch>` vagy `npm run check:migration-numbering -- --base-latest-tag`, hogy összehasonlítsa a legújabb kiadással.
+
+### Nyílt PR `NNN` migráció konvertálása
+
+A váltás előtt megnyitott lekérési kérelem továbbra is tartalmazhat egy szekvenciális fájlt, például `242_add_widgets.sql`. `241` feletti régi számokat a rendszer elutasítja, ezért egyesítés előtt konvertálja át:
+
+1. **Nevezze át a fájlt a generátorral, megtartva a leírást.** Futtassa `npm run db:new-migration -- <same description>` az új név megszerzéséhez, helyezze át a SQL bele, és törölje a régi `NNN_` fájlt. A leírásnak azonosnak kell lennie: az alábbi kompatibilitási bejegyzés megegyezik rajta.
+2. **Adjon hozzá egy kompatibilitási bejegyzést, ha egy állandó adatbázis a régi számot futtatta.** Ha bármelyik tárolt adatbázis (homolog, egy VPS, egy közreműködő saját telepítése) lefuttatta a PR buildjét a `NNN_` fájllal, adja hozzá `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` `RENAMED_MIGRATION_COMPATIBILITY` `src/lib/db/migrationRunner/constants.ts` ben. Ez van** szükséges `237` és `241` között** : ezek a slotok most a kanonikus `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` és `241_seen_models.sql` tartalmazzák, és a bejegyzés nélkül egy ilyen adatbázis örökre kihagyja a kanonikus migrációt, és újra futtatja a konvertált. Üresen maradó helyek esetén is működik, mint például `242`, amikor a cél egy időbélyeg. Ha kétségei vannak, adja hozzá a bejegyzést. Nem számít, hogy a tömbben hol adja hozzá: ha egy bejegyzés célhelye még mindig tartalmaz egy sort, amelytől egy másik bejegyzés távolodik (például `237` egy PR sort tart, míg egy régebbi `usage_history_calculated_cost` sor arra vár, hogy `237` be kerüljön), a futó hagyja, hogy a bejegyzés megvárja, amíg a hely szabaddá válik. Csak egy valódi ütközés, például egy sor, amelynél nincs bejegyzés, vagy két bejegyzés, amely helyek cserél, állítja le a rendszerindítást `Cannot reconcile ...`-val.
+3. **Tartsa a SQL idempotenst** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), mert a konvertált migráció találkozhat olyan adatbázissal, ahol a séma már létezik.
+4. **Verziókulcsos speciális esetek áthelyezése.** Ha a PR kis- és nagybetűt adott hozzá a régi számhoz `isSchemaAlreadyApplied()` ben (`src/lib/db/migrationRunner.ts`) vagy `OPTIONAL_FTS5_MIGRATION_VERSIONS` ben (`src/lib/db/migrationRunner/constants.ts`), módosítsa a kulcsot az új időbélyegzőre.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` egy működő példa egy átnevezett migráció tesztjére.
+
+### Visszaportálás a váltás előtti ágakba
+
+Soha ne válasszunk `YYYYMMDDHHMMSS_` fájlt egy olyan ágba, amely a váltás előtti ágra (például egy régebbi `release/v*` ágra) kerülne. Az ottani futó a fájlneveket szövegként rendezi, így egy időbélyegzett fájl `201_` és `202_` között futna egy friss adatbázison, és az ottani régi kapu nem érti a 14 számjegyű előtagokat. Egy ilyen ágra írja be a változást az adott ág saját következő `NNN_` fájljaként, idempotent, így ez egy no-op, amikor az időbélyegzett verzió később érkezik.
+
+### Hogyan futnak a migrációk
+
+Indításkor `migrationRunner.ts`:
+
+1. Ha nem létezik, `_omniroute_migrations` táblát hoz létre
+2. Lekérdezések a már alkalmazott migrációkhoz
+3. Sorrendben alkalmazza az új migrációkat, mindegyiket egy tranzakcióban
+4. Minden alkalmazott migrációt időbélyeggel rögzít
 
 ```ts
-// src/lib/db/migrationRunner.ts (egyszerűsített)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotencia
 
-A migrációknak **idempotensnek** kell lenniük — kétszeri futtatásuk másodjára nem okozhat változást:
+A migrációnak lennie kell** idempotens** — kétszeri futtatása no-op:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Használja bátran az `IF NOT EXISTS`, `IF EXISTS`, valamint az `OR IGNORE` / `OR REPLACE` záradékokat.
+Bőségesen használja `IF NOT EXISTS`, `IF EXISTS` és `OR IGNORE` / `OR REPLACE` tagmondatokat.
 
 ### Új migráció hozzáadása
 
-1. **Határozza meg a következő számot**: `ls src/lib/db/migrations/ | tail -1`
-2. **Hozza létre a fájlt**: `NNN_my_change.sql`
-3. **Használjon biztonságos DDL-t**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Körültekintően töltse fel a meglévő adatokat**: használja az `UPDATE ... WHERE ...` utasítást a meglévő sorok kezeléséhez
-5. **Tesztelje egy másolaton**: soha ne futtasson nem tesztelt migrációkat éles környezetben
+1. **Hozd létre a fájlt a generátorral** : `npm run db:new-migration -- <description>` (például `npm run db:new-migration -- add combo priority`). `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` az aktuális UTC idővel és egy megjegyzés fejléccel írja, egy másodpercet előrelép, ha ezt az időbélyeget veszi, és soha nem ír felül fájlt. Ne válasszon számot kézzel.
+2. **Használjon biztonságos DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Gondosan töltse ki az adatokat** : használja `UPDATE ... WHERE ...` a meglévő sorok kezelésére
+4. **Ellenőrizze a sorrendet és az elnevezést** : `npm run test:migrations:fresh` (minden migráció üres adatbázison) és `npm run check:migration-numbering`
+5. **Teszt egy másolaton** : soha ne futtasson teszteletlen migrációt éles környezetben
 
 Példa:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> A **visszafelé nem kompatibilis módosítások** (például oszlopok törlése) körülményesek. Az OmniRoute NEM támogatja a visszaállítást — egy migráció alkalmazása után a sémamódosítás végleges. Ennek megfelelően tervezzen.
+> **Visszafelé nem kompatibilis változtatások** (pl. oszlopok ledobása) trükkösek. OmniRoute támogatja-e NOT — visszaminősítését az áttelepítés után, a sémaváltás végleges. Ennek megfelelően tervezzen.
 
 ---
 
@@ -401,52 +464,53 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 Ez az SQLite online biztonsági mentési API-ját használja — biztonságosan futtatható az OmniRoute működése közben.
 
-## Teljesítményhangolás
+## Teljesítmény hangolás
 
 ### WAL mód
 
-A WAL alapértelmezés szerint engedélyezve van. Nagy írási terhelés esetén fontolja meg a következőket:
+WAL alapértelmezés szerint engedélyezve van. Nagy írási terhelés esetén vegye figyelembe:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Ellenőrzőpont minden 1000 oldal után
-PRAGMA journal_size_limit = 67108864;  -- 64 MB-os WAL-korlát
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute nem állítja be `journal_size_limit`. Egy ellenőrzőpont áthelyezi WAL kereteket a főfájlba, de a WAL fájl megtartja a legnagyobb lefoglalt méretét. A `OMNIROUTE_WAL_GUARD_MAX_MB` őr csak figyelmeztet és fut `wal_checkpoint(RESTART)`; ez nem lemez méretű kupak.
 
 ### Indexek
 
-A teljesítmény szempontjából fontos indexek (a migrációk automatikusan létrehozzák őket):
+A teljesítmény kulcsfontosságú indexei (áttelepítéssel automatikusan létrehozva):
 
-- `idx_models_provider` — modellek keresése szolgáltató alapján
-- `idx_combo_targets_combo_id` — kombinációs célok kibontása
-- `idx_usage_history_api_key_timestamp` — használati elemzések
-- `idx_quota_snapshots_api_key_window` — kvóták nyomon követése
-- `idx_call_logs_timestamp` — hívásnapló-lekérdezések
+- `idx_models_provider` — modell keresések szolgáltató szerint
+- `idx_combo_targets_combo_id` — kombinált célbővítés
+- `idx_usage_history_api_key_timestamp` — használati elemzés
+- `idx_quota_snapshots_api_key_window` — kvótakövetés
+- `idx_call_logs_timestamp` — hívásnapló lekérdezések
 
-Új index hozzáadásához hozzon létre egy migrációt:
+Új index hozzáadásához hozzon létre egy áttelepítést:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Memórialeképezett I/O
+### Memóriaképes I/O
 
-Nagyon nagy adatbázisok (>10 GB) esetén a memórialeképezés a SQLite pragma használatával módosítható:
+Nagyon nagy adatbázisok esetén (> 10GB) a memórialeképezés SQLite pragma segítségével állítható be:
 
 ```sql
--- Beállítás SQLite pragma használatával (módosítsa a core.ts fájlban vagy futásidőben)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Tömörítés
 
-A hosszú ideig futó OmniRoute-példányok számára előnyös az alkalmankénti `VACUUM`:
+A régóta futó OmniRoute példányok előnyösek az alkalmi `VACUUM` ből:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Futtassa havonta, alacsony forgalmú időszakokban. (A WAL mód csökkenti ennek szükségességét, de nem szünteti meg teljesen.)
+Futtassa havonta az alacsony forgalmú ablakok alatt. (WAL mód csökkenti a szükségességet, de nem szünteti meg.)
 
 ---
 

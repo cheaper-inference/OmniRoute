@@ -29,70 +29,61 @@ mgbanwe ọ bụla a na-ahụkarị na nkwekọrịta ya, nyocha ndị e lekwas�
 6. **Dekọọ ihe akaebe.** N'ime template PR, depụta command ndị a gbara, faịlụ ule ọ bụla agbakwunyere ma ọ bụ gbanwere,
    migration ma ọ bụ feature flag, yana nkwado ọ bụla ga-eme naanị na CI nke ka na-echere.
 
-## Ụzọ kachasị mma dịka ụdị mgbanwe si dị
+## Ụzọ ọla edo site n'ụdị mgbanwe
 
-Command ndị dị n'okpuru bụ nyocha kacha nta e lekwasịrị anya na ha, ọ bụghị ikike ịwụfe ule nke na-enyocha
-omume ị gbanwere ozugbo.
+Iwu ndị dị n'okpuru bụ nlele eledo anya kacha nta, ọ bụghị ikike ịwụgharị ule na-ekpuchi omume ị gbanwere ozugbo.
 
-### Provider
+### Onye na-enye
 
 **Nkwekọrịta**
 
-- Nkọwa provider dị na `src/shared/constants/providers/` na otu e si chịkọta ya na
-  `src/shared/constants/providers.ts`.
-- Model na capability dị na `open-sse/config/providerRegistry.ts` ma ọ bụ faịlụ registry e wepụtara na ya.
-- Nhọrọ executor/translator, nhazi OAuth ma ọ bụ API key, asset dashboard, na reference
-  provider emepụtara mgbe ọ dị mkpa.
-- Credential ọha ga-eji `resolvePublicCred()`; response njehie ga-eji helper njehie e kesara nke
-  e sachapụrụ ozi nzuzo. Lee `docs/security/PUBLIC_CREDS.md` (git; anaghị etinye ya n'ime `/docs`) na
-  [Nsachapụ Ozi Njehie](../security/ERROR_SANITIZATION.md).
+- Nkọwa onye na-enye na `src/shared/constants/providers/` na ihe mejupụtara ya na `src/shared/constants/providers.ts`.
+- Ụdị na ike dị na `open-sse/config/providerRegistry.ts` ma ọ bụ faịlụ ndekọ aha ewepụtara.
+- nhọrọ Executor/translator, nhazi igodo OAuth ma ọ bụ API na akụ dashboard. Emela eserese `docs/reference/PROVIDER_REFERENCE.md` ma ọ bụ README emegharịrị: ntọhapụ na-edegharị ha (`check:pr-derived-paths` dara njiri mara PR na-ebu ha).
+- nzere ọha ga-eji `resolvePublicCred()`; nzaghachi njehie ga-eji ndị enyemaka njehie emekọrịtara ọnụ. Hụ `docs/security/PUBLIC_CREDS.md` (git; achịkọtabeghị ya n'ime `/docs`) yana [nhichapụ mperi](../security/ERROR_SANITIZATION.md).
 
-**Usoro e lekwasịrị anya na ya**
+**loop lekwasịrị anya**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # mgbe katalọgụ gbanwere; commit diff emepụtara
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Nweekwa ule maka request family ọ bụla emetụtara: chat, Responses, images, embeddings, audio, ma ọ bụ video.
-Nyochaa katalọgụ emepụtara na golden diff dịka mgbanwe nkwekọrịta; anabatala ha n'enweghị nyocha.
+Nwaleekwa ezinụlọ ọ bụla emetụtara arịrịọ: nkata, nzaghachi, onyonyo, ntinye, ọdịyo ma ọ bụ vidiyo. Nyochaa katalọgụ emepụtara na ọdịiche ọla edo dị ka mgbanwe nkwekọrịta; anabatala ha n'ìsì.
 
-### Routing
+### Ntugharị
 
 **Nkwekọrịta**
 
-- Uru strategy ọha na metadata UI dị na `src/shared/constants/routingStrategies.ts`.
-- Dispatch na ordering n'okpuru `open-sse/services/combo.ts` na `open-sse/services/combo/`.
-- Schema combo, persistence, resilience state, capability model, na njikwa API/UI.
+- Ụkpụrụ atụmatụ ọha na UI metadata na `src/shared/constants/routingStrategies.ts`.
+- zipu na ịtụ n'okpuru `open-sse/services/combo.ts` na `open-sse/services/combo/`.
+- Atụmatụ combo, nnọgidesi ike, ọnọdụ nkwụghachi azụ, ike nlereanya, na njikwa API/UI.
 - [Auto-Combo Engine](../routing/AUTO-COMBO.md) na akwụkwọ resilience mgbe omume gbanwere.
 
-**Usoro e lekwasịrị anya na ya**
+**loop lekwasịrị anya**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # mgbanwe strategy ma ọ bụ dispatch
-npm run check:known-symbols      # mgbanwe ndebanye strategy
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Jiri ule mocked-upstream nwere nsonaazụ a pụrụ ibu amụma n'igwe gị. Live combo smoke chọrọ credential ma bụrụ
-nke a na-eji aka eme, ọ bụghị ihe nnọchi anya CI.
+Jiri deterministic emopped-upstream ule na mpaghara. Anwụrụ ọkụ combo dị ndụ chọrọ nzere ma bụrụ akwụkwọ ntuziaka, ọ bụghị ihe nnọchi CI.
 
 ### UI / UX
 
 **Nkwekọrịta**
 
-- Route/page Next.js na oke shared component n'okpuru `src/app/` na
-  `src/shared/components/`.
-- Ọdịdị response API, ọnọdụ loading/empty/error, omume keyboard na screen reader,
-  layout responsive, theming, na mgbasawanye locale.
-- String UI Bekee ndị bụ isi dị na `src/i18n/messages/en.json`; etinyela copy ọhụrụ onye ọrụ ga-ahụ kpọmkwem n'ime koodu.
+- Next.js route/page na oke akụkụ akụrụngwa n'okpuru `src/app/` na `src/shared/components/`.
+- Ụdị nzaghachi API, steeti loading/empty/error, ahụigodo na omume onye na-agụ ihuenyo, nhazi nzaghachi, isiokwu, na mgbasawanye mpaghara.
+- English UI isi iyi strings na `src/i18n/messages/en.json`; emela hard-code ọhụrụ oyiri chere onye ọrụ ihu.
 
-**Usoro e lekwasịrị anya na ya**
+**loop lekwasịrị anya**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Gbaa app ahụ maka mgbanwe interaction ma ọ bụ visual ma lelee viewport dị warara na nke sara mbara. CI na-agba
-production build na suite ndị sara mbara karị; omume visual ka chọrọ component a lekwasịrị anya na ya, Playwright,
-ma ọ bụ nyocha e ji aka mee nke edekọtara nke dabara na mgbanwe ahụ.
+Gbaa ngwa ahụ maka mgbanwe mmekọrịta ma ọ bụ nlegharị anya wee lelee ma oghere nlele dị warara na obosara. CI na-arụ ọrụ mmepụta na ụlọ sara mbara; omume a na-ahụ anya ka chọrọ akụrụngwa gbadoro anya, Playwright, ma ọ bụ nyocha akwụkwọ ntuziaka dabara adaba na mgbanwe ahụ.
 
 ### i18n
 
 **Nkwekọrịta**
 
-- `src/i18n/messages/en.json` bụ isi mmalite UI; `config/i18n.json` bụ isi mmalite locale.
-- Katalọgụ CLI dị iche n'okpuru `bin/cli/locales/`.
-- Debe placeholder na tag ICU otu ha dị kpọmkwem. Atụgharịla aha product/provider/model,
-  aha protocol na header, command, identifier code/JSON, URL, environment variable, ma ọ bụ
-  mkpụrụokwu echedoro dịka `OmniRoute`, `OAuth`, `MCP`, na `A2A`. Ndepụta isi mmalite ugbu a bụ
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` bụ isi iyi UI ; `config/i18n.json` bụ isi mmalite mpaghara.
+- CLI katalọgụ bi iche iche n'okpuru `bin/cli/locales/`.
+- Chekwaa ebe ICU na mkpado kpọmkwem. Atụgharịla aha product/provider/model, protocol na aha nkụnye eji isi mee, iwu, ihe nchọpụta code/JSON, URLs, mgbanwe gburugburu ebe obibi, ma ọ bụ okwu echedoro dịka `OmniRoute`, `OAuth`, `MCP`, na `A2A`. Ndepụta isi mmalite ugbu a bụ `scripts/i18n/glossary/protected-terms.json`.
 
-**Usoro e lekwasịrị anya na ya**
+Otu njirimara PR na-edezi naanị `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); A na-emecha mpaghara ndị ọzọ otu ugboro kwa ntọhapụ site na ntọhapụ ntọhapụ ma ọ bụ ntụgharị ntụgharị (`docs/guides/I18N.md` → "Feature PRs touch `en.json` only"). `npm run check:pr-derived-paths` dara njiri mara PR nke na-edezi katalọgụ mpaghara ọzọ.
+
+**loop lekwasịrị anya**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # mgbe string/katalọgụ CLI gbanwere
 npm run lint
 ```
 
-Nke a bụ ntuziaka maka sistemụ dị ugbu a, ọ bụghị ọkpụkpọ oku ka a gbasaa tooling ma ọ bụ key model ya.
-Mee ka patch i18n metụta naanị ihe dị mkpa mgbe a ka na-emepụta sistemụ ga-anọchi ya. Agbala command translation
-ndị na-akpọ service mpụga ma ọ bụrụ na ọrụ ahụ achọghị translation emepụtara kpọmkwem ma
-ị nyochabeghị diff sitere na ya.
+Na-enweghị `--mode=pr` ọnụ ụzọ ámá ndị a na-agba ọsọ na ọnọdụ ntọhapụ na mpaghara ma na-akọ igodo ọ bụla okirikiri agbakwunyere ma ọ bụ degharịa na `en.json`; nke ahụ bụ ọrụ ume ọhụrụ ntọhapụ, ọ bụghị PR gị.
+
+Nke a bụ nduzi maka usoro dị ugbu a, ọ bụghị òkù ịgbasa ngwá ọrụ ya ma ọ bụ ihe nlereanya isi. Debe patches i18n ịwa ahụ mgbe a na-emepụta usoro nnọchi. Emela iwu ntụgharị asụsụ nke na-akpọ ọrụ mpụga, ọ gwụla ma ọrụ a chọrọ ntụgharị asụsụ ewepụtara nke ọma ma ị tụlela ihe dị iche.
 
 ### CLI
 
 **Nkwekọrịta**
 
-- Iwu ọha na flags dị na `bin/cli/`, iwu API ndị emepụtara, koodu ọpụpụ, stdout/stderr na
-  ọdịdị mmepụta JSON, omume nhazi/environment, na faịlụ ndị e tinyere na ngwugwu.
-- Eriri ederede CLI ndị ọrụ na-ahụ ga-eji oyi akwa i18n nke CLI ma mee ka katalọgụ `en`/`pt-BR` kwekọọ.
-- Chekwaa Node dịka runtime a na-akwado yana nkwekọrịta binary e bipụtara.
+- Iwu ọha na ọkọlọtọ na `bin/cli/`, emepụtara API iwu, koodu ọpụpụ, stdout/stderr na JSON mmepụta shapes, config/environment omume, na ngwugwu faịlụ.
+- CLI ọrụ na-eche ihu ga-ejirịrị CLI i18n oyi akwa ( igodo `t()` dị na `bin/cli/locales/en.json`). Otu njirimara PR na-edezi naanị `en.json`; `pt-BR` na mpaghara ndị ọzọ ka emechara na ntọhapụ.
+- Chekwaa Node dị ka oge ọsọ ọsọ na-akwado yana nkwekọrịta ọnụọgụ abụọ ebipụtara.
 
-**Usoro nnwale a gbadoro anya**
+**loop lekwasịrị anya**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # mgbanwe CLI emepụtara/e jikọtara ọnụ
-npm run check:pack-policy     # mgbanwe n'akụkụ ngwugwu
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Jiri iwu ahụ kpọmkwem n'ime ndekọ data nwa oge mgbe omume dabere na parsing, faịlụ, ma ọ bụ ọnọdụ
-ọpụpụ. CI na-eme nyocha sara mbara karị nke artifact ngwugwu na ecosystem.
+Jiri ezigbo iwu na ndekọ data nwa oge mgbe omume dabere na ntule, faịlụ ma ọ bụ ọkwa ọpụpụ. CI na-arụ nnukwu ngwungwu arịa na nyocha gburugburu ebe obibi.
 
 ### Ebe nchekwa data
 
 **Nkwekọrịta**
 
-- Modul domain ndị dị n'okpuru `src/lib/db/`; bubata modul ndị akọwapụtara ozugbo (e wepụrụ oyi akwa ochie `localDb.ts` nke na-eme re-export).
-- SQL migrations ndị e tinyere nọmba ma bụrụ idempotent n'okpuru `src/lib/db/migrations/`, nchekwa transaction, omume
-  upgrade, indexes, na caller ọ bụla schema ahụ metụtara.
-- Routes na handlers anaghị enye raw SQL ozugbo.
+- Ngalaba modul n'okpuru `src/lib/db/`; mbubata modul kpọmkwem ozugbo (wepụrụ oyi akwa mbupu `localDb.ts` ochie).
+- Agụnyere ọnụ, mbugharị SQL nwere ike n'okpuru `src/lib/db/migrations/`, nchekwa azụmahịa, omume kwalite, ndenye aha na onye ọkpụkpọ ọ bụla nke atụmatụ ahụ metụtara.
+- Ụzọ na ndị njikwa anaghị enye raw SQL ozugbo.
 
-**Usoro nnwale a gbadoro anya**
+**loop lekwasịrị anya**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Nwalee ma ebe nchekwa data ọhụrụ ma upgrade sitere na schema gara aga mgbe ị na-agbakwunye migration. Nnwale ebe nchekwa data
-ga-emechi handles ma kpọọ `resetDbInstance()` n'oge nhicha. Gbaa `npm run test:bun:db` naanị mgbe
-ụzọ adapter Bun nke best-effort gbanwere; Node ka bụ isi ikike.
+Nwalee ma nchekwa data ọhụrụ wee kwalite site na nhazi mbụ mgbe ị na-agbakwunye mbugharị. Nnwale nchekwa data ga-emechi aka wee kpọọ `resetDbInstance()` n'oge nhicha. Gbaa `npm run test:bun:db` naanị mgbe ụzọ nkwụnye ihe kacha mma Bun gbanwere; Node ka nwere ikike.
 
-### Build / deploy
+### Wulite / bufee ya
 
 **Nkwekọrịta**
 
-- Manifests/lockfile nke root na workspace, `scripts/build/`, nchịkọta standalone nke Next.js, ọdịnaya ngwugwu
-  `dist/`, metadata platform Electron, workflows CI, na sentinels deployment.
-- Oke Node ndị a na-akwado na ojiji Bun e tinyere na allow-list n'ime `CLAUDE.md` ga-anọgide dịka ha dị.
-- Artifacts build agaghị eso na tracking; iwu dependency, license, workflow, na ngwugwu ga-adị irè.
+- Mgbọrọgwụ na oghere ọrụ manifests/lockfile, `scripts/build/`, mgbakọ Next.js kwụ ọtọ, ọdịnaya ngwugwu `dist/`, metadata n'elu ikpo okwu Electron, usoro ọrụ CI, na izipu ozi.
+- Oke Node akwadoro yana ojiji Bun edepụtara na `CLAUDE.md` ga-adịrịrịrịrị.
+- Nrụpụta ihe arụrụ arụ na-anọghị n'anya; ndabere, ikike, usoro ọrụ na amụma ngwugwu na-etinye.
 
-**Usoro nnwale a gbadoro anya**
+**loop lekwasịrị anya**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # mgbanwe dependency ma ọ bụ lockfile
-npm run check:pack-policy      # mgbanwe n'akụkụ ngwugwu e bipụtara
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Jiri `npm run build` na mpaghara gị naanị mgbe mgbanwe ahụ metụtara compilation, nchịkọta standalone, assets,
-ma ọ bụ bundling runtime. Jiri `npm run build:release` naanị maka nkwado release/deploy. Build CI bụ
-akara ikpeazụ gafee platforms; mgbanwe Electron pụrụ iche nye platform chọrọ build a gbadoro anya kwekọrọ
-ma ọ bụ ihe akaebe smoke.
+Jiri `npm run build` na mpaghara naanị mgbe mgbanwe ahụ na-emetụta mkpokọta, mgbakọ kwụụrụ onwe ya, akụ, ma ọ bụ ngwungwu oge. Jiri `npm run build:release` naanị maka nkwado release/deploy. wuo CI bụ mgbama cross-ikpo okwu ikpeazụ; Mgbanwe Electron dị n'elu ikpo okwu chọrọ ihe mgbakwasa agbadoro anya ma ọ bụ ihe akaebe anwụrụ ọkụ.
 
 ## Skript ndị nrụpụta maka igwe a na-ekekọrịta
 

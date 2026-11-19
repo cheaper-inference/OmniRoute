@@ -21,6 +21,7 @@ import {
   CUSTOM_JSON_VARIABLES,
 } from "../config/customJson.ts";
 import { isForbiddenUpstreamHeaderName } from "../executors/default/customHeaders.ts";
+import { isLoopbackHostname } from "./urlHost.ts";
 
 type JsonRecord = Record<string, unknown>;
 
@@ -206,15 +207,38 @@ export function assertCustomJsonEndpoint(endpoint: unknown): string {
   return url.toString();
 }
 
+const PLAINTEXT_KEY_MESSAGE =
+  'A custom JSON node that sends an API key (authType "bearer" or "api-key") needs an ' +
+  "https:// endpoint. Plain http:// is allowed only for loopback hosts (localhost, " +
+  "127.0.0.0/8, ::1); private LAN addresses (10.x, 172.16-31.x, 192.168.x) are not exempt. " +
+  'Switch the endpoint to https:// or use authType "none" (sends no key).';
+
+/**
+ * CWE-319: the connection key never travels in plaintext to a non-loopback host. A node
+ * that attaches a key (`bearer`, `api-key`) needs `https:`; plain `http:` stays available
+ * for loopback hosts and for `authType: "none"`, which sends no key.
+ */
+export function assertCustomJsonKeyTransport(
+  config: Pick<CustomJsonConfig, "authType">,
+  endpoint: string
+): void {
+  if (config.authType === "none") return;
+  const url = new URL(endpoint);
+  if (url.protocol === "http:" && !isLoopbackHostname(url.hostname)) {
+    throw new CustomJsonError(PLAINTEXT_KEY_MESSAGE);
+  }
+}
+
 /** Validate + normalize a stored or submitted config. Throws CustomJsonError. */
 export function normalizeCustomJsonConfig(input: unknown, endpoint: unknown): CustomJsonConfig {
-  assertCustomJsonEndpoint(endpoint);
+  const url = assertCustomJsonEndpoint(endpoint);
   const parsed = customJsonConfigSchema.safeParse(input ?? {});
   if (!parsed.success) {
     const issue = parsed.error.issues[0];
     const field = issue?.path?.length ? `${issue.path.join(".")}: ` : "";
     throw new CustomJsonError(`Invalid custom JSON configuration — ${field}${issue?.message}`);
   }
+  assertCustomJsonKeyTransport(parsed.data, url);
   return parsed.data;
 }
 
