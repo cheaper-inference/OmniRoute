@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Ondoa ufunguo"
   },
   "plugins": {
+    "privilegesWarningTitle": "Programu-jalizi huendeshwa na upendeleo kamili",
+    "privilegesWarningBody": "Programu-jalizi huendesha kama mchakato wa Node.js wa kawaida na ufikiaji sawa na OmniRoute: inaweza kusoma faili, kuendesha programu na kutumia mtandao, ruhusa yoyote ambayo faili yake ya maelezo itatangaza. Sakinisha programu-jalizi unazoziamini pekee.",
     "title": "Programu-jalizi",
     "description": "Sakinisha na udhibiti programu-jalizi ili kupanua utendaji wa OmniRoute",
     "loading": "Inapakia programu-jalizi...",

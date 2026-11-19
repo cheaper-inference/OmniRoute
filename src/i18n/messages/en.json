@@ -13434,6 +13434,8 @@
     "scanForPlugins": "Scan for Plugins",
     "noPlugins": "No plugins installed",
     "noPluginsDescription": "Place plugin directories in ~/.omniroute/plugins/ and click Scan.",
+    "privilegesWarningTitle": "Plugins run with full privileges",
+    "privilegesWarningBody": "A plugin runs as a regular Node.js process with the same access as OmniRoute: it can read files, run programs and use the network, whatever permissions its manifest declares. Install only plugins you trust.",
     "activate": "Activate",
     "deactivate": "Deactivate",
     "uninstall": "Uninstall",
