@@ -348,6 +348,32 @@ export const AGY_CONFIG = {
   fetchAvailableModelsEndpoint: ANTIGRAVITY_CONFIG.fetchAvailableModelsEndpoint,
 };
 
+// Gemini App (Robin native client) OAuth Configuration.
+// Different public desktop client from `gemini` (Gemini API) and `antigravity`
+// (Cloud Code). The id/secret ship inside the public gemini-app2api CLI and are
+// embedded through resolvePublicCred (Hard Rule #11). Google binds refresh
+// tokens to the issuing client, so this provider must keep its own credentials
+// at both authorize and refresh time.
+export const GEMINI_APP_CONFIG = {
+  clientId: resolvePublicCred("gemini_app_id", "GEMINI_APP_OAUTH_CLIENT_ID"),
+  clientSecret: resolvePublicCred("gemini_app_alt", "GEMINI_APP_OAUTH_CLIENT_SECRET"),
+  authorizeUrl: "https://accounts.google.com/o/oauth2/v2/auth",
+  tokenUrl: "https://oauth2.googleapis.com/token",
+  userInfoUrl: "https://www.googleapis.com/oauth2/v1/userinfo",
+  scopes: [
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+    "https://www.googleapis.com/auth/assistant",
+    "https://www.googleapis.com/auth/client_channel",
+    "https://www.googleapis.com/auth/gemini",
+    "https://www.googleapis.com/auth/cloud-platform",
+    "https://www.googleapis.com/auth/cclog",
+    "https://www.googleapis.com/auth/experimentsandconfigs",
+  ],
+  nativeOrigin: "https://robinfrontend-pa.googleapis.com",
+};
+
 // OpenAI OAuth Configuration (Authorization Code Flow with PKCE)
 // Re-uses CODEX_CONFIG.clientId to avoid duplication — same provider, different originator.
 // IMPORTANT: same Auth0 backend as Codex → same multi-account session-takeover
@@ -599,6 +625,7 @@ export const PROVIDERS = {
   QODER: "qoder",
   ANTIGRAVITY: "antigravity",
   AGY: "agy",
+  GEMINI_APP: "gemini-app",
   KIMI_CODING: "kimi-coding",
   OPENAI: "openai",
   GITHUB: "github",

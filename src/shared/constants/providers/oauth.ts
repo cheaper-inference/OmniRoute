@@ -110,6 +110,21 @@ export const OAUTH_PROVIDERS = {
     authHint:
       "Import your Antigravity CLI (`agy`) login (paste/upload its token file), auto-detect a local CLI login, or sign in with Google. Shares the Antigravity backend (incl. Claude models).",
   },
+  "gemini-app": {
+    id: "gemini-app",
+    serviceKinds: ["llm"],
+    alias: "gapp",
+    name: "Gemini App",
+    icon: "smart_toy",
+    color: "#4285F4",
+    textIcon: "GAPP",
+    website: "https://gemini.google.com",
+    subscriptionRisk: true,
+    riskNoticeVariant: "oauth",
+    hasFree: true,
+    authHint:
+      "Native HTTP/2 (gRPC/protobuf) access to Google's Robin backend using a Google sign-in, with the Gemini App model families (Neon, Hydrogen, Flash Lite). Requires an eligible Google account; use of a subscription plan is subject to Google's Terms of Service.",
+  },
   kiro: {
     id: "kiro",
     serviceKinds: ["llm"],

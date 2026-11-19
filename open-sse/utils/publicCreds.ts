@@ -137,6 +137,18 @@ const EMBEDDED_DEFAULTS = {
     40, 34, 45, 58, 34, 55, 88, 64, 16, 101, 23, 56, 50, 1, 68, 82, 66, 65, 98, 4, 64, 9, 12, 36,
     89, 54, 1, 80, 78, 28, 45, 36, 31, 17, 15,
   ],
+  // Gemini App (Robin native client) — public OAuth desktop client (PKCE).
+  // Extracted from ShawTim/gemini-app2api DEFAULT_OAUTH_PROFILE. Public by
+  // design (native installed-app client); masked only to avoid scanner noise.
+  gemini_app_id: [
+    87, 94, 87, 92, 66, 86, 68, 77, 85, 24, 69, 69, 79, 0, 91, 80, 31, 5, 6, 3, 24, 30, 2, 2, 89,
+    19, 65, 82, 21, 65, 77, 7, 31, 1, 7, 26, 3, 5, 28, 1, 90, 80, 64, 95, 29, 90, 4, 93, 0, 6, 76,
+    11, 6, 12, 74, 26, 84, 26, 30, 11, 27, 17, 0, 27, 0, 0, 67, 4, 91, 1, 3, 4,
+  ],
+  gemini_app_alt: [
+    40, 34, 45, 58, 34, 55, 88, 23, 1, 72, 18, 69, 37, 47, 2, 55, 96, 58, 104, 41, 57, 43, 1, 57,
+    46, 70, 69, 21, 69, 54, 54, 32, 62, 26, 13,
+  ],
   // Antigravity — google oauth client (public)
   antigravity_id: [
     94, 93, 89, 88, 66, 95, 67, 68, 83, 29, 69, 76, 83, 65, 29, 14, 69, 5, 66, 6, 3, 92, 1, 64, 94,

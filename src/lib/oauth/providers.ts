@@ -11,7 +11,7 @@ import { generatePKCE, generateState } from "./utils/pkce";
 import { PROVIDERS } from "./providers/index";
 import { resolvePublicCred } from "@omniroute/open-sse/utils/publicCreds.ts";
 
-const GOOGLE_BROWSER_PROVIDERS = new Set(["antigravity", "agy"]);
+const GOOGLE_BROWSER_PROVIDERS = new Set(["antigravity", "agy", "gemini-app"]);
 
 type OAuthRedirectEnv = Record<string, string | undefined>;
 

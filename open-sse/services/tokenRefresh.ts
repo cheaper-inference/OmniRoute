@@ -136,6 +136,7 @@ export const REFRESH_LEAD_MS: Record<string, number> = {
   // is safe and reduces unnecessary upstream chatter.
   antigravity: 15 * 60 * 1000,
   agy: 15 * 60 * 1000, // same Google backend as antigravity (non-rotating refresh tokens)
+  "gemini-app": 15 * 60 * 1000, // Google refresh tokens are non-rotating
 };
 
 /**
@@ -376,6 +377,7 @@ async function _getAccessTokenInternal(provider, credentials, log, proxyConfig: 
     }
 
     case "gemini":
+    case "gemini-app":
     case "antigravity":
     case "agy": {
       // Google binds each refresh token to the client that issued it. When
@@ -531,6 +533,7 @@ export function supportsTokenRefresh(provider) {
     "chatgpt",
     "copilot-m365-web",
     "gemini",
+    "gemini-app",
     "antigravity",
     "agy",
     "claude",
@@ -900,6 +903,7 @@ export function formatProviderCredentials(provider, credentials, log) {
 
     case "antigravity":
     case "agy":
+    case "gemini-app":
       return {
         accessToken: credentials.accessToken,
         refreshToken: credentials.refreshToken,
