@@ -3,7 +3,9 @@ import { createSseTextTransform, FieldCategory, classifyField } from "./sseTextT
 import { sanitizePII, getPiiResponseMode } from "./piiSanitizer";
 import {
   bufferField,
+  ensureResponsesTextDeltaIds,
   flushOpenAiTextBuffers,
+  responsesTextTailDelta,
   type BufferedField,
   type TextBuffers,
 } from "./sseTextBuffers";
@@ -207,19 +209,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
         if (!buffers.content) return null;
         const delta = buffers.content;
         buffers.content = "";
-        const itemId =
-          (typeof lastJson.item_id === "string" ? lastJson.item_id : undefined) ??
-          (typeof (lastJson.item as Record<string, unknown> | undefined)?.id === "string"
-            ? (lastJson.item as Record<string, unknown>).id
-            : undefined) ??
-          `msg_${idx}`;
-        return {
-          type: "response.output_text.delta",
-          item_id: itemId,
-          output_index: idx,
-          content_index: typeof lastJson.content_index === "number" ? lastJson.content_index : 0,
-          delta,
-        };
+        return responsesTextTailDelta(lastJson, idx, delta);
       }
       const finalJson = JSON.parse(JSON.stringify(lastJson));
       if (buffers.content) {
@@ -232,14 +222,7 @@ export function createPiiSseTransform(options?: PiiTransformOptions): TransformS
         };
         buffers.toolArgs = "";
       }
-      if (finalJson.type === "response.output_text.delta") {
-        if (finalJson.item_id === undefined) {
-          finalJson.item_id = `msg_${idx}`;
-        }
-        if (finalJson.content_index === undefined) {
-          finalJson.content_index = 0;
-        }
-      }
+      ensureResponsesTextDeltaIds(finalJson, idx);
       return finalJson;
     }
 
