@@ -146,3 +146,48 @@ test("a finished tool call before response.incomplete keeps tool_calls and sends
   assert.equal(callArgs(out), '{"a":1}');
   assert.deepEqual(finishReasons(out), ["tool_calls"]);
 });
+
+test("response.completed with complete arguments wins over a partial argument buffer", () => {
+  // Arguments are held back until the call closes, so nothing partial reached the client yet.
+  const out = responsesToChat([
+    added,
+    argsDelta('{"a":'),
+    {
+      type: "response.completed",
+      response: {
+        status: "completed",
+        output: [
+          { type: "function_call", id: "fc_1", call_id: "c1", name: "f", arguments: '{"a":1}' },
+        ],
+        usage,
+      },
+    },
+  ]);
+  assert.equal(callArgs(out), '{"a":1}');
+  assert.deepEqual(finishReasons(out), ["tool_calls"]);
+});
+
+test("a nameless call that only response.completed names reaches the client with its arguments", () => {
+  const out = responsesToChat([
+    { ...added, item: { ...added.item, name: "" } },
+    argsDelta('{"a":'),
+    {
+      type: "response.completed",
+      response: {
+        status: "completed",
+        output: [
+          { type: "function_call", id: "fc_1", call_id: "c1", name: "f", arguments: '{"a":1}' },
+        ],
+        usage,
+      },
+    },
+  ]);
+  const calls = out.flatMap((chunk) => chunk.choices[0].delta.tool_calls ?? []) as Array<
+    ToolCall & { id?: string; index?: number; function?: { name?: string } }
+  >;
+  const header = calls.find((call) => call.id === "c1");
+  assert.equal(header?.function?.name, "f", JSON.stringify(calls));
+  assert.equal(header?.index, 0);
+  assert.equal(callArgs(out), '{"a":1}');
+  assert.deepEqual(finishReasons(out), ["tool_calls"]);
+});

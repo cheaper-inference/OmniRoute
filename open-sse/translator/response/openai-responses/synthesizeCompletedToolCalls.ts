@@ -189,6 +189,7 @@ interface OpenCallEntry {
   name?: string;
   argsBuffer?: string;
   needsNormalization?: boolean;
+  deferred?: boolean;
 }
 
 interface OpenCallState extends CompletionState {
@@ -197,8 +198,11 @@ interface OpenCallState extends CompletionState {
 }
 
 /**
- * Arguments chunks for every call still open (no `output_item.done`), taken from its argument
- * buffer or, when nothing was buffered, from the matching item of a terminal snapshot.
+ * Arguments chunks for every call still open (no `output_item.done`), taken from the matching
+ * item of a terminal snapshot or, when it has none, from the call's argument buffer (arguments
+ * are held back until the call closes, so a complete snapshot value replaces a partial buffer).
+ * A deferred call (no name yet, so nothing was sent for it) is released only when the snapshot
+ * names it: it then claims an index and gets its header with the arguments, as `.done` would.
  * Used at end of stream and on `response.completed` / `response.incomplete`, so a call that
  * never got its `.done` does not reach the client with empty arguments.
  */
@@ -209,25 +213,40 @@ export function drainOpenToolCallArgs(
   if (!(state.toolCallByCallId instanceof Map)) return [];
   const chunks: Record<string, unknown>[] = [];
   for (const [callId, entry] of state.toolCallByCallId as Map<string, OpenCallEntry>) {
-    if (entry.index == null) continue;
     const snapshot = snapshotOutput.find(
       (item) => (item as { call_id?: unknown } | null)?.call_id === callId
-    ) as { arguments?: unknown } | undefined;
-    const raw =
-      entry.argsBuffer || (typeof snapshot?.arguments === "string" ? snapshot.arguments : "");
-    if (!raw) continue;
+    ) as { arguments?: unknown; name?: unknown } | undefined;
+    const header = entry.index == null;
+    if (header) {
+      const resolvedName = normalizeToolName(snapshot?.name);
+      if (!resolvedName) continue;
+      entry.index = state.toolCallIndex ?? 0;
+      state.toolCallIndex = entry.index + 1;
+      entry.name = resolvedName;
+      entry.deferred = false;
+    }
+    const snapshotArgs =
+      typeof snapshot?.arguments === "string" && snapshot.arguments.length > 0
+        ? snapshot.arguments
+        : "";
+    const raw = snapshotArgs || entry.argsBuffer || "";
+    if (!raw && !header) continue;
     const toolName = entry.name ?? "";
-    const stripped = stripEmptyOptionalToolArgs(raw, toolName, state.toolSchemas?.get(toolName));
+    const stripped = raw
+      ? stripEmptyOptionalToolArgs(raw, toolName, state.toolSchemas?.get(toolName))
+      : "";
     const argsStr = typeof stripped === "string" ? stripped : JSON.stringify(stripped ?? {});
+    const toolCall = header
+      ? {
+          index: entry.index,
+          id: callId,
+          type: "function",
+          function: { name: toolName, arguments: argsStr },
+        }
+      : { index: entry.index, function: { arguments: argsStr } };
     chunks.push({
       ...baseChunk(state),
-      choices: [
-        {
-          index: 0,
-          delta: { tool_calls: [{ index: entry.index, function: { arguments: argsStr } }] },
-          finish_reason: null,
-        },
-      ],
+      choices: [{ index: 0, delta: { tool_calls: [toolCall] }, finish_reason: null }],
     });
     entry.argsBuffer = "";
     entry.needsNormalization = false;
