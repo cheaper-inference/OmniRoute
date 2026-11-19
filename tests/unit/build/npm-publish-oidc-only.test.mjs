@@ -32,7 +32,11 @@ test("only the DIRECT emergency fallback still reads the NPM_TOKEN secret", () =
   assert.deepEqual(stepsUsingNpmToken(), [`stage-npm → ${DIRECT_FALLBACK}`]);
 });
 
-for (const jobName of ["publish-opencode-plugin", "publish-opencode-plugin-v2"]) {
+for (const jobName of [
+  "publish-opencode-plugin",
+  "publish-opencode-plugin-v2",
+  "publish-opencode-provider",
+]) {
   test(`${jobName} publishes through OIDC: id-token write, no auth token on the publish step`, () => {
     const job = workflow.jobs[jobName];
     assert.equal(job.permissions["id-token"], "write");
@@ -50,4 +54,14 @@ test("stage-npm staged mode publishes through OIDC as well", () => {
   assert.ok(staged, "stage-npm has the staged step");
   assert.equal(staged.env?.NODE_AUTH_TOKEN, undefined);
   assert.match(staged.run, /npm stage publish/);
+});
+
+// The reusable-workflow entry used to declare NPM_TOKEN as required and electron-release.yml
+// forwarded it, so deleting the expired secret would fail the desktop release at startup.
+// The default publish path is OIDC; only the dispatch-only DIRECT fallback reads the secret.
+test("the reusable entry no longer requires NPM_TOKEN and electron-release no longer forwards it", () => {
+  const call = workflow.on.workflow_call;
+  assert.equal(call.secrets?.NPM_TOKEN, undefined);
+  const electron = readFileSync(join(root, ".github/workflows/electron-release.yml"), "utf8");
+  assert.doesNotMatch(electron, /secrets\.NPM_TOKEN/);
 });

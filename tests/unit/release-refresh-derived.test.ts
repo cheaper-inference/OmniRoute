@@ -643,6 +643,110 @@ describe("phase-4/5 steps", () => {
     );
   });
 
+  // A stub sync-ui-keys that records every call and reports `pending` values to translate.
+  const uiKeysStub = (pending: { added: number; failed?: number }) => ({
+    "scripts/i18n/sync-ui-keys.mjs":
+      'import fs from "node:fs";\nimport path from "node:path";\n' +
+      "export function loadDotEnv(envPath, env) {\n" +
+      "  if (!fs.existsSync(envPath)) return;\n" +
+      '  for (const line of fs.readFileSync(envPath, "utf8").split("\\n")) {\n' +
+      '    const i = line.indexOf("=");\n' +
+      "    if (i > 0 && env[line.slice(0, i)] === undefined) env[line.slice(0, i)] = line.slice(i + 1);\n" +
+      "  }\n}\n" +
+      "export async function syncUiKeys(opts) {\n" +
+      '  fs.appendFileSync(path.join(opts.root, "calls.jsonl"), JSON.stringify({ catalog: opts.catalog, dryRun: opts.dryRun, translate: opts.translate }) + "\\n");\n' +
+      `  return { changedFiles: [], added: ${pending.added}, markedRewritten: 0, failed: opts.translate ? ${pending.failed ?? 0} : 0 };\n}\n`,
+    "src/i18n/messages/en.json": "{}\n",
+  });
+  const calls = (root: string) =>
+    (read(root, "calls.jsonl") ?? "")
+      .trim()
+      .split("\n")
+      .filter(Boolean)
+      .map((l) => JSON.parse(l));
+  // These tests own the OMNIROUTE_TRANSLATION_* variables: none from the operator's shell leaks in.
+  const withoutTranslationEnv = async (fn: () => Promise<void>) => {
+    const saved = Object.entries(process.env).filter(([k]) =>
+      k.startsWith("OMNIROUTE_TRANSLATION_")
+    );
+    for (const [k] of saved) delete process.env[k];
+    try {
+      await fn();
+    } finally {
+      for (const k of Object.keys(process.env))
+        if (k.startsWith("OMNIROUTE_TRANSLATION_")) delete process.env[k];
+      for (const [k, v] of saved) process.env[k] = v;
+    }
+  };
+
+  it("ui-keys: without a backend the release fails and writes nothing, the nightly skips, --allow-untranslated writes markers", async () =>
+    withoutTranslationEnv(async () => {
+      const release = tree(uiKeysStub({ added: 3 }));
+      const failed = await refreshDerived({
+        root: release,
+        only: ["ui-keys"],
+        rewrittenSince: null,
+      });
+      const step = failed.steps.find((s) => s.id === "ui-keys")!;
+      assert.equal(step.status, "failed");
+      assert.match(step.detail, /no translation backend is configured/);
+      assert.ok(
+        calls(release).every((c) => c.dryRun === true),
+        "only a dry run, nothing written"
+      );
+      assert.equal(refreshExitCode(failed, { check: false }), 2);
+
+      const nightly = tree(uiKeysStub({ added: 3 }));
+      const skipped = await refreshDerived({
+        root: nightly,
+        only: ["ui-keys"],
+        profile: "nightly",
+        rewrittenSince: null,
+      });
+      const nightlyStep = skipped.steps.find((s) => s.id === "ui-keys")!;
+      assert.equal(nightlyStep.status, "skipped");
+      assert.match(nightlyStep.detail, /never writes __MISSING__ markers/);
+      assert.ok(calls(nightly).every((c) => c.dryRun === true));
+
+      const allowed = tree(uiKeysStub({ added: 3 }));
+      await refreshDerived({
+        root: allowed,
+        only: ["ui-keys"],
+        rewrittenSince: null,
+        allowUntranslated: true,
+      });
+      assert.ok(
+        calls(allowed).some((c) => c.dryRun === false && c.translate === false),
+        "--allow-untranslated writes the markers on purpose"
+      );
+    }));
+
+  it("ui-keys: reads ONLY the OMNIROUTE_TRANSLATION_* keys from .env and translates; leftover failures fail the step", async () =>
+    withoutTranslationEnv(async () => {
+      const files = {
+        ...uiKeysStub({ added: 3 }),
+        ".env": "OMNIROUTE_TRANSLATION_ENGINE=google\nUNRELATED_SECRET=do-not-leak\n",
+      };
+      const root = tree(files);
+      const r = await refreshDerived({ root, only: ["ui-keys"], rewrittenSince: null });
+      assert.equal(r.steps.find((s) => s.id === "ui-keys")?.status, "changed");
+      assert.ok(calls(root).some((c) => c.dryRun === false && c.translate === true));
+      assert.equal(process.env.OMNIROUTE_TRANSLATION_ENGINE, "google");
+      assert.equal(process.env.UNRELATED_SECRET, undefined, "the rest of .env never leaks");
+
+      const partial = tree({ ...uiKeysStub({ added: 3, failed: 2 }), ".env": files[".env"] });
+      const bad = await refreshDerived({ root: partial, only: ["ui-keys"], rewrittenSince: null });
+      const step = bad.steps.find((s) => s.id === "ui-keys")!;
+      assert.equal(step.status, "failed");
+      assert.match(step.detail, /2 value\(s\) failed to translate/);
+    }));
+
+  it("parses --allow-untranslated", () => {
+    assert.equal(parseRefreshArgs([]).allowUntranslated, false);
+    assert.equal(parseRefreshArgs(["--allow-untranslated"]).allowUntranslated, true);
+    assert.equal(parseRefreshArgs(["--allow-untranslated"]).error, null);
+  });
+
   it("e2e-timings: skipped until syncE2eTimings exists, then reported in --check", async () => {
     const bare = tree({ "README.md": "x\n" });
     const skipped = await refreshDerived({ root: bare, check: true, only: ["e2e-timings"] });
