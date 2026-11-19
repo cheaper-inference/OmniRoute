@@ -1,0 +1,34 @@
+{
+  "family": "translation",
+  "description": "Everything translated from an English source: the dashboard and CLI catalogs of the non-English locales, the docs/i18n mirrors with their hash ledger, and the real-translation ratchet measured on them. A feature PR edits only the English source (src/i18n/messages/en.json, bin/cli/locales/en.json, the English docs); these files are rewritten once per release by release:refresh-derived, by a translation wave, or by the scheduled mirror-refresh PR. The compact error-boundary catalogs (src/i18n/global-error-messages) are companions, not a category: they are regenerated from the catalogs on every build, a translation-only PR may carry them, and a feature PR that edits en.json publicSystem.globalError must still be able to regenerate them.",
+  "writers": ["release/v*", "docs/i18n-*", "chore/i18n-*", "chore/derived-*"],
+  "companions": ["changelog.d/**", "src/i18n/global-error-messages/*.json"],
+  "categories": [
+    {
+      "id": "ui-locale-catalogs",
+      "paths": ["src/i18n/messages/*.json"],
+      "except": ["src/i18n/messages/en.json"],
+      "why": "A feature PR adds or rewrites keys in en.json only; at runtime the dashboard falls back to English (src/i18n/request.ts deepMergeFallback) until the locales are completed. Catalog edits carried by feature PRs conflicted on every merge (48 open PRs touched the same ~43 catalogs on 2026-11-13).",
+      "refreshedBy": "release:refresh-derived → syncUiKeys({ catalog: \"ui\", pruneExtra: true, rewrittenSinceRef, translate: true }) in scripts/i18n/sync-ui-keys.mjs (CLI: node scripts/i18n/sync-ui-keys.mjs --rewritten-since=<ref> --translate-markers --batch-size=40), or a translation wave branch"
+    },
+    {
+      "id": "cli-locale-catalogs",
+      "paths": ["bin/cli/locales/*.json"],
+      "except": ["bin/cli/locales/en.json"],
+      "why": "A feature PR adds CLI strings to bin/cli/locales/en.json only; the CLI falls back to English until the locales are completed.",
+      "refreshedBy": "release:refresh-derived → syncUiKeys({ catalog: \"cli\", pruneExtra: true, translate: true }) in scripts/i18n/sync-ui-keys.mjs (CLI: node scripts/i18n/sync-ui-keys.mjs --catalog=cli --translate-markers --batch-size=40)"
+    },
+    {
+      "id": "docs-i18n-mirrors",
+      "paths": ["docs/i18n/**", ".i18n-state.json"],
+      "why": "The 66 translated mirrors of the English docs and their hash ledger are rewritten from the English source; a feature PR edits the English doc only.",
+      "refreshedBy": "npm run i18n:run -- --files=<doc> on a translation wave branch (docs/i18n-*), the scheduled i18n-mirror-refresh workflow (chore/i18n-mirror-refresh), or release:refresh-derived"
+    },
+    {
+      "id": "ui-translation-ratio-baseline",
+      "paths": ["config/quality/i18n-translation-baseline.json"],
+      "why": "The real-translation ratchet is measured on the locale catalogs, so it only moves when they do; on a feature PR the ratio gate runs in release mode (SKIP) and there is nothing for the PR to tighten.",
+      "refreshedBy": "npm run i18n:check-ratio:update after the catalogs are refreshed (release:refresh-derived or a translation wave)"
+    }
+  ]
+}

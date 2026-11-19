@@ -33,6 +33,7 @@ describe("pricing schema GET → PATCH round-trip (#12494)", () => {
       output_cost_per_video_per_second: 0.06,
       search_unit_cost: 0.001,
       ocr_cost_per_page: 0.002,
+      ocr_cost_per_annotated_page: 0.003,
     };
     assert.deepEqual(pricingFieldsSchema.parse(entry), entry);
   });

@@ -24,6 +24,7 @@ import { getModelSpec } from "../../../src/shared/constants/modelSpecs.ts";
 import {
   gemini38ThinkingConfig,
   isGeminiThinkingLevelModel,
+  resolveClaudeNativeGeminiThinking,
 } from "../../services/thinkingBudget.ts";
 
 import {
@@ -61,6 +62,37 @@ function urlImagePart(url) {
   return { fileData: { fileUri: url, mimeType: "image/*" } };
 }
 
+/**
+ * A Claude `document` block (PDF etc.) maps to Gemini the same way the Claude ->
+ * OpenAI -> Gemini route maps it: base64 -> inlineData, an HTTPS URL -> fileData
+ * (HTTPS only, same rule as isUrlImageBlock), a text source -> plain text.
+ * Without this case the block was dropped in user turns, so an attached PDF never
+ * reached the model.
+ */
+function documentPart(block): { inlineData?: unknown; fileData?: unknown; text?: string } | null {
+  const source = block?.source;
+  if (source?.type === "base64") return base64DocumentPart(source);
+  if (source?.type === "url") return urlDocumentPart(source);
+  if (source?.type === "text" && typeof source.data === "string" && source.data) {
+    return { text: source.data };
+  }
+  return null;
+}
+
+function base64DocumentPart(source) {
+  if (typeof source.data !== "string" || !source.data) return null;
+  return {
+    inlineData: { mimeType: source.media_type || "application/pdf", data: source.data },
+  };
+}
+
+function urlDocumentPart(source) {
+  if (typeof source.url !== "string" || !/^https:\/\//i.test(source.url)) return null;
+  return {
+    fileData: { fileUri: source.url, mimeType: source.media_type || "application/pdf" },
+  };
+}
+
 function isPlainTextPart(part: { text?: unknown }): boolean {
   return Object.keys(part).length === 1 && typeof part.text === "string";
 }
@@ -70,10 +102,13 @@ function appendTextToFunctionResponse(
   textParts: string[]
 ): boolean {
   const response = part.functionResponse?.response;
-  if (!response || typeof response.result !== "string") return false;
+  // A failed tool_result carries its text in `error`, a successful one in `result`.
+  const key = typeof response?.result === "string" ? "result" : "error";
+  const current = response?.[key];
+  if (!response || typeof current !== "string") return false;
   const combinedText = textParts.join("\n");
   if (!combinedText) return false;
-  response.result = response.result ? `${response.result}\n${combinedText}` : combinedText;
+  response[key] = current ? `${current}\n${combinedText}` : combinedText;
   return true;
 }
 
@@ -126,6 +161,10 @@ function mergeTrailingTextIntoFunctionResponses(contents: GeminiContent[]) {
     for (const index of leadingIndexes.reverse()) content.parts.splice(index, 1);
   }
 }
+
+// Every turn re-sends all earlier tool_result images; keep only the newest few.
+const MAX_TOOL_RESULT_IMAGES = 5;
+const TOOL_RESULT_IMAGE_PLACEHOLDER = "[Earlier tool result image omitted to bound request size]";
 
 type ToolUseOccurrence = { name: string; signature: string | null };
 
@@ -187,6 +226,7 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
       googleSearch?: Record<string, unknown>;
       googleSearchRetrieval?: Record<string, unknown>;
     }>;
+    toolConfig?: { functionCallingConfig: Record<string, unknown> };
     _toolNameMap?: Map<string, string>;
   } = {
     model: model,
@@ -275,6 +315,8 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
     // matching tool_result becomes text instead of a Gemini-400'd functionResponse.
     const omittedToolCallIds = new Set<string>();
     const toolUseOccurrences = createToolUseOccurrenceQueue();
+    // Base64 tool_result image parts in request order, for the cap after the loop.
+    const toolResultInlineImages: Array<Record<string, unknown>> = [];
     for (const msg of body.messages) {
       const parts = [];
       // Images returned inside tool_result blocks go right after the last tool response,
@@ -334,24 +376,43 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 // A base64 image (the Read tool on a PNG, an MCP screenshot) becomes an
                 // inlineData part, as claude-to-openai.ts lifts it into an image turn
                 // (#5100); JSON.stringify would hand Gemini the base64 as text.
+                // Documents follow the same rule — a PDF inside a tool result is
+                // attached as a part, never serialized into the text.
                 const textParts = [];
                 let hasImage = false;
+                let hasDocument = false;
                 for (const c of content) {
                   if (c.type === "image" && c.source?.type === "base64") {
-                    toolResultImageParts.push({
+                    const imagePart = {
                       inlineData: { mimeType: c.source.media_type, data: c.source.data },
-                    });
+                    };
+                    toolResultImageParts.push(imagePart);
+                    toolResultInlineImages.push(imagePart);
                     hasImage = true;
                   } else if (isUrlImageBlock(c)) {
                     toolResultImageParts.push(urlImagePart(c.source.url));
                     hasImage = true;
+                  } else if (c.type === "document") {
+                    const document = documentPart(c);
+                    if (document && (document.inlineData || document.fileData)) {
+                      toolResultImageParts.push(document);
+                      hasDocument = true;
+                    } else if (document?.text !== undefined) {
+                      textParts.push(document.text);
+                    } else {
+                      textParts.push(JSON.stringify(c));
+                    }
                   } else {
                     textParts.push(c.type === "text" ? c.text : JSON.stringify(c));
                   }
                 }
                 content =
                   textParts.join("\n") ||
-                  (hasImage ? "[tool returned an image; see attached]" : "");
+                  (hasImage
+                    ? "[tool returned an image; see attached]"
+                    : hasDocument
+                      ? "[tool returned a document; see attached]"
+                      : "");
               }
               const toolUseId = block.tool_use_id;
               // Pair with this id's oldest unconsumed tool_use; the id-keyed maps
@@ -379,7 +440,10 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 functionResponse: {
                   ...(stripFunctionCallId ? {} : { id: toolUseId }),
                   name,
-                  response: { result: sanitizeFunctionResponseData(content) },
+                  response: {
+                    [block.is_error === true ? "error" : "result"]:
+                      sanitizeFunctionResponseData(content),
+                  },
                 },
               });
               afterLastToolResult = parts.length;
@@ -399,6 +463,12 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
                 parts.push(urlImagePart(block.source.url));
               }
               break;
+
+            case "document": {
+              const document = documentPart(block);
+              if (document) parts.push(document);
+              break;
+            }
           }
         }
       } else if (typeof msg.content === "string" && msg.content) {
@@ -413,6 +483,17 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
         const geminiRole = msg.role === "assistant" ? "model" : "user";
         result.contents.push({ role: geminiRole, parts });
       }
+    }
+    // Turn the oldest images into text in place, so part order stays valid.
+    const droppedImages = toolResultInlineImages.slice(0, -MAX_TOOL_RESULT_IMAGES);
+    for (const part of droppedImages) {
+      delete part.inlineData;
+      part.text = TOOL_RESULT_IMAGE_PLACEHOLDER;
+    }
+    if (droppedImages.length > 0) {
+      console.warn(
+        `TOOL_RESULT_IMAGE_CAP kept=${MAX_TOOL_RESULT_IMAGES} dropped=${droppedImages.length}`
+      );
     }
   }
 
@@ -436,11 +517,54 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
     result.tools = geminiTools;
   }
 
+  // ── Tool choice ────────────────────────────────────────────────
+  // Claude tool_choice -> Gemini toolConfig. "auto" is Gemini's default, so it sets nothing.
+  const declaredNames = (geminiTools ?? []).flatMap((tool) =>
+    (tool.functionDeclarations ?? []).map((declaration) => declaration.name as string)
+  );
+  const choice = body.tool_choice;
+  const choiceType = typeof choice === "string" ? choice : choice?.type;
+  // A forced Claude server web search tool was dropped above (or became googleSearch).
+  const forcesServerTool =
+    choiceType === "tool" &&
+    Array.isArray(body.tools) &&
+    body.tools.some((tool) => isClaudeServerWebSearchTool(tool) && tool.name === choice.name);
+  if (choiceType === "none") {
+    // No tool call is wanted, so a native search tool (googleSearch) goes too.
+    if (declaredNames.length > 0) {
+      result.toolConfig = { functionCallingConfig: { mode: "NONE" } };
+    } else {
+      delete result.tools;
+    }
+  } else if (
+    declaredNames.length > 0 &&
+    (choiceType === "any" || (choiceType === "tool" && !forcesServerTool))
+  ) {
+    const functionCallingConfig: Record<string, unknown> = { mode: "ANY" };
+    if (choiceType === "tool") {
+      const forcedName = typeof choice.name === "string" ? sanitizeToolName(choice.name) : "";
+      if (!declaredNames.includes(forcedName)) {
+        throw Object.assign(
+          new Error(`tool_choice names "${choice.name}", which is not in the tools list.`),
+          { statusCode: 400, errorType: "invalid_request_error" }
+        );
+      }
+      functionCallingConfig.allowedFunctionNames = [forcedName];
+    }
+    result.toolConfig = { functionCallingConfig };
+  }
+
   // ── Thinking config ────────────────────────────────────────────
   // Priority: thinking.budget_tokens (Claude native) > output_config.effort (Claude Code).
   // Models without thinking support (TTS, transcription, gemini-2.5-flash-image)
   // 400 on ANY thinkingConfig, so they skip both paths below (#16928).
-  if (model.startsWith("gemma-4") || geminiModelRejectsThinkingConfig(model)) {
+  const rejectsThinkingConfig = geminiModelRejectsThinkingConfig(model);
+  const nativeThinking = rejectsThinkingConfig
+    ? null
+    : resolveClaudeNativeGeminiThinking(model, body);
+  if (nativeThinking !== null) {
+    result.generationConfig.thinkingConfig = nativeThinking;
+  } else if (model.startsWith("gemma-4") || rejectsThinkingConfig) {
     // gemma-4 models returns - 400: Thinking budget is not supported for this model
   } else if (body.thinking?.type === "enabled" && typeof body.thinking.budget_tokens === "number") {
     // typeof check ensures only numeric budget_tokens triggers the thinking path;

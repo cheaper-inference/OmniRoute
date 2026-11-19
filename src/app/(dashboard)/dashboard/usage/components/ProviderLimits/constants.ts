@@ -1,4 +1,5 @@
 export const PROVIDER_LABEL: Record<string, string> = {
+  chatgpt: "ChatGPT",
   antigravity: "Antigravity",
   github: "GitHub Copilot",
   kiro: "Kiro AI",
