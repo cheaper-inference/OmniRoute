@@ -27,13 +27,14 @@ const posixModes = {
 };
 
 test("secure file helpers request restrictive modes on every platform", async (t) => {
+  // Finish any loader cache writes before spying on calls made by the helpers.
+  const { ensureSecureDir, writeSecureFile } =
+    await import("../../open-sse/utils/secureFileWrite.ts");
   const mkdir = t.mock.method(fs, "mkdirSync", () => undefined);
   const chmod = t.mock.method(fs, "chmodSync", () => undefined);
   const write = t.mock.method(fs, "writeFileSync", () => undefined);
   syncBuiltinESMExports();
   try {
-    const { ensureSecureDir, writeSecureFile } =
-      await import("../../open-sse/utils/secureFileWrite.ts");
     const dir = join(probeDataDir, "mode-contract");
     const file = join(dir, "probe.json");
     ensureSecureDir(dir);
