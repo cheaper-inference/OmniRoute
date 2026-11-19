@@ -58,8 +58,10 @@ test("GET reports historical usage even before a counter is created", async () =
     new Request("http://localhost/api/usage/token-limits?apiKeyId=report-history")
   );
   const { limits } = await response.json();
-  assert.equal(limits[0].tokensUsed, 125);
-  assert.equal(limits[0].remaining, 1999875);
+  // Billable total = input + output; reasoning (5) is a subset of output (20) and the
+  // cache read (30) is a breakdown inside input, so neither is added again (#19031).
+  assert.equal(limits[0].tokensUsed, 120);
+  assert.equal(limits[0].remaining, 1999880);
   assert.equal(counter.getCurrentWindowUsage(limit, Date.now(), true), limits[0].tokensUsed);
 });
 

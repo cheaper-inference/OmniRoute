@@ -26,7 +26,7 @@ function TokenLimitCard({
   return (
     <article className="rounded-lg border border-border p-4 flex flex-col gap-3">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h3 className="min-w-0 text-sm font-medium break-words">
+        <h3 className="min-w-0 text-sm break-words">
           {t(limit.scopeType)}
           {limit.scopeValue ? ` · ${limit.scopeValue}` : ""} · {t(limit.resetInterval)}
         </h3>
@@ -92,7 +92,7 @@ function TokenLimitHeader({ state, onAdd }: { state: TokenLimitsState; onAdd: ()
   return (
     <div className="flex flex-wrap items-start justify-between gap-3">
       <div className="flex flex-col gap-1">
-        <h2 className="text-sm font-medium">{t("title")}</h2>
+        <h2 className="text-sm">{t("title")}</h2>
         <p className="text-xs text-text-muted">{t("description")}</p>
         <p className="text-xs text-text-muted">{t("independentSave")}</p>
         <p className="text-xs text-text-muted">{t("enforcementHint")}</p>
