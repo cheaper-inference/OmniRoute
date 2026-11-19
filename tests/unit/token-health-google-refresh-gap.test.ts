@@ -17,6 +17,8 @@ const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const { OAUTH_ENDPOINTS } = await import("../../open-sse/config/constants.ts");
 const tokenHealthCheck = await import("../../src/lib/tokenHealthCheck.ts");
+const { waitForGoogleRefreshSlot, __resetGoogleRefreshSlotsForTests } =
+  await import("../../src/lib/tokenHealthGoogleGap.ts");
 
 const GAP_MS = 300;
 const COUNT = 3;
@@ -85,5 +87,38 @@ test("flag on: Google refreshes start at least BG_REFRESH_GOOGLE_DELAY_MS apart"
     }
   } finally {
     delete process.env.BG_REFRESH_GOOGLE_DELAY_MS;
+  }
+});
+
+test("flag on: a host sleep past several pending slots still starts them a gap apart", async (t) => {
+  const BASE = 12_000;
+  process.env.BG_REFRESH_GOOGLE_DELAY_MS = String(BASE);
+  t.mock.method(Math, "random", () => 0); // no jitter: the gap is exactly the base
+  t.mock.timers.enable({ apis: ["setTimeout", "Date"], now: 1_000_000 });
+  __resetGoogleRefreshSlotsForTests();
+  const flush = async () => {
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+  };
+  try {
+    const starts: number[] = [];
+    // agy and gemini are Google OAuth accounts too, so they share the spacing.
+    const pending = ["antigravity", "agy", "gemini"].map((provider) =>
+      waitForGoogleRefreshSlot(provider).then(() => starts.push(Date.now()))
+    );
+    await flush();
+    assert.deepEqual(starts, [1_000_000], "the first refresh starts at once");
+
+    // The host sleeps 30 s: the clock jumps, and every pending wait is overdue on resume.
+    t.mock.timers.setTime(1_030_000);
+    t.mock.timers.tick(0);
+    await flush();
+    assert.deepEqual(starts, [1_000_000, 1_030_000], "only one overdue refresh starts on resume");
+
+    t.mock.timers.tick(BASE);
+    await Promise.all(pending);
+    assert.deepEqual(starts, [1_000_000, 1_030_000, 1_042_000]);
+  } finally {
+    delete process.env.BG_REFRESH_GOOGLE_DELAY_MS;
+    __resetGoogleRefreshSlotsForTests();
   }
 });
