@@ -320,7 +320,7 @@ export const APIKEY_PROVIDERS_SPECIALTY = {
       apiKeyUrl: "https://agent.tinyfish.ai/api-keys",
     },
     authHint: "X-API-Key from agent.tinyfish.ai/api-keys",
-    serviceKinds: ["webFetch", "webSearch"],
+    serviceKinds: ["webFetch"],
   },
   deepai: {
     id: "deepai",
