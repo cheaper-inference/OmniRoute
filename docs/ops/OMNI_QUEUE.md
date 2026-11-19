@@ -1612,13 +1612,14 @@ Two consequences:
   candidate branches (see [Cut-over and rollback](#cut-over-and-rollback)) need the ruleset to be
   disabled first.
 
-Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Two
+Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Three
 existing repository rulesets also match release branches:
 
-| Ruleset (id)                              | Matches                | Rules                            | Effect on the landing push                                                                                                                                                 |
-| ----------------------------------------- | ---------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| "Protect release branches" (15605329)     | `refs/heads/release/*` | `deletion`, `non_fast_forward`   | None: nobody can delete or force-push a release branch, and the landing push is a fast-forward.                                                                            |
-| "Require PR on default branch" (21899981) | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors | **Rejects it** on whichever release branch is the default branch (the active release): it has no bypass actor, and a ruleset of ours cannot lift it for the landing actor. |
+| Ruleset (id)                                           | Matches                | Rules                                                                                                                                       | Effect on the landing push                                                                                                                                                                                                                  |
+| ------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Protect release branches" (15605329)                  | `refs/heads/release/*` | `deletion`, `non_fast_forward`                                                                                                              | None: nobody can delete or force-push a release branch, and the landing push is a fast-forward.                                                                                                                                             |
+| "Require PR on default branch" (21899981)              | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors                                                                                                            | **Rejects it** on whichever release branch is the default branch (the active release): it has no bypass actor, and a ruleset of ours cannot lift it for the landing actor.                                                                  |
+| "Require green gates on the active release" (27616259) | `~DEFAULT_BRANCH`      | `required_status_checks`: `Gate / CI` and `Gate / Quality`, pinned to GitHub Actions (`integration_id` 15368), not strict; no bypass actors | None: the landing push (`merge-ff`) pushes the candidate itself, and the queue lands a candidate only after its verdict saw both checks green on it from GitHub Actions. The landing-path check accepts it and prints it as an `info` line. |
 
 The status door replaces "Require PR on default branch", so the cut-over removes it (see
 [Cut-over and rollback](#cut-over-and-rollback)). Until it is gone, the landing-path check below
@@ -1667,7 +1668,17 @@ node scripts/merge-queue/apply-ruleset.mjs --kind queue-refs \
   (`RepositoryRole` 5) or `OrganizationAdmin` in mode `always`. On `--dry-run` this is a warning;
   on a real apply the script exits `1`, after writing its own ruleset, until those rulesets are
   fixed. Its hint is to remove them: the status door replaces them. Rules whose ruleset is not
-  readable with the token count as not bypassed.
+  readable with the token count as not bypassed. One exception, whoever lands: a
+  `required_status_checks` rule the candidate already satisfies does not block. GitHub lets a
+  commit reach a branch under such a rule when it was pushed to another branch first and its checks
+  passed there, and the landing pushes the candidate whose checks the queue's verdict saw green. The
+  rule is accepted only when `strict_required_status_checks_policy` is `false`, it has no parameter
+  other than that one, `do_not_enforce_on_create` and `required_status_checks`, and every required
+  check has only `context` and `integration_id`, with a context listed in `requiredChecks`
+  (compared exactly) and an `integration_id` that is absent, `null` or 15368 (GitHub Actions, the
+  only app whose run turns a required check green in the queue's verdict). Each accepted rule is
+  printed as an `info` line naming its ruleset, and it never changes the exit code. A strict rule,
+  a check outside `requiredChecks` or a check pinned to another app still blocks.
 - Exit codes: `0` ok, `1` failure (API error, or a foreign rule blocks the landing push), `2` usage
   error or refused.
 - Run `--kind release` once per new release branch, after the branch is cut and before it becomes
