@@ -360,8 +360,8 @@ function AgentActions({ editor }: { editor: Editor }) {
       </Button>
       <Button
         size="sm"
-        variant="ghost"
-        className="!h-7 !px-2 text-xs text-error hover:text-error"
+        variant="destructive-ghost"
+        className="!h-7 !px-2 text-xs"
         onClick={() => void send(editor, "DELETE", undefined, "delete")}
       >
         Delete remote

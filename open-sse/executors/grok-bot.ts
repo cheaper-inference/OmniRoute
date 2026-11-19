@@ -35,6 +35,38 @@ const CLEANUP_BUDGET_MS = 3000;
 const CLEANUP_MAX_PER_RUN = 5;
 
 /**
+ * Delete one queued temporal agent. Returns false when the item must stay queued.
+ * Throws on an RPC failure; the caller keeps the item then as well.
+ */
+async function reconcileCleanup(
+  t: ReturnType<typeof getTransport>,
+  item: PendingCleanup,
+  signal: AbortSignal
+): Promise<boolean> {
+  let rowId = item.rowId;
+  if (!rowId && item.agentId) {
+    const roster = (await t.rpc("ListGrokBotAgents", {}, { signal })) as {
+      agents?: { id?: string; agentId?: string }[];
+    };
+    const row = roster?.agents?.find((a) => a.agentId === item.agentId);
+    // A roster miss and a roster failure look the same here, so the item
+    // stays queued rather than being dropped on a guess.
+    if (!row?.id) return false;
+    rowId = row.id;
+  }
+  if (rowId) {
+    await t.rpc("DeleteGrokBotAgent", { id: rowId }, { signal });
+  }
+  // Remove this item from the on-disk queue immediately, inside one
+  // synchronous read-filter-write section. The previous shape wrote the
+  // whole `remaining` snapshot after the loop, so a concurrent
+  // enqueueCleanup during the awaited deletes was silently overwritten
+  // (review finding r8).
+  removeFromQueue(item);
+  return true;
+}
+
+/**
  * Grok Bot executor -- single-account, plain-conversation path.
  *
  * Wire contract (spec: _tasks/superpowers/specs/2026-09-22-grok-bot-executor-integration.md):
@@ -116,29 +148,7 @@ export class GrokBotExecutor extends BaseExecutor {
       }
       attempted += 1;
       try {
-        let rowId = item.rowId;
-        if (!rowId && item.agentId) {
-          const roster = (await t.rpc("ListGrokBotAgents", {}, { signal: deadline })) as {
-            agents?: { id?: string; agentId?: string }[];
-          };
-          const row = roster?.agents?.find((a) => a.agentId === item.agentId);
-          if (!row?.id) {
-            // A roster miss and a roster failure look the same here, so the item
-            // stays queued rather than being dropped on a guess.
-            remaining.push(item);
-            continue;
-          }
-          rowId = row.id;
-        }
-        if (rowId) {
-          await t.rpc("DeleteGrokBotAgent", { id: rowId }, { signal: deadline });
-        }
-        // Remove this item from the on-disk queue immediately, inside one
-        // synchronous read-filter-write section. The previous shape wrote the
-        // whole `remaining` snapshot after the loop, so a concurrent
-        // enqueueCleanup during the awaited deletes was silently overwritten
-        // (review finding r8).
-        removeFromQueue(item);
+        if (!(await reconcileCleanup(t, item, deadline))) remaining.push(item);
       } catch (err) {
         log?.warn?.("GROK_BOT", `cleanup reconcile failed: ${sanitizeErrorMessage(err)}`);
         remaining.push(item);

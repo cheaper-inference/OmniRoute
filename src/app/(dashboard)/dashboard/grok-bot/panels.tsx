@@ -440,7 +440,7 @@ function PermissionCards({
         </div>
       ))}
       {permissionFailed ? (
-        <p className="mt-2 text-xs text-muted-foreground">{t("permissionFailed")}</p>
+        <p className="mt-2 text-xs text-text-muted">{t("permissionFailed")}</p>
       ) : null}
     </div>
   );
@@ -498,15 +498,13 @@ function SendBar({
           {t("sendButton")}
         </Button>
       </form>
-      {uploadNote !== "" ? <p className="text-sm text-muted-foreground">{uploadNote}</p> : null}
+      {uploadNote !== "" ? <p className="text-sm text-text-muted">{uploadNote}</p> : null}
       {sendState === "unknown" ? (
-        <p className="text-sm text-muted-foreground">{t("sendUnknown")}</p>
+        <p className="text-sm text-text-muted">{t("sendUnknown")}</p>
       ) : null}
-      {fanState === "done" ? (
-        <p className="text-sm text-muted-foreground">{t("fanoutDone")}</p>
-      ) : null}
+      {fanState === "done" ? <p className="text-sm text-text-muted">{t("fanoutDone")}</p> : null}
       {fanState === "partial" ? (
-        <p className="text-sm text-muted-foreground">{t("fanoutPartial")}</p>
+        <p className="text-sm text-text-muted">{t("fanoutPartial")}</p>
       ) : null}
     </>
   );
@@ -768,7 +766,11 @@ export function ComputersPanel({
                 onChange={(event) => onPath(event.target.value)}
                 value={path}
               />
-              <Button variant="ghost" size="sm" className="rounded-control border px-2 py-1 text-xs">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="rounded-control border px-2 py-1 text-xs"
+              >
                 Read file
               </Button>
             </form>
