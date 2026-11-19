@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Elimină cheia"
   },
   "plugins": {
+    "privilegesWarningTitle": "Pluginurile rulează cu privilegii complete",
+    "privilegesWarningBody": "Un plugin rulează ca un proces Node.js obișnuit, cu același acces ca și OmniRoute: poate citi fișiere, rula programe și poate folosi rețeaua, indiferent de permisiunile pe care manifestul său le declară. Instalați numai pluginuri în care aveți încredere.",
     "title": "Pluginuri",
     "description": "Instalați și gestionați pluginuri pentru a extinde funcționalitatea OmniRoute",
     "loading": "Se încarcă pluginurile...",
