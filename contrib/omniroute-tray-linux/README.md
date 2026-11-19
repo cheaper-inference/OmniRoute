@@ -146,13 +146,13 @@ Update your OmniRoute checkout, then re-run `bash contrib/omniroute-tray-linux/i
 To remove OmniRoute Tray:
 
 ```bash
-./uninstall.sh
+bash contrib/omniroute-tray-linux/uninstall.sh
 ```
 
 Pass `--purge` to also delete configuration and log files:
 
 ```bash
-./uninstall.sh --purge
+bash contrib/omniroute-tray-linux/uninstall.sh --purge
 ```
 
 ---

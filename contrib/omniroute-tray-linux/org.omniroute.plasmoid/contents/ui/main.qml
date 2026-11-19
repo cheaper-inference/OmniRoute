@@ -12,7 +12,7 @@ PlasmoidItem {
     Plasmoid.backgroundHints: PlasmaCore.Types.DefaultBackground
 
     toolTipMainText: "OmniRoute"
-    toolTipSubText: isRunning ? ("Running · " + healthActiveProviders + " active providers · Port 20128") : "Stopped"
+    toolTipSubText: isRunning ? ("Running · " + healthActiveProviders + " active providers · " + serverPortLabel) : "Stopped"
 
     // Pinning / Keep Open support
     property bool pinned: false
@@ -209,8 +209,13 @@ PlasmoidItem {
             } else if (sourceName.indexOf("--cost") !== -1) {
                 applyCost(stdout);
             } else if (sourceName.indexOf("omniroute_snapshot") !== -1 || sourceName.indexOf("--snapshot") !== -1) {
-                root.isFetchingSnapshot = false;
-                snapshotTimeoutTimer.stop();
+                // Only the fetch itself releases its guard: the cached read can finish
+                // while a fetch is still writing "$SNAP.tmp", and clearing the guard then
+                // would let a second fetch write the same file.
+                if (sourceName.indexOf("--snapshot") !== -1) {
+                    root.isFetchingSnapshot = false;
+                    snapshotTimeoutTimer.stop();
+                }
                 applySnapshot(stdout);
             } else if (sourceName.indexOf("--stop") !== -1) {
                 root.isRunning = false;
@@ -403,6 +408,13 @@ PlasmoidItem {
     // TELEMETRY & NETWORK FETCHING
     // ========================================================================
     readonly property string baseUrl: plasmoid.configuration.serverUrl || "http://127.0.0.1:20128"
+    // host:port of the configured server, and the label the UI shows for it
+    // (":port" when the URL names one, the host otherwise).
+    readonly property string serverAddress: baseUrl.replace(/^[a-z][a-z0-9+.-]*:\/\//i, "").replace(/\/.*$/, "")
+    readonly property string serverPortLabel: {
+        var match = /:(\d+)$/.exec(serverAddress);
+        return match ? (":" + match[1]) : serverAddress;
+    }
 
     function fetchFastPing() {
         var xhr = new XMLHttpRequest();

@@ -3,6 +3,7 @@
 
 import json
 import os
+import socket
 import subprocess
 import sys
 import tempfile
@@ -19,50 +20,66 @@ import omniroute_tray as tray
 
 
 class TestCLI(unittest.TestCase):
-    """Test CLI flags and invocations."""
+    """Test CLI flags and invocations.
+
+    Every run gets a throwaway home (config, state, data and ~/.omniroute), an empty
+    PATH and a server URL on a port that is bound but never listening, so a test can
+    neither write the developer's files nor reach a server or a host command.
+    """
+
+    def setUp(self):
+        self._home = tempfile.TemporaryDirectory()
+        self.addCleanup(self._home.cleanup)
+        home = Path(self._home.name)
+        # Bound, not listening: connections are refused and nothing else can take it.
+        self._port = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self._port.bind(("127.0.0.1", 0))
+        self.addCleanup(self._port.close)
+        port = self._port.getsockname()[1]
+        config = home / ".config" / tray.APP_ID
+        config.mkdir(parents=True)
+        (config / "settings.json").write_text(json.dumps({"api_base": f"http://127.0.0.1:{port}"}))
+        empty_bin = home / "bin"
+        empty_bin.mkdir()
+        self.env = {
+            "HOME": str(home),
+            "XDG_CONFIG_HOME": str(home / ".config"),
+            "XDG_DATA_HOME": str(home / ".local" / "share"),
+            "XDG_STATE_HOME": str(home / ".local" / "state"),
+            "PATH": str(empty_bin),
+        }
+
+    def run_cli(self, *args, timeout):
+        return subprocess.run(
+            [sys.executable, str(REPO_ROOT / "omniroute_tray.py"), *args],
+            capture_output=True,
+            text=True,
+            timeout=timeout,
+            env=self.env,
+        )
 
     def test_help_flags(self):
         for flag in ["--help", "-h"]:
-            res = subprocess.run(
-                [sys.executable, str(REPO_ROOT / "omniroute_tray.py"), flag],
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
+            res = self.run_cli(flag, timeout=5)
             self.assertEqual(res.returncode, 0, f"Failed for flag {flag}")
             self.assertIn("OmniRoute Tray", res.stdout)
             self.assertIn("Options:", res.stdout)
 
     def test_version_flags(self):
         for flag in ["--version", "-v"]:
-            res = subprocess.run(
-                [sys.executable, str(REPO_ROOT / "omniroute_tray.py"), flag],
-                capture_output=True,
-                text=True,
-                timeout=5,
-            )
+            res = self.run_cli(flag, timeout=5)
             self.assertEqual(res.returncode, 0, f"Failed for flag {flag}")
             self.assertIn(f"v{tray.TRAY_VERSION}", res.stdout)
 
     def test_cost_range_flags(self):
         # --cost with --range should parse cleanly without unhandled argument error
-        res = subprocess.run(
-            [sys.executable, str(REPO_ROOT / "omniroute_tray.py"), "--cost", "--range", "7d"],
-            capture_output=True,
-            text=True,
-            timeout=15,
-        )
+        res = self.run_cli("--cost", "--range", "7d", timeout=15)
         # Should not throw unhandled exception or argparse crash
         self.assertNotIn("Traceback (most recent call last):", res.stderr)
 
     def test_snapshot_range_flags(self):
         # --snapshot with --range should parse cleanly and return valid JSON
-        res = subprocess.run(
-            [sys.executable, str(REPO_ROOT / "omniroute_tray.py"), "--snapshot", "--range", "30d"],
-            capture_output=True,
-            text=True,
-            timeout=20,
-        )
+        res = self.run_cli("--snapshot", "--range", "30d", timeout=20)
         self.assertEqual(res.returncode, 0)
         self.assertNotIn("Traceback", res.stderr)
         data = json.loads(res.stdout)
@@ -71,12 +88,7 @@ class TestCLI(unittest.TestCase):
         self.assertIn("tray_version", data)
 
     def test_check_tray_cli(self):
-        res = subprocess.run(
-            [sys.executable, str(REPO_ROOT / "omniroute_tray.py"), "--check-tray"],
-            capture_output=True,
-            text=True,
-            timeout=10,
-        )
+        res = self.run_cli("--check-tray", timeout=10)
         self.assertEqual(res.returncode, 0)
         self.assertNotIn("Traceback", res.stderr)
         data = json.loads(res.stdout)

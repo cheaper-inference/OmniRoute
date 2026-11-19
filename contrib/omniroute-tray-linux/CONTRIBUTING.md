@@ -31,12 +31,10 @@ python3 omniroute_tray.py                # GUI tray (needs PySide6)
 
 ### Working on the plasmoid
 
-The plasmoid is loaded from its installed location, so editing the checkout has no effect
-until you sync it and restart the shell:
+`install.sh` links the installed plasmoid to this checkout, so an edit here is what the
+widget loads; clear the QML cache and restart the shell to see it:
 
 ```bash
-rsync -a --delete org.omniroute.plasmoid/ \
-    ~/.local/share/plasma/plasmoids/org.omniroute.plasmoid/
 rm -rf ~/.cache/plasmashell/qmlcache ~/.cache/qmlcache
 systemctl --user restart plasma-plasmashell   # see note below
 ```

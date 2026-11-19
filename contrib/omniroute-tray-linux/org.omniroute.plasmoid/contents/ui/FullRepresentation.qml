@@ -82,7 +82,7 @@ Item {
                     if (plasmoidItem.serverActionState === "stopping") return "Stopping…";
                     if (plasmoidItem.serverActionState === "restarting") return "Restarting…";
                     return plasmoidItem.isRunning ?
-                          ("Running (:" + (plasmoidItem.serverPid ? plasmoidItem.serverPid : "20128") + ")") :
+                          ("Running (" + plasmoidItem.serverPortLabel + ")") :
                           "Stopped";
                 }
                 font.pixelSize: 11
@@ -100,7 +100,7 @@ Item {
                 width: 24
                 height: 22
                 radius: 4
-                color: logsArea.containsMouse ? Qt.rgba(255, 255, 255, 0.14) : "transparent"
+                color: logsArea.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.14) : "transparent"
                 Text {
                     anchors.centerIn: parent
                     text: "📄"
@@ -145,8 +145,8 @@ Item {
                     Layout.fillWidth: true
                     height: 24
                     radius: 5
-                    color: cardRoot.activeTab === modelData.id ? Qt.rgba(255, 255, 255, 0.12) : Qt.rgba(255, 255, 255, 0.03)
-                    border.color: cardRoot.activeTab === modelData.id ? Qt.rgba(255, 255, 255, 0.18) : "transparent"
+                    color: cardRoot.activeTab === modelData.id ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.12) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
+                    border.color: cardRoot.activeTab === modelData.id ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.18) : "transparent"
                     border.width: 1
 
                     RowLayout {
@@ -183,7 +183,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: Qt.rgba(255, 255, 255, 0.08)
+            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
         }
 
         // ====================================================================
@@ -202,8 +202,8 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 74
                 radius: 8
-                color: Qt.rgba(255, 255, 255, 0.04)
-                border.color: Qt.rgba(255, 255, 255, 0.08)
+                color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.04)
+                border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                 border.width: 1
 
                 ColumnLayout {
@@ -243,8 +243,8 @@ Item {
                         }
                         Text {
                             text: (plasmoidItem && plasmoidItem.isRunning && plasmoidItem.serverPid) ?
-                                  ("PID " + plasmoidItem.serverPid + " · Port 20128") :
-                                  "Port 20128 · Standby"
+                                  ("PID " + plasmoidItem.serverPid + " · " + plasmoidItem.serverPortLabel) :
+                                  (plasmoidItem ? plasmoidItem.serverPortLabel : ":20128") + " · Standby"
                             font.pixelSize: 11
                             font.family: "monospace"
                             color: "#fafafa"
@@ -272,8 +272,8 @@ Item {
                 visible: plasmoidItem ? (plasmoidItem.serverActionError !== "" && !plasmoidItem.isRunning) : false
                 implicitHeight: visible ? (errLayout.implicitHeight + 16) : 0
                 radius: 8
-                color: Qt.rgba(239, 68, 68, 0.15)
-                border.color: Qt.rgba(239, 68, 68, 0.45)
+                color: Qt.rgba(239 / 255, 68 / 255, 68 / 255, 0.15)
+                border.color: Qt.rgba(239 / 255, 68 / 255, 68 / 255, 0.45)
                 border.width: 1
 
                 RowLayout {
@@ -341,27 +341,27 @@ Item {
                     radius: 10
 
                     color: {
-                        if (btnRow.isBusy) return Qt.rgba(245, 158, 11, 0.12);
+                        if (btnRow.isBusy) return Qt.rgba(245 / 255, 158 / 255, 11 / 255, 0.12);
                         if (btnRow.isRunning) {
                             return mouseAreaStartStop.containsMouse ?
-                                   Qt.rgba(239, 68, 68, 0.16) :
-                                   Qt.rgba(239, 68, 68, 0.08);
+                                   Qt.rgba(239 / 255, 68 / 255, 68 / 255, 0.16) :
+                                   Qt.rgba(239 / 255, 68 / 255, 68 / 255, 0.08);
                         }
                         return mouseAreaStartStop.containsMouse ?
-                               Qt.rgba(16, 185, 129, 0.16) :
-                               Qt.rgba(16, 185, 129, 0.08);
+                               Qt.rgba(16 / 255, 185 / 255, 129 / 255, 0.16) :
+                               Qt.rgba(16 / 255, 185 / 255, 129 / 255, 0.08);
                     }
 
                     border.color: {
-                        if (btnRow.isBusy) return Qt.rgba(245, 158, 11, 0.45);
+                        if (btnRow.isBusy) return Qt.rgba(245 / 255, 158 / 255, 11 / 255, 0.45);
                         if (btnRow.isRunning) {
                             return mouseAreaStartStop.containsMouse ?
-                                   Qt.rgba(239, 68, 68, 0.50) :
-                                   Qt.rgba(239, 68, 68, 0.25);
+                                   Qt.rgba(239 / 255, 68 / 255, 68 / 255, 0.50) :
+                                   Qt.rgba(239 / 255, 68 / 255, 68 / 255, 0.25);
                         }
                         return mouseAreaStartStop.containsMouse ?
-                               Qt.rgba(16, 185, 129, 0.50) :
-                               Qt.rgba(16, 185, 129, 0.25);
+                               Qt.rgba(16 / 255, 185 / 255, 129 / 255, 0.50) :
+                               Qt.rgba(16 / 255, 185 / 255, 129 / 255, 0.25);
                     }
                     border.width: 1
 
@@ -421,20 +421,20 @@ Item {
 
                     color: {
                         if (plasmoidItem && plasmoidItem.serverActionState === "restarting") {
-                            return Qt.rgba(245, 158, 11, 0.12);
+                            return Qt.rgba(245 / 255, 158 / 255, 11 / 255, 0.12);
                         }
                         return restartArea.containsMouse ?
-                               Qt.rgba(255, 255, 255, 0.10) :
-                               Qt.rgba(255, 255, 255, 0.04);
+                               Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.10) :
+                               Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.04);
                     }
 
                     border.color: {
                         if (plasmoidItem && plasmoidItem.serverActionState === "restarting") {
-                            return Qt.rgba(245, 158, 11, 0.45);
+                            return Qt.rgba(245 / 255, 158 / 255, 11 / 255, 0.45);
                         }
                         return restartArea.containsMouse ?
-                               Qt.rgba(255, 255, 255, 0.22) :
-                               Qt.rgba(255, 255, 255, 0.10);
+                               Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.22) :
+                               Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.10);
                     }
                     border.width: 1
 
@@ -484,8 +484,8 @@ Item {
                 Layout.fillWidth: true
                 Layout.preferredHeight: 40
                 radius: 8
-                color: Qt.rgba(255, 255, 255, 0.04)
-                border.color: Qt.rgba(255, 255, 255, 0.08)
+                color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.04)
+                border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                 border.width: 1
 
                 RowLayout {
@@ -536,8 +536,8 @@ Item {
                     Layout.fillWidth: true
                     height: 32
                     radius: 6
-                    color: Qt.rgba(255, 255, 255, 0.03)
-                    border.color: Qt.rgba(255, 255, 255, 0.07)
+                    color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
+                    border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.07)
                     border.width: 1
 
                     MouseArea {
@@ -589,14 +589,14 @@ Item {
                             readonly property int inactiveCount: Math.max(0, configuredCount - activeCount)
 
                             color: {
-                                if (breakers > 0) return Qt.rgba(239, 68, 68, 0.15);
-                                if (inactiveCount > 0) return Qt.rgba(255, 255, 255, 0.06);
-                                return Qt.rgba(16, 185, 129, 0.12);
+                                if (breakers > 0) return Qt.rgba(239 / 255, 68 / 255, 68 / 255, 0.15);
+                                if (inactiveCount > 0) return Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06);
+                                return Qt.rgba(16 / 255, 185 / 255, 129 / 255, 0.12);
                             }
                             border.color: {
-                                if (breakers > 0) return Qt.rgba(239, 68, 68, 0.35);
-                                if (inactiveCount > 0) return Qt.rgba(255, 255, 255, 0.10);
-                                return Qt.rgba(16, 185, 129, 0.25);
+                                if (breakers > 0) return Qt.rgba(239 / 255, 68 / 255, 68 / 255, 0.35);
+                                if (inactiveCount > 0) return Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.10);
+                                return Qt.rgba(16 / 255, 185 / 255, 129 / 255, 0.25);
                             }
                             border.width: 1
                             implicitWidth: breakerTxt.implicitWidth + 12
@@ -650,8 +650,8 @@ Item {
                     implicitHeight: rateLimitsLayout.implicitHeight + 16
                     visible: (plasmoidItem ? plasmoidItem.usageAccountsModel.length : 0) > 0
                     radius: 8
-                    color: Qt.rgba(255, 255, 255, 0.04)
-                    border.color: Qt.rgba(255, 255, 255, 0.08)
+                    color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.04)
+                    border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                     border.width: 1
 
                     ColumnLayout {
@@ -674,7 +674,7 @@ Item {
                                 width: 54
                                 height: 20
                                 radius: 4
-                                color: Qt.rgba(255, 255, 255, 0.08)
+                                color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                                 Text {
                                     anchors.centerIn: parent
                                     text: (plasmoidItem && plasmoidItem.showUsed) ? "% used" : "% left"
@@ -714,7 +714,7 @@ Item {
                                         visible: modelData.provider && (modelData.provider.toLowerCase() !== modelData.account.toLowerCase())
                                         height: 16
                                         radius: 3
-                                        color: Qt.rgba(255, 255, 255, 0.08)
+                                        color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                                         implicitWidth: provBadge.implicitWidth + 8
                                         Layout.alignment: Qt.AlignVCenter
                                         Text {
@@ -766,7 +766,7 @@ Item {
                                             Layout.alignment: Qt.AlignVCenter
                                             height: 6
                                             radius: 3
-                                            color: Qt.rgba(255, 255, 255, 0.10)
+                                            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.10)
 
                                             Rectangle {
                                                 id: barFill
@@ -824,8 +824,8 @@ Item {
                     Layout.fillWidth: true
                     implicitHeight: costLayout.implicitHeight + 16
                     radius: 8
-                    color: Qt.rgba(255, 255, 255, 0.04)
-                    border.color: Qt.rgba(255, 255, 255, 0.08)
+                    color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.04)
+                    border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                     border.width: 1
 
                     ColumnLayout {
@@ -860,7 +860,7 @@ Item {
                                         height: 18
                                         radius: 3
                                         readonly property bool isSelected: plasmoidItem && plasmoidItem.costRange === modelData.val
-                                        color: isSelected ? Qt.rgba(56, 189, 248, 0.20) : Qt.rgba(255, 255, 255, 0.06)
+                                        color: isSelected ? Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.20) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06)
                                         border.color: isSelected ? "#38bdf8" : "transparent"
                                         border.width: 1
 
@@ -883,7 +883,7 @@ Item {
                                     height: 18
                                     radius: 3
                                     readonly property bool isSelected: plasmoidItem && plasmoidItem.showCostPct
-                                    color: isSelected ? Qt.rgba(56, 189, 248, 0.20) : Qt.rgba(255, 255, 255, 0.06)
+                                    color: isSelected ? Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.20) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06)
                                     border.color: isSelected ? "#38bdf8" : "transparent"
                                     border.width: 1
 
@@ -926,7 +926,7 @@ Item {
                                     anchors.bottom: parent.bottom
                                     radius: 3
                                     width: Math.max(0, parent.width * (modelData.costPct / 100))
-                                    color: Qt.rgba(56, 189, 248, 0.08)
+                                    color: Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.08)
                                     visible: modelData.costPct > 0
                                 }
 
@@ -985,8 +985,8 @@ Item {
                     Layout.fillWidth: true
                     implicitHeight: diagLayout.implicitHeight + 16
                     radius: 8
-                    color: Qt.rgba(255, 255, 255, 0.04)
-                    border.color: Qt.rgba(255, 255, 255, 0.08)
+                    color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.04)
+                    border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                     border.width: 1
 
                     ColumnLayout {
@@ -1010,7 +1010,7 @@ Item {
                                 width: 56
                                 height: 20
                                 radius: 4
-                                color: copyDiagArea.containsMouse ? Qt.rgba(255, 255, 255, 0.14) : Qt.rgba(255, 255, 255, 0.08)
+                                color: copyDiagArea.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.14) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
 
                                 Text {
                                     id: copyDiagTxt
@@ -1083,8 +1083,8 @@ Item {
                     Layout.fillWidth: true
                     implicitHeight: logsHeaderLayout.implicitHeight + 120 + 20
                     radius: 8
-                    color: Qt.rgba(255, 255, 255, 0.04)
-                    border.color: Qt.rgba(255, 255, 255, 0.08)
+                    color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.04)
+                    border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                     border.width: 1
 
                     ColumnLayout {
@@ -1119,8 +1119,8 @@ Item {
                             Layout.fillWidth: true
                             height: 110
                             radius: 6
-                            color: Qt.rgba(0, 0, 0, 0.40)
-                            border.color: Qt.rgba(255, 255, 255, 0.08)
+                            color: Qt.rgba(0 / 255, 0 / 255, 0 / 255, 0.40)
+                            border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                             border.width: 1
 
                             ListView {
@@ -1196,16 +1196,16 @@ Item {
                     readonly property bool isBusy: plasmoidItem && (plasmoidItem.isCheckingUpdate || plasmoidItem.isUpdatingTray || plasmoidItem.isCheckingTrayUpdate)
 
                     color: {
-                        if (hasUpdate) return Qt.rgba(56, 189, 248, 0.12);
-                        if (hasError) return Qt.rgba(239, 68, 68, 0.12);
-                        if (isBusy) return Qt.rgba(245, 158, 11, 0.12);
-                        return Qt.rgba(16, 185, 129, 0.12);
+                        if (hasUpdate) return Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.12);
+                        if (hasError) return Qt.rgba(239 / 255, 68 / 255, 68 / 255, 0.12);
+                        if (isBusy) return Qt.rgba(245 / 255, 158 / 255, 11 / 255, 0.12);
+                        return Qt.rgba(16 / 255, 185 / 255, 129 / 255, 0.12);
                     }
                     border.color: {
-                        if (hasUpdate) return Qt.rgba(56, 189, 248, 0.35);
-                        if (hasError) return Qt.rgba(239, 68, 68, 0.35);
-                        if (isBusy) return Qt.rgba(245, 158, 11, 0.35);
-                        return Qt.rgba(16, 185, 129, 0.35);
+                        if (hasUpdate) return Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.35);
+                        if (hasError) return Qt.rgba(239 / 255, 68 / 255, 68 / 255, 0.35);
+                        if (isBusy) return Qt.rgba(245 / 255, 158 / 255, 11 / 255, 0.35);
+                        return Qt.rgba(16 / 255, 185 / 255, 129 / 255, 0.35);
                     }
                     border.width: 1
                     implicitWidth: summaryRow.implicitWidth + 18
@@ -1256,8 +1256,8 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 radius: 8
-                color: Qt.rgba(255, 255, 255, 0.03)
-                border.color: Qt.rgba(255, 255, 255, 0.08)
+                color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
+                border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                 border.width: 1
                 implicitHeight: serverCol.implicitHeight + 20
 
@@ -1287,8 +1287,8 @@ Item {
                             height: 22
                             radius: 4
                             Layout.alignment: Qt.AlignVCenter
-                            color: serverGhMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.12) : "transparent"
-                            border.color: serverGhMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.20) : "transparent"
+                            color: serverGhMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.12) : "transparent"
+                            border.color: serverGhMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.20) : "transparent"
                             border.width: 1
 
                             Behavior on color { ColorAnimation { duration: 120 } }
@@ -1322,8 +1322,8 @@ Item {
                             height: 20
                             radius: 4
                             Layout.alignment: Qt.AlignVCenter
-                            color: Qt.rgba(255, 255, 255, 0.06)
-                            border.color: Qt.rgba(255, 255, 255, 0.08)
+                            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06)
+                            border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                             border.width: 1
                             implicitWidth: serverVerText.implicitWidth + 10
 
@@ -1392,8 +1392,8 @@ Item {
                             radius: 5
                             Layout.alignment: Qt.AlignVCenter
                             property bool isBusy: plasmoidItem && plasmoidItem.isCheckingUpdate
-                            color: checkServerMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.12) : Qt.rgba(255, 255, 255, 0.06)
-                            border.color: checkServerMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.22) : Qt.rgba(255, 255, 255, 0.10)
+                            color: checkServerMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.12) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06)
+                            border.color: checkServerMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.22) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.10)
                             border.width: 1
                             implicitWidth: checkServerLabel.implicitWidth + 18
 
@@ -1424,8 +1424,8 @@ Item {
                         Layout.fillWidth: true
                         height: 32
                         radius: 5
-                        color: Qt.rgba(56, 189, 248, 0.08)
-                        border.color: Qt.rgba(56, 189, 248, 0.25)
+                        color: Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.08)
+                        border.color: Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.25)
                         border.width: 1
                         visible: plasmoidItem && plasmoidItem.serverUpdateAvailable
 
@@ -1453,7 +1453,7 @@ Item {
                                 radius: 4
                                 Layout.alignment: Qt.AlignVCenter
                                 property bool copied: false
-                                color: serverCopyMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.18) : Qt.rgba(255, 255, 255, 0.08)
+                                color: serverCopyMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.18) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                                 implicitWidth: serverCopyLabel.implicitWidth + 12
 
                                 Text {
@@ -1495,8 +1495,8 @@ Item {
             Rectangle {
                 Layout.fillWidth: true
                 radius: 8
-                color: Qt.rgba(255, 255, 255, 0.03)
-                border.color: Qt.rgba(255, 255, 255, 0.08)
+                color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.03)
+                border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                 border.width: 1
                 implicitHeight: trayCol.implicitHeight + 20
 
@@ -1526,8 +1526,8 @@ Item {
                             height: 22
                             radius: 4
                             Layout.alignment: Qt.AlignVCenter
-                            color: trayGhMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.12) : "transparent"
-                            border.color: trayGhMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.20) : "transparent"
+                            color: trayGhMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.12) : "transparent"
+                            border.color: trayGhMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.20) : "transparent"
                             border.width: 1
 
                             Behavior on color { ColorAnimation { duration: 120 } }
@@ -1561,8 +1561,8 @@ Item {
                             height: 20
                             radius: 4
                             Layout.alignment: Qt.AlignVCenter
-                            color: Qt.rgba(255, 255, 255, 0.06)
-                            border.color: Qt.rgba(255, 255, 255, 0.08)
+                            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06)
+                            border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                             border.width: 1
                             implicitWidth: trayVerText.implicitWidth + 10
 
@@ -1647,15 +1647,15 @@ Item {
 
                             color: {
                                 if (hasUpdate) {
-                                    return checkTrayMouse.containsMouse ? Qt.rgba(56, 189, 248, 0.25) : Qt.rgba(56, 189, 248, 0.14);
+                                    return checkTrayMouse.containsMouse ? Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.25) : Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.14);
                                 }
-                                return checkTrayMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.12) : Qt.rgba(255, 255, 255, 0.06);
+                                return checkTrayMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.12) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06);
                             }
                             border.color: {
                                 if (hasUpdate) {
-                                    return checkTrayMouse.containsMouse ? Qt.rgba(56, 189, 248, 0.55) : Qt.rgba(56, 189, 248, 0.35);
+                                    return checkTrayMouse.containsMouse ? Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.55) : Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.35);
                                 }
-                                return checkTrayMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.22) : Qt.rgba(255, 255, 255, 0.10);
+                                return checkTrayMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.22) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.10);
                             }
                             border.width: 1
                             implicitWidth: checkTrayLabel.implicitWidth + 18
@@ -1705,8 +1705,8 @@ Item {
                         Layout.fillWidth: true
                         height: 32
                         radius: 5
-                        color: Qt.rgba(56, 189, 248, 0.08)
-                        border.color: Qt.rgba(56, 189, 248, 0.25)
+                        color: Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.08)
+                        border.color: Qt.rgba(56 / 255, 189 / 255, 248 / 255, 0.25)
                         border.width: 1
                         visible: plasmoidItem && plasmoidItem.trayUpdateAvailable
 
@@ -1734,7 +1734,7 @@ Item {
                                 radius: 4
                                 Layout.alignment: Qt.AlignVCenter
                                 property bool copied: false
-                                color: trayCopyMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.18) : Qt.rgba(255, 255, 255, 0.08)
+                                color: trayCopyMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.18) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                                 implicitWidth: trayCopyLabel.implicitWidth + 12
 
                                 Text {
@@ -1775,8 +1775,8 @@ Item {
                 Layout.fillWidth: true
                 height: 30
                 radius: 6
-                color: Qt.rgba(255, 255, 255, 0.02)
-                border.color: Qt.rgba(255, 255, 255, 0.06)
+                color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.02)
+                border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06)
                 border.width: 1
 
                 RowLayout {
@@ -1795,8 +1795,8 @@ Item {
                         id: cliCmdBox
                         height: 20
                         radius: 4
-                        color: Qt.rgba(255, 255, 255, 0.05)
-                        border.color: Qt.rgba(255, 255, 255, 0.08)
+                        color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.05)
+                        border.color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
                         border.width: 1
                         implicitWidth: cliCmdText.implicitWidth + 14
                         Layout.alignment: Qt.AlignVCenter
@@ -1818,8 +1818,8 @@ Item {
                         radius: 4
                         Layout.alignment: Qt.AlignVCenter
                         property bool copied: false
-                        color: cliCopyMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.14) : Qt.rgba(255, 255, 255, 0.06)
-                        border.color: cliCopyBtn.copied ? "#10b981" : (cliCopyMouse.containsMouse ? Qt.rgba(255, 255, 255, 0.22) : Qt.rgba(255, 255, 255, 0.10))
+                        color: cliCopyMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.14) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06)
+                        border.color: cliCopyBtn.copied ? "#10b981" : (cliCopyMouse.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.22) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.10))
                         border.width: 1
                         implicitWidth: cliCopyLabel.implicitWidth + 12
 
@@ -1869,7 +1869,7 @@ Item {
         Rectangle {
             Layout.fillWidth: true
             height: 1
-            color: Qt.rgba(255, 255, 255, 0.08)
+            color: Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.08)
         }
 
         RowLayout {
@@ -1883,8 +1883,8 @@ Item {
                 height: 22
                 width: 115
                 radius: 5
-                color: portMouseArea.containsMouse ? Qt.rgba(255, 255, 255, 0.14) : Qt.rgba(255, 255, 255, 0.06)
-                border.color: portMouseArea.containsMouse ? Qt.rgba(255, 255, 255, 0.20) : Qt.rgba(255, 255, 255, 0.10)
+                color: portMouseArea.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.14) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.06)
+                border.color: portMouseArea.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.20) : Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.10)
                 border.width: 1
 
                 RowLayout {
@@ -1896,7 +1896,7 @@ Item {
                         color: "#a1a1aa"
                     }
                     Text {
-                        text: ":20128"
+                        text: plasmoidItem ? plasmoidItem.serverPortLabel : ":20128"
                         font.pixelSize: 10
                         font.family: "monospace"
                         color: "#ffffff"
@@ -1908,7 +1908,7 @@ Item {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
                     hoverEnabled: true
-                    onClicked: Qt.openUrlExternally("http://127.0.0.1:20128")
+                    onClicked: Qt.openUrlExternally(plasmoidItem ? plasmoidItem.baseUrl : "http://127.0.0.1:20128")
                 }
                 QQC2.ToolTip.visible: portMouseArea.containsMouse
                 QQC2.ToolTip.text: "Open OmniRoute Dashboard"
@@ -1921,7 +1921,7 @@ Item {
                 width: 26
                 height: 26
                 radius: 5
-                color: refreshMouseArea.containsMouse ? Qt.rgba(255, 255, 255, 0.14) : "transparent"
+                color: refreshMouseArea.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.14) : "transparent"
                 Text {
                     anchors.centerIn: parent
                     text: "⟳"
@@ -1948,7 +1948,7 @@ Item {
                 width: 26
                 height: 26
                 radius: 5
-                color: githubArea.containsMouse ? Qt.rgba(255, 255, 255, 0.14) : "transparent"
+                color: githubArea.containsMouse ? Qt.rgba(255 / 255, 255 / 255, 255 / 255, 0.14) : "transparent"
                 Image {
                     anchors.centerIn: parent
                     width: 16
