@@ -186,3 +186,61 @@ test("streaming: usage row names the family-fallback model that served the reque
   })) as Array<{ model: string; success: number }> | null;
   assert.equal(rows?.[0]?.model, SERVED);
 });
+
+test("a guardrail-blocked reply from the family-fallback model is recorded under that model", async () => {
+  const { guardrailRegistry } = await import("../../src/lib/guardrails/registry.ts");
+  const { BaseGuardrail } = await import("../../src/lib/guardrails/base.ts");
+  class DenyAll extends BaseGuardrail {
+    constructor() {
+      super("deny-all-family-fallback", { priority: 1 });
+    }
+    async postCall() {
+      return { block: true, message: "blocked by test guardrail" };
+    }
+  }
+  await h.resetStorage();
+  await h.seedConnection("claude", { name: "family-fallback-block", apiKey: "k-family-block" });
+  const key = (await h.seedApiKey({})) as { id: string; key: string };
+  guardrailRegistry.register(new DenyAll());
+  try {
+    const sentModels: string[] = [];
+    globalThis.fetch = (async (_input: unknown, init: RequestInit = {}) => {
+      const sent = JSON.parse(String(init.body ?? "{}")) as { model?: string };
+      sentModels.push(String(sent.model));
+      if (sent.model === REQUESTED) {
+        return new Response(
+          JSON.stringify({
+            type: "error",
+            error: { type: "not_found_error", message: `model: ${REQUESTED}` },
+          }),
+          { status: 404, headers: { "Content-Type": "application/json" } }
+        );
+      }
+      return claudeReply(String(sent.model));
+    }) as typeof fetch;
+    const res = await h.handleChat(
+      h.buildRequest({
+        authKey: key.key,
+        body: {
+          model: `claude/${REQUESTED}`,
+          stream: false,
+          messages: [{ role: "user", content: `family block ${crypto.randomUUID()}` }],
+        },
+      })
+    );
+    await res.text();
+    assert.equal(res.status, 400);
+    assert.deepEqual(sentModels, [REQUESTED, SERVED], "the sibling must have served the request");
+    const rows = (await h.waitFor(() => {
+      const found = getDbInstance()
+        .prepare("SELECT model, success FROM usage_history WHERE api_key_id = ?")
+        .all(key.id) as Array<{ model: string; success: number }>;
+      return found.length > 0 ? found : null;
+    })) as Array<{ model: string; success: number }> | null;
+    assert.equal(rows?.length, 1, JSON.stringify(rows));
+    assert.equal(rows?.[0].success, 0);
+    assert.equal(rows?.[0].model, SERVED);
+  } finally {
+    guardrailRegistry.clear();
+  }
+});

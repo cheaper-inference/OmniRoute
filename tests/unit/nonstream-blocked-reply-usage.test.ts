@@ -104,6 +104,9 @@ test("a reply that fails the malformed-reply gate is one failure row, counts tow
   assert.equal(rows.length, 1, JSON.stringify(rows));
   assert.equal(rows[0].success, 0);
   assert.notEqual(rows[0].status, "200");
+  // The upstream billed the reply: the one failure row keeps its tokens, as the guardrail row does.
+  assert.equal(rows[0].tokens_input, 4);
+  assert.equal(rows[0].tokens_output, 2);
   const counters = getKeyQuotaCounters(key.id);
   assert.equal(counters.rpmUsed, 1);
   assert.equal(counters.tpmUsed, 6);
