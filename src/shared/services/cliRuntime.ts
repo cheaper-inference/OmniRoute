@@ -1230,6 +1230,30 @@ const listAlternateCandidates = async (
   return located.ok ? parseWhereCandidates(located.stdout, normalizeMsys2Path) : [];
 };
 
+// #20452: a stale shim must not hide a working binary later on PATH.
+const healthcheckWithFallthrough = async (
+  command: string | undefined,
+  commandPath: string | null | undefined,
+  env: Record<string, string | undefined>,
+  healthTimeout: number
+) => {
+  let healthcheck = await checkRunnable(commandPath || command || "", env, healthTimeout);
+  let resolvedPath = commandPath;
+  if (!healthcheck.runnable && command) {
+    const alt = await findRunnableAlternate(
+      await listAlternateCandidates(command, env),
+      commandPath ?? null,
+      isSafePath,
+      (candidate) => checkRunnable(candidate, env, healthTimeout)
+    );
+    if (alt) {
+      healthcheck = alt.healthcheck as typeof healthcheck;
+      resolvedPath = alt.commandPath;
+    }
+  }
+  return { healthcheck, resolvedPath };
+};
+
 export const getCliRuntimeStatus = async (toolId: string) => {
   toolId = normalizeCliToolId(toolId);
   const tool = CLI_TOOLS[toolId];
@@ -1292,26 +1316,12 @@ export const getCliRuntimeStatus = async (toolId: string) => {
     };
   }
 
-  const healthTimeout = Number(tool.healthcheckTimeoutMs || 4000);
-  let healthcheck = await checkRunnable(
-    located.commandPath || command || "", // located + executable ⇒ commandPath set
+  const { healthcheck, resolvedPath } = await healthcheckWithFallthrough(
+    command,
+    located.commandPath,
     env,
-    healthTimeout
+    Number(tool.healthcheckTimeoutMs || 4000)
   );
-  let resolvedPath = located.commandPath;
-  if (!healthcheck.runnable && command) {
-    // #20452: a stale shim must not hide a working binary later on PATH.
-    const alt = await findRunnableAlternate(
-      await listAlternateCandidates(command, env),
-      located.commandPath,
-      isSafePath,
-      (candidate) => checkRunnable(candidate, env, healthTimeout)
-    );
-    if (alt) {
-      healthcheck = alt.healthcheck as typeof healthcheck;
-      resolvedPath = alt.commandPath;
-    }
-  }
   return {
     installed: true,
     runnable: healthcheck.runnable,
