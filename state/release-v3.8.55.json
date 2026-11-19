@@ -2,39 +2,7 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": {
-    "batchId": "b3",
-    "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b3-ed3affcf3805",
-    "candidateSha": "ed3affcf38053cd514ca57f521e282dd8d9aba7f",
-    "baseSha": "3de17c8a2a32b104319166a3679d3b5c60911317",
-    "treeSha": "63a1fc5a42561d7954653b122eb00311770334dd",
-    "prs": [
-      {
-        "n": 20632,
-        "head": "86fe1955c24483918ecc1c70be041bd05755e6b4",
-        "title": "fix(ci): count only real workflow jobs in the omni-queue verdict",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-19T15:36:39Z"
-      }
-    ],
-    "stage": "testing",
-    "startedAt": "2026-11-19T16:42:45.319Z",
-    "attempts": 0,
-    "bisect": null,
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b3-ed3affcf3805",
-      "requestedAt": "2026-11-19T17:14:51.764Z",
-      "afterMs": 1795108465000,
-      "runIds": [
-        44569184538
-      ],
-      "jobs": [
-        "Gate / CI",
-        "Unit Tests (4/8)"
-      ]
-    }
-  },
+  "inFlight": null,
   "baseChecks": [
     {
       "baseSha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
@@ -52,7 +20,8 @@
   ],
   "shadow": {
     "processed": {
-      "20630": "393a8a45d89ba2ceb6d8d8331350193173ec0a65"
+      "20630": "393a8a45d89ba2ceb6d8d8331350193173ec0a65",
+      "20632": "86fe1955c24483918ecc1c70be041bd05755e6b4"
     }
   },
   "counters": {
@@ -247,7 +216,29 @@
       "sha": "ed3affcf38053cd514ca57f521e282dd8d9aba7f",
       "detail": "re-running the failed jobs of b3 once (Gate / CI, Unit Tests (4/8)) before a base check",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44575023688"
+    },
+    {
+      "at": "2026-11-19T18:14:48.169Z",
+      "type": "checks-green",
+      "batchId": "b3",
+      "prs": [
+        20632
+      ],
+      "sha": "ed3affcf38053cd514ca57f521e282dd8d9aba7f",
+      "detail": "green after re-running Gate / CI, Unit Tests (4/8) (flaky)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44585639763"
+    },
+    {
+      "at": "2026-11-19T18:14:59.376Z",
+      "type": "would-land",
+      "batchId": "b3",
+      "prs": [
+        20632
+      ],
+      "sha": "ed3affcf38053cd514ca57f521e282dd8d9aba7f",
+      "detail": "shadow mode: would merge-ff onto 3de17c8a2a32",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44585639763"
     }
   ],
-  "updatedAt": "2026-11-19T17:15:07.271Z"
+  "updatedAt": "2026-11-19T18:15:18.258Z"
 }
