@@ -1,0 +1,1 @@
+- **ci(quality):** PR verification now fails closed when a base-dependent detector is declared but not invoked ([#20614](https://github.com/cheaper-inference/OmniRoute/pull/20614)) — thanks @maxmad64bis
