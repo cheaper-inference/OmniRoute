@@ -79,3 +79,29 @@ test("a restore that fails releases the gate", async () => {
   }
   assert.doesNotThrow(() => core.getDbInstance());
 });
+
+test("two restores at once run one after the other, each with its own staged copy", async () => {
+  const db = core.getDbInstance();
+  const snapshot = (marker: string, suffix: string) => {
+    core
+      .getDbInstance()
+      .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
+      .run("restore-swap", "marker", marker);
+    const id = `db_${new Date().toISOString().replace(/[:.]/g, "-")}_${suffix}.sqlite`;
+    const target = path.join(core.DB_BACKUPS_DIR as string, id);
+    core.getDbInstance().exec(`VACUUM INTO '${target.replace(/'/g, "''")}'`);
+    return id;
+  };
+  assert.ok(db);
+  const first = snapshot("first", "concurrent-a");
+  const second = snapshot("second", "concurrent-b");
+
+  const [a, b] = await Promise.all([
+    backupDb.restoreDbBackup(first),
+    backupDb.restoreDbBackup(second),
+  ]);
+  assert.equal(a.backupId, first);
+  assert.equal(b.backupId, second);
+  assert.equal(readMarker(), "second", "the later restore lands last");
+  assert.doesNotThrow(() => core.getDbInstance());
+});

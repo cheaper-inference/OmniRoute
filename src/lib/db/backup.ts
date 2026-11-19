@@ -518,7 +518,17 @@ export async function listDbBackups() {
 
 // ──────────────── Restore Backup ────────────────
 
-export async function restoreDbBackup(backupId: string) {
+// One restore at a time per process: the staged file path and the swap gate have one owner, so a
+// second restore cannot overwrite the first one's staged copy or clear its gate mid-swap.
+let restoreQueue: Promise<unknown> = Promise.resolve();
+
+export function restoreDbBackup(backupId: string): ReturnType<typeof restoreDbBackupExclusive> {
+  const run = restoreQueue.then(() => restoreDbBackupExclusive(backupId));
+  restoreQueue = run.catch(() => undefined);
+  return run;
+}
+
+async function restoreDbBackupExclusive(backupId: string) {
   const backupDir = getBackupDir();
 
   // Validate format: must be db_<timestamp>_<reason>.sqlite, no path separators
