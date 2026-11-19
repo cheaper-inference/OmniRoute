@@ -129,13 +129,13 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
     >
       <div className="mb-2 flex items-center gap-2">
         <span aria-hidden className="inline-block h-2 w-2 animate-pulse rounded-full bg-warning" />
-        <h3 className="text-sm font-medium text-warning">
+        <h3 className="text-sm text-warning">
           {providerText(t, "coolingConnectionsTitle", "Currently cooling ({count})", {
             count: cooling.length,
           })}
         </h3>
       </div>
-      <p className="mb-3 text-xs text-muted-foreground">
+      <p className="mb-3 text-xs text-text-muted">
         {providerText(
           t,
           "coolingConnectionsDescription",
@@ -163,7 +163,7 @@ export default function CoolingConnectionsPanel(props: CoolingConnectionsPanelPr
                 <span className="font-medium">{label}</span>
                 {recorded ? (
                   <span
-                    className="mt-0.5 block truncate text-xs text-muted-foreground"
+                    className="mt-0.5 block truncate text-xs text-text-muted"
                     data-testid="cooling-last-error"
                     title={recorded.title}
                   >

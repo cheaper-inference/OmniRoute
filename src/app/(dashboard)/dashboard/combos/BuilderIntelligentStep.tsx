@@ -235,7 +235,7 @@ export default function BuilderIntelligentStep({
       <Card.Section>
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h3 className="text-sm font-semibold text-text-main">
+            <h3 className="text-sm text-text-main">
               {getI18nOrFallback(t, "builderIntelligentTitle", "Intelligent Routing Configuration")}
             </h3>
             <p className="text-xs text-text-muted mt-1">
