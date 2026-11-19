@@ -46,23 +46,24 @@ haiathiriwi kamwe nayo.
 
 ## Usanidi
 
-1. Fungua **Dashibodi → Hali ya Chaos** (`/dashboard/chaos`).
-2. **Iwashe** — Hali ya Chaos hutolewa ikiwa **imezimwa kwa chaguo-msingi** (`enabled: false` katika
+1. Fungua **Dashibodi → Chaos Mode** (`/dashboard/chaos`).
+2. Iwashe — Chaos Mode huja ikiwa **imezimwa kwa chaguo-msingi** (`enabled: false` katika
    `src/lib/chaos/chaosConfig.ts`). Ikiwa imezimwa, `POST /api/chaos/run` hujibu
-   `400 — "Hali ya Chaos haijawashwa. Iwashe katika Dashibodi → Hali ya Chaos."`.
-3. Chagua washiriki na chaguo-msingi (huhifadhiwa kwa kila instansi kupitia hifadhi ya mipangilio):
+   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Chagua washiriki na mipangilio chaguo-msingi (huhifadhiwa kwa kila instance kupitia hifadhi ya mipangilio):
 
-   | Sehemu              | Maana                                                                       | Chaguo-msingi / vikomo                                   |
-   | ------------------- | --------------------------------------------------------------------------- | -------------------------------------------------------- |
-   | `enabled`           | Swichi kuu                                                                  | `false`                                                  |
-   | `defaultMode`       | `parallel` au `collaborative` (tazama hapa chini)                           | `parallel`                                               |
-   | `providerOverrides` | Ushiriki kwa kila mtoa huduma (`providerId`, `modelId` ya hiari, `enabled`) | tupu = kila mtoa huduma anayetumika, kiwango cha juu 200 |
-   | `systemPrompt`      | Ubatilishaji wa kidokezo cha mfumo cha Chaos kilichojengewa ndani           | hiari, kiwango cha juu herufi 10 000                     |
-   | `timeoutMs`         | Muda wa juu zaidi kwa kila mwito wa modeli                                  | `120000` (5 000–600 000)                                 |
-   | `maxTokens`         | `max_tokens` kwa kila mwito wa modeli                                       | `4096` (256–128 000)                                     |
+   | Sehemu              | Maana                                                                      | Chaguo-msingi / mipaka                         |
+   | ------------------- | -------------------------------------------------------------------------- | ---------------------------------------------- |
+   | `enabled`           | Swichi kuu                                                                 | `false`                                        |
+   | `defaultMode`       | `parallel` au `collaborative` (tazama hapa chini)                          | `parallel`                                     |
+   | `providerOverrides` | Ushiriki wa kila mtoa huduma (`providerId`, `modelId` ya hiari, `enabled`) | tupu = kila mtoa huduma aliye hai, isizidi 200 |
+   | `systemPrompt`      | Maelekezo mbadala ya mfumo wa Chaos yaliyojengewa ndani                    | ya hiari, isizidi herufi 10 000                |
+   | `timeoutMs`         | Muda wa juu kwa kila ombi la modeli                                        | `120000` (5 000–600 000)                       |
+   | `maxTokens`         | `max_tokens` kwa kila ombi la modeli                                       | `4096` (256–128 000)                           |
 
-4. Tekeleza **jaribio kutoka kwenye ukurasa wenyewe** — paneli ya matokeo huonyesha jibu,
-   hali na muda wa kila mtoa huduma.
+4. Mpe kila mtoa huduma anayeshiriki **modeli**. Modeli ya mtoa huduma ni `modelId` ya
+   override yake iliyowashwa kwenye ukurasa wa Chaos Mode (hiyo ndiyo hutumika kwanza), la sivyo ni **modeli chaguo-msingi** ya muunganisho wake. Kitambulisho cha mtoa huduma hakitumiki kamwe kama jina la modeli. Mtoa huduma asiye na mojawapo ya hizo **haitaitwa**: huonekana katika matokeo ikiwa na `status: "error"` pamoja na ujumbe _"No model set for this provider. Set a model for it on the Chaos Mode page or a default model on the connection."_ na `modelId` tupu, huku watoa huduma wengine wakiendelea kufanya kazi kama kawaida. Ikiwa hakuna mtoa huduma aliyechaguliwa aliye na modeli, utekelezaji hushindikana kabla ya ombi lolote la upstream kwa ujumbe _"No provider has a model set. …"_ (HTTP 500 kwenye endpoints zote mbili).
+5. Fanya **jaribio kutoka kwenye ukurasa wenyewe** — paneli ya matokeo huonyesha jibu, hali na muda wa kila mtoa huduma.
 
 ## Hali za utekelezaji
 
@@ -74,15 +75,15 @@ haiathiriwi kamwe nayo.
 
 ## API
 
-### `POST /api/chaos/run` — kipindi cha dashibodi
+### `POST /api/chaos/run` — kipindi cha dashboard
 
-Huthibitishwa kwa kuki (kipindi cha usimamizi — tazama
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); hutumiwa na ukurasa wa dashibodi.
+Imethibitishwa kwa cookie (kikao cha usimamizi — tazama
+[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); hutumiwa na ukurasa wa dashboard.
 
 ```jsonc
 // mwili
 {
-  "task": "Linganisha mbinu za X", // inahitajika
+  "task": "Compare approaches to X", // inahitajika
   "providers": ["glm", "kimi"], // kichujio cha hiari
   "mode": "parallel", // hiari — hubatilisha defaultMode
   "systemPrompt": "…", // ubatilishaji wa hiari
@@ -92,18 +93,18 @@ Huthibitishwa kwa kuki (kipindi cha usimamizi — tazama
 
 ### `POST /api/skills/collect/chaos` — ufunguo wa API
 
-Toleo la tokeni ya Bearer kwa wapigaji wa nje. Ufunguo lazima uwe na **ruhusa ya Hali ya Chaos**
-(`chaosModeEnabled`), ambayo **imezimwa kwa chaguo-msingi** — iwashe kwa kila ufunguo katika
-**Dashibodi → Kidhibiti cha API → hariri ufunguo → ruhusa → Hali ya Chaos**. Mwili ni sawa na ulio hapo juu.
+Toleo la tokeni ya Bearer kwa wapigaji wa nje. Ufunguo lazima uwe na **ruhusa ya Chaos Mode**
+(`chaosModeEnabled`), ambayo **imezimwa kwa chaguo-msingi** — iwashe kwa kila ufunguo kupitia
+**Dashboard → API Manager → edit key → permissions → Chaos Mode**. Mwili ni sawa na hapo juu.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -H "Authorization: Bearer $OMNIROUTE_API_KEY" \
   -H "Content-Type: application/json" \
-  -d '{"task":"Linganisha mbinu za X","mode":"parallel"}'
+  -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Njia zote mbili hurudisha muundo uleule:
+Njia zote mbili za mwisho hurejesha muundo sawa:
 
 ```jsonc
 {
@@ -122,15 +123,16 @@ Njia zote mbili hurudisha muundo uleule:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // hali ya collaborative pekee
+  "summary": "…", // hali ya ushirikiano pekee
 }
 ```
 
-## Utatuzi wa matatizo
+## Utatuzi wa Matatizo
 
 - **`400 Chaos Mode is not enabled`** — hatua ya 2 hapo juu: swichi ya kimataifa imezimwa.
-- **Ufunguo wa API unakataliwa kwenye `/api/skills/collect/chaos`** — ufunguo hauna ruhusa ya
-  `chaosModeEnabled` ya ufunguo huo (imezimwa kwa chaguo-msingi; huu ni mpangilio, si hitilafu).
-- **Mtoa huduma uliyemtarajia hayupo katika matokeo** — angalia `providerOverrides` kwenye
-  ukurasa wa Hali ya Chaos (ubatilishaji uliozimwa humwondoa) na kama muunganisho wa mtoa huduma
-  unatumika.
+- **Ufunguo wa API unakataliwa kwenye `/api/skills/collect/chaos`** — ufunguo hauna ruhusa ya kila ufunguo
+  ya `chaosModeEnabled` (imezimwa kwa chaguo-msingi; hii ni mipangilio, si hitilafu).
+- **Mtoa huduma anaonyesha `No model set for this provider`** — weka modeli yake kwenye ukurasa wa Chaos Mode
+  au modeli chaguo-msingi kwenye muunganisho wake (tazama Usanidi, hatua ya 4).
+- **Mtoa huduma uliyemtarajia haupo kwenye matokeo** — angalia `providerOverrides` kwenye
+  ukurasa wa Chaos Mode (override iliyozimwa huiondoa) na ikiwa muunganisho wa mtoa huduma unatumika.

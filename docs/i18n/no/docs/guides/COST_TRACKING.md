@@ -64,7 +64,7 @@ For samme provider/model overskriver verdier fra høyere prioriterte lag samsvar
 | `MODELS_DEV_SYNC_ENABLED`  | _(uaktivert)_ | Unset følger innstillingsbryteren; `1/true/on/yes` tvinger på og `0/false/off/no` tvinger av (selv om Innstillinger aktiverer det). |
 | `MODELS_DEV_SYNC_INTERVAL` | `86400`       | Standard models.dev synkroniseringsintervall i sekunder (daglig).                                                                   |
 
-`PRICING_SYNC_SOURCES` gjør det** ikke** aktivere models.dev; den kontrollerer bare LiteLLM synkroniseringen. Sletting av en brukeroverstyring sletter ikke noen av de synkroniserte navneområdene. neste tilgjengelige prislag trer i kraft. For en upriset modell, sjekk både synkroniseringsinnstillinger og `sourceMap` før du legger til en manuell overstyring.
+`PRICING_SYNC_SOURCES` gjør det** ikke** aktivere models.dev; den kontrollerer bare LiteLLM synkroniseringen. Sletting av en brukeroverstyring sletter ikke noen av de synkroniserte navneområdene; neste tilgjengelige prislag trer i kraft. For en upriset modell, sjekk både synkroniseringsinnstillinger og `sourceMap` før du legger til en manuell overstyring.
 
 ### Kostnadsformelen
 
@@ -82,15 +82,37 @@ Modellnavn normaliseres først (leverandørbaneprefikser som `openai/` eller `ac
 
 ### Hvordan forbruk registreres
 
-- Kostnaden per forespørsel beregnes etter responsen og registreres brann-og-glem, slik at den aldri legger ventetid til klienten. Forbruk av delt kvote er planlagt på neste event-loop-merke via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- API-nøkkelforbruk bufres og tømmes i batcher av [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standard 60-talls skylleintervall, 1000 inngangsbuffer). Kan justeres via:
+- Kostnaden per forespørsel beregnes ved fullføring av forespørselen. Forbruk av delt kvote er planlagt på neste event-loop-merke via [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- API-nøkkelforbruk bufres og tømmes i batcher av [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (standard 60-talls flush-intervall, 1000-entry buffer). Kan justeres via:
 
   | Env var                             | Misligholde | Hensikt                             |
   | ----------------------------------- | ----------- | ----------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`     | Skylleintervall i millisekunder.    |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`      | Maks bufrede oppføringer før flush. |
 
-Dashbordets kostnadstall er** ikke** leses fra et lagret per rad dollarbeløp — de beregnes på nytt fra tokenantall og gjeldende pristabell hver gang analyseendepunktet kjører. Det betyr at korrigering av en feil pris (og re-synkronisering) oppdaterer historiske kostnadsestimater med tilbakevirkende kraft.
+Kostnader foretrekker en eksakt leverandørrapportert belastning (`provider_cost_usd`), deretter et øyeblikksbilde av forespørselen med katalogpriset (`calculated_cost_usd`), og deretter token-reprising fra gjeldende katalog. Lagrede kostnader belastes ikke igjen gjennom token-tellingene. Eldre token-rader endres fortsatt når katalogprisen deres endres.
+
+### OCR og embeddings
+
+- Vellykkede `/v1/ocr` -forespørsler bruker oppstrøms `usage_info.pages_processed`, ikke det forespurte sideområdet eller antallet returnerte sideobjekter. Anslaget er sider × `ocr_cost_per_page` (absolutt USD/page,** ikke** USD/million).
+- Forespørsler med dokument- eller avgrensningsmerknader krever en egen `ocr_cost_per_annotated_page` tariff. Uten det forblir kostnaden ukjent; den ordinære OCR tariffen erstattes ikke stille.
+- LiteLLM sync kartlegger oppstrøms `annotation_cost_per_page` feltet til `ocr_cost_per_annotated_page`, og beholder den absolutte USD/page verdien og kun merknader, inkludert eksplisitt null. Et levert kanonisk felt har forrang; ugyldige aliasverdier ignoreres. Overstyring av brukerpriser beholder sin normale prioritet. Se [LiteLLMOCR -prisnøkler](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- OCR -bruk lagrer sideantall, enhetspris, beregnet USD kostnad, API -nøkkel og valgt tilkobling. Sider er aldri representert som tokens. Anropslogger inneholder faktureringsmetadata, ikke dokument URLs, PDF byte eller ekstrahert tekst.
+- Vellykkede `/v1/embeddings` -forespørsler registrerer én bruksrad per fysisk batch, inkludert separate batcher fullført i samme millisekund. Leverandørrapporterte belastninger har forrang over tokenestimater; combo wrappers legger ikke til en kostnad.
+- Brukshistorikk, kostnadsanalyse, provider/account vinduer, API-nøkkelforbruksgrenser, forespørselskostnadsbok og daglig brukssammendrag inkluderer disse kostnadene. No-log-nøkler beholder numerisk regnskap uten å beholde kildetekst.
+- Manglende bruk eller tariffer er** ukjent** , ikke gratis: svarkostnadsoverskriften er utelatt, og den eksisterende policyen for upriset bruk gjelder begrensede API nøkler. Eksplisitt konfigurerte nullsatser forblir gyldig nullkostnadsbruk.
+
+Dette er kun foreløpig regnskap. Gamle OCR/embedding -anrop som aldri skrev brukshistorie kan ikke rekonstrueres fra denne migrasjonen. Kataloganslag er USD -anslag, ikke en faktura, og inkluderer ikke valutaomregning, avgifter eller rabatter.
+
+### Tale og bilder
+
+- Vellykkede forsøk på `/v1/audio/transcriptions`, `/v1/audio/speech` og bildegenerering deler numerisk regnskap. Direkte og kombinasjonsanrop har anroperens API -tast og den valgte forbindelsen; en combo wrapper legger aldri til en ekstra debet.
+- Leverandørrapportert USD vinner over et katalogestimat, inkludert en eksplisitt nullavgift. OpenRouterJSON `usage.cost` er normalisert til `cost_usd`. Ellers bruker målte tokens tokenpriser, transkripsjonssekunder bruker priser per sekund, taleinndata bruker Unicode-tegnteller, og flatprisbilder bruker tallet som faktisk returneres, ikke den forespurte `n`.
+- Binær OpenRouter TTS har ingen JSON -brukstekst. Etter at lyden er fullført eller den som ringer kansellerer, spør OmniRoute sin generasjon ID på** samme** konfigurert OpenRouter opprinnelse. En EU forespørsel faller aldri tilbake til den globale opprinnelsen. Dette er et avgrenset, skrivebeskyttet oppslag; syntese prøves ikke på nytt for regnskap. Faktureringsposter kan vises etter at lyden er ferdig: oppslagsforsøk kjører i bakgrunnen i opptil 52 sekunder, inkludert nettverksfrister.
+- Under det oppslaget har lydresponsen `X-OmniRoute-Cost-Status: pending` og ingen responskostnadsoverskrift. Den endelige belastningen vises i brukshistorikk, analyser og hovedboken etter avstemming. Hvis metadata ikke er tilgjengelig, brukes et konfigurert tarifføyeblikksbilde; ellers forblir kostnaden ukjent.
+- Sekunder, tegn og bildeantall har separate faktureringsenhetsfelt, aldri falske tokentellinger. Regnskap beholder kun numerisk bruk, ikke taletekst, transkripsjoner eller bildebytes. Eksisterende fritak for uprisede bilder er uendret: en virkelig manglende bildetariff låser ikke nylig en begrenset nøkkel, og svaret utelater kostnadsoverskriften i stedet for å erklære samtalen gratis. En svikt i prissettingsbutikken beholder fortsatt bruksbevis for feillukket håndhevelse.
+
+Ingen historisk speech/image ladning er oppfunnet eller gjenfylt. Leverandørfakturering forblir referansen for fakturaer og for samtaler hvis kostnad ikke ble rapportert.
 
 ---
 
