@@ -14,6 +14,7 @@ import {
   normalizeCodexServiceTier,
   type CodexServiceTier,
 } from "@/lib/providers/requestDefaults";
+import { scopeCodexServiceTierDefault } from "../../config/codexServiceTierModels.ts";
 
 /** The effective service tier carried through a request: "standard" or a normalized Codex tier. */
 export type EffectiveServiceTier = "standard" | CodexServiceTier;
@@ -38,7 +39,12 @@ export function resolveEffectiveServiceTier(
     const normalizedServiceTier = normalizeCodexServiceTier(rawServiceTier);
     if (normalizedServiceTier) return normalizedServiceTier;
   }
-  return getCodexRequestDefaults(providerSpecificData).serviceTier ?? "standard";
+  return (
+    scopeCodexServiceTierDefault(
+      getCodexRequestDefaults(providerSpecificData).serviceTier,
+      requestRecord.model
+    ) ?? "standard"
+  );
 }
 
 /**
