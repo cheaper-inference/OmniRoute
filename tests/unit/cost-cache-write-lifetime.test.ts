@@ -60,3 +60,18 @@ test("inconsistent tier counters fall back to the single write price", () => {
   };
   close(computeCostFromPricing(PRICING, usage, claude), 12.5);
 });
+
+test("a provider-prefixed Claude model id still gets the native 2x 1h write price", () => {
+  const usage = {
+    input: 1_000_000,
+    cache_creation_input_tokens: 1_000_000,
+    cache_creation: { ephemeral_5m_input_tokens: 0, ephemeral_1h_input_tokens: 1_000_000 },
+  };
+  close(
+    computeCostFromPricing(PRICING, usage, {
+      provider: "anthropic",
+      model: "anthropic/claude-sonnet-4-5",
+    }),
+    20
+  );
+});

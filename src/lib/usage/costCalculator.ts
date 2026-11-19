@@ -252,7 +252,7 @@ function oneHourCacheWritePremium(
   const explicit = rates.cache_creation_1h;
   const claude =
     ["anthropic", "claude", "cc"].includes(normalizeServiceTier(options.provider)) &&
-    String(options.model ?? "").startsWith("claude-");
+    normalizeModelName(String(options.model ?? "")).startsWith("claude-");
   const price =
     typeof explicit === "number" && Number.isFinite(explicit) && explicit >= 0
       ? explicit
