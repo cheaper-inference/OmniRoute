@@ -15,6 +15,7 @@ import {
   resolveAgyTransport,
   tuiConversationKey,
   tuiJsonBody,
+  tuiModelVersion,
   tuiSseBody,
   tuiWorkspace,
 } from "../../open-sse/executors/agyCliTuiExecutor.ts";
@@ -27,6 +28,32 @@ function temporaryDir(): string {
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-tui-exec-test-"));
   dirs.push(dir);
   return dir;
+}
+
+/** An executable stand-in for agy. Nothing runs it: discovery only looks. */
+function fakeAgy(dir: string, name: string): string {
+  const file = path.join(dir, name);
+  fs.writeFileSync(file, "#!/bin/sh\n", { encoding: "utf8", mode: 0o755 });
+  return file;
+}
+
+/**
+ * Run `body` with discovery starved of every agy on the machine, so a host that
+ * has one installed (and `script`) never spawns it, never edits the operator's
+ * hook file, and answers with the same no-agy error as any other host.
+ */
+async function withoutAgy<T>(body: () => Promise<T>): Promise<T> {
+  const saved = { PATH: process.env.PATH, AGY_PATH: process.env.AGY_PATH };
+  process.env.PATH = temporaryDir();
+  process.env.AGY_PATH = path.join(temporaryDir(), "no-agy-here");
+  try {
+    return await body();
+  } finally {
+    for (const [key, value] of Object.entries(saved)) {
+      if (value === undefined) delete process.env[key];
+      else process.env[key] = value;
+    }
+  }
 }
 
 after(() => {
@@ -146,6 +173,13 @@ describe("agyCliTuiExecutor — the response", () => {
     assert.equal(agyModelId("agy/gemini-3-pro"), "gemini-3-pro");
     assert.equal(agyModelId("gemini-3-pro"), "gemini-3-pro");
   });
+
+  it("names the model agy reported, not the one the caller asked for", () => {
+    assert.equal(tuiModelVersion("antigravity/gemini-3-pro", "gemini-3-flash"), "gemini-3-flash");
+    // agy said nothing: the requested name is the only one there is.
+    assert.equal(tuiModelVersion("antigravity/gemini-3-pro", null), "gemini-3-pro");
+    assert.equal(tuiModelVersion("agy/gemini-3-pro", "  "), "gemini-3-pro");
+  });
 });
 
 describe("agyCliTuiExecutor — the failure surface", () => {
@@ -174,33 +208,54 @@ describe("agyCliTuiExecutor — the failure surface", () => {
   });
 
   it("uses the same error envelope as every other executor", async () => {
-    const result = await executeViaAgyTui({
-      model: "gemini-3-pro",
-      body: { contents: [{ role: "user", parts: [{ text: "hi" }] }] },
-      stream: true,
-    });
+    const result = await withoutAgy(() =>
+      executeViaAgyTui({
+        model: "gemini-3-pro",
+        body: { contents: [{ role: "user", parts: [{ text: "hi" }] }] },
+        stream: true,
+      })
+    );
     const body = (await result.response.json()) as ReturnType<typeof buildErrorBody>;
+    // No pty on Windows (501), no agy anywhere else (502): an error either way.
+    assert.equal(result.response.status, process.platform === "win32" ? 501 : 502);
     assert.equal(typeof body.error.message, "string");
     assert.equal(typeof body.error.type, "string");
     // A stack trace must never reach the caller (Hard Rule #12).
-    assert.equal(JSON.stringify(body).includes("at "), false);
+    assert.doesNotMatch(JSON.stringify(body), /\\n\s*at |"stack"/);
   });
 });
 
 describe("agyCliTuiExecutor — the machine", () => {
   it("finds an agy named by AGY_PATH", () => {
-    const dir = temporaryDir();
-    const file = path.join(dir, process.platform === "win32" ? "agy.exe" : "agy");
-    fs.writeFileSync(file, "#!/bin/sh\n", "utf8");
+    const file = fakeAgy(temporaryDir(), process.platform === "win32" ? "agy.exe" : "agy");
     assert.equal(findAgyBinary({ AGY_PATH: file }), file);
   });
 
   it("finds an agy on PATH", () => {
     const dir = temporaryDir();
     const name = process.platform === "win32" ? "agy.exe" : "agy";
-    fs.writeFileSync(path.join(dir, name), "#!/bin/sh\n", "utf8");
+    fakeAgy(dir, name);
     assert.equal(findAgyBinary({ PATH: dir }), path.join(dir, name));
   });
+
+  it(
+    "skips an agy that cannot be executed and resolves a relative PATH entry",
+    { skip: process.platform === "win32" ? "POSIX execute bits" : false },
+    () => {
+      const shadow = temporaryDir();
+      fs.writeFileSync(path.join(shadow, "agy"), "#!/bin/sh\n", { encoding: "utf8", mode: 0o644 });
+      const real = temporaryDir();
+      const file = fakeAgy(real, "agy");
+      assert.equal(findAgyBinary({ PATH: `${shadow}:${real}` }), file);
+      assert.equal(findAgyBinary({ AGY_PATH: path.join(shadow, "agy") }), null);
+      const relative = path.relative(process.cwd(), real);
+      assert.equal(
+        findAgyBinary({ PATH: relative }),
+        file,
+        "the runner only takes an absolute path"
+      );
+    }
+  );
 
   it("reports no agy rather than guessing a path", () => {
     assert.equal(findAgyBinary({ PATH: temporaryDir() }), null);

@@ -38,10 +38,15 @@ const QUESTION_DENIED =
   "No one can answer questions during this run. Continue with your best judgment and " +
   "list open questions in your final answer.";
 
+/**
+ * Each answer is one complete JSON document quoted as a single shell word, so the
+ * shell cannot strip the quotes inside it and agy always reads valid JSON.
+ */
 const ASK_SCRIPT =
   "cat > /dev/null; " +
-  'if [ -n "$OMNIROUTE_AGY_HOOKS" ]; then echo \'{"decision":"deny","reason":' +
-  `${shellQuote(JSON.stringify(QUESTION_DENIED))}}'; else echo '{"decision":"allow"}'; fi`;
+  `if [ -n "$OMNIROUTE_AGY_HOOKS" ]; then echo ${shellQuote(
+    JSON.stringify({ decision: "deny", reason: QUESTION_DENIED })
+  )}; else echo ${shellQuote(JSON.stringify({ decision: "allow" }))}; fi`;
 
 /** POSIX single-quote escaping, the same shape as Python's `shlex.quote`. */
 export function shellQuote(value: string): string {
@@ -245,7 +250,8 @@ export function dropHookDir(directory: string): void {
  * and so is this port. Saying so plainly beats a spawn that fails obscurely.
  */
 export function tuiRuntimeUnsupported(platform: NodeJS.Platform = process.platform): boolean {
-  return platform === "win32";
+  // Only the `script` syntaxes ptyCommand builds (util-linux, macOS) are supported.
+  return platform !== "linux" && platform !== "darwin";
 }
 
 /** A PTY runner is only useful if the tool it needs is actually present. */

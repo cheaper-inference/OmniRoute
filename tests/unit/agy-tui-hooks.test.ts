@@ -2,6 +2,7 @@
 // The operator's own agy runs must never be affected, so the gating is the
 // property most of these assertions are about.
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -65,6 +66,27 @@ describe("agyTuiHooks — the entry", () => {
     // The whole script is a single condition on the variable: unset means no write.
     assert.match(command, new RegExp(`\\[ -n "\\$${HOOK_ENV}" \\]`));
   });
+
+  it(
+    "answers the question gate with valid JSON, set or unset",
+    { skip: process.platform === "win32" ? "the hook runs under /bin/sh" : false },
+    () => {
+      const entry = hookEntry() as Record<string, unknown>;
+      const gate = (entry.PreToolUse as Array<{ hooks: Array<{ command: string }> }>)[0];
+      const run = (env: Record<string, string>): unknown =>
+        JSON.parse(
+          execFileSync("/bin/sh", ["-c", gate.hooks[0].command], {
+            input: "{}",
+            env: { PATH: process.env.PATH ?? "", ...env },
+            encoding: "utf8",
+          })
+        );
+      const denied = run({ [HOOK_ENV]: temporaryHome() }) as Record<string, unknown>;
+      assert.equal(denied.decision, "deny");
+      assert.match(String(denied.reason), /No one can answer questions/);
+      assert.deepEqual(run({}), { decision: "allow" });
+    }
+  );
 
   it("quotes values so an argument can never become shell syntax", () => {
     assert.equal(shellQuote("plain"), "'plain'");
@@ -223,6 +245,11 @@ describe("agyTuiHooks — runtime support", () => {
     assert.equal(tuiRuntimeUnsupported("win32"), true);
     assert.equal(tuiRuntimeUnsupported("linux"), false);
     assert.equal(tuiRuntimeUnsupported("darwin"), false);
+  });
+
+  it("refuses a POSIX host whose `script` syntax has not been built for", () => {
+    assert.equal(tuiRuntimeUnsupported("freebsd"), true);
+    assert.equal(tuiRuntimeUnsupported("android"), true);
   });
 
   it("reports no PTY helper on Windows without shelling out", () => {

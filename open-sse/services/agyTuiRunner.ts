@@ -163,6 +163,14 @@ export async function runAgyTuiTurn(request: AgyTuiRequest): Promise<AgyTuiResul
   if (request.signal?.aborted) {
     throw new AgyTuiTurnError("the request was cancelled", 499);
   }
+  // The caller's own mistakes are reported as such on every host, before the
+  // host's capabilities are probed (which spawns a shell).
+  if (!path.isAbsolute(request.executable)) {
+    throw new AgyTuiTurnError("agy executable must be an absolute path", 500);
+  }
+  if (request.conversationId && !/^[A-Za-z0-9-]{1,80}$/.test(request.conversationId)) {
+    throw new AgyTuiTurnError("invalid agy conversation id", 400);
+  }
   if (tuiRuntimeUnsupported()) {
     throw new AgyTuiTurnError(
       "the tui transport runs agy in its interactive mode, which needs a POSIX pseudo-terminal; use the http or acp transport on this host",
@@ -174,12 +182,6 @@ export async function runAgyTuiTurn(request: AgyTuiRequest): Promise<AgyTuiResul
       "the tui transport needs `script` (util-linux) on PATH to give agy a pseudo-terminal",
       501
     );
-  }
-  if (!path.isAbsolute(request.executable)) {
-    throw new AgyTuiTurnError("agy executable must be an absolute path", 500);
-  }
-  if (request.conversationId && !/^[A-Za-z0-9-]{1,80}$/.test(request.conversationId)) {
-    throw new AgyTuiTurnError("invalid agy conversation id", 400);
   }
 
   const home = request.home || os.homedir();
@@ -403,6 +405,8 @@ class AgyTuiTurn {
     const startedAt = Date.now();
     let menuSince: number | null = null;
     while (Date.now() - startedAt < EXPERIMENT_WAIT_MS) {
+      // This wait runs before anything is sent, so a cancel here costs nothing.
+      this.throwIfAborted();
       this.runLog ??= findRunLog(
         path.join(this.home, ".gemini", "antigravity-cli", "log"),
         this.terminal.pid ?? 0
@@ -426,12 +430,16 @@ class AgyTuiTurn {
   private async deliver(): Promise<void> {
     const paste = cleanPaste(this.request.prompt);
     this.expected = flat(paste).slice(0, 40);
+    // The last moment a cancel keeps the turn from starting at all.
+    this.throwIfAborted();
     this.terminal.send(`\x1b[200~${paste}\x1b[201~`);
 
     const startedAt = Date.now();
     let submitted: SubmitState = { submittedAt: null, retried: false };
 
     while (!this.progress.userSeen) {
+      // Enter is what starts the turn; a cancel before it must not press it.
+      this.throwIfAborted();
       if (this.terminal.exited) {
         throw new AgyTuiTurnError("agy exited before taking the prompt", 502);
       }
@@ -456,6 +464,7 @@ class AgyTuiTurn {
     const echoed = this.expected.length > 0 && box.includes(this.expected);
     if (state.submittedAt === null && (echoed || PASTED_PLACEHOLDER.test(box))) {
       await sleep(500); // Let agy finish taking the paste before Enter.
+      this.throwIfAborted();
       if (screenState(this.terminal.text()) === "menu") return state;
       this.terminal.send("\r");
       return { submittedAt: Date.now(), retried: state.retried };

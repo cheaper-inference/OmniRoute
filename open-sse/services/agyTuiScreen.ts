@@ -51,6 +51,13 @@ export function cleanPaste(text: string): string {
 /** The same pattern, global: stripping every escape, not just the first. */
 const ANSI_ALL = new RegExp(ANSI.source, "g");
 
+/**
+ * The same pattern, sticky: it only matches an escape that starts where the
+ * buffer does. Unanchored, an invalid escape at the front would match a later
+ * one, and slicing that match's length off the front would drop the wrong text.
+ */
+const ANSI_AT_START = new RegExp(ANSI.source, "y");
+
 /** ANSI stripped, nothing else touched. */
 export function stripAnsi(text: string): string {
   return text.replace(ANSI_ALL, "");
@@ -84,7 +91,8 @@ export class AgyScreen {
     let queries = 0;
     while (this.pending) {
       if (this.pending.startsWith("\x1b")) {
-        const match = ANSI.exec(this.pending);
+        ANSI_AT_START.lastIndex = 0;
+        const match = ANSI_AT_START.exec(this.pending);
         if (!match) {
           if (this.pending.length < 256) break; // An escape split across PTY reads.
           this.pending = this.pending.slice(1); // Unterminated: drop the ESC only.
@@ -262,9 +270,27 @@ export function bottomLines(screen: string): string[] {
   return lines.slice(-span);
 }
 
+/**
+ * The bottom lines without what sits inside the input box (between the last two
+ * rules). The box holds the user's own prompt, which can quote any of agy's
+ * words (`[y/n]`, "esc to cancel"); only what agy draws around it says what
+ * state agy is in. The box is found on the whole screen, so a prompt taller
+ * than the bottom window is still left out.
+ */
+function bottomLinesOutsideBox(screen: string): string[] {
+  const all = screenLines(screen);
+  const start = all.length - bottomLines(screen).length;
+  const rules = all.flatMap((line, index) => (isRule(line) ? [index] : []));
+  const [upper, lower] = rules.length >= 2 ? rules.slice(-2) : [-1, -1];
+  return all.slice(start).filter((_, offset) => {
+    const index = start + offset;
+    return index <= upper || index >= lower;
+  });
+}
+
 export function screenState(screen: string): AgyScreenState {
   const lines = bottomLines(screen);
-  const lowered = lines.map((line) => line.toLowerCase());
+  const lowered = bottomLinesOutsideBox(screen).map((line) => line.toLowerCase());
   // The footer is drawn as "↑/↓ to navigate · Enter to confirm"; the gap between
   // "enter" and "confirm" is not fixed, so the words are matched separately.
   if (

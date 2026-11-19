@@ -16,6 +16,10 @@
  * Modal scope is deliberately the last user turn. agy keeps the conversation
  * itself (`--conversation`), so replaying the history into the prompt would
  * duplicate every message it already holds.
+ *
+ * The requested model is not passed to agy: it answers with whatever model it is
+ * set to, and the response names the model agy's `Stop` hook reported, falling
+ * back to the requested one only when agy did not say.
  */
 import fs from "node:fs";
 import os from "node:os";
@@ -97,7 +101,7 @@ export function tuiConversationKey(body: unknown): string | null {
 /** Where the machine keeps an `agy`, or null. */
 export function findAgyBinary(env: NodeJS.ProcessEnv = process.env): string | null {
   const marked = env.AGY_PATH?.trim();
-  if (marked && isExecutableFile(marked)) return marked;
+  if (marked && isExecutableFile(marked)) return path.resolve(marked);
   const platform = process.platform;
   const separator = platform === "win32" ? ";" : ":";
   const names = platform === "win32" ? ["agy.exe", "agy.cmd"] : ["agy"];
@@ -105,7 +109,8 @@ export function findAgyBinary(env: NodeJS.ProcessEnv = process.env): string | nu
     const clean = directory.replace(/^"|"$/g, "").trim();
     if (!clean) continue;
     for (const name of names) {
-      const candidate = path.join(clean, name);
+      // Resolved, because the runner only spawns an absolute path.
+      const candidate = path.resolve(clean, name);
       if (isExecutableFile(candidate)) return candidate;
     }
   }
@@ -114,7 +119,10 @@ export function findAgyBinary(env: NodeJS.ProcessEnv = process.env): string | nu
 
 function isExecutableFile(file: string): boolean {
   try {
-    return fs.statSync(file).isFile();
+    if (!fs.statSync(file).isFile()) return false;
+    // A non-executable `agy` early on PATH must not shadow a working one later.
+    if (process.platform !== "win32") fs.accessSync(file, fs.constants.X_OK);
+    return true;
   } catch {
     return false;
   }
@@ -158,6 +166,16 @@ function tuiFrame(model: string, text: string): Record<string, unknown> {
 /** The model name agy knows, without the router's provider prefix. */
 export function agyModelId(model: string): string {
   return model.replace(/^(?:antigravity|agy)\//, "");
+}
+
+/**
+ * The model a response names: the one agy reported it used, else the requested
+ * one. agy is never told which model to use, so the requested name is only a
+ * fallback, never a claim about what answered.
+ */
+export function tuiModelVersion(requested: string, used: string | null | undefined): string {
+  const reported = typeof used === "string" ? used.trim() : "";
+  return reported || agyModelId(requested);
 }
 
 /**
@@ -245,7 +263,7 @@ export async function executeViaAgyTui(
       cwd: tuiWorkspace(),
       signal: signal ?? undefined,
     });
-    const upstreamModel = agyModelId(model);
+    const upstreamModel = tuiModelVersion(model, result.model);
     const payload = stream
       ? new Response(tuiSseBody(upstreamModel, result.text), {
           status: 200,

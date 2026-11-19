@@ -5,14 +5,17 @@
  * native addon, and adding one would have to pass `check:native-deps`, ship
  * prebuilds for every platform and survive the Docker image build. agy's
  * interactive mode only needs a tty on its end plus a way to read what it draws,
- * and util-linux `script` provides exactly that on POSIX:
+ * and `script` provides exactly that. Its syntax differs by family:
  *
- *     script -qfc "<agy …>" /dev/null
+ *     script -qfc "<agy …>" /dev/null        util-linux (Linux)
+ *     script -q /dev/null <agy> <args…>      BSD (macOS)
  *
- * The child sees a pty (so it takes its interactive path), the bytes come back on
- * stdout, and the window size is set from here. Non-POSIX hosts have no `script`
- * and no `openpty` path in the reference runtime either (agentnave: "Windows has
- * no interactive runtime"), so they get a clear refusal rather than a broken spawn.
+ * The child sees a pty (so it takes its interactive path) and the bytes come back
+ * on stdout; the pty keeps the size `script` gives it, and the screen reader does
+ * not depend on it. Every other platform is refused: Windows has no `script` and
+ * no `openpty` path in the reference runtime either (agentnave: "Windows has no
+ * interactive runtime"), and the remaining POSIX `script`s are untested, so they
+ * get a clear refusal rather than a broken spawn.
  */
 import { spawn, type ChildProcessWithoutNullStreams } from "node:child_process";
 
@@ -36,8 +39,6 @@ export type AgyTuiTerminalOptions = {
   /** Extra environment for the child (the hook directory, the account home). */
   env?: EnvRecord;
   cwd?: string;
-  cols?: number;
-  rows?: number;
   /**
    * Overrides `process.platform`. Only tests set it: the refusal below is about
    * the host's capabilities, and asserting it must not depend on which machine
@@ -61,6 +62,10 @@ export function ptyCommand(
   platform: NodeJS.Platform = process.platform
 ): { file: string; args: string[] } | null {
   if (tuiRuntimeUnsupported(platform)) return null;
+  // BSD `script` has no `-c`: it takes the command as its own arguments, so
+  // nothing goes through a shell there.
+  if (platform === "darwin")
+    return { file: "script", args: ["-q", "/dev/null", executable, ...args] };
   // The command string is built from the caller's own binary and argument list,
   // never from request data: the prompt travels on stdin, not here.
   const command = [executable, ...args].map((part) => quoteForShell(part)).join(" ");
@@ -84,6 +89,7 @@ export class AgyTuiTerminal {
   readonly screen = new AgyScreen();
   private readonly child: ChildProcessWithoutNullStreams;
   private outgoing = Buffer.alloc(0);
+  private failed: Error | null = null;
 
   constructor(options: AgyTuiTerminalOptions) {
     const spec = ptyCommand(options.executable, options.args, options.platform);
@@ -101,6 +107,20 @@ export class AgyTuiTerminal {
     }) as ChildProcessWithoutNullStreams;
     this.child.stdout.on("data", (chunk: Buffer) => this.absorb(chunk));
     this.child.stderr.on("data", (chunk: Buffer) => this.absorb(chunk));
+    // An "error" event nobody listens to is thrown, and would take every other
+    // request in the process down with this one: a spawn that fails (no
+    // `script`, a missing cwd) or a write into a pipe agy already closed is
+    // recorded instead, and the turn reads it as the child having gone.
+    const record = (error: Error): void => {
+      this.failed ??= error;
+    };
+    this.child.on("error", record);
+    this.child.stdin.on("error", record);
+  }
+
+  /** The spawn or pipe failure this terminal recorded, if any. */
+  get failure(): Error | null {
+    return this.failed;
   }
 
   get pid(): number | undefined {
@@ -108,7 +128,12 @@ export class AgyTuiTerminal {
   }
 
   get exited(): boolean {
-    return this.child.exitCode !== null || this.child.signalCode !== null;
+    return (
+      this.child.exitCode !== null ||
+      this.child.signalCode !== null ||
+      // A child that never started has no exit to wait for.
+      (this.failed !== null && this.child.pid === undefined)
+    );
   }
 
   get exitCode(): number | null {

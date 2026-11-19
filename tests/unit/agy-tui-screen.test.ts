@@ -64,6 +64,14 @@ describe("agyTuiScreen — VT view", () => {
     assert.equal(screen.text(), "⠋ working");
   });
 
+  it("never lets an invalid escape consume a later escape's length", () => {
+    const screen = new AgyScreen();
+    // ESC ESC [ 0 m: the first ESC starts no valid sequence. An unanchored match
+    // would find the second one and slice its length off the front, printing "m".
+    screen.feed(new TextEncoder().encode("\x1b\x1b[0mab" + " ".repeat(300)));
+    assert.equal(screenLines(screen.text())[0], "ab");
+  });
+
   it("drops an unterminated escape instead of stalling the screen", () => {
     const screen = new AgyScreen();
     screen.feed(new TextEncoder().encode("ok"));
@@ -87,6 +95,19 @@ describe("agyTuiScreen — reading the screen", () => {
   it("reads an idle footer above the input box", () => {
     const screen = screenOf(["  some conversation text", RULE, "> ", RULE, "? for shortcuts"]);
     assert.equal(screenState(screen), "idle");
+  });
+
+  it("does not read the user's own prompt in the input box as agy's state", () => {
+    for (const prompt of [
+      "> Add a confirm step [y/n] to the CLI",
+      "> navigate the menu and press enter to confirm",
+      "> say esc to cancel",
+    ]) {
+      const screen = screenOf(["  some conversation text", RULE, prompt, RULE, "? for shortcuts"]);
+      assert.equal(screenState(screen), "idle", prompt);
+    }
+    const tall = screenOf([RULE, "> first line", "second", "third [y/n]", RULE, "? for shortcuts"]);
+    assert.notEqual(screenState(tall), "menu", "a prompt taller than the bottom window");
   });
 
   it("reads the spinner line as busy and never confuses it with idle", () => {

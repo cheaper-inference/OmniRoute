@@ -18,10 +18,18 @@ describe("agyTuiPty — the command", () => {
   });
 
   it("quotes an argument that would otherwise be shell syntax", () => {
-    const spec = ptyCommand("/usr/bin/agy", ["--settings", '{"a":"it\'s"}'], "darwin");
+    const spec = ptyCommand("/usr/bin/agy", ["--settings", '{"a":"it\'s"}'], "linux");
     assert.ok(spec);
     // The single quote inside the JSON must survive as a quote, not close the arg.
     assert.match(spec.args[1], /'\\''/);
+  });
+
+  it("uses the BSD `script` form on macOS, which has no -c and takes the command as argv", () => {
+    const spec = ptyCommand("/usr/bin/agy", ["--settings", '{"a":"it\'s"}'], "darwin");
+    assert.deepEqual(spec, {
+      file: "script",
+      args: ["-q", "/dev/null", "/usr/bin/agy", "--settings", '{"a":"it\'s"}'],
+    });
   });
 
   it("has no command on Windows", () => {
@@ -41,6 +49,27 @@ describe("agyTuiPty — the command", () => {
       (error: unknown) =>
         error instanceof AgyTuiUnsupportedError && /pseudo-terminal/.test(error.message)
     );
+  });
+});
+
+describe("agyTuiPty — a child that fails", () => {
+  it("records a spawn failure as the child having gone, instead of throwing it", async () => {
+    // A missing cwd makes the spawn fail asynchronously with an "error" event;
+    // unheard, that event would be thrown and take the whole process down.
+    const terminal = new AgyTuiTerminal({
+      executable: "/nonexistent/agy",
+      args: [],
+      cwd: "/nonexistent-omniroute-agy-tui-cwd",
+      platform: "linux",
+    });
+    const deadline = Date.now() + 5_000;
+    while (!terminal.failure && Date.now() < deadline) {
+      await new Promise((resolve) => setTimeout(resolve, 10));
+    }
+    assert.match(String(terminal.failure?.message), /ENOENT/);
+    assert.equal(terminal.exited, true);
+    terminal.send("\r"); // a write after the failure is dropped, not thrown
+    terminal.close();
   });
 });
 

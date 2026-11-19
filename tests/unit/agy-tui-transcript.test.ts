@@ -53,6 +53,24 @@ describe("agyTuiTranscript — path and flattening", () => {
 });
 
 describe("agyTuiTranscript — incremental reading", () => {
+  it("decodes a character split between two polls whole", () => {
+    const file = path.join(temporaryDir(), "transcript_full.jsonl");
+    fs.writeFileSync(file, "", "utf8");
+    const progress = freshProgress();
+    const reader = new AgyTranscriptReader(file, () => "hello there", progress);
+    const bytes = Buffer.from(
+      `${JSON.stringify(userRow("hello there"))}\n${JSON.stringify(plannerRow("olá ✓ 日本"))}\n`,
+      "utf8"
+    );
+    // Cut inside the three-byte "✓", the way a poll can land while agy writes.
+    const cut = bytes.indexOf(Buffer.from("✓", "utf8")) + 1;
+    fs.appendFileSync(file, bytes.subarray(0, cut));
+    reader.poll();
+    fs.appendFileSync(file, bytes.subarray(cut));
+    reader.poll();
+    assert.equal(progress.response, "olá ✓ 日本");
+  });
+
   it("ignores everything written before the turn started", () => {
     const file = path.join(temporaryDir(), "transcript_full.jsonl");
     append(file, [userRow("an earlier turn"), plannerRow("an earlier reply")]);

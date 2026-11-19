@@ -110,17 +110,19 @@ describe("agyTuiRunner — refusals", () => {
     cwd: "/tmp",
   };
 
-  it("refuses a host with no pseudo-terminal before touching anything", async () => {
-    if (process.platform !== "win32") return; // the only host this can assert on
-    await assert.rejects(
-      () => runAgyTuiTurn(request),
-      (error: unknown) =>
-        error instanceof AgyTuiTurnError && error.status === 501 && /POSIX/.test(error.message)
-    );
-  });
+  it(
+    "refuses a host with no pseudo-terminal before touching anything",
+    { skip: process.platform !== "win32" ? "only a Windows host takes this refusal" : false },
+    async () => {
+      await assert.rejects(
+        () => runAgyTuiTurn(request),
+        (error: unknown) =>
+          error instanceof AgyTuiTurnError && error.status === 501 && /POSIX/.test(error.message)
+      );
+    }
+  );
 
   it("refuses a relative executable", async () => {
-    if (process.platform === "win32") return;
     await assert.rejects(
       () => runAgyTuiTurn({ ...request, executable: "agy" }),
       (error: unknown) => error instanceof AgyTuiTurnError && error.status === 500
@@ -128,14 +130,35 @@ describe("agyTuiRunner — refusals", () => {
   });
 
   it("refuses a conversation id agy could not resolve", async () => {
-    if (process.platform === "win32") return;
-
     await assert.rejects(
       () =>
         runAgyTuiTurn({
           ...request,
           conversationId: "../../etc/passwd",
         }),
+      (error: unknown) => error instanceof AgyTuiTurnError && error.status === 400
+    );
+  });
+
+  it("reports the caller's mistake, not the host's, on a host with no pty helper", async () => {
+    // An empty PATH hides `script` (and `sh`), which is what a minimal container
+    // looks like; the request's own defects must still be what the caller hears.
+    const saved = process.env.PATH;
+    let relative: Promise<unknown>;
+    let unresolvable: Promise<unknown>;
+    try {
+      process.env.PATH = "";
+      relative = runAgyTuiTurn({ ...request, executable: "agy" });
+      unresolvable = runAgyTuiTurn({ ...request, conversationId: "../../etc/passwd" });
+    } finally {
+      process.env.PATH = saved;
+    }
+    await assert.rejects(
+      relative,
+      (error: unknown) => error instanceof AgyTuiTurnError && error.status === 500
+    );
+    await assert.rejects(
+      unresolvable,
       (error: unknown) => error instanceof AgyTuiTurnError && error.status === 400
     );
   });

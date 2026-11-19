@@ -15,6 +15,7 @@
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { StringDecoder } from "node:string_decoder";
 
 /** Where agy keeps one conversation's untruncated record. */
 export function transcriptPath(conversationId: string, home: string = os.homedir()): string {
@@ -67,6 +68,8 @@ export type TranscriptProgress = {
 export class AgyTranscriptReader {
   private offset = 0;
   private pending = "";
+  /** Kept across polls, so a character split between two reads decodes whole. */
+  private readonly decoder = new StringDecoder("utf8");
 
   constructor(
     private readonly file: string,
@@ -93,9 +96,10 @@ export class AgyTranscriptReader {
         const size = fs.fstatSync(handle).size;
         if (size <= this.offset) return this.progress;
         const buffer = Buffer.alloc(size - this.offset);
-        fs.readSync(handle, buffer, 0, buffer.length, this.offset);
-        this.offset = size;
-        chunk = buffer.toString("utf8");
+        // A short read is possible; only the bytes actually read move the offset.
+        const read = fs.readSync(handle, buffer, 0, buffer.length, this.offset);
+        this.offset += read;
+        chunk = this.decoder.write(buffer.subarray(0, read));
       } finally {
         fs.closeSync(handle);
       }
