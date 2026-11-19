@@ -33,22 +33,23 @@ Chaos Mode は、**1 つのタスクを複数のプロバイダーへ同時に�
    イベント（`model`、`index`、`ok`、`error`）も送信されます。これらに回答テキストは含まれません。
 4. OpenAI 形式の最終チャンクとして、パネル回答のうち**1 つ**を送信します。最初のパネルメンバー（`auto/chaos` がそのメンバーを `judgeModel` として設定）が成功した場合はその回答を使用し、失敗した場合は最後に成功したメンバーの回答を使用します。他のパネル回答は返されないため、N 回分の呼び出し料金を支払っても、受け取る補完は 1 つだけです。
 
-## セットアップ
+## 設定
 
-1. **ダッシュボード → Chaos Mode**（`/dashboard/chaos`）を開きます。
-2. **オン**にします。Chaos Modeは**デフォルトで無効**です（`src/lib/chaos/chaosConfig.ts`の`enabled: false`）。無効な間、`POST /api/chaos/run`は`400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`を返します。
-3. 参加プロバイダーとデフォルト値を選択します（設定ストアを通じてインスタンスごとに永続化されます）。
+1. 開ける**ダッシュボード→カオス モード**(`/dashboard/chaos`)。
+2. 回してください**の上**—カオスモードが出荷される**デフォルトで無効になっています**( `src/lib/chaos/chaosConfig.ts`の`enabled: false` )。無効になっている間、 `POST /api/chaos/run` `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`応答します。
+3. 参加者とデフォルトを選択します (設定ストアを介してインスタンスごとに保持されます)。
 
-   | フィールド          | 意味                                                                         | デフォルト / 制限                                |
-   | ------------------- | ---------------------------------------------------------------------------- | ------------------------------------------------ |
-   | `enabled`           | マスタースイッチ                                                             | `false`                                          |
-   | `defaultMode`       | `parallel`または`collaborative`（以下を参照）                                | `parallel`                                       |
-   | `providerOverrides` | プロバイダーごとの参加設定（`providerId`、オプションの`modelId`、`enabled`） | 空 = すべてのアクティブなプロバイダー、最大200件 |
-   | `systemPrompt`      | 組み込みのChaosシステムプロンプトの上書き                                    | オプション、最大10,000文字                       |
-   | `timeoutMs`         | モデル呼び出しごとの最大時間                                                 | `120000`（5,000～600,000）                       |
-   | `maxTokens`         | モデル呼び出しごとの`max_tokens`                                             | `4096`（256～128,000）                           |
+   | 分野                | 意味                                                                     | デフォルト/制限                               |
+   | ------------------- | ------------------------------------------------------------------------ | --------------------------------------------- |
+   | `enabled`           | マスタースイッチ                                                         | `false`                                       |
+   | `defaultMode`       | `parallel`または`collaborative` (下記を参照)                             | `parallel`                                    |
+   | `providerOverrides` | プロバイダーごとの参加 (`providerId`、オプションの`modelId`、 `enabled`) | 空の=アクティブなプロバイダーごとに、最大 200 |
+   | `systemPrompt`      | 組み込みの Chaos システム プロンプトをオーバーライドします。             | オプション、最大 10,000 文字                  |
+   | `timeoutMs`         | モデル呼び出しあたりの最大時間                                           | `120000` (5 000–600 000)                      |
+   | `maxTokens`         | モデル呼び出しごとの`max_tokens`                                         | `4096` (256–128 000)                          |
 
-4. **ページ自体からテストを実行**します。結果パネルには各プロバイダーの回答、ステータス、所要時間が表示されます。
+4. 参加しているすべてのプロバイダーに**モデル**。プロバイダーのモデルは、カオス モード ページで有効になっているオーバーライドの`modelId`です (それが勝ちます)。それ以外の場合は、**デフォルトモデル**そのつながりの。プロバイダー ID がモデル名として使用されることはありません。どちらも持たないプロバイダーは、**呼ばれていない**: 結果には`status: "error"`として表示され、メッセージ _「このプロバイダーにはモデルが設定されていません。カオス モード ページまたは接続上のデフォルト モデルでモデルを設定してください。」_ と空の`modelId`が表示されますが、他のプロバイダーは通常どおり実行されます。選択したプロバイダーにモデルがない場合、実行はアップストリーム リクエストの前に失敗し、_「プロバイダーにモデルが設定されていません。…」_ (両方のエンドポイントでHTTP 500) が表示されます。
+5. を実行します**ページ自体からテストする**—結果パネルには、各プロバイダーの回答、ステータス、期間が表示されます。
 
 ## 実行モード
 
@@ -57,24 +58,24 @@ Chaos Mode は、**1 つのタスクを複数のプロバイダーへ同時に�
 
 ## API
 
-### `POST /api/chaos/run` — ダッシュボードセッション
+### `POST /api/chaos/run` —ダッシュボード セッション
 
-Cookie認証（管理セッション。[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)を参照）を使用し、ダッシュボードページから利用されます。
+Cookie 認証済み (管理セッション— [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)を参照)。ダッシュボード ページで使用されます。
 
 ```jsonc
-// リクエストボディ
+// body
 {
-  "task": "Compare approaches to X", // 必須
-  "providers": ["glm", "kimi"], // オプションのフィルター
-  "mode": "parallel", // オプション — defaultModeを上書き
-  "systemPrompt": "…", // オプションの上書き
-  "maxTokens": 4096, // オプションの上書き
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
 ### `POST /api/skills/collect/chaos` — APIキー
 
-外部呼び出し元向けのBearerトークン版です。キーには**Chaos Mode権限**（`chaosModeEnabled`）が必要です。この権限は**デフォルトでオフ**になっています。キーごとに**ダッシュボード → API Manager → キーを編集 → 権限 → Chaos Mode**で有効にしてください。リクエストボディは上記と同じです。
+外部呼び出し元のベアラー トークンのバリアント。キーは次のものを運ぶ必要があります**カオスモード許可**(`chaosModeEnabled`)、つまり**デフォルトではオフになっています**—キーごとに有効にします**ダッシュボード→ APIマネージャー→編集キー→権限→カオス モード**。本体は上と同じです。
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -83,7 +84,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-どちらのエンドポイントも同じ形式を返します。
+両方のエンドポイントは同じ形状を返します。
 
 ```jsonc
 {
@@ -102,12 +103,13 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // collaborativeモードのみ
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## トラブルシューティング
 
-- **`400 Chaos Mode is not enabled`** — 上記の手順2を確認してください。グローバルスイッチがオフになっています。
-- **APIキーが`/api/skills/collect/chaos`で拒否される** — キーに、キーごとの`chaosModeEnabled`権限がありません（デフォルトではオフです。これは設定であり、エラーではありません）。
-- **結果に想定していたプロバイダーが含まれていない** — Chaos Modeページの`providerOverrides`（無効なオーバーライドは対象から除外されます）と、プロバイダー接続がアクティブかどうかを確認してください。
+- **`400 Chaos Mode is not enabled`**上記の—ステップ 2: グローバル スイッチはオフです。
+- **APIキーが`/api/skills/collect/chaos`で拒否される**—キーにはキーごとの`chaosModeEnabled`権限がありません (デフォルトではオフ。これは設定であり、エラーではありません)。
+- **プロバイダーは`No model set for this provider`を表示します**— 、[カオス モード] ページでモデルを設定するか、その接続でデフォルト モデルを設定します (セットアップ、ステップ 4 を参照)。
+- **期待したプロバイダーが結果に表示されない**—カオス モード] ページで`providerOverrides`チェックし (無効なオーバーライドでは除外されます)、プロバイダー接続がアクティブかどうかを確認します。

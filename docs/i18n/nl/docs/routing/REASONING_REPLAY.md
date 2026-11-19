@@ -24,19 +24,21 @@ Maar typische clients (Cursor, Cline, Roo Code, OpenAI SDK) ontdoen `reasoning_c
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Het vastleggen gebeurt in `open-sse/handlers/chatCore.ts` (twee locaties, op de twee `cacheReasoningFromAssistantMessage` -oproeplocaties). Herhaling gebeurt in `open-sse/translator/index.ts` na schemadwang maar vóór verzending.
+
+Tool-call-items worden opgeslagen onder `buildToolCallCacheKey()`, een samenvatting van het verzoekbereik en de tool-call-ID, dus dezelfde id die door een andere API sleutel of sessie wordt gebruikt, selecteert het item niet. Het bereik komt van `buildReasoningCacheScope()`: de API -sleutel-ID, plus de sessiesleutel als het verzoek er een heeft. De `tool_call_id` kolom en het dashboard tonen daarom deze samenvatting voor die vermeldingen.
 
 Gewone (niet-tool-call) assistent-beurten worden anders gecodeerd: `buildAssistantMessageCacheKey()` verteert de sessieomvang plus het genormaliseerde OpenAI-formaat transcript tot die beurt, omdat DeepSeek de redenering van _elke_ voorgaande beurt vereist zodra `tools` aanwezig is. Voor Responses-API-doelen (bijvoorbeeld `opencode-go/deepseek-v4-flash`, gerouteerd naar `/responses`) draagt het stroomopwaartse lichaam `input`, niet `messages`, dus `translateRequest()` (`open-sse/translator/index.ts`) rapporteert het draaitranscript dat het heeft verwerkt via een callback-optie en de opnamesites verwerken datzelfde transcript. De Responses replay pass draait op de OpenAI -spil voor elk bronformaat, dus Anthropic Messages-clients (Claude → OpenAI → Responses) worden ook opnieuw afgespeeld.
 

@@ -18,90 +18,75 @@
 
 ## 1. 各要素の配置場所
 
-- **キット。** `packages/ui-kit/src` は、`packages/ui-kit/UPSTREAM.md` に固定されたコミット（ライセンスの許諾も同ファイルに記録）におけるアップストリームの `src/` をバイト単位で完全に複製したものです。`PATCHES.md` にはローカルパッチ（なし）が記載されています。ビルドせずにソースとして利用され、`next.config.mjs` がトランスパイルを行い、`tsconfig.json` が `@omniroute/ui-kit` → `packages/ui-kit/src` および `@omniroute/ui-kit/*` → `packages/ui-kit/src/*` をマッピングします（`vitest.config.ts` と `vitest.mcp.config.ts` にも同じエイリアスがあります）。キットのコンポーネントは、そのサブパス（`@omniroute/ui-kit/table`、`@omniroute/ui-kit/page-header` など）からインポートし、`@omniroute/ui-kit` バレル経由では決してインポートしないでください。バレルを使用すると、すべてのコンポーネント（日付ピッカーを含む）が各インポーターに取り込まれます。キットのスタイルシートは `src/app/globals.css` を通じて読み込まれます（`@import "../../packages/ui-kit/src/ci-styles.css"`。これはコアの `ci-ui.css` とすべてのパターンファミリーを含む完全なスタイルシートです）。
-- **トークン。** `packages/ui-kit/src/ci-tokens.css` は `--ci-*` トークンを宣言します。`src/app/globals.css` は、それらを従来の OmniRoute 名（`--color-*`、`--radius-*`、`--font-sans`/`--font-mono`、`--table-*`、`--orch-status-*`、`--color-fd-*`）に橋渡しするため、既存の `var(--color-*)` による参照と Tailwind ユーティリティは引き続き機能します。新しいコードでは、Tailwind ユーティリティ（`bg-surface`、`text-text-muted`、`border-border`、`text-success`、`bg-success-bg`、`bg-chart-1` など）またはキットクラスを使用し、16 進数値は決して使用しません（`tests/unit/design-kit-bridge.test.ts` がこの橋渡しを検証します）。`text-primary` は `--text-color-primary` を介して `--color-primary-ink` に解決されるため、プライマリーテキストの可読性が保たれる一方で、`bg-primary`/`border-primary` はアクセントサーフェスを維持します。Editions ではキットの `--ci-color-accent-active`（ライトでは濃い銅色の `#99562f`、ダークでは銅色のアクセント）、Classic ではライトの lime-800 とダークのライムアクセントになります。チャート系列では `--color-chart-1` … `--color-chart-8` を使用し、それぞれにテキスト表示に適した `--color-chart-N-ink` と、不透明なチップ用ティント `--color-chart-N-subtle` があり、キットの系列順序（`ciChartSeriesOrder`）に従って割り当てられます。
-- **テーマ。** `<html className="ci-theme">`（`src/app/layout.tsx`）によって、ドキュメントでキットテーマが有効になります。設定値は `light`、`dark`、または `system` です（`src/shared/constants/appConfig.ts` の `THEME_CONFIG.defaultTheme = "system"`。`system` は `prefers-color-scheme` に従います）。`src/store/themeStore.ts` の `applyTheme()`（ハイドレーション前に実行される、`src/app/layout.tsx` 内へインライン化された `THEME_BOOT_SCRIPT` にも同じ処理があります）は、`data-theme="dark"|"light"` を設定すると同時に、`<html>` 上の `.dark` クラスを切り替えます。キットのダークトークンセットは `data-theme="dark"` をキーとします（`packages/ui-kit/src/ci-tokens.css`）。OmniRoute 独自のダークオーバーライド（`globals.css` 内の `.dark` ブロック）と従来の Tailwind `dark:` ユーティリティは、`.dark` クラスをキーとします。アクセントカラーのプリセットはありません。アクセントは常にキットから取得され、旧ビルドから永続化されたプリセットはストアの読み込み時に削除されます。
-- **パレット。** どちらもキット由来の 2 種類があります（`src/shared/constants/appearancePalette.ts`）。デフォルトの `editions` と `classic` です。Editions は `<html>` 上のキットの `data-ci-appearance="editions"` 属性であり、`ci-editions.css`（`ci-ui.css` によってインポート）がこれを `data-theme` と組み合わせます。Classic は、この属性が存在しない状態です。ルートレイアウトがこの属性をサーバーレンダリングするため、保存済みの設定がない訪問者（または JS が無効な訪問者）には、ダッシュボード、ログイン、`/status`、エラーページ、`/docs`、PWA のすべてのサーフェスで Editions が適用されます。選択内容は、同じ `theme` ストア内でテーマとともに永続化され（`src/store/themeStore.ts` の `palette`、`setPalette()`、`applyPalette()`）、`THEME_BOOT_SCRIPT`（`src/shared/utils/themeBootScript.ts`。レイアウトの `<head>` にインライン化）によって描画前に適用されます。このスクリプトは、保存されたパレットが `"classic"` の場合にのみ属性を削除します。ルートレイアウト外にある `src/app/global-error.tsx` は、同じストアからパレットを適用します。`data-ci-appearance` をほかの要素に設定しないでください。キットは `html:root:has([data-ci-appearance="editions"])` でこれを照合するため、子孫要素が 1 つでも該当するとドキュメント全体が切り替わります。Editions の `data-ci-editions-variant="landing"` バリアントはマーケティングページ用であり、ダッシュボード用ではありません。ブラウザー UI については、サーバーがデフォルトの Editions を `viewport.themeColor`（`prefers-color-scheme` ごとに 1 つのタグ）と Web マニフェストにレンダリングします。`src/shared/constants/pwaThemeColors.ts` の `PWA_THEME_COLORS` は、Editions の `--ci-color-background`（`#f3f1e9` / `#11120f`）を唯一ミラーするものであり、`tests/unit/pwa-theme-colors.test.ts` によって `ci-editions.css` に固定されています。その後、動的な `<meta name="theme-color">` は保存されたパレットとモードに従います。`THEME_BOOT_SCRIPT` が描画前にタグを書き換え、テーマストアのアクションが変更のたびに同じ処理を行います（`src/shared/utils/themeColorMeta.ts` の `resolveThemeColor()` / `applyThemeColor()`。`CLASSIC_PAGE_BACKGROUND` はキットの `ciTokens` から読み取られます）。明示的なライト／ダークテーマでは、すべてのタグがそのモードに設定されます。`system` では、スキームごとに 1 色が維持されます。マニフェストは Editions のままです。マニフェストはインストールごとに 1 回だけ取得され、設定値は反映されません。Monaco はプローブから色を読み取ります（`monacoKitTheme.ts`）。Editions では、キットがルートから Editions のライト／ダークを解決するため、プローブによる読み取り時に、同期処理の 1 パスだけルートの `data-theme` を反転させます。
-- **コンポーネント（アダプター）。** `src/shared/components/index.tsx` は OmniRoute のコンポーネント API（同じ名前、デフォルトエクスポート、props）を維持し、その背後のプリミティブはキット上のアダプターとして実装されています。対象は、フォーム（`Button`、`Input`、`Textarea`、`Checkbox`、`Select`、`Toggle`、`Badge`、`Card`）、オーバーレイとフィードバック（`Modal`/`ConfirmModal`、`Tooltip`/`InfoTooltip`、`NotificationToast`、`EmptyState`、`Loading`）、構造（`Collapsible`、`CollapsibleSection`、`SegmentedControl`、`Breadcrumbs`、`Avatar`）、テーブル（`DataTable`、`FilterBar`、`ColumnToggle`、`FilterPills`、`PresetSlider`）です。アダプターはキットのコンポーネントをサブパスからインポートし、従来の props をそのコンポーネントにマッピングします。たとえば、`Button variant="primary"` はキットの `default` ボタン（`--ci-button-primary-*`。ライトでは反転サーフェス、ダークでは `--ci-color-accent-foreground` のインク色を伴うアクセント）、`danger` は `destructive`、`warning` はキットの `warning` ボタンです。`Badge` のステータスバリアントにはキットのトーンが使用され、`<option>` 子要素を持つ `Select` はキットの `NativeSelect` をレンダリングします。
-  `tests/unit/ui/adapters/*.test.tsx` が各アダプターの仕様を固定します。
-- **シェル。** `src/app/(dashboard)/layout.tsx` は `DashboardLayout` をレンダリングし、さらに
-  `src/shared/components/layouts/DashboardShell.tsx` をレンダリングします。これはキットの `SidebarProvider` / `Sidebar` /
-  `SidebarInset`（`packages/ui-kit/src/sidebar.tsx`）を使用し、OmniRoute のナビゲーションロジックは
-  `src/shared/components/Sidebar.tsx` にあります。`#main-content` への「コンテンツへスキップ」リンクが、最初にフォーカス可能な
-  要素です。`src/shared/components/Header.tsx` には、キットの `SidebarTrigger`（シェルで唯一のサイドバー
-  切り替え）、Keak の `ProductSwitcher`、およびコマンドパレットを開くための要素があります。ルートタイトルは、
-  `#main-content` 内にキットの `PageHeader`（`.ci-page-header`）がマウントされていない場合にのみ表示されるため、独自の
-  `PageHeader` を持つページでは `h1` が1つになります。`src/shared/components/CommandPalette.tsx` はキットの `Dialog` です。
+- **キット。** `packages/ui-kit/src` は、`packages/ui-kit/UPSTREAM.md` に記録されたコミット時点の upstream `src/` のバイト単位の完全なコピーです（同ファイルにはライセンス認可も記録されています）。`PATCHES.md` にはローカルパッチが一覧化されています（なし）。ビルドは行わずソースとして使用されます。`next.config.mjs` がこれをトランスパイルし、`tsconfig.json` は `@omniroute/ui-kit` → `packages/ui-kit/src`、`@omniroute/ui-kit/*` → `packages/ui-kit/src/*` のマッピングを定義しています（`vitest.config.ts` と `vitest.mcp.config.ts` にも同じエイリアスがあります）。キットのコンポーネントはサブパス（`@omniroute/ui-kit/table`、`@omniroute/ui-kit/page-header` …）からインポートし、`@omniroute/ui-kit` のバレル経由では絶対にインポートしないでください。バレルは各インポーターにすべてのコンポーネント（date picker を含む）を取り込みます。キットのスタイルシートは `src/app/globals.css`（`@import "../../packages/ui-kit/src/ci-styles.css"`）から読み込まれます。これは完全なスタイルシートであり、コアの `ci-ui.css` とすべてのパターンファミリーを含みます。
+- **トークン。** `packages/ui-kit/src/ci-tokens.css` は `--ci-*` トークンを宣言します。`src/app/globals.css` はそれらを従来の OmniRoute 名（`--color-*`、`--radius-*`、`--font-sans`/`--font-mono`、`--table-*`、`--orch-status-*`、`--color-fd-*`）に橋渡しするため、既存の `var(--color-*)` による参照と Tailwind ユーティリティは引き続き機能します。新しいコードでは Tailwind ユーティリティ（`bg-surface`、`text-text-muted`、`border-border`、`text-success`、`bg-success-bg`、`bg-chart-1` …）またはキットのクラスを使用し、16進数値は決して使用しないでください（`tests/unit/design-kit-bridge.test.ts` がこのブリッジを強制します）。`text-primary` は `--text-color-primary` を通じて `--color-primary-ink` に解決されるため、プライマリテキストは読みやすいままです。一方、`bg-primary`/`border-primary` はアクセントサーフェスを維持します。Editions ではキットの `--ci-color-accent-active`（ライトでは深い銅色の `#99562f`、ダークでは銅色のアクセント）、Classic ではライトの lime-800、ダークの lime アクセントになります。チャート系列では `--color-chart-1` … `--color-chart-8` を使用します。各系列にはテキストに安全な `--color-chart-N-ink` と、不透明な `--color-chart-N-subtle` チップ色があり、キットの系列順（`ciChartSeriesOrder`）に従って割り当てられます。
+- **テーマ。** `<html className="ci-theme">`（`src/app/layout.tsx`）はドキュメントをキットテーマに切り替えます。設定値は `light`、`dark`、`system` のいずれかです（`src/shared/constants/appConfig.ts` の `THEME_CONFIG.defaultTheme = "system"`。`system` は `prefers-color-scheme` に従います）。`src/store/themeStore.ts` の `applyTheme()`（`src/app/layout.tsx` にインライン化された `THEME_BOOT_SCRIPT` も同様に動作し、ハイドレーション前に実行されます）は、`data-theme="dark"|"light"` を設定し、`<html>` の `.dark` クラスを同時に切り替えます。キットのダークトークンセットは `data-theme="dark"`（`packages/ui-kit/src/ci-tokens.css`）をキーにします。OmniRoute 独自のダーク上書き（`globals.css` の `.dark` ブロック）と、従来の Tailwind `dark:` ユーティリティは `.dark` クラスをキーにします。アクセントカラーのプリセットはありません。アクセントは常にキットから取得され、以前のビルドで保存されたプリセットはストアの読み込み時に破棄されます。
+- **パレット。** 2種類あり、どちらもキット由来です（`src/shared/constants/appearancePalette.ts`）。デフォルトは `editions`、もう一方は `classic` です。Editions は `<html>` に設定されるキットの `data-ci-appearance="editions"` 属性であり、`ci-ui.css` がインポートする `ci-editions.css` によって `data-theme` と組み合わされます。Classic はこの属性がない状態です。ルートレイアウトはこの属性をサーバーレンダリングするため、保存された設定がない訪問者（または JavaScript が無効な訪問者）は、ダッシュボード、ログイン、`/status`、エラーページ、`/docs`、PWA のすべてのサーフェスで Editions を取得します。選択内容はテーマと同じ `theme` ストア（`src/store/themeStore.ts` の `palette`、`setPalette()`、`applyPalette()`）に保存され、`THEME_BOOT_SCRIPT`（`src/shared/utils/themeBootScript.ts`。レイアウトの `<head>` にインライン化）によって描画前に適用されます。このスクリプトは、保存されたパレットが `"classic"` の場合にのみ属性を削除します。ルートレイアウトの外部にある `src/app/global-error.tsx` は、同じストアからこの属性を適用します。`data-ci-appearance` を他の要素に設定しないでください。キットは `html:root:has([data-ci-appearance="editions"])` でこの属性を照合するため、子孫要素が1つあるだけでドキュメント全体が切り替わります。Editions の `data-ci-editions-variant="landing"` バリアントはマーケティングページ用であり、ダッシュボード用ではありません。ブラウザの外観については、サーバーがデフォルトの Editions を `viewport.themeColor`（`prefers-color-scheme` ごとに1つのタグ）とウェブマニフェストに出力します。`src/shared/constants/pwaThemeColors.ts` の `PWA_THEME_COLORS` は、Editions の `--ci-color-background`（`#f3f1e9` / `#11120f`）を唯一ミラーするもので、`tests/unit/pwa-theme-colors.test.ts` によって `ci-editions.css` に固定されています。その後、実際の `<meta name="theme-color">` は保存されたパレットとモードに従います。`THEME_BOOT_SCRIPT` は描画前にタグを書き換え、テーマストアのアクションは変更のたびにこれを実行します（`src/shared/utils/themeColorMeta.ts` の `resolveThemeColor()` / `applyThemeColor()`。`CLASSIC_PAGE_BACKGROUND` はキットの `ciTokens` から読み取られます）。明示的な light/dark テーマでは、すべてのタグがそのモードに設定されます。`system` ではスキームごとに1つの色が維持されます。マニフェストは Editions のままです。インストールごとに一度取得され、設定は反映されません。Monaco はプローブ（`monacoKitTheme.ts`）から色を読み取ります。Editions では、キットがルートの `data-theme` から Editions のライト/ダークを解決するため、プローブの読み取り時に1回の同期処理の間だけルートの `data-theme` を切り替えます。
+- **コンポーネント（アダプター）。** `src/shared/components/index.tsx` は OmniRoute のコンポーネント API（同じ名前、デフォルトエクスポート、props）を維持し、その内部のプリミティブはキット上のアダプターです。フォーム（`Button`、`Input`、`Textarea`、`Checkbox`、`Select`、`Toggle`、`Badge`、`Card`）、オーバーレイとフィードバック（`Modal`/`ConfirmModal`、`Tooltip`/`InfoTooltip`、`NotificationToast`、`EmptyState`、`Loading`）、構造（`Collapsible`、`CollapsibleSection`、`SegmentedControl`、`Breadcrumbs`、`Avatar`）、テーブル（`DataTable`、`FilterBar`、`ColumnToggle`、`FilterPills`、`PresetSlider`）が該当します。アダプターはキットコンポーネントをサブパスからインポートし、従来の props を対応付けます。たとえば `Button variant="primary"` はキットの `default` ボタン（`--ci-button-primary-*`：ライトでは反転サーフェス、ダークでは `--ci-color-accent-foreground` のインクを持つアクセント）に対応し、`danger` は `destructive`、`warning` はキットの `warning` ボタンに対応します。`Badge` のステータスバリアントはキットのトーンであり、`<option>` の子要素を持つ `Select` はキットの `NativeSelect` をレンダリングします。
+  2つのアダプターは index からではなくパスでインポートされます。`InteractiveTableRow`（`src/shared/components/InteractiveTableRow.tsx`）は、`onActivate` と `selected` を受け取り、Tab、Enter、Space に応答するキットの `TableRow` です。`CodePreview`（`src/shared/components/CodePreview.tsx`）はキットのコードブロックで、コピー用ラベルが翻訳されています。
+  `tests/unit/ui/adapters/*.test.tsx` が各アダプターを固定します。
+- **シェル。** `src/app/(dashboard)/layout.tsx` は `DashboardLayout` をレンダリングし、`DashboardLayout` は
+  `src/shared/components/layouts/DashboardShell.tsx` をレンダリングします。そこではキットの
+  `SidebarProvider` / `Sidebar` / `SidebarInset`（`packages/ui-kit/src/sidebar.tsx`）と、
+  `src/shared/components/Sidebar.tsx` にある OmniRoute のナビゲーションロジックが使用されます。「コンテンツへスキップ」リンク（`#main-content` へのリンク）が最初のフォーカス可能な
+  要素です。`src/shared/components/Header.tsx` には、シェル唯一のサイドバー切り替え機能であるキットの
+  `SidebarTrigger`、Keak の `ProductSwitcher`、コマンドパレットのオープナーが含まれています。また、
+  `#main-content` 内にキットの `PageHeader`（`.ci-page-header`）がマウントされていない場合にのみ
+  ルートタイトルを表示するため、独自の `PageHeader` を持つページでは `h1` が1つになります。
+  `src/shared/components/CommandPalette.tsx` はキットの `Dialog` です。
 - **アイコン。** `<Icon name="material_name">`（`src/shared/components/Icon.tsx`）は、画面で使用される
-  Material Symbols の語彙に基づく名前を、`ICON_MAP`（`src/shared/constants/iconMap.ts`）を介して
-  Lucide グリフへ解決します。Material Symbols のフォントとパッケージは削除されています。マップに存在しない名前は
-  ニュートラルなプレースホルダーグリフ（`data-icon-missing="true"`）としてレンダリングされ、本番環境以外ではコンソールに警告が記録されます。
-  `npm run gen:icon-map` は、使用中でありながらマップに存在しない名前を出力します
-  （Lucide アイコンのない名前があると `tests/unit/icon-map-coverage.test.ts` が失敗し、
+  Material Symbols の語彙に基づく名前を、`ICON_MAP`（`src/shared/constants/iconMap.ts`）経由で
+  Lucide のグリフに解決します。Material Symbols のフォントとパッケージは削除されています。マップにない名前は
+  ニュートラルなプレースホルダーグリフ（`data-icon-missing="true"`）をレンダリングし、本番環境以外では
+  コンソール警告を記録します。`npm run gen:icon-map` は、使用中でマップに存在しない名前を出力します
+  （`tests/unit/icon-map-coverage.test.ts` は Lucide アイコンのない名前があると失敗し、
   `tests/unit/icon-map-object-values.test.ts` はルックアップオブジェクトに格納された名前を対象とします）。
   `scripts/dev/codemod-material-icons.mjs <dir|file>... [--write]` は、リテラルの
-  `<span className="material-symbols-outlined">` span を `<Icon>` に書き換えます。
-- **ブランド。** `src/shared/components/OmniRouteLogo.tsx` はキットをラップします。デフォルトエクスポートの `OmniRouteLogo`
-  は `ProductIcon product="omniroute" variant="glyph"`（インライン SVG、`basePath` 対応）をレンダリングし、
-  `OmniRouteLockup` は `ProductLockup product="omniroute"`（アクセシブル名は「Keak OmniRoute」）をレンダリングします。ホワイトラベルの
-  オペレーターの場合は、独自の `name`/`logoSrc` をレンダリングします。製品スイッチャーの遷移先は
-  `src/shared/constants/keakProducts.ts`（`KEAK_PRODUCT_LINKS`、`KEAK_ACTIVE_PRODUCT`）にあります。スタンドアロン
-  画面である `src/app/login/page.tsx`、`src/app/status/page.tsx`、`src/app/maintenance/page.tsx`、
+  `<span className="material-symbols-outlined">` スパンを `<Icon>` に書き換えます。
+- **ブランド。** `src/shared/components/OmniRouteLogo.tsx` はキットをラップします。デフォルトエクスポートの
+  `OmniRouteLogo` は `ProductIcon product="omniroute" variant="glyph"`（インライン SVG、`basePath` 対応）を
+  レンダリングし、`OmniRouteLockup` は `ProductLockup product="omniroute"`（アクセシブル名は
+  "Keak OmniRoute"）をレンダリングします。または、ホワイトラベルの運営者の場合は独自の `name`/`logoSrc` を
+  レンダリングします。プロダクトスイッチャーの移動先は `src/shared/constants/keakProducts.ts`
+  （`KEAK_PRODUCT_LINKS`、`KEAK_ACTIVE_PRODUCT`）にあります。スタンドアロン画面 —
+  `src/app/login/page.tsx`、`src/app/status/page.tsx`、`src/app/maintenance/page.tsx`、
   `src/app/offline/page.tsx`、`src/app/not-found.tsx`、`src/shared/components/ErrorPageScaffold.tsx`
-  にはロックアップが表示され、`tests/unit/brand-pages-static.test.ts` がこれを保証します。
+  — にはロックアップが表示されます。`tests/unit/brand-pages-static.test.ts` がこれを保証します。
 
 ## 2. ルール
 
-1. リテラルではなく、トークンを使用します。意図的に残している例外は、常にダークテーマのコンソールターミナルと
-   `STATUS_HEX`（`src/shared/constants/statusColors.ts`）です。後者は、リテラルの 16 進数カラー値を必要とする呼び出し元向けに、キットのステータスパレットを解決済みの 16 進数カラー値に対応付けたものです。カテゴリーパレットも、もはや例外ではありません。
-   これらは、キットの 8 つのチャートトークン（`--color-chart-1..8` と `-ink`/`-subtle`）を、
-   キットのシリーズ順に従い、
-   `src/shared/utils/categoricalPalette.ts`、およびルーティング戦略については
-   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` を介して使用します。ReactFlow のエッジとオーケストレーション
-   キャンバスは、テーマ対応の `--orch-status-*` 変数（`src/shared/components/flow/edgeStyles.ts`）を参照します。
-2. `packages/ui-kit/src` を手動で変更しないでください。`scripts/dev/sync-ui-kit.sh <commit>` で同期します。
-   pre-commit ゲートの `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）は、固定されたアップストリームコミットと
-   1 バイトでも異なると失敗します（アップストリームのクローンである
-   `UI_KIT_CLONE` または `_references/cheaper-inference-ui-kit` が存在しない場合は、警告を表示してスキップします）。キットに必要なものがない場合は、
-   アダプターまたは画面側で回避策を実装し、アップストリームに対応を依頼してください。
-3. キットのテキストのデフォルト値は英語です（`label = "Loading"`、`loadingLabel = "Loading table"` など）。キットコンポーネントがテキストをレンダリングする場合は、必ず
-   `useTranslations(...)` から取得した翻訳済み文字列を渡してください。
-4. Tailwind ユーティリティはキットコンポーネントのクラスより優先されます（キットでは
-   `@layer theme, base, components, utilities` が宣言されており、そのルールは `components` にあります）。キットコンポーネントの色を変更するためではなく、
-   余白とレイアウトのためにユーティリティを使用してください。
-5. 見出し：ページタイトルとセクションタイトルには `.ci-heading` を使用します。`.ci-dashboard-display` は、エラーページのステータスコードなど、
-   大きく、まばらに配置される表示テキストにのみ使用します。どちらも Switzer を使用します。
-6. `tests/unit/dashboard-kit-sweep.test.ts` は、キットの採用状況を検証します。
-   `src/app` または `src/shared/components` 配下では Material リガチャーの span を使用できません。ダッシュボードツリー（`src/app/(dashboard)` と
-   `src/shared/components`）では、生の `<select>`、`<textarea>`、`<table>`、および列挙された例外（`Select` アダプターのネイティブ分岐、
-   `RequestLoggerDetail`）以外の自作
-   `role="dialog"` を使用できません。そこにある生の `<button>` または `<input>` には、それぞれの要素から最大 3 行上までの位置に、理由を添えた
-   `kit-exception:` を含むコメントが必要です。パレットの色相と `dark:` バリアントは、
-   テストで列挙されたファイル内でのみ使用できます。
-7. PR の前に、両方のテーマと 390 px のビューポートを確認し、スクリーンショットを撮影してください。`tests/e2e/a11y.spec.ts` では
-   axe が実行されます。
+1. リテラルではなくトークンを使用する。意図的に残された例外は、常にダークなコンソールターミナルと
+   `STATUS_HEX`（`src/shared/constants/statusColors.ts`）である。これは、リテラルの16進数を必要とする呼び出し元向けの、キットのステータスパレットを解決した16進数ミラーである。カテゴリパレットはもはや例外ではない。
+   `src/shared/utils/categoricalPalette.ts` を通じて、キットの8つのチャートトークン（`--color-chart-1..8`、および `-ink`/`-subtle`）をキットのシリーズ順で使用し、ルーティング戦略では
+   `src/app/(dashboard)/dashboard/combos/strategyPalette.ts` を使用する。ReactFlowのエッジとオーケストレーションキャンバスは、テーマに対応した `--orch-status-*` 変数（`src/shared/components/flow/edgeStyles.ts`）を読み取る。
+2. `packages/ui-kit/src` を手作業で変更しない。`scripts/dev/sync-ui-kit.sh <commit>` と同期する。コミット前ゲートの `npm run check:ui-kit-snapshot`（`.husky/pre-commit`）は、固定された上流コミットと異なるバイトが1つでもあると失敗する（上流クローンである `UI_KIT_CLONE` または `_references/cheaper-inference-ui-kit` が存在しない場合は、警告を出してスキップする）。キットに不足しているものがある場合は、アダプターまたは画面側で回避し、上流に追加を依頼する。
+3. キットのテキストのデフォルト値は英語（`label = "Loading"`、`loadingLabel = "Loading table"`…）であるため、キットコンポーネントがテキストを表示する場合は常に `useTranslations(...)` から翻訳済みの文字列を渡す。
+4. Tailwindユーティリティはキットコンポーネントのクラスより優先される（キットは `@layer theme, base, components, utilities` を宣言し、そのルールは `components` に配置される）。そのため、キットコンポーネントの色を再設定するのではなく、スペーシングとレイアウトにはユーティリティを使用する。タイポグラフィは例外である。
+   `packages/ui-kit/src/ci-typography.css` はどのレイヤーの外側でもインポートされるため、そのタグルールがユーティリティより優先される。`h1`–`h6` ではウェイト、`tracking-*`、`leading-*` クラスは効果がなく、テーブルセルではウェイトと `tracking-*` が効果を持たず、ボタンではウェイトが効果を持たない
+   （`tests/unit/dead-typography-classes.test.ts` がこれらを拒否する）。`th`、`td`、`button`、`input`、`textarea` では `font-mono` は効果を持たない。サイズ、色、`uppercase` ユーティリティは引き続き適用される。
+5. 見出し: ページタイトルとセクションタイトルには `.ci-heading` を使用し、大きく余白の多い表示テキスト（エラーページのステータスコードなど）にのみ `.ci-dashboard-display` を使用する。どちらもSwitzerを使用する。
+6. `tests/unit/dashboard-kit-sweep.test.ts` はキットの採用状況を検査する。`src/app` または `src/shared/components` 配下にMaterialのリガチャ用spanがないこと、ダッシュボードツリー（`src/app/(dashboard)` および `src/shared/components`）内に生の `<select>`、`<textarea>`、`<table>` がなく、列挙された例外（`Select` アダプターのネイティブ分岐、`RequestLoggerDetail`）以外に手作りの `role="dialog"` がないことを検査する。そこにあるすべての生の `<button>` または `<input>` には、直前3行以内で終わる、理由を含む `kit-exception:` コメントが必要である。また、パレットの色相と `dark:` バリアントは、テストが列挙するファイル内でのみ使用する。
+7. PRの前に、両方のテーマと390 pxのビューポートを確認する（スクリーンショット）。`tests/e2e/a11y.spec.ts` はaxeを実行する。
+8. 色ユーティリティは、`src/app/globals.css` の `@theme` ブロックにあるトークン名を指定しなければならない。そこにない名前（`text-text`、`bg-bg-muted`、`text-danger` など）はCSSを生成せず、要素は継承した色のままとなる（`tests/unit/theme-color-classes.test.ts`）。`card` クラスは存在しないため、`Card` アダプターを使用する（`tests/unit/no-bare-card-class.test.ts`）。チャートの色でテキストを表示する場合は `text-chart-N-ink` を使用し、`text-chart-N` はアイコンとストローク用である（`tests/unit/chart-ink-for-text.test.ts`）。半透明の色は `color-mix` で構築し、`var()` になる可能性がある値に16進数のアルファ値を連結してはならない
+   （`tests/unit/color-alpha-concatenation.test.ts`）。
+9. テーブル: すべてのキット `Table` では、スクロール領域の名前である `scrollLabel` と、永続スクロールバーを描画する場合は `scrollbarLabel` を渡す
+   （`tests/unit/kit-tables-have-accessible-name.test.ts`）。クリック可能な行には `onActivate` を持つ `InteractiveTableRow` を使用し、決して `<TableRow onClick>` を使用しない
+   （`tests/unit/table-row-click-needs-keyboard.test.ts`）。カード内、または枠線付きのボックス内にあるテーブルは、`containerClassName="rounded-none border-0"` によって自身のフレームを外す
+   （`tests/unit/datatable-not-framed-inside-card.test.ts`）。
+10. 数値を表示するバーにはキットの `Progress` を使用する。キットのバーで表示できない場合は、名前と値を持つ `role="progressbar"` を付与する
+    （`tests/unit/progress-bars-have-semantics.test.ts`）。メニュー、ポップオーバー、ツールチップは、ローカル状態で開く絶対配置パネルではなく、キット（`Popover`、`SearchableSelect`、`Tooltip` アダプター）から提供する
+    （`tests/unit/hand-positioned-overlays.test.ts`）。
+11. `Input` アダプターでは、`className` はフィールドのラッパーをスタイルする。コントロール向けのクラスは `inputClassName` に指定する
+    （`tests/unit/input-adapter-classname-destination.test.ts`）。
 
 ## 3. 画面の追加
 
-1. ページはキットの `PageHeader`（`@omniroute/ui-kit/page-header`、ダッシュボード内では
-   `compact`）で開始する — タイトル、説明、`actions`。シェルヘッダーはこれにより自身の
-   タイトルを表示しなくなる。
-2. コントロールは `@/shared/components`（アダプター）から構築し、アダプターが存在しない
-   場所ではサブパス経由でキットコンポーネントを使用する（`Table`/`TableScrollArea`/
-   `DataTableShell`、`Field`、`Alert`、`Tabs`、`RadioGroup`、`Slider` など）。
-3. アイコン: `<Icon name="…" />`。新しい名前は、意味的に対応する Lucide コンポーネントと
-   ともに `ICON_MAP` に追加する。`npm run gen:icon-map` でまだ不足している名前を一覧できる。
-4. 色: セマンティックユーティリティ（`text-success`、`bg-warning-bg`、`border-border` など）と、
-   チャート系列には `var(--color-chart-N)` を使う。hex 値や、色を繰り返すだけの `dark:`
-   バリアントは使わない。
-5. テキスト: キットコンポーネントに渡すラベルを含むすべての文字列は `useTranslations` から
-   取得する。新しいキーは `src/i18n/messages/en.json`、`pt-BR.json`、`vi.json` に追加する
-   （ベトナム語のパリティテストがすべての英語キーをピン留めする）。他のロケールは i18n 同期で
-   補完される。
-6. PR の前にガードを実行する: `tests/unit/dashboard-kit-sweep.test.ts`、
-   `tests/unit/icon-map-coverage.test.ts`、`tests/unit/icon-map-object-values.test.ts`、
-   `npm run check:dashboard-typecheck`（`iconMap.ts` の重複インポートを検出できる唯一の
-   チェック）、`npm run check:ui-icu`、およびその画面自体のテスト。
+1. キットの `PageHeader`（`@omniroute/ui-kit/page-header`、ダッシュボード内では `compact`）を使用してページを開きます — タイトル、説明、`actions` を指定します。シェルのヘッダーは独自のタイトルを表示しなくなり、1024 px 未満では非表示になるため、`PageHeader` のないルートはスマートフォン上でタイトルが表示されません（`tests/unit/dashboard-page-header-coverage.test.ts`）。独自のページを持たないパスセグメントは `src/shared/utils/breadcrumbTrail.ts` の `ROUTE_PREFIXES_WITHOUT_PAGE` に追加し、パンくずをリンク切れにせずテキストとして表示します（`tests/unit/breadcrumb-trail-routes.test.ts`）。
+2. `@/shared/components`（アダプター）からコントロールを構築し、アダプターが存在しない場合はサブパス経由でキットのコンポーネント（`Table`/`TableScrollArea`/`DataTableShell`、`Field`、`Alert`、`Tabs`、`RadioGroup`、`Slider`…）を使用します。
+3. アイコン: `<Icon name="…" />` を使用します。新しい名前は、意味的に対応する Lucide コンポーネントとともに `ICON_MAP` に追加します。`npm run gen:icon-map` を実行すると、まだ不足している名前が一覧表示されます。
+4. 色: セマンティックなユーティリティ（`text-success`、`bg-warning-bg`、`border-border`…）と、チャート系列用の `var(--color-chart-N)` を使用します。16進数の値や、色を繰り返すだけの `dark:` バリアントは使用しません。
+5. テキスト: キットコンポーネントに渡すラベルを含め、すべての文字列は `useTranslations` から取得します。新しいキーは `src/i18n/messages/en.json` にのみ追加します。リリース時の更新で他のロケールが補完されます（`tests/_helpers/localeParityMode.ts` に2つのモードの説明があります）。実際の非英語カタログをマウントするテストでは、`src/i18n/request.ts` の `deepMergeFallback` を使用して実行時と同じようにメッセージを構築するため、英語にしか存在しないキーもエラーにならず、フォールバックされます。
+6. PR の前に、`tests/unit/dashboard-kit-sweep.test.ts`、`tests/unit/icon-map-coverage.test.ts`、`tests/unit/icon-map-object-values.test.ts`、`npm run check:dashboard-typecheck`（`iconMap.ts` 内の重複した import を検出できる唯一のチェック）、`npm run check:ui-icu`、ルール4および8〜11で指定されているガード、画面固有のテストを実行します。
 
 ## 4. アダプターの追加・変更
 
@@ -131,27 +116,16 @@ PRを開くことができない場合 (ターゲット リリースがフリー
 
 ## 6. README の図
 
-ルートの `README.md` に埋め込まれている 12 個の図（`docs/diagrams/*.svg`）は、静的画像にキットを適用したものであり、手作業で描かれたものではなく生成されています。`scripts/docs/gen-readme-*.mjs` に 13 個のジェネレーターファイル
-（12 個の図に加えて `gen-readme-diagrams.mjs` ドライバー）があり、
-`tests/unit/docs/readme-*-svg.test.ts` には図ごとに 1 つ、合計 12 個の陳腐化テストがあります。各テストは、コミット済みファイルと対応する
-ジェネレーターの出力をバイト単位で比較します（ジョブ `test-unit`）。
+ルートの `README.md` に埋め込まれている 12 個の図（`docs/diagrams/*.svg`）は、静的画像に適用されるキットであり、手作業で描いたものではなく生成されます。生成ファイルは、`scripts/docs/gen-readme-*.mjs` にある 13 個のジェネレーター（12 個の図と `gen-readme-diagrams.mjs` ドライバー）と、図ごとに 1 つずつある 12 個の陳腐化テスト `tests/unit/docs/readme-*-svg.test.ts` です。各テストは、コミット済みファイルとそのジェネレーターの出力をバイト単位で比較します（ジョブ `test-unit`）。
 
-- **トークン。** `scripts/docs/readme-diagram-theme.mjs` は Editions パレット（デフォルトの外観）を
-  `packages/ui-kit/src/ci-editions.css` からコピーします（
-  `tests/unit/docs/readme-diagram-theme.test.ts` によりそのファイルに固定されています。このテストは、両方の配色におけるすべてのサーフェス上の各テキスト色について WCAG AA への準拠も確認します。唯一の例外であるライトテーマの `warn` は、キットの値がキャンバス上で 4.46:1 であるため、キットの警告色を 10 % 暗くしたものです）。また、キットのタイプスケール（`ci-tokens.css`）に基づいてテキストの役割を定義します。コード用の役割（`.cmd`、`.term`、`.term-lg`、`.mono`、`.mono-sm`、`.mono-xs`）を除き、すべてにキットのウェイト（400/500/600、ディスプレイは 500）とトラッキングを使用した Switzer が適用されます。コード用の役割には IBM Plex Mono が使われ、コマンド、URL、識別子、ターミナル画面にのみ使用されます。
-  ライトテーマの値は `:root` に、ダークテーマの値はファイル内の `prefers-color-scheme: dark` の後ろに配置されているため、各画像は GitHub 上で閲覧者の配色に従います。
-- **フォント。** GitHub Markdown には CSS が含まれず、camo プロキシはすべての外部フェッチをブロックするため、キットの書体をファイル内に含める必要があります。各ジェネレーターの最終ステップである `scripts/docs/readme-outline.mjs` は、HarfBuzz を使用して Switzer の各役割をシェーピングし、ベクターアウトライン（`<defs>` のパスと `<use>`）として描画します。Switzer にない矢印と幾何学記号は、Switzer 独自のメトリクスに基づいて描画されます。埋め込みフォントではなく、必ずアウトラインを使用してください。Switzer のライセンス（`packages/ui-kit/src/fonts/FFL.txt`）では、書面による同意なしでのサブセット化と形式変換を禁止する一方、ベクター描画は許可されています。そのため、Switzer の `@font-face` や `data:` URI を再導入しないでください。ファイル内に残る唯一のフォントは、実際のコードテキストとして残る部分に使用される OFL ライセンスの IBM Plex Mono サブセット
-  （`scripts/docs/readme-fonts.mjs`）で、該当する文字から構築されます。埋め込めないグリフがある場合は例外が発生します。
-- **再生成。** `npm run docs:readme-diagrams` は、README の順序ですべての 12 ファイルを書き換え、ファイルごとにサイズを 1 行出力します。個別のジェネレーターを単独で実行することもできます（`node scripts/docs/gen-readme-<name>.mjs`）。
-  `free-tier-budget` の数値は
-  `open-sse/config/freeModelCatalog.ts` のライブカタログローダーから取得されるため、`node --import tsx/esm` が必要です。カタログ変更による CI への影響については、
-  `docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` を参照してください。ジェネレーターと SVG は一緒にコミットしてください。
-- **検証。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` は、GitHub が配信する方法
-  （`<img>` タグ、camo の `Content-Security-Policy`、`image/svg+xml`）でファイルをレンダリングし、ライトテーマとダークテーマのフレームをキャプチャして、ページが行った外部フォントリクエスト数を報告します（0 でなければなりません）。
-- **容量。** 1 ファイルあたり 200 KB 未満です（各陳腐化テストでアサートされます）。README
-  画像のハード上限は 500 KB です（SVG studio バリデーターのルール）。
-- **文言は変更せず、数値はゲートから取得。** リブランドで変更されたのは書体とパレットであり、文言ではありません。各ジェネレーターは図の文言を `*_COPY` 定数として保持するか、ライブカタログから構築します。この文言は、描画されるテキストであると同時に、アウトライン化ステップへの入力でもあります。正式な数値は `<text>` ノード内に保持され（アウトライン化後は不可視、`fill-opacity:0`）、`check:docs-counts`
-  （`scripts/check/check-docs-counts-sync.mjs`）によって読み取られます。そのゲートが読み取る図の陳腐化テストでは、生成されたファイルに対してゲートのバリデーターも実行されるため、数値がコードから乖離するとテストが失敗します。ジェネレーター内の数値ではなく、必ずゲートが読み取るソースを修正してください。
+- **トークン。** `scripts/docs/readme-diagram-theme.mjs` は Editions のパレット（デフォルトの外観）を `packages/ui-kit/src/ci-editions.css` からコピーします。このパレットは `tests/unit/docs/readme-diagram-theme.test.ts` によってそのファイルに固定されており、両方の配色におけるすべてのサーフェス上のすべてのテキスト色について WCAG AA も検証します。唯一の例外であるライトテーマの `warn` は、キットの値がキャンバス上で 4.46:1 になるため、キットの警告色を 10 % 暗くしたものです。また、`ci-tokens.css` のキットのタイプスケール上にテキストの役割を定義します。Switzer はキットのウェイト（400/500/600、display は 500）と、すべての要素に対するトラッキングを使用します。ただしコードの役割（`.cmd`、`.term`、`.term-lg`、`.mono`、`.mono-sm`、`.mono-xs`）は IBM Plex Mono で、コマンド、URL、識別子、ターミナル画面専用です。
+  ライトテーマの値は `:root` に、ダークテーマの値はファイル内の `prefers-color-scheme: dark` の背後に置かれます。これにより、各画像は GitHub 上で閲覧者の配色に従います。
+- **フォント。** GitHub Markdown には CSS がなく、camo プロキシは外部取得をすべてブロックするため、キットのタイポグラフィはファイル内に含める必要があります。各ジェネレーターの最後のステップである `scripts/docs/readme-outline.mjs` は、HarfBuzz で Switzer の各役割を整形し、ベクターアウトライン（`<defs>` のパスと `<use>`）として描画します。また、Switzer にない矢印や幾何学記号は、それぞれ独自のメトリクスで描画します。フォントを埋め込むのではなく、必ずアウトラインを使用してください。Switzer のライセンス（`packages/ui-kit/src/fonts/FFL.txt`）は、書面による同意なしのサブセット化と形式変換を禁止する一方、ベクター描画を認めています。そのため、Switzer の `@font-face` や `data:` URI を再導入しないでください。ファイル内に残る唯一のフォントは、実際のコードテキストとして残る部分に使用する OFL の IBM Plex Mono サブセットです（`scripts/docs/readme-fonts.mjs`）。これはそれらの文字から構築され、埋め込めないグリフがある場合はエラーになります。
+- **再生成。** `npm run docs:readme-diagrams` は README の順序ですべての 12 個の図を書き換え、各ファイルについてサイズを 1 行ずつ出力します。単一のジェネレーターも単独で実行できます（`node scripts/docs/gen-readme-<name>.mjs`）。`free-tier-budget` は、図のデータがライブカタログローダー `open-sse/config/freeModelCatalog.ts` から取得されるため、`node --import tsx/esm` が必要です。カタログ変更による CI への影響は、`docs/architecture/QUALITY_GATES.md` → `docs-sync-strict` に記載されています。ジェネレーターと SVG は一緒にコミットしてください。
+  リリースモードでは、古い SVG があると失敗します。機能 PR では、`npm run check:generated-artifacts` が PR で編集された SVG のみを判定します（`docs/architecture/QUALITY_GATES.md` → "Generated files and derived baselines"）。
+- **検証。** `scripts/docs/readme-svg-shots.mjs <file.svg> <outdir>` は、GitHub が配信する方法（`<img>` タグ、camo の `Content-Security-Policy`、`image/svg+xml`）でファイルをレンダリングし、ライトとダークのフレームを取得します。また、ページが行った外部フォントリクエストを報告します（0 でなければなりません）。
+- **サイズ上限。** 1 ファイルあたり 200 KB 未満（各陳腐化テストで検証されます）。500 KB は README の画像に対する絶対的な上限です（SVG studio バリデーターのルール）。
+- **コピーは変更せず、カウントはゲートのものを使用。** リブランドで変更されたのはタイポグラフィとパレットであり、文言ではありません。各ジェネレーターは図のコピーを `*_COPY` 定数として保持するか、ライブカタログから構築します。このコピーは描画されるテキストであると同時に、アウトライン化ステップへの入力でもあります。正規の数値は `<text>` ノードに保持され（アウトライン化後は `fill-opacity:0` によって不可視）、`check:docs-counts`（`scripts/check/check-docs-counts-sync.mjs`）によって読み取られます。読み取りをゲートする図の陳腐化テストでは、生成ファイルに対してそのバリデーターも実行されます。そのため、コードと異なる数値になった図はテストに失敗します。修正するのは、ゲートが読み取るソースであり、ジェネレーター内の数値ではありません。
 
 ## 7. リファレンス索引
 
