@@ -936,6 +936,9 @@ export function updateFromHeaders(provider, connectionId, headers, status, model
   const retryAfterStr = getHeader(headerMap.retryAfter);
   const overLimit = getHeader(STANDARD_HEADERS.overLimit);
 
+  // Before the status-specific early returns: a 429 carries the exhausted window.
+  recordGroqTokenWindow(provider, connectionId, plainHeaders, model);
+
   // Handle 429 — rate limited
   if (status === 429) {
     const counts = limiter.counts();
@@ -1006,8 +1009,6 @@ export function updateFromHeaders(provider, connectionId, headers, status, model
       model
     );
   }
-
-  recordGroqTokenWindow(provider, connectionId, plainHeaders, model);
 }
 
 // Opt-in (RATE_LIMIT_GROQ_TOKEN_TRACKING): Groq's token window, default off.

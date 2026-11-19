@@ -57,3 +57,24 @@ test("with the flag on, a non-Groq provider records no token window", () => {
     undefined
   );
 });
+
+test("with the flag on, a Groq 429 still records its exhausted token window", () => {
+  // The 429 branch evicts the limiter and returns early; the token window it
+  // reports (remaining 0) is exactly the state monitoring must show.
+  process.env.RATE_LIMIT_GROQ_TOKEN_TRACKING = "true";
+  const connectionId = "groq-token-429";
+  rateLimitManager.enableRateLimitProtection(connectionId);
+
+  rateLimitManager.updateFromHeaders(
+    "groq",
+    connectionId,
+    { "x-ratelimit-limit-tokens": "18000", "x-ratelimit-remaining-tokens": "0" },
+    429,
+    "llama"
+  );
+
+  const learned = rateLimitManager.getLearnedLimits()[`groq:${connectionId}`];
+  assert.ok(learned, "the 429 should still record the Groq token window");
+  assert.equal(learned.tokenLimit, 18000);
+  assert.equal(learned.tokenRemaining, 0);
+});
