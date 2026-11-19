@@ -31,87 +31,10 @@ const {
   areContextWindowChecksDisabled,
 } = await import("../../src/shared/utils/featureFlags.ts");
 
-// #10889 added OMNIROUTE_OIDC_DISABLE_PASSWORD_LOGIN, bumping the count to 51.
-// The codex-app-server work then added OMNIROUTE_CODEX_APP_SERVER_ENABLED
-// (feature flag gating the opt-in Codex app-server WebSocket transport),
-// bumping it from 51 to 52. NO_THINKING_ALIAS_ENABLED (master switch for the
-// no-think/<provider>/<model> gateway aliases) then bumped it from 52 to 53.
-// OMNIROUTE_DISABLE_THINKING_LEVEL_VARIANTS bumped it from 53 to 54;
-// the dead ONEPROXY_ENABLED (readerless since the 1proxy purge, #12091)
-// brought it back to 53. UNIVERSAL_CONTEXT_HANDOFF_ENABLED bumped it to 54.
-// #13641 added SEARCH_STATS_HIDE_DELETED_CONNECTIONS, bumping the count to 56.
-// 893fef9c added OPENCODE_PARK_AND_RESUME (74 -> 75); FLUSH_EMPTY_RETRY_ENABLED
-// (flush empty-turn retry, default off) bumps it to 76. ROTATION_ATTRIBUTION
-// (rotation skipped/served masked ids + proxy-log request correlation, all
-// read-only diagnostics) takes it to 77. STREAM_READINESS_STALL_RETRY
-// (one bounded retry when a stream stalls before usable output, default off)
-// takes it to 78.
-// OPENCODE_POOL_RESELECT (re-select a pool member per attempt after a
-// per-address 429, default off) takes the registry to 79.
-// PROXY_POOL_SHARED_EGRESS_ORDER (shared-egress pool ordering, default off)
-// takes it to 80.
-// PROXY_OPERATOR_EGRESS_ENABLED (operator-pushed dated observed addresses per
-// pool member, default off) takes it to 82; USAGE_LIMIT_IGNORE_UNPRICED (#14799,
-// opt-in flag to count unpriced usage as $0 in USD quotas, default off) to 83;
-// REASONING_REPLAY_ENABLED (#12486, default on) to 84; COMBO_AUTO_PRUNE_STALE_STEPS
-// (#13505, default off) to 85; KIRO_TOOL_CALL_REPAIR_ENABLED (one-shot Kiro
-// tool_call wrapper repair, default on) to 86.
-// OPENCODE_PUBLISHED_CATALOG_ROUTING_ENABLED (#16798, OpenCode model surface from the
-// published catalog, default off) takes it to 87.
-// UNPRICED_USAGE_BUDGET_POLICY (#14604, default fail_closed) takes it to 113.
-// COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, default off) takes it to 114.
-// API_KEY_AUDIT_CLIENT_DETAILS_ENABLED (#17982, client IP + user-agent on api_key.auth.touch
-// audit rows, default off) takes it to 115.
-// CLAUDE_CACHE_TAIL_TTL_1H (1h TTL for the Claude cache conversation tail, default off)
-// takes it to 116.
-// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection
-// keepMidConversationSystem opt-in) takes it back to 115.
-// The two #18312 transport flags (PROXY_STRICT_POST_REPLAY_ENABLED, RESPONSES_TRANSPORT_KEEPALIVE_ENABLED,
-// both default off) take it to 117.
-// OPENCODE_FREE_TIER_EGRESS_PROBE (one-hop egress probe after a FreeTierError, default off) takes it to 118.
-// PROXY_REFUSAL_MODEL_SCOPE (#18686, default off) takes it to 119.
-// FAL_NATIVE_ENABLED (#18849, schema-driven Fal gateway, default off) takes it to 120;
-// CODEX_SEARCH_AUTO_FALLBACK_ENABLED (#17933, default off) takes it to 121.
-// CODE_ASSIST_INELIGIBLE_ONBOARD_LEGACY_TIER (#18060, default off) takes it to 122;
-// PII_REVERSIBLE_VAULT_ENABLED (#18017 wiring, default off) takes it to 123;
-// SYSTEMONE_CLOUDFLARE_BACKEND_ENABLED (#16676), SYSTEMONE_OLLAMA_LOCAL_BACKEND_ENABLED (#14667)
-// and COMBO_JEV_STRATEGY_ENABLED (#15279), all default off, take it to 126.
-const EXPECTED_FEATURE_FLAG_COUNT = 126;
-// tool_call wrapper repair, default on) to 86; OPENCODE_V2_CLIENT_FINGERPRINT_ENABLED
-// (#16571, OpenCode v2 client fingerprint, default off) to 87.
-// tool_call wrapper repair, default on) to 86; CLAUDE_OAUTH_SUMMARIZED_THINKING_UNREDACTED
-// (#17003, lets Claude OAuth drop the redact-thinking beta for summarized thinking,
-// default off) to 87.
-// MODEL_ENDPOINT_CAPABILITY_GATE_ENABLED (#16929/#16956, default off) takes it to 88.
-// ANTHROPIC_COMPATIBLE_MID_CONVERSATION_SYSTEM (#16236, moved to the per-connection keepMidConversationSystem opt-in) — 115 back to 114.
-// MODELS_DEV_EFFORT_TIERS_ENABLED (#15944, default off) takes it to 88.
-// default off) to 87; AUTO_REQUEST_RESOLVED_CAPABILITIES (#16419, resolved-capability
-// scoring inputs on the auto/* request path, default off) to 88.
-// default off) to 87; CREDENTIAL_HEALTH_RETEST_AUTO_DISABLED (#16190, retest of
-// gateway-disabled connections, default off) to 88.
-// CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY (#16599, default off) to 88.
-// default off) to 87; STREAM_LATE_OUTPUT_PROBE_ENABLED
-// (#16927 late-output stream probe, default off) to 88.
-// LMARENA_SYNTHESIZED_CX_ENABLED (#16895, default off) to 88.
-// CONTENT_POLICY_REFUSAL_COMBO_STOP_ENABLED (#15917, default off) takes it to 88.
-// NATIVE_CODEX_REACTIVE_COMPACTION_ENABLED (#16632, default off) to 88.
-// COOLDOWN_RETRY_SKIP_REFUSALS_ENABLED (#16305, default off) takes it to 88.
-// CURSOR_GROK_47_DROP_MAX_EFFORT (#17386, default off) takes it to 112.
-// default off) to 87; QUOTA_WINDOW_BOUNDED_PARK
-// (#17000, per-window quota policy honours the bounded park, default off) to 88.
-// default off) to 87; IMAGE_GENERATION_LONG_JOBS
-// (#16260, connection image timeout + caller cancellation + Playground SSE, default off) to 88.
-// COMPRESSION_CACHE_AUTOMATIC_PREFIX_ESTIMATE (#17114, automatic-prefix eligibility estimate in
-// the compression cache stats, default off) takes it to 114.
-
 // ──────────────────────────────────────────────────────
 // Test group 1 — Flag definitions registry
 // ──────────────────────────────────────────────────────
 describe("featureFlagDefinitions", () => {
-  it(`has exactly ${EXPECTED_FEATURE_FLAG_COUNT} flag definitions`, () => {
-    assert.strictEqual(FEATURE_FLAG_DEFINITIONS.length, EXPECTED_FEATURE_FLAG_COUNT);
-  });
-
   it("keeps the documented catalog total in sync with the registry", () => {
     const catalog = fs.readFileSync(
       new URL("../../docs/reference/FEATURE_FLAGS.md", import.meta.url),
@@ -141,7 +64,7 @@ describe("featureFlagDefinitions", () => {
 
   it("has unique keys for all flags", () => {
     const keys = FEATURE_FLAG_DEFINITIONS.map((d) => d.key);
-    assert.strictEqual(new Set(keys).size, EXPECTED_FEATURE_FLAG_COUNT);
+    assert.strictEqual(new Set(keys).size, keys.length);
   });
 
   it("has valid categories for all flags", () => {
@@ -599,9 +522,14 @@ describe("resolveFeatureFlag", () => {
   });
 
   describe("resolveAllFeatureFlags", () => {
-    it(`returns all ${EXPECTED_FEATURE_FLAG_COUNT} flags`, () => {
-      const all = resolveAllFeatureFlags();
-      assert.strictEqual(all.length, EXPECTED_FEATURE_FLAG_COUNT);
+    it("returns one resolved value for each registered flag", () => {
+      const resolved = resolveAllFeatureFlags();
+      const keys = resolved.map((flag) => flag.key);
+      const registeredKeys = FEATURE_FLAG_DEFINITIONS.map((definition) => definition.key);
+      assert.deepEqual(keys.sort(), registeredKeys.sort());
+      for (const flag of resolved) {
+        assert.equal(flag.definition.key, flag.key);
+      }
     });
 
     it("marks DB-overridden flags with source 'db'", () => {
