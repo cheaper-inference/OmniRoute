@@ -257,15 +257,15 @@ Hookovi stranice:
 
 ## Varijable okruženja
 
-| Varijabla                          | Zadano     | Opis                                                             |
-| ---------------------------------- | ---------- | ---------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`   | Drajver za upotrebu: `sqlite` ili `redis`                        |
-| `QUOTA_STORE_REDIS_URL`            | _(prazno)_ | Redis URL, npr. `redis://localhost:6379`                         |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`      | 0..1; `>=` prag aktivira strogi način rada                       |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`      | 0..1; množitelj za kombinovani rezultat meke politike            |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`       | Dani prije nego što GC ukloni stare `quota_consumption` bucket-e |
+| Varijabilna                        | Default    | Opis                                                            |
+| ---------------------------------- | ---------- | --------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`   | Driver za korištenje: `sqlite` ili `redis`                      |
+| `QUOTA_STORE_REDIS_URL`            | _(prazno)_ | Redis URL, npr `redis://localhost:6379`                         |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`      | 0..1; `>= threshold` aktivira strogi način rada                 |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`      | 0..1; množitelj za soft-policy combo rezultat                   |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`       | Danima prije nego što GC ukloni stare `quota_consumption` kante |
 
-Postavke baze podataka (`quotaStore.*`) nadjačavaju varijable okruženja.
+DB postavke (`quotaStore.*`) nadjačavaju env vars.
 
 ---
 
@@ -304,16 +304,16 @@ Ako su oba uslova ispunjena, šalje svaki naslijeđeni pool na `POST /api/quota/
 
 ---
 
-## Pokrivenost testovima
+## Test Coverage
 
-Dva sloja automatizovane pokrivenosti dolaze uz quota-share engine:
+Dva sloja automatiziranog pokrivanja broda s motorom za podjelu kvota:
 
-| Paket                  | Komanda                                                                | Šta pokriva                                                                                                                                                                                            |
-| :--------------------- | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jedinični (29 testova) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR scheduler, saturation gating, concurrency caps, fairShare matematika, backlog queueing                                                                                                             |
-| Integraciona matrica   | `npm run test:combo:matrix`                                            | End-to-end odluka o rutiranju kroz stvarni combo pipeline; DRR pravičnost + saturation deprioritization putem live seams (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite                 | Command                                                                | Šta pokriva                                                                                                                                                                                                             |
+| :-------------------- | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jedinica (29 testova) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR planer, gating zasićenja, ograničenja konkurentnosti, fairShare matematika, zaostali red čekanja                                                                                                                    |
+| Integraciona matrica  | `npm run test:combo:matrix`                                            | Odluka o rutiranju od kraja do kraja kroz pravi kombinovani cevovod; DRR pravičnost + određivanje prioriteta zasićenja putem šavova uživo (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Integraciona matrica se pokreće u CI-u zajedno sa svih 19 javnih strategija. Jedinični paket se može pokrenuti samostalno.
+Matrica integracije radi u CI zajedno sa sve 22 javne strategije. Jedinica se može pokretati samostalno.
 
 ---
 
