@@ -51,67 +51,67 @@ OmniRoute/
 
 ---
 
-## Bestanden in de hoofdmap
+## Root-bestanden
 
-| Bestand                                     | Doel                                                                                                     |
-| ------------------------------------------- | -------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Marketinglandingspagina + snelstartgids + functiematrix (zie ook `llm.txt`)                              |
-| **CHANGELOG.md**                            | Changelog per release (automatisch gegenereerd door de skill `/version-bump-cc`)                         |
-| **LICENSE**                                 | Tekst van de MIT-licentie                                                                                |
-| **CLAUDE.md**                               | Projectregels voor Claude Code-agents (strikte regels, conventies, scenario's)                           |
-| **AGENTS.md**                               | Hetzelfde als CLAUDE.md, maar voor AI-agents die niet van Claude zijn (Codex, Cursor enz.)               |
-| **GEMINI.md**                               | Beknopte regels voor op Gemini gebaseerde agents (subset van CLAUDE.md)                                  |
-| **CONTRIBUTING.md**                         | Handleiding voor bijdragers: installatie, conventionele commits, tests, PR-proces                        |
-| **SECURITY.md**                             | Beleid voor het melden van kwetsbaarheden, ondersteunde versies, dreigingsmodel                          |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — verwachtingen voor gedrag binnen de community                                     |
-| **llm.txt**                                 | Landingspagina in platte tekst, geoptimaliseerd voor LLM-crawlers (SEO voor AI-assistenten)              |
-| **package.json**                            | npm-manifest, scripts, afhankelijkheden, engines, c8-dekkingsdrempel                                     |
-| **package-lock.json**                       | Vergrendelde afhankelijkheidsboom                                                                        |
-| **tsconfig.json**                           | TypeScript-hoofdconfiguratie                                                                             |
-| **tsconfig.typecheck-core.json**            | Typecheckconfiguratie voor de kern in `src/`                                                             |
-| **tsconfig.typecheck-noimplicit-core.json** | Strikte typecheck (`noImplicitAny`)                                                                      |
-| **tsconfig.tsbuildinfo**                    | Cache voor incrementele TS-builds (genegeerd door Git)                                                   |
-| **next.config.mjs**                         | Buildconfiguratie voor Next.js 16 (zelfstandige uitvoer)                                                 |
-| **next-env.d.ts**                           | Automatisch door Next.js gegenereerde omgevingstypen                                                     |
-| **eslint.config.mjs**                       | Platte ESLint-configuratie (regels per projectonderdeel)                                                 |
-| **prettier.config.mjs**                     | Opmaakregels voor Prettier                                                                               |
-| **postcss.config.mjs**                      | PostCSS-configuratie voor de Tailwind/CSS-pijplijn                                                       |
-| **playwright.config.ts**                    | Configuratie voor Playwright-E2E-tests                                                                   |
-| **vitest.config.ts**                        | Vitest-configuratie (standaardtestsuite)                                                                 |
-| **vitest.mcp.config.ts**                    | Vitest-configuratie voor MCP-server-/autoCombo-/cachetestsuites                                          |
-| **sonar-project.properties**                | SonarQube-/SonarCloud-configuratie (codekwaliteit)                                                       |
-| **Dockerfile**                              | Meerfasige Docker-build (builder → runner-base → runner-cli)                                             |
-| **docker-compose.yml**                      | Compose-configuratie voor ontwikkeling met 4 profielen (base, cli, host, cliproxyapi) + Redis-sidecar    |
-| **docker-compose.prod.yml**                 | Compose-configuratie voor productie (poort 20130, Redis, benoemde volumes)                               |
-| **.dockerignore**                           | Bestanden die van de Docker-context zijn uitgesloten                                                     |
-| **fly.toml**                                | Implementatieconfiguratie voor Fly.io (regio `sin`, poort 20128, /data-volume)                           |
-| **.env.example**                            | Sjabloon voor omgevingsbestand (bij de eerste installatie automatisch gekopieerd naar `.env`)            |
-| **.gitignore**                              | Git-negeerpatronen                                                                                       |
-| **.npmignore**                              | Uitsluitingslijst voor npm-publicatie                                                                    |
-| **.npmrc**                                  | npm-configuratie (register, lockfilebeleid)                                                              |
-| **.node-version**                           | Vastgezette Node-versie (gebruikt door nvm-compatibele tools)                                            |
-| **.nvmrc**                                  | Vastgezette Node-versie voor nvm                                                                         |
-| **eslint.complexity.config.mjs**            | ESLint-configuratie voor de complexiteitsratel (`scripts/check/check-complexity.mjs --config`)           |
-| **eslint.sonarjs.config.mjs**               | ESLint-configuratie voor SonarJS-regels (cognitieve complexiteit/duplicatie)                             |
-| **source.config.ts**                        | Fumadocs-`defineDocs`-bronconfiguratie (levert invoer voor `.source/`)                                   |
-| **knip.json**                               | Knip-configuratie — ongebruikte bestanden/exports/afhankelijkheden (levert invoer voor de dode-codegate) |
-| **stryker.conf.json**                       | Configuratie voor mutatietests met Stryker                                                               |
-| **.size-limit.json**                        | Configuratie voor het bundelbudget van size-limit                                                        |
-| **promptfooconfig.yaml**                    | Evaluatieconfiguratie voor promptfoo                                                                     |
-| **.gitleaks.toml**                          | Regelset voor geheimegegevensscans met gitleaks                                                          |
-| **.zizmor.yml**                             | Configuratie voor beveiligingslinting van GitHub Actions met zizmor                                      |
-| **socket.yml**                              | Configuratie voor toeleveringsketenbeveiliging van Socket.dev                                            |
-| **news.json**                               | Gelokaliseerde v2-aankondigingsfeed; het Radar-lanceringsitem wordt inactief geleverd                    |
-| **flake.nix** / **flake.lock**              | Nix-dev-shell-definitie + vergrendeling                                                                  |
-| **.env**                                    | Lokale geheime gegevens (genegeerd door git — gegenereerd vanuit `.env.example`)                         |
+| Bestand                                     | Doel                                                                                            |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| **README.md**                               | Marketingbestemmingspagina + snelle start + functiematrix (zie ook `llm.txt`)                   |
+| **CHANGELOG.md**                            | Wijzigingslogboek per release (automatisch gegenereerd door `/version-bump-cc` skill)           |
+| **LICENSE**                                 | MIT -licentietekst                                                                              |
+| **CLAUDE.md**                               | Projectregels voor Claude Code-agenten (harde regels, conventies, scenario's)                   |
+| **AGENTS.md**                               | Hetzelfde als CLAUDE.md maar voor niet-Claude AI agenten (Codex, Cursor, etc.)                  |
+| **GEMINI.md**                               | Beknopte regels voor op Gemini gebaseerde agenten (subset van CLAUDE.md)                        |
+| **CONTRIBUTING.md**                         | Gids voor bijdragers: installatie, conventionele commits, testen, PR -stroom                    |
+| **SECURITY.md**                             | Beleid voor kwetsbaarheidsrapportage, ondersteunde versies, bedreigingsmodel                    |
+| **CODE_OF_CONDUCT**                         | Inzender Convenant — gedragsverwachtingen gemeenschap                                           |
+| **llm.txt**                                 | Landing in platte tekst geoptimaliseerd voor LLM crawlers (SEO voor AI assistenten)             |
+| **package.json**                            | npm-manifest, scripts, afhankelijkheden, motoren, c8-dekkingspoort                              |
+| **package-lock.json**                       | Vergrendelde afhankelijkheidsboom                                                               |
+| **tsconfig.json**                           | Root TypeScript -configuratie                                                                   |
+| **tsconfig.typecheck-core.json**            | Typecheck configuratie voor `src/` core                                                         |
+| **tsconfig.typecheck-noimplicit-core.json** | Strikte (`noImplicitAny`) typecontrole                                                          |
+| **tsconfig.tsbuildinfo**                    | TS incrementele build-cache (gitignored)                                                        |
+| **volgende.config.mjs**                     | Next.js 16 build-configuratie (standalone uitvoer)                                              |
+| **volgende-env.d.ts**                       | Next.js automatisch gegenereerde env-typen                                                      |
+| **eslint.config.mjs**                       | ESLint flat config (regels per projectgebied)                                                   |
+| **mooier.config.mjs**                       | Prettier -opmaakregels                                                                          |
+| **postcss.config.mjs**                      | PostCSS configuratie voor Tailwind/CSS pijplijn                                                 |
+| **toneelschrijver.config.ts**               | Playwright E2E -testconfiguratie                                                                |
+| **vitaal.config.ts**                        | Vitest -configuratie (standaardsuite)                                                           |
+| **vitest.mcp.config.ts**                    | Vitest configuratie voor MCP server / autoCombo / cache-suites                                  |
+| **sonar-project.eigenschappen**             | SonarQube/SonarCloud config (codekwaliteit)                                                     |
+| **Dockerbestand**                           | Meertraps Docker -build (bouwer → runner-base → runner-cli)                                     |
+| **docker-compose.yml**                      | Ontwikkelaar componeert met 4 profielen (base, cli, host, cliproxyapi) + redis sidecar          |
+| **docker-componeren.prod.yml**              | Productiecompositie (poort 20130, redis, benoemde volumes)                                      |
+| **.dockerignore**                           | Bestanden uitgesloten van Docker -context                                                       |
+| **fly.toml**                                | Fly.io-implementatieconfiguratie (regio `sin`, poort 20128, /datavolume)                        |
+| **.env.voorbeeld**                          | Sjabloon-env-bestand (automatisch gekopieerd naar `.env` bij eerste installatie)                |
+| **.gitnegeren**                             | Git negeer patronen                                                                             |
+| **.npmignore**                              | npm publiceert uitsluitingslijst                                                                |
+| **.npmrc**                                  | npm config (register, lockfile-beleid)                                                          |
+| **.node-versie**                            | Knooppuntversiepin (gebruikt door nvm-compatibele tools)                                        |
+| **.nvmrc**                                  | Knooppuntversiepin voor nvm                                                                     |
+| **eslint.complexiteit.config.mjs**          | ESLint -configuratie voor de complexiteitsratel (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | ESLint configuratie voor SonarJS -regels (cognitieve complexiteit / duplicatie)                 |
+| **bron.config.ts**                          | Fumadocs `defineDocs` bronconfiguratie (feeds `.source/`)                                       |
+| **knip.json**                               | Knip config — ongebruikte files/exports/deps (voedt de poort met dode code)                     |
+| **spits.conf.mjs**                          | Stryker-mutatietestconfiguratie (berekent `tap.testFiles` uit `mutate`)                         |
+| **.size-limit.json**                        | groottelimiet bundelbudgetconfiguratie                                                          |
+| **promptfooconfig.yaml**                    | promptfoo eval-config                                                                           |
+| **.gitleaks.toml**                          | gitleaks geheime scanregelset                                                                   |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                      |
+| **socket.yml**                              | Socket.dev supply chain-configuratie                                                            |
+| **news.json**                               | Gelokaliseerde v2-aankondigingsfeed; Radarlanceringsitem wordt inactief verzonden               |
+| **vlok.nix** /** vlok.slot**                | Nix dev-shell definitie + slot                                                                  |
+| **.env**                                    | Lokale geheimen (git genegeerd — gegenereerd op basis van `.env.example`)                       |
 
-> **In v3.8.26 uit de hoofdmap verplaatst (opruiming):**
+> **Verplaatst uit de root in v3.8.26 (opruimen):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` en het gegenereerde `quality-metrics.json` (genegeerd door git). Zie [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` en de gegenereerde `quality-metrics.json` (gitignored). Zie [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
-## `src/` — Next.js -applicatie
+## `src/` — Next.js toepassing
 
 ```
 src/
@@ -242,13 +242,13 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboardcomponent API: adapters over `packages/ui-kit` — zie `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: pictogramnamen gebruikt door de schermen → Lucide-componenten (`<Icon>`)               |
-| `constants/providers.ts`         | **381 aanbieders** met Zod -validatie (bron van waarheid)                                          |
+| `constants/providers.ts`         | **394 aanbieders** met Zod -validatie (bron van waarheid)                                          |
 | `constants/cliTools.ts`          | Extern CLI toolregister                                                                            |
-| `constants/routingStrategies.ts` | **20 routeringsstrategieën** met prioriteiten                                                      |
+| `constants/routingStrategies.ts` | **22 routeringsstrategieën** met prioriteiten                                                      |
 | `constants/publicApiRoutes.ts`   | Routes waarvoor Bearer-authenticatie (vs. management) vereist is                                   |
 | `constants/upstreamHeaders.ts`   | Header-weigerlijst voor upstream-aanvragen                                                         |
 | `validation/schemas.ts`          | ~ 80 Zod schema's (enkele bron van waarheid voor API contracten)                                   |
-| `validation/helpers.ts`          | Zod -validatiehelpers (`validateBody`, etc.)                                                       |
+| `validation/helpers.ts`          | Zod -validatiehelpers (`validateBody`, enz.)                                                       |
 | `types/`                         | Gedeelde TS typen                                                                                  |
 | `contracts/`                     | Publieke API contracten (geconsumeerd door `files:` in `package.json`)                             |
 | `utils/circuitBreaker.ts`        | Leverancier stroomonderbreker (zie `docs/architecture/RESILIENCE_GUIDE.md`)                        |
@@ -265,7 +265,7 @@ Afzonderlijke npm-werkruimte (`@omniroute/open-sse`). Verwerkt aanvragen en voer
 ```
 open-sse/
 ├── handlers/            # 16 bestanden (12 handlers + 4 helpers): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, enz.
-├── executors/           # 150 executormodules (klassen die BaseExecutor uitbreiden + helpers per provider)
+├── executors/           # 163 executormodules (klassen die BaseExecutor uitbreiden + helpers per provider)
 ├── translator/          # Formaatconverters (9 voor aanvragen, 9 voor antwoorden, 9 helpers)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ servicemodules (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM, enz.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Externe CLI -integraties + Interne OmniRoute CLI                                                   |
 | `I18N.md`                   | i18n-architectuur, een taal toegevoegd, 67 locales                                                 |
 | `UNINSTALL.md`              | Reinig de verwijderingsstappen                                                                     |
-| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerd** catalogus van 381 aanbieders (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Automatisch gegenereerd** catalogus van 394 aanbieders (regen: `npm run gen:provider-reference`) |
 
 ### Subsysteem diepe duiken
 

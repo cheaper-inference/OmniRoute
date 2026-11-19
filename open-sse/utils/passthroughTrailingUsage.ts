@@ -1,20 +1,48 @@
-import { estimateUsage } from "./usageTracking.ts";
+import {
+  deriveUsageEvidence,
+  hasEstimatedUsageEvidence,
+  mergeUsageEvidence,
+  usableTokenCounter,
+} from "./usageEvidence.ts";
+import { estimateUsage, type UsageLike } from "./usageTracking.ts";
 import { mergeCacheCreationFields } from "./cacheWriteUsage.ts";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type UsageRecord = Record<string, any>;
-
-/**
- * Passthrough chat path: resolve the usage for a trailing usage-only
- * (`choices: []`) summary frame.
- *
- * - Some upstreams (e.g. Ollama Cloud) emit `prompt_tokens: 0` although input
- *   was sent; estimate the input count from the request body (mutates `summary`,
- *   which is what gets forwarded to the client).
- * - #15619: the real trailing summary wins over the finish-chunk usage
- *   (last-wins, never summed); fields the summary omits (e.g. completion_tokens)
- *   are kept from the previous usage.
- */
+type UsageRecord = UsageLike;
+function previousInputIsKnown(previous: unknown): boolean {
+  if (!previous || typeof previous !== "object") return false;
+  return (
+    usableTokenCounter((previous as UsageRecord).prompt_tokens) &&
+    deriveUsageEvidence(previous).input.source !== "unknown"
+  );
+}
+function repairTrailingInput(
+  summary: UsageRecord,
+  previous: unknown,
+  body: unknown,
+  length: number,
+  format: string
+): void {
+  if (!(summary.completion_tokens > 0)) return;
+  if ((summary.prompt_tokens ?? 0) !== 0) return;
+  if (summary.prompt_tokens == null && previousInputIsKnown(previous)) return;
+  const estimated = estimateUsage(body, length, format);
+  if (!(estimated?.prompt_tokens > 0)) return;
+  summary.usage_evidence = {
+    ...deriveUsageEvidence(summary),
+    input: deriveUsageEvidence(estimated).input,
+  };
+  summary.estimated = true;
+  summary.prompt_tokens = estimated.prompt_tokens;
+  // A reported total may contain additional categories, so never add an estimate to it.
+  if (!usableTokenCounter(summary.total_tokens))
+    summary.total_tokens = summary.completion_tokens + estimated.prompt_tokens;
+}
+function fillMissingTotal(result: UsageRecord, summary: UsageRecord): void {
+  if (usableTokenCounter(summary.total_tokens)) return;
+  if (usableTokenCounter(result.prompt_tokens) && usableTokenCounter(result.completion_tokens))
+    result.total_tokens = result.prompt_tokens + result.completion_tokens;
+}
+/** Merge the last cumulative receipt without fabricating counters the provider omitted. */
 export function resolveTrailingUsageSummary(
   summary: UsageRecord,
   previous: unknown,
@@ -22,17 +50,23 @@ export function resolveTrailingUsageSummary(
   totalContentLength: number,
   sourceFormat: string
 ) {
-  if (typeof summary === "object" && !Array.isArray(summary) && summary.completion_tokens > 0) {
-    if ((summary.prompt_tokens ?? 0) === 0) {
-      const estimated = estimateUsage(body, totalContentLength, sourceFormat);
-      if (estimated?.prompt_tokens > 0) {
-        summary.prompt_tokens = estimated.prompt_tokens;
-        summary.total_tokens = (summary.total_tokens ?? 0) + estimated.prompt_tokens;
-      }
-    }
-  }
-  if (previous && typeof previous === "object" && !Array.isArray(previous)) {
-    return { ...previous, ...summary, ...mergeCacheCreationFields(previous, summary) };
-  }
-  return summary;
+  repairTrailingInput(summary, previous, body, totalContentLength, sourceFormat);
+  if (!previous || typeof previous !== "object" || Array.isArray(previous)) return summary;
+  const result: UsageRecord = {
+    ...previous,
+    ...summary,
+    ...mergeCacheCreationFields(previous, summary),
+    usage_evidence: mergeUsageEvidence(previous, summary),
+  };
+  fillMissingTotal(result, summary);
+  if (hasEstimatedUsageEvidence(result)) result.estimated = true;
+  else delete result.estimated;
+  return result;
+}
+/** Output-only summaries must reach the merge before generic zero-input repair. */
+export function hasPriorInputForTrailingUsage(payload: unknown, previous: unknown): boolean {
+  const event = payload as { choices?: unknown[]; usage?: UsageRecord } | null;
+  if (!Array.isArray(event?.choices) || event.choices.length !== 0 || !event.usage) return false;
+  if (event.usage.prompt_tokens != null || event.usage.input_tokens != null) return false;
+  return previousInputIsKnown(previous);
 }

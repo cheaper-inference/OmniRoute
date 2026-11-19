@@ -84,6 +84,10 @@ lastUpdated: 2026-11-03
   `--ci-color-accent-foreground` ink in dark), `danger` is `destructive`, and `warning` is the kit `warning`
   button. `Badge` status variants are kit tones, and `Select` with `<option>` children renders the kit
   `NativeSelect`.
+  Two adapters are imported by path, not from the index: `InteractiveTableRow`
+  (`src/shared/components/InteractiveTableRow.tsx`), a kit `TableRow` that takes `onActivate` and
+  `selected` and answers Tab, Enter and Space, and `CodePreview`
+  (`src/shared/components/CodePreview.tsx`), the kit code block with its copy labels translated.
   `tests/unit/ui/adapters/*.test.tsx` pin each adapter.
 - **Shell.** `src/app/(dashboard)/layout.tsx` renders `DashboardLayout`, which renders
   `src/shared/components/layouts/DashboardShell.tsx`: the kit `SidebarProvider` / `Sidebar` /
@@ -130,7 +134,12 @@ lastUpdated: 2026-11-03
    strings from `useTranslations(...)` whenever a kit component renders text.
 4. Tailwind utilities win over kit component classes (the kit declares
    `@layer theme, base, components, utilities` and its rules live in `components`) — use utilities for
-   spacing and layout, not to re-color kit components.
+   spacing and layout, not to re-color kit components. Typography is the exception:
+   `packages/ui-kit/src/ci-typography.css` is imported outside any layer, so its tag rules beat
+   utilities. Weight, `tracking-*` and `leading-*` classes have no effect on `h1`–`h6`, weight and
+   `tracking-*` have none on table cells, and weight has none on buttons
+   (`tests/unit/dead-typography-classes.test.ts` rejects them there); `font-mono` has no effect on
+   `th`, `td`, `button`, `input` and `textarea`. Size, colour and `uppercase` utilities still apply.
 5. Headings: `.ci-heading` for page and section titles; `.ci-dashboard-display` only for large, sparse
    display text such as the error-page status code. Both use Switzer.
 6. `tests/unit/dashboard-kit-sweep.test.ts` guards the kit adoption: no Material ligature span under
@@ -142,11 +151,37 @@ lastUpdated: 2026-11-03
    only in the files the test lists.
 7. Verify both themes and the 390 px viewport before a PR (screenshots); `tests/e2e/a11y.spec.ts` runs
    axe.
+8. A colour utility must name a token of the `@theme` block in `src/app/globals.css`: a name that is
+   not there (`text-text`, `bg-bg-muted`, `text-danger`…) generates no CSS and the element keeps the
+   inherited colour (`tests/unit/theme-color-classes.test.ts`). There is no `card` class: use the
+   `Card` adapter (`tests/unit/no-bare-card-class.test.ts`). Text in a chart colour uses
+   `text-chart-N-ink`; `text-chart-N` is for icons and strokes
+   (`tests/unit/chart-ink-for-text.test.ts`). A translucent colour is built with `color-mix`, never
+   by appending a hex alpha to a value that may be a `var()`
+   (`tests/unit/color-alpha-concatenation.test.ts`).
+9. Tables: every kit `Table` passes `scrollLabel`, the name of its scroll region, and
+   `scrollbarLabel` when it draws the persistent scrollbar
+   (`tests/unit/kit-tables-have-accessible-name.test.ts`). A clickable row is an
+   `InteractiveTableRow` with `onActivate`, never `<TableRow onClick>`
+   (`tests/unit/table-row-click-needs-keyboard.test.ts`). A table inside a card, or inside any
+   bordered box, drops its own frame with `containerClassName="rounded-none border-0"`
+   (`tests/unit/datatable-not-framed-inside-card.test.ts`).
+10. A bar that shows an amount is the kit `Progress`, or carries `role="progressbar"` with a name and a
+    value when the kit bar cannot draw it (`tests/unit/progress-bars-have-semantics.test.ts`). Menus,
+    popovers and tooltips come from the kit (`Popover`, `SearchableSelect`, the `Tooltip` adapter), not
+    from an absolutely positioned panel opened by local state
+    (`tests/unit/hand-positioned-overlays.test.ts`).
+11. On the `Input` adapter `className` styles the field wrapper; a class meant for the control goes in
+    `inputClassName` (`tests/unit/input-adapter-classname-destination.test.ts`).
 
 ## 3. Adding a screen
 
 1. Open the page with the kit `PageHeader` (`@omniroute/ui-kit/page-header`, `compact` inside the
-   dashboard) — title, description and `actions`. The shell header then drops its own title.
+   dashboard) — title, description and `actions`. The shell header then drops its own title, and it
+   is hidden below 1024 px, so a route without a `PageHeader` has no title on a phone
+   (`tests/unit/dashboard-page-header-coverage.test.ts`). A path segment that has no page of its own
+   goes into `ROUTE_PREFIXES_WITHOUT_PAGE` in `src/shared/utils/breadcrumbTrail.ts`, so its crumb is
+   text and not a dead link (`tests/unit/breadcrumb-trail-routes.test.ts`).
 2. Build controls from `@/shared/components` (the adapters) and use kit components by subpath where no
    adapter exists (`Table`/`TableScrollArea`/`DataTableShell`, `Field`, `Alert`, `Tabs`, `RadioGroup`,
    `Slider`…).
@@ -155,12 +190,14 @@ lastUpdated: 2026-11-03
 4. Colors: semantic utilities (`text-success`, `bg-warning-bg`, `border-border`…) and
    `var(--color-chart-N)` for chart series; no hex values and no `dark:` variants that only repeat a color.
 5. Text: every string, including the labels you pass to kit components, comes from `useTranslations`. New
-   keys go into `src/i18n/messages/en.json`, `pt-BR.json` and `vi.json` (the Vietnamese parity test pins
-   every English key); the other locales are filled by the i18n sync.
+   keys go into `src/i18n/messages/en.json` only; the release refresh fills the other locales
+   (`tests/_helpers/localeParityMode.ts` describes the two modes). A test that mounts a real
+   non-English catalog builds its messages as the runtime does, with `deepMergeFallback` from
+   `src/i18n/request.ts`, so a key that is still English-only falls back instead of throwing.
 6. Run the guards before the PR: `tests/unit/dashboard-kit-sweep.test.ts`,
    `tests/unit/icon-map-coverage.test.ts`, `tests/unit/icon-map-object-values.test.ts`,
    `npm run check:dashboard-typecheck` (the only check that catches a duplicated import in `iconMap.ts`),
-   `npm run check:ui-icu`, and the screen's own tests.
+   `npm run check:ui-icu`, the guards named in rules 4 and 8–11, and the screen's own tests.
 
 ## 4. Adding or changing an adapter
 
