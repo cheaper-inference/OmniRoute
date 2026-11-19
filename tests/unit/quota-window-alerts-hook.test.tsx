@@ -240,7 +240,9 @@ it("retries a failed latch read instead of muting the alerts for the session", a
       if (url === LATCH_URL) {
         latchReads += 1;
         // First read fails, later ones succeed: the opt-in must survive one blip.
-        return latchReads === 1 ? new Response("down", { status: 500 }) : Response.json({ latch: {} });
+        return latchReads === 1
+          ? new Response("down", { status: 500 })
+          : Response.json({ latch: {} });
       }
       return Response.json({ credits: [] });
     })
