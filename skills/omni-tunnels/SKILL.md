@@ -15,7 +15,119 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 
 ## Endpoints
 
-_No endpoints mapped for this area yet._
+### GET /api/tunnels/cloudflared
+
+GET tunnels › cloudflared
+
+```bash
+curl http://localhost:20128/api/tunnels/cloudflared \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/tunnels/cloudflared
+
+POST tunnels › cloudflared
+
+```bash
+curl -X POST http://localhost:20128/api/tunnels/cloudflared \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/tunnels/ngrok
+
+GET tunnels › ngrok
+
+```bash
+curl http://localhost:20128/api/tunnels/ngrok \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/tunnels/ngrok
+
+POST tunnels › ngrok
+
+```bash
+curl -X POST http://localhost:20128/api/tunnels/ngrok \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### GET /api/tunnels/tailscale
+
+GET tunnels › tailscale
+
+```bash
+curl http://localhost:20128/api/tunnels/tailscale \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### GET /api/tunnels/tailscale/check
+
+GET tunnels › tailscale › check
+
+```bash
+curl http://localhost:20128/api/tunnels/tailscale/check \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/tunnels/tailscale/disable
+
+POST tunnels › tailscale › disable
+
+```bash
+curl -X POST http://localhost:20128/api/tunnels/tailscale/disable \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/tunnels/tailscale/enable
+
+POST tunnels › tailscale › enable
+
+```bash
+curl -X POST http://localhost:20128/api/tunnels/tailscale/enable \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/tunnels/tailscale/install
+
+POST tunnels › tailscale › install
+
+```bash
+curl -X POST http://localhost:20128/api/tunnels/tailscale/install \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/tunnels/tailscale/login
+
+POST tunnels › tailscale › login
+
+```bash
+curl -X POST http://localhost:20128/api/tunnels/tailscale/login \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
+### POST /api/tunnels/tailscale/start-daemon
+
+POST tunnels › tailscale › start daemon
+
+```bash
+curl -X POST http://localhost:20128/api/tunnels/tailscale/start-daemon \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
 ## Payloads
 
 See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.yaml` for detailed request/response schemas.
