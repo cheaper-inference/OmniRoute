@@ -7,6 +7,7 @@ import { join } from "node:path";
 process.env.DATA_DIR = mkdtempSync(join(tmpdir(), "or9r-bedrock-cache-"));
 
 const { BedrockExecutor } = await import("../../open-sse/executors/bedrock.ts");
+const { opaqueTokenFingerprint } = await import("../../open-sse/utils/opaqueTokenFingerprint.ts");
 
 function credentials(apiKey = "key-a", region = "eu-west-2", customUserAgent?: string) {
   return {
@@ -51,4 +52,20 @@ test("Bedrock client eviction destroys the oldest client and keeps the cache bou
   executor.createClient(credentials("key-32"));
   assert.equal(constructions, 33);
   assert.equal(firstClientDestroyCalls, 1);
+});
+
+test("the client cache key holds a fingerprint of the API key, never the key itself", () => {
+  const executor = new BedrockExecutor(() => ({ send: async () => ({}) }));
+  const apiKey = "bedrock-secret-key-for-cache-test";
+  executor.createClient(credentials(apiKey));
+
+  const keys = [...(executor as unknown as { clients: Map<string, unknown> }).clients.keys()];
+  assert.equal(keys.length, 1);
+  assert.ok(!keys[0].includes(apiKey), "the raw API key must not be part of the cache key");
+  // The helper's plain mode is the historical sha256 hex (covered by its own tests), so the
+  // cache keeps the meaning of its existing entries.
+  assert.ok(
+    keys[0].includes(opaqueTokenFingerprint(apiKey)),
+    "the cache key carries the key fingerprint"
+  );
 });

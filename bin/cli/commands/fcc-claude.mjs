@@ -21,6 +21,7 @@ import { t } from "../i18n.mjs";
 import { resolveDataDir } from "../data-dir.mjs";
 import { resolveActiveContext } from "../contexts.mjs";
 import { quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
+import { isLoopbackUrl } from "../api.mjs";
 import {
   buildClaudeEnv,
   fetchModelContextWindow,
@@ -42,6 +43,41 @@ function getFallbackConfigPath() {
 
 function getVersionCachePath() {
   return join(getFccDataDir(), "version-cache.json");
+}
+
+// ─── Plain-HTTP guard for the credential ─────────────────────────────────────
+
+/** Opt-in for sending the key over plain HTTP to a non-loopback host. */
+export const ALLOW_INSECURE_REMOTE_ENV = "OMNIROUTE_ALLOW_INSECURE_REMOTE";
+
+/**
+ * Why fcc-claude must not send `authToken` to `baseUrl`, or null when it may.
+ *
+ * The bearer key goes to the catalog (GET /v1/models), to /v1/messages in
+ * --test mode and to claude itself, so a non-loopback `http://` target would
+ * carry it in plaintext (CWE-319). Loopback HTTP, HTTPS and requests without
+ * a credential are fine. An operator on a network they trust (a LAN server at
+ * http://192.168.x.y:20128) opts in with OMNIROUTE_ALLOW_INSECURE_REMOTE=1;
+ * the variable must come from the shell or the data-dir `.env`, since a `.env`
+ * in the working directory cannot set it (bin/cli/utils/untrustedCwdEnv.mjs).
+ * The message names only the origin: never the key or URL userinfo.
+ */
+export function insecureRemoteRefusal(baseUrl, authToken, env = process.env) {
+  if (!authToken || !String(authToken).trim()) return null;
+  let url;
+  try {
+    url = new URL(baseUrl);
+  } catch {
+    return null; // not a URL: every request fails before anything is sent
+  }
+  if (url.protocol !== "http:" || isLoopbackUrl(url.href)) return null;
+  if (/^(1|true)$/i.test(String(env[ALLOW_INSECURE_REMOTE_ENV] ?? "").trim())) return null;
+  const origin = `${url.protocol}//${url.host}`;
+  return (
+    `[fcc-claude] Refusing to send your OmniRoute API key in plaintext to ${origin}: ` +
+    `it is plain http:// and not a loopback address. Use an https:// URL, or, on a ` +
+    `network you trust, set ${ALLOW_INSECURE_REMOTE_ENV}=1 in your shell to allow it.`
+  );
 }
 
 // ─── Default fallback chain (FCC style) ──────────────────────────────────────
@@ -163,6 +199,11 @@ export async function* streamMessages(
  */
 export async function runTestCommand(opts = {}) {
   const { baseUrl, authToken } = resolveLaunchTarget(opts);
+  const refusal = insecureRemoteRefusal(baseUrl, authToken);
+  if (refusal) {
+    console.error(refusal);
+    return 1;
+  }
   const prompt = opts.test || opts.prompt || "Say hi";
   const chain = loadFallbackChain(opts);
   const fallbackModels = chain.models?.slice(1) || [];
@@ -299,6 +340,11 @@ export async function runFccClaude(opts = {}, claudeArgs = []) {
 
   // Normal mode: launch the claude binary.
   const { baseUrl, authToken } = resolveLaunchTarget(opts);
+  const refusal = insecureRemoteRefusal(baseUrl, authToken);
+  if (refusal) {
+    console.error(refusal);
+    return 1;
+  }
 
   // Health check
   try {

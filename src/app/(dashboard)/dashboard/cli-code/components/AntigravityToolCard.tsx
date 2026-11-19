@@ -286,7 +286,7 @@ export default function AntigravityToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-sm">{tool.name}</h3>
+              <h3 className="text-sm">{tool.name}</h3>
               {isRunning ? (
                 <Badge variant="success" size="sm">
                   {t("active")}
