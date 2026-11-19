@@ -8,6 +8,8 @@ const HIGH_RISK_METHOD_RULES = [
   [/^\/api\/keys\/?$/, ["GET", "POST"]],
   // Must precede the generic /api/keys/{id} rule: "import" is a static segment, not a key id.
   [/^\/api\/keys\/import\/?$/, ["POST"]],
+  // The groups collection is also a static segment, with its own creation method.
+  [/^\/api\/keys\/groups\/?$/, ["GET", "POST"]],
   [/^\/api\/keys\/[^/]+\/?$/, ["GET", "PATCH", "DELETE"]],
   [/^\/api\/keys\/[^/]+\/devices\/?$/, ["GET"]],
 ];

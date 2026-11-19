@@ -811,7 +811,9 @@ function readCheckoutSha() {
 
 export function makePackPhaseReference(phase, invocationId, candidateSha, context = {}) {
   if (
-    !["build-cli", "stamp-build-sha", "validate-pack-artifact"].includes(phase?.phaseId) ||
+    !["build-next", "build-cli", "stamp-build-sha", "validate-pack-artifact"].includes(
+      phase?.phaseId
+    ) ||
     phase.mode !== "shared" ||
     !Number.isSafeInteger(phase.budgetMs) ||
     phase.budgetMs <= 0 ||
@@ -910,7 +912,12 @@ async function run(cmd, cmdArgs, opts = {}) {
   const result = await runGateProcess(cmd, cmdArgs, {
     receiptIdentity,
     cwd: ROOT,
-    env: buildGateEnv(opts.env),
+    env: buildGateEnv({
+      ...opts.env,
+      ...(packPhase?.phaseId === "build-next"
+        ? { OMNIROUTE_NEXT_PRODUCER_CONTEXT: JSON.stringify(packPhase) }
+        : {}),
+    }),
     logPath,
     timeout: opts.timeout || 30 * 60 * 1000,
     signal: cancellation.signal,
@@ -940,6 +947,12 @@ const runAsync = run;
 async function runPackArtifactGate(timeoutMs) {
   const deadline = Date.now() + timeoutMs;
   const steps = [
+    {
+      phaseId: "build-next",
+      cmd: process.execPath,
+      args: ["scripts/build/build-fresh-next.mjs"],
+      env: BUILD_GATE_ENV,
+    },
     { phaseId: "build-cli", cmd: npmCmd, args: ["run", "build:cli"], env: BUILD_GATE_ENV },
     {
       phaseId: "stamp-build-sha",
@@ -954,6 +967,7 @@ async function runPackArtifactGate(timeoutMs) {
     },
   ];
   let out = "";
+  let nextInputSha256;
   for (const step of steps) {
     if (readCheckoutSha() !== observerCandidateSha) {
       return {
@@ -972,7 +986,12 @@ async function runPackArtifactGate(timeoutMs) {
     let result;
     try {
       result = await runAsync(step.cmd, step.args, {
-        env: withHardGateMode(step.env),
+        env: withHardGateMode({
+          ...step.env,
+          ...(step.phaseId === "build-cli"
+            ? { OMNIROUTE_REQUIRE_PREBUILT_NEXT: "1", OMNIROUTE_NEXT_INPUT_SHA256: nextInputSha256 }
+            : {}),
+        }),
         timeout: remaining,
         packPhase: {
           phaseId: step.phaseId,
@@ -1010,6 +1029,36 @@ async function runPackArtifactGate(timeoutMs) {
             }
           : {}),
       };
+    if (step.phaseId === "build-next") {
+      try {
+        const { nextDistPath, NEXT_INPUT_RECEIPT, readProofJson, readNextInput, requireProof } =
+          await import("../build/standaloneInput.mjs");
+        const dist = nextDistPath(ROOT);
+        const proof = readProofJson(join(dist, NEXT_INPUT_RECEIPT));
+        const receipt = readNextInput(dist, proof.sha256);
+        requireProof(
+          receipt.source.candidateSha === observerCandidateSha &&
+            receipt.producer.kind === "observer" &&
+            JSON.stringify(receipt.producer.phase) === JSON.stringify(result.receipt.packPhase),
+          "next-producer-receipt-mismatch"
+        );
+        writeFileSync(
+          join(LOG_DIR, `next-input-${result.receipt.invocationId}.json`),
+          readFileSync(join(dist, NEXT_INPUT_RECEIPT)),
+          { flag: "wx" }
+        );
+        nextInputSha256 = proof.sha256;
+      } catch {
+        return {
+          code: 1,
+          out,
+          phaseId: step.phaseId,
+          evidenceState: "INCOMPLETE",
+          causeId: result.receipt.invocationId,
+          detail: "Fresh Next product evidence is missing or inconsistent with its command",
+        };
+      }
+    }
   }
   return { code: 0, out };
 }

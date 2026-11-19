@@ -235,7 +235,7 @@ test("pre-flight wires the test-masking PR-context gate against origin/main (v3.
   // (routed through buildGateEnv since the --hermetic scrub was added).
   assert.match(
     src,
-    /env:\s*buildGateEnv\(opts\.env\)/,
+    /env:\s*buildGateEnv\(\{\s*\.\.\.opts\.env,/,
     "run() must merge opts.env into the child env"
   );
   assert.match(
@@ -909,7 +909,7 @@ test("every HARD command of the pre-flight goes through withHardGateMode; drift 
     /"check:test-masking"\][\s\S]{0,80}env: withHardGateMode\(env\)/, // test-masking mode
     /env: withHardGateMode\(\{ TEST_SHARD: `\$\{shard\}\/\$\{total\}` \}\)/, // unit shards
     /runAsync\(npmCmd, g\.args, \{ timeout: g\.timeout, env: withHardGateMode\(g\.env\) \}\)/, // lanes
-    /env: withHardGateMode\(step\.env\)/, // package artifact
+    /env: withHardGateMode\(\{\s*\.\.\.step\.env,/, // package artifact + verified input
     /"check:pack-boot"\][\s\S]{0,80}env: withHardGateMode\(\)/, // tarball boot
     /hardGate = fullCiKindFor\(g\.id, results, g\.kind\) === "hard"/, // --full-ci bucket
     /env: hardGate \? withHardGateMode\(gateEnv\) : gateEnv/, // --full-ci, HARD bucket only

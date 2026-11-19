@@ -68,6 +68,16 @@ test("legacy callers receive no invented identity", async (t) => {
   assert.equal(Object.hasOwn(result.receipt, "packPhase"), false);
 });
 
+test("the fresh Next phase keeps the existing UUID, source and deadline contract", async (t) => {
+  const nextPhase = { ...packPhase, phaseId: "build-next" };
+  const result = await runGateProcess(process.execPath, ["-e", ""], {
+    ...fixture(t),
+    receiptIdentity: { invocationId, packPhase: nextPhase },
+  });
+  assert.equal(result.code, 0);
+  assert.deepEqual(result.receipt.packPhase, nextPhase);
+});
+
 for (const [name, receiptIdentity] of [
   ["invalid UUID", { invocationId: "invalid" }],
   ["reserved result", { invocationId, outcome: "PASS" }],
@@ -80,6 +90,7 @@ for (const [name, receiptIdentity] of [
   ],
   ["partial hosted identity", { invocationId, packPhase: { ...packPhase, runId: "123" } }],
   ["unknown phase payload", { invocationId, packPhase: { ...packPhase, rawOutput: "forged" } }],
+  ["unknown phase name", { invocationId, packPhase: { ...packPhase, phaseId: "unknown" } }],
   ["invalid candidate SHA", { invocationId, packPhase: { ...packPhase, candidateSha: "HEAD" } }],
   ["inherited identity", Object.assign(Object.create({ inherited: true }), { invocationId })],
   ["symbol metadata", { invocationId, [Symbol("unexpected")]: "forged" }],

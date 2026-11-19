@@ -127,7 +127,19 @@ const IGNORE_FROM_CODE = new Set([
   "GITHUB_RUN_ATTEMPT",
   "GITHUB_RUN_ID",
   "GITHUB_SHA",
+  // Runner-owned workflow/job identity recorded by the Release-Green observer
+  // and scripts/ci/release-green-result.mjs, not server configuration.
+  "GITHUB_WORKFLOW_SHA",
+  "GITHUB_JOB",
   "NEEDS_JSON",
+  // quality.yml binds the changelog gate to its immutable event comparison.
+  // scripts/quality/changelog-comparison-base.mjs consumes these CI inputs.
+  "CHANGELOG_CANDIDATE_SHA",
+  "CHANGELOG_EVENT_NAME",
+  "CHANGELOG_EVENT_REF",
+  "CHANGELOG_MERGE_GROUP_BASE_SHA",
+  "CHANGELOG_PR_BASE_SHA",
+  "CHANGELOG_PUSH_BEFORE_SHA",
   // Set by the Actions runner; the ts7 ratchet appends its job summary there
   // (scripts/check/check-ts7-diagnostics-ratchet.mjs) — never OmniRoute runtime config (#9985).
   "GITHUB_STEP_SUMMARY",
@@ -228,6 +240,9 @@ const IGNORE_FROM_CODE = new Set([
   // write-build-sha.mjs to stamp dist/BUILD_SHA — injected by the build, never
   // configured by users in .env.
   "OMNIROUTE_BUILD_SHA",
+  // CI/observer build-input protocol: prepublish must verify the standalone
+  // receipt before touching staging. Set by the producer/observer, not .env.
+  "OMNIROUTE_REQUIRE_PREBUILT_NEXT",
   // Listener-owned self-fetch transport signal. The HTTP/HTTPS launchers set
   // this before application imports; it is not user-configurable product env.
   "OMNIROUTE_INTERNAL_SCHEME",
@@ -378,6 +393,21 @@ export const CODE_SCAN_ROOTS = [
 
 const CODE_ENV_REF = /process\.env\.([A-Z][A-Z0-9_]+)/g;
 
+// Inputs from i18n-mirror-refresh.yml and the Actions runner belong to this helper.
+// The same names are still checked when another file reads them.
+const MIRROR_REFRESH_INPUTS = new Set([
+  "BASE",
+  "CANDIDATE_SHA",
+  "ENGINE",
+  "PARTIAL",
+  "REFRESH_BRANCH",
+  "REFRESH_SHA",
+  "REPO",
+  "RUN_URL",
+  "RUNNER_TEMP",
+  "TRANSLATION_SHA",
+]);
+
 /**
  * Collect environment variable references in source code.
  *
@@ -404,7 +434,12 @@ export function scanCodeVars({ cwd, roots = CODE_SCAN_ROOTS } = {}) {
       return;
     }
     if (text.includes("\0")) return;
-    for (const m of text.matchAll(CODE_ENV_REF)) vars.add(m[1]);
+    const isMirrorRefresh = file === path.join(repoRoot, "scripts/i18n/mirror-refresh-safety.mjs");
+    for (const match of text.matchAll(CODE_ENV_REF)) {
+      const name = match[1];
+      if (isMirrorRefresh && MIRROR_REFRESH_INPUTS.has(name)) continue;
+      vars.add(name);
+    }
   };
   const walk = (dir) => {
     let entries;

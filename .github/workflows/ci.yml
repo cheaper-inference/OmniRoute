@@ -879,6 +879,12 @@ jobs:
 
   build:
     name: Build
+    outputs:
+      nextArtifactId: ${{ steps.next-build-artifact.outputs.artifact-id }}
+      nextArtifactDigest: ${{ steps.next-build-artifact.outputs.artifact-digest }}
+      nextManifestSha256: ${{ steps.next-build-proof.outputs.manifestSha256 }}
+      nextArchiveSha256: ${{ steps.next-build-proof.outputs.archiveSha256 }}
+      nextProducerAttempt: ${{ steps.next-build-proof.outputs.producerAttempt }}
     # Dynamic runner: when the release captain flips the USE_VPS_RUNNER repo var to
     # 'true' (scripts/vps/release-runner-up.sh does it after the self-hosted VM is
     # online), push Builds (main only: release/** pushes stopped running this workflow
@@ -932,6 +938,11 @@ jobs:
       # runners cannot hold it and build with webpack (14 GB). Next 16.4.x regresses
       # (33 GB in the compile phase alone) - re-measure before bumping. Guarded by
       # tests/unit/ci-build-bundler-webpack.test.ts and heavy-build-queue.test.ts.
+      - name: Capture Next.js producer identity
+        env:
+          NEXT_BUILD_QUEUE_BASE: ${{ needs.changes.outputs.candidateBase }}
+          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/')) && '1' || '0' }}
+        run: node scripts/ci/next-build-provenance.mjs capture "$RUNNER_TEMP/next-build-source-$GITHUB_RUN_ATTEMPT.json"
       - run: npm run build
         env:
           OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/')) && '1' || '0' }}
@@ -946,20 +957,33 @@ jobs:
         env:
           RUN_STANDALONE_INT: "1"
       - name: Archive Next.js build for downstream jobs
+        id: next-build-proof
         # Use tar so the archive preserves paths relative to CWD (.build/next/...).
         # upload-artifact path-stripping is ambiguous when exclude patterns are used;
         # an explicit tar avoids the double-nesting issue (.build/next/next/...).
         # Keep standalone/node_modules intact: package/electron jobs consume the
         # Next-traced standalone tree and must not replace it with root node_modules.
+        env:
+          NEXT_BUILD_QUEUE_BASE: ${{ needs.changes.outputs.candidateBase }}
+          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/')) && '1' || '0' }}
         run: |
-          tar -czf "$RUNNER_TEMP/e2e-build.tar.gz" \
+          mkdir "$RUNNER_TEMP/next-build-$GITHUB_RUN_ATTEMPT"
+          tar -czf "$RUNNER_TEMP/next-build-$GITHUB_RUN_ATTEMPT/e2e-build.tar.gz" \
             --exclude='.build/next/cache' \
+            --exclude='.build/next/.omniroute-next-input.json' \
             .build/next
+          node scripts/ci/next-build-provenance.mjs seal \
+            "$RUNNER_TEMP/next-build-source-$GITHUB_RUN_ATTEMPT.json" \
+            "$RUNNER_TEMP/next-build-$GITHUB_RUN_ATTEMPT"
       - name: Upload Next.js build for downstream jobs
+        id: next-build-artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: next-build
-          path: ${{ runner.temp }}/e2e-build.tar.gz
+          name: next-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/next-build-${{ github.run_attempt }}/e2e-build.tar.gz
+            ${{ runner.temp }}/next-build-${{ github.run_attempt }}/next-build-provenance.json
+          if-no-files-found: error
           retention-days: 1
 
   package-artifact:
@@ -988,17 +1012,29 @@ jobs:
       - name: Download Next.js build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
-          name: next-build
-          # Workspace-relative on purpose: the matrix below includes windows-latest, whose
-          # default shell is pwsh, where $RUNNER_TEMP is empty (it is $env:RUNNER_TEMP) —
-          # #11896's first cut broke the Electron smoke on exactly that. A relative path
-          # works in bash and pwsh alike; hosted workspaces are ephemeral.
-          path: next-build-artifact
+          # Exact immutable ID from the successful producer, including partial reruns.
+          artifact-ids: ${{ needs.build.outputs.nextArtifactId }}
+          skip-decompress: true
+          digest-mismatch: error
+          path: _artifacts/next-build-download
       - name: Extract Next.js build artifact
+        shell: bash
+        env:
+          NEXT_BUILD_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}
+          NEXT_BUILD_ARTIFACT_ID: ${{ needs.build.outputs.nextArtifactId }}
+          NEXT_BUILD_ARTIFACT_DIGEST: ${{ needs.build.outputs.nextArtifactDigest }}
+          NEXT_BUILD_ARCHIVE_SHA256: ${{ needs.build.outputs.nextArchiveSha256 }}
+          NEXT_BUILD_MANIFEST_SHA256: ${{ needs.build.outputs.nextManifestSha256 }}
+          NEXT_BUILD_PRODUCER_ATTEMPT: ${{ needs.build.outputs.nextProducerAttempt }}
+          NEXT_BUILD_PRODUCER_RESULT: ${{ needs.build.result }}
+          NEXT_BUILD_QUEUE_BASE: ${{ needs.changes.outputs.candidateBase }}
         run: |
-          tar -xzf next-build-artifact/e2e-build.tar.gz
-      # build:cli consumes the downloaded .build/next standalone artifact and assembles dist/;
-      # it only rebuilds if the downloaded standalone artifact is missing.
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py unpack _artifacts/next-build-download _artifacts/next-build-verified
+          node scripts/ci/next-build-provenance.mjs verify _artifacts/next-build-verified
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py inspect _artifacts/next-build-verified/e2e-build.tar.gz
+          tar -xzf _artifacts/next-build-verified/e2e-build.tar.gz
+          node scripts/ci/next-build-provenance.mjs consume _artifacts/next-build-verified
+      # The strict receipt written above is checked again before build:cli changes staging.
       - run: npm run build:cli
       - name: Assert dist/server.js exists
         run: test -f dist/server.js || (echo "dist/server.js missing — build:cli did not assemble correctly" && exit 1)
@@ -1052,6 +1088,19 @@ jobs:
       - name: Boot-smoke the packed tarball
         run: npm run check:pack-boot
 
+      - name: Retain Next.js consumption evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: next-input-package-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            _artifacts/next-build-verified/next-build-provenance.json
+            _artifacts/next-build-verified/zip-verification.json
+            _artifacts/next-build-verified/next-build-consumption.json
+            _artifacts/next-build-verified/next-input.json
+          retention-days: 7
+          if-no-files-found: ignore
+
   electron-package-smoke:
     name: Electron Package Smoke (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -1090,15 +1139,28 @@ jobs:
       - name: Download Next.js build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
-          name: next-build
-          # Workspace-relative on purpose: the matrix below includes windows-latest, whose
-          # default shell is pwsh, where $RUNNER_TEMP is empty (it is $env:RUNNER_TEMP) —
-          # #11896's first cut broke the Electron smoke on exactly that. A relative path
-          # works in bash and pwsh alike; hosted workspaces are ephemeral.
-          path: next-build-artifact
+          # Exact immutable ID from the successful producer, including partial reruns.
+          artifact-ids: ${{ needs.build.outputs.nextArtifactId }}
+          skip-decompress: true
+          digest-mismatch: error
+          path: _artifacts/next-build-download
       - name: Extract Next.js build artifact
+        shell: bash
+        env:
+          NEXT_BUILD_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}
+          NEXT_BUILD_ARTIFACT_ID: ${{ needs.build.outputs.nextArtifactId }}
+          NEXT_BUILD_ARTIFACT_DIGEST: ${{ needs.build.outputs.nextArtifactDigest }}
+          NEXT_BUILD_ARCHIVE_SHA256: ${{ needs.build.outputs.nextArchiveSha256 }}
+          NEXT_BUILD_MANIFEST_SHA256: ${{ needs.build.outputs.nextManifestSha256 }}
+          NEXT_BUILD_PRODUCER_ATTEMPT: ${{ needs.build.outputs.nextProducerAttempt }}
+          NEXT_BUILD_PRODUCER_RESULT: ${{ needs.build.result }}
+          NEXT_BUILD_QUEUE_BASE: ${{ needs.changes.outputs.candidateBase }}
         run: |
-          tar -xzf next-build-artifact/e2e-build.tar.gz
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py unpack _artifacts/next-build-download _artifacts/next-build-verified
+          node scripts/ci/next-build-provenance.mjs verify _artifacts/next-build-verified
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py inspect _artifacts/next-build-verified/e2e-build.tar.gz
+          tar -xzf _artifacts/next-build-verified/e2e-build.tar.gz
+          node scripts/ci/next-build-provenance.mjs consume _artifacts/next-build-verified
       - name: Install Electron dependencies
         working-directory: electron
         run: npm install --no-audit --no-fund
@@ -1121,6 +1183,19 @@ jobs:
         env:
           ELECTRON_SMOKE_TIMEOUT_MS: 60000
         run: xvfb-run -a npm run electron:smoke:packaged
+
+      - name: Retain Next.js consumption evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: next-input-electron-${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            _artifacts/next-build-verified/next-build-provenance.json
+            _artifacts/next-build-verified/zip-verification.json
+            _artifacts/next-build-verified/next-build-consumption.json
+            _artifacts/next-build-verified/next-input.json
+          retention-days: 7
+          if-no-files-found: ignore
 
   test-unit:
     name: Unit Tests (${{ matrix.shard }}/8)
@@ -1693,15 +1768,28 @@ jobs:
       - name: Download Next.js build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
-          name: next-build
-          # Workspace-relative on purpose: the matrix below includes windows-latest, whose
-          # default shell is pwsh, where $RUNNER_TEMP is empty (it is $env:RUNNER_TEMP) —
-          # #11896's first cut broke the Electron smoke on exactly that. A relative path
-          # works in bash and pwsh alike; hosted workspaces are ephemeral.
-          path: next-build-artifact
+          # Exact immutable ID from the successful producer, including partial reruns.
+          artifact-ids: ${{ needs.build.outputs.nextArtifactId }}
+          skip-decompress: true
+          digest-mismatch: error
+          path: _artifacts/next-build-download
       - name: Extract Next.js build artifact
+        shell: bash
+        env:
+          NEXT_BUILD_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}
+          NEXT_BUILD_ARTIFACT_ID: ${{ needs.build.outputs.nextArtifactId }}
+          NEXT_BUILD_ARTIFACT_DIGEST: ${{ needs.build.outputs.nextArtifactDigest }}
+          NEXT_BUILD_ARCHIVE_SHA256: ${{ needs.build.outputs.nextArchiveSha256 }}
+          NEXT_BUILD_MANIFEST_SHA256: ${{ needs.build.outputs.nextManifestSha256 }}
+          NEXT_BUILD_PRODUCER_ATTEMPT: ${{ needs.build.outputs.nextProducerAttempt }}
+          NEXT_BUILD_PRODUCER_RESULT: ${{ needs.build.result }}
+          NEXT_BUILD_QUEUE_BASE: ${{ needs.changes.outputs.candidateBase }}
         run: |
-          tar -xzf next-build-artifact/e2e-build.tar.gz
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py unpack _artifacts/next-build-download _artifacts/next-build-verified
+          node scripts/ci/next-build-provenance.mjs verify _artifacts/next-build-verified
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py inspect _artifacts/next-build-verified/e2e-build.tar.gz
+          tar -xzf _artifacts/next-build-verified/e2e-build.tar.gz
+          node scripts/ci/next-build-provenance.mjs consume _artifacts/next-build-verified
       # WS4.1: duration-balanced shards (LPT over config/quality/e2e-timings.json).
       # Measured skew of plain --shard was 14× (24m47s vs 1m47s) — E2E was the CI
       # critical path. The balancer self-verifies completeness and exits non-zero on
@@ -1732,6 +1820,19 @@ jobs:
           junit-paths: junit-e2e-results.xml
           org-slug: omniroute
           token: ${{ secrets.TRUNK_TOKEN }}
+
+      - name: Retain Next.js consumption evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: next-input-e2e-${{ matrix.shard }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            _artifacts/next-build-verified/next-build-provenance.json
+            _artifacts/next-build-verified/zip-verification.json
+            _artifacts/next-build-verified/next-build-consumption.json
+            _artifacts/next-build-verified/next-input.json
+          retention-days: 7
+          if-no-files-found: ignore
 
   test-integration:
     name: Integration Tests (${{ matrix.shard }}/2)

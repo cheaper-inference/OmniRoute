@@ -57,7 +57,18 @@ function observe(
     "eslint-measurement.mjs",
   ])
     copyFileSync(join(root, "scripts/quality", name), join(directory, "scripts/quality", name));
+  for (const name of ["build-fresh-next.mjs", "standaloneInput.mjs"]) {
+    copyFileSync(join(root, "scripts/build", name), join(directory, "scripts/build", name));
+  }
   writeFileSync(join(directory, "package.json"), JSON.stringify({ type: "commonjs" }));
+  writeFileSync(join(directory, "package-lock.json"), '{"lockfileVersion":3}\n');
+  writeFileSync(
+    join(directory, "scripts/build/build-next-isolated.mjs"),
+    `
+    export const getEffectiveBuildMemoryBytes = () => 8 * 1024 ** 3;
+    export const resolveNextBuildBundlerFlag = () => "--webpack";
+  `
+  );
   writeFileSync(
     join(directory, "config/quality/quality-baseline.json"),
     JSON.stringify({
@@ -75,7 +86,7 @@ function observe(
     `
     const fs = require("node:fs");
     const marker = ${JSON.stringify(candidateMarker)};
-    console.log(fs.existsSync(marker) ? fs.readFileSync(marker, "utf8") : "${sha}");
+    if(["rev-parse", "merge-base"].includes(process.argv[2])) console.log(fs.existsSync(marker) ? fs.readFileSync(marker, "utf8") : "${sha}");
   `
   );
   executable(
@@ -83,6 +94,12 @@ function observe(
     `
     const script = process.argv[3];
     ${record}
+    if(script === "build") {
+      const fs = require("node:fs");
+      fs.mkdirSync(".build/next/standalone", { recursive: true });
+      fs.writeFileSync(".build/next/standalone/server.js", "fixture current Next output");
+      fs.writeFileSync(".build/next/BUILD_ID", "fixture-build-id");
+    }
     if(script === "${failure}") process.exit(23);
     if(script === "build:cli" && ${expireAfterBuild}) require("node:fs").writeFileSync(${JSON.stringify(clockMarker)}, "expired");
     if(script === "build:cli" && ${changeCandidateAfterBuild}) require("node:fs").writeFileSync(${JSON.stringify(candidateMarker)}, "${"2".repeat(40)}");
@@ -197,7 +214,7 @@ for (const [name, context] of [
       const phases = result.report.commandReceipts.filter((entry) => entry.packPhase);
       assert.deepEqual(
         phases.map((entry) => entry.packPhase.phaseId),
-        ["build-cli", "stamp-build-sha", "validate-pack-artifact"]
+        ["build-next", "build-cli", "stamp-build-sha", "validate-pack-artifact"]
       );
       for (const entry of phases) {
         assert.equal(entry.packPhase.invocationId, entry.invocationId);
@@ -233,6 +250,11 @@ for (const [failure, exitCode] of [
     assert.equal(pack.phaseId, failure === "build:cli" ? "build-cli" : failure);
     assert.equal(boot.ok, false);
     assert.equal(boot.dependencyOf, "pack-artifact");
+    assert.equal(
+      report.checks.find((entry) => entry.id === "test-masking")?.ok,
+      true,
+      JSON.stringify(report.hardFailures)
+    );
     assert.equal(report.hardFailures.length, 2, "blocked boot remains a blocking check");
     assert.equal(report.executionIncidents.incidentCount, 1);
     assert.deepEqual(report.executionIncidents.blockedDependencies, [
@@ -298,6 +320,11 @@ test("one cleanup failure retains both blocking checks and a blocked boot", cliO
   assert.equal(result.status, 1, result.stderr);
   const { report } = result;
   assert.equal(report.releaseGreen, false);
+  assert.equal(
+    report.checks.find((entry) => entry.id === "test-masking")?.ok,
+    true,
+    JSON.stringify(report.hardFailures)
+  );
   assert.equal(report.hardFailures.length, 3);
   assert.equal(report.executionIncidents.incidentCount, 1);
   assert.equal(report.executionIncidents.incidents[0].checkIds.length, 2);
@@ -327,7 +354,7 @@ test("an expired shared deadline creates no receipt for an unstarted phase", cli
     result.report.commandReceipts
       .filter((entry) => entry.packPhase)
       .map((entry) => entry.packPhase.phaseId),
-    ["build-cli"]
+    ["build-next", "build-cli"]
   );
   assert.ok(!result.calls.some((entry) => entry.script === "stamp-build-sha"));
 });
@@ -345,7 +372,7 @@ test("a changed checkout cannot relabel prior evidence or authorize stamping", c
     result.report.commandReceipts
       .filter((entry) => entry.packPhase)
       .map((entry) => entry.packPhase.candidateSha),
-    [sha]
+    [sha, sha]
   );
 });
 

@@ -65,7 +65,9 @@ function snapshotReceiptIdentity(value) {
     if (
       phase.schemaVersion !== 1 ||
       phase.laneId !== "pack-artifact" ||
-      !["build-cli", "stamp-build-sha", "validate-pack-artifact"].includes(phase.phaseId) ||
+      !["build-next", "build-cli", "stamp-build-sha", "validate-pack-artifact"].includes(
+        phase.phaseId
+      ) ||
       phase.mode !== "shared" ||
       !Number.isSafeInteger(phase.budgetMs) ||
       phase.budgetMs <= 0 ||
