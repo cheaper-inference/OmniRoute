@@ -1,0 +1,1 @@
+- fix(quota): attribute percent-plan (Claude/Codex/Bailian) consumption per API key via a token proxy so fair-share weights are enforced (#19904)

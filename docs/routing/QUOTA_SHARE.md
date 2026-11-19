@@ -172,6 +172,14 @@ QuotaDimension {
 
 A request must satisfy all dimensions to be allowed.
 
+**Percent dimensions and per-key attribution.** The upstream reports a single account-wide
+utilisation percentage, so there is no per-key counter for `percent` units. OmniRoute attributes
+it with a proxy (`src/lib/quota/percentProxy.ts`): routed token volume is recorded per key in a
+shadow bucket, and each key's share of that volume is applied to the upstream figure. Weights
+therefore only compare OmniRoute-routed traffic; usage outside OmniRoute counts toward the global
+saturation but cannot be attributed to a key. With no recorded tokens yet, a key is treated as
+having consumed 0.
+
 ---
 
 ## Plan Resolver
