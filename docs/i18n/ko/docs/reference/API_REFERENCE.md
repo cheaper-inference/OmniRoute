@@ -800,62 +800,185 @@ OpenAI 호환 배치 처리입니다.
 
 ---
 
-## API 검색
+## 검색 API
 
-Web/search 공급자 추상화(Tavily, Brave, Exa, Serper 등).
+웹/검색 제공자 추상화(Tavily, Brave, Exa, Serper 등).
 
-| 방법 | 길                     | 설명                                                                                  |
-| ---- | ---------------------- | ------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | 구성된 검색 공급자 + 기능 나열                                                        |
-| POST | `/v1/search`           | `v1SearchSchema` 로 검증된 — 본문 검색 쿼리를 실행하고 caching/coalescing 지원합니다. |
-| GET  | `/v1/search/analytics` | 공급자별 hit/latency/cache 통계                                                       |
+| Method | Path                   | Description                                                                  |
+| ------ | ---------------------- | ---------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | 구성된 검색 제공자 및 기능 목록                                              |
+| POST   | `/v1/search`           | 검색 쿼리 실행 — 본문은 `v1SearchSchema`로 검증되며 캐싱/동시 요청 병합 지원 |
+| GET    | `/v1/search/analytics` | 제공자별 적중/지연 시간/캐시 통계                                            |
 
-**인증:** 베어러 API 키(`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` 통해 시행되는 검색 정책.
+**인증:** Bearer API 키(`extractApiKey` + `isValidApiKey`). 검색 정책은 `enforceApiKeyPolicy`를 통해 적용됩니다.
 
-**자동 선택:** `provider` 없으면 연결이 구성된 가장 저렴한 공급자가 먼저 실행되고 다음으로 가장 저렴한 공급자가 장애 조치입니다. 무료 최후의 수단 공급자(`duckduckgo-free`)는 아무것도 구성되지 않은 경우에만 사용됩니다. 자체 호스팅 SearXNG 연결이 실제 `baseUrl` (카탈로그 기본값 `http://localhost:8888/search` 아님)를 저장하면 구성된 것으로 계산됩니다. 그런 다음 SearXNG 400, 401, 403 또는 404로 응답하는 경우를 포함하여 가장 저렴한 키 공급자를 장애 조치로 사용하여 키 공급자보다 $0 공급자로 순위를 매깁니다. 유효한 `http(s)` URL 아니거나 클라우드 메타데이터 주소를 가리키는 `baseUrl` 는 계산되지 않습니다. 토큰을 저장하는 SearXNG 연결은 `https://` 또는 루프백 `http://` 에 대해서만 이러한 방식으로 순위를 매깁니다. 원격 일반 `http://` 에서는 결코 장애 조치가 아니며 최후의 수단으로 유지되며 다른 공급자가 구성되지 않거나 이름으로 요청될 때만 사용되므로 이 두 경우에 일반 텍스트로 토큰을 보냅니다.
+### 명명된 검색/가져오기 조합
 
-### 엑사와 타빌리 `provider_options`
+`POST /v1/search`와 `POST /v1/web/fetch` 모두 저장된 조합 이름을 `model`로 받습니다.
+`model` 또는 명시적 `provider` 중 하나를 사용해야 하며, 둘 다 보내면 `400`을 반환합니다.
+두 필드가 모두 없으면 기존 자동 제공자 선택이 변경 없이 유지됩니다.
 
-Exa와 Tavily는 네임스페이스 백( `provider_options.exa` (또는 `provider_options["exa-search"]`) 및 `provider_options.tavily` (또는 `provider_options["tavily-search"]`))에서 공급자별 필드를 읽습니다. 아래 키만 전달됩니다. 각각은 `open-sse/handlers/search/providerOptionsPassthrough.ts` 의 자체 Zod 스키마와 비교하여 검사되며 잘못된 유형의 키는 삭제됩니다. auth, base URL, `stream` 및 `outputSchema` 를 포함한 다른 모든 키는 무시됩니다. 다른 공급자(`cx`, `depth`, ...)에서 사용하는 일반 키는 이전과 같이 작동합니다.
+Combo Builder와 해당 Add Model 카탈로그는 연결된 제공자에 LLM 모델 목록이 없는 경우에도
+네이티브 웹 작업 항목을 노출합니다. Serper에는 **Web search**가 표시되고,
+Tavily에는 **Web search / Page extraction**이 표시되며, 가져오기 전용 제공자에는 **Page extraction**이
+표시됩니다. 평소처럼 항목과 계정을 선택합니다. 하나의 Tavily 항목이 두 웹 엔드포인트 모두에 사용됩니다.
+이러한 작업 항목은 채팅 전용 클라이언트 선택기나 채팅 모델 프로브에는 추가되지 않습니다.
 
-| 공급자 | 최상위 필드                                                                                                                                                                                                                                                                                                                                                               | 중첩됨                                                                                                                                     |
-| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| 엑사   | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (플랫 프리미티브), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` 기본 `{ text: true, highlights: true }` 위에 병합되었습니다. |
-| 타빌리 | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                          |
+예를 들어 다음 순서의 대상이 포함된 `shared-free`라는 **priority** 조합을 생성합니다.
 
-일반 필드는 항상 승리합니다: `query`, `max_results`, `filters` (도메인), `country` 및 `search_type` 에서 파생된 주제. Exa에서 `search_type: "news"` `category: "news"` 유지합니다. Tavily는 `search_type: "finance"` (`topic: "finance"`)도 허용합니다.
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
 
-Firecrawl 검색 비용은 반환된 결과 10개의 시작 블록당 $0.002(2크레딧), 호출당 최소 하나의 블록( [Firecrawl 청구](https://docs.firecrawl.dev/billing) )으로 기록됩니다. 11개 결과 비용은 $0.004입니다.
+그런 다음 각 표면에서 동일한 이름을 사용합니다.
 
-일반 `time_range` 이제 두 공급자 모두에 도달합니다. Exa는 `startPublishedDate` (ISO 타임스탬프)를 가져오고 Tavily는 `start_date` (`YYYY-MM-DD`)를 가져옵니다. `provider_options` 의 명시적인 날짜는 매핑된 날짜보다 우선합니다.
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
 
-Exa 결과는 `id`, `highlights` ( `snippet` 로 사용된 첫 번째 하이라이트뿐만 아니라 모든 하이라이트), `highlight_scores`, `summary`, `subpages`, `entities` 및 `extras` `provider_raw` 에 유지합니다. Tavily 결과는 `images` 및 `favicon` 유지합니다.
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
 
-링크업 검색 비용은 `depth` `provider_options` 또는 연결 설정에서 제공되는지 여부에 관계없이 `depth` `fast` 및 `standard` 의 경우 $0.005, `deep` 의 경우 $0.05로 기록됩니다( [링크업 가격 책정](https://docs.linkup.so/pages/documentation/development/pricing) ).
+검색에서는 Tavily를 먼저 고려한 다음 Serper를 고려하고, 가져오기에서는 Tavily를 먼저 고려한 다음 Jina Reader를
+고려합니다. 채팅에서는 전용 검색/가져오기 제공자를 건너뛰고 OpenAI를 고려합니다. 호환성은 모델 이름의
+단어가 아니라 검색/가져오기 실행기 레지스트리에서 결정됩니다. 필터링은 자격 증명 선택 및 디스패치보다
+먼저 수행되며 저장된 조합은 절대 수정하지 않습니다.
 
-Exa `type: "lite"` (Exa 3.0)는 더 작은 필드 집합을 허용하고 다른 필드가 설정되면 전체 요청을 거부합니다. 라이트의 경우 `additionalQueries`, `systemPrompt` 및 `text` 및 `highlights` 제외한 모든 `contents` 키는 호출 전에 삭제됩니다. 더 이상 사용되지 않는 `subpages`, `subpageTarget`, `highlights.numSentences` 및 `highlights.highlightsPerUrl` 는 더 이상 전달되지 않습니다.
+비채팅 기능 라우트는 `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, `p2c`를 지원합니다. `fusion`, `pipeline`, `context-relay`와 같은
+채팅 전용 합성 전략은 비채팅 라우트에서 거부되며 검색 또는 생성 미디어에 조용히 적용되지 않습니다.
+기존 조합 엔진은 업스트림 할당량 실패를 포함한 순서 기반 폴백을 처리하며, 단계 ID, 계정 고정,
+단계별 계정 허용 목록, 중첩 참조, 호출자 연결/할당량 범위 및 조합 액세스 정책을 유지합니다. 결과는
+실제 제공자를 포함하여 네이티브 검색/가져오기 스키마를 유지하며, `X-OmniRoute-Combo-Trace`가
+라우팅 결정을 식별합니다. 알 수 없는 조합은 `404`를 반환하고, 비활성 조합 및 호환 가능한 대상이 없는
+조합은 `400`을 반환합니다.
 
-비용 계산은 평면 레지스트리 `costPerQuery` 입니다. 단, Exa의 자체 가격을 따르는 Exa는 다음과 같습니다. `auto` (및 레거시 `fast`)의 경우 호출당 $0.007, `lite` (및 레거시 `instant`)의 경우 $0.004, 10개 결과 포함. 추가 결과당 $0.001; `contents.summary` 설정된 경우 반환된 결과당 $0.001입니다. Tavily는 `search_depth` `basic`, `fast` 및 `ultra-fast` 에 대해 1 크레딧($0.008), `advanced` ( [Tavily API 크레딧](https://docs.tavily.com/documentation/api-credits) )에 대해 2 크레딧($0.016)으로 기록됩니다. Tavily가 고급으로 업그레이드한 `auto_parameters: true` 사용한 통화는 여전히 1크레딧으로 기록됩니다.
+각 조합 시도에서는 하나의 명시적 제공자를 사용합니다. 조합 몰래 네이티브 자동 제공자 풀을 호출할 수 없습니다.
+명시적 제공자 요청은 기존의 단일 제공자 동작을 유지합니다. 전용 검색/가져오기 제공자를 대상으로 하는
+직접 채팅 요청은 OpenAI 스타일 실행기로 폴백되지 않고, 실행 가능한 JSON `400`을 반환합니다.
 
----
+### 기능별 조합 라우트
+
+저장된 조합에는 API 기능을 키로 사용하는 `routes` 객체가 포함될 수 있습니다. 각 라우트는 자체 대상 목록,
+전략 및 런타임 구성을 소유합니다. 최상위 `models`, `strategy`, `config`는 이전 버전과 호환되는 Chat
+플랜으로 유지되며, `routes`가 없는 기존 조합도 변경 없이 계속 작동합니다.
+
+지원되는 라우트 키는 `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, `audio-generation`입니다. 엔드포인트 투영은 자격 증명 선택, 점수 계산 또는 디스패치보다
+먼저 수행됩니다. 중첩 조합 참조는 동일한 기능에 대해 자식 조합의 라우트를 선택합니다.
+
+`POST /v1/music/generations` 및 `POST /v1/ocr`은 `model`에 조합 이름을 받습니다. 네이티브
+ElevenLabs 호환 `POST /v1/music`도 `model_id`에 조합 이름을 받지만, 해당 네이티브 엔드포인트에서
+사용 가능한 모든 대상은 ElevenLabs 음악 모델이어야 바이너리 응답 계약이 유지됩니다.
+`POST /v1/sound-generation`은 동일한 네이티브 바이너리 제약 조건에 따라 `model_id`에서
+`audio-generation` 조합을 받습니다. 서로 다른 음악 제공자를 사용하려면 `/v1/music/generations`를 사용합니다.
+
+**자동 선택:** `provider`가 없으면 연결이 구성된 제공자 중 가장 저렴한 제공자가 먼저 실행되고, 다음으로 저렴한
+제공자가 장애 조치 제공자가 됩니다. 무료 최후 수단 제공자(`duckduckgo-free`)는 다른 제공자가 구성되지 않은
+경우에만 사용됩니다. 자체 호스팅 SearXNG는 연결에 실제 `baseUrl`(카탈로그 기본값
+`http://localhost:8888/search`가 아님)이 저장되면 구성된 것으로 간주됩니다. 이 경우 키가 필요한 제공자보다
+앞선 $0 제공자로 순위가 매겨지고, 가장 저렴한 키 기반 제공자가 장애 조치 제공자가 됩니다. SearXNG가
+400, 401, 403 또는 404를 응답하는 경우에도 동일합니다. 유효한 `http(s)` URL이 아니거나 클라우드 메타데이터
+주소를 가리키는 `baseUrl`은 구성된 것으로 간주되지 않습니다. 토큰을 저장하는 SearXNG 연결은
+`https://` 또는 루프백 `http://`에 대해서만 이러한 방식으로 순위가 매겨집니다. 원격 일반 `http://`에서는
+절대 장애 조치 제공자가 되지 않으며 최후 수단으로 유지됩니다. 즉, 다른 제공자가 구성되지 않았거나 이름으로
+요청된 경우에만 사용되므로, 이 두 경우에는 토큰이 평문으로 전송됩니다.
+
+### Exa 및 Tavily `provider_options`
+
+Exa와 Tavily는 네임스페이스가 지정된 백에서 공급자별 필드를 읽습니다:
+`provider_options.exa`(또는 `provider_options["exa-search"]`) 및 `provider_options.tavily`
+(또는 `provider_options["tavily-search"]`). 아래 키만 전달됩니다. 각 키는
+`open-sse/handlers/search/providerOptionsPassthrough.ts`의 자체 Zod 스키마에 따라 확인되며,
+잘못된 타입의 키는 삭제됩니다. 인증, 기본 URL, `stream`, `outputSchema`를 포함한 그 외의
+모든 키는 무시됩니다. 다른 공급자가 사용하는 평면 키(`cx`, `depth`, ...)는 이전과
+동일하게 작동합니다.
+
+| 공급자 | 최상위 필드                                                                                                                                                                                                                                                                                                                                                               | 중첩 필드                                                                                                                             |
+| ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa    | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (평면 기본형), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                  | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}`가 기본값 `{ text: true, highlights: true }` 위에 병합됨 |
+| Tavily | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                     |
+
+일반 필드는 항상 우선합니다: `query`, `max_results`, `filters`(도메인), `country` 및
+`search_type`에서 파생된 주제입니다. Exa에서는 `search_type: "news"`가
+`category: "news"`를 유지합니다. Tavily는 `search_type: "finance"`도 허용하며
+(`topic: "finance"`), 이 경우 주제는 `"finance"`입니다.
+
+Firecrawl 검색 비용은 반환된 결과 10개가 시작될 때마다 블록 단위로 기록되며, 블록당
+$0.002(2크레딧)이고 호출당 최소 한 블록이 적용됩니다
+([Firecrawl 청구](https://docs.firecrawl.dev/billing)): 결과 11개는 $0.004입니다.
+
+일반 `time_range`는 이제 두 공급자 모두에 전달됩니다. Exa에는
+`startPublishedDate`(ISO 타임스탬프)로, Tavily에는 `start_date`(`YYYY-MM-DD`)로
+전달됩니다. `provider_options`에 날짜가 명시된 경우 매핑된 날짜보다 우선합니다.
+
+Exa 결과는 `id`, `highlights`(`snippet`에 사용된 첫 번째 항목뿐 아니라 모든 하이라이트),
+`highlight_scores`, `summary`, `subpages`, `entities` 및 `extras`를
+`provider_raw`에 유지합니다. Tavily 결과는 `images` 및 `favicon`을 유지합니다.
+
+Linkup 검색 비용은 `depth`가 `fast` 및 `standard`일 때 $0.005, `deep`일 때 $0.05로
+기록됩니다
+([Linkup 가격](https://docs.linkup.so/pages/documentation/development/pricing)).
+`depth`가 `provider_options`에서 제공되든 연결 설정에서 제공되든 동일합니다.
+
+Exa `type: "lite"`(Exa 3.0)는 더 적은 필드 집합을 허용하며 다른 필드가 하나라도
+설정되면 전체 요청을 거부합니다. lite의 경우 호출 전에 `additionalQueries`,
+`systemPrompt` 및 `text`와 `highlights`를 제외한 모든 `contents` 키가 삭제됩니다.
+더 이상 사용되지 않는 `subpages`, `subpageTarget`, `highlights.numSentences` 및
+`highlights.highlightsPerUrl`은 더 이상 전달되지 않습니다.
+
+비용 계산은 고정 레지스트리 `costPerQuery`를 따릅니다. 단, Exa는 Exa 자체 가격을
+적용합니다. `auto`(및 레거시 `fast`)는 호출당 $0.007, `lite`(및 레거시 `instant`)는
+호출당 $0.004이며, 두 경우 모두 결과 10개까지 포함됩니다. 추가 결과마다 $0.001이
+부과되고, `contents.summary`가 설정된 경우 반환된 결과마다 $0.001이 부과됩니다.
+Tavily는 `search_depth`가 `basic`, `fast`, `ultra-fast`인 경우 1크레딧($0.008),
+`advanced`인 경우 2크레딧($0.016)으로 기록됩니다
+([Tavily API 크레딧](https://docs.tavily.com/documentation/api-credits)).
+`auto_parameters: true`로 호출하여 Tavily가 `advanced`로 업그레이드하더라도
+1크레딧으로 기록됩니다.
 
 ## Web Fetch API
 
-구성된 웹 가져오기 제공자(Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract)를 통해 URL에서 콘텐츠를 추출합니다.
+구성된 웹 페치 제공자(Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch)를 통해 URL에서 콘텐츠를 추출합니다.
 
-Parallel Extract(`parallel-search`, Parallel Search와 동일한 API 키 사용)는 Markdown만 반환합니다. 다른 `format`은 모두 `400`이 되며, 콘텐츠는 100,000자로 제한됩니다. 대상 페이지 자체를 추출할 수 없는 경우 upstream은 이를 HTTP 200 내부에 보고하고, OmniRoute는 고정 메시지와 함께 이를 `422`로 표시합니다.
+Parallel Extract(`parallel-search`, Parallel Search와 동일한 API 키 사용)는 Markdown
+만 반환하며 다른 `format`은 모두 `400`을 반환합니다. 콘텐츠는 100,000자로
+제한됩니다. 대상 페이지 자체를 추출할 수 없는 경우 업스트림은 이를 HTTP 200
+응답 내부에 보고하며, OmniRoute는 이를 고정 메시지와 함께 `422`로 표시합니다.
+
+Keenable Fetch(`keenable-search`)도 Markdown만 반환하며(다른 `format`은 모두
+`400`) 콘텐츠를 100,000자로 제한합니다. 키 없이도 작동합니다. 연결 없이
+`provider: "keenable-search"`를 명시한 요청은 Keenable의 키 없는 엔드포인트를
+사용합니다(IP별 요청 제한 적용). 구성된 키는 해당 제한만 해제하며, 자동 선택은
+키가 구성된 경우에만 Keenable을 사용합니다.
 
 | Method | Path            | Description                                              |
 | ------ | --------------- | -------------------------------------------------------- |
 | POST   | `/v1/web/fetch` | URL 가져오기/스크랩 — 본문은 `v1WebFetchSchema`로 검증됨 |
 
-**인증:** Bearer API 키(`extractApiKey` + `isValidApiKey`). 정책은 `enforceApiKeyPolicy`를 통해 적용됩니다.
+**인증:** Bearer API 키(`extractApiKey` + `isValidApiKey`). 정책은
+`enforceApiKeyPolicy`를 통해 적용됩니다.
 
-**쿼터 인식 대체 처리 (#8297):** 명시적인 `provider`가 지정되지 않은 경우, 풀
+이름이 지정된 조합은 위의 [`model` 라우팅 계약](#named-searchfetch-combinations)을
+사용하며, 가져오기별 옵션과 응답을 유지합니다.
+
+**할당량 인식 폴백(#8297):** `provider`와 `model`이 모두 지정되지 않은 경우 풀
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`)은 고정된
-우선순위 순서로(선착순 방식) 순회됩니다. 요청 시 속도 제한 상태이지만 구성된 제공자는 요청을 중단하는 대신 건너뛰며, 재시도 가능한 upstream/쿼터 실패(HTTP 429는 항상 해당하며, Firecrawl/Tavily/TinyFish의 쿼터 방식 무료 티어에서는 402/403도 해당 — Jina Reader에는 해당하지 않고, 일반적인 잘못된 요청인 400에는 절대 해당하지 않음)는 요청 시 아직 시도하지 않은 인증된 다음 제공자로 전달됩니다. 풀의 모든 제공자가 소진되면 엔드포인트는 이전의 일반적인 `400` 대신 단일 `429`( `Retry-After` 헤더 포함)를 반환합니다. 명시적인 `provider`가 요청된 경우에는 자동 대체 처리가 없습니다. 속도 제한 또는 실패한 명시적 제공자는 자체 오류를 표시합니다(속도 제한이면 `429`, 그 외에는 upstream 상태 코드).
+`parallel-search` → `keenable-search`)이 고정된 우선순위 순서(fill-first)로
+순회됩니다. 요청 제한에 도달했지만 구성이 완료된 제공자는 건너뛰며 요청이
+즉시 종료되지 않습니다. 또한 재시도 가능한/할당량 관련 업스트림 오류(HTTP 429는
+항상 해당하며, Firecrawl/Tavily/TinyFish의 할당량 방식 무료 티어에서는 402/403도
+해당 — Jina Reader에는 해당하지 않으며, 일반적인 400 잘못된 요청에는 절대
+해당하지 않음)가 발생하면 요청 시점에 아직 시도하지 않은 다음 인증된 제공자로
+넘어갑니다. 풀의 모든 제공자가 소진되면 엔드포인트는 이전의 일반적인 `400` 대신
+`Retry-After` 헤더가 포함된 단일 `429`를 반환합니다. 명시적인 `provider`가
+요청된 경우에는 자동 폴백이 없습니다. 요청 제한에 도달했거나 실패한 명시적
+제공자는 자체 오류를 표시합니다(요청 제한인 경우 `429`, 그렇지 않으면 업스트림
+상태 코드).
 
 ---
 
@@ -914,37 +1037,39 @@ CLI는 `base_url + /responses`를 WebSocket으로 업그레이드하고, OmniRou
 
 ---
 
-## 할당량 및 이슈 보고
+## 할당량 및 문제 보고
 
-| Method | Path                | Description                                                             |
-| ------ | ------------------- | ----------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | 등록된 키를 발급하기 전에 `provider` + `accountId`의 할당량을 사전 검증 |
-| POST   | `/v1/issues/report` | 할당량/키 발급 실패를 GitHub에 보고 (`GITHUB_ISSUES_REPO` + 토큰 필요)  |
+| Method | Path                | Description                                                                   |
+| ------ | ------------------- | ----------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | 등록된 키를 발급하기 전에 `provider` + `accountId`의 할당량을 사전 검증합니다 |
+| POST   | `/v1/issues/report` | GitHub에 할당량/키 발급 실패를 보고합니다 (`GITHUB_ISSUES_REPO` + 토큰 필요)  |
 
-**인증:** Bearer API 키 (`isAuthenticated`).
+**인증:** `/v1/quotas/check`는 Bearer API 키(`isAuthenticated`)를 사용합니다. `/v1/issues/report`는
+`/api/v1/registered-keys`와 마찬가지로 관리 전용(`requireManagementAuth`)입니다. 대시보드 세션,
+로컬 CLI 토큰 또는 `manage`/`admin` 스코프가 있는 API 키를 사용할 수 있으며, 추론 전용 API 키는
+`403`을 반환합니다.
 
-### 할당량 세션 복구 (선택 사항)
+### 할당량 세션 복구(선택적 활성화)
 
-터미널 할당량 오류(`402`/`429`/`503`이며 본문에 할당량 또는 크레딧이 소진되었다고 표시됨)로
-실패한 비스트리밍 `POST /v1/chat/completions` 또는 `POST /v1/responses` 요청은 오류를
-반환하는 대신 보류한 후 나중에 재생할 수 있습니다. 호출자는 요청별로 다음 세 헤더를 사용하여
-옵트인합니다.
+할당량 오류가 최종 오류인 경우(본문에 할당량 또는 크레딧이 소진되었다는 내용이 있는
+`402`/`429`/`503`), 스트리밍하지 않는 `POST /v1/chat/completions` 또는 `POST /v1/responses` 요청은
+오류를 반환하는 대신 보류한 후 나중에 재생할 수 있습니다. 호출자는 다음 세 개의 헤더를 사용해
+요청별로 이 기능을 활성화합니다.
 
-| Header                       | Value                                  |
-| ---------------------------- | -------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                 |
-| `x-omniroute-session`        | 세션 ID, `[A-Za-z0-9._:-]{1,128}`      |
-| `x-omniroute-recovery-turn`  | 세션 내에서 고유한 턴 ID (동일한 규칙) |
+| Header                       | Value                                 |
+| ---------------------------- | ------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                |
+| `x-omniroute-session`        | 세션 ID, `[A-Za-z0-9._:-]{1,128}`     |
+| `x-omniroute-recovery-turn`  | 세션 내에서 고유한 턴 ID(동일한 규칙) |
 
-`stream: false`이고 도구, 도구 기록 또는 `previous_response_id`가 없으며
-`x-omniroute-connection` 고정이 없는 턴만 대상이 됩니다. 또한 `STORAGE_ENCRYPTION_KEY`가
-설정되어 있어야 합니다(요청은 최대 24시간 동안 암호화된 상태로 저장됨). 이후 응답은
-`202` 및 `recovery.poll`이 되며, 폴링은 `GET /v1/quota-recoveries/{id}`를 사용합니다
-(대기 중에는 `202`, 완료되면 복구된 본문과 함께 `200`). 또는 `DELETE`로 취소할 수 있습니다.
-티켓은 해당 티켓을 생성한 API 키에만 표시됩니다. 결과가 불확실한 재생은 두 번 전송되는 대신
-`needs_confirmation` 상태로 종료됩니다. 출처: `src/lib/quota/quotaSessionRecovery.ts`.
-
----
+`stream: false`인 턴 중 도구, 도구 기록 또는 `previous_response_id`가 없고
+`x-omniroute-connection` 고정이 없는 경우에만 대상이 됩니다. 또한 `STORAGE_ENCRYPTION_KEY`가
+설정되어 있어야 합니다(요청은 최대 24시간 동안 암호화된 상태로 저장됩니다). 이후 응답은
+`recovery.poll`이 포함된 `202`가 됩니다. `GET /v1/quota-recoveries/{id}`를 폴링하면
+(처리 중에는 `202`, 완료되면 복구된 본문과 함께 `200`) 상태를 확인할 수 있으며, `DELETE`로
+취소할 수도 있습니다. 티켓은 해당 티켓을 생성한 API 키에만 표시됩니다. 결과가 확실하지 않은
+재생은 요청이 두 번 전송되는 대신 `needs_confirmation` 상태로 종료됩니다. 출처:
+`src/lib/quota/quotaSessionRecovery.ts`.
 
 ## 셀프 서비스 사용량(`/api/usage/om-usage`)
 
@@ -1584,10 +1709,10 @@ GET /api/telemetry/summary
 ## 예산
 
 ```bash
-# Get budget status for all API keys
+# 모든 API 키의 예산 상태 가져오기
 GET /api/usage/budget
 
-# Set or update a budget
+# 예산 설정 또는 업데이트
 POST /api/usage/budget
 Content-Type: application/json
 
@@ -1601,7 +1726,7 @@ Content-Type: application/json
 }
 ```
 
-> **스키마 메모** (`setBudgetSchema`): `apiKeyId` 필요합니다. `dailyLimitUsd`, `weeklyLimitUsd` 또는 `monthlyLimitUsd` 중 적어도 하나는 0보다 커야 합니다. 선택 필드: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). 레거시 `{keyId, limit, period}` 형태는 `400 Bad Request` 반환합니다.
+> **스키마 참고** (`setBudgetSchema`): `apiKeyId`는 필수이며, `dailyLimitUsd`, `weeklyLimitUsd`, `monthlyLimitUsd` 중 하나 이상이 0보다 커야 합니다. 선택적 필드: `warningThreshold` (0–1), `resetInterval` (`daily` | `weekly` | `monthly`), `resetTime` (`HH:MM`). 기존 `{keyId, limit, period}` 형식은 `400 Bad Request`를 반환합니다.
 
 ## 토큰 제한
 
@@ -1680,19 +1805,23 @@ OmniRoute 이벤트(요청 완료, 할당량 소진, 키 순환 등)에 대한 �
 
 ---
 
-## 등록된 키(자동 관리)
+## 등록된 키 (자동 관리)
 
-자동 키 관리 하위 시스템에서 백업 제공자/계정에 대한 API 키를 발급하고 순환하는 데 사용하며, 일일/시간별 할당량을 적용합니다.
+백업 제공자/계정에 대해 API 키를 발급하고 교체하며, 일일/시간별 할당량을 관리하는 자동 키 관리 하위 시스템에서 사용됩니다.
 
-| Method | Path                                  | Description                                                                                                                                                                             |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | 등록된 키 목록 조회 (마스킹된 접두사만 표시)                                                                                                                                            |
-| POST   | `/api/v1/registered-keys`             | 새 등록 키 발급 — 본문: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. 원본 키는 **한 번만** 반환됩니다. 할당량 거부 시 `429`를 반환합니다. |
-| GET    | `/api/v1/registered-keys/[id]`        | 등록된 키의 메타데이터 조회 (원본 키 자료 없음)                                                                                                                                         |
-| DELETE | `/api/v1/registered-keys/[id]`        | 등록된 키 폐기                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | 명시적 폐기 엔드포인트 (DELETE와 동일한 효과)                                                                                                                                           |
+| Method | Path                                  | Description                                                                                                                                                                           |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | 등록된 키 목록 조회 (마스킹된 접두사만 표시)                                                                                                                                          |
+| POST   | `/api/v1/registered-keys`             | 새 등록 키 발급 — 본문: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. 원시 키는 **한 번** 반환됩니다. 할당량 거부 시 `429`를 반환합니다. |
+| GET    | `/api/v1/registered-keys/[id]`        | 등록된 키의 메타데이터 조회 (원시 자료 없음)                                                                                                                                          |
+| DELETE | `/api/v1/registered-keys/[id]`        | 등록된 키 폐기                                                                                                                                                                        |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | 명시적 폐기 엔드포인트 (DELETE와 동일한 효과)                                                                                                                                         |
+| GET    | `/api/v1/providers/[provider]/limits` | 제공자의 발급 한도 조회                                                                                                                                                               |
+| PUT    | `/api/v1/providers/[provider]/limits` | 제공자의 발급 한도 설정 — 본문: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                               |
+| GET    | `/api/v1/accounts/[id]/limits`        | 계정의 발급 한도 조회                                                                                                                                                                 |
+| PUT    | `/api/v1/accounts/[id]/limits`        | 계정의 발급 한도 설정 — 제공자 라우트와 동일한 본문                                                                                                                                   |
 
-**인증:** 관리 세션/API 키(`requireManagementAuth`) — `/api/keys`와 동일한 가드입니다. 대시보드 세션, 로컬 CLI 토큰 또는 `manage`/`admin` 스코프가 있는 API 키를 사용할 수 있으며, 추론 전용 API 키는 `403`을 반환합니다. `/v1/quotas/check` 및 `/v1/issues/report`도 참조하세요.
+**인증:** 관리 세션/API 키(`requireManagementAuth`) — `/api/keys`와 동일한 가드로, 대시보드 세션, 로컬 CLI 토큰 또는 `manage`/`admin` 범위가 있는 API 키를 사용할 수 있습니다. 추론 전용 API 키는 `403`을 받습니다. `/v1/quotas/check` 및 `/v1/issues/report`도 참조하세요.
 
 ---
 

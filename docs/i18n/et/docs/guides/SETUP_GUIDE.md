@@ -18,7 +18,7 @@
 
 ---
 
-## Paigaldusmeetodid
+## Installimeetodid
 
 ### npm (soovitatav)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Juhtpaneel avaneb aadressil `http://localhost:20128` ja API baas-URL on `http://localhost:20128/v1`.
+Armatuurlaud avaneb `http://localhost:20128` juures ja API baasi URL on `http://localhost:20128/v1`.
+
+> **npm kasutajad:** Kui npm hoiatab, et installiskriptid on blokeeritud (nt `omniroute`, `better-sqlite3`), vaadake [tõrkeotsingut — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm-i kasutajad:** lipp `--allow-build` on vajalik pakettide `better-sqlite3` ja `@swc/core` natiivsete ehitusskriptide lubamiseks. Käsku `pnpm approve-builds -g` ei toetata pnpm v11 globaalsete paigalduste korral.
+> **pnpm kasutajad:** `--allow-build` lipp on vajalik natiivsete ehitusskriptide lubamiseks `better-sqlite3` ja `@swc/core` jaoks. `pnpm approve-builds -g` käsku ei toetata pnpm v11 globaalsete installide korral.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR-i pakett](https://aur.archlinux.org/packages/omniroute-bin) paigaldab OmniRoute’i ja sisaldab systemd kasutajateenust.
+[AUR pakett](https://aur.archlinux.org/packages/omniroute-bin) installib OmniRoute ja pakub süsteemset kasutajateenust.
 
-### Lähtekoodist
+### Allikast
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Märkus Windowsi kohta:** kui pärandkataloogi `%USERPROFILE%\.omniroute` pole olemas, kasutab OmniRoute vaikimisi kataloogi `%APPDATA%\omniroute`. Muu andmekataloogi asukoha valimiseks määrake `DATA_DIR`.
+> **Windows märkus:** Vaikimisi kasutab OmniRoute `%APPDATA%\omniroute`, kui `%USERPROFILE%\.omniroute` pärandkataloogi pole. Määrake `DATA_DIR`, et valida muu andmekataloogi asukoht.
 
-> **Märkus:** `npm install` genereerib esmakordsel käivitamisel faili `.env` automaatselt faili `.env.example` põhjal. Järgnevad paigaldused olemasolevat faili `.env` üle ei kirjuta, mistõttu kohandused säilivad. Uuesti algväärtustamiseks kustutage `.env` enne käsu korduskäivitamist.
+> **Märkus.** `npm install` genereerib `.env` -st automaatselt `.env.example` esimesel käivitamisel. Järgmised installid ei kirjuta üle olemasolevat `.env`, seega säilivad kohandused. Uuesti külvamiseks kustutage `.env` enne uuesti käivitamist.
 
 ### Docker
 
-Täieliku Dockeri seadistuse, sealhulgas Compose’i profiilide ja Caddy HTTPS-i kohta vaadake [Dockeri juhendit](./DOCKER_GUIDE.md).
+Vaadake [Docker juhendist](./DOCKER_GUIDE.md) Docker täielikku seadistamist, sealhulgas koostamisprofiile ja Caddy HTTPS.
 
 ### Töölauarakendus (Electron)
 
-OmniRoute sisaldab töölauaümbrist, mis põhineb Electron 41-l ja electron-builder 26.10-l. Saadaolevad skriptid (tööruumi juurkaustas):
+OmniRoute tarnib töölaua ümbrist, mis on ehitatud Electron 41 + electron-builderile 26.10. Saadaolevad skriptid (tööruumi juur):
 
 ```bash
-npm run electron:dev          # Käivita töölauarakendus automaatse uuesti laadimisega
-npm run electron:build        # Ehita praeguse operatsioonisüsteemi jaoks (tuvastatakse automaatselt)
-npm run electron:build:win    # Windowsi paigaldusprogramm (NSIS + kaasaskantav)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Pakendatud versiooni suitsutest
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Töölauarakenduse paigaldusprogrammid lisatakse GitHubi väljalasetele. Electroni täieliku süvakäsitluse (allkirjastamine, IPC-sild, distributsioonid) leiate failist [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(loodud hilisemas etapis)_.
+Töölaua installiprogrammide versioonid on lisatud GitHub väljaannetele. Täieliku Electron -sügavsukeldumise (allkirjastamine, IPC -sild, distributsioonid) leiate jaotisest [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Graafilise liideseta server (CI/automatiseerimine)
+### Peata server (CI/automation)
 
-Järelevalveta seadistuste (Docker, Kubernetes, CI) jaoks kasutage:
+Järelevalveta seadistuste jaoks (Docker, Kubernetes, CI) kasutage:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Koos keskkonnamuutujatega (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` jne) võimaldab see käivitada OmniRoute’i eksemplari täielikult skriptitaval viisil.
+Koos env vars-idega (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` jne) võimaldab see teil keerutada OmniRoute eksemplari, mis on täielikult skriptitav.
 
-### CLI suvandid
+### CLI Valikud
 
-| Käsk                    | Kirjeldus                                                                     |
-| ----------------------- | ----------------------------------------------------------------------------- |
-| `omniroute`             | Käivita server (`PORT=20128`, API ja juhtpaneel samas pordis)                 |
-| `omniroute setup`       | Juhendatud CLI esmane seadistus parooli ja esimese teenusepakkuja jaoks       |
-| `omniroute doctor`      | Käivita kohalikud tervisekontrollid ilma serverit käivitamata                 |
-| `omniroute providers`   | Avasta, loetle, valideeri ja testi teenusepakkujaid CLI kaudu                 |
-| `omniroute config`      | CLI-tööriista seadistus — loetle, hangi, määra ja valideeri seadistusi        |
-| `omniroute status`      | Võrguühenduseta oleku juhtpaneel — versioon, andmebaas, tööriistad, seadistus |
-| `omniroute logs`        | Voogedasta API-st kasutuslogisid (toetab lippu `--follow`)                    |
-| `omniroute update`      | Kontrolli või rakenda OmniRoute’i värskendusi                                 |
-| `omniroute provider`    | Halda teenusepakkuja ühendusi — lisa, loetle, eemalda, testi, määra vaikimisi |
-| `omniroute --port 3000` | Määra kanooniliseks/API-pordiks 3000                                          |
-| `omniroute --mcp`       | Käivita MCP-server (stdio-transport)                                          |
-| `omniroute --no-open`   | Ära ava brauserit automaatselt                                                |
-| `omniroute --help`      | Kuva abi                                                                      |
+| Käsk                    | Kirjeldus                                                                            |
+| ----------------------- | ------------------------------------------------------------------------------------ |
+| `omniroute`             | Käivitage server (`PORT=20128`, API ja armatuurlaud samas pordis)                    |
+| `omniroute setup`       | Juhendatud CLI kasutuselevõtt parooli ja esimese pakkuja jaoks                       |
+| `omniroute doctor`      | Käivitage kohalik tervisekontroll ilma serverit käivitamata                          |
+| `omniroute providers`   | Avastage, loendage, kinnitage ja testige CLI teenusepakkujaid                        |
+| `omniroute config`      | CLI tööriista konfiguratsioon — loend, hankige, määrake, kinnitage konfiguratsioonid |
+| `omniroute status`      | Võrguühenduseta oleku armatuurlaud — versioon, DB, tööriistad, konfiguratsioon       |
+| `omniroute logs`        | Voogesitage API kasutusloge (toetab `--follow`)                                      |
+| `omniroute update`      | Kontrollige OmniRoute värskendusi või rakendage neid                                 |
+| `omniroute provider`    | Halda teenusepakkuja ühendusi — lisada, loetleda, eemaldada, testida, vaikimisi      |
+| `omniroute --port 3000` | Seadke canonical/API port väärtuseks 3000                                            |
+| `omniroute --mcp`       | Käivita MCP server (stdio transport)                                                 |
+| `omniroute --no-open`   | Ärge avage brauserit automaatselt                                                    |
+| `omniroute --help`      | Näita abi                                                                            |
 
-Graafilise liideseta seadistust saab skriptida lippude või keskkonnamuutujatega:
+Peata seadistust saab skriptida lippude või keskkonnamuutujatega:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Kohaliku diagnostika käivitamine ilma juhtpaneeli avamata:
+Käivitage kohalik diagnostika ilma armatuurlauda avamata:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Teenusepakkujate haldamine SSH või skriptide kaudu ilma juhtpaneeli avamata:
+Pakkujate haldamine SSH või skriptide kaudu armatuurlauda avamata.
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **Claude kood:**
 
+Claude kood ühendab HTTP kaudu, mida `omniroute --mcp` (stdio) ei käivitu. HTTP transport on vaikimisi välja lülitatud: esmalt lubage see töötavas serveris. Kui armatuurlauale sisselogimine on lubatud, saab päring ilma mandaadita `401`, seega edastage API klahv, mis sisaldab `mcp:connect` (või `manage`); võti ilma `manage`/`admin` vajab samuti iga tööriista ulatust (vt [MCP Server → MCP tööriista ulatused](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
@@ -332,7 +338,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Kehtetu Linux (xbps-src) mall
 
-Void Linux kasutajad saavad luua natiivse paketi `xbps-src` abil. Salvestage see plokk `srcpkgs/omniroute/template`:
+Void Linux kasutajate jaoks saate luua algpaketi, kasutades `xbps-src`. Salvestage see plokk `srcpkgs/omniroute/template`:
 
 ```bash
 # Template file for 'omniroute'
