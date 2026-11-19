@@ -20,6 +20,8 @@ Tabi nipasẹ gbigbe-si-sse:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -144,7 +146,7 @@ Cursor, Cline, àti àwọn oníbàárà MCP tó bá a mu.
 | `omniroute_rtk_discover`            | `read:compression`  | Ṣe iwari ariwo loorekoore ni ijade-inu awọn ayẹwo igbejade RTK                                                   |
 | `omniroute_rtk_learn`               | `read:compression`  | Ṣe agbekalẹ apẹrẹ àlẹmọ RTK atunyẹwo lati awọn ayẹwo ijade                                                       |
 
-awọn titẹ sii CCR lo ibi-itaja meji-ipele: ipele iranti ti o gbona ti o ṣe afẹyinti, lori awọn akoko asiko-awọsanma ti agbegbe, nipasẹ ipele SQLite ti o tọ (`ccr_blocks`, lori aiyipada) nitoribẹẹ bulọki kan ye kuro ni ilekuro tabi tun bẹrẹ titi TTL rẹ yoo fi jade — ayafi awọn bulọọki lori 512 KB ati awọn akoko asiko awọsanma, eyiti o duro iranti-lori. Bulọọki kọọkan ni opin si 2 MiB, ọkọọkan si 16 MiB, ati ile itaja agbaye si 64 MiB. Awọn titẹ sii aiyipada si 24-wakati TTL (o pọju ọjọ meje). Igbapada MCP ni kikun ni opin si 256 KiB; awọn bulọọki ti o tobi julọ wa nipasẹ awọn ipo larin ati awọn ipo grep. Ibi ipamọ, imupadabọ, kikojọ, ayewo, piparẹ, ati awọn iṣiro jẹ iyasọtọ nipasẹ oluṣakoso bọtini API-ifọwọsi. Awọn igbasilẹ iṣayẹwo ni awọn hashes ati metadata iwọn, ko ni akoonu rara. Awọn alaye ti nkọju si oniṣẹ (awọn ami ami meji, awọn ohun pataki alabara, `codemode:false`, awọn iwọn-ọpa-ọpa, pagination, ati matrix iwadii kan) n gbe ni [Awọn ẹrọ Imudarapọ → Awọn iṣaaju / itọsọna oniṣẹ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+awọn titẹ sii CCR lo ile itaja meji-ipele: ipele iranti ti o gbona ti o ṣe afẹyinti, lori awọn akoko asiko-awọsanma ti agbegbe, nipasẹ ipele SQLite ti o tọ (`ccr_blocks`, lori aiyipada) nitoribẹẹ bulọki kan ye kuro ni ilekuro tabi tun bẹrẹ titi TTL rẹ yoo fi jade — ayafi awọn bulọọki lori 512 KB, awọn akoko ṣiṣe awọsanma, ati iranti `COMPRESSION_CCR_DURABLE_STORE=false`. Kọ ti o tọ jẹ igbiyanju ti o dara julọ: o ti lọ silẹ lakoko ti awọn kikọ 1,000 ti wa ni isunmọtosi tẹlẹ, ati pe SQLite ti kuna ti wa ni ibuwolu wọle, ko tun gbiyanju, nitorinaa bulọki ti sọnu ni atunbere. Bulọọki kọọkan ni opin si 2 MiB, ọkọọkan si 16 MiB, ati ile itaja agbaye si 64 MiB. Awọn titẹ sii aiyipada si 24-wakati TTL (o pọju ọjọ meje). Imupadabọ MCP ni kikun ni opin si 256 KiB; awọn bulọọki ti o tobi julọ wa nipasẹ awọn ipo larin ati awọn ipo grep. Ibi ipamọ, imupadabọ, kikojọ, ayewo, piparẹ, ati awọn iṣiro jẹ iyasọtọ nipasẹ oluṣakoso bọtini API-ifọwọsi. Awọn igbasilẹ iṣayẹwo ni awọn hashes ati metadata iwọn, ko ni akoonu rara. Awọn alaye ti nkọju si oniṣẹ (awọn ami ami meji, awọn ohun pataki alabara, `codemode:false`, awọn iwọn-ọpa fun-ọpa, pagination, ati matrix iwadii kan) n gbe ni [Awọn ẹrọ Imudanu → Awọn iṣaaju / itọsọna oniṣẹ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` ṣe ijabọ funmorawon apejuwe MCP lọtọ labẹ `analytics.mcpDescriptionCompression`. Awọn iye wọnyẹn jẹ awọn iṣiro iwọn-metadata fun awọn apejuwe MCP ti a ṣe akojọ (`tools`, `prompts`, `resources`, ati `resourceTemplates`); wọn kii ṣe awọn sisanwo lilo olupese ati pe wọn samisi pẹlu `source: "mcp_metadata_estimate"`.
 

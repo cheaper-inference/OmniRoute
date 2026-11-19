@@ -2,7 +2,7 @@
 
 import { useMemo, useSyncExternalStore } from "react";
 import { useTranslations } from "next-intl";
-import { Button, Icon } from "@/shared/components";
+import { GuardedAction, Icon } from "@/shared/components";
 import { getI18nOrFallback } from "./comboPageHelpers";
 import {
   describeComboStepTestResult,
@@ -34,8 +34,13 @@ export default function ComboStepTestButton({ entry }: { entry: unknown }) {
 
   const state = snapshot?.state ?? "idle";
   const style = STATE_STYLES[state];
-  const title = !target
-    ? getI18nOrFallback(t, "testStepNotTestable", "Only single-model steps can be tested")
+  // Wildcard/combo-ref steps cannot be probed: a reason, shown by GuardedAction (a disabled
+  // button's title never shows under the kit's `pointer-events: none`).
+  const notTestableReason = target
+    ? undefined
+    : getI18nOrFallback(t, "testStepNotTestable", "Only single-model steps can be tested");
+  const title = notTestableReason
+    ? notTestableReason
     : snapshot?.state === "running"
       ? getI18nOrFallback(t, "testStepRunning", "Testing…")
       : snapshot
@@ -43,13 +48,14 @@ export default function ComboStepTestButton({ entry }: { entry: unknown }) {
         : getI18nOrFallback(t, "testStep", "Test this model");
 
   return (
-    <Button
+    <GuardedAction
       type="button"
       variant="ghost"
       size="icon-sm"
       onClick={() => target && void runComboStepTest(target)}
-      disabled={!target || state === "running"}
-      className={`border ${style.tone} ${target ? "" : "opacity-30 cursor-not-allowed"}`}
+      disabled={state === "running"}
+      reason={notTestableReason}
+      className={`border ${style.tone}`}
       title={title}
       aria-label={title}
     >
@@ -58,6 +64,6 @@ export default function ComboStepTestButton({ entry }: { entry: unknown }) {
       ) : (
         <Icon name={style.icon} size={12} />
       )}
-    </Button>
+    </GuardedAction>
   );
 }

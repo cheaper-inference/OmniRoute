@@ -1,3 +1,4 @@
+import { readUsageEvidence } from "./usageEvidence.ts";
 /** Provider-reported cache-write tiers. TTL request hints are deliberately not inputs. */
 export type CacheWriteStatus = "reported" | "partial" | "unknown" | "inconsistent" | "invalid";
 export interface CacheWriteUsage {
@@ -28,6 +29,8 @@ function sources(value: unknown) {
       usage.cache_creation_input_tokens ??
       prompt.cache_creation_tokens ??
       input.cache_creation_tokens ??
+      prompt.cache_creation_input_tokens ??
+      input.cache_creation_input_tokens ??
       prompt.cache_write_tokens ??
       input.cache_write_tokens ??
       usage.cache_write_tokens ??
@@ -91,7 +94,10 @@ export function readCacheWriteUsage(value: unknown): CacheWriteUsage {
   const fiveMinute = counter(tiers.ephemeral_5m_input_tokens);
   const oneHour = counter(tiers.ephemeral_1h_input_tokens);
   const sum = (fiveMinute ?? 0) + (oneHour ?? 0);
-  const total = cacheWriteTotal(rawTotal, fiveMinute, oneHour, sum);
+  const total =
+    readUsageEvidence(value)?.cacheCreation.source === "unknown"
+      ? null
+      : cacheWriteTotal(rawTotal, fiveMinute, oneHour, sum);
   const invalid = invalidCacheWriteCounters(rawTotal, rawTiers, tiers, usage, sum);
   const inconsistent =
     usage.cache_creation_tier_status === "inconsistent" ||

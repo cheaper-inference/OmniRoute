@@ -84,7 +84,7 @@ export default function ClaudeClassifierCompatToggle() {
     <div className="rounded-lg border border-border bg-bg-subtle p-3">
       <div className="flex items-center justify-between gap-3">
         <div className="min-w-0">
-          <h4 className="text-xs font-semibold text-text-main">{t("classifierCompatTitle")}</h4>
+          <h4 className="text-xs text-text-main">{t("classifierCompatTitle")}</h4>
           <p className="text-xs text-text-muted">
             {t.rich("classifierCompatDescription", {
               code: (chunks) => <code>{chunks}</code>,
@@ -97,7 +97,7 @@ export default function ClaudeClassifierCompatToggle() {
           onClick={cycle}
           disabled={loading || saving}
           title={t("classifierCompatCycle")}
-          className={cn("shrink-0 text-xs font-medium uppercase tracking-wide", MODE_STYLES[mode])}
+          className={cn("shrink-0 text-xs uppercase tracking-wide", MODE_STYLES[mode])}
         >
           {t(`classifierCompatMode.${mode}`)}
         </Button>
