@@ -13,6 +13,7 @@
 // names the strategies the grid leaves out, so it is curated together with TILES. The grid
 // shows 18 of the 22 strategies by design — the README table next to it carries
 // cache-optimized, quota-weighted, expiry-first and jev; do not add or remove tiles here.
+// `--all` renders the 22-tile design alternative (EXTRA_TILES), which is not committed.
 import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { outlineSvg } from "./readme-outline.mjs";
@@ -33,7 +34,7 @@ const track = (i, end = TRACK_END, from = "62,79 84") =>
 const TILES = [
   {
     name: "priority",
-    caption: "drain the 1st, then the next",
+    caption: "try in your order",
     dur: 3.6,
     tracks: ["solid", "dashed", "dashed", "dashed"],
     picks: [0],
@@ -41,11 +42,12 @@ const TILES = [
   },
   {
     name: "fill-first",
-    caption: "fill T1’s quota, then move on",
+    // Ordering only preserves the declared order (applyStrategyOrdering.ts "fill-first"); it does
+    // not measure quota, so the tile no longer draws quota bars.
+    caption: "stay on T1 until it fails",
     dur: 3.6,
     tracks: ["solid", "dashed", "", ""],
     picks: [0],
-    bars: [15.8, 3.3, 0, 0],
     dots: [[0, null, null]],
   },
   {
@@ -76,11 +78,12 @@ const TILES = [
   },
   {
     name: "p2c",
-    caption: "pick 2, take the lighter",
+    // Compares success rate and latency of the two samples (targetSorters.ts); tags = success.
+    caption: "sample 2, take the healthier",
     dur: 3.6,
     tracks: ["", "dashed", "", "dashed"],
     picks: [1],
-    tags: ["", "20%", "", "65%"],
+    tags: ["", "98%", "", "71%"],
     dots: [
       [1, 0.05, 0.24],
       [3, 0.05, 0.24],
@@ -89,17 +92,18 @@ const TILES = [
   },
   {
     name: "least-used",
-    caption: "lowest current load wins",
+    // Recorded request counts per target, not instantaneous load.
+    caption: "fewest requests wins",
     dur: 3.6,
     tracks: ["", "solid", "", ""],
     picks: [1],
-    bars: [16.5, 4.4, 12.1, 8.8],
-    tags: ["75%", "20%", "55%", "40%"],
+    bars: [16.4, 2.4, 11.2, 6.8],
+    tags: ["41", "6", "28", "17"],
     dots: [[1, null, null]],
   },
   {
     name: "random",
-    caption: "uniform random (deduped)",
+    caption: "fresh shuffle each request",
     dur: 4.0,
     tracks: ["faint", "faint", "faint", "faint"],
     picks: [],
@@ -112,21 +116,24 @@ const TILES = [
   },
   {
     name: "strict-random",
-    caption: "pure random — repeats ok",
+    // A per-combo shuffled deck (shuffleDeck.ts): every target is dealt once before any repeats.
+    // `deal` marks each slot as it is dealt and keeps it marked until the cycle (= the deck)
+    // ends, so the tile reads "all four used, none twice" — the opposite of the old "×2!".
+    caption: "shuffled deck — no repeats",
     dur: 4.0,
     tracks: ["faint", "faint", "faint", "faint"],
     picks: [],
-    tags: ["", "×2!", "", ""],
+    deal: true,
     dots: [
       [1, 0.05, 0.2],
-      [1, 0.28, 0.43],
-      [3, 0.51, 0.66],
-      [0, 0.74, 0.89],
+      [3, 0.28, 0.43],
+      [0, 0.51, 0.66],
+      [2, 0.74, 0.89],
     ],
   },
   {
     name: "cost-optimized",
-    caption: "cheapest $ per request",
+    caption: "lowest input price first",
     dur: 3.6,
     tracks: ["", "", "", "solid"],
     picks: [3],
@@ -135,7 +142,7 @@ const TILES = [
   },
   {
     name: "headroom",
-    caption: "most remaining quota",
+    caption: "most free 5h/weekly capacity",
     dur: 3.6,
     tracks: ["", "solid", "", ""],
     picks: [1],
@@ -154,7 +161,7 @@ const TILES = [
   },
   {
     name: "reset-aware",
-    caption: "rank by reset — short first",
+    caption: "quota left + reset urgency",
     dur: 3.6,
     tracks: ["dashed", "solid", "dashed", ""],
     picks: [1],
@@ -166,7 +173,7 @@ const TILES = [
   },
   {
     name: "context-relay",
-    caption: "hand off long context",
+    caption: "hand off with a summary",
     dur: 4.0,
     tracks: ["solid", "", "", ""],
     extraTracks: [`M ${TRACK_END},43.5 C 92,43.5 92,67.5 ${TRACK_END},67.5`],
@@ -183,7 +190,7 @@ const TILES = [
   },
   {
     name: "context-optimized",
-    caption: "fit the context size",
+    caption: "largest window first",
     dur: 3.6,
     tracks: ["", "solid", "", ""],
     picks: [1],
@@ -248,6 +255,85 @@ const TILES = [
   },
 ];
 
+// The four strategies the default 18-tile grid leaves to the README table. They are drawn only by
+// the full 22-tile variant (renderStrategiesGridAll, `--all`), a design alternative; the default
+// grid above stays the committed README picture.
+const EXTRA_TILES = [
+  {
+    name: "quota-weighted",
+    caption: "split by quota and load",
+    dur: 3.6,
+    tracks: [["solid", 2.4, 0.45], ["solid", 1.2, 0.3], "faint", ["solid", 1.8, 0.38]],
+    picks: [0],
+    bars: [17.6, 8.8, 2.2, 13.2],
+    dots: [
+      [0, 0.04, 0.3],
+      [3, 0.4, 0.62],
+      [0, 0.7, 0.92],
+    ],
+  },
+  {
+    name: "expiry-first",
+    caption: "spend quota before reset",
+    dur: 3.6,
+    tracks: ["", "solid", "", ""],
+    picks: [1],
+    bars: [6.6, 17.6, 15.4, 4.4],
+    tags: ["6h", "1h!", "9d", "2h"],
+    dots: [[1, null, null]],
+  },
+  {
+    name: "cache-optimized",
+    caption: "prefer the warm cache",
+    dur: 3.6,
+    tracks: ["", "solid", "", ""],
+    picks: [1],
+    tags: ["", "hit", "", ""],
+    dots: [
+      [1, 0.05, 0.28],
+      [1, 0.45, 0.68],
+    ],
+  },
+  {
+    name: "jev",
+    caption: "opt-in: Jev picks a rank",
+    dur: 3.6,
+    tracks: ["dashed", "dashed", "solid", "dashed"],
+    picks: [2],
+    tags: ["1", "2", "3", "4"],
+    tagsInside: true,
+    dots: [[2, null, null]],
+  },
+];
+
+// Full-grid order: grouped by what the strategy optimizes, with the four extra tiles beside
+// their closest relatives (quota-weighted by headroom, expiry-first by the reset pair,
+// cache-optimized by the context pair, jev last).
+const ALL_ORDER = [
+  "priority",
+  "fill-first",
+  "weighted",
+  "round-robin",
+  "p2c",
+  "least-used",
+  "random",
+  "strict-random",
+  "cost-optimized",
+  "headroom",
+  "quota-weighted",
+  "reset-window",
+  "reset-aware",
+  "expiry-first",
+  "context-relay",
+  "context-optimized",
+  "cache-optimized",
+  "lkgp",
+  "auto",
+  "fusion",
+  "pipeline",
+  "jev",
+];
+
 export const STRATEGIES_GRID_COPY = {
   kicker: ["COMBO ROUTING · 18 OF 22 STRATEGY FLOWS"],
   legend: [
@@ -289,9 +375,12 @@ function dot([where, start, end, t = "ink", r = 2.8], begin, dur) {
   );
 }
 
-function tile(T, i) {
+function tile(T, i, rowWidths = null) {
   const col = i % 6;
   const row = Math.floor(i / 6);
+  // A short last row (the 22-tile grid ends with 4) is centered under the full rows.
+  const inRow = rowWidths ? rowWidths[row] : 6;
+  const x0 = 40 + ((6 - inRow) * 189) / 2;
   const begin = n(0.22 * i);
   const dur = T.dur.toFixed(1);
   const parts = [];
@@ -328,9 +417,21 @@ function tile(T, i) {
     parts.push(
       `<g transform="translate(44,72)"><path d="M 8,0 L 16,7 L 8,14 L 0,7 Z" fill="none" class="stroke-warn" stroke-width="1.4"/></g>`
     );
+  if (T.deal) {
+    // Dealt-card markers: a slot's outline turns green when its dot lands and stays until the
+    // loop seam (keyTime 1 resets every marker, so iteration 2 starts with a full deck).
+    for (const [k, , end] of T.dots) {
+      const on = n(end);
+      const b = `begin="${begin}s" dur="${dur}s" repeatCount="indefinite"`;
+      parts.push(
+        `<rect x="${SLOT_X}" y="${SLOT_Y[k] - 5.5}" width="26" height="11" rx="2.5" fill="none" class="stroke-ok" stroke-width="1.4" opacity="0">` +
+          `<animate attributeName="opacity" values="0;0;1;1;0" keyTimes="0;${on};${n(end + 0.02)};0.97;1" ${b}/></rect>`
+      );
+    }
+  }
   for (const d of T.dots) parts.push(dot(d, begin, dur));
   return (
-    `  <g transform="translate(${40 + col * 189},${104 + row * 176})">\n` +
+    `  <g transform="translate(${x0 + col * 189},${104 + row * 176})">\n` +
     `    <rect width="173" height="158" rx="10" class="surface" stroke-width="1"/>\n` +
     `    <text x="12" y="21" class="mono-sm" style="fill:var(--ink)">${esc(T.name)}</text>\n` +
     `    ${parts.join("")}\n` +
@@ -354,7 +455,41 @@ export async function renderStrategiesGrid() {
       `  <text x="40" y="52" class="kicker">${esc(C.kicker[0])}</text>\n` +
       `  <line x1="${afterKicker(40, C.kicker[0])}" y1="47" x2="1160" y2="47" class="rule" stroke-width="1"/>\n` +
       `  <text x="40" y="80" class="body">${esc(C.legend[0])}<tspan style="fill:var(--ok)">${esc(C.legend[1])}</tspan></text>\n` +
-      TILES.map(tile).join("") +
+      TILES.map((t, i) => tile(t, i)).join("") +
+      "</svg>\n"
+  );
+}
+
+/** Design alternative: every public strategy (22), one tile each, in ALL_ORDER. */
+export async function renderStrategiesGridAll() {
+  const byName = new Map([...TILES, ...EXTRA_TILES].map((t) => [t.name, t]));
+  const tiles = ALL_ORDER.map((name) => {
+    const t = byName.get(name);
+    if (!t) throw new Error(`strategies-grid: no tile for ${name}`);
+    return t;
+  });
+  if (tiles.length !== RF.routingStrategies || byName.size !== tiles.length) {
+    throw new Error(
+      `strategies-grid --all: ${tiles.length} tiles for ${RF.routingStrategies} routing strategies`
+    );
+  }
+  const rows = Math.ceil(tiles.length / 6);
+  const rowWidths = Array.from({ length: rows }, (_, r) => Math.min(6, tiles.length - r * 6));
+  const H = 104 + rows * 176;
+  const kicker = `COMBO ROUTING · ALL ${tiles.length} STRATEGIES`;
+  return outlineSvg(
+    svgOpen({
+      viewBox: `0 0 1200 ${H}`,
+      title: `Animated examples for all ${tiles.length} of OmniRoute's combo routing strategies: ${ALL_ORDER.join(", ")}.`,
+      desc: `Animated grid of ${tiles.length} routing-strategy tiles; static tracks show each flow on the first frame while a small dot repeatedly travels the path each strategy takes. Light and dark follow the viewer's color scheme.`,
+    }) +
+      gridDefs("sg-grid") +
+      `  <rect class="bg" x="0" y="0" width="1200" height="${H}"/>\n` +
+      `  <rect x="0" y="0" width="1200" height="${H}" fill="url(#sg-grid)"/>\n` +
+      `  <text x="40" y="52" class="kicker">${esc(kicker)}</text>\n` +
+      `  <line x1="${afterKicker(40, kicker)}" y1="47" x2="1160" y2="47" class="rule" stroke-width="1"/>\n` +
+      `  <text x="40" y="80" class="body">${esc(STRATEGIES_GRID_COPY.legend[0])}<tspan style="fill:var(--ok)">${esc(STRATEGIES_GRID_COPY.legend[1])}</tspan></text>\n` +
+      tiles.map((t, i) => tile(t, i, rowWidths)).join("") +
       "</svg>\n"
   );
 }
@@ -362,8 +497,9 @@ export async function renderStrategiesGrid() {
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
+  const all = process.argv.includes("--all");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/strategies-grid.svg";
-  const svg = await renderStrategiesGrid();
+  const svg = all ? await renderStrategiesGridAll() : await renderStrategiesGrid();
   writeFileSync(out, svg);
   console.log(`strategies-grid → ${out} (${Math.round(Buffer.byteLength(svg) / 1024)} KB)`);
 }
