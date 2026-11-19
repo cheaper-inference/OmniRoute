@@ -209,7 +209,7 @@ function RadarSetupPageContent() {
           {setupData.setup?.keyUrl && (
             <Card>
               <div className="flex flex-col gap-2">
-                <h2 className="font-semibold">{t("getApiKey")}</h2>
+                <h2>{t("getApiKey")}</h2>
                 <a
                   href={setupData.setup.keyUrl}
                   target="_blank"
@@ -226,7 +226,7 @@ function RadarSetupPageContent() {
           {setupData.setup && setupData.setup.steps.length > 0 && (
             <Card>
               <div className="flex flex-col gap-4">
-                <h2 className="font-semibold">{t("setupSteps")}</h2>
+                <h2>{t("setupSteps")}</h2>
                 <ol className="flex flex-col gap-3">
                   {setupData.setup.steps.map((step, idx) => (
                     <li key={idx} className="flex items-start gap-3">
@@ -255,7 +255,7 @@ function RadarSetupPageContent() {
           {/* Test connection */}
           <Card>
             <div className="flex flex-col gap-3">
-              <h2 className="font-semibold">{t("testConnection")}</h2>
+              <h2>{t("testConnection")}</h2>
               <p className="text-sm text-text-muted">{t("testDescription")}</p>
               <div className="flex items-center gap-3">
                 <Button
@@ -277,7 +277,7 @@ function RadarSetupPageContent() {
           {/* Add connection link */}
           <Card>
             <div className="flex flex-col gap-2">
-              <h2 className="font-semibold">{t("addConnection")}</h2>
+              <h2>{t("addConnection")}</h2>
               <p className="text-sm text-text-muted">{t("addConnectionDescription")}</p>
               <Link
                 href={providerSetupConnectionUrl(provider)}

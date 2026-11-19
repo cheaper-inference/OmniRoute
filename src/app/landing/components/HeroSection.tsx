@@ -20,7 +20,7 @@ export default function HeroSection() {
         </div>
 
         {/* Main heading */}
-        <h1 className="text-4xl sm:text-5xl md:text-7xl font-black leading-[1.1] tracking-tight break-words">
+        <h1 className="text-4xl sm:text-5xl md:text-7xl break-words">
           {t("oneEndpoint")} <br />
           <span className="text-primary">{t("allProviders")}</span>
         </h1>
@@ -34,7 +34,7 @@ export default function HeroSection() {
         <div className="flex flex-wrap items-center justify-center gap-4 w-full">
           <button
             onClick={() => router.push("/dashboard")}
-            className="w-full sm:w-auto h-12 px-8 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-base font-semibold transition-all shadow-[0_0_15px_color-mix(in_srgb,var(--color-primary)_40%,transparent)] flex items-center justify-center gap-2"
+            className="w-full sm:w-auto h-12 px-8 rounded-lg bg-primary hover:bg-primary-hover text-accent-foreground text-base transition-all shadow-[0_0_15px_color-mix(in_srgb,var(--color-primary)_40%,transparent)] flex items-center justify-center gap-2"
           >
             <Icon name="rocket_launch" size={20} />
             {t("getStarted")}

@@ -134,7 +134,7 @@ export default function NotionSourceCard() {
           variant="ghost"
           onClick={() => setExpanded(!expanded)}
           aria-expanded={expanded}
-          className="w-full h-auto justify-start gap-3 p-0 text-left font-normal whitespace-normal hover:bg-transparent"
+          className="w-full h-auto justify-start gap-3 p-0 text-left whitespace-normal hover:bg-transparent"
         >
           <div className="flex items-center justify-center size-10 rounded-lg bg-info/10 shrink-0">
             <Icon name="description" className="text-xl text-info" />
@@ -189,7 +189,7 @@ export default function NotionSourceCard() {
                     onChange={(e) => setToken(e.target.value)}
                     placeholder="ntn_... or secret_..."
                     disabled={busy}
-                    className="font-mono text-sm flex-1"
+                    className="flex-1"
                   />
                   <Button onClick={handleSaveToken} loading={busy} variant="primary" size="sm">
                     {translateOrFallback("notionConnect", "Connect")}
