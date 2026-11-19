@@ -243,6 +243,66 @@ export function collectBackupFamilies(backupDir: string): BackupFamily[] {
   );
 }
 
+const SNAPSHOT_TEMP_PREFIX = ".migration-snapshot-";
+const SNAPSHOT_TEMP_FILE = "snapshot.sqlite";
+// A killed `VACUUM INTO` can leave this rollback journal next to the temp snapshot.
+const SNAPSHOT_TEMP_NAMES = new Set([SNAPSHOT_TEMP_FILE, `${SNAPSHOT_TEMP_FILE}-journal`]);
+/** A live snapshot writer touches its temp file or directory far more often than this. */
+export const STALE_SNAPSHOT_TEMP_MS = 60 * 60 * 1000;
+
+/**
+ * Remove `.migration-snapshot-*` temp directories that a killed upgrade left behind, so the
+ * scheduled backup prune (which pauses while one exists) can run again. Only a directory this
+ * process user owns, that holds nothing but `snapshot.sqlite` and its `-journal`, and that nothing wrote to for
+ * `maxIdleMs`, is removed. Anything else is left alone. The directory name carries no process
+ * id, so write recency is the liveness signal. Returns how many directories were removed.
+ */
+export function removeStaleSnapshotTemps(
+  backupDir: string,
+  maxIdleMs = STALE_SNAPSHOT_TEMP_MS
+): number {
+  let entries: string[];
+  try {
+    entries = fs.readdirSync(backupDir);
+  } catch {
+    return 0;
+  }
+
+  let removed = 0;
+  for (const name of entries) {
+    if (!name.startsWith(SNAPSHOT_TEMP_PREFIX)) continue;
+    try {
+      if (!removeStaleSnapshotTemp(path.join(backupDir, name), maxIdleMs)) continue;
+      removed++;
+      console.warn(`[Cleanup] Removed stale migration snapshot temp directory: ${name}`);
+    } catch (err) {
+      console.warn(`[Cleanup] Could not remove snapshot temp directory ${name}:`, err);
+    }
+  }
+  return removed;
+}
+
+/** Removes one temp directory when it is ours, holds only the snapshot file (and its journal), and is idle. */
+function removeStaleSnapshotTemp(dir: string, maxIdleMs: number): boolean {
+  const stat = fs.lstatSync(dir);
+  if (!stat.isDirectory()) return false;
+  if (typeof process.getuid === "function" && stat.uid !== process.getuid()) return false;
+
+  const children = fs.readdirSync(dir);
+  if (children.some((child) => !SNAPSHOT_TEMP_NAMES.has(child))) return false;
+  let newestMs = stat.mtimeMs;
+  for (const child of children) {
+    const childStat = fs.lstatSync(path.join(dir, child));
+    if (!childStat.isFile()) throw new Error("not a regular file");
+    newestMs = Math.max(newestMs, childStat.mtimeMs);
+  }
+  if (Date.now() - newestMs < maxIdleMs) return false;
+
+  for (const child of children) fs.unlinkSync(path.join(dir, child));
+  fs.rmdirSync(dir);
+  return true;
+}
+
 export type PruneResult = {
   deletedBackupFamilies: number;
   deletedFiles: number;

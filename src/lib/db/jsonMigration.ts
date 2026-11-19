@@ -284,13 +284,18 @@ export function runJsonMigration(
           id, provider, model, connection_id, account_key, account_label, account_label_priority,
           api_key_id, api_key_name, billing_team_id, team_rollup_processed_at,
           tokens_input, tokens_output, tokens_cache_read, tokens_cache_creation, tokens_reasoning,
-          service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, timestamp
+          service_tier, status, success, latency_ms, ttft_ms, error_code, combo_strategy, timestamp,
+          endpoint, cpa_auth_index, provider_credits, provider_cost_usd
         ) VALUES (
           @id, @provider, @model, @connection_id, @account_key, @account_label,
           @account_label_priority, @api_key_id, @api_key_name, @billing_team_id,
           @team_rollup_processed_at, @tokens_input, @tokens_output, @tokens_cache_read,
           @tokens_cache_creation, @tokens_reasoning, @service_tier, @status, @success,
-          @latency_ms, @ttft_ms, @error_code, @combo_strategy, @timestamp
+          @latency_ms, @ttft_ms, @error_code, @combo_strategy, @timestamp,
+          COALESCE(@endpoint, (SELECT endpoint FROM usage_history WHERE id = @id)),
+          COALESCE(@cpa_auth_index, (SELECT cpa_auth_index FROM usage_history WHERE id = @id)),
+          COALESCE(@provider_credits, (SELECT provider_credits FROM usage_history WHERE id = @id)),
+          COALESCE(@provider_cost_usd, (SELECT provider_cost_usd FROM usage_history WHERE id = @id))
         )
       `);
       for (const row of data.usageHistory) {
@@ -326,6 +331,11 @@ export function runJsonMigration(
           error_code: row.error_code ?? null,
           combo_strategy: row.combo_strategy ?? "direct",
           timestamp: row.timestamp,
+          // Carried billing columns win; a backup from before they existed keeps what is stored.
+          endpoint: row.endpoint ?? null,
+          cpa_auth_index: row.cpa_auth_index ?? row.cpaAuthIndex ?? null,
+          provider_credits: row.provider_credits ?? row.providerCredits ?? null,
+          provider_cost_usd: row.provider_cost_usd ?? row.providerCostUsd ?? null,
         });
       }
     }

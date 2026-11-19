@@ -212,9 +212,7 @@ export default function ProfilePage() {
               {level}
             </div>
             <div>
-              <h2 className="text-xl font-bold">
-                {tg(`levelTitles.${getLevelTitle(level).toLowerCase()}`)}
-              </h2>
+              <h2 className="text-xl">{tg(`levelTitles.${getLevelTitle(level).toLowerCase()}`)}</h2>
               <div className="flex items-center gap-2 mt-1">
                 <Badge className={`${tierConfig.bg} ${tierConfig.color} border-0`}>
                   {tg("tierLabel", { tier: tg(tierConfig.labelKey) })}
@@ -256,7 +254,7 @@ export default function ProfilePage() {
           <div className="flex items-center gap-4">
             <div className="text-5xl">🔥</div>
             <div>
-              <p className="text-2xl font-bold">{tg("dayStreak", { count: streak })}</p>
+              <p className="text-2xl font-semibold">{tg("dayStreak", { count: streak })}</p>
               <p className="text-sm text-text-muted">{tg("maintainStreak")}</p>
             </div>
           </div>
@@ -265,7 +263,7 @@ export default function ProfilePage() {
 
       {/* Badges Grid */}
       <div>
-        <h3 className="text-lg font-semibold mb-4">
+        <h3 className="text-lg mb-4">
           {tg("badgesTitle", { earned: earnedBadges.length, total: allBadges.length })}
         </h3>
 

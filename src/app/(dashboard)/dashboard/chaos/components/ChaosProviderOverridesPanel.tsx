@@ -70,10 +70,9 @@ function ChaosProviderOverrideRow({
         {override.enabled ? t("on") : t("off")}
       </Button>
       <Button
-        variant="ghost"
+        variant="destructive-ghost"
         size="icon"
         icon="close"
-        className="text-error"
         aria-label={t("removeProvider")}
         title={t("removeProvider")}
         onClick={() => onRemove(index)}

@@ -829,71 +829,178 @@ OpenAI-ਅਨੁਕੂਲ ਬੈਚ ਪ੍ਰੋਸੈਸਿੰਗ।
 
 ## ਖੋਜ API
 
-Web/search ਪ੍ਰਦਾਤਾ ਐਬਸਟਰੈਕਸ਼ਨ (ਟੈਵੀਲੀ, ਬ੍ਰੇਵ, ਐਕਸਾ, ਸਰਪਰ, ਆਦਿ)।
+ਵੈੱਬ/ਖੋਜ ਪ੍ਰਦਾਤਾ ਅਬਸਟਰੈਕਸ਼ਨ (Tavily, Brave, Exa, Serper ਆਦਿ)।
 
-| ਵਿਧੀ | ਮਾਰਗ                   | ਵਰਣਨ                                                                                              |
-| ---- | ---------------------- | ------------------------------------------------------------------------------------------------- |
-| GET  | `/v1/search`           | ਕੌਂਫਿਗਰ ਕੀਤੇ ਖੋਜ ਪ੍ਰਦਾਤਾ + ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ ਬਣਾਓ                                                 |
-| POST | `/v1/search`           | `v1SearchSchema` ਦੁਆਰਾ ਪ੍ਰਮਾਣਿਤ ਇੱਕ ਖੋਜ ਪੁੱਛਗਿੱਛ — ਬਾਡੀ ਚਲਾਓ, caching/coalescing ਦਾ ਸਮਰਥਨ ਕਰਦਾ ਹੈ |
-| GET  | `/v1/search/analytics` | ਪ੍ਰਤੀ-ਪ੍ਰਦਾਤਾ hit/latency/cache ਅੰਕੜੇ                                                             |
+| ਵਿਧੀ | ਪਾਥ                    | ਵੇਰਵਾ                                                                                        |
+| ---- | ---------------------- | -------------------------------------------------------------------------------------------- |
+| GET  | `/v1/search`           | ਕਨਫਿਗਰ ਕੀਤੇ ਖੋਜ ਪ੍ਰਦਾਤਾਵਾਂ ਅਤੇ ਸਮਰੱਥਾਵਾਂ ਦੀ ਸੂਚੀ                                             |
+| POST | `/v1/search`           | ਖੋਜ ਕਵੇਰੀ ਚਲਾਓ — ਬਾਡੀ ਦੀ ਜਾਂਚ `v1SearchSchema` ਦੁਆਰਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਕੈਸ਼ਿੰਗ/ਕੋਐਲੈਸਿੰਗ ਸਮਰਥਿਤ |
+| GET  | `/v1/search/analytics` | ਹਰ ਪ੍ਰਦਾਤਾ ਲਈ ਹਿੱਟ/ਲੇਟੈਂਸੀ/ਕੈਸ਼ ਅੰਕੜੇ                                                        |
 
-**ਪ੍ਰਮਾਣ:** ਬੇਅਰਰ API ਕੁੰਜੀ (`extractApiKey` + `isValidApiKey`)। ਖੋਜ ਨੀਤੀ `enforceApiKeyPolicy` ਦੁਆਰਾ ਲਾਗੂ ਕੀਤੀ ਗਈ ਹੈ।
+**ਪ੍ਰਮਾਣੀਕਰਨ:** Bearer API ਕੁੰਜੀ (`extractApiKey` + `isValidApiKey`)। ਖੋਜ ਨੀਤੀ `enforceApiKeyPolicy` ਰਾਹੀਂ ਲਾਗੂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
 
-**ਆਟੋ-ਚੋਣ:** `provider` ਤੋਂ ਬਿਨਾਂ, ਕੌਂਫਿਗਰ ਕੀਤੇ ਕੁਨੈਕਸ਼ਨ ਵਾਲਾ ਸਭ ਤੋਂ ਸਸਤਾ ਪ੍ਰਦਾਤਾ ਪਹਿਲਾਂ ਚੱਲਦਾ ਹੈ ਅਤੇ ਅਗਲਾ ਸਭ ਤੋਂ ਸਸਤਾ ਫੇਲਓਵਰ ਹੈ। ਮੁਫ਼ਤ ਆਖਰੀ-ਸਹਾਰਾ ਪ੍ਰਦਾਤਾ (`duckduckgo-free`) ਦੀ ਵਰਤੋਂ ਸਿਰਫ਼ ਉਦੋਂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ ਜਦੋਂ ਹੋਰ ਕੁਝ ਵੀ ਕੌਂਫਿਗਰ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਇੱਕ ਸਵੈ-ਹੋਸਟਡ SearXNG ਦੀ ਸੰਰਚਨਾ ਦੇ ਰੂਪ ਵਿੱਚ ਗਿਣਿਆ ਜਾਂਦਾ ਹੈ ਜਦੋਂ ਇਸਦਾ ਕਨੈਕਸ਼ਨ ਇੱਕ ਅਸਲ `baseUrl` (ਕੈਟਾਲੌਗ ਡਿਫੌਲਟ `http://localhost:8888/search` ਨਹੀਂ) ਨੂੰ ਸਟੋਰ ਕਰਦਾ ਹੈ: ਇਹ ਫਿਰ ਕੀਡ ਵਾਲੇ ਤੋਂ ਅੱਗੇ ਇੱਕ $0 ਪ੍ਰਦਾਤਾ ਵਜੋਂ ਦਰਜਾਬੰਦੀ ਕਰਦਾ ਹੈ, ਫੇਲਓਵਰ ਵਜੋਂ ਸਭ ਤੋਂ ਸਸਤੇ `baseUrl` ਪ੍ਰਦਾਤਾ ਦੇ ਨਾਲ, ਇਸ ਵਿੱਚ ਸ਼ਾਮਲ ਹੈ ਕਿ ਜਦੋਂ SearXNG 400, 401, 04gval3 ਜਾਂ 40gval3 ਨਹੀਂ ਹੈ। `http(s)` URL ਜਾਂ ਕਲਾਉਡ-ਮੈਟਾਡੇਟਾ ਪਤੇ 'ਤੇ ਪੁਆਇੰਟਾਂ ਦੀ ਗਿਣਤੀ ਨਹੀਂ ਕੀਤੀ ਜਾਂਦੀ। ਇੱਕ SearXNG ਕਨੈਕਸ਼ਨ ਜੋ ਇੱਕ ਟੋਕਨ ਰੈਂਕ ਨੂੰ ਸਟੋਰ ਕਰਦਾ ਹੈ ਇਸ ਤਰੀਕੇ ਨਾਲ ਸਿਰਫ `https://` ਜਾਂ ਲੂਪਬੈਕ `http://` ਉੱਤੇ ਹੈ। ਰਿਮੋਟ ਪਲੇਨ `http://` ਤੇ ਇਹ ਕਦੇ ਵੀ ਫੇਲਓਵਰ ਨਹੀਂ ਹੁੰਦਾ ਹੈ ਅਤੇ ਆਖਰੀ ਉਪਾਅ ਰਹਿੰਦਾ ਹੈ, ਸਿਰਫ ਉਦੋਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ ਜਦੋਂ ਕੋਈ ਹੋਰ ਪ੍ਰਦਾਤਾ ਕੌਂਫਿਗਰ ਨਹੀਂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਜਾਂ ਜਦੋਂ ਨਾਮ ਦੁਆਰਾ ਬੇਨਤੀ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਇਸਲਈ ਇਹ ਉਨ੍ਹਾਂ ਦੋ ਮਾਮਲਿਆਂ ਵਿੱਚ ਟੋਕਨ ਨੂੰ ਸਪਸ਼ਟ ਟੈਕਸਟ ਵਿੱਚ ਭੇਜਦਾ ਹੈ।
+### ਨਾਮਿਤ ਖੋਜ/ਫੈਚ ਸੰਯੋਜਨ
+
+`POST /v1/search` ਅਤੇ `POST /v1/web/fetch` ਦੋਵੇਂ `model` ਨੂੰ ਸੁਰੱਖਿਅਤ ਕੰਬੋ ਨਾਮ ਵਜੋਂ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ।
+`model` ਜਾਂ ਸਪਸ਼ਟ `provider` ਵਿੱਚੋਂ ਕੋਈ ਇੱਕ ਵਰਤੋ; ਦੋਵੇਂ ਭੇਜਣ ’ਤੇ `400` ਵਾਪਸ ਹੁੰਦਾ ਹੈ।
+ਦੋਵੇਂ ਫੀਲਡਾਂ ਤੋਂ ਬਿਨਾਂ, ਮੌਜੂਦਾ ਆਟੋਮੈਟਿਕ ਪ੍ਰਦਾਤਾ ਚੋਣ ਵਿੱਚ ਕੋਈ ਬਦਲਾਅ ਨਹੀਂ ਹੁੰਦਾ।
+
+ਕੰਬੋ ਬਿਲਡਰ ਅਤੇ ਇਸਦਾ Add Model ਕੈਟਾਲਾਗ, ਕਨੈਕਟ ਕੀਤੇ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ ਮੂਲ ਵੈੱਬ-ਓਪਰੇਸ਼ਨ ਐਂਟਰੀਆਂ ਵੀ ਦਿਖਾਉਂਦੇ ਹਨ, ਭਾਵੇਂ ਉਨ੍ਹਾਂ ਕੋਲ LLM ਮਾਡਲਾਂ ਦੀ ਸੂਚੀ ਨਾ ਹੋਵੇ। Serper **Web search** ਦਿਖਾਉਂਦਾ ਹੈ;
+Tavily **Web search / Page extraction** ਦਿਖਾਉਂਦਾ ਹੈ, ਅਤੇ ਸਿਰਫ਼ ਫੈਚ ਕਰਨ ਵਾਲੇ ਪ੍ਰਦਾਤਾ **Page extraction** ਦਿਖਾਉਂਦੇ ਹਨ।
+ਐਂਟਰੀ ਅਤੇ ਖਾਤਾ ਆਮ ਤਰੀਕੇ ਨਾਲ ਚੁਣੋ। ਇੱਕੋ Tavily ਐਂਟਰੀ ਦੋਵੇਂ ਵੈੱਬ ਐਂਡਪੋਇੰਟਾਂ ਲਈ ਵਰਤੀ ਜਾਂਦੀ ਹੈ;
+ਇਹ ਓਪਰੇਸ਼ਨ ਐਂਟਰੀਆਂ ਸਿਰਫ਼ ਚੈਟ ਵਾਲੇ ਕਲਾਇੰਟ ਚੋਣਕਾਰਾਂ ਜਾਂ ਚੈਟ ਮਾਡਲ ਜਾਂਚਾਂ ਵਿੱਚ ਸ਼ਾਮਲ ਨਹੀਂ ਕੀਤੀਆਂ ਜਾਂਦੀਆਂ।
+
+ਉਦਾਹਰਨ ਵਜੋਂ, ਇਹ ਕ੍ਰਮਬੱਧ ਟਾਰਗਿਟਾਂ ਵਾਲਾ `priority` ਕੰਬੋ `shared-free` ਨਾਮ ਨਾਲ ਬਣਾਓ:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+ਫਿਰ ਹਰ ਸਤ੍ਹਾ ’ਤੇ ਇਹੀ ਨਾਮ ਵਰਤੋ:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+ਖੋਜ Tavily ਅਤੇ ਫਿਰ Serper ਨੂੰ ਵਿਚਾਰਦੀ ਹੈ; ਫੈਚ Tavily ਅਤੇ ਫਿਰ Jina Reader ਨੂੰ ਵਿਚਾਰਦਾ ਹੈ;
+ਚੈਟ ਸਮਰਪਿਤ ਖੋਜ/ਫੈਚ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ ਛੱਡ ਕੇ OpenAI ਨੂੰ ਵਿਚਾਰਦੀ ਹੈ। ਅਨੁਕੂਲਤਾ
+ਖੋਜ/ਫੈਚ ਐਗਜ਼ਿਕਿਊਟਰ ਰਜਿਸਟਰੀਆਂ ਤੋਂ ਆਉਂਦੀ ਹੈ, ਮਾਡਲ ਨਾਮ ਵਿੱਚ ਮੌਜੂਦ ਸ਼ਬਦਾਂ ਤੋਂ ਨਹੀਂ।
+ਫਿਲਟਰਿੰਗ ਕ੍ਰੈਡੈਂਸ਼ਲ ਚੋਣ ਅਤੇ ਡਿਸਪੈਚ ਤੋਂ ਪਹਿਲਾਂ ਹੁੰਦੀ ਹੈ, ਅਤੇ ਸੁਰੱਖਿਅਤ ਕੰਬੋ ਨੂੰ ਕਦੇ ਵੀ ਸੰਪਾਦਿਤ ਨਹੀਂ ਕਰਦੀ।
+
+ਗੈਰ-ਚੈਟ ਸਮਰੱਥਾ ਰੂਟ `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, ਅਤੇ `p2c` ਨੂੰ ਸਮਰਥਨ ਦਿੰਦੇ ਹਨ। ਸਿਰਫ਼-ਚੈਟ ਸੰਸਲੇਸ਼ਣ ਰਣਨੀਤੀਆਂ ਜਿਵੇਂ
+`fusion`, `pipeline`, ਅਤੇ `context-relay` ਨੂੰ ਗੈਰ-ਚੈਟ ਰੂਟਾਂ ’ਤੇ ਰੱਦ ਕਰ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ, ਨਾ ਕਿ
+ਚੁੱਪਚਾਪ ਖੋਜ ਜਾਂ ਜਨਰੇਟ ਕੀਤੇ ਮੀਡੀਆ ’ਤੇ ਲਾਗੂ ਕੀਤਾ ਜਾਂਦਾ ਹੈ।
+ਮੌਜੂਦਾ ਕੰਬੋ ਇੰਜਣ ਅੱਪਸਟ੍ਰੀਮ ਕੋਟਾ ਅਸਫਲਤਾਵਾਂ ਸਮੇਤ, ਕ੍ਰਮਬੱਧ ਫਾਲਬੈਕ ਸੰਭਾਲਦਾ ਹੈ,
+ਅਤੇ ਸਟੈਪ ID, ਖਾਤਾ ਪਿੰਨ, ਹਰ-ਸਟੈਪ ਖਾਤਾ ਅਲਾਊਲਿਸਟ, ਨੇਸਟ ਕੀਤੇ ਹਵਾਲੇ,
+ਕਾਲਰ ਕਨੈਕਸ਼ਨ/ਕੋਟਾ ਸਕੋਪ ਅਤੇ ਕੰਬੋ ਐਕਸੈਸ ਨੀਤੀ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦਾ ਹੈ। ਨਤੀਜੇ ਆਪਣੀ ਮੂਲ
+ਖੋਜ/ਫੈਚ ਸਕੀਮਾ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖਦੇ ਹਨ, ਜਿਸ ਵਿੱਚ ਅਸਲ ਪ੍ਰਦਾਤਾ ਵੀ ਸ਼ਾਮਲ ਹੈ; `X-OmniRoute-Combo-Trace` ਰੂਟਿੰਗ ਫੈਸਲੇ ਦੀ ਪਛਾਣ ਕਰਦਾ ਹੈ।
+ਅਣਜਾਣ ਕੰਬੋ `404` ਵਾਪਸ ਕਰਦੇ ਹਨ; ਗੈਰ-ਸਰਗਰਮ ਕੰਬੋ ਅਤੇ ਅਨੁਕੂਲ ਟਾਰਗਿਟਾਂ ਤੋਂ ਰਹਿਤ ਸੰਯੋਜਨ `400` ਵਾਪਸ ਕਰਦੇ ਹਨ।
+
+ਹਰ ਕੰਬੋ ਕੋਸ਼ਿਸ਼ ਇੱਕ ਸਪਸ਼ਟ ਪ੍ਰਦਾਤਾ ਵਰਤਦੀ ਹੈ। ਇਹ ਕੰਬੋ ਦੇ ਪਿੱਛੇ ਮੂਲ ਆਟੋਮੈਟਿਕ ਪ੍ਰਦਾਤਾ ਪੂਲ ਨੂੰ ਨਹੀਂ ਚਲਾ ਸਕਦੀ।
+ਸਪਸ਼ਟ-ਪ੍ਰਦਾਤਾ ਬੇਨਤੀਆਂ ਆਪਣਾ ਮੌਜੂਦਾ ਸਿੰਗਲ-ਪ੍ਰਦਾਤਾ ਵਿਹਾਰ ਬਰਕਰਾਰ ਰੱਖਦੀਆਂ ਹਨ।
+ਸਮਰਪਿਤ ਖੋਜ/ਫੈਚ ਪ੍ਰਦਾਤਾਵਾਂ ਨੂੰ ਟਾਰਗਿਟ ਕਰਨ ਵਾਲੀਆਂ ਸਿੱਧੀਆਂ ਚੈਟ ਬੇਨਤੀਆਂ OpenAI-ਸ਼ੈਲੀ ਐਗਜ਼ਿਕਿਊਟਰ ਵਿੱਚ ਜਾਣ ਦੀ ਬਜਾਏ,
+ਕਾਰਵਾਈਯੋਗ JSON `400` ਵਾਪਸ ਕਰਦੀਆਂ ਹਨ।
+
+### ਸਮਰੱਥਾ-ਵਿਸ਼ੇਸ਼ ਕੰਬੋ ਰੂਟ
+
+ਸੁਰੱਖਿਅਤ ਕੰਬੋ ਵਿੱਚ `routes` ਆਬਜੈਕਟ ਹੋ ਸਕਦਾ ਹੈ, ਜਿਸ ਦੀਆਂ ਕੁੰਜੀਆਂ API ਸਮਰੱਥਾਵਾਂ ਹੁੰਦੀਆਂ ਹਨ। ਹਰ ਰੂਟ ਦੀ ਆਪਣੀ
+ਟਾਰਗਿਟ ਸੂਚੀ, ਰਣਨੀਤੀ ਅਤੇ ਰਨਟਾਈਮ ਕਨਫਿਗਰੇਸ਼ਨ ਹੁੰਦੀ ਹੈ। ਸਿਖਰ-ਪੱਧਰੀ `models`, `strategy`, ਅਤੇ `config`
+ਪੁਰਾਣੀ-ਅਨੁਕੂਲ Chat ਯੋਜਨਾ ਵਜੋਂ ਜਾਰੀ ਰਹਿੰਦੇ ਹਨ; `routes` ਤੋਂ ਬਿਨਾਂ ਪੁਰਾਣੇ ਕੰਬੋ ਬਿਨਾਂ ਕਿਸੇ ਬਦਲਾਅ ਦੇ ਕੰਮ ਕਰਦੇ ਰਹਿੰਦੇ ਹਨ।
+
+ਸਮਰਥਿਤ ਰੂਟ ਕੁੰਜੀਆਂ `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, ਅਤੇ `audio-generation` ਹਨ। ਐਂਡਪੋਇੰਟ ਪ੍ਰੋਜੈਕਸ਼ਨ ਕ੍ਰੈਡੈਂਸ਼ਲ ਚੋਣ,
+ਸਕੋਰਿੰਗ ਜਾਂ ਡਿਸਪੈਚ ਤੋਂ ਪਹਿਲਾਂ ਹੁੰਦੀ ਹੈ। ਨੇਸਟ ਕੀਤੇ ਕੰਬੋ ਹਵਾਲੇ ਉਸੇ ਸਮਰੱਥਾ ਲਈ ਚਾਈਲਡ ਕੰਬੋ ਦਾ ਰੂਟ ਚੁਣਦੇ ਹਨ।
+
+`POST /v1/music/generations` ਅਤੇ `POST /v1/ocr` `model` ਵਿੱਚ ਕੰਬੋ ਨਾਮ ਸਵੀਕਾਰ ਕਰਦੇ ਹਨ। ਮੂਲ
+ElevenLabs-ਅਨੁਕੂਲ `POST /v1/music` ਵੀ `model_id` ਵਿੱਚ ਕੰਬੋ ਨਾਮ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ, ਪਰ ਇਸ ਮੂਲ ਐਂਡਪੋਇੰਟ ’ਤੇ ਹਰ ਵਰਤਣਯੋਗ
+ਟਾਰਗਿਟ ElevenLabs ਮਿਊਜ਼ਿਕ ਮਾਡਲ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ, ਤਾਂ ਜੋ ਇਸਦਾ ਬਾਈਨਰੀ ਜਵਾਬ ਕਾਂਟ੍ਰੈਕਟ
+ਬਰਕਰਾਰ ਰਹੇ। `POST /v1/sound-generation` ਵੀ ਇਸੇ ਮੂਲ-ਬਾਈਨਰੀ ਪਾਬੰਦੀ ਅਧੀਨ `model_id` ਵਿੱਚ
+`audio-generation` ਕੰਬੋ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ। ਵੱਖ-ਵੱਖ ਮਿਊਜ਼ਿਕ ਪ੍ਰਦਾਤਾਵਾਂ ਲਈ `/v1/music/generations` ਵਰਤੋ।
+
+**ਆਟੋ-ਚੋਣ:** `provider` ਤੋਂ ਬਿਨਾਂ, ਕਨਫਿਗਰ ਕੀਤਾ ਕਨੈਕਸ਼ਨ ਰੱਖਣ ਵਾਲਾ ਸਭ ਤੋਂ ਸਸਤਾ ਪ੍ਰਦਾਤਾ ਪਹਿਲਾਂ ਚੱਲਦਾ ਹੈ
+ਅਤੇ ਅਗਲਾ ਸਭ ਤੋਂ ਸਸਤਾ ਫੇਲਓਵਰ ਹੁੰਦਾ ਹੈ। ਮੁਫ਼ਤ ਆਖ਼ਰੀ-ਉਪਾਅ ਪ੍ਰਦਾਤਾ (`duckduckgo-free`) ਸਿਰਫ਼ ਉਦੋਂ ਵਰਤੇ ਜਾਂਦੇ ਹਨ ਜਦੋਂ ਹੋਰ ਕੁਝ ਕਨਫਿਗਰ ਨਾ ਹੋਵੇ।
+ਸਵੈ-ਹੋਸਟ ਕੀਤਾ SearXNG ਉਦੋਂ ਕਨਫਿਗਰ ਕੀਤਾ ਹੋਇਆ ਮੰਨਿਆ ਜਾਂਦਾ ਹੈ ਜਦੋਂ ਇਸਦਾ ਕਨੈਕਸ਼ਨ ਅਸਲ `baseUrl` ਸਟੋਰ ਕਰਦਾ ਹੋਵੇ
+(ਕੈਟਾਲਾਗ ਡਿਫਾਲਟ `http://localhost:8888/search` ਨਹੀਂ): ਇਸ ਤੋਂ ਬਾਅਦ ਇਹ $0 ਪ੍ਰਦਾਤਾ ਵਜੋਂ ਕੀ ਵਾਲੇ ਪ੍ਰਦਾਤਾਵਾਂ ਤੋਂ ਪਹਿਲਾਂ ਦਰਜ ਹੁੰਦਾ ਹੈ,
+ਅਤੇ ਸਭ ਤੋਂ ਸਸਤਾ ਕੀ ਵਾਲਾ ਪ੍ਰਦਾਤਾ ਫੇਲਓਵਰ ਹੁੰਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ ਉਹ ਸਥਿਤੀ ਵੀ ਸ਼ਾਮਲ ਹੈ ਜਦੋਂ SearXNG 400, 401, 403 ਜਾਂ 404 ਜਵਾਬ ਦਿੰਦਾ ਹੈ।
+ਅਵੈਧ `http(s)` URL ਵਾਲਾ ਜਾਂ ਕਲਾਉਡ-ਮੈਟਾਡਾਟਾ ਪਤੇ ਵੱਲ ਇਸ਼ਾਰਾ ਕਰਨ ਵਾਲਾ `baseUrl` ਗਿਣਤੀ ਵਿੱਚ ਨਹੀਂ ਆਉਂਦਾ।
+ਟੋਕਨ ਸਟੋਰ ਕਰਨ ਵਾਲਾ SearXNG ਕਨੈਕਸ਼ਨ ਇਸ ਤਰੀਕੇ ਨਾਲ ਸਿਰਫ਼ `https://` ਜਾਂ ਲੂਪਬੈਕ `http://` ਉੱਤੇ ਦਰਜ ਹੁੰਦਾ ਹੈ।
+ਰਿਮੋਟ ਸਧਾਰਣ `http://` ਉੱਤੇ ਇਹ ਕਦੇ ਵੀ ਫੇਲਓਵਰ ਨਹੀਂ ਹੁੰਦਾ ਅਤੇ ਆਖ਼ਰੀ ਉਪਾਅ ਵਜੋਂ ਰਹਿੰਦਾ ਹੈ, ਸਿਰਫ਼ ਉਦੋਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ ਜਦੋਂ ਕੋਈ ਹੋਰ ਪ੍ਰਦਾਤਾ ਕਨਫਿਗਰ ਨਾ ਹੋਵੇ
+ਜਾਂ ਨਾਮ ਰਾਹੀਂ ਬੇਨਤੀ ਕੀਤੀ ਗਈ ਹੋਵੇ; ਇਸ ਲਈ ਇਨ੍ਹਾਂ ਦੋ ਸਥਿਤੀਆਂ ਵਿੱਚ ਇਹ ਟੋਕਨ ਨੂੰ ਸਪਸ਼ਟ ਪਾਠ ਵਿੱਚ ਭੇਜਦਾ ਹੈ।
 
 ### Exa ਅਤੇ Tavily `provider_options`
 
-Exa ਅਤੇ Tavily ਇੱਕ ਨੇਮਸਪੇਸ ਵਾਲੇ ਬੈਗ ਤੋਂ ਪ੍ਰਦਾਤਾ-ਵਿਸ਼ੇਸ਼ ਖੇਤਰਾਂ ਨੂੰ ਪੜ੍ਹੋ: `provider_options.exa` (ਜਾਂ `provider_options["exa-search"]`) ਅਤੇ `provider_options.tavily` (ਜਾਂ `provider_options["tavily-search"]`)। ਸਿਰਫ਼ ਹੇਠਾਂ ਦਿੱਤੀਆਂ ਕੁੰਜੀਆਂ ਹੀ ਅੱਗੇ ਭੇਜੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। `open-sse/handlers/search/providerOptionsPassthrough.ts` ਵਿੱਚ ਹਰ ਇੱਕ ਦੀ ਆਪਣੀ ਖੁਦ ਦੀ Zod ਸਕੀਮਾ ਦੇ ਵਿਰੁੱਧ ਜਾਂਚ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਅਤੇ ਗਲਤ ਕਿਸਮ ਵਾਲੀ ਇੱਕ ਕੁੰਜੀ ਛੱਡ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। auth, base URL, `stream` ਅਤੇ `outputSchema` ਸਮੇਤ ਕਿਸੇ ਵੀ ਹੋਰ ਕੁੰਜੀ ਨੂੰ ਅਣਡਿੱਠ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। ਦੂਜੇ ਪ੍ਰਦਾਤਾਵਾਂ (`cx`, `depth`, ...) ਦੁਆਰਾ ਵਰਤੀਆਂ ਜਾਂਦੀਆਂ ਫਲੈਟ ਕੁੰਜੀਆਂ ਪਹਿਲਾਂ ਵਾਂਗ ਕੰਮ ਕਰਦੀਆਂ ਹਨ।
+Exa ਅਤੇ Tavily namespaced bag ਵਿੱਚੋਂ provider-specific fields ਪੜ੍ਹਦੇ ਹਨ:
+`provider_options.exa` (ਜਾਂ `provider_options["exa-search"]`) ਅਤੇ `provider_options.tavily`
+(ਜਾਂ `provider_options["tavily-search"]`)। ਹੇਠਾਂ ਦਿੱਤੀਆਂ ਕੁੰਜੀਆਂ ਵਿੱਚੋਂ ਕੇਵਲ ਇਹੀ ਅੱਗੇ ਭੇਜੀਆਂ ਜਾਂਦੀਆਂ ਹਨ। ਹਰ ਇੱਕ ਦੀ
+ਜਾਂਚ `open-sse/handlers/search/providerOptionsPassthrough.ts` ਵਿੱਚ ਆਪਣੇ Zod schema ਦੇ ਵਿਰੁੱਧ ਕੀਤੀ ਜਾਂਦੀ ਹੈ,
+ਅਤੇ ਗਲਤ ਕਿਸਮ ਵਾਲੀ ਕੁੰਜੀ ਹਟਾ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। auth, base URL,
+`stream` ਅਤੇ `outputSchema` ਸਮੇਤ ਹੋਰ ਕੋਈ ਵੀ ਕੁੰਜੀ ਅਣਡਿੱਠੀ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਹੋਰ providers ਵੱਲੋਂ ਵਰਤੀਆਂ ਜਾਂਦੀਆਂ flat keys (`cx`, `depth`, ...) ਪਹਿਲਾਂ ਵਾਂਗ ਕੰਮ ਕਰਦੀਆਂ ਹਨ।
 
-| ਪ੍ਰਦਾਤਾ | ਸਿਖਰ-ਪੱਧਰੀ ਖੇਤਰ                                                                                                                                                                                                                                                                                                                                                           | ਨੇਸਟਡ                                                                                                                                          |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------- |
-| ਐਕਸ     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (ਫਲੈਟ ਪ੍ਰਾਈਮਿਟਿਵਜ਼), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                            | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ਡਿਫਾਲਟ `{ text: true, highlights: true }` ਉੱਤੇ ਮਿਲਾ ਦਿੱਤਾ ਗਿਆ ਹੈ |
-| ਤਵੀਲੀ   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                              |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                            |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` ਡਿਫ਼ਾਲਟ `{ text: true, highlights: true }` ਉੱਤੇ merge ਕੀਤੇ ਜਾਂਦੇ ਹਨ |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                 |
 
-ਆਮ ਖੇਤਰ ਹਮੇਸ਼ਾ ਜਿੱਤਦੇ ਹਨ: `query`, `max_results`, `filters` (ਡੋਮੇਨ), `country` ਅਤੇ `search_type` ਤੋਂ ਲਿਆ ਗਿਆ ਵਿਸ਼ਾ। Exa 'ਤੇ, `search_type: "news"` `category: "news"` ਰੱਖਦਾ ਹੈ। Tavily `search_type: "finance"` (`topic: "finance"`) ਨੂੰ ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ।
+Generic fields ਹਮੇਸ਼ਾ ਪ੍ਰਬਲ ਰਹਿੰਦੇ ਹਨ: `query`, `max_results`, `filters` (domains), `country` ਅਤੇ
+`search_type` ਤੋਂ ਪ੍ਰਾਪਤ topic। Exa ਉੱਤੇ `search_type: "news"` ਹੋਣ ਨਾਲ `category: "news"` ਬਣਿਆ ਰਹਿੰਦਾ ਹੈ।
+Tavily `search_type: "finance"` (`topic: "finance"`) ਵੀ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ।
 
-ਫਾਇਰਕ੍ਰੌਲ ਖੋਜ ਦੀ ਲਾਗਤ 10 ਵਾਪਸ ਕੀਤੇ ਨਤੀਜਿਆਂ ਦੇ ਪ੍ਰਤੀ ਸ਼ੁਰੂਆਤੀ ਬਲਾਕ, $0.002 (2 ਕ੍ਰੈਡਿਟ) ਇੱਕ ਬਲਾਕ ਅਤੇ ਘੱਟੋ-ਘੱਟ ਇੱਕ ਬਲਾਕ ਪ੍ਰਤੀ ਕਾਲ ( [ਫਾਇਰਕ੍ਰੌਲ ਬਿਲਿੰਗ](https://docs.firecrawl.dev/billing) ): 11 ਨਤੀਜਿਆਂ ਦੀ ਕੀਮਤ $0.004 ਦਰਜ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
+Firecrawl search ਦੀ ਲਾਗਤ ਵਾਪਸ ਕੀਤੇ ਗਏ ਨਤੀਜਿਆਂ ਦੇ ਹਰ ਸ਼ੁਰੂ ਕੀਤੇ 10-ਨਤੀਜਿਆਂ ਵਾਲੇ block ਲਈ ਦਰਜ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਪ੍ਰਤੀ block $0.002 (2
+credits) ਅਤੇ ਹਰ call ਲਈ ਘੱਟੋ-ਘੱਟ ਇੱਕ block
+([Firecrawl billing](https://docs.firecrawl.dev/billing)): 11 ਨਤੀਜਿਆਂ ਦੀ ਲਾਗਤ $0.004 ਹੈ।
 
-ਆਮ `time_range` ਹੁਣ ਦੋਵਾਂ ਪ੍ਰਦਾਤਾਵਾਂ ਤੱਕ ਪਹੁੰਚਦਾ ਹੈ: Exa ਨੂੰ `startPublishedDate` (ISO ਟਾਈਮਸਟੈਂਪ) ਅਤੇ Tavily ਨੂੰ `start_date` (`YYYY-MM-DD`) ਮਿਲਦਾ ਹੈ। `provider_options` ਵਿੱਚ ਇੱਕ ਸਪਸ਼ਟ ਮਿਤੀ ਮੈਪ ਕੀਤੇ ਇੱਕ ਨੂੰ ਓਵਰਰਾਈਡ ਕਰਦੀ ਹੈ।
+Generic `time_range` ਹੁਣ ਦੋਵੇਂ providers ਤੱਕ ਪਹੁੰਚਦਾ ਹੈ: Exa ਨੂੰ `startPublishedDate` (ISO timestamp)
+ਅਤੇ Tavily ਨੂੰ `start_date` (`YYYY-MM-DD`) ਮਿਲਦਾ ਹੈ। `provider_options` ਵਿੱਚ ਦਿੱਤੀ explicit date
+mapped date ਨੂੰ override ਕਰਦੀ ਹੈ।
 
-Exa ਨਤੀਜੇ `id`, `highlights` (ਹਰੇਕ ਹਾਈਲਾਈਟ, ਨਾ ਸਿਰਫ਼ `snippet` ਵਜੋਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ), `highlight_scores`, `summary`, `subpages`, `entities` ਅਤੇ `extras` ਨੂੰ `provider_raw` ਵਿੱਚ ਰੱਖਦੇ ਹਨ। Tavily ਨਤੀਜੇ `images` ਅਤੇ `favicon` ਰੱਖਦੇ ਹਨ।
+Exa ਦੇ ਨਤੀਜੇ `id`, `highlights` (ਹਰ highlight, ਨਾ ਕਿ ਸਿਰਫ਼ ਪਹਿਲਾ ਜੋ
+`snippet` ਵਜੋਂ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ), `highlight_scores`, `summary`, `subpages`, `entities` ਅਤੇ `extras` ਨੂੰ
+`provider_raw` ਵਿੱਚ ਰੱਖਦੇ ਹਨ। Tavily ਦੇ ਨਤੀਜੇ `images` ਅਤੇ `favicon` ਨੂੰ ਰੱਖਦੇ ਹਨ।
 
-ਲਿੰਕਅੱਪ ਖੋਜ ਦੀ ਲਾਗਤ `depth` `fast` ਅਤੇ `standard` ਲਈ $0.005 ਅਤੇ `deep` ( [ਲਿੰਕਅੱਪ ਕੀਮਤ](https://docs.linkup.so/pages/documentation/development/pricing) ) ਲਈ $0.05 ਦਰਜ ਕੀਤੀ ਗਈ ਹੈ, ਭਾਵੇਂ `depth` `provider_options` ਜਾਂ ਕਨੈਕਸ਼ਨ ਦੀਆਂ ਸੈਟਿੰਗਾਂ ਤੋਂ ਆਉਂਦਾ ਹੈ।
+Linkup search ਦੀ ਲਾਗਤ `depth` `fast` ਅਤੇ `standard` ਲਈ $0.005 ਅਤੇ
+`deep` ਲਈ $0.05 ਦਰਜ ਕੀਤੀ ਜਾਂਦੀ ਹੈ
+([Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing)),
+ਭਾਵੇਂ `depth` `provider_options` ਤੋਂ ਆਵੇ ਜਾਂ connection ਦੀਆਂ settings ਤੋਂ।
 
-Exa `type: "lite"` (Exa 3.0) ਖੇਤਰਾਂ ਦੇ ਇੱਕ ਛੋਟੇ ਸਮੂਹ ਨੂੰ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ ਅਤੇ ਜਦੋਂ ਕੋਈ ਹੋਰ ਖੇਤਰ ਸੈੱਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਤਾਂ ਪੂਰੀ ਬੇਨਤੀ ਨੂੰ ਰੱਦ ਕਰਦਾ ਹੈ। ਲਾਈਟ ਲਈ, `additionalQueries`, `systemPrompt` ਅਤੇ `text` ਅਤੇ `highlights` ਨੂੰ ਛੱਡ ਕੇ ਹਰ `contents` ਕੁੰਜੀ ਕਾਲ ਤੋਂ ਪਹਿਲਾਂ ਛੱਡ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। ਬਰਤਰਫ਼ ਕੀਤੇ `subpages`, `subpageTarget`, `highlights.numSentences` ਅਤੇ `highlights.highlightsPerUrl` ਨੂੰ ਹੁਣ ਅੱਗੇ ਨਹੀਂ ਭੇਜਿਆ ਜਾਵੇਗਾ।
+Exa `type: "lite"` (Exa 3.0) fields ਦਾ ਇੱਕ ਛੋਟਾ ਸਮੂਹ ਸਵੀਕਾਰ ਕਰਦਾ ਹੈ ਅਤੇ ਜਦੋਂ ਕੋਈ ਹੋਰ field ਸੈੱਟ ਹੋਵੇ ਤਾਂ ਪੂਰੀ request
+ਨੂੰ ਰੱਦ ਕਰ ਦਿੰਦਾ ਹੈ। lite ਲਈ, call ਤੋਂ ਪਹਿਲਾਂ `additionalQueries`, `systemPrompt` ਅਤੇ `text` ਅਤੇ
+`highlights` ਤੋਂ ਇਲਾਵਾ ਹਰ `contents` key ਹਟਾ ਦਿੱਤੀ ਜਾਂਦੀ ਹੈ। Deprecated
+`subpages`, `subpageTarget`, `highlights.numSentences` ਅਤੇ `highlights.highlightsPerUrl` ਹੁਣ
+ਅੱਗੇ ਨਹੀਂ ਭੇਜੇ ਜਾਂਦੇ।
 
-ਲਾਗਤ ਲੇਖਾਕਾਰੀ ਫਲੈਟ ਰਜਿਸਟਰੀ `costPerQuery` ਹੈ, Exa ਨੂੰ ਛੱਡ ਕੇ, ਜੋ Exa ਦੀ ਆਪਣੀ ਕੀਮਤ ਦਾ ਪਾਲਣ ਕਰਦੀ ਹੈ: `auto` (ਅਤੇ ਵਿਰਾਸਤੀ `fast`) ਲਈ $0.007 ਪ੍ਰਤੀ ਕਾਲ ਜਾਂ `lite` (ਅਤੇ ਵਿਰਾਸਤੀ `instant`) ਲਈ $0.004, 10 ਨਤੀਜਿਆਂ ਨੂੰ ਕਵਰ ਕਰਦੇ ਹਨ; ਹਰੇਕ ਅਗਲੇ ਨਤੀਜੇ ਲਈ $0.001; ਅਤੇ $0.001 ਪ੍ਰਤੀ ਰਿਟਰਨ ਨਤੀਜਾ ਜਦੋਂ `contents.summary` ਸੈੱਟ ਕੀਤਾ ਜਾਂਦਾ ਹੈ। Tavily ਨੂੰ `search_depth` `basic`, `fast` ਅਤੇ `ultra-fast` ਲਈ 1 ਕ੍ਰੈਡਿਟ ($0.008) ਅਤੇ `advanced` ( [Tavily API ਕ੍ਰੈਡਿਟ](https://docs.tavily.com/documentation/api-credits) ) ਲਈ 2 ਕ੍ਰੈਡਿਟ ($0.016) 'ਤੇ ਰਿਕਾਰਡ ਕੀਤਾ ਗਿਆ ਹੈ। `auto_parameters: true` ਨਾਲ ਇੱਕ ਕਾਲ ਜੋ Tavily ਐਡਵਾਂਸਡ ਵਿੱਚ ਅੱਪਗਰੇਡ ਕਰਦੀ ਹੈ ਅਜੇ ਵੀ 1 ਕ੍ਰੈਡਿਟ 'ਤੇ ਰਿਕਾਰਡ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
+Cost accounting flat registry `costPerQuery` ਹੈ, Exa ਨੂੰ ਛੱਡ ਕੇ, ਜੋ Exa ਦੀ ਆਪਣੀ pricing ਦੀ ਪਾਲਣਾ ਕਰਦਾ ਹੈ: `auto`
+(ਅਤੇ legacy `fast`) ਲਈ ਪ੍ਰਤੀ call $0.007 ਜਾਂ `lite` (ਅਤੇ legacy `instant`) ਲਈ $0.004, ਜੋ 10 ਨਤੀਜਿਆਂ ਨੂੰ cover ਕਰਦਾ ਹੈ;
+ਹਰ ਵਾਧੂ ਨਤੀਜੇ ਲਈ $0.001; ਅਤੇ `contents.summary` ਸੈੱਟ ਹੋਣ ਉੱਤੇ ਹਰ ਵਾਪਸ ਕੀਤੇ ਨਤੀਜੇ ਲਈ $0.001। Tavily ਨੂੰ
+`search_depth` `basic`, `fast` ਅਤੇ `ultra-fast` ਲਈ 1 credit ($0.008), ਅਤੇ `advanced`
+ਲਈ 2 credits ($0.016) ਦਰਜ ਕੀਤਾ ਜਾਂਦਾ ਹੈ
+([Tavily API credits](https://docs.tavily.com/documentation/api-credits))। `auto_parameters: true` ਵਾਲੀ call,
+ਜਿਸ ਵਿੱਚ Tavily advanced ਉੱਤੇ upgrade ਕਰਦਾ ਹੈ, ਫਿਰ ਵੀ 1 credit ਵਜੋਂ ਦਰਜ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
 
 ---
 
-## Web Fetch API
+## ਵੈੱਬ Fetch API
 
-ਕਨਫਿਗਰ ਕੀਤੇ ਵੈੱਬ-ਫੈਚ ਪ੍ਰਦਾਤਾ (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) ਰਾਹੀਂ URL ਤੋਂ ਸਮੱਗਰੀ
-ਐਕਸਟ੍ਰੈਕਟ ਕਰੋ।
+ਕਨਫ਼ਿਗਰ ਕੀਤੇ ਵੈੱਬ-fetch ਪ੍ਰਦਾਤਾ (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch) ਰਾਹੀਂ URL ਤੋਂ ਸਮੱਗਰੀ ਕੱਢੋ।
 
 Parallel Extract (`parallel-search`, Parallel Search ਵਾਲੀ ਹੀ API key) ਸਿਰਫ਼ Markdown
-ਵਾਪਸ ਕਰਦਾ ਹੈ — ਕੋਈ ਵੀ ਹੋਰ `format` ਇੱਕ `400` ਹੈ — ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ 100,000 ਅੱਖਰਾਂ ਤੱਕ
-ਸੀਮਿਤ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਟਾਰਗੇਟ ਪੇਜ ਨੂੰ ਖੁਦ ਐਕਸਟ੍ਰੈਕਟ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ, ਤਾਂ ਅੱਪਸਟ੍ਰੀਮ ਇਸਨੂੰ HTTP 200 ਦੇ ਅੰਦਰ
-ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ; OmniRoute ਇਸਨੂੰ ਇੱਕ ਨਿਰਧਾਰਤ ਸੁਨੇਹੇ ਨਾਲ `422` ਵਜੋਂ ਦਿਖਾਉਂਦਾ ਹੈ।
+ਵਾਪਸ ਕਰਦਾ ਹੈ — ਕੋਈ ਹੋਰ `format` ਇੱਕ `400` ਹੁੰਦਾ ਹੈ — ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ 100,000
+ਅੱਖਰਾਂ ਤੱਕ ਸੀਮਿਤ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਟਾਰਗੇਟ ਪੰਨਾ ਖੁਦ ਕੱਢਿਆ ਨਹੀਂ ਜਾ ਸਕਦਾ, ਤਾਂ ਅੱਪਸਟ੍ਰੀਮ ਇਸਨੂੰ HTTP 200 ਦੇ ਅੰਦਰ ਰਿਪੋਰਟ ਕਰਦਾ ਹੈ;
+OmniRoute ਇਸਨੂੰ ਇੱਕ ਨਿਰਧਾਰਤ ਸੁਨੇਹੇ ਵਾਲੇ `422` ਵਜੋਂ ਦਰਸਾਉਂਦਾ ਹੈ।
 
-| Method | Path            | Description                                                              |
-| ------ | --------------- | ------------------------------------------------------------------------ |
-| POST   | `/v1/web/fetch` | URL ਫੈਚ/ਸਕ੍ਰੇਪ ਕਰੋ — ਬਾਡੀ ਦੀ ਜਾਂਚ `v1WebFetchSchema` ਰਾਹੀਂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ |
+Keenable Fetch (`keenable-search`) ਵੀ ਸਿਰਫ਼ Markdown ਵਾਪਸ ਕਰਦਾ ਹੈ (ਕੋਈ ਹੋਰ `format` ਇੱਕ
+`400` ਹੁੰਦਾ ਹੈ) ਅਤੇ ਸਮੱਗਰੀ ਨੂੰ 100,000 ਅੱਖਰਾਂ ਤੱਕ ਸੀਮਿਤ ਕਰਦਾ ਹੈ। ਇਹ key ਤੋਂ ਬਿਨਾਂ ਵੀ ਕੰਮ ਕਰਦਾ ਹੈ: ਬਿਨਾਂ connection ਦੇ ਇੱਕ ਸਪਸ਼ਟ
+`provider: "keenable-search"` request, Keenable ਦੇ keyless endpoint ਦੀ ਵਰਤੋਂ ਕਰਦੀ ਹੈ
+(ਪ੍ਰਤੀ-IP rate limits)। ਕਨਫ਼ਿਗਰ ਕੀਤੀ key ਸਿਰਫ਼ ਇਹ limits ਹਟਾਉਂਦੀ ਹੈ; auto-select Keenable ਦੀ ਵਰਤੋਂ ਸਿਰਫ਼ ਉਦੋਂ ਕਰਦਾ ਹੈ ਜਦੋਂ key ਕਨਫ਼ਿਗਰ ਕੀਤੀ ਹੋਵੇ।
 
-**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)। ਪਾਲਿਸੀ `enforceApiKeyPolicy` ਰਾਹੀਂ ਲਾਗੂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
+| Method | Path            | Description                                                                |
+| ------ | --------------- | -------------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | URL fetch/scrape ਕਰੋ — body ਦੀ ਜਾਂਚ `v1WebFetchSchema` ਦੁਆਰਾ ਕੀਤੀ ਜਾਂਦੀ ਹੈ |
 
-**Quota-aware fallback (#8297):** ਜਦੋਂ ਸਪਸ਼ਟ `provider` ਨਹੀਂ ਦਿੱਤਾ ਜਾਂਦਾ, ਤਾਂ ਪੂਲ
+**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`)। ਨੀਤੀ `enforceApiKeyPolicy` ਰਾਹੀਂ ਲਾਗੂ ਕੀਤੀ ਜਾਂਦੀ ਹੈ।
+
+ਨਾਮਿਤ combinations ਉੱਪਰ ਦਿੱਤੇ [`model` routing contract](#named-searchfetch-combinations)
+ਦੀ ਪਾਲਣਾ ਕਰਦੇ ਹਨ ਅਤੇ fetch-ਵਿਸ਼ੇਸ਼ options ਤੇ responses ਨੂੰ ਕਾਇਮ ਰੱਖਦੇ ਹਨ।
+
+**Quota-aware fallback (#8297):** ਜਦੋਂ ਨਾ `provider` ਦਿੱਤਾ ਗਿਆ ਹੋਵੇ ਅਤੇ ਨਾ ਹੀ `model`, ਤਾਂ pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) ਨੂੰ ਨਿਰਧਾਰਤ
-ਤਰਜੀਹ ਕ੍ਰਮ (fill-first) ਵਿੱਚ
-ਚਲਾਇਆ ਜਾਂਦਾ ਹੈ — rate-limited ਪਰ configured ਪ੍ਰਦਾਤਾ ਨੂੰ ਬੇਨਤੀ ਨੂੰ short-circuit ਕਰਨ ਦੀ ਬਜਾਏ ਛੱਡ ਦਿੱਤਾ ਜਾਂਦਾ ਹੈ, ਅਤੇ retryable/quota upstream failure
+`parallel-search` → `keenable-search`) ਨੂੰ
+ਨਿਰਧਾਰਤ priority order (fill-first) ਵਿੱਚ traverse ਕੀਤਾ ਜਾਂਦਾ ਹੈ — rate-limited ਪਰ ਕਨਫ਼ਿਗਰ ਕੀਤਾ ਹੋਇਆ provider skip ਕੀਤਾ ਜਾਂਦਾ ਹੈ
+ਤਾਂ ਜੋ request ਨੂੰ short-circuit ਨਾ ਕੀਤਾ ਜਾਵੇ, ਅਤੇ retryable/quota upstream failure
 (HTTP 429 ਹਮੇਸ਼ਾ; Firecrawl/Tavily/TinyFish quota-style free tiers ਲਈ 402/403 —
-Jina Reader ਲਈ ਨਹੀਂ, ਅਤੇ ਸਧਾਰਣ 400 bad request ਲਈ ਕਦੇ ਨਹੀਂ) request time ਤੇ ਅਗਲੇ
-ਅਣਅਜ਼ਮਾਏ credentialed ਪ੍ਰਦਾਤਾ ਵੱਲ ਜਾਂਦਾ ਹੈ। ਜਦੋਂ ਪੂਲ ਦਾ ਹਰ ਪ੍ਰਦਾਤਾ ਖਤਮ ਹੋ ਜਾਂਦਾ ਹੈ, ਤਾਂ endpoint ਪਿਛਲੇ generic `400` ਦੀ ਬਜਾਏ
-`Retry-After` header ਸਮੇਤ ਇੱਕੋ `429` ਵਾਪਸ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਸਪਸ਼ਟ `provider` ਦੀ ਬੇਨਤੀ ਕੀਤੀ ਜਾਂਦੀ ਹੈ, ਤਾਂ ਕੋਈ ਵੀ
-silent fallback ਨਹੀਂ ਹੁੰਦਾ — rate-limited ਜਾਂ ਅਸਫਲ explicit
-provider ਆਪਣੀ ਖੁਦ ਦੀ error ਦਿਖਾਉਂਦਾ ਹੈ (rate-limited ਹੋਣ ਤੇ `429`, ਨਹੀਂ ਤਾਂ upstream status)।
+Jina Reader ਲਈ ਨਹੀਂ, ਅਤੇ ਸਧਾਰਣ 400 bad request ਲਈ ਕਦੇ ਨਹੀਂ) request ਸਮੇਂ ਅਗਲੇ
+ਅਣਵਰਤੇ credentialed provider ਵੱਲ pass ਹੋ ਜਾਂਦੀ ਹੈ। ਜਦੋਂ pool ਵਿੱਚ ਹਰ provider
+exhausted ਹੋ ਜਾਂਦਾ ਹੈ, endpoint ਪਿਛਲੇ generic `400` ਦੀ ਬਜਾਏ ਇੱਕ single `429` (ਇੱਕ `Retry-After`
+header ਸਮੇਤ) ਵਾਪਸ ਕਰਦਾ ਹੈ। ਜਦੋਂ ਕੋਈ explicit `provider` ਮੰਗਿਆ ਜਾਂਦਾ ਹੈ, ਤਾਂ
+ਕੋਈ silent fallback ਨਹੀਂ ਹੁੰਦਾ — rate-limited ਜਾਂ failing explicit
+provider ਆਪਣੀ error ਦਿਖਾਉਂਦਾ ਹੈ (rate-limited ਹੋਣ 'ਤੇ `429`, ਨਹੀਂ ਤਾਂ upstream status)।
 
 ---
 
@@ -968,34 +1075,35 @@ server ਦੇ ਵਿਰੁੱਧ end-to-end validation ਕੀਤੀ ਗਈ ਹ�
 
 ## ਕੋਟੇ ਅਤੇ ਸਮੱਸਿਆਵਾਂ ਦੀ ਰਿਪੋਰਟਿੰਗ
 
-| ਵਿਧੀ | ਪਾਥ                 | ਵੇਰਵਾ                                                                                           |
-| ---- | ------------------- | ----------------------------------------------------------------------------------------------- |
-| GET  | `/v1/quotas/check`  | ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਜਾਰੀ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ `provider` + `accountId` ਲਈ ਕੋਟੇ ਦੀ ਪਹਿਲਾਂ ਜਾਂਚ ਕਰੋ       |
-| POST | `/v1/issues/report` | GitHub ਨੂੰ ਕੋਟਾ/ਕੁੰਜੀ ਜਾਰੀ ਕਰਨ ਦੀ ਅਸਫਲਤਾ ਦੀ ਰਿਪੋਰਟ ਕਰੋ (`GITHUB_ISSUES_REPO` + ਟੋਕਨ ਲੋੜੀਂਦਾ ਹੈ) |
+| ਵਿਧੀ | ਪਾਥ                 | ਵੇਰਵਾ                                                                                             |
+| ---- | ------------------- | ------------------------------------------------------------------------------------------------- |
+| GET  | `/v1/quotas/check`  | ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਜਾਰੀ ਕਰਨ ਤੋਂ ਪਹਿਲਾਂ `provider` + `accountId` ਲਈ ਕੋਟੇ ਦੀ ਪੂਰਵ-ਜਾਂਚ               |
+| POST | `/v1/issues/report` | ਕੋਟੇ/ਕੁੰਜੀ ਜਾਰੀ ਕਰਨ ਵਿੱਚ ਅਸਫਲਤਾ ਦੀ GitHub ਨੂੰ ਰਿਪੋਰਟ ਕਰੋ (`GITHUB_ISSUES_REPO` + ਟੋਕਨ ਲੋੜੀਂਦਾ ਹੈ) |
 
-**ਪ੍ਰਮਾਣਿਕਤਾ:** Bearer API ਕੁੰਜੀ (`isAuthenticated`)।
+**ਪ੍ਰਮਾਣੀਕਰਨ:** `/v1/quotas/check` ਇੱਕ Bearer API ਕੁੰਜੀ (`isAuthenticated`) ਲੈਂਦਾ ਹੈ। `/v1/issues/report` ਸਿਰਫ਼
+ਪ੍ਰਬੰਧਨ ਲਈ ਹੈ (`requireManagementAuth`), `/api/v1/registered-keys` ਵਾਂਗ: ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ,
+ਸਥਾਨਕ CLI ਟੋਕਨ, ਜਾਂ `manage`/`admin` ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ; ਸਿਰਫ਼ inference ਵਾਲੀਆਂ API ਕੁੰਜੀਆਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ।
 
 ### ਕੋਟਾ ਸੈਸ਼ਨ ਰਿਕਵਰੀ (ਵਿਕਲਪਿਕ)
 
-ਇੱਕ non-streaming `POST /v1/chat/completions` ਜਾਂ `POST /v1/responses` ਜੋ
-terminal ਕੋਟਾ ਗਲਤੀ (`402`/`429`/`503` ਜਿਸ ਦੇ body ਵਿੱਚ ਕੋਟਾ ਜਾਂ credits ਖਤਮ ਹੋਣ ਬਾਰੇ ਲਿਖਿਆ ਹੋਵੇ)
-ਨਾਲ ਅਸਫਲ ਹੁੰਦੀ ਹੈ, ਉਸ ਨੂੰ ਗਲਤੀ ਵਾਪਸ ਕਰਨ ਦੀ ਬਜਾਏ ਬਾਅਦ ਵਿੱਚ replay ਕਰਨ ਲਈ ਰੋਕਿਆ ਜਾ ਸਕਦਾ ਹੈ। ਕਾਲਰ ਹਰ
-request ਲਈ ਹੇਠਾਂ ਦਿੱਤੇ ਤਿੰਨ headers ਨਾਲ opt in ਕਰਦਾ ਹੈ:
+ਇੱਕ ਨਾਨ-ਸਟ੍ਰੀਮਿੰਗ `POST /v1/chat/completions` ਜਾਂ `POST /v1/responses`, ਜੋ
+ਟਰਮੀਨਲ ਕੋਟਾ ਗਲਤੀ (`402`/`429`/`503`, ਜਿਸਦੀ ਬਾਡੀ ਦੱਸਦੀ ਹੋਵੇ ਕਿ ਕੋਟਾ ਜਾਂ ਕ੍ਰੈਡਿਟ ਖਤਮ ਹੋ ਗਏ ਹਨ) ਨਾਲ ਅਸਫਲ ਹੁੰਦੀ ਹੈ,
+ਗਲਤੀ ਵਾਪਸ ਕਰਨ ਦੀ ਬਜਾਏ ਬਾਅਦ ਵਿੱਚ ਦੁਬਾਰਾ ਚਲਾਉਣ ਲਈ ਰੋਕੀ ਜਾ ਸਕਦੀ ਹੈ। ਕਾਲਰ ਹਰ
+ਰਿਕਵੈਸਟ ਲਈ ਹੇਠਾਂ ਦਿੱਤੇ ਤਿੰਨ ਹੈਡਰਾਂ ਨਾਲ ਇਸਨੂੰ ਚੁਣਦਾ ਹੈ:
 
-| Header                       | Value                                     |
-| ---------------------------- | ----------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                    |
-| `x-omniroute-session`        | session id, `[A-Za-z0-9._:-]{1,128}`      |
-| `x-omniroute-recovery-turn`  | session ਦੇ ਅੰਦਰ ਵਿਲੱਖਣ turn id (ਇਹੀ ਨਿਯਮ) |
+| ਹੈਡਰ                         | ਮੁੱਲ                                   |
+| ---------------------------- | -------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                 |
+| `x-omniroute-session`        | ਸੈਸ਼ਨ ID, `[A-Za-z0-9._:-]{1,128}`     |
+| `x-omniroute-recovery-turn`  | ਸੈਸ਼ਨ ਦੇ ਅੰਦਰ ਵਿਲੱਖਣ ਟਰਨ ID (ਇਹੀ ਨਿਯਮ) |
 
-ਸਿਰਫ਼ `stream: false` ਵਾਲੀਆਂ turns ਜਿਨ੍ਹਾਂ ਵਿੱਚ tools, tool history ਜਾਂ
-`previous_response_id` ਨਾ ਹੋਵੇ, ਅਤੇ `x-omniroute-connection` pin ਵੀ ਨਾ ਹੋਵੇ, ਯੋਗ ਹਨ। ਨਾਲ ਹੀ
-`STORAGE_ENCRYPTION_KEY` ਸੈੱਟ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ (request ਨੂੰ ਵੱਧ ਤੋਂ ਵੱਧ 24 ਘੰਟਿਆਂ ਲਈ encrypted ਰੂਪ ਵਿੱਚ
-ਸੰਭਾਲਿਆ ਜਾਂਦਾ ਹੈ)। ਇਸ ਤੋਂ ਬਾਅਦ response `202` ਹੁੰਦਾ ਹੈ ਅਤੇ ਇਸ ਵਿੱਚ
-`recovery.poll` ਹੁੰਦਾ ਹੈ; poll ਲਈ `GET /v1/quota-recoveries/{id}` ਵਰਤੋ (`202` ਜਦੋਂ pending ਹੋਵੇ,
-`200` ਜਦੋਂ ਪੂਰਾ ਹੋਣ ਉੱਤੇ recovered body ਮਿਲੇ) ਜਾਂ `DELETE` ਨਾਲ cancel ਕਰੋ। Tickets ਸਿਰਫ਼ ਉਸ API
-ਕੁੰਜੀ ਨੂੰ ਦਿਖਾਈ ਦਿੰਦੇ ਹਨ ਜਿਸ ਨੇ ਉਹ ਬਣਾਏ ਹਨ। ਜਿਸ replay ਦਾ outcome ਅਨਿਸ਼ਚਿਤ ਹੋਵੇ, ਉਹ ਦੋ ਵਾਰ ਭੇਜੇ ਜਾਣ
-ਦੀ ਬਜਾਏ `needs_confirmation` ਵਿੱਚ ਸਮਾਪਤ ਹੁੰਦਾ ਹੈ। ਸਰੋਤ: `src/lib/quota/quotaSessionRecovery.ts`।
+ਸਿਰਫ਼ `stream: false` ਵਾਲੇ ਟਰਨ, ਜਿਨ੍ਹਾਂ ਵਿੱਚ ਕੋਈ ਟੂਲ, ਟੂਲ ਇਤਿਹਾਸ ਜਾਂ `previous_response_id` ਨਾ ਹੋਵੇ,
+ਅਤੇ ਕੋਈ `x-omniroute-connection` ਪਿਨ ਨਾ ਹੋਵੇ, ਯੋਗ ਹਨ, ਅਤੇ `STORAGE_ENCRYPTION_KEY` ਸੈੱਟ ਹੋਣਾ ਲਾਜ਼ਮੀ ਹੈ
+(ਰਿਕਵੈਸਟ ਨੂੰ ਵੱਧ ਤੋਂ ਵੱਧ 24 ਘੰਟਿਆਂ ਲਈ ਇਨਕ੍ਰਿਪਟ ਕਰਕੇ ਸਟੋਰ ਕੀਤਾ ਜਾਂਦਾ ਹੈ)। ਇਸ ਤੋਂ ਬਾਅਦ ਜਵਾਬ `202` ਹੁੰਦਾ ਹੈ ਅਤੇ ਇਸ ਵਿੱਚ
+`recovery.poll` ਹੁੰਦਾ ਹੈ; ਪੋਲ ਕਰਨ ਲਈ `GET /v1/quota-recoveries/{id}` ਵਰਤੋ (`202` ਬਕਾਇਆ ਹੋਣ ਦੌਰਾਨ, ਪੂਰਾ ਹੋਣ ਤੇ
+ਰਿਕਵਰ ਕੀਤੀ ਬਾਡੀ ਨਾਲ `200`) ਜਾਂ `DELETE` ਨਾਲ ਰੱਦ ਕਰੋ। ਟਿਕਟਾਂ ਸਿਰਫ਼ ਉਸ API
+ਕੁੰਜੀ ਨੂੰ ਦਿਖਾਈ ਦਿੰਦੀਆਂ ਹਨ ਜਿਸ ਨੇ ਉਨ੍ਹਾਂ ਨੂੰ ਬਣਾਇਆ ਹੈ। ਜਿਸ ਰੀਪਲੇਅ ਦਾ ਨਤੀਜਾ ਅਨਿਸ਼ਚਿਤ ਹੋਵੇ, ਉਹ ਦੋ ਵਾਰ ਭੇਜਣ ਦੀ ਬਜਾਏ
+`needs_confirmation` ਵਿੱਚ ਸਮਾਪਤ ਹੁੰਦਾ ਹੈ। ਸਰੋਤ: `src/lib/quota/quotaSessionRecovery.ts`।
 
 ---
 
@@ -1741,17 +1849,21 @@ OmniRoute ਇਵੈਂਟਾਂ (ਬੇਨਤੀ ਪੂਰੀ ਹੋਣਾ, ਕ�
 
 ## ਰਜਿਸਟਰ ਕੀਤੀਆਂ ਕੁੰਜੀਆਂ (ਸਵੈਚਾਲਿਤ ਪ੍ਰਬੰਧਨ)
 
-ਇਹ ਆਟੋ-ਕੀ ਪ੍ਰਬੰਧਨ ਸਬਸਿਸਟਮ ਵੱਲੋਂ ਬੈਕਿੰਗ ਪ੍ਰੋਵਾਈਡਰ/ਖਾਤੇ ਦੇ ਵਿਰੁੱਧ API ਕੁੰਜੀਆਂ ਜਾਰੀ ਕਰਨ ਅਤੇ ਰੋਟੇਟ ਕਰਨ ਲਈ ਵਰਤਿਆ ਜਾਂਦਾ ਹੈ, ਜਿਸ ਵਿੱਚ ਰੋਜ਼ਾਨਾ/ਘੰਟਾਵਾਰ ਕੋਟੇ ਹੁੰਦੇ ਹਨ।
+ਬੈਕਿੰਗ ਪ੍ਰਦਾਤਾ/ਖਾਤੇ ਦੇ ਵਿਰੁੱਧ API ਕੁੰਜੀਆਂ ਜਾਰੀ ਕਰਨ ਅਤੇ ਰੋਟੇਟ ਕਰਨ ਲਈ ਆਟੋ-ਕੀ ਪ੍ਰਬੰਧਨ ਸਬਸਿਸਟਮ ਵੱਲੋਂ ਵਰਤੀਆਂ ਜਾਂਦੀਆਂ ਹਨ, ਜਿਨ੍ਹਾਂ ਉੱਤੇ ਰੋਜ਼ਾਨਾ/ਘੰਟਾਵਾਰ ਕੋਟੇ ਲਾਗੂ ਹੁੰਦੇ ਹਨ।
 
-| ਵਿਧੀ   | ਪਾਥ                                   | ਵੇਰਵਾ                                                                                                                                                                                                                  |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | ਰਜਿਸਟਰ ਕੀਤੀਆਂ ਕੁੰਜੀਆਂ ਦੀ ਸੂਚੀ ਬਣਾਓ (ਸਿਰਫ਼ ਮਾਸਕ ਕੀਤਾ ਪ੍ਰੀਫਿਕਸ)                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys`             | ਨਵੀਂ ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਜਾਰੀ ਕਰੋ — ਬਾਡੀ: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`। ਕੱਚੀ ਕੁੰਜੀ **ਇੱਕ ਵਾਰ** ਵਾਪਸ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਕੋਟਾ ਅਸਵੀਕਾਰ ਹੋਣ 'ਤੇ `429` ਵਾਪਸ ਕਰਦਾ ਹੈ। |
-| GET    | `/api/v1/registered-keys/[id]`        | ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਦਾ ਮੈਟਾਡੇਟਾ ਪ੍ਰਾਪਤ ਕਰੋ (ਕੱਚੀ ਕੁੰਜੀ ਨਹੀਂ)                                                                                                                                                             |
-| DELETE | `/api/v1/registered-keys/[id]`        | ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਰੱਦ ਕਰੋ                                                                                                                                                                                              |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | ਸਪਸ਼ਟ ਰੱਦਕਰਨ ਐਂਡਪੌਇੰਟ (DELETE ਵਰਗਾ ਹੀ ਪ੍ਰਭਾਵ)                                                                                                                                                                          |
+| ਵਿਧੀ   | ਪਾਥ                                   | ਵੇਰਵਾ                                                                                                                                                                                                                       |
+| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | ਰਜਿਸਟਰ ਕੀਤੀਆਂ ਕੁੰਜੀਆਂ ਦੀ ਸੂਚੀ (ਕੇਵਲ ਮਾਸਕ ਕੀਤਾ ਪ੍ਰੀਫਿਕਸ)                                                                                                                                                                     |
+| POST   | `/api/v1/registered-keys`             | ਨਵੀਂ ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਜਾਰੀ ਕਰੋ — ਬਾਡੀ: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`। ਕੱਚੀ ਕੁੰਜੀ **ਕੇਵਲ ਇੱਕ ਵਾਰ** ਵਾਪਸ ਕੀਤੀ ਜਾਂਦੀ ਹੈ। ਕੋਟਾ ਅਸਵੀਕਾਰ ਹੋਣ 'ਤੇ `429` ਵਾਪਸ ਕਰਦਾ ਹੈ। |
+| GET    | `/api/v1/registered-keys/[id]`        | ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਦਾ ਮੈਟਾਡਾਟਾ ਪ੍ਰਾਪਤ ਕਰੋ (ਕੱਚੀ ਸਮੱਗਰੀ ਨਹੀਂ)                                                                                                                                                                 |
+| DELETE | `/api/v1/registered-keys/[id]`        | ਰਜਿਸਟਰ ਕੀਤੀ ਕੁੰਜੀ ਰੱਦ ਕਰੋ                                                                                                                                                                                                   |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | ਸਪਸ਼ਟ ਰੱਦਕਰਨ ਐਂਡਪੌਇੰਟ (DELETE ਵਰਗਾ ਹੀ ਪ੍ਰਭਾਵ)                                                                                                                                                                               |
+| GET    | `/api/v1/providers/[provider]/limits` | ਪ੍ਰਦਾਤਾ ਦੀਆਂ ਜਾਰੀਕਰਨ ਸੀਮਾਵਾਂ ਪੜ੍ਹੋ                                                                                                                                                                                          |
+| PUT    | `/api/v1/providers/[provider]/limits` | ਪ੍ਰਦਾਤਾ ਦੀਆਂ ਜਾਰੀਕਰਨ ਸੀਮਾਵਾਂ ਸੈੱਟ ਕਰੋ — ਬਾਡੀ: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                       |
+| GET    | `/api/v1/accounts/[id]/limits`        | ਖਾਤੇ ਦੀਆਂ ਜਾਰੀਕਰਨ ਸੀਮਾਵਾਂ ਪੜ੍ਹੋ                                                                                                                                                                                             |
+| PUT    | `/api/v1/accounts/[id]/limits`        | ਖਾਤੇ ਦੀਆਂ ਜਾਰੀਕਰਨ ਸੀਮਾਵਾਂ ਸੈੱਟ ਕਰੋ — ਪ੍ਰਦਾਤਾ ਰੂਟ ਵਰਗੀ ਹੀ ਬਾਡੀ                                                                                                                                                               |
 
-**ਪ੍ਰਮਾਣੀਕਰਨ:** ਪ੍ਰਬੰਧਨ ਸੈਸ਼ਨ/API ਕੁੰਜੀ (`requireManagementAuth`) — ਇਹ `/api/keys` ਵਾਲਾ ਹੀ ਗਾਰਡ ਹੈ: ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਸਥਾਨਕ CLI ਟੋਕਨ, ਜਾਂ `manage`/`admin` ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ; ਸਿਰਫ਼ ਇਨਫ਼ਰੈਂਸ ਲਈ API ਕੁੰਜੀਆਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ। `/v1/quotas/check` ਅਤੇ `/v1/issues/report` ਵੀ ਵੇਖੋ।
+**ਪ੍ਰਮਾਣੀਕਰਨ:** ਪ੍ਰਬੰਧਨ ਸੈਸ਼ਨ/API ਕੁੰਜੀ (`requireManagementAuth`) — `/api/keys` ਵਾਲਾ ਹੀ ਗਾਰਡ: ਡੈਸ਼ਬੋਰਡ ਸੈਸ਼ਨ, ਸਥਾਨਕ CLI ਟੋਕਨ, ਜਾਂ `manage`/`admin` ਸਕੋਪ ਵਾਲੀ API ਕੁੰਜੀ; ਸਿਰਫ਼ ਇਨਫ਼ਰੈਂਸ ਲਈ API ਕੁੰਜੀਆਂ ਨੂੰ `403` ਮਿਲਦਾ ਹੈ। ਇਹ ਵੀ ਵੇਖੋ: `/v1/quotas/check` ਅਤੇ `/v1/issues/report`.
 
 ---
 

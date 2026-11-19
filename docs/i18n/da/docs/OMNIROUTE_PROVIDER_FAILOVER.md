@@ -4,10 +4,20 @@
 
 ---
 
-Fejl klassificeres, før der træffes beslutninger om nye forsøg.
+Fejl klassificeres, før der træffes beslutninger om genforsøg.
 
-Midlertidige fejl såsom timeouts, netværksfejl, hastighedsbegrænsninger og 5xx-svar fra udbydere kan udløse failover. Godkendelsesfejl, tilladelsesfejl, ugyldige anmodninger, utilgængelige modeller og ukendte fejl forsøges ikke blindt igen.
+Forbigående fejl såsom timeouts, netværksfejl, hastighedsgrænser og udbyders 5xx-svar kan mislykkes. Opbrugt kvote eller kredit (en kvote 429 eller 402 betaling påkrævet) prøves aldrig igen hos den samme udbyder, men mislykkes til en anden, hvis kvote er separat. Godkendelsesfejl, tilladelsesfejl, ugyldige anmodninger, utilgængelige modeller og ukendte fejl forsøges ikke blindt igen.
 
-Standardpolitikken på tværs af udbydere tillader op til tre udbyderforsøg, forsøger igen ved hastighedsbegrænsninger og timeouts og holder administrativ deaktivering adskilt fra midlertidig kredsløbstilstand.
+Standardpolitikken på tværs af udbydere tillader op til tre udbyderforsøg, genforsøger hastighedsgrænser og timeouts, mislykkes på opbrugt kvote og holder administrativ deaktivering adskilt fra den midlertidige kredsløbstilstand.
 
-Kredsløbstilstandene er `closed`, `open` og `half_open`. En nedkølingsperiode planlægger en afgrænset test; en vellykket test lukker kredsløbet, mens en mislykket test åbner det igen.
+## Hvor det gælder
+
+- **Combos** mislykkes mellem deres mål i henhold til comboens egen strategi og indstillinger.
+- **Et blottet model-id** (ingen `provider/` præfiks), som flere aktive udbydere tjener, uden kombination af det nøjagtige navn, sendes først til udbyderens konklusioner. Hvis dette forsøg mislykkes på en måde, som politikken mislykkes, sendes den samme anmodning til den næste aktive udbyder, der betjener id'et. Svaret bærer `x-omniroute-fallback-attempts` med antallet af prøvede udbydere før den, der svarede.
+  - Hver suppleant er autoriseret nøjagtigt, som om slutningen havde valgt den. Et mål, som API nøglen blokerer eller ikke indrømmer, springes over uden et opstrømskald, og klienten får den rigtige upstream-fejl, ikke en politikafvisning for et mål, den aldrig har navngivet.
+  - Kun et mislykket svar fortsætter: intet fejler efter den første streamede byte.
+  - Nødudskiftning af reservemodel gælder kun, efter at hver udbyder af den anmodede model har fejlet.
+  - En anmodning fastgjort til en forbindelse (`x-omniroute-connection`) forbliver på den.
+  - Et præfikset id (`provider/model`) omdirigeres aldrig til en anden udbyder.
+
+Kredsløbstilstande er `closed`, `open` og `half_open`. En nedkøling planlægger en afgrænset sonde; en vellykket sonde lukker kredsløbet, og en fejlbehæftet sonde genåbner det.

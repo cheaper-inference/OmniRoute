@@ -170,7 +170,12 @@ test("R10: chatCore wires applyStatusRestatement into the providerFailure block"
   const hookIndex = block.indexOf("applyStatusRestatement(");
   const statusReassign = block.indexOf("statusCode = restatement.status;");
   const retryReassign = block.indexOf("retryAfterMs = restatement.retryAfterMs;");
-  const classifyCallIndex = block.indexOf("await applyProviderFailureClassification(");
+  const classifyCallIndex = block.indexOf("applyProviderFailureClassification({");
+  assert.match(
+    block,
+    /await runWithCodexResponseFence\(providerResponse, \(\) =>\s*applyProviderFailureClassification\(/,
+    "provider failure classification must remain inside the awaited response-owner fence"
+  );
   assert.ok(
     hookIndex > -1 &&
       statusReassign > hookIndex &&
