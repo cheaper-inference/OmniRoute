@@ -13,6 +13,10 @@ export const sensenovaProvider: RegistryEntry = {
   // also currently advertises sensenova-u1-fast, but chat completions return
   // 404 "model is not found" for that model; U1 Fast belongs to image flows.
   models: [
+    // The vendor's U1.5 Lite Token Plan page names this id as the chat model. It publishes no
+    // context window or capability flags for it, so none are declared here; the output cap is the
+    // Token Plan limit that applies to every model below.
+    { id: "sensenova-6.8-flash-lite", name: "SenseNova 6.8 Flash-Lite", maxOutputTokens: 65536 },
     {
       id: "sensenova-6.7-flash-lite",
       name: "SenseNova 6.7 Flash-Lite",

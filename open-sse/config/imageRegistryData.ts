@@ -50,6 +50,8 @@ export interface ImageProviderConfig {
   models: ImageModelEntry[];
   routingAliases?: readonly string[];
   supportedSizes: string[];
+  /** Extra client body fields copied verbatim to the upstream request when the client sends them. */
+  bodyFields?: readonly string[];
 }
 
 export interface ImageModelAliasEntry {
@@ -754,12 +756,17 @@ export const IMAGE_PROVIDERS: Record<string, ImageProviderConfig> = {
   // SenseNova api-key/connection as the chat provider. (9router#2233)
   sensenova: {
     id: "sensenova",
-    baseUrl: "https://api.sensenova.cn/v1/images/generations",
+    // Token Plan host, same as the chat route and the vendor's U1.5 Lite page.
+    baseUrl: "https://token.sensenova.cn/v1/images/generations",
     authType: "apikey",
     authHeader: "bearer",
     format: "openai",
-    models: [{ id: "sensenova-u1-fast", name: "SenseNova U1 Fast" }],
+    models: [
+      { id: "sensenova-u1-fast", name: "SenseNova U1 Fast" },
+      { id: "sensenova-u1.5-lite", name: "SenseNova U1.5 Lite" },
+    ],
     supportedSizes: ["1024x1024"],
+    bodyFields: ["output_format", "watermark", "prompt_extend"],
   },
 
   // HuggingFace Hub Inference API text-to-image task. Returns raw image bytes
