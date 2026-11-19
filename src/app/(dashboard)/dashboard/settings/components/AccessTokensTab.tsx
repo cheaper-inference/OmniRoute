@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { useFormatter, useTranslations } from "next-intl";
-import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import CodePreview from "@/shared/components/CodePreview";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import {
   Table,
@@ -258,6 +258,7 @@ export default function AccessTokensTab() {
         ) : (
           <Table
             scrollbarLabel={t("accessTokensExisting")}
+            scrollLabel={t("accessTokensExisting")}
             containerClassName="rounded-none border-0"
           >
             <TableHeader>

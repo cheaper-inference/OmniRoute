@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Filer i roden
+## Root-filer
 
 | Fil                                         | Formål                                                                                 |
 | ------------------------------------------- | -------------------------------------------------------------------------------------- |
-| **README.md**                               | Marketinglandingsside + hurtig start + funktionsmatrix (se også `llm.txt`)             |
-| **CHANGELOG.md**                            | Ændringslog pr. udgivelse (automatisk genereret af færdigheden `/version-bump-cc`)     |
-| **LICENSE**                                 | MIT-licenstekst                                                                        |
-| **CLAUDE.md**                               | Projektregler for Claude Code-agenter (ufravigelige regler, konventioner, scenarier)   |
-| **AGENTS.md**                               | Samme som CLAUDE.md, men for AI-agenter, der ikke er Claude (Codex, Cursor osv.)       |
-| **GEMINI.md**                               | Kortfattede regler for Gemini-baserede agenter (delmængde af CLAUDE.md)                |
-| **CONTRIBUTING.md**                         | Bidragydervejledning: opsætning, konventionelle commits, test og PR-flow               |
-| **SECURITY.md**                             | Politik for rapportering af sårbarheder, understøttede versioner og trusselsmodel      |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — forventninger til adfærd i fællesskabet                         |
-| **llm.txt**                                 | Landingsside i ren tekst optimeret til LLM-crawlere (SEO til AI-assistenter)           |
-| **package.json**                            | npm-manifest, scripts, afhængigheder, engines og c8-dækningskrav                       |
+| **README.md**                               | Marketinglandingsside + quick start + feature matrix (se også `llm.txt`)               |
+| **CHANGELOG.md**                            | Ændringslog pr. udgivelse (autogenereret af `/version-bump-cc` færdigheden)            |
+| **LICENSE**                                 | MIT licens tekst                                                                       |
+| **CLAUDE.md**                               | Projektregler for Claude Code-agenter (hårde regler, konventioner, scenarier)          |
+| **AGENTS.md**                               | Samme som CLAUDE.md, men for ikke-Claude AI agenter (Codex, Cursor, osv.)              |
+| **GEMINI.md**                               | Kortfattede regler for Gemini-baserede agenter (undersæt af CLAUDE.md)                 |
+| **CONTRIBUTING.md**                         | Bidragyderguide: opsætning, konventionelle commits, test, PR flow                      |
+| **SECURITY.md**                             | Sårbarhedsrapporteringspolitik, understøttede versioner, trusselsmodel                 |
+| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — community adfærdsforventninger                                  |
+| **llm.txt**                                 | Landing i almindelig tekst optimeret til LLM crawlere (SEO for AI assistenter)         |
+| **package.json**                            | npm manifest, scripts, afhængigheder, motorer, c8 coverage gate                        |
 | **package-lock.json**                       | Låst afhængighedstræ                                                                   |
-| **tsconfig.json**                           | TypeScript-rodconfig                                                                   |
-| **tsconfig.typecheck-core.json**            | Typecheck-config til kernen i `src/`                                                   |
-| **tsconfig.typecheck-noimplicit-core.json** | Streng typecheck (`noImplicitAny`)                                                     |
-| **tsconfig.tsbuildinfo**                    | Cache til inkrementel TS-build (ignoreret af git)                                      |
-| **next.config.mjs**                         | Next.js 16-buildkonfiguration (selvstændigt output)                                    |
-| **next-env.d.ts**                           | Automatisk genererede miljøtyper fra Next.js                                           |
-| **eslint.config.mjs**                       | Flad ESLint-config (regler pr. projektområde)                                          |
-| **prettier.config.mjs**                     | Formateringsregler for Prettier                                                        |
-| **postcss.config.mjs**                      | PostCSS-config til Tailwind/CSS-pipeline                                               |
-| **playwright.config.ts**                    | Playwright-config til E2E-test                                                         |
-| **vitest.config.ts**                        | Vitest-config (standardsuite)                                                          |
-| **vitest.mcp.config.ts**                    | Vitest-config til MCP-server-/autoCombo-/cachesuiter                                   |
-| **sonar-project.properties**                | SonarQube-/SonarCloud-config (kodekvalitet)                                            |
-| **Dockerfile**                              | Docker-build i flere faser (builder → runner-base → runner-cli)                        |
-| **docker-compose.yml**                      | Udviklings-compose med 4 profiler (base, cli, host, cliproxyapi) + redis-sidecar       |
-| **docker-compose.prod.yml**                 | Produktions-compose (port 20130, redis, navngivne volumes)                             |
-| **.dockerignore**                           | Filer udeladt fra Docker-konteksten                                                    |
-| **fly.toml**                                | Fly.io-udrulningsconfig (region `sin`, port 20128, /data-volume)                       |
-| **.env.example**                            | Skabelon til miljøfil (kopieres automatisk til `.env` ved første installation)         |
-| **.gitignore**                              | Git-ignore-mønstre                                                                     |
-| **.npmignore**                              | Eksklusionsliste til npm-udgivelse                                                     |
-| **.npmrc**                                  | npm-config (registry, lockfile-politik)                                                |
-| **.node-version**                           | Fastlåst Node-version (bruges af nvm-kompatible værktøjer)                             |
-| **.nvmrc**                                  | Fastlåst Node-version til nvm                                                          |
-| **eslint.complexity.config.mjs**            | ESLint-config til kompleksitetsratchet (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | ESLint-config til SonarJS-regler (kognitiv kompleksitet/duplikering)                   |
-| **source.config.ts**                        | Fumadocs-`defineDocs`-kildeconfig (leverer data til `.source/`)                        |
-| **knip.json**                               | Knip-config — ubrugte filer/exports/afhængigheder (leverer data til dead code-kravet)  |
-| **stryker.conf.json**                       | Stryker-config til mutationstest                                                       |
-| **.size-limit.json**                        | Konfiguration af bundlebudget for size-limit                                           |
-| **promptfooconfig.yaml**                    | Konfiguration af promptfoo-evaluering                                                  |
-| **.gitleaks.toml**                          | Regelsæt til hemmelighedsscanning med gitleaks                                         |
-| **.zizmor.yml**                             | Konfiguration af zizmor-sikkerhedslintning for GitHub Actions                          |
-| **socket.yml**                              | Konfiguration af forsyningskæde for Socket.dev                                         |
-| **news.json**                               | Lokaliseret v2-meddelelsesfeed; Radar-lanceringselementet leveres inaktivt             |
-| **flake.nix** / **flake.lock**              | Definition og låsning af Nix-udviklingsshell                                           |
-| **.env**                                    | Lokale hemmeligheder (ignoreres af git — genereret fra `.env.example`)                 |
+| **tsconfig.json**                           | Root TypeScript config                                                                 |
+| **tsconfig.typecheck-core.json**            | Typecheck config for `src/` core                                                       |
+| **tsconfig.typecheck-noimplicit-core.json** | Streng (`noImplicitAny`) typekontrol                                                   |
+| **tsconfig.tsbuildinfo**                    | TS inkrementel build-cache (gitignored)                                                |
+| **næste.config.mjs**                        | Next.js 16 build-konfiguration (standalone output)                                     |
+| **næste-env.d.ts**                          | Next.js auto-genererede env-typer                                                      |
+| **eslint.config.mjs**                       | ESLint flat config (regler pr. projektområde)                                          |
+| **smukkere.config.mjs**                     | Prettier -formateringsregler                                                           |
+| **postcss.config.mjs**                      | PostCSS config til Tailwind/CSS pipeline                                               |
+| **dramatiker.config.ts**                    | Playwright E2E test konfiguration                                                      |
+| **vitest.config.ts**                        | Vitest config (standard suite)                                                         |
+| **vitest.mcp.config.ts**                    | Vitest config til MCP server / autoCombo / cache suiter                                |
+| **sonar-projekt.egenskaber**                | SonarQube/SonarCloud config (kodekvalitet)                                             |
+| **Dockerfil**                               | Multi-stage Docker build (builder → runner-base → runner-cli)                          |
+| **docker-compose.yml**                      | Dev compose med 4 profiler (base, cli, host, cliproxyapi) + redis sidevogn             |
+| **docker-komponer.prod.yml**                | Produktionskomponering (port 20130, redis, navngivne volumener)                        |
+| **.dockerignore**                           | Filer ekskluderet fra Docker kontekst                                                  |
+| **fly.toml**                                | Fly.io-implementeringskonfiguration (region `sin`, port 20128, /datavolumen)           |
+| **.env.eksempel**                           | Skabelon env-fil (kopieret automatisk til `.env` ved første installation)              |
+| **.gitignore**                              | Git ignorere mønstre                                                                   |
+| **.npmignore**                              | npm offentliggør ekskluderingsliste                                                    |
+| **.npmrc**                                  | npm-konfiguration (registreringsdatabasen, låsefilpolitik)                             |
+| **.node-version**                           | Node version pin (brugt af nvm-kompatible værktøjer)                                   |
+| **.nvmrc**                                  | Node version pin til nvm                                                               |
+| **eslint.kompleksitet.config.mjs**          | ESLint config til kompleksitetsratchet (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | ESLint config for SonarJS regler (kognitiv kompleksitet / duplikering)                 |
+| **kilde.config.ts**                         | Fumadocs `defineDocs` source config (feeds `.source/`)                                 |
+| **knip.json**                               | Knip config — ubrugt files/exports/deps (føder dødkodeporten)                          |
+| **stryker.conf.mjs**                        | Stryker mutationstest-konfiguration (beregner `tap.testFiles` fra `mutate`)            |
+| **.size-limit.json**                        | størrelsesbegrænset bundt budgetkonfiguration                                          |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                  |
+| **.gitleaks.toml**                          | gitleaks regelsæt for hemmelig scanning                                                |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                             |
+| **socket.yml**                              | Socket.dev supply-chain config                                                         |
+| **news.json**                               | Lokaliseret v2-meddelelsesfeed; Radarlanceringselement afsendes inaktivt               |
+| **flage.nix** /** flage.lås**               | Nix dev-shell definition + lås                                                         |
+| **.env**                                    | Lokale hemmeligheder (gitignored — genereret fra `.env.example`)                       |
 
-> **Flyttet ud af roden i v3.8.26 (oprydning):**
+> **Flyttet ud af roden i v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` og den genererede `quality-metrics.json` (ignoreres af git). Se [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` og den genererede `quality-metrics.json` (gitignored). Se [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -153,8 +153,8 @@ src/
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | AgentBridge dashboard side — serverkort, 9 agentkort, opsætningsguide, modelkortlægning, bypass-liste. i18n PT-BR + EN. Se `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                                                        |
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Traffic Inspector dashboard side — DevTools split, 7 detalje faner, 4 capture mode switches, session recorder, kontekstfarvning. i18n PT-BR + EN. Se `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                                                        |
 | `app/(dashboard)/dashboard/activity/`                                        | Aktivitetsfeedside (gruppe B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — `docs/architecture/MONITORING_SECTIONS.md`                                                                                                                 |
-| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotedelingsside (gruppe B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
-| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfigurationsside for udbyderplan (gruppe B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvotedimensioner pr. forbindelsestilsidesættelse                                                                                                                                                                       |
+| `app/(dashboard)/dashboard/costs/quota-share/`                               | Kvotedelingsside (Gruppe B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                            |
+| `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Konfigurationsside for udbyderplan (Gruppe B): `page.tsx` + `ProviderPlanConfigClient.tsx` — kvotedimensioner pr. forbindelsestilsidesættelse                                                                                                                                                                       |
 | `app/docs/`                                                                  | Indlejret dokumentationsfremviser (gengiver `docs/*.md`)                                                                                                                                                                                                                                                            |
 | `app/landing/`                                                               | Marketing landingsside                                                                                                                                                                                                                                                                                              |
 | `app/login/`, `forgot-password/`, `forbidden/`                               | Auth-relaterede sider                                                                                                                                                                                                                                                                                               |
@@ -179,7 +179,7 @@ src/
 | `compliance/`                            | Revisionslog + udbyder revision — se `docs/security/COMPLIANCE.md`                                                                                                                                                                                                                                                 |
 | `compression/`                           | Kompressionsmotorlim (motorer lever i `open-sse/services/compression/`)                                                                                                                                                                                                                                            |
 | `config/`                                | Runtime config hjælpere                                                                                                                                                                                                                                                                                            |
-| `db/`                                    | 120 + domæne DB moduler + 168 migreringer (gå altid igennem her for SQLite)                                                                                                                                                                                                                                        |
+| `db/`                                    | 120 + domæne DB moduler + 168 migrationer (gå altid igennem her for SQLite)                                                                                                                                                                                                                                        |
 | `quota/`                                 | Kvotedelingsmotor: `dimensions.ts` (types/Zod), `types.ts` (QuotaStore grænseflade), `sqliteQuotaStore.ts`, `redisQuotaStore.ts`, `storeFactory.ts`, `fairShare.ts`, `burnRate.ts`, `planResolver.ts`, `planRegistry.ts`, `saturationSignals.ts`, `enforce.ts`, `spendRecorder.ts` — `docs/routing/QUOTA_SHARE.md` |
 | `radar/`                                 | Radar fri-model katalog klient: `feedSchema.ts`, `pinnedKeys.ts`, `verify.ts`, `sync.ts`, `applyFeed.ts`, `index.ts` (`getRadarCatalog()`) — `docs/frameworks/RADAR.md`                                                                                                                                            |
 | `display/`                               | UI -formateringshjælpere (omkostninger, ventetid osv.)                                                                                                                                                                                                                                                             |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard komponent API: adaptere over `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavne, der bruges af skærmene → Lucide-komponenter (`<Icon>`)                      |
-| `constants/providers.ts`         | **381 udbydere** med Zod -validering (sandhedens kilde)                                            |
+| `constants/providers.ts`         | **394 udbydere** med Zod -validering (sandhedens kilde)                                            |
 | `constants/cliTools.ts`          | Ekstern CLI -værktøjsregistrering                                                                  |
-| `constants/routingStrategies.ts` | **20 routingstrategier** med prioriteringer                                                        |
+| `constants/routingStrategies.ts` | **22 rutestrategier** med prioriteringer                                                           |
 | `constants/publicApiRoutes.ts`   | Ruter, der kræver bærer (vs. ledelse) godkendelse                                                  |
 | `constants/upstreamHeaders.ts`   | Header afvisningsliste til upstream-anmodninger                                                    |
 | `validation/schemas.ts`          | ~ 80 Zod skemaer (enkelt kilde til sandhed for API kontrakter)                                     |
@@ -265,7 +265,7 @@ Separat npm-arbejdsområde (`@omniroute/open-sse`). Håndterer behandling af anm
 ```
 open-sse/
 ├── handlers/            # 16 filer (12 handlere + 4 hjælpefunktioner): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search osv.
-├── executors/           # 150 eksekveringsmoduler (klasser, der udvider BaseExecutor + hjælpefunktioner pr. udbyder)
+├── executors/           # 163 eksekveringsmoduler (klasser, der udvider BaseExecutor + hjælpefunktioner pr. udbyder)
 ├── translator/          # Formatkonvertere (9 til anmodninger, 9 til svar, 9 hjælpefunktioner)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ tjenestemoduler (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM osv.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI integrationer + Intern OmniRoute CLI                                     |
 | `I18N.md`                   | i18n-arkitektur, tilføjelse af et sprog, 67 lokaliteter                               |
 | `UNINSTALL.md`              | Rengør afinstallationstrinene                                                         |
-| `PROVIDER_REFERENCE.md`     | **Autogenereret** katalog over 381 udbydere (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Autogenereret** katalog over 394 udbydere (regen: `npm run gen:provider-reference`) |
 
 ### Dybdyk i undersystemet
 

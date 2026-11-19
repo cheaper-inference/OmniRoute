@@ -113,36 +113,10 @@ Origin များကို စာလုံးအကြီးအသေးမခ
 အတူတူပင်ဖြစ်သည်။ အလားတူ CSV ကို restart ပြုလုပ်ရန်မလိုဘဲ runtime တွင်
 **Dashboard → Security → CORS Allowed Origins** မှတစ်ဆင့် သတ်မှတ်နိုင်သည်။
 
-## API key များနှင့် cookie session များ
+## API သော့များနှင့် ကွတ်ကီးဆက်ရှင်များ
 
-- **Bearer / `x-api-key` (`/v1/*` inference surface):** browser များသည်
-  ၎င်းတို့ကို မည်သည့်အခါမျှ အလိုအလျောက်မထည့်သွင်းပါ။ ဤနေရာတွင် CORS သည်
-  အဓိပ္ပာယ်ရှိသော အတားအဆီးတစ်ခုမဟုတ်ပါ — API key ကသာ အတားအဆီးဖြစ်သည် —
-  ထို့ကြောင့် browser နှင့် Electron client များက ၎င်းတို့ဖတ်ရှုခွင့်ရှိပြီးသား
-  response များကို ဖတ်နိုင်စေရန် ထို surface ကို ရည်ရွယ်ချက်ရှိရှိ permissive
-  ပြုလုပ်ထားခြင်းဖြစ်သည်။
-  ဖြေလျှော့ထားသော origin ပြန်လည်ဖော်ပြမှုသည် header ရှိနေရုံသက်သက်ကို မဟုတ်ဘဲ
-  အတည်ပြုပြီး key ကို လိုက်နာသည်။ `REQUIRE_API_KEY=false` က request တစ်ခုကို အမည်မသိအဖြစ်
-  ဆောင်ရွက်ပေးသည့်အခါ ၎င်း၏ အောင်မြင်သော response သည် fail-closed allowlist အတိုင်း
-  ဆက်ရှိနေသည်။ Auth ငြင်းပယ်မှုများ (401) ကို ဆက်လက်ဖတ်ရှုနိုင်သဖြင့် client များက
-  ရုပ်သိမ်းထားသော သို့မဟုတ် စာလုံးမှားရိုက်ထားသော key ကို ပြသနိုင်သည် (#5242)။ pipeline ၏
-  ကိုယ်ပိုင် 401 သည် origin ပြန်လည်ဖော်ပြမှုကို ထိန်းထားပြီး pipeline က request ကို အမည်မသိအဖြစ်
-  ဆောင်ရွက်ပြီးနောက် key ကို ကိုယ်တိုင်ငြင်းပယ်သော route (management auth စီစဉ်ထားသည့်အခါ
-  `/v1/models` နှင့် `/v1beta/models`၊ owner-scoped `/v1/files`၊ `/v1/batches`၊ `/v1/media`၊
-  `/v1/session-leases` နှင့် auto-combo candidate route များ) သည် ထို 401 သို့
-  `credentialRejectionHeaders()` မှတစ်ဆင့် origin ပြန်လည်ဖော်ပြမှုကို ထည့်ပေးသည်။ ဤဖော်ပြမှုသည်
-  request တွင် credential header (`Authorization`၊ `x-api-key`၊ `x-goog-api-key` သို့မဟုတ်
-  `auth_token` cookie) ပါ၊ မပါအပေါ် မူတည်ပြီး route က ၎င်းတို့အနက် မည်သည့်တစ်ခုကို စစ်ဆေးခဲ့သည်
-  အပေါ် မမူတည်ပါ။ ၎င်းကို `Access-Control-Allow-Credentials` နှင့် မည်သည့်အခါမျှ တွဲမပေးပါ။
-  body သည် ပုံသေ error envelope တစ်ခုဖြစ်သည်။ `requireManagementAuth()` ဖြင့် ကာကွယ်ထားသော
-  `/api/v1/` အောက်ရှိ management route များ (`/api/v1/management/*`၊
-  `/api/v1/registered-keys`) သည် origin ပြန်လည်ဖော်ပြမှုကို မထည့်ပါ။ `REQUIRE_API_KEY=false`
-  ဖြစ်သည့်အခါ ၎င်းတို့၏ 401/403 ကို cross-origin မှ ဖတ်ရှု၍ မရပါ။
-- **Cookie session (dashboard):** fail-closed default **နှင့်**
-  မျှဝေထားသော path တွင် `Access-Control-Allow-Credentials` မရှိခြင်းတို့ဖြင့်
-  ကာကွယ်ထားသည်။ Management/dashboard origin များကို permissive config
-  တစ်ခုခုထဲ မထည့်ပါနှင့်။ ၎င်းတို့သည် fail-closed အတိုင်း တိတိကျကျ
-  ဆက်ရှိနေရမည်။
+- **Bearer / `x-api-key` ( `/v1/*` စုံစုံမျက်နှာပြင်):** ဘရောက်ဆာများသည် ၎င်းတို့ကို မည်သည့်အခါမျှ အလိုအလျောက် မတွဲပါ။ CORS ဤနေရာတွင် အဓိပ္ပါယ်ရှိသော အတားအဆီးတစ်ခုမဟုတ်ပါ — အဆိုပါ API သော့သည် အတားအဆီး — ဖြစ်သောကြောင့် ၎င်းမျက်နှာပြင်သည် ရည်ရွယ်ချက်ရှိရှိ ခွင့်ပြုထားသောကြောင့် browser နှင့် Electron သုံးစွဲသူများသည် ၎င်းတို့ရပိုင်ခွင့်ရှိပြီးသား တုံ့ပြန်ချက်များကို ဖတ်နိုင်သည်။ ဖြေလျှော့ထားသော ပဲ့တင်သံသည် ခေါင်းစီး၏ တည်ရှိမှုမျှသာမဟုတ်ဘဲ အတည်ပြုထားသော သော့ကို လိုက်နာသည်- `REQUIRE_API_KEY=false` အမည်ဝှက်ဖြင့် တောင်းဆိုချက်ကို ဆောင်ရွက်ပေးသောအခါ၊ ၎င်း၏ အောင်မြင်သော တုံ့ပြန်မှုသည် ပျက်ကွက်သော ခွင့်ပြုစာရင်းကို သိမ်းထားသည်။ Auth rejections (401) သည် ဆက်လက်ဖတ်ရှုနိုင်စေရန်အတွက် clients များသည် ရုပ်သိမ်းထားသော သို့မဟုတ် ရိုက်ထားသောသော့ (#5242): ပိုက်လိုင်း၏ကိုယ်ပိုင် 401 သည် ပဲ့တင်သံကို ထိန်းသိမ်းထားပြီး၊ ပိုက်လိုင်းသည် အမည်မသိအဖြစ် လုပ်ဆောင်ပြီးနောက် သော့ကို ငြင်းပယ်သည့် လမ်းကြောင်း (`/v1/models` နှင့် `/v1beta/models` ဖြင့် စီမံခန့်ခွဲမှု auth configured, the owner- `/v1/batches` `/v1/files`, `/v1/media` auto-combo ကိုယ်စားလှယ်လောင်းလမ်းကြောင်းများ) `/v1/session-leases` `credentialRejectionHeaders()` မှတဆင့် 401 သို့ ပဲ့တင်သံကို ပေါင်းထည့်သည်။ အထောက်အထားဆိုင်ရာ ခေါင်းစီး (`Authorization`၊ `x-api-key`၊ `x-goog-api-key` သို့မဟုတ် `auth_token` cookie ) ပါရှိသည့် တောင်းဆိုချက်တွင် ပဲ့တင်သံကို သော့ခတ်ထားပြီး ၎င်းတို့ထဲမှ မည်သည့်လမ်းကြောင်းတွင် မဟုတ်ဘဲ `Access-Control-Allow-Credentials` နှင့် တွဲချိတ်မည် မဟုတ်ပါ။ body သည် fixed error envelope ဖြစ်သည်။ `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) မှ စောင့်ကြပ်ထားသော `/api/v1/` အောက်တွင်ရှိသော စီမံခန့်ခွဲမှုလမ်းကြောင်း 401/403 ပဲ့တင်သံကို မထည့်ပါနှင့် `REQUIRE_API_KEY=false`
+- **ကွတ်ကီးစက်ရှင် (ဒက်ရှ်ဘုတ်)-** fail-closed default ဖြင့် ကာကွယ်ထားသည်။** နှင့်** မျှဝေထားသောလမ်းကြောင်းပေါ်တွင် `Access-Control-Allow-Credentials` မရှိတော့ပါ။ ခွင့်ပြုထားသော config တစ်ခုခုမှ management/dashboard ဇစ်မြစ်များကို သိမ်းဆည်းထားပါ။ အတိအကျ ပြတ်ပြတ်သားသားနေရမယ်။
 
 ## WebSocket handshake များ (`/v1/responses`, `/v1/ws`)
 
