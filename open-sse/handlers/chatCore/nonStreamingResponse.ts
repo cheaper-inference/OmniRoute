@@ -801,8 +801,12 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       webFetchFallbackPlan.toolName,
       ...(memoryOwnerId && memorySettings?.enabled ? MEMORY_BUILTIN_TOOL_NAMES : []),
     ].filter((name): name is string => Boolean(name));
+    // Whether OmniRoute actually ran a server-side tool on this reply (not merely could have):
+    // handleToolCallExecution returns the reply object untouched when no call was its own.
+    let serverToolsExecuted = false;
     if (!toolLoopRan && (customSkillExecutionEnabled || builtinToolNames.length > 0)) {
       const skillSessionId = pipelineSessionId;
+      const replyBeforeServerTools = translatedResponse;
 
       translatedResponse = await handleToolCallExecution(
         translatedResponse,
@@ -817,6 +821,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
           model: effectiveModel,
         }
       );
+      serverToolsExecuted = translatedResponse !== replyBeforeServerTools;
     }
 
     // Opt-in observe-mode tool-call guard (OMNIROUTE_TOOL_CALL_GUARD_OBSERVE): audit row only,
@@ -934,11 +939,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         hasTrustedEmptyTurn(providerResponse)
       ) ??
       // Opt-in (OMNIROUTE_REQUIRED_TOOL_GUARD): a forced tool call that never happened.
-      requiredToolGuardReason(
-        body,
-        translatedResponse,
-        toolLoopRan || customSkillExecutionEnabled || builtinToolNames.length > 0
-      );
+      requiredToolGuardReason(body, translatedResponse, toolLoopRan || serverToolsExecuted);
     if (malformedTranslatedReason) {
       const malformedDiagnostic = buildMalformedResponseDiagnostic(
         malformedTranslatedReason,

@@ -79,7 +79,10 @@ async function readRefusalText(response: Response): Promise<string> {
   } catch {
     return "";
   } finally {
-    await reader.cancel().catch(() => undefined);
+    // Never await this: `clone()` tees the body, and cancelling one branch settles only once
+    // the other branch is read or cancelled too, so awaiting here would stall a body longer
+    // than the read limit until the caller (who has not got the response yet) reads it.
+    void reader.cancel().catch(() => undefined);
   }
   return text;
 }

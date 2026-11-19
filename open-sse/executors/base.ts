@@ -787,6 +787,8 @@ export class BaseExecutor {
     let activeCredentials = credentials;
     // Track per-URL intra-retry attempts to avoid infinite loops
     const retryAttemptsByUrl: Record<number, number> = {};
+    // Opt-in recovery-storm limiter: the URLs whose first send was already counted.
+    const initialSentUrls = new Set<number>();
     // Claude OAuth usage wall (opt-in per connection): see ./claudeUsageLimit.ts.
     const claudeUsageLimit = new ClaudeUsageLimitGuard(this.provider, log);
 
@@ -1625,9 +1627,12 @@ export class BaseExecutor {
           await gateOutboundRequest(`agentrouter:${url}`);
         }
 
-        // Opt-in recovery-storm limiter: an in-place retry re-enters this loop with the same
-        // urlIndex, so only a first send on this URL is an initial send.
-        if (!retryAttemptsByUrl[urlIndex]) getRecoveryLimiter(this.provider)?.noteInitial();
+        // Opt-in recovery-storm limiter: every re-run of this urlIndex (WAF, 429 and Claude
+        // usage-wall retries) reuses the same send, so only the first one is an initial send.
+        if (!initialSentUrls.has(urlIndex)) {
+          initialSentUrls.add(urlIndex);
+          getRecoveryLimiter(this.provider)?.noteInitial();
+        }
         let response = await fetchWithStartTimeout(url, fetchOptions);
 
         if (openrouterFreeWindowAccountKey) {

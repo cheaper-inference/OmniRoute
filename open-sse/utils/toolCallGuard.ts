@@ -4,8 +4,10 @@
  * exfiltration. It only observes: the reply is never blocked, edited or delayed.
  *
  * Evidence is a rule id and an offset. Argument text and tool names the guard does not know are
- * never returned. Work is bounded: each argument is cut at SCAN_CHARS, and every rule is a
- * bounded scan (no unbounded backtracking), because the text is untrusted model output.
+ * never returned. Work is bounded: each argument is cut at SCAN_CHARS, a reply is read up to
+ * MAX_CALLS calls, MAX_NODES argument nodes and MAX_REPLY_SCAN_CHARS scanned characters, and
+ * every rule is a bounded scan (no unbounded backtracking), because the text is untrusted model
+ * output.
  */
 
 type Json = Record<string, unknown>;
@@ -13,6 +15,9 @@ export type ToolCallFinding = { rule: string; call: number; leaf: string; offset
 
 const SCAN_CHARS = 64 * 1024;
 const MAX_CALLS = 64;
+// Per reply, shared by every call: argument nodes visited and characters handed to the rules.
+const MAX_NODES = 4096;
+const MAX_REPLY_SCAN_CHARS = 16 * SCAN_CHARS;
 const isRecord = (v: unknown): v is Json => !!v && typeof v === "object" && !Array.isArray(v);
 
 // Tools that run code or touch the machine, matched on the last name segment, lower case.
@@ -183,13 +188,25 @@ function scanText(text: string): Array<{ rule: string; offset: number }> {
   return found;
 }
 
-/** Every string leaf of an arguments value, depth and count bounded. */
-function* leaves(value: unknown, depth = 0): Generator<string> {
+type ScanBudget = { nodes: number; chars: number };
+
+/** Every string leaf of an arguments value: depth, width and the reply's node budget bounded. */
+function* leaves(value: unknown, budget: ScanBudget, depth = 0): Generator<string> {
+  if (budget.nodes <= 0) return;
+  budget.nodes -= 1;
   if (typeof value === "string") yield value;
-  else if (depth < 4 && Array.isArray(value))
-    for (const v of value.slice(0, 32)) yield* leaves(v, depth + 1);
-  else if (depth < 4 && isRecord(value))
-    for (const v of Object.values(value).slice(0, 32)) yield* leaves(v, depth + 1);
+  else if (depth < 4 && Array.isArray(value)) {
+    const width = Math.min(value.length, 32);
+    for (let i = 0; i < width && budget.nodes > 0; i += 1)
+      yield* leaves(value[i], budget, depth + 1);
+  } else if (depth < 4 && isRecord(value)) {
+    let width = 0;
+    for (const key in value) {
+      if (!Object.hasOwn(value, key)) continue;
+      if (width++ >= 32 || budget.nodes <= 0) break;
+      yield* leaves(value[key], budget, depth + 1);
+    }
+  }
 }
 
 function parsedArgs(raw: unknown): unknown {
@@ -203,22 +220,26 @@ function parsedArgs(raw: unknown): unknown {
 
 type Call = [string, unknown];
 const list = (v: unknown): unknown[] => (Array.isArray(v) ? v : []);
-const nameOf = (v: unknown) => String(v ?? "");
+const nameOf = (v: unknown): string => {
+  try {
+    return String(v ?? "");
+  } catch {
+    return ""; // a name that cannot become a string (e.g. {"toString": null}) is an unknown name
+  }
+};
 
 const chatCalls = (reply: Json): Call[] =>
   list(reply.choices).flatMap((choice) => {
     const message = isRecord(choice) && isRecord(choice.message) ? choice.message : {};
     return list(message.tool_calls).flatMap((c): Call[] => {
       const fn = isRecord(c) && isRecord(c.function) ? c.function : null;
-      return fn ? [[nameOf(fn.name), parsedArgs(fn.arguments)]] : [];
+      return fn ? [[nameOf(fn.name), fn.arguments]] : [];
     });
   });
 
 const responsesCalls = (reply: Json): Call[] =>
   list(reply.output).flatMap((item): Call[] =>
-    isRecord(item) && item.type === "function_call"
-      ? [[nameOf(item.name), parsedArgs(item.arguments)]]
-      : []
+    isRecord(item) && item.type === "function_call" ? [[nameOf(item.name), item.arguments]] : []
   );
 
 const claudeCalls = (reply: Json): Call[] =>
@@ -239,7 +260,11 @@ const geminiCalls = (reply: Json): Call[] =>
 function toolCallsOf(reply: unknown): Call[] {
   if (!isRecord(reply)) return [];
   const readers = [chatCalls, responsesCalls, claudeCalls, geminiCalls];
-  return readers.flatMap((read) => read(reply)).slice(0, MAX_CALLS);
+  // The call cap applies before any argument string is parsed: calls past it are never parsed.
+  return readers
+    .flatMap((read) => read(reply))
+    .slice(0, MAX_CALLS)
+    .map(([name, raw]): Call => [name, parsedArgs(raw)]);
 }
 
 /** Findings for one reply: rule id, call index, tool leaf (known names only) and offset. */
@@ -249,14 +274,18 @@ export function scanToolCalls(
 ): ToolCallFinding[] {
   const allow = allowed(env);
   const findings: ToolCallFinding[] = [];
+  const budget: ScanBudget = { nodes: MAX_NODES, chars: MAX_REPLY_SCAN_CHARS };
   toolCallsOf(reply).forEach(([name, args], call) => {
     const leaf = leafName(name);
     const known = EXEC_TOOLS.has(leaf);
     const shown = known ? leaf : "other";
     if (known && !allow.has(leaf))
       findings.push({ rule: "blacklisted_tool", call, leaf: shown, offset: 0 });
-    for (const text of leaves(args)) {
-      for (const { rule, offset } of scanText(text))
+    for (const text of leaves(args, budget)) {
+      if (budget.chars <= 0) break;
+      const head = text.slice(0, Math.min(SCAN_CHARS, budget.chars));
+      budget.chars -= head.length;
+      for (const { rule, offset } of scanText(head))
         findings.push({ rule, call, leaf: shown, offset });
     }
   });

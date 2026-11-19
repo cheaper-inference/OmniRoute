@@ -133,6 +133,71 @@ test("flag on: an ordinary API error is returned as it is and never resent", asy
   assert.equal(seen.length, 1, "no resend for a rate limit");
 });
 
+// A 403 body longer than the refusal read limit, sent in many chunks (tee + partial read).
+function multiChunk403(prefix: string, chunks = 40): Response {
+  const encoder = new TextEncoder();
+  let sent = 0;
+  return new Response(
+    new ReadableStream<Uint8Array>({
+      pull(controller) {
+        if (sent === 0) controller.enqueue(encoder.encode(prefix));
+        if (sent++ < chunks) controller.enqueue(encoder.encode("x".repeat(1000)));
+        else controller.close();
+      },
+    }),
+    { status: 403, headers: { "content-type": "text/plain" } }
+  );
+}
+const within = <T>(promise: Promise<T>, ms = 5_000) =>
+  Promise.race([
+    promise,
+    new Promise<never>((_, reject) => {
+      const timer = setTimeout(() => reject(new Error(`stalled for ${ms} ms`)), ms);
+      timer.unref?.();
+    }),
+  ]);
+
+test("flag on: a large multi-chunk 403 is delivered without stalling, and still readable", async () => {
+  reset();
+  let calls = 0;
+  const transport = async () => {
+    calls += 1;
+    return multiChunk403("forbidden by policy ");
+  };
+  const response = await within(
+    dispatchWithZstdBody(
+      "codex",
+      CODEX_URL,
+      { method: "POST", headers, body: bigBody() },
+      transport
+    )
+  );
+  assert.equal(response.status, 403);
+  assert.equal(calls, 1, "not an encoding refusal: no resend");
+  assert.ok((await within(response.text())).length > 8192, "the caller reads the whole body");
+});
+
+test("flag on: a large multi-chunk 403 encoding refusal is resent uncompressed without stalling", async () => {
+  reset();
+  const encodings: Array<string | null> = [];
+  const transport = async (_url: string, init: RequestInit) => {
+    encodings.push(new Headers(init.headers).get("content-encoding"));
+    return encodings.length === 1
+      ? multiChunk403("unsupported content-encoding ")
+      : new Response("{}", { status: 200 });
+  };
+  const response = await within(
+    dispatchWithZstdBody(
+      "codex",
+      CODEX_URL,
+      { method: "POST", headers, body: bigBody() },
+      transport
+    )
+  );
+  assert.equal(response.status, 200);
+  assert.deepEqual(encodings, ["zstd", null]);
+});
+
 // Wiring through the real Codex executor: the flag must reach the wire from execute().
 test("CodexExecutor.execute sends a large body zstd only when the flag is on", async () => {
   const { CodexExecutor } = await import("../../open-sse/executors/codex.ts");

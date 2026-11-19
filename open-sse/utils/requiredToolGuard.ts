@@ -1,8 +1,8 @@
 /**
  * Opt-in guard (OMNIROUTE_REQUIRED_TOOL_GUARD, default off) for non-streaming replies. When the
- * client forced a tool call (tool_choice "required", a named tool, or Claude "any") and the
- * finished reply carries no tool call, the turn is a contract break. It is reported as one
- * `required_tool_not_called` error, instead of a successful plain-text answer.
+ * client forced a tool call (tool_choice "required", a named function or custom tool, or Claude
+ * "any") and the finished reply carries no tool call, the turn is a contract break. It is
+ * reported as one `required_tool_not_called` error, instead of a successful plain-text answer.
  *
  * Never fires for: a reply that was cut off or refused, an error, a request with no tools, a
  * request that declares a server-side tool, or a turn where OmniRoute ran the tools itself.
@@ -28,7 +28,7 @@ function forcesClientTool(request: unknown): boolean {
   const choice = request.tool_choice;
   const forced =
     choice === "required" ||
-    (isRecord(choice) && ["function", "tool", "any"].includes(String(choice.type)));
+    (isRecord(choice) && ["function", "custom", "tool", "any"].includes(String(choice.type)));
   return clientOnly && forced;
 }
 

@@ -2,6 +2,8 @@ import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 import { BaseExecutor } from "../../open-sse/executors/base.ts";
 import { DefaultExecutor } from "../../open-sse/executors/default.ts";
+import { getRecoveryLimiter } from "../../open-sse/services/recoveryRatioLimiter.ts";
+import { _resetClaudeLowPriorityState } from "../../open-sse/services/claudeLowPriority.ts";
 
 const FLAG = "OMNIROUTE_RECOVERY_RATIO_LIMIT";
 
@@ -64,4 +66,61 @@ test("flag on: a refused retry does not stop a later initial send, and pools are
   for (let i = 0; i < 3; i += 1) await send429("mistral");
   assert.equal((await send429("mistral")).calls, 1, "pool spent");
   assert.equal((await send429("together")).calls, 3, "another pool has its own budget");
+});
+
+test("flag on: a Claude usage-wall re-run of the same URL is not a second initial send", async () => {
+  process.env[FLAG] = "true";
+  const nowS = Math.floor(Date.now() / 1000);
+  const wall = () =>
+    new Response(JSON.stringify({ type: "error", error: { type: "rate_limit_error" } }), {
+      status: 429,
+      headers: {
+        "Content-Type": "application/json",
+        "anthropic-ratelimit-unified-status": "rejected",
+        "anthropic-ratelimit-unified-reset": String(nowS + 3600),
+        "anthropic-ratelimit-unified-representative-claim": "five_hour",
+        "anthropic-ratelimit-unified-slow-offer": "treatment",
+        "anthropic-ratelimit-unified-slow-retry-after": "20",
+        "anthropic-ratelimit-unified-slow-max-wait": "1200",
+      },
+    });
+  const ok = () =>
+    new Response(JSON.stringify({ id: "msg_1", type: "message", content: [] }), {
+      status: 200,
+      headers: { "Content-Type": "application/json" },
+    });
+  const originalFetch = globalThis.fetch;
+  let sends = 0;
+  globalThis.fetch = (async (input: unknown) => {
+    if (!String(input).includes("/v1/messages")) return new Response("{}", { status: 200 });
+    sends += 1;
+    return sends % 2 === 1 ? wall() : ok();
+  }) as typeof fetch;
+  try {
+    // 10 requests, each one wall 429 then the same-account re-run: 10 initial sends, not 20.
+    for (let i = 0; i < 10; i += 1) {
+      _resetClaudeLowPriorityState();
+      const result = await new DefaultExecutor("claude").execute({
+        model: "claude-opus-4-8",
+        body: { model: "claude-opus-4-8", messages: [{ role: "user", content: "hi" }] },
+        stream: false,
+        credentials: {
+          connectionId: `wall-${i}`,
+          accessToken: `sk-ant-oat-wall-${i}`,
+          providerSpecificData: { lowPriorityMode: true },
+        },
+        skipUpstreamRetry: true,
+      });
+      assert.equal(result.response.status, 200);
+    }
+  } finally {
+    globalThis.fetch = originalFetch;
+    _resetClaudeLowPriorityState();
+  }
+  assert.equal(sends, 20);
+  // 10 initials leave the floor of 3 recoveries; 20 (double-counted) would leave 4.
+  const limiter = getRecoveryLimiter("claude");
+  assert.ok(limiter);
+  const admitted = [1, 2, 3, 4].map(() => limiter.tryRecovery());
+  assert.deepEqual(admitted, [true, true, true, false]);
 });

@@ -3,7 +3,7 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { admitChatRequest, ChatAdmissionController } =
+const { admitChatRequest, ChatAdmissionController, resolveSelfLoopBearer } =
   await import("../../src/shared/middleware/chatBodyAdmission.ts");
 
 const FLAG = "OMNIROUTE_REJECT_DUPLICATE_MODEL_MEMBER";
@@ -123,5 +123,20 @@ test("flag on: a rejected request releases its lease", async () => {
     );
     assert.equal(ok.admit, true, "the single heavy slot must be free again");
     if (ok.admit) ok.lease?.release();
+  });
+});
+
+test("flag on: the internal self-loop bypass is checked too", async () => {
+  const internal = {
+    "x-omniroute-admission-bypass": "internal",
+    authorization: `Bearer ${resolveSelfLoopBearer()}`,
+  };
+  await withFlag("1", async () => {
+    const result = await admit(DUP, internal);
+    assert.equal(result.admit, false);
+    if (result.admit) return;
+    assert.equal(result.response.status, 400);
+    assert.equal((await result.response.json()).error.code, "duplicate_model_field");
+    assert.equal((await admit('{"model":"gpt-a","messages":[]}', internal)).admit, true);
   });
 });

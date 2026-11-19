@@ -55,7 +55,7 @@ const CALL = {
   tool_calls: [{ id: "call_1", type: "function", function: { name: "get_time", arguments: "{}" } }],
 };
 
-async function ask(toolChoice, reply, { env = true } = {}) {
+async function ask(toolChoice, reply, { env = true, apiKeyInfo = undefined } = {}) {
   if (env) process.env.OMNIROUTE_REQUIRED_TOOL_GUARD = "true";
   globalThis.fetch = async () => reply();
   const body = {
@@ -76,6 +76,7 @@ async function ask(toolChoice, reply, { env = true } = {}) {
       headers: new Headers({ accept: "application/json" }),
     },
     connectionId: "openai-conn",
+    ...(apiKeyInfo ? { apiKeyInfo } : {}),
   });
 }
 
@@ -91,6 +92,15 @@ test("flag on, a named tool forced, text-only answer: the same error", async () 
   const result = await ask({ type: "function", function: { name: "get_time" } }, () =>
     chatReply(TEXT)
   );
+  assert.equal(result.errorCode, "required_tool_not_called");
+});
+
+test("flag on, an API-key request (skills on by default) that ran no server tool is still checked", async () => {
+  // With an API key the custom-skill executor is enabled by default; it ran nothing here,
+  // so the text-only answer to a forced tool call is still a contract break.
+  const result = await ask("required", () => chatReply(TEXT), {
+    apiKeyInfo: { id: "key-required-tool", name: "required-tool-key" },
+  });
   assert.equal(result.errorCode, "required_tool_not_called");
 });
 
@@ -144,6 +154,17 @@ test("the guard reads Responses and Claude replies and spares server-side tools"
 
   // OmniRoute ran the tool itself: the client never sees a tool call, and that is correct.
   assert.equal(detectRequiredToolNotCalled(required, responses(text), true), null);
+  // A forced custom tool (Responses `tool_choice: {type: "custom"}`) is a forced client tool too.
+  const forcedCustom = {
+    tool_choice: { type: "custom", name: "runner" },
+    tools: [{ type: "custom", name: "runner" }],
+  };
+  assert.equal(detectRequiredToolNotCalled(forcedCustom, responses(text)), reason);
+  assert.equal(
+    detectRequiredToolNotCalled(forcedCustom, responses([{ type: "custom_tool_call" }])),
+    null
+  );
+
   // No tools declared: tool_choice cannot be met, and the guard does not guess.
   assert.equal(detectRequiredToolNotCalled({ tool_choice: "required" }, responses(text)), null);
 });

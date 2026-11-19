@@ -1143,6 +1143,11 @@ export async function admitChatRequest(
     if (!("body" in decodedBypass)) {
       return { admit: false, response: chatAdmissionRejectionResponse(413, hardMaxBytes) };
     }
+    // Opt-in (OMNIROUTE_REJECT_DUPLICATE_MODEL_MEMBER): the self-loop bypass skips the lease,
+    // not the body check. No lease is held here, so there is nothing to release.
+    if (isRejectDuplicateModelMemberEnabled() && hasDuplicateModelMember(decodedBypass.body)) {
+      return { admit: false, response: duplicateModelFieldResponse() };
+    }
     return { admit: true, request: rebuildRequest(request, decodedBypass.body), lease: NULL_LEASE };
   }
 
