@@ -20,7 +20,9 @@ import {
   PACK_ARTIFACT_MAX_PACKED_BYTES,
   PACK_ARTIFACT_REQUIRED_PATHS,
   exceedsPackedSizeBudget,
+  findDuplicatedLocaleCatalogChunks,
   findMissingArtifactPaths,
+  localeCatalogChunkLocale,
   findUnexpectedArtifactPaths,
   needsPackStagingBuild,
   parseJsonValuesOutput,
@@ -164,12 +166,19 @@ try {
   const mcpClosure: string[] = computeMcpClosure(ROOT);
   const missingMcpPaths: string[] = findMissingMcpClosurePaths(artifactPaths, mcpClosure);
 
+  // #20439 — each full locale catalog may be bundled into at most one server chunk.
+  const localeCatalogChunks: number = artifactPaths.filter(
+    (filePath) => localeCatalogChunkLocale(filePath) !== null
+  ).length;
+  const duplicatedCatalogChunks: string[] = findDuplicatedLocaleCatalogChunks(artifactPaths);
+
   console.log("📦 npm pack artifact summary");
   console.log(`   File:          ${packReport.filename}`);
   console.log(`   Entry count:   ${packReport.entryCount}`);
   console.log(`   Packed size:   ${formatBytes(packReport.size)}`);
   console.log(`   Unpacked size: ${formatBytes(packReport.unpackedSize)}`);
   console.log(`   MCP closure:   ${mcpClosure.length} source files checked`);
+  console.log(`   Locale catalog chunks: ${localeCatalogChunks}`);
 
   if (unexpectedPaths.length > 0) {
     console.error("\n❌ Unexpected files were found in the npm publish artifact:");
@@ -206,6 +215,15 @@ try {
     }
   }
 
+  if (duplicatedCatalogChunks.length > 0) {
+    console.error(
+      "\n❌ Locale catalogs are bundled into more than one server chunk (#20439 — a route handler or another non-page context reached src/i18n/request.ts; use src/i18n/routeHandlerTranslations.ts):"
+    );
+    for (const duplicatedPath of duplicatedCatalogChunks) {
+      console.error(`   - ${duplicatedPath}`);
+    }
+  }
+
   const overPackedBudget = exceedsPackedSizeBudget(packReport.size);
   if (overPackedBudget) {
     console.error(
@@ -218,6 +236,7 @@ try {
     missingRequiredPaths.length > 0 ||
     leakedTestPaths.length > 0 ||
     missingMcpPaths.length > 0 ||
+    duplicatedCatalogChunks.length > 0 ||
     overPackedBudget
   ) {
     process.exit(1);
