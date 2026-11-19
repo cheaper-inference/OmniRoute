@@ -317,8 +317,11 @@ async function retrieveMemoriesInternal(
       };
 
   // Build base query
+  // BUG-#FIX-2026-11-19: Also match memories whose api_key_id is NULL or empty.
+  // Dashboard-created memories without an active session key otherwise become
+  // permanently invisible (only physically present in storage.sqlite).
   let query =
-    `SELECT * FROM ${tableName} WHERE ${columns.apiKeyId} = ? ` +
+    `SELECT * FROM ${tableName} WHERE (${columns.apiKeyId} = ? OR ${columns.apiKeyId} IS NULL OR ${columns.apiKeyId} = '') ` +
     `AND (${columns.expiresAt} IS NULL OR datetime(${columns.expiresAt}) > datetime('now'))`;
   const params: unknown[] = [apiKeyId];
 

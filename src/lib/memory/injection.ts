@@ -119,16 +119,25 @@ export function systemMessageMustBeFirst(
 /**
  * Format memories into a single labeled context string.
  * Format: "Memory context: <content1>\n<content2>..."
+ *
+ * BUG-#FIX-2026-11-19: Original implementation dropped `m.key`,
+ * emitting only raw content. Models therefore saw bare values
+ * with no association to the user-defined label keys.
+ * Fix: emit `Key: <label>` prefix whenever `m.key` is non-empty.
  */
 export function formatMemoryContext(memories: Memory[]): string {
   if (!memories || memories.length === 0) return "";
 
   const content = memories
-    .map((m) => m.content.trim())
+    .map((m) =>
+      m.key
+        ? `Key: ${m.key}\nValue: ${m.content.trim()}`
+        : m.content.trim()
+    )
     .filter(Boolean)
-    .join("\n");
+    .join("\n\n");
 
-  return content ? `Memory context: ${content}` : "";
+  return content ? `Memory context:\n${content}` : "";
 }
 
 /**

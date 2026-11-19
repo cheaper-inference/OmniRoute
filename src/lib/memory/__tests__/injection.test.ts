@@ -37,26 +37,34 @@ describe("formatMemoryContext", () => {
     expect(formatMemoryContext([])).toBe("");
   });
 
-  test("single memory is formatted with 'Memory context:' prefix", () => {
+  test("single memory is formatted with 'Memory context:' prefix and key label", () => {
     const result = formatMemoryContext([makeMemory("User prefers dark mode")]);
-    expect(result).toBe("Memory context: User prefers dark mode");
+    expect(result).toBe("Memory context:\nKey: test-key\nValue: User prefers dark mode");
   });
 
-  test("multiple memories are joined with newline", () => {
+  test("multiple memories are joined with double newline, each prefixed with its key", () => {
     const memories = [makeMemory("fact one"), makeMemory("fact two")];
     const result = formatMemoryContext(memories);
-    expect(result).toBe("Memory context: fact one\nfact two");
+    expect(result).toBe(
+      "Memory context:\nKey: test-key\nValue: fact one\n\nKey: test-key\nValue: fact two"
+    );
+  });
+
+  test("memories without a key emit raw content only (backwards compat)", () => {
+    const memories = [makeMemory("orphaned content", { key: "" })];
+    const result = formatMemoryContext(memories);
+    expect(result).toBe("Memory context:\norphaned content");
   });
 
   test("trims whitespace from individual memory content", () => {
     const result = formatMemoryContext([makeMemory("  padded content  ")]);
-    expect(result).toBe("Memory context: padded content");
+    expect(result).toBe("Memory context:\nKey: test-key\nValue: padded content");
   });
 
   test("filters out blank memories", () => {
     const memories = [makeMemory("real content"), makeMemory("   ")];
     const result = formatMemoryContext(memories);
-    expect(result).toBe("Memory context: real content");
+    expect(result).toBe("Memory context:\nKey: test-key\nValue: real content");
   });
 });
 
@@ -92,7 +100,7 @@ describe("injectMemory — system message injection", () => {
     const result = injectMemory(request, memories, "openai");
 
     expect(result.messages[0].role).toBe("system");
-    expect(result.messages[0].content).toBe("Memory context: User prefers concise answers");
+    expect(result.messages[0].content).toBe("Memory context:\nKey: test-key\nValue: User prefers concise answers");
     expect(result.messages[1]).toEqual({ role: "user", content: "Hello" });
   });
 
@@ -141,7 +149,7 @@ describe("injectMemory — message prefix fallback", () => {
     const result = injectMemory(request, memories, "o1");
 
     expect(result.messages[0].role).toBe("user");
-    expect(result.messages[0].content).toBe("Memory context: User context detail");
+    expect(result.messages[0].content).toBe("Memory context:\nKey: test-key\nValue: User context detail");
     expect(result.messages[1]).toEqual({ role: "user", content: "Hello" });
   });
 
@@ -183,7 +191,9 @@ describe("injectMemory — edge cases", () => {
     const result = injectMemory(request, memories, "openai");
 
     expect(result.messages[0].role).toBe("system");
-    expect(result.messages[0].content).toBe("Memory context: fact A\nfact B\nfact C");
+    expect(result.messages[0].content).toBe(
+      "Memory context:\nKey: test-key\nValue: fact A\n\nKey: test-key\nValue: fact B\n\nKey: test-key\nValue: fact C"
+    );
     expect(result.messages).toHaveLength(2);
   });
 });

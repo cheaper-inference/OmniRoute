@@ -189,75 +189,98 @@ export async function createMemory(
   const db = getDbInstance();
   const now = new Date().toISOString();
 
-  // Check for existing memory with same apiKeyId + key (UPSERT logic)
+  // Check for existing memory with same apiKeyId + key (UPSERT logic).
+  // BUG-#FIX-2026-11-19: Also match orphaned memories whose api_key_id is NULL or empty,
+  // so that a later creation with a valid apiKeyId repairs the record in place instead
+  // of creating a duplicate entry.
   const existing = memory.key ? findExistingMemory(db, memory.apiKeyId, memory.key) : undefined;
+  const isOrphanReparent =
+    !existing &&
+    !!memory.apiKeyId &&
+    !!memory.key &&
+    db.prepare(
+      "SELECT id FROM memories WHERE (api_key_id IS NULL OR api_key_id = '') AND key = ?"
+    )
+      .get(memory.key) !== undefined;
 
-  if (existing) {
-    // UPDATE existing record
-    const updatedMetadata = { ...parseJSON(existing.metadata), ...memory.metadata };
+  if (existing || isOrphanReparent) {
+    // UPDATE existing (or reparent orphan) record
+    const lookupStmt = existing
+      ? db.prepare(
+          "SELECT * FROM memories WHERE api_key_id = ? AND key = ? ORDER BY created_at DESC LIMIT 1"
+        )
+      : db.prepare(
+          "SELECT * FROM memories WHERE (api_key_id IS NULL OR api_key_id = '') AND key = ? ORDER BY created_at DESC LIMIT 1"
+        );
+    const targetRow = existing
+      ? existing
+      : (lookupStmt.get(memory.key) as MemoryRow);
+
+    const updatedMetadata = { ...parseJSON(targetRow.metadata), ...memory.metadata };
     const stmt = db.prepare(
-      "UPDATE memories SET content = ?, metadata = ?, updated_at = ?, session_id = ?, type = ?, expires_at = ? WHERE id = ?"
+      "UPDATE memories SET api_key_id = ?, content = ?, metadata = ?, updated_at = ?, session_id = ?, type = ?, expires_at = ? WHERE id = ?"
     );
     stmt.run(
+      memory.apiKeyId,
       memory.content,
       JSON.stringify(updatedMetadata),
       now,
       memory.sessionId,
       memory.type,
       memory.expiresAt?.toISOString() ?? null,
-      existing.id
+      targetRow.id
     );
 
     const updatedMemory: Memory = {
-      id: String(existing.id),
+      id: String(targetRow.id),
       apiKeyId: memory.apiKeyId,
       sessionId: memory.sessionId,
       type: memory.type,
       key: memory.key,
       content: memory.content,
       metadata: updatedMetadata,
-      createdAt: new Date(String(existing.created_at)),
+      createdAt: new Date(String(targetRow.created_at)),
       updatedAt: new Date(now),
       expiresAt: memory.expiresAt ?? null,
-      // Preserve the existing access telemetry on UPSERT (an update is not a fresh access).
-      accessCount: typeof existing.access_count === "number" ? existing.access_count : 0,
-      lastAccessedAt: existing.last_accessed_at
-        ? new Date(String(existing.last_accessed_at))
+      accessCount: typeof targetRow.access_count === "number" ? targetRow.access_count : 0,
+      lastAccessedAt: targetRow.last_accessed_at
+        ? new Date(String(targetRow.last_accessed_at))
         : null,
     };
 
-    // Invalidate and update cache
-    invalidateMemoryCache(existing.id);
+    invalidateMemoryCache(targetRow.id);
     evictIfNeeded(_memoryCache);
-    _memoryCache.set(existing.id, { value: updatedMemory, timestamp: Date.now() });
+    _memoryCache.set(targetRow.id, { value: updatedMemory, timestamp: Date.now() });
 
     log.info("memory.updated", {
       apiKeyId: memory.apiKeyId,
       type: memory.type,
-      id: existing.id,
+      id: targetRow.id,
       key: memory.key,
+      wasOrphan: isOrphanReparent,
     });
 
-    // Best-effort vector upsert (fire-and-forget — content changed so regenerate)
-    scheduleVectorUpsert(String(existing.id), memory.content);
+    scheduleVectorUpsert(String(targetRow.id), memory.content);
 
-    // Best-effort re-sync to Qdrant after update
     upsertSemanticMemoryPoint({
-      id: String(existing.id),
+      id: String(targetRow.id),
       apiKeyId: memory.apiKeyId || "",
       sessionId: memory.sessionId || "",
       key: memory.key || "",
       content: memory.content,
       metadata: updatedMetadata || {},
-      createdAt: String(existing.created_at),
+      createdAt: String(targetRow.created_at),
       expiresAt: memory.expiresAt ? memory.expiresAt.toISOString() : null,
     })
       .then((r) => {
-        if (r.ok) log.debug?.("qdrant.upsert.ok", { id: existing.id, latencyMs: r.latencyMs });
+        if (r.ok)
+          log.debug?.("qdrant.upsert.ok", { id: targetRow.id, latencyMs: r.latencyMs });
         else if (r.error && r.error !== "not_configured")
-          log.warn?.("qdrant.upsert.fail", { id: existing.id, error: r.error });
+          log.warn?.("qdrant.upsert.fail", { id: targetRow.id, error: r.error });
       })
-      .catch((e) => log.warn?.("qdrant.upsert.error", { id: existing.id, error: String(e) }));
+      .catch((e) =>
+        log.warn?.("qdrant.upsert.error", { id: targetRow.id, error: String(e) })
+      );
 
     return updatedMemory;
   }
