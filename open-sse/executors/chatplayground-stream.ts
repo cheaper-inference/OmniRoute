@@ -48,9 +48,7 @@ export function chatMessageText(content: unknown): string {
   if (typeof content === "string") return content;
   if (!Array.isArray(content)) return "";
   return content
-    .map((part) =>
-      typeof part === "string" ? part : ((part as { text?: unknown })?.text ?? "")
-    )
+    .map((part) => (typeof part === "string" ? part : ((part as { text?: unknown })?.text ?? "")))
     .filter(Boolean)
     .join("\n");
 }
@@ -61,9 +59,7 @@ export function chatMessageText(content: unknown): string {
  * turn is the message proper. Non-chat roles (tool/system-only) still count
  * toward the transcript so context is never silently dropped.
  */
-export function renderChatPlaygroundMessageText(
-  messages: Array<Record<string, unknown>>
-): string {
+export function renderChatPlaygroundMessageText(messages: Array<Record<string, unknown>>): string {
   if (messages.length === 0) return "";
   if (messages.length === 1) return chatMessageText(messages[0]?.content);
   const history = messages.slice(0, -1);
@@ -127,10 +123,7 @@ export function extractChatPlaygroundAttachments(
  * (`chatId` or `conversationId`); the rest of the unified optional keys
  * (`parentId`, `turnId`, `metadata`, `seed`) are not sent by OmniRoute.
  */
-export function buildUnifiedChatPayload(
-  body: unknown,
-  slug: string
-): Record<string, unknown> {
+export function buildUnifiedChatPayload(body: unknown, slug: string): Record<string, unknown> {
   const req = (body && typeof body === "object" ? body : {}) as Record<string, unknown>;
   const messages = Array.isArray(req.messages)
     ? (req.messages as Array<Record<string, unknown>>)
@@ -441,7 +434,12 @@ function terminalSseFrames(
   frames.push("data: [DONE]\n\n");
   return frames;
 }
-function eventToSseFrame(event: AiSdkEvent, id: string, created: number, model: string): string | null {
+function eventToSseFrame(
+  event: AiSdkEvent,
+  id: string,
+  created: number,
+  model: string
+): string | null {
   if (event.kind === "content" && event.delta) {
     return sseChunk(id, created, model, { content: event.delta }, null);
   }
@@ -482,7 +480,9 @@ export function chatPlaygroundStreamToResponse(
     extra: AiSdkEvent[] = []
   ) => {
     if (!roleSent && parser.hasStarted) {
-      controller.enqueue(encoder.encode(sseChunk(streamId, created, model, { role: "assistant" }, null)));
+      controller.enqueue(
+        encoder.encode(sseChunk(streamId, created, model, { role: "assistant" }, null))
+      );
       roleSent = true;
     }
     // `extra` carries events from a manual flush() (already spliced out of the
@@ -496,7 +496,9 @@ export function chatPlaygroundStreamToResponse(
 
   const finishUpstream = (controller: TransformStreamDefaultController<Uint8Array>) => {
     if (!roleSent && parser.hasStarted) {
-      controller.enqueue(encoder.encode(sseChunk(streamId, created, model, { role: "assistant" }, null)));
+      controller.enqueue(
+        encoder.encode(sseChunk(streamId, created, model, { role: "assistant" }, null))
+      );
       roleSent = true;
     }
     for (const frame of terminalSseFrames(streamId, created, model, parser, finishSent)) {

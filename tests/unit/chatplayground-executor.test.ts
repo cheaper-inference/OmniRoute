@@ -386,7 +386,13 @@ test("ChatPlayground — unified payload construction", () => {
   const multi = buildUnifiedChatPayload(
     {
       messages: [
-        { role: "user", content: [{ type: "text", text: "A" }, { type: "text", text: "B" }] },
+        {
+          role: "user",
+          content: [
+            { type: "text", text: "A" },
+            { type: "text", text: "B" },
+          ],
+        },
       ],
     },
     "gpt-6-luna"
@@ -405,12 +411,9 @@ test("ChatPlayground — unified payload construction", () => {
     },
     "gpt-6-luna"
   );
-  assert.deepEqual(
-    history.message,
-    {
-      text: "Conversation history:\nsystem: Be terse.\nuser: 1+1?\nassistant: 2\n\nReply to the last message.\nand 2+2?",
-    }
-  );
+  assert.deepEqual(history.message, {
+    text: "Conversation history:\nsystem: Be terse.\nuser: 1+1?\nassistant: 2\n\nReply to the last message.\nand 2+2?",
+  });
   assert.equal(renderChatPlaygroundMessageText([]), "");
   assert.equal(renderChatPlaygroundMessageText([{ role: "user", content: "solo" }]), "solo");
 
@@ -687,8 +690,7 @@ test("ChatPlaygroundExecutor — model validation & message size limits", async 
   assert.equal((oversized as { response: Response }).response.status, 400);
   const body1 = await (oversized as { response: Response }).response.json();
   assert.ok(
-    body1.error.message.includes("15,000-character limit") ||
-      body1.error.message.includes("15000"),
+    body1.error.message.includes("15,000-character limit") || body1.error.message.includes("15000"),
     `unexpected message: ${body1.error.message}`
   );
   assert.ok(body1.error.message.includes("15001 characters"));
@@ -894,7 +896,10 @@ test("ChatPlayground — discovery models parser (unified + legacy rows)", () =>
       group: "image",
     },
   ]);
-  assert.deepEqual(parsed.map((m) => m.id), ["gpt-6.1-sol", "gpt-6-luna"]);
+  assert.deepEqual(
+    parsed.map((m) => m.id),
+    ["gpt-6.1-sol", "gpt-6-luna"]
+  );
   assert.equal(parsed[0].name, "ChatGPT-6.1 Sol");
   assert.equal(parsed[0].owned_by, "chatplayground");
   assert.equal(parsed[1].provider, "openai");
@@ -975,4 +980,3 @@ test("ChatPlayground — constants & legacy text helpers", () => {
   assert.equal(countChatPlaygroundMessageChars(null), 0);
   assert.ok(CHATPLAYGROUND_CHAT_URL.startsWith("https://web.chatplayground.ai"));
 });
-

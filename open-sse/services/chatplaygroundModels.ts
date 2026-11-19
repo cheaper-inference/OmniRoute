@@ -87,9 +87,7 @@ function readChatPlaygroundRowFields(rec: Record<string, unknown>): {
     displayName: display || legacyModelName,
     provider: typeof rec.provider === "string" ? rec.provider.trim() : "",
     group:
-      typeof rec.group === "string" && rec.group.trim()
-        ? rec.group.trim().toLowerCase()
-        : "chat",
+      typeof rec.group === "string" && rec.group.trim() ? rec.group.trim().toLowerCase() : "chat",
     tier: rec.tier === "advanced" ? "advanced" : "basic",
     legacyModelName,
     creditWeight: typeof rec.creditWeight === "number" ? rec.creditWeight : undefined,
@@ -128,7 +126,7 @@ export function buildChatPlaygroundRow(item: unknown): ChatPlaygroundModel | nul
     contextLength:
       typeof rec.contextWindow === "number"
         ? rec.contextWindow
-        : LEGACY_CONTEXT_BY_SLUG[fields.key] ?? contextForCapabilities(fields.capabilities),
+        : (LEGACY_CONTEXT_BY_SLUG[fields.key] ?? contextForCapabilities(fields.capabilities)),
     creditWeight: fields.creditWeight,
   };
 }
@@ -167,34 +165,226 @@ const c = (vision: boolean, fileInput: boolean, reasoning: boolean, imageGen: bo
  * whenever discovery is unavailable.
  */
 export const CHATPLAYGROUND_FALLBACK_MODELS: ChatPlaygroundModel[] = [
-  legacyRow("gpt-6.1-sol", "ChatGPT-6.1 Sol", "openai", "chat", "advanced", true, c(true, false, false, false)),
-  legacyRow("gpt-6-luna", "ChatGPT-6 Luna", "openai", "chat", "basic", false, c(true, false, false, false)),
-  legacyRow("gemini-3.5-flash-lite", "Gemini (Latest Model)", "google", "chat", "basic", false, c(true, false, false, false)),
-  legacyRow("gemini-3.8-flash", "Gemini 3.8 Flash", "google", "chat", "basic", true, c(true, false, false, false)),
-  legacyRow("gemini-3.1-pro", "Gemini 3.1 Pro", "google", "chat", "advanced", true, c(true, false, false, false)),
-  legacyRow("claude-opus-5-5", "Claude Opus 5.5", "anthropic", "chat", "advanced", true, c(true, false, false, false)),
-  legacyRow("claude-haiku-5-5", "Claude (Latest Model)", "anthropic", "chat", "basic", false, c(true, false, false, false)),
-  legacyRow("claude-sonnet-5-5", "Claude Sonnet 5.5", "anthropic", "chat", "advanced", true, c(true, false, false, false)),
-  legacyRow("claude-fable-5-2", "Claude Fable 5.2", "anthropic", "chat", "advanced", true, c(true, false, false, false)),
+  legacyRow(
+    "gpt-6.1-sol",
+    "ChatGPT-6.1 Sol",
+    "openai",
+    "chat",
+    "advanced",
+    true,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "gpt-6-luna",
+    "ChatGPT-6 Luna",
+    "openai",
+    "chat",
+    "basic",
+    false,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "gemini-3.5-flash-lite",
+    "Gemini (Latest Model)",
+    "google",
+    "chat",
+    "basic",
+    false,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "gemini-3.8-flash",
+    "Gemini 3.8 Flash",
+    "google",
+    "chat",
+    "basic",
+    true,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "gemini-3.1-pro",
+    "Gemini 3.1 Pro",
+    "google",
+    "chat",
+    "advanced",
+    true,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "claude-opus-5-5",
+    "Claude Opus 5.5",
+    "anthropic",
+    "chat",
+    "advanced",
+    true,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "claude-haiku-5-5",
+    "Claude (Latest Model)",
+    "anthropic",
+    "chat",
+    "basic",
+    false,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "claude-sonnet-5-5",
+    "Claude Sonnet 5.5",
+    "anthropic",
+    "chat",
+    "advanced",
+    true,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "claude-fable-5-2",
+    "Claude Fable 5.2",
+    "anthropic",
+    "chat",
+    "advanced",
+    true,
+    c(true, false, false, false)
+  ),
   legacyRow("kimi-k3", "Kimi K3", "kimi", "chat", "advanced", true, c(true, false, true, false)),
-  legacyRow("deepseek-v4-pro", "DeepSeek V4 Pro", "deepseek", "chat", "basic", false, c(false, false, true, false)),
-  legacyRow("deepseek-v4.1-flash", "DeepSeek V4.1 Flash", "deepseek", "chat", "basic", false, c(false, false, true, false)),
-  legacyRow("deepseek-r1", "DeepSeek R1", "deepseek", "chat", "basic", false, c(false, false, true, false)),
-  legacyRow("llama-4-maverick", "Llama 4 Maverick", "meta", "chat", "basic", false, c(true, false, false, false)),
-  legacyRow("llama-4-scout", "Llama 4 Scout", "meta", "chat", "basic", false, c(true, false, false, false)),
-  legacyRow("minimax-m3", "MiniMax M3", "minimax", "chat", "basic", false, c(false, false, false, false)),
-  legacyRow("qwen3.8-max", "Qwen3.8 Max", "qwen", "chat", "advanced", true, c(false, false, true, false)),
-  legacyRow("qwen3.7-plus", "Qwen3.7 Plus", "qwen", "chat", "basic", false, c(false, false, true, false)),
-  legacyRow("qwen3.6-flash", "Qwen3.6 Flash", "qwen", "chat", "basic", false, c(false, false, true, false)),
-  legacyRow("nova-2-lite-v1", "Nova 2 Lite", "amazon", "chat", "basic", false, c(true, false, false, false)),
-  legacyRow("mimo-v2.6-pro", "MiMo V2.6 Pro", "xiaomi", "chat", "basic", false, c(false, false, false, false)),
+  legacyRow(
+    "deepseek-v4-pro",
+    "DeepSeek V4 Pro",
+    "deepseek",
+    "chat",
+    "basic",
+    false,
+    c(false, false, true, false)
+  ),
+  legacyRow(
+    "deepseek-v4.1-flash",
+    "DeepSeek V4.1 Flash",
+    "deepseek",
+    "chat",
+    "basic",
+    false,
+    c(false, false, true, false)
+  ),
+  legacyRow(
+    "deepseek-r1",
+    "DeepSeek R1",
+    "deepseek",
+    "chat",
+    "basic",
+    false,
+    c(false, false, true, false)
+  ),
+  legacyRow(
+    "llama-4-maverick",
+    "Llama 4 Maverick",
+    "meta",
+    "chat",
+    "basic",
+    false,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "llama-4-scout",
+    "Llama 4 Scout",
+    "meta",
+    "chat",
+    "basic",
+    false,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "minimax-m3",
+    "MiniMax M3",
+    "minimax",
+    "chat",
+    "basic",
+    false,
+    c(false, false, false, false)
+  ),
+  legacyRow(
+    "qwen3.8-max",
+    "Qwen3.8 Max",
+    "qwen",
+    "chat",
+    "advanced",
+    true,
+    c(false, false, true, false)
+  ),
+  legacyRow(
+    "qwen3.7-plus",
+    "Qwen3.7 Plus",
+    "qwen",
+    "chat",
+    "basic",
+    false,
+    c(false, false, true, false)
+  ),
+  legacyRow(
+    "qwen3.6-flash",
+    "Qwen3.6 Flash",
+    "qwen",
+    "chat",
+    "basic",
+    false,
+    c(false, false, true, false)
+  ),
+  legacyRow(
+    "nova-2-lite-v1",
+    "Nova 2 Lite",
+    "amazon",
+    "chat",
+    "basic",
+    false,
+    c(true, false, false, false)
+  ),
+  legacyRow(
+    "mimo-v2.6-pro",
+    "MiMo V2.6 Pro",
+    "xiaomi",
+    "chat",
+    "basic",
+    false,
+    c(false, false, false, false)
+  ),
   legacyRow("hy3", "Hy3", "tencent", "chat", "basic", false, c(false, false, false, false)),
   legacyRow("grok-4.7", "Grok 4.7", "xai", "chat", "basic", false, c(true, false, false, false)),
   legacyRow("glm-5.3", "GLM 5.3", "xai", "chat", "basic", true, c(false, false, false, false)),
-  legacyRow("glm-5.3-flash", "GLM 5.3 Flash", "zai", "chat", "basic", false, c(false, false, false, false)),
-  legacyRow("perplexity-sonar-pro", "Perplexity Sonar Pro", "perplexity", "chat", "advanced", true, c(false, false, false, false)),
-  legacyRow("perplexity-sonar", "Perplexity Sonar", "perplexity", "chat", "basic", false, c(false, false, false, false)),
-  legacyRow("command-a-plus", "Command A+", "cohere", "chat", "basic", false, c(false, false, false, false)),
+  legacyRow(
+    "glm-5.3-flash",
+    "GLM 5.3 Flash",
+    "zai",
+    "chat",
+    "basic",
+    false,
+    c(false, false, false, false)
+  ),
+  legacyRow(
+    "perplexity-sonar-pro",
+    "Perplexity Sonar Pro",
+    "perplexity",
+    "chat",
+    "advanced",
+    true,
+    c(false, false, false, false)
+  ),
+  legacyRow(
+    "perplexity-sonar",
+    "Perplexity Sonar",
+    "perplexity",
+    "chat",
+    "basic",
+    false,
+    c(false, false, false, false)
+  ),
+  legacyRow(
+    "command-a-plus",
+    "Command A+",
+    "cohere",
+    "chat",
+    "basic",
+    false,
+    c(false, false, false, false)
+  ),
 ];
 
 /**
@@ -340,9 +530,10 @@ export function resolveChatPlaygroundAccount(data: unknown): {
   user: Record<string, unknown>;
 } {
   const rec = (data && typeof data === "object" ? data : {}) as Record<string, unknown>;
-  const user = (
-    rec.user && typeof rec.user === "object" ? rec.user : rec
-  ) as Record<string, unknown>;
+  const user = (rec.user && typeof rec.user === "object" ? rec.user : rec) as Record<
+    string,
+    unknown
+  >;
   const plan = firstString(
     section(rec, "plan").displayName,
     section(rec, "entitlement").planName,
@@ -366,7 +557,8 @@ function quotaFromBucket(key: string, raw: unknown, plan: string): UsageQuota {
       used,
       total: bucket.limit,
       remaining,
-      remainingPercentage: bucket.limit > 0 ? Math.round((remaining / bucket.limit) * 1000) / 10 : 0,
+      remainingPercentage:
+        bucket.limit > 0 ? Math.round((remaining / bucket.limit) * 1000) / 10 : 0,
       resetAt,
       unlimited: false,
       displayName,
