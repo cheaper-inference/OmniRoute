@@ -5,6 +5,7 @@ import {
   isCloudMetadataHost,
   OutboundUrlGuardError,
 } from "../../../shared/network/outboundUrlGuard";
+import { isEffortSuffixedVariantOfListedId } from "../../../shared/reasoning/effortSuffixedId";
 import { resolveOpencodeConfigPath } from "../../../shared/services/opencodeConfigPath";
 import { readPrivateConfigFile } from "../privateConfigFile";
 
@@ -56,6 +57,8 @@ interface CatalogModelEntry {
     temperature?: boolean;
     tool_calling?: boolean;
     vision?: boolean;
+    /** Reasoning effort levels the model accepts, in ascending order. */
+    effort_tiers?: string[];
   };
   /** OpenAI-compatible modality arrays; some upstreams return these. */
   input_modalities?: string[];
@@ -240,6 +243,44 @@ function resolveContextLength(entry: CatalogModelEntry): number | undefined {
 }
 
 /**
+ * OpenCode 1.x `variants` from the catalog's effort tiers, in tier order. OpenCode has
+ * no "off" variant, so `none` is skipped.
+ */
+function buildReasoningVariants(
+  tiers: unknown
+): Record<string, { reasoningEffort: string }> | undefined {
+  if (!Array.isArray(tiers)) return undefined;
+  const variants: Record<string, { reasoningEffort: string }> = {};
+  for (const tier of tiers) {
+    if (typeof tier !== "string" || !tier || tier === "none") continue;
+    variants[tier] = { reasoningEffort: tier };
+  }
+  return Object.keys(variants).length > 0 ? variants : undefined;
+}
+
+/**
+ * A variants object the generator itself wrote: every entry is exactly
+ * `{ reasoningEffort: <its own key> }`. Anything else (renamed keys, extra options, an
+ * empty object) belongs to the user and is never rewritten.
+ */
+function isGeneratorOwnedVariants(variants: unknown): boolean {
+  if (!variants || typeof variants !== "object" || Array.isArray(variants)) return false;
+  const entries = Object.entries(variants);
+  return (
+    entries.length > 0 &&
+    entries.every(([key, value]) => {
+      if (!value || typeof value !== "object" || Array.isArray(value)) return false;
+      const keys = Object.keys(value);
+      return (
+        keys.length === 1 &&
+        keys[0] === "reasoningEffort" &&
+        (value as Record<string, unknown>).reasoningEffort === key
+      );
+    })
+  );
+}
+
+/**
  * Build the entry that ends up under `provider.<name>.models[id]` in the
  * emitted opencode.json. Precedence:
  *
@@ -255,7 +296,8 @@ function resolveContextLength(entry: CatalogModelEntry): number | undefined {
 function buildModelEntry(
   id: string,
   catalog: CatalogModelEntry | undefined,
-  existing: ExistingModelEntry | undefined
+  existing: ExistingModelEntry | undefined,
+  listedIds: ReadonlySet<unknown>
 ): ExistingModelEntry {
   // Carry over user-set names first, then native catalog display metadata.
   // Technical ids remain map keys; names are presentation only.
@@ -294,6 +336,17 @@ function buildModelEntry(
       if (v === undefined) continue;
       if (!(k in entry)) entry[k] = v;
     }
+  }
+
+  // An effort-suffixed row (`<base>-low`) has its effort fixed by the id; a ladder would let a
+  // client override it, so it gets none. Generator-written variants refresh from the current
+  // tiers; user-shaped variants stay as they are.
+  if (!("variants" in entry) || isGeneratorOwnedVariants(entry.variants)) {
+    const variants = isEffortSuffixedVariantOfListedId(id, listedIds)
+      ? undefined
+      : buildReasoningVariants(catalog?.capabilities?.effort_tiers);
+    if (variants) entry.variants = variants;
+    else delete entry.variants;
   }
 
   // Resolve the context window. Honor an explicit user override, then fall
@@ -490,7 +543,7 @@ export async function generateOpencodeConfig(options: GenerateOpencodeOptions): 
 
   const mergedModels: Record<string, ExistingModelEntry> = {};
   for (const id of mergedIds) {
-    mergedModels[id] = buildModelEntry(id, catalogById.get(id), existingModels[id]);
+    mergedModels[id] = buildModelEntry(id, catalogById.get(id), existingModels[id], mergedIds);
   }
 
   const provider: Record<string, unknown> = {
