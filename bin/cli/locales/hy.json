@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Սահմանը պետք է լինի դրական ամբողջ թիվ։",
     "error": "Սխալ՝ {message}",
     "serverOffline": "OmniRoute սերվերն անցանց է։ Գործարկեք այն հետևյալ հրամանով՝ omniroute serve",
     "authRequired": "Պահանջվում է նույնականացում։ Սահմանեք OMNIROUTE_API_KEY-ը կամ գործարկեք՝ omniroute setup",

@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "සීමාව ධන නිඛිලයක් විය යුතුය.",
     "error": "දෝෂය: {message}",
     "serverOffline": "OmniRoute සේවාදායකය නොබැඳියි. එය ආරම්භ කිරීමට: omniroute serve",
     "authRequired": "සත්යාපනය අවශ්යයි. OMNIROUTE_API_KEY සකසන්න හෝ මෙය ධාවනය කරන්න: omniroute setup",
