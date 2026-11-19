@@ -24,11 +24,11 @@ export const geminiDecisionSchema = z
 
 export async function handleGeminiDecisions(
   body: z.infer<typeof geminiDecisionSchema>,
-  credentials: { apiKey?: unknown },
+  credentials: object,
   signal: AbortSignal,
   send: typeof fetch = fetch
 ): Promise<Response> {
-  if (typeof credentials.apiKey !== "string" || !credentials.apiKey) {
+  if (!("apiKey" in credentials) || typeof credentials.apiKey !== "string" || !credentials.apiKey) {
     return errorResponse(401, "An Gemini Developer API API key is required.");
   }
   try {
