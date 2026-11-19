@@ -48,6 +48,7 @@ test("a feature PR may edit the English catalogs and regenerate the compact erro
         "src/i18n/messages/en.json",
         "bin/cli/locales/en.json",
         "src/i18n/global-error-messages/en.json",
+        "src/i18n/route-handler-messages.json",
         "docs/guides/I18N.md",
       ],
       "feat/x"
@@ -85,6 +86,7 @@ test("a translation-only PR (with its compact catalogs and a changelog fragment)
       [
         "src/i18n/messages/ko.json",
         "src/i18n/global-error-messages/ko.json",
+        "src/i18n/route-handler-messages.json",
         "changelog.d/fixes/0000-ko-copy.md",
       ],
       "fix/ko-copy"

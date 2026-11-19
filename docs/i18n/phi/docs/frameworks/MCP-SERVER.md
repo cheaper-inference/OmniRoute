@@ -20,6 +20,8 @@ O sa pamamagitan ng open-sse transport:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -144,7 +146,7 @@ Cursor, Cline, at mga katugmang MCP client.
 | `omniroute_rtk_discover`            | `read:compression`  | Tuklasin ang paulit-ulit na ingay sa mga opt-in na RTK output sample                                                                                |
 | `omniroute_rtk_learn`               | `read:compression`  | Bumuo ng nasusuri na RTK filter draft mula sa mga opt-in na sample                                                                                  |
 
-Gumagamit ang mga entry CCR ng dalawang-tier na tindahan: isang mainit na in-memory na tier na naka-back, sa mga lokal na non-cloud na runtime, ng isang matibay SQLite tier (`ccr_blocks`, naka-on bilang default) kaya ang isang block ay nakaligtas sa pagpapaalis o isang pag-restart hanggang sa TTL nito ay maubusan ng — maliban sa mga bloke ng higit sa 512 KB at cloud runtime, na nananatiling memory-only. Ang bawat bloke ay limitado sa 2 MiB, bawat punong-guro sa 16 MiB, at ang pandaigdigang tindahan sa 64 MiB. Default ang mga entry sa 24 na oras TTL (maximum na pitong araw). Ang buong pagkuha MCP ay limitado sa 256 KiB; mananatiling available ang malalaking bloke sa pamamagitan ng ranged at grep mode. Ang storage, retrieval, listing, inspeksyon, pagtanggal, at mga istatistika ay ibinukod ng na-authenticate na API-key principal. Ang mga talaan ng audit ay naglalaman ng mga hash at laki ng metadata, hindi kailanman nilalaman. Ang mga detalyeng nakaharap sa operator (ang dalawang marker, mga kinakailangan ng kliyente, `codemode:false`, mga saklaw ng bawat tool, pagination, at isang diagnostic matrix) ay nakatira sa [Mga Compression Engine → Mga Kinakailangan / gabay ng operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+Gumagamit ang mga entry CCR ng dalawang-tier na tindahan: isang mainit na in-memory na tier na naka-back, sa mga lokal na non-cloud na runtime, ng isang matibay SQLite tier (`ccr_blocks`, naka-on bilang default) kaya ang isang block ay nakaligtas sa pagpapalayas o isang restart hanggang sa TTL nito ay maubusan ng — maliban sa mga block na higit sa 512 KB, cloud runtimes at `COMPRESSION_CCR_DURABLE_STORE=false` na mananatili sa memory-only. Ang matibay na pagsulat ay pinakamahusay na pagsisikap: ito ay ibinabagsak habang ang 1,000 na pagsusulat ay nakabinbin na, at ang isang nabigong SQLite na pagsulat ay naka-log, hindi muling sinubukan, upang ang block na iyon ay nawala sa pag-restart. Ang bawat bloke ay limitado sa 2 MiB, bawat punong-guro sa 16 MiB, at ang pandaigdigang tindahan sa 64 MiB. Default ang mga entry sa 24 na oras TTL (maximum na pitong araw). Ang buong pagkuha MCP ay limitado sa 256 KiB; mananatiling available ang malalaking bloke sa pamamagitan ng ranged at grep mode. Ang storage, retrieval, listing, inspeksyon, pagtanggal, at mga istatistika ay ibinukod ng na-authenticate na API-key principal. Ang mga talaan ng audit ay naglalaman ng mga hash at laki ng metadata, hindi kailanman nilalaman. Ang mga detalyeng nakaharap sa operator (ang dalawang marker, mga kinakailangan ng kliyente, `codemode:false`, mga saklaw ng bawat tool, pagination, at isang diagnostic matrix) ay nakatira sa [Mga Compression Engine → Mga Kinakailangan / gabay ng operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 Iniuulat ng `omniroute_compression_status` ang MCP description compression nang hiwalay sa ilalim ng `analytics.mcpDescriptionCompression`. Ang mga halagang iyon ay mga pagtatantya sa laki ng metadata para sa mga nakalistang paglalarawan MCP (`tools`, `prompts`, `resources`, at `resourceTemplates`); hindi sila mga resibo sa paggamit ng provider at minarkahan ng `source: "mcp_metadata_estimate"`.
 
@@ -157,7 +159,7 @@ Mga pangunahing gawi:
 - Kino-collapse ang ≥ ng 30 magkakasunod na paulit-ulit na linya ng magkapatid sa head + tail summary
 - Pinapanatili ang mga `[ref=eXX]` anchor na kinakailangan ng Playwright/computer-use
 - Mga hard-truncate na sobrang laki ng text (> 50,000 chars) na may hint ng navigation
-- Inaasahang matitipid:** 60–80%** sa mga snapshot payload ng browser
+- Inaasahang matitipid:** 60–80%** sa mga payload ng snapshot ng browser
 
 Configuration: `compression.mcpAccessibility` sa mga pandaigdigang setting (migration 056). Pagpapatupad: `open-sse/services/compression/engines/mcpAccessibility/`. Mga kumpletong doc: [Mga Compression Engine — MCP Accessibility Tree Filter](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 

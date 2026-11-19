@@ -13,6 +13,7 @@ import { join, dirname, resolve, sep } from "path";
 import { randomUUID } from "crypto";
 import { logger } from "../../../open-sse/utils/logger.ts";
 import { getDefaultPluginDir, scanPluginDir } from "./scanner";
+import { getPluginSourcesDir, resolvePluginInstallSource } from "./installSource";
 import { loadPlugin, type LoadedPlugin } from "./loader";
 import { registerHook, unregisterHooks, emitHook, type HookHandler, type Plugin } from "./hooks";
 import {
@@ -119,6 +120,21 @@ class PluginManager {
       PluginManager.instance = new PluginManager();
     }
     return PluginManager.instance;
+  }
+
+  /** Directory that caller-supplied local install paths must live in. */
+  getSourcesDir(): string {
+    return getPluginSourcesDir(this.pluginDir);
+  }
+
+  /**
+   * Install from a caller-supplied local path (POST /api/plugins). The path must
+   * resolve inside {@link getSourcesDir}; see ./installSource for the checks.
+   * Throws PluginInstallSourceError when the path is refused.
+   */
+  async installFromLocalSource(requestedPath: string): Promise<PluginRow> {
+    const source = await resolvePluginInstallSource(requestedPath, this.getSourcesDir());
+    return this.install(source);
   }
 
   /**

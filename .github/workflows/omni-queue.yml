@@ -142,9 +142,10 @@ jobs:
     # label change, and an operator who cancels the run mid-incident must stop the tick too.
     #
     # A pull request event starts a tick only when it can change what the queue does: the
-    # event's label is an approval label or one of config.json's `blockLabels`, the pull request
-    # carries the queue label, or a merge moved a base. Anything else (a label on, or a push to,
-    # a pull request that is not queued) starts nothing; the 5-minute cron stays the safety net.
+    # event's label is an approval label, one of config.json's `blockLabels` or one of its two
+    # `lanes` labels (hotfix, base repair), the pull request carries the queue label, or a merge
+    # moved a base. Anything else (a label on, or a push to, a pull request that is not queued)
+    # starts nothing; the 5-minute cron stays the safety net.
     # Same label literals as config/merge-queue/config.json: rename in BOTH places. And only a
     # pull request into a release/v* branch, like the approval job: the queue manages release
     # bases only, and no App token is minted for any other pull request.
@@ -161,6 +162,8 @@ jobs:
             || github.event.label.name == 'hold-vps'
             || github.event.label.name == 'do-not-merge'
             || github.event.label.name == 'wip'
+            || github.event.label.name == 'omni-queue-hotfix'
+            || github.event.label.name == 'omni-queue-base-repair'
             || contains(github.event.pull_request.labels.*.name, 'omni-queue')
             || (github.event.action == 'closed' && github.event.pull_request.merged == true))))
     runs-on: ubuntu-latest
@@ -196,7 +199,9 @@ jobs:
           # bless, and withdrawn (failure) when a landing does not complete.
           permission-statuses: write
           permission-checks: read
-          permission-actions: read
+          # POST /actions/runs/{id}/rerun-failed-jobs: a red candidate's failed jobs are re-run
+          # once before a pull request is blamed (config flakyReruns).
+          permission-actions: write
       # The default branch's orchestrator, never the PR's code.
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:

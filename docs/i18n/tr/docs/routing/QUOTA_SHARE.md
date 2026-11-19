@@ -347,15 +347,14 @@ görünmemesi için kasıtlı olarak `ROUTING_STRATEGY_VALUES` kapsamı dışın
 
 ## Test Kapsamı
 
-Quota-share motoruyla birlikte iki otomatik test kapsamı katmanı sunulur:
+Kota paylaşımlı motorla birlikte iki katmanlı otomatik kapsama alanı sunulur:
 
-| Test Paketi         | Komut                                                                  | Kapsadığı alanlar                                                                                                                                                                                                                    |
-| :------------------ | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Birim (29 test)     | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR zamanlayıcısı, doygunluk geçitlemesi, eşzamanlılık sınırları, fairShare hesaplamaları, birikmiş işlerin kuyruğa alınması                                                                                                         |
-| Entegrasyon matrisi | `npm run test:combo:matrix`                                            | Gerçek kombinasyon işlem hattı üzerinden uçtan uca yönlendirme kararı; canlı bağlantı noktaları (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) aracılığıyla DRR adaleti + doygunlukta öncelik düşürme |
+| Süit                | Emretmek                                                               | Neleri kapsıyor                                                                                                                                                                                                          |
+| :------------------ | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Birim (29 test)     | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR zamanlayıcı, doygunluk geçidi, eşzamanlılık sınırları, fairShare matematiği, birikim kuyruğuna alma                                                                                                                  |
+| Entegrasyon matrisi | `npm run test:combo:matrix`                                            | Gerçek birleşik boru hattı aracılığıyla uçtan uca yönlendirme kararı; DRR adillik + canlı dikişler yoluyla doygunluğun önceliklendirilmesi (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Entegrasyon matrisi, 19 herkese açık stratejinin tamamıyla birlikte CI'da çalışır. Birim
-test paketi bağımsız olarak çalıştırılabilir.
+Entegrasyon matrisi, 22 genel stratejinin tamamıyla birlikte CI çalışır. Birim paketi bağımsız olarak çalıştırılabilir.
 
 ---
 
