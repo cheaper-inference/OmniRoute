@@ -258,6 +258,14 @@ async function getBodySizeSettings(): Promise<Record<string, unknown> | undefine
   }
 }
 
+/**
+ * Paths whose bodies are capped before any handler parses them: every `/api/*` route (the `/v1`
+ * aliases normalize into it) plus the `/a2a` JSON-RPC endpoint, which keeps its own path (#19832).
+ */
+function isBodySizeGuardedPath(pathname: string): boolean {
+  return pathname.startsWith("/api/") || pathname === "/a2a" || pathname.startsWith("/a2a/");
+}
+
 export async function runAuthzPipeline(
   request: NextRequest,
   options: AuthzPipelineOptions = {}
@@ -315,7 +323,7 @@ export async function runAuthzPipeline(
     return response;
   }
 
-  if (guardedPathname.startsWith("/api/") && method !== "GET" && method !== "OPTIONS") {
+  if (isBodySizeGuardedPath(guardedPathname) && method !== "GET" && method !== "OPTIONS") {
     const bodySizeSettings = await getBodySizeSettings();
     const bodySizeRejection = checkBodySize(
       request,
