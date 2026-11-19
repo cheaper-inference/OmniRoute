@@ -107,3 +107,23 @@ test("an interrupted publish keeps the old catalog whole and removes the temp fi
     await fs.rm(dir, { recursive: true, force: true });
   }
 });
+
+test("two publications in the same millisecond each get their own temp file", async (t) => {
+  const dir = await tempDir();
+  try {
+    // A timestamp-based temp name would be shared by both writes below.
+    const now = Date.now();
+    t.mock.method(Date, "now", () => now);
+    const [a, b] = await Promise.all([write(dir, ["openai/a"]), write(dir, ["openai/b"])]);
+    assert.ok(a.catalogPath, a.warning);
+    assert.ok(b.catalogPath, b.warning);
+    const published = JSON.parse(await fs.readFile(getCodexCatalogPath(dir), "utf8")) as {
+      models: Array<{ slug: string }>;
+    };
+    assert.ok(Array.isArray(published.models) && published.models.length > 0);
+    const leftovers = (await fs.readdir(dir)).filter((name) => name.endsWith(".tmp"));
+    assert.deepEqual(leftovers, [], "no temp file is left behind");
+  } finally {
+    await fs.rm(dir, { recursive: true, force: true });
+  }
+});

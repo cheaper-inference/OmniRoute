@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import fs from "fs/promises";
 import path from "path";
 import {
@@ -59,9 +60,10 @@ async function publishCatalog(catalogPath: string, content: string): Promise<voi
   const next = Buffer.from(content);
   const current = await fs.readFile(catalogPath).catch(() => null);
   if (current?.equals(next)) return;
-  const tempPath = `${catalogPath}.${process.pid}.${Date.now()}.tmp`;
+  // A unique, exclusively created temp file: two publications never share one.
+  const tempPath = `${catalogPath}.${process.pid}.${randomUUID()}.tmp`;
   try {
-    await fs.writeFile(tempPath, next);
+    await fs.writeFile(tempPath, next, { flag: "wx" });
     await fs.rename(tempPath, catalogPath);
   } catch (error) {
     await fs.rm(tempPath, { force: true }).catch(() => undefined);
