@@ -1,1 +1,0 @@
-- **feat(images):** Codex image calls record their image token usage in the call log only; the usage never changes key budgets or the returned image result.
