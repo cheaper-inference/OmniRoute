@@ -81,11 +81,11 @@ test("csvToJsonl: escaped double-quotes inside quoted field → literal quote in
   assert.equal(parsed[0].body.messages[0].content, 'He said "hi"');
 });
 
-test("csvToJsonl: CRLF line endings → same result as LF", () => {
-  const csv = "id,prompt\r\nr1,hello\r\nr2,world";
-  const result = make(csv);
+test("csvToJsonl preserves unquoted rows across mixed line endings", () => {
+  const result = make("id,prompt\r\nr1,hello\r\rr2,world\n\n");
   assert.equal(result.rowsParsed, 2);
-  assert.equal(result.errors.length, 0);
+  assert.deepEqual(result.errors, []);
+  assert.deepEqual(result, make("id,prompt\nr1,hello\nr2,world"));
 });
 
 test("csvToJsonl: inline newline inside quoted field → preserved in content", () => {
@@ -132,20 +132,29 @@ test("csvToJsonl: auto-fill role=user when content is mapped without explicit ro
   assert.equal(parsed[0].body.messages[0].role, "user");
 });
 
-test("csvToJsonl: explicit role override via mapping → not auto-filled", () => {
-  const csv = "id,prompt,role\nr1,hello,assistant";
+test("csvToJsonl preserves explicit and default roles across rows", () => {
+  const csv = "id,prompt,role,next\nr1,hello,assistant,first\nr2,second,system,third";
   const mapping = {
     id: "custom_id",
     prompt: "body.messages[0].content",
     role: "body.messages[0].role",
+    next: "body.messages[1].content",
   };
   const result = csvToJsonl({ csv, mapping, defaults: DEFAULT_DEFAULTS });
-  assert.equal(result.rowsParsed, 1);
+  assert.equal(result.rowsParsed, 2);
   const parsed = parseLines(result.jsonl);
-  assert.equal(
-    parsed[0].body.messages[0].role,
-    "assistant",
-    "explicit role should not be overridden"
+  assert.deepEqual(
+    parsed.map((row) => row.body.messages),
+    [
+      [
+        { content: "hello", role: "assistant" },
+        { content: "first", role: "user" },
+      ],
+      [
+        { content: "second", role: "system" },
+        { content: "third", role: "user" },
+      ],
+    ]
   );
 });
 

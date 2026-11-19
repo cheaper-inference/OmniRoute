@@ -24,10 +24,17 @@ const jsonl =
       body: { model: destination.model, messages: [{ role: "user", content: "hello" }] },
     })
   ).join("\n") + "\n";
+const csvPrompt = "hello".repeat(20);
 const csv =
   "id,prompt\n" +
-  Array.from({ length: rowCount }, (_, i) => `req-${i},${"hello".repeat(20)}`).join("\n") +
+  Array.from({ length: rowCount }, (_, i) => `req-${i},${csvPrompt}`).join("\n") +
   "\n";
+const csvJsonlPrefix =
+  JSON.stringify({
+    method: "POST",
+    url: destination.endpoint,
+    body: { model: destination.model, messages: [{ content: csvPrompt, role: "user" }] },
+  }).slice(0, -1) + ',"custom_id":"req-';
 
 function readText(blob: Blob): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -171,19 +178,28 @@ test.each([
     expect(submitted).toBeDefined();
     const uploaded = await readText(submitted!);
     expect(uploaded.includes("[...sample only...]")).toBe(false);
-    const parsed = uploaded
-      .trim()
-      .split("\n")
-      .map((line) => JSON.parse(line));
-    expect(parsed).toHaveLength(rows);
-    expect(parsed.map((row) => row.custom_id)).toEqual(
-      Array.from({ length: rows }, (_, i) => `req-${i}`)
-    );
+    const lines = uploaded.trim().split("\n");
+    expect(lines).toHaveLength(rows);
+    const invalidRow = lines.findIndex((line, index) => {
+      // Fast comparison for the usual CSV encoding. Parsing the fallback keeps
+      // the assertions independent of the JSON object's property order.
+      if (kind === "csv" && line === `${csvJsonlPrefix}${index}"}`) return false;
+      const row = JSON.parse(line);
+      return (
+        row.custom_id !== `req-${index}` ||
+        (kind === "csv" && row.body.messages[0].content !== csvPrompt)
+      );
+    });
+    expect(invalidRow, "first uploaded row with an unexpected ID or content").toBe(-1);
     if (kind === "jsonl") {
       expect(uploaded === content).toBe(true);
       expect(submitted!.size).toBe(file.size);
     } else {
-      expect(parsed.every((row) => row.body.messages[0].content === "hello".repeat(20))).toBe(true);
+      expect(JSON.parse(lines[0])).toMatchObject({
+        method: "POST",
+        url: destination.endpoint,
+        body: { model: destination.model },
+      });
       expect(file.text).toHaveBeenCalledOnce();
     }
     expect(onCreated).toHaveBeenCalledWith("batch-test");
