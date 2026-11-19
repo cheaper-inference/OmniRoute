@@ -40,7 +40,8 @@ const hermesAgentSettingsSchema = z.object({
     .min(1, "selections must be a non-empty array of { role, model }"),
   preview: z.boolean().optional(),
   // Optional: apply to one named Hermes profile, or to every listed profile. Neither = default home.
-  profile: z.string().optional(),
+  // An empty name is refused: it must never fall back to the default home.
+  profile: z.string().min(1, "profile must be a non-empty profile name").optional(),
   applyToAll: z.boolean().optional(),
 });
 
@@ -126,8 +127,9 @@ export async function GET(request: Request) {
     const query = new URL(request.url).searchParams;
     const profile = query.get("profile");
     let configPath = getCliPrimaryConfigPath("hermes-agent") || getConfigPath();
-    if (profile) {
-      const profileHome = resolveHermesProfileHome(profile);
+    // `?profile=` (empty) is refused like an unknown name instead of reading the default home.
+    if (profile !== null) {
+      const profileHome = profile ? resolveHermesProfileHome(profile) : null;
       if (!profileHome)
         return NextResponse.json({ error: "Unknown Hermes profile" }, { status: 400 });
       configPath = path.join(profileHome, "config.yaml");
@@ -181,7 +183,7 @@ export async function POST(request: Request) {
   if (!validateBaseUrl(baseUrl)) {
     return NextResponse.json({ error: "baseUrl must be a valid http(s) URL" }, { status: 400 });
   }
-  if (profile && applyToAll) {
+  if (profile !== undefined && applyToAll) {
     return NextResponse.json(
       { error: "Use either profile or applyToAll, not both" },
       { status: 400 }
@@ -199,7 +201,7 @@ export async function POST(request: Request) {
   if (applyToAll) return NextResponse.json(await applyToEveryProfile(input));
 
   let configPath = getCliPrimaryConfigPath("hermes-agent") || getConfigPath();
-  if (profile) {
+  if (profile !== undefined) {
     const profileHome = resolveHermesProfileHome(profile);
     if (!profileHome)
       return NextResponse.json({ error: "Unknown Hermes profile" }, { status: 400 });
@@ -234,8 +236,13 @@ async function applyToEveryProfile(input: ApplyInput) {
   for (const name of listHermesProfiles()) {
     const profileHome = resolveHermesProfileHome(name);
     if (!profileHome) continue;
-    const outcome = await applyToConfig(path.join(profileHome, "config.yaml"), input);
-    results.push({ profile: name, success: outcome.status === 200, ...outcome.body });
+    try {
+      const outcome = await applyToConfig(path.join(profileHome, "config.yaml"), input);
+      results.push({ profile: name, success: outcome.status === 200, ...outcome.body });
+    } catch (error) {
+      // A filesystem failure (mkdir, backup, .env, publish) fails this profile only.
+      results.push({ profile: name, success: false, error: sanitizeErrorMessage(error) });
+    }
   }
   return { success: results.every((entry) => entry.success), results };
 }

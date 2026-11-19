@@ -173,3 +173,45 @@ test("POST refuses profile together with applyToAll", async () => {
   const response = await post({ profile: "alpha", applyToAll: true, apiKey: PLACEHOLDER_KEY });
   assert.equal(response.status, 400);
 });
+
+test("an empty profile name is refused and never falls back to the default home", async () => {
+  const defaultBefore = read(path.join(HOME, "config.yaml"));
+  const response = await post({ profile: "", apiKey: PLACEHOLDER_KEY });
+  assert.equal(response.status, 400);
+  assert.equal(read(path.join(HOME, "config.yaml")), defaultBefore);
+  const both = await post({ profile: "", applyToAll: true, apiKey: PLACEHOLDER_KEY });
+  assert.equal(both.status, 400);
+  assert.equal((await get("?profile=")).status, 400);
+});
+
+test("applyToAll: a filesystem failure on one profile is reported and the next is still written", async () => {
+  const key = await apiKeysDb.createApiKey("hermes-partial-key", "hermes-partial-machine");
+  // alpha's .env is a directory, so reading it fails with EISDIR inside the apply.
+  const alphaEnv = path.join(profileDir("alpha"), ".env");
+  fs.rmSync(alphaEnv, { force: true });
+  fs.mkdirSync(alphaEnv);
+  try {
+    const response = await post({
+      applyToAll: true,
+      keyId: key.id,
+      selections: [{ role: "default", model: "partial-batch-model" }],
+    });
+    assert.equal(response.status, 200);
+    const body = (await response.json()) as {
+      success: boolean;
+      results: Array<{ profile: string; success: boolean; error?: string }>;
+    };
+    assert.equal(body.success, false);
+    assert.deepEqual(
+      body.results.map((entry) => [entry.profile, entry.success]),
+      [
+        ["alpha", false],
+        ["beta", true],
+      ]
+    );
+    assert.equal(typeof body.results[0].error, "string");
+    assert.match(read(path.join(profileDir("beta"), "config.yaml")), /partial-batch-model/);
+  } finally {
+    fs.rmSync(alphaEnv, { recursive: true, force: true });
+  }
+});
