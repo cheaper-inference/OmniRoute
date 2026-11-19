@@ -13,7 +13,7 @@ import { validateBody } from "../../src/shared/validation/helpers.ts";
 
 const DEPRECATED_MIMO_V2_MODELS = ["mimo-v2-pro", "mimo-v2-omni", "mimo-v2-flash", "mimo-v2-tts"];
 
-test("xiaomi-mimo registry uses the current default base URL and MiMo V2.5 models", () => {
+test("xiaomi-mimo registry uses the current default base URL and the MiMo V2.6 models", () => {
   const entry = REGISTRY["xiaomi-mimo"];
 
   assert.ok(entry, "xiaomi-mimo should exist in registry");
@@ -21,10 +21,15 @@ test("xiaomi-mimo registry uses the current default base URL and MiMo V2.5 model
   for (const modelId of DEPRECATED_MIMO_V2_MODELS) {
     assert.ok(!entry.models.some((model) => model.id === modelId), `${modelId} is deprecated`);
   }
+  // Vendor: V2.5 ids retired 2026-10-21; V2.6 pages list 1M context and 128K output.
   assert.deepEqual(
     entry.models.map((model) => model.id),
-    ["mimo-v2.5-pro", "mimo-v2.5"]
+    ["mimo-v2.6-pro", "mimo-v2.6-flash", "mimo-v2.6-pro-ultraspeed"]
   );
+  for (const model of entry.models) {
+    assert.equal(model.contextLength, 1048576, `${model.id} context`);
+    assert.equal(model.maxOutputTokens, 131072, `${model.id} max output`);
+  }
 });
 
 test("xiaomi-mimo TTS models are registered in the audio speech registry", () => {
