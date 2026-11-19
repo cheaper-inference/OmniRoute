@@ -94,10 +94,10 @@ test("#17297: absent or null cache-read fields remain unmeasured", () => {
   }
 });
 
-test("#17297: non-finite values without a positive candidate remain zero", () => {
+test("#17297: non-finite values remain unknown in nullable accounting", () => {
   for (const value of [NaN, Infinity, "Infinity", "invalid", ""]) {
     const usage = { cacheRead: value };
     assert.equal(getPromptCacheReadTokens(usage), 0);
-    assert.equal(getPromptCacheReadTokensOrNull(usage), 0);
+    assert.equal(getPromptCacheReadTokensOrNull(usage), null);
   }
 });

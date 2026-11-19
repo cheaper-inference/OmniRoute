@@ -43,5 +43,11 @@ export const nvidiaProvider: RegistryEntry = {
       supportsReasoning: true,
       supportsVision: true,
     },
+    {
+      id: "openai/gpt-oss-20b",
+      name: "GPT OSS 20B",
+      supportsReasoning: true,
+      toolCalling: true,
+    },
   ],
 };

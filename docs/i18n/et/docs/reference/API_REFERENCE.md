@@ -840,75 +840,178 @@ seansivälisele kutsujale (toomine, kustutamine, tühistamine ja loomisel tehtav
 
 ---
 
-## API
+## Otsingu API
 
-Web/search pakkuja abstraktsioon (Tavily, Brave, Exa, Serper jne).
+Veebi-/otsingupakkujate abstraktsioon (Tavily, Brave, Exa, Serper jne).
 
-| meetod | Tee                    | Kirjeldus                                                                                  |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------ |
-| GET    | `/v1/search`           | Loetlege konfigureeritud otsingupakkujate + võimalused                                     |
-| POST   | `/v1/search`           | Käivitage otsingupäring — body, mille kinnitas `v1SearchSchema`, toetab caching/coalescing |
-| GET    | `/v1/search/analytics` | Pakkujapõhine hit/latency/cache statistika                                                 |
+| Meetod | Tee                    | Kirjeldus                                                                                                                     |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Seadistatud otsingupakkujate ja võimaluste loend                                                                              |
+| POST   | `/v1/search`           | Otsingupäringu käivitamine — keha valideeritakse `v1SearchSchema` abil, toetab vahemällu salvestamist ja päringute koondamist |
+| GET    | `/v1/search/analytics` | Pakkujate kaupa päringute õnnestumise, latentsuse ja vahemälu statistika                                                      |
 
-**Auth:** Kandja API võti (`extractApiKey` + `isValidApiKey`). Otsingupoliitika jõustatakse `enforceApiKeyPolicy` kaudu.
+**Autentimine:** Bearer API-võti (`extractApiKey` + `isValidApiKey`). Otsingupoliitikat jõustatakse `enforceApiKeyPolicy` abil.
 
-**Automaatne valimine:** ilma `provider` töötab esimesena odavaim konfigureeritud ühendusega pakkuja ja odavaim on tõrkesiirde. Tasuta viimase võimaluse pakkujaid (`duckduckgo-free`) kasutatakse ainult siis, kui midagi muud pole seadistatud. Isehostitud SearXNG loetakse konfigureerituks, kui selle ühendus salvestab tõelise `baseUrl` (mitte kataloogi vaikimisi `http://localhost:8888/search`): siis on see 0-dollarine teenusepakkuja võtmega pakkujatest ees, odavaima võtmega pakkuja on tõrkeotsas, sealhulgas `baseUrl`, URL SearXNG `http(s)` 400, 401, 403 või 404 punktile. pilve metaandmete aadress ei lähe arvesse. SearXNG -ühendus, mis salvestab märgi, paikneb sel viisil ainult `https://` või loopback- `http://` kohal. Tavalise kaug- `http://` kaudu ei ole see kunagi tõrkeotsing ja see jääb viimaseks abinõuks, mida kasutatakse ainult siis, kui ühtegi teist pakkujat pole konfigureeritud või kui seda küsitakse nime järgi, seega saadab see luba neil kahel juhul selgetekstis.
+### Nimega otsingu-/toomiskombinatsioonid
+
+Nii `POST /v1/search` kui ka `POST /v1/web/fetch` aktsepteerivad `model`-i salvestatud kombinatsiooni nimena.
+Kasutage kas `model`-it või otsest `provider`-it; mõlema saatmine tagastab `400`.
+Kui kumbagi välja ei ole, jääb olemasolev automaatne pakkuja valik muutmata.
+
+Nii Combo Builder kui ka selle Add Modeli kataloog kuvavad ühendatud pakkujate loomulikke veebitoimingu kirjeid
+ka siis, kui neil pole LLM-mudelite loendit. Serper kuvab **Veebiotsing**;
+Tavily kuvab **Veebiotsing / Lehe eraldamine** ning ainult toomist toetavad pakkujad kuvavad **Lehe eraldamine**.
+Valige kirje ja konto tavapäraselt. Üks Tavily kirje teenindab mõlemat veebiotspunkti;
+neid toimingukirjeid ei lisata ainult vestluseks mõeldud kliendivalijatesse ega vestlusmudelite sondeerimisse.
+
+Näiteks looge **priority**-kombinatsioon nimega `shared-free` järgmiste järjestatud sihtmärkidega:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Seejärel kasutage sama nime kummalgi pinnal:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Otsing arvestab esmalt Tavily ja seejärel Serperiga; toomine arvestab esmalt Tavily ja seejärel Jina Readeriga;
+vestlus jätab spetsiaalsed otsingu-/toomispakkujad vahele ning arvestab OpenAI-ga. Ühilduvus
+tuleneb otsingu-/toomise täitjate registritest, mitte mudeli nimes sisalduvatest sõnadest.
+Filtreerimine toimub enne mandaatide valimist ja väljasaatmist ning salvestatud kombinatsiooni ei muudeta.
+
+Mittevestluse võimaluste marsruudid toetavad `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` ja `p2c` strateegiaid. Ainult vestluseks mõeldud sünteesistrateegiad, nagu
+`fusion`, `pipeline` ja `context-relay`, lükatakse mittevestluse marsruutidel tagasi, mitte ei rakendata
+vaikselt otsingule või loodud meediale.
+Olemasolev kombinatsioonimootor haldab järjestatud varuvalikut, sealhulgas ülesvoolu kvooditõrkeid,
+ning säilitab sammu-ID-d, kontokinnitused, sammu kaupa konto lubatud loendid, pesastatud viited,
+kutsuja ühenduse-/kvoodiulatuse ja kombinatsioonile juurdepääsu poliitika. Tulemused säilitavad oma loomuliku
+otsingu-/toomisskeemi, sealhulgas tegeliku pakkuja; `X-OmniRoute-Combo-Trace` tuvastab
+marsruutimisotsuse. Tundmatud kombinatsioonid tagastavad `404`; mitteaktiivsed kombinatsioonid ja kombinatsioonid,
+millel pole ühilduvaid sihtmärke, tagastavad `400`.
+
+Iga kombinatsioonikatse kasutab üht konkreetset pakkujat. See ei saa kombinatsiooni teadmata kasutada
+selle taga olevat loomulikku automaatset pakkujate kogumit. Konkreetse pakkujaga päringud säilitavad oma olemasoleva
+ühe pakkuja käitumise. Spetsiaalsetele otsingu-/toomispakkujatele suunatud otsevestluse päringud
+tagastavad OpenAI-laadse täitja juurde langemise asemel rakendatava JSON-i kujul `400`.
+
+### Võimalusepõhised kombinatsioonimarsruudid
+
+Salvestatud kombinatsioonid võivad sisaldada `routes`-objekti, mille võtmed on API võimalused. Igal marsruudil on oma
+sihtmärkide loend, strateegia ja käitusaja konfiguratsioon. Ülataseme `models`, `strategy` ja `config`
+jäävad pärandühilduvaks vestlusplaaniks; vanad kombinatsioonid ilma `routes`-ita töötavad muutmata edasi.
+
+Toetatud marsruudivõtmed on `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` ja `audio-generation`. Otspunktile vastava marsruudi määramine toimub enne mandaatide valimist,
+hindamist või väljasaatmist. Pesastatud kombinatsiooniviited valivad sama võimaluse jaoks alamkombinatsiooni marsruudi.
+
+`POST /v1/music/generations` ja `POST /v1/ocr` aktsepteerivad `model`-is kombinatsiooni nime. Natiivne
+ElevenLabsiga ühilduv `POST /v1/music` aktsepteerib kombinatsiooni nime ka `model_id`-is, kuid kõik kasutatavad
+sihtmärgid sellel natiivotspunktil peavad olema ElevenLabsi muusikamudelid, et säilitada selle binaarse vastuse leping.
+`POST /v1/sound-generation` aktsepteerib `model_id`-is `audio-generation`-kombinatsiooni sama natiivse binaarpiirangu alusel.
+Erinevate muusikapakkujate jaoks kasutage `/v1/music/generations`.
+
+**Automaatne valik:** ilma `provider`-ita käivitub esmalt odavaim seadistatud ühendusega pakkuja
+ning järgmine odavaim on varupakkuja. Tasuta viimase abinõu pakkujaid (`duckduckgo-free`) kasutatakse ainult siis,
+kui midagi muud pole seadistatud. Ise hostitud SearXNG loetakse seadistatuks, kui selle ühendus salvestab tegeliku
+`baseUrl`-i (mitte kataloogi vaikeväärtust `http://localhost:8888/search`): siis järjestatakse see 0-dollarilise pakkujana
+võtmega pakkujatest ettepoole, kusjuures varupakkujaks on odavaim võtmega pakkuja, ka siis, kui SearXNG vastab koodiga
+400, 401, 403 või 404. `baseUrl`, mis ei ole korrektne `http(s)`-URL või viitab pilvemetateabe aadressile,
+ei lähe arvesse. SearXNG-ühendus, kuhu on salvestatud tunnus, järjestatakse sel viisil ainult `https://`-i või
+silmusühenduse `http://`-i puhul. Kaugühenduse tavalise `http://`-i korral ei ole see kunagi varupakkuja ja jääb
+viimaseks abinõuks: seda kasutatakse ainult siis, kui ükski teine pakkuja pole seadistatud või kui seda nime järgi
+taotletakse, mistõttu saadetakse tunnus neil kahel juhul tekstselge ühenduse kaudu.
 
 ### Exa ja Tavily `provider_options`
 
-Exa ja Tavily loevad nimeruumiga kotti pakkujaspetsiifilisi välju: `provider_options.exa` (või `provider_options["exa-search"]`) ja `provider_options.tavily` (või `provider_options["tavily-search"]`). Ainult allolevad võtmed edastatakse. Igaüht neist kontrollitakse `open-sse/handlers/search/providerOptionsPassthrough.ts` oma Zod skeemiga ja vale tüüpi võti jäetakse välja. Kõiki muid võtmeid eiratakse, sealhulgas auth, base URL, `stream` ja `outputSchema`. Teiste pakkujate kasutatavad lamedad klahvid (`cx`, `depth`, ...) töötavad nagu varem.
+Exa ja Tavily loevad pakkujaspetsiifilisi välju nimeruumiga sõnastikust:
+`provider_options.exa` (või `provider_options["exa-search"]`) ja `provider_options.tavily`
+(või `provider_options["tavily-search"]`). Edastatakse ainult allpool loetletud võtmed. Iga võtit
+kontrollitakse selle enda Zodi skeemi vastu failis
+`open-sse/handlers/search/providerOptionsPassthrough.ts` ning vale tüüpi võti jäetakse välja. Kõiki
+teisi võtmeid eiratakse, sealhulgas autentimist, baas-URL-i,
+`stream` ja `outputSchema`. Teiste pakkujate kasutatavad lamedad võtmed (`cx`, `depth`, ...)
+töötavad nagu varem.
 
-| Pakkuja | Tipptasemel väljad                                                                                                                                                                                                                                                                                                                                                        | Pesastatud                                                                                                                      |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (lamedad primitiivid), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` liideti vaike- `{ text: true, highlights: true }` |
-| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                               |
+| Pakkuja | Ülataseme väljad                                                                                                                                                                                                                                                                                                                                                          | Pesastatud                                                                                                                                  |
+| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (lamedad primitiivid), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                          | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` liidetakse vaikeväärtusega `{ text: true, highlights: true }` |
+| Tavily  | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                           |
 
-Üldväljad võidavad alati: `query`, `max_results`, `filters` (domeenid), `country` ja `search_type` st tuletatud teema. Eksa puhul säilitab `search_type: "news"` `category: "news"`. Tavily aktsepteerib `search_type: "finance"` (`topic: "finance"`).
+Üldised väljad on alati ülimuslikud: `query`, `max_results`, `filters` (domeenid), `country` ja
+teema, mis tuletatakse väärtusest `search_type`. Exa puhul säilitab `search_type: "news"` väärtuse
+`category: "news"`. Tavily aktsepteerib ka väärtust `search_type: "finance"` (`topic: "finance"`).
 
-Firecrawli otsingu maksumus registreeritakse 10 tagastatud tulemuse alustatud ploki kohta, 0,002 dollarit (2 krediiti) plokk ja vähemalt üks blokk kõne kohta ( [Firecrawli arveldus](https://docs.firecrawl.dev/billing) ): 11 tulemust maksavad 0,004 dollarit.
+Firecrawl’i otsingu maksumus registreeritakse iga alustatud 10 tagastatud tulemuse ploki kohta
+hinnaga 0,002 dollarit (2 krediiti) ploki kohta ning iga kõne puhul registreeritakse vähemalt üks
+plokk
+([Firecrawl’i arveldamine](https://docs.firecrawl.dev/billing)): 11 tulemust maksavad 0,004 dollarit.
 
-Üldine `time_range` jõuab nüüd mõlema pakkujani: Exa saab `startPublishedDate` (ISO timestamp ) ja Tavily saab `start_date` (`YYYY-MM-DD`). Täpne kuupäev `provider_options` is alistab kaardistatud kuupäeva.
+Üldine `time_range` jõuab nüüd mõlema pakkujani: Exa saab `startPublishedDate`-i (ISO ajatempli)
+ja Tavily saab `start_date`-i (`YYYY-MM-DD`). `provider_options`-is määratud kuupäev on
+kaardistatud kuupäevast ülimuslik.
 
-Eksamitulemused säilitavad `id`, `highlights` (iga esiletõst, mitte ainult esimene, mida kasutatakse `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ja `extras` `provider_raw`. Tavily tulemused säilitavad `images` ja `favicon`.
+Exa tulemused säilitavad jaotises `provider_raw` väljad `id`, `highlights` (kõik esiletõstud,
+mitte ainult esimene, mida kasutatakse väljana `snippet`), `highlight_scores`, `summary`,
+`subpages`, `entities` ja `extras`. Tavily tulemused säilitavad väljad `images` ja `favicon`.
 
-Linkup-otsingu maksumus registreeritakse `depth` `fast` ja `standard` puhul 0,005 dollarit ning `deep` ( [linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) puhul 0,05 dollarit, olenemata sellest, kas `depth` pärineb `provider_options` või ühenduse seadetest.
+Linkupi otsingu maksumuseks registreeritakse 0,005 dollarit `depth`-i väärtuste `fast` ja
+`standard` puhul ning 0,05 dollarit väärtuse `deep` puhul
+([Linkupi hinnakiri](https://docs.linkup.so/pages/documentation/development/pricing)),
+olenemata sellest, kas `depth` pärineb `provider_options`-ist või ühenduse seadetest.
 
-Exa `type: "lite"` (Exa 3.0) aktsepteerib väiksemat väljade kogumit ja lükkab kogu taotluse tagasi, kui on määratud mõni muu väli. Lite'i puhul jäetakse enne kõnet välja `additionalQueries`, `systemPrompt` ja kõik `contents` -klahvid, välja arvatud `text` ja `highlights`. Aegunud `subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` ei edastata enam.
+Exa `type: "lite"` (Exa 3.0) aktsepteerib väiksemat väljade kogumit ja lükkab kogu päringu tagasi,
+kui määratud on mõni muu väli. Lite’i puhul eemaldatakse enne kõnet `additionalQueries`,
+`systemPrompt` ja kõik `contents`-i võtmed peale `text` ja `highlights`. Aegunud välju
+`subpages`, `subpageTarget`, `highlights.numSentences` ja `highlights.highlightsPerUrl` enam ei
+edastata.
 
-Kulude arvestus on ühtne register `costPerQuery`, välja arvatud Exa, mis järgib Exa enda hinnakujundust: 0,007 dollarit `auto` (ja pärand `fast`) kõne kohta või 0,004 dollarit `lite` (ja pärand `instant`) puhul, mis hõlmab 10 tulemust; 0,001 dollarit iga järgmise tulemuse eest; ja 0,001 $ iga tagastatud tulemuse kohta, kui `contents.summary` on määratud. Tavily on registreeritud 1 krediit ($ 0,008) `search_depth` `basic`, `fast` ja `ultra-fast` jaoks ning 2 krediiti ($ 0,016) `advanced` ( [Tavily API krediiti](https://docs.tavily.com/documentation/api-credits) ). Kõne `auto_parameters: true`, mille Tavily täiendab edasijõudnutele, salvestatakse endiselt 1 krediidiga.
+Maksumuse arvestus kasutab kindlat registrit `costPerQuery`, välja arvatud Exa puhul, mis järgib
+Exa enda hinnastust: `auto` (ja pärandväärtuse `fast`) puhul 0,007 dollarit kõne kohta või
+`lite` (ja pärandväärtuse `instant`) puhul 0,004 dollarit kõne kohta, mis katab 10 tulemust;
+iga järgmise tulemuse eest 0,001 dollarit ning iga tagastatud tulemuse eest 0,001 dollarit, kui
+määratud on `contents.summary`. Tavily registreeritakse 1 krediidina (0,008 dollarit)
+`search_depth`-i väärtuste `basic`, `fast` ja `ultra-fast` puhul ning 2 krediidina (0,016 dollarit)
+väärtuse `advanced` puhul
+([Tavily API krediidid](https://docs.tavily.com/documentation/api-credits)). Kõne, mille puhul
+`auto_parameters: true` paneb Tavily üle minema režiimile advanced, registreeritakse endiselt
+1 krediidina.
 
----
+## Veebihanke API
 
-## Veebi Fetch API
+Ekstraheerige URL-i sisu seadistatud veebihanke pakkuja kaudu (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Eralda URL-ist sisu konfigureeritud veebi-fetch’i pakkuja kaudu (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Parallel Extract (`parallel-search`, sama API-võti mis Parallel Search) tagastab ainult Markdowni — mis tahes muu `format` annab tulemuseks `400` — ning piirab sisu 100 000 märgini. Kui sihtlehte ennast ei saa ekstraheerida, teatab ülesvoolu teenus sellest HTTP 200 vastuses;
+OmniRoute edastab selle fikseeritud sõnumiga `422`.
 
-Parallel Extract (`parallel-search`, sama API-võti mis Parallel Searchil) tagastab ainult
-Markdowni — mis tahes muu `format` annab tulemuseks `400` — ning piirab sisu
-100 000 märgini. Kui sihtlehte ennast ei saa eraldada, teatab upstream sellest HTTP 200
-vastuses; OmniRoute annab selle edasi `422` vastusena fikseeritud sõnumiga.
+Keenable Fetch (`keenable-search`) tagastab samuti ainult Markdowni (mis tahes muu `format` annab tulemuseks `400`) ning piirab sisu 100 000 märgini. See töötab ilma võtmeta: sõnaselge `provider: "keenable-search"` päring ilma ühenduseta kasutab Keenable'i võtmeta lõpp-punkti
+(iga IP-aadressi kohta kehtivad päringupiirangud). Seadistatud võti eemaldab ainult need piirangud; automaatne valik kasutab Keenable'i ainult siis, kui võti on seadistatud.
 
-| Meetod | Tee             | Kirjeldus                                                              |
-| ------ | --------------- | ---------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Hangi/ekraabi URL — keha valideeritakse skeemi `v1WebFetchSchema` abil |
+| Meetod | Tee             | Kirjeldus                                                               |
+| ------ | --------------- | ----------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | URL-i hankimine/kaapimine — keha valideeritakse `v1WebFetchSchema` abil |
 
-**Autentimine:** Bearer API-võti (`extractApiKey` + `isValidApiKey`). Poliitikat jõustatakse
-`enforceApiKeyPolicy` abil.
+**Autentimine:** Bearer API-võti (`extractApiKey` + `isValidApiKey`). Poliitikat rakendatakse `enforceApiKeyPolicy` abil.
 
-**Kvooditeadlik varuvariant (#8297):** kui sõnaselget `provider`-it ei anta, läbitakse
-kogum (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) kindlas
-prioriteedijärjekorras (täida-esimesena) — kiirusepiiranguga, kuid konfigureeritud pakkuja
-jäetakse vahele, selle asemel et päring kohe lõpetada, ning uuesti proovitav/kvoodiga seotud
-upstreami tõrge (HTTP 429 alati; 402/403 Firecrawl/Tavily/TinyFishi kvoodilaadsete tasuta
-tasemete korral — mitte Jina Readeri puhul ning mitte kunagi tavalise vigase päringu 400
-korral) liigub päringu ajal edasi järgmise proovimata autentitud pakkujani. Kui kõik
-kogumis olevad pakkujad on ammendatud, tagastab lõpp-punkt varasema üldise `400` asemel ühe
-`429` vastuse koos päisega `Retry-After`. Kui küsitakse sõnaselget `provider`-it, siis
-**vaikset varuvarianti ei kasutata** — kiirusepiiranguga või tõrkuv sõnaselgelt määratud
-pakkuja annab edasi oma vea (`429`, kui kiirusepiirang on rakendunud, muul juhul upstreami
-olek).
+Nimega kombinatsioonid kasutavad ülaltoodud [`model`-i marsruutimislepingut](#named-searchfetch-combinations), säilitades hankimisele omased suvandid ja vastused.
+
+**Kvooditeadlik varuvariant (#8297):** kui ei ole määratud `provider` ega `model`, läbitakse kogum
+(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search` → `keenable-search`) kindlas
+prioriteedijärjekorras (täitmise põhjal) — päringupiiranguga, kuid seadistatud pakkuja jäetakse vahele,
+selle asemel et päring enneaegselt lõpetada, ning uuesti proovitav/kvoodiga seotud ülesvoolu tõrge
+(HTTP 429 alati; 402/403 Firecrawl/Tavily/TinyFishi kvooditüüpi tasuta tasemete puhul —
+mitte Jina Readeri puhul ega kunagi lihtsa vale päringu 400 korral) liigub päringu ajal edasi
+järgmise proovimata autentitud pakkujani. Kui kõik kogumis olevad pakkujad on ammendunud, tagastab lõpp-punkt varasema üldise `400` asemel ühe `429` vastuse (päisega `Retry-After`). Kui taotletakse sõnaselgelt `provider`-it, **vaikset varuvarianti ei ole** — päringupiiranguga või tõrkuv sõnaselge pakkuja edastab oma tõrke (`429`, kui päringute arv on piiratud, vastasel juhul ülesvoolu teenuse olek).
 
 ---
 
@@ -988,21 +1091,23 @@ ChatGPT tagastab `codex.rate_limits` + `response.created` ning voogedastab lõpe
 
 ---
 
-## Kvootide ja probleemide aruandlus
+## Kvootide ja probleemide teatamine
 
-| Meetod | Tee                 | Kirjeldus                                                                                                |
-| ------ | ------------------- | -------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Kvoodi eelvalideerimine kombinatsioonile `provider` + `accountId` enne registreeritud võtme väljastamist |
-| POST   | `/v1/issues/report` | Kvoodi või võtme väljastamise tõrke teatamine GitHubile (nõuab `GITHUB_ISSUES_REPO` + tokenit)           |
+| Meetod | Tee                 | Kirjeldus                                                                                   |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Kvoodi eelkontroll `provider` + `accountId` jaoks enne registreeritud võtme väljastamist    |
+| POST   | `/v1/issues/report` | Kvoodi või võtme väljastamise tõrke teatamine GitHubile (nõuab `GITHUB_ISSUES_REPO` + luba) |
 
-**Autentimine:** Bearer API-võti (`isAuthenticated`).
+**Autentimine:** `/v1/quotas/check` kasutab Bearer API-võtit (`isAuthenticated`). `/v1/issues/report` on
+ainult halduseks (`requireManagementAuth`), nagu `/api/v1/registered-keys`: armatuurlaua seanss,
+kohaliku CLI luba või API-võti ulatusega `manage`/`admin`; ainult järelduste tegemiseks mõeldud API-võtmed saavad `403`.
 
 ### Kvoodiseansi taastamine (valikuline)
 
-Mittevoogedastav `POST /v1/chat/completions` või `POST /v1/responses`, mis nurjub
-lõpliku kvoodiveaga (`402`/`429`/`503`, mille keha ütleb, et kvoot või krediidid on ammendunud),
-saab vea tagastamise asemel ootele panna ja hiljem uuesti esitada. Helistaja lubab selle iga päringu
-jaoks kolme päisega:
+Mittevoogedastav `POST /v1/chat/completions` või `POST /v1/responses`, mis ebaõnnestub
+lõpliku kvoodiveaga (`402`/`429`/`503`, mille keha ütleb, et kvoot või krediidid on ammendatud),
+saab vea tagastamise asemel ootele panna ja hiljem uuesti esitada. Helistaja lubab selle iga päringu puhul
+kolme päisega:
 
 | Päis                         | Väärtus                                         |
 | ---------------------------- | ----------------------------------------------- |
@@ -1010,15 +1115,13 @@ jaoks kolme päisega:
 | `x-omniroute-session`        | seansi ID, `[A-Za-z0-9._:-]{1,128}`             |
 | `x-omniroute-recovery-turn`  | seansi piires unikaalne pöörde ID (sama reegel) |
 
-Sobivad ainult `stream: false` pöörded, millel pole tööriistu, tööriistade ajalugu ega
-`previous_response_id`-i ning millel pole `x-omniroute-connection`-i sidumist; lisaks peab olema määratud
-`STORAGE_ENCRYPTION_KEY` (päring salvestatakse krüptitult kuni 24 tunniks). Vastuseks saadetakse
-seejärel `202` koos väljaga `recovery.poll`; küsitlege `GET /v1/quota-recoveries/{id}` kaudu
-ootel oleku ajal `202`, lõpetamisel aga `200` koos taastatud kehaga, või tühistage päring käsuga `DELETE`.
-Piletid on nähtavad ainult need loonud API-võtmele. Taasesitus, mille tulemus on ebakindel, lõpeb olekus
-`needs_confirmation`, selle asemel et päringut kaks korda saata. Allikas: `src/lib/quota/quotaSessionRecovery.ts`.
-
----
+Sobivad ainult `stream: false` pöörded, millel puuduvad tööriistad, tööriistaajalugu või `previous_response_id`
+ning puudub `x-omniroute-connection`-i kinnitus; lisaks peab olema määratud `STORAGE_ENCRYPTION_KEY`
+(päring salvestatakse krüptitult kuni 24 tunniks). Seejärel on vastus `202` koos väärtusega
+`recovery.poll`; küsitle `GET /v1/quota-recoveries/{id}` (`202`, kuni ootel, `200` koos
+taastatud kehaga, kui lõpetatud) või tühista käsuga `DELETE`. Pileteid näeb ainult need loonud API-võti.
+Taasesitus, mille tulemus on ebakindel, lõpeb olekus `needs_confirmation`, selle asemel et päringut kaks korda saata.
+Allikas: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ## Iseteeninduse kasutamine (`/api/usage/om-usage`)
 
@@ -1770,17 +1873,21 @@ OmniRoute'i sündmuste (päringu lõpuleviimine, kvoodi ammendumine, võtme rota
 
 ## Registreeritud võtmed (automaatne haldus)
 
-Kasutatakse automaatse võtmehalduse alamsüsteemis API-võtmete väljastamiseks ja rotatsiooniks varupakkuja/-konto vastu, koos päeva- ja tunnipõhiste kvootidega.
+Kasutatakse automaatse võtmehalduse alamsüsteemis API-võtmete väljastamiseks ja rotatsiooniks aluspakkuja/-konto vastu koos päeva- ja tunnipõhiste kvootidega.
 
-| Meetod | Tee                                   | Kirjeldus                                                                                                                                                                                                                |
-| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| GET    | `/api/v1/registered-keys`             | Loetleb registreeritud võtmed (näidatakse ainult maskeeritud prefiksit)                                                                                                                                                  |
-| POST   | `/api/v1/registered-keys`             | Väljastab uue registreeritud võtme — keha: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Tagastab töötlemata võtme **üks kord**. Kvoodist keeldumise korral tagastab `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Hangib registreeritud võtme metaandmed (töötlemata võtit ei tagastata)                                                                                                                                                   |
-| DELETE | `/api/v1/registered-keys/[id]`        | Tühistab registreeritud võtme                                                                                                                                                                                            |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Selgesõnaline tühistamise lõpp-punkt (sama toime nagu DELETE)                                                                                                                                                            |
+| Meetod | Tee                                   | Kirjeldus                                                                                                                                                                                                          |
+| ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| GET    | `/api/v1/registered-keys`             | Loetle registreeritud võtmed (kuvatakse ainult maskeeritud prefiks)                                                                                                                                                |
+| POST   | `/api/v1/registered-keys`             | Väljasta uus registreeritud võti — keha: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Toorvõti tagastatakse **üks kord**. Kvoodist keeldumise korral tagastab `429`. |
+| GET    | `/api/v1/registered-keys/[id]`        | Hangi registreeritud võtme metaandmed (toormaterjali ei tagastata)                                                                                                                                                 |
+| DELETE | `/api/v1/registered-keys/[id]`        | Tühista registreeritud võti                                                                                                                                                                                        |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Spetsiaalne tühistamise lõpp-punkt (sama toime nagu DELETE-il)                                                                                                                                                     |
+| GET    | `/api/v1/providers/[provider]/limits` | Loe pakkuja väljastamispiiranguid                                                                                                                                                                                  |
+| PUT    | `/api/v1/providers/[provider]/limits` | Määra pakkuja väljastamispiirangud — keha: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                 |
+| GET    | `/api/v1/accounts/[id]/limits`        | Loe konto väljastamispiiranguid                                                                                                                                                                                    |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Määra konto väljastamispiirangud — sama keha nagu pakkuja marsruudil                                                                                                                                               |
 
-**Autentimine:** haldussessioon/API-võti (`requireManagementAuth`) — sama kontroll nagu `/api/keys` puhul: armatuurlaua sessioon, lokaalne CLI-luba või `manage`/`admin` ulatusega API-võti; ainult järeldamiseks mõeldud API-võtmed saavad vastuseks `403`. Vt ka `/v1/quotas/check` ja `/v1/issues/report`.
+**Autentimine:** haldusseanss/API-võti (`requireManagementAuth`) — sama kaitse nagu `/api/keys` puhul: armatuurlaua seanss, kohaliku CLI tunnus või `manage`/`admin` ulatusega API-võti; ainult järeldamiseks mõeldud API-võtmed saavad vastuseks `403`. Vt ka `/v1/quotas/check` ja `/v1/issues/report`.
 
 ---
 

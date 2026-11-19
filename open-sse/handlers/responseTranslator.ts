@@ -1,6 +1,7 @@
 import {
   applyToolCallShimToBuffer,
   findToolCallSchema,
+  hasToolCallShim,
 } from "../translator/helpers/toolCallShim.ts";
 import { FORMATS } from "../translator/formats.ts";
 import { MalformedToolCallArgumentsError } from "./chatCore/malformedToolCallArguments.ts";
@@ -812,7 +813,7 @@ function parseToolUseInput(
   schema: ReturnType<typeof findToolCallSchema>
 ): Record<string, unknown> {
   const parsed = parseToolCallArguments(rawArguments);
-  if (name.toLowerCase() !== "read" || !schema) return parsed;
+  if (!schema || !hasToolCallShim(name, schema)) return parsed;
   return JSON.parse(applyToolCallShimToBuffer(name, JSON.stringify(parsed), schema));
 }
 

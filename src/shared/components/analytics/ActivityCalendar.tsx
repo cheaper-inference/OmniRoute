@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useRef } from "react";
+import { useTranslations } from "next-intl";
 import { CalendarHeatmap } from "@omniroute/ui-kit/calendar-heatmap";
 
 const DAYS_SHOWN = 365;
@@ -41,6 +42,7 @@ export function ActivityCalendar({
   locale,
   valueFormatter,
 }: ActivityCalendarProps) {
+  const tc = useTranslations("common");
   const figureRef = useRef<HTMLElement>(null);
   const data = useMemo(() => lastYearOfActivity(activityMap), [activityMap]);
 
@@ -57,6 +59,7 @@ export function ActivityCalendar({
       locale={locale}
       lessLabel={lessLabel}
       moreLabel={moreLabel}
+      unavailableLabel={tc("notAvailable")}
       valueFormatter={valueFormatter}
     />
   );
