@@ -86,15 +86,20 @@ for (const profile of ["ci", "quality"]) {
     for (const action of ["opened", "synchronize", "converted_to_draft"]) {
       const values = valuesFor({ ...draft, "github.event.action": action });
       const producer = workflow.jobs[profile === "ci" ? "lint" : "fast-gates"];
+      assert.equal(Boolean(expression(workflow.jobs.changes.if, values)), true);
+      assert.equal(values["needs.changes.outputs.queueCandidate"], "false");
       assert.equal(Boolean(expression(producer.if, values)), false);
       assert.equal(Boolean(expression(gate.if, values)), false);
       assert.equal(expression(gate.name, values), notRequested);
       // The evaluator remains fail-closed if a caller incorrectly asks to admit this draft.
-      assert.equal(
-        evaluateAdmission(policy, profile, admissionContext(values), needsFor(profile, "skipped"))
-          .verdict,
-        "FAIL"
+      const receipt = evaluateAdmission(
+        policy,
+        profile,
+        admissionContext(values),
+        needsFor(profile, "skipped")
       );
+      assert.equal(receipt.verdict, "FAIL");
+      assert.ok(receipt.errors.includes("draft or unknown PR readiness"));
     }
   });
 
@@ -112,13 +117,25 @@ for (const profile of ["ci", "quality"]) {
       assert.equal(values["needs.changes.outputs.queueCandidate"], "false");
       assert.equal(Boolean(expression(gate.if, values)), false);
       assert.equal(expression(gate.name, values), notRequested);
+      const receipt = evaluateAdmission(
+        policy,
+        profile,
+        admissionContext(values),
+        needsFor(profile)
+      );
+      assert.equal(receipt.verdict, "FAIL");
+      assert.ok(receipt.errors.includes("draft or unknown PR readiness"));
     }
   });
 
   test(`${profile}: ready_for_review and ready PR updates retain required admission`, () => {
     assert.ok(workflow.on.pull_request.types.includes("ready_for_review"));
+    assert.ok(workflow.on.pull_request.types.includes("converted_to_draft"));
+    const producer = workflow.jobs[profile === "ci" ? "lint" : "fast-gates"];
     for (const action of ["ready_for_review", "opened", "synchronize", "reopened", "edited"]) {
       const values = valuesFor({ ...ready, "github.event.action": action });
+      assert.equal(Boolean(expression(workflow.jobs.changes.if, values)), true);
+      assert.equal(Boolean(expression(producer.if, values)), true);
       assert.equal(Boolean(expression(gate.if, values)), true);
       assert.equal(expression(gate.name, values), checkName);
     }
