@@ -102,7 +102,13 @@ export async function readPackedTarball(
   { capture = [] as string[] } = {}
 ): Promise<PackedTarballContents> {
   const absolute = path.resolve(tarballPath);
-  const size = statSync(absolute).size;
+  let size: number;
+  try {
+    size = statSync(absolute).size;
+  } catch (error) {
+    const code = (error as NodeJS.ErrnoException).code ?? (error as Error).message;
+    throw new Error(`cannot read tarball ${absolute} (${code})`);
+  }
   const wanted = new Set(capture);
   const files: PackedTarballFile[] = [];
   const captured: Record<string, string> = {};
