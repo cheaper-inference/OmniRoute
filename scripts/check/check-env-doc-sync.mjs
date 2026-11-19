@@ -416,6 +416,10 @@ const CI_HELPER_INPUTS = new Map([
     new Set(["OMNIROUTE_CI_SYNC_TSX_CACHE", "TMPDIR"]),
   ],
   [path.join("scripts", "ci", "native-worker-v8-layout.mjs"), new Set(["NODE_V8_COVERAGE"])],
+  [
+    path.join("scripts", "check", "migration-commutation.ts"),
+    new Set(["NODE_V8_COVERAGE", "OMNIROUTE_CI_SYNC_TSX_CACHE"]),
+  ],
 ]);
 
 /**
