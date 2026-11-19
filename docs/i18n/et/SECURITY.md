@@ -4,13 +4,13 @@
 
 ---
 
-## Turvanõrkustest teatamine
+## Haavatavustest teatamine
 
-Kui avastate OmniRoute'is turvanõrkuse, teatage sellest vastutustundlikult:
+Kui avastate rakenduses OmniRoute turvaauku, teavitage sellest vastutustundlikult:
 
-1. **ÄRGE** avage avalikku GitHubi probleemi
-2. Kasutage [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Lisage: kirjeldus, reprodutseerimise sammud ja võimalik mõju
+1. **DO NOT** avage avalik GitHub probleem
+2. Kasutage [GitHub turvanõuandeid](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Kaasake: kirjeldus, reprodutseerimise etapid ja võimalik mõju
 
 ## Reageerimise ajakava
 
@@ -29,25 +29,14 @@ Kui avastate OmniRoute'is turvanõrkuse, teatage sellest vastutustundlikult:
 | 3.7.x    | ✅ Turvatugi                                       |
 | < 3.7.0  | ❌ Toetamata                                       |
 
-## LTS-i tugiperiood (v3.9.x)
+## LTS tugiaken (v3.9.x)
 
-Pärast versiooni 3.8.59 on järgmine versioon **3.9.0**, mis avab pikaajalise toe haru
-`stable/v3` harus (vt [`ROADMAP.md`](ROADMAP.md) → „Phase 3 — v3.9.0 LTS“).
+Pärast 3.8.59 on järgmine versioon** 3.9.0** , mis avab `stable/v3` harul pikaajalise tugiliini (vt [`ROADMAP.md`](ROADMAP.md) → "Phase 3 — v3.9.0 LTS").
 
-- **Mida `stable/v3` saab:** veaparandused, turbepaigad ja teenusepakkujate uuendused. Uued
-  funktsioonid lähevad v4 kanalisse; LTS-i haru seab esikohale stabiilsuse. `npm install omniroute`
-  (`latest` dist-tag) jääb kogu v4 tsükli vältel v3-le.
-- **Tugiperioodi kestus:** `stable/v3` saab **turvaparandusi ja kriitiliste regressioonide parandusi
-  12 kuu jooksul pärast versiooni 3.9.0 väljalaset või kuni 90 päeva pärast seda, kui v4.0.0 avaldatakse `latest`-versioonina —
-  olenevalt sellest, kumb kuupäev on hilisem**. Selle tulemusel saadud lõppkuupäev märgitakse versiooni 3.9.0 väljalaskemärkmetesse ja
-  faili [`ROADMAP.md`](ROADMAP.md), kui väljalase toimub.
-- **LTS-i haru haavatavusest teatamine:** kasutage sama kanalit nagu kõigi teiste versioonide puhul —
-  privaatset [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) teadet,
-  mitte kunagi avalikku probleemi. Märkige, millist versiooni testisite (näiteks `3.9.2`); parandused lisatakse
-  harusse `stable/v3` ja porditakse edasi v4-le.
-- **Turvalisuse lähtepunkt LTS-i väljalaske ajal:** skanneri mõõdetud olek ning marsruudikaitse ja
-  avalike mandaatide tõendid talletatakse failis
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Mida `stable/v3` saab:** veaparandused, turvapaigad ja teenusepakkuja värskendused. Uued funktsioonid lähevad v4 kanalile; LTS rida on stabiilsuse esikohal. `npm install omniroute` ( `latest` dist-silt) jääb versioonile v3 kogu v4 tsükli vältel.
+- **Akna kestus:** `stable/v3` saab** turvaparandused ja kriitilised regressioonid 12 kuu jooksul pärast versiooni 3.9.0 lõikamist või kuni 90 päeva pärast v4.0.0 avaldamist `latest` — olenevalt sellest, kumb on hilisem** . Saadud lõppkuupäev salvestatakse versiooni 3.9.0 väljalaskemärkustesse ja [`ROADMAP.md`](ROADMAP.md), kui lõikamine toimub.
+- **LTS rea haavatavusest teatamine:** sama kanal mis iga teine versioon — privaatne [GitHub turvanõuanne](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), mitte kunagi avalik probleem. Öelge, millist versiooni testisite (näiteks `3.9.2`); parandused maanduvad `stable/v3` ja on edasiportitud versioonile v4.
+- **Turvalisuse lähtejoon LTS lõikes:** mõõdetud skanneri olek, marsruudivalve ja avaliku volikirja tõendid salvestatakse [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 

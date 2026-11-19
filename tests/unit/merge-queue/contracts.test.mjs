@@ -168,6 +168,19 @@ test("state documents validate and keep a bounded history", () => {
   assert.ok(EVENT_TYPES.includes("would-land"));
 });
 
+test("state.batchWindow: absent in older documents; a positive integer when present", () => {
+  const state = initialState("release/v3.8.54", NOW);
+  assert.equal(Object.hasOwn(state, "batchWindow"), false);
+  assert.deepEqual(validateState(state), [], "a state without it still loads");
+  for (const ok of [1, 6, 12, 40]) {
+    // 40: above any maxSize, still valid; the read clamps it (eligibility.currentBatchWindow)
+    assert.deepEqual(validateState({ ...state, batchWindow: ok }), [], String(ok));
+  }
+  for (const bad of [0, -1, 2.5, "6", null, true]) {
+    assert.deepEqual(validateState({ ...state, batchWindow: bad }), ["batchWindow"], String(bad));
+  }
+});
+
 test("would-dequeue (shadow mode) is a history event the state document accepts", () => {
   assert.ok(EVENT_TYPES.includes("would-dequeue"));
   const state = initialState("release/v3.8.54", NOW);

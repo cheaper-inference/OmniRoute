@@ -186,6 +186,37 @@ describe("collectCatalog combo source", () => {
     assert.equal(collected.entries.has("omniroute/Mixed"), false, "a paid member drops the combo");
     assert.equal(collected.counts.combos, 1);
   });
+
+  // CodeRabbit R5 (#19191): a /v1/models combo row is named from its raw id, not
+  // from the mapper's already-formatted `omniroute - <id>` name.
+  it("models: a combo row with no overlay entry is named combo - <id>", async () => {
+    const collected = await quiet(() =>
+      collectCatalog({ ...baseOpts, combosSource: "models" }, {
+        models: async () => [{ id: "m1" }, { id: "My Combo", owned_by: "combo" }],
+      } as never)
+    );
+    assert.equal(collected.entries.get("omniroute/My Combo")?.name, "combo - My Combo");
+  });
+
+  // CodeRabbit R2 (#19191): an /api/combos overlay entry with pricing but no name
+  // must not blank the combo name to `combo - `.
+  it("default: a combo overlay entry without a name keeps the combo name", async () => {
+    const collected = await quiet(() =>
+      collectCatalog(
+        {
+          ...baseOpts,
+          enrichment: new Map([["x", { pricing: { input: 1, output: 2 } }]]) as never,
+        },
+        {
+          models: async () => [{ id: "m1" }],
+          combos: async () => [{ id: "x", name: "Duo", models: [{ kind: "model", model: "m1" }] }],
+        } as never
+      )
+    );
+    const duo = collected.entries.get("omniroute/Duo");
+    assert.equal(duo?.name, "combo - Duo");
+    assert.equal(duo?.cost.input, 1, "the pricing overlay still applies");
+  });
 });
 
 function setupCtx(options: Record<string, unknown>) {
