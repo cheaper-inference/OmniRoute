@@ -295,7 +295,10 @@ test("syncBackNextSteps prints the PR URL and the three landing statements", asy
     branch: "release/v3.8.56",
     prUrl: "https://github.com/cheaper-inference/OmniRoute/pull/1",
   });
-  assert.ok(out.includes("https://github.com/cheaper-inference/OmniRoute/pull/1"));
+  assert.equal(
+    out.split("\n")[0],
+    "[sync-next-cycle] sync-back PR: https://github.com/cheaper-inference/OmniRoute/pull/1"
+  );
   assert.match(out, /MERGE COMMIT/);
   assert.match(out, /never squash or rebase/i);
   assert.match(out, /required gates must be green/i);
