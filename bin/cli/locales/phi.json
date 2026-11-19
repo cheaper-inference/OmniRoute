@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Ang limitasyon ay dapat na isang positibong integer.",
     "error": "Error: {message}",
     "serverOffline": "Offline ang OmniRoute server. Simulan ito gamit ang: omniroute serve",
     "authRequired": "Kinakailangan ang authentication. Itakda ang OMNIROUTE_API_KEY o patakbuhin ang: omniroute setup",

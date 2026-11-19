@@ -32,8 +32,11 @@ import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
 import {
   FREEZE_LABEL,
   RESUME_EXPECT_PREFIX,
+  RESUME_REFUSED_PREFIX,
   STATE_BRANCH,
+  hasQueueWork,
   isSha,
+  resumeRefusal,
   sanitizeTitle,
   stateFilePath,
   validateState,
@@ -41,6 +44,18 @@ import {
 import { createGitHubClient } from "./github.mjs";
 
 export const QUEUE_WORKFLOW = "omni-queue.yml";
+
+/**
+ * `status` flags a state older than this as STALE on a base with work (a candidate in flight, a
+ * pause, a stored land-status withdrawal, or labeled PRs, drafts included:
+ * contracts.hasQueueWork): ticks visit such a base every
+ * few minutes and save its state at least once per STATE_HEARTBEAT_MINUTES (tick.mjs, 60), so an
+ * older save means no
+ * tick has completed for it since. A base without work is not visited, and its age means nothing.
+ * 90, not 75: an idle healthy base saves about every 60 to 65 minutes, and scheduled runs are
+ * often late.
+ */
+export const STATUS_STALE_MINUTES = 90;
 
 /** pause/resume/bless confirmation: a dispatch may wait behind a running tick (≤ 30 min). */
 const CONFIRM_TIMEOUT_MS = 20 * 60_000;
@@ -118,6 +133,28 @@ const fmtTime = (iso) => {
   return Number.isNaN(t) ? "-" : `${new Date(t).toISOString().slice(0, 16).replace("T", " ")}Z`;
 };
 const short = (sha) => String(sha ?? "").slice(0, 12) || "-";
+
+/** Whole minutes → "45 min", "2 h", "1 h 16 min". */
+const fmtAge = (minutes) => {
+  const m = Math.max(0, Math.floor(minutes));
+  if (m < 60) return `${m} min`;
+  return m % 60 ? `${Math.floor(m / 60)} h ${m % 60} min` : `${m / 60} h`;
+};
+
+/** "state saved <age> ago", with STALE when the base has work and the save is too old. */
+function savedLine(state, labeled, now) {
+  const age = (Date.parse(now) - Date.parse(state.updatedAt)) / 60_000;
+  if (Number.isNaN(age)) return `state saved at an unreadable time (${state.updatedAt})`;
+  // Drafts included: ticks visit a base with a labeled draft too (discoverBases, the watchdog).
+  const work = hasQueueWork(state, labeled.length > 0);
+  // Whole minutes, as printed (and as the watchdog judges); assessHealth compares fractions.
+  const stale =
+    work && Math.floor(age) > STATUS_STALE_MINUTES
+      ? ` · STALE: no tick has saved it for more than ${STATUS_STALE_MINUTES} min while the base ` +
+        "has work"
+      : "";
+  return `state saved ${fmtAge(age)} ago${stale}`;
+}
 
 async function defaultExec(cmd, args) {
   const { stdout } = await promisify(execFile)(cmd, args, { encoding: "utf8", timeout: 30_000 });
@@ -230,7 +267,7 @@ function requireManagedBase(config, base) {
 // ───────────────────────────── commands ─────────────────────────────
 
 async function cmdStatus(ctx) {
-  const { gh, config, flags, out } = ctx;
+  const { gh, config, flags, out, now } = ctx;
   let byBase;
   let cache;
   let bases;
@@ -257,6 +294,13 @@ async function cmdStatus(ctx) {
           ? `paused: ${p.reason} since ${fmtTime(p.since)} — ${sanitizeTitle(p.detail)}`
           : "paused: no"
       );
+      const main = state.landWithdrawals?.length ?? 0;
+      const overflow = state.landWithdrawalsOverflow?.length ?? 0;
+      if (main || overflow) {
+        out(
+          `stored withdrawals: ${main} in landWithdrawals, ${overflow} in landWithdrawalsOverflow`
+        );
+      }
       const f = state.inFlight;
       if (!f) out("in flight: nothing");
       else {
@@ -278,6 +322,7 @@ async function cmdStatus(ctx) {
         `counters: landed ${c.landedPrs} PRs / ${c.landedBatches} batches · CI runs ${c.ciRuns} · ` +
           `red batches ${c.redBatches} · bisections ${c.bisections} · culprits ${c.culprits}`
       );
+      out(savedLine(state, byBase.get(base) ?? [], now()));
     }
     const labeled = byBase.get(base) ?? [];
     out(`labeled PRs (${labeled.length}):`);
@@ -357,6 +402,18 @@ function lastEventAt(state, type) {
   return last;
 }
 
+/** An `error` event of a tick that refused a `resume` (contracts.RESUME_REFUSED_PREFIX). */
+const isResumeRefusal = (e) =>
+  e.type === "error" && String(e.detail ?? "").startsWith(RESUME_REFUSED_PREFIX);
+
+/** Newest time (ms) of a resume refusal in `state`; -Infinity when there is none. */
+function lastRefusalAt(state) {
+  let last = -Infinity;
+  for (const e of state?.history ?? [])
+    if (isResumeRefusal(e)) last = Math.max(last, Date.parse(e.at));
+  return last;
+}
+
 /** Newest time (ms) of a `manual-bless` event for `sha`; -Infinity when there is none. */
 function lastBlessAt(state, sha) {
   let last = -Infinity;
@@ -389,6 +446,14 @@ async function cmdDispatch(ctx, action) {
     out(`${base} is not paused: nothing to resume`);
     return 0;
   }
+  // The tick refuses a resume while the overflow holds entries (contracts.resumeRefusal): say so
+  // now instead of dispatching a request the tick will refuse.
+  const refusal = action === "resume" ? resumeRefusal(before) : null;
+  if (refusal) {
+    err(`${base}: ${refusal}`);
+    return 1;
+  }
+  const refusedBefore = lastRefusalAt(before);
   const pausedBefore = lastEventAt(before, "paused");
   const blessedBefore = lastBlessAt(before, flags.sha);
   // A resume names the pause it saw, and the tick clears only that one. This also makes a
@@ -420,6 +485,14 @@ async function cmdDispatch(ctx, action) {
     // Runs first, then the state: a run already seen completed has saved whatever it saved.
     const runs = (await listRuns()).filter((run) => !known.has(run.id));
     const state = await loadState(gh, base);
+    if (action === "resume" && lastRefusalAt(state) > refusedBefore) {
+      // The tick refused it (the overflow filled after this command read the state).
+      const refused = (state.history ?? []).findLast((e) => isResumeRefusal(e));
+      // Whole (a tick wrote it, at most 500 characters), control characters flattened.
+      // eslint-disable-next-line no-control-regex
+      err(`${base}: ${String(refused.detail).replace(/[\u0000-\u001f\u007f]+/g, " ")}`);
+      return 1;
+    }
     if (applied(state)) {
       if (action === "resume" && state?.paused) {
         out(
@@ -472,11 +545,35 @@ function prGreenState(checkRuns, name) {
   return "failure";
 }
 
+/**
+ * {gate name → state} of the PR gates (config.prChecksRequired) on `pull`'s head, read as the tick
+ * reads them (Tick.snapshotPull, Tick.gateSuites): eligibility.prCheckState of each name over the
+ * head's check runs; only when a gate is ambiguous (eligibility.prChecksNeedWorkflowRuns) are the
+ * head's workflow runs listed, and a listing that fails leaves every suite current.
+ */
+async function prGates(gh, eligibility, config, pull, checkRuns) {
+  const gates = config.prChecksRequired ?? [];
+  let suiteIsCurrent;
+  if (gates.length && eligibility.prChecksNeedWorkflowRuns(checkRuns, gates)) {
+    try {
+      const runs = await gh.listWorkflowRuns({ headSha: pull.headSha });
+      const own = (runs ?? []).filter((run) => run?.headSha === pull.headSha);
+      suiteIsCurrent = eligibility.currentSuitePredicate(own);
+    } catch {
+      suiteIsCurrent = undefined; // the stricter reading, as the tick's
+    }
+  }
+  return Object.fromEntries(
+    gates.map((name) => [name, eligibility.prCheckState(checkRuns, name, suiteIsCurrent)])
+  );
+}
+
 async function cmdWhy(ctx) {
   const { gh, config, positionals, out, now } = ctx;
   const [n] = parsePrNumbers(positionals);
   if (positionals.length !== 1) throw new UsageError("why expects exactly one PR number");
-  const eligibility = ctx.eligibility ?? (await import("./eligibility.mjs"));
+  // The real rules, with what a test injects on top (an injected evaluateEligibility, say).
+  const eligibility = { ...(await import("./eligibility.mjs")), ...(ctx.eligibility ?? {}) };
   const pull = await gh.getPull(n);
   const [files, timeline, headStatuses, checkRuns, freezeIssues] = await Promise.all([
     gh.listPullFiles(n),
@@ -502,13 +599,18 @@ async function cmdWhy(ctx) {
     timeline,
     headStatuses,
     prGreenCheck: prGreenState(checkRuns, config.prGreenCheck),
+    // The PR gates as a tick reads them (Tick.snapshotPull): each of config.prChecksRequired.
+    prChecks: await prGates(gh, eligibility, config, pull, checkRuns),
   };
-  const verdict = eligibility.evaluateEligibility(snapshot, {
+  const judge = {
     config,
     freezeIssues: freezeIssues.map((i) => ({ number: i.number, title: i.title, body: i.body })),
     state,
     now: now(),
-  });
+  };
+  // The PR's lane decides whether the PR gates apply, as in the tick (Tick.snapshotQueue).
+  const lane = eligibility.laneOf(snapshot, judge);
+  const verdict = eligibility.evaluateEligibility(snapshot, lane ? { ...judge, lane } : judge);
   out(
     `#${n} ${sanitizeTitle(pull.title)} (${pull.author}) → ${pull.baseRef} @ ${short(pull.headSha)}`
   );
@@ -521,6 +623,13 @@ async function cmdWhy(ctx) {
   );
   out(`protected surface: ${verdict.protectedSurface ? "yes" : "no"}`);
   out(`${config.prGreenCheck} on head: ${snapshot.prGreenCheck ?? "none"}`);
+  const gates = Object.entries(snapshot.prChecks);
+  out(
+    `PR gates (prChecksRequired): ${
+      gates.map(([name, st]) => `${name} ${st ?? "missing"}`).join("; ") || "none required"
+    }`
+  );
+  out(`lane: ${lane ?? "none"}`);
   for (const action of verdict.actions ?? []) {
     out(
       action.type === "removeLabel"
