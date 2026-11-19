@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Opțional) Eliminați imaginea
+docker rmi cheaperinference/omniroute:latest
+# Instalările mai vechi au extras numele moștenit:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

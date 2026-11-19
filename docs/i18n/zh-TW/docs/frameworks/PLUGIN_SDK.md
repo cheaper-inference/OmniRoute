@@ -4,7 +4,7 @@
 
 ---
 
-## 快速開始
+## 快速入門
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API 參考
+## API參考
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-建立具有預設值之 Plugin 物件的工廠函式。
+使用預設值建立插件物件的工廠函數。
 
 **參數：**
 
-- `name`（字串，必填）— 使用 kebab-case 的外掛程式名稱
-- `priority`（數字，選填，預設值：100）— 數值越低越先執行
-- `enabled`（布林值，選填，預設值：true）— 啟動時是否啟用？
-- `onRequest`（函式，選填）— 在聊天處理常式之前執行
-- `onResponse`（函式，選填）— 在聊天處理常式之後執行
-- `onError`（函式，選填）— 在處理常式發生錯誤時執行
+- `name` （字串，必填） —短橫線格式的插件名稱
+- `priority` （數字，可選，預設：100） —下層先運行
+- `enabled` （布林值，可選，預設值：true） —啟動已啟用？
+- `onRequest` （函數，可選） —在聊天處理程序之前執行
+- `onResponse` （函數，可選） —在聊天處理程序之後運行
+- `onError` （函數，可選） —在處理程序錯誤時執行
 
 ### `blockRequest(response?): BlockingHookResult`
 
-封鎖請求，並可選擇回傳自訂回應。
+阻止請求並可選擇返回自訂回應。
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-在請求主體送達提供者之前修改它。
+在請求正文到達提供者之前修改請求正文。
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-將中繼資料附加至請求情境。
+將元資料附加到請求上下文。
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## 外掛程式情境（`PluginContext`）
+## 插件上下文 (`PluginContext`)
 
-| 欄位        | 類型                      | 說明             |
-| ----------- | ------------------------- | ---------------- |
-| `requestId` | `string`                  | 唯一請求識別碼   |
-| `model`     | `string`                  | 請求的模型名稱   |
-| `provider`  | `string`                  | 目標提供者 ID    |
-| `body`      | `Record<string, unknown>` | 請求主體         |
-| `headers`   | `Record<string, string>`  | 請求標頭         |
-| `metadata`  | `Record<string, unknown>` | 可變更的中繼資料 |
-| `timestamp` | `number`                  | 請求時間戳記     |
+| 場地         | 類型                      | 描述                  |
+| ------------ | ------------------------- | --------------------- |
+| `requestId`  | `string`                  | 唯一的請求標識符      |
+| `model`      | `string`                  | 請求的型號名稱        |
+| `provider`   | `string`                  | 目標提供者ID          |
+| `body`       | `Record<string, unknown>` | 請求正文              |
+| `headers`    | `Record<string, string>`  | 請求標頭（見註）      |
+| `metadata`   | `Record<string, unknown>` | 可變元數據            |
+| `timestamp`  | `number`                  | 請求時間戳            |
+| `apiKeyInfo` | `object` （可選）         | API金鑰元資料（見註） |
+
+上下文永遠不會攜帶客戶端的憑證： `authorization`、 `x-api-key`、 `proxy-authorization`和`cookie`標頭被刪除（任何大小寫），並且`apiKeyInfo`保留密鑰的元資料（例如`id`、 `name`和`scopes`），但不保留密鑰值或其指紋（ `src/lib/plugins/hooks.ts`中的`redactPluginContext()` ）。這適用於`onRequest`、 `onResponse`和`onError`。
 
 ## 資訊清單（`plugin.json`）
 
@@ -140,17 +143,16 @@ onRequest: (ctx) => {
 
 ## 權限系統
 
-外掛程式會在沙箱化的 VM 環境中執行。存取外部資源需要明確的權限：
+插件有**未沙盒化**。每個活動插件在與OmniRoute相同的作業系統使用者下作為單獨的普通Node.js子程序（ `src/lib/plugins/loader.ts`中的`loadPlugin()` ）運行，沒有VM上下文，也沒有Node.js權限標誌。插件程式碼可以使用`node:fs`、 `node:child_process`、 `fetch`和其他Node.js API：它可以讀寫OmniRoute用戶可以存取的任何檔案（包括資料目錄）、運行程式並存取網路。
 
-| 權限         | 授予的功能                                                   |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`、`AbortController`、`Headers`、`Request`、`Response` |
-| `file-read`  | `fs.readFile`、`fs.readdir`、`fs.stat`                       |
-| `file-write` | `fs.writeFile`、`fs.mkdir`、`fs.rm`                          |
-| `env`        | 唯讀的 `process.env` 代理                                    |
-| `exec`       | `child_process.exec`、`child_process.execSync`               |
+清單的`requires.permissions`接受`network`、 `file-read`、 `file-write`、 `env`和`exec`，但現在只有`env`在運行時有效：
 
-若未授予某項權限，對應的全域物件在沙箱中將無法使用。
+| 允許                                         | 今天生效                                                                                                                                                                                                         |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | 插件程序也接收`PORT`、 `HOSTNAME`、 `TZ`和`TMPDIR`。如果沒有它，它只會接收`PATH`、 `HOME`、 `USER`、 `LANG`、 `LC_ALL`、 `NODE_ENV`、 `PLUGIN_ENTRY`和`PLUGIN_NAME` （加上Windows上的`SystemRoot`和`windir` ）。 |
+| `network`, `file-read`, `file-write`, `exec` | 沒有任何。它們只是聲明：當它們丟失時，任何東西都不會被阻止。                                                                                                                                                     |
+
+安裝插件就像在主機上安裝任何其他程式一樣。僅安裝您信任來源的插件。
 
 ## 設定結構描述
 
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 分鐘
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### 回應轉換器
+### 回應變壓器
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

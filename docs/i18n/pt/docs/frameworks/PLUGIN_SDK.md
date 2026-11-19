@@ -4,7 +4,7 @@
 
 ---
 
-## Início Rápido
+## Início rápido
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## Referência da API
+## Referência API
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Função de fábrica que cria um objeto Plugin com valores predefinidos.
+Função de fábrica que cria um objeto Plugin com padrões.
 
 **Parâmetros:**
 
-- `name` (string, obrigatório) — Nome do plugin em kebab-case
-- `priority` (number, opcional, predefinição: 100) — Os valores mais baixos são executados primeiro
-- `enabled` (boolean, opcional, predefinição: true) — Iniciar ativado?
-- `onRequest` (function, opcional) — É executada antes do processador de chat
-- `onResponse` (function, opcional) — É executada após o processador de chat
-- `onError` (function, opcional) — É executada quando ocorre um erro no processador
+- `name` (string, obrigatório) — Nome do plugin no kebab-case
+- `priority` (número, opcional, predefinição: 100) — O baixo é executado primeiro
+- `enabled` (booleano, opcional, predefinição: verdadeiro) — Iniciar ativado?
+- `onRequest` (função, opcional) — É executado antes do manipulador de chat
+- `onResponse` (função, opcional) — É executado após o manipulador de chat
+- `onError` (função, opcional) — É executado em caso de erro do manipulador
 
 ### `blockRequest(response?): BlockingHookResult`
 
-Bloqueia o pedido e, opcionalmente, devolve uma resposta personalizada.
+Bloqueie o pedido e, opcionalmente, devolva uma resposta personalizada.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-Modifica o corpo do pedido antes de este chegar ao fornecedor.
+Modifique o corpo do pedido antes que este chegue ao prestador.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-Associa metadados ao contexto do pedido.
+Anexe metadados ao contexto do pedido.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## Contexto do Plugin (`PluginContext`)
+## Contexto do plugin (`PluginContext`)
 
-| Campo       | Tipo                      | Descrição                      |
-| ----------- | ------------------------- | ------------------------------ |
-| `requestId` | `string`                  | Identificador único do pedido  |
-| `model`     | `string`                  | Nome do modelo solicitado      |
-| `provider`  | `string`                  | ID do fornecedor de destino    |
-| `body`      | `Record<string, unknown>` | Corpo do pedido                |
-| `headers`   | `Record<string, string>`  | Cabeçalhos do pedido           |
-| `metadata`  | `Record<string, unknown>` | Metadados mutáveis             |
-| `timestamp` | `number`                  | Carimbo de data/hora do pedido |
+| Campo        | Tipo                      | Descrição                         |
+| ------------ | ------------------------- | --------------------------------- |
+| `requestId`  | `string`                  | Identificador de pedido exclusivo |
+| `model`      | `string`                  | Nome do modelo solicitado         |
+| `provider`   | `string`                  | Fornecedor de destino ID          |
+| `body`       | `Record<string, unknown>` | Solicitar corpo                   |
+| `headers`    | `Record<string, string>`  | Solicitar cabeçalhos (ver nota)   |
+| `metadata`   | `Record<string, unknown>` | Metadados mutáveis                |
+| `timestamp`  | `number`                  | Solicitar carimbo de data/hora    |
+| `apiKeyInfo` | `object` (opcional)       | Metadados da chave API (ver nota) |
+
+O contexto nunca carrega as credenciais do cliente: os cabeçalhos `authorization`, `x-api-key`, `proxy-authorization` e `cookie` são removidos (qualquer caixa) e `apiKeyInfo` mantém os metadados da chave (como `id`, `name` e `scopes`), mas não o valor da chave ou a sua impressão digital (`redactPluginContext()` em `src/lib/plugins/hooks.ts`). Isto aplica-se a `onRequest`, `onResponse` e `onError`.
 
 ## Manifesto (`plugin.json`)
 
@@ -138,19 +141,18 @@ Ou como valores booleanos simples (prioridade predefinida: 100):
 }
 ```
 
-## Sistema de Permissões
+## Sistema de permissão
 
-Os plugins são executados num contexto de VM isolado. O acesso a recursos externos requer permissões explícitas:
+Os plug-ins são** não em sandbox** . Cada plug-in ativo é executado como um processo filho Node.js comum e separado (`loadPlugin()` em `src/lib/plugins/loader.ts`) sob o mesmo utilizador do sistema operativo que OmniRoute, sem contexto VM e sem sinalizadores de permissão Node.js. O código do plug-in pode utilizar `node:fs`, `node:child_process`, `fetch` e todos os outros Node.js API: pode ler e escrever qualquer ficheiro que o utilizador OmniRoute possa (incluindo o directório de dados), executar programas e aceder à rede.
 
-| Permissão    | Concede acesso a                                             |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Proxy `process.env` só de leitura                            |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+O `requires.permissions` do manifesto aceita `network`, `file-read`, `file-write`, `env` e `exec`, mas hoje apenas `env` tem efeito em tempo de execução:
 
-Sem uma permissão, os objetos globais correspondentes simplesmente não estão disponíveis no ambiente isolado.
+| Permissão                                    | Efeito hoje                                                                                                                                                                                                                    |
+| -------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `env`                                        | O processo do plugin também recebe `PORT`, `HOSTNAME`, `TZ` e `TMPDIR`. Sem ele, recebe apenas `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` e `PLUGIN_NAME` (mais `SystemRoot` e `windir` em Windows). |
+| `network`, `file-read`, `file-write`, `exec` | Nenhum. São apenas declarações: nada é bloqueado quando faltam.                                                                                                                                                                |
+
+Instalar um plugin é como instalar qualquer outro programa no host. Instale apenas plug-ins cuja fonte confie.
 
 ## Esquema de Configuração
 
@@ -194,7 +196,7 @@ Os valores de configuração são guardados na base de dados e estão acessívei
 
 ## Exemplos
 
-### Registador de Pedidos
+### Registador de solicitações
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Limitador de Pedidos
+### Limitador de taxa
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 minuto
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### Transformador de Respostas
+### Transformador de resposta
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

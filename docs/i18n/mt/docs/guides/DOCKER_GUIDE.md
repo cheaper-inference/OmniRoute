@@ -27,13 +27,9 @@
 
 ---
 
-## Tħaddim Rapidu
+## Mexxi malajr
 
-> **Trid tospita s-servizz int stess bi kmand wieħed?** Ara l-
-> [Gwida għall-Awtoospitar](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (immaġni ppubblikata +
-> Redis, aċċessibbli biss mil-loopback, mingħajr għażla ta’ profil). It-Tħaddim Rapidu hawn taħt huwa
-> l-metodu b’kontenitur wieħed għal utenti li diġà jħaddmu Redis x’imkien ieħor.
+> **Self-host fi kmand wieħed?** Ara l- [Gwida ta' Self-Host](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (immaġni ppubblikata + Redis, loopback-only, l-ebda għażla ta' profil). Il-Quick Run hawn taħt hija l-mogħdija ta 'kontenitur wieħed għall-utenti li diġà jmexxu Redis x'imkien ieħor.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
-## B’Fajl tal-Varjabbli tal-Ambjent
+## Bil-Fajl tal-Ambjent
 
 ```bash
-# L-ewwel ikkopja u editja .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -237,18 +233,18 @@ docker compose -f docker-compose.prod.yml down
 
 L-istack tal-produzzjoni jaħdem b’mod parallel mal-compose tal-iżvilupp (b’ismijiet tal-containers, ports u volumi differenti), għalhekk tista’ tkompli taħdem lokalment filwaqt li l-produzzjoni tibqa’ taħdem.
 
-## Stadji tad-Dockerfile
+## Stadji Dockerfile
 
-Ir-repożitorju jinkludi Dockerfile b’diversi stadji (`Dockerfile`). Erba’ stadji huma esposti; agħżel it-`target` adattat għall-każ tal-użu tiegħek.
+Ir-repożitorju jibgħat Dockerfile f'diversi stadji (`Dockerfile`). Erba 'stadji huma esposti; agħżel il- `target` it-tajjeb għall-każ tal-użu tiegħek.
 
-| Stadju        | Immaġni bażi          | Għan                                                                                                                                                                                                                                                                                        |
+| Stadju        | Immaġini bażi         | Għan                                                                                                                                                                                                                                                                                        |
 | ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `builder`     | `node:26-trixie-slim` | Jinstalla d-dipendenzi (`npm ci --legacy-peer-deps`) u jħaddem `npm run build` (Turbopack b’mod awtomatiku — ara r-Riżorsi waqt il-build hawn taħt)                                                                                                                                         |
-| `runner-base` | `node:26-trixie-slim` | Ambjent ta’ eżekuzzjoni għall-produzzjoni bl-output standalone ta’ Next.js. **L-ebda CLI tal-fornituri mhi inkluża.**                                                                                                                                                                       |
-| `runner-cli`  | `runner-base`         | Iżid `git`, `docker.io`, `docker-compose` u l-CLIs globali: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Agħżel dan għal flussi tax-xogħol aġentiċi.**                                                                                                              |
-| `runner-web`  | `runner-base`         | Iżid Playwright + browser Chromium (`--with-deps`) għall-fornituri ta’ sessjonijiet web: `gemini-web`, `claude-web`, `claude-turnstile`. **Agħżel dan meta tuża dawk il-fornituri** — l-immaġni sempliċi tfalli waqt it-talba mingħajru (ara n-nota dwar `-web` taħt il-Kanali tar-Rilaxx). |
+| `builder`     | `node:26-trixie-slim` | Jinstalla deps (`npm ci --legacy-peer-deps`) u jmexxi `npm run build` (Turbopack b'mod awtomatiku — ara riżorsi tal-ħin tal-bini hawn taħt)                                                                                                                                                 |
+| `runner-base` | `node:26-trixie-slim` | Runtime tal-produzzjoni bl-output standalone Next.js.** L-ebda fornitur CLIs magħqud.**                                                                                                                                                                                                     |
+| `runner-cli`  | `runner-base`         | Żid `git`, `docker.io`, `docker-compose` u CLIs globali : `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Agħżel dan għal flussi tax-xogħol aġenti.**                                                                                                                  |
+| `runner-web`  | `runner-base`         | Iżid Playwright + browser Chromium (`--with-deps`) għal fornituri ta' sessjonijiet tal-web: `gemini-web`, `claude-web`, `claude-turnstile`.** Agħżel dan meta tuża dawk il-fornituri** — l-immaġini sempliċi tfalli fil-ħin tat-talba mingħajrha (ara n-nota `-web` taħt Release Channels). |
 
-Ibni `target` speċifiku manwalment:
+Ibni mira speċifika manwalment:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,42 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Riżorsi waqt il-build
+### Riżorsi fil-ħin tal-bini
 
-Tliet argumenti tal-build jikkontrollaw kemm jiswa l-istadju `builder`. Dawn japplikaw biss waqt il-build —
-`OMNIROUTE_MEMORY_MB` (hawn taħt) huwa kontroll separat waqt l-eżekuzzjoni.
+Tliet build args jikkontrollaw x tiswa l-istadju `builder`. Huma build-time biss — `OMNIROUTE_MEMORY_MB` (hawn taħt) huwa pum separat, runtime.
 
-| Argument tal-build          | Valur awtomatiku | Effett                                                                                          |
-| --------------------------- | ---------------- | ----------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`              | `0` jibni b’webpack: inqas memorja massima, iżda aktar bil-mod. `1` jagħżel Turbopack.          |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`           | Limitu tal-heap ta’ V8 (`--max-old-space-size`) għall-`next build` li jinbeda.                  |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`              | Jipprovdi `CIRCLE_NODE_TOTAL`; Next jikkalkula `workers = N - 1` għall-ġbir tad-data tal-paġni. |
+| Ibni arg                    | Default | Effett                                                                                              |
+| --------------------------- | ------- | --------------------------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`     | `0` jibni bil-webpack: memorja tal-quċċata aktar baxxa, aktar bil-mod. `1` jagħżel Turbopack.       |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`  | V8 heap ceiling (`--max-old-space-size`) għall - spawned `next build`.                              |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`     | Feeds `CIRCLE_NODE_TOTAL`; Sussegwentement joħroġ `workers = N - 1` għall-ġbir tad-dejta tal-paġna. |
 
-`OMNIROUTE_BUILD_WORKERS` huwa dak li għandek iżżid fuq builder b’saħħtu u dak li
-għandek tissuspetta meta build b’riżorsi limitati jmut **wara** `✓ Compiled successfully`. Kull
-worker tad-data tal-paġni huwa proċess għalih, bħalma huwa wkoll il-proċess prinċipali `next build`;
-riproduzzjoni diretta fuq VPS (kwistjoni #7518) kejlet l-ogħla RSS ta’ kull proċess għal
-~4.5 GB indipendentement mill-flag tal-heap `NODE_OPTIONS` (Turbopack jikkompila f’memorja
-nattiva/Rust barra mill-heap ta’ V8). Il-valur awtomatiku ta’ `2` (→ worker wieħed, total ta’ 2
-proċessi) huwa adattat għar-runners ospitati minn GitHub b’16 GB / 4 vCPU li tuża
-l-pipeline tal-pubblikazzjoni. B’`8` (→ 7 workers), dak ir-runner spiċċalu l-memorja u
-buildkit falla l-pass b’`ResourceExhausted: ... cannot allocate memory`;
-`3` (→ 2 workers) xorta ma kienx biżżejjed ladarba l-RSS għal kull proċess tkejjel
-direttament minflok ġie dedott. `tests/unit/docker-build-memory-budget.test.ts`
-jagħmel il-kalkoli skont iċ-ċifra mkejla u jfalli jekk xi wieħed miż-żewġ kontrolli
-jaqbeż il-kapaċità tar-runner.
+`OMNIROUTE_BUILD_WORKERS` huwa dak li jqajjem fuq bennej kbir u dak li jissuspetta meta build kostrett imut** wara** `✓ Compiled successfully`. Kull ħaddiem tad-data tal-paġna huwa l-proċess tiegħu stess, u għalhekk huwa l-ġenitur `next build` innifsu; riproduzzjoni VPS ħaj (ħarġa #7518) imkejla l-ogħla RSS ta' kull proċess ~ 4.5 GB indipendenti mill-bandiera `NODE_OPTIONS` heap (Turbopack jikkompila fil-memorja native/Rust barra l-heap V8). Id-default ta ' `2` (→ 1 ħaddiem, 2 proċessi totali) huwa daqs is-16 GB / 4 vCPU runners ospitati minn GitHub li juża l-pipeline tal-pubblikazzjoni. `8` (→ 7 ħaddiema) dak ir-runner spiċċa bla memorja u buildkit falla l-pass bi `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 ħaddiema) xorta ma jaqbilx ladarba l- RSS għal kull proċess tkejjel direttament minflok dedott. `tests/unit/docker-build-memory-budget.test.ts` jagħmel l-aritmetika kontra l-figura mkejla u jonqos jekk xi pum jegħleb ir-runner.
 
-Turbopack jikkompila f’memorja nattiva ta’ Rust li tinsab **barra** mill-heap ta’ V8, għalhekk
-`OMNIROUTE_BUILD_MEMORY_MB` ma jillimitahiex. Fuq host b’limitu tal-memorja,
-il-build imbagħad jinqatel b’SIGKILL mill-OOM killer mingħajr ebda test ta’ żball — sempliċement
-jieqaf f’nofs `Creating an optimized production build`, u dan jidher qisu weħel aktar
-milli qisu spiċċatlu l-memorja. Għalhekk id-`Dockerfile` juża webpack b’mod awtomatiku
-(`OMNIROUTE_USE_TURBOPACK=0`), għall-kuntrarju ta’ `npm run dev` / `npm run build`, fejn
-Turbopack huwa l-valur awtomatiku fil-kodiċi: `docker build .` sempliċi mingħajr argumenti tal-build (dak li
-jħaddmu Railway u hosts oħra ta’ klikk waħda) ma jridx imut fis-skiet fuq builder
-b’limitu tal-memorja. L-immaġnijiet ippubblikati diġà jgħaddu `OMNIROUTE_USE_TURBOPACK=0`
-b’mod espliċitu f’`docker-publish.yml`. Fuq builder b’ħafna RAM, agħżel
-Turbopack għal build aktar veloċi:
+Turbopack tiġbor fil-memorja Rust nattiva li tgħix** barra** il-borġ V8, għalhekk `OMNIROUTE_BUILD_MEMORY_MB` ma jorbotx. Fuq host b'limitu ta 'memorja l-bini huwa mbagħad SIGKILLed mill-qattiel OOM mingħajr l-ebda test ta' żball — sempliċement tieqaf f'nofs `Creating an optimized production build`, li jaqra bħal hang aktar milli barra mill-memorja. Huwa għalhekk li l- `Dockerfile` defaults għall-webpack (`OMNIROUTE_USE_TURBOPACK=0`), b'differenza `npm run dev` / `npm run build`, fejn Turbopack huwa l-inadempjenza tal-kodiċi: `docker build .` vojt mingħajr l-ebda build args (dak li jmexxu Railway u hosts oħra b'klikk waħda) m'għandux imut siekta fuq bennej b'limitu ta 'memorja. L-immaġini ppubblikati diġà jgħaddu `OMNIROUTE_USE_TURBOPACK=0` b'mod espliċitu `docker-publish.yml`. Fuq bennej b'ħafna RAM, agħżel Turbopack għal bini aktar mgħaġġel:
 
 ```bash
 docker build --target runner-base \
@@ -299,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` huwa attivat, għalhekk `next build` iħaddem proċess prinċipali **u** proċess
-worker, u kull wieħed jirrispetta `OMNIROUTE_BUILD_MEMORY_MB` separatament. Issettja l-limitu
-tal-container għal bejn wieħed u ieħor aktar mid-doppju ta’ dak il-valur, mhux darba biss.
+`webpackBuildWorker` huwa attivat, għalhekk `next build` imexxi ġenitur** u** proċess ħaddiem u kull jonora `OMNIROUTE_BUILD_MEMORY_MB` separatament. Daqs il-limitu tal-kontenitur 'il fuq bejn wieħed u ieħor darbtejn dak il-valur, mhux darba.
 
 Imkejjel fuq din is-siġra (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Bundler   | Limitu tal-container | Riżultat                              |
-| --------- | -------------------- | ------------------------------------- |
-| Turbopack | 8 GiB / 16 GiB       | Inqatel mill-OOM fit-tnejn, fis-skiet |
-| webpack   | 8 GiB                | Il-build worker inqatel b’SIGKILL     |
-| webpack   | 12 GiB               | Irnexxa, u laħaq massimu ta’ 11.1 GiB |
+| Bundler   | Limitu tal-kontenitur | Riżultat                                  |
+| --------- | --------------------- | ----------------------------------------- |
+| Turbopack | 8 GiB / 16 GiB        | OOM-maqtula fit-tnejn, skiet              |
+| webpack   | 8 GiB                 | build worker SIGKILLed                    |
+| webpack   | 12 GiB                | irnexxielu, laħaq il-quċċata fil-11.1 GiB |
 
-### Valuri awtomatiċi waqt l-eżekuzzjoni
+### Runtime defaults
 
-Valuri awtomatiċi esportati minn `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+Defaults esportati minn `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-L-imġiba tal-memorja f’Docker:
+Imġieba tal-memorja Docker:
 
-- L-immaġni tissettja `OMNIROUTE_MEMORY_MB=1024` u minnha tidderiva `NODE_OPTIONS=--max-old-space-size=1024`.
-- Il-proċess attwali tas-server jinbeda mil-launcher awtonomu, li jaqra `OMNIROUTE_MEMORY_MB` u jżid `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node juża l-aħħar valur ripetut ta’ `--max-old-space-size`, għalhekk l-issettjar ta’ `OMNIROUTE_MEMORY_MB` jikkontrolla l-limitu effettiv tal-heap f’Docker.
-- Minħabba li l-immaġni dejjem tissettjah, il-valur alternattiv tal-launcher stess, ikkalibrat skont ir-RAM, qatt ma japplika taħt Docker. Żidu b’mod espliċitu skont il-piż tax-xogħol (it-tabella hawn taħt). `2048` xorta għadu żgħir wisq għal `/v1/responses` ta’ aġent tal-kodifikazzjoni.
+- L-immaġni tissettja `OMNIROUTE_MEMORY_MB=1024` u toħroġ `NODE_OPTIONS=--max-old-space-size=1024` minnha.
+- Il-proċess tas-server attwali jinbeda mill-lanċjar waħdu, li jaqra `OMNIROUTE_MEMORY_MB` u jehmeż `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Node juża l-aħħar valur `--max-old-space-size` ripetut, għalhekk l-issettjar `OMNIROUTE_MEMORY_MB` jikkontrolla l-limitu effettiv tal-borġ Docker.
+- Minħabba li l-immaġini dejjem tissettjaha, il-backup kalibrat bir-RAM tal-lanċjar stess qatt ma japplika taħt Docker. Għolliha b'mod espliċitu għall-ammont ta' xogħol (tabella hawn taħt). `2048` għadu żgħir wisq għall-coding-agent `/v1/responses`.
 
-### RAM waqt it-tħaddim għall-aġenti tal-kodifikazzjoni
+### Runtime RAM għall-coding agents
 
-Il-valur predefinit ta’ 1 GiB f’Docker huwa l-minimu għal dashboard/chat ħafif, mhux daqs għall-produzzjoni. Bodies twal ta’ `POST /v1/responses` (mijiet ta’ messaġġi, għexieren ta’ għodod) iżommu diversi graffs fil-memorja waqt il-kompressjoni. Żewġ talbiet li jikkoinċidu ta’ madwar 3 MiB / 750k token waqqfu V8 b’old-space ta’ **12 GiB** (`FATAL ERROR: Reached heap limit`) u laħqu wkoll OOM ta’ cgroup ta’ 16 GiB. Ara [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Id-default 1 GiB Docker huwa art dashboard/light-chat, mhux daqs tal-produzzjoni. Korpi `POST /v1/responses` twal (mijiet ta 'messaġġi, għexieren ta' għodod) iżommu graffs multipli fil-memorja waqt il-kompressjoni. Żewġ talbiet ~ 3 MiB / ~ 750k-token li jikkoinċidu abortjaw V8 fi żmien** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) u tolqot ukoll 16 GiB cgroup OOM. Ara [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Issettja d-daqs ta’ **cgroup `--memory` ogħla mill-heap** — buffers nattivi, SQLite, u riżultati intermedji tal-kompressjoni jinsabu barra minn V8.
+Daqs** cgroup `--memory` fuq il-borz** — buffers indiġeni, SQLite, u intermedji tal-kompressjoni joqogħdu barra V8.
 
-| Piż tax-xogħol                                      | `OMNIROUTE_MEMORY_MB`          | Container / cgroup       | Noti                                                                                                                       |
-| --------------------------------------------------- | ------------------------------ | ------------------------ | -------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard, chat ħafif wieħed                        | `1024` (predefinit fl-immaġni) | ≥2 GiB                   |                                                                                                                            |
-| Aġent tal-kodifikazzjoni wieħed (Claude/Codex/Grok) | `8192`                         | ≥10 GiB                  | Sessjoni waħda tipika ta’ `/v1/responses`                                                                                  |
-| Żewġ `/v1/responses` twal konkorrenti               | `10240`–`12288`                | ≥12–16 GiB               | Twaqqif ta’ V8 imkejjel b’heap ta’ madwar 12 GiB                                                                           |
-| Tliet kuntesti twal konkorrenti jew aktar           | tagħmilx dan fi proċess wieħed | isserjalizza / aktar RAM | L-ammissjoni predefinita għal xogħol tqil hija talba waħda għaddejja; jekk iżżidha mingħajr RAM, terġa’ ddaħħal il-waqfien |
+| L-ammont ta' xogħol                                 | `OMNIROUTE_MEMORY_MB`     | Kontenitur / cgroup   | Noti                                                                                           |
+| --------------------------------------------------- | ------------------------- | --------------------- | ---------------------------------------------------------------------------------------------- |
+| Dashboard, chat dawl wieħed                         | `1024` (immaġini default) | ≥2 GiB                |                                                                                                |
+| Aġent ta' kodifikazzjoni wieħed (Claude/Codex/Grok) | `8192`                    | ≥10 GiB               | `/v1/responses` tipiku ta' sessjoni wahda                                                      |
+| Żewġ `/v1/responses` twal konkorrenti               | `10240`–`12288`           | ≥12–16 GiB            | Measured V8 abort at ~ 12 GiB heap                                                             |
+| Tliet + kuntesti twal konkorrenti                   | ma fuq proċess wieħed     | serialize / aktar RAM | Ammissjoni default heavyweight hija 1 matul it-titjira; li jghollih bla RAM jintroduci l-abort |
 
-`omniroute serve` fuq bare metal jikkalibra madwar 35% tar-RAM (limitat għal `[512, 4096]`) meta `OMNIROUTE_MEMORY_MB` **ma jkunx issettjat**. Docker dejjem jissettja `1024`, għalhekk dik il-kalibrazzjoni qatt ma titħaddem fl-immaġni uffiċjali.
+`omniroute serve` fuq bare metal tikkalibra ~ 35% ta RAM (clamped `[512, 4096]`) meta `OMNIROUTE_MEMORY_MB` huwa** mitfija** . Docker dejjem jistabbilixxi `1024`, sabiex il-kalibrazzjoni qatt ma tmur fl-immaġni uffiċjali.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Varjabbli Kritiċi tal-Ambjent
@@ -366,20 +337,11 @@ Lil hinn mill-valuri awtomatiċi ddokumentati f’[ENVIRONMENT.md](../reference/
 
 ## Reverse Proxy fuq Subpath (Traefik / nginx)
 
-Il-`basePath` ta’ Next.js jiġi kkompilat fil-bundle standalone. OmniRoute jirreġistra l-valur integrat
-f’fajl sentinel fl-għerq tal-app (miktub waqt `npm run build`; jinqara minn
-`scripts/docker/ensure-docker-base-path.mjs`) u jqabblu ma’
-`OMNIROUTE_BASE_PATH` meta jibda l-container. Meta jkunu differenti u l-image tkun
-inbniet għall-għerq tad-domain, l-entrypoint jerġa’ jikteb il-manifests standalone,
-il-litterali integrati ta’ `basePath`/`assetPrefix` (Next 16 jirrendi l-URLs tal-assets SSR
-minn `assetPrefix` biss — il-patcher jirrifletti s-subpath fih), l-URLs integrati
-tal-assets `/_next/static` (manifests tar-referenzi tal-client, imports tal-media, paġni
-tal-iżbalji prerendered) u x-shim `process.env` tal-client qabel ma jitħaddem
-`node dev/run-standalone.mjs`.
+Next.js `basePath` is compiled into the standalone bundle. OmniRoute records the baked value in a sentinel file at the app root (written during `npm run build`; read by `scripts/docker/ensure-docker-base-path.mjs`) and compares it with `OMNIROUTE_BASE_PATH` when the container starts. When they differ and the image was built for the domain root, the entrypoint rewrites the standalone manifests, the embedded `basePath`/`assetPrefix` literals (Next 16 renders SSR asset URLs from `assetPrefix` alone — the patcher mirrors the subpath into it), the baked `/_next/static` asset URLs (client-reference manifests, media imports, prerendered error pages) and the client `process.env` shim before `node dev/run-standalone.mjs` runs.
 
-### Build b’Compose (rakkomandat)
+### Ikteb bini (rakkomandat)
 
-Issettja ż-żewġ varjabbli f’`.env`, imbagħad erġa’ agħmel build sabiex l-image u r-runtime jaqblu:
+Issettja ż-żewġ varjabbli `.env`, imbagħad ibni mill-ġdid sabiex l-immaġni u l-ħin tar-runtime jaqblu:
 
 ```bash
 # .env
@@ -391,69 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` jgħaddi `OMNIROUTE_BASE_PATH` bħala Docker build-arg u bħala
-varjabbli tal-ambjent tar-runtime.
+`docker-compose.yml` jgħaddi `OMNIROUTE_BASE_PATH` bħala Docker build-arg u bħala varjabbli tal-ambjent runtime.
 
-### Image tal-għerq mibnija minn qabel + subpath waqt ir-runtime
+### Immaġini għerq mibnija minn qabel + runtime subpath
 
-L-images ippubblikati `diegosouzapw/omniroute:*` huma mibnija għall-għerq tad-domain. Xorta tista’
-tissettja `OMNIROUTE_BASE_PATH` waqt ir-runtime; il-container japplika patch lill-bundle darba waħda meta jibda.
-Użah flimkien mal-origin pubbliku korrispondenti:
+Immaġini `cheaperinference/omniroute:*` ppubblikati huma mibnija għall-għerq tad-dominju. Xorta tista' tissettja `OMNIROUTE_BASE_PATH` waqt ir-runtime; il-kontenitur irqajja l-qatta darba mal-istartjar. Għaqqadha mal-oriġini pubblika li tqabbel:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Ikkonfigura r-reverse proxy biex jgħaddi l-path estern **sħiħ** (tneħħix il-
-prefix). Traefik għandu jirrotta `PathPrefix(`/omniroute`)` lejn il-container mingħajr
-`StripPrefix`, sabiex Next.js jirċievi `/omniroute/...` u jservi l-assets minn
-`/omniroute/_next/...`.
+Ikkonfigura r-reverse proxy biex tgħaddi l-** sħiħa** mogħdija esterna (tqaxxarx il-prefiss). Traefik għandu jgħaddi `PathPrefix(`/omniroute `)` lejn il-kontenitur mingħajr `StripPrefix`, għalhekk Next.js jirċievi `/omniroute/...` u jservi assi minn `/omniroute/_next/...`.
 
-Il-healthcheck ta’ Docker jittestja l-endpoint ħafif taċ-ċiklu tal-ħajja `/healthz`, b’prefix
-tal-`OMNIROUTE_BASE_PATH` attiv. `/api/monitoring/health` jibqa’ disponibbli għal
-dijanjostika minn persuni/dashboards; biex terġa’ tidderieġi l-HEALTHCHECK tal-container lejh (pereżempju
-għal infurzar profond tal-istat tas-saħħa), issettja `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`.
-Dak il-path huwa kontroll **profond** (DB + sommarju tal-monitoraġġ) — xieraq għall-
-`HEALTHCHECK` mhux frekwenti ta’ Docker jekk tagħżel li terġa’ tattivah, iżda **mhux** għal intervalli ta’
-`livenessProbe` ta’ Kubernetes.
+Il-kontroll tas-saħħa Docker jistħarreġ l-endpoint ħafif taċ-ċiklu tal-ħajja `/healthz` ipprefissat bl- `OMNIROUTE_BASE_PATH` attiv. `/api/monitoring/health` jibqa' disponibbli għad-dijanjostika human/dashboard ; biex tipponta l-kontenitur HEALTHCHECK lura lejh (pereżempju għal infurzar profond tas-saħħa), issettja `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Dik it-triq hija a** fond** iċċekkja ( sommarju tal-monitoraġġ DB + ) — xieraq għal `HEALTHCHECK` mhux frekwenti ta' Docker jekk tagħżel lura, iżda** le** għall-intervalli `livenessProbe` Kubernetes.
 
 Għall-orkestraturi (Kubernetes, Nomad, eċċ.):
 
-| Probe              | Ippreferi                                                                   | Evita                                                     |
-| ------------------ | --------------------------------------------------------------------------- | --------------------------------------------------------- |
-| Liveness           | HTTP `GET /livez`, jew TCP fuq il-port prinċipali (`PORT`, default `20128`) | `/api/monitoring/health` bħala liveness                   |
-| Readiness          | HTTP `GET /healthz`                                                         | Timeouts stretti li jqisu event loop okkupat bħala mejjet |
-| Profond / blackbox | `/api/monitoring/health`                                                    | —                                                         |
+| Sonda           | Jippreferi                                                                    | Evita                                                      |
+| --------------- | ----------------------------------------------------------------------------- | ---------------------------------------------------------- |
+| Ħajja           | HTTP `GET /livez`, jew TCP fuq il - port prinċipali (`PORT`, default `20128`) | `/api/monitoring/health` bhal hajja                        |
+| Prontezza       | HTTP `GET /healthz`                                                           | Timeouts stretti li jittrattaw event-loop busy bħala mejta |
+| Deep / blackbox | `/api/monitoring/health`                                                      | —                                                          |
 
-`/healthz` jirrapporta ċ-ċiklu tal-ħajja tal-proċess (`ok` / `starting` / `stopping`). `/livez` huwa
-biss kontroll li l-proċess għadu ħaj (200 kull meta l-handler ikun jista’ jitħaddem; ma jistenniex
-ir-readiness). It-tnejn xorta jitħaddmu fuq l-istess event loop ta’ Node bħall-ipproċessar tat-talbiet, għalhekk
-xogħol marbut mas-CPU fuq il-katalgu jew il-kompressjoni jista’ jdewwimhom — okkupat ≠ mejjet. Ippreferi
-liveness permezz ta’ TCP jekk il-probes HTTP jilħqu t-timeout. Gwida sħiħa dwar il-probes:
-[Gwida tal-monitoraġġ — rakkomandazzjonijiet għall-probes ta’ Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` jirrapporta ċiklu tal-ħajja tal-proċess (`ok` / `starting` / `stopping`). `/livez` huwa proċess-alive biss (200 kull meta l-handler jista 'jidħol; ma jistenna li jkun lest). It-tnejn għadhom jimxu fuq l-istess linja ta 'avvenimenti Node bħall-immaniġġjar tat-talbiet, għalhekk il-katalgu marbut mas-CPU jew ix-xogħol ta' kompressjoni jista 'jdewwemhom — busy ≠ dead. Ippreferi TCP liveness jekk HTTP sondi time out. Gwida sħiħa tas-sonda: [Gwida tal-monitoraġġ — Rakkomandazzjonijiet tas-sonda Kubernetes](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose ma’ Caddy (HTTPS Auto-TLS)
+## Docker Ikkomponi ma' Caddy (HTTPS Auto-TLS)
 
-OmniRoute jista’ jiġi espost b’mod sigur permezz tal-forniment awtomatiku tal-SSL ta’ Caddy. Kun żgur li r-rekord DNS A tad-dominju tiegħek jipponta lejn l-IP tas-server tiegħek.
+OmniRoute jista 'jiġi espost b'mod sigur bl-użu ta' forniment awtomatiku ta ' SSL ta' Caddy. Kun żgur li r-rekord DNS A tad-dominju tiegħek jindika IP tas-server tiegħek.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Oriġini li tidher mill-browser għall-callbacks tal-OAuth, links tad-dashboard, u URLs pubbliċi ġġenerati.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # URL intern bejn server u ieħor għal kompiti skedati / self-fetches.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -470,12 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy jistabbilixxi l-headers standard tat-trażmissjoni għall-container upstream. OmniRoute juża
-`NEXT_PUBLIC_BASE_URL` bħala l-oriġini pubblika kanonika għall-callbacks tal-OAuth u l-links pubbliċi
-ġġenerati; l-operazzjonijiet ta’ kitba awtentikati tad-dashboard jużaw talbiet mill-istess oriġini flimkien ma’
-protezzjoni CSRF marbuta mas-sessjoni. Ippermetti `OMNIROUTE_TRUST_PROXY` biss għal deployments avvanzati fejn intenzjonalment
-trid li OmniRoute jidderiva l-oriġini pubblika minn headers trażmessi fdati minflok minn konfigurazzjoni
-espliċita.
+Caddy jistabbilixxi l-headers standard tal-kunsinna għall-kontenitur upstream. OmniRoute juża `NEXT_PUBLIC_BASE_URL` bħala l-oriġini pubblika kanonika għal callbacks OAuth u links pubbliċi ġġenerati; kitbiet ta' dashboard awtentikati jużaw talbiet tal-istess oriġini flimkien ma' protezzjoni CSRF marbuta mas-sessjoni. Ippermetti `OMNIROUTE_TRUST_PROXY` biss għal skjeramenti avvanzati fejn intenzjonalment trid li OmniRoute joħroġ l-oriġini pubblika minn headers mgħoddija ta' fiduċja minflok konfigurazzjoni espliċita.
 
 ## Cloudflare Quick Tunnel
 
@@ -492,49 +432,51 @@ Il-pannelli tat-tunnels tal-endpoints (Cloudflare, Tailscale, ngrok) jistgħu ji
 - L-images ta’ Docker jinkludu l-għeruq CA tas-sistema u jgħadduhom lil `cloudflared` ġestit, u b’hekk jiġu evitati fallimenti ta’ fiduċja TLS meta t-tunnel jinbeda minn ġewwa l-container.
 - Issettja `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` jekk trid li OmniRoute juża binarju eżistenti minflok iniżżel wieħed.
 
-## Tags tal-Images
+## Tikketti tal-Immaġni
 
-| Image                    | Tag      | Daqs   | Deskrizzjoni                                            |
-| ------------------------ | -------- | ------ | ------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | L-ogħla SemVer stabbli **ppubblikat** (mhux git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | Iffissa din il-klassi ta’ tag għal GitOps               |
+| Immaġni                      | Tag      | Daqs    | Deskrizzjoni                                             |
+| ---------------------------- | -------- | ------- | -------------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250MB | L-ogħla** ippubblikat** SemVer stabbli (mhux git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250MB | Pin din il-klassi ta tag gall- GitOps                    |
 
-Manifest għal diversi pjattaformi: `linux/amd64` + `linux/arm64` nattivi (Apple Silicon, AWS Graviton, Raspberry Pi). Docker jagħżel l-arkitettura korrispondenti awtomatikament; għaddi `--platform linux/amd64` jekk ikollok bżonn tisforza l-emulazzjoni AMD64 fuq hosts ARM.
+L-istess immaġini huma ppubblikati fi tliet repożitorji, bl-istess diġesti għal kull arkitettura: `cheaperinference/omniroute` (Docker Hub, l-organizzazzjoni tal-Inferenza Cheaper, minn 3.8.53 'il quddiem), `ghcr.io/cheaper-inference/omniroute` u l-legacy `diegosouzapw/omniroute`, li żżomm l-istorja tal-ġibda tagħha u għadha tirċievi kull rilaxx. L-iskjeramenti eżistenti `diegosouzapw/omniroute` jibqgħu jaġġornaw; il-bidla tal-isem tal-immaġni hija fakultattiva. Il-kanal ta' qabel ir-rilaxx `:next` / `:next-web` hawn taħt huwa ppubblikat għal `diegosouzapw/omniroute` u GHCR biss.
 
-### Kanali tar-Rilaxxi
+Manifest multi-pjattaforma: `linux/amd64` + `linux/arm64` indiġeni (Apple Silicon, AWS Graviton, Raspberry Pi). Docker jagħżel l-arkitettura li tqabbel awtomatikament; jgħaddi `--platform linux/amd64` jekk għandek bżonn sfurza l-emulazzjoni AMD64 fuq hosts ARM.
 
-OmniRoute jippubblika kanali Docker separati għal rilaxxi stabbli, ittestjar tal-fergħa attiva tar-rilaxx, u builds tal-iżvilupp.
+### Rilaxx Kanali
 
-| Kanal                           | Sors                                       | Mutabbiltà                            | Użu rakkomandat                                                                                                                       |
-| ------------------------------- | ------------------------------------------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Rilaxx iffirmat/b’verżjoni                 | Immutabbli                            | Deployments ta’ produzzjoni li jiffissaw rilaxx eżatt                                                                                 |
-| `:latest` / `:latest-web`       | L-ogħla SemVer stabbli **ppubblikat**      | Puntatur stabbli mutabbli             | Isegwi rilaxxi stabbli **wara** kompitu ta’ pubblikazzjoni SemVer — **ma** jsegwix `main` jew commits ta’ `release/v*` mhux rilaxxati |
-| `:next` / `:next-web`           | Il-fergħa `release/v*` predefinita attwali | Puntatur mutabbli ta’ qabel ir-rilaxx | Ittestjar ta’ soluzzjonijiet li ddaħħlu fil-fergħa attiva tar-rilaxx iżda għadhom mhumiex f’rilaxx stabbli                            |
-| `:main` / `:main-web`           | Il-fergħa `main`                           | Puntatur mutabbli tal-iżvilupp        | Għall-iżvilupp u l-ittestjar tal-integrazzjoni biss                                                                                   |
+OmniRoute tippubblika kanali Docker separati għal rilaxxi stabbli, ittestjar attiv tal-fergħa ta 'rilaxx, u bini ta' żvilupp.
 
-#### Fornituri ta’ sessjonijiet web: l-images `-web`
+| Kanal                           | Sors                                   | Mutabbiltà                           | Użu rakkomandat                                                                                                                      |
+| ------------------------------- | -------------------------------------- | ------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------ |
+| `:<version>` / `:<version>-web` | Signed/versioned rilaxx                | Immutabbli                           | Skjeramenti tal-produzzjoni li pin rilaxx eżatt                                                                                      |
+| `:latest` / `:latest-web`       | L-ogħla** ippubblikat** SemVer stabbli | Pointer stabbli mutevoli             | Isegwi rilaxxi stabbli** wara** a SemVer jippubblika xoghol — jaghmel** le** track `main` jew `release/v*` mhux rilaxxat jikkommetti |
+| `:next` / `:next-web`           | Fergħa `release/v*` default kurrenti   | Pointer ta' qabel ir-rilaxx mutevoli | Ittestjar ta 'soluzzjonijiet li niżlu fuq il-fergħa ta' rilaxx attiv iżda għadhom mhumiex f'rilaxx stabbli                           |
+| `:main` / `:main-web`           | fergħa `main`                          | Pointer ta 'żvilupp mutevoli         | Ittestjar ta' żvilupp u integrazzjoni biss                                                                                           |
 
-Kull kanal ta’ hawn fuq huwa disponibbli wkoll bħala tag `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), mibni mill-istadju `runner-web` — l-istess image flimkien ma’ Playwright u browser Chromium. L-image sempliċi tiġi **mingħajr** Chromium; `gemini-web`, `claude-web` u `claude-turnstile` jeħtiġuh.
+#### Fornituri tas-sessjoni tal-web: l-immaġini `-web`
 
-Il-falliment jiġi pospost, u ma jseħħx waqt l-istartjar: dawk il-fornituri jelenkaw il-mudelli tagħhom u jidhru bħala konnessi fid-dashboard, u l-ewwel talba biss tfalli b’dan il-messaġġ
+Kull kanal hawn fuq jirdoppja bħala tikketta `-web` (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), mibnija mill-istadju `runner-web` — l-istess immaġni flimkien ma Playwright u browser Chromium. L-immaġni sempliċi vapuri** mingħajr** Kromju; `gemini-web`, `claude-web` u `claude-turnstile` jeħtieġuha.
+
+Il-falliment huwa differit, mhux ħin tal-istartjar: dawk il-fornituri jelenkaw il-mudelli tagħhom u juru bħala konnessi fid-dashboard, u l-ewwel talba biss tfalli.
 
 ```
 [500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Jekk tuża dawk il-fornituri, niżżel it-tag `-web` tal-kanal li diġà qed tuża — ma jinbidel xejn aktar. Fuq installazzjoni npm/CLI (mingħajr image ta’ Docker), il-parti nieqsa ekwivalenti hija l-binarju tal-browser: ħaddem `npx playwright install chromium` fuq il-host.
+Jekk tuża dawk il-fornituri, iġbed it-tikketta `-web` tal-kanal li diġà qiegħed fuq — xejn aktar ma jinbidel. Fuq installazzjoni npm/CLI (l-ebda immaġni Docker ), il-biċċa ekwivalenti nieqsa hija l-binarju tal-browser: mexxi `npx playwright install chromium` fuq il-host.
 
-#### Kif tuża l-kanal ta’ qabel ir-rilaxx
+#### Bl-użu tal-kanal ta 'qabel ir-rilaxx
 
-Il-kanal `next` jerġa’ jinbena ma’ kull push lejn il-fergħa predefinita attwali `release/v*` u jiġi ppubblikat kemm għal AMD64 kif ukoll għal ARM64. Fergħat ta’ manutenzjoni eqdem ma jistgħux jissostitwuh. Il-kanal jipprovdi immaġni li tista’ tinġibed għal soluzzjonijiet li jkunu ġew integrati fil-fergħa tar-rilaxx attiva qabel ma tinħoloq it-tikketta stabbli li jmiss.
+Il-kanal `next` jinbena mill-ġdid fuq kull spinta lejn il-fergħa `release/v*` default attwali u huwa ppubblikat kemm għal AMD64 kif ukoll ARM64. Fergħat ta 'manutenzjoni anzjani ma jistgħux jissostitwixxuh. Il-kanal jipprovdi immaġni li tista 'tinġibed għal soluzzjonijiet li ngħaqdu fil-fergħa tar-rilaxx attiva qabel ma tinqata' t-tikketta stabbli li jmiss.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-Għal Docker Compose, issostitwixxi t-tikketta tal-immaġni użata mill-profil magħżul, imbagħad iġbed u erġa’ oħloq is-servizz:
+Għal Docker Compose, ibdel it-tikketta tal-immaġini użata mill-profil magħżul, imbagħad iġbed u oħloq mill-ġdid is-servizz:
 
 ```yaml
 services:
@@ -547,32 +489,32 @@ docker compose pull
 docker compose up -d
 ```
 
-#### Sikurezza u treġġigħ lura
+#### Sigurtà u rollback
 
-`next` huwa kanal varjabbli ta’ qabel ir-rilaxx. Jista’ jinbidel ma’ kwalunkwe push lejn il-fergħa tar-rilaxx attiva u **mhuwiex appoġġjat għall-użu fil-produzzjoni**. Waħħal id-diġest tal-immaġni waqt li tkun qed tevalwa build speċifika:
+`next` huwa kanal floating qabel ir-rilaxx. Jista 'jinbidel fuq kwalunkwe push għall-fergħa ta' rilaxx attiv u huwa** mhux appoġġjat għall-użu fil-produzzjoni** . Pin id-diġest tal-immaġni waqt li tevalwa bini speċifiku:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Qabel l-ittestjar, agħmel backup tal-volum tad-data ta’ OmniRoute jew tad-direttorju tad-data mmuntat permezz ta’ bind mount. Biex treġġa’ lura, irrestawra l-verżjoni stabbli jew id-diġest użat qabel u erġa’ oħloq il-container:
+Qabel l-ittestjar, agħmel backup tal-volum tad-dejta OmniRoute jew tad-direttorju tad-dejta immuntat fuq il-bind. Biex terġa 'lura, restawra l-verżjoni stabbli użata qabel jew iddiġerixxi u ħolqu mill-ġdid il-kontenitur:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Build minn fergħa tar-rilaxx qatt ma tista’ tmexxi `latest`; verżjoni semantika stabbli eliġibbli biss tista’ tippromwovi l-indikatur stabbli. L-immaġnijiet `next` iżommu l-ispezzjoni tal-immaġni tar-rilaxx u l-kontroll imblokkanti għall-vulnerabbiltajiet CRITICAL.
+A release-branch build qatt ma tista tiċċaqlaq `latest`; verżjoni semantika stabbli eliġibbli biss tista' tippromwovi l-pointer stabbli. L-immaġini `next` iżommu l-ispezzjoni tal-immaġni tar-rilaxx u l-imblukkar tal-bieb tal-vulnerabbiltà KRITIKA.
 
-**`latest` mhuwiex garanzija ta’ aġġornament għal git.** Soluzzjonijiet integrati f’`main` jew fil-fergħa attiva `release/v*` **ma jkunux** f’`:latest` sakemm tiġi ppubblikata immaġni SemVer stabbli u l-proċess tal-pubblikazzjoni jippromwovi `:latest` (bl-istess diġest bħal dak is-SemVer). Jekk `latest` jidher wieqaf waqt li GitHub diġà juri s-soluzzjoni, iġbed `:next` biex tittestja l-fergħa tar-rilaxx jew stenna t-tikketta SemVer.
+**`latest` mhix garanzija tal-munita għal git.** Fixs magħquda fuq `main` jew fuq il-fergħa attiva `release/v*` huma** le** fi `:latest` sakemm tiġi ppubblikata immaġni SemVer stabbli u l-impjieg tal-pubblikazzjoni jippromwovi `:latest` (l-istess diġest bħal dak SemVer). Jekk `latest` jidher iffriżat waqt li GitHub diġà juri l-iffissar, iġbed `:next` biex tittestja l-fergħa tar-rilaxx jew stenna t-tikketta SemVer.
 
-| Dak li trid                                                                       | Uża                                         |
-| --------------------------------------------------------------------------------- | ------------------------------------------- |
-| GitOps / produzzjoni li ma tridx tiddevja                                         | Waħħal `:X.Y.Z` (jew id-diġest tal-immaġni) |
-| Segwi r-rilaxxi stabbli ppubblikati u aċċetta li jerġgħu jinħolqu ma’ kull rilaxx | `:latest`                                   |
-| Ittestja commits mhux rilaxxati ta’ `release/v*`                                  | `:next` (mhux għall-produzzjoni)            |
-| Ittestja `main`                                                                   | `:main` (mhux għall-produzzjoni)            |
+| Trid                                                                | Użu                                      |
+| ------------------------------------------------------------------- | ---------------------------------------- |
+| GitOps / produzzjoni li ma tridx drift                              | Pin `:X.Y.Z` (jew id-diġest tal-immaġni) |
+| Segwi l-istalel ippubblikati u aċċetta rikreazzjoni fuq kull rilaxx | `:latest`                                |
+| Test unreleased `release/v*` kommits                                | `:next` (mhux produzzjoni)               |
+| Test `main`                                                         | `:main` (mhux produzzjoni)               |
 
 ## Aġġornamenti tad-dashboard f'Docker
 

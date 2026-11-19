@@ -27,33 +27,26 @@ reitit eivät ole käytettävissä muista kuin loopback-lähteistä todennuksest
 riippumatta. Katso
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Kokonaisuuden toiminta
+## Kuinka se sopii Together
 
 ```
-Hallintapaneeli (/dashboard/plugins)
-  ├─ "Asennetut"-välilehti → GET /api/plugins            (listPlugins)
-  │                          POST /api/plugins/scan      (pluginManager.scan)
-  │                          POST /api/plugins/{name}/activate|deactivate
-  │                          DELETE /api/plugins/{name}   (asennuksen poisto)
-  └─ "Lisäosakauppa"-välilehti → GET /api/plugins/marketplace
-                                  → listMarketplacePlugins()
-                                    ├─ ei mukautettua URL-osoitetta → sisäänrakennettu SEED_REGISTRY
-                                    └─ mukautettu URL-osoite → isSafeMarketplaceUrl() SSRF-suojaus
-                                                               → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Rekisterikerros** — `src/lib/plugins/marketplace.ts`: luettelee luettelon
-  sisällön ja tekee siitä hakuja sekä käyttää virhetilanteissa alustavaa
-  rekisteriä.
-- **Elinkaarikerros** — `src/lib/plugins/manager.ts` (`pluginManager`-singleton):
-  asennus, päivitys, aktivointi, käytöstäpoisto, asennuksen poisto, tarkistus ja
-  lataus käynnistyksen yhteydessä.
-- **Manifestikerros** — `src/lib/plugins/manifest.ts`: Zod-skeema ja
-  oletusarvot tiedostolle `plugin.json`.
-- **Tarkistin** — `src/lib/plugins/scanner.ts`: löytää levyllä olevat lisäosat
-  lisäosahakemistosta.
-- **Lataaja** — `src/lib/plugins/loader.ts`: käynnistää jokaisen lisäosan
-  eristetyssä aliprosessissa ja välittää koukkukutsut IPC:n kautta.
+- **Rekisteritaso** — `src/lib/plugins/marketplace.ts`: luetteloi / etsii luetteloa ja palaa siemenrekisteriin virheiden sattuessa.
+- **Elinkaarikerros** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): asenna, päivitä, aktivoi, deaktivoi, poista, skannaa, käynnistä lataus.
+- **Ilmeinen kerros** — `src/lib/plugins/manifest.ts`: Zod -skeema + oletusarvot `plugin.json`.
+- **Skanneri** — `src/lib/plugins/scanner.ts`: löytää laajennuksia levyltä laajennushakemistosta.
+- **Loader** — `src/lib/plugins/loader.ts`: synnyttää jokaisen laajennuksen erillisessä Node.js -alaprosessissa ja välittää puhelut IPC kautta. Lapsi ei ole hiekkalaatikko (katso "Lisäosien suorittamisen eristäminen" alla).
 
 ## Lisäosakaupan luettelo
 
@@ -91,34 +84,31 @@ kirjaa varoituksen ja käyttää alustavaa luetteloa.
 
 ## REST API
 
-Kaikki päätepisteet edellyttävät hallinnan todennusta (`requireManagementAuth`) **ja**
-ovat käytettävissä vain loopback-osoitteesta — `/api/plugins` ja `/api/plugins/` on lueteltu
-`LOCAL_ONLY_API_PREFIXES`-taulukossa (`src/server/authz/routeGuard.ts`).
+Kaikki päätepisteet vaativat hallinnan todennuksen (`requireManagementAuth`)** ja** ovat vain silmukoita — `/api/plugins` ja `/api/plugins/` on lueteltu kohdassa `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Päätepiste                       | Menetelmä | Kuvaus                                                        |
-| -------------------------------- | --------- | ------------------------------------------------------------- |
-| `/api/plugins`                   | GET       | Luettele asennetut lisäosat (valinnainen `?status=`-suodatin) |
-| `/api/plugins`                   | POST      | Asenna lisäosa absoluuttisesta paikallisesta polusta          |
-| `/api/plugins/scan`              | POST      | Tarkista lisäosahakemisto ja rekisteröi uudet lisäosat        |
-| `/api/plugins/marketplace`       | GET       | Luettele markkinapaikan luettelomerkinnät                     |
-| `/api/plugins/[name]`            | GET       | Hae asennetun lisäosan tiedot                                 |
-| `/api/plugins/[name]`            | DELETE    | Poista lisäosan asennus                                       |
-| `/api/plugins/[name]/activate`   | POST      | Aktivoi (lataa + rekisteröi koukut)                           |
-| `/api/plugins/[name]/deactivate` | POST      | Poista käytöstä (suorita `onDeactivate`, poista koukut)       |
-| `/api/plugins/[name]/config`     | GET       | Hae lisäosan määritykset + määritysskeema                     |
-| `/api/plugins/[name]/config`     | PUT       | Päivitä lisäosan määritykset (validoidaan skeemaa vasten)     |
+| Päätepiste                       | Menetelmä | Kuvaus                                                                   |
+| -------------------------------- | --------- | ------------------------------------------------------------------------ |
+| `/api/plugins`                   | GET       | Listaa asennetut laajennukset (valinnainen `?status=` suodatin)          |
+| `/api/plugins`                   | POST      | Asenna laajennus laajennuslähteiden hakemistosta                         |
+| `/api/plugins/scan`              | POST      | Tarkista laajennushakemisto ja rekisteröi uudet lisäosat                 |
+| `/api/plugins/marketplace`       | GET       | Listaa markkinapaikan luettelomerkinnät                                  |
+| `/api/plugins/[name]`            | GET       | Hanki asennetun laajennuksen tiedot                                      |
+| `/api/plugins/[name]`            | DELETE    | Poista laajennus                                                         |
+| `/api/plugins/[name]/activate`   | POST      | Aktivoi (lataa + -rekisterikoukut)                                       |
+| `/api/plugins/[name]/deactivate` | POST      | Poista käytöstä (sammuta `onDeactivate`, poista koukkujen rekisteröinti) |
+| `/api/plugins/[name]/config`     | GET       | Hae plugin config + config schema                                        |
+| `/api/plugins/[name]/config`     | PUT       | Päivitä laajennuksen kokoonpano (vahvistettu mallia vastaan)             |
 
-`GET /api/plugins` -pyynnön `status`-suodatin hyväksyy yhden seuraavista arvoista:
-`installed` / `active` / `inactive` / `error`. Virheellinen arvo palauttaa vastauksen `400`.
+`GET /api/plugins` `status` suodatin hyväksyy jonkin seuraavista : `installed` / `active` / `inactive` / `error`. Virheellinen arvo palauttaa `400`.
 
-### Asennettujen lisäosien luetteleminen
+### Listaa asennetut laajennukset
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Asentaminen paikallisesta polusta
+### Asenna paikalliselta polulta
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -127,19 +117,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path`-arvon on oltava **absoluuttinen**, eikä se saa sisältää `..`-siirtymäsegmenttejä tai
-nollatavuja (Zod varmistaa tämän). Lähdehakemiston on sisällettävä kelvollinen
-`plugin.json` (tai sen on oltava sellaisen ylähakemisto). Onnistuneen pyynnön vastaus on `201`, ja se
-sisältää asennetun lisäosan rivin.
+`path` on oltava an** ehdoton** polku hakemistoon** laajennuksen lähdehakemiston sisällä** : `plugin-sources` laajennuksen juuren vieressä, joten oletuksena `~/.omniroute/plugin-sources/` tai `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/`, kun kyseinen muuttuja on asetettu (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Kopioi tai kloonaa laajennus ensin sinne. Asennus hylätään komennolla `400`, kun polku sisältää `..` tai nollatavun, sijaitsee kyseisen hakemiston ulkopuolella, ratkaisee sen ulkopuolella symlinkin kautta, sisältää symlinkin, jonka kohde on sen ulkopuolella, tai kun hakemistoa ei ole olemassa. Lähdehakemiston on sisällettävä kelvollinen `plugin.json` (tai sen on oltava sen ylätaso). Onnistuessa vastaus on `201` asennetulla liitännäisrivillä.
 
-### Markkinapaikan selaaminen
+Toisin kuin muut liitännäisreitit, tämä vaatii hallintatiedot (kojelaudan istunnon tai hallintalaajuisen API avaimen), vaikka sisäänkirjautuminen olisi estetty (`requireLogin=false`): koodin asentaminen ei ole koskaan anonyymi toimenpide.
+
+### Selaa markkinapaikkaa
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Lisäosan määritysten päivittäminen
+### Päivitä laajennuksen kokoonpano
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -148,10 +137,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validoi jokaisen annetun arvon lisäosan
-`configSchema`-skeemaa vasten (määritetty manifestissa): `number`-kentät noudattavat `min`-/`max`-rajoja,
-ja `select`-kenttien on vastattava määritettyä `enum`-arvoa. Avaimet, joita skeemassa ei ole,
-sallitaan sellaisinaan.
+`PUT .../config` vahvistaa jokaisen syötetyn arvon laajennuksen `configSchema` vastaan (ilmoitettu luettelossa): `number` kentät kunnioittavat `min`/`max`, `select` -kenttien on vastattava ilmoitettua `enum`. Avaimet, joita ei ole skeemassa, sallitaan.
 
 ## Määritykset
 
@@ -208,95 +194,60 @@ Hallintapaneelin "Markkinapaikka"-välilehti sisältää kentän tälle URL-osoi
 > julkaisussasi ennen kuin luotat siihen — **lukupolku** (`getSettings()` →
 > `listMarketplacePlugins()`) huomioi avaimen, kun se on asetustietovarastossa.
 
-## Tietoturva
+## Turvallisuus
 
-### Reittitaso — vain loopback-yhteydet
+### Vain reittitason — loopback
 
-Liitännäiset suorittavat koodia käynnistetyissä aliprosesseissa, joten koko
-`/api/plugins`-rajapinta on luokiteltu tasolle `LOCAL_ONLY` (taso 1).
-Loopback-rajoitus suoritetaan poikkeuksetta **ennen** mitään todennustarkistusta,
-joten tunnelin kautta koneelle päätynyt vuotanut hallintatunniste ei siltikään
-voi asentaa, aktivoida tai poistaa liitännäistä. Katso
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) ja
-ehdottomat säännöt #15 / #17.
+Pluginit suorittavat koodia synnytetyissä lapsiprosesseissa, joten koko `/api/plugins` pinta luokitellaan `LOCAL_ONLY` (Tier 1). Loopback-valvonta suoritetaan ehdoitta** ennen** mitään todennustarkistusta, joten tunnelin kautta laatikkoon saapuva vuotanut hallintatunnus ei voi silti asentaa, aktivoida tai poistaa laajennusta. Katso [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) ja kovat säännöt #15 / #17.
 
-### Markkinapaikkarekisterin SSRF-suojaus
+### Markkinapaikan rekisterin SSRF vartija
 
-Mukautettu rekisterin URL-osoite on hyökkääjän vaikutettavissa oleva määritys,
-joten ennen sen noutamista `listMarketplacePlugins()` käsittelee sen kahdella
-suojaustasolla:
+Mukautettu rekisteri URL on kokoonpano, johon hyökkääjä voi vaikuttaa, joten ennen sen hakemista `listMarketplacePlugins()` suorittaa sen kahden kerroksen läpi:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - Hylkää kaiken, mikä ei käytä `http:`- tai `https:`-protokollaa.
-   - Hylkää literaaliset yksityiset, loopback-, link-local- ja ULA-isännät
-     (sekä IPv4 **että** IPv6, mukaan lukien IPv4-mappaukset) käyttäen
-     kanonista `isPrivateHost`-toimintoa
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Selvittää **sekä** `A`- että `AAAA`-tietueet ja hylkää URL-osoitteen, jos
-     **mikä tahansa** selvitetty osoite on yksityinen — tämä estää
-     julkinen isäntänimi → yksityinen IP -ohituksen.
-   - **Estää oletusarvoisesti**: DNS-selvityksen epäonnistuminen johtaa
-     URL-osoitteen hylkäämiseen.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): ottaa julkisiin osoitteisiin
-   rajoittuvan URL-suojauksen uudelleen käyttöön noutohetkellä ja **estää
-   uudelleenohjaukset** (ei julkinen → yksityinen `30x`-siirtymää).
+   - Hylkää kaiken, mikä ei ole `http:` / `https:`.
+   - Hylkää kirjaimelliset private/loopback/link-local/ULA isännät (IPv4** ja** IPv6, mukaan lukien IPv4-mapped) kanonisen `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) kautta.
+   - Ratkaisee** molemmat** `A` ja `AAAA` tallentavat ja hylkäävät jos** mikä tahansa** ratkaistu osoite on yksityinen — joka sulkee julkisen isäntänimen → yksityisen IP-osoitteen ohituksen.
+   - **Epäonnistuu kiinni** : DNS -resoluutiovirhe hylkää URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): ottaa uudelleen käyttöön vain julkisen URL suojan noutohetkellä ja** estää uudelleenohjaukset** (ei julkista → yksityistä `30x` pivotia).
 
-Kumman tahansa suojaustason hylkäämä URL-osoite ei keskeytä pyyntöä —
-markkinapaikka palaa huomaamattomasti sisäänrakennettuun alkurekisteriin ja
-kirjaa varoituksen.
+URL, joka epäonnistuu jommassakummassa tasossa, ei keskeytä pyyntöä — markkinapaikka palaa hiljaa sisäänrakennettuun siemenrekisteriin ja kirjaa varoituksen.
 
-> Tätä suojausta vahvistettiin PR:ssä #3774 erityisesti selvittämään A + AAAA
-> ja käyttämään kanonista `isPrivateHost`-toimintoa pelkän IPv4-tarkistuksen
-> sijaan.
+> Tämä suoja on karkaistu PR #3774 :ssä erityisesti A + AAAA ratkaisemiseksi ja kanonisen `isPrivateHost` käyttämiseksi IPv4-only -tarkistuksen sijaan.
 
-### Liitännäisten suorituksen eristäminen
+### Laajennuksen suorittamisen eristäminen
 
-- **Prosessieristys** — `loadPlugin()` (`src/lib/plugins/loader.ts`) käynnistää
-  jokaisen liitännäisen erillisessä Node.js-aliprosessissa ja viestii sen kanssa
-  IPC:n kautta. Koukkujen kutsuilla on aikakatkaisu, joka eskaloituu
-  `SIGTERM` → `SIGKILL`.
-- **Ympäristömuuttujien sallittujen luettelo** — aliprosessi saa vain
-  sallittujen luetteloon kuuluvat ympäristömuuttujat; laajempi joukko annetaan
-  vain, kun manifesti pyytää `env`-oikeutta.
-- **Polkujen rajaaminen** — asennus, päivitys ja poistaminen varmistavat ennen
-  mitään kopiointia tai rekursiivista poistamista, että liitännäisen hakemisto
-  ja `manifest.main` ratkeavat hallitun liitännäisjuuren **sisälle** (suojaa
-  peukaloiduilta tietokantapoluilta ja `../`-siirtymiseltä kohteessa
-  `manifest.main`). Aktivointi ratkaisee symboliset linkit `realpath`-toiminnolla
-  ja kieltäytyy lataamasta aloituskohtaa, joka sijaitsee liitännäishakemiston
-  ulkopuolella.
-- **Valinnainen eheyskiinnitys** — manifesti voi määrittää `integrity`-kentän
-  (`sha256-<base64>`, SRI-muoto). Kun kenttä on määritetty, lataaja tarkistaa
-  aloitustiedoston tiivisteen lataushetkellä ja kieltäytyy aktivoimasta
-  liitännäistä, jos tiiviste ei täsmää. Kyseessä on erikseen käyttöön otettava
-  peukaloinnin tunnistus, **ei** tietoturvaraja — todelliset rajat muodostuvat
-  vain loopback-yhteydet sallivasta reitityksestä ja käyttöoikeusmallista.
+> **Plugins ei ole hiekkalaatikko.** Lapsi on tavallinen Node.js prosessi, joka toimii OmniRoute käyttäjänä, ilman VM kontekstia eikä Node.js käyttöoikeuslippuja, joten liitännäiskoodi voi lukea ja kirjoittaa mitä tahansa tiedostoja, joita käyttäjä voi, suorittaa ohjelmia ja päästä verkkoon. `requires.permissions` vain päättää, mitkä ympäristömuuttujat lapsi saa; muita käyttöoikeuksia ei pakoteta. Asenna vain laajennuksia, joihin luotat. Alla oleva prosessiraja sisältää kaatumisia ja jumiutumia; se ei ole turvallisuusraja.
+
+- **Prosessin eristäminen** — `loadPlugin()` (`src/lib/plugins/loader.ts`) synnyttää jokaisen liitännäisen erillisessä Node.js -lapsiprosessissa ja kommunikoi IPC kautta. Hook-puheluissa on aikakatkaisu `SIGTERM` → `SIGKILL` eskalaatiolla.
+- **Env sallittujen lista** — lapsi saa vain sallittujen ympäristömuuttujien joukon; laajempi joukko myönnetään vain, kun luettelo pyytää `env` lupaa.
+- **Asenna lähteen suojaus** — `POST /api/plugins` lukee vain laajennuksen lähdehakemistosta (katso "Asenna paikallisesta polusta"): polku kanonisoidaan `realpath` llä, sen on pysyttävä tiukasti kyseisen hakemiston sisällä, ja lähdepuu, joka sisältää symlinkin, joka pakottaa sen, hylätään ennen kuin mitään kopioidaan.
+- **Polun rajoitus** — install/upgrade/uninstall väittävät, että laajennushakemisto ja `manifest.main` ratkaisevat** sisällä** hallitun laajennuksen juuri ennen kopiointia tai rekursiivista poistoa (suojaa peukaloituja DB -polkuja ja `../` -läpikulkua `manifest.main` ssä). Aktivointi ratkaisee symbolilinkit `realpath` kautta ja kieltäytyy lataamasta sisääntulopistettä, joka pakenee laajennushakemistosta.
+- **Valinnainen eheysnasta** — luettelo voi ilmoittaa `integrity` (`sha256-<base64>`, SRI muoto) -kentän. Kun se on olemassa, lataaja tarkistaa syöttötiedoston tiivisteen latausaikana ja kieltäytyy aktivoimasta, jos se ei täsmää. Se on valinnainen peukaloinnin tunnistus,** ei** turvallisuusraja: se ei rajoita ladatun laajennuksen toimintaa.
+- **Ei asiakkaan tunnistetietoja koukuissa** — `onRequest`, `onResponse` ja `onError` välitetystä kontekstista on poistettu otsikot `authorization`, `x-api-key`, `proxy-authorization` ja `cookie`, eikä API -avaintietue sisällä avainarvoa (`redactPluginContext()` in `src/lib/plugins/hooks.ts`).
 
 ## Manifesti (`plugin.json`)
 
-Validoidaan `PluginManifestSchema`-skeemalla
-(`src/lib/plugins/manifest.ts`):
+Vahvistanut `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Kenttä             | Tyyppi    | Huomautukset                                                   |
-| ------------------ | --------- | -------------------------------------------------------------- |
-| `name`             | string    | Pakollinen; kebab-case (`^[a-z0-9-]+$`), 1–100 merkkiä         |
-| `version`          | string    | Pakollinen; semver (`MAJOR.MINOR.PATCH`)                       |
-| `description`      | string?   | ≤ 500 merkkiä                                                  |
-| `author`           | string?   | ≤ 200 merkkiä                                                  |
-| `license`          | string?   | Oletusarvo on `MIT`                                            |
-| `main`             | string?   | Aloitustiedosto; oletusarvo on `index.js`                      |
-| `source`           | enum?     | `local` \| `marketplace` (oletusarvo on `local`)               |
-| `tags`             | string[]? | Hakutunnisteet                                                 |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                |
-| `hooks`            | object?   | Totuusarvot, jotka ilmoittavat liitännäisen toteuttamat koukut |
-| `skills`           | object[]? | Valinnaiset taitomääritykset                                   |
-| `enabledByDefault` | boolean?  | Aktivoi automaattisesti asennuksen yhteydessä                  |
-| `configSchema`     | object?   | Määrityskenttien kartta (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Valinnainen aloitustiedoston `sha256-<base64>`-kiinnitys       |
+| Ala                | Tyyppi        | Huomautuksia                                                   |
+| ------------------ | ------------- | -------------------------------------------------------------- |
+| `name`             | merkkijono    | Pakollinen; kebab-kotelo (`^[a-z0-9-]+$`), 1-100 merkkiä       |
+| `version`          | merkkijono    | Pakollinen; semver (`MAJOR.MINOR.PATCH`)                       |
+| `description`      | merkkijono?   | ≤ 500 merkkiä                                                  |
+| `author`           | merkkijono?   | ≤ 200 merkkiä                                                  |
+| `license`          | merkkijono?   | Oletusarvo on `MIT`                                            |
+| `main`             | merkkijono?   | Tulotiedosto; oletuksena `index.js`                            |
+| `source`           | enum?         | `local` \| `marketplace` (oletus on `local`)                   |
+| `tags`             | merkkijono[]? | Hae tunnisteita                                                |
+| `requires`         | esine?        | `{ omniroute?, permissions[] }`                                |
+| `hooks`            | esine?        | Booleans ilmoittaa mitkä koukut plugin toteuttaa               |
+| `skills`           | esine[]?      | Valinnaiset taitojen määritelmät                               |
+| `enabledByDefault` | boolean?      | Aktivoi automaattisesti asennuksen yhteydessä                  |
+| `configSchema`     | esine?        | Määrityskenttien kartta (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | merkkijono?   | Valinnainen `sha256-<base64>` -syöttötiedostonasta             |
 
-Käyttöoikeudet valitaan enumeraatiosta
-`network` / `file-read` / `file-write` / `env` / `exec`.
+Oikeudet haetaan luettelosta `network` / `file-read` / `file-write` / `env` / `exec`. Vain `env` llä on ajonaikainen vaikutus (hieman suurempi ympäristömuuttujien sallittu luettelo lapselle); muut ovat julistuksia eikä niitä panna täytäntöön.
 
 ## Elinkaaren kulku
 
@@ -355,21 +306,16 @@ Taulu `plugins` (migraatio `076_create_plugins.sql`):
 Liitännäisten mittareita ja analytiikkaa seurataan erillisissä tauluissa
 (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`).
 
-## Hallintapaneeli
+## Kojelauta
 
-Hallintapaneelin sivulla `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) on kaksi välilehteä:
+Kojelautasivulla osoitteessa `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) on kaksi välilehteä:
 
-- **Asennetut** — näyttää asennetut liitännäiset ja niiden määrittämät koukut,
-  aktivoinnin/deaktivoinnin vaihtokytkimen, asennuksen poistopainikkeen sekä
-  "Etsi liitännäisiä" -toiminnon (`POST /api/plugins/scan`).
-- **Markkinapaikka** — näyttää luettelon, joka haetaan osoitteesta
-  `GET /api/plugins/marketplace`, sekä kentän mukautetun rekisterin URL-osoitteen
-  määrittämistä varten.
+- **Asennettu** — luettelee asennetut laajennukset niiden ilmoitetuilla koukuilla, activate/deactivate -kytkimellä, asennuksen poistopainikkeella ja "Scan for plugins" -toiminnolla (`POST /api/plugins/scan`).
+- **Markkinapaikka** — näyttää luettelon `GET /api/plugins/marketplace` stä ja kentän mukautetun rekisterin URL määrittämistä varten.
 
-Liitännäiskohtainen määrityssivu sijaitsee osoitteessa
-`/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Sivu näyttää aina varoituksen, että laajennukset toimivat OmniRoute -prosessin kaikilla oikeuksilla.
+
+Plugin-kohtainen konfigurointisivu sijaitsee osoitteessa `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Katso myös
 
