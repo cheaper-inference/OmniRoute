@@ -1,0 +1,1 @@
+- **fix(resilience):** `lockModel(..., "model_not_found")` now locks only the missing model on Codex connections instead of locking the entire `codex` quota scope when the upstream returns a non-404 status ([#20622](https://github.com/cheaper-inference/OmniRoute/issues/20622)) — thanks @zerafachris

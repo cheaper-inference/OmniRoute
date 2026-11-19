@@ -22,6 +22,7 @@ process.env.API_KEY_SECRET = "test-lockout-5xx-scope-secret"; // pragma: allowli
 const core = await import("../../src/lib/db/core.ts");
 const { handleComboChat } = await import("../../open-sse/services/combo.ts");
 const {
+  lockModel,
   recordModelLockoutFailure,
   isModelLocked,
   getModelLockoutInfo,
@@ -74,6 +75,13 @@ test("codex 502 on one model locks only that model — sibling gpt-5* models sta
   assert.equal(isModelLocked("codex", CONN, SOL), false, "sibling scope member stays routable");
   assert.equal(isModelLocked("codex", CONN, TERRA), false);
   assert.equal(isModelLocked("cx", CONN, SOL), false, "alias spelling agrees");
+});
+
+test("codex lockModel with reason model_not_found locks only the missing model, leaving sibling Codex models unlocked (#20622)", () => {
+  lockModel("codex", CONN, "gpt-5.5-codex", "model_not_found", 60_000);
+  assert.equal(isModelLocked("codex", CONN, "gpt-5.5-codex"), true, "missing model is locked");
+  assert.equal(isModelLocked("codex", CONN, "gpt-5.4"), false, "sibling Codex model stays unlocked");
+  assert.equal(isModelLocked("cx", CONN, "gpt-5.4"), false, "alias spelling agrees");
 });
 
 test("codex 429 on one model still locks the whole quota scope (unchanged)", () => {
