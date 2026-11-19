@@ -21,7 +21,7 @@ lastUpdated: 2026-11-03
 
 - **Kit.** `packages/ui-kit/src` is a byte-for-byte copy of the upstream `src/` at the commit pinned in
   `packages/ui-kit/UPSTREAM.md` (which also records the license authorization); `PATCHES.md` lists local
-  patches (none). It is consumed as source, with no build: `next.config.mjs` transpiles it, and
+  patches (each one keyed by that commit, with its diff and upstream status). It is consumed as source, with no build: `next.config.mjs` transpiles it, and
   `tsconfig.json` maps `@omniroute/ui-kit` → `packages/ui-kit/src` and `@omniroute/ui-kit/*` →
   `packages/ui-kit/src/*` (`vitest.config.ts` and `vitest.mcp.config.ts` carry the same alias). Import a
   kit component by its subpath (`@omniroute/ui-kit/table`, `@omniroute/ui-kit/page-header`…), never
