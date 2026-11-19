@@ -125,42 +125,83 @@ const RELEASE_CALLERS = [
   "version-bump/SKILL.md",
 ];
 const RELEASE_OVERLAY_PATH = "skill-caller-overlays/release-cut-bump.patch";
+const MERGE_CALLER_POLICY = fileURLToPath(
+  new URL("../../config/quality/merge-skill-callers.json", import.meta.url)
+);
+const MERGE_CALLERS = [
+  "merge-waves/SKILL.md",
+  "merge-waves/references/01-censo.md",
+  "merge-waves/references/02-pregate.md",
+  "merge-waves/references/03-board-validacao.md",
+  "merge-waves/references/04-squash.md",
+  "merge-waves/references/05-teardown-relato.md",
+  "merge-waves/references/06-conserto-branch.md",
+  "security-wave/SKILL.md",
+  "security-wave/references/recipes-and-pitfalls.md",
+  "omni-code-sec/SKILL.md",
+  "omni-code-sec/rubric.md",
+  "omni-code-review/rubric.md",
+  "_shared/omni-review-core.md",
+  "_shared/pr-rework-uplift.md",
+  "security-wave/templates/worker-prompt.md",
+  "uplift-prs/REWORK_RULES.md",
+  "review-prs/SKILL.md",
+  "review-group-prs/SKILL.md",
+];
 
 // Exact reviewed bytes detect instruction drift. MATCH does not certify GitHub
 // admission, authorize publication, or review the unchanged legacy skill text.
 export function inspectReleaseSkillCallers(root, policyPath = RELEASE_CALLER_POLICY) {
+  return inspectReviewedCallers(root, policyPath, {
+    scope: "release-cut-bump-admission-callers",
+    paths: RELEASE_CALLERS,
+    overlayPath: RELEASE_OVERLAY_PATH,
+    newFile: "generate-release/phases/candidate-admission.md",
+    label: "reviewed-release-overlay",
+  });
+}
+
+export function inspectMergeSkillCallers(root, policyPath = MERGE_CALLER_POLICY) {
+  return inspectReviewedCallers(root, policyPath, {
+    scope: "merge-security-admission-callers",
+    paths: MERGE_CALLERS,
+    overlayPath: "skill-caller-overlays/merge-security-admission.patch",
+    label: "reviewed-merge-security-overlay",
+  });
+}
+
+function inspectReviewedCallers(root, policyPath, contract) {
   if (!existsSync(root)) return { ok: false, status: "NOT_INSTALLED", files: [] };
   let policy;
   try {
     policy = JSON.parse(readFileSync(policyPath, "utf8"));
     if (
       policy?.schemaVersion !== 1 ||
-      policy.scope !== "release-cut-bump-admission-callers" ||
+      policy.scope !== contract.scope ||
       !Array.isArray(policy.files) ||
-      policy.files.length !== RELEASE_CALLERS.length ||
-      new Set(policy.files.map((file) => file?.path)).size !== RELEASE_CALLERS.length ||
+      policy.files.length !== contract.paths.length ||
+      new Set(policy.files.map((file) => file?.path)).size !== contract.paths.length ||
       policy.files.some(
         (file) =>
-          !RELEASE_CALLERS.includes(file?.path) ||
+          !contract.paths.includes(file?.path) ||
           !(
             validHash(file.beforeSha256) ||
-            (file.path === "generate-release/phases/candidate-admission.md" &&
-              file.beforeSha256 === null)
+            (file.path === contract.newFile && file.beforeSha256 === null)
           ) ||
           !validHash(file.afterSha256)
       ) ||
-      policy.overlay?.path !== RELEASE_OVERLAY_PATH ||
+      policy.overlay?.path !== contract.overlayPath ||
       !validHash(policy.overlay.sha256) ||
-      sha256(readFileSync(resolve(dirname(policyPath), RELEASE_OVERLAY_PATH))) !==
+      sha256(readFileSync(resolve(dirname(policyPath), contract.overlayPath))) !==
         policy.overlay.sha256
     ) {
-      throw new Error("Invalid release caller contract");
+      throw new Error("Invalid reviewed caller contract");
     }
   } catch {
     return {
       ok: false,
       status: "INCOMPLETE",
-      reason: "Invalid or unavailable release caller contract/overlay",
+      reason: "Invalid or unavailable reviewed caller contract/overlay",
       files: [],
     };
   }
@@ -180,14 +221,14 @@ export function inspectReleaseSkillCallers(root, policyPath = RELEASE_CALLER_POL
           stat.isSymbolicLink() ||
           !(index === parts.length - 1 ? stat.isFile() : stat.isDirectory())
         ) {
-          throw new Error("Invalid installed release caller");
+          throw new Error("Invalid installed reviewed caller");
         }
       }
       status = sha256(readFileSync(cursor)) === afterSha256 ? "MATCH" : "DRIFT";
     } catch (error) {
       status = error.code === "ENOENT" ? "MISSING" : "INVALID";
     }
-    return { path, status, contract: "reviewed-release-overlay" };
+    return { path, status, contract: contract.label };
   });
   const ok = files.every((file) => file.status === "MATCH");
   return { ok, status: ok ? "MATCH" : "INCOMPLETE", files };
@@ -197,13 +238,14 @@ export function inspectInstalledSkillContracts(root) {
   const templates = inspectSkillContracts(root);
   const callers = inspectSkillCallers(root);
   const releaseCallers = inspectReleaseSkillCallers(root);
-  const ok = templates.ok && callers.ok && releaseCallers.ok;
+  const mergeCallers = inspectMergeSkillCallers(root);
+  const ok = templates.ok && callers.ok && releaseCallers.ok && mergeCallers.ok;
   return {
     ok,
     status: ok ? "MATCH" : templates.status === "NOT_INSTALLED" ? "NOT_INSTALLED" : "INCOMPLETE",
     installedRoot: resolve(root),
-    files: [...templates.files, ...callers.files, ...releaseCallers.files],
-    scopes: { templates, callers, releaseCallers },
+    files: [...templates.files, ...callers.files, ...releaseCallers.files, ...mergeCallers.files],
+    scopes: { templates, callers, releaseCallers, mergeCallers },
   };
 }
 

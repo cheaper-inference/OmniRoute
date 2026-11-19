@@ -155,5 +155,6 @@ test("ordinary admission keeps its exact failure allowance instead of broadening
     "check-success=Merge integrity (changelog + generated skills)",
     "check-success=Gate / CI",
     "check-success=Gate / Quality",
+    "check-success=@github-actions/API Route Typecheck",
   ]);
 });
