@@ -1,5 +1,5 @@
 import type { RegistryEntry } from "../../../shared.ts";
-import { OPENCODE_ZEN_GO_SHARED_MODELS } from "../../../shared.ts";
+import { GLM_SHARED_MODELS, OPENCODE_ZEN_GO_SHARED_MODELS } from "../../../shared.ts";
 
 export const opencode_goProvider: RegistryEntry = {
   id: "opencode-go",
@@ -39,6 +39,9 @@ export const opencode_goProvider: RegistryEntry = {
     },
     { id: "glm-5.2-high", name: "GLM-5.2 (high effort)", supportsReasoning: true },
     { id: "glm-5.2-max", name: "GLM-5.2 (max effort)", supportsReasoning: true },
+    // GLM-5.3 and GLM-5.3-Flash: same limits and effort vocabulary as the shared GLM catalog
+    // (vendor Go list https://opencode.ai/zen/go/v1/models); the effort sanitizer clamps by it.
+    ...GLM_SHARED_MODELS.filter((m) => m.id === "glm-5.3" || m.id === "glm-5.3-flash"),
 
     ...OPENCODE_ZEN_GO_SHARED_MODELS,
     // models[0] (glm-5.2) is the dashboard default (LlmChatCard/ProviderTestSlideOver take models[0]).
