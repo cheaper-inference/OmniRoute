@@ -598,7 +598,7 @@ export default function ApiTab(_props: ApiTabProps) {
           <div className="p-4 space-y-3">
             <div className="flex items-center gap-2">
               <Icon name="attach_file" size={18} className="text-text-muted" />
-              <h3 className="text-sm font-semibold text-text-main">
+              <h3 className="text-sm text-text-main">
                 {isTranscriptionEndpoint ? t("audioFile") : t("attachImages")}
               </h3>
               {isTranscriptionEndpoint && (
@@ -693,7 +693,7 @@ export default function ApiTab(_props: ApiTabProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Icon name="upload" size={18} className="text-text-muted" />
-                <h3 className="text-sm font-semibold text-text-main">{t("request")}</h3>
+                <h3 className="text-sm text-text-main">{t("request")}</h3>
                 <Badge variant="info" size="sm">
                   POST {ENDPOINT_PATHS[selectedEndpoint]}
                 </Badge>
@@ -756,7 +756,7 @@ export default function ApiTab(_props: ApiTabProps) {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Icon name="download" size={18} className="text-text-muted" />
-                <h3 className="text-sm font-semibold text-text-main">{t("response")}</h3>
+                <h3 className="text-sm text-text-main">{t("response")}</h3>
                 {responseStatus !== null && (
                   <Badge
                     variant={responseStatus >= 200 && responseStatus < 300 ? "success" : "error"}

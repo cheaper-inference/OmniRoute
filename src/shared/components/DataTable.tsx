@@ -13,21 +13,7 @@ import {
 } from "@omniroute/ui-kit/table";
 import { cn } from "@/shared/utils/cn";
 import EmptyState from "./EmptyState";
-
-const INTERACTIVE_ELEMENT_SELECTOR =
-  'a[href], button, input, select, textarea, summary, [role="button"], [role="link"], ' +
-  '[contenteditable]:not([contenteditable="false"]), [tabindex]:not([tabindex="-1"])';
-
-function targetsNestedInteractiveElement(
-  row: HTMLTableRowElement,
-  target: EventTarget | null
-): boolean {
-  if (!(target instanceof Element)) return false;
-  const interactiveElement = target.closest(INTERACTIVE_ELEMENT_SELECTOR);
-  return (
-    interactiveElement !== null && interactiveElement !== row && row.contains(interactiveElement)
-  );
-}
+import InteractiveTableRow from "./InteractiveTableRow";
 
 /**
  * DataTable — adapter over the kit `DataTableShell` + `Table` (KEA-7886).
@@ -136,29 +122,10 @@ export default function DataTable({
             {data.map((row, idx) => {
               const selected = selectedId !== undefined && row.id === selectedId;
               return (
-                <TableRow
+                <InteractiveTableRow
                   key={row.id || idx}
-                  aria-selected={selected || undefined}
-                  data-state={selected ? "selected" : undefined}
-                  onClick={(event) => {
-                    if (
-                      !onRowClick ||
-                      targetsNestedInteractiveElement(event.currentTarget, event.target)
-                    )
-                      return;
-                    onRowClick(row);
-                  }}
-                  onKeyDown={
-                    onRowClick
-                      ? (event) => {
-                          if (event.target !== event.currentTarget) return;
-                          if (event.key !== "Enter" && event.key !== " ") return;
-                          event.preventDefault();
-                          onRowClick(row);
-                        }
-                      : undefined
-                  }
-                  tabIndex={onRowClick ? 0 : undefined}
+                  onActivate={onRowClick && (() => onRowClick(row))}
+                  selected={selected}
                   className={cn(onRowClick && "cursor-pointer")}
                 >
                   {columns.map((col) => (
@@ -170,7 +137,7 @@ export default function DataTable({
                       {renderCell(row, col)}
                     </TableCell>
                   ))}
-                </TableRow>
+                </InteractiveTableRow>
               );
             })}
           </TableBody>
