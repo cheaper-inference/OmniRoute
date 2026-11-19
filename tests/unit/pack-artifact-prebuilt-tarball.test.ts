@@ -275,11 +275,11 @@ test(
     const run = runGate(["--tarball", tarball]);
     assert.equal(run.status, 1, run.stdout + run.stderr);
     assert.deepEqual(run.npmCalls, []);
-    assert.match(
-      run.stderr,
-      new RegExp(
-        `prebuilt tarball stale\\.tgz does not match \\./package\\.json: version "0\\.0\\.1" \\(expected "${ROOT_MANIFEST.version.replace(/\./g, "\\.")}"\\)`
-      )
+    assert.ok(
+      run.stderr.includes(
+        `prebuilt tarball stale.tgz does not match ./package.json: version "0.0.1" (expected "${ROOT_MANIFEST.version}")`
+      ),
+      run.stderr
     );
     assert.doesNotMatch(run.stdout, /npm pack artifact summary/);
   })
