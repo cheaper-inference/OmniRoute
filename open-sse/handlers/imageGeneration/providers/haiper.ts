@@ -9,7 +9,7 @@ import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../../../utils/remoteMediaFetch.ts";
 
 export async function handleHaiperImageGeneration({
   model,

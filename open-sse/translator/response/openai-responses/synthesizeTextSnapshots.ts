@@ -7,10 +7,14 @@ interface Fragment {
 interface TextPart {
   fragments: Fragment[];
   length: number;
+  /** Its own output_text.done was seen. */
+  closed?: boolean;
 }
 interface TextItem {
   id?: string;
   parts: Map<number | null, TextPart>;
+  /** Its own output_item.done was seen. */
+  closed?: boolean;
 }
 interface TextTracker {
   closed: boolean;
@@ -32,6 +36,13 @@ interface Identity {
   content_index?: unknown;
 }
 type Snapshot = Record<string, unknown>;
+type SnapshotTexts = Map<number | null, string>;
+/**
+ * What an event says about its text, used to decide whether an unseen item_id on an
+ * already-tracked output_index is the same item under a rotated id (GitHub Copilot
+ * rotates item_id on every event) or a genuinely new item reusing the index.
+ */
+type RotationEvidence = { deltaContentIndex: unknown } | { snapshot: SnapshotTexts };
 
 function tracker(state: TextState): TextTracker {
   return (state.responsesTextSnapshots ??= {
@@ -55,6 +66,7 @@ function mergeParts(target: TextPart, source: TextPart): void {
   for (const fragment of source.fragments) target.fragments.push(fragment);
   target.fragments.sort((a, b) => a.order - b.order);
   target.length += source.length;
+  target.closed ||= source.closed;
 }
 function mergeItems(t: TextTracker, target: TextItem, source: TextItem): void {
   for (const [key, part] of source.parts) {
@@ -65,9 +77,59 @@ function mergeItems(t: TextTracker, target: TextItem, source: TextItem): void {
   for (const [key, item] of t.byIndex) if (item === source) t.byIndex.set(key, target);
   for (const [key, item] of t.byId) if (item === source) t.byId.set(key, target);
   if (t.anonymous === source) t.anonymous = undefined;
+  target.closed ||= source.closed;
   t.items.delete(source);
 }
-function resolveItem(t: TextTracker, identity: Identity, allowAnonymous = false): TextItem {
+function trackedText(part: TextPart): string {
+  return part.fragments.map((fragment) => fragment.text).join("");
+}
+function snapshotTextFor(
+  texts: SnapshotTexts,
+  key: number | null,
+  partCount: number
+): string | undefined {
+  const exact = texts.get(key);
+  if (exact !== undefined) return exact;
+  // An unindexed side can only pair with the other side's sole part.
+  const unindexed = key === null || texts.has(null);
+  return unindexed && texts.size === 1 && partCount === 1 ? [...texts.values()][0] : undefined;
+}
+/** A snapshot proves continuity only when it extends text already tracked for the item. */
+function continuesTrackedText(item: TextItem, texts: SnapshotTexts): boolean {
+  let matched = false;
+  for (const [key, part] of item.parts) {
+    const text = snapshotTextFor(texts, key, item.parts.size);
+    if (text === undefined) continue;
+    if (!text.startsWith(trackedText(part))) return false;
+    matched ||= part.length > 0;
+  }
+  return matched;
+}
+function isRotatedAlias(item: TextItem, evidence: RotationEvidence | undefined): boolean {
+  if (!evidence) return false;
+  if ("snapshot" in evidence) return continuesTrackedText(item, evidence.snapshot);
+  // A delta continues the tracked item only while that item and part are still open.
+  const part = item.parts.get(index(evidence.deltaContentIndex) ?? null);
+  return !item.closed && !part?.closed;
+}
+function messageTexts(snapshot: Snapshot): SnapshotTexts {
+  const texts: SnapshotTexts = new Map();
+  if (!Array.isArray(snapshot.content)) return texts;
+  snapshot.content.forEach((value, contentIndex) => {
+    const part = object(value);
+    const text = part?.type === "refusal" ? part.refusal : part?.text;
+    if ((part?.type === "output_text" || part?.type === "refusal") && typeof text === "string") {
+      texts.set(contentIndex, text);
+    }
+  });
+  return texts;
+}
+function resolveItem(
+  t: TextTracker,
+  identity: Identity,
+  allowAnonymous = false,
+  evidence?: RotationEvidence
+): TextItem {
   const id =
     typeof identity.item_id === "string" && identity.item_id ? identity.item_id : undefined;
   const outputIndex = index(identity.output_index);
@@ -75,8 +137,11 @@ function resolveItem(t: TextTracker, identity: Identity, allowAnonymous = false)
   const byId = id ? t.byId.get(id) : undefined;
   const byIndex = outputIndex !== undefined ? t.byIndex.get(outputIndex) : undefined;
   // Explicit IDs are authoritative; a malformed reused output index must not merge them.
-  const compatibleIndex =
-    byIndex && (!id || !byIndex.id || byIndex.id === id) ? byIndex : undefined;
+  // An unseen id on a tracked index is adopted only when the event proves it continues
+  // that item (a rotated id), never merely because the index matches (#19218, #19575).
+  const sameId = byIndex && (!id || !byIndex.id || byIndex.id === id);
+  const rotatedId = byIndex && !sameId && !byId && isRotatedAlias(byIndex, evidence);
+  const compatibleIndex = sameId || rotatedId ? byIndex : undefined;
   let item = byId ?? compatibleIndex;
   if (byId && compatibleIndex && byId !== compatibleIndex) mergeItems(t, byId, compatibleIndex);
   // Only a complete, single-message snapshot can prove where anonymous deltas belong.
@@ -156,7 +221,7 @@ export function recordResponsesTextDelta(state: TextState, identity: Identity, t
   const t = tracker(state);
   if (t.closed) return;
   // Missing identity is provenance we do not know yet, not the sole item/part seen so far.
-  const item = resolveItem(t, identity);
+  const item = resolveItem(t, identity, false, { deltaContentIndex: identity.content_index });
   const key = index(identity.content_index) ?? null;
   let part = item.parts.get(key);
   if (!part) {
@@ -173,11 +238,14 @@ export function reconcileResponsesTextDone(
 ): string {
   const t = tracker(state);
   if (t.closed || typeof text !== "string" || !text) return "";
-  const item = resolveItem(t, identity);
+  const snapshot: SnapshotTexts = new Map([[index(identity.content_index) ?? null, text]]);
+  const item = resolveItem(t, identity, false, { snapshot });
   if (t.anonymous && t.items.size > 1) return "";
   if (index(identity.content_index) === undefined && item.parts.size > 1) return "";
   const part = resolvePart(item, identity.content_index, false, text);
-  return part ? reconcile(t, part, text) : "";
+  if (!part) return "";
+  part.closed = true;
+  return reconcile(t, part, text);
 }
 export function bindResponsesTextItem(
   state: TextState,
@@ -224,8 +292,10 @@ export function synthesizeTextItemSnapshot(
   const item = resolveItem(
     t,
     { item_id: snapshot.id, output_index: outputIndex },
-    t.items.size === 1 && !!t.anonymous
+    t.items.size === 1 && !!t.anonymous,
+    { snapshot: messageTexts(snapshot) }
   );
+  item.closed = true;
   if (t.anonymous && t.items.size > 1) return [];
   return recoverItem(t, item, snapshot).map(({ text, field }) =>
     buildTextSnapshotChunk(state, text, field)
@@ -250,7 +320,9 @@ export function recoverTextSnapshotsByOutputIndex(
   const resolved = items.map(({ snapshot, outputIndex }) => ({
     snapshot,
     outputIndex,
-    item: resolveItem(t, { item_id: snapshot.id, output_index: outputIndex }, items.length === 1),
+    item: resolveItem(t, { item_id: snapshot.id, output_index: outputIndex }, items.length === 1, {
+      snapshot: messageTexts(snapshot),
+    }),
   }));
   if (t.anonymous && t.items.size > 1) return recovered;
   for (const { snapshot, item, outputIndex } of resolved) {

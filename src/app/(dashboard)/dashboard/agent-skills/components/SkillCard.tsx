@@ -68,7 +68,7 @@ export function SkillCard({ skill, selected, onClick }: SkillCardProps): JSX.Ele
             variant={
               skill.category === "api" ? "info" : skill.category === "cli" ? "primary" : "success"
             }
-            className="font-bold uppercase tracking-wide"
+            className="font-semibold uppercase tracking-wide"
           >
             {skill.category === "api"
               ? t("categoryApi")
@@ -78,13 +78,13 @@ export function SkillCard({ skill, selected, onClick }: SkillCardProps): JSX.Ele
           </Badge>
 
           {skill.isEntry && (
-            <Badge variant="primary" size="sm" className="font-bold uppercase tracking-wide">
+            <Badge variant="primary" size="sm" className="font-semibold uppercase tracking-wide">
               start
             </Badge>
           )}
 
           {skill.isNew && (
-            <Badge variant="warning" size="sm" className="font-bold uppercase tracking-wide">
+            <Badge variant="warning" size="sm" className="font-semibold uppercase tracking-wide">
               new
             </Badge>
           )}

@@ -1086,17 +1086,30 @@ export function pipeWithDisconnect(
     }, contentStallTimeoutMs);
   };
 
+  // A request-signal abort calls the inner controller directly (bound in
+  // createStreamController), which skips the wrapper below. Watch the same signal so
+  // that path clears the timers too; every normal terminal path detaches the listener.
+  const abortSignal = streamController.signal;
+  const clearOnAbort = () => {
+    clearWatchdogs();
+    clearContentStall();
+  };
+  const detachAbortWatch = () => abortSignal?.removeEventListener?.("abort", clearOnAbort);
+  abortSignal?.addEventListener?.("abort", clearOnAbort, { once: true });
+
   // Wrap controller so every termination path clears all watchdog timers.
   // Without this, abort/complete/error/disconnect paths leave a timer armed
   // and a stale abort could fire after the request has already ended.
   const wrappedController: StreamController = {
     ...streamController,
     handleComplete: () => {
+      detachAbortWatch();
       clearWatchdogs();
       clearContentStall();
       streamController.handleComplete();
     },
     handleError: (e: unknown) => {
+      detachAbortWatch();
       clearWatchdogs();
       clearContentStall();
       // A watchdog already fired its own handleError — the inner pull()
@@ -1106,11 +1119,13 @@ export function pipeWithDisconnect(
       streamController.handleError(e);
     },
     handleDisconnect: (reason?: string) => {
+      detachAbortWatch();
       clearWatchdogs();
       clearContentStall();
       streamController.handleDisconnect(reason);
     },
     abort: () => {
+      detachAbortWatch();
       clearWatchdogs();
       clearContentStall();
       streamController.abort();
@@ -1133,6 +1148,8 @@ export function pipeWithDisconnect(
       armStall();
       armActive();
       armContentStall();
+      // The request may already be aborted: the abort event fired before the listener.
+      if (abortSignal?.aborted) clearOnAbort();
     },
     transform(chunk, controller) {
       armStall();
@@ -1158,6 +1175,7 @@ export function pipeWithDisconnect(
       controller.enqueue(chunk);
     },
     flush() {
+      detachAbortWatch();
       clearWatchdogs();
       clearContentStall();
     },

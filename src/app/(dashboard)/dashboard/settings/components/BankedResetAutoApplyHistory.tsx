@@ -84,7 +84,7 @@ function HistoryRow({
           <span className="block font-mono text-xs text-text-muted">{entry.reason}</span>
         ) : null}
       </TableCell>
-      <TableCell className={`py-1.5 font-medium ${RESULT_CLASS[status] ?? "text-text-muted"}`}>
+      <TableCell className={`py-1.5 ${RESULT_CLASS[status] ?? "text-text-muted"}`}>
         {translatedOrRaw(t, RESULT_KEYS, status || null)}
       </TableCell>
     </TableRow>
@@ -101,23 +101,28 @@ function HistoryTable({
   const t = useTranslations("settings");
   return (
     <div className="overflow-x-auto">
-      <Table className="w-full text-left text-sm">
+      {/* The Card of the auto-apply tab is the frame around this table (#19620). */}
+      <Table
+        className="w-full text-left text-sm"
+        containerClassName="rounded-none border-0"
+        scrollbarLabel={t("bankedResetAutoApplyHistoryTitle")}
+      >
         <TableCaption className="sr-only">{t("bankedResetAutoApplyHistoryTitle")}</TableCaption>
         <TableHeader>
           <TableRow className="border-b border-border text-xs text-text-muted">
-            <TableHead scope="col" className="py-1.5 pe-3 font-medium">
+            <TableHead scope="col" className="py-1.5 pe-3">
               {t("bankedResetAutoApplyHistoryTime")}
             </TableHead>
-            <TableHead scope="col" className="py-1.5 pe-3 font-medium">
+            <TableHead scope="col" className="py-1.5 pe-3">
               {t("bankedResetAutoApplyHistoryAccount")}
             </TableHead>
-            <TableHead scope="col" className="py-1.5 pe-3 font-medium">
+            <TableHead scope="col" className="py-1.5 pe-3">
               {t("bankedResetAutoApplyHistoryCreditType")}
             </TableHead>
-            <TableHead scope="col" className="py-1.5 pe-3 font-medium">
+            <TableHead scope="col" className="py-1.5 pe-3">
               {t("bankedResetAutoApplyHistoryReason")}
             </TableHead>
-            <TableHead scope="col" className="py-1.5 font-medium">
+            <TableHead scope="col" className="py-1.5">
               {t("bankedResetAutoApplyHistoryResult")}
             </TableHead>
           </TableRow>

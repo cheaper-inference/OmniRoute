@@ -14,23 +14,24 @@ Mai rarrabawa yana sanya wa kowace isarwa sa hannun HMAC-SHA256, yana sake gwada
 gazawa ta wucin gadi, yana bibiyar lafiyar isarwa ga kowane webhook, sannan yana kashe endpoints da
 suka ci gaba da gazawa ta atomatik.
 
-## Abubuwan da Ake Tallafawa
+## Abubuwan Taimako
 
-Nau'in `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, wanda `src/lib/webhookDispatcher.ts` ke amfani da shi) a halin yanzu yana wakiltar abubuwa huɗu kacal:
+Nau'in `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, wanda `src/lib/webhookDispatcher.ts` ke cinyewa) a halin yanzu yana ƙirƙira abubuwa takwas:
 
-| Abu                 | Lokacin da yake faruwa                                               |
-| ------------------- | -------------------------------------------------------------------- |
-| `request.completed` | Buƙatar da aka tura ta wakili ta kammala cikin nasara                |
-| `request.failed`    | Buƙatar da aka tura ta wakili ta gaza bayan duk sake-gwadawa/madadin |
-| `quota.exceeded`    | Maɓallin API ya ƙetare iyakar kasafi/quota                           |
-| `test.ping`         | Abu na kwaikwayo da endpoint na gwaji ke amfani da shi               |
+| Lamarin                   | Wuta lokacin                                                                                                  |
+| ------------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `request.completed`       | An kammala buƙatun wakili cikin nasara                                                                        |
+| `request.failed`          | Neman wakili ya gaza bayan duk retries/fallback                                                               |
+| `quota.exceeded`          | Maɓallin API ya ketare madaidaicin budget/quota                                                               |
+| `proxy.set_aside`         | An keɓe memba na tafkin wakili bayan an ƙi maimaitawa (canji kawai)                                           |
+| `proxy.pool.exhausted`    | An keɓe kowane memba na keɓan wurin wurin wakilta                                                             |
+| `provider.reset_redeemed` | Sake saitin banki da aka yi ta atomatik ya fanshi kiredit na sake saiti ko sake saitin zaman mako-mako Claude |
+| `provider.exhausted`      | Kowane asusu na mai badawa yana sanyaya (akalla sau ɗaya kowane mai bayarwa kowane minti 10)                  |
+| `test.ping`               | Lamarin da aka yi amfani da shi ta hanyar ƙarshen gwajin                                                      |
 
-Rajista suna karɓar ainihin `"*"` don karɓar kowane abu. Ana watsi da sunayen abubuwan da ba a sani ba
-a cikin `events` a lokacin rarrabawa.
+Biyan kuɗi suna karɓar ainihin `"*"` don karɓar kowane taron. Sunayen taron da ba a san su ba a cikin `events` ana watsi da su a lokacin aikawa.
 
-> Lura: an haɗa API na mai rarrabawa, amma wuraren kiran production na wasu daga cikin
-> abubuwan da ba `test.ping` ba har yanzu suna kan shigowa. Duba `grep dispatchEvent` don ganin
-> waɗanne hanyoyi ne suke kiran mai rarrabawa a halin yanzu a cikin fitowarku.
+> Lura: mai aikawa API yana da waya, amma wuraren samarwa don wasu abubuwan da ba na `test.ping` ba har yanzu suna sauka. Bincika `grep dispatchEvent` don ganin waɗanne hanyoyi a halin yanzu ke kiran mai aikawa a cikin sakin ku.
 
 ## Tsarin Gine-gine
 

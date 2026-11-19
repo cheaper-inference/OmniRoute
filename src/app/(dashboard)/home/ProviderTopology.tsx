@@ -152,7 +152,7 @@ function ModelNode({ data }: { data: ModelNodeData }) {
       className="flex items-center gap-1.5 px-2 py-0.5 rounded-full border bg-bg font-mono text-[10px] transition-all duration-300 cursor-pointer max-w-[136px] motion-reduce:[&_.animate-ping]:hidden"
       style={{
         borderColor: active ? color : "var(--color-border)",
-        boxShadow: active ? `0 0 10px ${color}40` : "none",
+        boxShadow: active ? `0 0 10px ${flowColorAlpha(color, 25)}` : "none",
         color: active ? color : "var(--color-text-muted)",
       }}
       title={label}
@@ -211,9 +211,9 @@ function RouterNode({ data }: { data: RouterNodeData }) {
       <div className="flex items-center justify-center size-7 rounded-md bg-primary/15 shrink-0">
         <Icon name="route" size={16} className="text-primary" />
       </div>
-      <span className="text-sm font-bold text-primary">OmniRoute</span>
+      <span className="text-sm font-semibold text-primary">OmniRoute</span>
       {data.activeCount > 0 && (
-        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary text-accent-foreground text-[10px] font-bold leading-none">
+        <span className="ml-1 px-1.5 py-0.5 rounded-full bg-primary text-accent-foreground text-[10px] font-semibold leading-none">
           {data.activeCount}
         </span>
       )}
@@ -449,7 +449,7 @@ function ModelModeToolbar({
             aria-pressed={selected}
             title={t(hintKey)}
             onClick={() => onChange(mode)}
-            className={`px-2 py-0.5 rounded font-semibold transition-colors ${
+            className={`px-2 py-0.5 rounded transition-colors ${
               selected ? "bg-primary text-accent-foreground" : "text-text-muted hover:bg-bg-subtle"
             }`}
           >

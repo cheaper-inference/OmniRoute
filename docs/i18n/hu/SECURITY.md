@@ -4,13 +4,13 @@
 
 ---
 
-## Sérülékenységek bejelentése
+## Sebezhetőségek jelentése
 
-Ha biztonsági sérülékenységet fedez fel az OmniRoute-ban, kérjük, felelősségteljesen jelentse:
+Ha a OmniRoute biztonsági rését fedezi fel, kérjük, felelősségteljesen jelentse:
 
-1. **NE** nyisson nyilvános GitHub-hibajegyet
-2. Használja a [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) felületét
-3. Adja meg a következőket: leírás, reprodukálási lépések és lehetséges hatás
+1. **DO NOT** nyisson meg egy nyilvános GitHub kiadást
+2. Használja [GitHub biztonsági figyelmeztetéseket](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Tartalmazza: leírás, reprodukálási lépések és lehetséges hatás
 
 ## Válaszadási ütemezés
 
@@ -29,25 +29,14 @@ Ha biztonsági sérülékenységet fedez fel az OmniRoute-ban, kérjük, felelő
 | 3.7.x   | ✅ Biztonsági támogatás                         |
 | < 3.7.0 | ❌ Nem támogatott                               |
 
-## LTS-támogatási időszak (v3.9.x)
+## LTS támogatási ablak (v3.9.x)
 
-A 3.8.59 után következő verzió a **3.9.0**, amely megnyitja a hosszú távú támogatási ágat a
-`stable/v3` ágon (lásd: [`ROADMAP.md`](ROADMAP.md) → „3. fázis — v3.9.0 LTS”).
+3.8.59 után a következő verzió** 3.9.0** , amely megnyitja a hosszú távú támogatási vonalat a `stable/v3` ágon (lásd [`ROADMAP.md`](ROADMAP.md) → "Phase 3 — v3.9.0 LTS").
 
-- **Mit kap a `stable/v3`:** hibajavításokat, biztonsági javításokat és szolgáltatói frissítéseket. Az új
-  funkciók a v4 csatornába kerülnek; az LTS-ág elsődleges célja a stabilitás. Az `npm install omniroute`
-  (a `latest` dist-tag) a teljes v4-ciklus alatt a v3 verzión marad.
-- **Az időszak hossza:** a `stable/v3` **a 3.9.0 kiadását követő 12 hónapig, vagy addig az időpontig kap
-  biztonsági javításokat és kritikus regressziójavításokat, amely 90 nappal azután következik be, hogy a v4.0.0 `latest` jelöléssel megjelenik —
-  attól függően, hogy melyik a későbbi időpont**. Az így meghatározott záró dátumot a 3.9.0 kiadási megjegyzéseiben és a
-  [`ROADMAP.md`](ROADMAP.md) fájlban rögzítjük a kiadáskor.
-- **Biztonsági rés jelentése az LTS-ágban:** ugyanazon a csatornán történik, mint bármely más verziónál —
-  privát [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) formájában,
-  soha nem nyilvános hibajegyként. Adja meg, melyik verziót tesztelte (például `3.9.2`); a javítások a
-  `stable/v3` ágra kerülnek, majd átvezetjük őket a v4-be.
-- **Biztonsági alapállapot az LTS kiadásakor:** a mérőeszközökkel rögzített állapotot, az útvonalvédelmi és
-  a nyilvános hitelesítő adatokra vonatkozó ellenőrzések eredményeit a
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) dokumentum tartalmazza.
+- **Amit `stable/v3` kap:** hibajavítások, biztonsági javítások és szolgáltatói frissítések. Az új funkciók a v4 csatornához kerülnek; a LTS sor a stabilitás az első. `npm install omniroute` (a `latest` dist-tag) a v3-on marad a teljes v4 ciklus alatt.
+- **Ablak időtartama:** `stable/v3` kap** biztonsági javítások és kritikus regressziók 12 hónapig a 3.9.0 vágás után, vagy a v4.0.0 `latest` — néven történő közzététele után 90 napig, attól függően, hogy melyik a későbbi** . Az eredményül kapott befejezési dátum a 3.9.0 kiadási megjegyzésekben és [`ROADMAP.md`](ROADMAP.md) ben rögzítésre kerül, amikor a vágás megtörténik.
+- **A LTS sor sérülékenységének jelentése:** ugyanaz a csatorna, mint bármely más verzió — privát [GitHub biztonsági tanácsadó](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), soha nem nyilvános probléma. Mondja meg, melyik verziót tesztelte (például `3.9.2`); javítások landolnak `stable/v3`, és előre portolják a v4-re.
+- **Biztonsági alapvonal a LTS vágásnál:** A mért szkenner állapot, az útvonal-őrzés és a nyilvános hitelesítő adatok [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) -ben vannak rögzítve.
 
 ---
 

@@ -4,7 +4,7 @@ import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
 import { MemoryReindexSchema } from "@/shared/schemas/memory";
 import { runReindexBatch, getReindexPending } from "@/lib/memory/reindex";
 import { createReindexDrainController } from "@/lib/memory/reindexDrain";
-import { markAllMemoriesNeedReindex } from "@/lib/db/memoryVec";
+import { markAllMemoriesNeedReindex, isMemoryVecIndexMissing } from "@/lib/db/memoryVec";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { logger } from "@omniroute/open-sse/utils/logger.ts";
 
@@ -54,7 +54,12 @@ export async function POST(request: Request) {
     // processed rows even though start() correctly refuses a second worker.
     // Keep the pending count in the response and preserve the empty-queue
     // {started:true} behavior for an idle worker.
-    const started = reindexDrain.start(force ? markAllMemoriesNeedReindex : undefined);
+    // Memories that exist while vec_memories does not (saved before an
+    // embedding source was configured) are never flagged needs_reindex, so a
+    // plain reindex would drain 0 rows. The dashboard button always sends
+    // force:false, so rebuild in that case too.
+    const rebuild = force || isMemoryVecIndexMissing();
+    const started = reindexDrain.start(rebuild ? markAllMemoriesNeedReindex : undefined);
     const pending = getReindexPending();
     return NextResponse.json({ started, pending });
   } catch (err: unknown) {

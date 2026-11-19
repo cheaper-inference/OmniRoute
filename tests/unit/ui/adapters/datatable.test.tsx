@@ -175,7 +175,8 @@ describe("DataTable family adapters", () => {
     const search = screen.getByRole("searchbox", { name: "Search" });
     fireEvent.change(search, { target: { value: "cl" } });
     expect(onSearchChange).toHaveBeenCalledWith("cl");
-    // FilterBar passes `options`, so the shared Select is the kit (Radix) Select (track C).
+    // FilterBar uses the platform picker on phones: a real <select>, read through the helpers.
+    expect(screen.getByRole("combobox", { name: "Status" }).tagName).toBe("SELECT");
     const select = screen.getByRole("combobox", { name: "Status" });
     expect(kitSelectValue(select)).toBe("ok");
     chooseKitSelectValue(select, "down");
