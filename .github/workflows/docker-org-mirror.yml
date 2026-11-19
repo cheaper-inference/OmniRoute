@@ -51,6 +51,15 @@ jobs:
     name: Copy release to cheaperinference/omniroute
     runs-on: ${{ vars.DOCKER_AMD64_RUNNER == 'blacksmith' && 'blacksmith-2vcpu-ubuntu-2404' || 'ubuntu-latest' }}
     timeout-minutes: 45
+    # One group for every mirror run, whatever the caller: docker-publish groups by github.ref,
+    # so two releases never share its group and their mirrors could otherwise overlap. Queued
+    # here, the later run re-reads origin's tags (the script's :latest recheck) after the earlier
+    # one finished, so an older release cannot move :latest back. GitHub keeps one pending run per
+    # group: a pending mirror replaced by a newer one shows as cancelled and is re-run with a
+    # workflow_dispatch of this workflow.
+    concurrency:
+      group: docker-org-mirror
+      cancel-in-progress: false
     permissions:
       contents: read
     env:
@@ -66,6 +75,7 @@ jobs:
         uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4
 
       - name: Copy the release images
+        id: mirror
         env:
           VERSION: ${{ inputs.version }}
           PROMOTE_LATEST: ${{ inputs.promote_latest && 'true' || 'false' }}
@@ -74,7 +84,9 @@ jobs:
         run: node scripts/ci/docker-org-mirror.mjs
 
       - name: Update the org repository description
-        if: env.HAS_ORG_CREDENTIALS == 'true' && inputs.promote_latest
+        # The README follows :latest: only when this run actually moved it (the script rechecks
+        # the promote_latest request against origin's tags and may decline it).
+        if: env.HAS_ORG_CREDENTIALS == 'true' && steps.mirror.outputs.promoted == 'true'
         continue-on-error: true
         uses: peter-evans/dockerhub-description@1b9a80c056b620d92cedb9d9b5a223409c68ddfa # v5
         with:
