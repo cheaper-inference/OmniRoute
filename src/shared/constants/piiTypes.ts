@@ -36,6 +36,12 @@ export const PII_BUILTIN_TYPES = [
   "za_phone",
   "za_vat",
   "za_tax_ref",
+  // Russia (RU)
+  "phone_ru",
+  "passport_ru",
+  "snils_ru",
+  "inn_ru",
+  "vin",
 ] as const;
 
 export type PiiBuiltinType = (typeof PII_BUILTIN_TYPES)[number];
@@ -80,6 +86,7 @@ export const PII_TEMPLATES: ReadonlyArray<{ id: string; types: readonly PiiBuilt
     ],
   },
   { id: "popia", types: ["email", "za_id", "za_phone", "za_vat", "za_tax_ref"] },
+  { id: "russian", types: ["phone_ru", "passport_ru", "snils_ru", "inn_ru", "vin", "email"] },
   { id: "full", types: [...PII_BUILTIN_TYPES] },
 ];
 

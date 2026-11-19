@@ -11,7 +11,7 @@ import { getFeatureFlagOverride } from "@/lib/db/featureFlags";
 import { parseEnvBoolean } from "@/shared/utils/envBoolean";
 import { resolveBlockThreshold, shouldBlockDetections } from "@/shared/utils/injectionSeverity";
 import { PII_REQUEST_TYPE_ALIASES } from "@/shared/constants/piiTypes";
-import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
+import { buildGdprPopiaRules, buildRuPiiRules, precedingContext } from "@/shared/utils/piiPatterns";
 
 // ─── Prompt Injection Patterns ───────────────────────────────────────
 
@@ -157,6 +157,14 @@ const PII_PATTERNS = [
   // validated ID keeps its own label. Order numbers, timestamps and identifiers such as
   // `gpt4o` or `gh12abc` stay untouched.
   ...buildGdprPopiaRules().map((rule) => ({
+    name: rule.name,
+    pattern: rule.regex,
+    replacement: rule.replacement,
+    validate: rule.validate,
+  })),
+  // Russia (RU) identifiers, shared with the response-side sanitizer. Placed ahead of
+  // phone_br so validated RU phones and 10-digit INNs keep their own labels.
+  ...buildRuPiiRules().map((rule) => ({
     name: rule.name,
     pattern: rule.regex,
     replacement: rule.replacement,

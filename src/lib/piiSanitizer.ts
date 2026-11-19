@@ -16,7 +16,7 @@
 import { isFeatureFlagEnabled, resolveFeatureFlag } from "@/shared/utils/featureFlags";
 import { getPiiRuleConfig, type PiiRuleConfig } from "@/lib/pii/piiRuleConfig";
 import { recordPiiDetections } from "@/lib/pii/piiDetectionStats";
-import { buildGdprPopiaRules, precedingContext } from "@/shared/utils/piiPatterns";
+import { buildGdprPopiaRules, buildRuPiiRules, precedingContext } from "@/shared/utils/piiPatterns";
 
 const isEnabled = () => isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION");
 
@@ -76,6 +76,9 @@ const PII_PATTERNS: PIIPattern[] = [
   // (src/shared/utils/piiPatterns.ts). Every match goes through its validator, and the
   // group sits ahead of the generic phone patterns so a validated ID keeps its own label.
   ...buildGdprPopiaRules(),
+  // Russia (RU) identifiers, placed ahead of phone_us/phone_br/cpf so validated RU
+  // phones, SNILS, passports, INNs and VINs keep their own labels.
+  ...buildRuPiiRules(),
   {
     name: "phone_us",
     regex:
@@ -229,11 +232,13 @@ export function sanitizePII(
     end: number;
     replacement: string;
     pattern: string;
+    priority: number;
   }
   const ranges: RedactRange[] = [];
   let endMatchIndex: number | undefined = undefined;
 
-  for (const pattern of activePatterns) {
+  for (let priority = 0; priority < activePatterns.length; priority++) {
+    const pattern = activePatterns[priority];
     pattern.regex.lastIndex = 0;
     let match;
     while ((match = pattern.regex.exec(cleanText)) !== null) {
@@ -280,6 +285,7 @@ export function sanitizePII(
           end,
           replacement: pattern.replacement,
           pattern: pattern.name,
+          priority,
         });
       }
 
@@ -335,6 +341,11 @@ export function sanitizePII(
         if (r.end >= last.start) {
           last.start = Math.min(r.start, last.start);
           last.end = Math.max(r.end, last.end);
+          if (r.priority < last.priority) {
+            last.replacement = r.replacement;
+            last.pattern = r.pattern;
+            last.priority = r.priority;
+          }
         } else {
           mergedRanges.push(r);
         }
