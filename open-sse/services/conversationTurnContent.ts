@@ -149,7 +149,7 @@ export function resolveTurnDisplayContent(
     const { artifact, state } = readCallArtifact(relPath);
     if (state !== "ready") continue;
     const pipeline = asRecord(artifact?.pipeline);
-    indexTurns(result, turnsFromBody(asRecord(pipeline?.clientRawRequest)?.body));
+    indexTurns(result, turnsFromBody(artifact?.requestBody ?? asRecord(pipeline?.clientRawRequest)?.body));
     indexTurns(result, turnsFromClientResponse(pipeline?.clientResponse));
     indexTurns(result, turnsFromProviderRequest(asRecord(pipeline?.providerRequest)?.body));
   }
