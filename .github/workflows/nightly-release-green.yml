@@ -442,6 +442,19 @@ jobs:
 
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "in:title $TITLE" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          # The observer can finish after another commit reaches the branch.
+          # Keep its verdict and artifact tied to the tested SHA.
+          REF="refs/heads/$TARGET"
+          REMOTE_ENTRY=$(git ls-remote --exit-code --refs origin "$REF") || REMOTE_ENTRY=""
+          CURRENT_SHA=${REMOTE_ENTRY%%$'\t'*}
+          if [[ ! "$CURRENT_SHA" =~ ^[0-9a-f]{40}$ || "$REMOTE_ENTRY" != "$CURRENT_SHA"$'\t'"$REF" ]]; then
+            echo "::warning::Could not verify the current revision of $REF; skipping the tracking issue update."
+            exit 0
+          fi
+          if [ "$CURRENT_SHA" != "$VALIDATED_SHA" ]; then
+            echo "::notice::Skipping the tracking issue update for $REF at $VALIDATED_SHA (current $CURRENT_SHA)."
+            exit 0
+          fi
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file issue-body.md
             echo "Updated existing issue #$EXISTING"
@@ -804,6 +817,19 @@ jobs:
 
           EXISTING=$(gh issue list --repo "$GITHUB_REPOSITORY" --state open \
             --search "in:title $TITLE" --json number --jq '.[0].number' 2>/dev/null || echo "")
+          # The observer can finish after another commit reaches the branch.
+          # Keep its verdict and artifact tied to the tested SHA.
+          REF=refs/heads/main
+          REMOTE_ENTRY=$(git ls-remote --exit-code --refs origin "$REF") || REMOTE_ENTRY=""
+          CURRENT_SHA=${REMOTE_ENTRY%%$'\t'*}
+          if [[ ! "$CURRENT_SHA" =~ ^[0-9a-f]{40}$ || "$REMOTE_ENTRY" != "$CURRENT_SHA"$'\t'"$REF" ]]; then
+            echo "::warning::Could not verify the current revision of $REF; skipping the tracking issue update."
+            exit 0
+          fi
+          if [ "$CURRENT_SHA" != "$VALIDATED_SHA" ]; then
+            echo "::notice::Skipping the tracking issue update for $REF at $VALIDATED_SHA (current $CURRENT_SHA)."
+            exit 0
+          fi
           if [ -n "$EXISTING" ]; then
             gh issue comment "$EXISTING" --repo "$GITHUB_REPOSITORY" --body-file issue-body.md
             echo "Updated existing issue #$EXISTING"
