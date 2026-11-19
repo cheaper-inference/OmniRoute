@@ -939,6 +939,12 @@ export function openaiResponsesToOpenAIRequest(
     ];
   });
 
+  // Upstream providers reject messages:[] (see the empty-input placeholder above). Skipped
+  // replay items or dropped tool results can still leave nothing: keep the same placeholder.
+  if (Array.isArray(result.messages) && result.messages.length === 0) {
+    result.messages = [{ role: "user", content: "..." }];
+  }
+
   // Translate tool_choice object format: Responses {type,name} → Chat {type,function:{name}}
   if (
     result.tool_choice &&

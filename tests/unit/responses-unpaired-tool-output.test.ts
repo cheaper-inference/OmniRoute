@@ -94,3 +94,11 @@ test("Responses -> Chat: a custom_tool_call with a call_id is untouched", () => 
     ]
   );
 });
+
+test("Responses -> Chat: when the blank-id pair is the whole input, one placeholder message stays", () => {
+  const messages = toChat([
+    { type: "custom_tool_call", call_id: "", name: "apply_patch", input: "x" },
+    { type: "custom_tool_call_output", call_id: "", output: "patched text" },
+  ]);
+  assert.deepEqual(messages, [{ role: "user", content: "..." }]);
+});
