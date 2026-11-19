@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Limit musí byť kladné celé číslo.",
     "error": "Chyba: {message}",
     "serverOffline": "Server OmniRoute je offline. Spustite: omniroute serve",
     "authRequired": "Vyžaduje sa overenie. Nastavte OMNIROUTE_API_KEY alebo spustite: omniroute setup",

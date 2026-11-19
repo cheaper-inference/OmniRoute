@@ -1,0 +1,1 @@
+- **chore(ci):** SonarCloud analyses go to the `cheaper-inference_OmniRoute` project of the Cheaper Inference organization instead of the personal `diegosouzapw_OmniRoute` ([#20633](https://github.com/cheaper-inference/OmniRoute/pull/20633))
