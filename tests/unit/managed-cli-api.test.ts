@@ -250,3 +250,30 @@ test("npm policy requirement reaches the browser with its actionable message", a
   assert.equal(payload.error.details.code, "npm_policy_unsupported");
   assert.equal(payload.error.message, message);
 });
+
+test("HTTP route guards both handlers before dispatch, including with login disabled", async () => {
+  const { GET, POST } = await import("../../src/app/api/cli-tools/runtime/managed/route.ts");
+  for (const handler of [GET, POST]) {
+    const method = handler === GET ? "GET" : "POST";
+    for (const locality of ["", "unknown", "remote", "loopback", "lan"]) {
+      const response = await handler(
+        new Request(url, {
+          method,
+          headers: { [AUTHZ_HEADER_PEER_LOCALITY]: locality },
+        })
+      );
+      assert.equal(response.status, locality === "loopback" || locality === "lan" ? 401 : 403);
+      assert.equal(response.headers.get("cache-control"), "no-store");
+    }
+    const remote = await makeManagementSessionRequest(url, {
+      method,
+      headers: { [AUTHZ_HEADER_PEER_LOCALITY]: "remote" },
+    });
+    assert.equal((await handler(remote)).status, 403);
+  }
+  // A locally authenticated request reaches validation, not runtime installation.
+  const validSession = await authenticated("invalid-json");
+  const response = await POST(validSession);
+  assert.equal(response.status, 400);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+});

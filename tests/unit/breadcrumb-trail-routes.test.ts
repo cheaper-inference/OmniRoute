@@ -201,3 +201,10 @@ test("a route with a sidebar entry and no breadcrumb key shows the sidebar label
   // Data segments (ids) have no label.
   assert.deepEqual(breadcrumbLabelRefs("openai", "/dashboard/providers/openai"), []);
 });
+
+test("CLI runtime updates has a localized breadcrumb and a navigable page", () => {
+  assert.deepEqual(breadcrumbLabelRefs("runtimes", "/dashboard/cli-code/runtimes"), [
+    { namespace: "breadcrumbs", key: "runtimeUpdates" },
+  ]);
+  assert.equal(routeHasPage("/dashboard/cli-code/runtimes"), true);
+});

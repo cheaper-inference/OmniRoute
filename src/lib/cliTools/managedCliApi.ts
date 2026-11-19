@@ -32,10 +32,7 @@ function noStore(response: Response): Response {
   return response;
 }
 
-export async function handleManagedCliRequest(
-  request: Request,
-  dependencies: ManagedCliApiDependencies = {}
-): Promise<Response> {
+export function requireManagedCliLocality(request: Request): Response | null {
   // This trusted stamp is written by the peer guard; client-supplied copies are stripped there.
   const locality = request.headers.get(AUTHZ_HEADER_PEER_LOCALITY);
   if (locality !== "loopback" && locality !== "lan") {
@@ -47,9 +44,26 @@ export async function handleManagedCliRequest(
       })
     );
   }
+  return null;
+}
+
+/** Guarded entry for callers outside the HTTP route. */
+export async function handleManagedCliRequest(
+  request: Request,
+  dependencies: ManagedCliApiDependencies = {}
+): Promise<Response> {
+  const localityError = requireManagedCliLocality(request);
+  if (localityError) return localityError;
   const authError = await requireCliToolsAuth(request, { alwaysRequireAuth: true });
   if (authError) return noStore(authError);
+  return handleAuthorizedManagedCliRequest(request, dependencies);
+}
 
+/** Internal dispatch: HTTP routes must complete locality and management auth first. */
+export async function handleAuthorizedManagedCliRequest(
+  request: Request,
+  dependencies: ManagedCliApiDependencies = {}
+): Promise<Response> {
   try {
     if (request.method === "GET") {
       const items = await (dependencies.list ?? listManagedCliRuntimes)();

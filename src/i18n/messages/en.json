@@ -1899,6 +1899,7 @@
     "apiKeys": "API Keys",
     "models": "Models",
     "cliCode": "CLI Code",
+    "runtimeUpdates": "Runtime updates",
     "cliAgents": "CLI Agents",
     "acpAgents": "ACP Agents",
     "endpoint": "Endpoint",
