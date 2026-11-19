@@ -133,6 +133,7 @@ import { resolveApiKeyForbiddenFallback } from "./accountFallback/nonRetryableUp
 import * as exactModelLock from "./accountFallback/exactModelLock.ts";
 import { isCreditsExhaustedWithSharedWallet } from "./accountFallback/sharedWalletCredits.ts";
 import { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
+import { isCreditsExhaustedForStatus } from "./accountFallback/creditsExhaustedForStatus.ts";
 export { CREDITS_EXHAUSTED_SIGNALS } from "./accountFallback/creditExhaustionSignals.ts";
 import { isMistralAmbiguous401 } from "./accountFallback/mistralAmbiguousAuth.ts";
 import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
@@ -2197,7 +2198,10 @@ export function checkFallbackError(
 
     // T10 (sub2api #1169) + #8247: credits/quota exhausted; per-model-quota providers stay model-scoped
     // unless the body is an account-level Open Platform empty wallet.
-    if (shouldUseQuotaSignal && isCreditsExhausted(errorStr)) {
+    if (
+      shouldUseQuotaSignal &&
+      isCreditsExhaustedForStatus(status, provider, errorStr, structuredError?.code)
+    ) {
       return {
         shouldFallback: true,
         cooldownMs: COOLDOWN_MS.paymentRequired ?? 3600 * 1000, // 1h cooldown
