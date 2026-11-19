@@ -30,7 +30,7 @@ import {
 // decolua/9router#1243.
 const DEFAULT_STREAM_STALL_TIMEOUT_MS = STREAM_IDLE_TIMEOUT_MS;
 const SSE_EVENT_BOUNDARY = new TextEncoder().encode("\n\n");
-/** How long a withheld terminal waits for the upstream to end before it is judged. */
+/** How long a withheld terminal waits for the upstream to end before it is released. */
 const HELD_TERMINAL_GRACE_MS = 1000;
 
 type StreamController = ReturnType<typeof createStreamController>;
