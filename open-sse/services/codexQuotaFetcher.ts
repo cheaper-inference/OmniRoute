@@ -22,6 +22,7 @@ import {
 } from "../config/codexQuotaScopes.ts";
 import {
   registerQuotaCacheInvalidator,
+  registerQuotaCachePeek,
   registerQuotaFetcher,
   registerQuotaWindows,
   type QuotaInfo,
@@ -87,6 +88,13 @@ interface CacheEntry {
 
 // In-memory cache: connectionId → { quota, fetchedAt }
 const quotaCache = new Map<string, CacheEntry>();
+
+// Network reads in progress, keyed like quotaCache. `meta` pins the credential
+// epoch so a caller never receives a read made with someone else's token.
+const inFlightQuotaFetches = new Map<
+  string,
+  { meta: CodexConnectionMeta; promise: Promise<CodexDualWindowQuota | null> }
+>();
 
 function sweepQuotaCache(): void {
   const now = Date.now();
@@ -230,11 +238,37 @@ export async function fetchCodexQuota(
   // Resolve credentials first: a connection id can be reused for a different owner.
   const meta = getCodexConnectionMeta(connectionId, connection);
   if (!meta?.accessToken) return null;
-  const isCurrent = () => connectionRegistry.get(connectionId) === meta;
   const cached = quotaCache.get(cacheKey);
   if (cached && Date.now() - cached.fetchedAt < CACHE_TTL_MS) {
     return cached.quota;
   }
+
+  // One network read per (connection, scope, credential epoch) at a time. The
+  // combo's reset-aware refresh and the request's own preflight both miss the
+  // cache at the same TTL boundary; without sharing, the second caller queued a
+  // duplicate fetch behind the global throttle and the request waited for both.
+  const inFlight = inFlightQuotaFetches.get(cacheKey);
+  if (inFlight && inFlight.meta === meta) return inFlight.promise;
+
+  const promise = fetchCodexQuotaFromUpstream(connectionId, cacheKey, requestedModel, meta, cached);
+  inFlightQuotaFetches.set(cacheKey, { meta, promise });
+  try {
+    return await promise;
+  } finally {
+    if (inFlightQuotaFetches.get(cacheKey)?.promise === promise) {
+      inFlightQuotaFetches.delete(cacheKey);
+    }
+  }
+}
+
+async function fetchCodexQuotaFromUpstream(
+  connectionId: string,
+  cacheKey: string,
+  requestedModel: string | null,
+  meta: CodexConnectionMeta,
+  cached: CacheEntry | undefined
+): Promise<CodexDualWindowQuota | null> {
+  const isCurrent = () => connectionRegistry.get(connectionId) === meta;
 
   try {
     const headers: Record<string, string> = {
@@ -297,6 +331,22 @@ export async function fetchCodexQuota(
   }
 }
 
+/**
+ * Last successful read for this connection/scope, without any network call, so
+ * preflight can decide whether waiting for a refresh is worth it. Returns null
+ * when nothing was read yet or the credentials changed since (a cache entry is
+ * dropped whenever the registered credential epoch changes).
+ */
+export function peekCodexQuota(
+  connectionId: string,
+  connection?: Record<string, unknown>
+): { quota: CodexDualWindowQuota; fetchedAt: number } | null {
+  const meta = getCodexConnectionMeta(connectionId, connection);
+  if (!meta?.accessToken) return null;
+  const cached = quotaCache.get(getQuotaCacheKey(connectionId, getRequestedModel(connection)));
+  return cached ? { quota: cached.quota, fetchedAt: cached.fetchedAt } : null;
+}
+
 // ─── Quota-Aware Reset Time ───────────────────────────────────────────────────
 
 /**
@@ -348,6 +398,7 @@ export function invalidateCodexQuotaCache(connectionId: string): void {
 export function registerCodexQuotaFetcher(): void {
   registerQuotaFetcher("codex", fetchCodexQuota);
   registerQuotaCacheInvalidator("codex", invalidateCodexQuotaCache);
+  registerQuotaCachePeek("codex", peekCodexQuota);
   registerMonitorFetcher("codex", fetchCodexQuota);
   registerQuotaWindows("codex", [
     CODEX_WINDOW_SESSION,
