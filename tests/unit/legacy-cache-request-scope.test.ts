@@ -168,3 +168,15 @@ test("pragma: no-cache is a bypass on read, like cache-control: no-cache", () =>
   assert.equal(sem.isCacheableForRead(body, { "cache-control": "no-cache" }), false);
   assert.equal(sem.isCacheableForRead(body, {}), true);
 });
+
+test("a Responses call on a conversation is never served from the cache", async () => {
+  // The conversation grows upstream with every turn, so the same body and id can need a new
+  // answer later: the id in the key alone cannot make a cached reply current.
+  for (const conversation of ["conv_read_A", { id: "conv_read_B" }]) {
+    const body = { ...question("conversation read question 6"), conversation };
+    assert.equal(sem.isCacheableForRead(body, {}), false, JSON.stringify(conversation));
+    store(body, {}, "turn-one-answer");
+    assert.equal(await served(body, {}), null, JSON.stringify(conversation));
+  }
+  assert.equal(sem.isCacheableForRead(question("conversation read question 6"), {}), true);
+});

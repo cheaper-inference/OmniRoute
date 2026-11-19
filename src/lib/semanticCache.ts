@@ -589,6 +589,9 @@ export function getCacheStats() {
 export function isCacheableForRead(body, headers) {
   if (isCacheBypassedByHeaders(headers)) return false;
   if (typeof body.temperature !== "number" || body.temperature !== 0) return false;
+  // A Responses conversation grows upstream with every turn: the same body and conversation id
+  // can need a different answer later, so a cached reply is never current for it.
+  if (body.conversation !== undefined && body.conversation !== null) return false;
   return true;
 }
 
