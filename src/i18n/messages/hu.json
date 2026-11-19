@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Kulcs eltávolítása"
   },
   "plugins": {
+    "privilegesWarningTitle": "A beépülő modulok teljes jogosultságokkal futnak",
+    "privilegesWarningBody": "A beépülő modulok normál Node.js folyamatként futnak, ugyanazzal a hozzáféréssel, mint OmniRoute: képes fájlokat olvasni, programokat futtatni és a hálózatot használni, függetlenül attól, hogy milyen engedélyeket deklarál a manifest. Csak olyan bővítményeket telepítsen, amelyekben megbízik.",
     "title": "Bővítmények",
     "description": "Bővítmények telepítése és kezelése az OmniRoute funkcióinak kibővítéséhez",
     "loading": "Bővítmények betöltése...",

@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Hapus kunci"
   },
   "plugins": {
+    "privilegesWarningTitle": "Plugin dijalankan dengan hak penuh",
+    "privilegesWarningBody": "Sebuah plugin berjalan sebagai proses Node.js biasa dengan akses yang sama seperti OmniRoute: plugin dapat membaca file, menjalankan program dan menggunakan jaringan, apa pun izin yang dinyatakan dalam manifesnya. Instal hanya plugin yang Anda percayai.",
     "title": "Plugin",
     "description": "Instal dan kelola plugin untuk memperluas fungsionalitas OmniRoute",
     "loading": "Memuat plugin...",
