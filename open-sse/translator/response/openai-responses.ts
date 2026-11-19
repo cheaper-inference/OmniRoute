@@ -464,6 +464,8 @@ function startReasoning(state, emit, requestedIdx) {
     }
     state.reasoningId = `rs_${state.responseId}_${idx}`;
     state.reasoningIndex = idx;
+    // Every reasoning item keeps its index: a later phase must not reopen at a done one's index.
+    (state.reasoningAllocatedIndexes ??= {})[idx] = true;
 
     emit("response.output_item.added", {
       type: "response.output_item.added",
@@ -546,6 +548,7 @@ function nextFreeMessageIndex(state, requestedIdx) {
   const claimed = (i) =>
     state.msgItemAdded[i] ||
     allocatedToolIndexes[i] !== undefined ||
+    state.reasoningAllocatedIndexes?.[i] ||
     (state.reasoningId && i === normalizeOutputIndex(state.reasoningIndex));
   while (claimed(candidate)) candidate += 1;
   return candidate;
@@ -739,12 +742,18 @@ function emitToolCallAdded(state, emit, idx, outputIndex, terminal = false) {
 // message opened or relocated after the call's first delta used to shift the
 // close-time index away from the added-time index (clients keying items by
 // output_index see the identity change mid-flight). Also never land on an
-// index a message item already holds.
+// index a message, an earlier call (a replaced call keeps its own) or a
+// reasoning item already holds.
 function allocateToolOutputIndex(state, tcIdx) {
   if (!state.funcOutputIndex) state.funcOutputIndex = {};
   if (state.funcOutputIndex[tcIdx] === undefined) {
     let candidate = toolCallOutputIndexBase(state) + resolveLocalToolCallIndex(state, tcIdx);
-    while (state.msgItemAdded[candidate]) candidate += 1;
+    while (
+      state.msgItemAdded[candidate] ||
+      state.funcAllocatedOutputIndexes?.[candidate] ||
+      state.reasoningAllocatedIndexes?.[candidate]
+    )
+      candidate += 1;
     state.funcOutputIndex[tcIdx] = candidate;
   }
   return state.funcOutputIndex[tcIdx];

@@ -60,3 +60,31 @@ test("a tool without an upstream id receives a stable generated id", () => {
   assert.equal(item.call_id, added.data.item.call_id);
   assert.equal(item.arguments, "{}");
 });
+
+test("a replacement call and the next call never share an output_index", () => {
+  const state = initState(FORMATS.OPENAI_RESPONSES);
+  const send = (delta: Record<string, unknown>) =>
+    openaiToOpenAIResponsesResponse({ choices: [{ index: 0, delta }] }, state) || [];
+  const events = [
+    ...send({ tool_calls: [{ index: 0, id: "call_a", function: { name: "a", arguments: "{}" } }] }),
+    ...send({ content: "text" }),
+    ...send({ tool_calls: [{ index: 0, id: "call_b", function: { name: "b", arguments: "{}" } }] }),
+    ...send({ tool_calls: [{ index: 1, id: "call_c", function: { name: "c", arguments: "{}" } }] }),
+    ...(openaiToOpenAIResponsesResponse(
+      { choices: [{ index: 0, delta: {}, finish_reason: "tool_calls" }] },
+      state
+    ) || []),
+    ...(openaiToOpenAIResponsesResponse(null, state) || []),
+  ];
+  const addedIndexes = events
+    .filter((event) => event.event === "response.output_item.added")
+    .map((event) => event.data.output_index);
+  assert.equal(new Set(addedIndexes).size, addedIndexes.length, JSON.stringify(addedIndexes));
+  const completed = events.find((event) => event.event === "response.completed");
+  assert.deepEqual(
+    completed.data.response.output
+      .filter((item) => item.type === "function_call")
+      .map((item) => item.call_id),
+    ["call_a", "call_b", "call_c"]
+  );
+});

@@ -105,3 +105,21 @@ test("a second <think> block after text opens a second reasoning item", () => {
   assert.deepEqual(reasoningTexts(events), ["one", "two"]);
   assert.ok(unique(added(events)), JSON.stringify(added(events)));
 });
+
+test("a third reasoning phase does not reuse a completed reasoning item's index or id", () => {
+  const events = run([
+    { reasoning_content: "a" },
+    { content: "x" },
+    { reasoning_content: "b" },
+    { content: "y" },
+    { reasoning_content: "c" },
+  ]);
+  const items = added(events);
+  assert.equal(items.length, 5, JSON.stringify(items));
+  assert.ok(unique(items), JSON.stringify(items));
+  assert.deepEqual(reasoningTexts(events), ["a", "b", "c"]);
+  const ids = events
+    .filter((entry) => entry.event === "response.output_item.added")
+    .map((entry) => entry.data.item?.id);
+  assert.equal(new Set(ids).size, ids.length, JSON.stringify(ids));
+});
