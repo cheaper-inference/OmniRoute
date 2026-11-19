@@ -350,6 +350,64 @@ for (const bad of ["{", '{"result":[]}', '{"result":[{"url":"node:fs","functions
   });
 }
 
+test("a truncated producer input identifies the raw file and leaves no admitted shard", async (t) => {
+  const { packCoverageShard } = await helpers();
+  const dir = await workspace(t);
+  const inputDirectory = join(dir, "raw");
+  const outputDirectory = join(dir, "packed");
+  await mkdir(inputDirectory);
+  await writeFile(
+    join(inputDirectory, "coverage-4606-1794431026138-0.json"),
+    JSON.stringify(rawCoverage())
+  );
+  const prefix = '{"result":[{"url":"node:';
+  const raw = prefix.padEnd(262144, "x");
+  await writeFile(join(inputDirectory, rawName), raw);
+
+  await assert.rejects(
+    packCoverageShard({
+      inputDirectory,
+      outputDirectory,
+      shard: `1/${total}`,
+      candidateSha,
+      runId,
+      runAttempt,
+      sourceRoot: root,
+    }),
+    {
+      message: `V8_EVIDENCE_INCOMPLETE:invalid-raw-json {"shard":"1/${total}","rawInput":"${rawName}","bytes":262144}`,
+    }
+  );
+  assert.equal(existsSync(outputDirectory), false);
+  assert.equal(await readFile(join(inputDirectory, rawName), "utf8"), raw);
+});
+
+test("incompatible producer layouts identify both raw observations", async (t) => {
+  const { prepareCoverageShards } = await helpers();
+  const options = await matrixArtifacts(t, {
+    input(index, sourceRoot) {
+      const raw = rawCoverage(index, sourceRoot);
+      raw["source-map-cache"] = {
+        [raw.result[0].url]: { data: null, lineLengths: [index === 1 ? 80 : 81] },
+      };
+      return raw;
+    },
+  });
+  const prefix = "V8_EVIDENCE_INCOMPLETE:source-map-layout-generated-evidence-missing ";
+  await assert.rejects(prepareCoverageShards(options), (error) => {
+    assert.ok(error.message.startsWith(prefix));
+    assert.deepEqual(JSON.parse(error.message.slice(prefix.length)), {
+      source: "scripts/quality/audit-dependencies.mjs",
+      shard: 2,
+      rawInput: rawName,
+      producerProofs: 0,
+      firstObservation: { shard: 1, rawInput: rawName, producerProofs: 0 },
+    });
+    return true;
+  });
+  assert.equal(existsSync(options.outputDirectory), false);
+});
+
 test("zero-denominator coverage is incomplete even if c8 emits 100 percent", async (t) => {
   const { verifyCoverageReport } = await helpers();
   const dir = await workspace(t);
