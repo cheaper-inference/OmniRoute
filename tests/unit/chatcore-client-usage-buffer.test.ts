@@ -176,6 +176,12 @@ test("real client-visible usage is not inflated by the context safety buffer", (
       prompt_tokens: 69,
       completion_tokens: 5,
       total_tokens: 74,
+      usage_evidence: {
+        input: { source: "reported" },
+        output: { source: "reported" },
+        cacheRead: { source: "unknown" },
+        cacheCreation: { source: "unknown" },
+      },
     });
   } finally {
     if (saved === undefined) delete process.env.USAGE_TOKEN_BUFFER;
@@ -199,5 +205,11 @@ test("usage is validated against the provider-bound body with injected context",
     prompt_tokens: 15_000,
     completion_tokens: 5,
     total_tokens: 15_005,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "unknown" },
+      cacheCreation: { source: "unknown" },
+    },
   });
 });

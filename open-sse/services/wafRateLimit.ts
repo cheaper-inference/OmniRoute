@@ -17,6 +17,7 @@ import { log } from "../utils/logger.ts";
 
 interface BurstGuardState {
   lastSentAt: number;
+  tail: Promise<void>;
 }
 
 const state = new Map<string, BurstGuardState>();
@@ -50,22 +51,25 @@ export function getWafRateLimitConfig(): WafRateLimitConfig {
  * @param bucketKey Stable identifier for the upstream (e.g. "agentrouter:url").
  */
 export async function gateOutboundRequest(bucketKey: string): Promise<void> {
-  const now = Date.now();
   const bucket = state.get(bucketKey);
   if (!bucket) {
-    state.set(bucketKey, { lastSentAt: now });
+    state.set(bucketKey, { lastSentAt: Date.now(), tail: Promise.resolve() });
     return;
   }
-  const elapsed = now - bucket.lastSentAt;
-  const wait = config.minGapMs - elapsed;
-  if (wait > 0) {
-    log?.debug?.(
-      "WAF_RATE_LIMIT",
-      `Throttling outbound to ${bucketKey} — waiting ${wait}ms (min gap ${config.minGapMs}ms)`
-    );
-    await new Promise((resolve) => setTimeout(resolve, wait));
-  }
-  state.set(bucketKey, { lastSentAt: Date.now() });
+  const run = bucket.tail.then(async () => {
+    const elapsed = Date.now() - bucket.lastSentAt;
+    const wait = config.minGapMs - elapsed;
+    if (wait > 0) {
+      log?.debug?.(
+        "WAF_RATE_LIMIT",
+        `Throttling outbound to ${bucketKey} — waiting ${wait}ms (min gap ${config.minGapMs}ms)`
+      );
+      await new Promise((resolve) => setTimeout(resolve, wait));
+    }
+    bucket.lastSentAt = Date.now();
+  });
+  bucket.tail = run.catch(() => {});
+  return run;
 }
 
 /**
