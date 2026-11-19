@@ -117,6 +117,11 @@ const lazyCliUserIDCache = new Map<string, string>();
 
 const HEX64_RE = /^[a-f0-9]{64}$/i;
 
+/** True for a value `resolveCliUserID` would accept as a persisted device id. */
+export function isValidCliUserID(value: unknown): value is string {
+  return typeof value === "string" && HEX64_RE.test(value);
+}
+
 /**
  * Resolve the cliUserID for an account, in priority order:
  *   1. providerSpecificData.cliUserID — persisted at OAuth provisioning.
