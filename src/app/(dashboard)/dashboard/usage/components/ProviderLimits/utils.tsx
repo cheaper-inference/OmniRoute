@@ -526,10 +526,13 @@ export function getBarColor(remainingPercentage: number): {
   };
 }
 
-export function formatCountdown(resetAt: string | null | undefined): string | null {
+export function formatCountdown(
+  resetAt: string | null | undefined,
+  now: number = Date.now()
+): string | null {
   if (!resetAt) return null;
   try {
-    const diff = new Date(resetAt).getTime() - Date.now();
+    const diff = new Date(resetAt).getTime() - now;
     if (diff <= 0) return null;
     const h = Math.floor(diff / 3_600_000);
     const m = Math.floor((diff % 3_600_000) / 60_000);
@@ -543,9 +546,11 @@ export function formatCountdown(resetAt: string | null | undefined): string | nu
   }
 }
 
-export function getNextResetSummary(quotas: any[] | undefined): string | null {
+export function getNextResetSummary(
+  quotas: any[] | undefined,
+  now: number = Date.now()
+): string | null {
   if (!quotas || quotas.length === 0) return null;
-  const now = Date.now();
   let soonest = Number.POSITIVE_INFINITY;
   let soonestIso: string | null = null;
   for (const q of quotas) {
@@ -557,7 +562,7 @@ export function getNextResetSummary(quotas: any[] | undefined): string | null {
       soonestIso = typeof q.resetAt === "string" ? q.resetAt : new Date(ts).toISOString();
     }
   }
-  return soonestIso ? formatCountdown(soonestIso) : null;
+  return soonestIso ? formatCountdown(soonestIso, now) : null;
 }
 
 function addQuotaModelIdVariants(out: Set<string>, provider: string, modelId: string) {

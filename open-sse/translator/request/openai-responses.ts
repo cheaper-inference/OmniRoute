@@ -1027,15 +1027,12 @@ export function openaiResponsesToOpenAIRequest(
     }
   }
 
-  // #12141: When translated Chat tools is empty/absent, strip neutral tool_choice
-  // ("auto" / "none") so strict Chat endpoints (e.g. vLLM) do not reject with 400
-  // ("When using tool_choice, tools must be set"). Contradictory choices like "required"
-  // or forced functions are preserved so the upstream error remains visible.
+  // #12141: Strip dangling "auto" for strict Chat endpoints without tools.
+  // Explicit "none" forbids more tool calls, including after a tool loop;
+  // preserve it even when there are no definitions. Contradictory "required"
+  // or forced-function choices retain their existing upstream-error behavior.
   const finalChatTools = Array.isArray(result.tools) ? result.tools : [];
-  if (
-    finalChatTools.length === 0 &&
-    (result.tool_choice === "auto" || result.tool_choice === "none")
-  ) {
+  if (finalChatTools.length === 0 && result.tool_choice === "auto") {
     delete result.tool_choice;
   }
 
@@ -1045,7 +1042,11 @@ export function openaiResponsesToOpenAIRequest(
   // prompt caching (#517). But #517's fix never added a provider gate, so it leaked to
   // every destination, OpenAI or not — a strict non-OpenAI upstream (NVIDIA) 400s on the
   // unrecognized field (#7533). Strip it for any non-OpenAI destination.
-  if (!isOpenAIDestination) delete result.prompt_cache_key;
+  // `conversation_id` is the same kind of session field (Codex reads it), so it follows the same gate.
+  if (!isOpenAIDestination) {
+    delete result.prompt_cache_key;
+    delete result.conversation_id;
+  }
   delete result.input;
   delete result.instructions;
   delete result.include;

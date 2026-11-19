@@ -85,7 +85,7 @@ export default function SearchConceptCard({ defaultCollapsed = false }: SearchCo
                 <Icon name={c.icon} size={20} className="text-primary" />
                 <div>
                   <div className="text-xs font-semibold text-text-main mb-0.5">{t(c.titleKey)}</div>
-                  <div className="text-[11px] text-text-muted leading-relaxed">{t(c.descKey)}</div>
+                  <div className="text-xs text-text-muted leading-relaxed">{t(c.descKey)}</div>
                 </div>
               </div>
             ))}

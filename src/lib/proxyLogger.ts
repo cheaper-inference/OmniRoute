@@ -360,6 +360,29 @@ function writeProxyBatch(batch: ProxyLogEntry[], db: ReturnType<typeof getDbInst
   transaction(batch);
 }
 
+// A non-lock failure (one row SQLite rejects) must not drop the whole batch:
+// retry row by row so only the bad row is lost. Lock errors still propagate to
+// the deferred whole-batch retry.
+function writeProxyBatchIsolatingBadRows(
+  batch: ProxyLogEntry[],
+  db: ReturnType<typeof getDbInstance>
+): void {
+  try {
+    writeProxyBatch(batch, db);
+  } catch (err) {
+    if (batch.length < 2 || isWriteLockError(err)) throw err;
+    let rowError: unknown;
+    for (const entry of batch) {
+      try {
+        writeProxyBatch([entry], db);
+      } catch (error) {
+        rowError ??= error;
+      }
+    }
+    if (rowError) logProxyBatchFailure(rowError);
+  }
+}
+
 function ensureBatchTimer() {
   if (batchTimer) return;
   batchTimer = setInterval(() => {
@@ -406,7 +429,7 @@ export function flushProxyLogsSync() {
   let db: ReturnType<typeof getDbInstance> | undefined;
   try {
     db = getDbInstance();
-    writeProxyBatch(batch, db);
+    writeProxyBatchIsolatingBadRows(batch, db);
   } catch (err: any) {
     if (!db || !isWriteLockError(err)) {
       logProxyBatchFailure(err);
@@ -420,7 +443,7 @@ export function flushProxyLogsSync() {
     const originalDb = db;
     void scheduleWriteRetry(() => {
       if (generation !== proxyLogGeneration) return;
-      writeProxyBatch(batch, originalDb);
+      writeProxyBatchIsolatingBadRows(batch, originalDb);
     }, logProxyBatchFailure);
   }
 }

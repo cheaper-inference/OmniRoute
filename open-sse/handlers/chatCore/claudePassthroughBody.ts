@@ -14,7 +14,10 @@
 import { shouldUseMidConversationSystem } from "../../executors/claudeIdentity.ts";
 import { detachClaudeCodeRewriteTargets } from "../../executors/claudeOauthBodyIsolation.ts";
 import { ensureCacheControlOnLastUserMessage } from "../../services/claudeCodeConstraints.ts";
-import { hoistDeferredToolsForTarget } from "../../translator/helpers/claudeDeferredTools.ts";
+import {
+  acceptsInlineToolAdditions,
+  hoistDeferredToolsForTarget,
+} from "../../translator/helpers/claudeDeferredTools.ts";
 import {
   disableManualThinkingWithoutFinalBlock,
   ensurePassthroughCacheBreakpoints,
@@ -33,6 +36,28 @@ import {
 import type { ClaudeMessage } from "./claudeMessageTypes.ts";
 import { stripOutputConfigFormatForCompat } from "./outputConfigFormatStrip.ts";
 import { stripClaudeRejectedTopLevelFields } from "./passthroughHelpers.ts";
+
+const BILLING_LINE = /^x-anthropic-billing-header:[^\n]*(?:\r?\n)?/i;
+
+// Claude Code's billing line rotates every turn. A non-Claude target cannot use it, and it breaks
+// that target's prompt-cache prefix. Replace the system value; never mutate the client's array.
+// shortcut: Anthropic-shape means provider claude/anthropic/anthropic-compatible-* or a "claude"
+// model name; a custom host that proxies real Claude under another name keeps losing the line.
+function dropBillingLine(body: Record<string, unknown>): void {
+  const { system } = body;
+  if (typeof system === "string") {
+    const text = system.replace(BILLING_LINE, "");
+    if (text) body.system = text;
+    else delete body.system;
+  } else if (Array.isArray(system)) {
+    body.system = system.flatMap((block) => {
+      const text = block?.text;
+      if (typeof text !== "string" || !BILLING_LINE.test(text)) return [block];
+      const rest = text.replace(BILLING_LINE, "");
+      return rest ? [{ ...block, text: rest }] : [];
+    });
+  }
+}
 
 type LoggerLike = { debug?: (...args: unknown[]) => void } | null | undefined;
 
@@ -92,6 +117,10 @@ export function buildClaudePassthroughBody({
     provider
   );
   translatedBody._disableToolPrefix = true;
+
+  if (!acceptsInlineToolAdditions(provider) && !/claude/i.test(effectiveModel)) {
+    dropBillingLine(translatedBody);
+  }
 
   const isFirstPartyAnthropic = provider === "claude" || provider === "anthropic";
   // Sanitize historical thinking-block signatures for first-party Anthropic (OAuth + API key).
@@ -167,9 +196,11 @@ export function buildClaudePassthroughBody({
   // Anthropic returns a 400 on the legacy field; some clients (e.g. ForgeCode)
   // still emit it. Preserves an existing output_config.format if present.
   if (translatedBody.output_format !== undefined) {
+    // Copy-on-write: output_config may be the caller's shared object (shallow
+    // body copy per combo leg); writing format into it leaks to the other legs.
     const oc =
       translatedBody.output_config && typeof translatedBody.output_config === "object"
-        ? (translatedBody.output_config as Record<string, unknown>)
+        ? { ...(translatedBody.output_config as Record<string, unknown>) }
         : {};
     if (oc.format === undefined) oc.format = translatedBody.output_format;
     translatedBody.output_config = oc;

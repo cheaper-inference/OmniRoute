@@ -51,7 +51,7 @@ export function Slider({
   const range = Number(max) - Number(min);
   const visibleMarks = (marks ?? []).filter((mark) => Number.isFinite(mark.value) && mark.value >= Number(min) && mark.value <= Number(max));
   return (
-    <div className={cn("ci-slider", className)}>
+    <div className={cn("ci-slider", className)} dir={props.dir === "auto" ? undefined : props.dir}>
       {label || showValue ? <div className="ci-slider__header">{label ? <label htmlFor={inputId}>{label}</label> : <span />}{showValue ? <output htmlFor={inputId}>{formatValue(value)}</output> : null}</div> : null}
       <input
         id={inputId}
@@ -81,7 +81,7 @@ export function Slider({
         {presets.filter(preset => Number.isFinite(preset.value) && preset.value >= Number(min) && preset.value <= Number(max)).map(preset => {
           const position = (preset.value - Number(min)) / (Number(max) - Number(min)) * 100;
           return <Button key={preset.value} type="button" variant="ghost" size="sm"
-            className="ci-slider__preset" style={{ left: `${position}%` }}
+            className="ci-slider__preset" style={{ insetInlineStart: `${position}%` }}
             data-edge={position === 0 ? "start" : position === 100 ? "end" : undefined}
             aria-pressed={value === preset.value} disabled={props.disabled}
             onClick={() => select(preset.value)}>{preset.label}</Button>;

@@ -724,7 +724,8 @@ export class AdaptiveAdmissionController {
     const now = this.clock.now();
     const keysToDelete: string[] = [];
     for (const [key, lane] of this.virtualLanes) {
-      if (now - lane.lastUsedMs >= ADMISSION_LANE_TTL_MS) {
+      // A lane with a live waiter is not idle: that request fails at its own deadline.
+      if (lane.queue.size === 0 && now - lane.lastUsedMs >= ADMISSION_LANE_TTL_MS) {
         keysToDelete.push(key);
       }
     }

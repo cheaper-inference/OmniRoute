@@ -343,17 +343,16 @@ tidher bħala għażla li tista’ tintgħażel mill-utent fl-UI jew fl-API.
 
 ---
 
-## Kopertura tat-Testijiet
+## Kopertura tat-Test
 
-Żewġ livelli ta’ kopertura awtomatizzata huma inklużi mal-magna quota-share:
+Żewġ saffi ta' vapur ta' kopertura awtomatizzat bil-magna tal-kwota-share:
 
-| Sett ta’ testijiet        | Kmand                                                                  | X’ikopri                                                                                                                                                                                                                                                                               |
-| :------------------------ | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unità (29 test)           | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | L-iskedatur DRR, l-imblukkar tas-saturazzjoni, il-limiti tal-konkorrenza, il-kalkoli ta’ fairShare, u t-tqegħid tax-xogħol pendenti fi kju                                                                                                                                             |
-| Matriċi ta’ integrazzjoni | `npm run test:combo:matrix`                                            | Deċiżjoni tar-routing minn tarf sa tarf permezz tal-pipeline reali tal-kombinazzjonijiet; l-ekwità tad-DRR + it-tnaqqis tal-prijorità minħabba s-saturazzjoni permezz ta’ punti ta’ integrazzjoni attivi (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite                     | Kmand                                                                  | Dak li tkopri                                                                                                                                                                                                                 |
+| :------------------------ | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unità (29 test)           | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Scheduler DRR, gating tas-saturazzjoni, limiti tal-konkorrenza, matematika fairShare, kju b'lura                                                                                                                              |
+| Matriċi ta' integrazzjoni | `npm run test:combo:matrix`                                            | Deċiżjoni tar-rotot minn tarf sa tarf permezz tal-pipeline combo reali; DRR ekwità + saturazzjoni deprioritizzazzjoni permezz ta' ħjatat ħajjin (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Il-matriċi ta’ integrazzjoni taħdem fis-CI flimkien mad-19-il strateġija pubblika kollha. Is-sett ta’ testijiet tal-unità
-jista’ jitħaddem waħdu.
+Il-matriċi ta' integrazzjoni taħdem CI flimkien mat-22 strateġija pubblika kollha. L-unità suite tista 'titħaddem waħedha.
 
 ---
 

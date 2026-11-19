@@ -609,7 +609,7 @@ describe("rejection mapping", () => {
         maxLimit: 1,
         maxQueueCount: 4,
         maxQueueCost: 40,
-        defaultMaxWaitMs: 120_000, // must outlive the 60s lane TTL so the lane eviction wins
+        defaultMaxWaitMs: 120_000, // outlives the 60s idle TTL: a live waiter keeps its lane
         windowMs: 1_000,
         virtualLanes: true,
         cost: { maxRequestCost: 1, baseCost: 1 },
@@ -621,16 +621,17 @@ describe("rejection mapping", () => {
     });
     assert.equal(hold.status, "admitted");
 
-    // Park a waiter in a virtual lane; its own deadline is far beyond the TTL.
+    // Park a waiter in a virtual lane, then fill the 1000-lane cap. The next new
+    // lane evicts the least recently used one and rejects its waiter.
     const pending = runtime.acquire({
       tenantKey: "lane-waiter",
       body: { stream: true },
-      maxWaitMs: 120_000,
     });
-
-    // Advance past the 60s lane TTL: the window tick evicts idle lanes, which
-    // drains and rejects the queued waiter with ADMISSION_LANE_EVICTED.
-    clock.advance(60_001);
+    const others: Array<ReturnType<typeof runtime.acquire>> = [];
+    for (let i = 0; i < 1000; i += 1) {
+      clock.advance(1);
+      others.push(runtime.acquire({ tenantKey: `other-${i}`, body: { stream: true } }));
+    }
 
     const rejected = await pending;
     assert.equal(rejected.status, "rejected");
@@ -644,6 +645,7 @@ describe("rejection mapping", () => {
     }
     if (hold.status === "admitted") hold.lease.release();
     runtime.dispose();
+    await Promise.allSettled(others);
   });
 });
 

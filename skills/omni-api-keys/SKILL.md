@@ -28,11 +28,27 @@ curl http://localhost:20128/api/keys \
 
 Create API key
 
+Submit the legacy key settings, or name with a complete policy and optional
+templateRef containing id and revision. Policy-based creation writes the key
+and related settings atomically. Submitted edits are final; templateRef is
+provenance and never replaces the policy. The fresh secret is returned once
+with Cache-Control no-store. Blocking missing references return 422.
+
+
 ```bash
 curl -X POST http://localhost:20128/api/keys \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
+```
+
+### GET /api/keys/{id}/template-policy
+
+Preview a key policy without revealing its credential
+
+```bash
+curl http://localhost:20128/api/keys/{id}/template-policy \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
 ### POST /api/keys/import

@@ -125,6 +125,10 @@ function renderWizard(props?: {
   return { el: dialog, onClose, onCreated };
 }
 
+// The kit Wizard keeps a blocked Next focusable: `aria-disabled`, not `disabled`.
+const isBlocked = (button: Element) =>
+  button.getAttribute("aria-disabled") === "true" || (button as HTMLButtonElement).disabled;
+
 // Helper: wait for a condition to be true with retries
 async function waitFor(
   fn: () => boolean,
@@ -157,7 +161,7 @@ async function goToStep2(el: HTMLElement) {
   const allBtns = Array.from(el.querySelectorAll("button"));
   const nextBtns = allBtns.filter((b) => b.textContent === "wizardNext");
   await act(async () => {
-    if (nextBtns[0] && !(nextBtns[0] as HTMLButtonElement).disabled) {
+    if (nextBtns[0] && !isBlocked(nextBtns[0])) {
       nextBtns[0].click();
     }
   });
@@ -191,7 +195,62 @@ describe("NewBatchWizard", () => {
       (b) => b.textContent === "wizardNext"
     );
     expect(nextBtns.length).toBeGreaterThan(0);
-    expect((nextBtns[0] as HTMLButtonElement).disabled).toBe(true);
+    expect(isBlocked(nextBtns[0])).toBe(true);
+  });
+
+  it("renders the kit Wizard: one entry per step, current step marked, step title as heading", () => {
+    const { el } = renderWizard();
+    expect(el.querySelector(".ci-wizard")).not.toBeNull();
+    const items = Array.from(el.querySelectorAll(".ci-wizard__steps li"));
+    expect(items.map((item) => item.textContent)).toEqual([
+      expect.stringContaining("wizardStep1Destination"),
+      expect.stringContaining("wizardStep2Input"),
+      expect.stringContaining("wizardStep3Validate"),
+      expect.stringContaining("wizardStep4Cost"),
+    ]);
+    expect(items[0].getAttribute("aria-current")).toBe("step");
+    expect(el.querySelector("h1")?.textContent).toBe("wizardStep1Destination");
+    expect(el.textContent).toContain("1 / 4");
+  });
+
+  it("does not advance when a blocked Next is clicked or Enter is pressed", async () => {
+    const { el } = renderWizard();
+    const next = Array.from(el.querySelectorAll("button")).find(
+      (b) => b.textContent === "wizardNext"
+    )!;
+    await act(async () => next.click());
+    await act(async () => {
+      el.dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    });
+    expect(el.querySelector("h1")?.textContent).toBe("wizardStep1Destination");
+  });
+
+  it("advances on Enter from a non-interactive element once the step is valid", async () => {
+    const { el } = renderWizard();
+    const selects = el.querySelectorAll("select");
+    await act(async () => {
+      (selects[0] as HTMLSelectElement).value = "openai";
+      selects[0].dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    const selectsAfter = el.querySelectorAll("select");
+    await act(async () => {
+      (selectsAfter[2] as HTMLSelectElement).value = "gpt-4o-mini";
+      selectsAfter[2].dispatchEvent(new Event("change", { bubbles: true }));
+    });
+
+    // Typing in a form control never advances.
+    await act(async () => {
+      selectsAfter[2].dispatchEvent(new KeyboardEvent("keydown", { key: "Enter", bubbles: true }));
+    });
+    expect(el.querySelector("h1")?.textContent).toBe("wizardStep1Destination");
+
+    await act(async () => {
+      el.querySelector("h1")!.dispatchEvent(
+        new KeyboardEvent("keydown", { key: "Enter", bubbles: true })
+      );
+    });
+    expect(el.querySelector("h1")?.textContent).toBe("wizardStep2Input");
+    expect(el.querySelector(".ci-wizard__steps li")?.getAttribute("data-complete")).toBe("true");
   });
 
   // 2. Empty state when availableProviders is empty
@@ -261,7 +320,7 @@ describe("NewBatchWizard", () => {
     const nextBtns = Array.from(el.querySelectorAll("button")).filter(
       (b) => b.textContent === "wizardNext"
     );
-    expect((nextBtns[0] as HTMLButtonElement).disabled).toBe(false);
+    expect(isBlocked(nextBtns[0])).toBe(false);
     await act(async () => {
       nextBtns[0].click();
     });
@@ -278,7 +337,7 @@ describe("NewBatchWizard", () => {
     const nextBtns = Array.from(el.querySelectorAll("button")).filter(
       (b) => b.textContent === "wizardNext"
     );
-    expect((nextBtns[0] as HTMLButtonElement).disabled).toBe(true);
+    expect(isBlocked(nextBtns[0])).toBe(true);
   });
 
   // 8. Back button returns to step 1
@@ -322,7 +381,7 @@ describe("NewBatchWizard", () => {
       const btns = Array.from(el.querySelectorAll("button")).filter(
         (b) => b.textContent === "wizardNext"
       );
-      return btns.length > 0 && !(btns[0] as HTMLButtonElement).disabled;
+      return btns.length > 0 && !isBlocked(btns[0]);
     });
 
     await act(async () => {
@@ -342,7 +401,7 @@ describe("NewBatchWizard", () => {
     const nextBtns = Array.from(el.querySelectorAll("button")).filter(
       (b) => b.textContent === "wizardNext"
     );
-    expect((nextBtns[0] as HTMLButtonElement).disabled).toBe(true);
+    expect(isBlocked(nextBtns[0])).toBe(true);
   });
 
   // 10. Step 4 cost breakdown visible
@@ -355,7 +414,7 @@ describe("NewBatchWizard", () => {
       const btns = Array.from(el.querySelectorAll("button")).filter(
         (b) => b.textContent === "wizardNext"
       );
-      return btns.length > 0 && !(btns[0] as HTMLButtonElement).disabled;
+      return btns.length > 0 && !isBlocked(btns[0]);
     });
 
     // Step 3
@@ -372,7 +431,7 @@ describe("NewBatchWizard", () => {
       const btns = Array.from(el.querySelectorAll("button")).filter(
         (b) => b.textContent === "wizardNext"
       );
-      return btns.length > 0 && !(btns[0] as HTMLButtonElement).disabled;
+      return btns.length > 0 && !isBlocked(btns[0]);
     });
 
     // Step 4
@@ -403,7 +462,7 @@ describe("NewBatchWizard", () => {
       const btns = Array.from(el.querySelectorAll("button")).filter(
         (b) => b.textContent === "wizardNext"
       );
-      return btns.length > 0 && !(btns[0] as HTMLButtonElement).disabled;
+      return btns.length > 0 && !isBlocked(btns[0]);
     });
 
     // Step 3
@@ -417,7 +476,7 @@ describe("NewBatchWizard", () => {
       const btns = Array.from(el.querySelectorAll("button")).filter(
         (b) => b.textContent === "wizardNext"
       );
-      return btns.length > 0 && !(btns[0] as HTMLButtonElement).disabled;
+      return btns.length > 0 && !isBlocked(btns[0]);
     });
 
     // Step 4
@@ -481,7 +540,7 @@ describe("NewBatchWizard", () => {
       const btns = Array.from(el.querySelectorAll("button")).filter(
         (b) => b.textContent === "wizardNext"
       );
-      return btns.length > 0 && !(btns[0] as HTMLButtonElement).disabled;
+      return btns.length > 0 && !isBlocked(btns[0]);
     });
 
     await act(async () => {
@@ -494,7 +553,7 @@ describe("NewBatchWizard", () => {
       const btns = Array.from(el.querySelectorAll("button")).filter(
         (b) => b.textContent === "wizardNext"
       );
-      return btns.length > 0 && !(btns[0] as HTMLButtonElement).disabled;
+      return btns.length > 0 && !isBlocked(btns[0]);
     });
 
     await act(async () => {

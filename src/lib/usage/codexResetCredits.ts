@@ -1,4 +1,3 @@
-import { createHash } from "node:crypto";
 import { getProviderConnectionById } from "@/lib/db/providers";
 import {
   getCodexAutospendCount,
@@ -15,6 +14,7 @@ import {
 } from "@/lib/usage/providerLimits";
 import { releaseCodexCooldownAfterResetCredit } from "@/lib/usage/resetCreditCooldownRelease";
 import { invalidateCodexQuotaCache } from "@omniroute/open-sse/services/codexQuotaFetcher.ts";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { getCodexBackendIdentityHeaders } from "@omniroute/open-sse/config/codexClient.ts";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
@@ -671,9 +671,7 @@ function autospendIdempotencyKey(
   creditId: string,
   generation: number
 ): string {
-  const hex = createHash("sha256")
-    .update(`auto-spend:${connectionId}:${creditId}:${generation}`)
-    .digest("hex");
+  const hex = opaqueTokenFingerprint(`auto-spend:${connectionId}:${creditId}:${generation}`);
   const variant = ((Number.parseInt(hex[16], 16) & 0x3) | 0x8).toString(16);
   return [
     hex.slice(0, 8),
