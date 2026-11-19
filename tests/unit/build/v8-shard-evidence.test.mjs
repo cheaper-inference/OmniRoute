@@ -438,7 +438,7 @@ async function portableFixture(t, { esm = false } = {}) {
   return { dir, firstRoot, secondRoot, sha };
 }
 
-async function compareNativePortableCoverage(t, { esm = false } = {}) {
+async function compareNativePortableCoverage(t, { esm = false, aliases = false } = {}) {
   const {
     initializeCoverageTransformCache,
     packCoverageShard,
@@ -499,11 +499,13 @@ async function compareNativePortableCoverage(t, { esm = false } = {}) {
       recorded.add(identity);
       const bytes = await readFile(join(raw, name));
       const data = JSON.parse(bytes.toString("utf8"));
-      const scripts = data.result.filter((script) => script.url.endsWith("/src/branch.ts"));
+      const scripts = data.result.filter((script) =>
+        script.url.split("?")[0].endsWith("/src/branch.ts")
+      );
       if (!scripts.length) continue;
       const maps = Object.fromEntries(
         Object.entries(data["source-map-cache"] || {}).filter(([url]) =>
-          url.endsWith("/src/branch.ts")
+          url.split("?")[0].endsWith("/src/branch.ts")
         )
       );
       samples.push({ label, shard, name, rawSha256: digest(bytes), scripts, sourceMapCache: maps });
@@ -511,6 +513,7 @@ async function compareNativePortableCoverage(t, { esm = false } = {}) {
     await writeFile(join(evidenceDirectory, "samples.json"), JSON.stringify(samples, null, 2));
   };
   let sourceMaps = 0;
+  let multipleAliases = 0;
   for (let index = 1; index <= total; index++) {
     const sourceRoot = index % 2 ? firstRoot : secondRoot;
     const inputDirectory = join(dir, `portable-raw-${index}`);
@@ -530,23 +533,30 @@ async function compareNativePortableCoverage(t, { esm = false } = {}) {
       [firstRoot, baseline],
       [sourceRoot, inputDirectory],
     ]) {
-      command(
-        process.execPath,
-        ["--import", import.meta.resolve("tsx/esm"), "src/branch.ts", argument],
-        {
-          cwd,
-          env: {
-            ...cleanEnv,
-            NODE_V8_COVERAGE: raw,
-            ...(raw === baseline ? {} : { TMPDIR: transformCacheDirectory }),
-          },
-        }
-      );
+      const entry = aliases
+        ? [
+            "--input-type=module",
+            "--eval",
+            'process.argv.splice(1, 0, "fixture"); await import("./src/branch.ts?case=first"); await import("./src/branch.ts?case=second");',
+            "--",
+          ]
+        : ["src/branch.ts"];
+      command(process.execPath, ["--import", import.meta.resolve("tsx/esm"), ...entry, argument], {
+        cwd,
+        env: {
+          ...cleanEnv,
+          NODE_V8_COVERAGE: raw,
+          ...(raw === baseline ? {} : { TMPDIR: transformCacheDirectory }),
+        },
+      });
       await captureSamples(raw, raw === baseline ? "baseline" : "producer", index);
     }
     for (const name of await readdir(inputDirectory)) {
       const data = JSON.parse(await readFile(join(inputDirectory, name), "utf8"));
-      sourceMaps += Object.keys(data["source-map-cache"] || {}).length;
+      const urls = Object.keys(data["source-map-cache"] || {});
+      sourceMaps += urls.length;
+      if (urls.filter((url) => url.includes("/src/branch.ts?case=")).length === 2)
+        multipleAliases++;
     }
     const manifest = await packCoverageShard({
       inputDirectory,
@@ -590,6 +600,7 @@ async function compareNativePortableCoverage(t, { esm = false } = {}) {
     );
   }
   assert.ok(sourceMaps > 0, "the real tsx fixture must exercise source-map-cache");
+  if (aliases) assert.equal(multipleAliases, total, "each raw producer must contain both aliases");
   const preparedDirectory = join(dir, "prepared");
   const prepared = await prepareCoverageShards({
     directory: artifacts,
@@ -673,6 +684,37 @@ test(
     await compareNativePortableCoverage(t, { esm: true });
   }
 );
+
+test(
+  "native c8 retains every counter for query-string imports of the same source within one process",
+  posix,
+  async (t) => {
+    await compareNativePortableCoverage(t, { esm: true, aliases: true });
+  }
+);
+
+test("coverage rejects query aliases with incompatible layouts for one source", async (t) => {
+  const { prepareCoverageShards } = await helpers();
+  const options = await matrixArtifacts(t, {
+    input(index, sourceRoot) {
+      const raw = rawCoverage(index, sourceRoot);
+      const url = raw.result[0].url;
+      raw["source-map-cache"] = {
+        [`${url}?case=first`]: { data: null, lineLengths: [80] },
+        [`${url}?case=second`]: { data: null, lineLengths: [81] },
+      };
+      return raw;
+    },
+  });
+  await assert.rejects(prepareCoverageShards(options), (error) => {
+    assert.match(error.message, /V8_EVIDENCE_INCOMPLETE:ambiguous-source-map/);
+    assert.match(error.message, /"source":"scripts\/quality\/audit-dependencies\.mjs"/);
+    assert.match(error.message, /"shard":1/);
+    assert.ok(error.message.includes(`"rawInput":"${rawName}"`));
+    return true;
+  });
+  assert.equal(existsSync(options.outputDirectory), false);
+});
 
 test("coverage consumer bounds retained raw without losing the eight original producers", async (t) => {
   const { prepareCoverageShards } = await helpers();

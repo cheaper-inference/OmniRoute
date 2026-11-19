@@ -4,7 +4,7 @@ import { lstat, mkdir, mkdtemp, readFile, readdir, rename, rm, writeFile } from 
 import { createRequire } from "node:module";
 import { dirname, isAbsolute, join, relative, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
-import { promisify } from "node:util";
+import { isDeepStrictEqual, promisify } from "node:util";
 import { gzip, gunzip } from "node:zlib";
 import { verifyCoverageSelection } from "./select-v8-coverage.mjs";
 import { createSourceMapLayoutProjector } from "./v8-source-map-layouts.mjs";
@@ -470,8 +470,18 @@ export async function prepareCoverageShards(options) {
         const absolute = absolutePath(url);
         const path = absolute && inside(item.origin, absolute);
         if (!path || !item.declared.has(path)) continue;
-        if (maps.has(path)) throw new Error("V8_EVIDENCE_INCOMPLETE:ambiguous-source-map");
-        maps.set(path, cache);
+        const aliases = maps.get(path);
+        if (!aliases) {
+          maps.set(path, [cache]);
+          continue;
+        }
+        // Node records each query-string import, while c8 combines them by path.
+        // Only identical raw maps and layouts may share that canonical path.
+        if (!isDeepStrictEqual(aliases[0], cache)) {
+          const detail = JSON.stringify({ source: path, shard: item.index, rawInput: item.name });
+          throw new Error(`V8_EVIDENCE_INCOMPLETE:ambiguous-source-map ${detail}`);
+        }
+        aliases.push(cache);
       }
       const originals = data.result.map((script) => {
         const absolute = absolutePath(script.url);
@@ -480,7 +490,7 @@ export async function prepareCoverageShards(options) {
           url: script.url,
           generatedProofs: matchingTransformProofs(
             item.generated,
-            maps.get(path),
+            maps.get(path)?.[0],
             path,
             script.url
           ),
@@ -503,7 +513,7 @@ export async function prepareCoverageShards(options) {
         )
           continue;
         instrumentedShards.add(item.index);
-        const cache = maps.get(path);
+        const cache = maps.get(path)?.[0];
         try {
           const lineLengths = layouts.project({
             script,
@@ -513,7 +523,7 @@ export async function prepareCoverageShards(options) {
             sourceIdentity: verifiedSources.get(path),
             generatedProofs: originals[index].generatedProofs,
           });
-          if (lineLengths) cacheUpdates.set(cache, lineLengths);
+          if (lineLengths) cacheUpdates.set(path, lineLengths);
         } catch (error) {
           if (!error.message?.startsWith("V8_EVIDENCE_INCOMPLETE:source-map-layout-")) throw error;
           const detail = JSON.stringify({
@@ -525,9 +535,10 @@ export async function prepareCoverageShards(options) {
           throw new Error(`${error.message} ${detail}`, { cause: error });
         }
       }
-      // Several script IDs may share a source map. Each reads the original
-      // generated layout before the derivative cache is changed once.
-      for (const [cache, lineLengths] of cacheUpdates) cache.lineLengths = lineLengths;
+      // All aliases read the original layout before every equivalent cache
+      // receives the projection. c8 may retain any one of those aliases.
+      for (const [path, lineLengths] of cacheUpdates)
+        for (const cache of maps.get(path)) cache.lineLengths = lineLengths;
       if (moved) relocatedFiles++;
       if (cacheUpdates.size) projectedFiles++;
       // Match c8's incremental report order. Merging batches or individual
