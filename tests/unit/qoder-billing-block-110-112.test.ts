@@ -88,3 +88,30 @@ test("CLI failure parser classifies nested code 112 as a billing block", () => {
   assert.equal(failure.status, 429);
   assert.equal(failure.code, "qoder_billing_block");
 });
+
+function queuedFlagBody(code: string): string {
+  // The 10605 throttle's inner payload carries `isQueued`; a billing block in the same shape
+  // must not be read as the busy throttle because the word "queued" appears in that key.
+  return JSON.stringify({
+    code: "403",
+    message: JSON.stringify({ code, message: JSON.stringify({ isQueued: false }) }),
+  });
+}
+
+for (const code of ["110", "112"]) {
+  test(`nested code ${code} with isQueued:false is still a billing block, not upstream_busy`, async () => {
+    const result = await unwrapQoderEnvelope(
+      sseEnvelope({ statusCodeValue: 403, body: queuedFlagBody(code) })
+    );
+
+    assert.equal(result.status, 429);
+    const payload = (await result.json()) as ErrorPayload;
+    assert.equal(payload.error.code, "qoder_billing_block");
+  });
+
+  test(`CLI failure parser: nested code ${code} with isQueued:false is a billing block`, () => {
+    const failure = parseQoderCliFailure(`qodercli failed: ${queuedFlagBody(code)}`);
+    assert.equal(failure.status, 429);
+    assert.equal(failure.code, "qoder_billing_block");
+  });
+}

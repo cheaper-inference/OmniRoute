@@ -606,6 +606,12 @@ export function parseQoderCliFailure(stderrText: string, stdoutText = ""): Qoder
     return { status: 504, message: combined, code: "timeout" };
   }
 
+  // Exact billing codes 110/112 first: their inner payload can carry `isQueued`,
+  // which the broad busy heuristic below would read as the 10605 throttle.
+  if (isQoderBillingBlock(combined)) {
+    return { status: 429, message: combined, code: "qoder_billing_block" };
+  }
+
   // Qoder answers a temporarily throttled account with a queued/busy envelope
   // (upstream code 10605) instead of an HTTP error. Classifying it as a generic
   // 502 upstream_error parked the connection on the long failure cooldown, so a
@@ -613,10 +619,6 @@ export function parseQoderCliFailure(stderrText: string, stdoutText = ""): Qoder
   // serviceUnavailable cooldown, which lets routing retry or fail over at once.
   if (isQoderUpstreamBusy(combined)) {
     return { status: 503, message: combined, code: "upstream_busy" };
-  }
-
-  if (isQoderBillingBlock(combined)) {
-    return { status: 429, message: combined, code: "qoder_billing_block" };
   }
 
   return { status: 502, message: combined, code: "upstream_error" };
