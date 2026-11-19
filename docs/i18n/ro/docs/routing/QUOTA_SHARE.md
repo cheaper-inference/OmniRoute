@@ -279,15 +279,15 @@ Hook-urile paginii:
 
 ## Variabile de mediu
 
-| Variabilă                          | Valoare implicită | Descriere                                                                       |
-| ---------------------------------- | ----------------- | ------------------------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`          | Driver de utilizat: `sqlite` sau `redis`                                        |
-| `QUOTA_STORE_REDIS_URL`            | _(gol)_           | URL Redis, de ex. `redis://localhost:6379`                                      |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`             | 0..1; `>= prag` activează modul strict                                          |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`             | 0..1; multiplicator pentru scorul combinat al politicii soft                    |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`              | Numărul de zile înainte ca GC să elimine bucket-urile `quota_consumption` vechi |
+| Variabilă                          | Implicit | Descriere                                                           |
+| ---------------------------------- | -------- | ------------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite` | Driver de utilizat: `sqlite` sau `redis`                            |
+| `QUOTA_STORE_REDIS_URL`            | _(gol)_  | Redis URL, de exemplu `redis://localhost:6379`                      |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`    | 0..1; `>= threshold` activează modul strict                         |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`    | 0..1; multiplicator pentru scorul combinat soft-policy              |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`     | Cu zile înainte ca GC să elimine vechile găleți `quota_consumption` |
 
-Setările BD (`quotaStore.*`) suprascriu variabilele de mediu.
+setările DB (`quotaStore.*`) suprascriu vars.
 
 ---
 
@@ -343,17 +343,16 @@ apară niciodată ca opțiune selectabilă de utilizator în interfața cu utili
 
 ---
 
-## Acoperirea cu teste
+## Acoperire de testare
 
-Motorul quota-share include două niveluri de acoperire cu teste automate:
+Două straturi de acoperire automată sunt livrate cu motorul de cotă:
 
-| Suită                 | Comandă                                                                | Ce acoperă                                                                                                                                                                                                                                       |
-| :-------------------- | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unitare (29 de teste) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Planificatorul DRR, controlul saturației, limitele de concurență, calculele fairShare, plasarea în coadă a operațiunilor restante                                                                                                                |
-| Matrice de integrare  | `npm run test:combo:matrix`                                            | Decizia de rutare de la un capăt la altul prin pipeline-ul real de combinații; echitatea DRR + deprioritizarea în caz de saturație prin puncte de integrare active (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suită                 | Comanda                                                                | Ce acoperă                                                                                                                                                                                                |
+| :-------------------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unitate (29 de teste) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | programator DRR, limitare de saturație, limite de concurență, matematică fairShare, așteptare în așteptare                                                                                                |
+| Matricea de integrare | `npm run test:combo:matrix`                                            | Decizie de rutare end-to-end prin conducta combo reală; DRR echitate + saturație deprioritizare prin intermediul live seams (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Matricea de integrare rulează în CI alături de toate cele 19 strategii publice. Suita de teste unitare
-poate fi rulată independent.
+Matricea de integrare rulează în CI alături de toate cele 22 de strategii publice. Suita unității poate fi rulată independent.
 
 ---
 

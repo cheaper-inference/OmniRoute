@@ -482,6 +482,21 @@ test("a base check that timed out is not redone: pr-red", () => {
   assert.equal(result.baseCheckPending, false);
   assert.match(result.detail, /timed out/);
   assert.deepEqual(result.unmatched, [sig("Unit Tests", "tests/unit/a.test.ts a")]);
+  // the verdict says it rests on no base evidence (the tick keeps the adaptive window)
+  assert.equal(result.baseTimedOut, true);
+  // every other verdict has baseTimedOut false, a pr-red on a green base included
+  for (const status of ["green", "red", "pending"]) {
+    const other = classifyRed({
+      signatures: [sig("Unit Tests", "tests/unit/a.test.ts a")],
+      baseSha: BASE_SHA,
+      baseCheck: baseCheck(status),
+    });
+    assert.equal(other.baseTimedOut, false, status);
+  }
+  assert.equal(
+    classifyRed({ signatures: [], baseSha: BASE_SHA, baseCheck: null }).baseTimedOut,
+    false
+  );
 });
 
 test("end to end: candidate and base runs on different shards classify as base-red", () => {
