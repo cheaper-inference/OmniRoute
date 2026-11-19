@@ -128,7 +128,8 @@ function isAuthDiagnosesOnlyGateEnabled(): boolean {
       typeof process !== "undefined"
         ? process.env?.[CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG]
         : undefined;
-    if (env !== undefined) {
+    // An empty value counts as unset, matching resolveFeatureFlag().
+    if (env !== undefined && env !== "") {
       return env === "true" || env === "1" || env === "yes";
     }
     return true; // on by default (#20256)

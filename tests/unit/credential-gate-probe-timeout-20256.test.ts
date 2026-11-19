@@ -8,6 +8,7 @@ import {
   CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG,
 } from "../../src/lib/credentialHealth/cache.ts";
 import { checkCredentialGate } from "../../open-sse/services/credentialGate.ts";
+import { registerFeatureFlagResolver } from "../../src/shared/utils/featureFlagResolverBridge.ts";
 
 test.afterEach(() => {
   __test_resetCredentialHealthCache();
@@ -120,4 +121,34 @@ test("Issue #20256: opting out via CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY=false res
 
   const gateResult = checkCredentialGate(connectionId, provider, modelStr);
   assert.equal(gateResult.allowed, false);
+});
+
+test("Issue #20256: an empty CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY uses the default when no resolver is registered", () => {
+  // Without the server resolver (client bundle, or before featureFlags.ts loads) the gate
+  // reads the env directly. An empty value must count as unset, like resolveFeatureFlag().
+  const resolverKey = Symbol.for("omniroute.featureFlagResolver");
+  const saved = (globalThis as Record<symbol, unknown>)[resolverKey];
+  registerFeatureFlagResolver(null);
+  process.env[CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG] = "";
+  try {
+    const connectionId = "conn-empty-env";
+    setCredentialHealth(
+      connectionId,
+      "deepseek",
+      "error",
+      "Scheduler error",
+      "runtime_error",
+      "scheduler"
+    );
+
+    assert.equal(isCredentialHealthy(connectionId), undefined);
+    assert.notEqual(
+      checkCredentialGate(connectionId, "deepseek", "deepseek/deepseek-flash").allowed,
+      false
+    );
+  } finally {
+    if (typeof saved === "function") {
+      registerFeatureFlagResolver(saved as (key: string) => boolean);
+    }
+  }
 });
