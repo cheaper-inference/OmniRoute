@@ -1189,6 +1189,9 @@ jobs:
           # Capture the transforms this producer actually executes; a reused or
           # shared TSX cache cannot establish generated-layout provenance.
           node scripts/ci/prepare-v8-coverage.mjs init-cache "$TMPDIR" "$TEST_SHARD" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKSPACE"
+          V8_CACHE_PRELOAD="$(node -p 'require("node:url").pathToFileURL(process.argv[1]).href' "$GITHUB_WORKSPACE/scripts/ci/atomic-tsx-cache.mjs")"
+          V8_NATIVE_PRELOAD="$(node -p 'require("node:url").pathToFileURL(process.argv[1]).href' "$GITHUB_WORKSPACE/scripts/ci/native-worker-v8-layout.mjs")"
+          OMNIROUTE_CI_SYNC_TSX_CACHE="$TMPDIR" NODE_OPTIONS="$NODE_OPTIONS --import=$V8_CACHE_PRELOAD --import=$V8_NATIVE_PRELOAD" \
           npx c8 --merge-async \
             --temp-directory=coverage-shard \
             --reports-dir=coverage-shard-report \

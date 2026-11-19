@@ -504,15 +504,26 @@ export async function prepareCoverageShards(options) {
           continue;
         instrumentedShards.add(item.index);
         const cache = maps.get(path);
-        const lineLengths = layouts.project({
-          script,
-          cache,
-          originUrl: originals[index].url,
-          sourcePath: path,
-          sourceIdentity: verifiedSources.get(path),
-          generatedProofs: originals[index].generatedProofs,
-        });
-        if (lineLengths) cacheUpdates.set(cache, lineLengths);
+        try {
+          const lineLengths = layouts.project({
+            script,
+            cache,
+            originUrl: originals[index].url,
+            sourcePath: path,
+            sourceIdentity: verifiedSources.get(path),
+            generatedProofs: originals[index].generatedProofs,
+          });
+          if (lineLengths) cacheUpdates.set(cache, lineLengths);
+        } catch (error) {
+          if (!error.message?.startsWith("V8_EVIDENCE_INCOMPLETE:source-map-layout-")) throw error;
+          const detail = JSON.stringify({
+            source: path,
+            shard: item.index,
+            rawInput: item.name,
+            producerProofs: originals[index].generatedProofs.length,
+          });
+          throw new Error(`${error.message} ${detail}`, { cause: error });
+        }
       }
       // Several script IDs may share a source map. Each reads the original
       // generated layout before the derivative cache is changed once.
