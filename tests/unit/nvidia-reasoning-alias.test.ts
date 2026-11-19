@@ -49,5 +49,12 @@ test("other providers keep both reasoning fields (regression guard)", () => {
   const msg = { role: "assistant", content: "x", reasoning: "r", reasoning_content: "r" };
   const body = { model: MODEL, messages: [msg] };
   stripUnsupportedParams("deepseek", MODEL, body);
-  assert.deepEqual(body.messages[0], msg);
+  // Independent expected value: comparing against `msg` itself would pass even if the
+  // filter mutated the shared object in place.
+  assert.deepEqual(body.messages[0], {
+    role: "assistant",
+    content: "x",
+    reasoning: "r",
+    reasoning_content: "r",
+  });
 });
