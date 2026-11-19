@@ -168,6 +168,24 @@ function hasFollowingToolResult(messages, index: number): boolean {
  * Convert OpenAI messages to Kiro format
  * Rules: system/tool/user -> user role, merge consecutive same roles
  */
+type OrphanToolResult = {
+  toolUseId?: string;
+  status?: string;
+  content?: Array<{ text?: string }>;
+};
+
+/**
+ * Text for a tool result whose tool call is missing from the history (truncated conversation).
+ * The status is lost with the toolResults field, so a failed run keeps the `[tool_error: true]`
+ * line that claude-to-openai writes for it.
+ */
+function orphanToolResultText(tr: OrphanToolResult): string {
+  const id = tr.toolUseId || "";
+  const text = tr.content?.map((c) => c.text || "").join("\n") || "";
+  const body = tr.status === "error" ? `[tool_error: true]\n${text}` : text;
+  return id ? `[Tool Result (${id})]\n${body}` : `[Tool Result]\n${body}`;
+}
+
 function convertMessages(messages, tools, model) {
   let history = [];
   let currentMessage = null;
@@ -694,17 +712,9 @@ function convertMessages(messages, tools, model) {
       prev?.assistantResponseMessage?.toolUses && prev.assistantResponseMessage.toolUses.length > 0;
 
     if (!hasPrecedingAssistant) {
-      const toolResults = item.userInputMessage.userInputMessageContext.toolResults as Array<{
-        toolUseId?: string;
-        content?: Array<{ text?: string }>;
-      }>;
-      const toolResultTexts = toolResults
-        .map((tr) => {
-          const id = tr.toolUseId || "";
-          const text = tr.content?.map((c) => c.text || "").join("\n") || "";
-          return id ? `[Tool Result (${id})]\n${text}` : `[Tool Result]\n${text}`;
-        })
-        .join("\n\n");
+      const toolResults = item.userInputMessage.userInputMessageContext
+        .toolResults as OrphanToolResult[];
+      const toolResultTexts = toolResults.map(orphanToolResultText).join("\n\n");
 
       const originalContent = item.userInputMessage.content || "";
       item.userInputMessage.content = originalContent
@@ -727,14 +737,8 @@ function convertMessages(messages, tools, model) {
 
     if (!hasPrecedingAssistant) {
       const toolResults = currentMessage.userInputMessage.userInputMessageContext
-        .toolResults as Array<{ toolUseId?: string; content?: Array<{ text?: string }> }>;
-      const toolResultTexts = toolResults
-        .map((tr) => {
-          const id = tr.toolUseId || "";
-          const text = tr.content?.map((c) => c.text || "").join("\n") || "";
-          return id ? `[Tool Result (${id})]\n${text}` : `[Tool Result]\n${text}`;
-        })
-        .join("\n\n");
+        .toolResults as OrphanToolResult[];
+      const toolResultTexts = toolResults.map(orphanToolResultText).join("\n\n");
 
       const originalContent = currentMessage.userInputMessage.content || "";
       currentMessage.userInputMessage.content = originalContent

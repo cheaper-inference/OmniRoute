@@ -52,3 +52,21 @@ test("guard: an enabled budget is unchanged", () => {
     { thinkingBudget: 2048, includeThoughts: true }
   );
 });
+
+test("gemini-2.5-pro cannot switch thinking off, so it gets no zero budget", () => {
+  // Gemini 2.5 Pro takes a budget of 128..32768 and answers 400 to thinkingBudget 0.
+  for (const extra of [{ thinking: { type: "disabled" } }, { output_config: { effort: "none" } }]) {
+    assert.equal(thinkingConfig("gemini-2.5-pro", extra), undefined);
+    assert.equal(thinkingConfig("gemini-2.5-pro-preview-06-05", extra), undefined);
+  }
+});
+
+test("an enabled numeric budget keeps priority over output_config.effort none", () => {
+  assert.deepEqual(
+    thinkingConfig("gemini-2.5-flash", {
+      thinking: { type: "enabled", budget_tokens: 1024 },
+      output_config: { effort: "none" },
+    }),
+    { thinkingBudget: 1024, includeThoughts: true }
+  );
+});

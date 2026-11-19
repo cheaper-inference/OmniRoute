@@ -568,18 +568,22 @@ export function claudeToGeminiRequest(model, body, stream, credentials = null) {
     // gemma-4 models returns - 400: Thinking budget is not supported for this model
   } else if (
     body.thinking?.type === "disabled" ||
-    (typeof body.output_config?.effort === "string" &&
+    // An enabled numeric budget keeps its priority over effort (see the priority note above).
+    (!(body.thinking?.type === "enabled" && typeof body.thinking.budget_tokens === "number") &&
+      typeof body.output_config?.effort === "string" &&
       body.output_config.effort.toLowerCase() === "none")
   ) {
     // The client asked for no thinking. Gemini 2.5 thinks dynamically when no thinkingConfig is
     // sent, so switch it off explicitly, as the OpenAI path does for reasoning_effort "none".
     // Models with a thinking-level knob or a zero budget cap (gemini-3 style) have no numeric
-    // off switch and reject a zero budget: leave them on the upstream default.
+    // off switch and reject a zero budget: leave them on the upstream default. Gemini 2.5 Pro
+    // cannot switch thinking off either (budget 128..32768, a zero budget answers 400).
     const spec = getModelSpec(model);
     if (
       !isGeminiThinkingLevelModel(model) &&
       !spec?.geminiThinkingLevels?.length &&
-      spec?.thinkingBudgetCap !== 0
+      spec?.thinkingBudgetCap !== 0 &&
+      !/gemini-2\.5-pro/i.test(model)
     ) {
       result.generationConfig.thinkingConfig = buildGeminiThinkingConfig(model, 0, false);
     }
