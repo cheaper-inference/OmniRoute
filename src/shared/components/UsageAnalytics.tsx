@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useMemo, useRef, useSyncExternalStore
 import { useLocale, useTranslations } from "next-intl";
 import Button from "./Button";
 import Card from "./Card";
-import CachedInputTokens from "./CachedInputTokens";
+import TokenBreakdownCards from "./analytics/TokenBreakdownCards";
 import Icon from "./Icon";
 import { CardSkeleton } from "./Loading";
 import AnimatedNumber from "./AnimatedNumber";
@@ -63,6 +63,11 @@ function writeTokenDisplayMode(mode: TokenDisplayMode): void {
   for (const listener of tokenDisplayListeners) listener();
 }
 
+/**
+ * Render usage analytics for the selected date range and API keys.
+ * Fetch the corresponding usage summary and breakdowns while preserving the user's
+ * compact or exact token-display preference across filter changes.
+ */
 export default function UsageAnalytics() {
   const locale = useLocale();
   const t = useTranslations("analytics");
@@ -139,12 +144,8 @@ export default function UsageAnalytics() {
   }, [fetchAnalytics]);
 
   const handleRangeSelect = useCallback((value: string) => {
-    if (value === "custom") {
-      setShowCustomPicker(true);
-    } else {
-      setRange(value);
-      setShowCustomPicker(false);
-    }
+    setRange(value);
+    setShowCustomPicker(false);
   }, []);
 
   const handleCustomApply = useCallback((start: string, end: string) => {
@@ -244,7 +245,7 @@ export default function UsageAnalytics() {
       <UsageEvidenceNotice estimated={s.estimated} unknownEvidence={s.unknownEvidence} />
       {/* Header + Filters */}
       <div className="flex items-center justify-between flex-wrap gap-3">
-        <h2 className="text-xl font-semibold flex items-center gap-2">
+        <h2 className="text-xl flex items-center gap-2">
           <Icon name="analytics" size={22} className="text-primary" />
           {t("usageAnalyticsTitle")}
         </h2>
@@ -303,91 +304,48 @@ export default function UsageAnalytics() {
                 {r.label}
               </Button>
             ))}
-            <Button
-              size="sm"
-              variant={range === "custom" ? "primary" : "ghost"}
-              aria-pressed={range === "custom"}
-              onClick={() => handleRangeSelect("custom")}
-              className="h-7 min-h-7 px-3 text-xs gap-1"
+            {/* Custom range: the button is the trigger of the picker's kit Popover. */}
+            <CustomRangePicker
+              open={showCustomPicker}
+              onOpenChange={setShowCustomPicker}
+              start={customStart}
+              end={customEnd}
+              onApply={handleCustomApply}
             >
-              <Icon name="date_range" size={13} />
-              {customRangeLabel || t("customRange")}
-              {range === "custom" && customRangeLabel && (
-                <span
-                  role="button"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setRange("30d");
-                    setCustomStart("");
-                    setCustomEnd("");
-                  }}
-                  className="ml-0.5 opacity-70 hover:opacity-100"
-                >
-                  <Icon name="close" size={11} />
-                </span>
-              )}
-            </Button>
-
-            {/* Custom Range Picker Popover */}
-            {showCustomPicker && (
-              <CustomRangePicker
-                start={customStart}
-                end={customEnd}
-                onApply={handleCustomApply}
-                onClose={() => setShowCustomPicker(false)}
-              />
-            )}
+              <Button
+                size="sm"
+                variant={range === "custom" ? "primary" : "ghost"}
+                aria-pressed={range === "custom"}
+                className="h-7 min-h-7 px-3 text-xs gap-1"
+              >
+                <Icon name="date_range" size={13} />
+                {customRangeLabel || t("customRange")}
+                {range === "custom" && customRangeLabel && (
+                  <span
+                    role="button"
+                    onClick={(e) => {
+                      // Inside the popover trigger: the press does not dismiss the panel and the
+                      // stopped click does not toggle it, so close it here with the range.
+                      e.stopPropagation();
+                      setShowCustomPicker(false);
+                      setRange("30d");
+                      setCustomStart("");
+                      setCustomEnd("");
+                    }}
+                    className="ml-0.5 opacity-70 hover:opacity-100"
+                  >
+                    <Icon name="close" size={11} />
+                  </span>
+                )}
+              </Button>
+            </CustomRangePicker>
           </div>
         </div>
       </div>
 
       {/* Primary KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <StatCard
-          icon="generating_tokens"
-          label={t("totalTokens")}
-          value={
-            <AnimatedNumber
-              value={s.totalTokens}
-              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
-            />
-          }
-          tooltip={tokenDisplayMode === "exact" ? `~${fmt(s.totalTokens)}` : fmtFull(s.totalTokens)}
-          subValue={`${fmtFull(s.totalRequests)} ${t("chartRequests")}`}
-        />
-        <StatCard
-          icon="input"
-          label={t("inputTokens")}
-          value={
-            <AnimatedNumber
-              value={s.promptTokens}
-              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
-            />
-          }
-          tooltip={
-            tokenDisplayMode === "exact" ? `~${fmt(s.promptTokens)}` : fmtFull(s.promptTokens)
-          }
-          color="text-primary"
-          subValue={
-            <CachedInputTokens value={s.cachedInputTokens} complete={s.cachedInputTokensComplete} />
-          }
-        />
-        <StatCard
-          icon="output"
-          label={t("outputTokens")}
-          value={
-            <AnimatedNumber
-              value={s.completionTokens}
-              format={tokenDisplayMode === "exact" ? fmtFull : fmt}
-            />
-          }
-          tooltip={
-            tokenDisplayMode === "exact"
-              ? `~${fmt(s.completionTokens)}`
-              : fmtFull(s.completionTokens)
-          }
-          color="text-success"
-        />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-6 gap-3">
+        <TokenBreakdownCards summary={s} displayMode={tokenDisplayMode} />
         <StatCard
           icon="payments"
           label={t("estCost")}
@@ -412,7 +370,7 @@ export default function UsageAnalytics() {
                 icon: "dns",
                 label: t("infraProviders"),
                 value: providerCount,
-                color: "text-chart-2",
+                color: "text-chart-2-ink",
               },
               { icon: "vpn_key", label: t("infraApiKeys"), value: s.uniqueApiKeys || 0 },
               { icon: "model_training", label: t("infraModels"), value: s.uniqueModels || 0 },
@@ -445,7 +403,7 @@ export default function UsageAnalytics() {
                 icon: "compare_arrows",
                 label: t("perfIoRatio"),
                 value: `${ioRatio}x`,
-                color: "text-chart-3",
+                color: "text-chart-3-ink",
               },
               {
                 icon: "bolt",
@@ -470,13 +428,13 @@ export default function UsageAnalytics() {
                 icon: "star",
                 label: t("highlightsTopModel"),
                 value: topModel,
-                color: "text-chart-5",
+                color: "text-chart-5-ink",
               },
               {
                 icon: "cloud",
                 label: t("highlightsTopProvider"),
                 value: topProvider,
-                color: "text-chart-4",
+                color: "text-chart-4-ink",
               },
               {
                 icon: "today",

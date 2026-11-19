@@ -39,6 +39,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
     // PoolCard's Card is the frame around this table (#19620).
     <Table
       scrollbarLabel={t("apiKeyColumn")}
+      scrollLabel={t("apiKeyColumn")}
       className="min-w-0 text-[11px]"
       containerClassName="rounded-none border-0"
     >
@@ -84,10 +85,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                   )}
                 </div>
               </TableCell>
-              <TableCell
-                className="h-auto px-2 py-1.5 text-right font-semibold tabular-nums"
-                style={{ color }}
-              >
+              <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums" style={{ color }}>
                 {alloc.weight}%
               </TableCell>
               <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums text-text-muted">

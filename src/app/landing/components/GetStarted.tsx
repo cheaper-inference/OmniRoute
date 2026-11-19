@@ -24,9 +24,7 @@ export default function GetStarted() {
         <div className="flex flex-col lg:flex-row gap-16 items-start">
           {/* Left: Steps */}
           <div className="flex-1">
-            <h2 className="text-3xl md:text-4xl font-semibold mb-6">
-              {t("getStartedIn30Seconds")}
-            </h2>
+            <h2 className="text-3xl md:text-4xl mb-6">{t("getStartedIn30Seconds")}</h2>
             <p className="text-text-muted text-lg mb-8">{t("getStartedDescription")}</p>
 
             <div className="flex flex-col gap-6">
@@ -35,7 +33,7 @@ export default function GetStarted() {
                   1
                 </div>
                 <div>
-                  <h4 className="font-semibold text-lg">{t("installOmniRoute")}</h4>
+                  <h4 className="text-lg">{t("installOmniRoute")}</h4>
                   <p className="text-sm text-text-muted mt-1">{t("installStepDescription")}</p>
                 </div>
               </div>
@@ -45,7 +43,7 @@ export default function GetStarted() {
                   2
                 </div>
                 <div>
-                  <h4 className="font-semibold text-lg">{t("openDashboard")}</h4>
+                  <h4 className="text-lg">{t("openDashboard")}</h4>
                   <p className="text-sm text-text-muted mt-1">
                     {t("openDashboardStepDescription")}
                   </p>
@@ -57,7 +55,7 @@ export default function GetStarted() {
                   3
                 </div>
                 <div>
-                  <h4 className="font-semibold text-lg">{t("routeRequests")}</h4>
+                  <h4 className="text-lg">{t("routeRequests")}</h4>
                   <p className="text-sm text-text-muted mt-1">
                     {t("routeRequestsStepDescription", { endpoint })}
                   </p>
