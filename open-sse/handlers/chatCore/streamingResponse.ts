@@ -18,6 +18,7 @@ import {
 } from "./passthroughHelpers.ts";
 import { recoverAnthropicThinkingSignature } from "../chatCore/thinkingSignatureRecovery.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
+import { admitQuotaShareRotation } from "../chatCore/quotaSharePreHook.ts";
 import { markCodexScopeRateLimited } from "../chatCore/codexFailover.ts";
 import { deleteSessionAccountAffinityBestEffort } from "@/lib/db/sessionAccountAffinity";
 import { buildStreamingResponseHeaders, stripStaleForwardingHeaders } from "./responseHeaders.ts";
@@ -274,6 +275,13 @@ async function runStreamingResponseInner(deps: StreamingDeps) {
         getProviderCredentials,
         getProviderCredentialsWithQuotaPreflight,
         allowedConnections: deps.allowedConnections ?? null,
+        admitRotation: (nextConnectionId) =>
+          admitQuotaShareRotation({
+            apiKeyInfo,
+            connectionId: nextConnectionId,
+            provider,
+            model,
+          }),
       },
       wire: {
         body: translatedBody as Record<string, unknown>,

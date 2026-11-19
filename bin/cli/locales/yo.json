@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Iye ààlà gbọ́dọ̀ jẹ́ odidi nọ́ńbà rere.",
     "error": "Àṣìṣe: {message}",
     "serverOffline": "Sẹ́fà OmniRoute kò sí lórí ayélujára. Bẹ̀rẹ̀ rẹ̀ pẹ̀lú: omniroute serve",
     "authRequired": "Ìfàṣẹsí jẹ́ dandan. Ṣètò OMNIROUTE_API_KEY tàbí ṣiṣẹ́: omniroute setup",

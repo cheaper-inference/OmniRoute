@@ -18,7 +18,7 @@
 
 ---
 
-## Diegimo būdai
+## Diegimo metodai
 
 ### npm (rekomenduojama)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Valdymo skydelis atidaromas adresu `http://localhost:20128`, o bazinis API URL yra `http://localhost:20128/v1`.
+Prietaisų skydelis atsidaro ties `http://localhost:20128`, o API bazė URL yra `http://localhost:20128/v1`.
+
+> **npm vartotojai:** Jei npm įspėja, kad diegimo scenarijai buvo užblokuoti (pvz., `omniroute`, `better-sqlite3`), žr. [Trikčių šalinimas — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm naudotojams:** vėliavėlė `--allow-build` būtina norint įjungti vietinius `better-sqlite3` ir `@swc/core` kūrimo scenarijus. Komanda `pnpm approve-builds -g` nepalaikoma visuotiniams diegimams naudojant pnpm v11.
+> **pnpm vartotojai:** `--allow-build` vėliavėlė reikalinga norint įgalinti vietinius `better-sqlite3` ir `@swc/core` kūrimo scenarijus. Komanda `pnpm approve-builds -g` nepalaikoma visuotiniam diegimui pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR paketas](https://aur.archlinux.org/packages/omniroute-bin) įdiegia „OmniRoute“ ir pateikia systemd naudotojo paslaugą.
+[AUR paketas](https://aur.archlinux.org/packages/omniroute-bin) įdiegia OmniRoute ir teikia sisteminę vartotojo paslaugą.
 
-### Iš pirminio kodo
+### Iš Šaltinio
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Pastaba „Windows“ naudotojams:** pagal numatytąsias nuostatas „OmniRoute“ naudoja `%APPDATA%\omniroute`, kai senojo `%USERPROFILE%\.omniroute` katalogo nėra. Norėdami pasirinkti kitą duomenų katalogo vietą, nustatykite `DATA_DIR`.
+> **Windows pastaba:** Pagal numatytuosius nustatymus OmniRoute naudoja `%APPDATA%\omniroute`, kai nėra senojo `%USERPROFILE%\.omniroute` katalogo. Nustatykite `DATA_DIR`, kad pasirinktumėte kitą duomenų katalogo vietą.
 
-> **Pastaba:** pirmą kartą paleidus `npm install`, `.env` automatiškai sugeneruojamas iš `.env.example`. Vėlesni diegimai neperrašys esamo `.env`, todėl tinkinimai bus išsaugoti. Norėdami sugeneruoti jį iš naujo, prieš kartodami komandą ištrinkite `.env`.
+> **Pastaba:** `npm install` automatiškai generuoja `.env` iš `.env.example` pirmą kartą paleidus. Vėlesni diegimai neperrašys esamo `.env`, todėl tinkinimai išsaugomi. Norėdami iš naujo sėti, prieš paleisdami iš naujo ištrinkite `.env`.
 
 ### Docker
 
-Išsamią „Docker“ sąranką, įskaitant „Compose“ profilius ir „Caddy HTTPS“, rasite [„Docker“ vadove](./DOCKER_GUIDE.md).
+Visą Docker sąranką, įskaitant Compose profilius ir Caddy HTTPS, rasite [Docker vadove](./DOCKER_GUIDE.md).
 
 ### Darbalaukio programa (Electron)
 
-„OmniRoute“ pateikiama su darbalaukio apvalkalu, sukurtu naudojant Electron 41 ir electron-builder 26.10. Galimi scenarijai (darbo srities šakniniame kataloge):
+OmniRoute pristato darbalaukio apvalkalą, sukurtą ant Electron 41 + elektronų kūrimo priemonės 26.10. Galimi scenarijai (darbo srities šaknis):
 
 ```bash
-npm run electron:dev          # Paleisti darbalaukio programą su automatiniu perkrovimu
-npm run electron:build        # Sukurti dabartinei OS (aptinkama automatiškai)
-npm run electron:build:win    # „Windows“ diegimo programa (NSIS + nešiojamoji versija)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Atlikti supakuotos versijos bazinį patikrinimą
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Darbalaukio diegimo programų leidimai pridedami prie „GitHub Releases“. Išsamų „Electron“ aprašą (pasirašymą, IPC tiltą, platinamuosius paketus) rasite [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(sukurta vėlesniame etape)_.
+Stalinių kompiuterių diegimo programų leidimai pridedami prie GitHub leidimų. Visą Electron giluminį nardymą (pasirašymas, IPC tiltas, paskirstymas) žr. [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Serveris be grafinės sąsajos (CI / automatizavimas)
+### Serveris be galvos (CI/automation)
 
-Neprižiūrimoms sąrankoms („Docker“, „Kubernetes“, CI) naudokite:
+Neprižiūrintoms sąrankoms (Docker, Kubernetes, CI) naudokite:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Naudojant kartu su aplinkos kintamaisiais (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` ir kt.), „OmniRoute“ egzempliorių galima visiškai automatizuotai paleisti scenarijais.
+Kartu su env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` ir t. t.), tai leidžia sukurti OmniRoute egzempliorių, kuris yra visiškai scenarijus.
 
 ### CLI parinktys
 
-| Komanda                 | Aprašas                                                                                 |
-| ----------------------- | --------------------------------------------------------------------------------------- |
-| `omniroute`             | Paleisti serverį (`PORT=20128`, API ir valdymo skydelis tame pačiame prievade)          |
-| `omniroute setup`       | Interaktyvi pradinė CLI slaptažodžio ir pirmojo teikėjo sąranka                         |
-| `omniroute doctor`      | Atlikti vietines būklės patikras nepaleidžiant serverio                                 |
-| `omniroute providers`   | Aptikti, išvardyti, patikrinti ir išbandyti teikėjus per CLI                            |
-| `omniroute config`      | CLI įrankio konfigūravimas — konfigūracijų sąrašas, gavimas, nustatymas ir tikrinimas   |
-| `omniroute status`      | Neprisijungus pasiekiamas būsenos skydelis — versija, DB, įrankiai, konfigūracija       |
-| `omniroute logs`        | Srautiniu būdu gauti naudojimo žurnalus iš API (palaiko `--follow`)                     |
-| `omniroute update`      | Patikrinti arba pritaikyti „OmniRoute“ naujinimus                                       |
-| `omniroute provider`    | Valdyti teikėjų ryšius — pridėti, išvardyti, pašalinti, išbandyti, nustatyti numatytąjį |
-| `omniroute --port 3000` | Nustatyti pagrindinį / API prievadą į 3000                                              |
-| `omniroute --mcp`       | Paleisti MCP serverį (stdio perdavimo būdas)                                            |
-| `omniroute --no-open`   | Automatiškai neatidaryti naršyklės                                                      |
-| `omniroute --help`      | Rodyti žinyną                                                                           |
+| komandą                 | Aprašymas                                                                         |
+| ----------------------- | --------------------------------------------------------------------------------- |
+| `omniroute`             | Paleisti serverį (`PORT=20128`, API ir prietaisų skydelis tame pačiame prievade)  |
+| `omniroute setup`       | Vadovaujamas CLI prisijungimas prie slaptažodžio ir pirmojo teikėjo               |
+| `omniroute doctor`      | Vykdykite vietinius sveikatos patikrinimus nepaleidę serverio                     |
+| `omniroute providers`   | Atraskite, įtraukite į sąrašą, patvirtinkite ir patikrinkite tiekėjus iš CLI      |
+| `omniroute config`      | CLI įrankio konfigūracija — sąrašas, gauti, nustatyti, patvirtinti konfigūracijas |
+| `omniroute status`      | Būsenos neprisijungus prietaisų skydelis — versija, DB, įrankiai, konfigūracija   |
+| `omniroute logs`        | Srautinio naudojimo žurnalai iš API (palaiko `--follow`)                          |
+| `omniroute update`      | Patikrinkite, ar yra OmniRoute naujinimų arba pritaikykite juos                   |
+| `omniroute provider`    | Tvarkykite tiekėjų ryšius — pridėti, įtraukti, pašalinti, išbandyti, numatytieji  |
+| `omniroute --port 3000` | Nustatykite canonical/API prievadą į 3000                                         |
+| `omniroute --mcp`       | Paleisti MCP serverį (stdio transportą)                                           |
+| `omniroute --no-open`   | Neatidarykite naršyklės automatiškai                                              |
+| `omniroute --help`      | Rodyti pagalbą                                                                    |
 
-Sąranką be grafinės sąsajos galima automatizuoti naudojant vėliavėles arba aplinkos kintamuosius:
+Sąranką be galvos galima parašyti naudojant vėliavėles arba aplinkos kintamuosius:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Paleiskite vietinę diagnostiką neatidarydami valdymo skydelio:
+Vykdykite vietinę diagnostiką neatidarę prietaisų skydelio:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Valdykite teikėjus per SSH arba scenarijus neatidarydami valdymo skydelio:
+Tvarkykite tiekėjus iš SSH arba scenarijų neatidarę prietaisų skydelio:
 
 ```bash
 omniroute providers available
@@ -219,8 +221,12 @@ npm run test:protocols:e2e
 
 **Claude kodas:**
 
+Claude kodas jungiasi per HTTP, kurio `omniroute --mcp` (stdio) nepaleidžia. Pagal numatytuosius nustatymus HTTP transportavimas išjungtas: pirmiausia įjunkite jį veikiančiame serveryje. Kai įjungtas prisijungimas prie prietaisų skydelio, užklausa be kredencialų gauna `401`, todėl perduokite API raktą, kuriame yra `mcp:connect` (arba `manage`); raktui be `manage`/`admin` taip pat reikia kiekvieno įrankio taikymo srities (žr [MCP Server → MCP įrankių apimtis](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
