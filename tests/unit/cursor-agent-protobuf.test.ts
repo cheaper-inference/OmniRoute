@@ -351,11 +351,13 @@ test("encodeAgentRunRequest sends standard Grok 4.7 effort through RequestedMode
       assert.ok(field?.wireType === WT_LEN);
       return field.bytes.toString("utf8");
     };
-    const parameters = modelFields.filter((field) => field.fieldNumber === 3).map((field) => {
-      assert.ok(field.wireType === WT_LEN);
-      const pair = decodeFields(field.bytes);
-      return [textField(pair, 1), textField(pair, 2)];
-    });
+    const parameters = modelFields
+      .filter((field) => field.fieldNumber === 3)
+      .map((field) => {
+        assert.ok(field.wireType === WT_LEN);
+        const pair = decodeFields(field.bytes);
+        return [textField(pair, 1), textField(pair, 2)];
+      });
     return { modelId: textField(modelFields, 1), parameters };
   };
 
@@ -455,11 +457,13 @@ test("Grok 4.7 High 256K standard speed uses only RequestedModel", () => {
     return field.bytes.toString("utf8");
   };
   assert.equal(text(modelFields, 1), "grok-4.7");
-  const parameters = modelFields.filter((field) => field.fieldNumber === 3).map((field) => {
-    assert.ok(field.wireType === WT_LEN);
-    const pair = decodeFields(field.bytes);
-    return [text(pair, 1), text(pair, 2)];
-  });
+  const parameters = modelFields
+    .filter((field) => field.fieldNumber === 3)
+    .map((field) => {
+      assert.ok(field.wireType === WT_LEN);
+      const pair = decodeFields(field.bytes);
+      return [text(pair, 1), text(pair, 2)];
+    });
   assert.deepEqual(parameters, [
     ["context", "256k"],
     ["reasoning_effort", "high"],
