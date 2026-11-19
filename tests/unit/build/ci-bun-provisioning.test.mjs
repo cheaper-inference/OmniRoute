@@ -100,8 +100,10 @@ for (const scenario of [
       ]) {
         await writeFile(join(dir, path), JSON.stringify(value));
       }
+      // Keep the packaged .exe path with a shell fixture that behaves like a
+      // native child under the shard's inherited Node preloads.
       const fake = (value, marker) =>
-        `#!${process.execPath}\nconst fs=require("node:fs");fs.writeFileSync(process.env.${marker},"called");console.log(${JSON.stringify(value)});\n`;
+        `#!/bin/sh\nset -eu\nprintf 'called' > "$${marker}"\nprintf '%s\\n' ${JSON.stringify(value)}\n`;
       const executable = join(localDirectory, "bin/bun.exe");
       if (scenario !== "missing-binary") {
         await writeFile(
