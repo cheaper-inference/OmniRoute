@@ -11,10 +11,14 @@ is a free alternative**: it stores an AES-256-GCM encrypted backup in storage yo
 
 ## What it syncs
 
-The remote bundle is a consistent SQLite snapshot from `GET /api/db-backups/export`, so it
-includes provider connections, credentials, combos, routing settings, dashboard API keys and
-memory. Nothing is written to the remote in plaintext: the snapshot is encrypted locally with a
-password you choose, using scrypt for key derivation and AES-256-GCM for encryption.
+The remote bundle is a consistent SQLite snapshot from `GET /api/db-backups/export?portable=true`,
+so it includes provider connections, credentials, combos, routing settings, dashboard API keys and
+memory. The `portable=true` flag empties the high-volume `usage_history` and `call_logs` tables
+in the exported copy, which keeps the bundle small and leaves request history out of it. The
+dashboard's database export calls the same route without the flag and still downloads the
+complete database. Nothing is written to the remote in plaintext: the snapshot is encrypted
+locally with a password you choose, using scrypt for key derivation and AES-256-GCM for
+encryption.
 
 ## Setup
 
@@ -46,8 +50,10 @@ omniroute sync remote daemon --interval 60000
 ```
 
 The daemon pulls once at startup, then pushes whenever the local database changes. Before an
-import it downloads a fresh local snapshot, so a last-write-wins restore never silently loses
-the previous state.
+import it saves a complete local snapshot (history included) to `backups/` in the data
+directory, so a last-write-wins restore never silently loses the previous state. The restored
+bundle has no usage or call-log history, which means the local history after a pull exists
+only in that snapshot.
 
 ## Storage requirements
 

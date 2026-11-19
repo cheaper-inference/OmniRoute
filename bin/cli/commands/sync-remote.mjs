@@ -14,6 +14,9 @@ const DEFAULT_INTERVAL_MS = 60_000;
 const MIN_INTERVAL_MS = 1_000;
 // setTimeout uses a signed 32-bit delay; larger values wrap into an immediate poll.
 const MAX_INTERVAL_MS = 2_147_483_647;
+// Every snapshot that is uploaded or hashed against an uploaded version uses the portable
+// (history-free) export, so the version hashes stay comparable (#20418).
+const PORTABLE = { portable: true };
 
 /** Validate the daemon poll interval before it reaches setTimeout. */
 export function parseIntervalMs(value = DEFAULT_INTERVAL_MS) {
@@ -293,7 +296,7 @@ export async function runSyncRemotePush(options = {}) {
   const staging = mkdtempSync(join(tmpdir(), "omniroute-sync-"));
   try {
     const sqlite = join(staging, "storage.sqlite");
-    const exportCode = await runSyncExportSqlite(sqlite, opts);
+    const exportCode = await runSyncExportSqlite(sqlite, opts, PORTABLE);
     if (exportCode !== 0) return exportCode;
     assertSqlite(sqlite);
     const { envelopePath, version } = buildEnvelope(sqlite, passphrase, staging);
@@ -327,6 +330,8 @@ export async function runSyncRemotePull(options = {}) {
       throw new Error("bundle checksum mismatch; refusing to import");
     }
     // Snapshot the current database to a persistent path before the import overwrites it.
+    // This one is the COMPLETE export: the bundle being imported carries no usage/call-log
+    // history, so this snapshot is the only copy of the local history.
     const backupsDir = join(resolveDataDir(), "backups");
     mkdirSync(backupsDir, { recursive: true });
     const snapshot = join(backupsDir, `pre-remote-restore-${Date.now()}.sqlite`);
@@ -357,7 +362,7 @@ async function localDatabaseHash(opts) {
   const staging = mkdtempSync(join(tmpdir(), "omniroute-sync-"));
   try {
     const sqlite = join(staging, "storage.sqlite");
-    const code = await runSyncExportSqlite(sqlite, opts);
+    const code = await runSyncExportSqlite(sqlite, opts, PORTABLE);
     if (code !== 0) throw new Error("local database export failed during sync check");
     return fileHash(sqlite);
   } finally {
@@ -412,7 +417,7 @@ export async function runSyncRemoteDaemon(options = {}) {
       let localHash;
       try {
         const sqlite = join(staging, "storage.sqlite");
-        const code = await runSyncExportSqlite(sqlite, opts);
+        const code = await runSyncExportSqlite(sqlite, opts, PORTABLE);
         if (code !== 0) continue;
         localHash = fileHash(sqlite);
       } finally {
