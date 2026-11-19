@@ -411,7 +411,9 @@ function isValidRU_Passport(value: string, context: string): boolean {
     return false;
   }
   if (/^\d{2}\s\d{2}\s{1,2}\d{6}$/.test(value.trim())) return true;
-  return /(?:passport|паспорт|серия|seria|doc(?:ument)?|id\b)/i.test(context);
+  return /(?<![\p{L}\p{N}_])(?:passport|паспорт|серия|seria|doc(?:ument)?|id)(?![\p{L}\p{N}_])/iu.test(
+    context
+  );
 }
 
 /**
@@ -464,7 +466,9 @@ function isValidVIN(value: string, context: string): boolean {
   const upper = value.toUpperCase();
   if (!/^[A-HJ-NPR-Z0-9]{17}$/.test(upper)) return false;
   if (!/[A-HJ-NPR-Z]/.test(upper) || !/\d/.test(upper)) return false;
-  if (/^[0-9A-F]{17}$/.test(upper) && !/\bvin\b/i.test(context)) return false;
+  if (/^[0-9A-F]{17}$/.test(upper) && !/(?<![\p{L}\p{N}_])vin(?![\p{L}\p{N}_])/iu.test(context)) {
+    return false;
+  }
 
   let sum = 0;
   for (let i = 0; i < 17; i++) {
@@ -476,7 +480,7 @@ function isValidVIN(value: string, context: string): boolean {
   const rem = sum % 11;
   const expected = rem === 10 ? "X" : String(rem);
   if (upper[8] === expected) return true;
-  return /\b(?:vin|chassis|кузов|авто)\b/i.test(context);
+  return /(?<![\p{L}\p{N}_])(?:vin|chassis|кузов|авто)(?![\p{L}\p{N}_])/iu.test(context);
 }
 
 // ── Pattern table ──
@@ -657,7 +661,7 @@ export const RU_PII_PATTERNS: readonly GdprPopiaPatternDef[] = [
   {
     name: "vin",
     core: "[A-HJ-NPR-Z0-9]{17}",
-    flags: "g",
+    flags: "gi",
     replacement: "[VIN_REDACTED]",
     severity: "high",
     jurisdiction: "RU",

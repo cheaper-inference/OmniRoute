@@ -262,3 +262,38 @@ test("reversible PII vault round-trips RU identifiers end-to-end", async () => {
     delete process.env.PII_REVERSIBLE_VAULT_ENABLED;
   }
 });
+
+test("VIN supports Cyrillic context cues and lowercase values on both sanitizers", () => {
+  assert.equal(validate("vin", "XTA21099AY2766389", ""), false);
+  assert.equal(validate("vin", "XTA21099AY2766389", "кузов: "), true);
+  assert.equal(validate("vin", "1hgcm82633a004352", ""), true);
+  assert.equal(validate("vin", "xta21099ay2766389", "кузов: "), true);
+  assert.equal(validate("passport_ru", "4512 123456", "паспорт: "), true);
+  assert.equal(validate("passport_ru", "4512 123456", "непаспорт: "), false);
+
+  process.env.PII_RESPONSE_SANITIZATION = "true";
+  try {
+    setPiiSettings({ enabledTypes: ["vin"], customPatterns: [] });
+    clearPiiSettingsCache();
+
+    const cases = [
+      { input: "кузов: XTA21099AY2766389", raw: "XTA21099AY2766389" },
+      { input: "1hgcm82633a004352", raw: "1hgcm82633a004352" },
+      { input: "кузов: xta21099ay2766389", raw: "xta21099ay2766389" },
+    ];
+
+    for (const { input, raw } of cases) {
+      const req = processPII(input, true, { enabledTypes: new Set(["vin"]) });
+      assert.ok(req.text.includes("[VIN_REDACTED]"), `request failed for ${input}: ${req.text}`);
+      assert.ok(!req.text.includes(raw), `request leaked ${raw}`);
+
+      const res = sanitizePII(input);
+      assert.ok(res.text.includes("[VIN_REDACTED]"), `response failed for ${input}: ${res.text}`);
+      assert.ok(!res.text.includes(raw), `response leaked ${raw}`);
+    }
+  } finally {
+    setPiiSettings({ enabledTypes: null, customPatterns: [] });
+    clearPiiSettingsCache();
+    delete process.env.PII_RESPONSE_SANITIZATION;
+  }
+});
