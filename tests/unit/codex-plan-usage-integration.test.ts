@@ -57,10 +57,7 @@ test("Codex quota refresh persists Free -> Plus and fixes paid-model eligibility
   let usageCalls = 0;
   codex.setCodexUsageFetchForTests(async (url, init) => {
     assert.match(url, /\/backend-api\/wham\/usage$/);
-    assert.equal(
-      (init.headers as Record<string, string>)["chatgpt-account-id"],
-      "workspace-test"
-    );
+    assert.equal((init.headers as Record<string, string>)["chatgpt-account-id"], "workspace-test");
     usageCalls++;
     return Response.json({
       plan_type: "plus",

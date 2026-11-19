@@ -1,9 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import {
-  codexPlanFromUsage,
-  syncCodexPlanFromUsage,
-} from "../../src/lib/usage/codexPlanSync.ts";
+import { codexPlanFromUsage, syncCodexPlanFromUsage } from "../../src/lib/usage/codexPlanSync.ts";
 import { isCodexPlanEligibleForModel } from "../../open-sse/services/codexPlanEligibility.ts";
 
 const paidModel = "gpt-6-sol";
@@ -67,7 +64,9 @@ test("do not overwrite a valid plan on missing, invalid, stale or failed usage",
     { plan: "free", _stale: true },
     { plan: "plus<script>" },
   ]) {
-    const updated = await syncCodexPlanFromUsage(initial, usage, async () => { writes += 1; });
+    const updated = await syncCodexPlanFromUsage(initial, usage, async () => {
+      writes += 1;
+    });
     assert.equal(updated, initial);
   }
   assert.equal(writes, 0);
@@ -99,7 +98,9 @@ test("does not rewrite unrelated providers or missing workspace field", async ()
     providerSpecificData: { chatgptPlanType: "free" },
   };
   assert.equal(
-    await syncCodexPlanFromUsage(other, { plan: "plus" }, async () => { writes += 1; }),
+    await syncCodexPlanFromUsage(other, { plan: "plus" }, async () => {
+      writes += 1;
+    }),
     other
   );
   const codex = {
