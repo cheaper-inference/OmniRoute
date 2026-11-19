@@ -46,23 +46,21 @@ Az `auto/chaos` **nem** hibainjektálási vagy rezilienciatesztelési beállít�
 
 ## Beállítás
 
-1. Nyissa meg az **Irányítópult → Chaos Mode** oldalt (`/dashboard/chaos`).
-2. **Kapcsolja be** — a Chaos Mode alapértelmezés szerint **le van tiltva** (`enabled: false` a
-   `src/lib/chaos/chaosConfig.ts` fájlban). Letiltott állapotban a `POST /api/chaos/run` válasza:
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. Válassza ki a résztvevőket és az alapértelmezéseket (példányonként tartósan tárolva a beállítástárban):
+1. Nyitott** Irányítópult → Chaos Mode** (`/dashboard/chaos`).
+2. Fordítsa meg** -on** — Chaos Mode hajók** alapértelmezés szerint le van tiltva** (`enabled: false` a `src/lib/chaos/chaosConfig.ts`). Ha le van tiltva, `POST /api/chaos/run` `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."` választ ad.
+3. Válassza ki a résztvevőket és az alapértelmezett értékeket (példányonként megmarad a beállítások tárolójában):
 
-   | Mező                | Jelentés                                                                    | Alapértelmezés / korlátok                       |
-   | ------------------- | --------------------------------------------------------------------------- | ----------------------------------------------- |
-   | `enabled`           | Főkapcsoló                                                                  | `false`                                         |
-   | `defaultMode`       | `parallel` vagy `collaborative` (lásd alább)                                | `parallel`                                      |
-   | `providerOverrides` | Szolgáltatónkénti részvétel (`providerId`, opcionális `modelId`, `enabled`) | üres = minden aktív szolgáltató, legfeljebb 200 |
-   | `systemPrompt`      | A beépített Chaos rendszerprompt felülbírálása                              | opcionális, legfeljebb 10 000 karakter          |
-   | `timeoutMs`         | Modellhívásonkénti maximális idő                                            | `120000` (5 000–600 000)                        |
-   | `maxTokens`         | Modellhívásonkénti `max_tokens`                                             | `4096` (256–128 000)                            |
+   | Mező                | Jelentése                                                                   | Alapértelmezett / határértékek           |
+   | ------------------- | --------------------------------------------------------------------------- | ---------------------------------------- |
+   | `enabled`           | Főkapcsoló                                                                  | `false`                                  |
+   | `defaultMode`       | `parallel` vagy `collaborative` (lásd lent)                                 | `parallel`                               |
+   | `providerOverrides` | Szolgáltatónkénti részvétel (`providerId`, opcionális `modelId`, `enabled`) | üres = minden aktív szolgáltató, max 200 |
+   | `systemPrompt`      | A beépített Chaos rendszerprompt felülbírálása                              | opcionális, maximum 10 000 karakter      |
+   | `timeoutMs`         | Maximális idő modellhívásonként                                             | `120000` (5 000–600 000)                 |
+   | `maxTokens`         | `max_tokens` modellhívásonként                                              | `4096` (256–128 000)                     |
 
-4. Futtasson **tesztet közvetlenül az oldalról** — az eredménypanel megjeleníti az egyes szolgáltatók válaszát,
-   állapotát és időtartamát.
+4. Adja meg minden résztvevő szolgáltatónak a** modell** . A szolgáltató modellje a Káosz mód oldalon engedélyezett felülírásának `modelId` (nyer), ellenkező esetben a** alapértelmezett modell** kapcsolatáról. A szolgáltatói azonosító soha nem használható modellnévként. Egyik szolgáltató sem** nem hívták** : a találatok között `status: "error"` ként jelenik meg a következő üzenettel: _"Nincs modell beállítva ehhez a szolgáltatóhoz. Állítson be neki egy modellt a Chaos Mode oldalon, vagy egy alapértelmezett modellt a kapcsolaton."_ és egy üres `modelId`, miközben a többi szolgáltató normálisan fut. Ha egyetlen kiválasztott szolgáltató sem rendelkezik modellel, a futtatás meghiúsul minden felfelé irányuló kérés előtt a _"Nincs szolgáltatónak nincs beállítva modellje..."_ (HTTP 500 mindkét végponton).
+5. Fuss a** teszt magáról az oldalról** — az eredmények panelen az egyes szolgáltatók válaszai, állapota és időtartama látható.
 
 ## Végrehajtási módok
 
@@ -74,27 +72,24 @@ Az `auto/chaos` **nem** hibainjektálási vagy rezilienciatesztelési beállít�
 
 ## API
 
-### `POST /api/chaos/run` — irányítópult-munkamenet
+### `POST /api/chaos/run` — műszerfali munkamenet
 
-Sütialapú hitelesítést használ (a felügyeleti munkamenetet — lásd:
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); az irányítópult oldala használja.
+Cookie-hitelesített (a kezelési munkamenet — lásd [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); az irányítópult oldala használja.
 
 ```jsonc
-// törzs
+// body
 {
-  "task": "Compare approaches to X", // kötelező
-  "providers": ["glm", "kimi"], // opcionális szűrő
-  "mode": "parallel", // opcionális — felülbírálja a defaultMode értékét
-  "systemPrompt": "…", // opcionális felülbírálás
-  "maxTokens": 4096, // opcionális felülbírálás
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
-### `POST /api/skills/collect/chaos` — API-kulcs
+### `POST /api/skills/collect/chaos` — API kulcs
 
-Bearer-tokenes változat külső hívók számára. A kulcsnak rendelkeznie kell a **Chaos Mode-jogosultsággal**
-(`chaosModeEnabled`), amely **alapértelmezés szerint ki van kapcsolva** — kulcsonként engedélyezhető az
-**Irányítópult → API Manager → kulcs szerkesztése → jogosultságok → Chaos Mode** útvonalon. A törzs megegyezik a fentivel.
+Bearer-token változat külső hívók számára. A kulcsnak hordoznia kell a** Chaos Mode engedély** (`chaosModeEnabled`), ami az** alapértelmezés szerint kikapcsolva** — engedélyezze kulcsonként** Irányítópult → API Manager → szerkesztési kulcs → engedélyek → káosz mód** . Ugyanaz a test, mint fent.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Mindkét végpont azonos szerkezetű választ ad vissza:
+Mindkét végpont ugyanazt az alakot adja vissza:
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ Mindkét végpont azonos szerkezetű választ ad vissza:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // csak collaborative módban
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## Hibaelhárítás
 
-- **`400 Chaos Mode is not enabled`** — lásd a fenti 2. lépést: a globális kapcsoló ki van kapcsolva.
-- **Az API-kulcsot elutasítja a `/api/skills/collect/chaos` végpont** — a kulcs nem rendelkezik a kulcsonkénti
-  `chaosModeEnabled` jogosultsággal (alapértelmezés szerint ki van kapcsolva; ez egy beállítás, nem hiba).
-- **Egy várt szolgáltató hiányzik az eredményekből** — ellenőrizze a `providerOverrides` beállítást a
-  Chaos Mode oldalán (egy letiltott felülbírálás kizárja a szolgáltatót), valamint azt, hogy a szolgáltatói kapcsolat
-  aktív-e.
+- **`400 Chaos Mode is not enabled`** — fenti 2. lépés: a globális kapcsoló ki van kapcsolva.
+- **API kulcsot elutasítja a `/api/skills/collect/chaos`** — a kulcsból hiányzik a kulcsonkénti `chaosModeEnabled` engedély (alapértelmezés szerint ki van kapcsolva; ez beállítás, nem hiba).
+- **Egy szolgáltató `No model set for this provider` mutatja** — beállította a modelljét a Chaos Mode oldalon, vagy egy alapértelmezett modellt a kapcsolatán (lásd: Beállítás, 4. lépés).
+- **A várt szolgáltató hiányzik az eredményekből** — ellenőrizze `providerOverrides` a Chaos Mode oldalon (a letiltott felülírás kizárja), és hogy a szolgáltatói kapcsolat aktív-e.

@@ -246,9 +246,10 @@ function withoutAggregates(signatures, aggregateChecks) {
  *    `check`, and every failing test of the key fails on the base in some shard of that check —
  *    both empty counts as a name-only match, exactly one empty never matches) → "base-red";
  *    otherwise "pr-red";
- *  - baseCheck for the SAME base SHA timed out → "pr-red": baseCheckRef is deterministic per
- *    SHA and the queue never force-pushes, so that base check can never be redone (asking for it
- *    again would loop forever);
+ *  - baseCheck for the SAME base SHA timed out → "pr-red" with `baseTimedOut: true`:
+ *    baseCheckRef is deterministic per SHA and the queue never force-pushes, so that base check
+ *    can never be redone (asking for it again would loop forever). That verdict rests on no base
+ *    evidence, so the tick does not count it as a confirmed red batch;
  *  - a baseCheck for the SAME base SHA still "pending" → "needs-base-check" with
  *    `baseCheckPending: true`: wait for it, do NOT start another;
  *  - otherwise (no verdict for this base SHA) → "needs-base-check" (`baseCheckPending: false`):
@@ -257,16 +258,17 @@ function withoutAggregates(signatures, aggregateChecks) {
  *    tip the queue landed itself already carries a green verdict (tick.afterLanded), so only a
  *    tip that arrived from outside the queue costs a base check.
  * `matched`/`unmatched` partition the non-infra signatures against the base check; `nameOnly`
- * counts the matches made on the check name alone (both keys empty).
+ * counts the matches made on the check name alone (both keys empty); `baseTimedOut` is false on
+ * every verdict but the timed-out one.
  * @param {{signatures: FailureSignature[], baseSha: string, baseCheck: BaseCheck|null,
  *          aggregateChecks?: string[]}} input
  * @returns {{kind: "infra"|"base-red"|"pr-red"|"needs-base-check", detail: string,
  *            matched: FailureSignature[], unmatched: FailureSignature[],
- *            baseCheckPending: boolean, nameOnly: number}}
+ *            baseCheckPending: boolean, nameOnly: number, baseTimedOut: boolean}}
  */
 export function classifyRed(input) {
   const result = classifyRedCore(input);
-  return { baseCheckPending: false, nameOnly: 0, ...result };
+  return { baseCheckPending: false, nameOnly: 0, baseTimedOut: false, ...result };
 }
 
 function classifyRedCore(input) {
@@ -330,6 +332,7 @@ function classifyRedCore(input) {
         "the same SHA): no base-red evidence",
       matched: [],
       unmatched: real,
+      baseTimedOut: true,
     };
   }
 
