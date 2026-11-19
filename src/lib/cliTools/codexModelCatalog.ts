@@ -121,16 +121,33 @@ const normalizeModel = (model: CatalogModelInput) => {
 const isCatalogMetadataEnabled = () =>
   /^(1|true|yes|on)$/i.test(process.env.OMNIROUTE_CODEX_CATALOG_METADATA?.trim() ?? "");
 
-/** Keep only the efforts the routed model offers; move the default if it was filtered out. */
+// Picker text for an effort the template does not carry.
+const EFFORT_DESCRIPTIONS: Record<string, string> = {
+  none: "No reasoning",
+  minimal: "Minimal reasoning",
+  low: "Fast responses with lighter reasoning",
+  medium: "Balanced speed and reasoning depth",
+  high: "Greater reasoning depth",
+  xhigh: "Extra high reasoning depth",
+};
+
+/**
+ * Offer exactly the efforts the routed model declares, in Codex's order. A template level is
+ * reused when it exists; an effort the template lacks gets its own level. The default moves to
+ * the first offered effort when the template default is not offered.
+ */
 const filterReasoningLevels = (entry: CodexCatalogEntry, efforts: string[]) => {
   const levels = Array.isArray(entry.supported_reasoning_levels)
     ? (entry.supported_reasoning_levels as { effort?: string }[])
     : [];
-  const kept = levels.filter((level) => efforts.includes(String(level.effort)));
-  if (kept.length === 0) return;
-  entry.supported_reasoning_levels = kept;
-  if (!kept.some((level) => level.effort === entry.default_reasoning_level)) {
-    entry.default_reasoning_level = String(kept[0].effort);
+  const byEffort = new Map(levels.map((level) => [String(level.effort), level]));
+  const offered = CODEX_EFFORTS.filter((effort) => efforts.includes(effort)).map(
+    (effort) => byEffort.get(effort) ?? { effort, description: EFFORT_DESCRIPTIONS[effort] }
+  );
+  if (offered.length === 0) return;
+  entry.supported_reasoning_levels = offered;
+  if (!offered.some((level) => level.effort === entry.default_reasoning_level)) {
+    entry.default_reasoning_level = String(offered[0].effort);
   }
 };
 

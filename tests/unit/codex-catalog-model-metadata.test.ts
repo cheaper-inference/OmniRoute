@@ -117,6 +117,28 @@ describe("Codex catalog model metadata (opt-in)", () => {
     assert.deepEqual(entryFor.input_modalities, ["text", "image"]);
   });
 
+  it("flag on: a declared effort the template lacks gets its own level", () => {
+    process.env[FLAG] = "1";
+    const catalog = buildCodexModelCatalog(bundled, [
+      { id: "kr/none-only", capabilities: { effort_tiers: ["none"] } },
+      { id: "kr/low-xhigh", capabilities: { effort_tiers: ["xhigh", "low"] } },
+    ]);
+    const noneOnly = bySlug(catalog, "kr/none-only");
+    assert.deepEqual(
+      (noneOnly.supported_reasoning_levels as { effort: string }[]).map((l) => l.effort),
+      ["none"]
+    );
+    assert.equal(noneOnly.default_reasoning_level, "none");
+    const lowXhigh = bySlug(catalog, "kr/low-xhigh");
+    const levels = lowXhigh.supported_reasoning_levels as { effort: string; description: string }[];
+    assert.deepEqual(
+      levels.map((l) => l.effort),
+      ["low", "xhigh"]
+    );
+    assert.equal(levels[0].description, "Fast", "a template level is reused as is");
+    assert.equal(typeof levels[1].description, "string");
+  });
+
   it("the listing keeps effort tiers and input modalities from the unified catalog", async () => {
     const providers = await import("../../src/lib/db/providers.ts");
     await providers.createProviderConnection({
