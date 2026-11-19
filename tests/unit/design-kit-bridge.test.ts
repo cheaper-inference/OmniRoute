@@ -357,7 +357,12 @@ test("DataTable is theme-aware via --table-* tokens, no color literal, no dead f
   // KEA-7886: rows, borders, hover and selection come from the kit table (ci-ui.css tokens);
   // the selected row is the kit's data-state="selected" instead of a zebra/selected inline mix.
   assert.ok(dt.includes('from "@omniroute/ui-kit/table"'), "rows render through the kit table");
-  assert.ok(dt.includes('data-state={selected ? "selected" : undefined}'), "kit row selection");
+  // The row itself (keyboard activation and selection) lives in the InteractiveTableRow adapter.
+  const row = read("src/shared/components/InteractiveTableRow.tsx");
+  assert.ok(dt.includes("selected={selected}"), "the adapter passes the selection to the row");
+  assert.ok(row.includes('from "@omniroute/ui-kit/table"'), "the row is the kit TableRow");
+  assert.ok(row.includes('data-state={selected ? "selected" : undefined}'), "kit row selection");
+  assert.ok(!/rgba\(|#[0-9a-fA-F]{3,6}/.test(row), "the row hardcodes no color literal");
   assert.ok(!/rgba\(|#[0-9a-fA-F]{3,6}/.test(dt), "DataTable hardcodes no color literal");
   assert.ok(
     !dt.includes("--text-secondary") && !dt.includes("--bg-table-header"),

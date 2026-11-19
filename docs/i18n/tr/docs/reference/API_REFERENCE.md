@@ -796,71 +796,174 @@ OpenAI uyumlu toplu işleme.
 
 ---
 
-## API
+## Search API'si
 
-Web/search sağlayıcı soyutlaması (Tavily, Brave, Exa, Serper, vb.).
+Web/arama sağlayıcısı soyutlaması (Tavily, Brave, Exa, Serper vb.).
 
-| Yöntem | Yol                    | Tanım                                                                                                        |
-| ------ | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
-| GET    | `/v1/search`           | Yapılandırılmış arama sağlayıcılarının + yeteneklerini listeleyin                                            |
-| POST   | `/v1/search`           | `v1SearchSchema` tarafından doğrulanmış bir — gövdesi arama sorgusu çalıştırın, caching/coalescing destekler |
-| GET    | `/v1/search/analytics` | Sağlayıcı başına hit/latency/cache istatistikleri                                                            |
+| Yöntem | Yol                    | Açıklama                                                                                                          |
+| ------ | ---------------------- | ----------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Yapılandırılmış arama sağlayıcılarını ve yeteneklerini listeler                                                   |
+| POST   | `/v1/search`           | Bir arama sorgusu çalıştırır — gövde `v1SearchSchema` tarafından doğrulanır, önbellekleme/birleştirmeyi destekler |
+| GET    | `/v1/search/analytics` | Sağlayıcı bazında isabet/gecikme/önbellek istatistikleri                                                          |
 
-**Yetki:** Taşıyıcı API anahtarı (`extractApiKey` + `isValidApiKey`). `enforceApiKeyPolicy` aracılığıyla uygulanan arama politikası.
+**Kimlik doğrulama:** Bearer API anahtarı (`extractApiKey` + `isValidApiKey`). Arama politikası `enforceApiKeyPolicy` aracılığıyla uygulanır.
 
-**Otomatik seç:** `provider` olmadan, yapılandırılmış bağlantısı olan en ucuz sağlayıcı ilk önce çalışır ve sonraki en ucuz sağlayıcı yük devretmedir. Ücretsiz son çare sağlayıcılar (`duckduckgo-free`) yalnızca başka hiçbir şey yapılandırılmadığında kullanılır. Şirket içinde barındırılan bir SearXNG bağlantısı gerçek bir `baseUrl` (katalog varsayılanı `http://localhost:8888/search` değil) depoladığında yapılandırılmış olarak sayılır: bu durumda, SearXNG 400, 401, 403 veya 404'e yanıt vermesi de dahil olmak üzere, en ucuz anahtarlı sağlayıcı yük devretme olarak anahtarlı olanların önünde 0 $ sağlayıcı olarak sıralanır. Geçerli bir `http(s)` URL olmayan veya bir bulut meta veri adresini işaret eden bir `baseUrl` sayılmaz. Bir belirteci depolayan bir SearXNG bağlantısı, yalnızca `https://` veya geri döngü `http://` üzerinden bu şekilde sıralanır. Uzak düz `http://` üzerinden bu asla bir yük devretme değildir ve son çare olarak kalır, yalnızca başka hiçbir sağlayıcı yapılandırılmadığında veya isimle istendiğinde kullanılır, dolayısıyla bu iki durumda belirteci açık metin olarak gönderir.
+### Adlandırılmış arama/getirme kombinasyonları
+
+Hem `POST /v1/search` hem de `POST /v1/web/fetch`, kayıtlı kombinasyon adı olarak `model` kabul eder.
+`model` veya açık bir `provider` kullanın; her ikisinin gönderilmesi `400` döndürür.
+Her iki alan da olmadan mevcut otomatik sağlayıcı seçimi değişmeden kalır.
+
+Hem Combo Builder hem de Add Model kataloğu, bağlı sağlayıcılar için yerel web işlemi girişlerini,
+LLM model listeleri olmasa bile sunar. Serper **Web search** gösterir;
+Tavily **Web search / Page extraction** gösterir ve yalnızca getirme yapan sağlayıcılar **Page extraction**
+gösterir. Girişi ve hesabı her zamanki gibi seçin. Tek bir Tavily girişi her iki web uç noktasını da
+kullanır; bu işlem girişleri yalnızca sohbet istemcisi seçicilerine veya sohbet modeli yoklamalarına eklenmez.
+
+Örneğin, aşağıdaki sıralı hedeflerle `shared-free` adlı bir **priority** kombinasyonu oluşturun:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Ardından aynı adı her yüzeyde kullanın:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Arama Tavily'yi, ardından Serper'ı değerlendirir; getirme Tavily'yi, ardından Jina Reader'ı değerlendirir;
+sohbet, özel arama/getirme sağlayıcılarını atlar ve OpenAI'yi değerlendirir. Uyumluluk, model adlarındaki
+kelimelerden değil, arama/getirme yürütücü kayıtlarından kaynaklanır. Filtreleme kimlik bilgisi seçiminden
+ve dağıtımdan önce gerçekleşir ve kayıtlı kombinasyonu hiçbir zaman değiştirmez.
+
+Sohbet dışı yetenek rotaları `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` ve `p2c` stratejilerini destekler. `fusion`,
+`pipeline` ve `context-relay` gibi yalnızca sohbete özgü sentezleme stratejileri, arama veya
+oluşturulan medyaya sessizce uygulanmak yerine sohbet dışı rotalarda reddedilir.
+Mevcut kombinasyon altyapısı, üst akış kota hataları da dahil olmak üzere sıralı geri dönüşü yönetir
+ve adım kimliklerini, hesap sabitlemelerini, adım başına hesap izin listelerini, iç içe başvuruları,
+çağıranın bağlantı/kota kapsamlarını ve kombinasyon erişim politikasını korur. Sonuçlar, gerçek
+sağlayıcı da dahil olmak üzere yerel arama/getirme şemalarını korur; `X-OmniRoute-Combo-Trace`,
+yönlendirme kararını tanımlar. Bilinmeyen kombinasyonlar `404`; etkin olmayan kombinasyonlar ve
+uyumlu hedef içermeyen kombinasyonlar `400` döndürür.
+
+Her kombinasyon denemesi tek bir açık sağlayıcı kullanır. Kombinasyonun arkasındaki yerel otomatik
+sağlayıcı havuzunu çağıramaz. Açık sağlayıcılı istekler mevcut tek sağlayıcılı davranışını korur.
+Özel arama/getirme sağlayıcılarını hedefleyen doğrudan sohbet istekleri, OpenAI tarzı bir yürütücüye
+aktarılmak yerine işlem yapılabilir bir JSON `400` döndürür.
+
+### Yeteneklere özgü kombinasyon rotaları
+
+Kayıtlı kombinasyonlar, API yeteneklerinin anahtar olduğu bir `routes` nesnesi içerebilir. Her rota,
+kendi hedef listesine, stratejisine ve çalışma zamanı yapılandırmasına sahiptir. En üst düzeydeki
+`models`, `strategy` ve `config`, geriye dönük uyumlu Chat planı olarak kalır; `routes` içermeyen
+eski kombinasyonlar değişiklik yapılmadan çalışmaya devam eder.
+
+Desteklenen rota anahtarları `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` ve `audio-generation` değerleridir. Uç nokta projeksiyonu kimlik bilgisi
+seçiminden, puanlamadan veya dağıtımdan önce gerçekleşir. İç içe kombinasyon başvuruları, aynı
+yetenek için alt kombinasyonun rotasını seçer.
+
+`POST /v1/music/generations` ve `POST /v1/ocr`, `model` alanında bir kombinasyon adını kabul eder.
+Yerel ElevenLabs uyumlu `POST /v1/music` uç noktası da `model_id` alanında bir kombinasyon adını kabul eder;
+ancak bu yerel uç noktadaki kullanılabilir her hedef bir ElevenLabs müzik modeli olmalıdır; böylece ikili
+yanıt sözleşmesi korunur. `POST /v1/sound-generation`, aynı yerel ikili kısıt altında `model_id` alanında
+bir `audio-generation` kombinasyonunu kabul eder. Farklı müzik sağlayıcıları için `/v1/music/generations`
+kullanın.
+
+**Otomatik seçim:** `provider` olmadan, yapılandırılmış bağlantıya sahip en ucuz sağlayıcı önce çalışır
+ve bir sonraki en ucuz sağlayıcı yük devralır. Ücretsiz son çare sağlayıcıları (`duckduckgo-free`),
+yalnızca başka hiçbir şey yapılandırılmadığında kullanılır. Kendi barındırdığınız bir SearXNG, bağlantısı
+gerçek bir `baseUrl` (katalog varsayılanı `http://localhost:8888/search` değil) depoladığında
+yapılandırılmış sayılır: bu durumda anahtarlı sağlayıcılardan önce, $0 sağlayıcısı olarak sıralanır
+ve SearXNG 400, 401, 403 veya 404 yanıtı verse bile en ucuz anahtarlı sağlayıcı yük devralır.
+Geçerli bir `http(s)` URL'si olmayan veya bir bulut meta veri adresini gösteren `baseUrl` dikkate alınmaz.
+Token depolayan bir SearXNG bağlantısı bu şekilde yalnızca `https://` veya döngü geri bildirimi
+`http://` üzerinden sıralanır. Uzak düz `http://` üzerinden hiçbir zaman yük devralma sağlayıcısı
+olmaz ve son çare olarak kalır; yalnızca başka hiçbir sağlayıcı yapılandırılmadığında veya ada göre
+istendiğinde kullanılır; bu iki durumda token'ı düz metin olarak gönderir.
 
 ### Exa ve Tavily `provider_options`
 
-Exa ve Tavily, sağlayıcıya özel alanları ad alanlı bir paketten okur: `provider_options.exa` (veya `provider_options["exa-search"]`) ve `provider_options.tavily` (veya `provider_options["tavily-search"]`). Yalnızca aşağıdaki anahtarlar iletilir. Her biri `open-sse/handlers/search/providerOptionsPassthrough.ts` içindeki kendi Zod şemasına göre kontrol edilir ve yanlış türde bir anahtar bırakılır. Auth, base URL, `stream` ve `outputSchema` dahil diğer anahtarlar göz ardı edilir. Diğer sağlayıcılar tarafından kullanılan düz tuşlar (`cx`, `depth`, ...) daha önce olduğu gibi çalışır.
+Exa ve Tavily, sağlayıcıya özgü alanları ad alanı içeren bir çantadan okur:
+`provider_options.exa` (veya `provider_options["exa-search"]`) ve `provider_options.tavily`
+(veya `provider_options["tavily-search"]`). Yalnızca aşağıdaki anahtarlar iletilir. Her biri
+`open-sse/handlers/search/providerOptionsPassthrough.ts` içindeki kendi Zod şemasına karşı
+denetlenir ve yanlış türdeki bir anahtar atılır. Kimlik doğrulama, temel URL, `stream` ve
+`outputSchema` dahil olmak üzere diğer tüm anahtarlar yok sayılır. Diğer sağlayıcılar tarafından
+kullanılan düz anahtarlar (`cx`, `depth`, ...) daha önce olduğu gibi çalışır.
 
-| sağlayıcı | Üst düzey alanlar                                                                                                                                                                                                                                                                                                                                                         | Yuvalanmış                                                                                                                                          |
-| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (düz temeller), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                                 | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` varsayılan `{ text: true, highlights: true }` üzerinden birleştirildi |
-| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                   |
+| Sağlayıcı | Üst düzey alanlar                                                                                                                                                                                                                                                                                                                                                         | İç içe                                                                                                                                            |
+| --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa       | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (düz ilkel değerler), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                           | Varsayılan `{ text: true, highlights: true }` üzerine birleştirilen `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` |
+| Tavily    | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                 |
 
-Genel alanlar her zaman kazanır: `query`, `max_results`, `filters` (domainler), `country` ve `search_type` türetilen konu. Exa'da `search_type: "news"`, `category: "news"` değerini korur. Tavily ayrıca `search_type: "finance"` (`topic: "finance"`) de kabul eder.
+Genel alanlar her zaman önceliklidir: `query`, `max_results`, `filters` (alan adları), `country`
+ve `search_type` değerinden türetilen konu. Exa'da `search_type: "news"`,
+`category: "news"` değerini korur. Tavily ayrıca `search_type: "finance"` değerini
+(`topic: "finance"`) kabul eder.
 
-Firecrawl arama maliyeti, döndürülen 10 sonuçtan oluşan başlatılan blok başına, blok başına 0,002 USD (2 kredi) ve çağrı başına en az bir blok ( [Firecrawl faturalandırması](https://docs.firecrawl.dev/billing) ) olarak kaydedilir: 11 sonucun maliyeti 0,004 USD'dir.
+Firecrawl arama maliyeti, döndürülen her 10 sonuçtan oluşan başlatılmış blok başına, blok başına
+0,002 $ (2 kredi) olarak ve çağrı başına en az bir blok olacak şekilde kaydedilir
+([Firecrawl faturalandırması](https://docs.firecrawl.dev/billing)): 11 sonuç 0,004 $ tutar.
 
-Jenerik `time_range` artık her iki sağlayıcıya da ulaşıyor: Exa `startPublishedDate` (ISO zaman damgası) alıyor ve Tavily `start_date` (`YYYY-MM-DD`) alıyor. `provider_options` açık bir tarih, eşlenen tarihi geçersiz kılar.
+Genel `time_range` artık her iki sağlayıcıya da ulaşır: Exa `startPublishedDate` (ISO zaman
+damgası), Tavily ise `start_date` (`YYYY-MM-DD`) alır. `provider_options` içindeki açık bir
+tarih, eşlenen tarihe göre önceliklidir.
 
-Exa sonuçları `id`, `highlights` (her vurgu, yalnızca `snippet` olarak kullanılan ilki değil), `highlight_scores`, `summary`, `subpages`, `entities` ve `extras` `provider_raw` içinde tutar. Tavily sonuçları `images` ve `favicon` korur.
+Exa sonuçları `id`, `highlights` (yalnızca `snippet` olarak kullanılan ilk vurgu değil, tüm
+vurgular), `highlight_scores`, `summary`, `subpages`, `entities` ve `extras` alanlarını
+`provider_raw` içinde korur. Tavily sonuçları `images` ve `favicon` alanlarını korur.
 
-Bağlantı arama maliyeti, `depth` `provider_options` veya bağlantı ayarlarından gelmesine bakılmaksızın, `depth` `fast` ve `standard` için 0,005 ABD Doları ve `deep` ( [Bağlantı fiyatlandırması](https://docs.linkup.so/pages/documentation/development/pricing) ) için 0,05 ABD Doları olarak kaydedilir.
+Linkup arama maliyeti, `depth` değeri `fast` ve `standard` için 0,005 $, `deep` için 0,05 $
+olarak kaydedilir ([Linkup fiyatlandırması](https://docs.linkup.so/pages/documentation/development/pricing));
+`depth` değerinin `provider_options` içinden veya bağlantının ayarlarından gelmesi fark etmez.
 
-Exa `type: "lite"` (Exa 3.0) daha küçük bir alan kümesini kabul eder ve başka bir alan ayarlandığında isteğin tamamını reddeder. Lite için `additionalQueries`, `systemPrompt` ve `text` ile `highlights` dışındaki tüm `contents` tuşları çağrıdan önce bırakılır. Kullanımdan kaldırılan `subpages`, `subpageTarget`, `highlights.numSentences` ve `highlights.highlightsPerUrl` artık iletilmiyor.
+Exa `type: "lite"` (Exa 3.0), daha küçük bir alan kümesini kabul eder ve başka herhangi bir
+alan ayarlanmışsa isteğin tamamını reddeder. lite için `additionalQueries`, `systemPrompt` ve
+`text` ile `highlights` dışındaki tüm `contents` anahtarları çağrıdan önce atılır. Kullanımdan
+kaldırılan `subpages`, `subpageTarget`, `highlights.numSentences` ve
+`highlights.highlightsPerUrl` artık iletilmez.
 
-Maliyet muhasebesi, Exa hariç, Exa'nın kendi fiyatlandırmasını izleyen düz kayıt `costPerQuery`: 10 sonucu kapsayan `auto` (ve eski `fast`) için çağrı başına 0,007 ABD doları veya `lite` (ve eski `instant`) için 0,004 ABD doları; Sonraki her sonuç için 0,001 ABD Doları; ve `contents.summary` ayarlandığında döndürülen sonuç başına 0,001 ABD doları. Tavily `search_depth` `basic`, `fast` ve `ultra-fast` için 1 kredi (0,008 ABD doları) ve `advanced` ( [Tavily API kredileri](https://docs.tavily.com/documentation/api-credits) ) için 2 kredi (0,016 ABD doları) olarak kaydedilmiştir. Tavily'nin gelişmiş seviyeye yükselttiği `auto_parameters: true` ile yapılan bir çağrı hâlâ 1 kredi olarak kaydediliyor.
+Maliyet hesaplama, Exa dışında sabit kayıt defterindeki `costPerQuery` değerini kullanır.
+Exa ise kendi fiyatlandırmasını izler: 10 sonucu kapsayacak şekilde `auto` (ve eski `fast`)
+için çağrı başına 0,007 $ veya `lite` (ve eski `instant`) için 0,004 $; her ek sonuç için
+0,001 $; ayrıca `contents.summary` ayarlandığında döndürülen her sonuç için 0,001 $. Tavily,
+`search_depth` değeri `basic`, `fast` ve `ultra-fast` için 1 kredi (0,008 $), `advanced`
+için ise 2 kredi (0,016 $) olarak kaydedilir
+([Tavily API kredileri](https://docs.tavily.com/documentation/api-credits)). `auto_parameters: true`
+ile yapılan ve Tavily'nin `advanced` düzeyine yükselttiği bir çağrı yine 1 kredi olarak kaydedilir.
 
 ---
 
-## Web Fetch API
+## Web Fetch API’si
 
 Yapılandırılmış bir web-fetch sağlayıcısı (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) aracılığıyla bir URL'den içerik çıkarın.
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch) aracılığıyla bir URL’den içerik çıkarın.
 
-Parallel Extract (`parallel-search`, Parallel Search ile aynı API anahtarı) yalnızca Markdown döndürür — başka herhangi bir `format` değeri `400` hatasıyla sonuçlanır — ve içeriği 100.000 karakterle sınırlar. Hedef sayfanın kendisi çıkarılamadığında upstream bunu HTTP 200 içinde bildirir; OmniRoute bunu sabit bir mesajla `422` olarak sunar.
+Parallel Extract (`parallel-search`, Parallel Search ile aynı API anahtarını kullanır) yalnızca Markdown döndürür — başka herhangi bir `format` değeri `400` hatasıyla sonuçlanır — ve içeriği 100.000 karakterle sınırlar. Hedef sayfanın kendisi çıkarılamadığında upstream bunu bir HTTP 200 içinde bildirir; OmniRoute bunu sabit bir mesajla `422` olarak sunar.
 
-| Method | Path            | Description                                                                  |
-| ------ | --------------- | ---------------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Bir URL'yi getirir/tarayıp çıkarır — gövde `v1WebFetchSchema` ile doğrulanır |
+Keenable Fetch (`keenable-search`) de yalnızca Markdown döndürür (başka herhangi bir `format` değeri `400` hatasıyla sonuçlanır) ve içeriği 100.000 karakterle sınırlar. Anahtar olmadan çalışır: bağlantı olmadan açıkça `provider: "keenable-search"` isteği, Keenable’ın anahtarsız uç noktasını kullanır (IP başına hız sınırları uygulanır). Yapılandırılmış bir anahtar yalnızca bu sınırları kaldırır; otomatik seçim, Keenable’ı yalnızca bir anahtar yapılandırılmışsa kullanır.
 
-**Kimlik doğrulama:** Bearer API anahtarı (`extractApiKey` + `isValidApiKey`). Politika `enforceApiKeyPolicy` aracılığıyla uygulanır.
+| Method | Path            | Description                                                                         |
+| ------ | --------------- | ----------------------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | Bir URL’yi getirir/tarayıp çıkarır — gövde `v1WebFetchSchema` tarafından doğrulanır |
 
-**Kotaya duyarlı geri dönüş (#8297):** Açık bir `provider` verilmediğinde havuz
+**Kimlik doğrulama:** Bearer API anahtarı (`extractApiKey` + `isValidApiKey`). İlke, `enforceApiKeyPolicy` aracılığıyla uygulanır.
+
+Adlandırılmış kombinasyonlar, [`model` yönlendirme sözleşmesini](#named-searchfetch-combinations) izler ve getirmeye özgü seçenekleri ve yanıtları korur.
+
+**Kotaya duyarlı geri dönüş (#8297):** `provider` veya `model` belirtilmediğinde havuz
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) sabit öncelik sırasıyla (fill-first) taranır — hız sınırına
-takılmış ancak yapılandırılmış bir sağlayıcı, isteği kısa devreye sokmak yerine
-atlanır ve yeniden denenebilir/kota kaynaklı bir upstream hatası (her zaman HTTP
-429; Firecrawl/Tavily/TinyFish kota türü ücretsiz katmanları için 402/403 —
-Jina Reader için değil ve hiçbir zaman düz bir hatalı istek olan 400 için değil)
-istek sırasında henüz denenmemiş sonraki kimlik bilgileri tanımlanmış sağlayıcıya
-aktarılır. Havuzdaki tüm sağlayıcılar tükendiğinde uç nokta, önceki genel
-`400` yerine `Retry-After` başlığıyla tek bir `429` döndürür. Açık bir
-`provider` istendiğinde sessiz geri dönüş yapılmaz — hız sınırına takılan veya
-başarısız olan açık sağlayıcı kendi hatasını gösterir (hız sınırına takılmışsa
-`429`, aksi durumda upstream durumu).
+`parallel-search` → `keenable-search`) sabit
+öncelik sırasıyla (önce uygun olanı doldur) taranır — hız sınırına takılmış ancak yapılandırılmış bir sağlayıcı, isteği kısa devreye uğratmak yerine atlanır ve yeniden denenebilir/kota kaynaklı bir upstream hatası (her zaman HTTP 429; Firecrawl/Tavily/TinyFish kota türündeki ücretsiz katmanları için 402/403 — Jina Reader için değil ve normal bir 400 hatalı istek için hiçbir zaman değil) istek sırasında denenmemiş sonraki kimlik bilgileri yapılandırılmış sağlayıcıya aktarılır. Havuzdaki tüm sağlayıcılar tükendiğinde uç nokta, önceki genel `400` yerine `Retry-After` başlığıyla tek bir `429` döndürür. Açıkça bir `provider` istendiğinde **sessiz geri dönüş yoktur** — hız sınırına takılan veya başarısız olan açık sağlayıcı kendi hatasını gösterir (hız sınırına takılmışsa `429`, aksi durumda upstream durumu).
 
 ---
 
@@ -939,36 +1042,37 @@ tamamlanma akışını gerçekleştirir.
 
 ---
 
-## Kotalar ve Sorun Raporlama
+## Kotalar ve Sorun Bildirimi
 
-| Yöntem | Yol                 | Açıklama                                                                                    |
-| ------ | ------------------- | ------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Kayıtlı bir anahtar oluşturmadan önce `provider` + `accountId` için kotayı önceden doğrular |
-| POST   | `/v1/issues/report` | GitHub'a kota/anahtar oluşturma hatasını bildirir (`GITHUB_ISSUES_REPO` + token gerektirir) |
+| Method | Path                | Description                                                                                |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------ |
+| GET    | `/v1/quotas/check`  | Kayıtlı bir anahtar vermeden önce `provider` + `accountId` için kotayı önceden doğrular    |
+| POST   | `/v1/issues/report` | GitHub'a kota/anahtar verme hatasını bildirir (`GITHUB_ISSUES_REPO` + belirteç gerektirir) |
 
-**Kimlik doğrulama:** Bearer API anahtarı (`isAuthenticated`).
+**Kimlik doğrulama:** `/v1/quotas/check` bir Bearer API anahtarı alır (`isAuthenticated`). `/v1/issues/report` ise
+`/api/v1/registered-keys` gibi yalnızca yönetim erişimine açıktır (`requireManagementAuth`): bir kontrol paneli oturumu,
+yerel CLI belirteci veya `manage`/`admin` kapsamına sahip bir API anahtarı; yalnızca çıkarım için kullanılan API anahtarları
+`403` alır.
 
 ### Kota oturumu kurtarma (isteğe bağlı)
 
-Terminal kota hatasıyla (gövdesi kotanın veya kredilerin tükendiğini belirten `402`/`429`/`503`)
-başarısız olan akışsız bir `POST /v1/chat/completions` veya `POST /v1/responses` isteği,
-hatayı döndürmek yerine bekletilip daha sonra yeniden oynatılabilir. Çağıran, istek başına
-aşağıdaki üç başlıkla bu özelliği etkinleştirir:
+Terminal bir kota hatasıyla (`402`/`429`/`503` ve gövdesi kotanın veya kredilerin tükendiğini belirten) sonuçlanan,
+akış dışı bir `POST /v1/chat/completions` veya `POST /v1/responses`, hatayı döndürmek yerine beklemeye alınıp daha
+sonra yeniden oynatılabilir. Çağıran, istek başına üç üst bilgiyle bu özelliği etkinleştirir:
 
-| Başlık                       | Değer                                              |
-| ---------------------------- | -------------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                             |
-| `x-omniroute-session`        | oturum kimliği, `[A-Za-z0-9._:-]{1,128}`           |
-| `x-omniroute-recovery-turn`  | oturum içinde benzersiz dönüş kimliği (aynı kural) |
+| Header                       | Value                                            |
+| ---------------------------- | ------------------------------------------------ |
+| `x-omniroute-quota-recovery` | `auto`                                           |
+| `x-omniroute-session`        | oturum kimliği, `[A-Za-z0-9._:-]{1,128}`         |
+| `x-omniroute-recovery-turn`  | oturum içinde benzersiz tur kimliği (aynı kural) |
 
 Yalnızca `stream: false` olan, araç, araç geçmişi veya `previous_response_id` içermeyen ve
-`x-omniroute-connection` sabitlemesi bulunmayan dönüşler uygundur; ayrıca
-`STORAGE_ENCRYPTION_KEY` ayarlanmış olmalıdır (istek en fazla 24 saat boyunca şifrelenmiş
-olarak saklanır). Yanıt daha sonra `recovery.poll` ile birlikte `202` olur; yoklama için
-`GET /v1/quota-recoveries/{id}` kullanılır (beklemede `202`, tamamlandığında kurtarılan
-gövdeyle `200`) veya `DELETE` ile iptal edilebilir. Biletler yalnızca bunları oluşturan API
-anahtarına görünür. Sonucu belirsiz olan bir yeniden oynatma, iki kez gönderilmek yerine
-`needs_confirmation` durumuyla sona erer. Kaynak: `src/lib/quota/quotaSessionRecovery.ts`.
+`x-omniroute-connection` sabitlemesi bulunmayan turlar uygun olur; ayrıca `STORAGE_ENCRYPTION_KEY` ayarlanmış
+olmalıdır (istek, en fazla 24 saat boyunca şifrelenmiş olarak saklanır). Yanıt daha sonra `202` olur ve
+`recovery.poll` içerir; yoklamak için `GET /v1/quota-recoveries/{id}` kullanılır (beklemede `202`, tamamlandığında
+kurtarılan gövdeyle `200`) veya `DELETE` ile iptal edilir. Biletler yalnızca bunları oluşturan API anahtarı tarafından
+görülebilir. Sonucu belirsiz olan bir yeniden oynatma, iki kez gönderilmek yerine `needs_confirmation` durumunda
+sonlanır. Kaynak: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1701,17 +1805,21 @@ OmniRoute olayları için giden webhook abonelikleri (istek tamamlanması, kota 
 
 ## Kayıtlı Anahtarlar (Otomatik Yönetim)
 
-Günlük/saatlik kotalara sahip bir arka uç sağlayıcıya/hesaba karşı API anahtarları oluşturmak ve döndürmek için otomatik anahtar yönetimi alt sistemi tarafından kullanılır.
+Günlük/saatlik kotalarla, bir arka uç sağlayıcı/hesaba karşı API anahtarları oluşturmak ve döndürmek için otomatik anahtar yönetimi alt sistemi tarafından kullanılır.
 
-| Method | Path                                  | Açıklama                                                                                                                                                                                                |
+| Yöntem | Yol                                   | Açıklama                                                                                                                                                                                                |
 | ------ | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | GET    | `/api/v1/registered-keys`             | Kayıtlı anahtarları listeler (yalnızca maskelenmiş önek)                                                                                                                                                |
 | POST   | `/api/v1/registered-keys`             | Yeni bir kayıtlı anahtar oluşturur — gövde: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Ham anahtarı **bir kez** döndürür. Kota reddinde `429` döndürür. |
-| GET    | `/api/v1/registered-keys/[id]`        | Kayıtlı bir anahtarın meta verilerini getirir (ham materyal yoktur)                                                                                                                                     |
+| GET    | `/api/v1/registered-keys/[id]`        | Kayıtlı anahtarın meta verilerini alır (ham materyal yoktur)                                                                                                                                            |
 | DELETE | `/api/v1/registered-keys/[id]`        | Kayıtlı bir anahtarı iptal eder                                                                                                                                                                         |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Açık iptal uç noktası (`DELETE` ile aynı etkiyi gösterir)                                                                                                                                               |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Açık iptal uç noktası (DELETE ile aynı etkiyi gösterir)                                                                                                                                                 |
+| GET    | `/api/v1/providers/[provider]/limits` | Sağlayıcının oluşturma sınırlarını okur                                                                                                                                                                 |
+| PUT    | `/api/v1/providers/[provider]/limits` | Sağlayıcının oluşturma sınırlarını ayarlar — gövde: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                             |
+| GET    | `/api/v1/accounts/[id]/limits`        | Hesabın oluşturma sınırlarını okur                                                                                                                                                                      |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Hesabın oluşturma sınırlarını ayarlar — sağlayıcı rotasıyla aynı gövde                                                                                                                                  |
 
-**Kimlik doğrulama:** yönetim oturumu/API anahtarı (`requireManagementAuth`) — `/api/keys` ile aynı koruma: bir kontrol paneli oturumu, yerel CLI belirteci veya `manage`/`admin` kapsamına sahip bir API anahtarı; yalnızca çıkarım için kullanılan API anahtarları `403` alır. Ayrıca `/v1/quotas/check` ve `/v1/issues/report` bölümlerine bakın.
+**Kimlik Doğrulama:** yönetim oturumu/API anahtarı (`requireManagementAuth`) — `/api/keys` ile aynı koruma: bir kontrol paneli oturumu, yerel CLI belirteci veya `manage`/`admin` kapsamına sahip bir API anahtarı; yalnızca çıkarım yapan API anahtarları `403` alır. Ayrıca bkz. `/v1/quotas/check` ve `/v1/issues/report`.
 
 ---
 
