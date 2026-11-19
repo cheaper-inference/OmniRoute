@@ -21,7 +21,19 @@
     "stage": "testing",
     "startedAt": "2026-11-19T16:42:45.319Z",
     "attempts": 0,
-    "bisect": null
+    "bisect": null,
+    "rerun": {
+      "ref": "omni-queue/release-v3.8.55/b3-ed3affcf3805",
+      "requestedAt": "2026-11-19T17:14:51.764Z",
+      "afterMs": 1795108465000,
+      "runIds": [
+        44569184538
+      ],
+      "jobs": [
+        "Gate / CI",
+        "Unit Tests (4/8)"
+      ]
+    }
   },
   "baseChecks": [
     {
@@ -48,7 +60,7 @@
     "ciRuns": 4,
     "landedPrs": 0,
     "landedBatches": 0,
-    "redBatches": 1,
+    "redBatches": 2,
     "bisections": 0,
     "culprits": 0
   },
@@ -213,7 +225,29 @@
         "20632": "2026-11-19T15:36:39Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44569016721"
+    },
+    {
+      "at": "2026-11-19T17:14:51.765Z",
+      "type": "checks-red",
+      "batchId": "b3",
+      "prs": [
+        20632
+      ],
+      "sha": "ed3affcf38053cd514ca57f521e282dd8d9aba7f",
+      "detail": "Gate / CI, Unit Tests (4/8)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44575023688"
+    },
+    {
+      "at": "2026-11-19T17:14:51.765Z",
+      "type": "flaky-rerun",
+      "batchId": "b3",
+      "prs": [
+        20632
+      ],
+      "sha": "ed3affcf38053cd514ca57f521e282dd8d9aba7f",
+      "detail": "re-running the failed jobs of b3 once (Gate / CI, Unit Tests (4/8)) before a base check",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44575023688"
     }
   ],
-  "updatedAt": "2026-11-19T16:42:49.333Z"
+  "updatedAt": "2026-11-19T17:15:07.271Z"
 }
