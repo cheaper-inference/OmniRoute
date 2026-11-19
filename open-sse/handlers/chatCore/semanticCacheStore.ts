@@ -107,7 +107,9 @@ export function storeSemanticCacheResponse(
       .store({
         body: args.body as Record<string, unknown>,
         headers: args.headers,
-        response: args.translatedResponse as Record<string, unknown>,
+        // The manager keeps what it gets, and the caller echoes the model into the answer after
+        // this store; a copy keeps that edit out of the cached entry.
+        response: snapshotBodyForCacheWrite(args.translatedResponse) as Record<string, unknown>,
         model: args.model,
         provider:
           args.provider ||

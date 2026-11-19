@@ -364,6 +364,15 @@ export function getCachedResponse(signature) {
   // 1. Check memory cache
   const memResult = getMemoryCache().get(signature);
   if (memResult) {
+    // The caller no longer records a legacy hit on top of this one, so the stored row's
+    // counter is kept here, as the SQLite branch below does.
+    try {
+      getDbInstance()
+        .prepare("UPDATE semantic_cache SET hit_count = hit_count + 1 WHERE signature = ?")
+        .run(signature);
+    } catch {
+      // DB not available — the memory hit is still served
+    }
     incrementMetric("hits");
     incrementMetric("tokens_saved", memResult.tokensSaved || 0);
     return memResult.response;

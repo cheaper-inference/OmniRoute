@@ -70,6 +70,25 @@ test("one legacy cache hit counts one hit and the tokens once", async () => {
   assert.equal(stats.tokensSaved, 100);
 });
 
+test("a legacy memory hit still increments the stored row's hit_count once", async () => {
+  sem.clearCache();
+  const body = { messages: [{ role: "user", content: "row counter" }], temperature: 0 };
+  store(body, chatResponse("ok"));
+  const hitCounts = () =>
+    (
+      core.getDbInstance().prepare("SELECT hit_count FROM semantic_cache").all() as Array<{
+        hit_count: number;
+      }>
+    ).map((row) => row.hit_count);
+  assert.deepEqual(hitCounts(), [0]);
+  assert.ok(await lookup(body), "first hit (served from the memory tier)");
+  assert.ok(await lookup(body), "second hit (served from the memory tier)");
+  assert.deepEqual(hitCounts(), [2]);
+  const stats = sem.getCacheStats();
+  assert.equal(stats.hits, 2);
+  assert.equal(stats.tokensSaved, 200);
+});
+
 test("the cache write key equals the read key after the body is sanitized in place", async () => {
   sem.clearCache();
   const body: Record<string, unknown> = {
@@ -108,6 +127,35 @@ test("echoing the model into the answer does not change the cached copy", async 
   const hit = await lookup(body);
   const served = (await hit!.response.json()) as { model: string };
   assert.equal(served.model, "upstream-model");
+});
+
+test("echoing the model into the answer does not change the manager's cached copy", async () => {
+  const { SemanticCacheManager, resetSemanticCacheManager } =
+    await import("../../open-sse/services/cache/semanticCacheManager.ts");
+  const { MemoryVectorStore } = await import("../../open-sse/services/cache/memoryVectorStore.ts");
+  const manager = new SemanticCacheManager(
+    { enabled: true, backend: "memory", requireZeroTemperature: false },
+    new MemoryVectorStore({ maxEntries: 10 })
+  );
+  resetSemanticCacheManager(manager);
+  try {
+    sem.clearCache();
+    const body = { messages: [{ role: "user", content: "manager echo probe" }], temperature: 0 };
+    const response = chatResponse("hi", "upstream-model");
+    store(body, response);
+    await new Promise((resolve) => setImmediate(resolve));
+    echoModelInObject(response, "alias-requested-by-caller-A");
+    const result = await manager.lookup({
+      body,
+      model: "gpt-4o",
+      provider: "openai",
+      apiKeyId: "k1",
+    });
+    assert.equal(result.hit, true, "expected a manager hit");
+    assert.equal((result.entry!.response as { model: string }).model, "upstream-model");
+  } finally {
+    resetSemanticCacheManager(null);
+  }
 });
 
 // Wiring: handleChatCore must key the cache write on the snapshot. A no-arg tool schema is
