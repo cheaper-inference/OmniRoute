@@ -186,29 +186,92 @@ Il-lista sħiħa ta’ madwar 30+ tabella tinsab f’`src/lib/db/migrations/`.
 
 ## Migrazzjonijiet
 
-OmniRoute juża **migrazzjonijiet verżjonati u idempotenti** f’`src/lib/db/migrations/`. Kull migrazzjoni hija fajl SQL wieħed bl-isem `NNN_description.sql`.
+OmniRoute juża** migrazzjonijiet versioned, idempotenti** fi `src/lib/db/migrations/`. Kull migrazzjoni hija fajl SQL wieħed. Żewġ formati ta' ismijiet jikkoeżistu; il-verżjoni rreġistrata `_omniroute_migrations` hija l-prefiss numeriku.
 
-### Għoti ta’ Ismijiet lill-Migrazzjonijiet
+### Ismijiet tal-Migrazzjoni
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Format                                              | Eżempju                              | Użat għal                                                                                                                                                        |
+| --------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (eżatt 3 ċifri)               | `241_seen_models.sql`                | Is-serje l-antika `001`–`241`. Iffriżat meta l-format tal-timestamp niżel (`240` u `241` ġew magħquda eżatt qabel): l-ebda fajl ġdid ma jieħu numru sekwenzjali. |
+| `YYYYMMDDHHMMSS_description.sql` (14-il ċifra, UTC) | `20261113120000_add_usage_index.sql` | Kull migrazzjoni maħluqa mill-2026-11-13 'il quddiem.                                                                                                            |
 
-### Kif Jitħaddmu l-Migrazzjonijiet
+Għaliex il-bidla: b'numri sekwenzjali, PRs paralleli qabad l-istess numru li jmiss u kollha ħlief wieħed kellhom jerġgħu jiġu numerati qabel ma jingħaqdu. Timestamp UTC jagħti lil kull PR il-verżjoni tiegħu stess.
 
-Meta tibda l-applikazzjoni, `migrationRunner.ts`:
+Regoli għall-format tat-timbru taż-żmien (infurzat minn `npm run check:migration-numbering`, maqsuma mal-ġeneratur `scripts/check/lib/migrationNaming.mjs`):
 
-1. Joħloq it-tabella `_omniroute_migrations` jekk ma teżistix
-2. Jivverifika liema migrazzjonijiet diġà ġew applikati
+- It-timestamp huwa data u ħin UTC reali, mhux qabel `20261113000000` u mhux aktar minn 10 minuti fil-futur.
+- Id-deskrizzjoni hija `snake_case` żgħira li tibda b'ittra (`a-z`, `0-9`, `_` wieħed bejn il-kliem), mhux aktar minn 80 karattru.
+- Żewġ fajls bl-istess timestamp huma duplikati.
+- Ir-regola tal-ebda vojt tapplika biss għas-serje l-antika: kull numru minn `001` sa `241` għandu jeżisti, ħlief il-lakuni magħrufa `026`, `055` u `121`. It-tħassir ta `241` (jew kwalunkwe fajl antik) ifalli l-gate. `001` u `241` qatt ma jistgħu jiġu miżjuda mal-lista ta' permessi `KNOWN_GAPS`. Fajls bit-timbru qatt ma joħolqu vojt.
+- Kull entrata `src/lib/db/migrations/` trid tkun fajl regolari b'isem `.sql` minusku validu. Direttorju, symlink, fajl `.SQL` jew `.sql.bak`, fajl moħbi jew isem bi spazju jfallu l-bieb, minħabba li r-runner kien jaqbeżha siekta jew tiġġarraf mal-but.
+
+**Applika l-ordni.** Ir-runner jagħżel skont il-valur numeriku tal-prefiss, mhux skont it-test: l-ewwel fajls `001`–`241` l-antik, imbagħad il-fajls bit-timestamp f’ordni tat-timestamp, imbagħad kwalunkwe direttorji spazjati bl-isem irreġistrati ma `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` (verżjonijiet bħal `ee-001`). Migrazzjoni pendenti hija kwalunkwe fajl li l-verżjoni tiegħu mhix `_omniroute_migrations`, għalhekk migrazzjoni minn fergħa anzjani li tgħaqqad wara waħda aktar ġdida għadha tapplika fuq databases eżistenti.
+
+**Il-timestamp huwa ordni ta' ħolqien, mhux ordni ta' amalgamazzjoni.** Jekk il-migrazzjoni tiegħek tiddependi fuq tabella jew kolonna maħluqa minn migrazzjoni b'a** aktar ġodda** timestamp (per eżempju, wieħed minn PR oħra li ngħaqdet l-ewwel), database ġdida taħdem tiegħek l-ewwel u tfalli. Waqt li PR tiegħek għadu miftuħ, iġġenera l-isem tal-fajl `npm run db:new-migration` sabiex ikollu timestamp aktar ġdid, jew għamilha indipendenti. `npm run test:migrations:fresh` japplika kull migrazzjoni għal database vojta u jaqbad dan.
+
+### Migrazzjoni Magħquda Qatt Qatt Tħassar jew Isimha mill-ġdid
+
+Ladarba fajl tal-migrazzjoni jkun fuq fergħa tar-rilaxx jew `main`, ikun diġà ħadmu fuq databases tal-omolog u tal-iżviluppaturi, fuq installazzjonijiet VPS u fis-sinkronizzazzjoni tal-Enterprise. Minn hemm 'il quddiem:
+
+- **Qatt tħassarha.** Installazzjonijiet friski jitilfu l-iskema tiegħu filwaqt li databases aġġornati jżommuha.
+- **Qatt semmieh.** Il-verżjoni `_omniroute_migrations` ma tibqax taqbel ma' fajl, għalhekk kull database li diġà applikatha terġa' tħaddem. SQL mhux idempotent imbagħad jidduplika d-data jew iwaqqaf il-boot.
+- **Għandek bżonn skema differenti?** Oħloq migrazzjoni ġdida bi `npm run db:new-migration`.
+
+Tismija mill-ġdid hija sigura biss għal fajl li għadu mhux magħqud, li huwa l-każ li jirreferu għalih il-ħjiel tal-gate. Tag rilaxx ma tbiddel xejn hawn: kull spinta lejn fergħa `release/v*` tippubblika l-immaġni Docker `:next` u taħdem fuq homolog, VPS installs u s-sinkronizzazzjoni tal-Enterprise, għalhekk migrazzjoni magħquda saret fuq databases reali qabel ma teżisti kwalunkwe tag `vX.Y.Z`. Il-bieb jonqos kull tneħħija ta 'fajl bażi, ittikkettat jew le.
+
+- **Treġġa' lura migrazzjoni magħquda.** A `git revert` li tħassar il-fajl ifalli l-gate. Żomm il-fajl u ħoll l-iskema tiegħu f'migrazzjoni ġdida: `npm run db:new-migration -- <description>`, ma `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` eċċ. Databases aġġornati u friski mbagħad jispiċċaw bl-istess skema.
+- **Il-wieħed aċċettat isem ġdid: dħul ta 'kompatibilità u kontenut identiku.** Jekk fajl magħqud irid jiċċaqlaq (pereżempju, żewġ fajls magħquda jaqsmu timestamp u r-runner jieqaf b'ħabta tal-verżjoni), semmi mill-ġdid lil dak ta' aktar tard mingħajr ma tmiss SQL tiegħu u żid `{ fromVersion, fromName, toVersion, toName }` ma' `RENAMED_MIGRATION_COMPATIBILITY` `src/lib/db/migrationRunner/constants.ts`. Id-databases li applikaw il-verżjoni l-antika jċaqalqu r-ringiela `_omniroute_migrations` tagħhom minflok ma jerġgħu jmexxu l-fajl. Il-bieb iwissi dwar isem ġdid bħal dan u dejjem imexxi l-kontroll tal-kommutazzjoni fuqha, tkun xi tkun il-timestamp il-ġdid: installazzjonijiet friski japplikaw il-fajl fil-pożizzjoni l-ġdida tiegħu, id-databases aġġornati ma jagħmlux dan, għalhekk agħżel timestamp ġdid ħdejn il-qadim. Il-bieb jonqos l-isem mill-ġdid jekk il-kontenut jinbidel (bidla ta 'skema għadha tmur f'migrazzjoni ġdida), jew jekk il-fajl fil-mira tad-dħul ma jkunx fuq disk.
+- **Qatt tibdel isem fl-istess timestamp.** Tismija mill-ġdid li żżomm it-timbru taż-żmien u tbiddel biss id-deskrizzjoni tfalli l-bieb, bi jew mingħajr dħul. B'entrata li `toVersion` tagħha hija ugwali għal `fromVersion` tagħha , ir-runner iħassar ir-ringiela `_omniroute_migrations` l-antika u jerġa' japplika l-fajl fuq kull database li diġà ħadmet. Mingħajr dħul, ir-runner isegwi biss il-verżjoni: jaqbeż il-fajl fuq dawk id-databases (kontenut ġdid qatt ma jmur hemm) u jirreġistra żball ta' numerazzjoni mill-ġdid fuq kull boot. Uża timestamp ieħor flimkien ma' dħul ta' kompatibilità, jew żomm l-isem.
+- **Il-bieb jiċċekkja li l-fajl isem ġdid ma jerġax jaħdem.** Għal kull isem ġdid kopert, il-bieb jgħaddi l-isem tal-fajl il-ġdid lill-kontroll tal-kommutazzjoni `--must-not-apply`. Iċ-check boots id-database aġġornata bir-runner reali, u jekk ir-runner jerġa' japplika dak il-fajl (pereżempju, minħabba li d-dħul għandu verżjoni jew isem ħażin, jew minħabba li l-parser tat-test tal-gate jaqra `constants.ts` b'mod differenti minn TypeScript), il-gate jonqos `migration renomeada rodaria de novo` u jgħidlek biex tiċċekkja l-verżjonijiet u l-ismijiet qodma u ġodda tad-dħul.
+
+### Dak li l-Bieb Iċċekkja Kontra l-Bażi
+
+Fuq talba pull u merge-queue runs, `npm run check:migration-numbering` jqabbel `src/lib/db/migrations/` fuq disk mal-istess direttorju fuq il-fergħa bażi. Il-bażi hija, f'din l-ordni: `--base-latest-tag`, `--base <ref>`, il-varjabbli `MIGRATION_BASE_REF`, jew, meta `GITHUB_EVENT_NAME` huwa `pull_request`, `pull_request_target` jew `merge_group`, l-ewwel ġenitur tal-commit tal-merge, iż- `merge_group.base_sha` tat-tagħbija tal-avveniment, jew `git merge-base HEAD origin/$GITHUB_BASE_REF`. F'talba pull jew merge-queue run bl-ebda bażi riżolvibbli l-gate jonqos. Barra CI mingħajr `--base` jistampa `comparação com a base: pulada (sem --base)` u taqbeż dawn ir-regoli.
+
+`--base-latest-tag` tqabbel mat-tikketta tar-rilaxx l-aktar ġdida (`vX.Y.Z` f'ordni semver; tags suffissi bħal nightlies ma jgħoddux) li hija fl-istorja ta ' `HEAD`, bl-istess regoli bħal `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) imexxi l-bieb b'dan il-mod, minħabba li l-ġirjiet push u skedati m'għandhom l-ebda bażi ta 'talba ta' ġibda u amalgamazzjoni tista 'tinżel mingħajr ġirja CI friska. Bl-ebda tikketta ta 'rilaxx fl-istorja l-bieb jonqos; run `git fetch --tags` (fi CI, `actions/checkout` ma `fetch-depth: 0` iġib it-tags).
+
+| Bidla fuq it-talba tal-ġibda                                                                                             | Riżultat                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Fajl li jeżisti fuq il-bażi jingħata isem ġdid, b'entrata `RENAMED_MIGRATION_COMPATIBILITY`                              | **Twissija** jekk il-kontenut ikun identiku, u l-kontroll tal-kommutazzjoni jibda jkun xi jkun il-timestamp il-ġdid; tonqos jekk il-pożizzjoni l-ġdida tbiddel l-iskema finali (ħoll l-isem mill-ġdid, jew agħżel timestamp ġdid ieħor fejn jibdel) jew jekk ir-runner jerġa' japplika l-fajl isem ġdid fuq database aġġornata.** Jfalli** jekk il-kontenut inbidel. |
+| Fajl li jeżisti fuq il-bażi jingħata l-isem mill-ġdid u jżomm it-timbru taż-żmien tiegħu (id-deskrizzjoni biss tinbidel) | **Jfalli** , bi jew mingħajr dħul: ir-runner jerġa' japplikaha (bl-entrata) jew jaqbeżha skont il-verżjoni (mingħajr waħda). Uża timestamp ieħor flimkien ma' dħul ta' kompatibilità, jew żomm l-isem.                                                                                                                                                               |
+| Fajl li jeżisti fuq il-bażi jitħassar, jew jismu mill-ġdid mingħajr dħul                                                 | **Jfalli** , kemm jekk il-fajl ikun f'tikketta tar-rilaxx jew le. Biex tneħħiha, irrestawra l-fajl `git checkout <base> -- src/lib/db/migrations/<file>`; biex ireġġa' lura l-iskema tagħha, żid migrazzjoni ġdida `DROP ... IF EXISTS`.                                                                                                                             |
+| Fajl li jeżisti fuq il-bażi għandu kontenut differenti                                                                   | **Twissija** (annotazzjoni `::warning` f'Azzjonijiet GitHub ), u l-kontroll tal-kommutazzjoni jibda. Jfalli jekk l-editjar jibdel l-iskema finali, minħabba li databases aġġornati ma jerġgħux japplikaw il-fajl editjat: poġġi l-bidla f'migrazzjoni ġdida. Editjar li ma jagħmilx ħsara (kumment, `IF NOT EXISTS`) iwissi biss.                                    |
+| Fajl bit-timestamp huwa miżjud b'timestamp mhux aktar ġdid mill-aktar ġdid tal-bażi                                      | Iwettaq il-kontroll tal-kommutazzjoni, deskritt hawn taħt.                                                                                                                                                                                                                                                                                                           |
+| Fajl `NNN_` ta 'format antik huwa miżjud b'numru taħt l-aktar fajl ġdid ta' format antik tal-bażi                        | **Jfalli** , anki jekk `KNOWN_GAPS` jiġi editjat fl-istess talba tal-ġibda: is-serje l-antika hija ffriżata, oħloq il-migrazzjoni `npm run db:new-migration`. Fajls ta' format antik fuq l-aktar wieħed ġdid tal-bażi (talba ta' ġibda `release/v*` sa `main` ) huma aċċettati.                                                                                      |
+| Fajl mhux ta' ordni, editjat jew isem ġdid fih dikjarazzjonijiet `INSERT`, `UPDATE`, `DELETE` jew `REPLACE`              | **Twissija** : il-verifika tal-kommutazzjoni ma tqabbilx id-dejta, għalhekk tirrevedi jekk l-ordni li fiha d-databases aġġornati u ġodda japplikaw hix tibdel ir-riżultat.                                                                                                                                                                                           |
+
+Run waħda tal-kontroll tal-kommutazzjoni tkopri l-out-of-order, il-fajls editjati u l-fajls isem ġdid flimkien.
+
+Il-kontroll tal-kommutazzjoni (`scripts/check/migration-commutation.ts`) jibni żewġ databases temporanji bil-mogħdija tal-installazzjoni reali: an** imtejba** wieħed (ibbutja bil-migrazzjonijiet bażi, imbagħad ibda mill-ġdid fuq l-istess fajl bil-migrazzjonijiet tal-pull request) u** frisk** wieħed (boot wieħed bil-migrazzjonijiet tat-talba tal-ġibda). Hija tqabbel l-iskemi li jirriżultaw: tabelli u kolonni (jinjora l-ordni tal-kolonni), UNIQUE / PRIMARY KEY u FOREIGN KEY restrizzjonijiet, it-test `CREATE TABLE` normalizzat ta 'kull tabella (li jkopri CHECK restrizzjonijiet, kollazzjonijiet, kolonni ġġenerati u għażliet ta' tabella), indiċi, triggers u fehmiet. Id-dejta tar-ringiela mhix imqabbla. Jekk jaqblu, il-bieb jistampa li l-fajl huwa barra mill-ordni iżda jibdel, u jgħaddi. Jekk ivarjaw, il-bieb jonqos bid-differenza u ħjiel għall-każ: għal fajl li ma kienx fl-ordni, riġenera ismu `npm run db:new-migration`, li huwa sigur minħabba li l-fajl għadu ma ġiex magħqud; għal fajl bażi editjat, irrestawra l-kontenut bażi u poġġi l-bidla f'migrazzjoni ġdida; għal fajl b'isem ġdid, neħħi l-isem mill-ġdid jew agħżel timestamp ġdid ieħor fejn jibdel, qatt l-istess timestamp b'isem ieħor. Jekk il-kontroll innifsu ma jistax jaħdem, il-bieb ifalli CI u jwissi biss lokalment. Għal fajl bażi editjat, id-database aġġornata hija mibnija bil-kontenut tal-bażi ta 'dak il-fajl, u t-tieni boot taqbeżha minħabba li l-verżjoni tagħha hija diġà rreġistrata. Għal fajl isem ġdid, id-database aġġornata hija mibnija bil-fajl taħt l-isem l-antik tagħha, u t-tieni boot iċċaqlaq ir-ringiela `_omniroute_migrations` tagħha permezz tal-entrata ta 'kompatibilità minflok terġa' tħaddem; il-bieb jgħaddi l-isem il-ġdid `--must-not-apply`, għalhekk il-kontroll ifalli jekk it-tieni boot tapplikah. Jekk migrazzjoni ta 'talba ta' ġibda tonqos milli tapplika fuq il-mogħdija aġġornata, jiġifieri, wara kull migrazzjoni bażi (kemm jekk tonqos ukoll fuq installazzjoni ġdida jew le), il-bieb jirrapporta `migration do PR não aplica` u jistaqsik biex tiffissa l- SQL kontra l-iskema attwali tal-bażi; jekk il-fajl jiddependi fuq migrazzjoni oħra ta 'pull request b'timestamp aktar tard, riġenera ismu `npm run db:new-migration`.
+
+Biex tmexxi l-istess paragun lokalment, għaddi l-bażi b'mod espliċitu, pereżempju `npm run check:migration-numbering -- --base origin/<base-branch>`, jew `npm run check:migration-numbering -- --base-latest-tag` biex tqabbel mal-aħħar rilaxx.
+
+### Konverżjoni ta' Migrazzjoni `NNN` ta' PR Miftuħ
+
+Talba ta' ġibda miftuħa qabel is-swiċċ xorta tista' ġġorr fajl sekwenzjali bħal `242_add_widgets.sql`. Numri qodma 'l fuq minn `241` huma miċħuda, għalhekk ikkonverti qabel ma tingħaqad:
+
+1. **Semmi mill-ġdid il-fajl bil-ġeneratur, filwaqt li żżomm id-deskrizzjoni.** Mexxi `npm run db:new-migration -- <same description>` biex tikseb l-isem il-ġdid, ċċaqlaq iż- SQL fih, u ħassar il-fajl `NNN_` l-antik. Id-deskrizzjoni trid tibqa' identika: id-dħul ta' kompatibilità hawn taħt taqbel magħha.
+2. **Żid dħul ta 'kompatibilità jekk database persistenti mexxiet in-numru l-antik.** Jekk xi database li tinżamm (homolog, a VPS, installazzjoni ta' kontributur stess) mexxa build ta' PR bil-fajl `NNN_`, żid `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` ma `RENAMED_MIGRATION_COMPATIBILITY` `src/lib/db/migrationRunner/constants.ts`. Dan hu** meħtieġa għal `237` sa `241`** : dawk is-slots issa jżommu l-kanoniku `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` u `241_seen_models.sql`, u mingħajr id-dħul tali database taqbeż il-migrazzjoni kanonika għal dejjem u terġa 'tmexxi dik konvertita. Taħdem ukoll għal slot li jibqa' vojt, bħal `242`, meta d-destinazzjoni tkun timestamp. Meta għandek dubju, żid l-entrata. Fejn iżżidha fl-array ma jimpurtax: meta slot fil-mira ta' dħul ikun għadu jżomm ringiela li dħul ieħor jitbiegħed (per eżempju `237` li jżomm ringiela PR waqt li ringiela `usage_history_calculated_cost` anzjana tistenna li timxi fi `237`), ir-runner iħalli dik id-dħul tistenna sakemm is-slot ikun ħieles. Konflitt reali biss, bħal slot miżmum minn ringiela l-ebda dħul ma jiċċaqlaq, jew żewġ entrati li jbiddlu slots, iwaqqaf il-boot `Cannot reconcile ...`.
+3. **Żomm SQL idempotent** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), minħabba li l-migrazzjoni kkonvertita tista' tilħaq database fejn l-iskema tagħha diġà teżisti.
+4. **Ċaqlaq każijiet speċjali verżjoni keyed.** Jekk iż- PR żiedet każ għan-numru l-antik tagħha `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) jew `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), ibdel iċ-ċavetta għall-timestamp il-ġdid.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` huwa eżempju ta' ħidma ta' test għal migrazzjoni b'isem ġdid.
+
+### Backports għal Fergħat Qabel l-Iswiċċ
+
+Qatt ma tiġbor ċirasa jew tagħti lura fajl `YYYYMMDDHHMMSS_` għal fergħa li tkun qabel is-swiċċ (pereżempju fergħa `release/v*` eqdem). Ir-runner hemmhekk jagħżel l-ismijiet tal-fajls bħala test, għalhekk fajl b'timbra taż-żmien ikun għaddej bejn `201_` u `202_` fuq database ġdida, u l-bieb l-antik hemmhekk ma jifhimx prefissi ta '14-il ċifra. Fuq fergħa bħal din, ikteb il-bidla bħala l-fajl `NNN_` li jmiss ta' dik il-fergħa stess, idempotent, għalhekk huwa no-op meta l-verżjoni bit-timestamp tasal aktar tard.
+
+### Kif Jiġru l-Migrazzjonijiet
+
+Fl-istartjar, `migrationRunner.ts`:
+
+1. Johloq tabella `_omniroute_migrations` jekk ma tezistix
+2. Mistoqsijiet għal migrazzjonijiet diġà applikati
 3. Japplika kwalunkwe migrazzjoni ġdida fl-ordni, kull waħda fi tranżazzjoni
-4. Jirreġistra kull migrazzjoni applikata flimkien mat-timbru tal-ħin
+4. Jirreġistra kull migrazzjoni applikata b'timestamp
 
 ```ts
-// src/lib/db/migrationRunner.ts (issimplifikat)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotenza
 
-Il-migrazzjonijiet iridu jkunu **idempotenti** — jekk jitħaddmu darbtejn, it-tieni darba m’għandha tagħmel l-ebda bidla:
+Il-migrazzjonijiet iridu jkunu** idempotenti** — li jmexxihom darbtejn għandu jkun no-op:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Uża b’mod estensiv il-klawżoli `IF NOT EXISTS`, `IF EXISTS`, u `OR IGNORE` / `OR REPLACE`.
+Uża klawżoli `IF NOT EXISTS`, `IF EXISTS`, u `OR IGNORE` / `OR REPLACE` liberali.
 
-### Żieda ta’ Migrazzjoni Ġdida
+### Żieda ta' Migrazzjoni Ġdida
 
-1. **Identifika n-numru li jmiss**: `ls src/lib/db/migrations/ | tail -1`
-2. **Oħloq il-fajl**: `NNN_my_change.sql`
-3. **Uża DDL sikur**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Imla d-data retroattivament b’attenzjoni**: uża `UPDATE ... WHERE ...` biex timmaniġġja r-ringieli eżistenti
-5. **Ittestja fuq kopja**: qatt tħaddem migrazzjonijiet mhux ittestjati fil-produzzjoni
+1. **Oħloq il-fajl bil-ġeneratur** : `npm run db:new-migration -- <description>` (per eżempju `npm run db:new-migration -- add combo priority`). Jikteb `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` bil-ħin UTC kurrenti u header tal-kumment, jimxi 'l quddiem sekonda jekk jittieħed dak it-timestamp, u qatt ma jikteb fuq fajl. Tagħżelx numru bl-idejn.
+2. **DDL sigur** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Imla d-data bir-reqqa** : uża `UPDATE ... WHERE ...` biex timmaniġġja ringieli eżistenti
+4. **Iċċekkja l-ordni u l-ismijiet** : `npm run test:migrations:fresh` (il-migrazzjoni kollha fuq database vojta) u `npm run check:migration-numbering`
+5. **Test fuq kopja** : qatt ma tmexxi migrazzjonijiet mhux ittestjati fuq il-produzzjoni
 
 Eżempju:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Bidliet mhux kompatibbli b’lura** (eż., it-tneħħija ta’ kolonni) huma diffiċli. OmniRoute MA jappoġġjax downgrade — ladarba migrazzjoni tiġi applikata, il-bidla fl-iskema tkun permanenti. Ippjana kif xieraq.
+> **Bidliet inkompatibbli b'lura** (eż., twaqqa' kolonni) huma delikati. OmniRoute ma NOT jappoġġa downgrade — ladarba migrazzjoni tiġi applikata, il-bidla skema hija permanenti. Ippjana kif xieraq.
 
 ---
 
@@ -403,26 +466,27 @@ Dan juża l-API tal-backup online ta’ SQLite — jista’ jitħaddem b’mod s
 
 ---
 
-## Ottimizzazzjoni tal-Prestazzjoni
+## Irfinar tal-Prestazzjoni
 
-### Modalità WAL
+### WAL Mode
 
-WAL hija attivata b’mod awtomatiku. Għal ammonti ta’ xogħol b’ħafna kitbiet, ikkunsidra:
+WAL huwa attivat b'mod awtomatiku. Għal xogħol ta' kitba għolja, ikkunsidra:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Oħloq checkpoint kull 1000 paġna
-PRAGMA journal_size_limit = 67108864;  -- Limitu WAL ta’ 64MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute ma jissettjax `journal_size_limit`. Punt ta 'kontroll iċċaqlaq frames WAL fil-fajl prinċipali, iżda l-fajl WAL iżomm l-akbar daqs allokat tiegħu. Il-gwardja `OMNIROUTE_WAL_GUARD_MAX_MB` biss iwissi u tmexxi `wal_checkpoint(RESTART)`; mhuwiex għatu tad-daqs tad-diska.
 
 ### Indiċijiet
 
-Indiċijiet ewlenin għall-prestazzjoni (jinħolqu awtomatikament mill-migrazzjonijiet):
+Indiċi ewlenin għall-prestazzjoni (maħluqa awtomatikament minn migrazzjonijiet):
 
-- `idx_models_provider` — tiftix ta’ mudelli skont il-fornitur
-- `idx_combo_targets_combo_id` — espansjoni tal-miri ta’ kombinazzjoni
-- `idx_usage_history_api_key_timestamp` — analitika tal-użu
-- `idx_quota_snapshots_api_key_window` — traċċar tal-kwoti
-- `idx_call_logs_timestamp` — mistoqsijiet fir-reġistru tas-sejħiet
+- Lookups tal-mudell `idx_models_provider` — mill-fornitur
+- `idx_combo_targets_combo_id` — espansjoni tal-mira combo
+- `idx_usage_history_api_key_timestamp` — usage analytics
+- `idx_quota_snapshots_api_key_window` — quota tracking
+- `idx_call_logs_timestamp` — call log queries
 
 Biex iżżid indiċi ġdid, oħloq migrazzjoni:
 
@@ -431,24 +495,24 @@ Biex iżżid indiċi ġdid, oħloq migrazzjoni:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O Immappjat fil-Memorja
+### Memory-Mapped I/O
 
-Għal databases kbar ħafna (>10GB), l-immappjar tal-memorja jista’ jiġi aġġustat permezz ta’ pragma ta’ SQLite:
+Għal databases kbar ħafna (> 10GB), l-immappjar tal-memorja jista’ jiġi aġġustat permezz SQLite pragma:
 
 ```sql
--- Issettja permezz ta’ pragma ta’ SQLite (aġġusta f’core.ts jew waqt l-eżekuzzjoni)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Kumpattazzjoni
+### Kompattazzjoni
 
-L-istanzi ta’ OmniRoute li jibqgħu jaħdmu għal żmien twil jibbenefikaw minn `VACUUM` okkażjonali:
+L-istanzi OmniRoute fit-tul jibbenefikaw minn `VACUUM` okkażjonali:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Ħaddmu kull xahar matul perjodi bi ftit traffiku. (Il-modalità WAL tnaqqas il-ħtieġa, iżda ma teliminahiex.)
+Mexxi kull xahar waqt twieqi ta' traffiku baxx. (Il-mod WAL inaqqas il-ħtieġa, iżda ma jeliminahx.)
 
 ---
 

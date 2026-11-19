@@ -41,7 +41,11 @@ export default async function Page(props: { params: Promise<{ slug: string[] }> 
   if (!page) notFound();
 
   const locale = await getDocsLocale();
-  const translated = await loadTranslatedDoc(params.slug, locale, page.data.toc);
+  // `page.path` (e.g. `getting-started/QUICK-START.md`) names the mirror file to fetch when the
+  // install has no bundled docs/i18n tree; the slug alone lost the file name's case.
+  const translated = await loadTranslatedDoc(params.slug, locale, page.data.toc, undefined, {
+    sourcePath: page.path,
+  });
 
   if (translated) {
     // Render translated markdown (non-English locale with available translation)

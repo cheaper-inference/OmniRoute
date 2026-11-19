@@ -339,16 +339,16 @@ Agar ikkala shart ham bajarilsa, u har bir eski pulni paketli tarzda `POST /api/
 
 ---
 
-## Test qamrovi
+## Sinov qamrovi
 
-Quota-share mexanizmi bilan birga avtomatlashtirilgan qamrovning ikki qatlami taqdim etiladi:
+Avtomatlashtirilgan qamrovning ikki qatlami kvotani taqsimlash dvigateliga ega:
 
-| To‘plam                 | Buyruq                                                                 | Nimalarni qamrab oladi                                                                                                                                                                                                                                  |
-| :---------------------- | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Modul (29 ta test)      | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR rejalashtiruvchisi, to‘yinganlikni cheklash, parallellik limitlari, fairShare hisobi, navbatga to‘plash                                                                                                                                             |
-| Integratsiya matritsasi | `npm run test:combo:matrix`                                            | Haqiqiy kombinatsiya konveyeri orqali boshidan oxirigacha marshrutlash qarori; jonli ulanish nuqtalari (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) orqali DRR adolatliligi va to‘yinganlikda ustuvorlikni pasaytirish |
+| Suite                   | Buyruq                                                                 | U nimani qamrab oladi                                                                                                                                                                                                    |
+| :---------------------- | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Birlik (29 test)        | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR rejalashtiruvchisi, toʻyinganlik chegarasi, parallellik chegaralari, fairShare matematikasi, orqada qolish navbati                                                                                                   |
+| Integratsiya matritsasi | `npm run test:combo:matrix`                                            | Haqiqiy kombo quvur liniyasi orqali oxirigacha marshrutlash qarori; DRR adolatlilik + to‘yinganlik jonli tikuvlar orqali deprioritizatsiya (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Integratsiya matritsasi CI’da barcha 19 ta ommaviy strategiya bilan birga ishga tushiriladi. Modul testlari to‘plamini alohida ishga tushirish mumkin.
+Integratsiya matritsasi barcha 22 davlat strategiyasi bilan bir qatorda CI da ishlaydi. Birlik to'plami mustaqil ravishda ishga tushirilishi mumkin.
 
 ---
 

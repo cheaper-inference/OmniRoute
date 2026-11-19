@@ -1,0 +1,162 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>اختصار OmniRoute على سطح المكتب</title>
+<style>
+  :root {
+    --bg: #f7f6f2;
+    --card: #ffffff;
+    --text: #1f2933;
+    --muted: #52606d;
+    --line: #d9d6cc;
+    --accent: #0f766e;
+    --warn-bg: #fff4e0;
+    --warn-line: #e0a030;
+    --code-bg: #eef1f4;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #14181c;
+      --card: #1c2228;
+      --text: #e6eaee;
+      --muted: #a3afba;
+      --line: #2e3740;
+      --accent: #4fd1c5;
+      --warn-bg: #2b2415;
+      --warn-line: #b8862b;
+      --code-bg: #10151a;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", Tahoma, "Noto Naskh Arabic", "Noto Sans Arabic", Arial, sans-serif;
+    font-size: 17px;
+    line-height: 2;
+    letter-spacing: normal;
+  }
+  main { max-width: 820px; margin: 0 auto; padding: 24px 16px 56px; }
+  h1 { font-size: 1.7rem; line-height: 1.6; margin: 8px 0 4px; }
+  h2 { font-size: 1.3rem; line-height: 1.7; margin: 0 0 8px; color: var(--accent); }
+  p { margin: 6px 0; }
+  .lead { color: var(--muted); margin-bottom: 20px; }
+  section {
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin: 16px 0;
+  }
+  ol, ul { margin: 6px 0; padding-inline-start: 1.6rem; }
+  li { margin: 4px 0; }
+  code, pre {
+    direction: ltr;
+    unicode-bidi: isolate;
+    font-family: Consolas, "Courier New", monospace;
+    background: var(--code-bg);
+    border-radius: 6px;
+    letter-spacing: normal;
+  }
+  code { padding: 1px 6px; font-size: 0.92em; }
+  pre { padding: 10px 14px; margin: 8px 0; overflow-x: auto; text-align: left; line-height: 1.6; }
+  .note {
+    background: var(--warn-bg);
+    border: 1px solid var(--warn-line);
+    border-radius: 8px;
+    padding: 10px 16px;
+    margin: 12px 0;
+  }
+  table { width: 100%; border-collapse: collapse; margin: 8px 0; }
+  th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: right; vertical-align: top; }
+  th { background: var(--code-bg); }
+</style>
+</head>
+<body>
+<main>
+  <h1>اختصار OmniRoute على سطح المكتب</h1>
+  <p class="lead">يفتح الاختصار بوابة OmniRoute ثم لوحة التحكم على العنوان <code>http://localhost:20128/dashboard</code> بنقرتين.</p>
+
+  <div class="note">
+    <strong>تنبيه:</strong> لا يمكن إنشاء الاختصار من بيئة العمل السحابية، فهو يُنشأ على جهازك أنت. الملفات المرفقة (الموجودة في المجلد <code>scripts/launchers</code>) تقوم بذلك عند تشغيلها عندك.
+  </div>
+
+  <section>
+    <h2>أولًا: التثبيت (مرة واحدة)</h2>
+    <ol>
+      <li>ثبّت Node.js بالإصدار 22 أو أحدث من <code>nodejs.org</code>.</li>
+      <li>افتح موجه الأوامر أو PowerShell (أو الطرفية في ماك ولينكس) ونفّذ:
+<pre>npm install -g omniroute</pre></li>
+      <li>انسخ المجلد <code>scripts/launchers</code> من المستودع إلى أي مكان ثابت على جهازك، ولا تحذفه بعد إنشاء الاختصار.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>ثانيًا: إنشاء الاختصار</h2>
+    <h3>ويندوز</h3>
+    <ol>
+      <li>انقر بزر الفأرة الأيمن على الملف <code>Create-Desktop-Shortcut.ps1</code> واختر «Run with PowerShell».</li>
+      <li>إن منع النظام تشغيله بسبب سياسة التنفيذ، نفّذ هذا الأمر من داخل المجلد:
+<pre>powershell -ExecutionPolicy Bypass -File .\Create-Desktop-Shortcut.ps1</pre></li>
+      <li>طريقة يدوية بديلة: انقر بزر الفأرة الأيمن على <code>OmniRoute.bat</code> ثم «إرسال إلى» ثم «سطح المكتب (إنشاء اختصار)».</li>
+    </ol>
+    <h3>ماك</h3>
+    <ol>
+      <li>افتح الطرفية داخل المجلد ونفّذ:
+<pre>bash create-desktop-shortcut.sh</pre></li>
+      <li>في أول تشغيل انقر بزر الفأرة الأيمن على الملف الجديد على سطح المكتب واختر «فتح» ثم أكّد.</li>
+    </ol>
+    <h3>لينكس</h3>
+    <ol>
+      <li>نفّذ الأمر نفسه: <code>bash create-desktop-shortcut.sh</code>.</li>
+      <li>إن ظهر تحذير على الأيقونة، انقر بزر الفأرة الأيمن واختر «السماح بالتشغيل» (Allow Launching).</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>ثالثًا: الاستخدام اليومي</h2>
+    <ol>
+      <li>انقر مرتين على الاختصار. تظهر نافذة طرفية، وتُفتح لوحة التحكم في المتصفح عند جاهزية الخادم (ينتظر الاختصار حتى 60 ثانية).</li>
+      <li>أبقِ نافذة الطرفية مفتوحة طوال الاستخدام. إغلاقها يوقف الخادم.</li>
+      <li>إذا كان الخادم يعمل أصلًا، فالنقر على الاختصار يفتح لوحة التحكم فقط.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>رابعًا: التفعيل (أول دخول وإضافة المزوّدين)</h2>
+    <ol>
+      <li>سجّل الدخول بكلمة المرور المحددة في المتغير <code>INITIAL_PASSWORD</code>. القيمة في ملف المثال <code>.env.example</code> هي <code>CHANGEME</code> وهي للتجربة المحلية فقط، وغيّرها من <strong>Dashboard ← Settings ← Security</strong>. إن لم يقبل الدخول فراجع <code>docs/getting-started/TROUBLESHOOTING.md</code>.</li>
+      <li>اذهب إلى <strong>Providers ← Add Provider</strong> واختر المزوّد وأدخل مفتاحه.</li>
+      <li>لا تحتاج مفتاحًا مع بعض المزوّدين المجانيين مثل Kiro وOpenCode Free وPollinations، ويكفي الضغط على Connect.</li>
+      <li>اربط أدواتك بالعنوان <code>http://localhost:20128/v1</code> واستعمل النموذج <code>auto</code> ليختار OmniRoute المزوّد المناسب.</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2>خامسًا: المزوّدون الأربعة الجدد</h2>
+    <div class="note">هؤلاء المزوّدون متاحون بدءًا من الإصدار الذي يتضمن طلب الدمج رقم 19206. إن لم يظهروا في نسختك فحدّثها بالأمر <code>npm install -g omniroute@latest</code>.</div>
+    <table>
+      <tr><th>المزوّد</th><th>المطلوب عند الإضافة</th></tr>
+      <tr><td>Hetzner Inference</td><td>مفتاح من <code>experiments.hetzner.com/inference</code>. الخدمة تجريبية بلا اتفاقية مستوى خدمة.</td></tr>
+      <tr><td>Grokified</td><td>مفتاح من <code>grokified.com</code>.</td></tr>
+      <tr><td>Replicate</td><td>رمز الوصول (API token) من <code>replicate.com</code>.</td></tr>
+      <tr><td>Cerebrium</td><td>المفتاح، مع حقل <strong>Base URL</strong> إلزامي بصيغة <code>https://api.cerebrium.ai/v4/p-xxxx/اسم-التطبيق/run</code> وهو رابط نشرك أنت. بدونه يظهر خطأ 400.</td></tr>
+    </table>
+    <p>لم تُجرَّب هذه المزوّدات على الخدمات الحية بعد، لأن بيئة العمل لا تملك مفاتيح ولا وصولًا إلى مضيفاتها. يستحسن اختبار طلب واحد لكل مزوّد قبل الاعتماد عليه.</p>
+  </section>
+
+  <section>
+    <h2>حل المشكلات الشائعة</h2>
+    <ul>
+      <li><strong>العبارة «OmniRoute is not installed yet»:</strong> نفّذ <code>npm install -g omniroute</code> ثم أعد فتح الطرفية.</li>
+      <li><strong>عدم التعرف على الأمر <code>npm</code>:</strong> أعد تثبيت Node.js وأعد تشغيل الجهاز.</li>
+      <li><strong>المنفذ 20128 مشغول:</strong> أغلق النسخة الأخرى أو غيّر المنفذ بالمتغير <code>PORT</code>، وعدّل العنوان داخل ملف الاختصار.</li>
+      <li><strong>الاختصار لا يعمل بعد نقل المجلد:</strong> أعد تشغيل ملف إنشاء الاختصار من مكان المجلد الجديد.</li>
+    </ul>
+  </section>
+</main>
+</body>
+</html>

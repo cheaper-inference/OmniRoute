@@ -335,7 +335,7 @@ export default function A2ADashboardPage() {
       </div>
 
       <Card className="p-5">
-        <h2 className="text-lg font-semibold mb-4">{t("taskStateOverview")}</h2>
+        <h2 className="text-lg mb-4">{t("taskStateOverview")}</h2>
         <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
           {(["submitted", "working", "completed", "failed", "cancelled"] as A2ATaskState[]).map(
             (state) => (
@@ -350,7 +350,7 @@ export default function A2ADashboardPage() {
 
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
         <Card className="p-5">
-          <h2 className="text-lg font-semibold mb-3">{t("agentCard")}</h2>
+          <h2 className="text-lg mb-3">{t("agentCard")}</h2>
           {status?.agent ? (
             <div className="space-y-2 text-sm">
               <p className="font-semibold">{status.agent.name}</p>
@@ -374,7 +374,7 @@ export default function A2ADashboardPage() {
         </Card>
 
         <Card className="p-5">
-          <h2 className="text-lg font-semibold mb-3">{t("quickValidation")}</h2>
+          <h2 className="text-lg mb-3">{t("quickValidation")}</h2>
           <p className="text-sm text-text-muted mb-3">{t("quickValidationDescription")}</p>
           <div className="flex flex-wrap gap-2">
             <Button
@@ -401,7 +401,7 @@ export default function A2ADashboardPage() {
       <Card className="p-5">
         <div className="flex flex-wrap items-end justify-between gap-3 mb-4">
           <div>
-            <h2 className="text-lg font-semibold">{t("taskManagement")}</h2>
+            <h2 className="text-lg">{t("taskManagement")}</h2>
             <p className="text-sm text-text-muted">
               {t("taskSummary", { total: tasksData.total, page: currentPage, totalPages })}
             </p>
@@ -445,7 +445,11 @@ export default function A2ADashboardPage() {
           <p className="text-sm text-text-muted">{t("noTasksForFilters")}</p>
         ) : (
           <div className="overflow-x-auto">
-            <Table scrollbarLabel={t("taskManagement")}>
+            <Table
+              scrollbarLabel={t("taskManagement")}
+              scrollLabel={t("taskManagement")}
+              containerClassName="rounded-none border-0"
+            >
               <TableHeader>
                 <TableRow>
                   <TableHead>{t("tableTask")}</TableHead>
@@ -462,7 +466,7 @@ export default function A2ADashboardPage() {
                     task.metadata?.fsmPhase || (task.metadata?.workflowFSM as any)?.currentPhase;
                   let fsmBadgeColor = "bg-surface-2 text-text-muted";
                   if (fsmPhase === "plan" || fsmPhase === "plan_review")
-                    fsmBadgeColor = "bg-chart-3/15 text-chart-3";
+                    fsmBadgeColor = "bg-chart-3/15 text-chart-3-ink";
                   else if (fsmPhase === "execute") fsmBadgeColor = "bg-info/15 text-info";
                   else if (
                     ["code_review", "quality_review", "security", "test", "output_review"].includes(
@@ -555,7 +559,7 @@ export default function A2ADashboardPage() {
       {selectedTask && (
         <Card className="p-5">
           <div className="flex items-center justify-between mb-3">
-            <h2 className="text-lg font-semibold">{t("taskDetail")}</h2>
+            <h2 className="text-lg">{t("taskDetail")}</h2>
             <Button size="sm" variant="secondary" onClick={() => setSelectedTask(null)}>
               {t("close")}
             </Button>

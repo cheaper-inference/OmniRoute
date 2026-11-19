@@ -24,6 +24,10 @@ import os from "node:os";
 import path from "node:path";
 import test, { mock } from "node:test";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+import { waitForConnectionFollowUps } from "../../src/lib/providers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-revalidate-16190-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -128,16 +132,9 @@ async function createConnection(node: string): Promise<string> {
   );
   const body = await readJsonObject(response);
   assert.equal(response.status, 201, `create connection failed: ${JSON.stringify(body)}`);
-  // POST fires a background auto-test. Wait for its persisted result instead of
-  // racing a fixed sleep: a late initial probe must not run during an operator
-  // disable/revalidation assertion below. Failed initial probes also settle.
-  const connectionId = (body.connection as { id: string }).id;
-  const deadline = Date.now() + 5000;
-  while (readRow(connectionId).lastTested === null) {
-    assert.ok(Date.now() < deadline, "the initial background probe must finish before setup");
-    await new Promise((resolve) => setTimeout(resolve, 10));
-  }
-  return connectionId;
+  // POST starts the connection's auto-test as a follow-up; let it settle before the test acts.
+  assert.equal(await waitForConnectionFollowUps(10_000), true);
+  return (body.connection as { id: string }).id;
 }
 
 async function activeConnection(node: string): Promise<string> {

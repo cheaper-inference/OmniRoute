@@ -10,12 +10,13 @@ import { useTranslations } from "next-intl";
  * Escape and focus return come from Radix).
  */
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { Popover, PopoverContent, PopoverTrigger } from "@omniroute/ui-kit/popover";
 import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 import Badge from "./Badge";
 import Button from "./Button";
 import Icon from "./Icon";
+import { useNotificationStore } from "@/store/notificationStore";
 
 // Semantic text tones (kit tokens through the @theme bridge) — theme-aware in the header.
 const STATUS_MAP = {
@@ -39,26 +40,69 @@ export default function TokenHealthBadge() {
   const t = useTranslations("stats");
   const [health, setHealth] = useState(null);
   const [open, setOpen] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   // A hover-opened panel is a passive summary: it must not take focus (the badge sits in every
   // dashboard header, next to inputs) and it closes when the pointer leaves. A click "pins" it
   // open instead of toggling the hover-opened panel shut.
   const openedByHover = useRef(false);
 
   useEffect(() => {
-    const fetchHealth = async () => {
+    // The poll is defined inside the effect (not a useCallback) so the initial
+    // fetch and the interval share one function; the async fetch means no state
+    // is set synchronously in the effect.
+    const poll = async () => {
       try {
         const res = await fetch("/api/token-health");
         if (res.ok) {
-          const data = await res.json();
-          setHealth(data);
+          setHealth(await res.json());
         }
       } catch {
         // silent
       }
     };
 
-    return startVisiblePolling(fetchHealth, 60000);
+    return startVisiblePolling(poll, 60000);
   }, []);
+
+  const handleRefresh = useCallback(async () => {
+    setRefreshing(true);
+    try {
+      const res = await fetch("/api/token-health", { method: "POST" });
+      let data = null;
+      try {
+        data = await res.json();
+      } catch {
+        data = null;
+      }
+      if (res.ok && data) {
+        const message = t("tokenHealthRefreshResult", {
+          refreshed: data.refreshed,
+          failed: data.failed,
+          skipped: data.skipped,
+        });
+        if (data.failed === 0) {
+          useNotificationStore.getState().success(message);
+        } else {
+          useNotificationStore.getState().error(message);
+        }
+      } else {
+        useNotificationStore.getState().error(t("tokenHealthTooltips.refreshFailures"));
+      }
+    } catch {
+      useNotificationStore.getState().error(t("tokenHealthTooltips.refreshFailures"));
+    } finally {
+      setRefreshing(false);
+      // Re-poll so the badge reflects the post-wave health state.
+      try {
+        const res = await fetch("/api/token-health");
+        if (res.ok) {
+          setHealth(await res.json());
+        }
+      } catch {
+        // silent
+      }
+    }
+  }, [t]);
 
   if (!health || health.total === 0) return null;
 
@@ -147,6 +191,15 @@ export default function TokenHealthBadge() {
             </div>
           )}
         </dl>
+        <Button
+          variant="outline"
+          size="sm"
+          className="w-full mt-2"
+          onClick={handleRefresh}
+          disabled={refreshing}
+        >
+          {t("tokenHealthRefreshAll")}
+        </Button>
       </PopoverContent>
     </Popover>
   );
