@@ -184,53 +184,48 @@ Precedenza (dalla più alta alla più bassa):
 
 ---
 
-## Integrazione nella pipeline
+## Integrazione della pipeline
 
-### Hook PRE (`open-sse/handlers/chatCore.ts`)
+### gancio PRE (`open-sse/handlers/chatCore.ts`)
 
-Viene eseguito prima dell'esecutore upstream, dopo i controlli di autenticazione e delle policy:
+Viene eseguito prima dell'esecutore upstream, dopo i controlli di autenticazione e policy:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() per dimensione
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → se bloccata → restituisce 429 (buildErrorBody, regola rigida n. 12)
-      → se consentita + deprioritizzata → imposta quotaSoftPenalty=true sul candidato
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Fail-open**: se `enforceQuotaShare` genera un'eccezione, la richiesta viene consentita
-con un log `pino.warn`. Ciò impedisce che un bug del motore delle quote blocchi tutto
-il traffico.
+**Fail-open** : se `enforceQuotaShare` genera un'eccezione, la richiesta viene consentita con un log `pino.warn`. Ciò impedisce a un bug del motore di quota di bloccare tutto il traffico.
 
-### Hook POST (registrazione del consumo)
+### gancio POST (consumo record)
 
-Dopo una risposta riuscita:
+Dopo una risposta positiva:
 
 ```
-l'esecutore restituisce un esito positivo
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() per dimensione
-      → fail-open: gli errori vengono registrati come pino.warn e non vengono mai propagati al client
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Nota sulla deriva**: se `consume` non riesce dopo la risposta, il contatore mobile sottostima il consumo.
-Il segnale di saturazione del provider (ad es. `anthropic-ratelimit-unified-5h-utilization`)
-corregge la stima globale alla richiesta successiva.
+**Nota di deriva** : se `consume` fallisce dopo la risposta, il contatore che rotola sottoconta. Il segnale di saturazione del provider (ad esempio `anthropic-ratelimit-unified-5h-utilization`) corregge la stima globale alla richiesta successiva.
 
-### Penalità soft della combinazione (`open-sse/services/combo.ts`)
+### Penalità morbida combinata (`open-sse/services/combo.ts`)
 
 Quando `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // valore predefinito: 0,7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-La penalità viene applicata dopo tutti gli altri fattori di punteggio. Riduce la probabilità
-che la combinazione automatica selezioni una chiave satura, senza bloccarla in modo rigido.
+La penalità viene applicata dopo tutti gli altri fattori di punteggio. Riduce la probabilità di combo automatica di selezionare una chiave saturata senza bloccarla.
 
 ---
 
@@ -331,17 +326,16 @@ non appaia mai come opzione selezionabile dall'utente nell'interfaccia utente o 
 
 ---
 
-## Copertura dei test
+## Copertura di prova
 
-Il motore quota-share include due livelli di copertura automatizzata:
+Due livelli di copertura automatizzata forniti con il motore di quota-share:
 
-| Suite                   | Comando                                                                | Cosa copre                                                                                                                                                                                                                                              |
-| :---------------------- | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Unitari (29 test)       | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Scheduler DRR, controllo della saturazione, limiti di concorrenza, calcoli fairShare, accodamento del backlog                                                                                                                                           |
-| Matrice di integrazione | `npm run test:combo:matrix`                                            | Decisione di instradamento end-to-end attraverso la pipeline combo reale; equità DRR + riduzione della priorità in caso di saturazione tramite punti di integrazione live (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite                   | Comando                                                                | Cosa copre                                                                                                                                                                                                                    |
+| :---------------------- | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unità (29 test)         | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | scheduler DRR, gating di saturazione, limiti di concorrenza, matematica fairShare, accodamento del backlog                                                                                                                    |
+| Matrice di integrazione | `npm run test:combo:matrix`                                            | Decisione di routing end-to-end attraverso la pipeline combinata reale; DRR equità + deprioritizzazione della saturazione tramite cuciture live (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-La matrice di integrazione viene eseguita nella CI insieme a tutte le 19 strategie pubbliche. La suite
-di test unitari può essere eseguita autonomamente.
+La matrice di integrazione corre in CI insieme a tutte le 22 strategie pubbliche. La suite di unità può essere eseguita in modo autonomo.
 
 ---
 

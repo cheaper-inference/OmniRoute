@@ -204,19 +204,23 @@ Runs after `test-coverage`. Blocks merge on failure.
 | `check:compression-budget`   | Compression benchmark budget — per-engine token-savings floors must not regress                                                                             | Yes                       |
 | `check:type-coverage`        | Percent-typed ratchet (`type-coverage`) does not regress; largely subsumes `typecheck:noimplicit:core`                                                      | Yes                       |
 | `check:codeql-ratchet`       | Open CodeQL alert count does not regress (reads via `gh api`; graceful-skip without token) — refresh cadence and manual trigger: see "CodeQL ratchet" below | Yes                       |
+| `check:type-scale-ratchet`   | Kit type scale: sizes under 12 px and `font-bold` in `src/` only go down (`typeScaleSubFloorSizes`, `typeScaleFontBold`); also in the pre-commit hook       | Yes                       |
 
 ### Job: `quality-extended`
 
-Entire job is advisory (`continue-on-error: true`). The npm-based ratchets run for
-real; the external scanners install via `gh release download` and self-skip (exit 0)
-when a binary is still absent.
+Mixed job, with no job-level `continue-on-error`: a step that passes `--ratchet` fails the job
+on a measured regression vs `quality-baseline.json`. Only `check:circular-deps` and the scanner
+install step are advisory (step-level `continue-on-error: true`). The external scanners install
+via `gh release download`; `check:secrets` self-skips (exit 0) when gitleaks is absent, while
+`check:vuln-ratchet`, `check:workflows` and `check:openapi-breaking` fail closed when their
+measurement is missing.
 
 | Script                   | Validates                                                                                                                                                                                       | Blocking                                          |
 | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------- |
 | `check:circular-deps`    | No circular dependencies (dpdm)                                                                                                                                                                 | **Advisory**                                      |
-| `check:bundle-size`      | Bundle size does not exceed the cap                                                                                                                                                             | **Advisory**                                      |
-| `check:secrets`          | Secret scanning (gitleaks) — skips if binary absent                                                                                                                                             | **Advisory**                                      |
-| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — `--ratchet` fails as INCOMPLETE (exit 2) if unmeasured                                                                                | **Advisory**                                      |
+| `check:bundle-size`      | Bundle size does not exceed the cap; an unmeasurable size fails too                                                                                                                             | **Blocking with --ratchet**                       |
+| `check:secrets`          | Secret scanning (gitleaks) — skips if binary absent                                                                                                                                             | **Blocking with --ratchet**                       |
+| `check:vuln-ratchet`     | Dependency vulnerabilities (osv-scanner) do not regress — `--ratchet` fails as INCOMPLETE (exit 2) if unmeasured                                                                                | **Blocking with --ratchet**                       |
 | `check:workflows`        | Workflow lint (actionlint + zizmor); missing/broken scanners, invalid reports or missing ratchet baseline fail as INCOMPLETE. Valid findings follow the selected strict/advisory/ratchet policy | Execution required; zizmor ratchet blocking in CI |
 | `check:openapi-breaking` | Public API contract against pinned event commits (PR merge-base, push before, merge-group base; scheduled/manual checkout first parent); required measurement fails closed                      | **Blocking with --ratchet**                       |
 
@@ -366,7 +370,9 @@ The commands behind it:
   `readme-diagrams`, `skills` (generated `SKILL.md`), `e2e-timings` (skipped until the tree
   ships `syncE2eTimings`), `ui-keys` (prunes keys `en.json` dropped and, with
   `--rewritten-since=<ref>` — default `origin/main` — re-queues English values rewritten since
-  the last release) and `llm-mirrors`. The
+  the last release), `llm-mirrors` and `verify-generated` (after a write, `check:generated-artifacts`
+  and `check:agent-skills-sync` in release mode must pass; skipped in `--check` and when `--only`
+  leaves it out; a failure is exit 2). The
   `changelog` step is opt-in (`--with-changelog`, release profile only). `--profile=nightly`
   never touches a version claim. With `-- --check` it writes nothing and exits 1 when any file
   would change or a managed value needs a manual edit (listing both); exit 2 on an
@@ -709,14 +715,16 @@ PRs rewrote `PROVIDER_REFERENCE.md`, 26–28 rewrote the README diagrams).
 **The guard.** `check:pr-derived-paths` (job `pr-test-policy`) fails a feature PR that touches a
 file of a family in `config/quality/derived-paths/`:
 
-| Family      | Files                                                                                                                                              | Rewritten by                                                                          |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `generated` | `docs/reference/PROVIDER_REFERENCE.md`; the twelve generated README SVGs; `skills/*/references/**`; the `SKILL.md` files that have no custom block | `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
-| `baselines` | `config/quality/e2e-timings.json`                                                                                                                  | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                  |
+| Family      | Files                                                                                                                                                                                   | Rewritten by                                                                                                             |
+| ----------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `generated` | `docs/reference/derived-facts.json`; `docs/reference/PROVIDER_REFERENCE.md`; the twelve generated README SVGs; `skills/*/references/**`; the `SKILL.md` files that have no custom block | `release:refresh-derived` (facts), `gen:provider-reference`, `docs:readme-diagrams`, `generate-agent-skills.mjs --apply` |
+| `baselines` | `config/quality/e2e-timings.json`                                                                                                                                                       | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                                                     |
 
 Writers (`release/v*`, `chore/derived-*`, and `chore/bank-ratchet-*` for baselines) are exempt; so is
 a PR that changes only one family plus its companions (for `generated`: the generator scripts, their
-tests and `changelog.d/**`), e.g. a hero layout change with its regenerated SVG. A `SKILL.md` with a
+tests, the agent-skill inputs — `src/shared/constants/agentSkills.ts`, the hand-written `skills/**`
+docs, `docs/openapi.yaml` — and `changelog.d/**`), e.g. a hero layout change with its regenerated SVG,
+or a skills fix whose test reads the regenerated `SKILL.md` files. A `SKILL.md` with a
 hand-written `<!-- skill:custom-start -->` block is not in the family: its custom block stays
 editable next to a feature.
 
