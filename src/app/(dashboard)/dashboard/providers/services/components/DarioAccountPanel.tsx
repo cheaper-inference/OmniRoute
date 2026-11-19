@@ -392,7 +392,7 @@ export function DarioAccountPanel() {
               {pending.authorizeUrl}
             </a>
             {pending.expiresAt && (
-              <p className="text-[11px] text-text-muted">
+              <p className="text-xs text-text-muted">
                 {t("pendingExpires", {
                   time: new Date(pending.expiresAt).toLocaleTimeString(),
                 })}

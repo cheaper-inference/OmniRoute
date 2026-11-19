@@ -10,6 +10,8 @@ export const openaiProvider: RegistryEntry = {
   reasoningTransport: "opaque",
   authType: "apikey",
   authHeader: "bearer",
+  // OpenAI Chat Completions rejects function names over 64 chars (MCP tool names hit this).
+  toolNameMaxLength: 64,
   defaultContextLength: 128000,
   models: [
     // https://developers.openai.com/api/docs/models/gpt-6.1-sol

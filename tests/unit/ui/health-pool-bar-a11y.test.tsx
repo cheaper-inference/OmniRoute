@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
 /**
- * KEA-7886 lote 1: the learned-limit pool bar on /dashboard/health is the kit Progress. The kit
- * spreads aria-* onto its outer div and never names the inner role="progressbar", so the bar is
- * decorative (aria-hidden) and the visible "remaining of limit" text carries the value.
+ * KEA-7886 lote 1: the learned-limit pool bar on /dashboard/health is the kit Progress. Since kit
+ * 0.0.116 the Progress forwards its name to the inner role="progressbar" and has a `tone`, so the
+ * bar is exposed to assistive tech with its name and spoken value (UI review 2026-11-15, defect 13)
+ * instead of being hidden behind aria-hidden and recoloured from the outside.
  */
 import React from "react";
 import axe from "axe-core";
@@ -48,7 +49,7 @@ const HEALTH = {
   quotaMonitor: {},
 };
 
-it("keeps the pool bar decorative and the progressbar out of the accessibility tree", async () => {
+it("exposes the pool bar as a named progressbar with its remaining value", async () => {
   vi.stubGlobal(
     "fetch",
     vi.fn(async (input: RequestInfo | URL) => {
@@ -71,16 +72,22 @@ it("keeps the pool bar decorative and the progressbar out of the accessibility t
   await act(async () => {});
 
   const bar = await screen.findByTestId("health-pool-bar");
-  expect(bar.getAttribute("aria-hidden")).toBe("true");
-  // The kit progressbar is inside the hidden wrapper…
+  // The bar is reachable: nothing above it hides it from assistive tech.
+  expect(bar.closest('[aria-hidden="true"]')).toBeNull();
   const progressbar = bar.querySelector('[role="progressbar"]');
   expect(progressbar).not.toBeNull();
-  // …and no aria-label is stranded on the kit's non-role outer div.
-  expect(bar.querySelector(".ci-progress[aria-label]")).toBeNull();
-  // Every progressbar on the page is either named or hidden from assistive tech.
+  expect(progressbar?.getAttribute("aria-label")).toBe(messages.health.learnedFromHeaders);
+  expect(progressbar?.getAttribute("aria-valuenow")).toBe("40");
+  expect(progressbar?.getAttribute("aria-valuemax")).toBe("100");
+  expect(progressbar?.getAttribute("aria-valuetext")).toContain("40");
+  // The status colour is the kit tone, not a class override on the indicator.
+  expect(bar.querySelector(".ci-progress__indicator")?.getAttribute("data-tone")).toBe("success");
+  expect(bar.className).not.toContain("ci-progress__indicator");
+  // No aria-label is stranded on the kit's non-role outer div.
+  expect(bar.matches(".ci-progress[aria-label]")).toBe(false);
+  // Every progressbar on the page is named.
   for (const el of container.querySelectorAll('[role="progressbar"]')) {
-    const named = el.hasAttribute("aria-label") || el.hasAttribute("aria-labelledby");
-    expect(named || el.closest('[aria-hidden="true"]') !== null).toBe(true);
+    expect(el.hasAttribute("aria-label") || el.hasAttribute("aria-labelledby")).toBe(true);
   }
 
   const results = await axe.run(bar.parentElement as HTMLElement, {
