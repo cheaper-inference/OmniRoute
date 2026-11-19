@@ -392,6 +392,30 @@ describe("conn-modals (Phase 1c extraction)", () => {
     expect(c.textContent).not.toContain("test-p...78b9");
   });
 
+  it("EditConnectionModal shows a stored-mask API key as its last 4 characters only", () => {
+    const onSave = vi.fn().mockResolvedValue(undefined);
+    const connection = {
+      id: "conn-masked-key",
+      name: "Masked Connection",
+      provider: "openai",
+      authType: "apikey",
+      priority: 1,
+      apiKey: "sk-proj-****a82f",
+    };
+    const c = renderModal(
+      <EditConnectionModal
+        isOpen={true}
+        connection={connection}
+        providerId="openai"
+        onSave={onSave}
+        onClose={vi.fn()}
+      />
+    );
+
+    expect(c.textContent).toContain("sk-••••••••a82f");
+    expect(c.textContent).not.toContain("sk-proj-****a82f");
+  });
+
   it("EditConnectionModal renders OpenRouter preset when provider comes from the page", () => {
     const onSave = vi.fn().mockResolvedValue(undefined);
     const connection = {
