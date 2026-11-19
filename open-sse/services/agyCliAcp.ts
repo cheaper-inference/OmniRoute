@@ -104,6 +104,14 @@ const DEFAULT_TURN_TIMEOUT_MS = 5 * 60 * 1000;
 const DEFAULT_IDLE_MS = 10 * 60 * 1000;
 const DEFAULT_MAX_PROCS = 16;
 const DEFAULT_IDE_CALL_DEADLINE_MS = 150_000;
+
+/**
+ * How long one session setup request (create, resume, model or option change)
+ * may take. It shares the start-up budget: both are agy answering a request that
+ * does no model work, and a request with no deadline would hold the turn forever.
+ */
+const setupTimeoutMs = (): number =>
+  configured("AGY_BRIDGE_START_TIMEOUT_MS", DEFAULT_PROC_START_TIMEOUT_MS);
 /** agy's stderr is kept for the death message, bounded. */
 const STDERR_TAIL = 32 * 1024;
 
@@ -238,6 +246,12 @@ export class AgyAcpProcess implements BridgePeer {
   private systemAppendSupported = false;
   private resumeSupported = false;
   private hasSentFirstTurn = false;
+  /**
+   * Held from the moment a prompt is accepted until its turn ends, so a second
+   * request for the same conversation is refused while the first is still
+   * setting its session up, before `turn` exists.
+   */
+  private reserved = false;
   /**
    * Tokens this session has been sent, estimated as it goes.
    *
@@ -570,13 +584,17 @@ export class AgyAcpProcess implements BridgePeer {
       ? { _meta: { antigravity: { systemPrompt: { append: outgoing(instructions) } } } }
       : {};
 
-    const session = await this.request("session/new", {
-      cwd: this.options.workDir,
-      // No upstream MCP servers: the bridge is the only one, and it is dialled
-      // through --ide-mcp-port rather than named here.
-      mcpServers: [],
-      ...meta,
-    });
+    const session = await this.request(
+      "session/new",
+      {
+        cwd: this.options.workDir,
+        // No upstream MCP servers: the bridge is the only one, and it is dialled
+        // through --ide-mcp-port rather than named here.
+        mcpServers: [],
+        ...meta,
+      },
+      setupTimeoutMs()
+    );
     const sessionId =
       isRecord(session) && typeof session.sessionId === "string" ? session.sessionId : null;
     if (!sessionId) throw new Error("agy session/new returned no sessionId");
@@ -612,7 +630,11 @@ export class AgyAcpProcess implements BridgePeer {
     }
     // An older agy has no session/set_config_option; the documented
     // session/set_model is the only route, and it carries no effort.
-    await this.request("session/set_model", { sessionId: this.sessionId, modelId: model });
+    await this.request(
+      "session/set_model",
+      { sessionId: this.sessionId, modelId: model },
+      setupTimeoutMs()
+    );
     this.currentModel = model;
   }
 
@@ -653,11 +675,11 @@ export class AgyAcpProcess implements BridgePeer {
   }
 
   private async setConfig(config: JsonRecord, value: string): Promise<void> {
-    const result = await this.request("session/set_config_option", {
-      sessionId: this.sessionId,
-      configId: config.id,
-      value,
-    });
+    const result = await this.request(
+      "session/set_config_option",
+      { sessionId: this.sessionId, configId: config.id, value },
+      setupTimeoutMs()
+    );
     if (!Array.isArray(result?.configOptions)) {
       throw new Error("agy returned no configOptions after setting a session option");
     }
@@ -718,7 +740,9 @@ export class AgyAcpProcess implements BridgePeer {
 
     const options = Array.isArray(params.options) ? params.options : [];
     const tool = ideToolOf(params.toolCall);
-    const declared = tool && this.options.tools.some((entry) => entry.name === tool);
+    // The catalog, not the constructor's list: a continued request can declare
+    // a tool the process was not started with, and agy lists it from here.
+    const declared = tool && this.catalog.current().some((entry) => entry.name === tool);
     if (declared) {
       const allow = options.find((option) => isRecord(option) && option.kind === "allow_once");
       if (allow) return { outcome: { outcome: "selected", optionId: allow.optionId } };
@@ -745,7 +769,7 @@ export class AgyAcpProcess implements BridgePeer {
    */
   async prompt(input: AgyPromptInput): Promise<AgyTurnResult> {
     if (this.dead) throw this.deadError || new Error("agy process is not running");
-    if (this.turn)
+    if (this.turn || this.reserved)
       throw new AgyTurnError(
         "agy bridge: this conversation still has an unfinished response",
         409,
@@ -756,21 +780,31 @@ export class AgyAcpProcess implements BridgePeer {
     // common case on a cold pool: the turn must not run at all then.
     if (input.signal?.aborted) return this.cancelledBeforeStart([]);
 
-    const instructions = (input.instructions || "").trim();
-    this.assertImagesSupported(input);
-    const preCompacted = await this.openSession(input, instructions);
-    if (input.model) await this.selectModel(input.model);
-    if (input.tools && this.catalog.toolsGrew(input.tools)) {
-      await this.catalog.updateTools(input.tools);
-    }
-    this.toolHandler = input.onToolCall || null;
+    // Reserved before the first await: the guard above only sees `turn`, which
+    // exists once setup is done, and two requests must not both get past it.
+    this.reserved = true;
+    try {
+      const instructions = (input.instructions || "").trim();
+      this.assertImagesSupported(input);
+      const preCompacted = await this.openSession(input, instructions);
+      if (input.model) await this.selectModel(input.model);
+      if (input.tools && this.catalog.toolsGrew(input.tools)) {
+        await this.catalog.updateTools(input.tools);
+      }
+      // The abort listener is bound with the turn, so an abort that landed
+      // during setup has not been heard yet: honour it before agy is sent anything.
+      if (input.signal?.aborted) return this.cancelledBeforeStart([]);
+      this.toolHandler = input.onToolCall || null;
 
-    return this.runTurn(input, {
-      turn: this.startTurn(input),
-      parts: this.turnParts(input, instructions),
-      instructions,
-      preCompacted,
-    });
+      return await this.runTurn(input, {
+        turn: this.startTurn(input),
+        parts: this.turnParts(input, instructions),
+        instructions,
+        preCompacted,
+      });
+    } finally {
+      this.reserved = false;
+    }
   }
 
   /** Send one turn and settle it, whatever agy answers. */
@@ -1040,11 +1074,11 @@ export class AgyAcpProcess implements BridgePeer {
       return;
     }
     try {
-      const session = await this.request("session/resume", {
-        sessionId,
-        cwd: this.options.workDir,
-        mcpServers: [],
-      });
+      const session = await this.request(
+        "session/resume",
+        { sessionId, cwd: this.options.workDir, mcpServers: [] },
+        setupTimeoutMs()
+      );
       if (!isRecord(session)) throw new Error("empty session/resume result");
       this.sessionId = sessionId;
       this.hasSentFirstTurn = true;
@@ -1088,7 +1122,13 @@ export class AgyAcpProcess implements BridgePeer {
       const kill = windowsTreeKill([this.child.pid]);
       if (kill) {
         try {
-          spawn(kill.file, kill.args, { stdio: "ignore", windowsHide: true }).unref();
+          const killer = spawn(kill.file, kill.args, { stdio: "ignore", windowsHide: true });
+          // A spawn failure (no taskkill) arrives as an event, not a throw; an
+          // unheard "error" event would take the whole server down.
+          killer.on("error", () => {
+            /* the process is going either way */
+          });
+          killer.unref();
         } catch {
           /* the process is going either way */
         }

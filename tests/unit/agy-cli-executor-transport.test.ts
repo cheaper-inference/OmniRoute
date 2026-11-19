@@ -211,49 +211,62 @@ test("a non-streaming request through agy answers with the JSON body", async () 
   }
 });
 
-test("a host with no agy reports it as an actionable error, not a crash", async () => {
-  const workDir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-exec-missing-"));
-  const savedPath = process.env.PATH;
-  const savedLocal = process.env.LOCALAPPDATA;
-  const savedProfile = process.env.USERPROFILE;
-  const savedHome = process.env.HOME;
-  const savedOverride = process.env.AGY_PATH;
-  try {
-    process.env.PATH = "";
-    process.env.LOCALAPPDATA = workDir;
-    process.env.USERPROFILE = workDir;
-    process.env.HOME = workDir;
-    delete process.env.AGY_PATH;
-    await withEnv({ AGY_CLI_TRANSPORT: "acp" }, async () => {
-      const { AntigravityExecutor } = await import("../../open-sse/executors/antigravity.ts");
-      const acp = await import("../../open-sse/services/agyCliAcp.ts");
-      const executor = new AntigravityExecutor();
-      try {
-        const result = await executor.execute({
-          model: "gemini-3-pro",
-          body: userMessage("hello"),
-          stream: true,
-          credentials: credentials(),
-        });
-        const response = "response" in result ? result.response : result;
-        assert.equal(response.status, 500);
-        const parsed = JSON.parse(await response.text());
-        assert.match(parsed.error.message, /agy/);
-        assert.match(parsed.error.message, /not found/i);
-      } finally {
-        await acp.shutdownAgyPool();
-      }
-    });
-  } finally {
-    if (savedPath === undefined) delete process.env.PATH;
-    else process.env.PATH = savedPath;
-    if (savedLocal === undefined) delete process.env.LOCALAPPDATA;
-    else process.env.LOCALAPPDATA = savedLocal;
-    if (savedProfile === undefined) delete process.env.USERPROFILE;
-    else process.env.USERPROFILE = savedProfile;
-    if (savedHome === undefined) delete process.env.HOME;
-    else process.env.HOME = savedHome;
-    if (savedOverride !== undefined) process.env.AGY_PATH = savedOverride;
-    fs.rmSync(workDir, { recursive: true, force: true });
+// Discovery also reads fixed install paths no environment variable can hide.
+const FIXED_AGY_INSTALLS =
+  process.platform === "win32"
+    ? []
+    : ["/usr/local/bin/agy", "/opt/homebrew/bin/agy"].filter((file) => fs.existsSync(file));
+const SKIP_WHEN_AGY_INSTALLED = FIXED_AGY_INSTALLS.length
+  ? `agy is installed at ${FIXED_AGY_INSTALLS.join(", ")}`
+  : false;
+
+test(
+  "a host with no agy reports it as an actionable error, not a crash",
+  { skip: SKIP_WHEN_AGY_INSTALLED },
+  async () => {
+    const workDir = fs.mkdtempSync(path.join(os.tmpdir(), "agy-exec-missing-"));
+    const savedPath = process.env.PATH;
+    const savedLocal = process.env.LOCALAPPDATA;
+    const savedProfile = process.env.USERPROFILE;
+    const savedHome = process.env.HOME;
+    const savedOverride = process.env.AGY_PATH;
+    try {
+      process.env.PATH = "";
+      process.env.LOCALAPPDATA = workDir;
+      process.env.USERPROFILE = workDir;
+      process.env.HOME = workDir;
+      delete process.env.AGY_PATH;
+      await withEnv({ AGY_CLI_TRANSPORT: "acp" }, async () => {
+        const { AntigravityExecutor } = await import("../../open-sse/executors/antigravity.ts");
+        const acp = await import("../../open-sse/services/agyCliAcp.ts");
+        const executor = new AntigravityExecutor();
+        try {
+          const result = await executor.execute({
+            model: "gemini-3-pro",
+            body: userMessage("hello"),
+            stream: true,
+            credentials: credentials(),
+          });
+          const response = "response" in result ? result.response : result;
+          assert.equal(response.status, 500);
+          const parsed = JSON.parse(await response.text());
+          assert.match(parsed.error.message, /agy/);
+          assert.match(parsed.error.message, /not found/i);
+        } finally {
+          await acp.shutdownAgyPool();
+        }
+      });
+    } finally {
+      if (savedPath === undefined) delete process.env.PATH;
+      else process.env.PATH = savedPath;
+      if (savedLocal === undefined) delete process.env.LOCALAPPDATA;
+      else process.env.LOCALAPPDATA = savedLocal;
+      if (savedProfile === undefined) delete process.env.USERPROFILE;
+      else process.env.USERPROFILE = savedProfile;
+      if (savedHome === undefined) delete process.env.HOME;
+      else process.env.HOME = savedHome;
+      if (savedOverride !== undefined) process.env.AGY_PATH = savedOverride;
+      fs.rmSync(workDir, { recursive: true, force: true });
+    }
   }
-});
+);

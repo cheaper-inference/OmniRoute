@@ -481,10 +481,16 @@ if (mode === "slow-start") {
     if (message.method === "session/new") {
       record({ event: "session-new", meta: message.params._meta ?? null });
       if (mode === "no-session") { reply(message.id, {}); return; }
+      // Never answers: the session setup deadline is what is under test.
+      if (mode === "hang-session") return;
+      // Answers late, so a caller can act while the session is being set up.
+      const answer = mode === "slow-session"
+        ? (result) => setTimeout(() => reply(message.id, result), 400)
+        : (result) => reply(message.id, result);
       // A reopen must not answer with the id it just retired, or the client
       // cannot tell rotation from reuse.
       sessionId = "session-" + ++sessionCount;
-      reply(message.id, {
+      answer({
         sessionId,
         models: { currentModelId: "gemini-3.8-flash", availableModels: [] },
         configOptions: [
@@ -883,6 +889,21 @@ test("a declared tool is still refused when the caller passed no tools at all", 
   });
 });
 
+test("a tool declared on a later request of the conversation is allowed once", async () => {
+  const tools = [{ name: "read_file", description: "read", inputSchema: { type: "object" } }];
+  await withTransport("permission-tool", async ({ run, log }) => {
+    await run({ conversationId: "conv-grow", tools: [] });
+    await run({ conversationId: "conv-grow", tools });
+    const outcomes = log()
+      .filter((entry) => entry.event === "permission")
+      .map((entry) => entry.outcome);
+    assert.deepEqual(outcomes, [
+      { outcome: { outcome: "selected", optionId: "reject" } },
+      { outcome: { outcome: "selected", optionId: "allow" } },
+    ]);
+  });
+});
+
 test("thinking chunks are reported apart from the reply text", async () => {
   await withTransport("thinking", async ({ run }) => {
     const thinking: string[] = [];
@@ -904,19 +925,27 @@ test("text is streamed as it arrives, not only at the end", async () => {
   });
 });
 
+/** Wait until the fake agy has logged a request for `method`. */
+async function waitForRequest(
+  log: () => Array<Record<string, unknown>>,
+  method: string
+): Promise<void> {
+  const deadline = Date.now() + 20_000;
+  while (
+    !log().some((entry) => entry.event === "request" && entry.method === method) &&
+    Date.now() < deadline
+  ) {
+    await new Promise((resolve) => setTimeout(resolve, 25));
+  }
+}
+
 test("an abort while the turn is running asks agy to cancel", async () => {
   await withTransport("slow", async ({ run, log }) => {
     const controller = new AbortController();
     const pending = run({ signal: controller.signal });
     // Abort only once agy has the prompt: aborting during the spawn is a
     // different path, covered below, and the spawn time varies by machine.
-    const deadline = Date.now() + 20_000;
-    while (
-      !log().some((entry) => entry.event === "request" && entry.method === "session/prompt") &&
-      Date.now() < deadline
-    ) {
-      await new Promise((resolve) => setTimeout(resolve, 25));
-    }
+    await waitForRequest(log, "session/prompt");
     controller.abort();
     const result = await pending;
     assert.equal(result.stopReason, "cancelled");
@@ -941,6 +970,65 @@ test("an abort before the prompt is sent never runs the turn", async () => {
       "a cancelled request costs no upstream call"
     );
   });
+});
+
+test("an abort while the session is being set up never sends the turn", async () => {
+  await withTransport("slow-session", async ({ run, log }) => {
+    const controller = new AbortController();
+    const pending = run({ signal: controller.signal });
+    await waitForRequest(log, "session/new");
+    controller.abort();
+    const result = await pending;
+    assert.equal(result.stopReason, "cancelled");
+    assert.equal(result.text, "");
+    assert.equal(
+      log().some((entry) => entry.event === "request" && entry.method === "session/prompt"),
+      false,
+      "an abort that landed during setup costs no upstream call"
+    );
+  });
+});
+
+test("a second request for a conversation still being set up is refused, not interleaved", async () => {
+  await withTransport("slow-session", async ({ run, log }) => {
+    const first = run({ conversationId: "conv-busy" });
+    await waitForRequest(log, "session/new");
+    await assert.rejects(
+      run({ conversationId: "conv-busy" }),
+      (error: unknown) => error instanceof AgyTurnError && error.status === 409
+    );
+    const result = await first;
+    assert.equal(result.text, "hello");
+    assert.equal(
+      log().filter((entry) => entry.event === "session-new").length,
+      1,
+      "the refused request did not open a session of its own"
+    );
+  });
+});
+
+test("a session agy never opens is refused after the setup deadline", async () => {
+  const savedTimeout = process.env.AGY_BRIDGE_START_TIMEOUT_MS;
+  process.env.AGY_BRIDGE_START_TIMEOUT_MS = "3000";
+  try {
+    await withTransport("hang-session", async ({ run }) => {
+      let timer: ReturnType<typeof setTimeout> | undefined;
+      const outcome = await Promise.race([
+        run().then(
+          () => "answered",
+          (error: unknown) => error
+        ),
+        new Promise((resolve) => {
+          timer = setTimeout(() => resolve("still waiting"), 15_000);
+        }),
+      ]);
+      clearTimeout(timer);
+      assert.match(String(outcome), /session\/new timed out after 3000ms/);
+    });
+  } finally {
+    if (savedTimeout === undefined) delete process.env.AGY_BRIDGE_START_TIMEOUT_MS;
+    else process.env.AGY_BRIDGE_START_TIMEOUT_MS = savedTimeout;
+  }
 });
 
 test("a session is resumed instead of created when the caller continues one", async () => {
@@ -1298,36 +1386,49 @@ test("an agy that never answers is refused after the start timeout", async () =>
   }
 });
 
-test("a machine with no agy is reported as not found, never as a crash", async () => {
-  // This box has a real agy under %LOCALAPPDATA%, so discovery has to be
-  // starved of every directory it looks in — otherwise this test would spawn
-  // it and spend a real call.
-  const empty = fs.mkdtempSync(path.join(os.tmpdir(), "agy-none-"));
-  const keys = ["PATH", "Path", "PATHEXT", "LOCALAPPDATA", "USERPROFILE", "HOME", "AGY_PATH"];
-  const saved = new Map(keys.map((key) => [key, process.env[key]]));
-  try {
-    for (const key of keys) delete process.env[key];
-    process.env.PATH = "";
-    process.env.LOCALAPPDATA = path.join(empty, "AppData", "Local");
-    process.env.USERPROFILE = empty;
-    process.env.HOME = empty;
+// Discovery also reads fixed install paths no environment variable can hide.
+const FIXED_AGY_INSTALLS =
+  process.platform === "win32"
+    ? []
+    : ["/usr/local/bin/agy", "/opt/homebrew/bin/agy"].filter((file) => fs.existsSync(file));
+const SKIP_WHEN_AGY_INSTALLED = FIXED_AGY_INSTALLS.length
+  ? `agy is installed at ${FIXED_AGY_INSTALLS.join(", ")}`
+  : false;
 
-    const acp = await import("../../open-sse/services/agyCliAcp.ts");
-    assert.equal(acp.resolveAgyBinary(process.env), null, "nothing is installed here");
-    await assert.rejects(
-      acp.runAgyPrompt({
-        connectionId: "c",
-        conversationId: "v",
-        workDir: empty,
-        parts: [{ type: "text", text: "hi" }],
-      }),
-      /the `agy` CLI was not found/
-    );
-  } finally {
-    for (const [key, value] of saved) {
-      if (value === undefined) delete process.env[key];
-      else process.env[key] = value;
+test(
+  "a machine with no agy is reported as not found, never as a crash",
+  { skip: SKIP_WHEN_AGY_INSTALLED },
+  async () => {
+    // This box has a real agy under %LOCALAPPDATA%, so discovery has to be
+    // starved of every directory it looks in — otherwise this test would spawn
+    // it and spend a real call.
+    const empty = fs.mkdtempSync(path.join(os.tmpdir(), "agy-none-"));
+    const keys = ["PATH", "Path", "PATHEXT", "LOCALAPPDATA", "USERPROFILE", "HOME", "AGY_PATH"];
+    const saved = new Map(keys.map((key) => [key, process.env[key]]));
+    try {
+      for (const key of keys) delete process.env[key];
+      process.env.PATH = "";
+      process.env.LOCALAPPDATA = path.join(empty, "AppData", "Local");
+      process.env.USERPROFILE = empty;
+      process.env.HOME = empty;
+
+      const acp = await import("../../open-sse/services/agyCliAcp.ts");
+      assert.equal(acp.resolveAgyBinary(process.env), null, "nothing is installed here");
+      await assert.rejects(
+        acp.runAgyPrompt({
+          connectionId: "c",
+          conversationId: "v",
+          workDir: empty,
+          parts: [{ type: "text", text: "hi" }],
+        }),
+        /the `agy` CLI was not found/
+      );
+    } finally {
+      for (const [key, value] of saved) {
+        if (value === undefined) delete process.env[key];
+        else process.env[key] = value;
+      }
+      fs.rmSync(empty, { recursive: true, force: true });
     }
-    fs.rmSync(empty, { recursive: true, force: true });
   }
-});
+);
