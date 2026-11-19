@@ -28,3 +28,14 @@ test("rejects OpenAI question arrays and empty batches", () => {
   for (const questions of [[], {}, [{ name: "damaged", type: "predicate" }]])
     assert.equal(geminiDecisionSchema.safeParse({ ...request, questions }).success, false);
 });
+test("Vertex models require a project-scoped credential and never fall back to Gemini API keys", async () => {
+  const result = await handleGeminiDecisions(
+    { ...request, model: "vertex/gemini-decision-1" },
+    { apiKey: "{}" },
+    new AbortController().signal,
+    async () => {
+      assert.fail("unexpected dispatch");
+    }
+  );
+  assert.equal(result.status, 400);
+});
