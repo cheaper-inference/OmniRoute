@@ -33,6 +33,7 @@ import Button from "./Button";
 import ColumnToggle from "./ColumnToggle";
 import EmptyState from "./EmptyState";
 import Input from "./Input";
+import InteractiveTableRow from "./InteractiveTableRow";
 import Select from "./Select";
 import RequestLoggerDetail from "./RequestLoggerDetail";
 import RequestLogTokens from "./RequestLogTokens";
@@ -1036,7 +1037,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
               </Badge>
             )}
             {comboCount > 0 && (
-              <Badge size="sm" className="border-chart-3/30 bg-chart-3/10 text-chart-3">
+              <Badge size="sm" className="border-chart-3/30 bg-chart-3/10 text-chart-3-ink">
                 {comboCount} {t("combo")}
               </Badge>
             )}
@@ -1130,7 +1131,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                 variant="outline"
                 aria-pressed={groupedView}
                 onClick={() => setGroupedView((v) => !v)}
-                className={cn(groupedView && "border-chart-3/30 bg-chart-3/15 text-chart-3")}
+                className={cn(groupedView && "border-chart-3/30 bg-chart-3/15 text-chart-3-ink")}
                 title={groupedView ? t("group.showAllRows") : t("group.showLatestPerCorrelation")}
               >
                 <Icon name={groupedView ? "unfold_less" : "unfold_more"} size={16} />
@@ -1253,7 +1254,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                       : f.key === "ok"
                         ? "bg-success/20 text-success border-success/40"
                         : f.key === "combo"
-                          ? "bg-chart-3/20 text-chart-3 border-chart-3/40"
+                          ? "bg-chart-3/20 text-chart-3-ink border-chart-3/40"
                           : "bg-primary text-accent-foreground border-primary"
                     : "text-text-muted"
                 )}
@@ -1283,7 +1284,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                   aria-pressed={isActive}
                   onClick={() => setSelectedProvider(isActive ? "" : p)}
                   className={cn(
-                    "h-7 min-h-7 rounded-full border px-3 text-xs font-semibold uppercase",
+                    "h-7 min-h-7 rounded-full border px-3 text-xs uppercase",
                     isActive
                       ? "border-border-strong ring-1 ring-border-strong"
                       : "border-transparent hover:bg-bg-subtle"
@@ -1313,6 +1314,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
             <Table
               ref={tableRef}
               scrollbarLabel={t("tableLabel")}
+              scrollLabel={t("tableLabel")}
               // The table container is the scroll viewport: infinite scroll, the sticky header
               // and the user's resize all act on it (opaque bg-surface, #4233).
               containerClassName="min-h-[460px] resize-y overflow-auto rounded-none border-0 bg-surface"
@@ -1383,9 +1385,9 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                   const isHoveredGroup = !!hoveredCid && log.correlationId === hoveredCid;
 
                   return (
-                    <TableRow
+                    <InteractiveTableRow
                       key={log.id}
-                      onClick={() => openDetail(log)}
+                      onActivate={() => openDetail(log)}
                       data-cid={log.correlationId || undefined}
                       onMouseEnter={() => log.correlationId && setHoveredCid(log.correlationId)}
                       onMouseLeave={() => setHoveredCid(null)}
@@ -1499,7 +1501,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                         </TableCell>
                       )}
                       {visibleColumns.model && (
-                        <TableCell className="px-3 py-2 font-mono text-[11px] font-medium text-primary">
+                        <TableCell className="px-3 py-2 font-mono text-[11px] text-primary">
                           <div className="flex items-center gap-1.5">
                             <span>{log.model}</span>
                             {!isActive && log.groupStatus === "healed" && !log.isRetry && (
@@ -1520,7 +1522,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                             )}
                             {log.modelPinned && (
                               <span
-                                className="inline-flex items-center gap-0.5 rounded border border-chart-3/25 bg-chart-3/15 px-1 py-0 text-[8px] font-semibold text-chart-3"
+                                className="inline-flex items-center gap-0.5 rounded border border-chart-3/25 bg-chart-3/15 px-1 py-0 text-[8px] font-semibold text-chart-3-ink"
                                 title={t("status.pinnedTitle")}
                               >
                                 {t("status.pinned")}
@@ -1635,7 +1637,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                           {isActive ? (
                             <span className="text-[10px] text-text-muted">—</span>
                           ) : log.comboName ? (
-                            <span className="inline-block rounded-full border border-chart-3/40 bg-chart-3/20 px-2 py-0.5 text-[9px] font-semibold text-chart-3">
+                            <span className="inline-block rounded-full border border-chart-3/40 bg-chart-3/20 px-2 py-0.5 text-[9px] font-semibold text-chart-3-ink">
                               {log.comboName}
                             </span>
                           ) : (
@@ -1692,7 +1694,7 @@ const RequestLoggerV2 = forwardRef<RequestLoggerV2Handle, RequestLoggerV2Initial
                           )}
                         </TableCell>
                       )}
-                    </TableRow>
+                    </InteractiveTableRow>
                   );
                 })}
               </TableBody>
