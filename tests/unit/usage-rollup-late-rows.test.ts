@@ -17,6 +17,7 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 const core = await import("../../src/lib/db/core.ts");
 const usagePurge = await import("../../src/lib/db/cleanup/usagePurge.ts");
 const { rollupUsageHistoryBeforeDate } = await import("../../src/lib/usage/aggregateHistory.ts");
+const { recordUsagePurgedBefore } = await import("../../src/lib/usage/usagePurgedBefore.ts");
 
 const CUTOFF = "2026-09-10";
 const DAY_1 = "2026-09-01";
@@ -206,4 +207,59 @@ test("a summary whose cache-read total is unknown stays unknown after a late row
     )
     .get();
   assert.deepEqual(row, { n: 3, cache: null });
+});
+
+test("a late row that another writer commits between the id read and the row read is counted once", async () => {
+  seed(DAY_1, 3);
+  await rollupAndPurge();
+  seed(DAY_1, 1);
+
+  // Another process commits a late row right after this rollup reads MAX(id) and before
+  // it reads the rows. The rollup must leave that row for the next run.
+  const handle = db();
+  const originalPrepare = handle.prepare;
+  handle.prepare = ((sql: string) => {
+    const statement = originalPrepare.call(handle, sql);
+    if (!sql.includes("AS maxId FROM usage_history")) return statement;
+    return {
+      ...statement,
+      get: (...args: unknown[]) => {
+        const row = (statement.get as (...a: unknown[]) => unknown)(...args);
+        seed(DAY_1, 1);
+        return row;
+      },
+    };
+  }) as typeof handle.prepare;
+  let first;
+  try {
+    first = await rollupUsageHistoryBeforeDate(CUTOFF);
+  } finally {
+    handle.prepare = originalPrepare;
+  }
+  assert.equal(first.errors, 0);
+
+  await rollupAndPurge();
+  assert.deepEqual(summary(DAY_1), { requests: 5, input: 500, output: 50 });
+  assert.equal(rawCount(DAY_1), 0);
+});
+
+test("a rollup that read a day before a concurrent purge does not replace that day's summary", async () => {
+  seed(DAY_1, 2);
+
+  // This rollup reads the day's two raw rows, then waits on pricing.
+  const stale = rollupUsageHistoryBeforeDate(CUTOFF);
+  // Meanwhile another writer rolls the day up, purges it and adds a late row: 3 requests.
+  db()
+    .prepare(
+      `INSERT INTO daily_usage_summary
+        (provider, model, date, total_requests, total_input_tokens, total_output_tokens, total_cache_read_tokens, total_cost, estimated_requests, unknown_evidence_requests, cached_input_unknown_requests)
+       VALUES ('p', 'm', ?, 3, 300, 30, 0, 0, 0, 0, 0)`
+    )
+    .run(DAY_1);
+  db().exec("DELETE FROM usage_history");
+  recordUsagePurgedBefore(CUTOFF);
+
+  const result = await stale;
+  assert.equal(result.errors, 1, "the stale rollup must roll back and report an error");
+  assert.deepEqual(summary(DAY_1), { requests: 3, input: 300, output: 30 });
 });

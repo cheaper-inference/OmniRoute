@@ -63,3 +63,14 @@ export function advanceUsageCountedThrough(mark: UsagePurgeMark, id: number): vo
     .run(JSON.stringify({ day: mark.day, id: Math.max(id, mark.id) }), NAMESPACE, KEY, mark.raw);
   if (changes !== 1) throw new Error("usage purge mark changed during the rollup");
 }
+
+/**
+ * Call in a transaction that replaces summaries without adding late rows. Throws when the mark
+ * moved since `mark` was read: a day this transaction would replace may now hold purged or late
+ * rows, so it must roll back instead of overwriting them.
+ */
+export function assertUsagePurgeMarkUnchanged(mark: UsagePurgeMark): void {
+  if (getUsagePurgeMark().raw !== mark.raw) {
+    throw new Error("usage purge mark changed during the rollup");
+  }
+}
