@@ -363,17 +363,20 @@ const promptNormalizeLog = logger("AG_PROMPT_NORMALIZE");
 /**
  * Normalize systemInstruction.parts text before Antigravity dispatch: strip
  * competing-agent identity sentences (#10420) and rewrite OMP harness markers.
- * Only string `text` parts are touched; every other part and field is kept.
+ * Only string `text` parts are touched; empty objects are dropped. Every other
+ * part and field is kept. Returns undefined when no parts remain.
  * Returns the original reference when nothing matched (no allocation).
  */
 export function normalizeAntigravitySystemInstruction(systemInstruction: unknown): unknown {
   const record = asRecord(systemInstruction);
-  const parts = Array.isArray(record?.parts)
+  const allParts = Array.isArray(record?.parts)
     ? (record.parts as Array<Record<string, unknown>>)
-    : [];
-  if (parts.length === 0) return systemInstruction;
+    : null;
+  if (!allParts) return systemInstruction;
+  const parts = allParts.filter((part) => Object.keys(part).length > 0);
+  if (parts.length === 0) return undefined;
 
-  let changed = false;
+  let changed = parts.length !== allParts.length;
   const newParts = parts.map((part) => {
     if (typeof part.text !== "string" || part.text.length === 0) return part;
     let text = part.text;
@@ -463,9 +466,26 @@ function normalizeAntigravityGeminiSystemInstruction<T extends Record<string, un
 ): T {
   if (!asRecord(request.systemInstruction)) return request;
   const systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+  if (systemInstruction === undefined) {
+    const { systemInstruction: _empty, ...withoutSystemInstruction } = request;
+    return withoutSystemInstruction as T;
+  }
   return systemInstruction === request.systemInstruction
     ? request
     : { ...request, systemInstruction };
+}
+
+/** Remove empty `{}` systemInstruction parts only; every other part and field is kept. */
+function dropEmptyAntigravitySystemParts<T extends Record<string, unknown>>(request: T): T {
+  const record = asRecord(request.systemInstruction);
+  if (!Array.isArray(record?.parts)) return request;
+  const parts = (record.parts as unknown[]).filter(
+    (p) => Object.keys(asRecord(p) ?? {}).length > 0
+  );
+  if (parts.length === record.parts.length) return request;
+  if (parts.length > 0) return { ...request, systemInstruction: { ...record, parts } };
+  const { systemInstruction: _empty, ...withoutSystemInstruction } = request;
+  return withoutSystemInstruction as T;
 }
 
 /**
@@ -531,7 +551,8 @@ function sanitizeAntigravityGeminiRequest(
     // #10420: strip competing-agent identity sentences (e.g. "You are a
     // Claude agent, built on Anthropic's Claude Agent SDK.") that Antigravity
     // flags and answers with 429 RESOURCE_EXHAUSTED.
-    clean.systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+    const systemInstruction = normalizeAntigravitySystemInstruction(request.systemInstruction);
+    if (systemInstruction !== undefined) clean.systemInstruction = systemInstruction;
   }
 
   clean.generationConfig = asRecord(request.generationConfig)
@@ -946,7 +967,9 @@ export class AntigravityExecutor extends BaseExecutor {
         ? stripTrailingAntigravityAssistantTurn(
             normalizeAntigravityGeminiSystemInstruction(rawTransformedRequest)
           )
-        : rawTransformedRequest;
+        : // Other chat models (gemini-4-argon-high, gpt-oss-120b-medium): no trailing-turn strip
+          // and no identity rewrite, but empty system parts are rejected the same way.
+          dropEmptyAntigravitySystemParts(rawTransformedRequest);
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
     // Identity labels join (never replace) the caller's own labels (#16618).

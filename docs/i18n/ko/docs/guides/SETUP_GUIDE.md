@@ -20,14 +20,16 @@
 
 ## 설치 방법
 
-### npm (권장)
+### npm(권장)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-대시보드는 `http://localhost:20128`에서 열리며 API 기본 URL은 `http://localhost:20128/v1`입니다.
+대시보드는 `http://localhost:20128` 및 API 기본 URL 에서 열립니다. `http://localhost:20128/v1`.
+
+> **npm 사용자:** npm이 설치 스크립트가 차단되었음을 경고하는 경우(예: `omniroute`, `better-sqlite3`) [— npm install-scripts 차단 문제 해결을](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) 참조하세요.
 
 ### pnpm
 
@@ -36,77 +38,77 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm 사용자:** `better-sqlite3` 및 `@swc/core`의 네이티브 빌드 스크립트를 활성화하려면 `--allow-build` 플래그가 필요합니다. pnpm v11의 전역 설치에서는 `pnpm approve-builds -g` 명령이 지원되지 않습니다.
+> **pnpm 사용자:** `better-sqlite3` 및 `@swc/core` 에 대한 기본 빌드 스크립트를 활성화하려면 `--allow-build` 플래그가 필요합니다. pnpm v11의 전역 설치에는 `pnpm approve-builds -g` 명령이 지원되지 않습니다.
 
-### Arch Linux (AUR)
+### 아치 Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR 패키지](https://aur.archlinux.org/packages/omniroute-bin)는 OmniRoute를 설치하고 systemd 사용자 서비스를 제공합니다.
+[AUR 패키지는](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute 설치하고 시스템 사용자 서비스를 제공합니다.
 
-### 소스에서 설치
+### 소스에서
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows 참고:** 기본적으로 OmniRoute는 기존 `%USERPROFILE%\.omniroute` 디렉터리가 없을 때 `%APPDATA%\omniroute`를 사용합니다. 다른 데이터 디렉터리 위치를 선택하려면 `DATA_DIR`을 설정하세요.
+> **Windows 참고:** 기본적으로 OmniRoute 레거시 `%USERPROFILE%\.omniroute` 디렉토리가 없을 때 `%APPDATA%\omniroute` 사용합니다. 다른 데이터 디렉토리 위치를 선택하려면 `DATA_DIR` 설정하십시오.
 
-> **참고:** `npm install`은 처음 실행할 때 `.env.example`에서 `.env`를 자동으로 생성합니다. 이후 설치에서는 기존 `.env`를 덮어쓰지 않으므로 사용자 지정 설정이 유지됩니다. 다시 초기화하려면 재실행하기 전에 `.env`를 삭제하세요.
+> **메모:** `npm install` 처음 실행 시 `.env.example` 에서 `.env` 자동 생성합니다. 후속 설치에서는 기존 `.env` 덮어쓰지 않으므로 사용자 정의가 유지됩니다. 다시 시드하려면 다시 실행하기 전에 `.env` 삭제하세요.
 
 ### Docker
 
-Compose 프로필과 Caddy HTTPS를 포함한 전체 Docker 설정은 [Docker 가이드](./DOCKER_GUIDE.md)를 참조하세요.
+Compose 프로필 및 Caddy HTTPS 포함한 전체 Docker 설정에 대해서는 [Docker 가이드를](./DOCKER_GUIDE.md) 참조하세요.
 
-### 데스크톱 앱 (Electron)
+### 데스크톱 앱(Electron)
 
-OmniRoute는 Electron 41 + electron-builder 26.10을 기반으로 구축된 데스크톱 래퍼를 제공합니다. 사용 가능한 스크립트는 다음과 같습니다(워크스페이스 루트).
+OmniRoute Electron 41 + electronic-builder 26.10을 기반으로 구축된 데스크탑 래퍼를 제공합니다. 사용 가능한 스크립트(작업공간 루트):
 
 ```bash
-npm run electron:dev          # 핫 리로드를 사용하여 데스크톱 실행
-npm run electron:build        # 현재 OS용 빌드(자동 감지)
-npm run electron:build:win    # Windows 설치 프로그램(NSIS + 포터블)
-npm run electron:build:mac    # macOS(dmg + zip, arm64+x64)
-npm run electron:build:linux  # Linux(AppImage + deb + rpm)
-npm run electron:smoke:packaged  # 패키징된 빌드 스모크 테스트
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
+npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
+npm run electron:build:linux  # Linux (AppImage + deb + rpm)
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-데스크톱 설치 프로그램 릴리스는 GitHub Releases에 첨부됩니다. 서명, IPC 브리지, 배포판 등 Electron에 대한 전체 상세 설명은 [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md)를 참조하세요. _(추후 단계에서 작성됨)_.
+데스크탑 설치 프로그램의 릴리스는 GitHub 릴리스에 첨부되어 있습니다. 전체 Electron 심층 분석(서명, IPC 브리지, 배포판)은 [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase Posterior)_를 참조하세요.
 
-### 헤드리스 서버 (CI/자동화)
+### 헤드리스 서버(CI/automation)
 
-무인 설정(Docker, Kubernetes, CI)의 경우 다음을 사용하세요.
+무인 설정(Docker, Kubernetes, CI)의 경우 다음을 사용합니다.
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-환경 변수(`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` 등)와 함께 사용하면 OmniRoute 인스턴스를 완전히 스크립트 방식으로 실행할 수 있습니다.
+env vars(`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` 등)와 결합하면 OmniRoute 인스턴스를 완전히 스크립트 가능하게 만들 수 있습니다.
 
 ### CLI 옵션
 
-| 명령                    | 설명                                                          |
-| ----------------------- | ------------------------------------------------------------- |
-| `omniroute`             | 서버 시작(`PORT=20128`, 동일한 포트에서 API 및 대시보드 제공) |
-| `omniroute setup`       | 비밀번호 및 첫 번째 제공자를 위한 안내식 CLI 온보딩           |
-| `omniroute doctor`      | 서버를 시작하지 않고 로컬 상태 검사 실행                      |
-| `omniroute providers`   | CLI에서 제공자 검색, 목록 조회, 검증 및 테스트                |
-| `omniroute config`      | CLI 도구 구성 — 구성 목록 조회, 가져오기, 설정 및 검증        |
-| `omniroute status`      | 오프라인 상태 대시보드 — 버전, DB, 도구, 구성                 |
-| `omniroute logs`        | API의 사용 로그 스트리밍(`--follow` 지원)                     |
-| `omniroute update`      | OmniRoute 업데이트 확인 또는 적용                             |
-| `omniroute provider`    | 제공자 연결 관리 — 추가, 목록 조회, 제거, 테스트, 기본값 설정 |
-| `omniroute --port 3000` | 표준/API 포트를 3000으로 설정                                 |
-| `omniroute --mcp`       | MCP 서버 시작(stdio 전송 방식)                                |
-| `omniroute --no-open`   | 브라우저를 자동으로 열지 않음                                 |
-| `omniroute --help`      | 도움말 표시                                                   |
+| 명령                    | 설명                                                   |
+| ----------------------- | ------------------------------------------------------ |
+| `omniroute`             | 서버 시작(동일 포트의 `PORT=20128`, API 및 대시보드)   |
+| `omniroute setup`       | 비밀번호 및 첫 번째 공급자에 대한 CLI 온보딩 안내      |
+| `omniroute doctor`      | 서버를 시작하지 않고 로컬 상태 확인 실행               |
+| `omniroute providers`   | CLI 에서 공급자 검색, 나열, 검증 및 테스트             |
+| `omniroute config`      | CLI 도구 구성 — 목록, 구성 가져오기, 설정, 유효성 검사 |
+| `omniroute status`      | 오프라인 상태 대시보드 — 버전, DB, 도구, 구성          |
+| `omniroute logs`        | API 의 스트림 사용 로그( `--follow` 지원)              |
+| `omniroute update`      | OmniRoute 업데이트 확인 또는 적용                      |
+| `omniroute provider`    | 공급자 연결 관리 — 추가, 나열, 제거, 테스트, 기본값    |
+| `omniroute --port 3000` | canonical/API 포트를 3000으로 설정                     |
+| `omniroute --mcp`       | MCP 서버 시작(stdio 전송)                              |
+| `omniroute --no-open`   | 브라우저를 자동으로 열지 않음                          |
+| `omniroute --help`      | 도움말 표시                                            |
 
-헤드리스 설정은 플래그 또는 환경 변수를 사용해 스크립트로 작성할 수 있습니다.
+헤드리스 설정은 플래그 또는 환경 변수를 사용하여 스크립팅할 수 있습니다.
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-대시보드를 열지 않고 SSH 또는 스크립트에서 제공자를 관리합니다.
+대시보드를 열지 않고도 SSH 또는 스크립트에서 공급자를 관리합니다.
 
 ```bash
 omniroute providers available
@@ -225,8 +227,12 @@ npm run test:protocols:e2e
 
 **Claude 코드:**
 
+Claude 코드는 `omniroute --mcp` (stdio)가 시작되지 않는 HTTP 통해 연결됩니다. HTTP 전송은 기본적으로 꺼져 있습니다. 먼저 실행 중인 서버에서 활성화하세요. 대시보드 로그인이 활성화되면 자격 증명이 없는 요청은 `401` 가져오므로 `mcp:connect` (또는 `manage`)를 보유하는 API 키를 전달하세요. `manage`/`admin` 없는 키에도 각 도구의 범위가 필요합니다( [MCP 서버 → MCP 도구 범위](../frameworks/MCP-SERVER.md#mcp-tool-scopes) 참조).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
@@ -331,7 +337,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## 무효 Linux (xbps-src) 템플릿
 
-Void Linux 사용자의 경우 `xbps-src` 사용하여 기본 패키지를 빌드할 수 있습니다. 이 블록을 `srcpkgs/omniroute/template` 로 저장합니다.
+Void Linux 사용자의 경우 `xbps-src` 사용하여 기본 패키지를 빌드할 수 있습니다. 이 블록을 `srcpkgs/omniroute/template` 로 저장하십시오.
 
 ```bash
 # Template file for 'omniroute'

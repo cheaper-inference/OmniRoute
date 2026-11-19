@@ -38,6 +38,8 @@ import {
   runImageComboTargets,
   type ImageComboDispatchResult,
 } from "@omniroute/open-sse/services/imageCombo.ts";
+import { projectComboForEndpoint } from "@omniroute/open-sse/services/combo/endpointCapabilities.ts";
+import { orderCapabilityTargets } from "@omniroute/open-sse/services/combo/capabilityTargetOrder.ts";
 import { isAllRateLimitedCredentials } from "@/app/api/v1/_shared/rateLimit";
 import {
   runImageRequestWithAccounting,
@@ -57,6 +59,7 @@ import { isMicrosoftDesignerWebProviderRetiredError } from "@/shared/constants/d
 import { resolveProxyForConnection } from "@/lib/db/settings";
 import { runWithProxyContext } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import { isCodexFreePlan } from "@omniroute/open-sse/executors/codex/tools.ts";
+import { imageQuotaPreflightOptions } from "@/sse/services/imageQuotaSelectionPolicy";
 import { RequestBodyTooLargeError } from "@/shared/middleware/bodySizeGuard";
 import { readEditInput, type EditInput } from "./editInput.ts";
 import {
@@ -234,6 +237,7 @@ interface ImageEditContext {
 /** A combo target that resolved to an edit-capable provider/node. */
 interface EditComboTarget {
   modelStr: string;
+  weight?: number;
   parsed: ReturnType<typeof parseImageModel>;
   providerConfig: ReturnType<typeof getImageProvider> | null;
   /** Credential/connection lookup key (built-in provider id, or custom node id). */
@@ -472,19 +476,13 @@ async function dispatchImageEditTarget(
  * edit-capable (or lacks credentials) now falls through to a later edit-capable
  * target instead of flattening to the first target and hard-erroring.
  */
-async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): Promise<Response> {
-  const combo = await getComboByName(comboName);
-  if (!combo) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
-  }
-  const allCombos = await getCombos();
-  const targets = resolveComboTargets(combo as never, allCombos as never);
-  if (!targets || targets.length === 0) {
-    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
-  }
-
-  // Build the edit-capable target list (prefix-resolved). Non-edit-capable and
-  // retired targets are skipped here so the loop only iterates dispatchable ones.
+/**
+ * Build the edit-capable target list (prefix-resolved). Non-edit-capable and
+ * retired targets are skipped here so the loop only iterates dispatchable ones.
+ */
+async function resolveEditComboTargets(
+  targets: NonNullable<ReturnType<typeof resolveComboTargets>>
+): Promise<EditComboTarget[]> {
   const editTargets: EditComboTarget[] = [];
   for (const t of targets) {
     const raw =
@@ -503,9 +501,30 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
     const providerConfig = parsed.provider ? getImageProvider(parsed.provider) : null;
     const capability = classifyImageEditTarget(resolved, parsed, providerConfig);
     if (!capability) continue;
-    editTargets.push({ modelStr: resolved, parsed, providerConfig, credKey: capability.credKey });
+    editTargets.push({
+      modelStr: resolved,
+      weight: t.weight,
+      parsed,
+      providerConfig,
+      credKey: capability.credKey,
+    });
+  }
+  return editTargets;
+}
+
+async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): Promise<Response> {
+  const combo = await getComboByName(comboName);
+  if (!combo) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo not found: ${comboName}`);
+  }
+  const allCombos = await getCombos();
+  const projected = projectComboForEndpoint(combo as never, allCombos as never, "image-edits");
+  const targets = resolveComboTargets(projected.combo as never, projected.allCombos as never);
+  if (!targets || targets.length === 0) {
+    return errorResponse(HTTP_STATUS.BAD_REQUEST, `Combo "${comboName}" has no usable targets`);
   }
 
+  const editTargets = await resolveEditComboTargets(targets);
   if (editTargets.length === 0) {
     return errorResponse(
       HTTP_STATUS.BAD_REQUEST,
@@ -513,14 +532,21 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
     );
   }
 
-  const run = await runImageComboTargets(editTargets, {
+  const orderedTargets = orderCapabilityTargets({
+    comboName,
+    endpoint: "image-edits",
+    strategy: projected.combo.strategy,
+    targets: editTargets,
+  });
+  const run = await runImageComboTargets(orderedTargets, {
     resolveProvider: (target) => ({ provider: target.credKey, model: target.parsed.model }),
     resolveCredentials: (_provider, target) =>
       getProviderCredentialsWithQuotaPreflight(
         target.credKey,
         null,
         ctx.allowedConnections,
-        target.modelStr
+        target.modelStr,
+        imageQuotaPreflightOptions(target.credKey)
       ),
     isRateLimited: isAllRateLimitedCredentials,
     dispatch: ({ target, credentials }) =>
@@ -530,7 +556,7 @@ async function executeImageEditCombo(comboName: string, ctx: ImageEditContext): 
           target.parsed.provider || target.credKey,
           target.parsed.model,
           credentials,
-          "priority"
+          projected.combo.strategy || "priority"
         ),
         () => dispatchImageEditTarget(target, credentials, ctx)
       ),
@@ -731,7 +757,8 @@ async function postHandler(request: Request, _context?: unknown) {
       parsed.provider,
       null,
       allowedConnections,
-      resolvedModel
+      resolvedModel,
+      imageQuotaPreflightOptions(parsed.provider)
     );
     // Paid-only Codex models skip Free/Go accounts during selection; a pool made only of
     // them still gets the explicit paid-plan answer instead of "no credentials".

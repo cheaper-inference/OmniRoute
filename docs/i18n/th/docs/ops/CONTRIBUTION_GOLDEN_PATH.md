@@ -29,70 +29,61 @@
 6. **บันทึกหลักฐาน** ในเทมเพลต PR ให้ระบุคำสั่งที่เรียกใช้ ไฟล์ทดสอบทุกไฟล์ที่เพิ่มหรือเปลี่ยนแปลง
    migration หรือ feature flag และการตรวจสอบเฉพาะ CI ที่ยังรอดำเนินการ
 
-## แนวทางมาตรฐานตามประเภทการเปลี่ยนแปลง
+## เส้นทางทองคำตามประเภทการเปลี่ยนแปลง
 
-คำสั่งด้านล่างเป็นการตรวจสอบแบบเจาะจงขั้นต่ำ ไม่ใช่การอนุญาตให้ข้ามการทดสอบที่ครอบคลุม
-พฤติกรรมที่คุณเปลี่ยนแปลงโดยตรง
+คำสั่งด้านล่างนี้เป็นการตรวจสอบที่มุ่งเน้นขั้นต่ำ ไม่ใช่การอนุญาตให้ข้ามการทดสอบที่ครอบคลุมพฤติกรรมที่คุณเปลี่ยนแปลงโดยตรง
 
-### Provider
+### ผู้ให้บริการ
 
 **สัญญา**
 
-- นิยาม Provider ใน `src/shared/constants/providers/` และการประกอบนิยามดังกล่าวใน
-  `src/shared/constants/providers.ts`
-- Model และ capability ใน `open-sse/config/providerRegistry.ts` หรือไฟล์ registry ที่แยกออกมา
-- การเลือก executor/translator, การกำหนดค่า OAuth หรือ API key, asset ของ dashboard และข้อมูลอ้างอิง
-  provider ที่สร้างขึ้นเมื่อเกี่ยวข้อง
-- Credential สาธารณะต้องใช้ `resolvePublicCred()` ส่วน response ข้อผิดพลาดต้องใช้ helper กลางสำหรับ
-  การกรองข้อมูลที่ละเอียดอ่อน โปรดดู `docs/security/PUBLIC_CREDS.md` (อยู่ใน git; ไม่ถูก compile เข้า `/docs`) และ
-  [การกรองข้อมูลที่ละเอียดอ่อนจากข้อผิดพลาด](../security/ERROR_SANITIZATION.md)
+- คำจำกัดความของผู้ให้บริการใน `src/shared/constants/providers/` และองค์ประกอบใน `src/shared/constants/providers.ts`
+- โมเดลและความสามารถใน `open-sse/config/providerRegistry.ts` หรือไฟล์รีจิสตรีที่แตกออกมา
+- การเลือก Executor/translator, การกำหนดค่า OAuth หรือคีย์ API และเนื้อหาแดชบอร์ด อย่าคอมมิตไดอะแกรม `docs/reference/PROVIDER_REFERENCE.md` หรือ README ที่สร้างใหม่: การรีเฟรชรีลีสจะเขียนใหม่ (`check:pr-derived-paths` ล้มเหลวในฟีเจอร์ PR ที่บรรทุกไดอะแกรมเหล่านั้น)
+- ข้อมูลรับรองสาธารณะต้องใช้ `resolvePublicCred()`; การตอบสนองข้อผิดพลาดต้องใช้ตัวช่วยข้อผิดพลาดที่ผ่านการฆ่าเชื้อที่ใช้ร่วมกัน ดู `docs/security/PUBLIC_CREDS.md` (git; ไม่ได้คอมไพล์เป็น `/docs`) และ [Error Sanitization](../security/ERROR_SANITIZATION.md)
 
-**วงจรแบบเจาะจง**
+**วงโฟกัส**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # เมื่อ catalog เปลี่ยนแปลง ให้ commit diff ที่สร้างขึ้น
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-ทดสอบ request family ที่ได้รับผลกระทบทุกประเภทด้วย ได้แก่ chat, Responses, images, embeddings, audio หรือ video
-ตรวจสอบ catalog ที่สร้างขึ้นและ golden diff ในฐานะการเปลี่ยนแปลงสัญญา อย่ายอมรับโดยไม่ตรวจสอบ
+นอกจากนี้ ทดสอบกลุ่มคำขอที่ได้รับผลกระทบทั้งหมด เช่น แชท การตอบกลับ รูปภาพ การฝัง เสียง หรือวิดีโอ ตรวจสอบแค็ตตาล็อกที่สร้างขึ้นและส่วนต่างสีทองเมื่อมีการเปลี่ยนแปลงสัญญา อย่ายอมรับพวกเขาอย่างสุ่มสี่สุ่มห้า
 
-### Routing
+### การกำหนดเส้นทาง
 
 **สัญญา**
 
-- ค่าของ strategy สาธารณะและ metadata ของ UI ใน `src/shared/constants/routingStrategies.ts`
-- การ dispatch และการจัดลำดับภายใต้ `open-sse/services/combo.ts` และ `open-sse/services/combo/`
-- Combo schema, persistence, สถานะ resilience, capability ของ model และส่วนควบคุม API/UI
-- [กลไก Auto-Combo](../routing/AUTO-COMBO.md) และเอกสาร resilience เมื่อพฤติกรรมเปลี่ยนแปลง
+- ค่ากลยุทธ์สาธารณะและข้อมูลเมตา UI ใน `src/shared/constants/routingStrategies.ts`
+- จัดส่งและสั่งซื้อภายใต้ `open-sse/services/combo.ts` และ `open-sse/services/combo/`.
+- สคีมาแบบผสม การคงอยู่ สถานะความยืดหยุ่น ความสามารถของโมเดล และการควบคุม API/UI
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) และเอกสารประกอบความยืดหยุ่นเมื่อพฤติกรรมเปลี่ยนไป
 
-**วงจรแบบเจาะจง**
+**วงโฟกัส**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # การเปลี่ยนแปลง strategy หรือ dispatch
-npm run check:known-symbols      # การเปลี่ยนแปลงการลงทะเบียน strategy
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-ใช้การทดสอบที่ mock upstream และให้ผลลัพธ์คงที่ในเครื่อง การทดสอบ smoke ของ combo แบบ live ต้องใช้ credential และดำเนินการ
-ด้วยตนเอง จึงใช้แทน CI ไม่ได้
+ใช้การทดสอบจำลองอัพสตรีมเชิงกำหนดภายในเครื่อง การรมควันแบบคอมโบสดจำเป็นต้องมีข้อมูลรับรองและเป็นการดำเนินการด้วยตนเอง ไม่ใช่การทดแทน CI
 
 ### UI / UX
 
 **สัญญา**
 
-- route/page ของ Next.js และขอบเขตของ component ที่ใช้ร่วมกันภายใต้ `src/app/` และ
-  `src/shared/components/`
-- รูปแบบ response ของ API, สถานะ loading/empty/error, พฤติกรรมสำหรับ keyboard และ screen reader,
-  layout แบบ responsive, theming และการรองรับ locale เพิ่มเติม
-- สตริงต้นฉบับภาษาอังกฤษสำหรับ UI ใน `src/i18n/messages/en.json` ห้าม hard-code ข้อความใหม่ที่ผู้ใช้มองเห็น
+- Next.js route/page และขอบเขตองค์ประกอบที่ใช้ร่วมกันภายใต้ `src/app/` และ `src/shared/components/`
+- รูปร่างการตอบสนอง API สถานะ loading/empty/error พฤติกรรมของแป้นพิมพ์และโปรแกรมอ่านหน้าจอ เค้าโครงที่ตอบสนอง ธีม และการขยายสถานที่
+- สตริงซอร์สภาษาอังกฤษ UI ใน `src/i18n/messages/en.json`; อย่าฮาร์ดโค้ดสำเนาที่ผู้ใช้เผชิญหน้ากันใหม่
 
-**วงจรแบบเจาะจง**
+**วงโฟกัส**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,68 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-เรียกใช้แอปสำหรับการเปลี่ยนแปลงด้านการโต้ตอบหรือภาพ และตรวจสอบทั้ง viewport แบบแคบและกว้าง CI จะเรียกใช้
-production build และชุดทดสอบที่ครอบคลุมกว่า แต่พฤติกรรมด้านภาพยังคงต้องใช้ component test แบบเจาะจง, Playwright
-หรือการตรวจสอบด้วยตนเองที่มีการบันทึกไว้และเหมาะสมกับการเปลี่ยนแปลง
+เรียกใช้แอปเพื่อการโต้ตอบหรือการเปลี่ยนแปลงภาพ และตรวจสอบวิวพอร์ตทั้งแคบและกว้าง CI รันเวอร์ชันที่ใช้งานจริงและชุดโปรแกรมที่กว้างขึ้น พฤติกรรมการมองเห็นยังคงต้องการองค์ประกอบที่มุ่งเน้น Playwright หรือการตรวจสอบด้วยตนเองที่จัดทำเป็นเอกสารซึ่งเหมาะสมกับการเปลี่ยนแปลง
 
 ### i18n
 
 **สัญญา**
 
-- `src/i18n/messages/en.json` เป็นแหล่งต้นฉบับของ UI ส่วน `config/i18n.json` เป็นแหล่งข้อมูล locale
-- Catalog ของ CLI แยกอยู่ภายใต้ `bin/cli/locales/`
-- รักษา placeholder และ tag ของ ICU ให้เหมือนเดิมทุกประการ ห้ามแปลชื่อผลิตภัณฑ์/provider/model,
-  ชื่อ protocol และ header, คำสั่ง, identifier ของ code/JSON, URL, environment variable หรือ
-  คำที่ได้รับการคุ้มครอง เช่น `OmniRoute`, `OAuth`, `MCP` และ `A2A` รายการต้นฉบับปัจจุบันคือ
-  `scripts/i18n/glossary/protected-terms.json`
+- `src/i18n/messages/en.json` เป็นแหล่ง UI `config/i18n.json` เป็นแหล่งที่มาของโลแคล
+- แคตตาล็อก CLI อยู่แยกกันภายใต้ `bin/cli/locales/`
+- รักษาตัวยึดตำแหน่งและแท็ก ICU ไว้ทุกประการ อย่าแปลชื่อ product/provider/model, โปรโตคอลและชื่อส่วนหัว, คำสั่ง, ตัวระบุ code/JSON, URLs, ตัวแปรสภาพแวดล้อม หรือคำที่ได้รับการป้องกัน เช่น `OmniRoute`, `OAuth`, `MCP` และ `A2A` รายการแหล่งที่มาปัจจุบันคือ `scripts/i18n/glossary/protected-terms.json`
 
-**วงจรแบบเจาะจง**
+คุณลักษณะ PR แก้ไขเฉพาะ `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); สถานที่อื่นๆ จะเสร็จสมบูรณ์หนึ่งครั้งต่อรีลีสโดยการรีเฟรชรีลีสหรือคลื่นการแปล (`docs/guides/I18N.md` → "ฟีเจอร์ PRs touch `en.json` เท่านั้น") `npm run check:pr-derived-paths` ล้มเหลวในฟีเจอร์ PR ที่แก้ไขแค็ตตาล็อกสถานที่อื่น
+
+**วงโฟกัส**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # เมื่อสตริง/catalog ของ CLI เปลี่ยนแปลง
 npm run lint
 ```
 
-นี่คือแนวทางสำหรับระบบที่มีอยู่ ไม่ใช่คำเชิญให้ขยายเครื่องมือหรือโมเดล key ของระบบ
-จำกัดแพตช์ i18n ให้เฉพาะเจาะจงในระหว่างที่กำลังออกแบบระบบทดแทน ห้ามเรียกใช้คำสั่งแปล
-ที่ติดต่อบริการภายนอก เว้นแต่งานนั้นกำหนดให้สร้างคำแปลอย่างชัดเจน และคุณได้ตรวจสอบ diff ที่เกิดขึ้นแล้ว
+หากไม่มี `--mode=pr` ประตูเหล่านี้จะทำงานในโหมด release ภายในเครื่องและรายงานทุกคีย์ที่วงจรเพิ่มหรือเขียนใหม่ใน `en.json` นั่นคืองานของการรีเฟรช release ไม่ใช่ PR ของคุณ
+
+นี่เป็นแนวทางสำหรับระบบที่มีอยู่ ไม่ใช่คำเชิญให้ขยายเครื่องมือหรือโมเดลหลัก ให้การผ่าตัดแพทช์ i18n ในขณะที่กำลังออกแบบระบบทดแทน อย่ารันคำสั่งการแปลที่เรียกใช้บริการภายนอก เว้นแต่งานนั้นต้องการการแปลที่สร้างขึ้นอย่างชัดเจน และคุณได้ตรวจสอบความแตกต่างที่เกิดขึ้นแล้ว
 
 ### CLI
 
 **สัญญา**
 
-- คำสั่งและแฟล็กสาธารณะใน `bin/cli/`, คำสั่ง API ที่สร้างขึ้น, exit code, stdout/stderr และ
-  รูปแบบเอาต์พุต JSON, ลักษณะการทำงานของการกำหนดค่า/สภาพแวดล้อม และไฟล์ที่รวมอยู่ในแพ็กเกจ
-- สตริงที่แสดงต่อผู้ใช้ CLI ต้องใช้เลเยอร์ i18n ของ CLI และทำให้แค็ตตาล็อก `en`/`pt-BR` สอดคล้องกัน
-- รักษา Node ไว้เป็นรันไทม์ที่รองรับ และคงสัญญาของไบนารีที่เผยแพร่ไว้
+- คำสั่งสาธารณะและแฟล็กใน `bin/cli/`, คำสั่ง API ที่สร้างขึ้น, รหัสทางออก, รูปร่างเอาต์พุต stdout/stderr และ JSON, ลักษณะการทำงาน config/environment และไฟล์แพ็กเกจ
+- สตริงที่ผู้ใช้เห็น CLI ต้องใช้เลเยอร์ CLI i18n (คีย์`t()` ที่มีอยู่ใน `bin/cli/locales/en.json`) คุณลักษณะ PR แก้ไขเฉพาะ `en.json`; `pt-BR` และโลแคลอื่นๆ จะเสร็จสมบูรณ์เมื่อรีลีส
+- รักษาโหนดเป็นรันไทม์ที่รองรับและสัญญาไบนารีที่เผยแพร่
 
-**วงรอบการตรวจสอบแบบเจาะจง**
+**วงโฟกัส**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # การเปลี่ยนแปลง CLI ที่สร้างขึ้น/บันเดิล
-npm run check:pack-policy     # การเปลี่ยนแปลงพื้นผิวของแพ็กเกจ
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-ใช้คำสั่งจริงในไดเรกทอรีข้อมูลชั่วคราว เมื่อลักษณะการทำงานขึ้นอยู่กับการแยกวิเคราะห์ ไฟล์ หรือ
-สถานะการออก CI จะดำเนินการตรวจสอบอาร์ติแฟกต์ของแพ็กเกจและระบบนิเวศในขอบเขตที่กว้างกว่า
+ใช้คำสั่งที่แน่นอนในไดเร็กทอรีข้อมูลชั่วคราวเมื่อการทำงานขึ้นอยู่กับการแยกวิเคราะห์ ไฟล์ หรือสถานะการออก CI ดำเนินการตรวจสอบสิ่งประดิษฐ์แพ็คเกจและระบบนิเวศที่กว้างขึ้น
 
 ### ฐานข้อมูล
 
 **สัญญา**
 
-- โมดูลโดเมนอยู่ภายใต้ `src/lib/db/`; ให้นำเข้าโมดูลที่ต้องการโดยตรง (เลเยอร์ re-export เดิม `localDb.ts` ถูกนำออกแล้ว)
-- การย้าย SQL ที่มีหมายเลขกำกับและทำซ้ำได้อย่างปลอดภัยภายใต้ `src/lib/db/migrations/`, ความปลอดภัยของทรานแซกชัน, ลักษณะการทำงานเมื่ออัปเกรด,
-  ดัชนี และผู้เรียกใช้ทุกรายที่ได้รับผลกระทบจากสคีมา
-- Routes และ handlers ต้องไม่เรียกใช้ SQL ดิบโดยตรง
+- โมดูลโดเมนภายใต้ `src/lib/db/`; นำเข้าโมดูลเฉพาะโดยตรง (เลเยอร์การส่งออกซ้ำ `localDb.ts` เก่าถูกลบออก)
+- การย้ายข้อมูล SQL แบบกำหนดหมายเลขและมีค่าคงที่ภายใต้ `src/lib/db/migrations/` ความปลอดภัยของธุรกรรม ลักษณะการอัปเกรด ดัชนี และผู้เรียกทุกคนที่ได้รับผลกระทบจากสคีมา
+- เส้นทางและตัวจัดการไม่เคยออก SQL แบบดิบโดยตรง
 
-**วงรอบการตรวจสอบแบบเจาะจง**
+**วงโฟกัส**
 
 ```bash
 npm run check:migration-numbering
@@ -172,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-เมื่อเพิ่ม migration ให้ทดสอบทั้งกับฐานข้อมูลใหม่และการอัปเกรดจากสคีมาก่อนหน้า การทดสอบฐานข้อมูล
-ต้องปิด handles และเรียก `resetDbInstance()` ระหว่างการล้างข้อมูล เรียกใช้ `npm run test:bun:db` เฉพาะเมื่อ
-เส้นทางอะแดปเตอร์ Bun แบบ best-effort มีการเปลี่ยนแปลงเท่านั้น โดย Node ยังคงเป็นแหล่งอ้างอิงหลัก
+ทดสอบทั้งฐานข้อมูลใหม่และอัปเกรดจากสคีมาก่อนหน้าเมื่อเพิ่มการย้าย การทดสอบฐานข้อมูลต้องปิดจุดจับและเรียก `resetDbInstance()` ระหว่างการล้างข้อมูล รัน `npm run test:bun:db` เฉพาะเมื่อเส้นทางอะแด็ปเตอร์ Bun ความพยายามที่ดีที่สุดเปลี่ยนแปลงเท่านั้น โหนดยังคงเชื่อถือได้
 
-### การบิลด์ / การปรับใช้
+### สร้าง/ปรับใช้
 
 **สัญญา**
 
-- manifests/lockfile ที่รูทและใน workspace, `scripts/build/`, การประกอบ Next.js standalone, เนื้อหาแพ็กเกจ `dist/`,
-  เมทาดาทาของ Electron สำหรับแต่ละแพลตฟอร์ม, เวิร์กโฟลว์ CI และ deployment sentinels
-- ช่วงเวอร์ชัน Node ที่รองรับและการใช้งาน Bun ที่อยู่ในรายการอนุญาตใน `CLAUDE.md` ต้องคงเดิม
-- อาร์ติแฟกต์จากการบิลด์ต้องไม่ถูกติดตาม; ต้องปฏิบัติตามนโยบายเกี่ยวกับ dependency, license, workflow และ package
+- รูทและพื้นที่ทำงาน manifests/lockfile, `scripts/build/`, แอสเซมบลีสแตนด์อโลน Next.js, เนื้อหาแพ็คเกจ `dist/`, ข้อมูลเมตาของแพลตฟอร์ม Electron, เวิร์กโฟลว์ CI และผู้พิทักษ์การปรับใช้
+- ช่วงของโหนดที่รองรับและการใช้ Bun ที่อยู่ในรายการที่อนุญาตใน `CLAUDE.md` จะต้องคงสภาพเดิม
+- การสร้างสิ่งประดิษฐ์ไม่ได้รับการติดตาม มีการใช้นโยบายการพึ่งพา ใบอนุญาต เวิร์กโฟลว์ และแพ็คเกจ
 
-**วงรอบการตรวจสอบแบบเจาะจง**
+**วงโฟกัส**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # การเปลี่ยนแปลง dependency หรือ lockfile
-npm run check:pack-policy      # การเปลี่ยนแปลงพื้นผิวของแพ็กเกจที่เผยแพร่
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-ใช้ `npm run build` ในเครื่องเฉพาะเมื่อการเปลี่ยนแปลงส่งผลต่อการคอมไพล์ การประกอบ standalone, assets
-หรือการบันเดิลรันไทม์ ใช้ `npm run build:release` เฉพาะสำหรับการตรวจสอบ release/deploy เท่านั้น การบิลด์ของ CI
-เป็นสัญญาณข้ามแพลตฟอร์มขั้นสุดท้าย; การเปลี่ยนแปลง Electron ที่เฉพาะเจาะจงต่อแพลตฟอร์มต้องมีผลการบิลด์แบบเจาะจง
-หรือหลักฐาน smoke test ที่ตรงกับแพลตฟอร์มนั้น
+ใช้ `npm run build` ในเครื่องเฉพาะเมื่อการเปลี่ยนแปลงส่งผลต่อการคอมไพล์ แอสเซมบลีแบบสแตนด์อโลน แอสเซท หรือการรวมรันไทม์ ใช้ `npm run build:release` สำหรับการตรวจสอบ release/deploy เท่านั้น บิลด์ของ CI เป็นสัญญาณข้ามแพลตฟอร์มสุดท้าย การเปลี่ยนแปลง Electron เฉพาะแพลตฟอร์มจำเป็นต้องมีหลักฐานการสร้างหรือควันที่เน้นการจับคู่
 
 ## สคริปต์สำหรับนักพัฒนาบนเครื่องที่ใช้ร่วมกัน
 

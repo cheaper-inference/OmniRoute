@@ -7,7 +7,11 @@ import {
   unknownQuotaState,
 } from "@/lib/quota/providerQuotaTelemetry";
 import { classifyProviderFailure } from "@/lib/resilience/failureClassification";
-import { rankCandidates, shouldFailover } from "@/lib/routing/adaptiveRouting";
+import {
+  DEFAULT_FAILOVER_POLICY,
+  rankCandidates,
+  shouldFailover,
+} from "@/lib/routing/adaptiveRouting";
 
 test("unknown quota remains unknown and does not disable routing", async () => {
   const state = await collectQuotaState({ id: "c1", provider: "codex" }, []);
@@ -134,6 +138,30 @@ test("failure classification retries transient failures but not authentication e
   assert.equal(shouldFailover(timeout), true);
   assert.equal(auth.type, "authentication_error");
   assert.equal(shouldFailover(auth), false);
+});
+
+test("exhausted quota or credit fails over to another provider without being retryable", () => {
+  const credit = classifyProviderFailure({ providerId: "a", statusCode: 402, message: "pay" });
+  const quota = classifyProviderFailure({
+    providerId: "a",
+    statusCode: 429,
+    message: "monthly quota exceeded",
+  });
+  for (const failure of [credit, quota]) {
+    assert.equal(failure.type, "quota_exhausted");
+    assert.equal(failure.retryable, false); // never retry the same provider
+    assert.equal(shouldFailover(failure), true); // another provider's quota is separate
+    assert.equal(
+      shouldFailover(failure, { ...DEFAULT_FAILOVER_POLICY, failoverOnQuotaExhausted: false }),
+      false
+    );
+    assert.equal(
+      shouldFailover(failure, { ...DEFAULT_FAILOVER_POLICY, allowCrossProviderFallback: false }),
+      false
+    );
+  }
+  const invalid = classifyProviderFailure({ providerId: "a", statusCode: 400, message: "bad" });
+  assert.equal(shouldFailover(invalid), false);
 });
 
 test("unknown state helper is explicit", () => {

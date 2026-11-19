@@ -1,7 +1,7 @@
 // Test-only DATA_DIR isolation.
 //
 // Loaded via `node --import ./tests/_setup/isolateDataDir.ts` from the test/mutation
-// invocations (package.json test scripts, stryker.conf.json tap.nodeArgs, the
+// invocations (package.json test scripts, stryker.conf.mjs tap.nodeArgs, the
 // quality.yml TIA step, and the CI test jobs) — NEVER from production. It MUST stay
 // out of open-sse/utils/setupPolyfill.ts, which is also imported by production
 // (bin/omniroute.mjs, proxyFetch.ts, proxyDispatcher.ts) where redirecting DATA_DIR
