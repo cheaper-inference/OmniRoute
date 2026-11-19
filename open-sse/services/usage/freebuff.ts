@@ -138,15 +138,22 @@ export function parseFreebuffUsage(payload: JsonRecord): { quotas: Record<string
   }
 
   // 3. The live one-hour session, if any.
+  //    Display-only countdown: mark `fractionReported: false` so
+  //    genericQuotaFetcher excludes it from preflight cutoff enforcement (a
+  //    session with 30 s left reports <2% remaining, which would otherwise fail
+  //    a still-active hour under a 2% cutoff).
   if (payload["status"] === "active") {
     const remainingMs = Math.max(0, toNumber(payload["remainingMs"], 0));
     const model = typeof payload["model"] === "string" ? (payload["model"] as string) : "";
-    quotas["Current session"] = quotaFromCounts(
-      SESSION_MS - Math.min(remainingMs, SESSION_MS),
-      SESSION_MS,
-      payload["expiresAt"],
-      `Session${model ? ` (${model})` : ""}: ${Math.ceil(remainingMs / 60000)} min left`
-    );
+    quotas["Current session"] = {
+      ...quotaFromCounts(
+        SESSION_MS - Math.min(remainingMs, SESSION_MS),
+        SESSION_MS,
+        payload["expiresAt"],
+        `Session${model ? ` (${model})` : ""}: ${Math.ceil(remainingMs / 60000)} min left`
+      ),
+      fractionReported: false,
+    };
   }
 
   // 4. Verification wall: the account cannot start a session until it clears.

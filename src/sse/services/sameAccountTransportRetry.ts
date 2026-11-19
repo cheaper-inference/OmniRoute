@@ -16,6 +16,7 @@
 
 import { UPSTREAM_RESPONDED_ERROR_TYPE } from "@omniroute/open-sse/utils/diagnostics.ts";
 import { LOCAL_CONFIGURATION_ERROR_CODES } from "@omniroute/open-sse/config/constants.ts";
+import { isContentPolicyRefusal } from "@omniroute/open-sse/utils/contentPolicyError.ts";
 import {
   isFreebuffProvider,
   isFreebuffQuotaExhausted,
@@ -139,6 +140,7 @@ export function shouldRetrySameAccountTransport(options: {
   if (options.attempt >= sameAccountRetryMaxFor(options.provider)) return false;
   if (isFreebuffProvider(options.provider)) {
     if (options.errorType && NON_RETRYABLE_ERROR_TYPES.has(options.errorType)) return false;
+    if (isContentPolicyRefusal({ code: options.errorCode, type: options.errorType })) return false;
     if (options.errorCode && String(options.errorCode).startsWith("LEASE_")) return false;
     if (options.errorCode && LOCAL_CONFIGURATION_ERROR_CODES.has(String(options.errorCode))) {
       return false;

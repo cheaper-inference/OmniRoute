@@ -72,9 +72,41 @@ test("freebuff rules: a reported shortfall is exhaustion even without counters",
   assert.equal(match?.reason, "quota_exhausted");
 });
 
+test("freebuff rules: counter exhaustion without freebucksShortfall still matches", () => {
+  const counterOnly = {
+    status: "rate_limited",
+    pool: "freebucks",
+    limit: 25,
+    recentCount: 25,
+  };
+  const match = matchFor("freebuff", 429, counterOnly);
+  assert.equal(match?.reason, "quota_exhausted");
+  assert.equal(match?.scope, "connection");
+});
+
 test("freebuff rules: other providers and statuses are untouched", () => {
   assert.equal(matchFor("freebuff", 500, EXHAUSTED), null, "only 429/402 carry this");
   assert.equal(matchFor("openai", 429, EXHAUSTED), null, "rule is provider-scoped");
+});
+
+test("same-account retry: content-policy refusals are never retried for freebuff", () => {
+  const base = {
+    provider: "freebuff",
+    status: 500,
+    errorText: "safety refusal",
+    attempt: 0,
+    hasForcedConnection: false,
+    hasEmittedOutput: false,
+  };
+  assert.equal(
+    shouldRetrySameAccountTransport({ ...base, errorCode: "content_policy_violation" }),
+    false
+  );
+  assert.equal(shouldRetrySameAccountTransport({ ...base, errorCode: "cyber_policy" }), false);
+  assert.equal(
+    shouldRetrySameAccountTransport({ ...base, errorType: "content_policy_violation" }),
+    false
+  );
 });
 
 test("same-account retry: freebuff gets a larger budget than the global default", () => {

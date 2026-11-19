@@ -15,6 +15,8 @@
  * `m-61c26317cc`).
  */
 
+import { z } from "zod";
+
 export interface FreebuffCatalogRow {
   key: string;
   handle: string;
@@ -57,29 +59,71 @@ export function freebuffLegacyDigest(modelId: string): string {
   return h1.toString(16).padStart(8, "0") + h2.toString(16).padStart(8, "0");
 }
 
+const FreebuffCatalogRowSchema = z
+  .object({
+    key: z.string().min(1),
+    handle: z.string().min(1),
+    displayName: z.unknown().optional(),
+    legacyDigests: z.unknown().optional(),
+    contextWindow: z.unknown().optional(),
+    multimodal: z.unknown().optional(),
+    premium: z.unknown().optional(),
+    access: z.unknown().optional(),
+    dataUse: z.unknown().optional(),
+    efforts: z.unknown().optional(),
+    defaultEffort: z.unknown().optional(),
+    opensAt: z.unknown().optional(),
+  })
+  .passthrough();
+
+const FreebuffCatalogPayloadSchema = z
+  .object({
+    fetchId: z.string().min(1),
+    rows: z.array(z.unknown()),
+    recommendedKey: z.unknown().optional(),
+    fallbackKey: z.unknown().optional(),
+    plansUrl: z.unknown().optional(),
+    issuedAt: z.unknown().optional(),
+    refreshAt: z.unknown().optional(),
+  })
+  .passthrough();
+
+function asFinitePositiveNumber(value: unknown): number | undefined {
+  return typeof value === "number" && Number.isFinite(value) ? value : undefined;
+}
+
 function asRow(value: unknown): FreebuffCatalogRow | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const raw = value as Record<string, unknown>;
-  if (typeof raw.key !== "string" || !raw.key) return null;
-  if (typeof raw.handle !== "string" || !raw.handle) return null;
+  const parsed = FreebuffCatalogRowSchema.safeParse(value);
+  if (!parsed.success) return null;
+  const raw = parsed.data;
+  const displayName =
+    typeof raw.displayName === "string" && raw.displayName.trim() ? raw.displayName : raw.key;
+  const access = raw.access === "open" || raw.access === "locked" ? raw.access : undefined;
+  const dataUse = raw.dataUse === "service" || raw.dataUse === "training" ? raw.dataUse : undefined;
   return {
-    ...(raw as FreebuffCatalogRow),
+    ...raw,
+    displayName,
     legacyDigests: Array.isArray(raw.legacyDigests)
       ? raw.legacyDigests.filter((d): d is string => typeof d === "string")
       : [],
+    contextWindow: asFinitePositiveNumber(raw.contextWindow),
+    multimodal: typeof raw.multimodal === "boolean" ? raw.multimodal : undefined,
+    premium: typeof raw.premium === "boolean" ? raw.premium : undefined,
+    access,
+    dataUse,
     efforts: Array.isArray(raw.efforts)
       ? raw.efforts.filter((e): e is string => typeof e === "string")
       : undefined,
+    defaultEffort: typeof raw.defaultEffort === "string" ? raw.defaultEffort : undefined,
+    opensAt: asFinitePositiveNumber(raw.opensAt),
   };
 }
 
 export function parseFreebuffCatalog(value: unknown): FreebuffCatalog | null {
-  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
-  const raw = value as Record<string, unknown>;
-  if (typeof raw.fetchId !== "string" || !raw.fetchId) return null;
-  const rows = Array.isArray(raw.rows)
-    ? raw.rows.map(asRow).filter((row): row is FreebuffCatalogRow => row !== null)
-    : [];
+  const parsed = FreebuffCatalogPayloadSchema.safeParse(value);
+  if (!parsed.success) return null;
+  const raw = parsed.data;
+  const rows = raw.rows.map(asRow).filter((row): row is FreebuffCatalogRow => row !== null);
   if (rows.length === 0) return null;
   return {
     fetchId: raw.fetchId,
@@ -88,8 +132,8 @@ export function parseFreebuffCatalog(value: unknown): FreebuffCatalog | null {
     recommendedKey: typeof raw.recommendedKey === "string" ? raw.recommendedKey : undefined,
     fallbackKey: typeof raw.fallbackKey === "string" ? raw.fallbackKey : undefined,
     plansUrl: typeof raw.plansUrl === "string" ? raw.plansUrl : undefined,
-    issuedAt: typeof raw.issuedAt === "number" ? raw.issuedAt : undefined,
-    refreshAt: typeof raw.refreshAt === "number" ? raw.refreshAt : undefined,
+    issuedAt: asFinitePositiveNumber(raw.issuedAt),
+    refreshAt: asFinitePositiveNumber(raw.refreshAt),
   };
 }
 
@@ -142,9 +186,13 @@ export function handleForKey(
 }
 
 /**
- * Every human model id the catalog advertises, resolved through the legacy
- * digests. Used to build the provider's model list from live data instead of a
- * hand-maintained table that silently rots when upstream rotates its catalog.
+ * Human model ids from the catalog that match a known `FREEBUFF_LEGACY_MODEL_IDS`
+ * digest.
+ *
+ * Discovery is intentionally limited to known ids: `legacyDigests` are one-way
+ * hashes, so a brand-new upstream row whose hash is not in
+ * `FREEBUFF_LEGACY_MODEL_IDS` cannot be inverted automatically and must be added
+ * to that table before it appears here.
  */
 export function catalogModelIds(
   catalog: FreebuffCatalog

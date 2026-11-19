@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 
 import { parseFreebuffUsage } from "../../open-sse/services/usage/freebuff.ts";
+import { convertUsageToQuotaInfo } from "../../open-sse/services/genericQuotaFetcher.ts";
 
 test("freebuff usage: groups models by pool and keeps fractional weighted usage", () => {
   const reset = "2026-11-11T08:00:00.000Z";
@@ -41,14 +42,24 @@ test("freebuff usage: groups models by pool and keeps fractional weighted usage"
 });
 
 test("freebuff usage: active session becomes a one-hour quota", () => {
-  const { quotas } = parseFreebuffUsage({
+  const parsed = parseFreebuffUsage({
     status: "active",
     model: "deepseek/deepseek-v4-pro",
-    remainingMs: 15 * 60 * 1000,
+    remainingMs: 30_000,
     expiresAt: "2026-11-10T20:00:00.000Z",
+    freebucks: {
+      daily: { limit: 25, spent: 5, remaining: 20, resetAt: "2026-11-11T08:00:00.000Z" },
+    },
   });
-  assert.equal(quotas["Current session"].used, 45 * 60 * 1000);
-  assert.equal(quotas["Current session"].total, 60 * 60 * 1000);
+  assert.equal(parsed.quotas["Current session"].used, 60 * 60 * 1000 - 30_000);
+  assert.equal(parsed.quotas["Current session"].total, 60 * 60 * 1000);
+  assert.equal(parsed.quotas["Current session"].fractionReported, false);
+
+  // Preflight must enforce Freebucks, never the display-only session countdown.
+  const quotaInfo = convertUsageToQuotaInfo(parsed, { provider: "freebuff" });
+  assert.ok(quotaInfo);
+  assert.equal(quotaInfo!.windows?.["Current session"], undefined);
+  assert.ok(quotaInfo!.windows?.["Freebucks (daily)"]);
 });
 
 test("freebuff usage: empty payload yields no quotas", () => {

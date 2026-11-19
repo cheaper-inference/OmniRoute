@@ -21,13 +21,15 @@ import {
   createHash,
   createPrivateKey,
   generateKeyPairSync,
+  randomUUID,
   sign as signEd25519,
   type KeyObject,
 } from "node:crypto";
-import { chmod, mkdir, readFile, rename, writeFile } from "node:fs/promises";
+import { chmod, mkdir, readFile, rename, unlink, writeFile } from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 
+import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
 import { FREEBUFF_HEADERS } from "./identity.ts";
 
 export const FREEBUFF_DEVICE_SIGNATURE_VERSION = "freebuff-device-v1";
@@ -83,7 +85,7 @@ export function buildDeviceSignaturePayload(input: {
 export function deviceScopeKey(origin: string, accountId?: string | null, token?: string): string {
   const host = origin.replace(/\/+$/, "");
   if (accountId?.trim()) return `${host} user:${accountId.trim()}`;
-  return `${host} token:${sha256Hex(token ?? "").slice(0, 32)}`;
+  return `${host} token:${opaqueTokenFingerprint(token ?? "", { length: 32 })}`;
 }
 
 /** First registration recorded for `origin`, regardless of account. */
@@ -201,6 +203,8 @@ export function createReadOnlyDeviceStore(filePath: string): FreebuffDeviceStore
   };
 }
 
+const fileWriteQueues = new Map<string, Promise<void>>();
+
 export class FileDeviceStore implements FreebuffDeviceStore {
   readonly persistable = true;
   constructor(private readonly filePath: string) {}
@@ -210,12 +214,28 @@ export class FileDeviceStore implements FreebuffDeviceStore {
   }
 
   async save(record: FreebuffDeviceRecord): Promise<void> {
-    const target = this.filePath;
-    await mkdir(path.dirname(target), { recursive: true }).catch(() => undefined);
-    const tmp = `${target}.${process.pid}.tmp`;
-    await writeFile(tmp, `${JSON.stringify(record)}\n`, { mode: 0o600 });
-    await rename(tmp, target);
-    await chmod(target, 0o600).catch(() => undefined);
+    const target = path.resolve(this.filePath);
+    const previous = fileWriteQueues.get(target) ?? Promise.resolve();
+    const next = previous
+      .catch(() => undefined)
+      .then(async () => {
+        await mkdir(path.dirname(target), { recursive: true }).catch(() => undefined);
+        const tmp = `${target}.${process.pid}.${randomUUID()}.tmp`;
+        try {
+          await writeFile(tmp, `${JSON.stringify(record)}\n`, { mode: 0o600, flag: "wx" });
+          await rename(tmp, target);
+          await chmod(target, 0o600).catch(() => undefined);
+        } catch (err) {
+          await unlink(tmp).catch(() => undefined);
+          throw err;
+        }
+      });
+    fileWriteQueues.set(target, next);
+    try {
+      await next;
+    } finally {
+      if (fileWriteQueues.get(target) === next) fileWriteQueues.delete(target);
+    }
   }
 }
 

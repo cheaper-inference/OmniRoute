@@ -1,7 +1,15 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { mkdtempSync, rmSync } from "node:fs";
+import os from "node:os";
+import path from "node:path";
 
 import { FreebuffExecutor } from "../../open-sse/executors/freebuff.ts";
+import {
+  FileDeviceStore,
+  createDeviceRecord,
+  loadDeviceKeyFile,
+} from "../../open-sse/executors/freebuff/deviceKey.ts";
 import type { ExecuteInput } from "../../open-sse/executors/base.ts";
 import {
   freebuffLegacyDigest,
@@ -152,11 +160,15 @@ test("freebuff identity: the env fingerprint and agent id match the captured cli
   assert.match(FREEBUFF_CHAT_UA, /^ai-sdk\/openai-compatible\/0\.0\.0-test\/codebuff /);
 });
 
-test("freebuff identity: timezone header drops UTC aliases and junk", () => {
+test("freebuff identity: timezone header drops zero-offset UTC aliases and keeps nonzero Etc/GMT", () => {
   assert.equal(freebuffTimezone("Europe/Kiev"), "Europe/Kiev");
   assert.equal(freebuffTimezone("America/Los_Angeles"), "America/Los_Angeles");
+  assert.equal(freebuffTimezone("Etc/GMT+5"), "Etc/GMT+5");
+  assert.equal(freebuffTimezone("Etc/GMT-2"), "Etc/GMT-2");
   assert.equal(freebuffTimezone("UTC"), undefined);
   assert.equal(freebuffTimezone("Etc/UTC"), undefined);
+  assert.equal(freebuffTimezone("Etc/GMT"), undefined);
+  assert.equal(freebuffTimezone("Etc/GMT+0"), undefined);
   assert.equal(freebuffTimezone(""), undefined);
   assert.equal(freebuffTimezone("not a zone"), undefined);
 });
@@ -227,6 +239,26 @@ test("freebuff catalog: rejects a payload without fetchId or rows", () => {
   assert.equal(parseFreebuffCatalog({ rows: [] }), null);
   assert.equal(parseFreebuffCatalog({ fetchId: FETCH_ID, rows: [] }), null);
   assert.equal(parseFreebuffCatalog(null), null);
+});
+
+test("freebuff catalog: sanitizes invalid optional row fields without dropping valid rows", () => {
+  const catalog = parseFreebuffCatalog({
+    fetchId: FETCH_ID,
+    rows: [
+      {
+        key: "m-096e75164d",
+        handle: HANDLE,
+        displayName: 42,
+        opensAt: "later",
+        legacyDigests: ["1e303ac563a6f9cc", 99],
+      },
+    ],
+  });
+  assert.ok(catalog);
+  assert.equal(catalog!.rows[0].displayName, "m-096e75164d");
+  assert.equal(catalog!.rows[0].opensAt, undefined);
+  assert.deepEqual(catalog!.rows[0].legacyDigests, ["1e303ac563a6f9cc"]);
+  assert.equal(resolveCatalogHandle(catalog!, "deepseek/deepseek-v4-flash"), HANDLE);
 });
 
 // ------------------------------- executor -------------------------------
@@ -798,7 +830,7 @@ test("FreebuffExecutor: a failed chat request fails loudly instead of sending an
   );
 });
 
-test("FreebuffExecutor: separate chats do not share a client_id or run chain", async () => {
+test("FreebuffExecutor: separate chats do not share a client_id, trace_session_id or run chain", async () => {
   const { fetchImpl, captured } = installFetchStub(happyPath);
   const executor = new FreebuffExecutor({ fetchImpl, traceSessionId: "trace-1" });
 
@@ -812,6 +844,7 @@ test("FreebuffExecutor: separate chats do not share a client_id or run chain", a
         (JSON.parse(c.body!) as { codebuff_metadata: Record<string, unknown> }).codebuff_metadata
     );
   assert.notEqual(metadata[0].client_id, metadata[1].client_id);
+  assert.notEqual(metadata[0].trace_session_id, metadata[1].trace_session_id);
 
   // Each chat asks the upstream for its own slot (the stub admits one id for
   // both, so compare what was requested, not what came back).
@@ -819,6 +852,108 @@ test("FreebuffExecutor: separate chats do not share a client_id or run chain", a
     .filter((c) => c.url === ADMISSION)
     .map((c) => c.headers["x-freebuff-instance-id"]);
   assert.notEqual(requested[0], requested[1]);
+});
+
+test("FreebuffExecutor: a late failure of an older run does not wipe a newer run", async () => {
+  let runCounter = 0;
+  let resolveSlowChat: (() => void) | null = null;
+  let chatCount = 0;
+  const { fetchImpl, captured } = installFetchStub(async (url, init) => {
+    if (url === AGENT_RUNS) {
+      const body = JSON.parse(String(init.body ?? "{}")) as { action?: string };
+      if (body.action === "START") {
+        runCounter += 1;
+        return jsonResponse(200, { runId: `run-${runCounter}` });
+      }
+      return jsonResponse(200, {});
+    }
+    if (url === CHAT) {
+      chatCount += 1;
+      if (chatCount === 1) {
+        await new Promise<void>((resolve) => {
+          resolveSlowChat = resolve;
+        });
+        return jsonResponse(500, { message: "late failure on R1" });
+      }
+      return new Response("data: {}\n\n", {
+        status: 200,
+        headers: { "Content-Type": "text/event-stream" },
+      });
+    }
+    return happyPath(url, init);
+  });
+
+  const executor = new FreebuffExecutor({ fetchImpl, traceSessionId: "trace-1" });
+  const firstTurn = executor.execute(makeInput());
+  // Wait until the slow first turn reaches CHAT (R1 is now active and stored).
+  while (!resolveSlowChat) await new Promise((r) => setTimeout(r, 5));
+
+  // Clear R1 by rotating a fresh run R2 into the conversation state, then let R1 fail.
+  (executor as unknown as { forgetRun: (k: string) => void }).forgetRun("account-1:default");
+  const secondTurn = await executor.execute(makeInput());
+  assert.equal(secondTurn.response.status, 200);
+
+  resolveSlowChat();
+  const lateFail = await firstTurn;
+  assert.equal(lateFail.response.status, 500);
+
+  // A third turn must still replay R2 instead of starting R3.
+  const thirdTurn = await executor.execute(makeInput());
+  assert.equal(thirdTurn.response.status, 200);
+  const runIds = captured
+    .filter((c) => c.url === CHAT)
+    .map(
+      (c) =>
+        (JSON.parse(c.body!) as { codebuff_metadata: Record<string, unknown> }).codebuff_metadata
+    )
+    .map((m) => m.run_id);
+  assert.equal(runIds[2], "run-2");
+});
+
+test("FreebuffExecutor: device key registration attaches a bounded AbortSignal", async () => {
+  let registrationSignal: AbortSignal | null | undefined;
+  const { fetchImpl } = installFetchStub((url, init) => {
+    if (url === DEVICE_KEYS) registrationSignal = init.signal;
+    return happyPath(url, init);
+  });
+  const executor = new FreebuffExecutor({
+    fetchImpl,
+    externalDeviceKeyStores: [],
+    deviceKeyStore: {
+      persistable: true,
+      async load() {
+        return createDeviceRecord();
+      },
+      async save() {},
+    },
+  });
+  await executor.execute(makeInput());
+  assert.ok(
+    registrationSignal instanceof AbortSignal,
+    "registration POST must be bounded by timeout signal"
+  );
+});
+
+test("FileDeviceStore: concurrent saves serialize cleanly without corrupting the key file", async () => {
+  const dir = mkdtempSync(path.join(os.tmpdir(), "freebuff-devstore-"));
+  const filePath = path.join(dir, "device-key.json");
+  try {
+    const store = new FileDeviceStore(filePath);
+    const base = createDeviceRecord();
+    await Promise.all([
+      store.save({ ...base, registrations: { "https://a": "k1" } }),
+      store.save({ ...base, registrations: { "https://a": "k1", "https://b": "k2" } }),
+      store.save({
+        ...base,
+        registrations: { "https://a": "k1", "https://b": "k2", "https://c": "k3" },
+      }),
+    ]);
+    const loaded = await loadDeviceKeyFile(filePath);
+    assert.ok(loaded);
+    assert.equal(loaded!.registrations["https://c"], "k3");
+  } finally {
+    rmSync(dir, { recursive: true, force: true });
+  }
 });
 
 test("FreebuffExecutor: conversation continuity survives a dead session slot", async () => {

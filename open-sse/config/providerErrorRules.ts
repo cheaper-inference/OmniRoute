@@ -451,7 +451,7 @@ function buildFreebuffRules(): ProviderErrorRule[] {
         }
         const recent = /"recentcount"\s*:\s*(\d+)/.exec(text);
         const limit = /"limit"\s*:\s*(\d+)/.exec(text);
-        if (recent && limit && Number(recent[1]) >= Number(limit) && Number(limit) > 0) {
+        if (recent && limit && Number(recent[1]) >= Number(limit[1]) && Number(limit[1]) > 0) {
           return { reason: "quota_exhausted", scope: "connection" };
         }
         return null;

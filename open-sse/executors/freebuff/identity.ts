@@ -141,8 +141,15 @@ export const FREEBUFF_ERROR_CODES = {
 export function freebuffTimezone(timeZone?: string): string | undefined {
   const zone = (timeZone ?? "").trim();
   if (!zone) return undefined;
-  // The client never sends UTC-alias zones: they carry no signal.
-  if (/^(UTC|UCT|GMT|GMT0|Greenwich|Universal|Zulu|Etc\/.*)$/i.test(zone)) return undefined;
+  // Exclude zero-offset UTC aliases (they carry no regional signal), while
+  // keeping non-zero Etc/GMT+/-N zones which represent real UTC offsets.
+  if (
+    /^(?:UTC|UCT|GMT|GMT0|Greenwich|Universal|Zulu|Etc\/(?:UTC|UCT|GMT|GMT0|GMT[+-]0|Greenwich|Universal|Zulu))$/i.test(
+      zone
+    )
+  ) {
+    return undefined;
+  }
   if (!/^[A-Za-z]+(?:\/[A-Za-z0-9_+-]+){1,2}$/.test(zone)) return undefined;
   return zone;
 }

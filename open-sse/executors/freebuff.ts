@@ -3,6 +3,7 @@ import { randomInt, randomUUID } from "node:crypto";
 import { BaseExecutor, type ExecuteInput } from "./base.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { buildErrorBody, sanitizeErrorMessage } from "../utils/error.ts";
+import { opaqueTokenFingerprint } from "../utils/opaqueTokenFingerprint.ts";
 import {
   isFreebuffQuotaExhausted,
   parseFreebuffResetMs,
@@ -21,7 +22,6 @@ import {
   FreebuffDeviceSigner,
   officialDeviceKeyPath,
   resolveFreebuffDeviceKeyPath,
-  sha256Hex,
 } from "./freebuff/deviceKey.ts";
 import {
   FREEBUFF_AGENT_ID,
@@ -48,6 +48,7 @@ const CHAT_URL = `${FREEBUFF_API}/chat/completions`;
 const ME_URL = `${FREEBUFF_API}/me?fields=id%2Cemail`;
 
 const ACCOUNT_TTL_MS = 60 * 60 * 1000;
+const DEVICE_REGISTER_TIMEOUT_MS = 15_000;
 
 /** Cap on the conversation-state map (bounded LRU, like the client). */
 const INSTANCE_CACHE_LIMIT = 512;
@@ -390,10 +391,10 @@ export class FreebuffExecutor extends BaseExecutor {
    */
   private readonly fetchOverride?: FreebuffFetch;
   /**
-   * Fallback trace session id, used only when a request carries no conversation
-   * key. Per-chat trace ids live in `conversationCache`.
+   * Optional test override for the first conversation's trace session id.
+   * Each conversation receives its own `traceSessionId` in `conversationCache`.
    */
-  private readonly traceSessionId: string;
+  private readonly traceSessionIdOverride?: string;
   private readonly signer: FreebuffDeviceSigner;
   private readonly catalogCache = new FreebuffCatalogCache();
   private readonly accountCache = new Map<string, { id: string; expiresAt: number }>();
@@ -411,7 +412,7 @@ export class FreebuffExecutor extends BaseExecutor {
   constructor(options: FreebuffExecutorOptions = {}) {
     super("freebuff", PROVIDERS.freebuff || { format: "openai" });
     this.fetchOverride = options.fetchImpl;
-    this.traceSessionId = options.traceSessionId ?? randomUUID();
+    this.traceSessionIdOverride = options.traceSessionId;
     this.now = options.now ?? Date.now;
     this.signer = new FreebuffDeviceSigner({
       externalStores: options.externalDeviceKeyStores ?? [
@@ -467,6 +468,7 @@ export class FreebuffExecutor extends BaseExecutor {
         method: "POST",
         headers: this.headers(token, { ua: FREEBUFF_RUNTIME_UA }),
         body: JSON.stringify({ publicKey, client: "cli" }),
+        signal: AbortSignal.timeout(DEVICE_REGISTER_TIMEOUT_MS),
       });
       if (!res.ok) return null;
       const data = (await res.json().catch(() => null)) as { keyId?: unknown } | null;
@@ -478,7 +480,7 @@ export class FreebuffExecutor extends BaseExecutor {
 
   /** Account id used by `x-freebuff-acting-user-id` and the device-key scope. */
   private async accountId(token: string, signal?: AbortSignal | null): Promise<string | null> {
-    const key = sha256Hex(token).slice(0, 32);
+    const key = opaqueTokenFingerprint(token, { length: 32 });
     const cached = this.accountCache.get(key);
     if (cached && cached.expiresAt > this.now()) return cached.id;
     try {
@@ -561,7 +563,10 @@ export class FreebuffExecutor extends BaseExecutor {
     }
     const created: FreebuffConversationState = {
       instanceId: `cli:${randomUUID()}`,
-      traceSessionId: this.traceSessionId,
+      traceSessionId:
+        this.traceSessionIdOverride && this.conversationCache.size === 0
+          ? this.traceSessionIdOverride
+          : randomUUID(),
       clientId: generateClientSessionId(),
       lastRunId: "",
     };
@@ -607,10 +612,12 @@ export class FreebuffExecutor extends BaseExecutor {
     state.lastRunId = runId;
   }
 
-  /** Drop a dead run id so the next turn starts a fresh one. */
-  private forgetRun(conversationKey: string): void {
+  /** Drop a dead run id only if this failed request still owns it. */
+  private forgetRun(conversationKey: string, expectedRunId?: string): void {
     const state = this.conversationCache.get(conversationKey);
-    if (state) state.lastRunId = "";
+    if (!state) return;
+    if (expectedRunId !== undefined && state.lastRunId !== expectedRunId) return;
+    state.lastRunId = "";
   }
 
   /**
@@ -979,7 +986,7 @@ export class FreebuffExecutor extends BaseExecutor {
     //    it and let the next turn start a fresh one. A successful turn keeps the
     //    run alive, exactly like the official client (one run per session).
     if (!response.ok) {
-      this.forgetRun(conversationKey);
+      this.forgetRun(conversationKey, runId);
       void this.finishAgentRun(token, runId, accountId);
     }
 
