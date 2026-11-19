@@ -62,6 +62,31 @@ function writeLastRunAt(schedule: BackupSchedule, at: Date, lastError?: string |
   writeFileSync(schedulePath, JSON.stringify(updated, null, 2), "utf8");
 }
 
+function alreadyRanThisMinute(schedule: BackupSchedule, now: Date): boolean {
+  if (!schedule.lastRunAt) return false;
+  const lastRun = new Date(schedule.lastRunAt);
+  return !Number.isNaN(lastRun.getTime()) && minuteKey(lastRun) === minuteKey(now);
+}
+
+async function runScheduledBackup(schedule: BackupSchedule, now: Date): Promise<void> {
+  try {
+    // runBackupCommand reports failure through its exit code, not by throwing.
+    const exitCode = await runBackupCommand({
+      cloud: !!schedule.cloud,
+      encrypt: !!schedule.encrypt,
+      keyFile: schedule.encrypt ? schedule.keyFile : undefined,
+      retention: schedule.retention || undefined,
+    });
+    if (exitCode !== 0) {
+      console.error(`[BackupSchedule] Backup failed (exit ${exitCode})`);
+      writeLastRunAt(schedule, now, `backup failed (exit ${exitCode})`);
+    }
+  } catch (error) {
+    console.error("[BackupSchedule] Job failed:", error);
+    writeLastRunAt(schedule, now, error instanceof Error ? error.message : String(error));
+  }
+}
+
 /**
  * Evaluates the persisted `backup-schedule.json` against `now` and, if due,
  * runs the backup. Returns whether a backup was actually triggered — used
@@ -87,30 +112,10 @@ export async function runBackupScheduleTick(now: Date = new Date()): Promise<boo
   // A tick shorter than 60s means multiple ticks can land inside the same
   // matching minute — without this guard the backup would fire once per
   // tick for the whole minute instead of once for the whole day.
-  if (schedule.lastRunAt) {
-    const lastRun = new Date(schedule.lastRunAt);
-    if (!Number.isNaN(lastRun.getTime()) && minuteKey(lastRun) === minuteKey(now)) {
-      return false;
-    }
-  }
+  if (alreadyRanThisMinute(schedule, now)) return false;
 
   writeLastRunAt(schedule, now);
-  try {
-    // runBackupCommand reports failure through its exit code, not by throwing.
-    const exitCode = await runBackupCommand({
-      cloud: !!schedule.cloud,
-      encrypt: !!schedule.encrypt,
-      keyFile: schedule.encrypt ? schedule.keyFile : undefined,
-      retention: schedule.retention || undefined,
-    });
-    if (exitCode !== 0) {
-      console.error(`[BackupSchedule] Backup failed (exit ${exitCode})`);
-      writeLastRunAt(schedule, now, `backup failed (exit ${exitCode})`);
-    }
-  } catch (error) {
-    console.error("[BackupSchedule] Job failed:", error);
-    writeLastRunAt(schedule, now, error instanceof Error ? error.message : String(error));
-  }
+  await runScheduledBackup(schedule, now);
   return true;
 }
 
