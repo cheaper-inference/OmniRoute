@@ -48,11 +48,14 @@ test("skips invalid nested levels and honors a valid top-level fallback", () => 
 });
 
 test("rejects unknown explicit thinking levels without forwarding them", () => {
-  const config = translatedThinkingConfig({
-    messages: [{ role: "user", content: "hello" }],
-    reasoning_effort: "high",
-    thinkingLevel: "unsupported_level",
-  }, "gemini-3.8-flash");
+  const config = translatedThinkingConfig(
+    {
+      messages: [{ role: "user", content: "hello" }],
+      reasoning_effort: "high",
+      thinkingLevel: "unsupported_level",
+    },
+    "gemini-3.8-flash"
+  );
   assert.equal(config.thinkingLevel, "high");
   assert.equal(config.thinkingBudget, undefined);
 });

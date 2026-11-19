@@ -203,10 +203,7 @@ type GeminiToolNameOptions = {
 // generationConfig.thinkingConfig (the operator payload-override surface).
 // Native thinking-level models require supported enum values. Preserve the
 // pre-existing passthrough for models that do not use native thinking levels.
-function extractExplicitThinkingLevel(
-  body: Record<string, unknown>,
-  model: string
-): string | null {
+function extractExplicitThinkingLevel(body: Record<string, unknown>, model: string): string | null {
   const validatesNativeLevel = isGeminiThinkingLevelModel(model);
   const gc = body.generationConfig as Record<string, unknown> | undefined;
   const tc = gc?.thinkingConfig as Record<string, unknown> | undefined;
