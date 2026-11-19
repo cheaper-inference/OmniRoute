@@ -10,6 +10,8 @@
 // Regression guard: GET /api/v1/quotas/check stays a Bearer-key read (docs/reference/API_REFERENCE.md).
 import test from "node:test";
 import assert from "node:assert/strict";
+import crypto from "node:crypto";
+import { syncBuiltinESMExports } from "node:module";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
@@ -148,7 +150,7 @@ async function assertRefused(
   make: RequestFactory,
   expectedStatus: 401 | 403,
   secret?: string
-): Promise<void> {
+): Promise<string> {
   seedOperatorCaps();
   const before = storedCaps();
 
@@ -160,16 +162,28 @@ async function assertRefused(
   const serialized = JSON.stringify(body);
 
   assert.equal(response.status, expectedStatus, `${surface.name}: ${serialized}`);
-  assert.equal(body.error?.type, "invalid_request");
-  assert.equal(typeof body.requestId, "string", "refusal goes through createErrorResponse()");
-  assert.ok(!serialized.includes("at /"), "error body must not leak a stack trace");
-  if (expectedStatus === 403) assert.match(body.error?.message ?? "", /manage/i);
-  if (secret) assert.ok(!serialized.includes(secret), "error body must not echo the credential");
-  assert.ok(
-    !serialized.includes(String(OPERATOR_CAPS.maxActiveKeys)),
-    "a refused call must not disclose the configured caps"
+  assert.deepEqual(Object.keys(body).sort(), ["error", "requestId"]);
+  assert.ok(body.error);
+  assert.deepEqual(Object.keys(body.error).sort(), ["message", "type"]);
+  assert.equal(body.error.type, "invalid_request");
+  assert.ok(typeof body.error.message === "string");
+  assert.ok(typeof body.requestId === "string", "refusal goes through createErrorResponse()");
+  assert.match(
+    body.requestId,
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
   );
+  assert.ok(!serialized.includes("at /"), "error body must not leak a stack trace");
+  if (expectedStatus === 403) assert.match(body.error.message, /manage/i);
+  if (secret) assert.ok(!serialized.includes(secret), "error body must not echo the credential");
+  const errorPayload = JSON.stringify(body.error);
+  for (const [capName, capValue] of Object.entries(OPERATOR_CAPS)) {
+    assert.ok(
+      !errorPayload.includes(String(capValue)),
+      `a refused call must not disclose ${capName}`
+    );
+  }
   assert.deepEqual(storedCaps(), before, "a refused call must not change the caps");
+  return body.requestId;
 }
 
 async function assertAllowed(surface: Surface, make: RequestFactory): Promise<void> {
@@ -232,13 +246,19 @@ for (const surface of SURFACES) {
 
   // The /api/v1/ public prefix must not count as "auth not required" here: with no password
   // configured yet, a caller with no credential still gets 401 once setup is complete.
-  test(`${surface.name}: with no password configured an anonymous caller gets 401`, async () => {
+  test(`${surface.name}: with no password configured an anonymous caller gets 401`, async (t) => {
     const initialPassword = process.env.INITIAL_PASSWORD;
     delete process.env.INITIAL_PASSWORD;
     await updateSettings({ setupComplete: true });
+    // A valid correlation ID can contain all three decimal cap values.
+    const requestId = "79197907-7901-4abc-8123-abcdef987654";
+    const uuid = t.mock.method(crypto, "randomUUID", () => requestId);
     try {
-      await assertRefused(surface, plainRequest(), 401);
+      syncBuiltinESMExports();
+      assert.equal(await assertRefused(surface, plainRequest(), 401), requestId);
     } finally {
+      uuid.mock.restore();
+      syncBuiltinESMExports();
       process.env.INITIAL_PASSWORD = initialPassword;
       await updateSettings({ setupComplete: false });
     }
