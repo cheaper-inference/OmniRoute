@@ -161,7 +161,17 @@ export function buildOAuthConnectionCreatePayload(
   };
 }
 
-/** Replace all token-lifetime metadata together when a user signs in again. */
+/**
+ * Replace all token-lifetime metadata together when a user signs in again.
+ *
+ * #20067: a sign-in is an explicit operator reset, so the cooldown is cleared
+ * together with its evidence (as codexImport and the ChatGPT session sign-in
+ * already do). Clearing only the evidence left an orphaned future
+ * `rateLimitedUntil` that no recovery path could release: #11277 treats it as
+ * a hard statement and the #17043 observed-reset override needs the wiped
+ * `lastErrorType`/`errorCode`/`lastErrorAt`. If the account is still limited,
+ * the next upstream 429 re-establishes the cooldown with fresh evidence.
+ */
 export function buildOAuthTokenUpdate(
   tokenData: Record<string, unknown>,
   expiresAt: string | null
@@ -175,6 +185,8 @@ export function buildOAuthTokenUpdate(
     lastErrorType: null,
     lastErrorSource: null,
     errorCode: null,
+    rateLimitedUntil: null,
+    backoffLevel: 0,
   };
 }
 
