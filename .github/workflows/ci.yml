@@ -38,6 +38,9 @@ env:
   # system TLS). Belt-and-suspenders with tests/_setup/isolateDataDir.ts.
   OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
   CI_NODE_VERSION: "24"
+  # The V8 manifests require the producer and aggregator to have the same Node
+  # patch. A floating major can resolve to different patch versions on runner caches.
+  CI_V8_NODE_VERSION: "24.22.3"
   CI_NODE_24_VERSION: "24"
   CI_NODE_26_VERSION: "26"
 
@@ -1156,7 +1159,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
-          node-version: ${{ env.CI_NODE_VERSION }}
+          node-version: ${{ env.CI_V8_NODE_VERSION }}
       - uses: ./.github/actions/prepare-unit-storage
         with:
           cache: ${{ github.event_name == 'pull_request' }}
@@ -1387,7 +1390,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
-          node-version: ${{ env.CI_NODE_VERSION }}
+          node-version: ${{ env.CI_V8_NODE_VERSION }}
       - uses: ./.github/actions/npm-ci-retry
         with:
           # PR acceleration is not release-candidate provenance.

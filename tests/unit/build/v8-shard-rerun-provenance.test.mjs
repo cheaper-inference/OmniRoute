@@ -467,6 +467,17 @@ test("coverage downloads selected immutable IDs and keeps both required read per
   assert.ok(coverage.steps.indexOf(selection) < coverage.steps.indexOf(download));
 });
 
+test("coverage producers and aggregator use one exact Node version across reruns", () => {
+  const versionRef = "${{ env.CI_V8_NODE_VERSION }}";
+  assert.match(workflow.env.CI_V8_NODE_VERSION, /^\d+\.\d+\.\d+$/);
+  for (const job of ["test-unit", "test-coverage"]) {
+    const setup = workflow.jobs[job].steps.find((step) =>
+      step.uses?.startsWith("actions/setup-node@")
+    );
+    assert.equal(setup?.with["node-version"], versionRef, job);
+  }
+});
+
 test("the selection receipt is produced, consumed and archived under the coverage prefix", () => {
   const coverage = workflow.jobs["test-coverage"];
   const selection = coverage.steps.find((step) => step.id === "coverage_selection");
