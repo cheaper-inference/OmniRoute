@@ -83,6 +83,15 @@ test("hasOAuthSessionRoom: counts other sessions only", () => {
   assert.equal(occupancy.hasOAuthSessionRoom("acc", "s3", 0), true, "0 = no cap");
 });
 
+test("hasOAuthSessionRoom: a session on an account above the cap keeps its slot", () => {
+  // The all-full fallback can put a second session on an account with max=1.
+  occupancy.reserveOAuthSession("acc", "s1");
+  occupancy.reserveOAuthSession("acc", "s3");
+  assert.equal(occupancy.hasOAuthSessionRoom("acc", "s1", 1), true);
+  assert.equal(occupancy.hasOAuthSessionRoom("acc", "s3", 1), true);
+  assert.equal(occupancy.hasOAuthSessionRoom("acc", "s4", 1), false);
+});
+
 test("a new session moves to the next account once the first is full", async () => {
   process.env[FLAG] = "1";
   const [a, b] = await seed(2);
@@ -124,6 +133,18 @@ test("when every account is full the request still gets one", async () => {
   await pick("sess-2");
   const third = await pick("sess-3");
   assert.ok([a, b].includes(String(third?.connectionId)));
+});
+
+test("after the all-full overflow, a running session stays when another account frees up", async () => {
+  process.env[FLAG] = "1";
+  const [a, b] = await seed(2);
+  assert.equal((await pick("sess-1"))?.connectionId, a);
+  const second = await pick("sess-2");
+  assert.equal(second?.connectionId, b);
+  // every account is full: the first choice keeps sess-3, so a now serves two sessions
+  assert.equal((await pick("sess-3"))?.connectionId, a);
+  second?.releaseOAuthSession?.();
+  assert.equal((await pick("sess-1"))?.connectionId, a, "sess-1 must not move to b");
 });
 
 test("an invalid value turns the cap off", async () => {

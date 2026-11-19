@@ -44,6 +44,11 @@ export function hasOAuthSessionRoom(
   now = Date.now()
 ): boolean {
   if (!(max > 0)) return true;
+  // The all-full fallback can leave an account above the cap; its sessions still stay on it.
+  if (connectionId && sessionKey) {
+    prune(now);
+    if (occupancy.get(connectionId)?.has(sessionKey)) return true;
+  }
   return getForeignOAuthSessionCount(connectionId, sessionKey, now) < max;
 }
 
