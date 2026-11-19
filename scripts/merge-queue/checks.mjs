@@ -1,11 +1,12 @@
 // scripts/merge-queue/checks.mjs — WP1 (pure). Plan §3.4: verdict of a candidate's checks.
 //
-// Mirrors the Mergify merge_conditions of .mergify.yml: zero failures except the advisory
-// checks, zero pending (advisory included, like "#check-pending=0"), and every required check
-// an affirmative `success`. Fail closed: a required check reported as skipped/neutral is red.
+// Mirrors the Mergify merge_conditions of .mergify.yml for check runs: zero failures except the
+// advisory checks, zero pending (advisory included, like "#check-pending=0"), and every required
+// check an affirmative `success`. Fail closed: a required check reported as skipped/neutral is
+// red. One deliberate difference: Mergify's #check-failure / #check-pending also count commit
+// statuses; this verdict reads check runs only and never reads a commit status.
 
 /**
- * @typedef {import("./eligibility.mjs").CommitStatus} CommitStatus
  * @typedef {import("./config.mjs").QueueConfig} QueueConfig
  */
 
@@ -51,13 +52,14 @@ export const FAILING_CONCLUSIONS = Object.freeze([
   "stale",
 ]);
 
-/** Statuses/runs written by the queue itself never count towards the candidate verdict. */
+/** Check runs named like the queue's own contexts never count towards the candidate verdict. */
 const OWN_PREFIX = "omni-queue/";
 
 /**
- * The only app whose `success` satisfies a required check. A commit status, or a check run of
- * another app, with a required name can still make the verdict red/pending, never green: any
- * actor with statuses:write / checks:write could otherwise forge a green Gate.
+ * The only app whose `success` satisfies a required check. A check run of another app with a
+ * required name can still make the verdict red/pending, never green: any actor with
+ * checks:write could otherwise forge a green Gate. Commit statuses are not read at all (anybody
+ * with statuses:write could otherwise turn a candidate red or keep it pending).
  */
 export const REQUIRED_CHECK_APP = "github-actions";
 
@@ -78,11 +80,18 @@ const toMs = (iso) => {
  * `newer` replaces `older` only when it is a genuine re-run: same name, higher id, not of a
  * different workflow (when both name one), and started at or after `older` completed. Runs
  * that overlap in time are parallel jobs of different workflows that happen to share a name
- * (ci.yml and quality.yml both have "Change Classification") and must all be kept.
+ * (ci.yml and quality.yml both have "Change Classification") and must all be kept. Nor does a run
+ * of one check suite supersede a run of another when both suite ids are known: a re-run of failed
+ * jobs stays in its run's suite (its next attempt), so a later run in another suite is another
+ * workflow's job of the same name, and a failure there is never hidden by it.
  */
 function supersedes(newer, older) {
   if (newer.name !== older.name || !(Number(newer.id) > Number(older.id))) return false;
   if (newer.workflow && older.workflow && newer.workflow !== older.workflow) return false;
+  const known = (id) => id !== null && id !== undefined;
+  if (known(newer.checkSuiteId) && known(older.checkSuiteId)) {
+    if (newer.checkSuiteId !== older.checkSuiteId) return false;
+  }
   const done = toMs(older.completedAt);
   const start = toMs(newer.startedAt);
   return done !== null && start !== null && start >= done;
@@ -115,41 +124,6 @@ export function latestByName(checkRuns) {
   return runs.filter((r) => !superseded.has(r));
 }
 
-/** Newest status per context (max createdAt; ties keep the earlier entry of a newest-first list). */
-function latestStatusByContext(statuses) {
-  const best = new Map();
-  for (const s of statuses ?? []) {
-    if (!s || typeof s.context !== "string") continue;
-    const ms = Date.parse(String(s.createdAt ?? ""));
-    const cur = best.get(s.context);
-    if (!cur || (Number.isFinite(ms) && ms > cur.ms)) {
-      best.set(s.context, { status: s, ms: Number.isFinite(ms) ? ms : -Infinity });
-    }
-  }
-  return [...best.values()].map((v) => v.status);
-}
-
-/**
- * A failed commit status presented as a CheckRun so failures can flow into classify.mjs.
- * `id` is 0 (no check-run annotations exist for a status: callers must not fetch them).
- * @param {CommitStatus} s
- * @returns {CheckRun & {source: "status"}}
- */
-function statusAsRun(s) {
-  return {
-    id: 0,
-    name: s.context,
-    status: "completed",
-    conclusion: "failure",
-    startedAt: null,
-    completedAt: s.createdAt ?? null,
-    htmlUrl: s.targetUrl ?? null,
-    appSlug: null,
-    output: { title: s.description ?? null, summary: null, text: null },
-    source: "status",
-  };
-}
-
 /** "pending" | "success" | "failure" | "neutral" | "skipped" for one check run. */
 function runOutcome(run) {
   if (run.status !== "completed") return "pending";
@@ -168,22 +142,20 @@ function severity(outcome) {
 }
 
 /**
- * Plan §3.4 (mirrors the Mergify merge_conditions):
- *  - red: any completed non-advisory run/status with failure | cancelled | timed_out |
+ * Plan §3.4 (mirrors the Mergify merge_conditions, for check runs only):
+ *  - red: any completed non-advisory run with failure | cancelled | timed_out |
  *    action_required | startup_failure | stale, or a required check concluded other than success;
  *  - green: every config.requiredChecks is `success`, nothing pending, no non-advisory failure;
  *  - timeout (reason "no-ci-run"): no run of REQUIRED_CHECK_APP at all after
  *    NO_RUN_TIMEOUT_MINUTES since startedAt (CI never started for the candidate);
  *  - timeout (reason "checks-timeout"): not decided after config.checksTimeoutMinutes;
  *  - pending: otherwise.
- * Statuses: failure/error → failure, pending → pending (advisory names tolerated as for runs).
- * A required check is `success` only through a check run of REQUIRED_CHECK_APP; a status or a
- * run of another app reporting success for a required name leaves it "missing" (pending).
- * Contexts/names starting with "omni-queue/" (the queue's own approval statuses) are ignored.
- * Failed statuses appear in `failures` as CheckRun-shaped objects with id 0 and
- * `source: "status"`.
- * @param {{checkRuns: CheckRun[], statuses: CommitStatus[], config: QueueConfig,
- *          startedAt: string, now: string}} input
+ * Only check runs count: commit statuses on the SHA, whoever created them and whatever their
+ * context or state, never decide the verdict, so a required name posted only as a status is
+ * "missing". A required check is `success` only through a check run of REQUIRED_CHECK_APP; a run
+ * of another app reporting success for a required name leaves it "missing" (pending).
+ * Run names starting with "omni-queue/" are ignored.
+ * @param {{checkRuns: CheckRun[], config: QueueConfig, startedAt: string, now: string}} input
  * @returns {ChecksVerdict}
  */
 export function evaluateChecks(input) {
@@ -195,22 +167,7 @@ export function evaluateChecks(input) {
   const entries = [];
   for (const run of latestByName(input.checkRuns)) {
     if (run.name.startsWith(OWN_PREFIX)) continue;
-    entries.push({ name: run.name, outcome: runOutcome(run), run, source: "run" });
-  }
-  for (const s of latestStatusByContext(input.statuses)) {
-    if (s.context.startsWith(OWN_PREFIX)) continue;
-    const outcome =
-      s.state === "success"
-        ? "success"
-        : s.state === "failure" || s.state === "error"
-          ? "failure"
-          : "pending";
-    entries.push({
-      name: s.context,
-      outcome,
-      run: outcome === "failure" ? statusAsRun(s) : null,
-      source: "status",
-    });
+    entries.push({ name: run.name, outcome: runOutcome(run), run });
   }
 
   const failures = [];
@@ -233,13 +190,12 @@ export function evaluateChecks(input) {
       if (!pendingNames.includes(name)) pendingNames.push(name);
       continue;
     }
-    // A name reported several times (run + status, or parallel runs): the worst outcome wins.
+    // A name reported by several (parallel) runs: the worst outcome wins.
     const worst = mine.reduce((a, b) => (severity(b.outcome) > severity(a.outcome) ? b : a));
     if (worst.outcome === "success") {
       // Only a GitHub Actions check run can make a required check green.
       const trusted = mine.some(
-        (e) =>
-          e.source === "run" && e.outcome === "success" && e.run?.appSlug === REQUIRED_CHECK_APP
+        (e) => e.outcome === "success" && e.run.appSlug === REQUIRED_CHECK_APP
       );
       if (trusted) {
         required[name] = "success";
@@ -250,9 +206,9 @@ export function evaluateChecks(input) {
     } else if (worst.outcome === "pending") {
       required[name] = "pending";
     } else {
-      required[name] = worst.run?.conclusion ?? "failure";
+      required[name] = worst.run.conclusion ?? "failure";
       // Fail closed: skipped/neutral (any non-success conclusion) on a required check is red.
-      if (worst.outcome !== "failure" && worst.run && !failures.includes(worst.run)) {
+      if (worst.outcome !== "failure" && !failures.includes(worst.run)) {
         failures.push(worst.run);
       }
     }
@@ -266,9 +222,7 @@ export function evaluateChecks(input) {
   const startedMs = Date.parse(String(input.startedAt ?? ""));
   const nowMs = Date.parse(String(input.now ?? ""));
   const elapsedMs = Number.isFinite(startedMs) && Number.isFinite(nowMs) ? nowMs - startedMs : null;
-  const actionsRan = entries.some(
-    (e) => e.source === "run" && e.run?.appSlug === REQUIRED_CHECK_APP
-  );
+  const actionsRan = entries.some((e) => e.run.appSlug === REQUIRED_CHECK_APP);
   if (!actionsRan && elapsedMs !== null && elapsedMs >= NO_RUN_TIMEOUT_MINUTES * 60 * 1000) {
     return { verdict: "timeout", reason: "no-ci-run", ...base };
   }
