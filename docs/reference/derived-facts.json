@@ -1,9 +1,9 @@
 {
   "schemaVersion": 1,
-  "version": "3.8.54",
+  "version": "3.8.55",
   "providers": 394,
   "providerReferenceTotal": 394,
-  "migrations": 238,
+  "migrations": 240,
   "locales": 67,
   "routingStrategies": 22,
   "scoringFactors": 16,

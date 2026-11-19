@@ -293,67 +293,67 @@ PR-ის გახსნამდე გამოიყენეთ
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # მართვის პანელის გვერდები (23 სექცია)
-│   ├── api/                # API მარშრუტები (51 დირექტორია)
-│   └── login/              # ავტორიზაციის გვერდები (.tsx)
-├── domain/                 # პოლიტიკების ძრავა (policyEngine, comboResolver, costRules და სხვ.)
-├── lib/                    # ძირითადი ბიზნესლოგიკა (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 პროტოკოლის სერვერი
-│   ├── acp/                # Agent Communication Protocol-ის რეესტრი
-│   ├── compliance/         # შესაბამისობის პოლიტიკების ძრავა
-│   ├── db/                 # SQLite-ის დომენური მოდულები + 130 მიგრაცია
-│   ├── memory/             # მუდმივი სასაუბრო მეხსიერება
-│   ├── oauth/              # OAuth-ის პროვაიდერები, სერვისები და დამხმარე საშუალებები
-│   ├── skills/             # გაფართოებადი უნარების ფრეიმვორკი
-│   ├── usage/              # გამოყენების აღრიცხვა და ღირებულების გამოთვლა
-│   └── localDb.ts          # მხოლოდ ხელახალი ექსპორტის შრე — აქ ლოგიკა არასოდეს დაამატოთ
-├── middleware/              # მოთხოვნების შუალედური პროგრამული უზრუნველყოფა (promptInjectionGuard)
-├── mitm/                   # MITM პროქსი (სერტიფიკატი, DNS, სამიზნე მარშრუტიზაცია)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React კომპონენტები (.tsx)
-│   ├── constants/          # პროვაიდერების განსაზღვრებები (329), MCP-ის ფარგლები, მარშრუტიზაციის 20 სტრატეგია
-│   ├── utils/              # ავტომატური ამომრთველი, სანიტაიზერი, ავტორიზაციის დამხმარე საშუალებები
-│   └── validation/         # Zod v4 სქემები
-└── sse/                    # SSE პროქსის კონვეიერი
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse სამუშაო სივრცე
-├── executors/              # 150 შემსრულებელი მოდული (შემსრულებელი კლასები + თითოეული პროვაიდერის დამხმარე საშუალებები)
-├── handlers/               # მოთხოვნების 11 დამმუშავებელი (ჩატი, პასუხები, ემბედინგები, სურათები და სხვ.)
-├── mcp-server/             # MCP სერვერი (110 უნიკალური ინსტრუმენტი, 3 ტრანსპორტი, 33 ფარგალი)
-├── services/               # ზედა დონის 178 სერვისი (combo, autoCombo, rateLimitManager და სხვ.)
-├── translator/             # ფორმატების გარდამქმნელები (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API-ის გარდამქმნელი
-└── utils/                  # 22 დამხმარე მოდული (ნაკადი, TLS, პროქსი, ჟურნალირება)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron-ის დესკტოპაპლიკაცია (მრავალპლატფორმული)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js-ის ტესტების გამშვები (1,574 სატესტო ფაილი)
-├── integration/            # ინტეგრაციული ტესტები
-├── e2e/                    # Playwright-ის ტესტები
-├── security/               # უსაფრთხოების ტესტები
-├── translator/             # გარდამქმნელისთვის სპეციფიკური ტესტები
-└── load/                   # დატვირთვის ტესტები
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # არქიტექტურული გადაწყვეტილებების ჩანაწერები
-├── architecture/            # სისტემის არქიტექტურა და მდგრადობა
-├── comparison/              # OmniRoute-ის შედარება ალტერნატივებთან
-├── compression/             # შეკუმშვის სახელმძღვანელოები და წესები
-├── dev/                     # შემუშავების სახელმძღვანელოები
-├── diagrams/                # არქიტექტურული დიაგრამები
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # მომხმარებლის სახელმძღვანელო, Docker, გამართვა, პრობლემების მოგვარება
-├── i18n/                    # README-ის ინტერნაციონალიზებული თარგმანები
-├── marketing/               # მარკეტინგული მასალები
-├── ops/                     # განთავსება, პროქსი, დაფარვა, გამოშვებები
-├── providers/               # პროვაიდერებისთვის სპეციფიკური დოკუმენტაცია
-├── reference/               # API ცნობარი, გარემოს ცვლადები, CLI ინსტრუმენტები, უფასო ტარიფები
-├── releases/                # გამოშვების შენიშვნები
-├── routing/                 # ავტომატური კომბინაციების ძრავა, მსჯელობის განმეორებითი გაშვება
-├── screenshots/             # მართვის პანელის ეკრანის ანაბეჭდები
-├── security/                # დამცავი მექანიზმები, შესაბამისობა, შეუმჩნევლობა, ტოკენები
-└── specs/                   # დიზაინის სპეციფიკაციები
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

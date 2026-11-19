@@ -1,1 +1,0 @@
-- **feat(analytics):** split the summary into total tokens, total input, input excluding cache reads, and cached input, with explicit incomplete-data handling and localized explanations while preserving provider accounting.
