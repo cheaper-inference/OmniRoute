@@ -29,6 +29,12 @@ import NotionSourceCard from "./components/NotionSourceCard";
 import ObsidianSourceCard from "./components/ObsidianSourceCard";
 import VscodeTokenAliasCard from "./VscodeTokenAliasCard";
 
+const DECISION_ENDPOINTS = [
+  { title: "OpenAI Decisions", path: "/v1/decisions" },
+  { title: "Gemini Decisions", path: "/v1beta/decisions" },
+  { title: "System One", path: "/v1/systemone" },
+] as const;
+
 const BUILD_TIME_CLOUD_URL = process.env.NEXT_PUBLIC_CLOUD_URL || null;
 const CLOUD_ACTION_TIMEOUT_MS = 15000;
 
@@ -411,7 +417,15 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     const modelUtility =
       (endpointData.rerank.length > 0 ? 1 : 0) + (endpointData.moderation.length > 0 ? 1 : 0);
     const searchCount = searchProviders.length > 0 ? 1 : 0;
-    return chatCount + imageCount + otherMedia + utilityFixed + modelUtility + searchCount;
+    return (
+      chatCount +
+      imageCount +
+      otherMedia +
+      utilityFixed +
+      modelUtility +
+      searchCount +
+      DECISION_ENDPOINTS.length
+    );
   }, [endpointData, searchProviders]);
 
   const postCloudAction = async (action, timeoutMs = CLOUD_ACTION_TIMEOUT_MS) => {
@@ -1959,6 +1973,20 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 copied={copied}
                 baseUrl={currentEndpoint}
               />
+              {DECISION_ENDPOINTS.map(({ title, path }) => (
+                <EndpointCard
+                  key={path}
+                  icon="rule"
+                  iconColor="text-primary"
+                  iconBg="bg-primary/10"
+                  title={title}
+                  path={path}
+                  models={null}
+                  copy={copy}
+                  copied={copied}
+                  baseUrl={currentEndpoint}
+                />
+              ))}
             </div>
           </div>
 
