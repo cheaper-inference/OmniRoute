@@ -18,27 +18,29 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 
 သို့သော် ပုံမှန်ဖောက်သည်များ (Cursor၊ Cline၊ Roo Code ၊ OpenAI SDK) သည် ၎င်းတို့ ပြန်ဖွင့်သည့်သမိုင်းမှ `reasoning_content` ဖယ်ထုတ်သည်။ OmniRoute ၎င်းကို server-side cache မှ ပြန်လည်ရယူပေးသောကြောင့် အထက်စီးကြောင်းမှမြင်ရသော တောင်းဆိုချက်သည် တသမတ်တည်းဖြစ်သည်။ ထုတ်ဝေမှု #1628 သည် hybrid memory/SQLite မြဲမြံမှုကို မိတ်ဆက်ပေးခဲ့ပြီး၊ ထို့ကြောင့် ကက်ရှ်သည် လုပ်ငန်းစဉ် ပြန်လည်စတင်ခြင်းတွင် ဆက်လက်ရှင်သန်နေပါသည်။
 
-## ဗိသုကာပညာ
+## အဆောက်အအုံ
 
 ```
-Turn N (assistant generates):
-  → response contains reasoning_content + tool_calls
-  → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
-  → forward response to client (which may or may not retain reasoning)
+Turn N (assistant က ထုတ်ပေးသည်):
+  → response တွင် reasoning_content + tool_calls ပါဝင်သည်
+  → requiresReasoningReplay(provider, model) ဖြစ်ပါက: cacheReasoningFromAssistantMessage()
+      (memory + DB) သို့ ရေးသားပြီး request scope အတွင်း tool_call.id တစ်ခုစီအတွက် entry တစ်ခုစီ သိမ်းဆည်းသည်
+  → response ကို client ထံ ပေးပို့သည် (client က reasoning ကို သိမ်းဆည်းချင်မှ သိမ်းဆည်းမည်)
 
-Turn N+1 (client sends follow-up):
-  → translator detects: requiresReasoningReplay(provider, model) === true
-  → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
-      hit  → msg.reasoning_content = cached; recordReplay()
-      miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
-  → upstream sees consistent history → no 400
+Turn N+1 (client က follow-up ပေးပို့သည်):
+  → translator က requiresReasoningReplay(provider, model) === true ဖြစ်ကြောင်း ရှာဖွေတွေ့ရှိသည်
+  → tool_calls ပါရှိပြီး reasoning_content မပါသော assistant message တစ်ခုစီအတွက်:
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
+      ရရှိပါက  → msg.reasoning_content = cached; recordReplay()
+      မရရှိပါက → msg.reasoning_content = "" (ယခင် DeepSeek များအတွက် legacy fallback)
+  → upstream က ကိုက်ညီညီဖြစ်သော history ကို မြင်ရသဖြင့် 400 မဖြစ်တော့ပါ
 ```
 
-ဖမ်းယူမှုသည် `open-sse/handlers/chatCore.ts` (ဆိုက်နှစ်ခု၊ `cacheReasoningFromAssistantMessage` ခေါ်ဆိုမှုဆိုက်နှစ်ခု) တွင်ဖြစ်သည်။ schema coercion ပြီးနောက် `open-sse/translator/index.ts` တွင် ပြန်ဖွင့်သော်လည်း dispatch မတိုင်မီ။
+Capture လုပ်ခြင်းသည် `open-sse/handlers/chatCore.ts` တွင် `cacheReasoningFromAssistantMessage` ခေါ်ဆိုသည့်နေရာနှစ်ခု၌ ဖြစ်ပေါ်သည်။ Replay လုပ်ခြင်းသည် schema coercion ပြီးနောက်၊ dispatch မလုပ်မီ `open-sse/translator/index.ts` တွင် ဖြစ်ပေါ်သည်။
 
-Plain (non-tool-call) assistant turns are keyed differently: `buildAssistantMessageCacheKey()` digests the session scope plus the normalized OpenAI-format transcript up to that turn, because DeepSeek requires the reasoning of _every_ prior turn once `tools` is present. For Responses-API targets (for example `opencode-go/deepseek-v4-flash`, routed to `/responses`) the upstream body carries `input`, not `messages`, so `translateRequest()` (`open-sse/translator/index.ts`) reports the pivot transcript it digested through a callback option and the capture sites digest that same transcript. The Responses replay pass runs on the OpenAI pivot for every source format, so Anthropic Messages clients (Claude → OpenAI → Responses) are replayed too.
+Tool-call entries များကို request scope နှင့် tool call id တို့၏ digest ဖြစ်သော `buildToolCallCacheKey()` အောက်တွင် သိမ်းဆည်းထားသောကြောင့် အခြား API key သို့မဟုတ် session တစ်ခုက အသုံးပြုထားသည့် id တူညီမှုဖြင့် entry ကို ရွေးချယ်မိမည်မဟုတ်ပါ။ Scope ကို `buildReasoningCacheScope()` မှ ရရှိပြီး API key id နှင့် request တွင် session key ပါရှိပါက ၎င်း session key တို့ ပါဝင်သည်။ ထို့ကြောင့် ထို entries များအတွက် `tool_call_id` column နှင့် dashboard တို့တွင် ဤ digest ကို ပြသမည်ဖြစ်သည်။
+
+Plain (tool-call မပါသော) assistant turns များကို ကွဲပြားသောနည်းလမ်းဖြင့် key သတ်မှတ်သည်။ `buildAssistantMessageCacheKey()` သည် ထို turn အထိရှိသော normalized OpenAI-format transcript နှင့် session scope တို့ကို digest လုပ်ပေးသည်။ အကြောင်းမှာ `tools` ပါရှိလာသည်နှင့် DeepSeek သည် ယခင် turn အားလုံး၏ reasoning ကို လိုအပ်သောကြောင့် ဖြစ်သည်။ Responses-API targets များအတွက် (ဥပမာ `opencode-go/deepseek-v4-flash` ကို `/responses` သို့ route လုပ်ထားသည့်အခါ) upstream body တွင် `messages` မဟုတ်ဘဲ `input` ပါရှိသည်။ ထို့ကြောင့် `translateRequest()` (`open-sse/translator/index.ts`) သည် digest လုပ်ထားသော pivot transcript ကို callback option မှတစ်ဆင့် report လုပ်ပြီး capture sites များကလည်း ထို transcript ကိုပင် digest လုပ်သည်။ Responses replay pass သည် source format တိုင်းအတွက် OpenAI pivot ပေါ်တွင် လုပ်ဆောင်သောကြောင့် Anthropic Messages clients (Claude → OpenAI → Responses) များကိုလည်း replay လုပ်ပေးသည်။
 
 ## သိုလှောင်မှု — Hybrid Memory + SQLite
 
@@ -57,9 +59,9 @@ hot path သည် ပျက်စီးမှုပြန်လည်ရယူ�
 - အများဆုံးမှတ်ဉာဏ်ထည့်သွင်းမှုများ- `200` (`MAX_MEMORY_ENTRIES`)
 - နှင်ထုတ်ခြင်း- အသက်အကြီးဆုံး `createdAt` ပထမ
 
-## Database Schema
+## ဒေတာဘေ့စ် Schema
 
-ရွှေ့ပြောင်းခြင်း- `src/lib/db/migrations/033_create_reasoning_cache.sql`
+Migration: `src/lib/db/migrations/033_create_reasoning_cache.sql`
 
 ```sql
 CREATE TABLE IF NOT EXISTS reasoning_cache (
@@ -73,7 +75,7 @@ CREATE TABLE IF NOT EXISTS reasoning_cache (
 );
 ```
 
-အညွှန်းများ- `expires_at`၊ `provider`၊ `model`၊ `created_at`။ `expires_at` Unix epoch စက္ကန့်အဖြစ် သိမ်းဆည်းထားသည်။ SELECT အလွှာသည် `EXPIRES_AT_EPOCH_SQL` မှတစ်ဆင့် အမွေအနှစ်စာသားတန်ဖိုးများကို ပုံမှန်ဖြစ်စေသည်။
+အညွှန်းများ: `expires_at`၊ `provider`၊ `model`၊ `created_at`။ `expires_at` ကို Unix epoch စက္ကန့်များအဖြစ် သိမ်းဆည်းထားပြီး SELECT အလွှာသည် `EXPIRES_AT_EPOCH_SQL` မှတစ်ဆင့် အမွေဆက်ခံထားသော စာသားတန်ဖိုးများကို ပုံမှန်ပုံစံသို့ ပြောင်းလဲပေးသည်။
 
 ## ပံ့ပိုးသူ / မော်ဒယ် ထောက်လှမ်းခြင်း။
 
