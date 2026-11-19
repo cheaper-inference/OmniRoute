@@ -100,16 +100,34 @@ function isAssistantMessage(value: unknown): value is JsonRecord {
   );
 }
 
+function hasToolCalls(message: JsonRecord): boolean {
+  return Array.isArray(message.tool_calls) && message.tool_calls.length > 0;
+}
+
+export interface InjectReasoningContentOptions {
+  /**
+   * Only patch assistant turns that carry `tool_calls`. Native DeepSeek rejects a
+   * tool-call turn without reasoning but accepts a plain turn without it, so plain
+   * turns keep the field absent there (#1682, #20282).
+   */
+  toolCallTurnsOnly?: boolean;
+}
+
 /**
  * Inject a placeholder `reasoning_content` on every assistant message in
  * `body.messages` that carries no reasoning (neither `reasoning_content` nor
- * the `reasoning` alias, as a non-empty string or array). Returns the original
- * object if no mutation was needed, or a shallow-copied body with a new
- * messages array otherwise.
+ * the `reasoning` alias, as a non-empty string or array). An empty `reasoning`
+ * alias is dropped when the placeholder is added, since serde-based upstreams
+ * reject a body carrying both aliases. Returns the original object if no
+ * mutation was needed, or a shallow-copied body with a new messages array
+ * otherwise.
  *
  * No-op when the body shape is unexpected (defensive).
  */
-export function injectReasoningContentForThinkingModel(body: unknown): unknown {
+export function injectReasoningContentForThinkingModel(
+  body: unknown,
+  options: InjectReasoningContentOptions = {}
+): unknown {
   if (!body || typeof body !== "object" || Array.isArray(body)) return body;
   const record = body as JsonRecord;
   if (!Array.isArray(record.messages)) return body;
@@ -117,9 +135,11 @@ export function injectReasoningContentForThinkingModel(body: unknown): unknown {
   let modified = false;
   const messages = record.messages.map((message) => {
     if (!isAssistantMessage(message)) return message;
+    if (options.toolCallTurnsOnly && !hasToolCalls(message)) return message;
     if (hasAnyReasoningCarrier(message)) return message;
     modified = true;
-    return { ...message, reasoning_content: PLACEHOLDER };
+    const { reasoning: _emptyReasoningAlias, ...rest } = message;
+    return { ...rest, reasoning_content: PLACEHOLDER };
   });
 
   return modified ? { ...record, messages } : body;

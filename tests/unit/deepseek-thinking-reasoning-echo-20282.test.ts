@@ -102,3 +102,63 @@ test("Issue #20282: DefaultExecutor('deepseek') preserves authentic reasoning_co
     "pre-existing reasoning_content must not be replaced"
   );
 });
+
+type TransformedBody = { messages: Array<Record<string, unknown>> };
+
+async function transformForDeepSeek(body: unknown): Promise<TransformedBody> {
+  const executor = new DefaultExecutor("deepseek");
+  return (await (
+    executor as unknown as {
+      transformRequest(model: string, body: unknown, stream?: boolean): Promise<unknown>;
+    }
+  ).transformRequest("deepseek-v4-pro", body, false)) as TransformedBody;
+}
+
+const TOOL_CALL = {
+  id: "call_def456",
+  type: "function",
+  function: { name: "git_status", arguments: "{}" },
+};
+
+test("Issue #20282: DefaultExecutor('deepseek') leaves a plain assistant turn without reasoning unchanged", async () => {
+  // Plain-turn invariant (#1682): only tool-call turns are rejected without reasoning,
+  // so a plain turn keeps the field absent instead of carrying placeholder reasoning.
+  const transformed = await transformForDeepSeek({
+    model: "deepseek-v4-pro",
+    messages: [
+      { role: "user", content: "hi" },
+      { role: "assistant", content: "Hello! How can I help?" },
+      { role: "user", content: "tell me more" },
+    ],
+  });
+
+  const plainTurn = transformed.messages[1];
+  assert.equal(Object.prototype.hasOwnProperty.call(plainTurn, "reasoning_content"), false);
+  assert.equal(plainTurn.content, "Hello! How can I help?");
+});
+
+test("Issue #20282: DefaultExecutor('deepseek') drops an empty reasoning alias when it adds the placeholder", async () => {
+  // DeepSeek aliases `reasoning` to `reasoning_content`: sending both is a
+  // `400 duplicate field`, so the empty alias must go when the placeholder is added.
+  const transformed = await transformForDeepSeek({
+    model: "deepseek-v4-pro",
+    messages: [
+      { role: "user", content: "Check git status" },
+      { role: "assistant", content: null, reasoning: "", tool_calls: [TOOL_CALL] },
+      { role: "tool", tool_call_id: TOOL_CALL.id, content: "clean" },
+      { role: "assistant", content: null, reasoning: "real chain", tool_calls: [TOOL_CALL] },
+      { role: "tool", tool_call_id: TOOL_CALL.id, content: "clean" },
+    ],
+  });
+
+  const emptyAliasTurn = transformed.messages[1];
+  assert.equal(emptyAliasTurn.reasoning_content, " ");
+  assert.equal(Object.prototype.hasOwnProperty.call(emptyAliasTurn, "reasoning"), false);
+
+  const authenticAliasTurn = transformed.messages[3];
+  assert.equal(authenticAliasTurn.reasoning, "real chain");
+  assert.equal(
+    Object.prototype.hasOwnProperty.call(authenticAliasTurn, "reasoning_content"),
+    false
+  );
+});

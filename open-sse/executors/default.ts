@@ -1020,7 +1020,11 @@ export class DefaultExecutor extends BaseExecutor {
           ? ((withDefaults as Record<string, unknown>).model as string)
           : model;
       if (shouldInjectReasoningContentPlaceholder(reasoningEcho, this.provider, outboundModel)) {
-        withDefaults = injectReasoningContentForThinkingModel(withDefaults);
+        // Native DeepSeek only rejects tool-call turns without reasoning; plain turns
+        // keep the field absent so placeholder reasoning stays out of history (#1682).
+        withDefaults = injectReasoningContentForThinkingModel(withDefaults, {
+          toolCallTurnsOnly: this.provider === "deepseek",
+        });
       }
     }
 
