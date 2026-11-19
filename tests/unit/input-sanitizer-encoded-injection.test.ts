@@ -91,3 +91,27 @@ test("block mode blocks an encoded high-severity directive", () => {
     else process.env.INPUT_SANITIZER_MODE = prior;
   }
 });
+
+test("decoy hex runs placed first cannot use up the decode budget before a base64 directive", () => {
+  const decoys = Array.from({ length: 200 }, (_, i) =>
+    crypto.createHash("sha256").update(String(i)).digest("hex").slice(0, 24)
+  ).join(" ");
+  assert.ok(names(`${decoys} ${b64(DIRECTIVE)}`).includes("decoded:system_override"));
+});
+
+test("decoy base64 runs placed first cannot hide a hex directive either", () => {
+  const decoys = Array.from({ length: 200 }, () => crypto.randomBytes(18).toString("base64")).join(
+    " "
+  );
+  assert.ok(names(`${decoys} ${hex(DIRECTIVE)}`).includes("decoded:system_override"));
+});
+
+test("a scan text packed with readable encoded runs stays cheap", () => {
+  const run = b64("The quarterly numbers look fine, thanks.");
+  const blob = Array.from({ length: Math.ceil((16 * 1024) / (run.length + 1)) }, () => run).join(
+    " "
+  );
+  const started = performance.now();
+  assert.deepEqual(names(blob), []);
+  assert.ok(performance.now() - started < 1000, "scan must stay cheap");
+});

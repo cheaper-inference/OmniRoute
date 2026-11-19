@@ -327,7 +327,11 @@ function buildInjectionScanText(text) {
 
 // Decode limits. The scan text is capped at 16 KB, so these bound the extra work per request.
 const MAX_DECODE_DEPTH = 2;
-const MAX_DECODE_ATTEMPTS = 64;
+// Decode budget in decoded bytes, shared by both layers. A scan text of MAX_INJECTION_SCAN_BYTES
+// yields at most ~4x that in candidate bytes (hex runs also match the base64 expression, and
+// layer 2 rescans what layer 1 decoded), so a real scan never reaches this: short decoy runs
+// placed first can no longer use it up and hide an encoded instruction behind them.
+const MAX_DECODE_BYTES = 8 * MAX_INJECTION_SCAN_BYTES;
 // Linear runs: one character class with a fixed floor, no nested quantifier. 24 base64 characters
 // are 18 bytes; 24 hex digits are 12 bytes. Shorter runs hold no usable instruction.
 const BASE64_RUN_RE = /[A-Za-z0-9+/_-]{24,}={0,2}/g;
@@ -378,18 +382,19 @@ function byteCandidates(text) {
 
 /**
  * Decode one layer of sources into the next layer. Reads and consumes the shared
- * attempt budget; when it runs out, later candidates are dropped.
+ * byte budget (sized so the capped scan text cannot exhaust it).
  * @param {string[]} layer
- * @param {{ left: number }} attempts
+ * @param {{ left: number }} budget
  * @returns {string[]}
  */
-function decodeOneLayer(layer, attempts) {
+function decodeOneLayer(layer, budget) {
   const next = [];
   for (const source of layer) {
     const unescaped = decodePercentOnce(source);
     if (unescaped) next.push(unescaped);
     for (const bytes of byteCandidates(source)) {
-      if (attempts.left-- <= 0) break;
+      if (bytes.length > budget.left) break;
+      budget.left -= bytes.length;
       const decoded = readableText(bytes);
       if (decoded) next.push(decoded);
     }
@@ -406,10 +411,10 @@ function decodeOneLayer(layer, attempts) {
  */
 function decodeEncodedLayers(text) {
   const found = [];
-  const attempts = { left: MAX_DECODE_ATTEMPTS };
+  const budget = { left: MAX_DECODE_BYTES };
   let layer = [text];
   for (let depth = 0; depth < MAX_DECODE_DEPTH && layer.length > 0; depth++) {
-    layer = decodeOneLayer(layer, attempts);
+    layer = decodeOneLayer(layer, budget);
     found.push(...layer);
   }
   return found;
