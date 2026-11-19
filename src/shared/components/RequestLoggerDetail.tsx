@@ -432,6 +432,14 @@ export function RequestLoggerDetailPanel({
   const [unblocking, setUnblocking] = useState(false);
   const [cleared, setCleared] = useState(false);
   const [copiedAll, flashCopiedAll] = useTransientFlag();
+  const copyAllLifetime = useRef({ active: false });
+  useEffect(() => {
+    const lifetime = { active: true };
+    copyAllLifetime.current = lifetime;
+    return () => {
+      lifetime.active = false;
+    };
+  }, []);
 
   // #7920 gave this component formatErrorForDisplay for structured error objects, but the
   // #8213 combo/cooldown checks below went straight to the raw field and call
@@ -552,8 +560,9 @@ export function RequestLoggerDetailPanel({
       legacyRequestTitle: t("requestPayloadLegacy"),
     });
     if (!text) return;
+    const lifetime = copyAllLifetime.current;
     const success = await onCopy(text);
-    if (success !== false) flashCopiedAll();
+    if (success !== false && lifetime.active) flashCopiedAll();
   };
   const detailIssue =
     detail?.detailState === "missing"

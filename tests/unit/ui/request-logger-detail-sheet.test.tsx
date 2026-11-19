@@ -284,6 +284,73 @@ describe("RequestLoggerDetail keeps its tools on the Sheet", () => {
     expect(text).toContain("resp-1");
   });
 
+  it("cancels the copy-all reset when the sheet unmounts", async () => {
+    const onCopy = vi.fn(async () => true);
+    const { unmount } = renderDetail({ onCopy });
+    const schedule = vi.spyOn(globalThis, "setTimeout");
+    const cancel = vi.spyOn(globalThis, "clearTimeout");
+    try {
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: detail.copyAll }));
+      });
+      const index = schedule.mock.calls.findIndex(([, delay]) => delay === 2000);
+      expect(index).toBeGreaterThanOrEqual(0);
+      const timer = schedule.mock.results[index].value;
+      unmount();
+      expect(cancel).toHaveBeenCalledWith(timer);
+    } finally {
+      schedule.mockRestore();
+      cancel.mockRestore();
+    }
+  });
+
+  it("replaces the pending copy-all reset on a second successful copy", async () => {
+    const onCopy = vi.fn(async () => true);
+    const { unmount } = renderDetail({ onCopy });
+    const schedule = vi.spyOn(globalThis, "setTimeout");
+    const cancel = vi.spyOn(globalThis, "clearTimeout");
+    try {
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: detail.copyAll }));
+      });
+      const first = schedule.mock.calls.findIndex(([, delay]) => delay === 2000);
+      expect(first).toBeGreaterThanOrEqual(0);
+      const timer = schedule.mock.results[first].value;
+      await act(async () => {
+        fireEvent.click(screen.getByRole("button", { name: detail.copyAll }));
+      });
+      expect(onCopy).toHaveBeenCalledTimes(2);
+      expect(cancel).toHaveBeenCalledWith(timer);
+      unmount();
+    } finally {
+      schedule.mockRestore();
+      cancel.mockRestore();
+    }
+  });
+
+  it("does not schedule a copy-all reset if copying finishes after unmount", async () => {
+    let finishCopy: (success: boolean) => void = () => {};
+    const onCopy = vi.fn(
+      () =>
+        new Promise<boolean>((resolve) => {
+          finishCopy = resolve;
+        })
+    );
+    const { unmount } = renderDetail({ onCopy });
+    const schedule = vi.spyOn(globalThis, "setTimeout");
+    try {
+      fireEvent.click(screen.getByRole("button", { name: detail.copyAll }));
+      expect(onCopy).toHaveBeenCalledTimes(1);
+      unmount();
+      await act(async () => {
+        finishCopy(true);
+      });
+      expect(schedule.mock.calls.filter(([, delay]) => delay === 2000)).toHaveLength(0);
+    } finally {
+      schedule.mockRestore();
+    }
+  });
+
   it("copies over plain HTTP while the Sheet traps focus", async () => {
     vi.stubGlobal("navigator", { ...navigator, clipboard: undefined });
     const copied: Array<{ value: string; focused: boolean }> = [];
