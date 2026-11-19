@@ -707,11 +707,15 @@ test("pr base: unresolvable in CI is exit 2; local, no-PR and queue runs skip th
 });
 
 test("planDerivedRewrites moves every strategy-count claim #15159 pins (real tree)", () => {
-  // The tree states the strategy count of the last refresh (the snapshot), not the fixture's.
-  const treeCount = JSON.parse(readReal("docs/reference/derived-facts.json") as string)
-    .routingStrategies as number;
+  // The tree states the strategy count and the version of the last refresh (the snapshot), not
+  // the fixture's. With the fixture's version the plan would also rewrite the version prose of
+  // llm.txt after a bump (v3.8.55 cut, 2026-11-16: "3.8.55" -> "3.8.54"), and the llm.txt check
+  // below would fail for a reason that has nothing to do with strategy counts.
+  const snapshot = JSON.parse(readReal("docs/reference/derived-facts.json") as string);
+  const treeCount = snapshot.routingStrategies as number;
   assert.ok(Number.isInteger(treeCount) && treeCount >= 20, `snapshot count ${treeCount}`);
-  const treeFacts = { ...FACTS, routingStrategies: treeCount };
+  assert.match(String(snapshot.version), /^\d+\.\d+\.\d+$/, "snapshot version");
+  const treeFacts = { ...FACTS, routingStrategies: treeCount, version: String(snapshot.version) };
   const live = gate.planDerivedRewrites({ facts: treeFacts, readFile: readReal });
   const next = treeCount + 1;
   const plan = gate.planDerivedRewrites({

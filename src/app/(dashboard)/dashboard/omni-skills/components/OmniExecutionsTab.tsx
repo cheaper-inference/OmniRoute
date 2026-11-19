@@ -66,7 +66,7 @@ export function OmniExecutionsTab({
           ) : (
             executions.map((exec) => (
               <TableRow key={exec.id}>
-                <TableCell className="font-medium">{exec.skillName}</TableCell>
+                <TableCell>{exec.skillName}</TableCell>
                 <TableCell>
                   <span
                     className={`text-xs px-2 py-1 rounded ${

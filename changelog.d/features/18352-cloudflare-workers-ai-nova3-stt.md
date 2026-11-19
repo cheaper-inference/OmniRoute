@@ -1,1 +1,0 @@
-- **feat(audio):** Cloudflare Workers AI Deepgram Nova-3 transcription (`cf/@cf/deepgram/nova-3`) with opt-in speaker diarization and `verbose_json` words, per-speaker segments and `num_speakers` ([#18352](https://github.com/cheaper-inference/OmniRoute/pull/18352)) — thanks @LeandroTechify
