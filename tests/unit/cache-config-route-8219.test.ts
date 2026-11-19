@@ -207,4 +207,46 @@ test("cache-config route resolves and modelCatalogCacheTtlMs round-trips", async
       assert.equal(afterDisableCacheStats.config.semanticCacheEnabled, false);
     }
   );
+
+  await t.test(
+    "PATCH-path semanticCacheEnabled rebuilds the semantic cache manager (#20399)",
+    async () => {
+      const { updateSettings } = await import("../../src/lib/db/settings.ts");
+      const { updateDatabaseSettings } = await import("../../src/lib/db/databaseSettings.ts");
+      const { ensureSemanticCacheDbBridge } =
+        await import("../../src/lib/cache/semanticCacheDbBridge.ts");
+      const { getSemanticCacheManager, resetSemanticCacheManager } =
+        await import("../../open-sse/services/cache/semanticCacheManager.ts");
+
+      const previousEnvFlag = process.env.OMNIROUTE_SEMANTIC_CACHE_ENABLED;
+      delete process.env.OMNIROUTE_SEMANTIC_CACHE_ENABLED;
+      try {
+        ensureSemanticCacheDbBridge();
+        // Vector layer on, master toggle off (Settings -> Cache disabled the feature).
+        updateDatabaseSettings({
+          cache: { semanticCacheVectorEnabled: true, semanticCacheEnabled: false },
+        });
+        resetSemanticCacheManager();
+
+        // A request builds the manager while the master flag is off.
+        const disabledManager = getSemanticCacheManager();
+        assert.equal(disabledManager.getConfig().enabled, false);
+
+        // PATCH /api/settings re-enables it through updateSettings().
+        await updateSettings({ semanticCacheEnabled: true });
+
+        const rebuiltManager = getSemanticCacheManager();
+        assert.notEqual(
+          rebuiltManager,
+          disabledManager,
+          "updateSettings must drop the stale semantic cache manager"
+        );
+        assert.equal(rebuiltManager.getConfig().enabled, true);
+      } finally {
+        resetSemanticCacheManager();
+        if (previousEnvFlag === undefined) delete process.env.OMNIROUTE_SEMANTIC_CACHE_ENABLED;
+        else process.env.OMNIROUTE_SEMANTIC_CACHE_ENABLED = previousEnvFlag;
+      }
+    }
+  );
 });

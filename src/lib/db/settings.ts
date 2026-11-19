@@ -464,6 +464,11 @@ export async function updateSettings(
   if (updates.semanticCacheEnabled !== undefined) {
     const { clearSemanticCacheFlagCache } = await import("./databaseSettings");
     clearSemanticCacheFlagCache();
+    // Same as PUT /api/settings/cache-config: drop the in-memory manager so the next request
+    // rebuilds it from the freshly-persisted master flag instead of a stale disabled config.
+    const { resetSemanticCacheManager } =
+      await import("@omniroute/open-sse/services/cache/semanticCacheManager.ts");
+    resetSemanticCacheManager();
   }
   invalidateDbCache("settings"); // Bust the read cache immediately
 
