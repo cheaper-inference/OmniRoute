@@ -104,6 +104,24 @@ test("skill_executions keeps a small input and output unchanged", async () => {
   assert.deepEqual(stored?.output, { echoed: "hi" });
 });
 
+test("skill_executions history write does not fail a call whose output cannot be serialized", async () => {
+  await registerEchoSkill();
+  skillExecutor.registerHandler("echo-handler", async () => ({ count: BigInt(1) }));
+
+  const execution = await skillExecutor.execute(
+    "echo@1.0.0",
+    { value: "hi" },
+    { apiKeyId: "key-a", sessionId: "s1" }
+  );
+
+  // The caller still gets the handler result.
+  assert.equal((execution.output as { count: bigint }).count, BigInt(1));
+
+  // The history row holds a readable marker instead of the unserializable value.
+  const stored = skillExecutor.getExecution(execution.id);
+  assert.equal((stored?.output as { unserializable?: boolean }).unserializable, true);
+});
+
 test("skill_executions drops rows older than the retention age on the next execution", async () => {
   const skill = await registerEchoSkill();
   skillExecutor.registerHandler("echo-handler", async () => ({ echoed: "ok" }));

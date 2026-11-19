@@ -20,7 +20,15 @@ const SKILL_EXECUTION_MAX_AGE_DAYS = 30;
 const SKILL_EXECUTION_MAX_ROWS = 10_000;
 
 function toStoredJson(value: unknown): string {
-  const json = JSON.stringify(value);
+  // History must never fail the call: a value JSON cannot represent (BigInt, a cycle, a bare
+  // function) is stored as a marker instead of throwing after the handler already ran.
+  let json: string | undefined;
+  try {
+    json = JSON.stringify(value);
+  } catch {
+    json = undefined;
+  }
+  if (json === undefined) return JSON.stringify({ unserializable: true });
   const bytes = Buffer.byteLength(json);
   return bytes > SKILL_EXECUTION_MAX_JSON_BYTES
     ? JSON.stringify({ truncated: true, originalBytes: bytes })
