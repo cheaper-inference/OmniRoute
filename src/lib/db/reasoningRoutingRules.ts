@@ -48,7 +48,7 @@ export async function getReasoningRoutingRules(
 ): Promise<ReasoningRoutingRule[]> {
   while (pendingMutations.size || !cache || cache.version !== version) {
     if (pendingMutations.size) {
-      // Update already yields before writing; do not read a pre-write snapshot.
+      // A backend may yield before writing; do not read a pre-write snapshot.
       await Promise.allSettled([...pendingMutations]);
       continue;
     }

@@ -100,11 +100,15 @@ async function list(options: { enabledOnly?: boolean } = {}): Promise<ReasoningR
   return options.enabledOnly ? rules.filter((rule) => rule.enabled) : rules;
 }
 
-async function findById(id: string): Promise<ReasoningRoutingRule | null> {
+function findRuleSync(id: string): ReasoningRoutingRule | null {
   const row = getDbInstance()
     .prepare("SELECT * FROM reasoning_routing_rules WHERE id = ?")
     .get(id) as RuleRow | undefined;
   return row ? rowToRule(row) : null;
+}
+
+async function findById(id: string): Promise<ReasoningRoutingRule | null> {
+  return findRuleSync(id);
 }
 
 function ruleParams(
@@ -163,7 +167,9 @@ async function update(
   id: string,
   patch: Partial<ReasoningRoutingRuleInput>
 ): Promise<ReasoningRoutingRule | null> {
-  const existing = await findById(id);
+  // Read, merge and write in one tick: an await here would let an overlapping update read the
+  // same base row and overwrite this patch with stale fields.
+  const existing = findRuleSync(id);
   if (!existing) return null;
   const { id: _id, createdAt, updatedAt: _updatedAt, ...base } = existing;
   const next = { ...base, ...patch } as ReasoningRoutingRuleInput;
@@ -181,7 +187,7 @@ async function update(
       WHERE id=@id`
     )
     .run(ruleParams(next, id, createdAt, now));
-  return findById(id);
+  return findRuleSync(id);
 }
 
 async function deleteById(id: string): Promise<boolean> {

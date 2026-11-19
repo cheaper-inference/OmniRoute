@@ -140,6 +140,17 @@ test("repository rejects missing references on create and merged update without 
   }
 });
 
+test("overlapping updates of one rule keep both patches", async () => {
+  const created = await repository.create(ruleInput());
+  await Promise.all([
+    repository.update(created.id, { name: "Renamed rule" }),
+    repository.update(created.id, { priority: 7 }),
+  ]);
+  const stored = await repository.findById(created.id);
+  assert.equal(stored?.name, "Renamed rule");
+  assert.equal(stored?.priority, 7);
+});
+
 test("retained repository survives reset/reopen and replacement at the same DATA_DIR", async () => {
   const created = await repository.create(ruleInput());
   core.resetDbInstance();
