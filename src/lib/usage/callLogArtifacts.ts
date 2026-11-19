@@ -269,11 +269,10 @@ function buildSizeLimitStages(artifact: CallLogArtifact): Array<() => unknown> {
   return [
     () => truncateArtifactForStorage(artifact),
     // Request body alone: the usual cap-tripper (multi-hundred-KB client
-    // prompts) and the least diagnostic once the pipeline holds a translated
-    // copy of it. Worth a stage only when there is a pipeline to keep in
-    // exchange -- without one it produces the same bytes as a later stage, so
-    // it is left out rather than costing a redundant stringify.
-    ...(artifact.pipeline ? [() => omitBodies(artifact, true)] : []),
+    // prompts) and the least diagnostic side. Always runs, pipeline or not:
+    // without it a small upstream error body was dropped together with the
+    // huge request body (#20520).
+    () => omitBodies(artifact, true),
     // Bodies alone: worth a stage only when there is a pipeline to keep in
     // exchange. Without one it produces the same bytes as the stage two lines
     // below, so it is left out rather than costing a redundant stringify.

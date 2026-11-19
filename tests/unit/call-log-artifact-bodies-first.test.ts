@@ -80,10 +80,7 @@ test("artifact bodies-first eviction", async (t) => {
       },
     });
     const capBytes = getArtifactMaxBytesForTest(input);
-    assert.ok(
-      Buffer.byteLength(JSON.stringify(input)) > capBytes,
-      "pre-image must exceed the cap"
-    );
+    assert.ok(Buffer.byteLength(JSON.stringify(input)) > capBytes, "pre-image must exceed the cap");
     assert.ok(
       Buffer.byteLength(JSON.stringify({ ...input, requestBody: OMITTED })) <= capBytes,
       "omitting requestBody alone must fit the cap"
@@ -119,17 +116,15 @@ test("artifact bodies-first eviction", async (t) => {
       },
     });
     const capBytes = getArtifactMaxBytesForTest(input);
-    assert.ok(
-      Buffer.byteLength(JSON.stringify(input)) > capBytes,
-      "pre-image must exceed the cap"
-    );
+    assert.ok(Buffer.byteLength(JSON.stringify(input)) > capBytes, "pre-image must exceed the cap");
     assert.ok(
       Buffer.byteLength(JSON.stringify({ ...input, requestBody: OMITTED })) > capBytes,
       "omitting requestBody alone must still exceed the cap"
     );
     assert.ok(
-      Buffer.byteLength(JSON.stringify({ ...input, requestBody: OMITTED, responseBody: OMITTED })) <=
-        capBytes,
+      Buffer.byteLength(
+        JSON.stringify({ ...input, requestBody: OMITTED, responseBody: OMITTED })
+      ) <= capBytes,
       "omitting both bodies must fit the cap"
     );
     const stored = roundTrip(input);
@@ -184,11 +179,7 @@ test("artifact bodies-first eviction", async (t) => {
     assert.equal(stored.responseBody, OMITTED);
     assert.deepEqual(stored.pipeline, PIPELINE_MARKER);
   });
-  await t.test("no pipeline: the stage is skipped, storage is unchanged", async () => {
-    // Without a pipeline there is nothing for the new stage to save, and its
-    // output would be byte-identical to the minimal stage below it -- it must
-    // not fire at all, so an artifact that never had a pipeline keeps exactly
-    // the shape it had before this change.
+  await t.test("no pipeline: small response body is kept, request omitted (#20520)", async () => {
     const stored = roundTrip(
       artifact({
         requestBody: "r".repeat(600 * 1024),
@@ -198,7 +189,7 @@ test("artifact bodies-first eviction", async (t) => {
     );
 
     assert.equal(stored.requestBody, OMITTED);
-    assert.equal(stored.responseBody, OMITTED);
+    assert.deepEqual(stored.responseBody, { output: "response" });
     assert.deepEqual(stored.error, { message: "upstream 500" });
     assert.equal(stored.pipeline, undefined);
   });

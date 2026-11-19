@@ -54,6 +54,33 @@ export function unwrapTencentEnvelope(json: unknown): TencentEnvelopeFields {
   return { message: null, errorCode: undefined };
 }
 
+const UPSTREAM_METADATA_MAX_CHARS = 300;
+
+/**
+ * OpenRouter wraps the real provider failure in `error.metadata`
+ * ({raw, provider_name}) and leaves `error.message` as "Provider returned
+ * error" (#20520). Returns a short bounded " (Provider: raw)" suffix, or "".
+ * Upstream-controlled text: consumers still route the message through
+ * sanitizeErrorMessage / buildErrorBody (Rule #12).
+ */
+function summarizeUpstreamMetadata(errorObj: Record<string, unknown> | null): string {
+  const metadata = asRecord(errorObj?.metadata);
+  if (!metadata) return "";
+  const provider = typeof metadata.provider_name === "string" ? metadata.provider_name.trim() : "";
+  let raw = "";
+  if (typeof metadata.raw === "string") raw = metadata.raw;
+  else if (asRecord(metadata.raw) || Array.isArray(metadata.raw)) {
+    try {
+      raw = JSON.stringify(metadata.raw);
+    } catch {
+      raw = "";
+    }
+  }
+  raw = raw.replace(/\s+/g, " ").trim().slice(0, UPSTREAM_METADATA_MAX_CHARS);
+  if (!provider && !raw) return "";
+  return ` (${[provider, raw].filter(Boolean).join(": ")})`;
+}
+
 /**
  * JSON error-field reader for parseUpstreamError: OpenAI-shaped fields first,
  * then Tencent/CodeBuddy envelope fallbacks. Lives here so frozen error.ts
@@ -71,10 +98,14 @@ export function extractJsonErrorFields(
     (rootError && Object.keys(rootError).length > 0) || !isProviderSafetyStopsEnabled()
       ? rootError
       : asRecord(asRecord(record.response)?.error);
+  const metadataSuffix =
+    !envelopeMessage && typeof errorObj?.message === "string" && errorObj.message
+      ? summarizeUpstreamMetadata(errorObj)
+      : "";
   return {
     message:
       envelopeMessage ||
-      errorObj?.message ||
+      (metadataSuffix ? `${errorObj?.message}${metadataSuffix}` : errorObj?.message) ||
       record.message ||
       (typeof record.detail === "string" ? record.detail : null) ||
       tencent.message ||

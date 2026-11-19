@@ -1,0 +1,1 @@
+- fix(observability): surface OpenRouter `error.metadata` (provider + raw detail) in upstream error messages and keep a small upstream response body in call logs when only the request exceeds the size cap (#20520)
