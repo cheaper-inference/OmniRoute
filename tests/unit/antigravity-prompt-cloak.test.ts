@@ -78,6 +78,17 @@ test("turnsAway tolerates any run of white space between words", () => {
   assert.equal(turnsAway("You  are\n\tOpenCode"), true);
 });
 
+test("turnsAway stays linear on a long run of U+FEFF after a word", () => {
+  // U+FEFF is both an invisible character and ECMAScript white space; a
+  // separator with two quantifiers over it backtracks cubically, so a client
+  // prompt with a few thousand of them would block the event loop for seconds.
+  const prompt = "you" + "\ufeff".repeat(1_500) + "x";
+  const started = performance.now();
+  assert.equal(turnsAway(prompt), false);
+  assert.ok(performance.now() - started < 250, "matching must not backtrack over the run");
+  assert.equal(turnsAway("You\ufeff\ufeff are\ufeffOpenCode"), true, "the run still separates");
+});
+
 test("cloak rewrites each signature to the verified SAID_AS wording", () => {
   const cases: Array<[string, string]> = [
     [

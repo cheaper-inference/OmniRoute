@@ -52,7 +52,11 @@ const escape = (c: string): string => c.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
 const lineRe = (line: string): RegExp => {
   const words = line.split(" ").map((w) => [...w].map(escape).join(`${INVISIBLE}*`));
   const tail = line === "x-anthropic-billing-header:" ? "[^\\n]*\\n?" : "";
-  return new RegExp(words.join(`${INVISIBLE}*\\s+${INVISIBLE}*`) + tail, "gi");
+  // U+FEFF is both an INVISIBLE character and \s, so `${INVISIBLE}*\s+${INVISIBLE}*`
+  // would hand one run to three quantifiers and backtrack cubically on it. One
+  // class over the whole run, with a lookahead for its white space, is linear.
+  const run = INVISIBLE.slice(1, -1) + "\\s";
+  return new RegExp(words.join(`(?=[${run}]*\\s)[${run}]+`) + tail, "gi");
 };
 const TURNED_AWAY_RE: RegExp[] = TURNED_AWAY.map(lineRe);
 

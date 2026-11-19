@@ -237,6 +237,21 @@ describe("historyKey and hasPrefix", () => {
     assert.notEqual(historyKey([user("x")]), historyKey([assistant("x")]));
   });
 
+  it("tells images apart by their payload, and an image from text that names one", () => {
+    const image = (data: string): AgyMessage => ({
+      role: "user",
+      parts: [{ type: "image", mimeType: "image/png", data }],
+    });
+    assert.notEqual(historyKey([image("AAAA")]), historyKey([image("BBBB")]));
+    assert.equal(historyKey([image("AAAA")]), historyKey([image("AAAA")]));
+    assert.notEqual(historyKey([image("AAAA")]), historyKey([user("[image image/png]")]));
+    assert.equal(
+      hasPrefix([image("BBBB"), assistant("b"), user("c")], [image("AAAA"), assistant("b")]),
+      false,
+      "an edited earlier image is a different history"
+    );
+  });
+
   it("matches only a real prefix", () => {
     const messages = [user("a"), assistant("b"), user("c")];
     assert.equal(hasPrefix(messages, [user("a")]), true);

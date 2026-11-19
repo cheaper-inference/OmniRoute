@@ -18,6 +18,8 @@
  * already in Gemini `contents` form and the client's format is gone.
  */
 
+import { createHash } from "node:crypto";
+
 import type { PromptPart } from "./agyCliProtocol.ts";
 
 /** One conversational turn, after the provider wire format has been left behind. */
@@ -367,13 +369,22 @@ export function trailingMessages(messages: AgyMessage[]): {
   return { history: messages.slice(0, start), current: messages.slice(start) };
 }
 
+/**
+ * One part's identity. An image is keyed by a digest of its payload, so an
+ * edited earlier image is a different history, and the type tag keeps an image
+ * apart from text that happens to read like the placeholder for one.
+ */
+function partKey(part: PromptPart): string {
+  if (part.type === "text") return `t${part.text.length}:${part.text}`;
+  const digest = createHash("sha256").update(part.data).digest("hex");
+  return `i${part.mimeType.length}:${part.mimeType}:${digest}`;
+}
+
 /** A stable identity for a message list, for "has the session already seen this?". */
 export function historyKey(messages: AgyMessage[]): string {
   return messages
     .map((message) => {
-      const text = message.parts
-        .map((part) => (part.type === "text" ? part.text : `[image ${part.mimeType}]`))
-        .join("");
+      const text = message.parts.map(partKey).join("");
       return `${message.role[0]}:${text.length}:${text}`;
     })
     .join("\u0000");
