@@ -20,6 +20,9 @@ export const ANTIGRAVITY_MODEL_ALIASES = Object.freeze({
   "gemini-3.8-flash-tiered": "gemini-3.8-flash-high",
   // Gemini 4 Argon is served only at its tier ids; the bare id defaults to medium.
   "gemini-4-argon": "gemini-4-argon-medium",
+  // Gemini 4 Neon follows the same tier-only serving; the bare id resolves to
+  // Google's documented default thinking level, high.
+  "gemini-4-neon": "gemini-4-neon-high",
   "gpt-oss-120b": "gpt-oss-120b-medium",
   // gemini-3.1-pro-low is not aliased: the upstream accepts it verbatim.
   // gemini-3.1-pro-high: the discovery slot returns HTTP 400 on v1internal;

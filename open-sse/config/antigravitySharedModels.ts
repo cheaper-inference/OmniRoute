@@ -136,6 +136,43 @@ export const ANTIGRAVITY_SHARED_MODELS = Object.freeze([
     supportsVision: true,
     toolCalling: true,
   },
+  // Gemini 4 Neon tiers (advertised by live `:fetchAvailableModels` for Pro/Ultra plans)
+  {
+    id: "gemini-4-neon-xhigh",
+    name: "Gemini 4 Neon (Extra High)",
+    contextLength: 1048576,
+    maxOutputTokens: 65535,
+    supportsReasoning: true,
+    supportsVision: true,
+    toolCalling: true,
+  },
+  {
+    id: "gemini-4-neon-high",
+    name: "Gemini 4 Neon (High)",
+    contextLength: 1048576,
+    maxOutputTokens: 65535,
+    supportsReasoning: true,
+    supportsVision: true,
+    toolCalling: true,
+  },
+  {
+    id: "gemini-4-neon-medium",
+    name: "Gemini 4 Neon (Medium)",
+    contextLength: 1048576,
+    maxOutputTokens: 65535,
+    supportsReasoning: true,
+    supportsVision: true,
+    toolCalling: true,
+  },
+  {
+    id: "gemini-4-neon-low",
+    name: "Gemini 4 Neon (Low)",
+    contextLength: 1048576,
+    maxOutputTokens: 65535,
+    supportsReasoning: true,
+    supportsVision: true,
+    toolCalling: true,
+  },
   // Claude 5.5 tiers (advertised by live `:fetchAvailableModels` on CLI 1.3.4+)
   {
     id: "claude-opus-5-5-high",
