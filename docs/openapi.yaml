@@ -16623,22 +16623,94 @@ paths:
       responses:
         "200":
           description: OK
-  /api/v1/vscode/combos/{token}/{{slug}}:
+  /api/v1/vscode/combos/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
-      summary: "GET vscode › combos › <token> › <{slug>}"
+      summary: List the VS Code combo catalog
       responses:
         "200":
-          description: OK
+          description: Combo metadata for the authenticated request
+  /api/v1/vscode/combos/{token}/api/version:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - V1 Vscode
+      summary: Read the Ollama compatibility version for the combo endpoint
+      responses:
+        "200":
+          description: Compatibility version
+  /api/v1/vscode/combos/{token}/api/tags:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - V1 Vscode
+      summary: List the combo catalog in Ollama format
+      responses:
+        "200":
+          description: Combo models in Ollama format
+  /api/v1/vscode/combos/{token}/api/show:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     post:
       tags:
         - V1 Vscode
-      summary: "POST vscode › combos › <token> › <{slug>}"
+      summary: Describe one combo in Ollama format
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              oneOf:
+                - required: [name]
+                  properties:
+                    name:
+                      type: string
+                      minLength: 1
+                      pattern: '\S'
+                - required: [model]
+                  properties:
+                    name:
+                      type: "null"
+                    model:
+                      type: string
+                      minLength: 1
+                      pattern: '\S'
       responses:
         "200":
-          description: OK
+          description: Combo model details
+        "400":
+          description: A nonempty model name is required
+        "404":
+          description: Model not found in the combo catalog
   /api/v1/vscode/raw/{token}:
+    parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
     get:
       tags:
         - V1 Vscode
