@@ -4,6 +4,7 @@ import { useEffect, useId, useRef, useState, type CSSProperties, type ReactNode 
 import { ChevronDown, ChevronLeft, ChevronRight, Megaphone, Minus } from "lucide-react";
 import { brandTintVars } from "./brand-tint";
 import { Button } from "./button";
+import { inertProps } from "./lib/inert";
 import { resolveLabels } from "./lib/labels";
 
 export interface AnnouncementMediaState {
@@ -239,7 +240,7 @@ export function AnnouncementCarousel({
                 <div
                   className="ci-announcements__media"
                   aria-hidden="true"
-                  inert
+                  {...inertProps(true)}
                   key={current.id}
                   data-paused={mediaPaused}
                   data-reduced-motion={reducedMotion}

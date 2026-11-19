@@ -2453,7 +2453,10 @@
     left: 50%;
     width: calc(100vw - 3rem);
     max-width: 30rem;
+    /* dvh is the visible viewport: on a phone with the browser toolbar showing, 100vh is taller than
+       the screen. The vh line stays first for browsers without dvh. Same for full and the sheets. */
     max-height: min(42rem, calc(100vh - 3rem));
+    max-height: min(42rem, calc(100dvh - 3rem));
     overflow-y: auto;
     border: var(--ci-border-default) solid var(--ci-color-border-strong);
     border-radius: var(--ci-radius-surface);
@@ -2494,7 +2497,7 @@
      full also takes the whole height, so it does not resize with its content. */
   .ci-dialog:where([data-size="lg"]) { max-width: 48rem; }
   .ci-dialog:where([data-size="xl"]) { max-width: 64rem; }
-  .ci-dialog:where([data-size="full"]) { max-width: none; height: calc(100vh - 3rem); max-height: calc(100vh - 3rem); }
+  .ci-dialog:where([data-size="full"]) { max-width: none; height: calc(100vh - 3rem); height: calc(100dvh - 3rem); max-height: calc(100vh - 3rem); max-height: calc(100dvh - 3rem); }
 
   .ci-popover {
     z-index: var(--ci-z-dropdown);
@@ -3513,8 +3516,8 @@
   .ci-sidebar-sheet > .ci-sidebar { width: 100%; min-width: 0; height: 100%; border: 0; }
   .ci-sheet:where([data-side="right"]) { top: 0; right: 0; bottom: 0; width: min(26rem, 88vw); border-left-width: var(--ci-border-default); animation: ci-sheet-right-in var(--ci-duration-base) var(--ci-ease-emphasized); }
   .ci-sheet:where([data-side="left"]) { top: 0; bottom: 0; left: 0; width: min(26rem, 88vw); border-right-width: var(--ci-border-default); animation: ci-sheet-left-in var(--ci-duration-base) var(--ci-ease-emphasized); }
-  .ci-sheet:where([data-side="top"]) { top: 0; inset-inline-end: 0; inset-inline-start: 0; max-height: 85vh; border-bottom-width: var(--ci-border-default); animation: ci-sheet-top-in var(--ci-duration-base) var(--ci-ease-emphasized); }
-  .ci-sheet:where([data-side="bottom"]) { inset-inline-end: 0; bottom: 0; inset-inline-start: 0; max-height: 85vh; border-top-width: var(--ci-border-default); animation: ci-sheet-bottom-in var(--ci-duration-base) var(--ci-ease-emphasized); }
+  .ci-sheet:where([data-side="top"]) { top: 0; inset-inline-end: 0; inset-inline-start: 0; max-height: 85vh; max-height: 85dvh; border-bottom-width: var(--ci-border-default); animation: ci-sheet-top-in var(--ci-duration-base) var(--ci-ease-emphasized); }
+  .ci-sheet:where([data-side="bottom"]) { inset-inline-end: 0; bottom: 0; inset-inline-start: 0; max-height: 85vh; max-height: 85dvh; border-top-width: var(--ci-border-default); animation: ci-sheet-bottom-in var(--ci-duration-base) var(--ci-ease-emphasized); }
   .ci-sheet__close { position: absolute; top: var(--ci-space-4); inset-inline-end: var(--ci-space-4); display: grid; width: var(--ci-control-height-sm); height: var(--ci-control-height-sm); place-items: center; border: 0; border-radius: var(--ci-radius-full); background: transparent; color: var(--ci-color-text-muted); cursor: pointer; }
   .ci-sheet__close:hover { color: var(--ci-color-heading); background: var(--ci-color-surface-muted); }
   .ci-sheet__close:focus-visible { outline: none; box-shadow: var(--ci-ring-focus); }
@@ -4007,7 +4010,9 @@
 .ci-dialog[data-layout="fixed-footer"] {
   display:flex;
   flex-direction:column;
-  max-height:calc(100svh - 3rem);
+  /* The visible viewport, as for every dialog size; vh for browsers without dvh. */
+  max-height:calc(100vh - 3rem);
+  max-height:calc(100dvh - 3rem);
   overflow-x:hidden;
   overflow-y:auto;
 }

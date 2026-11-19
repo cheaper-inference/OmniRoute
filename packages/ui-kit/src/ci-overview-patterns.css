@@ -19,7 +19,7 @@
   .ci-overview-panels { grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); row-gap: 0; }
   .ci-overview-panels__card { grid-row: span 4; grid-template-rows: subgrid; }
 }
-.ci-token-savings { display: grid; flex: 1; align-content: space-between; gap: var(--ci-space-5); margin: 0; padding: 0; list-style: none; }
+.ci-token-savings { display: grid; flex: 1; align-content: start; gap: var(--ci-space-5); margin: 0; padding: 0; list-style: none; }
 .ci-token-savings__item { display: flex; align-items: center; gap: var(--ci-space-3); min-width: 0; }
 .ci-token-savings__icon { display: grid; place-items: center; flex: none; width: 2.5rem; height: 2.5rem; border: 1px solid var(--ci-color-border-subtle); border-radius: var(--ci-radius-control); background: var(--ci-color-accent-surface-subtle); color: var(--ci-color-accent-active); }
 .ci-token-savings__icon svg { width: 1.125rem; height: 1.125rem; }

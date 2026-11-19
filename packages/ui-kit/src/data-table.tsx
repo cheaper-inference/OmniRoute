@@ -4,6 +4,7 @@ import { useMemo, useState } from "react";
 import type { ReactNode } from "react";
 import type { TableRowActivateEvent, TableRowFocus } from "./table";
 import { Search, X } from "lucide-react";
+import { inertProps } from "./lib/inert";
 import { resolveLabels } from "./lib/labels";
 import { cn } from "./lib/utils";
 import { foldSearchText } from "./lib/search-fold";
@@ -290,7 +291,7 @@ export function DataTable<Row>({
             )}
           </TableBody>
         </Table>
-        <DataTablePagerRow pageSizeControl={pageSizeControl} inert={loading || undefined} aria-hidden={loading || undefined}>
+        <DataTablePagerRow pageSizeControl={pageSizeControl} {...inertProps(loading)} aria-hidden={loading || undefined}>
           {pageCount > 1 ? (
             <PaginationControls
               page={activePage}

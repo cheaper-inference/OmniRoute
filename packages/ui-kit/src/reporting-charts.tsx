@@ -273,8 +273,13 @@ function PlotPoints<Point extends PlotPoint>({ points, describe, rows, selectedI
   const [focusedId, setFocusedId] = useState<string | null>(null);
   const indexOf = (id: string | null | undefined) => id == null ? -1 : points.findIndex(point => point.id === id);
   const selectedIndex = indexOf(selectedId);
-  const rovingId = indexOf(focusedId) >= 0 ? focusedId : selectedIndex >= 0 ? selectedId : points[0]?.id;
+  const focusedIndex = indexOf(focusedId);
   const activeIndex = indexOf(activeId);
+  // A point that left the data is forgotten, so it takes back neither the tooltip nor the tab stop
+  // if it comes back. Reset while rendering, as React allows for a component's own state: no effect, no loop.
+  if (focusedId !== null && focusedIndex < 0) setFocusedId(null);
+  if (activeId !== null && activeIndex < 0) setActiveId(null);
+  const rovingId = focusedIndex >= 0 ? focusedId : selectedIndex >= 0 ? selectedId : points[0]?.id;
   const active = points[activeIndex];
   const activeRatio = pointRatio(activeIndex, points.length);
   const last = points.length - 1;

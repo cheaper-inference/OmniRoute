@@ -5,6 +5,7 @@ import { Button } from "./button";
 import { BrandLoader, type BrandLoaderVariant } from "./brand-loader";
 import { Card, CardContent } from "./card";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./tooltip";
+import { inertProps } from "./lib/inert";
 import { cn } from "./lib/utils";
 import { Alert } from "./alert";
 /** Interface text for Wizard chrome. Step titles and the heading come from props. */
@@ -278,7 +279,7 @@ export function Wizard({
         </ol>}
         {steps[activeStep]?.children?.length ? <div className="ci-wizard__substeps-mobile"><Substeps step={steps[activeStep]} active={activeSubstep} onSelect={onSubstepSelect} disabled={!!unavailable} /></div> : null}
         <div ref={viewport} className="ci-wizard__viewport" data-loading={loading || undefined}>
-        <div ref={scrollArea} className="ci-wizard__scroll" inert={loading || undefined} aria-hidden={loading || undefined}>
+        <div ref={scrollArea} className="ci-wizard__scroll" {...inertProps(loading)} aria-hidden={loading || undefined}>
         <h1 ref={heading} tabIndex={-1} id={id} className="ci-wizard__title" data-has-badge={titleBadge != null || undefined}>
           {titleBadge != null ? <><span>{title}</span><span className="ci-wizard__title-badge">{titleBadge}</span></> : title}
         </h1>

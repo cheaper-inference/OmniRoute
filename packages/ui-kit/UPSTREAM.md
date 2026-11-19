@@ -1,10 +1,10 @@
 # Upstream snapshot — @keak/cheaper-inference-ui-kit
 
 - repo: https://github.com/keak-ai/cheaper-inference-ui-kit
-- commit: 1c7d792809cbee27942bc6fb45bc863a0578fb74
-- version: 0.43.0
-- upstream-date: 2026-11-18
-- synced: 2026-11-18
+- commit: d61d750461ff9ea5e0e6c711429e718c5080baed
+- version: 0.43.5
+- upstream-date: 2026-11-19
+- synced: 2026-11-19
 - license-authorization: Diego Souza (Keak, dono do repositório), 2026-10-19, por escrito na sessão de planejamento: "a licença está ok e da nossa empresa e livre para esse uso" — kit da própria empresa, autorizado para redistribuição neste repositório MIT.
 
 Fonte consumida (sem build): `src/` é cópia byte a byte do commit acima, exceto pela única

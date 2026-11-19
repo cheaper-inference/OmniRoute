@@ -1,16 +1,16 @@
 "use client";
 
-import { cloneElement, createContext, forwardRef, isValidElement, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState, version as reactVersion } from "react";
+import { cloneElement, createContext, forwardRef, isValidElement, useCallback, useContext, useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { ComponentProps, ForwardedRef, MouseEvent as ReactMouseEvent, MutableRefObject, ReactElement, ReactNode } from "react";
 import { ChevronDown, PanelLeft } from "lucide-react";
 import { Sheet, SheetContent, SheetTitle } from "./sheet";
 import { Slot } from "@radix-ui/react-slot";
 import { TooltipContent, TooltipTrigger } from "./tooltip";
 import { TooltipRoot } from "./lib/tooltip-root";
+import { inertProps } from "./lib/inert";
 import { cn } from "./lib/utils";
 
 const DEFAULT_MOBILE_BREAKPOINT = 768;
-const SUPPORTS_BOOLEAN_INERT = Number.parseInt(reactVersion, 10) >= 19;
 
 export type SidebarState = "expanded" | "collapsed";
 export type SidebarSide = "left" | "right";
@@ -211,13 +211,10 @@ export function Sidebar({
   const scopeId = useContext(SidebarScopeContext);
   const hiddenOffcanvas = !isMobile && collapsible === "offcanvas" && state === "collapsed";
   const rail = !isMobile && collapsible === "icon" && state === "collapsed";
-  const inertProps = hiddenOffcanvas || inertProp
-    ? ({ inert: SUPPORTS_BOOLEAN_INERT ? true : "" } as unknown as ComponentProps<"aside">)
-    : {};
   const aside = (
     <aside
       {...props}
-      {...inertProps}
+      {...inertProps(hiddenOffcanvas || Boolean(inertProp))}
       data-slot="sidebar"
       data-state={isMobile || collapsible === "none" ? "expanded" : state}
       data-side={side}
