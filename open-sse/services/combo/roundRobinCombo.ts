@@ -1449,7 +1449,7 @@ export async function handleRoundRobinCombo({
     // Every exit path passes here, including a request that succeeded on the
     // first target: targets after it were never reached and the trace has to
     // say so rather than leaving them out of the candidate set.
-    trace.finalize(filteredTargets.map((t) => ({ executionKey: t.executionKey, modelStr: t.modelStr })));
+    trace.finalize(filteredTargets);
   }
 
   // G4: if the safety timer fired between iterations (no race captured it),
