@@ -67,11 +67,13 @@ function capUnitReason(value: string): string {
 }
 
 /**
- * Make one unit's reason safe to join with the others. The joined message is sanitized
- * again as a whole, and that pass keeps only the first line, caps at 4096 chars and treats
- * a path-like span as running to the end, so one raw multi-line, HTML or oversized upstream
- * body would otherwise swallow every later unit's reason. Connection identifiers are
- * redacted before the cap: an identifier cut in half no longer matches the redaction.
+ * Make one unit's reason (or label) safe to join with the others. Each part is sanitized on
+ * its own because a pass over the joined message keeps only the first line, caps at 4096
+ * chars, treats a path-like span as running to the end and redacts a credential label
+ * fail-closed (everything after it), so one raw multi-line, HTML, oversized or
+ * credential-bearing upstream body would otherwise swallow every later unit's reason.
+ * Connection identifiers are redacted before the cap: an identifier cut in half no longer
+ * matches the redaction.
  */
 function normalizeUnitReason(reason: string): string {
   const sanitized = sanitizeErrorMessage(collapseControlCharacters(reason));
@@ -84,6 +86,7 @@ function pushOutcome(outcomes: RuntimeUnitOutcomes, unitKey: string, raw: ComboE
   // The free-tier check reads the full reason; the signal can sit past the display cap.
   const entry: ComboErrorEntry = {
     ...raw,
+    model: normalizeUnitReason(raw.model),
     error: normalizeUnitReason(raw.error),
     ...(isFreeTierRefusalOutcome(raw) ? { freeTierRefusal: true } : {}),
   };
@@ -174,7 +177,12 @@ export async function withRuntimeUnitOutcomes(
   if ((response.status === 400 || response.status === 413) && isContextOverflow400(previous)) {
     return response;
   }
-  const message = sanitizeErrorMessage(formatComboOutcomes(outcomes.entries));
+  // Every upstream-derived part (label and reason) was sanitized on its own in pushOutcome
+  // and the rest is fixed text, so the joined message is not sanitized again as a whole: that
+  // pass matched an already-redacted "Password: [REDACTED]" and cut the unit's status and
+  // every later unit. The formatter lists at most 5 entries, each a label and a reason of
+  // <= 300 chars, so the message stays under the sanitizer's 4096-char budget.
+  const message = formatComboOutcomes(outcomes.entries);
   if (!message) return response;
   const headers = new Headers(response.headers);
   headers.delete("content-length");

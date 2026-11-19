@@ -356,3 +356,20 @@ test("the per-unit cap does not split a character in half", async () => {
   assert.match(message, /provider-a\/model-x: provider — x+ \(HTTP 500\)/);
   assert.match(message, SECOND_DOWN);
 });
+
+// The sanitizer redacts a credential label fail-closed: everything after "Password:" goes.
+// Each reason is already sanitized on its own, so a second pass over the joined message
+// matched the redacted label again and dropped that unit's status and every later unit.
+test("a credential label in an earlier unit's reason keeps that unit's status and the later units", async () => {
+  const message = await twoUnitMessage(
+    "ru-terminal-credential-label",
+    500,
+    "upstream rejected: Password: hunter2 for account"
+  );
+  assert.doesNotMatch(message, /hunter2/);
+  assert.match(
+    message,
+    /^provider-a\/model-x: provider — upstream rejected: Password: \[REDACTED\] \(HTTP 500\); /
+  );
+  assert.match(message, SECOND_DOWN);
+});
