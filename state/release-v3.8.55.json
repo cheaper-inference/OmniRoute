@@ -2,7 +2,62 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b4",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b4-b7f1ad39432c",
+    "candidateSha": "b7f1ad39432c7b4002097ab3c77e43b4d1eed58f",
+    "baseSha": "6d87faf23640404336404dc101b74125be666258",
+    "treeSha": "8be6b05e7487030e757d6516c1dd45755ed4a56b",
+    "prs": [
+      {
+        "n": 20616,
+        "head": "97013f5becf14020c55b685c9d0d43d5ae93d0c3",
+        "title": "chore(ci): retire the Mergify merge queue",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-19T19:52:23Z"
+      },
+      {
+        "n": 19788,
+        "head": "78b7a2b34b564454a234e2b0fed15eee2ff5900d",
+        "title": "fix(cache): do not store upstream refusals and obsolescence notices in semantic cache (#19619)",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-19T19:53:09Z"
+      },
+      {
+        "n": 19798,
+        "head": "ea246abe1c7b22dd5be931f58d3ddc78ec0a8667",
+        "title": "fix(openrouter): treat capability 404 responses as request-scoped without model lockout",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-19T19:53:11Z"
+      },
+      {
+        "n": 19804,
+        "head": "41a52b2f4df98fde67b6063193055f7f6d4d9c1e",
+        "title": "fix(sse): bound heartbeat queue and stop timer on abandoned streams",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-19T19:53:14Z"
+      },
+      {
+        "n": 19844,
+        "head": "bc24bb240304af4fccabb2e581d31a457f816fdb",
+        "title": "fix(telegram): enforce bidirectional timestamp bounds and anti-replay on initData",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-19T19:53:16Z"
+      },
+      {
+        "n": 19845,
+        "head": "4273a5e34f618b438ed6895fe3f9e4aa39cf6e80",
+        "title": "fix(authz): include /a2a and /connect in proxy matcher and classify /a2a as CLIENT_API",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-19T19:53:19Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-19T19:54:48.398Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
@@ -25,8 +80,8 @@
     }
   },
   "counters": {
-    "batchSeq": 3,
-    "ciRuns": 4,
+    "batchSeq": 4,
+    "ciRuns": 5,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 2,
@@ -238,7 +293,31 @@
       "sha": "ed3affcf38053cd514ca57f521e282dd8d9aba7f",
       "detail": "shadow mode: would merge-ff onto 3de17c8a2a32",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44585639763"
+    },
+    {
+      "at": "2026-11-19T19:54:51.807Z",
+      "type": "batch-started",
+      "batchId": "b4",
+      "prs": [
+        20616,
+        19788,
+        19798,
+        19804,
+        19844,
+        19845
+      ],
+      "sha": "b7f1ad39432c7b4002097ab3c77e43b4d1eed58f",
+      "detail": "6 PR(s) on 6d87faf23640; window 6",
+      "labeledAt": {
+        "19788": "2026-11-19T19:53:09Z",
+        "19798": "2026-11-19T19:53:11Z",
+        "19804": "2026-11-19T19:53:14Z",
+        "19844": "2026-11-19T19:53:16Z",
+        "19845": "2026-11-19T19:53:19Z",
+        "20616": "2026-11-19T19:52:23Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44602926075"
     }
   ],
-  "updatedAt": "2026-11-19T19:16:16.464Z"
+  "updatedAt": "2026-11-19T19:54:53.250Z"
 }
