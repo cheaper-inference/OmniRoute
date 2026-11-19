@@ -169,3 +169,35 @@ test("resolveTurnDisplayContent reads turns from top-level requestBody when deta
     toolName: null,
   });
 });
+
+test("resolveTurnDisplayContent prefers the pipeline body over a whole-body requestBody summary (#20623)", () => {
+  insertCallLog({ id: "log-7", correlationId: "corr-7", artifactRelPath: "2026-01-01/log-7.json" });
+  const absPath = path.join(TEST_DATA_DIR, "call_logs", "2026-01-01/log-7.json");
+  fs.mkdirSync(path.dirname(absPath), { recursive: true });
+  fs.writeFileSync(
+    absPath,
+    JSON.stringify({
+      schemaVersion: 5,
+      // truncateForLog replaces a body over CHAT_LOG_MAX_BODY_KB with a summary that has no turns.
+      requestBody: { _truncated: true, _originalBytes: 2_000_000, model: "m", messageCount: 1 },
+      responseBody: null,
+      error: null,
+      pipeline: {
+        clientRawRequest: { body: { messages: [{ role: "user", content: "large request turn" }] } },
+      },
+    })
+  );
+
+  const result = resolveTurnDisplayContent([{ lastCorrelationId: "corr-7" }]);
+  const userHash = hashTurnContent({
+    role: "user",
+    text: "large request turn",
+    blockKind: "text",
+    toolName: null,
+  });
+  assert.deepEqual(result.get(userHash), {
+    textPreview: "large request turn",
+    blockKind: "text",
+    toolName: null,
+  });
+});
