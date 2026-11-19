@@ -33,7 +33,12 @@ export function EncoderComparisonTable({ comparison }: { comparison: EncoderComp
           {t("encoderWinner", { winner: comparison.winner })}
         </span>
       </header>
-      <Table persistentScrollbars={false} className="min-w-0 font-mono text-xs">
+      <Table
+        persistentScrollbars={false}
+        scrollLabel={t("encoderComparison", { count: comparison.arraysCompared })}
+        className="min-w-0 font-mono text-xs"
+        containerClassName="rounded-none border-0"
+      >
         <TableHeader>
           <TableRow>
             <TableHead className="h-8">{t("encoder")}</TableHead>
