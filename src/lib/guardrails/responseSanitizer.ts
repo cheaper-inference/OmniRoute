@@ -23,10 +23,10 @@ const PLACEHOLDER =
   /\{\{[^}]{0,100}\}\}|\$\{[^}]{0,100}\}|%7B%7B|\[\[[^\]]{0,100}\]\]|<[A-Za-z_][^<>]{0,100}>/i;
 // The text is untrusted model output: images and tags are found by linear scans, not by
 // backtracking regexes (a repeated "![a](" cost seconds on a few KB with the regex form).
-const ALT_MAX = 500;
 const TITLE_MAX = 500;
+// `<` covers a CommonMark angle-bracketed destination (`[a](<javascript:...>)`).
 const DANGEROUS_LINK =
-  /(\]\(\s{0,10}|\b(?:href|src|action|formaction)\s{0,5}=\s{0,5}["']?\s{0,5})(?:javascript:|data:\s{0,5}text\/html)[^\s)"']{0,4000}/gi;
+  /(\]\(\s{0,10}<?|\b(?:href|src|action|formaction)\s{0,5}=\s{0,5}["']?\s{0,5})(?:javascript:|data:\s{0,5}text\/html)[^\s)"']{0,4000}/gi;
 const REMOVED_NOTICE = "[response text removed by the response sanitizer]";
 const SKIP_KEYS = new Set([
   "tool_calls",
@@ -79,13 +79,23 @@ function forwardFinder(text: string, needle: string): (from: number) => number {
   };
 }
 
-/** The URL token of `](url ...)` that follows the closing bracket at `bracket`, if any. */
+/**
+ * The URL token of `](url ...)` that follows the closing bracket at `bracket`, if any. Balanced
+ * parentheses stay inside the token, as CommonMark allows (`https://a/(p)?k=...`).
+ */
 function readImageTarget(text: string, bracket: number): { start: number; end: number } | null {
   if (text[bracket + 1] !== "(") return null;
   let start = bracket + 2;
   while (start < bracket + 12 && isSpace(text[start])) start++;
   let end = start;
-  while (end < text.length && text[end] !== ")" && !isSpace(text[end])) end++;
+  let depth = 0;
+  for (; end < text.length && !isSpace(text[end]); end++) {
+    if (text[end] === "(") depth++;
+    else if (text[end] === ")") {
+      if (depth === 0) break;
+      depth--;
+    }
+  }
   return end > start ? { start, end } : null;
 }
 
@@ -104,7 +114,9 @@ function stripExfilImages(text: string): { text: string; hit: boolean } {
     from = start + 2;
     const bracket = nextBracket(from);
     if (bracket === -1) break;
-    const target = bracket - from > ALT_MAX ? null : readImageTarget(text, bracket);
+    // Any alt length: a long alt must not hide the URL from the check. Still linear, since the
+    // scan resumes after the URL token once one is read.
+    const target = readImageTarget(text, bracket);
     if (!target) continue;
     from = target.end;
     const paren = nextParen(target.end);
