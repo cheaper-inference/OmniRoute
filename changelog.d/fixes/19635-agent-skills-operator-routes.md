@@ -1,0 +1,1 @@
+- **fix(skills):** The `omni-usage-logs` agent skill now lists the log-export routes, and the `omni-db-backups` skill no longer lists the operator-only database restore and import routes (API keys get 403 there). The `omni-cache` and `omni-db-backups` descriptions now match what the skills list.
