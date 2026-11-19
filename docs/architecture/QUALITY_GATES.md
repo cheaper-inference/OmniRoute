@@ -728,6 +728,12 @@ or a skills fix whose test reads the regenerated `SKILL.md` files. A `SKILL.md` 
 hand-written `<!-- skill:custom-start -->` block is not in the family: its custom block stays
 editable next to a feature.
 
+Orphan cleanup is not judged by the families either: a PR may delete `docs/i18n/<locale>/<doc>`
+when the merge base had that mirror and `<doc>` no longer exists in the PR's head, and may edit
+`.i18n-state.json` only to drop such documents from `sources`. The guard lists those files under
+`orphan-cleanup`. Deleting the mirror of a document that still exists stays a violation: no other
+pipeline tracks that state, and the `llm.txt` and `CHANGELOG.md` mirrors have their own writers.
+
 **The checks, per gate mode** (`scripts/check/lib/gateMode.mjs`; helper
 `scripts/check/lib/derivedArtifactScope.mjs`):
 
