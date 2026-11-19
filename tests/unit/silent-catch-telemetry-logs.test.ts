@@ -9,6 +9,10 @@ const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-silent-ca
 process.env.DATA_DIR = TEST_DATA_DIR;
 
 const core = await import("../../src/lib/db/core.ts");
+// The hook imports these lazily inside its fire-and-forget block. Loading them here keeps that
+// import out of the bounded settle() wait, so the expected log line is not late on a slow load.
+await import("../../src/lib/db/compressionAnalytics.ts");
+await import("../../open-sse/config/contextEditing.ts");
 const { recordContextEditingTelemetryHook } =
   await import("../../open-sse/handlers/chatCore/contextEditingTelemetry.ts");
 const { emitCompressionStepEvent } =
