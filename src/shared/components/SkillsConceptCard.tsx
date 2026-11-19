@@ -39,7 +39,7 @@ export function SkillsConceptCard({
           <Icon name={icon} size={20} className="text-primary" />
         </div>
         <div className="flex-1 min-w-0">
-          <h3 className="text-sm font-semibold text-text-main">{title}</h3>
+          <h3 className="text-sm text-text-main">{title}</h3>
         </div>
         <Link
           href={crossLinkHref}

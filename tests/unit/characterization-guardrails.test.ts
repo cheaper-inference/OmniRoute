@@ -90,9 +90,9 @@ test("importing the barrel registers the six default guardrails in priority orde
       ["vision-bridge", 5, true],
       ["audio-bridge", 6, true],
       ["video-bridge", 7, true],
+      ["credential-masker", 9, true],
       ["pii-masker", 10, true],
       ["prompt-injection", 20, true],
-      ["credential-masker", 95, true],
     ]
   );
 });

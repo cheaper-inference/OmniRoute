@@ -22,7 +22,7 @@ import type { FreeModelBudget } from "./freeModelCatalog.ts";
  * rewrites file timestamps on every deploy, which would report a months-old
  * catalog as "updated today". Bump this whenever the entries below change.
  */
-export const FREE_CATALOG_CURATED_AT = "2026-10-30";
+export const FREE_CATALOG_CURATED_AT = "2026-11-09";
 
 export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   { provider: "agentrouter", modelId: "claude-opus-4-8", displayName: "Claude Opus 4.8", monthlyTokens: 0, creditTokens: 200000000, freeType: "one-time-initial", poolKey: "agentrouter", tos: "caution" },
@@ -320,14 +320,15 @@ export const FREE_MODEL_BUDGETS: FreeModelBudget[] = [
   // https://build.nvidia.com/search publishes request-rate limits, not a token/credit allowance; model pages advertise free endpoints. Requires an API key; trial-use restrictions apply (#18499).
   { provider: "nvidia", modelId: "google/gemma-4-31b-it", displayName: "Gemma 4 31B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution" },
   { provider: "nvidia", modelId: "nvidia/nemotron-3.5-super-vl-120b-a12b", displayName: "Nemotron 3.5 Super VL 120B A12B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution" },
-  // evidence: https://ollama.com/pricing (2026-10-27) now bills exact IDs
-  // deepseek-v4-pro, kimi-k2.6, minimax-m2.7 and nemotron-3-super. Their
-  // unconditional grants were removed. Older Free/starter-plan copy is stale;
-  // https://ollama.com/library/gemma4:31b-cloud (2026-10-28) also binds gemma4:31b
-  // to a paid cloud API request. Its grant was removed; legacy account entitlements
-  // are unverified. qwen3.5:397b remains unverified (#17028).
-  // ollama.com/library/deepseek-v4-flash (Aug 27) and /library/glm-5.1 (Sep 25): retired 2026.
-  { provider: "ollama-cloud", modelId: "qwen3.5:397b", displayName: "Qwen 3.5 397B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "ollama-cloud", tos: "ambiguous" },
+  // evidence: public-page https://github.com/mnfst/awesome-free-llm-apis (2026-10-30)
+  // lists GPT OSS 20B on NVIDIA NIM's free Developer Program tier (40 RPM / 10,000 RPD).
+  // NVIDIA's model page https://build.nvidia.com/openai/gpt-oss-20b identifies this as an
+  // API Trial governed by NVIDIA API Trial Terms. The allowance is request-based, not a
+  // published token budget; keep it uncapped here rather than inventing a token estimate.
+  // NVIDIA's trial notice says prompts are logged to improve products; do not send secrets
+  // or confidential code through this free endpoint.
+  { provider: "nvidia", modelId: "openai/gpt-oss-20b", displayName: "GPT OSS 20B", monthlyTokens: 0, creditTokens: 0, freeType: "recurring-uncapped", poolKey: "nvidia", tos: "caution", trainsOnPrompts: true },
+  // evidence: https://ollama.com/pricing (2026-11-09) ended the free tier; all models moved to pay-as-you-go (#19334).
   // evidence: api-public https://onomeo.com/api/info (2026-10-25) — `freeModels` lists the models served free of
   // charge. Metering is 30 calls per 5 h per account inside a site-wide pool shared by all accounts (`rate`:
   // perAccountWindowMax 30, windowMinutes 300) — a call count, not a token quantity ⇒ recurring-uncapped with 0

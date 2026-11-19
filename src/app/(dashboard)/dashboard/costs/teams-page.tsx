@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Button from "@/shared/components/Button";
 
 import { useTeamCosts, useTeamList } from "./teams/useTeamCosts";
@@ -36,21 +37,26 @@ function TeamsHeader({
   onCreate: () => void;
 }) {
   const t = useTranslations("teamCosts");
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   return (
-    <div className="flex flex-wrap items-start justify-between gap-3">
-      <div>
-        <h1 className="text-2xl font-semibold">{t("title")}</h1>
-        <p className="mt-1 text-sm text-text-muted">{t("subtitle")}</p>
-      </div>
-      <div className="flex gap-2">
-        <Button variant="secondary" icon="refresh" disabled={blocked} onClick={onRefresh}>
-          {t("refresh")}
-        </Button>
-        <Button icon="add" disabled={createDisabled} onClick={onCreate}>
-          {t("create")}
-        </Button>
-      </div>
-    </div>
+    // The page title: same text the shell showed for this route (it used to render a second
+    // <h1> next to this one).
+    <PageHeader
+      compact
+      title={tSidebar("costsTeams")}
+      description={tHeader("teamsDescription")}
+      actions={
+        <>
+          <Button variant="secondary" icon="refresh" disabled={blocked} onClick={onRefresh}>
+            {t("refresh")}
+          </Button>
+          <Button icon="add" disabled={createDisabled} onClick={onCreate}>
+            {t("create")}
+          </Button>
+        </>
+      }
+    />
   );
 }
 
