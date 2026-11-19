@@ -55,6 +55,8 @@ import {
   rrCounters,
 } from "./rrState.ts";
 import { executeRuntimeUnitCombo } from "./runtimeUnits.ts";
+import { orderJevRuntimeUnits } from "./jevRuntimeUnits.ts";
+import type { JevResilienceSettings } from "./jevBlockChecker.ts";
 import {
   releaseQualityClone,
   releaseRejectedQualityResponse,
@@ -954,6 +956,7 @@ async function orderRuntimeUnits(args: {
  * `flatten`, or when the strategy needs the full target machinery.
  */
 type RuntimeUnitDispatchArgs = {
+  invocationId?: string;
   body: Record<string, unknown>;
   combo: ComboLike;
   config: ComboSetupConfig;
@@ -965,6 +968,8 @@ type RuntimeUnitDispatchArgs = {
   isModelAvailable?: IsModelAvailable;
   log: ComboLogger;
   settings?: Record<string, unknown> | null;
+  /** Combo-setup resilience settings; the `jev` runtime-unit gates read them. */
+  resilienceSettings: JevResilienceSettings;
   relayOptions?: HandleComboChatOptions["relayOptions"];
   signal?: AbortSignal | null;
   apiKeyAllowedConnections?: string[] | null;
@@ -978,13 +983,51 @@ type RuntimeUnitDispatchArgs = {
   runCombo: RunCombo;
 };
 
+/**
+ * Runtime-unit order for the strategy. `jev` (#15276) asks System One which units run
+ * and keeps the operator's order for failover; every other strategy uses its own order.
+ */
+async function orderRuntimeUnitsForStrategy(
+  args: RuntimeUnitDispatchArgs,
+  executeModeUnits: ResolvedComboUnit[]
+): Promise<RuntimeUnitOrdering | { earlyResponse: Response }> {
+  const { body, combo, config, strategy, allCombos, log, settings } = args;
+  if (strategy !== "jev") {
+    return orderRuntimeUnits({ strategy, executeModeUnits, combo, config, settings });
+  }
+  const jevOrdering = await orderJevRuntimeUnits({
+    units: executeModeUnits,
+    body,
+    comboName: combo.name,
+    config,
+    resilienceSettings: args.resilienceSettings,
+    allCombos: allCombos ?? [],
+    apiKeyAllowedConnections: args.apiKeyAllowedConnections,
+    hiddenModelsByProvider: args.hiddenModelsByProvider,
+    isModelAvailable: args.isModelAvailable,
+    invocationId: args.invocationId,
+    signal: args.signal,
+    log,
+  });
+  if (jevOrdering.earlyResponse) return { earlyResponse: jevOrdering.earlyResponse };
+  return {
+    units: jevOrdering.units,
+    executionStrategy: jevOrdering.executionStrategy,
+    stickyLimit: null,
+    stickyTargets: executeModeUnits,
+  };
+}
+
 /** Dispatch a runtime unit after resolving its target and request compatibility. */
 export async function tryRuntimeUnitDispatch(
   args: RuntimeUnitDispatchArgs
 ): Promise<Response | null> {
   const { body, combo, config, strategy, allCombos, log, settings } = args;
   const nestingContext = buildDefaultNesting(args.nesting, combo.name, config);
-  const nestedComboMode = normalizeNestedComboMode(config.nestedComboMode);
+  // Jev's spec treats a combo-ref as one opaque choice; never flatten child targets
+  // into the parent's choice set, even when a persisted combo predates execute mode.
+  const nestedComboMode =
+    strategy === "jev" ? "execute" : normalizeNestedComboMode(config.nestedComboMode);
 
   const executeModeUnits =
     nestedComboMode === "execute" && allCombos
@@ -1003,13 +1046,8 @@ export async function tryRuntimeUnitDispatch(
   const runtimeUnitsSupported = getStrategyTraits(strategy).runtimeUnitOrder !== "unsupported";
   if (!hasExecutableComboRef || !runtimeUnitsSupported) return null;
 
-  const ordering = await orderRuntimeUnits({
-    strategy,
-    executeModeUnits,
-    combo,
-    config,
-    settings,
-  });
+  const ordering = await orderRuntimeUnitsForStrategy(args, executeModeUnits);
+  if ("earlyResponse" in ordering) return ordering.earlyResponse;
   const {
     units: runtimeUnits,
     executionStrategy: unitExecutionStrategy,

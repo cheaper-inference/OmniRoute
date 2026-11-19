@@ -694,7 +694,8 @@ export default function AddApiKeyModal({
                             <Input
                               value={commandCodeAuthState.authUrl}
                               readOnly
-                              className="flex-1 font-mono text-xs"
+                              className="flex-1"
+                              inputClassName="text-xs"
                             />
                             <Button
                               variant="ghost"
@@ -715,7 +716,8 @@ export default function AddApiKeyModal({
                               <Input
                                 value={commandCodeAuthState.callbackUrl}
                                 readOnly
-                                className="flex-1 font-mono text-xs"
+                                className="flex-1"
+                                inputClassName="text-xs"
                               />
                               <Button
                                 variant="ghost"

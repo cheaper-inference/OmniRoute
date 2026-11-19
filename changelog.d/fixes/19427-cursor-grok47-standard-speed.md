@@ -1,1 +1,0 @@
-- **fix(cursor):** `cursor-grok-4.7-high-256k` now goes out as a standard-speed request: the legacy ModelDetails envelope is omitted and the effort parameter is sent as `reasoning_effort`, so Cursor no longer records it as the Fast variant.
