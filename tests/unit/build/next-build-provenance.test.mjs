@@ -1,5 +1,11 @@
 import assert from "node:assert/strict";
+import { execFileSync } from "node:child_process";
+import { copyFileSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { dirname, join } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
+import { hashFile, sha256 } from "../../../scripts/build/standaloneInput.mjs";
 import { ciSourceContext, verifyManifest } from "../../../scripts/ci/next-build-provenance.mjs";
 
 const candidateSha = "1".repeat(40);
@@ -89,6 +95,39 @@ test("a later consumer retains the original successful producer attempt and runt
   assert.equal(JSON.stringify(manifest), before);
   assert.equal(manifest.producer.runAttempt, "1");
   assert.equal(manifest.producer.runtime.platform, "linux");
+});
+
+test("Next provenance inputs retain their bytes in a Git checkout with autocrlf enabled", (t) => {
+  const root = fileURLToPath(new URL("../../../", import.meta.url));
+  const repo = mkdtempSync(join(tmpdir(), "next-input-eol-"));
+  t.after(() => rmSync(repo, { recursive: true, force: true }));
+  const git = (...args) =>
+    execFileSync("git", ["-c", "core.autocrlf=true", ...args], {
+      cwd: repo,
+      stdio: ["ignore", "pipe", "pipe"],
+      timeout: 10000,
+      maxBuffer: 4 * 1024 * 1024,
+    });
+
+  git("init", "--quiet");
+  const inputs = ["package-lock.json", ".github/workflows/ci.yml"];
+  for (const path of [".gitattributes", ...inputs]) {
+    const target = join(repo, path);
+    mkdirSync(dirname(target), { recursive: true });
+    copyFileSync(join(root, path), target);
+  }
+  writeFileSync(join(repo, "ordinary.txt"), "first\nsecond\n");
+  git("add", "--", ".gitattributes", "ordinary.txt", ...inputs);
+  git("checkout-index", "--prefix=checkout/", "--", "ordinary.txt", ...inputs);
+
+  assert.equal(readFileSync(join(repo, "checkout/ordinary.txt"), "utf8"), "first\r\nsecond\r\n");
+  for (const path of inputs) {
+    assert.equal(
+      hashFile(join(repo, "checkout", path)).sha256,
+      sha256(git("show", `:${path}`)),
+      path
+    );
+  }
 });
 
 for (const key of [
