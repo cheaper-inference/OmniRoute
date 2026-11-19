@@ -29,6 +29,7 @@ function chunk(delta: Record<string, unknown>, finishReason: string | null = nul
 
 async function run(chunks: string[]) {
   let completed: Loose | null = null;
+  let completionCount = 0;
   const source = new ReadableStream({
     start(controller) {
       for (const c of chunks) controller.enqueue(textEncoder.encode(c));
@@ -43,6 +44,7 @@ async function run(chunks: string[]) {
     body: { messages: [{ role: "user", content: "hi" }] },
     onComplete(payload: Loose) {
       completed = payload;
+      completionCount++;
     },
   });
   const text = await new Response(source.pipeThrough(stream)).text();
@@ -51,7 +53,7 @@ async function run(chunks: string[]) {
     .map((b) => b.trim())
     .filter((b) => b.startsWith("data: {"))
     .map((b) => JSON.parse(b.slice(6)));
-  return { text, events, completed: completed as Loose | null };
+  return { text, events, completed: completed as Loose | null, completionCount };
 }
 
 test.after(() => {
@@ -82,7 +84,7 @@ test("all-empty tool_calls placeholders never become a phantom call or a tool_ca
 });
 
 test("name-only, id-only and argument fragments of one real call are all kept", async () => {
-  const { events, completed } = await run([
+  const { text, events, completed, completionCount } = await run([
     chunk({ tool_calls: [{ index: 0, function: { name: "read_file" } }] }),
     chunk({ tool_calls: [{ index: 0, function: { arguments: '{"path":' } }] }),
     chunk({ tool_calls: [{ index: 0, function: { arguments: '"a"}' } }] }),
@@ -99,7 +101,39 @@ test("name-only, id-only and argument fragments of one real call are all kept", 
   const calls = completed?.responseBody.choices[0].message.tool_calls;
   assert.equal(calls.length, 2);
   assert.equal(calls[0].function.arguments, '{"path":"a"}');
-  assert.equal(events.at(-1)?.choices?.[0]?.finish_reason, "tool_calls");
+  assert.deepEqual(
+    fragments.slice(1, 3).map((fragment) => fragment.function.arguments),
+    ['{"path":', '"a"}']
+  );
+  const finishIndex = events.findIndex((event) => event.choices?.[0]?.finish_reason != null);
+  const finishes = events.filter((event) => event.choices?.[0]?.finish_reason != null);
+  assert.deepEqual(
+    finishes.map((event) => event.choices[0].finish_reason),
+    ["tool_calls"]
+  );
+  const lastFragmentIndex = events.findLastIndex(
+    (event) => event.choices?.[0]?.delta?.tool_calls?.length
+  );
+  assert.ok(lastFragmentIndex < finishIndex, "all tool fragments precede the finish");
+  const trailers = events.slice(finishIndex + 1);
+  assert.equal(trailers.length, 1, "one usage-only receipt follows the finish");
+  assert.deepEqual(trailers[0].choices, []);
+  const usage = trailers[0].usage;
+  assert.equal(usage.completion_tokens, 4, "only the generated arguments are estimated");
+  assert.ok(Number.isInteger(usage.prompt_tokens) && usage.prompt_tokens > 0);
+  assert.equal(usage.total_tokens, usage.prompt_tokens + usage.completion_tokens);
+  assert.equal(usage.estimated, true);
+  assert.deepEqual(usage.usage_evidence.output, {
+    source: "estimated",
+    method: "observed_characters",
+  });
+  assert.equal(usage.usage_evidence.cacheRead.source, "unknown");
+  assert.equal(usage.usage_evidence.cacheCreation.source, "unknown");
+  assert.equal(completed.usage.completion_tokens, usage.completion_tokens);
+  assert.deepEqual(completed.usage.usage_evidence, usage.usage_evidence);
+  assert.equal(completionCount, 1);
+  assert.equal(text.match(/^data: \[DONE\]$/gm)?.length, 1);
+  assert.ok(text.trimEnd().endsWith("data: [DONE]"));
 });
 
 test("a tool_call with an extension key (not a placeholder) is kept", async () => {

@@ -374,7 +374,7 @@ omniroute
 omniroute --port 3000
 ```
 
-O CLI carrega automaticamente `.env` a partir de `~/.omniroute/.env` ou `./.env`. Um `./.env` no directório de trabalho pode definir apenas uma pequena lista de chaves permitidas (portas, `REQUIRE_API_KEY`, definições de localidade e cores); coloque tudo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+O CLI carrega automaticamente `.env` a partir de `~/.omniroute/.env` ou `./.env`. Um `./.env` no directório de trabalho pode definir apenas uma pequena lista de chaves permitidas (`REQUIRE_API_KEY`, localização, fuso horário e definições de cor, e não as portas); coloque tudo o resto em `~/.omniroute/.env`. Consulte [os contratos de lançamento CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modo bandeja
 
@@ -411,7 +411,7 @@ Ative a inicialização no próximo login da máquina:
 omniroute autostart enable
 ```
 
-A inicialização automática utiliza o modo de bandeja nas sessões macOS, Windows e gráficas Linux. Linux sem headless utiliza o serviço de utilizador systemd existente.
+O arranque automático utiliza o modo de bandeja nas sessões macOS, Windows e gráficas Linux. Linux sem headless utiliza o serviço de utilizador systemd existente.
 
 Desative a inicialização no login:
 
@@ -717,14 +717,14 @@ Qualquer gateway que fale o OpenAI API (um proxy auto-hospedado, vLLM, um agrega
 2. **Nome** : um rótulo de visualização para o nó.
 3. **Prefixo** : o nome do encaminhamento. Os clientes chamam os modelos como `<prefix>/<model>`, pelo que um nó com prefixo `mygw` serve `mygw/gpt-4o-mini`. Obrigatório; não há restrição de caracteres.
 4. **Tipo API** : a família de endpoints que o gateway serve (conclusões de chat, respostas, incorporações, áudio, imagens).
-5. **Base URL** : a raiz API, até e incluindo `/v1` (por exemplo `https://gateway.example.com/v1`), e não o caminho `/chat/completions` completo. Os gateways com caminhos não padrão definem-nos em** Configurações avançadas** (percurso do chat, percurso dos modelos).
+5. **Base URL** : a raiz API, até `/v1` inclusive (por exemplo `https://gateway.example.com/v1`), e não o caminho `/chat/completions` completo. Os gateways com caminhos não padrão definem-nos em** Configurações avançadas** (percurso do chat, percurso dos modelos).
 6. O** Chave API (para verificação)** campo apenas testa a ligação. Após criar o nó, abra-o e utilize** Adicionar ligação** para armazenar a chave que os pedidos irão utilizar.
 
 O nó obtém um id interno no formato `openai-compatible-<apiType>-<uuid>`; nunca precisa de o digitar, o prefixo é o nome público.
 
 #### Prefixos reservados
 
-Um prefixo não pode ser o id ou alias de um fornecedor integrado (por exemplo `openai`, `cf`), nem o id de um fornecedor retirado. O resolvedor de modelos verifica os ids e aliases integrados antes dos nós personalizados, pelo que um nó que utiliza um destes prefixos nunca receberia tráfego: `<prefix>/model` iria para o fornecedor integrado ou falharia o fecho se esse fornecedor fosse desativado. A criação ou edição de um nó com este prefixo é rejeitada com:
+Um prefixo não pode ser o id ou o alias de um fornecedor integrado (por exemplo `openai`, `cf`), nem o id de um fornecedor desativado. O resolvedor de modelos verifica os ids e aliases integrados antes dos nós personalizados, pelo que um nó que utiliza um destes prefixos nunca receberia tráfego: `<prefix>/model` iria para o fornecedor integrado ou falharia o fecho se esse fornecedor fosse desativado. A criação ou edição de um nó com este prefixo é rejeitada com:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
@@ -736,8 +736,8 @@ Escolha um prefixo distinto (`mygw`, `acme-proxy`). Se os pedidos para um nó pe
 
 Estas chaves vão para o `providerSpecificData` de uma ligação (por exemplo, através `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (inteiro, 1–1024) — para ligações compatíveis com o formato de chat OpenAI cuja gateway rejeita nomes de ferramentas longos. Os nomes mais longos são enviados como aliases curtos e restaurados na resposta.
-- `quotaEndpoint` — o endpoint quota/credits do gateway, lido para a gama de quotas do painel e encaminhamento com reconhecimento de quotas. Funciona em ligações compatíveis com OpenAI e Anthropic; a forma completa está documentada em `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (inteiro, 1–1024) — para ligações compatíveis com o formato de chat OpenAI cuja gateway rejeita nomes de ferramentas longos. Os nomes mais longos são enviados como aliases curtos e restaurados na resposta. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code já alias de nomes com mais de 64 caracteres sem configuração. Um valor de ligação substitui o padrão Azure OpenAI /Azure AI Foundry (uma ligação Azure atrás de um gateway mais rigoroso) e define o limite para um nó compatível personalizado; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go e Muse Code mantêm o seu limite de registo e ignoram-no.
+- `quotaEndpoint` — o endpoint quota/credits do gateway, lê a gama de quotas do painel e o encaminhamento com reconhecimento de quotas. Funciona em ligações compatíveis com OpenAI e Anthropic; a forma completa está documentada em `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -772,9 +772,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Apenas os pedidos enviados para um peer URL explicitamente incluído na lista de permissões recebem o cabeçalho `X-OmniRoute-Peer-Trace`. Um gateway rejeita uma instância repetida ID ou orçamento de salto esgotado com HTTP `508 Loop Detected`; os fornecedores upstream comuns não recebem metadados de pares.
+Apenas os pedidos enviados para um peer URL explicitamente incluído na lista de permissões recebem o cabeçalho `X-OmniRoute-Peer-Trace`. Um gateway rejeita uma instância repetida ID ou um orçamento de salto esgotado com HTTP `508 Loop Detected`; os fornecedores upstream comuns não recebem metadados de pares.
 
-O encadeamento de pares não é replicação de base de dados ou failover de host. Cada gateway mantém estados SQLite, caches, contadores de taxas e sessões independentes. Utilize um proxy reverso com verificação de integridade ou failover de cliente para a disponibilidade active/passive ou active/active e nunca monte uma base de dados SQLite em várias instâncias OmniRoute em execução.
+O encadeamento de pares não é replicação de base de dados ou failover de host. Cada gateway mantém o estado SQLite, caches, contadores de taxas e sessões independentes. Utilize um proxy reverso com verificação de integridade ou failover de cliente para a disponibilidade active/passive ou active/active e nunca monte uma base de dados SQLite em várias instâncias OmniRoute em execução.
 
 ### Rotas de fornecedores dedicados
 
@@ -834,9 +834,9 @@ Retorna modelos agrupados por fornecedor com tipos (`chat`, `embedding`, `image`
 
 ### LLM Gateway Intelligence (Fase 9)
 
-- **Cache Semântico** - Armazena automaticamente em cache as respostas sem streaming e temperatura = 0 (ignorar com `X-OmniRoute-No-Cache: true`)
-- **Solicitar Idempotência** — Desduplica os pedidos em 5s através do cabeçalho `Idempotency-Key` ou `X-Request-Id`
-- **Acompanhamento do progresso** - Eventos SSE `event: progress` ativados através do cabeçalho `X-OmniRoute-Progress: true`
+- **Cache Semântico** — Armazena automaticamente em cache as respostas sem streaming e temperatura = 0 (ignorar com `X-OmniRoute-No-Cache: true`)
+- **Solicitar Idempotência** — desduplica pedidos em 5s através do cabeçalho `Idempotency-Key` ou `X-Request-Id`
+- **Acompanhamento do progresso** — Opt-in SSE events `event: progress` através do cabeçalho `X-OmniRoute-Progress: true`
 
 ---
 
@@ -867,25 +867,25 @@ Configurar via** Painel → Configurações Encaminhamento →** . O dashboard e
 
 | Estratégia                       | Descrição                                                                                                        |
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Preencha primeiro**            | Utiliza as contas por ordem de prioridade – a conta principal trata de todos os pedidos até ficar indisponível   |
+| **Preencha primeiro**            | Utiliza contas por ordem de prioridade — conta primária trata de todos os pedidos até ficar indisponível         |
 | **Rodada Robin**                 | Percorre todas as contas com um limite fixo configurável (padrão: 3 chamadas por conta)                          |
-| **P2C (poder de duas escolhas)** | Escolhe 2 contas aleatórias e direciona para a mais saudável – equilibra a carga com a consciência da saúde      |
+| **P2C (poder de duas escolhas)** | Escolhe 2 contas aleatórias e direciona para a mais saudável — equilibra a carga com consciência de saúde        |
 | **Aleatório**                    | Seleciona aleatoriamente uma conta para cada pedido utilizando o embaralhamento Fisher-Yates                     |
 | **Menos usado**                  | Percursos para a conta com o carimbo de data/hora `lastUsedAt` mais antigo, distribuindo o tráfego uniformemente |
 | **Custo Otimizado**              | Percursos para a conta com o valor de menor prioridade, otimizando para prestadores de menor custo               |
 
 **Combinações avançadas e estratégias automáticas** (configurável por combo ou através de prefixos `auto/*` — ver [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` – ordem estrita, nunca round-robins
-- `weighted` — tráfego proporcional dividido por pesos por modelo
+- `priority` — ordem estrita, nunca round-robins
+- tráfego proporcional `weighted` — dividido por pesos por modelo
 - `fill-first` — drena o primeiro modelo até que os limites sejam atingidos
 - `round-robin` / `strict-random` / `random`
 - `p2c` (poder de duas escolhas)
 - `least-used` e `cost-optimized`
-- `auto` – baseado na pontuação de todos os candidatos
-- `lkgp` (último fornecedor válido) – fixa o último fornecedor bem-sucedido e depois volta às regras
+- `auto` — com base na pontuação de todos os candidatos
+- `lkgp` (último fornecedor válido) — fixa o último fornecedor bem-sucedido e depois volta às regras
 - `context-optimized` — escolhe o modelo com a maior janela de contexto livre
-- `context-relay` — encadeia modelos de longo contexto para turnos de seguimento
+- `context-relay` — encadeia modelos de contexto longo para turnos de acompanhamento
 
 #### Cabeçalho de sessão fixa externa
 
@@ -895,7 +895,7 @@ Para afinidade de sessão externa (por exemplo, agentes Claude Code/Codex atrás
 X-Session-Id: your-session-key
 ```
 
-OmniRoute também aceita `x_session_id` e devolve a chave de sessão efetiva em `X-OmniRoute-Session-Id`.
+OmniRoute também aceita `x_session_id` e devolve a chave de sessão efectiva em `X-OmniRoute-Session-Id`.
 
 Se utilizar o Nginx e enviar cabeçalhos em formato de sublinhado, ative:
 
@@ -992,24 +992,24 @@ Configurar via** Painel → Configurações Resiliência →** .
 
 OmniRoute implementa a resiliência ao nível do fornecedor com cinco componentes:
 
-1. **Solicitar fila e ritmo** — Modelação de pedidos ao nível de sistema:
+1. **Solicitar fila e ritmo** Modelação de pedidos ao nível de sistema — :
    - **Pedidos por minuto (RPM)** — Máximo de pedidos por minuto por conta
    - **Tempo mínimo entre pedidos** — Intervalo mínimo em milissegundos entre pedidos
    - **Máximo de pedidos simultâneos** — Máximo de pedidos simultâneos por conta
 
-2. **Arrefecimento da conexão** — Configuração por tipo de autenticação para uma única ligação após falhas repetíveis:
-   - **Recarga básica** — Janela de arrefecimento padrão para falhas upstream repetíveis
-   - **Utilize dicas de nova tentativa upstream** — Honra `Retry-After` oficial ou dicas de redefinição quando fornecidas
-   - **Etapas máximas de espera** — Nível máximo de espera exponencial para avarias repetidas
+2. **Arrefecimento da conexão** — Configuração do tipo por autenticação para uma única ligação após falhas repetíveis:
+   - **Recarga básica** Janela de arrefecimento padrão — para falhas de upstream repetíveis
+   - **Utilize dicas de nova tentativa upstream** — homenageia `Retry-After` oficial ou dicas de redefinição quando fornecidas
+   - **Etapas máximas de espera** — Nível máximo de espera exponencial para falhas repetidas
 
-3. **Disjuntor do fornecedor** — Rastreia as falhas do fornecedor de ponta a ponta, marca um fornecedor como degradado no limite de aviso configurado e abre o disjuntor quando o limite de falha configurado é atingido:
+3. **Disjuntor do fornecedor** — acompanha as falhas do fornecedor de ponta a ponta, marca um fornecedor degradado no limite de aviso configurado e abre o disjuntor quando o limite de falha configurado é atingido:
    - **Limite de degradação** — Falhas consecutivas do fornecedor antes de entrar `DEGRADED`
    - **Limite de falha** — Falhas consecutivas do fornecedor antes de entrar `OPEN`
-   - **Repor tempo limite** — Período de tempo antes de o prestador ser testado novamente
-   - **CLOSED** (Saudável) — As solicitações fluem normalmente
-   - **DEGRADED** — As solicitações ainda fluem enquanto as falhas elevadas são rastreadas
-   - **OPEN** — O fornecedor é bloqueado temporariamente após falhas repetidas
-   - **HALF_OPEN** — Testando se o prestador recuperou
+   - **Repor tempo limite** — Janela de tempo antes de o fornecedor ser testado novamente
+   - **CLOSED** (Saudável) os pedidos — fluem normalmente
+   - **DEGRADED** Os pedidos — ainda fluem enquanto falhas elevadas são rastreadas
+   - **OPEN** O fornecedor — é bloqueado temporariamente após falhas repetidas
+   - **HALF_OPEN** — Testando se o fornecedor recuperou
 
    Os limites de taxa `429` com âmbito de ligação permanecem válidos** Arrefecimento da conexão** e não contam para o disjuntor do fornecedor.
 
@@ -1063,7 +1063,7 @@ A página de definições está organizada em** 7 guias** para facilitar a naveg
 | --------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **General**     | Ferramentas de armazenamento do sistema, comportamento padrão, visibilidade do túnel Endpoint                                                                                                |
 | **Aspeto**      | Controlos de tema (light/dark/system), visibilidade da barra lateral, alternância de painel para cartões de túnel Cloudflare/Tailscale/ngrok                                                 |
-| **AI**          | Pensar no orçamento (passagem/remoção automática/personalizada/adaptativa - ver [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt do sistema global, estatísticas de cache de prompt      |
+| **AI**          | Pensar no orçamento (passthrough/auto-strip/custom/adaptive — ver [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt do sistema global, prompt de estatísticas de cache                    |
 | **Segurança**   | definições Login/Password, controlo de acesso IP, autenticação API para `/models`, bloqueio de fornecedor, protecção de injecção de prompt                                                   |
 | **Roteamento**  | Estratégia de encaminhamento global (preencher primeiro/round robin/ P2C /aleatório/menos utilizado/custo otimizado), aliases de modelo wildcard, cadeias de fallback, padrões de combinação |
 | **Resiliência** | Fila de solicitação, arrefecimento da ligação, configuração do disjuntor do fornecedor e comportamento de espera pelo arrefecimento                                                          |
@@ -1080,7 +1080,7 @@ Acesso via** Custos → painel** .
 | Guia          | Finalidade                                                                                            |
 | ------------- | ----------------------------------------------------------------------------------------------------- |
 | **Orçamento** | Defina limites de gastos por chave API com orçamentos daily/weekly/monthly e rastreio em tempo real   |
-| **Preços**    | Visualizar e editar entradas de preços de modelo — custo por 1 mil tokens input/output por fornecedor |
+| **Preços**    | Visualizar e editar entradas de preços do modelo custo — por 1 mil tokens input/output por fornecedor |
 
 ```bash
 # API: Set a budget

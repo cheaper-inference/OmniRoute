@@ -302,7 +302,7 @@ export function OAuthExportImportModal({
                         onChange={() => toggleRow(row.index)}
                       />
                     </TableCell>
-                    <TableCell className="h-auto px-2 py-1 font-medium text-text-main">
+                    <TableCell className="h-auto px-2 py-1 text-text-main">
                       {row.email || t("oauthExportNoEmail")}
                     </TableCell>
                     <TableCell className="h-auto px-2 py-1 font-mono text-text-muted">
