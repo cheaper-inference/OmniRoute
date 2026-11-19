@@ -42,10 +42,6 @@ export type NativeEvent =
   | { type: "frame"; bytes: Buffer }
   | { type: "end"; httpStatus: number | null; grpcStatus: number | null };
 
-interface StreamWithRst extends http2.ClientHttp2Stream {
-  rstCode?: number;
-}
-
 export interface OpenTurnOptions {
   token: string;
   userText: string;
@@ -72,7 +68,7 @@ function decodeGrpcMessage(value: unknown): string | null {
 }
 
 export interface NativeTurn {
-  events: AsyncIterable<NativeEvent>;
+  events: AsyncIterableIterator<NativeEvent>;
   cancel: () => void;
 }
 
@@ -138,7 +134,7 @@ export function openDirectTurn({
 
   let client: http2.ClientHttp2Session | undefined;
   let socket: NodeJS.ReadWriteStream | null = null;
-  let request: StreamWithRst | undefined;
+  let request: http2.ClientHttp2Stream | undefined;
   let timer: NodeJS.Timeout | undefined;
   let connectionEnd: { rstCode: number } | null = null;
   let closed = false;
@@ -317,7 +313,7 @@ export function openDirectTurn({
       "grpc-timeout": `${timeoutMs}m`,
       te: "trailers",
       "user-agent": "omniroute-gemini-app/1.0",
-    }) as StreamWithRst;
+    });
     request.on("response", (headers) => inspectStatus(headers));
     request.on("trailers", (headers) => inspectStatus(headers));
     request.on("error", () => {
@@ -356,7 +352,7 @@ export function openDirectTurn({
     fail("NATIVE_UNAVAILABLE", 502);
   }
 
-  const events: AsyncIterable<NativeEvent> = {
+  const events: AsyncIterableIterator<NativeEvent> = {
     [Symbol.asyncIterator]() {
       return this;
     },
@@ -367,7 +363,7 @@ export function openDirectTurn({
         return Promise.resolve({ value, done: false });
       }
       if (error) return Promise.reject(error);
-      if (ended || closed) return Promise.resolve({ done: true });
+      if (ended || closed) return Promise.resolve({ done: true, value: undefined });
       if (waiting)
         return Promise.reject(
           new GeminiAppError("NATIVE_PROTOCOL_ERROR", 502, "Native reader busy")
@@ -382,12 +378,12 @@ export function openDirectTurn({
         items.length = 0;
         queued = 0;
         if (waiting) {
-          waiting.resolve({ done: true });
+          waiting.resolve({ done: true, value: undefined });
           waiting = null;
         }
         stop();
       }
-      return Promise.resolve({ done: true });
+      return Promise.resolve({ done: true, value: undefined });
     },
   };
 
