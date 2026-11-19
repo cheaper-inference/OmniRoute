@@ -69,6 +69,13 @@ async function readMultipartOptions(formData: FormData): Promise<Record<string, 
   return options;
 }
 
+function readMultipartControls(formData: FormData): ImageEditControls {
+  return parseImageEditControls({
+    quality: formData.get("quality") ?? undefined,
+    background: formData.get("background") ?? undefined,
+  });
+}
+
 async function readMultipartImage(formData: FormData): Promise<EditInput> {
   const options = await readMultipartOptions(formData);
   const promptRaw = formData.get("prompt");
@@ -94,10 +101,7 @@ async function readMultipartImage(formData: FormData): Promise<EditInput> {
   const firstImage = images[0] ?? null;
   return {
     options,
-    controls: parseImageEditControls({
-      quality: formData.get("quality") ?? undefined,
-      background: formData.get("background") ?? undefined,
-    }),
+    controls: readMultipartControls(formData),
     prompt,
     model,
     size,
