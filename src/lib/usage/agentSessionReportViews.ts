@@ -216,47 +216,85 @@ function rankAxis(axis: Map<string, AxisValue>, cap: number, wholeSessions: bool
   return { headers, indexOf: (key: string) => index.get(key) ?? kept.length };
 }
 
-function computeMatrix(
+/** The sums a matrix scan accumulates: per row value, per column value, per cell and in total. */
+interface MatrixSums {
+  rows: Map<string, AxisValue>;
+  cols: Map<string, AxisValue>;
+  cells: Map<string, Map<string, MetricsSum>>;
+  total: MetricsSum;
+  /**
+   * Where each session's first slice went; for a session-level dimension every slice of the
+   * session goes to the same value, so its active time belongs there.
+   */
+  sessionPlaces: Map<string, { row: AxisValue; col: AxisValue; cell: MetricsSum }>;
+}
+
+function cellSum(cells: MatrixSums["cells"], rowKey: string, colKey: string): MetricsSum {
+  let line = cells.get(rowKey);
+  if (!line) cells.set(rowKey, (line = new Map()));
+  let cell = line.get(colKey);
+  if (!cell) line.set(colKey, (cell = new MetricsSum()));
+  return cell;
+}
+
+function sumMatrixSlices(
   scan: ReportScan,
   rowDimension: ReportMatrixDimension,
   colDimension: ReportMatrixDimension
-): ReportMatrix {
+): MatrixSums {
   const rowOf = SLICE_IDENTITY[rowDimension];
   const colOf = SLICE_IDENTITY[colDimension];
-  const rows = new Map<string, AxisValue>();
-  const cols = new Map<string, AxisValue>();
-  const cells = new Map<string, Map<string, MetricsSum>>();
-  const total = new MetricsSum();
-  // Where each session's first slice went; for a session-level dimension every slice of the
-  // session goes to the same value, so its active time belongs there.
-  const sessionPlaces = new Map<string, { row: AxisValue; col: AxisValue; cell: MetricsSum }>();
-
+  const sums: MatrixSums = {
+    rows: new Map(),
+    cols: new Map(),
+    cells: new Map(),
+    total: new MetricsSum(),
+    sessionPlaces: new Map(),
+  };
   for (const slice of scan.slices) {
     const rowId = rowOf(slice);
     const colId = colOf(slice);
-    const row = axisValue(rows, rowId.key, rowId.label);
-    const col = axisValue(cols, colId.key, colId.label);
-    let line = cells.get(row.key);
-    if (!line) cells.set(row.key, (line = new Map()));
-    let cell = line.get(col.key);
-    if (!cell) line.set(col.key, (cell = new MetricsSum()));
+    const row = axisValue(sums.rows, rowId.key, rowId.label);
+    const col = axisValue(sums.cols, colId.key, colId.label);
+    const cell = cellSum(sums.cells, row.key, col.key);
     row.sum.add(slice);
     col.sum.add(slice);
     cell.add(slice);
-    total.add(slice);
-    if (!sessionPlaces.has(slice.sessionId)) sessionPlaces.set(slice.sessionId, { row, col, cell });
+    sums.total.add(slice);
+    if (!sums.sessionPlaces.has(slice.sessionId)) {
+      sums.sessionPlaces.set(slice.sessionId, { row, col, cell });
+    }
   }
+  return sums;
+}
 
-  const rowWhole = SESSION_LEVEL_DIMENSIONS.has(rowDimension);
-  const colWhole = SESSION_LEVEL_DIMENSIONS.has(colDimension);
+/** Each session's active time counts in total, and on the axes that hold whole sessions. */
+function addSessionActiveTime(
+  scan: ReportScan,
+  sums: MatrixSums,
+  rowWhole: boolean,
+  colWhole: boolean
+): void {
   for (const { sessionId, activeMs } of scan.sessionTimes()) {
-    total.activeMs += activeMs;
-    const place = sessionPlaces.get(sessionId);
+    sums.total.activeMs += activeMs;
+    const place = sums.sessionPlaces.get(sessionId);
     if (!place) continue;
     if (rowWhole) place.row.sum.activeMs += activeMs;
     if (colWhole) place.col.sum.activeMs += activeMs;
     if (rowWhole && colWhole) place.cell.activeMs += activeMs;
   }
+}
+
+function computeMatrix(
+  scan: ReportScan,
+  rowDimension: ReportMatrixDimension,
+  colDimension: ReportMatrixDimension
+): ReportMatrix {
+  const sums = sumMatrixSlices(scan, rowDimension, colDimension);
+  const { rows, cols, cells, total } = sums;
+  const rowWhole = SESSION_LEVEL_DIMENSIONS.has(rowDimension);
+  const colWhole = SESSION_LEVEL_DIMENSIONS.has(colDimension);
+  addSessionActiveTime(scan, sums, rowWhole, colWhole);
 
   const rowAxis = rankAxis(rows, REPORT_MATRIX_MAX_ROWS, rowWhole);
   const colAxis = rankAxis(cols, REPORT_MATRIX_MAX_COLS, colWhole);

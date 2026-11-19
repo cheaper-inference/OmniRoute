@@ -127,7 +127,12 @@ export default function SessionsTable({
   const t = useTranslations("reports");
   const columns = useColumnDefs().filter((column) => visible[column.key]);
   return (
-    <Table className="text-sm" scrollbarLabel={t("tab_sessions")}>
+    <Table
+      className="text-sm"
+      containerClassName="border-0"
+      scrollbarLabel={t("tab_sessions")}
+      scrollLabel={t("tab_sessions")}
+    >
       <TableHeader>
         <TableRow className="text-left text-xs uppercase tracking-wider text-text-muted">
           {columns.map((column) => (

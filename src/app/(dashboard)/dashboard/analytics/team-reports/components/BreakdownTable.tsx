@@ -110,7 +110,7 @@ function SortableHeader({
       defaultDirection={column.key === "name" ? "asc" : "desc"}
       align={column.numeric ? "right" : "left"}
       onDirectionChange={(direction) => onSort(column.key, direction === "desc")}
-      className="py-2 px-3 text-xs font-semibold uppercase tracking-wider text-text-muted"
+      className="py-2 px-3 text-xs uppercase text-text-muted"
     >
       {column.label}
     </SortableTableHead>
@@ -226,7 +226,12 @@ export default function BreakdownTable({
   }
 
   return (
-    <Table className="text-sm" scrollbarLabel={nameHeader}>
+    <Table
+      className="text-sm"
+      containerClassName="border-0"
+      scrollbarLabel={nameHeader}
+      scrollLabel={nameHeader}
+    >
       <TableHeader>
         <TableRow>
           {columns.map((column) => (

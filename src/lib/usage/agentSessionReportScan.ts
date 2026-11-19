@@ -53,7 +53,7 @@ export function listPricedSlices(
 }
 
 /** Dimensions of the original summary breakdowns (the dashboard's breakdown tabs). */
-export const REPORT_DIMENSIONS = [
+const REPORT_DIMENSIONS = [
   "members",
   "projects",
   "clients",
@@ -62,7 +62,6 @@ export const REPORT_DIMENSIONS = [
   "accounts",
   "daily",
 ] as const;
-export type ReportDimension = (typeof REPORT_DIMENSIONS)[number];
 
 /** Every summary breakdown: the original dimensions plus branch, error code, tier and team. */
 export const REPORT_BREAKDOWN_DIMENSIONS = [

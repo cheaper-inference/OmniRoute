@@ -226,17 +226,21 @@ export function parseReportView(params: URLSearchParams, now = new Date()): Repo
  * Page query params for a view, in a fixed order and without defaults, so one view always has one
  * URL. Presets stay relative ("7d"); a custom range is stored as absolute ISO timestamps.
  */
+function serializeRange(params: URLSearchParams, preset: PresetChoice, filters: ReportFilterState) {
+  if (preset !== "custom") {
+    if (preset !== DEFAULT_PRESET) params.set("range", preset);
+    return;
+  }
+  if (filters.from) params.set("from", new Date(filters.from).toISOString());
+  if (filters.to) params.set("to", new Date(filters.to).toISOString());
+  // Both ends cleared by hand is the same as "all time".
+  if (!filters.from && !filters.to) params.set("range", "all");
+}
+
 export function serializeReportView(view: ReportView): URLSearchParams {
   const { preset, filters, tab, sessionOrder } = view;
   const params = new URLSearchParams();
-  if (preset === "custom") {
-    if (filters.from) params.set("from", new Date(filters.from).toISOString());
-    if (filters.to) params.set("to", new Date(filters.to).toISOString());
-    // Both ends cleared by hand is the same as "all time".
-    if (!filters.from && !filters.to) params.set("range", "all");
-  } else if (preset !== DEFAULT_PRESET) {
-    params.set("range", preset);
-  }
+  serializeRange(params, preset, filters);
   for (const field of FILTER_FIELDS) {
     for (const value of filters[field]) params.append(field, value);
   }

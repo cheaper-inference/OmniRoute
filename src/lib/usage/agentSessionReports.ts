@@ -48,9 +48,7 @@ import { calculateCostDetailed } from "./costCalculator";
 export type { AgentSessionReportFilter, SessionRequestsPage };
 export {
   REPORT_BREAKDOWN_DIMENSIONS,
-  REPORT_DIMENSIONS,
   type ReportBreakdownDimension,
-  type ReportDimension,
 } from "./agentSessionReportScan";
 
 export interface ReportTotals {

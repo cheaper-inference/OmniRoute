@@ -15,6 +15,7 @@ import {
   isTrends,
   type ReportTrendDimension,
   type ReportTrendMetric,
+  type ReportTrends,
 } from "../reportViews";
 import { useReportResource } from "../useReportResource";
 import type { TrendChartSeries } from "./TrendsChart";
@@ -37,6 +38,84 @@ interface TrendsSectionProps {
 
 const OTHER_COLOR = "var(--color-text-muted)";
 
+type TrendSeries = TrendChartSeries & { total: number; other: boolean };
+
+/** The chart's series, colored in order, "other" in a muted color, each with its total. */
+function useTrendSeries(data: ReportTrends | undefined, dimension: ReportTrendDimension) {
+  const t = useTranslations("reports");
+  const fallback = t(DIMENSION_INFO[dimension].fallbackKey);
+  return useMemo<TrendSeries[]>(() => {
+    let slot = 0;
+    return (data?.series ?? []).map((entry) => ({
+      name: headerName(entry, fallback, t("other")),
+      color: entry.other ? OTHER_COLOR : categoricalSlot(slot++).colorVar,
+      values: entry.values,
+      other: entry.other,
+      total: entry.values.reduce((sum, value) => sum + value, 0),
+    }));
+  }, [data, fallback, t]);
+}
+
+function TrendsLegend({ series, metric }: { series: TrendSeries[]; metric: ReportTrendMetric }) {
+  return (
+    <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
+      {series.map((entry, index) => (
+        <li key={`${index}-${entry.name}`} className="flex items-center gap-1.5">
+          <span
+            aria-hidden="true"
+            className="inline-block size-2.5 rounded-sm"
+            style={{ background: entry.color }}
+          />
+          <span className={entry.other ? "italic" : undefined}>{entry.name}</span>
+          <span className="tabular-nums">({formatMetric(metric, entry.total)})</span>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+interface TrendsChartAreaProps {
+  data: ReportTrends;
+  series: TrendSeries[];
+  metric: ReportTrendMetric;
+  dimension: ReportTrendDimension;
+  total: number;
+  compact: boolean;
+}
+
+/** The stacked chart, described for screen readers, and its legend. */
+function TrendsChartArea({
+  data,
+  series,
+  metric,
+  dimension,
+  total,
+  compact,
+}: TrendsChartAreaProps) {
+  const t = useTranslations("reports");
+  const largest = [...series].filter((entry) => !entry.other).sort((a, b) => b.total - a.total)[0];
+  const summary = t("trendsSummary", {
+    metric: t(`metric_${metric}`),
+    dimension: t(DIMENSION_INFO[dimension].nameKey),
+    bucket: data.bucket ?? "day",
+    total: formatMetric(metric, total),
+    count: data.days.length,
+    top: largest ? `${largest.name} (${formatMetric(metric, largest.total)})` : "-",
+  });
+  return (
+    <>
+      <div
+        role="img"
+        aria-label={summary}
+        className={`${compact ? "h-44" : "h-64"} w-full rounded-xl border border-border bg-surface-2 px-3 py-4`}
+      >
+        <TrendsChart days={data.days} series={series} metric={metric} />
+      </div>
+      <TrendsLegend series={series} metric={metric} />
+    </>
+  );
+}
+
 export default function TrendsSection({
   query,
   dimension,
@@ -57,38 +136,15 @@ export default function TrendsSection({
     refreshToken,
     isTrends
   );
-
-  const fallback = t(DIMENSION_INFO[dimension].fallbackKey);
-  const series = useMemo<(TrendChartSeries & { total: number; other: boolean })[]>(() => {
-    let slot = 0;
-    return (data?.series ?? []).map((entry) => ({
-      name: headerName(entry, fallback, t("other")),
-      color: entry.other ? OTHER_COLOR : categoricalSlot(slot++).colorVar,
-      values: entry.values,
-      other: entry.other,
-      total: entry.values.reduce((sum, value) => sum + value, 0),
-    }));
-  }, [data, fallback, t]);
-
-  const dimensionName = t(DIMENSION_INFO[dimension].nameKey);
-  const days = data?.days ?? [];
+  const series = useTrendSeries(data, dimension);
   const total = series.reduce((sum, entry) => sum + entry.total, 0);
-  const largest = [...series].filter((entry) => !entry.other).sort((a, b) => b.total - a.total)[0];
-  const metricName = t(`metric_${metric}`);
-  const summary = t("trendsSummary", {
-    metric: metricName,
-    dimension: dimensionName,
-    bucket: data?.bucket ?? "day",
-    total: formatMetric(metric, total),
-    count: days.length,
-    top: largest ? `${largest.name} (${formatMetric(metric, largest.total)})` : "-",
-  });
+  const dimensionName = t(DIMENSION_INFO[dimension].nameKey);
 
   return (
     <section className="space-y-3" aria-label={t("trends")}>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <div>
-          <h3 className="text-sm font-semibold text-text-main">{t("trends")}</h3>
+          <h3 className="text-sm text-text-main">{t("trends")}</h3>
           <p className="text-xs text-text-muted">{t("trendsBy", { dimension: dimensionName })}</p>
         </div>
         <SegmentedControl
@@ -108,28 +164,16 @@ export default function TrendsSection({
       )}
       {failed && <p className="text-sm text-error">{t("trendsFailed")}</p>}
 
-      {data && days.length > 0 && total > 0 ? (
+      {data && data.days.length > 0 && total > 0 ? (
         <div className={loading ? "opacity-60 transition-opacity" : undefined}>
-          <div
-            role="img"
-            aria-label={summary}
-            className={`${compact ? "h-44" : "h-64"} w-full rounded-xl border border-border bg-surface-2 px-3 py-4`}
-          >
-            <TrendsChart days={days} series={series} metric={metric} />
-          </div>
-          <ul className="mt-2 flex flex-wrap gap-x-4 gap-y-1 text-xs text-text-muted">
-            {series.map((entry, index) => (
-              <li key={`${index}-${entry.name}`} className="flex items-center gap-1.5">
-                <span
-                  aria-hidden="true"
-                  className="inline-block size-2.5 rounded-sm"
-                  style={{ background: entry.color }}
-                />
-                <span className={entry.other ? "italic" : undefined}>{entry.name}</span>
-                <span className="tabular-nums">({formatMetric(metric, entry.total)})</span>
-              </li>
-            ))}
-          </ul>
+          <TrendsChartArea
+            data={data}
+            series={series}
+            metric={metric}
+            dimension={dimension}
+            total={total}
+            compact={compact}
+          />
         </div>
       ) : (
         !failed &&

@@ -94,127 +94,179 @@ interface MatrixTableProps {
   handlers: MatrixHandlers;
 }
 
-/** The matrix as a table: a shaded cell per row x column, row and column totals, "other" last. */
-export default function MatrixTable({ matrix, metric, handlers }: MatrixTableProps) {
-  const t = useTranslations("reports");
-  const { rows, cols, cells } = matrix;
-  const rowInfo = DIMENSION_INFO[matrix.rowDimension];
-  const colInfo = DIMENSION_INFO[matrix.colDimension];
-  const rowName = (entry: Entry) => headerName(entry, t(rowInfo.fallbackKey), t("other"));
-  const colName = (entry: Entry) => headerName(entry, t(colInfo.fallbackKey), t("other"));
-  const show = (metrics: ReportMatrixMetrics) => {
-    const value = metricValue(metrics, metric);
-    return value ? formatMetric(metric, value) : NO_VALUE;
-  };
+/** What the table's parts share: names, the shown value and the shade scale. */
+interface MatrixParts {
+  matrix: ReportMatrix;
+  metric: MatrixMetric;
+  handlers: MatrixHandlers;
+  rowName: (entry: Entry) => string;
+  colName: (entry: Entry) => string;
+  show: (metrics: ReportMatrixMetrics) => string;
+  max: number;
+}
 
-  // The shade scale ends at the largest ordinary cell; the "other" bucket is sums, not comparable.
+/** The shade scale ends at the largest ordinary cell; the "other" bucket is sums, not comparable. */
+function largestCell({ rows, cols, cells }: ReportMatrix, metric: MatrixMetric): number {
   let max = 0;
   cells.forEach((line, i) =>
     line.forEach((cell, j) => {
       if (!rows[i]?.other && !cols[j]?.other) max = Math.max(max, metricValue(cell, metric) ?? 0);
     })
   );
+  return max;
+}
 
-  const clickable = (i: number, j: number) =>
+function isClickable(
+  { rows, cols, cells, rowDimension, colDimension }: ReportMatrix,
+  i: number,
+  j: number
+) {
+  return Boolean(
     !rows[i].other &&
     !cols[j].other &&
     cells[i][j].requests > 0 &&
-    (rows[i].key || rowInfo.filterNone) &&
-    (cols[j].key || colInfo.filterNone);
+    (rows[i].key || DIMENSION_INFO[rowDimension].filterNone) &&
+    (cols[j].key || DIMENSION_INFO[colDimension].filterNone)
+  );
+}
+
+/** One shaded cell; a cell with requests applies both filters. */
+function MatrixCell({ view, i, j }: { view: MatrixParts; i: number; j: number }) {
+  const t = useTranslations("reports");
+  const { matrix, metric, handlers } = view;
+  const row = matrix.rows[i];
+  const col = matrix.cols[j];
+  const cell = matrix.cells[i][j];
+  const text = view.show(cell);
+  const title = `${view.rowName(row)} × ${view.colName(col)}: ${text}`;
+  const other = row.other || col.other;
+  const shade = other ? undefined : heatColor(metricValue(cell, metric) ?? 0, view.max);
+  return (
+    <TableCell
+      title={title}
+      className={`p-0 text-right tabular-nums ${other ? "bg-surface-2 italic" : ""}`}
+      style={{ backgroundColor: shade }}
+    >
+      {isClickable(matrix, i, j) ? (
+        // kit-exception: the whole shaded cell is the click target, so it needs no
+        // button padding, border or hover surface of its own.
+        <button
+          type="button"
+          aria-label={`${title}. ${t("matrixApply")}`}
+          className="block w-full cursor-pointer px-3 py-2 text-right tabular-nums hover:underline focus-ring"
+          onClick={() =>
+            handlers.onFilter([
+              [DIMENSION_INFO[matrix.rowDimension].field, filterValueFor(row.key)],
+              [DIMENSION_INFO[matrix.colDimension].field, filterValueFor(col.key)],
+            ])
+          }
+        >
+          {text}
+        </button>
+      ) : (
+        <span className="block px-3 py-2 text-text-muted">{text}</span>
+      )}
+    </TableCell>
+  );
+}
+
+function MatrixHeaderRow({ view }: { view: MatrixParts }) {
+  const t = useTranslations("reports");
+  const { matrix, handlers } = view;
+  return (
+    <TableRow>
+      <TableHead scope="col" className={`${STICKY_HEAD} min-w-32`}>
+        {t(DIMENSION_INFO[matrix.rowDimension].nameKey)} /{" "}
+        {t(DIMENSION_INFO[matrix.colDimension].nameKey)}
+      </TableHead>
+      {matrix.cols.map((col) => (
+        <TableHead
+          key={col.key + String(col.other)}
+          scope="col"
+          className={`min-w-24 text-right ${col.other ? "bg-surface-2" : ""}`}
+        >
+          <MatrixHeaderLabel
+            entry={col}
+            dimension={matrix.colDimension}
+            name={view.colName(col)}
+            handlers={handlers}
+          />
+        </TableHead>
+      ))}
+      <TableHead scope="col" className="min-w-24 text-right">
+        {t("matrixTotal")}
+      </TableHead>
+    </TableRow>
+  );
+}
+
+function MatrixTotalsRow({ view }: { view: MatrixParts }) {
+  const t = useTranslations("reports");
+  return (
+    <TableRow>
+      <TableHead scope="row" className={STICKY_HEAD}>
+        {t("matrixTotal")}
+      </TableHead>
+      {view.matrix.cols.map((col) => (
+        <TableCell key={col.key + String(col.other)} className="px-3 py-2 text-right tabular-nums">
+          <span className="font-medium">{view.show(col)}</span>
+        </TableCell>
+      ))}
+      <TableCell className="px-3 py-2 text-right tabular-nums">
+        <span className="font-semibold">{view.show(view.matrix.totals)}</span>
+      </TableCell>
+    </TableRow>
+  );
+}
+
+/** The matrix as a table: a shaded cell per row x column, row and column totals, "other" last. */
+export default function MatrixTable({ matrix, metric, handlers }: MatrixTableProps) {
+  const t = useTranslations("reports");
+  const rowFallback = t(DIMENSION_INFO[matrix.rowDimension].fallbackKey);
+  const colFallback = t(DIMENSION_INFO[matrix.colDimension].fallbackKey);
+  const view: MatrixParts = {
+    matrix,
+    metric,
+    handlers,
+    rowName: (entry) => headerName(entry, rowFallback, t("other")),
+    colName: (entry) => headerName(entry, colFallback, t("other")),
+    show: (metrics) => {
+      const value = metricValue(metrics, metric);
+      return value ? formatMetric(metric, value) : NO_VALUE;
+    },
+    max: largestCell(matrix, metric),
+  };
 
   return (
-    <Table className="text-xs" scrollbarLabel={t("matrix")}>
+    <Table
+      className="text-xs"
+      containerClassName="border-0"
+      scrollbarLabel={t("matrix")}
+      scrollLabel={t("matrix")}
+    >
       <TableHeader>
-        <TableRow>
-          <TableHead scope="col" className={`${STICKY_HEAD} min-w-32`}>
-            {t(rowInfo.nameKey)} / {t(colInfo.nameKey)}
-          </TableHead>
-          {cols.map((col) => (
-            <TableHead
-              key={col.key + String(col.other)}
-              scope="col"
-              className={`min-w-24 text-right ${col.other ? "bg-surface-2" : ""}`}
-            >
-              <MatrixHeaderLabel
-                entry={col}
-                dimension={matrix.colDimension}
-                name={colName(col)}
-                handlers={handlers}
-              />
-            </TableHead>
-          ))}
-          <TableHead scope="col" className="min-w-24 text-right">
-            {t("matrixTotal")}
-          </TableHead>
-        </TableRow>
+        <MatrixHeaderRow view={view} />
       </TableHeader>
       <TableBody>
-        {rows.map((row, i) => (
+        {matrix.rows.map((row, i) => (
           <TableRow key={row.key + String(row.other)}>
             <TableHead scope="row" className={`${STICKY_HEAD} ${row.other ? "bg-surface-2" : ""}`}>
               <MatrixHeaderLabel
                 entry={row}
                 dimension={matrix.rowDimension}
-                name={rowName(row)}
+                name={view.rowName(row)}
                 handlers={handlers}
               />
             </TableHead>
-            {cols.map((col, j) => {
-              const cell = cells[i][j];
-              const text = show(cell);
-              const title = `${rowName(row)} × ${colName(col)}: ${text}`;
-              const other = row.other || col.other;
-              const shade = other ? undefined : heatColor(metricValue(cell, metric) ?? 0, max);
-              return (
-                <TableCell
-                  key={col.key + String(col.other)}
-                  title={title}
-                  className={`p-0 text-right tabular-nums ${other ? "bg-surface-2 italic" : ""}`}
-                  style={{ backgroundColor: shade }}
-                >
-                  {clickable(i, j) ? (
-                    // kit-exception: the whole shaded cell is the click target, so it needs no
-                    // button padding, border or hover surface of its own.
-                    <button
-                      type="button"
-                      aria-label={`${title}. ${t("matrixApply")}`}
-                      className="block w-full cursor-pointer px-3 py-2 text-right tabular-nums hover:underline focus-ring"
-                      onClick={() =>
-                        handlers.onFilter([
-                          [rowInfo.field, filterValueFor(row.key)],
-                          [colInfo.field, filterValueFor(col.key)],
-                        ])
-                      }
-                    >
-                      {text}
-                    </button>
-                  ) : (
-                    <span className="block px-3 py-2 text-text-muted">{text}</span>
-                  )}
-                </TableCell>
-              );
-            })}
-            <TableCell className="px-3 py-2 text-right font-medium tabular-nums">
-              {show(row)}
+            {matrix.cols.map((col, j) => (
+              <MatrixCell key={col.key + String(col.other)} view={view} i={i} j={j} />
+            ))}
+            <TableCell className="px-3 py-2 text-right tabular-nums">
+              <span className="font-medium">{view.show(row)}</span>
             </TableCell>
           </TableRow>
         ))}
-        <TableRow>
-          <TableHead scope="row" className={STICKY_HEAD}>
-            {t("matrixTotal")}
-          </TableHead>
-          {cols.map((col) => (
-            <TableCell
-              key={col.key + String(col.other)}
-              className="px-3 py-2 text-right font-medium tabular-nums"
-            >
-              {show(col)}
-            </TableCell>
-          ))}
-          <TableCell className="px-3 py-2 text-right font-semibold tabular-nums">
-            {show(matrix.totals)}
-          </TableCell>
-        </TableRow>
+        <MatrixTotalsRow view={view} />
       </TableBody>
     </Table>
   );

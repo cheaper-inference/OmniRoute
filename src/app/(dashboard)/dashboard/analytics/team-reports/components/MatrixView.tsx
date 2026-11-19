@@ -11,6 +11,7 @@ import {
   MATRIX_DIMENSIONS,
   isMatrix,
   type MatrixMetric,
+  type ReportMatrix,
   type ReportMatrixDimension,
 } from "../reportViews";
 import { useReportResource } from "../useReportResource";
@@ -25,6 +26,103 @@ interface MatrixViewProps extends MatrixHandlers {
   onSelectionChange: (selection: MatrixSelection) => void;
 }
 
+type Axis = "rows" | "cols";
+
+/** The two dimensions always differ: picking the other axis's dimension swaps them. */
+function pickDimension(
+  selection: MatrixSelection,
+  axis: Axis,
+  value: ReportMatrixDimension
+): MatrixSelection {
+  if (axis === "rows") {
+    return {
+      ...selection,
+      rows: value,
+      cols: selection.cols === value ? selection.rows : selection.cols,
+    };
+  }
+  return {
+    ...selection,
+    rows: selection.rows === value ? selection.cols : selection.rows,
+    cols: value,
+  };
+}
+
+/** Active time is offered only when the matrix has it; otherwise cost is shown instead. */
+function metricChoices(data: ReportMatrix | undefined, metric: MatrixMetric) {
+  const hasActive = Boolean(data?.cells.some((line) => line.some((cell) => cell.activeMs != null)));
+  const shownMetric: MatrixMetric = metric === "activeMs" && !hasActive ? "costUsd" : metric;
+  const metrics: MatrixMetric[] = [
+    "costUsd",
+    "tokens",
+    "requests",
+    ...(hasActive ? ["activeMs" as const] : []),
+  ];
+  return { shownMetric, metrics };
+}
+
+interface MatrixControlsProps {
+  selection: MatrixSelection;
+  shownMetric: MatrixMetric;
+  metrics: MatrixMetric[];
+  onSelectionChange: (selection: MatrixSelection) => void;
+}
+
+function MatrixControls({
+  selection,
+  shownMetric,
+  metrics,
+  onSelectionChange,
+}: MatrixControlsProps) {
+  const t = useTranslations("reports");
+  const options = MATRIX_DIMENSIONS.map((value) => ({
+    value,
+    label: t(DIMENSION_INFO[value].nameKey),
+  }));
+  const pick = (axis: Axis, value: ReportMatrixDimension) =>
+    onSelectionChange(pickDimension(selection, axis, value));
+  return (
+    <div className="flex flex-wrap items-end gap-3">
+      <Select
+        native
+        label={t("matrixRows")}
+        value={selection.rows}
+        options={options}
+        onChange={(event) => pick("rows", event.target.value as ReportMatrixDimension)}
+      />
+      <Select
+        native
+        label={t("matrixCols")}
+        value={selection.cols}
+        options={options}
+        onChange={(event) => pick("cols", event.target.value as ReportMatrixDimension)}
+      />
+      <SegmentedControl
+        semantics="radio"
+        size="sm"
+        aria-label={t("matrixMetric")}
+        value={shownMetric}
+        onChange={(value) => onSelectionChange({ ...selection, metric: value as MatrixMetric })}
+        options={metrics.map((value) => ({ value, label: t(`metric_${value}`) }))}
+      />
+    </div>
+  );
+}
+
+function MatrixTruncatedNote({ data }: { data: ReportMatrix }) {
+  const t = useTranslations("reports");
+  return (
+    <p role="note" className="text-xs text-warning">
+      {t("matrixTruncated", {
+        rows: data.rows.filter((entry) => !entry.other).length,
+        cols: data.cols.filter((entry) => !entry.other).length,
+        rowCount: data.rowCount,
+        colCount: data.colCount,
+      })}
+    </p>
+  );
+}
+
 /** Row and column dimension, metric, and the matrix for the current filters. Mounted only while shown. */
 export default function MatrixView({
   query,
@@ -35,91 +133,32 @@ export default function MatrixView({
   onOpen,
 }: MatrixViewProps) {
   const t = useTranslations("reports");
-  const { metric, ...dimensions } = selection;
+  const { rows, cols } = selection;
 
   const matrixQuery = useMemo(() => {
     const params = new URLSearchParams(query);
-    params.set("rows", dimensions.rows);
-    params.set("cols", dimensions.cols);
+    params.set("rows", rows);
+    params.set("cols", cols);
     return params.toString();
-  }, [query, dimensions]);
+  }, [query, rows, cols]);
   const { data, loading, failed } = useReportResource(
     "/api/reports/matrix",
     matrixQuery,
     refreshToken,
     isMatrix
   );
-
-  // The two dimensions always differ: picking the other axis's dimension swaps them.
-  const pick = (axis: "rows" | "cols", value: ReportMatrixDimension) => {
-    if (axis === "rows") {
-      onSelectionChange({
-        ...selection,
-        rows: value,
-        cols: selection.cols === value ? selection.rows : selection.cols,
-      });
-    } else {
-      onSelectionChange({
-        ...selection,
-        rows: selection.rows === value ? selection.cols : selection.rows,
-        cols: value,
-      });
-    }
-  };
-
-  const hasActive = Boolean(data?.cells.some((line) => line.some((cell) => cell.activeMs != null)));
-  const shownMetric: MatrixMetric = metric === "activeMs" && !hasActive ? "costUsd" : metric;
-  const metrics: MatrixMetric[] = [
-    "costUsd",
-    "tokens",
-    "requests",
-    ...(hasActive ? ["activeMs" as const] : []),
-  ];
-
-  const options = MATRIX_DIMENSIONS.map((value) => ({
-    value,
-    label: t(DIMENSION_INFO[value].nameKey),
-  }));
-  const shownRows = data?.rows.filter((entry) => !entry.other).length ?? 0;
-  const shownCols = data?.cols.filter((entry) => !entry.other).length ?? 0;
+  const { shownMetric, metrics } = metricChoices(data, selection.metric);
 
   return (
     <div className="space-y-3">
-      <div className="flex flex-wrap items-end gap-3">
-        <Select
-          native
-          label={t("matrixRows")}
-          value={dimensions.rows}
-          options={options}
-          onChange={(event) => pick("rows", event.target.value as ReportMatrixDimension)}
-        />
-        <Select
-          native
-          label={t("matrixCols")}
-          value={dimensions.cols}
-          options={options}
-          onChange={(event) => pick("cols", event.target.value as ReportMatrixDimension)}
-        />
-        <SegmentedControl
-          semantics="radio"
-          size="sm"
-          aria-label={t("matrixMetric")}
-          value={shownMetric}
-          onChange={(value) => onSelectionChange({ ...selection, metric: value as MatrixMetric })}
-          options={metrics.map((value) => ({ value, label: t(`metric_${value}`) }))}
-        />
-      </div>
+      <MatrixControls
+        selection={selection}
+        shownMetric={shownMetric}
+        metrics={metrics}
+        onSelectionChange={onSelectionChange}
+      />
       <p className="text-xs text-text-muted">{t("matrixHelp")}</p>
-      {data?.truncated && (
-        <p role="note" className="text-xs text-warning">
-          {t("matrixTruncated", {
-            rows: shownRows,
-            cols: shownCols,
-            rowCount: data.rowCount,
-            colCount: data.colCount,
-          })}
-        </p>
-      )}
+      {data?.truncated && <MatrixTruncatedNote data={data} />}
       {failed && <p className="text-sm text-error">{t("matrixFailed")}</p>}
       {data && data.rows.length > 0 && data.cols.length > 0 ? (
         <div className={loading ? "opacity-60 transition-opacity" : undefined}>

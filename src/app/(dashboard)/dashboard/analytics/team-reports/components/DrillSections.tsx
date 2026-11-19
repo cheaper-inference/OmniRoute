@@ -57,7 +57,7 @@ export function DrillTopList({
   const top = [...rows].sort((a, b) => b.costUsd - a.costUsd).slice(0, TOP_COUNT);
   return (
     <section className="space-y-1.5" aria-label={title}>
-      <h4 className="text-sm font-semibold text-text-main">{title}</h4>
+      <h4 className="text-sm text-text-main">{title}</h4>
       {top.length === 0 ? (
         <p className="text-xs text-text-muted">{t("noData")}</p>
       ) : (
@@ -95,7 +95,7 @@ export function DrillSessions({
   const t = useTranslations("reports");
   return (
     <section className="space-y-1.5" aria-label={t("drillRecentSessions")}>
-      <h4 className="text-sm font-semibold text-text-main">{t("drillRecentSessions")}</h4>
+      <h4 className="text-sm text-text-main">{t("drillRecentSessions")}</h4>
       {sessions.length === 0 ? (
         <p className="text-xs text-text-muted">{t("noData")}</p>
       ) : (

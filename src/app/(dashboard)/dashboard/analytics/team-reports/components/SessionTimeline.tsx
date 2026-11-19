@@ -56,7 +56,7 @@ export default function SessionTimeline({ timeline }: { timeline: AgentSessionTi
 
   return (
     <section className="space-y-2" aria-label={t("timeline")}>
-      <h4 className="font-semibold">{t("timeline")}</h4>
+      <h4>{t("timeline")}</h4>
       <p className="text-xs text-text-muted">{t("timelineHelp")}</p>
       {capped && (
         <p role="note" className="text-xs text-warning">

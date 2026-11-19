@@ -33,6 +33,82 @@ interface HeatmapViewProps {
   refreshToken: number;
 }
 
+interface HeatmapTableProps {
+  grid: number[][];
+  metric: HeatmapMetric;
+  max: number;
+}
+
+/** The weekday x hour grid, one shaded cell per hour. */
+function HeatmapTable({ grid, metric, max }: HeatmapTableProps) {
+  const t = useTranslations("reports");
+  const metricName = t(metric === "requests" ? "metric_requests" : "metric_costUsd");
+  return (
+    <Table
+      className="text-xs"
+      containerClassName="border-0"
+      scrollbarLabel={t("heatmap")}
+      scrollLabel={t("heatmap")}
+    >
+      <TableHeader>
+        <TableRow>
+          <TableHead scope="col" className="sticky left-0 z-10 bg-surface text-left">
+            <span className="ci-sr-only">{t("heatmapWeekday")}</span>
+          </TableHead>
+          {HOURS.map((hour) => (
+            <TableHead key={hour} scope="col" className="px-0 text-center tabular-nums">
+              {hour}
+            </TableHead>
+          ))}
+        </TableRow>
+      </TableHeader>
+      <TableBody>
+        {grid.map((hours, index) => {
+          const day = weekdayName(MONDAY_FIRST[index]);
+          return (
+            <TableRow key={day}>
+              <TableHead scope="row" className="sticky left-0 z-10 bg-surface text-left">
+                {day}
+              </TableHead>
+              {HOURS.map((hour) => {
+                const value = hours[hour] ?? 0;
+                const text = formatMetric(metric, value);
+                return (
+                  <TableCell
+                    key={hour}
+                    title={`${day} ${String(hour).padStart(2, "0")}:00 - ${text} ${metricName}`}
+                    className="h-8 min-w-6 border border-border/30 p-0"
+                    style={{ backgroundColor: heatColor(value, max) }}
+                  >
+                    <span className="ci-sr-only">{text}</span>
+                  </TableCell>
+                );
+              })}
+            </TableRow>
+          );
+        })}
+      </TableBody>
+    </Table>
+  );
+}
+
+function HeatmapLegend({ metric, max }: { metric: HeatmapMetric; max: number }) {
+  const t = useTranslations("reports");
+  return (
+    <div className="mt-2 flex items-center gap-2 text-xs text-text-muted" aria-hidden="true">
+      <span>{t("heatmapLess")}</span>
+      {[0.1, 0.35, 0.6, 0.85, 1].map((share) => (
+        <span
+          key={share}
+          className="inline-block size-4 rounded-sm border border-border/30"
+          style={{ backgroundColor: heatColor(share, 1) }}
+        />
+      ))}
+      <span>{t("heatmapMore", { max: formatMetric(metric, max) })}</span>
+    </div>
+  );
+}
+
 /** Requests or cost by local weekday and hour, Monday first. Mounted only while shown. */
 export default function HeatmapView({ query, refreshToken }: HeatmapViewProps) {
   const t = useTranslations("reports");
@@ -46,7 +122,6 @@ export default function HeatmapView({ query, refreshToken }: HeatmapViewProps) {
 
   const grid = data ? mondayFirst(data[metric]) : [];
   const max = data ? (metric === "requests" ? data.maxRequests : data.maxCostUsd) : 0;
-  const metricName = t(metric === "requests" ? "metric_requests" : "metric_costUsd");
 
   return (
     <div className="space-y-3">
@@ -64,57 +139,8 @@ export default function HeatmapView({ query, refreshToken }: HeatmapViewProps) {
       {failed && <p className="text-sm text-error">{t("heatmapFailed")}</p>}
       {data && max > 0 ? (
         <div className={loading ? "opacity-60 transition-opacity" : undefined}>
-          <Table className="text-xs" scrollbarLabel={t("heatmap")}>
-            <TableHeader>
-              <TableRow>
-                <TableHead scope="col" className="sticky left-0 z-10 bg-surface text-left">
-                  <span className="ci-sr-only">{t("heatmapWeekday")}</span>
-                </TableHead>
-                {HOURS.map((hour) => (
-                  <TableHead key={hour} scope="col" className="px-0 text-center tabular-nums">
-                    {hour}
-                  </TableHead>
-                ))}
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {grid.map((hours, index) => {
-                const day = weekdayName(MONDAY_FIRST[index]);
-                return (
-                  <TableRow key={day}>
-                    <TableHead scope="row" className="sticky left-0 z-10 bg-surface text-left">
-                      {day}
-                    </TableHead>
-                    {HOURS.map((hour) => {
-                      const value = hours[hour] ?? 0;
-                      const text = formatMetric(metric, value);
-                      return (
-                        <TableCell
-                          key={hour}
-                          title={`${day} ${String(hour).padStart(2, "0")}:00 - ${text} ${metricName}`}
-                          className="h-8 min-w-6 border border-border/30 p-0"
-                          style={{ backgroundColor: heatColor(value, max) }}
-                        >
-                          <span className="ci-sr-only">{text}</span>
-                        </TableCell>
-                      );
-                    })}
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
-          <div className="mt-2 flex items-center gap-2 text-xs text-text-muted" aria-hidden="true">
-            <span>{t("heatmapLess")}</span>
-            {[0.1, 0.35, 0.6, 0.85, 1].map((share) => (
-              <span
-                key={share}
-                className="inline-block size-4 rounded-sm border border-border/30"
-                style={{ backgroundColor: heatColor(share, 1) }}
-              />
-            ))}
-            <span>{t("heatmapMore", { max: formatMetric(metric, max) })}</span>
-          </div>
+          <HeatmapTable grid={grid} metric={metric} max={max} />
+          <HeatmapLegend metric={metric} max={max} />
         </div>
       ) : (
         !failed &&
