@@ -37,6 +37,9 @@ import {
   type JsonObject,
   type RecordedRequest,
 } from "./_providerJourneyHarness.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 // ---------------------------------------------------------------------------
 // Isolated storage + env — must be set BEFORE importing any DB-backed module.
@@ -315,9 +318,7 @@ test.describe("provider journey — Gemini client format (openai-compatible upst
   test("STEP 6: /v1beta/models lists the synced model for Gemini clients", async () => {
     // #16208: the Gemini catalog now enforces the same requireAuthForModels gate as
     // /v1/models — an anonymous caller is refused, a keyed Gemini caller gets in.
-    const anonResponse = await v1betaModelsRoute.GET(
-      new Request("http://localhost/v1beta/models")
-    );
+    const anonResponse = await v1betaModelsRoute.GET(new Request("http://localhost/v1beta/models"));
     assert.equal(anonResponse.status, 401, "anonymous catalog listing must be rejected");
 
     const response = await v1betaModelsRoute.GET(
