@@ -216,8 +216,10 @@ export function fetchInputs({ git, base, prs, filter }) {
 /**
  * `git merge-tree --write-tree ours theirs` → {clean: true, tree} | {clean: false}.
  * Exit 0 = clean (tree on line 1), exit 1 = conflict, anything else = error.
+ * Exported for land.verifyComposition, which recomposes each merge commit of a candidate with
+ * exactly this call to check its tree.
  */
-function mergeTree(git, ours, theirs) {
+export function mergeTree(git, ours, theirs) {
   const res = scratchGit(git).run(
     ["merge-tree", "--write-tree", "--no-messages", "--name-only", ours, theirs],
     { allowFail: true }
@@ -233,7 +235,7 @@ function mergeTree(git, ours, theirs) {
 }
 
 /** True when the two commits share history (`git merge-base` finds a common ancestor). */
-function haveCommonAncestor(git, a, b) {
+export function haveCommonAncestor(git, a, b) {
   const res = scratchGit(git).run(["merge-base", a, b], { allowFail: true });
   if (res.code === 0) return true;
   if (res.code === 1) return false;

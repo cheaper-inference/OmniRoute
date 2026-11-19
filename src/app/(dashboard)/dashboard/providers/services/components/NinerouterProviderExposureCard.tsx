@@ -63,7 +63,7 @@ export function NinerouterProviderExposureCard() {
           <Icon name="hub" size={20} />
         </div>
         <div>
-          <h3 className="font-medium text-sm">{t("providerExposure")}</h3>
+          <h3 className="text-sm">{t("providerExposure")}</h3>
           <p className="text-xs text-text-muted">
             {t.rich("providerExposureDescription", {
               prefix: renderPrefix,
