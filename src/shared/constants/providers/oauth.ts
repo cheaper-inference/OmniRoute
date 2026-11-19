@@ -269,7 +269,7 @@ export const OAUTH_PROVIDERS = {
   },
   megabrain: {
     id: "megabrain",
-    serviceKinds: ["llm"],
+    serviceKinds: ["llm", "image", "video"],
     alias: "mb",
     name: "MegaBrain",
     icon: "psychology",
@@ -277,7 +277,7 @@ export const OAUTH_PROVIDERS = {
     textIcon: "MB",
     website: "https://getmegabrain.com",
     authHint:
-      "Sign in with your MegaBrain account (device code), or paste an mb-v1-… MegaBrain API key (add each key as a separate connection to rotate them). A paid plan covers the included models (Auto, GLM, Kimi, MiniMax, Grok, DeepSeek, Qwen) within its session and weekly limits; Claude, GPT and Gemini are paid from the account's credits, from Pro up or with Extra Usage turned on. Address models as mb/<model> or megabrain/<model>.",
+      "Sign in with your MegaBrain account (device code), or paste an mb-v1-… MegaBrain API key (add each key as a separate connection to rotate them). A paid plan covers the included models (Auto, GLM, Kimi, MiniMax, Grok, DeepSeek, Qwen) within its session and weekly limits; Claude, GPT and Gemini are paid from the account's credits, from Pro up or with Extra Usage turned on. The same connection makes images (Nano Banana Pro, FLUX 2, Seedream 4.5, MiniMax H3) and video (Kling 3.0 and 2.6), paid from the credits. Address chat models as mb/<model> or megabrain/<model>, image and video models as megabrain/<model>.",
   },
   cline: {
     id: "cline",
