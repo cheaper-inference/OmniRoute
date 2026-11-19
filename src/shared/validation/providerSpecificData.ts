@@ -3,6 +3,10 @@ import {
   OPENROUTER_PRESET_MAX_LENGTH,
   isOpenRouterPresetValue,
 } from "@/shared/constants/openRouterPreset";
+import {
+  CODEX_TRANSPORT_VALUES,
+  QODER_CLI_TRANSPORT_VALUES,
+} from "@/shared/constants/connectionTransport";
 import { isValidGitHubCreditLimit } from "@omniroute/open-sse/services/githubCreditLimit.ts";
 
 function isHttpUrl(value: string): boolean {
@@ -24,6 +28,11 @@ const REQUEST_DEFAULT_SERVICE_TIER_VALUES = new Set([
 ]);
 const CODEX_FINGERPRINT_MODE_VALUES = new Set(["off", "device", "session", "full"]);
 const CODEX_PROMPT_CACHE_KEY_SCOPE_VALUES = new Set(["client", "thread"]);
+// Per-connection transport selectors exposed in the connection edit modal.
+// Values live in src/shared/constants/connectionTransport.ts so the UI selectors,
+// the Zod refinement and the executors cannot drift apart.
+const CODEX_TRANSPORT_SET = new Set<string>(CODEX_TRANSPORT_VALUES);
+const QODER_CLI_TRANSPORT_SET = new Set<string>(QODER_CLI_TRANSPORT_VALUES);
 const CACHE_PASSTHROUGH_VALUES = new Set(["strip", "openai-format", "claude-format"]);
 const REASONING_CONTROL_VALUES = new Set(["chat-template", "openai"]);
 const PEAK_HOUR_PROTECTION_MODES = new Set(["block", "avoid"]);
@@ -352,6 +361,32 @@ export function validateProviderSpecificData(
         code: z.ZodIssueCode.custom,
         message: "providerSpecificData.codexPromptCacheKeyScope must be one of client, thread",
         path: ["codexPromptCacheKeyScope"],
+      });
+    }
+  }
+
+  const codexTransport = data.codexTransport;
+  if (codexTransport !== undefined && codexTransport !== null) {
+    const normalized =
+      typeof codexTransport === "string" ? codexTransport.trim().toLowerCase() : "";
+    if (!CODEX_TRANSPORT_SET.has(normalized)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "providerSpecificData.codexTransport must be one of http, websocket, app-server",
+        path: ["codexTransport"],
+      });
+    }
+  }
+
+  const qoderCliTransport = data.qoderCliTransport;
+  if (qoderCliTransport !== undefined && qoderCliTransport !== null) {
+    const normalized =
+      typeof qoderCliTransport === "string" ? qoderCliTransport.trim().toLowerCase() : "";
+    if (!QODER_CLI_TRANSPORT_SET.has(normalized)) {
+      ctx.addIssue({
+        code: z.ZodIssueCode.custom,
+        message: "providerSpecificData.qoderCliTransport must be one of print, acp",
+        path: ["qoderCliTransport"],
       });
     }
   }

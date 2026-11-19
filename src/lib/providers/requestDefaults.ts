@@ -225,6 +225,28 @@ export function normalizeProviderSpecificData(
     if (normalized.codexPromptCacheKeyScope === null) delete normalized.codexPromptCacheKeyScope;
   }
 
+  // Per-connection transport selectors: the edit modal sends an explicit `null`
+  // to go back to "default / inherit env", because PUT /api/providers/[id] merges
+  // { ...existing, ...incoming } and an omitted key would keep the old value.
+  if ("codexTransport" in normalized) {
+    const raw = normalized.codexTransport;
+    const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+    if (value === "http" || value === "websocket" || value === "app-server") {
+      normalized.codexTransport = value;
+    } else {
+      delete normalized.codexTransport;
+    }
+  }
+  if ("qoderCliTransport" in normalized) {
+    const raw = normalized.qoderCliTransport;
+    const value = typeof raw === "string" ? raw.trim().toLowerCase() : "";
+    if (value === "print" || value === "acp") {
+      normalized.qoderCliTransport = value;
+    } else {
+      delete normalized.qoderCliTransport;
+    }
+  }
+
   // Hugging Face Bill-To account (X-HF-Bill-To header source): the edit modal
   // sends explicit `null` to clear a previously-saved value (the PUT route
   // merges { ...existing, ...incoming }, so omitting the key would keep it).

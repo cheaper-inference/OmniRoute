@@ -251,7 +251,14 @@ export class QoderExecutor extends BaseExecutor {
           transformedBody: body,
         };
       }
-      return this.executeViaQoderCli({ model: resolvedModel, body, stream, token, signal });
+      return this.executeViaQoderCli({
+        model: resolvedModel,
+        body,
+        stream,
+        token,
+        signal,
+        providerSpecificData: credentials.providerSpecificData,
+      });
     }
 
     // Non-PAT tokens (OAuth apiKey / DashScope key) → DashScope OpenAI-compatible API.
@@ -357,12 +364,14 @@ export class QoderExecutor extends BaseExecutor {
     stream,
     token,
     signal,
+    providerSpecificData,
   }: {
     model: string;
     body: unknown;
     stream: boolean;
     token: string;
     signal?: AbortSignal | null;
+    providerSpecificData?: Record<string, unknown> | null;
   }): Promise<{
     response: Response;
     url: string;
@@ -372,7 +381,14 @@ export class QoderExecutor extends BaseExecutor {
     const url = "qodercli://stdio";
     const prompt = buildQoderPrompt(body);
 
-    const run = await runQoderCli({ token, prompt, stream: false, model, signal });
+    const run = await runQoderCli({
+      token,
+      prompt,
+      stream: false,
+      model,
+      signal,
+      providerSpecificData,
+    });
 
     // Honor client cancellation the same way the HTTP path does.
     if (signal?.aborted) {
