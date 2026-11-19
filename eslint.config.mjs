@@ -246,6 +246,11 @@ const eslintConfig = [
       "packages/ui-kit/**",
       "_references/**",
       "_mono_repo/**",
+      // _cache/ e _trash/ — caches locais e a lixeira local (gitignored por /_*/). O ESLint 10
+      // não lê o .gitignore; sem estas linhas, `eslint .` no checkout principal desce em cópias
+      // inteiras do repositório guardadas ali.
+      "_cache/**",
+      "_trash/**",
       "review/**",
       // Electron app
       "electron/**",
