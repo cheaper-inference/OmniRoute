@@ -1025,6 +1025,9 @@ export function createSSEStream(options: StreamOptions = {}) {
     const changed =
       !hasPriorInputForTrailingUsage(payload, usage) &&
       sanitizeUsagePayloadForRequest(payload as UsageLike, body, clientResponseFormat);
+    // The receipt is only consumed on Claude's final message_delta. Resolving it for every other
+    // chunk re-estimates the whole request body and stalls the event loop on long histories (#20480).
+    if ((payload as { type?: unknown } | null)?.type !== "message_delta") return changed;
     return repairClaudeFinalWireUsage(payload, getAccountingUsage()) || changed;
   };
   // Passthrough: accumulate content and reasoning separately for call log response body
