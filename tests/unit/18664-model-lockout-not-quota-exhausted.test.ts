@@ -131,3 +131,21 @@ test("an excluded account without a lockout does not shorten the quota-exhaustio
   assert.equal(result.retryAfter, weeklyReset);
   assert.equal(String(result.lastError).includes("exhausted their quota"), true);
 });
+
+test("an excluded account whose own quota is exhausted cannot shorten the quota-exhaustion reset", async () => {
+  // The excluded account's short lockout ends before the other account's reset, but its
+  // own quota for the model is exhausted too: once the lockout ends it still cannot serve.
+  const exhausted = await seedClaude("claude-18664-exhausted-both");
+  const tried = await seedClaude("claude-18664-tried-exhausted");
+  const weeklyReset = new Date(Date.now() + 60 * 60 * 60_000).toISOString();
+  exhaustWeekly(exhausted.id, weeklyReset);
+  exhaustWeekly(tried.id, new Date(Date.now() + 30 * 60 * 60_000).toISOString());
+  fallback.lockModel("claude", tried.id, MODEL, "server_error", 5_000);
+
+  const result = await auth.getProviderCredentials("claude", tried.id, null, MODEL);
+
+  assert.equal(result.allRateLimited, true);
+  assert.notEqual(result.cooldownScope, "model");
+  assert.equal(result.retryAfter, weeklyReset);
+  assert.equal(String(result.lastError).includes("exhausted their quota"), true);
+});
