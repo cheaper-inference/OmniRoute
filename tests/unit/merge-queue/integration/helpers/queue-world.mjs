@@ -617,6 +617,32 @@ export async function createQueueWorld(t, options = {}) {
       clock.advance(1);
     },
 
+    /**
+     * A check run created through POST /check-runs with a workflow token (any workflow's
+     * GITHUB_TOKEN with checks: write), named `name`, concluding `conclusion`, on `sha`, after
+     * every job there. GitHub files it in the check suite of a push run of `ref` on `sha` (the
+     * newest one) and lists it among that run's jobs, as measured on 2026-11-19: html_url
+     * …/runs/<id>, no runner, no labels, no steps (fake.addCheckRun `job: false`). Returns the raw
+     * check run.
+     */
+    forgeCheckRun(sha, ref, { name = "Gate / CI", conclusion }) {
+      const run = fake.workflowRuns.findLast(
+        (r) => r.head_sha === sha && r.head_branch === ref && r.event === "push"
+      );
+      if (!run) throw new Error(`forgeCheckRun: no push run of ${ref} on ${sha}`);
+      clock.advance(1);
+      const forged = fake.addCheckRun(sha, {
+        name,
+        conclusion,
+        headBranch: ref,
+        suiteId: run.check_suite_id,
+        output: { title: "posted by a workflow token", summary: null, text: null },
+        job: false,
+      });
+      clock.advance(1);
+      return forged;
+    },
+
     /** PR numbers whose head makes a candidate red (CI fails when the candidate contains it). */
     culprits: new Set(),
 

@@ -168,6 +168,7 @@ import {
   botIdentity,
   candidateRef,
   hasQueueWork,
+  isRealWorkflowJob,
   isSha,
   resumeBlockers,
   resumeRefusal,
@@ -1146,12 +1147,15 @@ class Tick {
    *    only says which branch, never which event, so the workflow run is what decides.
    * Fail closed: without a ref, or while no push run is listed, no check run counts (the verdict
    * stays pending and checks.NO_RUN_TIMEOUT_MINUTES applies).
-   * Inside those suites only the check runs of the runs' JOBS count (github.listWorkflowRunJobs,
-   * every attempt: a re-run's attempt 2 adds jobs to the same suite, and they count). Any token
-   * with checks: write (the GITHUB_TOKEN of any workflow run in the repository) can create a check
-   * run on the candidate's SHA, which GitHub files in one of its Actions suites; such a run is no
-   * job of the push runs: ignored for the verdict (neither green nor red: absent), and noted once
-   * per batch (noteForeignChecks). One job listing per push run of the ref; a listing that fails
+   * Inside those suites only the check runs of the runs' REAL jobs count
+   * (github.listWorkflowRunJobs, every attempt: a re-run's attempt 2 adds jobs to the same suite,
+   * and they count). Any token with checks: write (the GITHUB_TOKEN of any workflow run in the
+   * repository) can create a check run on the candidate's SHA, which GitHub files in one of its
+   * Actions suites AND lists among the jobs of that suite's run (measured 2026-11-19), so being
+   * listed proves nothing: contracts.isRealWorkflowJob decides (the job URL form for that run and
+   * that job id, and a runner for a success). Every other check run in the suites is no job of
+   * the push runs: ignored for the verdict (neither green nor red: absent), and noted once per
+   * batch (noteForeignChecks). One job listing per push run of the ref; a listing that fails
    * fails the tick, as any other read here.
    * @param {string} sha
    * @param {string|null} ref
@@ -1170,7 +1174,9 @@ class Tick {
       if (!ours || run.checkSuiteId === null || run.checkSuiteId === undefined) continue;
       suites.add(run.checkSuiteId);
       for (const job of await this.gh.listWorkflowRunJobs(run.id)) {
-        if (Number.isSafeInteger(job.checkRunId)) jobs.add(job.checkRunId);
+        // A listed entry is no proof: GitHub lists a check run created through the Checks API
+        // among the jobs of the run whose suite holds it. Only a real job of THIS run counts.
+        if (isRealWorkflowJob(job, run.id)) jobs.add(job.checkRunId);
       }
     }
     const inSuites = runs.filter((run) => suites.has(run.checkSuiteId));
@@ -1180,7 +1186,8 @@ class Tick {
   }
 
   /**
-   * Check runs in the candidate's own suites that are no job of its push runs (pushCheckRuns): one
+   * Check runs in the candidate's own suites that are no real job of its push runs (pushCheckRuns,
+   * contracts.isRealWorkflowJob), whether GitHub lists them among the runs' jobs or not: one
    * `error` event per batch (per SHA when the batch is unknown) naming each such check and its app
    * on one line, so an operator sees the attempt. Never a verdict.
    */
