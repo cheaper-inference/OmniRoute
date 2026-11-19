@@ -393,19 +393,29 @@ export const CODE_SCAN_ROOTS = [
 
 const CODE_ENV_REF = /process\.env\.([A-Z][A-Z0-9_]+)/g;
 
-// Inputs from i18n-mirror-refresh.yml and the Actions runner belong to this helper.
+// Workflow and Node coverage inputs belong to their specific CI helpers.
 // The same names are still checked when another file reads them.
-const MIRROR_REFRESH_INPUTS = new Set([
-  "BASE",
-  "CANDIDATE_SHA",
-  "ENGINE",
-  "PARTIAL",
-  "REFRESH_BRANCH",
-  "REFRESH_SHA",
-  "REPO",
-  "RUN_URL",
-  "RUNNER_TEMP",
-  "TRANSLATION_SHA",
+const CI_HELPER_INPUTS = new Map([
+  [
+    path.join("scripts", "i18n", "mirror-refresh-safety.mjs"),
+    new Set([
+      "BASE",
+      "CANDIDATE_SHA",
+      "ENGINE",
+      "PARTIAL",
+      "REFRESH_BRANCH",
+      "REFRESH_SHA",
+      "REPO",
+      "RUN_URL",
+      "RUNNER_TEMP",
+      "TRANSLATION_SHA",
+    ]),
+  ],
+  [
+    path.join("scripts", "ci", "atomic-tsx-cache.mjs"),
+    new Set(["OMNIROUTE_CI_SYNC_TSX_CACHE", "TMPDIR"]),
+  ],
+  [path.join("scripts", "ci", "native-worker-v8-layout.mjs"), new Set(["NODE_V8_COVERAGE"])],
 ]);
 
 /**
@@ -434,10 +444,10 @@ export function scanCodeVars({ cwd, roots = CODE_SCAN_ROOTS } = {}) {
       return;
     }
     if (text.includes("\0")) return;
-    const isMirrorRefresh = file === path.join(repoRoot, "scripts/i18n/mirror-refresh-safety.mjs");
+    const helperInputs = CI_HELPER_INPUTS.get(path.relative(repoRoot, file));
     for (const match of text.matchAll(CODE_ENV_REF)) {
       const name = match[1];
-      if (isMirrorRefresh && MIRROR_REFRESH_INPUTS.has(name)) continue;
+      if (helperInputs?.has(name)) continue;
       vars.add(name);
     }
   };
