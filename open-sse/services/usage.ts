@@ -40,6 +40,7 @@ import {
   mapCodeAssistTierIdToLabel,
   mapSubscriptionTierStringToPlanLabel,
 } from "./usage/antigravity.ts";
+import { getGeminiAppUsage } from "./usage/geminiApp.ts";
 import { getCursorUsage } from "./usage/cursor.ts";
 import { getKimiUsage } from "./usage/kimi.ts";
 import { getCodexUsage } from "./usage/codex.ts";
@@ -170,6 +171,9 @@ export async function getUsageForProvider(
         id,
         options
       );
+    case "gemini-app":
+    case "gapp":
+      return await getGeminiAppUsage(accessToken, options);
     case "claude":
       return await getClaudeUsage(accessToken, id || "", {
         forceRefresh: options.forceRefresh === true,

@@ -21,6 +21,7 @@
 export const USAGE_SUPPORTED_PROVIDERS: readonly string[] = [
   "antigravity",
   "agy",
+  "gemini-app",
   "kiro",
   "amazon-q",
   "github",
