@@ -414,17 +414,22 @@ function ReasoningRules() {
 
 function PayloadPrivacy() {
   const { t, formState, updateState } = useKeyPolicyEditor();
+  // Presented as "Logging" (ON by default), matching the global, connection and
+  // per-model toggles. The stored column stays `no_log` (true = withhold), so
+  // the switch reads `!noLog` and flips the same flag on change. Turning this
+  // off is an opt-out tier in resolveNoLogEnabled: no lower tier can re-enable
+  // payload logging for this key.
   return (
     <div className="flex items-start justify-between gap-3 p-3.5 rounded-lg border border-border bg-surface/40">
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-medium text-text-main">{t("noLogPayloadPrivacy")}</p>
-        <p className="text-xs text-text-muted">{t("templateNoLogDesc")}</p>
+        <p className="text-sm font-medium text-text-main">{t("keyLoggingToggle")}</p>
+        <p className="text-xs text-text-muted">{t("keyLoggingDescription")}</p>
       </div>
       <Toggle
         size="sm"
-        checked={formState.noLog}
-        onChange={() => updateState((p) => ({ ...p, noLog: !p.noLog }))}
-        ariaLabel={t("noLogPayloadPrivacy")}
+        checked={formState.noLog !== true}
+        onChange={() => updateState((p) => ({ ...p, noLog: p.noLog !== true }))}
+        ariaLabel={t("keyLoggingToggle")}
       />
     </div>
   );

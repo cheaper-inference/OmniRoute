@@ -2633,6 +2633,8 @@
     "apiManagerRemoveLimitTitle": "Remove limit",
     "apiManagerTimezonePlaceholder": "America/Sao_Paulo",
     "noLogPayloadPrivacy": "No-Log Payload Privacy",
+    "keyLoggingToggle": "Logging",
+    "keyLoggingDescription": "When off, this API key never stores request or response message content in call logs. Timestamp, model, provider, status, duration, token counts and errors are still recorded. Turning it off here overrides every other level for this key.",
     "bannedStatus": "Banned Status",
     "managementApiAccess": "Management API Access",
     "expirationDate": "Expiration Date",

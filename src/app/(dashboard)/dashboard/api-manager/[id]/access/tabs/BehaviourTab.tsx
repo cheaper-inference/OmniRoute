@@ -31,20 +31,21 @@ type BehaviourSectionProps<K extends keyof BehaviourTabProps> = Pick<
 function PayloadPrivacyToggle({ formState, setNoLog }: BehaviourSectionProps<"setNoLog">) {
   const t = useTranslations("apiManager");
 
+  // "Logging" (ON by default) matches the global, connection and per-model
+  // toggles. The stored column stays `no_log` (true = withhold), so the switch
+  // reads `!noLog` and flips the same flag.
   return (
     <div className="flex items-start justify-between gap-3 p-4 rounded-lg border border-border bg-surface/40">
       <div className="flex flex-col gap-1">
-        <p className="text-sm font-medium text-text-main">{t("noLogPayloadPrivacy")}</p>
-        <p className="text-xs text-text-muted">
-          Disable request/response payload persistence for this API key.
-        </p>
+        <p className="text-sm font-medium text-text-main">{t("keyLoggingToggle")}</p>
+        <p className="text-xs text-text-muted">{t("keyLoggingDescription")}</p>
       </div>
       <Toggle
         size="sm"
         className="shrink-0"
-        checked={formState.noLog}
-        onChange={() => setNoLog(!formState.noLog)}
-        ariaLabel={t("noLogPayloadPrivacy")}
+        checked={formState.noLog !== true}
+        onChange={() => setNoLog(formState.noLog !== true)}
+        ariaLabel={t("keyLoggingToggle")}
       />
     </div>
   );
