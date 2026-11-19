@@ -124,6 +124,8 @@ import {
   isOpenAIResponsesStoreEnabled,
 } from "@/lib/providers/requestDefaults";
 import { guardrailRegistry, resolveDisabledGuardrails } from "@/lib/guardrails";
+import { getActiveRequestTokenVault } from "@/lib/pii/tokenVault";
+import { runWithRequestTokenVault } from "@/lib/pii/requestTokenVaultScope";
 import {
   resolveModelOrError,
   comboTargetCredentialProviderId,
@@ -160,7 +162,12 @@ import {
 import { markAntigravityMissingCloudCodeProject } from "@omniroute/open-sse/services/antigravityProjectPersistence.ts";
 import { connectionHasExtraKeys } from "@omniroute/open-sse/services/apiKeyRotator.ts";
 import { wrapResponseWithOAuthSessionRelease } from "@omniroute/open-sse/services/oauthSessionOccupancy.ts";
-import { inheritProviderProbeResponse, inheritResponsePolicies } from "./chat/responsePolicies.ts";
+import {
+  inheritProviderProbeResponse,
+  inheritResponsePolicies,
+  isNoReplayResponse,
+  markCustomJsonNoReplay,
+} from "./chat/responsePolicies.ts";
 import { resolveProviderId } from "@/shared/constants/providers";
 import {
   extractReasoningIntent,
@@ -885,6 +892,7 @@ async function handleChatImplementation(
     model: modelStr,
     signal,
     stream: body?.stream === true,
+    tokenVault: getActiveRequestTokenVault() ?? null,
   });
   if (preCallGuardrails.blocked) {
     log.warn("GUARDRAIL", "Request blocked during pre-call guardrails", {
@@ -1530,9 +1538,13 @@ async function handleChatImplementation(
 // One turn-execution ownership scope per client request (#18716): every account retry, rotation
 // and combo leg of this request re-enters chatCore under it and reuses the turn slot the request
 // already holds instead of 409ing itself. A scope per dispatch would not span those attempts.
+// The reversible PII vault is scoped the same way: one vault per client request, restored once
+// on the response that leaves here (a no-op unless both PII vault flags are on).
 export const handleChat = chatAdmission.withChatAdmission(
   (...args: Parameters<typeof handleChatImplementation>) =>
-    runWithTurnExecutionOwnership(() => handleChatImplementation(...args))
+    runWithRequestTokenVault(() =>
+      runWithTurnExecutionOwnership(() => handleChatImplementation(...args))
+    )
 );
 
 function readEmptyStreamSiblingRecoveryFlag(): boolean {
@@ -2379,6 +2391,7 @@ async function handleSingleModelChat(
         return execution.localResourcePressureResult.response;
       }
       const { result, tlsFingerprintUsed, wasProviderProbe } = execution;
+      markCustomJsonNoReplay(result.response, credentials?.providerSpecificData);
       if (!result.success) releaseOAuthSession();
       if (result.success && agyLease.isStreamingAntigravityResponse(result.response))
         result.response = inheritProviderProbeResponse(
@@ -2468,6 +2481,12 @@ async function handleSingleModelChat(
         releaseOAuthSession();
         return successResponse;
       }
+      // Custom JSON API node: the business call may already have taken effect. Surface
+      // its failure as-is — no account cooldown, no replay on this or another connection.
+      if (isNoReplayResponse(result.response)) {
+        return withSelectedConnectionHeader(result.response, credentials.connectionId);
+      }
+
       // A trusted caller's deadline must not cool a shared connection.
       // A shorter *preferred* deadline may perform one in-request sibling hop,
       // without recording a connection failure or evicting session affinity.
