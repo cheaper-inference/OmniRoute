@@ -318,7 +318,7 @@ export async function getUsageForProvider(
       // USD credit from the operator-pasted Orb billing portal link; display-only.
       return await getZedHostedUsage(id || "", providerSpecificData);
     case "muse-code":
-      // Muse Code has no usage/balance API. Return persisted subscription metadata.
+      // Muse Code: the session/weekly usage Meta reported with the last response, plus the tier.
       return await getMuseUsage(accessToken, providerSpecificData, id || "");
     default:
       return { message: `Usage API not implemented for ${provider}` };
