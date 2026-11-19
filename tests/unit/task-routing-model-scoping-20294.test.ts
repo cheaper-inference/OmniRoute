@@ -109,6 +109,28 @@ test("#20294 excludedModels takes precedence when model matches targetModels and
   assert.equal(res.model, "auto/dev:no-route");
 });
 
+test("#20294 a scoped model id does not match a different model it merely prefixes", () => {
+  const codingBody = {
+    messages: [{ role: "user", content: "write a python function to calculate fibonacci" }],
+  };
+
+  setTaskRoutingConfig({ targetModels: ["openai/gpt-4o"], excludedModels: undefined });
+  assert.equal(applyTaskAwareRouting("openai/gpt-4o", codingBody).wasRouted, true);
+  assert.equal(applyTaskAwareRouting("openai/gpt-4o:thinking", codingBody).wasRouted, true);
+  const mini = applyTaskAwareRouting("openai/gpt-4o-mini", codingBody);
+  assert.equal(mini.wasRouted, false);
+  assert.equal(mini.model, "openai/gpt-4o-mini");
+
+  setTaskRoutingConfig({ targetModels: undefined, excludedModels: ["openai/gpt-4o"] });
+  assert.equal(applyTaskAwareRouting("openai/gpt-4o", codingBody).wasRouted, false);
+  assert.equal(applyTaskAwareRouting("openai/gpt-4o-mini", codingBody).wasRouted, true);
+
+  // A provider or namespace entry still scopes every model under it.
+  setTaskRoutingConfig({ targetModels: ["openai"], excludedModels: undefined });
+  assert.equal(applyTaskAwareRouting("openai/gpt-4o-mini", codingBody).wasRouted, true);
+  assert.equal(applyTaskAwareRouting("openai-compatible/gpt-4o", codingBody).wasRouted, false);
+});
+
 test("#20294 updateTaskRoutingSchema accepts and validates targetModels and excludedModels", () => {
   const valid = updateTaskRoutingSchema.safeParse({
     targetModels: ["auto/dev", "combo/primary"],

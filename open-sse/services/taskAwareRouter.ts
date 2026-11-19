@@ -47,7 +47,8 @@ export interface TaskRoutingConfig {
   patternOverrides?: TaskPatternOverrides;
   detectionEnabled: boolean;
   /**
-   * If specified, only intercept when originalModel matches or starts with these IDs.
+   * If specified, only intercept when originalModel is one of these IDs or one of their
+   * ":" variants / "/" children.
    * (#20294)
    */
   targetModels?: string[];
@@ -397,6 +398,23 @@ export function detectTaskType(body: any): TaskType {
   return "chat";
 }
 
+/** Characters that end a model id segment: a variant (":fast") or a path ("openai/"). */
+const MODEL_SCOPE_BOUNDARY = /[:/]/;
+
+/**
+ * A scoped entry covers the exact id and its variants or children ("auto/dev" ->
+ * "auto/dev:fast", "openai" -> "openai/gpt-4o"), but never a different model it
+ * merely prefixes ("openai/gpt-4o" must not cover "openai/gpt-4o-mini") (#20294).
+ */
+function matchesModelScope(modelId: string, entry: string): boolean {
+  if (modelId === entry) return true;
+  if (!entry || !modelId.startsWith(entry)) return false;
+  return (
+    MODEL_SCOPE_BOUNDARY.test(entry.charAt(entry.length - 1)) ||
+    MODEL_SCOPE_BOUNDARY.test(modelId.charAt(entry.length))
+  );
+}
+
 /**
  * Apply task-aware model override.
  * Returns the original model if routing is disabled or no override found.
@@ -420,7 +438,7 @@ export function applyTaskAwareRouting(
   if (
     config.targetModels &&
     config.targetModels.length > 0 &&
-    !config.targetModels.some((m) => modelId === m || modelId.startsWith(m))
+    !config.targetModels.some((m) => matchesModelScope(modelId, m))
   ) {
     return { model: originalModel, taskType: "chat", wasRouted: false };
   }
@@ -429,7 +447,7 @@ export function applyTaskAwareRouting(
   if (
     config.excludedModels &&
     config.excludedModels.length > 0 &&
-    config.excludedModels.some((m) => modelId === m || modelId.startsWith(m))
+    config.excludedModels.some((m) => matchesModelScope(modelId, m))
   ) {
     return { model: originalModel, taskType: "chat", wasRouted: false };
   }
