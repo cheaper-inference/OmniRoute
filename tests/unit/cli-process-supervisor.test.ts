@@ -2,6 +2,7 @@ import test from "node:test";
 import assert from "node:assert/strict";
 import { EventEmitter } from "node:events";
 import fs from "node:fs";
+import { tmpdir } from "node:os";
 import path from "node:path";
 
 // #4425: the supervisor now waits for the listen port to free up before respawning.
@@ -255,10 +256,19 @@ test("ServerSupervisor.handleExit com string code não passa string para process
 
 // --- pid.mjs multi-service ---
 
-test("writePidFile/readPidFile/cleanupPidFile operam por service", async () => {
-  const os = await import("node:os");
-  const tmpDir = os.default.tmpdir() + "/omniroute-pid-test-" + Date.now();
+test("writePidFile/readPidFile/cleanupPidFile operam por service", async (t) => {
+  const tmpDir = fs.mkdtempSync(path.join(tmpdir(), "omniroute-pid-test-"));
+  const previousDataDir = process.env.DATA_DIR;
   process.env.DATA_DIR = tmpDir;
+  t.after(() => {
+    if (previousDataDir === undefined) delete process.env.DATA_DIR;
+    else process.env.DATA_DIR = previousDataDir;
+    fs.rmSync(tmpDir, { recursive: true, force: true });
+  });
+
+  const probe = t.mock.method(process, "kill", () => {
+    throw Object.assign(new Error("Fixture process has exited"), { code: "ESRCH" });
+  });
 
   const { writePidFile, readPidFile, cleanupPidFile } = await import("../../bin/cli/utils/pid.mjs");
 
@@ -276,7 +286,15 @@ test("writePidFile/readPidFile/cleanupPidFile operam por service", async () => {
   assert.equal(readPidFile("mitm"), 99999); // mitm não foi afetado
 
   cleanupPidFile("mitm");
-  delete process.env.DATA_DIR;
+  assert.deepEqual(
+    probe.mock.calls.map((call) => call.arguments),
+    [
+      [12345, 0],
+      [99999, 0],
+      [12345, 0],
+      [99999, 0],
+    ]
+  );
 });
 
 // --- #11980: Bun --preload must resolve against the package root, never dist/ ---

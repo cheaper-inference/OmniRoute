@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { getSettledModelCatalogResponse } from "../_setup/modelCatalogFixture.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-10615-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -43,13 +44,10 @@ test("#10615: /api/models must agree with /v1/models on exclusive synced-listing
   ]);
   v1ModelsCatalog.__resetCatalogBuilderRunsForTest();
 
-  const v1Res = await v1ModelsCatalog.getUnifiedModelsResponse(
-    new Request("http://localhost/api/v1/models")
-  );
+  const v1Res = await getSettledModelCatalogResponse(v1ModelsCatalog);
+  assert.equal(v1Res.status, 200);
   const v1Body = (await v1Res.json()) as { data: Array<{ id: string }> };
   const v1Ids = v1Body.data.map((m) => m.id);
-
-  assert.equal(v1Res.status, 200);
   assert.ok(v1Ids.includes("cu/composer-3"));
   assert.equal(v1Ids.includes("cu/composer-2.5"), false);
 
