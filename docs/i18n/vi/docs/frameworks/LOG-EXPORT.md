@@ -195,144 +195,149 @@ các mô tả trường được trả về, nên việc thêm đích xuất m�
 
 ---
 
-## 4. Đích xuất BigQuery
+## 4. Đích BigQuery
 
 Các khóa cấu hình (`type: "bigquery"`):
 
-| Khóa                 | Ghi chú                                                                            |
-| -------------------- | ---------------------------------------------------------------------------------- |
-| `projectId`          | Dự án GCP chứa tập dữ liệu                                                         |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                    |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                    |
-| `location`           | Chỉ dùng khi cần tạo tập dữ liệu (mặc định là `EU`)                                |
-| `serviceAccountJson` | Khóa tài khoản dịch vụ. Bí mật: được mã hóa khi lưu trữ, không bao giờ được trả về |
-| `autoCreate`         | Tạo tập dữ liệu và bảng trong lần xuất đầu tiên (mặc định là `true`)               |
+| Key                  | Notes                                                                                                               |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | Dự án GCP chứa dataset                                                                                              |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                     |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                     |
+| `location`           | Chỉ được sử dụng khi dataset cần được tạo (mặc định là `EU`)                                                        |
+| `serviceAccountJson` | Khóa tài khoản dịch vụ. Bí mật: được mã hóa khi lưu trữ, không bao giờ được trả về                                  |
+| `autoCreate`         | Tạo dataset/table còn thiếu; có điều kiện thêm các cột usage-evidence có thể nhận giá trị null (mặc định là `true`) |
 
-Tài khoản dịch vụ cần có quyền `bigquery.tables.updateData` trên bảng đích, cùng với
-`bigquery.datasets.create` / `bigquery.tables.create` khi bật `autoCreate`.
+Tài khoản dịch vụ cần có quyền `bigquery.tables.updateData` trên table đích, cùng với
+`bigquery.datasets.create` / `bigquery.tables.create` khi `autoCreate` được bật.
+Việc cập nhật một table hiện có để thêm hai trường usage-evidence có thể nhận giá trị null cũng yêu cầu
+`bigquery.tables.update`. Quyền bị thiếu sẽ khiến quá trình xuất thất bại mà không làm tiến con trỏ.
 
-Một lô được cấu hình là đơn vị của **con trỏ**, không phải đơn vị HTTP: `send()` chia lô thành các lệnh gọi insertAll
-với tối đa 500 hàng mỗi lần, nên `batch_size` lớn không thể vượt giới hạn yêu cầu 10 MB của BigQuery.
-Các mã trạng thái tạm thời (408/429/500/502/503/504) được thử lại tối đa ba lần với thời gian chờ
-tăng theo cấp số nhân, sử dụng lại cùng các insertIds; lỗi xác thực và lược đồ sẽ phát sinh ngoại lệ ngay lần thử đầu tiên thay vì
-lãng phí cả lượt chạy.
+Một batch được cấu hình là một đơn vị **con trỏ**, không phải đơn vị HTTP: `send()` chia batch thành các lệnh gọi
+insertAll, mỗi lệnh tối đa 500 hàng, vì vậy `batch_size` lớn không thể làm vượt giới hạn yêu cầu 10 MB của BigQuery.
+Các trạng thái tạm thời (408/429/500/502/503/504) được thử lại tối đa ba lần với
+thời gian chờ tăng theo cấp số nhân, sử dụng lại cùng các insertIds; lỗi xác thực và lỗi schema sẽ ném lỗi ngay ở lần thử đầu tiên
+thay vì tiêu tốn lượt chạy.
 
-Bảng vừa được tạo chưa hiển thị ngay với điểm cuối truyền trực tuyến, nên điểm cuối này trả về
-404 trong vài giây. Mã 404 đó sẽ được thử lại, nhưng **chỉ khi bảng được tạo trong lượt chạy này** —
-bảng thực sự không tồn tại vẫn sẽ báo lỗi ngay. Lưu ý rằng việc tạo lại bảng bằng tên
-vừa bị xóa gần đây khiến BigQuery từ chối chèn dữ liệu trực tuyến trong vài phút; đây là
-đặc tính của thao tác xóa rồi tạo lại, vì vậy hãy ưu tiên tên bảng mới thay vì xóa rồi thêm lại bảng cũ.
+Một table vừa được tạo chưa hiển thị ngay với endpoint streaming, endpoint này trả về
+404 trong vài giây. 404 đó sẽ được thử lại, nhưng **chỉ khi lượt chạy này đã tạo table** —
+một table thực sự bị thiếu vẫn sẽ thất bại ngay. Lưu ý rằng việc tạo lại table dưới một tên
+vừa bị xóa gần đây khiến BigQuery từ chối các thao tác chèn streaming trong vài phút; đây là
+đặc tính của việc xóa rồi tạo lại, vì vậy nên ưu tiên tên table mới thay vì xóa và thêm lại table cũ.
 
-**Lỗi một phần được trả về dưới dạng HTTP 200 với `insertErrors[]` không rỗng.** Trường hợp này được coi là
-thất bại và phát sinh ngoại lệ, nhờ đó ngăn con trỏ tiến qua các hàng mà BigQuery chưa từng
-chấp nhận; `tests/unit/log-export-bigquery.test.ts` kiểm chứng hành vi này.
+**Lỗi một phần được trả về dưới dạng HTTP 200 với `insertErrors[]` không rỗng.** Trường hợp này được xử lý như
+một lỗi và ném exception, nhờ đó ngăn con trỏ tiến vượt qua các hàng mà BigQuery chưa chấp nhận;
+`tests/unit/log-export-bigquery.test.ts` cố định hành vi này.
 
-Việc truyền dữ liệu sử dụng REST thuần — một xác nhận RS256 tự ký được đổi lấy mã thông báo truy cập tại
-`https://oauth2.googleapis.com/token`, sau đó các hàng được gửi đến `tabledata.insertAll`. Không đưa thêm Google SDK
-vào làm phần phụ thuộc. Mã thông báo truy cập được lưu đệm trong tiến trình theo từng cặp (tài khoản dịch vụ, phạm vi).
+Lớp truyền tải là REST thuần túy — một assertion RS256 tự ký được trao đổi lấy access token tại
+`https://oauth2.googleapis.com/token`, sau đó các hàng được gửi đến `tabledata.insertAll`. Không có Google SDK nào được
+đưa vào. Access token được lưu trong bộ nhớ tiến trình theo từng cặp (tài khoản dịch vụ, scope).
 
-Bảng được tạo có một cột cho mỗi trường trong thẻ Logs cùng với `exported_at`, và được bố trí theo
-cách truy vấn nhật ký lệnh gọi trong thực tế:
+Table được tạo sẽ chứa một cột cho mỗi trường của tab Logs cùng với `exported_at`, và được bố trí để
+phù hợp với cách các nhật ký cuộc gọi thực sự được truy vấn:
 
-- **Phân vùng theo ngày trên `timestamp`**, để truy vấn giới hạn theo ngày chỉ quét những ngày đó.
-- **Phân cụm theo `api_key_name`, `provider`, `model`, `status`** (theo thứ tự đó), để khi lọc theo
-  người thực hiện, đích đến hoặc trạng thái thất bại, các khối trong mỗi phân vùng được loại bớt. BigQuery
-  cho phép tối đa bốn cột phân cụm và thứ tự có ý nghĩa: chỉ lọc theo `api_key_name`
-  sẽ loại bớt các khối, còn chỉ lọc theo `status` thì không.
-- **Thời hạn lưu giữ phân vùng tùy chọn** thông qua `partitionExpirationDays` (0 giữ lại mọi dữ liệu), được áp dụng
-  khi tạo bảng.
+- **Phân vùng theo ngày dựa trên `timestamp`**, vì vậy truy vấn giới hạn theo ngày chỉ quét các ngày đó.
+- **Phân cụm theo `api_key_name`, `provider`, `model`, `status`** (theo thứ tự này), nhờ đó việc lọc theo
+  người đã chạy, nơi yêu cầu được chuyển đến hoặc yêu cầu có thất bại hay không sẽ loại bỏ các khối bên trong mỗi phân vùng. BigQuery
+  cho phép tối đa bốn cột phân cụm và thứ tự có ý nghĩa: bộ lọc chỉ trên `api_key_name` sẽ
+  loại bỏ các khối, còn bộ lọc chỉ trên `status` thì không.
+- **Lưu giữ phân vùng tùy chọn** thông qua `partitionExpirationDays` (0 là giữ lại mọi thứ), được áp dụng
+  khi table được tạo.
 
-Cả hai thiết lập đều áp dụng tại thời điểm tạo. Bảng hiện có giữ nguyên bố cục sẵn có, vì vậy
-hãy trỏ đích xuất đến một mã định danh bảng mới nếu bạn muốn áp dụng chúng.
+Cả hai thiết lập đều được áp dụng tại thời điểm tạo. Table hiện có sẽ giữ nguyên bố cục hiện tại, vì vậy
+hãy trỏ đích đến một table id mới nếu muốn áp dụng các thiết lập này.
 
-`tests/unit/log-export-bigquery.test.ts` xác nhận rằng bộ ánh xạ và lược đồ bảng luôn đồng bộ,
-để không có cột nhật ký lệnh gọi mới nào bị âm thầm bỏ qua khi xuất.
+`tests/unit/log-export-bigquery.test.ts` đảm bảo mapper và schema của table luôn đồng bộ,
+vì vậy một cột nhật ký cuộc gọi mới không thể bị âm thầm loại bỏ trong quá trình xuất.
 
-Các lô được chia thành các phần dựa trên **cả** số hàng và số byte sau khi tuần tự hóa. Chỉ dựa vào số hàng là chưa đủ
-khi xuất cả dữ liệu tải: 500 hàng chứa câu lệnh đầu vào có thể lên tới hàng chục megabyte, và insertAll
-từ chối yêu cầu vượt quá 10 MB. Mỗi phần kết thúc khi đạt 500 hàng hoặc 9 MB, tùy giới hạn nào đến trước.
+Batch được chia theo **cả số lượng hàng và số byte sau khi tuần tự hóa**. Chỉ dựa vào số lượng hàng là không đủ
+khi payload được xuất: 500 hàng chứa prompt có thể chiếm hàng chục megabyte, và insertAll
+sẽ từ chối yêu cầu vượt quá 10 MB. Các phần được đóng ở mức 500 hàng hoặc 9 MB, tùy điều kiện nào đến trước.
 
 ---
 
-## 5. Đích xuất trace OTLP/HTTP
+## 5. Đích traces OTLP/HTTP
 
-Cấu hình sử dụng `type: "otlp-http"`. Đây là cơ chế xuất nhật ký lệnh gọi đã lưu theo lịch,
-có con trỏ theo dõi, không phải đích nhận sự kiện định tuyến trực tiếp theo cơ chế nỗ lực tối đa trong
-`open-sse/services/routing/otel.ts`. Cơ chế này không đọc hoặc thay đổi các biến môi trường,
-bộ định thời hay bộ đệm của đích nhận đó. Bật cả hai có thể tạo ra hai loại span độc lập;
-hãy dùng phạm vi đo lường `omniroute.log-export` để phân biệt các span nhật ký lệnh gọi này.
+Cấu hình sử dụng `type: "otlp-http"`. Đây là hoạt động xuất dữ liệu theo lịch, có cursor, đối với
+nhật ký cuộc gọi đã được lưu trữ, không phải bộ tiếp nhận các sự kiện định tuyến trực tiếp theo cơ chế
+best-effort trong `open-sse/services/routing/otel.ts`. Nó không đọc hoặc thay đổi các biến môi trường,
+bộ hẹn giờ hay bộ đệm của bộ tiếp nhận đó. Việc bật cả hai có thể tạo ra hai loại span độc lập;
+sử dụng scope instrumentation `omniroute.log-export` để phân biệt các span nhật ký cuộc gọi này.
 
-| Khóa                     | Mặc định / mục đích                                                                |
-| ------------------------ | ---------------------------------------------------------------------------------- |
-| `endpoint`               | URL trace HTTP(S) đầy đủ, bắt buộc; không tự thêm hậu tố `/v1/traces`              |
-| `headers`                | Các dòng `Name: value` hoặc đối tượng JSON chứa chuỗi, không bắt buộc; được mã hóa |
-| `requestHeaderAllowlist` | Trống (tắt); tên/tiền tố header của máy khách cần thu thập làm thuộc tính span     |
-| `serviceName`            | `omniroute`; thuộc tính tài nguyên `service.name`                                  |
-| `langfuseMapping`        | `false`; thêm các thuộc tính generation/session/user của Langfuse                  |
-| `identity`               | `pseudonymous`, `keyName` hoặc `none`                                              |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                            |
-| `timeoutMs`              | `30000` cho mỗi lần thử HTTP                                                       |
-| `environment`            | Chưa đặt; `langfuse.environment` không bắt buộc                                    |
+| Key                      | Mặc định / mục đích                                                             |
+| ------------------------ | ------------------------------------------------------------------------------- |
+| `endpoint`               | URL traces HTTP(S) đầy đủ bắt buộc; không tự động thêm hậu tố `/v1/traces`      |
+| `headers`                | Các dòng `Name: value` hoặc đối tượng JSON gồm các chuỗi, tùy chọn; được mã hóa |
+| `requestHeaderAllowlist` | Rỗng (tắt); tên/prefix của header client cần thu thập làm thuộc tính span       |
+| `serviceName`            | `omniroute`; resource `service.name`                                            |
+| `langfuseMapping`        | `false`; thêm các thuộc tính generation/session/user của Langfuse               |
+| `identity`               | `pseudonymous`, `keyName` hoặc `none`                                           |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                         |
+| `timeoutMs`              | `30000` cho mỗi lần thử HTTP                                                    |
+| `environment`            | Không đặt; `langfuse.environment` tùy chọn                                      |
 
-Bảng điều khiển chung hiển thị các trường này. `paths` chấp nhận một mảng qua API hoặc một vùng nhập văn bản
-chứa các đường dẫn chính xác, phân tách bằng ký tự xuống dòng/dấu phẩy. Các đường dẫn embeddings, rerank và đường dẫn khác
-sẽ bị bỏ qua trừ khi được cho phép rõ ràng. Các hàng bị bỏ qua vẫn làm con trỏ tiến lên; các bộ đếm
-`exported`/`exportedTotal` của trình chạy hiện có đếm các hàng nguồn đã xử lý, bao gồm cả các hàng
-bị lọc, thay vì số span được chấp nhận. Việc lọc được thực hiện trong tiến trình con, không thay đổi
-giao ước IPC/con trỏ của nó.
+Dashboard chung hiển thị các trường này. `paths` chấp nhận một mảng API hoặc textarea
+với các path chính xác được phân tách bằng dòng mới/dấu phẩy. Embeddings, rerank và các
+path khác sẽ bị bỏ qua trừ khi được cho phép rõ ràng. Các dòng bị bỏ qua vẫn làm tăng
+cursor; các bộ đếm `exported`/`exportedTotal` của runner hiện tại đếm số dòng nguồn đã
+xử lý, bao gồm cả các dòng bị lọc, thay vì số span được chấp nhận. Việc lọc được thực hiện
+trong child mà không thay đổi contract IPC/cursor của nó.
 
-Việc xác thực URL sử dụng hàm trợ giúp `parseAndValidateNonMetadataUrl` không phụ thuộc cơ sở dữ liệu từ
-`src/shared/network/outboundUrlGuard.ts`: chính sách `block-metadata`. Chính sách này có cùng
-các kiểm tra vô điều kiện đối với metadata/giao thức/thông tin xác thực nhúng như trình xác thực webhook khi
-cho phép URL riêng tư, nhưng chủ động cho phép các đích localhost/LAN mà không cần ghi đè
-bằng cờ tính năng toàn cục. Điều này cho phép các endpoint Langfuse, Phoenix, Tempo và Collector
-tự lưu trữ, bao gồm cả các endpoint HTTP riêng tư. Các máy chủ metadata đám mây luôn bị chặn.
-Không thực hiện theo chuyển hướng, nên collector không thể chuyển hướng thông tin xác thực sang máy chủ khác.
-Giống như cơ chế bảo vệ URL dựa trên chuỗi hiện có, cơ chế này không cố định kết quả phân giải DNS; chỉ cấu hình
-các máy chủ do người vận hành kiểm soát. Ưu tiên HTTPS bất cứ khi nào endpoint không nằm trên mạng đáng tin cậy.
+Việc xác thực URL sử dụng helper `parseAndValidateNonMetadataUrl` không phụ thuộc DB từ
+`src/shared/network/outboundUrlGuard.ts`: chính sách `block-metadata`. Helper này có cùng
+các kiểm tra metadata/protocol/credential nhúng luôn được thực hiện như validator webhook,
+với các URL private được cho phép, nhưng chủ ý cho phép các đích localhost/LAN mà không cần
+ghi đè feature flag toàn cục. Điều này cho phép các endpoint Langfuse, Phoenix, Tempo và
+Collector tự lưu trữ, bao gồm cả các endpoint HTTP private. Các host cloud-metadata luôn bị
+chặn. Redirect không được theo dõi, vì vậy collector không thể chuyển hướng credential đến
+một host khác. Giống như bộ bảo vệ URL theo lexical hiện tại, cơ chế này không cố định
+việc phân giải DNS; chỉ cấu hình các host do operator kiểm soát. Ưu tiên HTTPS bất cứ khi
+nào endpoint không nằm trên mạng đáng tin cậy.
 
 ### Payload và việc phân phối
 
-JSON OTLP/HTTP (`ExportTraceServiceRequest`, `Content-Type: application/json`) mang một
-span CLIENT cho mỗi hàng được cho phép, được đặt tên theo đường dẫn yêu cầu chính xác của hàng đó. Việc đặt tên theo đường dẫn giúp phân biệt
-Chat Completions, Responses và Messages mà không nhúng dữ liệu mô hình hay danh tính vào
-tên span. Các thuộc tính tài nguyên bao gồm `service.name` và `service.version` của gói.
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) mang một
+CLIENT span cho mỗi dòng được cho phép, được đặt tên theo path request chính xác. Việc đặt
+tên theo path phân biệt Chat Completions, Responses và Messages mà không nhúng dữ liệu model
+hoặc identity vào tên span. Các thuộc tính resource bao gồm `service.name` và
+`service.version` của package.
 
-Trình ghi nhật ký lần thử chat thông thường (`open-sse/handlers/chatCore/attemptLogging.ts`) ghi
-`duration = Date.now() - startTime` khi hoàn tất và không cung cấp dấu thời gian;
-`saveCallLogOperation` trong `src/lib/usage/callLogs.ts` mặc định đặt dấu thời gian là thời điểm ghi
-(hoàn tất). Vì vậy, quá trình xuất đặt thời điểm kết thúc = dấu thời gian của hàng và thời điểm bắt đầu = thời điểm kết thúc − thời lượng
-(mili giây, được chuyển đổi sang nano giây dạng thập phân). Các dấu thời gian quá khứ do bên gọi cung cấp
-cũng được giữ nguyên làm thời điểm kết thúc; không có thông tin phân biệt thời điểm bắt đầu/hoàn tất cho từng hàng.
-Thời lượng null được chuyển thành không. Dấu thời gian không hợp lệ/bị thiếu khiến cả lô thất bại thay vì tạo ra
-các span không xác định. `ttftMs` có thể là null và được ánh xạ sang `omniroute.ttft_ms`.
+Bộ ghi nhật ký lần thử chat thông thường (`open-sse/handlers/chatCore/attemptLogging.ts`) ghi
+`duration = Date.now() - startTime` khi hoàn tất và không cung cấp timestamp;
+`saveCallLogOperation` trong `src/lib/usage/callLogs.ts` mặc định timestamp là thời điểm ghi
+(hoàn tất). Vì vậy, quá trình xuất đặt end = timestamp của dòng và start = end − duration
+(mili giây, được chuyển đổi thành nanosecond thập phân). Các timestamp lịch sử do caller cung
+cấp cũng được giữ làm thời điểm end; không có cơ chế phân biệt start/completion cho từng dòng.
+Duration null trở thành zero. Timestamp không hợp lệ/thiếu sẽ làm batch thất bại thay vì tạo
+các span không xác định. `ttftMs` có thể là null và được ánh xạ thành `omniroute.ttft_ms`.
 
-Các thuộc tính bao gồm `gen_ai.operation.name="chat"`, nhà cung cấp, mô hình được yêu cầu/mô hình phản hồi,
-token đầu vào/đầu ra, token đọc bộ nhớ đệm/tạo bộ nhớ đệm/suy luận không bắt buộc, trạng thái HTTP,
-combo, nguồn bộ nhớ đệm, thẻ phiên và ID tương quan. Các giá trị OTLP kiểu số nguyên và dấu thời gian
-là chuỗi thập phân; chuỗi, boolean và số có phần thập phân sử dụng các biến thể giá trị OTLP gốc
-tương ứng. Span lỗi có trạng thái ERROR và thông báo trạng thái đã được làm sạch. Bản ghi chuẩn
-không có URL máy chủ thượng nguồn, vì vậy `server.address` được lược bỏ thay vì xác định sai
-collector là máy chủ mô hình. Chi phí không được xuất.
+Các thuộc tính bao gồm `gen_ai.operation.name="chat"`, provider, model được yêu cầu/model
+phản hồi, token input/output, token cache-read/cache-creation/reasoning tùy chọn, HTTP status,
+combo, nguồn cache, session tag và correlation id. Các giá trị OTLP dạng integer và timestamp
+là chuỗi thập phân; chuỗi, boolean và số phân số sử dụng các biến thể giá trị OTLP native
+tương ứng. Span lỗi có status ERROR và thông báo status đã được làm sạch. Bản ghi chuẩn
+không có URL host upstream, vì vậy `server.address` được bỏ qua thay vì xác định sai
+collector là model server. Cost không được xuất.
 
-Chỉ `includeBodies=true` mới nạp nội dung. Với `langfuseMapping=false`,
-`gen_ai.input.messages` / `gen_ai.output.messages` chứa JSON phần thân yêu cầu/phản hồi
-đã được làm sạch như được lưu bởi OmniRoute (được chuẩn hóa khi có thể phân tích cú pháp), không phải mảng
-thông điệp semconv đã được định dạng lại. Phần thân bị cắt ngắn/không phải JSON vẫn giữ dạng văn bản thô. Với `langfuseMapping=true`,
-phần thân chỉ được xuất dưới dạng `langfuse.observation.input` / `langfuse.observation.output`;
-các thuộc tính `gen_ai.*.messages` được lược bỏ để mỗi phần thân chỉ được gửi một lần. Cả hai chế độ
-đều kế thừa `maxBodyBytes` từ luồng nạp nội dung hiện có;
-`omniroute.bodies_truncated=true` đánh dấu việc cắt ngắn.
-Đích này không bổ sung bản chụp pipeline hay thao tác đọc hiện vật chưa được làm sạch nào;
-tính năng thu thập header yêu cầu tùy chọn sử dụng bản chụp máy khách đã nạp hiện có được mô tả bên dưới.
-Hãy sử dụng chu kỳ ở mức phút như `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` khi xuất
-phần thân, thay vì để tích tụ lượng tồn đọng theo giờ.
+Chỉ `includeBodies=true` mới hydrate nội dung. Khi `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` chứa JSON body request/response đã được
+làm sạch như được OmniRoute lưu trữ (được canonicalize khi có thể parse), không phải một
+mảng messages semconv đã được định hình lại. Body bị cắt/không phải JSON vẫn giữ dạng văn bản
+thô. Khi `langfuseMapping=true`, body chỉ được phát ra dưới dạng
+`langfuse.observation.input` / `langfuse.observation.output`; các thuộc tính
+`gen_ai.*.messages` được bỏ qua để mỗi body chỉ được gửi một lần. Cả hai chế độ đều kế thừa
+`maxBodyBytes` từ đường dẫn hydration hiện có;
+`omniroute.bodies_truncated=true` đánh dấu việc cắt bớt.
+Đích này không bổ sung snapshot pipeline hoặc việc đọc artifact chưa được làm sạch nào;
+việc thu thập header request tùy chọn sử dụng snapshot client đã hydrate hiện có được mô tả
+bên dưới. Sử dụng chu kỳ theo phút, chẳng hạn như `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`,
+khi xuất body, thay vì tích lũy backlog hàng giờ.
 
-### Header yêu cầu của máy khách tùy chọn
+### Header request client tùy chọn
 
-Việc thu thập header **mặc định bị tắt**. Đặt `requestHeaderAllowlist` trong cấu hình đích
-và bật **Xuất prompt và phản hồi** (`includeBodies: true` trên đích).
-Danh sách cho phép chấp nhận một mảng qua API hoặc một vùng nhập văn bản chứa các tên được phân tách bằng ký tự xuống dòng/dấu phẩy:
+Việc thu thập header **được tắt theo mặc định**. Đặt `requestHeaderAllowlist` trong cấu hình
+destination và bật **Export prompts and responses** (`includeBodies: true` trên destination).
+Allowlist chấp nhận một mảng API hoặc textarea với các tên được phân tách bằng dòng mới/dấu phẩy:
 
 ```json
 {
@@ -340,77 +345,60 @@ Danh sách cho phép chấp nhận một mảng qua API hoặc một vùng nhậ
 }
 ```
 
-Tên được so khớp chính xác và không phân biệt chữ hoa chữ thường, trừ khi một dấu `*` duy nhất ở cuối chọn một
-tiền tố tên header không rỗng. Dấu `*` đứng riêng, ký tự đại diện nằm giữa và tên header HTTP không hợp lệ đều bị từ chối.
-Có tối đa 64 bộ chọn, mỗi bộ có tên/tiền tố dài tối đa 256 byte ASCII.
-Thiết lập này tách biệt với `headers`, vốn dùng để xác thực trình xuất với bộ thu thập.
+Tên được so khớp không phân biệt chữ hoa chữ thường và phải khớp chính xác, trừ khi một dấu `*` duy nhất ở cuối chọn tiền tố không rỗng của tên header. Dấu `*` đứng riêng, ký tự đại diện được chèn giữa chuỗi và tên header HTTP không hợp lệ đều bị từ chối.
+Có tối đa 64 bộ chọn, mỗi bộ chọn có tên/tiền tố dài tối đa 256 byte ASCII.
+Thiết lập này tách biệt với `headers`, vốn dùng để xác thực exporter với collector.
 
-Việc thu thập chỉ đọc `pipeline_client_request`, được điền từ
-`clientRawRequest` (hoặc `clientRequest` kiểu cũ) của pipeline chi tiết đã lưu. Cơ chế này không bao giờ dùng header yêu cầu của nhà cung cấp làm nguồn dự phòng.
-Tính năng ghi nhật ký pipeline chi tiết phải được bật tại thời điểm yêu cầu được ghi lại. Khi
-`includeBodies` bị tắt, hoặc JSON ảnh chụp trạng thái phía máy khách bị thiếu, hỏng hoặc cắt bớt, sẽ không có thuộc tính
-header nào được xuất. Tăng `maxBodyBytes` có thể tránh việc ảnh chụp trạng thái bị cắt bớt khi xuất;
-nhưng không thể khôi phục chi tiết chưa từng được lưu. Ảnh chụp trạng thái lớn hơn 1 MiB hoặc chứa hơn
-256 mục header sẽ bị bỏ qua. Việc xuất lời nhắc/phản hồi hiện có vẫn được bật song song với
-việc thu thập header; danh sách cho phép không cung cấp chế độ nạp dữ liệu chỉ dành cho header.
+Capture chỉ đọc `pipeline_client_request`, được điền từ `clientRawRequest` (hoặc `clientRequest` trong phiên bản cũ) của pipeline chi tiết đã lưu. Nó không bao giờ dự phòng sang các header request của provider.
+Tính năng ghi log pipeline chi tiết phải được bật tại thời điểm request được ghi nhận. Khi `includeBodies` bị tắt, hoặc JSON client-snapshot bị thiếu, hỏng hay bị cắt bớt, không có thuộc tính header nào được phát ra. Việc tăng `maxBodyBytes` có thể tránh snapshot bị cắt tại thời điểm export;
+nhưng không thể khôi phục chi tiết chưa từng được lưu. Snapshot lớn hơn 1 MiB hoặc chứa hơn
+256 mục header sẽ bị bỏ qua. Tính năng export prompt/response hiện có vẫn được bật cùng với việc capture header; allowlist không cung cấp chế độ hydrate chỉ dành cho header.
 
-Các giá trị được chọn trở thành mảng chuỗi OTLP `http.request.header.<full lowercase header name>`,
-ngay cả khi chỉ có một chuỗi. Ví dụ, `X-OmniRoute-Meta-Team: example-team` trở thành
+Các giá trị được chọn trở thành các mảng chuỗi OTLP `http.request.header.<full lowercase header name>`,
+kể cả khi chỉ có một chuỗi. Ví dụ, `X-OmniRoute-Meta-Team: example-team` trở thành
 `http.request.header.x-omniroute-meta-team` với
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Toàn bộ tiền tố được giữ nguyên: đây là các header thông thường, không có phân tích trường nghiệp vụ hay
-chuyển đổi sang `omniroute.metadata.*` / siêu dữ liệu Langfuse. `langfuseMapping` không thay đổi ngữ nghĩa
-của header. Một `User-Agent` được chọn có một giá trị duy nhất cũng đặt thuộc tính vô hướng tiêu chuẩn
-`user_agent.original`. Dấu phẩy trong một giá trị không được dùng để tách giá trị đó. Các biến thể chữ hoa chữ thường được gộp theo thứ tự
-mục đã lưu; bất kỳ biến thể không hợp lệ nào cũng khiến toàn bộ header đó bị loại bỏ. Các thuộc tính được sắp xếp theo tên viết thường.
+Toàn bộ tiền tố được giữ nguyên: đây là các header thông thường, không có hoạt động phân tích trường nghiệp vụ hay chuyển đổi sang `omniroute.metadata.*` / metadata của Langfuse. `langfuseMapping` không thay đổi ngữ nghĩa của header. Một `User-Agent` được chọn có một giá trị cũng thiết lập scalar chuẩn
+`user_agent.original`. Dấu phẩy bên trong một giá trị không bị tách. Các biến thể chữ hoa chữ thường được hợp nhất theo thứ tự mục đã lưu; bất kỳ biến thể nào không hợp lệ cũng khiến toàn bộ header đó bị loại bỏ. Các thuộc tính được sắp xếp theo tên viết thường.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, các header khóa API, tên chứa
-dấu hiệu auth/token/secret/password/credential và thông tin xác thực nội bộ của cổng kết nối luôn
-bị loại trừ, ngay cả khi được chọn hoặc đã được che một phần trong bộ nhớ lưu trữ. Các mẫu thông tin xác thực đã biết sử dụng lại
-bộ phát hiện thông tin xác thực dùng chung; các dấu đánh dấu che dữ liệu bị loại bỏ, không được xuất dưới dạng giá trị an toàn.
-Chỉ chấp nhận chuỗi và mảng chuỗi không rỗng; không ép kiểu số hoặc đối tượng.
-Tên không hợp lệ, khóa prototype, ký tự điều khiển (ngoại trừ tab ngang) và Unicode sai định dạng
-đều bị bỏ qua mà không làm lô thất bại hoặc đưa nội dung của chúng vào lỗi.
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, các header API-key, tên chứa các dấu hiệu
+auth/token/secret/password/credential và thông tin xác thực nội bộ của gateway luôn bị loại trừ, ngay cả khi được chọn hoặc bị che một phần trong bộ nhớ lưu trữ. Các mẫu thông tin xác thực đã biết sử dụng lại bộ phát hiện thông tin xác thực dùng chung; các dấu hiệu che dữ liệu bị loại bỏ, không được export dưới dạng giá trị an toàn.
+Chỉ chấp nhận chuỗi và mảng chuỗi không rỗng; không ép kiểu số hoặc object. Tên không hợp lệ, khóa prototype, ký tự điều khiển (ngoại trừ tab ngang) và Unicode không hợp lệ đều bị bỏ qua mà không làm hỏng batch hoặc phản ánh nội dung của chúng trong lỗi.
 
-Mỗi span thu thập tối đa 32 header, 16 giá trị cho mỗi header, 4096 byte UTF-8 cho mỗi giá trị,
-và tổng cộng 16384 byte UTF-8 cho tên và giá trị của các header được thu thập. Các header quá lớn/không hợp lệ
-bị loại bỏ toàn bộ, không bị cắt bớt. Việc lựa chọn là quyết định về quyền riêng tư của người vận hành: những tên có vẻ an toàn
-vẫn có thể chứa dữ liệu cá nhân, và các giới hạn/bộ phát hiện này không phải là công cụ làm sạch PII tổng quát.
+Mỗi span capture tối đa 32 header, 16 giá trị cho mỗi header, 4096 byte UTF-8 cho mỗi giá trị
+và tổng cộng 16384 byte UTF-8 cho tên và giá trị header được capture. Header quá lớn/không hợp lệ
+bị loại bỏ toàn bộ, không bị cắt bớt. Việc lựa chọn là quyết định về quyền riêng tư của operator: các tên trông có vẻ an toàn vẫn có thể chứa dữ liệu cá nhân, và các giới hạn/bộ phát hiện này không phải là công cụ xóa PII tổng quát.
 
-### Giới hạn gửi dữ liệu
+### Giới hạn phân phối
 
-Mỗi yêu cầu bị giới hạn ở 500 span và 4 MiB JSON UTF-8, bao gồm cả phần bao ngoài.
-Mọi span được phép đều được kiểm tra kích thước trước yêu cầu đầu tiên của một lô con trỏ. Nếu một
-span riêng lẻ vượt giới hạn, không phần nào của lô đó được gửi và thao tác sẽ thất bại kèm hướng dẫn giảm
-`maxBodyBytes`; span đó không bị âm thầm loại bỏ. Bước kiểm tra trước chỉ giữ lại tham chiếu bản ghi và
-số byte, loại bỏ từng span/JSON tạm thời; các span được dựng lại cho các phần có kích thước giới hạn
-thay vì giữ thêm một bản sao đã tuần tự hóa của lô. HTTP 408/429/5xx, lỗi mạng và hết thời gian chờ được thử tối đa
-ba lần, với thời gian chờ tăng theo cấp số nhân là 250/500 ms. `Retry-After` ở dạng giây hoặc ngày giờ HTTP
-có thể kéo dài thời gian chờ lên tối đa 5 giây. Các mã trạng thái khác khiến thao tác thất bại ngay lập tức. Việc OTLP 2xx từ chối một phần cũng phát sinh lỗi thay vì
-xác nhận một span đã bị mất; chấp nhận phản hồi xác nhận rỗng hoặc JSON hợp lệ, với
-giới hạn đọc phản hồi là 64 KiB.
+Request được giới hạn ở 500 span và 4 MiB JSON UTF-8, bao gồm cả envelope.
+Mọi span được cho phép đều được kiểm tra kích thước trước request đầu tiên của một batch cursor. Một
+span riêng lẻ lớn hơn giới hạn sẽ khiến không phần nào của batch đó được gửi và thao tác thất bại với hướng dẫn giảm
+`maxBodyBytes`; span đó không bị âm thầm loại bỏ. Preflight chỉ giữ lại các tham chiếu bản ghi và số byte,
+loại bỏ từng span/JSON tạm thời; các span được dựng lại cho những chunk có kích thước giới hạn
+thay vì giữ một bản sao đã tuần tự hóa thứ hai của batch. HTTP 408/429/5xx, lỗi mạng và timeout được thử lại tối đa
+ba lần, với thời gian chờ lũy thừa 250/500 ms. `Retry-After` tính theo giây hoặc ngày HTTP
+có thể kéo dài thời gian chờ lên tối đa 5 giây. Các status khác sẽ thất bại ngay lập tức. Việc từ chối một phần OTLP 2xx cũng ném lỗi thay vì
+xác nhận một span đã mất; phản hồi xác nhận JSON rỗng hoặc hợp lệ được chấp nhận, với
+giới hạn đọc phản hồi 64 KiB.
 
-Lỗi chỉ chứa các thông tin do trình xuất quản lý: trạng thái HTTP, loại thử lại, số lần thử và số span
-đã gửi, hoặc thông báo cố định về lỗi xác nhận/lỗi mạng. Nội dung phản hồi của bộ thu thập,
-số lượng thành công một phần và header phản hồi không bao giờ được sao chép vào lỗi, nhật ký hoặc
-bảng điều khiển. Một lô thất bại hoặc chỉ được chấp nhận một phần sẽ không được xác nhận: đích đến hiển thị
-Đang lỗi với trạng thái đó, con trỏ giữ nguyên ở lô được xác nhận gần nhất, và lần chạy tiếp theo
-gửi lại cùng các hàng đó. Các mã trạng thái lỗi vĩnh viễn tiếp tục gây thất bại cho đến khi bộ thu thập hoặc cấu hình
-được sửa. Hãy dùng nhật ký của chính bộ thu thập để xem chi tiết phản hồi. Các bản tóm tắt lỗi trong nhật ký cuộc gọi vẫn giữ
-cơ chế che dữ liệu riêng.
-`prepare()` không cấp phát tài nguyên nào; Kiểm tra gửi POST chính xác `{"resourceSpans":[]}` và báo cáo
-trạng thái HTTP mà không ghi span nhật ký cuộc gọi.
+Lỗi chỉ chứa các thông tin do exporter sở hữu: status HTTP, lớp retry, số lần thử và số span đã gửi,
+hoặc nội dung cố định về lỗi xác nhận/mạng. Nội dung body phản hồi của collector,
+số lượng thành công một phần và response header không bao giờ được sao chép vào lỗi,
+log hoặc dashboard. Batch thất bại hoặc chỉ được chấp nhận một phần sẽ không được xác nhận: đích đến hiển thị trạng thái Failing cùng status đó, cursor vẫn ở batch được xác nhận gần nhất và lần chạy tiếp theo sẽ gửi lại các hàng tương tự. Các status vĩnh viễn tiếp tục gây lỗi cho đến khi collector hoặc cấu hình được sửa. Hãy sử dụng log riêng của collector để xem chi tiết phản hồi. Các bản tóm tắt lỗi trong call-log vẫn giữ cơ chế che dữ liệu riêng.
+`prepare()` không provision gì; Test chỉ post chính xác `{"resourceSpans":[]}` và báo cáo
+status HTTP mà không ghi các span call-log.
 
-ID trace và ID span là 32/16 chữ số thập lục phân đầu tiên của SHA-256 tính trên
+Trace id và span id là 32/16 chữ số hex đầu tiên của SHA-256 trên
 `"omniroute.trace\\0" + callLogId` và `"omniroute.span\\0" + callLogId`. Các lần gửi lại mang
-ID giống hệt nhau. Điều này không bảo đảm loại bỏ trùng lặp: một số hệ thống phía sau, bao gồm cơ chế tiếp nhận của Langfuse
-v4, không loại bỏ các span có cùng ID. Sự cố hoặc lỗi ở một phần dữ liệu có thể
-khiến tối đa một lô con trỏ chưa được xác nhận được gửi lại; toàn bộ lô đó có thể bị trùng lặp,
-chứ không chỉ phần HTTP cuối cùng. Hãy cân nhắc sự đánh đổi này khi chọn kích thước lô con trỏ.
+id giống hệt nhau. Đây không phải là bảo đảm chống trùng lặp: một số backend, bao gồm việc ingest Langfuse
+v4, không loại bỏ trùng lặp các span có cùng id. Sự cố hoặc lỗi một phần của chunk có thể
+gửi lại tối đa một batch cursor chưa được xác nhận; toàn bộ batch đó có thể bị nhân đôi,
+không chỉ chunk HTTP cuối cùng của nó. Hãy cân nhắc đánh đổi này khi chọn kích thước batch cursor.
 
 ### Ví dụ về Langfuse
 
-Cấu hình các trường sau cho một phiên bản Langfuse tự lưu trữ:
+Cấu hình các trường sau cho một instance Langfuse tự lưu trữ:
 
 ```json
 {
@@ -423,44 +411,45 @@ Cấu hình các trường sau cho một phiên bản Langfuse tự lưu trữ:
 }
 ```
 
-Tạo giá trị Authorization cục bộ bằng cách mã hóa Base64 chuỗi nguyên văn `public-key:secret-key`
-(ví dụ với `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Không dán thông tin xác thực thật vào nhật ký, ảnh chụp màn hình hoặc báo cáo vấn đề. Cơ chế ánh xạ tự động
-đặt `x-langfuse-ingestion-version: 4`; Authorization vẫn được cung cấp trong `headers`.
-Cả header và giá trị salt định danh được tạo đều sử dụng cơ chế trường bí mật được mã hóa
-và giá trị giữ chỗ API hiện có; bắt buộc phải có `STORAGE_ENCRYPTION_KEY`.
+Xây dựng giá trị Authorization cục bộ dưới dạng Base64 của chuỗi literal `public-key:secret-key`
+(ví dụ bằng `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Không dán thông tin xác thực thực vào log, ảnh chụp màn hình hoặc issue. Việc mapping tự động
+thiết lập `x-langfuse-ingestion-version: 4`; Authorization vẫn được cung cấp trong `headers`.
+Cả header và salt identity được tạo đều sử dụng cơ chế trường secret được mã hóa hiện có và API placeholder;
+`STORAGE_ENCRYPTION_KEY` là bắt buộc.
 
-Ánh xạ bổ sung loại/mô hình sinh, chi tiết sử dụng dạng JSON (đầu vào/đầu ra/tổng và các
-khóa bộ nhớ đệm hiện có), ảnh chụp nhanh đầu vào/đầu ra dạng JSON, mức ERROR/DEFAULT, thông báo trạng thái đã được làm sạch,
-tên dấu vết, id phiên, môi trường tùy chọn và
-`langfuse.observation.metadata.<key>` có thể lọc cho nhà cung cấp, mô hình được yêu cầu, đường dẫn, tổ hợp, nguồn bộ nhớ
-đệm và trạng thái. `langfuse.observation.completion_start_time` có định dạng ISO 8601, bằng
-thời điểm bắt đầu + TTFT chỉ khi biết TTFT và giá trị này nằm trong khoảng thời lượng. Không gửi thuộc tính chi phí nào.
+Ánh xạ bổ sung loại/mô hình sinh, thông tin chi tiết về mức sử dụng JSON (đầu vào/đầu ra/tổng và các khóa
+bộ nhớ đệm khả dụng), ảnh chụp nhanh đầu vào/đầu ra JSON, cấp độ ERROR/DEFAULT, thông báo trạng thái
+đã loại bỏ thông tin nhạy cảm, tên trace, ID phiên, môi trường tùy chọn và
+`langfuse.observation.metadata.<key>` có thể lọc cho nhà cung cấp, mô hình được yêu cầu, đường dẫn, combo, nguồn
+bộ nhớ đệm và trạng thái. `langfuse.observation.completion_start_time` là thời gian ISO 8601 tại
+thời điểm bắt đầu + TTFT chỉ khi TTFT đã biết và nằm trong khoảng thời lượng. Không có thuộc tính chi phí nào được gửi.
 
-Các chế độ định danh áp dụng cho `langfuse.user.id`:
+Các chế độ danh tính áp dụng cho `langfuse.user.id`:
 
-- `pseudonymous` (mặc định): HMAC-SHA256 của id nội bộ của khóa API với một salt ngẫu nhiên
-  32 byte riêng cho từng đích. Salt được tạo khi khởi tạo nếu chưa có, được mã hóa
-  dưới dạng `identitySalt`, không bao giờ được trả về và được giữ lại khi chỉnh sửa. Id khóa thô không bao giờ
-  được đưa vào thuộc tính span. Việc tạo lại/luân chuyển salt của một đích sẽ làm thay đổi các định danh.
-- `keyName`: tên khóa API đã cấu hình, cố ý tiết lộ nhãn đó do người vận hành đặt.
-- `none`: không có id người dùng. Các thẻ phiên vẫn được xuất khi có; những chế độ này không
-  ẩn danh hóa nội dung lời nhắc tùy ý hoặc các nhãn phiên/tương quan do người vận hành cung cấp.
+- `pseudonymous` (mặc định): HMAC-SHA256 của ID nội bộ của khóa API với một salt 32 byte ngẫu nhiên
+  cho mỗi đích. Salt được tạo khi khởi tạo nếu chưa tồn tại, được mã hóa dưới dạng
+  `identitySalt`, không bao giờ được trả về và được giữ nguyên trong quá trình chỉnh sửa. ID khóa thô không bao giờ được
+  đưa vào các thuộc tính span. Việc tạo lại/xoay vòng salt của một đích sẽ thay đổi danh tính.
+- `keyName`: tên khóa API được cấu hình, cố ý để lộ nhãn do nhà vận hành đặt.
+- `none`: không có user ID. Các thẻ phiên vẫn được xuất khi có; các chế độ này không
+  ẩn danh nội dung prompt tùy ý hoặc các nhãn phiên/tương quan do nhà vận hành cung cấp.
 
-### Bắt đầu mà không nạp bù dữ liệu
+### Bắt đầu mà không backfill
 
-Chỉ khi tạo mới, hãy bật **Bắt đầu từ vị trí hiện tại (bỏ qua nhật ký hiện có)** hoặc truyền
-`startFromCurrentPosition: true` ở cấp cao nhất của payload API tạo mới. Tùy chọn này khởi tạo
-`cursor_row_id` thành rowid lớn nhất hiện tại của nhật ký cuộc gọi còn được lưu giữ bằng các hàm hỗ trợ con trỏ
-hiện có, không cần di chuyển dữ liệu. Giá trị mặc định là false (con trỏ 0 và nạp bù lịch sử còn được lưu giữ).
-Đây không phải là thiết lập đặt lại con trỏ khi cập nhật.
+Chỉ khi tạo, hãy bật **Bắt đầu từ vị trí hiện tại (bỏ qua log hiện có)** hoặc truyền
+`startFromCurrentPosition: true` ở cấp cao nhất của payload API tạo. Tùy chọn này khởi tạo
+`cursor_row_id` bằng rowid tối đa hiện được giữ lại của call-log bằng các helper cursor hiện có,
+mà không cần migration. Giá trị mặc định là false (cursor 0 và backfill lịch sử được giữ lại).
+Đây không phải là tùy chọn đặt lại cursor khi cập nhật.
 
-Phần bổ sung `ttftMs` dùng chung cũng thêm cột `ttft_ms` cho phép null vào bộ ánh xạ BigQuery
-và lược đồ bảng mới: kiểm thử lược đồ yêu cầu mọi trường bản ghi chuẩn tắc đều phải có một
-cột tương ứng. Các bảng hiện có tiếp tục xuất dữ liệu như trước: `prepare()` đọc lược đồ bảng và
-chỉ bỏ qua `ttft_ms` khi không có cột đó. Thêm cột INT64 cho phép null để nhận TTFT
-ở lần chạy tiếp theo, hoặc sử dụng bảng mới. Không cần PATCH, thay đổi lược đồ tự động hay
-quyền bổ sung; tất cả các trường khác của hàng vẫn được kiểm tra lược đồ nghiêm ngặt.
+Việc bổ sung `ttftMs` dùng chung cũng thêm một cột nullable `ttft_ms` vào mapper BigQuery
+và lược đồ bảng mới: bài kiểm thử lược đồ yêu cầu mọi trường bản ghi chuẩn đều có một cột. Các
+bảng hiện có vẫn tiếp tục xuất không thay đổi: `prepare()` đọc lược đồ bảng và chỉ bỏ qua
+`ttft_ms` khi cột đó không tồn tại. Hãy thêm cột INT64 nullable để nhận TTFT
+trong lần chạy tiếp theo hoặc sử dụng bảng mới. Cột TTFT tùy chọn không kích hoạt cập nhật lược đồ. Các cột bằng chứng sử dụng
+tuân theo quy trình tương thích có điều kiện, opt-in bên dưới; các trường hàng khác vẫn áp dụng
+việc kiểm tra lược đồ nghiêm ngặt.
 
 ---
 
@@ -487,13 +476,24 @@ Hai quy tắc dành cho đích đến mới:
 
 ## 7. Vận hành
 
-- **Bảng điều khiển**: Tích hợp → Xuất nhật ký. Thêm đích đến, chạy **Kiểm tra** để kiểm tra thông tin xác thực
-  mà không ghi hàng nào, sau đó bật đích đến.
-- **Dữ liệu tồn đọng**: mỗi thẻ đích đến hiển thị các hàng đang chờ và con trỏ; `GET
-/api/log-export/status` trả về các số liệu tương tự cùng 20 lần chạy tác vụ gần nhất.
-- **Một đích đến bị lỗi không khiến các đích đến khác bị lỗi** — bản tóm tắt lần chạy ghi lại trạng thái của từng đích đến
-  trong `last_status` / `last_error`, còn lịch sử chạy tác vụ lưu kết quả tổng hợp.
-- **Xóa đích đến sẽ xóa cả con trỏ của nó.** Khi thêm lại, quá trình sẽ bắt đầu từ nhật ký cuộc gọi cũ nhất còn được lưu giữ,
-  do đó gửi lại các hàng mà đích đến có thể đã có. Trên BigQuery, `insertId`
-  của từng hàng chỉ xử lý được việc trùng lặp này trong khoảng thời gian khử trùng lặp riêng của BigQuery, vì vậy nên tắt
-  đích đến thay vì xóa.
+- **Bảng điều khiển**: Tích hợp → Xuất nhật ký. Thêm một đích đến, chạy **Kiểm tra** để xác minh thông tin xác thực
+  mà không ghi các hàng, sau đó bật đích đến.
+- **Tồn đọng**: mỗi thẻ đích đến hiển thị số hàng đang chờ xử lý và con trỏ; `GET
+/api/log-export/status` trả về các số liệu tương tự cùng với 20 lần chạy công việc gần nhất.
+- **Một đích đến bị lỗi không làm các đích đến khác thất bại** — bản tóm tắt lần chạy ghi lại trạng thái theo từng đích đến
+  trong `last_status` / `last_error`, còn lịch sử lần chạy công việc lưu trạng thái tổng hợp.
+- **Xóa một đích đến sẽ xóa con trỏ của đích đến đó.** Việc thêm lại sẽ bắt đầu từ nhật ký cuộc gọi được lưu giữ lâu nhất,
+  khiến các hàng mà đích đến có thể đã lưu bị gửi lại. Trên BigQuery, `insertId` theo từng hàng chỉ xử lý được việc này trong
+  khoảng thời gian khử trùng lặp riêng của BigQuery, vì vậy nên tắt đích đến thay vì xóa đích đến.
+
+### Khả năng tương thích của lược đồ bằng chứng sử dụng
+
+Các bảng BigQuery mới bao gồm `usage_evidence` có thể nhận giá trị null (STRING chứa JSON) và
+`usage_estimated` (BOOL). Khi bật `autoCreate`, một bảng hiện có chỉ có thể nhận
+các cột nullable còn thiếu này. Trình xuất giữ nguyên toàn bộ lược đồ hiện có, bao gồm siêu dữ liệu trường,
+và gửi PATCH có điều kiện bằng etag được trả về. Một thay đổi lược đồ đồng thời sẽ khiến việc xuất thất bại thay vì ghi đè
+lược đồ; lần chạy tiếp theo sẽ đọc lại bảng.
+
+Khi tắt `autoCreate`, hãy tự thêm các cột này trước khi xuất các bản ghi
+có bằng chứng sử dụng. Thiếu siêu dữ liệu lược đồ/etag hoặc cập nhật không thành công cũng ngăn các thao tác chèn có bằng chứng. Con trỏ xuất không tiến lên khi xảy ra lỗi đó và
+bằng chứng không bao giờ bị loại bỏ âm thầm. Việc lưu giữ nhật ký cục bộ vẫn được áp dụng trong khi quá trình xuất bị chặn, vì vậy hãy giải quyết lỗi trước khi các hàng nguồn được lưu giữ hết hạn.
