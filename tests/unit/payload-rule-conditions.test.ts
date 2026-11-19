@@ -158,3 +158,16 @@ test("the settings schema accepts a valid when and rejects a malformed one", () 
     false
   );
 });
+
+test("the settings schema rejects a condition path the runtime normalizer would discard", () => {
+  const rule = (path: string) => ({
+    override: [
+      { models: [{ name: "gpt-*" }], params: { tag: "hit" }, when: [{ path, op: "exists" }] },
+    ],
+  });
+  for (const path of [".", "..", " . ", ". ."]) {
+    assert.equal(updatePayloadRulesSchema.safeParse(rule(path)).success, false, `accepted ${path}`);
+    assert.equal(normalizePayloadRulesConfig(rule(path)).override.length, 0);
+  }
+  assert.equal(updatePayloadRulesSchema.safeParse(rule("a.b")).success, true);
+});

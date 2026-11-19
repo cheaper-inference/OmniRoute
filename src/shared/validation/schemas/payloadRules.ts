@@ -23,9 +23,18 @@ export const payloadRuleModelSpecSchema = z
 
 // Optional guard on a rule. `eq` / `neq` / `in` need a `value` (`in` a list); `exists` / `missing`
 // take none. All conditions of a rule must hold.
+// The path needs at least one nonempty dot segment, the same check the runtime normalizer applies:
+// a path such as "." would otherwise pass here and the whole rule would be dropped on save.
 export const payloadRuleConditionSchema = z
   .object({
-    path: z.string().trim().min(1),
+    path: z
+      .string()
+      .trim()
+      .min(1)
+      .refine(
+        (value) => value.split(".").some((segment) => segment.trim().length > 0),
+        "path needs at least one nonempty segment"
+      ),
     op: z.enum(["eq", "neq", "in", "exists", "missing"]),
     value: z.unknown().optional(),
   })
