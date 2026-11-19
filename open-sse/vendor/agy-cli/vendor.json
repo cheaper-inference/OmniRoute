@@ -1,0 +1,8 @@
+{
+  "repository": "magpie-community/plugins",
+  "path": "packages/agy-cli",
+  "license": "MIT",
+  "copyright": "Copyright (c) 2026 magpie-community contributors",
+  "vendoredVia": "https://github.com/cheaper-inference/OmniRoute/pull/20315",
+  "notes": "Port of tool-schema.mjs, re2-pattern.mjs, array-items.mjs and tool-budget.mjs from packages/agy-cli. Byte-faithful apart from the TS types and the `unknown`-typed signatures; scripts/ad-hoc/agy-schema-diff.mjs validates the port against the upstream .mjs files. Kept as one file so a future upstream refresh stays an auditable diff of the same three stages, not a re-derivation."
+}
