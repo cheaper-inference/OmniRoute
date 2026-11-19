@@ -227,34 +227,19 @@ function tierFamilyKeyFor(
   return baseFamily;
 }
 
-/**
- * Parse a model id into its tier-scoped family, numeric version tuple and
- * stability channel. Returns `null` for anything unrecognized (unknown family,
- * no version token) so callers can leave those candidates in score order.
- */
-export function parseModelGeneration(
-  modelId: string | null | undefined,
-  provider?: string | null
-): ParsedModelGeneration | null {
-  if (typeof modelId !== "string" || modelId.trim().length === 0) return null;
-  const baseFamily = detectBaseFamily(modelId, provider);
-  if (!baseFamily) return null;
+function appendVersionParts(version: number[], parts: readonly number[]): void {
+  for (const part of parts) {
+    if (version.length >= MAX_VERSION_COMPONENTS) return;
+    version.push(part);
+  }
+}
 
-  // Strip Bedrock/router `:0` invocation suffix before tokenizing (`claude-sonnet-4-v1:0`).
-  let bare = bareModelId(modelId).toLowerCase().replace(/:\d+$/, "");
-  let stability: GenerationStability = "ga";
-
-  // Match hyphenated/underscored YYYY-MM-DD snapshots BEFORE splitting on [-_],
-  // otherwise `gpt-4o-2024-08-06` splits into `2024`, `08`, `06` and reads `2024`
-  // as a minor version.
-  const stripped = bare.replace(INLINE_DATE_SNAPSHOT, () => {
-    stability = "snapshot";
-    return "";
-  });
-  bare = stripped;
-
-  const tokens = bare.split(/[-_]/).filter((token) => token.length > 0);
-
+/** Split model-id tokens into the numeric version, leftover words and stability channel. */
+function scanGenerationTokens(
+  tokens: readonly string[],
+  initialStability: GenerationStability
+): { version: number[]; nonVersionTokens: string[]; stability: GenerationStability } {
+  let stability = initialStability;
   const version: number[] = [];
   const nonVersionTokens: string[] = [];
 
@@ -273,15 +258,41 @@ export function parseModelGeneration(
     }
     const tokenVersion = versionFromToken(token);
     if (tokenVersion && !SIZE_COUNT_TOKEN.test(token)) {
-      for (const part of tokenVersion) {
-        if (version.length >= MAX_VERSION_COMPONENTS) break;
-        version.push(part);
-      }
+      appendVersionParts(version, tokenVersion);
       continue;
     }
     nonVersionTokens.push(token);
   }
+  return { version, nonVersionTokens, stability };
+}
 
+/**
+ * Parse a model id into its tier-scoped family, numeric version tuple and
+ * stability channel. Returns `null` for anything unrecognized (unknown family,
+ * no version token) so callers can leave those candidates in score order.
+ */
+export function parseModelGeneration(
+  modelId: string | null | undefined,
+  provider?: string | null
+): ParsedModelGeneration | null {
+  if (typeof modelId !== "string" || modelId.trim().length === 0) return null;
+  const baseFamily = detectBaseFamily(modelId, provider);
+  if (!baseFamily) return null;
+
+  // Strip Bedrock/router `:0` invocation suffix before tokenizing (`claude-sonnet-4-v1:0`).
+  const bare = bareModelId(modelId).toLowerCase().replace(/:\d+$/, "");
+
+  // Match hyphenated/underscored YYYY-MM-DD snapshots BEFORE splitting on [-_],
+  // otherwise `gpt-4o-2024-08-06` splits into `2024`, `08`, `06` and reads `2024`
+  // as a minor version.
+  let initialStability: GenerationStability = "ga";
+  const stripped = bare.replace(INLINE_DATE_SNAPSHOT, () => {
+    initialStability = "snapshot";
+    return "";
+  });
+
+  const tokens = stripped.split(/[-_]/).filter((token) => token.length > 0);
+  const { version, nonVersionTokens, stability } = scanGenerationTokens(tokens, initialStability);
   if (version.length === 0) return null;
 
   return {
@@ -406,78 +417,135 @@ export function promoteNewestGenerationsInOrder<T>(
 ): T[] {
   if (items.length < 2) return [...items];
   const multiplier = resolveNewestPriceMultiplier(options.maxPriceMultiplier);
-
   const described = items.map(describe);
-  const groups = new Map<string, number[]>();
-  for (let index = 0; index < described.length; index += 1) {
-    const candidate = described[index];
-    if (!candidate) continue;
-    const key = bucketGroupKey(candidate);
-    if (!key) continue;
-    const members = groups.get(key);
-    if (members) members.push(index);
-    else groups.set(key, [index]);
-  }
 
   const desired = new Map<string, number[]>();
-  for (const [key, members] of groups) {
+  for (const [key, members] of groupIndicesByBucket(described)) {
     if (members.length < 2) continue;
-    // Build the promoted order one slot at a time so NO member can ever jump
-    // ahead of a cheaper (or unpriced) earlier-ranked member in the group.
-    const remaining = [...members];
-    const chosen: number[] = [];
-    const reportedBlocked = new Set<number>();
-    while (remaining.length > 0) {
-      const byNewest = [...remaining].sort((a, b) => {
-        const left = described[a];
-        const right = described[b];
-        if (!left || !right) return a - b;
-        const delta = compareGenerationVersions(right, left);
-        return delta !== 0 ? delta : a - b;
-      });
-      let picked: number | undefined;
-      for (const candIdx of byNewest) {
-        const candPos = remaining.indexOf(candIdx);
-        const cand = described[candIdx];
-        if (!cand) continue;
-        let blockingBaseline: number | null = null;
-        for (let i = 0; i < candPos; i += 1) {
-          const baseIdx = remaining[i];
-          const displaced = described[baseIdx];
-          if (!displaced || !priceGuardAllows(cand, displaced, multiplier)) {
-            blockingBaseline = baseIdx;
-            break;
-          }
-        }
-        if (blockingBaseline === null) {
-          picked = candIdx;
-          break;
-        }
-        if (candIdx === byNewest[0] && options.onBlocked && !reportedBlocked.has(candIdx)) {
-          reportedBlocked.add(candIdx);
-          const baseDesc = described[blockingBaseline];
-          options.onBlocked({
-            baseline: items[blockingBaseline],
-            blocked: items[candIdx],
-            reason:
-              cand.rawCost === null || (baseDesc?.rawCost ?? null) === null
-                ? "null-cost"
-                : "multiplier",
-            baselineCost: baseDesc?.rawCost ?? null,
-            newerCost: cand.rawCost,
-          });
-        }
-      }
-      const next = picked ?? remaining[0];
-      chosen.push(next);
-      remaining.splice(remaining.indexOf(next), 1);
-    }
+    const chosen = chooseGroupOrder(members, described, items, multiplier, options.onBlocked);
     if (chosen.every((index, position) => index === members[position])) continue;
     desired.set(key, chosen);
   }
 
   if (desired.size === 0) return [...items];
+  return fillDesiredSlots(items, described, desired);
+}
 
+/** Slot indices of every `(bucket, tierFamilyKey)` group; unparseable items belong to none. */
+function groupIndicesByBucket(
+  described: ReadonlyArray<NewestGenerationCandidate | null>
+): Map<string, number[]> {
+  const groups = new Map<string, number[]>();
+  for (let index = 0; index < described.length; index += 1) {
+    const candidate = described[index];
+    const key = candidate ? bucketGroupKey(candidate) : null;
+    if (!key) continue;
+    const members = groups.get(key);
+    if (members) members.push(index);
+    else groups.set(key, [index]);
+  }
+  return groups;
+}
+
+/** Group members, newest generation first; ties and unparseable members keep their slot order. */
+function sortMembersByNewest(
+  remaining: readonly number[],
+  described: ReadonlyArray<NewestGenerationCandidate | null>
+): number[] {
+  return [...remaining].sort((a, b) => {
+    const left = described[a];
+    const right = described[b];
+    if (!left || !right) return a - b;
+    const delta = compareGenerationVersions(right, left);
+    return delta !== 0 ? delta : a - b;
+  });
+}
+
+/** First earlier-ranked member the candidate may NOT jump ahead of, or `null` when it may. */
+function findBlockingBaseline(
+  candidate: NewestGenerationCandidate,
+  candidatePosition: number,
+  remaining: readonly number[],
+  described: ReadonlyArray<NewestGenerationCandidate | null>,
+  multiplier: number
+): number | null {
+  for (let position = 0; position < candidatePosition; position += 1) {
+    const baselineIndex = remaining[position];
+    const displaced = described[baselineIndex];
+    if (!displaced || !priceGuardAllows(candidate, displaced, multiplier)) return baselineIndex;
+  }
+  return null;
+}
+
+function reportBlockedPromotion<T>(
+  onBlocked: (info: BlockedPromotionInfo<T>) => void,
+  items: readonly T[],
+  described: ReadonlyArray<NewestGenerationCandidate | null>,
+  candidateIndex: number,
+  blockingBaseline: number
+): void {
+  const candidate = described[candidateIndex];
+  const baseline = described[blockingBaseline];
+  const baselineCost = baseline?.rawCost ?? null;
+  const newerCost = candidate?.rawCost ?? null;
+  onBlocked({
+    baseline: items[blockingBaseline],
+    blocked: items[candidateIndex],
+    reason: newerCost === null || baselineCost === null ? "null-cost" : "multiplier",
+    baselineCost,
+    newerCost,
+  });
+}
+
+/**
+ * Build one group's promoted order one slot at a time so NO member can ever jump
+ * ahead of a cheaper (or unpriced) earlier-ranked member in the group.
+ */
+function chooseGroupOrder<T>(
+  members: readonly number[],
+  described: ReadonlyArray<NewestGenerationCandidate | null>,
+  items: readonly T[],
+  multiplier: number,
+  onBlocked: ((info: BlockedPromotionInfo<T>) => void) | undefined
+): number[] {
+  const remaining = [...members];
+  const chosen: number[] = [];
+  const reportedBlocked = new Set<number>();
+  while (remaining.length > 0) {
+    const byNewest = sortMembersByNewest(remaining, described);
+    let picked: number | undefined;
+    for (const candidateIndex of byNewest) {
+      const candidate = described[candidateIndex];
+      if (!candidate) continue;
+      const blockingBaseline = findBlockingBaseline(
+        candidate,
+        remaining.indexOf(candidateIndex),
+        remaining,
+        described,
+        multiplier
+      );
+      if (blockingBaseline === null) {
+        picked = candidateIndex;
+        break;
+      }
+      if (candidateIndex === byNewest[0] && onBlocked && !reportedBlocked.has(candidateIndex)) {
+        reportedBlocked.add(candidateIndex);
+        reportBlockedPromotion(onBlocked, items, described, candidateIndex, blockingBaseline);
+      }
+    }
+    const next = picked ?? remaining[0];
+    chosen.push(next);
+    remaining.splice(remaining.indexOf(next), 1);
+  }
+  return chosen;
+}
+
+/** Refill each group's original slots in its desired order; every other slot is untouched. */
+function fillDesiredSlots<T>(
+  items: readonly T[],
+  described: ReadonlyArray<NewestGenerationCandidate | null>,
+  desired: ReadonlyMap<string, number[]>
+): T[] {
   const cursor = new Map<string, number>();
   const result: T[] = [];
   for (let slot = 0; slot < items.length; slot += 1) {

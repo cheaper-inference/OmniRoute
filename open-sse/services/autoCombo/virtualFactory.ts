@@ -1001,6 +1001,31 @@ function isFullPoolFallbackEnabled(spec: AutoComboSpec | undefined): boolean {
 }
 
 /**
+ * `auto/<family>:<tier>` composes BOTH overlays: the family narrows the pool to
+ * one model family, the tier then applies its own candidate filter (free/pro
+ * model tier, vision/reasoning capability). A family-only spec keeps the
+ * historical family-only behavior because `buildAutoCandidateFilter` returns
+ * null for an undefined category+tier.
+ */
+function buildOverlayCandidateFilter(
+  spec: AutoComboSpec | undefined
+): ((candidate: VirtualAutoComboCandidate) => boolean) | null {
+  const filters: Array<(candidate: VirtualAutoComboCandidate) => boolean> = [];
+  if (spec?.family) filters.push(buildFamilyCandidateFilter(spec.family));
+  const tierFilter = spec ? buildAutoCandidateFilter(spec.category, spec.tier) : null;
+  if (tierFilter) filters.push(tierFilter);
+  if (filters.length === 0) return null;
+  return (candidate) => filters.every((filter) => filter(candidate));
+}
+
+function describeAutoSpecLabel(spec: AutoComboSpec | undefined): string {
+  const tierSuffix = spec?.tier ? `:${spec.tier}` : "";
+  return spec?.family
+    ? `auto/${spec.family}${tierSuffix}`
+    : `auto/${spec?.category ?? ""}${tierSuffix}`;
+}
+
+/**
  * #4235 Phase B: narrow the pool by the `auto/<category>:<tier>` overlay
  * (vision/reasoning capability, free/premium model tier).
  *
@@ -1020,18 +1045,8 @@ function narrowPoolByCategoryTier(
   spec: AutoComboSpec | undefined,
   traceInvocationId?: string
 ): VirtualAutoComboCandidate[] {
-  // `auto/<family>:<tier>` composes BOTH overlays: the family narrows the pool to
-  // one model family, the tier then applies its own candidate filter (free/pro
-  // model tier, vision/reasoning capability). A family-only spec keeps the
-  // historical family-only behavior because `buildAutoCandidateFilter` returns
-  // null for an undefined category+tier.
-  const filters: Array<(candidate: VirtualAutoComboCandidate) => boolean> = [];
-  if (spec?.family) filters.push(buildFamilyCandidateFilter(spec.family));
-  const tierFilter = spec ? buildAutoCandidateFilter(spec.category, spec.tier) : null;
-  if (tierFilter) filters.push(tierFilter);
-  if (filters.length === 0) return candidatePool;
-  const candidateFilter = (candidate: VirtualAutoComboCandidate) =>
-    filters.every((filter) => filter(candidate));
+  const candidateFilter = buildOverlayCandidateFilter(spec);
+  if (!candidateFilter) return candidatePool;
 
   const narrowed = candidatePool.filter((candidate) => candidateFilter(candidate));
   recordAutoDroppedCandidates(
@@ -1043,9 +1058,7 @@ function narrowPoolByCategoryTier(
   );
   if (narrowed.length > 0) return narrowed;
 
-  const label = spec?.family
-    ? `auto/${spec.family}${spec.tier ? `:${spec.tier}` : ""}`
-    : `auto/${spec?.category ?? ""}${spec?.tier ? `:${spec.tier}` : ""}`;
+  const label = describeAutoSpecLabel(spec);
   if (isFullPoolFallbackEnabled(spec)) {
     // Opt-in legacy behavior (category/tier only): warn loudly, then keep the full pool.
     log.warn(
