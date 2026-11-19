@@ -62,8 +62,10 @@ for (const name of FILES) {
   test(`${name} skill only documents commands and options that exist`, () => {
     const full = fs.readFileSync(new URL(`../../skills/${name}/SKILL.md`, import.meta.url), "utf8");
     // Only the hand-written block: the generated half comes from the parser and is covered by its own tests.
-    const md = full.slice(full.indexOf("<!-- skill:custom-start -->"));
-    assert.ok(md.length < full.length, `${name} has no custom block`);
+    const start = full.indexOf("<!-- skill:custom-start -->");
+    // slice(-1) would keep one character and check nothing, so a missing marker must fail here.
+    assert.ok(start > 0, `${name} has no custom block`);
+    const md = full.slice(start);
     const bad: string[] = [];
     for (const block of md.matchAll(/```(?:bash|sh|shell)\n([\s\S]*?)```/g)) {
       for (const line of block[1].replace(/\\\n\s*/g, " ").split("\n")) {
