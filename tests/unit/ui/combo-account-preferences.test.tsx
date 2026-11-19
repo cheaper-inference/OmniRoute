@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import { afterEach, expect, it, vi } from "vitest";
+import "@testing-library/jest-dom/vitest";
 import { act, cleanup, fireEvent, render, screen } from "@testing-library/react";
 import AccountPreferencesEditor from "../../../src/app/(dashboard)/dashboard/combos/AccountPreferencesEditor";
 import BuilderIntelligentStep from "../../../src/app/(dashboard)/dashboard/combos/BuilderIntelligentStep";
@@ -34,6 +35,14 @@ function choose(element: HTMLElement, value: string, label: string) {
   }
 }
 
+async function openAccountPreferences() {
+  // The mocked provider fetch resolves during this act. Polling for the first
+  // row adds a separate wall-clock deadline to the synchronous fixture data.
+  await act(async () => {
+    fireEvent.click(screen.getByRole("button", { name: /Account preferences/ }));
+  });
+}
+
 it("the builder passes its selected pool and uses available providers when the pool is unrestricted", async () => {
   vi.stubGlobal(
     "fetch",
@@ -56,8 +65,8 @@ it("the builder passes its selected pool and uses available providers when the p
   const { rerender } = render(
     <BuilderIntelligentStep {...props} config={{ candidatePool: ["openai"] }} />
   );
-  fireEvent.click(screen.getByRole("button", { name: /Account preferences/ }));
-  await screen.findByRole("combobox", { name: "openai · A" });
+  await openAccountPreferences();
+  expect(screen.getByRole("combobox", { name: "openai · A" })).toBeTruthy();
   expect(screen.queryByRole("combobox", { name: "anthropic · B" })).toBeNull();
   rerender(<BuilderIntelligentStep {...props} config={{ candidatePool: [] }} />);
   expect(screen.getByRole("combobox", { name: "anthropic · B" })).toBeTruthy();
@@ -150,8 +159,7 @@ it("bounds long lists in a keyboard-accessible scroll region without dropping th
     })
   );
   render(<Harness providerIds={["openai"]} />);
-  fireEvent.click(screen.getByRole("button", { name: /Account preferences/ }));
-  await screen.findByRole("combobox", { name: "openai · Account 59" });
+  await openAccountPreferences();
   const region = screen.getByRole("region", { name: "Account preferences" });
   expect(region.className).toContain("overflow-y-auto");
   expect(region.className).toContain("max-h-");
@@ -159,7 +167,14 @@ it("bounds long lists in a keyboard-accessible scroll region without dropping th
   // 60 live accounts plus the harness's stored a/b preferences, which have no live
   // connection here and stay listed as resettable unavailable rows.
   expect(region.querySelectorAll('[role="combobox"],select')).toHaveLength(62);
-  expect(screen.getByRole("combobox", { name: "Unavailable account (a)" })).toBeTruthy();
+  // Follow the label's native association to check only the intended control.
+  for (const name of ["openai · Account 59", "Unavailable account (a)"]) {
+    const control = screen.getByText(name, { selector: "label" }).closest("label")?.control;
+    expect(region).toContainElement(control ?? null);
+    expect(control).toBeVisible();
+    expect(control).toHaveRole("combobox");
+    expect(control).toHaveAccessibleName(name);
+  }
 });
 
 it("keeps preferences for deleted connections visible and resettable inside a scoped pool", async () => {
