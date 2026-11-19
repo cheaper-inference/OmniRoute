@@ -42,6 +42,18 @@ test("a tool without the prefix still restores a prefixed echo and adds no extra
   assert.deepEqual([...(ledger ?? [])], [["proxy_get_weather", "get_weather"]]);
 });
 
+test("stream: a declared SEARCH stays SEARCH when proxy_search is declared before it", () => {
+  const tools = [{ name: "proxy_search" }, { name: "SEARCH" }];
+  const ledger = buildClaudePassthroughToolNameMap({ tools });
+  const event = {
+    type: "content_block_start",
+    index: 0,
+    content_block: { type: "tool_use", id: "t1", name: "SEARCH", input: {} },
+  };
+  restoreClaudePassthroughToolUseName(event, ledger, tools);
+  assert.equal(event.content_block.name, "SEARCH");
+});
+
 test("a client that declares both search and proxy_search keeps search as search", () => {
   const ledger = buildClaudePassthroughToolNameMap({
     tools: [{ name: "search" }, { name: "proxy_search" }],

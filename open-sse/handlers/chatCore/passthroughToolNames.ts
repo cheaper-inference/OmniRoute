@@ -25,15 +25,18 @@ export function buildClaudePassthroughToolNameMap(
   if (!body || !Array.isArray(body.tools)) return null;
 
   const names = declaredToolNames(body.tools);
+  const lowerNames = new Set(names.map((name) => name.toLowerCase()));
   const toolNameMap = new Map<string, string>();
   for (const name of names) {
     toolNameMap.set(`${CLAUDE_OAUTH_TOOL_PREFIX}${name}`, name);
     // The native executor strips a leading `proxy_`, so a tool the client named
-    // `proxy_x` comes back as `x`. Map it home unless the client also declared `x`.
+    // `proxy_x` comes back as `x`. Map it home unless the client also declared `x`
+    // in any casing: the stream restorer matches names case-insensitively, so an
+    // `x` alias would otherwise rename a declared `X` to `proxy_x`.
     const stripped = name.startsWith(CLAUDE_OAUTH_TOOL_PREFIX)
       ? name.slice(CLAUDE_OAUTH_TOOL_PREFIX.length)
       : "";
-    if (stripped && !names.includes(stripped)) toolNameMap.set(stripped, name);
+    if (stripped && !lowerNames.has(stripped.toLowerCase())) toolNameMap.set(stripped, name);
   }
 
   return toolNameMap.size > 0 ? toolNameMap : null;
