@@ -1,4 +1,4 @@
-// bin/cli/launch/adapters/aider.mjs: `omnirouter launch aider`. Pure: no process, fs or os reads.
+// bin/cli/launch/adapters/aider.mjs: `omniroute launch aider`. Pure: no process, fs or os reads.
 //
 // Recipe: key and base URL live in a launcher-owned 0600 env file (--env-file loads last with
 // override, so a user .env cannot win), model limits go in a temp --model-metadata-file, and

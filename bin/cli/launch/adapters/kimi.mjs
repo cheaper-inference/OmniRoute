@@ -22,7 +22,7 @@ const PASSTHROUGH = [
     aliases: ["-m"],
     action: "reject",
     message:
-      "kimi -m switches away from the OmniRoute overlay; use omnirouter launch kimi --model <id>",
+      "kimi -m switches away from the OmniRoute overlay; use omniroute launch kimi --model <id>",
   },
 ];
 
@@ -45,7 +45,7 @@ const ALWAYS_UNSET = [
   "KIMI_CODE_PROVIDER_NAME",
 ];
 
-const MODEL_HINT = "use omnirouter launch kimi --model <id>";
+const MODEL_HINT = "use omniroute launch kimi --model <id>";
 
 function preflightSpec(ctx) {
   const version = ctx.tool.version;

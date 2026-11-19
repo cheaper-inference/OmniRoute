@@ -1,4 +1,4 @@
-// bin/cli/launch/command/gateway.mjs: `omnirouter gateway status|keep|stop`.
+// bin/cli/launch/command/gateway.mjs: `omniroute gateway status|keep|stop`.
 
 import { io, jsonLine, reportError, resolveStateDir, usageExitOverride } from "./shared.mjs";
 

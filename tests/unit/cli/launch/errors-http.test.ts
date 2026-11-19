@@ -66,7 +66,7 @@ test("toLaunchError / exitCodeFor / formatError / errorJson for thrown values", 
   assert.equal(exitCodeFor(launch), 2);
   assert.equal(exitCodeFor(new LaunchError("BudgetExceeded", "over"), 5), 5);
   assert.equal(exitCodeFor(new LaunchError("BudgetExceeded", "over")), 1);
-  assert.equal(formatError(launch), "omnirouter: bad\n  hint: try again\n");
+  assert.equal(formatError(launch), "omniroute: bad\n  hint: try again\n");
   assert.equal(
     formatError(new Error("x"), { prefix: "omniroute" }),
     "omniroute: internal error: x\n"

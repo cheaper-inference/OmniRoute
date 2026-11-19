@@ -29,7 +29,7 @@ function summaryText(tool, summary) {
     modelsPart(summary),
     fallbacksPart(summary),
   ].filter((part) => part !== null);
-  return `omnirouter: ${tool} session: ${parts.join(", ")}\n`;
+  return `omniroute: ${tool} session: ${parts.join(", ")}\n`;
 }
 
 /**
@@ -46,7 +46,7 @@ export async function reportUsage(L, run, outcome) {
   } catch (error) {
     // Cosmetic, but never silently dropped (found in live testing): one stderr line.
     if (!L.jsonMode) {
-      L.stderr.write(`omnirouter: usage summary unavailable (${usageFailureReason(error)})\n`);
+      L.stderr.write(`omniroute: usage summary unavailable (${usageFailureReason(error)})\n`);
     }
   }
 }

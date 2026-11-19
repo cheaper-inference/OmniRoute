@@ -294,7 +294,7 @@ test("bad parent key: AuthFailed exit 77; unknown model: ModelNotFound exit 2 an
     const adapter = fakeAdapter({ outPath: join(tempRoot("o"), "d.json") });
     const denied = await launchAgainst(stub, adapter, { apiKey: "sk-wrong" });
     assert.equal(denied.outcome.exitCode, 77, denied.stderr.text);
-    assert.match(denied.stderr.text, /^omnirouter: /);
+    assert.match(denied.stderr.text, /^omniroute: /);
     const missing = await launchAgainst(stub, adapter, {
       apiKey: "sk-right",
       model: "openai/gpt-5.3",

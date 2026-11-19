@@ -26,7 +26,7 @@ test("OMNIROUTE_LAUNCH_TRACE=1 prints exactly one trace line", () => {
   assert.equal(res.stdout, "true");
   const lines = res.stderr.split("\n").filter(Boolean);
   assert.equal(lines.length, 1);
-  assert.match(lines[0], /^omnirouter: trace \d+\.\dms x$/);
+  assert.match(lines[0], /^omniroute: trace \d+\.\dms x$/);
 });
 
 test("unset and =0 keep stderr empty", () => {

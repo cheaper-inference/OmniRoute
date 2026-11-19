@@ -5,7 +5,7 @@ lastUpdated: 2026-11-14
 
 # Launch quality gates
 
-One command checks the production code of `omnirouter launch` against the operator's quality
+One command checks the production code of `omniroute launch` against the operator's quality
 gates and prints a per file, per function report. It exits 1 when any gate has a violation.
 
 ```bash
@@ -116,7 +116,8 @@ globs) and JSDoc `import("x").Name` references, and resolves relative, `@/` and
 `@omniroute/open-sse` specifiers.
 
 1. Unused file: a scope file that no other file references; entries are the `route.ts` files
-   and `bin/omnirouter.mjs`.
+   (the launch CLI modules are reached from `bin/cli/commands/launch.mjs` and
+   `bin/cli/commands/gateway.mjs`, outside the scope).
 2. Unused export: an export of a scope file that no other file imports by name. Uses from
    tests count as used. An export used only inside its own file is reported (as knip does).
    Next.js route handler exports (`GET`, `POST`, `dynamic`, and so on) are framework entries.
@@ -147,7 +148,7 @@ are measured by every gate without editing the config. The run prints the resolv
 on its first line (`launch scope: N files`), and the JSON report carries `scopeCount` and the
 resolved `scope`.
 
-- include: `bin/cli/launch/**/*.{mjs,ts}` (this covers `contract.d.ts`), `bin/omnirouter.mjs`,
+- include: `bin/cli/launch/**/*.{mjs,ts}` (this covers `contract.d.ts`),
   `src/app/api/launch/**/*.ts`, `src/shared/launch/**/*.ts`,
   `src/shared/validation/launchView.ts`, `src/lib/db/launchSessions.ts`,
   `src/app/api/v1/models/catalogLaunchView.ts`.

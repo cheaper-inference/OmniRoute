@@ -39,13 +39,13 @@ export function exitCodeFor(error, childCode) {
 }
 
 /**
- * Text for stderr: `omnirouter: <message>` plus an indented hint line.
+ * Text for stderr: `omniroute: <message>` plus an indented hint line.
  * @param {Thrown} error
  * @param {{ prefix?: string }} [options]
  */
 export function formatError(error, options = {}) {
   const err = toLaunchError(error);
-  const prefix = options.prefix ?? "omnirouter";
+  const prefix = options.prefix ?? "omniroute";
   const lines = [`${prefix}: ${err.message}`];
   if (err.hint) lines.push(`  hint: ${err.hint}`);
   return `${lines.join("\n")}\n`;

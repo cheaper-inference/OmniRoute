@@ -1,5 +1,5 @@
 /**
- * Launch sessions: the short-lived `olx_<sessionId>_<secret>` credential `omnirouter launch`
+ * Launch sessions: the short-lived `olx_<sessionId>_<secret>` credential `omniroute launch`
  * mints for every tool it starts.
  *
  * - The token is never stored: only its fingerprint (`opaqueTokenFingerprint`, the same helper

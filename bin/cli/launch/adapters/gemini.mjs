@@ -12,7 +12,7 @@ import { requireLaunchModel } from "./_shared/gemini-preflight.mjs";
 const VERSION_GATE = { args: ["--version"], min: "0.25.0", recommended: "0.68.0" };
 const UPGRADE_HINT = "npm install -g @google/gemini-cli@latest";
 const PLATFORMS = ["darwin", "linux", "win32"];
-const MODEL_HINT = "use omnirouter launch gemini --model <id>";
+const MODEL_HINT = "use omniroute launch gemini --model <id>";
 
 // Auxiliary model aliases the CLI hard-codes to gemini-* ids.
 // UNVERIFIED: the exact alias keys were not confirmed by a live run of every one.

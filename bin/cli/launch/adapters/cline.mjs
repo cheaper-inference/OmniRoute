@@ -1,4 +1,4 @@
-// Launch adapter for Cline CLI 3.x (`omnirouter launch cline`).
+// Launch adapter for Cline CLI 3.x (`omniroute launch cline`).
 // Recipe: ephemeral injection via CLINE_SANDBOX + temp data dir.
 
 import {

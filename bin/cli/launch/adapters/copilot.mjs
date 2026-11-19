@@ -21,7 +21,7 @@ const PASSTHROUGH = [
   {
     flag: "--model",
     action: "reject",
-    message: "use omnirouter launch copilot --model <id>",
+    message: "use omniroute launch copilot --model <id>",
   },
 ];
 
@@ -58,7 +58,7 @@ function preflightSpec(ctx) {
     noRows: "No OmniRoute model matches the copilot view.",
     noRowsHint: "Connect a provider with a tool-calling chat model, then retry.",
     noModel: "Copilot CLI needs a model.",
-    noModelHint: "use omnirouter launch copilot --model <id>",
+    noModelHint: "use omniroute launch copilot --model <id>",
   };
 }
 

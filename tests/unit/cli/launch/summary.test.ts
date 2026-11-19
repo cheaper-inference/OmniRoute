@@ -182,7 +182,7 @@ test("summary: usage throwing keeps the exit code and prints one unavailable lin
   assert.equal(r.stderr.text.includes("session:"), false);
   assert.equal(r.stderr.text.includes("boom"), false);
   const lines = r.stderr.text.split("\n").filter((l) => l.includes("usage summary unavailable"));
-  assert.deepEqual(lines, ["omnirouter: usage summary unavailable (error)"]);
+  assert.deepEqual(lines, ["omniroute: usage summary unavailable (error)"]);
   assert.deepEqual(r.calls, ["usage", "revoke", "release"]);
 });
 
@@ -232,7 +232,7 @@ test("summary: a failing usage endpoint is retried once, then prints exactly one
   assert.equal(r.outcome.exitCode, 3);
   assert.equal(fetches, 2, "one retry");
   const lines = r.stderr.text.split("\n").filter((l) => l.includes("usage summary"));
-  assert.deepEqual(lines, ["omnirouter: usage summary unavailable (HTTP 500)"]);
+  assert.deepEqual(lines, ["omniroute: usage summary unavailable (HTTP 500)"]);
   assert.deepEqual(r.calls, ["usage", "revoke", "release"], "revoke still after the fetch");
 });
 
@@ -246,7 +246,7 @@ test("summary: a usage timeout says timed out", async () => {
     usage: () => client.usage({ sessionId: "s1", token: TOKEN }, { timeoutMs: 50 }),
   });
   const lines = r.stderr.text.split("\n").filter((l) => l.includes("usage summary"));
-  assert.deepEqual(lines, ["omnirouter: usage summary unavailable (timed out)"]);
+  assert.deepEqual(lines, ["omniroute: usage summary unavailable (timed out)"]);
 });
 
 test("summary: no unavailable line with --no-summary, OMNIROUTE_LAUNCH_SUMMARY=0 or --json", async () => {

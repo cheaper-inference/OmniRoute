@@ -23,7 +23,7 @@ async function acquireStep(L, run) {
     target: publicTarget(L.target),
     flags: L.flags,
     stateDir: launchRoot(L.dataDir),
-    log: (message) => L.stderr.write(`omnirouter: ${message}\n`),
+    log: (message) => L.stderr.write(`omniroute: ${message}\n`),
   });
   trace("gateway acquire");
   const rootUrl = normalizeRootUrl(run.gateway.baseUrl);

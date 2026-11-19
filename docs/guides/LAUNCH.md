@@ -1,12 +1,12 @@
 ---
-title: "Launching coding tools with omnirouter launch"
+title: "Launching coding tools with omniroute launch"
 version: 3.8.54
 lastUpdated: 2026-11-13
 ---
 
-# Launching coding tools with `omnirouter launch`
+# Launching coding tools with `omniroute launch`
 
-`omnirouter launch <tool>` starts an AI coding tool (Claude Code, Codex, OpenCode and others)
+`omniroute launch <tool>` starts an AI coding tool (Claude Code, Codex, OpenCode and others)
 pointed at your OmniRoute gateway, for one session. It:
 
 - starts a local gateway if none is running, and stops it again after the last launch exits,
@@ -18,18 +18,21 @@ pointed at your OmniRoute gateway, for one session. It:
 Nothing about your other clients changes: the tailored model list is visible only to the tool
 the launch started.
 
-`omnirouter` is a second bin of the `omniroute` package. The older `omniroute launch` and
-`omniroute run <tool>` commands keep working as before (see
+`omniroute launch` is a command of the `omniroute` CLI; there is no separate binary. When the
+first word after `launch` is a launchable tool (or you pass `--list` or `--cleanup`), the launch
+described here runs. Without a tool name, `omniroute launch` keeps its older behaviour: it starts
+Claude Code with the remaining arguments passed through and prints a one-line deprecation note.
+`omniroute launch-codex` and `omniroute run <tool>` keep working as before (see
 [CLI-LAUNCH-CONTRACTS.md](./CLI-LAUNCH-CONTRACTS.md)).
 
 ## Quick start
 
 ```bash
-omnirouter launch --list                     # which tools are installed and launchable
-omnirouter launch claude                     # start Claude Code; gateway auto-starts
-omnirouter launch codex -m openai/gpt-5.2    # pick the model on the command line
-omnirouter launch opencode --dry-run         # show what would run, change nothing
-omnirouter launch claude -- --resume         # everything after -- goes to the tool
+omniroute launch --list                     # which tools are installed and launchable
+omniroute launch claude                     # start Claude Code; gateway auto-starts
+omniroute launch codex -m openai/gpt-5.2    # pick the model on the command line
+omniroute launch opencode --dry-run         # show what would run, change nothing
+omniroute launch claude -- --resume         # everything after -- goes to the tool
 ```
 
 You need at least one provider connected in OmniRoute (`omniroute setup`). With none, the launch
@@ -38,7 +41,7 @@ stops with `NoProviders` (exit 69).
 ## Supported tools
 
 `core` tools are golden-tested and listed first. `supported` tools are golden-tested and smoke
-tested on demand. `omnirouter launch --help` prints the same list with aliases (for example `cc`
+tested on demand. `omniroute launch --help` prints the same list with aliases (for example `cc`
 for `claude`, `dsh` for `deepseek`, `cn` for `continue`).
 
 "Model list" says how the tool learns its models: `inject` writes the list into the tool's own
@@ -148,14 +151,14 @@ The gateway log is `DATA_DIR/launch/gateway.log`.
 ### Keeping or stopping a launcher gateway
 
 ```bash
-omnirouter launch claude --keep-gateway   # the gateway this launch starts outlives it
-omnirouter gateway status                 # running? started by a launcher? active launches
-omnirouter gateway keep                   # keep the current launcher gateway running
-omnirouter gateway stop                   # stop the launcher gateway now
+omniroute launch claude --keep-gateway   # the gateway this launch starts outlives it
+omniroute gateway status                 # running? started by a launcher? active launches
+omniroute gateway keep                   # keep the current launcher gateway running
+omniroute gateway stop                   # stop the launcher gateway now
 ```
 
 After `gateway keep` (or `--keep-gateway`) the gateway is a normal gateway: launches never stop
-it, and you stop it with `omniroute stop`. `omnirouter gateway stop` only stops a gateway a
+it, and you stop it with `omniroute stop`. `omniroute gateway stop` only stops a gateway a
 launcher started; for one you started yourself it fails and points you at `omniroute stop`.
 `omniroute stop` also works on a launcher gateway; running tools then lose their connection.
 
@@ -256,7 +259,7 @@ longer than 60 s on slow disks: raise it with `--start-timeout 120000`.
 `--port <other>`.
 
 **"A launcher-started gateway already runs on port N".** A launcher gateway is up on another
-port. Use `--port N` or stop it with `omnirouter gateway stop`.
+port. Use `--port N` or stop it with `omniroute gateway stop`.
 
 **`StateLocked` (75).** Another launch held `DATA_DIR/launch/lock` for too long. If no other
 launch is running, remove that file.
@@ -267,9 +270,9 @@ launch is running, remove that file.
 **`NoProviders` (69).** The catalog is empty, no provider you have a key for has a model that
 fits the tool, or no model fits the tool at all (tool calling, context). Add a provider key with
 `omniroute setup`, or pass `--all-models` to also list free keyless providers and `auto/*`, then
-check with `omnirouter launch <tool> --doctor`.
+check with `omniroute launch <tool> --doctor`.
 
-**Leftover temp directories after a crash.** Run `omnirouter launch --cleanup`.
+**Leftover temp directories after a crash.** Run `omniroute launch --cleanup`.
 
 **Slow startup.** Set `OMNIROUTE_LAUNCH_TRACE=1` to print one stderr line per launch step
 (module load, target resolve, gateway acquire, capabilities, session mint, catalog fetch,

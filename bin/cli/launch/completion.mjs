@@ -8,5 +8,5 @@ export function launchToolWords() {
   return listManifestTargets("launch").join(" ");
 }
 
-/** `omnirouter gateway <sub>` subcommands. */
+/** `omniroute gateway <sub>` subcommands. */
 export const GATEWAY_SUBCOMMANDS = "status keep stop";

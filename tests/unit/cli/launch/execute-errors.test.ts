@@ -110,6 +110,6 @@ test("executePlan: default warn prints scrubbed pre-spawn warnings to stderr", a
   assert.equal(result.exitCode, 0);
   const expected =
     "merge base /missing/***/s.json is missing or not valid JSON; using launcher settings alone";
-  assert.deepEqual(lines, [`omnirouter: warning: ${expected}\n`]);
+  assert.deepEqual(lines, [`omniroute: warning: ${expected}\n`]);
   assert.deepEqual(result.warnings, [expected]);
 });

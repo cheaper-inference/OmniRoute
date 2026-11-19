@@ -103,7 +103,7 @@ const CAPABILITIES = {
 function assertModelChoice(ctx, userModel) {
   if (!ctx.model && !userModel) {
     throw new LaunchError("ModelRequired", "Qwen Code requires a model.", {
-      hint: "Pass --model <id> (omnirouter launch qwen --model <id>).",
+      hint: "Pass --model <id> (omniroute launch qwen --model <id>).",
     });
   }
 }

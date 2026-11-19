@@ -20,7 +20,6 @@
   "scope": {
     "include": [
       "bin/cli/launch/**/*.{mjs,ts}",
-      "bin/omnirouter.mjs",
       "src/app/api/launch/**/*.ts",
       "src/shared/launch/**/*.ts",
       "src/shared/validation/launchView.ts",

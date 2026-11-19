@@ -264,21 +264,20 @@ export async function runDeadCode(files, { root }) {
   const violations = [];
   const details = { unusedFiles: [], unusedExports: [] };
   for (const file of files) {
-    const isEntry = /(?:^|\/)route\.ts$/.test(file) || file === "bin/omnirouter.mjs";
+    // Entries: the Next.js route files (the launch CLI is reached from bin/cli/commands/).
+    const isRoute = /(?:^|\/)route\.ts$/.test(file);
     const u = usage.get(file);
     const referenced = Boolean(u && u.importers.size > 0);
-    if (!isEntry && !referenced) {
+    if (!isRoute && !referenced) {
       violations.push({ file, line: 1, function: "<file>", value: "unused file" });
       details.unusedFiles.push(file);
       continue;
     }
     if (!SOURCE_EXT.test(file)) continue;
     const { sf } = parse(root, file);
-    const isRoute = /(?:^|\/)route\.ts$/.test(file);
     for (const exp of exportedDeclarations(file, sf)) {
       if (isRoute && ROUTE_FRAMEWORK_EXPORTS.has(exp.name)) continue;
       if (u?.all || u?.names.has(exp.name)) continue;
-      if (file === "bin/omnirouter.mjs") continue;
       violations.push({ file, line: exp.line, function: exp.name, value: "unused export" });
       details.unusedExports.push(`${file}:${exp.name}`);
     }

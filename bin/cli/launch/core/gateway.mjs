@@ -1,4 +1,4 @@
-// bin/cli/launch/core/gateway.mjs: gateway lifecycle for `omnirouter launch`.
+// bin/cli/launch/core/gateway.mjs: gateway lifecycle for `omniroute launch`.
 // Frozen interface (core/target.mjs codes against it):
 //
 //   acquireGateway({target, flags:{noStart, keepGateway, port, startTimeoutMs}, stateDir, log})

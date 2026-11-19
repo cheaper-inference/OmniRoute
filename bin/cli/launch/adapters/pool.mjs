@@ -12,7 +12,7 @@ import {
 
 const VERSION_GATE = { args: ["--version"] };
 const STANDALONE_PREFIX = "POOLSIDE_STANDALONE_";
-const MODEL_HINT = "use omnirouter launch pool --model <id>";
+const MODEL_HINT = "use omniroute launch pool --model <id>";
 
 const PLATFORMS = ["darwin", "linux"];
 const PASSTHROUGH = [{ flag: "--model", aliases: ["-m"], action: "reject", message: MODEL_HINT }];

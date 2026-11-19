@@ -2,7 +2,7 @@
 // with a mock OpenAI-compatible upstream registered as a provider. No real keys.
 //
 //   1. start mock upstream + gateway, log in, create an API key, register the upstream
-//   2. `omnirouter launch <tool> --port <gw> --yes -- <args>` per tool that passed phase A
+//   2. `omniroute launch <tool> --port <gw> --yes -- <args>` per tool that passed phase A
 //      (plus --api-key: the gateway refuses anonymous mint once a key exists, and --tag so the
 //      launch can be read back from the gateway by session tag)
 //   3. gateway lifecycle: a launch with the gateway DOWN (auto-start + auto-stop), and the
@@ -15,7 +15,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
-  OMNIROUTER,
+  OMNIROUTE_BIN,
   PROMPT,
   WORKTREE,
   killAll,
@@ -216,7 +216,7 @@ export async function runTool(p, ctx, opt = {}) {
         ? baseArgs.map((x) => (x === PROMPT ? opt.promptFor(marker) : x))
         : withMarker(baseArgs, marker);
   const launchArgs = [
-    OMNIROUTER,
+    OMNIROUTE_BIN,
     "launch",
     id,
     "--port",
@@ -231,7 +231,7 @@ export async function runTool(p, ctx, opt = {}) {
     "--",
     ...toolArgs,
   ];
-  result.command = `node bin/omnirouter.mjs ${launchArgs
+  result.command = `node bin/omniroute.mjs ${launchArgs
     .slice(1)
     .map((a) => (a === ctx.apiKey ? "<sk-key>" : /\s/.test(a) ? JSON.stringify(a) : a))
     .join(" ")}`;
@@ -270,7 +270,7 @@ export async function runTool(p, ctx, opt = {}) {
     writeFileSync(join(ctx.outDir, `${id}.${label}.stderr.log`), clean(run.stderr));
     result.stdoutTail = tail(clean(run.stdout));
     result.stderrTail = tail(clean(run.stderr));
-    const summary = /omnirouter: \S+ session: .*/.exec(run.stderr + "\n" + run.stdout);
+    const summary = /omniroute: \S+ session: .*/.exec(run.stderr + "\n" + run.stdout);
     result.exitSummary = summary ? summary[0].trim() : null;
     const upstream = ctx.mock
       ? ctx.mock.requests.slice(mockFrom).filter((r) => r.method === "POST")
@@ -529,7 +529,7 @@ async function lifecycleDown(p, ctx) {
   const port = await freePort();
   const env = launcherEnv(sb, p.exp.env || {});
   const args = [
-    OMNIROUTER,
+    OMNIROUTE_BIN,
     "launch",
     p.id,
     "--port",
@@ -541,7 +541,7 @@ async function lifecycleDown(p, ctx) {
     ...p.exp.args,
   ];
   const out = {
-    command: `node bin/omnirouter.mjs ${args
+    command: `node bin/omniroute.mjs ${args
       .slice(1)
       .map((a) => (/\s/.test(a) ? JSON.stringify(a) : a))
       .join(" ")}`,

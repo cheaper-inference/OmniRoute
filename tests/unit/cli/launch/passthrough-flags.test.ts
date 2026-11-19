@@ -50,14 +50,14 @@ test("reject and owned default messages; owned shows flag and value", () => {
   assert.throws(
     () => applyPassthrough(["--x"], [{ flag: "--x", action: "reject" }], { tool: "claude" }),
     (e: ErrLike) =>
-      e.code === "UsageError" && e.message === "--x is not supported with omnirouter launch claude"
+      e.code === "UsageError" && e.message === "--x is not supported with omniroute launch claude"
   );
   assert.throws(
     () => applyPassthrough(["-cmodel=y"], [{ flag: "-c", action: "owned" }], { tool: "codex" }),
     (e: ErrLike) =>
       e.code === "ConfigConflict" &&
       e.message === "-c model=y conflicts with the launcher, which sets it for codex" &&
-      e.hint === "use the omnirouter option instead (for example --model before `--`)"
+      e.hint === "use the omniroute launch option instead (for example --model before `--`)"
   );
   assert.throws(
     () =>

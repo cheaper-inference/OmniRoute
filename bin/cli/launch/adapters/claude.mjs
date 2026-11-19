@@ -158,7 +158,7 @@ function assertVersion(ctx, version) {
   if (!version || !semverLess(version, parseVersion(MIN_VERSION))) return;
   throw new LaunchError(
     "ToolVersionTooOld",
-    `Claude Code ${ctx.tool.version} is too old for omnirouter launch (needs ${MIN_VERSION}+, ` +
+    `Claude Code ${ctx.tool.version} is too old for omniroute launch (needs ${MIN_VERSION}+, ` +
       `${RECOMMENDED_VERSION}+ recommended)`,
     {
       hint: "Update with `claude update` or reinstall: curl -fsSL https://claude.ai/install.sh | bash",
@@ -188,7 +188,7 @@ function assertModelFits(model) {
   throw new LaunchError(
     "ModelUnsuitable",
     `${model.id} has a ${model.contextTokens} token context; Claude Code needs at least ${MIN_CONTEXT_TOKENS}`,
-    { hint: "Pick a model with a larger context window (omnirouter launch claude --model <id>)." }
+    { hint: "Pick a model with a larger context window (omniroute launch claude --model <id>)." }
   );
 }
 

@@ -71,7 +71,7 @@ export function readJsonValue(value, flag, { cwd = process.cwd(), readFile = rea
 function rejectAction(rule, hit, state) {
   throw new LaunchError(
     "UsageError",
-    rule.message ?? `${hit.flag} is not supported with omnirouter launch ${state.tool}`
+    rule.message ?? `${hit.flag} is not supported with omniroute launch ${state.tool}`
   );
 }
 
@@ -80,7 +80,7 @@ function ownedAction(rule, hit, state) {
   throw new LaunchError(
     "ConfigConflict",
     rule.message ?? `${shown} conflicts with the launcher, which sets it for ${state.tool}`,
-    { hint: "use the omnirouter option instead (for example --model before `--`)" }
+    { hint: "use the omniroute launch option instead (for example --model before `--`)" }
   );
 }
 

@@ -1,7 +1,7 @@
-// `omnirouter launch` / `omnirouter gateway` command layer:
+// `omniroute launch` / `omniroute gateway` command layer:
 // flag parsing into runLaunch flags, `--` passthrough, usage errors, --list, --cleanup,
-// gateway subcommands, plus end-to-end dry-runs through bin/omnirouter.mjs against the stub
-// gateway (fake registry, then every tier-core adapter).
+// gateway subcommands, plus end-to-end dry-runs through the `omniroute` program
+// (bin/cli/program.mjs) against the stub gateway (fake registry, then every tier-core adapter).
 
 import { test } from "node:test";
 import assert from "node:assert/strict";
@@ -26,7 +26,8 @@ import {
 } from "../../../../bin/cli/launch/command.mjs";
 import { launchRegistry } from "../../../../bin/cli/launch/registry.mjs";
 import { probeTool as realProbeTool } from "../../../../bin/cli/launch/core/resolve-bin.mjs";
-import { createOmnirouterProgram } from "../../../../bin/omnirouter.mjs";
+import { registerLaunch } from "../../../../bin/cli/commands/launch.mjs";
+import { createProgram } from "../../../../bin/cli/program.mjs";
 import { startStubGateway } from "../../../helpers/launch/stubGateway.mjs";
 
 const roots: string[] = [];
@@ -225,7 +226,7 @@ test("tool resolution goes through the registry (alias handed to runLaunch as ty
   assert.equal(h.calls[0].toolId, "CC");
 });
 
-test("unknown option before -- is a usage error (exit 2) under omnirouter", async () => {
+test("unknown option before -- is a usage error (exit 2) on the core command", async () => {
   const h = harness();
   await assert.rejects(h.run(["claude", "--bogus"]), (err: { exitCode: number; code: string }) => {
     assert.equal(err.code, "commander.unknownOption");
@@ -521,7 +522,7 @@ test("gateway keep and stop call core; a not-owned stop is a usage error (exit 2
   assert.match(refused.out.stderr.text, /No launcher-started gateway is running/);
 });
 
-// ---- end to end through bin/omnirouter.mjs ----
+// ---- end to end through the omniroute program (bin/cli/program.mjs) ----
 
 const PARENT_KEY = "sk-parent-SECRET-0123456789";
 
@@ -540,12 +541,22 @@ function e2eLaunchDeps(root: string, extra: object = {}) {
   };
 }
 
-async function runOmnirouter(argv: string[], launchDeps: object, registry?: object) {
+/**
+ * The real `omniroute` program with its `launch` registered again with injected effects, so
+ * `omniroute launch ...` runs the production routing (bin/cli/commands/launch.mjs) into the core
+ * command without touching the host.
+ */
+async function runOmniroute(argv: string[], launchDeps: object, registry?: object) {
   const stdout = sink();
   const stderr = sink();
   let code: number | undefined;
-  const program = await createOmnirouterProgram({
-    launch: {
+  const program = createProgram();
+  program.commands.splice(
+    program.commands.findIndex((c) => c.name() === "launch"),
+    1
+  );
+  registerLaunch(program, {
+    deps: {
       ...(registry ? { registry } : {}),
       stdout,
       stderr,
@@ -555,25 +566,32 @@ async function runOmnirouter(argv: string[], launchDeps: object, registry?: obje
       launchDeps,
     },
   });
-  program.exitOverride();
-  await program.parseAsync(["node", "omnirouter", ...argv]);
+  await program.parseAsync(["node", "omniroute", ...argv]);
   return { stdout: stdout.text, stderr: stderr.text, code };
 }
 
-test("omnirouter program: name, new launch replaces the legacy one, gateway registered", async () => {
-  const program = await createOmnirouterProgram();
-  assert.equal(program.name(), "omnirouter");
+test("omniroute program: one launch command (routes tools to the core), gateway registered", () => {
+  const program = createProgram();
+  assert.equal(program.name(), "omniroute");
   const launches = program.commands.filter((c) => c.name() === "launch");
   assert.equal(launches.length, 1);
-  assert.ok(launches[0].options.some((o) => o.long === "--dry-run"));
-  assert.ok(program.commands.some((c) => c.name() === "gateway"));
+  assert.ok(
+    launches[0].options.some((o) => o.long === "--start"),
+    "legacy Claude options kept"
+  );
+  const gateways = program.commands.filter((c) => c.name() === "gateway");
+  assert.equal(gateways.length, 1);
+  assert.deepEqual(
+    gateways[0].commands.map((c) => c.name()),
+    ["status", "keep", "stop"]
+  );
 });
 
-test("e2e: omnirouter launch <fake> --dry-run --json against the stub gateway", async () => {
+test("e2e: omniroute launch <fake> --dry-run --json against the stub gateway", async () => {
   const stub = await startStubGateway({ parentKey: PARENT_KEY });
   try {
     const root = tempRoot("e2e");
-    const res = await runOmnirouter(
+    const res = await runOmniroute(
       ["launch", "fake", "--remote", stub.url, "--api-key", PARENT_KEY, "--dry-run", "--json"],
       e2eLaunchDeps(root, {
         resolveBinary: async () => ({ command: "/opt/fake-tool", shell: false }),
@@ -600,8 +618,30 @@ test("e2e: omnirouter launch <fake> --dry-run --json against the stub gateway", 
   }
 });
 
+/** The core `launch` command alone (what `omniroute launch <tool>` hands over to). */
+async function runCoreLaunch(argv: string[], launchDeps: object) {
+  const stdout = sink();
+  const stderr = sink();
+  let code: number | undefined;
+  const program = new Command().name("omniroute").exitOverride();
+  registerLaunchCommand(program, {
+    deps: {
+      stdout,
+      stderr,
+      setExitCode: (c: number) => {
+        code = c;
+      },
+      launchDeps,
+    },
+  });
+  await program.parseAsync(argv, { from: "user" });
+  return { stdout: stdout.text, stderr: stderr.text, code };
+}
+
 test("e2e: unknown tool through the real pipeline exits 2 with launchable ids", async () => {
-  const res = await runOmnirouter(
+  // `omniroute launch nope` keeps the older Claude launch (legacy-launch.test.ts); the core
+  // command still rejects an unknown id when it is handed one.
+  const res = await runCoreLaunch(
     ["launch", "nope", "--dry-run", "--json"],
     e2eLaunchDeps(tempRoot("e2e-unknown"))
   );
@@ -640,7 +680,7 @@ for (const id of CORE_TOOLS) {
     const stub = await startStubGateway({ parentKey: PARENT_KEY });
     try {
       const root = tempRoot(`dry-${id}`);
-      const res = await runOmnirouter(
+      const res = await runOmniroute(
         [
           "launch",
           id,

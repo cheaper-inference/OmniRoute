@@ -16,7 +16,8 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 
 export const WORKTREE = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
-export const OMNIROUTER = join(WORKTREE, "bin", "omnirouter.mjs");
+/** The `omniroute` CLI entry; the smoke runs `omniroute launch <tool>` through it. */
+export const OMNIROUTE_BIN = join(WORKTREE, "bin", "omniroute.mjs");
 /** Optional tool install root ($LAUNCH_SMOKE_SANDBOX). Unset: no sandbox, tools come from PATH. */
 export const SANDBOX = process.env.LAUNCH_SMOKE_SANDBOX || "";
 /** Output dir when --out is not given: $LAUNCH_SMOKE_OUT, else <os tmpdir>/omniroute-launch-smoke. */
@@ -114,11 +115,14 @@ export function launcherEnv(sb, extra = {}) {
   }
   // PWD must match the spawn cwd: the launcher forwards PWD (bin/cli/launch-env.mjs SAFE_KEYS)
   // and tools such as opencode/kilo resolve their project dir from it, not from the real cwd.
+  // OMNIROUTE_CLI_SKIP_REPO_ENV: the entry must not load this checkout's own .env (the
+  // sandbox DATA_DIR and HOME already keep the user's .env files out).
   Object.assign(env, sb.env, {
     PATH: sandboxPath(process.env.PATH),
     NO_COLOR: "1",
     CI: "1",
     PWD: sb.work,
+    OMNIROUTE_CLI_SKIP_REPO_ENV: "1",
   });
   for (const [k, v] of Object.entries(extra)) env[k] = expandVars(v, sb);
   return env;

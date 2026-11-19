@@ -71,6 +71,15 @@ test("legacyLaunchRoute: known id or alias goes to core, anything else stays leg
   }
 });
 
+test("legacyLaunchRoute: the tool-less core options --list and --cleanup go to core", () => {
+  const registry = launchRegistry;
+  assert.equal(legacyLaunchRoute([], { options: ["--list"], registry }), "core");
+  assert.equal(legacyLaunchRoute([], { options: ["--json", "--cleanup"], registry }), "core");
+  assert.equal(legacyLaunchRoute(["fix it"], { options: ["--list"], registry }), "core");
+  assert.equal(legacyLaunchRoute([], { options: ["--port", "--start"], registry }), "legacy");
+  assert.equal(legacyLaunchRoute(["fix it"], { options: [], registry }), "legacy");
+});
+
 test("splitLaunchTail: option values are skipped, `--` counts, root-only options are dropped", () => {
   const valueFlags = new Set(["--port", "-m", "--model", "--output"]);
   const dropFlags = new Set(["--output", "-q"]);
@@ -78,6 +87,7 @@ test("splitLaunchTail: option values are skipped, `--` counts, root-only options
   assert.deepEqual(a.positionals, ["codex"]);
   assert.equal(a.afterDashDash, 0);
   assert.deepEqual(a.forwarded, ["--port", "3000", "codex", "--dry-run"]);
+  assert.deepEqual(a.options, ["--port", "--dry-run"]);
   assert.equal(legacyLaunchRoute(a.positionals, { ...a, registry: launchRegistry }), "core");
 
   const b = splitLaunchTail(["--", "codex"], { valueFlags, dropFlags });
@@ -91,9 +101,13 @@ test("splitLaunchTail: option values are skipped, `--` counts, root-only options
   });
   assert.deepEqual(c.positionals, ["codex"]);
   assert.deepEqual(c.forwarded, ["-m", "x/y", "codex", "--port=1"]);
+  assert.deepEqual(c.options, ["-m", "--port"], "dropped root options and `=value` left out");
+
+  const d = splitLaunchTail(["--json", "--", "--list"], { valueFlags, dropFlags });
+  assert.deepEqual(d.options, ["--json"], "options after `--` belong to the tool");
 });
 
-function harness(env: Record<string, string> = {}) {
+function harness(env: Record<string, string> = {}, extra: Record<string, unknown> = {}) {
   const calls: Array<{ toolId: string; flags: Record<string, unknown> }> = [];
   const legacyCalls: Array<{ opts: Record<string, unknown>; args: string[] }> = [];
   const codes: number[] = [];
@@ -113,6 +127,7 @@ function harness(env: Record<string, string> = {}) {
       legacyCalls.push({ opts, args });
       return 7;
     },
+    ...extra,
   };
   const root = new Command();
   root.name("omniroute").exitOverride();
@@ -174,6 +189,79 @@ test("registerLaunch: `launch --help` keeps the legacy help (with --start)", asy
   assert.match(out, /claudeArgs/);
   assert.match(out, /--start/);
   assert.equal(h.calls.length + h.legacyCalls.length, 0);
+});
+
+test("registerLaunch: legacy `launch --help` also shows the `omniroute launch <tool>` form", async () => {
+  const h = harness();
+  let out = "";
+  for (const sub of h.root.commands) sub.configureOutput({ writeOut: (s: string) => (out += s) });
+  await assert.rejects(
+    h.root.parseAsync(["launch", "--help"], { from: "user" }),
+    (error: { code?: string }) => error.code === "commander.helpDisplayed"
+  );
+  assert.match(out, /omniroute launch <tool> \[options\] \[-- toolArgs\.\.\.\]/);
+  assert.match(out, /omniroute launch --list/);
+  assert.match(out, /omniroute launch <tool> --help/);
+  assert.match(
+    out,
+    /Launchable tools:\n {2}\S+ +core /,
+    "the registry's tools, as in the core help"
+  );
+  assert.match(out, /^ {2}codex +core +/m);
+});
+
+test("registerLaunch: `launch --list --json` runs the core list, not Claude", async () => {
+  const h = harness(
+    {},
+    {
+      resolveBinary: async () => {
+        throw new Error("absent");
+      },
+      probeTool: async () => ({}),
+      platform: "linux",
+    }
+  );
+  await h.root.parseAsync(["launch", "--list", "--json"], { from: "user" });
+  assert.equal(h.calls.length + h.legacyCalls.length, 0);
+  assert.deepEqual(h.codes, [0]);
+  const doc = JSON.parse(h.stdout.text);
+  const claude = doc.tools.find((row: { id: string }) => row.id === "claude");
+  assert.equal(claude?.installed, false);
+  assert.equal(h.stderr.text, "", "no deprecation note on the core path");
+});
+
+test("registerLaunch: `launch --cleanup` runs the core sweep, not Claude", async () => {
+  const h = harness({}, { stateDir: "/state", cleanup: async () => ({ leases: 1, tempDirs: [] }) });
+  await h.root.parseAsync(["launch", "--cleanup"], { from: "user" });
+  assert.equal(h.calls.length + h.legacyCalls.length, 0);
+  assert.deepEqual(h.codes, [0]);
+  assert.equal(h.stderr.text, "omniroute: cleanup removed 1 stale leases, 0 temp dirs\n");
+});
+
+test("registerLaunch: `launch <tool>` is strict before `--` (unknown option: exit 2)", async () => {
+  const h = harness();
+  await h.root.parseAsync(["launch", "codex", "--bogus"], { from: "user" });
+  assert.equal(h.calls.length + h.legacyCalls.length, 0);
+  assert.deepEqual(h.codes, [2]);
+  assert.match(h.stderr.text, /unknown option '--bogus'/);
+  assert.match(h.stderr.text, /see omniroute launch <tool> --help/);
+});
+
+test("registerLaunch: `launch <tool>` is strict before `--` (stray word: exit 2 + hint)", async () => {
+  const h = harness();
+  await h.root.parseAsync(["launch", "codex", "fix", "it"], { from: "user" });
+  assert.equal(h.calls.length + h.legacyCalls.length, 0);
+  assert.deepEqual(h.codes, [2]);
+  assert.match(h.stderr.text, /unexpected argument "fix"/);
+  assert.match(h.stderr.text, /omniroute launch claude -- --help/);
+});
+
+test("registerLaunch: `launch codex -- --full-auto fix it` passes everything after -- through", async () => {
+  const h = harness();
+  await h.root.parseAsync(["launch", "codex", "--", "--full-auto", "fix", "it"], { from: "user" });
+  assert.equal(h.calls.length, 1);
+  assert.equal(h.calls[0].toolId, "codex");
+  assert.deepEqual(h.calls[0].flags.args, ["--full-auto", "fix", "it"]);
 });
 
 test("registerLaunch: `launch -- codex` stays legacy (claude with prompt codex) + note", async () => {

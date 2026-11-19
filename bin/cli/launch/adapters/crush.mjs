@@ -117,7 +117,7 @@ export default defineAdapter({
       throw new LaunchError(
         "ConfigConflict",
         "--data-dir / -D conflicts with the launcher-owned Crush data dir.",
-        { hint: "Drop the flag; omnirouter launch sets CRUSH_DATA_DIR itself." }
+        { hint: "Drop the flag; omniroute launch sets CRUSH_DATA_DIR itself." }
       );
     }
 

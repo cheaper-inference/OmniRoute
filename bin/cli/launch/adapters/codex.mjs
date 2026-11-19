@@ -1,4 +1,4 @@
-// bin/cli/launch/adapters/codex.mjs: `omnirouter launch codex` (OpenAI Codex CLI).
+// bin/cli/launch/adapters/codex.mjs: `omniroute launch codex` (OpenAI Codex CLI).
 //
 // Fully ephemeral: every OmniRoute setting rides on `-c key=value` runtime overrides (the
 // highest Codex config layer), the model catalog lives in ${STATE}, the key only in the child
@@ -57,13 +57,13 @@ const PASSTHROUGH = [
     flag: "-m",
     aliases: ["--model"],
     action: "owned",
-    message: "the launcher sets the Codex model; use `omnirouter launch codex --model <id>`",
+    message: "the launcher sets the Codex model; use `omniroute launch codex --model <id>`",
   },
   {
     flag: "--profile",
     aliases: ["-p"],
     action: "owned",
-    message: "use `omnirouter launch codex --profile <name>` for a Codex profile",
+    message: "use `omniroute launch codex --profile <name>` for a Codex profile",
   },
   {
     flag: "-c",
@@ -78,7 +78,7 @@ const PASSTHROUGH = [
     action: "owned",
     message:
       "the launcher owns the Codex provider, model, catalog and profile settings; " +
-      "use `omnirouter launch codex --model <id>` / `--profile <name>`",
+      "use `omniroute launch codex --model <id>` / `--profile <name>`",
   },
   {
     flag: "--oss",
@@ -251,7 +251,7 @@ function versionChecks(ctx) {
   if (status === "too-old") {
     throw new LaunchError(
       "ToolVersionTooOld",
-      `Codex ${ctx.tool.version} is too old; omnirouter launch needs ${VERSION_GATE.min} or newer`,
+      `Codex ${ctx.tool.version} is too old; omniroute launch needs ${VERSION_GATE.min} or newer`,
       { hint: "Upgrade with `codex update` or `npm install -g @openai/codex`" }
     );
   }
@@ -274,7 +274,7 @@ function requireModel(ctx) {
   const model = ctx.model;
   if (!model) {
     throw new LaunchError("ModelRequired", "Codex needs a model", {
-      hint: "Pass `--model <id>` (see `omnirouter models`)",
+      hint: "Pass `--model <id>` (see `omniroute models`)",
     });
   }
   const context = knownContext(model);

@@ -204,7 +204,7 @@ export interface LaunchContext {
     readonly version?: string;
   };
   readonly auth: {
-    /** Always the literal "${TOKEN}" placeholder for `omnirouter launch`. `${TOKEN}` is never
+    /** Always the literal "${TOKEN}" placeholder for `omniroute launch`. `${TOKEN}` is never
      *  empty: core always substitutes the minted `olx_` session token, also when the gateway
      *  runs without auth (the anonymous posture still mints one). Adapters therefore always send
      *  it as the tool's key and never branch on "auth off" to send an empty or missing key. */

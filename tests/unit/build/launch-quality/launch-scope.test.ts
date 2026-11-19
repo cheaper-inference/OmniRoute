@@ -24,8 +24,8 @@ test("glob: ** spans any depth, * stays in one segment, braces expand", () => {
   assert.ok(
     globToRegExp("src/app/api/launch/**/*.ts").test("src/app/api/launch/sessions/[id]/route.ts")
   );
-  assert.ok(globToRegExp("bin/omnirouter.mjs").test("bin/omnirouter.mjs"));
-  assert.ok(!globToRegExp("bin/omnirouter.mjs").test("bin/omnirouterXmjs"));
+  assert.ok(globToRegExp("src/lib/db/launchSessions.ts").test("src/lib/db/launchSessions.ts"));
+  assert.ok(!globToRegExp("src/lib/db/launchSessions.ts").test("src/lib/db/launchSessionsXts"));
 });
 
 test("filterScope: excludes assets and every test file, keeps new split modules", () => {
@@ -59,7 +59,7 @@ test("resolveScope: picks up an untracked file created after the config was writ
   try {
     const files = resolveScope(cfg, ROOT);
     assert.ok(files.includes(probe));
-    assert.ok(files.includes("bin/omnirouter.mjs"));
+    assert.ok(files.includes("src/shared/validation/launchView.ts"));
     assert.ok(files.includes("src/lib/db/launchSessions.ts"));
     assert.ok(!files.some((f) => f.startsWith("bin/cli/launch/assets/")));
   } finally {
@@ -69,5 +69,8 @@ test("resolveScope: picks up an untracked file created after the config was writ
 });
 
 test("resolveScope: rejects the old fixed-list form", () => {
-  assert.throws(() => resolveScope({ scope: ["bin/omnirouter.mjs"] }, ROOT), /include, exclude/);
+  assert.throws(
+    () => resolveScope({ scope: ["src/lib/db/launchSessions.ts"] }, ROOT),
+    /include, exclude/
+  );
 });

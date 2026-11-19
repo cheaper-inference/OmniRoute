@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Live smoke for `omnirouter launch <tool>` against real tool installs. Advisory, never part of
+// Live smoke for `omniroute launch <tool>` against real tool installs. Advisory, never part of
 // the default unit run.
 //
 //   npm run test:launch:smoke                        phase A (stub gateway), every installed tool
@@ -85,7 +85,7 @@ function cell(r) {
 }
 
 function renderMarkdown(results) {
-  const lines = ["# omnirouter launch smoke results", "", `Generated: ${results.generatedAt}`, ""];
+  const lines = ["# omniroute launch smoke results", "", `Generated: ${results.generatedAt}`, ""];
   lines.push(
     "| tool | version | phase A | phase B | phase C | real model id | error (one line) |",
     "| --- | --- | --- | --- | --- | --- | --- |"

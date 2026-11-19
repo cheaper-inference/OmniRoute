@@ -81,7 +81,7 @@ function plan(ctx) {
     if (ctx.passthroughArgs.some((arg) => arg === flag || arg.startsWith(`${flag}=`))) {
       throw new LaunchError(
         "ConfigConflict",
-        `${flag} is set by omnirouter for DeepSeek Harness.`,
+        `${flag} is set by omniroute launch for DeepSeek Harness.`,
         {
           hint: `Remove ${flag} from the arguments after --.`,
         }
@@ -173,12 +173,12 @@ export default defineAdapter({
       {
         flag: "--patch",
         action: "reject",
-        message: "omnirouter injects its own --patch file for DeepSeek Harness.",
+        message: "omniroute launch injects its own --patch file for DeepSeek Harness.",
       },
       {
         flag: "--profile",
         action: "reject",
-        message: "omnirouter launches the web profile of DeepSeek Harness.",
+        message: "omniroute launch starts the web profile of DeepSeek Harness.",
       },
     ],
   },

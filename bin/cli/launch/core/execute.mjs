@@ -225,7 +225,7 @@ function needsStateDir(plan) {
 }
 
 function defaultWarn(message) {
-  process.stderr.write(`omnirouter: warning: ${message}\n`);
+  process.stderr.write(`omniroute: warning: ${message}\n`);
 }
 
 /** executePlan option defaults, applied (lazily, in order) to options that are undefined. */

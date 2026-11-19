@@ -1,4 +1,4 @@
-// bin/cli/launch/adapters/hermes.mjs: `omnirouter launch hermes` (Hermes Agent, NousResearch).
+// bin/cli/launch/adapters/hermes.mjs: `omniroute launch hermes` (Hermes Agent, NousResearch).
 //
 // Pure: imports only ../contract.mjs, no I/O, no process reads.
 //
@@ -102,15 +102,15 @@ function assertPassthrough(args) {
   for (const rule of OWNED_FLAGS) {
     const hit = findFlag(args, [rule.flag, ...(rule.aliases || [])]);
     if (hit) {
-      throw new LaunchError("ConfigConflict", `${hit.flag} is owned by omnirouter launch`, {
-        hint: `${rule.message}. Use omnirouter's own --model instead.`,
+      throw new LaunchError("ConfigConflict", `${hit.flag} is owned by omniroute launch`, {
+        hint: `${rule.message}. Use the --model option of omniroute launch instead.`,
       });
     }
   }
   for (const rule of REJECTED_FLAGS) {
     const hit = findFlag(args, rule.flag, { takesValue: false });
     if (hit) {
-      throw new LaunchError("ConfigConflict", `${hit.flag} cannot be used with omnirouter launch`, {
+      throw new LaunchError("ConfigConflict", `${hit.flag} cannot be used with omniroute launch`, {
         hint: `${rule.message}. Run hermes directly for that mode.`,
       });
     }

@@ -1,4 +1,4 @@
-// bin/cli/launch/adapters/openclaw.mjs: `omnirouter launch openclaw`.
+// bin/cli/launch/adapters/openclaw.mjs: `omniroute launch openclaw`.
 // Fully ephemeral: config and state live in ${TMP},
 // the embedded local TUI (`tui --local`) talks to OmniRoute over /v1/chat/completions.
 // Pure: imports only ../contract.mjs, no I/O, no process reads.

@@ -623,7 +623,7 @@ async function handleChatCoreInner({
   let upstreamHttpSelection: HttpAttemptSelection | null = null;
   let providerResponse;
   const agentContext = resolveUsageAgentContext(body, clientRawRequest?.headers, apiKeyInfo);
-  // `omnirouter launch` session tag (olx_ bearer) unless an explicit x-omniroute-session-id
+  // `omniroute launch` session tag (olx_ bearer) unless an explicit x-omniroute-session-id
   // header is present; null for every other request, so their session_tag is unchanged.
   const launchSessionTag = resolveLaunchSessionTag(clientRawRequest?.headers, apiKeyInfo);
   // Failure usage record building extracted to chatCore/failureUsage.ts (#3501); the handler keeps

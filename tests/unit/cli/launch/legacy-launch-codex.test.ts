@@ -208,7 +208,7 @@ test("deprecation note is printed by the command action and silenced by the env 
         err.restore();
       }
       if (silenced) assert.equal(err.text(), "");
-      else assert.match(err.text(), /launch-codex` is deprecated, use `omnirouter launch codex`/);
+      else assert.match(err.text(), /launch-codex` is deprecated, use `omniroute launch codex`/);
     }
   } finally {
     console.error = origError;

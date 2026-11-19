@@ -9,7 +9,7 @@
  *            `role: "system"` message (2.1.28x, mid-conversation-system beta), "Working
  *            directory:" in the top-level `system` field (older builds), or Codex's `<cwd>` inside
  *            `<environment_context>`.
- *   session  x-omniroute-session-id, then the `omnirouter launch` session id (olx_ bearer, see
+ *   session  x-omniroute-session-id, then the `omniroute launch` session id (olx_ bearer, see
  *            withLaunchSession), then the client's own session id exactly as call logs
  *            record it (resolveClientSessionId in services/conversationTracker.ts:
  *            x-claude-code-session-id, x-opencode-session, Codex `session_id`, the Claude Code
@@ -234,7 +234,7 @@ function hasExplicitSessionHeader(headers: HeaderSource): boolean {
 }
 
 /**
- * `omnirouter launch`: the launch session id is the client session id
+ * `omniroute launch`: the launch session id is the client session id
  * with the same precedence as `x-omniroute-session-id` (an explicit header still wins), and the
  * launched tool's id is the client, so one launch aggregates into one agent_sessions row.
  */

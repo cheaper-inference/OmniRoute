@@ -26,7 +26,7 @@ const PASSTHROUGH = [
   {
     flag: "--model",
     action: "reject",
-    message: "cn --model takes a Hub slug; use omnirouter launch continue --model <id>",
+    message: "cn --model takes a Hub slug; use omniroute launch continue --model <id>",
   },
   {
     flag: "--org",

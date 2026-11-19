@@ -64,7 +64,7 @@ async function planStep(L, run, ctx0, probed) {
   const planned = planWithWarnings(L, ctx0, probed);
   const { plan } = planned;
   for (const message of plan.warnings) L.warn(message);
-  for (const note of plan.notes) L.stderr.write(`omnirouter: ${note}\n`);
+  for (const note of plan.notes) L.stderr.write(`omniroute: ${note}\n`);
   run.revokeOnExit = plan.cleanup?.revokeSession !== false;
   await L.bus.emit({
     type: "plan.final",

@@ -6,7 +6,7 @@ lastUpdated: 2026-11-13
 
 # Adding a launch adapter
 
-`omnirouter launch <tool>` starts a coding tool pointed at your OmniRoute gateway. Everything that
+`omniroute launch <tool>` starts a coding tool pointed at your OmniRoute gateway. Everything that
 is specific to one tool lives in one file: a launch adapter in `bin/cli/launch/adapters/<id>.mjs`.
 This page is for contributors who want to add or change one. For how to use the command, see
 [LAUNCH.md](./LAUNCH.md). For the older shared run/configure contracts, see

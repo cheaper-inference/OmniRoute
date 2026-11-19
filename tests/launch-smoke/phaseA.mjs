@@ -5,7 +5,7 @@ import { writeFileSync } from "node:fs";
 import { join } from "node:path";
 
 import {
-  OMNIROUTER,
+  OMNIROUTE_BIN,
   TOKEN_RE,
   attributeChanges,
   diffSnapshots,
@@ -69,7 +69,7 @@ export async function runPhaseA(exp, info, opts) {
   const before = snapshotHome(realHomePaths);
   const env = launcherEnv(sb, exp.env || {});
   const launchArgs = [
-    OMNIROUTER,
+    OMNIROUTE_BIN,
     "launch",
     id,
     "--base-url",
@@ -80,7 +80,7 @@ export async function runPhaseA(exp, info, opts) {
     "--",
     ...exp.args,
   ];
-  result.command = `node bin/omnirouter.mjs ${launchArgs
+  result.command = `node bin/omniroute.mjs ${launchArgs
     .slice(1)
     .map((a) => (/\s/.test(a) ? JSON.stringify(a) : a))
     .join(" ")}`;
@@ -114,7 +114,7 @@ export async function runPhaseA(exp, info, opts) {
     writeFileSync(join(outDir, `${id}.A.stderr.log`), redactSecrets(run.stderr));
     result.stdoutTail = tail(redactSecrets(run.stdout));
     result.stderrTail = tail(redactSecrets(run.stderr));
-    const summaryLine = /omnirouter: \S+ session: .*/.exec(run.stderr + "\n" + run.stdout);
+    const summaryLine = /omniroute: \S+ session: .*/.exec(run.stderr + "\n" + run.stdout);
     result.exitSummary = summaryLine ? summaryLine[0].trim() : null;
 
     const launchReqs = [...stub.requests];
@@ -266,7 +266,7 @@ export async function runPhaseA(exp, info, opts) {
       });
       const reqs = sinceIndex(stub, from);
       result.headlessProbe = {
-        command: `node bin/omnirouter.mjs ${probeArgs
+        command: `node bin/omniroute.mjs ${probeArgs
           .slice(1)
           .map((a) => (/\s/.test(a) ? JSON.stringify(a) : a))
           .join(" ")}`,

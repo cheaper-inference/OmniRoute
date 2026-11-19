@@ -86,7 +86,7 @@ function executeOptions(L, run, { bin, probed }) {
 function writeExitHints(L, result, ctx) {
   if (typeof L.adapter.exitHints !== "function") return;
   for (const hint of L.adapter.exitHints(result.exitCode, ctx) || []) {
-    L.stderr.write(`omnirouter: ${hint}\n`);
+    L.stderr.write(`omniroute: ${hint}\n`);
   }
 }
 

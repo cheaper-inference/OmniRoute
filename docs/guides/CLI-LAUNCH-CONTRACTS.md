@@ -30,7 +30,7 @@ waits for the child's close event before removing temporary configuration.
 `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` controls the grace period before forced
 termination (default 5000 milliseconds).
 
-`omnirouter launch <tool>` (see [LAUNCH.md](./LAUNCH.md)) follows the same
+`omniroute launch <tool>` (see [LAUNCH.md](./LAUNCH.md)) follows the same
 environment rules and signal forwarding, and adds:
 
 - **Gateway auto-start.** For a local target, when no gateway answers on the
@@ -40,7 +40,7 @@ environment rules and signal forwarding, and adds:
   when its process is gone). The reaper stops the gateway it started once no
   lease has been live for the idle grace (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`,
   default 10000 milliseconds). A gateway the user started is used but never
-  stopped. `--keep-gateway` or `omnirouter gateway keep` turns a launcher
+  stopped. `--keep-gateway` or `omniroute gateway keep` turns a launcher
   gateway into a normal one; `--no-start` restores the old fail-if-down
   behaviour. Remote targets are probed only.
 - **Launch sessions.** Every launch mints a short-lived `olx_` session token
@@ -55,7 +55,7 @@ environment rules and signal forwarding, and adds:
 - **Per-launch config.** Tool config files are written to a private temp
   directory (mode 0700, prefix `omnirouter-`) and removed after the child
   exits. A `SIGKILL` of the launcher leaves the directory behind;
-  `omnirouter launch --cleanup` removes such directories once they are older
+  `omniroute launch --cleanup` removes such directories once they are older
   than a day.
 
 ## Gemini persistent setup

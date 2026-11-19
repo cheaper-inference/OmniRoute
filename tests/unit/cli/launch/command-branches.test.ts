@@ -1,4 +1,4 @@
-// `omnirouter launch` / `gateway` command layer: the branches command.test.ts does not reach.
+// `omniroute launch` / `gateway` command layer: the branches command.test.ts does not reach.
 // --cleanup combined with --json / a tool / --list, runLaunch deps forwarding, flag key order,
 // root-option promotion, --list row reasons, the help footer, the gateway text renderers and
 // the runCleanup edge cases. Everything runs against injected deps and private temp dirs.
@@ -117,7 +117,7 @@ test("--cleanup --json with a tool stays silent about the sweep and still launch
 test("--cleanup with a tool (text) reports on stderr then launches", async () => {
   const h = harness({ stateDir: "/state", cleanup: async () => REMOVED });
   await h.run(["claude", "--cleanup"]);
-  assert.equal(h.out.stderr.text, "omnirouter: cleanup removed 2 stale leases, 2 temp dirs\n");
+  assert.equal(h.out.stderr.text, "omniroute: cleanup removed 2 stale leases, 2 temp dirs\n");
   assert.equal(h.calls.length, 1);
 });
 
@@ -157,7 +157,7 @@ test("missing tool uses registry.ids() when the registry has it", async () => {
   await h.run([]);
   assert.equal(h.out.code, 2);
   assert.match(h.out.stderr.text, /missing tool/);
-  assert.match(h.out.stderr.text, /launchable tools: alpha, beta \(or omnirouter launch --list\)/);
+  assert.match(h.out.stderr.text, /launchable tools: alpha, beta \(or omniroute launch --list\)/);
 });
 
 test("a preset alone runs launch with an empty tool id", async () => {

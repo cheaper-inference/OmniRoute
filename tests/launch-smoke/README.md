@@ -1,6 +1,6 @@
 # Live launch smoke
 
-`tests/launch-smoke/run.mjs` runs `omnirouter launch <tool>` against real tool installs. It is
+`tests/launch-smoke/run.mjs` runs `omniroute launch <tool>` against real tool installs. It is
 advisory and never part of the default unit run.
 
 Every run gets a fresh temp root with its own `HOME`, XDG dirs, `TMPDIR` and `DATA_DIR`. The

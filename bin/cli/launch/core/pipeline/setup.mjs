@@ -32,7 +32,7 @@ export function rejectReserved(flags) {
     const value = flags[key];
     if (value !== undefined && value !== false && value !== null) {
       throw new LaunchError("UsageError", `${spelled} is not yet supported`, {
-        hint: "it arrives with a later omnirouter release",
+        hint: "it arrives with a later OmniRoute release",
       });
     }
   }
@@ -56,7 +56,7 @@ function warningSink(stderr) {
   const warn = (message) => {
     if (warnings.includes(message)) return; // one line per distinct warning
     warnings.push(message);
-    stderr.write(`omnirouter: warning: ${message}\n`);
+    stderr.write(`omniroute: warning: ${message}\n`);
   };
   return { warnings, warn };
 }

@@ -1,4 +1,4 @@
-// bin/cli/launch/core/trace.mjs: opt-in startup timing trace for `omnirouter launch`.
+// bin/cli/launch/core/trace.mjs: opt-in startup timing trace for `omniroute launch`.
 //
 // OMNIROUTE_LAUNCH_TRACE=1 prints one stderr line per pipeline step with the milliseconds since
 // process start (performance.now() counts from the process time origin). Off by default: the
@@ -19,7 +19,7 @@ export function traceEnabled() {
 export function trace(step) {
   if (!ENABLED) return;
   try {
-    process.stderr.write(`omnirouter: trace ${performance.now().toFixed(1)}ms ${step}\n`);
+    process.stderr.write(`omniroute: trace ${performance.now().toFixed(1)}ms ${step}\n`);
   } catch {
     // tracing must never break a launch
   }

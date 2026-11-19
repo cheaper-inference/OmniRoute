@@ -33,7 +33,7 @@ const PUBLIC_API_ROUTE_PREFIXES = [
   // OmniRoute-minted session JWT that exchange returns. See
   // open-sse/handlers/cursorCliProxy.ts. Do not widen.
   "/api/cursor-cli/",
-  // `omnirouter launch` sessions (mint/heartbeat/view/revoke/usage) and capabilities. Spawns
+  // `omniroute launch` sessions (mint/heartbeat/view/revoke/usage) and capabilities. Spawns
   // nothing, so not LOCAL_ONLY. Every handler enforces its own auth
   // (src/app/api/launch/launchRouteHelpers.ts resolveLaunchCaller): a valid API key or the
   // session's own olx_ token; no credential only from a trusted loopback peer with

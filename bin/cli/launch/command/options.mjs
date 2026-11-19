@@ -93,20 +93,24 @@ function toolLines(registry) {
 
 const reservedNames = () => RESERVED_OPTIONS.map(([o]) => o.split(" ")[0]).join(" ");
 
+/** "Launchable tools:" plus one line per registered tool (id, tier, name, aliases). */
+export function toolListHelp(registry) {
+  return ["Launchable tools:", ...toolLines(registry)].join("\n");
+}
+
 export function helpFooter(registry) {
   const lines = [
     "",
-    "Launchable tools:",
-    ...toolLines(registry),
+    toolListHelp(registry),
     "",
     "Everything after -- goes to the tool verbatim.",
     `Reserved for a later release (exit 2): ${reservedNames()} @<preset>`,
     "",
     "Examples:",
-    "  omnirouter launch claude",
-    "  omnirouter launch codex -m openai/gpt-5.2 -- --full-auto",
-    "  omnirouter launch opencode --dry-run --json",
-    "  omnirouter launch --list",
+    "  omniroute launch claude",
+    "  omniroute launch codex -m openai/gpt-5.2 -- --full-auto",
+    "  omniroute launch opencode --dry-run --json",
+    "  omniroute launch --list",
   ];
   return `${lines.join("\n")}\n`;
 }

@@ -2,6 +2,7 @@
 // missing-tool check, then the hand-over to core's runLaunch.
 
 import { LaunchError } from "../contract.mjs";
+import { trace } from "../core/trace.mjs";
 import { runCleanup } from "./cleanup.mjs";
 import { argsAfterDashDash, buildLaunchFlags, globalOverrides } from "./flags.mjs";
 import { listLaunchTools, renderList } from "./list.mjs";
@@ -23,7 +24,7 @@ function writeCleanupReport(removed, { json, toolId, out }) {
     return;
   }
   out.stderr.write(
-    `omnirouter: cleanup removed ${removed.leases} stale leases, ${removed.tempDirs.length} temp dirs\n`
+    `omniroute: cleanup removed ${removed.leases} stale leases, ${removed.tempDirs.length} temp dirs\n`
   );
 }
 
@@ -46,7 +47,7 @@ async function listStep({ toolId, json, registry, deps, out }) {
 function assertToolGiven({ toolId, flags, registry }) {
   if (toolId || flags.preset) return;
   throw new LaunchError("UsageError", "missing tool", {
-    hint: `launchable tools: ${registryIds(registry).join(", ")} (or omnirouter launch --list)`,
+    hint: `launchable tools: ${registryIds(registry).join(", ")} (or omniroute launch --list)`,
   });
 }
 
@@ -72,6 +73,8 @@ async function launchSteps(ctx) {
 /** Commander action for `launch`; every effect goes through `deps` (see registerLaunchCommand). */
 export function createLaunchAction({ registry, deps, legacy }) {
   return async (tool, toolArgs, opts, command) => {
+    // OMNIROUTE_LAUNCH_TRACE: the CLI modules are loaded and the arguments parsed.
+    trace("module load");
     const out = io(deps);
     const json = Boolean(opts.json);
     try {

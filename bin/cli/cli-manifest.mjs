@@ -11,7 +11,7 @@
  *
  * Capability semantics:
  * - `run`: launchable through `omniroute run <target>`.
- * - `launch`: launchable through `omnirouter launch <target>` (a launch adapter exists).
+ * - `launch`: launchable through `omniroute launch <target>` (a launch adapter exists).
  * - `configure`: supported by the `omniroute configure <target>` picker.
  * - `runModel`: how `run` injects `--model` for the target (`null` when the
  *   model travels via env/provider args instead of a CLI flag).

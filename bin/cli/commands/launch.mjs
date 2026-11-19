@@ -7,6 +7,7 @@ import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
 import { claudeWindowEnv } from "../utils/claudeWindowEnv.mjs";
 import { executePlan } from "../launch/core/execute.mjs";
 import { probeWindowsBinary as coreProbeWindowsBinary } from "../launch/core/resolve-bin.mjs";
+import { toolListHelp } from "../launch/command/options.mjs";
 
 /**
  * Legacy-shaped Windows probe on top of the single core copy (core/resolve-bin.mjs): the
@@ -306,18 +307,24 @@ export async function runLaunchCommand(opts = {}, claudeArgs = []) {
 
 /** `omniroute launch` without a known tool: the one-line note. */
 const LEGACY_LAUNCH_NOTE =
-  "`omniroute launch` without a tool is deprecated, use `omnirouter launch claude` " +
+  "`omniroute launch` without a tool is deprecated, use `omniroute launch claude` " +
   "(silence with OMNIROUTE_NO_DEPRECATION=1)";
+
+/** Core `launch` options that take no tool: they always run on the core command. */
+const TOOLLESS_CORE_OPTIONS = new Set(["--list", "--cleanup"]);
 
 /**
  * Section 8 routing for `omniroute launch`: "core" when the first positional (not after a
- * literal `--`) is a launch registry id or alias, else "legacy" (Claude with pass-through args).
+ * literal `--`) is a launch registry id or alias, or when a tool-less core option (`--list`,
+ * `--cleanup`) comes before `--`; else "legacy" (Claude with pass-through args).
  * @param {string[]} positionals  positional words in order (options and their values removed)
- * @param {{ afterDashDash?: number, registry: { resolve?(idOrAlias: string): unknown, get(idOrAlias: string): unknown } }} options
- *   afterDashDash: how many of the trailing positionals came after `--`
+ * @param {{ afterDashDash?: number, options?: string[], registry: { resolve?(idOrAlias: string): unknown, get(idOrAlias: string): unknown } }} options
+ *   afterDashDash: how many of the trailing positionals came after `--`; options: option names
+ *   typed before `--` (splitLaunchTail)
  * @returns {"core"|"legacy"}
  */
-export function legacyLaunchRoute(positionals, { afterDashDash = 0, registry } = {}) {
+export function legacyLaunchRoute(positionals, { afterDashDash = 0, options = [], registry } = {}) {
+  if (options.some((name) => TOOLLESS_CORE_OPTIONS.has(name))) return "core";
   const words = positionals || [];
   const before = words.length - Math.min(afterDashDash, words.length);
   if (before <= 0) return "legacy";
@@ -338,11 +345,13 @@ function optionFlags(option) {
  * @param {{ valueFlags?: Set<string>, dropFlags?: Set<string> }} [spec]
  *   valueFlags: options that consume the next word; dropFlags: root-only options (consumed by
  *   the root program in the legacy parse) that must not reach the new launch command
- * @returns {{ positionals: string[], afterDashDash: number, forwarded: string[] }}
+ * @returns {{ positionals: string[], afterDashDash: number, forwarded: string[],
+ *   options: string[] }}  options: names of the forwarded options before `--`, without `=value`
  */
 export function splitLaunchTail(tail, { valueFlags = new Set(), dropFlags = new Set() } = {}) {
   const positionals = [];
   const forwarded = [];
+  const options = [];
   let afterDashDash = 0;
   for (let i = 0; i < tail.length; i++) {
     const arg = String(tail[i]);
@@ -360,6 +369,7 @@ export function splitLaunchTail(tail, { valueFlags = new Set(), dropFlags = new 
         if (takesValue) i++;
         continue;
       }
+      options.push(flag);
       forwarded.push(arg);
       if (takesValue) forwarded.push(String(tail[++i]));
       continue;
@@ -367,7 +377,7 @@ export function splitLaunchTail(tail, { valueFlags = new Set(), dropFlags = new 
     positionals.push(arg);
     forwarded.push(arg);
   }
-  return { positionals, afterDashDash, forwarded };
+  return { positionals, afterDashDash, forwarded, options };
 }
 
 function rootCommandOf(cmd) {
@@ -399,6 +409,15 @@ async function loadRegistry(deps) {
   return deps.registry ?? (await import("../launch/registry.mjs")).launchRegistry;
 }
 
+/**
+ * Text after the legacy `launch --help`: the `omniroute launch <tool>` form and, once the routing
+ * hook has loaded the registry, the launchable tools.
+ */
+function legacyHelpFooter(registry) {
+  const tools = registry ? `\n${toolListHelp(registry)}\n` : "";
+  return `\n${t("launch.toolsHelp")}\n${tools}`;
+}
+
 /** Route + forwarded args for the dispatched legacy command (pure apart from the registry). */
 async function routeLegacyLaunch(cmd, deps) {
   const root = rootCommandOf(cmd);
@@ -415,7 +434,7 @@ async function routeLegacyLaunch(cmd, deps) {
   const tail = rawLaunchTail(cmd);
   const split = splitLaunchTail(tail, { valueFlags, dropFlags });
   const registry = await loadRegistry(deps);
-  return { route: legacyLaunchRoute(split.positionals, { ...split, registry }), split };
+  return { route: legacyLaunchRoute(split.positionals, { ...split, registry }), split, registry };
 }
 
 /** Root options typed on the command line (`omniroute --context x launch codex`). */
@@ -433,6 +452,11 @@ function rootPassthroughArgs(cmd) {
   return out;
 }
 
+/**
+ * Run `launch <tool> ...` (or a tool-less `--list` / `--cleanup`) on the core command. The core
+ * command is strict, as documented in docs/guides/LAUNCH.md: an unknown option or a stray word
+ * before `--` is a usage error (exit 2), and arguments for the tool go after `--`.
+ */
 async function delegateToCore(cmd, forwarded, deps, setExitCode) {
   const { registerLaunchCommand } = await import("../launch/command.mjs");
   const { Command } = await import("commander");
@@ -445,7 +469,7 @@ async function delegateToCore(cmd, forwarded, deps, setExitCode) {
       ...(deps.stderr ? { writeErr: (s) => deps.stderr.write(s) } : {}),
     });
   }
-  registerLaunchCommand(fresh, { legacy: true, deps });
+  registerLaunchCommand(fresh, { deps });
   try {
     // Root options go first so the same option typed after `launch` wins.
     await fresh.parseAsync(["launch", ...rootPassthroughArgs(cmd), ...forwarded], {
@@ -497,7 +521,9 @@ async function runLegacyStart(opts, claudeArgs, deps, setExitCode) {
 }
 
 /**
- * Register `omniroute launch`.
+ * Register `omniroute launch`, the single launch entry point: `omniroute launch <tool>` (a
+ * launch registry id or alias) and the tool-less `--list` / `--cleanup` run on the launch core
+ * (bin/cli/launch/command.mjs); anything else keeps the older Claude Code launch.
  * @param {import("commander").Command} program  the root program
  * @param {{ deps?: { registry?, runLaunch?, runLaunchCommand?, setExitCode?, stdout?, stderr?,
  *   env?, launchDeps? } }} [options]  injectable effects for tests; also handed to the core
@@ -532,6 +558,7 @@ export function registerLaunch(program, { deps = {} } = {}) {
     .allowUnknownOption(true)
     .allowExcessArguments(true)
     .argument("[claudeArgs...]", "arguments passed through to the claude binary")
+    .addHelpText("after", () => legacyHelpFooter(routed?.registry))
     .action(async (claudeArgs, opts) => {
       const { route, split } = routed ?? (await routeLegacyLaunch(cmd, deps));
       routed = undefined;

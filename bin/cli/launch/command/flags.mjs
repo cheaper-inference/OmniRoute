@@ -115,7 +115,7 @@ function takePreset(before) {
 function assertNoExtra(extra, legacy) {
   if (extra.length === 0 || legacy) return;
   throw new LaunchError("UsageError", `unexpected argument ${JSON.stringify(extra[0])}`, {
-    hint: "put arguments for the tool after --, e.g. omnirouter launch claude -- --help",
+    hint: "put arguments for the tool after --, e.g. omniroute launch claude -- --help",
   });
 }
 

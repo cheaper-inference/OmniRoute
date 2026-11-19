@@ -44,7 +44,7 @@ export const ADAPTER_ERROR_CODES = Object.freeze([
 export class LaunchError extends Error {
   /**
    * @param {LaunchErrorCode} code one of ERROR_CODES
-   * @param {string} message user-facing, printed as `omnirouter: <message>`
+   * @param {string} message user-facing, printed as `omniroute: <message>`
    * @param {{ hint?: string, cause?: import("../contract.d.ts").Thrown }} [options]
    */
   constructor(code, message, options = {}) {

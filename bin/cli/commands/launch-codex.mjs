@@ -239,7 +239,7 @@ export function registerLaunchCodex(program) {
     .action(async (codexArgs, opts) => {
       // Note lives here, not in runLaunchCodexCommand: `omniroute run codex` reuses that.
       legacyDeprecationNote(
-        "`omniroute launch-codex` is deprecated, use `omnirouter launch codex` " +
+        "`omniroute launch-codex` is deprecated, use `omniroute launch codex` " +
           "(silence with OMNIROUTE_NO_DEPRECATION=1)"
       );
       const merged = { ...opts, profile: opts.profile ?? opts.p };

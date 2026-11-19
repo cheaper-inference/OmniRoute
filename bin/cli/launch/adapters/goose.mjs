@@ -1,4 +1,4 @@
-// bin/cli/launch/adapters/goose.mjs: `omnirouter launch goose`.
+// bin/cli/launch/adapters/goose.mjs: `omniroute launch goose`.
 //
 // Env-only launch through the OpenAI Chat Completions provider. GOOSE_PATH_ROOT=${TMP} isolates
 // config, sessions, logs and secrets from the user's HOME and keyring. The model list is
