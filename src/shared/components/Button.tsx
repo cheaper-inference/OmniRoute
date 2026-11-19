@@ -8,7 +8,6 @@ import {
   type ButtonVariant as KitVariant,
 } from "@omniroute/ui-kit/button";
 import { cn } from "@/shared/utils/cn";
-import { isKeyboardNavigationFocus } from "@/shared/utils/keyboardFocus";
 import Icon from "./Icon";
 
 /** Legacy variant vocabulary — kept because 150+ call sites and Modal.tsx type against it. */
@@ -93,7 +92,8 @@ export function resolveKitButton(variant: ButtonVariant, size: ButtonSize) {
  * `:disabled`), stays a tab stop and runs no click. The native `title` is not rendered, so
  * there is one tooltip. A reason for being disabled is not a title: use GuardedAction `reason`.
  *
- * Focus opens it only when the user moved there with the keyboard (see `keyboardFocusOnly`).
+ * The kit opens it on focus only when the user moved there with the keyboard (kit #317), so a
+ * dialog that focuses a titled button when it opens shows no tooltip and keeps its Escape.
  */
 function tooltipOf(title: unknown): string | undefined {
   return typeof title === "string" && title.trim() !== "" ? title.trim() : undefined;
@@ -111,22 +111,6 @@ function nameWithTitle(tooltip: string | undefined, props: NameProps): string | 
   const named = props["aria-label"] != null || props["aria-labelledby"] != null;
   const textless = children == null || typeof children === "boolean" || children === "";
   return tooltip && !named && textless ? tooltip : props["aria-label"];
-}
-
-/**
- * `onFocus` for a titled button. The kit tooltip (Radix) opens on every focus, also the one a
- * dialog moves to its first control on open or back to its opener on close; that open tooltip
- * would then take the first Escape instead of the dialog. Radix skips its own focus handler
- * when the event is default-prevented, so the tooltip opens only on a focus the user navigated
- * to. Hover is not affected.
- */
-function keyboardFocusOnly(
-  onFocus: ButtonProps["onFocus"]
-): React.FocusEventHandler<HTMLButtonElement> {
-  return (event) => {
-    onFocus?.(event);
-    if (!isKeyboardNavigationFocus()) event.preventDefault();
-  };
 }
 
 /** An `icon` / `iconRight` slot: hidden while the spinner shows. */
@@ -152,7 +136,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
     className,
     type = "button",
     title,
-    onFocus,
     ...props
   },
   ref
@@ -172,7 +155,6 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(function Button(
       className={cn(kit.className, fullWidth && "w-full", className)}
       {...props}
       aria-label={nameWithTitle(tooltip, { children, ...props })}
-      onFocus={tooltip ? keyboardFocusOnly(onFocus) : onFocus}
     >
       {slotIcon(icon, kit.iconSize, loading)}
       {children}

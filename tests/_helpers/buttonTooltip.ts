@@ -1,8 +1,8 @@
 import { act, fireEvent } from "@testing-library/react";
 
 /**
- * Moves focus to `target` the way the Tab key does. The Button adapter opens its tooltip only on
- * a focus the user navigated to (src/shared/utils/keyboardFocus.ts), so a bare `focus()` — what a
+ * Moves focus to `target` the way the Tab key does. The kit tooltip opens only on a focus the user
+ * navigated to (packages/ui-kit/src/lib/keyboard-focus.ts, kit #317), so a bare `focus()` — what a
  * dialog does when it opens — shows none. The key events go to the document, not through the
  * component tree, so no widget handles them.
  */
