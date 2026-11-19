@@ -29,70 +29,61 @@ izmaiņu veidu ar tā līgumiem, mērķētajām pārbaudēm un CI tvērumu.
 6. **Dokumentējiet pierādījumus.** PR veidnē norādiet izpildītās komandas, katru pievienoto vai mainīto testa failu,
    migrācijas vai funkcionalitātes karogus un visas vēl neizpildītās pārbaudes, kas veicamas tikai CI.
 
-## Standarta ceļi pēc izmaiņas veida
+## Zelta ceļi pēc izmaiņu veida
 
-Tālāk norādītās komandas ir minimālās mērķētās pārbaudes, nevis atļauja izlaist testu, kas tieši pārbauda
-jūsu mainīto darbību.
+Tālāk norādītās komandas ir minimālās mērķtiecīgās pārbaudes, nevis atļauja izlaist testu, kas tieši aptver jūsu mainīto darbību.
 
 ### Pakalpojumu sniedzējs
 
 **Līgumi**
 
-- Pakalpojumu sniedzēja definīcija direktorijā `src/shared/constants/providers/` un tās kompozīcija failā
-  `src/shared/constants/providers.ts`.
-- Modeļi un iespējas failā `open-sse/config/providerRegistry.ts` vai tā nodalītajos reģistra failos.
-- Izpildītāja/tulkotāja atlase, OAuth vai API atslēgas konfigurācija, informācijas paneļa resursi un ģenerētā
-  pakalpojumu sniedzēja atsauce, ja piemērojams.
-- Publiskajiem akreditācijas datiem jāizmanto `resolvePublicCred()`; kļūdu atbildēm jāizmanto koplietotie sanitizētie
-  kļūdu palīgrīki. Skatiet `docs/security/PUBLIC_CREDS.md` (git; netiek kompilēts direktorijā `/docs`) un
-  [Kļūdu sanitizēšana](../security/ERROR_SANITIZATION.md).
+- Pakalpojumu sniedzēja definīcija `src/shared/constants/providers/` un tās sastāvs `src/shared/constants/providers.ts`.
+- Modeļi un iespējas `open-sse/config/providerRegistry.ts` vai tā izvilktajos reģistra failos.
+- Executor/translator atlase, OAuth vai API atslēgas konfigurācija un informācijas paneļa līdzekļi. Neizmantojiet reģenerētās `docs/reference/PROVIDER_REFERENCE.md` vai README diagrammas: laidiena atsvaidzināšana tās pārraksta (`check:pr-derived-paths` neizdodas izmantot PR līdzekli, kas tās nes).
+- Publiskajiem akreditācijas datiem ir jāizmanto `resolvePublicCred()`; kļūdu atbildēs ir jāizmanto koplietojami sanitāri kļūdu palīgi. Skatiet `docs/security/PUBLIC_CREDS.md` (git; nav kompilēts `/docs`) un [kļūdu sanitizācija](../security/ERROR_SANITIZATION.md).
 
-**Mērķētais cikls**
+**Fokusēta cilpa**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # kad katalogs mainās; iekļaujiet ģenerētās izmaiņas komitā
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Pārbaudiet arī katru ietekmēto pieprasījumu saimi: tērzēšanu, Responses, attēlus, iegulumus, audio vai video.
-Pārskatiet ģenerētā kataloga un etalona izmaiņas kā līgumu izmaiņas; nepieņemiet tās akli.
+Pārbaudiet arī katru ietekmēto pieprasījumu saimi: tērzēšanu, atbildes, attēlus, iegulšanas, audio vai video. Pārskatiet ģenerēto katalogu un zelta atšķirības kā līguma izmaiņas; nepieņem tos akli.
 
 ### Maršrutēšana
 
 **Līgumi**
 
-- Publiskās stratēģiju vērtības un UI metadati failā `src/shared/constants/routingStrategies.ts`.
-- Nosūtīšana un secība failā `open-sse/services/combo.ts` un direktorijā `open-sse/services/combo/`.
-- Combo shēmas, saglabāšana, noturības stāvoklis, modeļu iespējas un API/UI vadīklas.
-- [Auto-Combo dzinis](../routing/AUTO-COMBO.md) un noturības dokumentācija, ja mainās darbība.
+- Publiskās stratēģijas vērtības un UI metadati `src/shared/constants/routingStrategies.ts`.
+- Izsūtīšana un pasūtīšana zem `open-sse/services/combo.ts` un `open-sse/services/combo/`.
+- Kombinētās shēmas, noturība, elastības stāvoklis, modeļa iespējas un API/UI vadīklas.
+- [Auto-Combo dzinējs](../routing/AUTO-COMBO.md) un noturības dokumentācija, mainoties uzvedībai.
 
-**Mērķētais cikls**
+**Fokusēta cilpa**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # stratēģijas vai nosūtīšanas izmaiņas
-npm run check:known-symbols      # stratēģijas reģistrācijas izmaiņas
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Lokāli izmantojiet deterministiskus testus ar imitētiem augšupstraumes pakalpojumiem. Darbspējas pārbaudēm ar aktīvu combo ir nepieciešami akreditācijas dati, un tās
-veic manuāli; tās neaizstāj CI.
+Izmantojiet deterministiskus izsmietus augšupējās plūsmas testus lokāli. Tiešsaistes kombinētajiem dūmiem ir nepieciešami akreditācijas dati, un tie ir manuāli, nevis CI aizstājēji.
 
 ### UI / UX
 
 **Līgumi**
 
-- Next.js maršruta/lapas un koplietoto komponentu robežas direktorijās `src/app/` un
-  `src/shared/components/`.
-- API atbilžu formas, ielādes/tukšie/kļūdu stāvokļi, tastatūras un ekrāna lasītāja darbība,
-  responsīvais izkārtojums, motīvi un lokalizāciju paplašināšana.
-- Angļu valodas UI avota virknes failā `src/i18n/messages/en.json`; neiekodējiet jaunu lietotājam redzamu tekstu tieši kodā.
+- Next.js route/page un koplietojamo komponentu robežas zem `src/app/` un `src/shared/components/`.
+- API atbildes formas, loading/empty/error stāvokļi, tastatūras un ekrāna lasītāja darbība, atsaucīgs izkārtojums, motīvi un lokalizācijas paplašināšana.
+- Angļu UI avota virknes `src/i18n/messages/en.json`; neiekodējiet jaunu lietotājam paredzētu kopiju.
 
-**Mērķētais cikls**
+**Fokusēta cilpa**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Mijiedarbības vai vizuālu izmaiņu gadījumā palaidiet lietotni un pārbaudiet gan šaurus, gan platus skata laukumus. CI izpilda
-produkcijas būvējumu un plašākas testu kopas; vizuālajai darbībai joprojām nepieciešams izmaiņai atbilstošs mērķēts komponenta tests, Playwright tests
-vai dokumentēta manuāla pārbaude.
+Palaidiet lietotni, lai veiktu mijiedarbību vai vizuālas izmaiņas, un pārbaudiet gan šauru, gan platu skatu logu. CI vada ražošanas būvniecību un plašākus komplektus; vizuālai uzvedībai joprojām ir nepieciešama fokusēta sastāvdaļa Playwright vai dokumentēta manuāla pārbaude, kas atbilst izmaiņām.
 
 ### i18n
 
 **Līgumi**
 
-- `src/i18n/messages/en.json` ir UI avots; `config/i18n.json` ir lokalizāciju avots.
-- CLI katalogi atrodas atsevišķi direktorijā `bin/cli/locales/`.
-- Precīzi saglabājiet ICU vietturus un tagus. Netulkojiet produktu/pakalpojumu sniedzēju/modeļu nosaukumus,
-  protokolu un galveņu nosaukumus, komandas, koda/JSON identifikatorus, URL, vides mainīgos vai
-  aizsargātus terminus, piemēram, `OmniRoute`, `OAuth`, `MCP` un `A2A`. Pašreizējais avota saraksts ir
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` ir UI avots; `config/i18n.json` ir lokalizācijas avots.
+- CLI katalogi atrodas atsevišķi zem `bin/cli/locales/`.
+- Precīzi saglabājiet ICU vietturus un atzīmes. Netulkojiet product/provider/model nosaukumus, protokolu un galveņu nosaukumus, komandas, code/JSON identifikatorus, URLs, vides mainīgos vai aizsargātus terminus, piemēram, `OmniRoute`, `OAuth`, `MCP` un `A2A`. Pašreizējais avotu saraksts ir `scripts/i18n/glossary/protected-terms.json`.
 
-**Mērķētais cikls**
+Līdzeklis PR rediģē tikai `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); pārējās lokalizācijas tiek pabeigtas vienu reizi katrā laidienā, izmantojot laidiena atsvaidzināšanu vai tulkošanas vilni (`docs/guides/I18N.md` → "Tikai funkcija PRs touch `en.json` "). `npm run check:pr-derived-paths` neizdodas izmantot līdzekli PR, kas rediģē citu lokalizāciju katalogu.
+
+**Fokusēta cilpa**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # kad mainās CLI virknes/katalogi
 npm run lint
 ```
 
-Šie ir norādījumi esošajai sistēmai, nevis aicinājums paplašināt tās rīkus vai atslēgu modeli.
-Kamēr tiek izstrādāta aizstājošā sistēma, veiciet tikai precīzi mērķētas i18n izmaiņas. Nepalaidiet tulkošanas
-komandas, kas izsauc ārējus pakalpojumus, ja vien uzdevums skaidri nepieprasa ģenerētus tulkojumus un
-neesat pārskatījis iegūtās izmaiņas.
+Bez `--mode=pr` šie vārti darbojas lokāli atbrīvošanas režīmā un ziņo par katru atslēgu, kas pievienots vai pārrakstīts `en.json`; tas ir laidiena atsvaidzināšanas darbs, nevis jūsu PR.
+
+Šie ir norādījumi esošajai sistēmai, nevis aicinājums paplašināt tās rīkus vai galveno modeli. Kamēr tiek izstrādāta nomaiņas sistēma, saglabājiet i18n ielāpus. Nepalaidiet tulkošanas komandas, kas izsauc ārējos pakalpojumus, ja vien uzdevumam nav skaidri nepieciešami ģenerēti tulkojumi un ja esat pārskatījis iegūto atšķirību.
 
 ### CLI
 
 **Līgumi**
 
-- Publiskās komandas un karodziņi direktorijā `bin/cli/`, ģenerētās API komandas, izejas kodi, stdout/stderr un
-  JSON izvades struktūras, konfigurācijas/vides darbība un pakotnē iekļautie faili.
-- CLI lietotājiem paredzētajām virknēm jāizmanto CLI i18n slānis, un `en`/`pt-BR` katalogiem jābūt savstarpēji saskaņotiem.
-- Saglabājiet Node kā atbalstīto izpildvidi un publicētā binārā faila līgumu.
+- Publiskās komandas un karodziņi programmā `bin/cli/`, ģenerētas API komandas, izejas kodi, stdout/stderr un JSON izvades formas, config/environment darbība un iepakotie faili.
+- CLI lietotājam paredzētajām virknēm ir jāizmanto slānis CLI i18n (`t()` atslēgas, kas pastāv `bin/cli/locales/en.json`). Līdzeklis PR rediģē tikai `en.json`; `pt-BR` un citas lokalizācijas ir pabeigtas izlaišanas laikā.
+- Saglabājiet Node kā atbalstīto izpildlaiku un publicēto bināro līgumu.
 
-**Fokusētais cikls**
+**Fokusēta cilpa**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # ģenerētās/apvienotās CLI izmaiņas
-npm run check:pack-policy     # pakotnes publiskās virsmas izmaiņas
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Izmantojiet precīzo komandu pagaidu datu direktorijā, ja darbība ir atkarīga no parsēšanas, failiem vai izejas
-statusa. CI veic plašākas pakotnes artefaktu un ekosistēmas pārbaudes.
+Izmantojiet precīzu komandu pagaidu datu direktorijā, ja darbība ir atkarīga no parsēšanas, failiem vai izejas statusa. CI veic plašākas pakotnes artefaktu un ekosistēmu pārbaudes.
 
-### Datubāze
+### Datu bāze
 
 **Līgumi**
 
-- Domēna moduļi atrodas direktorijā `src/lib/db/`; importējiet konkrētos moduļus tieši (vecais `localDb.ts` atkārtotas eksportēšanas slānis tika noņemts).
-- Numurētas, idempotentas SQL migrācijas direktorijā `src/lib/db/migrations/`, transakciju drošība, jaunināšanas
-  darbība, indeksi un visi izsaucēji, kurus ietekmē shēma.
-- Maršruti un apstrādātāji nekad tieši neizpilda neapstrādātu SQL.
+- Domēna moduļi zem `src/lib/db/`; tieši importēt konkrētus moduļus (vecais `localDb.ts` reeksporta slānis tika noņemts).
+- Numurētas, idempotentas SQL migrācijas saskaņā ar `src/lib/db/migrations/`, darījumu drošība, jaunināšanas darbība, indeksi un katrs zvanītājs, ko ietekmē shēma.
+- Maršruti un apstrādātāji nekad neizsniedz neapstrādātu SQL tieši.
 
-**Fokusētais cikls**
+**Fokusēta cilpa**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Pievienojot migrāciju, pārbaudiet gan jaunu datubāzi, gan jaunināšanu no iepriekšējās shēmas. Datubāzes testiem
-tīrīšanas laikā jāaizver savienojumi un jāizsauc `resetDbInstance()`. Izpildiet `npm run test:bun:db` tikai tad, ja
-mainās eksperimentālais Bun adaptera ceļš; Node joprojām ir noteicošā izpildvide.
+Pievienojot migrāciju, pārbaudiet gan jaunu datubāzi, gan jaunināšanu no iepriekšējās shēmas. Datu bāzes testiem tīrīšanas laikā ir jāaizver rokturi un jāizsauc `resetDbInstance()`. Palaidiet `npm run test:bun:db` tikai tad, kad mainās vislabākā Bun adaptera ceļš; Mezgls paliek autoritatīvs.
 
-### Būvēšana / izvietošana
+### Veidot / izvietot
 
 **Līgumi**
 
-- Saknes un darbvietu manifesti/bloķēšanas fails, `scripts/build/`, Next.js savrupās versijas komplektēšana, `dist/`
-  pakotnes saturs, Electron platformu metadati, CI darbplūsmas un izvietošanas kontrolatzīmes.
-- Atbalstītajiem Node versiju diapazoniem un `CLAUDE.md` atļauto Bun lietojumu sarakstam jāpaliek neskartiem.
-- Būvējuma artefakti netiek izsekoti; ir spēkā atkarību, licenču, darbplūsmu un pakotņu politikas.
+- Saknes un darbvietas manifests/lockfile, `scripts/build/`, Next.js savrupā montāža, `dist/` pakotnes saturs, Electron platformas metadati, CI darbplūsmas un izvietošanas uzraugi.
+- Atbalstītajiem mezglu diapazoniem un atļautajam Bun lietojumam `CLAUDE.md` ir jāpaliek neskartiem.
+- Būvēšanas artefakti netiek izsekoti; tiek piemērotas atkarības, licences, darbplūsmas un pakotnes politikas.
 
-**Fokusētais cikls**
+**Fokusēta cilpa**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # atkarību vai bloķēšanas faila izmaiņas
-npm run check:pack-policy      # publicētās pakotnes publiskās virsmas izmaiņas
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Izmantojiet `npm run build` lokāli tikai tad, ja izmaiņas ietekmē kompilēšanu, savrupās versijas komplektēšanu, resursus
-vai izpildlaika apvienošanu. Izmantojiet `npm run build:release` tikai laidiena/izvietošanas validācijai. CI būvējums ir
-galīgais starpplatformu signāls; platformai specifiskām Electron izmaiņām nepieciešams atbilstošs fokusētais būvējums
-vai ātrās pārbaudes apliecinājums.
+Izmantojiet `npm run build` lokāli tikai tad, ja izmaiņas ietekmē kompilāciju, atsevišķu montāžu, līdzekļus vai izpildlaika grupēšanu. Izmantojiet `npm run build:release` tikai release/deploy validācijai. CI uzbūve ir pēdējais starpplatformu signāls; platformai specifiskām Electron izmaiņām ir nepieciešams atbilstošs koncentrēts uzbūves vai dūmu pierādījums.
 
 ## Izstrādātāju skripti koplietojamai iekārtai
 
