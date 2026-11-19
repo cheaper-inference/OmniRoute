@@ -4,6 +4,7 @@ import assert from "node:assert/strict";
 const {
   executeWithAnthropicThinkingSignatureRecovery,
   isAnthropicThinkingSignatureError,
+  stripAllThinkingForSignatureRecovery,
   stripHistoricalThinkingForSignatureRecovery,
 } = await import("@omniroute/open-sse/handlers/chatCore/passthroughHelpers.ts");
 const { recoverAnthropicThinkingSignature } =
@@ -314,6 +315,69 @@ test("Anthropic thinking-signature recovery contract", async (t) => {
     );
     assert.deepEqual(body, snapshot, "caller body is not mutated");
   });
+
+  await t.test(
+    "full strip drops clear_thinking context edits with thinking, keeps other edits",
+    async () => {
+      const activeCycle = [
+        { role: "user", content: [{ type: "text", text: "run" }] },
+        {
+          role: "assistant",
+          content: [
+            { type: "thinking", thinking: "x", signature: "FOREIGN" },
+            { type: "tool_use", id: "toolu_1", name: "Bash", input: {} },
+          ],
+        },
+        {
+          role: "user",
+          content: [{ type: "tool_result", tool_use_id: "toolu_1", content: "ok" }],
+        },
+      ];
+      const body = {
+        thinking: { type: "adaptive" },
+        context_management: {
+          edits: [
+            { type: "clear_thinking_20251015", keep: "all" },
+            { type: "clear_tool_uses_20250919", keep: { type: "tool_uses", value: 3 } },
+          ],
+        },
+        messages: activeCycle,
+      };
+      const snapshot = structuredClone(body);
+      const calls: Array<Record<string, unknown>> = [];
+      const out = await executeWithAnthropicThinkingSignatureRecovery({
+        provider: "claude",
+        body,
+        execute: async (requestBody) => {
+          calls.push(requestBody as Record<string, unknown>);
+          return calls.length === 1
+            ? { status: 400, message: "Invalid signature in thinking block" }
+            : { status: 200, message: "ok" };
+        },
+        getError: (result) => (result.status >= 400 ? result : null),
+      });
+
+      assert.equal(out.result.status, 200);
+      assert.equal(calls.length, 2);
+      assert.equal("thinking" in calls[1], false);
+      assert.deepEqual(calls[1].context_management, {
+        edits: [{ type: "clear_tool_uses_20250919", keep: { type: "tool_uses", value: 3 } }],
+      });
+      assert.deepEqual(body, snapshot, "caller body is not mutated");
+
+      const onlyClearThinking = stripAllThinkingForSignatureRecovery({
+        thinking: { type: "adaptive" },
+        context_management: { edits: [{ type: "clear_thinking_20251015", keep: "all" }] },
+        messages: activeCycle,
+      }) as Record<string, unknown>;
+      assert.equal("thinking" in onlyClearThinking, false);
+      assert.equal(
+        "context_management" in onlyClearThinking,
+        false,
+        "an edits list left empty is dropped with thinking"
+      );
+    }
+  );
 
   await t.test(
     "active-cycle thinking: conservative strip is a no-op, full strip is used",

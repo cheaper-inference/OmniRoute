@@ -505,8 +505,28 @@ export function stripAllThinkingForSignatureRecovery<T>(body: T): T {
   });
 
   if (!changed) return body;
-  const { thinking: _thinking, ...rest } = record;
-  return { ...rest, messages } as T;
+  const { thinking: _thinking, context_management: contextManagement, ...rest } = record;
+  const keptContextManagement = withoutClearThinkingEdits(contextManagement);
+  return {
+    ...rest,
+    ...(keptContextManagement === undefined ? {} : { context_management: keptContextManagement }),
+    messages,
+  } as T;
+}
+
+/**
+ * `clear_thinking_*` context edits require thinking to be on, so they go with it; every other
+ * edit stays. An edits list left empty drops `context_management` entirely.
+ */
+function withoutClearThinkingEdits(contextManagement: unknown): unknown {
+  if (!contextManagement || typeof contextManagement !== "object") return contextManagement;
+  const cm = contextManagement as { edits?: unknown };
+  if (!Array.isArray(cm.edits)) return contextManagement;
+  const edits = cm.edits.filter(
+    (edit) => !String((edit as { type?: unknown } | null)?.type ?? "").startsWith("clear_thinking")
+  );
+  if (edits.length === cm.edits.length) return contextManagement;
+  return edits.length > 0 ? { ...cm, edits } : undefined;
 }
 
 type SignatureRecoveryExecution<T> = {
