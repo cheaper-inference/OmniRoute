@@ -251,6 +251,10 @@ async function sweepAt(offsetMs: number): Promise<void> {
   }
 }
 
+// Importing the routes installs the patched fetch. Put the probe in its place afterwards, so a
+// test reaches it directly and does not depend on the real lookup of a fake host failing first.
+globalThis.fetch = probeFetch;
+
 test.after(() => {
   scheduler.stopCredentialHealthCheck();
   globalThis.fetch = originalFetch;
