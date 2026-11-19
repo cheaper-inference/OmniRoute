@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Der Grenzwert muss eine positive ganze Zahl sein.",
     "error": "Fehler: {message}",
     "serverOffline": "OmniRoute-Server ist offline. Starten mit: omniroute serve",
     "authRequired": "Authentifizierung erforderlich. OMNIROUTE_API_KEY setzen oder ausführen: omniroute setup",

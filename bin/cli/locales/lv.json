@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Ierobežojumam ir jābūt pozitīvam veselam skaitlim.",
     "error": "Kļūda: {message}",
     "serverOffline": "OmniRoute serveris nedarbojas. Startējiet to ar: omniroute serve",
     "authRequired": "Nepieciešama autentifikācija. Iestatiet OMNIROUTE_API_KEY vai palaidiet: omniroute setup",

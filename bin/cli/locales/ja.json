@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "制限は正の整数である必要があります。",
     "error": "エラー: {message}",
     "serverOffline": "OmniRouteサーバーはオフラインです。起動: omniroute serve",
     "authRequired": "認証が必要です。OMNIROUTE_API_KEYを設定するか実行してください: omniroute setup",
