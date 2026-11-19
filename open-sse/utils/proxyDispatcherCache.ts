@@ -23,6 +23,15 @@ type GlobalWithDispatcherCache = typeof globalThis & {
   [LOCAL_RETRY_DISPATCHER_KEY]?: Dispatcher;
 };
 
+/** undici keys `Agent.stats` by `URL.origin`; a dispatch may pass a URL or a string with a path. */
+function statsOriginKey(origin: Dispatcher.DispatchOptions["origin"]): string {
+  try {
+    return new URL(String(origin)).origin;
+  } catch {
+    return String(origin);
+  }
+}
+
 /**
  * Direct upstream fan-out dispatcher.
  *
@@ -42,16 +51,16 @@ class RoundRobinDispatcher {
   }
 
   /**
-   * Requests an agent holds right now: running plus queued, from undici's public `stats`.
-   * An agent without `stats` counts as idle, which keeps plain rotation for it.
+   * Requests an agent holds right now for `origin`: running plus queued, from undici's public
+   * `stats`, which keeps one entry per origin. Each origin has its own client in the agent, so a
+   * stream to another origin does not queue this request. An agent without `stats` counts as
+   * idle, which keeps plain rotation for it.
    */
-  private load(dispatcher: Dispatcher): number {
+  private load(dispatcher: Dispatcher, origin: string): number {
     const stats = (dispatcher as { stats?: Record<string, { running?: number; pending?: number }> })
       .stats;
-    let load = 0;
-    for (const origin of Object.values(stats ?? {}))
-      load += (origin.running ?? 0) + (origin.pending ?? 0);
-    return load;
+    const entry = stats?.[origin];
+    return (entry?.running ?? 0) + (entry?.pending ?? 0);
   }
 
   dispatch(options: Dispatcher.DispatchOptions, handler: Dispatcher.DispatchHandler): boolean {
@@ -59,11 +68,12 @@ class RoundRobinDispatcher {
     // rotate. A blind rotation could send a request to the agent that holds a long SSE stream
     // while the other agents were idle.
     const count = this.dispatchers.length;
+    const origin = statsOriginKey(options.origin);
     let pick = this.nextIndex % count;
-    let pickLoad = this.load(this.dispatchers[pick]);
+    let pickLoad = this.load(this.dispatchers[pick], origin);
     for (let step = 1; step < count && pickLoad > 0; step++) {
       const index = (this.nextIndex + step) % count;
-      const load = this.load(this.dispatchers[index]);
+      const load = this.load(this.dispatchers[index], origin);
       if (load < pickLoad) {
         pick = index;
         pickLoad = load;

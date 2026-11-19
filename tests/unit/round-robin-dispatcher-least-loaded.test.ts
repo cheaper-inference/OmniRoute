@@ -57,6 +57,38 @@ describe("round-robin direct dispatcher picks the least loaded agent", () => {
     assert.deepEqual(log, [1]);
   });
 
+  it("only counts the load an agent holds for the requested origin", () => {
+    // Each agent keeps one client per origin: streams to other origins do not queue this request,
+    // so the agent that holds a stream to the requested origin loses to one busy elsewhere.
+    const log: number[] = [];
+    const dispatcher = __createRoundRobinDispatcherForTest([
+      stubAgent(busy(1), log, 0),
+      stubAgent(
+        {
+          "http://other-a.test": { running: 1, pending: 0 },
+          "http://other-b.test": { running: 1, pending: 0 },
+        },
+        log,
+        1
+      ),
+    ]);
+    dispatchOnce(dispatcher);
+    assert.deepEqual(log, [1]);
+  });
+
+  it("matches a URL origin against the origin keys of the agent stats", () => {
+    const log: number[] = [];
+    const dispatcher = __createRoundRobinDispatcherForTest([
+      stubAgent(busy(1), log, 0),
+      stubAgent({}, log, 1),
+    ]);
+    dispatcher.dispatch(
+      { origin: new URL("http://upstream.test/"), path: "/", method: "POST" },
+      {} as never
+    );
+    assert.deepEqual(log, [1]);
+  });
+
   it("rotates among equally loaded agents, starting after the previous pick", () => {
     const log: number[] = [];
     const dispatcher = __createRoundRobinDispatcherForTest([
@@ -96,9 +128,17 @@ describe("round-robin direct dispatcher picks the least loaded agent", () => {
   });
 });
 
-// Yield to the event loop n times: lets in-flight socket events run without a wall-clock wait.
-async function setImmediateChain(times: number): Promise<void> {
-  for (let i = 0; i < times; i++) await new Promise<void>((resolve) => setImmediate(resolve));
+// Failure guard for one quick loopback request, generous so a loaded machine cannot trip it. A
+// request queued behind the long stream never finishes before the stream ends, however long the
+// guard is: an event-loop turn count is no deadline, since socket events can land after it.
+const QUICK_REQUEST_GUARD_MS = 5_000;
+
+function stuckAfter(ms: number): { promise: Promise<"stuck">; cancel: () => void } {
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const promise = new Promise<"stuck">((resolve) => {
+    timer = setTimeout(() => resolve("stuck"), ms);
+  });
+  return { promise, cancel: () => clearTimeout(timer) };
 }
 
 describe("round-robin direct dispatcher with real agents", () => {
@@ -127,8 +167,8 @@ describe("round-robin direct dispatcher with real agents", () => {
       // 2 agents are idle. Four quick requests, one after another, must all finish while the
       // long stream is still open: a blind rotation sends the fourth to the busy agent.
       // A blind rotation leaves the fourth request queued until the long stream ends. The race
-      // below lets the long stream end only after the quick request has been seen to wait, so
-      // the test fails by assertion instead of hanging, and uses no timer.
+      // below lets the long stream end only after the quick request has waited past the guard,
+      // so the test fails by assertion instead of hanging.
       const quick = async (): Promise<"quick" | "after-long"> => {
         const res = await undiciFetch(`${base}/quick`, { dispatcher });
         await res.text();
@@ -138,7 +178,9 @@ describe("round-robin direct dispatcher with real agents", () => {
       const results: string[] = [];
       for (let i = 0; i < 4; i++) {
         const pending = quick();
-        const settled = await Promise.race([pending, setImmediateChain(50).then(() => "stuck")]);
+        const guard = stuckAfter(QUICK_REQUEST_GUARD_MS);
+        const settled = await Promise.race([pending, guard.promise]);
+        guard.cancel();
         if (settled === "stuck") {
           longEnded = true;
           releaseLong();
