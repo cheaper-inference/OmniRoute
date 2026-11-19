@@ -13,6 +13,10 @@ import {
   isForbiddenCustomHeaderName,
 } from "@/shared/constants/upstreamHeaders";
 import { MAX_TIMER_TIMEOUT_MS } from "@/shared/utils/runtimeTimeouts";
+import {
+  COMBO_ENDPOINTS,
+  COMBO_NON_CHAT_STRATEGIES,
+} from "@omniroute/open-sse/config/comboEndpoints.ts";
 import { OPENAI_SERVICE_TIER_VALUES } from "@omniroute/open-sse/config/serviceTier.ts";
 
 // ──── Combo Schemas ────
@@ -30,7 +34,7 @@ export const comboModelStepInputSchema = z.object({
   providerId: z.string().trim().min(1).max(120).optional(),
   model: z.string().trim().min(1).max(300),
   connectionId: z.string().trim().min(1).max(200).nullable().optional(),
-  allowedConnectionIds: z.array(z.string().trim().min(1).max(200)).max(50).optional(),
+  allowedConnectionIds: z.array(z.string().trim().min(1).max(200)).max(250).optional(),
   tags: z.array(z.string().trim().min(1).max(100)).max(20).optional(),
   // Pipeline strategy (open-sse/services/pipeline.ts): an optional per-step
   // instruction. Steps run in `models` order — each step's output feeds the next
@@ -301,6 +305,21 @@ export const comboRuntimeConfigSchema = z
       .object({
         enabled: z.boolean().optional(),
         maxToolRounds: z.coerce.number().int().min(1).max(32).optional(),
+        contextCompaction: z
+          .object({
+            enabled: z.boolean().optional(),
+            defaultMaxChars: z.coerce.number().int().min(10_000).max(4_000_000).optional(),
+            targetRatio: z.coerce.number().min(0.25).max(0.95).optional(),
+            toolResultMaxChars: z.coerce.number().int().min(1_000).max(500_000).optional(),
+            modelMaxChars: z
+              .record(
+                z.string().trim().min(1).max(200),
+                z.coerce.number().int().min(10_000).max(4_000_000)
+              )
+              .optional(),
+          })
+          .strict()
+          .optional(),
       })
       .strict()
       .optional(),
@@ -361,6 +380,48 @@ export const comboNameSchema = z
     "Name can only contain letters, numbers, spaces, -, _, /, ., [ and ]."
   );
 
+export const comboCapabilityRouteSchema = z
+  .object({
+    models: z.array(comboModelEntry).min(1, "a capability route requires at least one model"),
+    strategy: comboStrategySchema.optional().default("priority"),
+    config: comboRuntimeConfigSchema.optional(),
+  })
+  .strict()
+  .superRefine(validateQuotaOnlyComboRefs);
+
+export const comboCapabilityRoutesSchema = z
+  .object({
+    chat: comboCapabilityRouteSchema.optional(),
+    search: comboCapabilityRouteSchema.optional(),
+    "web-fetch": comboCapabilityRouteSchema.optional(),
+    embeddings: comboCapabilityRouteSchema.optional(),
+    rerank: comboCapabilityRouteSchema.optional(),
+    images: comboCapabilityRouteSchema.optional(),
+    "image-edits": comboCapabilityRouteSchema.optional(),
+    videos: comboCapabilityRouteSchema.optional(),
+    music: comboCapabilityRouteSchema.optional(),
+    ocr: comboCapabilityRouteSchema.optional(),
+    "audio-speech": comboCapabilityRouteSchema.optional(),
+    "audio-transcriptions": comboCapabilityRouteSchema.optional(),
+    "audio-translations": comboCapabilityRouteSchema.optional(),
+    "audio-generation": comboCapabilityRouteSchema.optional(),
+  })
+  .strict()
+  .superRefine((routes, ctx) => {
+    const supported = new Set<string>(COMBO_NON_CHAT_STRATEGIES);
+    for (const endpoint of COMBO_ENDPOINTS) {
+      if (endpoint === "chat") continue;
+      const route = routes[endpoint];
+      if (route && !supported.has(route.strategy)) {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          message: `Strategy ${route.strategy} is not supported for ${endpoint}`,
+          path: [endpoint, "strategy"],
+        });
+      }
+    }
+  });
+
 type QuotaOnlyComboRefState = {
   models?: Array<z.infer<typeof comboModelEntry>>;
   strategy?: string;
@@ -420,6 +481,7 @@ export const createComboSchema = z
     models: z.array(comboModelEntry).min(1, "a combo requires at least one model"),
     strategy: comboStrategySchema.optional().default("priority"),
     config: comboRuntimeConfigSchema.optional(),
+    routes: comboCapabilityRoutesSchema.optional(),
     universal_handoff: universalHandoffSchema.optional(),
     universalHandoff: universalHandoffSchema.optional(),
     allowedProviders: z.array(z.string().trim().min(1).max(200)).max(100).optional(),
@@ -490,6 +552,7 @@ export const updateComboSchema = z
       .optional(),
     strategy: comboStrategySchema.optional(),
     config: comboRuntimeConfigSchema.optional(),
+    routes: comboCapabilityRoutesSchema.optional().nullable(),
     isActive: z.boolean().optional(),
     // Stored on the combo record and honoured by the readers — the builder's
     // option list and the dashboard grid both filter on it — but omitted here,
@@ -526,6 +589,7 @@ export const updateComboSchema = z
       value.models === undefined &&
       value.strategy === undefined &&
       value.config === undefined &&
+      value.routes === undefined &&
       value.isActive === undefined &&
       value.isHidden === undefined &&
       value.allowedProviders === undefined &&

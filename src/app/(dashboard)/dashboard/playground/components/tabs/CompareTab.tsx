@@ -3,6 +3,7 @@
 import Input from "@/shared/components/Input";
 import Textarea from "@/shared/components/Textarea";
 import Button from "@/shared/components/Button";
+import GuardedAction from "@/shared/components/GuardedAction";
 import Icon from "@/shared/components/Icon";
 
 // src/app/(dashboard)/dashboard/playground/components/tabs/CompareTab.tsx
@@ -411,18 +412,18 @@ export default function CompareTab({ configState }: CompareTabProps) {
             inputClassName="text-xs"
             className="w-40 min-w-0"
           />
-          <Button
+          <GuardedAction
             variant="outline"
             size="sm"
             icon="add"
             onClick={addColumn}
-            disabled={atColumnLimit}
+            reason={atColumnLimit ? t("maxColumnsReached", { max: MAX_COLUMNS }) : undefined}
             className="text-text-muted"
-            title={atColumnLimit ? t("maxColumnsReached", { max: MAX_COLUMNS }) : t("addColumn")}
+            title={t("addColumn")}
             aria-label={t("addModelColumn")}
           >
             {t("addModel")}
-          </Button>
+          </GuardedAction>
         </div>
 
         {/* Column count indicator */}
