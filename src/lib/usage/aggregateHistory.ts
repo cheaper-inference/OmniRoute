@@ -137,6 +137,20 @@ export async function rollupHourlyQuota(
 }
 
 /**
+ * SQL predicate: a retained Team shape map honours the count contract of
+ * parseBillingShapeCounts (a JSON object of non-negative integer counts that sum to the
+ * bucket's request count). Syntactic validity alone is not enough: a negative count could
+ * cancel against the next rollup and leave a map that parses as fully priced.
+ */
+function teamShapeMapHonoursContractSql(column: string, requests: string): string {
+  // Nested CASEs keep json_type/json_each away from malformed JSON, which they reject.
+  return `CASE WHEN json_valid(${column}) THEN CASE WHEN json_type(${column}) = 'object' THEN
+    NOT EXISTS (SELECT 1 FROM json_each(${column}) WHERE type != 'integer' OR value < 0)
+    AND (SELECT COALESCE(SUM(value), 0) FROM json_each(${column})) = ${requests}
+    ELSE 0 END ELSE 0 END`;
+}
+
+/**
  * Roll up usage_history into daily_usage_summary before raw rows are deleted.
  * This is the authoritative rollup — sourced from actual per-request token data,
  * not from quota_snapshots. Should be called before cleanupUsageHistory() deletes rows.
@@ -251,7 +265,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           SELECT json_group_object(shape, total) FROM (
             SELECT key AS shape, SUM(value) AS total FROM (
               SELECT key, value FROM json_each(CASE
-                WHEN json_valid(daily_team_usage_summary.token_shapes_json) THEN daily_team_usage_summary.token_shapes_json
+                WHEN ${teamShapeMapHonoursContractSql("daily_team_usage_summary.token_shapes_json", "daily_team_usage_summary.total_requests")} THEN daily_team_usage_summary.token_shapes_json
                 ELSE json_object(CASE WHEN daily_team_usage_summary.token_shapes_json IS NULL
                   THEN 'legacy_unpriced' ELSE 'legacy_invalid' END, daily_team_usage_summary.total_requests) END)
               UNION ALL SELECT key, value FROM json_each(excluded.token_shapes_json)
@@ -262,7 +276,7 @@ export async function rollupUsageHistoryBeforeDate(beforeDate: string): Promise<
           SELECT json_group_object(shape, total) FROM (
             SELECT key AS shape, SUM(value) AS total FROM (
               SELECT key, value FROM json_each(CASE
-                WHEN json_valid(daily_team_usage_summary.successful_token_shapes_json) THEN daily_team_usage_summary.successful_token_shapes_json
+                WHEN ${teamShapeMapHonoursContractSql("daily_team_usage_summary.successful_token_shapes_json", "daily_team_usage_summary.successful_requests")} THEN daily_team_usage_summary.successful_token_shapes_json
                 ELSE json_object(CASE WHEN daily_team_usage_summary.successful_token_shapes_json IS NULL
                   THEN 'legacy_unpriced' ELSE 'legacy_invalid' END, daily_team_usage_summary.successful_requests) END)
               UNION ALL SELECT key, value FROM json_each(excluded.successful_token_shapes_json)

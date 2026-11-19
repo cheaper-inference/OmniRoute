@@ -328,6 +328,30 @@ test("corrupt retained accounting cannot use the missing-price availability exce
   assert.equal(after.blockReason, "pricing_unavailable");
 });
 
+test("a contract-invalid retained shape map is not made valid by the next rollup", async () => {
+  const { a } = await setup();
+  await record(a.id, { cost: 0.1 });
+  await retain();
+  const db = core.getDbInstance();
+  const row = db
+    .prepare("SELECT successful_token_shapes_json AS shapes FROM daily_team_usage_summary")
+    .get() as { shapes: string };
+  const [key] = Object.keys(JSON.parse(row.shapes));
+  // Valid JSON that breaks the count contract: the negative count would cancel against the next
+  // request with the same shape and leave a map that parses as fully priced.
+  const corrupt = JSON.stringify({ [key]: -1, "[1000,0,0,0,0,0.05,null,null,null]": 2 });
+  db.prepare(
+    "UPDATE daily_team_usage_summary SET token_shapes_json = ?, successful_token_shapes_json = ?"
+  ).run(corrupt, corrupt);
+  flags.setFeatureFlagOverride("UNPRICED_USAGE_BUDGET_POLICY", "count_as_zero");
+  assert.equal((await limits.getTeamUsageLimitStatusForApiKey(a.id, now))?.hasPricingFailure, true);
+  await record(a.id, { cost: 0.1 });
+  await retain();
+  const after = await limits.getTeamUsageLimitStatusForApiKey(a.id, now);
+  assert.equal(after?.hasPricingFailure, true);
+  assert.equal(after.blockReason, "pricing_unavailable");
+});
+
 test("retained imported identities keep their existing case-normalized catalog lookup", async () => {
   const { team, a } = await setup();
   await record(a.id, { model: "synthetic-priced" });
