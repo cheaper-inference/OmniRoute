@@ -47,7 +47,11 @@ export function flattenCatalog(node, prefix = "", out = new Map()) {
 function classify(value, english, key, untranslatable) {
   if (value === undefined) return "absent";
   if (typeof value === "string" && value.startsWith(PLACEHOLDER_PREFIX)) return "marker";
-  if (value === english && !untranslatable.has(key)) return "identical";
+  const literalBaseUrl =
+    typeof value === "string" &&
+    key.endsWith("BaseUrlPlaceholder") &&
+    /^https?:\/\/[^\s<>{}]+$/.test(value);
+  if (value === english && !untranslatable.has(key) && !literalBaseUrl) return "identical";
   return "translated";
 }
 
