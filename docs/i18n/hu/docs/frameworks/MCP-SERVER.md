@@ -20,11 +20,13 @@ Vagy az open-sse transzporttal:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
 
-A HTTP átvitelek (`sse` / `streamable-http`, folyamat közben az irányítópult-szerver szolgálja ki) alapértelmezés szerint ki vannak kapcsolva, és korábban csak a `/dashboard/mcp` oldalról válthatók át. A 3.8.51 verziótól kezdve a CLI paritása:
+A HTTP átvitelek (`sse` / `streamable-http`, folyamat közben az irányítópult-szerver szolgálja ki) alapértelmezés szerint ki vannak kapcsolva, és korábban csak a `/dashboard/mcp` oldalról válthatók át. A 3.8.51-es verziótól kezdve a CLI paritása:
 
 ```bash
 omniroute mcp status                                  # enabled/online, transport, tool count
@@ -144,7 +146,7 @@ Cursor, Cline és kompatibilis MCP-kliensek beállításához lásd az [MCP-klie
 | `omniroute_rtk_discover`            | `read:compression`  | Fedezze fel az ismétlődő zajokat az opt-in RTK kimeneti mintákban                                                                                |
 | `omniroute_rtk_learn`               | `read:compression`  | Áttekinthető RTK szűrővázlat létrehozása az önkéntes mintákból                                                                                   |
 
-CCR bejegyzések kétszintű tárolót használnak: egy forró memóriaréteget, amelyet helyi, nem felhőalapú futtatókörnyezeteken támogat egy tartós SQLite réteg (`ccr_blocks`, alapértelmezés szerint be van kapcsolva), így a blokk túléli a kilakoltatást vagy az újraindítást, amíg TTL ből ki nem fogy — kivéve az 512 feletti KB memóriablokkokat, amelyek megmaradnak. Minden blokk 2 MiB-re, mindegyik fő 16 MiB, a globális tároló pedig 64 MiB-re korlátozódik. A bejegyzések alapértelmezés szerint 24 órás TTL (maximum hét nap). A teljes MCP visszakeresés 256 KiB-re korlátozódik; a nagyobb blokkok elérhetők maradnak a ranged és grep módokon keresztül. A tárolást, a visszakeresést, a listázást, az ellenőrzést, a törlést és a statisztikákat a hitelesített API-kulcs elválasztja. Az ellenőrzési rekordok kivonatokat és méret metaadatokat tartalmaznak, tartalmat soha. A kezelőre vonatkozó részletek (a két jelölő, az ügyfél előfeltételei, `codemode:false`, az eszközenkénti hatókör, az oldalszámozás és a diagnosztikai mátrix) megtalálhatók [a Compression Engines → Előfeltételek / kezelői útmutatóban](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR bejegyzések kétszintű tárolót használnak: egy forró memórián belüli réteget, amelyet helyi, nem felhőalapú futási környezeteken támogat egy tartós SQLite réteg (`ccr_blocks`, alapértelmezés szerint be van kapcsolva), így a blokk túléli a kilakoltatást vagy az újraindítást, amíg TTL ki nem fogy — `COMPRESSION_CCR_DURABLE_STORE=false` KB. A tartós írás a legjobb erőfeszítés: eldobják, amíg 1000 írás már függőben van, és a sikertelen SQLite írást naplózza, nem próbálja újra, így a blokk újraindításkor elveszik. Minden blokk 2 MiB-re, mindegyik fő 16 MiB, a globális tároló pedig 64 MiB ra korlátozódik. A bejegyzések alapértelmezés szerint 24 órás TTL (maximum hét nap). A teljes MCP lekérdezés 256 KiB-re korlátozódik; a nagyobb blokkok elérhetők maradnak a ranged és grep módokon keresztül. A tárolást, a visszakeresést, a listázást, az ellenőrzést, a törlést és a statisztikákat a hitelesített API-kulcs elválasztja. Az ellenőrzési rekordok kivonatokat és méret metaadatokat tartalmaznak, tartalmat soha. A kezelőre vonatkozó részletek (a két jelölő, az ügyfél előfeltételei, `codemode:false`, az eszközenkénti hatókör, az oldalszámozás és a diagnosztikai mátrix) megtalálhatók [a Compression Engines → Előfeltételek / kezelői útmutatóban](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` külön jelenti MCP leírás tömörítését `analytics.mcpDescriptionCompression` alatt. Ezek az értékek MCP listázható leírások metaadat-méretére vonatkozó becslések (`tools`, `prompts`, `resources` és `resourceTemplates`); ezek nem szolgáltatói használati nyugták, és `source: "mcp_metadata_estimate"` jelzéssel vannak ellátva.
 
