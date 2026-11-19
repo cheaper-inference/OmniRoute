@@ -15,6 +15,7 @@
  */
 import { fetchUntrustedRemoteImage } from "@/shared/network/remoteImageFetch";
 import { sniffCursorImageFormat } from "../../utils/cursorImages.ts";
+import { sanitizeErrorMessage } from "../../utils/error.ts";
 
 /** Per-image cap. Antigravity's whole request must stay under ~20 MB of inline data. */
 export const ANTIGRAVITY_MAX_REMOTE_IMAGE_BYTES = 15 * 1024 * 1024;
@@ -27,6 +28,33 @@ export class AntigravityRemoteImageError extends Error {
     super(message);
     this.name = "AntigravityRemoteImageError";
   }
+}
+
+const localImageRejections = new WeakSet<object>();
+
+/**
+ * The local 400 returned when a remote image cannot be inlined. It is answered before any
+ * upstream call and recorded as a local rejection: another upstream model id
+ * cannot fix an image URL, and the Pro fallback chain must not retry it.
+ */
+export function buildAntigravityInvalidImageResponse(error: AntigravityRemoteImageError): Response {
+  const response = new Response(
+    JSON.stringify({
+      error: {
+        message: sanitizeErrorMessage(error.message),
+        type: "invalid_request_error",
+        code: "invalid_image_url",
+      },
+    }),
+    { status: 400, headers: { "Content-Type": "application/json" } }
+  );
+  localImageRejections.add(response);
+  return response;
+}
+
+/** True for a response built by `buildAntigravityInvalidImageResponse`. */
+export function isAntigravityLocalImageRejection(response: unknown): boolean {
+  return typeof response === "object" && response !== null && localImageRejections.has(response);
 }
 
 interface InlineImage {

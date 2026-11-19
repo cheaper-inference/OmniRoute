@@ -36,7 +36,9 @@ import { markAntigravityModelQuotaExhausted } from "../services/antigravityFamil
 import { cleanModelName } from "./antigravity/modelResolution.ts";
 import {
   AntigravityRemoteImageError,
+  buildAntigravityInvalidImageResponse,
   inlineAntigravityRemoteImages,
+  isAntigravityLocalImageRejection,
 } from "./antigravity/remoteImageInline.ts";
 export { cleanModelName } from "./antigravity/modelResolution.ts";
 import { resolveAntigravityOutputCap } from "./antigravityOutputCap.ts";
@@ -941,29 +943,6 @@ export class AntigravityExecutor extends BaseExecutor {
       }
     }
 
-    // Antigravity rejects `fileData` image URLs (the translator labels them `image/*`) with
-    // a 400, so download each remote image and send it as `inlineData` instead.
-    let contents: AntigravityContent[];
-    try {
-      contents = await inlineAntigravityRemoteImages(mergedContents, {
-        signal,
-        cacheKey: bodyRecord,
-      });
-    } catch (error) {
-      if (!(error instanceof AntigravityRemoteImageError)) throw error;
-      const resp = new Response(
-        JSON.stringify({
-          error: {
-            message: error.message,
-            type: "invalid_request_error",
-            code: "invalid_image_url",
-          },
-        }),
-        { status: 400, headers: { "Content-Type": "application/json" } }
-      );
-      return resp as unknown as never;
-    }
-
     const identity = buildAntigravityEnvelopeIdentity({
       isClaude,
       credentials,
@@ -974,7 +953,7 @@ export class AntigravityExecutor extends BaseExecutor {
     const safetySettings = getAntigravitySafetySettings(normalizedRequest?.safetySettings);
     const rawTransformedRequest = {
       ...normalizedRequest,
-      ...(contents.length > 0 && { contents }),
+      ...(mergedContents.length > 0 && { contents: mergedContents }),
       sessionId: identity.sessionId,
       ...(safetySettings !== undefined && { safetySettings }),
       toolConfig:
@@ -997,6 +976,23 @@ export class AntigravityExecutor extends BaseExecutor {
         : // Other chat models (gemini-4-argon-high, gpt-oss-120b-medium): no trailing-turn strip
           // and no identity rewrite, but empty system parts are rejected the same way.
           dropEmptyAntigravitySystemParts(rawTransformedRequest);
+
+    // Antigravity rejects `fileData` image URLs (the translator labels them `image/*`) with
+    // a 400, so download each remote image and send it as `inlineData` instead. This runs
+    // after the trailing-turn strip so only images that reach upstream are downloaded.
+    const outgoingContents = (transformedRequest as Record<string, unknown>).contents;
+    if (mergedContents.length > 0 && Array.isArray(outgoingContents)) {
+      try {
+        (transformedRequest as Record<string, unknown>).contents =
+          await inlineAntigravityRemoteImages(outgoingContents as AntigravityContent[], {
+            signal,
+            cacheKey: bodyRecord,
+          });
+      } catch (error) {
+        if (!(error instanceof AntigravityRemoteImageError)) throw error;
+        return buildAntigravityInvalidImageResponse(error) as unknown as never;
+      }
+    }
 
     applyAntigravityGenerationDefaults(transformedRequest, upstreamModel);
     // Identity labels join (never replace) the caller's own labels (#16618).
@@ -1426,8 +1422,12 @@ export class AntigravityExecutor extends BaseExecutor {
         }
       }
 
-      // Success (or any non-400) on a candidate → return immediately.
-      if (result.response.status !== HTTP_STATUS.BAD_REQUEST) {
+      // Success (or any non-400) on a candidate → return immediately. A local image
+      // rejection is returned too: no other upstream model id can fix an image URL.
+      if (
+        result.response.status !== HTTP_STATUS.BAD_REQUEST ||
+        isAntigravityLocalImageRejection(result.response)
+      ) {
         return result;
       }
 

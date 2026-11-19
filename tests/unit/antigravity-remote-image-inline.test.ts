@@ -7,6 +7,7 @@ import {
   inlineAntigravityRemoteImages,
 } from "../../open-sse/executors/antigravity/remoteImageInline.ts";
 import { setPinnedFetchTestOverride } from "../../src/shared/network/remoteImageFetch.ts";
+import { seedAntigravityIdeVersionCache } from "../../open-sse/services/antigravityVersion.ts";
 
 // Antigravity answered every OpenAI `image_url` request that used an https URL with
 // "400 Unsupported mime type: image/* in contents.file_data", because the translator
@@ -103,6 +104,64 @@ describe("Antigravity remote image URLs", () => {
     assert.ok(result instanceof Response);
     assert.equal(result.status, 400);
     assert.deepEqual(calls, []);
+  });
+
+  it("does not download an image in a trailing model turn that is stripped", async () => {
+    const calls: string[] = [];
+    setPinnedFetchTestOverride((async (input: string | URL | Request) => {
+      calls.push(String(input));
+      return new Response("nope", { status: 404 });
+    }) as typeof fetch);
+    const body = openAIImageRequest(IMAGE_URL);
+    body.request.contents = [
+      { role: "user", parts: convertOpenAIContentToParts([{ type: "text", text: "hi" }]) },
+      { role: "model", parts: body.request.contents[0].parts },
+    ];
+
+    const result = await new AntigravityExecutor().transformRequest(
+      "gemini-3.1-flash-lite",
+      body,
+      true,
+      creds
+    );
+    assert.ok(!(result instanceof Response));
+    const contents = (result.request as { contents: Array<{ role: string }> }).contents;
+    assert.deepEqual(
+      contents.map((c) => c.role),
+      ["user"]
+    );
+    assert.deepEqual(calls, []);
+  });
+
+  it("answers invalid_image_url once instead of retrying the Pro fallback chain", async () => {
+    const imageCalls: string[] = [];
+    setPinnedFetchTestOverride((async (input: string | URL | Request) => {
+      imageCalls.push(String(input));
+      return new Response("nope", { status: 404 });
+    }) as typeof fetch);
+    seedAntigravityIdeVersionCache("2.1.1");
+    const originalFetch = globalThis.fetch;
+    let upstreamCalls = 0;
+    globalThis.fetch = (async () => {
+      upstreamCalls += 1;
+      return new Response("{}", { status: 500 });
+    }) as typeof fetch;
+    try {
+      const result = await new AntigravityExecutor().execute({
+        model: "antigravity/gemini-3.1-pro-low",
+        body: openAIImageRequest(IMAGE_URL),
+        stream: false,
+        credentials: { accessToken: "token", projectId: "project-1" },
+        log: { debug() {}, warn() {}, info() {} },
+      });
+      assert.equal(result.response.status, 400);
+      const payload = (await result.response.json()) as { error: { code: string } };
+      assert.equal(payload.error.code, "invalid_image_url");
+      assert.equal(imageCalls.length, 1, "the next Pro candidate must not refetch the image");
+      assert.equal(upstreamCalls, 0);
+    } finally {
+      globalThis.fetch = originalFetch;
+    }
   });
 
   it("leaves data-URI images, text and non-image fileData untouched", async () => {
