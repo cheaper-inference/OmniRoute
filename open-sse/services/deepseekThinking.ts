@@ -11,7 +11,7 @@
  * with no `thinking` object, `reasoning_effort: "none"` turns thinking off; anything else
  * (including no field at all) leaves it on.
  */
-import { isForcedToolChoice } from "@/shared/constants/modelSpecs";
+import { isForcedToolChoice } from "../utils/toolChoice.ts";
 
 type JsonRecord = Record<string, unknown>;
 

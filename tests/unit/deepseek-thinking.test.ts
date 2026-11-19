@@ -3,7 +3,7 @@ import assert from "node:assert/strict";
 
 const { isDeepSeekThinkingActive, isDeepSeekThinkingModel, shouldDropForcedToolChoiceForDeepSeek } =
   await import("../../open-sse/services/deepseekThinking.ts");
-const { isForcedToolChoice } = await import("../../src/shared/constants/modelSpecs.ts");
+const { isForcedToolChoice } = await import("../../open-sse/utils/toolChoice.ts");
 
 const NAMED = { type: "function", function: { name: "lookup" } };
 
