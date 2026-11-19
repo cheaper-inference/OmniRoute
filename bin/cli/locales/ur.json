@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "حد ایک مثبت صحیح عدد ہونی چاہیے۔",
     "error": "خرابی: {message}",
     "serverOffline": "OmniRoute سرور آف لائن ہے۔ اسے اس کمانڈ سے شروع کریں: omniroute serve",
     "authRequired": "توثیق درکار ہے۔ OMNIROUTE_API_KEY سیٹ کریں یا یہ کمانڈ چلائیں: omniroute setup",

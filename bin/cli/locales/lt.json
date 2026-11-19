@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Riba turi būti teigiamas sveikasis skaičius.",
     "error": "Klaida: {message}",
     "serverOffline": "OmniRoute serveris nepasiekiamas. Paleiskite jį naudodami komandą: omniroute serve",
     "authRequired": "Reikalingas autentifikavimas. Nustatykite OMNIROUTE_API_KEY arba vykdykite komandą: omniroute setup",
