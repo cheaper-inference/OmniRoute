@@ -1,0 +1,1 @@
+- **docs(cli):** document `OMNIROUTE_ALLOW_INSECURE_REMOTE`, the opt-in that lets `omniroute fcc-claude` send the API key to a trusted plain-HTTP LAN server ([#20544](https://github.com/cheaper-inference/OmniRoute/pull/20544))

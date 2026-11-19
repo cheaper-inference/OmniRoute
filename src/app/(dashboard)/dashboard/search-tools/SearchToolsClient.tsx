@@ -1,6 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import type { SearchProviderCatalogItem } from "@/shared/schemas/searchTools";
 import type { PlaygroundState } from "@/lib/playground/codeExport";
 
@@ -31,6 +33,8 @@ const DEFAULT_CONFIG: ConfigState = {
 };
 
 export default function SearchToolsClient() {
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   const [activeTab, setActiveTab] = useState<ActiveTab>("search");
   const [configState, setConfigState] = useState<ConfigState>(DEFAULT_CONFIG);
   const [catalogProviders, setCatalogProviders] = useState<SearchProviderCatalogItem[]>([]);
@@ -75,6 +79,13 @@ export default function SearchToolsClient() {
 
   return (
     <div className="flex flex-col lg:h-[calc(100vh-120px)]" data-testid="search-tools-studio">
+      {/* Inside the fixed-height column: the studio below keeps what the title leaves. */}
+      <PageHeader
+        compact
+        className="shrink-0 pb-4"
+        title={tSidebar("searchTools")}
+        description={tHeader("searchToolsDescription")}
+      />
       {/* Top bar: tabs + metrics + export */}
       <SearchToolsTopBar
         activeTab={activeTab}
