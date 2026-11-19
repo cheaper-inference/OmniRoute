@@ -9,7 +9,8 @@ const { FORMATS } = await import("../../open-sse/translator/formats.ts");
 
 const MODEL = "claude-sonnet-4-5";
 const CONN = "conn-caps";
-// The documented per-session caps (docs/reference/ENVIRONMENT.md): 256 turns, 512 blocks, 16 MiB.
+// The documented per-session caps (docs/reference/ENVIRONMENT.md): 256 turns, 512 tool_use ids,
+// 512 blocks, 16 MiB.
 const TURNS = 256;
 const BLOCKS = 512;
 const CHARS = 16 * 1024 * 1024;
@@ -105,6 +106,43 @@ test("flag on: a session keeps at most its byte cap", () => {
   for (let i = 0; i < fit + 4; i++) storeTurn([`big${i}`], "session-a", size);
   assert.equal(countAlive("big", fit + 4), fit);
   assert.equal(restorable("big0"), false);
+});
+
+test("flag on: a session keeps at most its tool_use-id cap, so it cannot fill the global id cap", () => {
+  process.env.CLAUDE_THINKING_SESSION_CAPS = "true";
+  storeTurn(["b0"], "session-b");
+  // 16 turns of one signed block and 64 tool_use ids: 1024 ids, over the 1000-id global cap, while
+  // the session stays under its turn, block and byte caps.
+  for (let i = 0; i < 16; i++) {
+    const ids = Array.from({ length: 64 }, (_, k) => `ids${i}-${k}`);
+    store.storeClaudeThinkingBlocks({
+      content: [signed(`ids${i}`), ...ids.map(toolUse)],
+      provider: "claude",
+      model: MODEL,
+      connectionId: CONN,
+      sessionKey: "session-a",
+    });
+  }
+  assert.equal(restorable("b0"), true, "the other session's turn stays");
+  assert.equal(restorable("ids15-0"), true, "the newest turn stays");
+  assert.equal(restorable("ids0-0"), false, "the oldest turns of the heavy session go");
+});
+
+test("flag on: the byte cap counts every tool_use id's copy of a turn, as the global cap does", () => {
+  process.env.CLAUDE_THINKING_SESSION_CAPS = "true";
+  storeTurn(["b0"], "session-b");
+  // ~1.5 MiB per turn under 16 tool_use ids: each turn holds ~24 MiB of the 64 MiB global budget.
+  const perBlock = 96 * 1024;
+  for (let i = 0; i < 4; i++) {
+    storeTurn(
+      Array.from({ length: 16 }, (_, k) => `wide${i}-${k}`),
+      "session-a",
+      perBlock
+    );
+  }
+  assert.equal(restorable("b0"), true, "the other session's turn stays");
+  assert.equal(restorable("wide3-0"), true, "the newest turn stays even above the session cap");
+  assert.equal(restorable("wide0-0"), false);
 });
 
 test("flag off: the session key changes nothing (today's behaviour)", () => {
