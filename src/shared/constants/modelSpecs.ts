@@ -4,6 +4,8 @@
  * when clients request more than the model supports.
  */
 
+import { isForcedToolChoice } from "@omniroute/open-sse/utils/toolChoice.ts";
+
 export type GeminiThinkingLevel = "minimal" | "low" | "medium" | "high";
 
 export interface ModelSpec {
@@ -1154,18 +1156,7 @@ export function normalizeForcedToolChoiceForModel<T extends Record<string, unkno
   modelId: string
 ): T {
   if (!getModelSpec(modelId)?.rejectsForcedToolChoice) return body;
-
-  const toolChoice = body.tool_choice;
-  const forced =
-    toolChoice === "required" ||
-    toolChoice === "any" ||
-    (toolChoice !== null &&
-      typeof toolChoice === "object" &&
-      !Array.isArray(toolChoice) &&
-      ["any", "tool", "function"].includes(
-        String((toolChoice as Record<string, unknown>).type || "").toLowerCase()
-      ));
-  if (!forced) return body;
+  if (!isForcedToolChoice(body.tool_choice)) return body;
 
   const { tool_choice: _omitted, ...rest } = body;
   return rest as T;

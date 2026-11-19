@@ -9,6 +9,7 @@
 
 import { stripUnsupportedParams } from "../translator/paramSupport.ts";
 import { sanitizeReasoningEffortForProvider } from "../executors/base/reasoningEffort.ts";
+import { shouldDropForcedToolChoiceForDeepSeek } from "./deepseekThinking.ts";
 
 type JsonRecord = Record<string, unknown>;
 type LoggerLike =
@@ -108,9 +109,19 @@ export function sanitizeRequestForResolvedTarget<T extends JsonRecord>(
   // for strict upstreams that reject a selection without tool definitions.
   const strippedToolChoice = stripToolChoiceWithoutTools(next);
 
-  if (stripped.length > 0 || strippedToolChoice) {
+  // DeepSeek V4 thinks by default and 400s on a forced tool_choice while thinking is on (#20639).
+  // Runs on the final body, after payload rules and effort normalization decided the mode.
+  const strippedForcedChoice = shouldDropForcedToolChoiceForDeepSeek(
+    next,
+    options.provider,
+    options.model
+  );
+  if (strippedForcedChoice) delete next.tool_choice;
+
+  if (stripped.length > 0 || strippedToolChoice || strippedForcedChoice) {
     const parts = [...stripped];
     if (strippedToolChoice) parts.push("tool_choice (no tools)");
+    if (strippedForcedChoice) parts.push("forced tool_choice (thinking on)");
     options.log?.debug?.(
       "TARGET_PARAMS",
       `Stripped ${parts.join(", ")} for resolved target ${options.provider || "unknown"}/${options.model}`
