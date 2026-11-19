@@ -13,7 +13,8 @@ const combosDb = await import("../../src/lib/db/combos.ts");
 const mappingsDb = await import("../../src/lib/db/modelComboMappings.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 
-const SETTINGS_READ = "SELECT key, value FROM key_value WHERE namespace = 'settings'";
+const SETTINGS_READ =
+  "SELECT namespace, key, value FROM key_value WHERE namespace IN ('settings', 'databaseSettings')";
 const COMBO_BY_NAME_READ =
   "SELECT id, data, sort_order, context_cache_protection FROM combos WHERE name = ?";
 const MAPPING_RESOLVE_READ = /FROM model_combo_mappings m/;

@@ -8,7 +8,7 @@
  */
 
 import { saveCallLog } from "../imageResult.ts";
-import { fetchUntrustedRemoteImage } from "@/shared/network/remoteImageFetch";
+import { fetchUntrustedRemoteImage } from "../../utils/remoteMediaFetch.ts";
 import { stringifyImageErrorForLog } from "../imageErrorLog.ts";
 
 export const UPSCALE_CALL_LOG_PATH = "/v1/images/upscale";

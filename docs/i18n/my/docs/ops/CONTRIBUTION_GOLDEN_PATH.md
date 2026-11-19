@@ -27,69 +27,61 @@
 6. **အထောက်အထားကို မှတ်တမ်းတင်ပါ။** PR template တွင် run ခဲ့သည့် commands များ၊ ထည့်သွင်းထားသည့် သို့မဟုတ် ပြောင်းလဲထားသည့် test file တိုင်း၊
    migrations သို့မဟုတ် feature flags များနှင့် ဆိုင်းငံ့ထားဆဲဖြစ်သည့် CI-only validation အားလုံးကို စာရင်းပြုစုပါ။
 
-## ပြောင်းလဲမှုအမျိုးအစားအလိုက် စံပြလမ်းကြောင်းများ
+## အမျိုးအစားအလိုက် ရွှေလမ်းကြောင်းများ
 
-အောက်ပါ commands များသည် အနည်းဆုံး focused checks များသာဖြစ်ပြီး သင်ပြောင်းလဲခဲ့သည့် အပြုအမူကို တိုက်ရိုက်လွှမ်းခြုံသည့် test တစ်ခုကို
-ကျော်သွားရန် ခွင့်ပြုချက်မဟုတ်ပါ။
+အောက်ဖော်ပြပါ ညွှန်ကြားချက်များသည် သင်ပြောင်းလဲထားသော အပြုအမူကို တိုက်ရိုက်အကျုံးဝင်သော စမ်းသပ်မှုတစ်ခုကို ကျော်ရန် ခွင့်ပြုချက်မဟုတ်ဘဲ အနည်းဆုံးအာရုံစိုက်စစ်ဆေးမှုများဖြစ်သည်။
 
-### Provider
+### ပံ့ပိုးပေးသူ
 
-**Contracts**
+**စာချုပ်များ**
 
-- `src/shared/constants/providers/` အတွင်းရှိ Provider definition နှင့်
-  `src/shared/constants/providers.ts` အတွင်းရှိ ၎င်း၏ composition။
-- `open-sse/config/providerRegistry.ts` သို့မဟုတ် ၎င်းမှ ခွဲထုတ်ထားသည့် registry files များအတွင်းရှိ models နှင့် capabilities။
-- သက်ဆိုင်သည့်အခါ Executor/translator selection၊ OAuth သို့မဟုတ် API-key configuration၊ dashboard assets နှင့် generated
-  provider reference။
-- Public credentials များသည် `resolvePublicCred()` ကို အသုံးပြုရမည်။ error responses များသည် မျှဝေထားသည့် sanitized
-  error helpers ကို အသုံးပြုရမည်။ `docs/security/PUBLIC_CREDS.md` (git; `/docs` ထဲသို့ compile မလုပ်ထားပါ) နှင့်
-  [Error Sanitization](../security/ERROR_SANITIZATION.md) ကို ကြည့်ပါ။
+- `src/shared/constants/providers/` တွင် ပံ့ပိုးသူ အဓိပ္ပါယ်ဖွင့်ဆိုချက် `src/shared/constants/providers.ts` တွင် ၎င်း၏ဖွဲ့စည်းမှု။
+- `open-sse/config/providerRegistry.ts` သို့မဟုတ် ၎င်း၏ ထုတ်ယူထားသော မှတ်ပုံတင်ဖိုင်များတွင် မော်ဒယ်များနှင့် စွမ်းဆောင်ရည်များ။
+- Executor/translator ရွေးချယ်မှု၊ OAuth သို့မဟုတ် API-သော့ဖွဲ့စည်းမှု နှင့် ဒက်ရှ်ဘုတ်ပိုင်ဆိုင်မှုများ။ အသစ်ထုတ်ထားသော `docs/reference/PROVIDER_REFERENCE.md` သို့မဟုတ် README ပုံများကို မကျူးလွန်ပါနှင့်- ထုတ်ဝေမှု ပြန်လည်ဆန်းသစ်ခြင်းသည် ၎င်းတို့ကို ပြန်လည်ရေးသားသည် (`check:pr-derived-paths` ၎င်းတို့ကို သယ်ဆောင်သည့် PR အင်္ဂါရပ်တစ်ခု မအောင်မြင်ပါ)။
+- အများသူငှာ အထောက်အထားများသည် `resolvePublicCred()` အသုံးပြုရပါမည်။ error တုံ့ပြန်မှုများသည် မျှဝေထားသော သန့်စင်ထားသော error helpers များကို အသုံးပြုရပါမည်။ `docs/security/PUBLIC_CREDS.md` (git; `/docs` တွင် မစုစည်းထား) နှင့် [Error Sanitization ကို](../security/ERROR_SANITIZATION.md) ကြည့်ပါ။
 
-**အဓိကထားသည့် loop**
+**အာရုံစူးစိုက်မှု ကွင်းဆက်**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # catalog ပြောင်းလဲသည့်အခါ၊ generated diff ကို commit လုပ်ပါ
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-သက်ရောက်မှုရှိသည့် request family တိုင်းဖြစ်သော chat၊ Responses၊ images၊ embeddings၊ audio သို့မဟုတ် video တို့ကိုလည်း test လုပ်ပါ။
-Generated catalog နှင့် golden diffs များကို contract ပြောင်းလဲမှုများအဖြစ် review လုပ်ပါ။ ၎င်းတို့ကို မစစ်ဆေးဘဲ လက်မခံပါနှင့်။
+သက်ရောက်မှုရှိသော တောင်းဆိုမှုမိသားစုတိုင်းကိုလည်း စမ်းသပ်ပါ- ချတ်၊ တုံ့ပြန်မှုများ၊ ရုပ်ပုံများ၊ မြှုပ်သွင်းမှုများ၊ အသံ သို့မဟုတ် ဗီဒီယို။ စာချုပ်အပြောင်းအလဲများအဖြစ် ထုတ်လုပ်လိုက်သော ကတ်တလောက်နှင့် ရွှေရောင်ကွဲပြားမှုများကို ပြန်လည်သုံးသပ်ပါ။ မျက်စိစုံမှိတ် လက်မခံပါနှင့်။
 
-### Routing
+### လမ်းကြောင်းပေး
 
-**Contracts**
+**စာချုပ်များ**
 
-- `src/shared/constants/routingStrategies.ts` အတွင်းရှိ public strategy values နှင့် UI metadata။
-- `open-sse/services/combo.ts` နှင့် `open-sse/services/combo/` အောက်ရှိ dispatch နှင့် ordering။
-- Combo schemas၊ persistence၊ resilience state၊ model capabilities နှင့် API/UI controls။
-- အပြုအမူပြောင်းလဲသည့်အခါ [Auto-Combo Engine](../routing/AUTO-COMBO.md) နှင့် resilience documentation။
+- `src/shared/constants/routingStrategies.ts` ရှိ အများသူငှာ မဟာဗျူဟာတန်ဖိုးများနှင့် UI မက်တာဒေတာ။
+- `open-sse/services/combo.ts` နှင့် `open-sse/services/combo/` အောက်တွင်ပေးပို့ခြင်းနှင့်အော်ဒါမှာပါ။
+- ပေါင်းစပ်အစီအစဉ်များ၊ တည်မြဲမှု၊ ခံနိုင်ရည်ရှိမှုအခြေအနေ၊ မော်ဒယ်စွမ်းရည်များနှင့် API/UI ထိန်းချုပ်မှုများ။
+- အပြုအမူပြောင်းလဲသောအခါတွင် [Auto-Combo Engine](../routing/AUTO-COMBO.md) နှင့် ခံနိုင်ရည်အား စာရွက်စာတမ်းများ။
 
-**အဓိကထားသည့် loop**
+**အာရုံစူးစိုက်မှု ကွင်းဆက်**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strategy သို့မဟုတ် dispatch ပြောင်းလဲမှုများ
-npm run check:known-symbols      # strategy registration ပြောင်းလဲမှုများ
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Local တွင် deterministic mocked-upstream tests များကို အသုံးပြုပါ။ Live combo smokes များအတွက် credentials လိုအပ်ပြီး
-manual ဖြစ်သဖြင့် CI အစားထိုးမှုများ မဟုတ်ပါ။
+ဒေသအလိုက် အဆုံးအဖြတ်ပေးသော လှောင်ပြောင်စမ်းသပ်မှုများကို အသုံးပြုပါ။ တိုက်ရိုက်ပေါင်းစပ် ဆေးလိပ်ငွေ့များသည် အထောက်အထားများ လိုအပ်ပြီး CI အစားထိုးမှုများမဟုတ်ဘဲ ကိုယ်တိုင်ဖြစ်သည်။
 
 ### UI / UX
 
-**Contracts**
+**စာချုပ်များ**
 
-- `src/app/` နှင့် `src/shared/components/` အောက်ရှိ Next.js route/page နှင့် shared component boundaries။
-- API response shapes၊ loading/empty/error states၊ keyboard နှင့် screen-reader အပြုအမူ၊
-  responsive layout၊ theming နှင့် locale expansion။
-- `src/i18n/messages/en.json` အတွင်းရှိ English UI source strings။ user-facing copy အသစ်ကို hard-code မလုပ်ပါနှင့်။
+- Next.js route/page နှင့် `src/app/` နှင့် `src/shared/components/` အောက်တွင် မျှဝေထားသော အစိတ်အပိုင်းနယ်နိမိတ်များ။
+- API တုံ့ပြန်မှုပုံစံများ၊ loading/empty/error အခြေအနေများ၊ ကီးဘုတ်နှင့် စခရင်ဖတ်စာအပြုအမူ၊ တုံ့ပြန်မှုပုံစံ၊ အပြင်အဆင်နှင့် ဒေသချဲ့ထွင်မှု။
+- `src/i18n/messages/en.json` တွင် အင်္ဂလိပ် UI ရင်းမြစ်စာကြောင်းများ အသုံးပြုသူမျက်နှာစာမိတ္တူအသစ်ကို hard-code မလုပ်ပါနှင့်။
 
-**အဓိကထားသည့် loop**
+**အာရုံစူးစိုက်မှု ကွင်းဆက်**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -98,68 +90,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Interaction သို့မဟုတ် visual ပြောင်းလဲမှုများအတွက် app ကို run ပြီး ကျဉ်းသော viewport နှင့် ကျယ်သော viewport နှစ်မျိုးလုံးကို စစ်ဆေးပါ။ CI သည်
-production build နှင့် ပိုမိုကျယ်ပြန့်သော suites များကို run သော်လည်း visual အပြုအမူအတွက် ပြောင်းလဲမှုနှင့်သင့်လျော်သည့် focused component၊ Playwright
-သို့မဟုတ် မှတ်တမ်းတင်ထားသော manual check တစ်ခု လိုအပ်နေဆဲဖြစ်သည်။
+အပြန်အလှန်ဆက်သွယ်မှု သို့မဟုတ် အမြင်ဆိုင်ရာပြောင်းလဲမှုများအတွက် အက်ပ်ကိုဖွင့်ပြီး ကျဉ်းမြောင်းခြင်းနှင့် ကျယ်သော ရှုထောင့်နှစ်ခုလုံးကို စစ်ဆေးပါ။ CI ထုတ်လုပ်မှုတည်ဆောက်မှုနှင့် ပိုမိုကျယ်ပြန့်သောအခန်းများကို လုပ်ဆောင်သည်။ အမြင်အမူအရာသည် ပြောင်းလဲမှုအတွက် သင့်လျော်သော အစိတ်အပိုင်း၊ Playwright သို့မဟုတ် မှတ်တမ်းပြုစုထားသော လက်စွဲစစ်ဆေးမှုတစ်ခု လိုအပ်နေသေးသည်။
 
 ### i18n
 
-**Contracts**
+**စာချုပ်များ**
 
-- `src/i18n/messages/en.json` သည် UI source ဖြစ်ပြီး `config/i18n.json` သည် locale source ဖြစ်သည်။
-- CLI catalogs များကို `bin/cli/locales/` အောက်တွင် သီးခြားထားရှိသည်။
-- ICU placeholders နှင့် tags များကို အတိအကျ ထိန်းသိမ်းပါ။ product/provider/model အမည်များ၊
-  protocol နှင့် header အမည်များ၊ commands၊ code/JSON identifiers၊ URLs၊ environment variables သို့မဟုတ်
-  `OmniRoute`၊ `OAuth`၊ `MCP` နှင့် `A2A` ကဲ့သို့သော protected terms များကို ဘာသာမပြန်ပါနှင့်။ လက်ရှိ source list မှာ
-  `scripts/i18n/glossary/protected-terms.json` ဖြစ်သည်။
+- `src/i18n/messages/en.json` သည် UI အရင်းအမြစ်ဖြစ်သည်။ `config/i18n.json` သည် locale source ဖြစ်သည်။
+- CLI ကတ်တလောက်များသည် `bin/cli/locales/` အောက်တွင် သီးခြားစီနေထိုင်သည်။
+- ICU နေရာကိုင်ဆောင်သူများနှင့် တဂ်များကို အတိအကျ ထိန်းသိမ်းပါ။ product/provider/model အမည်များ၊ ပရိုတိုကောနှင့် ခေါင်းစီးအမည်များ၊ ညွှန်ကြားချက်များ၊ code/JSON ခွဲခြားသတ်မှတ်မှုများ၊ URLs၊ ပတ်၀န်းကျင်ပြောင်းလဲနိုင်သော သို့မဟုတ် `OmniRoute`၊ `OAuth`၊ `MCP` နှင့် `A2A` ကဲ့သို့သော အကာအကွယ်ပေးထားသော ဝေါဟာရများကို ဘာသာပြန်ခြင်းမပြုပါနှင့်။ လက်ရှိရင်းမြစ်စာရင်းမှာ `scripts/i18n/glossary/protected-terms.json` ဖြစ်သည်။
 
-**အဓိကထားသည့် loop**
+PR လုပ်ဆောင်ချက်သည် `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); ထုတ်ဝေမှု ပြန်လည်စတင်ခြင်း သို့မဟုတ် ဘာသာပြန်လှိုင်းဖြင့် ထုတ်ဝေမှုတစ်ခုလျှင် အခြားဒေသများကို ပြီးမြောက်သည် (`docs/guides/I18N.md` → "Feature PRs touch `en.json` only")။ `npm run check:pr-derived-paths` သည် အခြားဒေသဆိုင်ရာ ကတ်တလောက်ကို တည်းဖြတ်သည့် PR အင်္ဂါရပ်ကို မအောင်မြင်ပါ။
+
+**အာရုံစူးစိုက်မှု ကွင်းဆက်**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # CLI strings/catalogs ပြောင်းလဲသည့်အခါ
 npm run lint
 ```
 
-ဤအရာသည် လက်ရှိ system အတွက် လမ်းညွှန်ချက်ဖြစ်ပြီး ၎င်း၏ tooling သို့မဟုတ် key model ကို တိုးချဲ့ရန် ဖိတ်ခေါ်ခြင်းမဟုတ်ပါ။
-အစားထိုး system ကို ဒီဇိုင်းရေးဆွဲနေစဉ် i18n patches များကို လိုအပ်သလောက်သာ တိကျစွာ ပြင်ဆင်ပါ။ Task တွင် generated translations များကို
-အတိအကျ လိုအပ်ကြောင်း ဖော်ပြထားပြီး ထွက်ပေါ်လာသည့် diff ကို သင် review လုပ်ပြီးသားဖြစ်သည့်အခြေအနေမှလွဲ၍ external services များကို
-ခေါ်ယူသည့် translation commands များကို မ run ပါနှင့်။
+`--mode=pr` မပါဘဲ ဤဂိတ်များသည် စက်တွင်းထုတ်လွှတ်မှုမုဒ်တွင် လည်ပတ်ပြီး သံသရာကို ထည့်သည် သို့မဟုတ် `en.json` တွင် ပြန်ရေးထားသောသော့တိုင်းကို သတင်းပို့ပါ။ အဲဒါက မင်းရဲ့ PR နဲ့ မဟုတ်ဘဲ refresh ရဲ့ အလုပ်ပါ။
+
+၎င်းသည် ၎င်း၏ကိရိယာတန်ဆာပလာ သို့မဟုတ် သော့ပုံစံကို ချဲ့ထွင်ရန် ဖိတ်ကြားခြင်းမဟုတ်ဘဲ လက်ရှိစနစ်အတွက် လမ်းညွှန်ချက်ဖြစ်သည်။ အစားထိုးစနစ်အား ဒီဇိုင်းထုတ်နေစဉ် i18n ဖာထေးမှုများကို ခွဲစိတ်မှုပြုလုပ်ပါ။ အလုပ်သည် ထုတ်ပေးထားသော ဘာသာပြန်ဆိုချက်များကို ပြတ်သားစွာ လိုအပ်ပြီး ရရှိလာသော ကွဲပြားမှုကို သင်စစ်ဆေးပြီးပြီမှမဟုတ်ပါက ပြင်ပဝန်ဆောင်မှုများကို ခေါ်သည့် ဘာသာပြန်အမိန့်များကို မလုပ်ဆောင်ပါနှင့်။
 
 ### CLI
 
-**Contracts**
+**စာချုပ်များ**
 
-- `bin/cli/` အောက်ရှိ အများသုံး command များနှင့် flag များ၊ ထုတ်လုပ်ထားသော API command များ၊ exit code များ၊ stdout/stderr နှင့်
-  JSON output ပုံစံများ၊ config/environment အပြုအမူနှင့် package ထဲပါဝင်သော file များ။
-- CLI အသုံးပြုသူမြင်ရသည့် စာသားများသည် CLI i18n layer ကို အသုံးပြုရမည်ဖြစ်ပြီး `en`/`pt-BR` catalog များကို တစ်ပြေးညီထားရမည်။
-- ပံ့ပိုးထားသော runtime အဖြစ် Node ကို ဆက်လက်ထိန်းသိမ်းပြီး ထုတ်ဝေထားသော binary contract ကို မပြောင်းလဲစေရပါ။
+- `bin/cli/` ရှိ အများသူငှာ အမိန့်များနှင့် အလံများ၊ ထုတ်ပေးထားသော API ညွှန်ကြားချက်များ၊ အထွက်ကုဒ်များ၊ stdout/stderr နှင့် JSON အထွက်ပုံသဏ္ဍာန်များ၊ config/environment အပြုအမူများနှင့် ထုပ်ပိုးထားသော ဖိုင်များ။
+- CLI user-facing strings များသည် CLI i18n အလွှာ ( `bin/cli/locales/en.json` တွင်ရှိသော`t()` ကီးများ ) ကို အသုံးပြုရပါမည်။ PR အင်္ဂါရပ်တစ်ခုသည် `en.json` သာ တည်းဖြတ်သည်။ `pt-BR` နှင့် အခြားဒေသများ သည် ထွက်ရှိချိန်တွင် ပြီးမြောက်ပါသည်။
+- Node ကို ပံ့ပိုးထားသော runtime နှင့် ထုတ်ပြန်ထားသော binary စာချုပ်အဖြစ် ထိန်းသိမ်းပါ။
 
-**အဓိကထား စစ်ဆေးသည့် လုပ်ငန်းစဉ်**
+**အာရုံစူးစိုက်မှု ကွင်းဆက်**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # ထုတ်လုပ်ထားသော/bundle လုပ်ထားသော CLI ပြောင်းလဲမှုများ
-npm run check:pack-policy     # package မျက်နှာပြင်ဆိုင်ရာ ပြောင်းလဲမှုများ
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-အပြုအမူသည် parsing၊ file များ သို့မဟုတ် exit status ပေါ် မူတည်သည့်အခါ ယာယီ data directory တစ်ခုအတွင်း command အတိအကျကို အသုံးပြုပါ။ CI သည် ပိုမိုကျယ်ပြန့်သော package artifact နှင့် ecosystem စစ်ဆေးမှုများကို လုပ်ဆောင်သည်။
+အပြုအမူကို ခွဲခြမ်းစိတ်ဖြာခြင်း၊ ဖိုင်များ သို့မဟုတ် ထွက်ခြင်းအခြေအနေအပေါ် မူတည်သည့်အခါ ယာယီဒေတာလမ်းညွှန်တွင် အတိအကျအမိန့်ကို အသုံးပြုပါ။ CI ပိုမိုကျယ်ပြန့်သော အထုပ်အပိုးများနှင့် ဂေဟစနစ်စစ်ဆေးမှုများကို လုပ်ဆောင်သည်။
 
-### Database
+### ဒေတာဘေ့စ်
 
-**Contract များ**
+**စာချုပ်များ**
 
-- `src/lib/db/` အောက်ရှိ domain module များ၊ သတ်မှတ်ထားသော module များကို တိုက်ရိုက် import လုပ်ပါ (`localDb.ts` re-export layer အဟောင်းကို ဖယ်ရှားထားသည်)။
-- `src/lib/db/migrations/` အောက်ရှိ နံပါတ်စဉ်တပ်ထားပြီး idempotent ဖြစ်သော SQL migration များ၊ transaction ဘေးကင်းမှု၊ upgrade
-  အပြုအမူ၊ index များနှင့် schema ကြောင့် သက်ရောက်မှုရှိသည့် caller အားလုံး။
-- Route နှင့် handler များသည် raw SQL ကို မည်သည့်အခါမျှ တိုက်ရိုက် မလုပ်ဆောင်ရပါ။
+- `src/lib/db/` အောက်ရှိ ဒိုမိန်း မော်ဂျူးများ သတ်မှတ်ထားသော module များကို တိုက်ရိုက်တင်သွင်းပါ (ယခင် `localDb.ts` re-export layer ကို ဖယ်ရှားခဲ့သည်)။
+- `src/lib/db/migrations/` အောက်တွင် နံပါတ်တပ်ထားသော၊ အရည်အချင်းပြည့်မီသော SQL ရွှေ့ပြောင်းမှုများ၊ ငွေပေးငွေယူ ဘေးကင်းမှု၊ အဆင့်မြှင့်သည့် အပြုအမူ၊ အညွှန်းကိန်းများနှင့် schema မှ သက်ရောက်မှုရှိသော ခေါ်ဆိုသူတိုင်း။
+- လမ်းကြောင်းများနှင့် ကိုင်တွယ်သူများသည် SQL အကြမ်းကို တိုက်ရိုက်ထုတ်မည်မဟုတ်ပါ။
 
-**အဓိကထား စစ်ဆေးသည့် လုပ်ငန်းစဉ်**
+**အာရုံစူးစိုက်မှု ကွင်းဆက်**
 
 ```bash
 npm run check:migration-numbering
@@ -169,28 +156,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Migration တစ်ခု ထည့်သွင်းသည့်အခါ database အသစ်တစ်ခုနှင့် ယခင် schema မှ upgrade လုပ်ခြင်း နှစ်မျိုးလုံးကို စမ်းသပ်ပါ။ Database test များသည် handle များကို ပိတ်ရမည်ဖြစ်ပြီး cleanup ပြုလုပ်စဉ် `resetDbInstance()` ကို ခေါ်ရမည်။ အကောင်းဆုံးကြိုးပမ်းမှုအဖြစ် ထားရှိသော Bun adapter လမ်းကြောင်း ပြောင်းလဲသည့်အခါမှသာ `npm run test:bun:db` ကို လုပ်ဆောင်ပါ။ Node သည် အတည်ပြုချက်အတွက် အဓိကစံအဖြစ် ဆက်လက်တည်ရှိသည်။
+ရွှေ့ပြောင်းခြင်းကို ထည့်သွင်းသည့်အခါ လတ်ဆတ်သောဒေတာဘေ့စ်နှစ်ခုလုံးကို စမ်းသပ်ပြီး ယခင်အစီအစဉ်မှ အဆင့်မြှင့်ပါ။ ဒေတာဘေ့စ်စစ်ဆေးမှုများသည် လက်ကိုင်များကိုပိတ်ပြီး သန့်ရှင်းရေးလုပ်နေစဉ် `resetDbInstance()` ခေါ်ဆိုရပါမည်။ အကောင်းဆုံးကြိုးစားမှု Bun အဒက်တာလမ်းကြောင်းပြောင်းလဲသည့်အခါမှသာ `npm run test:bun:db` ကိုဖွင့်ပါ။ Node သည် တရားဝင်ဖြစ်နေဆဲဖြစ်သည်။
 
-### Build / deploy
+### တည်ဆောက်/အသုံးချပါ။
 
-**Contract များ**
+**စာချုပ်များ**
 
-- Root နှင့် workspace manifest များ/lockfile၊ `scripts/build/`၊ Next.js standalone စုစည်းတည်ဆောက်မှု၊ `dist/`
-  package အကြောင်းအရာများ၊ Electron platform metadata၊ CI workflow များနှင့် deployment sentinel များ။
-- ပံ့ပိုးထားသော Node range များနှင့် `CLAUDE.md` တွင် allow-list ထည့်ထားသော Bun အသုံးပြုမှုကို မပြောင်းလဲဘဲ ထိန်းသိမ်းထားရမည်။
-- Build artifact များကို version control တွင် track မလုပ်ရပါ။ dependency၊ license၊ workflow နှင့် package policy များကို လိုက်နာရမည်။
+- အမြစ်နှင့် အလုပ်ခွင် manifests/lockfile၊ `scripts/build/`၊ Next.js သီးသန့်စုဝေးမှု၊ `dist/` ပက်ကေ့ဂျ်အကြောင်းအရာများ၊ Electron ပလပ်ဖောင်း မက်တာဒေတာ၊ CI အလုပ်အသွားအလာများနှင့် ဖြန့်ကျက်ထားသော ကင်းစောင့်များ။
+- ပံ့ပိုးထားသော Node အပိုင်းအခြားများနှင့် `CLAUDE.md` တွင် ခွင့်ပြုထားသော စာရင်းဝင် Bun အသုံးပြုမှုတို့သည် နဂိုအတိုင်း ရှိနေရပါမည်။
+- ရှေးဟောင်းပစ္စည်းများကို တည်ဆောက်ရာတွင် ခြေရာခံမနေပါ။ မှီခိုမှု၊ လိုင်စင်၊ အလုပ်အသွားအလာနှင့် ပက်ကေ့ခ်ျမူဝါဒများ သက်ရောက်သည်။
 
-**အဓိကထား စစ်ဆေးသည့် လုပ်ငန်းစဉ်**
+**အာရုံစူးစိုက်မှု ကွင်းဆက်**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # dependency သို့မဟုတ် lockfile ပြောင်းလဲမှုများ
-npm run check:pack-policy      # ထုတ်ဝေထားသော package မျက်နှာပြင် ပြောင်းလဲမှုများ
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-ပြောင်းလဲမှုသည် compilation၊ standalone စုစည်းတည်ဆောက်မှု၊ asset များ သို့မဟုတ် runtime bundling ကို သက်ရောက်သည့်အခါမှသာ local တွင် `npm run build` ကို အသုံးပြုပါ။ Release/deploy အတည်ပြုမှုအတွက်သာ `npm run build:release` ကို အသုံးပြုပါ။ CI ၏ build သည် နောက်ဆုံး cross-platform အချက်ပြမှုဖြစ်သည်။ Platform သီးသန့် Electron ပြောင်းလဲမှုများအတွက် သက်ဆိုင်ရာ အဓိကထား build သို့မဟုတ် smoke စမ်းသပ်မှုအထောက်အထား လိုအပ်သည်။
+အပြောင်းအလဲသည် စုစည်းမှု၊ သီးခြားစုဝေးမှု၊ ပိုင်ဆိုင်မှုများ၊ သို့မဟုတ် runtime အစုအဝေးကို သက်ရောက်မှုရှိမှသာ `npm run build` စက်တွင်းတွင် အသုံးပြုပါ။ release/deploy အတည်ပြုရန်အတွက်သာ `npm run build:release` သုံးပါ။ CI's build သည် နောက်ဆုံး cross-platform signal ဖြစ်သည်။ ပလက်ဖောင်းအလိုက် Electron အပြောင်းအလဲများသည် ကိုက်ညီသော အာရုံစိုက်တည်ဆောက်မှု သို့မဟုတ် မီးခိုးငွေ့အထောက်အထားများ လိုအပ်သည်။
 
 ## မျှဝေသုံးစက်အတွက် developer script များ
 

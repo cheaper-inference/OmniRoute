@@ -24,7 +24,7 @@
 - [`POST /api/providers/agy-auth/apply-local`](#post-apiprovidersagy-authapply-local)
 - [`GET /api/provider-nodes`](#get-apiprovider-nodes)
 - [`POST /api/provider-nodes`](#post-apiprovider-nodes)
-- [`PATCH /api/provider-nodes/{id}`](#patch-apiprovider-nodesid)
+- [`PUT /api/provider-nodes/{id}`](#put-apiprovider-nodesid)
 - [`DELETE /api/provider-nodes/{id}`](#delete-apiprovider-nodesid)
 - [`POST /api/provider-nodes/validate`](#post-apiprovider-nodesvalidate)
 - [`GET /api/provider-models`](#get-apiprovider-models)
@@ -289,7 +289,7 @@ curl http://localhost:20128/api/provider-nodes \
 
 Create provider node
 
-Optional `providerIdSuffix` (letters, digits, `-`, `_`, `.`; max 64; must start with a letter or digit) replaces the random UUID in the generated node id (`openai-compatible-<apiType>-<suffix>`, `anthropic-compatible-<suffix>`, `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID.
+Optional `providerIdSuffix` (letters, digits, `-`, `_`, `.`; max 64; must start with a letter or digit) replaces the random UUID in the generated node id (`openai-compatible-<apiType>-<suffix>`, `anthropic-compatible-<suffix>`, `anthropic-compatible-cc-<suffix>`). Blank keeps the UUID. For an openai-compatible node, `apiType: "custom-json"` with a `customJson` object (request template, response path, method, auth mode) calls an arbitrary JSON endpoint; see `docs/guides/CUSTOM_JSON_API.md`.
 
 ```bash
 curl -X POST http://localhost:20128/api/provider-nodes \
@@ -298,12 +298,14 @@ curl -X POST http://localhost:20128/api/provider-nodes \
   -d '{}'
 ```
 
-### PATCH /api/provider-nodes/{id}
+### PUT /api/provider-nodes/{id}
 
 Update provider node
 
+Accepts `apiType` and `customJson` for custom JSON API nodes (see POST).
+
 ```bash
-curl -X PATCH http://localhost:20128/api/provider-nodes/{id} \
+curl -X PUT http://localhost:20128/api/provider-nodes/{id} \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'
@@ -321,6 +323,8 @@ curl -X DELETE http://localhost:20128/api/provider-nodes/{id} \
 ### POST /api/provider-nodes/validate
 
 Validate a provider node
+
+With `apiType: "custom-json"` and `customJson`, sends exactly one real request to the business endpoint and answers with its status only, never the upstream body.
 
 ```bash
 curl -X POST http://localhost:20128/api/provider-nodes/validate \
