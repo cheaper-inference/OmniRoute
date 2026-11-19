@@ -1,0 +1,1 @@
+- **feat(api):** combos gain a **Logging** toggle (ON by default); turning it off withholds request/response message content from call logs for every request routed through that combo, alongside the existing per-request, per-key, global, per-connection and per-model opt-outs ([#20609](https://github.com/cheaper-inference/OmniRoute/pull/20609))
