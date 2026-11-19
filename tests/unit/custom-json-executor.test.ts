@@ -204,10 +204,52 @@ for (const [label, make] of [
 test("the outbound URL guard runs on every call (cloud metadata is refused)", async () => {
   stubFetch(() => Response.json({}));
   const { response } = await run({
-    psd: providerData(config(), { baseUrl: "http://169.254.169.254/latest/meta-data" }),
+    psd: providerData(config(), { baseUrl: "https://169.254.169.254/latest/meta-data" }),
   });
   assert.equal(response.status, 403);
   assert.equal(calls.length, 0);
+});
+
+// CWE-319 (CodeRabbit R17 on #19191): a node saved before the http:// rule fails closed —
+// the key is never attached to a plaintext request to a non-loopback host.
+for (const baseUrl of ["http://api.example.com/v1/answer", "http://192.168.1.20:8080/answer"]) {
+  for (const authType of ["bearer", "api-key"]) {
+    test(`a stored ${authType} node on ${baseUrl} is refused before any request`, async () => {
+      stubFetch(() => Response.json({ data: { answers: [{ text: "OK" }] } }));
+      const result = await run({
+        psd: providerData(config({ authType, authHeader: "X-Service-Key" }), { baseUrl }),
+      });
+      assert.equal(result.response.status, 400);
+      assert.equal(calls.length, 0);
+      const text = await result.response.text();
+      assert.doesNotMatch(text, /test-secret/);
+      const parsed = JSON.parse(text) as { error: { message: string } };
+      assert.match(parsed.error.message, /https:\/\//);
+      assert.match(parsed.error.message, /authType "none"/);
+      assert.deepEqual(result.headers, {});
+    });
+  }
+}
+
+test("plain http:// still works for a loopback host and for authType none", async () => {
+  stubFetch(() => Response.json({ data: { answers: [{ text: "OK" }] } }));
+  const local = await run({
+    psd: providerData(config(), { baseUrl: "http://127.0.0.1:9000/run" }),
+  });
+  assert.equal(local.response.status, 200);
+  assert.equal(calls.length, 1);
+  assert.equal(
+    (calls[0].init.headers as Record<string, string>).Authorization,
+    "Bearer test-secret"
+  );
+
+  stubFetch(() => Response.json({ data: { answers: [{ text: "OK" }] } }));
+  const open = await run({
+    psd: providerData(config({ authType: "none" }), { baseUrl: "http://192.168.1.20/run" }),
+  });
+  assert.equal(open.response.status, 200);
+  assert.equal(calls.length, 1);
+  assert.equal((calls[0].init.headers as Record<string, string>).Authorization, undefined);
 });
 
 test("a redirect is never followed: one request, reported as 502", async () => {

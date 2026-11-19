@@ -117,33 +117,10 @@ ang trailing slash, kaya magkatumbas ang `http://localhost:3000` at
 `http://localhost:3000/`. Maaari ring itakda ang parehong CSV sa runtime sa
 **Dashboard → Security → CORS Allowed Origins** nang hindi nagre-restart.
 
-## Mga API key kumpara sa mga cookie session
+## API keys vs cookie session
 
-- **Bearer / `x-api-key` (ang `/v1/*` inference surface):** hindi kailanman awtomatikong
-  inilalakip ng mga browser ang mga ito. Hindi makabuluhang hadlang ang CORS dito — ang API key
-  ang hadlang — kaya sadyang permissive ang surface na iyon upang mabasa ng mga browser at
-  Electron client ang mga tugon na mayroon na silang karapatang ma-access.
-  Sinusundan ng niluwagang echo ang na-validate na key, hindi ang basta presensya ng
-  header: kapag pinagsilbihan ng `REQUIRE_API_KEY=false` ang isang request nang
-  anonymous, pinananatili ng matagumpay nitong tugon ang fail-closed na allowlist.
-  Nananatiling nababasa ang mga auth rejection (401) upang maipakita ng mga client ang
-  binawi o maling na-type na key (#5242): pinananatili ng sariling 401 ng pipeline ang
-  echo, at ang isang ruta na mismong tumatanggi sa key matapos itong pagsilbihan ng
-  pipeline bilang anonymous (`/v1/models` at `/v1beta/models` kapag naka-configure ang
-  management auth, ang mga owner-scoped na `/v1/files`, `/v1/batches`, `/v1/media`,
-  `/v1/session-leases` at mga candidate route ng auto-combo) ay nagdaragdag ng echo sa
-  401 na iyon sa pamamagitan ng `credentialRejectionHeaders()`. Nakabatay ang echo sa
-  kung may dalang credential header ang request (`Authorization`, `x-api-key`,
-  `x-goog-api-key` o ang cookie na `auth_token`), hindi sa kung alin sa mga ito ang
-  sinuri ng ruta, at hindi kailanman ipinapares sa `Access-Control-Allow-Credentials`;
-  ang body ay isang nakapirming error envelope. Ang mga management route sa ilalim ng
-  `/api/v1/` na binabantayan ng `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`) ay hindi nagdaragdag ng echo: kapag
-  `REQUIRE_API_KEY=false`, hindi nababasa nang cross-origin ang kanilang 401/403.
-- **Cookie session (ang dashboard):** pinoprotektahan ng fail-closed na default **at**
-  ng kawalan ng `Access-Control-Allow-Credentials` sa shared path. Huwag isama ang mga
-  origin ng management/dashboard sa anumang permissive na config; dapat manatiling ganap na
-  fail-closed ang mga ito.
+- **Tagadala / `x-api-key` (ang ibabaw ng hinuha `/v1/*` ):** hindi kailanman awtomatikong ikinakabit ng mga browser ang mga ito. CORS ay hindi isang makabuluhang hadlang dito — ang API key ay ang hadlang — kung kaya't ang ibabaw na iyon ay sadyang pinahintulutan upang ang mga kliyente ng browser at Electron ay makakabasa ng mga tugon na mayroon na silang karapatan. Ang nakakarelaks na echo ay sumusunod sa na-validate na key, hindi ang presensya lamang ng header: kapag `REQUIRE_API_KEY=false` ay naghahatid ng isang kahilingan nang hindi nagpapakilala, ang matagumpay na tugon nito ay nagpapanatili sa fail-closed allowlist. Ang mga pagtanggi sa auth (401) ay mananatiling nababasa upang maipakita ng mga kliyente ang isang binawi o na-mistype na key (#5242): ang sariling pipeline na 401 ay nagpapanatili ng echo, at isang ruta na tumatanggi sa mismong susi pagkatapos itong ihatid ng pipeline bilang anonymous (`/v1/models` at `/v1beta/models` na may management auth na na-configure, ang nasasakupan ng may-ari `/v1/files`, `/v1/media`-com) na mga ruta, `/v1/batches`, `/v1/session-leases`, ang mga ruta ng may-ari. echo sa 401 na iyon sa pamamagitan ng `credentialRejectionHeaders()`. Ang echo ay naka-key sa kahilingan na nagdadala ng isang kredensyal na header (`Authorization`, `x-api-key`, `x-goog-api-key` o ang `auth_token` cookie), hindi sa kung alin sa kanila ang ruta na nasuri, at hindi kailanman ipinares sa `Access-Control-Allow-Credentials`; ang katawan ay isang nakapirming sobre ng error. Ang mga ruta ng pamamahala sa ilalim ng `/api/v1/` na binabantayan ng `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) ay huwag magdagdag ng echo: sa `REQUIRE_API_KEY=false` ang kanilang 401/403 ay hindi nababasa na cross-origin.
+- **Cookie session (ang dashboard):** protektado ng default na fail-closed** at** sa pamamagitan ng kawalan ng `Access-Control-Allow-Credentials` sa ibinahaging landas. Panatilihin ang management/dashboard na pinagmulan sa anumang permissive na config; dapat silang manatiling eksaktong nabigo-sarado.
 
 ## Mga WebSocket handshake (`/v1/responses`, `/v1/ws`)
 

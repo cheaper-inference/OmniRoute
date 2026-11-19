@@ -296,72 +296,72 @@ production build የCI ኃላፊነት ናቸው — እነዚህን በአካ�
 
 ---
 
-## የፕሮጀክቱ መዋቅር
+## የፕሮጀክት መዋቅር
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # የዳሽቦርድ ገጾች (23 ክፍሎች)
-│   ├── api/                # API መስመሮች (51 ማውጫዎች)
-│   └── login/              # የማረጋገጫ ገጾች (.tsx)
-├── domain/                 # የፖሊሲ ሞተር (policyEngine, comboResolver, costRules, ወዘተ.)
-├── lib/                    # ዋና የንግድ ሎጂክ (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 ፕሮቶኮል አገልጋይ
-│   ├── acp/                # Agent Communication Protocol መዝገብ
-│   ├── compliance/         # የተገዢነት ፖሊሲ ሞተር
-│   ├── db/                 # SQLite የጎራ ሞጁሎች + 130 ሽግግሮች
-│   ├── memory/             # ቋሚ የውይይት ማህደረ ትውስታ
-│   ├── oauth/              # OAuth አቅራቢዎች፣ አገልግሎቶች እና መገልገያዎች
-│   ├── skills/             # ሊሰፋ የሚችል የክህሎት ማዕቀፍ
-│   ├── usage/              # የአጠቃቀም ክትትል እና የወጪ ስሌት
-│   └── localDb.ts          # እንደገና ወደ ውጭ የመላኪያ ንብርብር ብቻ — እዚህ ሎጂክ ፈጽሞ አይጨምሩ
-├── middleware/              # የጥያቄ middleware (promptInjectionGuard)
-├── mitm/                   # MITM ፕሮክሲ (የምስክር ወረቀት፣ DNS፣ የመዳረሻ ማዘዋወር)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React ኮምፖነንቶች (.tsx)
-│   ├── constants/          # የአቅራቢ ትርጓሜዎች (329)፣ MCP ወሰኖች፣ 20 የማዘዋወር ስልቶች
-│   ├── utils/              # የወረዳ መቋረጫ፣ ማጽጃ፣ የማረጋገጫ ረዳቶች
-│   └── validation/         # Zod v4 ንድፎች
-└── sse/                    # SSE የፕሮክሲ ቧንቧ መስመር
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
 open-sse/                   # @omniroute/open-sse workspace
-├── executors/              # 150 የአስፈጻሚ ሞጁሎች (የአስፈጻሚ ክፍሎች + የእያንዳንዱ አቅራቢ ረዳቶች)
-├── handlers/               # 11 የጥያቄ ተቆጣጣሪዎች (ውይይት፣ ምላሾች፣ መክተቻዎች፣ ምስሎች፣ ወዘተ.)
-├── mcp-server/             # MCP አገልጋይ (110 ልዩ መሣሪያዎች፣ 3 ማጓጓዣዎች፣ 33 ወሰኖች)
-├── services/               # 178 ከፍተኛ-ደረጃ አገልግሎቶች (combo, autoCombo, rateLimitManager, ወዘተ.)
-├── translator/             # የቅርጸት ተርጓሚዎች (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API ቀያሪ
-└── utils/                  # 22 የመገልገያ ሞጁሎች (ዥረት፣ TLS፣ ፕሮክሲ፣ ምዝግብ ማስቀመጥ)
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron የዴስክቶፕ መተግበሪያ (መድረክ-ተሻጋሪ)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js የሙከራ አስኪያጅ (1,574 የሙከራ ፋይሎች)
-├── integration/            # የውህደት ሙከራዎች
-├── e2e/                    # Playwright ሙከራዎች
-├── security/               # የደህንነት ሙከራዎች
-├── translator/             # ተርጓሚ-ተኮር ሙከራዎች
-└── load/                   # የጭነት ሙከራዎች
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # የሥነ-ሕንፃ ውሳኔ መዝገቦች
-├── architecture/            # የስርዓት ሥነ-ሕንፃ እና የመቋቋም ችሎታ
-├── comparison/              # OmniRoute ከአማራጮች ጋር ንጽጽር
-├── compression/             # የመጭመቂያ መመሪያዎች እና ደንቦች
-├── dev/                     # የልማት መመሪያዎች
-├── diagrams/                # የሥነ-ሕንፃ ሥዕላዊ መግለጫዎች
-├── frameworks/              # MCP፣ A2A፣ OpenCode፣ Memory፣ Skills
-├── guides/                  # የተጠቃሚ መመሪያ፣ Docker፣ ማዋቀር፣ መላ መፈለግ
-├── i18n/                    # ዓለም አቀፋዊ የተደረጉ README ትርጉሞች
-├── marketing/               # የግብይት ቁሳቁሶች
-├── ops/                     # ማሰማራት፣ ፕሮክሲ፣ ሽፋን፣ ልቀቶች
-├── providers/               # አቅራቢ-ተኮር ሰነዶች
-├── reference/               # API ማጣቀሻ፣ የአካባቢ ተለዋዋጮች፣ CLI መሣሪያዎች፣ ነጻ ደረጃዎች
-├── releases/                # የልቀት ማስታወሻዎች
-├── routing/                 # ራስ-ሰር የጥምረት ሞተር፣ የምክንያታዊነት ድጋሚ ማጫወት
-├── screenshots/             # የዳሽቦርድ ቅጽበታዊ ገጽ ዕይታዎች
-├── security/                # የመከላከያ ገደቦች፣ ተገዢነት፣ ስውርነት፣ ቶከኖች
-└── specs/                   # የንድፍ ዝርዝር መስፈርቶች
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

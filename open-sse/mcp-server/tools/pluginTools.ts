@@ -5,33 +5,10 @@
  */
 
 import { z } from "zod";
-import { resolve, normalize, isAbsolute } from "path";
 import { toSafeMcpErrorMessage } from "../errorMessage";
 import { listPlugins, getPluginByName, updatePluginConfig } from "../../../src/lib/db/plugins";
 import { pluginManager } from "../../../src/lib/plugins/manager";
 import { validatePluginConfig, type ConfigField } from "../../../src/lib/plugins/manifest";
-
-/**
- * Validate a path is safe for plugin installation.
- * Prevents directory traversal and null byte injection.
- */
-function validatePluginPath(path: string): string {
-  // Reject null bytes
-  if (path.includes("\0")) {
-    throw new Error("Invalid path: contains null bytes");
-  }
-  // Must be absolute
-  if (!isAbsolute(path)) {
-    throw new Error("Path must be absolute");
-  }
-  // Normalize and resolve to prevent traversal
-  const normalized = normalize(resolve(path));
-  // Reject paths with traversal patterns
-  if (normalized.includes("..") || normalized.includes("~")) {
-    throw new Error("Invalid path: directory traversal detected");
-  }
-  return normalized;
-}
 
 export const pluginTools = [
   {
@@ -64,14 +41,19 @@ export const pluginTools = [
 
   {
     name: "plugin_install",
-    description: "Install a plugin from a local directory path.",
+    description: "Install a plugin from a local directory inside the plugin sources directory.",
     scopes: ["write:plugins"],
     inputSchema: z.object({
-      path: z.string().describe("Absolute path to the plugin directory containing plugin.json"),
+      path: z
+        .string()
+        .describe(
+          "Absolute path to a plugin directory (containing plugin.json) inside the plugin sources directory"
+        ),
     }),
     handler: async (args: { path: string }) => {
-      const safePath = validatePluginPath(args.path);
-      const plugin = await pluginManager.install(safePath);
+      // Same containment as POST /api/plugins: the source must resolve inside the
+      // plugin sources directory (src/lib/plugins/installSource.ts).
+      const plugin = await pluginManager.installFromLocalSource(args.path);
       return {
         success: true,
         plugin: {
