@@ -4,13 +4,13 @@
 
 ---
 
-## Rapportering av sårbarheter
+## Rapportera sårbarheter
 
-Om du upptäcker en säkerhetssårbarhet i OmniRoute ska du rapportera den på ett ansvarsfullt sätt:
+Om du upptäcker en säkerhetsbrist i OmniRoute, vänligen rapportera det på ett ansvarsfullt sätt:
 
-1. **ÖPPNA INTE** ett offentligt GitHub-ärende
-2. Använd [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Inkludera: beskrivning, steg för att återskapa problemet och potentiell påverkan
+1. **DO NOT** öppna ett offentligt GitHub problem
+2. Använd [GitHub Security Advisories](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Inkludera: beskrivning, reproduktionssteg och potentiell påverkan
 
 ## Tidsplan för hantering
 
@@ -29,25 +29,14 @@ Om du upptäcker en säkerhetssårbarhet i OmniRoute ska du rapportera den på e
 | 3.7.x   | ✅ Säkerhetssupport                            |
 | < 3.7.0 | ❌ Stöds inte                                  |
 
-## LTS-supportfönster (v3.9.x)
+## LTS supportfönster (v3.9.x)
 
-Efter 3.8.59 är nästa version **3.9.0**, vilket inleder linjen för långsiktigt stöd på
-grenen `stable/v3` (se [`ROADMAP.md`](ROADMAP.md) → ”Fas 3 — v3.9.0 LTS”).
+Efter 3.8.59 är nästa version** 3.9.0** , som öppnar den långsiktiga supportlinjen på `stable/v3` -grenen (se [`ROADMAP.md`](ROADMAP.md) → "Fas 3 — v3.9.0 LTS").
 
-- **Vad `stable/v3` får:** felrättningar, säkerhetskorrigeringar och leverantörsuppdateringar. Nya
-  funktioner går till v4-kanalen; LTS-linjen prioriterar stabilitet. `npm install omniroute`
-  (`latest`-dist-taggen) ligger kvar på v3 under hela v4-cykeln.
-- **Fönstrets varaktighet:** `stable/v3` får **säkerhetskorrigeringar och korrigeringar av kritiska regressioner i
-  12 månader efter lanseringen av 3.9.0, eller till 90 dagar efter att v4.0.0 publiceras som `latest` —
-  beroende på vilket som inträffar sist**. Det resulterande slutdatumet dokumenteras i versionsinformationen för 3.9.0 och i
-  [`ROADMAP.md`](ROADMAP.md) när lanseringen sker.
-- **Rapportera en sårbarhet i LTS-linjen:** använd samma kanal som för alla andra versioner —
-  en privat [GitHub-säkerhetsavisering](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  aldrig ett offentligt ärende. Ange vilken version du testade (till exempel `3.9.2`); korrigeringar införs i
-  `stable/v3` och vidareporteras till v4.
-- **Säkerhetsbaslinje vid LTS-lanseringen:** uppmätt skannerstatus samt belägg för ruttskydd och
-  offentliga autentiseringsuppgifter dokumenteras i
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Vad `stable/v3` tar emot:** buggfixar, säkerhetskorrigeringar och leverantörsuppdateringar. Nya funktioner går till v4-kanalen; LTS linjen är stabilitet först. `npm install omniroute` ( `latest` dist-taggen) stannar på v3 under hela v4-cykeln.
+- **Fönsterlängd:** `stable/v3` tar emot** säkerhetskorrigeringar och kritiska regressioner i 12 månader efter 3.9.0-klippet, eller till 90 dagar efter att v4.0.0 har publicerats som `latest` — beroende på vilket som inträffar senare** . Det resulterande slutdatumet registreras i 3.9.0 release notes och i [`ROADMAP.md`](ROADMAP.md) när klippet sker.
+- **Rapportera en sårbarhet i LTS raden:** samma kanal som alla andra versioner — en privat [GitHub säkerhetsrådgivning](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), aldrig ett offentligt problem. Säg vilken version du testade (till exempel `3.9.2`); fixar landar på `stable/v3` och vidareporteras till v4.
+- **Säkerhetsbaslinje vid LTS cut:** uppmätt skannertillstånd, ruttskyddsbevis och offentliga bevis registreras i [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 

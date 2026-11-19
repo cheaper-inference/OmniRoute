@@ -57,7 +57,7 @@ export default function FlowAnimation() {
         {/* OmniRoute Hub - Center */}
         <div className="relative z-20 w-32 h-32 rounded-full bg-surface border-2 border-[var(--ci-color-accent-ink)] shadow-[0_0_40px_color-mix(in_srgb,var(--color-primary)_30%,transparent)] flex flex-col items-center justify-center gap-1 group cursor-pointer hover:scale-105 transition-transform duration-500">
           <Icon name="hub" size={36} className="text-primary" />
-          <span className="text-xs font-bold text-text-main tracking-widest uppercase">
+          <span className="text-xs font-semibold text-text-main tracking-widest uppercase">
             {t("brandName")}
           </span>
           <div className="absolute inset-0 rounded-full border border-primary/30 animate-ping opacity-20"></div>
@@ -153,7 +153,7 @@ export default function FlowAnimation() {
           {providers.map((provider, idx) => (
             <div
               key={provider.id}
-              className={`px-3 py-2 rounded-lg ${provider.color} flex items-center justify-center font-bold text-[11px] leading-tight text-center shadow-lg hover:scale-110 transition-all cursor-help min-w-[110px] max-w-[140px] ${
+              className={`px-3 py-2 rounded-lg ${provider.color} flex items-center justify-center font-semibold text-[11px] leading-tight text-center shadow-lg hover:scale-110 transition-all cursor-help min-w-[110px] max-w-[140px] ${
                 activeFlow === idx ? "ring-2 ring-[var(--ci-color-accent-ink)] scale-110" : ""
               }`}
               title={provider.name}

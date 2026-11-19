@@ -279,15 +279,15 @@ Hook halaman:
 
 ## Variabel Lingkungan
 
-| Variabel                           | Nilai Bawaan | Deskripsi                                                        |
-| ---------------------------------- | ------------ | ---------------------------------------------------------------- |
-| `QUOTA_STORE_DRIVER`               | `sqlite`     | Driver yang digunakan: `sqlite` atau `redis`                     |
-| `QUOTA_STORE_REDIS_URL`            | _(kosong)_   | URL Redis, misalnya `redis://localhost:6379`                     |
-| `QUOTA_SATURATION_THRESHOLD`       | `0.5`        | 0..1; `>= ambang batas` mengaktifkan mode ketat                  |
-| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`        | 0..1; pengali untuk skor gabungan kebijakan lunak                |
-| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`         | Jumlah hari sebelum GC menghapus bucket `quota_consumption` lama |
+| Variabel                           | Bawaan     | Keterangan                                                        |
+| ---------------------------------- | ---------- | ----------------------------------------------------------------- |
+| `QUOTA_STORE_DRIVER`               | `sqlite`   | Driver yang digunakan: `sqlite` atau `redis`                      |
+| `QUOTA_STORE_REDIS_URL`            | _(kosong)_ | Redis URL, misalnya `redis://localhost:6379`                      |
+| `QUOTA_SATURATION_THRESHOLD`       | `0.5`      | 0..1; `>= threshold` mengaktifkan mode ketat                      |
+| `QUOTA_SOFT_DEPRIORITIZE_FACTOR`   | `0.7`      | 0..1; pengganda untuk skor kombo kebijakan lunak                  |
+| `QUOTA_CONSUMPTION_RETENTION_DAYS` | `14`       | Beberapa hari sebelum GC menghapus ember `quota_consumption` lama |
 
-Pengaturan DB (`quotaStore.*`) menggantikan variabel lingkungan.
+pengaturan DB (`quotaStore.*`) menimpa env vars.
 
 ---
 
@@ -343,17 +343,16 @@ muncul sebagai opsi yang dapat dipilih pengguna di UI atau API.
 
 ---
 
-## Cakupan Pengujian
+## Cakupan Tes
 
-Dua lapisan cakupan otomatis disertakan bersama mesin quota-share:
+Dua lapisan cakupan otomatis dikirimkan bersama mesin pembagian kuota:
 
-| Suite               | Perintah                                                               | Yang dicakup                                                                                                                                                                                                             |
-| :------------------ | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit (29 pengujian) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Penjadwal DRR, pembatasan saturasi, batas konkurensi, perhitungan fairShare, antrean backlog                                                                                                                             |
-| Matriks integrasi   | `npm run test:combo:matrix`                                            | Keputusan perutean menyeluruh melalui pipeline kombinasi sebenarnya; keadilan DRR + penurunan prioritas akibat saturasi melalui seam aktif (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Rangkaian         | Memerintah                                                             | Apa yang dicakupnya                                                                                                                                                                                              |
+| :---------------- | :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Satuan (29 tes)   | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | penjadwal DRR, gerbang saturasi, batas konkurensi, matematika fairShare, antrian backlog                                                                                                                         |
+| Matriks integrasi | `npm run test:combo:matrix`                                            | Keputusan perutean ujung ke ujung melalui pipa kombo yang sebenarnya; DRR keadilan deprioritas saturasi + melalui jahitan langsung (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Matriks integrasi dijalankan di CI bersama seluruh 19 strategi publik. Suite unit
-dapat dijalankan secara mandiri.
+Matriks integrasi berjalan di CI bersama dengan 22 strategi publik. Unit suite dapat dijalankan secara mandiri.
 
 ---
 

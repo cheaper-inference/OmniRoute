@@ -7,6 +7,7 @@ import { getCompatibleFallbackModels } from "@/lib/providers/managedAvailableMod
 import { getResolvedModelCapabilities } from "@/lib/modelCapabilities";
 import { getSyncedCapabilities } from "@/lib/modelsDevSync";
 import { getModelsByProviderId } from "@/shared/constants/models";
+import { getWebComboTargets } from "@/shared/utils/webComboTargets";
 import { getImageProvider } from "@omniroute/open-sse/config/imageRegistry.ts";
 import {
   getSpeechProvider,
@@ -21,6 +22,8 @@ import {
 } from "@/shared/constants/providers";
 import type { RegistryModel } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { getVideoProvider } from "@omniroute/open-sse/config/videoRegistry.ts";
+import { getMusicProvider } from "@omniroute/open-sse/config/musicRegistry.ts";
+import { getOcrProvider } from "@omniroute/open-sse/config/ocrRegistry.ts";
 import { appendSyncedEffortVariants } from "@omniroute/open-sse/utils/syncedEffortVariants";
 
 type JsonRecord = Record<string, unknown>;
@@ -206,7 +209,15 @@ function hasStaticMediaRoutingMetadata(model: ComboBuilderModelOption): boolean 
     model.source === "system" &&
     Boolean(
       model.supportedEndpoints?.some((endpoint) =>
-        ["images", "videos", "audio-speech", "audio-transcriptions"].includes(endpoint)
+        [
+          "images",
+          "videos",
+          "audio-speech",
+          "audio-transcriptions",
+          "audio-generation",
+          "search",
+          "web-fetch",
+        ].includes(endpoint)
       )
     )
   );
@@ -367,7 +378,7 @@ function addModelOption(
     // A custom row created before media metadata existed carries the form's
     // historical defaults (`chat-completions` + `["chat"]`).  Those defaults
     // are not an intentional reclassification and must not erase a same-id
-    // image/video/audio registry entry.  Keep explicit non-default custom
+    // image/video/audio/web registry entry. Keep explicit non-default custom
     // routing metadata authoritative, while still allowing all other custom
     // fields (display name, token limits, thinking support) to take precedence.
     const preserveStaticMediaRouting =
@@ -458,6 +469,21 @@ function addStaticMediaModelOptions(
 
   const transcriptionProvider = getTranscriptionProvider(providerId);
   append(transcriptionProvider?.models, "audio", "audio-transcriptions", "audio-transcriptions");
+
+  if (providerId === "elevenlabs") {
+    append(
+      [{ id: "eleven_text_to_sound_v2", name: "Eleven Text to Sound V2" }],
+      "audio",
+      "audio-generation",
+      "audio-generation"
+    );
+  }
+
+  const musicProvider = getMusicProvider(providerId);
+  append(musicProvider?.models, "audio", "music", "music");
+
+  const ocrProvider = getOcrProvider(providerId);
+  append(ocrProvider?.models, "ocr", "ocr", "ocr");
 }
 
 function buildModelOptions(
@@ -570,6 +596,9 @@ function buildModelOptions(
   }
 
   addStaticMediaModelOptions(modelMap, providerId);
+  for (const operation of getWebComboTargets(providerId)) {
+    addModelOption(modelMap, providerId, { ...operation, source: "system" });
+  }
 
   // #9485: static registry models can declare provider-specific effort tiers even
   // when a connection's synced row does not include supportedThinkingEfforts.

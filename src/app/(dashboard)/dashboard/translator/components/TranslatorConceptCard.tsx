@@ -30,7 +30,7 @@ export default function TranslatorConceptCard() {
         <div className="flex items-start gap-3">
           <Icon name="info" size={22} className="text-primary mt-0.5" />
           <div className="flex-1 min-w-0">
-            <h2 className="text-sm font-semibold text-text-main mb-1">
+            <h2 className="text-sm text-text-main mb-1">
               {tr(
                 "conceptHeadline",
                 'Your app speaks one API "language". Translator converts it to use another provider.'
@@ -53,7 +53,7 @@ export default function TranslatorConceptCard() {
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls="translator-concept-how-it-works"
-          className="w-full justify-start text-xs font-medium text-primary"
+          className="w-full justify-start text-xs text-primary"
         >
           <span>{tr("conceptHowItWorksToggle", "How it works")}</span>
           <Icon name={open ? "expand_less" : "expand_more"} size={16} />
