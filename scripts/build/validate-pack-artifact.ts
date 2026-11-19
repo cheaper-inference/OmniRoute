@@ -1,9 +1,11 @@
 #!/usr/bin/env node
 
 import { execFileSync, spawnSync } from "node:child_process";
-import { existsSync } from "node:fs";
+import { existsSync, readFileSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
+
+import { PACKED_TARBALL_ENV, resolvePrebuiltTarballOption } from "../check/check-pack-boot.mjs";
 import { makeGitAncestryProbe, readBuildSha, resolveBuildProvenance } from "./buildProvenance.ts";
 
 import {
@@ -26,6 +28,7 @@ import {
   findUnexpectedArtifactPaths,
   parseJsonValuesOutput,
 } from "./pack-artifact-policy.ts";
+import { describeManifestMismatch, readPackedTarball } from "./packedTarballContents.ts";
 
 const __filename: string = fileURLToPath(import.meta.url);
 const __dirname: string = dirname(__filename);
@@ -140,9 +143,58 @@ function formatBytes(bytes: number): string {
 // Artifact job. See incident v3.8.36 (#5029).
 const POLICY_ONLY = process.argv.includes("--policy-only");
 
-try {
-  if (!POLICY_ONLY) ensureAppStagingReady();
-  const packReport = runPackDryRun();
+/**
+ * #20644 — the report for an already-packed tarball (--tarball / OMNIROUTE_PACKED_TARBALL):
+ * its own entries and sizes instead of a second `npm pack --dry-run`, after checking that
+ * its package.json name/version are ./package.json's. Also returns the tarball's
+ * dist/BUILD_SHA so provenance is judged on the bytes that ship.
+ */
+async function readPrebuiltPackReport(
+  tarballPath: string
+): Promise<{ report: PackReport; buildSha: string }> {
+  if (!existsSync(tarballPath)) {
+    throw new Error(
+      `prebuilt tarball not found: ${tarballPath} (from --tarball/${PACKED_TARBALL_ENV})`
+    );
+  }
+  const contents = await readPackedTarball(tarballPath, {
+    capture: ["package.json", "dist/BUILD_SHA"],
+  });
+  const rootManifest = JSON.parse(readFileSync(join(ROOT, "package.json"), "utf8"));
+  const mismatches = describeManifestMismatch(contents.captured["package.json"], {
+    name: rootManifest.name,
+    version: rootManifest.version,
+  });
+  if (mismatches.length > 0) {
+    throw new Error(
+      `prebuilt tarball ${contents.filename} does not match ./package.json: ${mismatches.join(", ")}`
+    );
+  }
+  return {
+    report: {
+      files: contents.files.map((file) => ({ path: file.path })),
+      filename: contents.filename,
+      entryCount: contents.entryCount,
+      size: contents.size,
+      unpackedSize: contents.unpackedSize,
+    },
+    buildSha: (contents.captured["dist/BUILD_SHA"] ?? "").trim(),
+  };
+}
+
+async function main(): Promise<void> {
+  const prebuiltTarball: string | null = resolvePrebuiltTarballOption(process.argv.slice(2));
+  let packReport: PackReport;
+  let buildSha: string;
+  if (prebuiltTarball) {
+    // No build and no pack: the tarball IS the artifact; validate what it holds.
+    console.log(`📦 Validating the prebuilt tarball ${prebuiltTarball} — not packing`);
+    ({ report: packReport, buildSha } = await readPrebuiltPackReport(prebuiltTarball));
+  } else {
+    if (!POLICY_ONLY) ensureAppStagingReady();
+    packReport = runPackDryRun();
+    buildSha = readBuildSha(process.cwd());
+  }
   const artifactPaths: string[] = packReport.files.map((file) => file.path);
   const unexpectedPaths: string[] = findUnexpectedArtifactPaths(artifactPaths, {
     exactPaths: PACK_ARTIFACT_ALLOWED_EXACT_PATHS,
@@ -243,7 +295,7 @@ try {
   // --policy-only, which deliberately runs without a build (no dist/BUILD_SHA to check).
   if (!POLICY_ONLY) {
     const provenance = resolveBuildProvenance({
-      buildSha: readBuildSha(process.cwd()),
+      buildSha,
       isAncestorOfRelease: makeGitAncestryProbe(
         process.env.OMNIROUTE_RELEASE_REF || "origin/main",
         process.cwd()
@@ -258,7 +310,9 @@ try {
   }
 
   console.log("\n✅ Pack artifact policy check passed.");
-} catch (error) {
+}
+
+main().catch((error) => {
   console.error(`\n❌ Pack artifact validation failed: ${error.message}`);
   process.exit(1);
-}
+});

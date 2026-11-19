@@ -41,15 +41,18 @@ export function makeFakeRoot(manifest: Record<string, unknown>): string {
 }
 
 /**
- * Run `node <scriptPath> ...args` in `cwd` with an npm shim first on PATH. The caller's
- * OMNIROUTE_PACKED_TARBALL is dropped unless `env` sets it, so the test fully controls
- * the interface under test.
+ * Run `node [...nodeArgs] <scriptPath> ...args` in `cwd` with an npm shim first on PATH.
+ * `npm_execpath` points at a recording `npm-cli.js` too, so scripts that run npm through
+ * `process.execPath <npm-cli.js>` (scripts/build/resolveNpmEntry.ts) are recorded in the
+ * same log instead of reaching the real npm. The caller's OMNIROUTE_PACKED_TARBALL is
+ * dropped unless `env` sets it, so the test fully controls the interface under test.
  */
 export function runGateWithNpmShim(
   scriptPath: string,
   cwd: string,
   args: string[],
-  env: Record<string, string> = {}
+  env: Record<string, string> = {},
+  { nodeArgs = [] as string[], timeout = 60_000 } = {}
 ) {
   const shimDir = mkdtempSync(path.join(os.tmpdir(), "packed-tarball-npm-shim-"));
   const npmLog = path.join(shimDir, "npm-calls.log");
@@ -57,18 +60,23 @@ export function runGateWithNpmShim(
   writeFileSync(path.join(shimDir, "npm"), '#!/bin/sh\necho "$*" >> "$NPM_SHIM_LOG"\nexit 0\n', {
     mode: 0o755,
   });
+  writeFileSync(
+    path.join(shimDir, "npm-cli.js"),
+    'require("fs").appendFileSync(process.env.NPM_SHIM_LOG, process.argv.slice(2).join(" ") + "\\n");\n'
+  );
   const childEnv: NodeJS.ProcessEnv = { ...process.env, ...env };
   if (!(PACKED_TARBALL_ENV in env)) delete childEnv[PACKED_TARBALL_ENV];
   try {
-    const run = spawnSync(process.execPath, [scriptPath, ...args], {
+    const run = spawnSync(process.execPath, [...nodeArgs, scriptPath, ...args], {
       cwd,
       env: {
         ...childEnv,
         PATH: `${shimDir}${path.delimiter}${process.env.PATH ?? ""}`,
         NPM_SHIM_LOG: npmLog,
+        npm_execpath: path.join(shimDir, "npm-cli.js"),
       },
       encoding: "utf8",
-      timeout: 60_000,
+      timeout,
     });
     const npmCalls = readFileSync(npmLog, "utf8").split("\n").filter(Boolean);
     return { status: run.status, stdout: run.stdout, stderr: run.stderr, npmCalls };
