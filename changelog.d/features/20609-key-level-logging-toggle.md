@@ -1,0 +1,1 @@
+- **feat(api):** the API-key payload opt-out is now presented as a **Logging** toggle (ON by default) on the key detail page and in the key-template editor, matching the global, connection and per-model toggles; the stored `no_log` column and its enforcement are unchanged ([#20609](https://github.com/cheaper-inference/OmniRoute/pull/20609))
