@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "移除鍵"
   },
   "plugins": {
+    "privilegesWarningTitle": "插件以完全權限運行",
+    "privilegesWarningBody": "插件作為常規Node.js進程運行，具有與OmniRoute相同的存取權限：它可以讀取檔案、運行程式和使用網絡，無論其清單聲明什麼權限。僅安裝您信任的插件。",
     "title": "外掛",
     "description": "安裝和管理外掛以擴充套件 OmniRoute 功能",
     "loading": "載入外掛中…",

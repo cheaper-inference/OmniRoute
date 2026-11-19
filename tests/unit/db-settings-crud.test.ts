@@ -315,7 +315,7 @@ test("settings and pricing readers skip malformed rows while merging surviving l
   db.prepare = (sql) => {
     const text = String(sql);
 
-    if (text.includes("namespace = 'settings'")) {
+    if (text.includes("namespace IN ('settings', 'databaseSettings')")) {
       return {
         all: () => [
           123,

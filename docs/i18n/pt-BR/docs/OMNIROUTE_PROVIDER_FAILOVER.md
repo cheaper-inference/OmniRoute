@@ -6,8 +6,18 @@
 
 As falhas são classificadas antes que as decisões de nova tentativa sejam tomadas.
 
-Falhas transitórias, como timeouts, erros de rede, limites de taxa e respostas 5xx do provedor, podem acionar o failover. Erros de autenticação, erros de permissão, solicitações inválidas, modelos indisponíveis e falhas desconhecidas não são repetidos indiscriminadamente.
+Falhas transitórias, como tempos limite, erros de rede, limites de taxa e respostas 5xx do provedor podem falhar. A cota ou crédito esgotado (uma cota 429 ou 402 Pagamento Necessário) nunca é tentado novamente no mesmo provedor, mas faz failover para outro, cuja cota é separada. Erros de autenticação, erros de permissão, solicitações inválidas, modelos indisponíveis e falhas desconhecidas não são repetidos às cegas.
 
-A política padrão entre provedores permite até três tentativas de provedor, repete tentativas em caso de limites de taxa e timeouts e mantém a desativação administrativa separada do estado temporário do circuito.
+A política padrão entre provedores permite até três tentativas de provedores, novas tentativas de limites de taxa e tempos limite, failover na cota esgotada e mantém a desativação administrativa separada do estado temporário do circuito.
 
-Os estados do circuito são `closed`, `open` e `half_open`. Um período de espera agenda uma sondagem limitada; uma sondagem bem-sucedida fecha o circuito, enquanto uma sondagem malsucedida o reabre.
+## Onde se aplica
+
+- **Combos** failover entre seus alvos de acordo com a estratégia e configurações do próprio combo.
+- **Um ID de modelo simples** (sem prefixo `provider/` ) que vários provedores ativos atendem, sem nenhuma combinação desse nome exato, é enviado primeiro para as escolhas de inferência do provedor. Se essa tentativa falhar de forma que a política falhe, a mesma solicitação será enviada ao próximo provedor ativo que atende o ID. A resposta carrega `x-omniroute-fallback-attempts` com o número de provedores tentados antes daquele que atendeu.
+  - Cada alternativa é autorizada exatamente como se a inferência a tivesse escolhido. Um alvo que a chave API bloqueia ou não admite é ignorado sem uma chamada upstream, e o cliente obtém o erro upstream real, e não uma rejeição de política para um alvo que ele nunca nomeou.
+  - Somente uma resposta com falha segue em frente: nada falha após o primeiro byte transmitido.
+  - A troca de modelo de fallback de emergência se aplica somente após a falha de todos os provedores do modelo solicitado.
+  - Uma solicitação fixada em uma conexão (`x-omniroute-connection`) permanece nela.
+  - Um id prefixado (`provider/model`) nunca é redirecionado para outro provedor.
+
+Os estados do circuito são `closed`, `open` e `half_open`. Um resfriamento agenda uma investigação limitada; uma sonda bem-sucedida fecha o circuito e uma sonda com falha o reabre.
