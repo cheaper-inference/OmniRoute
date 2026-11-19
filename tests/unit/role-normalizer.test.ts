@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 
 const { normalizeDeveloperRole, normalizeModelRole, normalizeSystemRole, normalizeRoles } =
   await import("../../open-sse/services/roleNormalizer.ts");
+const { sanitizeResponsesInputItems } =
+  await import("../../open-sse/services/responsesInputSanitizer.ts");
 
 test("normalizeDeveloperRole preserves developer for official openai provider by default", () => {
   const messages = [{ role: "developer", content: "internal policy" }];
@@ -141,9 +143,119 @@ test("normalizeSystemRole inserts a user message when no user exists and drops e
   const result = normalizeSystemRole(messages, "openai", "ernie-4.0");
 
   assert.deepEqual(result, [
-    { role: "user", content: "[System Instructions]\nplain developer text" },
+    { role: "user", content: "[System Instructions]\n[Image: ignored]\n\nplain developer text" },
     { role: "assistant", content: "ready" },
   ]);
+});
+
+test("system image part becomes a text placeholder when folding roles", () => {
+  const messages = [
+    {
+      role: "system",
+      content: [
+        { type: "text", text: "Describe this image" },
+        { type: "image_url", image_url: { url: "https://example.test/diagram.png" } },
+      ],
+    },
+    { role: "user", content: [{ type: "text", text: "What does it show?" }] },
+  ];
+
+  const result = normalizeSystemRole(messages, "glm", "glm-4.6v");
+
+  assert.deepEqual(result, [
+    {
+      role: "user",
+      content:
+        "[System Instructions]\nDescribe this image\n[Image: https://example.test/diagram.png]\n\n[User Message]\nWhat does it show?",
+    },
+  ]);
+});
+
+test("input_image with a string URL uses the same image placeholder", () => {
+  const messages = [
+    {
+      role: "system",
+      content: [
+        { type: "text", text: "Context" },
+        { type: "input_image", image_url: "https://example.test/photo.jpg" },
+      ],
+    },
+    { role: "user", content: [{ type: "text", text: "Describe it" }] },
+  ];
+
+  const result = normalizeSystemRole(messages, "glm", "glm-4.6v") as Array<{
+    role: string;
+    content: string;
+  }>;
+
+  assert.ok(result[0].content.includes("[Image: https://example.test/photo.jpg]"));
+});
+
+test("image part without a URL yields the bare image placeholder", () => {
+  const messages = [
+    {
+      role: "system",
+      content: [
+        { type: "text", text: "Context" },
+        { type: "image_url", image_url: { detail: "high" } },
+      ],
+    },
+    { role: "user", content: [{ type: "text", text: "Describe it" }] },
+  ];
+
+  const result = normalizeSystemRole(messages, "glm", "glm-4.6v") as Array<{
+    role: string;
+    content: string;
+  }>;
+
+  assert.ok(result[0].content.includes("[Image]"), "bare placeholder is present");
+  assert.ok(!result[0].content.includes("undefined"), "no undefined leaks into the text");
+});
+
+test("system image placeholder matches the Responses input sanitizer format", () => {
+  const url = "https://example.test/diagram.png";
+  const messages = [
+    {
+      role: "system",
+      content: [
+        { type: "text", text: "Describe this image" },
+        { type: "image_url", image_url: { url } },
+      ],
+    },
+    { role: "user", content: [{ type: "text", text: "What does it show?" }] },
+  ];
+
+  const folded = normalizeSystemRole(messages, "glm", "glm-4.6v") as Array<{
+    role: string;
+    content: string;
+  }>;
+  const placeholder = `[Image: ${url}]`;
+  assert.ok(folded[0].content.includes(placeholder));
+
+  const sanitized = sanitizeResponsesInputItems([
+    { role: "assistant", content: [{ type: "image_url", image_url: { url } }] },
+  ]) as Array<{ content: Array<{ type: string; text: string }> }>;
+  assert.equal(sanitized[0].content[0].text, placeholder);
+});
+
+test("non-image non-text system part becomes a type placeholder", () => {
+  const messages = [
+    {
+      role: "system",
+      content: [
+        { type: "text", text: "ctx" },
+        { type: "audio", audio: { data: "sample" } },
+      ],
+    },
+    { role: "user", content: [{ type: "text", text: "go" }] },
+  ];
+
+  const result = normalizeSystemRole(messages, "glm", "glm-4.6v") as Array<{
+    role: string;
+    content: string;
+  }>;
+
+  assert.ok(result[0].content.includes("[audio]"));
 });
 
 test("normalizeSystemRole treats ZenMux z-ai/glm models as GLM even with vendor prefix", () => {
