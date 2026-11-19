@@ -74,9 +74,21 @@ export function cleanEnv(home: string, extra: Record<string, string> = {}) {
   };
 }
 
+export function cliCoverageNodeArgs(bin: string) {
+  // Node inherits V8 coverage even with a clean environment. Keep
+  // NODE_OPTIONS scrubbed and pass only the repo's coverage preload.
+  return bin === BIN && process.env.NODE_V8_COVERAGE && process.env.OMNIROUTE_CI_SYNC_TSX_CACHE
+    ? ["--import", new URL("../../scripts/ci/native-worker-v8-layout.mjs", import.meta.url).href]
+    : [];
+}
+
 export function runCli(bin: string, args: string[], cwd: string, env: Record<string, string>) {
   return new Promise<{ code: number | null; stdout: string; stderr: string }>((resolve) => {
-    const child = spawn(process.execPath, [bin, ...args], { cwd, env, detached: true });
+    const child = spawn(process.execPath, [...cliCoverageNodeArgs(bin), bin, ...args], {
+      cwd,
+      env,
+      detached: true,
+    });
     let stdout = "";
     let stderr = "";
     child.stdout.on("data", (d) => (stdout += d));
