@@ -116,31 +116,10 @@ A na-atụnyere origin n’agbanyeghị mkpụrụedemede ukwu ma ọ bụ nta, 
 n’oge runtime na **Dashboard → Security → CORS Allowed Origins** n’enweghị
 restart.
 
-## API key ma e jiri ya tụnyere cookie session
+## Igodo API tụnyere nnọkọ kuki
 
-- **Bearer / `x-api-key` (elu inference `/v1/*`):** browser anaghị etinye
-  ihe ndị a n’onwe ya. CORS abụghị ihe mgbochi bara uru ebe a — API key bụ
-  ihe mgbochi ahụ — ọ bụkwa ya mere e ji kpachapụ anya mee ka elu ahụ nabata ọtụtụ origin ka browser na
-  Electron client nwee ike ịgụ response ndị ha nwere ikike inweta. Nweghachi origin a mere
-  ka ọ dị nro na-agbaso key e kwadoro, ọ bụghị naanị ịdị adị nke header ahụ: mgbe
-  `REQUIRE_API_KEY=false` na-ejere arịrịọ ozi n’enweghị aha, nzaghachi ya gara nke ọma
-  na-edebe ndepụta ikike fail-closed ahụ. Ọjụjụ auth (401) na-anọgide na-agụ agụ ka client
-  nwee ike igosi key a kagburu ma ọ bụ nke e dehiere ihe (#5242): 401 nke pipeline n’onwe
-  ya na-edebe nweghachi ahụ, na route nke n’onwe ya na-ajụ key ahụ mgbe pipeline jesịrị
-  arịrịọ ahụ ozi dị ka nke na-enweghị aha (`/v1/models` na `/v1beta/models` mgbe a haziri
-  management auth, `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ndị e
-  kenyere onye nwe ha, na route ndị a na-atụle maka auto-combo) na-agbakwunye nweghachi
-  ahụ na 401 ahụ site na `credentialRejectionHeaders()`. Ihe na-ekpebi nweghachi ahụ bụ ma
-  arịrịọ ahụ ọ na-ebu header nke nzere (`Authorization`, `x-api-key`, `x-goog-api-key` ma
-  ọ bụ cookie `auth_token`), ọ bụghị nke n’ime ha route ahụ lelere, a naghịkwa ejikọ ya
-  ọnụ na `Access-Control-Allow-Credentials`; body ya bụ envelope njehie a kapịrị ọnụ.
-  Route management ndị dị n’okpuru `/api/v1/` nke `requireManagementAuth()` na-echekwa
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) anaghị agbakwunye nweghachi ahụ:
-  mgbe `REQUIRE_API_KEY=false`, a pụghị ịgụ 401/403 ha site n’isi mmalite ọzọ.
-- **Cookie session (dashboard):** ndabara **fail-closed** na
-  enweghị `Access-Control-Allow-Credentials` n’ụzọ a na-ekekọrịta na-echebe ya. Etinyela
-  origin management/dashboard na config ọ bụla na-enye ohere sara mbara; ha ga-anọrịrị kpọmkwem
-  n’ọnọdụ fail-closed.
+- **Bearer / `x-api-key` (ebe inference `/v1/*`):** ihe nchọgharị anaghị etinye ihe ndị a na arịrịọ na-akpaghị aka. CORS abụghị mgbochi bara uru ebe a — igodo API bụ mgbochi ahụ — nke mere na ebe ahụ ji anabata ọtụtụ ihe n'ebumnuche ka ndị ahịa browser na Electron nwee ike ịgụ nzaghachi ha nwere ikike ịnweta. Nkwughachi a dị jụụ na-agbaso igodo a kwadoro, ọ bụghị naanị ịdị nke isiokwu ahụ: mgbe `REQUIRE_API_KEY=false` na-eje ozi arịrịọ n’enweghị aha, nzaghachi ya gara nke ọma na-edobe ndepụta ikike fail-closed. Ọjụjụ nyocha ikike (401) ka ndị ahịa nwee ike ịgụ ya iji gosi igodo akagbuola ma ọ bụ e depụtaghị nke ọma (#5242): 401 nke pipeline n'onwe ya na-edobe nkwughachi ahụ, ebe ụzọ nke jụrụ igodo ahụ n'onwe ya mgbe pipeline jere ozi ya dị ka arịrịọ na-enweghị aha (`/v1/models` na `/v1beta/models` mgbe ahaziri njirimara njikwa, `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ndị ejikọtara na onye nwe ya, yana ụzọ ndị ga-abụ ndị ga-ekwe omume nke auto-combo) na-agbakwunye nkwughachi ahụ na 401 ahụ site na `credentialRejectionHeaders()`. Nkwughachi ahụ dabere na arịrịọ ahụ nwere isiokwu nzere (`Authorization`, `x-api-key`, `x-goog-api-key` ma ọ bụ kuki `auth_token`), ọ bụghị na nke n'ime ha ụzọ ahụ nyochara, a naghị ejikọkwa ya na `Access-Control-Allow-Credentials` mgbe ọ bụla; ahụ nzaghachi ahụ bụ envelopu njehie ahaziri ahazi. Ụzọ njikwa dị n'okpuru `/api/v1/` nke `requireManagementAuth()` na-echekwa (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) anaghị agbakwunye nkwughachi ahụ: mgbe `REQUIRE_API_KEY=false`, 401/403 ha anaghị agụgharị site na cross-origin.
+- **Nnọkọ kuki (dashboard):** ndabara fail-closed **NA** enweghị `Access-Control-Allow-Credentials` n'ụzọ nkekọrịta na-echekwa ya. Debe origins njikwa/dashboard n'èzí nhazi ọ bụla na-anabata ọtụtụ ihe; ha ga-anọrịrị kpọmkwem fail-closed.
 
 ## Njikọ mbido WebSocket (`/v1/responses`, `/v1/ws`)
 

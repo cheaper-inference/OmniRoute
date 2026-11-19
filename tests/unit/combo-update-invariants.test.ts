@@ -87,3 +87,24 @@ test("updateCombo allows updating allowedProviders and clearing with null", asyn
   assert.equal(typedCleared.allowedProviders, undefined);
   assert.equal(typedCleared.models[0]?.providerId, "openrouter");
 });
+
+test("capability route targets must satisfy provider invariants", async () => {
+  const combo = await combosDb.createCombo({
+    name: "restricted-route-combo",
+    allowedProviders: ["openai"],
+    models: [{ provider: "openai", model: "gpt-5" }],
+  });
+  assert.ok(combo?.id);
+
+  await assert.rejects(
+    combosDb.updateCombo(String(combo.id), {
+      routes: {
+        search: {
+          strategy: "priority",
+          models: [{ providerId: "tavily-search", model: "web" }],
+        },
+      },
+    }),
+    /violates its invariant/
+  );
+});

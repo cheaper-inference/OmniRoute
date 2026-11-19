@@ -1,16 +1,19 @@
 "use client";
 import { useState } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import { PlayView } from "./PlayView";
 import { CompareView } from "./CompareView";
 
 export default function CompressionStudioPage() {
   const t = useTranslations("compressionStudio");
+  const tSidebar = useTranslations("sidebar");
   const [tab, setTab] = useState<"play" | "compare">("play");
   const [text, setText] = useState("");
   return (
-    <div className="flex h-[calc(100dvh-6rem)] min-h-[480px] flex-col p-4">
+    <div className="flex h-[calc(100dvh-6rem)] min-h-[480px] flex-col gap-4 p-4">
+      <PageHeader compact title={tSidebar("compressionStudio")} />
       {/* Kit underline Tabs (WAI-ARIA tablist); the selected view mounts in its panel. */}
       <Tabs
         variant="underline"
