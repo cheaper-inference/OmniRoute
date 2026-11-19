@@ -18,7 +18,11 @@ const { isServerOwnedToolLoopEnabled } = await import("../../src/shared/utils/fe
 
 describe("SERVER_OWNED_TOOL_LOOP_ENABLED flag definition", () => {
   it("exists in FEATURE_FLAG_DEFINITIONS", () => {
-    const def = FEATURE_FLAG_DEFINITIONS.find((d) => d.key === "SERVER_OWNED_TOOL_LOOP_ENABLED");
+    const declarations = FEATURE_FLAG_DEFINITIONS.filter(
+      (definition) => definition.key === "SERVER_OWNED_TOOL_LOOP_ENABLED"
+    );
+    assert.equal(declarations.length, 1, "SERVER_OWNED_TOOL_LOOP_ENABLED must be registered once");
+    const [def] = declarations;
     assert.ok(def, "SERVER_OWNED_TOOL_LOOP_ENABLED should exist");
     assert.equal(def.category, "runtime");
     assert.equal(def.defaultValue, "false");

@@ -523,9 +523,13 @@ describe("resolveFeatureFlag", () => {
 
   describe("resolveAllFeatureFlags", () => {
     it("returns one resolved value for each registered flag", () => {
-      const keys = resolveAllFeatureFlags().map((flag) => flag.key);
+      const resolved = resolveAllFeatureFlags();
+      const keys = resolved.map((flag) => flag.key);
       const registeredKeys = FEATURE_FLAG_DEFINITIONS.map((definition) => definition.key);
       assert.deepEqual(keys.sort(), registeredKeys.sort());
+      for (const flag of resolved) {
+        assert.equal(flag.definition.key, flag.key);
+      }
     });
 
     it("marks DB-overridden flags with source 'db'", () => {
