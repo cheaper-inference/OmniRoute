@@ -151,7 +151,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
 
   if (collapsed) {
     return (
-      <div className="flex flex-col items-center w-8 shrink-0">
+      <div className="flex w-full shrink-0 items-center justify-end border-t border-border md:w-8 md:flex-col md:justify-start md:border-t-0">
         <Button
           variant="ghost"
           size="icon-sm"
@@ -167,7 +167,7 @@ export default function StudioConfigPane({ configState, setConfigState }: Studio
 
   return (
     <aside
-      className="w-72 shrink-0 border-l border-border bg-bg-alt flex flex-col overflow-y-auto"
+      className="flex max-h-[45vh] min-h-0 w-full shrink flex-col overflow-y-auto border-t border-border bg-bg-alt md:max-h-none md:w-72 md:shrink-0 md:border-t-0 md:border-l"
       aria-label={tp("configPane")}
     >
       {/* Header */}

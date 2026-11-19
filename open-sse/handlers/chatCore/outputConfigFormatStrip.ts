@@ -23,6 +23,10 @@ export function stripOutputConfigFormatForCompat(
   const oc = body.output_config;
   if (!oc || typeof oc !== "object") return;
   const outputConfig = oc as Record<string, unknown>;
-  delete outputConfig.format;
-  if (Object.keys(outputConfig).length === 0) delete body.output_config;
+  // Copy-on-write: the caller's body is shared per combo leg ({ ...body } is a
+  // shallow copy), so deleting `format` in place also strips it from legs that
+  // target a first-party Anthropic endpoint and DO support structured output.
+  const { format: _format, ...rest } = outputConfig;
+  if (Object.keys(rest).length === 0) delete body.output_config;
+  else body.output_config = rest;
 }

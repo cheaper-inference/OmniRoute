@@ -11,7 +11,6 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import EmptyState from "@/shared/components/EmptyState";
 import Icon from "@/shared/components/Icon";
-import { cn } from "@/shared/utils/cn";
 import { copyToClipboard } from "@/shared/utils/clipboard";
 import McpDashboardPage from "../endpoint/components/MCPDashboard";
 
@@ -32,7 +31,6 @@ function ServiceToggle({
   toggling: boolean;
 }) {
   const t = useTranslations("mcpDashboard");
-  const tCommon = useTranslations("common");
   const online = enabled && status.online;
   const loading = enabled && status.loading;
 
@@ -49,15 +47,6 @@ function ServiceToggle({
         aria-label={enabled ? t("disableLabel", { label }) : t("enableLabel", { label })}
         title={enabled ? t("disableLabel", { label }) : t("enableLabel", { label })}
       />
-
-      <span
-        className={cn(
-          "text-xs font-medium min-w-[24px]",
-          enabled ? "text-success" : "text-text-muted"
-        )}
-      >
-        {toggling ? "..." : enabled ? tCommon("on") : tCommon("off")}
-      </span>
     </div>
   );
 }

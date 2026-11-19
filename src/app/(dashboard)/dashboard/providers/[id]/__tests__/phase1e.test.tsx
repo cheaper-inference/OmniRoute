@@ -104,6 +104,24 @@ describe("providerPageHelpers — model-compat pure functions", () => {
     expect(effectiveNormalizeForProtocol("unknown", "openai", customMap, overrideMap)).toBe(false);
   });
 
+  it("effectiveNormalizeForProtocol mirrors the mistral runtime default (#19338)", () => {
+    const empty = buildCompatMap([]);
+    // No flag anywhere: mistral normalizes by default, other providers do not.
+    expect(
+      effectiveNormalizeForProtocol("mistral-large-4", "openai", empty, empty, "mistral")
+    ).toBe(true);
+    expect(effectiveNormalizeForProtocol("gpt-4o", "openai", empty, empty, "openai")).toBe(false);
+    expect(effectiveNormalizeForProtocol("gpt-4o", "openai", empty, empty)).toBe(false);
+    // An explicit false (override or custom row) wins over the provider default.
+    const explicitOff = buildCompatMap([{ id: "mistral-large-4", normalizeToolCallId: false }]);
+    expect(
+      effectiveNormalizeForProtocol("mistral-large-4", "openai", empty, explicitOff, "mistral")
+    ).toBe(false);
+    expect(
+      effectiveNormalizeForProtocol("mistral-large-4", "openai", explicitOff, empty, "mistral")
+    ).toBe(false);
+  });
+
   it("effectivePreserveForProtocol returns correct flag", () => {
     const customMap = buildCompatMap(customModels);
     const overrideMap = buildCompatMap(overrideModels);

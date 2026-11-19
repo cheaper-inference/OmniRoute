@@ -1,4 +1,5 @@
 import { CORS_HEADERS } from "../utils/cors.ts";
+import { trackOpenRouterSpeech } from "../utils/speechUsage.ts";
 import { stripTrailingSlashes } from "../utils/urlSanitize.ts";
 /**
  * Audio Speech Handler (TTS)
@@ -35,12 +36,13 @@ import {
   upstreamErrorResponse,
 } from "../utils/audioResponse.ts";
 import { handleSyntxSpeech } from "./syntxAudio.ts";
+import { handleRenderhourSpeech } from "./renderhourSpeech.ts";
 import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
   upstreamAudioContentType,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../utils/remoteMediaFetch.ts";
 import {
   getKieCallbackUrl,
   getKieErrorMessage,
@@ -1067,6 +1069,10 @@ export async function handleAudioSpeech({
       return handleTortoiseSpeech(providerConfig, body);
     }
 
+    if (providerConfig.format === "renderhour-tts") {
+      return handleRenderhourSpeech({ providerConfig, body, modelId, credentials });
+    }
+
     if (providerConfig.format === "syntx-audio") {
       return handleSyntxSpeech({
         model: modelId,
@@ -1099,7 +1105,7 @@ export async function handleAudioSpeech({
       return upstreamErrorResponse(res, await res.text());
     }
 
-    return audioStreamResponse(res);
+    return trackOpenRouterSpeech(res, audioStreamResponse(res), providerConfig.baseUrl, token);
   } catch (err) {
     return audioErrorResponse(500, `Speech request failed: ${err.message}`);
   }

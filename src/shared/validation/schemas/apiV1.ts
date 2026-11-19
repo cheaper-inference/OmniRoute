@@ -609,6 +609,7 @@ export const v1SearchSchema = z.preprocess(
     if (!raw || typeof raw !== "object" || Array.isArray(raw)) return raw;
     const o = { ...(raw as Record<string, unknown>) };
     if (o.provider === "x_search") o.provider = "x-search";
+    if (o.provider === "codex_search") o.provider = "codex-search";
     if (o.provider === "xquik" || o.provider === "xquik_search") o.provider = "xquik-search";
     if (o.provider === "anysearch" || o.provider === "anysearch_search")
       o.provider = "anysearch-search";
@@ -632,9 +633,10 @@ export const v1SearchSchema = z.preprocess(
       // exa-search, tavily-search, firecrawl, google-pse-search, linkup-search, ollama-search,
       // searchapi-search, youcom-search, searxng-search, zai-search, jina-search, jina-ai,
       // jina, duckduckgo-free, x-search, x_search, xquik-search, xquik, anysearch-search,
-      // anysearch, parallel-search, parallel (plus short aliases resolved by
-      // SEARCH_PROVIDER_ALIASES).
+      // anysearch, parallel-search, parallel, keenable-search, keenable (plus short aliases
+      // resolved by SEARCH_PROVIDER_ALIASES).
       provider: z.string().min(1).optional(),
+      model: z.string().trim().min(1).max(300).optional(),
       max_results: z.coerce.number().int().min(1).max(100).default(5),
       search_type: z.enum(["web", "news", "x", "finance"]).default("web"),
       offset: z.coerce.number().int().min(0).default(0),
@@ -679,6 +681,9 @@ export const v1SearchSchema = z.preprocess(
       strict_filters: z.boolean().default(false),
     })
     .catchall(z.unknown())
+    .refine((body) => !(body.model && body.provider), {
+      message: "Specify a routing combo in model or an explicit provider, not both",
+    })
 );
 
 export const searchResultSchema = z.object({
@@ -736,22 +741,28 @@ export const v1BatchCreateSchema = z.object({
 
 // ── Web Fetch ─────────────────────────────────────────────────────────────────
 
-export const v1WebFetchSchema = z.object({
-  url: z.string().url("url must be a valid URL (http/https)"),
-  provider: z
-    .enum([
-      "firecrawl",
-      "jina-reader",
-      "tavily-search",
-      "tinyfish",
-      "context7",
-      "nimble-search",
-      "anysearch-search",
-      "parallel-search",
-    ])
-    .optional(),
-  format: z.enum(["markdown", "html", "links", "screenshot"]).default("markdown"),
-  depth: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
-  wait_for_selector: z.string().max(256).optional(),
-  include_metadata: z.boolean().default(false),
-});
+export const v1WebFetchSchema = z
+  .object({
+    url: z.string().url("url must be a valid URL (http/https)"),
+    model: z.string().trim().min(1).max(300).optional(),
+    provider: z
+      .enum([
+        "firecrawl",
+        "jina-reader",
+        "tavily-search",
+        "tinyfish",
+        "context7",
+        "nimble-search",
+        "anysearch-search",
+        "parallel-search",
+        "keenable-search",
+      ])
+      .optional(),
+    format: z.enum(["markdown", "html", "links", "screenshot"]).default("markdown"),
+    depth: z.union([z.literal(0), z.literal(1), z.literal(2)]).default(0),
+    wait_for_selector: z.string().max(256).optional(),
+    include_metadata: z.boolean().default(false),
+  })
+  .refine((body) => !(body.model && body.provider), {
+    message: "Specify a routing combo in model or an explicit provider, not both",
+  });

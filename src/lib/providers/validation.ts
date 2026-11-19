@@ -27,6 +27,7 @@ import {
   resolveBaseUrl,
 } from "./validation/urlHelpers";
 import { toValidationErrorResult } from "./validation/transport";
+import { isCustomJsonProviderData, validateCustomJsonConnection } from "./validation/customJson";
 import { validateOpencodeProvider } from "./validation/opencode";
 import { validateCloudflareAiProvider } from "./validation/cloudflareAi";
 import {
@@ -206,6 +207,10 @@ export async function validateProviderApiKey({
     return { valid: false, error: "Provider and API key required", unsupported: false };
   }
 
+  if (isOpenAICompatibleProvider(provider) && isCustomJsonProviderData(providerSpecificData)) {
+    return validateCustomJsonConnection(providerSpecificData);
+  }
+
   if (isOpenAICompatibleProvider(provider)) {
     try {
       return await validateOpenAICompatibleProvider({ apiKey, providerSpecificData });
@@ -300,6 +305,8 @@ export async function validateProviderApiKey({
     soniox: validateSonioxProvider,
     "fal-ai": ({ apiKey, providerSpecificData }: any) =>
       validateImageProviderApiKey({ provider: "fal-ai", apiKey, providerSpecificData }),
+    renderhour: ({ apiKey, providerSpecificData }: any) =>
+      validateImageProviderApiKey({ provider: "renderhour", apiKey, providerSpecificData }),
     "stability-ai": ({ apiKey, providerSpecificData }: any) =>
       validateImageProviderApiKey({ provider: "stability-ai", apiKey, providerSpecificData }),
     "black-forest-labs": ({ apiKey, providerSpecificData }: any) =>
