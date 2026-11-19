@@ -1,1 +1,0 @@
-- **feat(compression):** Gemini and Antigravity tool outputs can be compressed, behind the default-off `GEMINI_TOOL_OUTPUT_COMPRESSION_ENABLED` environment flag; with the flag off, bodies are unchanged.
