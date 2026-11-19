@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Supprimer la clé"
   },
   "plugins": {
+    "privilegesWarningTitle": "Les plugins fonctionnent avec tous les privilèges",
+    "privilegesWarningBody": "Un plugin s'exécute comme un processus Node.js standard avec le même accès que OmniRoute: il peut lire des fichiers, exécuter des programmes et utiliser le réseau, quelles que soient les autorisations déclarées par son manifeste. Installez uniquement les plugins auxquels vous faites confiance.",
     "title": "Extensions",
     "description": "Installez et gérez des plugins pour étendre les fonctionnalités d’OmniRoute",
     "loading": "Chargement des plugins...",
