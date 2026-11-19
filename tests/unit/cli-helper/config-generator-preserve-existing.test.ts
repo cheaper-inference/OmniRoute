@@ -106,4 +106,12 @@ describe("generic config generators keep unrelated user config", () => {
     assert.equal(out.models[1].apiBase, "http://localhost:20128/v1");
     assert.equal(out.models[1].apiKey, KEY);
   });
+
+  it("continue: an existing file that is not valid YAML aborts instead of being replaced", async () => {
+    const configPath = tmp("config.yaml", "models: [unclosed\n  - title: Other\n");
+    await assert.rejects(
+      async () => generateContinueConfig({ ...options, configPath }),
+      /refusing to overwrite/i
+    );
+  });
 });

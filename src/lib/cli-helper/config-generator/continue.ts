@@ -30,11 +30,16 @@ export async function generateContinueConfig(options: {
   // Keep the user's other keys and models; replace only the OmniRoute entry.
   let config: Record<string, unknown> = {};
   if (options.configPath && fs.existsSync(options.configPath)) {
+    // Read errors (e.g. the symlink guard) propagate as they are; a file that does not parse
+    // aborts Apply like the JSON generators do, instead of being replaced by a fresh document.
+    const text = readPrivateConfigFile(options.configPath);
     let loaded: unknown;
     try {
-      loaded = y.load(readPrivateConfigFile(options.configPath));
+      loaded = y.load(text);
     } catch {
-      loaded = undefined;
+      throw new Error(
+        `Existing ${options.configPath} is not valid YAML; refusing to overwrite it.`
+      );
     }
     if (loaded === null || loaded === undefined) loaded = {};
     if (typeof loaded !== "object" || Array.isArray(loaded)) {

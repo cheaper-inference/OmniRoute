@@ -101,6 +101,26 @@ test(
 );
 
 test(
+  "a failed copy of the backup database leaves the live database and its WAL in place",
+  { skip },
+  withDataDir(async (dataDir, backupDir) => {
+    const live = makeCrashedLiveDb(dataDir);
+    makeDb(path.join(backupDir, "storage.sqlite"), ["restored"]);
+    const before = fs.readFileSync(live);
+    const wal = fs.readFileSync(`${live}-wal`);
+    // The backup is staged next to the live file before anything live is touched; a directory
+    // squatting on the staging name makes that copy fail.
+    fs.mkdirSync(`${live}.restore-tmp`);
+
+    assert.equal(await runRestoreCommand("b1", { yes: true }), 1);
+
+    assert.deepEqual(fs.readFileSync(live), before, "the live database must be unchanged");
+    assert.deepEqual(fs.readFileSync(`${live}-wal`), wal, "the live WAL must survive");
+    assert.deepEqual(rowsOf(live), ["live-only", "old"]);
+  })
+);
+
+test(
   "restore refuses a corrupt backup database and leaves the live files alone",
   { skip },
   withDataDir(async (dataDir, backupDir) => {

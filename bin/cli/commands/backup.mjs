@@ -10,6 +10,7 @@ import {
   readdirSync,
   readFileSync,
   readSync,
+  renameSync,
   rmSync,
   statSync,
   unlinkSync,
@@ -179,6 +180,24 @@ async function decryptFile(srcPath, destPath, passphrase) {
     decipher,
     createWriteStream(destPath)
   );
+}
+
+// Stage the backup database next to the live one first, so a failed copy (disk full, I/O
+// error) leaves the live file and its WAL untouched. Only then drop the sidecars (a leftover WAL
+// or journal would replay the old database over the restored file) and swap the copy in.
+function installRestoredSqlite(sourcePath, destPath) {
+  const staged = `${destPath}.restore-tmp`;
+  try {
+    copyFileSync(sourcePath, staged);
+  } catch (err) {
+    try {
+      rmSync(staged, { force: true });
+    } catch {}
+    throw err;
+  }
+  for (const suffix of ["-wal", "-shm", "-journal"])
+    rmSync(`${destPath}${suffix}`, { force: true });
+  renameSync(staged, destPath);
 }
 
 async function promptPassphrase() {
@@ -535,13 +554,9 @@ export async function runRestoreCommand(backupId, opts = {}) {
     for (const file of FILES_TO_BACKUP) {
       const sourcePath = join(sourceDir, file.name);
       if (existsSync(sourcePath)) {
-        if (file.name === "storage.sqlite") {
-          // A leftover WAL or journal would replay the old database over the restored file.
-          for (const suffix of ["-wal", "-shm", "-journal"]) {
-            rmSync(join(dataDir, `${file.name}${suffix}`), { force: true });
-          }
-        }
-        copyFileSync(sourcePath, join(dataDir, file.name));
+        if (file.name === "storage.sqlite")
+          installRestoredSqlite(sourcePath, join(dataDir, file.name));
+        else copyFileSync(sourcePath, join(dataDir, file.name));
         restored++;
         console.log(`\x1b[2m  Restored: ${file.name}\x1b[0m`);
       }
