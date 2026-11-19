@@ -1,5 +1,5 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import { useNotificationStore } from "@/store/notificationStore";
 import {
@@ -32,31 +32,46 @@ export default function ImportGrokCliAuthModal({
   const [name, setName] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  // Some accounts were saved while others failed: closing must still refresh the list.
+  const [importedSome, setImportedSome] = useState(false);
+  // Bumped on every new file selection or paste edit, so a slow file read cannot replace
+  // the preview of a later input.
+  const inputGeneration = useRef(0);
 
-  function handlePreview(json: unknown) {
+  function handlePreview(json: unknown, unreadable = 0) {
     setParseError(null);
     const { accounts: parsed, rejected } = parseGrokAccounts(json);
     setAccounts(parsed);
-    setRejectedCount(rejected);
+    setRejectedCount(rejected + unreadable);
     if (parsed.length === 0) setParseError(t("grokInvalidAuth"));
+  }
+
+  function handleClose() {
+    if (importedSome) onSuccess();
+    else onClose();
   }
 
   function handleFileChange(e: React.ChangeEvent<HTMLInputElement>) {
     // e0274: accept several auth.json files at once; each file is one account.
     const files = Array.from(e.target.files ?? []);
     if (files.length === 0) return;
+    const generation = ++inputGeneration.current;
     void Promise.all(files.map((file) => file.text().catch(() => null))).then((texts) => {
+      if (generation !== inputGeneration.current) return;
       const docs: unknown[] = [];
       let sawParseFailure = false;
+      let unreadable = 0;
       for (const text of texts) {
         if (text == null) {
           sawParseFailure = true;
+          unreadable += 1;
           continue;
         }
         try {
           docs.push(JSON.parse(text));
         } catch {
           sawParseFailure = true;
+          unreadable += 1;
         }
       }
       if (docs.length === 0) {
@@ -71,11 +86,12 @@ export default function ImportGrokCliAuthModal({
         setParseError(t("grokParseFailed"));
         return;
       }
-      handlePreview(docs.length === 1 ? docs[0] : docs);
+      handlePreview(docs.length === 1 ? docs[0] : docs, unreadable);
     });
   }
 
   function handlePasteChange(text: string) {
+    inputGeneration.current += 1;
     setPasteText(text);
     if (!text.trim()) {
       setAccounts([]);
@@ -97,7 +113,7 @@ export default function ImportGrokCliAuthModal({
     setLoading(true);
     setError(null);
     let ok = 0;
-    let failed = 0;
+    const failedAccounts: GrokAuthAccount[] = [];
     for (const account of accounts) {
       try {
         const res = await fetch("/api/oauth/grok-cli/import-token", {
@@ -106,23 +122,34 @@ export default function ImportGrokCliAuthModal({
           body: JSON.stringify({ token: account.doc }),
         });
         if (res.ok) ok += 1;
-        else failed += 1;
+        else failedAccounts.push(account);
       } catch {
-        failed += 1;
+        failedAccounts.push(account);
       }
     }
     setLoading(false);
-    if (ok > 0) {
+    const failed = failedAccounts.length;
+    if (failed === 0) {
       notify.success(t("grokImportSuccess"));
       onSuccess();
+      return;
     }
-    if (failed > 0) setError(t("grokImportFailed"));
+    if (ok === 0) {
+      setError(t("grokImportFailed"));
+      return;
+    }
+    // Partial import: keep the modal open with only the failed accounts, ready to retry.
+    notify.success(t("grokImportSuccess"));
+    setImportedSome(true);
+    setAccounts(failedAccounts);
+    setRejectedCount(0);
+    setError(t("grokBulkPartial", { ok, failed }));
   }
 
   const first = accounts[0];
 
   return (
-    <Modal isOpen onClose={onClose} title={t("grokImportTitle")} size="md">
+    <Modal isOpen onClose={handleClose} title={t("grokImportTitle")} size="md">
       <div className="flex flex-col gap-4">
         <p className="text-sm text-text-muted">
           {t.rich("grokImportDescription", {
@@ -217,7 +244,7 @@ export default function ImportGrokCliAuthModal({
           <Button onClick={handleSubmit} fullWidth disabled={accounts.length === 0 || loading}>
             {loading ? t("grokSaving") : t("grokSaveConnection")}
           </Button>
-          <Button onClick={onClose} variant="ghost" fullWidth>
+          <Button onClick={handleClose} variant="ghost" fullWidth>
             {t("cancel")}
           </Button>
         </div>

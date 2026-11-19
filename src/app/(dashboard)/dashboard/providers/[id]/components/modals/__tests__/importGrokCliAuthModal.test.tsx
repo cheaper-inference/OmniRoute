@@ -20,7 +20,9 @@ const notify = vi.hoisted(() => ({
 
 vi.mock("next-intl", () => ({
   useTranslations: () => {
-    const t = (key: string) => key;
+    // Interpolation values are appended so assertions can check counts.
+    const t = (key: string, values?: Record<string, unknown>) =>
+      values ? `${key}${JSON.stringify(values)}` : key;
     t.rich = (key: string) => key;
     return t;
   },
@@ -67,6 +69,24 @@ async function typeInto(el: HTMLInputElement | HTMLTextAreaElement, value: strin
   await act(async () => {
     setter?.call(el, value);
     el.dispatchEvent(new Event("input", { bubbles: true }));
+  });
+}
+
+/** Select "files" on the upload input: each item only needs a text() method. */
+async function selectFiles(files: Array<{ text: () => Promise<string> }>) {
+  const input = document.body.querySelector<HTMLInputElement>("input[type='file']");
+  if (!input) throw new Error("no file input on screen");
+  Object.defineProperty(input, "files", { configurable: true, value: files });
+  await act(async () => {
+    input.dispatchEvent(new Event("change", { bubbles: true }));
+  });
+}
+
+const fileOf = (content: string) => ({ text: async () => content });
+
+async function flush() {
+  await act(async () => {
+    await new Promise((resolve) => setTimeout(resolve, 0));
   });
 }
 
@@ -182,5 +202,61 @@ describe("ImportGrokCliAuthModal bulk import", () => {
     await click("grokPasteJson");
     await typeInto(textarea(), JSON.stringify(notADoc));
     expect(document.body.textContent).toContain("grokInvalidAuth");
+  });
+
+  it("counts a malformed file among the skipped entries of a multi-file selection", async () => {
+    renderModal();
+    stubImportFetch();
+    await selectFiles([fileOf(JSON.stringify(validDoc("a@x.ai"))), fileOf("{not json")]);
+    await flush();
+    expect(document.body.textContent).toContain("grokValidToken");
+    expect(document.body.textContent).toContain('grokBulkRejected{"count":1}');
+  });
+
+  it("ignores a slow file read that finishes after a later selection", async () => {
+    renderModal();
+    const fetchMock = stubImportFetch();
+    let releaseSlow: (text: string) => void = () => {};
+    const slow = { text: () => new Promise<string>((resolve) => (releaseSlow = resolve)) };
+    await selectFiles([slow]);
+    await selectFiles([fileOf(JSON.stringify(validDoc("later@x.ai")))]);
+    await flush();
+    await act(async () => {
+      releaseSlow(JSON.stringify(validDoc("stale@x.ai")));
+    });
+    await flush();
+    expect(document.body.textContent).toContain("later@x.ai");
+    expect(document.body.textContent).not.toContain("stale@x.ai");
+    await click("grokSaveConnection");
+    expect(sentTokens(fetchMock).map((s) => s.token)).toEqual([validDoc("later@x.ai")]);
+  });
+
+  it("partial failure keeps the modal open with only the failed accounts to retry", async () => {
+    const onSuccess = renderModal();
+    let fetchMock = stubImportFetch("b@x.ai");
+    await click("grokPasteJson");
+    await typeInto(textarea(), JSON.stringify([validDoc("a@x.ai"), validDoc("b@x.ai")]));
+    await click("grokSaveConnection");
+
+    expect(fetchMock.mock.calls.length).toBe(2);
+    expect(onSuccess).not.toHaveBeenCalled();
+    expect(document.body.textContent).toContain('grokBulkPartial{"ok":1,"failed":1}');
+    expect(document.body.textContent).toContain("b@x.ai");
+
+    fetchMock = stubImportFetch();
+    await click("grokSaveConnection");
+    expect(sentTokens(fetchMock).map((s) => s.token)).toEqual([validDoc("b@x.ai")]);
+    expect(onSuccess).toHaveBeenCalledTimes(1);
+  });
+
+  it("closing after a partial import still refreshes the connection list", async () => {
+    const onSuccess = renderModal();
+    stubImportFetch("b@x.ai");
+    await click("grokPasteJson");
+    await typeInto(textarea(), JSON.stringify([validDoc("a@x.ai"), validDoc("b@x.ai")]));
+    await click("grokSaveConnection");
+    expect(onSuccess).not.toHaveBeenCalled();
+    await click("cancel");
+    expect(onSuccess).toHaveBeenCalledTimes(1);
   });
 });
