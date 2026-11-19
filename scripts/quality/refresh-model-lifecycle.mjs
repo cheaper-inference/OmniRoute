@@ -15,7 +15,8 @@
 //   npm run quality:refresh-model-lifecycle -- --dry-run
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const ROOT = process.cwd();
 const SNAPSHOT_PATH = path.join(ROOT, "config/quality/model-lifecycle.json");
@@ -192,7 +193,7 @@ async function main() {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().catch((err) => {
     console.error(`[refresh-model-lifecycle] ERROR — ${err?.message ?? err}`);
     process.exit(1);

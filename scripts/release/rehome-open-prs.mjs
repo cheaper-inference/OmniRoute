@@ -31,7 +31,8 @@
 // at `main`, they never target a release branch at all.
 
 import { execFileSync } from "node:child_process";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const REPO = "cheaper-inference/OmniRoute";
 
@@ -183,6 +184,6 @@ function main(argv) {
   }
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main(process.argv.slice(2));
 }

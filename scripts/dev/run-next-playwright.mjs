@@ -3,7 +3,7 @@
 import { spawn } from "node:child_process";
 import { cpSync, existsSync, mkdirSync, readdirSync, renameSync } from "node:fs";
 import { dirname, join } from "node:path";
-import { pathToFileURL } from "node:url";
+
 import {
   resolveRuntimePorts,
   sanitizeColorEnv,
@@ -11,6 +11,7 @@ import {
   withRuntimePortEnv,
 } from "../build/runtime-env.mjs";
 import { bootstrapEnv } from "../build/bootstrap-env.mjs";
+import { realpathSync } from "node:fs";
 
 const mode = process.argv[2] === "start" ? "start" : "dev";
 const cwd = process.cwd();
@@ -293,6 +294,6 @@ export async function main() {
   });
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   await main();
 }

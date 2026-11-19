@@ -6,7 +6,8 @@
  */
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve, join } from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const REPO_ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "../..");
 
@@ -123,7 +124,7 @@ export function generateRouteHandlerMessages(root = REPO_ROOT) {
   return catalogsByCode.length;
 }
 
-if (process.argv[1] && pathToFileURL(resolve(process.argv[1])).href === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   console.log(`Generated ${generateGlobalErrorMessages()} compact global-error catalogs.`);
   console.log(
     `Generated the route-handler catalog from ${generateRouteHandlerMessages()} locales.`

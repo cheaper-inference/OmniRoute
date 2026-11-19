@@ -24,7 +24,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import crypto from "node:crypto";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 export const SEMVER = String.raw`\d+\.\d+\.\d+`;
 const BOLD = "\\*\\*";
@@ -350,5 +351,4 @@ function main() {
   process.exit(stale ? 1 : 0);
 }
 
-if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url)
-  main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

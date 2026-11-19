@@ -30,6 +30,7 @@ import { renderComparisonTable } from "./gen-readme-comparison-table.mjs";
 import { renderPrivacyLocal } from "./gen-readme-privacy-local.mjs";
 import { renderCliTerminal } from "./gen-readme-cli-terminal.mjs";
 import { renderCompressionPipeline } from "./gen-readme-compression-pipeline.mjs";
+import { realpathSync } from "node:fs";
 
 const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -77,7 +78,7 @@ export const README_DIAGRAMS = [
   },
 ];
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   for (const { name, render, out } of README_DIAGRAMS) {
     let svg;
     try {

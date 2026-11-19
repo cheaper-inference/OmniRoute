@@ -28,10 +28,11 @@
 
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 import { describeGateMode } from "./lib/gateMode.mjs";
 import { prModeSkipLine, resolveDerivedScope } from "./lib/derivedArtifactScope.mjs";
+import { realpathSync } from "node:fs";
 
 export const GENERATED_ARTIFACT_TAG = "[generated-artifacts]";
 const E2E_TIMINGS = "config/quality/e2e-timings.json";
@@ -157,7 +158,7 @@ async function main() {
   process.exit(failed.length > 0 ? 1 : 0);
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().catch((err) => {
     console.error(`${GENERATED_ARTIFACT_TAG} error: ${err instanceof Error ? err.message : err}`);
     process.exit(1);

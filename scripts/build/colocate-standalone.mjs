@@ -21,6 +21,7 @@ import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { runBuildTool } from "./buildToolRunner.mjs";
 import { computeDependencyClosure } from "./colocateOptionals.mjs";
+import { realpathSync } from "node:fs";
 
 const ROOT = dirname(dirname(dirname(fileURLToPath(import.meta.url))));
 // STANDALONE defaults to the real build output; OMNIROUTE_STANDALONE_DIR overrides
@@ -242,7 +243,6 @@ export function bundleOptionalWorker(workerDest, build = runBuildTool) {
 }
 
 // Run as a script (npm `postbuild` hook), but stay importable for unit tests.
-const entryScript = process.argv[1] ? pathToFileURL(process.argv[1]).href : null;
-if (entryScript === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main();
 }

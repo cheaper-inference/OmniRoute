@@ -30,7 +30,8 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 // ---------------------------------------------------------------------------
 // Claim triggers
@@ -177,7 +178,7 @@ function buildReport(lines) {
 }
 
 // Only run as CLI entry point.
-const isMain = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isMain = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 
 if (isMain) {
   const summaryFile = getArg("--summary-file", "");

@@ -14,10 +14,11 @@
 // buildBudgetCardCopy() returns every string the card draws, formatted exactly as drawn: it is
 // both the drawn text and what the outlining step shapes (or, for the code roles, subsets).
 import fs from "node:fs";
-import { fileURLToPath } from "node:url";
+
 import { computeFreeModelTotals } from "../../open-sse/config/freeModelCatalog.ts";
 import { svgOpen, gridDefs, esc } from "../docs/readme-diagram-theme.mjs";
 import { outlineSvg } from "../docs/readme-outline.mjs";
+import { realpathSync } from "node:fs";
 
 const W = 1200;
 const STEADY_TYPES = new Set(["recurring-daily", "recurring-monthly", "keyless"]);
@@ -222,7 +223,7 @@ export async function renderBudgetCard() {
   return outlineSvg(svg);
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const outIdx = process.argv.indexOf("--out");
   if (outIdx >= 0 && !process.argv[outIdx + 1]) throw new Error("--out requires a path");
   const out = outIdx >= 0 ? process.argv[outIdx + 1] : "docs/screenshots/free-tier-budget-card.svg";

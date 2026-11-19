@@ -18,10 +18,11 @@
 //   Type "omniroute health"        12.2 → 13.0 s · output 12.8 → 13.6 s · hold until 16.7 s
 //   Ticker: 32 commands scrolling left, one full period every 55 s.
 import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+
 import { drawnSymbol, outlineSvg } from "./readme-outline.mjs";
 import { KIT, svgOpen, esc } from "./readme-diagram-theme.mjs";
 import { RF } from "./readmeFacts.mjs";
+import { realpathSync } from "node:fs";
 
 const NB = " "; // NBSP runs keep the column alignment (spaces collapse in <text>)
 const nb = (n) => NB.repeat(n);
@@ -361,7 +362,7 @@ export async function renderCliTerminal() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/cli-terminal.svg";

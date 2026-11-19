@@ -1,7 +1,7 @@
 import { execFileSync } from "node:child_process";
 import { appendFile, readFile, writeFile } from "node:fs/promises";
 import { resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
 
 const POLICY = "v8-shard-provenance-v1";
 const SHA = /^[a-f0-9]{40}$/;
@@ -377,7 +377,7 @@ async function main() {
   );
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().catch((error) => {
     const reason = /^V8_EVIDENCE_INCOMPLETE:[a-z-]+$/.test(error?.message ?? "")
       ? error.message

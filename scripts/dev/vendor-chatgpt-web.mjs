@@ -19,8 +19,9 @@
 
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
+import { realpathSync } from "node:fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const VENDOR_JSON_PATH = join(__dirname, "../../open-sse/vendor/codex-chatgpt-web/vendor.json");
@@ -119,7 +120,7 @@ async function main(argv) {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main(process.argv.slice(2)).catch((err) => {
     console.error(err.message);
     process.exit(1);

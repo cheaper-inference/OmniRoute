@@ -8,8 +8,9 @@
 import { promises as fs, existsSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { buildMirrorBar, buildSourceBar, replaceLanguageBar } from "./lib/language-bar.mjs";
+import { realpathSync } from "node:fs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -59,7 +60,7 @@ export async function syncLanguageBars({ root = ROOT, dryRun = false } = {}) {
   return changed;
 }
 
-const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isDirectRun = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) {
   const dryRun = process.argv.includes("--dry-run");
   syncLanguageBars({ dryRun })

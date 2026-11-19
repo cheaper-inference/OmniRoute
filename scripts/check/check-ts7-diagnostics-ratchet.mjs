@@ -8,7 +8,8 @@ import { spawnSync } from "node:child_process";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const ROOT = process.cwd();
 const DEFAULT_TSCONFIG = "tsconfig.typecheck-core.json";
@@ -312,7 +313,7 @@ function main() {
   }
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     process.exitCode = main();
   } catch (error) {

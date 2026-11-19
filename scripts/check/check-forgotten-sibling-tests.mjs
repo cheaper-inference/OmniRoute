@@ -6,6 +6,7 @@ import { fileURLToPath } from "node:url";
 import { globSync } from "tinyglobby";
 
 import { readTestImpactMap, resolveImport } from "../quality/build-test-impact-map.mjs";
+import { realpathSync } from "node:fs";
 
 const DEFAULT_ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const SOURCE_ROOTS = ["src/", "open-sse/", "bin/"];
@@ -329,7 +330,7 @@ function main() {
   }
 }
 
-if (fileURLToPath(import.meta.url) === path.resolve(process.argv[1] || "")) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     main();
   } catch (error) {

@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import http from "node:http";
 import net from "node:net";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 import {
   isAllowedGuardHostname,
@@ -126,7 +127,7 @@ export function createGuardProxy({
   return server;
 }
 
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const [host, portText] = (process.env.GUARD_LISTEN || "0.0.0.0:8080").split(":");
   const server = createGuardProxy({
     policy: process.env.GUARD_POLICY || "deny-all",

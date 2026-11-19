@@ -21,7 +21,6 @@
  */
 import { writeFileSync, readFileSync, existsSync, readdirSync, statSync } from "node:fs";
 import { join, relative } from "node:path";
-import { pathToFileURL } from "node:url";
 
 import { parseArgs } from "./lib/args.mjs";
 import { defaultDeps } from "./lib/github.mjs";
@@ -29,6 +28,7 @@ import { classifyIssue } from "./lib/classify.mjs";
 import { detectDelivered, resolveVersion } from "./lib/delivered.mjs";
 import { isStaleNeedDetails, isStaleDefer, detectClosedExternally } from "./lib/lifecycle.mjs";
 import { parseFrontmatter } from "./lib/frontmatter.mjs";
+import { realpathSync } from "node:fs";
 
 function log(verbose, msg) {
   if (verbose) process.stderr.write(`[triage] ${msg}\n`);
@@ -290,7 +290,7 @@ async function main(argv, env, deps = defaultDeps) {
   process.exit(0);
 }
 
-const invokedDirectly = import.meta.url === pathToFileURL(process.argv[1] || "").href;
+const invokedDirectly = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (invokedDirectly) {
   main(process.argv.slice(2), process.env).catch((e) => {
     process.stderr.write(`Fatal: ${e.stack || e.message}\n`);

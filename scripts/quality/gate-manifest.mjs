@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { CHANGE_DOMAINS } from "./classify-pr-changes.mjs";
+import { realpathSync } from "node:fs";
 
 const VALIDATION_ALIAS =
   /^(check(?::|$)|test(?::|$)|quality:|lint(?::|$)|typecheck:|audit:|i18n:check)/;
@@ -116,7 +117,7 @@ export function resolveProfile(manifest, scripts, name) {
   }));
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     const { manifest } = readManifest();
     console.log(

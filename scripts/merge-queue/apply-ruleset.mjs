@@ -857,9 +857,7 @@ export async function main(argv = process.argv.slice(2), env = process.env, deps
 
 function invokedDirectly() {
   try {
-    return (
-      Boolean(process.argv[1]) && realpathSync(process.argv[1]) === fileURLToPath(import.meta.url)
-    );
+    return process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
   } catch {
     return false;
   }

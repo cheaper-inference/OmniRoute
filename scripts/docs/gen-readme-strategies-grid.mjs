@@ -14,10 +14,11 @@
 // shows 18 of the 22 strategies by design — the README table next to it carries
 // cache-optimized, quota-weighted, expiry-first and jev; do not add or remove tiles here.
 import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, afterKicker } from "./readme-diagram-theme.mjs";
 import { RF } from "./readmeFacts.mjs";
+import { realpathSync } from "node:fs";
 
 // Slot geometry inside a 173 × 158 tile: the request leaves (26,79), the four targets sit at
 // SLOT_Y; tracks end at the slot edge, dots stop just before it.
@@ -359,7 +360,7 @@ export async function renderStrategiesGrid() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/strategies-grid.svg";

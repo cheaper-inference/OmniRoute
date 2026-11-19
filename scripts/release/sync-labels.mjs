@@ -22,8 +22,9 @@ import { execFile } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
 import { promisify } from "node:util";
-import { pathToFileURL } from "node:url";
+
 import { load as parseYaml } from "js-yaml";
+import { realpathSync } from "node:fs";
 
 const execFileAsync = promisify(execFile);
 
@@ -191,7 +192,7 @@ async function main(argv) {
   await syncLabels({ labels, apply: opts.apply, repo: opts.repo });
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main(process.argv.slice(2)).catch((err) => {
     console.error(`✖ ${err.stderr || err.message}`);
     process.exit(1);

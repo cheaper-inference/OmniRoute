@@ -8,11 +8,12 @@
 import fs from "node:fs";
 import { promises as fsAsync } from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { execFileSync } from "node:child_process";
 import * as yaml from "js-yaml";
 import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
 import { lookupMessagePath } from "../i18n/message-lookup.mjs";
+import { realpathSync } from "node:fs";
 
 const cwd = process.cwd();
 const out = {};
@@ -263,7 +264,7 @@ async function i18nUiCoverage() {
 // Only run the collection pipeline when this file is executed directly.
 // When imported (e.g. in tests), only the exported pure functions are available
 // without triggering the expensive ESLint + i18n filesystem walks.
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   eslintCounts();
   coverage();
   coverageByModule();

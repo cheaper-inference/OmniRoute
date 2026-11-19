@@ -9,10 +9,11 @@
  * two independent failure messages. Prefer this on docs-gates CI; individual
  * scripts remain for targeted local runs.
  */
-import { pathToFileURL } from "node:url";
+
 import { collectApiRouteFiles, collectApiRouteUrlPaths } from "./lib/apiRoutes.mjs";
 import { runOpenapiRoutesCheck } from "./check-openapi-routes.mjs";
 import { runDocsSymbolsCheck } from "./check-docs-symbols.mjs";
+import { realpathSync } from "node:fs";
 
 function main() {
   const implPaths = collectApiRouteUrlPaths();
@@ -29,4 +30,4 @@ function main() {
   process.exit(openapi.ok && docs.ok ? 0 : 1);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

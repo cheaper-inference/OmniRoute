@@ -7,7 +7,8 @@
 // `prepare` rebuilds on 1 and fails on 2, so a registry hiccup cannot start a ~2 h rebuild.
 import { spawnSync } from "node:child_process";
 import { setTimeout as sleep } from "node:timers/promises";
-import { fileURLToPath } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const EXIT_COMPLETE = 0;
 const EXIT_INCOMPLETE = 1;
@@ -129,6 +130,6 @@ async function main(refs) {
   return EXIT_COMPLETE;
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exit(await main(process.argv.slice(2)));
 }

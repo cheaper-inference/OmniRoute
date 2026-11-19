@@ -26,6 +26,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.resolve(__dirname, "..", "..");
@@ -569,15 +570,16 @@ function main() {
  * contains characters the URL form percent-encodes (e.g. a space), which made
  * the CLI exit 0 without running anything.
  */
-export function isMainEntry(argv1, moduleUrl) {
+export function isMainEntry(argv1 = process.argv[1], moduleUrl = import.meta.url) {
   if (!argv1) return false;
+  let resolved = argv1;
   try {
-    return pathToFileURL(argv1).href === moduleUrl;
+    resolved = realpathSync(argv1);
   } catch {
-    return false;
+    // keep the path as invoked; it may not exist on this machine
   }
+  return pathToFileURL(path.resolve(resolved)).href === moduleUrl;
 }
-
-if (isMainEntry(process.argv[1], import.meta.url)) {
+if (isMainEntry()) {
   main();
 }

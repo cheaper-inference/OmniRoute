@@ -3,9 +3,10 @@ import { createRequire } from "node:module";
 import { isDeepStrictEqual } from "node:util";
 import { mkdirSync, readFileSync, readdirSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { instrumentCoverageSource } from "./coverage-instrumenter.mjs";
 import { verifyCoverageScope } from "./coverage-scope.mjs";
+import { realpathSync } from "node:fs";
 
 const require = createRequire(import.meta.url);
 const { createCoverageMap } = require("istanbul-lib-coverage");
@@ -234,7 +235,7 @@ function main() {
   if (verdict.floorVerdict !== "PASS") process.exitCode = 1;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     main();
   } catch (error) {

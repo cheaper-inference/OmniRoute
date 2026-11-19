@@ -9,15 +9,14 @@
 // órfão real → gate falha com instrução de remoção (evita furo de regressão silencioso).
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import * as yaml from "js-yaml";
 import { reportStaleEntries } from "./lib/allowlist.mjs";
 import {
   apiRoot,
   collectApiRouteUrlPaths,
   collectOptionalCatchAllRoutes,
-} from "./lib/apiRoutes.mjs";
-
+} from "./lib/apiRoutes.mjs";import { realpathSync } from "node:fs";
 const ROOT = process.cwd();
 const OPENAPI_PATH = path.join(ROOT, "docs", "openapi.yaml");
 
@@ -218,4 +217,4 @@ function main() {
   process.exit(result.exitCode);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

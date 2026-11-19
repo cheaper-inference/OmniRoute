@@ -34,6 +34,7 @@
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const FRAGMENT_DIRS = ["features", "fixes", "maintenance"];
@@ -102,7 +103,11 @@ export function classifyFragments({ fragments = [], changelog = "" }) {
     }
     const norm = normalizeBullet(frag.body);
     if (norm.length >= 12 && changelogBullets.has(norm)) {
-      stale.push({ ...frag, reason: "identical bullet text already in CHANGELOG.md", matchedBy: "text" });
+      stale.push({
+        ...frag,
+        reason: "identical bullet text already in CHANGELOG.md",
+        matchedBy: "text",
+      });
     } else {
       keep.push(frag);
     }
@@ -155,7 +160,8 @@ function main(argv) {
 
   const { byPrNumber, byText } = summarizeStale(stale);
   process.stdout.write(`  matched by pr-number: ${byPrNumber} · by text: ${byText}\n`);
-  for (const s of stale) process.stdout.write(`  ${apply ? "removed" : "stale"}: ${s.rel} — ${s.reason}\n`);
+  for (const s of stale)
+    process.stdout.write(`  ${apply ? "removed" : "stale"}: ${s.rel} — ${s.reason}\n`);
 
   if (!apply) {
     process.stdout.write(
@@ -172,6 +178,6 @@ function main(argv) {
   return 0;
 }
 
-if (process.argv[1] && fs.realpathSync(process.argv[1]) === fs.realpathSync(fileURLToPath(import.meta.url))) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exit(main(process.argv.slice(2)));
 }

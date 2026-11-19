@@ -25,6 +25,7 @@
  */
 import fs from "node:fs";
 import path from "node:path";
+import { realpathSync } from "node:fs";
 
 const E2E_DIR = path.join("tests", "e2e");
 const TIMINGS_PATH = path.join("config", "quality", "e2e-timings.json");
@@ -150,6 +151,5 @@ function main() {
 }
 
 const isDirectRun =
-  process.argv[1] &&
-  path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname);
+  process.argv[1] && process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) main();

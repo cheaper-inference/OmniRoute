@@ -74,6 +74,7 @@ import {
   resolvePrDiffBase,
 } from "./lib/gateMode.mjs";
 import * as factsLib from "../release/facts.mjs";
+import { realpathSync } from "node:fs";
 import {
   countFiles,
   parseProviderTotal,
@@ -1542,6 +1543,5 @@ function main() {
   process.exit(result.exitCode);
 }
 
-const invokedDirectly =
-  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const invokedDirectly = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (invokedDirectly) main();

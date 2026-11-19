@@ -1,8 +1,9 @@
 import fs from "node:fs";
 import path from "node:path";
 import { execFileSync } from "node:child_process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { readTestImpactMap } from "./build-test-impact-map.mjs";
+import { realpathSync } from "node:fs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const HUB_RE =
@@ -68,7 +69,7 @@ function changedFiles() {
     .filter(Boolean);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const mapPath = path.join(ROOT, "config/quality/test-impact-map.json");
   let map;
   try {

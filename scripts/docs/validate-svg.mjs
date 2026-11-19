@@ -2,9 +2,9 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { XMLParser, XMLValidator } from "fast-xml-parser";
+import { realpathSync } from "node:fs";
 
 const parser = new XMLParser({
   ignoreAttributes: false,
@@ -110,7 +110,7 @@ export function validateSvgFile(file) {
 
 function isDirectExecution() {
   if (!process.argv[1]) return false;
-  return fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+  return process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 }
 
 if (isDirectExecution()) {

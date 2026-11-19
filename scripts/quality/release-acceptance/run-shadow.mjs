@@ -3,7 +3,7 @@ import { execFileSync, spawnSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { mkdirSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
 import { main as validateAcceptance } from "../validate-release-acceptance.mjs";
 import { gateKey } from "./types.mjs";
 
@@ -111,7 +111,7 @@ export async function runShadow(out, { env = process.env, cwd = process.cwd() } 
   return code;
 }
 
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const out = process.argv[2];
   if (!out) throw new Error("Release acceptance shadow requires an artifact output directory");
   process.exitCode = await runShadow(out);

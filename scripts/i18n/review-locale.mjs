@@ -11,8 +11,9 @@ import { existsSync, readFileSync, promises as fs } from "node:fs";
 import path from "node:path";
 import process from "node:process";
 import { execFileSync } from "node:child_process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { backendConfig, callChat } from "./lib/translate-backend.mjs";
+import { realpathSync } from "node:fs";
 
 // ----- .env loader (same contract as sync-ui-keys.mjs: repo-root .env, already-set vars win)
 (function loadDotEnv() {
@@ -238,7 +239,7 @@ async function main() {
   );
 }
 
-const isDirectRun = process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isDirectRun = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) {
   main().catch((e) => {
     console.error(`[review] ${e.message}`);

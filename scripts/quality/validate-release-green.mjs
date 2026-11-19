@@ -51,6 +51,7 @@ import { load as parseYaml } from "js-yaml";
 import { runGateProcess } from "./gate-process.mjs";
 import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
 import { loadFullCiProfile, staticGateOutcome } from "./release-green-static-profile.mjs";
+import { realpathSync } from "node:fs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
@@ -1434,6 +1435,6 @@ async function main() {
 }
 
 // Run only when invoked directly (so tests can import the pure helpers).
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main();
 }

@@ -55,6 +55,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { resolveCycleBase } from "./list-uncovered-commits.mjs";
 import { queuePrByCommit } from "../merge-queue/history-map.mjs";
+import { realpathSync } from "node:fs";
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const MAINTAINER = "diegosouzapw";
@@ -983,6 +984,6 @@ export function main(argv = process.argv.slice(2)) {
   return 0;
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exit(main());
 }
