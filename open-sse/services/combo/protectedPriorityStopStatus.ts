@@ -46,3 +46,17 @@ export function isComboEmptyPoolNoEligibleTargetsEnabled(): boolean {
     return false;
   }
 }
+
+/**
+ * Opt-in gate for the crash-storm breaker (open-sse/services/crashStormBreaker.ts). Skipping a
+ * provider is a routing change, so it ships behind a default-off flag. It lives here for the same
+ * boundary reason as above. Fail closed: an unreadable flag store keeps the legacy routing.
+ */
+export function isCrashStormBreakerEnabled(): boolean {
+  try {
+    return isRegisteredFeatureFlagEnabled("CRASH_STORM_BREAKER_ENABLED");
+  } catch {
+    // no-effect: an unreadable flag store keeps the legacy routing (breaker off)
+    return false;
+  }
+}

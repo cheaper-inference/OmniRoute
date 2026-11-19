@@ -66,6 +66,7 @@ import {
   isHedgeCancelledSentinel,
   isAccountSemaphoreCapacityFailure,
   isLocalQueueCapacityErrorBody,
+  isSelfInflictedComboFailure,
   isLocalProcessPressureResponse,
   toRecordedTarget,
   resolveDelayMs,
@@ -80,6 +81,7 @@ import { applyComboTargetExhaustion } from "./targetExhaustion.ts";
 import { buildBudgetExhaustedResponse } from "./budgetExhaustion.ts";
 import { advanceNativeCodexTurnGeneration, pinNativeCodexTurn } from "./nativeCodexTurnPin.ts";
 import { recordComboDecision } from "./decisionTrace.ts";
+import { recordCrashFailure } from "../crashStormBreaker.ts";
 import { recordProviderCooldown } from "../providerCooldownTracker.ts";
 import {
   validateResponseQuality,
@@ -115,7 +117,10 @@ import type { ExecuteTargetResult, ExecuteTargetAttemptOptions } from "./attempt
 import { readAttemptFailure, resolveAttemptRetryAfter } from "./attemptFailure.ts";
 import type { ResponseValidationConfig } from "./responseValidation.ts";
 import { resolveComboDailyReset } from "./comboDailyResetClock.ts";
-import type { ProtectedPriorityStopCause } from "./protectedPriorityStopStatus.ts";
+import {
+  isCrashStormBreakerEnabled,
+  type ProtectedPriorityStopCause,
+} from "./protectedPriorityStopStatus.ts";
 import { isProviderProbeResponse } from "../../../src/shared/utils/providerProbeResult.ts";
 import { recordLocalCircuitRefusal } from "./localCircuitRefusal.ts";
 import { getStrategyTraits } from "./strategyRegistry.ts";
@@ -822,6 +827,17 @@ export async function executeTargetAttempt(
       return { ok: false, response: result };
     }
     const retryAfter = resolveAttemptRetryAfter(failure);
+
+    // Crash-storm breaker feed (opt-in): recurring same-signature self-inflicted
+    // failures on one provider trip the pre-dispatch crash_storm gate. One sample
+    // per target, so same-target retries never count twice.
+    if (
+      retry === 0 &&
+      isCrashStormBreakerEnabled() &&
+      isSelfInflictedComboFailure(errorText, structuredError)
+    ) {
+      recordCrashFailure(provider, errorText, result.status);
+    }
 
     // Track earliest retryAfter
     if (

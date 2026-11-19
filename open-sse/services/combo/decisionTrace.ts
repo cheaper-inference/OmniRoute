@@ -50,6 +50,7 @@ export const COMBO_SKIP_REASONS = [
   "low_confidence",
   "jev_unavailable",
   "cliproxy_management_health",
+  "crash_storm",
 ] as const;
 
 export type ComboSkipReason = (typeof COMBO_SKIP_REASONS)[number];
