@@ -7,6 +7,7 @@ import Link from "next/link";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Button } from "@/shared/components";
 import ProviderIcon from "@/shared/components/ProviderIcon";
+import { flowColorAlpha } from "@/shared/components/flow/edgeStyles";
 import { getHeaderIconProviderId, providerText } from "../providerPageHelpers";
 import type { ProviderMessageTranslator } from "../providerPageHelpers";
 import type { ProviderNotice } from "@/lib/providers/catalog";
@@ -70,6 +71,9 @@ export default function ProviderPageHeader({
     "Partner link — supports OmniRoute at no extra cost to you"
   );
 
+  // The brand colour as an 8% tint behind the icon; no tint when the catalog has no colour.
+  const brandTint = providerInfo.color ? flowColorAlpha(providerInfo.color, 8) : undefined;
+
   // Resolve the API-key registration link: prefer apiKeyUrl, fall back to
   // signupUrl, hide when neither is set (#9270).
   const noticeUrl = providerInfo.notice?.apiKeyUrl || providerInfo.notice?.signupUrl;
@@ -102,7 +106,7 @@ export default function ProviderPageHeader({
           {/* The brand colour is only a tint behind the icon; text uses neutral/primary tokens. */}
           <span
             className="inline-flex items-center justify-center rounded-lg"
-            style={{ backgroundColor: `${providerInfo.color}15` }}
+            style={{ backgroundColor: brandTint }}
           >
             <ProviderIcon
               providerId={getHeaderIconProviderId(
@@ -152,7 +156,7 @@ export default function ProviderPageHeader({
               variant="ghost"
               size="sm"
               onClick={onOpenTutorial}
-              className="h-auto min-h-0 px-0 text-sm font-medium text-primary underline underline-offset-2 hover:bg-transparent hover:text-text-main"
+              className="h-auto min-h-0 px-0 text-sm text-primary underline underline-offset-2 hover:bg-transparent hover:text-text-main"
             >
               Tutorial
             </Button>

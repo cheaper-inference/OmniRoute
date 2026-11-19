@@ -9,6 +9,8 @@
 // over the API disappears from the bare repository. PR heads are published by the sandbox as
 // refs/pull/<n>/head and mirrored into the fake pull (head.sha). Only the state branch
 // (omni-queue-state) lives in the fake's own object store, written through the Contents API.
+// The queue refs are protected by default (fake.branchRules: the queue-refs ruleset's rules on
+// omni-queue-state and every omni-queue/… name); world.unprotect(ref, rule) drops one.
 //
 // Ticks are built the way main() builds them (createTickDeps from the environment), with the clock
 // injected and git isolated from the user's configuration.
@@ -38,6 +40,37 @@ const TOKEN = "ghs_e2eInstallationToken";
 /** The repository owner's token (OMNI_QUEUE_LAND_TOKEN): only the landing uses it. */
 export const LAND_TOKEN = "ghp_e2eOwnerLandToken";
 const ZERO = "0".repeat(40);
+
+const EMPTY_OUTPUT = Object.freeze({ title: null, summary: null, text: null });
+/** Output of a failing required check in the shape scenarios 1–10 were written against. */
+const REPORTER_OUTPUT = Object.freeze({
+  title: "1 failing test",
+  summary: "tests/unit/widget.test.ts",
+  text: null,
+});
+/**
+ * The only annotation GitHub Actions writes on a job whose step exits non-zero. It names no test
+ * (node:test / vitest emit no failure annotation in this repository), so the classifier can match
+ * such a failure by check name only.
+ */
+const EXIT_CODE_ANNOTATION = Object.freeze({
+  path: ".github",
+  start_line: 1,
+  end_line: 1,
+  annotation_level: "failure",
+  title: null,
+  message: "Process completed with exit code 1.",
+});
+/** What GitHub writes on a job it cancels at its `timeout-minutes` (conclusion `cancelled`). */
+const MAX_EXECUTION_TIME_ANNOTATION = Object.freeze({
+  path: ".github",
+  start_line: 1,
+  end_line: 1,
+  annotation_level: "failure",
+  title: null,
+  message:
+    "The job running on runner GitHub Actions 7 has exceeded the maximum execution time of 30 minutes.",
+});
 
 /** fake-github `externalRefs` backend over the bare repository (keys "heads/<branch>"). */
 export function gitRefsBackend(sb) {
@@ -77,7 +110,8 @@ export function gitRefsBackend(sb) {
  * @param {import("node:test").TestContext} t
  * @param {{mode?: "live"|"shadow", start?: string, config?: object, landToken?: string|null}}
  *   [options]  landToken: OMNI_QUEUE_LAND_TOKEN of the ticks (null = not set); the fake GitHub
- *   accepts it as the owner (APPROVER)
+ *   accepts it as the owner (APPROVER). `config.flakyReruns` is 0 unless a scenario sets it (the
+ *   shipped config says 1): the scenarios written before the re-run test what follows it.
  */
 export async function createQueueWorld(t, options = {}) {
   const {
@@ -112,7 +146,7 @@ export async function createQueueWorld(t, options = {}) {
   fake.externalRefs = gitRefsBackend(sb);
   fake.tokenActors.set(LAND_TOKEN, APPROVER);
 
-  const config = { ...loadConfig(), mode, ...overrides };
+  const config = { ...loadConfig(), mode, flakyReruns: 0, ...overrides };
   const configPath = join(sb.root, "omni-queue.config.json");
   writeFileSync(configPath, `${JSON.stringify(config, null, 2)}\n`);
 
@@ -170,6 +204,7 @@ export async function createQueueWorld(t, options = {}) {
         n,
         Object.keys(files).map((filename) => ({ filename, status: "added" }))
       );
+      world.reportPrGates(n);
       return head;
     },
 
@@ -182,7 +217,57 @@ export async function createQueueWorld(t, options = {}) {
       for (const filename of Object.keys(files)) {
         if (!known.has(filename)) fake.files.get(n).push({ filename, status: "added" });
       }
+      world.reportPrGates(n);
       return head;
+    },
+
+    /**
+     * The PR gates (config.prChecksRequired) GitHub Actions reports on the current head of PR #n,
+     * one check suite per gate as ci.yml and quality.yml each run in their own workflow:
+     * `conclusion` for each (default "success"; null = still running) unless `conclusions` names
+     * one. openPr and pushToPr report them green, as the PR's own CI passing; a scenario about
+     * the gates reports other conclusions on top. No workflow run is registered for these suites,
+     * so none can be told superseded: each counts and the worst wins (reportPrGateRun reports a
+     * gate from a listed workflow run instead).
+     */
+    reportPrGates(n, { conclusion = "success", conclusions = {} } = {}) {
+      const pull = fake.pulls.get(n);
+      for (const name of config.prChecksRequired ?? []) {
+        fake.addCheckRun(pull.head.sha, {
+          name,
+          conclusion: Object.hasOwn(conclusions, name) ? conclusions[name] : conclusion,
+          headBranch: pull.head.ref,
+        });
+      }
+    },
+
+    /**
+     * One workflow run of workflow `workflowId` on the current head of PR #n, started by `event`
+     * (default pull_request; workflow_dispatch for a maintainer's dispatch at the same SHA), as
+     * GitHub lists it: a new run with a check suite of its own holding one job `name` that
+     * concluded `conclusion` (null = still running). A later call with the same `workflowId` and
+     * `event` is a newer run of the same workflow on the same head (a retarget re-triggers ci.yml
+     * and quality.yml): it supersedes the earlier run's suite. A run of another event does not.
+     * Returns the workflow run.
+     */
+    reportPrGateRun(n, name, { conclusion = "success", workflowId, event = "pull_request" }) {
+      const pull = fake.pulls.get(n);
+      const check = fake.addCheckRun(pull.head.sha, {
+        name,
+        conclusion,
+        headBranch: pull.head.ref,
+      });
+      const run = fake.addWorkflowRun({
+        headSha: pull.head.sha,
+        headBranch: pull.head.ref,
+        event,
+        checkSuiteId: check.check_suite.id,
+        workflowId,
+        name: `workflow ${workflowId}`,
+        status: conclusion === null ? "in_progress" : "completed",
+        conclusion,
+      });
+      return run;
     },
 
     headOf(n) {
@@ -237,6 +322,13 @@ export async function createQueueWorld(t, options = {}) {
       });
     },
 
+    /**
+     * When set, a function run once right before the tick's next git push to the base branch (the
+     * merge-ff landing push), after the tick and the landing read the base tip: somebody merges in
+     * that window, the race the push's lease refuses. Cleared when it runs.
+     */
+    beforeBasePush: null,
+
     /** One tick, built like main() (fresh runner directory every time). */
     async tick({ action = "tick" } = {}) {
       tickCount += 1;
@@ -245,6 +337,27 @@ export async function createQueueWorld(t, options = {}) {
         { ...env, RUNNER_TEMP: runnerTemp },
         { now: clock.now, gitEnv, log: (line) => logs.push(line) }
       );
+      // The git runners of the tick, unchanged except that a push to the base runs
+      // world.beforeBasePush first (the App's and, with landing.actor "owner", the land token's).
+      const baseDst = `:refs/heads/${QBASE}`;
+      const hooked = (factory) =>
+        factory &&
+        ((cwd) => {
+          const git = factory(cwd);
+          return {
+            ...git,
+            run(args, opts) {
+              const hook = world.beforeBasePush;
+              if (hook && args[0] === "push" && args.some((a) => String(a).endsWith(baseDst))) {
+                world.beforeBasePush = null;
+                hook();
+              }
+              return git.run(args, opts);
+            },
+          };
+        });
+      deps.gitFor = hooked(deps.gitFor);
+      deps.landGitFor = hooked(deps.landGitFor);
       const from = fake.requests.length;
       const result = await runTick(deps, { base: QBASE, action });
       return { result, requests: fake.requests.slice(from) };
@@ -310,13 +423,60 @@ export async function createQueueWorld(t, options = {}) {
     /**
      * Report the three required checks of the in-flight candidate as GitHub Actions does on a
      * push of its ref: one push workflow run on the candidate ref and its check suite (whose
-     * head_branch is that ref). `red` decides whether "Gate / CI" fails; by default a candidate
-     * is red when it contains the head of one of `world.culprits`.
+     * head_branch is that ref). `red` = a test fails; by default a candidate is red when it
+     * contains the head of one of `world.culprits`. `hang` = a job hangs until GitHub cancels it
+     * at its time limit; by default when the candidate contains the head of one of `world.hangs`.
+     *
+     * Green, or red with `world.failingJob` unset: the shape scenarios 1–10 use, "Gate / CI"
+     * alone fails, with a reporter title. Otherwise the failing jobs are reported the way GitHub
+     * Actions reports them in this repository: the test job `world.failingJob` concludes
+     * `failure` with only the step's exit-code annotation, the hanging job `world.hangJob`
+     * concludes `cancelled` with GitHub's "exceeded the maximum execution time" annotation, and
+     * the aggregate "Gate / CI" fails with them (its own exit-code annotation, no title).
+     * `runStatus` "in_progress" keeps the workflow run open (see reportChecks).
      */
-    runCi(sha, ref, { red = world.containsCulprit(sha) } = {}) {
+    runCi(
+      sha,
+      ref,
+      {
+        red = world.containsCulprit(sha),
+        hang = world.containsHang(sha),
+        runStatus = "completed",
+      } = {}
+    ) {
+      if (!hang && (!red || world.failingJob === null)) {
+        world.reportChecks(sha, {
+          headBranch: ref,
+          conclusions: { "Gate / CI": red ? "failure" : "success" },
+          runStatus,
+        });
+        return;
+      }
+      const extraRuns = [];
+      if (red) {
+        if (world.failingJob === null) {
+          throw new Error("runCi: a red candidate that also hangs needs world.failingJob");
+        }
+        extraRuns.push({
+          name: world.failingJob,
+          conclusion: "failure",
+          annotations: [EXIT_CODE_ANNOTATION],
+        });
+      }
+      if (hang) {
+        extraRuns.push({
+          name: world.hangJob,
+          conclusion: "cancelled",
+          annotations: [MAX_EXECUTION_TIME_ANNOTATION],
+        });
+      }
       world.reportChecks(sha, {
         headBranch: ref,
-        conclusions: { "Gate / CI": red ? "failure" : "success" },
+        conclusions: { "Gate / CI": "failure" },
+        failureOutput: EMPTY_OUTPUT,
+        annotations: { "Gate / CI": [EXIT_CODE_ANNOTATION] },
+        extraRuns,
+        runStatus,
       });
     },
 
@@ -324,7 +484,14 @@ export async function createQueueWorld(t, options = {}) {
      * One workflow run on `sha` with the three required checks in a check suite of its own.
      * `event` "pull_request" = the CI of a PR whose head is that commit; `suiteBranch` is the
      * head_branch GitHub reports for the suite (null for a fork PR). `conclusion` applies to
-     * every check unless `conclusions` names one.
+     * every check unless `conclusions` names one. A failing required check carries
+     * `failureOutput` (default: a reporter title); `annotations` maps a required check name to
+     * the raw annotations GitHub serves for its run. `extraRuns` are more jobs of the same
+     * workflow run (same check suite), after the required ones: [{name, conclusion,
+     * annotations?, output?}]. The workflow run concludes `failure` when a job did not succeed,
+     * else `success`; with `runStatus` "in_progress" it stays open with no conclusion while its
+     * check runs are completed (a job failed first, the others still run), until
+     * world.concludeRuns.
      */
     reportChecks(sha, options = {}) {
       const {
@@ -333,38 +500,174 @@ export async function createQueueWorld(t, options = {}) {
         event = "push",
         conclusion = "success",
         conclusions = {},
+        failureOutput = REPORTER_OUTPUT,
+        annotations = {},
+        extraRuns = [],
+        runStatus = "completed",
       } = options;
       clock.advance(1);
       let suiteId;
-      for (const name of config.requiredChecks) {
-        const result = conclusions[name] ?? conclusion;
+      const jobs = [
+        ...config.requiredChecks.map((name) => {
+          const result = conclusions[name] ?? conclusion;
+          return {
+            name,
+            conclusion: result,
+            output: result === "failure" ? failureOutput : EMPTY_OUTPUT,
+            annotations: annotations[name] ?? [],
+          };
+        }),
+        ...extraRuns.map((job) => ({ output: EMPTY_OUTPUT, annotations: [], ...job })),
+      ];
+      for (const job of jobs) {
         const run = fake.addCheckRun(sha, {
-          name,
-          conclusion: result,
+          name: job.name,
+          conclusion: job.conclusion,
           headBranch: suiteBranch,
           suiteId,
-          output:
-            result === "failure"
-              ? { title: "1 failing test", summary: "tests/unit/widget.test.ts", text: null }
-              : { title: null, summary: null, text: null },
+          output: { ...job.output },
         });
+        if (job.annotations.length) {
+          fake.annotations.set(
+            run.id,
+            job.annotations.map((a) => ({ ...a }))
+          );
+        }
         suiteId = run.check_suite.id;
       }
-      fake.addWorkflowRun({ headSha: sha, headBranch, event, checkSuiteId: suiteId });
+      const failed = jobs.some((job) => job.conclusion !== "success");
+      const open = runStatus !== "completed";
+      fake.addWorkflowRun({
+        headSha: sha,
+        headBranch,
+        event,
+        checkSuiteId: suiteId,
+        status: runStatus,
+        conclusion: open ? null : failed ? "failure" : "success",
+      });
+      clock.advance(1);
+    },
+
+    /**
+     * Every push workflow run on `sha` still open at its first attempt concludes: `failure` when a
+     * check run of its suite did not succeed, else `success`.
+     */
+    concludeRuns(sha) {
+      clock.advance(1);
+      for (const run of fake.workflowRuns) {
+        if (run.head_sha !== sha || run.event !== "push" || run.status === "completed") continue;
+        if (run.run_attempt !== 1) continue;
+        const failed = (fake.checkRuns.get(sha) ?? []).some(
+          (check) =>
+            check.check_suite.id === run.check_suite_id &&
+            !["success", "skipped", "neutral"].includes(check.conclusion)
+        );
+        Object.assign(run, { status: "completed", conclusion: failed ? "failure" : "success" });
+      }
+      clock.advance(1);
+    },
+
+    /** The queued re-run attempts of the push runs on `sha` start: status `in_progress`. */
+    startRerun(sha) {
+      for (const run of fake.workflowRuns) {
+        if (run.head_sha === sha && run.event === "push" && run.status === "queued") {
+          run.status = "in_progress";
+        }
+      }
+    },
+
+    /**
+     * The re-run GitHub Actions runs after POST /actions/runs/:id/rerun-failed-jobs: for every
+     * push workflow run on `sha` whose re-run attempt (run_attempt above 1, queued or in progress)
+     * is not completed, each failed check run of its suite gets a new check run of the same name
+     * in the same suite, started after the old one completed, that passes (`pass`) or fails the
+     * same way; then the attempt concludes.
+     */
+    reportRerun(sha, { pass }) {
+      clock.advance(1);
+      const waiting = fake.workflowRuns.filter(
+        (run) =>
+          run.head_sha === sha &&
+          run.event === "push" &&
+          run.run_attempt > 1 &&
+          run.status !== "completed"
+      );
+      for (const run of waiting) {
+        const failed = (fake.checkRuns.get(sha) ?? []).filter(
+          (check) =>
+            check.check_suite.id === run.check_suite_id &&
+            !["success", "skipped", "neutral"].includes(check.conclusion)
+        );
+        for (const old of failed) {
+          const rerun = fake.addCheckRun(sha, {
+            name: old.name,
+            conclusion: pass ? "success" : old.conclusion,
+            suiteId: run.check_suite_id,
+            output: { ...old.output },
+          });
+          if (!pass && fake.annotations.has(old.id)) {
+            fake.annotations.set(
+              rerun.id,
+              fake.annotations.get(old.id).map((a) => ({ ...a }))
+            );
+          }
+        }
+        Object.assign(run, { status: "completed", conclusion: pass ? "success" : "failure" });
+      }
       clock.advance(1);
     },
 
     /** PR numbers whose head makes a candidate red (CI fails when the candidate contains it). */
     culprits: new Set(),
 
+    /**
+     * PR numbers whose head makes a job hang (GitHub cancels `world.hangJob` at its time limit
+     * on every candidate that contains it).
+     */
+    hangs: new Set(),
+
+    /**
+     * Base SHAs that fail `world.failingJob` themselves: a base check of that exact SHA is red,
+     * and so is every batch composed on it. A commit pushed on top (a repair) is not broken.
+     */
+    brokenBases: new Set(),
+
+    /**
+     * The job a test failure fails ("Unit Tests (2/8)", say). null keeps the shape of scenarios
+     * 1–10: "Gate / CI" fails alone, with a reporter title (see runCi).
+     */
+    failingJob: null,
+
+    /** The job a PR of `world.hangs` makes hang. */
+    hangJob: "Unit Tests (3/8)",
+
     containsCulprit(sha) {
       return [...world.culprits].some((n) => world.isAncestor(world.headOf(n), sha));
     },
 
-    /** CI on whatever is in flight (no-op when idle); returns the in-flight record. */
+    containsHang(sha) {
+      return [...world.hangs].some((n) => world.isAncestor(world.headOf(n), sha));
+    },
+
+    /**
+     * CI on whatever is in flight (no-op when idle); returns the in-flight record. A base check
+     * (f.kind "base-check") runs on the bare base: red only when that SHA is in
+     * `world.brokenBases`. A batch is red when it contains a culprit or is composed on a broken
+     * base, and hangs when it contains a PR of `world.hangs`.
+     */
     ciInFlight() {
       const f = world.state()?.inFlight ?? null;
-      if (f) world.runCi(f.candidateSha, f.candidateRef);
+      if (!f) return f;
+      if (f.kind === "base-check") {
+        world.runCi(f.candidateSha, f.candidateRef, {
+          red: world.brokenBases.has(f.candidateSha),
+          hang: false,
+        });
+      } else {
+        world.runCi(f.candidateSha, f.candidateRef, {
+          red: world.containsCulprit(f.candidateSha) || world.brokenBases.has(f.baseSha),
+        });
+      }
       return f;
     },
 
@@ -379,6 +682,11 @@ export async function createQueueWorld(t, options = {}) {
 
     events(type) {
       return (world.state()?.history ?? []).filter((e) => e.type === type);
+    },
+
+    /** GitHub no longer enforces rule type `rule` (creation, update, deletion) on `ref`. */
+    unprotect(ref, rule) {
+      fake.unprotect(ref, rule);
     },
   };
   return world;
