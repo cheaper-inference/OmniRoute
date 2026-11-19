@@ -47,6 +47,9 @@ class FakeWebSocket {
   }
 }
 
+// Tests below replace `refuse` with a no-op; afterEach puts the original back.
+const originalRefuse = FakeWebSocket.prototype.refuse;
+
 const REQ = (id: string) => ({
   id,
   source: "http-proxy",
@@ -103,6 +106,7 @@ afterEach(() => {
   }
   vi.useRealTimers();
   vi.unstubAllGlobals();
+  FakeWebSocket.prototype.refuse = originalRefuse;
 });
 
 describe("useTrafficStream polling fallback", () => {

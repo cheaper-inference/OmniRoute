@@ -93,3 +93,22 @@ test("two concurrent writers with the same revision: exactly one wins", async ()
   ]);
   assert.deepEqual(results.map((r) => r.status).sort(), [200, 409, 409]);
 });
+
+test("each concurrent writer gets the revision of the order its own reorder produced", async () => {
+  const { createHash } = await import("node:crypto");
+  const revisionOf = (combos: Array<{ id: unknown }>) =>
+    createHash("sha256")
+      .update(combos.map((combo) => String(combo.id)).join("\n"))
+      .digest("hex")
+      .slice(0, 16);
+  const responses = await Promise.all([
+    post({ comboIds: [ids[1], ids[0], ids[2]] }),
+    post({ comboIds: [ids[2], ids[1], ids[0]] }),
+    post({ comboIds: [ids[0], ids[2], ids[1]] }),
+  ]);
+  for (const response of responses) {
+    assert.equal(response.status, 200);
+    const body = await response.json();
+    assert.equal(body.revision, revisionOf(body.combos));
+  }
+});

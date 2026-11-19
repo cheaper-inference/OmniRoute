@@ -77,7 +77,9 @@ export async function POST(request) {
         const revision = await currentRevision();
         if (revision !== expected) return { conflict: revision } as const;
       }
-      return { combos: await reorderCombos(validation.data.comboIds) } as const;
+      const combos = await reorderCombos(validation.data.comboIds);
+      // Read the revision inside the lock: it must describe the order this reorder produced.
+      return { combos, revision: await currentRevision() } as const;
     });
     if ("conflict" in outcome) {
       return NextResponse.json(
@@ -90,7 +92,7 @@ export async function POST(request) {
     }
     await syncToCloudIfEnabled();
 
-    return NextResponse.json({ combos: outcome.combos, revision: await currentRevision() });
+    return NextResponse.json({ combos: outcome.combos, revision: outcome.revision });
   } catch (error) {
     console.log("Error reordering combos:", error);
     return NextResponse.json({ error: "Failed to reorder combos" }, { status: 500 });
