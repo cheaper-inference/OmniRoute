@@ -1,21 +1,23 @@
-/** Match visible catalogue entries by provider as well as model name. */
-export function decisionEndpointModels<
+/** Count native Gemini support and matching catalogue entries for the other routes. */
+export function decisionEndpointModelCount<
   T extends { id: string; parent?: unknown; owned_by?: string; supported_endpoints?: string[] },
->(models: T[], path: string): T[] {
+>(models: readonly T[], path: string): number {
+  // The native route accepts one model, gemini-decision-1, including its qualified alias.
+  // Gemini's chat catalogue does not need to advertise this Decisions-only model.
+  if (path === "/v1beta/decisions") return 1;
+
   const seen = new Set<string>();
-  return models.filter((model) => {
-    if (model.parent) return false;
+  for (const model of models) {
+    if (model.parent) continue;
     const qualified = model.id.includes("/") ? model.id : `${model.owned_by}/${model.id}`;
-    if (seen.has(qualified)) return false;
+    if (seen.has(qualified)) continue;
     const matches =
       path === "/v1/decisions"
         ? qualified === "openai/gpt-6-luna"
-        : path === "/v1beta/decisions"
-          ? qualified === "gemini/gemini-decision-1"
-          : path === "/v1/systemone" &&
-            (model.supported_endpoints?.includes("systemone") ||
-              qualified.startsWith("typesafe/jev-"));
+        : path === "/v1/systemone" &&
+          (model.supported_endpoints?.includes("systemone") ||
+            qualified.startsWith("typesafe/jev-"));
     if (matches) seen.add(qualified);
-    return matches;
-  });
+  }
+  return seen.size;
 }

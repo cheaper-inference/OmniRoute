@@ -1,6 +1,6 @@
 "use client";
 
-import { decisionEndpointModels } from "@/shared/constants/decisionEndpointModels";
+import { decisionEndpointModelCount } from "@/shared/constants/decisionEndpointModels";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Alert } from "@omniroute/ui-kit/alert";
@@ -1968,7 +1968,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 iconBg="bg-chart-3/10"
                 title={t("messagesApi")}
                 path="/v1/messages"
-                models={null}
+                models={endpointData.chat}
+                modelsLoading={modelsLoading}
                 badge="Anthropic"
                 copy={copy}
                 copied={copied}
@@ -1982,8 +1983,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   iconBg="bg-primary/10"
                   title={title}
                   path={path}
-                  models={decisionEndpointModels(allModels, path)}
-                  modelsLoading={modelsLoading}
+                  modelCount={decisionEndpointModelCount(allModels, path)}
+                  modelsLoading={path !== "/v1beta/decisions" && modelsLoading}
                   copy={copy}
                   copied={copied}
                   baseUrl={currentEndpoint}
@@ -2533,6 +2534,7 @@ function EndpointCard({
   title,
   path,
   models,
+  modelCount = models?.length,
   copy,
   copied,
   baseUrl,
@@ -2544,7 +2546,8 @@ function EndpointCard({
   iconBg: string;
   title: string;
   path: string;
-  models: EndpointModelSummary[] | null;
+  models?: EndpointModelSummary[] | null;
+  modelCount?: number;
   copy: CopyHandler;
   copied?: string | null;
   baseUrl: string;
@@ -2571,11 +2574,11 @@ function EndpointCard({
             )}
           </div>
           <span className="text-xs text-text-muted mt-0.5 block">
-            {models === null
+            {modelCount === undefined
               ? "—"
               : modelsLoading
                 ? "..."
-                : t("modelsCount", { count: models.length })}
+                : t("modelsCount", { count: modelCount })}
           </span>
         </div>
       </div>
