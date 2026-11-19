@@ -135,7 +135,9 @@ export class GitHubError extends Error {
  *            head_sha / event (at most 10 pages)
  * @property {(runId: number) => Promise<WorkflowJob[]>} listWorkflowRunJobs   GET
  *            /actions/runs/{runId}/jobs?filter=all (every page): the jobs of every attempt of the
- *            run, each with the id of its check run (checkRunId, read from check_run_url)
+ *            run, each with the id of its check run (checkRunId, read from check_run_url), its
+ *            htmlUrl and runnerId. GitHub also lists here a check run created through the Checks
+ *            API in the run's suite: contracts.isRealWorkflowJob tells the real jobs apart
  * @property {(workflowFile: string, q: {branch?: string, event?: string})
  *            => Promise<WorkflowRun[]>} listWorkflowFileRuns   runs of ONE workflow file, newest
  *            first (first page only: callers look for runs they just triggered)
@@ -378,6 +380,12 @@ export function normalizeWorkflowRun(raw) {
  * @property {string|null} conclusion
  * @property {number|null} checkRunId  the id of the job's check run: the last path segment of its
  *                                     `check_run_url`; null when the payload has none
+ * @property {string|null} htmlUrl  `html_url`: …/actions/runs/<run id>/job/<job id> for a real job,
+ *                                  …/runs/<check run id> for a check run created through the
+ *                                  Checks API that GitHub lists among the run's jobs
+ *                                  (contracts.isRealWorkflowJob); null when absent
+ * @property {number|null} runnerId  `runner_id`: null for a job that never ran and for such a
+ *                                   check run
  */
 
 /** @returns {WorkflowJob} */
@@ -392,6 +400,8 @@ export function normalizeWorkflowJob(raw) {
     status: String(raw.status ?? ""),
     conclusion: raw.conclusion ?? null,
     checkRunId: Number.isSafeInteger(checkRunId) ? checkRunId : null,
+    htmlUrl: typeof raw.html_url === "string" && raw.html_url ? raw.html_url : null,
+    runnerId: Number.isSafeInteger(raw.runner_id) ? raw.runner_id : null,
   };
 }
 
