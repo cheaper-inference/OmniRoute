@@ -304,67 +304,67 @@ production build គឺជាការទទួលខុសត្រូវរប
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ទំព័រ Dashboard (23 ផ្នែក)
-│   ├── api/                # ផ្លូវ API (51 ថត)
-│   └── login/              # ទំព័រផ្ទៀងផ្ទាត់អត្តសញ្ញាណ (.tsx)
-├── domain/                 # ម៉ាស៊ីនគោលការណ៍ (policyEngine, comboResolver, costRules ជាដើម)
-├── lib/                    # តក្កវិជ្ជាអាជីវកម្មស្នូល (.ts)
-│   ├── a2a/                # ម៉ាស៊ីនមេពិធីការ Agent-to-Agent v0.3
-│   ├── acp/                # បញ្ជីឈ្មោះ Agent Communication Protocol
-│   ├── compliance/         # ម៉ាស៊ីនគោលការណ៍អនុលោមភាព
-│   ├── db/                 # ម៉ូឌុលដែន SQLite + ការផ្ទេរទិន្នន័យ 130
-│   ├── memory/             # អង្គចងចាំការសន្ទនាអចិន្ត្រៃយ៍
-│   ├── oauth/              # អ្នកផ្តល់សេវា សេវាកម្ម និងឧបករណ៍ប្រើប្រាស់ OAuth
-│   ├── skills/             # ក្របខណ្ឌជំនាញដែលអាចពង្រីកបាន
-│   ├── usage/              # ការតាមដានការប្រើប្រាស់ និងការគណនាថ្លៃដើម
-│   └── localDb.ts          # ស្រទាប់នាំចេញឡើងវិញប៉ុណ្ណោះ — កុំបន្ថែមតក្កវិជ្ជានៅទីនេះ
-├── middleware/              # Middleware សំណើ (promptInjectionGuard)
-├── mitm/                   # ប្រូកស៊ី MITM (វិញ្ញាបនបត្រ, DNS, ការកំណត់ផ្លូវគោលដៅ)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # សមាសភាគ React (.tsx)
-│   ├── constants/          # និយមន័យអ្នកផ្តល់សេវា (329), វិសាលភាព MCP, យុទ្ធសាស្ត្រកំណត់ផ្លូវ 20
-│   ├── utils/              # ឧបករណ៍បំបែកសៀគ្វី, កម្មវិធីសម្អាត, ឧបករណ៍ជំនួយផ្ទៀងផ្ទាត់អត្តសញ្ញាណ
-│   └── validation/         # Schema Zod v4
-└── sse/                    # ខ្សែដំណើរការប្រូកស៊ី SSE
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # Workspace @omniroute/open-sse
-├── executors/              # ម៉ូឌុលប្រតិបត្តិ 150 (ថ្នាក់ប្រតិបត្តិ + ឧបករណ៍ជំនួយតាមអ្នកផ្តល់សេវានីមួយៗ)
-├── handlers/               # កម្មវិធីដោះស្រាយសំណើ 11 (ការជជែក, ការឆ្លើយតប, embeddings, រូបភាព ជាដើម)
-├── mcp-server/             # ម៉ាស៊ីនមេ MCP (ឧបករណ៍តែមួយគត់ 110, មធ្យោបាយដឹកជញ្ជូន 3, វិសាលភាព 33)
-├── services/               # សេវាកម្មកម្រិតកំពូល 178 (combo, autoCombo, rateLimitManager ជាដើម)
-├── translator/             # កម្មវិធីបកប្រែទ្រង់ទ្រាយ (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # កម្មវិធីបម្លែង Responses API
-└── utils/                  # ម៉ូឌុលឧបករណ៍ប្រើប្រាស់ 22 (ស្ទ្រីម, TLS, ប្រូកស៊ី, ការកត់ត្រា)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # កម្មវិធីកុំព្យូទ័រលើតុ Electron (ឆ្លងវេទិកា)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # កម្មវិធីដំណើរការតេស្ត Node.js (ឯកសារតេស្ត 1,574)
-├── integration/            # តេស្តសមាហរណកម្ម
-├── e2e/                    # តេស្ត Playwright
-├── security/               # តេស្តសុវត្ថិភាព
-├── translator/             # តេស្តជាក់លាក់សម្រាប់កម្មវិធីបកប្រែ
-└── load/                   # តេស្តបន្ទុក
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # កំណត់ត្រាសេចក្តីសម្រេចចិត្តស្ថាបត្យកម្ម
-├── architecture/            # ស្ថាបត្យកម្មប្រព័ន្ធ និងភាពធន់
-├── comparison/              # OmniRoute ធៀបនឹងជម្រើសផ្សេងៗ
-├── compression/             # មគ្គុទ្ទេសក៍ និងច្បាប់បង្ហាប់
-├── dev/                     # មគ្គុទ្ទេសក៍អភិវឌ្ឍន៍
-├── diagrams/                # ដ្យាក្រាមស្ថាបត្យកម្ម
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # មគ្គុទ្ទេសក៍អ្នកប្រើប្រាស់, Docker, ការដំឡើង, ការដោះស្រាយបញ្ហា
-├── i18n/                    # ការបកប្រែ README ជាភាសាផ្សេងៗ
-├── marketing/               # សម្ភារៈទីផ្សារ
-├── ops/                     # ការដាក់ឱ្យប្រើប្រាស់, ប្រូកស៊ី, វិសាលភាពគ្របដណ្តប់, ការចេញផ្សាយ
-├── providers/               # ឯកសារជាក់លាក់តាមអ្នកផ្តល់សេវា
-├── reference/               # ឯកសារយោង API, អថេរបរិស្ថាន, ឧបករណ៍ CLI, កម្រិតប្រើប្រាស់ឥតគិតថ្លៃ
-├── releases/                # កំណត់សម្គាល់ការចេញផ្សាយ
-├── routing/                 # ម៉ាស៊ីន auto-combo, ការចាក់ដំណើរការហេតុផលឡើងវិញ
-├── screenshots/             # រូបថតអេក្រង់ Dashboard
-├── security/                # របាំងការពារ, អនុលោមភាព, ភាពសម្ងាត់, token
-└── specs/                   # លក្ខណៈបច្ចេកទេសនៃការរចនា
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

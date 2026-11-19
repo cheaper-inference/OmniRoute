@@ -21,6 +21,8 @@ process.env.DATA_DIR = TEST_DATA_DIR;
 
 const { defaultEndpointsForProviderNodeApiType } =
   await import("../../src/shared/constants/modelSupportedEndpoints.ts");
+await import("../_helpers/offlineCatalogDiscovery.ts");
+
 const core = await import("../../src/lib/db/core.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
 const modelsDb = await import("../../src/lib/db/models.ts");

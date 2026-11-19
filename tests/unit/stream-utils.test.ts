@@ -2461,12 +2461,34 @@ test("createSSEStream passthrough forwards OpenAI usage-only empty choices chunk
 
   assert.doesNotMatch(text, /\[OmniRoute\] Upstream returned an empty response/);
   assert.match(text, /"choices":\[\]/);
-  assert.match(text, /"usage":\{"prompt_tokens":7,"completion_tokens":3,"total_tokens":10\}/);
+  const usageFrame = text
+    .split("\n")
+    .filter((line) => line.startsWith("data: {"))
+    .map((line) => JSON.parse(line.slice(6)))
+    .find((chunk) => chunk.choices?.length === 0 && chunk.usage);
+  assert.ok(usageFrame, "usage-only frame must remain on the wire");
+  assert.equal(usageFrame.usage.prompt_tokens, 7);
+  assert.equal(usageFrame.usage.completion_tokens, 3);
+  assert.equal(usageFrame.usage.total_tokens, 10);
+  assert.deepEqual(usageFrame.usage.usage_evidence, {
+    input: { source: "reported" },
+    output: { source: "reported" },
+    cacheRead: { source: "unknown" },
+    cacheCreation: { source: "unknown" },
+  });
   assert.equal(onCompletePayload.status, 200);
   assert.equal(onCompletePayload.usage.prompt_tokens, 7);
   assert.equal(onCompletePayload.usage.completion_tokens, 3);
   assert.equal(onCompletePayload.responseBody.choices[0].message.content, "Hello");
-  assert.deepEqual(onCompletePayload.responseBody.usage, usage);
+  assert.deepEqual(onCompletePayload.responseBody.usage, {
+    ...usage,
+    usage_evidence: {
+      input: { source: "reported" },
+      output: { source: "reported" },
+      cacheRead: { source: "unknown" },
+      cacheCreation: { source: "unknown" },
+    },
+  });
 });
 
 test("createSSEStream translated Gemini path clears an invalid cache count after a hit", async () => {
@@ -2512,7 +2534,8 @@ test("createSSEStream passthrough preserves cache evidence across late snapshots
     }
   );
   assert.equal(onCompletePayload.usage.cached_tokens, 4);
-  assert.equal(onCompletePayload.responseBody.usage.cached_tokens, undefined);
+  assert.equal(onCompletePayload.responseBody.usage.cached_tokens, 4);
+  assert.equal(onCompletePayload.responseBody.usage.usage_evidence.cacheRead.source, "reported");
 });
 
 test("createSSEStream translated path clears a prior cache hit on explicit zero", async () => {
