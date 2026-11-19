@@ -105,7 +105,15 @@ test("#15901 translated compaction also preserves the replay declaration through
   const result = transform(request({ _nativeCodexPassthrough: false }));
   assert.deepEqual(result.tools, [{ type: "web_search" }]);
   assert.equal(result.tool_choice, "none");
-  assert.deepEqual(result.input, input);
+  assert.deepEqual(result.input, [
+    {
+      type: "message",
+      role: "developer",
+      content: [{ type: "input_text", text: "Summarize without using tools." }],
+      status: "completed",
+    },
+    ...input,
+  ]);
 });
 
 test("#15901 normal turns retain the existing ID sanitization and tool filtering", () => {
