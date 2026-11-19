@@ -16,7 +16,7 @@ import {
   assertCacheCredentialEndpoint,
   encryptLegacyCacheSecretCopies,
 } from "./cacheSecrets";
-import { getDatabaseStats } from "./stats";
+import { getDatabaseSizeStats } from "./stats";
 import { getState as getVacuumSchedulerState, refreshVacuumScheduler } from "./vacuumScheduler";
 
 const DATABASE_SETTINGS_NAMESPACE = "databaseSettings";
@@ -472,7 +472,7 @@ export function isSemanticCacheDbEnabled(): boolean {
 }
 
 export function getDatabaseSettings(): DatabaseSettings {
-  const dbStats = getDatabaseStats();
+  const dbStats = getDatabaseSizeStats();
   const vacuumState = getVacuumSchedulerState();
   const lastCheck = readLastIntegrityCheck();
 

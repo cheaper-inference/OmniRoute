@@ -46,6 +46,19 @@ function isDbstatAvailable(db: SqliteAdapter): boolean {
   }
 }
 
+/**
+ * Cheap size stats (PRAGMA values only) — no per-table COUNT(*) / dbstat scans,
+ * so it is safe on the main thread even for multi-GB databases (#20615).
+ */
+export function getDatabaseSizeStats(
+  db: SqliteAdapter = getDbInstance()
+): Pick<DatabaseStats, "totalSize" | "pageSize" | "pageCount" | "cacheSize"> {
+  const pageSize = db.pragma("page_size", { simple: true }) as number;
+  const pageCount = db.pragma("page_count", { simple: true }) as number;
+  const cacheSize = db.pragma("cache_size", { simple: true }) as number;
+  return { totalSize: pageSize * pageCount, pageSize, pageCount, cacheSize };
+}
+
 export function getDatabaseStats(db: SqliteAdapter = getDbInstance()): DatabaseStats {
   const pageSize = db.pragma("page_size", { simple: true }) as number;
   const pageCount = db.pragma("page_count", { simple: true }) as number;
@@ -65,8 +78,7 @@ export function getDatabaseStats(db: SqliteAdapter = getDbInstance()): DatabaseS
     try {
       const quotedName = `"${table.name.replaceAll('"', '""')}"`;
       const row = db.prepare(`SELECT COUNT(*) as count FROM ${quotedName}`).get() as
-        | { count: number }
-        | undefined;
+        { count: number } | undefined;
       rowCount = row?.count ?? 0;
     } catch (error) {
       if (!(error instanceof Error) || !error.message.startsWith("no such module:")) {

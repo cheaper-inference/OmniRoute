@@ -1,0 +1,1 @@
+- fix(db): Settings → General no longer runs per-table COUNT(*)/dbstat scans on the main thread when loading database settings (#20615)
