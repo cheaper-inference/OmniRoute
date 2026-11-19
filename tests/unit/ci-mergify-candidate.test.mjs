@@ -160,6 +160,31 @@ const fullLane = new Set(
     .map(([id]) => id)
 );
 
+test("an official queue identity becomes a fast-lane PR when marked ready", () => {
+  const values = jobValues({
+    ...queue,
+    "github.event.action": "ready_for_review",
+    "github.event.pull_request.draft": false,
+  });
+  assert.equal(values["needs.changes.outputs.queueCandidate"], "false");
+  assert.equal(
+    expression(workflow.jobs["admission-verdict"].name, values),
+    policy.profiles.ci.checkName
+  );
+  for (const id of required) assert.equal(scheduled(id, values), !fullLane.has(id), id);
+});
+
+test("retargeting an official queue draft still schedules the complete CI graph", () => {
+  const values = jobValues({
+    ...queue,
+    "github.event.action": "edited",
+    "github.event.changes.base": { ref: { from: "main" } },
+    "github.event.changes.body": { from: "" },
+  });
+  assert.equal(values["needs.changes.outputs.queueCandidate"], "true");
+  for (const id of required) assert.equal(scheduled(id, values), true, id);
+});
+
 test("ready PRs run the fast lane, skip the full matrix, and classification still rules", () => {
   for (const id of required)
     assert.equal(
