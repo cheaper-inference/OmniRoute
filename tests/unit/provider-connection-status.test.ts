@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 const {
   getEffectiveProviderConnectionStatus,
+  getProviderHealth,
   isProviderConnectionConnected,
   isProviderConnectionErrored,
 } = await import("../../src/shared/utils/providerConnectionStatus.ts");
@@ -86,4 +87,69 @@ test("the connection row shows a routing warning instead of a healthy badge", as
     (key) => key
   );
   assert.equal(restored.statusVariant, "success");
+});
+
+test("provider health: any healthy connection wins over errored siblings", () => {
+  assert.equal(
+    getProviderHealth([
+      { isActive: true, testStatus: "error" },
+      { isActive: true, testStatus: "active" },
+    ]),
+    "active"
+  );
+});
+
+test("provider health: error only when no connection is healthy", () => {
+  assert.equal(
+    getProviderHealth([
+      { isActive: true, testStatus: "expired" },
+      { isActive: true, testStatus: "error" },
+    ]),
+    "error"
+  );
+});
+
+test("provider health: no usable connection is idle, never active", () => {
+  assert.equal(getProviderHealth([]), "idle");
+  assert.equal(
+    getProviderHealth([
+      { isActive: false, testStatus: "active" },
+      { isActive: false, testStatus: "error" },
+    ]),
+    "idle"
+  );
+});
+
+test("provider health: forwards `now` so an expired cooldown is healthy again", () => {
+  // Regression guard for `.some(isProviderConnectionConnected)`: `some` passes the
+  // array index as the second argument, which the helper reads as `now` — an
+  // expired cooldown then stays "errored" and the provider stays red forever.
+  const now = Date.parse("2026-07-17T00:00:00.000Z");
+  const connection = {
+    isActive: true,
+    testStatus: "unavailable",
+    rateLimitedUntil: "2026-07-16T23:59:59.000Z",
+  };
+  assert.equal(getProviderHealth([connection], now), "active");
+  assert.equal(
+    getProviderHealth([{ isActive: true, testStatus: "error" }, connection], now),
+    "active"
+  );
+});
+
+test("provider health: a live cooldown keeps the provider errored", () => {
+  const now = Date.parse("2026-07-17T00:00:00.000Z");
+  assert.equal(
+    getProviderHealth(
+      [
+        {
+          isActive: true,
+          testStatus: "unavailable",
+          rateLimitedUntil: "2026-07-17T00:00:01.000Z",
+        },
+      ],
+      now
+    ),
+    "error"
+  );
 });

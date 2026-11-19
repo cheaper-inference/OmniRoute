@@ -10,6 +10,7 @@
 import { getProviderAlias } from "@/shared/constants/providers";
 import { isLoopbackNodeHost } from "@/shared/network/loopbackNodeHost";
 import { hasUnsafeModelIdSyntax } from "../utils/modelIdSafety.ts";
+import { RENDERHOUR_SPEECH_PROVIDER } from "./providers/registry/renderhour/mediaModels.ts";
 import {
   toRegistrySpeechModels as toSyntxSpeechModels,
   toRegistryTranscriptionModels as toSyntxTranscriptionModels,
@@ -149,6 +150,18 @@ export const AUDIO_TRANSCRIPTION_PROVIDERS: Record<string, AudioProvider> = {
       { id: "nova-2", name: "Nova 2" },
       { id: "whisper-large", name: "Whisper Large" },
     ],
+  },
+
+  // Account-scoped: the handler replaces {accountId} with the connection's
+  // providerSpecificData.accountId (URL-encoded) and appends the model id.
+  "cloudflare-ai": {
+    id: "cloudflare-ai",
+    alias: "cf",
+    baseUrl: "https://api.cloudflare.com/client/v4/accounts/{accountId}/ai/run",
+    authType: "apikey",
+    authHeader: "bearer",
+    format: "cloudflare-workers-ai",
+    models: [{ id: "@cf/deepgram/nova-3", name: "Deepgram Nova-3 (Workers AI)" }],
   },
 
   pollinations: {
@@ -763,6 +776,7 @@ export const AUDIO_SPEECH_PROVIDERS: Record<string, AudioProvider> = {
     format: "syntx-audio",
     models: toSyntxSpeechModels(),
   },
+  renderhour: RENDERHOUR_SPEECH_PROVIDER,
 };
 
 /**
@@ -970,7 +984,12 @@ export function missingAudioProviderCredentialsMessage(
  * Get all audio models as a flat list
  */
 export function getAllAudioModels() {
-  const models = [];
+  const models: Array<{
+    id: string;
+    name: string;
+    provider: string;
+    subtype: "transcription" | "speech";
+  }> = [];
 
   for (const [providerId, config] of Object.entries(AUDIO_TRANSCRIPTION_PROVIDERS)) {
     for (const model of config.models) {

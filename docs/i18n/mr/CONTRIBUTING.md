@@ -291,72 +291,72 @@ production build ही CI ची जबाबदारी आहे — ती 
 
 ---
 
-## प्रकल्प संरचना
+## प्रकल्पाची रचना
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # डॅशबोर्ड पृष्ठे (23 विभाग)
-│   ├── api/                # API मार्ग (51 निर्देशिका)
-│   └── login/              # प्रमाणीकरण पृष्ठे (.tsx)
-├── domain/                 # धोरण इंजिन (policyEngine, comboResolver, costRules, इत्यादी)
-├── lib/                    # मुख्य व्यवसाय तर्कशास्त्र (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 प्रोटोकॉल सर्व्हर
-│   ├── acp/                # Agent Communication Protocol नोंदणी
-│   ├── compliance/         # अनुपालन धोरण इंजिन
-│   ├── db/                 # SQLite डोमेन मॉड्यूल्स + 130 स्थलांतरे
-│   ├── memory/             # कायमस्वरूपी संभाषणात्मक स्मृती
-│   ├── oauth/              # OAuth प्रदाते, सेवा आणि उपयुक्तता
-│   ├── skills/             # विस्तारक्षम कौशल्य फ्रेमवर्क
-│   ├── usage/              # वापराचा मागोवा आणि खर्चाची गणना
-│   └── localDb.ts          # केवळ पुनर्निर्यात स्तर — येथे कधीही तर्कशास्त्र जोडू नका
-├── middleware/              # विनंती मिडलवेअर (promptInjectionGuard)
-├── mitm/                   # MITM प्रॉक्सी (प्रमाणपत्र, DNS, लक्ष्य रूटिंग)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React घटक (.tsx)
-│   ├── constants/          # प्रदाता व्याख्या (329), MCP व्याप्ती, 20 रूटिंग धोरणे
-│   ├── utils/              # सर्किट ब्रेकर, सॅनिटायझर, प्रमाणीकरण सहाय्यके
-│   └── validation/         # Zod v4 स्कीमा
-└── sse/                    # SSE प्रॉक्सी पाइपलाइन
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse कार्यक्षेत्र
-├── executors/              # 150 एक्झिक्युटर मॉड्यूल्स (एक्झिक्युटर वर्ग + प्रत्येक प्रदात्यासाठी सहाय्यके)
-├── handlers/               # 11 विनंती हँडलर्स (चॅट, प्रतिसाद, एम्बेडिंग्ज, प्रतिमा, इत्यादी)
-├── mcp-server/             # MCP सर्व्हर (110 अद्वितीय साधने, 3 ट्रान्सपोर्ट्स, 33 व्याप्ती)
-├── services/               # 178 उच्च-स्तरीय सेवा (combo, autoCombo, rateLimitManager, इत्यादी)
-├── translator/             # स्वरूप अनुवादक (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API ट्रान्सफॉर्मर
-└── utils/                  # 22 उपयुक्तता मॉड्यूल्स (स्ट्रीम, TLS, प्रॉक्सी, लॉगिंग)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron डेस्कटॉप ॲप (बहु-प्लॅटफॉर्म)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js चाचणी रनर (1,574 चाचणी फाइल्स)
-├── integration/            # एकत्रीकरण चाचण्या
-├── e2e/                    # Playwright चाचण्या
-├── security/               # सुरक्षा चाचण्या
-├── translator/             # अनुवादक-विशिष्ट चाचण्या
-└── load/                   # भार चाचण्या
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # आर्किटेक्चर निर्णय नोंदी
-├── architecture/            # प्रणाली आर्किटेक्चर आणि लवचिकता
-├── comparison/              # OmniRoute विरुद्ध पर्याय
-├── compression/             # संक्षेपण मार्गदर्शिका आणि नियम
-├── dev/                     # विकास मार्गदर्शिका
-├── diagrams/                # आर्किटेक्चर आकृत्या
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # वापरकर्ता मार्गदर्शिका, Docker, सेटअप, समस्यानिवारण
-├── i18n/                    # आंतरराष्ट्रीयीकृत README भाषांतरे
-├── marketing/               # विपणन साहित्य
-├── ops/                     # उपयोजन, प्रॉक्सी, व्याप्ती, प्रकाशने
-├── providers/               # प्रदाता-विशिष्ट दस्तऐवज
-├── reference/               # API संदर्भ, पर्यावरण चल, CLI साधने, विनामूल्य स्तर
-├── releases/                # प्रकाशन टिपणे
-├── routing/                 # स्वयं-कॉम्बो इंजिन, तर्क पुनरावृत्ती
-├── screenshots/             # डॅशबोर्ड स्क्रीनशॉट्स
-├── security/                # सुरक्षात्मक मर्यादा, अनुपालन, गुप्तता, टोकन्स
-└── specs/                   # डिझाइन तपशील
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

@@ -258,3 +258,49 @@ test("handleVideoGeneration never leaks a stack trace in xAI video error respons
     globalThis.fetch = originalFetch;
   }
 });
+
+test("handleVideoGeneration sends the xAI start frame as { url } and forwards reference_images", async () => {
+  const originalFetch = globalThis.fetch;
+  const originalSetTimeout = globalThis.setTimeout;
+  const createBodies = [];
+
+  globalThis.setTimeout = immediateTimeout;
+  globalThis.fetch = async (url, options = {}) => {
+    const stringUrl = String(url);
+    if (stringUrl === CREATE_URL) {
+      createBodies.push(JSON.parse(await new Response(options.body).text()));
+      return jsonResponse({ request_id: `xai-img-${createBodies.length}`, status: "pending" });
+    }
+    if (stringUrl.startsWith(POLL_URL_PREFIX)) {
+      return jsonResponse({ status: "done", video: { url: "https://videos.x.ai/i2v.mp4" } });
+    }
+    throw new Error(`Unexpected URL: ${stringUrl}`);
+  };
+
+  const call = (extra) =>
+    handleVideoGeneration({
+      body: { model: "xai/grok-imagine-video", prompt: "animate it", ...extra },
+      credentials: { apiKey: "xai-key" },
+      log: null,
+    });
+
+  try {
+    const fromString = await call({ image: "https://example.com/frame.jpg" });
+    const fromObject = await call({
+      image: { url: "data:image/jpeg;base64,AAAA" },
+      reference_images: [{ url: "https://example.com/style.jpg" }],
+    });
+    await call({ image: 42 });
+
+    assert.equal(fromString.success, true);
+    assert.equal(fromObject.success, true);
+    assert.deepEqual(createBodies[0].image, { url: "https://example.com/frame.jpg" });
+    assert.deepEqual(createBodies[1].image, { url: "data:image/jpeg;base64,AAAA" });
+    assert.deepEqual(createBodies[1].reference_images, [{ url: "https://example.com/style.jpg" }]);
+    assert.equal(createBodies[2].image, undefined);
+    assert.equal(createBodies[0].reference_images, undefined);
+  } finally {
+    globalThis.fetch = originalFetch;
+    globalThis.setTimeout = originalSetTimeout;
+  }
+});

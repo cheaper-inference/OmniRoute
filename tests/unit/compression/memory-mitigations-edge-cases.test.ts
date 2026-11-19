@@ -494,6 +494,7 @@ describe("Memory Mitigations — Comprehensive Edge Cases & Failure Modes", () =
       const collector = createStructuredSSECollector({
         maxEvents: 100,
         maxBytes: 200,
+        retainEvents: true,
       });
 
       collector.push({ role: "assistant", content: "hi" });
@@ -513,6 +514,7 @@ describe("Memory Mitigations — Comprehensive Edge Cases & Failure Modes", () =
       const collector = createStructuredSSECollector({
         maxEvents: 5,
         maxBytes: 100000,
+        retainEvents: true,
       });
       for (let i = 0; i < 20; i++) {
         collector.push({ role: "assistant", content: `m${i}` });

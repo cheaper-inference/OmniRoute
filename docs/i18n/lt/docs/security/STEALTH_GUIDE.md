@@ -139,41 +139,63 @@ Susiję to paties rinkinio moduliai:
 
 ---
 
-## Antigravity maskavimas
+## Antigravity Stealth
 
-Antigravity užklausose kviečiančiojo tekstas išsaugomas baitas į baitą. OmniRoute neįterpia nulinio pločio simbolių į užklausas ir nepervadina ar neįterpia įrankių, kad imituotų IDE klientą.
+Antigravity užklausos išsaugoti skambinančiojo tekstą baitais už baitą. OmniRoute neįterpia nulinio pločio simbolių į raginimus ar rename/inject įrankius, kad imituotų IDE klientą.
 
 ### `antigravityHeaderScrub.ts`
 
-Prieš persiunčiant pašalina Stainless SDK žymeklius (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
+Nerūdijančio plieno SDK žymeklius (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`) prieš persiuntimą nulupame.
 
-### ⚠️ Rizika: `ANTIGRAVITY_CREDITS=always` (didelė paskyros blokavimo rizika)
+### ⚠️ rizika: `ANTIGRAVITY_CREDITS=always` (sąskaitos uždraudimo karštoji vieta)
 
-`ANTIGRAVITY_CREDITS=always` (naudojamas `open-sse/executors/antigravity.ts`) nukreipia **kiekvieną** užklausą per Antigravity AI Credit Overages (mokamus Google kreditus), užuot leidus nemokamo plano kvotai riboti naudojimą. Tai dokumentuota kaip funkcija, tačiau tai yra **viena dažniausiai mūsų gaunamų pranešimų apie paslaugų teikimo sąlygų pažeidimą priežasčių** — kelios Google Ultra paskyros buvo užblokuotos su `403 / "service disabled for ToS violation" / insufficient_quota`, kai kelias valandas veikė su `=always`.
+`ANTIGRAVITY_CREDITS=always` (sunaudoja `open-sse/executors/antigravity.ts`) maršrutai** kas** pateikite užklausą per Antigravity AI kreditų viršijimą (sumokėtus Google kreditus), o ne leiskite Google laisvos pakopos kvotos vartams. Tai dokumentuojama kaip savybė, bet taip yra** vienintelė dažniausiai matoma paslaugų teikimo sąlygų pažeidimo ataskaita** — kelios Google Ultra paskyros buvo uždraustos naudojant `403 / "service disabled for ToS violation" / insufficient_quota` po kelių valandų su `=always`.
 
-Apribojimus taiko **Google**, ir OmniRoute negali jų išvengti. Aplinkos kintamojo pavadinimas ir esama dokumentacija sudaro įspūdį, kad šią parinktį saugu įjungti, tačiau taip nėra.
+Prieš srovę vykdomas vykdymas**Google pusė** , nieko OmniRoute negali užkirsti kelio. Dėl env var pavadinimo ir esamų dokumentų jis skamba kaip saugi rankenėlė, kurią galima apversti; tai ne.
 
-**Kodėl tai piktnaudžiavimo aptikimo sistemas suaktyvina labiau nei vien nemokamo plano naudojimas:**
+**Kodėl dėl to piktnaudžiavimo aptikimas yra agresyvesnis nei naudojant tik laisvos pakopos:**
 
-- Nuolatinės automatizuotos vienos Google paskyros išlaidos pažymimos kitaip nei nemokamo plano naudojimas, kuris pasiekia kvotą ir sustoja.
-- Papildomų kreditų naudojimui netaikoma spartos riba, todėl netinkamai sukonfigūruotas klientas per kelias minutes gali išleisti kelis šimtus USD ir atrodyti kaip API rakto perpardavimas arba robotų srautas.
-- Kai keli OmniRoute naudotojai lygiagrečiai naudoja papildomus kreditus iš to paties išorinio IP adreso, signalas dar labiau sustiprėja.
+- Nuolatinės automatizuotos išlaidos vienoje Google paskyroje žymimos kitaip nei nemokamos pakopos įvykdymas-kvota ir sustojimas.
+- Kredito viršijimas neturi normos lubų, todėl netinkamai sukonfigūruotas klientas per kelias minutes gali sudeginti kelis šimtus USD ir atrodyti kaip API rakto perpardavimas arba robotų srautas.
+- Keli OmniRoute naudotojai, lygiagrečiai gaunantys perviršio kreditus iš to paties išorinio IP sujungia signalą.
 
-**Rekomenduojama praktika:**
+**Rekomenduojama laikysena:**
 
-1. Palikite numatytąją reikšmę `ANTIGRAVITY_CREDITS=off`, nebent operatorius aiškiai prisiima mokamų kreditų naudojimo ir paskyrai taikomų sankcijų riziką. `retry` pirmiausia siunčia įprastą užklausą ir ne daugiau kaip vieną kartą įterpia kreditus po tinkamos kvotos 429 klaidos; `always` įterpia kreditus jau į pirmąją užklausą.
-2. **Paskirstykite apkrovą tarp teikėjų naudodami Auto-Combo** (`model: "auto"` arba `kr/glm/etc`-combo), užuot apkrovę vieną Antigravity paskyrą iki ribos.
-3. **Nustatykite kiekvieno ryšio RPM ribas** Antigravity teikėjo redagavimo puslapyje (Dashboard → Providers → Antigravity → ryšys → spartos apribojimas). 30–60 RPM yra pagrįsta viršutinė ilgalaikio naudojimo riba.
-4. **Naudokite stabilų, operatoriaus valdomą aukštesnio lygio tinklo ryšį** ir venkite vieną paskyrą bendrinti tarp nesusijusių naudotojų ar darbo krūvių.
-5. **Jei paskyra užblokuota**: pateikite apeliaciją per `support.google.com` → „Restore Workspace/Account access“, pridėdami tikslų Google atsiųstą `quota_exceeded` / `service disabled` atsakymo turinį. Paskyros atkūrimas negarantuojamas.
+1. Išsaugokite numatytąjį `ANTIGRAVITY_CREDITS=off` nebent operatorius aiškiai prisiima apmokėto kredito ir sąskaitos vykdymo riziką. `retry` pirmiausia išsiunčia įprastą užklausą ir įveda kreditus ne daugiau kaip vieną kartą po tinkamos kvotos 429; `always` įveda kreditus pagal pirmą užklausą.
+2. **Paskirstykite apkrovą tarp paslaugų teikėjų naudodami automatinį derinimą** (`model: "auto"` arba `kr/glm/etc` -combo), užuot užpildę vieną Antigravity paskyrą.
+3. **Nustatykite jungties RPM ribas** Antigravity teikėjo redagavimo puslapyje (Dashboard → Providers → Antigravity → connection → rate limit). 30–60 RPM yra tinkama viršutinė riba ilgalaikiam naudojimui.
+4. **Naudokite stabilų, operatoriaus valdomą tinklo ryšį** ir venkite dalytis viena paskyra nesusijusiems naudotojams ar darbo krūviams.
+5. **Jei uždrausta** : apeliacija per `support.google.com` → „Atkurti Workspace/Account prieigą“ ir tiksliai Google `quota_exceeded` / `service disabled` atsakymo tekstas. Atkūrimas negarantuojamas.
 
-Aplinkos kintamųjų žinyne aprašytos kiekvieno kreditų režimo pasekmės paskyrai ir išlaidoms.
+Aplinkos nuoroda dokumentuoja kiekvieno kreditų režimo sąskaitą ir išlaidas.
 
-Susijusios vietos:
+#### Ne tik `=always`: Antigravity OAuth maršrutizavimas apskritai
 
-- `open-sse/executors/antigravity.ts` — nuskaito `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — prisijungimo duomenų perdavimas
-- Pradinis incidento pranešimas: diskusija [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+Sustabdymas neapsiriboja kredito perviršiu. 2026 m. lapkričio mėn. ataskaitose (#19223, #19266) aprašomos kelios Google paskyros, sustabdytos nukreipiant per `antigravity` ir `agy` (Antigravity CLI) teikėjus su:
+
+```
+403: This service has been disabled in this account for violation of Terms of Service.
+Please submit an appeal to continue using this product.
+```
+
+Abu teikėjai autentifikuojasi naudodami Antigravity produkto OAuth seansą, apie kurį įspėja prietaisų skydelio pranešimas apie riziką („Šis teikėjas naudoja jūsų oficialų produktą session/OAuth, kuris nėra įgaliotas naudoti proxy/router “) prieš prijungiant ryšį. Nė viena iš aukščiau pateiktų rekomendacijų neleidžia naudoti tokio naudojimo; jie tik sumažina vienos paskyros srautą.
+
+**Įgaliotos API sąsajos Gemini modeliams.** Google siūlo programinę prieigą prie Gemini per savo APIs, kurią OmniRoute palaiko kaip įprastus API raktų teikėjus:
+
+| Teikėjo ID | Prietaisų skydelio pavadinimas | Kredencialas                                                                          |
+| ---------- | ------------------------------ | ------------------------------------------------------------------------------------- |
+| `gemini`   | Gemini (Google AI Studio)      | Gemini API raktas iš Google AI Studio (galima nemokama pakopa)                        |
+| `vertex`   | Viršūnė AI                     | Paslaugos paskyra JSON, OAuth prieigos raktas arba Vertex Express API raktas (Gemini) |
+
+Šie teikėjai naudoja kredencialų Google problemas API prieigai, skirtingai nei Antigravity produkto seanso metu. Jomis ne kiekvienas naudojimas atitinka reikalavimus arba pašalinama vykdymo rizika: kiekvienai jų taikomos atskiros sąlygos, kurias operatorius turi patikrinti, kad būtų naudojamasi. Pavyzdžiui, [Gemini API papildomos paslaugų teikimo sąlygos](https://ai.google.dev/gemini-api/terms) leidžia teikti tik mokamas paslaugas, kai API klientai yra prieinami vartotojams Europos ekonominėje erdvėje, Šveicarijoje arba Jungtinėje Karalystėje, o į nemokamoms paslaugoms išsiųstas turinys gali būti naudojamas Google produktams tobulinti. Vietoj to Vertex AI patenka į Google Cloud sąlygas ( [specifinės paslaugos sąlygos](https://cloud.google.com/terms/service-terms) ). Kainos ir kvotos atitinka šias API sąlygas, o ne Antigravity prenumeratą.
+
+Operatoriai, norintys išvengti anksčiau aprašytų Antigravity sustabdymų, patikrinę, ar jų naudojimas atitinka teikėjo sąlygas, turėtų nukreipti Gemini srautą per vieną iš šių teikėjų, o ne `antigravity` / `agy`.
+
+Lietimo taškai:
+
+- `open-sse/executors/antigravity.ts` — skaito `process.env.ANTIGRAVITY_CREDITS`
+- `src/lib/oauth/providers/antigravity.ts` — kredencialų santechnika
+- Originalus incidento pranešimas: Diskusija [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 

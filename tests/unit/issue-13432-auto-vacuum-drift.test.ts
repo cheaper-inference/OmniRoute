@@ -46,6 +46,17 @@ function seedMigration046Config(mode: "NONE" | "FULL" | "INCREMENTAL") {
   );
 }
 
+// A fresh database is now created INCREMENTAL. #13432 is about databases that already exist in
+// NONE mode, so turn the live file back into one (journal_mode must be off WAL for the VACUUM).
+function makeLegacyNoneDb() {
+  const db = core.getDbInstance();
+  db.pragma("journal_mode = DELETE");
+  db.pragma("auto_vacuum = NONE");
+  db.exec("VACUUM");
+  db.pragma("journal_mode = WAL");
+  return db;
+}
+
 function readPersistedDriftRecord(): unknown {
   const db = core.getDbInstance();
   const row = db
@@ -69,10 +80,10 @@ test.after(() => {
 });
 
 test("issue #13432: startup drift detection records the mismatch WITHOUT running a blocking VACUUM", () => {
-  const db = core.getDbInstance();
+  const db = makeLegacyNoneDb();
 
   const initialLiveMode = optimizationSettings.getAutoVacuumModeForDb(db);
-  assert.equal(initialLiveMode, "NONE", "sanity: fresh test DB defaults to auto_vacuum=NONE");
+  assert.equal(initialLiveMode, "NONE", "sanity: the legacy test DB is auto_vacuum=NONE");
 
   seedMigration046Config("INCREMENTAL");
 
@@ -94,7 +105,7 @@ test("issue #13432: startup drift detection records the mismatch WITHOUT running
 });
 
 test("issue #13432: vacuumScheduler.runNow() reconciles a pending startup drift out-of-request", async () => {
-  const db = core.getDbInstance();
+  const db = makeLegacyNoneDb();
   seedMigration046Config("INCREMENTAL");
   optimizationSettings.applyStoredDatabaseOptimizationSettings(db);
   assert.deepEqual(readPersistedDriftRecord(), { configured: "INCREMENTAL", live: "NONE" });

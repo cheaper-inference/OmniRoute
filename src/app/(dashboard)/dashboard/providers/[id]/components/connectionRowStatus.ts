@@ -115,7 +115,7 @@ export function getStatusPresentation(
       statusLabel: providerText(t, "statusDeactivated", "Deactivated"),
       errorType,
       errorBadge,
-      errorTextClass: "text-error font-bold",
+      errorTextClass: "text-error font-semibold",
     };
   }
 
@@ -170,7 +170,7 @@ export function getStatusPresentation(
       statusLabel: providerText(t, "statusBanned", "Banned (403)"),
       errorType,
       errorBadge,
-      errorTextClass: "text-error font-bold",
+      errorTextClass: "text-error font-semibold",
     };
   }
 

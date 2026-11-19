@@ -1,4 +1,5 @@
-import { createHmac, randomBytes } from "node:crypto";
+import { randomBytes } from "node:crypto";
+import { opaqueTokenFingerprint } from "@omniroute/open-sse/utils/opaqueTokenFingerprint.ts";
 import { getDbInstance } from "./core";
 import { getExistingDbInstance } from "./singleton";
 import type { SqliteAdapter } from "./adapters/types";
@@ -53,9 +54,11 @@ export function trafficRoute(proxy: unknown, db: SqliteAdapter = getDbInstance()
   }
   const tuple = credentialTuple(proxy, value);
   if (!tuple) return { key: "unattributed", proxyId: null, kind: "unattributed" };
-  const digest = createHmac("sha256", identitySalt(db))
-    .update(JSON.stringify(tuple), "utf8")
-    .digest("hex");
+  // Keyed identity fingerprint under the private 256-bit salt, never compared to authenticate
+  // anything; this database already keeps the proxy settings themselves (proxy_registry and the
+  // proxyConfig namespace). Same bytes as the historical HMAC-SHA-256 hex, so persisted
+  // `legacy:` rows keep matching.
+  const digest = opaqueTokenFingerprint(JSON.stringify(tuple), { key: identitySalt(db) });
   return { key: `legacy:${digest}`, proxyId: null, kind: "legacy" };
 }
 
