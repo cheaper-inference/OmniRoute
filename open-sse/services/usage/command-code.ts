@@ -231,9 +231,17 @@ export async function getCommandCodeUsage(apiKey: string, connectionId?: string)
     const weekly = windowQuota(windowLimits.weekly, "Weekly window");
     if (weekly) quotas.weekly = weekly;
 
-    const creditsTotal = creditCap ?? periodUsed + remaining;
+    // The cap bounds the monthly allowance only. Purchased/free credits are a
+    // separate pool: they never shrink the monthly usage (cap - monthly), but
+    // they stay spendable, so they extend the total next to `remaining`.
+    const monthlyRemaining = Math.max(0, toNumber(creditsObj.monthlyCredits, 0));
+    const extraRemaining = remaining - monthlyRemaining;
+    const creditsTotal =
+      creditCap != null
+        ? Math.max(creditCap, monthlyRemaining) + extraRemaining
+        : periodUsed + remaining;
     const creditsUsed =
-      creditCap != null ? Math.max(0, creditCap - remaining) : Math.max(0, periodUsed);
+      creditCap != null ? Math.max(0, creditCap - monthlyRemaining) : Math.max(0, periodUsed);
     const creditsRemainingPct =
       creditsTotal > 0
         ? Math.round((remaining / creditsTotal) * 1000) / 10

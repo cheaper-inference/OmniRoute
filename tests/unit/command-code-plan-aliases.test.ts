@@ -12,7 +12,12 @@ const { getCommandCodeUsage } = __testing;
 
 const originalFetch = globalThis.fetch;
 
-type QuotaShape = { used: number; total: number; remaining?: number };
+type QuotaShape = {
+  used: number;
+  total: number;
+  remaining?: number;
+  remainingPercentage?: number;
+};
 
 function jsonResponse(body: unknown, status = 200) {
   return new Response(JSON.stringify(body), {
@@ -40,11 +45,11 @@ function subscription(planId: string) {
 
 const SUMMARY = { totalCost: 0 };
 
-function installMockFetch(planId: string) {
+function installMockFetch(planId: string, credits: unknown = CREDITS) {
   globalThis.fetch = async (input: RequestInfo | URL) => {
     const url = String(input);
     if (url.includes("/alpha/whoami")) return jsonResponse(WHOAMI);
-    if (url.includes("/alpha/billing/credits")) return jsonResponse(CREDITS);
+    if (url.includes("/alpha/billing/credits")) return jsonResponse(credits);
     if (url.includes("/alpha/billing/subscriptions")) return jsonResponse(subscription(planId));
     if (url.includes("/alpha/usage/summary")) return jsonResponse(SUMMARY);
     return jsonResponse({ error: `unhandled fetch: ${url}` }, 500);
@@ -86,6 +91,23 @@ describe("Command Code short plan ids and credit caps", () => {
     assert.match(r.plan || "", /Team Pro/);
     assert.equal(r.quotas?.credits?.total, 40);
     assert.equal(r.quotas?.credits?.used, 36);
+  });
+
+  it("an exhausted monthly allowance shows as used even when extra credits remain", async () => {
+    // Purchased/free credits are a separate pool from the plan's monthly cap: they
+    // must not be subtracted from the cap (that reported used=0 / 100% left), but
+    // they still count as spendable balance on top of the cap.
+    installMockFetch("go", {
+      credits: { monthlyCredits: 0, purchasedCredits: 10, freeCredits: 0 },
+      windowLimits: {},
+    });
+    const r = (await getCommandCodeUsage("cc-key")) as {
+      quotas?: { credits?: QuotaShape };
+    };
+    assert.equal(r.quotas?.credits?.used, 10); // the whole 10-credit monthly cap
+    assert.equal(r.quotas?.credits?.remaining, 10); // the purchased credits
+    assert.equal(r.quotas?.credits?.total, 20); // monthly cap + extra credits
+    assert.equal(r.quotas?.credits?.remainingPercentage, 50);
   });
 
   it("a plan without a known cap keeps the spend-derived total", async () => {
