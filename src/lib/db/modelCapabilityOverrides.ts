@@ -207,35 +207,42 @@ export function getReasoningEffortsOverride(
   }
 }
 
-export function setModelCapabilityOverride(
-  target: string,
-  key: ModelCapabilityOverrideKey,
-  value: number | string | boolean | readonly string[]
-): boolean {
-  const parsedTarget = parseModelOverrideTarget(target);
-  if (!parsedTarget || !isSupportedKey(key)) return false;
+type OverrideInputValue = number | string | boolean | readonly string[];
+type NormalizedOverrideValue = number | boolean | ReasoningEffortOverrideValue[];
 
-  let normalizedValue: number | boolean | ReasoningEffortOverrideValue[];
+/** Accepts a boolean or its "true"/"false" string form (query-string style input). */
+function normalizeBooleanValue(value: OverrideInputValue): boolean | null {
+  if (typeof value === "boolean") return value;
+  if (value === "true") return true;
+  if (value === "false") return false;
+  return null;
+}
+
+/** The value as stored for `key`, or null when it is not valid for that key. */
+function normalizeOverrideValue(
+  key: ModelCapabilityOverrideKey,
+  value: OverrideInputValue
+): NormalizedOverrideValue | null {
   if (key === "reasoning_efforts") {
     const parsed = Array.isArray(value)
       ? parseReasoningEffortsOverride(value.join(","))
       : parseReasoningEffortsOverride(typeof value === "string" ? value : "");
-    if (!parsed.ok) return false;
-    normalizedValue = parsed.efforts;
-  } else if (isBooleanKey(key)) {
-    if (typeof value === "boolean") {
-      normalizedValue = value;
-    } else if (value === "true") {
-      normalizedValue = true;
-    } else if (value === "false") {
-      normalizedValue = false;
-    } else {
-      return false;
-    }
-  } else {
-    if (!isPositiveInteger(value)) return false;
-    normalizedValue = value;
+    return parsed.ok ? parsed.efforts : null;
   }
+  if (isBooleanKey(key)) return normalizeBooleanValue(value);
+  return isPositiveInteger(value) ? value : null;
+}
+
+export function setModelCapabilityOverride(
+  target: string,
+  key: ModelCapabilityOverrideKey,
+  value: OverrideInputValue
+): boolean {
+  const parsedTarget = parseModelOverrideTarget(target);
+  if (!parsedTarget || !isSupportedKey(key)) return false;
+
+  const normalizedValue = normalizeOverrideValue(key, value);
+  if (normalizedValue === null) return false;
 
   getDbInstance()
     .prepare(

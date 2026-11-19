@@ -81,6 +81,26 @@ function setNestedOverride(
   byModel.set(modelId, value);
 }
 
+function setNestedBooleanOverride(
+  map: Map<string, Map<string, Map<BooleanModelCapabilityOverrideKey, boolean>>>,
+  provider: string,
+  modelId: string,
+  key: BooleanModelCapabilityOverrideKey,
+  value: boolean
+): void {
+  let byModel = map.get(provider);
+  if (!byModel) {
+    byModel = new Map();
+    map.set(provider, byModel);
+  }
+  let byKey = byModel.get(modelId);
+  if (!byKey) {
+    byKey = new Map();
+    byModel.set(modelId, byKey);
+  }
+  byKey.set(key, value);
+}
+
 /**
  * Load all capability/custom-model tables in one uninterrupted JS turn.
  * Callers must not yield between the bulk reads if they need a coherent view;
@@ -113,20 +133,14 @@ export function createModelCapabilityResolutionSnapshot(
         reasoningEffortsOverrides.set(entry.provider, byModel);
       }
       byModel.set(entry.modelId, entry.value);
-    } else if (isBooleanKey(entry.key)) {
-      let byModel = booleanCapabilityOverrides.get(entry.provider);
-      if (!byModel) {
-        byModel = new Map();
-        booleanCapabilityOverrides.set(entry.provider, byModel);
-      }
-      let byKey = byModel.get(entry.modelId);
-      if (!byKey) {
-        byKey = new Map();
-        byModel.set(entry.modelId, byKey);
-      }
-      if (typeof entry.value === "boolean") {
-        byKey.set(entry.key, entry.value);
-      }
+    } else if (isBooleanKey(entry.key) && typeof entry.value === "boolean") {
+      setNestedBooleanOverride(
+        booleanCapabilityOverrides,
+        entry.provider,
+        entry.modelId,
+        entry.key,
+        entry.value
+      );
     }
   }
 

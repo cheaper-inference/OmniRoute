@@ -720,6 +720,14 @@ function getBooleanCapabilityOverride(
   const bulk = snapshot?.booleanCapabilityOverrides ?? null;
   const canonical = getBooleanModelCapabilityOverride(resolved.provider, resolved.model, key, bulk);
   if (canonical !== null) return canonical;
+  // PATCH stores a custom node's `<prefix>/<model>` target under the node id, while a
+  // prefix-addressed lookup (the catalog alias) arrives with the prefix: map it back,
+  // after the direct match, as getCompatVisionOverride() does.
+  const nodeId = resolved.provider ? getProviderNodeIdByPrefixSync(resolved.provider) : null;
+  if (nodeId && nodeId !== resolved.provider) {
+    const mapped = getBooleanModelCapabilityOverride(nodeId, resolved.model, key, bulk);
+    if (mapped !== null) return mapped;
+  }
   return resolved.rawModel && resolved.rawModel !== resolved.model
     ? getBooleanModelCapabilityOverride(resolved.provider, resolved.rawModel, key, bulk)
     : null;

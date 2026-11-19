@@ -14,6 +14,7 @@ const caps = await import("../../src/lib/modelCapabilities.ts");
 const overrides = await import("../../src/lib/db/modelCapabilityOverrides.ts");
 const route = await import("../../src/app/api/model-capability-overrides/route.ts");
 const snapshotMod = await import("../../src/lib/modelCapabilityResolutionSnapshot.ts");
+const nodes = await import("../../src/lib/db/providers/nodes.ts");
 
 beforeEach(() => {
   coreDb.resetDbInstance();
@@ -120,6 +121,34 @@ describe("model capability boolean overrides (#20127)", () => {
     assert.equal(
       overrides.getBooleanModelCapabilityOverride("openai", "gpt-4o", "structured_output"),
       null
+    );
+  });
+
+  it("applies an override stored under a custom node id to its prefix-addressed model", async () => {
+    const nodeId = "openai-compatible-chat-20127-0000-4000-8000-000000000001";
+    await nodes.createProviderNode({
+      id: nodeId,
+      type: "openai-compatible",
+      prefix: "boolproxy",
+      name: "BoolProxy",
+      apiType: "chat",
+      baseUrl: "https://example.com/v1",
+    });
+
+    const res = await patchOverride("boolproxy/demo-model", "structured_output", false);
+    assert.equal(res.status, 200);
+    assert.equal(overrides.listModelCapabilityOverrides()[0]?.provider, nodeId);
+
+    const viaPrefix = { provider: "boolproxy", model: "demo-model" };
+    assert.equal(caps.getResolvedModelCapabilities(viaPrefix).structuredOutput, false);
+    const snapshot = snapshotMod.createModelCapabilityResolutionSnapshot();
+    assert.equal(
+      caps.getResolvedModelCapabilities(viaPrefix, undefined, snapshot).structuredOutput,
+      false
+    );
+    assert.equal(
+      caps.getResolvedModelCapabilities({ provider: nodeId, model: "demo-model" }).structuredOutput,
+      false
     );
   });
 
