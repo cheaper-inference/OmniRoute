@@ -284,3 +284,27 @@ test("runBaseline adds a streamTtft measurement only when --stream-url is set", 
   assert.ok(!JSON.stringify(report).includes("sk-test"), "the key never reaches the report");
   assert.match(renderMarkdown(report), /streamTtft/);
 });
+
+test("measureStreamTtft: a stream that stalls is a failure, not a hang", async () => {
+  // Sends the lifecycle frame, then nothing: no content, no terminal event, no end.
+  const server = http.createServer((_req, res) => {
+    res.writeHead(200, { "content-type": "text/event-stream" });
+    res.write(SCRIPTS.openai.pre);
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", () => resolve()));
+  const { port } = server.address() as { port: number };
+  try {
+    const r = await measureStreamTtft({
+      url: `http://127.0.0.1:${port}/stream`,
+      init: {},
+      fetchImpl: fetch,
+      now: () => performance.now(),
+      timeoutMs: 300,
+    });
+    assert.equal(r.ok, false);
+    assert.match(r.reason, /stream failed/);
+  } finally {
+    server.closeAllConnections();
+    await new Promise<void>((resolve) => server.close(() => resolve()));
+  }
+});

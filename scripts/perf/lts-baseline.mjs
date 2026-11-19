@@ -478,11 +478,21 @@ export function classifySsePayload(p) {
  * shortcut: an OpenAI chunk that carries both content and finish_reason counts as content only,
  * so such a stream needs its `data: [DONE]` line; OmniRoute always sends it.
  */
-export async function measureStreamTtft({ url, init, fetchImpl, now }) {
+const STREAM_TIMEOUT_MS = 120_000;
+
+export async function measureStreamTtft({
+  url,
+  init,
+  fetchImpl,
+  now,
+  timeoutMs = STREAM_TIMEOUT_MS,
+}) {
   const t0 = now();
   let res;
   try {
-    res = await fetchImpl(url, init);
+    // A fresh signal per run (init is shared across runs). It also aborts the body read, so a
+    // stream that stalls ends in the catch below instead of hanging the whole baseline.
+    res = await fetchImpl(url, { ...init, signal: AbortSignal.timeout(timeoutMs) });
   } catch (e) {
     return { ok: false, reason: `request failed: ${errorMessage(e)}` };
   }
