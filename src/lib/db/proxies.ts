@@ -31,6 +31,10 @@ import {
 import { isGlobalProxyEnabled, PROXY_ALIVE_PREDICATE } from "./proxies/guards";
 import { bumpProxyRegistryGeneration } from "./proxies/registryGeneration";
 import { isProxyRegistryStatus } from "@/shared/constants/proxyRegistryStatus";
+
+/** upsertProxy input: like ProxyPayload, but an import may omit the proxy type. */
+export type UpsertProxyPayload = Omit<ProxyPayload, "type"> & { type?: ProxyPayload["type"] };
+
 export {
   hasBlockingProxyAssignment,
   hasBlockingProxyAssignmentForProvider,
@@ -356,6 +360,7 @@ export async function createProxy(payload: ProxyPayload) {
  *
  * On an existing row the status is written only when the payload carries a valid one,
  * so a write that omits it never revives a proxy the operator or auto-disable turned off.
+ * Likewise an omitted type keeps the stored one; only a new row defaults to "http".
  *
  * `claimOwnership: false` is reserved for subscription sync: a matched row whose
  * subscription_id differs from the payload's (manual rows included), or whose source
@@ -364,14 +369,14 @@ export async function createProxy(payload: ProxyPayload) {
  * a caller that omits it would find manual rows (null === null) counted as owned.
  */
 export async function upsertProxy(
-  payload: ProxyPayload
+  payload: UpsertProxyPayload
 ): Promise<{ proxy: ProxyRegistryRecord | null; action: "created" | "updated" }>;
 export async function upsertProxy(
-  payload: ProxyPayload,
+  payload: UpsertProxyPayload,
   options: { claimOwnership?: boolean }
 ): Promise<{ proxy: ProxyRegistryRecord | null; action: "created" | "updated" | "skipped" }>;
 export async function upsertProxy(
-  payload: ProxyPayload,
+  payload: UpsertProxyPayload,
   options: { claimOwnership?: boolean } = {}
 ): Promise<{ proxy: ProxyRegistryRecord | null; action: "created" | "updated" | "skipped" }> {
   const db = getDbInstance();
@@ -397,10 +402,12 @@ export async function upsertProxy(
     if (!claimOwnership && (ownerChanged || sourceChanged)) {
       return { proxy: null, action: "skipped" };
     }
-    const { status, ...rest } = payload;
-    const changes: Partial<ProxyPayload> = isProxyRegistryStatus(status)
-      ? { ...rest, status }
-      : rest;
+    const { status, type, ...rest } = payload;
+    const changes: Partial<ProxyPayload> = {
+      ...rest,
+      ...(type !== undefined ? { type } : {}),
+      ...(isProxyRegistryStatus(status) ? { status } : {}),
+    };
     // Sync and import paths delegate here with an already-proven subscription
     // (sync checks the subscription once up front; import payloads never carry
     // one), so the existence check is skipped on this path. Route updates go
@@ -411,7 +418,7 @@ export async function upsertProxy(
     return { proxy: updated, action: "updated" };
   }
 
-  const created = await createProxy(payload);
+  const created = await createProxy({ ...payload, type: payload.type ?? "http" });
   return { proxy: created, action: "created" };
 }
 

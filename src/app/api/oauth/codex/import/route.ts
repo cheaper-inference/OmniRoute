@@ -287,7 +287,7 @@ export async function POST(request: Request) {
   const parsed = bodySchema.safeParse(rawBody);
   if (parsed.success === false) {
     return NextResponse.json(
-      { error: parsed.error.issues[0]?.message ?? "Invalid request body" },
+      { error: sanitizeErrorMessage(parsed.error.issues[0]?.message ?? "Invalid request body") },
       { status: 400 }
     );
   }

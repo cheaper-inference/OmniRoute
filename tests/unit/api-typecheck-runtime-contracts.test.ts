@@ -11,6 +11,7 @@ const core = await import("../../src/lib/db/core.ts");
 const settings = await import("../../src/lib/db/settings.ts");
 const { POST: preview } = await import("../../src/app/api/omniroute/route/preview/route.ts");
 const { POST: modelsDev } = await import("../../src/app/api/settings/models-dev/route.ts");
+const { POST: codexImport } = await import("../../src/app/api/oauth/codex/import/route.ts");
 const { decryptApiKeySecret } = await import("../../src/lib/db/apiKeys/secretAtRest.ts");
 let externalCalls = 0;
 const fetchOriginal = globalThis.fetch;
@@ -83,6 +84,16 @@ test("models-dev invalid action returns a real 400 response instead of undefined
   assert.ok(response instanceof Response);
   assert.equal(response.status, 400);
   assert.ok((await response.json()).error);
+});
+test("codex import rejects a non-object accounts payload with its schema message", async () => {
+  const response = await codexImport(
+    request("http://localhost/api/oauth/codex/import", { accounts: 42 })
+  );
+  assert.equal(response.status, 400);
+  assert.deepEqual(await response.json(), {
+    error: "accounts must be an object or an array of objects",
+  });
+  assert.equal(externalCalls, 0);
 });
 test("malformed stored key values are absent, not opaque non-string credentials", () => {
   assert.equal(decryptApiKeySecret({}), null);
