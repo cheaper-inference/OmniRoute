@@ -143,6 +143,43 @@ const SURFACES: Surface[] = [
   },
 ];
 
+function assertNoCapDisclosure(body: Record<string, unknown>): void {
+  const { requestId, ...payload } = body;
+  assert.equal(typeof requestId, "string", "refusal includes a correlation ID");
+  assert.match(
+    requestId as string,
+    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
+    "correlation ID must be a UUID, not operator configuration"
+  );
+  // A random correlation UUID may coincidentally contain a cap's digits.
+  // Validate that metadata separately and inspect every remaining response field.
+  const serializedPayload = JSON.stringify(payload);
+  for (const cap of Object.values(OPERATOR_CAPS)) {
+    assert.ok(
+      !serializedPayload.includes(String(cap)),
+      "a refused call must not disclose the configured caps"
+    );
+  }
+}
+
+test("cap disclosure checks allow coincidental UUID digits but reject actual leaks", () => {
+  const refusal = {
+    requestId: "00000000-7919-4000-8000-000000000001",
+    error: { message: "Management scope required", type: "invalid_request" },
+  };
+  assertNoCapDisclosure(refusal);
+  for (const [field, cap] of Object.entries(OPERATOR_CAPS)) {
+    for (const leaked of [
+      { ...refusal, limits: { [field]: cap } },
+      { ...refusal, error: { ...refusal.error, message: `Configured cap: ${cap}` } },
+      { ...refusal, error: { ...refusal.error, details: { [field]: cap } } },
+    ]) {
+      assert.throws(() => assertNoCapDisclosure(leaked), /must not disclose/);
+    }
+  }
+  assert.throws(() => assertNoCapDisclosure({ ...refusal, requestId: "7919" }), /must be a UUID/);
+});
+
 async function assertRefused(
   surface: Surface,
   make: RequestFactory,
@@ -165,10 +202,7 @@ async function assertRefused(
   assert.ok(!serialized.includes("at /"), "error body must not leak a stack trace");
   if (expectedStatus === 403) assert.match(body.error?.message ?? "", /manage/i);
   if (secret) assert.ok(!serialized.includes(secret), "error body must not echo the credential");
-  assert.ok(
-    !serialized.includes(String(OPERATOR_CAPS.maxActiveKeys)),
-    "a refused call must not disclose the configured caps"
-  );
+  assertNoCapDisclosure(body);
   assert.deepEqual(storedCaps(), before, "a refused call must not change the caps");
 }
 
