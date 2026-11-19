@@ -63,7 +63,8 @@ export function parseSensenovaOrigin(baseUrl: unknown): string | null {
  */
 export function isSensenovaQuotaConnection(connection: SensenovaOriginConnection): boolean {
   const psd = connection.providerSpecificData;
-  const record = psd && typeof psd === "object" && !Array.isArray(psd) ? (psd as Record<string, unknown>) : null;
+  const record =
+    psd && typeof psd === "object" && !Array.isArray(psd) ? (psd as Record<string, unknown>) : null;
   const baseUrl = record?.baseUrl;
   if (typeof baseUrl === "string" && baseUrl.trim() !== "") {
     return parseSensenovaOrigin(baseUrl) !== null;
