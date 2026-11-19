@@ -311,6 +311,7 @@ Use `IF NOT EXISTS`, `IF EXISTS`, and `OR IGNORE` / `OR REPLACE` clauses liberal
 3. **Backfill data carefully**: use `UPDATE ... WHERE ...` to handle existing rows
 4. **Check order and naming**: `npm run test:migrations:fresh` (all migrations on an empty database) and `npm run check:migration-numbering`
 5. **Test on a copy**: never run untested migrations on production
+6. **A table created from code needs a migration too**: if a module also creates the table lazily (`CREATE TABLE IF NOT EXISTS`, kept as a self-heal path), a migration must create it with the same DDL. Otherwise a clean install and an upgraded install end up with different schemas, depending on whether that code path ran. `tests/unit/db/lazy-table-migration-guard.test.ts` scans `src/` and `open-sse/` and fails on a lazy `CREATE` without a migration (#20557). Example: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
 Example:
 
