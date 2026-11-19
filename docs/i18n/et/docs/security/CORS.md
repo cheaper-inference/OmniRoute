@@ -116,32 +116,10 @@ Päritoluallikaid võrreldakse tõstutundetult ja lõpus olevat kaldkriipsu eira
 saab määrata käitusajal asukohas **Juhtpaneel → Turvalisus → CORS-i lubatud päritoluallikad** ilma
 taaskäivitamiseta.
 
-## API-võtmed võrreldes küpsiseseanssidega
+## API võtmed vs küpsiseansid
 
-- **Bearer / `x-api-key` (`/v1/*` järeldusliides):** brauserid ei lisa
-  neid kunagi automaatselt. CORS ei ole siin sisuline tõke — tõkkeks on API-võti —
-  mistõttu on see liides teadlikult liberaalne, et brauseri- ja
-  Electroni kliendid saaksid lugeda vastuseid, millele neil on juba õigus.
-  Leevendatud peegeldamine järgib valideeritud võtit, mitte pelgalt päise olemasolu: kui
-  `REQUIRE_API_KEY=false` teenindab päringut anonüümselt, säilitab selle edukas vastus
-  fail-closed lubatud loendi. Autentimise tagasilükkamised (401) jäävad loetavaks, et
-  kliendid saaksid kuvada tühistatud või valesti sisestatud võtme (#5242): konveieri enda
-  401 säilitab peegeldamise ning marsruut, mis lükkab võtme ise tagasi pärast seda, kui
-  konveier teenindas päringut anonüümsena (`/v1/models` ja `/v1beta/models`
-  seadistatud haldusautentimisega, omanikupõhised `/v1/files`, `/v1/batches`,
-  `/v1/media`, `/v1/session-leases` ja auto-combo kandidaatmarsruudid), lisab
-  peegeldamise sellele 401-le funktsiooni `credentialRejectionHeaders()` kaudu.
-  Peegeldamine sõltub sellest, kas päring kannab mandaadipäist (`Authorization`,
-  `x-api-key`, `x-goog-api-key` või küpsis `auth_token`), mitte sellest, millist neist
-  marsruut kontrollis, ning seda ei seota kunagi päisega
-  `Access-Control-Allow-Credentials`; keha on fikseeritud veaümbrik. Haldusmarsruudid
-  `/api/v1/` all, mida kaitseb `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`), peegeldamist ei lisa: `REQUIRE_API_KEY=false` korral ei
-  ole nende 401/403 päritoluüleselt loetav.
-- **Küpsiseseanss (juhtpaneel):** seda kaitseb vaikimisi ligipääsu keelav seadistus **ja**
-  päise `Access-Control-Allow-Credentials` puudumine ühisel teel. Ärge lisage
-  haldusliidese ega juhtpaneeli päritoluallikaid ühelegi liberaalsele seadistusele; nende puhul peab
-  vaikimisi ligipääs olema alati rangelt keelatud.
+- **Kandja / `x-api-key` ( `/v1/*` järelduspind):** brauserid ei lisa neid kunagi automaatselt. CORS ei ole siin tähendusrikas tõke — API võti on barjäär — mistõttu on see pind tahtlikult lubatav, nii et brauseri ja Electron kliendid saavad lugeda vastuseid, millele neil juba on õigus. Lõdvestunud kaja järgib valideeritud võtit, mitte pelgalt päise olemasolu: kui `REQUIRE_API_KEY=false` esitab päringu anonüümselt, säilitab selle edukas vastus tõrkesuletud lubade loendi. Auth tagasilükkamised (401) jäävad loetavaks, et kliendid saaksid esile tuua tühistatud või valesti sisestatud võtme (#5242): konveieri enda 401 hoiab kaja ja marsruut, mis keeldub võtmest ise pärast seda `/v1/session-leases` kui konveier on seda anonüümseks pakkunud (`/v1/models` ja `/v1beta/models` koos konfigureeritud haldusautentimisega, omaniku `/v1/files`, `/v1/batches` `/v1/media` ja auto-combo kandidaatmarsruudid) lisab sellele 401-le kaja `credentialRejectionHeaders()` kaudu. Kaja sisestatakse päringule, mis kannab mandaadi päist (`Authorization`, `x-api-key`, `x-goog-api-key` või `auth_token` küpsis), mitte seda, millisel neist marsruuti kontrolliti, ja seda ei seostata kunagi `Access-Control-Allow-Credentials`; keha on fikseeritud veaümbris. Haldusmarsruudid `/api/v1/` all, mida valvab `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`), kaja ei lisa: `REQUIRE_API_KEY=false` puhul ei ole nende 401/403 ristpäritolu loetav.
+- **Küpsiste seanss (juhtpaneel):** kaitstud tõrkesulgemise vaikeseadega** ja** `Access-Control-Allow-Credentials` puudumise tõttu jagatud teel. Hoidke management/dashboard origins eemal igasugusest lubavast konfiguratsioonist; need peavad jääma täpselt suletuks.
 
 ## WebSocketi kätlused (`/v1/responses`, `/v1/ws`)
 

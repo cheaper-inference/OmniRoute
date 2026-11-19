@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "ቁልፉን አስወግድ"
   },
   "plugins": {
+    "privilegesWarningTitle": "ፕለጊኖች ከሙሉ ልዩ መብቶች ጋር ይሰራሉ",
+    "privilegesWarningBody": "አንድ ፕለጊን እንደ መደበኛ Node.js ሂደት ከ OmniRoute ጋር ተመሳሳይ ነው የሚሰራው፡ ፋይሎችን ማንበብ፣ ፕሮግራሞችን ማስኬድ እና አውታረ መረቡን መጠቀም ይችላል፣ የፈለገውን ፍቃድ ያውጃል። የሚያምኗቸውን ፕለጊኖች ብቻ ይጫኑ።",
     "title": "ተሰኪዎች",
     "description": "የOmniRoute ተግባራትን ለማስፋት ተሰኪዎችን ይጫኑ እና ያስተዳድሩ",
     "loading": "ተሰኪዎች በመጫን ላይ...",
