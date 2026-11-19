@@ -61,19 +61,25 @@ function safeModuleDir(moduleUrl: string): string | null {
   }
 }
 
+function resolveModuleDir(context: WorkerResolutionContext): string | null {
+  if (context.moduleDir !== undefined) return context.moduleDir;
+  return safeModuleDir(context.moduleUrl ?? import.meta.url);
+}
+
+function moduleWorkerPath(moduleDir: string | null, fileName: string): string | null {
+  return moduleDir ? path.join(moduleDir, fileName) : null;
+}
+
 export function resolveCallLogArtifactWorker(context: WorkerResolutionContext = {}): {
   workerFile: string;
   execArgv: string[];
 } {
-  const moduleDir =
-    context.moduleDir !== undefined
-      ? context.moduleDir
-      : safeModuleDir(context.moduleUrl ?? import.meta.url);
+  const moduleDir = resolveModuleDir(context);
   const cwd = context.cwd ?? process.cwd();
   const entryFile = context.entryFile === undefined ? process.argv[1] : context.entryFile;
   const exists = context.fileExists ?? fileExistsAtRuntime;
 
-  const moduleJs = moduleDir ? path.join(moduleDir, "callLogArtifactWorker.js") : null;
+  const moduleJs = moduleWorkerPath(moduleDir, "callLogArtifactWorker.js");
   if (moduleJs && exists(moduleJs)) return { workerFile: moduleJs, execArgv: [] };
 
   const entryJs = entryFile
@@ -85,7 +91,7 @@ export function resolveCallLogArtifactWorker(context: WorkerResolutionContext = 
   if (exists(cwdJs)) return { workerFile: cwdJs, execArgv: [] };
 
   // Native TypeScript workers avoid esbuild zombies when terminated.
-  const moduleTs = moduleDir ? path.join(moduleDir, "callLogArtifactWorker.ts") : null;
+  const moduleTs = moduleWorkerPath(moduleDir, "callLogArtifactWorker.ts");
   if (moduleTs && exists(moduleTs)) {
     return { workerFile: moduleTs, execArgv: [] };
   }
