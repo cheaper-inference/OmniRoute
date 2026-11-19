@@ -30,7 +30,7 @@ function AccountQuotaCard({ quota }: { quota: AccountQuotaView }) {
     <li className="flex min-w-0 flex-col gap-3 rounded-lg border border-border bg-surface/40 p-4">
       <div className="flex flex-wrap items-start justify-between gap-2">
         <div className="min-w-0">
-          <h3 className="break-words text-sm font-semibold text-text-main">{quota.label}</h3>
+          <h3 className="break-words text-sm text-text-main">{quota.label}</h3>
           <p className="text-xs text-text-muted">{getProviderDisplayName(quota.provider)}</p>
         </div>
         <div className="flex flex-wrap items-center gap-1.5">

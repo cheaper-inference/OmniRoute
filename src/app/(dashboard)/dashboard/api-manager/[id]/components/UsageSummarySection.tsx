@@ -19,7 +19,7 @@ function PeriodCard({ title, period }: { title: string; period: UsagePeriod | nu
   if (!period) {
     return (
       <div className="flex flex-col gap-2 rounded-lg border border-border bg-surface/40 p-4">
-        <h3 className="text-sm font-semibold text-text-main">{title}</h3>
+        <h3 className="text-sm text-text-main">{title}</h3>
         <EmptyNote>{t("usageUnavailable")}</EmptyNote>
       </div>
     );
@@ -28,7 +28,7 @@ function PeriodCard({ title, period }: { title: string; period: UsagePeriod | nu
   return (
     <div className="flex flex-col gap-3 rounded-lg border border-border bg-surface/40 p-4">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <h3 className="text-sm font-semibold text-text-main">{title}</h3>
+        <h3 className="text-sm text-text-main">{title}</h3>
         {resetAt && (
           <span className="text-[11px] text-text-muted" title={period.resetAt ?? undefined}>
             {t("resetsAt", { date: resetAt })}

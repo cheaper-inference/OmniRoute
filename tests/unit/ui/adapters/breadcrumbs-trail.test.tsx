@@ -51,7 +51,6 @@ describe("Breadcrumbs: no link to a route prefix without a page", () => {
     ["/dashboard/system/proxy", "/dashboard/system", en.sidebar.systemGroup],
     ["/dashboard/tools/agent-bridge", "/dashboard/tools", en.breadcrumbs.tools],
     ["/dashboard/gamification/admin", "/dashboard/gamification", en.breadcrumbs.gamification],
-    ["/dashboard/api-manager/key-1/access", "/dashboard/api-manager/key-1", "Key-1"],
     ["/dashboard/plugins/my-plugin/config", "/dashboard/plugins/my-plugin", "My-plugin"],
   ])("%s: the %s crumb is text, not a link", (pathname, deadHref, label) => {
     const { container } = renderAt(pathname);
@@ -71,6 +70,14 @@ describe("Breadcrumbs: no link to a route prefix without a page", () => {
       { text: en.sidebar.mitmProxy, href: null },
     ]);
     expect(screen.getByText(en.sidebar.mitmProxy).getAttribute("aria-current")).toBe("page");
+  });
+
+  it("links a key's crumb now that `api-manager/[id]` has a page (#14863)", () => {
+    const { container } = renderAt("/dashboard/api-manager/key-1/access");
+    expect(crumbs(container).find((c) => c.text === "Key-1")).toEqual({
+      text: "Key-1",
+      href: "/dashboard/api-manager/key-1",
+    });
   });
 
   it("keeps the link when a dynamic route answers for the segment", () => {

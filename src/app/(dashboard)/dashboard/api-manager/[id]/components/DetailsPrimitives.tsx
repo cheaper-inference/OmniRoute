@@ -50,7 +50,7 @@ export function DetailsSection({
             </span>
           )}
           <div className="min-w-0">
-            <h2 id={headingId} className="text-base font-semibold text-text-main">
+            <h2 id={headingId} className="text-base text-text-main">
               {title}
             </h2>
             {description && <p className="mt-0.5 text-xs text-text-muted">{description}</p>}

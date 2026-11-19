@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Button } from "@/shared/components";
 import type { SelfServiceView } from "../apiKeyDetailsData";
 import { StatusBadge } from "./DetailsPrimitives";
@@ -28,34 +29,32 @@ export function ApiKeyDetailsHeader({
   const tc = useTranslations("common");
 
   return (
-    <header className="space-y-3">
+    <div className="space-y-3">
       <Link href="/dashboard/api-manager" className="text-sm text-primary hover:underline">
         ← {t("backToKeys")}
       </Link>
-      <div className="flex flex-wrap items-start justify-between gap-3">
-        <div className="min-w-0 space-y-1">
-          <h1 className="break-words text-2xl font-semibold tracking-tight text-text-main">
-            {name || t("pageTitle")}
-          </h1>
-          <p className="break-all font-mono text-xs text-text-muted">
-            {t("keyIdLabel", { id: keyId })}
-          </p>
-          {generatedAt && (
-            <p className="text-[11px] text-text-muted">{t("generatedAt", { date: generatedAt })}</p>
-          )}
-        </div>
-        {hasData && (
-          <Button
-            variant="secondary"
-            size="sm"
-            icon="refresh"
-            loading={refreshing}
-            onClick={onReload}
-          >
-            {tc("refresh")}
-          </Button>
-        )}
-      </div>
+      <PageHeader
+        compact
+        className="break-words"
+        title={name || t("pageTitle")}
+        description={<span className="break-all font-mono">{t("keyIdLabel", { id: keyId })}</span>}
+        actions={
+          hasData ? (
+            <Button
+              variant="secondary"
+              size="sm"
+              icon="refresh"
+              loading={refreshing}
+              onClick={onReload}
+            >
+              {tc("refresh")}
+            </Button>
+          ) : undefined
+        }
+      />
+      {generatedAt && (
+        <p className="text-[11px] text-text-muted">{t("generatedAt", { date: generatedAt })}</p>
+      )}
       {view && (
         <div className="flex flex-wrap gap-1.5" role="group" aria-label={t("visibilityTitle")}>
           <StatusBadge
@@ -72,6 +71,6 @@ export function ApiKeyDetailsHeader({
           </StatusBadge>
         </div>
       )}
-    </header>
+    </div>
   );
 }
