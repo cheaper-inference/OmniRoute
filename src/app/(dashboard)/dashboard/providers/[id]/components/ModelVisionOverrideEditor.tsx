@@ -21,7 +21,7 @@ export default function ModelVisionOverrideEditor({
       <Checkbox
         aria-label={t("visionCapableLabel")}
         label={
-          <span className="text-[11px] font-normal text-text-muted">{t("visionCapableLabel")}</span>
+          <span className="text-xs font-normal text-text-muted">{t("visionCapableLabel")}</span>
         }
         className="items-center gap-1"
         checked={value === true}

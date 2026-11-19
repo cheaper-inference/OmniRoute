@@ -2,6 +2,7 @@
 
 import { useTranslations } from "next-intl";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { PROVIDER_COLORS as CHART_PROVIDER_COLORS } from "@/shared/components/analytics/chartColors";
 import SegmentedControl from "@/shared/components/SegmentedControl";
 import Button from "@/shared/components/Button";
@@ -208,6 +209,8 @@ export default function ProviderUtilizationTab() {
         action={
           <div className="flex items-center gap-4">
             <SegmentedControl
+              semantics="radio"
+              aria-label={t("providerUtilizationTitle")}
               size="sm"
               value={aggregateBy}
               onChange={(next) => setAggregateBy(next as typeof aggregateBy)}
@@ -340,7 +343,7 @@ export default function ProviderUtilizationTab() {
 
                     <div className="flex items-end justify-between gap-3">
                       <div>
-                        <p className="text-3xl font-bold text-text-main">
+                        <p className="text-3xl font-semibold text-text-main">
                           {point.remainingPct.toFixed(point.remainingPct < 10 ? 1 : 0)}%
                         </p>
                         <p className="mt-1 text-xs text-text-muted">
@@ -354,14 +357,13 @@ export default function ProviderUtilizationTab() {
                     </div>
 
                     <div className="flex flex-col gap-2">
-                      <div className="h-2 overflow-hidden rounded-full bg-surface-2">
-                        <div
-                          className={`h-full rounded-full transition-all ${
-                            point.isExhausted ? "bg-error" : isLow ? "bg-warning" : "bg-primary"
-                          }`}
-                          style={{ width: `${Math.max(point.remainingPct, 0)}%` }}
-                        />
-                      </div>
+                      <Progress
+                        aria-label={t("remainingQuota")}
+                        aria-valuetext={`${point.remainingPct.toFixed(point.remainingPct < 10 ? 1 : 0)}%`}
+                        value={point.remainingPct}
+                        tone={point.isExhausted ? "danger" : isLow ? "warning" : "default"}
+                        animate={false}
+                      />
                       <div className="flex items-center justify-between text-xs text-text-muted">
                         <span>0%</span>
                         <span>{t("remainingQuota")}</span>

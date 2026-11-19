@@ -151,12 +151,12 @@ OmniRoute 6 A2A képességet tesz közzé `src/lib/a2a/taskExecution.ts::A2A_SKI
 | :---------------------- | :------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | :------------------------------- | :------------------------------------------------------- |
 | Intelligens útválasztás | `smart-routing`      | A prompt az optimális provider/combo keresztül irányítja OmniRoute kombinált motorjának + pontozását                                                                             | útválasztás, szolgáltatók        | "Route this prompt via the best model"                   |
 | Kvótakezelés            | `quota-management`   | Szolgáltatónkénti kvótaállapotot jelent, segít a hívóknak eldönteni, hogy mikor kell throttle/switch tenni                                                                       | kvóta, szolgáltatók              | "Check quot for anthropic"                               |
-| Szolgáltató felfedezése | `provider-discovery` | Felsorolja a telepített szolgáltatókat képességekkel, szabadszintű jelzőkkel és OAuth állapottal                                                                                 | szolgáltatók, felfedezés         | – Milyen szolgáltatók érhetők el?                        |
+| Szolgáltató felfedezése | `provider-discovery` | Felsorolja a telepített szolgáltatókat képességekkel, ingyenes szintjelzőkkel és OAuth állapottal                                                                                | szolgáltatók, felfedezés         | – Milyen szolgáltatók érhetők el?                        |
 | Költségelemzés          | `cost-analysis`      | Egy request/conversation becsült költsége a + katalógus legutóbbi használatának függvényében                                                                                     | költség, használat               | "A beszélgetés becsült költsége"                         |
 | Egészségügyi jelentés   | `health-report`      | Aggregálja a megszakítót, a lehűlést, a lezárási állapotot szolgáltatónként                                                                                                      | egészség, rugalmasság            | "Minden szolgáltató egészségi állapotának megjelenítése" |
 | Képességek listázása    | `list-capabilities`  | Visszaadja a teljes, 45 bejegyzésből álló Agent Skills katalógust (23 API + 21 CLI + 1 konfiguráció) leértékelési táblázatként nyers SKILL.md URLs vel a kontextus-injektáláshoz | katalógus, felfedezés, készségek | "List all OmniRoute képességek"                          |
 
-> Az ügynökkártyát összhangban kell tartani az élő 381-es szolgáltatókatalógussal; A szolgáltatók száma és free/no-auth metaadatok a futásidejű beállításjegyzékből származnak.
+> Az ügynökkártyát összhangban kell tartani az élő 394-es szolgáltatókatalógussal; A szolgáltatók száma és free/no-auth metaadatok a futásidejű beállításjegyzékből származnak.
 
 ### `list-capabilities` Skill Detail
 
@@ -169,7 +169,7 @@ A `list-capabilities` készség különösen hasznos a külső ügynökök szám
 ...
 ```
 
-Minden sor tartalmazza a `rawUrl` oszlopot, így az ügynökök azonnal lekérhetik a teljes SKILL.md. A `metadata.totalSkills` mező tükrözi a katalógus méretet (ma 45). Megvalósítás: `src/lib/a2a/skills/listCapabilities.ts`. Lásd még: [AGENT-SKILLS.md](./AGENT-SKILLS.md).
+Minden sor tartalmazza a `rawUrl` oszlopot, így az ügynökök azonnal lekérhetik a teljes SKILL.md. A `metadata.totalSkills` mező a katalógus méretet tükrözi (ma 45). Megvalósítás: `src/lib/a2a/skills/listCapabilities.ts`. Lásd még: [AGENT-SKILLS.md](./AGENT-SKILLS.md).
 
 ---
 

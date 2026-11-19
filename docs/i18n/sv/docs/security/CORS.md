@@ -119,32 +119,10 @@ Ursprung matchas skiftlägesokänsligt och avslutande snedstreck ignoreras, så
 CSV-lista kan anges under körning i **Instrumentpanel → Säkerhet → Tillåtna
 CORS-ursprung** utan omstart.
 
-## API-nycklar kontra cookiesessioner
+## API -nycklar vs cookie-sessioner
 
-- **Bearer / `x-api-key` (`/v1/*`-inferensytan):** webbläsare bifogar aldrig dessa
-  automatiskt. CORS utgör inget meningsfullt hinder här — API-nyckeln är hindret
-  — vilket är anledningen till att den ytan avsiktligt är tillåtande så att
-  webbläsar- och Electron-klienter kan läsa svar som de redan har rätt till.
-  Den tillåtande ursprungsreturneringen följer den validerade nyckeln, inte enbart att
-  huvudet finns: när `REQUIRE_API_KEY=false` betjänar en begäran anonymt behåller dess
-  lyckade svar den tillåtelselista som nekar som standard. Autentiseringsavslag (401)
-  förblir läsbara så att klienter kan visa en återkallad eller felskriven nyckel (#5242):
-  pipelinens egen 401 behåller ursprungsreturneringen, och en rutt som själv avvisar
-  nyckeln efter att pipelinen har betjänat begäran som anonym (`/v1/models` och
-  `/v1beta/models` när hanteringsautentisering är konfigurerad, de ägarbegränsade
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` och rutterna för
-  auto-combo-kandidater) lägger till ursprungsreturneringen i den 401:an via
-  `credentialRejectionHeaders()`. Returneringen styrs av att begäran bär ett
-  autentiseringshuvud (`Authorization`, `x-api-key`, `x-goog-api-key` eller cookien
-  `auth_token`), inte av vilket av dem rutten kontrollerade, och kombineras aldrig med
-  `Access-Control-Allow-Credentials`; brödtexten är ett fast felkuvert. Hanteringsrutter
-  under `/api/v1/` som skyddas av `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`) lägger inte till returneringen: med `REQUIRE_API_KEY=false`
-  går deras 401/403 inte att läsa från ett annat ursprung.
-- **Cookiesession (instrumentpanelen):** skyddas av standardinställningen som
-  nekar vid fel **och** av avsaknaden av `Access-Control-Allow-Credentials` på
-  den delade sökvägen. Undanta ursprung för hantering/instrumentpanelen från alla
-  tillåtande konfigurationer; de måste fortsätta att neka vid fel utan undantag.
+- **Bärare / `x-api-key` ( `/v1/*` -inferensytan):** webbläsare bifogar aldrig dessa automatiskt. CORS är inte en meningsfull barriär här — API nyckeln är barriären — vilket är anledningen till att den ytan är avsiktligt tillåtande så att webbläsare och Electron -klienter kan läsa svar de redan har rätt till. Det avslappnade ekot följer den validerade nyckeln, inte bara närvaron av rubriken: när `REQUIRE_API_KEY=false` betjänar en begäran anonymt, behåller dess framgångsrika svar den misslyckade godkännandelistan. Auth-avslag (401) förblir läsbara så att klienter kan visa upp en återkallad eller felskriven nyckel (#5242): pipelinens egen 401 behåller ekot, och en rutt som vägrar själva nyckeln efter att pipelinen serverade den som anonym (`/v1/models` och `/v1beta/models` med hanteringsbehörighet konfigurerad, den ägaromfattade `/v1/files`, `/v1/batches` `/v1/media` `/v1/session-leases`, ) lägger till ekot till den 401:an via `credentialRejectionHeaders()`. Ekot nycklas på begäran med en referensrubrik (`Authorization`, `x-api-key`, `x-goog-api-key` eller `auth_token` -cookien), inte på vilken av dem rutten kontrollerade, och är aldrig ihopparad med `Access-Control-Allow-Credentials`; kroppen är ett fast felomslag. Hanteringsvägar under `/api/v1/` bevakade av `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) lägger inte till ekot: med `REQUIRE_API_KEY=false` är deras 401/403 inte läsbart korsursprung.
+- **Cookiesession (instrumentpanelen):** skyddas av felstängd standard** och** av frånvaron av `Access-Control-Allow-Credentials` på den delade vägen. Håll management/dashboard ursprung borta från alla tillåtande konfigurationer; de måste vara exakt stängda.
 
 ## WebSocket-handskakningar (`/v1/responses`, `/v1/ws`)
 

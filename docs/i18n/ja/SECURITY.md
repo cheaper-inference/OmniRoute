@@ -6,11 +6,11 @@
 
 ## 脆弱性の報告
 
-OmniRoute でセキュリティ脆弱性を発見した場合は、責任ある方法で報告してください：
+OmniRouteのセキュリティ脆弱性を発見した場合は、責任を持って報告してください。
 
-1. 公開 GitHub issue を作成**しないでください**
-2. [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) を使用してください
-3. 説明、再現手順、想定される影響を含めてください
+1. **DO NOT**公開GitHub問題を開く
+2. [GitHubセキュリティ アドバイザリ](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)を使用する
+3. 内容: 説明、再現手順、潜在的な影響
 
 ## 対応タイムライン
 
@@ -29,14 +29,14 @@ OmniRoute でセキュリティ脆弱性を発見した場合は、責任ある�
 | 3.7.x      | ✅ セキュリティ                                 |
 | < 3.7.0    | ❌ サポート対象外                               |
 
-## LTS サポート期間 (v3.9.x)
+## LTSサポート ウィンドウ (v3.9.x)
 
-3.8.59 の次のバージョンは **3.9.0** であり、`stable/v3` ブランチで長期サポートラインが開始されます（[`ROADMAP.md`](ROADMAP.md) → 「フェーズ 3 — v3.9.0 LTS」を参照）。
+3.8.59 以降の次のバージョンは**3.9.0** 、 `stable/v3`ブランチで長期サポート ラインが開始されます ( [`ROADMAP.md`](ROADMAP.md) → "フェーズ 3 — v3.9.0 LTS" を参照)。
 
-- **`stable/v3` に含まれるもの:** バグ修正、セキュリティパッチ、プロバイダーの更新。新機能は v4 チャネルに導入され、LTS ラインでは安定性が最優先されます。`npm install omniroute`（`latest` dist-tag）は、v4 サイクル全体を通して v3 のまま維持されます。
-- **サポート期間:** `stable/v3` には、**3.9.0 のリリース後 12 か月間、または v4.0.0 が `latest` として公開されてから 90 日後までの、いずれか遅い時点まで、セキュリティ修正および重大なリグレッション修正が提供されます**。確定した終了日は、3.9.0 のリリース時に、そのリリースノートおよび [`ROADMAP.md`](ROADMAP.md) に記録されます。
-- **LTS ラインの脆弱性の報告:** 他のバージョンと同じチャネルを使用してください。公開 Issue は決して使用せず、非公開の [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) を使用します。テストしたバージョン（例: `3.9.2`）を明記してください。修正は `stable/v3` に適用され、v4 にもフォワードポートされます。
-- **LTS リリース時点のセキュリティベースライン:** 測定されたスキャナーの状態、ルートガード、および公開認証情報に関する検証結果は、[`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md) に記録されます。
+- **`stable/v3`が受け取るもの:**バグ修正、セキュリティパッチ、プロバイダーのアップデート。新機能は v4 チャネルに移行します。 LTSラインは安定性を第一に考えています。 `npm install omniroute` ( `latest` dist-tag) は、v4 サイクル全体を通じて v3 に残ります。
+- **ウィンドウ期間:** `stable/v3`が受け取ります**セキュリティ修正と重大なリグレッションは、3.9.0 カット後 12 か月間、または v4.0.0 が`latest` —として公開されてから 90 日後のいずれか遅い方まで有効です。** 。結果の終了日は、3.9.0 リリース ノートと、カットが行われたときに[`ROADMAP.md`](ROADMAP.md)に記録されます。
+- **LTS行の脆弱性を報告します。**他のバージョンと同じチャネル—非公開の[GitHubセキュリティ アドバイザリ](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)であり、決して公開される問題ではありません。どのバージョンをテストしたかを述べてください (たとえば、 `3.9.2`)。修正は`stable/v3`に導入され、v4 に前方移植されます。
+- **LTSカットでのセキュリティ ベースライン:**測定されたスキャナーの状態、ルートガード、および公開資格証明の証明は[`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md)に記録されます。
 
 ---
 

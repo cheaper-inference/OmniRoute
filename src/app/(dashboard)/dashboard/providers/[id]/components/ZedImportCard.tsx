@@ -86,7 +86,7 @@ export default function ZedImportCard({ fetchConnections, notify }: ZedImportCar
       <Card>
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex-1 min-w-0">
-            <h2 className="text-lg font-semibold flex items-center gap-2">
+            <h2 className="text-lg flex items-center gap-2">
               <Icon name="download" size={20} />
               {t("zedImportTitle")}
             </h2>
@@ -111,7 +111,7 @@ export default function ZedImportCard({ fetchConnections, notify }: ZedImportCar
             onClick={() => setShowZedManual((v) => !v)}
             aria-expanded={showZedManual}
           >
-            <h2 className="text-lg font-semibold flex items-center gap-2">
+            <h2 className="text-lg flex items-center gap-2">
               <Icon name="edit" size={20} />
               {t("zedManualTitle")}
             </h2>
