@@ -52,6 +52,17 @@ const COLUMNS: Column[] = [
   { field: "cost", labelKey: "chartCost", align: "right" },
 ];
 
+// Rows are per (provider, model) since #20453: the same model name can appear once per
+// provider, so the provider takes part in the React key and is shown next to the name.
+function modelRowKey(m: ModelBreakdownRow, index: number): string {
+  const model = String(m.model ?? index);
+  return m.provider ? `${m.provider}:${model}` : model;
+}
+
+function ProviderLabel({ provider }: { provider?: string | null }) {
+  return provider ? <span className="text-xs text-text-muted">{provider}</span> : null;
+}
+
 export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelTableProps) {
   const t = useTranslations("analytics");
   const [sort, setSort] = useState<{
@@ -106,9 +117,7 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
         </TableHeader>
         <TableBody>
           {sorted.map((m, i) => (
-            <TableRow
-              key={m.provider ? `${m.provider}:${String(m.model ?? i)}` : String(m.model ?? i)}
-            >
+            <TableRow key={modelRowKey(m, i)}>
               <TableCell className="px-4 py-2.5">
                 <div className="flex items-center gap-2">
                   <span
@@ -116,9 +125,7 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
                     style={{ backgroundColor: getSeriesColor(i) }}
                   />
                   <span className="font-medium">{m.model}</span>
-                  {m.provider ? (
-                    <span className="text-xs text-text-muted">{m.provider}</span>
-                  ) : null}
+                  <ProviderLabel provider={m.provider} />
                 </div>
               </TableCell>
               <TableCell className="px-4 py-2.5 text-right font-mono text-text-muted">
