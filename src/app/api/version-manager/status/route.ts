@@ -12,7 +12,10 @@ export async function GET(request: Request) {
   if (authError) return authError;
 
   try {
-    const rows = await getVersionManagerStatus();
+    // The service API and management keys are credentials, not status: never serialize them.
+    const rows = (await getVersionManagerStatus()).map(
+      ({ apiKey: _apiKey, managementKey: _managementKey, ...row }) => row
+    );
 
     // Merge live supervisor state into DB rows so callers see consistent data
     // whether they started the service via the legacy or the new UI.
