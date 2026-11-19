@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 
 const { cleanJSONSchemaForAntigravity: clean } =
   await import("../../open-sse/translator/helpers/geminiHelper.ts");
+const { coerceSchemaValueShapes } =
+  await import("../../open-sse/translator/helpers/schemaValueShapes.ts");
 const { isGeminiTrailingModelTurnRejectingModel: rejectsTrailing } =
   await import("../../open-sse/translator/helpers/geminiTrailingModelTurn.ts");
 
@@ -41,6 +43,38 @@ test("guard: an explicit items schema wins over prefixItems", () => {
     prefixItems: [{ type: "integer" }],
   }) as Schema;
   assert.equal(out.items.type, "number");
+});
+
+// A nested single-element tuple chain must not double the schema at every level.
+test("a deep nested prefixItems chain keeps a bounded node count", () => {
+  const depth = 18;
+  let leaf: Record<string, unknown> = { type: "integer" };
+  for (let i = 0; i < depth; i += 1) leaf = { type: "array", prefixItems: [leaf] };
+  const countNodes = (value: unknown): number => {
+    if (!value || typeof value !== "object") return 0;
+    let count = 1;
+    for (const child of Object.values(value)) count += countNodes(child);
+    return count;
+  };
+  const shaped = coerceSchemaValueShapes(leaf);
+  assert.ok(countNodes(shaped) < depth * depth * 4, `nodes ${countNodes(shaped)}`);
+  let node = clean(leaf) as Record<string, unknown>;
+  for (let i = 0; i < depth; i += 1) node = node.items as Record<string, unknown>;
+  assert.equal(node.type, "integer");
+});
+
+test("a response schema keeps a null enum member as nullable", () => {
+  const out = clean({ enum: ["a", null] }, { preserveNullable: true }) as Schema & {
+    nullable?: boolean;
+  };
+  assert.equal(out.nullable, true);
+  assert.deepEqual(out.enum, ["a"]);
+});
+
+test("guard: a tool parameter enum with null gains no nullable flag", () => {
+  const out = clean({ type: "string", enum: ["a", null] }) as Schema & { nullable?: boolean };
+  assert.equal(out.nullable, undefined);
+  assert.deepEqual(out.enum, ["a"]);
 });
 
 test("guard: an array with neither items nor prefixItems still gets a string items schema", () => {

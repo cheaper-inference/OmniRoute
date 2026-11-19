@@ -29,3 +29,18 @@ test("boolean required on a property is still promoted to the parent required li
   assert.deepEqual(out.required, ["city"]);
   assert.equal((out.properties?.city as { required?: unknown }).required, undefined);
 });
+
+test("boolean required is promoted inside a property that is itself named properties", () => {
+  const out = cleanJSONSchemaForAntigravity({
+    type: "object",
+    properties: {
+      properties: {
+        type: "object",
+        properties: { city: { type: "string", required: true } },
+      },
+    },
+  }) as { properties: { properties: Schema } };
+  const inner = out.properties.properties;
+  assert.deepEqual(inner.required, ["city"]);
+  assert.equal((inner.properties?.city as { required?: unknown }).required, undefined);
+});

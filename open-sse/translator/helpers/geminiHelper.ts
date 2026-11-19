@@ -545,12 +545,16 @@ function expandShorthandProperties(record: JsonRecord): void {
 // Pre-pass for Cloud Code (#12269): boolean `required` on a property and nested
 // bare property maps both survive the later phases and 400 Gemini's proto.
 // Mirrors CLIProxyAPI normalizeMalformedSchemaObjects.
-function normalizeMalformedSchemaObjects(obj: unknown, parentKey?: string): void {
+function normalizeMalformedSchemaObjects(
+  obj: unknown,
+  parentKey?: string,
+  isNameMap = false
+): void {
   if (!obj || typeof obj !== "object") return;
 
   if (Array.isArray(obj)) {
     for (const item of obj) {
-      normalizeMalformedSchemaObjects(item, parentKey);
+      normalizeMalformedSchemaObjects(item, parentKey, isNameMap);
     }
     return;
   }
@@ -570,12 +574,13 @@ function normalizeMalformedSchemaObjects(obj: unknown, parentKey?: string): void
   }
 
   // Inside a name map (`properties`, `$defs`, …) every key is a property name: a parameter named
-  // `required` is not the schema keyword, and promoteBooleanRequired would delete it.
-  if (parentKey === undefined || !SCHEMA_MAP_KEYS.has(parentKey)) promoteBooleanRequired(record);
+  // `required` is not the schema keyword, and promoteBooleanRequired would delete it. Track the
+  // map context explicitly: a property that is itself named `properties` is a schema, not a map.
+  if (!isNameMap) promoteBooleanRequired(record);
 
   for (const [key, value] of Object.entries(record)) {
     if (value && typeof value === "object") {
-      normalizeMalformedSchemaObjects(value, key);
+      normalizeMalformedSchemaObjects(value, key, !isNameMap && SCHEMA_MAP_KEYS.has(key));
     }
   }
 }
@@ -1058,6 +1063,20 @@ function preserveNullable(obj: unknown): void {
   }
 }
 
+/**
+ * Response schemas only: a JSON null inside `enum` (`["a", null]`) is the same "nothing is a
+ * legal answer" signal as a null union branch. Record it as `nullable: true` before
+ * convertEnumValuesToStrings drops the null.
+ */
+function markNullableEnums(obj: unknown): void {
+  if (!obj || typeof obj !== "object") return;
+  const record = obj as JsonRecord;
+  if (Array.isArray(record.enum) && record.enum.includes(null)) record.nullable = true;
+  for (const value of Object.values(record)) {
+    if (value && typeof value === "object") markNullableEnums(value);
+  }
+}
+
 /** Property Phase 6 adds to an empty object schema (stripped again by geminiPlaceholderArgs.ts). */
 export const GEMINI_PLACEHOLDER_KEY = "reason";
 export const GEMINI_PLACEHOLDER_SCHEMA = Object.freeze({
@@ -1098,6 +1117,7 @@ export function cleanJSONSchemaForAntigravity(
   // first — flattenAnyOfOneOf would otherwise keep only the first literal.
   mergeLiteralUnions(cleaned, { nullable: options.preserveNullable === true, location });
   convertConstToEnum(cleaned);
+  if (options.preserveNullable) markNullableEnums(cleaned);
   convertEnumValuesToStrings(cleaned);
 
   // Phase 1b: response schemas only — record nullability while the union
