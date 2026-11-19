@@ -1,4 +1,10 @@
 import { updateProviderConnection } from "@/lib/db/providers";
+import {
+  captureCodexConnectionFence,
+  captureCodexConnectionOwnerFence,
+  adoptCodexConnectionFence,
+  StaleCodexOperationError,
+} from "@/lib/db/codexConnectionFences";
 import * as passive from "@omniroute/open-sse/services/tokenRefresh/passiveCodex.ts";
 import type { BaseExecutor } from "@omniroute/open-sse/executors/base";
 import {
@@ -100,6 +106,26 @@ function buildCredentialUpdateData(
   return updateData;
 }
 
+function captureRefreshFence(connection: ProviderConnectionLike) {
+  if (connection.provider !== "codex") return null;
+  const capture = passive.isPassiveCodex(connection.provider)
+    ? captureCodexConnectionOwnerFence
+    : captureCodexConnectionFence;
+  return capture(connection as unknown as JsonRecord, connection.id);
+}
+
+function buildRefreshCredentials(connection: ProviderConnectionLike) {
+  return {
+    connectionId: connection.id,
+    accessToken: connection.accessToken,
+    refreshToken: connection.refreshToken,
+    expiresAt: connection.tokenExpiresAt || connection.expiresAt || null,
+    providerSpecificData: connection.providerSpecificData,
+    copilotToken: connection.providerSpecificData?.copilotToken,
+    copilotTokenExpiresAt: connection.providerSpecificData?.copilotTokenExpiresAt,
+  };
+}
+
 /** Refresh and persist credentials using a caller-supplied executor resolver. */
 export async function refreshAndUpdateCredentialsWithResolver(
   connection: ProviderConnectionLike,
@@ -109,16 +135,9 @@ export async function refreshAndUpdateCredentialsWithResolver(
   if (!shouldAttemptRotatingRefresh(connection.provider, opts.allowRotatingRefresh)) {
     return { connection, refreshed: false };
   }
+  const fence = captureRefreshFence(connection);
   const executor = await resolveExecutor(connection.provider);
-  const credentials = {
-    connectionId: connection.id,
-    accessToken: connection.accessToken,
-    refreshToken: connection.refreshToken,
-    expiresAt: connection.tokenExpiresAt || connection.expiresAt || null,
-    providerSpecificData: connection.providerSpecificData,
-    copilotToken: connection.providerSpecificData?.copilotToken,
-    copilotTokenExpiresAt: connection.providerSpecificData?.copilotTokenExpiresAt,
-  };
+  const credentials = buildRefreshCredentials(connection);
 
   if (!opts.force && !executor.needsRefresh(credentials)) {
     return { connection, refreshed: false };
@@ -126,6 +145,12 @@ export async function refreshAndUpdateCredentialsWithResolver(
 
   if (passive.isPassiveCodex(connection.provider)) {
     const adopted = await passive.adoptPassiveCodex(connection);
+    adoptCodexConnectionFence(
+      fence,
+      connection as unknown as JsonRecord,
+      adopted as unknown as JsonRecord,
+      connection.id
+    );
     return {
       connection: adopted,
       refreshed: false,
@@ -153,7 +178,12 @@ export async function refreshAndUpdateCredentialsWithResolver(
 
   const updateData = buildCredentialUpdateData(connection, refreshResult);
 
-  await updateProviderConnection(connection.id, updateData);
+  const persisted = await updateProviderConnection(
+    connection.id,
+    updateData,
+    fence ? { expectedCodexFence: fence } : undefined
+  );
+  if (fence && !persisted) throw new StaleCodexOperationError();
 
   return {
     connection: {

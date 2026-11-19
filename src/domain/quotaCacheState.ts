@@ -46,6 +46,7 @@ export interface QuotaCacheEntry {
   nextResetAt: string | null;
   windowDurationMs?: number | null; // T08: optional rolling window duration
   burnMetrics?: QuotaBurnMetrics;
+  codexOwnerEpoch?: string; // opaque durable identity, never credential material
   /** When the latest attested-complete reading was recorded (see isCompleteUsageReading). */
   completeAt?: number;
 }

@@ -357,7 +357,7 @@ export default function HermesAgentToolCard({
           </div>
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h3 className="font-medium text-sm flex items-center gap-2">
+              <h3 className="text-sm flex items-center gap-2">
                 {tool?.name || "Hermes Agent"}
                 {firstSetupAt && (
                   <span
@@ -419,7 +419,7 @@ export default function HermesAgentToolCard({
                     variant="outline"
                     size="sm"
                     onClick={() => applyToAll(modelValue)}
-                    className="h-6 px-2 text-xs font-normal"
+                    className="h-6 px-2 text-xs"
                     title={t("hermesApplyModelToAll", { model: modelValue })}
                   >
                     {modelValue}

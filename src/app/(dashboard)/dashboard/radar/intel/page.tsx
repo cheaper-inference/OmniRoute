@@ -165,13 +165,18 @@ export default function RadarIntelPage() {
 
           <Card>
             <div className="mb-4 flex items-center justify-between gap-3">
-              <h2 className="text-lg font-semibold">{t("ranking")}</h2>
+              <h2 className="text-lg">{t("ranking")}</h2>
               <span className="text-xs text-text-muted">{meta.version}</span>
             </div>
             {intel.rankings.length === 0 ? (
               <p className="py-6 text-center text-text-muted">{t("noRankings")}</p>
             ) : (
-              <Table className="text-sm" aria-label={t("ranking")} scrollbarLabel={t("ranking")}>
+              <Table
+                className="text-sm"
+                aria-label={t("ranking")}
+                scrollbarLabel={t("ranking")}
+                containerClassName="rounded-none border-0"
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead>#</TableHead>
