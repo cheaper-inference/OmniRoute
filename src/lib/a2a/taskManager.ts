@@ -362,6 +362,8 @@ export class A2ATaskManager {
         task.state !== "cancelled"
       ) {
         task.state = "failed";
+        // Stop the running work too, or its upstream call runs on until its own timeout.
+        this.aborts.get(id)?.abort();
         this.aborts.delete(id);
         task.updatedAt = now.toISOString();
         task.events.push({ timestamp: now.toISOString(), state: "failed", message: "TTL expired" });

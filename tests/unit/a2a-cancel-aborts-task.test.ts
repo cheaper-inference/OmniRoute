@@ -6,7 +6,7 @@
  *
  * Uses a fake persistence object — no SQLite, no DATA_DIR.
  */
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 
 import { A2ATaskManager, type A2APersistence } from "../../src/lib/a2a/taskManager.ts";
@@ -98,4 +98,21 @@ test("a task that already failed still rejects an unrelated transition", () => {
   tm.updateTask(task.id, "failed");
 
   assert.throws(() => tm.updateTask(task.id, "working"), /Invalid transition: failed → working/);
+});
+
+test("a task failed by the TTL cleanup aborts the signal its running work holds", () => {
+  mock.timers.enable({ apis: ["setInterval", "Date"], now: Date.now() });
+  try {
+    const tm = newManager(); // 5-minute TTL; the cleanup runs every 60 s
+    const task = newWorkingTask(tm);
+    const signal = tm.getTaskSignal(task.id);
+    assert.equal(signal?.aborted, false);
+
+    mock.timers.tick(6 * 60_000);
+
+    assert.equal(tm.getTask(task.id)?.state, "failed");
+    assert.equal(signal?.aborted, true, "the expired task's upstream work is told to stop");
+  } finally {
+    mock.timers.reset();
+  }
 });

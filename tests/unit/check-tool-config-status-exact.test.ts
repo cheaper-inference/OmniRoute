@@ -12,8 +12,16 @@ import path from "node:path";
 import os from "node:os";
 
 process.env.DATA_DIR = path.join(os.tmpdir(), "omniroute-check-tool-exact-test");
-delete process.env.API_PORT;
-delete process.env.PORT;
+// The expected URLs use the default port: clear every variable that moves it, restore after.
+const PORT_ENV = ["API_PORT", "PORT", "OMNIROUTE_PORT"] as const;
+const savedPortEnv = PORT_ENV.map((name) => [name, process.env[name]] as const);
+for (const name of PORT_ENV) delete process.env[name];
+test.after(() => {
+  for (const [name, value] of savedPortEnv) {
+    if (value === undefined) delete process.env[name];
+    else process.env[name] = value;
+  }
+});
 
 const { checkToolConfigStatus } = await import("../../src/lib/cliTools/checkToolConfigStatus.ts");
 
