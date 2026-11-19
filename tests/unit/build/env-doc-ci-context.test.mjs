@@ -22,7 +22,20 @@ const CI_INTERNAL_NAMES = [
   "OMNIROUTE_REQUIRE_PREBUILT_NEXT",
 ];
 
-function runFixture(t, { ci = [], runtime = [], envExample = "", envDoc = "" } = {}) {
+const MIRROR_REFRESH_INPUTS = [
+  "BASE",
+  "CANDIDATE_SHA",
+  "ENGINE",
+  "PARTIAL",
+  "REFRESH_BRANCH",
+  "REFRESH_SHA",
+  "REPO",
+  "RUN_URL",
+  "RUNNER_TEMP",
+  "TRANSLATION_SHA",
+];
+
+function runFixture(t, { ci = [], mirror = [], runtime = [], envExample = "", envDoc = "" } = {}) {
   const root = mkdtempSync(join(tmpdir(), "omniroute env contract "));
   t.after(() => rmSync(root, { recursive: true, force: true }));
   const checker = join(root, "scripts/check/check-env-doc-sync.mjs");
@@ -30,6 +43,7 @@ function runFixture(t, { ci = [], runtime = [], envExample = "", envDoc = "" } =
   copyFileSync(checkerSource, checker);
   for (const [path, names] of [
     ["scripts/quality/fixture-context.mjs", ci],
+    ["scripts/i18n/mirror-refresh-safety.mjs", mirror],
     ["src/runtimeFixture.ts", runtime],
   ]) {
     const target = join(root, path);
@@ -60,6 +74,31 @@ for (const name of CI_INTERNAL_NAMES) {
     assert.match(result.stdout, /Env \/ docs contract is in sync/);
   });
 }
+
+test("the mirror refresh helper reads workflow inputs without a product env entry", (t) => {
+  const result = runFixture(t, { mirror: MIRROR_REFRESH_INPUTS });
+  assert.equal(result.status, 0, result.stdout);
+});
+
+test("mirror input names still require documentation when used by the product", (t) => {
+  const result = runFixture(t, { mirror: MIRROR_REFRESH_INPUTS, runtime: MIRROR_REFRESH_INPUTS });
+  assert.equal(result.status, 1);
+  for (const name of MIRROR_REFRESH_INPUTS) {
+    assert.match(result.stdout, new RegExp(`- ${name}(?:\r?\n|$)`));
+  }
+});
+
+test("a matching name in another script stays visible to the gate", (t) => {
+  const result = runFixture(t, { mirror: ["BASE"], ci: ["BASE"] });
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /- BASE(?:\r?\n|$)/);
+});
+
+test("an unclassified mirror input stays visible to the gate", (t) => {
+  const result = runFixture(t, { mirror: ["UNKNOWN_MIRROR_INPUT"] });
+  assert.equal(result.status, 1);
+  assert.match(result.stdout, /- UNKNOWN_MIRROR_INPUT(?:\r?\n|$)/);
+});
 
 test("existing runner context remains classified", (t) => {
   assert.equal(runFixture(t, { ci: ["GITHUB_SHA", "GITHUB_OUTPUT"] }).status, 0);

@@ -393,6 +393,21 @@ export const CODE_SCAN_ROOTS = [
 
 const CODE_ENV_REF = /process\.env\.([A-Z][A-Z0-9_]+)/g;
 
+// Inputs from i18n-mirror-refresh.yml and the Actions runner belong to this helper.
+// The same names are still checked when another file reads them.
+const MIRROR_REFRESH_INPUTS = new Set([
+  "BASE",
+  "CANDIDATE_SHA",
+  "ENGINE",
+  "PARTIAL",
+  "REFRESH_BRANCH",
+  "REFRESH_SHA",
+  "REPO",
+  "RUN_URL",
+  "RUNNER_TEMP",
+  "TRANSLATION_SHA",
+]);
+
 /**
  * Collect environment variable references in source code.
  *
@@ -419,7 +434,12 @@ export function scanCodeVars({ cwd, roots = CODE_SCAN_ROOTS } = {}) {
       return;
     }
     if (text.includes("\0")) return;
-    for (const m of text.matchAll(CODE_ENV_REF)) vars.add(m[1]);
+    const isMirrorRefresh = file === path.join(repoRoot, "scripts/i18n/mirror-refresh-safety.mjs");
+    for (const match of text.matchAll(CODE_ENV_REF)) {
+      const name = match[1];
+      if (isMirrorRefresh && MIRROR_REFRESH_INPUTS.has(name)) continue;
+      vars.add(name);
+    }
   };
   const walk = (dir) => {
     let entries;
