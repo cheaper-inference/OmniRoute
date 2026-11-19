@@ -46,6 +46,9 @@ export async function getOrCreateApiKey(tool: string): Promise<string> {
 }
 
 export function maskApiKey(plainKey: string): string {
-  const last4 = plainKey.slice(-4);
-  return `nr_••••••••${last4}`;
+  if (!plainKey) return "";
+  const last4 = plainKey.length <= 4 ? plainKey : plainKey.slice(-4);
+  const match = plainKey.match(/^([a-zA-Z0-9]+[_-])/);
+  const prefix = match ? match[1] : "";
+  return `${prefix}••••••••${last4}`;
 }
