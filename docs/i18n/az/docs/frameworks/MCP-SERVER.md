@@ -20,6 +20,8 @@ Və ya açıq nəqliyyat vasitəsi ilə:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -143,9 +145,9 @@ Claude Desktop, Cursor, Cline və uyğun MCP klientlərinin qurulması üçün [
 | `omniroute_rtk_discover`            | `read:compression`  | Seçilmiş RTK çıxış nümunələrində təkrarlanan səs-küyü kəşf edin                                                                          |
 | `omniroute_rtk_learn`               | `read:compression`  | Seçilmiş nümunələrdən nəzərdən keçirilə bilən RTK filtr layihəsi yaradın                                                                 |
 
-CCR girişləri iki səviyyəli mağazadan istifadə edir: yerli qeyri-bulud iş vaxtlarında, davamlı SQLite səviyyəsi ilə dəstəklənən isti yaddaşdaxili səviyyə (`ccr_blocks`, standart olaraq aktivdir), beləliklə blok 512 — KB dən çox bloklar və buludda işləyən bloklar istisna olmaqla, TTL bitənə qədər çıxarılmadan və ya yenidən işə salınmadan sağ qalır. Hər blok 2 MiB, hər bir əsas 16 MiB və qlobal mağaza 64 MiB ilə məhdudlaşır . Girişlər standart olaraq 24 saatlıq TTL (maksimum yeddi gün). Tam MCP axtarışı 256 KiB ilə məhdudlaşır; diapazonlu və grep rejimləri vasitəsilə daha böyük bloklar əlçatan qalır. Saxlama, axtarış, siyahı, yoxlama, silinmə və statistik məlumatlar təsdiqlənmiş API açarı prinsipi ilə təcrid olunur. Audit qeydlərində heşlər və ölçü metadataları var, heç vaxt məzmun yoxdur. Operatorla bağlı təfərrüatlar (iki marker, müştəri ilkin şərtləri, `codemode:false`, alət üzrə əhatə dairəsi, səhifələşdirmə və diaqnostik matrisa) [Sıxılma Mühərrikləri → İlkin şərtlər / operator təlimatında](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) mövcuddur.
+CCR girişləri iki səviyyəli mağazadan istifadə edir: yerli qeyri-bulud iş vaxtlarında, davamlı SQLite səviyyəsi ilə dəstəklənən isti yaddaşdaxili səviyyə (`ccr_blocks`, standart olaraq aktivdir), beləliklə blok TTL bitənə qədər 512 KB dən çox bloklar istisna olmaqla, — çıxarılmadan və ya yenidən işə `COMPRESSION_CCR_DURABLE_STORE=false` sağ qalır. Davamlı yazmaq ən yaxşı səydir: 1000 yazma artıq gözlənilən halda atılır və uğursuz SQLite yazısı daxil edilir, təkrar cəhd edilmir, beləliklə, blok yenidən başladıqda itirilir. Hər blok 2 MiB, hər bir əsas 16 MiB və qlobal mağaza 64 MiB ilə məhdudlaşır . Girişlər standart olaraq 24 saatlıq TTL (maksimum yeddi gün). Tam MCP axtarışı 256 KiB ilə məhdudlaşır; diapazonlu və grep rejimləri vasitəsilə daha böyük bloklar əlçatan qalır. Saxlama, axtarış, siyahı, yoxlama, silinmə və statistik məlumatlar təsdiqlənmiş API açarı prinsipi ilə təcrid olunur. Audit qeydlərində heşlər və ölçü metadataları var, heç vaxt məzmun yoxdur. Operatorla bağlı təfərrüatlar (iki marker, müştəri ilkin şərtləri, `codemode:false`, hər alət üzrə əhatə dairəsi, səhifələşdirmə və diaqnostik matrisa) [Sıxılma Mühərrikləri → İlkin şərtlər / operator təlimatında](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) mövcuddur.
 
-`omniroute_compression_status` ayrıca `analytics.mcpDescriptionCompression` altında MCP təsvirinin sıxılmasını bildirir. Bu dəyərlər MCP siyahıya alına bilən təsvirlər üçün metadata ölçüsündə təxminlərdir (`tools`, `prompts`, `resources` və `resourceTemplates`); onlar provayderin istifadə qəbzi deyil və `source: "mcp_metadata_estimate"` ilə qeyd olunur.
+`omniroute_compression_status` ayrıca `analytics.mcpDescriptionCompression` altında MCP təsvirinin sıxılmasını bildirir. Bu dəyərlər MCP siyahıya alına bilən təsvirlər üçün metadata ölçüsündə təxminlərdir (`tools`, `prompts`, `resources` və `resourceTemplates`); onlar provayderin istifadə qəbzləri deyil və `source: "mcp_metadata_estimate"` ilə qeyd olunur.
 
 ### MCP Əlçatımlılıq Ağacı Filtri (v3.8.0)
 

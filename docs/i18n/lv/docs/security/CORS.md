@@ -119,32 +119,10 @@ Izcelsmes vietas tiek salīdzinātas, neņemot vērā reģistru un ignorējot no
 izpildlaikā var iestatīt sadaļā **Dashboard → Security → CORS Allowed Origins** bez
 restartēšanas.
 
-## API atslēgas un sīkfailu sesijas
+## API taustiņi vs sīkfailu sesijas
 
-- **Bearer / `x-api-key` (`/v1/*` secinājumu saskarne):** pārlūkprogrammas nekad nepievieno
-  tās automātiski. CORS šeit nav nozīmīga barjera — barjera ir API atslēga —,
-  tāpēc šī saskarne ir apzināti konfigurēta pielaidīgi, lai pārlūkprogrammu un
-  Electron klienti varētu lasīt atbildes, kurām tiem jau ir piekļuves tiesības. Atvieglotā
-  izcelsmes atgriešana seko validētajai atslēgai, nevis tikai galvenes klātbūtnei: ja
-  `REQUIRE_API_KEY=false` apkalpo pieprasījumu anonīmi, tā veiksmīgā atbilde saglabā
-  atļauto izcelsmju sarakstu, kas pēc noklusējuma visu liedz. Autentifikācijas atteikumi
-  (401) paliek nolasāmi, lai klienti varētu parādīt atsauktu vai kļūdaini ievadītu atslēgu
-  (#5242): konveijera paša 401 saglabā izcelsmes atgriešanu, un maršruts, kas pats noraida
-  atslēgu pēc tam, kad konveijers pieprasījumu apkalpojis kā anonīmu (`/v1/models` un
-  `/v1beta/models`, ja ir konfigurēta pārvaldības autentifikācija, īpašniekam piesaistītie
-  `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` un auto-combo kandidātu
-  maršruti), pievieno izcelsmes atgriešanu šim 401, izmantojot
-  `credentialRejectionHeaders()`. Izcelsmes atgriešanu nosaka tas, vai pieprasījumā ir
-  akreditācijas datu galvene (`Authorization`, `x-api-key`, `x-goog-api-key` vai sīkfails
-  `auth_token`), nevis tas, kuru no tām maršruts pārbaudīja, un tā nekad netiek apvienota
-  ar `Access-Control-Allow-Credentials`; pamatteksts ir fiksēta kļūdas aploksne.
-  Pārvaldības maršruti zem `/api/v1/`, ko aizsargā `requireManagementAuth()`
-  (`/api/v1/management/*`, `/api/v1/registered-keys`), nepievieno izcelsmes atgriešanu: ar
-  `REQUIRE_API_KEY=false` to 401/403 nav nolasāmi no citas izcelsmes.
-- **Sīkfailu sesija (informācijas panelis):** aizsargāta gan ar pēc noklusējuma slēgtu piekļuvi, **gan**
-  ar `Access-Control-Allow-Credentials` neesamību koplietotajā ceļā. Neiekļaujiet
-  pārvaldības/informācijas paneļa izcelsmes vietas nevienā pielaidīgā konfigurācijā; tām jāpaliek ar precīzi
-  slēgtu piekļuvi.
+- **Nesējs / `x-api-key` ( `/v1/*` secinājuma virsma):** pārlūkprogrammas nekad tos nepievieno automātiski. CORS šeit nav nozīmīgs šķērslis. — atslēga API ir barjera — tāpēc šī virsma ir apzināti pieļaujama, lai pārlūkprogrammas un Electron klienti varētu lasīt atbildes, uz kurām viņiem jau ir tiesības. Atslābinātā atbalss seko apstiprinātajai atslēgai, nevis tikai galvenes klātbūtnei: kad `REQUIRE_API_KEY=false` anonīmi apkalpo pieprasījumu, tā veiksmīgā atbilde saglabā neveiksmīgi aizvērto atļauju sarakstu. Autentifikācijas noraidījumi (401) paliek lasāmi, lai klienti varētu parādīt atsauktu vai nepareizi ievadītu atslēgu (#5242): konveijera 401 saglabā atbalsi un maršruts, kas atsaka pašu atslēgu pēc tam, kad konveijera to izmantoja kā anonīmu (`/v1/models` un `/v1beta/models` ar konfigurētu pārvaldības autentifikāciju, īpašnieka `/v1/files`, `/v1/batches` `/v1/media` un auto-combo kandidātu maršruti) pievieno atbalsi šim 401 `/v1/session-leases` izmantojot `credentialRejectionHeaders()`. Atbalss tiek ievadīta pieprasījumam ar akreditācijas datu galveni (`Authorization`, `x-api-key`, `x-goog-api-key` vai `auth_token` sīkfailu), nevis tam, kurā no tiem maršruts ir pārbaudīts, un nekad netiek savienots pārī ar `Access-Control-Allow-Credentials`; korpuss ir fiksēts kļūdu apvalks. Pārvaldības maršruti zem `/api/v1/` kurus apsargā `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`), nepievieno atbalsi: ar `REQUIRE_API_KEY=false` to 401/403 nav nolasāms krusteniski.
+- **Sīkfailu sesija (informācijas panelis):** aizsargāts ar neveiksmes aizvēršanas noklusējuma iestatījumu** un** ar `Access-Control-Allow-Credentials` neesamību kopīgā ceļā. Neļaujiet management/dashboard origins no jebkādas pieļaujamās konfigurācijas; tiem jāpaliek precīzi aizvērtiem.
 
 ## WebSocket rokasspiedieni (`/v1/responses`, `/v1/ws`)
 
