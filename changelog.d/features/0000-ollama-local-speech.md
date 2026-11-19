@@ -1,1 +1,0 @@
-- **feat(audio):** Ollama 0.40.9+ local speech (Phonon) is available as `ollama-local` through `/v1/audio/speech`, with wav and pcm output; no key is needed on the default host.
