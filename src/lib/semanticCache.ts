@@ -45,7 +45,12 @@ function isoNow(): string {
   return new Date().toISOString();
 }
 
-function ensureCacheMetricsTable() {
+/**
+ * Self-heal path for `cache_metrics`. Migration 20261119144750_cache_metrics.sql creates the
+ * same table and seed rows on every database; keep the two definitions identical
+ * (tests/unit/db/cache-metrics-migration.test.ts compares them).
+ */
+export function ensureCacheMetricsTable() {
   try {
     const db = getDbInstance();
     db.prepare(
