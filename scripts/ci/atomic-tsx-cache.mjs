@@ -5,9 +5,11 @@ import { userInfo } from "node:os";
 import { basename, dirname, join, resolve } from "node:path";
 import { isInternalThread } from "node:worker_threads";
 
-const tsxImport = process.execArgv.some(
-  (arg, index, args) =>
-    arg === "--import=tsx/esm" || (arg === "--import" && args[index + 1] === "tsx/esm")
+const tsxImport = ["tsx/esm", "tsx"].some((specifier) =>
+  process.execArgv.some(
+    (arg, index, args) =>
+      arg === `--import=${specifier}` || (arg === "--import" && args[index + 1] === specifier)
+  )
 );
 const root = process.env.OMNIROUTE_CI_SYNC_TSX_CACHE;
 if (root && root === process.env.TMPDIR && (isInternalThread || tsxImport)) {
