@@ -155,7 +155,12 @@ for (const [name, attempts] of [
     );
     const result = await prepareCoverageShards(input);
     assert.equal(result.shards, 8);
-    assert.equal((await readdir(input.outputDirectory)).length, 8);
+    assert.equal(result.inputFiles, 8);
+    assert.deepEqual(await readdir(input.outputDirectory), ["coverage-merged.json"]);
+    const merged = JSON.parse(
+      await readFile(join(input.outputDirectory, "coverage-merged.json"), "utf8")
+    );
+    assert.equal(merged.result[0].functions[0].ranges[0].count, 36);
     assert.deepEqual(result.producerAttempts, attempts.map(String));
     const after = await Promise.all(
       input.selection.producers.map((producer) =>
@@ -460,6 +465,17 @@ test("coverage downloads selected immutable IDs and keeps both required read per
   assert.equal(download.with.pattern, undefined);
   assert.equal(download.with["merge-multiple"], false);
   assert.ok(coverage.steps.indexOf(selection) < coverage.steps.indexOf(download));
+});
+
+test("coverage producers and aggregator use one exact Node version across reruns", () => {
+  const versionRef = "${{ env.CI_V8_NODE_VERSION }}";
+  assert.match(workflow.env.CI_V8_NODE_VERSION, /^\d+\.\d+\.\d+$/);
+  for (const job of ["test-unit", "test-coverage"]) {
+    const setup = workflow.jobs[job].steps.find((step) =>
+      step.uses?.startsWith("actions/setup-node@")
+    );
+    assert.equal(setup?.with["node-version"], versionRef, job);
+  }
 });
 
 test("the selection receipt is produced, consumed and archived under the coverage prefix", () => {

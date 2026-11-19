@@ -38,6 +38,9 @@ env:
   # system TLS). Belt-and-suspenders with tests/_setup/isolateDataDir.ts.
   OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
   CI_NODE_VERSION: "24"
+  # The V8 manifests require the producer and aggregator to have the same Node
+  # patch. A floating major can resolve to different patch versions on runner caches.
+  CI_V8_NODE_VERSION: "24.22.3"
   CI_NODE_24_VERSION: "24"
   CI_NODE_26_VERSION: "26"
 
@@ -1172,7 +1175,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
-          node-version: ${{ env.CI_NODE_VERSION }}
+          node-version: ${{ env.CI_V8_NODE_VERSION }}
       - uses: ./.github/actions/prepare-unit-storage
         with:
           cache: ${{ github.event_name == 'pull_request' }}
@@ -1205,6 +1208,9 @@ jobs:
           # Capture the transforms this producer actually executes; a reused or
           # shared TSX cache cannot establish generated-layout provenance.
           node scripts/ci/prepare-v8-coverage.mjs init-cache "$TMPDIR" "$TEST_SHARD" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKSPACE"
+          V8_CACHE_PRELOAD="$(node -p 'require("node:url").pathToFileURL(process.argv[1]).href' "$GITHUB_WORKSPACE/scripts/ci/atomic-tsx-cache.mjs")"
+          V8_NATIVE_PRELOAD="$(node -p 'require("node:url").pathToFileURL(process.argv[1]).href' "$GITHUB_WORKSPACE/scripts/ci/native-worker-v8-layout.mjs")"
+          OMNIROUTE_CI_SYNC_TSX_CACHE="$TMPDIR" NODE_OPTIONS="$NODE_OPTIONS --import=$V8_CACHE_PRELOAD --import=$V8_NATIVE_PRELOAD" \
           npx c8 --merge-async \
             --temp-directory=coverage-shard \
             --reports-dir=coverage-shard-report \
@@ -1373,7 +1379,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
-          node-version: ${{ env.CI_NODE_VERSION }}
+          node-version: ${{ env.CI_V8_NODE_VERSION }}
       - uses: ./.github/actions/npm-ci-retry
         with:
           # PR acceleration is not release-candidate provenance.
@@ -1392,9 +1398,8 @@ jobs:
           path: coverage-shards/
           merge-multiple: false
       - name: Merge + report + gate
-        # Merging 8 shards of raw v8 coverage is memory-heavy. `--merge-async`
-        # keeps the V8 coverage merge incremental instead of loading every raw
-        # JSON blob into one in-memory merge, which avoids Node heap OOMs.
+        # Verify and merge each raw report in order without storing a second
+        # raw copy. c8 reads the aggregate for source mapping and reporting.
         # lcov only outside pull_request (2026-10-26): its sole consumer on a PR was the
         # informational Codecov upload below (SonarQube is off: vars.SONARQUBE_ENABLED is
         # unset), and the PR gate only needs the json/text summaries. The step took ~21 min
@@ -1408,7 +1413,7 @@ jobs:
           if [ "$EVENT_NAME" != "pull_request" ]; then LCOV_REPORTER=(--reporter=lcov); fi
           mkdir -p coverage
           # Retained producers keep their original attempts. The receipt binds all
-          # eight job/artifact identities before the native c8 merge reads samples.
+          # eight job/artifact identities and the aggregate sent to c8.
           node scripts/ci/prepare-v8-coverage.mjs prepare coverage-shards coverage-shards-verified 8 "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKSPACE" coverage/coverage-selection.json "$RUN_HEAD_SHA" "$GITHUB_REPOSITORY" > coverage/coverage-preparation.json
           cat coverage/coverage-preparation.json
           # Gate aligned to the project's local coverage bar: `npm run test:coverage`

@@ -49,7 +49,7 @@ async function workspace(t) {
   return dir;
 }
 
-async function matrixArtifacts(t, { count = total, sourceRoot = root } = {}) {
+async function matrixArtifacts(t, { count = total, sourceRoot = root, input = rawCoverage } = {}) {
   const { packCoverageShard } = await helpers();
   const dir = await workspace(t);
   const directory = join(dir, "downloads");
@@ -59,7 +59,7 @@ async function matrixArtifacts(t, { count = total, sourceRoot = root } = {}) {
     const inputDirectory = join(dir, `raw-${index}`);
     const outputDirectory = join(directory, `coverage-shard-${runAttempt}-${index}`);
     await mkdir(inputDirectory);
-    await writeFile(join(inputDirectory, rawName), JSON.stringify(rawCoverage(index, sourceRoot)));
+    await writeFile(join(inputDirectory, rawName), JSON.stringify(input(index, sourceRoot)));
     manifests.push(
       await packCoverageShard({
         inputDirectory,
@@ -203,16 +203,17 @@ async function exerciseWorkflow(t, count) {
   };
 }
 
-test("the real eight-shard workflow retains colliding filenames before c8", posix, async (t) => {
-  assert.deepEqual(workflow.jobs["test-unit"].strategy.matrix.shard, [1, 2, 3, 4, 5, 6, 7, 8]);
-  const result = await exerciseWorkflow(t, total);
-  assert.equal(result.status, 0, result.stdout + result.stderr);
-  assert.equal(result.observed.length, total, "every independent V8 sample must reach c8");
-  assert.deepEqual(
-    result.observed.map((sample) => sample.result[0].functions[0].ranges[0].count),
-    [1, 2, 3, 4, 5, 6, 7, 8]
-  );
-});
+test(
+  "the real eight-shard workflow merges contributions with colliding filenames before c8",
+  posix,
+  async (t) => {
+    assert.deepEqual(workflow.jobs["test-unit"].strategy.matrix.shard, [1, 2, 3, 4, 5, 6, 7, 8]);
+    const result = await exerciseWorkflow(t, total);
+    assert.equal(result.status, 0, result.stdout + result.stderr);
+    assert.equal(result.observed.length, 1);
+    assert.equal(result.observed[0].result[0].functions[0].ranges[0].count, 36);
+  }
+);
 
 test("the real workflow cannot report with only seven of eight shards", posix, async (t) => {
   const result = await exerciseWorkflow(t, total - 1);
@@ -220,20 +221,34 @@ test("the real workflow cannot report with only seven of eight shards", posix, a
   assert.equal(result.observed, null, "admission must fail before c8 is invoked");
 });
 
-test("lossless shard transport preserves every byte, namespace and volume measurement", async (t) => {
+test("shard transport preserves producer bytes and accounts for the single c8 input", async (t) => {
   const { prepareCoverageShards } = await helpers();
   const options = await matrixArtifacts(t);
   const prepared = await prepareCoverageShards(options);
   assert.equal(prepared.inputFiles, total);
   const files = await readdir(options.outputDirectory);
-  assert.equal(files.length, total);
-  for (const [index, name] of files.entries()) {
-    assert.deepEqual(
-      JSON.parse(await readFile(join(options.outputDirectory, name), "utf8")),
-      rawCoverage(index + 1)
+  assert.deepEqual(files, ["coverage-merged.json"]);
+  const aggregate = await readFile(join(options.outputDirectory, files[0]));
+  assert.equal(prepared.aggregateBytes, aggregate.length);
+  assert.equal(prepared.aggregateSha256, digest(aggregate));
+  assert.equal(JSON.parse(aggregate).result[0].functions[0].ranges[0].count, 36);
+  const order = options.manifests
+    .map(
+      (manifest, index) => JSON.stringify([rawName, index + 1, manifest.inputs[0].sha256]) + "\n"
+    )
+    .join("");
+  assert.equal(prepared.mergeOrderSha256, digest(order));
+  for (const [index, manifest] of options.manifests.entries()) {
+    const artifact = join(options.directory, `coverage-shard-${runAttempt}-${index + 1}`);
+    assert.equal(
+      prepared.manifestHashes[index],
+      digest(await readFile(join(artifact, "manifest.json")))
     );
-  }
-  for (const manifest of options.manifests) {
+    assert.equal(manifest.inputs[0].sha256, digest(JSON.stringify(rawCoverage(index + 1))));
+    assert.equal(
+      manifest.inputs[0].packedSha256,
+      digest(await readFile(join(artifact, "raw", rawName + ".gz")))
+    );
     assert.ok(manifest.inputBytes > 0 && manifest.packedBytes > 0);
     assert.equal(manifest.sourceRoot, root);
     assert.equal(manifest.pathPolicy, "git-tracked-file-urls-v1");
@@ -658,3 +673,152 @@ test(
     await compareNativePortableCoverage(t, { esm: true });
   }
 );
+
+test("coverage consumer bounds retained raw without losing the eight original producers", async (t) => {
+  const { prepareCoverageShards } = await helpers();
+  const options = await matrixArtifacts(t);
+  const originals = [];
+  for (const [offset, manifest] of options.manifests.entries()) {
+    const artifact = join(options.directory, `coverage-shard-${runAttempt}-${offset + 1}`);
+    for (const path of [
+      join(artifact, "manifest.json"),
+      ...manifest.inputs.map((input) => join(artifact, "raw", `${input.name}.gz`)),
+    ]) {
+      originals.push({ path, sha256: digest(await readFile(path)) });
+    }
+  }
+  const prepared = await prepareCoverageShards(options);
+  let materializedBytes = 0;
+  let contributedCount = 0;
+  for (const name of await readdir(options.outputDirectory)) {
+    const bytes = await readFile(join(options.outputDirectory, name));
+    materializedBytes += bytes.length;
+    const sample = JSON.parse(bytes.toString("utf8"));
+    assert.ok(Array.isArray(sample.result), "the c8 input directory contains only V8 derivatives");
+    for (const script of sample.result) contributedCount += script.functions[0].ranges[0].count;
+  }
+  assert.equal(prepared.inputFiles, 8, "provenance retains the original input count");
+  assert.equal(prepared.shards, 8);
+  assert.equal(contributedCount, 36, "all original counts 1..8 contribute exactly once");
+  for (const original of originals) {
+    assert.equal(
+      digest(await readFile(original.path)),
+      original.sha256,
+      "producer bytes remain immutable"
+    );
+  }
+  const largestInputBytes = Math.max(
+    ...options.manifests.flatMap((manifest) => manifest.inputs.map((input) => input.bytes))
+  );
+  assert.ok(
+    materializedBytes <= largestInputBytes * 2,
+    `repeated-source corpus retains ${materializedBytes} raw bytes for largest input ${largestInputBytes}`
+  );
+});
+
+test(
+  "coverage consumer enforces an independent peak quota across all eight shards",
+  posix,
+  async (t) => {
+    const { assertBoundedPreparation } = await import("./fixtures/v8-disk-quota-harness.mjs");
+    await assertBoundedPreparation(await matrixArtifacts(t), { expectedCount: 36 });
+  }
+);
+
+test("coverage consumer retains distinct scripts when the aggregate exceeds a repeated-source bound", async (t) => {
+  const { prepareCoverageShards } = await helpers();
+  const files = [
+    "scripts/quality/admission-verdict.mjs",
+    "scripts/quality/audit-dependencies.mjs",
+    "scripts/quality/balance-e2e-shards.mjs",
+    "scripts/quality/baseline-headroom.mjs",
+    "scripts/quality/build-test-impact-map.mjs",
+    "scripts/quality/check-quality-ratchet.mjs",
+    "scripts/quality/check-skill-contract.mjs",
+    "scripts/quality/classify-pr-changes.mjs",
+  ];
+  const options = await matrixArtifacts(t, {
+    input(index, sourceRoot) {
+      const sample = rawCoverage(index, sourceRoot);
+      sample.result[0].url = pathToFileURL(join(sourceRoot, files[index - 1])).href;
+      return sample;
+    },
+  });
+  const prepared = await prepareCoverageShards(options);
+  assert.deepEqual(await readdir(options.outputDirectory), ["coverage-merged.json"]);
+  const result = JSON.parse(
+    await readFile(join(options.outputDirectory, "coverage-merged.json"), "utf8")
+  );
+  const counts = new Map(
+    result.result.map((script) => [script.url, script.functions[0].ranges[0].count])
+  );
+  assert.equal(counts.size, 8);
+  assert.deepEqual(
+    files.map((file) => counts.get(pathToFileURL(join(root, file)).href)),
+    [1, 2, 3, 4, 5, 6, 7, 8]
+  );
+  assert.ok(
+    prepared.aggregateBytes >
+      2 * Math.max(...options.manifests.map((manifest) => manifest.inputBytes))
+  );
+});
+
+test(
+  "coverage consumer removes owned staging after a late eighth-shard failure",
+  posix,
+  async (t) => {
+    const { runWithIndependentDiskQuota, snapshotProducerInputs, assertProducerInputsUnchanged } =
+      await import("./fixtures/v8-disk-quota-harness.mjs");
+    const options = await matrixArtifacts(t);
+    await writeFile(
+      join(options.directory, `coverage-shard-${runAttempt}-8`, "raw", `${rawName}.gz`),
+      "corrupt eighth gzip"
+    );
+    const originals = await snapshotProducerInputs(options);
+    const largest = Math.max(
+      ...options.manifests.flatMap((manifest) => manifest.inputs.map((input) => input.bytes))
+    );
+    const result = runWithIndependentDiskQuota({
+      directory: options.dir,
+      options,
+      quotaBytes: largest * 8,
+    });
+    assert.equal(result.status, 1);
+    assert.equal(result.report.subjectError.reason, "packed-hash-mismatch");
+    assert.equal(result.report.outputExists, false);
+    assert.equal(result.report.subject.finalBytes, 0);
+    assert.equal(
+      result.report.subject.events.some((event) => event.rejected === "ENOSPC"),
+      false,
+      "the generous control quota must expose the eighth input's corruption"
+    );
+    await assertProducerInputsUnchanged(originals);
+  }
+);
+
+test("coverage consumer preserves incremental c8 semantics for mixed function and block samples", async (t) => {
+  const { prepareCoverageShards } = await helpers();
+  const options = await matrixArtifacts(t, {
+    input(index, sourceRoot) {
+      const sample = rawCoverage(index, sourceRoot);
+      const script = sample.result[0];
+      if (index === 2) script.url = fileURLToPath(script.url);
+      if (index === 3) script.url += "?variant=1#fixture";
+      script.functions[0].isBlockCoverage = [4, 7, 8].includes(index);
+      return sample;
+    },
+  });
+  const prepared = await prepareCoverageShards(options);
+  assert.equal(prepared.inputFiles, 8);
+  const raw = JSON.parse(
+    await readFile(join(options.outputDirectory, "coverage-merged.json"), "utf8")
+  );
+  assert.equal(raw.result.length, 1, "file URLs and absolute paths name one c8 script");
+  assert.equal(raw.result[0].functions.length, 1);
+  const fn = raw.result[0].functions[0];
+  assert.equal(fn.isBlockCoverage, true);
+  // The first two positive function-only counts are merged into block
+  // granularity, so later function-only records cannot replace their counts.
+  // A single merge over all eight would discard the first two and report 19.
+  assert.equal(fn.ranges[0].count, 22);
+});

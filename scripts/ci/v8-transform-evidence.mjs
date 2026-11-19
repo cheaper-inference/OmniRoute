@@ -50,13 +50,14 @@ async function bytesOf(path) {
   return bytes;
 }
 
-function parsePayload(bytes) {
+function parsePayload(bytes, { allowInvalidJson = false } = {}) {
   let payload;
   let map;
   try {
     payload = JSON.parse(bytes.toString("utf8"));
-    map = typeof payload.map === "string" ? JSON.parse(payload.map) : payload.map;
-  } catch {
+    map = typeof payload?.map === "string" ? JSON.parse(payload.map) : payload?.map;
+  } catch (error) {
+    if (allowInvalidJson && error instanceof SyntaxError) return null;
     incomplete("invalid-json");
   }
   if (
@@ -85,7 +86,7 @@ function mappedSource(map, sourceRoot) {
         ? source
         : null;
   } catch {
-    incomplete("source");
+    return null;
   }
   if (!absolute || (map.sourceRoot && map.sourceRoot !== "")) return null;
   const path = relative(sourceRoot, absolute);
@@ -99,14 +100,12 @@ function mappedSource(map, sourceRoot) {
   return path.split(process.platform === "win32" ? "\\" : "/").join("/");
 }
 
-function verifySource(payload, sourcePath, source, sourceRoot) {
-  if (
-    mappedSource(payload.map, sourceRoot) !== sourcePath ||
-    payload.map.sourcesContent?.length !== 1 ||
-    typeof payload.map.sourcesContent[0] !== "string" ||
-    hash(payload.map.sourcesContent[0]) !== source.sha256
-  )
-    incomplete("source");
+function matchesSourceContents(payload, source) {
+  return (
+    payload.map.sourcesContent?.length === 1 &&
+    typeof payload.map.sourcesContent[0] === "string" &&
+    hash(payload.map.sourcesContent[0]) === source.sha256
+  );
 }
 
 export function transformProducerIdentity(binding) {
@@ -164,14 +163,27 @@ export async function packTransformEvidence({
   const entries = [];
   const seen = new Set();
   let scannedBytes = 0;
+  let invalidJsonEntries = 0;
+  let mismatchedSourceEntries = 0;
   for (const name of names) {
     const bytes = await bytesOf(join(cacheDirectory, name));
     scannedBytes += bytes.length;
-    const value = parsePayload(bytes);
+    // tsx writes its cache asynchronously. An interrupted local write is a
+    // cache miss. Projection still requires verified proof for every layout it changes.
+    const value = parsePayload(bytes, { allowInvalidJson: true });
+    if (!value) {
+      invalidJsonEntries++;
+      continue;
+    }
     const sourcePath = mappedSource(value.map, producer.sourceRoot);
     const source = sourceFiles.get(sourcePath);
     if (!source) continue;
-    verifySource(value, sourcePath, source, producer.sourceRoot);
+    // The raw V8 maps have their own source check. Local cache entries that
+    // cannot prove a candidate transform are omitted from transport.
+    if (!matchesSourceContents(value, source)) {
+      mismatchedSourceEntries++;
+      continue;
+    }
     const payloadSha256 = hash(bytes);
     if (seen.has(payloadSha256)) continue;
     seen.add(payloadSha256);
@@ -197,6 +209,8 @@ export async function packTransformEvidence({
     payloadBytes: entries.reduce((sum, entry) => sum + entry.payloadBytes, 0),
     scannedEntries: names.length,
     scannedBytes,
+    invalidJsonEntries,
+    mismatchedSourceEntries,
     limits: { maxEntryBytes: MAX_ENTRY_BYTES, maxEntries: MAX_ENTRIES },
   };
 }
@@ -285,7 +299,11 @@ export async function readTransformEvidence({
     const value = parsePayload(bytes);
     if (hash(value.code) !== entry.codeSha256 || hash(value.mapText) !== entry.mapSha256)
       incomplete("hash");
-    verifySource(value, entry.sourcePath, source, producer.sourceRoot);
+    if (
+      mappedSource(value.map, producer.sourceRoot) !== entry.sourcePath ||
+      !matchesSourceContents(value, source)
+    )
+      incomplete("source");
     const descriptors = index.get(entry.sourcePath) || [];
     descriptors.push(descriptor(value, entry, producer.sourceRoot));
     index.set(entry.sourcePath, descriptors);

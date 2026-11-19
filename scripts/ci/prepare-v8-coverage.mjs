@@ -17,6 +17,7 @@ import {
 } from "./v8-transform-evidence.mjs";
 
 const require = createRequire(import.meta.url);
+const { mergeProcessCovs } = require("@bcoe/v8-coverage");
 const requireFromC8 = createRequire(require.resolve("c8/package.json"));
 const TestExclude = requireFromC8("test-exclude");
 const { buildYargs } = require("c8/lib/parse-args");
@@ -112,6 +113,46 @@ function absolutePath(value, base) {
   if (isAbsolute(value)) return value;
   if (base && !/^[a-zA-Z][a-zA-Z0-9+.-]*:/.test(value)) return resolve(base, value);
   return null;
+}
+
+function c8CoveragePolicy(cwd) {
+  const policy = buildYargs().parse(["report", "--exclude=tests/**", "--exclude=**/*.test.*"]);
+  const exclude = new TestExclude({
+    cwd,
+    exclude: policy.exclude,
+    include: policy.include,
+    extension: policy.extension,
+    excludeNodeModules: policy.excludeNodeModules,
+    relativePath: !policy.allowExternal,
+  });
+  return { policy, exclude };
+}
+
+function verifyEmbeddedSources(data, origin, target, sources, exclude) {
+  for (const [url, cache] of Object.entries(data["source-map-cache"] || {})) {
+    const absolute = absolutePath(url);
+    const path = absolute && inside(origin, absolute);
+    const map = cache?.data;
+    if (!path || !sources.has(path) || !exclude.shouldInstrument(resolve(target, path))) continue;
+    if (map?.sourcesContent == null) continue;
+    if (
+      !Array.isArray(map.sourcesContent) ||
+      !Array.isArray(map.sources) ||
+      map.sourcesContent.length > map.sources.length
+    )
+      throw new Error("V8_EVIDENCE_INCOMPLETE:generated-evidence-embedded-source");
+    const root = map.sourceRoot
+      ? absolutePath(map.sourceRoot, dirname(absolute))
+      : dirname(absolute);
+    if (!root) throw new Error("V8_EVIDENCE_INCOMPLETE:generated-evidence-embedded-source");
+    for (const [index, text] of map.sourcesContent.entries()) {
+      if (text == null) continue;
+      const source = absolutePath(map.sources[index], root);
+      const expected = source && sources.get(inside(origin, source));
+      if (typeof text !== "string" || !expected || hash(text) !== expected.sha256)
+        throw new Error(`V8_EVIDENCE_INCOMPLETE:generated-evidence-embedded-source (${path})`);
+    }
+  }
 }
 
 function validateCoverage(data) {
@@ -224,6 +265,7 @@ export async function packCoverageShard(options) {
   const shard = shardIdentity(options.shard);
   const sourceRoot = resolve(options.sourceRoot || process.cwd());
   const tree = gitTree(sourceRoot, binding.candidateSha);
+  const { exclude } = c8CoveragePolicy(sourceRoot);
   const input = resolve(options.inputDirectory);
   const files = (await readdir(input)).sort();
   if (!files.length) throw new Error("No V8 coverage inputs");
@@ -244,6 +286,8 @@ export async function packCoverageShard(options) {
       for (const path of referenced) {
         if (!sources.has(path)) sources.set(path, await sourceIdentity(sourceRoot, path, tree));
       }
+      // c8 may use embedded source text instead of reading the checked-out file.
+      verifyEmbeddedSources(data, sourceRoot, sourceRoot, sources, exclude);
       const packed = await compress(bytes, { level: 1 });
       await writeFile(join(stage, "raw", `${name}.gz`), packed, { flag: "wx" });
       inputs.push({
@@ -311,6 +355,7 @@ export async function prepareCoverageShards(options) {
     throw new Error("V8_EVIDENCE_INCOMPLETE:downloaded-shard-inventory-mismatch");
   const inputs = [];
   const verifiedSources = new Map();
+  const manifestHashes = [];
   let generatedEvidenceBytes = 0;
   for (let index = 1; index <= total; index++) {
     const producer = producers[index - 1];
@@ -318,7 +363,9 @@ export async function prepareCoverageShards(options) {
     const artifact = join(directory, producer.artifactName);
     if (!(await lstat(artifact)).isDirectory()) throw new Error("Invalid coverage artifact layout");
     await regular(join(artifact, "manifest.json"));
-    const manifest = JSON.parse(await readFile(join(artifact, "manifest.json"), "utf8"));
+    const manifestBytes = await readFile(join(artifact, "manifest.json"));
+    const manifest = JSON.parse(manifestBytes.toString("utf8"));
+    manifestHashes.push(hash(manifestBytes));
     const artifactNames = manifest.transformEvidence?.entries?.length
       ? ["generated", "manifest.json", "raw"]
       : ["manifest.json", "raw"];
@@ -397,22 +444,17 @@ export async function prepareCoverageShards(options) {
       throw new Error("Incomplete coverage shard inventory");
   }
   inputs.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.index - b.index));
-  const policy = buildYargs().parse(["report", "--exclude=tests/**", "--exclude=**/*.test.*"]);
-  const exclude = new TestExclude({
-    cwd: sourceRoot,
-    exclude: policy.exclude,
-    include: policy.include,
-    extension: policy.extension,
-    excludeNodeModules: policy.excludeNodeModules,
-    relativePath: true,
-  });
+  const { policy, exclude } = c8CoveragePolicy(sourceRoot);
   const { output, stage } = await freshStage(options.outputDirectory);
   const instrumentedShards = new Set();
   const layouts = createSourceMapLayoutProjector();
+  const sourceMapCache = Object.create(null);
+  const mergeOrder = createHash("sha256");
+  let merged = null;
   let relocatedFiles = 0;
   let projectedFiles = 0;
   try {
-    for (const [ordinal, item] of inputs.entries()) {
+    for (const item of inputs) {
       await regular(item.file);
       const packed = await readFile(item.file);
       if (packed.length !== item.packedBytes || hash(packed) !== item.packedSha256)
@@ -422,6 +464,7 @@ export async function prepareCoverageShards(options) {
         throw new Error("Raw coverage hash mismatch");
       const data = JSON.parse(bytes.toString("utf8"));
       validateCoverage(data);
+      verifyEmbeddedSources(data, item.origin, sourceRoot, verifiedSources, exclude);
       const maps = new Map();
       for (const [url, cache] of Object.entries(data["source-map-cache"] || {})) {
         const absolute = absolutePath(url);
@@ -461,29 +504,66 @@ export async function prepareCoverageShards(options) {
           continue;
         instrumentedShards.add(item.index);
         const cache = maps.get(path);
-        const lineLengths = layouts.project({
-          script,
-          cache,
-          originUrl: originals[index].url,
-          sourcePath: path,
-          sourceIdentity: verifiedSources.get(path),
-          generatedProofs: originals[index].generatedProofs,
-        });
-        if (lineLengths) cacheUpdates.set(cache, lineLengths);
+        try {
+          const lineLengths = layouts.project({
+            script,
+            cache,
+            originUrl: originals[index].url,
+            sourcePath: path,
+            sourceIdentity: verifiedSources.get(path),
+            generatedProofs: originals[index].generatedProofs,
+          });
+          if (lineLengths) cacheUpdates.set(cache, lineLengths);
+        } catch (error) {
+          if (!error.message?.startsWith("V8_EVIDENCE_INCOMPLETE:source-map-layout-")) throw error;
+          const detail = JSON.stringify({
+            source: path,
+            shard: item.index,
+            rawInput: item.name,
+            producerProofs: originals[index].generatedProofs.length,
+          });
+          throw new Error(`${error.message} ${detail}`, { cause: error });
+        }
       }
       // Several script IDs may share a source map. Each reads the original
       // generated layout before the derivative cache is changed once.
       for (const [cache, lineLengths] of cacheUpdates) cache.lineLengths = lineLengths;
       if (moved) relocatedFiles++;
       if (cacheUpdates.size) projectedFiles++;
-      await writeFile(
-        join(stage, `coverage-${String(ordinal).padStart(10, "0")}.json`),
-        moved || cacheUpdates.size ? JSON.stringify(data) : bytes,
-        { flag: "wx" }
-      );
+      // Match c8's incremental report order. Merging batches or individual
+      // scripts first can change how function and block coverage are combined.
+      // c8 normalizes script and cache keys separately before each merge.
+      for (const [url, entry] of Object.entries(data["source-map-cache"] || {})) {
+        sourceMapCache[pathToFileURL(fileURLToPath(url)).href] = entry;
+      }
+      const scripts = data.result.filter((script) => {
+        if (script.url.startsWith("node:")) script.url = script.url.slice(5) + ".js";
+        if (script.url.startsWith("file://")) {
+          try {
+            script.url = fileURLToPath(script.url);
+          } catch {
+            return false;
+          }
+        }
+        return (
+          (!policy.omitRelative || isAbsolute(script.url)) &&
+          (policy.excludeAfterRemap || exclude.shouldInstrument(script.url))
+        );
+      });
+      const sample = { result: scripts };
+      merged = mergeProcessCovs(merged ? [merged, sample] : [sample]);
+      mergeOrder.update(JSON.stringify([item.name, item.index, item.sha256]) + "\n");
     }
     if (instrumentedShards.size !== total)
       throw new Error("A shard has no instrumented candidate coverage");
+    if (!merged?.result.length) throw new Error("Empty merged candidate coverage");
+    // c8 still performs source mapping and produces the reports. Only this
+    // aggregate is written, so disk no longer holds all normalized raw inputs.
+    for (const script of merged.result) {
+      if (isAbsolute(script.url)) script.url = pathToFileURL(script.url).href;
+    }
+    const aggregate = JSON.stringify({ ...merged, "source-map-cache": sourceMapCache });
+    await writeFile(join(stage, "coverage-merged.json"), aggregate, { flag: "wx" });
     await rename(stage, output);
     return {
       ...binding,
@@ -493,6 +573,10 @@ export async function prepareCoverageShards(options) {
       inputBytes: inputs.reduce((sum, item) => sum + item.bytes, 0),
       packedBytes: inputs.reduce((sum, item) => sum + item.packedBytes, 0),
       generatedEvidenceBytes,
+      manifestHashes,
+      mergeOrderSha256: mergeOrder.digest("hex"),
+      aggregateBytes: Buffer.byteLength(aggregate),
+      aggregateSha256: hash(aggregate),
       relocatedFiles,
       projectedFiles,
       layoutProjection: layouts.summary(),
