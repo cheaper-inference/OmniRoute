@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import { execFileSync } from "node:child_process";
-import { mkdtemp, readdir, readFile, rm } from "node:fs/promises";
+import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
@@ -133,4 +133,68 @@ test("without the preload, tsx and the worker still exhibit distinct layouts", a
   assert.equal(parent.mapped, true);
   assert.equal(native.mapped, false);
   assert.notEqual(parent.functions[0].ranges[0].endOffset, native.functions[0].ranges[0].endOffset);
+});
+
+test("migration schema boots retain the native layout for the shared data paths module", async (t) => {
+  const fixture = await mkdtemp(join(tmpdir(), "migration-native-coverage-"));
+  t.after(() => rm(fixture, { recursive: true, force: true }));
+  const base = join(fixture, "base");
+  const head = join(fixture, "head");
+  const coverage = join(fixture, "coverage");
+  await Promise.all([base, head, coverage].map((directory) => mkdir(directory)));
+  const original = "20261119010000_create_coverage_layout_fixture.sql";
+  const createTable = "CREATE TABLE coverage_layout_fixture (id INTEGER PRIMARY KEY);";
+  await Promise.all([
+    writeFile(join(base, original), createTable),
+    writeFile(join(head, original), createTable),
+    writeFile(
+      join(head, "20261119020000_extend_coverage_layout_fixture.sql"),
+      "ALTER TABLE coverage_layout_fixture ADD COLUMN label TEXT;"
+    ),
+  ]);
+  execFileSync(
+    process.execPath,
+    [
+      "--import",
+      "tsx/esm",
+      "scripts/check/migration-commutation.ts",
+      "--base-dir",
+      base,
+      "--head-dir",
+      head,
+    ],
+    {
+      cwd: root,
+      env: {
+        ...process.env,
+        TMPDIR: fixture,
+        NODE_OPTIONS: `--import=${preload.href}`,
+        NODE_V8_COVERAGE: coverage,
+        OMNIROUTE_CI_SYNC_TSX_CACHE: fixture,
+      },
+      stdio: "pipe",
+      timeout: 240_000,
+    }
+  );
+  const boot = new URL("scripts/check/lib/migrationSchemaBoot.ts", root).href;
+  const dbCore = new URL("src/lib/db/core.ts", root).href;
+  const dataPaths = new URL("src/lib/dataPaths.ts", root);
+  const sourceLength = (await readFile(dataPaths, "utf8")).length;
+  let boots = 0;
+  for (const file of await readdir(coverage)) {
+    if (!file.endsWith(".json")) continue;
+    const report = JSON.parse(await readFile(join(coverage, file), "utf8"));
+    const urls = new Set(report.result.map((script) => script.url));
+    if (!urls.has(boot) || !urls.has(dbCore)) continue;
+    boots++;
+    const script = report.result.find((script) => script.url === dataPaths.href);
+    assert.ok(script, "the boot exercised the data paths module");
+    assert.equal(report["source-map-cache"]?.[dataPaths.href], undefined);
+    const [{ startOffset, endOffset }] = script.functions[0].ranges;
+    assert.deepEqual(
+      [startOffset, endOffset],
+      [0, sourceLength + `\n\n//# sourceURL=${dataPaths.href}`.length]
+    );
+  }
+  assert.ok(boots > 0, "the migration boot supplied coverage");
 });
