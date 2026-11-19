@@ -141,7 +141,11 @@ async function buildClaudePlan(rawOpts, args = []) {
     model: merged.model || undefined,
     inheritEnv: merged.inheritEnv,
   });
-  const spawnArgs = quoteShellArgsForSpawn(args, process.platform, commandSpec.shell);
+  const spawnArgs = quoteShellArgsForSpawn(
+    [...(commandSpec.argsPrefix || []), ...args],
+    process.platform,
+    commandSpec.shell
+  );
 
   return {
     target: "claude",
@@ -174,7 +178,7 @@ async function buildCodexPlan(rawOpts, args = []) {
   const env = buildCodexEnv(process.env, authToken, {
     inheritEnv: merged.inheritEnv,
   });
-  const fullArgs = [...providerArgs, ...profileArgs, ...args];
+  const fullArgs = [...(commandSpec.argsPrefix || []), ...providerArgs, ...profileArgs, ...args];
   const spawnArgs = quoteShellArgsForSpawn(fullArgs, process.platform, commandSpec.shell);
 
   return {

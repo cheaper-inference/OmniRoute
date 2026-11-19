@@ -110,11 +110,11 @@ async function spawnQoderCliUnlimited(options: SpawnQoderCliOptions): Promise<Qo
   // #6263: resolve the real qodercli command (absolute .cmd/.exe on Windows) and
   // whether it needs a shell, then spawn with the cliRuntime-enriched env (PATH +
   // PATHEXT + APPDATA) so the npm `.cmd` wrapper under %APPDATA%\npm is found.
-  const { command, useShell } = await resolveQoderCliInvocation(options.command);
+  const { command, useShell, argsPrefix = [] } = await resolveQoderCliInvocation(options.command);
 
   let child: ReturnType<typeof spawn>;
   try {
-    child = spawn(command, options.args, {
+    child = spawn(command, [...argsPrefix, ...options.args], {
       env: buildQoderCliEnv(options.token),
       cwd: options.cwd || undefined,
       stdio: ["pipe", "pipe", "pipe"],

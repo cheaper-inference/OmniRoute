@@ -5275,6 +5275,67 @@ paths:
         "200":
           description: Backup created
 
+  /api/cli-tools/runtime/managed:
+    get:
+      tags: [CLI Tools]
+      x-loopback-only: true
+      summary: List installed managed CLI runtimes and their last update check
+      description: Requires trusted loopback or private-LAN peer locality and management authentication, even when dashboard login is disabled. Does not install packages or check the registry.
+      responses:
+        "200":
+          description: Runtime items with installedVersion, latestVersion, source, updateAvailable, canUpdate, checkedAt, reason and error
+        "401":
+          description: Management authentication required
+        "403":
+          description: Request did not originate from a trusted local peer
+        "500":
+          description: Runtime inventory unavailable
+    post:
+      tags: [CLI Tools]
+      summary: Check or apply stable managed CLI updates
+      x-loopback-only: true
+      description: Requires trusted loopback or private-LAN peer locality and management authentication. The server selects an official package and exact stable version. Update activation follows package and executable verification; a failed update preserves the previous runtime.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              oneOf:
+                - type: object
+                  additionalProperties: false
+                  required: [action]
+                  properties:
+                    action:
+                      type: string
+                      enum: [check]
+                - type: object
+                  additionalProperties: false
+                  required: [action, toolId]
+                  properties:
+                    action:
+                      type: string
+                      enum: [update]
+                    toolId:
+                      type: string
+                      enum: [codex, claude, droid, openclaw, qoder]
+      responses:
+        "200":
+          description: Updated inventory for check, or verified item and cache-refresh effects for update
+        "400":
+          description: Invalid JSON or unsupported request fields
+        "401":
+          description: Management authentication required
+        "403":
+          description: Request did not originate from a trusted local peer
+        "404":
+          description: Unsupported CLI tool
+        "409":
+          description: Update is already running, tool is missing or not runnable, an explicit binary override is active, or this runtime requires a dedicated updater
+        "500":
+          description: Runtime update preparation or activation failed
+        "502":
+          description: Registry check, installation or executable verification failed
+
   /api/cli-tools/runtime/{toolId}:
     get:
       tags: [CLI Tools]

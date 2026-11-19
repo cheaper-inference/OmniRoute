@@ -123,6 +123,17 @@ export function getClaudeCodeClientVersionSource(): CliVersionSource {
   return "default";
 }
 
+/** Warm identity discovery after a managed npm version and executable were both verified. */
+export function seedVerifiedClaudeCodeClientVersion(version: string): void {
+  if (!/^(0|[1-9]\d{0,8})\.(0|[1-9]\d{0,8})\.(0|[1-9]\d{0,8})$/.test(version)) {
+    throw new TypeError("Invalid verified Claude Code client version");
+  }
+  const current = pickAtLeastPin(cachedVersion);
+  cachedVersion = compareDottedTriple(version, current) > 0 ? version : current;
+  cachedAt = Date.now();
+  nextBackgroundRefreshAt = cachedAt + CLAUDE_CODE_VERSION_CACHE_TTL_MS;
+}
+
 /**
  * Warm the npm cache (5s timeout, 6h TTL, coalesced, never rejects).
  * Any failure — network, non-2xx, or a payload that is not a dotted triple —
@@ -163,6 +174,11 @@ export function refreshClaudeCodeClientVersion(fetchImpl: FetchLike = fetch): Pr
       resolved = null;
     }
 
+    // A verified installation may seed a newer cache while this lookup is pending.
+    const freshAfterLookup = readFreshCache();
+    if (freshAfterLookup && (!resolved || compareDottedTriple(freshAfterLookup, resolved) > 0)) {
+      resolved = freshAfterLookup;
+    }
     if (resolved && compareDottedTriple(resolved, CLAUDE_CODE_CLIENT_VERSION) > 0) {
       cachedVersion = resolved;
       cachedAt = Date.now();

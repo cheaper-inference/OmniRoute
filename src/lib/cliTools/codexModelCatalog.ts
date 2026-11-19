@@ -1,6 +1,7 @@
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { resolveProviderId } from "@/shared/constants/providers";
+import { resolveManagedCliInvocation } from "@/shared/services/managedCliLaunch";
 import {
   getCliToolCommandCandidates,
   getLookupEnv,
@@ -190,14 +191,16 @@ export async function loadBundledCodexCatalog(codexHome: string): Promise<CodexM
     throw new Error(`Codex CLI not available (${located.reason || "not_found"})`);
   }
 
-  // Hard Rule #13: argv array, no shell string. Windows .cmd/.bat wrappers still need
-  // cmd.exe, which Node quotes itself when `shell` is set.
-  const { stdout } = await execFileAsync(located.commandPath, BUNDLED_CATALOG_ARGS, {
+  // Managed Windows wrappers resolve to their verified Node/native entry without a shell.
+  const invocation = resolveManagedCliInvocation(located.commandPath, BUNDLED_CATALOG_ARGS);
+  const command = invocation?.command ?? located.commandPath;
+  const args = invocation?.args ?? BUNDLED_CATALOG_ARGS;
+  const { stdout } = await execFileAsync(command, args, {
     windowsHide: true,
     env: { ...env, CODEX_HOME: codexHome },
     timeout: BUNDLED_CATALOG_TIMEOUT_MS,
     maxBuffer: BUNDLED_CATALOG_MAX_BUFFER,
-    ...(shouldUseShellForCommand(located.commandPath) ? { shell: true } : {}),
+    ...(!invocation && shouldUseShellForCommand(command) ? { shell: true } : {}),
   });
   const parsed = JSON.parse(String(stdout));
   if (!Array.isArray(parsed?.models) || parsed.models.length === 0) {

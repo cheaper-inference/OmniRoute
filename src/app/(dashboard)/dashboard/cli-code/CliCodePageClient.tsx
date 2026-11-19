@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslations } from "next-intl";
 import { PageHeader } from "@omniroute/ui-kit/page-header";
+import { buttonVariants } from "@omniroute/ui-kit/button";
 import Link from "next/link";
 import Icon from "@/shared/components/Icon";
 import { Button, CardSkeleton, Input } from "@/shared/components";
@@ -141,15 +142,23 @@ export default function CliCodePageClient({
         title={t("title")}
         description={t("pageSubtitle")}
         actions={
-          <Button
-            variant="secondary"
-            size="sm"
-            onClick={refetch}
-            icon="refresh"
-            aria-label={tCommon("card.refreshDetection")}
-          >
-            {tCommon("card.refreshDetection")}
-          </Button>
+          <div className="flex flex-wrap items-center gap-2">
+            <Link
+              href="/dashboard/cli-code/runtimes"
+              className={buttonVariants({ variant: "outline", size: "sm" })}
+            >
+              {t("runtimeUpdates.manageLink")}
+            </Link>
+            <Button
+              variant="secondary"
+              size="sm"
+              onClick={refetch}
+              icon="refresh"
+              aria-label={tCommon("card.refreshDetection")}
+            >
+              {tCommon("card.refreshDetection")}
+            </Button>
+          </div>
         }
       />
 

@@ -3,6 +3,7 @@ import { t } from "../i18n.mjs";
 import { contextCredentialFor, resolveActiveContext } from "../contexts.mjs";
 import { quoteShellArgs, quoteShellArgsForSpawn } from "../utils/winShellArgs.mjs";
 import { buildSafeCliLaunchEnv } from "../launch-env.mjs";
+import { resolveManagedCliSpawn } from "../utils/managedCliSpawn.mjs";
 
 /**
  * Probe PATH for a Windows executable via `where.exe`, preferring a `.exe` over
@@ -65,6 +66,8 @@ const NO_AUTH_SENTINEL = "omniroute-no-auth";
  * @returns {Promise<{ command: string, shell: true|undefined }>}
  */
 export async function resolveCodexSpawn(platform, opts = {}) {
+  const managed = resolveManagedCliSpawn("codex", platform);
+  if (managed) return managed;
   if (platform !== "win32") return { command: "codex", shell: undefined };
   const probe = opts.probe ?? probeWindowsBinary;
   const located = await probe("codex");
@@ -222,12 +225,16 @@ export async function runLaunchCodexCommand(opts = {}, codexArgs = []) {
   const extraArgs = [...providerArgs, ...profileArgs, ...codexArgs];
   const env = buildCodexEnv(process.env, authToken, opts);
 
-  const { command: codexLaunch, shell: shellValue } = await resolveCodexSpawn(process.platform);
+  const {
+    command: codexLaunch,
+    shell: shellValue,
+    argsPrefix = [],
+  } = await resolveCodexSpawn(process.platform);
 
   return await new Promise((resolve) => {
     const child = spawn(
       codexLaunch,
-      quoteShellArgsForSpawn(extraArgs, process.platform, shellValue),
+      quoteShellArgsForSpawn([...argsPrefix, ...extraArgs], process.platform, shellValue),
       {
         env,
         stdio: "inherit",

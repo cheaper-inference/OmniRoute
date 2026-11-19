@@ -13,6 +13,8 @@ import { isLocationTrusted, findKnownPathMatch } from "./cliRuntimeKnownPath";
 import { buildHealthcheckPath } from "./cliRuntimeHealthcheckPath";
 import { appendWindowsKnownBinPaths, mergeWindowsLookupPath } from "./cliRuntimeWindowsNode";
 import { getNpmGlobalPrefix } from "./cliRuntimeNpmPrefix";
+import { getManagedCliCommand, getManagedCliRoot } from "./managedCliRuntime";
+import { resolveManagedCliInvocation } from "./managedCliLaunch";
 import {
   describeContainerTarget,
   hasBindMountAt,
@@ -429,6 +431,8 @@ const runProcess = (
   } = {}
 ): Promise<any> =>
   new Promise((resolve) => {
+    const managed = resolveManagedCliInvocation(command, args);
+    if (managed) ({ command, args, useShell } = managed);
     // Guard: reject commands with shell metacharacters — command comes from
     // server-controlled env vars/config, not HTTP input, but belt-and-suspenders.
     if (/[;&|`$<>\n\r]/.test(command)) {
@@ -602,6 +606,7 @@ const getExpectedParentPaths = (): string[] => {
     validatedProgramFiles,
     validatedProgramFilesX86,
     npmPrefix,
+    getManagedCliRoot(),
   ].filter(Boolean);
 };
 
@@ -628,7 +633,8 @@ const getExtraPaths = () =>
 export const getKnownToolPaths = (toolId: string): string[] => {
   toolId = normalizeCliToolId(toolId);
   const home = os.homedir();
-  const paths: string[] = [];
+  const managedCommand = getManagedCliCommand(toolId);
+  const paths: string[] = managedCommand ? [managedCommand] : [];
 
   const npmPrefix = getNpmGlobalPrefix();
   const nvmNodePath = getNvmNodePath();

@@ -188,6 +188,20 @@ export function seedCodexClientVersionCache(version: string, fetchedAt = Date.no
   versionCache = { fetchedAt, version };
 }
 
+/** Record an exact registry version only after a managed executable passed verification. */
+export function seedVerifiedCodexClientVersion(version: string): void {
+  const parsed = codexVersionMetadataSchema.safeParse({ name: "@openai/codex", version });
+  if (!parsed.success) throw new TypeError("Invalid verified Codex client version");
+  const current = pickCodexVersionAtLeastPin(cachedCodexVersion);
+  const previous = getCachedCodexClientVersion();
+  const floor = compareDottedTriple(current, previous) >= 0 ? current : previous;
+  cachedCodexVersion =
+    compareDottedTriple(parsed.data.version, floor) > 0 ? parsed.data.version : floor;
+  seedCodexClientVersionCache(cachedCodexVersion);
+  codexVersionRefreshAt = Date.now() + CODEX_VERSION_CACHE_TTL_MS;
+  codexVersionSource = "registry";
+}
+
 export function clearCodexClientVersionCache(): void {
   versionCache = null;
   versionInFlight = null;
