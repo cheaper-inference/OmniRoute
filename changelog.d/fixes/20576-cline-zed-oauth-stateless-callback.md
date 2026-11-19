@@ -1,0 +1,1 @@
+- fix(oauth): Cline and Zed Hosted connections no longer fail with "OAuth state mismatch": providers whose redirect cannot echo state are allowlisted as stateless, strict binding kept for all others (#20576, #20580)
