@@ -77,7 +77,8 @@ test("the translated request still carries the normalized values", () => {
     }>;
   };
   const call = out.messages[1].tool_calls?.[0];
-  assert.match(String(call?.id), /\S/, "a missing tool call id is filled in the output");
+  assert.equal(typeof call?.id, "string", "a missing tool call id is filled in the output");
+  assert.match(call.id, /\S/, "the filled tool call id is not blank");
   assert.equal(call?.function.arguments, "{}", "empty arguments become {}");
   assert.equal(out.messages[1].reasoning_content, undefined, "echo fields are still stripped");
 });
@@ -105,4 +106,40 @@ test("a later combo target still sees the client reasoning after an earlier targ
     "deepseek"
   ) as { messages: Array<{ reasoning_content?: string }> };
   assert.equal(second.messages[1].reasoning_content, "KEEP-ME");
+});
+
+test("Claude -> Claude: tool ids are sanitized in the output, not in the caller's content blocks", () => {
+  // Pass 1.4 of prepareClaudeRequest rewrites ids an Anthropic upstream rejects ("call:1").
+  // The caller's tool_use / tool_result blocks are shared with later combo targets. (The
+  // cache_control marker on a Claude content block is a separate, documented case.)
+  const input = {
+    model: "m",
+    max_tokens: 64,
+    messages: [
+      { role: "user", content: [{ type: "text", text: "u" }] },
+      {
+        role: "assistant",
+        content: [{ type: "tool_use", id: "call:1", name: "f", input: {} }],
+      },
+      {
+        role: "user",
+        content: [{ type: "tool_result", tool_use_id: "call:1", content: "r" }],
+      },
+    ],
+  };
+  const callerToolUse = input.messages[1].content[0] as { id?: string };
+  const callerToolResult = input.messages[2].content[0] as { tool_use_id?: string };
+  const out = translateRequest(
+    "claude",
+    "claude",
+    "claude-sonnet-4",
+    input,
+    false,
+    null,
+    "anthropic"
+  ) as { messages: Array<{ content: Array<{ id?: string; tool_use_id?: string }> }> };
+  assert.equal(callerToolUse.id, "call:1", "the caller's tool_use id is unchanged");
+  assert.equal(callerToolResult.tool_use_id, "call:1", "the caller's tool_result id is unchanged");
+  assert.equal(out.messages[1].content[0].id, "call_1", "the output id is sanitized");
+  assert.equal(out.messages[2].content[0].tool_use_id, "call_1", "the pair stays matched");
 });

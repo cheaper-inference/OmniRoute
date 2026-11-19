@@ -23,7 +23,9 @@ function copyMessage(message: unknown): unknown {
  * edits it makes (echo-field strip, tool call id and argument repair, displaced tool result
  * reorder) never reach the caller's body. A combo shares message objects between targets (the
  * body copy per target is shallow, #7847), so an edit by one target would change the next.
- * One level only: `content` is shared with the caller because the translator never writes into it.
+ * One level only: `content` is shared with the caller, so a pass that rewrites a content block
+ * must copy it (claudeHelper Pass 1.4 does); the Claude `cache_control` marker is still set
+ * in place.
  */
 export function ownMessages<T>(body: T): T {
   if (!isRecord(body) || !Array.isArray(body.messages)) return body;
