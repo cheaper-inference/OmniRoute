@@ -57,7 +57,10 @@ test("zed anthropic stream restores tool name from toolNameMap", async () => {
   const out = await readAll(wrapped.body as ReadableStream<Uint8Array>);
 
   assert.ok(out.includes('"name":"glob"'), `expected "glob" tool name in output, got: ${out}`);
-  assert.ok(!out.includes('"name":"proxy_glob"'), `proxy_glob must be un-prefixed in output, got: ${out}`);
+  assert.ok(
+    !out.includes('"name":"proxy_glob"'),
+    `proxy_glob must be un-prefixed in output, got: ${out}`
+  );
 });
 
 test("zed anthropic stream falls back to stripping proxy_ prefix when toolNameMap has no entry", async () => {
@@ -66,5 +69,8 @@ test("zed anthropic stream falls back to stripping proxy_ prefix when toolNameMa
   const out = await readAll(wrapped.body as ReadableStream<Uint8Array>);
 
   assert.ok(out.includes('"name":"read"'), `expected "read" tool name in output, got: ${out}`);
-  assert.ok(!out.includes('"name":"proxy_read"'), `proxy_read must be un-prefixed in output, got: ${out}`);
+  assert.ok(
+    !out.includes('"name":"proxy_read"'),
+    `proxy_read must be un-prefixed in output, got: ${out}`
+  );
 });
