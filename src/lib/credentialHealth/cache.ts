@@ -9,6 +9,7 @@
  * configurable TTL. Auto-expiry on read for stale entries.
  */
 import { redactSecrets } from "@/shared/utils/logRedaction";
+import { resolveRegisteredFeatureFlag } from "@/shared/utils/featureFlagResolverBridge";
 
 export interface CredentialHealthStatus {
   connectionId: string;
@@ -115,26 +116,18 @@ export const NON_CREDENTIAL_PROBE_DIAGNOSES: ReadonlySet<string> = new Set([
  * block dispatch for the cache TTL (5 minutes).
  */
 export const CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG = "CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY";
+/** Must match the flag's `defaultValue` in featureFlagDefinitions.ts. */
+const CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_DEFAULT = true;
 
 function isAuthDiagnosesOnlyGateEnabled(): boolean {
   try {
-    const resolver = (globalThis as Record<symbol, unknown>)[
-      Symbol.for("omniroute.featureFlagResolver")
-    ];
-    if (typeof resolver === "function") {
-      return Boolean(resolver(CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG));
-    }
-    const env =
-      typeof process !== "undefined"
-        ? process.env?.[CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG]
-        : undefined;
-    // An empty value counts as unset, matching resolveFeatureFlag().
-    if (env !== undefined && env !== "") {
-      return env === "true" || env === "1" || env === "yes";
-    }
-    return true; // on by default (#20256)
+    return resolveRegisteredFeatureFlag(
+      CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG,
+      CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_DEFAULT
+    );
   } catch {
-    return false; // fail closed for non-transport probe errors when resolver throws
+    // A resolver that throws falls back to the flag default, like an unset flag.
+    return CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_DEFAULT;
   }
 }
 

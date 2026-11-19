@@ -97,7 +97,7 @@ test(
   }
 );
 
-test("a throwing flag resolver fails closed to the release gate", { timeout: 2000 }, () => {
+test("a throwing flag resolver falls back to the flag default (#20256)", { timeout: 2000 }, () => {
   const key = Symbol.for("omniroute.featureFlagResolver");
   const store = globalThis as Record<symbol, unknown>;
   const previous = store[key];
@@ -111,8 +111,14 @@ test("a throwing flag resolver fails closed to the release gate", { timeout: 200
     setCredentialHealth("synthetic", "codex", "error", "Probe timed out", "network_error");
     assert.equal(isCredentialHealthy("synthetic"), undefined);
     assert.notEqual(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
-    // A throwing feature-flag resolver still fails closed for OTHER diagnoses.
+    // A throwing feature-flag resolver falls back to the flag default (on since #20256):
+    // OTHER inconclusive diagnoses stay unknown, proven auth failures still block.
     for (const type of OTHER_INCONCLUSIVE_FAILURES) {
+      setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
+      assert.equal(isCredentialHealthy("synthetic"), undefined, String(type));
+      assert.notEqual(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);
+    }
+    for (const type of AUTH_FAILURES) {
       setCredentialHealth("synthetic", "codex", "error", "Probe failed", type, "upstream");
       assert.equal(isCredentialHealthy("synthetic"), false, String(type));
       assert.equal(checkCredentialGate("synthetic", "codex", "codex/model").allowed, false);

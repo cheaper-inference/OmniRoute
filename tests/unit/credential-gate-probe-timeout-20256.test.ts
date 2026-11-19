@@ -152,3 +152,38 @@ test("Issue #20256: an empty CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY uses the defaul
     }
   }
 });
+
+test("Issue #20256: with the server resolver registered, the definition default and DB override drive the gate", async () => {
+  // Production path: featureFlags.ts registers the DB-aware resolver on load.
+  delete process.env[CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG];
+  await import("../../src/shared/utils/featureFlags.ts");
+  const { setFeatureFlagOverride, removeFeatureFlagOverride } =
+    await import("../../src/lib/db/featureFlags.ts");
+  const core = await import("../../src/lib/db/core.ts");
+
+  const connectionId = "conn-registered-resolver";
+  const record = () =>
+    setCredentialHealth(
+      connectionId,
+      "deepseek",
+      "error",
+      "Scheduler error",
+      "runtime_error",
+      "scheduler"
+    );
+  try {
+    record();
+    assert.equal(isCredentialHealthy(connectionId), undefined, "definition default is on");
+
+    setFeatureFlagOverride(CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG, "false");
+    record();
+    assert.equal(isCredentialHealthy(connectionId), false, "DB override false restores strict");
+    assert.equal(
+      checkCredentialGate(connectionId, "deepseek", "deepseek/deepseek-flash").allowed,
+      false
+    );
+  } finally {
+    removeFeatureFlagOverride(CREDENTIAL_GATE_AUTH_DIAGNOSES_ONLY_FLAG);
+    core.resetDbInstance();
+  }
+});
