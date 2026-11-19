@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -143,9 +145,9 @@ Claude Desktop, Cursor, Cline, അനുയോജ്യമായ MCP ക്ല�
 | `omniroute_rtk_discover`            | `read:compression`  | ഓപ്റ്റ്-ഇൻ RTK ഔട്ട്പുട്ട് സാമ്പിളുകളിൽ ആവർത്തിച്ചുള്ള ശബ്ദം കണ്ടെത്തുക                                                                       |
 | `omniroute_rtk_learn`               | `read:compression`  | ഓപ്റ്റ്-ഇൻ സാമ്പിളുകളിൽ നിന്ന് അവലോകനം ചെയ്യാവുന്ന RTK ഫിൽട്ടർ ഡ്രാഫ്റ്റ് സൃഷ്ടിക്കുക                                                         |
 
-CCR എൻട്രികൾ ഒരു ടു-ടയർ സ്റ്റോർ ഉപയോഗിക്കുന്നു: ലോക്കൽ നോൺ-ക്ലൗഡ് റൺടൈമുകളിൽ, ഡ്യൂറബിൾ SQLite ടയർ (`ccr_blocks`, ഡിഫോൾട്ടായി ഓൺ) ഉപയോഗിച്ച് ഒരു ഹോട്ട് ഇൻ-മെമ്മറി ടയർ പിന്തുണയ്ക്കുന്നു, അതിനാൽ ഒരു ബ്ലോക്ക് എവിക്ഷനെ അതിജീവിക്കും അല്ലെങ്കിൽ അതിൻ്റെ TTL KB 512-ൽ അധികം മെമ്മറി ശേഷിക്കാതെ — പ്രവർത്തിക്കുന്നത് വരെ പുനരാരംഭിക്കും. ഓരോ ബ്ലോക്കും 2 MiB, ഓരോ പ്രിൻസിപ്പലും 16 MiB, ഗ്ലോബൽ സ്റ്റോർ 64 MiB എന്നിങ്ങനെ പരിമിതപ്പെടുത്തിയിരിക്കുന്നു. 24-മണിക്കൂർ TTL (പരമാവധി ഏഴ് ദിവസം) ലേക്ക് എൻട്രികൾ ഡിഫോൾട്ട്. മുഴുവൻ MCP വീണ്ടെടുക്കൽ 256 KiB ആയി പരിമിതപ്പെടുത്തിയിരിക്കുന്നു; റേഞ്ച്ഡ്, ഗ്രെപ് മോഡുകൾ വഴി വലിയ ബ്ലോക്കുകൾ ലഭ്യമാണ്. സംഭരണം, വീണ്ടെടുക്കൽ, ലിസ്റ്റിംഗ്, പരിശോധന, ഇല്ലാതാക്കൽ, സ്ഥിതിവിവരക്കണക്കുകൾ എന്നിവ ആധികാരികതയുള്ള API-കീ പ്രിൻസിപ്പൽ വേർതിരിച്ചിരിക്കുന്നു. ഓഡിറ്റ് റെക്കോർഡുകളിൽ ഹാഷുകളും സൈസ് മെറ്റാഡാറ്റയും അടങ്ങിയിരിക്കുന്നു, ഒരിക്കലും ഉള്ളടക്കം ഇല്ല. ഓപ്പറേറ്റർ അഭിമുഖീകരിക്കുന്ന വിശദാംശങ്ങൾ (രണ്ട് മാർക്കറുകൾ, ക്ലയൻ്റ് മുൻവ്യവസ്ഥകൾ, `codemode:false`, ഓരോ ടൂൾ സ്കോപ്പുകൾ, പേജിനേഷൻ, ഒരു ഡയഗ്നോസ്റ്റിക് മാട്രിക്സ്) [കംപ്രഷൻ എഞ്ചിനുകൾ → മുൻകരുതലുകൾ / ഓപ്പറേറ്റർ ഗൈഡ്](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB, cloud runtimes and `COMPRESSION_CCR_DURABLE_STORE=false`, which stay memory-only. The durable write is best effort: it is dropped while 1,000 writes are already pending, and a failed SQLite write is logged, not retried, so that block is lost on restart. Each block is limited to 2 MiB, each principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by the authenticated API-key principal. Audit records contain hashes and size metadata, never content. Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes, pagination, and a diagnostic matrix) live in [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` `analytics.mcpDescriptionCompression` ന് കീഴിൽ MCP വിവരണം കംപ്രഷൻ പ്രത്യേകം റിപ്പോർട്ട് ചെയ്യുന്നു. ആ മൂല്യങ്ങൾ MCP ലിസ്റ്റ് ചെയ്യാവുന്ന വിവരണങ്ങൾക്കായുള്ള മെറ്റാഡാറ്റ-വലിപ്പം എസ്റ്റിമേറ്റുകളാണ് (`tools`, `prompts`, `resources`, ഒപ്പം `resourceTemplates`); അവ ദാതാവിൻ്റെ ഉപയോഗ രസീതുകളല്ല, അവ `source: "mcp_metadata_estimate"` ഉപയോഗിച്ച് അടയാളപ്പെടുത്തിയിരിക്കുന്നു.
+`omniroute_compression_status` MCP വിവരണ കംപ്രഷൻ `analytics.mcpDescriptionCompression` ന് കീഴിൽ പ്രത്യേകം റിപ്പോർട്ടുചെയ്യുന്നു. ആ മൂല്യങ്ങൾ MCP ലിസ്റ്റ് ചെയ്യാവുന്ന വിവരണങ്ങൾക്കായുള്ള മെറ്റാഡാറ്റ-വലിപ്പം എസ്റ്റിമേറ്റുകളാണ് (`tools`, `prompts`, `resources`, ഒപ്പം `resourceTemplates`); അവ ദാതാവിൻ്റെ ഉപയോഗ രസീതുകളല്ല, അവ `source: "mcp_metadata_estimate"` ഉപയോഗിച്ച് അടയാളപ്പെടുത്തിയിരിക്കുന്നു.
 
 ### MCP പ്രവേശനക്ഷമത ട്രീ ഫിൽട്ടർ (v3.8.0)
 

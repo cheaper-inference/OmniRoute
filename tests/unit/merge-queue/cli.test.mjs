@@ -7,6 +7,7 @@ import { join } from "node:path";
 import test from "node:test";
 import { DEFAULT_CONFIG_PATH, loadConfig } from "../../../scripts/merge-queue/config.mjs";
 import {
+  RESUME_REFUSED_PREFIX,
   initialState,
   STATE_BRANCH,
   stateFilePath,
@@ -215,6 +216,32 @@ test("status shows in-flight state and labeled PRs per discovered base", async (
   assert.equal(lines.err.length, 0);
 });
 
+test("status counts the stored land-status withdrawals of each list when there are any", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  const entry = (name) => ({
+    sha: sha(name),
+    batchId: "b7",
+    candidateSha: sha("c"),
+    why: "left the landing stage",
+    since: "2026-11-13T09:00:00Z",
+    attempts: 2,
+  });
+  writeState(fake, {
+    ...sampleState(),
+    landWithdrawals: [entry("w1"), entry("w2")],
+    landWithdrawalsOverflow: [entry("w3")],
+  });
+  assert.equal(await run(["status", "--base", BASE]), 0);
+  assert.ok(
+    lines.out.includes("stored withdrawals: 2 in landWithdrawals, 1 in landWithdrawalsOverflow"),
+    lines.out.join("\n")
+  );
+  lines.out.length = 0;
+  writeState(fake, sampleState());
+  assert.equal(await run(["status", "--base", BASE]), 0);
+  assert.ok(!lines.out.some((line) => line.startsWith("stored withdrawals")), "none: no line");
+});
+
 test("status --base on a base without state, and with nothing labeled", async (t) => {
   const { run, lines } = await setup(t);
   assert.equal(await run(["status"]), 0);
@@ -267,6 +294,53 @@ test("without --base, a paused base with no labeled PR still shows in status and
   assert.ok(lines.out.includes("== release/v3.8.55"));
   assert.ok(lines.out.includes("2026-11-13 09:30Z  base-red-paused  red"));
   assert.ok(lines.out.includes("== release/v3.8.54"));
+});
+
+test("status prints the heartbeat age and STALE", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  // NOW is 12:00. In flight, saved at 10:00: work, 2 h old → STALE.
+  writeState(fake, sampleState());
+  // Saved 6 h ago, nothing in flight, no pause, nothing labeled: idle, so only the age.
+  writeState(fake, initialState("release/v3.8.55", "2026-11-13T06:00:00Z"));
+  // Labeled PRs, saved 90 min ago: not STALE yet (the limit is exclusive; an idle healthy base
+  // saves every 60 to 65 minutes and scheduled runs are often late).
+  writeState(fake, initialState("release/v3.8.56", "2026-11-13T10:30:00Z"));
+  fake.addPull({ number: 21, labels: ["omni-queue"], base: { ref: "release/v3.8.56" } });
+  // Labeled PRs, saved 91 min ago → STALE.
+  writeState(fake, initialState("release/v3.8.57", "2026-11-13T10:29:00Z"));
+  fake.addPull({ number: 22, labels: ["omni-queue"], base: { ref: "release/v3.8.57" } });
+  // Paused, nothing labeled, saved 3 h ago: a pause is work → STALE.
+  writeState(fake, {
+    ...initialState("release/v3.8.58", "2026-11-13T09:00:00Z"),
+    paused: {
+      reason: "manual",
+      since: "2026-11-13T08:00:00Z",
+      baseSha: null,
+      detail: "",
+      issue: null,
+    },
+  });
+  // Only a draft is labeled, saved 2 h ago: ticks visit a base with a labeled draft too
+  // (discoverBases, the watchdog), so it is work → STALE.
+  writeState(fake, initialState("release/v3.8.59", "2026-11-13T10:00:00Z"));
+  fake.addPull({
+    number: 23,
+    labels: ["omni-queue"],
+    draft: true,
+    base: { ref: "release/v3.8.59" },
+  });
+  assert.equal(await run(["status"]), 0);
+  const text = lines.out.join("\n");
+  const section = (base) => text.split(`== ${base}\n`)[1].split("\n== ")[0];
+  const stale = " · STALE: no tick has saved it for more than 90 min while the base has work";
+  assert.ok(section("release/v3.8.54").includes(`state saved 2 h ago${stale}`), text);
+  assert.ok(section("release/v3.8.55").includes("state saved 6 h ago\n"), text);
+  assert.ok(section("release/v3.8.56").includes("state saved 1 h 30 min ago\n"), text);
+  assert.ok(section("release/v3.8.57").includes(`state saved 1 h 31 min ago${stale}`), text);
+  assert.ok(section("release/v3.8.58").includes(`state saved 3 h ago${stale}`), text);
+  assert.ok(section("release/v3.8.59").includes(`state saved 2 h ago${stale}`), text);
+  assert.equal(text.match(/STALE/g).length, 4);
+  assert.equal(lines.err.length, 0);
 });
 
 test("status reports a corrupt state document as an error (exit 1)", async (t) => {
@@ -541,6 +615,77 @@ test("a resume names the pause it saw and never claims a newer pause was cleared
   assert.doesNotMatch(lines.out.join("\n"), /resume applied/);
 });
 
+test("resume is refused at once while the overflow holds entries: nothing dispatched", async (t) => {
+  const { run, lines, fake, gh } = await setup(t);
+  await applyAction(gh, fake, { base: BASE, action: "pause", reason: "x" });
+  const s = JSON.parse((await gh.getFileContent(stateFilePath(BASE), STATE_BRANCH)).content);
+  const entry = (name) => ({
+    sha: sha(name),
+    batchId: "b7",
+    candidateSha: sha("c"),
+    why: "left the landing stage",
+    since: "2026-11-13T09:00:00Z",
+    attempts: 2,
+  });
+  writeState(fake, {
+    ...s,
+    landWithdrawals: [entry("w1")],
+    landWithdrawalsOverflow: [entry("w2")],
+  });
+  assert.equal(await run(["resume", BASE]), 1);
+  assert.deepEqual(fake.dispatches, []);
+  assert.ok(lines.err.at(-1).startsWith(`${BASE}: ${RESUME_REFUSED_PREFIX}`), lines.err.at(-1));
+  assert.match(lines.err.at(-1), /landWithdrawalsOverflow holds 1 entry/);
+});
+
+test("the resume wait loop stops on the tick's refusal event, with its reason", async (t) => {
+  const { run, lines, fake, gh } = await setup(t);
+  await applyAction(gh, fake, { base: BASE, action: "pause", reason: "x" });
+  let polls = 0;
+  const sleep = async () => {
+    polls += 1;
+    if (polls === 1) {
+      // The tick refused the resume: the overflow filled after the CLI read the state.
+      const s = JSON.parse((await gh.getFileContent(stateFilePath(BASE), STATE_BRANCH)).content);
+      const detail = `${RESUME_REFUSED_PREFIX}: landWithdrawalsOverflow holds 1 entry`;
+      writeState(fake, {
+        ...s,
+        history: [...s.history, { at: nextEventAt(), type: "error", detail }],
+      });
+    }
+  };
+  const confirm = { sleep, confirmTimeoutMs: 60_000, confirmIntervalMs: 1000 };
+  assert.equal(await run(["resume", BASE], confirm), 1);
+  assert.equal(polls, 1, "stopped at the refusal, not at the timeout");
+  assert.match(
+    lines.err.at(-1),
+    new RegExp(`${RESUME_REFUSED_PREFIX}: landWithdrawalsOverflow holds 1 entry`)
+  );
+});
+
+test("Y3 (re-review Q-CLI): a refusal event older than the dispatch does not stop the resume wait loop", async (t) => {
+  const { run, lines, fake, gh } = await setup(t);
+  await applyAction(gh, fake, { base: BASE, action: "pause", reason: "x" });
+  // A refusal of an earlier attempt, already in the history when the command runs.
+  const s0 = JSON.parse((await gh.getFileContent(stateFilePath(BASE), STATE_BRANCH)).content);
+  const old = `${RESUME_REFUSED_PREFIX}: landWithdrawalsOverflow holds 1 entry (an earlier attempt)`;
+  writeState(fake, {
+    ...s0,
+    history: [...s0.history, { at: nextEventAt(), type: "error", detail: old }],
+  });
+  let polls = 0;
+  const sleep = async () => {
+    polls += 1;
+    if (polls === 2) await applyAction(gh, fake, fake.dispatches[0].inputs);
+  };
+  const confirm = { sleep, confirmTimeoutMs: 60_000, confirmIntervalMs: 1000 };
+  assert.equal(await run(["resume", BASE], confirm), 0, lines.err.join("\n"));
+  assert.equal(polls, 2, "waited past the old refusal");
+  assert.equal(fake.dispatches.length, 1);
+  assert.equal(lines.out.at(-1), `resume applied to ${BASE}`);
+  assert.deepEqual(lines.err, []);
+});
+
 test("API failure during dispatch → exit 1", async (t) => {
   const { run, lines, fake } = await setup(t);
   fake.inject({
@@ -666,6 +811,50 @@ test("why on an unmanaged base skips the state and reports eligibility", async (
   assert.match(lines.out.join("\n"), /verdict: ELIGIBLE/);
   assert.match(lines.out.join("\n"), /Gate \/ Quality on head: none/);
   assert.equal(await run(["why", "999"], { eligibility }), 1, "missing PR → API error");
+});
+
+test("G6 (T14-a): why judges the PR gates and the lane as the tick does (real eligibility)", async (t) => {
+  const { run, lines, fake } = await setup(t);
+  const labeled = (label, created_at = "2026-11-13T11:00:00Z") => ({
+    event: "labeled",
+    actor: { login: "diegosouzapw" },
+    created_at,
+    label: { name: label },
+  });
+  const pull = fake.addPull({ number: 52, labels: ["omni-queue"] });
+  fake.timeline.set(52, [labeled("omni-queue")]);
+  fake.statuses.set(pull.head.sha, [
+    {
+      context: "omni-queue/approval",
+      state: "success",
+      creator: { login: "omni-queue[bot]" },
+      created_at: "2026-11-13T11:00:05Z",
+      description: "approved",
+    },
+  ]);
+  for (const name of config.prChecksRequired) {
+    fake.addCheckRun(pull.head.sha, {
+      name,
+      conclusion: name === "API Route Typecheck" ? "failure" : "success",
+    });
+  }
+  assert.equal(await run(["why", "52"]), 0);
+  let text = lines.out.join("\n");
+  assert.match(text, /verdict: NOT eligible/);
+  assert.match(text, /- pr-checks-not-green: API Route Typecheck failure/);
+  assert.match(
+    text,
+    /PR gates \(prChecksRequired\): Gate \/ CI success; Gate \/ Quality success; API Route Typecheck failure/
+  );
+  assert.match(text, /lane: none/);
+  // An approver puts it in the base-repair lane: the PR gates no longer apply, as in the tick.
+  fake.pulls.get(52).labels.push({ name: config.lanes.baseRepairLabel });
+  fake.timeline.get(52).push(labeled(config.lanes.baseRepairLabel, "2026-11-13T11:01:00Z"));
+  lines.out.length = 0;
+  assert.equal(await run(["why", "52"]), 0);
+  text = lines.out.join("\n");
+  assert.ok(!/pr-checks-not-green/.test(text), text);
+  assert.match(text, /lane: base-repair/);
 });
 
 // ───────────────────────────── gh token / repository discovery ─────────────────────────────
