@@ -1,0 +1,1 @@
+- **feat(providers):** Kimi Code connections can opt into the OpenAI Responses format per connection (`/responses`, Bearer auth); the default stays the chat and Messages routes. ([#20668](https://github.com/cheaper-inference/OmniRoute/pull/20668))

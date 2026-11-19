@@ -1,1 +1,0 @@
-- **feat(providers):** Kimi Code connections can opt into the OpenAI Responses format per connection (`/responses`, Bearer auth); the default stays the chat and Messages routes.
