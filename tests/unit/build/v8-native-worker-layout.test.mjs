@@ -135,13 +135,20 @@ test("without the preload, tsx and the worker still exhibit distinct layouts", a
   assert.notEqual(parent.functions[0].ranges[0].endOffset, native.functions[0].ranges[0].endOffset);
 });
 
-test("CLI JavaScript coverage keeps the Node layout with an explicit tsx preload", async (t) => {
+test("CLI and tray coverage keep the Node layout before and after tsx registration", async (t) => {
   const directory = await mkdtemp(join(tmpdir(), "native-cli-coverage-"));
   t.after(() => rm(directory, { recursive: true, force: true }));
   const entry = new URL("bin/cli/utils/cliToken.mjs", root).href;
   const dependency = new URL("bin/cli/data-dir.mjs", root).href;
+  const tray = new URL("bin/cli/runtime/trayRuntime.ts", root).href;
+  const trayEntry = new URL("bin/cli/tray/traySystray.mjs", root).href;
+  const windows = new URL("src/shared/platform/windowsProcess.ts", root).href;
+  const cliTsx = new URL("scripts/ci/native-cli-v8-tsx.mjs", root).href;
   const query = `${entry}?coverage-fixture=1`;
-  const imports = `await import(${JSON.stringify(entry)}); await import(${JSON.stringify(query)});`;
+  const required = new Set([entry, query, dependency, tray, trayEntry, windows]);
+  const imports = [entry, query, tray, trayEntry]
+    .map((url) => `await import(${JSON.stringify(url)});`)
+    .join("\n");
 
   async function record(mode, args, code) {
     const coverage = join(directory, mode);
@@ -163,19 +170,27 @@ test("CLI JavaScript coverage keeps the Node layout with an explicit tsx preload
       if (!file.endsWith(".json")) continue;
       const report = JSON.parse(await readFile(join(coverage, file), "utf8"));
       for (const script of report.result) {
-        if (script.url !== entry && script.url !== query && script.url !== dependency) continue;
+        const projectTs =
+          script.url.startsWith(root.href) &&
+          script.url.endsWith(".ts") &&
+          !script.url.includes("/node_modules/");
+        if (!required.has(script.url) && !projectTs) continue;
         assert.equal(Boolean(report["source-map-cache"]?.[script.url]), false, script.url);
         assert.equal(samples.has(script.url), false, script.url);
         samples.set(script.url, script.functions);
       }
     }
-    assert.equal(samples.size, 3, `${mode} must cover the CLI modules and the query alias`);
+    for (const url of required) assert.ok(samples.has(url), `${mode} did not cover ${url}`);
     return samples;
   }
 
   const native = await record("native", [], imports);
   assert.deepEqual(await record("native-preload", [], imports), native);
   assert.deepEqual(await record("early", ["--import", "tsx/esm"], imports), native);
+  assert.deepEqual(
+    await record("late", [], `await import(${JSON.stringify(cliTsx)});\n${imports}`),
+    native
+  );
 });
 
 test("the real CLI keeps native coverage through the clean-environment launcher", async (t) => {
