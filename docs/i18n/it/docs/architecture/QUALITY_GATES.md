@@ -37,7 +37,7 @@ Dopo una rimozione dalla coda, un push non sempre riaccoda lo PR. Commenta `@mer
 
 ### Prove conservate nel riduttore di accettazione
 
-`scripts/quality/validate-release-acceptance.mjs` riduce un piano fornito e i suoi manifesti; non stabilisce che il piano copra l'intero percorso di rilascio. I suoi rapporti impostano esplicitamente `releaseAcceptance: false`, anche quando quel piano è `VERIFIED`. Il flusso di lavoro `release-acceptance.yml` utilizza ancora dispositivi ombra, non ricevute di build, pacchetti, avvio o promozioni reali.
+`scripts/quality/validate-release-acceptance.mjs` riduce un piano fornito e i suoi manifesti; non stabilisce che il piano copra l'intero percorso di rilascio. I suoi rapporti impostano esplicitamente `releaseAcceptance: false`, anche quando quel piano è `VERIFIED`.
 
 La CLI richiede `--evidence-root` di verificare le prove conservate. I file vengono risolti come `<evidence-root>/<artifact_id>/<member>` e sottoposti ad hashing come SHA-256. Un record PASS senza prove, un file mancante o modificato, un percorso non sicuro o un collegamento simbolico impediscono la verifica. I file mancanti non equivalgono a svuotare i log riusciti. I controlli SHA/run/attempt esistenti rimangono indipendenti: i byte corrispondenti non possono salvare una ricevuta scaduta. L'integrità del file non è una prova dell'autenticità dell'esecuzione o della promozione degli artefatti.
 

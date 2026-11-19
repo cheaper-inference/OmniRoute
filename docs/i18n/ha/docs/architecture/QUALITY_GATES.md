@@ -37,7 +37,7 @@ Bayan dequee, tura ba koyaushe yana neman PR. Yi comment `@mergifyio queue` akai
 
 ### Riƙe shaida a cikin mai rage karɓa
 
-`scripts/quality/validate-release-acceptance.mjs` yana rage tsarin da aka kawowa da bayyanarsa; bai tabbatar da cewa shirin ya shafi cikakken bututun sakin ba. Rahotonta yana saita `releaseAcceptance: false` a sarari , koda lokacin da wannan shirin ya kasance `VERIFIED`. Gudun aikin `release-acceptance.yml` har yanzu yana amfani da kayan gyara inuwa, ba ainihin gini ba, fakiti, taya ko rasidun tallatawa.
+`scripts/quality/validate-release-acceptance.mjs` yana rage tsarin da aka kawowa da bayyanarsa; bai tabbatar da cewa shirin ya shafi cikakken bututun sakin ba. Rahotonta yana saita `releaseAcceptance: false` a sarari , koda lokacin da wannan shirin ya kasance `VERIFIED`.
 
 CLI yana buƙatar `--evidence-root` don tabbatar da shaidar da aka riƙe. Ana warware fayiloli azaman `<evidence-root>/<artifact_id>/<member>` kuma ana hashed azaman SHA-256. Rikodin PASS ba tare da shaida ba, fayil ɗin da ya ɓace ko canza, hanya mara lafiya ko alamar haɗin gwiwa yana hana tabbatarwa. Fayilolin da suka ɓace ba su yi daidai da ɓangarorin rajistan ayyukan nasara ba. Canjin SHA/run/attempt da ke wanzu sun kasance masu zaman kansu: madaidaitan bytes ba za su iya ceton dattijon rasit ba. Mutuncin fayil ba hujja ba ce ta sahihancin aiwatarwa ko haɓaka kayan tarihi.
 

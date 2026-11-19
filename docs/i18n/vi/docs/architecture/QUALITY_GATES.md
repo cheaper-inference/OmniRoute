@@ -37,7 +37,7 @@ Sau một lần dequeue, một lần đẩy không phải lúc nào cũng yêu c
 
 ### Bằng chứng được giữ lại trong bộ giảm chấp nhận
 
-`scripts/quality/validate-release-acceptance.mjs` giảm kế hoạch được cung cấp và các bảng kê khai của nó; nó không chứng minh rằng kế hoạch bao trùm toàn bộ quy trình phát hành. Báo cáo của nó đặt rõ ràng `releaseAcceptance: false`, ngay cả khi kế hoạch đó là `VERIFIED`. Quy trình làm việc `release-acceptance.yml` vẫn sử dụng các thiết bị cố định bóng, không phải biên lai xây dựng, gói, khởi động hoặc khuyến mãi thực.
+`scripts/quality/validate-release-acceptance.mjs` giảm kế hoạch được cung cấp và các bảng kê khai của nó; nó không chứng minh rằng kế hoạch bao trùm toàn bộ quy trình phát hành. Báo cáo của nó đặt rõ ràng `releaseAcceptance: false`, ngay cả khi kế hoạch đó là `VERIFIED`.
 
 CLI yêu cầu `--evidence-root` xác minh bằng chứng được lưu giữ. Các tệp được phân giải dưới dạng `<evidence-root>/<artifact_id>/<member>` và được băm dưới dạng SHA-256. Bản ghi PASS không có bằng chứng, tệp bị thiếu hoặc bị thay đổi, đường dẫn không an toàn hoặc liên kết tượng trưng sẽ ngăn cản việc xác minh. Tệp bị thiếu không tương đương với nhật ký thành công trống. Kiểm tra SHA/run/attempt hiện tại vẫn độc lập: các byte phù hợp không thể giải cứu biên nhận cũ. Tính toàn vẹn của tệp không phải là bằng chứng về tính xác thực thực thi hoặc quảng cáo tạo phẩm.
 

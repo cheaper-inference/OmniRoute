@@ -37,7 +37,7 @@ Después de una retirada de la cola, una inserción no siempre vuelve a poner en
 
 ### Evidencia retenida en el reductor de aceptación.
 
-`scripts/quality/validate-release-acceptance.mjs` reduce un plan suministrado y sus manifiestos; no establece que el plan cubra todo el proceso de lanzamiento. Sus informes establecen explícitamente `releaseAcceptance: false`, incluso cuando ese plan es `VERIFIED`. El flujo de trabajo `release-acceptance.yml` todavía utiliza accesorios ocultos, no recibos reales de compilación, paquete, arranque o promoción.
+`scripts/quality/validate-release-acceptance.mjs` reduce un plan suministrado y sus manifiestos; no establece que el plan cubra todo el proceso de lanzamiento. Sus informes establecen explícitamente `releaseAcceptance: false`, incluso cuando ese plan es `VERIFIED`.
 
 La CLI exige que `--evidence-root` verifique las pruebas retenidas. Los archivos se resuelven como `<evidence-root>/<artifact_id>/<member>` y se procesan como SHA-256. Un registro PASS sin evidencia, un archivo faltante o modificado, una ruta insegura o un enlace simbólico impiden la verificación. Los archivos faltantes no equivalen a registros exitosos vacíos. Las comprobaciones SHA/run/attempt existentes siguen siendo independientes: los bytes coincidentes no pueden rescatar un recibo obsoleto. La integridad del archivo no es una prueba de autenticidad de ejecución ni de promoción de artefactos.
 

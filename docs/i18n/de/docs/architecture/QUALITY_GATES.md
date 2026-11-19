@@ -37,7 +37,7 @@ Nach einem Auszug aus der Warteschlange wird der PR durch einen Push nicht immer
 
 ### Beweissicherung im Akzeptanzminderer
 
-`scripts/quality/validate-release-acceptance.mjs` reduziert einen bereitgestellten Plan und seine Manifeste; Es wird nicht festgestellt, dass der Plan die gesamte Release-Pipeline abdeckt. Seine Berichte legen `releaseAcceptance: false` explizit fest, auch wenn dieser Plan `VERIFIED` ist. Der `release-acceptance.yml` Workflow verwendet weiterhin Schatten-Fixtures, keine echten Build-, Paket-, Boot- oder Promotion-Belege.
+`scripts/quality/validate-release-acceptance.mjs` reduziert einen bereitgestellten Plan und seine Manifeste; Es wird nicht festgestellt, dass der Plan die gesamte Release-Pipeline abdeckt. Seine Berichte legen `releaseAcceptance: false` explizit fest, auch wenn dieser Plan `VERIFIED` ist.
 
 Die CLI verpflichtet `--evidence-root` zur Überprüfung der aufbewahrten Beweise. Dateien werden als `<evidence-root>/<artifact_id>/<member>` aufgelöst und als SHA-256 gehasht. Ein PASS Eintrag ohne Beweise, eine fehlende oder geänderte Datei, ein unsicherer Pfad oder ein symbolischer Link verhindern die Überprüfung. Fehlende Dateien sind nicht gleichbedeutend mit leeren erfolgreichen Protokollen. Bestehende SHA/run/attempt -Prüfungen bleiben unabhängig: Übereinstimmende Bytes können eine veraltete Quittung nicht retten. Die Dateiintegrität ist kein Beweis für die Authentizität der Ausführung oder die Förderung von Artefakten.
 

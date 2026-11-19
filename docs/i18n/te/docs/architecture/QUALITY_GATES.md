@@ -68,8 +68,7 @@ Mergify తన క్యూ సారాంశాన్ని డ్రాఫ్
 `scripts/quality/validate-release-acceptance.mjs` అందించిన ప్లాన్ మరియు దాని
 మానిఫెస్టులను తగ్గిస్తుంది; ఆ ప్లాన్ పూర్తి విడుదల పైప్లైన్ను కవర్ చేస్తుందని ఇది స్థాపించదు.
 ఆ ప్లాన్ `VERIFIED` అయినప్పటికీ, దాని నివేదికలు స్పష్టంగా
-`releaseAcceptance: false`ను సెట్ చేస్తాయి. `release-acceptance.yml` వర్క్ఫ్లో ఇప్పటికీ
-నిజమైన build, package, boot లేదా promotion రసీదుల బదులుగా shadow fixturesను ఉపయోగిస్తుంది.
+`releaseAcceptance: false`ను సెట్ చేస్తాయి.
 
 నిల్వ చేసిన సాక్ష్యాన్ని ధృవీకరించడానికి CLIకి `--evidence-root` అవసరం. ఫైళ్లు
 `<evidence-root>/<artifact_id>/<member>`గా పరిష్కరించబడి SHA-256గా హ్యాష్ చేయబడతాయి. సాక్ష్యం లేని

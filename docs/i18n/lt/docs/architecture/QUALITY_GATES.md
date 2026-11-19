@@ -37,7 +37,7 @@ Nutraukus eilę, stūmimas ne visada papildo PR. Komentuokite `@mergifyio queue`
 
 ### Priėmimo reduktoriuje išliko įrodymai
 
-`scripts/quality/validate-release-acceptance.mjs` sumažina pateiktą planą ir jo apraiškas; jame nenustatyta, kad planas apima visą išleidimo vamzdyną. Jos ataskaitose aiškiai nustatytas `releaseAcceptance: false`, net kai tas planas yra `VERIFIED`. `release-acceptance.yml` darbo eigoje vis dar naudojami šešėliniai įrenginiai, o ne tikri kūrimo, paketo, įkrovos ar reklamos kvitai.
+`scripts/quality/validate-release-acceptance.mjs` sumažina pateiktą planą ir jo apraiškas; jame nenustatyta, kad planas apima visą išleidimo vamzdyną. Jos ataskaitose aiškiai nustatytas `releaseAcceptance: false`, net kai tas planas yra `VERIFIED`.
 
 CLI reikalauja, kad `--evidence-root` patikrintų išsaugotus įrodymus. Failai išsprendžiami kaip `<evidence-root>/<artifact_id>/<member>` ir maišos kaip SHA-256. PASS įrašas be įrodymų, trūkstamas arba pakeistas failas, nesaugus kelias arba simbolinė nuoroda neleidžia patikrinti. Trūkstami failai nėra lygiaverčiai tuščiiems sėkmingiems žurnalams. Esami SHA/run/attempt patikrinimai išlieka nepriklausomi: sutampantys baitai negali išgelbėti pasenusio kvito. Failo vientisumas nėra vykdymo autentiškumo ar artefakto reklamavimo įrodymas.
 

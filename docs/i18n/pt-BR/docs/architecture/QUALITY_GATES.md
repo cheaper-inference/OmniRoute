@@ -37,7 +37,7 @@ Após um desenfileiramento, um push nem sempre recoloca o PR. Comente `@mergifyi
 
 ### Evidências retidas no redutor de aceitação
 
-`scripts/quality/validate-release-acceptance.mjs` reduz um plano fornecido e seus manifestos; não estabelece que o plano cubra todo o pipeline de lançamento. Seus relatórios definem explicitamente `releaseAcceptance: false`, mesmo quando esse plano é `VERIFIED`. O fluxo de trabalho `release-acceptance.yml` ainda usa acessórios de sombra, e não recibos reais de construção, pacote, inicialização ou promoção.
+`scripts/quality/validate-release-acceptance.mjs` reduz um plano fornecido e seus manifestos; não estabelece que o plano cubra todo o pipeline de lançamento. Seus relatórios definem explicitamente `releaseAcceptance: false`, mesmo quando esse plano é `VERIFIED`.
 
 O CLI exige que `--evidence-root` verifique as evidências retidas. Os arquivos são resolvidos como `<evidence-root>/<artifact_id>/<member>` e com hash como SHA-256. Um registro PASS sem evidência, um arquivo ausente ou alterado, um caminho inseguro ou um link simbólico impedem a verificação. Arquivos ausentes não são equivalentes a logs vazios bem-sucedidos. As verificações SHA/run/attempt existentes permanecem independentes: os bytes correspondentes não podem resgatar um recibo obsoleto. A integridade do arquivo não é prova de autenticidade de execução ou promoção de artefato.
 

@@ -66,8 +66,7 @@ A sorból való kivétel után egy push nem mindig teszi vissza a PR-t a sorba. 
 A `scripts/quality/validate-release-acceptance.mjs` egy megadott tervet és annak
 manifestjeit redukálja; nem állapítja meg, hogy a terv lefedi-e a teljes kiadási folyamatot.
 A jelentései kifejezetten `releaseAcceptance: false` értéket állítanak be, még akkor is, ha a terv
-`VERIFIED` állapotú. A `release-acceptance.yml` munkafolyamat továbbra is árnyék-fixture-öket használ,
-nem valódi build-, csomag-, boot- vagy előléptetési nyugtákat.
+`VERIFIED` állapotú.
 
 A CLI a megőrzött bizonyítékok ellenőrzéséhez megköveteli a `--evidence-root` kapcsolót. A fájlok feloldása
 `<evidence-root>/<artifact_id>/<member>` formában történik, és SHA-256 szerint lesznek hashelve. Bizonyíték

@@ -37,7 +37,7 @@ Tar éis scuaine, ní i gcónaí a éilíonn brú an PR. Déan trácht air `@mer
 
 ### Fianaise coinnithe sa laghdaitheoir glactha
 
-laghdaíonn `scripts/quality/validate-release-acceptance.mjs` plean a sholáthraítear agus a chuid léirithe; ní shuíonn sé go gclúdaíonn an plean an phíblíne scaoilte iomlán. Shocraigh a thuarascálacha `releaseAcceptance: false` go sainráite , fiú nuair is `VERIFIED` an plean sin . Úsáideann an sreabhadh oibre `release-acceptance.yml` fós daingneáin scáth, ní fáltais fíor-thógála, pacáiste, tosaithe nó ardú céime.
+laghdaíonn `scripts/quality/validate-release-acceptance.mjs` plean a sholáthraítear agus a chuid léirithe; ní shuíonn sé go gclúdaíonn an plean an phíblíne scaoilte iomlán. Shocraigh a thuarascálacha `releaseAcceptance: false` go sainráite , fiú nuair is `VERIFIED` an plean sin .
 
 Éilíonn an CLI `--evidence-root` chun fianaise coinnithe a fhíorú. Réitítear comhaid mar `<evidence-root>/<artifact_id>/<member>` agus hash mar SHA-256. Coisceann taifead PASS gan fhianaise, comhad in easnamh nó athraithe, conair neamhshábháilte nó nasc simplí fíorú. Níl comhaid ar iarraidh comhionann le logaí rathúla folamh. Fanann seiceálacha SHA/run/attempt reatha neamhspleách: ní féidir le bearta meaitseála admháil sheanchaite a tharrtháil. Ní cruthúnas é sláine comhaid ar bharántúlacht forghníomhaithe ná ar chur chun cinn déantán.
 

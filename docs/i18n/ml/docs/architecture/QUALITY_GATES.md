@@ -38,7 +38,7 @@ Dequeue ചെയ്തതിന് ശേഷം ഒരു push എല്ലാ�
 
 ### Acceptance reducer-ൽ നിലനിർത്തുന്ന തെളിവുകൾ
 
-`scripts/quality/validate-release-acceptance.mjs` നൽകിയിരിക്കുന്ന ഒരു plan-ഉം അതിന്റെ manifests-ഉം ചുരുക്കുന്നു; ആ plan പൂർണ്ണ release pipeline-നെ ഉൾക്കൊള്ളുന്നുവെന്ന് അത് സ്ഥാപിക്കുന്നില്ല. ആ plan `VERIFIED` ആയാലും, അതിന്റെ റിപ്പോർട്ടുകൾ `releaseAcceptance: false` എന്ന് വ്യക്തമായി സജ്ജമാക്കുന്നു. `release-acceptance.yml` workflow ഇപ്പോഴും യഥാർത്ഥ build, package, boot, promotion രസീതുകൾക്ക് പകരം shadow fixtures ആണ് ഉപയോഗിക്കുന്നത്.
+`scripts/quality/validate-release-acceptance.mjs` നൽകിയിരിക്കുന്ന ഒരു plan-ഉം അതിന്റെ manifests-ഉം ചുരുക്കുന്നു; ആ plan പൂർണ്ണ release pipeline-നെ ഉൾക്കൊള്ളുന്നുവെന്ന് അത് സ്ഥാപിക്കുന്നില്ല. ആ plan `VERIFIED` ആയാലും, അതിന്റെ റിപ്പോർട്ടുകൾ `releaseAcceptance: false` എന്ന് വ്യക്തമായി സജ്ജമാക്കുന്നു.
 
 നിലനിർത്തിയ തെളിവുകൾ പരിശോധിക്കാൻ CLI-യ്ക്ക് `--evidence-root` ആവശ്യമാണ്. ഫയലുകൾ `<evidence-root>/<artifact_id>/<member>` എന്ന രീതിയിൽ പരിഹരിക്കുകയും SHA-256 ആയി hash ചെയ്യുകയും ചെയ്യുന്നു. തെളിവില്ലാത്ത PASS റെക്കോർഡ്, കാണാതായതോ മാറ്റം വരുത്തിയതോ ആയ ഫയൽ, സുരക്ഷിതമല്ലാത്ത പാത, അല്ലെങ്കിൽ ഒരു symlink എന്നിവ verification തടയുന്നു. കാണാതായ ഫയലുകൾ ശൂന്യമായ വിജയകരമായ logs-ന് തുല്യമല്ല. നിലവിലുള്ള SHA/run/attempt പരിശോധനകൾ സ്വതന്ത്രമായി തുടരും: പൊരുത്തപ്പെടുന്ന bytes-ന് പഴകിയ ഒരു രസീതിനെ രക്ഷിക്കാനാകില്ല. ഫയൽ integrity, execution authenticity-യുടെയോ artifact promotion-ന്റെയോ തെളിവല്ല.
 

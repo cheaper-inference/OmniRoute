@@ -37,7 +37,7 @@ Wara dequeue, push mhux dejjem jerġa' jpoġġi l- PR. Ikkummenta `@mergifyio qu
 
 ### Evidenza miżmuma fir-reducer ta 'aċċettazzjoni
 
-`scripts/quality/validate-release-acceptance.mjs` tnaqqas pjan fornut u l-manifesti taghha; ma jistabbilixxix li l-pjan ikopri l-pipeline tar-rilaxx sħiħ. Ir-rapporti tagħha jistabbilixxu b'mod espliċitu `releaseAcceptance: false`, anki meta dak il-pjan huwa `VERIFIED`. Il-fluss tax-xogħol `release-acceptance.yml` għadu juża shadow fixtures, mhux irċevuti ta 'bini reali, pakkett, boot jew promozzjoni.
+`scripts/quality/validate-release-acceptance.mjs` tnaqqas pjan fornut u l-manifesti taghha; ma jistabbilixxix li l-pjan ikopri l-pipeline tar-rilaxx sħiħ. Ir-rapporti tagħha jistabbilixxu b'mod espliċitu `releaseAcceptance: false`, anki meta dak il-pjan huwa `VERIFIED`.
 
 Iż CLI teħtieġ `--evidence-root` tivverifika l-evidenza miżmuma. Fajls jiġu solvuti bħala `<evidence-root>/<artifact_id>/<member>` u hashed bħala SHA-256. Rekord PASS mingħajr evidenza, fajl nieqes jew mibdul, passaġġ mhux sikur jew symlink jipprevjeni l-verifika. Fajls neqsin mhumiex ekwivalenti għal zkuk ta' suċċess vojta. Il-kontrolli SHA/run/attempt eżistenti jibqgħu indipendenti: bytes li jaqblu ma jistgħux isalvaw irċevuta skaduta. L-integrità tal-fajl mhijiex prova tal-awtentiċità tal-eżekuzzjoni jew il-promozzjoni tal-artifact.
 

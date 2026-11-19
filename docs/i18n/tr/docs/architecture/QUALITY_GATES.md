@@ -37,7 +37,7 @@ Kuyruktan çıkarma işleminden sonra push her zaman PR yeniden kuyruğa almaz. 
 
 ### Kabul düşürücüde tutulan kanıtlar
 
-`scripts/quality/validate-release-acceptance.mjs` sağlanan bir planı ve onun manifestolarını azaltır; planın sürüm hattının tamamını kapsadığını ortaya koymaz. Plan `VERIFIED` olsa bile raporları `releaseAcceptance: false` açıkça ayarlıyor. `release-acceptance.yml` iş akışı, gerçek yapı, paket, önyükleme veya promosyon makbuzlarını değil, hâlâ gölge fikstürleri kullanıyor.
+`scripts/quality/validate-release-acceptance.mjs` sağlanan bir planı ve onun manifestolarını azaltır; planın sürüm hattının tamamını kapsadığını ortaya koymaz. Plan `VERIFIED` olsa bile raporları `releaseAcceptance: false` açıkça ayarlıyor.
 
 CLI `--evidence-root` saklanan kanıtları doğrulamasını gerektirir. Dosyalar `<evidence-root>/<artifact_id>/<member>` olarak çözümlenir ve SHA-256 olarak karma işlemi uygulanır. Kanıtı olmayan bir PASS kaydı, eksik veya değiştirilmiş bir dosya, güvenli olmayan bir yol veya sembolik bağlantı, doğrulamayı engeller. Eksik dosyalar, boş başarılı günlüklere eşdeğer değildir. Mevcut SHA/run/attempt kontrolleri bağımsız kalır: eşleşen baytlar eski bir alındı bilgisini kurtaramaz. Dosya bütünlüğü, yürütme orijinalliğinin veya yapı tanıtımının kanıtı değildir.
 

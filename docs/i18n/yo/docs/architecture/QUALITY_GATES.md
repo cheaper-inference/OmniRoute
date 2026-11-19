@@ -37,7 +37,7 @@ Lẹhin isọdi, titari ko ni beere nigbagbogbo PR. Ọrọìwòye `@mergifyio q
 
 ### Ẹri ti o ni idaduro ni idinku gbigba
 
-`scripts/quality/validate-release-acceptance.mjs` dinku eto ti a pese ati awọn ifihan rẹ; ko ṣe fi idi rẹ mulẹ pe ero naa ni wiwa opo gigun ti itusilẹ pipe. Awọn ijabọ rẹ ṣeto `releaseAcceptance: false` ni gbangba, paapaa nigba ti ero yẹn jẹ `VERIFIED`. Ṣiṣan iṣẹ ṣiṣe `release-acceptance.yml` tun nlo awọn imuduro ojiji, kii ṣe itumọ gidi, package, bata tabi awọn owo igbega.
+`scripts/quality/validate-release-acceptance.mjs` dinku eto ti a pese ati awọn ifihan rẹ; ko ṣe fi idi rẹ mulẹ pe ero naa ni wiwa opo gigun ti itusilẹ pipe. Awọn ijabọ rẹ ṣeto `releaseAcceptance: false` ni gbangba, paapaa nigba ti ero yẹn jẹ `VERIFIED`.
 
 CLI naa nilo `--evidence-root` lati mọ daju ẹri ti o daduro. Awọn faili ti wa ni ipinnu bi `<evidence-root>/<artifact_id>/<member>` ati hashed bi SHA-256. Igbasilẹ PASS laisi ẹri, sonu tabi faili ti o yipada, ọna ti ko lewu tabi aami-ọna kan ṣe idilọwọ ijẹrisi. Awọn faili ti o nsọnu ko ṣe deede si awọn akọọlẹ aṣeyọri ofo. Awọn sọwedowo SHA/run/attempt ti o wa tẹlẹ wa ni ominira: awọn baiti ti o baamu ko le gba iwe-ẹri ti o duro duro. Iduroṣinṣin fáìlì kii ṣe ẹ̀rí ìfójútó ipaniyan tabi igbega artifact.
 

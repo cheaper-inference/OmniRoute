@@ -36,7 +36,7 @@ Mergify는 초안 설명에 대기열 요약을 기록하고 다른 앱도 이�
 
 ### 수용 감소기에 보관된 증거
 
-`scripts/quality/validate-release-acceptance.mjs` 제공된 계획과 그 매니페스트를 줄입니다. 계획이 전체 릴리스 파이프라인을 포괄한다는 사실은 확립되지 않았습니다. 해당 계획이 `VERIFIED` 인 경우에도 해당 보고서는 명시적으로 `releaseAcceptance: false` 설정합니다. `release-acceptance.yml` 워크플로우는 실제 빌드, 패키지, 부팅 또는 프로모션 영수증이 아닌 섀도우 픽스처를 여전히 사용합니다.
+`scripts/quality/validate-release-acceptance.mjs` 제공된 계획과 그 매니페스트를 줄입니다. 계획이 전체 릴리스 파이프라인을 포괄한다는 사실은 확립되지 않았습니다. 해당 계획이 `VERIFIED` 인 경우에도 해당 보고서는 명시적으로 `releaseAcceptance: false` 설정합니다.
 
 CLI 보유된 증거를 확인하기 위해 `--evidence-root` 요구합니다. 파일은 `<evidence-root>/<artifact_id>/<member>` 로 확인되고 SHA-256 로 해시됩니다. 증거가 없는 PASS 레코드, 누락되거나 변경된 파일, 안전하지 않은 경로 또는 심볼릭 링크로 인해 확인이 불가능합니다. 누락된 파일은 빈 성공 로그와 동일하지 않습니다. 기존 SHA/run/attempt 검사는 독립적으로 유지됩니다. 일치하는 바이트는 오래된 영수증을 복구할 수 없습니다. 파일 무결성은 실행 신뢰성이나 아티팩트 승격을 증명하지 않습니다.
 

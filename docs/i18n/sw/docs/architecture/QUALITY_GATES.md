@@ -37,7 +37,7 @@ Baada ya msururu, msukumo hauleti PR kila wakati. Toa maoni `@mergifyio queue` j
 
 ### Ushahidi uliobaki katika kipunguza kukubalika
 
-`scripts/quality/validate-release-acceptance.mjs` inapunguza mpango uliotolewa na udhihirisho wake; haithibitishi kuwa mpango huo unashughulikia bomba kamili la kutolewa. Ripoti zake zimewekwa wazi `releaseAcceptance: false`, hata wakati mpango huo ni `VERIFIED`. Mtiririko wa kazi `release-acceptance.yml` bado unatumia urekebishaji wa vivuli, sio muundo halisi, kifurushi, risiti za kuwasha au ukuzaji.
+`scripts/quality/validate-release-acceptance.mjs` inapunguza mpango uliotolewa na udhihirisho wake; haithibitishi kuwa mpango huo unashughulikia bomba kamili la kutolewa. Ripoti zake zimewekwa wazi `releaseAcceptance: false`, hata wakati mpango huo ni `VERIFIED`.
 
 CLI inahitaji `--evidence-root` ili kuthibitisha ushahidi uliobaki. Faili hutatuliwa kama `<evidence-root>/<artifact_id>/<member>` na kuharakishwa kama SHA-256. Rekodi ya PASS bila ushahidi, faili iliyokosekana au iliyobadilishwa, njia isiyo salama au ulinganifu huzuia uthibitishaji. Faili zinazokosekana si sawa na kumbukumbu tupu zilizofanikiwa. Hundi zilizopo za SHA/run/attempt zinasalia kuwa huru: baiti zinazolingana haziwezi kuokoa risiti ya zamani. Uadilifu wa faili si uthibitisho wa uhalali wa utekelezaji au ukuzaji wa vizalia vya programu.
 

@@ -37,7 +37,7 @@ Na een dequeue wordt de PR bij een push niet altijd opnieuw in de wachtrij gepla
 
 ### Behouden bewijsmateriaal in de acceptatieverminderaar
 
-`scripts/quality/validate-release-acceptance.mjs` reduceert een aangeleverd plan en zijn manifesten; er wordt niet aangetoond dat het plan de volledige releasepijplijn bestrijkt. De rapporten stellen expliciet `releaseAcceptance: false` vast, zelfs als dat plan `VERIFIED` is. De `release-acceptance.yml` workflow maakt nog steeds gebruik van schaduwarmaturen, geen echte bouw-, pakket-, opstart- of promotiebonnen.
+`scripts/quality/validate-release-acceptance.mjs` reduceert een aangeleverd plan en zijn manifesten; er wordt niet aangetoond dat het plan de volledige releasepijplijn bestrijkt. De rapporten stellen expliciet `releaseAcceptance: false` vast, zelfs als dat plan `VERIFIED` is.
 
 De CLI vereist dat de `--evidence-root` het bewaarde bewijsmateriaal verifieert. Bestanden worden omgezet als `<evidence-root>/<artifact_id>/<member>` en gehasht als SHA-256. Een PASS -record zonder bewijs, een ontbrekend of gewijzigd bestand, een onveilig pad of een symlink verhindert verificatie. Ontbrekende bestanden zijn niet hetzelfde als lege succesvolle logboeken. Bestaande SHA/run/attempt -controles blijven onafhankelijk: overeenkomende bytes kunnen een verouderd ontvangstbewijs niet redden. Bestandsintegriteit is geen bewijs van de authenticiteit van de uitvoering of van artefactpromotie.
 

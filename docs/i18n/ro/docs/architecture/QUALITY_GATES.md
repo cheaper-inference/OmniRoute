@@ -37,7 +37,7 @@ După o scoatere din coadă, o apăsare nu reia întotdeauna PR. Comentează `@m
 
 ### Dovezi reținute în reductorul de acceptare
 
-`scripts/quality/validate-release-acceptance.mjs` reduce un plan furnizat și manifestele acestuia; nu stabilește că planul acoperă întreaga conductă de eliberare. Rapoartele sale stabilesc în mod explicit `releaseAcceptance: false`, chiar și atunci când acel plan este `VERIFIED`. Fluxul de lucru `release-acceptance.yml` folosește în continuare dispozitive de umbră, nu chitanțe reale de construcție, pachet, boot sau promoție.
+`scripts/quality/validate-release-acceptance.mjs` reduce un plan furnizat și manifestele acestuia; nu stabilește că planul acoperă întreaga conductă de eliberare. Rapoartele sale stabilesc în mod explicit `releaseAcceptance: false`, chiar și atunci când acel plan este `VERIFIED`.
 
 CLI cere ca `--evidence-root` să verifice dovezile reținute. Fișierele sunt rezolvate ca `<evidence-root>/<artifact_id>/<member>` și indexate ca SHA-256. O înregistrare PASS fără dovezi, un fișier lipsă sau schimbat, o cale nesigură sau un link simbolic împiedică verificarea. Fișierele lipsă nu sunt echivalente cu jurnalele de succes goale. Verificările SHA/run/attempt existente rămân independente: octeții potriviți nu pot salva o chitanță veche. Integritatea fișierului nu este dovada autenticității execuției sau promovarea artefactului.
 

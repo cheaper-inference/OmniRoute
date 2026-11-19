@@ -37,7 +37,7 @@ Setelah dequeue, push tidak selalu mengantri ulang PR. Komentari `@mergifyio que
 
 ### Bukti yang disimpan di peredam penerimaan
 
-`scripts/quality/validate-release-acceptance.mjs` mengurangi rencana yang disediakan dan manifesnya; hal ini tidak menetapkan bahwa rencana tersebut mencakup seluruh jalur pelepasan. Laporannya secara eksplisit menetapkan `releaseAcceptance: false`, meskipun rencananya adalah `VERIFIED`. Alur kerja `release-acceptance.yml` masih menggunakan perlengkapan bayangan, bukan tanda terima pembuatan, paket, boot, atau promosi yang sebenarnya.
+`scripts/quality/validate-release-acceptance.mjs` mengurangi rencana yang disediakan dan manifesnya; hal ini tidak menetapkan bahwa rencana tersebut mencakup seluruh jalur pelepasan. Laporannya secara eksplisit menetapkan `releaseAcceptance: false`, meskipun rencananya adalah `VERIFIED`.
 
 CLI membutuhkan `--evidence-root` untuk memverifikasi bukti yang disimpan. File diselesaikan sebagai `<evidence-root>/<artifact_id>/<member>` dan di-hash sebagai SHA-256. Catatan PASS tanpa bukti, file yang hilang atau diubah, jalur yang tidak aman, atau symlink mencegah verifikasi. File yang hilang tidak sama dengan log sukses yang kosong. Pemeriksaan SHA/run/attempt yang ada tetap independen: byte yang cocok tidak dapat menyelamatkan tanda terima yang sudah basi. Integritas file bukan bukti keaslian eksekusi atau promosi artefak.
 

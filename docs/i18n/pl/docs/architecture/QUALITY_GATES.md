@@ -38,7 +38,7 @@ Po usunięciu z kolejki push nie zawsze powoduje ponowne kolejkowanie PR. Skomen
 
 ### Zachowany dowód w reduktorze odbioru
 
-`scripts/quality/validate-release-acceptance.mjs` redukuje dostarczony plan i jego manifesty; nie ustala, że plan obejmuje cały proces wydań. Jego raporty wyraźnie ustawiają `releaseAcceptance: false`, nawet jeśli tym planem jest `VERIFIED`. Przepływ pracy `release-acceptance.yml` w dalszym ciągu wykorzystuje urządzenia cieniowe, a nie prawdziwe potwierdzenia kompilacji, pakietów, rozruchu lub promocji.
+`scripts/quality/validate-release-acceptance.mjs` redukuje dostarczony plan i jego manifesty; nie ustala, że plan obejmuje cały proces wydań. Jego raporty wyraźnie ustawiają `releaseAcceptance: false`, nawet jeśli tym planem jest `VERIFIED`.
 
 CLI wymaga od `--evidence-root` weryfikacji zatrzymanych dowodów. Pliki są rozpoznawane jako `<evidence-root>/<artifact_id>/<member>` i haszowane jako SHA-256. Rekord PASS bez dowodów, brakujący lub zmieniony plik, niebezpieczna ścieżka lub dowiązanie symboliczne uniemożliwiają weryfikację. Brakujące pliki nie są równoznaczne z pustymi pomyślnymi dziennikami. Istniejące kontrole SHA/run/attempt pozostają niezależne: pasujące bajty nie mogą uratować nieaktualnego paragonu. Integralność pliku nie jest dowodem autentyczności wykonania ani promowania artefaktów.
 

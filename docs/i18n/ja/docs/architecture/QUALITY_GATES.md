@@ -71,9 +71,7 @@ Mergify はキューの概要をドラフトの説明に書き込みますが、
 `scripts/quality/validate-release-acceptance.mjs` は、指定されたプランとその
 マニフェストを縮約しますが、そのプランがリリースパイプライン全体を対象としていることは
 確立しません。そのレポートは、そのプランが `VERIFIED` であっても、
-`releaseAcceptance: false` を明示的に設定します。`release-acceptance.yml`
-ワークフローは、実際のビルド、パッケージ、起動、プロモーションのレシートではなく、
-引き続きシャドーフィクスチャを使用します。
+`releaseAcceptance: false` を明示的に設定します。
 
 CLI で保持された証跡を検証するには `--evidence-root` が必要です。ファイルは
 `<evidence-root>/<artifact_id>/<member>` として解決され、SHA-256 としてハッシュ化されます。

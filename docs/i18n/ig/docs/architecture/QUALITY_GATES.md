@@ -37,7 +37,7 @@ Mgbe dequeue gasịrị, ọ bụghị mgbe niile ka ọ na-achọ PR. Kwuo `@me
 
 ### Ihe akaebe echekwabara na mbelata nnabata
 
-`scripts/quality/validate-release-acceptance.mjs` na-ebelata atụmatụ enyere na ngosipụta ya; ọ naghị egosi na atụmatụ ahụ na-ekpuchi pipeline ntọhapụ zuru oke. Akụkọ ya doziri `releaseAcceptance: false` n'ụzọ doro anya, ọbụlagodi mgbe atụmatụ ahụ bụ `VERIFIED`. Usoro ọrụ `release-acceptance.yml` ka na-eji nrụnye onyinyo, ọ bụghị ezigbo ihe nrụpụta, ngwugwu, buut ma ọ bụ nnata nkwalite.
+`scripts/quality/validate-release-acceptance.mjs` na-ebelata atụmatụ enyere na ngosipụta ya; ọ naghị egosi na atụmatụ ahụ na-ekpuchi pipeline ntọhapụ zuru oke. Akụkọ ya doziri `releaseAcceptance: false` n'ụzọ doro anya, ọbụlagodi mgbe atụmatụ ahụ bụ `VERIFIED`.
 
 CLI chọrọ `--evidence-root` iji nyochaa ihe akaebe edobere. A na-edozi faịlụ dị ka `<evidence-root>/<artifact_id>/<member>` na hashed ka SHA-256. Ndekọ PASS na-enweghị ihe akaebe, faịlụ efu ma ọ bụ gbanwere, ụzọ adịghị mma ma ọ bụ symlink na-egbochi nkwenye. Faịlụ na-efu efu abaghị na ndekọ ndekọ na-aga nke ọma. Nlebanya SHA/run/attempt dị ugbu a na-anọọrọ onwe ya: bytes dakọtara enweghị ike ịzọpụta nnata ochie. Iguzosi ike n'ezi ihe faịlụ abụghị ihe akaebe nke izi ezi ogbugbu ma ọ bụ nkwalite arịa.
 

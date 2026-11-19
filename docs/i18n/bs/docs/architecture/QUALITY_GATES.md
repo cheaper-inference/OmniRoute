@@ -39,7 +39,7 @@ Nakon dequeua, push ne stavlja uvijek u red PR. Komentirajte `@mergifyio queue` 
 
 ### Zadržani dokazi u reduktoru prihvata
 
-`scripts/quality/validate-release-acceptance.mjs` smanjuje isporučeni plan i njegove manifeste; ne utvrđuje da plan pokriva kompletan cevovod za oslobađanje. Njegovi izvještaji eksplicitno postavljaju `releaseAcceptance: false`, čak i kada je taj plan `VERIFIED`. `release-acceptance.yml` radni tok još uvijek koristi sjenčane postavke, a ne priznanice o stvarnoj izgradnji, paketu, pokretanju ili promociji.
+`scripts/quality/validate-release-acceptance.mjs` smanjuje isporučeni plan i njegove manifeste; ne utvrđuje da plan pokriva kompletan cevovod za oslobađanje. Njegovi izvještaji eksplicitno postavljaju `releaseAcceptance: false`, čak i kada je taj plan `VERIFIED`.
 
 CLI zahtijeva `--evidence-root` da provjeri zadržane dokaze. Fajlovi se rješavaju kao `<evidence-root>/<artifact_id>/<member>` i heširaju kao SHA-256. PASS zapis bez dokaza, datoteka koja nedostaje ili je promijenjena, nesigurna putanja ili simbolična veza sprječava verifikaciju. Fajlovi koji nedostaju nisu ekvivalentni praznim uspješnim zapisnicima. Postojeće SHA/run/attempt provjere ostaju nezavisne: odgovarajući bajtovi ne mogu spasiti zastarjeli račun. Integritet datoteke nije dokaz autentičnosti izvršenja ili promocije artefakta.
 

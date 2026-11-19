@@ -38,7 +38,7 @@ O'chirishdan so'ng, surish har doim ham PR talab qilmaydi. Bunga `@mergifyio que
 
 ### Qabul qilish reduktorida saqlangan dalillar
 
-`scripts/quality/validate-release-acceptance.mjs` taqdim etilgan rejani va uning manifestlarini kamaytiradi; bu reja to'liq chiqarish quvurini qamrab olishini aniqlamaydi. Uning hisobotlarida `releaseAcceptance: false` aniq belgilangan, hatto bu reja `VERIFIED` bo'lsa ham. `release-acceptance.yml` ish jarayoni hali ham haqiqiy tuzilish, paket, yuklash yoki reklama kvitantsiyalaridan emas, balki soya qurilmalaridan foydalanadi.
+`scripts/quality/validate-release-acceptance.mjs` taqdim etilgan rejani va uning manifestlarini kamaytiradi; bu reja to'liq chiqarish quvurini qamrab olishini aniqlamaydi. Uning hisobotlarida `releaseAcceptance: false` aniq belgilangan, hatto bu reja `VERIFIED` bo'lsa ham.
 
 CLI saqlangan dalillarni tekshirish uchun `--evidence-root` talab qiladi. Fayllar `<evidence-root>/<artifact_id>/<member>` sifatida hal qilinadi va SHA-256 sifatida xeshlanadi. Dalilsiz PASS yozuvi, etishmayotgan yoki o'zgartirilgan fayl, xavfli yo'l yoki symlink tekshirishni oldini oladi. Yo'qolgan fayllar bo'sh muvaffaqiyatli jurnallarga teng emas. Mavjud SHA/run/attempt tekshiruvlari mustaqil bo'lib qoladi: mos baytlar eskirgan chekni qutqara olmaydi. Fayl yaxlitligi ijro haqiqiyligi yoki artefaktni reklama qilishning isboti emas.
 

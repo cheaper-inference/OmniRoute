@@ -53,7 +53,7 @@ Queue ରୁ ବାହାରିବା ପରେ, push ସବୁବେଳେ PR �
 `scripts/quality/validate-release-acceptance.mjs` ଦିଆଯାଇଥିବା plan ଏବଂ ତାହାର
 manifests କୁ reduce କରେ; ଏହା plan ଟି ସମ୍ପୂର୍ଣ୍ଣ release pipeline କୁ ଆବୃତ କରୁଛି ବୋଲି ସ୍ଥାପନ କରେ ନାହିଁ।
 ଏହାର report ଗୁଡ଼ିକ ସ୍ପଷ୍ଟ ଭାବେ `releaseAcceptance: false` ସେଟ୍ କରେ, ଯଦିଓ ସେହି plan
-`VERIFIED` ହୋଇଥାଏ। `release-acceptance.yml` workflow ଏବେ ମଧ୍ୟ ପ୍ରକୃତ build, package, boot କିମ୍ବା promotion receipt ବଦଳରେ shadow fixture ବ୍ୟବହାର କରେ।
+`VERIFIED` ହୋଇଥାଏ।
 
 CLI retained evidence ଯାଞ୍ଚ କରିବା ପାଇଁ `--evidence-root` ଆବଶ୍ୟକ କରେ। File ଗୁଡ଼ିକ `<evidence-root>/<artifact_id>/<member>` ଭାବେ resolve ହୁଏ ଏବଂ SHA-256 ଭାବେ hash କରାଯାଏ। Evidence ବିନା PASS record, ଅନୁପସ୍ଥିତ କିମ୍ବା ପରିବର୍ତ୍ତିତ file, ଅସୁରକ୍ଷିତ path କିମ୍ବା symlink verification କୁ ରୋକେ। ଅନୁପସ୍ଥିତ file ଗୁଡ଼ିକ ଖାଲି ସଫଳ log ସହିତ ସମାନ ନୁହେଁ। ପୂର୍ବରୁ ଥିବା SHA/run/attempt ଯାଞ୍ଚଗୁଡ଼ିକ ସ୍ୱାଧୀନ ରହେ: ମେଳ ଖାଉଥିବା byte ଗୁଡ଼ିକ ପୁରୁଣା receipt କୁ ସଠିକ୍ କରିପାରେ ନାହିଁ। File integrity ହେଉଛି execution authenticity କିମ୍ବା artifact promotion ର ପ୍ରମାଣ ନୁହେଁ।
 

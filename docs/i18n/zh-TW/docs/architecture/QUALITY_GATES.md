@@ -37,7 +37,7 @@ Mergify 將其佇列摘要寫入草稿的描述中，其他應用程式也可以
 
 ### 在接受減速器中保留證據
 
-`scripts/quality/validate-release-acceptance.mjs`減少提供的計劃及其清單；它沒有確定該計劃涵蓋完整的發布管道。它的報告明確設定了`releaseAcceptance: false`，即使該計劃是`VERIFIED`。 `release-acceptance.yml`工作流程仍然使用影子裝置，而不是真正的建造、打包、啟動或升級收據。
+`scripts/quality/validate-release-acceptance.mjs`減少提供的計劃及其清單；它沒有確定該計劃涵蓋完整的發布管道。它的報告明確設定了`releaseAcceptance: false`，即使該計劃是`VERIFIED`。
 
 CLI要求`--evidence-root`驗證保留的證據。檔案解析為`<evidence-root>/<artifact_id>/<member>`並散列為SHA-256。沒有證據的PASS記錄、遺失或更改的檔案、不安全的路徑或符號連結都會阻止驗證。遺失的檔案並不等於空的成功日誌。現有的SHA/run/attempt檢查保持獨立：匹配的位元組無法挽救陳舊的收據。文件完整性並不是執行真實性或工件升級的證明。
 

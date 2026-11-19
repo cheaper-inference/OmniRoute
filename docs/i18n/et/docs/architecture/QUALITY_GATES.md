@@ -68,8 +68,7 @@ Pärast järjekorrast eemaldamist ei lisa tõuge PR-i alati uuesti järjekorda. 
 `scripts/quality/validate-release-acceptance.mjs` redutseerib etteantud plaani ja selle
 manifestid; see ei kinnita, et plaan hõlmab kogu väljalaske konveierit.
 Selle aruanded määravad sõnaselgelt väärtuseks `releaseAcceptance: false`, isegi kui plaan on
-`VERIFIED`. Töövoog `release-acceptance.yml` kasutab endiselt varivarasid, mitte
-tegeliku ehituse, pakendamise, käivitamise või edutamise kviitungeid.
+`VERIFIED`.
 
 CLI nõuab säilitatud tõendite kontrollimiseks lippu `--evidence-root`. Failid lahendatakse kujule
 `<evidence-root>/<artifact_id>/<member>` ja räsitakse SHA-256-ga. Tõendita PASS-kirje,

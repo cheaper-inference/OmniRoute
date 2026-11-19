@@ -37,7 +37,7 @@ Efter en dekø stiller et push ikke altid PR i kø. Kommenter `@mergifyio queue`
 
 ### Beholdt bevis i acceptreduceren
 
-`scripts/quality/validate-release-acceptance.mjs` reducerer en leveret plan og dens manifester; det fastslår ikke, at planen dækker hele frigivelsesrørledningen. Dens rapporter angiver eksplicit `releaseAcceptance: false`, selv når planen er `VERIFIED`. `release-acceptance.yml` arbejdsgangen bruger stadig skyggearmaturer, ikke rigtige build-, pakke-, boot- eller kampagnekvitteringer.
+`scripts/quality/validate-release-acceptance.mjs` reducerer en leveret plan og dens manifester; det fastslår ikke, at planen dækker hele frigivelsesrørledningen. Dens rapporter angiver eksplicit `releaseAcceptance: false`, selv når planen er `VERIFIED`.
 
 CLI kræver `--evidence-root` for at verificere bevarede beviser. Filer løses som `<evidence-root>/<artifact_id>/<member>` og hash som SHA-256. En PASS -post uden beviser, en manglende eller ændret fil, en usikker sti eller et symlink forhindrer verifikation. Manglende filer svarer ikke til tomme vellykkede logfiler. Eksisterende SHA/run/attempt -checks forbliver uafhængige: matchende bytes kan ikke redde en forældet kvittering. Filintegritet er ikke bevis for eksekveringsægthed eller artefaktpromovering.
 

@@ -37,7 +37,7 @@ Pagkatapos ng isang dequeue, ang isang push ay hindi palaging requeue ang PR. Co
 
 ### Napanatili ang ebidensya sa reducer ng pagtanggap
 
-binabawasan ng `scripts/quality/validate-release-acceptance.mjs` ang isang ibinigay na plano at ang mga manifest nito; hindi nito itinatag na ang plano ay sumasaklaw sa kumpletong release pipeline. Ang mga ulat nito ay tahasang nagtatakda ng `releaseAcceptance: false`, kahit na ang planong iyon ay `VERIFIED`. Gumagamit pa rin ang `release-acceptance.yml` workflow ng mga shadow fixture, hindi tunay na build, package, boot o mga resibo ng promosyon.
+binabawasan ng `scripts/quality/validate-release-acceptance.mjs` ang isang ibinigay na plano at ang mga manifest nito; hindi nito itinatag na ang plano ay sumasaklaw sa kumpletong release pipeline. Ang mga ulat nito ay tahasang nagtatakda ng `releaseAcceptance: false`, kahit na ang planong iyon ay `VERIFIED`.
 
 Ang CLI ay nangangailangan ng `--evidence-root` upang i-verify ang napanatili na ebidensya. Naresolba ang mga file bilang `<evidence-root>/<artifact_id>/<member>` at na-hash bilang SHA-256. Pinipigilan ng PASS record na walang ebidensya, nawawala o binagong file, hindi ligtas na landas o symlink ang pag-verify. Ang mga nawawalang file ay hindi katumbas ng walang laman na matagumpay na mga log. Ang mga kasalukuyang SHA/run/attempt check ay nananatiling independiyente: ang pagtutugma ng mga byte ay hindi makakapagligtas ng isang lipas na resibo. Ang integridad ng file ay hindi patunay ng pagiging tunay ng pagpapatupad o pag-promote ng artifact.
 

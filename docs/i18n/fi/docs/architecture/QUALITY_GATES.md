@@ -70,8 +70,6 @@ Jonosta poistamisen jälkeen push ei aina lisää PR:ää takaisin jonoon. Komme
 `scripts/quality/validate-release-acceptance.mjs` redusoi annetun suunnitelman ja sen
 manifestit; se ei osoita, että suunnitelma kattaa koko julkaisuprosessin. Sen raportit asettavat
 nimenomaisesti arvoksi `releaseAcceptance: false`, vaikka kyseinen suunnitelma olisi `VERIFIED`.
-`release-acceptance.yml`-työnkulku käyttää edelleen varjokalusteita, ei todellisia koonti-,
-paketointi-, käynnistys- tai promootiokuitteja.
 
 CLI vaatii `--evidence-root`-parametrin säilytetyn näytön tarkistamiseen. Tiedostot ratkaistaan
 muodossa `<evidence-root>/<artifact_id>/<member>` ja niistä lasketaan SHA-256-tiiviste.

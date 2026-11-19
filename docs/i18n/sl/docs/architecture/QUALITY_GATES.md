@@ -37,7 +37,7 @@ Po odstranitvi iz čakalne vrste potisni element PR ne postavi vedno znova v ča
 
 ### Zadržani dokazi v sprejemnem reduktorju
 
-`scripts/quality/validate-release-acceptance.mjs` zmanjša predloženi načrt in njegove manifeste; ne dokazuje, da načrt zajema celoten cevovod za sprostitev. Njegova poročila izrecno določajo `releaseAcceptance: false`, tudi če je ta načrt `VERIFIED`. Delovni tok `release-acceptance.yml` še vedno uporablja senčne napeljave, ne pravih potrdil o gradnji, pakiranju, zagonu ali napredovanju.
+`scripts/quality/validate-release-acceptance.mjs` zmanjša predloženi načrt in njegove manifeste; ne dokazuje, da načrt zajema celoten cevovod za sprostitev. Njegova poročila izrecno določajo `releaseAcceptance: false`, tudi če je ta načrt `VERIFIED`.
 
 CLI zahteva, da `--evidence-root` preveri zadržane dokaze. Datoteke so razrešene kot `<evidence-root>/<artifact_id>/<member>` in zgoščene kot SHA-256. Zapis PASS brez dokazov, manjkajoča ali spremenjena datoteka, nevarna pot ali simbolna povezava preprečuje preverjanje. Manjkajoče datoteke niso enakovredne praznim uspešnim dnevnikom. Obstoječa preverjanja SHA/run/attempt ostajajo neodvisna: ujemajoči se bajti ne morejo rešiti zastarelega računa. Celovitost datoteke ni dokaz pristnosti izvajanja ali promocije artefaktov.
 

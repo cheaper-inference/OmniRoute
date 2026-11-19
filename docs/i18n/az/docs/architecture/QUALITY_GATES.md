@@ -34,7 +34,7 @@ Dequeue sonra, bir təkan həmişə PR requeue deyil. Bu barədə `@mergifyio qu
 
 ### Qəbul reduktorunda saxlanılan sübut
 
-`scripts/quality/validate-release-acceptance.mjs` təchiz edilmiş planı və onun təzahürlərini azaldır; planın tam buraxılış boru kəmərini əhatə etdiyini müəyyən etmir. Onun hesabatları açıq şəkildə `releaseAcceptance: false` təyin edir, hətta bu plan `VERIFIED` olduqda belə. `release-acceptance.yml` iş axını hələ də real quruluş, paket, açılış və ya tanıtım qəbzləri deyil, kölgə qurğularından istifadə edir.
+`scripts/quality/validate-release-acceptance.mjs` təchiz edilmiş planı və onun təzahürlərini azaldır; planın tam buraxılış boru kəmərini əhatə etdiyini müəyyən etmir. Onun hesabatları açıq şəkildə `releaseAcceptance: false` təyin edir, hətta bu plan `VERIFIED` olduqda belə.
 
 CLI saxlanılan sübutları yoxlamaq üçün `--evidence-root` tələb edir. Fayllar `<evidence-root>/<artifact_id>/<member>` kimi həll edilir və SHA-256 kimi hashed olunur. Sübutsuz PASS qeydi, itkin və ya dəyişdirilmiş fayl, təhlükəli yol və ya simvolik əlaqə yoxlamanın qarşısını alır. Çatışmayan fayllar boş uğurlu qeydlərə bərabər deyil. Mövcud SHA/run/attempt çekləri müstəqil olaraq qalır: uyğun baytlar köhnə qəbzi xilas edə bilməz. Fayl bütövlüyü icranın həqiqiliyinə və ya artefaktın təşviqinə sübut deyil.
 

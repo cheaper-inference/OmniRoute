@@ -37,7 +37,7 @@ Nakon uklanjanja iz reda čekanja, push ne stavlja uvijek ponovno u red čekanja
 
 ### Zadržani dokazi u reduktoru prihvata
 
-`scripts/quality/validate-release-acceptance.mjs` smanjuje isporučeni plan i njegove manifeste; ne utvrđuje da plan pokriva cijeli cjevovod ispuštanja. Njegova izvješća eksplicitno postavljaju `releaseAcceptance: false`, čak i kada je taj plan `VERIFIED`. Tijek rada `release-acceptance.yml` i dalje koristi shadow fixture, a ne prave račune za izgradnju, paket, pokretanje ili promociju.
+`scripts/quality/validate-release-acceptance.mjs` smanjuje isporučeni plan i njegove manifeste; ne utvrđuje da plan pokriva cijeli cjevovod ispuštanja. Njegova izvješća eksplicitno postavljaju `releaseAcceptance: false`, čak i kada je taj plan `VERIFIED`.
 
 CLI zahtijeva da `--evidence-root` provjeri zadržane dokaze. Datoteke se rješavaju kao `<evidence-root>/<artifact_id>/<member>` i raspršuju kao SHA-256. PASS zapis bez dokaza, datoteka koja nedostaje ili je promijenjena, nesigurna staza ili simbolička veza sprječavaju provjeru. Datoteke koje nedostaju nisu ekvivalent praznim uspješnim zapisima. Postojeće SHA/run/attempt provjere ostaju neovisne: odgovarajući bajtovi ne mogu spasiti ustajali račun. Integritet datoteke nije dokaz autentičnosti izvršenja ili promicanje artefakta.
 

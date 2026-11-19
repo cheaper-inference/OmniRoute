@@ -64,8 +64,7 @@ After a dequeue, a push does not always requeue the PR. Comment `@mergifyio queu
 `scripts/quality/validate-release-acceptance.mjs` reduces a supplied plan and its
 manifests; it does not establish that the plan covers the complete release pipeline.
 Its reports explicitly set `releaseAcceptance: false`, even when that plan is
-`VERIFIED`. The `release-acceptance.yml` workflow still uses shadow fixtures, not
-real build, package, boot or promotion receipts.
+`VERIFIED`.
 
 The CLI requires `--evidence-root` to verify retained evidence. Files are resolved
 as `<evidence-root>/<artifact_id>/<member>` and hashed as SHA-256. A PASS record

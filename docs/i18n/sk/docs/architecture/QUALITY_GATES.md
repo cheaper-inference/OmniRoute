@@ -37,7 +37,7 @@ Po vyradení z frontu nemusí push vždy znova zaradiť PR. Komentujte to `@merg
 
 ### Zachovaný dôkaz v akceptačnom reduktore
 
-`scripts/quality/validate-release-acceptance.mjs` znižuje dodaný plán a jeho manifesty; nestanovuje, že plán pokrýva celý proces uvoľňovania. Jeho správy explicitne stanovujú `releaseAcceptance: false`, aj keď je plán `VERIFIED`. Pracovný postup `release-acceptance.yml` stále používa tieňové príslušenstvo, nie skutočné potvrdenie o zostavení, balíku, zavádzaní alebo propagácii.
+`scripts/quality/validate-release-acceptance.mjs` znižuje dodaný plán a jeho manifesty; nestanovuje, že plán pokrýva celý proces uvoľňovania. Jeho správy explicitne stanovujú `releaseAcceptance: false`, aj keď je plán `VERIFIED`.
 
 CLI vyžaduje `--evidence-root` na overenie zachovaných dôkazov. Súbory sú rozlíšené ako `<evidence-root>/<artifact_id>/<member>` a hašované ako SHA-256. Záznam PASS bez dôkazov, chýbajúci alebo zmenený súbor, nebezpečná cesta alebo symbolický odkaz bráni overeniu. Chýbajúce súbory nie sú ekvivalentom prázdnych úspešných protokolov. Existujúce kontroly SHA/run/attempt zostávajú nezávislé: zhodné bajty nemôžu zachrániť zastaraný príjem. Integrita súboru nie je dôkazom pravosti vykonania alebo propagácie artefaktu.
 

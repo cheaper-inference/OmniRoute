@@ -37,7 +37,7 @@ Selepas dequeue, tolakan tidak selalunya requeue PR. Komen `@mergifyio queue` di
 
 ### Bukti yang dikekalkan dalam pengurangan penerimaan
 
-`scripts/quality/validate-release-acceptance.mjs` mengurangkan pelan yang dibekalkan dan manifesnya; ia tidak menetapkan bahawa pelan itu meliputi saluran paip keluaran lengkap. Laporannya secara eksplisit menetapkan `releaseAcceptance: false`, walaupun rancangan itu ialah `VERIFIED`. Aliran kerja `release-acceptance.yml` masih menggunakan lekapan bayangan, bukan binaan sebenar, pakej, but atau resit promosi.
+`scripts/quality/validate-release-acceptance.mjs` mengurangkan pelan yang dibekalkan dan manifesnya; ia tidak menetapkan bahawa pelan itu meliputi saluran paip keluaran lengkap. Laporannya secara eksplisit menetapkan `releaseAcceptance: false`, walaupun rancangan itu ialah `VERIFIED`.
 
 CLI memerlukan `--evidence-root` untuk mengesahkan bukti yang disimpan. Fail diselesaikan sebagai `<evidence-root>/<artifact_id>/<member>` dan dicincang sebagai SHA-256. Rekod PASS tanpa bukti, fail yang hilang atau ditukar, laluan tidak selamat atau pautan sym menghalang pengesahan. Fail yang hilang tidak bersamaan dengan log yang berjaya kosong. Semakan SHA/run/attempt sedia ada kekal bebas: bait yang sepadan tidak boleh menyelamatkan resit yang lapuk. Integriti fail bukan bukti keaslian pelaksanaan atau promosi artifak.
 

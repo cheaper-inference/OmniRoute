@@ -68,9 +68,7 @@ Pēc izņemšanas no rindas push ne vienmēr atkārtoti ievieto PR rindā. Ierak
 
 `scripts/quality/validate-release-acceptance.mjs` reducē iesniegto plānu un tā manifestus;
 tas neapstiprina, ka plāns aptver pilnu laidiena cauruļvadu. Tā pārskati skaidri iestata
-`releaseAcceptance: false`, pat ja šis plāns ir `VERIFIED`. `release-acceptance.yml`
-darbplūsma joprojām izmanto ēnu fiksatorus, nevis reālus būvēšanas, pakotņu, palaišanas vai
-promocijas apliecinājumus.
+`releaseAcceptance: false`, pat ja šis plāns ir `VERIFIED`.
 
 CLI pieprasa `--evidence-root`, lai pārbaudītu saglabātos pierādījumus. Faili tiek atrisināti
 kā `<evidence-root>/<artifact_id>/<member>` un jaukti, izmantojot SHA-256. PASS ieraksts

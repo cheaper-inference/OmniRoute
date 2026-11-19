@@ -37,7 +37,7 @@ Après une sortie de file d'attente, un push ne remet pas toujours le PR en file
 
 ### Preuve conservée dans le réducteur d'acceptation
 
-`scripts/quality/validate-release-acceptance.mjs` réduit un plan fourni et ses manifestes ; il n’établit pas que le plan couvre l’intégralité du pipeline de libération. Ses rapports définissent explicitement `releaseAcceptance: false`, même lorsque ce plan est `VERIFIED`. Le flux de travail `release-acceptance.yml` utilise toujours des appareils fantômes, et non de véritables reçus de construction, de package, de démarrage ou de promotion.
+`scripts/quality/validate-release-acceptance.mjs` réduit un plan fourni et ses manifestes ; il n’établit pas que le plan couvre l’intégralité du pipeline de libération. Ses rapports définissent explicitement `releaseAcceptance: false`, même lorsque ce plan est `VERIFIED`.
 
 Le CLI exige que `--evidence-root` vérifie les preuves conservées. Les fichiers sont résolus en tant que `<evidence-root>/<artifact_id>/<member>` et hachés en tant que SHA-256. Un enregistrement PASS sans preuve, un fichier manquant ou modifié, un chemin dangereux ou un lien symbolique empêche la vérification. Les fichiers manquants ne sont pas équivalents à des journaux de réussite vides. Les contrôles SHA/run/attempt existants restent indépendants : les octets correspondants ne peuvent pas récupérer un reçu périmé. L'intégrité des fichiers ne constitue pas une preuve de l'authenticité de l'exécution ou de la promotion d'un artefact.
 

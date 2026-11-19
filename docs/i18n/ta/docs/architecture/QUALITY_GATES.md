@@ -73,8 +73,7 @@ dequeue செய்யப்பட்ட பிறகு, ஒரு push எப
 `scripts/quality/validate-release-acceptance.mjs`, வழங்கப்பட்ட plan மற்றும் அதன் manifests-ஐ
 குறைக்கிறது; அந்த plan முழுமையான release pipeline-ஐ உள்ளடக்குகிறது என்பதை அது நிறுவாது.
 அதன் அறிக்கைகள், அந்த plan `VERIFIED` ஆக இருந்தாலும், `releaseAcceptance: false` என
-வெளிப்படையாக அமைக்கின்றன. `release-acceptance.yml` workflow இன்னும் உண்மையான build,
-package, boot அல்லது promotion ரசீதுகளுக்குப் பதிலாக shadow fixtures-ஐப் பயன்படுத்துகிறது.
+வெளிப்படையாக அமைக்கின்றன.
 
 தக்கவைக்கப்பட்ட ஆதாரத்தைச் சரிபார்க்க CLI-க்கு `--evidence-root` தேவை. கோப்புகள்
 `<evidence-root>/<artifact_id>/<member>` எனத் தீர்மானிக்கப்பட்டு SHA-256 ஆக hash செய்யப்படுகின்றன.

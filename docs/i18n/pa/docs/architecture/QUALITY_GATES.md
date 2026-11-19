@@ -69,8 +69,7 @@ Mergify ਆਪਣਾ ਕਤਾਰ ਸਾਰ ਡ੍ਰਾਫ਼ਟ ਦੇ ਵੇ�
 `scripts/quality/validate-release-acceptance.mjs` ਦਿੱਤੀ ਗਈ ਯੋਜਨਾ ਅਤੇ ਇਸ ਦੇ
 ਮੈਨੀਫੈਸਟਾਂ ਨੂੰ ਘਟਾਉਂਦਾ ਹੈ; ਇਹ ਸਥਾਪਤ ਨਹੀਂ ਕਰਦਾ ਕਿ ਯੋਜਨਾ ਪੂਰੀ ਰਿਲੀਜ਼ ਪਾਈਪਲਾਈਨ ਨੂੰ
 ਕਵਰ ਕਰਦੀ ਹੈ। ਇਸ ਦੀਆਂ ਰਿਪੋਰਟਾਂ ਸਪਸ਼ਟ ਤੌਰ ਉੱਤੇ `releaseAcceptance: false` ਸੈੱਟ ਕਰਦੀਆਂ ਹਨ,
-ਭਾਵੇਂ ਉਹ ਯੋਜਨਾ `VERIFIED` ਹੋਵੇ। `release-acceptance.yml` ਵਰਕਫ਼ਲੋ ਅਜੇ ਵੀ ਅਸਲ
-ਬਿਲਡ, ਪੈਕੇਜ, ਬੂਟ ਜਾਂ ਪ੍ਰਮੋਸ਼ਨ ਰਸੀਦਾਂ ਦੀ ਥਾਂ shadow fixtures ਵਰਤਦਾ ਹੈ।
+ਭਾਵੇਂ ਉਹ ਯੋਜਨਾ `VERIFIED` ਹੋਵੇ।
 
 CLI ਨੂੰ ਸੰਭਾਲੇ ਹੋਏ ਸਬੂਤ ਦੀ ਪੁਸ਼ਟੀ ਕਰਨ ਲਈ `--evidence-root` ਲਾਜ਼ਮੀ ਚਾਹੀਦਾ ਹੈ।
 ਫ਼ਾਈਲਾਂ ਨੂੰ `<evidence-root>/<artifact_id>/<member>` ਵਜੋਂ ਹੱਲ ਕੀਤਾ ਜਾਂਦਾ ਹੈ ਅਤੇ
