@@ -107,20 +107,25 @@ describe("FeatureFlagCard", () => {
     expect(container.textContent).toContain("SOME_FLAG");
   });
 
-  it("clamp mode (default) visually clamps the description but keeps the full text reachable via the hover tooltip", () => {
+  it("clamp mode (default) visually clamps the description but keeps the full text reachable via the kit tooltip", () => {
     const container = renderCard(makeFlag(), "clamp");
 
-    const clamped = container.querySelector("p.line-clamp-2");
+    const clamped = container.querySelector<HTMLElement>("p.line-clamp-2");
     expect(clamped).not.toBeNull();
     expect(clamped!.textContent).toBe(LONG_DESCRIPTION);
+    // No hand-positioned panel revealed by CSS hover any more (UI review 2026-11-15, defect 16).
+    expect(container.querySelector('[role="tooltip"]')).toBeNull();
+    expect(container.querySelector(".absolute")).toBeNull();
 
-    // The full text must also exist in the DOM (readable by assistive tech /
-    // findable by tests) via the tooltip element the clamped paragraph points at.
-    const describedBy = clamped!.getAttribute("aria-describedby");
-    expect(describedBy).toBeTruthy();
-    const tooltip = container.querySelector(`#${describedBy}[role="tooltip"]`);
+    // The full text opens in the kit Tooltip (Radix: body portal, collision-aware), from the
+    // keyboard too: the clamped paragraph is focusable and points at the tooltip while open.
+    expect(clamped!.tabIndex).toBe(0);
+    act(() => clamped!.focus());
+    const tooltip = document.querySelector<HTMLElement>('[role="tooltip"]');
     expect(tooltip).not.toBeNull();
+    expect(container.contains(tooltip)).toBe(false);
     expect(tooltip!.textContent).toBe(LONG_DESCRIPTION);
+    expect(clamped!.getAttribute("aria-describedby")).toBe(tooltip!.id);
   });
 
   it("full mode always expands the description and renders no clamp/tooltip", () => {

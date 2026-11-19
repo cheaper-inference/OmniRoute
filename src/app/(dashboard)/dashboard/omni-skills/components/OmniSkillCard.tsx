@@ -47,7 +47,7 @@ export function OmniSkillCard({ skill, selected, onClick }: OmniSkillCardProps):
       onClick={onClick}
       aria-pressed={selected}
       className={cn(
-        "h-auto w-full justify-start whitespace-normal p-3 text-left font-normal",
+        "h-auto w-full justify-start whitespace-normal p-3 text-left",
         selected
           ? "border-primary bg-primary/10"
           : "border-border bg-bg-subtle hover:border-border/80 hover:bg-surface-2"
