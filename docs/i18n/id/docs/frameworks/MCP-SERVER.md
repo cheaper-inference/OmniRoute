@@ -20,11 +20,13 @@ Atau melalui transportasi terbuka:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
 
-Transportasi HTTP (`sse` / `streamable-http`, disajikan dalam proses oleh server dasbor) dinonaktifkan secara default dan sebelumnya hanya dapat diubah dari halaman `/dashboard/mcp`. Pada v3.8.51 CLI memiliki paritas:
+Transportasi HTTP (`sse` / `streamable-http`, disajikan dalam proses oleh server dasbor) dinonaktifkan secara default dan sebelumnya hanya dapat dialihkan dari halaman `/dashboard/mcp`. Pada v3.8.51 CLI memiliki paritas:
 
 ```bash
 omniroute mcp status                                  # enabled/online, transport, tool count
@@ -144,13 +146,13 @@ Cursor, Cline, dan klien MCP yang kompatibel.
 | `omniroute_rtk_discover`            | `read:compression`  | Temukan kebisingan berulang dalam sampel keluaran RTK opt-in                                                                        |
 | `omniroute_rtk_learn`               | `read:compression`  | Hasilkan draf filter RTK yang dapat ditinjau dari sampel keikutsertaan                                                              |
 
-entri CCR menggunakan penyimpanan dua tingkat: tingkat dalam memori panas yang didukung, pada runtime non-cloud lokal, oleh tingkat SQLite yang tahan lama (`ccr_blocks`, diaktifkan secara default) sehingga sebuah blok bertahan dari penggusuran atau restart hingga TTL -nya habis — kecuali memblokir lebih dari 512 KB dan runtime cloud, yang tetap hanya memori. Setiap blok dibatasi hingga 2 MiB, masing-masing blok utama hingga 16 MiB, dan penyimpanan global hingga 64 MiB. Entri default adalah TTL 24 jam (maksimum tujuh hari). Pengambilan MCP penuh dibatasi hingga 256 KiB; blok yang lebih besar tetap tersedia melalui mode jarak jauh dan grep. Penyimpanan, pengambilan, pencatatan, inspeksi, penghapusan, dan statistik diisolasi oleh prinsip kunci API yang diautentikasi. Catatan audit berisi hash dan metadata ukuran, tidak pernah berisi konten. Detail yang dilihat oleh operator (dua penanda, prasyarat klien, `codemode:false`, cakupan per alat, penomoran halaman, dan matriks diagnostik) terdapat di [Mesin Kompresi → Prasyarat / panduan operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+entri CCR menggunakan penyimpanan dua tingkat: tingkat dalam memori panas yang didukung, pada runtime non-cloud lokal, oleh tingkat SQLite yang tahan lama (`ccr_blocks`, diaktifkan secara default) sehingga sebuah blok bertahan dari penggusuran atau restart hingga TTL habis — kecuali blok di atas 512 KB, runtime cloud dan `COMPRESSION_CCR_DURABLE_STORE=false`, yang tetap hanya memori. Penulisan yang tahan lama adalah upaya terbaik: penulisan tersebut dibatalkan ketika 1.000 penulisan sudah tertunda, dan penulisan SQLite yang gagal dicatat, tidak dicoba lagi, sehingga blok hilang saat dimulai ulang. Setiap blok dibatasi hingga 2 MiB, masing-masing blok utama hingga 16 MiB, dan penyimpanan global hingga 64 MiB. Entri default adalah TTL 24 jam (maksimum tujuh hari). Pengambilan MCP penuh dibatasi hingga 256 KiB; blok yang lebih besar tetap tersedia melalui mode jarak jauh dan grep. Penyimpanan, pengambilan, pencatatan, inspeksi, penghapusan, dan statistik diisolasi oleh prinsip kunci API yang diautentikasi. Catatan audit berisi hash dan metadata ukuran, tidak pernah berisi konten. Detail yang dilihat oleh operator (dua penanda, prasyarat klien, `codemode:false`, cakupan per alat, penomoran halaman, dan matriks diagnostik) terdapat di [Mesin Kompresi → Prasyarat / panduan operator](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` melaporkan kompresi deskripsi MCP secara terpisah di bawah `analytics.mcpDescriptionCompression`. Nilai tersebut merupakan perkiraan ukuran metadata untuk deskripsi daftar MCP (`tools`, `prompts`, `resources`, dan `resourceTemplates`); itu bukan tanda terima penggunaan penyedia dan ditandai dengan `source: "mcp_metadata_estimate"`.
 
 ### MCP Filter Pohon Aksesibilitas (v3.8.0)
 
-Terpisah dari alat kompresi di atas, OmniRoute menyertakan filter pasca-eksekusi yang mengompresi** hasil alat** alat MCP browser/accessibility sebelum dikembalikan ke agen. Filter ini sendiri bukan merupakan alat — melainkan berjalan secara transparan pada hasil alat apa pun yang berisi pohon aksesibilitas verbose atau teks cuplikan browser (≥ 2000 karakter).
+Terpisah dari alat kompresi di atas, OmniRoute menyertakan filter pasca-eksekusi yang mengompresi** hasil alat** alat MCP browser/accessibility sebelum dikembalikan ke agen. Filter ini sendiri bukanlah alat — melainkan berjalan secara transparan pada hasil alat apa pun yang berisi pohon aksesibilitas verbose atau teks cuplikan browser (≥ 2000 karakter).
 
 Perilaku utama:
 

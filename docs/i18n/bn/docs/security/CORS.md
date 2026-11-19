@@ -115,31 +115,10 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 `http://localhost:3000` এবং `http://localhost:3000/` সমতুল্য। একই CSV
 restart ছাড়াই runtime-এ **Dashboard → Security → CORS Allowed Origins**-এ সেট করা যায়।
 
-## API key বনাম cookie session
+## API কী বনাম কুকি সেশন
 
-- **Bearer / `x-api-key` (`/v1/*` inference surface):** browser কখনোই
-  এগুলো স্বয়ংক্রিয়ভাবে সংযুক্ত করে না। এখানে CORS অর্থবহ কোনো প্রতিবন্ধকতা নয়—API key-ই
-  প্রতিবন্ধকতা—এ কারণেই এই surface ইচ্ছাকৃতভাবে permissive রাখা হয়েছে, যাতে browser ও
-  Electron client তাদের আগে থেকেই অনুমোদিত response পড়তে পারে। শিথিল echo যাচাইকৃত key
-  অনুসরণ করে, কেবল header-এর উপস্থিতি নয়: যখন `REQUIRE_API_KEY=false` কোনো request
-  বেনামিভাবে পরিবেশন করে, তখন তার সফল response fail-closed অনুমোদন-তালিকা বজায় রাখে। Auth
-  প্রত্যাখ্যান (401) পাঠযোগ্য থাকে, যাতে client বাতিল হওয়া বা ভুল টাইপ করা key দেখাতে
-  পারে (#5242): pipeline-এর নিজস্ব 401 echo বজায় রাখে, এবং pipeline request-টিকে বেনামি
-  হিসেবে পরিবেশন করার পর যে route নিজেই key প্রত্যাখ্যান করে (management auth কনফিগার করা
-  থাকলে `/v1/models` ও `/v1beta/models`, মালিক-সীমিত `/v1/files`, `/v1/batches`,
-  `/v1/media`, `/v1/session-leases` এবং auto-combo প্রার্থী route), সেটি
-  `credentialRejectionHeaders()`-এর মাধ্যমে সেই 401-এ echo যোগ করে। echo নির্ধারিত হয়
-  request-এ কোনো credential header (`Authorization`, `x-api-key`, `x-goog-api-key` অথবা
-  `auth_token` cookie) আছে কি না তার ভিত্তিতে, route সেগুলোর কোনটি যাচাই করেছে তার
-  ভিত্তিতে নয়, এবং এটি কখনো `Access-Control-Allow-Credentials`-এর সঙ্গে যুক্ত হয় না;
-  body একটি নির্দিষ্ট error envelope। `requireManagementAuth()` দ্বারা সুরক্ষিত
-  `/api/v1/`-এর অধীন management route (`/api/v1/management/*`, `/api/v1/registered-keys`)
-  echo যোগ করে না: `REQUIRE_API_KEY=false` থাকলে তাদের 401/403 ক্রস-origin থেকে পড়া যায়
-  না।
-- **Cookie session (ড্যাশবোর্ড):** fail-closed default **এবং**
-  shared path-এ `Access-Control-Allow-Credentials` অনুপস্থিত থাকা—উভয়টির মাধ্যমেই সুরক্ষিত। যেকোনো
-  permissive config থেকে management/dashboard অরিজিনগুলো বাদ রাখুন; এগুলোকে অবশ্যই সম্পূর্ণভাবে
-  fail-closed থাকতে হবে।
+- **বহনকারী / `x-api-key` ( `/v1/*` অনুমান পৃষ্ঠ):** ব্রাউজার কখনই স্বয়ংক্রিয়ভাবে এগুলি সংযুক্ত করে না। CORS এখানে একটি অর্থপূর্ণ বাধা নয় — হল API কী হল বাধা — যার কারণে সেই পৃষ্ঠটি ইচ্ছাকৃতভাবে অনুমোদিত যাতে ব্রাউজার এবং Electron ক্লায়েন্টরা প্রতিক্রিয়া পড়তে পারে যার জন্য তারা ইতিমধ্যেই অধিকারী। শিথিল প্রতিধ্বনি যাচাইকৃত কী অনুসরণ করে, হেডারের উপস্থিতি নয়: যখন `REQUIRE_API_KEY=false` বেনামে একটি অনুরোধ পরিবেশন করে, তখন এর সফল প্রতিক্রিয়া ব্যর্থ-বন্ধ অনুমোদিত তালিকাকে রাখে। প্রমাণ প্রত্যাখ্যান (401) পঠনযোগ্য থাকে যাতে ক্লায়েন্টরা একটি প্রত্যাহার করা বা ভুল টাইপ করা কী (#5242): পাইপলাইনের নিজস্ব 401 ইকো রাখে, এবং একটি রুট যা পাইপলাইনটি বেনামী হিসাবে পরিবেশন করার পরে কীটি নিজেই প্রত্যাখ্যান করে (`/v1/models` এবং `/v1beta/models` ব্যবস্থাপনা প্রমাণীকরণের সাথে কনফিগার করা হয়েছে, মালিক-, `/v1/files`, `/v1/batches` `/v1/media` এবং স্বয়ংক্রিয়-কম্বো প্রার্থী রুট) `credentialRejectionHeaders()` এর মাধ্যমে সেই 401-এ ইকো যোগ করে `/v1/session-leases` ইকো একটি শংসাপত্রের শিরোনাম (`Authorization`, `x-api-key`, `x-goog-api-key` বা `auth_token` কুকি ) বহনকারী অনুরোধের উপর চাবিকাঠি করা হয় , তাদের মধ্যে কোন রুটে চেক করা হয়েছে তা নয় এবং `Access-Control-Allow-Credentials` সাথে কখনও জোড়া হয় না ; শরীর একটি নির্দিষ্ট ত্রুটি খাম. `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) দ্বারা সুরক্ষিত `/api/v1/` অধীনে ম্যানেজমেন্ট রুটগুলি ইকো যোগ করে না: `REQUIRE_API_KEY=false` সাথে তাদের 401/403 পাঠযোগ্য ক্রস-অরিজিন নয়।
+- **কুকি সেশন (ড্যাশবোর্ড):** ব্যর্থ-বন্ধ ডিফল্ট দ্বারা সুরক্ষিত** এবং** ভাগ করা পথে `Access-Control-Allow-Credentials` অনুপস্থিতির দ্বারা। management/dashboard অরিজিনগুলিকে যেকোনো অনুমতিমূলক কনফিগারের বাইরে রাখুন; তাদের অবশ্যই ব্যর্থ-বন্ধ থাকতে হবে।
 
 ## WebSocket handshake (`/v1/responses`, `/v1/ws`)
 
