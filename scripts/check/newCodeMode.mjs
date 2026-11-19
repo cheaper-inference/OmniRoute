@@ -3,8 +3,9 @@
 //
 // A global ratchet ("total violations ≤ baseline") makes an innocent PR red whenever the
 // base drifted — and it lets a PR that adds 10 violations pass as long as someone else
-// removed 11. In new-code mode (`--base-ref <sha>`, PR events only) a gate compares the
-// PR's HEAD against the merge-base **restricted to the files the PR touched**:
+// removed 11. In new-code mode (`--base-ref <sha>`: PR events, and omni-queue candidates
+// against their base) a gate compares the PR's HEAD against the merge-base **restricted to
+// the files the PR touched**:
 //
 //   blocking  → the PR added violations / dead symbols in files it changed
 //   advisory  → the global total vs. the frozen baseline (printed, never exit 1);
@@ -37,6 +38,8 @@ function git(args, opts = {}) {
   }).trim();
 }
 
+const QUEUE_CANDIDATE_REF = /^refs\/heads\/omni-queue\//;
+
 /**
  * Merge-base between the PR base ref and HEAD (falls back to the ref itself).
  *
@@ -47,12 +50,17 @@ function git(args, opts = {}) {
  * (#15346/#15322 — a #12740 base change blamed on unrelated PRs). When HEAD is a
  * merge commit and `baseRef` is an ancestor of HEAD^1, compare against HEAD^1:
  * that diff is exactly the PR's new code, matching GitHub's "Files changed" view.
+ *
+ * Not on an omni-queue candidate (`ref` = the pushed ref, `refs/heads/omni-queue/**`): it is
+ * the base plus one merge commit per batched PR, so HEAD^1 is the candidate without its LAST
+ * pull request, and `baseRef` (the Omni-Queue-Base the batch was composed on) is never stale.
+ * The first-parent rule would judge only the last PR of the batch.
  */
-export function resolveMergeBase(baseRef, { cwd = ROOT } = {}) {
+export function resolveMergeBase(baseRef, { cwd = ROOT, ref } = {}) {
   try {
     const parents = git(["rev-list", "--parents", "-n", "1", "HEAD"], { cwd }).split(/\s+/);
     const firstParent = parents[1];
-    if (parents.length > 2 && firstParent) {
+    if (parents.length > 2 && firstParent && !QUEUE_CANDIDATE_REF.test(ref ?? "")) {
       // Throws (exit 1) when baseRef is NOT an ancestor of the live base tip —
       // i.e. a local diverged branch, where merge-base semantics still apply.
       git(["merge-base", "--is-ancestor", baseRef, firstParent], { cwd });

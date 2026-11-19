@@ -1,4 +1,5 @@
 type CacheWriteDetails = {
+  cache_creation_input_tokens?: number;
   cache_creation_tokens?: number;
   cache_write_tokens?: number;
   cache_creation_in_prompt?: boolean;
@@ -10,6 +11,26 @@ type CacheWriteUsageSource = {
   prompt_tokens_details?: CacheWriteDetails;
   input_tokens_details?: CacheWriteDetails;
 };
+
+/** Nested `cache_creation_*` counts (the two spellings), prompt details before input details. */
+function nestedNamedWrite(usage: CacheWriteUsageSource): number | undefined {
+  const promptDetails = usage.prompt_tokens_details;
+  const inputDetails = usage.input_tokens_details;
+  return (
+    promptDetails?.cache_creation_tokens ??
+    inputDetails?.cache_creation_tokens ??
+    promptDetails?.cache_creation_input_tokens ??
+    inputDetails?.cache_creation_input_tokens
+  );
+}
+
+/** Nested `cache_write_tokens` alias, prompt details before input details. */
+function nestedAliasWrite(usage: CacheWriteUsageSource): number | undefined {
+  return (
+    usage.prompt_tokens_details?.cache_write_tokens ??
+    usage.input_tokens_details?.cache_write_tokens
+  );
+}
 
 /**
  * Resolve prompt cache-CREATION (write) tokens from any container shape.
@@ -29,14 +50,10 @@ type CacheWriteUsageSource = {
  */
 export function pickCacheCreationTokens(usage: CacheWriteUsageSource | null | undefined) {
   if (!usage || typeof usage !== "object") return undefined;
-  const promptDetails = usage.prompt_tokens_details;
-  const inputDetails = usage.input_tokens_details;
   return (
     usage.cache_creation_input_tokens ??
-    promptDetails?.cache_creation_tokens ??
-    inputDetails?.cache_creation_tokens ??
-    promptDetails?.cache_write_tokens ??
-    inputDetails?.cache_write_tokens ??
+    nestedNamedWrite(usage) ??
+    nestedAliasWrite(usage) ??
     usage.cache_write_tokens
   );
 }
@@ -55,14 +72,10 @@ export function pickCacheCreationInPrompt(
 // A top-level write alias has no verified inclusion contract.
 export function isTopLevelCacheWriteOnly(usage: CacheWriteUsageSource | null | undefined) {
   if (!usage || typeof usage !== "object" || !usage.cache_write_tokens) return false;
-  const promptDetails = usage.prompt_tokens_details;
-  const inputDetails = usage.input_tokens_details;
   return (
     usage.cache_creation_input_tokens === undefined &&
-    promptDetails?.cache_creation_tokens === undefined &&
-    inputDetails?.cache_creation_tokens === undefined &&
-    promptDetails?.cache_write_tokens === undefined &&
-    inputDetails?.cache_write_tokens === undefined
+    nestedNamedWrite(usage) === undefined &&
+    nestedAliasWrite(usage) === undefined
   );
 }
 
@@ -72,15 +85,9 @@ export function resolveCacheCreationInPrompt(
 ): boolean | undefined {
   const explicit = pickCacheCreationInPrompt(usage);
   if (explicit !== undefined || !usage || typeof usage !== "object") return explicit;
-  const promptDetails = usage.prompt_tokens_details;
-  const inputDetails = usage.input_tokens_details;
-  const namedWrite =
-    usage.cache_creation_input_tokens ??
-    promptDetails?.cache_creation_tokens ??
-    inputDetails?.cache_creation_tokens;
-  if (namedWrite !== undefined) return undefined;
-  const nestedAliasWrite = promptDetails?.cache_write_tokens ?? inputDetails?.cache_write_tokens;
-  return nestedAliasWrite ? true : undefined;
+  if ((usage.cache_creation_input_tokens ?? nestedNamedWrite(usage)) !== undefined)
+    return undefined;
+  return nestedAliasWrite(usage) ? true : undefined;
 }
 
 // Nested write aliases are inclusive. An unmarked top-level alias stays unmarked.

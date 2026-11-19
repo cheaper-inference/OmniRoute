@@ -36,7 +36,13 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
   const primaryDim = usage?.dimensions?.[0];
 
   return (
-    <Table scrollbarLabel={t("apiKeyColumn")} className="min-w-0 text-[11px]">
+    // PoolCard's Card is the frame around this table (#19620).
+    <Table
+      scrollbarLabel={t("apiKeyColumn")}
+      scrollLabel={t("apiKeyColumn")}
+      className="min-w-0 text-[11px]"
+      containerClassName="rounded-none border-0"
+    >
       <TableHeader>
         <TableRow>
           <TableHead className="h-8 px-2">{t("apiKeyColumn")}</TableHead>
@@ -71,7 +77,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                     <Badge
                       size="sm"
                       variant="warning"
-                      className="shrink-0 text-[9px] font-bold"
+                      className="shrink-0 text-[9px] font-semibold"
                       title={t("borrowingIndicator")}
                     >
                       {t("borrowingIndicator")}
@@ -79,10 +85,7 @@ export default function AllocationTable({ allocations, usage, keyLabels }: Alloc
                   )}
                 </div>
               </TableCell>
-              <TableCell
-                className="h-auto px-2 py-1.5 text-right font-bold tabular-nums"
-                style={{ color }}
-              >
+              <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums" style={{ color }}>
                 {alloc.weight}%
               </TableCell>
               <TableCell className="h-auto px-2 py-1.5 text-right tabular-nums text-text-muted">

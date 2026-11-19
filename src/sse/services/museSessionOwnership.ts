@@ -212,12 +212,26 @@ function hasForbiddenMuseHistory(body: Record<string, unknown>, references: Set<
   );
 }
 
+/**
+ * Request state that is bound to the provider session that served it: opaque
+ * reasoning, item references, a response id, or items no session could adopt.
+ * Plain tool history (calls carrying a `call_id`) is NOT bound, so it stays
+ * adoptable and can still fail over. Same boundary the ownership claim uses.
+ */
+export function bodyCarriesBoundContinuation(body: Record<string, unknown>): boolean {
+  if (!body || typeof body !== "object") return false;
+  return hasForbiddenMuseHistory(body, continuationIds(body));
+}
+
 function assertKeptOwnerUsable(
   owner: Owner,
   current: Connection | null | undefined,
   forcedId?: string | null
 ): void {
-  if (!current || current.unavailable) {
+  // Only a missing owner forces another account. A present owner that is cooling down
+  // (rate limit, per-model lockout) keeps the session: credential selection is pinned to
+  // it, so the caller gets the normal 429 with its reset instead of a cross-account error.
+  if (!current) {
     throw new MuseOwnershipError(
       "Muse session owner is unavailable; cross-account continuation is forbidden.",
       503

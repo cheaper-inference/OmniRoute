@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { z } from "zod";
 import { validateBody, isValidationFailure } from "@/shared/validation/helpers";
 import { GLOBAL_SKILL_OWNER_ID, skillRegistry } from "@/lib/skills/registry";
-import { isAuthenticated } from "@/shared/utils/apiAuth";
+import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import {
   fetchSkillMd,
   SkillsShSourceSchema,
@@ -21,9 +21,10 @@ const skillsshInstallSchema = z.object({
 });
 
 export async function POST(request: Request) {
-  if (!(await isAuthenticated(request))) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
+  // The installed skill is global and injected into every key's requests, so this
+  // stays authenticated when login is off.
+  const authError = await requireManagementAuth(request, { alwaysRequireAuth: true });
+  if (authError) return authError;
   try {
     const provider = await getSkillsProviderSetting();
     if (provider !== "skillssh") {

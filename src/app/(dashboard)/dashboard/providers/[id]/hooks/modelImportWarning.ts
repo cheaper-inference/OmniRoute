@@ -167,3 +167,83 @@ export function classifyModelImport({
     newModels,
   };
 }
+
+/**
+ * What one model import (`POST /api/providers/[id]/sync-models?mode=import`)
+ * did, as the import dialog must report it. Pure, so the contracts below are
+ * unit-testable without a React renderer.
+ *
+ * - `degraded` (#15069, B-03 / #15159): remote discovery failed and only a
+ *   fallback catalog answered. The sync refuses to store a fallback (502), and
+ *   the dialog must never read that as success or as "nothing new". The rule is
+ *   the server's own `isDegradedDiscovery`, so the two cannot drift.
+ * - `no-listing` (#5460/#5465): the provider publishes no model list; its
+ *   built-in catalog is the intended source, not a failure.
+ * - `free-filter-empty`: a free-only connection whose provider lists no free model.
+ * - `synced`: a live listing, with the model ids the import added and the ids
+ *   the provider no longer lists.
+ */
+export type ModelSyncOutcome =
+  | { kind: "degraded"; warning: string | null; cause: string | null }
+  | { kind: "failed"; error: string }
+  | { kind: "free-filter-empty" }
+  | { kind: "no-listing"; warning: string | null; addedModelIds: string[] }
+  | { kind: "synced"; addedModelIds: string[]; removedModelIds: string[] };
+
+function record(data: unknown): Record<string, unknown> {
+  return data && typeof data === "object" && !Array.isArray(data)
+    ? (data as Record<string, unknown>)
+    : {};
+}
+
+function idList(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((id): id is string => typeof id === "string" && id.length > 0)
+    : [];
+}
+
+function failureMessage(data: Record<string, unknown>, status: number): string {
+  const error = data.error;
+  if (typeof error === "string" && error.trim()) return error.trim();
+  const nested = record(error).message;
+  if (typeof nested === "string" && nested.trim()) return nested.trim();
+  return `HTTP ${status}`;
+}
+
+export function classifyModelSync(ok: boolean, status: number, data: unknown): ModelSyncOutcome {
+  const body = record(data);
+  if (!ok) {
+    if (typeof body.source === "string" && isDegradedDiscovery(body)) {
+      return {
+        kind: "degraded",
+        warning: extractImportWarning(body),
+        cause: extractImportCause(body),
+      };
+    }
+    return { kind: "failed", error: failureMessage(body, status) };
+  }
+  if (body.freeFilterEmpty === true) return { kind: "free-filter-empty" };
+  if (body.intentional === true || typeof body.skipped === "string") {
+    return {
+      kind: "no-listing",
+      warning: extractImportWarning(body),
+      addedModelIds: idList(body.addedModelIds),
+    };
+  }
+  return {
+    kind: "synced",
+    addedModelIds: idList(body.addedModelIds),
+    removedModelIds: idList(body.removedModelIds),
+  };
+}
+
+/**
+ * #15069: the dialog phase of an import. A degraded discovery ends in
+ * "warning" — never "done": the live list was never read, so a success
+ * indicator would be a false answer.
+ */
+export function phaseOfModelSync(outcome: ModelSyncOutcome): "done" | "warning" | "error" {
+  if (outcome.kind === "degraded") return "warning";
+  if (outcome.kind === "failed") return "error";
+  return "done";
+}

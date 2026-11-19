@@ -18,7 +18,7 @@ test("cleanup: compression_analytics uses 'timestamp' column (not 'created_at')"
   // The bug: cleanup used WHERE created_at < ? but the table has 'timestamp' column.
   // This caused silent failures — 600K+ rows accumulated over 52 days.
   assert.ok(
-    source.includes("DELETE FROM compression_analytics WHERE timestamp < ?"),
+    /table: "compression_analytics",\s*column: "timestamp"/.test(source),
     "compression_analytics cleanup must use 'timestamp' column, not 'created_at'"
   );
   assert.ok(
@@ -64,7 +64,7 @@ test("cleanup: has proxy_logs cleanup function", () => {
     "must have cleanupProxyLogs function for the proxy_logs table"
   );
   assert.ok(
-    source.includes("DELETE FROM proxy_logs WHERE timestamp < ?"),
+    /table: "proxy_logs",\s*column: "timestamp"/.test(source),
     "proxy_logs cleanup must use timestamp column"
   );
 });

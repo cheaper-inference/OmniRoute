@@ -65,7 +65,7 @@ function ComboOptionRow({
       aria-pressed={isSelected}
       onClick={() => onToggle(combo.name)}
       className={cn(
-        "w-full justify-start gap-2 text-left text-xs font-normal",
+        "w-full justify-start gap-2 text-left text-xs",
         isSelected ? "bg-primary/10 text-text-main" : "text-text-muted"
       )}
     >
@@ -95,9 +95,7 @@ function PreservedComboRules({ rules }: { rules: string[] }) {
   if (rules.length === 0) return null;
   return (
     <div className="flex flex-col gap-1 pt-2 border-t border-border">
-      <p className="text-[11px] text-text-muted">
-        {t("preservedComboRules", { count: rules.length })}
-      </p>
+      <p className="text-xs text-text-muted">{t("preservedComboRules", { count: rules.length })}</p>
       <div className="flex flex-wrap gap-1">
         {rules.map((rule, index) => (
           <span
