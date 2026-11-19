@@ -278,3 +278,75 @@ test("the lease is taken in one write transaction, so two owners never both scan
   }
   assert.ok(used >= 1, "the lease check-and-set runs inside db.immediate");
 });
+
+test("the default lease owner is unique per instance, not only the pid", async () => {
+  const id = await account("same-pid");
+  run400(id, 25, 60, 5);
+  ON();
+  // Another container on the same database file can run under the same pid (PID 1).
+  db()
+    .prepare(
+      "INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES ('repeated400', 'lease', ?)"
+    )
+    .run(JSON.stringify({ owner: `pid-${process.pid}`, until: NOW + 5 * MIN }));
+  assert.equal((await job.runRepeated400Scan({ now: NOW })).state, "not-leader");
+  assert.equal(alerts().length, 0);
+});
+
+test("a failed audit insert leaves the alert armed, so the next scan writes it", async () => {
+  const id = await account("audit-down");
+  run400(id, 25, 60, 5);
+  ON();
+  db().exec(
+    "CREATE TEMP TRIGGER audit_down BEFORE INSERT ON audit_log BEGIN SELECT RAISE(ABORT, 'audit down'); END;"
+  );
+  try {
+    assert.equal((await scan()).alerted, 0, "an alert that was not recorded is not reported");
+  } finally {
+    db().exec("DROP TRIGGER IF EXISTS audit_down");
+  }
+  assert.equal(alerts().length, 0);
+  assert.equal((await scan("A", NOW + 5 * MIN)).alerted, 1);
+  assert.equal(alerts().length, 1);
+});
+
+test("re-arm: a success between two scans ends the run even when no scan saw it as newest", async () => {
+  const id = await account("unseen-boundary");
+  run400(id, 25, 60, 5);
+  ON();
+  assert.equal((await scan()).alerted, 1);
+  // A success one minute after the alert scan, then the same 400 resumes before the next scan.
+  row(id, -1, 200);
+  run400(id, 25, -2, -50);
+  assert.equal((await scan("A", NOW + 55 * MIN)).alerted, 1);
+  assert.equal(alerts().length, 2);
+});
+
+test("the same run growing between scans does not alert again", async () => {
+  const id = await account("growing");
+  run400(id, 25, 60, 5);
+  ON();
+  assert.equal((await scan()).alerted, 1);
+  run400(id, 10, -1, -20);
+  assert.equal((await scan("A", NOW + 25 * MIN)).alerted, 0);
+  run400(id, 10, -21, -40);
+  assert.equal((await scan("A", NOW + 45 * MIN)).alerted, 0);
+  assert.equal(alerts().length, 1);
+});
+
+test("a high-volume run qualifies on its full span, beyond one read page", async () => {
+  const id = await account("high-volume");
+  // 10 identical 400s per second for 12 minutes: 7,200 rows, more than one 5,000-row page.
+  const insert = db().prepare(
+    "INSERT INTO call_logs (id, timestamp, status, provider, connection_id, error_summary) VALUES (?, ?, 400, 'openai', ?, 'invalid schema: field x')"
+  );
+  db().transaction(() => {
+    for (let i = 0; i < 7_200; i += 1) {
+      insert.run(`hv-${i}`, new Date(NOW - MIN - i * 100).toISOString(), id);
+    }
+  })();
+  ON();
+  assert.equal((await scan()).alerted, 1);
+  const [entry] = alerts();
+  assert.ok(entry.details.spanMinutes >= 10);
+});

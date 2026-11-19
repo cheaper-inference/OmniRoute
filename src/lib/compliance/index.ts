@@ -358,7 +358,12 @@ export function initAuditLog() {
  * @param {Object|string} [entry.details] - Additional details
  * @param {string} [entry.ipAddress] - Client IP
  */
-export function logAuditEvent(entry: {
+export function logAuditEvent(entry: Parameters<typeof tryLogAuditEvent>[0]) {
+  tryLogAuditEvent(entry);
+}
+
+/** Same write as logAuditEvent, but reports whether the row was written. Never throws. */
+export function tryLogAuditEvent(entry: {
   action: string;
   actor?: string;
   target?: string;
@@ -369,9 +374,9 @@ export function logAuditEvent(entry: {
   status?: string;
   requestId?: string;
   createdAt?: string;
-}) {
+}): boolean {
   const db = getDb();
-  if (!db) return;
+  if (!db) return false;
 
   try {
     ensureAuditLogSchema(db);
@@ -410,8 +415,10 @@ export function logAuditEvent(entry: {
       entry.requestId || null,
       serializeAuditValue(metadataSource)
     );
+    return true;
   } catch {
     // Silently fail — audit logging should never break the main flow
+    return false;
   }
 }
 

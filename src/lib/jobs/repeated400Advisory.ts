@@ -11,8 +11,9 @@
  * It reads call_logs and writes only audit_log and its own key_value rows. No migration.
  */
 
+import { randomUUID } from "node:crypto";
 import { getDbInstance } from "../db/core";
-import { logAuditEvent } from "../compliance";
+import { tryLogAuditEvent } from "../compliance";
 
 const NS = "repeated400";
 const LOOKBACK_MS = 6 * 60 * 60_000;
@@ -20,7 +21,10 @@ const MIN_HITS = 20;
 const MIN_SPAN_MS = 10 * 60_000;
 const INTERVAL_MS = 5 * 60_000;
 const LEASE_MS = 2 * INTERVAL_MS;
-const MAX_ROWS_PER_ACCOUNT = 5_000;
+const PAGE_ROWS = 5_000;
+const MAX_PAGES = 24;
+// One id per process instance: two containers on one database file can share a pid (PID 1).
+const INSTANCE_OWNER = `pid-${process.pid}-${randomUUID()}`;
 
 export const isRepeated400AdvisoryEnabled = (
   env: Record<string, string | undefined> = process.env
@@ -48,6 +52,8 @@ const kvSet = (db: Db, key: string, value: string) =>
   db
     .prepare("INSERT OR REPLACE INTO key_value (namespace, key, value) VALUES (?, ?, ?)")
     .run(NS, key, value);
+const kvDelete = (db: Db, key: string) =>
+  db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(NS, key);
 
 /**
  * Take or renew the lease. The read and the write run in one IMMEDIATE transaction (write lock
@@ -67,56 +73,114 @@ function takeLease(db: Db, owner: string, now: number): boolean {
   return taken;
 }
 
-type Row = { status: number | null; error_summary: string | null; timestamp: string };
-type Run = { signature: string; count: number; spanMs: number };
+type Row = { id: string; status: number | null; error_summary: string | null; timestamp: string };
+/** `ended`: a row that breaks the run was read, so `oldest` is where the run really starts. */
+type Run = { signature: string; count: number; newest: string; oldest: string; ended: boolean };
+/** The stored alert: its signature and the newest row of the run it already covers. */
+type Marker = { signature: string; seen: string };
+type Account = { id: string; provider: string };
+type Page = (after: Row | null) => Row[];
 
-/**
- * Newest unbroken run of identical 400 signatures, newest row first. Any other row (a success, a
- * different status or a different message) ends it. Null when the newest row is not a 400.
- */
-function newestRun(rows: Row[]): Run | null {
-  if (rows.length === 0 || rows[0].status !== 400) return null;
-  const signature = normalize400Message(rows[0].error_summary);
-  let count = 0;
-  for (const row of rows) {
-    if (row.status !== 400 || normalize400Message(row.error_summary) !== signature) break;
-    count += 1;
+const spanMs = (run: Run) => Date.parse(run.newest) - Date.parse(run.oldest);
+const qualifies = (run: Run | null): run is Run =>
+  !!run && run.count >= MIN_HITS && spanMs(run) >= MIN_SPAN_MS;
+
+function readMarker(raw: string | null): Marker | null {
+  if (raw === null) return null;
+  try {
+    const marker = JSON.parse(raw) as Partial<Marker> | null;
+    if (typeof marker?.signature === "string" && typeof marker.seen === "string") {
+      return { signature: marker.signature, seen: marker.seen };
+    }
+  } catch {
+    // Unreadable: treated as no alert, so the run can alert again.
   }
-  const newest = Date.parse(rows[0].timestamp);
-  const oldest = Date.parse(rows[count - 1].timestamp);
-  return { signature, count, spanMs: newest - oldest };
+  return null;
 }
 
-function alertFor(db: Db, account: { id: string; provider: string }, run: Run | null): boolean {
+/** Extends the run with rows (newest first); false once a row breaks it. */
+function extendRun(run: Run, rows: Row[]): boolean {
+  for (const row of rows) {
+    if (row.status !== 400 || normalize400Message(row.error_summary) !== run.signature) {
+      run.ended = true;
+      return false;
+    }
+    run.count += 1;
+    run.oldest = row.timestamp;
+  }
+  return true;
+}
+
+/**
+ * Newest unbroken run of identical 400 signatures, read newest first one page at a time. Any
+ * other row (a success, a different status or a different message) ends it. Reading stops at
+ * that row, at the window start, or once the run qualifies and reaches back to `seen`, so the
+ * span is not cut at one page of rows. Null when the newest row is not a 400.
+ */
+function readNewestRun(page: Page, seen: string | null): Run | null {
+  let rows = page(null);
+  if (rows.length === 0 || rows[0].status !== 400) return null;
+  const newest = rows[0].timestamp;
+  const run: Run = {
+    signature: normalize400Message(rows[0].error_summary),
+    count: 0,
+    newest,
+    oldest: newest,
+    ended: false,
+  };
+  for (let pages = 1; extendRun(run, rows); pages += 1) {
+    const covered = seen === null || Date.parse(run.oldest) <= Date.parse(seen);
+    if (rows.length < PAGE_ROWS || pages >= MAX_PAGES || (qualifies(run) && covered)) break;
+    rows = page(rows[rows.length - 1]);
+  }
+  return run;
+}
+
+/** Same run as the stored alert unless a row that broke it was logged after the alerted rows. */
+function isSameRun(run: Run, marker: Marker): boolean {
+  if (run.signature !== marker.signature) return false;
+  return !run.ended || Date.parse(run.oldest) <= Date.parse(marker.seen);
+}
+
+/** The audit row and the marker commit together: a failed audit insert leaves the alert armed. */
+function recordAlert(db: Db, key: string, account: Account, run: Run): boolean {
+  let recorded = false;
+  db.transaction(() => {
+    recorded = tryLogAuditEvent({
+      action: "account.repeated_400",
+      actor: "system",
+      target: account.id,
+      details: {
+        provider: account.provider,
+        signature: run.signature,
+        count: run.count,
+        spanMinutes: Math.round(spanMs(run) / 60_000),
+      },
+    });
+    if (recorded) kvSet(db, key, JSON.stringify({ signature: run.signature, seen: run.newest }));
+  })();
+  return recorded;
+}
+
+function alertFor(db: Db, account: Account, page: Page | null): boolean {
   const key = `alert:${account.id}`;
-  const armed = kvGet(db, key);
-  const qualifies = !!run && run.count >= MIN_HITS && run.spanMs >= MIN_SPAN_MS;
-  if (!qualifies) {
-    if (armed !== null && (!run || run.signature !== armed))
-      db.prepare("DELETE FROM key_value WHERE namespace = ? AND key = ?").run(NS, key);
+  const raw = kvGet(db, key);
+  const marker = readMarker(raw);
+  const run = page ? readNewestRun(page, marker?.seen ?? null) : null;
+  if (run && marker && isSameRun(run, marker)) {
+    kvSet(db, key, JSON.stringify({ signature: run.signature, seen: run.newest }));
     return false;
   }
-  if (armed === run.signature) return false;
-  kvSet(db, key, run.signature);
-  logAuditEvent({
-    action: "account.repeated_400",
-    actor: "system",
-    target: account.id,
-    details: {
-      provider: account.provider,
-      signature: run.signature,
-      count: run.count,
-      spanMinutes: Math.round(run.spanMs / 60_000),
-    },
-  });
-  return true;
+  // The run ended (a success, another status or message) or changed: re-arm.
+  if (raw !== null) kvDelete(db, key);
+  return qualifies(run) && recordAlert(db, key, account, run);
 }
 
 export async function runRepeated400Scan(options: { now?: number; owner?: string } = {}) {
   if (!isRepeated400AdvisoryEnabled()) return { state: "off" as const, alerted: 0 };
   const now = options.now ?? Date.now();
   const db = getDbInstance();
-  if (!takeLease(db, options.owner ?? `pid-${process.pid}`, now)) {
+  if (!takeLease(db, options.owner ?? INSTANCE_OWNER, now)) {
     return { state: "not-leader" as const, alerted: 0 };
   }
   const since = new Date(now - LOOKBACK_MS).toISOString();
@@ -136,18 +200,24 @@ export async function runRepeated400Scan(options: { now?: number; owner?: string
         .all(since, until) as Array<{ connection_id: string }>
     ).map((r) => r.connection_id)
   );
-  const rows = db.prepare(
-    `SELECT status, error_summary, timestamp FROM call_logs
-      WHERE connection_id = ? AND timestamp >= ? AND timestamp <= ?
-        AND (request_type IS NULL OR request_type <> 'upstream_http_attempt')
-      ORDER BY timestamp DESC LIMIT ?`
+  const columns = "SELECT id, status, error_summary, timestamp FROM call_logs";
+  const filter = "AND (request_type IS NULL OR request_type <> 'upstream_http_attempt')";
+  const order = "ORDER BY timestamp DESC, id DESC LIMIT ?";
+  const first = db.prepare(
+    `${columns}
+      WHERE connection_id = ? AND timestamp >= ? AND timestamp <= ? ${filter} ${order}`
+  );
+  const next = db.prepare(
+    `${columns}
+      WHERE connection_id = ? AND timestamp >= ? AND (timestamp, id) < (?, ?) ${filter} ${order}`
   );
   let alerted = 0;
   for (const account of accounts) {
-    const run = withA400.has(account.id)
-      ? newestRun(rows.all(account.id, since, until, MAX_ROWS_PER_ACCOUNT) as Row[]) // stops at the first row that is not the same 400
-      : null;
-    if (alertFor(db, account, run)) alerted += 1;
+    const page: Page = (after) =>
+      (after
+        ? next.all(account.id, since, after.timestamp, after.id, PAGE_ROWS)
+        : first.all(account.id, since, until, PAGE_ROWS)) as Row[];
+    if (alertFor(db, account, withA400.has(account.id) ? page : null)) alerted += 1;
   }
   return { state: "scanned" as const, alerted };
 }
