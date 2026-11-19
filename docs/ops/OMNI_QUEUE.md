@@ -756,13 +756,15 @@ The cost: a real failure is blamed later, after the rest of the CI run plus the 
 often turn green on their re-run are flaky tests to fix.
 
 **The App needs Actions: Read and write.** The tick job asks for `permission-actions: write` when
-it mints its token. Grant it to the App, and accept it on the installation, before the version of
-the queue that re-runs failed jobs reaches the default branch (see
-[Installing the GitHub App](#installing-the-github-app), step 4). A token that reaches the tick
-without it gets the call refused: the `checks-red` detail ends with `; re-run refused (<status>)`
-(403 is GitHub's usual answer to a missing permission), and the batch is classified in the same
-tick. Whether GitHub mints a token at all for an installation that lacks a
-permission the job asks for has not been measured: it may fail every tick at the token step.
+it mints its token. Grant it to the App, and accept it on the installation, before a tick runs with
+this version of the workflow (see [Installing the GitHub App](#installing-the-github-app), step 4).
+Without it GitHub mints no token at all. Asked for a permission the installation does not hold,
+`POST /app/installations/{id}/access_tokens` answers 422, "The level of access for permissions
+requested are not granted to this installation.", for the job's whole permission set (measured on
+2026-11-17 against an installation with `actions: read`). So every tick fails at the step that
+mints the token, not only the re-run, and no state is saved; the watchdog reports each base with
+work after 90 minutes. A re-run GitHub refuses for any other reason ends the `checks-red` detail
+with `; re-run refused (<status>)`, and the batch is classified in the same tick.
 
 **Known limits.** These are accepted trade-offs of the current design, not bugs to work around:
 
@@ -1419,10 +1421,11 @@ action.
    contains a PR touching a workflow would be rejected. **Actions** write lets the tick re-run the
    failed jobs of a red candidate (`flakyReruns`), and the `tick` job of the workflow asks for it
    when it mints the App token (`permission-actions: write`). Grant "Actions: Read and write" to
-   the App, and accept the new permission on the installation, **before** the version of the queue
-   that re-runs failed jobs reaches the default branch. What happens in the other order has not
-   been measured yet (a rehearsal will record it): an installation without that permission may
-   refuse to mint any token, which would fail every tick, not only the re-run. The watchdog does
+   the App, and accept the new permission on the installation, **before** a tick runs with this
+   version of the workflow: before OMNI_QUEUE_ENABLED is set or, where the queue is already
+   enabled, before this version reaches the default branch. In the other order GitHub refuses to
+   mint the tick's token (HTTP 422 for the job's whole permission set, measured on 2026-11-17), and
+   every tick fails at that step, not only the re-run. The watchdog does
    not use the App: its workflow's own token has `contents: read`, `issues: write` and
    `pull-requests: read`.
 
@@ -1609,13 +1612,14 @@ Two consequences:
   candidate branches (see [Cut-over and rollback](#cut-over-and-rollback)) need the ruleset to be
   disabled first.
 
-Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Two
+Rulesets stack, and **a ruleset's bypass list only covers that ruleset's own rules**. Three
 existing repository rulesets also match release branches:
 
-| Ruleset (id)                              | Matches                | Rules                            | Effect on the landing push                                                                                                                                                 |
-| ----------------------------------------- | ---------------------- | -------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| "Protect release branches" (15605329)     | `refs/heads/release/*` | `deletion`, `non_fast_forward`   | None: nobody can delete or force-push a release branch, and the landing push is a fast-forward.                                                                            |
-| "Require PR on default branch" (21899981) | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors | **Rejects it** on whichever release branch is the default branch (the active release): it has no bypass actor, and a ruleset of ours cannot lift it for the landing actor. |
+| Ruleset (id)                                           | Matches                | Rules                                                                                                                                       | Effect on the landing push                                                                                                                                                                                                                  |
+| ------------------------------------------------------ | ---------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| "Protect release branches" (15605329)                  | `refs/heads/release/*` | `deletion`, `non_fast_forward`                                                                                                              | None: nobody can delete or force-push a release branch, and the landing push is a fast-forward.                                                                                                                                             |
+| "Require PR on default branch" (21899981)              | `~DEFAULT_BRANCH`      | `pull_request`, no bypass actors                                                                                                            | **Rejects it** on whichever release branch is the default branch (the active release): it has no bypass actor, and a ruleset of ours cannot lift it for the landing actor.                                                                  |
+| "Require green gates on the active release" (27616259) | `~DEFAULT_BRANCH`      | `required_status_checks`: `Gate / CI` and `Gate / Quality`, pinned to GitHub Actions (`integration_id` 15368), not strict; no bypass actors | None: the landing push (`merge-ff`) pushes the candidate itself, and the queue lands a candidate only after its verdict saw both checks green on it from GitHub Actions. The landing-path check accepts it and prints it as an `info` line. |
 
 The status door replaces "Require PR on default branch", so the cut-over removes it (see
 [Cut-over and rollback](#cut-over-and-rollback)). Until it is gone, the landing-path check below
@@ -1664,7 +1668,17 @@ node scripts/merge-queue/apply-ruleset.mjs --kind queue-refs \
   (`RepositoryRole` 5) or `OrganizationAdmin` in mode `always`. On `--dry-run` this is a warning;
   on a real apply the script exits `1`, after writing its own ruleset, until those rulesets are
   fixed. Its hint is to remove them: the status door replaces them. Rules whose ruleset is not
-  readable with the token count as not bypassed.
+  readable with the token count as not bypassed. One exception, whoever lands: a
+  `required_status_checks` rule the candidate already satisfies does not block. GitHub lets a
+  commit reach a branch under such a rule when it was pushed to another branch first and its checks
+  passed there, and the landing pushes the candidate whose checks the queue's verdict saw green. The
+  rule is accepted only when `strict_required_status_checks_policy` is `false`, it has no parameter
+  other than that one, `do_not_enforce_on_create` and `required_status_checks`, and every required
+  check has only `context` and `integration_id`, with a context listed in `requiredChecks`
+  (compared exactly) and an `integration_id` that is absent, `null` or 15368 (GitHub Actions, the
+  only app whose run turns a required check green in the queue's verdict). Each accepted rule is
+  printed as an `info` line naming its ruleset, and it never changes the exit code. A strict rule,
+  a check outside `requiredChecks` or a check pinned to another app still blocks.
 - Exit codes: `0` ok, `1` failure (API error, or a foreign rule blocks the landing push), `2` usage
   error or refused.
 - Run `--kind release` once per new release branch, after the branch is cut and before it becomes
@@ -2265,8 +2279,9 @@ entries of each list while either is not empty. Check, in order:
 
 1. Why GitHub refuses the App's status writes: the run's log names the error of each refused
    write, and so does an `error` event (`<batchId>: could not withdraw …`, or the detail of the
-   failed tick's own `error` event when the tick threw). A revoked `statuses: write` permission of
-   the App, an uninstalled App or a GitHub incident are the usual causes.
+   failed tick's own `error` event when the tick threw). A GitHub incident is the usual cause. A
+   permission the App no longer holds, or an App that is no longer installed, does not get this
+   far: GitHub mints no token for the tick, which fails at that step and stores nothing.
 2. Once that is fixed, wait until both lists are gone from `state/<sanitized-base>.json` on
    `omni-queue-state` (the next ticks write the `failure` statuses). Nothing else needs a person.
 3. Then `npm run queue -- resume <base>`. It is refused while `landWithdrawalsOverflow` holds
