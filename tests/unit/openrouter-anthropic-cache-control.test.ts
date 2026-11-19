@@ -276,6 +276,62 @@ describe("translation: markers survive for openrouter + anthropic/*, and only th
     assert.equal(systemBlocks[0].cache_control, undefined, "the next earliest marker is culled");
     assert.deepEqual(systemBlocks[1].cache_control, EPHEMERAL);
   });
+
+  test("a marker on a tool message part never reaches OpenRouter: 4 serialized markers at most", () => {
+    // An OpenAI-format client (alwaysPreserveClientCache) can mark a part of a role:"tool"
+    // message. Anthropic rejects cache_control inside tool_result.content, so
+    // filterToOpenAIFormat moves the marker off the part onto the tool message, and the
+    // OpenAI echo-field pass then drops message-level cache_control. OpenRouter documents
+    // neither placement, so the marker is gone and the cap sees only the 4 content-part ones.
+    const body = {
+      model: ANTHROPIC_MODEL,
+      messages: [
+        {
+          role: "system",
+          content: [
+            { type: "text", text: "s1", cache_control: EPHEMERAL },
+            { type: "text", text: "s2", cache_control: EPHEMERAL },
+          ],
+        },
+        { role: "user", content: [{ type: "text", text: "u1", cache_control: EPHEMERAL }] },
+        {
+          role: "assistant",
+          content: null,
+          tool_calls: [
+            { id: "call_1", type: "function", function: { name: "Read", arguments: "{}" } },
+          ],
+        },
+        {
+          role: "tool",
+          tool_call_id: "call_1",
+          content: [{ type: "text", text: "file body", cache_control: EPHEMERAL }],
+        },
+        { role: "user", content: [{ type: "text", text: "u2", cache_control: EPHEMERAL }] },
+      ],
+    };
+    const out = translateRequest(
+      "openai",
+      "openai",
+      ANTHROPIC_MODEL,
+      body,
+      false,
+      null,
+      "openrouter",
+      null,
+      { preserveCacheControl: true }
+    ) as OpenAIOut;
+
+    assert.equal(countCacheControl(out), 4, "OpenRouter allows 4 explicit breakpoints");
+    const tool = out.messages.find((m) => m.role === "tool");
+    assert.equal(countCacheControl(tool), 0, "no marker on the tool message or its parts");
+    const system = out.messages.find((m) => m.role === "system");
+    const systemBlocks = system?.content as Array<Record<string, unknown>>;
+    assert.deepEqual(
+      systemBlocks[0].cache_control,
+      EPHEMERAL,
+      "the dropped tool marker costs none"
+    );
+  });
 });
 
 describe("what turning caching on changes for openrouter + anthropic/* (pinned)", () => {
