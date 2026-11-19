@@ -16,14 +16,24 @@
 //                                        even though AGENTS.md calls this document
 //                                        "the full strategy table"
 //
-// The count is asserted against the code rather than hardcoded, so adding a
-// strategy and updating the prose stays a two-step chore instead of a silent lie.
+// Two different things are checked, against two different sources:
+//
+// - The strategy NAMES are checked against the code: a PR that adds a strategy writes its name
+//   into these lists and into the AUTO-COMBO.md table itself (that text is the PR's own content).
+// - The strategy COUNT is a derived number (plan 2026-11-13): feature PRs no longer write it;
+//   `npm run release:refresh-derived` rewrites it and records the same value in
+//   docs/reference/derived-facts.json. Between releases the code count moves ahead of the prose
+//   by design, so the stated counts are compared with the snapshot (written by the same refresh
+//   as the prose), never with the live constant. The snapshot itself must equal the code right
+//   after a refresh; that is the release-mode check (`release:refresh-derived --check`).
+//
 // `quota-share` is deliberately NOT public (`INTERNAL_ROUTING_STRATEGY_VALUES`),
 // so it must never appear in these lists.
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { test } from "node:test";
 
+import { loadFactsSnapshot } from "../../scripts/release/facts.mjs";
 import {
   INTERNAL_ROUTING_STRATEGY_VALUES,
   ROUTING_STRATEGY_VALUES,
@@ -31,6 +41,14 @@ import {
 
 const PUBLIC = [...ROUTING_STRATEGY_VALUES] as string[];
 const INTERNAL = [...INTERNAL_ROUTING_STRATEGY_VALUES] as string[];
+
+const snapshot = loadFactsSnapshot() as { routingStrategies: number } | null;
+assert.ok(
+  snapshot,
+  "docs/reference/derived-facts.json is missing — run npm run release:refresh-derived"
+);
+/** The strategy count the prose must state: the one recorded by the last refresh. */
+const COUNT = snapshot.routingStrategies;
 
 function doc(path: string): string {
   return readFileSync(new URL(`../../${path}`, import.meta.url), "utf8");
@@ -61,64 +79,51 @@ test("DOC-01: the code exposes a non-trivial public strategy set", () => {
   // Guards the test itself: if the constant ever empties, every count assertion
   // below would pass vacuously.
   assert.ok(PUBLIC.length >= 20, `expected >= 20 public strategies, got ${PUBLIC.length}`);
+  // Same guard for the snapshot count the prose is compared with (it may differ from the code
+  // between releases, by design).
+  assert.ok(COUNT >= 20, `expected >= 20 strategies in derived-facts.json, got ${COUNT}`);
   assert.ok(PUBLIC.includes("quota-weighted"), "quota-weighted must be public");
   assert.ok(!PUBLIC.includes("quota-share"), "quota-share must stay internal");
   assert.deepEqual(INTERNAL, ["quota-share"]);
 });
 
-test("DOC-01: AGENTS.md states the real count and lists every public strategy", () => {
-  const text = doc("AGENTS.md");
+// Phase 2 of plan 2026-11-13: the agent-instruction files (AGENTS.md, its bs fork, the services
+// guide) no longer carry the strategy count or the inline list — both went stale (the bs fork said
+// "20 strategija", llm.txt's list had lost `expiry-first`). They point to the registry instead, so
+// there is no copy to drift. What #15159 DOC-01 guarded is still guarded: no instruction file can
+// state a wrong count or an incomplete list, because it states neither, and the counts gate's
+// "No derived counts (agent-instruction file …)" invariant keeps it that way. The one place that
+// names every strategy is the AUTO-COMBO.md table, checked against the code below.
+const REGISTRY = "`ROUTING_STRATEGY_VALUES` in `src/shared/constants/routingStrategies.ts`";
+const REGISTRY_BS = "`ROUTING_STRATEGY_VALUES` u `src/shared/constants/routingStrategies.ts`";
 
-  const count = text.match(/(\d+)\s+public strategies/);
-  assert.ok(count, "AGENTS.md must state a public-strategy count");
-  assert.equal(
-    Number(count[1]),
-    PUBLIC.length,
-    `AGENTS.md says ${count[1]} public strategies but the code has ${PUBLIC.length}`
+function assertNoStrategyCountOrList(text: string, file: string) {
+  const count = text.match(
+    /(\d+)\*{0,2}\s+(?:public\s+|routing\s+|javn\p{L}*\s+)?strategi(?:es|j\p{L}*)\b/iu
   );
+  assert.equal(count, null, `${file} states a strategy count again: "${count?.[0]}"`);
+  // An inline list is a line naming most public strategies; a single mention (`fusion`,
+  // `quota-share`) is fine.
+  const listed = text.split("\n").find((l) => PUBLIC.filter((s) => l.includes(s)).length >= 8);
+  assert.equal(listed, undefined, `${file} carries an inline strategy list again: ${listed}`);
+}
 
-  const line = text.split("\n").find((l) => /public strategies/.test(l)) ?? "";
-  const missing = PUBLIC.filter((strategy) => !line.includes(strategy));
-  assert.deepEqual(
-    missing,
-    [],
-    `AGENTS.md's inline strategy list is missing: ${missing.join(", ")}`
+test("DOC-01: AGENTS.md points to the strategy registry and carries no count or list", () => {
+  const text = doc("AGENTS.md");
+  assert.ok(text.includes(REGISTRY), "AGENTS.md must point to the strategy registry");
+  assertNoStrategyCountOrList(text, "AGENTS.md");
+  assert.ok(
+    /Auto-Combo \(scoring factors, strategy table\) — `docs\/routing\/AUTO-COMBO\.md`/.test(text),
+    "the reference-table row must still send readers to the AUTO-COMBO.md strategy table"
   );
 });
 
-test("DOC-01: the AGENTS.md reference-table row agrees with the code", () => {
-  const text = doc("AGENTS.md");
-  const row = text.split("\n").find((l) => /Auto-Combo \(.*strategies\)/.test(l));
-
-  assert.ok(row, "AGENTS.md must have the Auto-Combo reference-table row");
-  const count = row.match(/(\d+)\s+strategies/);
-  assert.ok(count, "the reference-table row must state a strategy count");
-  assert.equal(
-    Number(count[1]),
-    PUBLIC.length,
-    `the reference-table row says ${count[1]} strategies, code has ${PUBLIC.length}`
-  );
-});
-
-test("DOC-01: open-sse/services/AGENTS.md states the real count and full list", () => {
+test("DOC-01: open-sse/services/AGENTS.md points to the registry and carries no count or list", () => {
   const text = doc("open-sse/services/AGENTS.md");
   const line = text.split("\n").find((l) => /\*\*Strategies\*\*/.test(l));
-
   assert.ok(line, "open-sse/services/AGENTS.md must document the strategies");
-
-  const count = line.match(/\((\d+)\)/);
-  assert.ok(count, "the strategies line must state a count in parentheses");
-  assert.equal(
-    Number(count[1]),
-    PUBLIC.length,
-    `open-sse/services/AGENTS.md says ${count[1]}, code has ${PUBLIC.length}`
-  );
-
-  // `P2C` is the one documented in caps; normalize so the check is not a
-  // formatting trap that hides a genuinely missing entry.
-  const normalized = line.replace(/`P2C`/g, "`p2c`");
-  const missing = PUBLIC.filter((strategy) => !normalized.includes(`\`${strategy}\``));
-  assert.deepEqual(missing, [], `open-sse/services/AGENTS.md is missing: ${missing.join(", ")}`);
+  assert.ok(line.includes(REGISTRY), "the strategies line must point to the registry");
+  assertNoStrategyCountOrList(text, "open-sse/services/AGENTS.md");
 });
 
 test("DOC-01: AUTO-COMBO.md count and full strategy table match the code", () => {
@@ -132,8 +137,8 @@ test("DOC-01: AUTO-COMBO.md count and full strategy table match the code", () =>
   for (const count of counts) {
     assert.equal(
       count,
-      PUBLIC.length,
-      `AUTO-COMBO.md states ${count} strategies, code has ${PUBLIC.length}`
+      COUNT,
+      `AUTO-COMBO.md states ${count} strategies, derived-facts.json has ${COUNT}`
     );
   }
 
@@ -145,21 +150,11 @@ test("DOC-01: AUTO-COMBO.md count and full strategy table match the code", () =>
   );
 });
 
-test("DOC-01: the bs i18n fork agrees with the code too", () => {
-  // docs/i18n/bs/AGENTS.md is a hand-maintained translation fork (DOC-03), so it
-  // drifts silently. It is the only AGENTS.md mirror tracked in the repo.
+test("DOC-01: the bs i18n fork points to the registry too", () => {
+  // docs/i18n/bs/AGENTS.md is a hand-maintained translation fork (DOC-03), so it drifted
+  // silently ("20 strategija" while the code had 21). It is the only AGENTS.md mirror tracked in
+  // the repo; like the source it now points to the registry and states no count.
   const text = doc("docs/i18n/bs/AGENTS.md");
-  const line = text.split("\n").find((l) => /javnih strategija/.test(l));
-
-  assert.ok(line, "the bs mirror must carry the strategy sentence");
-  const count = line.match(/(\d+)\s+javnih strategija/);
-  assert.ok(count, "the bs mirror must state a strategy count");
-  assert.equal(
-    Number(count[1]),
-    PUBLIC.length,
-    `docs/i18n/bs/AGENTS.md says ${count[1]}, code has ${PUBLIC.length}`
-  );
-
-  const missing = PUBLIC.filter((strategy) => !line.includes(strategy));
-  assert.deepEqual(missing, [], `docs/i18n/bs/AGENTS.md is missing: ${missing.join(", ")}`);
+  assert.ok(text.includes(REGISTRY_BS), "the bs mirror must point to the strategy registry");
+  assertNoStrategyCountOrList(text, "docs/i18n/bs/AGENTS.md");
 });

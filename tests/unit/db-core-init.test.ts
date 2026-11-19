@@ -773,7 +773,7 @@ test(
         assert.ok(
           db
             .prepare("SELECT name FROM sqlite_master WHERE type = 'index' AND name = ?")
-            .get("idx_call_logs_request_type")
+            .get("idx_cl_request_provider")
         );
         assert.ok(
           db

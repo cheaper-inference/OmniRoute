@@ -461,7 +461,7 @@ export default function CustomModelsSection({
 
   return (
     <div className="mt-6 pt-6 border-t border-border">
-      <h3 className="text-sm font-semibold mb-3 flex items-center gap-2">
+      <h3 className="text-sm mb-3 flex items-center gap-2">
         <Icon name="tune" size={16} className="text-primary" />
         {t("customModels")}
       </h3>
@@ -675,7 +675,7 @@ export default function CustomModelsSection({
                     {model.supportsVision === true && (
                       <CapabilityBadge
                         icon="visibility"
-                        className="bg-chart-5/15 text-chart-5"
+                        className="bg-chart-5/15 text-chart-5-ink"
                         title={t("visionCapableHint")}
                       >
                         {t("visionCapableLabel")}
@@ -687,7 +687,10 @@ export default function CustomModelsSection({
                       </span>
                     )}
                     {model.supportedEndpoints?.includes("embeddings") && (
-                      <CapabilityBadge icon="scatter_plot" className="bg-chart-3/15 text-chart-3">
+                      <CapabilityBadge
+                        icon="scatter_plot"
+                        className="bg-chart-3/15 text-chart-3-ink"
+                      >
                         {t("supportedEndpointEmbeddings")}
                       </CapabilityBadge>
                     )}
@@ -713,7 +716,7 @@ export default function CustomModelsSection({
                       </CapabilityBadge>
                     )}
                     {model.supportedEndpoints?.includes("audio-transcriptions") && (
-                      <CapabilityBadge icon="mic" className="bg-chart-2/15 text-chart-2">
+                      <CapabilityBadge icon="mic" className="bg-chart-2/15 text-chart-2-ink">
                         {t("audioTranscriptions")}
                       </CapabilityBadge>
                     )}
@@ -727,7 +730,7 @@ export default function CustomModelsSection({
                     )}
                     {anyNoPreserveCompatBadge(model.id!, customMap, overrideMap) && (
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-2/15 text-chart-2 font-medium"
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-2/15 text-chart-2-ink font-medium"
                         title={t("compatDoNotPreserveDeveloper")}
                       >
                         {t("compatBadgeNoPreserve")}
@@ -735,7 +738,7 @@ export default function CustomModelsSection({
                     )}
                     {anyUpstreamHeadersBadge(model.id!, customMap, overrideMap) && (
                       <span
-                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-3/15 text-chart-3 font-medium"
+                        className="text-[10px] px-1.5 py-0.5 rounded-full bg-chart-3/15 text-chart-3-ink font-medium"
                         title={t("compatUpstreamHeadersLabel")}
                       >
                         {t("compatBadgeUpstreamHeaders")}
@@ -947,11 +950,11 @@ export default function CustomModelsSection({
                     />
                   )}
                   <Button
-                    variant="ghost"
+                    variant="destructive-ghost"
                     size="icon-sm"
                     icon="delete"
                     onClick={() => handleRemove(model.id!)}
-                    className="size-6 min-h-6 rounded text-error hover:bg-error-bg"
+                    className="size-6 min-h-6 rounded"
                     title={t("removeCustomModel")}
                     aria-label={t("removeCustomModel")}
                   />

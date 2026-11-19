@@ -85,10 +85,10 @@ test("opencode-zen Grok models route to the Zen /responses URL with x-api-key au
     assert.equal(row.targetFormat, "openai-responses");
     assert.equal(resolveOpencodeTargetFormat("opencode-zen", model), "openai-responses");
     assert.equal(urlFor("opencode-zen", model), "https://opencode.ai/zen/v1/responses");
-    // #12633: Zen's /responses endpoint authenticates with x-api-key, not Bearer.
+    // #12633 / #19315: Zen's /responses endpoint preserves x-api-key and supplies Bearer for Console auth.
     const headers = headersFor("opencode-zen", model);
     assert.equal(headers["x-api-key"], "sk-test");
-    assert.equal(headers["Authorization"], undefined);
+    assert.equal(headers["Authorization"], "Bearer sk-test");
   }
 });
 

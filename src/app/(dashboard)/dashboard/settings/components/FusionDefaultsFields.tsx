@@ -48,7 +48,7 @@ export default function FusionDefaultsFields({
         onChange={(e) =>
           setComboDefaults((prev: any) => ({ ...prev, judgeModel: e.target.value || undefined }))
         }
-        className="text-sm md:col-span-2"
+        className="md:col-span-2"
       />
       <Input
         label={translateOrFallback(t, "fusionMinPanel", "Min Panel")}
@@ -58,7 +58,6 @@ export default function FusionDefaultsFields({
         value={comboDefaults.fusionTuning?.minPanel ?? ""}
         placeholder="2"
         onChange={(e) => setTuning({ minPanel: num(e.target.value) })}
-        className="text-sm"
       />
       <Input
         label={translateOrFallback(t, "fusionStragglerGraceMs", "Straggler Grace (ms)")}
@@ -68,7 +67,6 @@ export default function FusionDefaultsFields({
         value={comboDefaults.fusionTuning?.stragglerGraceMs ?? ""}
         placeholder="8000"
         onChange={(e) => setTuning({ stragglerGraceMs: num(e.target.value) })}
-        className="text-sm"
       />
       <Input
         label={translateOrFallback(t, "fusionPanelHardTimeoutMs", "Panel Hard Timeout (ms)")}
@@ -78,7 +76,7 @@ export default function FusionDefaultsFields({
         value={comboDefaults.fusionTuning?.panelHardTimeoutMs ?? ""}
         placeholder="90000"
         onChange={(e) => setTuning({ panelHardTimeoutMs: num(e.target.value) })}
-        className="text-sm md:col-span-2"
+        className="md:col-span-2"
       />
       <div className="md:col-span-2 rounded-lg border border-info/20 bg-info/5 p-3">
         <p className="text-xs text-info">

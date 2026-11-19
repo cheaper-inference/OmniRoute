@@ -473,16 +473,31 @@ test("geminiHelper converts content, safely parses JSON and cleans complex schem
 
   const cleaned = geminiHelper.cleanJSONSchemaForAntigravity(schema);
   assert.equal(cleaned.type, "array");
-  assert.deepEqual(cleaned.required.sort(), ["a", "b"]);
-  assert.equal(cleaned.properties.a.minLength, undefined);
-  assert.deepEqual(cleaned.properties.b.enum, ["fixed"]);
+  // The node flattens to `array`, so `properties` and `required` from allOf are pruned.
+  assert.equal(cleaned.required, undefined);
+  assert.equal(cleaned.properties, undefined);
   assert.deepEqual(cleaned.enum, ["1", "2"]);
   assert.equal(cleaned.items.type, "integer");
+  // The surviving child node is still cleaned: its integer enum becomes a range.
+  assert.deepEqual(cleaned.items, { type: "integer", minimum: 1, maximum: 2 });
   assert.equal(cleaned.additionalProperties, undefined);
   assert.equal(cleaned.patternProperties, undefined);
   assert.equal(cleaned.if, undefined);
   assert.equal(cleaned.default, undefined);
   assert.equal(cleaned.examples, undefined);
+
+  // An object node keeps its merged allOf members: the old asserts for that merge live here.
+  const merged = geminiHelper.cleanJSONSchemaForAntigravity({
+    type: "object",
+    allOf: [
+      { properties: { a: { type: "string", minLength: 2 } }, required: ["a"] },
+      { properties: { b: { const: "fixed" } }, required: ["b"] },
+    ],
+  });
+  assert.equal(merged.type, "object");
+  assert.deepEqual(merged.required.sort(), ["a", "b"]);
+  assert.equal(merged.properties.a.minLength, undefined);
+  assert.deepEqual(merged.properties.b.enum, ["fixed"]);
 
   const placeholder = geminiHelper.cleanJSONSchemaForAntigravity({
     type: "object",
@@ -920,11 +935,11 @@ test("translateRequest does NOT inject duplicate thinking for Claude-format mess
   clearReasoningCacheAll();
 });
 
-test("translateRequest replays cached reasoning when the client's Claude-format thinking block has no signature", () => {
+test("translateRequest replays cached reasoning when the client's Claude-format thinking block is unsigned and empty", () => {
   // #12105: an unsigned thinking block cannot be replayed to Claude, so the request
-  // translator drops it instead of stamping a fabricated signature. For Kimi Coding the
-  // tool_use turn still needs a thinking precursor, and the reasoning cache (keyed by the
-  // tool_use id) is the authentic source — it must be re-hydrated exactly once.
+  // translator never stamps a fabricated signature. For Kimi Coding the tool_use turn still
+  // needs a thinking precursor. When the client block has no text, the reasoning cache (keyed
+  // by the tool_use id) is the authentic source — it must be re-hydrated exactly once.
   clearReasoningCacheAll();
   cacheReasoningByKey("toolu_unsigned", "kimi-coding-apikey", "k3-256k", "cached thinking");
 
@@ -938,7 +953,7 @@ test("translateRequest replays cached reasoning when the client's Claude-format 
         {
           role: "assistant",
           content: [
-            { type: "thinking", thinking: "unsigned client thinking" },
+            { type: "thinking", thinking: "" },
             { type: "tool_use", id: "toolu_unsigned", name: "read", input: {} },
           ],
         },
@@ -969,6 +984,53 @@ test("translateRequest replays cached reasoning when the client's Claude-format 
   const toolUseIdx = assistantMsg.content.findIndex((b) => b?.type === "tool_use");
   assert.ok(thinkingIdx < toolUseIdx, "thinking block should be before tool_use");
   assert.equal(getReasoningCacheServiceStats().replays, 1);
+
+  clearReasoningCacheAll();
+});
+
+test("translateRequest replays cached reasoning when the client's Claude-format thinking block has text but no signature keeps the client text", () => {
+  // Kimi ignores signatures, so the client's own thinking text is kept and wins over the
+  // cache (client reasoning wins; nothing is replayed).
+  clearReasoningCacheAll();
+  cacheReasoningByKey("toolu_unsigned_text", "kimi-coding-apikey", "k3-256k", "cached thinking");
+
+  const result = translateRequest(
+    FORMATS.OPENAI,
+    FORMATS.CLAUDE,
+    "k3-256k",
+    {
+      messages: [
+        { role: "user", content: "hi" },
+        {
+          role: "assistant",
+          content: [
+            { type: "thinking", thinking: "unsigned client thinking" },
+            { type: "tool_use", id: "toolu_unsigned_text", name: "read", input: {} },
+          ],
+        },
+        { role: "tool", tool_call_id: "toolu_unsigned_text", content: "data" },
+      ],
+    },
+    false,
+    null,
+    "kimi-coding-apikey"
+  );
+
+  const assistantMsg = result.messages.find((m) => m.role === "assistant");
+  const thinkingBlocks =
+    Array.isArray(assistantMsg.content) &&
+    assistantMsg.content.filter((b) => b?.type === "thinking");
+  assert.equal(thinkingBlocks?.length, 1, "should keep exactly one thinking block");
+  assert.equal(thinkingBlocks[0].thinking, "unsigned client thinking");
+  assert.equal(
+    thinkingBlocks[0].signature,
+    undefined,
+    "replayed thinking must not carry a fabricated signature"
+  );
+  const thinkingIdx = assistantMsg.content.indexOf(thinkingBlocks[0]);
+  const toolUseIdx = assistantMsg.content.findIndex((b) => b?.type === "tool_use");
+  assert.ok(thinkingIdx < toolUseIdx, "thinking block should be before tool_use");
+  assert.equal(getReasoningCacheServiceStats().replays, 0);
 
   clearReasoningCacheAll();
 });

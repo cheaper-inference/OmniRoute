@@ -29,23 +29,18 @@
 6. **תעדו ראיות.** בתבנית בקשת המשיכה, רשמו את הפקודות שהורצו, כל קובץ בדיקה שנוסף או השתנה,
    מיגרציות או דגלי תכונה, וכל אימות שעדיין ממתין להרצה ב-CI בלבד.
 
-## מסלולים מומלצים לפי סוג שינוי
+## שבילי זהב לפי סוג שינוי
 
-הפקודות שלהלן הן בדיקות ממוקדות מינימליות, ולא הרשאה לדלג על בדיקה שמכסה ישירות את
-ההתנהגות ששיניתם.
+הפקודות למטה הן בדיקות מינימליות ממוקדות, לא הרשאה לדלג על בדיקה המכסה ישירות את ההתנהגות ששינתם.
 
 ### ספק
 
 **חוזים**
 
-- הגדרת הספק ב-`src/shared/constants/providers/` והשילוב שלה בתוך
-  `src/shared/constants/providers.ts`.
-- מודלים ויכולות ב-`open-sse/config/providerRegistry.ts` או בקובצי הרישום שחולצו ממנו.
-- בחירת המבצע/המתרגם, תצורת OAuth או מפתח API, נכסי לוח המחוונים והפניית הספק שנוצרת
-  אוטומטית, כאשר הדבר רלוונטי.
-- פרטי גישה ציבוריים חייבים להשתמש ב-`resolvePublicCred()`; תגובות שגיאה חייבות להשתמש במסייעי
-  ניקוי השגיאות המשותפים. ראו `docs/security/PUBLIC_CREDS.md` (ב-git; אינו נכלל בהידור אל `/docs`) וכן
-  [ניקוי שגיאות](../security/ERROR_SANITIZATION.md).
+- הגדרת ספק `src/shared/constants/providers/` והרכבו `src/shared/constants/providers.ts`.
+- דגמים ויכולות ב- `open-sse/config/providerRegistry.ts` או בקבצי הרישום שחולצו.
+- בחירת Executor/translator, OAuth או מפתח API ונכסי לוח מחוונים. אל תבצע את דיאגרמות `docs/reference/PROVIDER_REFERENCE.md` או README המחודשות: רענון השחרור משכתב אותם (`check:pr-derived-paths` נכשל בתכונה PR הנושאת אותם).
+- אישורים ציבוריים חייבים להשתמש `resolvePublicCred()`; תגובות שגיאה חייבות להשתמש במסייעי השגיאה המשותפים. ראה `docs/security/PUBLIC_CREDS.md` (git; לא הידור לתוך `/docs`) [וניקוי שגיאות](../security/ERROR_SANITIZATION.md).
 
 **לולאה ממוקדת**
 
@@ -54,43 +49,39 @@ npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # כאשר הקטלוג משתנה; בצעו commit להבדל שנוצר
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-בדקו גם כל משפחת בקשות שהושפעה: צ'אט, Responses, תמונות, embeddings, שמע או וידאו.
-התייחסו להבדלים בקטלוגים שנוצרו ובקובצי הזהב כשינויים בחוזה; אל תקבלו אותם באופן עיוור.
+בדוק גם כל משפחת בקשה מושפעת: צ'אט, תגובות, תמונות, הטמעות, אודיו או וידאו. סקור את הקטלוג שנוצר ואת הבדלי הזהב עם שינויים בחוזה; אל תקבל אותם באופן עיוור.
 
 ### ניתוב
 
 **חוזים**
 
-- ערכי אסטרטגיה ציבוריים ומטא-נתוני ממשק משתמש ב-`src/shared/constants/routingStrategies.ts`.
-- שיגור וסידור תחת `open-sse/services/combo.ts` וב-`open-sse/services/combo/`.
-- סכמות Combo, התמדה, מצב עמידות, יכולות מודלים ובקרות API/ממשק משתמש.
-- [מנוע Auto-Combo](../routing/AUTO-COMBO.md) ותיעוד העמידות כאשר ההתנהגות משתנה.
+- ערכי אסטרטגיה ציבורית ומטא נתונים UI ב- `src/shared/constants/routingStrategies.ts`.
+- שיגור והזמנה תחת `open-sse/services/combo.ts` `open-sse/services/combo/`.
+- סכימות משולבות, התמדה, מצב חוסן, יכולות מודל ובקרות API/UI.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) ותיעוד חוסן כאשר התנהגות משתנה.
 
 **לולאה ממוקדת**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # שינויי אסטרטגיה או שיגור
-npm run check:known-symbols      # שינויים ברישום אסטרטגיה
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-השתמשו באופן מקומי בבדיקות דטרמיניסטיות עם שירותי upstream מדומים. בדיקות עשן חיות של Combo דורשות פרטי גישה והן
-ידניות, ולא תחליף ל-CI.
+השתמש במבחנים דטרמיניסטיים מדומה במעלה הזרם באופן מקומי. עישון משולב חי דורש אישורים והם ידניים, לא תחליפי CI.
 
-### ממשק משתמש / חוויית משתמש
+### UI / UX
 
 **חוזים**
 
-- נתיב/עמוד של Next.js וגבולות רכיבים משותפים תחת `src/app/` וב-
-  `src/shared/components/`.
-- מבני תגובות API, מצבי טעינה/ריק/שגיאה, התנהגות מקלדת וקורא מסך,
-  פריסה רספונסיבית, ערכות נושא והרחבת אזורים.
-- מחרוזות המקור באנגלית של ממשק המשתמש ב-`src/i18n/messages/en.json`; אל תקודדו טקסט חדש המוצג למשתמש באופן קשיח.
+- Next.js route/page וגבולות רכיבים משותפים תחת `src/app/` ו- `src/shared/components/`.
+- צורות תגובה של API, מצבי loading/empty/error, התנהגות מקלדת וקורא מסך, פריסה רספונסיבית, עיצוב נושא והרחבת אזורים.
+- מחרוזות מקור באנגלית UI ב- `src/i18n/messages/en.json`; אל תקוד קשיח עותק חדש הפונה למשתמש.
 
 **לולאה ממוקדת**
 
@@ -101,67 +92,61 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-הריצו את היישום עבור שינויי אינטראקציה או תצוגה ובדקו תצוגות צרות ורחבות כאחת. CI מריץ את
-בניית הייצור ואת חבילות הבדיקות הרחבות יותר; התנהגות חזותית עדיין דורשת בדיקת רכיב ממוקדת, Playwright,
-או בדיקה ידנית מתועדת המתאימה לשינוי.
+הפעל את האפליקציה לצורך אינטראקציה או שינויים חזותיים ובדוק יציאות תצוגה צרות ורחבות כאחד. CI מפעיל את מבנה הייצור והסוויטות הרחבות יותר; התנהגות חזותית עדיין זקוקה לרכיב ממוקד, Playwright, או בדיקה ידנית מתועדת המתאימה לשינוי.
 
 ### i18n
 
 **חוזים**
 
-- `src/i18n/messages/en.json` הוא מקור ממשק המשתמש; `config/i18n.json` הוא מקור האזורים.
-- קטלוגי CLI נמצאים בנפרד תחת `bin/cli/locales/`.
-- שמרו במדויק על מצייני המיקום והתגים של ICU. אל תתרגמו שמות של מוצרים/ספקים/מודלים,
-  שמות פרוטוקולים וכותרות, פקודות, מזהי קוד/JSON, כתובות URL, משתני סביבה או
-  מונחים מוגנים כגון `OmniRoute`, `OAuth`, `MCP` ו-`A2A`. רשימת המקור הנוכחית נמצאת ב-
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` הוא מקור UI ; `config/i18n.json` הוא מקור המקום.
+- קטלוגי CLI חיים בנפרד תחת `bin/cli/locales/`.
+- שמור על מצייני מיקום ותגים ICU בדיוק. אין לתרגם שמות product/provider/model, שמות פרוטוקולים וכותרות, פקודות, מזהי code/JSON, URLs, משתני סביבה או מונחים מוגנים כגון `OmniRoute`, `OAuth`, `MCP` ו- `A2A`. רשימת המקורות הנוכחית היא `scripts/i18n/glossary/protected-terms.json`.
+
+תכונה PR עורכת רק `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); המקומות האחרים מושלמים פעם אחת בכל מהדורה על ידי רענון השחרור או גל תרגום (`docs/guides/I18N.md` → "תכונה PRs touch `en.json` בלבד"). `npm run check:pr-derived-paths` נכשל בתכונה PR שעורכת קטלוג מקומי אחר.
 
 **לולאה ממוקדת**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # כאשר מחרוזות/קטלוגים של CLI משתנים
 npm run lint
 ```
 
-זוהי הנחיה עבור המערכת הקיימת, ולא הזמנה להרחיב את כלי העבודה או את מודל המפתחות שלה.
-שמרו על תיקוני i18n נקודתיים בזמן שהמערכת החלופית נמצאת בתכנון. אל תריצו פקודות תרגום
-שקוראות לשירותים חיצוניים, אלא אם המשימה דורשת במפורש תרגומים שנוצרו אוטומטית
-ובדקתם את ההבדל שהתקבל.
+ללא `--mode=pr` שערים אלו פועלים במצב שחרור מקומי ומדווחים על כל מפתח שהמחזור הוסיף או שכתב ב- `en.json`; זו העבודה של רענון השחרור, לא של PR שלך.
+
+זוהי הדרכה למערכת הקיימת, לא הזמנה להרחיב את הכלים או מודל המפתח שלה. שמור על מדבקות i18n כירורגיות בזמן שהמערכת החלופית מתכננת. אין להריץ פקודות תרגום המתקשרות לשירותים חיצוניים אלא אם המשימה דורשת במפורש תרגומים שנוצרו וסקרת את ההבדל שנוצר.
 
 ### CLI
 
 **חוזים**
 
-- פקודות ודגלים ציבוריים ב-`bin/cli/`, פקודות API שנוצרו, קודי יציאה, stdout/stderr וכן
-  מבני פלט JSON, התנהגות תצורה/סביבה וקבצים הנכללים בחבילה.
-- מחרוזות CLI המוצגות למשתמש חייבות להשתמש בשכבת ה-i18n של ה-CLI ולשמור על התאמה בין הקטלוגים `en`/`pt-BR`.
-- יש לשמר את Node כסביבת הריצה הנתמכת ואת חוזה קובץ ההרצה שפורסם.
+- פקודות ודגלים ציבוריים ב- `bin/cli/`, פקודות API שנוצרו, קודי יציאה, צורות פלט stdout/stderr ו- JSON, התנהגות config/environment וקבצים ארוזים.
+- מחרוזות הפונות למשתמש של CLI חייבות להשתמש בשכבת CLI i18n (מפתחות `t()` שקיימים ב- `bin/cli/locales/en.json`). תכונה PR עורכת רק `en.json`; `pt-BR` והמקומות האחרים הושלמו עם השחרור.
+- שמור על Node כזמן הריצה הנתמך והחוזה הבינארי שפורסם.
 
 **לולאה ממוקדת**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # שינויים ב-CLI שנוצר/נארז
-npm run check:pack-policy     # שינויים בממשק החבילה
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-השתמשו בפקודה המדויקת בספריית נתונים זמנית כאשר ההתנהגות תלויה בניתוח, בקבצים או בסטטוס
-היציאה. CI מבצע את הבדיקות המקיפות יותר של ארטיפקט החבילה ושל המערכת האקולוגית.
+השתמש בפקודה המדויקת בספריית נתונים זמנית כאשר ההתנהגות תלויה בניתוח, קבצים או סטטוס יציאה. CI מבצע את החבילה הרחבה יותר ובדיקות מערכות אקולוגיות.
 
 ### מסד נתונים
 
 **חוזים**
 
-- מודולי תחום תחת `src/lib/db/`; יש לייבא מודולים ספציפיים ישירות (שכבת הייצוא מחדש הישנה `localDb.ts` הוסרה).
-- מיגרציות SQL ממוספרות ואידמפוטנטיות תחת `src/lib/db/migrations/`, בטיחות טרנזקציות, התנהגות
-  שדרוג, אינדקסים וכל קורא המושפע מהסכמה.
-- נתיבים ומטפלים לעולם אינם מריצים SQL גולמי ישירות.
+- מודולי תחום תחת `src/lib/db/`; לייבא מודולים ספציפיים ישירות (שכבת הייצוא מחדש `localDb.ts` הוסרה).
+- העברות SQL ממוספרות ואידמויות תחת `src/lib/db/migrations/`, בטיחות עסקאות, התנהגות שדרוג, אינדקסים וכל מתקשר המושפע מהסכמה.
+- מסלולים ומטפלים אף פעם לא מנפיקים SQL גולמית ישירות.
 
 **לולאה ממוקדת**
 
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-בעת הוספת מיגרציה, יש לבדוק גם מסד נתונים חדש וגם שדרוג מהסכמה הקודמת. בדיקות מסד נתונים
-חייבות לסגור נקודות אחיזה ולקרוא ל-`resetDbInstance()` במהלך הניקוי. יש להריץ את `npm run test:bun:db` רק כאשר
-נתיב מתאם Bun, הפועל במתכונת מיטבית, משתנה; Node נשאר הסמכות הקובעת.
+בדוק גם מסד נתונים חדש וגם שדרוג מהסכימה הקודמת בעת הוספת הגירה. בדיקות מסד נתונים חייבות לסגור נקודות אחיזה ולהתקשר `resetDbInstance()` במהלך הניקוי. הפעל `npm run test:bun:db` רק כאשר נתיב מתאם Bun במאמץ משתנה; הצומת נשאר סמכותי.
 
-### בנייה / פריסה
+### בנה/פריסה
 
 **חוזים**
 
-- מניפסטים/קובץ נעילה בשורש ובסביבות העבודה, `scripts/build/`, הרכבה עצמאית של Next.js, תוכני החבילה
-  `dist/`, מטא-נתונים תלויי פלטפורמה של Electron, תהליכי עבודה של CI וסמני פריסה.
-- טווחי Node הנתמכים והשימוש המאושר ב-Bun ב-`CLAUDE.md` חייבים להישאר ללא שינוי.
-- ארטיפקטי בנייה אינם נשמרים במעקב; חלות מדיניות תלויות, רישיונות, תהליכי עבודה וחבילות.
+- בסיס וסביבת עבודה manifests/lockfile, `scripts/build/`, Next.js עצמאית, תוכן חבילת `dist/`, מטא נתונים של פלטפורמת Electron, זרימות עבודה CI ופקחי פריסה.
+- טווחי צמתים נתמכים והשימוש ב- Bun הרשום ב- `CLAUDE.md` חייבים להישאר ללא פגע.
+- חפצי בנייה נשארים ללא מעקב; מדיניות התלות, הרישיון, זרימת העבודה והחבילה חלה.
 
 **לולאה ממוקדת**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # שינויים בתלויות או בקובץ הנעילה
-npm run check:pack-policy      # שינויים בממשק החבילה שפורסמה
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-השתמשו ב-`npm run build` באופן מקומי רק כאשר השינוי משפיע על הידור, הרכבה עצמאית, נכסים
-או אריזה עבור סביבת הריצה. השתמשו ב-`npm run build:release` רק לצורך אימות גרסה/פריסה. הבנייה של CI היא
-האות הסופי חוצה-הפלטפורמות; שינויים תלויי פלטפורמה ב-Electron דורשים בנייה ממוקדת תואמת
-או ראיות מבדיקת עשן.
+השתמש `npm run build` באופן מקומי רק כאשר השינוי משפיע על קומפילציה, הרכבה עצמאית, נכסים או צרור בזמן ריצה. השתמש ב- `npm run build:release` רק עבור אימות release/deploy. המבנה של CI הוא האות הסופי בין הפלטפורמות; שינויים ב- Electron הספציפיים לפלטפורמה זקוקים להוכחות בנייה ממוקדות תואמות או עשן.
 
 ## סקריפטים למפתחים עבור מכונה משותפת
 
