@@ -102,6 +102,8 @@ export const createProviderSchema = z
     defaultModel: z.string().max(200).nullable().optional(),
     testStatus: z.string().max(50).optional(),
     allowNoCredential: z.literal(true).optional(),
+    // Opt-in: only an explicit `false` turns a name or key match into a 409 instead of an upsert.
+    allowOverwrite: z.boolean().optional(),
     providerSpecificData: z
       .record(z.string(), z.unknown())
       .optional()
