@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Снимање се дешава у `open-sse/handlers/chatCore.ts` (две локације, на две `cacheReasoningFromAssistantMessage` позивне локације). Поновна репродукција се дешава у `open-sse/translator/index.ts` након принуде шеме, али пре слања.
+
+Уноси позива алата се чувају под `buildToolCallCacheKey()`, сажетком обима захтева и ИД-ом позива алата, тако да исти ИД који користи други API кључ или сесија не бира унос. Опсег долази од `buildReasoningCacheScope()`: API ИД кључа, плус кључ сесије када га захтев има. Колона `tool_call_id` и контролна табла стога показују овај сажетак за те уносе.
 
 Обични потези помоћника (без позивања алата) су различити кључеви: `buildAssistantMessageCacheKey()` обрађује обим сесије плус нормализовани транскрипт ОпенАИ формата до тог окрета, јер DeepSeek захтева образложење _сваког_ претходног окрета када је `tools` присутан. За мете АПИ-ја за одговоре (на пример `opencode-go/deepseek-v4-flash`, преусмерено на `/responses`) узводно тело носи `input`, а не `messages`, тако да `translateRequest()` (`open-sse/translator/index.ts`) извештава о централном транскрипту који је прегледао преко опције повратног позива, а локације за хватање обрађују тај исти транскрипт. Пролаз за понављање одговора се покреће на OpenAI пивот-у за сваки изворни формат, тако да се клијенти Anthropic порука (Claude → OpenAI → одговори) такође репродукују.
 

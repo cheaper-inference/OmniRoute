@@ -4,10 +4,20 @@
 
 ---
 
-Awarie są klasyfikowane przed podjęciem decyzji o ponowieniu próby.
+Awarie są klasyfikowane przed podjęciem decyzji o ponownej próbie.
 
-Awarie przejściowe, takie jak przekroczenie limitu czasu, błędy sieciowe, limity żądań i odpowiedzi dostawcy 5xx, mogą skutkować przełączeniem awaryjnym. Błędy uwierzytelniania, błędy uprawnień, nieprawidłowe żądania, niedostępne modele i nieznane awarie nie są ponawiane bezwarunkowo.
+Przejściowe awarie, takie jak przekroczenia limitu czasu, błędy sieci, ograniczenia szybkości i odpowiedzi dostawcy 5xx, mogą spowodować przełączenie awaryjne. Wyczerpany limit lub kredyt (limit 429 lub 402 Wymagana płatność) nigdy nie jest ponawiany u tego samego dostawcy, ale następuje przełączenie awaryjne do innego, którego limit jest oddzielny. Błędy uwierzytelniania, błędy uprawnień, nieprawidłowe żądania, niedostępne modele i nieznane awarie nie są ponawiane na ślepo.
 
-Domyślna polityka obejmująca wielu dostawców zezwala na maksymalnie trzy próby u dostawców, ponawia próby w przypadku limitów żądań i przekroczenia limitu czasu oraz oddziela wyłączenie administracyjne od tymczasowego stanu obwodu.
+Domyślne zasady dotyczące różnych dostawców dopuszczają maksymalnie trzy próby dostawcy, limity ponownych prób i przekroczenia limitu czasu, przełączanie awaryjne w przypadku wyczerpania przydziału i oddzielają wyłączenie administracyjne od tymczasowego stanu obwodu.
 
-Stany obwodu to `closed`, `open` i `half_open`. Okres karencji planuje ograniczoną próbę testową; udana próba zamyka obwód, a nieudana otwiera go ponownie.
+## Gdzie to ma zastosowanie
+
+- **Kombinacje** przełączanie awaryjne między celami zgodnie ze strategią i ustawieniami kombinacji.
+- **Goły identyfikator modelu** (bez prefiksu `provider/` ), który obsługuje kilku aktywnych dostawców, bez kombinacji o tej dokładnej nazwie, jest najpierw wysyłany do wybranych wnioskowań dostawcy. Jeśli ta próba zakończy się niepowodzeniem w sposób, w jaki zasada przełączy się awaryjnie, to samo żądanie zostanie wysłane do następnego aktywnego dostawcy obsługującego dany identyfikator. Odpowiedź zawiera `x-omniroute-fallback-attempts` z liczbą dostawców wypróbowanych przed tym, który odpowiedział.
+  - Każdy zastępca jest autoryzowany dokładnie tak, jakby wybrał go na podstawie wniosku. Cel, który klucz API blokuje lub do którego nie dopuszcza, jest pomijany bez wywołania upstream, a klient otrzymuje prawdziwy błąd upstream, a nie odrzucenie polityki dla celu, którego nigdy nie nazwał.
+  - Tylko nieudana odpowiedź jest kontynuowana: po pierwszym przesyłanym strumieniowo bajcie nic nie zostaje przełączone w tryb awaryjny.
+  - Awaryjna zamiana modelu awaryjnego ma zastosowanie dopiero w przypadku niepowodzenia każdego dostawcy żądanego modelu.
+  - Żądanie przypięte do połączenia (`x-omniroute-connection`) pozostaje na nim.
+  - Identyfikator z prefiksem (`provider/model`) nigdy nie jest przekierowywany do innego dostawcy.
+
+Stany obwodu to `closed`, `open` i `half_open`. Czas odnowienia planuje ograniczoną sondę; pomyślna sonda zamyka obwód, a nieudana sonda ponownie go otwiera.

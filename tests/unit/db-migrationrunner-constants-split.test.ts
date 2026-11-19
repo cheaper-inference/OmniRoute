@@ -78,7 +78,7 @@ describe("migrationRunner/constants — exact small-table snapshots", () => {
 
 describe("migrationRunner/constants — large-table integrity", () => {
   it("RENAMED_MIGRATION_COMPATIBILITY has 107 well-formed entries", () => {
-    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 107);
+    assert.equal(RENAMED_MIGRATION_COMPATIBILITY.length, 111);
     assert.deepEqual(
       RENAMED_MIGRATION_COMPATIBILITY.filter(
         (entry) => entry.fromName === "usage_history_calculated_cost"
