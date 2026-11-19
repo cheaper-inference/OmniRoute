@@ -1,0 +1,1 @@
+- **feat(quota):** add opt-in quota window ping targets that warm a first-use provider quota window (Codex session/weekly, Claude 5h/7d) with one tiny request, behind a default-off global kill switch, with dry run, longer-window headroom gates, per-target schedules, and a full skip-reason audit trail.

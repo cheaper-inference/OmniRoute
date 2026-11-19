@@ -390,6 +390,14 @@ export const updateSettingsSchema = z.object({
       connections: z.record(z.string().max(100), z.boolean()).optional(),
     })
     .optional(),
+  // Opt-in global kill switch for quota window ping targets; the targets
+  // themselves live in quota_ping_targets (src/lib/db/quotaWindowPing.ts).
+  // Off by default for the same reason as codexAutoPing above.
+  quotaWindowPing: z
+    .object({
+      enabled: z.boolean().optional(),
+    })
+    .optional(),
   // Opt-in auto-apply of banked resets; off by default (see bankedResetAutoApplySchema).
   bankedResetAutoApply: bankedResetAutoApplySchema.optional(),
   // Opt-in auto-spend of Codex reset credits about to expire. `enabled` is the
