@@ -80,10 +80,7 @@ test("external-IdP catalogue probes carry the token-type header, IdC does not", 
     1
   );
 
-  const idc = buildKiroFingerprintHeaders(
-    { clientId: "client-abc", authMethod: "idc" },
-    "token-1"
-  );
+  const idc = buildKiroFingerprintHeaders({ clientId: "client-abc", authMethod: "idc" }, "token-1");
   assert.equal(
     Object.values(idc).filter((v) => String(v).toUpperCase() === "EXTERNAL_IDP").length,
     0

@@ -93,8 +93,7 @@ export function buildKiroServiceUserAgent(
     `lang/js md/nodejs#${KIRO_NODE_VERSION} ` +
     `api/codewhispererstreaming#${KIRO_RUNTIME_SDK_VERSION} m/E ` +
     `KiroIDE-${KIRO_IDE_VERSION}-${machineId}`;
-  const amzUserAgent =
-    `aws-sdk-js/${KIRO_RUNTIME_SDK_VERSION} KiroIDE-${KIRO_IDE_VERSION}-${machineId}`;
+  const amzUserAgent = `aws-sdk-js/${KIRO_RUNTIME_SDK_VERSION} KiroIDE-${KIRO_IDE_VERSION}-${machineId}`;
   return { userAgent, amzUserAgent };
 }
 
