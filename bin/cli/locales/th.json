@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "ขีดจำกัดต้องเป็นจำนวนเต็มบวก",
     "error": "ข้อผิดพลาด: {message}",
     "serverOffline": "เซิร์ฟเวอร์ OmniRoute ออฟไลน์ เริ่มด้วย: omniroute serve",
     "authRequired": "ต้องการการยืนยันตัวตน ตั้งค่า OMNIROUTE_API_KEY หรือรัน: omniroute setup",

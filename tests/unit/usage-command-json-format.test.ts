@@ -32,11 +32,14 @@ function allowedDeps(overrides: Record<string, unknown> = {}) {
   return {
     now: () => NOW,
     isValidApiKey: async (apiKey: string) => apiKey === "sk-allowed",
+    // The panel key is explicitly granted the shared-account view; a plain
+    // client key (self:usage only) is covered by the tests at the bottom.
     getApiKeyMetadata: async () => ({
       id: "key-allowed",
       name: "panel key",
       allowUsageCommand: true,
       usageLimitEnabled: true,
+      scopes: ["self:usage", "self:account-quota"],
     }),
     getProviderConnections: async () => [
       { id: "conn-claude", provider: "claude", isActive: true },
@@ -222,4 +225,76 @@ test("om-usage preserves raw quota in json while text scales remaining quota by 
   const text = await textResponse.text();
   assert.match(text, /Weekly/);
   assert.match(text, /20% left/);
+});
+
+// A client key with the usage command could read, through ?format=json, every
+// shared provider account: connection ids, plan, raw quota and resets. Those
+// belong to the operator, not to the key holder.
+function failingProviderCollectors() {
+  const fail = () => {
+    throw new Error("provider accounts must not be read for this key");
+  };
+  return {
+    getProviderConnections: async () => fail(),
+    getAllProviderLimitsCache: () => fail(),
+    getProviderConnectionById: async () => fail(),
+    getProviderLimitsCache: () => fail(),
+  };
+}
+
+for (const [label, scopes] of [
+  ["a plain client key (self:usage only)", ["self:usage"]],
+  ["a key whose metadata carries no scopes", undefined],
+] as const) {
+  test(`om-usage ?format=json hides the shared provider accounts from ${label}`, async () => {
+    const response = await handleInternalUsageCommandHttpRequest(
+      new Request("http://localhost/api/usage/om-usage?format=json", {
+        headers: { Authorization: "Bearer sk-allowed" },
+      }),
+      allowedDeps({
+        getApiKeyMetadata: async () => ({
+          id: "key-client",
+          name: "client key",
+          allowUsageCommand: true,
+          usageLimitEnabled: true,
+          ...(scopes ? { scopes: [...scopes] } : {}),
+        }),
+        ...failingProviderCollectors(),
+      })
+    );
+
+    assert.equal(response.status, 200);
+    const body = (await response.json()) as {
+      allowed: boolean;
+      personal: { weeklySpentUsd: number } | null;
+      provider: unknown;
+      providers: unknown[];
+    };
+    assert.equal(body.allowed, true);
+    assert.equal(body.personal?.weeklySpentUsd, 8);
+    assert.equal(body.provider, null);
+    assert.deepEqual(body.providers, []);
+    assert.doesNotMatch(JSON.stringify(body), /conn-claude|conn-codex|Claude Max|Codex Pro/);
+  });
+}
+
+test("om-usage ?format=json still shows the shared accounts to a management key", async () => {
+  const response = await handleInternalUsageCommandHttpRequest(
+    new Request("http://localhost/api/usage/om-usage?format=json", {
+      headers: { Authorization: "Bearer sk-allowed" },
+    }),
+    allowedDeps({
+      getApiKeyMetadata: async () => ({
+        id: "key-admin",
+        name: "operator key",
+        allowUsageCommand: true,
+        usageLimitEnabled: false,
+        scopes: ["manage", "self:usage"],
+      }),
+    })
+  );
+
+  assert.equal(response.status, 200);
+  const body = (await response.json()) as { providers: Array<{ provider: string }> };
+  assert.deepEqual(body.providers.map((s) => s.provider).sort(), ["claude", "codex"]);
 });

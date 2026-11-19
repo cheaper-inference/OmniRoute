@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -135,7 +137,7 @@ Claude Desktop, Cursor, Cline, र मिल्दो MCP क्लाइन्�
 | `omniroute_list_compression_combos` | `read:compression`  | नाम कम्प्रेसन कम्बो र तिनीहरूको इन्जिन पाइपलाइनहरू सूची गर्नुहोस्                                                             |
 | `omniroute_compression_combo_stats` | `read:compression`  | एनालिटिक्स कम्प्रेसन कम्बो र इन्जिन द्वारा समूहबद्ध                                                                           |
 | `omniroute_ccr_store`               | `write:compression` | बाउन्डेड इन-मेमोरी CCR स्टोरमा कलर-पृथक सामग्री भण्डार गर्नुहोस् र मार्कर प्लस `ccr://` सन्दर्भ फिर्ता गर्नुहोस्              |
-| `omniroute_ccr_retrieve`            | `read:compression`  | CCR सामग्री पूर्ण रूपमा वा हेड, टेल, लाइनहरू, grep, र तथ्याङ्क मोडहरूको साथ पुन: प्राप्त गर्नुहोस्                            |
+| `omniroute_ccr_retrieve`            | `read:compression`  | CCR सामग्री पूर्ण रूपमा वा हेड, टेल, लाइनहरू, grep, र तथ्याङ्क मोडहरू पुन: प्राप्त गर्नुहोस्                                  |
 | `omniroute_ccr_inspect`             | `read:compression`  | सामग्री फिर्ता नगरी कलरको स्वामित्वमा रहेको CCR मेटाडेटा निरीक्षण गर्नुहोस्                                                   |
 | `omniroute_ccr_list`                | `read:compression`  | कलरको स्वामित्वमा रहेको CCR ब्लकहरूको लागि पृष्ठन गरिएको मेटाडेटा सूची गर्नुहोस्                                              |
 | `omniroute_ccr_delete`              | `write:compression` | कलरको स्वामित्वमा रहेको CCR ब्लक मेटाउनुहोस्                                                                                  |
@@ -143,7 +145,7 @@ Claude Desktop, Cursor, Cline, र मिल्दो MCP क्लाइन्�
 | `omniroute_rtk_discover`            | `read:compression`  | अप्ट-इन RTK आउटपुट नमूनाहरूमा आवर्ती आवाज पत्ता लगाउनुहोस्                                                                    |
 | `omniroute_rtk_learn`               | `read:compression`  | अप्ट-इन नमूनाहरूबाट समीक्षायोग्य RTK फिल्टर ड्राफ्ट उत्पन्न गर्नुहोस्                                                         |
 
-CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB and cloud runtimes, which stay memory-only. Each block is limited to 2 MiB, each principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by the authenticated API-key principal. Audit records contain hashes and size metadata, never content. Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes, pagination, and a diagnostic matrix) live in [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR प्रविष्टिहरूले दुई-स्तरीय स्टोर प्रयोग गर्दछ: तातो इन-मेमोरी टियर समर्थित, स्थानीय गैर-क्लाउड रनटाइममा, एक टिकाऊ SQLite टियर (`ccr_blocks`, पूर्वनिर्धारित रूपमा) द्वारा, त्यसैले ब्लक बेदखल वा पुन: सुरु नभएसम्म यसको TTL — रन बाहेक, KB भन्दा बढी ब्लकहरू र क्लाउड रन `COMPRESSION_CCR_DURABLE_STORE=false` रन बाहेक। मेमोरी मात्र। टिकाउ लेखन उत्तम प्रयास हो: 1,000 लेखहरू पहिले नै विचाराधीन हुँदा यसलाई छोडिन्छ, र असफल SQLite लेखन लग इन गरिएको छ, पुन: प्रयास गरिएको छैन, त्यसैले त्यो ब्लक पुन: सुरु गर्दा हराएको छ। प्रत्येक ब्लक 2 MiB मा सीमित छ, प्रत्येक प्रिन्सिपल 16 MiB मा, र ग्लोबल स्टोर 64 MiB मा सीमित छ। प्रविष्टिहरू 24-घण्टा TTL (अधिकतम सात दिन) मा पूर्वनिर्धारित छन्। पूर्ण MCP पुनःप्राप्ति 256 KiB मा सीमित छ; ठूला ब्लकहरू दायरा र grep मोडहरू मार्फत उपलब्ध रहन्छन्। भण्डारण, पुन: प्राप्ति, सूचीकरण, निरीक्षण, मेटाउने, र तथ्याङ्कहरू प्रमाणित API-कुञ्जी प्रिन्सिपलद्वारा अलग छन्। लेखापरीक्षण अभिलेखहरूमा ह्यास र साइज मेटाडेटा समावेश हुन्छ, सामग्री कहिल्यै हुँदैन। अपरेटर-फेसिङ विवरणहरू (दुई मार्करहरू, क्लाइन्ट आवश्यकताहरू, `codemode:false`, प्रति-उपकरण स्कोपहरू, पृष्ठांकन, र एक डायग्नोस्टिक म्याट्रिक्स) [कम्प्रेसन इन्जिनहरू → आवश्यकताहरू / अपरेटर गाइडमा](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) रहन्छन्।
 
 `omniroute_compression_status` `analytics.mcpDescriptionCompression` अन्तर्गत MCP विवरण सङ्कुचनलाई छुट्टै रिपोर्ट गर्दछ। ती मानहरू MCP सूचीयोग्य विवरणहरूका लागि मेटाडेटा-आकार अनुमानहरू हुन् (`tools`, `prompts`, `resources`, र `resourceTemplates`); तिनीहरू प्रदायक प्रयोग रसिदहरू होइनन् र `source: "mcp_metadata_estimate"` सँग चिन्ह लगाइएका छन्।
 

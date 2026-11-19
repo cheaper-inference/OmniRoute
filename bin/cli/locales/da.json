@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Grænse skal være et positivt heltal.",
     "error": "Fejl: {message}",
     "serverOffline": "OmniRoute-serveren er offline. Start med: omniroute serve",
     "authRequired": "Godkendelse kræves. Sæt OMNIROUTE_API_KEY eller kør: omniroute setup",

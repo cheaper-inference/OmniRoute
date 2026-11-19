@@ -1,0 +1,1 @@
+- **chore(ci):** `check:pr-derived-paths` accepts orphan cleanup: a PR that deletes an English document may delete its `docs/i18n/<locale>/` mirrors and drop it from `.i18n-state.json` in the same PR; deleting the mirror of a document that still exists, or any other state edit, is still a violation ([#20558](https://github.com/cheaper-inference/OmniRoute/pull/20558))

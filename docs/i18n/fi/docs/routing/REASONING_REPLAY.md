@@ -24,19 +24,21 @@ Mutta tyypilliset asiakkaat (Cursor, Cline, Roo Code , OpenAI SDK) poistavat `re
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Sieppaus tapahtuu `open-sse/handlers/chatCore.ts` (kahdessa paikassa, kahdessa `cacheReasoningFromAssistantMessage` -puhelupaikassa). Toisto tapahtuu `open-sse/translator/index.ts` ssä skeeman pakottamisen jälkeen, mutta ennen lähettämistä.
+
+Työkalukutsun merkinnät tallennetaan kohtaan `buildToolCallCacheKey()`, pyynnön laajuuden tiivistelmä ja työkalukutsutunnus, joten toisen API -avaimen tai istunnon käyttämä sama id ei valitse merkintää. Laajuus tulee `buildReasoningCacheScope()`:stä: API -avaimen tunnus sekä istuntoavain, kun pyynnöllä on sellainen. Siksi `tool_call_id` sarake ja kojelauta näyttävät tämän tiivistelmän kyseisistä merkinnöistä.
 
 Pelkät (ei-työkalukutsut) avustajan käännökset on näppäilty eri tavalla: `buildAssistantMessageCacheKey()` sulattaa istunnon laajuuden ja normalisoidun OpenAI-muotoisen transkription siihen vuoroon asti, koska DeepSeek vaatii _jokaisen_ edellisen käännöksen perustelut, kun `tools` on läsnä. Responses-API-kohteissa (esimerkiksi `opencode-go/deepseek-v4-flash`, reititetty `/responses`) ylävirran runko sisältää `input`, ei `messages`, joten `translateRequest()` (`open-sse/translator/index.ts`) raportoi pivot-transkription, joka on sulatettu takaisinsoittovaihtoehdon kautta, ja sieppauspaikat sulattavat saman transkriptin. Responses Replay Pass toimii OpenAI pivotissa jokaisessa lähdemuodossa, joten myös Anthropic Messages -asiakkaat (Claude → OpenAI → Responses) toistetaan uudelleen.
 
