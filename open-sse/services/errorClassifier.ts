@@ -2,11 +2,11 @@ import {
   ACCOUNT_DEACTIVATED_SIGNALS,
   CREDITS_EXHAUSTED_SIGNALS,
   isAccountDeactivated,
-  isCreditsExhausted,
   isDailyQuotaExhausted,
   isOAuthInvalidToken,
 } from "./accountFallback.ts";
 import { isSubscriptionQuotaText } from "./quotaTextCooldowns.ts";
+import { isCreditsExhaustedForStatus } from "./accountFallback/creditsExhaustedForStatus.ts";
 import { isProviderSafetyRefusalBody } from "../utils/providerSafety.ts";
 import { isModelScopedAccessDenial } from "./accountFallback/modelScopedAccessDenial.ts";
 import { getProviderCategory, getRegistryEntry } from "../config/providerRegistry.ts";
@@ -426,7 +426,7 @@ export function classifyProviderError(
   provider?: string | null
 ): ProviderErrorType | null {
   const bodyStr = responseBodyToString(responseBody);
-  const creditsExhausted = isCreditsExhausted(bodyStr);
+  const creditsExhausted = isCreditsExhaustedForStatus(statusCode, provider, bodyStr);
   // Claude's native weekly 429 wording is provider-scoped; omitting provider
   // silently classified the long-window quota as a short RPM rate limit.
   const subscriptionQuotaExhausted = isSubscriptionQuotaText(bodyStr.toLowerCase(), provider);
