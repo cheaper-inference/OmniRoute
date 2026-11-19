@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Limit musi być dodatnią liczbą całkowitą.",
     "error": "Błąd: {message}",
     "serverOffline": "Serwer OmniRoute jest offline. Uruchom: omniroute serve",
     "authRequired": "Wymagane uwierzytelnienie. Ustaw OMNIROUTE_API_KEY lub uruchom: omniroute setup",
