@@ -15,7 +15,7 @@ Claude Code-এর ক্ষেত্রে প্রযোজ্য — `AGENTS
 
 সম্পূর্ণ বাধ্যতামূলক worktree প্রোটোকল (base-branch নিশ্চিতকরণ, `.claude/worktrees/` ক্যানোনিক্যাল
 পাথ, `cp -al` node_modules, teardown নিয়মাবলি) রয়েছে
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md)-এ (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)-এ (`AGENTS.md` →
 Git Workflow → "Worktree isolation"-এ সংক্ষিপ্ত করা হয়েছে)। Claude Code-নির্দিষ্ট পয়েন্টসমূহ:
 
 - অপারেটরের কাছ থেকে `AskUserQuestion` এর মাধ্যমে বেস ব্রাঞ্চটি নিশ্চিত করুন (কঠোর নিয়ম #19), যদি না

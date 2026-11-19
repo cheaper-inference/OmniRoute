@@ -406,49 +406,48 @@ Bu komut, SQLite'ın çevrimiçi yedekleme API'sini kullanır — OmniRoute çal
 
 ### WAL Modu
 
-WAL varsayılan olarak etkindir. Yüksek yazma iş yükleri için şunları göz önünde bulundurun:
+WAL varsayılan olarak etkindir. Yoğun yazma iş yükleri için şunları değerlendirin:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Her 1000 sayfada bir checkpoint oluştur
+PRAGMA journal_size_limit = 67108864;  -- 64MB WAL sınırı
 ```
 
-OmniRoute `journal_size_limit` ayarlamaz. Bir denetim noktası WAL çerçevelerini ana dosyaya taşır ancak WAL dosyası ayrılan en büyük boyutunu korur. `OMNIROUTE_WAL_GUARD_MAX_MB` koruması yalnızca `wal_checkpoint(RESTART)` uyarır ve çalıştırır; disk boyutunda bir kapak değil.
+### İndeksler
 
-### Dizinler
+Performans için temel indeksler (migration'lar tarafından otomatik olarak oluşturulur):
 
-Performansa yönelik temel dizinler (geçişlerle otomatik olarak oluşturulur):
-
-- Sağlayıcıya göre `idx_models_provider` — model aramaları
-- `idx_combo_targets_combo_id` — birleşik hedef genişletme
-- `idx_usage_history_api_key_timestamp` — kullanım analitiği
+- `idx_models_provider` — sağlayıcıya göre model aramaları
+- `idx_combo_targets_combo_id` — combo hedeflerini genişletme
+- `idx_usage_history_api_key_timestamp` — kullanım analizleri
 - `idx_quota_snapshots_api_key_window` — kota takibi
 - `idx_call_logs_timestamp` — çağrı günlüğü sorguları
 
-Yeni bir dizin eklemek için bir geçiş oluşturun:
+Yeni bir indeks eklemek için bir migration oluşturun:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Bellek Eşlemeli I/O
+### Bellek Eşlemeli G/Ç
 
-Çok büyük veritabanları için (> 10GB), bellek eşlemesi SQLite pragması aracılığıyla ayarlanabilir:
+Çok büyük veritabanları (>10GB) için bellek eşleme, SQLite pragma aracılığıyla ayarlanabilir:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- SQLite pragma aracılığıyla ayarla (core.ts veya çalışma zamanında düzenleyin)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Sıkıştırma
 
-Uzun süredir çalışan OmniRoute bulut sunucuları ara sıra `VACUUM` yararlanır:
+Uzun süre çalışan OmniRoute örnekleri, ara sıra `VACUUM` çalıştırılmasından fayda sağlar:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Trafiğin düşük olduğu dönemlerde aylık olarak çalıştırın. (WAL modu ihtiyacı azaltır ancak ortadan kaldırmaz.)
+Trafiğin düşük olduğu zaman aralıklarında ayda bir çalıştırın. (WAL modu ihtiyacı azaltır ancak tamamen ortadan kaldırmaz.)
 
 ---
 

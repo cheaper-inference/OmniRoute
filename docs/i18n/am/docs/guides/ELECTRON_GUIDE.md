@@ -4,102 +4,99 @@
 
 ---
 
-> **ዋና የእውነት ምንጭ:** `electron/` የሥራ ቦታ
-> **መጨረሻ የተዘመነው:** 2026-06-28 — v3.8.40
+> **የእውነት ምንጭ፡-** `electron/` የስራ ቦታ** መጨረሻ የዘመነው፡-** 2026-06-28 — v3.8.40
 
-OmniRoute በ**Electron 41** + **electron-builder 26.10** ላይ የተገነባ ባለብዙ-መድረክ የዴስክቶፕ መተግበሪያ (Windows / macOS / Linux) ይዞ ይመጣል። የዴስክቶፕ መተግበሪያው ራሱን የቻለውን የNext.js አገልጋይ እንደ ልጅ ሂደት ያስጀምራል፣ `BrowserWindow`ን ወደ እሱ ያመለክታል፣ እንዲሁም የስርዓት ትሪ፣ ራስ-ሰር አዘማኝ፣ የIPC ድልድይ እና ምንም ውቅር የማይፈልግ የምስጢር ማስነሻ ያክላል።
+OmniRoute አብሮገነብ የዴስክቶፕ አቋራጭ መተግበሪያ (Windows / macOS / Linux) ይልካል።**Electron 41** +** ኤሌክትሮን-ገንቢ 26.10** . የዴስክቶፕ መተግበሪያ የ Next.js ራሱን የቻለ አገልጋይ በልጅነት ሂደት ያፈልቃል፣ `BrowserWindow` ይጠቁማል እና የስርዓት መሣቢያ፣ ራስ-አፕዴተር፣ IPC ድልድይ እና ዜሮ-ውቅር ሚስጥራዊ ማስነሻን ይጨምራል።
 
 ## አርክቴክቸር
 
 ```
 ┌──────────────────────────────────────────────┐
-│ የElectron ዋና ሂደት (electron/main.js)       │
-│ ├─ የአንድ-ኢንስታንስ መቆለፊያ                 │
-│ ├─ ልጅ ሂደት፦ ራሱን የቻለ የNext.js አገልጋይ   │
-│ │   (በElectron Node runtime የሚጀመር)          │
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ የስርዓት ትሪ + የአውድ ምናሌ                │
-│ ├─ በelectron-updater በኩል ራስ-ሰር ማዘመን      │
-│ ├─ የይዘት ደህንነት ፖሊሲ (የክፍለ ጊዜ ራስጌዎች) │
-│ └─ የምስጢር ማስነሻ (JWT / API_KEY_SECRET)      │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
 └──────────────────────────────────────────────┘
-            ↕ የIPC ድልድይ (electron/preload.js)
+            ↕ IPC bridge (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ አቅራቢ (የNext.js ዳሽቦርድ)                     │
+│ Renderer (Next.js dashboard)                  │
 │   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
 ## ስሪቶች
 
-ከ`electron/package.json` የተረጋገጠ፦
+ከ `electron/package.json` የተረጋገጠ፡-
 
-| ጥቅል                | ስሪት                                                                |
-| ------------------ | ------------------------------------------------------------------ |
-| `electron`         | `^43.4.1`                                                          |
-| `electron-builder` | `^26.15.3`                                                         |
-| `electron-updater` | `^6.8.9`                                                           |
-| `better-sqlite3`   | root `^13.0.2` (የNode-API ቀድሞ-ግንባታዎች — የElectron ዳግም ግንባታ አያስፈልግም) |
-| የመተግበሪያ ስሪት        | `3.8.0`                                                            |
-| የመተግበሪያ መለያ        | `online.omniroute.desktop`                                         |
-| የምርት ስም            | `OmniRoute`                                                        |
+| ጥቅል                | ሥሪት                                                       |
+| ------------------ | --------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                 |
+| `electron-builder` | `^26.15.3`                                                |
+| `electron-updater` | `^6.8.9`                                                  |
+| `better-sqlite3`   | root `^13.0.2` (Node-API prebuilds — no Electron rebuild) |
+| የመተግበሪያ ስሪት        | `3.8.0`                                                   |
+| የመተግበሪያ መታወቂያ      | `online.omniroute.desktop`                                |
+| የምርት ስም            | `OmniRoute`                                               |
 
-## ስክሪፕቶች (root `package.json`)
+## ስክሪፕቶች (ስር `package.json`)
 
-| ስክሪፕት                             | ዓላማ                                                                |
-| --------------------------------- | ------------------------------------------------------------------ |
-| `npm run electron:dev`            | `npm run dev`ን ያስጀምራል + `localhost:20128`ን ይጠብቃል + Electronን ያስነሳል |
-| `npm run electron:build`          | Next.jsን ይገነባል፣ ከዚያም ለአሁኑ OS `electron-builder`ን ያስኬዳል             |
-| `npm run electron:build:win`      | የWindows NSIS ጫኚ + ተንቀሳቃሽ ስሪት (x64) ይገነባል                          |
-| `npm run electron:build:mac`      | የmacOS DMG (Intel + Apple Silicon) ይገነባል                           |
-| `npm run electron:build:linux`    | የLinux AppImage + DEB (x64 + arm64) ይገነባል                          |
-| `npm run electron:smoke:packaged` | የታሸገውን ባይነሪ ያስነሳል፣ `/login`ን ለHTTP 200 ይፈትሻል፣ ከዚያም ያጠፋዋል           |
+| ስክሪፕት                             | ዓላማ                                                            |
+| --------------------------------- | -------------------------------------------------------------- |
+| `npm run electron:dev`            | `npm run dev` ይጀምራል + ይጠብቃል `localhost:20128` + ያስነሳል Electron |
+| `npm run electron:build`          | Next.js ይገነባል ከዚያም `electron-builder` ለአሁኑ OS ይሰራል             |
+| `npm run electron:build:win`      | Windows NSIS ጫኝ + ተንቀሳቃሽ (x64) ይገነባል                           |
+| `npm run electron:build:mac`      | macOS DMG (Intel + አፕል ሲሊከን) ይገነባል።                            |
+| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) ይገነባል።                      |
+| `npm run electron:smoke:packaged` | የታሸገ ሁለትዮሽ ያስነሳል እና `/login` ለ HTTP 200 ይመርምር እና ይዘጋል          |
 
-የ`electron/` የሥራ ቦታ የሚከተሉትንም ያቀርባል፦
+የ `electron/` የስራ ቦታ እንዲሁ ያጋልጣል፡-
 
-- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs`ን ያስኬዳል
-- `npm run build:mac-x64` / `build:mac-arm64` — ባለአንድ-አርክቴክቸር macOS ግንባታዎች
-- `npm run pack` — ለአካባቢያዊ ሙከራ ማውጫ-ብቻ ግንባታ (ጫኚ የለውም)
+- `npm run prepare:bundle` — runs `scripts/build/prepare-electron-standalone.mjs`
+- `npm run build:mac-x64` / `build:mac-arm64` — ነጠላ-ቅስት macOS ይገነባል።
+- `npm run pack` — ማውጫ-ለአካባቢያዊ ሙከራ ግንባታ ብቻ (ጫኚ የለም)
 
-## አማራጭ የruntime ጥቅሎች
+## አማራጭ የአሂድ ጊዜ ጥቅሎች
 
-የdesktop build-ዎች ከመጫኛዎቻቸው ጋር አማራጭ የruntime ማህደሮችን ሊያወጡ ይችላሉ። የተጫነው የserver ይዘት `optional-packs.index.json` ይዟል (በWindows እና Linux ከ`resources/app` ስር)። ለ`browser-runtime` መዝገብ `packs[].tarball` ያንብቡ፣ **ያንኑ ትክክለኛ የፋይል ስም ከተመሳሳይ release** ያውርዱ። የማህደር ስሞች SHA-256 digest ይይዛሉ፤ የተለያዩ build-ዎች የተለያዩ ማህደሮች ሊፈልጉ ይችላሉ። የወረደውን የፋይል ስም አይቀይሩ።
+የዴስክቶፕ ግንባታዎች ከጫኚዎቻቸው ጋር በመሆን አማራጭ የሩጫ ጊዜ ማህደሮችን ማተም ይችላሉ። የተጫነው የአገልጋይ ጭነት `optional-packs.index.json` ይይዛል (በ `resources/app` እና Windows ላይ) Linux ለ `browser-runtime` ግቤት `packs[].tarball` ን ያንብቡ እና ያውርዱ** ትክክለኛው የፋይል ስም ከተመሳሳይ ልቀት** . የማህደር ስሞች የ SHA-256 መፍጨትን ያካትታሉ; የተለያዩ ግንባታዎች የተለያዩ ማህደሮች ሊፈልጉ ይችላሉ. የወረደውን የፋይል ስም ሳይለወጥ ያቆዩት።
 
-የተጫነውን መተግበሪያ መረጃ ጠቋሚና የተመረጠውን ማህደር ወደ አንድ ማውጫ ይቅዱ፣ ከዚያ ከተመሳሳይ release የመጣ CLI ይጠቀሙ፦
+የተጫነውን መተግበሪያ ኢንዴክስ እና የተመረጠውን ማህደር ወደ አንድ ማውጫ ይቅዱ እና ከዛው ልቀት CLI ይጠቀሙ
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` የመጫንና የማረጋገጥ ሁኔታን ያሳያል፣ የማህደሩን የፋይል ስም አይደለም። አብሮ የተሰጠው መረጃ ጠቋሚ ማህደሩን ይመርጣል። መጫን ከማውጣት በፊት የማህደሩን checksum፣ የተጫነ ጥቅል ከመተካት በፊትም የpackage checksum-ዎቹን ያረጋግጣል። አካባቢያዊ ፋይሎችን ያነባል፤ የጎደሉ ማህደሮችን አያወርድም። ከመጫን በኋላ መተግበሪያውን ዳግም ያስጀምሩ። release-ው የሚዛመድ asset ከሌለው፣ አማራጭ ጥቅሉ በዚያ release ንብረቶች አይገኝም።
+`packs list` የመጫኛ እና የማረጋገጫ ሁኔታን ያሳያል, የማህደር ፋይል ስም አይደለም. የተጠቀለለው መረጃ ጠቋሚ ማህደሩን ይመርጣል. ጭነት ከማውጣቱ በፊት የማህደሩን ቼክ እና የተጫነ ጥቅል ከመተካት በፊት የእሽግ ቼኮችን ያረጋግጣል። የአካባቢ ፋይሎችን ያነባል; የጎደሉ ማህደሮችን አያወርድም። ከተጫነ በኋላ መተግበሪያውን እንደገና ያስጀምሩ. የሚለቀቀው ምንም ተዛማጅ ንብረት ከሌለው፣ የአማራጭ እሽግ በተለቀቁት ንብረቶች በኩል አይገኝም።
 
 ## የማውጫ አቀማመጥ
 
 ```
 electron/
-├── package.json              # የElectron ጥገኞች + የelectron-builder ውቅር
-├── main.js                   # ዋና ሂደት (24 KB — ከታች ያሉትን ማብራሪያዎች ይመልከቱ)
-├── preload.js                # የcontextBridge IPC ድልድይ
-├── types.d.ts                # የAppInfo / ServerStatus / ElectronAPI ዓይነቶች
-├── README.md                 # በworkspace ውስጥ ያሉ ማስታወሻዎች
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # የelectron-builder ውጤት (በgit ችላ የሚባል)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # የ.next/electron-standalone ጥቅልን ያዘጋጃል
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # ከግንባታ በኋላ የሚካሄድ የsmoke ሙከራ
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-ሁለቱም `main.js` እና `preload.js` TypeScript ሳይሆኑ **CommonJS `.js` ፋይሎች** ናቸው።
-የrenderer-ጎን ዓይነት መግለጫዎች `electron/types.d.ts` ውስጥ ይገኛሉ።
+ሁለቱም `main.js` እና `preload.js` ናቸው።**CommonJS `.js` ፋይሎች** TypeScript አይደለም . የምስል አድራጊው ጎን ትየባዎች በ `electron/types.d.ts` ይኖራሉ።
 
 ## IPC ድልድይ (`preload.js`)
 
-preload፣ `contextIsolation: true` እና `nodeIntegration: false` ያለውን `contextBridge`
-በመጠቀም በ`window.electronAPI` ላይ በተፈቀደ ዝርዝር ውስጥ ያለ API ያጋልጣል።
+ቅድመ-ጭነቱ `contextBridge` በ `contextIsolation: true` እና `nodeIntegration: false` በመጠቀም `window.electronAPI` ላይ የተፈቀደ API ያጋልጣል።
 
 ```javascript
 const VALID_CHANNELS = {
@@ -118,148 +115,132 @@ const VALID_CHANNELS = {
 };
 ```
 
-የተጋለጡ ዘዴዎች፦
+የተጋለጡ ዘዴዎች፡-
 
-| የRenderer ጥሪ                                                      | ዓይነት                     |
-| ----------------------------------------------------------------- | ------------------------ |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                   |
-| `openExternal(url)`                                               | invoke                   |
-| `getDataDir()`                                                    | invoke                   |
-| `restartServer()`                                                 | invoke                   |
-| `getAppVersion()`                                                 | invoke                   |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                   |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                     |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (disposer ይመልሳል) |
+| የአድራሻ ጥሪ                                                          | ዓይነት               |
+| ----------------------------------------------------------------- | ------------------ |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | መጥራት               |
+| `openExternal(url)`                                               | መጥራት               |
+| `getDataDir()`                                                    | መጥራት               |
+| `restartServer()`                                                 | መጥራት               |
+| `getAppVersion()`                                                 | መጥራት               |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | መጥራት               |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | መላክ                |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | ተቀበል (የመመለሻ አከፋፋይ) |
 
-የreceive አጋዥ ዘዴዎቹ በ`removeAllListeners` ላይ ከመመርኮዝ ይልቅ **disposer function**
-ይመልሳሉ — ይህም የReact components እንደገና ሲጫኑ የlistener መከማቸትን ይከላከላል።
+የተቀበሉት ረዳቶች ይመለሳሉ ሀ** የማስወገጃ ተግባር** በ `removeAllListeners` — ላይ ከመተማመን ይልቅ ይህ React ክፍሎች እንደገና በሚሰቀሉበት ጊዜ የአድማጮችን ክምችት ይከላከላል።
 
-## የServer የሕይወት ዑደት
+## የአገልጋይ የህይወት ዑደት
 
-`main.js` ከsystem Node ጋር የnative-module ABI አለመጣጣምን ለማስወገድ፣
-የNext.js standalone ጥቅሉን በElectron Node runtime በቀጥታ ያስነሳል፦
+ቤተኛ-ሞዱል ABI ከስርዓት መስቀለኛ መንገድ ጋር አለመጣጣም ለማስቀረት `main.js` የ Next.js ራሱን የቻለ ቅርቅብ በ Electron Node Runtime ያፈልቃል
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-ዋና ዋና ነጥቦች፦
+ዋና ዋና ዜናዎች
 
-- `waitForServer()` መስኮቱን ከማሳየቱ በፊት URLን እስከ 30 s ድረስ በተደጋጋሚ ይፈትሻል (በcold start ጊዜ ባዶ ማያ አይታይም)።
-- `stdio: "pipe"` stdout/stderrን ይይዛል፤ የዝግጁነት ሐረጎች (`Ready` / `listening`) `server-status: running`ን በIPC ላይ ይልካሉ።
-- `before-quit` ለሰላማዊ SIGTERM (WAL checkpoint) እስከ 5 s ድረስ ይጠብቃል፤ ከዚያ SIGKILL ይልካል።
-- በtray ውስጥ ያለው የport መቀየሪያ (`20128`፣ `3000`፣ `8080`) serverን ያቆማል፣ እንደገና ያስነሳል፣ ከዚያም BrowserWindowን እንደገና ይጭናል።
+- `waitForServer()` መስኮቱን ከማሳየቱ በፊት URL እስከ 30 ሰከንድ ድረስ ይመርጣል (በቀዝቃዛ ጅምር ላይ ባዶ ስክሪን የለም)።
+- `stdio: "pipe"` stdout/stderr ይይዛል; ዝግጁ ሀረጎች (`Ready` / `listening`) `server-status: running` በ IPC ላይ ያስወጣሉ።
+- `before-quit` ለጸጋ SIGTERM (WAL ፍተሻ ነጥብ) እስከ 5 ሰከንድ ድረስ ይጠብቃል ከዚያም SIGKILL ይልካል።
+- ወደብ መቀየሪያ በትሪ (`20128`, `3000`, `8080`) ቆሞ አገልጋዩን እንደገና ያስጀምረዋል ከዚያም BrowserWindow እንደገና ይጭናል.
 
-## ዜሮ-ውቅር የሚስጥር ማስጀመሪያ
+## ዜሮ-ውቅር ሚስጥራዊ ማስነሻ
 
-በመጀመሪያው ማስጀመር፣ ዋናው ሂደት የጎደሉ ሚስጥሮችን በራስ-ሰር ያመነጫል እና በቋሚነት ያስቀምጣል፦
+በመጀመሪያ ጅምር ላይ ዋናው ሂደት ሚስጥሮችን በራስ ሰር ያመነጫል እና ይቀጥላል፡-
 
-| ሚስጥር                     | ምንጭ                                                                        |
-| ------------------------ | -------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                   |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (የተመሰጠሩ ማረጋገጫዎች አስቀድመው ካሉ አይቀበልም) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                   |
+| ምስጢር                     | ምንጭ                                                                         |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                    |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (የተመሰጠሩ ክሬዲቶች ቀድሞውኑ ካሉ እምቢ ማለት ነው) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                    |
 
-በ `<DATA_DIR>/server.env` ውስጥ በቋሚነት ይቀመጣሉ። `DATA_DIR` ወደሚከተሉት ይፈታል፦
+ወደ `<DATA_DIR>/server.env` ጸንቷል። `DATA_DIR` ወደሚከተለው ወስኗል፡-
 
-- Windows፦ `%APPDATA%\omniroute`
-- Linux፦ `$XDG_CONFIG_HOME/omniroute` ወይም `~/.omniroute`
-- macOS፦ `~/.omniroute`
+- Windows: `%APPDATA%\omniroute`
+- Linux: `$XDG_CONFIG_HOME/omniroute` ወይም `~/.omniroute`
+- macOS: `~/.omniroute`
 
 ## የአካባቢ ፋይል ፍለጋ
 
-ዋናው ሂደት አገልጋዩን ከማስጀመሩ በፊት (`electron/main.js` ውስጥ ያለው `getPreferredEnvFilePath()`)
-ካሉት ውስጥ በመጀመሪያ የተገኘውን **አንድ** `.env` ፋይል ይመርጣል።
+አገልጋዩን ከመፍጠሩ በፊት ዋናው ሂደት (`getPreferredEnvFilePath()` in `electron/main.js`) ይመርጣል** አንድ** `.env` ፋይል፡ ከእነዚህ ውስጥ የመጀመሪያው።
 
-1. መተግበሪያው በተጀመረበት አካባቢ `DATA_DIR` ከተዋቀረ፣ `$DATA_DIR/.env`።
-2. ከላይ ያሉትን ተመሳሳይ ነባሪዎች በመጠቀም፣ `<resolved DATA_DIR>/.env`፦ በ
-   Windows `%APPDATA%\omniroute\.env`፣ በ Linux እና macOS `$XDG_CONFIG_HOME/omniroute/.env` ወይም `~/.omniroute/.env`።
-3. በሂደቱ የሥራ ማውጫ ውስጥ ያለ `.env`።
+1. `$DATA_DIR/.env`፣ `DATA_DIR` በአከባቢው ሲዋቀር መተግበሪያው የጀመረው።
+2. `<resolved DATA_DIR>/.env`, ከላይ ያሉትን ተመሳሳይ ነባሪዎች በመጠቀም: `%APPDATA%\omniroute\.env` በ Windows, `$XDG_CONFIG_HOME/omniroute/.env` ወይም `~/.omniroute/.env` በ Linux እና macOS ላይ.
+3. `.env` በሂደቱ የስራ ማውጫ ውስጥ.
 
-ዋናው ሂደት ያንን ፋይል ብቻ ያነባል፤ ቀጥለው ያሉ እጩ ፋይሎች አይዋሃዱም። ከዚያም የአገልጋዩ
-አካባቢ በሚከተለው የቅድሚያ ቅደም ተከተል ይገነባል (ከፍተኛው በመጀመሪያ)፦
+ዋናው ሂደት ያንን ፋይል ብቻ ያነባል; በኋላ እጩዎች አልተዋሃዱም። የአገልጋዩ አካባቢ የተገነባው በዚህ ቀዳሚነት ነው (በመጀመሪያ ከፍተኛ)።
 
-1. የ Electron ሂደት አካባቢ (መተግበሪያውን ካስጀመረው ማንኛውም ነገር የተወረሱ ተለዋዋጮች)።
+1. የ Electron ሂደት አካባቢ (መተግበሪያውን ከጀመረው ከማንኛውም የተወረሱ ተለዋዋጮች)።
 2. የተመረጠው `.env` ፋይል።
-3. `<DATA_DIR>/server.env` (ከላይ ያሉት የማስጀመሪያ ሚስጥሮች)።
+3. `<DATA_DIR>/server.env` (ከላይ ያሉት የቡት ማሰሪያ ምስጢሮች)።
 
-የሂደቱ አካባቢ መተግበሪያው ሲጀምር ይያዛል፤ ስለዚህ መተግበሪያው በሚሠራበት ጊዜ የተዋቀረ የስርዓት ወይም የተጠቃሚ
-አካባቢ ተለዋዋጭ (መስኮቱ ከተዘጋ በኋላ በትሪው ውስጥ በሚቆይበት ጊዜ የተዋቀረንም ጨምሮ) መተግበሪያው ሙሉ በሙሉ ወጥቶ እንደገና
-እስኪጀመር ድረስ ወደ አገልጋዩ አይደርስም። እንደ `CONTEXT_LENGTH_<PROVIDER>` ላሉ የአሂድ ጊዜ ቅንብሮች (
-[የአካባቢ ተለዋዋጮች፦ በእያንዳንዱ አቅራቢ የዐውድ ርዝመት](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)
-ይመልከቱ)፣ `.env` ፋይሉን መጠቀም ይመረጣል፤ ከዚያ ሙሉ በሙሉ ይውጡ (ትሪ፣ **ውጣ**) እና እንደገና ያስጀምሩ።
+የሂደቱ አካባቢ የሚቀረፀው አፕ ሲጀምር ነው፣ ስለዚህ አፕ በሚሰራበት ጊዜ የስርዓት ወይም የተጠቃሚ አካባቢ ተለዋዋጭ (መስኮት ከተዘጋ በኋላ በትሪው ውስጥ ሲቀመጥ ጨምሮ) አፕ ሙሉ ለሙሉ ተቋርጦ እንደገና እስኪጀምር ድረስ አገልጋዩ ላይ አይደርስም። እንደ `CONTEXT_LENGTH_<PROVIDER>` ላሉት የአሂድ ማዞሪያዎች ( [የአካባቢ ተለዋዋጮችን ይመልከቱ፡ በአቅራቢው የአውድ ርዝመት](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ) የ `.env` ፋይልን ይምረጡ እና ከዚያ ሙሉ በሙሉ ያቁሙ (ትሪ፣** አቁም** ) እና እንደገና ያስጀምሩ።
 
 ## መስኮት እና ትሪ
 
-- `BrowserWindow`፦ 1400×900 (ዝቅተኛው 1024×700)፣ `backgroundColor: "#0a0a0a"`።
-- macOS፦ `titleBarStyle: "hiddenInset"`፣ የመቆጣጠሪያ አዝራሮች በ `{ x: 16, y: 16 }`።
-- Windows/Linux፦ የስርዓቱ ቤተኛ የርዕስ አሞሌ።
-- የመዝጊያ አዝራሩ ወደ ትሪው ይቀንሳል፤ የትሪው ምናሌ **OmniRouteን ክፈት**፣ **ዳሽቦርድን ክፈት** (በውጫዊ አሳሽ)፣ **የአገልጋይ ወደብ** ንዑስ ምናሌ፣ **ዝማኔዎችን ፈትሽ**፣ **ውጣ** ይዟል።
+- `BrowserWindow`: 1400 × 900 (ደቂቃ 1024 × 700)፣ `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`፣ የትራፊክ መብራት በ `{ x: 16, y: 16 }` ላይ።
+- Windows/Linux: ቤተኛ ርዕስ አሞሌ.
+- ዝጋ አዝራር ወደ ትሪ ይቀንሳል; የትሪ ምናሌው አለው።** OmniRoute ን ይክፈቱ** ,** ዳሽቦርድን ክፈት** (ውጫዊ አሳሽ) ፣** የአገልጋይ ወደብ** ንዑስ ምናሌ፣** ዝማኔዎችን ይመልከቱ** ,** አቁም** .
 
-## የይዘት ደኅንነት ፖሊሲ
+## የይዘት ደህንነት ፖሊሲ
 
-በ `session.defaultSession.webRequest.onHeadersReceived` በኩል ይዋቀራል። ትኩረት የሚሹ መመሪያዎች፦
+በ `session.defaultSession.webRequest.onHeadersReceived` አቀናብር። የሚታወቁ መመሪያዎች፡-
 
-- `frame-ancestors 'none'`፣ `object-src 'none'`፣ `child-src 'none'`
+- `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- የልማት ሁነታ `'unsafe-eval'`ን ወደ `script-src` ብቻ ያክላል
+- የዴቭ ሁነታ `'unsafe-eval'` ወደ `script-src` ብቻ ይጨምራል
 
-## ራስ-ሰር ዝማኔ
+## ራስ-አዘምን
 
-`electron-updater`ን ከ GitHub አቅራቢ (`diegosouzapw/OmniRoute`) ጋር ይጠቀማል።
+`electron-updater` ከ GitHub አቅራቢው (`diegosouzapw/OmniRoute`) ጋር ይጠቀማል።
 
-- `autoDownload = false`፣ `autoInstallOnAppQuit = true`
-- ክስተቶች በ `update-status` IPC በኩል ወደ አሳዩ ይተላለፋሉ፦
-  `checking`፣ `available`፣ `not-available`፣ `downloading` (`percent`ን ጨምሮ)፣ `downloaded`፣ `error`
-- `installUpdate()` አገልጋዩን ያቋርጣል፣ ከዚያ `autoUpdater.quitAndInstall()`ን ይጠራል
-- በልማት ሁነታ (`!app.isPackaged`) ይዘለላል
+- `autoDownload = false`, `autoInstallOnAppQuit = true`
+- ክንውኖች በ `update-status` IPC `checking`፣ `available`፣ `not-available`፣ `downloading` (ከ `percent` ጋር)፣ `downloaded`፣ `error`
+- `installUpdate()` አገልጋዩን ይገድላል ከዚያም `autoUpdater.quitAndInstall()` ይደውላል
+- በዴቭ ሁነታ (`!app.isPackaged`) ተዘሏል
 
-## የግንባታ ሂደት
+## የቧንቧ መስመር ይገንቡ
 
-1. `npm run build` → የNext.js ራሱን የቻለ ግንባታ በ`.next/standalone` ውስጥ።
-2. `prepare-electron-standalone.mjs` → ወደ `.next/electron-standalone` እንደገና ያደራጃል፤ እንዲሁም ጥቅሉ ወደ ሌላ ቦታ ሊዛወር እንዲችል በ`server.js` + `required-server-files.json` ውስጥ ያሉ ፍጹም ዱካዎችን እንደገና ይጽፋል።
-3. `electron-builder` `main.js`፣ `preload.js`፣ `node_modules` እና `extraResources: { ../.next/electron-standalone → app }`ን ወደ ጥቅል ያካትታል።
+1. `npm run build` → Next.js ለብቻው በ `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → እንደገና ወደ `.next/electron-standalone` ደረጃ በመቀየር `server.js` + `required-server-files.json` ውስጥ ፍፁም ዱካዎችን ይፅፋል ስለዚህ ጥቅሉ ወደ ሌላ ቦታ ሊዛወር ይችላል።
+3. `electron-builder` ፓኬጆች `main.js`, `preload.js`, `node_modules` እና `extraResources: { ../.next/electron-standalone → app }`.
 
-### የግንባታ ዒላማዎች
+### ግቦችን ይገንቡ
 
-| ስርዓተ ክወና | ዒላማዎች                                           |
-| -------- | ----------------------------------------------- |
-| Windows  | NSIS ጫኚ + ተንቀሳቃሽ (x64)                          |
-| macOS    | DMG (Intel + arm64፣ ወደ Applications በመጎተት የሚጫን) |
-| Linux    | AppImage + DEB (x64 + arm64)                    |
+| OS      | ዒላማዎች                                |
+| ------- | ------------------------------------ |
+| Windows | NSIS ጫኚ + ተንቀሳቃሽ (x64)               |
+| macOS   | DMG (Intel + arm64፣ ድራግ-ወደ-መተግበሪያዎች) |
+| Linux   | AppImage + DEB (x64 + arm64)         |
 
-የNSIS ቅንብሮች፦ `oneClick: false`፣ ተጠቃሚው የመጫኛ ማውጫውን እንዲመርጥ ያስችላል፣ እንዲሁም የDesktop እና Start-Menu አቋራጮችን ይፈጥራል።
+NSIS settings: `oneClick: false`, ተጠቃሚው የመጫኛ ማውጫውን እንዲመርጥ ያስችለዋል, የዴስክቶፕ እና የጀምር-ሜኑ አቋራጮችን ይፈጥራል.
 
-## የታሸገውን ግንባታ የጭስ ሙከራ ማድረግ
+## የጭስ ሙከራ የታሸገ ግንባታ
 
 ```bash
 npm run electron:smoke:packaged
 ```
 
-`scripts/dev/smoke-electron-packaged.mjs`፦
+`scripts/dev/smoke-electron-packaged.mjs`:
 
-- ለአሁኑ መድረክ በ`electron/dist-electron/` ውስጥ ያለውን የታሸገ ማስፈጸሚያ ፋይል በራስ-ሰር ያገኛል።
-- የገንቢውን ውሂብ እንዳይነካ በተነጠሉ `HOME`/`APPDATA`/`XDG_*` ማውጫዎች ያስጀምራል።
-- በ45 ሰከንድ ውስጥ HTTP 200 ለማግኘት `http://127.0.0.1:20128/login`ን በተደጋጋሚ ይፈትሻል።
-- stderr/stdoutን ለከባድ የስህተት ንድፎች (`Cannot find module`፣ `MODULE_NOT_FOUND`፣ `ERR_DLOPEN_FAILED`፣ `Failed to start server`፣ ወዘተ) ይከታተላል።
-- ዝግጁነት ከተረጋገጠ በኋላ ለ2 ሰከንድ የተረጋጋ አፈጻጸምን ይጠብቃል፣ ከዚያ SIGTERMን ይልካል እና ወደቡ እስኪለቀቅ ይጠብቃል።
-- በCI ውስጥ `--no-sandbox --disable-gpu`ን (እና በLinux ላይ `--disable-dev-shm-usage`ን) በራስ-ሰር ያስተላልፋል።
+- ለአሁኑ መድረክ የታሸገውን ሁለትዮሽ በ `electron/dist-electron/` ውስጥ በራስ-ሰር ያገኛል።
+- የገንቢ ውሂብን እንዳይነካ በተገለሉ `HOME`/`APPDATA`/`XDG_*` ማውጫዎች ይጀምራል።
+- የሕዝብ አስተያየት `http://127.0.0.1:20128/login` ለ HTTP 200 በ45 ሰከንድ ውስጥ።
+- stderr/stdout ለሞት የሚዳርጉ ቅጦች (`Cannot find module`፣ `MODULE_NOT_FOUND`፣ `ERR_DLOPEN_FAILED`፣ `Failed to start server`፣ ወዘተ.) ይመለከታል።
+- ከዝግጁነት በኋላ ለ2 ሰከንድ የተረጋጋ የሩጫ ጊዜ ይጠብቃል፣ከዛ SIGTERM አውጥቶ ወደቡ ነጻ እስኪወጣ ይጠብቃል።
+- በ CI፣ በራስሰር `--no-sandbox --disable-gpu` (እና `--disable-dev-shm-usage` በ Linux ላይ) ያልፋል።
 
-የአካባቢ ተለዋዋጭ ሽረታዎች፦ `ELECTRON_SMOKE_APP_EXECUTABLE`፣ `ELECTRON_SMOKE_URL`፣ `ELECTRON_SMOKE_TIMEOUT_MS`፣ `ELECTRON_SMOKE_SETTLE_MS`፣ `ELECTRON_SMOKE_DATA_DIR`፣ `ELECTRON_SMOKE_KEEP_DATA`፣ `ELECTRON_SMOKE_STREAM_LOGS`።
+Env ይሽራል `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
-## የኮድ ፊርማ
+## ኮድ ፊርማ
 
-`electron/package.json` የፊርማ ማረጋገጫዎችን በቀጥታ **አያገናኝም**። በአካባቢ ተለዋዋጮች በኩል ወደ `electron-builder` ያስተላልፉ፦
+`electron/package.json` ያደርጋል** አይደለም** የሽቦ ፊርማ ምስክርነቶችን በቀጥታ. በ env vars ወደ `electron-builder` ይልፏቸው፡-
 
 ### macOS
 
@@ -282,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-የAppImage ፊርማ አማራጭ ነው — ፊርማ ለማድረግ `LINUX_GPG_KEY`ን ያዘጋጁ።
+AppImage መፈረም ከተፈረመ — አዘጋጅ `LINUX_GPG_KEY` አማራጭ ነው።
 
 ## ስርጭት
 
-የግንባታ ውጤቶች በ`electron/dist-electron/` ውስጥ ይቀመጣሉ፦
+በ `electron/dist-electron/` ውስጥ ያሉ ቅርሶች መሬት;
 
-- `OmniRoute.Setup.X.Y.Z.exe`፣ `OmniRoute X.Y.Z.exe` (Windows)
-- `OmniRoute-X.Y.Z-mac.dmg`፣ `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
-- `OmniRoute-X.Y.Z.AppImage`፣ `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
+- `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
+- `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
+- `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-ልቀቶች በGitHub Releases (`diegosouzapw/OmniRoute`) ላይ ይታተማሉ፤ `electron-updater`ም አዳዲስ ስሪቶችን የሚፈትሸው በዚያው ነው።
+ልቀቶች ወደ GitHub Releases (`diegosouzapw/OmniRoute`) ታትመዋል፣ ይህ ደግሞ `electron-updater` አዳዲስ ስሪቶችን የሚፈትሽበት ነው።
 
-## መላ ፍለጋ
+## መላ መፈለግ
 
-| ምልክት                                                            | መፍትሔ                                                                                                                                       |
-| --------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
-| Electron ዋና ስሪት ከተሻሻለ በኋላ `Cannot find module 'better-sqlite3'` | better-sqlite3 v13 የNode-API ቅድመ-ግንባታዎችን ያቀርባል — በስር ማውጫው ውስጥ `npm install`ን እና `prepare:bundle`ን እንደገና ያስኪዱ (ለአሁኑ መድረክ ቅድመ-ግንባታውን ያረጋግጣል) |
-| ለኔቲቭ ሞጁል `ERR_DLOPEN_FAILED`                                    | `prepare:bundle`ን እንደገና ያስኪዱ — ለአሁኑ መድረክ የNode-API ቅድመ-ግንባታ ከጎደለ ወዲያውኑ በስህተት ይቋረጣል                                                         |
-| በLinux ላይ መስኮቱ ባዶ ሆኖ ይታያል                                       | የNext.js አገልጋይ በእርግጥ ከPORT ጋር መያያዙን ያረጋግጡ (`[Server]` ምዝግቦችን ይፈትሹ)                                                                         |
-| የmacOS ኖተራይዜሽን ሂደት ይቆማል                                         | `APPLE_*` ተለዋዋጮች ወደ ውጭ መላካቸውን ያረጋግጡ፤ በ`.env` ውስጥ ብቻ መኖራቸው በቂ አይደለም                                                                         |
-| የWindows SmartScreen ማስጠንቀቂያ                                    | በEV ሰርተፍኬት ይፈርሙ፣ ወይም ተጠቃሚዎች ቀኝ-ጠቅ አድርገው → "Run anyway"ን ይምረጡ                                                                               |
-| ወደቡ በጥቅም ላይ በመሆኑ የጭስ ሙከራው ይከሽፋል                                 | `electron:smoke:packaged`ን ከማስኬድዎ በፊት በ20128 ላይ ያለ ማንኛውንም የአካባቢ ልማት አገልጋይ ያቁሙ                                                              |
+| ምልክት                                                          | አስተካክል።                                                                                                                      |
+| ------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` ከ Electron ትልቅ እብጠት በኋላ | better-sqlite3 v13 መርከቦች Node-API ቀድሞ ይገነባል — `npm install` በሥሩ እና `prepare:bundle` እንደገና ያካሂዳል (ለአሁኑ መድረክ ቅድመ ግንባታን ያረጋግጣል) |
+| `ERR_DLOPEN_FAILED` ለ ቤተኛ ሞጁል                                 | `prepare:bundle` — እንደገና አሂድ አሁን ላለው የመሳሪያ ስርዓት የመስቀለኛ-ኤፒአይ ቅድመ ግንባታ ሲጠፋ በፍጥነት አይሳካም                                         |
+| መስኮት Linux ላይ ባዶ ሆኖ ይታያል                                      | Next.js አገልጋይ በትክክል ከ PORT ጋር የተያያዘ መሆኑን ያረጋግጡ ( `[Server]` ምዝግብ ማስታወሻዎችን ይመልከቱ)                                             |
+| macOS notarization ጋጥ                                         | `APPLE_*` vars በ `.env` ብቻ ሳይሆን ወደ ውጭ እንደሚላኩ ያረጋግጡ                                                                           |
+| Windows SmartScreen ማስጠንቀቂያ                                   | በ EV ሰርተፍኬት ይመዝገቡ፣ ወይም ተጠቃሚዎች → "ለማንኛውም አሂድ" ን ጠቅ ያድርጉ።                                                                      |
+| የጭስ ሙከራ በወደብ አጠቃቀም ላይ አይሳካም።                                  | `electron:smoke:packaged` ከማሄድዎ በፊት በ20128 ማንኛውንም የአካባቢ ዴቭ አገልጋይ ያቁሙ                                                         |
 
-## በተጨማሪ ይመልከቱ
+## በተጨማሪም ተመልከት
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
-- ምንጭ፦ `electron/main.js`፣ `electron/preload.js`፣ `electron/package.json`
-- ረዳቶች፦ `scripts/build/prepare-electron-standalone.mjs`፣ `scripts/dev/smoke-electron-packaged.mjs`
+- ምንጭ `electron/main.js`, `electron/preload.js`, `electron/package.json`
+- ረዳቶች `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

@@ -339,11 +339,11 @@ Ang extraction ay **nakabatay sa regex**, hindi sa LLM — tumatakbo ito sa loob
 `setImmediate()` kaya hindi nito kailanman bina-block ang response stream:
 
 - **Mga pattern ng kagustuhan** → `MemoryType.FACTUAL`
-  (hal. `I prefer …`, `I really like …`, `my favorite is …`, `I hate …`)
+  (hal. `Mas gusto ko ang …`, `Talagang gusto ko ang …`, `paborito ko ang …`, `ayaw ko sa …`)
 - **Mga pattern ng desisyon** → `MemoryType.EPISODIC`
-  (hal. `I'll use …`, `I chose …`, `I went with …`, `I'm going to adopt …`)
+  (hal. `Gagamitin ko ang …`, `Pinili ko ang …`, `Nagpasya ako sa …`, `Gagamitin ko na ang …`)
 - **Mga pattern ng gawi** → `MemoryType.FACTUAL`
-  (hal. `I usually …`, `I always …`, `I tend to …`)
+  (hal. `Karaniwan kong …`, `Palagi akong …`, `Madalas akong …`)
 
 Ang bawat tugma ay nililinis (`trim`, pagsasama-sama ng whitespace, nililimitahan sa 500 character),
 inaalisan ng mga duplicate sa loob ng batch sa pamamagitan ng matatag na `factKey(category, content)`, at
@@ -757,8 +757,7 @@ Kapag sinabi ng isang user:
 
 Upang maiwasan ang walang-kontrol na pagkuha, inilalapat ang mga sumusunod na limitasyon:
 
-| Pinakamababang haba ng nilalaman  | 3 character   |
-| --------------------------------- | ------------- |
+| Pinakamababang haba ng nilalaman | 3 character |
 | Pinakamataas na haba ng nilalaman | 500 character |
 
 ### Kailan Dapat I-disable ang Pagkuha

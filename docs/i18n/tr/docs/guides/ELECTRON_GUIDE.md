@@ -4,105 +4,99 @@
 
 ---
 
-> **Doğruluk kaynağı:** `electron/` çalışma alanı
-> **Son güncelleme:** 2026-06-28 — v3.8.40
+> **Gerçeğin kaynağı:** `electron/` çalışma alanı** Son güncelleme:** 2026-06-28 — v3.8.40
 
-OmniRoute, **Electron 41** + **electron-builder 26.10** üzerinde geliştirilmiş, platformlar arası bir masaüstü uygulamasıyla (Windows / macOS / Linux) birlikte sunulur. Masaüstü uygulaması, bağımsız Next.js sunucusunu bir alt süreç olarak başlatır, bir `BrowserWindow` örneğini bu sunucuya yönlendirir ve sistem tepsisi, otomatik güncelleyici, IPC köprüsü ve sıfır yapılandırmalı gizli değer önyüklemesi ekler.
+OmniRoute platformlar arası bir masaüstü uygulaması (Windows / macOS / Linux) üzerine kurulu olarak gelir**Electron 41** +** elektron oluşturucu 26.10** . Masaüstü uygulaması Next.js bağımsız sunucusunu bir alt süreç olarak oluşturur, ona bir `BrowserWindow` işaret eder ve bir sistem tepsisi, otomatik güncelleyici, IPC köprüsü ve sıfır yapılandırmalı gizli önyükleme ekler.
 
-## Mimari
+## Mimarlık
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Electron ana süreci (electron/main.js)       │
-│ ├─ Tek örnek kilidi                          │
-│ ├─ Alt süreç: Bağımsız Next.js sunucusu      │
-│ │   (Electron'ın Node çalışma zamanıyla      │
-│ │   başlatılır)                              │
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ Sistem tepsisi + bağlam menüsü            │
-│ ├─ electron-updater ile otomatik güncelleme  │
-│ ├─ İçerik Güvenliği Politikası               │
-│ │   (oturum üstbilgileri)                    │
-│ └─ Gizli değer önyüklemesi                   │
-│     (JWT / API_KEY_SECRET)                   │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
 └──────────────────────────────────────────────┘
-          ↕ IPC köprüsü (electron/preload.js)
+            ↕ IPC bridge (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ İşleyici (Next.js panosu)                    │
-│   window.electronAPI.* (contextIsolation)    │
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
 ## Sürümler
 
-`electron/package.json` dosyasından doğrulanmıştır:
+`electron/package.json` onaylandı:
 
-| Paket              | Sürüm                                                                            |
-| ------------------ | -------------------------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                                        |
-| `electron-builder` | `^26.15.3`                                                                       |
-| `electron-updater` | `^6.8.9`                                                                         |
-| `better-sqlite3`   | kök `^13.0.2` (Node-API ön derlemeleri — Electron için yeniden derleme gerekmez) |
-| Uygulama sürümü    | `3.8.0`                                                                          |
-| Uygulama kimliği   | `online.omniroute.desktop`                                                       |
-| Ürün adı           | `OmniRoute`                                                                      |
+| Paket              | Sürüm                                                                        |
+| ------------------ | ---------------------------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                                    |
+| `electron-builder` | `^26.15.3`                                                                   |
+| `electron-updater` | `^6.8.9`                                                                     |
+| `better-sqlite3`   | root `^13.0.2` (Node-API — önceden oluşturur, Electron yeniden oluşturulmaz) |
+| Uygulama sürümü    | `3.8.0`                                                                      |
+| Uygulama kimliği   | `online.omniroute.desktop`                                                   |
+| Ürün adı           | `OmniRoute`                                                                  |
 
-## Betikler (kök `package.json`)
+## Komut dosyaları (kök `package.json`)
 
-| Betik                             | Amaç                                                                                                                 |
-| --------------------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | `npm run dev` komutunu başlatır, `localhost:20128` için bekler ve Electron'ı başlatır                                |
-| `npm run electron:build`          | Next.js'i derler, ardından geçerli işletim sistemi için `electron-builder` çalıştırır                                |
-| `npm run electron:build:win`      | Windows NSIS yükleyicisini + taşınabilir sürümü (x64) derler                                                         |
-| `npm run electron:build:mac`      | macOS DMG'yi (Intel + Apple Silicon) derler                                                                          |
-| `npm run electron:build:linux`    | Linux AppImage + DEB paketlerini (x64 + arm64) derler                                                                |
-| `npm run electron:smoke:packaged` | Paketlenmiş ikili dosyayı başlatır, HTTP 200 yanıtı için `/login` uç noktasını yoklar ve ardından uygulamayı kapatır |
+| Senaryo                           | Amaç                                                                                      |
+| --------------------------------- | ----------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | `npm run dev` başlatır + bekler `localhost:20128` + Electron                              |
+| `npm run electron:build`          | Next.js oluşturur ve ardından mevcut OS için `electron-builder` çalıştırır                |
+| `npm run electron:build:win`      | Windows NSIS yükleyicisini oluşturur + taşınabilir (x64)                                  |
+| `npm run electron:build:mac`      | macOS DMG (Intel + Apple Silicon) oluşturur                                               |
+| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) oluşturur                                              |
+| `npm run electron:smoke:packaged` | Paketlenmiş ikili programı başlatır ve HTTP 200 için `/login` araştırır, ardından kapanır |
 
-`electron/` çalışma alanı ayrıca şunları sunar:
+`electron/` çalışma alanı ayrıca şunları da ortaya çıkarır:
 
-- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` betiğini çalıştırır
-- `npm run build:mac-x64` / `build:mac-arm64` — tek mimarili macOS derlemeleri
-- `npm run pack` — yerel testler için yalnızca dizin oluşturan derleme (yükleyici yok)
+- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` çalıştırır
+- `npm run build:mac-x64` / `build:mac-arm64` — tek kemerli macOS yapıları
+- `npm run pack` — yerel test için yalnızca dizin yapısı (yükleyici yok)
 
 ## İsteğe bağlı çalışma zamanı paketleri
 
-Masaüstü derlemeleri, yükleyicileriyle birlikte isteğe bağlı çalışma zamanı arşivleri yayımlayabilir. Kurulu sunucu içeriği `optional-packs.index.json` dosyasını içerir (Windows ve Linux'ta `resources/app` altında). `browser-runtime` girdisi için `packs[].tarball` değerini okuyun ve **tam olarak bu dosya adını aynı sürümden indirin**. Arşiv adları SHA-256 özeti içerir; farklı derlemeler farklı arşivler gerektirebilir. İndirilen dosyanın adını değiştirmeyin.
+Masaüstü yapıları, yükleyicileriyle birlikte isteğe bağlı çalışma zamanı arşivleri yayınlayabilir. Kurulu sunucu verisi `optional-packs.index.json` içerir ( Windows ve Linux `resources/app` altında). `browser-runtime` girişi için `packs[].tarball` okuyun ve indirin** aynı sürümdeki tam dosya adı** . Arşiv adları bir SHA-256 özeti içerir; farklı yapılar farklı arşivler gerektirebilir. İndirilen dosya adını değiştirmeden bırakın.
 
-Kurulu uygulamanın dizin dosyasını ve seçilen arşivi aynı dizine kopyalayın, ardından aynı sürümün CLI'sini kullanın:
+Yüklü uygulamanın dizinini ve seçilen arşivi tek bir dizine kopyalayın, ardından aynı sürümdeki CLI kullanın:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` arşiv dosyasının adını değil, kurulum ve doğrulama durumunu gösterir. Arşivi birlikte gelen dizin dosyası seçer. Kurulum, çıkarmadan önce arşiv sağlama toplamını ve kurulu paketi değiştirmeden önce paket sağlama toplamlarını doğrular. Yerel dosyaları okur; eksik arşivleri indirmez. Kurulumdan sonra uygulamayı yeniden başlatın. Sürümde eşleşen bir varlık yoksa isteğe bağlı paket o sürümün varlıkları üzerinden kullanılamaz.
+`packs list` arşiv dosya adını değil, kurulum ve doğrulama durumunu görüntüler. Paketlenmiş dizin arşivi seçer. Kurulum, çıkarmadan önce arşiv sağlama toplamını ve kurulu paketi değiştirmeden önce paket sağlama toplamlarını doğrular. Yerel dosyaları okur; eksik arşivleri indirmez. Kurulumdan sonra uygulamayı yeniden başlatın. Sürümün eşleşen bir varlığı yoksa isteğe bağlı paket, o sürümün varlıkları aracılığıyla kullanılamaz.
 
-## Dizin Yapısı
+## Dizin Düzeni
 
 ```
 electron/
-├── package.json              # Electron bağımlılıkları + electron-builder yapılandırması
-├── main.js                   # Ana süreç (24 KB — aşağıdaki açıklamalara bakın)
-├── preload.js                # contextBridge IPC köprüsü
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI türleri
-├── README.md                 # Çalışma alanı içi notlar
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder çıktısı (git tarafından yok sayılır)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # .next/electron-standalone paketini hazırlar
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Derleme sonrası duman testi
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Hem `main.js` hem de `preload.js`, TypeScript değil, **CommonJS `.js` dosyalarıdır**.
-İşleyici tarafı tür tanımları `electron/types.d.ts` içinde bulunur.
+Hem `main.js` hem de `preload.js`**CommonJS `.js` dosyaları** , TypeScript değil. Oluşturucu tarafı yazmaları `electron/types.d.ts` bulunur.
 
 ## IPC Köprüsü (`preload.js`)
 
-Ön yükleme betiği, `contextIsolation: true` ve `nodeIntegration: false` ayarlarıyla
-`contextBridge` kullanarak `window.electronAPI` üzerinde izin verilenler listesine alınmış bir API sunar.
+Ön yükleme, `contextIsolation: true` ve `nodeIntegration: false` ile `contextBridge` kullanarak `window.electronAPI` üzerinde beyaz listeye alınmış bir API ortaya çıkarır.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -121,124 +115,113 @@ const VALID_CHANNELS = {
 };
 ```
 
-Sunulan yöntemler:
+Maruz kalan yöntemler:
 
-| İşleyici çağrısı                                                  | Tür                            |
-| ----------------------------------------------------------------- | ------------------------------ |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                         |
-| `openExternal(url)`                                               | invoke                         |
-| `getDataDir()`                                                    | invoke                         |
-| `restartServer()`                                                 | invoke                         |
-| `getAppVersion()`                                                 | invoke                         |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                         |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                           |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (temizleyici döndürür) |
+| Oluşturucu çağrısı                                                | Tip                             |
+| ----------------------------------------------------------------- | ------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | çağırmak                        |
+| `openExternal(url)`                                               | çağırmak                        |
+| `getDataDir()`                                                    | çağırmak                        |
+| `restartServer()`                                                 | çağırmak                        |
+| `getAppVersion()`                                                 | çağırmak                        |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | çağırmak                        |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | Göndermek                       |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | almak (atıklayıcıyı iade etmek) |
 
-Alım yardımcıları, `removeAllListeners` işlevine dayanmak yerine bir **temizleyici işlev**
-döndürür; bu, React bileşenleri yeniden bağlandığında dinleyicilerin birikmesini önler.
+Alma yardımcıları bir** öğütücü işlevi** `removeAllListeners` — güvenmek yerine bu, React bileşenleri yeniden bağlandığında dinleyici birikimini önler.
 
 ## Sunucu Yaşam Döngüsü
 
-`main.js`, sistem Node'u ile yerel modül ABI uyuşmazlığını önlemek için Next.js
-bağımsız paketini doğrudan Electron Node çalışma zamanı ile başlatır:
+`main.js` yerel modül ABI sistem Düğümü ile eşleşmemesini önlemek için Next.js bağımsız paketini doğrudan Electron Düğümü çalışma zamanı ile oluşturur:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
 Öne çıkanlar:
 
-- `waitForServer()`, pencereyi göstermeden önce URL'yi 30 saniyeye kadar yoklar (soğuk başlatmada boş ekran gösterilmez).
-- `stdio: "pipe"`, stdout/stderr çıktısını yakalar; hazır olunduğunu belirten ifadeler (`Ready` / `listening`), IPC üzerinden `server-status: running` olayı yayar.
-- `before-quit`, düzgün bir SIGTERM sonlandırması (WAL denetim noktası) için 5 saniyeye kadar bekler ve ardından SIGKILL gönderir.
-- Tepsideki bağlantı noktası değiştirici (`20128`, `3000`, `8080`), sunucuyu durdurup yeniden başlatır ve ardından BrowserWindow'u yeniden yükler.
+- `waitForServer()` pencereyi göstermeden önce 30 saniyeye kadar URL yoklar (soğuk başlatmada boş ekran yoktur).
+- `stdio: "pipe"` stdout/stderr yakalar; hazır ifadeler (`Ready` / `listening`) IPC üzerinden `server-status: running` yayar.
+- `before-quit` zarif SIGTERM (WAL kontrol noktası) için 5 saniyeye kadar bekler ve ardından SIGKILL gönderir.
+- Tepsideki bağlantı noktası değiştirici (`20128`, `3000`, `8080`) sunucuyu durdurup yeniden başlatır ve ardından BrowserWindow yeniden yükler.
 
-## Sıfır yapılandırmalı Gizli Değer Önyüklemesi
+## Sıfır Yapılandırmalı Gizli Önyükleme
 
-İlk başlatmada ana süreç, eksik gizli değerleri otomatik olarak oluşturur ve kalıcı hâle getirir:
+İlk başlatmada ana süreç, eksik sırları otomatik olarak oluşturur ve devam ettirir:
 
-| Gizli Değer              | Kaynak                                                                                                 |
-| ------------------------ | ------------------------------------------------------------------------------------------------------ |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                               |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (şifrelenmiş kimlik bilgileri zaten mevcutsa işlemi reddeder) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                               |
+| Gizli                    | Kaynak                                                                                          |
+| ------------------------ | ----------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                        |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (şifrelenmiş kimlik bilgileri zaten mevcutsa reddeder) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                        |
 
-`<DATA_DIR>/server.env` dosyasına kaydedilir. `DATA_DIR` şu şekilde çözümlenir:
+`<DATA_DIR>/server.env` ısrar etti. `DATA_DIR` şu şekilde çözülür:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` veya `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Ortam dosyası arama sırası
+## Ortam dosyası arama
 
-Ana süreç, sunucuyu başlatmadan önce (`electron/main.js` içindeki `getPreferredEnvFilePath()`) aşağıdakilerden mevcut olan ilk **bir** `.env` dosyasını seçer.
+Sunucuyu oluşturmadan önce ana süreç ( `electron/main.js` `getPreferredEnvFilePath()` ) seçimleri yapar.** bir** `.env` dosyası: bunlardan ilki.
 
-1. Uygulamanın başlatıldığı ortamda `DATA_DIR` ayarlanmışsa `$DATA_DIR/.env`.
-2. Yukarıdaki varsayılanlar kullanılarak `<resolved DATA_DIR>/.env`: Windows'ta `%APPDATA%\omniroute\.env`, Linux ve macOS'ta `$XDG_CONFIG_HOME/omniroute/.env` veya `~/.omniroute/.env`.
-3. Sürecin çalışma dizinindeki `.env`.
+1. `$DATA_DIR/.env`, uygulamanın başlatıldığı ortamda `DATA_DIR` ayarlandığında.
+2. `<resolved DATA_DIR>/.env`, yukarıdakiyle aynı varsayılanları kullanır: Windows üzerinde `%APPDATA%\omniroute\.env`, `$XDG_CONFIG_HOME/omniroute/.env` veya `~/.omniroute/.env` ve Linux üzerinde macOS.
+3. süreç çalışma dizininde `.env`.
 
-Ana süreç yalnızca bu dosyayı okur; sonraki adaylar birleştirilmez. Ardından sunucu ortamı, aşağıdaki öncelik sırasına göre oluşturulur (en yüksek öncelikli önce):
+Ana süreç yalnızca o dosyayı okur; daha sonraki adaylar birleştirilmez. Sunucu ortamı daha sonra şu öncelik ile oluşturulur (önce en yüksek):
 
-1. Electron süreç ortamı (uygulamayı başlatan kaynaktan devralınan değişkenler).
+1. Electron süreç ortamı (uygulamayı başlatan şeyden miras alınan değişkenler).
 2. Seçilen `.env` dosyası.
-3. `<DATA_DIR>/server.env` (yukarıdaki önyükleme gizli değerleri).
+3. `<DATA_DIR>/server.env` (yukarıdaki önyükleme sırları).
 
-Süreç ortamı, uygulama başlatıldığında yakalanır. Bu nedenle uygulama çalışırken ayarlanan bir sistem veya kullanıcı ortam değişkeni (penceresi kapatıldıktan sonra tepside beklediği süre dâhil), uygulama tamamen kapatılıp yeniden başlatılana kadar sunucuya ulaşmaz. `CONTEXT_LENGTH_<PROVIDER>` gibi çalışma zamanı ayarları için (bkz.
-[Ortam Değişkenleri: Sağlayıcı başına bağlam uzunluğu](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
-`.env` dosyasını tercih edin, ardından uygulamadan tamamen çıkın (tepsi, **Çıkış**) ve yeniden başlatın.
+İşlem ortamı, uygulama başlatıldığında yakalanır; dolayısıyla, uygulama çalışırken (pencere kapatıldıktan sonra tepside durduğu süre dahil) ayarlanan bir sistem veya kullanıcı ortamı değişkeni, uygulamadan tamamen çıkılıp yeniden başlatılana kadar sunucuya ulaşmaz. `CONTEXT_LENGTH_<PROVIDER>` gibi çalışma zamanı düğmeleri için (bkz. [Ortam Değişkenleri: Sağlayıcı başına bağlam uzunluğu](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), `.env` dosyasını tercih edin ve ardından tamamen çıkın (tepsi,** Çıkış yapmak** ) ve yeniden başlatın.
 
-## Pencere ve Sistem Tepsisi
+## Pencere ve Tepsi
 
-- `BrowserWindow`: 1400×900 (min. 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, trafik ışığı düğmeleri `{ x: 16, y: 16 }` konumunda.
+- `BrowserWindow`: 1400 × 900 (en az 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, `{ x: 16, y: 16 }` trafik ışığı.
 - Windows/Linux: yerel başlık çubuğu.
-- Kapat düğmesi uygulamayı sistem tepsisine küçültür; tepsi menüsünde **OmniRoute'u Aç**, **Panoyu Aç** (harici tarayıcı), **Sunucu Bağlantı Noktası** alt menüsü, **Güncellemeleri Denetle** ve **Çıkış** seçenekleri bulunur.
+- Kapatma düğmesi tepsiye küçülür; tepsi menüsü var** OmniRoute aç** ,** Kontrol Panelini Aç** (harici tarayıcı),** Sunucu Bağlantı Noktası** alt menü,** Güncellemeleri Kontrol Et** ,** Çıkış yapmak** .
 
 ## İçerik Güvenliği Politikası
 
-`session.defaultSession.webRequest.onHeadersReceived` aracılığıyla ayarlanır. Dikkate değer yönergeler:
+`session.defaultSession.webRequest.onHeadersReceived` aracılığıyla ayarlayın. Önemli direktifler:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Geliştirme modu yalnızca `script-src` yönergesine `'unsafe-eval'` ekler
+- Geliştirme modu `'unsafe-eval'` yalnızca `script-src` ekler
 
 ## Otomatik güncelleme
 
-GitHub sağlayıcısıyla (`diegosouzapw/OmniRoute`) `electron-updater` kullanır.
+`electron-updater` GitHub sağlayıcısıyla (`diegosouzapw/OmniRoute`) kullanır.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Olaylar, `update-status` IPC üzerinden oluşturucu sürece iletilir:
-  `checking`, `available`, `not-available`, `downloading` (`percent` ile), `downloaded`, `error`
-- `installUpdate()`, sunucuyu sonlandırır ve ardından `autoUpdater.quitAndInstall()` çağrısını yapar
-- Geliştirme modunda atlanır (`!app.isPackaged`)
+- Oluşturucuya `update-status` IPC aracılığıyla iletilen olaylar: `checking`, `available`, `not-available`, `downloading` ( `percent` ile), `downloaded`, `error`
+- `installUpdate()` sunucuyu öldürür ve ardından `autoUpdater.quitAndInstall()` çağırır
+- Geliştirme modunda atlandı (`!app.isPackaged`)
 
-## Derleme İşlem Hattı
+## Ardışık Düzen Oluştur
 
-1. `npm run build` → `.next/standalone` içinde bağımsız Next.js derlemesi oluşturur.
-2. `prepare-electron-standalone.mjs` → dosyaları `.next/electron-standalone` içine yeniden yerleştirir ve paketin taşınabilir olması için `server.js` + `required-server-files.json` içindeki mutlak yolları yeniden yazar.
-3. `electron-builder`, `main.js`, `preload.js`, `node_modules` ve `extraResources: { ../.next/electron-standalone → app }` öğelerini paketler.
+1. `npm run build` → Next.js `.next/standalone` bağımsız.
+2. `prepare-electron-standalone.mjs` → `.next/electron-standalone` olarak yeniden aşamalandırılır ve `server.js` + `required-server-files.json` içindeki mutlak yolları yeniden yazar, böylece paket yeniden konumlandırılabilir olur.
+3. `electron-builder` paketleri `main.js`, `preload.js`, `node_modules` ve `extraResources: { ../.next/electron-standalone → app }`.
 
-### Derleme hedefleri
+### Hedefler oluşturun
 
-| İşletim Sistemi | Hedefler                                      |
-| --------------- | --------------------------------------------- |
-| Windows         | NSIS yükleyicisi + taşınabilir sürüm (x64)    |
-| macOS           | DMG (Intel + arm64, Applications'a sürükleme) |
-| Linux           | AppImage + DEB (x64 + arm64)                  |
+| OS      | Hedefler                                  |
+| ------- | ----------------------------------------- |
+| Windows | NSIS yükleyici + taşınabilir (x64)        |
+| macOS   | DMG (Intel + arm64, Uygulamalara sürükle) |
+| Linux   | AppImage + DEB (x64 + arm64)              |
 
-NSIS ayarları: `oneClick: false`, kullanıcının yükleme dizinini seçmesine olanak tanır, Masaüstü ve Başlat Menüsü kısayolları oluşturur.
+NSIS ayarları: `oneClick: false`, kullanıcının kurulum dizinini seçmesine olanak tanır, Masaüstü ve Başlat Menüsü kısayolları oluşturur.
 
-## Paketlenmiş Derlemenin Duman Testi
+## Duman Testi Paketlenmiş Yapı
 
 ```bash
 npm run electron:smoke:packaged
@@ -246,27 +229,27 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Geçerli platform için paketlenmiş ikili dosyayı `electron/dist-electron/` içinde otomatik olarak bulur.
-- Geliştirici verilerine dokunmaması için yalıtılmış `HOME`/`APPDATA`/`XDG_*` dizinleriyle başlatır.
-- 45 saniye içinde HTTP 200 yanıtı almak için `http://127.0.0.1:20128/login` adresini düzenli olarak yoklar.
-- Ölümcül hata kalıpları (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` vb.) için stderr/stdout çıktılarını izler.
-- Hazır duruma geldikten sonra 2 saniyelik kararlı çalışma süresini bekler, ardından SIGTERM gönderir ve portun serbest kalmasını bekler.
-- CI ortamında otomatik olarak `--no-sandbox --disable-gpu` (Linux'ta ayrıca `--disable-dev-shm-usage`) seçeneklerini iletir.
+- Geçerli platform için `electron/dist-electron/` paketlenmiş ikili dosyayı otomatik olarak keşfeder.
+- Geliştirici verilerine dokunmaması için yalıtılmış `HOME`/`APPDATA`/`XDG_*` dizinleriyle başlatılır.
+- 45 saniye içinde HTTP 200 için `http://127.0.0.1:20128/login` anketleri.
+- Ölümcül kalıplar için stderr/stdout izler (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, vb.).
+- Hazır olduktan sonra 2 saniyelik kararlı çalışma süresini bekler, ardından SIGTERM verir ve bağlantı noktasının serbest kalmasını bekler.
+- CI `--no-sandbox --disable-gpu` (ve Linux `--disable-dev-shm-usage` ) otomatik olarak geçirir.
 
-Ortam değişkeni geçersiz kılmaları: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Zarf geçersiz kılmaları: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## Kod İmzalama
 
-`electron/package.json`, imzalama kimlik bilgilerini **doğrudan** yapılandırmaz. Bunları ortam değişkenleri aracılığıyla `electron-builder`'a iletin:
+`electron/package.json` yapar** Olumsuz** imzalama kimlik bilgilerini doğrudan iletin. Bunları env vars aracılığıyla `electron-builder` iletin:
 
 ### macOS
 
 ```bash
-export APPLE_ID=<e-posta>
-export APPLE_APP_SPECIFIC_PASSWORD=<parola>
-export APPLE_TEAM_ID=<kimlik>
+export APPLE_ID=<email>
+export APPLE_APP_SPECIFIC_PASSWORD=<password>
+export APPLE_TEAM_ID=<id>
 export CSC_LINK=path/to/cert.p12
-export CSC_KEY_PASSWORD=<sertifika-parolası>
+export CSC_KEY_PASSWORD=<cert-password>
 npm run electron:build:mac
 ```
 
@@ -274,34 +257,34 @@ npm run electron:build:mac
 
 ```bash
 export CSC_LINK=path/to/cert.pfx
-export CSC_KEY_PASSWORD=<sertifika-parolası>
+export CSC_KEY_PASSWORD=<cert-password>
 npm run electron:build:win
 ```
 
 ### Linux
 
-AppImage imzalama isteğe bağlıdır — imzalamak için `LINUX_GPG_KEY` değişkenini ayarlayın.
+AppImage imzalama isteğe bağlıdır — imzalama durumunda `LINUX_GPG_KEY` ayarlayın.
 
 ## Dağıtım
 
-Derleme çıktıları `electron/dist-electron/` dizinine yerleştirilir:
+Eserler `electron/dist-electron/` iniyor:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Sürümler GitHub Releases (`diegosouzapw/OmniRoute`) üzerinde yayımlanır; `electron-updater` da yeni sürümleri burada denetler.
+Sürümler, aynı zamanda `electron-updater` yeni sürümleri kontrol ettiği GitHub Sürümlerine (`diegosouzapw/OmniRoute`) yayınlanır.
 
-## Sorun Giderme
+## Sorun giderme
 
-| Belirti                                                                         | Çözüm                                                                                                                                                                                                        |
-| ------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Electron ana sürümü yükseltildikten sonra `Cannot find module 'better-sqlite3'` | better-sqlite3 v13, Node-API için önceden derlenmiş dosyalar sunar — kök dizinde `npm install` ve `prepare:bundle` komutlarını yeniden çalıştırın (geçerli platform için önceden derlenmiş dosyayı doğrular) |
-| Yerel modül için `ERR_DLOPEN_FAILED`                                            | `prepare:bundle` komutunu yeniden çalıştırın — geçerli platforma ait Node-API için önceden derlenmiş dosya eksik olduğunda hemen başarısız olur                                                              |
-| Linux'ta pencere boş görünüyor                                                  | Next.js sunucusunun gerçekten PORT'a bağlandığını doğrulayın (`[Server]` günlüklerini kontrol edin)                                                                                                          |
-| macOS noter tasdiki takılıyor                                                   | `APPLE_*` değişkenlerinin yalnızca `.env` içinde bulunmadığından, dışa aktarıldığından emin olun                                                                                                             |
-| Windows SmartScreen uyarısı                                                     | EV sertifikasıyla imzalayın veya kullanıcıların sağ tıklayıp → "Yine de çalıştır" seçeneğini seçmesini sağlayın                                                                                              |
-| Duman testi, port kullanımda olduğu için başarısız oluyor                       | `electron:smoke:packaged` komutunu çalıştırmadan önce 20128 portundaki tüm yerel geliştirme sunucularını durdurun                                                                                            |
+| Belirti                                                             | Düzeltmek                                                                                                                                                                |
+| ------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Electron büyük darbeden sonra `Cannot find module 'better-sqlite3'` | better-sqlite3 v13, Node-API'yi gönderir, — önceden oluşturulmuş `npm install` kökte yeniden çalıştırır ve `prepare:bundle` (mevcut platform için ön derlemeyi doğrular) |
+| yerel modül için `ERR_DLOPEN_FAILED`                                | Mevcut platform için Node-API ön yapısı eksik olduğunda `prepare:bundle` — yeniden çalıştırın, hızlı bir şekilde başarısız olur                                          |
+| Linux pencere boş görünüyor                                         | Next.js sunucusunun gerçekten PORT bağlandığını doğrulayın ( `[Server]` günlüklerini kontrol edin)                                                                       |
+| macOS noter onay tezgahları                                         | `APPLE_*` değişkenlerinin yalnızca `.env` değil, dışa aktarıldığından emin olun                                                                                          |
+| Windows SmartScreen uyarısı                                         | EV sertifikasıyla imzalayın veya kullanıcılar → "Yine de çalıştır"ı sağ tıklayın                                                                                         |
+| Kullanımdaki portta duman testi başarısız oluyor                    | `electron:smoke:packaged` çalıştırmadan önce 20128'de herhangi bir yerel dev sunucusunu durdurun                                                                         |
 
 ## Ayrıca Bakınız
 

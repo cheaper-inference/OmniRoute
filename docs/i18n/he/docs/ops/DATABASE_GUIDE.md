@@ -407,49 +407,48 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ### מצב WAL
 
-WAL מופעל כברירת מחדל. עבור עומסי עבודה בכתיבה גבוהה, שקול:
+WAL מופעל כברירת מחדל. עבור עומסי עבודה עם כתיבות רבות, מומלץ לשקול:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- נקודת ביקורת בכל 1000 עמודים
+PRAGMA journal_size_limit = 67108864;  -- מגבלת WAL של 64MB
 ```
-
-OmniRoute לא מגדיר `journal_size_limit`. מחסום מעביר מסגרות WAL לתוך הקובץ הראשי, אך קובץ WAL שומר על הגודל המוקצה הגדול ביותר שלו. שומר ה- `OMNIROUTE_WAL_GUARD_MAX_MB` רק מזהיר ומפעיל `wal_checkpoint(RESTART)`; זה לא מכסה בגודל דיסק.
 
 ### אינדקסים
 
-אינדקסים מרכזיים לביצועים (נוצרים אוטומטית על ידי העברות):
+אינדקסים מרכזיים לביצועים (נוצרים אוטומטית באמצעות מיגרציות):
 
-- חיפושי דגמי `idx_models_provider` — לפי ספק
-- הרחבת יעד משולבת `idx_combo_targets_combo_id` —
-- ניתוח שימוש `idx_usage_history_api_key_timestamp` —
-- מעקב אחר מכסות `idx_quota_snapshots_api_key_window` —
-- שאילתות יומן שיחות `idx_call_logs_timestamp` —
+- `idx_models_provider` — חיפוש מודלים לפי ספק
+- `idx_combo_targets_combo_id` — הרחבת יעדי קומבו
+- `idx_usage_history_api_key_timestamp` — ניתוח נתוני שימוש
+- `idx_quota_snapshots_api_key_window` — מעקב אחר מכסות
+- `idx_call_logs_timestamp` — שאילתות ביומן קריאות
 
-כדי להוסיף אינדקס חדש, צור העברה:
+כדי להוסיף אינדקס חדש, צרו מיגרציה:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O ממופה זיכרון
+### קלט/פלט ממופה זיכרון
 
-עבור מסדי נתונים גדולים מאוד (> 10GB), ניתן להתאים את מיפוי הזיכרון באמצעות פרגמת SQLite :
+עבור מסדי נתונים גדולים מאוד (>10GB), ניתן להתאים את מיפוי הזיכרון באמצעות pragma של SQLite:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- הגדרה באמצעות pragma של SQLite (יש להתאים ב-core.ts או בזמן ריצה)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### דחיסה
 
-מופעי OmniRoute ארוכי טווח נהנים מ- `VACUUM` מדי פעם:
+מופעי OmniRoute שפועלים לאורך זמן מפיקים תועלת מהרצה מזדמנת של `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-הפעל מדי חודש במהלך חלונות עם תנועה נמוכה. (מצב WAL מפחית את הצורך, אך אינו מבטל אותו.)
+הריצו פעם בחודש בחלונות זמן שבהם התעבורה נמוכה. (מצב WAL מפחית את הצורך, אך אינו מבטל אותו.)
 
 ---
 

@@ -403,27 +403,26 @@ Perintah ini menggunakan API pencadangan online SQLite — aman dijalankan saat 
 
 ---
 
-## Penyetelan Kinerja
+## Penyetelan Performa
 
-### Modus WAL
+### Mode WAL
 
-WAL diaktifkan secara default. Untuk beban kerja tulis tinggi, pertimbangkan:
+WAL diaktifkan secara default. Untuk beban kerja dengan operasi tulis tinggi, pertimbangkan:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint setiap 1000 halaman
+PRAGMA journal_size_limit = 67108864;  -- Batas WAL 64MB
 ```
-
-OmniRoute tidak menyetel `journal_size_limit`. Sebuah pos pemeriksaan memindahkan frame WAL ke dalam file utama, namun file WAL mempertahankan ukuran alokasi terbesarnya. Penjaga `OMNIROUTE_WAL_GUARD_MAX_MB` hanya memperingatkan dan menjalankan `wal_checkpoint(RESTART)`; ini bukan batasan ukuran disk.
 
 ### Indeks
 
-Indeks utama untuk kinerja (dibuat secara otomatis oleh migrasi):
+Indeks utama untuk performa (dibuat secara otomatis oleh migrasi):
 
-- Pencarian model `idx_models_provider` — berdasarkan penyedia
-- Perluasan target kombo `idx_combo_targets_combo_id` —
-- Analisis penggunaan `idx_usage_history_api_key_timestamp` —
-- Pelacakan kuota `idx_quota_snapshots_api_key_window` —
-- Kueri log panggilan `idx_call_logs_timestamp` —
+- `idx_models_provider` — pencarian model berdasarkan penyedia
+- `idx_combo_targets_combo_id` — ekspansi target combo
+- `idx_usage_history_api_key_timestamp` — analitik penggunaan
+- `idx_quota_snapshots_api_key_window` — pelacakan kuota
+- `idx_call_logs_timestamp` — kueri log panggilan
 
 Untuk menambahkan indeks baru, buat migrasi:
 
@@ -432,24 +431,24 @@ Untuk menambahkan indeks baru, buat migrasi:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O yang Dipetakan Memori
+### I/O yang Dipetakan ke Memori
 
-Untuk database yang sangat besar (> 10GB), pemetaan memori dapat disesuaikan melalui pragma SQLite :
+Untuk basis data yang sangat besar (>10GB), pemetaan memori dapat disesuaikan melalui pragma SQLite:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- Tetapkan melalui pragma SQLite (sesuaikan di core.ts atau saat runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Pemadatan
 
-Instans OmniRoute yang sudah berjalan lama mendapat manfaat dari `VACUUM` sesekali:
+Instans OmniRoute yang berjalan dalam jangka panjang akan mendapat manfaat dari menjalankan `VACUUM` sesekali:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Jalankan setiap bulan selama periode lalu lintas rendah. (Mode WAL mengurangi kebutuhan, namun tidak menghilangkannya.)
+Jalankan setiap bulan pada periode dengan lalu lintas rendah. (Mode WAL mengurangi kebutuhan tersebut, tetapi tidak menghilangkannya.)
 
 ---
 

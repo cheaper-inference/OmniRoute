@@ -4,13 +4,9 @@
 
 ---
 
-> **Versio:** v3.8.44
-> **Viimeksi päivitetty:** 2026-10-28
-> **Kohderyhmä:** Kehittäjät, jotka lisäävät tai ylläpitävät upotettuja palveluja tai selvittävät niiden virheitä (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versio:** v3.8.44** Viimeksi päivitetty:** 28.10.2026** Yleisö:** Insinöörit, jotka lisäävät, ylläpitävät tai korjaavat sulautettuja palveluita (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Upotetut palvelut ovat paikallisesti asennettuja prosessien rinnakkaistyökaluja, jotka OmniRoute asentaa, valvoo ja
-tarjoaa ensiluokkaisina reitityskohteina. Toisin kuin ulkoiset palveluntarjoajat (joihin muodostetaan yhteys internetin kautta
-API-avaimilla), upotetut palvelut suoritetaan samalla koneella kuin OmniRoute, ja ne viestivät takaisinkytkentärajapinnan kautta.
+Sulautetut palvelut ovat paikallisesti asennettuja prosessin sivuvaunutyökaluja, jotka OmniRoute asentaa, valvoo ja paljastaa ensiluokkaisina reitityskohteina. Toisin kuin ulkoiset palveluntarjoajat (joihin päästään Internetin kautta API -näppäimien kautta), sulautetut palvelut toimivat samassa koneessa kuin OmniRoute ja kommunikoivat silmukan kautta.
 
 ---
 
@@ -29,49 +25,51 @@ API-avaimilla), upotetut palvelut suoritetaan samalla koneella kuin OmniRoute, j
 
 ## 1. Yleiskatsaus
 
-### Miksi upotettuja palveluita?
+### Miksi sulautetut palvelut?
 
-Upotettuja palveluja on kahdeksan:
+Kahdeksan palvelua on upotettu:
 
-| Palvelu         | npm-paketti                                  | Oletusportti | Tarkoitus                                                                                                                                                                                                                                                                                                                                                                             |
-| --------------- | -------------------------------------------- | :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                    |    20130     | AI-reititin, jota OmniRoute voi käyttää alipalveluntarjoajana. Mallit tarjotaan muodossa `9router/{sub}/{model}`                                                                                                                                                                                                                                                                      |
-| **CLIProxyAPI** | GitHub-julkaisubinaari (`cliproxy`)          |     8317     | Paikallinen välityssovitin Anthropic CLI -todennusprosesseille. Tarjoaa varareitityksen OAuth-tunnusten vanhentuessa                                                                                                                                                                                                                                                                  |
-| **Mux**         | `mux` (headless `mux server`)                |     8322     | Paikallinen agenttien orkestrointitaustaprosessi (coder/mux). Vain elinkaaren hallinta — ei reitityskohde (ei LLM-välitystä).                                                                                                                                                                                                                                                         |
-| **Bifrost**     | `@maximhq/bifrost`                           |     8080     | Go-pohjainen AI-yhdyskäytävän välitystaustajärjestelmä. Kun se on käynnissä, välitysreitti (`/v1/relay/`) valitsee sen automaattisesti                                                                                                                                                                                                                                                |
-| **Dario**       | `@askalf/dario`                              |     3456     | Claude-tilausvälityspalvelin — CLIProxyAPI:n vaihtoehto/varajärjestelmä Claude Code -muotoiselle liikenteelle; syötetty avain asetetaan muuttujaan `DARIO_ADMIN_TOKEN`, joka suojaa sen `/admin/*`-OAuth-hallintatasoa                                                                                                                                                                |
-| **open-wa**     | `@open-wa/wa-automate`                       |     8323     | WhatsApp Web -automaatio (Puppeteerin kautta toimiva headless Chromium). Vain elinkaaren hallinta — ei reitityskohde.                                                                                                                                                                                                                                                                 |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                         |    20135     | Kehotepakkauksen sivupalvelu — aito LLMLingua-2 ONNX -malli (Microsoftin algoritmin JS/TS-porttaus). `open-sse/services/compression/engines/llmlingua/index.ts` välittää `/compress`-pyynnöt sille HTTP:n kautta ja käyttää varajärjestelmänä prosessin sisäistä työntekijäsäietaustajärjestelmää, kun sivupalvelu ei ole käytettävissä. Vain elinkaaren hallinta — ei reitityskohde. |
-| **sing-box**    | GitHub-julkaisun binääritiedosto (`singbox`) |    20140     | TPROXY-apuprosessi, joka tukee `applyTproxy()`-toiminnon läpinäkyvää välityspalvelinkaappausta (`src/mitm/tproxy/setup.ts`). Asennusohjelma lataa kiinnitetyn version julkaisun ja tarkistaa sen tarkistussumman. Vain elinkaarta hallitaan; palvelu ei ole reitityskohde eikä välitä LLM-liikennettä.                                                                                |
+| Palvelu           | npm-paketti                        | Oletusportti | Tarkoitus                                                                                                                                                                                                                                                                                                                                        |
+| ----------------- | ---------------------------------- | :----------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| **9 Reititin**    | `9router`                          |    20130     | AI reititin, jota OmniRoute voi käyttää alipalveluntarjoajana. Mallit näkyvät `9router/{sub}/{model}`:nä                                                                                                                                                                                                                                         |
+| **CLIProxyAPI**   | GitHub release binary (`cliproxy`) |     8317     | Paikallinen välityspalvelinsovitin Anthropic CLI -todennusvirroille. Tarjoaa varareitityksen, kun OAuth -tunnukset vanhenevat                                                                                                                                                                                                                    |
+| **Mux**           | `mux` (päätön `mux server`)        |     8322     | Paikallinen agentti-orkesteridaemon (coder/mux). Vain elinkaaren mukaan hallittu — ei reitityskohde (ei LLM välityspalvelinta).                                                                                                                                                                                                                  |
+| **Bifrost**       | `@maximhq/bifrost`                 |     8080     | Siirry AI-gateway-releen taustajärjestelmään. Juoksessa valittu automaattisesti viestin reitin mukaan (`/v1/relay/`)                                                                                                                                                                                                                             |
+| **Dario**         | `@askalf/dario`                    |     3456     | Claude-tilauksen välityspalvelin — alternative/failover to CLIProxyAPI Claude-Code-muotoiselle liikenteelle; injektoidusta avaimesta tulee `DARIO_ADMIN_TOKEN` portti `/admin/*` OAuth -ohjaustasoonsa                                                                                                                                           |
+| **open-wa**       | `@open-wa/wa-automate`             |     8323     | WhatsApp Web-automaatio (päätön Chromium Puppeteerin kautta). Vain elinkaaren mukaan hallittu — ei reitityskohde.                                                                                                                                                                                                                                |
+| **LLMLingua**     | `@atjsh/llmlingua-2`               |    20135     | Pikapakkaussivuvaunu — todellinen LLMLingua-2 ONNX -malli (JS/TS algoritmin Microsoft-portti). `open-sse/services/compression/engines/llmlingua/index.ts` lähettää `/compress` HTTP yli siihen, ja se palaa prosessissa olevaan työntekijäsäikeen taustajärjestelmään, kun sivuvaunu on alhaalla. Elinkaarihallittu vain — ei ole reitityskohde. |
+| **laululaatikko** | GitHub release binary (`singbox`)  |    20140     | TPROXY sivuvaunu tukee `applyTproxy()`:n läpinäkyvää välityspalvelinta (`src/mitm/tproxy/setup.ts`). Asennusohjelma lataa kiinnitetyn, tarkistussummalla vahvistetun julkaisun. Vain elinkaaren mukaan hallittu — ei reitityskohde (ei LLM välityspalvelinta)                                                                                    |
 
 Kaikki kahdeksan noudattavat samaa valvontamallia:
 
-- OmniRoute asentaa ne hakemistoon `DATA_DIR/services/{name}/` (erillään OmniRouten omasta `package.json`-tiedostosta)
-- OmniRoute käynnistää ne aliprosesseina ja valvoo niitä
-- OmniRoute syöttää lyhytikäisen API-avaimen aliprosessin ympäristöön ja kierrättää sen ilman käyttökatkoa (soveltuvin osin)
-- Kaikki hallintareitit (`/api/services/*`) ovat **LOCAL_ONLY** — niitä voi käyttää vain loopback-osoitteesta (ehdoton sääntö #17)
+- OmniRoute asentaa ne `DATA_DIR/services/{name}/` n alle (eristettynä OmniRoute:n omasta `package.json`)
+- OmniRoute synnyttää ja valvoo niitä lapsiprosesseina
+- OmniRoute ruiskuttaa lyhytaikaisen API -avaimen lapsen ympäristöön ja pyörittää sitä ilman seisokkeja (tarvittaessa)
+- Kaikki hallintareitit (`/api/services/*`) ovat**LOCAL_ONLY** — käytettävissä vain silmukan kautta (kova sääntö 17)
 
-### Keskeiset päätökset (suunnitelmasta)
+### Keskeiset päätökset (suunnittelusuunnitelmasta)
 
-| Päätös                                                  | Arvo                                                                                          |
-| ------------------------------------------------------- | --------------------------------------------------------------------------------------------- |
-| Hallintapaneelin pääsy 9Routerin omaan käyttöliittymään | Käänteinen välityspalvelin osoitteessa `/dashboard/providers/services/9router/embed/*`        |
-| Asennusmekanismi                                        | `npm install {package}` komennolla `execFile` (ei komentotulkin interpolointia)               |
-| Käyttötapa                                              | Palveluntarjoaja rekisteröidään reititysmoottoriin muodossa `9router/{sub}/{model}`           |
-| API-avainten hallinta                                   | OmniRoute luo avaimet, salaa ne levossa (AES-256-GCM) ja syöttää ne ympäristömuuttujan kautta |
-| Hallintapaneelin sijainti                               | `/dashboard/providers/services` (kolme välilehteä)                                            |
-| Automaattinen käynnistys                                | Palvelukohtainen valitsin, oletuksena POIS PÄÄLTÄ                                             |
+| Päätös                                       | Arvo                                                                                   |
+| -------------------------------------------- | -------------------------------------------------------------------------------------- |
+| Pääsy kojelautaan 9Routerin alkuperäiseen UI | Käänteinen välityspalvelin osoitteessa `/dashboard/providers/services/9router/embed/*` |
+| Asennusmekanismi                             | `npm install {package}` `execFile` kautta (ei shellin interpolointia)                  |
+| Kulutustila                                  | Palveluntarjoaja on rekisteröity reititysmoottoriin nimellä `9router/{sub}/{model}`    |
+| API avainten hallinta                        | OmniRoute luo, salaa lepotilassa (AES-256-GCM) ja ruiskuttaa env:n kautta              |
+| Kojelaudan sijainti                          | `/dashboard/providers/services` (kolme välilehteä)                                     |
+| Automaattinen käynnistys                     | Vaihda palvelukohtaisesti, oletus OFF                                                  |
+
+---
 
 ## 2. Arkkitehtuuri — 4 kerrosta
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Kerros 1 — Käyttöliittymä                                        │
-│  /dashboard/providers/services  (välilehdet: CLIProxyAPI | 9Router | Mux)│
-│  Reaaliaikaiset lokit (SSE), Käynnistä/Pysäytä/Uudelleenkäynnistä/Päivitä, Asetukset, Asenna│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Kuori + välilehtireititys parametrilla ?tab=│
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
@@ -79,7 +77,7 @@ Kaikki kahdeksan noudattavat samaa valvontamallia:
 └──────────────────────┬─────────────────────────────────────────────┘
                        │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Kerros 2 — API (LOCAL_ONLY — vain loopback-yhteydet)              │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -88,75 +86,74 @@ Kaikki kahdeksan noudattavat samaa valvontamallia:
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (käänteinen HTTP- ja WebSocket-välityspalvelin → 9Router-ylävirta)│
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  Portinvartija: LOCAL_ONLY_API_PREFIXES sisältää "/api/services/" ja│
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
 │        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ prosessin sisäiset kutsut
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Kerros 3 — ServiceSupervisor (src/lib/services/)                  │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   Yleiskäyttöinen valvoja (child_process.spawn)│
-│    ├── asennus:    execFile('npm', ['install', pkg, '--prefix'])    │
-│    ├── käynnistys: spawn(node, [entrypoint], {env, cwd})           │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
 │    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
-│    ├── portti:     20130 9Routerille (määritettävissä)             │
-│    ├── lokit:      stdio-rengaspuskuri 5 MB → SSE-tapahtumat       │
-│    ├── kunto:      HTTP GET /health 2–5 s:n välein, laiska palautuminen│
-│    └── elinkaari:  SIGTERM 15 s → SIGKILL                          │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Alustaa kaikki SERVICES[]-palvelut prosessin käynnistyessä│
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       Säännöllinen GET /v1/models → service_models-taulu│
-│  ringBuffer.ts      Kiertävä lokipuskuri (5 MB palvelua kohden)    │
-│  healthCheck.ts     Kyselyihin perustuva HTTP-kuntotarkistus       │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (asennussovittimet)                           │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ OpenAI-yhteensopiva HTTP (loopback)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Kerros 4 — Palveluntarjoaja / Reititys                            │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Hakee portin ja API-avaimen uudelleen joka pyynnöllä (ei välimuistia).│
-│    Poistaa mallin tunnuksesta "9router/"-etuliitteen ennen välitystä.│
-│    Palauttaa 503 service_not_running, jos valvojan tila ei ole "running".│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    Kohde palvelulle "9router": isEmbeddedService: true             │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Mallit tallennetaan muodossa "9router/{sub}/{model}" (etuliitteellä).│
-│    modelSync.ts synkronoi ne 5 minuutin välein.                    │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Muxin VAIN elinkaarta hallitaan (kerrokset 1–3) — se on agenttien │
-│  orkestrointitaustapalvelu, ei LLM-välityspalvelin, joten sillä ei ole│
-│  kerroksen 4 suorittaja-/palveluntarjoajamerkintää eikä se koskaan ole│
-│  reitityskohde.                                                    │
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
-### Keskeiset lähdetiedostot
+### Tärkeimmät lähdetiedostot
 
-| Tiedosto                                    | Rooli                                                   |
-| ------------------------------------------- | ------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Ydinluokka: elinkaari, lukitus, kunto, rengaspuskuri    |
-| `src/lib/services/bootstrap.ts`             | Prosessitason rekisteröinti ja automaattinen käynnistys |
-| `src/lib/services/registry.ts`              | Singleton-kartta `työkalu → valvoja`                    |
-| `src/lib/services/apiKey.ts`                | Avaimen luonti, AES-256-GCM-salaus levossa              |
-| `src/lib/services/modelSync.ts`             | Mallien säännöllinen synkronointi (5 min) + pyynnöstä   |
-| `src/lib/services/ringBuffer.ts`            | 5 Mt:n rengaslokipuskuri SSE-tilauksella                |
-| `src/lib/services/healthCheck.ts`           | HTTP-kuntotarkistus (määritettävä aikaväli)             |
-| `src/lib/services/installers/ninerouter.ts` | 9Routerin npm-asennus, -päivitys ja -poisto             |
-| `src/lib/services/installers/cliproxy.ts`   | CLIProxyAPIn npm-asennus, -päivitys ja -poisto          |
-| `src/lib/services/installers/mux.ts`        | Muxin npm-asennus, -päivitys ja -poisto                 |
-| `src/lib/services/installers/openwa.ts`     | open-wan npm-asennus, -päivitys ja -poisto              |
-| `src/lib/services/installers/llmlingua.ts`  | LLMLinguan npm-asennus, -päivitys ja -poisto            |
-| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()`-apufunktio                      |
-| `src/app/api/services/[name]/logs/route.ts` | Jaettu SSE-lokien päätepiste                            |
-| `open-sse/executors/ninerouter.ts`          | Palveluntarjoajan suorittaja (kerros 4)                 |
+| Tiedosto                                    | Rooli                                                    |
+| ------------------------------------------- | -------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | Ydinluokka: elinkaari, lukko, terveys, rengaspuskuri     |
+| `src/lib/services/bootstrap.ts`             | Prosessitason rekisteröinti ja automaattinen käynnistys  |
+| `src/lib/services/registry.ts`              | Singleton kartta `tool → supervisor`                     |
+| `src/lib/services/apiKey.ts`                | Avaimen luonti, AES-256-GCM salaus levossa               |
+| `src/lib/services/modelSync.ts`             | Säännöllinen mallin synkronointi (5 min) + on-demand     |
+| `src/lib/services/ringBuffer.ts`            | 5 MB pyöreä lokipuskuri SSE -tilauksella                 |
+| `src/lib/services/healthCheck.ts`           | HTTP -terveysanturi (konfiguroitavissa oleva intervalli) |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall 9-reitittimelle             |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall for CLIProxyAPI             |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall Muxille                     |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall avoimelle wa                |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall for LLMLingua               |
+| `src/app/api/services/9router/_lib.ts`      | `getOrInitSupervisor()` apulainen                        |
+| `src/app/api/services/[name]/logs/route.ts` | Jaettu SSE -lokien päätepiste                            |
+| `open-sse/executors/ninerouter.ts`          | Palveluntarjoaja (taso 4)                                |
 
 ---
 
@@ -210,58 +207,54 @@ kilpailutilanteet esimerkiksi silloin, kun automaattinen käynnistys ja käyttö
 
 ---
 
-## 4. API-viite
+## 4. API viittaus
 
-Kaikki `/api/services/`-polun alla olevat reitit ovat **LOCAL_ONLY** (vain loopback, ehdoton sääntö #17).
-Muualta kuin loopback-osoitteesta tulevat pyynnöt saavat vastauksen `403 LOCAL_ONLY` todennustunnuksesta riippumatta.
+Kaikki `/api/services/` alaiset reitit ovat**LOCAL_ONLY** (vain silmukka, kova sääntö #17). Ei-paluupyynnöt saavat `403 LOCAL_ONLY` todennustunnuksesta riippumatta.
 
-### 4.1 9Router-päätepisteet (11 reittiä)
+### 4.1 9Reitittimen päätepisteet (11 reittiä)
 
 #### `POST /api/services/9router/install`
 
-Asentaa 9Routerin npm:stä. Luo hakemiston `DATA_DIR/services/9router/`, jossa ovat sen omat
-`package.json`- ja `node_modules/`-resurssit. Ei aiheuta ristiriitoja OmniRouten omien riippuvuuksien kanssa.
+Asenna 9Router npm:stä. Luo `DATA_DIR/services/9router/` omilla `package.json` llä ja `node_modules/`. Ei ole ristiriidassa OmniRoute:n omien depsien kanssa.
 
-**Pyynnön runko** (kaikki valinnaisia):
+**Pyynnön runko** (kaikki valinnaiset):
 
 ```json
 { "version": "latest" }
 ```
 
-| Kenttä    | Tyyppi   | Oletusarvo | Kuvaus                                    |
+| Ala       | Tyyppi   | Oletus     | Kuvaus                                    |
 | --------- | -------- | ---------- | ----------------------------------------- |
-| `version` | `string` | `"latest"` | Asennettava npm-versiotunniste tai semver |
+| `version` | `string` | `"latest"` | npm version tag tai semver asennettavaksi |
 
 **Vastaukset:**
 
-| Tila  | Kuvaus                                                              |
-| ----- | ------------------------------------------------------------------- |
-| `200` | `{ ok: true, installedVersion: "x.y.z", path: "..." }`              |
-| `400` | Virheellinen pyynnön runko (Zod-validointi epäonnistui)             |
-| `409` | Asennus on jo käynnissä (lukitus varattu)                           |
-| `500` | npm-asennus epäonnistui — selkokielinen virhe on kohdassa `message` |
+| Status | Kuvaus                                                          |
+| ------ | --------------------------------------------------------------- |
+| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`          |
+| `400`  | Virheellinen pyynnön runko (Zod -vahvistusvirhe)                |
+| `409`  | Asennus jo (lukko pidetty)                                      |
+| `500`  | npm-asennus epäonnistui — katso `message` :n ystävällinen virhe |
 
-**Huomautukset:** Käyttää kutsua `execFile('npm', [...])` — ei komentotulkkia eikä interpolointia (ehdoton sääntö #13).
-EACCES-virheet esitetään selkokielisinä viesteinä.
+**Huomautuksia:** Käyttää `execFile('npm', [...])` — ei kuorta, ei interpolointia (kova sääntö #13). EACCES virheet tulevat esiin ystäväviesteinä.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-Käynnistää 9Routerin. Rekisteröi valvojan, jos sitä ei ole jo rekisteröity, ja kutsuu sitten
-`supervisor.start()`-metodia. Idempotentti, kun palvelu on jo käynnissä.
+Käynnistä 9Router. Rekisteröi valvojan, jos ei ole jo rekisteröitynyt, ja soittaa sitten `supervisor.start()`. Idempotentti jo käynnissä ollessaan.
 
-**Pyynnön runko:** ei mitään
+**Pyynnön runko:** ei yhtään
 
 **Vastaukset:**
 
-| Tila  | Kuvaus                                                     |
-| ----- | ---------------------------------------------------------- |
-| `200` | `ServiceStatus`-objekti (katso skeema alta)                |
-| `409` | 9Routeria ei ole asennettu (`status: "not_installed"`)     |
-| `503` | Käynnistys epäonnistui (prosessivirhe — katso `lastError`) |
+| Status | Kuvaus                                                     |
+| ------ | ---------------------------------------------------------- |
+| `200`  | `ServiceStatus` objekti (katso kaavio alla)                |
+| `409`  | 9Reititintä ei ole asennettu (`status: "not_installed"`)   |
+| `503`  | Käynnistys epäonnistui (prosessivirhe — katso `lastError`) |
 
-**ServiceStatus-skeema:**
+**ServiceStatus -skeema:**
 
 ```json
 {
@@ -279,37 +272,34 @@ Käynnistää 9Routerin. Rekisteröi valvojan, jos sitä ei ole jo rekisteröity
 
 #### `POST /api/services/9router/stop`
 
-Pysäyttää 9Routerin hallitusti. Lähettää SIGTERM-signaalin, odottaa 15 s ja lähettää sitten SIGKILL-signaalin, jos prosessi on yhä käynnissä.
-Idempotentti, kun palvelu on jo pysäytetty.
+Pysäytä kauniisti 9Router. Lähettää SIGTERM, odottaa 15 s ja sitten SIGKILL, jos on vielä elossa. Idempotentti, kun se on jo pysähtynyt.
 
-**Pyynnön runko:** ei mitään
+**Pyynnön runko:** ei yhtään
 
 **Vastaukset:**
 
-| Tila  | Kuvaus                                |
-| ----- | ------------------------------------- |
-| `200` | `ServiceStatus` (`state: "stopped"`)  |
-| `503` | Pysäytys epäonnistui odottamattomasti |
+| Status | Kuvaus                               |
+| ------ | ------------------------------------ |
+| `200`  | `ServiceStatus` (tila: "pysähtynyt") |
+| `503`  | Pysäytys epäonnistui odottamatta     |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Vastaa `stop()`-kutsua ja sen jälkeen `start()`-kutsua toimintolukituksen alaisena.
+Vastaa `stop()` ja sitten `start()` käyttölukon alla.
 
-**Pyynnön runko:** ei mitään
+**Pyynnön runko:** ei yhtään
 
-**Vastaukset:** samat kuin `start`-päätepisteellä (palauttaa lopullisen `ServiceStatus`-objektin).
+**Vastaukset:** sama kuin `start` (palauttaa lopullisen `ServiceStatus`).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-Päivittää 9Routerin uudempaan npm-versioon. Jos palvelu on käynnissä, se pysäytetään
-ensin, npm-asennus suoritetaan (uudempi versio asennetaan nykyiseen sijaintiin), minkä jälkeen
-palvelu käynnistetään uudelleen.
+Päivittää 9Routerin uudempaan npm-versioon. Jos palvelu on käynnissä, se pysäytetään ensin, npm-asennus suoritetaan (uudemman version asentaminen paikalleen) ja sitten palvelu käynnistetään uudelleen.
 
-**Pyynnön runko** (kaikki valinnaisia):
+**Pyynnön runko** (kaikki valinnaiset):
 
 ```json
 { "version": "latest" }
@@ -317,46 +307,43 @@ palvelu käynnistetään uudelleen.
 
 **Vastaukset:**
 
-| Tila  | Kuvaus                                                          |
-| ----- | --------------------------------------------------------------- |
-| `200` | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400` | Virheellinen runko                                              |
-| `500` | npm-päivitys epäonnistui                                        |
+| Status | Kuvaus                                                          |
+| ------ | --------------------------------------------------------------- |
+| `200`  | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
+| `400`  | Virheellinen runko                                              |
+| `500`  | npm päivitys epäonnistui                                        |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-Luo uuden API-avaimen 9Routerille, salaa sen levossa ja käynnistää palvelun uudelleen
-(jos se on käynnissä), jotta se ottaa uuden avaimen käyttöön ympäristöstään. Vanha avain
-mitätöidään välittömästi.
+Luo uuden API avaimen 9Routerille, salaa sen lepotilassa ja käynnistää palvelun uudelleen (jos se on käynnissä), jotta se poimii uuden avaimen ympäristöstään. Vanha avain mitätöityy välittömästi.
 
-**Pyynnön runko:** ei mitään
+**Pyynnön runko:** ei yhtään
 
 **Vastaukset:**
 
-| Tila  | Kuvaus                                     |
-| ----- | ------------------------------------------ |
-| `200` | `{ keyRotated: true, restarted: boolean }` |
-| `500` | Avaimen vaihto epäonnistui                 |
+| Status | Kuvaus                                     |
+| ------ | ------------------------------------------ |
+| `200`  | `{ keyRotated: true, restarted: boolean }` |
+| `500`  | Kierto epäonnistui                         |
 
-**Tietoturva:** Uutta avainta ei koskaan palauteta vastauksessa (tunnistetietoja ei vuoda).
-Se tallennetaan salattuna (AES-256-GCM) `version_manager`-tauluun.
+**Turvallisuus:** Uutta avainta ei koskaan palauteta vastauksessa (ei valtuustietovuotoa). Se tallennetaan salattuna (AES-256-GCM) `version_manager` taulukkoon.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Palauttaa yhdistetyn reaaliaikaisen ja tietokantaan tallennetun tilan, mukaan lukien versioiden metatiedot ja API-avaimen esikatselun.
+Palauttaa yhdistetyn live- + DB -tilan, mukaan lukien version metatiedot ja API -avaimen esikatselu.
 
 **Vastaukset:**
 
-| Tila  | Kuvaus                      |
-| ----- | --------------------------- |
-| `200` | Katso skeema alta           |
-| `500` | Tilan lukeminen epäonnistui |
+| Status | Kuvaus                      |
+| ------ | --------------------------- |
+| `200`  | Katso alla oleva kaavio     |
+| `500`  | Tilan lukeminen epäonnistui |
 
-**Vastausskeema:**
+**Vastauskaavio:**
 
 ```json
 {
@@ -380,8 +367,7 @@ Palauttaa yhdistetyn reaaliaikaisen ja tietokantaan tallennetun tilan, mukaan lu
 
 #### `POST /api/services/9router/auto-start`
 
-Ottaa automaattisen käynnistyksen käyttöön tai poistaa sen käytöstä. Kun `enabled: true`, palvelu käynnistyy automaattisesti
-seuraavan kerran, kun OmniRoute käynnistyy (jos palvelu on asennettu).
+Vaihda automaattisen käynnistyksen lippu. Kun `enabled: true`, palvelu käynnistyy automaattisesti, kun OmniRoute käynnistyy seuraavan kerran (jos palvelu on asennettu).
 
 **Pyynnön runko:**
 
@@ -391,216 +377,171 @@ seuraavan kerran, kun OmniRoute käynnistyy (jos palvelu on asennettu).
 
 **Vastaukset:**
 
-| Tila  | Kuvaus                |
-| ----- | --------------------- |
-| `200` | `{ autoStart: true }` |
-| `400` | Virheellinen runko    |
+| Status | Kuvaus                |
+| ------ | --------------------- |
+| `200`  | `{ autoStart: true }` |
+| `400`  | Virheellinen runko    |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-SSE-virta 9Routerin stdout/stderr-rengaspuskurin reaaliaikaisista lokeista.
+SSE virta eläviä lokeja 9Routerin stdout/stderr -rengaspuskurista.
 
 **Kyselyparametrit:**
 
-| Parametri | Tyyppi    | Oletusarvo | Kuvaus                                                                                                |
-| --------- | --------- | ---------- | ----------------------------------------------------------------------------------------------------- |
-| `tail`    | `integer` | 200        | Ensin lähetettävien historiallisten rivien määrä (enintään 1000)                                      |
-| `filter`  | `string`  | ei mitään  | Kirjainkoosta riippumaton alimerkkijonosuodatin (ei regex-lausekkeita — suojattu ReDoS-hyökkäyksiltä) |
+| Param    | Tyyppi    | Oletus    | Kuvaus                                                              |
+| -------- | --------- | --------- | ------------------------------------------------------------------- |
+| `tail`   | `integer` | 200       | Kuinka monta historiallista riviä lähetetään ensin (enintään 1000)  |
+| `filter` | `string`  | ei yhtään | Kirjainkoolla ei eroa alimerkkijonosuodatin (ei regex — ReDoS-safe) |
 
-**SSE-tapahtumat:**
+**SSE tapahtumat:**
 
-| Tapahtuma   | Data        | Kuvaus                           |
-| ----------- | ----------- | -------------------------------- |
-| `snapshot`  | `LogLine[]` | Alustava historiallinen loppuosa |
-| `log`       | `LogLine`   | Reaaliaikainen lokirivi          |
-| `heartbeat` | `{}`        | Yhteyden ylläpito 15 s:n välein  |
+| Tapahtuma   | Data        | Kuvaus                            |
+| ----------- | ----------- | --------------------------------- |
+| `snapshot`  | `LogLine[]` | Alkuperäinen historiallinen häntä |
+| `log`       | `LogLine`   | Live log line                     |
+| `heartbeat` | `{}`        | Pysy hengissä 15 sekunnin välein  |
 
-**LogLine-skeema:**
+**LogLine -skeema:**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
 **Vastaukset:**
 
-| Tila  | Kuvaus                                              |
-| ----- | --------------------------------------------------- |
-| `200` | `text/event-stream`                                 |
-| `400` | `filter`-parametri on liian pitkä (> 200 merkkiä)   |
-| `404` | Palvelua ei löytynyt (valvojaa ei ole rekisteröity) |
+| Status | Kuvaus                                         |
+| ------ | ---------------------------------------------- |
+| `200`  | `text/event-stream`                            |
+| `400`  | `filter` parametri liian pitkä (> 200 merkkiä) |
+| `404`  | Palvelua ei löydy (ohjaajaa ei rekisteröity)   |
 
 ---
 
-### 4.2 CLIProxyAPI-päätepisteet (10 reittiä)
+### 4,2 CLIProxyAPI päätepistettä (10 reittiä)
 
-CLIProxyAPI käyttää samoja päätepisteitä kuin 9Router lukuun ottamatta `rotate-key`-päätepistettä sekä lisäksi päätepisteitä
-`accounts`, `provider-expose` ja `auto-restart-adopted`. Se vastaanottaa nyt
-käynnistyksen yhteydessä erillisen tietotason API-avaimen (`needsApiKey: true`
-tiedostossa `bootstrap.ts`, käytetään mallien synkronointiin); `status` sisältää vähemmän kenttiä.
+CLIProxyAPI on sama päätepisteen muoto kuin 9Router miinus `rotate-key` plus `accounts`, `provider-expose` ja `auto-restart-adopted`. Se vastaanottaa nyt omistetun datatason API -avaimen, joka ruiskutetaan syntyessä (`needsApiKey: true` in `bootstrap.ts`, käytetään mallin synkronointiin); `status` sisältää vähemmän kenttiä.
 
-| Menetelmä | Polku                               | Kuvaus                                                       |
-| --------- | ----------------------------------- | ------------------------------------------------------------ |
-| `POST`    | `/api/services/cliproxy/install`    | Asenna CLIProxyAPI npm:stä                                   |
-| `POST`    | `/api/services/cliproxy/start`      | Käynnistä CLIProxyAPI                                        |
-| `POST`    | `/api/services/cliproxy/stop`       | Pysäytä CLIProxyAPI                                          |
-| `POST`    | `/api/services/cliproxy/restart`    | Käynnistä CLIProxyAPI uudelleen                              |
-| `POST`    | `/api/services/cliproxy/update`     | Päivitä uudempaan versioon                                   |
-| `GET`     | `/api/services/cliproxy/status`     | Reaaliaikainen + tietokannan tila (ei `apiKeyMasked`)        |
-| `POST`    | `/api/services/cliproxy/auto-start` | Ota automaattinen käynnistys käyttöön tai poista se käytöstä |
+| Menetelmä | Polku                               | Kuvaus                              |
+| --------- | ----------------------------------- | ----------------------------------- |
+| `POST`    | `/api/services/cliproxy/install`    | Asenna CLIProxyAPI npm:stä          |
+| `POST`    | `/api/services/cliproxy/start`      | Aloita CLIProxyAPI                  |
+| `POST`    | `/api/services/cliproxy/stop`       | Lopeta CLIProxyAPI                  |
+| `POST`    | `/api/services/cliproxy/restart`    | Käynnistä CLIProxyAPI uudelleen     |
+| `POST`    | `/api/services/cliproxy/update`     | Päivitä uudempaan versioon          |
+| `GET`     | `/api/services/cliproxy/status`     | Live + DB -tila (ei `apiKeyMasked`) |
+| `POST`    | `/api/services/cliproxy/auto-start` | Vaihda automaattinen käynnistys     |
 
-Jaettu `GET /api/services/{name}/logs`-päätepiste (katso §4.1) toimii kaikille
-neljälle palvelulle dynaamisen `[name]`-segmentin avulla.
+Jaettu `GET /api/services/{name}/logs` -päätepiste (katso §4.1) toimii kaikissa neljässä dynaamista `[name]` segmenttiä käyttävässä palvelussa.
 
 ---
 
 ### 4.3 Mux-päätepisteet (8 reittiä)
 
-Mux käyttää samoja päätepisteitä kuin CLIProxyAPI — API-pinnassa ei ole `rotate-key`-reittiä
-(bearer-tunnus luodaan samalla tavalla kuin 9Routerissa kutsulla
-`getOrCreateApiKey("mux")` ja välitetään `MUX_SERVER_AUTH_TOKEN`-ympäristömuuttujan kautta, mutta
-sille ei vielä ole erillistä kierrätyspäätepistettä). Muxissa hallitaan vain elinkaarta: toisin kuin
-9Routerissa, siinä ei ole Layer 4 -suoritinta, eikä sitä koskaan rekisteröidä reitityspalveluntarjoajaksi.
+Muxilla on sama päätepisteen muoto kuin CLIProxyAPI — ei ole `rotate-key` reittiä API pinnassa (siirtotietunnus luodaan samalla tavalla kuin 9Routerin `getOrCreateApiKey("mux")` kautta ja injektoidaan `MUX_SERVER_AUTH_TOKEN` env var:n kautta, mutta kiertopäätepistettä ei ole vielä olemassa). Mux on vain elinkaarihallittu: toisin kuin 9Routerilla, sillä ei ole Layer 4 -suoritinta, eikä sitä ole koskaan rekisteröity reitityksen tarjoajaksi.
 
-| Menetelmä | Polku                          | Kuvaus                                                       |
-| --------- | ------------------------------ | ------------------------------------------------------------ |
-| `POST`    | `/api/services/mux/install`    | Asenna Mux npm:stä (`npm i mux`)                             |
-| `POST`    | `/api/services/mux/start`      | Käynnistä Mux (`mux server`)                                 |
-| `POST`    | `/api/services/mux/stop`       | Pysäytä Mux                                                  |
-| `POST`    | `/api/services/mux/restart`    | Käynnistä Mux uudelleen                                      |
-| `POST`    | `/api/services/mux/update`     | Päivitä uudempaan npm-versioon                               |
-| `GET`     | `/api/services/mux/status`     | Reaaliaikainen + tietokannan tila                            |
-| `POST`    | `/api/services/mux/auto-start` | Ota automaattinen käynnistys käyttöön tai poista se käytöstä |
+| Menetelmä | Polku                          | Kuvaus                                   |
+| --------- | ------------------------------ | ---------------------------------------- |
+| `POST`    | `/api/services/mux/install`    | Asenna Mux osoitteesta npm (`npm i mux`) |
+| `POST`    | `/api/services/mux/start`      | Aloita Mux (`mux server`)                |
+| `POST`    | `/api/services/mux/stop`       | Lopeta Mux                               |
+| `POST`    | `/api/services/mux/restart`    | Käynnistä Mux uudelleen                  |
+| `POST`    | `/api/services/mux/update`     | Päivitä uudempaan npm-versioon           |
+| `GET`     | `/api/services/mux/status`     | Live + DB -tila                          |
+| `POST`    | `/api/services/mux/auto-start` | Vaihda automaattinen käynnistys          |
 
 ---
 
 ### 4.4 Bifrost-päätepisteet (8 reittiä)
 
-Bifrost on Go-pohjainen AI-yhdyskäytävän välitystaustajärjestelmä (`@maximhq/bifrost`). Se käyttää samoja
-päätepisteitä kuin CLIProxyAPI (ei `rotate-key`-päätepistettä — Bifrost hallitsee omia palveluntarjoaja-avaimiaan
-`config.json`-tiedostossa sen `-app-dir`-hakemiston alla).
+Bifrost on Go AI-yhdyskäytävän rele-taustaosa (`@maximhq/bifrost`). Se käyttää samaa päätepisteen muotoa kuin CLIProxyAPI (ei `rotate-key` — Bifrost hallitsee omia palveluntarjoajan avaimia `config.json` :ssä `-app-dir` n alla).
 
-| Menetelmä | Polku                              | Kuvaus                                                             |
-| --------- | ---------------------------------- | ------------------------------------------------------------------ |
-| `POST`    | `/api/services/bifrost/install`    | Asenna Bifrost npm:stä (`@maximhq/bifrost`)                        |
-| `POST`    | `/api/services/bifrost/start`      | Käynnistä Bifrost portissa 8080 (oletus)                           |
-| `POST`    | `/api/services/bifrost/stop`       | Pysäytä Bifrost                                                    |
-| `POST`    | `/api/services/bifrost/restart`    | Käynnistä Bifrost uudelleen                                        |
-| `POST`    | `/api/services/bifrost/update`     | Päivitä uudempaan versioon                                         |
-| `GET`     | `/api/services/bifrost/status`     | Reaaliaikainen + tietokannan tila                                  |
-| `POST`    | `/api/services/bifrost/auto-start` | Ota automaattinen käynnistys käyttöön tai poista se käytöstä       |
-| `GET`     | `/api/services/bifrost/logs`       | SSE-lokin seuranta (jaetun dynaamisen `[name]/logs`-reitin kautta) |
+| Menetelmä | Polku                              | Kuvaus                                                       |
+| --------- | ---------------------------------- | ------------------------------------------------------------ |
+| `POST`    | `/api/services/bifrost/install`    | Asenna Bifrost osoitteesta npm (`@maximhq/bifrost`)          |
+| `POST`    | `/api/services/bifrost/start`      | Käynnistä Bifrost portista 8080 (oletus)                     |
+| `POST`    | `/api/services/bifrost/stop`       | Lopeta Bifrost                                               |
+| `POST`    | `/api/services/bifrost/restart`    | Käynnistä Bifrost uudelleen                                  |
+| `POST`    | `/api/services/bifrost/update`     | Päivitä uudempaan versioon                                   |
+| `GET`     | `/api/services/bifrost/status`     | Live + DB -tila                                              |
+| `POST`    | `/api/services/bifrost/auto-start` | Vaihda automaattinen käynnistys                              |
+| `GET`     | `/api/services/bifrost/logs`       | SSE log tail (jaetun `[name]/logs` dynaamisen reitin kautta) |
 
-**Reitityksen kytkentä:** Kun `BIFROST_BASE_URL`-muuttujaa ei ole asetettu ja valvottu Bifrost-instanssi
-on käynnissä, `getBifrostRoutingConfig()` (tiedostossa `routingBackend.ts`) käyttää automaattisesti
-osoitetta `http://127.0.0.1:{port}` välityksen perus-URL-osoitteena. Eksplisiittinen `BIFROST_BASE_URL`-ympäristömuuttuja
-on aina etusijalla.
+**Reittijohdot:** Kun `BIFROST_BASE_URL` ei ole asetettu ja valvottu Bifrost-ilmentymä on käynnissä, `getBifrostRoutingConfig()` (kohdassa `routingBackend.ts`) käyttää automaattisesti `http://127.0.0.1:{port}` välityskantana URL. Eksplisiittinen `BIFROST_BASE_URL` env on aina etusijalla.
 
 ---
 
 ### 4.5 Dario-päätepisteet (12 reittiä)
 
-Sama elinkaarirakenne kuin muissa palveluissa (`install`, `start`, `stop`, `restart`,
-`update`, `status`, `auto-start`, `auto-restart-adopted`) sekä tunnuksella suojattu OAuth-hallintataso
-polun `admin/` alla: `admin/accounts`, `admin/import-from-omniroute`,
-`admin/login-start`, `admin/login-complete` (kaikki `DARIO_ADMIN_TOKEN`-tunnuksen takana).
+Sama elinkaarimuoto kuin muillakin palveluilla (`install`, `start`, `stop` `DARIO_ADMIN_TOKEN` `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) sekä token-portittu OAuth -ohjaustaso `admin/`:n alla: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`( `admin/login-complete` all).
 
-### 4.6 open-wa-päätepisteet (7 reittiä)
+### 4.6 avointa päätepistettä (7 reittiä)
 
-open-wa (`@open-wa/wa-automate`) ohjaa headless-tilassa toimivaa Chromium-instanssia
-(Puppeteerin kautta) WhatsApp Webin automatisoimiseksi. Se käyttää samoja päätepisteitä kuin Mux (ei vielä
-`rotate-key`-reittiä). Siinä hallitaan vain elinkaarta — se ei ole reitityskohde,
-eikä sillä ole Layer 4 -suoritinta tai palveluntarjoajamerkintää.
+open-wa (`@open-wa/wa-automate`) ajaa päättömän Chromium-instanssin (Puppeteerin kautta) automatisoidakseen WhatsApp Webin. Se käyttää samaa päätepisteen muotoa kuin Mux (ei vielä `rotate-key` reittiä). Se on elinkaarihallittu vain — ei reitityskohde, ei Layer 4 executor/provider -merkintää.
 
-| Menetelmä | Polku                             | Kuvaus                                                             |
-| --------- | --------------------------------- | ------------------------------------------------------------------ |
-| `POST`    | `/api/services/openwa/install`    | Asenna open-wa npm:stä (`@open-wa/wa-automate`)                    |
-| `POST`    | `/api/services/openwa/start`      | Käynnistä open-wa portissa 8323 (oletus)                           |
-| `POST`    | `/api/services/openwa/stop`       | Pysäytä open-wa                                                    |
-| `POST`    | `/api/services/openwa/restart`    | Käynnistä open-wa uudelleen                                        |
-| `POST`    | `/api/services/openwa/update`     | Päivitä uudempaan versioon                                         |
-| `GET`     | `/api/services/openwa/status`     | Reaaliaikainen tila + tietokannan tila                             |
-| `POST`    | `/api/services/openwa/auto-start` | Ota automaattinen käynnistys käyttöön tai poista se käytöstä       |
-| `GET`     | `/api/services/openwa/logs`       | SSE-lokin seuranta (jaetun dynaamisen `[name]/logs`-reitin kautta) |
+| Menetelmä | Polku                             | Kuvaus                                                       |
+| --------- | --------------------------------- | ------------------------------------------------------------ |
+| `POST`    | `/api/services/openwa/install`    | Asenna open-wa npm:stä (`@open-wa/wa-automate`)              |
+| `POST`    | `/api/services/openwa/start`      | Käynnistä open-wa portissa 8323 (oletus)                     |
+| `POST`    | `/api/services/openwa/stop`       | Lopeta open-wa                                               |
+| `POST`    | `/api/services/openwa/restart`    | Käynnistä open-wa uudelleen                                  |
+| `POST`    | `/api/services/openwa/update`     | Päivitä uudempaan versioon                                   |
+| `GET`     | `/api/services/openwa/status`     | Live + DB -tila                                              |
+| `POST`    | `/api/services/openwa/auto-start` | Vaihda automaattinen käynnistys                              |
+| `GET`     | `/api/services/openwa/logs`       | SSE log tail (jaetun `[name]/logs` dynaamisen reitin kautta) |
 
-**API-avain:** syötetään muuttujana `WA_KEY` — open-wa:n yleinen `WA_*`-etuliitteinen
-ympäristömuuttujan ohitus yhdistää sen komentorivivalintaan `--key`/`-k`
-(`dist/cli/setup.js::envArgs()`, tarkistettu asennettua 4.76.0-pakettia
-vasten). Etuliite `ow_`, kun avain luodaan funktiolla `generateServiceApiKey()`. open-wa
-lukee avaimen `key`/`api_key`-HTTP-otsakkeesta (ei `Authorization:
-Bearer` -otsakkeesta); `/api-docs*` on nimenomaisesti vapautettu tarkistuksesta
-(`setupAuthenticationLayer` tiedostossa `dist/cli/server.js`), joten kuntotarkistus
-ei tarvitse todennusotsaketta.
+**API avain:** injektoidaan muodossa `WA_KEY` — open-wa:n yleinen `WA_*` -prefixed env override kartoittaa sen `--key`/`-k` CLI -vaihtoehtoon (`dist/cli/setup.js::envArgs()`, varmennettu asennettua 4.76.0-pakettia vastaan). Etuliite `ow_` kun `generateServiceApiKey()` tuottaa sen. open-wa lukee avaimen takaisin `key`/`api_key` HTTP otsikosta (ei `Authorization: Bearer`); `/api-docs*` on nimenomaisesti vapautettu tarkistuksesta (`setupAuthenticationLayer` in `dist/cli/server.js`), joten terveysanturi ei tarvitse todennusotsikkoa.
 
-**Paritus:** open-wa on epävirallinen eikä sillä ole yhteyttä WhatsAppiin —
-yhdistettyyn numeroon kohdistuu estoriski WhatsAppin oman automaation tunnistuksen vuoksi.
-Ensimmäisellä käynnistyskerralla parituksen QR-koodi tulostetaan vakiotulosteeseen ja tuodaan näkyviin
-olemassa olevan Lokit-paneelin/SSE-virran kautta — tässä integraatiossa ei vielä ole erillistä
-QR-kuvan päätepistettä.
+**Pariliitos:** open-wa on epävirallinen ja ei liity WhatsApp — hen yhdistettyyn numeroon liittyy WhatsApp:n oman automaation havaitsemisen estoriski. Ensimmäisellä käynnistyksellä pariliitoksen QR koodi tulostetaan stdoutiin ja tuodaan olemassa olevan lokien panel/SSE virran — läpi, tässä integraatiossa ei ole vielä omistettua QR-kuvan päätepistettä.
 
 ---
 
-### 4.7 LLMLingua-päätepisteet (8 reittiä)
+### 4,7 LLMLingua päätepistettä (8 reittiä)
 
-LLMLingua on kehotteiden pakkaamiseen tarkoitettu sivupalvelu, joka paketoi `@atjsh/llmlingua-2`:n (aito
-ONNX-tunnisteiden luokittelumalli, joka ladataan Hugging Facesta ensimmäisen
-`/compress`-kutsun yhteydessä). Se käyttää samaa päätepisterakennetta kuin Bifrost (ei API-avainta —
-`needsApiKey: false`, se ei koskaan käsittele tunnistetietoja).
+LLMLingua on pikapakkaus sivuvaunun kääre `@atjsh/llmlingua-2` (todellinen ONNX token-luokitusmalli, ladattu Hugging Facesta ensimmäisellä `/compress` kutsulla). Se käyttää samaa päätepisteen muotoa kuin Bifrost (ei API -näppäintä — `needsApiKey: false`, se ei koskaan käsittele valtuustietoja).
 
-| Menetelmä | Polku                                          | Kuvaus                                                                                                              |
-| --------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| `POST`    | `/api/services/llmlingua/install`              | Asenna `@atjsh/llmlingua-2` + vertaisriippuvuudet npm:llä ja kirjoita sivupalvelimen palvelinkomentosarja           |
-| `POST`    | `/api/services/llmlingua/start`                | Käynnistä sivupalvelu portissa 20135 (oletus)                                                                       |
-| `POST`    | `/api/services/llmlingua/stop`                 | Pysäytä sivupalvelu                                                                                                 |
-| `POST`    | `/api/services/llmlingua/restart`              | Käynnistä sivupalvelu uudelleen                                                                                     |
-| `POST`    | `/api/services/llmlingua/update`               | Päivitä uudempaan pakettiversioon                                                                                   |
-| `GET`     | `/api/services/llmlingua/status`               | Reaaliaikainen tila + tietokannan tila                                                                              |
-| `POST`    | `/api/services/llmlingua/auto-start`           | Ota automaattinen käynnistys käyttöön tai poista se käytöstä                                                        |
-| `POST`    | `/api/services/llmlingua/auto-restart-adopted` | Ota käyttöön tai poista käytöstä omaksutun (ennestään olemassa olevan) instanssin automaattinen uudelleenkäynnistys |
-| `GET`     | `/api/services/llmlingua/logs`                 | SSE-lokin seuranta (jaetun dynaamisen `[name]/logs`-reitin kautta)                                                  |
+| Menetelmä | Polku                                          | Kuvaus                                                                                     |
+| --------- | ---------------------------------------------- | ------------------------------------------------------------------------------------------ |
+| `POST`    | `/api/services/llmlingua/install`              | npm-install `@atjsh/llmlingua-2` + peers, kirjoita sivuvaunupalvelimen komentosarja        |
+| `POST`    | `/api/services/llmlingua/start`                | Käynnistä sivuvaunu portista 20135 (oletus)                                                |
+| `POST`    | `/api/services/llmlingua/stop`                 | Pysäytä sivuvaunu                                                                          |
+| `POST`    | `/api/services/llmlingua/restart`              | Käynnistä sivuvaunu uudelleen                                                              |
+| `POST`    | `/api/services/llmlingua/update`               | Päivitä uudempaan pakettiversioon                                                          |
+| `GET`     | `/api/services/llmlingua/status`               | Live + DB -tila                                                                            |
+| `POST`    | `/api/services/llmlingua/auto-start`           | Vaihda automaattinen käynnistys                                                            |
+| `POST`    | `/api/services/llmlingua/auto-restart-adopted` | Ota käyttöön otetun (aiemmin olemassa olevan) ilmentymän automaattinen uudelleenkäynnistys |
+| `GET`     | `/api/services/llmlingua/logs`                 | SSE log tail (jaetun `[name]/logs` dynaamisen reitin kautta)                               |
 
-**Sivupalvelun sopimus:** palvelinkomentosarja tarjoaa `GET /health` -päätepisteen (välitön — ei
-odota mallia) ja `POST /compress` -päätepisteen (`{ text, rate }` →
-`{ text, compressed, ratio }`). Malli ladataan laiskasti ensimmäisen
-`/compress`-kutsun yhteydessä.
+**Sivuvaunusopimus:** palvelinkomentosarja paljastaa `GET /health` (instant — ei odota mallia) ja `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). Malli latautuu laiskasti ensimmäisellä `/compress` -kutsulla.
 
-**Pakkauksen kytkentä:** tiedoston `open-sse/services/compression/engines/llmlingua/index.ts`
-`httpSidecarBackend` kutsuu osoitetta `LLMLINGUA_BASE_URL` (oletus
-`http://127.0.0.1:20135`) ja hyväksyy sivupalvelun vastauksen vain, kun se on
-ehdottomasti syötettä lyhyempi; mikä tahansa virhe (palvelu ei ole käynnissä, aikakatkaisu, mitään tekemätön
-vastaus) palautuu prosessin sisäiseen työntekijäsäikeen taustajärjestelmään (`./worker.ts`).
+**Kompressiojohdot:** `open-sse/services/compression/engines/llmlingua/index.ts` `httpSidecarBackend` kutsuu `LLMLINGUA_BASE_URL` (oletus `http://127.0.0.1:20135`) ja hyväksyy vain sivuvaunun vastauksen, kun se on ehdottomasti lyhyempi kuin syöte; kaikki viat (ei käynnissä, aikakatkaisu, ei-operaatiovaste) palaavat prosessin sisäiseen worker-säikeen taustajärjestelmään (`./worker.ts`).
 
 ---
 
-### 4.8 sing-boxin päätepisteet (8 reittiä)
+### 4,8 sing-box-päätepistettä (8 reittiä)
 
-sing-boxin päätepisterakenne on sama kuin Muxin: ei `rotate-key`-reittiä eikä API-avaimen syöttöä (`needsApiKey: false` tiedostossa `bootstrap.ts`). Vain sen elinkaarta hallitaan; se ei koskaan toimi reititys- tai LLM-palveluntarjoajana. `install()` lataa virallisen GitHub-julkaisun binääritiedoston (`SagerNet/sing-box`) kiinnitetylle versiolle (`SINGBOX_PINNED_VERSION` tiedostossa `src/lib/services/installers/singbox.ts`) ja tarkistaa SHA256-arvon samaan tiedostoon sisällytettyä tarkistussummaa vasten ennen kuin binääritiedostoa kirjoitetaan levylle. Kaikki muut pyydetyt versiot hylätään.
+sing-boxilla on sama päätepisteen muoto kuin Mux — no `rotate-key` route, ei API key injection (`needsApiKey: false` in `bootstrap.ts`). Se on vain elinkaarihallittu: ei koskaan routing/LLM palveluntarjoaja. `install()` lataa virallisen GitHub -julkaisubinaarin (`SagerNet/sing-box`) kiinnitetylle versiolle (`SINGBOX_PINNED_VERSION` in `src/lib/services/installers/singbox.ts`) ja tarkistaa sen SHA256 samaan tiedostoon lisättyä tarkistussummaa vastaan ennen kuin koskaan kirjoittaa sen levylle — mikä tahansa muu pyydetty versio hylätään.
 
-| Menetelmä | Polku                                        | Kuvaus                                                                                                                  |
-| --------- | -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
-| `POST`    | `/api/services/singbox/install`              | Lataa ja tarkista sing-boxin kiinnitetty julkaisu                                                                       |
-| `POST`    | `/api/services/singbox/start`                | Käynnistä sing-box (`sing-box run -c config.json`)                                                                      |
-| `POST`    | `/api/services/singbox/stop`                 | Pysäytä sing-box                                                                                                        |
-| `POST`    | `/api/services/singbox/restart`              | Käynnistä sing-box uudelleen                                                                                            |
-| `POST`    | `/api/services/singbox/update`               | Tarkista tai asenna kiinnitetty julkaisu uudelleen                                                                      |
-| `GET`     | `/api/services/singbox/status`               | Nykyinen tila ja tietokannan tila                                                                                       |
-| `POST`    | `/api/services/singbox/auto-start`           | Ota automaattinen käynnistys käyttöön tai pois käytöstä                                                                 |
-| `POST`    | `/api/services/singbox/auto-restart-adopted` | Ota hallintaan otetun, ennestään olemassa olevan prosessin automaattinen uudelleenkäynnistys käyttöön tai pois käytöstä |
-| `GET`     | `/api/services/singbox/logs`                 | Seuraa SSE-lokin loppua jaetun dynaamisen `[name]/logs`-reitin kautta                                                   |
+| Menetelmä | Polku                                        | Kuvaus                                                                                  |
+| --------- | -------------------------------------------- | --------------------------------------------------------------------------------------- |
+| `POST`    | `/api/services/singbox/install`              | Lataa + verify kiinnitetty sing-box-julkaisu                                            |
+| `POST`    | `/api/services/singbox/start`                | Aloita laululaatikko (`sing-box run -c config.json`)                                    |
+| `POST`    | `/api/services/singbox/stop`                 | Lopeta lauluboksi                                                                       |
+| `POST`    | `/api/services/singbox/restart`              | Käynnistä laululaatikko uudelleen                                                       |
+| `POST`    | `/api/services/singbox/update`               | Re-verify/reinstall kiinnitetty vapautus                                                |
+| `GET`     | `/api/services/singbox/status`               | Live + DB -tila                                                                         |
+| `POST`    | `/api/services/singbox/auto-start`           | Vaihda automaattinen käynnistys                                                         |
+| `POST`    | `/api/services/singbox/auto-restart-adopted` | Ota käyttöön otettu (aiemmin olemassa oleva) prosessi automaattinen uudelleenkäynnistys |
+| `GET`     | `/api/services/singbox/logs`                 | SSE log tail (jaetun `[name]/logs` dynaamisen reitin kautta)                            |
 
-**TPROXY-kytkentä:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) kirjoittaa `config.json`-tiedoston ja käynnistää valvojan ennen kuin `applyTproxy()` asentaa TPROXY-palomuurisäännöt. Jos valvoja puuttuu tai ei saavuta `running`-tilaa, tilanne kirjataan nyt virhetasolla sen sijaan, että epäonnistuminen sivuutettaisiin hiljaa. Näin ylläpitäjä voi havaita, että TPROXY-säännöt otettiin käyttöön ilman niiden takana toimivaa kuuntelijaa.
+**TPROXY johdotus:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) kirjoittaa `config.json` ja käynnistää valvojan ennen kuin `applyTproxy()` asentaa TPROXY -palomuurisäännöt. Jos valvoja puuttuu tai ei saavuta `running`, se kirjaa nyt lokiin virhetasolla (sen sijaan että nieleisi virheen hiljaa), jotta käyttäjä voi kertoa, että TPROXY -sääntöjä on sovellettu ilman toimivaa kuuntelijaa niiden takana.
 
 ---
 
-### 4.9 Käänteinen välityspalvelin (upotettu 9Router-hallintapaneeli)
+### 4.9 Käänteinen välityspalvelin (9reitittimen kojelautaan upotettu)
 
-Hallintapaneeli upottaa 9Router-verkkokäyttöliittymän iframe-kehykseen sisäisen käänteisen
-välityspalvelimen kautta osoitteessa:
+Kojelauta upottaa 9Router web UI -kehyksen iframe-kehykseen sisäisen käänteisen välityspalvelimen kautta osoitteessa:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
@@ -608,18 +549,15 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 Tämä välityspalvelin:
 
-- Välittää pyynnön osoitteeseen `http://127.0.0.1:{port}/{path}` (vain silmukkaosoite)
-- Poistaa saapuvat `cookie`- ja `authorization`-otsakkeet (OmniRoute-istunto ei vuoda)
-- Lisää 9Router-todennusta varten otsakkeen `Authorization: Bearer {apiKey}`
-- Poistaa vastauksesta otsakkeet `set-cookie`, `content-security-policy`, `x-frame-options` ja `cross-origin-*`
-- Kirjoittaa HTML-vastaukset uudelleen lisätäkseen `<base href>` -elementin ja normalisoidakseen absoluuttiset polut (`/foo` → `/dashboard/.../embed/foo`)
+- Välittää pyynnön `http://127.0.0.1:{port}/{path}` (vain silmukka)
+- Poistaa saapuvat `cookie` ja `authorization` otsikot (ei OmniRoute istunnon vuotoa)
+- Ruiskuttaa `Authorization: Bearer {apiKey}` 9reitittimen todennusta varten
+- Poistaa vastauksesta `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*`
+- Kirjoittaa uudelleen HTML -vastaukset injektoimaan `<base href>` ja normalisoimaan absoluuttiset polut (`/foo` → `/dashboard/.../embed/foo`)
 
-Upotetun hallintapaneelin WebSocket-päivitykset käsittelee erillinen oheispalvelin omassa
-portissaan (katso `src/lib/services/embedWsProxy.ts`).
+WebSocket päivitykset sulautettuun kojelautaan hoitaa kumppanipalvelin erillisessä portissa (katso `src/lib/services/embedWsProxy.ts`).
 
-**Tietoturva:** Upotusvälityspalvelimen reitit luokitellaan ryhmään `LOCAL_ONLY_API_PREFIXES`,
-ja niitä voi käyttää vain silmukkaosoitteesta. Hyökkääjä, joka saa JWT:n
-Cloudflare/Ngrok-tunnelin kautta, ei voi käyttää välityspalvelinta upotettujen palveluiden saavuttamiseen.
+**Turvallisuus:** Upotetut välityspalvelimen reitit luokitellaan `LOCAL_ONLY_API_PREFIXES` kategoriaan, ja niihin pääsee vain silmukan kautta. Hyökkääjä, joka saa JWT Cloudflare/Ngrok tunnelin kautta, ei voi käyttää välityspalvelinta sulautettuihin palveluihin.
 
 ---
 

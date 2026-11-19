@@ -15,7 +15,7 @@ cho Claude Code — các tinh chỉnh vận hành đối với những quy tắc
 
 Giao thức bắt buộc đầy đủ về worktree (xác nhận nhánh gốc, đường dẫn chuẩn
 `.claude/worktrees/`, `cp -al` node_modules, quy tắc dọn dẹp) nằm trong
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (được tóm tắt trong `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (được tóm tắt trong `AGENTS.md` →
 Git Workflow → "Worktree isolation"). Các điểm riêng của Claude Code:
 
 - Xác nhận nhánh gốc với người vận hành qua `AskUserQuestion` (Quy tắc cứng #19) trừ khi họ

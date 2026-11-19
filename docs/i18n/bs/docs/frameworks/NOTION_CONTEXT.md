@@ -4,6 +4,8 @@
 
 ---
 
+# Notion Context Source
+
 > **Izvor istine:** `src/lib/notion/api.ts` (REST klijent), `src/lib/db/notion.ts`
 > (trajno čuvanje tokena), `open-sse/mcp-server/tools/notionTools.ts` (6 MCP alata),
 > `src/app/api/settings/notion/route.ts` (settings API). Registracija alata i
@@ -63,7 +65,7 @@ rezultatom; ako Notion vrati objekat greške, token se briše i poziv ne uspijev
 
 Definisani u `open-sse/mcp-server/tools/notionTools.ts`. Token se razrješava u
 vrijeme poziva putem `getNotionToken()`; ako nijedan nije konfigurisan, alat
-izbacuje grešku `"Notion integration token not configured. Set it in Settings > Context Sources."`
+izbacuje grešku `"Notion integracijski token nije konfigurisan. Podesite ga u Settings > Context Sources."`
 
 | Alat                         | Opseg (Scope)  | Opis                                                                                                         |
 | ---------------------------- | -------------- | ------------------------------------------------------------------------------------------------------------ |

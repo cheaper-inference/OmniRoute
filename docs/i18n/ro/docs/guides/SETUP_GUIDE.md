@@ -27,9 +27,7 @@ npm install -g omniroute
 omniroute
 ```
 
-Tabloul de bord se deschide la `http://localhost:20128` și API baza URL este `http://localhost:20128/v1`.
-
-> **utilizatori npm:** Dacă npm avertizează că scripturile de instalare au fost blocate (de exemplu, `omniroute`, `better-sqlite3`), consultați [Depanarea — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+Panoul de control se deschide la `http://localhost:20128`, iar URL-ul de bază al API-ului este `http://localhost:20128/v1`.
 
 ### pnpm
 

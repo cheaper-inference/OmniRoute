@@ -4,72 +4,47 @@
 
 ---
 
-> Huwashwa kwa hiari, na kwa chaguo-msingi huwa imezimwa (`modelVisibilityAllowlist`/`modelVisibilityDenylist` zote zikiwa tupu huacha
-> katalogi ya `/v1/models` NA kila mkusanyiko wa wagombea wa `auto/*` zikiwa sawa kabisa kwa kila baiti). Ni mpangilio unaolingana na
-> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) kwa waendeshaji wanaotaka orodha
-> ya modeli iliyochaguliwa kwa sababu zisizohusiana kabisa na gharama.
+> Jijumuishe, imezimwa kwa chaguo-msingi (`modelVisibilityAllowlist`/`modelVisibilityDenylist` zote tupu huacha katalogi ya `/v1/models` AND kila mgombeaji wa `auto/*` anafanana kwa baiti). Ndugu wa `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) kwa waendeshaji ambao wanataka orodha ya modeli iliyoratibiwa kwa sababu ambazo hazihusiani na gharama.
 
 ## Kwa nini hii ipo
 
-`hidePaidModels` hujibu "je, modeli hii ni ya bure?" na `hideAutoCombos` hujibu "je, vitambulisho pepe vya `auto/*`
-vinapaswa kutangazwa kabisa?" — hakuna kati ya hizo inayomwezesha mwendeshaji kuchagua kikundi kidogo chochote cha
-modeli (k.m. kuwasilisha modeli mahsusi ambazo mteja fulani wa Claude Code / OpenCode anapaswa kuona,
-bila kutegemea bei). #11481 huongeza uwezo huo kama mipangilio miwili huru ya hiari ya safu za mifuatano.
+`hidePaidModels` anajibu "je mtindo huu ni bure?" na `hideAutoCombos` hujibu "vitambulisho dhahania vya `auto/*` vinapaswa kutangazwa hata kidogo?" — wala hairuhusu opereta kuratibu kitengo kidogo cha miundo kiholela (km kuwasilisha mifano haswa ambayo mteja wa Claude Code / OpenCode anapaswa kuona, bila kutegemea bei). #11481 inaongeza kuwa kama mipangilio miwili huru, ya kuchagua-katika safu ya safu.
 
 ## Mipangilio
 
-| Ufunguo                    | Aina       | Chaguo-msingi | Maana                                                                                     |
-| -------------------------- | ---------- | ------------- | ----------------------------------------------------------------------------------------- |
-| `modelVisibilityDenylist`  | `string[]` | `[]`          | Maingizo yanayolingana na mgombea humficha kutoka kwenye katalogi/mkusanyiko wa wagombea. |
-| `modelVisibilityAllowlist` | `string[]` | `[]`          | Ikiwa si tupu, ni maingizo yanayolingana na mgombea PEKEE yanayoendelea kuonekana.        |
+| Ufunguo                    | Aina       | Chaguomsingi | Maana                                                                             |
+| -------------------------- | ---------- | ------------ | --------------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`         | Maingizo yanayolingana na mgombea huificha kutoka kwenye bwawa catalog/candidate. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`         | Wakati si tupu, maingizo ONLY yanayolingana na mgombea hubaki wazi.               |
 
-Yote miwili hukubali hadi maingizo 500 yenye hadi herufi 200 kila moja (yakithibitishwa na Zod katika
-`src/shared/validation/settingsSchemas.ts`). Ingizo linaweza kuwa:
+Zote zinakubali hadi maingizo 500 ya hadi herufi 200 kila moja (Zod-iliyothibitishwa katika `src/shared/validation/settingsSchemas.ts`). Kuingia ni ama:
 
-- kitambulisho kamili cha katalogi — `"gpt-4o"` (kitambulisho cha modeli pekee) au `"openai/gpt-4o"` (chenye kiambishi awali cha mtoa huduma), au
-- ruwaza ya glob inayotumia `*`/`?` — k.m. `"openai/gpt-4*"` au `"anthropic/*"` — inayotatuliwa kupitia
-  kilinganishi kilekile cha pamoja cha `globToRegex()` (`src/shared/utils/globPattern.ts`) ambacho tayari kinatumiwa na
-  ulinganishaji wa michanganyiko kwa kila modeli wa `ModelRoutingSection` na `freeModels.ts::matchesOnlyPaidModels`.
+- kitambulisho halisi cha katalogi — `"gpt-4o"` (kitambulisho tupu cha mfano) au `"openai/gpt-4o"` (kiambishi awali cha mtoaji), au
+- mchoro wa globu unaotumia `*`/`?` — mfano `"openai/gpt-4*"` au `"anthropic/*"` — kutatuliwa kupitia kilinganishi sawa `globToRegex()` (`src/shared/utils/globPattern.ts`) ambacho tayari kinatumiwa na michoro ya `ModelRoutingSection` kwa kila modeli na `freeModels.ts::matchesOnlyPaidModels`.
 
-Mpangilio wa kipaumbele: orodha ya kukataa hukaguliwa kwanza (ingizo lililokataliwa hufichwa daima, hata ikiwa pia
-linalingana na orodha ya kuruhusu); orodha ya kuruhusu ikiwa si tupu, ni maingizo yanayolingana nayo pekee ndiyo yanayosalia.
+Utangulizi: orodha ya kunyimwa inakaguliwa kwanza (ingizo lililokataliwa hufichwa kila wakati, hata ikiwa pia linalingana na orodha ya vibali); wakati orodha ya viingilio haina tupu, ni maingizo tu yanayolingana na kuishi.
 
-## Vituo viwili vya udhibiti, si kimoja
+## Vichocheo viwili, sio moja
 
-Funzo kutoka #6512 (kichujio cha katalogi cha `hidePaidModels` pekee bado kiliruhusu `auto/*` kuelekeza kwa
-modeli ya kulipia, kwa sababu mkusanyiko wa wagombea wa mchanganyiko uliundwa kivyake) linatumika vivyo hivyo hapa.
-Prediketi ya ulinganishaji `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`)
-inaitwa kutoka sehemu ZOTE MBILI:
+Somo kutoka #6512 (kichujio cha katalogi cha `hidePaidModels` -only bado huruhusu `auto/*` njia hadi kwa muundo unaolipishwa, kwa kuwa kidimbwi cha wagombeaji wa mchanganyiko kilijengwa kivyake) kinatumika sawa hapa. Kivumishi kinacholingana `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kinaitwa kutoka BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — orodha yenyewe ya `/v1/models`, katika vituo vilevile 5 vya udhibiti kwa kila chanzo
-  ambavyo `shouldHidePaid()` tayari hudhibiti (modeli tuli za `PROVIDER_MODELS`, safu za watoa huduma zilizosawazishwa,
-  safu maalum, safu zinazotegemea lakabu, safu za mbadala zinazosimamiwa).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — huitwa
-  kutoka `virtualFactory.ts::buildPreparedPool`, mara tu baada ya mwito unaolingana wa
-  `filterPaidOnlyCandidates()`, ili modeli iliyokataliwa isiweze kamwe kuchaguliwa katika mkusanyiko wa wagombea wa `auto/*`.
+- `src/app/api/v1/models/catalog.ts` — uorodheshaji wa `/v1/models` wenyewe, katika sehemu zile zile 5 za chokepoints `shouldHidePaid()` tayari milango (tuli `PROVIDER_MODELS`, safu mlalo za watoa huduma zilizosawazishwa, safu mlalo maalum, safu mlalo zinazoungwa mkono na lakabu, safu mlalo-rudi nyuma).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — iliyoitwa kutoka `virtualFactory.ts::buildPreparedPool`, mara tu baada ya simu sawa `filterPaidOnlyCandidates()`, kwa hivyo mtindo uliokataliwa hauwezi kamwe kuchaguliwa kwenye dimbwi la mgombea wa `auto/*` pia.
 
-## Kile AMBACHO hakichujwi
+## NOT imechujwa nini
 
-Huakisi tabia iliyopo ya `hideAutoCombos`: kitambulisho cha modeli kinachotumwa **waziwazi** (si kupitia `auto/*`,
-wala hakijagunduliwa kupitia orodha ya katalogi) hakizuiwi kamwe wakati wa utumaji — ni
-utangazaji/uana-mkusanyiko wa wagombea pekee unaochujwa. Hii haitegemei `hidePaidModels`;
-mwendeshaji anaweza kutaka kikundi kilichochaguliwa kwa sababu zisizohusiana kabisa na gharama, kwa hivyo
-mipangilio yote miwili huunganishwa kama vichujio huru vinavyounganishwa kwa AND, sawa na muunganisho uliopo wa bendera nyingi katika
-`catalog.ts`.
+Huakisi tabia iliyopo ya `hideAutoCombos`: kitambulisho cha mfano kimetumwa** kwa uwazi** (sio kupitia `auto/*`, na haijagunduliwa kupitia uorodheshaji wa katalogi) haizuiliwi kamwe wakati wa kutuma — ni uanachama wa advertisement/candidate-pool pekee ndio unaochujwa. Hii ni huru na `hidePaidModels`; opereta anaweza kutaka seti iliyoratibiwa kwa sababu ambazo hazihusiani na gharama, kwa hivyo mipangilio yote miwili hutunga kama vichujio huru vya AND-ed, sawa na muundo uliopo wa bendera nyingi katika `catalog.ts`.
 
-Uhamishaji wa mipangilio (`GET /api/settings/export-json`) hujumuisha safu zote mbili bila mabadiliko, kama sehemu nyingine yoyote
-ya mipangilio — tofauti na kichujio cha uhamishaji cha hatua za mchanganyiko cha `hidePaidModels`, hakuna hatari ya kujazwa upya
-hapa: kitambulisho kilichokataliwa kilichopachikwa katika hatua ya mchanganyiko iliyohamishwa ni chaguo la mwendeshaji mwenyewe la uelekezaji wa wazi,
-si kitu ambacho mpaka wa uhamishaji unahitaji kuondoa.
+Uhamishaji wa mipangilio (`GET /api/settings/export-json`) inajumuisha safu zote mbili za kitenzi, kama vile uga mwingine wa mipangilio — tofauti na kichujio cha kusafirisha nje cha hatua ya mseto cha `hidePaidModels`, hakuna hatari ya kurejesha maji tena hapa: kitambulisho kilichokataliwa kilichopachikwa katika hatua ya mseto iliyosafirishwa ni chaguo dhahiri la opereta mwenyewe la uelekezaji, si jambo ambalo mpaka wa usafirishaji unahitaji kuvuliwa.
 
-## Orodha ya combo pekee (`exposeCombosOnly`)
+## Uorodheshaji wa mchanganyiko pekee (`exposeCombosOnly`)
 
-Boolean tofauti, ambayo pia lazima iwashwe kwa hiari na ina `false` kama chaguo-msingi, kwa deployment ambako combo ndizo model za umma na provider ni backend pekee. Ikiwa `true`, orodha ya umma (`GET /v1/models`, `GET /v1`, na discovery route nyingine za `/v1` zilizojengwa juu ya `getUnifiedModelsResponse()`) huhifadhi row zenye `owned_by: "combo"` pekee: combo za mtumiaji na combo zilizojengewa za `auto/*` (isipokuwa `hideAutoCombos` zizifiche). Hutumia jaribio lilelile la row kama `catalogScope: "combos"` ya kila key, na filter za allow/deny/scope za key yenyewe bado hutumika juu yake.
+boolean tofauti, pia jijumuishe na `false` kwa chaguo-msingi, kwa utumiaji ambapo michanganyiko ni sehemu ya muundo wa umma na watoa huduma ni viziada tu. Inapokuwa `true`, uorodheshaji wa umma (`GET /v1/models`, `GET /v1`, na njia zingine za ugunduzi wa `/v1` zilizojengwa kwenye `getUnifiedModelsResponse()`) huweka safu mlalo pekee `owned_by: "combo"`: michanganyiko ya watumiaji pamoja na michanganyiko ya `auto/*` iliyojengewa ndani (isipokuwa `hideAutoCombos` inazificha). Inatumia jaribio la safu mlalo sawa na la ufunguo kwa kila `catalogScope: "combos"`, na vichujio vya allow/deny/scope vya ufunguo bado vinatumika juu.
 
-Iwashe au izime katika **Settings → Routing → Models API listing**, au kwa `PATCH /api/settings {"exposeCombosOnly": true}`.
+Igeuze** Mipangilio → Uelekezaji wa Miundo ya → API uorodheshaji** , au na `PATCH /api/settings {"exposeCombosOnly": true}`.
 
-Kama orodha zilizo juu, hubadilisha tu kinachotangazwa:
+Kama orodha zilizo hapo juu, inabadilisha tu tangazo:
 
-- id ya wazi ya `provider/model` bado hutuma request, na `GET /v1/models/{id}` bado huitambua;
-- dashboard catalog (`GET /api/models/catalog`, inayotumiwa na model picker) haipunguzwi;
-- haiakisiwi katika candidate pool za `auto/*`, hivyo combo za `auto/*` huhifadhi pool zao kamili.
+- kitambulisho cha wazi `provider/model` bado kinatuma, na `GET /v1/models/{id}` bado inasuluhisha;
+- orodha ya dashibodi (`GET /api/models/catalog`, inayotumiwa na wachukuaji wa mfano) haijapunguzwa;
+- haijaakisiwa katika madimbwi ya wagombea wa `auto/*`, kwa hivyo mchanganyiko wa `auto/*` huweka kundi lao kamili.

@@ -402,53 +402,52 @@ Bu SQLite’ning onlayn zaxiralash API’sidan foydalanadi — OmniRoute ishlab 
 
 ---
 
-## Ishlashni sozlash
+## Unumdorlikni sozlash
 
 ### WAL rejimi
 
-WAL sukut bo'yicha yoqilgan. Yuqori yozish yuklari uchun quyidagilarni ko'rib chiqing:
+WAL sukut boʻyicha yoqilgan. Yozish amallari koʻp boʻlgan ish yuklamalari uchun quyidagilarni koʻrib chiqing:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Har 1000 sahifada nazorat nuqtasi yaratish
+PRAGMA journal_size_limit = 67108864;  -- WAL uchun 64MB cheklov
 ```
-
-OmniRoute `journal_size_limit` o'rnatmaydi. Tekshirish punkti WAL ramkalarini asosiy faylga o'tkazadi, lekin WAL fayli o'zining eng katta ajratilgan hajmini saqlaydi. `OMNIROUTE_WAL_GUARD_MAX_MB` qo'riqchisi faqat `wal_checkpoint(RESTART)` ogohlantiradi va ishlaydi; bu disk o'lchamidagi qopqoq emas.
 
 ### Indekslar
 
-Ishlash uchun asosiy indekslar (migratsiya orqali avtomatik yaratilgan):
+Unumdorlik uchun asosiy indekslar (migratsiyalar tomonidan avtomatik yaratiladi):
 
-- `idx_models_provider` — modeli provayder tomonidan qidiriladi
-- `idx_combo_targets_combo_id` — kombinatsiyalangan maqsadli kengaytirish
+- `idx_models_provider` — provayder boʻyicha model qidiruvlari
+- `idx_combo_targets_combo_id` — kombinatsiya nishonlarini kengaytirish
 - `idx_usage_history_api_key_timestamp` — foydalanish tahlili
-- `idx_quota_snapshots_api_key_window` — kvotasini kuzatish
-- `idx_call_logs_timestamp` — qo'ng'iroqlar jurnali so'rovlari
+- `idx_quota_snapshots_api_key_window` — kvotani kuzatish
+- `idx_call_logs_timestamp` — chaqiruv jurnali soʻrovlari
 
-Yangi indeks qo'shish uchun migratsiya yarating:
+Yangi indeks qoʻshish uchun migratsiya yarating:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Xotira xaritali I/O
+### Xotirada akslantirilgan kiritish-chiqarish
 
-Juda katta ma'lumotlar bazalari uchun (> 10GB), xotira xaritasini SQLite pragmasi orqali sozlash mumkin:
+Juda katta maʼlumotlar bazalari (>10GB) uchun xotirada akslantirishni SQLite pragma orqali sozlash mumkin:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- SQLite pragma orqali oʻrnating (core.ts yoki bajarilish muhitida sozlang)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Siqilish
+### Ixchamlash
 
-Uzoq muddatli OmniRoute namunalari vaqti-vaqti bilan `VACUUM` dan foydalanadi:
+Uzoq vaqt ishlaydigan OmniRoute nusxalari vaqti-vaqti bilan `VACUUM` bajarilishidan foyda koʻradi:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Har oyda trafik kam bo'lgan oynalarda ishga tushiring. (WAL rejimi ehtiyojni kamaytiradi, lekin uni yo'q qilmaydi.)
+Har oy trafik kam boʻlgan vaqt oraligʻida ishga tushiring. (WAL rejimi bunga boʻlgan ehtiyojni kamaytiradi, ammo butunlay bartaraf etmaydi.)
 
 ---
 

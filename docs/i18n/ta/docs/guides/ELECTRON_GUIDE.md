@@ -4,102 +4,99 @@
 
 ---
 
-> **உண்மையின் ஆதாரம்:** `electron/` பணியிடம்
-> **கடைசியாகப் புதுப்பிக்கப்பட்டது:** 2026-06-28 — v3.8.40
+> **உண்மையின் ஆதாரம்:** `electron/` பணியிடம்** கடைசியாக புதுப்பிக்கப்பட்டது:** 2026-06-28 — v3.8.40
 
-OmniRoute, **Electron 41** + **electron-builder 26.10** அடிப்படையில் உருவாக்கப்பட்ட பல்வேறு தளங்களுக்கான டெஸ்க்டாப் செயலியை (Windows / macOS / Linux) வழங்குகிறது. டெஸ்க்டாப் செயலி, Next.js தனித்த சேவையகத்தை ஒரு துணைச் செயல்முறையாகத் தொடங்கி, ஒரு `BrowserWindow`-ஐ அதை நோக்கி அமைப்பதுடன், கணினித் தட்டு, தானியங்குப் புதுப்பிப்பான், IPC இணைப்புப் பாலம் மற்றும் எந்த உள்ளமைவும் தேவையில்லாத ரகசியத் துவக்கத்தையும் சேர்க்கிறது.
+OmniRoute ஒரு குறுக்கு-தளம் டெஸ்க்டாப் பயன்பாட்டை (Windows / macOS / Linux) உருவாக்குகிறது**Electron 41** +** எலக்ட்ரான்-பில்டர் 26.10** . டெஸ்க்டாப் பயன்பாடு, Next.js ஸ்டாண்டலோன் சர்வரை ஒரு குழந்தை செயல்முறையாக உருவாக்குகிறது, அதில் ஒரு `BrowserWindow` சுட்டிக்காட்டுகிறது, மேலும் கணினி தட்டு, ஆட்டோ-அப்டேட்டர், IPC பிரிட்ஜ் மற்றும் ஜீரோ-கான்ஃபிக் ரகசிய பூட்ஸ்ட்ராப் ஆகியவற்றைச் சேர்க்கிறது.
 
-## கட்டமைப்பு
+## கட்டிடக்கலை
 
 ```
-┌────────────────────────────────────────────────────┐
-│ Electron முதன்மைச் செயல்முறை (electron/main.js)   │
-│ ├─ ஒற்றை நிகழ்வு பூட்டு                             │
-│ ├─ துணைச் செயல்முறை: Next.js தனித்த சேவையகம்     │
-│ │   (Electron-இன் Node இயக்கச்சூழலில் தொடங்கப்படும்) │
-│ ├─ BrowserWindow → http://localhost:PORT           │
-│ ├─ கணினித் தட்டு + சூழல் மெனு                     │
-│ ├─ electron-updater வழியான தானியங்குப் புதுப்பிப்பு │
-│ ├─ உள்ளடக்கப் பாதுகாப்புக் கொள்கை (அமர்வு தலைப்புகள்) │
-│ └─ ரகசியத் துவக்கம் (JWT / API_KEY_SECRET)         │
-└────────────────────────────────────────────────────┘
-            ↕ IPC இணைப்புப் பாலம் (electron/preload.js)
-┌────────────────────────────────────────────────────┐
-│ ரெண்டரர் (Next.js கட்டுப்பாட்டுப் பலகை)             │
-│   window.electronAPI.* (contextIsolation)          │
-└────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
+│ ├─ BrowserWindow → http://localhost:PORT     │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+└──────────────────────────────────────────────┘
+            ↕ IPC bridge (electron/preload.js)
+┌──────────────────────────────────────────────┐
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
+└──────────────────────────────────────────────┘
 ```
 
 ## பதிப்புகள்
 
-`electron/package.json`-இலிருந்து உறுதிப்படுத்தப்பட்டவை:
+`electron/package.json` இலிருந்து உறுதிப்படுத்தப்பட்டது:
 
-| தொகுப்பு           | பதிப்பு                                                                    |
-| ------------------ | -------------------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                                  |
-| `electron-builder` | `^26.15.3`                                                                 |
-| `electron-updater` | `^6.8.9`                                                                   |
-| `better-sqlite3`   | ரூட் `^13.0.2` (Node-API முன்கட்டமைப்புகள் — Electron மறுகட்டமைப்பு இல்லை) |
-| செயலி பதிப்பு      | `3.8.0`                                                                    |
-| செயலி அடையாளம்     | `online.omniroute.desktop`                                                 |
-| தயாரிப்புப் பெயர்  | `OmniRoute`                                                                |
+| தொகுப்பு             | பதிப்பு                                                           |
+| -------------------- | ----------------------------------------------------------------- |
+| `electron`           | `^43.4.1`                                                         |
+| `electron-builder`   | `^26.15.3`                                                        |
+| `electron-updater`   | `^6.8.9`                                                          |
+| `better-sqlite3`     | ரூட் `^13.0.2` (நோட்-ஏபிஐ ப்ரீபில்ட்ஸ் — இல்லை Electron ரீபில்ட்) |
+| பயன்பாட்டின் பதிப்பு | `3.8.0`                                                           |
+| பயன்பாட்டு ஐடி       | `online.omniroute.desktop`                                        |
+| தயாரிப்பு பெயர்      | `OmniRoute`                                                       |
 
-## ஸ்கிரிப்ட்கள் (ரூட் `package.json`)
+## ஸ்கிரிப்டுகள் (ரூட் `package.json`)
 
-| ஸ்கிரிப்ட்                        | நோக்கம்                                                                                                       |
-| --------------------------------- | ------------------------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | `npm run dev`-ஐத் தொடங்கி + `localhost:20128`-க்காகக் காத்திருந்து + Electron-ஐத் தொடங்குகிறது                |
-| `npm run electron:build`          | Next.js-ஐக் கட்டமைத்து, பின்னர் தற்போதைய OS-க்காக `electron-builder`-ஐ இயக்குகிறது                            |
-| `npm run electron:build:win`      | Windows NSIS நிறுவி + எடுத்துச் செல்லக்கூடிய பதிப்பை (x64) கட்டமைக்கிறது                                      |
-| `npm run electron:build:mac`      | macOS DMG-ஐ (Intel + Apple Silicon) கட்டமைக்கிறது                                                             |
-| `npm run electron:build:linux`    | Linux AppImage + DEB-ஐ (x64 + arm64) கட்டமைக்கிறது                                                            |
-| `npm run electron:smoke:packaged` | தொகுக்கப்பட்ட இருமக் கோப்பைத் தொடங்கி, HTTP 200 பதிலுக்காக `/login`-ஐச் சோதித்துவிட்டு, பின்னர் நிறுத்துகிறது |
+| ஸ்கிரிப்ட்                        | நோக்கம்                                                                                              |
+| --------------------------------- | ---------------------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | `npm run dev` + `localhost:20128` + Electron                                                         |
+| `npm run electron:build`          | Next.js உருவாக்குகிறது பின்னர் தற்போதைய OS க்கு `electron-builder` இயக்குகிறது                       |
+| `npm run electron:build:win`      | Windows NSIS நிறுவியை உருவாக்குகிறது + போர்ட்டபிள் (x64)                                             |
+| `npm run electron:build:mac`      | macOS DMG (Intel + Apple Silicon) உருவாக்குகிறது                                                     |
+| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) ஐ உருவாக்குகிறது                                                  |
+| `npm run electron:smoke:packaged` | HTTP 200 க்கு தொகுக்கப்பட்ட பைனரி மற்றும் ஆய்வுகள் `/login` அறிமுகப்படுத்துகிறது, பின்னர் மூடப்படும் |
 
-`electron/` பணியிடம் பின்வருவனவற்றையும் வழங்குகிறது:
+`electron/` பணியிடமும் அம்பலப்படுத்துகிறது:
 
-- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs`-ஐ இயக்குகிறது
-- `npm run build:mac-x64` / `build:mac-arm64` — ஒற்றைக் கட்டமைப்பு வகைக்கான macOS கட்டமைப்புகள்
-- `npm run pack` — உள்ளூர் சோதனைக்கான கோப்பகம்-மட்டும் கொண்ட கட்டமைப்பு (நிறுவி இல்லை)
+- `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` இயக்குகிறது
+- `npm run build:mac-x64` / `build:mac-arm64` — ஒற்றை-வளைவு macOS உருவாக்குகிறது
+- `npm run pack` — கோப்பகம்-உள்ளூர் சோதனைக்கு மட்டும் உருவாக்கம் (நிறுவி இல்லை)
 
-## விருப்ப runtime pack கள்
+## விருப்ப இயக்க நேர பொதிகள்
 
-Desktop build கள் installer களுடன் விருப்ப runtime archive களையும் வெளியிடலாம். நிறுவப்பட்ட server payload இல் `optional-packs.index.json` உள்ளது (Windows மற்றும் Linux இல் `resources/app` கீழ்). `browser-runtime` entry க்கு `packs[].tarball` ஐ வாசித்து, **அதே release இலிருந்து துல்லியமாக அந்த filename ஐப் பதிவிறக்கவும்**. Archive பெயர்களில் SHA-256 digest உள்ளது; வெவ்வேறு build களுக்கு வெவ்வேறு archive கள் தேவைப்படலாம். பதிவிறக்கிய filename ஐ மாற்ற வேண்டாம்.
+டெஸ்க்டாப் பில்ட்கள் அவற்றின் நிறுவிகளுடன் விருப்ப இயக்க நேர காப்பகங்களை வெளியிடலாம். நிறுவப்பட்ட சர்வர் பேலோடில் `optional-packs.index.json` ( Windows மற்றும் Linux இல் `resources/app` இன் கீழ்) உள்ளது. `browser-runtime` உள்ளீட்டிற்கு, `packs[].tarball` ஐப் படித்து பதிவிறக்கவும்** அதே வெளியீட்டில் இருந்து சரியான கோப்பு பெயர்** . காப்பகப் பெயர்களில் SHA-256 டைஜஸ்ட் அடங்கும்; வெவ்வேறு கட்டிடங்களுக்கு வெவ்வேறு காப்பகங்கள் தேவைப்படலாம். பதிவிறக்கம் செய்யப்பட்ட கோப்பின் பெயரை மாற்றாமல் வைத்திருங்கள்.
 
-நிறுவப்பட்ட app இன் index மற்றும் தேர்ந்தெடுத்த archive ஐ ஒரே directory இல் நகலெடுத்து, அதே release இன் CLI ஐப் பயன்படுத்தவும்:
+நிறுவப்பட்ட பயன்பாட்டின் அட்டவணை மற்றும் தேர்ந்தெடுக்கப்பட்ட காப்பகத்தை ஒரு கோப்பகத்தில் நகலெடுத்து, அதே வெளியீட்டிலிருந்து CLI ஐப் பயன்படுத்தவும்:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` installation மற்றும் verification நிலைகளைக் காட்டும்; archive filename ஐ அல்ல. இணைக்கப்பட்ட index archive ஐத் தேர்ந்தெடுக்கும். Installation, extraction க்கு முன் archive checksum ஐயும் நிறுவப்பட்ட pack ஐ மாற்றுமுன் package checksum களையும் சரிபார்க்கும். இது local file களை வாசிக்கும்; காணாத archive களைப் பதிவிறக்காது. நிறுவிய பிறகு application ஐ மறுதொடக்கம் செய்யவும். Release இல் பொருத்தமான asset இல்லையெனில், அந்த release இன் asset கள் வழியாக விருப்ப pack கிடைக்காது.
+`packs list` நிறுவல் மற்றும் சரிபார்ப்பு நிலையை காட்டுகிறது, காப்பக கோப்பு பெயர் அல்ல. தொகுக்கப்பட்ட குறியீடு காப்பகத்தைத் தேர்ந்தெடுக்கிறது. நிறுவல் பிரித்தெடுப்பதற்கு முன் அதன் காப்பக செக்சம் மற்றும் நிறுவப்பட்ட பேக்கை மாற்றுவதற்கு முன் அதன் தொகுப்பு செக்சம்களை சரிபார்க்கிறது. இது உள்ளூர் கோப்புகளைப் படிக்கிறது; இது விடுபட்ட காப்பகங்களைப் பதிவிறக்காது. நிறுவிய பின் பயன்பாட்டை மறுதொடக்கம் செய்யவும். வெளியீட்டில் பொருந்தக்கூடிய சொத்து இல்லை என்றால், அந்த வெளியீட்டின் சொத்துக்கள் மூலம் விருப்பத் தொகுப்பு கிடைக்காது.
 
-## அடைவு அமைப்பு
+## அடைவு தளவமைப்பு
 
 ```
 electron/
-├── package.json              # Electron சார்புகள் + electron-builder உள்ளமைவு
-├── main.js                   # முதன்மைச் செயல்முறை (24 KB — கீழேயுள்ள குறிப்புகளைப் பார்க்கவும்)
-├── preload.js                # contextBridge IPC பாலம்
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI வகைகள்
-├── README.md                 # பணியிடத்திற்குள்ளான குறிப்புகள்
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder வெளியீடு (gitignored)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # .next/electron-standalone தொகுப்பைத் தயார்நிலைப்படுத்துகிறது
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # உருவாக்கத்திற்குப் பிந்தைய smoke சோதனை
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-`main.js` மற்றும் `preload.js` இரண்டும் TypeScript அல்ல; அவை **CommonJS `.js` கோப்புகள்**.
-renderer பக்க வகை வரையறைகள் `electron/types.d.ts`-இல் உள்ளன.
+`main.js` மற்றும் `preload.js` இரண்டும்**CommonJS `.js` கோப்புகள்** , TypeScript அல்ல. ரெண்டரர் பக்க தட்டச்சுகள் `electron/types.d.ts` இல் வாழ்கின்றன.
 
 ## IPC பாலம் (`preload.js`)
 
-preload, `contextIsolation: true` மற்றும் `nodeIntegration: false` ஆகியவற்றுடன்
-`contextBridge`-ஐப் பயன்படுத்தி, அனுமதிப்பட்டியலில் உள்ள API-ஐ `window.electronAPI`-இல் வெளிப்படுத்துகிறது.
+`contextIsolation: true` மற்றும் `nodeIntegration: false` உடன் `contextBridge` பயன்படுத்தி `window.electronAPI` இல் அனுமதிப்பட்டியலில் உள்ள API முன் ஏற்றுதல் வெளிப்படுத்துகிறது.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -118,130 +115,113 @@ const VALID_CHANNELS = {
 };
 ```
 
-வெளிப்படுத்தப்பட்ட முறைகள்:
+வெளிப்படும் முறைகள்:
 
-| Renderer அழைப்பு                                                  | வகை                                                 |
-| ----------------------------------------------------------------- | --------------------------------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                                              |
-| `openExternal(url)`                                               | invoke                                              |
-| `getDataDir()`                                                    | invoke                                              |
-| `restartServer()`                                                 | invoke                                              |
-| `getAppVersion()`                                                 | invoke                                              |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                                              |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                                                |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (அகற்றும் செயல்பாட்டைத் திருப்பியளிக்கிறது) |
+| வழங்குபவர் அழைப்பு                                                | வகை                       |
+| ----------------------------------------------------------------- | ------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | அழைக்கவும்                |
+| `openExternal(url)`                                               | அழைக்கவும்                |
+| `getDataDir()`                                                    | அழைக்கவும்                |
+| `restartServer()`                                                 | அழைக்கவும்                |
+| `getAppVersion()`                                                 | அழைக்கவும்                |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | அழைக்கவும்                |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | அனுப்பு                   |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | பெறு (திரும்பப் பெறுபவர்) |
 
-receive உதவிகள் `removeAllListeners`-ஐச் சார்ந்திருப்பதற்குப் பதிலாக ஒரு
-**அகற்றும் செயல்பாட்டை**த் திருப்பியளிக்கின்றன — React கூறுகள் மீண்டும் mount
-செய்யப்படும்போது listener-கள் குவிவதை இது தடுக்கிறது.
+பெறும் உதவியாளர்கள் திரும்ப ஏ** அகற்றும் செயல்பாடு** `removeAllListeners` — ஐ நம்புவதை விட இது React கூறுகள் மீண்டும் ஏற்றப்படும் போது கேட்போர் திரட்சியைத் தடுக்கிறது.
 
-## சேவையக வாழ்க்கைச் சுழற்சி
+## சேவையக வாழ்க்கை சுழற்சி
 
-கணினியில் உள்ள Node உடனான native-module ABI பொருத்தமின்மையைத் தவிர்க்க, `main.js`
-Electron Node runtime-ஐக் கொண்டு Next.js standalone தொகுப்பை நேரடியாகத் தொடங்குகிறது:
+சிஸ்டம் நோடுடன் நேட்டிவ்-மாட்யூல் ABI பொருத்தமின்மையைத் தவிர்க்க,`main.js` Next.js ஸ்டாண்டலோன் மூட்டையை Electron நோட் இயக்க நேரத்துடன் நேரடியாக உருவாக்குகிறது:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-முக்கிய அம்சங்கள்:
+சிறப்பம்சங்கள்:
 
-- சாளரத்தைக் காட்டுவதற்கு முன் `waitForServer()` URL-ஐ அதிகபட்சம் 30 வினாடிகள் வரை தொடர்ச்சியாகச் சோதிக்கிறது (cold start-இல் வெற்றுத் திரை இருக்காது).
-- `stdio: "pipe"` stdout/stderr-ஐப் பதிவுசெய்கிறது; தயார் நிலையைக் குறிக்கும் சொற்றொடர்கள் (`Ready` / `listening`) IPC வழியாக `server-status: running`-ஐ வெளியிடுகின்றன.
-- `before-quit`, முறையான SIGTERM-க்காக (WAL checkpoint) அதிகபட்சம் 5 வினாடிகள் காத்திருந்து, பின்னர் SIGKILL-ஐ அனுப்புகிறது.
-- tray-இல் உள்ள port மாற்றி (`20128`, `3000`, `8080`) சேவையகத்தை நிறுத்தி மறுதொடக்கம் செய்த பின்னர் BrowserWindow-ஐ மீண்டும் ஏற்றுகிறது.
+- `waitForServer()` சாளரத்தைக் காண்பிப்பதற்கு முன் 30 வினாடிகள் வரை URL ஐத் தேர்ந்தெடுக்கிறது (குளிர் தொடக்கத்தில் வெற்றுத் திரை இல்லை).
+- `stdio: "pipe"` stdout/stderr ஐ கைப்பற்றுகிறது; தயாராக சொற்றொடர்கள் (`Ready` / `listening`) IPC மீது `server-status: running` வெளியிடுகின்றன.
+- `before-quit` அழகான SIGTERM (WAL சோதனைச் சாவடி)க்காக 5 வினாடிகள் வரை காத்திருந்து SIGKILL அனுப்புகிறது.
+- தட்டில் உள்ள போர்ட் மாற்றி (`20128`, `3000`, `8080`) சேவையகத்தை நிறுத்தி மறுதொடக்கம் செய்து, பின்னர் BrowserWindow ஐ மீண்டும் ஏற்றுகிறது.
 
-## கட்டமைப்பு இல்லா ரகசியத் தொடக்கநிலை அமைப்பு
+## Zero-config சீக்ரெட் பூட்ஸ்டார்ப்
 
-முதல் முறை தொடங்கும்போது, பிரதான செயல்முறை விடுபட்ட ரகசியங்களைத் தானாக உருவாக்கிச் சேமிக்கிறது:
+முதல் துவக்கத்தில், முக்கிய செயல்முறை தானாக உருவாக்கி, காணாமல் போன ரகசியங்களைத் தொடரும்:
 
-| ரகசியம்                  | மூலம்                                                                                                |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                             |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (குறியாக்கப்பட்ட நற்சான்றுகள் ஏற்கனவே இருந்தால் மறுக்கிறது) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                             |
+| இரகசியம்                 | ஆதாரம்                                                                                             |
+| ------------------------ | -------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                           |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (மறைகுறியாக்கப்பட்ட கடன்கள் ஏற்கனவே இருந்தால் மறுக்கிறது) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                           |
 
-`<DATA_DIR>/server.env`-இல் சேமிக்கப்படுகிறது. `DATA_DIR` பின்வருமாறு தீர்மானிக்கப்படுகிறது:
+`<DATA_DIR>/server.env` வரை நீடித்தது. `DATA_DIR` தீர்க்கிறது:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` அல்லது `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## சூழல் கோப்புத் தேடல்
+## சுற்றுச்சூழல் கோப்பு தேடல்
 
-சேவையகத்தைத் தொடங்குவதற்கு முன், பிரதான செயல்முறை (`electron/main.js`-இல் உள்ள
-`getPreferredEnvFilePath()`) **ஒரு** `.env` கோப்பைத் தேர்ந்தெடுக்கிறது: கீழுள்ளவற்றில் முதலில் இருப்பது.
+சேவையகத்தை உருவாக்குவதற்கு முன், முக்கிய செயல்முறை ( `electron/main.js` இல்`getPreferredEnvFilePath()` ) தேர்ந்தெடுக்கப்படுகிறது** ஒன்று** `.env` கோப்பு: இதில் உள்ள முதலாவது.
 
-1. பயன்பாடு தொடங்கப்பட்ட சூழலில் `DATA_DIR` அமைக்கப்பட்டிருந்தால், `$DATA_DIR/.env`.
-2. மேலே உள்ள அதே இயல்புநிலைகளைப் பயன்படுத்தி, `<resolved DATA_DIR>/.env`: Windows-இல்
-   `%APPDATA%\omniroute\.env`, Linux மற்றும் macOS-இல் `$XDG_CONFIG_HOME/omniroute/.env` அல்லது `~/.omniroute/.env`.
-3. செயல்முறையின் பணிக் கோப்பகத்தில் உள்ள `.env`.
+1. `$DATA_DIR/.env`, சூழலில் `DATA_DIR` அமைக்கப்படும் போது பயன்பாடு தொடங்கப்பட்டது.
+2. `<resolved DATA_DIR>/.env`, மேலே உள்ள அதே இயல்புநிலைகளைப் பயன்படுத்தி: Windows இல் `%APPDATA%\omniroute\.env`, `$XDG_CONFIG_HOME/omniroute/.env` அல்லது `~/.omniroute/.env` இல் Linux மற்றும் macOS.
+3. செயல்பாட்டில் செயல்படும் கோப்பகத்தில்`.env`.
 
-பிரதான செயல்முறை அந்தக் கோப்பை மட்டுமே படிக்கிறது; பின்னர் வரும் தேர்வுகள் ஒன்றிணைக்கப்படுவதில்லை. அதன் பிறகு
-சேவையகச் சூழல், பின்வரும் முன்னுரிமையில் உருவாக்கப்படுகிறது (மிக உயர்ந்தது முதலில்):
+முக்கிய செயல்முறை அந்த கோப்பை மட்டுமே படிக்கிறது; பின்னர் வேட்பாளர்கள் ஒன்றிணைக்கப்படவில்லை. சர்வர் சூழல் இந்த முன்னுரிமையுடன் கட்டமைக்கப்படுகிறது (அதிகமானது முதலில்):
 
-1. Electron செயல்முறைச் சூழல் (பயன்பாட்டைத் தொடங்கியதிலிருந்து மரபாகப் பெறப்பட்ட மாறிகள்).
+1. Electron செயல்முறை சூழல் (பயன்பாடு தொடங்கப்பட்டவற்றிலிருந்து மாறிகள்).
 2. தேர்ந்தெடுக்கப்பட்ட `.env` கோப்பு.
-3. `<DATA_DIR>/server.env` (மேலே உள்ள தொடக்கநிலை ரகசியங்கள்).
+3. `<DATA_DIR>/server.env` (மேலே உள்ள பூட்ஸ்ட்ராப் ரகசியங்கள்).
 
-பயன்பாடு தொடங்கும்போது செயல்முறைச் சூழல் பதிவு செய்யப்படுகிறது. எனவே, பயன்பாடு இயங்கிக்கொண்டிருக்கும்போது அமைக்கப்படும்
-கணினி அல்லது பயனர் சூழல் மாறி (அதன் சாளரம் மூடப்பட்ட பிறகு கணினித் தட்டில் தொடர்ந்து இயங்கும்போதும்)
-பயன்பாட்டை முழுமையாக வெளியேற்றி மீண்டும் தொடங்கும் வரை சேவையகத்தைச் சென்றடையாது. `CONTEXT_LENGTH_<PROVIDER>` போன்ற
-இயக்கநேர அமைப்புகளுக்கு ([சூழல் மாறிகள்: வழங்குநர் வாரியான சூழல் நீளம்](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)
-என்பதைப் பார்க்கவும்), `.env` கோப்பைப் பயன்படுத்துவது விரும்பத்தக்கது; பின்னர் முழுமையாக வெளியேறி (கணினித் தட்டு, **வெளியேறு**) மீண்டும் தொடங்கவும்.
+ஆப்ஸ் தொடங்கும் போது செயல்முறை சூழல் படம்பிடிக்கப்படும், எனவே ஆப்ஸ் இயங்கும் போது அமைப்பு அல்லது பயனர் சூழல் மாறி அமைக்கப்பட்டது (சாளரம் மூடப்பட்ட பிறகு தட்டில் அமர்ந்திருப்பது உட்பட) ஆப்ஸ் முழுமையாக வெளியேறி மீண்டும் தொடங்கும் வரை சேவையகத்தை அடையாது. `CONTEXT_LENGTH_<PROVIDER>` போன்ற இயக்க நேர கைப்பிடிகளுக்கு ( [சுற்றுச்சூழல் மாறிகளைப் பார்க்கவும்: ஒவ்வொரு வழங்குநருக்கும் சூழல் நீளம்](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), `.env` கோப்பை விரும்பவும், பின்னர் முழுமையாக வெளியேறவும் (தட்டு,** வெளியேறு** ) மற்றும் மறுதொடக்கம்.
 
-## சாளரம் & கணினித் தட்டு
+## ஜன்னல் & தட்டு
 
-- `BrowserWindow`: 1400×900 (குறைந்தபட்சம் 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, போக்குவரத்து விளக்குப் பொத்தான்கள் `{ x: 16, y: 16 }`-இல்.
-- Windows/Linux: சொந்த தலைப்புப் பட்டை.
-- மூடுதல் பொத்தான் கணினித் தட்டிற்குக் குறைக்கிறது; கணினித் தட்டு மெனுவில் **OmniRoute-ஐத் திற**, **கட்டுப்பாட்டுப் பலகையைத் திற** (வெளிப்புற உலாவி), **சேவையகப் போர்ட்** துணைமெனு, **புதுப்பிப்புகளைச் சரிபார்**, **வெளியேறு** ஆகியவை உள்ளன.
+- `BrowserWindow`: 1400 × 900 (நிமிடம் 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, `{ x: 16, y: 16 }` இல் போக்குவரத்து விளக்கு.
+- Windows/Linux: சொந்த தலைப்புப் பட்டி.
+- மூடு பொத்தான் தட்டுக்கு குறைக்கிறது; தட்டு மெனு உள்ளது** OmniRoute திறக்கவும்** ,** டாஷ்போர்டைத் திற** (வெளி உலாவி),** சர்வர் போர்ட்** துணைமெனு,** புதுப்பிப்புகளைச் சரிபார்க்கவும்** ,** வெளியேறு** .
 
-## உள்ளடக்கப் பாதுகாப்புக் கொள்கை
+## உள்ளடக்க பாதுகாப்பு கொள்கை
 
-`session.defaultSession.webRequest.onHeadersReceived` வழியாக அமைக்கப்படுகிறது. குறிப்பிடத்தக்க வழிமுறைகள்:
+`session.defaultSession.webRequest.onHeadersReceived` வழியாக அமைக்கவும். குறிப்பிடத்தக்க வழிகாட்டுதல்கள்:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- மேம்பாட்டு முறை `script-src`-இல் மட்டும் `'unsafe-eval'`-ஐச் சேர்க்கிறது
+- தேவ் பயன்முறை `'unsafe-eval'` `script-src` உடன் மட்டுமே சேர்க்கிறது
 
-## தானியங்குப் புதுப்பிப்பு
+## தானாக புதுப்பித்தல்
 
-GitHub வழங்குநருடன் (`diegosouzapw/OmniRoute`) `electron-updater`-ஐப் பயன்படுத்துகிறது.
+GitHub வழங்குநருடன் (`diegosouzapw/OmniRoute`) `electron-updater` பயன்படுத்துகிறது.
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- `update-status` IPC வழியாக வழங்கல் செயல்முறைக்கு அனுப்பப்படும் நிகழ்வுகள்:
-  `checking`, `available`, `not-available`, `downloading` (`percent` உடன்), `downloaded`, `error`
-- `installUpdate()` சேவையகத்தை நிறுத்திவிட்டு, பின்னர் `autoUpdater.quitAndInstall()`-ஐ அழைக்கிறது
-- மேம்பாட்டு முறையில் தவிர்க்கப்படுகிறது (`!app.isPackaged`)
+- `update-status` IPC வழியாக ரெண்டரருக்கு அனுப்பப்பட்ட நிகழ்வுகள்: `checking`, `available`, `not-available`, `downloading` ( `percent` உடன்), `downloaded`, `error`
+- `installUpdate()` சேவையகத்தைக் கொன்று `autoUpdater.quitAndInstall()` அழைக்கிறது
+- தேவ் பயன்முறையில் (`!app.isPackaged`) தவிர்க்கப்பட்டது
 
-## உருவாக்கப் பைப்லைன்
+## குழாய் அமைக்க
 
-1. `npm run build` → `.next/standalone`-இல் Next.js standalone உருவாக்கம்.
-2. `prepare-electron-standalone.mjs` → `.next/electron-standalone`-இல் மீண்டும் நிலைநிறுத்தி, தொகுப்பை இடமாற்றக்கூடியதாக மாற்றுவதற்காக `server.js` + `required-server-files.json` ஆகியவற்றில் உள்ள முழுமையான பாதைகளை மீண்டும் எழுதுகிறது.
-3. `electron-builder`, `main.js`, `preload.js`, `node_modules` மற்றும் `extraResources: { ../.next/electron-standalone → app }` ஆகியவற்றைத் தொகுப்பாக்குகிறது.
+1. `npm run build` → Next.js `.next/standalone` இல் தனித்தனியாக உள்ளது.
+2. `prepare-electron-standalone.mjs` → `.next/electron-standalone` க்கு மீண்டும் நிலைகளை உருவாக்குகிறது மற்றும் `server.js` + `required-server-files.json` க்குள் முழுமையான பாதைகளை மீண்டும் எழுதுகிறது, எனவே தொகுப்பு இடமாற்றம் செய்யப்படுகிறது.
+3. `electron-builder` தொகுப்புகள் `main.js`, `preload.js`, `node_modules` மற்றும் `extraResources: { ../.next/electron-standalone → app }`.
 
-### உருவாக்க இலக்குகள்
+### இலக்குகளை உருவாக்குங்கள்
 
-| இயங்குதளம் | இலக்குகள்                                            |
-| ---------- | ---------------------------------------------------- |
-| Windows    | NSIS நிறுவி + portable (x64)                         |
-| macOS      | DMG (Intel + arm64, இழுத்து-Applications-இல் இடுதல்) |
-| Linux      | AppImage + DEB (x64 + arm64)                         |
+| OS      | இலக்குகள்                              |
+| ------- | -------------------------------------- |
+| Windows | NSIS நிறுவி + போர்ட்டபிள் (x64)        |
+| macOS   | DMG (Intel + arm64, இழுவை பயன்பாடுகள்) |
+| Linux   | AppImage + DEB (x64 + arm64)           |
 
-NSIS அமைப்புகள்: `oneClick: false`; பயனர் நிறுவல் கோப்பகத்தைத் தேர்ந்தெடுக்க அனுமதிக்கிறது; Desktop மற்றும் Start-Menu குறுக்குவழிகளை உருவாக்குகிறது.
+NSIS அமைப்புகள்: `oneClick: false`, நிறுவல் கோப்பகத்தைத் தேர்வுசெய்ய பயனரை அனுமதிக்கிறது, டெஸ்க்டாப் மற்றும் ஸ்டார்ட்-மெனு குறுக்குவழிகளை உருவாக்குகிறது.
 
-## தொகுப்பாக்கப்பட்ட உருவாக்கத்தின் அடிப்படைச் சோதனை
+## ஸ்மோக் டெஸ்டிங் பேக்கேஜ்டு பில்ட்
 
 ```bash
 npm run electron:smoke:packaged
@@ -249,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- தற்போதைய தளத்திற்கான தொகுப்பாக்கப்பட்ட binary-ஐ `electron/dist-electron/`-இல் தானாகக் கண்டறிகிறது.
-- உருவாக்குநர் தரவைத் தொடாமல் இருப்பதற்காகத் தனிமைப்படுத்தப்பட்ட `HOME`/`APPDATA`/`XDG_*` கோப்பகங்களுடன் தொடங்குகிறது.
-- 45 s-க்குள் HTTP 200 பதிலுக்காக `http://127.0.0.1:20128/login`-ஐத் தொடர்ந்து சரிபார்க்கிறது.
-- ஆபத்தான வடிவங்களுக்காக stderr/stdout-ஐக் கண்காணிக்கிறது (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` போன்றவை).
-- தயார்நிலைக்குப் பிறகு 2 s நிலையான இயக்கத்திற்காகக் காத்திருந்து, பின்னர் SIGTERM-ஐ அனுப்பி port விடுவிக்கப்படும் வரை காத்திருக்கிறது.
-- CI-இல், தானாகவே `--no-sandbox --disable-gpu`-ஐ அனுப்புகிறது (Linux-இல் `--disable-dev-shm-usage`-ஐயும் அனுப்புகிறது).
+- தற்போதைய இயங்குதளத்திற்கான `electron/dist-electron/` இல் தொகுக்கப்பட்ட பைனரியைத் தானாகக் கண்டறியும்.
+- தனிமைப்படுத்தப்பட்ட `HOME`/`APPDATA`/`XDG_*` கோப்பகங்களுடன் தொடங்குகிறது, எனவே இது டெவலப்பர் தரவைத் தொடாது.
+- 45 வினாடிகளுக்குள் HTTP 200க்கான வாக்கெடுப்புகள் `http://127.0.0.1:20128/login`.
+- அபாயகரமான வடிவங்களுக்கான stderr/stdout கடிகாரங்கள் (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, முதலியன).
+- தயார்நிலைக்குப் பிறகு நிலையான இயக்க நேரம் 2 வினாடிகள் காத்திருக்கிறது, பின்னர் SIGTERM வெளியிடுகிறது மற்றும் போர்ட் விடுவிக்கப்படும் வரை காத்திருக்கிறது.
+- CI இல், தானாகவே `--no-sandbox --disable-gpu` (மற்றும் Linux இல் `--disable-dev-shm-usage` ) கடந்து செல்லும்.
 
-சூழல் மாறி மேலெழுதல்கள்: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+என்வி மேலெழுகிறது: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
-## குறியீட்டு கையொப்பமிடல்
+## குறியீடு கையொப்பமிடுதல்
 
-`electron/package.json`, கையொப்பமிடல் சான்றுகளை நேரடியாக இணைக்காது. அவற்றைச் சூழல் மாறிகள் வழியாக `electron-builder`-க்கு அனுப்பவும்:
+`electron/package.json` செய்கிறது** இல்லை** நேரடியாக கையொப்பமிடும் சான்றுகள். அவற்றை env vars வழியாக `electron-builder` க்கு அனுப்பவும்:
 
 ### macOS
 
@@ -283,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-AppImage கையொப்பமிடல் விருப்பத்தேர்வானது — கையொப்பமிட வேண்டுமெனில் `LINUX_GPG_KEY`-ஐ அமைக்கவும்.
+AppImage கையொப்பமிடுதல் விருப்பத்தேர்வு — அமைக்க `LINUX_GPG_KEY` கையொப்பமிட்டால்.
 
 ## விநியோகம்
 
-வெளியீட்டுக் கோப்புகள் `electron/dist-electron/`-இல் உருவாக்கப்படுகின்றன:
+கலைப்பொருட்கள் `electron/dist-electron/` இல் தரையிறங்குகின்றன:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-வெளியீடுகள் GitHub Releases-க்கு (`diegosouzapw/OmniRoute`) வெளியிடப்படுகின்றன; புதிய பதிப்புகளுக்காக `electron-updater` சரிபார்க்கும் இடமும் இதுவே.
+வெளியீடுகள் GitHub வெளியீடுகளில் வெளியிடப்படுகின்றன (`diegosouzapw/OmniRoute`), இது `electron-updater` புதிய பதிப்புகளை சரிபார்க்கிறது.
 
-## சிக்கல் தீர்வு
+## சரிசெய்தல்
 
-| அறிகுறி                                                                                   | தீர்வு                                                                                                                                                                                              |
-| ----------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Electron முதன்மைப் பதிப்பு மேம்படுத்தலுக்குப் பிறகு `Cannot find module 'better-sqlite3'` | better-sqlite3 v13, Node-API முன்கட்டமைப்புகளுடன் வழங்கப்படுகிறது — root-இல் `npm install` மற்றும் `prepare:bundle`-ஐ மீண்டும் இயக்கவும் (இது தற்போதைய தளத்திற்கான முன்கட்டமைப்பைச் சரிபார்க்கிறது) |
-| native module-க்கு `ERR_DLOPEN_FAILED`                                                    | `prepare:bundle`-ஐ மீண்டும் இயக்கவும் — தற்போதைய தளத்திற்கான Node-API முன்கட்டமைப்பு இல்லாதபோது இது உடனடியாகத் தோல்வியடைகிறது                                                                       |
-| Linux-இல் சாளரம் வெறுமையாகத் தோன்றுகிறது                                                  | Next.js server உண்மையிலேயே PORT-உடன் பிணைக்கப்பட்டுள்ளதா என்பதை உறுதிப்படுத்தவும் (`[Server]` பதிவுகளைச் சரிபார்க்கவும்)                                                                            |
-| macOS notarization செயல்முறை நின்றுவிடுகிறது                                              | `APPLE_*` மாறிகள் `.env`-இல் மட்டும் இல்லாமல் export செய்யப்பட்டிருப்பதை உறுதிப்படுத்தவும்                                                                                                          |
-| Windows SmartScreen எச்சரிக்கை                                                            | EV cert மூலம் கையொப்பமிடவும் அல்லது பயனர்கள் வலது-கிளிக் → "Run anyway" என்பதைத் தேர்ந்தெடுக்கலாம்                                                                                                  |
-| port பயன்பாட்டில் இருப்பதால் அடிப்படைச் சோதனை தோல்வியடைகிறது                              | `electron:smoke:packaged`-ஐ இயக்குவதற்கு முன் 20128-இல் இயங்கும் எந்தவொரு உள்ளூர் dev server-ஐயும் நிறுத்தவும்                                                                                      |
+| அறிகுறி                                                           | சரி                                                                                                                                                                                         |
+| ----------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Electron முக்கிய பம்ப் பிறகு`Cannot find module 'better-sqlite3'` | better-sqlite3 v13 கப்பல்கள் Node-API ரூட் மற்றும் `prepare:bundle` இல் `npm install` மீண்டும் இயங்கும் — முன் கட்டமைக்கிறது (இது தற்போதைய இயங்குதளத்திற்கான முன்கட்டமைப்பை சரிபார்க்கிறது) |
+| சொந்த தொகுதிக்கான `ERR_DLOPEN_FAILED`                             | `prepare:bundle` — மீண்டும் இயக்கவும், தற்போதைய இயங்குதளத்திற்கான Node-API ப்ரீபில்ட் இல்லாதபோது அது வேகமாக தோல்வியடையும்.                                                                  |
+| Linux இல் சாளரம் காலியாகத் தோன்றுகிறது                            | Next.js சர்வர் உண்மையில் PORT உடன் பிணைக்கப்பட்டுள்ளதை உறுதிப்படுத்தவும் ( `[Server]` பதிவுகளைச் சரிபார்க்கவும்)                                                                            |
+| macOS நோட்டரைசேஷன் ஸ்டால்கள்                                      | `APPLE_*` vars ஏற்றுமதி செய்யப்படுவதை உறுதி செய்யவும், `.env` இல் மட்டும் அல்ல                                                                                                              |
+| Windows SmartScreen எச்சரிக்கை                                    | EV சான்றிதழுடன் கையொப்பமிடவும் அல்லது பயனர்கள் → "எப்படியும் இயக்கவும்" வலது கிளிக் செய்யவும்                                                                                               |
+| போர்ட்-இன்-யூஸ் மூலம் புகை சோதனை தோல்வியடைந்தது                   | `electron:smoke:packaged` இயக்கும் முன் 20128 இல் எந்த உள்ளூர் தேவ் சேவையகத்தையும் நிறுத்தவும்                                                                                              |
 
-## மேலும் காண்க
+## மேலும் பார்க்கவும்
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
-- மூலம்: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- உதவிக் கருவிகள்: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- ஆதாரம்: `electron/main.js`, `electron/preload.js`, `electron/package.json`
+- உதவியாளர்கள்: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

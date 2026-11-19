@@ -20,16 +20,14 @@
 
 ## روشهای نصب
 
-### npm (توصیه می شود)
+### npm (پیشنهادشده)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-داشبورد در `http://localhost:20128` باز می شود و پایه API URL `http://localhost:20128/v1` است.
-
-> **کاربران npm:** اگر npm هشدار می دهد که اسکریپت های نصب مسدود شده اند (به عنوان مثال، `omniroute`، `better-sqlite3`)، [به عیب یابی — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) مراجعه کنید.
+داشبورد در `http://localhost:20128` باز میشود و URL پایه API برابر با `http://localhost:20128/v1` است.
 
 ### pnpm
 

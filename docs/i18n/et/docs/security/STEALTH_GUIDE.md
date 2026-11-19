@@ -128,63 +128,41 @@ Sama komplekti kaasmoodulid:
 
 ---
 
-## Antigravity Stealth
+## Antigravity varjatud režiim
 
-Antigravity taotlused säilitavad helistaja teksti bait-byte. OmniRoute ei lisa IDE kliendi jäljendamiseks viipadesse ega rename/inject tööriistadesse nulllaiusega märke.
+Antigravity päringud säilitavad kutsuja teksti baidi täpsusega. OmniRoute ei lisa viipadesse null-laiusega märke ega nimeta ümber või sisesta tööriistu IDE-kliendi jäljendamiseks.
 
 ### `antigravityHeaderScrub.ts`
 
-Enne edastamist ribadeks roostevabast terasest SDK markerid (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
+Eemaldab enne edastamist Stainless SDK markerid (`x-stainless-lang`, `x-stainless-package-version`, `x-stainless-os`, `x-stainless-arch`, `x-stainless-runtime`, `x-stainless-runtime-version`, `x-stainless-timeout`, `x-stainless-retry-count`, `x-stainless-helper-method`).
 
-### ⚠️ risk: `ANTIGRAVITY_CREDITS=always` (konto keelu leviala)
+### ⚠️ Risk: `ANTIGRAVITY_CREDITS=always` (konto blokeerimise peamine riskikoht)
 
-`ANTIGRAVITY_CREDITS=always` (tarbimiseks `open-sse/executors/antigravity.ts`) marsruudid **iga** taotlege Antigravity AI Credit Overages (makstud Google krediit) kaudu, selle asemel, et lasta Google-i vabatasemel kvootidel asju piirata. See on dokumenteeritud funktsioonina, kuid nii see on **kõige levinum teenusetingimuste rikkumise aruanne, mida näeme** — mitu Google Ultra kontot on `403 / "service disabled for ToS violation" / insufficient_quota` ga keelatud pärast mõnetunnist `=always` ga töötamist.
+`ANTIGRAVITY_CREDITS=always` (seda kasutab `open-sse/executors/antigravity.ts`) suunab **iga** päringu Antigravity AI Credit Overagesi kaudu (tasulised Google'i krediidid), selle asemel et lasta Google'i tasuta taseme kvoodil kasutust piirata. Seda dokumenteeritakse funktsioonina, kuid see on **kõige sagedamini teatatud kasutustingimuste rikkumine, mida näeme** — mitu Google Ultra kontot on blokeeritud veaga `403 / "service disabled for ToS violation" / insufficient_quota` pärast mõnetunnist töötamist väärtusega `=always`.
 
-Ülesvoolu jõustamine on sisse lülitatud **Google pool** , ei saa midagi OmniRoute ära hoida. env var nimi ja olemasolevad dokumendid panevad selle kõlama nagu turvaline klapp; see ei ole.
+Ülesvoolu jõustamine toimub **Google'i poolel** ning OmniRoute ei saa seda takistada. Keskkonnamuutuja nimi ja olemasolev dokumentatsioon jätavad mulje, et selle võib ohutult sisse lülitada; tegelikult pole see ohutu.
 
-**Miks see tuvastab väärkasutuse agressiivsemalt kui ainult vaba taseme kasutamine:**
+**Miks see käivitab väärkasutuse tuvastamise agressiivsemalt kui ainult tasuta taseme kasutamine:**
 
-- Püsivad automatiseeritud kulutused ühele Google kontole märgitakse erinevalt vabataseme tabamuste kvootide ja peatumiste kohta.
-- Krediidi ületamisel ei ole intressilagi, nii et valesti konfigureeritud klient võib minutitega läbi põletada mitusada USD ja välja näha nagu API-võtme edasimüük või robotiliiklus.
-- Mitu OmniRoute kasutajat, kes löövad paralleelselt sama välise IP krediiti, ühendavad signaali.
+- Püsiv automatiseeritud kulu ühe Google'i konto kaudu märgistatakse teisiti kui tasuta taseme kasutus, mis kvoodini jõudes peatub.
+- Krediidi ülekasutusel puudub kiiruslagi, mistõttu võib valesti seadistatud klient kulutada mõne minutiga mitusada USA dollarit ning paista API-võtmete edasimüügi või robotliiklusena.
+- Kui mitu OmniRoute'i kasutajat kasutavad sama välise IP kaudu paralleelselt ülekasutuskrediite, võimendab see signaali.
 
-**Soovitatav asend:**
+**Soovitatav lähenemine:**
 
-1. Säilitage vaike- `ANTIGRAVITY_CREDITS=off` välja arvatud juhul, kui operaator nõustub selgesõnaliselt makstud krediidi ja konto jõustamise riskiga. `retry` saadab esimesena tavalise päringu ja sisestab krediite kõige rohkem üks kord pärast sobivat kvooti 429; `always` sisestab krediiti esimesel taotlusel.
-2. **Jaotage koormus teenusepakkujate vahel automaatse kombineerimise kaudu** (`model: "auto"` või `kr/glm/etc` -combo) ühe Antigravity konto küllastamise asemel.
-3. **Määrake ühendusepõhised RPM piirangud** Antigravity pakkuja redigeerimislehel (Armatuurlaud → Providers → Antigravity → ühenduse → kiiruspiirang). 30–60 RPM on kaitsev ülempiir püsivaks kasutamiseks.
-4. **Kasutage stabiilset operaatori juhitavat ülesvoolu võrku** ja vältige ühe konto jagamist mitteseotud kasutajate või töökoormusega.
-5. **Kui keelatud** : apellatsioon `support.google.com` → kaudu "Taasta Workspace/Account juurdepääs" koos täpse `quota_exceeded` / `service disabled` vastuse kehaga Google. Taastamine ei ole garanteeritud.
+1. Hoidke vaikeväärtust `ANTIGRAVITY_CREDITS=off`, välja arvatud juhul, kui operaator nõustub selgesõnaliselt tasulise krediidi ja konto suhtes rakendatavate jõustamismeetmete riskiga. `retry` saadab esmalt tavapärase päringu ja lisab krediidid kõige rohkem ühe korra pärast sobivat kvoodiga seotud 429 vastust; `always` lisab krediidid juba esimesele päringule.
+2. **Jaotage koormus Auto-Combo abil pakkujate vahel** (`model: "auto"` või `kr/glm/etc`-combo), selle asemel et koormata üks Antigravity konto küllastuseni.
+3. **Määrake ühendusepõhised RPM-i piirangud** Antigravity pakkuja redigeerimislehel (juhtpaneel → pakkujad → Antigravity → ühendus → kiiruspiirang). 30–60 RPM on pideva kasutuse puhul põhjendatav ülempiir.
+4. **Kasutage stabiilset, operaatori kontrollitavat ülesvoolu võrguühendust** ning vältige ühe konto jagamist omavahel mitteseotud kasutajate või töökoormuste vahel.
+5. **Blokeerimise korral**: esitage apellatsioon lehel `support.google.com` → „Restore Workspace/Account access” koos Google'i saadetud täpse `quota_exceeded` / `service disabled` vastuse kehaga. Juurdepääsu taastamine pole garanteeritud.
 
-Keskkonna viide dokumenteerib iga krediidirežiimi konto ja kulutamise mõju.
+Keskkonnamuutujate juhend dokumenteerib iga krediidirežiimi mõju kontole ja kuludele.
 
-#### Mitte ainult `=always`: Antigravity OAuth marsruutimine üldiselt
+Puudutatud kohad:
 
-Peatamised ei piirdu krediidi ülejäägiga. 2026. aasta novembri aruanded (#19223, #19266) kirjeldavad mitut Google kontot, mis on peatatud `antigravity` ja `agy` (Antigravity CLI) pakkujate kaudu marsruutimisel, koos järgmistega:
-
-```
-403: This service has been disabled in this account for violation of Terms of Service.
-Please submit an appeal to continue using this product.
-```
-
-Mõlemad pakkujad autentivad Antigravity toote OAuth seansiga, mille kohta hoiatab armatuurlaua riskiteade ("See pakkuja kasutab teie ametlikku toodet session/OAuth, mis pole proxy/router kasutamiseks volitatud") enne ühenduse lisamist. Ükski ülaltoodud soovitustest ei muuda seda kasutamist lubatavaks; need vähendavad ainult ühe konto liiklust.
-
-**Autoriseeritud API liidesed Gemini mudelitele.** Google pakub programmilist juurdepääsu Gemini oma APIs kaudu, mida OmniRoute toetab tavaliste API-võtme pakkujatena:
-
-| Pakkuja id | Armatuurlaua nimi         | Mandaat                                                                        |
-| ---------- | ------------------------- | ------------------------------------------------------------------------------ |
-| `gemini`   | Gemini (Google AI Studio) | Gemini API võti Google AI Studiost (saadaval tasuta tase)                      |
-| `vertex`   | Tipp AI                   | Teenusekonto JSON, OAuth juurdepääsuluba või Vertex Expressi API võti (Gemini) |
-
-Erinevalt Antigravity tooteseansist kasutavad need pakkujad API juurdepääsuks mandaatide Google probleeme. Need ei muuda iga kasutust nõuetele vastavaks ega eemalda jõustamise ohtu: igaühele kehtivad oma tingimused, mida operaator peab nende kasutuselevõtuks kontrollima. Näiteks [Gemini API täiendavad teenusetingimused](https://ai.google.dev/gemini-api/terms) lubavad ainult tasulisi teenuseid, kui API kliendid tehakse kättesaadavaks kasutajatele Euroopa Majanduspiirkonnas, Šveitsis või Ühendkuningriigis ning Tasuta teenustele saadetud sisu võidakse kasutada Google toodete täiustamiseks. Vertex AI kuulub selle asemel Google pilvetingimuste alla ( [teenusespetsiifilised tingimused](https://cloud.google.com/terms/service-terms) ). Hinnakujundus ja kvoodid järgivad pigem neid API tingimusi kui Antigravity tellimust.
-
-Operaatorid, kes soovivad ülalkirjeldatud Antigravity peatamist vältida, peaksid pärast seda, kui on kontrollinud, kas nende kasutus vastab teenusepakkuja tingimustega, suunama Gemini liikluse ühe nendest pakkujatest, mitte `antigravity` / `agy`.
-
-Puutepunktid:
-
-- `open-sse/executors/antigravity.ts` — loeb `process.env.ANTIGRAVITY_CREDITS`
-- `src/lib/oauth/providers/antigravity.ts` — volitatud torustik
-- Algne juhtumiaruanne: arutelu [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
+- `open-sse/executors/antigravity.ts` — loeb väärtust `process.env.ANTIGRAVITY_CREDITS`
+- `src/lib/oauth/providers/antigravity.ts` — mandaadi edastamine
+- Algne intsidendiaruanne: arutelu [#1183](https://github.com/diegosouzapw/OmniRoute/discussions/1183)
 
 ---
 
@@ -253,9 +231,9 @@ Kõik MITM-i lõpp-punktid nõuavad haldusautentimist (`requireCliToolsAuth`). S
 
 ---
 
-## User-Agenti ülekirjutused — keskkonnamuutujad (`.env.example` jaotis 12)
+## User-Agent alistab — env vars (`.env.example` jaotis 12)
 
-| Muutuja             | Vaikeväärtus                                  |
+| Muutuv              | Vaikimisi                                     |
 | ------------------- | --------------------------------------------- |
 | `CLAUDE_USER_AGENT` | `claude-cli/2.1.280 (external, cli)`          |
 | `CODEX_USER_AGENT`  | `codex-cli/0.155.0 (Windows 10.0.26200; x64)` |
@@ -264,7 +242,7 @@ Kõik MITM-i lõpp-punktid nõuavad haldusautentimist (`requireCliToolsAuth`). S
 | `QODER_USER_AGENT`  | `Qoder-Cli`                                   |
 | `CURSOR_USER_AGENT` | `Cursor/3.4`                                  |
 
-Seda kasutab `open-sse/executors/base.ts::buildHeaders()` dünaamilise otsingu kaudu. **Uuendage neid väärtusi, kui teenusepakkujad annavad välja uued CLI-versioonid** — aegunud UA-stringe hakatakse tagasi lükkama, kuna neid peetakse aegunud klientideks.
+Tarbib `open-sse/executors/base.ts::buildHeaders()` dünaamilise otsingu kaudu.** Kui pakkujad lasevad välja uued CLI versioonid, tehke need löögiks** — aegunud UA stringid lükatakse tagasi kui aegunud kliendid.
 
 ## CLI ühilduvusrežiimi lülitid (`.env.example` jaotis 13)
 

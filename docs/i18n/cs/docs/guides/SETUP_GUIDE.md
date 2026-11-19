@@ -27,9 +27,7 @@ npm install -g omniroute
 omniroute
 ```
 
-Dashboard se otevírá na `http://localhost:20128` a API základna URL je `http://localhost:20128/v1`.
-
-> **Uživatelé npm:** Pokud npm varuje, že instalační skripty byly zablokovány (např. `omniroute`, `better-sqlite3`), přečtěte si [téma Odstraňování problémů — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+Ovládací panel se otevře na adrese `http://localhost:20128` a základní URL rozhraní API je `http://localhost:20128/v1`.
 
 ### pnpm
 

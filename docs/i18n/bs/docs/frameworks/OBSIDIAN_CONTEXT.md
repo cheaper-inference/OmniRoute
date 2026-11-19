@@ -4,6 +4,8 @@
 
 ---
 
+# Obsidian Context Source
+
 > **Izvor istine:** `src/lib/obsidian/api.ts` (REST + sync klijent),
 > `src/lib/db/obsidian.ts` (token / base-URL / WebDAV perzistencija),
 > `src/lib/obsidianSync.ts` (WebDAV sinhronizacija trezora), `open-sse/mcp-server/tools/obsidianTools.ts`

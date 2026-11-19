@@ -407,49 +407,48 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ### Mód WAL
 
-Tá WAL cumasaithe de réir réamhshocraithe. Le haghaidh ualaí oibre ardscríofa, smaoinigh ar:
+Tá WAL cumasaithe de réir réamhshocraithe. I gcás ualaí oibre ina ndéantar mórán scríbhneoireachta, smaoinigh ar:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Seicphointe gach 1000 leathanach
+PRAGMA journal_size_limit = 67108864;  -- Teorainn WAL de 64MB
 ```
-
-Ní shocraíonn OmniRoute `journal_size_limit`. Bogann seicphointe frámaí WAL isteach sa phríomhchomhad, ach coimeádann an comhad WAL an méid leithdháilte is mó. Ní thugann garda `OMNIROUTE_WAL_GUARD_MAX_MB` ach rabhadh agus ritheann `wal_checkpoint(RESTART)`; ní caipín méid diosca é.
 
 ### Innéacsanna
 
-Príomhinnéacsanna feidhmíochta (uathchruthaithe ag ascnaimh):
+Príomhinnéacsanna le haghaidh feidhmíochta (cruthaítear go huathoibríoch iad trí ascnaimh):
 
-- Samhail `idx_models_provider` — cuardaigh ag soláthraí
-- Leathnú sprioc teaglama `idx_combo_targets_combo_id` —
-- Anailísíocht úsáide `idx_usage_history_api_key_timestamp` —
-- Rianú cuóta `idx_quota_snapshots_api_key_window` —
-- Ceisteanna logáil glaonna `idx_call_logs_timestamp` —
+- `idx_models_provider` — cuardaigh samhlacha de réir soláthraí
+- `idx_combo_targets_combo_id` — leathnú sprice teaglama
+- `idx_usage_history_api_key_timestamp` — anailísíocht úsáide
+- `idx_quota_snapshots_api_key_window` — rianú cuótaí
+- `idx_call_logs_timestamp` — iarratais ar logaí glaonna
 
-Chun innéacs nua a chur leis, cruthaigh ascnamh:
+Chun innéacs nua a chur leis, cruthaigh ascnaimh:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O Mapáilte Cuimhne
+### I/A Mapáilte sa Chuimhne
 
-I gcás bunachair shonraí an-mhór (> 10GB), is féidir léarscáiliú cuimhne a choigeartú trí phragma SQLite :
+I gcás bunachair sonraí an-mhór (>10GB), is féidir mapáil chuimhne a choigeartú trí pragma SQLite:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- Socraigh trí pragma SQLite (coigeartaigh in core.ts nó ag am rite)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Comhdhlúthú
+### Dlúthú
 
-Baineann cásanna fadtéarmacha OmniRoute leas as `VACUUM` ó am go chéile :
+Baineann áscanna OmniRoute a ritheann ar feadh tréimhsí fada tairbhe as `VACUUM` ó am go chéile:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Rith go míosúil le linn fuinneoga tráchta íseal. (Laghdaíonn modh WAL an gá, ach ní chuireann sé deireadh leis.)
+Rith go míosúil le linn tréimhsí ísealtráchta. (Laghdaíonn mód WAL an gá leis, ach ní chuireann sé deireadh leis.)
 
 ---
 

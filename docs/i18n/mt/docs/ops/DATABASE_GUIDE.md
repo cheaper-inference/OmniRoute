@@ -403,27 +403,26 @@ Dan juża l-API tal-backup online ta’ SQLite — jista’ jitħaddem b’mod s
 
 ---
 
-## Irfinar tal-Prestazzjoni
+## Ottimizzazzjoni tal-Prestazzjoni
 
 ### Modalità WAL
 
-WAL huwa attivat awtomatikament. Għal xogħol ta' kitba għolja, ikkunsidra:
+WAL hija attivata b’mod awtomatiku. Għal ammonti ta’ xogħol b’ħafna kitbiet, ikkunsidra:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Oħloq checkpoint kull 1000 paġna
+PRAGMA journal_size_limit = 67108864;  -- Limitu WAL ta’ 64MB
 ```
-
-OmniRoute ma jissettjax `journal_size_limit`. Punt ta 'kontroll imexxi l-frejms WAL fil-fajl prinċipali, iżda l-fajl WAL iżomm l-akbar daqs allokat tiegħu. Il-gwardja `OMNIROUTE_WAL_GUARD_MAX_MB` twissi u tmexxi biss `wal_checkpoint(RESTART)`; mhuwiex għatu tad-daqs tad-diska.
 
 ### Indiċijiet
 
-Indiċi ewlenin għall-prestazzjoni (maħluqa awtomatikament minn migrazzjonijiet):
+Indiċijiet ewlenin għall-prestazzjoni (jinħolqu awtomatikament mill-migrazzjonijiet):
 
-- Lookups tal-mudell `idx_models_provider` — mill-fornitur
-- `idx_combo_targets_combo_id` — espansjoni tal-mira combo
-- Analitika tal-użu `idx_usage_history_api_key_timestamp` —
-- Traċċar tal-kwota `idx_quota_snapshots_api_key_window` —
-- Mistoqsijiet dwar il-log tas-sejħiet `idx_call_logs_timestamp` —
+- `idx_models_provider` — tiftix ta’ mudelli skont il-fornitur
+- `idx_combo_targets_combo_id` — espansjoni tal-miri ta’ kombinazzjoni
+- `idx_usage_history_api_key_timestamp` — analitika tal-użu
+- `idx_quota_snapshots_api_key_window` — traċċar tal-kwoti
+- `idx_call_logs_timestamp` — mistoqsijiet fir-reġistru tas-sejħiet
 
 Biex iżżid indiċi ġdid, oħloq migrazzjoni:
 
@@ -432,24 +431,24 @@ Biex iżżid indiċi ġdid, oħloq migrazzjoni:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Memory-Mapped I/O
+### I/O Immappjat fil-Memorja
 
-Għal databases kbar ħafna (> 10GB), l-immappjar tal-memorja jista 'jiġi aġġustat permezz ta' pragma SQLite :
+Għal databases kbar ħafna (>10GB), l-immappjar tal-memorja jista’ jiġi aġġustat permezz ta’ pragma ta’ SQLite:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- Issettja permezz ta’ pragma ta’ SQLite (aġġusta f’core.ts jew waqt l-eżekuzzjoni)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Kompattazzjoni
+### Kumpattazzjoni
 
-L-istanzi OmniRoute li ilhom għaddejjin jibbenefikaw minn `VACUUM` okkażjonali:
+L-istanzi ta’ OmniRoute li jibqgħu jaħdmu għal żmien twil jibbenefikaw minn `VACUUM` okkażjonali:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Mexxi kull xahar waqt twieqi ta' traffiku baxx. (Il-mod WAL inaqqas il-ħtieġa, iżda ma jeliminahx.)
+Ħaddmu kull xahar matul perjodi bi ftit traffiku. (Il-modalità WAL tnaqqas il-ħtieġa, iżda ma teliminahiex.)
 
 ---
 

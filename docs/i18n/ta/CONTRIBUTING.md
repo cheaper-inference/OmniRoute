@@ -15,12 +15,12 @@ Thank you for your interest in contributing! This guide covers everything you ne
 - **Node.js** `>=22.22.2 <23`, அல்லது `>=24.0.0 <27` (பரிந்துரைக்கப்படுகிறது: 24 LTS)
 - **npm** 10+
 
-> **Node 24 உடன் Windows:** தற்போதைய 24 LTS patch வெளியீட்டை (குறைந்தது 24.20.0) பயன்படுத்தவும்.\
+> **Node 24 உடன் Windows:** தற்போதைய 24 LTS patch வெளியீட்டை (குறைந்தது 24.20.0) பயன்படுத்தவும்.  
 > முந்தைய வெளியீடுகளில் `--test-force-exit` செயல்முறையை மூடிய பிறகு, வெற்றிகரமான சோதனைகளுக்குப் பின்னரும் செயல்முறை நிறுத்தப்படலாம். Node இன் [Windows libuv திருத்தம்](https://github.com/nodejs/node/pull/61999) இந்த runtime செயலிழப்பைத் தீர்க்கிறது; சோதனை assertions மற்றும் runner exit checks ஆகியவை இயக்கப்பட்ட நிலையிலேயே இருக்கட்டும்.
 
-> **npm v11+ பயனர்கள் (Node 24+):** `npm install` இயக்கிய பிறகு, native modules நிறுவப்பட்டுள்ளனவா என்பதைச் சரிபார்க்கவும்:\
-> `node -e "require('better-sqlite3')"` . இது `MODULE_NOT_FOUND` பிழையுடன் தோல்வியடைந்தால்,\
-> `npm approve-scripts better-sqlite3 && npm install` இயக்கவும்.\
+> **npm v11+ பயனர்கள் (Node 24+):** `npm install` இயக்கிய பிறகு, native modules நிறுவப்பட்டுள்ளனவா என்பதைச் சரிபார்க்கவும்:  
+> `node -e "require('better-sqlite3')"` . இது `MODULE_NOT_FOUND` பிழையுடன் தோல்வியடைந்தால்,  
+> `npm approve-scripts better-sqlite3 && npm install` இயக்கவும்.  
 > [Troubleshooting](docs/guides/TROUBLESHOOTING.md#npm-v11-better-sqlite3-not-installed-cannot-find-module) பார்க்கவும்.
 
 - **Git**
@@ -104,13 +104,13 @@ npm run build
        └─ output: dist/                   (server.js, .next/static/, public/, node_modules/)
 ```
 
-`npm run build:release` கூடுதலாக முதலில் இரு directories-ஐயும் சுத்தம் செய்து, deploy integrity sentinel ஆக\
+`npm run build:release` கூடுதலாக முதலில் இரு directories-ஐயும் சுத்தம் செய்து, deploy integrity sentinel ஆக  
 `dist/BUILD_SHA` (= `git rev-parse --short HEAD`) எழுதுகிறது.
 
 `npm run build:contributor` backend-only build profile-ஐப் பயன்படுத்துகிறது. Build செய்யும்போது dashboard UI கோப்புகளைத் தற்காலிகமாக stub செய்து, API route handlers-ஐ வைத்திருந்து, build முடிந்ததும் அசல் கோப்புகளை மீட்டமைக்கிறது. Dashboard UI-ஐ பாதிக்கும் மாற்றங்களுக்கு அல்லது முழுமையான release validation-க்கு `npm run build` பயன்படுத்தவும்; contributor profile, release build-க்கு மாற்றாகாது.
 
-> **VPS deploy குறிப்பு:** remote image directory `/usr/lib/node_modules/omniroute/app/`\
-> மாற்றமின்றி உள்ளது. deploy skills, `dist/` உள்ளடக்கங்களை அதில் rsync செய்கின்றன.\
+> **VPS deploy குறிப்பு:** remote image directory `/usr/lib/node_modules/omniroute/app/`  
+> மாற்றமின்றி உள்ளது. deploy skills, `dist/` உள்ளடக்கங்களை அதில் rsync செய்கின்றன.  
 > repository-க்குள் உள்ள build output path மட்டும் மாற்றப்பட்டது (`app/` → `dist/`).
 
 இயல்புநிலை URLs:

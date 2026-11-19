@@ -407,23 +407,22 @@ Tento příkaz používá online zálohovací API SQLite — lze jej bezpečně 
 
 ### Režim WAL
 
-WAL je ve výchozím nastavení povoleno. Pro velké pracovní zatížení zápisu zvažte:
+WAL je ve výchozím nastavení povolen. Pro úlohy s velkým množstvím zápisů zvažte:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Kontrolní bod každých 1000 stránek
+PRAGMA journal_size_limit = 67108864;  -- Limit WAL 64 MB
 ```
-
-OmniRoute nenastavuje `journal_size_limit`. Kontrolní bod přesune snímky WAL do hlavního souboru, ale soubor WAL si zachová největší přidělenou velikost. Ochranka `OMNIROUTE_WAL_GUARD_MAX_MB` pouze varuje a spouští `wal_checkpoint(RESTART)`; není to omezení velikosti disku.
 
 ### Indexy
 
-Klíčové indexy pro výkon (automaticky vytvořené migrací):
+Klíčové indexy pro výkon (automaticky vytvářené migracemi):
 
-- `idx_models_provider` Vyhledávání modelů — podle poskytovatele
-- Rozšíření kombinovaného cíle `idx_combo_targets_combo_id` —
-- `idx_usage_history_api_key_timestamp` Analýza využití —
-- `idx_quota_snapshots_api_key_window` Sledování kvóty —
-- `idx_call_logs_timestamp` Dotazy protokolu hovorů —
+- `idx_models_provider` — vyhledávání modelů podle poskytovatele
+- `idx_combo_targets_combo_id` — rozbalení cílů kombinace
+- `idx_usage_history_api_key_timestamp` — analytika využití
+- `idx_quota_snapshots_api_key_window` — sledování kvót
+- `idx_call_logs_timestamp` — dotazy na protokoly volání
 
 Chcete-li přidat nový index, vytvořte migraci:
 
@@ -432,24 +431,24 @@ Chcete-li přidat nový index, vytvořte migraci:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Paměťově mapovaná I/O
+### Vstup/výstup mapovaný do paměti
 
-U velmi velkých databází (> 10GB) lze mapování paměti upravit pomocí SQLite pragma:
+U velmi rozsáhlých databází (>10 GB) lze mapování do paměti upravit pomocí pragmatu SQLite:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
-PRAGMA mmap_size = 268435456;  -- 256MB
+-- Nastavte pomocí pragmatu SQLite (upravte v core.ts nebo za běhu)
+PRAGMA mmap_size = 268435456;  -- 256 MB
 ```
 
-### Zhutňování
+### Kompaktování
 
-Dlouhotrvající instance OmniRoute těží z příležitostných `VACUUM`:
+Dlouhodobě spuštěným instancím OmniRoute prospívá příležitostné použití příkazu `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Spouštět měsíčně během oken s nízkou návštěvností. (Režim WAL snižuje potřebu, ale neeliminuje ji.)
+Spouštějte jej jednou měsíčně v době nízkého provozu. (Režim WAL tuto potřebu snižuje, ale neodstraňuje ji.)
 
 ---
 

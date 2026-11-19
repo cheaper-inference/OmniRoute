@@ -15,7 +15,7 @@ gäller ENDAST Claude Code — operativa förtydliganden av regler som redan def
 
 Det fullständiga obligatoriska worktree-protokollet (bekräftelse av basgren, `.claude/worktrees/` som
 kanonisk sökväg, `cp -al` för node_modules, regler för nedmontering) finns i
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (sammanfattat i `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (sammanfattat i `AGENTS.md` →
 Git-arbetsflöde → "Worktree-isolering"). Punkter specifika för Claude Code:
 
 - Bekräfta basgrenen med operatören via `AskUserQuestion` (Hård regel #19) om de inte

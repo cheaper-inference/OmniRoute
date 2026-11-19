@@ -13,7 +13,7 @@
 
 Το πλήρες υποχρεωτικό πρωτόκολλο worktree (επιβεβαίωση του κλάδου βάσης, κανονική διαδρομή
 `.claude/worktrees/`, `cp -al` για τα node_modules, κανόνες teardown) βρίσκεται στο
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (συνοπτικά στο `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (συνοπτικά στο `AGENTS.md` →
 Ροή εργασίας Git → "Απομόνωση worktree"). Σημεία ειδικά για το Claude Code:
 
 - Επιβεβαιώστε τον κλάδο βάσης με τον χειριστή μέσω `AskUserQuestion` (Αυστηρός Κανόνας #19), εκτός αν

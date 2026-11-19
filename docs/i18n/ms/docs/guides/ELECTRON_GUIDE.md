@@ -4,105 +4,99 @@
 
 ---
 
-> **Sumber rujukan utama:** ruang kerja `electron/`
-> **Kemas kini terakhir:** 2026-06-28 — v3.8.40
+> **Sumber kebenaran:** ruang kerja `electron/`** Kemas kini terakhir:** 2026-06-28 — v3.8.40
 
-OmniRoute menyediakan aplikasi desktop merentas platform (Windows / macOS / Linux) yang dibina berasaskan
-**Electron 41** + **electron-builder 26.10**. Aplikasi desktop memulakan pelayan kendiri Next.js
-sebagai proses anak, menghalakan `BrowserWindow` kepadanya, serta menambahkan
-dulang sistem, pengemas kini automatik, jambatan IPC dan pemula rahsia tanpa konfigurasi.
+OmniRoute menghantar apl desktop merentas platform (Windows / macOS / Linux) yang dibina pada**Electron 41** +** pembina elektron 26.10** . Apl desktop menghasilkan pelayan kendiri Next.js sebagai proses anak, menunjuk `BrowserWindow` padanya dan menambah dulang sistem, pengemas kini automatik, jambatan IPC dan tali but rahsia konfigurasi sifar.
 
 ## Seni bina
 
 ```
-┌──────────────────────────────────────────────────────┐
-│ Proses utama Electron (electron/main.js)             │
-│ ├─ Kunci tika tunggal                                │
-│ ├─ Proses anak: pelayan kendiri Next.js              │
-│ │   (dimulakan dengan masa jalan Node Electron)      │
-│ ├─ BrowserWindow → http://localhost:PORT             │
-│ ├─ Dulang sistem + menu konteks                      │
-│ ├─ Kemas kini automatik melalui electron-updater     │
-│ ├─ Dasar Keselamatan Kandungan (pengepala sesi)      │
-│ └─ Pemula rahsia (JWT / API_KEY_SECRET)              │
-└──────────────────────────────────────────────────────┘
-            ↕ Jambatan IPC (electron/preload.js)
-┌──────────────────────────────────────────────────────┐
-│ Pemapar (papan pemuka Next.js)                       │
-│   window.electronAPI.* (contextIsolation)            │
-└──────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
+│ ├─ BrowserWindow → http://localhost:PORT     │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+└──────────────────────────────────────────────┘
+            ↕ IPC bridge (electron/preload.js)
+┌──────────────────────────────────────────────┐
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
+└──────────────────────────────────────────────┘
 ```
 
 ## Versi
 
 Disahkan daripada `electron/package.json`:
 
-| Pakej              | Versi                                                              |
-| ------------------ | ------------------------------------------------------------------ |
-| `electron`         | `^43.4.1`                                                          |
-| `electron-builder` | `^26.15.3`                                                         |
-| `electron-updater` | `^6.8.9`                                                           |
-| `better-sqlite3`   | akar `^13.0.2` (prabinaan Node-API — tiada binaan semula Electron) |
-| Versi aplikasi     | `3.8.0`                                                            |
-| ID aplikasi        | `online.omniroute.desktop`                                         |
-| Nama produk        | `OmniRoute`                                                        |
+| Pakej              | Versi                                                          |
+| ------------------ | -------------------------------------------------------------- |
+| `electron`         | `^43.4.1`                                                      |
+| `electron-builder` | `^26.15.3`                                                     |
+| `electron-updater` | `^6.8.9`                                                       |
+| `better-sqlite3`   | root `^13.0.2` (Node-API prabina — tiada Electron bina semula) |
+| Versi apl          | `3.8.0`                                                        |
+| id apl             | `online.omniroute.desktop`                                     |
+| Nama produk        | `OmniRoute`                                                    |
 
-## Skrip (`package.json` akar)
+## Skrip ( `package.json` akar )
 
-| Skrip                             | Tujuan                                                                                 |
-| --------------------------------- | -------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Memulakan `npm run dev` + menunggu `localhost:20128` + melancarkan Electron            |
-| `npm run electron:build`          | Membina Next.js, kemudian menjalankan `electron-builder` untuk OS semasa               |
-| `npm run electron:build:win`      | Membina pemasang Windows NSIS + versi mudah alih (x64)                                 |
-| `npm run electron:build:mac`      | Membina DMG macOS (Intel + Apple Silicon)                                              |
-| `npm run electron:build:linux`    | Membina AppImage + DEB Linux (x64 + arm64)                                             |
-| `npm run electron:smoke:packaged` | Melancarkan perduaan berpakej dan menguji `/login` untuk HTTP 200, kemudian menutupnya |
+| Skrip                             | Tujuan                                                                         |
+| --------------------------------- | ------------------------------------------------------------------------------ |
+| `npm run electron:dev`            | Mulakan `npm run dev` + menunggu `localhost:20128` + melancarkan Electron      |
+| `npm run electron:build`          | Membina Next.js kemudian menjalankan `electron-builder` untuk OS semasa        |
+| `npm run electron:build:win`      | Membina Windows NSIS pemasang + mudah alih (x64)                               |
+| `npm run electron:build:mac`      | Membina macOS DMG (Intel + Apple Silicon)                                      |
+| `npm run electron:build:linux`    | Membina Linux AppImage + DEB (x64 + arm64)                                     |
+| `npm run electron:smoke:packaged` | Melancarkan binari berpakej dan kuar `/login` untuk HTTP 200, kemudian ditutup |
 
-Ruang kerja `electron/` turut menyediakan:
+Ruang kerja `electron/` juga mendedahkan:
 
 - `npm run prepare:bundle` — menjalankan `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — binaan macOS seni bina tunggal
-- `npm run pack` — binaan direktori sahaja untuk ujian setempat (tanpa pemasang)
+- `npm run build:mac-x64` / `build:mac-arm64` — macOS lengkung tunggal
+- binaan direktori `npm run pack` — sahaja untuk ujian tempatan (tiada pemasang)
 
-## Pek runtime pilihan
+## Pek masa jalan pilihan
 
-Binaan desktop boleh menerbitkan arkib runtime pilihan bersama pemasangnya. Muatan pelayan yang dipasang mengandungi `optional-packs.index.json` (di bawah `resources/app` pada Windows dan Linux). Untuk entri `browser-runtime`, baca `packs[].tarball` dan muat turun **nama fail yang tepat itu daripada keluaran yang sama**. Nama arkib mengandungi digest SHA-256; binaan berlainan boleh memerlukan arkib berlainan. Kekalkan nama fail yang dimuat turun.
+Binaan desktop boleh menerbitkan arkib masa jalan pilihan bersama pemasangnya. Muatan pelayan yang dipasang mengandungi `optional-packs.index.json` (di bawah `resources/app` pada Windows dan Linux). Untuk entri `browser-runtime`, baca `packs[].tarball` dan muat turun** nama fail tepat itu daripada keluaran yang sama** . Nama arkib termasuk ringkasan SHA-256 ; binaan yang berbeza boleh memerlukan arkib yang berbeza. Pastikan nama fail yang dimuat turun tidak berubah.
 
-Salin indeks aplikasi yang dipasang dan arkib terpilih ke dalam satu direktori, kemudian gunakan CLI daripada keluaran yang sama:
+Salin indeks apl yang dipasang dan arkib yang dipilih ke dalam satu direktori, kemudian gunakan CLI daripada keluaran yang sama:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` memaparkan keadaan pemasangan dan pengesahan, bukannya nama fail arkib. Indeks yang dibekalkan memilih arkib. Pemasangan mengesahkan checksum arkib sebelum pengekstrakan serta checksum pakej sebelum mengganti pek yang dipasang. Ia membaca fail setempat; ia tidak memuat turun arkib yang tiada. Mulakan semula aplikasi selepas pemasangan. Jika keluaran tiada aset yang sepadan, pek pilihan itu tidak tersedia melalui aset keluaran tersebut.
+`packs list` memaparkan keadaan pemasangan dan pengesahan, bukan nama fail arkib. Indeks yang digabungkan memilih arkib. Pemasangan mengesahkan checksum arkibnya sebelum pengekstrakan dan checksum pakejnya sebelum menggantikan pek yang dipasang. Ia membaca fail tempatan; ia tidak memuat turun arkib yang hilang. Mulakan semula aplikasi selepas pemasangan. Jika keluaran tidak mempunyai aset yang sepadan, pek pilihan tidak tersedia melalui aset keluaran tersebut.
 
-## Susun Atur Direktori
+## Reka Letak Direktori
 
 ```
 electron/
-├── package.json              # Kebergantungan Electron + konfigurasi electron-builder
-├── main.js                   # Proses utama (24 KB — lihat anotasi di bawah)
-├── preload.js                # Jambatan IPC contextBridge
-├── types.d.ts                # Jenis AppInfo / ServerStatus / ElectronAPI
-├── README.md                 # Nota dalam ruang kerja
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # Output electron-builder (diabaikan oleh git)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Menyediakan himpunan .next/electron-standalone
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Ujian ringkas selepas binaan
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Kedua-dua `main.js` dan `preload.js` ialah **fail CommonJS `.js`**, bukan TypeScript. Penaipan
-untuk bahagian pemapar terletak dalam `electron/types.d.ts`.
+Kedua-dua `main.js` dan `preload.js` adalah**CommonJS `.js`** , bukan TypeScript. Taipan sisi pemapar hidup dalam `electron/types.d.ts`.
 
 ## Jambatan IPC (`preload.js`)
 
-Prapemuatan mendedahkan API yang disenaraiputihkan pada `window.electronAPI` menggunakan `contextBridge`
-dengan `contextIsolation: true` dan `nodeIntegration: false`.
+Pramuat mendedahkan API yang disenarai putih pada `window.electronAPI` menggunakan `contextBridge` dengan `contextIsolation: true` dan `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -121,60 +115,51 @@ const VALID_CHANNELS = {
 };
 ```
 
-Kaedah yang didedahkan:
+Kaedah terdedah:
 
-| Panggilan pemapar                                                 | Jenis                           |
-| ----------------------------------------------------------------- | ------------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                          |
-| `openExternal(url)`                                               | invoke                          |
-| `getDataDir()`                                                    | invoke                          |
-| `restartServer()`                                                 | invoke                          |
-| `getAppVersion()`                                                 | invoke                          |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                          |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                            |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (mengembalikan pelupus) |
+| Panggilan pemapar                                                 | taip                           |
+| ----------------------------------------------------------------- | ------------------------------ |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | menyeru                        |
+| `openExternal(url)`                                               | menyeru                        |
+| `getDataDir()`                                                    | menyeru                        |
+| `restartServer()`                                                 | menyeru                        |
+| `getAppVersion()`                                                 | menyeru                        |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | menyeru                        |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | hantar                         |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | menerima (memulangkan pelupus) |
 
-Pembantu penerimaan mengembalikan **fungsi pelupus** dan bukannya bergantung pada
-`removeAllListeners` — ini menghalang pengumpulan pendengar apabila komponen React
-dipasang semula.
+Pembantu yang menerima kembali a** fungsi pelupusan** daripada bergantung pada `removeAllListeners` — ini menghalang pengumpulan pendengar apabila komponen React dipasang semula.
 
 ## Kitaran Hayat Pelayan
 
-`main.js` melancarkan himpunan kendiri Next.js secara terus menggunakan persekitaran masa jalan Node
-Electron untuk mengelakkan ketidakpadanan ABI modul natif dengan Node sistem:
+`main.js` menghasilkan himpunan kendiri Next.js secara langsung dengan masa jalan Nod Electron untuk mengelakkan ketidakpadanan ABI modul asli dengan Nod sistem:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
 Sorotan:
 
-- `waitForServer()` meninjau URL sehingga 30 s sebelum memaparkan tetingkap (tiada skrin kosong semasa permulaan sejuk).
-- `stdio: "pipe"` menangkap stdout/stderr; frasa kesediaan (`Ready` / `listening`) memancarkan `server-status: running` melalui IPC.
-- `before-quit` menunggu sehingga 5 s untuk SIGTERM secara tertib (titik semak WAL), kemudian menghantar SIGKILL.
-- Penukar port dalam dulang (`20128`, `3000`, `8080`) menghentikan dan memulakan semula pelayan, kemudian memuatkan semula BrowserWindow.
+- `waitForServer()` meninjau URL sehingga 30 saat sebelum menunjukkan tetingkap (tiada skrin kosong pada permulaan sejuk).
+- `stdio: "pipe"` menangkap stdout/stderr; frasa sedia (`Ready` / `listening`) mengeluarkan `server-status: running` atas IPC.
+- `before-quit` menunggu sehingga 5 saat untuk SIGTERM yang anggun ( pusat pemeriksaan WAL ) kemudian menghantar SIGKILL.
+- Penukar port dalam dulang (`20128`, `3000`, `8080`) berhenti dan memulakan semula pelayan, kemudian muat semula BrowserWindow.
 
-## But Strap Rahsia Konfigurasi Sifar
+## Bootstrap Rahsia konfigurasi sifar
 
-Pada pelancaran pertama, proses utama menjana secara automatik dan menyimpan rahsia yang tiada:
+Pada pelancaran pertama, proses utama menjana automatik dan mengekalkan rahsia yang hilang:
 
-| Rahsia                   | Sumber                                                                                   |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                 |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (ditolak jika kelayakan disulitkan sudah wujud) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                 |
+| Rahsia                   | Sumber                                                                                     |
+| ------------------------ | ------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                   |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (menolak jika kredit yang disulitkan sudah wujud) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                   |
 
-Disimpan ke `<DATA_DIR>/server.env`. `DATA_DIR` ditentukan sebagai:
+Bertahan kepada `<DATA_DIR>/server.env`. `DATA_DIR` memutuskan untuk:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` atau `~/.omniroute`
@@ -182,70 +167,61 @@ Disimpan ke `<DATA_DIR>/server.env`. `DATA_DIR` ditentukan sebagai:
 
 ## Carian fail persekitaran
 
-Sebelum memulakan pelayan, proses utama (`getPreferredEnvFilePath()` dalam
-`electron/main.js`) memilih **satu** fail `.env`: fail pertama dalam senarai berikut yang wujud.
+Sebelum melahirkan pelayan, proses utama (`getPreferredEnvFilePath()` dalam `electron/main.js`) memilih** satu** fail `.env` : yang pertama daripada ini wujud.
 
-1. `$DATA_DIR/.env`, apabila `DATA_DIR` ditetapkan dalam persekitaran yang digunakan untuk melancarkan aplikasi.
-2. `<resolved DATA_DIR>/.env`, menggunakan nilai lalai yang sama seperti di atas: `%APPDATA%\omniroute\.env` pada
-   Windows, `$XDG_CONFIG_HOME/omniroute/.env` atau `~/.omniroute/.env` pada Linux dan macOS.
+1. `$DATA_DIR/.env`, apabila `DATA_DIR` ditetapkan dalam persekitaran apl itu dilancarkan dengan.
+2. `<resolved DATA_DIR>/.env`, menggunakan lalai yang sama seperti di atas: `%APPDATA%\omniroute\.env` pada Windows, `$XDG_CONFIG_HOME/omniroute/.env` atau `~/.omniroute/.env` pada Linux dan macOS.
 3. `.env` dalam direktori kerja proses.
 
-Proses utama hanya membaca fail tersebut; calon seterusnya tidak digabungkan. Persekitaran
-pelayan kemudiannya dibina mengikut keutamaan ini (tertinggi dahulu):
+Proses utama hanya membaca fail itu; calon kemudian tidak digabungkan. Persekitaran pelayan kemudian dibina dengan keutamaan ini (tertinggi dahulu):
 
-1. Persekitaran proses Electron (pemboleh ubah yang diwarisi daripada apa sahaja yang melancarkan aplikasi).
+1. Persekitaran proses Electron (pembolehubah yang diwarisi daripada apa sahaja yang melancarkan apl).
 2. Fail `.env` yang dipilih.
-3. `<DATA_DIR>/server.env` (rahsia but strap di atas).
+3. `<DATA_DIR>/server.env` (rahsia bootstrap di atas).
 
-Persekitaran proses direkodkan semasa aplikasi bermula, jadi pemboleh ubah persekitaran sistem atau pengguna
-yang ditetapkan semasa aplikasi sedang berjalan (termasuk ketika aplikasi berada dalam dulang selepas tetingkapnya
-ditutup) tidak akan sampai ke pelayan sehingga aplikasi ditutup sepenuhnya dan dilancarkan semula. Untuk tetapan masa jalan
-seperti `CONTEXT_LENGTH_<PROVIDER>` (lihat
-[Pemboleh Ubah Persekitaran: Panjang konteks setiap penyedia](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
-utamakan fail `.env`, kemudian tutup sepenuhnya (dulang, **Keluar**) dan lancarkan semula.
+Persekitaran proses ditangkap apabila apl dimulakan, jadi pembolehubah sistem atau persekitaran pengguna ditetapkan semasa apl sedang berjalan (termasuk semasa ia duduk di dalam dulang selepas tetingkapnya ditutup) tidak sampai ke pelayan sehingga apl dihentikan sepenuhnya dan dilancarkan semula. Untuk tombol masa jalan seperti `CONTEXT_LENGTH_<PROVIDER>` (lihat [Pembolehubah Persekitaran: Panjang konteks setiap penyedia](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), lebih suka fail `.env`, kemudian berhenti sepenuhnya (dulang,** Berhenti** ) dan melancarkan semula.
 
-## Tetingkap & Dulang
+## Tingkap & Dulang
 
-- `BrowserWindow`: 1400×900 (min 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, butang lampu isyarat pada `{ x: 16, y: 16 }`.
-- Windows/Linux: bar tajuk natif.
-- Butang tutup meminimumkan aplikasi ke dulang; menu dulang mempunyai **Buka OmniRoute**, **Buka Papan Pemuka** (pelayar luaran), submenu **Port Pelayan**, **Semak Kemas Kini**, **Keluar**.
+- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, lampu isyarat di `{ x: 16, y: 16 }`.
+- Windows/Linux: bar tajuk asli.
+- Butang tutup diminimumkan ke dulang; menu dulang mempunyai** Buka OmniRoute** ,** Buka Papan Pemuka** (pelayar luaran),** Pelabuhan Pelayan** submenu,** Semak Kemas Kini** ,** Berhenti** .
 
 ## Dasar Keselamatan Kandungan
 
-Ditetapkan melalui `session.defaultSession.webRequest.onHeadersReceived`. Arahan penting:
+Tetapkan melalui `session.defaultSession.webRequest.onHeadersReceived`. Arahan yang ketara:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Mod pembangunan menambahkan `'unsafe-eval'` pada `script-src` sahaja
+- Mod pembangun menambahkan `'unsafe-eval'` pada `script-src` sahaja
 
 ## Kemas kini automatik
 
-Menggunakan `electron-updater` dengan penyedia GitHub (`diegosouzapw/OmniRoute`).
+Menggunakan `electron-updater` dengan pembekal GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Peristiwa dimajukan kepada pemapar melalui IPC `update-status`:
-  `checking`, `available`, `not-available`, `downloading` (dengan `percent`), `downloaded`, `error`
-- `installUpdate()` menamatkan pelayan, kemudian memanggil `autoUpdater.quitAndInstall()`
-- Dilangkau dalam mod pembangunan (`!app.isPackaged`)
+- Acara dimajukan kepada pemapar melalui `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (dengan `percent`), `downloaded`, `error`
+- `installUpdate()` membunuh pelayan kemudian memanggil `autoUpdater.quitAndInstall()`
+- Dilangkau dalam mod dev (`!app.isPackaged`)
 
-## Saluran Binaan
+## Bina Saluran Paip
 
 1. `npm run build` → Next.js kendiri dalam `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → menyusun semula ke dalam `.next/electron-standalone` dan menulis semula laluan mutlak dalam `server.js` + `required-server-files.json` supaya berkas boleh dialihkan.
-3. `electron-builder` membungkus `main.js`, `preload.js`, `node_modules`, dan `extraResources: { ../.next/electron-standalone → app }`.
+2. `prepare-electron-standalone.mjs` → berperingkat semula menjadi `.next/electron-standalone` dan menulis semula laluan mutlak di dalam `server.js` + `required-server-files.json` supaya berkas boleh dipindahkan.
+3. pakej `electron-builder` `main.js`, `preload.js`, `node_modules` dan `extraResources: { ../.next/electron-standalone → app }`.
 
-### Sasaran binaan
+### Bina sasaran
 
-| OS      | Sasaran                                    |
-| ------- | ------------------------------------------ |
-| Windows | Pemasang NSIS + mudah alih (x64)           |
-| macOS   | DMG (Intel + arm64, seret ke Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)               |
+| OS      | Sasaran                                   |
+| ------- | ----------------------------------------- |
+| Windows | pemasang NSIS + mudah alih (x64)          |
+| macOS   | DMG (Intel + arm64, drag-to-Applications) |
+| Linux   | AppImage + DEB (x64 + lengan64)           |
 
-Tetapan NSIS: `oneClick: false`, membolehkan pengguna memilih direktori pemasangan serta mencipta pintasan Desktop dan menu Start.
+NSIS settings: `oneClick: false`, membenarkan pengguna memilih direktori pemasangan, mencipta pintasan Desktop dan Start-Menu.
 
-## Ujian Ringkas Binaan yang Dibungkus
+## Binaan Berbungkus Ujian Asap
 
 ```bash
 npm run electron:smoke:packaged
@@ -253,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Mengesan binari yang dibungkus secara automatik dalam `electron/dist-electron/` untuk platform semasa.
-- Melancarkan dengan direktori `HOME`/`APPDATA`/`XDG_*` yang diasingkan supaya tidak menyentuh data pembangun.
-- Meninjau `http://127.0.0.1:20128/login` untuk respons HTTP 200 dalam tempoh 45 s.
-- Memantau stderr/stdout untuk corak ralat maut (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, dan sebagainya).
-- Menunggu masa jalan stabil selama 2 s selepas sedia, kemudian menghantar SIGTERM dan menunggu port dibebaskan.
-- Dalam CI, menghantar `--no-sandbox --disable-gpu` secara automatik (dan `--disable-dev-shm-usage` pada Linux).
+- Auto temui binari berpakej dalam `electron/dist-electron/` untuk platform semasa.
+- Dilancarkan dengan direktori `HOME`/`APPDATA`/`XDG_*` terpencil supaya ia tidak menyentuh data pembangun.
+- Tinjauan `http://127.0.0.1:20128/login` untuk HTTP 200 dalam masa 45 saat.
+- Menonton stderr/stdout untuk corak maut (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, dsb.).
+- Menunggu 2 saat masa jalan yang stabil selepas kesediaan, kemudian mengeluarkan SIGTERM dan menunggu port dibebaskan.
+- Dalam CI, secara automatik melepasi `--no-sandbox --disable-gpu` (dan `--disable-dev-shm-usage` pada Linux).
 
-Penggantian env: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Env mengatasi: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## Penandatanganan Kod
 
-`electron/package.json` **tidak** menghubungkan kelayakan penandatanganan secara langsung. Berikannya melalui pemboleh ubah env kepada `electron-builder`:
+`electron/package.json` buat** bukan** bukti kelayakan menandatangani wayar secara langsung. Hantarkannya melalui env vars ke `electron-builder`:
 
 ### macOS
 
@@ -287,11 +263,11 @@ npm run electron:build:win
 
 ### Linux
 
-Penandatanganan AppImage adalah pilihan — tetapkan `LINUX_GPG_KEY` jika mahu menandatangani.
+tandatangan AppImage adalah pilihan — set `LINUX_GPG_KEY` jika menandatangani.
 
-## Pengedaran
+## Pengagihan
 
-Artifak ditempatkan dalam `electron/dist-electron/`:
+Artifak mendarat di `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
@@ -299,16 +275,16 @@ Artifak ditempatkan dalam `electron/dist-electron/`:
 
 Keluaran diterbitkan ke GitHub Releases (`diegosouzapw/OmniRoute`), yang juga merupakan tempat `electron-updater` menyemak versi baharu.
 
-## Penyelesaian Masalah
+## Menyelesaikan masalah
 
-| Gejala                                                                         | Penyelesaian                                                                                                                                                      |
-| ------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `Cannot find module 'better-sqlite3'` selepas peningkatan versi utama Electron | better-sqlite3 v13 menyediakan prabinaan Node-API — jalankan semula `npm install` pada akar dan `prepare:bundle` (ia mengesahkan prabinaan untuk platform semasa) |
-| `ERR_DLOPEN_FAILED` untuk modul natif                                          | Jalankan semula `prepare:bundle` — ia gagal dengan segera apabila prabinaan Node-API untuk platform semasa tiada                                                  |
-| Tetingkap kelihatan kosong pada Linux                                          | Sahkan pelayan Next.js benar-benar terikat pada PORT (semak log `[Server]`)                                                                                       |
-| Penotarisan macOS tersekat                                                     | Pastikan pemboleh ubah `APPLE_*` dieksport, bukan sekadar dalam `.env`                                                                                            |
-| Amaran Windows SmartScreen                                                     | Tandatangani dengan sijil EV, atau pengguna mengklik kanan → "Jalankan juga"                                                                                      |
-| Ujian ringkas gagal kerana port sedang digunakan                               | Hentikan sebarang pelayan pembangunan setempat pada 20128 sebelum menjalankan `electron:smoke:packaged`                                                           |
+| simptom                                                               | Betulkan                                                                                                                                                     |
+| --------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `Cannot find module 'better-sqlite3'` selepas Electron benjolan utama | better-sqlite3 v13 menghantar Node-API prabina — jalankan semula `npm install` pada akar dan `prepare:bundle` (ia mengesahkan prabina untuk platform semasa) |
+| `ERR_DLOPEN_FAILED` untuk modul asli                                  | Jalankan semula `prepare:bundle` — ia gagal dengan pantas apabila prabinaan Node-API untuk platform semasa tiada                                             |
+| Tetingkap kelihatan kosong pada Linux                                 | Sahkan pelayan Next.js sebenarnya terikat kepada PORT (semak log `[Server]` )                                                                                |
+| gerai notarization macOS                                              | Pastikan `APPLE_*` vars dieksport, bukan hanya dalam `.env`                                                                                                  |
+| Windows SmartScreen                                                   | Tandatangan dengan sijil EV, atau pengguna klik kanan → "Jalankan juga"                                                                                      |
+| Ujian asap gagal dengan port-in-use                                   | Hentikan mana-mana pelayan pembangun tempatan pada 20128 sebelum menjalankan `electron:smoke:packaged`                                                       |
 
 ## Lihat Juga
 

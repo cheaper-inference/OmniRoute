@@ -15,7 +15,7 @@ Claude Code मा मात्र लागू हुन्छन् — `AGENT
 
 पूर्ण अनिवार्य worktree प्रोटोकल (base-branch पुष्टिकरण, `.claude/worktrees/` आधिकारिक
 पथ, `cp -al` node_modules, teardown नियमहरू)
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) मा छ (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) मा छ (`AGENTS.md` →
 Git वर्कफ्लो → "Worktree अलगाव" मा सारांशित)। Claude-Code-विशिष्ट कुराहरू:
 
 - `AskUserQuestion` (कडा नियम #19) मार्फत अपरेटरसँग base branch पुष्टि गर्नुहोस्, उनीहरूले

@@ -15,7 +15,7 @@ Claude Code પર લાગુ પડે છે — `AGENTS.md`માં પહ
 
 સંપૂર્ણ ફરજિયાત worktree પ્રોટોકોલ (base-branch પુષ્ટિકરણ, `.claude/worktrees/` કેનોનિકલ
 પાથ, `cp -al` node_modules, teardown નિયમો)
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) માં છે (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) માં છે (`AGENTS.md` →
 Git વર્કફ્લો → "Worktree અલગતા" માં સારાંશિત). Claude-Code-વિશિષ્ટ મુદ્દા:
 
 - `AskUserQuestion` (હાર્ડ નિયમ #19) દ્વારા ઓપરેટર સાથે બેઝ બ્રાંચની પુષ્ટિ કરો, સિવાય કે

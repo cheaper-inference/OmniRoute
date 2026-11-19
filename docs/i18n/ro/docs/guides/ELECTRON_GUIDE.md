@@ -4,106 +4,99 @@
 
 ---
 
-> **Sursa adevărului:** spațiul de lucru `electron/`
-> **Ultima actualizare:** 2026-06-28 — v3.8.40
+> **Sursa adevărului:** spațiu de lucru `electron/`** Ultima actualizare:** 2026-06-28 — v3.8.40
 
-OmniRoute include o aplicație desktop multiplatformă (Windows / macOS / Linux), construită pe
-**Electron 41** + **electron-builder 26.10**. Aplicația desktop pornește serverul autonom Next.js
-ca proces copil, direcționează un `BrowserWindow` către acesta și adaugă o
-pictogramă în bara de sistem, actualizare automată, o punte IPC și inițializarea fără configurare a secretelor.
+OmniRoute oferă o aplicație desktop multiplatformă (Windows / macOS / Linux) construită pe**Electron 41** +** constructor de electroni 26.10** . Aplicația desktop generează serverul Next.js independent ca un proces copil, indică un `BrowserWindow` către el și adaugă o bară de sistem, un auto-updater, IPC bridge și zero-config secret bootstrap.
 
 ## Arhitectură
 
 ```
-┌─────────────────────────────────────────────────────┐
-│ Procesul principal Electron (electron/main.js)      │
-│ ├─ Blocare la o singură instanță                    │
-│ ├─ Proces copil: server autonom Next.js             │
-│ │   (pornit cu mediul de execuție Node al Electron) │
-│ ├─ BrowserWindow → http://localhost:PORT            │
-│ ├─ Bară de sistem + meniu contextual                │
-│ ├─ Actualizare automată prin electron-updater       │
-│ ├─ Politică de securitate a conținutului            │
-│ │   (antetele sesiunii)                             │
-│ └─ Inițializarea secretelor (JWT / API_KEY_SECRET)  │
-└─────────────────────────────────────────────────────┘
-            ↕ Punte IPC (electron/preload.js)
-┌─────────────────────────────────────────────────────┐
-│ Proces de randare (panou de control Next.js)        │
-│   window.electronAPI.* (contextIsolation)           │
-└─────────────────────────────────────────────────────┘
+┌──────────────────────────────────────────────┐
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
+│ ├─ BrowserWindow → http://localhost:PORT     │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
+└──────────────────────────────────────────────┘
+            ↕ IPC bridge (electron/preload.js)
+┌──────────────────────────────────────────────┐
+│ Renderer (Next.js dashboard)                  │
+│   window.electronAPI.* (contextIsolation)     │
+└──────────────────────────────────────────────┘
 ```
 
 ## Versiuni
 
-Confirmate din `electron/package.json`:
+Confirmat de `electron/package.json`:
 
-| Pachet               | Versiune                                                                        |
-| -------------------- | ------------------------------------------------------------------------------- |
-| `electron`           | `^43.4.1`                                                                       |
-| `electron-builder`   | `^26.15.3`                                                                      |
-| `electron-updater`   | `^6.8.9`                                                                        |
-| `better-sqlite3`     | rădăcină `^13.0.2` (versiuni Node-API precompilate — fără recompilare Electron) |
-| Versiunea aplicației | `3.8.0`                                                                         |
-| ID-ul aplicației     | `online.omniroute.desktop`                                                      |
-| Numele produsului    | `OmniRoute`                                                                     |
+| Pachet               | Versiune                                                        |
+| -------------------- | --------------------------------------------------------------- |
+| `electron`           | `^43.4.1`                                                       |
+| `electron-builder`   | `^26.15.3`                                                      |
+| `electron-updater`   | `^6.8.9`                                                        |
+| `better-sqlite3`     | rădăcină `^13.0.2` (Node-API prebuilding — no Electron rebuild) |
+| Versiunea aplicației | `3.8.0`                                                         |
+| ID aplicație         | `online.omniroute.desktop`                                      |
+| Numele produsului    | `OmniRoute`                                                     |
 
-## Scripturi (`package.json` din rădăcină)
+## Scripturi (rădăcină `package.json`)
 
-| Script                            | Scop                                                                                        |
-| --------------------------------- | ------------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | Pornește `npm run dev` + așteaptă `localhost:20128` + lansează Electron                     |
-| `npm run electron:build`          | Compilează Next.js, apoi rulează `electron-builder` pentru sistemul de operare curent       |
-| `npm run electron:build:win`      | Creează programul de instalare NSIS pentru Windows + versiunea portabilă (x64)              |
-| `npm run electron:build:mac`      | Creează imaginea DMG pentru macOS (Intel + Apple Silicon)                                   |
-| `npm run electron:build:linux`    | Creează pachetele AppImage + DEB pentru Linux (x64 + arm64)                                 |
-| `npm run electron:smoke:packaged` | Lansează binarul împachetat și verifică dacă `/login` răspunde cu HTTP 200, apoi îl oprește |
+| Scenariul                         | Scop                                                                          |
+| --------------------------------- | ----------------------------------------------------------------------------- |
+| `npm run electron:dev`            | Pornește `npm run dev` + așteaptă `localhost:20128` + lansează Electron       |
+| `npm run electron:build`          | Construiește Next.js apoi rulează `electron-builder` pentru OS curent         |
+| `npm run electron:build:win`      | Construiește Windows NSIS installer + portabil (x64)                          |
+| `npm run electron:build:mac`      | Construiește macOS DMG (Intel + Apple Silicon)                                |
+| `npm run electron:build:linux`    | Construiește Linux AppImage + DEB (x64 + arm64)                               |
+| `npm run electron:smoke:packaged` | Lansează pachetul binar și probează `/login` pentru HTTP 200, apoi se oprește |
 
-Spațiul de lucru `electron/` expune, de asemenea:
+Spațiul de lucru `electron/` expune și:
 
 - `npm run prepare:bundle` — rulează `scripts/build/prepare-electron-standalone.mjs`
-- `npm run build:mac-x64` / `build:mac-arm64` — compilări macOS pentru o singură arhitectură
-- `npm run pack` — compilare doar ca director pentru testare locală (fără program de instalare)
+- `npm run build:mac-x64` / `build:mac-arm64` — macOS un singur arc
+- `npm run pack` — numai director pentru testare locală (fără program de instalare)
 
-## Pachete opționale pentru mediul de execuție
+## Pachete de runtime opționale
 
-Buildurile desktop pot publica arhive opționale pentru mediul de execuție alături de instalatoare. Fișierele serverului instalat conțin `optional-packs.index.json` (sub `resources/app` pe Windows și Linux). Pentru intrarea `browser-runtime`, citiți `packs[].tarball` și descărcați **exact acel nume de fișier din aceeași versiune**. Numele arhivelor includ un hash SHA-256; builduri diferite pot necesita arhive diferite. Păstrați neschimbat numele fișierului descărcat.
+Compilările desktop pot publica arhivele de rulare opționale alături de instalatorii lor. Sarcina utilă a serverului instalat conține `optional-packs.index.json` (sub `resources/app` pe Windows și Linux). Pentru intrarea `browser-runtime`, citiți `packs[].tarball` și descărcați** exact acel nume de fișier din aceeași versiune** . Numele arhivelor includ un rezumat SHA-256 ; diferite versiuni pot necesita diferite arhive. Păstrați numele fișierului descărcat neschimbat.
 
-Copiați indexul aplicației instalate și arhiva selectată într-un singur director, apoi folosiți CLI-ul din aceeași versiune:
+Copiați indexul aplicației instalate și arhiva selectată într-un singur director, apoi utilizați CLI din aceeași versiune:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` afișează starea instalării și verificării, nu numele arhivei. Indexul inclus selectează arhiva. Instalarea verifică suma de control a arhivei înainte de extragere și sumele de control ale pachetelor înainte de a înlocui un pachet instalat. Citește fișiere locale; nu descarcă arhive lipsă. Reporniți aplicația după instalare. Dacă versiunea nu are un fișier corespunzător, pachetul opțional nu este disponibil prin fișierele acelei versiuni.
+`packs list` afișează starea de instalare și verificare, nu numele fișierului de arhivă. Indexul grupat selectează arhiva. Instalarea își verifică suma de verificare a arhivei înainte de extracție și sumele de verificare a pachetului înainte de a înlocui un pachet instalat. Citește fișierele locale; nu descarcă arhivele lipsă. Reporniți aplicația după instalare. Dacă ediția nu are niciun activ care se potrivește, pachetul opțional nu este disponibil prin activele versiunii respective.
 
-## Structura directoarelor
+## Aspect director
 
 ```
 electron/
-├── package.json              # Dependențe Electron + configurație electron-builder
-├── main.js                   # Proces principal (24 KB — consultați adnotările de mai jos)
-├── preload.js                # Punte IPC contextBridge
-├── types.d.ts                # Tipuri AppInfo / ServerStatus / ElectronAPI
-├── README.md                 # Note din spațiul de lucru
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # Rezultatul electron-builder (ignorat de git)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # Pregătește pachetul .next/electron-standalone
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # Test rapid după compilare
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-Atât `main.js`, cât și `preload.js` sunt **fișiere CommonJS `.js`**, nu TypeScript. Tipurile
-pentru partea de renderer se află în `electron/types.d.ts`.
+Atât `main.js`, cât și `preload.js` sunt** fișiere CommonJS `.js`** , nu TypeScript. Tastările din partea de redare se află în `electron/types.d.ts`.
 
-## Puntea IPC (`preload.js`)
+## Podul IPC (`preload.js`)
 
-Scriptul de preîncărcare expune un API permis explicit în `window.electronAPI`, utilizând `contextBridge`
-cu `contextIsolation: true` și `nodeIntegration: false`.
+Preîncărcarea expune un API pe lista albă pe `window.electronAPI` folosind `contextBridge` cu `contextIsolation: true` și `nodeIntegration: false`.
 
 ```javascript
 const VALID_CHANNELS = {
@@ -124,129 +117,111 @@ const VALID_CHANNELS = {
 
 Metode expuse:
 
-| Apel din renderer                                                 | Tip                                         |
-| ----------------------------------------------------------------- | ------------------------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                                      |
-| `openExternal(url)`                                               | invoke                                      |
-| `getDataDir()`                                                    | invoke                                      |
-| `restartServer()`                                                 | invoke                                      |
-| `getAppVersion()`                                                 | invoke                                      |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                                      |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                                        |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (returnează o funcție de eliminare) |
+| Apel de redare                                                    | Tip                               |
+| ----------------------------------------------------------------- | --------------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoca                            |
+| `openExternal(url)`                                               | invoca                            |
+| `getDataDir()`                                                    | invoca                            |
+| `restartServer()`                                                 | invoca                            |
+| `getAppVersion()`                                                 | invoca                            |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoca                            |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | trimite                           |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | primiți (returnează dispozitivul) |
 
-Funcțiile auxiliare de recepționare returnează o **funcție de eliminare** în loc să se bazeze pe
-`removeAllListeners` — astfel este prevenită acumularea ascultătorilor atunci când componentele React
-sunt remontate.
+Ajutoarele care primesc se întorc a** funcția de eliminare** în loc să se bazeze pe `removeAllListeners` — acest lucru previne acumularea de ascultători atunci când componentele React se remontează.
 
 ## Ciclul de viață al serverului
 
-`main.js` pornește direct pachetul autonom Next.js folosind mediul de execuție Node al Electron,
-pentru a evita incompatibilitatea ABI a modulelor native cu versiunea Node din sistem:
+`main.js` generează pachetul Next.js autonom direct cu timpul de execuție Electron Node pentru a evita nepotrivirea ABI a modulului nativ cu Nodul de sistem:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-Aspecte importante:
+Repere:
 
-- `waitForServer()` interoghează periodic URL-ul timp de până la 30 s înainte de afișarea ferestrei (fără ecran gol la pornirea la rece).
-- `stdio: "pipe"` capturează stdout/stderr; expresiile care indică disponibilitatea (`Ready` / `listening`) emit `server-status: running` prin IPC.
-- `before-quit` așteaptă până la 5 s pentru un SIGTERM controlat (punct de control WAL), apoi trimite SIGKILL.
-- Selectorul de porturi din zona de notificare (`20128`, `3000`, `8080`) oprește și repornește serverul, apoi reîncarcă fereastra BrowserWindow.
+- `waitForServer()` sonda URL până la 30 s înainte de a afișa fereastra (fără ecran gol la pornirea la rece).
+- `stdio: "pipe"` captează stdout/stderr; frazele gata (`Ready` / `listening`) emit `server-status: running` peste IPC.
+- `before-quit` așteaptă până la 5 s pentru SIGTERM grațios (punct de control WAL ), apoi trimite SIGKILL.
+- Comutatorul de porturi din tavă (`20128`, `3000`, `8080`) oprește și repornește serverul, apoi reîncarcă BrowserWindow.
 
-## Inițializarea secretelor fără configurare
+## Bootstrap secret cu configurație zero
 
-La prima lansare, procesul principal generează automat și salvează secretele care lipsesc:
+La prima lansare, procesul principal generează automat și persistă secretele lipsă:
 
-| Secret                   | Sursă                                                                                   |
-| ------------------------ | --------------------------------------------------------------------------------------- |
-| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (refuză dacă există deja credențiale criptate) |
-| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                |
+| Secret                   | Sursă                                                                               |
+| ------------------------ | ----------------------------------------------------------------------------------- |
+| `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                            |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (refuză dacă există deja credite criptate) |
+| `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                            |
 
-Sunt salvate în `<DATA_DIR>/server.env`. `DATA_DIR` este rezolvat astfel:
+A persistat la `<DATA_DIR>/server.env`. `DATA_DIR` se rezolvă la:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` sau `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## Căutarea fișierului de mediu
+## Căutare fișier de mediu
 
-Înainte de a porni serverul, procesul principal (`getPreferredEnvFilePath()` din
-`electron/main.js`) alege **un singur** fișier `.env`: primul dintre următoarele care există.
+Înainte de a genera serverul, procesul principal (`getPreferredEnvFilePath()` în `electron/main.js`) alege** unul** fișier `.env` : primul dintre acestea care există.
 
-1. `$DATA_DIR/.env`, când `DATA_DIR` este setat în mediul din care a fost lansată aplicația.
-2. `<resolved DATA_DIR>/.env`, folosind aceleași valori implicite ca mai sus: `%APPDATA%\omniroute\.env` pe
-   Windows, `$XDG_CONFIG_HOME/omniroute/.env` sau `~/.omniroute/.env` pe Linux și macOS.
-3. `.env` din directorul de lucru al procesului.
+1. `$DATA_DIR/.env`, când `DATA_DIR` este setat în mediul în care a fost lansată aplicația.
+2. `<resolved DATA_DIR>/.env`, folosind aceleași valori implicite ca mai sus: `%APPDATA%\omniroute\.env` pe Windows, `$XDG_CONFIG_HOME/omniroute/.env` sau `~/.omniroute/.env` pe Linux și macOS.
+3. `.env` în directorul de lucru al procesului.
 
-Procesul principal citește numai acel fișier; candidații ulteriori nu sunt îmbinați. Mediul
-serverului este apoi construit cu următoarea ordine de prioritate (de la cea mai mare la cea mai mică):
+Procesul principal citește doar acel fișier; candidații ulterioare nu sunt îmbinați. Mediul server este apoi construit cu această prioritate (mai întâi cea mai mare):
 
-1. Mediul procesului Electron (variabilele moștenite de la procesul care a lansat aplicația).
+1. Mediul de proces Electron (variabile moștenite de la orice a lansat aplicația).
 2. Fișierul `.env` selectat.
-3. `<DATA_DIR>/server.env` (secretele de inițializare de mai sus).
+3. `<DATA_DIR>/server.env` (secretele bootstrap de mai sus).
 
-Mediul procesului este capturat la pornirea aplicației, astfel încât o variabilă de mediu de sistem
-sau de utilizator setată în timp ce aplicația rulează (inclusiv atunci când rămâne în zona de
-notificare după închiderea ferestrei) nu ajunge la server până când aplicația nu este închisă complet
-și relansată. Pentru opțiuni configurabile în timpul rulării, precum `CONTEXT_LENGTH_<PROVIDER>` (consultați
-[Variabile de mediu: lungimea contextului pentru fiecare furnizor](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
-utilizați de preferință fișierul `.env`, apoi închideți complet aplicația (zona de notificare, **Ieșire**) și relansați-o.
+Mediul de proces este capturat atunci când pornește aplicația, astfel încât o variabilă de mediu de sistem sau utilizator setată în timp ce aplicația rulează (inclusiv în timp ce se află în tavă după ce fereastra sa este închisă) nu ajunge la server până când aplicația este complet închisă și relansată. Pentru butoanele de rulare, cum ar fi `CONTEXT_LENGTH_<PROVIDER>` (consultați [Variabilele de mediu: lungimea contextului pe furnizor](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), preferați fișierul `.env`, apoi ieșiți complet (tava,** Renunță** ) și relansați.
 
-## Fereastră și zona de notificare
+## Fereastra si tava
 
-- `BrowserWindow`: 1400×900 (minim 1024×700), `backgroundColor: "#0a0a0a"`.
-- macOS: `titleBarStyle: "hiddenInset"`, butoanele de control ale ferestrei la `{ x: 16, y: 16 }`.
-- Windows/Linux: bară de titlu nativă.
-- Butonul de închidere minimizează aplicația în zona de notificare; meniul din zona de notificare conține **Deschide OmniRoute**, **Deschide panoul de control** (în browserul extern), submeniul **Port server**, **Verifică actualizările**, **Ieșire**.
+- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`.
+- macOS: `titleBarStyle: "hiddenInset"`, semafor la `{ x: 16, y: 16 }`.
+- Windows/Linux: bara de titlu nativă.
+- Butonul de închidere minimizează în tavă; meniul tava are** Deschide OmniRoute** ,** Deschideți tabloul de bord** (browser extern),** Portul serverului** submeniu,** Verificați actualizările** ,** Renunță** .
 
 ## Politica de securitate a conținutului
 
-Setată prin `session.defaultSession.webRequest.onHeadersReceived`. Directive importante:
+Setați prin `session.defaultSession.webRequest.onHeadersReceived`. Directive notabile:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- Modul de dezvoltare adaugă `'unsafe-eval'` la `script-src` doar în acest mod
+- Modul Dev adaugă `'unsafe-eval'` numai la `script-src`
 
 ## Actualizare automată
 
 Utilizează `electron-updater` cu furnizorul GitHub (`diegosouzapw/OmniRoute`).
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- Evenimente transmise către procesul de randare prin IPC-ul `update-status`:
-  `checking`, `available`, `not-available`, `downloading` (cu `percent`), `downloaded`, `error`
-- `installUpdate()` oprește serverul, apoi apelează `autoUpdater.quitAndInstall()`
-- Omisă în modul de dezvoltare (`!app.isPackaged`)
+- Evenimente redirecționate către redator prin `update-status` IPC: `checking`, `available`, `not-available`, `downloading` (cu `percent`), `downloaded`, `error`
+- `installUpdate()` ucide serverul apoi apelează `autoUpdater.quitAndInstall()`
+- S-a omis în modul de dezvoltare (`!app.isPackaged`)
 
-## Fluxul de compilare
+## Construiți o conductă
 
-1. `npm run build` → versiune autonomă Next.js în `.next/standalone`.
-2. `prepare-electron-standalone.mjs` → reorganizează fișierele în `.next/electron-standalone` și rescrie căile absolute din `server.js` + `required-server-files.json`, astfel încât pachetul să poată fi relocat.
-3. `electron-builder` împachetează `main.js`, `preload.js`, `node_modules` și `extraResources: { ../.next/electron-standalone → app }`.
+1. `npm run build` → Next.js independent în `.next/standalone`.
+2. `prepare-electron-standalone.mjs` → re-stadiază în `.next/electron-standalone` și rescrie căile absolute în interiorul `server.js` + `required-server-files.json`, astfel încât pachetul să fie relocabil.
+3. pachetele `electron-builder` `main.js`, `preload.js`, `node_modules` și `extraResources: { ../.next/electron-standalone → app }`.
 
-### Ținte de compilare
+### Construiți ținte
 
-| SO      | Ținte                                        |
-| ------- | -------------------------------------------- |
-| Windows | Program de instalare NSIS + portabil (x64)   |
-| macOS   | DMG (Intel + arm64, tragere în Applications) |
-| Linux   | AppImage + DEB (x64 + arm64)                 |
+| OS      | Ținte                                     |
+| ------- | ----------------------------------------- |
+| Windows | NSIS installer + portable (x64)           |
+| macOS   | DMG (Intel + arm64, drag-to-Applications) |
+| Linux   | AppImage + DEB (x64 + arm64)              |
 
-Setări NSIS: `oneClick: false`, permite utilizatorului să aleagă directorul de instalare și creează scurtături pe desktop și în meniul Start.
+Setări NSIS : `oneClick: false`, permite utilizatorului să aleagă directorul de instalare, creează comenzi rapide pentru Desktop și Start-Menu.
 
-## Testarea rapidă a versiunii împachetate
+## Constructie ambalată pentru testarea fumului
 
 ```bash
 npm run electron:smoke:packaged
@@ -254,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- Descoperă automat executabilul împachetat din `electron/dist-electron/` pentru platforma curentă.
-- Îl lansează cu directoare `HOME`/`APPDATA`/`XDG_*` izolate, astfel încât să nu acceseze datele dezvoltatorului.
-- Interoghează periodic `http://127.0.0.1:20128/login` pentru a obține HTTP 200 în maximum 45 s.
-- Monitorizează stderr/stdout pentru tipare fatale (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server` etc.).
-- Așteaptă 2 s de funcționare stabilă după ce aplicația devine disponibilă, apoi trimite SIGTERM și așteaptă eliberarea portului.
-- În CI, transmite automat `--no-sandbox --disable-gpu` (și `--disable-dev-shm-usage` pe Linux).
+- Descoperă automat binarul împachetat în `electron/dist-electron/` pentru platforma curentă.
+- Se lansează cu directoare izolate `HOME`/`APPDATA`/`XDG_*`, astfel încât să nu atingă datele dezvoltatorului.
+- Sondați `http://127.0.0.1:20128/login` pentru 200 HTTP în 45 de secunde.
+- Ceasuri stderr/stdout pentru modele fatale (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, etc.).
+- Așteaptă 2 s de durată stabilă după pregătire, apoi emite SIGTERM și așteaptă ca portul să se elibereze.
+- În CI, trece automat `--no-sandbox --disable-gpu` (și `--disable-dev-shm-usage` pe Linux).
 
-Suprascrieri prin variabile de mediu: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
+Înv. suprascrie: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`.
 
 ## Semnarea codului
 
-`electron/package.json` **nu** configurează direct acreditările de semnare. Transmiteți-le prin variabile de mediu către `electron-builder`:
+`electron/package.json` face** nu** acreditările de semnare prin cablu direct. Transmite-le prin env vars la `electron-builder`:
 
 ### macOS
 
@@ -288,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-Semnarea AppImage este opțională — setați `LINUX_GPG_KEY` dacă doriți semnarea.
+semnarea AppImage este opțională — set `LINUX_GPG_KEY` dacă semnați.
 
-## Distribuție
+## Distributie
 
-Artefactele sunt generate în `electron/dist-electron/`:
+Artefacte aterizează în `electron/dist-electron/`:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-Versiunile sunt publicate în GitHub Releases (`diegosouzapw/OmniRoute`), unde `electron-updater` verifică și disponibilitatea versiunilor noi.
+Lansările sunt publicate în GitHub Releases (`diegosouzapw/OmniRoute`), care este, de asemenea, locul în care `electron-updater` verifică pentru versiuni noi.
 
 ## Depanare
 
-| Simptom                                                                   | Remediere                                                                                                                                                                                  |
-| ------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `Cannot find module 'better-sqlite3'` după actualizarea majoră a Electron | better-sqlite3 v13 include versiuni precompilate Node-API — rulați din nou `npm install` în rădăcină și `prepare:bundle` (acesta verifică versiunea precompilată pentru platforma curentă) |
-| `ERR_DLOPEN_FAILED` pentru un modul nativ                                 | Rulați din nou `prepare:bundle` — acesta eșuează imediat când lipsește versiunea precompilată Node-API pentru platforma curentă                                                            |
-| Fereastra apare goală pe Linux                                            | Confirmați că serverul Next.js este asociat efectiv la PORT (verificați jurnalele `[Server]`)                                                                                              |
-| Notarizarea macOS se blochează                                            | Asigurați-vă că variabilele `APPLE_*` sunt exportate, nu doar definite în `.env`                                                                                                           |
-| Avertisment Windows SmartScreen                                           | Semnați cu un certificat EV sau utilizatorii pot face clic dreapta → „Rulați oricum”                                                                                                       |
-| Testul rapid eșuează deoarece portul este utilizat                        | Opriți orice server local de dezvoltare de pe 20128 înainte de a rula `electron:smoke:packaged`                                                                                            |
+| Simptom                                                        | Fix                                                                                                                                                  |
+| -------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` după Electron bump major | better-sqlite3 v13 livrează Node-API prebuild — re-run `npm install` la rădăcină și `prepare:bundle` (verifică prebuild-ul pentru platforma curentă) |
+| `ERR_DLOPEN_FAILED` pentru modulul nativ                       | Reluați `prepare:bundle` — eșuează rapid când lipsește prebuild-ul Node-API pentru platforma actuală                                                 |
+| Fereastra apare goală pe Linux                                 | Confirmați că serverul Next.js este legat efectiv la PORT (verificați jurnalele `[Server]` )                                                         |
+| macOS standuri de notarizare                                   | Asigurați-vă că `APPLE_*` vars sunt exportate, nu doar în `.env`                                                                                     |
+| avertisment Windows SmartScreen                                | Semnează cu EV cert sau utilizatorii dau clic dreapta pe → „Run anyway”                                                                              |
+| Testul de fum eșuează cu portul în uz                          | Opriți orice server de dezvoltare local pe 20128 înainte de a rula `electron:smoke:packaged`                                                         |
 
-## Consultați și
+## Vezi De asemenea
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
-- Sursă: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- Utilitare: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- Sursa: `electron/main.js`, `electron/preload.js`, `electron/package.json`
+- Ajutoare: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

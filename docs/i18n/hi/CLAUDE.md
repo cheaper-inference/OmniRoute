@@ -15,7 +15,7 @@ Claude Code पर लागू होती है — `AGENTS.md` में �
 
 पूर्ण अनिवार्य वर्कट्री प्रोटोकॉल (बेस-ब्रांच पुष्टि, `.claude/worktrees/` कैनोनिकल
 पथ, `cp -al` node_modules, टियरडाउन नियम)
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) में है (`AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) में है (`AGENTS.md` →
 Git Workflow → "Worktree isolation" में सारांशित)। Claude Code-विशिष्ट बातें:
 
 - ऑपरेटर से `AskUserQuestion` के माध्यम से बेस ब्रांच की पुष्टि करें (हार्ड रूल #19), जब तक कि

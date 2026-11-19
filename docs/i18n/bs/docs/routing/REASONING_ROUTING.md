@@ -4,7 +4,9 @@
 
 ---
 
-Rezonirajuća pravila rutiranja proširuju postojeći model i kombinovano rutiranje. Kada se nijedno aktivno pravilo ne podudara, postojeće razmišljanje, sufiks, zadana veza i ponašanje dobavljača-prevoda ostaju nepromijenjeni.
+# Usmjeravanje rezonovanja
+
+Pravila usmjeravanja rezonovanja proširuju postojeće usmjeravanje modela i kombinacija. Kada se ne podudara nijedno aktivno pravilo, postojeće ponašanje za thinking, suffix, connection-default i provider-translation ostaje nepromijenjeno.
 
 ## Upravljanje
 

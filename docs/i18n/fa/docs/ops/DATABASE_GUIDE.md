@@ -407,49 +407,48 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ### حالت WAL
 
-WAL به طور پیش فرض فعال است. برای بارهای کاری با نوشتن بالا، در نظر بگیرید:
+حالت WAL بهطور پیشفرض فعال است. برای بارهای کاری با نوشتن زیاد، موارد زیر را در نظر بگیرید:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- ایجاد نقطهٔ بررسی در هر 1000 صفحه
+PRAGMA journal_size_limit = 67108864;  -- سقف 64MB برای WAL
 ```
 
-OmniRoute `journal_size_limit` را تنظیم نمی کند. یک چک پوینت فریم های WAL را به فایل اصلی منتقل می کند، اما فایل WAL بزرگترین اندازه اختصاص داده شده خود را حفظ می کند. نگهبان `OMNIROUTE_WAL_GUARD_MAX_MB` فقط هشدار می دهد و `wal_checkpoint(RESTART)` را اجرا می کند. این یک درپوش اندازه دیسک نیست.
+### ایندکسها
 
-### شاخص ها
+ایندکسهای کلیدی برای عملکرد بهتر (بهطور خودکار توسط مهاجرتها ایجاد میشوند):
 
-شاخص های کلیدی برای عملکرد (ایجاد خودکار توسط مهاجرت):
+- `idx_models_provider` — جستوجوی مدلها بر اساس ارائهدهنده
+- `idx_combo_targets_combo_id` — گسترش مقصدهای ترکیبی
+- `idx_usage_history_api_key_timestamp` — تحلیل میزان استفاده
+- `idx_quota_snapshots_api_key_window` — ردیابی سهمیه
+- `idx_call_logs_timestamp` — کوئریهای گزارش فراخوانی
 
-- جستجوی مدل `idx_models_provider` — توسط ارائه دهنده
-- گسترش هدف ترکیبی `idx_combo_targets_combo_id` —
-- تجزیه و تحلیل استفاده از `idx_usage_history_api_key_timestamp` —
-- ردیابی سهمیه `idx_quota_snapshots_api_key_window` —
-- درخواست های ثبت تماس `idx_call_logs_timestamp` —
-
-برای افزودن یک نمایه جدید، یک مهاجرت ایجاد کنید:
+برای افزودن یک ایندکس جدید، یک مهاجرت ایجاد کنید:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O دارای نقشه حافظه
+### ورودی/خروجی نگاشتشده در حافظه
 
-برای پایگاه های داده بسیار بزرگ (> 10GB)، نقشه برداری حافظه را می توان از طریق SQLite pragma تنظیم کرد:
+برای پایگاههای داده بسیار بزرگ (>10GB)، میتوان نگاشت حافظه را از طریق pragma در SQLite تنظیم کرد:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- تنظیم از طریق pragma در SQLite (در core.ts یا زمان اجرا تغییر دهید)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### فشرده سازی
+### فشردهسازی
 
-نمونه های طولانی مدت OmniRoute از `VACUUM` گاه به گاه سود می برند:
+نمونههای OmniRoute که برای مدت طولانی اجرا میشوند، از اجرای گاهبهگاه `VACUUM` سود میبرند:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-در پنجره های کم ترافیک هر ماه اجرا شود. (حالت WAL نیاز را کاهش می دهد، اما آن را از بین نمی برد.)
+این دستور را ماهانه و در بازههای کمترافیک اجرا کنید. (حالت WAL نیاز به آن را کاهش میدهد، اما از بین نمیبرد.)
 
 ---
 

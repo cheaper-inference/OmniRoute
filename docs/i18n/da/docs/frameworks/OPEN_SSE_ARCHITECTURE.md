@@ -484,11 +484,11 @@ Dette håndterer:
 
 ## Konfiguration
 
-`open-sse/config/` har konfigurationslaget:
+`open-sse/config/` indeholder konfigurationslaget:
 
 | Fil                           | Formål                                           |
 | ----------------------------- | ------------------------------------------------ |
-| `providerRegistry.ts`         | Chat-modelregistrering over 388-udbyderkataloget |
+| `providerRegistry.ts`         | Chat-modelregistrering over 381-udbyderkataloget |
 | `providerModels.ts`           | Modelaliaser, formatkortlægning                  |
 | `constants.ts`                | Timeouts, grænser, statuskoder                   |
 | `defaultThinkingSignature.ts` | Standard Claude tænkende signatur                |

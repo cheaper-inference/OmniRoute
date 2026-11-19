@@ -4,13 +4,9 @@
 
 ---
 
-> **Versión:** v3.8.44
-> **Última actualización:** 2026-10-28
-> **Destinatarios:** Ingenieros que añaden, mantienen o depuran servicios integrados (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
+> **Versión:** v3.8.44** Última actualización:** 2026-10-28** Audiencia:** Ingenieros que agregan, mantienen o depuran servicios integrados (9Router, CLIProxyAPI, Mux, Bifrost, open-wa, LLMLingua, sing-box).
 
-Los servicios integrados son herramientas de procesos auxiliares instaladas localmente que OmniRoute instala, supervisa y
-expone como destinos de enrutamiento de primera clase. A diferencia de los proveedores externos (a los que se accede a través de Internet
-mediante claves de API), los servicios integrados se ejecutan en la misma máquina que OmniRoute y se comunican a través de la interfaz de bucle invertido.
+Los servicios integrados son herramientas auxiliares de procesos instaladas localmente que OmniRoute instala, supervisa y expone como objetivos de enrutamiento de primera clase. A diferencia de los proveedores externos (a los que se accede a través de Internet mediante claves API ), los servicios integrados se ejecutan en la misma máquina que OmniRoute y se comunican a través de loopback.
 
 ---
 
@@ -31,36 +27,36 @@ mediante claves de API), los servicios integrados se ejecutan en la misma máqui
 
 ### ¿Por qué servicios integrados?
 
-Hay ocho servicios integrados:
+Ocho servicios están integrados:
 
-| Servicio        | Paquete npm                                            | Puerto predeterminado | Propósito                                                                                                                                                                                                                                                                                                                                                                                     |
-| --------------- | ------------------------------------------------------ | :-------------------: | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **9Router**     | `9router`                                              |         20130         | Router de IA que OmniRoute puede usar como proveedor secundario. Los modelos se exponen como `9router/{sub}/{model}`                                                                                                                                                                                                                                                                          |
-| **CLIProxyAPI** | Binario de versión de GitHub (`cliproxy`)              |         8317          | Adaptador de proxy local para los flujos de autenticación de la CLI de Anthropic. Proporciona enrutamiento de respaldo cuando caducan los tokens OAuth                                                                                                                                                                                                                                        |
-| **Mux**         | `mux` (`mux server` sin interfaz gráfica)              |         8322          | Demonio local de orquestación de agentes (coder/mux). Solo se gestiona su ciclo de vida; no es un destino de enrutamiento (sin proxy de LLM).                                                                                                                                                                                                                                                 |
-| **Bifrost**     | `@maximhq/bifrost`                                     |         8080          | Backend de retransmisión de puerta de enlace de IA en Go. Cuando está en ejecución, la ruta de retransmisión (`/v1/relay/`) lo selecciona automáticamente                                                                                                                                                                                                                                     |
-| **Dario**       | `@askalf/dario`                                        |         3456          | Proxy de suscripción de Claude: alternativa/conmutación por error a CLIProxyAPI para tráfico con el formato de Claude Code; la clave inyectada se convierte en `DARIO_ADMIN_TOKEN`, que protege su plano de control OAuth `/admin/*`                                                                                                                                                          |
-| **open-wa**     | `@open-wa/wa-automate`                                 |         8323          | Automatización de WhatsApp Web (Chromium sin interfaz gráfica mediante Puppeteer). Solo se gestiona su ciclo de vida; no es un destino de enrutamiento.                                                                                                                                                                                                                                       |
-| **LLMLingua**   | `@atjsh/llmlingua-2`                                   |         20135         | Servicio auxiliar de compresión de prompts: modelo ONNX real de LLMLingua-2 (adaptación a JS/TS del algoritmo de Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` envía `/compress` mediante HTTP a este servicio y, si no está disponible, recurre al backend interno basado en hilos de trabajo. Solo se gestiona su ciclo de vida; no es un destino de enrutamiento. |
-| **sing-box**    | Binario de una versión publicada en GitHub (`singbox`) |         20140         | Proceso auxiliar de TPROXY que respalda la interceptación mediante proxy transparente de `applyTproxy()` (`src/mitm/tproxy/setup.ts`). El instalador descarga la versión fijada y verifica su suma de comprobación. Solo se administra su ciclo de vida; no es un destino de enrutamiento ni actúa como proxy de LLM.                                                                         |
+| Servicio          | paquete npm                                | Puerto predeterminado | Objetivo                                                                                                                                                                                                                                                                                                                                                               |
+| ----------------- | ------------------------------------------ | :-------------------: | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **9enrutador**    | `9router`                                  |         20130         | enrutador AI que OmniRoute puede usar como subproveedor. Modelos expuestos como `9router/{sub}/{model}`                                                                                                                                                                                                                                                                |
+| **CLIProxyAPI**   | binario de lanzamiento GitHub (`cliproxy`) |         8317          | Adaptador de proxy local para flujos de autenticación Anthropic CLI. Proporciona enrutamiento alternativo cuando los tokens OAuth caducan                                                                                                                                                                                                                              |
+| **mux**           | `mux` ( `mux server` sin cabeza)           |         8322          | Demonio de orquestación de agentes local (coder/mux). Solo — administrado por ciclo de vida, no es un destino de enrutamiento (sin proxy LLM ).                                                                                                                                                                                                                        |
+| **bifrost**       | `@maximhq/bifrost`                         |         8080          | Vaya al backend de retransmisión de puerta de enlace de IA. Cuando se ejecuta, seleccionado automáticamente por la ruta de relevo (`/v1/relay/`)                                                                                                                                                                                                                       |
+| **Darío**         | `@askalf/dario`                            |         3456          | Proxy de suscripción de Claude — alternative/failover a CLIProxyAPI para tráfico en forma de Claude-Code; la clave inyectada se convierte en `DARIO_ADMIN_TOKEN` activando su plano de control `/admin/*` OAuth                                                                                                                                                        |
+| **abierto-wa**    | `@open-wa/wa-automate`                     |         8323          | Automatización web WhatsApp (Chromium sin cabeza a través de Puppeteer). Solo — administrado por ciclo de vida, no es un destino de enrutamiento.                                                                                                                                                                                                                      |
+| **LLMLingua**     | `@atjsh/llmlingua-2`                       |         20135         | Sidecar de compresión rápida — modelo real LLMLingua-2 ONNX (puerto JS/TS del algoritmo de Microsoft). `open-sse/services/compression/engines/llmlingua/index.ts` le envía `/compress` sobre HTTP, volviendo al backend del subproceso de trabajo en proceso cuando el sidecar está inactivo. Solo — administrado por ciclo de vida, no es un destino de enrutamiento. |
+| **caja de canto** | binario de lanzamiento GitHub (`singbox`)  |         20140         | sidecar TPROXY que respalda la intercepción de proxy transparente de `applyTproxy()`(`src/mitm/tproxy/setup.ts`). El instalador descarga la versión anclada y verificada con suma de comprobación. Solo — administrado por ciclo de vida, no es un destino de enrutamiento (sin proxy LLM )                                                                            |
 
 Los ocho siguen el mismo modelo de supervisión:
 
-- OmniRoute los instala en `DATA_DIR/services/{name}/` (aislados del propio `package.json` de OmniRoute)
-- OmniRoute los inicia y supervisa como procesos secundarios
-- OmniRoute inyecta una clave de API efímera en el entorno del proceso secundario y la rota sin tiempo de inactividad (cuando corresponde)
-- Todas las rutas de administración (`/api/services/*`) son **LOCAL_ONLY**: solo son accesibles desde la interfaz de bucle invertido (regla estricta n.º 17)
+- OmniRoute los instala bajo `DATA_DIR/services/{name}/` (aislado del propio `package.json` de OmniRoute)
+- OmniRoute los genera y monitorea como procesos secundarios
+- OmniRoute inyecta una clave API efímera en el entorno del niño y la rota sin tiempo de inactividad (cuando corresponda)
+- Todas las rutas de gestión (`/api/services/*`) son**LOCAL_ONLY** Se puede acceder — solo desde loopback (regla estricta n.° 17)
 
 ### Decisiones clave (del plan de diseño)
 
-| Decisión                                         | Valor                                                                                               |
-| ------------------------------------------------ | --------------------------------------------------------------------------------------------------- |
-| Acceso del panel a la interfaz nativa de 9Router | Proxy inverso en `/dashboard/providers/services/9router/embed/*`                                    |
-| Mecanismo de instalación                         | `npm install {package}` mediante `execFile` (sin interpolación del shell)                           |
-| Modo de uso                                      | Proveedor registrado como `9router/{sub}/{model}` en el motor de enrutamiento                       |
-| Gestión de claves de API                         | OmniRoute las genera, las cifra en reposo (AES-256-GCM) y las inyecta mediante variables de entorno |
-| Ubicación en el panel                            | `/dashboard/providers/services` (tres pestañas)                                                     |
-| Inicio automático                                | Opción por servicio, desactivada de forma predeterminada                                            |
+| Decisión                                        | Valor                                                                      |
+| ----------------------------------------------- | -------------------------------------------------------------------------- |
+| Acceso al panel de control UI nativo de 9Router | Proxy inverso en `/dashboard/providers/services/9router/embed/*`           |
+| Mecanismo de instalación                        | `npm install {package}` vía `execFile` (sin interpolación de shell)        |
+| Modo de consumo                                 | Proveedor registrado como `9router/{sub}/{model}` en motor de enrutamiento |
+| gestión de claves API                           | OmniRoute genera, cifra en reposo (AES-256-GCM) e inyecta a través de env  |
+| Ubicación del tablero                           | `/dashboard/providers/services` (tres pestañas)                            |
+| Inicio automático                               | Alternar por servicio, OFF predeterminado                                  |
 
 ---
 
@@ -68,20 +64,20 @@ Los ocho siguen el mismo modelo de supervisión:
 
 ```
 ┌────────────────────────────────────────────────────────────────────┐
-│  Capa 1 — IU                                                       │
-│  /dashboard/providers/services  (pestañas: CLIProxyAPI | 9Router | Mux)│
-│  Registros en vivo (SSE), Iniciar/Detener/Reiniciar/Actualizar, Configuración, Instalar│
+│  Layer 1 — UI                                                      │
+│  /dashboard/providers/services  (tabs: CLIProxyAPI | 9Router | Mux)│
+│  Logs live (SSE), Start/Stop/Restart/Update, Settings, Install     │
 │                                                                    │
 │  src/app/(dashboard)/dashboard/providers/services/                 │
-│    ├── page.tsx               Contenedor + enrutamiento de pestañas mediante ?tab=│
+│    ├── page.tsx               Shell + tab routing by ?tab=         │
 │    ├── tabs/                  CliproxyServiceTab, NinerouterServiceTab,│
 │    │                          MuxServiceTab                        │
 │    └── components/            ServiceStatusCard, ServiceLifecycleButtons,│
 │                               ServiceLogsPanel, ApiKeyCard, ...    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP (fetch de Next.js)
+                       │ HTTP (Next.js fetch)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Capa 2 — API (LOCAL_ONLY — solo loopback)                         │
+│  Layer 2 — API (LOCAL_ONLY — loopback only)                        │
 │                                                                    │
 │  /api/services/9router/{install|start|stop|restart|update|         │
 │                          rotate-key|status|auto-start|logs}        │
@@ -90,75 +86,74 @@ Los ocho siguen el mismo modelo de supervisión:
 │  /api/services/mux/{install|start|stop|restart|update|             │
 │                      status|auto-start|logs}                       │
 │  /dashboard/providers/services/9router/embed/[...path]             │
-│    (proxy HTTP inverso + WebSocket → upstream de 9Router)          │
+│    (reverse HTTP + WebSocket proxy → 9Router upstream)             │
 │                                                                    │
-│  Control: LOCAL_ONLY_API_PREFIXES incluye "/api/services/" y       │
+│  Gate: LOCAL_ONLY_API_PREFIXES includes "/api/services/" and       │
 │        "/dashboard/providers/services/*/embed/"                    │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ llamadas dentro del proceso
+                       │ in-process calls
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Capa 3 — ServiceSupervisor (src/lib/services/)                    │
+│  Layer 3 — ServiceSupervisor (src/lib/services/)                   │
 │                                                                    │
-│  ServiceSupervisor.ts   Supervisor genérico (child_process.spawn)  │
-│    ├── instalación: execFile('npm', ['install', pkg, '--prefix'])  │
-│    ├── inicio:      spawn(node, [entrypoint], {env, cwd})           │
-│    ├── clave API:   crypto.randomBytes(32) → env NINEROUTER_API_KEY│
-│    ├── puerto:      20130 para 9Router (configurable)              │
-│    ├── registros:   búfer circular stdio de 5 MB → eventos SSE    │
-│    ├── estado:      HTTP GET /health cada 2–5 s, recuperación diferida│
-│    └── ciclo de vida: SIGTERM 15 s → SIGKILL                       │
+│  ServiceSupervisor.ts   Generic supervisor (child_process.spawn)   │
+│    ├── install:    execFile('npm', ['install', pkg, '--prefix'])    │
+│    ├── start:      spawn(node, [entrypoint], {env, cwd})           │
+│    ├── api_key:    crypto.randomBytes(32) → env NINEROUTER_API_KEY  │
+│    ├── port:       20130 for 9Router (configurable)                │
+│    ├── logs:       stdio ring buffer 5 MB → SSE events             │
+│    ├── health:     HTTP GET /health every 2–5 s, lazy recovery     │
+│    └── lifecycle:  SIGTERM 15 s → SIGKILL                          │
 │                                                                    │
 │  registry.ts        getSupervisor(name) / registerSupervisor()     │
-│  bootstrap.ts       Inicializa todos los SERVICES[] al arrancar el proceso│
+│  bootstrap.ts       Bootstraps all SERVICES[] at process start     │
 │  apiKey.ts          getOrCreateApiKey(), generateServiceApiKey()   │
-│  modelSync.ts       GET periódico de /v1/models → tabla service_models│
-│  ringBuffer.ts      Búfer circular de registros (5 MB por servicio)│
-│  healthCheck.ts     Sondeo HTTP periódico de estado                │
+│  modelSync.ts       Periodic GET /v1/models → service_models table │
+│  ringBuffer.ts      Circular log buffer (5 MB per service)         │
+│  healthCheck.ts     Polling HTTP health probe                      │
 │  installers/        ninerouter.ts, cliproxy.ts, mux.ts, openwa.ts  │
-│                      (adaptadores de instalación)                  │
+│                      (installer adapters)                          │
 └──────────────────────┬─────────────────────────────────────────────┘
-                       │ HTTP compatible con OpenAI (loopback)
+                       │ OpenAI-compatible HTTP (loopback)
 ┌──────────────────────▼─────────────────────────────────────────────┐
-│  Capa 4 — Proveedor / Enrutamiento                                 │
+│  Layer 4 — Provider / Routing                                      │
 │                                                                    │
 │  open-sse/executors/ninerouter.ts                                  │
-│    Vuelve a consultar el puerto y la clave API en cada solicitud (sin caché).│
-│    Elimina el prefijo "9router/" del id. del modelo antes de reenviarlo.│
-│    Devuelve 503 service_not_running si el supervisor no está en "running".│
+│    Re-looks up port and API key per-request (no caching).          │
+│    Strips "9router/" prefix from model id before proxying.         │
+│    Returns 503 service_not_running if supervisor not in "running". │
 │                                                                    │
 │  src/shared/constants/providers.ts                                 │
-│    Entrada para "9router": isEmbeddedService: true                 │
+│    Entry for "9router": isEmbeddedService: true                    │
 │                                                                    │
 │  open-sse/config/providerRegistry.ts                               │
-│    Modelos almacenados como "9router/{sub}/{model}" (con prefijo). │
-│    Sincronizados cada 5 min por modelSync.ts.                      │
+│    Models stored as "9router/{sub}/{model}" (prefixed).            │
+│    Synced every 5 min by modelSync.ts.                             │
 │                                                                    │
-│  Mux SOLO tiene administrado su ciclo de vida (capas 1-3): es un  │
-│  daemon de orquestación de agentes, no un proxy de LLM, por lo que │
-│  no tiene entrada de ejecutor/proveedor en la capa 4 y nunca es un │
-│  destino de enrutamiento.                                          │
+│  Mux is lifecycle-managed ONLY (Layers 1-3) — it is an agent-       │
+│  orchestration daemon, not an LLM proxy, so it has no Layer 4      │
+│  executor/provider entry and is never a routing target.            │
 └────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Archivos fuente clave
 
-| Archivo                                     | Función                                                                |
-| ------------------------------------------- | ---------------------------------------------------------------------- |
-| `src/lib/services/ServiceSupervisor.ts`     | Clase principal: ciclo de vida, bloqueo, estado, búfer circular        |
-| `src/lib/services/bootstrap.ts`             | Registro a nivel de proceso e inicio automático                        |
-| `src/lib/services/registry.ts`              | Mapa singleton `herramienta → supervisor`                              |
-| `src/lib/services/apiKey.ts`                | Generación de claves, cifrado AES-256-GCM en reposo                    |
-| `src/lib/services/modelSync.ts`             | Sincronización periódica de modelos (5 min) y bajo demanda             |
-| `src/lib/services/ringBuffer.ts`            | Búfer circular de registros de 5 MB con suscripción SSE                |
-| `src/lib/services/healthCheck.ts`           | Comprobación de estado HTTP (intervalo configurable)                   |
-| `src/lib/services/installers/ninerouter.ts` | Instalación/actualización/desinstalación mediante npm para 9Router     |
-| `src/lib/services/installers/cliproxy.ts`   | Instalación/actualización/desinstalación mediante npm para CLIProxyAPI |
-| `src/lib/services/installers/mux.ts`        | Instalación/actualización/desinstalación mediante npm para Mux         |
-| `src/lib/services/installers/openwa.ts`     | Instalación/actualización/desinstalación mediante npm para open-wa     |
-| `src/lib/services/installers/llmlingua.ts`  | Instalación/actualización/desinstalación mediante npm para LLMLingua   |
-| `src/app/api/services/9router/_lib.ts`      | Función auxiliar `getOrInitSupervisor()`                               |
-| `src/app/api/services/[name]/logs/route.ts` | Endpoint compartido de registros SSE                                   |
-| `open-sse/executors/ninerouter.ts`          | Ejecutor del proveedor (capa 4)                                        |
+| Archivo                                     | Role                                                           |
+| ------------------------------------------- | -------------------------------------------------------------- |
+| `src/lib/services/ServiceSupervisor.ts`     | Clase principal: ciclo de vida, bloqueo, salud, búfer circular |
+| `src/lib/services/bootstrap.ts`             | Registro a nivel de proceso e inicio automático                |
+| `src/lib/services/registry.ts`              | Mapa singleton `tool → supervisor`                             |
+| `src/lib/services/apiKey.ts`                | Generación de claves, cifrado AES-256-GCM en reposo            |
+| `src/lib/services/modelSync.ts`             | Sincronización periódica del modelo (5 min) + bajo demanda     |
+| `src/lib/services/ringBuffer.ts`            | 5 buffer de registro circular MB con suscripción SSE           |
+| `src/lib/services/healthCheck.ts`           | Sonda de salud HTTP (intervalo configurable)                   |
+| `src/lib/services/installers/ninerouter.ts` | npm install/update/uninstall para 9Router                      |
+| `src/lib/services/installers/cliproxy.ts`   | npm install/update/uninstall para CLIProxyAPI                  |
+| `src/lib/services/installers/mux.ts`        | npm install/update/uninstall para Mux                          |
+| `src/lib/services/installers/openwa.ts`     | npm install/update/uninstall para open-wa                      |
+| `src/lib/services/installers/llmlingua.ts`  | npm install/update/uninstall para LLMLingua                    |
+| `src/app/api/services/9router/_lib.ts`      | ayudante `getOrInitSupervisor()`                               |
+| `src/app/api/services/[name]/logs/route.ts` | Punto final de registros SSE compartidos                       |
+| `open-sse/executors/ninerouter.ts`          | Ejecutor del proveedor (Capa 4)                                |
 
 ---
 
@@ -212,17 +207,15 @@ condiciones de carrera cuando, por ejemplo, el inicio automático y un botón de
 
 ---
 
-## 4. Referencia de la API
+## 4. referencia API
 
-Todas las rutas bajo `/api/services/` son **LOCAL_ONLY** (solo loopback, regla estricta n.º 17).
-Las solicitudes que no provengan de loopback reciben `403 LOCAL_ONLY` independientemente del token de autenticación.
+Todas las rutas bajo `/api/services/` son**LOCAL_ONLY** (solo bucle invertido, regla estricta n.° 17). Las solicitudes sin bucle invertido reciben `403 LOCAL_ONLY` independientemente del token de autenticación.
 
-### 4.1 Endpoints de 9Router (11 rutas)
+### 4.1 9 puntos finales del enrutador (11 rutas)
 
 #### `POST /api/services/9router/install`
 
-Instala 9Router desde npm. Crea `DATA_DIR/services/9router/` con sus propios
-`package.json` y `node_modules/`. No entra en conflicto con las dependencias de OmniRoute.
+Instale 9Router desde npm. Crea `DATA_DIR/services/9router/` con sus propios `package.json` y `node_modules/`. No entra en conflicto con los propios departamentos de OmniRoute.
 
 **Cuerpo de la solicitud** (todo opcional):
 
@@ -230,28 +223,26 @@ Instala 9Router desde npm. Crea `DATA_DIR/services/9router/` con sus propios
 { "version": "latest" }
 ```
 
-| Campo     | Tipo     | Valor predeterminado | Descripción                                          |
-| --------- | -------- | -------------------- | ---------------------------------------------------- |
-| `version` | `string` | `"latest"`           | Etiqueta de versión de npm o semver que se instalará |
+| Campo     | Tipo     | Por defecto | Descripción                                    |
+| --------- | -------- | ----------- | ---------------------------------------------- |
+| `version` | `string` | `"latest"`  | Etiqueta de versión npm o semver para instalar |
 
 **Respuestas:**
 
-| Estado | Descripción                                                                     |
-| ------ | ------------------------------------------------------------------------------- |
-| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                          |
-| `400`  | Cuerpo de solicitud no válido (fallo de validación de Zod)                      |
-| `409`  | Instalación ya en curso (bloqueo retenido)                                      |
-| `500`  | Error de instalación de npm; consulte `message` para ver un mensaje descriptivo |
+| Estado | Descripción                                                                 |
+| ------ | --------------------------------------------------------------------------- |
+| `200`  | `{ ok: true, installedVersion: "x.y.z", path: "..." }`                      |
+| `400`  | Cuerpo de solicitud no válido (error de validación Zod )                    |
+| `409`  | Ya se está instalando (bloqueo retenido)                                    |
+| `500`  | La instalación de npm falló — consulte `message` para ver un error amigable |
 
-**Notas:** Utiliza `execFile('npm', [...])`: sin shell ni interpolación (regla estricta n.º 13).
-Los errores EACCES se presentan como mensajes descriptivos.
+**Notas:** Utiliza `execFile('npm', [...])` — sin shell, sin interpolación (regla estricta n.° 13). Los errores EACCES aparecen como mensajes amigables.
 
 ---
 
 #### `POST /api/services/9router/start`
 
-Inicia 9Router. Registra un supervisor si aún no está registrado y, a continuación, llama a
-`supervisor.start()`. Es idempotente si ya está en ejecución.
+Inicie 9Router. Registra a un supervisor si aún no está registrado y luego llama `supervisor.start()`. Idempotente cuando ya está en ejecución.
 
 **Cuerpo de la solicitud:** ninguno
 
@@ -259,11 +250,11 @@ Inicia 9Router. Registra un supervisor si aún no está registrado y, a continua
 
 | Estado | Descripción                                                 |
 | ------ | ----------------------------------------------------------- |
-| `200`  | Objeto `ServiceStatus` (consulte el esquema a continuación) |
-| `409`  | 9Router no está instalado (`status: "not_installed"`)       |
-| `503`  | Error de inicio (error del proceso; consulte `lastError`)   |
+| `200`  | Objeto `ServiceStatus` (ver esquema a continuación)         |
+| `409`  | 9El enrutador no está instalado (`status: "not_installed"`) |
+| `503`  | Error al iniciar (error de proceso — ver `lastError`)       |
 
-**Esquema de ServiceStatus:**
+**esquema ServiceStatus :**
 
 ```json
 {
@@ -281,35 +272,32 @@ Inicia 9Router. Registra un supervisor si aún no está registrado y, a continua
 
 #### `POST /api/services/9router/stop`
 
-Detiene 9Router de forma controlada. Envía SIGTERM, espera 15 s y, a continuación, envía SIGKILL si el proceso sigue activo.
-Es idempotente si ya está detenido.
+Detenga con gracia 9Router. Envía SIGTERM, espera 15 s y luego SIGKILL si aún está vivo. Idempotente cuando ya está parado.
 
 **Cuerpo de la solicitud:** ninguno
 
 **Respuestas:**
 
-| Estado | Descripción                            |
-| ------ | -------------------------------------- |
-| `200`  | `ServiceStatus` (state: "stopped")     |
-| `503`  | La detención falló de forma inesperada |
+| Estado | Descripción                          |
+| ------ | ------------------------------------ |
+| `200`  | `ServiceStatus` (estado: "detenido") |
+| `503`  | La detención falló inesperadamente   |
 
 ---
 
 #### `POST /api/services/9router/restart`
 
-Equivale a ejecutar `stop()` y después `start()` bajo el bloqueo de operación.
+Equivale a `stop()` y luego `start()` bajo el bloqueo de operación.
 
 **Cuerpo de la solicitud:** ninguno
 
-**Respuestas:** las mismas que `start` (devuelve el `ServiceStatus` final).
+**Respuestas:** Igual que `start` (devuelve `ServiceStatus` final).
 
 ---
 
 #### `POST /api/services/9router/update`
 
-Actualiza 9Router a una versión más reciente de npm. Si el servicio está en ejecución, primero
-se detiene, se ejecuta la instalación de npm (instalando la versión más reciente en el mismo lugar) y, a continuación,
-se reinicia el servicio.
+Actualiza 9Router a una versión más nueva de npm. Si el servicio se está ejecutando, primero se detiene, se ejecuta npm install (instalando la versión más reciente en el lugar) y luego se reinicia el servicio.
 
 **Cuerpo de la solicitud** (todo opcional):
 
@@ -322,16 +310,14 @@ se reinicia el servicio.
 | Estado | Descripción                                                     |
 | ------ | --------------------------------------------------------------- |
 | `200`  | `{ ok: true, previousVersion: "...", installedVersion: "..." }` |
-| `400`  | Cuerpo no válido                                                |
-| `500`  | Error de actualización de npm                                   |
+| `400`  | cuerpo no válido                                                |
+| `500`  | La actualización de npm falló                                   |
 
 ---
 
 #### `POST /api/services/9router/rotate-key`
 
-Genera una nueva clave de API para 9Router, la cifra en reposo y reinicia el servicio
-(si está en ejecución) para que cargue la nueva clave desde su entorno. La clave anterior
-se invalida inmediatamente.
+Genera una nueva clave API para 9Router, la cifra en reposo y reinicia el servicio (si se está ejecutando) para que recoja la nueva clave de su entorno. La clave antigua queda invalidada inmediatamente.
 
 **Cuerpo de la solicitud:** ninguno
 
@@ -340,23 +326,22 @@ se invalida inmediatamente.
 | Estado | Descripción                                |
 | ------ | ------------------------------------------ |
 | `200`  | `{ keyRotated: true, restarted: boolean }` |
-| `500`  | Error de rotación                          |
+| `500`  | La rotación falló                          |
 
-**Seguridad:** La nueva clave nunca se devuelve en la respuesta (no se filtran credenciales).
-Se almacena cifrada (AES-256-GCM) en la tabla `version_manager`.
+**Seguridad:** La nueva clave nunca se devuelve en la respuesta (no hay pérdida de credenciales). Se almacena cifrado (AES-256-GCM) en la tabla `version_manager`.
 
 ---
 
 #### `GET /api/services/9router/status`
 
-Devuelve el estado combinado en tiempo real y de la base de datos, incluidos los metadatos de la versión y una vista previa de la clave de API.
+Devuelve el estado combinado + DB en vivo, incluidos los metadatos de la versión y la vista previa de la clave API.
 
 **Respuestas:**
 
-| Estado | Descripción                        |
-| ------ | ---------------------------------- |
-| `200`  | Consulte el esquema a continuación |
-| `500`  | Error al leer el estado            |
+| Estado | Descripción                |
+| ------ | -------------------------- |
+| `200`  | Ver esquema a continuación |
+| `500`  | Error de lectura de estado |
 
 **Esquema de respuesta:**
 
@@ -382,8 +367,7 @@ Devuelve el estado combinado en tiempo real y de la base de datos, incluidos los
 
 #### `POST /api/services/9router/auto-start`
 
-Activa o desactiva la opción de inicio automático. Cuando `enabled: true`, el servicio se inicia automáticamente
-la próxima vez que arranque OmniRoute (si el servicio está instalado).
+Alterna la bandera de inicio automático. Cuando `enabled: true`, el servicio se inicia automáticamente la próxima vez que se inicia OmniRoute (si el servicio está instalado).
 
 **Cuerpo de la solicitud:**
 
@@ -396,37 +380,33 @@ la próxima vez que arranque OmniRoute (si el servicio está instalado).
 | Estado | Descripción           |
 | ------ | --------------------- |
 | `200`  | `{ autoStart: true }` |
-| `400`  | Cuerpo no válido      |
+| `400`  | cuerpo no válido      |
 
 ---
 
 #### `GET /api/services/9router/logs`
 
-Flujo SSE de registros en tiempo real procedentes del búfer circular de stdout/stderr de 9Router.
+Flujo SSE de registros en vivo desde el búfer de anillo stdout/stderr de 9Router.
 
 **Parámetros de consulta:**
 
-| Parámetro | Tipo      | Valor predeterminado | Descripción                                                                                       |
-| --------- | --------- | -------------------- | ------------------------------------------------------------------------------------------------- |
-| `tail`    | `integer` | 200                  | Número de líneas históricas que se enviarán primero (máximo 1000)                                 |
-| `filter`  | `string`  | ninguno              | Filtro de subcadena que no distingue mayúsculas de minúsculas (sin regex; protegido contra ReDoS) |
+| parámetro | Tipo      | Por defecto | Descripción                                                                                                 |
+| --------- | --------- | ----------- | ----------------------------------------------------------------------------------------------------------- |
+| `tail`    | `integer` | 200         | Cuántas líneas históricas enviar primero (máximo 1000)                                                      |
+| `filter`  | `string`  | ninguno     | Filtro de subcadena que no distingue entre mayúsculas y minúsculas (sin expresiones regulares — ReDoS-safe) |
 
-**Eventos SSE:**
+**eventos SSE :**
 
-| Evento      | Datos       | Descripción                             |
-| ----------- | ----------- | --------------------------------------- |
-| `snapshot`  | `LogLine[]` | Historial inicial de las últimas líneas |
-| `log`       | `LogLine`   | Línea de registro en tiempo real        |
-| `heartbeat` | `{}`        | Señal de actividad cada 15 s            |
+| Evento      | Datos       | Descripción               |
+| ----------- | ----------- | ------------------------- |
+| `snapshot`  | `LogLine[]` | Cola histórica inicial    |
+| `log`       | `LogLine`   | Línea de registro en vivo |
+| `heartbeat` | `{}`        | Mantener vivo cada 15 s   |
 
-**Esquema de LogLine:**
+**esquema LogLine :**
 
 ```json
-{
-  "ts": 1716633600000,
-  "stream": "stdout",
-  "line": "[9router] Listening on :20130"
-}
+{ "ts": 1716633600000, "stream": "stdout", "line": "[9router] Listening on :20130" }
 ```
 
 **Respuestas:**
@@ -439,203 +419,145 @@ Flujo SSE de registros en tiempo real procedentes del búfer circular de stdout/
 
 ---
 
-### 4.2 Puntos de conexión de CLIProxyAPI (10 rutas)
+### 4.2 puntos finales CLIProxyAPI (10 rutas)
 
-CLIProxyAPI tiene la misma estructura de puntos de conexión que 9Router, excepto
-`rotate-key`, e incorpora `accounts`, `provider-expose` y
-`auto-restart-adopted`. Ahora recibe una clave de API dedicada para el plano de
-datos, inyectada al iniciarse (`needsApiKey: true` en `bootstrap.ts`, utilizada
-para sincronizar modelos); `status` incluye menos campos.
+CLIProxyAPI tiene la misma forma de punto final que 9Router menos `rotate-key`, más `accounts`, `provider-expose` y `auto-restart-adopted`. Ahora recibe una clave API plano de datos dedicada inyectada en el momento de generación (`needsApiKey: true` en `bootstrap.ts`, utilizada para la sincronización del modelo); `status` incluye menos campos.
 
-| Método | Ruta                                | Descripción                               |
-| ------ | ----------------------------------- | ----------------------------------------- |
-| `POST` | `/api/services/cliproxy/install`    | Instalar CLIProxyAPI desde npm            |
-| `POST` | `/api/services/cliproxy/start`      | Iniciar CLIProxyAPI                       |
-| `POST` | `/api/services/cliproxy/stop`       | Detener CLIProxyAPI                       |
-| `POST` | `/api/services/cliproxy/restart`    | Reiniciar CLIProxyAPI                     |
-| `POST` | `/api/services/cliproxy/update`     | Actualizar a una versión más reciente     |
-| `GET`  | `/api/services/cliproxy/status`     | Estado en vivo + BD (sin `apiKeyMasked`)  |
-| `POST` | `/api/services/cliproxy/auto-start` | Activar o desactivar el inicio automático |
+| Método | Camino                              | Descripción                                 |
+| ------ | ----------------------------------- | ------------------------------------------- |
+| `POST` | `/api/services/cliproxy/install`    | Instalar CLIProxyAPI desde npm              |
+| `POST` | `/api/services/cliproxy/start`      | Iniciar CLIProxyAPI                         |
+| `POST` | `/api/services/cliproxy/stop`       | Detener CLIProxyAPI                         |
+| `POST` | `/api/services/cliproxy/restart`    | Reiniciar CLIProxyAPI                       |
+| `POST` | `/api/services/cliproxy/update`     | Actualizar a una versión más nueva          |
+| `GET`  | `/api/services/cliproxy/status`     | Estado de + DB en vivo (sin `apiKeyMasked`) |
+| `POST` | `/api/services/cliproxy/auto-start` | Alternar inicio automático                  |
 
-El punto de conexión compartido `GET /api/services/{name}/logs` (véase §4.1)
-funciona para los cuatro servicios mediante el segmento dinámico `[name]`.
+El punto final `GET /api/services/{name}/logs` compartido (ver §4.1) funciona para los cuatro servicios utilizando el segmento dinámico `[name]`.
 
 ---
 
-### 4.3 Puntos de conexión de Mux (8 rutas)
+### 4.3 Puntos finales Mux (8 rutas)
 
-Mux tiene la misma estructura de puntos de conexión que CLIProxyAPI: no hay una
-ruta `rotate-key` en la superficie de la API (el token de portador se genera de
-la misma forma que el de 9Router mediante `getOrCreateApiKey("mux")` y se inyecta
-mediante la variable de entorno `MUX_SERVER_AUTH_TOKEN`, pero todavía no existe
-un punto de conexión específico para rotarlo). Mux solo está gestionado durante
-su ciclo de vida: a diferencia de 9Router, no tiene un ejecutor de Capa 4 y nunca
-se registra como proveedor de enrutamiento.
+Mux tiene la misma forma de punto final que CLIProxyAPI — no `rotate-key` route en la superficie API (el token de portador se genera de la misma manera que el de 9Router a través `getOrCreateApiKey("mux")` y se inyecta a través de `MUX_SERVER_AUTH_TOKEN` env var, pero aún no hay un punto final de rotación dedicado). Mux solo se administra por ciclo de vida: a diferencia de 9Router, no tiene un ejecutor de Capa 4 y nunca está registrado como proveedor de enrutamiento.
 
-| Método | Ruta                           | Descripción                                  |
-| ------ | ------------------------------ | -------------------------------------------- |
-| `POST` | `/api/services/mux/install`    | Instalar Mux desde npm (`npm i mux`)         |
-| `POST` | `/api/services/mux/start`      | Iniciar Mux (`mux server`)                   |
-| `POST` | `/api/services/mux/stop`       | Detener Mux                                  |
-| `POST` | `/api/services/mux/restart`    | Reiniciar Mux                                |
-| `POST` | `/api/services/mux/update`     | Actualizar a una versión más reciente de npm |
-| `GET`  | `/api/services/mux/status`     | Estado en vivo + BD                          |
-| `POST` | `/api/services/mux/auto-start` | Activar o desactivar el inicio automático    |
+| Método | Camino                         | Descripción                              |
+| ------ | ------------------------------ | ---------------------------------------- |
+| `POST` | `/api/services/mux/install`    | Instale Mux desde npm (`npm i mux`)      |
+| `POST` | `/api/services/mux/start`      | Iniciar Mux (`mux server`)               |
+| `POST` | `/api/services/mux/stop`       | Detener Mux                              |
+| `POST` | `/api/services/mux/restart`    | Reiniciar Mux                            |
+| `POST` | `/api/services/mux/update`     | Actualizar a la versión más nueva de npm |
+| `GET`  | `/api/services/mux/status`     | Estado + DB en vivo                      |
+| `POST` | `/api/services/mux/auto-start` | Alternar inicio automático               |
 
 ---
 
-### 4.4 Puntos de conexión de Bifrost (8 rutas)
+### 4.4 Puntos finales de Bifrost (8 rutas)
 
-Bifrost es un backend de retransmisión de puerta de enlace de IA escrito en Go
-(`@maximhq/bifrost`). Utiliza la misma estructura de puntos de conexión que
-CLIProxyAPI (sin `rotate-key`: Bifrost gestiona sus propias claves de proveedor
-en `config.json`, dentro de su `-app-dir`).
+Bifrost es un backend de retransmisión de puerta de enlace Go AI (`@maximhq/bifrost`). Utiliza la misma forma de punto final que CLIProxyAPI (no `rotate-key` — Bifrost administra sus propias claves de proveedor en `config.json` bajo su `-app-dir`).
 
-| Método | Ruta                               | Descripción                                                                                   |
-| ------ | ---------------------------------- | --------------------------------------------------------------------------------------------- |
-| `POST` | `/api/services/bifrost/install`    | Instalar Bifrost desde npm (`@maximhq/bifrost`)                                               |
-| `POST` | `/api/services/bifrost/start`      | Iniciar Bifrost en el puerto 8080 (predeterminado)                                            |
-| `POST` | `/api/services/bifrost/stop`       | Detener Bifrost                                                                               |
-| `POST` | `/api/services/bifrost/restart`    | Reiniciar Bifrost                                                                             |
-| `POST` | `/api/services/bifrost/update`     | Actualizar a una versión más reciente                                                         |
-| `GET`  | `/api/services/bifrost/status`     | Estado en vivo + BD                                                                           |
-| `POST` | `/api/services/bifrost/auto-start` | Activar o desactivar el inicio automático                                                     |
-| `GET`  | `/api/services/bifrost/logs`       | Seguimiento de registros mediante SSE (a través de la ruta dinámica compartida `[name]/logs`) |
+| Método | Camino                             | Descripción                                                               |
+| ------ | ---------------------------------- | ------------------------------------------------------------------------- |
+| `POST` | `/api/services/bifrost/install`    | Instale Bifrost desde npm (`@maximhq/bifrost`)                            |
+| `POST` | `/api/services/bifrost/start`      | Inicie Bifrost en el puerto 8080 (predeterminado)                         |
+| `POST` | `/api/services/bifrost/stop`       | Detener el bifrost                                                        |
+| `POST` | `/api/services/bifrost/restart`    | Reiniciar Bifrost                                                         |
+| `POST` | `/api/services/bifrost/update`     | Actualizar a una versión más nueva                                        |
+| `GET`  | `/api/services/bifrost/status`     | Estado + DB en vivo                                                       |
+| `POST` | `/api/services/bifrost/auto-start` | Alternar inicio automático                                                |
+| `GET`  | `/api/services/bifrost/logs`       | cola de registro SSE (a través de ruta dinámica `[name]/logs` compartida) |
 
-**Configuración del enrutamiento:** Cuando `BIFROST_BASE_URL` no está definida y
-la instancia supervisada de Bifrost está en ejecución,
-`getBifrostRoutingConfig()` (en `routingBackend.ts`) utiliza automáticamente
-`http://127.0.0.1:{port}` como URL base de retransmisión. La variable de entorno
-`BIFROST_BASE_URL` definida explícitamente siempre tiene prioridad.
+**Cableado de enrutamiento:** Cuando `BIFROST_BASE_URL` no está configurado y la instancia supervisada de Bifrost se está ejecutando, `getBifrostRoutingConfig()` (en `routingBackend.ts`) usa automáticamente `http://127.0.0.1:{port}` como base de retransmisión URL. El entorno `BIFROST_BASE_URL` explícito siempre tiene prioridad.
 
 ---
 
-### 4.5 Puntos de conexión de Dario (12 rutas)
+### 4.5 Puntos finales de Darío (12 rutas)
 
-La misma estructura de ciclo de vida que los demás servicios (`install`, `start`,
-`stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`),
-además de un plano de control OAuth protegido mediante token bajo `admin/`:
-`admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`,
-`admin/login-complete` (todos protegidos mediante `DARIO_ADMIN_TOKEN`).
+La misma forma de ciclo de vida que los otros servicios (`install`, `start`, `stop`, `restart`, `update`, `status`, `auto-start`, `auto-restart-adopted`) más un plano de control OAuth controlado por token bajo `admin/`: `admin/accounts`, `admin/import-from-omniroute`, `admin/login-start`, `admin/login-complete` (todos detrás de `DARIO_ADMIN_TOKEN`).
 
-### 4.6 Puntos de conexión de open-wa (7 rutas)
+### 4.6 puntos finales de wa abierta (7 rutas)
 
-open-wa (`@open-wa/wa-automate`) controla una instancia de Chromium sin interfaz
-gráfica (mediante Puppeteer) para automatizar WhatsApp Web. Utiliza la misma
-estructura de puntos de conexión que Mux (todavía sin una ruta `rotate-key`).
-Solo se gestiona durante su ciclo de vida: no es un destino de enrutamiento y no
-tiene una entrada de ejecutor/proveedor de Capa 4.
+open-wa (`@open-wa/wa-automate`) controla una instancia de Chromium sin cabeza (a través de Puppeteer) para automatizar WhatsApp Web. Utiliza la misma forma de punto final que Mux (aún no hay ruta `rotate-key` ). Se administra mediante ciclo de vida solo — no es un destino de enrutamiento, no hay entrada executor/provider de capa 4.
 
-| Método | Ruta                              | Descripción                                                                                   |
-| ------ | --------------------------------- | --------------------------------------------------------------------------------------------- |
-| `POST` | `/api/services/openwa/install`    | Instalar open-wa desde npm (`@open-wa/wa-automate`)                                           |
-| `POST` | `/api/services/openwa/start`      | Iniciar open-wa en el puerto 8323 (predeterminado)                                            |
-| `POST` | `/api/services/openwa/stop`       | Detener open-wa                                                                               |
-| `POST` | `/api/services/openwa/restart`    | Reiniciar open-wa                                                                             |
-| `POST` | `/api/services/openwa/update`     | Actualizar a una versión más reciente                                                         |
-| `GET`  | `/api/services/openwa/status`     | Estado en vivo + BD                                                                           |
-| `POST` | `/api/services/openwa/auto-start` | Activar o desactivar el inicio automático                                                     |
-| `GET`  | `/api/services/openwa/logs`       | Seguimiento de registros mediante SSE (a través de la ruta dinámica compartida `[name]/logs`) |
+| Método | Camino                            | Descripción                                                               |
+| ------ | --------------------------------- | ------------------------------------------------------------------------- |
+| `POST` | `/api/services/openwa/install`    | Instalar open-wa desde npm (`@open-wa/wa-automate`)                       |
+| `POST` | `/api/services/openwa/start`      | Inicie open-wa en el puerto 8323 (predeterminado)                         |
+| `POST` | `/api/services/openwa/stop`       | Detener wa abierto                                                        |
+| `POST` | `/api/services/openwa/restart`    | Reiniciar open-wa                                                         |
+| `POST` | `/api/services/openwa/update`     | Actualizar a una versión más nueva                                        |
+| `GET`  | `/api/services/openwa/status`     | Estado + DB en vivo                                                       |
+| `POST` | `/api/services/openwa/auto-start` | Alternar inicio automático                                                |
+| `GET`  | `/api/services/openwa/logs`       | cola de registro SSE (a través de ruta dinámica `[name]/logs` compartida) |
 
-**Clave de API:** se inyecta como `WA_KEY`; la sobrescritura genérica de variables
-de entorno de open-wa con el prefijo `WA_*` la asigna a la opción de CLI
-`--key`/`-k` (`dist/cli/setup.js::envArgs()`, verificado con respecto al paquete
-4.76.0 instalado). Se añade el prefijo `ow_` cuando la genera
-`generateServiceApiKey()`. open-wa vuelve a leer la clave desde una cabecera HTTP
-`key`/`api_key` (no `Authorization: Bearer`); `/api-docs*` está explícitamente
-exento de la comprobación (`setupAuthenticationLayer` en
-`dist/cli/server.js`), por lo que la sonda de estado no necesita una cabecera
-de autenticación.
+**clave API :** inyectado como la anulación genérica `WA_*` -prefixed env de `WA_KEY` — open-wa lo asigna a la opción `--key`/`-k` CLI (`dist/cli/setup.js::envArgs()`, verificado con el paquete 4.76.0 instalado). Prefijo `ow_` cuando se genera por `generateServiceApiKey()`. open-wa lee la clave desde un encabezado `key`/`api_key` HTTP (no `Authorization: Bearer`); `/api-docs*` está explícitamente exento de la verificación (`setupAuthenticationLayer` en `dist/cli/server.js`), por lo que la sonda de estado no necesita un encabezado de autenticación.
 
-**Vinculación:** open-wa no es oficial ni está afiliado a WhatsApp; el número
-conectado conlleva un riesgo de bloqueo por parte de los propios sistemas de
-detección de automatización de WhatsApp. En el primer inicio, el código QR de
-vinculación se imprime en stdout y se muestra a través del panel de registros
-y el flujo SSE existentes; esta integración aún no dispone de un endpoint
-específico para la imagen del código QR.
+**Emparejamiento:** open-wa no es oficial ni está afiliado a WhatsApp — El número conectado conlleva un riesgo de prohibición debido a la propia detección de automatización de WhatsApp. En el primer inicio, el código QR de emparejamiento se imprime en la salida estándar y se muestra a través del flujo panel/SSE registros existente — Todavía no hay un punto final de imagen QR dedicado en esta integración.
 
 ---
 
-### 4.7 Endpoints de LLMLingua (8 rutas)
+### 4.7 puntos finales LLMLingua (8 rutas)
 
-LLMLingua es un servicio auxiliar de compresión de prompts que encapsula
-`@atjsh/llmlingua-2` (un modelo real de clasificación de tokens ONNX, descargado
-desde Hugging Face en la primera llamada a `/compress`). Utiliza la misma forma
-de endpoint que Bifrost (sin clave de API: `needsApiKey: false`, nunca maneja
-credenciales).
+LLMLingua es un sidecar de compresión rápida que envuelve `@atjsh/llmlingua-2` (modelo de clasificación de tokens ONNX real, descargado de Hugging Face en la primera llamada `/compress` ). Utiliza la misma forma de punto final que Bifrost (sin clave API — `needsApiKey: false`, nunca maneja credenciales).
 
-| Método | Ruta                                           | Descripción                                                                                                |
-| ------ | ---------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| `POST` | `/api/services/llmlingua/install`              | Instalar mediante npm `@atjsh/llmlingua-2` + dependencias pares y escribir el script del servidor auxiliar |
-| `POST` | `/api/services/llmlingua/start`                | Iniciar el servicio auxiliar en el puerto 20135 (predeterminado)                                           |
-| `POST` | `/api/services/llmlingua/stop`                 | Detener el servicio auxiliar                                                                               |
-| `POST` | `/api/services/llmlingua/restart`              | Reiniciar el servicio auxiliar                                                                             |
-| `POST` | `/api/services/llmlingua/update`               | Actualizar a la versión más reciente del paquete                                                           |
-| `GET`  | `/api/services/llmlingua/status`               | Estado en vivo + BD                                                                                        |
-| `POST` | `/api/services/llmlingua/auto-start`           | Activar o desactivar el inicio automático                                                                  |
-| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Activar o desactivar el reinicio automático de una instancia adoptada (preexistente)                       |
-| `GET`  | `/api/services/llmlingua/logs`                 | Seguimiento de registros mediante SSE (a través de la ruta dinámica compartida `[name]/logs`)              |
+| Método | Camino                                         | Descripción                                                                      |
+| ------ | ---------------------------------------------- | -------------------------------------------------------------------------------- |
+| `POST` | `/api/services/llmlingua/install`              | npm-install `@atjsh/llmlingua-2` + peers, escribe el script del servidor sidecar |
+| `POST` | `/api/services/llmlingua/start`                | Inicie el sidecar en el puerto 20135 (predeterminado)                            |
+| `POST` | `/api/services/llmlingua/stop`                 | detener el sidecar                                                               |
+| `POST` | `/api/services/llmlingua/restart`              | Reiniciar el sidecar                                                             |
+| `POST` | `/api/services/llmlingua/update`               | Actualizar a la versión más nueva del paquete                                    |
+| `GET`  | `/api/services/llmlingua/status`               | Estado + DB en vivo                                                              |
+| `POST` | `/api/services/llmlingua/auto-start`           | Alternar inicio automático                                                       |
+| `POST` | `/api/services/llmlingua/auto-restart-adopted` | Alternar el reinicio automático de una instancia adoptada (preexistente)         |
+| `GET`  | `/api/services/llmlingua/logs`                 | cola de registro SSE (a través de ruta dinámica `[name]/logs` compartida)        |
 
-**Contrato del servicio auxiliar:** el script del servidor expone `GET /health`
-(instantáneo; no espera al modelo) y `POST /compress` (`{ text, rate }` →
-`{ text, compressed, ratio }`). El modelo se carga de forma diferida en la
-primera llamada a `/compress`.
+**Contrato de sidecar:** el script del servidor expone `GET /health` ( — instantáneo no espera en el modelo) y `POST /compress` (`{ text, rate }` → `{ text, compressed, ratio }`). El modelo se carga lentamente en la primera llamada `/compress`.
 
-**Cableado de la compresión:** el `httpSidecarBackend` de
-`open-sse/services/compression/engines/llmlingua/index.ts` llama a
-`LLMLINGUA_BASE_URL` (valor predeterminado:
-`http://127.0.0.1:20135`) y solo acepta la respuesta del servicio auxiliar
-cuando es estrictamente más corta que la entrada; ante cualquier fallo (no
-está en ejecución, tiempo de espera agotado o respuesta sin cambios), recurre
-al backend de hilos de trabajo en proceso (`./worker.ts`).
+**Cableado de compresión:** `open-sse/services/compression/engines/llmlingua/index.ts`'s `httpSidecarBackend` llama `LLMLINGUA_BASE_URL` ( `http://127.0.0.1:20135` predeterminado) y solo acepta la respuesta del sidecar cuando es estrictamente más corta que la entrada; cualquier falla (no ejecución, tiempo de espera, respuesta no operativa) recae en el backend del subproceso de trabajo en proceso (`./worker.ts`).
 
 ---
 
-### 4.8 Endpoints de sing-box (8 rutas)
+### 4.8 puntos finales de sing-box (8 rutas)
 
-sing-box tiene la misma estructura de endpoints que Mux: no hay ruta `rotate-key` ni inyección de clave API (`needsApiKey: false` en `bootstrap.ts`). Solo se administra su ciclo de vida; nunca es un proveedor de enrutamiento o LLM. `install()` descarga el binario oficial de la versión de GitHub (`SagerNet/sing-box`) correspondiente a la versión fijada (`SINGBOX_PINNED_VERSION` en `src/lib/services/installers/singbox.ts`) y verifica su SHA256 contra una suma de comprobación incorporada en ese mismo archivo antes de escribir el binario en disco. Se rechaza cualquier otra versión solicitada.
+sing-box tiene la misma forma de punto final que Mux — sin ruta `rotate-key`, sin inyección de clave API (`needsApiKey: false` en `bootstrap.ts`). Solo se gestiona mediante ciclo de vida: nunca es un proveedor routing/LLM. `install()` descarga el binario de lanzamiento oficial GitHub (`SagerNet/sing-box`) para la versión anclada (`SINGBOX_PINNED_VERSION` en `src/lib/services/installers/singbox.ts`) y verifica su SHA256 con una suma de verificación integrada en el mismo archivo antes de escribirlo en el disco. — cualquier otra versión solicitada es rechazada.
 
-| Método | Ruta                                         | Descripción                                                                         |
-| ------ | -------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `POST` | `/api/services/singbox/install`              | Descargar y verificar la versión fijada de sing-box                                 |
-| `POST` | `/api/services/singbox/start`                | Iniciar sing-box (`sing-box run -c config.json`)                                    |
-| `POST` | `/api/services/singbox/stop`                 | Detener sing-box                                                                    |
-| `POST` | `/api/services/singbox/restart`              | Reiniciar sing-box                                                                  |
-| `POST` | `/api/services/singbox/update`               | Volver a verificar o instalar la versión fijada                                     |
-| `GET`  | `/api/services/singbox/status`               | Estado en vivo y estado en la base de datos                                         |
-| `POST` | `/api/services/singbox/auto-start`           | Activar o desactivar el inicio automático                                           |
-| `POST` | `/api/services/singbox/auto-restart-adopted` | Activar o desactivar el reinicio automático de un proceso adoptado que ya existía   |
-| `GET`  | `/api/services/singbox/logs`                 | Seguir el final del registro SSE mediante la ruta dinámica compartida `[name]/logs` |
+| Método | Camino                                       | Descripción                                                               |
+| ------ | -------------------------------------------- | ------------------------------------------------------------------------- |
+| `POST` | `/api/services/singbox/install`              | Descargar + verificar la versión anclada de sing-box                      |
+| `POST` | `/api/services/singbox/start`                | Iniciar sing-box (`sing-box run -c config.json`)                          |
+| `POST` | `/api/services/singbox/stop`                 | Deja de cantar                                                            |
+| `POST` | `/api/services/singbox/restart`              | Reiniciar sing-box                                                        |
+| `POST` | `/api/services/singbox/update`               | Re-verify/reinstall el comunicado fijado                                  |
+| `GET`  | `/api/services/singbox/status`               | Estado + DB en vivo                                                       |
+| `POST` | `/api/services/singbox/auto-start`           | Alternar inicio automático                                                |
+| `POST` | `/api/services/singbox/auto-restart-adopted` | Alternar reinicio automático para un proceso adoptado (preexistente)      |
+| `GET`  | `/api/services/singbox/logs`                 | cola de registro SSE (a través de ruta dinámica `[name]/logs` compartida) |
 
-**Integración con TPROXY:** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) escribe `config.json` e inicia el supervisor antes de que `applyTproxy()` instale las reglas de cortafuegos de TPROXY. Si el supervisor no existe o no alcanza el estado `running`, ahora se registra un error en lugar de ocultar el fallo en silencio. Así, el operador puede identificar que se aplicaron las reglas de TPROXY sin un proceso de escucha operativo detrás.
+**cableado TPROXY :** `ensureSingboxTproxy()` (`src/mitm/tproxy/setup.ts`) escribe `config.json` e inicia el supervisor antes de que `applyTproxy()` instale las reglas de firewall TPROXY. Si el supervisor falta o no logra comunicarse con `running`, ahora registra en el nivel de error (en lugar de tragarse silenciosamente la falla) para que un operador pueda saber que las reglas TPROXY se aplicaron sin un oyente trabajando detrás de ellas.
 
 ---
 
-### 4.9 Proxy inverso (integración del panel de 9Router)
+### 4.9 Proxy inverso (incrustación del panel de 9Router)
 
-El panel integra la interfaz web de 9Router dentro de un iframe mediante un proxy
-inverso interno en:
+El panel incorpora 9Router web UI dentro de un iframe a través de un proxy inverso interno en:
 
 ```
 GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 ```
 
-Este proxy:
+Este apoderado:
 
-- Reenvía la solicitud a `http://127.0.0.1:{port}/{path}` (solo loopback)
-- Elimina las cabeceras entrantes `cookie` y `authorization` (sin filtración de la sesión de OmniRoute)
+- Reenvía la solicitud a `http://127.0.0.1:{port}/{path}` (solo bucle invertido)
+- Elimina los encabezados `cookie` y `authorization` entrantes (sin fugas de la sesión OmniRoute )
 - Inyecta `Authorization: Bearer {apiKey}` para la autenticación de 9Router
-- Elimina `set-cookie`, `content-security-policy`, `x-frame-options` y `cross-origin-*` de la respuesta
-- Reescribe las respuestas HTML para inyectar `<base href>` y normalizar las rutas absolutas (`/foo` → `/dashboard/.../embed/foo`)
+- Elimina `set-cookie`, `content-security-policy`, `x-frame-options`, `cross-origin-*` de la respuesta
+- Reescribe las respuestas HTML para inyectar `<base href>` y normalizar rutas absolutas (`/foo` → `/dashboard/.../embed/foo`).
 
-Las actualizaciones de WebSocket para el panel integrado son gestionadas por un
-servidor complementario en un puerto dedicado (consulte
-`src/lib/services/embedWsProxy.ts`).
+Las actualizaciones WebSocket para el panel integrado son manejadas por un servidor complementario en un puerto dedicado (consulte `src/lib/services/embedWsProxy.ts`).
 
-**Seguridad:** las rutas del proxy de integración están clasificadas bajo
-`LOCAL_ONLY_API_PREFIXES` y solo son accesibles desde loopback. Un atacante que
-obtenga un JWT a través de un túnel de Cloudflare/Ngrok no puede usar el proxy
-para acceder a los servicios integrados.
+**Seguridad:** Las rutas de proxy integradas se clasifican en `LOCAL_ONLY_API_PREFIXES` y solo se puede acceder a ellas desde loopback. Un atacante que obtiene un JWT a través de un túnel Cloudflare/Ngrok no puede acceder a servicios integrados.
 
 ---
 

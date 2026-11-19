@@ -403,27 +403,26 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ---
 
-## Настройка на производителността
+## Настройване на производителността
 
-### WAL режим
+### Режим WAL
 
-WAL е активиран по подразбиране. За големи работни натоварвания при запис помислете за:
+WAL е активиран по подразбиране. За натоварвания с много операции за запис обмислете:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Контролна точка на всеки 1000 страници
+PRAGMA journal_size_limit = 67108864;  -- Ограничение на WAL до 64MB
 ```
-
-OmniRoute не задава `journal_size_limit`. Контролна точка премества WAL рамки в основния файл, но WAL файлът запазва най-големия си разпределен размер. The `OMNIROUTE_WAL_GUARD_MAX_MB` guard only warns and runs `wal_checkpoint(RESTART)`; it is not a disk-size cap.
 
 ### Индекси
 
-Ключови индекси за ефективност (автоматично създадени от миграции):
+Ключови индекси за производителността (създавани автоматично от миграциите):
 
 - `idx_models_provider` — търсене на модели по доставчик
-- `idx_combo_targets_combo_id` — combo target expansion
-- `idx_usage_history_api_key_timestamp` Анализ на използването —
-- `idx_quota_snapshots_api_key_window` — проследяване на квоти
-- `idx_call_logs_timestamp` — заявки за регистър на повикванията
+- `idx_combo_targets_combo_id` — разгъване на целите на комбинация
+- `idx_usage_history_api_key_timestamp` — анализ на използването
+- `idx_quota_snapshots_api_key_window` — проследяване на квотите
+- `idx_call_logs_timestamp` — заявки към дневника на извикванията
 
 За да добавите нов индекс, създайте миграция:
 
@@ -432,24 +431,24 @@ OmniRoute не задава `journal_size_limit`. Контролна точка 
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Карта на паметта I/O
+### Входно-изходни операции с отображение в паметта
 
-За много големи бази данни (> 10GB), картографирането на паметта може да се коригира чрез SQLite pragma:
+За много големи бази данни (>10GB) отображението в паметта може да се настрои чрез прагма на SQLite:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- Задайте чрез прагма на SQLite (коригирайте в core.ts или по време на изпълнение)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Уплътняване
+### Компактиране
 
-Дълго работещите OmniRoute инстанции се възползват от случаен `VACUUM`:
+Дълго работещите екземпляри на OmniRoute имат полза от периодично изпълнение на `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Run monthly during low-traffic windows. (Режимът WAL намалява нуждата, но не я премахва.)
+Изпълнявайте ежемесечно в периоди с нисък трафик. (Режимът WAL намалява необходимостта, но не я премахва.)
 
 ---
 

@@ -20,16 +20,14 @@
 
 ## Asennustavat
 
-### npm (suositus)
+### npm (suositeltu)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Kojelauta aukeaa `http://localhost:20128` ssa ja API pohja URL on `http://localhost:20128/v1`.
-
-> **npm käyttäjät:** Jos npm varoittaa, että asennuskomentosarjat on estetty (esim. `omniroute`, `better-sqlite3`), katso [Vianmääritys — npm asennuskomentosarjat estetty](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+Hallintapaneeli avautuu osoitteessa `http://localhost:20128`, ja API:n perus-URL on `http://localhost:20128/v1`.
 
 ### pnpm
 

@@ -4,52 +4,57 @@
 
 ---
 
-> **מקור האמת:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**עודכן לאחרונה:** 2026-06-28 — v3.8.40
+> **מקור האמת:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
+> **עדכון אחרון:** 2026-06-28 — v3.8.40
 
-OmniRoute יכול לפטר HTTP webhooks באירועי פלטפורמה. השתמש בהם כדי להשתלב עם Slack, PagerDuty, Datadog, שירותי התראה פנימיים או כל מקלט HTTP.
+OmniRoute יכול לשלוח webhooks מסוג HTTP בתגובה לאירועי פלטפורמה. השתמשו בהם כדי להשתלב עם
+Slack, PagerDuty, Datadog, שירותי התראות פנימיים או כל מקלט HTTP.
 
-השולח חותם על כל מסירה עם HMAC-SHA256, מנסה שוב על כשלים חולפים, עוקב אחר תקינות המסירה לכל חיבור אינטרנט, ומשבית אוטומטית נקודות קצה שממשיכות להיכשל.
+הרכיב המשגר חותם על כל מסירה באמצעות HMAC-SHA256, מנסה שוב במקרה של
+כשלים זמניים, עוקב אחר תקינות המסירות של כל webhook ומשבית אוטומטית נקודות קצה
+שממשיכות להיכשל.
 
 ## אירועים נתמכים
 
-סוג `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, נצרך על ידי `src/lib/webhookDispatcher.ts`) מדגמן כיום שבעה אירועים:
+הטיפוס `WebhookEvent`‏ (`src/lib/webhooks/eventDescriptions.ts`, הנצרך על ידי `src/lib/webhookDispatcher.ts`) מייצג כרגע ארבעה אירועים בדיוק:
 
-| מִקרֶה                    | יורה מתי                                                                           |
-| ------------------------- | ---------------------------------------------------------------------------------- |
-| `request.completed`       | בקשת פרוקסי הושלמה בהצלחה                                                          |
-| `request.failed`          | בקשת פרוקסי נכשלת אחרי הכל retries/fallback                                        |
-| `quota.exceeded`          | מפתח API חוצה סף budget/quota                                                      |
-| `proxy.set_aside`         | חבר במאגר פרוקסי מודח לאחר סירובים חוזרים ונשנים (מעבר בלבד)                       |
-| `proxy.pool.exhausted`    | כל חבר בהיקף מאגר פרוקסי מופרש בצד                                                 |
-| `provider.reset_redeemed` | החלה אוטומטית של איפוסים בנקאיים מימשה זיכוי לאיפוס או איפוס ההפעלה השבועית Claude |
-| `test.ping`               | אירוע סינתטי המשמש את נקודת הסיום של הבדיקה                                        |
+| אירוע               | מופעל כאשר                                                         |
+| ------------------- | ------------------------------------------------------------------ |
+| `request.completed` | בקשה שהועברה באמצעות proxy מסתיימת בהצלחה                          |
+| `request.failed`    | בקשה שהועברה באמצעות proxy נכשלת לאחר כל הניסיונות החוזרים/החלופות |
+| `quota.exceeded`    | מפתח API חוצה סף תקציב/מכסה                                        |
+| `test.ping`         | אירוע סינתטי המשמש את נקודת הקצה לבדיקה                            |
 
-מנויים מקבלים את ה- `"*"` המילולי כדי לקבל כל אירוע. מתעלמים משמות אירועים לא ידועים ב- `events` בזמן המשלוח.
+מינויים מקבלים את הערך המילולי `"*"` כדי לקבל כל אירוע. שמות אירועים לא מוכרים
+ב-`events` זוכים להתעלמות בזמן השיגור.
 
-> הערה: השולח API מחובר באמצעות קווים, אך אתרי שיחות הפקה עבור חלק מהאירועים שאינם `test.ping` עדיין נוחתים. בדוק את `grep dispatchEvent` כדי לראות אילו נתיבים מפעילים כעת את השולח בגרסה שלך.
+> הערה: ה-API של הרכיב המשגר מחובר, אך אתרי הקריאה בסביבת הייצור עבור חלק
+> מהאירועים שאינם `test.ping` עדיין נמצאים בתהליך הוספה. בדקו באמצעות `grep dispatchEvent`
+> אילו נתיבים מפעילים כרגע את הרכיב המשגר בגרסה שלכם.
 
-## אַדְרִיכָלוּת
+## ארכיטקטורה
 
 ```
-Caller (handler, service, monitor)
+גורם קורא (מטפל, שירות, מנטר)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filter by webhook.events
-    -> for each match (in parallel):
+    -> סינון לפי webhook.events
+    -> עבור כל התאמה (במקביל):
        deliverWebhook(url, payload, secret)
-         build payload { event, timestamp, data }
-         sign body with HMAC-SHA256 (if secret present)
-         POST with 10s timeout
-         retry up to 3 times on 5xx / network error
+         בניית מטען { event, timestamp, data }
+         חתימה על הגוף באמצעות HMAC-SHA256 (אם קיים secret)
+         POST עם פסק זמן של 10 שניות
+         עד 3 ניסיונות חוזרים במקרה של 5xx / שגיאת רשת
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-השליחה היא אש ושכח עבור המתקשר: `Promise.allSettled` בולע שגיאות לכל חיבור לאינטרנט כך שמקלט רע אחד לא יכול לחסום את האחרים.
+השיגור מתבצע בשיטת שגר ושכח מבחינת הגורם הקורא: `Promise.allSettled` בולע
+שגיאות של webhooks בודדים, כך שמקלט תקול אחד אינו יכול לחסום את האחרים.
 
 ## חתימת HMAC
 
-כאשר ל-webhook יש `secret`, OmniRoute חותם על גוף JSON ושולח:
+כאשר ל-webhook יש `secret`,‏ OmniRoute חותם על גוף ה-JSON ושולח:
 
 ```
 Content-Type: application/json
@@ -59,11 +64,13 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> שמות כותרות משתמשים בקידומת `X-Webhook-*` (לא `X-OmniRoute-*`). ערך החתימה הוא `sha256=<hex>` — אמת את הקידומת המלאה.
+> שמות הכותרות משתמשים בקידומת `X-Webhook-*` (ולא `X-OmniRoute-*`). ערך החתימה
+> הוא `sha256=<hex>` — יש לאמת את הקידומת המלאה.
 
-אם קוראים `createWebhook` ללא סוד, מודול DB יוצר אחד (`whsec_<48 hex>`) כך שכל ה-webhooks חתומים כברירת מחדל.
+אם `createWebhook` נקראת ללא סוד, מודול מסד הנתונים יוצר אחד
+(`whsec_<48 hex>`), כך שכל ה-webhooks חתומים כברירת מחדל.
 
-### מאמת במקלט
+### אימות בצד המקלט
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -76,57 +83,66 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-בדוק תמיד נגד **נָא** גוף הבקשה, לפני כל ניתוח JSON.
+יש לבצע תמיד את האימות מול גוף הבקשה **הגולמי**, לפני ניתוח JSON כלשהו.
 
-## מדיניות ניסיון חוזר וכישלון
+## מדיניות ניסיונות חוזרים וכשלים
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- פסק זמן של 10 שניות לכל ניסיון (`AbortController`).
-- HTTP 2xx נחשב כהצלחה.
-- HTTP 3xx/4xx נחשב כסטטוס סופי שאינו ניתן לניסיון חוזר — שנרשם כפי שנמסר עם `success = res.ok`.
-- HTTP 5xx ושגיאות רשת מנוסים שוב עם השבתה אקספוננציאלית: `2^attempt * 1000 ms` (1s, 2s, 4s).
-- לאחר `maxRetries`, המסירה מתועדת ככשלה.
-- כל משלוח מעדכן `last_triggered_at`, `last_status`, ומאפס או מגדיל `failure_count`.
-- השולח קורא ל- `disableWebhooksWithHighFailures(10)` לאחר כל איוורור, כך שכל חיבור לאינטרנט עם `failure_count >= 10` מושבת באופן אוטומטי.
+- זמן קצוב של 10 שניות לכל ניסיון (`AbortController`).
+- HTTP 2xx נחשב להצלחה.
+- HTTP 3xx/4xx נחשב לסטטוס סופי ללא ניסיון חוזר — נרשם כנמסר
+  עם `success = res.ok`.
+- עבור HTTP 5xx ושגיאות רשת מתבצעים ניסיונות חוזרים עם השהיה מעריכית:
+  `2^attempt * 1000 ms` (שנייה אחת, 2 שניות, 4 שניות).
+- לאחר `maxRetries`, המסירה נרשמת ככישלון.
+- כל מסירה מעדכנת את `last_triggered_at`, את `last_status`, ומאפסת
+  או מגדילה את `failure_count`.
+- לאחר כל הפצה, המפיץ קורא ל-`disableWebhooksWithHighFailures(10)`,
+  כך שכל webhook עם `failure_count >= 10` מושבת אוטומטית.
 
 ## מסד נתונים
 
-טבלה `webhooks` (הגירה `011_webhooks.sql`):
+הטבלה `webhooks` (מיגרציה `011_webhooks.sql`):
 
-| עַמוּדָה            | סוּג    | הערות                                   |
-| ------------------- | ------- | --------------------------------------- |
-| `id`                | TEXT PK | UUID                                    |
-| `url`               | TEXT    | יעד URL                                 |
-| `events`            | TEXT    | מערך JSON ; ברירת מחדל `["*"]`          |
-| `secret`            | TEXT    | סוד HMAC (נוצר אוטומטית אם לא ניתן)     |
-| `enabled`           | INT     | 0/1; ברירת המחדל היא 1                  |
-| `description`       | TEXT    | תווית אנושית אופציונלית                 |
-| `created_at`        | TEXT    | `datetime('now')`                       |
-| `last_triggered_at` | TEXT    | מעודכן בכל ניסיון משלוח                 |
-| `last_status`       | INT     | סטטוס HTTP של הניסיון האחרון (0 רשת = ) |
-| `failure_count`     | INT     | מאפס ל-0 על הצלחה, + 1 על כישלון        |
+| עמודה               | סוג     | הערות                                  |
+| ------------------- | ------- | -------------------------------------- |
+| `id`                | TEXT PK | UUID                                   |
+| `url`               | TEXT    | כתובת URL של היעד                      |
+| `events`            | TEXT    | מערך JSON; ברירת המחדל היא `["*"]`     |
+| `secret`            | TEXT    | סוד HMAC (נוצר אוטומטית אם לא סופק)    |
+| `enabled`           | INT     | 0/1; ברירת המחדל היא 1                 |
+| `description`       | TEXT    | תווית אנושית אופציונלית                |
+| `created_at`        | TEXT    | `datetime('now')`                      |
+| `last_triggered_at` | TEXT    | מתעדכן בכל ניסיון מסירה                |
+| `last_status`       | INT     | סטטוס HTTP של הניסיון האחרון (0 = רשת) |
+| `failure_count`     | INT     | מתאפס ל-0 בהצלחה, גדל ב-1 בכישלון      |
 
-היסטוריית המסירה נמשכת בטבלת ה- `webhook_deliveries` הייעודית (הגירה `069_webhook_deliveries.sql`, נכתבת באמצעות `src/lib/db/webhookDeliveries.ts::insertDelivery` בכל ניסיון), בנוסף למונים המצטברים בשורת `webhooks`. מטא נתונים חביבים (Slack / Discord / Telegram / שנאי עומס מותאמים אישית) נוספו על ידי `070_webhooks_kind_metadata.sql`.
+היסטוריית המסירות נשמרת בטבלה הייעודית `webhook_deliveries`
+(מיגרציה `069_webhook_deliveries.sql`, נכתבת באמצעות
+`src/lib/db/webhookDeliveries.ts::insertDelivery` בכל ניסיון), בנוסף
+למונים המצטברים בשורה של `webhooks`. מטא-נתונים של סוג (Slack / Discord /
+Telegram / ממירי מטען מותאמים אישית) נוספו על ידי `070_webhooks_kind_metadata.sql`.
 
-## REST API
+## API מסוג REST
 
-כל נקודות הקצה דורשות אישור ניהול (`requireManagementAuth`).
+כל נקודות הקצה דורשות אימות ניהולי (`requireManagementAuth`).
 
-| נקודת קצה                       | שִׁיטָה | תֵאוּר                                  |
-| ------------------------------- | ------- | --------------------------------------- |
-| `/api/webhooks`                 | GET     | רשום webhooks (הסודות מוסווים)          |
-| `/api/webhooks`                 | POST    | צור webhook                             |
-| `/api/webhooks/[id]`            | GET     | פירוט Webhook (סוד מלא)                 |
-| `/api/webhooks/[id]`            | PUT     | עדכן שדות                               |
-| `/api/webhooks/[id]`            | DELETE  | לְהַסִיר                                |
-| `/api/webhooks/[id]/test`       | POST    | הפעלת `test.ping` (ללא ניסיונות חוזרים) |
-| `/api/webhooks/[id]/deliveries` | GET     | ניסיונות משלוח אחרונים עבור webhook אחד |
-| `/api/webhooks/validate-url`    | POST    | אימות URL לפני טיסה (שומר SSRF )        |
+| נקודת קצה                       | שיטה   | תיאור                                     |
+| ------------------------------- | ------ | ----------------------------------------- |
+| `/api/webhooks`                 | GET    | הצגת webhooks (הסודות מוסתרים חלקית)      |
+| `/api/webhooks`                 | POST   | יצירת webhook                             |
+| `/api/webhooks/[id]`            | GET    | פרטי webhook (הסוד המלא)                  |
+| `/api/webhooks/[id]`            | PUT    | עדכון שדות                                |
+| `/api/webhooks/[id]`            | DELETE | הסרה                                      |
+| `/api/webhooks/[id]/test`       | POST   | שליחת `test.ping` (ללא ניסיונות חוזרים)   |
+| `/api/webhooks/[id]/deliveries` | GET    | ניסיונות מסירה אחרונים עבור webhook מסוים |
+| `/api/webhooks/validate-url`    | POST   | אימות מקדים של כתובת URL (הגנת SSRF)      |
 
-`GET /api/webhooks` מסווה את הסוד ל- `<first 10 chars>...` כדי למנוע דליפה בדפי רישום. השתמש ב- `[id]` GET כאשר אתה באמת צריך את הסוד.
+`GET /api/webhooks` מסתיר חלק מהסוד בפורמט `<first 10 chars>...` כדי למנוע דליפה
+בדפי רשימות. השתמשו בבקשת GET של `[id]` כאשר אתם באמת זקוקים לסוד.
 
-### צור webhook
+### יצירת webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -140,7 +156,8 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-אם `secret` מושמט, השרת יוצר סוד `whsec_<hex>` ומחזיר אותו בתגובה.
+אם `secret` הושמט, השרת יוצר סוד מסוג `whsec_<hex>` ומחזיר
+אותו בתגובה.
 
 ### בדיקת webhook
 
@@ -149,18 +166,21 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-מחזיר `{ delivered, status, error }`. אין ניסיון חוזר — שימושי לאימות מהיר שהמקלט מקבל את המטען והחתימה.
+מחזיר `{ delivered, status, error }`. לא מתבצעים ניסיונות חוזרים — שימושי
+לאימות מהיר שהצד המקבל מקבל את המטען ואת החתימה.
 
-## לוּחַ מַחווָנִים
+## לוח בקרה
 
-דף לוח המחוונים ב- `/dashboard/webhooks` (ראה `src/app/(dashboard)/dashboard/webhooks/page.tsx`) מספק:
+דף לוח הבקרה ב-`/dashboard/webhooks` (ראו
+`src/app/(dashboard)/dashboard/webhooks/page.tsx`) מספק:
 
-- Create/edit webhooks עם בוחר אירועים
-- מחוון מצב (פעיל / לא פעיל / שגיאה) מבוסס על `enabled`, `failure_count` ו- `last_status`
-- מסירת בדיקה בקליק אחד
-- החלפת enable/disable ידנית
+- יצירה/עריכה של webhooks באמצעות בורר אירועים
+- מחוון מצב (פעיל / לא פעיל / שגיאה) המבוסס על `enabled`,
+  `failure_count` ו-`last_status`
+- שליחת בדיקה בלחיצה אחת
+- מתג ידני להפעלה/השבתה
 
-## דוגמאות למטען
+## דוגמאות למטענים
 
 ### request.completed
 
@@ -194,19 +214,29 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
 }
 ```
 
-צורות שדות עבור אירועים שאינם `test.ping` מוגדרות על ידי אתרי השיחות שפולטים אותם; התייחס לאובייקט `data` כתואם קדימה (הוסף שדות, אל תסתמך על היעדרות).
+מבני השדות עבור אירועים שאינם `test.ping` מוגדרים באתרי הקריאה שפולטים
+אותם; יש להתייחס לאובייקט `data` כתואם לשינויים עתידיים (הוסיפו שדות, אל תסתמכו על
+היעדרם).
 
 ## שיטות עבודה מומלצות
 
-- **אמת את החתימה בכל משלוח** נגד הגוף הגולמי — מונע POSTs מזויף מכל מי שמנחש את ה-webhook שלך URL.
-- **השב 2xx בתוך ~ 5 שניות** — הזמן קצוב של השולח ב-10 שניות. מקלטים איטיים יאכלו ניסיונות חוזרים וינפחו `failure_count`.
-- **הפוך את המטפלים לאימפוטנטיים** ניסיונות חוזרים — וסמנטיקה של מסירה לפחות פעם אחת אומר שכפולים אפשריים.
-- **הירשם מינימלי** — רשום רק אירועים שאתה צורך בפועל; `"*"` יוסיף עלות על מקלטים שאינך שולט בהם.
-- **צפו ב- `failure_count`** נקודות קצה — מושבתות אוטומטית ב-10 כשלים רצופים; לאפס על ידי קריאת `PUT /api/webhooks/[id]` עם `enabled: true` לאחר תיקון המקלט.
-- **סובב סודות מעת לעת** — `PUT` `secret` חדש, פרוס את הערך החדש למקלט ואשר באמצעות נקודת הקצה של הבדיקה.
+- **אמתו את החתימה בכל שליחה** מול גוף הבקשה הגולמי — הדבר מונע
+  בקשות POST מזויפות מכל מי שמנחש את כתובת ה-URL של ה-webhook שלכם.
+- **הגיבו עם 2xx בתוך כ-5 שניות** — הזמן המוקצב למפיץ מסתיים לאחר 10 שניות. מקלטים
+  איטיים יבזבזו ניסיונות חוזרים וינפחו את `failure_count`.
+- **הפכו את המטפלים לאידמפוטנטיים** — ניסיונות חוזרים וסמנטיקת מסירה של פעם אחת לפחות
+  משמעם שכפילויות אפשריות.
+- **הירשמו באופן מינימלי** — ציינו רק אירועים שאתם צורכים בפועל; `"*"` יוסיף
+  עלות למקלטים שאינם בשליטתכם.
+- **עקבו אחר `failure_count`** — נקודות קצה מושבתות אוטומטית לאחר 10
+  כשלים רצופים; אפסו אותו באמצעות קריאה אל `PUT /api/webhooks/[id]` עם `enabled: true`
+  לאחר תיקון המקלט.
+- **החליפו סודות באופן תקופתי** — בצעו `PUT` עם `secret` חדש, פרסו את הערך החדש
+  במקלט ואשרו באמצעות נקודת הקצה לבדיקה.
 
-## ראה גם
+## ראו גם
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — משטח API ניהול מלא
-- סמנטיקה של מפסק / קירור [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — שמאחורי כשלים בספק עלו דרך `request.failed`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — הממשק המלא של API הניהול
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — סמנטיקת מנתק מעגל / זמן צינון
+  שמאחורי כשלי ספקים הנחשפים באמצעות `request.failed`
 - מקור: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

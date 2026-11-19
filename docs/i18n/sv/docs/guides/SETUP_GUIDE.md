@@ -27,9 +27,7 @@ npm install -g omniroute
 omniroute
 ```
 
-Dashboard öppnas vid `http://localhost:20128` och API bas URL är `http://localhost:20128/v1`.
-
-> **npm användare:** Om npm varnar för att installationsskript blockerades (t.ex. `omniroute`, `better-sqlite3`), se [Felsökning av — npm installationsskript blockerade](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+Kontrollpanelen öppnas på `http://localhost:20128` och API:ets bas-URL är `http://localhost:20128/v1`.
 
 ### pnpm
 

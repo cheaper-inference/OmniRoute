@@ -405,25 +405,24 @@ Hierbei wird die Online-Backup-API von SQLite verwendet — die Ausführung ist 
 
 ## Leistungsoptimierung
 
-### WAL -Modus
+### WAL-Modus
 
-WAL ist standardmäßig aktiviert. Berücksichtigen Sie bei Workloads mit hohem Schreibaufwand Folgendes:
+WAL ist standardmäßig aktiviert. Für schreibintensive Workloads sollten Sie Folgendes in Betracht ziehen:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint alle 1000 Seiten
+PRAGMA journal_size_limit = 67108864;  -- WAL-Obergrenze von 64 MB
 ```
-
-OmniRoute setzt `journal_size_limit` nicht. Ein Prüfpunkt verschiebt WAL Frames in die Hauptdatei, aber die WAL Datei behält ihre größte zugewiesene Größe. Der `OMNIROUTE_WAL_GUARD_MAX_MB` Wächter warnt nur und führt `wal_checkpoint(RESTART)` aus; Es handelt sich nicht um eine Begrenzung der Festplattengröße.
 
 ### Indizes
 
-Wichtige Indizes für die Leistung (automatisch erstellt durch Migrationen):
+Wichtige Indizes für die Leistung (werden durch Migrationen automatisch erstellt):
 
-- `idx_models_provider` — -Modellsuche nach Anbieter
-- `idx_combo_targets_combo_id` — Combo-Zielerweiterung
-- `idx_usage_history_api_key_timestamp` — -Nutzungsanalyse
-- `idx_quota_snapshots_api_key_window` — Quotenverfolgung
-- `idx_call_logs_timestamp` — -Anrufprotokollabfragen
+- `idx_models_provider` — Modellsuche nach Anbieter
+- `idx_combo_targets_combo_id` — Erweiterung von Kombinationszielen
+- `idx_usage_history_api_key_timestamp` — Nutzungsanalysen
+- `idx_quota_snapshots_api_key_window` — Kontingentverfolgung
+- `idx_call_logs_timestamp` — Abfragen von Aufrufprotokollen
 
 Um einen neuen Index hinzuzufügen, erstellen Sie eine Migration:
 
@@ -432,24 +431,24 @@ Um einen neuen Index hinzuzufügen, erstellen Sie eine Migration:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Speicherabgebildete I/O
+### Speicherabgebildete E/A
 
-Für sehr große Datenbanken (> 10 GB) kann die Speicherzuordnung über SQLite Pragma angepasst werden:
+Für sehr große Datenbanken (>10 GB) kann die Speicherabbildung über ein SQLite-Pragma angepasst werden:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
-PRAGMA mmap_size = 268435456;  -- 256MB
+-- Über SQLite-Pragma festlegen (in core.ts oder zur Laufzeit anpassen)
+PRAGMA mmap_size = 268435456;  -- 256 MB
 ```
 
-### Verdichtung
+### Komprimierung
 
-Lang laufende OmniRoute Instanzen profitieren von gelegentlichem `VACUUM`:
+Lang laufende OmniRoute-Instanzen profitieren von einem gelegentlichen `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Monatlich in verkehrsarmen Zeitfenstern ausführen. (WAL Modus reduziert den Bedarf, beseitigt ihn jedoch nicht.)
+Führen Sie dies monatlich in Zeitfenstern mit geringem Datenverkehr aus. (Der WAL-Modus reduziert die Notwendigkeit, beseitigt sie jedoch nicht vollständig.)
 
 ---
 

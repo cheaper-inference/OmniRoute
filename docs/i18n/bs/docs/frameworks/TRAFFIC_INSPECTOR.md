@@ -4,6 +4,8 @@
 
 ---
 
+# Traffic Inspector
+
 Traffic Inspector je OmniRoute-ov ugrađeni HTTPS debugger saobraćaja — alat sličan Charles Proxy / mitmweb / HTTP Toolkit koji je **svjestan LLM-a** (LLM-aware) i **svjestan agenata** (agent-aware). Nalazi se na `/dashboard/tools/traffic-inspector` i prima saobraćaj uživo sa do 5 istovremenih izvora snimanja.
 
 **Lokacija kontrolne table:** `/dashboard/tools/traffic-inspector`
@@ -88,17 +90,17 @@ export HTTPS_PROXY=http://127.0.0.1:8080
 **Mehanizam:** Koristi API-je operativnog sistema za preusmjeravanje cjelokupnog HTTP/HTTPS saobraćaja kroz HTTP_PROXY osluškivač:
 
 - **macOS:** `networksetup -setwebproxy / -setsecurewebproxy`
-- **Linux (GNOME):** `gsettings set org.gnome.system.proxy` i postavke HTTP/HTTPS domaćina/porta
+- **Linux:** `gsettings set org.gnome.system.proxy` + `/etc/environment`
 - **Windows:** `netsh winhttp set proxy 127.0.0.1:8080`
   **Domet:** Svaka aplikacija na računaru koja poštuje sistemske postavke proxyja
   **Napomena:** `source` = `"system-proxy"`
 
 **Sigurnosni mehanizmi:**
 
-- Primjena proxyja zakazuje tajmer za povrat bez garancije, lokalno u procesu (zadano 30 min, podesivo putem `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`). Tajmer ne preživljava završetak serverskog procesa.
-- Prethodno stanje proxyja ostaje u memoriji procesa; ovo spremište stanja snimanja ne pohranjuje ga trajno u bazu podataka. Povrat vraća sačuvane macOS/GNOME postavke; na Windowsu resetuje WinHTTP proxy umjesto vraćanja prethodne konfiguracije.
-- Dok se proxy prijavljuje kao primijenjen, napuštanje stranice šalje keepalive zahtjev za povrat bez garancije i traži izvornu potvrdu čiji tekst određuje preglednik. Demontiranje inspektora tokom SPA navigacije također pokušava povrat, bez tog dijaloga preglednika.
-- Traka za snimanje prikazuje lokalizovanu kontrolu `System-wide` s ikonom upozorenja. Klik trenutno mijenja samo lokalno stanje interfejsa; ne prikazuje potvrdni okvir niti primjenjuje ili vraća sistemski proxy.
+- Tajmer za automatsko isključivanje (zadano 30 min, može se konfigurirati putem `INSPECTOR_SYSTEM_PROXY_GUARD_MINUTES`)
+- Prethodno stanje sistemskog proxyja čuva se u bazi podataka i vraća pri poništavanju
+- Kontrolna ploča prikazuje upit „Poništavanje sistemskog proxyja“ ako korisnik napusti stranicu dok je proxy aktivan
+- Korisnički interfejs prikazuje oznaku `⚠ Napredno` + kontrolno polje za izričitu potvrdu
 
 ### Način 5 — TPROXY transparentno dešifriranje (Linux, root, uz izričito uključivanje)
 
@@ -113,13 +115,13 @@ Ovo je značajan podsistem s vlastitim namjenskim vodičem za operatere — pogl
 
 ### Poređenje načina snimanja
 
-| Način rada        | Postavljanje                                                   |                 Sudo?                  | Doseg                                       | Napomene                                                                                                                                     |
-| ----------------- | -------------------------------------------------------------- | :------------------------------------: | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
-| 1. AgentBridge    | Automatsko                                                     |       Jednom (certifikat+hosts)        | 9 IDE agenata                               | Podrazumijevano uključeno                                                                                                                    |
-| 2. Custom Hosts   | Unos za svaki host                                             |          Da (hosts datoteka)           | Svaka aplikacija koja koristi taj host      | Sačuvano u bazi podataka                                                                                                                     |
-| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`                                       |                   Ne                   | Aplikacije koje poštuju varijable okruženja | Port 8080; HTTPS se tunelira putem CONNECT-a (samo metapodaci, nikada se ne dešifruje)                                                       |
-| 4. System-wide    | `POST /api/tools/traffic-inspector/capture-modes/system-proxy` |                   Da                   | Sve aplikacije na računaru                  | Tajmer za povrat bez garancije (zadano 30 min)                                                                                               |
-| 5. TPROXY decrypt | Prekidač (Linux + izvorni dodatak)                             | Da (root + instalacija CA certifikata) | Svaki host na ciljnom portu                 | Dešifruje proizvoljne hostove; podrazumijevano isključeno — pogledajte `docs/security/MITM-TPROXY-DECRYPT.md` (git; nije ugrađeno u `/docs`) |
+| Način rada        | Postavljanje                       |                 Sudo?                  | Doseg                                       | Napomene                                                                                                                                     |
+| ----------------- | ---------------------------------- | :------------------------------------: | ------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1. AgentBridge    | Automatsko                         |       Jednom (certifikat+hosts)        | 9 IDE agenata                               | Podrazumijevano uključeno                                                                                                                    |
+| 2. Custom Hosts   | Unos za svaki host                 |          Da (hosts datoteka)           | Svaka aplikacija koja koristi taj host      | Sačuvano u bazi podataka                                                                                                                     |
+| 3. HTTP_PROXY     | `export HTTPS_PROXY=...`           |                   Ne                   | Aplikacije koje poštuju varijable okruženja | Port 8080; HTTPS se tunelira putem CONNECT-a (samo metapodaci, nikada se ne dešifruje)                                                       |
+| 4. System-wide    | Prekidač + potvrda                 |                   Da                   | Sve aplikacije na računaru                  | Automatski se onemogućava nakon 30 min                                                                                                       |
+| 5. TPROXY decrypt | Prekidač (Linux + izvorni dodatak) | Da (root + instalacija CA certifikata) | Svaki host na ciljnom portu                 | Dešifruje proizvoljne hostove; podrazumijevano isključeno — pogledajte `docs/security/MITM-TPROXY-DECRYPT.md` (git; nije ugrađeno u `/docs`) |
 
 ---
 
@@ -312,7 +314,7 @@ TTL keš od 1 sekunde ograničava trošak procfs skeniranja pod opterećenjem. A
 ### 5.1 Snimanje sesije
 
 1. Kliknite na **"● Record session"** na traci sa alatkama → unesite naziv (opciono)
-2. Praćenje uživo nastavlja se normalno; traka za snimanje prikazuje pulsirajuću crvenu tačku, proteklo vrijeme, naziv sesije kada je dostupan i lokalizovanu kontrolu za zaustavljanje.
+2. Praćenje uživo (Live tail) se nastavlja normalno; crveni pulsirajući indikator prikazuje `◉ REC · <name> · 00:42 · 23 reqs`
 3. Kliknite na **"⏹ Stop"** → snimak sesije se čuva u `inspector_sessions` + `inspector_session_requests`
 
 ### 5.2 Pregled snimljene sesije
@@ -320,7 +322,7 @@ TTL keš od 1 sekunde ograničava trošak procfs skeniranja pod opterećenjem. A
 Padajući meni **Sessions** na traci sa alatkama prikazuje sačuvane sesije. Odabirom jedne:
 
 - Učitava se snimak sesije (zamrznuto stanje)
-- Banner prikazuje lokalizovanu oznaku snimljene sesije i naziv sesije (ili lokalizovani zamjenski tekst za sesiju bez naslova), uz lokalizovano dugme za povratak na prikaz uživo.
+- Prikazuje se baner: `Viewing recorded session "<name>" — [Back to live]`
 - Kartica Stats postaje dostupna sa Recharts agregatima
 
 ### 5.3 Formati za izvoz
@@ -344,7 +346,7 @@ Traffic Inspector prikazuje **sav presretnuti HTTPS saobraćaj**, uključujući 
 | ----------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **LOCAL_ONLY**                                  | Sve rute i WebSocket krajnja tačka dostupne su samo putem povratne petlje (provodi se u `routeGuard.ts` prije autentifikacije)                                                                                   |
 | **Maskiranje tajni**                            | Linearni skener `maskSecret()` rediguje RFC 6750 Bearer vjerodajnice, ključeve s prefiksom pružaoca i duge neprozirne tokene prije `TrafficBuffer.push()`                                                        |
-| **Ograničenje veličine tijela**                 | Tijela > `INSPECTOR_MAX_BODY_KB` (zadano 1024 KB) skraćuju se uz obavijest `"(truncated for performance)"`                                                                                                       |
+| **Ograničenje veličine tijela**                 | Tijela > `INSPECTOR_MAX_BODY_KB` (zadano 1024 KB) skraćuju se uz obavijest `"(skraćeno radi performansi)"`                                                                                                       |
 | **Sanitizacija zaglavlja**                      | Nazivi se pretvaraju u mala slova; zaglavlja za uokvirivanje/pojedinačni skok i proxy autentifikaciju se odbacuju; kolačići se potpuno rediguju; vrijednosti vjerodajnica prosljeđuju se funkciji `maskSecret()` |
 | **CSP**                                         | Stroga politika sigurnosti sadržaja na stranicama Traffic Inspectora radi sprečavanja XSS-a putem umetnutih tijela odgovora                                                                                      |
 | **Bez trajne pohrane prema zadanim postavkama** | `TrafficBuffer` se nalazi u memoriji i gubi se pri ponovnom pokretanju servera. Sesije se trajno pohranjuju samo kada se izričito snimaju                                                                        |
@@ -412,7 +414,7 @@ gsettings set org.gnome.system.proxy mode 'none'
 netsh winhttp reset proxy
 ```
 
-Sačuvano stanje proxyja postoji samo u serverskom procesu. Nakon pada ili ponovnog pokretanja, trenutno spremište stanja snimanja ne može vratiti tu snimku iz baze podataka; koristite gornje naredbe za oporavak platforme kada je potreban ručni oporavak.
+Kontrolna tabla će također ponuditi "Revert system proxy" pri sljedećem učitavanju ako detektuje da stanje baze podataka ukazuje na to da je proxy bio aktivan.
 
 ### Bafer pun
 

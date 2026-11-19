@@ -20,16 +20,14 @@
 
 ## Àwọn Ọ̀nà Ìfi Sórí Ẹ̀rọ
 
-### npm (a ṣe iṣeduro)
+### npm (a ṣe ìṣeduro rẹ̀)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dasibodu ṣii ni `http://localhost:20128` ati API ipilẹ URL jẹ `http://localhost:20128/v1`.
-
-> **npm:** Ti npm ba kilọ pe a ti dinamọ awọn iwe afọwọkọ sori ẹrọ (fun apẹẹrẹ, `omniroute`, `better-sqlite3`), wo [Laasigbotitusita — npm awọn iwe afọwọkọ fifi sori ẹrọ dina](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+Dashboard yóò ṣí ní `http://localhost:20128`, URL ìpìlẹ̀ API sì jẹ́ `http://localhost:20128/v1`.
 
 ### pnpm
 

@@ -16,7 +16,7 @@ määratletud reeglite praktilised täpsustused.
 
 Täielik kohustuslik worktree'i protokoll (baasharu kinnitamine, `.claude/worktrees/` kui
 kanooniline tee, `cp -al` node_modules'i jaoks, eemaldamisreeglid) on failis
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (kokkuvõtlikult `AGENTS.md`-is →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (kokkuvõtlikult `AGENTS.md`-is →
 Git'i töövoog → "Worktree'i isoleerimine"). Claude Code'i-spetsiifilised punktid:
 
 - Kinnita baasharu operaatoriga tööriista `AskUserQuestion` kaudu (Range reegel #19), kui ta

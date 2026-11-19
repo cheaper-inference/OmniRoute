@@ -407,49 +407,48 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ### WAL ሁነታ
 
-WAL በነባሪነት ነቅቷል። ለከፍተኛ-ጽሑፍ የሥራ ጫናዎች፣ አስቡበት፡-
+WAL በነባሪነት ነቅቷል። ብዙ የጽሑፍ ሥራዎች ላሏቸው ጭነቶች፣ የሚከተለውን ያስቡበት፦
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- በየ1000 ገጾች Checkpoint ያድርጉ
+PRAGMA journal_size_limit = 67108864;  -- 64MB የWAL ገደብ
 ```
 
-OmniRoute `journal_size_limit` አያቀናብርም። የፍተሻ ነጥብ WAL ፍሬሞችን ወደ ዋናው ፋይል ያንቀሳቅሳል፣ ነገር ግን የ WAL ፋይል የተመደበውን ትልቅ መጠን ይይዛል። የ `OMNIROUTE_WAL_GUARD_MAX_MB` ጠባቂ `wal_checkpoint(RESTART)` ብቻ ያስጠነቅቃል እና ያስኬዳል; የዲስክ መጠን ካፕ አይደለም።
+### ማውጫዎች
 
-### ኢንዴክሶች
+ለአፈጻጸም ቁልፍ የሆኑ ማውጫዎች (በማይግሬሽኖች በራስ-ሰር የሚፈጠሩ)፦
 
-የአፈጻጸም ቁልፍ ኢንዴክሶች (በስደት በራስ-የተፈጠረ)
+- `idx_models_provider` — በአቅራቢ የሞዴል ፍለጋዎች
+- `idx_combo_targets_combo_id` — የኮምቦ ዒላማ ማስፋፊያ
+- `idx_usage_history_api_key_timestamp` — የአጠቃቀም ትንታኔ
+- `idx_quota_snapshots_api_key_window` — የኮታ ክትትል
+- `idx_call_logs_timestamp` — የጥሪ ምዝግብ መጠይቆች
 
-- `idx_models_provider` — ሞዴል ፍለጋዎች በአቅራቢ
-- `idx_combo_targets_combo_id` — ጥምር ዒላማ ማስፋፊያ
-- `idx_usage_history_api_key_timestamp` — አጠቃቀም ትንታኔ
-- `idx_quota_snapshots_api_key_window` — ኮታ መከታተል
-- `idx_call_logs_timestamp` — የጥሪ ምዝግብ ማስታወሻ መጠይቆች
-
-አዲስ መረጃ ጠቋሚ ለመጨመር ፍልሰት ይፍጠሩ፡
+አዲስ ማውጫ ለመጨመር፣ ማይግሬሽን ይፍጠሩ፦
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### የማህደረ ትውስታ-ካርታ I/O
+### በማህደረ ትውስታ የተሰናሰለ I/O
 
-በጣም ትልቅ ለሆኑ የውሂብ ጎታዎች (> 10GB) የማህደረ ትውስታ ካርታ በ SQLite pragma በኩል ማስተካከል ይቻላል
+በጣም ትልቅ ለሆኑ የውሂብ ጎታዎች (>10GB)፣ የማህደረ ትውስታ ስነዳውን በSQLite pragma በኩል ማስተካከል ይቻላል፦
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- በSQLite pragma በኩል ያዘጋጁ (በcore.ts ወይም በruntime ውስጥ ያስተካክሉ)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### መጨናነቅ
+### ማጠቃለያ
 
-የረጅም ጊዜ OmniRoute አጋጣሚዎች ከ `VACUUM` ጥቅም ያገኛሉ
+ለረጅም ጊዜ የሚሰሩ የOmniRoute ኢንስታንሶች አልፎ አልፎ `VACUUM` በማድረግ ይጠቀማሉ፦
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-በዝቅተኛ ትራፊክ መስኮቶች ውስጥ በየወሩ ያሂዱ። (WAL ሁነታ ፍላጎቱን ይቀንሳል, ግን አያስወግደውም.)
+ትራፊክ ዝቅተኛ በሆነባቸው ጊዜያት በየወሩ ያስኪዱት። (WAL ሁነታ ፍላጎቱን ይቀንሳል፣ ነገር ግን ሙሉ በሙሉ አያስወግደውም።)
 
 ---
 

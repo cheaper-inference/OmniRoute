@@ -407,49 +407,48 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ### โหมด WAL
 
-WAL ถูกเปิดใช้งานตามค่าเริ่มต้น สำหรับเวิร์กโหลดที่มีการเขียนสูง ให้พิจารณา:
+WAL เปิดใช้งานโดยค่าเริ่มต้น สำหรับเวิร์กโหลดที่มีการเขียนข้อมูลปริมาณมาก ให้พิจารณาการตั้งค่าต่อไปนี้:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- ทำ checkpoint ทุก 1000 หน้า
+PRAGMA journal_size_limit = 67108864;  -- จำกัดขนาด WAL ที่ 64MB
 ```
-
-OmniRoute ไม่ได้ตั้งค่า `journal_size_limit` จุดตรวจสอบจะย้ายเฟรม WAL ไปยังไฟล์หลัก แต่ไฟล์ WAL จะคงขนาดที่จัดสรรไว้ที่ใหญ่ที่สุดไว้ การ์ด `OMNIROUTE_WAL_GUARD_MAX_MB` จะเตือนและเรียกใช้ `wal_checkpoint(RESTART)` เท่านั้น ไม่ใช่ขนาดสูงสุดของดิสก์
 
 ### ดัชนี
 
-ดัชนีหลักสำหรับประสิทธิภาพ (สร้างอัตโนมัติโดยการย้ายข้อมูล):
+ดัชนีสำคัญสำหรับประสิทธิภาพ (สร้างโดยอัตโนมัติผ่าน migration):
 
-- การค้นหาโมเดล `idx_models_provider` — ตามผู้ให้บริการ
-- `idx_combo_targets_combo_id` — การขยายเป้าหมายคอมโบ
-- การวิเคราะห์การใช้งาน `idx_usage_history_api_key_timestamp` —
-- การติดตามโควต้า `idx_quota_snapshots_api_key_window` —
-- `idx_call_logs_timestamp` — แบบสอบถามบันทึกการโทร
+- `idx_models_provider` — ค้นหาโมเดลตามผู้ให้บริการ
+- `idx_combo_targets_combo_id` — ขยายเป้าหมายของ combo
+- `idx_usage_history_api_key_timestamp` — วิเคราะห์การใช้งาน
+- `idx_quota_snapshots_api_key_window` — ติดตามโควตา
+- `idx_call_logs_timestamp` — คิวรีบันทึกการเรียกใช้
 
-หากต้องการเพิ่มดัชนีใหม่ ให้สร้างการย้าย:
+หากต้องการเพิ่มดัชนีใหม่ ให้สร้าง migration:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O ที่แมปหน่วยความจำ
+### I/O แบบแมปหน่วยความจำ
 
-สำหรับฐานข้อมูลขนาดใหญ่มาก (> 10GB) การแมปหน่วยความจำสามารถปรับได้ผ่าน SQLite pragma:
+สำหรับฐานข้อมูลขนาดใหญ่มาก (>10GB) สามารถปรับการแมปหน่วยความจำผ่าน pragma ของ SQLite ได้:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- ตั้งค่าผ่าน pragma ของ SQLite (ปรับใน core.ts หรือขณะรันไทม์)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### การบดอัด
+### การกระชับฐานข้อมูล
 
-อินสแตนซ์ OmniRoute ที่รันระยะยาวจะได้รับประโยชน์จาก `VACUUM` เป็นครั้งคราว :
+อินสแตนซ์ OmniRoute ที่ทำงานเป็นเวลานานจะได้รับประโยชน์จากการเรียกใช้ `VACUUM` เป็นครั้งคราว:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-เรียกใช้ทุกเดือนในช่วงกรอบเวลาที่มีการเข้าชมน้อย (โหมด WAL ช่วยลดความต้องการ แต่ไม่ได้กำจัดความต้องการดังกล่าว)
+เรียกใช้ทุกเดือนในช่วงที่มีทราฟฟิกต่ำ (โหมด WAL ช่วยลดความจำเป็น แต่ไม่ได้ขจัดความจำเป็นทั้งหมด)
 
 ---
 

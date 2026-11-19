@@ -10,20 +10,20 @@ O OmniRoute inclui um sistema completo de gerenciamento de proxies que permite r
 
 ---
 
-## Índice
+## Sumário
 
-- [Por que usar proxies?](#why-use-proxies)
-- [Visão geral da arquitetura](#architecture-overview)
-- [Sistema proxy de 4 níveis](#4-level-proxy-system)
-- [Registro de proxy (CRUD)](#proxy-registry-crud)
-- [1proxy Mercado Gratuito](#1proxy-free-proxy-marketplace)
-- [Rotação de proxy](#proxy-rotation)
-- [Antidetecção e furtividade](#anti-detection--stealth)
-- [Modos de proxy upstream](#upstream-proxy-modes)
-- [UI do painel](#dashboard-ui)
-- [Referência API](#api-reference)
-- [Variáveis de ambiente](#environment-variables)
-- [Solução de problemas](#troubleshooting)
+- [Por que usar proxies?](#por-que-usar-proxies)
+- [Visão geral da arquitetura](#visão-geral-da-arquitetura)
+- [Sistema de proxies em 4 níveis](#sistema-de-proxies-em-4-níveis)
+- [Registro de proxies (CRUD)](#registro-de-proxies-crud)
+- [Marketplace gratuito 1proxy](#marketplace-gratuito-1proxy)
+- [Rotação de proxies](#rotação-de-proxies)
+- [Antidetecção e modo furtivo](#antidetecção-e-modo-furtivo)
+- [Modos de proxy upstream](#modos-de-proxy-upstream)
+- [Interface do painel](#interface-do-painel)
+- [Referência da API](#referência-da-api)
+- [Variáveis de ambiente](#variáveis-de-ambiente)
+- [Solução de problemas](#solução-de-problemas)
 
 ---
 
@@ -391,17 +391,17 @@ O OmniRoute não apenas direciona o tráfego por meio de um proxy — ele faz co
 
 Usa `wreq-js` para gerar impressões digitais TLS semelhantes às de navegadores, contornando sistemas de detecção de bots que sinalizam handshakes TLS não provenientes de navegadores.
 
-### Correspondência de impressão digital CLI
+### Correspondência de Impressão Digital da CLI
 
-O **Alternar impressão digital CLI** (`Settings → Security`) reordena cabeçalhos HTTP e campos de corpo JSON para corresponder à assinatura exata dos binários CLI nativos ( Código Claude, Codex, etc.). Isso funciona **em cima de** o procurador:
+O **Seletor de Impressão Digital da CLI** (`Configurações → Segurança`) reordena os cabeçalhos HTTP e os campos do corpo JSON para corresponder à assinatura exata dos binários nativos de CLI (Claude Code, Codex etc.). Isso funciona **em conjunto com** o proxy:
 
 ```
-Your IP (blocked) → Proxy IP (US) → Provider API
-                    + TLS spoof
-                    + CLI fingerprint
+Seu IP (bloqueado) → IP do proxy (EUA) → API do provedor
+                     + falsificação de TLS
+                     + impressão digital da CLI
 ```
 
-Você consegue os dois **Mascaramento IP** e **solicitar autenticidade** simultaneamente.
+Você obtém simultaneamente **mascaramento de IP** e **autenticidade das requisições**.
 
 ### Preservação do IP do Proxy
 

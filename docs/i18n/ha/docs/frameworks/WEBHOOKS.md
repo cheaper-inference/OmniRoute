@@ -4,52 +4,57 @@
 
 ---
 
-> **Tushen gaskiya:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**An sabunta ta ƙarshe:** 2026-06-28 — v3.8.40
+> **Tushen gaskiya:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
+> **Sabuntawa ta ƙarshe:** 2026-06-28 — v3.8.40
 
-OmniRoute na iya korar ƙugiya na HTTP akan abubuwan dandali. Yi amfani da su don haɗawa tare da Slack, PagerDuty, Datadog, sabis na faɗakarwa na ciki, ko kowane mai karɓar HTTP.
+OmniRoute na iya aika HTTP webhooks lokacin da abubuwan da suka faru a dandali suka auku. Yi amfani da su don haɗawa da
+Slack, PagerDuty, Datadog, sabis na faɗakarwa na cikin gida, ko duk wani mai karɓar HTTP.
 
-Mai aikawa yana sanya alamar kowane bayarwa tare da HMAC-SHA256, yana sake gwadawa akan gazawar wucin gadi, yana kula da lafiyar isar da saƙon kowane gidan yanar gizo, kuma yana kashe ƙarshen ƙarshen da ke ci gaba da kasawa.
+Mai rarrabawa yana sanya wa kowace isarwa sa hannun HMAC-SHA256, yana sake gwadawa idan an sami
+gazawa ta wucin gadi, yana bibiyar lafiyar isarwa ga kowane webhook, sannan yana kashe endpoints da
+suka ci gaba da gazawa ta atomatik.
 
-## Abubuwan Taimako
+## Abubuwan da Ake Tallafawa
 
-Nau'in `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, wanda `src/lib/webhookDispatcher.ts` ke cinyewa) a halin yanzu yana ƙira abubuwa bakwai:
+Nau'in `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, wanda `src/lib/webhookDispatcher.ts` ke amfani da shi) a halin yanzu yana wakiltar abubuwa huɗu kacal:
 
-| Lamarin                   | Wuta lokacin                                                                                                           |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `request.completed`       | An kammala buƙatun wakili cikin nasara                                                                                 |
-| `request.failed`          | Buƙatun wakili ya gaza bayan duk retries/fallback                                                                      |
-| `quota.exceeded`          | Maɓallin API ya ketare iyakar budget/quota                                                                             |
-| `proxy.set_aside`         | An keɓe memba na tafkin wakili bayan an ƙi maimaitawa (canji kawai)                                                    |
-| `proxy.pool.exhausted`    | An keɓe kowane memba na keɓan wurin wurin wakilta                                                                      |
-| `provider.reset_redeemed` | Sake saitin banki da aka yi amfani da kai ta atomatik ya fanshi ƙimar sake saiti ko sake saitin zaman mako-mako Claude |
-| `test.ping`               | Lamarin da aka yi amfani da shi ta hanyar ƙarshen gwajin                                                               |
+| Abu                 | Lokacin da yake faruwa                                               |
+| ------------------- | -------------------------------------------------------------------- |
+| `request.completed` | Buƙatar da aka tura ta wakili ta kammala cikin nasara                |
+| `request.failed`    | Buƙatar da aka tura ta wakili ta gaza bayan duk sake-gwadawa/madadin |
+| `quota.exceeded`    | Maɓallin API ya ƙetare iyakar kasafi/quota                           |
+| `test.ping`         | Abu na kwaikwayo da endpoint na gwaji ke amfani da shi               |
 
-Biyan kuɗi suna karɓar ainihin `"*"` don karɓar kowane taron. Sunayen taron da ba a san su ba a cikin `events` ana watsi da su a lokacin aikawa.
+Rajista suna karɓar ainihin `"*"` don karɓar kowane abu. Ana watsi da sunayen abubuwan da ba a sani ba
+a cikin `events` a lokacin rarrabawa.
 
-> Lura: API mai aikawa yana da waya, amma wuraren samarwa don wasu abubuwan da ba na `test.ping` ba har yanzu suna sauka. Bincika `grep dispatchEvent` don ganin waɗanne hanyoyi a halin yanzu ke kiran mai aikawa a cikin sakin ku.
+> Lura: an haɗa API na mai rarrabawa, amma wuraren kiran production na wasu daga cikin
+> abubuwan da ba `test.ping` ba har yanzu suna kan shigowa. Duba `grep dispatchEvent` don ganin
+> waɗanne hanyoyi ne suke kiran mai rarrabawa a halin yanzu a cikin fitowarku.
 
-## Gine-gine
+## Tsarin Gine-gine
 
 ```
-Caller (handler, service, monitor)
+Mai kira (handler, service, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filter by webhook.events
-    -> for each match (in parallel):
+    -> tace bisa webhook.events
+    -> ga kowane wanda ya dace (a layi ɗaya):
        deliverWebhook(url, payload, secret)
-         build payload { event, timestamp, data }
-         sign body with HMAC-SHA256 (if secret present)
-         POST with 10s timeout
-         retry up to 3 times on 5xx / network error
+         gina payload { event, timestamp, data }
+         sanya wa body hannu da HMAC-SHA256 (idan secret yana nan)
+         POST tare da iyakar lokaci na 10s
+         sake gwadawa har sau 3 kan 5xx / kuskuren network
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Aika wuta-da-manta ga mai kira: `Promise.allSettled` yana haɗiye kurakuran yanar gizo don haka mummunan mai karɓa ba zai iya toshe sauran ba.
+Rarrabawa na tafiya ne ba tare da mai kira ya jira ba: `Promise.allSettled` yana danne
+kurakuran kowane webhook domin kada mai karɓa mara kyau guda ɗaya ya toshe sauran.
 
-## Shiga HMAC
+## Sa Hannun HMAC
 
-Lokacin da ƙugiya ta yanar gizo tana da `secret`, OmniRoute yana sanya hannu kan jikin JSON kuma ya aika:
+Lokacin da webhook yake da `secret`, OmniRoute yana sanya wa JSON body hannu sannan ya aika:
 
 ```
 Content-Type: application/json
@@ -59,11 +64,13 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Sunayen rubutun suna amfani da prefix `X-Webhook-*` (ba `X-OmniRoute-*` ba). Ƙimar sa hannun `sha256=<hex>` — ta tabbatar da cikakken prefix.
+> Sunayen headers suna amfani da prefix na `X-Webhook-*` (ba `X-OmniRoute-*` ba). Ƙimar sa hannun
+> ita ce `sha256=<hex>` — tabbatar da cikakken prefix.
 
-Idan ana kiran `createWebhook` ba tare da ɓoye ba, tsarin DB yana haifar da ɗaya (`whsec_<48 hex>`) don haka duk ƙugiya na yanar gizo suna sanya hannu ta tsohuwa.
+Idan an kira `createWebhook` ba tare da secret ba, module na DB yana ƙirƙirar ɗaya
+(`whsec_<48 hex>`) domin haka duk webhooks suna da sa hannu ta tsohuwa.
 
-### Tabbatarwa akan mai karɓa
+### Tabbatarwa a kan mai karɓa
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -76,57 +83,66 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Koyaushe tabbatarwa akan **danye** buqatar jiki, kafin duk wani bincike na JSON.
+Koyaushe tabbatar ta amfani da **raw** request body, kafin duk wani JSON parsing.
 
-## Sake gwadawa & Manufar gazawa
+## Manufofin Sake Gwaji & Gazawa
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- 10 na biyu lokacin ƙare kowane ƙoƙari (`AbortController`).
-- HTTP 2xx yana ƙidaya azaman nasara.
-- HTTP 3xx/4xx yana ƙidaya azaman matsayin ƙarshe wanda ba za'a iya sake gwadawa ba — da aka rubuta kamar yadda aka kawo tare da `success = res.ok`.
-- HTTP 5xx da kurakurai na cibiyar sadarwa ana sake gwada su tare da bayanan baya: `2^attempt * 1000 ms` (1s, 2s, 4s).
-- Bayan `maxRetries`, ana yin rikodin isarwa kamar yadda ya kasa.
-- Kowane bayarwa yana ɗaukaka `last_triggered_at`, `last_status`, kuma ko dai ya sake saiti ko ƙara `failure_count`.
-- Mai aikawa yana kiran `disableWebhooksWithHighFailures(10)` bayan kowane fan-out, don haka duk wani ƙugiya tare da `failure_count >= 10` ana kashe shi ta atomatik.
+- Lokacin jira na daƙiƙa 10 ga kowane yunƙuri (`AbortController`).
+- HTTP 2xx ana ɗaukarsa a matsayin nasara.
+- HTTP 3xx/4xx ana ɗaukarsa a matsayin matsayi na ƙarshe wanda ba za a sake gwadawa ba — ana rubuta shi a matsayin an isar
+  tare da `success = res.ok`.
+- HTTP 5xx da kurakuran hanyar sadarwa ana sake gwada su tare da ƙarin jinkiri mai ninkuwa:
+  `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Bayan `maxRetries`, ana rubuta isarwar a matsayin ta gaza.
+- Kowace isarwa tana sabunta `last_triggered_at`, `last_status`, sannan ko dai ta sake saita
+  ko ta ƙara `failure_count`.
+- Mai rarrabawa yana kiran `disableWebhooksWithHighFailures(10)` bayan kowace rarrabawa,
+  don haka duk wani webhook mai `failure_count >= 10` za a kashe shi ta atomatik.
 
-## Database
+## Ma'ajiyar Bayanai
 
-Tebur `webhooks` (Hijira `011_webhooks.sql`):
+Teburin `webhooks` (ƙaura `011_webhooks.sql`):
 
-| Rukunin             | Nau'in  | Bayanan kula                                                    |
-| ------------------- | ------- | --------------------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                                            |
-| `url`               | TEXT    | Hanyar URL                                                      |
-| `events`            | TEXT    | tsararrun JSON ; tsoho `["*"]`                                  |
-| `secret`            | TEXT    | Sirrin HMAC (wanda aka ƙirƙira ta atomatik idan ba a ba shi ba) |
-| `enabled`           | INT     | 0/1; gazawar zuwa 1                                             |
-| `description`       | TEXT    | Tambarin ɗan adam na zaɓi                                       |
-| `created_at`        | TEXT    | `datetime('now')`                                               |
-| `last_triggered_at` | TEXT    | An sabunta akan kowane ƙoƙarin bayarwa                          |
-| `last_status`       | INT     | Matsayin HTTP na ƙoƙari na ƙarshe (0 = cibiyar sadarwa)         |
-| `failure_count`     | INT     | Yana sake saitawa zuwa 0 akan nasara, + 1 akan gazawa           |
+| Ginshiƙi            | Nau'i   | Bayanan kula                                             |
+| ------------------- | ------- | -------------------------------------------------------- |
+| `id`                | TEXT PK | UUID                                                     |
+| `url`               | TEXT    | URL na inda za a aika                                    |
+| `events`            | TEXT    | Jerin JSON; tsoho `["*"]`                                |
+| `secret`            | TEXT    | Sirrin HMAC (ana ƙirƙira ta atomatik idan ba a bayar ba) |
+| `enabled`           | INT     | 0/1; tsohonsa 1                                          |
+| `description`       | TEXT    | Alamar bayanin ɗan adam ta zaɓi                          |
+| `created_at`        | TEXT    | `datetime('now')`                                        |
+| `last_triggered_at` | TEXT    | Ana sabunta shi a kowane yunƙurin isarwa                 |
+| `last_status`       | INT     | Matsayin HTTP na yunƙuri na ƙarshe (0 = hanyar sadarwa)  |
+| `failure_count`     | INT     | Yana komawa 0 idan an yi nasara, +1 idan an gaza         |
 
-Tarihin bayarwa yana dawwama a cikin keɓaɓɓen tebur `webhook_deliveries` (hijira `069_webhook_deliveries.sql`, an rubuta ta hanyar `src/lib/db/webhookDeliveries.ts::insertDelivery` akan kowane ƙoƙari), baya ga jimlar ƙididdiga akan layin `webhooks`. Metadata mai kirki (Slack / Discord / Telegram / masu canji na biyan kuɗi na al'ada) `070_webhooks_kind_metadata.sql` ya ƙara.
+Ana adana tarihin isarwa a cikin keɓantaccen teburin `webhook_deliveries`
+(ƙaura `069_webhook_deliveries.sql`, ana rubuta shi ta hanyar
+`src/lib/db/webhookDeliveries.ts::insertDelivery` a kowane yunƙuri), ban da
+jimillar ƙididdiga a layin `webhooks`. An ƙara metadata na nau'i (Slack / Discord /
+Telegram / masu sauya payload na musamman) ta hanyar `070_webhooks_kind_metadata.sql`.
 
 ## REST API
 
-Duk wuraren ƙarewa suna buƙatar auth gudanarwa (`requireManagementAuth`).
+Duk endpoints suna buƙatar tabbatarwar gudanarwa (`requireManagementAuth`).
 
-| Ƙarshen Ƙarshe                  | Hanya  | Bayani                                                |
-| ------------------------------- | ------ | ----------------------------------------------------- |
-| `/api/webhooks`                 | GET    | Jerin ƙugiya na gidan yanar gizo (asirin da aka rufe) |
-| `/api/webhooks`                 | POST   | Ƙirƙiri ƙugiya ta yanar gizo                          |
-| `/api/webhooks/[id]`            | GET    | Bayanin Webhook (cikakken sirri)                      |
-| `/api/webhooks/[id]`            | PUT    | Sabunta filayen                                       |
-| `/api/webhooks/[id]`            | DELETE | Cire                                                  |
-| `/api/webhooks/[id]/test`       | POST   | Wuta a `test.ping` (babu sakewa)                      |
-| `/api/webhooks/[id]/deliveries` | GET    | Ƙoƙarin isarwa na baya-bayan nan don ƙugiya guda ɗaya |
-| `/api/webhooks/validate-url`    | POST   | Ingancin URL kafin tashi jirgin (Magadin SSRF )       |
+| Endpoint                        | Hanya  | Bayani                                            |
+| ------------------------------- | ------ | ------------------------------------------------- |
+| `/api/webhooks`                 | GET    | Jera webhooks (an ɓoye sirrika)                   |
+| `/api/webhooks`                 | POST   | Ƙirƙiri webhook                                   |
+| `/api/webhooks/[id]`            | GET    | Cikakken bayani na webhook (cikakken sirri)       |
+| `/api/webhooks/[id]`            | PUT    | Sabunta filaye                                    |
+| `/api/webhooks/[id]`            | DELETE | Cire                                              |
+| `/api/webhooks/[id]/test`       | POST   | Aika `test.ping` (ba tare da sake gwadawa ba)     |
+| `/api/webhooks/[id]/deliveries` | GET    | Yunƙuran isarwa na baya-bayan nan na webhook ɗaya |
+| `/api/webhooks/validate-url`    | POST   | Tabbatar da URL kafin aikawa (kariyar SSRF)       |
 
-`GET /api/webhooks` yana rufe sirrin `<first 10 chars>...` don gujewa yaɗuwa akan shafukan jeri. Yi amfani da `[id]` GET lokacin da gaske kuna buƙatar sirrin.
+`GET /api/webhooks` yana ɓoye sirrin zuwa `<first 10 chars>...` domin hana fallasa shi
+a shafukan jeri. Yi amfani da GET na `[id]` lokacin da kake buƙatar sirrin a zahiri.
 
-### Ƙirƙiri ƙugiya ta yanar gizo
+### Ƙirƙiri webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -140,29 +156,33 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Idan an cire `secret`, uwar garken yana haifar da sirrin `whsec_<hex>` kuma ya mayar da shi a cikin martani.
+Idan ba a saka `secret` ba, sabar tana ƙirƙirar sirrin `whsec_<hex>` sannan ta mayar
+da shi a cikin amsar.
 
-### Gwada ƙugiya
+### Gwada webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Yana dawo da `{ delivered, status, error }`. Ba a yi ƙoƙarin sake gwadawa — mai amfani don tabbatarwa da sauri cewa mai karɓa ya karɓi kaya da sa hannu.
+Yana mayar da `{ delivered, status, error }`. Ba a yin sake gwadawa — wannan yana da amfani wajen
+tabbatarwa cikin sauri cewa mai karɓa yana amincewa da payload da sa hannun.
 
 ## Dashboard
 
-Shafin dashboard a `/dashboard/webhooks` (duba `src/app/(dashboard)/dashboard/webhooks/page.tsx`) yana ba da:
+Shafin dashboard da ke `/dashboard/webhooks` (duba
+`src/app/(dashboard)/dashboard/webhooks/page.tsx`) yana samar da:
 
-- Create/edit gidan yanar gizo tare da mai ɗaukar taron
-- Alamar matsayi (aiki / mara aiki / kuskure) dangane da `enabled`, `failure_count`, da `last_status`
-- Isar da gwajin dannawa ɗaya
-- Canjin enable/disable na hannu
+- Ƙirƙira/gyara webhooks tare da mai zaɓen event
+- Alamar matsayi (mai aiki / mara aiki / mai kuskure) bisa `enabled`,
+  `failure_count`, da `last_status`
+- Isarwar gwaji da dannawa sau ɗaya
+- Sauya kunna/kashewa da hannu
 
-## Misalan Biyan Kuɗi
+## Misalan Payload
 
-### nema.kammala
+### request.completed
 
 ```json
 {
@@ -181,32 +201,42 @@ Shafin dashboard a `/dashboard/webhooks` (duba `src/app/(dashboard)/dashboard/we
 }
 ```
 
-### gwaji.ping
+### test.ping
 
 ```json
 {
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "Test webhook delivery from OmniRoute",
+    "message": "Isarwar webhook ta gwaji daga OmniRoute",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-Siffofin filin don abubuwan da ba na `test.ping` ba ana bayyana su ta wuraren kiran da ke fitar da su; yi da abin `data` a matsayin mai dacewa da gaba (ƙara filayen, kar a dogara da rashi).
+Tsarin filaye na events waɗanda ba `test.ping` ba ana bayyana su ne ta wuraren kiran da ke fitar
+da su; ɗauki abin `data` a matsayin mai dacewa da nau'ikan gaba (ƙara filaye, kada a dogara da
+rashinsu).
 
-## Mafi kyawun Ayyuka
+## Ingantattun Hanyoyin Aiki
 
-- **Tabbatar da sa hannu akan kowane bayarwa** a kan danyen jiki — yana hana zubewar POSTs daga duk wanda ya zaci URL din ku.
-- **Amsa 2xx a cikin ~ 5 seconds** — lokacin aika aika a 10s. Masu karɓa a hankali za su ci maimaitawa kuma su busa `failure_count`.
-- **Ka sanya masu sarrafa su zama masu ƙarfi** Sake gwadawa — da tarukan isarwa aƙalla sau ɗaya yana nufin kwafi mai yiwuwa ne.
-- **Biyan kuɗi kaɗan** — jerin abubuwan da suka faru ne kawai da kuke cinyewa; `"*"` zai ƙara farashi akan masu karɓa waɗanda ba ku sarrafa su.
-- **Kalli `failure_count`** — ƙarshen maki an kashe su ta atomatik a gazawar 10 a jere; sake saiti ta hanyar kiran `PUT /api/webhooks/[id]` tare da `enabled: true` bayan gyara mai karɓa.
-- **Juya asirin lokaci-lokaci** — `PUT` sabon `secret`, ƙaddamar da sabon ƙimar zuwa mai karɓa, kuma tabbatar ta hanyar ƙarshen gwajin.
+- **Tabbatar da signature a kowace isarwa** ta hanyar kwatanta shi da ainihin body — wannan yana hana
+  POSTs na bogi daga duk wanda ya iya hasashen URL na webhook ɗinka.
+- **Amsa da 2xx cikin ~daƙiƙa 5** — dispatcher yana dakatar da jira bayan 10 s. Masu karɓa
+  masu jinkiri za su cinye retries kuma su ƙara `failure_count`.
+- **Sanya handlers su zama idempotent** — retries da tsarin isarwa na aƙalla sau ɗaya
+  suna nufin yiwuwar samun kwafi.
+- **Yi subscribe kaɗan kawai** — lissafa events da kake amfani da su kawai; `"*"` zai
+  ƙara wa masu karɓar da ba ka sarrafa su kuɗin aiki.
+- **Sa ido kan `failure_count`** — ana kashe endpoints ta atomatik bayan gazawa 10 a jere;
+  sake saita shi ta hanyar kiran `PUT /api/webhooks/[id]` tare da `enabled: true`
+  bayan gyara mai karɓar.
+- **Sauya secrets lokaci-lokaci** — yi `PUT` na sabon `secret`, tura sabuwar ƙimar
+  zuwa mai karɓar, sannan ka tabbatar ta hanyar endpoint na gwaji.
 
-## Duba kuma
+## Duba Kuma
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — cikakken gudanarwa API surface
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — na'ura mai ba da hanya tsakanin hanyoyin sadarwa / kwantar da hankali bayan gazawar mai samarwa ta fito ta hanyar `request.failed`
-- Source: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — cikakken tsarin API na gudanarwa
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — ma'anonin circuit breaker / cooldown
+  da ke bayan gazawar provider da ake nunawa ta `request.failed`
+- Tushe: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

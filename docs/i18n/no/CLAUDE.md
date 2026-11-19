@@ -15,7 +15,7 @@ for Claude Code — operasjonelle presiseringer av regler som allerede er define
 
 Hele den obligatoriske worktree-protokollen (bekreftelse av basisgren, `.claude/worktrees/` som
 kanonisk sti, `cp -al` node_modules, regler for opprydding) finnes i
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (oppsummert i `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (oppsummert i `AGENTS.md` →
 Git-arbeidsflyt → "Worktree-isolering"). Punkter spesifikke for Claude Code:
 
 - Bekreft basisgrenen med operatøren via `AskUserQuestion` (hard regel nr. 19), med mindre de

@@ -403,53 +403,52 @@ Tam naudojama SQLite internetinio atsarginių kopijų kūrimo API — komandą s
 
 ---
 
-## Našumo derinimas
+## Našumo optimizavimas
 
 ### WAL režimas
 
-WAL įjungta pagal numatytuosius nustatymus. Jei darbo krūvis yra didelis, apsvarstykite:
+WAL įjungtas pagal numatytuosius nustatymus. Esant didelėms rašymo apkrovoms, apsvarstykite šiuos nustatymus:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Kontrolinis taškas kas 1000 puslapių
+PRAGMA journal_size_limit = 67108864;  -- 64 MB WAL riba
 ```
-
-OmniRoute nenustato `journal_size_limit`. Patikrinimo taškas perkelia WAL kadrus į pagrindinį failą, tačiau WAL failas išlaiko didžiausią skirtą dydį. `OMNIROUTE_WAL_GUARD_MAX_MB` apsauga tik įspėja ir paleidžia `wal_checkpoint(RESTART)`; tai nėra disko dydžio dangtelis.
 
 ### Indeksai
 
-Pagrindiniai našumo indeksai (automatiškai sukuriami perkėlus):
+Pagrindiniai našumui skirti indeksai (automatiškai sukuriami migracijų metu):
 
-- `idx_models_provider` — modelio paieškos pagal teikėją
-- `idx_combo_targets_combo_id` — kombinuotas taikinio išplėtimas
+- `idx_models_provider` — modelių paieška pagal teikėją
+- `idx_combo_targets_combo_id` — kombinuotų paskirties objektų išplėtimas
 - `idx_usage_history_api_key_timestamp` — naudojimo analizė
-- `idx_quota_snapshots_api_key_window` — kvotos stebėjimas
-- `idx_call_logs_timestamp` — skambučių žurnalo užklausos
+- `idx_quota_snapshots_api_key_window` — kvotų stebėjimas
+- `idx_call_logs_timestamp` — iškvietimų žurnalo užklausos
 
-Norėdami pridėti naują indeksą, sukurkite perkėlimą:
+Norėdami pridėti naują indeksą, sukurkite migraciją:
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Atminties žemėlapis I/O
+### Į atmintį susietas įvedimas ir išvedimas
 
-Labai didelėms duomenų bazėms (> 10GB) atminties atvaizdavimą galima reguliuoti naudojant SQLite pragma:
+Labai didelėms duomenų bazėms (>10 GB) susiejimą su atmintimi galima koreguoti naudojant SQLite pragma:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
-PRAGMA mmap_size = 268435456;  -- 256MB
+-- Nustatykite naudodami SQLite pragma (pakoreguokite core.ts arba vykdymo aplinkoje)
+PRAGMA mmap_size = 268435456;  -- 256 MB
 ```
 
 ### Sutankinimas
 
-Ilgai veikiantys OmniRoute egzemplioriai gauna naudos iš atsitiktinio `VACUUM`:
+Ilgai veikiančioms OmniRoute instancijoms naudinga retkarčiais vykdyti `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Mažo srauto langais paleiskite kas mėnesį. (WAL režimas sumažina poreikį, bet jo nepanaikina.)
+Vykdykite kas mėnesį mažo srauto laikotarpiais. (WAL režimas sumažina poreikį, tačiau jo visiškai nepanaikina.)
 
 ---
 

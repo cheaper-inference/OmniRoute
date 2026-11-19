@@ -15,7 +15,7 @@ für Claude Code — operative Präzisierungen der bereits in `AGENTS.md` defini
 
 Das vollständige verbindliche Worktree-Protokoll (Bestätigung des Basis-Branches, kanonischer Pfad
 `.claude/worktrees/`, `cp -al` für node_modules, Regeln zum Aufräumen) befindet sich in
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (zusammengefasst in `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (zusammengefasst in `AGENTS.md` →
 Git-Workflow → „Worktree-Isolation"). Claude-Code-spezifische Hinweise:
 
 - Bestätige den Basis-Branch über `AskUserQuestion` mit dem Operator (Harte Regel Nr. 19), es sei

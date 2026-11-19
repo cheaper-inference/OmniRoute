@@ -15,7 +15,7 @@ pateikta informacija taikoma TIK Claude Code — tai `AGENTS.md` jau apibrėžt�
 
 Visas privalomas worktree protokolas (bazinės šakos patvirtinimas, kanoninis `.claude/worktrees/`
 kelias, `cp -al` node_modules, išmontavimo taisyklės) pateiktas
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (apibendrinta `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (apibendrinta `AGENTS.md` →
 Git Workflow → "Worktree isolation"). Claude Code specifiniai punktai:
 
 - Patvirtinkite bazinę šaką su operatoriumi naudodami `AskUserQuestion` (Griežtoji taisyklė Nr. 19),

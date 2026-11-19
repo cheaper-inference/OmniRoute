@@ -45,10 +45,10 @@ docker run -d \
   diegosouzapw/omniroute:latest
 ```
 
-## 使用环境变量文件
+## 带环境文件
 
 ```bash
-# 首先复制并编辑 .env
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -582,29 +582,29 @@ sudo systemctl enable --now omniroute-update.path
 
 该服务会在拉取之前删除请求文件，因此运行失败时不会进入循环。如果未设置 `DOCKER_UPDATE_TRIGGER_FILE`，仪表板将继续采用手动命令流程。
 
-## 可用性：默认 SQLite 仅支持单副本
+## 可用性：默认SQLite是单副本
 
-标准 Docker / Kubernetes OmniRoute 是**一个 Node 进程 + 一个 SQLite 写入器**。此拓扑**不支持**高可用性。
+库存Docker / Kubernetes OmniRoute是**一个 Node 进程+一个SQLite writer** 。高可用性是**不支持**在该拓扑上。
 
-| 约束                               | 后果                                                                                                                                                                                                                                       |
-| ---------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| 单写入器                           | **不要**让多个副本使用同一个 SQLite 文件。这样会损坏数据库。                                                                                                                                                                               |
-| 重新创建 / 重启 / HEALTHCHECK 终止 | 正在处理的 SSE、仪表板会话和内存状态会**完全中断**。每个已连接的客户端都会断开。在端点为空的时间窗口内，新请求会从反向代理收到 **`502 Bad Gateway: Unknown error`**，而不是 OmniRoute JSON——客户端无法将其与提供者故障区分开来（#11015）。 |
-| 与 `/healthz` 使用同一事件循环     | 繁忙的目录或压缩周期可能会延迟探测；较短的超时随后会重启**唯一的**副本。                                                                                                                                                                   |
+| 约束                               | 结果                                                                                                                                                                                                             |
+| ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 单身作家                           | 做**不是**针对同一个SQLite文件运行多个副本。这会损坏DB。                                                                                                                                                         |
+| 重新创建/重新启动/ HEALTHCHECK杀死 | **全面停电**进行中的SSE、仪表板会话和内存状态。每个连接的客户端都会掉线。空端点窗口期间的新请求获得反向代理**`502 Bad Gateway: Unknown error`** ，而不是OmniRoute JSON — 客户端无法区分这与提供者失败 (#11015)。 |
+| 与`/healthz`相同的事件循环         | 繁忙的目录或压缩标记可能会延迟探测；短暂超时然后重新启动**仅有的**复制品。                                                                                                                                       |
 
-**探测矩阵**（另请参阅 [Kubernetes 探测建议](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)）：
+**探针矩阵**（另请参阅[Kubernetes 探针建议](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations)）：
 
-| 探测类型            | 目标                                                        | 请勿使用                                   |
-| ------------------- | ----------------------------------------------------------- | ------------------------------------------ |
-| 存活探测            | `PORT` 上的 TCP（默认为 `20128`），或宽松的 HTTP `/healthz` | `/api/monitoring/health`                   |
-| 就绪探测            | HTTP `GET /healthz`                                         | 将事件循环繁忙视为进程已停止的严格超时设置 |
-| 深度检查 / 人工检查 | `/api/monitoring/health`                                    | 自动化 kubelet 存活探测                    |
+| 探测      | 目标                                               | 请勿使用                         |
+| --------- | -------------------------------------------------- | -------------------------------- |
+| 活力      | TCP on `PORT` （默认`20128`），或软HTTP `/healthz` | `/api/monitoring/health`         |
+| 准备状态  | HTTP `GET /healthz`                                | 严格的超时将事件循环繁忙视为已死 |
+| 深渊/人类 | `/api/monitoring/health`                           | 自动化 kubelet 活跃度            |
 
-**升级：**请预期所有会话都会断开。如果可以，请先排空客户端；默认 SQLite 不支持滚动更新。Compose 的 `restart: unless-stopped` 加上 Docker `HEALTHCHECK` 也会在容器处于 Unhealthy 状态时替换唯一的进程——影响范围相同。
+**升级：**预计每个会话都会下降。如果可以的话，流失客户；默认SQLite没有滚动更新。 Compose `restart: unless-stopped`加Docker `HEALTHCHECK`也将取代容器不健康时唯一的进程——相同的爆炸半径。
 
-现成的清单和 Helm chart 位于 `deploy/kubernetes/` 和 `deploy/helm/omniroute/` 中——请参阅 [Kubernetes 部署指南](../../../../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)。
+`deploy/kubernetes/`和`deploy/helm/omniroute/`中存在现成的清单和 Helm 图表 — 请参阅[Kubernetes 部署指南](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md)。
 
-用于**单副本**的 Kubernetes 代码片段（必须使用 Recreate；不要针对单个 SQLite 文件增加 `replicas`）：
+Kubernetes 片段**单一副本**（需要重新创建；不要针对一个SQLite文件引发`replicas` ）：
 
 ```yaml
 spec:
@@ -631,49 +631,39 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` 的休眠让 kube 能够在发送 SIGTERM 之前移除 Service 端点，从而使**新**流量不再命中即将终止的进程。正在处理的 `/v1/responses` SSE 会通过重量级准入租约（#11015）获得最长 `SHUTDOWN_TIMEOUT_MS`（默认 30 秒）的排空时间。仍然到达该进程的新请求将收到 `503` + `Retry-After: 5`。在替代实例进入 Ready 状态之前，Recreate 所导致的端点为空的间隔仍然会造成完全中断——这是 SQLite 拓扑本身的限制，并非探针配置错误。
+`preStop` sleep 让 kube 在SIGTERM之前删除服务端点，所以**新的**交通停止撞击垂死的进程。飞行中的`/v1/responses` SSE通过重量级准入租约耗尽至`SHUTDOWN_TIMEOUT_MS` （默认 30 秒）（#11015）。仍然到达进程的新请求将获得`503` + `Retry-After: 5`。在更换就绪之前重新创建空端点间隙仍然是硬中断 - 这是SQLite拓扑，而不是探针配置错误。
 
-外部 Postgres / 多写入器 HA **并非**已有文档说明的标准方案。如果需要 HA，请保持单副本，或者运行项目已单独测试并记录的拓扑。Postgres/MySQL 相关工作记录在 [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 中。在该功能发布之前，提升**大型** `/v1/responses` 容量的唯一受支持方式是运行 N 个相互独立的进程（见下一节），而不是在同一个卷上设置 `replicas > 1`。
+外部Postgres / 多写入者HA是**不是**记录的库存路径。如果您需要HA，请保留单个副本或运行项目已单独测试和记录的拓扑。 Postgres/MySQL作品位于[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 。在那之前，唯一受支持的繁殖方式**大的**`/v1/responses`容量是 N 个独立进程（下一节），而不是一个卷上的`replicas > 1` 。
 
-## 横向扩展：N 个独立进程
+## 横向扩展：N个独立进程
 
-### Codex 令牌轮换的责任归属
+### Codex币轮换所有权
 
-同一个 Codex 账户的多个副本不得各自独立消耗其一次性刷新令牌。仅使用同步凭据的实例应设置 `OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex`（别名为 `cx`）。唯一负责轮换的实例应保持此项未设置。每个进程仍须拥有自己的 `DATA_DIR`；此选项既不共享 SQLite，也不提供令牌同步或分布式锁。
+一个Codex帐户的副本不得独立消耗其一次性刷新令牌。在仅使用同步凭证的实例上，设置`OMNIROUTE_TOKEN_REFRESH_PASSIVE_PROVIDERS=codex` （别名`cx`）。在单个轮换所有者上保留其未设置状态。每个进程仍然需要自己的`DATA_DIR`；此选项既不共享SQLite ，也不提供令牌同步或分布式锁。
 
-需要刷新时，被动实例会重新读取连接，只采用不同且尚未过期的访问令牌。否则会禁用刷新，但不会将连接标记为过期或停用，也不会计入刷新熔断器的失败次数。上游实际发生的身份验证失败仍按正常方式记录失败、执行指数冷却并向客户端返回正常错误；账户停用仍是永久性的。请在访问令牌过期之前同步轮换实例更新的令牌（默认提前五分钟主动刷新），或重新导入 Codex 身份验证文件。被动导入会保存所提供的令牌，不会到令牌端点验证它们。通过控制面板/API 手动刷新会返回 `409 refresh_disabled`；新的 OAuth 登录不受影响。参见[环境参考](../reference/ENVIRONMENT.md#passive-codex-token-refresh)。
+当需要刷新时，被动实例会重新读取连接，并仅采用不同的、未过期的访问令牌。否则，刷新将被禁用，而不会过期或停用连接或计算刷新中断器故障。真正的上游身份验证失败仍然使用正常的失败计数、指数冷却和正常的客户端错误；帐户停用仍然是永久性的。在访问令牌过期之前同步所有者的轮换令牌（默认主动刷新提前时间为五分钟），或重新导入Codex身份验证文件。被动导入存储提供的令牌，而不在令牌端点验证它们。手动dashboard/API刷新返回`409 refresh_disabled`；新的OAuth登录没有变化。请参阅[环境参考](../reference/ENVIRONMENT.md#passive-codex-token-refresh)。
 
-一个 Node 进程对应**一个 V8 堆**。两个重叠执行、大小约为 3 MiB / 约 75 万 token 的编码智能体 `POST /v1/responses` 请求（RTK + Caveman），会在堆达到约 12 Gi 时导致其中止（`FATAL ERROR: Reached heap limit`），并可能使 16 Gi cgroup 发生 OOM。参见 [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849)。这一测量结果是**内存预算**警告，而不是产品将并发长时 `/v1/responses` 硬性限制为两个。重量级聊天准入由自动推导的接收字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`、`src/shared/middleware/admissionBudget.ts`）控制，该预算根据相同的 V8/cgroup 上限确定——如果在已经完成容量规划的进程上将其调高（或者设置旧版的 `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 请求数上限），将再次引发进程中止。小型聊天、`/healthz`、`/v1/models` 和 MCP **不**受该上限约束。
+一个节点进程是**一堆V8** 。两个重叠的~ 3 MiB / ~ 750k 令牌编码代理`POST /v1/responses` (RTK + Caveman) 在~ 12 Gi (`FATAL ERROR: Reached heap limit`) 处中止该堆，并且可以OOM一个 16 Gi cgroup。参见[#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) 。该测量是**内存预算**警告，不是两个并发长`/v1/responses`的乘积硬最大值。重量级聊天准入由自动生成的摄取字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`、 `src/shared/middleware/admissionBudget.ts`）控制，该预算大小来自相同的V8/cgroup上限—在已经调整大小的进程上向上覆盖它（或设置旧的`OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT`请求计数上限），从而重新引入中止。小型聊天， `/healthz`、 `/v1/models`和MCP是**不是**在那顶帽子里。
 
-### 单进程：超过两个长时 `/v1/responses`
+### 1.单进程：两个以上的长`/v1/responses`
 
-当进程处于**健康**状态（堆低于 `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`，默认值为 `0.75`），且进程级在途字节预算（`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110）仍有余量时，**可以**同时运行两个以上的长时 `POST /v1/responses`。请求体大小达到或超过 `OMNIROUTE_CHAT_LARGE_BODY_BYTES`（默认值为 256 KiB）的请求，会获取与结构复杂型请求相同的重量级租约，并使用相同的 [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` 逃生机制（`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`）。数十个并发的长时 SSE 客户端（运维人员通常需要 40–50 个）属于**内存预算**问题——需要确定堆大小、主槽位/余量槽位以及 `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`——而不是产品硬性规定“最多 2 个”。当堆承受压力时，系统仍会通过可重试的 `503` 拒绝请求，从而避免 #7849 再次出现。
+一个**健康**进程（堆低于`OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`，默认`0.75`）**可能**当进程范围的飞行字节预算 (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) 仍有空间时，运行两个以上的并发长`POST /v1/responses` 。 `OMNIROUTE_CHAT_LARGE_BODY_BYTES`或以上的主体（默认 256 KiB）采用与结构重请求相同的重量级租约，并使用相同的[#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom`转义（`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`）。数十个并发长SSE客户端（运营商通常需要 40-50 个）**内存预算**问题—大小堆+ primary/headroom插槽+ `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` —不是严格的“最大 2”乘积限制。受压堆仍然会因可重试的`503`而脱落，因此 #7849 不会返回。
 
-如需在**当前**实现中获得多个堆（相互独立的 V8 old-space）：
+到**乘法堆**（独立V8老空间）**今天**:
 
-| 应该做                                                                                                 | 不应该做                                         |
-| ------------------------------------------------------------------------------------------------------ | ------------------------------------------------ |
-| 运行 **N 个容器/pod**，每个都有其**自己的** `DATA_DIR` / 卷                                            | 对同一个 SQLite 文件设置 `replicas > 1`          |
-| 根据堆 / 在途字节预算确定重量级在途请求数与健康余量；1–2 是针对 #7849 的保守默认值，而不是产品硬性上限 | 为单个进程分配 8 倍 RAM 并设置无上限的请求数上限 |
-| 可选：使用 `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` 实现**共享配额计数器**                 | 将 Redis 当作共享 SQLite——它并不是               |
-| 将提供者密钥复制到每个实例中（或者接受仪表板相互隔离）                                                 | 期望跨实例使用同一个仪表板 / 同一份调用日志      |
-| 在前端使用任意负载均衡器；按 API 密钥或会话保持粘性即可                                                | 要求使用特定供应商、可感知请求大小的中间件       |
+| 做                                                                                           | 不要                                     |
+| -------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| 跑步**containers/pods** ，每个都有其**自己的**`DATA_DIR` / 体积                              | 针对一个SQLite文件设置`replicas > 1`     |
+| 从堆/飞行字节预算中调整飞行中+健康净空的大小； 1–2 是保守的 #7849 默认值，而不是硬产品最大值 | 给一个进程8个× RAM和一个无限制的计数上限 |
+| 可选： `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL`用于**共享配额计数器**            | 将Redis视为共享SQLite —它不是            |
+| 将提供程序机密复制到每个实例中（或接受分区仪表板）                                           | 预计跨实例有一个仪表板/一个呼叫日志      |
+| 前端带有任何负载均衡器；通过API密钥或会话粘性就足够了                                        | 需要特定于供应商的尺寸感知中间件         |
 
-会话与账户的亲和关系也可通过 Redis 共享：在每个进程中设置 `OMNIROUTE_SESSION_AFFINITY_STORE=redis` 和 `REDIS_URL`，使用相同的 `REDIS_KEY_PREFIX`，并将 `sessionAffinityTtlMs` 设为正值。固定记录会将使用账户身份的哈希映射到各进程中符合条件的本地连接，因此，身份元数据相同的 OAuth 账户不必使用相同的连接 ID。在解析固定记录和受保护的移除操作中，已知账户身份优先于相互矛盾的本地 ID；没有身份信息的记录（或没有身份信息的移除调用方）继续使用旧的 ID 检查。没有稳定使用身份的账户仍需要相同的 ID。Redis 出错或调用超过 100 ms 时，会回退到本地 SQLite。每个 Redis 亲和关系存储最多允许 8 个尚未结束的操作，达到上限后立即绕过 Redis，且只在底层工作结束时释放名额，而不是在调用方超时时释放。
+会话到帐户的关联性也可以通过Redis共享：在每个进程上设置`OMNIROUTE_SESSION_AFFINITY_STORE=redis`和`REDIS_URL` ，具有相同的`REDIS_KEY_PREFIX`和正的`sessionAffinityTtlMs`设置。引脚将散列使用帐户身份解析为每个进程的合格本地连接，因此具有匹配身份元数据的OAuth帐户不需要具有匹配的连接IDs。在 pin 解析和保护驱逐方面，已知账户身份优先于相互矛盾的本地IDs ；没有身份的记录（或没有身份的驱逐呼叫者）保留传统的ID守卫。没有稳定使用身份的账户仍然需要匹配IDs。 Redis错误或超过 100 毫秒的调用会回退到本地SQLite。每个Redis关联存储将未完成的操作限制为 8 个，在满时立即绕过Redis ，并且仅在底层工作解决时而不是在调用者截止日期时释放插槽。在Redis中断期间，不存在共享事实：每个实例都会回退到其自己的本地亲和性，每个实例的会话可能会重新固定一次，并且实例可能会出现分歧。当粘性恢复时，通过Redis重新收敛。超时限制等待，而不是发送EVAL，可能会在回退后落地。路由写入比较路由决策观察到的确切值，而不是新的突变时读取；观察到的未命中或SQLite回退观察将与缺失的Redis键进行比较。过时的引脚会在一个CAS中被替换，因此较晚的命令无法替换或删除较新的不同引脚。 Redis读取以原子方式返回值和剩余服务器TTL；正PTTL （或无过期）决定活性，而不是作者的JSON时间戳或读者的时钟。本地快照将剩余的TTL映射到本地截止日期；现有的JSON键仍然可读，并且为CAS保留其原始字节。 Redis是唯一的真相来源，同时它的答案。已确认的共享更新插入、触摸和删除会删除本地条目，而不会安装或刷新它。 Redis路径上的SQLite仅保存此实例自己的来自Redis错误、超时或准入饱和的后备决策，与以前一样受 TTL 限制。稍后中断时丢失的本地 pin 会导致一次新选择（一次提示缓存未命中），而不是错误或被逐出的帐户。被拒绝的更新插入以原子方式返回共享获胜者及其剩余的TTL ：普通选择重新检查映射的本地截止日期并使用仍然有效的合格获胜者，触摸该帐户的使用情况并记录，而无需其他共享写入。如果不可用，选择将保留本地候选，保持共享引脚不变并发出一条调试消息。拒绝CAS不写SQLite； Redis错误、超时或准入饱和将应用现有的本地操作。如果发送的突变的回复在超时后到达（接受、拒绝或错误），则同步精确序列化值比较和删除仅删除字节相同的超时后备行。比较和删除之间没有等待；保留较新的中断写入。即使Redis关闭，受保护的驱逐也会删除失败帐户自己的本地 pin，并在确认共享驱逐后再次清除它。待处理的早期共享回复无法恢复已逐出的本地 pin，因为共享成功永远不会写入SQLite。稍后的中断回退可以重新固定帐户；后来接受的共享写入仅存在于Redis中。 Redis未命中不咨询本地后备状态。当驱动器关闭时，新选择的引脚保留传统的四场SQLite JSON形状；只有Redis路由添加散列帐户身份。预取的引脚在其到期边界时重新检查。 Redis非租赁选择重新读取存储，但同步租赁规划仍然可以使用在预取和规划之间逐出的引脚（可接受的尽力而为窗口）。租约提交无法在持久声明后切换帐户：在拒绝更新插入时，它仅保留该请求的已声明候选者，而使共享获胜者保持不变，因此跨实例的协议受到该路径的限制。表的其余部分仍然适用：这不共享组合会话粘性、本机Codex转引脚、帐户信号量、锁定、支出限制、配置或呼叫日志。
 
-Redis 中断期间不存在共享的权威状态：每个实例回退到自身的本地亲和关系，会话可能在每个实例上各重新固定一次，实例之间也可能出现分歧。Redis 恢复后，亲和关系会再次通过 Redis 收敛。超时限制的是等待时间，并不能阻止已发送的 EVAL；它可能在回退后才生效。路由写入比较的是路由决策观察到的精确值，而不是修改时重新读取的值；观察到的缺失或 SQLite 回退结果，都按 Redis 键不存在进行比较。过时的固定记录通过一次 CAS 替换，因此迟到的命令不能替换或删除更新且不同的固定记录。Redis 读取以原子方式返回值和服务器剩余 TTL；记录是否有效由正 PTTL（或无过期时间）决定，而不是由写入方 JSON 时间戳或读取方时钟决定。本地快照将剩余 TTL 换算为本地截止时间；已有 JSON 键仍可读取，其原始字节会保留用于 CAS。
+硬件：每个实例并发长`/v1/responses`是**内存预算**问题（堆+飞行字节/#10110）。 `N`独立的`DATA_DIR`仍然会乘以堆：主机RAM必须覆盖`N × cgroup`，而不是“一个 16 Gi pod 和 N = 8”。切勿在一个SQLite文件上`replicas > 1` 。
 
-只要 Redis 正常响应，它就是唯一的权威来源。经确认的共享插入或更新、活动时间刷新和删除操作会删除本地条目，绝不会创建或刷新该条目。Redis 路径上的 SQLite 仅保存本实例因 Redis 错误、超时或接纳容量耗尽而做出的回退决策，并像以前一样受 TTL 限制。后续中断时，本地固定记录缺失只会带来一次新的选择（一次提示缓存未命中），不会因此使用错误或已移除的账户。被拒绝的插入或更新会原子地返回共享胜出记录及其剩余 TTL：常规选择会重新检查换算后的本地截止时间，采用仍有效且符合条件的胜出账户，更新该账户的使用记录和日志，而不再进行共享写入。
-
-如果胜出账户不可用，选择逻辑会保留本地候选账户，保持共享固定记录不变，并输出一条调试消息。CAS 被拒绝时不会写入 SQLite；Redis 错误、超时或接纳容量耗尽时，则应用既有的本地操作。如果已发送的修改在超时后收到响应（接受、拒绝或错误），同步执行的精确序列化值比较删除，只会移除与该超时回退行逐字节一致的行。比较和删除之间没有 await；中断期间更新的写入会保留。受保护的移除操作即使在 Redis 不可用时，也会删除失败账户自身的本地固定记录，并在确认共享移除后再次清理。较早的共享请求仍在等待的响应不能恢复已移除的本地固定记录，因为共享成功从不写入 SQLite。后续中断产生的回退可以再次固定某个账户；之后获准的共享写入则只存在于 Redis。
-
-Redis 未命中时不会查询本地回退状态。关闭驱动时，新选中的固定记录保留旧版 SQLite 的四字段 JSON 结构；只有 Redis 路由会添加账户身份哈希。预取的固定记录会在过期边界重新检查。Redis 的非租约选择会重新读取存储，但同步租约规划仍可能使用在预取与规划之间被移除的固定记录（这是接受的尽力而为时间窗口）。持久认领后，租约提交不能切换账户：插入或更新被拒绝时，只为当前请求保留已认领的候选账户，不改动共享胜出记录，因此该路径上实例间的一致性有边界。
-
-表格其余内容仍然适用：此功能不共享组合会话粘性、原生 Codex 轮次固定记录、账户信号量、锁定状态、支出上限、配置或调用日志。
-
-硬件方面：每个实例可并发运行多少个长时 `/v1/responses`，属于**内存预算**问题（堆 + 在途字节 / #10110）。使用相互独立 `DATA_DIR` 的 `N` 个实例仍会产生多个堆：主机 RAM 必须能够容纳 `N × cgroup`，而不是“一个 16 Gi pod，N=8”。绝不要让 `replicas > 1` 的实例使用同一个 SQLite 文件。
-
-Compose 示例（两个堆、两个卷——不要使用 `deploy.replicas: 2`）：
+撰写草图（两个堆，两个卷—不是`deploy.replicas: 2`）：
 
 ```yaml
 services:
@@ -700,7 +690,7 @@ volumes:
   omniroute-b-data:
 ```
 
-进程内密度（将压缩移出 HTTP isolate）参见 [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023)。基于共享持久状态构建单一逻辑集群参见 [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075)。
+进程内密度（ HTTP隔离压缩）为[#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) 。共享持久状态上的一个逻辑集群是[#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 。
 
 ## Docker 内的 Gemini 区域错误
 

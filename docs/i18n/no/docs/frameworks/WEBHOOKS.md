@@ -4,66 +4,73 @@
 
 ---
 
-> **Kilde til sannhet:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Sist oppdatert:** 2026-06-28 — v3.8.40
+> **Sannhetskilde:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
+> **Sist oppdatert:** 2026-06-28 — v3.8.40
 
-OmniRoute kan avfyre HTTP webhooks på plattformhendelser. Bruk dem til å integrere med Slack, PagerDuty, Datadog, interne varslingstjenester eller en hvilken som helst HTTP mottaker.
+OmniRoute kan utløse HTTP-webhooks ved plattformhendelser. Bruk dem til å integrere med
+Slack, PagerDuty, Datadog, interne varslingstjenester eller en hvilken som helst HTTP-mottaker.
 
-Senderen signerer hver levering med HMAC-SHA256, prøver på nytt på forbigående feil, sporer leveringshelse per webhook og deaktiverer automatisk endepunkter som stadig mislykkes.
+Dispatcher-komponenten signerer hver levering med HMAC-SHA256, prøver på nytt ved midlertidige
+feil, sporer leveringsstatusen for hver webhook og deaktiverer automatisk endepunkter som
+fortsetter å feile.
 
-## Støttede arrangementer
+## Støttede hendelser
 
-`WebhookEvent` typen (`src/lib/webhooks/eventDescriptions.ts`, konsumert av `src/lib/webhookDispatcher.ts`) modellerer for tiden syv hendelser:
+Typen `WebhookEvent` (`src/lib/webhooks/eventDescriptions.ts`, brukt av `src/lib/webhookDispatcher.ts`) modellerer for øyeblikket nøyaktig fire hendelser:
 
-| Hendelse                  | Fyrer når                                                                                              |
-| ------------------------- | ------------------------------------------------------------------------------------------------------ |
-| `request.completed`       | En proxy-forespørsel fullføres                                                                         |
-| `request.failed`          | En fullmaktsforespørsel mislykkes tross alt retries/fallback                                           |
-| `quota.exceeded`          | En API nøkkel krysser en budget/quota terskel                                                          |
-| `proxy.set_aside`         | Et medlem av proxy-poolen settes til side etter gjentatte avslag (kun overgang)                        |
-| `proxy.pool.exhausted`    | Hvert medlem av en proxy pool-omfang er satt til side                                                  |
-| `provider.reset_redeemed` | Auto-apply banked resets innløste en tilbakestillingskreditt eller Claude ukentlig økt tilbakestilling |
-| `test.ping`               | Syntetisk hendelse brukt av testendepunktet                                                            |
+| Hendelse            | Utløses når                                                                 |
+| ------------------- | --------------------------------------------------------------------------- |
+| `request.completed` | En videresendt forespørsel fullføres uten feil                              |
+| `request.failed`    | En videresendt forespørsel mislykkes etter alle nye forsøk/reserveløsninger |
+| `quota.exceeded`    | En API-nøkkel overskrider en budsjett-/kvoteterskel                         |
+| `test.ping`         | Syntetisk hendelse som brukes av testendepunktet                            |
 
-Abonnementer godtar den bokstavelige `"*"` for å motta hvert arrangement. Ukjente hendelsesnavn i `events` ignoreres ved utsendelsestidspunkt.
+Abonnementer godtar den bokstavelige verdien `"*"` for å motta alle hendelser. Ukjente
+hendelsesnavn i `events` ignoreres ved utsendelse.
 
-> Merk: koordinatoren API er kablet, men produksjonsanropssteder for noen av ikke-`test.ping` -hendelsene lander fortsatt. Sjekk `grep dispatchEvent` for å se hvilke stier som for øyeblikket påkaller avsenderen i utgivelsen din.
+> Merk: Dispatcher-API-et er koblet opp, men produksjonskallestedene for noen av
+> hendelsene som ikke er `test.ping`, er fortsatt under innføring. Sjekk `grep dispatchEvent` for å se
+> hvilke kodebaner som for øyeblikket kaller dispatcher-komponenten i din utgivelse.
 
 ## Arkitektur
 
 ```
-Caller (handler, service, monitor)
+Kallende part (håndterer, tjeneste, overvåker)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filter by webhook.events
-    -> for each match (in parallel):
+    -> filtrer etter webhook.events
+    -> for hvert treff (parallelt):
        deliverWebhook(url, payload, secret)
-         build payload { event, timestamp, data }
-         sign body with HMAC-SHA256 (if secret present)
-         POST with 10s timeout
-         retry up to 3 times on 5xx / network error
+         bygg nyttelast { event, timestamp, data }
+         signer brødteksten med HMAC-SHA256 (hvis en hemmelighet finnes)
+         POST med 10 s tidsavbrudd
+         prøv på nytt opptil 3 ganger ved 5xx-feil / nettverksfeil
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Sending er brann-og-glem for den som ringer: `Promise.allSettled` svelger feil per webhook slik at en dårlig mottaker ikke kan blokkere de andre.
+Utsendelsen skjer asynkront uten at den kallende parten venter på resultatet: `Promise.allSettled` absorberer
+feil per webhook, slik at én defekt mottaker ikke kan blokkere de andre.
 
-## HMAC -signering
+## HMAC-signering
 
-Når en webhook har en `secret`, signerer OmniRoute JSON kroppen og sender:
+Når en webhook har en `secret`, signerer OmniRoute JSON-brødteksten og sender:
 
 ```
 Content-Type: application/json
 User-Agent: OmniRoute-Webhook/1.0
-X-Webhook-Event: <event>
+X-Webhook-Event: <hendelse>
 X-Webhook-Timestamp: <ISO-8601>
-X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
+X-Webhook-Signature: sha256=<heksadesimal HMAC-SHA256(secret, brødtekst)>
 ```
 
-> Overskriftsnavn bruker `X-Webhook-*` prefikset (ikke `X-OmniRoute-*`). Signaturverdien er `sha256=<hex>` — verifiser hele prefikset.
+> Topptekstnavn bruker prefikset `X-Webhook-*` (ikke `X-OmniRoute-*`). Signaturverdien
+> er `sha256=<hex>` — verifiser hele prefikset.
 
-Hvis `createWebhook` kalles uten en hemmelighet, genererer DB modulen en (`whsec_<48 hex>`) slik at alle webhooks er signert som standard.
+Hvis `createWebhook` kalles uten en hemmelighet, genererer databasemodulen en
+(`whsec_<48 hex>`), slik at alle webhooks signeres som standard.
 
-### Verifisering på mottaker
+### Verifisering hos mottakeren
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -76,57 +83,66 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Verifiser alltid mot **rå** forespørselstekst, før noen JSON parsing.
+Verifiser alltid mot den **rå** forespørselsbrødteksten før JSON-parsing.
 
-## Retningslinjer for forsøk og feil
+## Retningslinjer for nye forsøk og feil
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- 10 sekunders timeout per forsøk (`AbortController`).
-- HTTP 2xx regnes som suksess.
-- HTTP 3xx/4xx teller som en endelig status — som ikke kan prøves på nytt, registrert som levert med `success = res.ok`.
-- HTTP 5xx og nettverksfeil prøves på nytt med eksponentiell backoff: `2^attempt * 1000 ms` (1s, 2s, 4s).
+- Tidsavbrudd på 10 sekunder per forsøk (`AbortController`).
+- HTTP 2xx regnes som vellykket.
+- HTTP 3xx/4xx regnes som en endelig status uten nye forsøk — registrert som levert
+  med `success = res.ok`.
+- HTTP 5xx og nettverksfeil prøves på nytt med eksponentiell ventetid:
+  `2^attempt * 1000 ms` (1s, 2s, 4s).
 - Etter `maxRetries` registreres leveringen som mislykket.
-- Hver levering oppdaterer `last_triggered_at`, `last_status`, og enten tilbakestiller eller øker `failure_count`.
-- Senderen ringer `disableWebhooksWithHighFailures(10)` etter hver fan-out, så enhver webhook med `failure_count >= 10` blir automatisk deaktivert.
+- Hver levering oppdaterer `last_triggered_at`, `last_status` og enten nullstiller
+  eller øker `failure_count`.
+- Dispatcher-funksjonen kaller `disableWebhooksWithHighFailures(10)` etter hver fan-out,
+  slik at alle webhooks med `failure_count >= 10` deaktiveres automatisk.
 
 ## Database
 
-Tabell `webhooks` (migrering `011_webhooks.sql`):
+Tabellen `webhooks` (migrering `011_webhooks.sql`):
 
-| Søyle               | Type    | Notater                                               |
-| ------------------- | ------- | ----------------------------------------------------- |
-| `id`                | TEXT PK | UUID                                                  |
-| `url`               | TEXT    | Destinasjon URL                                       |
-| `events`            | TEXT    | JSON array; standard `["*"]`                          |
-| `secret`            | TEXT    | HMAC hemmelighet (automatisk generert hvis ikke gitt) |
-| `enabled`           | INT     | 0/1; standard til 1                                   |
-| `description`       | TEXT    | Valgfri menneskelig etikett                           |
-| `created_at`        | TEXT    | `datetime('now')`                                     |
-| `last_triggered_at` | TEXT    | Oppdatert ved hvert leveringsforsøk                   |
-| `last_status`       | INT     | HTTP status for siste forsøk (0 = nettverk)           |
-| `failure_count`     | INT     | Tilbakestilles til 0 ved suksess, + 1 ved fiasko      |
+| Kolonne             | Type    | Merknader                                    |
+| ------------------- | ------- | -------------------------------------------- |
+| `id`                | TEXT PK | UUID                                         |
+| `url`               | TEXT    | Destinasjons-URL                             |
+| `events`            | TEXT    | JSON-array; standardverdi `["*"]`            |
+| `secret`            | TEXT    | HMAC-hemmelighet (autogenerert hvis utelatt) |
+| `enabled`           | INT     | 0/1; standardverdi er 1                      |
+| `description`       | TEXT    | Valgfri lesbar etikett                       |
+| `created_at`        | TEXT    | `datetime('now')`                            |
+| `last_triggered_at` | TEXT    | Oppdateres ved hvert leveringsforsøk         |
+| `last_status`       | INT     | HTTP-status for siste forsøk (0 = nettverk)  |
+| `failure_count`     | INT     | Nullstilles ved suksess, +1 ved feil         |
 
-Leveringshistorikken er opprettholdt i den dedikerte `webhook_deliveries` tabellen (migrering `069_webhook_deliveries.sql`, skrevet via `src/lib/db/webhookDeliveries.ts::insertDelivery` ved hvert forsøk), i tillegg til de samlede tellerne på `webhooks` raden. Snille metadata (Slack / Discord / Telegram / tilpassede nyttelasttransformatorer) ble lagt til av `070_webhooks_kind_metadata.sql`.
+Leveringshistorikken lagres i den dedikerte tabellen `webhook_deliveries`
+(migrering `069_webhook_deliveries.sql`, skrevet via
+`src/lib/db/webhookDeliveries.ts::insertDelivery` ved hvert forsøk), i tillegg
+til de aggregerte tellerne i `webhooks`-raden. Metadata om type (Slack / Discord /
+Telegram / egendefinerte payload-transformatorer) ble lagt til av `070_webhooks_kind_metadata.sql`.
 
-## REST API
+## REST-API
 
-Alle endepunkter krever administrasjonsgodkjenning (`requireManagementAuth`).
+Alle endepunkter krever administrasjonsautentisering (`requireManagementAuth`).
 
-| Endepunkt                       | Metode | Beskrivelse                             |
-| ------------------------------- | ------ | --------------------------------------- |
-| `/api/webhooks`                 | GET    | Liste webhooks (hemmeligheter maskert)  |
-| `/api/webhooks`                 | POST   | Lag webhook                             |
-| `/api/webhooks/[id]`            | GET    | Webhook-detalj (full hemmelighet)       |
-| `/api/webhooks/[id]`            | PUT    | Oppdater felt                           |
-| `/api/webhooks/[id]`            | DELETE | Fjerne                                  |
-| `/api/webhooks/[id]/test`       | POST   | Avfyr en `test.ping` (ingen forsøk)     |
-| `/api/webhooks/[id]/deliveries` | GET    | Nylige leveringsforsøk for én webhook   |
-| `/api/webhooks/validate-url`    | POST   | URL -validering før flyging (SSRF vakt) |
+| Endepunkt                       | Metode | Beskrivelse                                  |
+| ------------------------------- | ------ | -------------------------------------------- |
+| `/api/webhooks`                 | GET    | Vis webhooks (hemmeligheter maskert)         |
+| `/api/webhooks`                 | POST   | Opprett webhook                              |
+| `/api/webhooks/[id]`            | GET    | Webhook-detaljer (full hemmelighet)          |
+| `/api/webhooks/[id]`            | PUT    | Oppdater felter                              |
+| `/api/webhooks/[id]`            | DELETE | Fjern                                        |
+| `/api/webhooks/[id]/test`       | POST   | Utløs en `test.ping` (ingen nye forsøk)      |
+| `/api/webhooks/[id]/deliveries` | GET    | Nylige leveringsforsøk for én webhook        |
+| `/api/webhooks/validate-url`    | POST   | Forhåndsvalidering av URL (SSRF-beskyttelse) |
 
-`GET /api/webhooks` maskerer hemmeligheten til `<first 10 chars>...` for å unngå lekkasje på oppføringssider. Bruk `[id]` GET når du faktisk trenger hemmeligheten.
+`GET /api/webhooks` maskerer hemmeligheten som `<første 10 tegn>...` for å unngå lekkasje
+på listesider. Bruk GET-forespørselen for `[id]` når du faktisk trenger hemmeligheten.
 
-### Lag webhook
+### Opprett webhook
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -140,7 +156,8 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-Hvis `secret` utelates, genererer serveren en `whsec_<hex>` hemmelighet og returnerer den i svaret.
+Hvis `secret` utelates, genererer serveren en `whsec_<hex>`-hemmelighet og returnerer
+den i responsen.
 
 ### Test webhook
 
@@ -149,16 +166,19 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-Returnerer `{ delivered, status, error }`. Ingen gjenforsøk er forsøkt — nyttig for raskt å validere at mottakeren aksepterer nyttelasten og signaturen.
+Returnerer `{ delivered, status, error }`. Ingen nye forsøk utføres — nyttig for
+raskt å kontrollere at mottakeren godtar payloaden og signaturen.
 
-## Dashbord
+## Kontrollpanel
 
-Dashboard-siden på `/dashboard/webhooks` (se `src/app/(dashboard)/dashboard/webhooks/page.tsx`) gir:
+Kontrollpanelsiden på `/dashboard/webhooks` (se
+`src/app/(dashboard)/dashboard/webhooks/page.tsx`) tilbyr:
 
-- Create/edit webhooks med en hendelsesvelger
-- Statusindikator (aktiv / inaktiv / feil) basert på `enabled`, `failure_count` og `last_status`
+- Oppretting/redigering av webhooks med en hendelsesvelger
+- Statusindikator (aktiv / inaktiv / feil) basert på `enabled`,
+  `failure_count` og `last_status`
 - Testlevering med ett klikk
-- Manuell enable/disable -veksling
+- Manuell aktivering/deaktivering
 
 ## Eksempler på nyttelast
 
@@ -188,25 +208,35 @@ Dashboard-siden på `/dashboard/webhooks` (se `src/app/(dashboard)/dashboard/web
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "Test webhook delivery from OmniRoute",
+    "message": "Testlevering av webhook fra OmniRoute",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-Feltformer for ikke-`test.ping` -hendelser er definert av anropsstedene som sender dem ut; behandle `data` objektet som fremoverkompatibelt (legg til felt, ikke avhengig av fravær).
+Feltstrukturene for andre hendelser enn `test.ping` defineres av kallestedene som sender
+dem. Behandle `data`-objektet som foroverkompatibelt (legg til felt, ikke vær avhengig av
+at felt mangler).
 
-## Beste praksis
+## Anbefalte fremgangsmåter
 
-- **Bekreft signaturen på hver levering** mot den rå kroppen — forhindrer forfalsket POSTs fra alle som gjetter din webhook URL.
-- **Svar 2xx innen ~ 5 sekunder** — avsenderen timeout ved 10 s. Langsomme mottakere vil spise nye forsøk og blåse opp `failure_count`.
-- **Gjør behandlere idempotente** — forsøk og semantikk minst én gang betyr at duplikater er mulig.
-- **Abonner minimalt** — viser kun hendelser du faktisk bruker; `"*"` vil legge til kostnader på mottakere du ikke kontrollerer.
-- **Se `failure_count`** — endepunkter deaktiveres automatisk ved 10 påfølgende feil; tilbakestill ved å ringe `PUT /api/webhooks/[id]` med `enabled: true` etter at mottakeren er festet.
-- **Roter hemmeligheter med jevne mellomrom** — `PUT` en ny `secret`, distribuer den nye verdien til mottakeren, og bekreft via testendepunktet.
+- **Verifiser signaturen ved hver levering** mot den ubehandlede forespørselskroppen — dette hindrer
+  forfalskede POST-forespørsler fra hvem som helst som gjetter webhook-URL-en din.
+- **Svar med 2xx innen ~5 sekunder** — dispatcheren får tidsavbrudd etter 10 s. Trege
+  mottakere vil bruke opp nye forsøk og øke `failure_count`.
+- **Gjør behandlerne idempotente** — nye forsøk og leveringssemantikk med minst én levering
+  betyr at duplikater kan forekomme.
+- **Abonner minimalt** — oppgi bare hendelsene du faktisk bruker. `"*"` vil
+  påføre mottakere du ikke kontrollerer ekstra kostnader.
+- **Overvåk `failure_count`** — endepunkter deaktiveres automatisk etter 10 påfølgende
+  feil. Tilbakestill ved å kalle `PUT /api/webhooks/[id]` med `enabled: true`
+  etter at mottakeren er rettet.
+- **Roter hemmeligheter regelmessig** — bruk `PUT` for å angi en ny `secret`, distribuer den nye verdien
+  til mottakeren, og bekreft via testendepunktet.
 
 ## Se også
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — full styring API overflate
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — kretsbryter / nedkjølingssemantikk bak leverandørfeil dukket opp via `request.failed`
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — fullstendig administrasjons-API
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — semantikk for effektbryter / nedkjøling
+  ved leverandørfeil som eksponeres via `request.failed`
 - Kilde: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

@@ -20,16 +20,14 @@
 
 ## Metode Instalasi
 
-### npm (disarankan)
+### npm (direkomendasikan)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dasbor terbuka di `http://localhost:20128` dan basis API URL adalah `http://localhost:20128/v1`.
-
-> **pengguna npm:** Jika npm memperingatkan bahwa skrip instalasi diblokir (misalnya, `omniroute`, `better-sqlite3`), lihat [Memecahkan Masalah — npm install-scripts Blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+Dasbor terbuka di `http://localhost:20128` dan URL dasar API adalah `http://localhost:20128/v1`.
 
 ### pnpm
 

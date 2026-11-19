@@ -14,7 +14,7 @@
 ## جداسازی Worktree — نکات خاص Claude Code
 
 پروتکل کامل و اجباری worktree (تأیید شاخهی پایه، مسیر متعارف `.claude/worktrees/`، استفاده از `cp -al` برای node_modules، قوانین teardown) در
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) آمده است (خلاصهشده در `AGENTS.md` ←
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) آمده است (خلاصهشده در `AGENTS.md` ←
 گردش کار Git ← "جداسازی Worktree"). نکات خاص Claude Code:
 
 - شاخهی پایه را از طریق `AskUserQuestion` با اپراتور تأیید کنید (قانون سخت شماره ۱۹) مگر اینکه

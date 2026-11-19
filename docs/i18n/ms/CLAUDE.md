@@ -15,7 +15,7 @@ untuk Claude Code — penambahbaikan operasi terhadap peraturan yang telah ditak
 
 Protokol worktree mandatori penuh (pengesahan cabang asas, laluan kanonikal `.claude/worktrees/`,
 `cp -al` node_modules, peraturan teardown) terdapat dalam
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (diringkaskan dalam `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (diringkaskan dalam `AGENTS.md` →
 Git Workflow → "Worktree isolation"). Perkara khusus Claude Code:
 
 - Sahkan cabang asas dengan operator melalui `AskUserQuestion` (Peraturan Tegas #19) melainkan mereka

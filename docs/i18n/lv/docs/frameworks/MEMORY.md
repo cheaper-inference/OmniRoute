@@ -760,8 +760,7 @@ Kad lietotājs saka:
 
 Lai novērstu nekontrolētu izgūšanu, tiek piemēroti šādi ierobežojumi:
 
-| Minimālais satura garums  | 3 rakstzīmes   |
-| ------------------------- | -------------- |
+| Minimālais satura garums | 3 rakstzīmes |
 | Maksimālais satura garums | 500 rakstzīmes |
 
 ### Kad atspējot izgūšanu

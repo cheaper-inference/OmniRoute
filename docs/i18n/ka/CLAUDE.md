@@ -15,7 +15,7 @@ Claude Code-ზე — `AGENTS.md`-ში უკვე განსაზღვ�
 
 სრული სავალდებულო worktree პროტოკოლი (საბაზო ბრენჩის დადასტურება, `.claude/worktrees/` კანონიკური
 გზა, `cp -al` node_modules, დაშლის წესები) მოცემულია
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md)-ში (შეჯამებულია `AGENTS.md`-ში →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md)-ში (შეჯამებულია `AGENTS.md`-ში →
 Git Workflow → "Worktree isolation"). Claude Code-ის სპეციფიკური პუნქტები:
 
 - დაადასტურეთ საბაზო ბრენჩი ოპერატორთან `AskUserQuestion`-ით (მკაცრი წესი #19), თუ მან უკვე

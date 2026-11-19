@@ -27,9 +27,7 @@ npm install -g omniroute
 omniroute
 ```
 
-Prietaisų skydelis atidaromas `http://localhost:20128`, o API bazė URL yra `http://localhost:20128/v1`.
-
-> **npm vartotojai:** Jei npm įspėja, kad diegimo scenarijai buvo užblokuoti (pvz., `omniroute`, `better-sqlite3`), žr. [Trikčių šalinimas — npm diegimo scenarijai užblokuoti](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+Valdymo skydelis atidaromas adresu `http://localhost:20128`, o bazinis API URL yra `http://localhost:20128/v1`.
 
 ### pnpm
 

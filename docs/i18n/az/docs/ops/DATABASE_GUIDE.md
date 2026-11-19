@@ -402,27 +402,26 @@ Bu, SQLite-ın onlayn ehtiyat nüsxələmə API-sindən istifadə edir — OmniR
 
 ---
 
-## Performans Tuning
+## Performansın Tənzimlənməsi
 
-### WAL rejimi
+### WAL Rejimi
 
-WAL standart olaraq aktivdir. Yüksək yazma iş yükləri üçün nəzərə alın:
+WAL standart olaraq aktivdir. Çoxlu yazma əməliyyatları olan iş yükləri üçün bunları nəzərdən keçirin:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Hər 1000 səhifədən bir yoxlama nöqtəsi yaradın
+PRAGMA journal_size_limit = 67108864;  -- 64MB WAL limiti
 ```
-
-OmniRoute `journal_size_limit` təyin etmir. Yoxlama məntəqəsi WAL çərçivələrini əsas fayla köçürür, lakin WAL faylı ən böyük ayrılmış ölçüsünü saxlayır. `OMNIROUTE_WAL_GUARD_MAX_MB` mühafizəçisi yalnız `wal_checkpoint(RESTART)` xəbərdar edir və idarə edir; disk ölçüsündə qapaq deyil.
 
 ### İndekslər
 
-Performans üçün əsas indekslər (miqrasiya tərəfindən avtomatik yaradılmışdır):
+Performans üçün əsas indekslər (miqrasiyalar tərəfindən avtomatik yaradılır):
 
-- Provayder tərəfindən `idx_models_provider` — model axtarışları
-- `idx_combo_targets_combo_id` — kombo hədəf genişləndirilməsi
+- `idx_models_provider` — provayder üzrə model axtarışları
+- `idx_combo_targets_combo_id` — kombinasiya hədəflərinin genişləndirilməsi
 - `idx_usage_history_api_key_timestamp` — istifadə analitikası
-- `idx_quota_snapshots_api_key_window` — kvota izləmə
-- `idx_call_logs_timestamp` — zəng qeydləri sorğuları
+- `idx_quota_snapshots_api_key_window` — kvotanın izlənməsi
+- `idx_call_logs_timestamp` — çağırış jurnalı sorğuları
 
 Yeni indeks əlavə etmək üçün miqrasiya yaradın:
 
@@ -431,24 +430,24 @@ Yeni indeks əlavə etmək üçün miqrasiya yaradın:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Yaddaş Xəritəli I/O
+### Yaddaşla Xəritələnmiş Giriş-Çıxış
 
-Çox böyük verilənlər bazaları üçün (> 10GB), yaddaş xəritələşdirilməsi SQLite praqması vasitəsilə tənzimlənə bilər:
+Çox böyük verilənlər bazaları (>10GB) üçün yaddaş xəritələnməsi SQLite pragma vasitəsilə tənzimlənə bilər:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- SQLite pragma vasitəsilə təyin edin (core.ts və ya icra mühitində tənzimləyin)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Sıxılma
+### Sıxlaşdırma
 
-Uzunmüddətli OmniRoute nümunələri təsadüfi `VACUUM` dən faydalanır:
+Uzun müddət işləyən OmniRoute instansiyaları ara-sıra `VACUUM` əməliyyatından faydalanır:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Trafik az olan pəncərələrdə aylıq işləyin. (WAL rejimi ehtiyacı azaldır, lakin aradan qaldırmır.)
+Aşağı trafik dövrlərində ayda bir dəfə işə salın. (WAL rejimi ehtiyacı azaldır, lakin tamamilə aradan qaldırmır.)
 
 ---
 

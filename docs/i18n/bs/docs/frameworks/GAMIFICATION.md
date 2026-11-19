@@ -524,11 +524,7 @@ export async function transferTokens(
 3. **Transakcija** (pojedinačna SQLite transakcija):
    a. Izračunaj stanje pošiljatelja.
    b. Ako je `balance < amount`, prekini (nedovoljno sredstava).
-   c. Umetni red za slanje (`from=sender, to=receiver, amount`).
-   d. Umetni red za prijem (`from=receiver, to=sender, amount`).
-4. **Ograničenje učestalosti**: provjeri učestalost prijenosa za pošiljatelja (najviše 10 prijenosa/min).
-5. **Događaj**: emituj gamifikacijski događaj `token_share` za XP i evaluaciju znački.
-6. Vrati `{ success: true, balance: newBalance }`.
+   c. Umetni red za slanje (`from=sender,`.
 
 ### Ograničenje stope (Rate Limiting)
 

@@ -4,52 +4,57 @@
 
 ---
 
-> **Həqiqətin mənbəyi:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`**Son yeniləmə:** 28-06-2026 — v3.8.40
+> **Həqiqət mənbəyi:** `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`, `src/app/api/webhooks/`
+> **Son yenilənmə:** 2026-06-28 — v3.8.40
 
-OmniRoute platforma hadisələri üzərində HTTP webhooks işə sala bilər. Slack, PagerDuty, Datadog, daxili xəbərdarlıq xidmətləri və ya hər hansı HTTP qəbuledicisi ilə inteqrasiya etmək üçün onlardan istifadə edin.
+OmniRoute platform hadisələri zamanı HTTP webhook-ları işə sala bilər. Onlardan
+Slack, PagerDuty, Datadog, daxili xəbərdarlıq xidmətləri və ya istənilən HTTP qəbuledicisi ilə inteqrasiya üçün istifadə edin.
 
-Dispetçer hər bir çatdırılmanı HMAC-SHA256 ilə imzalayır, keçici nasazlıqlara yenidən cəhd edir, hər veb-qanda çatdırılma sağlamlığını izləyir və uğursuzluğa davam edən son nöqtələri avtomatik söndürür.
+Dispetçer hər çatdırılmanı HMAC-SHA256 ilə imzalayır, müvəqqəti
+xətalar zamanı yenidən cəhd edir, hər webhook üzrə çatdırılma vəziyyətini izləyir və
+davamlı olaraq uğursuz olan son nöqtələri avtomatik deaktiv edir.
 
-## Dəstəklənən Hadisələr
+## Dəstəklənən hadisələr
 
-`WebhookEvent` növü (`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` tərəfindən istehlak olunur) hazırda yeddi hadisəni modelləşdirir:
+`WebhookEvent` tipi (`src/lib/webhooks/eventDescriptions.ts`, `src/lib/webhookDispatcher.ts` tərəfindən istifadə olunur) hazırda dəqiq olaraq dörd hadisəni modelləşdirir:
 
-| Hadisə                    | Nə vaxt yanır                                                                                                  |
-| ------------------------- | -------------------------------------------------------------------------------------------------------------- |
-| `request.completed`       | Proksiləşdirilmiş sorğu uğurla tamamlanır                                                                      |
-| `request.failed`          | Bütün retries/fallback dan sonra etibarlı sorğu uğursuz olur                                                   |
-| `quota.exceeded`          | API açarı budget/quota həddini keçir                                                                           |
-| `proxy.set_aside`         | Proksi hovuz üzvü təkrar imtinalardan sonra kənara qoyulur (yalnız keçid)                                      |
-| `proxy.pool.exhausted`    | Proksi hovuz dairəsinin hər bir üzvü bir kənara qoyulur                                                        |
-| `provider.reset_redeemed` | Bank edilmiş sıfırlamaları avtomatik tətbiq edin, sıfırlanmış kredit və ya Claude həftəlik sessiya sıfırlaması |
-| `test.ping`               | Testin son nöqtəsi tərəfindən istifadə edilən sintetik hadisə                                                  |
+| Hadisə              | İşə düşmə şərti                                                                     |
+| ------------------- | ----------------------------------------------------------------------------------- |
+| `request.completed` | Proksi edilmiş sorğu uğurla tamamlanır                                              |
+| `request.failed`    | Proksi edilmiş sorğu bütün təkrar cəhdlərdən/ehtiyat keçidlərdən sonra uğursuz olur |
+| `quota.exceeded`    | API açarı büdcə/kvota həddini keçir                                                 |
+| `test.ping`         | Test son nöqtəsinin istifadə etdiyi sintetik hadisə                                 |
 
-Abunəliklər hər hadisəni qəbul etmək üçün hərfi `"*"` qəbul edir. `events` də naməlum hadisə adları göndərilmə zamanı nəzərə alınmır.
+Abunəliklər bütün hadisələri qəbul etmək üçün hərfi `"*"` dəyərini qəbul edir. `events` daxilindəki naməlum hadisə
+adları göndərmə zamanı nəzərə alınmır.
 
-> Qeyd: dispetçer API simlidir, lakin bəzi qeyri-`test.ping` hadisələri üçün istehsal zəng saytları hələ də eniş edir. Hazırda buraxılışınızda dispetçeri hansı yolların işə saldığını görmək üçün `grep dispatchEvent` yoxlayın.
+> Qeyd: dispetçer API-si qoşulub, lakin bəzi
+> `test.ping` olmayan hadisələr üçün istehsal mühitindəki çağırış nöqtələri hələ də əlavə olunur. Buraxılışınızda
+> hazırda hansı yolların dispetçeri çağırdığını görmək üçün `grep dispatchEvent` yoxlayın.
 
-## Memarlıq
+## Arxitektura
 
 ```
-Caller (handler, service, monitor)
+Çağıran tərəf (işləyici, xidmət, monitor)
   dispatchEvent(event, data)            [src/lib/webhookDispatcher.ts]
     -> getEnabledWebhooks()             [src/lib/db/webhooks.ts]
-    -> filter by webhook.events
-    -> for each match (in parallel):
+    -> webhook.events üzrə filtrlə
+    -> hər uyğunluq üçün (paralel olaraq):
        deliverWebhook(url, payload, secret)
-         build payload { event, timestamp, data }
-         sign body with HMAC-SHA256 (if secret present)
-         POST with 10s timeout
-         retry up to 3 times on 5xx / network error
+         faydalı yükü yarat { event, timestamp, data }
+         gövdəni HMAC-SHA256 ilə imzala (secret varsa)
+         10 san. taymautla POST göndər
+         5xx / şəbəkə xətası zamanı 3 dəfəyədək yenidən cəhd et
        recordWebhookDelivery(id, status, success)
     -> disableWebhooksWithHighFailures(10)
 ```
 
-Göndərmə zəng edən üçün unudulur və yaddan çıxır: `Promise.allSettled` hər webhook səhvlərini udur ki, bir pis qəbuledici digərlərini bloklaya bilmir.
+Göndərmə çağıran tərəf üçün başladılıb unudulan rejimdədir: `Promise.allSettled`
+hər webhook üzrə xətaları udur ki, nasaz bir qəbuledici digərlərini bloklamasın.
 
-## HMAC İmzalanması
+## HMAC ilə imzalama
 
-Veb kancada `secret` olduqda, OmniRoute JSON gövdəsini imzalayır və göndərir:
+Webhook-un `secret` dəyəri olduqda OmniRoute JSON gövdəsini imzalayır və bunları göndərir:
 
 ```
 Content-Type: application/json
@@ -59,11 +64,13 @@ X-Webhook-Timestamp: <ISO-8601>
 X-Webhook-Signature: sha256=<hex HMAC-SHA256(secret, body)>
 ```
 
-> Başlıq adları `X-Webhook-*` prefiksindən istifadə edir ( `X-OmniRoute-*` deyil). İmza dəyəri `sha256=<hex>` — tam prefiksi yoxlayın.
+> Başlıq adları `X-Webhook-*` prefiksindən istifadə edir (`X-OmniRoute-*` deyil). İmza
+> dəyəri `sha256=<hex>` formatındadır — tam prefiksi yoxlayın.
 
-Əgər `createWebhook` sirr olmadan çağırılırsa, DB modulu bir (`whsec_<48 hex>`) yaradır ki, bütün veb-qancalar defolt olaraq imzalanır.
+`createWebhook` secret olmadan çağırılarsa, DB modulu bir secret yaradır
+(`whsec_<48 hex>`), buna görə də bütün webhook-lar standart olaraq imzalanır.
 
-### Qəbuledicidə yoxlanılır
+### Qəbuledici tərəfdə yoxlama
 
 ```typescript
 import { createHmac, timingSafeEqual } from "node:crypto";
@@ -76,57 +83,67 @@ function verify(rawBody: string, signature: string, secret: string) {
 }
 ```
 
-Həmişə qarşı doğrulayın **xam** İstənilən JSON təhlilindən əvvəl sorğu orqanı.
+Həmişə hər hansı JSON emalından əvvəl **xam** sorğu gövdəsini yoxlayın.
 
-## Yenidən cəhd və uğursuzluq siyasəti
+## Təkrar cəhd və xəta siyasəti
 
 `deliverWebhook(url, payload, secret, maxRetries = 3)`:
 
-- Hər cəhd üçün 10 saniyə fasilə (`AbortController`).
-- HTTP 2xx uğur sayılır.
-- HTTP 3xx/4xx `success = res.ok` ilə çatdırıldığı kimi qeydə alınmış, təkrar sınanmaq mümkün olmayan yekun status — kimi sayılır.
-- HTTP 5xx və şəbəkə xətaları eksponensial geriləmə ilə yenidən yoxlanılır: `2^attempt * 1000 ms` (1s, 2s, 4s).
-- `maxRetries` dan sonra çatdırılma uğursuz kimi qeyd olunur.
-- Hər bir çatdırılma `last_triggered_at`, `last_status` yeniləyir və ya `failure_count` sıfırlayır və ya artırır.
-- Dispetçer hər fan-outdan sonra `disableWebhooksWithHighFailures(10)` zəng edir, ona görə də `failure_count >= 10` ilə istənilən veb-qanca avtomatik olaraq söndürülür.
+- Hər cəhd üçün 10 saniyəlik vaxt limiti (`AbortController`).
+- HTTP 2xx uğurlu hesab olunur.
+- HTTP 3xx/4xx təkrar cəhd edilməyən yekun status hesab olunur — `success = res.ok`
+  ilə çatdırılmış kimi qeydə alınır.
+- HTTP 5xx və şəbəkə xətaları eksponensial gecikmə ilə təkrar sınanır:
+  `2^attempt * 1000 ms` (1s, 2s, 4s).
+- `maxRetries` sayda təkrar cəhddən sonra çatdırılma uğursuz kimi qeydə alınır.
+- Hər çatdırılma `last_triggered_at`, `last_status` sahələrini yeniləyir və
+  `failure_count` sahəsini ya sıfırlayır, ya da artırır.
+- Dispetçer hər çoxsaylı göndərişdən sonra `disableWebhooksWithHighFailures(10)` çağırır,
+  buna görə `failure_count >= 10` olan istənilən webhook avtomatik olaraq deaktiv edilir.
 
 ## Verilənlər bazası
 
-Cədvəl `webhooks` (miqrasiya `011_webhooks.sql`):
+`webhooks` cədvəli (`011_webhooks.sql` miqrasiyası):
 
-| Sütun               | Növ     | Qeydlər                                       |
-| ------------------- | ------- | --------------------------------------------- |
-| `id`                | TEXT PK | UUID                                          |
-| `url`               | TEXT    | Təyinat URL                                   |
-| `events`            | TEXT    | JSON massivi; standart `["*"]`                |
-| `secret`            | TEXT    | HMAC sirri (verilmədikdə avtomatik yaradılır) |
-| `enabled`           | INT     | 0/1; default olaraq 1                         |
-| `description`       | TEXT    | İsteğe bağlı insan etiketi                    |
-| `created_at`        | TEXT    | `datetime('now')`                             |
-| `last_triggered_at` | TEXT    | Hər çatdırılma cəhdində yenilənir             |
-| `last_status`       | INT     | Son cəhdin HTTP statusu (0 = şəbəkəsi)        |
-| `failure_count`     | INT     | Uğurda 0-a, uğursuzluqda + 1-ə sıfırlanır     |
+| Sütun               | Növ     | Qeydlər                                        |
+| ------------------- | ------- | ---------------------------------------------- |
+| `id`                | TEXT PK | UUID                                           |
+| `url`               | TEXT    | Təyinat URL-i                                  |
+| `events`            | TEXT    | JSON massivi; standart dəyər `["*"]`           |
+| `secret`            | TEXT    | HMAC sirri (verilmədikdə avtomatik yaradılır)  |
+| `enabled`           | INT     | 0/1; standart dəyər 1-dir                      |
+| `description`       | TEXT    | İstəyə bağlı istifadəçi etiketi                |
+| `created_at`        | TEXT    | `datetime('now')`                              |
+| `last_triggered_at` | TEXT    | Hər çatdırılma cəhdində yenilənir              |
+| `last_status`       | INT     | Son cəhdin HTTP statusu (0 = şəbəkə)           |
+| `failure_count`     | INT     | Uğurlu olduqda 0-a sıfırlanır, xətada +1 artır |
 
-Çatdırılma tarixçəsi `webhooks` cərgəsindəki ümumi sayğaclara əlavə olaraq, xüsusi `webhook_deliveries` cədvəlində saxlanılır (miqrasiya `069_webhook_deliveries.sql`, hər cəhddə `src/lib/db/webhookDeliveries.ts::insertDelivery` vasitəsilə yazılır). Növ metadata (Slack / Discord / Telegram / xüsusi faydalı yük transformatorları) `070_webhooks_kind_metadata.sql` tərəfindən əlavə edildi.
+Çatdırılma tarixçəsi `webhooks` sətrindəki ümumi sayğaclara əlavə olaraq, ayrıca
+`webhook_deliveries` cədvəlində saxlanılır (`069_webhook_deliveries.sql` miqrasiyası,
+hər cəhddə `src/lib/db/webhookDeliveries.ts::insertDelivery` vasitəsilə yazılır).
+Növ metadatası (Slack / Discord / Telegram / fərdi faydalı yük çeviriciləri)
+`070_webhooks_kind_metadata.sql` tərəfindən əlavə edilib.
 
 ## REST API
 
-Bütün son nöqtələr idarəetmə autentliyini tələb edir (`requireManagementAuth`).
+Bütün son nöqtələr idarəetmə autentifikasiyası (`requireManagementAuth`) tələb edir.
 
-| Son nöqtə                       | Metod  | Təsvir                                        |
-| ------------------------------- | ------ | --------------------------------------------- |
-| `/api/webhooks`                 | GET    | Veb kancaların siyahısı (maskalı sirlər)      |
-| `/api/webhooks`                 | POST   | Webhook yaradın                               |
-| `/api/webhooks/[id]`            | GET    | Webhook təfərrüatı (tam gizli)                |
-| `/api/webhooks/[id]`            | PUT    | Sahələri yeniləyin                            |
-| `/api/webhooks/[id]`            | DELETE | Sil                                           |
-| `/api/webhooks/[id]/test`       | POST   | `test.ping` işə salın (yenidən cəhd yoxdur)   |
-| `/api/webhooks/[id]/deliveries` | GET    | Bir webhook üçün son çatdırılma cəhdləri      |
-| `/api/webhooks/validate-url`    | POST   | Uçuşdan əvvəl URL yoxlaması (SSRF mühafizəsi) |
+| Son nöqtə                       | Metod  | Təsvir                                         |
+| ------------------------------- | ------ | ---------------------------------------------- |
+| `/api/webhooks`                 | GET    | Webhook-ları siyahıya alır (sirlər maskalanır) |
+| `/api/webhooks`                 | POST   | Webhook yaradır                                |
+| `/api/webhooks/[id]`            | GET    | Webhook təfərrüatları (tam sirr)               |
+| `/api/webhooks/[id]`            | PUT    | Sahələri yeniləyir                             |
+| `/api/webhooks/[id]`            | DELETE | Silir                                          |
+| `/api/webhooks/[id]/test`       | POST   | `test.ping` göndərir (təkrar cəhd yoxdur)      |
+| `/api/webhooks/[id]/deliveries` | GET    | Bir webhook üçün son çatdırılma cəhdləri       |
+| `/api/webhooks/validate-url`    | POST   | İlkin URL yoxlaması (SSRF qoruması)            |
 
-`GET /api/webhooks` siyahı səhifələrində sızmamaq üçün `<first 10 chars>...` nin sirrini gizlədir. Həqiqətən sirrə ehtiyacınız olduqda `[id]` GET dən istifadə edin.
+`GET /api/webhooks` siyahı səhifələrində sızmanın qarşısını almaq üçün sirri
+`<first 10 chars>...` şəklində maskalayır. Sirrə həqiqətən ehtiyacınız olduqda
+`[id]` GET sorğusundan istifadə edin.
 
-### Webhook yaradın
+### Webhook yaratmaq
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -140,29 +157,31 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-`secret` buraxılıbsa, server `whsec_<hex>` sirri yaradır və onu cavabda qaytarır.
+`secret` buraxılarsa, server `whsec_<hex>` sirri yaradır və onu cavabda qaytarır.
 
-### Test webhook
+### Webhook-u sınaqdan keçirmək
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-`{ delivered, status, error }` nı qaytarır. Qəbuledicinin faydalı yükü və imzanı qəbul etdiyini tez bir zamanda təsdiqləmək üçün faydalı — heç bir təkrar cəhdə cəhd edilmir.
+`{ delivered, status, error }` qaytarır. Heç bir təkrar cəhd edilmir — qəbuledicinin
+faydalı yükü və imzanı qəbul etdiyini sürətlə yoxlamaq üçün faydalıdır.
 
-## İdarə paneli
+## İdarəetmə paneli
 
-`/dashboard/webhooks` -dakı tablosunun səhifəsi (bax: `src/app/(dashboard)/dashboard/webhooks/page.tsx`) aşağıdakıları təmin edir:
+`/dashboard/webhooks` ünvanındakı idarəetmə paneli səhifəsi (bax:
+`src/app/(dashboard)/dashboard/webhooks/page.tsx`) aşağıdakı imkanları təqdim edir:
 
-- Tədbir seçicisi ilə Create/edit veb-qançları
+- Hadisə seçicisi ilə webhook-lar yaratmaq/redaktə etmək
 - `enabled`, `failure_count` və `last_status` əsasında status göstəricisi (aktiv / qeyri-aktiv / xətalı)
-- Bir kliklə test çatdırılması
-- Əl ilə enable/disable keçidi
+- Bir kliklə sınaq çatdırılması
+- Əl ilə aktivləşdirmə/deaktivləşdirmə keçidi
 
-## Yükləmə nümunələri
+## Faydalı yük nümunələri
 
-### sorğu.tamamlandı
+### request.completed
 
 ```json
 {
@@ -188,25 +207,25 @@ curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   "event": "test.ping",
   "timestamp": "2026-05-13T20:32:00.000Z",
   "data": {
-    "message": "Test webhook delivery from OmniRoute",
+    "message": "OmniRoute-dan sınaq webhook çatdırılması",
     "webhookId": "<uuid>"
   }
 }
 ```
 
-Qeyri-`test.ping` hadisələri üçün sahə formaları onları yayan zəng saytları tərəfindən müəyyən edilir; `data` obyektini irəli uyğunluq kimi qəbul edin (sahələr əlavə edin, yoxluğundan asılı olmayın).
+`test.ping` olmayan hadisələr üçün sahə strukturları onları göndərən çağırış nöqtələri tərəfindən müəyyən edilir; `data` obyektini gələcək versiyalarla uyğun hesab edin (sahələr əlavə edin, onların olmamasına əsaslanmayın).
 
 ## Ən yaxşı təcrübələr
 
-- **Hər çatdırılmada imzanı yoxlayın** xam bədənə qarşı — URL webhookunuzu təxmin edən hər kəsdən saxta POSTs qarşısını alır.
-- **~ 5 saniyə ərzində 2xx cavab verin** — dispetçerin vaxtı 10 s. Yavaş qəbul edənlər təkrar cəhdləri yeyəcək və `failure_count` şişirdəcəklər.
-- **İşləyiciləri idempotent edin** — təkrar cəhdləri və ən azı bir dəfə çatdırılma semantikası dublikatların mümkün olduğunu bildirir.
-- **Minimum abunə olun** — yalnız həqiqətən istehlak etdiyiniz hadisələri siyahıya alır; `"*"` nəzarət etmədiyiniz qəbuledicilərə xərc əlavə edəcək.
-- **`failure_count` baxın** — son nöqtələri 10 ardıcıl uğursuzluqda avtomatik olaraq söndürülür; qəbuledicini düzəltdikdən sonra `PUT /api/webhooks/[id]` ilə `enabled: true` -yə zəng edərək sıfırlayın.
-- **Sirləri vaxtaşırı çevirin** — `PUT` yeni `secret`, yeni dəyəri qəbulediciyə yerləşdirin və testin son nöqtəsi vasitəsilə təsdiqləyin.
+- **Hər çatdırılmada imzanı ilkin gövdə ilə yoxlayın** — bu, webhook URL-nizi təxmin edən hər kəsdən gələn saxta POST sorğularının qarşısını alır.
+- **Təxminən 5 saniyə ərzində 2xx cavabı verin** — dispetçer 10 saniyədən sonra vaxt aşımına uğrayır. Yavaş qəbuledicilər təkrar cəhdləri sərf edəcək və `failure_count` dəyərini artıracaq.
+- **Emal proqramlarını idempotent edin** — təkrar cəhdlər və ən azı bir dəfə çatdırılma semantikası dublikatların mümkün olması deməkdir.
+- **Minimal abunə olun** — yalnız faktiki istifadə etdiyiniz hadisələri sadalayın; `"*"` nəzarət etmədiyiniz qəbuledicilərdə əlavə xərc yaradacaq.
+- **`failure_count` dəyərini izləyin** — son nöqtələr ardıcıl 10 uğursuzluqdan sonra avtomatik deaktiv edilir; qəbuledicini düzəltdikdən sonra `enabled: true` ilə `PUT /api/webhooks/[id]` çağıraraq sıfırlayın.
+- **Məxfi açarları vaxtaşırı dəyişdirin** — yeni `secret` dəyərini `PUT` ilə göndərin, yeni dəyəri qəbuledicidə yerləşdirin və sınaq son nöqtəsi vasitəsilə təsdiqləyin.
 
 ## Həmçinin baxın
 
-- [API_REFERENCE.md](../reference/API_REFERENCE.md) — tam idarə API səthi
-- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — dövrə açarı / provayder uğursuzluqlarının arxasındakı soyutma semantikası `request.failed` vasitəsilə ortaya çıxdı
+- [API_REFERENCE.md](../reference/API_REFERENCE.md) — idarəetmə API-sinin tam imkanları
+- [RESILIENCE_GUIDE.md](../architecture/RESILIENCE_GUIDE.md) — `request.failed` vasitəsilə göstərilən provayder uğursuzluqlarının arxasındakı dövrə kəsicisi / gözləmə müddəti semantikası
 - Mənbə: `src/lib/webhookDispatcher.ts`, `src/lib/db/webhooks.ts`

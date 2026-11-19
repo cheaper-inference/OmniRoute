@@ -484,11 +484,11 @@ On obrađuje:
 
 ## Konfiguracija
 
-`open-sse/config/` drži konfiguracijski sloj:
+`open-sse/config/` sadrži sloj konfiguracije:
 
 | File                          | Svrha                                               |
 | ----------------------------- | --------------------------------------------------- |
-| `providerRegistry.ts`         | Chat-model registar preko kataloga 388 dobavljača   |
+| `providerRegistry.ts`         | Chat-model registar preko kataloga 381-provajdera   |
 | `providerModels.ts`           | Alijasi modela, mapiranje formata                   |
 | `constants.ts`                | Vremenska ograničenja, ograničenja, statusni kodovi |
 | `defaultThinkingSignature.ts` | Zadani Claude thinking potpis                       |

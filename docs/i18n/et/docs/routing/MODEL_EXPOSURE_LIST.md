@@ -4,72 +4,47 @@
 
 ---
 
-> Lubatav erand, vaikimisi väljas (kui `modelVisibilityAllowlist`/`modelVisibilityDenylist` on mõlemad tühjad, jäävad
-> kataloog `/v1/models` JA kõik `auto/*` kandidaatide kogumid baidi täpsusega samaks). Seadete
-> `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) kaaslane operaatoritele, kes soovivad kureeritud
-> mudelite loendit põhjustel, millel pole kuludega mingit pistmist.
+> Lubatud, vaikimisi välja lülitatud (mõlemad tühjad `modelVisibilityAllowlist`/`modelVisibilityDenylist` jätavad `/v1/models` kataloogi AND iga `auto/*` kandidaadi kogumisbait on identne). `hidePaidModels`/`hideAutoCombos` (`src/lib/db/settings.ts`) vend operaatoritele, kes soovivad kureeritud mudeliloendit põhjustel, millel pole kuludega mingit pistmist.
 
-## Miks see olemas on
+## Miks see on olemas
 
-`hidePaidModels` vastab küsimusele „kas see mudel on tasuta?“ ja `hideAutoCombos` küsimusele „kas `auto/*`
-virtuaalseid ID-sid peaks üldse avalikustama?“ — kumbki neist ei võimalda operaatoril kureerida suvalist mudelite
-alamhulka (nt kuvada täpselt neid mudeleid, mida konkreetne Claude Code’i / OpenCode’i klient peaks nägema,
-hinnastusest sõltumata). #11481 lisab selleks kaks sõltumatut, lubatava erandina kasutatavat stringimassiivi sätet.
+`hidePaidModels` vastab "kas see mudel on tasuta?" ja `hideAutoCombos` vastab "kas `auto/*` virtuaalseid ID-sid peaks üldse reklaamima?" — ei lase ka operaatoril kureerida suvalist mudelite alamhulka (nt esitades täpselt mudelid, mida antud Claude Code / OpenCode klient peaks nägema, sõltumata hinnast). #11481 lisab selle kahe sõltumatu valikulise stringimassiivi seadistusena.
 
-## Sätted
+## Seaded
 
-| Võti                       | Tüüp       | Vaikeväärtus | Tähendus                                                                       |
-| -------------------------- | ---------- | ------------ | ------------------------------------------------------------------------------ |
-| `modelVisibilityDenylist`  | `string[]` | `[]`         | Kandidaadiga kattuvad kirjed peidavad selle kataloogist/kandidaatide kogumist. |
-| `modelVisibilityAllowlist` | `string[]` | `[]`         | Kui loend pole tühi, jäävad nähtavaks AINULT kandidaadiga kattuvad kirjed.     |
+| Võti                       | Tüüp       | Vaikimisi | Tähendus                                                                   |
+| -------------------------- | ---------- | --------- | -------------------------------------------------------------------------- |
+| `modelVisibilityDenylist`  | `string[]` | `[]`      | Kandidaadile vastavad kanded peidavad selle catalog/candidate kogumi eest. |
+| `modelVisibilityAllowlist` | `string[]` | `[]`      | Kui need pole tühjad, jäävad kandidaadile vastavad ONLY kirjed nähtavaks.  |
 
-Mõlemad lubavad kuni 500 kirjet, millest igaüks võib olla kuni 200 märki pikk (Zodiga valideeritud failis
-`src/shared/validation/settingsSchemas.ts`). Kirje on kas:
+Mõlemad aktsepteerivad kuni 500 kirjet, millest igaüks on kuni 200 tähemärki (Zod-validated in `src/shared/validation/settingsSchemas.ts`). Kirje on kas:
 
-- täpne kataloogi ID — `"gpt-4o"` (mudeli ID ilma prefiksita) või `"openai/gpt-4o"` (teenusepakkuja prefiksiga), või
-- metamärkidega muster, mis kasutab `*`/`?` — nt `"openai/gpt-4*"` või `"anthropic/*"` — mida töödeldakse sama
-  ühise `globToRegex()` sobitaja (`src/shared/utils/globPattern.ts`) abil, mida juba kasutavad
-  `ModelRoutingSection`-i mudelipõhised kombinatsioonivastendused ja `freeModels.ts::matchesOnlyPaidModels`.
+- täpne kataloogi ID — `"gpt-4o"` (palja mudeli ID) või `"openai/gpt-4o"` (teenusepakkuja eesliitega) või
+- glob muster, mis kasutab `*`/`?` — nt `"openai/gpt-4*"` või `"anthropic/*"` — mis on lahendatud sama jagatud `globToRegex()` sobitaja (`src/shared/utils/globPattern.ts`) kaudu, mida juba kasutavad `ModelRoutingSection` mudelipõhised kombineeritud vastendused ja `freeModels.ts::matchesOnlyPaidModels`.
 
-Prioriteet: esmalt kontrollitakse keeluloendit (keelatud kirje on alati peidetud, isegi kui see kattub ka
-lubamisloendiga); kui lubamisloend pole tühi, jäävad alles ainult sellega kattuvad kirjed.
+Tähelepanu: esmalt kontrollitakse keelamisloendit (keelatud kirje on alati peidetud, isegi kui see ühtib ka lubatud loendiga); kui lubatud loend ei ole tühi, jäävad alles ainult kirjed, millele see sobib.
 
-## Kaks kontrollpunkti, mitte üks
+## Kaks chokepointi, mitte üks
 
-Siin kehtib samamoodi #6512 õppetund (`hidePaidModels`-i põhine kataloogifilter võimaldas endiselt marsruutida
-`auto/*` tasulisele mudelile, sest kombinatsiooni kandidaatide kogum koostati eraldi).
-Sobitamispredikaati `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kutsutakse MÕLEMAS kohas:
+Õppetund numbrist #6512 ( `hidePaidModels` -only kataloogifilter võimaldab `auto/*` siiski suunata tasulisele mudelile, kuna kombineeritud kandidaatide kogum ehitati iseseisvalt) kehtib ka siin. Sobiv predikaat `isModelExposureAllowed()` (`src/shared/utils/modelExposureList.ts`) kutsutakse BOTH:
 
-- `src/app/api/v1/models/catalog.ts` — `/v1/models` loend ise, samades viies allikapõhises
-  kontrollpunktis, mida juba piirab `shouldHidePaid()` (staatiline `PROVIDER_MODELS`, sünkroonitud teenusepakkuja read,
-  kohandatud read, aliasepõhised read, hallatud varuvariandi read).
-- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — seda kutsutakse
-  funktsioonist `virtualFactory.ts::buildPreparedPool` kohe pärast samaväärset
-  `filterPaidOnlyCandidates()` kutset, mistõttu ei saa keelatud mudelit kunagi valida ka `auto/*`
-  kandidaatide kogumisse.
+- `src/app/api/v1/models/catalog.ts` — `/v1/models` loend ise, samal 5-l allika kohta `shouldHidePaid()` juba väravad (staatiline `PROVIDER_MODELS`, sünkroonitud pakkuja read, kohandatud read, pseudonüümiga tagatud read, hallatud varuread).
+- `open-sse/services/autoCombo/modelExposureFilter.ts::filterModelExposureCandidates()` — kutsus `virtualFactory.ts::buildPreparedPool` kohe pärast samaväärset `filterPaidOnlyCandidates()` -kutset, nii et keelatud mudelit ei saa kunagi valida ka `auto/*` kandidaatide kogumisse.
 
-## Mida EI filtreerita
+## Mis on NOT filtreeritud
 
-See järgib `hideAutoCombos` olemasolevat käitumist: **eksplitsiitselt** saadetud mudeli ID-d (mitte `auto/*` kaudu
-ega kataloogiloendist leitud) ei blokeerita päringu edastamisel kunagi — filtreeritakse ainult
-avalikustamist/kandidaatide kogumisse kuulumist. See ei sõltu sättest `hidePaidModels`;
-operaator võib soovida kureeritud kogumit põhjustel, millel pole kuludega mingit pistmist, seega
-rakendatakse mõlemat sätet sõltumatute JA-seosega filtritena, nagu olemasolevat mitme lipu kombinatsiooni failis
-`catalog.ts`.
+Peegeldab `hideAutoCombos` olemasolevat käitumist: saadeti mudeli ID** selgesõnaliselt** (mitte `auto/*` kaudu ja seda ei tuvastata kataloogi kirje kaudu) ei blokeerita kunagi saatmisel. — filtreeritakse ainult advertisement/candidate-pool liikmelisus. See ei sõltu `hidePaidModels`; operaator võib soovida kureeritud komplekti põhjustel, millel pole kuludega mingit pistmist, nii et mõlemad sätted koostatakse sõltumatute JA-ed filtritena, sama mis `catalog.ts` olemasolev mitme lipuga kompositsioon.
 
-Sätete eksport (`GET /api/settings/export-json`) sisaldab mõlemat massiivi muutmata kujul nagu kõiki teisi
-sätete välju — erinevalt `hidePaidModels`-i kombinatsioonisammu ekspordifiltrist puudub siin taastamisel
-risk: eksporditud kombinatsioonisammu manustatud keelatud ID on operaatori enda eksplitsiitne marsruutimisvalik,
-mitte miski, mida tuleks ekspordi piiril eemaldada.
+Seadete eksportimine (`GET /api/settings/export-json`) hõlmab mõlemat massiivi sõna-sõnalt, nagu kõik muud sätteväljad — erinevalt `hidePaidModels` kombineeritud sammuga ekspordifiltrist, ei ole siin uuesti hüdratatsiooni ohtu: eksporditud kombineeritud sammu sisseehitatud keelatud ID on operaatori enda selge marsruudivalik, mitte midagi, mida ekspordipiir peab eemaldama.
 
-## Ainult kombinatsioonide loend (`exposeCombosOnly`)
+## Ainult kombinatsioonide kirje (`exposeCombosOnly`)
 
-Eraldi tõeväärtus, samuti eraldi lubatav ja vaikimisi `false`, juurutustele, kus kombinatsioonid on avalik mudelipind ning pakkujad ainult taustateenused. Väärtusega `true` säilitab avalik loend (`GET /v1/models`, `GET /v1` ja muud `getUnifiedModelsResponse()`-il põhinevad `/v1` avastamismarsruudid) ainult read väärtusega `owned_by: "combo"`: kasutaja kombinatsioonid ja sisseehitatud `auto/*` kombinatsioonid (kui `hideAutoCombos` neid ei peida). See kasutab sama reakontrolli kui võtmepõhine `catalogScope: "combos"` ning võtme enda lubamis-/keelamis-/ulatusefiltrid kehtivad endiselt lisaks.
+Eraldi tõeväärtus (vaikimisi ka opt-in ja `false` juurutuste jaoks, kus kombod on avalik mudelipind ja pakkujad on ainult taustaprogrammid. Kui see on `true`, säilitab avalik loend (`GET /v1/models`, `GET /v1` ja teised `getUnifiedModelsResponse()` ehitatud `/v1` -tuvastusmarsruudid) ainult ridu `owned_by: "combo"`: kasutajakombinatsioonidega pluss sisseehitatud `auto/*` kombod (kui `hideAutoCombos` neid ei peida). See kasutab sama rea testi nagu klahvipõhine `catalogScope: "combos"` ja võtme enda allow/deny/scope filtrid rakenduvad endiselt peal.
 
-Lülita seda vaates **Settings → Routing → Models API listing** või käsuga `PATCH /api/settings {"exposeCombosOnly": true}`.
+Lülitage see sisse** Seaded → Marsruutimine → Mudelid API loend** või `PATCH /api/settings {"exposeCombosOnly": true}`-ga.
 
-Nagu ülaltoodud loendid, muudab see ainult avalikustamist:
+Nagu ülaltoodud loendid, muudab see ainult reklaami:
 
-- otsene `provider/model` ID suunatakse endiselt edasi ning `GET /v1/models/{id}` lahendab selle endiselt;
-- juhtpaneeli kataloogi (`GET /api/models/catalog`, mida kasutavad mudelivalijad) ei kitsendata;
-- seda ei peegeldata `auto/*` kandidaatide kogumitesse, seega säilitavad `auto/*` kombinatsioonid kogu oma kogumi.
+- selgesõnaline `provider/model` ID edastab endiselt ja `GET /v1/models/{id}` lahendab selle endiselt;
+- armatuurlaua kataloog (`GET /api/models/catalog`, mida kasutavad mudelivalijad) ei ole kitsendatud;
+- seda ei peegeldu `auto/*` kandidaatide kogumitesse, nii et `auto/*` -kombinatsioonid säilitavad oma täiskogu.

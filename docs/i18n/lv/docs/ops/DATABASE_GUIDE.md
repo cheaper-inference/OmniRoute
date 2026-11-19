@@ -407,23 +407,22 @@ Tiek izmantota SQLite tiešsaistes dublēšanas API — to var droši izpildīt,
 
 ### WAL režīms
 
-WAL ir iespējota pēc noklusējuma. Ja ir liela rakstīšanas slodze, apsveriet:
+WAL pēc noklusējuma ir iespējots. Lielas rakstīšanas slodzes gadījumā apsveriet:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- Kontrolpunkts ik pēc 1000 lapām
+PRAGMA journal_size_limit = 67108864;  -- 64MB WAL ierobežojums
 ```
-
-OmniRoute neiestata `journal_size_limit`. Kontrolpunkts pārvieto WAL kadrus galvenajā failā, bet WAL fails saglabā lielāko piešķirto izmēru. `OMNIROUTE_WAL_GUARD_MAX_MB` aizsargs tikai brīdina un palaiž `wal_checkpoint(RESTART)`; tas nav diska izmēra vāciņš.
 
 ### Indeksi
 
-Galvenie veiktspējas indeksi (automātiski izveidoti, migrējot):
+Galvenie veiktspējas indeksi (migrācijas tos izveido automātiski):
 
-- `idx_models_provider` — modeļa meklēšana pēc pakalpojumu sniedzēja
-- `idx_combo_targets_combo_id` — kombinētā mērķa paplašināšana
-- `idx_usage_history_api_key_timestamp` — lietojuma analīze
-- `idx_quota_snapshots_api_key_window` — kvotu izsekošana
-- `idx_call_logs_timestamp` — zvanu žurnāla vaicājumi
+- `idx_models_provider` — modeļu meklēšana pēc nodrošinātāja
+- `idx_combo_targets_combo_id` — kombināciju mērķu izvēršana
+- `idx_usage_history_api_key_timestamp` — lietojuma analītika
+- `idx_quota_snapshots_api_key_window` — kvotu uzskaite
+- `idx_call_logs_timestamp` — izsaukumu žurnāla vaicājumi
 
 Lai pievienotu jaunu indeksu, izveidojiet migrāciju:
 
@@ -432,24 +431,24 @@ Lai pievienotu jaunu indeksu, izveidojiet migrāciju:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### I/O ar atmiņas kartēšanu
+### Atmiņā kartēta ievade/izvade
 
-Ļoti lielām datu bāzēm (> 10GB) atmiņas kartēšanu var pielāgot, izmantojot SQLite pragma:
+Ļoti lielām datubāzēm (>10GB) atmiņas kartēšanu var pielāgot, izmantojot SQLite pragma:
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- Iestatiet, izmantojot SQLite pragma (pielāgojiet failā core.ts vai izpildlaikā)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Blīvēšana
+### Sablīvēšana
 
-Ilgstoši OmniRoute gadījumi gūst labumu no neregulārām `VACUUM`:
+Ilgstoši darbinātām OmniRoute instancēm ir lietderīgi periodiski izpildīt `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Palaist katru mēnesi zemas satiksmes logos. (WAL režīms samazina nepieciešamību, bet nenovērš to.)
+Izpildiet reizi mēnesī zemas noslodzes periodos. (WAL režīms samazina nepieciešamību, bet pilnībā to nenovērš.)
 
 ---
 

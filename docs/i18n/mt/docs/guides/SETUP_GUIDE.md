@@ -27,9 +27,7 @@ npm install -g omniroute
 omniroute
 ```
 
-Dashboard jiftaħ `http://localhost:20128` u API bażi URL hija `http://localhost:20128/v1`.
-
-> **utenti npm:** Jekk npm iwissi li install scripts ġew imblukkati (eż., `omniroute`, `better-sqlite3`), ara [Issolvi l-problemi — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+Id-dashboard jinfetaħ fuq `http://localhost:20128` u l-URL bażi tal-API huwa `http://localhost:20128/v1`.
 
 ### pnpm
 

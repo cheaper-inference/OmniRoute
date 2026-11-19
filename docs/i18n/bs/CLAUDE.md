@@ -15,7 +15,7 @@ na Claude Code — operativna pojašnjenja pravila koja su već definirana u `AG
 
 Cijeli obavezni worktree protokol (potvrda osnovne grane, kanonska putanja
 `.claude/worktrees/`, `cp -al` node_modules, pravila za uklanjanje) nalazi se u
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (sažeto u `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (sažeto u `AGENTS.md` →
 Git Workflow → "Worktree isolation"). Tačke specifične za Claude Code:
 
 - Potvrdite osnovnu granu s operaterom putem `AskUserQuestion` (Strogo pravilo br. 19), osim

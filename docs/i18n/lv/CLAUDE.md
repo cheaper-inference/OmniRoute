@@ -15,7 +15,7 @@ minētais attiecas TIKAI uz Claude Code — tās ir jau `AGENTS.md` definēto no
 
 Pilnais obligātais worktree protokols (bāzes zara apstiprināšana, `.claude/worktrees/` kanoniskais
 ceļš, `cp -al` node_modules, noņemšanas noteikumi) atrodas
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (apkopots `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (apkopots `AGENTS.md` →
 Git darbplūsma → "Worktree izolācija"). Claude Code specifiskie punkti:
 
 - Apstipriniet bāzes zaru ar operatoru, izmantojot `AskUserQuestion` (Stingrais noteikums Nr. 19),

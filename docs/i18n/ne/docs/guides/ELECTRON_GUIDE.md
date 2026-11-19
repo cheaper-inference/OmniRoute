@@ -4,102 +4,99 @@
 
 ---
 
-> **सत्यको आधिकारिक स्रोत:** `electron/` कार्यक्षेत्र
-> **अन्तिम अद्यावधिक:** 2026-06-28 — v3.8.40
+> **सत्यको स्रोत:** `electron/` कार्यक्षेत्र** पछिल्लो अपडेट:** 2026-06-28 — v3.8.40
 
-OmniRoute ले **Electron 41** + **electron-builder 26.10** मा निर्मित क्रस-प्लेटफर्म डेस्कटप एप (Windows / macOS / Linux) उपलब्ध गराउँछ। डेस्कटप एपले Next.js स्ट्यान्डअलोन सर्भरलाई चाइल्ड प्रोसेसका रूपमा सुरु गर्छ, त्यसतर्फ `BrowserWindow` लाई निर्देशित गर्छ, र सिस्टम ट्रे, स्वतः-अपडेटर, IPC ब्रिज तथा शून्य-कन्फिगरेसन गोप्य मान बुटस्ट्र्याप थप्छ।
+OmniRoute ले क्रस-प्लेटफर्म डेस्कटप एप (Windows / macOS / Linux) मा निर्मित**Electron 41** +** इलेक्ट्रोन-बिल्डर 26.10** । डेस्कटप एपले Next.js स्ट्यान्डअलोन सर्भरलाई चाइल्ड प्रक्रियाको रूपमा फैलाउँछ, यसमा `BrowserWindow` पोइन्ट गर्छ, र प्रणाली ट्रे, अटो-अपडेटर, IPC ब्रिज, र शून्य-कन्फिग गोप्य बुटस्ट्र्याप थप्छ।
 
-## आर्किटेक्चर
+## वास्तुकला
 
 ```
 ┌──────────────────────────────────────────────┐
-│ Electron मुख्य प्रोसेस (electron/main.js)    │
-│ ├─ एकल-इन्स्टेन्स लक                         │
-│ ├─ चाइल्ड प्रोसेस: Next.js स्ट्यान्डअलोन सर्भर │
-│ │   (Electron को Node रनटाइमद्वारा सुरु गरिएको) │
+│ Electron main process (electron/main.js)     │
+│ ├─ Single-instance lock                       │
+│ ├─ Child process: Next.js standalone server  │
+│ │   (spawned with Electron's Node runtime)   │
 │ ├─ BrowserWindow → http://localhost:PORT     │
-│ ├─ सिस्टम ट्रे + कन्टेक्स्ट मेनु             │
-│ ├─ electron-updater मार्फत स्वतः-अपडेट       │
-│ ├─ सामग्री सुरक्षा नीति (सेसन हेडरहरू)       │
-│ └─ गोप्य मान बुटस्ट्र्याप (JWT / API_KEY_SECRET) │
+│ ├─ System tray + context menu                │
+│ ├─ Auto-update via electron-updater          │
+│ ├─ Content Security Policy (session headers) │
+│ └─ Secret bootstrap (JWT / API_KEY_SECRET)   │
 └──────────────────────────────────────────────┘
-            ↕ IPC ब्रिज (electron/preload.js)
+            ↕ IPC bridge (electron/preload.js)
 ┌──────────────────────────────────────────────┐
-│ रेन्डरर (Next.js ड्यासबोर्ड)                 │
+│ Renderer (Next.js dashboard)                  │
 │   window.electronAPI.* (contextIsolation)     │
 └──────────────────────────────────────────────┘
 ```
 
 ## संस्करणहरू
 
-`electron/package.json` बाट पुष्टि गरिएको:
+`electron/package.json` बाट पुष्टि:
 
-| प्याकेज            | संस्करण                                                                            |
-| ------------------ | ---------------------------------------------------------------------------------- |
-| `electron`         | `^43.4.1`                                                                          |
-| `electron-builder` | `^26.15.3`                                                                         |
-| `electron-updater` | `^6.8.9`                                                                           |
-| `better-sqlite3`   | रुट `^13.0.2` (Node-API पूर्वनिर्मित बाइनरीहरू — Electron पुनर्निर्माण आवश्यक छैन) |
-| एप संस्करण         | `3.8.0`                                                                            |
-| एप आईडी            | `online.omniroute.desktop`                                                         |
-| उत्पादनको नाम      | `OmniRoute`                                                                        |
+| प्याकेज            | संस्करण                                                            |
+| ------------------ | ------------------------------------------------------------------ |
+| `electron`         | `^43.4.1`                                                          |
+| `electron-builder` | `^26.15.3`                                                         |
+| `electron-updater` | `^6.8.9`                                                           |
+| `better-sqlite3`   | रूट `^13.0.2` (नोड-एपीआई पूर्व निर्माण — नो Electron पुनर्निर्माण) |
+| एप संस्करण         | `3.8.0`                                                            |
+| एप आईडी            | `online.omniroute.desktop`                                         |
+| उत्पादन नाम        | `OmniRoute`                                                        |
 
-## स्क्रिप्टहरू (रुट `package.json`)
+## लिपिहरू (रूट `package.json`)
 
-| स्क्रिप्ट                         | उद्देश्य                                                                                 |
-| --------------------------------- | ---------------------------------------------------------------------------------------- |
-| `npm run electron:dev`            | `npm run dev` सुरु गर्छ + `localhost:20128` को प्रतीक्षा गर्छ + Electron सुरु गर्छ       |
-| `npm run electron:build`          | Next.js निर्माण गर्छ, त्यसपछि हालको OS का लागि `electron-builder` चलाउँछ                 |
-| `npm run electron:build:win`      | Windows NSIS इन्स्टलर + पोर्टेबल (x64) निर्माण गर्छ                                      |
-| `npm run electron:build:mac`      | macOS DMG (Intel + Apple Silicon) निर्माण गर्छ                                           |
-| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) निर्माण गर्छ                                          |
-| `npm run electron:smoke:packaged` | प्याकेज गरिएको बाइनरी सुरु गर्छ र HTTP 200 का लागि `/login` जाँच गर्छ, त्यसपछि बन्द गर्छ |
+| लिपि                              | उद्देश्य                                                                                    |
+| --------------------------------- | ------------------------------------------------------------------------------------------- |
+| `npm run electron:dev`            | `npm run dev` + सुरु हुन्छ `localhost:20128` + Electron सुरु हुन्छ                          |
+| `npm run electron:build`          | Next.js बनाउँछ त्यसपछि हालको OS को लागि `electron-builder` चलाउँछ                           |
+| `npm run electron:build:win`      | Windows NSIS स्थापनाकर्ता + पोर्टेबल (x64) बनाउँछ                                           |
+| `npm run electron:build:mac`      | macOS DMG बनाउँछ (Intel + Apple Silicon)                                                    |
+| `npm run electron:build:linux`    | Linux AppImage + DEB (x64 + arm64) बनाउँछ                                                   |
+| `npm run electron:smoke:packaged` | प्याकेज गरिएको बाइनरी लन्च गर्दछ र HTTP 200 को लागि `/login` प्रोब गर्छ, त्यसपछि बन्द हुन्छ |
 
-`electron/` कार्यक्षेत्रले निम्न पनि उपलब्ध गराउँछ:
+`electron/` कार्यस्थानले पनि उजागर गर्दछ:
 
 - `npm run prepare:bundle` — `scripts/build/prepare-electron-standalone.mjs` चलाउँछ
-- `npm run build:mac-x64` / `build:mac-arm64` — एकल-आर्किटेक्चर macOS बिल्डहरू
-- `npm run pack` — स्थानीय परीक्षणका लागि डाइरेक्टरी-मात्र बिल्ड (इन्स्टलरबिना)
+- `npm run build:mac-x64` / `build:mac-arm64` — एकल-arch macOS निर्माणहरू
+- स्थानीय परीक्षणको लागि`npm run pack` — निर्देशिका-मात्र निर्माण (कुनै स्थापनाकर्ता छैन)
 
-## वैकल्पिक रनटाइम प्याक
+## वैकल्पिक रनटाइम प्याकहरू
 
-डेस्कटप बिल्डले आफ्ना इन्स्टलरसँग वैकल्पिक रनटाइम आर्काइभ प्रकाशित गर्न सक्छन्। स्थापित सर्भर सामग्रीमा `optional-packs.index.json` हुन्छ (Windows र Linux मा `resources/app` अन्तर्गत)। `browser-runtime` प्रविष्टिका लागि `packs[].tarball` पढ्नुहोस् र **सोही रिलिजबाट ठ्याक्कै त्यही फाइलनाम डाउनलोड गर्नुहोस्**। आर्काइभ नाममा SHA-256 डाइजेस्ट हुन्छ; फरक बिल्डलाई फरक आर्काइभ चाहिन सक्छ। डाउनलोड गरिएको फाइलनाम नबदल्नुहोस्।
+डेस्कटप निर्माणहरूले तिनीहरूका स्थापनाकर्ताहरूसँग वैकल्पिक रनटाइम अभिलेखहरू प्रकाशित गर्न सक्छन्। स्थापित सर्भर पेलोडमा `optional-packs.index.json` ( Windows र Linux मा `resources/app` अन्तर्गत) समावेश छ। `browser-runtime` प्रविष्टिको लागि, `packs[].tarball` पढ्नुहोस् र डाउनलोड गर्नुहोस्** उही रिलीजबाट त्यो सही फाइल नाम** । अभिलेख नामहरूमा SHA-256 डाइजेस्ट समावेश छ; विभिन्न निर्माणहरूलाई विभिन्न अभिलेखहरू आवश्यक पर्दछ। डाउनलोड गरिएको फाइल नाम अपरिवर्तित राख्नुहोस्।
 
-स्थापित एपको इन्डेक्स र छानिएको आर्काइभ एउटै डाइरेक्टरीमा प्रतिलिपि गर्नुहोस्, त्यसपछि सोही रिलिजको CLI प्रयोग गर्नुहोस्:
+स्थापित एपको अनुक्रमणिका र चयन गरिएको अभिलेखलाई एउटा डाइरेक्टरीमा प्रतिलिपि गर्नुहोस्, त्यसपछि उही रिलीजबाट CLI प्रयोग गर्नुहोस्:
 
 ```bash
 omniroute packs list --source /path/to/packs
 omniroute packs install browser-runtime --source /path/to/packs
 ```
 
-`packs list` ले स्थापना र प्रमाणीकरण अवस्था देखाउँछ, आर्काइभ फाइलनाम होइन। सँगै आएको इन्डेक्सले आर्काइभ छान्छ। स्थापनाले निकाल्नुअघि आर्काइभ चेकसम र स्थापित प्याक बदल्नुअघि प्याकेज चेकसम जाँच्छ। यसले स्थानीय फाइल पढ्छ; हराएका आर्काइभ डाउनलोड गर्दैन। स्थापनापछि एप्लिकेसन पुनः सुरु गर्नुहोस्। रिलिजमा मिल्दो सम्पत्ति छैन भने त्यो रिलिजका सम्पत्तिमार्फत वैकल्पिक प्याक उपलब्ध हुँदैन।
+`packs list` स्थापना र प्रमाणिकरण अवस्था देखाउँछ, अभिलेख फाइलनाम होइन। बन्डल गरिएको अनुक्रमणिकाले अभिलेख चयन गर्छ। स्थापनाले निकासी अघि यसको संग्रह चेकसम र स्थापित प्याक प्रतिस्थापन गर्नु अघि यसको प्याकेज चेकसमहरू प्रमाणित गर्दछ। यसले स्थानीय फाइलहरू पढ्छ; यसले हराएको अभिलेखहरू डाउनलोड गर्दैन। स्थापना पछि अनुप्रयोग पुन: सुरु गर्नुहोस्। यदि रिलीजमा कुनै मिल्दो सम्पत्ति छैन भने, वैकल्पिक प्याक त्यो रिलीजको सम्पत्तिहरू मार्फत उपलब्ध हुँदैन।
 
-## डाइरेक्टरी संरचना
+## निर्देशिका लेआउट
 
 ```
 electron/
-├── package.json              # Electron निर्भरताहरू + electron-builder कन्फिगरेसन
-├── main.js                   # मुख्य प्रक्रिया (24 KB — तलका टिप्पणीहरू हेर्नुहोस्)
-├── preload.js                # contextBridge IPC ब्रिज
-├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI प्रकारहरू
-├── README.md                 # कार्यस्थानभित्रका टिपोटहरू
+├── package.json              # Electron deps + electron-builder config
+├── main.js                   # Main process (24 KB — see annotations below)
+├── preload.js                # contextBridge IPC bridge
+├── types.d.ts                # AppInfo / ServerStatus / ElectronAPI types
+├── README.md                 # In-workspace notes
 ├── assets/                   # icon.png, icon.ico, icon.icns, tray-icon.png
-└── dist-electron/            # electron-builder आउटपुट (gitignored)
+└── dist-electron/            # electron-builder output (gitignored)
 
 scripts/
 ├── build/
-│   └── prepare-electron-standalone.mjs   # .next/electron-standalone बन्डल तयार गर्छ
+│   └── prepare-electron-standalone.mjs   # Stages .next/electron-standalone bundle
 └── dev/
-    └── smoke-electron-packaged.mjs       # निर्माणपछिको स्मोक परीक्षण
+    └── smoke-electron-packaged.mjs       # Post-build smoke test
 ```
 
-`main.js` र `preload.js` दुवै TypeScript होइनन्, **CommonJS `.js` फाइलहरू** हुन्।
-रेन्डरर-पक्षका टाइपिङहरू `electron/types.d.ts` मा छन्।
+`main.js` र `preload.js` दुबै हुन्**CommonJS `.js` फाइलहरू** , TypeScript होइन . रेन्डरर-साइड टाइपिङहरू `electron/types.d.ts` मा रहन्छन्।
 
-## IPC ब्रिज (`preload.js`)
+## IPC पुल (`preload.js`)
 
-प्रिलोडले `contextIsolation: true` र `nodeIntegration: false` सहित `contextBridge`
-प्रयोग गरेर `window.electronAPI` मा ह्वाइटलिस्ट गरिएको API उपलब्ध गराउँछ।
+प्रिलोडले `contextIsolation: true` र `nodeIntegration: false` सँग `contextBridge` प्रयोग गरेर `window.electronAPI` मा श्वेतसूचीमा राखिएको API उजागर गर्दछ।
 
 ```javascript
 const VALID_CHANNELS = {
@@ -118,129 +115,113 @@ const VALID_CHANNELS = {
 };
 ```
 
-उपलब्ध गराइएका विधिहरू:
+खुलासा विधिहरू:
 
-| रेन्डरर कल                                                        | प्रकार                      |
-| ----------------------------------------------------------------- | --------------------------- |
-| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | invoke                      |
-| `openExternal(url)`                                               | invoke                      |
-| `getDataDir()`                                                    | invoke                      |
-| `restartServer()`                                                 | invoke                      |
-| `getAppVersion()`                                                 | invoke                      |
-| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | invoke                      |
-| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | send                        |
-| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | receive (डिस्पोजर फर्काउँछ) |
+| रेन्डरर कल                                                        | टाइप गर्नुहोस्            |
+| ----------------------------------------------------------------- | ------------------------- |
+| `getAppInfo()` → `{ name, version, platform, isDev, port }`       | आह्वान                    |
+| `openExternal(url)`                                               | आह्वान                    |
+| `getDataDir()`                                                    | आह्वान                    |
+| `restartServer()`                                                 | आह्वान                    |
+| `getAppVersion()`                                                 | आह्वान                    |
+| `checkForUpdates()` / `downloadUpdate()` / `installUpdate()`      | आह्वान                    |
+| `minimizeWindow()` / `maximizeWindow()` / `closeWindow()`         | पठाउनुहोस्                |
+| `onServerStatus(cb)` / `onPortChanged(cb)` / `onUpdateStatus(cb)` | प्राप्त (रिटर्न डिस्पोजर) |
 
-रिसिभ हेल्परहरूले `removeAllListeners` मा निर्भर हुनुको सट्टा **डिस्पोजर फङ्सन**
-फर्काउँछन् — यसले React कम्पोनेन्टहरू पुनः माउन्ट हुँदा लिस्नरहरू सञ्चित हुनबाट रोक्छ।
+प्राप्त सहयोगीहरू फिर्ता ए** डिस्पोजर प्रकार्य** `removeAllListeners` — मा भर पर्नुको सट्टा यसले React कम्पोनेन्टहरू पुन: माउन्ट गर्दा श्रोता सङ्कलनलाई रोक्छ।
 
 ## सर्भर जीवनचक्र
 
-प्रणालीको Node सँग नेटिभ-मोड्युल ABI बेमेल हुन नदिन `main.js` ले Electron Node
-रनटाइममार्फत Next.js स्ट्यान्डअलोन बन्डल सिधै सुरु गर्छ:
+`main.js` Next.js स्ट्यान्डअलोन बन्डललाई सीधा Electron नोड रनटाइमसँग स्प्यान गर्दछ नेटिभ-मोड्युल ABI प्रणाली नोडसँग बेमेल हुनबाट जोगिन:
 
 ```js
 spawn(process.execPath, [serverScript], {
   cwd: NEXT_SERVER_PATH,
-  env: {
-    ...serverEnv,
-    PORT,
-    NODE_ENV: "production",
-    ELECTRON_RUN_AS_NODE: "1",
-    NODE_PATH,
-  },
+  env: { ...serverEnv, PORT, NODE_ENV: "production", ELECTRON_RUN_AS_NODE: "1", NODE_PATH },
   stdio: "pipe",
 });
 ```
 
-मुख्य विशेषताहरू:
+हाइलाइटहरू:
 
-- `waitForServer()` ले विन्डो देखाउनुअघि बढीमा 30 s सम्म URL पोल गर्छ (कोल्ड स्टार्टमा खाली स्क्रिन देखिँदैन)।
-- `stdio: "pipe"` ले stdout/stderr क्याप्चर गर्छ; तयार भएको जनाउने वाक्यांशहरू (`Ready` / `listening`) ले IPC मार्फत `server-status: running` उत्सर्जन गर्छन्।
-- `before-quit` ले सहज SIGTERM (WAL चेकपोइन्ट) का लागि बढीमा 5 s पर्खन्छ र त्यसपछि SIGKILL पठाउँछ।
-- ट्रेमा रहेको पोर्ट स्विचर (`20128`, `3000`, `8080`) ले सर्भर रोक्छ र पुनः सुरु गर्छ, त्यसपछि BrowserWindow पुनः लोड गर्छ।
+- `waitForServer()` सञ्झ्याल देखाउनु अघि 30 s सम्म URL पोल गर्छ (कोल्ड स्टार्टमा कुनै खाली स्क्रिन छैन)।
+- `stdio: "pipe"` ले stdout/stderr कब्जा गर्छ; तयार वाक्यांशहरू (`Ready` / `listening`) `server-status: running` ओभर IPC उत्सर्जन गर्नुहोस्।
+- `before-quit` ग्रेसफुल SIGTERM (WAL checkpoint) को लागि 5 s सम्म पर्खन्छ त्यसपछि SIGKILL पठाउँछ।
+- ट्रेमा पोर्ट स्विचर (`20128`, `3000`, `8080`) रोक्छ र सर्भर पुन: सुरु गर्छ, त्यसपछि BrowserWindow पुन: लोड गर्दछ।
 
-## शून्य-कन्फिग गोप्य कुञ्जी बुटस्ट्र्याप
+## शून्य कन्फिगरेसन गोप्य बुटस्ट्र्याप
 
-पहिलोपटक सुरु हुँदा, मुख्य प्रक्रियाले छुटेका गोप्य कुञ्जीहरू स्वतः उत्पन्न गरी स्थायी रूपमा भण्डारण गर्छ:
+पहिलो प्रक्षेपणमा, मुख्य प्रक्रियाले स्वत: उत्पन्न गर्दछ र छुटेका रहस्यहरू जारी राख्छ:
 
-| गोप्य कुञ्जी             | स्रोत                                                                                                    |
+| गोप्य                    | स्रोत                                                                                                    |
 | ------------------------ | -------------------------------------------------------------------------------------------------------- |
 | `JWT_SECRET`             | `crypto.randomBytes(64).toString("hex")`                                                                 |
-| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (इन्क्रिप्ट गरिएका क्रेडेन्सियलहरू पहिले नै भएमा अस्वीकार गर्छ) |
+| `STORAGE_ENCRYPTION_KEY` | `crypto.randomBytes(32).toString("hex")` (इन्क्रिप्टेड क्रेडिटहरू पहिले नै अवस्थित छ भने अस्वीकार गर्दछ) |
 | `API_KEY_SECRET`         | `crypto.randomBytes(32).toString("hex")`                                                                 |
 
-`<DATA_DIR>/server.env` मा स्थायी रूपमा भण्डारण गरिन्छ। `DATA_DIR` यसरी निर्धारण हुन्छ:
+`<DATA_DIR>/server.env` मा लागि रह्यो। `DATA_DIR` ले समाधान गर्छ:
 
 - Windows: `%APPDATA%\omniroute`
 - Linux: `$XDG_CONFIG_HOME/omniroute` वा `~/.omniroute`
 - macOS: `~/.omniroute`
 
-## वातावरण फाइलको खोजी
+## वातावरण फाइल लुकअप
 
-सर्भर सुरु गर्नुअघि, मुख्य प्रक्रिया (`electron/main.js` मा रहेको
-`getPreferredEnvFilePath()`) ले **एउटा** `.env` फाइल छान्छ: तलका मध्ये अस्तित्वमा रहेको पहिलो फाइल।
+सर्भर स्प्यान गर्नु अघि, मुख्य प्रक्रिया (`getPreferredEnvFilePath()` in `electron/main.js`) छनोट हुन्छ** एउटा** `.env` फाइल: यी मध्ये पहिलो अवस्थित छ।
 
-1. `$DATA_DIR/.env`, जब एप सुरु गरिएको वातावरणमा `DATA_DIR` सेट गरिएको हुन्छ।
-2. `<resolved DATA_DIR>/.env`, माथिकै पूर्वनिर्धारित मानहरू प्रयोग गर्दै: Windows मा
-   `%APPDATA%\omniroute\.env`, Linux र macOS मा `$XDG_CONFIG_HOME/omniroute/.env` वा `~/.omniroute/.env`।
-3. प्रक्रियाको कार्यरत डाइरेक्टरीमा रहेको `.env`।
+1. `$DATA_DIR/.env`, जब `DATA_DIR` वातावरणमा सेट गरिएको छ अनुप्रयोगको साथ सुरू गरिएको थियो।
+2. `<resolved DATA_DIR>/.env`, माथिको जस्तै पूर्वनिर्धारितहरू प्रयोग गर्दै: `%APPDATA%\omniroute\.env` मा Windows, `$XDG_CONFIG_HOME/omniroute/.env` वा `~/.omniroute/.env` मा Linux र macOS।
+3. प्रक्रिया कार्य निर्देशिका मा`.env` ।
 
-मुख्य प्रक्रियाले त्यही फाइल मात्र पढ्छ; त्यसपछिका उम्मेदवार फाइलहरू मर्ज गरिँदैनन्। त्यसपछि
-सर्भर वातावरणलाई निम्न प्राथमिकताअनुसार बनाइन्छ (सबैभन्दा उच्च प्राथमिकता पहिले):
+मुख्य प्रक्रियाले त्यो फाइल मात्र पढ्छ; पछि उम्मेद्वारहरू मर्ज गरिएको छैन। सर्भर वातावरण त्यसपछि यो प्राथमिकता (उच्चतम पहिलो) संग बनाइन्छ।
 
-1. Electron प्रक्रियाको वातावरण (एप सुरु गर्ने स्रोतबाट इनहेरिट गरिएका भेरिएबलहरू)।
+1. Electron प्रक्रिया वातावरण (एप लन्च गरेको जुनसुकैबाट प्राप्त भ्यारीएबलहरू)।
 2. चयन गरिएको `.env` फाइल।
-3. `<DATA_DIR>/server.env` (माथिका बुटस्ट्र्याप गोप्य कुञ्जीहरू)।
+3. `<DATA_DIR>/server.env` (माथिको बुटस्ट्र्याप रहस्य)।
 
-एप सुरु हुँदा प्रक्रियाको वातावरण क्याप्चर गरिन्छ, त्यसैले एप चलिरहेको बेला सेट गरिएको प्रणाली वा प्रयोगकर्ता
-वातावरण भेरिएबल (यसको विन्डो बन्द भएपछि ट्रेमा रहिरहेको अवस्था समेत) एप पूर्ण रूपमा बन्द गरी पुनः सुरु
-नगरुन्जेल सर्भरमा पुग्दैन। `CONTEXT_LENGTH_<PROVIDER>` जस्ता रनटाइम विकल्पहरूका लागि (हेर्नुहोस्
-[वातावरण भेरिएबलहरू: प्रदायकअनुसारको कन्टेक्स्ट लम्बाइ](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider)),
-`.env` फाइललाई प्राथमिकता दिनुहोस्, त्यसपछि पूर्ण रूपमा बन्द गर्नुहोस् (ट्रे, **बन्द गर्नुहोस्**) र पुनः सुरु गर्नुहोस्।
+एप सुरु हुँदा प्रक्रियाको वातावरण क्याप्चर हुन्छ, त्यसैले एप चलिरहेको बेला प्रणाली वा प्रयोगकर्ता वातावरण चर सेट हुन्छ (यसको विन्डो बन्द भएपछि ट्रेमा बसेको बेला सहित) एप पूर्ण रूपमा बन्द र पुन: सुरु नभएसम्म सर्भरमा पुग्दैन। रनटाइम knobs को लागि जस्तै `CONTEXT_LENGTH_<PROVIDER>` ( [पर्यावरण चर हेर्नुहोस्: प्रति-प्रदायक सन्दर्भ लम्बाइ](../reference/ENVIRONMENT.md#per-provider-context-length-context_length_provider) ), `.env` फाइललाई प्राथमिकता दिनुहोस्, त्यसपछि पूर्ण रूपमा छोड्नुहोस् (ट्रे,** छोड्नुहोस्** ) र पुन: सुरु गर्नुहोस्।
 
 ## विन्डो र ट्रे
 
-- `BrowserWindow`: 1400×900 (न्यूनतम 1024×700), `backgroundColor: "#0a0a0a"`।
-- macOS: `titleBarStyle: "hiddenInset"`, ट्राफिक-लाइट `{ x: 16, y: 16 }` मा।
-- Windows/Linux: नेटिभ शीर्षक पट्टी।
-- बन्द गर्ने बटनले ट्रेमा मिनिमाइज गर्छ; ट्रे मेनुमा **OmniRoute खोल्नुहोस्**, **ड्यासबोर्ड खोल्नुहोस्** (बाह्य ब्राउजर), **सर्भर पोर्ट** उपमेनु, **अपडेटहरू जाँच गर्नुहोस्**, **बन्द गर्नुहोस्** छन्।
+- `BrowserWindow`: 1400 × 900 (min 1024 × 700), `backgroundColor: "#0a0a0a"`
+- macOS: `titleBarStyle: "hiddenInset"`, `{ x: 16, y: 16 }` मा ट्राफिक-लाइट।
+- Windows/Linux: मूल शीर्षक पट्टी।
+- बन्द बटन ट्रे मा न्यूनतम; ट्रे मेनु छ** OmniRoute खोल्नुहोस्** ,** ड्यासबोर्ड खोल्नुहोस्** (बाह्य ब्राउजर),** सर्भर पोर्ट** उपमेनु,** अपडेटहरूको लागि जाँच गर्नुहोस्** ,** छोड्नुहोस्** ।
 
 ## सामग्री सुरक्षा नीति
 
-`session.defaultSession.webRequest.onHeadersReceived` मार्फत सेट गरिन्छ। उल्लेखनीय निर्देशनहरू:
+`session.defaultSession.webRequest.onHeadersReceived` मार्फत सेट गर्नुहोस्। उल्लेखनीय निर्देशनहरू:
 
 - `frame-ancestors 'none'`, `object-src 'none'`, `child-src 'none'`
 - `connect-src 'self' http://localhost:* http://127.0.0.1:* ws://localhost:* ws://127.0.0.1:* https://*.omniroute.online https://*.omniroute.dev`
-- डेभ मोडले `script-src` मा मात्र `'unsafe-eval'` थप्छ
+- देव मोडले `'unsafe-eval'` लाई `script-src` मा मात्र थप्छ
 
-## स्वतः-अपडेट
+## स्वत: अद्यावधिक
 
-GitHub प्रदायक (`diegosouzapw/OmniRoute`) सँग `electron-updater` प्रयोग गर्छ।
+GitHub प्रदायक (`diegosouzapw/OmniRoute`) सँग `electron-updater` प्रयोग गर्दछ।
 
 - `autoDownload = false`, `autoInstallOnAppQuit = true`
-- `update-status` IPC मार्फत रेन्डररमा पठाइने इभेन्टहरू:
-  `checking`, `available`, `not-available`, `downloading` (`percent` सहित), `downloaded`, `error`
-- `installUpdate()` ले सर्भर बन्द गर्छ र त्यसपछि `autoUpdater.quitAndInstall()` कल गर्छ
-- डेभ मोडमा छोडिन्छ (`!app.isPackaged`)
+- घटनाहरू `update-status` IPC मार्फत रेन्डररलाई फर्वार्ड गरियो: `checking`, `available`, `not-available`, `downloading` ( `percent` सँग), `downloaded`, `error`
+- `installUpdate()` सर्भरलाई मार्छ त्यसपछि `autoUpdater.quitAndInstall()` कल गर्छ
+- देव मोडमा छोडियो (`!app.isPackaged`)
 
-## बिल्ड पाइपलाइन
+## पाइपलाइन निर्माण गर्नुहोस्
 
-1. `npm run build` → `.next/standalone` मा Next.js standalone।
-2. `prepare-electron-standalone.mjs` → `.next/electron-standalone` मा पुनः स्टेज गर्छ र `server.js` + `required-server-files.json` भित्रका निरपेक्ष पथहरू पुनर्लेखन गर्छ, जसले गर्दा बन्डललाई अन्य स्थानमा सार्न सकिन्छ।
-3. `electron-builder` ले `main.js`, `preload.js`, `node_modules`, र `extraResources: { ../.next/electron-standalone → app }` प्याकेज गर्छ।
+1. `npm run build` → Next.js स्ट्यान्डअलोन `.next/standalone` मा।
+2. `prepare-electron-standalone.mjs` → `.next/electron-standalone` मा पुन: चरणहरू बनाउँछ र `server.js` + `required-server-files.json` भित्र निरपेक्ष मार्गहरू पुन: लेख्छ त्यसैले बन्डल पुन: स्थानान्तरणयोग्य छ।
+3. `electron-builder` प्याकेजहरू `main.js`, `preload.js`, `node_modules`, र `extraResources: { ../.next/electron-standalone → app }`।
 
-### बिल्ड लक्ष्यहरू
+### लक्ष्यहरू निर्माण गर्नुहोस्
 
-| OS      | लक्ष्यहरू                                         |
-| ------- | ------------------------------------------------- |
-| Windows | NSIS इन्स्टलर + पोर्टेबल (x64)                    |
-| macOS   | DMG (Intel + arm64, तानेर Applications मा राख्ने) |
-| Linux   | AppImage + DEB (x64 + arm64)                      |
+| OS      | लक्ष्यहरू                                    |
+| ------- | -------------------------------------------- |
+| Windows | NSIS स्थापनाकर्ता + पोर्टेबल (x64)           |
+| macOS   | DMG (Intel + arm64, ड्र्याग-टू-एप्लिकेशनहरू) |
+| Linux   | AppImage + DEB (x64 + arm64)                 |
 
-NSIS सेटिङहरू: `oneClick: false`, प्रयोगकर्तालाई इन्स्टल डाइरेक्टरी छनोट गर्न दिन्छ, Desktop र Start-Menu सर्टकटहरू सिर्जना गर्छ।
+NSIS सेटिङहरू: `oneClick: false`, प्रयोगकर्तालाई स्थापना निर्देशिका छनोट गर्न दिन्छ, डेस्कटप र स्टार्ट-मेनू सर्टकटहरू सिर्जना गर्दछ।
 
-## प्याकेज गरिएको बिल्डको स्मोक परीक्षण
+## धुवाँ परीक्षण प्याकेज गरिएको निर्माण
 
 ```bash
 npm run electron:smoke:packaged
@@ -248,18 +229,18 @@ npm run electron:smoke:packaged
 
 `scripts/dev/smoke-electron-packaged.mjs`:
 
-- हालको प्लेटफर्मका लागि `electron/dist-electron/` भित्र प्याकेज गरिएको बाइनरी स्वतः पत्ता लगाउँछ।
-- विकासकर्ताको डेटा नछोओस् भनेर छुट्टै `HOME`/`APPDATA`/`XDG_*` डाइरेक्टरीहरूसहित सुरु गर्छ।
-- 45 s भित्र HTTP 200 प्राप्त गर्न `http://127.0.0.1:20128/login` लाई बारम्बार जाँच गर्छ।
-- गम्भीर त्रुटिका ढाँचाहरू (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, आदि) का लागि stderr/stdout निगरानी गर्छ।
-- तयार भएपछि 2 s सम्म स्थिर रनटाइमको प्रतीक्षा गर्छ, त्यसपछि SIGTERM पठाउँछ र पोर्ट खाली हुने प्रतीक्षा गर्छ।
-- CI मा, स्वचालित रूपमा `--no-sandbox --disable-gpu` (र Linux मा `--disable-dev-shm-usage`) पास गर्छ।
+- हालको प्लेटफर्मको लागि `electron/dist-electron/` मा प्याकेज गरिएको बाइनरी स्वतः पत्ता लगाउँदछ।
+- पृथक `HOME`/`APPDATA`/`XDG_*` डाइरेक्टरीहरूसँग सुरु हुन्छ त्यसैले यसले विकासकर्ता डेटालाई छुँदैन।
+- 45 सेकेन्ड भित्र HTTP 200 को लागि मतदान `http://127.0.0.1:20128/login` ।
+- घातक ढाँचाहरू (`Cannot find module`, `MODULE_NOT_FOUND`, `ERR_DLOPEN_FAILED`, `Failed to start server`, आदि) को लागि stderr/stdout हेर्छ।
+- तयारी पछि स्थिर रनटाइमको २ सेकेन्ड पर्खन्छ, त्यसपछि SIGTERM जारी गर्छ र पोर्ट खाली हुनको लागि पर्खन्छ।
+- CI मा, स्वचालित रूपमा `--no-sandbox --disable-gpu` (र Linux मा `--disable-dev-shm-usage` ) पास हुन्छ।
 
 Env ओभरराइडहरू: `ELECTRON_SMOKE_APP_EXECUTABLE`, `ELECTRON_SMOKE_URL`, `ELECTRON_SMOKE_TIMEOUT_MS`, `ELECTRON_SMOKE_SETTLE_MS`, `ELECTRON_SMOKE_DATA_DIR`, `ELECTRON_SMOKE_KEEP_DATA`, `ELECTRON_SMOKE_STREAM_LOGS`।
 
-## कोड साइनिङ
+## कोड हस्ताक्षर
 
-`electron/package.json` ले साइनिङ क्रेडेन्सियलहरू प्रत्यक्ष रूपमा जडान **गर्दैन**। तिनलाई env vars मार्फत `electron-builder` मा पास गर्नुहोस्:
+`electron/package.json` गर्छ** होइन** तार हस्ताक्षर प्रमाणहरू सीधा। तिनीहरूलाई env vars मार्फत `electron-builder` मा पास गर्नुहोस्:
 
 ### macOS
 
@@ -282,32 +263,32 @@ npm run electron:build:win
 
 ### Linux
 
-AppImage साइनिङ वैकल्पिक हो — साइनिङ गर्न `LINUX_GPG_KEY` सेट गर्नुहोस्।
+AppImage हस्ताक्षर वैकल्पिक — सेट `LINUX_GPG_KEY` यदि साइन इन गर्नुहोस्।
 
 ## वितरण
 
-आर्टिफ्याक्टहरू `electron/dist-electron/` मा राखिन्छन्:
+कलाकृतिहरू `electron/dist-electron/` मा भूमि:
 
 - `OmniRoute.Setup.X.Y.Z.exe`, `OmniRoute X.Y.Z.exe` (Windows)
 - `OmniRoute-X.Y.Z-mac.dmg`, `OmniRoute-X.Y.Z-arm64-mac.dmg` (macOS)
 - `OmniRoute-X.Y.Z.AppImage`, `omniroute-desktop_X.Y.Z_amd64.deb` (Linux)
 
-रिलिजहरू GitHub Releases (`diegosouzapw/OmniRoute`) मा प्रकाशित हुन्छन्, र `electron-updater` ले पनि नयाँ संस्करणहरू त्यहीँ जाँच गर्छ।
+विज्ञप्तिहरू GitHub रिलीजहरू (`diegosouzapw/OmniRoute`) मा प्रकाशित हुन्छन्, जहाँ पनि `electron-updater` नयाँ संस्करणहरूको लागि जाँच गर्दछ।
 
 ## समस्या निवारण
 
-| लक्षण                                                                    | समाधान                                                                                                                                                                          |
-| ------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Electron को प्रमुख संस्करण बढाएपछि `Cannot find module 'better-sqlite3'` | better-sqlite3 v13 ले Node-API prebuilds उपलब्ध गराउँछ — मूल डाइरेक्टरीमा `npm install` र `prepare:bundle` पुनः चलाउनुहोस् (यसले हालको प्लेटफर्मका लागि prebuild प्रमाणित गर्छ) |
-| native module का लागि `ERR_DLOPEN_FAILED`                                | `prepare:bundle` पुनः चलाउनुहोस् — हालको प्लेटफर्मका लागि Node-API prebuild नभएमा यो तुरुन्तै असफल हुन्छ                                                                        |
-| Linux मा विन्डो खाली देखिन्छ                                             | Next.js server वास्तवमै PORT मा बाँधिएको छ कि छैन पुष्टि गर्नुहोस् (`[Server]` logs जाँच गर्नुहोस्)                                                                             |
-| macOS notarization रोकिन्छ                                               | `APPLE_*` vars केवल `.env` मा नभई export गरिएका छन् भन्ने सुनिश्चित गर्नुहोस्                                                                                                   |
-| Windows SmartScreen चेतावनी                                              | EV cert प्रयोग गरी साइन गर्नुहोस्, वा प्रयोगकर्ताले दायाँ-क्लिक → "Run anyway" गर्नुहोस्                                                                                        |
-| पोर्ट प्रयोगमा भएकाले स्मोक परीक्षण असफल हुन्छ                           | `electron:smoke:packaged` चलाउनुअघि 20128 मा चलिरहेको कुनै पनि स्थानीय dev server रोक्नुहोस्                                                                                    |
+| लक्षण                                                           | ठीक गर्नुहोस्                                                                                                                                                         |
+| --------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Cannot find module 'better-sqlite3'` पछि Electron प्रमुख टक्कर | better-sqlite3 v13 ships Node-API ले मूल र `prepare:bundle` मा — पुन: रन `npm install` पूर्व-निर्माण गर्दछ (यसले हालको प्लेटफर्मको लागि पूर्व निर्माण प्रमाणित गर्दछ) |
+| नेटिभ मोड्युलको लागि`ERR_DLOPEN_FAILED`                         | `prepare:bundle` — पुन: चलाउनुहोस् यो छिटो असफल हुन्छ जब हालको प्लेटफर्मको लागि नोड-एपीआई प्रिबिल्ड हराइरहेको छ।                                                      |
+| Linux मा सञ्झ्याल खाली देखिन्छ                                  | Next.js सर्भर वास्तवमा PORT मा बाँधिएको पुष्टि गर्नुहोस् ( `[Server]` लगहरू जाँच गर्नुहोस्)                                                                           |
+| macOS notarization स्टलहरू                                      | `APPLE_*` vars `.env` मा मात्र होइन, निर्यात गरिएको सुनिश्चित गर्नुहोस्                                                                                               |
+| Windows SmartScreen चेतावनी                                     | EV cert को साथ साइन इन गर्नुहोस्, वा प्रयोगकर्ताहरूले → मा दायाँ क्लिक गर्नुहोस् "जस्तै पनि चलाउनुहोस्"                                                               |
+| धुवाँ परीक्षण पोर्ट-इन-प्रयोगको साथ असफल हुन्छ                  | `electron:smoke:packaged` चलाउनु अघि 20128 मा कुनै पनि स्थानीय dev सर्भर रोक्नुहोस्                                                                                   |
 
 ## यो पनि हेर्नुहोस्
 
 - [SETUP_GUIDE.md](./SETUP_GUIDE.md)
 - [RELEASE_CHECKLIST.md](../ops/RELEASE_CHECKLIST.md)
 - स्रोत: `electron/main.js`, `electron/preload.js`, `electron/package.json`
-- सहायकहरू: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`
+- सहयोगीहरू: `scripts/build/prepare-electron-standalone.mjs`, `scripts/dev/smoke-electron-packaged.mjs`

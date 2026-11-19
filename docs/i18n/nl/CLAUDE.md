@@ -15,7 +15,7 @@ van toepassing op Claude Code — operationele verfijningen van regels die al in
 
 Het volledige verplichte worktree-protocol (bevestiging van de basisbranch, het canonieke pad
 `.claude/worktrees/`, `cp -al` voor node_modules, afbreekregels) staat in
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (samengevat in `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (samengevat in `AGENTS.md` →
 Git-workflow → "Worktree-isolatie"). Punten die specifiek zijn voor Claude Code:
 
 - Bevestig de basisbranch met de operator via `AskUserQuestion` (Harde regel #19), tenzij die

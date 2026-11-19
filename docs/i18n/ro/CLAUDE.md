@@ -15,7 +15,7 @@ pentru Claude Code — îmbunătățiri operaționale ale regulilor deja definit
 
 Protocolul complet obligatoriu privind worktree-urile (confirmarea branch-ului de bază, calea
 canonică `.claude/worktrees/`, `cp -al` node_modules, regulile de teardown) se află în
-[`docs/ops/WORKTREE_ISOLATION.md`](../../../docs/ops/WORKTREE_ISOLATION.md) (rezumat în `AGENTS.md` →
+[`docs/ops/WORKTREE_ISOLATION.md`](docs/ops/WORKTREE_ISOLATION.md) (rezumat în `AGENTS.md` →
 Flux de lucru Git → „Izolarea worktree-urilor"). Aspecte specifice Claude Code:
 
 - Confirmă branch-ul de bază cu operatorul prin `AskUserQuestion` (Regula strictă nr. 19), cu

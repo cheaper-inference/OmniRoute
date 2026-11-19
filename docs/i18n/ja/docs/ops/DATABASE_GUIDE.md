@@ -404,51 +404,50 @@ sqlite3 ~/.omniroute/storage.sqlite ".backup /backups/omniroute-hot.db"
 
 ## パフォーマンスチューニング
 
-### WALモード
+### WAL モード
 
-WALはデフォルトで有効になっています。書き込み頻度の高いワークロードの場合は、次のことを考慮してください。
+WAL はデフォルトで有効です。書き込み負荷の高いワークロードでは、以下を検討してください。
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
+PRAGMA wal_autocheckpoint = 1000;  -- 1000ページごとにチェックポイントを実行
+PRAGMA journal_size_limit = 67108864;  -- WALの上限は64MB
 ```
-
-OmniRoute `journal_size_limit`を設定しません。チェックポイントはWALフレームをメイン ファイルに移動しますが、 WALファイルは割り当てられた最大サイズを維持します。 `OMNIROUTE_WAL_GUARD_MAX_MB`ガードは、 `wal_checkpoint(RESTART)`を警告して実行するだけです。ディスクサイズの上限ではありません。
 
 ### インデックス
 
-パフォーマンスの主要なインデックス (移行によって自動作成されます):
+パフォーマンス向上のための主要なインデックス（マイグレーションによって自動作成されます）：
 
-- プロバイダー別の`idx_models_provider` —モデルの検索
-- `idx_combo_targets_combo_id` —コンボ対象拡大
-- `idx_usage_history_api_key_timestamp` —使用状況分析
-- `idx_quota_snapshots_api_key_window` —クォータの追跡
-- `idx_call_logs_timestamp` —通話履歴クエリ
+- `idx_models_provider` — プロバイダー別のモデル検索
+- `idx_combo_targets_combo_id` — コンボターゲットの展開
+- `idx_usage_history_api_key_timestamp` — 使用状況の分析
+- `idx_quota_snapshots_api_key_window` — クォータの追跡
+- `idx_call_logs_timestamp` — コールログのクエリ
 
-新しいインデックスを追加するには、移行を作成します。
+新しいインデックスを追加するには、マイグレーションを作成します。
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### メモリマップドI/O
+### メモリマップド I/O
 
-非常に大規模なデータベース (> 10GB) の場合、 SQLiteプラグマを介してメモリ マッピングを調整できます。
+非常に大規模なデータベース（>10GB）では、SQLite pragma を使用してメモリマッピングを調整できます。
 
 ```sql
--- Set via SQLite pragma (adjust in core.ts or runtime)
+-- SQLite pragmaで設定（core.tsまたはランタイムで調整）
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### 圧縮
+### コンパクション
 
-長時間実行されるOmniRouteインスタンスは、時々 `VACUUM`使用することで恩恵を受けます。
+長期間稼働する OmniRoute インスタンスでは、定期的な `VACUUM` の実行が有効です。
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-毎月、トラフィックの少ない時間帯に実行します。 (WALモードでは必要性が軽減されますが、不要になるわけではありません。)
+トラフィックの少ない時間帯に毎月実行してください。（WAL モードにより必要性は低下しますが、完全になくなるわけではありません。）
 
 ---
 

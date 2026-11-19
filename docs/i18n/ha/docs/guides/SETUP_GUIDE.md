@@ -20,16 +20,14 @@
 
 ## Hanyoyin Shigarwa
 
-### npm (an bada shawarar)
+### npm (ana ba da shawara)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Dashboard yana buɗewa a `http://localhost:20128` kuma API tushe URL shine `http://localhost:20128/v1`.
-
-> **npm masu amfani:** Idan npm yayi kashedin cewa an toshe rubutun shigarwa (misali, `omniroute`, `better-sqlite3`), duba [Shirya matsala — npm an katange rubutun shigarwa](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+Dashboard yana buɗewa a `http://localhost:20128`, sannan tushen URL na API shi ne `http://localhost:20128/v1`.
 
 ### pnpm
 

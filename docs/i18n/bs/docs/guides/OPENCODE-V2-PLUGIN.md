@@ -4,9 +4,11 @@
 
 ---
 
-`@omniroute/opencode-plugin-v2` stavlja vaš cijeli OmniRoute katalog — modele, kombinacije i auto-kombo — u OpenCode v2-ov birač modela, sa imenima za prikaz, cijenama i besplatnim budžetima.
+# OpenCode v2 dodatak — instalacija i konfiguracija
 
-To je poseban paket od `@omniroute/opencode-plugin` jer OpenCode v1 i v2 učitavaju dodatke kroz različite ugovore. Odaberite onaj koji odgovara vašem OpenCode smjeru; ništa se ne dijeli između njih, tako da nadogradnja jednog nikada ne prisiljava drugog.
+`@omniroute/opencode-plugin-v2` postavlja vaš cijeli OmniRoute katalog — modele, kombinacije (combos) i automatske kombinacije (auto-combos) — u OpenCode v2 birač modela, sa prikazanim imenima, cijenama i budžetima za besplatni nivo.
+
+Ovo je zaseban paket od `@omniroute/opencode-plugin` jer OpenCode v1 i v2 učitavaju dodatke kroz različite ugovore. Odaberite onaj koji odgovara vašoj OpenCode glavnoj verziji; ništa se ne dijeli između njih, tako da nadogradnja jednog nikada ne prisiljava nadogradnju drugog.
 
 ## Zahtjevi
 

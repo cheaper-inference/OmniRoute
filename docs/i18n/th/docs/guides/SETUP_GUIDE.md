@@ -27,9 +27,7 @@ npm install -g omniroute
 omniroute
 ```
 
-แดชบอร์ดเปิดที่ฐาน `http://localhost:20128` และ API URL คือ `http://localhost:20128/v1`
-
-> **ผู้ใช้ npm:** หาก npm เตือนว่าสคริปต์การติดตั้งถูกบล็อก (เช่น `omniroute`, `better-sqlite3`) โปรดดู [การแก้ไขปัญหา — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install)
+แดชบอร์ดจะเปิดที่ `http://localhost:20128` และ URL ฐานของ API คือ `http://localhost:20128/v1`
 
 ### pnpm
 
