@@ -111,9 +111,7 @@ function OverrideEditor({
 
   return (
     <div className="space-y-3 rounded-xl border border-border p-3">
-      <h3 className="text-sm font-semibold">
-        {kind === "provider" ? "Provider overrides" : "Model overrides"}
-      </h3>
+      <h3 className="text-sm">{kind === "provider" ? "Provider overrides" : "Model overrides"}</h3>
       <p className="text-xs text-text-muted">
         {kind === "provider"
           ? "Example: codex or antigravity. Overrides the provider default."
@@ -156,7 +154,7 @@ function OverrideEditor({
         </Button>
       </div>
       {error && (
-        <p role="alert" className="text-sm text-danger">
+        <p role="alert" className="text-sm text-error">
           {error}
         </p>
       )}
@@ -187,7 +185,7 @@ export default function PreferredAccountFailoverCard({
 
   return (
     <Card className="space-y-4 p-6">
-      <h2 className="text-lg font-semibold">
+      <h2 className="text-lg">
         {label("preferredAccountFailoverTitle", "Preferred account failover")}
       </h2>
       <p className="text-sm text-text-muted">

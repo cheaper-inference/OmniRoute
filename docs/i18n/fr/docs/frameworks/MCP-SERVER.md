@@ -20,6 +20,8 @@ Ou via les transports open-sse :
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -144,7 +146,7 @@ Cursor, Cline et les clients MCP compatibles.
 | `omniroute_rtk_discover`            | `read:compression`  | Découvrez le bruit récurrent dans les échantillons de sortie opt-in RTK                                                                               |
 | `omniroute_rtk_learn`               | `read:compression`  | Générer un brouillon de filtre RTK révisable à partir d'échantillons opt-in                                                                           |
 
-Les entrées CCR utilisent un magasin à deux niveaux : un niveau en mémoire chaud soutenu, sur les environnements d'exécution locaux non cloud, par un niveau SQLite durable (`ccr_blocks`, activé par défaut) afin qu'un bloc survive à une expulsion ou à un redémarrage jusqu'à ce que son TTL épuise — à l'exception des blocs supérieurs à 512 KB et des environnements d'exécution cloud, qui restent en mémoire uniquement. Chaque bloc est limité à 2 MiB, chaque principal à 16 MiB et le magasin global à 64 MiB. Les entrées par défaut sont un TTL de 24 heures (maximum sept jours). La récupération complète MCP est limitée à 256 KiB; les blocs plus gros restent disponibles via les modes ranged et grep. Le stockage, la récupération, la liste, l'inspection, la suppression et les statistiques sont isolés par le principal de clé API authentifié. Les enregistrements d'audit contiennent des hachages et des métadonnées de taille, jamais du contenu. Les détails destinés à l'opérateur (les deux marqueurs, les prérequis du client, `codemode:false`, les étendues par outil, la pagination et une matrice de diagnostic) se trouvent dans [les moteurs de compression → Prerequisites / Operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+Les entrées CCR utilisent un magasin à deux niveaux : un niveau en mémoire chaud soutenu, sur les environnements d'exécution locaux non cloud, par un niveau SQLite durable (`ccr_blocks`, activé par défaut) afin qu'un bloc survive à une expulsion ou à un redémarrage jusqu'à ce que son TTL soit épuisé. — sauf les blocs supérieurs à 512 KB, les environnements d'exécution cloud et `COMPRESSION_CCR_DURABLE_STORE=false`, qui restent en mémoire uniquement. L'écriture durable est la meilleure solution : elle est abandonnée alors que 1 000 écritures sont déjà en attente, et une écriture SQLite ayant échoué est enregistrée, sans nouvelle tentative, de sorte que le bloc est perdu au redémarrage. Chaque bloc est limité à 2 MiB, chaque principal à 16 MiB et le magasin global à 64 MiB. Les entrées par défaut sont un TTL de 24 heures (sept jours maximum). La récupération complète MCP est limitée à 256 KiB; les blocs plus gros restent disponibles via les modes ranged et grep. Le stockage, la récupération, la liste, l'inspection, la suppression et les statistiques sont isolés par le principal de clé API authentifié. Les enregistrements d'audit contiennent des hachages et des métadonnées de taille, jamais du contenu. Les détails destinés à l'opérateur (les deux marqueurs, les prérequis du client, `codemode:false`, les étendues par outil, la pagination et une matrice de diagnostic) se trouvent dans [les moteurs de compression → Prerequisites / Operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` rapporte la compression de la description MCP séparément sous `analytics.mcpDescriptionCompression`. Ces valeurs sont des estimations de la taille des métadonnées pour les descriptions listables MCP (`tools`, `prompts`, `resources` et `resourceTemplates`) ; ce ne sont pas des reçus d'utilisation du fournisseur et sont marqués `source: "mcp_metadata_estimate"`.
 
@@ -159,7 +161,7 @@ Comportements clés :
 - Tronque durement le texte surdimensionné (> 50 000 caractères) avec une indication de navigation
 - Économies attendues :** 60 à 80 %** sur les charges utiles des instantanés du navigateur
 
-Configuration : `compression.mcpAccessibility` dans les paramètres globaux (migration 056). Implémentation : `open-sse/services/compression/engines/mcpAccessibility/`. Documentation complète : [Moteurs de compression — MCP Filtre d'arborescence d'accessibilité](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
+Configuration : `compression.mcpAccessibility` dans les paramètres globaux (migration 056). Implémentation : `open-sse/services/compression/engines/mcpAccessibility/`. Documentation complète : [Moteurs de compression — MCP Filtre d'arborescence d'accessibilité](../compression/COMPRESSION_ENGINES.md#mcp-accessibility-tree-filter).
 
 Voir [Moteurs de compression](../compression/COMPRESSION_ENGINES.md) et [compression RTK](../compression/RTK_COMPRESSION.md) pour connaître le modèle de compression d'exécution derrière ces outils.
 

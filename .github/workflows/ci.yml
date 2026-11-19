@@ -155,9 +155,16 @@ jobs:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
       - run: npm run check:node-runtime
+      # External state (the npm advisory database; "externalState" in
+      # config/quality/release-green-static-profile.json): advisory on an omni-queue candidate,
+      # so an advisory published during the batch's CI cannot throw the batch out.
       - run: npm run audit:deps
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
+      # The cache, the JSON report and its upload run even when a step above failed:
+      # quality-gate still runs on a failed lint job and its ESLint download is strict, so a
+      # missing artifact would skip the complexity / duplication / dead-code ratchets too.
       - name: Restore ESLint file cache
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && !cancelled()
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
@@ -172,6 +179,7 @@ jobs:
       # Single ESLint inventory (JSON) — quality-gate reuses the artifact instead of
       # a second cold full-tree pass for eslintWarnings ratchet counts.
       - name: ESLint (JSON report)
+        if: ${{ !cancelled() }}
         run: npm run lint:json
       - name: Upload ESLint results
         if: always()
@@ -236,6 +244,13 @@ jobs:
         env:
           CANDIDATE_BASE: ${{ needs.changes.outputs.candidateBase }}
         run: npm run check:ai-attribution -- --range "$CANDIDATE_BASE..$GITHUB_SHA"
+      # Release-Green holds test-masking as a hard gate; on pull requests it runs in PR Test
+      # Policy, which never runs on a push. A candidate is judged here, against its base.
+      - name: Detect test-masking against the omni-queue candidate base
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/')
+        env:
+          GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
+        run: npm run check:test-masking
       # A test parked in vitest.config.ts's exclude list does not run, and looks like
       # coverage to whoever reads the tree. 62 files accumulated behind a comment pointing
       # at #8618 — closed in August while the list grew to 62; 51 of them passed when
@@ -384,12 +399,19 @@ jobs:
         run: npm run check:type-coverage
       - name: Compression budget ratchet (F2.4 / N4)
         run: npm run check:compression-budget
+      # Kit type scale (#19066 block 7): sizes under 12 px and font-bold may only go down. The
+      # pre-commit hook runs it too, but `git commit --no-verify` skips the hook.
+      - name: Type scale ratchet
+        run: npm run check:type-scale-ratchet -- --ratchet
       # CodeQL alerts ratchet — BLOQUEANTE (promovido de advisory na v3.8.26).
       # Lê metrics.codeqlAlerts.value de quality-baseline.json e sai 1 SOMENTE numa
       # regressão real (alertas abertos > baseline). Falha de medição (gh/auth/api)
       # é skip gracioso com exit 0 — security-events:read no job-level permissions.
+      # External state (the repository's open code-scanning alerts): advisory on an omni-queue
+      # candidate, blocking everywhere else.
       - name: CodeQL alerts ratchet (blocking)
         run: npm run check:codeql-ratchet
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Append summary
@@ -475,17 +497,22 @@ jobs:
         run: |
           set +e
           mkdir -p "$HOME/.local/bin"
-          # gitleaks — download latest linux x64 tarball via gh (authed), extract binary
+          # Pinned to quality.yml's versions: a scanner release must not change a ratchet's
+          # verdict mid-cycle, nor give one gate two verdicts on one omni-queue candidate.
+          GITLEAKS_VERSION=v8.30.1
+          OSV_SCANNER_VERSION=v2.3.8
+          OASDIFF_VERSION=v1.19.1
+          # gitleaks — pinned linux x64 tarball via gh (authed), extract binary
           rm -rf /tmp/gl && mkdir -p /tmp/gl
-          gh release download --repo gitleaks/gitleaks --pattern '*linux_x64.tar.gz' --dir /tmp/gl
+          gh release download "$GITLEAKS_VERSION" --repo gitleaks/gitleaks --pattern '*linux_x64.tar.gz' --dir /tmp/gl
           tar -xzf /tmp/gl/*linux_x64.tar.gz -C "$HOME/.local/bin" gitleaks
-          # osv-scanner — download latest linux amd64 bare binary via gh (authed)
+          # osv-scanner — pinned linux amd64 bare binary via gh (authed)
           rm -rf /tmp/osv && mkdir -p /tmp/osv
-          gh release download --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
+          gh release download "$OSV_SCANNER_VERSION" --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
           install -m 0755 /tmp/osv/*linux_amd64 "$HOME/.local/bin/osv-scanner"
-          # oasdiff — download latest linux amd64 tarball via gh (authed), extract binary
+          # oasdiff — pinned linux amd64 tarball via gh (authed), extract binary
           rm -rf /tmp/oasd && mkdir -p /tmp/oasd
-          gh release download --repo oasdiff/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
+          gh release download "$OASDIFF_VERSION" --repo oasdiff/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
           tar -xzf /tmp/oasd/*linux_amd64.tar.gz -C "$HOME/.local/bin" oasdiff
           # ALWAYS export the bin dir (even if any step above failed)
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
@@ -512,9 +539,11 @@ jobs:
       # failure in the advisory-scanner step above surfaces here as
       # `vulnCount=INCOMPLETE reason=binary-absent`. See the CVE-variance note in
       # docs/security/SUPPLY_CHAIN.md — a newly-disclosed CVE on an unchanged dep can
-      # red this gate; the fix is to bump the dep or re-baseline metrics.vulnCount.
+      # red this gate; the fix is to bump the dep or re-baseline metrics.vulnCount. That variance
+      # is external state: advisory on an omni-queue candidate, blocking everywhere else.
       - name: Vulnerability ratchet (osv-scanner, ratchet, blocking)
         run: npm run check:vuln-ratchet -- --ratchet
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
       # BLOCKING ratchet (Etapa 2): zizmorFindings must not regress vs the baseline.
       # ONLY zizmor is ratcheted — actionlint findings are reported, not blocking.
       # Both tools must complete with valid reports. Missing/broken scanners or

@@ -227,7 +227,7 @@ export default function ModelsDevSyncTab() {
             <Icon name="sync" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("modelsDevTitle")}</h3>
+            <h3 className="text-lg">{t("modelsDevTitle")}</h3>
             <p className="text-sm text-text-muted">{t("modelsDevDesc")}</p>
           </div>
         </div>
@@ -258,7 +258,7 @@ export default function ModelsDevSyncTab() {
             <Icon name="database" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("modelsDevTitle")}</h3>
+            <h3 className="text-lg">{t("modelsDevTitle")}</h3>
             <p className="text-sm text-text-muted">{t("modelsDevDesc")}</p>
           </div>
           {feedback && (
@@ -337,7 +337,7 @@ export default function ModelsDevSyncTab() {
               <Icon name="bar_chart" size={20} />
             </div>
             <div>
-              <h3 className="text-lg font-semibold">{t("modelsDevStats")}</h3>
+              <h3 className="text-lg">{t("modelsDevStats")}</h3>
               <p className="text-sm text-text-muted">{t("modelsDevStatsDesc")}</p>
             </div>
           </div>
@@ -384,7 +384,7 @@ export default function ModelsDevSyncTab() {
             <Icon name="info" size={20} />
           </div>
           <div>
-            <h3 className="text-lg font-semibold">{t("modelsDevInfo")}</h3>
+            <h3 className="text-lg">{t("modelsDevInfo")}</h3>
           </div>
         </div>
         <div className="text-sm text-text-muted space-y-2">
