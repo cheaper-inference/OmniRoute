@@ -547,6 +547,19 @@ export function isInputBoundRequestFailure(error?: {
   return INPUT_BOUND_ERROR_CODES.has(code) || INPUT_BOUND_ERROR_CODES.has(type);
 }
 
+// Providers that answer an exhausted account allowance with a plain-text
+// invalid_request_error and no structured code (Claude OAuth: "You're out of extra usage").
+// Any other invalid_request_error may quote the caller's input back ("Invalid value for
+// 'model': 'quota exceeded'"), so a quota phrase there must not cool a healthy connection
+// (same rule as creditsExhaustedForStatus for credit phrases on a 400).
+const MESSAGE_ONLY_QUOTA_REQUEST_ERROR_PROVIDERS = new Set(["claude"]);
+
+function isMessageOnlyAccountQuota(provider: string, errorText: string): boolean {
+  return (
+    MESSAGE_ONLY_QUOTA_REQUEST_ERROR_PROVIDERS.has(provider) && isQuotaExhaustedText(errorText)
+  );
+}
+
 /**
  * #7177: whether handleSingleModelChat should skip the connection-level cooldown
  * (markAccountUnavailable) for a failed attempt — client disconnects, a 401 when the
@@ -624,7 +637,7 @@ export function shouldSkipConnDisable(
     // An account-quota signal ("out of extra usage") relayed as invalid_request_error is
     // account-scoped: cool the connection down and fail over instead of returning the 400.
     (isRequestScopedUpstreamFailure({ code: result.errorCode, type: result.errorType }) &&
-      !isQuotaExhaustedText(errorText) &&
+      !isMessageOnlyAccountQuota(provider, errorText) &&
       !(provider === "cursor" && isModelNotFound404(result.status, errorText))) ||
     isSelfInflictedUpstreamTimeout(result.status, result.errorType, provider) ||
     // #14948: a ChatGPT Web browser-bridge failure is local, not an account failure.

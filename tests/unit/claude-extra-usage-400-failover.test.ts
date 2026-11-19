@@ -92,3 +92,21 @@ test("context-overflow 400 stays request-scoped", () => {
   };
   assert.equal(shouldSkipConnDisable(result, false, false, "claude"), true);
 });
+
+test("a validation 400 that echoes quota text from the caller stays request-scoped", () => {
+  // Upstreams quote the caller's input back in a 400; that text must not cool a healthy
+  // connection the way Claude's own plain-text "out of extra usage" answer does.
+  for (const [provider, rawMessage] of [
+    ["zcode", "Unknown model: quota exceeded"],
+    ["openai", "Invalid value for 'model': 'quota exceeded'"],
+    ["openai", "messages.0.content: Input should be a valid string [input_value='quota exceeded']"],
+    ["openai", "You're out of extra usage"],
+  ]) {
+    const result = { status: 400, errorType: "invalid_request_error", rawMessage };
+    assert.equal(
+      shouldSkipConnDisable(result, false, false, provider),
+      true,
+      `${provider}: ${rawMessage}`
+    );
+  }
+});
