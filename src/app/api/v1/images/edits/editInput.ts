@@ -1,6 +1,9 @@
 import { z } from "zod";
 import { getCachedSettings } from "@/lib/db/readCache";
-import { extractImageEditInputFromJson } from "@/lib/images/imageRouteModel";
+import {
+  extractImageEditInputFromJson,
+  resolveRemoteImageEditReferences,
+} from "@/lib/images/imageRouteModel";
 import { getBodySizeLimit, readRequestBodyWithLimit } from "@/shared/middleware/bodySizeGuard";
 import * as log from "@/sse/utils/logger";
 
@@ -129,7 +132,10 @@ export async function readEditInput(request: Request): Promise<EditInput | null>
         log.warn("IMAGE", "Invalid JSON edit body shape");
         return null;
       }
-      const extracted = extractImageEditInputFromJson(parsed.data);
+      const resolved = await resolveRemoteImageEditReferences(parsed.data, {
+        signal: request.signal,
+      });
+      const extracted = extractImageEditInputFromJson(resolved);
       return extracted
         ? {
             ...extracted,

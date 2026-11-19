@@ -61,6 +61,8 @@ const LIVE_FLASH_IDS_THAT_MUST_STAY = [
   "gemini-3.7-flash-tiered",
   "gemini-3.6-flash-tiered",
   "gemini-3-flash",
+  "gemini-3.1-flash-lite",
+  "gemini-3.5-flash-lite",
   "gemini-3.8-flash-tiered",
 ] as const;
 
@@ -75,6 +77,7 @@ const STALE_IDS_THAT_STAY_HIDDEN = [
   "gemini-2.5-computer-use-preview-10-2025",
   "gemini-3.1-flash-image",
   "gemini-3.1-flash-tts-preview",
+  "gemini-3.1-flash-lite-preview",
 ] as const;
 
 function liveFetchStub() {

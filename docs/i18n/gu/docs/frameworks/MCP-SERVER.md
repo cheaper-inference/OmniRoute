@@ -19,8 +19,11 @@ omniroute --mcp
 અથવા ઓપન-એસએસઇ પરિવહન દ્વારા:
 
 ```bash
-# HTTP streamable transport (port 20130)
-omniroute --dev  # MCP auto-starts on /mcp endpoint
+# Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
+# Client endpoint: http://localhost:20128/api/mcp/stream
+# stdio: omniroute --mcp
 ```
 
 HTTP ટ્રાન્સપોર્ટ્સ (`sse` / `streamable-http`, ડેશબોર્ડ સર્વર દ્વારા પ્રક્રિયામાં સેવા આપવામાં આવે છે) મૂળભૂત રીતે બંધ છે અને અગાઉ ફક્ત `/dashboard/mcp` પૃષ્ઠથી ટૉગલ કરી શકાય તેવું હતું. v3.8.51 મુજબ CLI ની સમાનતા છે:
@@ -32,7 +35,7 @@ omniroute mcp disable
 omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` PATCH સમાન `mcpEnabled` (અને વૈકલ્પિક રીતે `mcpTransport`) ડેશબોર્ડને `/api/settings` દ્વારા ટૉગલ કરવાનું સેટ કરે છે. `mcp restart` `POST /api/mcp/restart` ને કૉલ કરે છે : તે સક્રિય `sse`/`streamable-http` સત્રોને તોડી નાખે છે જેથી આગળની વિનંતી સ્વચ્છ રીતે ફરી શરૂ થાય, જો MCP અક્ષમ હોય તો `409` પરત કરે છે, અને `stdio` પરિવહન માટે `501` (stdio ક્લાયન્ટ્સ તેમની પોતાની સબપ્રોસેસ — ધરાવે છે પુનઃપ્રારંભ કરવા માટે કોઈ ઇન-પ્રોસેસ હેન્ડલ નથી).
+`mcp enable`/`mcp disable` PATCH સમાન `mcpEnabled` (અને વૈકલ્પિક રીતે `mcpTransport`) ડેશબોર્ડને `/api/settings` દ્વારા ટૉગલ કરવાનું સેટ કરે છે. `mcp restart` `POST /api/mcp/restart` ને કૉલ કરે છે : તે સક્રિય `sse`/`streamable-http` સત્રોને ફાડી નાખે છે જેથી આગળની વિનંતી સ્વચ્છ રીતે ફરી શરૂ થાય, MCP અક્ષમ હોય તો `409` પરત કરે છે, અને `stdio` પરિવહન માટે `501` (stdio ક્લાયન્ટ્સ તેમની પોતાની સબપ્રોસેસ — ધરાવે છે પુનઃપ્રારંભ કરવા માટે કોઈ ઇન-પ્રોસેસ હેન્ડલ નથી).
 
 ## પરિવહન
 
@@ -142,7 +145,7 @@ Claude ડેસ્કટોપ, Cursor, Cline, અને સુસંગત MCP
 | `omniroute_rtk_discover`            | `read:compression`  | ઑપ્ટ-ઇન RTK આઉટપુટ નમૂનાઓમાં રિકરિંગ અવાજ શોધો                                                                             |
 | `omniroute_rtk_learn`               | `read:compression`  | ઑપ્ટ-ઇન નમૂનાઓમાંથી સમીક્ષા કરવા યોગ્ય RTK ફિલ્ટર ડ્રાફ્ટ બનાવો                                                            |
 
-CCR એન્ટ્રીઓ ફક્ત મેમરીમાં હોય છે અને પુનઃપ્રારંભ પર અદૃશ્ય થઈ જાય છે. દરેક બ્લોક 2 MiB સુધી મર્યાદિત છે, દરેક મુખ્ય 16 MiB સુધી અને વૈશ્વિક સ્ટોર 64 MiB સુધી મર્યાદિત છે. એન્ટ્રી ડિફોલ્ટ 24-કલાક TTL (મહત્તમ સાત દિવસ) પર હોય છે. સંપૂર્ણ MCP પુનઃપ્રાપ્તિ 256 KiB સુધી મર્યાદિત છે; રેન્જ્ડ અને grep મોડ દ્વારા મોટા બ્લોક્સ ઉપલબ્ધ રહે છે. સ્ટોરેજ, પુનઃપ્રાપ્તિ, સૂચિ, નિરીક્ષણ, કાઢી નાખવું અને આંકડા પ્રમાણિત API-કી પ્રિન્સિપલ દ્વારા અલગ કરવામાં આવે છે. ઓડિટ રેકોર્ડ્સમાં હેશ અને કદના મેટાડેટા હોય છે, ક્યારેય સામગ્રી હોતી નથી.
+CCR એન્ટ્રીઓ ટુ-ટાયર સ્ટોરનો ઉપયોગ કરે છે: સ્થાનિક નોન-ક્લાઉડ રનટાઇમ પર, એક ટકાઉ SQLite ટાયર (`ccr_blocks`, ઑન બાય ડિફૉલ્ટ) દ્વારા એક હોટ ઇન-મેમરી ટાયર સમર્થિત છે, જેથી બ્લોક બહાર કાઢવા અથવા પુનઃપ્રારંભ થાય ત્યાં સુધી TTL 512 કરતાં વધુ બ્લોક્સ સિવાય — ચાલે છે, KB અને `COMPRESSION_CCR_DURABLE_STORE=false` 512 થી વધુ ચાલે છે. માત્ર મેમરી. ટકાઉ લેખન એ શ્રેષ્ઠ પ્રયાસ છે: 1,000 લખાણો પહેલેથી જ બાકી હોય ત્યારે તે છોડી દેવામાં આવે છે, અને નિષ્ફળ SQLite લખાણ લોગ થયેલ છે, ફરીથી પ્રયાસ કરવામાં આવતો નથી, જેથી તે બ્લોક પુનઃપ્રારંભ પર ખોવાઈ જાય છે. દરેક બ્લોક 2 MiB સુધી મર્યાદિત છે, દરેક મુખ્ય 16 MiB અને વૈશ્વિક સ્ટોર 64 MiB સુધી મર્યાદિત છે. એન્ટ્રી ડિફોલ્ટ 24-કલાક TTL (મહત્તમ સાત દિવસ) પર હોય છે. સંપૂર્ણ MCP પુનઃપ્રાપ્તિ 256 KiB સુધી મર્યાદિત છે; રેન્જ્ડ અને grep મોડ દ્વારા મોટા બ્લોક્સ ઉપલબ્ધ રહે છે. સ્ટોરેજ, પુનઃપ્રાપ્તિ, સૂચિ, નિરીક્ષણ, કાઢી નાખવું અને આંકડા પ્રમાણિત API-કી પ્રિન્સિપલ દ્વારા અલગ કરવામાં આવે છે. ઓડિટ રેકોર્ડ્સમાં હેશ અને કદના મેટાડેટા હોય છે, ક્યારેય સામગ્રી હોતી નથી. ઓપરેટર-સામનો વિગતો (બે માર્કર્સ, ક્લાયંટ પૂર્વજરૂરીયાતો, `codemode:false`, પ્રતિ-ટૂલ સ્કોપ્સ, પૃષ્ઠ ક્રમાંકન અને ડાયગ્નોસ્ટિક મેટ્રિક્સ) [કમ્પ્રેશન એન્જીન્સ → પૂર્વજરૂરીયાતો / ઓપરેટર માર્ગદર્શિકામાં](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) રહે છે.
 
 `omniroute_compression_status` `analytics.mcpDescriptionCompression` હેઠળ MCP વર્ણન કમ્પ્રેશનને અલગથી રિપોર્ટ કરે છે. તે મૂલ્યો MCP સૂચિબદ્ધ વર્ણનો માટે મેટાડેટા-કદના અંદાજો છે (`tools`, `prompts`, `resources`, અને `resourceTemplates`); તે પ્રદાતા વપરાશ રસીદો નથી અને `source: "mcp_metadata_estimate"` સાથે ચિહ્નિત થયેલ છે.
 

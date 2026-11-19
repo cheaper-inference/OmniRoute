@@ -264,80 +264,78 @@ títí tí a ó fi ṣe é, àwọn release tuntun lè tún fa èyí.
 
 ---
 
-## Ìbámu pẹ̀lú Node.js
+## Node.js Ibamu
 
 <a name="nodejs-compatibility"></a>
 
-### Ojú-ìwé ìwọlé ń jáwọ́ tàbí ó ń fi àṣìṣe "Module self-registration" hàn
+### Awọn ipadanu oju-iwe iwọle tabi ṣafihan aṣiṣe “Iforukọsilẹ ara-ẹni Module”.
 
-**Ìdí:** Ẹ̀yà Node.js tí o ń lò kò sí láàárín ìpele ìṣiṣẹ́ tó ní ààbò tí OmniRoute fọwọ́ sí. Ohun tó wọ́pọ̀ jù ni lílo ìpele àtúnṣe Node 22 tàbí 24 àtijọ́ tí ó kéré ju ìpele ààbò tí a ti ṣàtúnṣe tí OmniRoute nílò lọ.
+**Nitori:** O n ṣiṣẹ ẹya Node.js kan ni ita ilẹ akoko asiko to ni aabo ti OmniRoute ti a fọwọsi. Ọran ti o wọpọ julọ ni ṣiṣe Node 22 tabi ipele alemo 24 agbalagba ti o ṣubu ni isalẹ ilẹ aabo patched OmniRoute nbeere.
 
-**Àwọn àmì:**
+**Awọn aami aisan:**
 
-- Ojú-ìwé ìwọlé ń fi ojú òfìfo tàbí àṣìṣe olupin hàn
-- Console ń fi `Error: Module did not self-register` tàbí àwọn àṣìṣe ìsopọ̀ abínibí tó jọra hàn
-- Ojú-ìwé ìwọlé ń fi **àsíá ìkìlọ̀ aláwọ̀ ọsàn** hàn pẹ̀lú ẹ̀yà Node rẹ bí runtime náà kò bá sí lábẹ́ ìlànà ààbò tí a ṣe àtìlẹ́yìn fún
+- Oju-iwe iwọle fihan iboju òfo tabi aṣiṣe olupin kan
+- Console fihan `Error: Module did not self-register` tabi iru awọn aṣiṣe abuda abinibi
+- Oju-iwe wiwọle fihan ẹya** osan ìkìlọ asia** pẹlu ẹya Node rẹ ti akoko asiko ba wa ni ita eto imulo aabo to ni atilẹyin
 
-**Àtúnṣe:**
+**Ṣe atunṣe:**
 
-1. Fi ẹ̀yà Node.js LTS tí a ṣe àtìlẹ́yìn fún sí ẹrọ (èyí tí a dábàá: Node.js 24.x):
+1. Fi itusilẹ Node.js LTS ti o ni atilẹyin sii (a ṣeduro: Node.js 24.x):
    ```bash
    nvm install 24
    nvm use 24
    ```
-2. Ṣàyẹ̀wò ẹ̀yà rẹ: `node --version` gbọ́dọ̀ fi `v24.0.0` tàbí tuntun sí i hàn lórí ẹ̀ka 24.x LTS
-3. Tún OmniRoute fi sí ẹrọ: `npm install -g omniroute`
-4. Tún un bẹ̀rẹ̀: `omniroute`
+2. Jẹrisi ẹya rẹ: `node --version` yẹ ki o ṣafihan `v24.0.0` tabi tuntun lori laini 24.x LTS
+3. Tun OmniRoute: `npm install -g omniroute` sori ẹrọ
+4. Tun bẹrẹ: `omniroute`
 
-> **Àwọn ẹ̀yà ààbò tí a ṣe àtìlẹ́yìn fún:** `>=22.22.2 <23` tàbí `>=24.0.0 <27`. Node.js 24.x LTS (Krypton) àti Node.js 26 ní àtìlẹ́yìn ní kíkún.
+> **Awọn ẹya aabo ti o ni atilẹyin:** `>=22.22.2 <23` tabi `>=24.0.0 <27`. Node.js 24.x LTS (Krypton) ati Node.js 26 ni atilẹyin ni kikun.
 
-### npm v11+: a kò fi `better-sqlite3` sí ẹrọ (A kò rí module náà)
+### npm v11 +: `better-sqlite3` ko fi sori ẹrọ (Ko le wa module)
 
 <a name="npm-v11-better-sqlite3-not-installed-cannot-find-module"></a>
 
-**Ìdí:** npm v11 (tí ó wà pẹ̀lú Node.js 24+) máa ń dí àwọn script ìfisisẹ̀ dúró fún àwọn dependency àṣàyàn
-nípa àìrídìmú. Nítorí pé `better-sqlite3` wà nínú `optionalDependencies`
-tó sì nílò ìkójọpọ̀ abínibí (`node-gyp rebuild`), npm máa ń foju rẹ̀ kọ́ láìfi ìkìlọ̀ hàn.
+**Nitori:** npm v11 (firanṣẹ pẹlu Node.js 24 +) awọn bulọọki fi awọn iwe afọwọkọ sori ẹrọ fun awọn igbẹkẹle iyan nipasẹ aiyipada. Niwọn igba ti `better-sqlite3` ti wa ni atokọ ni `optionalDependencies` ati pe o nilo akojọpọ abinibi (`node-gyp rebuild`), npm fi ipalọlọ fo rẹ.
 
-**Àwọn àmì:**
+**Awọn aami aisan:**
 
-- Olupin ń jáwọ́ nígbà tó ń bẹ̀rẹ̀ pẹ̀lú `Cannot find module 'better-sqlite3'`
-- `ls node_modules/better-sqlite3` ń fi "Kò sí fáìlì tàbí atọ́ka bẹ́ẹ̀" hàn
-- `npm ls better-sqlite3` ń fi `(òfìfo)` hàn
+- Olupin ipadanu lori ibẹrẹ pẹlu `Cannot find module 'better-sqlite3'`
+- `ls node_modules/better-sqlite3` fihan "Ko si iru faili tabi ilana"
+- `npm ls better-sqlite3` fihan `(empty)`
 
-**Àtúnṣe:**
+**Ṣe atunṣe:**
 
-1. Fọwọ́ sí àwọn script ìfisisẹ̀, kí o sì tún fi sí ẹrọ:
+1. Fọwọsi awọn iwe afọwọkọ fifi sori ẹrọ ki o tun fi sii:
    ```bash
    npm approve-scripts better-sqlite3
    npm install
    ```
-2. Tàbí fi ẹ̀yà tí a ti kọ́ tẹ́lẹ̀ sí ẹrọ pẹ̀lú ọwọ́:
+2. Tabi fi sori ẹrọ ti a ti kọ tẹlẹ pẹlu ọwọ:
    ```bash
    npm pack better-sqlite3@13.0.1
    tar -xzf better-sqlite3-*.tgz -C node_modules
    mv node_modules/package node_modules/better-sqlite3
    rm better-sqlite3-*.tgz
    ```
-3. Ṣàyẹ̀wò pé ó ń ṣiṣẹ́: `node -e "require('better-sqlite3')(':memory:').close(); console.log('OK')"`
+3. Jẹrisi pe o ṣiṣẹ: `node -e "require('better-sqlite3')(':memory:').close(); console.log('OK')"`
 
-### macOS: `dlopen` / "slice is not valid mach-o file"
+### macOS: `dlopen` / "bibẹ ko wulo faili mach-o"
 
 <a name="macos-native-module-rebuild"></a>
 
-**Ìdí:** Lẹ́yìn `npm install -g omniroute` àgbáyé, binary abínibí `better-sqlite3` tó wà nínú package náà lè jẹ́ èyí tí a kó jọ fún architecture tàbí ABI Node.js mìíràn tó yàtọ̀ sí èyí tó ń ṣiṣẹ́ lórí ẹ̀rọ rẹ. Èyí wọ́pọ̀ lórí macOS (Apple Silicon àti Intel) nígbà tí binary tí a ti kọ́ tẹ́lẹ̀ kò bá àyíká rẹ mu.
+**Nitori:** Lẹhin `npm install -g omniroute` agbaye kan, alakomeji `better-sqlite3` inu package le ti ṣe akojọpọ fun faaji ti o yatọ tabi Node.js ABI ju ohun ti n ṣiṣẹ ni agbegbe. Eyi jẹ wọpọ lori macOS (mejeeji Apple Silicon ati Intel) nigbati alakomeji ti a ti kọ tẹlẹ ko baamu agbegbe rẹ.
 
-**Àwọn àmì:**
+**Awọn aami aisan:**
 
-- Olupin kùnà lẹ́sẹ̀kẹsẹ̀ nígbà ìbẹ̀rẹ̀ pẹ̀lú àṣìṣe `dlopen`
-- Àṣìṣe náà ní `slice is not valid mach-o file`
-- Àpẹẹrẹ kíkún:
+- Olupin kuna lẹsẹkẹsẹ ni ibẹrẹ pẹlu aṣiṣe `dlopen`
+- Aṣiṣe ni `slice is not valid mach-o file` ninu
+- Apẹẹrẹ ni kikun:
 
 ```
 dlopen(/Users/<user>/.nvm/versions/node/v24.14.1/lib/node_modules/omniroute/app/node_modules/better-sqlite3/build/Release/better_sqlite3.node, 0x0001): tried: '...' (slice is not valid mach-o file)
 ```
 
-**Àtúnṣe — tún un kọ́ fún àyíká agbègbè rẹ (kò nílò láti sọ ẹ̀yà Node.js rẹ kalẹ̀):**
+**Ṣe atunṣe — fun agbegbe agbegbe rẹ (ko si idinku Node.js ti o nilo):**
 
 ```bash
 cd $(npm root -g)/omniroute/app
@@ -345,7 +343,7 @@ npm rebuild better-sqlite3
 omniroute
 ```
 
-> **Àkíyèsí:** Èyí máa tún ìsopọ̀ abínibí náà kó jọ ní ìbámu pẹ̀lú ẹ̀yà Node.js àti architecture CPU agbègbè rẹ, tí yóò sì yanjú àìbámu binary náà. Àyè runtime tí a ṣe àtìlẹ́yìn fún ní ìfọwọ́sí ni **`>=22.22.2 <23` tàbí `>=24.0.0 <27`** (`SUPPORTED_NODE_RANGE` nínú `src/shared/utils/nodeRuntimeSupport.ts`, tí a mú bá field `engines` nínú `package.json` mu). Node.js 24.x LTS (Krypton) àti Node.js 26 ní àtìlẹ́yìn ní kíkún pẹ̀lú `better-sqlite3` v12.x.
+> **Akiyesi:** Eyi ṣe atunpo abuda abinibi lodi si ẹya Node.js agbegbe rẹ ati faaji CPU, ipinnu aiṣedeede alakomeji. Iwọn akoko asiko ti o ni atilẹyin ni ifowosi jẹ**`>=22.22.2 <23` tabi `>=24.0.0 <27`** (`SUPPORTED_NODE_RANGE` ni `src/shared/utils/nodeRuntimeSupport.ts`, ni ibamu pẹlu aaye `package.json` `engines` ). Node.js 24.x LTS (Krypton) ati Node.js 26 ni atilẹyin ni kikun pẹlu `better-sqlite3` v12.x.
 
 ---
 
@@ -846,6 +844,30 @@ yóò tẹ̀síwájú láti bẹ̀rẹ̀ ní abẹ́lẹ̀, yóò sì ṣeé dé
 
 Wo [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) fún àlàyé
 kíkún nípa `OMNIROUTE_READY_TIMEOUT_MS`.
+
+---
+
+## CCR / dedup oran
+
+Matrix iwadii aisan fun funmorawon CCR (`ccr`) ati awọn irinṣẹ `session-dedup`. Fun itọkasi oniṣẹ ni kikun (awọn ami-ami, awọn ohun elo pataki, awọn iwọn-ọpa-ọpa-ọpa, pagination igbapada) wo [Awọn ohun elo Compression → Prerequisites / Itọsọna oniṣẹ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+| Aisan                                                                                         | O ṣeeṣe fa                                                                                                                                   | Jẹrisi                                                                                                            | Ṣe atunṣe                                                                                                                                                                                                                                                                                             |
+| --------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                | Ipa ọna-oluso loopback auth, kii ṣe kokoro gbigbe. Ko si `Bearer`, tabi bọtini kan laisi `mcp:connect`/`manage`/`admin`, de ọna `/api/mcp/`. | Ibeere naa gbe akọsori no/invalid `Authorization`.                                                                | Firanṣẹ bọtini `Bearer` to wulo. Bọtini isakoṣo latọna jijin le di `mcp:connect` mu (fi aṣẹ fun `/api/mcp/` agbegbe-ipin-jade nikan) pẹlu aaye read/write kan pato ti o nilo.                                                                                                                         |
+| **Àkọsílẹ ko ri** — `omniroute_ccr_retrieve` kọ hash naa                                      | Hash kii ṣe iye hex 24 tabi ti daakọ ni aṣiṣe, tabi bulọki naa ti pari tẹlẹ / ti jade.                                                       | Ṣe afiwe hash lodi si iye 24-hex ni ami ami `[CCR retrieve hash=…]` ; ṣayẹwo `omniroute_ccr_stats` fun ipo itaja. | Da 24-hex hash verbatim lati asami. Ti bulọọki naa ba lọ nitootọ, o ti kọja TTL rẹ tabi ko de ibi itaja ti o tọ (awọn bulọọki lori 512 KB, ati gbogbo bulọọki lori akoko asiko awọsanma, duro iranti-nikan ki o ma ṣe yege atunbere).                                                                 |
+| **CCR ko si-op** — Àkọsílẹ ko ni fisinuirindigbindigbin (ọrọ pada ko yipada)                  | Dina ni isalẹ iloro funmorawon, tabi ẹrọ CCR / ipo ko ṣiṣẹ.                                                                                  | Ṣayẹwo funmorawon ti nṣiṣe lọwọ `strategy`/`enabled` ati iwọn bulọki la iloro.                                    | Mu CCR ṣiṣẹ (tabi ipo tolera ti o nṣiṣẹ) ati jẹrisi bulọki naa tobi to lati tọsi titoju. A no-op kii ṣe aṣiṣe — kii ṣe "ko si nkankan lati compress."                                                                                                                                                 |
+| **dedup asami** — `[dedup:ref sha=…]` han ninu igbejade                                       | **Wiwo-pada mọọmọ** , kii ṣe pipadanu tabi aṣiṣe. `session-dedup` elided ọrọ ti a ti firanṣẹ tẹlẹ ni akoko iṣaaju ti igba kanna.             | Jẹrisi ọrọ kanna ti o han ni iṣaaju ni igba.                                                                      | Maṣe ṣe ohunkohun — maṣe pe ọpa kan ati pe maṣe gbiyanju lati tun ṣe. Iṣẹlẹ akọkọ jẹ ẹda canonical; awọn ti isiyi Tan ti wa ni ko tun kọ, o ti wa ni deduped lori kan nigbamii Tan.                                                                                                                   |
+| **Ipo koodu** — `omniroute_ccr_*` irinṣẹ ko si lati `tools[]` / CCR ilana ko itasi (OpenCode) | Ipo koodu OpenCode (aiyipada) ṣe ipolowo awọn irinṣẹ abinibi nikan si awoṣe, fifipamo awọn irinṣẹ MCP lati `tools[]`.                        | Ṣayẹwo titẹ sii olupin OpenCode MCP fun `codemode`.                                                               | Ṣeto `codemode: false` lori titẹsi olupin (a** onibara** eto) nitorina awọn irinṣẹ MCP ti wa ni ipolowo. Olupin ti a npè ni `omniroute` ṣafihan `omniroute_omniroute_ccr_retrieve`; `_` jẹ oluyapa ti o baamu, nitorinaa itọnisọna CCR jẹ itasi labẹ orukọ yẹn ni kete ti ibeere kan gbe ami ami CCR. |
+
+Awọn aami aisan diẹ sii:
+
+| Aisan                                                                                                    | O ṣeeṣe fa                                                                                                                                                         | Ṣe atunṣe                                                                                                                                                                             |
+| -------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `Insufficient MCP scopes for <tool>. Missing: <scope>.`                                                  | Abajade aṣiṣe irinṣẹ MCP kan (`isError: true`), kii ṣe HTTP 403. Bọtini olupe ko ni aaye ti o nilo.                                                                | Fi aaye kun lati tabili fun-ọpa (wo itọsọna oniṣẹ). Fun apẹẹrẹ `omniroute_ccr_retrieve` nilo `read:compression`.                                                                      |
+| `Unknown Mcp-Session-Id`                                                                                 | Streamable-HTTP igba laišišẹ jade ati awọn ti a kore (`OMNIROUTE_MCP_SESSION_IDLE_MS`); olupin naa dahun HTTP 404.                                                 | Tun tabi tun bẹrẹ igba — ṣe** kii ṣe** yi bọtini kan, yi aaye kan pada, tabi tunrukọ ohun elo kan. Kì í ṣe 401/403.                                                                   |
+| `JSON Parse error` / `Unterminated string` ninu abajade ọpa kan                                          | ọrọ irinṣẹ MCP gige ni ayika `mcpAccessibility.maxTextChars` (aiyipada `50000`) aarin-JSON.                                                                        | Lo oju-iwe `mode` dipo agan ni kikun: `mode:"grep"`, `mode:"lines"`, `mode:"head"`, `mode:"tail"`, tabi `mode:"stats"`. Ofin ti atanpako: `chars > 40000` → lo a `mode`.              |
+| `Failed to open SSE stream`                                                                              | Onibara kọlu julọ `/api/mcp/sse` singleton lakoko ti gbigbe jẹ `streamable`.                                                                                       | Tọkasi onibara ni `/api/mcp/stream` (ojuami ipari ṣiṣan) dipo `/api/mcp/sse`.                                                                                                         |
+| **Òkú stdio heartbeat** — `mcp-heartbeat.json` fihan `pidAlive: false` nigba ti HTTP gbigbe ti wa ni oke | Faili lilu ọkan jẹ ajẹkù stdio (stale PID, tabi ẹya ti o yatọ); Awọn gbigbe HTTP wa ninu ilana ati ijabọ ipinlẹ lati `getMcpHttpStatus()` dipo (ko si kikọ faili). | Ko si igbese — awọn gbigbe ni ilera. Otitọ ni `httpTransport.online` / `startedAt` lati `/api/mcp/status`, kii ṣe faili lilu ọkan. Ma ṣe tun olupin naa bẹrẹ tabi yi bọtini kan pada. |
 
 ---
 

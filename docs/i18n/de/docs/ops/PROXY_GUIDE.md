@@ -81,6 +81,18 @@ Auch außerhalb gesperrter Regionen sind Proxys für Folgendes nützlich:
 
 ---
 
+## Standard-Proxy-Status für neue Konten
+
+In** Einstellungen → Proxy → Globale Konfiguration** , verwenden** Aktivieren Sie den Proxy standardmäßig für neue Verbindungen** um den anfänglichen Proxy-Status neu hinzugefügter Anbieterkonten auszuwählen.
+
+Die neue Einstellung steuert den anfänglichen Proxy-Status neu hinzugefügter Anbieterkonten. Es ändert weder bestehende Konten noch ersetzt es den globalen Proxy-Switch. Sein Anfangswert behält das vorherige Verhalten bei. Deaktivieren Sie es einmal, um zukünftige Konten mit standardmäßig deaktiviertem Proxy zu erstellen.
+
+Die Präferenz wird als `defaultNewConnectionProxyEnabled` über die vorhandenen Einstellungen API gespeichert. Die Standardeinstellung ist `true`, wenn sie nie gespeichert wird. Das Speichern von `false` wird für nachfolgende neue Konten ohne Neustart wirksam. `POST /api/providers` akzeptiert einen optionalen strikten booleschen Wert `proxyEnabled`; Ein explizites `true` oder `false` hat Vorrang vor dem Erstellungsstandard. Wenn Sie ein doppeltes Konto oder OAuth Wiederverbindung weglassen, bleibt der gespeicherte Status dieses Kontos erhalten. Einzelne Konten können auch danach noch aktiviert oder deaktiviert werden.
+
+Selektive Anbieterübertragungen verwenden die Standardeinstellungen der Zielinstallation für neue Konten und behalten die Zielrichtlinie bei, wenn vorhandene Konten ersetzt werden. Proxy-Schalter sind keine tragbaren Übertragungsfelder. Die vollständige Backup-Wiederherstellung und die historische JSON/SQL -Migration behalten ihre bestehende Wiederherstellungssemantik bei, einschließlich gespeicherter Kontowerte und Legacy-Schema-Standardeinstellungen. Durch eine vollständige Wiederherstellung der Einstellungen kann diese Einstellung ebenfalls wiederhergestellt werden.
+
+Diese Einstellung weist keinen Proxy zu und stellt auch nicht fest, dass einer fehlerfrei ist oder verwendet wird. Das tatsächliche Routing hängt weiterhin vom globalen Proxy-Switch und der entsprechenden Proxy-Konfiguration ab. Synthetische Anbieter ohne dauerhaftes Konto, OAuth Verkehr vor der Kontoerstellung, environment/system Proxys und die Vernetzung externer Backends fallen nicht in den Geltungsbereich.
+
 ## 4-stufiges Proxy-System
 
 OmniRoute unterstützt die Proxy-Konfiguration auf **vier unabhängigen Ebenen**, die nach Priorität aufgelöst werden:

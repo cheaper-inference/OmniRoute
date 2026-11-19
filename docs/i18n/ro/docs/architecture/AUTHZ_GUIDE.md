@@ -158,17 +158,17 @@ activează (`src/server/auth/dashboardMfa.ts`).
      `auth.mfa.disabled` cu `secondFactor: "recovery_switch"`.
   4. Eliminați setarea `OMNIROUTE_DISABLE_MFA`, reporniți și înrolați din nou, dacă este necesar.
 
-## Clase de rute
+## Clasele de traseu
 
 `src/server/authz/types.ts` definește trei clase; orice rută care nu poate fi clasificată determinist revine la `MANAGEMENT`.
 
-| Clasă        | Descriere                                                                                                                                                         | Autentificare necesară                                                              |
-| ------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| `PUBLIC`     | Rute explicit sigure — autentificare, deconectare, stare, inițializare, health, bootstrap-ul onboarding-ului.                                                     | Niciuna                                                                             |
-| `CLIENT_API` | Endpoint-uri de servire a modelelor — `/api/v1/*`, `/api/v1beta/*` și alias-urile `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Cheie Bearer când flag-ul de funcționalitate efectiv `REQUIRE_API_KEY` este activat |
-| `MANAGEMENT` | Paginile panoului, setări, furnizori, chei, endpoint-uri de administrare și diagnostic.                                                                           | Sesiune de panou SAU Bearer cu domeniul `manage`                                    |
+| Clasă        | Descriere                                                                                                                                                           | Este necesară autorizarea                                                                 |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------- |
+| `PUBLIC`     | Rute sigure în mod explicit — autentificare, deconectare, stare, sănătate, bootstrap de îmbarcare.                                                                  | Nici unul                                                                                 |
+| `CLIENT_API` | Puncte finale de difuzare a modelului — `/api/v1/*`, `/api/v1beta/*`, plus aliasuri `/v1/*`, `/v1beta/*`, `/chat/completions`, `/responses`, `/models`, `/codex/*`. | Cheie purtător când este activat indicatorul efectiv al caracteristicii `REQUIRE_API_KEY` |
+| `MANAGEMENT` | Pagini de tablou de bord, setări, furnizori, chei, puncte finale de administrare și diagnosticare.                                                                  | Sesiune de tablou de bord OR Bearer cu domeniul de aplicare `manage`                      |
 
-Câteva acțiuni `MANAGEMENT` sunt **doar pentru operator**: o cheie `manage` nu este suficientă. Exportul credențialelor stocate (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), restaurarea unei copii de rezervă peste datele live (`POST /api/db-backups/import`, inclusiv `dryRun=true`, `POST /api/db-backups` restaurare după id, `POST /api/settings/import-json`) și distrugerea punctelor de restaurare (curățarea prin `DELETE /api/db-backups` și de asemenea `PATCH /api/db-backups`, deoarece retenția pe care o persistă determină curățarea automată după fiecare copie de rezervă) necesită o sesiune de panou, subiectul CLI local sau autentificarea dezactivată. Emiterea unui token de sincronizare (`POST /api/sync/tokens`) și crearea unui token de acces CLI cu domeniul `admin` (`POST /api/cli/tokens`) necesită o sesiune de panou sau subiectul CLI local în orice mod de autentificare. Cheile API de orice domeniu și tokenurile de acces `oma_` nu sunt credențiale de operator: primesc `403` ori de câte ori se cere una. Verificarea se află în `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Modificarea setărilor de autentificare este și ea rezervată operatorului: `POST /api/settings/require-login` (setarea parolei de administrare / comutarea `requireLogin`) acceptă doar aceste credențiale odată ce există o parolă — fereastra de bootstrap de la prima rulare (fără parolă) rămâne neschimbată — iar o sesiune de panou trebuie să trimită `currentPassword` pentru a înlocui parola (`403` dacă lipsește sau este greșită, auditat ca `settings.update_failed`). CLI-ul local și o instanță cu autentificarea dezactivată păstrează calea de recuperare și pot seta o parolă fără ea, deoarece ambele sunt legate de gazda care deține directorul de date.
+Câteva acțiuni `MANAGEMENT` sunt** numai pentru operator** : o cheie `manage` nu este suficientă. Exportarea acreditărilor stocate (`GET /api/settings/export-json`, `GET /api/db-backups/export`, `GET /api/db-backups/exportAll`), restaurarea unei copii de rezervă a datelor live (`POST /api/db-backups/import` inclusiv `dryRun=true`, `POST /api/db-backups` restore prin id, `POST /api/settings/import-json`), distrugerea punctelor de restaurare (`DELETE /api/db-backups` cleanup și `PATCH /api/db-backups` deoarece păstrarea persistă conduce la tăierea automată a datelor după fiecare sesiune de înregistrare a dashboard, subiectul CLI locală sau dashboard) dezactivat. Emiterea unui simbol de sincronizare (`POST /api/sync/tokens`) și baterea unui simbol de acces `admin` CLI `POST /api/cli/tokens`) necesită o sesiune de tablou de bord sau subiectul CLI local în fiecare mod de conectare. Cheile API de orice domeniu și jetoanele de acces `oma_` nu sunt acreditări ale operatorului: primesc `403` ori de câte ori este necesar. Cecul locuiește în `src/lib/api/operatorCredential.ts` (`resolveOperatorCredential()` / `requireOperatorCredential()`). Modificarea setărilor de conectare este și numai pentru operator: `POST /api/settings/require-login` (setează parola de management / comută `requireLogin`) acceptă doar acele acreditări odată ce există o parolă — fereastra de bootstrap pentru prima rulare (încă nu există parolă) este neschimbată — și o sesiune de tablou de bord trebuie să trimită `currentPassword` pentru a înlocui parola (`403` când este greșită sau auditată `settings.update_failed`). CLI local și o instanță cu autentificarea dezactivată păstrează calea de recuperare și pot seta o parolă fără ea, deoarece ambele sunt legate de gazda care deține directorul de date.
 
 ## Conductă
 
@@ -201,51 +201,47 @@ O politică de succes returnează `AuthSubject` cu `kind ∈ { client_api_key, d
 
 ## Lista rutelor publice
 
-`src/shared/constants/publicApiRoutes.ts` este lista explicită de permisiuni:
+`src/shared/constants/publicApiRoutes.ts` este lista explicită de permise:
 
-Lista este împărțită după **formă**, iar această împărțire este esențială (GHSA-74g9-q8f6-793h): un prefix este
-potrivit cu `startsWith()`, astfel încât se potrivește și cu fiecare rută adiacentă care îi partajează caracterele de început.
-`/api/usage/om-usage` ca prefix marcat `/api/usage/om-usage<anything>` PUBLIC, iar Next îl rezolvă
-la `/api/usage/[connectionId]` — un handler care nu are autentificare proprie.
+Lista este împărțită de** formă** , iar împărțirea este portantă (GHSA-74g9-q8f6-793h): un prefix se potrivește cu `startsWith()`, deci se potrivește, de asemenea, cu fiecare cale adiacentă care împarte caracterele sale principale. `/api/usage/om-usage` ca prefix marcat `/api/usage/om-usage<anything>` PUBLIC, iar Next rezolvă asta la `/api/usage/[connectionId]` — un handler fără autentificare proprie.
 
 ```ts
-// Subarbori autentici. Fiecare intrare TREBUIE să se termine cu "/" (verificat printr-un test unitar).
+// Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
 PUBLIC_API_ROUTE_PREFIXES = [
   "/api/auth/oidc/",
-  "/api/v1/", // tratat ca CLIENT_API în classify, nu ca „public fără autentificare”
+  "/api/v1/", // treated as CLIENT_API in classify, not as "no-auth public"
   "/api/oauth/",
   "/api/codex/connect/",
   "/api/telegram/",
   "/api/cursor-cli/",
 ];
 
-// Rute individuale, potrivite EXACT (cu sau fără slash la final).
+// Single routes, matched EXACTLY (with or without a trailing slash).
 PUBLIC_API_ROUTES_EXACT = new Set([
   "/api/auth/login",
   "/api/auth/logout",
   "/api/auth/status",
-  "/api/auth/mfa/verify", // pasul 2 al autentificării pentru TOTP activat opțional; necesită cookie-ul MFA-pending
-  "/api/init",
+  "/api/auth/mfa/verify", // login step 2 for opt-in TOTP; needs the MFA-pending cookie
   "/api/sync/bundle",
   "/api/cli/connect",
   "/api/usage/om-usage",
   "/api/skills/collect/chaos",
 ]);
 
-// Rute individuale numai pentru citire care beneficiază și de relaxarea originii CORS.
+// Read-only single routes that also take the CORS origin relaxation.
 PUBLIC_READONLY_CORS_API_ROUTES = [
   "/api/health/ping",
   "/api/monitoring/health",
   "/api/settings/require-login",
 ];
 
-// Rută individuală numai pentru citire FĂRĂ relaxarea CORS.
+// Read-only single route WITHOUT the CORS relaxation.
 PUBLIC_READONLY_API_ROUTES_EXACT = new Set(["/api/health"]);
 
 PUBLIC_READONLY_METHODS = new Set(["GET", "HEAD", "OPTIONS"]);
 ```
 
-Rutele numai pentru citire sunt publice **doar** pentru metode sigure. Notă: `classifyRoute()` exclude `/api/v1/*` și `/api/v1beta/*` din mecanismul de rezervă PUBLIC — acestea sunt întotdeauna `CLIENT_API`, astfel încât politica pentru cheia Bearer se aplică în continuare.
+Rutele numai în citire sunt publice** numai** pentru metode sigure. Notă: `classifyRoute()` exclude `/api/v1/*` și `/api/v1beta/*` din PUBLIC fall-through — acestea sunt întotdeauna `CLIENT_API` astfel încât politica Bearer-key încă se aplică.
 
 ## Adăugarea unei rute noi
 
@@ -323,15 +319,15 @@ Rămâne dezactivată, cu excepția cazului în care `OMNIROUTE_MCP_ENFORCE_SCOP
 (`src/lib/accessTokens/scopes.ts`). Acest rang se aplică doar credențialului token-ului de acces.
 Vezi [Autentificarea Managementului](../guides/MANAGEMENT-AUTH.md).
 
-## Comutatorul de autentificare obligatorie
+## Autentificare obligatorie Comutare
 
-`isAuthRequired()` din `src/shared/utils/apiAuth.ts` decide dacă se impune **orice** autentificare pentru o cerere:
+`isAuthRequired()` în `src/shared/utils/apiAuth.ts` decide dacă** orice** auth este aplicat pentru o cerere:
 
-- `settings.requireLogin === false` → autentificarea este dezactivată global, cu excepția nivelului protejat permanent (vezi [Route Guard Tiers](../security/ROUTE_GUARD_TIERS.md)) și a apelurilor care emit o credențială pe care o acceptă, acestea necesitând aceeași credențială ca atunci când autentificarea este activă: emiterea tokenurilor de sincronizare, crearea tokenurilor de acces CLI de orice domeniu și crearea unei chei API cu domeniul `manage`/`admin`, acordarea acestui domeniu unei chei, regenerarea sau dezvăluirea unei astfel de chei (`requireCredentialForManagementScopedKey()` din `src/lib/api/requireManagementAuth.ts`). Cheile destinate doar inferenței rămân deschise.
-- Nicio parolă configurată **și** nicio variabilă de mediu `INITIAL_PASSWORD` → modul de bootstrap permite expertul de configurare și cererile de pe loopback, dar cererile din rețea externă încă necesită credențiale.
-- Orice eroare de bază de date → eșec închis (secure-by-default).
+- Autentificarea `settings.requireLogin === false` → este dezactivată la nivel global, cu excepția nivelului întotdeauna protejat (consultați [Nivelurile Route Guard](../security/ROUTE_GUARD_TIERS.md) ) și a apelurilor care eliberează o acreditare pe care o acceptă, care au nevoie de aceeași autentificare ca și la autentificare: emiterea de jetoane de sincronizare, baterea jetoanelor de acces CLI la orice domeniu și crearea unei chei API / cu scopul `manage`, acordarea acelui scope `admin`. cheie, sau regenerarea sau dezvăluirea unei astfel de chei (`requireCredentialForManagementScopedKey()` în `src/lib/api/requireManagementAuth.ts`). Cheile numai pentru inferență rămân deschise. Scrierea unui semnalizator de caracteristică protejată (`REQUIRE_API_KEY`, celelalte steaguri de securitate și steaguri SSRF / TLS / MCP-scope / sandbox listate în [Indicatoare caracteristici](../reference/FEATURE_FLAGS.md#rest-api) ) și salvarea setărilor de mascare PII (`PUT /api/settings/pii`) continuă să aibă nevoie de acreditări.
+- Nicio parolă configurată** şi** nu `INITIAL_PASSWORD` env var → modul bootstrap permite expertul de onboarding și solicitările de loopback, dar solicitările de rețea expuse au nevoie în continuare de acreditări. Excepție: scrierea unui semnalizator de caracteristică protejată și salvarea setărilor de mascare PII (`PUT /api/settings/pii`) au nevoie de o acreditare chiar și de la loopback, deci loopback-ul în sine nu este suficient acolo.
+- Orice eroare DB → eșuează închisă (securizat implicit).
 
-Aplicarea cheii API a clientului folosește `isRequireApiKeyEnabled()` din `src/shared/utils/featureFlags.ts`, nu o citire directă a `process.env.REQUIRE_API_KEY`. Acest lucru contează pentru instanțele implementate: comutarea `REQUIRE_API_KEY` în Dashboard → Feature Flags stochează o suprascriere în baza de date și afectează imediat `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` și celelalte verificări de autentificare a API-ului clientului care partajează acest helper. Dacă depozitul de feature flag-uri nu poate fi citit, autentificarea API-ului clientului eșuează închis și cere o cheie.
+Aplicarea cheii API client folosește `isRequireApiKeyEnabled()` în `src/shared/utils/featureFlags.ts`, nu o citire `process.env.REQUIRE_API_KEY` directă. Acest lucru contează pentru instanțe implementate: comutarea `REQUIRE_API_KEY` în Dashboard → Feature Flags stochează o modificare DB și afectează imediat `/v1/*`, `/v1beta/*`, `/models`, `/responses`, `/chat/completions`, `/codex/*` și alte verificări de autentificare API client care partajează acest ajutor. Dacă magazinul de semnalizare a caracteristicilor nu poate fi citit, clientul API auth nu se închide și necesită o cheie.
 
 ## Modificare incompatibilă — v3.8.0
 

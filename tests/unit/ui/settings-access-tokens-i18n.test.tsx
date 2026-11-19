@@ -3,7 +3,9 @@ import { cleanup, fireEvent, render, screen, waitFor, within } from "@testing-li
 import { NextIntlClientProvider } from "next-intl";
 import { afterEach, beforeAll, beforeEach, describe, expect, it, vi } from "vitest";
 import AccessTokensTab from "@/app/(dashboard)/dashboard/settings/components/AccessTokensTab";
+import en from "@/i18n/messages/en.json";
 import zh from "@/i18n/messages/zh-CN.json";
+import { deepMergeFallback } from "@/i18n/request";
 // The shared Select renders the kit (Radix) Select for `options` since KEA-7886: no DOM
 // <select>/<option>; the helpers read the menu items (data-value) and the controlled value.
 import { chooseKitSelectValue } from "../../helpers/kitSelect";
@@ -20,6 +22,9 @@ const token = {
 };
 // Exercise the real catalog and formatter, not the global key-only test mock.
 vi.unmock("next-intl");
+// Load the catalog the way the runtime does (src/i18n/request.ts): a key the translation wave has
+// not reached yet falls back to English instead of throwing. A key missing from both still throws.
+const messages = deepMergeFallback(structuredClone(zh), en) as typeof en;
 
 // The kit Table measures itself with ResizeObserver (persistent scrollbar); jsdom lacks it.
 beforeAll(() => {
@@ -37,7 +42,7 @@ function mount() {
     <NextIntlClientProvider
       locale="zh-CN"
       timeZone="UTC"
-      messages={{ settings: zh.settings, common: zh.common }}
+      messages={{ settings: messages.settings, common: messages.common }}
       onError={(error) => {
         throw error;
       }}
@@ -143,6 +148,27 @@ describe("access-token settings with real Chinese catalogs", () => {
     await waitFor(() =>
       expect(document.activeElement).toBe(screen.getByPlaceholderText("名称（例如：笔记本电脑）"))
     );
+  });
+
+  it("shows the new token's scope as code-preview metadata, not as its language (#18073)", async () => {
+    mount();
+    await screen.findByRole("table");
+    fireEvent.change(screen.getByPlaceholderText("名称（例如：笔记本电脑）"), {
+      target: { value: "Remote laptop" },
+    });
+    chooseKitSelectValue(screen.getByRole("combobox"), "admin");
+    fetchMock.mockResolvedValueOnce(reply({ token: "omni_disposable_test_secret" }));
+    fireEvent.click(screen.getByRole("button", { name: "创建" }));
+    const secret = await screen.findByText("omni_disposable_test_secret");
+    const preview = secret.closest<HTMLElement>("[data-slot='code-preview']");
+    expect(preview).toBeTruthy();
+    const meta = preview!.querySelector(".ci-code-preview__meta");
+    expect(meta?.querySelector("strong")?.textContent).toBe("Remote laptop");
+    // The scope badge text sits in the metadata slot; the language slot stays empty.
+    expect(meta?.querySelector(".ci-code-preview__endpoint")?.textContent).toBe("管理员");
+    expect(meta?.querySelector("strong + span")?.textContent).toBe("");
+    // The code region is named by the token, not "<scope> code".
+    expect(within(preview!).getByLabelText("Remote laptop").tagName).toBe("PRE");
   });
 
   it("uses a localized create failure instead of surfacing English transport errors", async () => {

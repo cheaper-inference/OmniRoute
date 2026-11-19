@@ -38,24 +38,19 @@ na zinaauni ulinganishaji wa `any` au `all`.
 Kanuni ya `connection` hutathminiwa tu wakati hakuna kanuni ya mapema iliyoshinda na connection mahususi ya provider
 tayari imechaguliwa. Inaweza kubadilisha effort na budget pekee.
 
-## Effort na Budget
+## Juhudi na Bajeti
 
-`sourceEffort` hukubali `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, na
-`ultra`. `missing` humaanisha kuwa ombi halina effort mahususi wala thinking toggle
-au thinking budget. Kwa hivyo, ishara ya budget pekee hulinganishwa na `any` tu.
+`sourceEffort` inakubali `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, na `ultra`. `missing` inamaanisha kuwa ombi halina juhudi maalum au ubadilishaji wa kufikiria au bajeti ya kufikiria. Kwa hivyo ishara ya bajeti pekee inalinganishwa na `any` pekee.
 
-`effortMode` ina variants tatu:
+`effortMode` ina lahaja tatu:
 
-- `inherit` huhifadhi effort ya client huku bado ikiruhusu model au combo kubadilika.
-- `default` huweka `targetEffort` tu wakati hakuna ishara ya wazi ya reasoning.
-- `force` hubadilisha effort mahususi na `targetEffort`.
+- `inherit` huweka juhudi za mteja huku bado ikiruhusu kielelezo au mchanganyiko kubadilika.
+- `default` huweka `targetEffort` tu wakati hakuna ishara dhahiri ya hoja iliyopo.
+- `force` inabadilisha juhudi za kipekee na `targetEffort`.
 
-Bila kutegemea hilo, `budgetAction` inaweza kuwa `preserve`, `remove`, au `set`. `force` yenye `none` huondoa
-fields zote zinazotambulika za effort na budget. `none` pamoja na `set` si halali.
+Kwa kujitegemea, `budgetAction` inaweza kuwa `preserve`, `remove`, au `set`. `force` pamoja na `none` huondoa juhudi zote zinazotambulika na nyanja za bajeti, kisha huweka `reasoning_effort: "none"`, kwa sababu baadhi ya watoa huduma huwasha fikra wakati uga haupo. Watoa huduma wanaokataa `none` halisi hurekebishwa wakati wa kutumwa katika `open-sse/executors/base/reasoningEffort.ts`. Msimbo wa Amri huiweka `low`, isipokuwa kwa maombi yenye umbo la Majibu (`input` bila `messages`), ambapo huweka `none`. Kwenye Cloudflare Workers AI (`cloudflare-ai`), miundo inayokataa `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) hupata `low`; Wafanyikazi wengine AI mifano weka `none`. Kuangusha uga si chaguo hapo, kwa sababu jitihada zisizokuwepo huendesha kiwango cha msingi cha modeli. `none` pamoja na `set` ni batili.
 
-Maombi yanayolenga models zinazojulikana kutooana hukataliwa kabla ya simu ya upstream. Kwa targets za combo,
-entries zisizooana huondolewa; ikiwa hakuna inayosalia, ombi hurejesha status `400`.
-Data isiyojulikana ya capability hutoa onyo na kuacha kanuni ikiwa active.
+Maombi yanayolenga miundo isiyooana inayojulikana hukataliwa kabla ya simu ya juu. Kwa shabaha za mchanganyiko, maingizo yasiyolingana yanaondolewa; ikiwa hakuna iliyobaki, ombi hurejesha hali `400`. Data ya uwezo isiyojulikana hutoa onyo na kuacha sheria ikifanya kazi.
 
 ## Usalama na Transports
 

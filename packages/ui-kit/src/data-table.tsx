@@ -43,6 +43,8 @@ export interface DataTableProps<Row> {
   initialSort?: { id: string; direction: "asc" | "desc" };
   note?: ReactNode;
   className?: string;
+  /** Caps the table height so the rows scroll under a pinned header. See `Table`. */
+  maxHeight?: string | number;
 }
 
 function compare(a: DataTableValue, b: DataTableValue) {
@@ -74,6 +76,7 @@ export function DataTable<Row>({
   initialSort,
   note,
   className,
+  maxHeight,
 }: DataTableProps<Row>) {
   const [query, setQuery] = useState("");
   const [page, setPage] = useState(1);
@@ -117,7 +120,7 @@ export function DataTable<Row>({
           </div>
           <span className="ci-data-table__count" aria-live="polite">{filtered.length} results</span>
         </div>
-        <Table aria-label={ariaLabel} loading={loading} loadingLabel={loadingLabel}>
+        <Table aria-label={ariaLabel} loading={loading} loadingLabel={loadingLabel} maxHeight={maxHeight}>
           <TableHeader>
             <TableRow>
               {columns.map((column) => {

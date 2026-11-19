@@ -80,6 +80,18 @@ Kódà níta àwọn agbègbè tí a ti dí mọ́, àwọn proxy wúlò fún:
 
 ---
 
+## Ipo aṣoju aiyipada fun awọn iroyin titun
+
+Ninu** Eto → Aṣoju → Agbaye iṣeto ni** , lo** Mu aṣoju ṣiṣẹ nipasẹ aiyipada fun awọn asopọ tuntun** lati yan ipo aṣoju akọkọ ti awọn iroyin olupese ti a ṣafikun.
+
+Eto tuntun n ṣakoso ipo aṣoju akọkọ ti awọn iroyin olupese ti a ṣafikun. Ko yi awọn akọọlẹ ti o wa tẹlẹ pada tabi rọpo iyipada aṣoju agbaye. Iye ibẹrẹ rẹ ṣe itọju ihuwasi iṣaaju. Pa a ni ẹẹkan lati ṣẹda awọn iroyin iwaju pẹlu aṣoju alaabo nipasẹ aiyipada.
+
+Iyanfẹ ti wa ni ipamọ bi `defaultNewConnectionProxyEnabled` nipasẹ awọn Eto ti o wa tẹlẹ API. O ṣe aiyipada si `true` nigbati ko ṣe fipamọ. Fifipamọ `false` gba ipa fun awọn iroyin tuntun ti o tẹle laisi atunbere. `POST /api/providers` gba aṣayan ti o muna `proxyEnabled` boolean; `true` ti o fojuhan tabi `false` gba iṣaaju lori aiyipada ẹda. Iyọkuro lori akọọlẹ ẹda-ẹda kan tabi atunsopọ OAuth ṣe itọju ipo ipamọ akọọlẹ yẹn. Awọn akọọlẹ kọọkan le tun mu ṣiṣẹ tabi alaabo lẹhinna.
+
+Awọn gbigbe olupese ti o yan lo aiyipada fifi sori ẹrọ opin irin ajo fun awọn akọọlẹ tuntun ati ṣetọju eto imulo opin irin ajo nigbati o rọpo awọn iroyin to wa tẹlẹ. Awọn toggles aṣoju kii ṣe awọn aaye gbigbe to ṣee gbe. Imupadabọsipo ni kikun ati iṣilọ JSON/SQL itan ṣe idaduro awọn atunmọ imupadabọ ti o wa tẹlẹ, pẹlu awọn iye akọọlẹ ipamọ ti o fipamọ ati awọn aseku ero-ijogunba; mimu-pada sipo awọn eto ni kikun le tun mu ayanfẹ yii pada.
+
+Iyanfẹ yii ko yan aṣoju tabi fi idi rẹ mulẹ pe ọkan wa ni ilera tabi lilo. Itọnisọna gangan tun da lori iyipada aṣoju agbaye ati iṣeto aṣoju to wulo. Awọn olupese sintetiki laisi akọọlẹ ti o tẹpẹlẹ, ijabọ OAuth ṣaaju ṣiṣẹda akọọlẹ, awọn aṣoju environment/system, ati awọn nẹtiwọọki ti ita ita wa ni ita aaye rẹ.
+
 ## Ètò Proxy Onípele Mẹ́rin
 
 OmniRoute ṣe àtìlẹ́yìn fún ìṣètò proxy ní **àwọn ìpele òmìnira mẹ́rin**, tí a ń yanjú ní ìbámu pẹ̀lú bí ààyò wọn ṣe tẹ̀ lé ara wọn:

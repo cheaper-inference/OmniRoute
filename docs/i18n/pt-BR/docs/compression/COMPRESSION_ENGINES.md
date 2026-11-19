@@ -9,44 +9,33 @@ A compactação do OmniRoute é estruturada em torno de contratos de mecanismos.
 
 ## Modos
 
-| Modo | Caminho do motor  
-| Entrada pretendida |
-| ------------ | ------------------------------------------------------------------------------------- | ------------------------------------------------ |
-| `off` | nenhum | Preservação exata do prompt |
-| `lite` | Ajudantes Caveman lite | Limpeza de baixo risco sempre ativa |
-| `standard` | Caveman | Condensação de prompt em linguagem natural |
-| `aggressive` | Caveman + sumarizadores de histórico/ferramentas | Sessões de chat longas |
-| `ultra` | Caveman + ajudantes de poda | Recuperação de limite de contexto |
-| `rtk` | RTK | Saída de terminal, shell, build, teste e git |
-| `omniglyph` | OmniGlyph | Contexto como imagem no provedor nativo |
-| `stacked` | Pipeline. O padrão da requisição é `session-dedup -> lite`. `rtk -> caveman` é opcional. | Logs de ferramentas mistos e prosa, economia máxima |
+| Modo         | Caminho do motor                                                                          | Entrada pretendida                                       |
+| ------------ | ----------------------------------------------------------------------------------------- | -------------------------------------------------------- |
+| `off`        | nenhum                                                                                    | Preservação imediata e exata                             |
+| `lite`       | Ajudantes leves do homem das cavernas                                                     | Limpeza sempre ativa de baixo risco                      |
+| `standard`   | Homem das cavernas                                                                        | Condensação imediata em linguagem natural                |
+| `aggressive` | Resumidores do homem das cavernas + history/tool                                          | Longas sessões de bate-papo                              |
+| `ultra`      | Ajudantes de poda do homem das cavernas +                                                 | Recuperação de limite de contexto                        |
+| `rtk`        | RTK                                                                                       | Terminal, shell, compilação, teste e saída git           |
+| `omniglyph`  | OmniGlyph                                                                                 | Contexto como imagem na conexão do provedor nativo       |
+| `stacked`    | Gasoduto. O padrão da solicitação é `session-dedup -> lite`. `rtk -> caveman` é opcional. | Registros e prosa de ferramentas mistas, economia máxima |
 
-### Perfis de compressão OmniGlyph
+### perfis de compactação OmniGlyph
 
-O motor `omniglyph` (pacote `omniglyph`, 1.4.0+) aceita um perfil semântico nomeado, definido
-globalmente através de `omniglyph.profile` nas configurações de compressão ou por etapa através da
-configuração de etapa do pipeline empilhado:
+O mecanismo `omniglyph` (pacote `omniglyph`, 1.4.0 +) aceita um perfil semântico nomeado, definido globalmente por meio de `omniglyph.profile` nas configurações de compactação ou por etapa por meio da configuração de etapa do pipeline empilhado:
 
-| Perfil        | Limite                                                                                                                 |
-| ------------- | ---------------------------------------------------------------------------------------------------------------------- |
-| `aggressive`  | Padrão. A política que os recibos publicados mediram — sistema de imagens, documentos de ferramentas e histórico denso |
-| `balanced`    | Mantém o estado nativo, protege as últimas 8 rodadas, colapsa o histórico fechado mais antigo                          |
-| `coding-safe` | Mantém a autoridade, esquemas de ferramentas e saída de ferramentas nativas, protege as últimas 12 rodadas             |
-| `passthrough` | Roteia sem transformar; o motor é ignorado                                                                             |
+| Perfil        | Limite                                                                                                              |
+| ------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `aggressive`  | Padrão. A política dos recibos publicados mediu o sistema de imagens —, documentos de ferramentas e histórico denso |
+| `balanced`    | Mantém o estado ativo nativo, protege os últimos 8 turnos, colapsa o histórico fechado mais antigo                  |
+| `coding-safe` | Mantém autoridade, esquemas de ferramentas e saída de ferramenta ativa nativos, protege os últimos 12 turnos        |
+| `passthrough` | Rotas sem transformação; o motor é ignorado                                                                         |
 
-O perfil é um **teto, não um piso**: `mergeCompressionProfileOptions` no pacote
-recusa-se a permitir que um chamador substitua e reabra uma via com perdas que o perfil fechou, então um
-`preserveSystemPrompt: false` por etapa não pode reativar a compressão do sistema sob `coding-safe`.
+O perfil é um** teto, não um chão** : `mergeCompressionProfileOptions` no pacote se recusa a permitir que um chamador substitua a reabertura de uma pista com perdas que o perfil fechou, portanto, um `preserveSystemPrompt: false` por etapa não pode reativar a compactação do sistema em `coding-safe`.
 
-Medido nesta base de código: `coding-safe` e `balanced` elevam `minCompressChars` ao seu
-máximo e mantêm o sistema, esquemas de ferramentas e resultados de ferramentas nativos, então uma sessão que não
-acumulou histórico ainda para em `below_min_chars` e o motor não transforma nada. É
-por isso que o padrão é `aggressive` em vez do perfil mais seguro.
+Medido nesta base de código: `coding-safe` e `balanced` elevam `minCompressChars` ao máximo e mantêm o sistema, os esquemas de ferramentas e os resultados das ferramentas nativos, de modo que uma sessão que não acumulou histórico ainda pare em `below_min_chars` e o mecanismo não transforme nada. É por isso que o padrão é `aggressive` em vez do perfil mais seguro.
 
-O pacote resolve seu próprio escopo de modelo e perfil a partir de sua configuração de ambiente.
-OmniRoute nunca delega a decisão: o adaptador fixa o gate do modelo ao
-escopo mais restritivo do pacote, então as configurações do ambiente host só podem
-estreitar a lista de permissões, nunca ampliá-la além dos recibos medidos do OmniRoute.
+O pacote resolve seu próprio escopo e perfil de modelo a partir da configuração de seu ambiente. OmniRoute nunca delega a decisão: o adaptador fixa a porta do modelo ao escopo mais restritivo do pacote, de modo que as configurações do ambiente host podem apenas restringir a lista de permissões, nunca ampliá-la além dos recibos medidos de OmniRoute.
 
 ## Registro de engines
 
@@ -306,6 +295,95 @@ Combos de compressão são perfis de compressão nomeados que podem ser atribuí
 
 Área no dashboard: `Dashboard -> Context & Cache -> Compression Combos`.
 
+## Pré-requisitos/guia do operador (CCR e session-dedup)
+
+CCR (`ccr`) e `session-dedup` substituem ou eliminam o texto e deixam um** marcador** atrás. Esta seção é a referência do operador para conectar um cliente, ler os dois marcadores e recuperar ou diagnosticar o conteúdo elidido. A mecânica de cada motor é abordada acima; esta é a camada "como faço para executá-la".
+
+### Transportes e terminais
+
+O servidor MCP que expõe as ferramentas CCR pode ser acessado de três maneiras. A base URL padrão é `http://localhost:20128` (`OMNIROUTE_BASE_URL`):
+
+| Transporte                             | URL / comando                           | Notas                                                                                                                                      |
+| -------------------------------------- | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------ |
+| HTTP streamável (cliente, recomendado) | `http://localhost:20128/api/mcp/stream` | O endpoint com o qual os clientes MCP atuais conversam.                                                                                    |
+| Singleton SSE legado                   | `http://localhost:20128/api/mcp/sse`    | Transporte singleton mais antigo. Isto** fecha** sessões transmitíveis; use clientes `streamable-http` contra `/api/mcp/stream`, não este. |
+| estúdio                                | `omniroute --mcp`                       | Para IDE MCP config que gera o processo. Não há sinalizador `--dev` ; `omniroute --mcp` é o ponto de entrada do stdio.                     |
+
+### Camadas de armazenamento (o que sobrevive a uma reinicialização)
+
+CCR é um** dois níveis** armazenar, não apenas na memória:
+
+- **Camada quente na memória** — por bloco cap 2 MiB, por principal 16 MiB, global 64 MiB. As inscrições têm como padrão um TTL de 24 horas (máximo 7 dias). A recuperação completa MCP da memória é limitada a 256 KiB; qualquer coisa maior ainda pode ser alcançada através dos modos ranged/grep.
+- **Camada SQLite durável** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, on por padrão) — faz backup da camada de memória para que um bloco sobreviva à remoção LRU, a uma reinicialização ou a uma recuperação em outra instância. A linha mantém o bloco TTL, portanto, um bloco após seu TTL desaparece de ambas as camadas.
+
+Três guardas mantêm a camada durável limitada — um bloco permanece somente na memória quando:
+
+1. o bloco acabou** 512 KB** (`MAX_DURABLE_BLOCK_BYTES`);
+2. o tempo de execução é um tempo de execução em nuvem (sem disco local);
+3. `COMPRESSION_CCR_DURABLE_STORE=false`.
+
+Portanto, "o bloco desapareceu" não é uma história de reinicialização geral: um bloco sub-512 KB em um tempo de execução local, fora da nuvem, sobrevive a uma reinicialização por meio da camada durável até que seu TTL acabe, desde que sua gravação durável seja bem-sucedida. Essa gravação é o melhor esforço e é executada fora do caminho da solicitação: ela é descartada enquanto 1.000 gravações duráveis já estão pendentes, um erro de gravação SQLite é registrado (`[ccr] durable persist failed`) e não é tentado novamente, e uma falha antes da execução da gravação adiada também a perde. Esse bloco permanece apenas na memória e desaparece após a reinicialização. Consulte [Referência de ambiente](../reference/ENVIRONMENT.md) para a variável.
+
+### Os dois marcadores
+
+| Marcador                              | Significado                                                                                                                                        | O que o modelo deve fazer                                                                                                                                                                                   |
+| ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `[CCR retrieve hash=<24hex> chars=N]` | Um grande bloco foi armazenado com conteúdo endereçado.                                                                                            | Ligue para `omniroute_ccr_retrieve` com o** Hash de 24 hexadecimais copiado literalmente** para recuperar o texto original.                                                                                 |
+| `[dedup:ref sha=…]`                   | `session-dedup` texto elidido já enviado em um turno anterior da mesma sessão. Este é um** retrospectiva intencional** , não uma perda ou um erro. | Fazer** não** chame qualquer ferramenta e faça** não** tente "reconstruí-lo". A primeira ocorrência do texto é a cópia canônica; o turno atual nunca é reescrito, ele é desduplicado em um turno posterior. |
+
+A retrospectiva `[dedup:ref]` é uma decisão deliberada do protocolo — não há reconstrução pré-envio. Trate-o como "este texto exato já estava sendo transmitido no início desta sessão".
+
+### Pré-requisitos do cliente
+
+- **Chave (estdio):** um chamador stdio não carrega nenhuma identidade por solicitação, portanto, ele é autenticado com `OMNIROUTE_API_KEY` (definido no `env` do servidor MCP ). Sem ele, o chamador é anônimo e as ferramentas que exigem um principal podem ser degradadas.
+- **`tools[]` é a pré-condição da injeção.** A instrução do protocolo de recuperação CCR (#8033) é injetada** apenas** quando o `tools[]` anunciado da solicitação prova que o cliente pode realmente alcançar `omniroute_ccr_retrieve`. A correspondência é uma correspondência de segmento final delimitada por um separador (`__`, `.`, `/`, `:`) — nunca uma substring nua — portanto, um nome com namespace como `mcp__gateway__omniroute_ccr_retrieve` ainda conta. Um `tools[]` ausente ou não correspondente significa que a instrução _não_ foi injetada, por design.
+- **`codemode:false` (clientes OpenCode ).** O padrão do OpenCode é o Modo Código, que anuncia apenas suas ferramentas nativas para o modelo e** não** coloque as ferramentas MCP na lista nativa `tools[]`. Defina `codemode: false` na entrada do servidor MCP para que as ferramentas `omniroute_ccr_*` sejam anunciadas. Este é um** cliente** configuração, não OmniRoute. OpenCode nomeia uma ferramenta `<server>_<tool>`, então um servidor chamado `omniroute` expõe `omniroute_omniroute_ccr_retrieve`; `_` é um dos separadores correspondentes, portanto a instrução CCR é injetada com esse nome quando uma solicitação carrega um marcador CCR.
+- **Diretores.** O armazenamento e a recuperação são isolados por entidade autenticada (por chave API ). Uma chave vê apenas seus próprios blocos.
+
+### Escopos por ferramenta
+
+A aplicação do escopo está sempre ativada para chamadores HTTP/SSE com escopo restrito. As ferramentas `omniroute_` CCR requerem:
+
+| Ferramenta               | Escopo              |
+| ------------------------ | ------------------- |
+| `omniroute_ccr_store`    | `write:compression` |
+| `omniroute_ccr_delete`   | `write:compression` |
+| `omniroute_ccr_retrieve` | `read:compression`  |
+| `omniroute_ccr_inspect`  | `read:compression`  |
+| `omniroute_ccr_list`     | `read:compression`  |
+| `omniroute_ccr_stats`    | `read:compression`  |
+
+Um escopo ausente retorna um** resultado de erro da ferramenta MCP** (`isError: true`, não um HTTP 403 — o `403 LOCAL_ONLY` é a autenticação de proteção de rota de loopback separada): `Error: Insufficient MCP scopes for <tool>. Missing: <scope>.` Uma chave remota mínima pode conter `mcp:connect` (autoriza a divisão `/api/mcp/` apenas local) mais o escopo read/write específico necessário.
+
+### Matriz de clientes
+
+| Cliente               | Transporte                                           | Configuração para usar                                                                                                                                                                                                                                          | `tools[]` anunciado? (instrução → CCR injetada)                                                                                                                                        |
+| --------------------- | ---------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Código Claude         | streaming-http                                       | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                               | Sim — compatível com MCP; injetado.                                                                                                                                                    |
+| Cursor / Cline        | `stdio`** ou** `streamable-http`                     | stdio: `omniroute --mcp` com `OMNIROUTE_API_KEY` em `env`; ou uma entrada MCP remota apontando para `http://localhost:20128/api/mcp/stream` (consulte [Guia de configuração → MCP Configuração do cliente](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Sim — anuncia as ferramentas `omniroute_ccr_*`.                                                                                                                                        |
+| OpenCode              | streaming-http                                       | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream`, mais `codemode: false`                                                                                                                                                                | Ferramentas anunciadas apenas com `codemode: false`; em seguida, injetado, nomeando `omniroute_omniroute_ccr_retrieve` (consulte [Pré-requisitos do cliente](#client-prerequisites) ). |
+| Compatível com OpenAI | HTTP compatível com OpenAI (conclusões de bate-papo) | cliente padrão de conclusão de bate-papo em relação ao endpoint compatível com OpenAI                                                                                                                                                                           | **Nunca** — um chamador simples compatível com OpenAI nunca é instruído a chamar a ferramenta e a instrução não é injetada.                                                            |
+
+### Limites de recuperação e paginação
+
+Os resultados do texto da ferramenta MCP são recortados em torno de `mcpAccessibility.maxTextChars` (padrão `50000`). Uma recuperação `full` de um bloco é limitada a 256 KiB —** não há recuperação completa ilimitada** . Quando `chars=N` de um bloco for grande, page-o em vez de puxar tudo:
+
+- Regra prática:**`chars > 40000` → use um `mode`** , nunca totalmente cheio.
+- `mode:"grep"` — regex `pattern` combinado linha por linha, até 1.000 linhas correspondentes (`unique: true` elimina repetições), mais barato para "encontrar a linha que preciso".
+- `mode:"lines"` — um intervalo de linhas indexadas em 1; precisa de `start` e `end`.
+- linhas `mode:"head"` / `mode:"tail"` — first/last `n`.
+- `mode:"stats"` — contagens de linhas, caracteres e bytes sem o corpo.
+
+Use `mode:"lines"` com `start`/`end` para percorrer um longo bloco nas páginas, em vez de solicitar tudo de uma vez.
+
+### Nomenclatura de ferramentas
+
+A ferramenta de recuperação atualmente é chamada `omniroute_ccr_retrieve` (o prefixo `omniroute_` é uma solução alternativa desatualizada para colisões de nomes entre servidores). Um nome de ferramenta de sufixo limitado mais limpo e uma correção para resultados MCP JSON truncados no meio da string são rastreados como acompanhamentos upstream; esta página documenta apenas o comportamento atual enviado.
+
+### Ciclo de vida da sessão
+
+As sessões Streamable-HTTP ficam inativas e o servidor as colhe; a janela inativa é definida por `OMNIROUTE_MCP_SESSION_IDLE_MS` (padrão 5 minutos; referenciada pelo nome, não por um valor codificado, portanto, esta página não oscila quando muda). O sintoma de uma sessão ociosa é um HTTP 404 com `Unknown Mcp-Session-Id` — a solução é reconectar ou reiniciar a sessão,** não** para girar uma chave, alterar um escopo ou renomear uma ferramenta.
+
 ## Superfície da API
 
 | Rota                                   | Finalidade                                                                     |
@@ -389,7 +467,7 @@ sensíveis ao cache etc.).
 
 ## Validação
 
-Os "gates" focados para esta área são:
+Os portões focados para esta área são:
 
 ```bash
 node --import tsx/esm --test tests/unit/compression/rtk-*.test.ts tests/unit/compression/pipeline-integration.test.ts tests/unit/compression/context-compression-api.test.ts

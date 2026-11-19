@@ -8,10 +8,9 @@
  * comes back online.
  */
 
-import { useState, useEffect } from "react";
-import { useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
-import Button from "./Button";
+import { Alert } from "@omniroute/ui-kit/alert";
 import Icon from "./Icon";
 import { startVisiblePolling } from "@/shared/utils/visiblePolling";
 
@@ -63,28 +62,24 @@ export default function MaintenanceBanner() {
     return startVisiblePolling(checkHealth, 10000);
   }, [t]);
 
+  const dismiss = useCallback(() => {
+    dismissedUntilRecoveryRef.current = true;
+    setShow(false);
+  }, []);
+
   if (!show) return null;
 
+  // Kit warning Alert (role="status"), inline layout. Square, side-less and top-less so it stays
+  // a strip under the Header rather than a card.
   return (
-    <div
-      role="status"
-      className="bg-warning-bg border-b border-warning/30 px-4 py-2.5 flex items-center justify-between gap-3 animate-in slide-in-from-top"
-    >
-      <div className="flex items-center gap-2.5">
-        <Icon name="warning" size={18} className="text-warning animate-pulse" />
-        <span className="text-sm text-text-main">{message}</span>
-      </div>
-      <Button
-        variant="ghost"
-        size="icon"
-        onClick={() => {
-          dismissedUntilRecoveryRef.current = true;
-          setShow(false);
-        }}
-        aria-label={t("close")}
-      >
-        <Icon name="close" size={16} />
-      </Button>
-    </div>
+    <Alert
+      variant="warning"
+      layout="inline"
+      icon={<Icon name="warning" size={16} />}
+      description={message}
+      dismissLabel={t("close")}
+      onDismiss={dismiss}
+      className="rounded-none border-x-0 border-t-0"
+    />
   );
 }

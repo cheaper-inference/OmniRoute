@@ -25,6 +25,7 @@ import {
   type DeltaFrameCoalescer,
 } from "./sseDeltaCoalesce.ts";
 import type { StreamTiming } from "./streamTiming.ts";
+import type { CancelableTransformer } from "./cancelableTransformStream.ts";
 
 type OutputController = TransformStreamDefaultController<Uint8Array>;
 type SinkTiming = Pick<StreamTiming, "markForward" | "observeOutput">;
@@ -163,9 +164,7 @@ export function createSSEOutputSink(
   const wrap = <T extends Transformer<Uint8Array, Uint8Array>>(transformer: T): T => {
     if (!deltaStage && frameWindowMs <= 0) return transformer;
     const originalFlush = transformer.flush;
-    const originalCancel = (
-      transformer as T & { cancel?: (reason?: unknown) => void | PromiseLike<void> }
-    ).cancel;
+    const originalCancel = (transformer as CancelableTransformer<Uint8Array, Uint8Array>).cancel;
     return {
       ...transformer,
       async flush(controller: OutputController) {

@@ -8,7 +8,7 @@ import Icon from "./Icon";
 /**
  * EmptyState — adapter over the kit `EmptyState` (KEA-7886).
  *
- * `icon` is either a Material Symbols name (rendered through `<Icon>`, i.e. Lucide) or an
+ * `icon` is either an ICON_MAP name (rendered through `<Icon>`, i.e. Lucide) or an
  * emoji/glyph rendered as text. The action goes through the `Button` adapter.
  *
  * Usage:

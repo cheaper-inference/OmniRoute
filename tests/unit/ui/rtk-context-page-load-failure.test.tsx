@@ -1,7 +1,9 @@
 // @vitest-environment jsdom
 import React, { act } from "react";
 import { createRoot } from "react-dom/client";
-import { describe, it, expect, beforeEach, afterEach, vi } from "vitest";
+import fs from "node:fs";
+import path from "node:path";
+import { describe, it, expect, beforeAll, beforeEach, afterEach, vi } from "vitest";
 
 const containers: HTMLElement[] = [];
 const roots: Array<{ unmount: () => void }> = [];
@@ -17,6 +19,12 @@ function mount(ui: React.ReactElement): HTMLElement {
   });
   return container;
 }
+
+// Load the page module once, outside the per-test budget: a cold transform of the page and
+// its imports under a loaded runner otherwise eats the first test's 20 s (#18074).
+beforeAll(async () => {
+  await import("../../../src/app/(dashboard)/dashboard/context/rtk/RtkContextPageClient");
+}, 180_000);
 
 beforeEach(() => {
   (
@@ -142,5 +150,22 @@ describe("RtkContextPageClient when the settings GET fails", () => {
     // The stored flag is on, so the banner the defaults would show stays hidden.
     expect(container.textContent).not.toContain("master switch is OFF");
     expect(container.querySelectorAll("input, select, textarea").length).toBeGreaterThan(0);
+  });
+});
+
+describe("RtkContextPageClient imports (#18074)", () => {
+  it("loads its shared components by subpath, not through the @/shared/components barrel", () => {
+    // The barrel pulls in every shared component; cold under load that took 67–119 s here,
+    // far over the 20 s per-test budget of the tests above.
+    const src = fs.readFileSync(
+      path.join(
+        process.cwd(),
+        "src/app/(dashboard)/dashboard/context/rtk/RtkContextPageClient.tsx"
+      ),
+      "utf8"
+    );
+    expect(src).not.toMatch(/from "@\/shared\/components"/);
+    expect(src).toContain('from "@/shared/components/Collapsible"');
+    expect(src).toContain('from "@/shared/components/SegmentedControl"');
   });
 });

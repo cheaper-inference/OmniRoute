@@ -96,3 +96,28 @@ test("an unguarded request keeps its native fallback", async () => {
   assert.notEqual(undiciCalls[0].dispatcher, getGuardedDispatcher("block-metadata"));
   assert.equal(native(), 1);
 });
+
+for (const fails of [false, true]) {
+  test(`a guarded paid image ${fails ? "failure" : "success"} keeps guard precedence and one attempt`, async () => {
+    const { deps, undiciCalls, native } = recorder(fails ? connectionFailure() : null);
+    let looked = 0;
+    const request = proxyFetch(
+      "https://chatgpt.com/backend-api/codex/images/generations",
+      { method: "POST", body: "{}", connectGuard: "block-metadata" },
+      {
+        ...deps,
+        findWorkingProxy: async () => {
+          looked++;
+          return "http://127.0.0.1:9";
+        },
+      }
+    );
+    if (fails) await assert.rejects(request);
+    else assert.equal(await (await request).text(), "ok");
+    assert.equal(undiciCalls.length, 1);
+    assert.equal(undiciCalls[0].dispatcher, getGuardedDispatcher("block-metadata"));
+    assert.equal("connectGuard" in undiciCalls[0], false);
+    assert.equal(native(), 0);
+    assert.equal(looked, 0);
+  });
+}

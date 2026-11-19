@@ -14,23 +14,24 @@ Slack、PagerDuty、Datadog、內部警示服務或任何 HTTP 接收端整合�
 失敗時重試、個別追蹤每個 Webhook 的傳遞健康狀況，並自動停用持續
 失敗的端點。
 
-## 支援的事件
+## 支持的活動
 
-`WebhookEvent` 類型（`src/lib/webhooks/eventDescriptions.ts`，由 `src/lib/webhookDispatcher.ts` 使用）目前明確定義了四種事件：
+`WebhookEvent`類型（`src/lib/webhooks/eventDescriptions.ts`，由`src/lib/webhookDispatcher.ts`使用）目前對八個事件進行建模：
 
-| 事件                | 觸發時機                         |
-| ------------------- | -------------------------------- |
-| `request.completed` | 代理請求成功完成時               |
-| `request.failed`    | 代理請求在所有重試／備援皆失敗後 |
-| `quota.exceeded`    | API 金鑰超過預算／配額門檻時     |
-| `test.ping`         | 測試端點所使用的合成事件         |
+| 事件                      | 觸發時                                                       |
+| ------------------------- | ------------------------------------------------------------ |
+| `request.completed`       | 代理請求成功完成                                             |
+| `request.failed`          | 代理請求在所有retries/fallback之後失敗                       |
+| `quota.exceeded`          | API密鑰跨越budget/quota閾值                                  |
+| `proxy.set_aside`         | 代理池成員在多次拒絕後被擱置（僅限過渡）                     |
+| `proxy.pool.exhausted`    | 代理池範圍的每個成員都被預留                                 |
+| `provider.reset_redeemed` | 自動應用銀行重置已兌換重置積分或Claude每週會話重置           |
+| `provider.exhausted`      | 提供者的每個帳戶正在冷卻（每個提供者每 10 分鐘最多冷卻一次） |
+| `test.ping`               | 測試端點使用的綜合事件                                       |
 
-訂閱可接受字面值 `"*"`，以接收所有事件。`events` 中未知的事件
-名稱會在分派時被忽略。
+訂閱接受文字`"*"`來接收每個事件。 `events`中的未知事件名稱在調度時將被忽略。
 
-> 注意：分派器 API 已完成連接，但部分非 `test.ping` 事件的正式環境
-> 呼叫位置仍在陸續加入。請執行 `grep dispatchEvent`，查看您的版本中
-> 目前有哪些路徑會叫用分派器。
+> 注意：調度程序API已連接，但某些非`test.ping`事件的生產呼叫站點仍在登陸。檢查`grep dispatchEvent`以查看目前在您的版本中哪些路徑呼叫調度程序。
 
 ## 架構
 
@@ -125,23 +126,22 @@ Telegram / 自訂承載資料轉換器）由 `070_webhooks_kind_metadata.sql` �
 
 ## REST API
 
-所有端點都需要管理驗證（`requireManagementAuth`）。
+所有端點都需要管理身份驗證（`requireManagementAuth`）。
 
-| 端點                            | 方法   | 說明                                |
-| ------------------------------- | ------ | ----------------------------------- |
-| `/api/webhooks`                 | GET    | 列出 webhook（密鑰已遮蔽）          |
-| `/api/webhooks`                 | POST   | 建立 webhook                        |
-| `/api/webhooks/[id]`            | GET    | webhook 詳細資料（完整密鑰）        |
-| `/api/webhooks/[id]`            | PUT    | 更新欄位                            |
-| `/api/webhooks/[id]`            | DELETE | 移除                                |
-| `/api/webhooks/[id]/test`       | POST   | 觸發 `test.ping`（不重試）          |
-| `/api/webhooks/[id]/deliveries` | GET    | 取得單一 webhook 最近的傳遞嘗試記錄 |
-| `/api/webhooks/validate-url`    | POST   | 預先驗證 URL（SSRF 防護）           |
+| 端點                            | 方法   | 描述                         |
+| ------------------------------- | ------ | ---------------------------- |
+| `/api/webhooks`                 | GET    | 列出 webhooks（隱藏秘密）    |
+| `/api/webhooks`                 | POST   | 創建網路鉤子                 |
+| `/api/webhooks/[id]`            | GET    | Webhook 詳細資料（完全秘密） |
+| `/api/webhooks/[id]`            | PUT    | 更新字段                     |
+| `/api/webhooks/[id]`            | DELETE | 消除                         |
+| `/api/webhooks/[id]/test`       | POST   | 觸發`test.ping` （不重試）   |
+| `/api/webhooks/[id]/deliveries` | GET    | 最近嘗試傳送一個 Webhook     |
+| `/api/webhooks/validate-url`    | POST   | 飛行前URL驗證（SSRF防護）    |
 
-`GET /api/webhooks` 會將密鑰遮蔽為 `<前 10 個字元>...`，以避免在
-列表頁面中洩漏。實際需要密鑰時，請使用 `[id]` GET。
+`GET /api/webhooks`向`<first 10 chars>...`隱藏秘密，以避免在清單頁面上洩漏。當您確實需要秘密時，請使用`[id]` GET 。
 
-### 建立 webhook
+### 創建網路鉤子
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -155,18 +155,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-若省略 `secret`，伺服器會產生 `whsec_<hex>` 密鑰，並在回應中
-傳回該密鑰。
+如果省略`secret` ，伺服器會產生`whsec_<hex>`金鑰並在回應中傳回它。
 
-### 測試 webhook
+### 測試網路鉤子
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-傳回 `{ delivered, status, error }`。不會進行重試——適合用來
-快速驗證接收端是否接受承載資料與簽章。
+返回`{ delivered, status, error }`。不嘗試重試—對於快速驗證接收器是否接受有效負載和簽章很有用。
 
 ## 儀表板
 

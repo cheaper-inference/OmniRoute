@@ -3,7 +3,7 @@
 import { forwardRef, useCallback, useId, useState } from "react";
 import { useTranslations } from "next-intl";
 import { Field } from "@omniroute/ui-kit/field";
-import { Input as KitInput } from "@omniroute/ui-kit/input";
+import { Input as KitInput, type InputSize } from "@omniroute/ui-kit/input";
 import { cn } from "@/shared/utils/cn";
 import Icon from "./Icon";
 
@@ -11,9 +11,28 @@ interface InputProps extends Omit<React.InputHTMLAttributes<HTMLInputElement>, "
   label?: React.ReactNode;
   error?: React.ReactNode;
   hint?: React.ReactNode;
-  /** Material Symbols name, rendered as a leading icon via <Icon>. */
+  /** ICON_MAP name, rendered as a leading icon via <Icon>. */
   icon?: string;
+  /** ICON_MAP name, rendered as a trailing icon via <Icon>. Decorative (aria-hidden). */
+  trailingIcon?: string;
+  /** Decorative trailing content (a unit such as "ms" or "%"); wins over `trailingIcon`. */
+  suffix?: React.ReactNode;
+  /** Kit control height: `default` or the compact `sm`. */
+  size?: InputSize;
+  /**
+   * Classes for the kit `Field` wrapper around the label, the control and the message: its place
+   * in the layout (`flex-1`, `w-40`, `md:col-span-2`). Text or box classes written here do not
+   * reach the control — use `inputClassName` (tests/unit/input-adapter-classname-destination.test.ts).
+   */
+  className?: string;
+  /** Classes for the `<input>` itself (`text-xs`, `text-right`, a fixed height…). */
   inputClassName?: string;
+}
+
+// Kit trailing slot: a decorative suffix wins over a trailing icon name.
+function trailingSlot(suffix: React.ReactNode, trailingIcon?: string): React.ReactNode {
+  if (suffix != null && suffix !== "") return suffix;
+  return trailingIcon ? <Icon name={trailingIcon} size={16} /> : undefined;
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
@@ -26,6 +45,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
     error,
     hint,
     icon,
+    trailingIcon,
+    suffix,
+    size = "default",
     disabled = false,
     required = false,
     className,
@@ -91,7 +113,9 @@ const Input = forwardRef<HTMLInputElement, InputProps>(function Input(
       error={Boolean(error)}
       aria-invalid={error ? true : undefined}
       aria-describedby={describedBy}
+      size={size}
       leadingIcon={icon ? <Icon name={icon} size={16} /> : undefined}
+      trailingIcon={trailingSlot(suffix, trailingIcon)}
       className={inputClassName}
       onKeyDown={handleKeyDown}
       onKeyUp={handleKeyUp}

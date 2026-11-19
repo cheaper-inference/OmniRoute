@@ -42,27 +42,27 @@ Forespørsel ──▶ chatCore ──▶ usage.record() ──▶ SQLite
 
 Tjenesten `usage.ts` registrerer en **brukshendelse** for hver forespørsel:
 
-| Felt               | Type    | Kilde                                                           |
-| ------------------ | ------- | --------------------------------------------------------------- |
-| `id`               | string  | UUID generert ved registrering                                  |
-| `apiKeyId`         | string  | API-nøkkelen som startet forespørselen                          |
-| `provider`         | string  | Leverandør-ID (openai, anthropic osv.)                          |
-| `model`            | string  | Modell-ID (gpt-5, claude-opus-4-6 osv.)                         |
-| `comboId`          | string? | Kombinasjons-ID hvis rutet gjennom en kombinasjon               |
-| `promptTokens`     | number  | Fra oppstrømssvaret                                             |
-| `completionTokens` | number  | Fra oppstrømssvaret                                             |
-| `cachedTokens`     | number  | Tokener med hurtigbuffertreff (Anthropic-ledetekstbufring osv.) |
-| `totalTokens`      | number  | ledetekst + fullføring                                          |
-| `costUsd`          | number  | Beregnet fra prisdata                                           |
-| `latencyMs`        | number  | Forespørselens totale varighet                                  |
-| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`      |
-| `errorClass`       | string? | Feilklasse hvis status != success                               |
-| `timestamp`        | string  | ISO 8601 UTC                                                    |
-| `metadata`         | object  | Egendefinerte data satt inn av programtillegg                   |
+| Felt               | Type    | Kilde                                                        |
+| ------------------ | ------- | ------------------------------------------------------------ |
+| `id`               | string  | UUID generert ved registrering                               |
+| `apiKeyId`         | string  | API-nøkkelen som startet forespørselen                       |
+| `provider`         | string  | Leverandør-ID (openai, anthropic osv.)                       |
+| `model`            | string  | Modell-ID (gpt-5, claude-opus-4-6 osv.)                      |
+| `comboId`          | string? | Kombinasjons-ID hvis rutet gjennom en kombinasjon            |
+| `promptTokens`     | number  | Fra oppstrømssvaret                                          |
+| `completionTokens` | number  | Fra oppstrømssvaret                                          |
+| `cachedTokens`     | number  | Tokener med hurtigbuffertreff (Anthropic-promptbufring osv.) |
+| `totalTokens`      | number  | prompt + fullføring                                          |
+| `costUsd`          | number  | Beregnet fra prisdata                                        |
+| `latencyMs`        | number  | Forespørselens varighet fra ende til ende                    |
+| `status`           | enum    | `success`, `error`, `rate_limited`, `timeout`, `cancelled`   |
+| `errorClass`       | string? | Feilklasse hvis status != success                            |
+| `timestamp`        | string  | ISO 8601 UTC                                                 |
+| `metadata`         | object  | Egendefinerte data injisert av programtillegg                |
 
-### Hvor tokener kommer fra
+### Hvor tokenene kommer fra
 
-Tokener trekkes ut fra oppstrømsleverandørens svar i **responsbehandleren**:
+Tokener hentes ut fra oppstrømsleverandørens svar i **svarbehandleren**:
 
 ```ts
 // Fra open-sse/handlers/chatCore.ts
@@ -74,15 +74,45 @@ const usage = response.usage || {
 };
 ```
 
-For leverandører som ikke returnerer bruksdata (enkelte leverandører som bruker nettinformasjonskapsler), **estimerer** OmniRoute antall tokener ved hjelp av en tommelfingerregel på `~4 tegn per token` (se `open-sse/services/autoCombo/pipelineRouter.ts`).
+For leverandører som ikke returnerer bruksdata (enkelte leverandører som bruker nettleserinformasjonskapsler), **estimerer** OmniRoute antall tokener med en heuristikk på `~4 chars per token` (se `open-sse/services/autoCombo/pipelineRouter.ts`).
 
-### Bufrede tokener
+### Hurtigbufrede tokener
 
 OmniRoute sporer `cached_tokens` separat fra `prompt_tokens` fordi:
 
-- Anthropics ledetekstbufring tar en redusert pris for bufrede tokener (10 % av normal pris)
-- Enkelte leverandører returnerer `cache_read_input_tokens`, som bør prises annerledes
-- Analyse kan vise **treffraten for hurtigbufferen** = `cached_tokens / prompt_tokens`
+- Anthropics promptbufring har en redusert sats for hurtigbufrede tokener (10 % av normal sats)
+- Enkelte leverandører returnerer `cache_read_input_tokens`, som skal prises annerledes
+- Analyser kan vise **treffraten for hurtigbufferen** = `cached_tokens / prompt_tokens`
+
+### Diagnostikk for nivåer ved hurtigbufferskriving
+
+Panelet for promptbufferens tilstand i analysedashbordet skiller mellom leverandørrapporterte
+hurtigbufferskrivinger med 5 minutters og 1 times levetid. Anthropics
+`usage.cache_creation.ephemeral_5m_input_tokens` og
+`usage.cache_creation.ephemeral_1h_input_tokens` bevares gjennom oversetting av bruksdata både med og
+uten strømming og lagres sammen med sammendrag i kalloggen. Det samlede
+antallet hurtigbufferskrivinger legges ikke til disse kategoriene en gang til.
+
+Kall med bare en samlet skriveteller, inkludert eldre oppføringer, har et ukjent
+nivå. Ved en delvis fordeling forblir den ufordelte resten ukjent; ugyldige eller
+motstridende tellere merkes i stedet for å bli tildelt en TTL uten varsel. TTL-markører
+på forespørselssiden er ikke dokumentasjon på et fakturert nivå.
+
+Panelets API-ekvivalente skriveestimat dekker bare rapporterte nivåer med kjent pris, ikke
+hele forespørselen. For prising av native Claude/Anthropic-modeller brukes 1,25 ganger
+inndatasatsen for skrivinger med 5 minutters levetid og det dobbelte av inndatasatsen for skrivinger med 1 times levetid. Manglende
+pris angis som utilgjengelig, ikke null. Prisene registreres når hvert nytt kall loggføres;
+historiske oppføringer prises ikke på nytt. Abonnementskontoer kan derfor ha et
+API-ekvivalent estimat uten at beløpet belastes som en pengeutgift eller trekkes fra
+abonnementskvoten. Eksisterende beregninger av kvoter, budsjetter og leverandørspesifikke kostnader er uendret.
+
+Denne diagnostikken bruker det eksisterende avgrensede sammendraget av hurtigbufferens tilstand og gjeldende lagringstid for
+kalloggen. Den endrer ikke standardverdier for forespørslenes TTL, ruting eller kontovalg.
+Registrering av klientforespurt TTL kontra faktisk utgående TTL ved sending
+til leverandøren er utsatt; dette panelet rapporterer nivåene fra kvitteringen, ikke faktisk utgående TTL.
+
+Implementasjon: `src/lib/usage/cacheWriteEstimate.ts`,
+`src/lib/usage/cacheHealth.ts` og `open-sse/utils/cacheWriteUsage.ts`.
 
 ---
 
@@ -123,31 +153,31 @@ For modeller uten prisdata bruker OmniRoute **estimert kostnad** basert på inte
 
 ## Aggregering etter datointervall
 
-Modulen `usageAnalytics.ts` beregner kontrollpanelmoduler fra rå bruksdata. Den støtter 7 tidsintervaller:
+Modulen `usageAnalytics.ts` beregner kontrollpanelkomponenter fra rå bruksdata. Den støtter 7 tidsintervaller:
 
-| Intervall | Tidsrom                          | Bruksområde                           |
-| --------- | -------------------------------- | ------------------------------------- |
-| `1d`      | Siste 24 timer                   | Oppdagelse av kostnadstopper per time |
-| `7d`      | Siste 7 dager                    | Ukentlig gjennomgang                  |
-| `30d`     | Siste 30 dager                   | Månedlig fakturering                  |
-| `90d`     | Siste 90 dager                   | Kvartalsanalyse                       |
-| `ytd`     | Siden 1. januar i inneværende år | Oppfølging av årsbudsjett             |
-| `all`     | Hele perioden                    | Samlet statistikk                     |
-| `custom`  | Brukerdefinert start/slutt       | Revisjoner og ad hoc-spørringer       |
+| Intervall | Tidsvindu                        | Bruksområde                          |
+| --------- | -------------------------------- | ------------------------------------ |
+| `1d`      | Siste 24 timer                   | Oppdaging av timevise kostnadstopper |
+| `7d`      | Siste 7 dager                    | Ukentlig gjennomgang                 |
+| `30d`     | Siste 30 dager                   | Månedlig fakturering                 |
+| `90d`     | Siste 90 dager                   | Kvartalsanalyse                      |
+| `ytd`     | Siden 1. januar i inneværende år | Årlig budsjettoppfølging             |
+| `all`     | Hele perioden                    | Statistikk for hele perioden         |
+| `custom`  | Brukerdefinert start/slutt       | Revisjoner, ad hoc-spørringer        |
 
-### Beregnede kontrollpanelmoduler
+### Beregnede kontrollpanelkomponenter
 
 For ethvert datointervall beregner analyselaget:
 
-| Modul                    | Beskrivelse                                                                    |
-| ------------------------ | ------------------------------------------------------------------------------ |
-| **Sammendragskort**      | Totalt antall forespørsler, samlet kostnad, totalt antall tokener, suksessrate |
-| **Daglig trenddiagram**  | Kostnad + tokener per dag, stablet etter modell                                |
-| **Aktivitetsvarmekart**  | Rutenett med klokkeslett × ukedag, farge = antall forespørsler                 |
-| **Modellfordeling**      | Sektordiagram over kostnad etter modell                                        |
-| **Leverandørfordeling**  | Stolpediagram over forespørsler etter leverandør                               |
-| **Vanligste API-nøkler** | Tabell over de 10 API-nøklene med høyest kostnad                               |
-| **Feilanalyse**          | Feilrate over tid, vanligste feilklasser                                       |
+| Komponent               | Beskrivelse                                                                   |
+| ----------------------- | ----------------------------------------------------------------------------- |
+| **Oppsummeringskort**   | Totalt antall forespørsler, total kostnad, totalt antall tokener, suksessrate |
+| **Daglig trenddiagram** | Kostnad + tokener per dag, stablet etter modell                               |
+| **Aktivitetsvarmekart** | Rutenett med time på døgnet × ukedag, farge = antall forespørsler             |
+| **Modellfordeling**     | Sektordiagram over kostnad per modell                                         |
+| **Leverandørfordeling** | Stolpediagram over forespørsler per leverandør                                |
+| **Topp API-nøkler**     | Tabell over de 10 nøklene med høyest kostnad                                  |
+| **Feilanalyse**         | Feilrate over tid, vanligste feilklasser                                      |
 
 ### Programmatisk tilgang
 
@@ -155,9 +185,9 @@ For ethvert datointervall beregner analyselaget:
 import { computeAnalytics } from "@/lib/usageAnalytics";
 
 const analytics = await computeAnalytics(
-  history,              // historikkoppføringer for bruk
+  history,              // oppføringer i brukshistorikken
   "7d",                 // tidsintervall: "1d" | "7d" | "30d" | "90d" | "ytd" | "all" | "custom"
-  connectionMap,        // tilkoblingskart for leverandører (connectionId → kontonavn)
+  connectionMap,        // kart over leverandørtilkoblinger (connectionId → kontonavn)
   {
     startDate: "2025-01-01",  // valgfritt: for intervallet "custom"
     endDate: "2025-06-01",   // valgfritt: for intervallet "custom"
@@ -171,9 +201,9 @@ console.log(analytics.byModel[0]);           // { model, cost, requests, promptT
 
 ## Håndheving av kvoter
 
-Kvoter per API-nøkkel håndheves på to steder:
+Kvoten per API-nøkkel håndheves på to steder:
 
-1. **Myk grense** (`quotaWarnAt`): advarsel i kontrollpanelet når bruken overstiger terskelen
+1. **Myk grense** (`quotaWarnAt`): advarsel i kontrollpanelet når bruken overskrider terskelen
 2. **Hard grense** (`quotaLimit`): forespørselen avvises med HTTP 429 når grensen overskrides
 
 ### Konfigurasjon
@@ -182,7 +212,7 @@ Kvoter per API-nøkkel håndheves på to steder:
 // Per API-nøkkel
 await updateApiKey(keyId, {
   quotaWarnAt: 5_00,    // $5.00 — vis advarsel
-  quotaLimit: 10_00,    // $10.00 — hard stopp
+  quotaLimit: 10_00,    // $10.00 — full stopp
   quotaWindow: "month", // "day" | "week" | "month" | "all"
 });
 ````
@@ -190,31 +220,31 @@ await updateApiKey(keyId, {
 ### Håndhevingsflyt
 
 ```
-Forespørsel ──▶ quotaCheck()
-                  │
-                  ├── Innenfor grensen?  ──▶ tillat
-                  │
-                  └── Over grensen?  ──▶ 429 Too Many Requests
-                                         med Retry-After-header
+Request ──▶ quotaCheck()
+              │
+              ├── Within limit?  ──▶ allow
+              │
+              └── Over limit?  ──▶ 429 Too Many Requests
+                                   with Retry-After header
 ```
 
-### Kvotebilder
+### Øyeblikksbilder av kvoter
 
 Tabellen `quotaSnapshots` lagrer **historisk kvotestatus** for trendanalyse:
 
 | Felt | Beskrivelse |
-| ----------- | ------------------------------------- | ------ | ------- |
+| ----------- | -------------------------------- | ------ | ------- |
 | `apiKeyId` | Nøkkelen som spores |
 | `window` | "day" | "week" | "month" |
-| `used` | Kostnad brukt i dette vinduet (cent) |
+| `used` | Kostnad brukt i dette tidsvinduet (cent) |
 | `limit` | Grensen (cent) |
-| `resetAt` | Når vinduet tilbakestilles |
+| `resetAt` | Når tidsvinduet nullstilles |
 | `createdAt` | Når øyeblikksbildet ble tatt |
 
-Øyeblikksbilder tas **for hver forespørsel** som medfører en kostnad > 0, og brukes til å:
+Øyeblikksbilder tas **ved hver forespørsel** med kostnad > 0, og brukes til å:
 
 - Vise fremdriftslinjen for kvoten i kontrollpanelet
-- Vise diagrammer over kvotetrenden de siste 30 dagene
+- Vise trenddiagrammer for kvoten over 30 dager
 - Utløse varsler når bruken nærmer seg grensen
 
 ---
@@ -272,12 +302,7 @@ Svar:
   },
   "models": [
     { "model": "gpt-5", "cost": 8.5, "requests": 1234, "tokens": 4567890 },
-    {
-      "model": "claude-opus-4-6",
-      "cost": 3.84,
-      "requests": 234,
-      "tokens": 234567
-    }
+    { "model": "claude-opus-4-6", "cost": 3.84, "requests": 234, "tokens": 234567 }
   ],
   "daily": [
     { "date": "2026-06-01", "cost": 1.5, "requests": 800 },
@@ -286,11 +311,11 @@ Svar:
 }
 ```
 
-### Spørr bruksanalyse
+### Hent bruksanalyser
 
-Bruksdata er tilgjengelige via kontrollpanelet eller MCP-verktøy, ikke via direkte REST-endepunkter for eksport. Tilgjengelige analyser:
+Bruksdata er tilgjengelige via dashbordet eller MCP-verktøy, ikke via direkte REST-endepunkter for eksport. Tilgjengelige analyser:
 
-- **`/api/usage/analytics`** — aggregerte bruksmålinger (gruppert etter modell, leverandør eller nøkkel)
+- **`/api/usage/analytics`** — aggregerte bruksmålinger (grupper etter modell, leverandør, nøkkel)
 - **`/api/usage/quota`** — gjeldende kvotestatus per API-nøkkel
 - **`/api/usage/history`** — logger over forespørselshistorikk
 
@@ -298,7 +323,7 @@ Bruksdata er tilgjengelige via kontrollpanelet eller MCP-verktøy, ikke via dire
 
 ## MCP-verktøy
 
-To MCP-verktøy eksponerer bruksdata for agenter (se `open-sse/mcp-server/tools/`):
+To MCP-verktøy gjør bruksdata tilgjengelige for agenter (se `open-sse/mcp-server/tools/`):
 
 | Verktøy                 | Beskrivelse                                                 |
 | ----------------------- | ----------------------------------------------------------- |
@@ -318,9 +343,9 @@ Eksempel på agentkall:
 
 ## Oppbevaring og opprydding
 
-Bruksdata vokser med ~1–10 KB per forespørsel. I stor skala kan dette bli betydelig.
+Bruksdata vokser med ~1-10KB per forespørsel. Ved stor skala kan dette bli betydelig.
 
-### Innstillinger for oppbevaring
+### Oppbevaringsinnstillinger
 
 Oppbevaring av brukshistorikk konfigureres via databaseinnstillingene i brukergrensesnittet eller via `/api/settings/database`.
 
@@ -331,21 +356,21 @@ Som standard oppbevares brukshistorikken i **90 dager**.
 Gamle oppføringer ryddes opp av `src/lib/db/cleanup.ts`:
 
 - Utløses av cron-prosessen i bakgrunnen
-- Sletter oppføringer fra `usage_history` som er eldre enn den konfigurerte oppbevaringsinnstillingen `usageHistory`
+- Sletter oppføringer fra `usage_history` som er eldre enn oppbevaringstiden konfigurert i innstillingen `usageHistory`
 
 ### Estimert lagringsbehov
 
 | Forespørselsrate         | Lagring i 30 dager | Lagring i 90 dager |
 | ------------------------ | ------------------ | ------------------ |
-| 100 forespørsler/dag     | ~3 MB              | ~9 MB              |
-| 1 000 forespørsler/dag   | ~30 MB             | ~90 MB             |
-| 10 000 forespørsler/dag  | ~300 MB            | ~900 MB            |
-| 100 000 forespørsler/dag | ~3 GB              | ~9 GB              |
+| 100 forespørsler/dag     | ~3MB               | ~9MB               |
+| 1 000 forespørsler/dag   | ~30MB              | ~90MB              |
+| 10 000 forespørsler/dag  | ~300MB             | ~900MB             |
+| 100 000 forespørsler/dag | ~3GB               | ~9GB               |
 
-Ved svært høy trafikk bør du vurdere:
+Ved svært høy trafikk bør du vurdere å:
 
-- Å redusere oppbevaringsperioden via databaseinnstillingene
-- Å bruke `aggregated_metrics` i stedet for rådata (kun for analyse)
+- Redusere oppbevaringstiden via databaseinnstillingene
+- Bruke `aggregated_metrics` i stedet for råoppføringer (kun for analyse)
 
 ---
 
@@ -354,29 +379,29 @@ Ved svært høy trafikk bør du vurdere:
 ### 1. Bruk riktig modell
 
 ```bash
-# Raskt svar — bruk en billig og rask modell
+# Raskt svar — bruk billig + rask
 curl -d '{"model":"auto/fast","messages":[...]}'
 
-# Kompleks oppgave — bruk høy kvalitet
+# Kompleks oppgave — bruk kvalitet
 curl -d '{"model":"auto/smart","messages":[...]}'
 ```
 
-### 2. Aktiver mellomlagring
+### 2. Aktiver hurtigbufring
 
-Anthropics mellomlagring av ledetekster sparer **90 % ved gjentatt kontekst**:
+Anthropics hurtigbufring av ledetekster sparer **90% ved gjentatt kontekst**:
 
 ```ts
-// Mellomlagringen skjer automatisk — inkluder bare den samme store systemledeteksten
+// Hurtigbufringen er automatisk — bare inkluder den samme store systemledeteksten
 const response = await openai.chat({
   model: "claude-sonnet-4-5",
-  system: longSystemPrompt, // Mellomlagres automatisk
+  system: longSystemPrompt, // Blir hurtigbufret automatisk
   messages: [{ role: "user", content: "..." }],
 });
 ```
 
 ### 3. Bruk komprimering
 
-RTK- og Caveman-komprimering sparer **15–95 % i økter med omfattende bruk av verktøy**:
+RTK + Caveman-komprimering sparer **15-95% i økter med omfattende verktøybruk**:
 
 ```ts
 const config = {
@@ -389,15 +414,15 @@ const config = {
 
 ### 4. Angi kvoter per nøkkel
 
-Angi alltid `quotaLimit` for å forhindre løpske kostnader:
+Angi alltid `quotaLimit` for å hindre ukontrollerte kostnader:
 
 ```ts
 await updateApiKey(keyId, { quotaLimit: 10_00 }); // Grense på $10/måned
 ```
 
-### 5. Kontroller de største forbrukerne
+### 5. Gjennomgå de største forbrukerne
 
-Bruk kontrollpanelet eller **`/api/usage/analytics`** til å gruppere etter API-nøkkel og sortere etter kostnad:
+Bruk dashbordet eller **`/api/usage/analytics`** for å gruppere etter API-nøkkel og sortere etter kostnad:
 
 ```bash
 GET /api/usage/analytics?groupBy=apiKey
@@ -407,21 +432,21 @@ GET /api/usage/analytics?groupBy=apiKey
 
 ## Feilsøking
 
-### «Kostnaden er høyere enn forventet»
+### "Kostnaden er høyere enn forventet"
 
-1. Sjekk **`/api/usage/analytics?groupBy=model`** — finn den kostbare modellen
+1. Sjekk **`/api/usage/analytics?groupBy=model`** — finn den dyre modellen
 2. Sjekk **`/api/usage/analytics?groupBy=apiKey`** — finn storforbrukeren
 3. Kontroller at prisdataene er oppdaterte: `POST /api/pricing/sync`
 
-### «Oppføringer mangler»
+### "Oppføringer mangler"
 
-- Kontroller innstillingene for databaseoppbevaring under Kontrollpanel → Database → Opprydding — gamle oppføringer slettes av den periodiske oppryddingsoppgaven (`src/lib/db/cleanup.ts`)
-- Se etter feil i `src/lib/db/usage*.ts` — feil ved skriving til databasen loggføres, men vises ikke
+- Sjekk innstillingene for databasens oppbevaringstid under Dashbord → Database → Opprydding — gamle oppføringer slettes av den periodiske oppryddingsoppgaven (`src/lib/db/cleanup.ts`)
+- Se etter feil i `src/lib/db/usage*.ts` — feil ved skriving til databasen logges, men vises ikke
 - Kontroller at forespørselen faktisk nådde `chatCore` — sjekk kombinasjonsrutingen
 
-### «Kvoten håndheves ikke»
+### "Kvoten håndheves ikke"
 
-- Kontroller nøkkelens `quotaLimit`-innstilling
+- Sjekk nøkkelens `quotaLimit`-innstilling
 - Kontroller at `quotaWindow` er riktig angitt
 - Se etter `quotaSnapshots`-oppføringer — de skal opprettes ved hver forespørsel
 
@@ -430,7 +455,7 @@ GET /api/usage/analytics?groupBy=apiKey
 ## Se også
 
 - [DATABASE_GUIDE.md](../ops/DATABASE_GUIDE.md) — Skjema for brukstabeller
-- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — miljøvariabler for prissynkronisering
-- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Slik reduserer `auto/fast` og `auto/cheap` kostnadene
+- [ENVIRONMENT.md](../reference/ENVIRONMENT.md#18-pricing-sync) — Miljøvariabler for prissynkronisering
+- [AUTO-COMBO.md](../routing/AUTO-COMBO.md) — Slik reduserer `auto/fast`, `auto/cheap` kostnadene
 - [API_REFERENCE.md](../reference/API_REFERENCE.md) — Fullstendig referanse for `/api/usage/*`
 - Kilde: `open-sse/services/usage.ts`, `src/lib/usageAnalytics.ts`, `src/lib/db/usage*.ts`

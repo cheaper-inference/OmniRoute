@@ -340,82 +340,82 @@ API キー: [ダッシュボードから取得]
 
 ---
 
-## 🚀 デプロイ
+## 🚀展開
 
-### グローバル npm インストール（推奨）
+### グローバル npm インストール (推奨)
 
 ```bash
 npm install -g omniroute
 
-# 設定ディレクトリを作成
+# Create config directory
 mkdir -p ~/.omniroute
 
-# .env ファイルを作成（.env.example を参照）
+# Create .env file (see .env.example)
 cp .env.example ~/.omniroute/.env
 
-# サーバーを起動
+# Start server
 omniroute
-# またはカスタムポートを指定:
+# Or with custom port:
 omniroute --port 3000
 ```
 
-CLI は `~/.omniroute/.env` または `./.env` から `.env` を自動的に読み込みます。
+CLI 、 `~/.omniroute/.env`または`./.env`から`.env`自動的にロードします。作業ディレクトリ内の`./.env`は、キーの短い許可リスト (`REQUIRE_API_KEY`、ロケール、タイム ゾーン、およびカラー設定、ポートではない) のみを設定できます。他のすべてを`~/.omniroute/.env`に入れます。 [CLI起動コントラクト」](CLI-LAUNCH-CONTRACTS.md#working-directory-env)を参照してください。
 
 ### トレイモード
 
-OmniRoute をシステムトレイで起動します:
+システム トレイでOmniRoute起動します。
 
 ```bash
 omniroute serve --tray
 ```
 
-このコマンドは、サーバーとトレイの準備が完了すると終了します。
+サーバーとトレイの準備が完了すると、コマンドが返されます。
 
-サーバーはターミナルなしで動作を継続します。
+サーバーは端末なしでも継続します。
 
-トレイモードは macOS、Windows、およびグラフィカルな Linux セッションをサポートします。トレイモードではダッシュボードは自動的に開きません。
+トレイ モードはmacOS、 Windows、およびグラフィカルLinuxセッションをサポートします。トレイ モードでは、ダッシュボードが自動的に開きません。
 
-トレイメニューから次の操作を実行できます:
+次の操作にはトレイ メニューを使用します。
 
-- ダッシュボードを開く。
-- `/dashboard/logs` を開く。
-- 自動起動の設定を変更する。
-- OmniRoute を停止する。
+- ダッシュボードを開きます。
+- `/dashboard/logs`を開きます。
+- 自動起動を変更します。
+- OmniRouteを停止します。
 
-`--tray` を次のオプションと併用しないでください:
+`--tray`次のオプションと組み合わせないでください。
 
 - `--daemon`
 - `--log`
 - `--no-recovery`
 
-これらのモードでは、異なるプロセス所有方式が必要です。
+これらのモードでは、異なるプロセス所有権が必要です。
 
-次回のマシンへのログイン時に起動するよう有効化します:
+次回のマシンログイン時の起動を有効にします。
 
 ```bash
 omniroute autostart enable
 ```
 
-自動起動では、macOS、Windows、およびグラフィカルな Linux セッションでトレイモードが使用されます。ヘッドレス Linux では、既存の systemd ユーザーサービスが使用されます。
+自動開始はmacOS、 Windows、およびグラフィカルLinuxセッションでトレイ モードを使用します。ヘッドレスLinuxは既存の systemd ユーザー サービスを使用します。
 
-ログイン時の起動を無効化します:
+ログイン時の起動を無効にします。
 
 ```bash
 omniroute autostart disable
 ```
 
-### アンインストール
+### アンインストールする
 
-OmniRoute が不要になった場合、クリーンに削除するための簡単なスクリプトを 2 つ用意しています:
+OmniRouteが必要なくなった場合は、クリーンに削除するための 2 つの簡単なスクリプトが提供されています。
 
-| コマンド                 | 操作                                                                                  |
-| ------------------------ | ------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | システムアプリを削除しますが、`~/.omniroute` 内の**データベースと設定は保持します**。 |
-| `npm run uninstall:full` | アプリを削除し、さらに**すべての設定、キー、データベースを完全に消去します**。        |
+| 指示                     | アクション                                                                  |
+| ------------------------ | --------------------------------------------------------------------------- |
+| `npm run uninstall`      | システムアプリを削除しますが、** DBと設定を保持します**`~/.omniroute`で。   |
+| `npm run uninstall:full` | アプリAND完全に削除します**すべての設定、キー、データベースを消去します**。 |
 
-> 注: これらのコマンドを実行するには、OmniRoute プロジェクトフォルダー（クローンした場合）に移動してから実行してください。または、グローバルにインストールした場合は、`npm uninstall -g omniroute` を実行するだけです。
+> 注: これらのコマンドを実行するには、 OmniRouteプロジェクト フォルダー (クローンを作成した場合) に移動して実行します。あるいは、グローバルにインストールされている場合は、単に`npm uninstall -g omniroute`を実行することもできます。
 
-### VPS デプロイ
+### VPS展開
 
 ```bash
 git clone https://github.com/diegosouzapw/OmniRoute.git
@@ -431,25 +431,25 @@ export NEXT_PUBLIC_BASE_URL="http://localhost:20128"
 export API_KEY_SECRET="endpoint-proxy-api-key-secret"
 
 npm run start
-# または: pm2 start npm --name omniroute -- start
+# Or: pm2 start npm --name omniroute -- start
 ```
 
-### PM2 デプロイ（低メモリ）
+### PM2デプロイメント (低メモリ)
 
-RAM が限られているサーバーでは、メモリ制限オプションを使用してください:
+RAMが制限されているサーバーの場合は、メモリ制限オプションを使用します。
 
 ```bash
-# 512MB の制限を指定（デフォルト）
+# With 512MB limit (default)
 pm2 start npm --name omniroute -- start
 
-# またはカスタムメモリ制限を指定
+# Or with custom memory limit
 OMNIROUTE_MEMORY_MB=512 pm2 start npm --name omniroute -- start
 
-# または ecosystem.config.js を使用
+# Or using ecosystem.config.js
 pm2 start ecosystem.config.js
 ```
 
-`ecosystem.config.js` を作成します:
+`ecosystem.config.js`を作成します。
 
 ```javascript
 module.exports = {
@@ -474,24 +474,24 @@ module.exports = {
 ### Docker
 
 ```bash
-# イメージをビルド（デフォルト = codex/claude/droid がプリインストールされた runner-cli）
+# Build image (default = runner-cli with codex/claude/droid preinstalled)
 docker build -t omniroute:cli .
 
-# ポータブルモード（推奨）
+# Portable mode (recommended)
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-CLI バイナリを使用するホスト統合モードについては、メインドキュメントの Docker セクションを参照してください。
+CLIバイナリを使用したホスト統合モードについては、メイン ドキュメントのDockerセクションを参照してください。
 
-### Void Linux (xbps-src)
+### ボイドLinux (xbps-src)
 
-Void Linux ユーザーは、`xbps-src` クロスコンパイルフレームワークを使用して、OmniRoute をネイティブにパッケージ化してインストールできます。これにより、Node.js のスタンドアロンビルドと、必要な `better-sqlite3` ネイティブバインディングが自動的に処理されます。
+Void Linuxユーザーは、 `xbps-src`クロスコンパイル フレームワークを使用して、 OmniRouteネイティブにパッケージ化してインストールできます。これにより、必要な`better-sqlite3`ネイティブ バインディングとともにNode.jsスタンドアロン ビルドが自動化されます。
 
 <details>
-<summary><b>xbps-src テンプレートを表示</b></summary>
+<summary><b>xbps-src テンプレートを表示する</b></summary>
 
 ```bash
-# 'omniroute' 用テンプレートファイル
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -512,7 +512,7 @@ export npm_config_fund=false
 export npm_config_audit=false
 
 do_build() {
-	# node-gyp のターゲット CPU アーキテクチャを判定
+	# Determine target CPU arch for node-gyp
 	local _gyp_arch
 	case "$XBPS_TARGET_MACHINE" in
 		aarch64*) _gyp_arch=arm64 ;;
@@ -521,29 +521,29 @@ do_build() {
 		*) _gyp_arch=x64 ;;
 	esac
 
-	# 1) すべての依存関係をインストール – スクリプトはスキップ
+	# 1) Install all deps – skip scripts
 	NODE_ENV=development npm ci --ignore-scripts
 
-	# 2) Next.js スタンドアロンバンドルをビルド
+	# 2) Build the Next.js standalone bundle
 	npm run build
 
-	# 3) 静的アセットをスタンドアロンにコピー
+	# 3) Copy static assets into standalone
 	cp -r .next/static .next/standalone/.next/static
 	[ -d public ] && cp -r public .next/standalone/public || true
 
-	# 4) better-sqlite3 ネイティブバインディングをコンパイル
+	# 4) Compile better-sqlite3 native binding
 	local _node_gyp=/usr/lib/node_modules/npm/node_modules/node-gyp/bin/node-gyp.js
 	(cd node_modules/better-sqlite3 && node "$_node_gyp" rebuild --arch="$_gyp_arch")
 
-	# 5) コンパイル済みバインディングをスタンドアロンバンドルに配置
+	# 5) Place the compiled binding into the standalone bundle
 	local _bs3_release=.next/standalone/node_modules/better-sqlite3/build/Release
 	mkdir -p "$_bs3_release"
 	cp node_modules/better-sqlite3/build/Release/better_sqlite3.node "$_bs3_release/"
 
-	# 6) アーキテクチャ固有の sharp バンドルを削除
+	# 6) Remove arch-specific sharp bundles
 	rm -rf .next/standalone/node_modules/@img
 
-	# 7) Next.js の静的解析で省略された pino のランタイム依存関係をコピー:
+	# 7) Copy pino runtime deps omitted by Next.js static analysis:
 	for _mod in pino-abstract-transport split2 process-warning; do
 		cp -r "node_modules/$_mod" .next/standalone/node_modules/
 	done
@@ -557,7 +557,7 @@ do_install() {
 	vmkdir usr/lib/omniroute/.next
 	vcopy .next/standalone/. usr/lib/omniroute/.next/standalone
 
-	# インストール後フックによって空の Next.js App Router ディレクトリが削除されるのを防止
+	# Prevent removal of empty Next.js app router dirs by the post-install hook
 	for _d in \
 		.next/standalone/.next/server/app/dashboard \
 		.next/standalone/.next/server/app/dashboard/settings \
@@ -585,30 +585,30 @@ post_install() {
 
 ### 環境変数
 
-| 変数                                    | デフォルト                           | 説明                                                                                                        |
-| --------------------------------------- | ------------------------------------ | ----------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | `omniroute-default-secret-change-me` | JWT 署名用シークレット（**本番環境では変更してください**）                                                  |
-| `INITIAL_PASSWORD`                      | `CHANGEME`                           | 初回ログイン用パスワード                                                                                    |
-| `DATA_DIR`                              | `~/.omniroute`                       | データディレクトリ（データベース、使用状況、ログ）                                                          |
-| `PORT`                                  | フレームワークのデフォルト           | サービスポート（例では `20128`）                                                                            |
-| `HOSTNAME`                              | フレームワークのデフォルト           | バインド先ホスト（Docker のデフォルトは `0.0.0.0`）                                                         |
-| `NODE_ENV`                              | ランタイムのデフォルト               | デプロイ時には `production` に設定                                                                          |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`             | ダッシュボードに表示され、サーバーにも公開される公開ベース URL（従来の `BASE_URL` を置き換え）              |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`              | クラウド同期エンドポイントのベース URL（従来の `CLOUD_URL` を置き換え）                                     |
-| `API_KEY_SECRET`                        | `endpoint-proxy-api-key-secret`      | 生成される API キー用の HMAC シークレット                                                                   |
-| `REQUIRE_API_KEY`                       | `false`                              | `/v1/*` で Bearer API キーを必須にする                                                                      |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                              | 認証済みのダッシュボードユーザーが、保存されている API キーの完全な値をオンデマンドで表示できるようにする   |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                                 | キャッシュされたプロバイダー制限データのサーバー側更新間隔。UI の更新ボタンでは引き続き手動同期が実行される |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                              | 書き込み、インポート、復元前の SQLite 自動スナップショットを無効化する。手動バックアップは引き続き利用可能  |
-| `APP_LOG_TO_FILE`                       | `true`                               | アプリケーションログと監査ログのディスクへの出力を有効にする                                                |
-| `AUTH_COOKIE_SECURE`                    | `false`                              | `Secure` 認証 Cookie を強制する（HTTPS リバースプロキシの背後で使用）                                       |
-| `CLOUDFLARED_BIN`                       | 未設定                               | 管理対象としてダウンロードする代わりに、既存の `cloudflared` バイナリを使用する                             |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                              | 管理対象の Quick Tunnels 用トランスポート（`http2`、`quic`、または `auto`）                                 |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                                | Node.js のヒープ上限（MB）                                                                                  |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                                 | プロンプトキャッシュの最大エントリ数                                                                        |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                                | セマンティックキャッシュの最大エントリ数                                                                    |
+| 変数                                    | デフォルト                 | 説明                                                                                                                              |
+| --------------------------------------- | -------------------------- | --------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(自動生成)_               | JWT署名シークレット—最初の実行時に自動生成され、 `server.env`に保持されます。データディレクトリが一時的な場合は明示的に設定します |
+| `INITIAL_PASSWORD`                      | _(未設定)_                 | 初回ログインパスワード。 npm/sourceインストールは`CHANGEME`で始まります。それを置き換えます。未設定: オンボーディング ウィザード  |
+| `DATA_DIR`                              | `~/.omniroute`             | データディレクトリ (データベース、使用状況、ログ)                                                                                 |
+| `PORT`                                  | フレームワークのデフォルト | サービスポート (例では`20128` )                                                                                                   |
+| `HOSTNAME`                              | フレームワークのデフォルト | バインドホスト (Dockerデフォルトは`0.0.0.0`)                                                                                      |
+| `NODE_ENV`                              | 実行時のデフォルト         | デプロイ用に`production`を設定する                                                                                                |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`   | パブリックベースURLダッシュボードに表示され、サーバーに公開されます (従来の`BASE_URL`を置き換えます)                              |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`    | クラウド同期エンドポイント ベースURL (従来の`CLOUD_URL`を置き換える)                                                              |
+| `API_KEY_SECRET`                        | _(自動生成)_               | 生成されたAPIキーのHMACシークレット—最初の実行時に自動生成され、 `server.env`に保持されます                                       |
+| `REQUIRE_API_KEY`                       | `false`                    | `/v1/*`に Bearer APIキーを強制する                                                                                                |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                    | 認証されたダッシュボード ユーザーが、保存されている完全なAPIキー値をオンデマンドで公開できるようにする                            |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                       | キャッシュされたプロバイダー制限データのサーバー側の更新頻度。 UI更新ボタンは依然として手動同期をトリガーします                   |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                    | writes/import/restoreの前に自動SQLiteスナップショットを無効にします。手動バックアップは引き続き機能します                         |
+| `APP_LOG_TO_FILE`                       | `true`                     | アプリケーションと監査ログのディスクへの出力を有効にします。                                                                      |
+| `AUTH_COOKIE_SECURE`                    | `false`                    | `Secure`認証 Cookie を強制する ( HTTPSリバース プロキシの背後)                                                                    |
+| `CLOUDFLARED_BIN`                       | 設定を解除する             | 管理されたダウンロードの代わりに既存の`cloudflared`バイナリを使用する                                                             |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                    | 管理されたクイック トンネルのトランスポート (`http2`、 `quic`、または`auto`)                                                      |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                      | MBのNode.jsヒープ制限                                                                                                             |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                       | プロンプト キャッシュ エントリの最大数                                                                                            |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                      | セマンティック キャッシュ エントリの最大数                                                                                        |
 
-環境変数の完全なリファレンスについては、[README](../README.md) を参照してください。
+環境変数の完全なリファレンスについては、 [README](../README.md)参照してください。
 
 ---
 
@@ -696,7 +696,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 ### カスタム OpenAI 互換プロバイダー
 
-OpenAI API (セルフホステッド プロキシ、vLLM、サードパーティ アグリゲータ) を話すゲートウェイは、独自のプロバイダー ノードとして追加できます。
+OpenAI API (セルフホスト型プロキシ、 vLLM、サードパーティ アグリゲータ) を話すゲートウェイは、独自のプロバイダー ノードとして追加できます。
 
 1. **プロバイダー→追加OpenAI互換**。
 2. **名前**: ノードの表示ラベル。
@@ -709,7 +709,7 @@ OpenAI API (セルフホステッド プロキシ、vLLM、サードパーティ
 
 #### 予約済みプレフィックス
 
-プレフィックスには、組み込みプロバイダーの ID やエイリアス (たとえば`openai`、 `cf`)、または廃止されたプロバイダーの ID を使用することはできません。モデル リゾルバーはカスタム ノードの前に組み込み ID とエイリアスをチェックするため、これらのプレフィックスのいずれかを使用するノードはトラフィックを受信しません。zqc `<prefix>/model`代わりに組み込みプロバイダーにアクセスするか、そのプロバイダーが廃止された場合はフェールクローズされます。このようなプレフィックスを持つノードの作成または編集は、次のように拒否されます。
+A prefix cannot be the id or alias of a built-in provider (for example `openai`, `cf`), nor the id of a retired provider. The model resolver checks built-in ids and aliases before custom nodes, so a node using one of those prefixes would never receive traffic: `<prefix>/model` would go to the built-in provider instead, or fail closed if that provider was retired. Creating or editing a node with such a prefix is rejected with:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
@@ -721,8 +721,8 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 これらのキーは接続の`providerSpecificData`に入力されます (たとえば、 `PUT /api/providers/{id}`経由)。
 
-- `toolNameMaxLength` (整数、1 ～ 1024) — ゲートウェイが長いツール名を拒否するOpenAIチャット形式と互換性のある接続用。長い名前は短いエイリアスとして送信され、応答で復元されます。
-- `quotaEndpoint` — ゲートウェイのquota/creditsエンドポイント。ダッシュボード クォータ ストリップおよびクォータ対応ルーティング用に読み取ります。 OpenAI と Anthropic 互換の接続の両方で動作します。完全な形状は`open-sse/services/usage/openaiCompatible.ts`に文書化されています。
+- `toolNameMaxLength` (整数、1 ～ 1024) —ゲートウェイが長いツール名を拒否するOpenAIチャット形式と互換性のある接続の場合。長い名前は短いエイリアスとして送信され、応答で復元されます。 OpenAI、 Azure OpenAI、 Azure AI Foundry、 Mistral、 NVIDIA、 OpenCode Zen/Goおよび Muse Code は、設定なしで 64 文字を超えるエイリアス名をすでに使用しています。接続値は、Azure OpenAI / Azure AI Foundry のデフォルト (より厳格なゲートウェイの背後にある Azure 接続) を置き換え、カスタム互換ノードの制限を設定します。 OpenAI、 Mistral、 NVIDIA、 OpenCode Zen/Goおよび Muse コードはレジストリ制限を維持し、無視します。
+- `quotaEndpoint` —ゲートウェイのquota/creditsエンドポイント。ダッシュボード クォータ ストリップおよびクォータ対応ルーティング用に読み取ります。 OpenAI と Anthropic 互換の接続の両方で動作します。完全な形状は`open-sse/services/usage/openaiCompatible.ts`に文書化されています。
 
 ```json
 {
@@ -819,15 +819,15 @@ curl http://localhost:20128/api/models/catalog
 
 ### LLMゲートウェイ インテリジェンス (フェーズ 9)
 
-- **セマンティックキャッシュ**— 非ストリーミング、温度= 0 応答を自動キャッシュします ( `X-OmniRoute-No-Cache: true`でバイパス)
-- **リクエストのべき等性**— `Idempotency-Key`または`X-Request-Id`ヘッダーを介して 5 秒以内にリクエストの重複を排除します
+- **セマンティックキャッシュ**—非ストリーミング、温度= 0 応答を自動キャッシュします ( `X-OmniRoute-No-Cache: true`でバイパス)
+- **リクエストのべき等性**`Idempotency-Key`または`X-Request-Id`ヘッダーを介して 5 秒以内にリクエストの重複を排除します—
 - **進捗状況の追跡**— `X-OmniRoute-Progress: true`ヘッダーを介したSSE `event: progress`イベントのオプトイン
 
 ---
 
 ### 翻訳者の遊び場
 
-アクセス方法**ダッシュボード→トランスレータ**。 OmniRouteプロバイダー間でAPIリクエストをどのように変換するかをデバッグして視覚化します。
+アクセス方法**ダッシュボード→トランスレーター**。 OmniRouteプロバイダー間でAPIリクエストをどのように変換するかをデバッグして視覚化します。
 
 | モード               | 目的                                                                                        |
 | -------------------- | ------------------------------------------------------------------------------------------- |
@@ -850,31 +850,31 @@ curl http://localhost:20128/api/models/catalog
 
 **ダッシュボードに表示される戦略 (アカウントレベルのルーティング):**
 
-| 戦略                         | 説明                                                                                                                         |
-| ---------------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| **最初に入力してください**   | 優先順位に従ってアカウントを使用します - プライマリ アカウントは利用できなくなるまですべてのリクエストを処理します           |
-| **ラウンドロビン**           | 構成可能なスティッキー制限を使用して、すべてのアカウントを循環します (デフォルト: アカウントごとに 3 コール)                 |
-| **P2C (2 つの選択肢の累乗)** | ランダムな 2 つのアカウントを選択し、より健全なアカウントにルーティングします — 健全性を意識しながら負荷のバランスをとります |
-| **ランダム**                 | Fisher-Yates シャッフルを使用してリクエストごとにアカウントをランダムに選択します                                            |
-| **最も使用されていない**     | 最も古い`lastUsedAt`タイムスタンプを持つアカウントにルーティングし、トラフィックを均等に分散します                           |
-| **コストの最適化**           | 最も低い優先順位の値を持つアカウントにルーティングし、最もコストの低いプロバイダーを最適化します。                           |
+| 戦略                         | 説明                                                                                                                    |
+| ---------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| **最初に入力してください**   | アカウントを優先順位で使用します。 —プライマリ アカウントは、使用できなくなるまですべてのリクエストを処理します。       |
+| **ラウンドロビン**           | 構成可能なスティッキー制限を使用して、すべてのアカウントを循環します (デフォルト: アカウントごとに 3 コール)            |
+| **P2C (2 つの選択肢の累乗)** | 2 つのランダムなアカウントを選択し、より健全なアカウントにルーティングします—健全性を意識して負荷のバランスをとります。 |
+| **ランダム**                 | Fisher-Yates シャッフルを使用してリクエストごとにアカウントをランダムに選択します                                       |
+| **最も使用されていない**     | 最も古い`lastUsedAt`タイムスタンプを持つアカウントにルーティングし、トラフィックを均等に分散します                      |
+| **コストの最適化**           | 最も低い優先順位の値を持つアカウントにルーティングし、最もコストの低いプロバイダーを最適化します。                      |
 
-**高度なコンボとオート戦略**(コンボごとまたは`auto/*`プレフィックス経由で構成可能 — [AUTO-COMBO.md](../routing/AUTO-COMBO.md)参照):
+**高度なコンボとオート戦略**(コンボごとに、または`auto/*`プレフィックス—を介して構成可能です。 [AUTO-COMBO.md](../routing/AUTO-COMBO.md)参照):
 
-- `priority` — 厳密な順序、決してラウンドロビンではない
-- `weighted` — モデルごとの重みによって分割された比例トラフィック
-- `fill-first` — 制限に達するまで最初のモデルをドレインします
+- `priority` —厳密な順序、ラウンドロビンはありません
+- `weighted` —比例トラフィックをモデルごとの重みで分割
+- `fill-first` —制限に達するまで最初のモデルをドレインします
 - `round-robin` / `strict-random` / `random`
 - `p2c` (2 つの選択肢の累乗)
 - `least-used`と`cost-optimized`
-- `auto` — すべての候補者にわたるスコア主導型
-- `lkgp` (Last Known Good Provider) — 最後に成功したプロバイダーに固定し、ルールにフォールバックします。
-- `context-optimized` — 最大の自由コンテキスト ウィンドウを持つモデルを選択します
-- `context-relay` — フォローアップターンのためにロングコンテキストモデルを連鎖させる
+- `auto` —すべての候補者にわたるスコア主導型
+- `lkgp` (Last Known Good Provider) —最後に成功したプロバイダーに固定し、ルールにフォールバックします。
+- `context-optimized` —最大の自由コンテキスト ウィンドウを持つモデルを選択します
+- `context-relay` —はフォローアップ ターンのためにロングコンテキスト モデルをチェーンします
 
 #### 外部スティッキーセッションヘッダー
 
-外部セッション アフィニティ (たとえば、リバース プロキシの背後にあるClaude Code/Codexエージェント) の場合は、次を送信します。
+外部セッション アフィニティ (リバース プロキシの背後にあるClaude Code/Codexエージェントなど) の場合は、次を送信します。
 
 ```http
 X-Session-Id: your-session-key
@@ -977,32 +977,32 @@ omniroute combo create free-stack \
 
 OmniRoute 、次の 5 つのコンポーネントでプロバイダー レベルの復元力を実装します。
 
-1. **リクエストキューとペーシング**— システムレベルのリクエストシェーピング:
-   - **1 分あたりのリクエスト数 (RPM)** — アカウントごとの 1 分あたりの最大リクエスト
-   - **リクエスト間の最小時間**— リクエスト間の最小ギャップ（ミリ秒単位）
-   - **最大同時リクエスト数**— アカウントごとの最大同時リクエスト
+1. **リクエストキューとペーシング**—システムレベルのリクエストシェーピング:
+   - **1 分あたりのリクエスト数 (RPM)** —アカウントごとの 1 分あたりの最大リクエスト数
+   - **リクエスト間の最小時間**—リクエスト間の最小ギャップ (ミリ秒単位)
+   - **最大同時リクエスト数**—アカウントごとの最大同時リクエスト数
 
-2. **接続クールダウン**— 再試行可能な失敗後の単一接続の認証タイプごとの構成:
-   - **基本クールダウン**— 再試行可能なアップストリーム障害に対するデフォルトのクールダウン ウィンドウ
-   - **アップストリームの再試行ヒントを使用する**— 権威ある`Retry-After`を尊重するか、提供されたヒントをリセットします
-   - **最大バックオフ ステップ**— 繰り返される障害に対する最大の指数バックオフ レベル
+2. **接続クールダウン**—再試行可能な失敗後の単一接続の認証タイプごとの構成:
+   - **基本クールダウン**—再試行可能なアップストリーム障害に対するデフォルトのクールダウン ウィンドウ
+   - **アップストリームの再試行ヒントを使用する**—提供された場合、権威ある`Retry-After`またはリセットヒントを尊重します。
+   - **最大バックオフ ステップ**—繰り返される障害に対する最大指数バックオフ レベル
 
-3. **プロバイダーのサーキットブレーカー**— エンドツーエンドのプロバイダー障害を追跡し、設定された警告しきい値でプロバイダーに機能低下のマークを付け、設定された障害しきい値に達するとブレーカーを開きます。
+3. **プロバイダーのサーキットブレーカー**— 、エンドツーエンドのプロバイダーの障害を追跡し、構成された警告しきい値でプロバイダーに機能低下のマークを付け、構成された障害しきい値に達するとブレーカーを開きます。
    - **劣化閾値**— `DEGRADED`に入る前にプロバイダーが連続して失敗する
    - **失敗のしきい値**— `OPEN`に入る前にプロバイダーが連続して失敗する
-   - **リセットタイムアウト**— プロバイダーが再度テストされるまでの時間枠
-   - **CLOSED** (健全) — リクエストは正常に流れます
-   - **DEGRADED** — 重大な障害が追跡されている間もリクエストは引き続き送信されます
-   - **OPEN** — 失敗が繰り返された後、プロバイダーが一時的にブロックされる
-   - **HALF_OPEN** — プロバイダーが回復したかどうかをテストする
+   - **リセットタイムアウト**—プロバイダーが再度テストされるまでの時間枠
+   - **CLOSED** (健全な) —リクエストは正常に流れます
+   - **DEGRADED** —高度な障害が追跡されている間もリクエストは引き続きフローします
+   - **OPEN** —プロバイダーが失敗を繰り返すと一時的にブロックされる
+   - **HALF_OPEN** —プロバイダーが回復したかどうかのテスト
 
    接続スコープの`429`レート制限は維持されます**接続クールダウン**プロバイダー ブレーカーにはカウントされません。
 
    プロバイダー ブレーカーのランタイム状態は次のとおりです。**ダッシュボード→ヘルス**のみ。
 
-4. **クールダウンを待つ**— すべての接続候補がすでにクールダウンしている場合、 OmniRoute最も早いクールダウンを待って、同じクライアント要求を自動的に再試行できます。
+4. **クールダウンを待つ**—すべての接続候補がすでにクールダウンしている場合、 OmniRoute最も早いクールダウンを待って、同じクライアント要求を自動的に再試行できます。
 
-5. **レート制限の自動検出**— 上流プロバイダーが明示的な待機ウィンドウを返す場合、設定が有効になっている場合、それらのヒントはローカル接続のクールダウンをオーバーライドします。
+5. **レート制限の自動検出**—上流プロバイダーが明示的な待機ウィンドウを返す場合、設定が有効になっている場合、それらのヒントはローカル接続のクールダウンをオーバーライドします。
 
 **プロのヒント:**を使用します。**健康**停止後にライブプロバイダーのブレーカーを検査してリセットするためのページ。 [Resilience] ページでは構成のみが変更されます。
 
@@ -1015,7 +1015,7 @@ OmniRoute 、次の 5 つのコンポーネントでプロバイダー レベル
 | アクション                       | 説明                                                                                                                                                                    |
 | -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **データベースのエクスポート**   | 現在のSQLiteデータベースを`.sqlite`ファイルとしてダウンロードします                                                                                                     |
-| **すべてエクスポート (.tar.gz)** | データベース、設定、コンボ、プロバイダー接続 (資格情報なし)、 APIキー メタデータを含む完全バックアップ アーカイブをダウンロードします。                                 |
+| **すべてエクスポート (.tar.gz)** | データベース、設定、コンボ、プロバイダー接続 (認証情報なし)、 APIキー メタデータを含む完全バックアップ アーカイブをダウンロードします。                                 |
 | **データベースのインポート**     | `.sqlite`ファイルをアップロードして、現在のデータベースを置き換えます。 `DISABLE_SQLITE_AUTO_BACKUP=true`でない限り、インポート前のバックアップは自動的に作成されます。 |
 
 ```bash
@@ -1044,15 +1044,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 設定ページは次のように構成されています**7つのタブ**簡単にナビゲーションするには:
 
-| タブ             | コンテンツ                                                                                                                                                                               |
-| ---------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **一般的な**     | システム ストレージ ツール、デフォルトの動作、エンドポイント トンネルの可視性                                                                                                            |
-| **外観**         | テーマ コントロール (light/dark/system)、サイドバーの可視性、 Cloudflare/Tailscale/ngrokトンネル カードのパネル切り替え                                                                  |
-| **AI**           | バジェットの考え方 (パススルー / 自動ストリップ / カスタム / アダプティブ — [THINKING_BUDGET.md](./THINKING_BUDGET.md)を参照)、グローバル システム プロンプト、プロンプト キャッシュ統計 |
-| **安全**         | Login/Password設定、 IPアクセス制御、 `/models`のAPI認証、プロバイダー ブロッキング、プロンプト インジェクション ガード                                                                  |
-| **ルーティング** | グローバル ルーティング戦略 (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized)、ワイルドカード モデル エイリアス、フォールバック チェーン、コンボ デフォルト        |
-| **回復力**       | リクエストキュー、接続クールダウン、プロバイダーブレーカー設定、およびクールダウン待機動作                                                                                               |
-| **高度な**       | グローバル プロキシ構成 (HTTP/SOCKS5)、プロバイダーごとのプロキシ オーバーライド                                                                                                         |
+| タブ             | コンテンツ                                                                                                                                                                          |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **一般的な**     | システム ストレージ ツール、デフォルトの動作、エンドポイント トンネルの可視性                                                                                                       |
+| **外観**         | テーマ コントロール (light/dark/system)、サイドバーの可視性、 Cloudflare/Tailscale/ngrokトンネル カードのパネル切り替え                                                             |
+| **AI**           | 思考バジェット (パススルー / 自動ストリップ / カスタム / アダプティブ— [THINKING_BUDGET.md](./THINKING_BUDGET.md)を参照)、グローバル システム プロンプト、プロンプト キャッシュ統計 |
+| **安全**         | Login/Password設定、 IPアクセス制御、 `/models`のAPI認証、プロバイダー ブロッキング、プロンプト インジェクション ガード                                                             |
+| **ルーティング** | グローバル ルーティング戦略 (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized)、ワイルドカード モデル エイリアス、フォールバック チェーン、コンボ デフォルト   |
+| **回復力**       | リクエストキュー、接続クールダウン、プロバイダーブレーカー設定、およびクールダウン待機動作                                                                                          |
+| **高度な**       | グローバル プロキシ構成 (HTTP/SOCKS5)、プロバイダーごとのプロキシ オーバーライド                                                                                                    |
 
 一般では、読み取り専用ログとキャッシュ メモが複製されなくなりました。データベースの保持と最適化の設定は、 `/api/settings/database`を通じて保持されます。手動キャッシュクリアには`DELETE /api/cache`を使用します。リクエストおよびプロキシ ログの行キャップは、 `CALL_LOGS_TABLE_MAX_ROWS`および`PROXY_LOGS_TABLE_MAX_ROWS`によって制御されます。
 
@@ -1065,7 +1065,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | タブ         | 目的                                                                                         |
 | ------------ | -------------------------------------------------------------------------------------------- |
 | **予算**     | daily/weekly/monthly予算とリアルタイム追跡を使用して、 APIキーごとに支出制限を設定します     |
-| **価格設定** | モデル価格エントリの表示と編集 - プロバイダーごとの 1,000 input/outputトークンあたりのコスト |
+| **価格設定** | モデル価格エントリの表示および編集 プロバイダーごとの 1K input/outputトークンあたりの—コスト |
 
 ```bash
 # API: Set a budget
@@ -1111,7 +1111,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 **テキスト読み上げ (`POST /v1/audio/speech`)**プロバイダー:
 
-- `openai/` (tts-1、tts-1-hd)
+- `openai/` (tts-1, tts-1-hd)
 - `hyperbolic/`
 - `deepgram/` （オーラ）
 - `nvidia/` (カササギTTS)
@@ -1145,9 +1145,9 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 グローバルコンボのデフォルトは以下で設定できます。**ダッシュボード→設定→ルーティング→コンボのデフォルト**。コンボ ターゲット タイムアウトは、デフォルトで現在のリクエスト タイムアウトを継承します。使用**ターゲットタイムアウト(秒)**ターゲットごとの制限を短くすることでより高速なフォールバックをトリガーする必要がある場合にのみ、コンボのデフォルトまたは個々のコンボで使用します。
 
-ゼロレイテンシのコンボ最適化はオプトインです。離れる**ゼロレイテンシーの最適化**これらのレイテンシ機能がフォールバック ターゲットと競合したり、 TTFT履歴に基づいてターゲットをスキップしたり、フォールバック リクエストを圧縮したりするのを防ぐために無効になります。これを有効にすると、構成されたヘッジ、予測TTFTスキップ、プロアクティブなフォールバック圧縮が可能になり、 routing/request忠実度を犠牲にしてテール レイテンシを低くすることができます。
+ゼロレイテンシのコンボ最適化はオプトインです。離れる**ゼロレイテンシーの最適化**これらのレイテンシ機能がフォールバック ターゲットと競合したり、 TTFT履歴に基づいてターゲットをスキップしたり、フォールバック リクエストを圧縮したりするのを防ぐために無効化されます。これを有効にすると、構成されたヘッジ、予測TTFTスキップ、プロアクティブなフォールバック圧縮が可能になり、 routing/request忠実度を犠牲にしてテール レイテンシを低くすることができます。
 
-無効にする**推論トークンバッファ**上流プロバイダーが厳格な`max_tokens` / `maxOutputTokens`制限を必要とする場合。コンボ ルーティングを有効にすると、既知の出力上限を持つモデルに対して推論モデルのヘッドルームのみが追加され、安全なバッファー値がその上限を超える場合、クライアント トークンの制限は変更されません。クライアント制限がすでに既知の上限を超えている場合、 OmniRouteアップストリーム要求を送信する前に制限をその上限までクランプします。
+無効にする**推論トークンバッファ**アップストリームプロバイダーが厳格な`max_tokens` / `maxOutputTokens`制限を必要とする場合。コンボ ルーティングを有効にすると、既知の出力上限を持つモデルに対して推論モデルのヘッドルームのみが追加され、安全なバッファリングされた値がその上限を超える場合、クライアント トークンの制限は変更されません。クライアント制限がすでに既知の上限を超えている場合、 OmniRouteアップストリーム要求を送信する前に制限をその上限までクランプします。
 
 ---
 
@@ -1164,7 +1164,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **署名キャッシュ**           | 重複排除キャッシュの統計 (アクティブなキー、ヒット率)      |
 | **レイテンシーテレメトリー** | プロバイダーごとのp50/p95/p99レイテンシの集計              |
 
-**プロのヒント:** [ヘルス] ページは 10 秒ごとに自動更新されます。サーキット ブレーカー カードを使用して、問題が発生しているプロバイダーを特定します。
+**プロのヒント:** [ヘルス] ページは 10 秒ごとに自動更新されます。サーキット ブレーカー カードを使用して、どのプロバイダーで問題が発生しているかを特定します。
 
 ---
 
@@ -1284,36 +1284,36 @@ OmniRoute はクラウドコーディングエージェント（**OpenAI Codex C
 
 ---
 
-## 🛠️ プログラムによる管理
+## 🛠️プログラマティック管理
 
-**`manage` スコープを持つ Bearer キー**を使用して、すべての OmniRoute リソース（プロバイダー、コンボ、キー、設定）を HTTP 経由で管理できます。
+すべてのOmniRouteリソース (プロバイダー、コンボ、キー、設定) をHTTP経由で管理できます。** `manage`スコープのベアラー キー**。
 
-キーは **ダッシュボード → API Keys → New Key → Scope: manage** から生成し、次のように使用します。
+でキーを生成します**ダッシュボード→ APIキー→新しいキー→スコープ: 管理**、 それから：
 
 ```bash
-# プロバイダーを一覧表示
+# List providers
 curl http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 
-# プロバイダー接続を追加
+# Add a provider connection
 curl -X POST http://localhost:20128/api/providers \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "provider": "openai", "apiKey": "sk-...", "name": "main" }'
 
-# コンボを作成
+# Create a combo
 curl -X POST http://localhost:20128/api/combos \
   -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -H "Content-Type: application/json" \
   -d '{ "name": "premium", "strategy": "priority", "models": [{ "model": "cc/claude-opus-4-7" }, { "model": "glm/glm-5.1" }] }'
 
-# API キーを一覧表示／作成
+# List/create API keys
 curl http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY"
 curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUTE_MANAGE_KEY" \
   -d '{ "name": "ci-bot", "scopes": ["chat"] }'
 ```
 
-エンドポイントの完全な一覧とリクエスト／レスポンスのスキーマについては、[API_REFERENCE.md](../reference/API_REFERENCE.md) を参照してください。
+完全なエンドポイント カタログとrequest/responseスキーマについては、 [API_REFERENCE.md](../reference/API_REFERENCE.md)を参照してください。
 
 ---
 

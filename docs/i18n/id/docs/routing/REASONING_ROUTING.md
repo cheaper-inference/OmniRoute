@@ -38,24 +38,19 @@ dan mendukung pencocokan `any` atau `all`.
 Aturan `connection` hanya dievaluasi ketika tidak ada aturan awal yang menang dan koneksi provider tertentu
 telah dipilih. Aturan ini hanya dapat mengubah effort dan budget.
 
-## Effort dan Budget
+## Upaya dan Anggaran
 
-`sourceEffort` menerima `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, dan
-`ultra`. `missing` berarti bahwa permintaan tidak berisi effort diskret maupun toggle thinking
-atau budget thinking. Oleh karena itu, sinyal yang hanya berisi budget hanya dicocokkan oleh `any`.
+`sourceEffort` menerima `any`, `missing`, `none`, `low`, `medium`, `high`, `xhigh`, `max`, dan `ultra`. `missing` berarti bahwa permintaan tersebut tidak berisi upaya terpisah, peralihan pemikiran, atau anggaran pemikiran. Oleh karena itu, sinyal khusus anggaran hanya cocok dengan `any`.
 
 `effortMode` memiliki tiga varian:
 
-- `inherit` mempertahankan effort klien sambil tetap memungkinkan model atau combo berubah.
-- `default` menetapkan `targetEffort` hanya ketika tidak ada sinyal penalaran eksplisit.
-- `force` mengganti effort diskret dengan `targetEffort`.
+- `inherit` menjaga upaya klien sambil tetap membiarkan model atau kombo berubah.
+- `default` menyetel `targetEffort` hanya jika tidak ada sinyal penalaran eksplisit.
+- `force` menggantikan upaya diskrit dengan `targetEffort`.
 
-Secara independen, `budgetAction` dapat berupa `preserve`, `remove`, atau `set`. `force` dengan `none` menghapus
-semua field effort dan budget yang dikenali. `none` bersama dengan `set` tidak valid.
+Secara mandiri, `budgetAction` dapat berupa `preserve`, `remove`, atau `set`. `force` dengan `none` menghapus semua bidang upaya dan anggaran yang dikenali, lalu menetapkan `reasoning_effort: "none"`, karena beberapa penyedia mengaktifkan pemikiran ketika bidang tersebut tidak ada. Penyedia yang menolak `none` literal disesuaikan saat pengiriman di `open-sse/executors/base/reasoningEffort.ts`. Kode Perintah memetakannya ke `low`, kecuali pada permintaan berbentuk Respons (`input` tanpa `messages`), yang menyimpannya `none`. Pada Cloudflare Workers AI (`cloudflare-ai`), model yang menolak `none` (gpt-oss, qwen3.8, nemotron-3, glm-4.7-flash) mendapatkan `low`; Model AI Pekerja lainnya tetap `none`. Menghapus bidang bukanlah suatu pilihan di sana, karena tidak ada upaya yang menjalankan tingkat default model. `none` bersama dengan `set` tidak valid.
 
-Permintaan yang menargetkan model yang diketahui tidak kompatibel ditolak sebelum panggilan upstream. Untuk target
-combo, entri yang tidak kompatibel dihapus; jika tidak ada yang tersisa, permintaan mengembalikan status `400`.
-Data kapabilitas yang tidak diketahui menghasilkan peringatan dan membiarkan aturan tetap aktif.
+Permintaan yang menargetkan model yang diketahui tidak kompatibel ditolak sebelum panggilan upstream. Untuk target kombo, entri yang tidak kompatibel akan dihapus; jika tidak ada yang tersisa, permintaan akan mengembalikan status `400`. Data kemampuan yang tidak diketahui menghasilkan peringatan dan membiarkan aturan tetap aktif.
 
 ## Keamanan dan Transport
 

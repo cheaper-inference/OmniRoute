@@ -4,6 +4,7 @@ import {
   updateDatabaseSettings,
   type UserDatabaseSettings,
 } from "@/lib/db/databaseSettings";
+import { backupDbFileAwaited } from "@/lib/db/backup";
 import { getSettings, updateSettings } from "@/lib/db/settings";
 import { isAuthenticated } from "@/shared/utils/apiAuth";
 import { ensureSemanticCacheDbBridge } from "@/lib/cache/semanticCacheDbBridge";
@@ -206,6 +207,14 @@ export async function PUT(request: NextRequest) {
     // which bumps the model-catalog cache version so in-flight responses pick
     // up the fresh TTL — no separate version bump needed here.
     if (Object.keys(updates).length > 0) {
+      // Snapshot the state BEFORE the write and wait for it. A failed routine snapshot is logged
+      // and does not block the write.
+      await backupDbFileAwaited("pre-write").catch((error: unknown) => {
+        console.error(
+          "[DB] Pre-write backup failed:",
+          error instanceof Error ? error.message : error
+        );
+      });
       updateDatabaseSettings({ cache: updates });
       // Drop the in-memory semantic cache manager so the next request rebuilds it
       // from the freshly-persisted databaseSettings (dual-layer cache work).

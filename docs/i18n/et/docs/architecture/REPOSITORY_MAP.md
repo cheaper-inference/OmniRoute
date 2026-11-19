@@ -53,61 +53,61 @@ OmniRoute/
 
 ## Juurfailid
 
-| Fail                                        | Otstarve                                                                                                  |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Turunduslik sihtleht + kiirjuhend + funktsioonide maatriks (vt ka `llm.txt`)                              |
-| **CHANGELOG.md**                            | Väljalaskepõhine muudatuste logi (genereeritakse automaatselt oskusega `/version-bump-cc`)                |
-| **LICENSE**                                 | MIT-litsentsi tekst                                                                                       |
-| **CLAUDE.md**                               | Projekti reeglid Claude Code’i agentidele (kohustuslikud reeglid, kokkulepped, stsenaariumid)             |
-| **AGENTS.md**                               | Sama mis CLAUDE.md, kuid muudele AI-agentidele (Codex, Cursor jne)                                        |
-| **GEMINI.md**                               | Lühikesed reeglid Gemini-põhistele agentidele (CLAUDE.md alamhulk)                                        |
-| **CONTRIBUTING.md**                         | Kaastööjuhend: seadistamine, tavapärased commit’id, testimine, PR-i töövoog                               |
-| **SECURITY.md**                             | Turvanõrkustest teatamise kord, toetatud versioonid, ohumudel                                             |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — kogukonnas käitumise ootused                                                       |
-| **llm.txt**                                 | Lihttekstis sihtleht, mis on optimeeritud LLM-i roomikutele (SEO AI-assistentide jaoks)                   |
-| **package.json**                            | npm-i manifest, skriptid, sõltuvused, käituskeskkonna nõuded, c8 katvuskontroll                           |
-| **package-lock.json**                       | Lukustatud sõltuvuspuu                                                                                    |
-| **tsconfig.json**                           | TypeScripti juurkonfiguratsioon                                                                           |
-| **tsconfig.typecheck-core.json**            | Tüübikontrolli konfiguratsioon `src/` tuuma jaoks                                                         |
-| **tsconfig.typecheck-noimplicit-core.json** | Range (`noImplicitAny`) tüübikontroll                                                                     |
-| **tsconfig.tsbuildinfo**                    | TS-i inkrementaalse koostamise vahemälu (gitignored)                                                      |
-| **next.config.mjs**                         | Next.js 16 koostekonfiguratsioon (eraldiseisev väljund)                                                   |
-| **next-env.d.ts**                           | Next.js-i automaatselt genereeritud keskkonnatüübid                                                       |
-| **eslint.config.mjs**                       | ESLinti lamekonfiguratsioon (reeglid projektialade kaupa)                                                 |
-| **prettier.config.mjs**                     | Prettieri vormindusreeglid                                                                                |
-| **postcss.config.mjs**                      | PostCSS-i konfiguratsioon Tailwindi/CSS-i töövoo jaoks                                                    |
-| **playwright.config.ts**                    | Playwrighti E2E-testide konfiguratsioon                                                                   |
-| **vitest.config.ts**                        | Vitesti konfiguratsioon (vaikimisi testikomplekt)                                                         |
-| **vitest.mcp.config.ts**                    | Vitesti konfiguratsioon MCP-serveri / autoCombo / vahemälu testikomplektide jaoks                         |
-| **sonar-project.properties**                | SonarQube’i/SonarCloudi konfiguratsioon (koodikvaliteet)                                                  |
-| **Dockerfile**                              | Mitmeetapiline Dockeri koosteprotsess (builder → runner-base → runner-cli)                                |
-| **docker-compose.yml**                      | Arenduskeskkonna Compose nelja profiiliga (base, cli, host, cliproxyapi) + Redise kõrvalkonteiner         |
-| **docker-compose.prod.yml**                 | Tootmiskeskkonna Compose (port 20130, Redis, nimega andmeköited)                                          |
-| **.dockerignore**                           | Dockeri kontekstist välistatud failid                                                                     |
-| **fly.toml**                                | Fly.io juurutuskonfiguratsioon (piirkond `sin`, port 20128, andmeköide /data)                             |
-| **.env.example**                            | Keskkonnafaili mall (kopeeritakse esimesel installimisel automaatselt faili `.env`)                       |
-| **.gitignore**                              | Giti eiramismustrid                                                                                       |
-| **.npmignore**                              | npm-is avaldamisest välistatavate failide loend                                                           |
-| **.npmrc**                                  | npm-i konfiguratsioon (register, lukustusfaili reeglid)                                                   |
-| **.node-version**                           | Fikseeritud Node’i versioon (kasutavad nvm-iga ühilduvad tööriistad)                                      |
-| **.nvmrc**                                  | Fikseeritud Node’i versioon nvm-i jaoks                                                                   |
-| **eslint.complexity.config.mjs**            | ESLinti konfiguratsioon keerukuse astmelise piiraja jaoks (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | ESLinti konfiguratsioon SonarJS-i reeglite jaoks (kognitiivne keerukus / dubleerimine)                    |
-| **source.config.ts**                        | Fumadocsi `defineDocs` lähtekonfiguratsioon (täidab `.source/` sisu)                                      |
-| **knip.json**                               | Knipi konfiguratsioon — kasutamata failid/ekspordid/sõltuvused (toidab surnud koodi kontrolli)            |
-| **stryker.conf.json**                       | Strykeri mutatsioonitestimise konfiguratsioon                                                             |
-| **.size-limit.json**                        | size-limit'i paketi mahupiirangu konfiguratsioon                                                          |
-| **promptfooconfig.yaml**                    | promptfoo hindamise konfiguratsioon                                                                       |
-| **.gitleaks.toml**                          | gitleaksi saladuste skannimise reeglistik                                                                 |
-| **.zizmor.yml**                             | zizmori GitHub Actionsi turbekontrolli konfiguratsioon                                                    |
-| **socket.yml**                              | Socket.devi tarkvara tarneahela konfiguratsioon                                                           |
-| **news.json**                               | Lokaliseeritud v2 teadaannete voog; Radari väljalaskekirje tarnitakse inaktiivsena                        |
-| **flake.nix** / **flake.lock**              | Nixi arenduskesta definitsioon + lukufail                                                                 |
-| **.env**                                    | Kohalikud saladused (gitignore'iga eiratud — genereeritud failist `.env.example`)                         |
+| Fail                                        | Eesmärk                                                                                               |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **README.md**                               | Turunduse sihtleht + Quick Start + funktsioonimaatriks (vt ka `llm.txt`)                              |
+| **CHANGELOG.md**                            | Väljalase muudatuste logi (automaatselt genereeritud `/version-bump-cc` oskuste poolt)                |
+| **LICENSE**                                 | MIT litsentsi tekst                                                                                   |
+| **CLAUDE.md**                               | Projektireeglid Claude Code agentidele (karmid reeglid, kokkulepped, stsenaariumid)                   |
+| **AGENTS.md**                               | Sama mis CLAUDE.md, kuid mitte-Claude'i AI agentide jaoks (Codex, Cursor jne)                         |
+| **GEMINI.md**                               | Lühikesed reeglid Kaksikute-põhiste agentide jaoks ( CLAUDE.md alamhulk)                              |
+| **CONTRIBUTING.md**                         | Kaasautori juhend: seadistamine, tavapärased sissekanded, testimine, PR voog                          |
+| **SECURITY.md**                             | Haavatavuse aruandluspoliitika, toetatud versioonid, ohumudel                                         |
+| **CODE_OF_CONDUCT.md**                      | Panustaja pakti — kogukonna käitumise ootused                                                         |
+| **llm.txt**                                 | Lihtteksti maandumine optimeeritud LLM roomikute jaoks (SEO AI assistentide jaoks)                    |
+| **package.json**                            | npm manifest, skriptid, sõltuvused, mootorid, c8 levivärav                                            |
+| **package-lock.json**                       | Lukustatud sõltuvuspuu                                                                                |
+| **tsconfig.json**                           | Root TypeScript konfiguratsioon                                                                       |
+| **tsconfig.typecheck-core.json**            | Tüübikontrolli konfiguratsioon `src/` core jaoks                                                      |
+| **tsconfig.typecheck-noimplicit-core.json** | Range (`noImplicitAny`) tüübikontroll                                                                 |
+| **tsconfig.tsbuildinfo**                    | TS järkjärguline ehitamise vahemälu (gitignoositud)                                                   |
+| **järgmiseks.config.mjs**                   | Next.js 16 ehituse konfiguratsioon (eraldi väljund)                                                   |
+| **järgmine-env.d.ts**                       | Next.js automaatselt genereeritud env-tüübid                                                          |
+| **eslint.config.mjs**                       | ESLint flat config (reeglid projektipiirkonna kohta)                                                  |
+| **ilusam.config.mjs**                       | Prettier vormindamise reeglid                                                                         |
+| **postcss.config.mjs**                      | PostCSS konfiguratsioon Tailwind/CSS torujuhtme jaoks                                                 |
+| **näitekirjanik.config.ts**                 | Playwright E2E testi konfiguratsioon                                                                  |
+| **vitest.config.ts**                        | Vitest config (vaikekomplekt)                                                                         |
+| **vitest.mcp.config.ts**                    | Vitest konfiguratsioon MCP serveri / autoCombo / vahemälu komplektide jaoks                           |
+| **sonar-projekt.omadused**                  | SonarQube/SonarCloud konfiguratsioon (koodi kvaliteet)                                                |
+| **Dockerfile**                              | Mitmeastmeline Docker ehitamine (ehitaja → runner-base → runner-cli)                                  |
+| **docker-compose.yml**                      | Arenduskomponeerimine 4 profiiliga (alus, cli, host, cliproxyapi) + redis külgkorv                    |
+| **dokkija-komponeeri.prod.yml**             | Tootmise koostamine (port 20130, redis, nimega köited)                                                |
+| **.dockeri ignoreerida**                    | Docker kontekstist välistatud failid                                                                  |
+| **fly.toml**                                | Fly.io juurutamise konfiguratsioon (regioon `sin`, port 20128, /andmemaht)                            |
+| **.env.example**                            | Malli env-fail (esimesel installimisel kopeeritakse automaatselt `.env` -sse)                         |
+| **.gitignoreeri**                           | Git ignoreeri mustreid                                                                                |
+| **.npmignore**                              | npm avaldab välistamisloendi                                                                          |
+| **.npmrc**                                  | npm konfiguratsioon (register, lukustusfailipoliitika)                                                |
+| **.node-version**                           | Sõlme versiooni pin (kasutavad nvm-iga ühilduvad tööriistad)                                          |
+| **.nvmrc**                                  | Sõlme versiooni pin nvm jaoks                                                                         |
+| **eslint.keerukus.config.mjs**              | ESLint konfiguratsioon keerukuse põrkmehhanismi jaoks (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | ESLint konfiguratsioon SonarJS reeglite jaoks (kognitiivne keerukus / dubleerimine)                   |
+| **allikas.config.ts**                       | Fumadocs `defineDocs` lähtekoodi konfiguratsioon (toidab `.source/`)                                  |
+| **knip.json**                               | Knip config — unused files/exports/deps (toidab surnud koodi väravat)                                 |
+| **ründaja.conf.mjs**                        | Strykeri mutatsioonide testimise konfiguratsioon (arvutab `tap.testFiles` `mutate`-st)                |
+| **.size-limit.json**                        | suurusepiiranguga kogumi eelarve konfiguratsioon                                                      |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                                 |
+| **.gitleaks.toml**                          | gitleaks salajase skannimise reeglid                                                                  |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                            |
+| **socket.yml**                              | Socket.dev tarneahela konfiguratsioon                                                                 |
+| **news.json**                               | Lokaliseeritud v2 teadaannete voog; Radari stardiüksus tarnitakse passiivselt                         |
+| **helbed.nix** /** helbed.lukk**            | Nix dev-shelli definitsiooniga + lukk                                                                 |
+| **.env**                                    | Kohalikud saladused (ignoreeritud — mis on genereeritud `.env.example` st)                            |
 
-> **Teisaldatud versioonis v3.8.26 juurkataloogist välja (korrastamine):**
+> **V3.8.26 juurest välja tõstetud (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ja genereeritud `quality-metrics.json` (gitignore'iga eiratud). Vaadake jaotist [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` ja genereeritud `quality-metrics.json` (gitignoositud). Vaata [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -144,7 +144,7 @@ src/
 | `app/api/playground/`                                                        | Playground Studio marsruudid: `improve-prompt/` (POST — LLM viipade ümberkirjutaja), `presets/` (GET list / POST create), `presets/[id]/` (GET / PUT / DELETE) — vaata `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                                         |
 | `app/api/` (non-v1)                                                          | Management/admin marsruudid (~ 60 kataloogid: pakkujad, kombod, seaded, mcp, a2a, evals, mälu, oskused, veebihaagid, vastavus, vastupidavus, jälgimine, tunnelid, kliiritööriistad jne)                                                                                                                               |
 | `app/api/tools/agent-bridge/`                                                | AgentBridge REST API — 12 marsruuti (serveri juhtimine, agent state/DNS/mappings, ümbersõit, sert, ülesvoolu CA). LOCAL_ONLY + SPAWN_CAPABLE. Vaata `docs/frameworks/AGENTBRIDGE.md §7`.                                                                                                                              |
-| `app/api/tools/traffic-inspector/`                                           | Liiklusinspektor REST + WS API — 16 + marsruuti (päringud, seansid, hostid, püüdmisrežiimid, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. Vaata `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                               |
+| `app/api/tools/traffic-inspector/`                                           | Liiklusinspektor REST + WS API — 16 + marsruuti (päringud, seansid, hostid, püüdmisrežiimid, eksport, ws). LOCAL_ONLY + SPAWN_CAPABLE. Vaadake `docs/frameworks/TRAFFIC_INSPECTOR.md §8`.                                                                                                                             |
 | `app/a2a/`                                                                   | A2A JSON-RPC 2.0 sisendpunkt (`POST /a2a`)                                                                                                                                                                                                                                                                            |
 | `app/.well-known/agent.json/`                                                | A2A agendikaart (avastus)                                                                                                                                                                                                                                                                                             |
 | `app/(dashboard)/dashboard/`                                                 | Armatuurlaua UI lehed (50 + jaotist, ~ 118 page.tsx -faili: pakkujad, kombinatsioonid, seaded, mälu, oskused, veebihaagid, evals, audit, pakett, vahemälu, kulud, tervis, süsteem, tegevus jne)                                                                                                                       |
@@ -193,7 +193,7 @@ src/
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 ümbris — KNN brute-force + hübriid RRF (FTS5 + vektor, k = 60). Lazy-init, laguneb graatsiliselt, kui sqlite-vec pole saadaval. (plaan 21)                                                                                                                                                             |
 | `memory/reindex.ts`                      | `runReindexBatch()` — töötleb mälestusi `needs_reindex=1` taustal; kutsutakse `POST /api/memory/reindex` ja laiska-tagasitäite teega. (plaan 21)                                                                                                                                                                         |
 | `monitoring/`                            | Tervisekontroll, mõõdikud emissioon                                                                                                                                                                                                                                                                                      |
-| `oauth/`                                 | OAuth/import vood 22 pakkuja mooduli jaoks (agy, antigravity, claude, cline, codebuddy-cn, codex, kursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilokood, kimi-kodeerimine, traqo, xau-oference, kiro, xai-oference zed-hosted, zed)                                                 |
+| `oauth/`                                 | OAuth/import vood 22 pakkuja mooduli jaoks (agy, antigravity, claude, cline, codebuddy-cn, codex, kursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilokood, kimi-kodeerimine, traqo, xaioference, kiro, xaioference zed-hosted, zed)                                                   |
 | `plugins/`                               | Pluginate register                                                                                                                                                                                                                                                                                                       |
 | `promptCache/`                           | Antroopilises stiilis kiire vahemälu katkestuspunktid                                                                                                                                                                                                                                                                    |
 | `skills/`                                | Oskuste raamistik (sisseehitatud + turg + SkillsSH) — vt `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                                     |
@@ -219,7 +219,7 @@ src/
 
 | Moodul                 | Eesmärk                                                   |
 | ---------------------- | --------------------------------------------------------- |
-| `policy.ts`            | Poliitikamootor                                           |
+| `policy.ts`            | Poliitika mootor                                          |
 | `fallbackPolicy.ts`    | Varuotsuste puu                                           |
 | `costRules.ts`         | Kulude arvutamise reeglid                                 |
 | `lockoutPolicy.ts`     | Model/connection töösulu poliitika                        |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ------------------------------------------------------------------------------------------------- |
 | `components/`                    | Armatuurlaua komponent API: `packages/ui-kit` adapterid — vt `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ekraanidel kasutatavad ikooninimed → Lucide'i komponendid (`<Icon>`)                  |
-| `constants/providers.ts`         | **380 pakkujat** Zod valideerimisega (tõe allikas)                                                |
+| `constants/providers.ts`         | **394 pakkujat** Zod valideerimisega (tõe allikas)                                                |
 | `constants/cliTools.ts`          | Väline CLI tööriista register                                                                     |
-| `constants/routingStrategies.ts` | **20 marsruutimisstrateegiat** prioriteetidega                                                    |
+| `constants/routingStrategies.ts` | **22 marsruutimisstrateegiat** prioriteetidega                                                    |
 | `constants/publicApiRoutes.ts`   | Marsruudid, mis nõuavad kandja (vs haldamise) autentimist                                         |
 | `constants/upstreamHeaders.ts`   | Päise keelamisloend ülesvoolu päringute jaoks                                                     |
 | `validation/schemas.ts`          | ~ 80 Zod skeemi (üks tõeallikas API lepingute jaoks)                                              |
@@ -265,7 +265,7 @@ Eraldi npm-i tööruum (`@omniroute/open-sse`). Tegeleb päringute töötlemise 
 ```
 open-sse/
 ├── handlers/            # 16 faili (12 töötlejat + 4 abifaili): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search jne.
-├── executors/           # 150 käituri moodulit (BaseExecutorit laiendavad klassid + teenusepakkuja-põhised abifailid)
+├── executors/           # 163 käituri moodulit (BaseExecutorit laiendavad klassid + teenusepakkuja-põhised abifailid)
 ├── translator/          # Vormingute teisendajad (9 päringu-, 9 vastuse- ja 9 abimoodulit)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ teenusemoodulit (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM jne)
@@ -395,24 +395,24 @@ open-sse/
 
 ### Tipptasemel juhendid
 
-| Doc                         | Eesmärk                                                                                      |
-| --------------------------- | -------------------------------------------------------------------------------------------- |
-| `ARCHITECTURE.md`           | Kõrgetasemeline arhitektuur, alamsüsteemi kaart, armatuurlaua pind                           |
-| `CODEBASE_DOCUMENTATION.md` | Tehniline viide: kataloogid, moodulid, kokkulepped                                           |
-| `FEATURES.md`               | Funktsioonimaatriks koos v3.8 esiletõstmistega                                               |
-| `USER_GUIDE.md`             | Lõppkasutaja käsiraamat (seadistus, mudelid, kombinatsioonid, CLIs, heli jne)                |
-| `API_REFERENCE.md`          | API lõpp-punkti viide autentimismudeliga                                                     |
-| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsioon (121 rada)                                                      |
-| `SETUP_GUIDE.md`            | Installimismeetodid (npm, npx, Docker, Electron, Termux, allikas)                            |
-| `ENVIRONMENT.md`            | Kõik env-vars (dokumenteeritud ~ 800, ~ 3050 rida `.env.example`)                            |
-| `TROUBLESHOOTING.md`        | Levinud vead + v3.8.0 teadaolevad probleemid                                                 |
-| `RELEASE_CHECKLIST.md`      | Täielik vabastamise voog (oskused, husky, tavapärased kohustused, juurutamine)               |
-| `COVERAGE_PLAN.md`          | Katvuse eesmärgid ja hetkeseis                                                               |
-| `FREE_TIERS.md`             | Kureeritud vabataseme pakkujad (48 + tasuta + 11 OAuth)                                      |
-| `CLI-TOOLS.md`              | Välised CLI integratsioonid + Sisemine OmniRoute CLI                                         |
-| `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaali                                                 |
-| `UNINSTALL.md`              | Puhastage desinstalli sammud                                                                 |
-| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** 380 pakkuja kataloog (regen: `npm run gen:provider-reference`) |
+| Doc                         | Eesmärk                                                                                        |
+| --------------------------- | ---------------------------------------------------------------------------------------------- |
+| `ARCHITECTURE.md`           | Kõrgetasemeline arhitektuur, alamsüsteemi kaart, armatuurlaua pind                             |
+| `CODEBASE_DOCUMENTATION.md` | Tehniline viide: kataloogid, moodulid, kokkulepped                                             |
+| `FEATURES.md`               | Funktsioonimaatriks koos v3.8 esiletõstmistega                                                 |
+| `USER_GUIDE.md`             | Lõppkasutaja käsiraamat (seadistus, mudelid, kombinatsioonid, CLIs, heli jne)                  |
+| `API_REFERENCE.md`          | API lõpp-punkti viide autentimismudeliga                                                       |
+| `openapi.yaml`              | OpenAPI 3.0 spetsifikatsioon (121 rada)                                                        |
+| `SETUP_GUIDE.md`            | Installimismeetodid (npm, npx, Docker, Electron, Termux, allikas)                              |
+| `ENVIRONMENT.md`            | Kõik env-vars (dokumenteeritud ~ 800, ~ 3050 rida `.env.example`)                              |
+| `TROUBLESHOOTING.md`        | Levinud vead + v3.8.0 teadaolevad probleemid                                                   |
+| `RELEASE_CHECKLIST.md`      | Täielik vabastamise voog (oskused, husky, tavapärased kohustused, juurutamine)                 |
+| `COVERAGE_PLAN.md`          | Katvuse eesmärgid ja hetkeseis                                                                 |
+| `FREE_TIERS.md`             | Kureeritud vabataseme pakkujad (48 + tasuta + 11 OAuth)                                        |
+| `CLI-TOOLS.md`              | Välised CLI integratsioonid + Sisemine OmniRoute CLI                                           |
+| `I18N.md`                   | i18n arhitektuur, keele lisamine, 67 lokaali                                                   |
+| `UNINSTALL.md`              | Puhastage desinstalli sammud                                                                   |
+| `PROVIDER_REFERENCE.md`     | **Automaatselt genereeritud** kataloog 394 pakkujast (regen: `npm run gen:provider-reference`) |
 
 ### Alamsüsteemi süvasukeldumised
 
@@ -441,7 +441,7 @@ open-sse/
 | ------------------------------- | ------------------------------------------ |
 | `COMPRESSION_GUIDE.md`          | Ülevaade tihendusrežiimidest + tegevuskava |
 | `COMPRESSION_ENGINES.md`        | Caveman + RTK mootorid, registrileping     |
-| `COMPRESSION_RULES_FORMAT.md`   | Caveman reeglipaketi JSON skeem            |
+| `COMPRESSION_RULES_FORMAT.md`   | Koopainimese reeglipaketi JSON skeem       |
 | `COMPRESSION_LANGUAGE_PACKS.md` | Keelepõhine reeglipaketi inventar          |
 | `RTK_COMPRESSION.md`            | RTK deklaratiivne torujuhe (56 filtrit)    |
 

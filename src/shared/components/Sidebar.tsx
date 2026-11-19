@@ -4,6 +4,7 @@ import { Fragment, useState, useEffect, useCallback, useSyncExternalStore, useId
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/shared/utils/cn";
+import { usePinnedSidebarItems } from "@/shared/hooks/usePinnedSidebarItems";
 import { getActiveSidebarHref } from "@/shared/utils/sidebarRouteMatch";
 import { filterSidebarSectionsByQuery } from "@/shared/utils/sidebarSearch";
 import {
@@ -20,6 +21,7 @@ import {
   SidebarGroupLabel,
   SidebarHeader,
   SidebarMenu,
+  SidebarMenuAction,
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarRail,
@@ -27,6 +29,7 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@omniroute/ui-kit/sidebar";
+import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
 import OmniRouteLogo, { OmniRouteLockup } from "./OmniRouteLogo";
 import Icon from "./Icon";
 import Button from "./Button";
@@ -50,6 +53,7 @@ import {
   applySectionOrder,
   applyItemOrder,
   isSidebarItemVisibleForFlags,
+  getSectionItems,
   resolveRuntimeSidebarSections,
   type SidebarSectionId,
   type SidebarItemDefinition,
@@ -77,7 +81,6 @@ const isE2EMode = process.env.NEXT_PUBLIC_OMNIROUTE_E2E_MODE === "1";
 const DEFAULT_EXPANDED: SidebarSectionId = "omni-proxy";
 const EXPANDED_SECTIONS_KEY = "sidebar-expanded-sections";
 const PINNED_SECTIONS_KEY = "sidebar-pinned-sections";
-const PINNED_ITEMS_KEY = "sidebar-pinned-items";
 
 type SidebarProps = {
   onClose?: () => void;
@@ -124,13 +127,6 @@ function readStoredPinnedRaw() {
     return null;
   }
 }
-function readStoredPinnedItemsRaw() {
-  try {
-    return localStorage.getItem(PINNED_ITEMS_KEY);
-  } catch {
-    return null;
-  }
-}
 
 /**
  * Dashboard navigation. Must render inside the kit `SidebarProvider` + `<Sidebar>` (DashboardShell
@@ -172,7 +168,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
     new Set([DEFAULT_EXPANDED])
   );
   const [pinnedSections, setPinnedSections] = useState<Set<SidebarSectionId>>(new Set());
-  const [pinnedItems, setPinnedItems] = useState<Set<string>>(new Set());
+  const { pinnedItems, togglePinItem } = usePinnedSidebarItems();
   const [pinnedSectionCollapsed, setPinnedSectionCollapsed] = useState(false);
   const [sidebarExpansionLoaded, setSidebarExpansionLoaded] = useState(false);
   const [skipInitialActiveExpansion, setSkipInitialActiveExpansion] = useState(false);
@@ -198,11 +194,6 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
     readStoredPinnedRaw,
     getServerSnapshotNull
   );
-  const storedPinnedItemsRaw = useSyncExternalStore(
-    noopSubscribe,
-    readStoredPinnedItemsRaw,
-    getServerSnapshotNull
-  );
   if (hydrated && !sidebarExpansionLoaded) {
     const storedExpanded = parseStoredArray<SidebarSectionId[]>(storedExpandedRaw, [
       DEFAULT_EXPANDED,
@@ -211,7 +202,6 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
       storedPinnedRaw !== null
         ? parseStoredArray<SidebarSectionId[]>(storedPinnedRaw, [])
         : (SIDEBAR_SECTIONS.filter((s) => s.defaultPinned).map((s) => s.id) as SidebarSectionId[]);
-    const storedPinnedItems = parseStoredArray<string[]>(storedPinnedItemsRaw, []);
 
     const initialPinned = new Set<SidebarSectionId>(storedPinned);
     const initialExpanded = hydrateExpandedSections(storedExpanded, initialPinned);
@@ -219,7 +209,6 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
     setSkipInitialActiveExpansion(storedExpanded.length === 0);
     setExpandedSections(initialExpanded);
     setPinnedSections(initialPinned);
-    setPinnedItems(new Set(storedPinnedItems));
     setSidebarExpansionLoaded(true);
   }
 
@@ -301,8 +290,9 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
   const getSidebarLabel = (key: string, fallback: string) =>
     typeof t.has === "function" && t.has(key) ? t(key) : fallback;
 
-  const resolveItem = (item: SidebarItemDefinition, hidden: Set<string>) => {
-    if (hidden.has(item.id)) return null;
+  /** Apply runtime gates and labels; only normal navigation passes the preset-hidden IDs. */
+  const resolveItem = (item: SidebarItemDefinition, hidden?: Set<string>) => {
+    if (hidden?.has(item.id)) return null;
     if (!isSidebarItemVisibleForFlags(item, featureFlags)) return null;
     const subtitle = item.subtitleKey
       ? getSidebarLabel(item.subtitleKey, item.subtitleFallback ?? "")
@@ -371,8 +361,14 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
     section.children.flatMap((child: any) => (child.type === "group" ? child.items : [child]))
   );
 
+  // Pins are explicit shortcuts, independent of the sidebar preset's hidden entries.
+  // Resolve against the runtime catalog so feature gates and private URLs still apply.
+  const pinnableItems = orderedSections.flatMap(getSectionItems);
   const pinnedItemList = Array.from(pinnedItems)
-    .map((id) => allVisibleItems.find((item) => item.id === id))
+    .map((id) => {
+      const item = pinnableItems.find((entry) => entry.id === id);
+      return item ? resolveItem(item) : null;
+    })
     .filter(Boolean) as (SidebarItemDefinition & { label: string; subtitle?: string })[];
 
   const homeIndex = visibleSections.findIndex((s) => s.id === "home");
@@ -395,7 +391,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
         ]
       : visibleSections;
 
-  const activeHref = getActiveSidebarHref(pathname, allVisibleItems);
+  const activeHref = getActiveSidebarHref(pathname, [...allVisibleItems, ...pinnedItemList]);
 
   const isSearching = searchQuery.trim().length > 0;
   // Section master toggle: hidden sections drop out of the normal display,
@@ -478,19 +474,6 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
     });
   }, []);
 
-  const togglePinItem = useCallback((itemId: string) => {
-    setPinnedItems((prev) => {
-      const next = new Set(prev);
-      if (next.has(itemId)) {
-        next.delete(itemId);
-      } else {
-        next.add(itemId);
-      }
-      saveToStorage(PINNED_ITEMS_KEY, [...next]);
-      return next;
-    });
-  }, []);
-
   const handleShutdown = async () => {
     setIsShuttingDown(true);
     try {
@@ -541,10 +524,8 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
         )}
       </>
     );
-    const linkClassName = cn(showPin && "pe-8");
-
     return (
-      <SidebarMenuItem key={itemKey} className="group/nav-item relative">
+      <SidebarMenuItem key={itemKey}>
         <SidebarMenuButton asChild isActive={active} tooltip={item.label}>
           {item.external ? (
             <a
@@ -553,27 +534,20 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
               rel="noopener noreferrer"
               aria-label={item.label}
               title={title}
-              className={linkClassName}
             >
               {content}
             </a>
           ) : (
-            <Link
-              href={item.href}
-              prefetch={false}
-              aria-label={item.label}
-              title={title}
-              className={linkClassName}
-            >
+            <Link href={item.href} prefetch={false} aria-label={item.label} title={title}>
               {content}
             </Link>
           )}
         </SidebarMenuButton>
         {showPin && (
-          // kit-exception: Native button on kit tokens (track F): the pin overlays the kit SidebarMenuButton
-          // (absolute, hover-revealed); the kit has no SidebarMenuAction slot.
-          <button
-            type="button"
+          // The kit action places itself at the row's inline end (RTL-safe), pads the row for it
+          // and takes the active row's ink. A pin that is off shows on row hover or focus only.
+          <SidebarMenuAction
+            showOnHover={!isItemPinned}
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
@@ -581,18 +555,9 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
             }}
             title={isItemPinned ? t("unpinItem") : t("pinItem")}
             aria-label={isItemPinned ? t("unpinItem") : t("pinItem")}
-            className={cn(
-              "absolute end-1 top-1/2 flex size-7 -translate-y-1/2 items-center justify-center rounded-control transition-opacity focus-visible:opacity-100",
-              active
-                ? "text-accent-foreground"
-                : isItemPinned
-                  ? "text-text-main"
-                  : "text-text-muted",
-              !isItemPinned && "opacity-0 group-hover/nav-item:opacity-100"
-            )}
           >
             <Icon name="push_pin" size={13} fill={isItemPinned} />
-          </button>
+          </SidebarMenuAction>
         )}
       </SidebarMenuItem>
     );
@@ -607,38 +572,35 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
       separatorHidden ||
       isSearching ||
       (expandedGroups[child.id] ?? child.items.some((item) => item.href === activeHref));
+    const groupItems = (
+      <SidebarMenu className={cn(!separatorHidden && "ms-3 border-s border-border ps-2")}>
+        {child.items.map((item: any) => renderNavLink(item, keyPrefix))}
+      </SidebarMenu>
+    );
+    // A group whose separator is hidden has no header: its items sit in the section, always open.
+    if (separatorHidden) {
+      return (
+        <SidebarMenuItem key={child.id} className="mt-1">
+          {groupItems}
+        </SidebarMenuItem>
+      );
+    }
+    // Kit Disclosure (#19066): trigger and panel wired by the kit (aria-expanded/aria-controls);
+    // the panel renders its links only while open; the kit chevron points right when closed and
+    // down when open, as the legacy one did. The trigger keeps the compact sidebar row.
     return (
       <SidebarMenuItem key={child.id} className="mt-1">
-        {!separatorHidden && (
-          // kit-exception: Native disclosure button on kit tokens (track F): full-width subgroup header row.
-          <button
-            type="button"
-            aria-expanded={groupExpanded}
-            aria-controls={`${navigationId}-${child.id}`}
-            onClick={() =>
-              setExpandedGroups((previous) => ({
-                ...previous,
-                [child.id]: !groupExpanded,
-              }))
-            }
-            className="flex min-h-9 w-full items-center justify-between gap-2 rounded-control px-3 text-start text-xs font-semibold text-text-muted hover:bg-surface hover:text-text-main"
-          >
+        <Disclosure
+          open={groupExpanded}
+          onOpenChange={(open) =>
+            setExpandedGroups((previous) => ({ ...previous, [child.id]: open }))
+          }
+        >
+          <DisclosureTrigger className="min-h-9 px-3 py-0 text-xs font-semibold text-text-muted hover:bg-surface hover:text-text-main">
             {child.title}
-            <Icon
-              name="chevron_right"
-              size={16}
-              className={cn("transition-transform", groupExpanded && "rotate-90")}
-            />
-          </button>
-        )}
-        {groupExpanded && (
-          <SidebarMenu
-            id={`${navigationId}-${child.id}`}
-            className={cn(!separatorHidden && "ms-3 border-s border-border ps-2")}
-          >
-            {child.items.map((item: any) => renderNavLink(item, keyPrefix))}
-          </SidebarMenu>
-        )}
+          </DisclosureTrigger>
+          <DisclosureContent>{groupItems}</DisclosureContent>
+        </Disclosure>
       </SidebarMenuItem>
     );
   };
@@ -759,7 +721,8 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
               <SidebarGroup key={section.id}>
                 <SidebarGroupLabel className="group/header h-auto gap-1 px-0">
                   {/* kit-exception: Native disclosure button on kit tokens (track F): a full-width section header
-                      inside the kit SidebarGroupLabel (the kit Button is a fixed-height pill). */}
+                      inside the kit SidebarGroupLabel. The kit Disclosure wraps trigger and panel in its own
+                      element, which would split SidebarGroupLabel from SidebarGroup. */}
                   <button
                     type="button"
                     onClick={() => toggleSection(sectionId)}
@@ -776,7 +739,8 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
                   </button>
                   {sectionId !== "pinned" && (
                     // kit-exception: Native button on kit tokens (track F): a hover-revealed pin inside the kit
-                    // SidebarGroupLabel; the kit has no SidebarGroupAction slot.
+                    // SidebarGroupLabel. The kit SidebarGroupAction is positioned with a physical `right`
+                    // (wrong side in RTL) and turns the label into an ellipsized block.
                     <button
                       type="button"
                       onClick={() => togglePin(sectionId)}
@@ -847,7 +811,7 @@ export default function Sidebar({ isMacElectron = false }: SidebarProps) {
           is that edge in LTR; under dir=rtl globals.css mirrors it to `inset-inline-end: 0` (the
           aside's left = content edge, the aside itself kept on the right by DashboardShell's
           `rtl:order-none`). */}
-      <SidebarRail className="right-0" />
+      <SidebarRail className="right-0" aria-label={t("toggleSidebar")} title={t("toggleSidebar")} />
 
       <ConfirmModal
         isOpen={showShutdownModal}

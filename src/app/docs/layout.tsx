@@ -7,6 +7,7 @@ import { Suspense } from "react";
 import LanguageSelector from "@/shared/components/LanguageSelector";
 import { getTranslations } from "next-intl/server";
 import DocsThemeSwitch, { DocsThemeHotKey } from "./DocsThemeSwitch";
+import { docsGithubLink } from "./docsGithubLink";
 
 export async function generateMetadata() {
   const t = await getTranslations("docs");
@@ -45,8 +46,9 @@ export default async function Layout({ children }: { children: ReactNode }) {
         url: "/dashboard",
         secondary: true,
       },
+      // Instead of `githubUrl`, whose generated glyph is an unnamed svg role="img" (#18078).
+      docsGithubLink,
     ],
-    githubUrl: "https://github.com/cheaper-inference/OmniRoute",
     slots: { themeSwitch: DocsThemeSwitch },
   };
 

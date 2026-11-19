@@ -25,6 +25,7 @@ import { stripObfuscationZeroWidth } from "../utils/zeroWidth.ts";
 import { normalizeArrayContentChunk } from "../utils/arrayContentDelta.ts";
 import { assignAliasCacheWrite } from "../utils/pickCacheCreationTokens.ts";
 import { findBalancedJsonEnd } from "./responseSanitizer/balancedJson.ts";
+import { copyUrlCitationAnnotations } from "./responseSanitizer/urlCitations.ts";
 import { normalizeResponsesContextUsage } from "../utils/normalizeResponsesContextUsage.ts";
 export {
   extractThinkingFromContent,
@@ -451,6 +452,7 @@ function sanitizeMessage(msg: unknown, options: ParseOptions = {}): unknown {
   applyDotsToolCallSanitization(sanitized, msgRecord);
   copyOpenAICompatibleReasoningFields(msgRecord, sanitized);
   scrubDotsFromReasoning(sanitized);
+  copyUrlCitationAnnotations(msgRecord, sanitized);
   applyTextualToolCallSanitization(sanitized, msgRecord);
 
   if (msgRecord.tool_calls) {
@@ -620,6 +622,24 @@ function normalizeResponsesId(id: unknown): string {
   }
   if (id.startsWith("resp_")) return id;
   return `resp_${id}`;
+}
+
+const TOOL_CALL_BASE_KEYS = new Set(["index", "id", "type", "function"]);
+
+/**
+ * False for a streamed tool_call placeholder that carries nothing: no id, name,
+ * argument text, non-function type or extension key. Such items made the stream
+ * count a phantom call, mint an id for it and rewrite the finish to tool_calls.
+ */
+function isNonEmptyToolCallDelta(tc: unknown): boolean {
+  const t = toRecord(tc);
+  if (!t) return true;
+  if (t.id != null && t.id !== "") return true;
+  if (t.type != null && t.type !== "function") return true;
+  const fn = toRecord(t.function);
+  if (fn?.name) return true;
+  if (fn?.arguments != null && fn.arguments !== "") return true;
+  return Object.entries(t).some(([key, value]) => value != null && !TOOL_CALL_BASE_KEYS.has(key));
 }
 
 /**
@@ -1161,23 +1181,28 @@ export function sanitizeStreamingChunk(parsed: unknown): unknown {
             }
           }
           if (deltaRecord.tool_calls !== undefined) {
-            delta.tool_calls = Array.isArray(deltaRecord.tool_calls)
-              ? deltaRecord.tool_calls.map((tc) => {
-                  const t = toRecord(tc);
-                  if (!t) return tc;
-                  const strippedToolCall = stripZeroWidthToolCallArguments(t);
-                  const strippedRecord = toRecord(strippedToolCall) || t;
-                  if (t.id !== undefined && t.id !== null && typeof t.id !== "string") {
-                    return { ...strippedRecord, id: String(t.id) };
-                  }
-                  return strippedRecord;
-                })
-              : deltaRecord.tool_calls;
+            if (!Array.isArray(deltaRecord.tool_calls)) {
+              delta.tool_calls = deltaRecord.tool_calls;
+            } else {
+              const toolCalls = deltaRecord.tool_calls.filter(isNonEmptyToolCallDelta).map((tc) => {
+                const t = toRecord(tc);
+                if (!t) return tc;
+                const strippedToolCall = stripZeroWidthToolCallArguments(t);
+                const strippedRecord = toRecord(strippedToolCall) || t;
+                if (t.id !== undefined && t.id !== null && typeof t.id !== "string") {
+                  return { ...strippedRecord, id: String(t.id) };
+                }
+                return strippedRecord;
+              });
+              if (toolCalls.length > 0) delta.tool_calls = toolCalls;
+            }
           }
           if (deltaRecord.function_call !== undefined)
             delta.function_call = stripZeroWidthFunctionArguments(deltaRecord.function_call);
           // Generated-image deltas (gemini-to-openai inlineData) must survive the allow-list.
           if (Array.isArray(deltaRecord.images)) delta.images = deltaRecord.images;
+          // So must the sources a web-grounded answer cites.
+          copyUrlCitationAnnotations(deltaRecord, delta);
           c.delta = delta;
         } else {
           c.delta = choiceRecord.delta;

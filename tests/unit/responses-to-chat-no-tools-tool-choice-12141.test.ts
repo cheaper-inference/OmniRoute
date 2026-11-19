@@ -1,9 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
-const { openaiResponsesToOpenAIRequest } = await import(
-  "../../open-sse/translator/request/openai-responses.ts"
-);
+const { openaiResponsesToOpenAIRequest } =
+  await import("../../open-sse/translator/request/openai-responses.ts");
 
 test("#12141: Responses-to-Chat strips tool_choice='auto' when tools is empty array", () => {
   const body = {
@@ -23,22 +22,24 @@ test("#12141: Responses-to-Chat strips tool_choice='auto' when tools is empty ar
   );
 });
 
-test("#12141: Responses-to-Chat strips tool_choice='none' when tools is absent or empty", () => {
-  const body = {
-    model: "vllm/qwen-2.5-72b",
-    input: "hello",
-    tool_choice: "none",
-    stream: false,
-  };
-
-  const result = openaiResponsesToOpenAIRequest(null, body, null, null) as Record<string, unknown>;
-
-  assert.equal(
-    result.tool_choice,
-    undefined,
-    "Neutral tool_choice 'none' must be omitted when no tools exist"
-  );
-});
+for (const tools of [undefined, [], [{ type: "function", name: "lookup", parameters: {} }]]) {
+  test(`Responses-to-Chat preserves explicit none with ${tools === undefined ? "absent" : tools.length} tools`, () => {
+    const body = {
+      model: "mistralai/mistral-medium-3-5",
+      input: "Give the final answer without more tools.",
+      ...(tools === undefined ? {} : { tools }),
+      tool_choice: "none",
+      stream: true,
+    };
+    const snapshot = structuredClone(body);
+    const result = openaiResponsesToOpenAIRequest(null, body, null, null) as Record<
+      string,
+      unknown
+    >;
+    assert.equal(result.tool_choice, "none");
+    assert.deepEqual(body, snapshot);
+  });
+}
 
 test("#12141: Responses-to-Chat preserves tools and tool_choice='auto' when valid tools are present", () => {
   const body = {

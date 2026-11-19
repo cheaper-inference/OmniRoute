@@ -18,27 +18,29 @@
 
 ---
 
-## Способы установки
+## Методы установки
 
-### npm (рекомендуется)
+### НПМ (рекомендуется)
 
 ```bash
 npm install -g omniroute
 omniroute
 ```
 
-Панель управления откроется по адресу `http://localhost:20128`, а базовый URL API — `http://localhost:20128/v1`.
+Панель мониторинга открывается по адресу `http://localhost:20128`, а база API URL — `http://localhost:20128/v1`.
 
-### pnpm
+> **Пользователи нпм:** Если npm предупреждает, что сценарии установки заблокированы (например, `omniroute`, `better-sqlite3`), см. [раздел Устранение неполадок — npm install-scripts заблокированы](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
+
+### пнпм
 
 ```bash
 pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/core
 omniroute
 ```
 
-> **Для пользователей pnpm:** флаг `--allow-build` необходим для разрешения нативных сценариев сборки `better-sqlite3` и `@swc/core`. Команда `pnpm approve-builds -g` не поддерживается для глобальных установок в pnpm v11.
+> **Пользователи пнпм:** Флаг `--allow-build` необходим для включения собственных сценариев сборки для `better-sqlite3` и `@swc/core`. Команда `pnpm approve-builds -g` не поддерживается для глобальной установки в pnpm v11.
 
-### Arch Linux (AUR)
+### Арка Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
@@ -47,66 +49,66 @@ systemctl --user enable --now omniroute.service
 
 [Пакет AUR](https://aur.archlinux.org/packages/omniroute-bin) устанавливает OmniRoute и предоставляет пользовательскую службу systemd.
 
-### Установка из исходного кода
+### Из источника
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Примечание для Windows:** по умолчанию OmniRoute использует `%APPDATA%\omniroute`, если устаревший каталог `%USERPROFILE%\.omniroute` отсутствует. Задайте `DATA_DIR`, чтобы выбрать другое расположение каталога данных.
+> **Windows Примечание:** По умолчанию OmniRoute использует `%APPDATA%\omniroute`, когда устаревший каталог `%USERPROFILE%\.omniroute` отсутствует. Установите `DATA_DIR`, чтобы выбрать другое расположение каталога данных.
 
-> **Примечание:** при первом запуске `npm install` автоматически создаёт `.env` на основе `.env.example`. Последующие установки не перезаписывают существующий `.env`, поэтому пользовательские настройки сохраняются. Чтобы создать файл заново, удалите `.env` перед повторным запуском.
+> **Примечание:** `npm install` автоматически генерирует `.env` из `.env.example` при первом запуске. Последующие установки не будут перезаписывать существующий `.env`, поэтому настройки сохраняются. Чтобы повторно заполнить, удалите `.env` перед повторным запуском.
 
 ### Docker
 
-Полные инструкции по настройке Docker, включая профили Compose и HTTPS через Caddy, см. в [руководстве по Docker](./DOCKER_GUIDE.md).
+См. [руководство Docker](./DOCKER_GUIDE.md) для полной настройки Docker, включая профили Compose и Caddy HTTPS.
 
 ### Настольное приложение (Electron)
 
-OmniRoute поставляется с настольной оболочкой, созданной на основе Electron 41 + electron-builder 26.10. Доступные сценарии (из корня рабочего пространства):
+OmniRoute поставляет оболочку рабочего стола, созданную на основе Electron 41 + Electron-Builder 26.10. Доступные скрипты (корень рабочей области):
 
 ```bash
-npm run electron:dev          # Запустить настольное приложение с горячей перезагрузкой
-npm run electron:build        # Собрать для текущей ОС (определяется автоматически)
-npm run electron:build:win    # Установщик Windows (NSIS + переносная версия)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Выполнить дымовой тест упакованной сборки
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Выпуски установщиков настольного приложения прикрепляются к релизам GitHub. Подробное руководство по Electron (подписание, мост IPC, дистрибутивы) см. в [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(создано на более позднем этапе)_.
+Релизы установщиков настольных компьютеров прикреплены к релизам GitHub. Полное описание Electron (подпись, мост IPC, дистрибутивы) см. [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Сервер без графического интерфейса (CI/автоматизация)
+### Безголовый сервер (CI/automation)
 
-Для автоматической настройки без участия пользователя (Docker, Kubernetes, CI) используйте:
+Для автоматической настройки (Docker, Kubernetes, CI) используйте:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-В сочетании с переменными окружения (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` и т. д.) это позволяет развёртывать экземпляр OmniRoute полностью программным способом.
+В сочетании с переменными env (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` и т. д.) это позволяет вам создать экземпляр OmniRoute полностью допускающий сценарии.
 
 ### Параметры CLI
 
-| Команда                 | Описание                                                                                                |
-| ----------------------- | ------------------------------------------------------------------------------------------------------- |
-| `omniroute`             | Запустить сервер (`PORT=20128`, API и панель управления на одном порту)                                 |
-| `omniroute setup`       | Пошаговая настройка пароля и первого провайдера через CLI                                               |
-| `omniroute doctor`      | Выполнить локальные проверки состояния без запуска сервера                                              |
-| `omniroute providers`   | Обнаруживать, выводить, проверять и тестировать провайдеров через CLI                                   |
-| `omniroute config`      | Настройка инструментов CLI — вывод, получение, изменение и проверка конфигураций                        |
-| `omniroute status`      | Автономная панель состояния — версия, БД, инструменты, конфигурация                                     |
-| `omniroute logs`        | Потоковый вывод журналов использования из API (поддерживает `--follow`)                                 |
-| `omniroute update`      | Проверить наличие обновлений OmniRoute или применить их                                                 |
-| `omniroute provider`    | Управлять подключениями провайдеров — добавлять, выводить, удалять, тестировать, назначать по умолчанию |
-| `omniroute --port 3000` | Установить основной порт/порт API равным 3000                                                           |
-| `omniroute --mcp`       | Запустить сервер MCP (транспорт stdio)                                                                  |
-| `omniroute --no-open`   | Не открывать браузер автоматически                                                                      |
-| `omniroute --help`      | Показать справку                                                                                        |
+| Команда                 | Описание                                                                                                   |
+| ----------------------- | ---------------------------------------------------------------------------------------------------------- |
+| `omniroute`             | Запустить сервер (`PORT=20128`, API и панель мониторинга на одном порту)                                   |
+| `omniroute setup`       | Управляемая регистрация CLI для пароля и первого поставщика                                                |
+| `omniroute doctor`      | Запускайте локальные проверки работоспособности без запуска сервера                                        |
+| `omniroute providers`   | Находите, составляйте список, проверяйте и тестируйте поставщиков от CLI                                   |
+| `omniroute config`      | Конфигурация инструмента CLI Список —, получение, установка, проверка конфигураций                         |
+| `omniroute status`      | Автономная панель статуса — версия, DB, инструменты, конфигурация                                          |
+| `omniroute logs`        | Потоковая передача журналов использования из API (поддерживает `--follow`)                                 |
+| `omniroute update`      | Проверьте наличие обновлений OmniRoute или примените их.                                                   |
+| `omniroute provider`    | Управление подключениями к провайдерам — добавление, список, удаление, тестирование, значение по умолчанию |
+| `omniroute --port 3000` | Установите порт canonical/API на 3000.                                                                     |
+| `omniroute --mcp`       | Запустить сервер MCP (транспорт stdio)                                                                     |
+| `omniroute --no-open`   | Не открывать браузер автоматически                                                                         |
+| `omniroute --help`      | Показать справку                                                                                           |
 
-Настройку без графического интерфейса можно автоматизировать с помощью флагов или переменных окружения:
+Безголовую настройку можно записать с помощью флагов или переменных среды:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Запустите локальную диагностику, не открывая панель управления:
+Запустите локальную диагностику, не открывая приборную панель:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Управляйте провайдерами через SSH или сценарии, не открывая панель управления:
+Управляйте провайдерами из SSH или скриптов, не открывая панель управления:
 
 ```bash
 omniroute providers available
@@ -191,9 +193,9 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 
 ---
 
-## Настройка протоколов (MCP + A2A)
+## Настройка протокола (MCP + A2A)
 
-### Настройка MCP (Model Context Protocol)
+### Настройка MCP (протокол контекста модели)
 
 Запустите транспорт MCP в режиме stdio:
 
@@ -201,31 +203,35 @@ omniroute setup-qwen         # ~/.qwen/settings.json + ~/.qwen/.env
 omniroute --mcp
 ```
 
-Рекомендуемый процесс проверки:
+Рекомендуемый порядок проверки:
 
 ```bash
-# 1. Запустите сервер MCP
+# 1. Start MCP server
 omniroute --mcp
 
-# 2. Из клиента MCP вызовите:
-omniroute_get_health        # Должен вернуть состояние системы
-omniroute_list_combos       # Должен вернуть активные комбинации
+# 2. From your MCP client, call:
+omniroute_get_health        # Should return system health
+omniroute_list_combos       # Should return active combos
 
-# 3. Или запустите полный набор тестов E2E:
+# 3. Or run the full E2E suite:
 npm run test:protocols:e2e
 ```
 
-#### Настройка клиента MCP
+#### Конфигурация клиента MCP
 
-**Claude Code:**
+**Код Claude :**
+
+Код Claude подключается через HTTP, который `omniroute --mcp` (stdio) не запускается. По умолчанию транспорт HTTP отключен: сначала включите его на работающем сервере. Когда вход в панель управления включен, запрос без учетных данных получает `401`, поэтому передайте ключ API, который содержит `mcp:connect` (или `manage`); для ключа без `manage`/`admin` также требуется область действия каждого инструмента (см. [области действия инструмента MCP Server → MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
 
 ```bash
-claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-Добавьте в настройки MCP:
+Добавьте в настройки MCP (stdio, с ключом, чтобы у вызывающего абонента был принципал):
 
 ```json
 {
@@ -233,31 +239,38 @@ claude mcp add-server omniroute --type http --url http://localhost:20128/api/mcp
     "omniroute": {
       "command": "omniroute",
       "args": ["--mcp"],
-      "env": {}
+      "env": {
+        "OMNIROUTE_API_KEY": "your-key",
+        "OMNIROUTE_BASE_URL": "http://localhost:20128"
+      }
     }
   }
 }
 ```
 
-**Полная документация по MCP:** [README сервера MCP](../../open-sse/mcp-server/README.md) — 110 инструментов, конфигурации IDE, клиенты Python/TS/Go.
+Или, если `mcpTransport` это `streamable-http` (установите его на `/dashboard/mcp` или с помощью `omniroute mcp enable --transport streamable-http`), укажите запись удаленного сервера MCP клиента на `http://localhost:20128/api/mcp/stream`.
 
-### Настройка A2A (протокол Agent-to-Agent)
+Ключ передается как `Authorization: Bearer <api-key>` (см. [MCP Server → Удаленный доступ](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) для удаленных хостов; для удаленного ключа требуется `mcp:connect` плюс его области read/write ).
 
-Проверьте Agent Card:
+**Полная документация MCP :** [Сервер MCP инструменты README](../../open-sse/mcp-server/README.md) — 110, конфигурации IDE, клиенты Python/TS/Go. Справочник оператора по инструментам сжатия CCR/dedup (маркеры, предварительные условия, области для каждого инструмента, разбиение на страницы, диагностика): [Предварительные условия для механизмов сжатия → /руководство оператора](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+
+### Настройка A2A (протокол между агентами)
+
+Проверьте карту агента:
 
 ```bash
 curl http://localhost:20128/.well-known/agent.json
 ```
 
-Отправьте задачу:
+Отправить задачу:
 
 ```bash
 curl -X POST http://localhost:20128/a2a \
   -H 'content-type: application/json' \
-  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Дайте мне краткую сводку по квоте."}]}}'
+  -d '{"jsonrpc":"2.0","id":"quickstart","method":"message/send","params":{"skill":"quota-management","messages":[{"role":"user","content":"Give me a short quota summary."}]}}'
 ```
 
-**Полная документация по A2A:** [README сервера A2A](../../src/lib/a2a/README.md) — JSON-RPC 2.0, навыки, потоковая передача, жизненный цикл задач.
+**Полная документация A2A :** [Сервер A2A README](../../src/lib/a2a/README.md) — JSON-RPC 2.0, навыки, потоковая передача, жизненный цикл задач.
 
 ---
 
@@ -316,12 +329,12 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ---
 
-## Шаблон для Void Linux (xbps-src)
+## Шаблон Void Linux (xbps-src)
 
-Пользователи Void Linux могут собрать нативный пакет с помощью `xbps-src`. Сохраните этот блок как `srcpkgs/omniroute/template`:
+Пользователи Void Linux могут создать собственный пакет с помощью `xbps-src`. Сохраните этот блок как `srcpkgs/omniroute/template`:
 
 ```bash
-# Файл шаблона для 'omniroute'
+# Template file for 'omniroute'
 pkgname=omniroute
 version=3.8.0
 revision=1
@@ -332,7 +345,7 @@ maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
 homepage="https://github.com/diegosouzapw/OmniRoute"
 distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
-# Создавайте контрольную сумму заново для каждого выпуска с помощью:
+# Regenerate the checksum for each release with:
 #   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"

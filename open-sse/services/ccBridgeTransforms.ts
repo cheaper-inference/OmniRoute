@@ -251,7 +251,7 @@ function sha256Hex(input: string): string {
 }
 
 function pickCharsAtPositions(text: string, positions: readonly number[]): string {
-  return positions.map((p) => (typeof text[p] === "string" ? text[p] : "\0")).join("");
+  return positions.map((p) => (typeof text[p] === "string" ? text[p] : "0")).join("");
 }
 
 /**

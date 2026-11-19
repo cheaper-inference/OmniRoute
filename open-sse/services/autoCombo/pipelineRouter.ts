@@ -9,6 +9,7 @@
  */
 
 import { classifyPromptIntent, type IntentType } from "../intentClassifier.ts";
+import { stripHarnessWrappers } from "../specificityRules.ts";
 import {
   executePipeline,
   buildPipelineConfig,
@@ -276,7 +277,8 @@ export async function handlePipelineCombo({
   const systemMsg = messages.find((m) => m.role === "system");
   const systemText = typeof systemMsg?.content === "string" ? systemMsg.content : undefined;
 
-  const intent = classifyPromptIntent(promptText, systemText);
+  // Classify the user's own words; the stages still get the full promptText.
+  const intent = classifyPromptIntent(stripHarnessWrappers(promptText), systemText);
   const taskType = INTENT_TO_TASK[intent] ?? "simple";
 
   log.info("PIPELINE", `Intent: ${intent} → task: ${taskType}`);

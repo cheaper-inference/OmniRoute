@@ -136,7 +136,9 @@ restart.
   `auth_token` cookie), not on which of them the route checked, and is never
   paired with `Access-Control-Allow-Credentials`; the body is a fixed error
   envelope. Management routes under `/api/v1/` guarded by
-  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`)
+  `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`,
+  `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`,
+  `/api/v1/issues/report`)
   do not add the echo: with `REQUIRE_API_KEY=false` their 401/403 is not
   readable cross-origin.
 - **Cookie session (the dashboard):** protected by the fail-closed default **and**

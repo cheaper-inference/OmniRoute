@@ -1,4 +1,7 @@
+import { transformStreamWithCancel } from "../utils/cancelableTransformStream.ts";
+import { RESPONSES_DEFERRED_COMPLETION_GRACE_MS } from "../config/constants.ts";
 import { appendToolCallArgumentDelta } from "../utils/toolCallArguments.ts";
+import { mergeCacheCreationFields } from "../utils/cacheWriteUsage.ts";
 import { ToolCallLifecycle } from "../translator/response/openai-responses/toolCallLifecycle.ts";
 import { shouldParseTextualReasoningTags } from "../handlers/responseSanitizer.ts";
 import { getReadableReasoningValue } from "../utils/reasoningFields.ts";
@@ -146,10 +149,13 @@ function normalizeResponsesUsage(previous: unknown, raw: unknown): UsageRecord |
     usageNumber(source.total_tokens) ??
     usageNumber(source.totalTokens) ??
     inputTokens + outputTokens;
+  const cacheFields = mergeCacheCreationFields(previous, raw);
 
   return {
+    ...cacheFields,
     input_tokens: inputTokens,
     input_tokens_details: {
+      ...cacheFields,
       cached_tokens: cachedTokens,
       ...(cacheCreationTokens !== undefined ? { cache_creation_tokens: cacheCreationTokens } : {}),
       ...(cacheCreationTokens !== undefined && cacheCreationInPrompt !== undefined
@@ -261,6 +267,7 @@ export function createResponsesApiTransformStream(
     // response.completed — a trailing usage-only chunk (choices: [], usage: {...}) may
     // still arrive for stream_options.include_usage=true upstreams.
     awaitingTrailingUsage: false,
+    completionTimer: null as ReturnType<typeof setTimeout> | null,
   };
 
   const encoder = new TextEncoder();
@@ -595,7 +602,15 @@ export function createResponsesApiTransformStream(
     }
   };
 
+  const clearCompletionTimer = () => {
+    if (state.completionTimer) {
+      clearTimeout(state.completionTimer);
+      state.completionTimer = null;
+    }
+  };
+
   const sendCompleted = (controller) => {
+    clearCompletionTimer();
     if (!state.completedSent) {
       state.completedSent = true;
 
@@ -631,7 +646,7 @@ export function createResponsesApiTransformStream(
   // goes through the normal per-message path instead of being silently dropped.
   const SSE_MESSAGE_TERMINATOR = encoder.encode("\n\n");
 
-  return new TransformStream(
+  return transformStreamWithCancel<Uint8Array, Uint8Array>(
     {
       start(controller) {
         // Periodic keepalive heartbeat to prevent client timeouts (Codex CLI #2544)
@@ -972,8 +987,21 @@ export function createResponsesApiTransformStream(
               // #6906: defer response.completed — a trailing usage-only chunk may
               // still arrive (stream_options.include_usage=true). The empty-choices
               // branch above (or flush() at stream end, as a fallback) actually
-              // calls sendCompleted().
+              // calls sendCompleted(). An upstream that sends neither usage nor
+              // [DONE] and keeps the connection open must not hold the client until
+              // the stall watchdog fires, so a short timer completes the response.
               state.awaitingTrailingUsage = true;
+              state.completionTimer = setTimeout(() => {
+                state.completionTimer = null;
+                try {
+                  sendCompleted(controller);
+                } catch (error) {
+                  // flush() and cancel() clear this timer, so a failure here happened on a live
+                  // stream: report it to the client. error() is a no-op on a closed stream.
+                  controller.error(error);
+                }
+              }, RESPONSES_DEFERRED_COMPLETION_GRACE_MS);
+              (state.completionTimer as { unref?: () => void })?.unref?.();
             }
           }
         }
@@ -997,6 +1025,7 @@ export function createResponsesApiTransformStream(
           clearInterval(state.keepaliveTimer);
           state.keepaliveTimer = null;
         }
+        clearCompletionTimer();
         for (const i in state.msgItemAdded) closeMessage(controller, i);
         closeReasoning(controller);
         for (const i in state.funcCallIds) closeToolCall(controller, i);
@@ -1015,6 +1044,7 @@ export function createResponsesApiTransformStream(
           clearInterval(state.keepaliveTimer);
           state.keepaliveTimer = null;
         }
+        clearCompletionTimer();
       },
     },
     { highWaterMark: 16384 },
