@@ -98,7 +98,7 @@ const budget = [
   { file: "open-sse/translator/helpers/geminiHelper.ts", maxAny: 0 },
   { file: "open-sse/translator/helpers/openaiHelper.ts", maxAny: 0 },
   { file: "open-sse/translator/helpers/responsesApiHelper.ts", maxAny: 0 },
-  { file: "open-sse/translator/request/claude-to-gemini.ts", maxAny: 0 },
+  { file: "open-sse/translator/request/claude-to-gemini.ts", maxAny: 1 }, // 1 = string literal "any" (Claude tool_choice value, not a TS type) — #19405
   { file: "open-sse/translator/request/gemini-to-openai.ts", maxAny: 0 },
   { file: "open-sse/translator/request/openai-to-claude.ts", maxAny: 1 }, // 1 = string literal "any" (Claude tool_choice value, not a TS type) — #1072
   { file: "open-sse/translator/request/openai-to-cursor.ts", maxAny: 0 },

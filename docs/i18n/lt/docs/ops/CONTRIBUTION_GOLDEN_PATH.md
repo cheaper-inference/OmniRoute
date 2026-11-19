@@ -29,70 +29,61 @@ pakeitimo tipą su jo sutartimis, tikslinėmis patikromis ir CI aprėptimi.
 6. **Užfiksuokite įrodymus.** PR šablone nurodykite paleistas komandas, kiekvieną pridėtą ar pakeistą testo failą,
    migracijas ar funkcijų vėliavėles ir visus dar laukiančius tik CI atliekamus patikrinimus.
 
-## Rekomenduojami keliai pagal pakeitimo tipą
+## Auksiniai takai pagal pokyčių tipą
 
-Toliau pateiktos komandos yra minimalios tikslinės patikros, o ne leidimas praleisti testą, kuris tiesiogiai tikrina jūsų
-pakeistą elgseną.
+Toliau pateiktos komandos yra minimalios tikslinės patikros, o ne leidimas praleisti testą, kuris tiesiogiai apima jūsų pakeistą elgesį.
 
 ### Teikėjas
 
 **Sutartys**
 
-- Teikėjo aprašas kataloge `src/shared/constants/providers/` ir jo kompozicija faile
-  `src/shared/constants/providers.ts`.
-- Modeliai ir galimybės faile `open-sse/config/providerRegistry.ts` arba išskaidytuose jo registro failuose.
-- Vykdytojo / transformatoriaus parinkimas, OAuth arba API rakto konfigūracija, valdymo skydelio ištekliai ir, kai
-  taikoma, sugeneruotas teikėjo žinynas.
-- Viešieji prisijungimo duomenys turi naudoti `resolvePublicCred()`; klaidų atsakymai turi naudoti bendrinamas išvalytų
-  klaidų pagalbines priemones. Žr. `docs/security/PUBLIC_CREDS.md` (git; nekompiliuojamas į `/docs`) ir
-  [Klaidų duomenų išvalymą](../security/ERROR_SANITIZATION.md).
+- Teikėjo apibrėžimas `src/shared/constants/providers/` ir jo sudėtis `src/shared/constants/providers.ts`.
+- Modeliai ir galimybės `open-sse/config/providerRegistry.ts` arba jos ištrauktuose registro failuose.
+- Executor/translator pasirinkimas, OAuth arba API rakto konfigūracija ir prietaisų skydelio ištekliai. Neįtraukite regeneruotų `docs/reference/PROVIDER_REFERENCE.md` arba README diagramų: išleidimo atnaujinimas jas perrašo (`check:pr-derived-paths` sugenda jas nešančia funkcija PR ).
+- Viešuosiuose kredencialuose turi būti naudojamas `resolvePublicCred()`; atsakant į klaidas turi būti naudojami bendri sutvarkyti klaidų pagalbininkai. Žr. `docs/security/PUBLIC_CREDS.md` (git; nesudaryta į `/docs`) ir [klaidų pašalinimas](../security/ERROR_SANITIZATION.md).
 
-**Tikslinis ciklas**
+**Fokusuota kilpa**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # kai pasikeičia katalogas; įtraukite sugeneruotą skirtumą į komitą
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Taip pat išbandykite kiekvieną paveiktą užklausų šeimą: pokalbių, Responses, vaizdų, vektorinių reprezentacijų, garso ar vaizdo įrašų.
-Sugeneruotų katalogų ir etaloninius skirtumus vertinkite kaip sutarčių pakeitimus; nepriimkite jų aklai.
+Taip pat išbandykite kiekvieną paveiktą užklausų grupę: pokalbius, atsakymus, vaizdus, įterpimus, garsą ar vaizdo įrašą. Sukurto katalogo ir auksinių skirtumų peržiūra pasikeitus sutarčiai; nepriimkite jų aklai.
 
-### Maršruto parinkimas
+### Maršrutas
 
 **Sutartys**
 
-- Viešosios strategijų reikšmės ir UI metaduomenys faile `src/shared/constants/routingStrategies.ts`.
-- Nukreipimas ir eiliškumas faile `open-sse/services/combo.ts` ir kataloge `open-sse/services/combo/`.
-- Combo schemos, išlaikymas, atsparumo būsena, modelių galimybės ir API / UI valdikliai.
-- [Auto-Combo variklis](../routing/AUTO-COMBO.md) ir atsparumo dokumentacija, kai keičiasi elgsena.
+- Viešosios strategijos vertybės ir UI metaduomenys `src/shared/constants/routingStrategies.ts`.
+- Siuntimas ir užsakymas pagal `open-sse/services/combo.ts` ir `open-sse/services/combo/`.
+- Kombinuotos schemos, patvarumas, atsparumo būsena, modelio galimybės ir API/UI valdikliai.
+- [„Auto-Combo“ variklio](../routing/AUTO-COMBO.md) ir atsparumo dokumentai pasikeitus elgesiui.
 
-**Tikslinis ciklas**
+**Fokusuota kilpa**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strategijos arba nukreipimo pakeitimai
-npm run check:known-symbols      # strategijos registracijos pakeitimai
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Vietoje naudokite deterministinius testus su imituojamais aukštesnio lygio paslaugų atsakymais. Tiesioginiams Combo baziniams testams reikia prisijungimo duomenų, jie
-atliekami rankiniu būdu ir nėra CI pakaitalas.
+Vietoje naudokite deterministinius tyčinius bandymus. Tiesiogiai kombinuoti dūmai reikalauja kredencialų ir yra rankiniai, o ne CI pakaitalai.
 
 ### UI / UX
 
 **Sutartys**
 
-- Next.js maršruto / puslapio ir bendrinamų komponentų ribos kataloguose `src/app/` ir
-  `src/shared/components/`.
-- API atsakymų struktūros, įkėlimo / tuščios būsenos / klaidų būsenos, klaviatūros ir ekrano skaitytuvų veikimas,
-  prisitaikantis išdėstymas, temos ir lokalių plėtra.
-- Angliški UI šaltinio tekstai faile `src/i18n/messages/en.json`; neįrašykite naujo naudotojams matomo teksto tiesiai kode.
+- Next.js route/page ir bendrų komponentų ribos pagal `src/app/` ir `src/shared/components/`.
+- API atsako formos, loading/empty/error būsenos, klaviatūros ir ekrano skaitytuvo elgsena, reaguojantis išdėstymas, temos ir lokalės išplėtimas.
+- Anglų kalbos UI šaltinio eilutės `src/i18n/messages/en.json`; neužkoduokite naujos vartotojui skirtos kopijos.
 
-**Tikslinis ciklas**
+**Fokusuota kilpa**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Jei keičiama sąveika ar vaizdas, paleiskite programą ir patikrinkite siaurą bei platų rodinio plotį. CI paleidžia
-produkcinį komponavimą ir platesnius testų rinkinius; vaizdinei elgsenai vis tiek reikia tikslinio komponento ar Playwright testo
-arba dokumentuotos, pakeitimui tinkamos rankinės patikros.
+Paleiskite programą sąveikai ar vizualiniams pakeitimams ir patikrinkite siauras ir plačias peržiūros sritis. CI valdo gamybinę versiją ir platesnius rinkinius; vizualiniam elgesiui vis tiek reikia tikslinio komponento Playwright arba dokumentuoto rankinio patikrinimo, atitinkančio pakeitimą.
 
 ### i18n
 
 **Sutartys**
 
-- `src/i18n/messages/en.json` yra UI šaltinis; `config/i18n.json` yra lokalių šaltinis.
-- CLI katalogai saugomi atskirai kataloge `bin/cli/locales/`.
-- Tiksliai išsaugokite ICU vietaženklius ir žymas. Neverskite produktų / teikėjų / modelių pavadinimų,
-  protokolų ir antraščių pavadinimų, komandų, kodo / JSON identifikatorių, URL, aplinkos kintamųjų ar
-  saugomų terminų, pvz., `OmniRoute`, `OAuth`, `MCP` ir `A2A`. Dabartinis šaltinio sąrašas yra
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` yra UI šaltinis; `config/i18n.json` yra lokalės šaltinis.
+- CLI katalogai gyvena atskirai pagal `bin/cli/locales/`.
+- Tiksliai išsaugokite ICU vietos rezervavimo ženklus ir žymas. Neverskite product/provider/model pavadinimų, protokolų ir antraščių pavadinimų, komandų, code/JSON identifikatorių, URLs, aplinkos kintamųjų ar apsaugotų terminų, pvz., `OmniRoute`, `OAuth`, `MCP` ir `A2A`. Dabartinis šaltinių sąrašas yra `scripts/i18n/glossary/protected-terms.json`.
 
-**Tikslinis ciklas**
+Funkcija PR redaguoja tik `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); kitos lokalės užbaigiamos vieną kartą per leidimą leidimo atnaujinimu arba vertimo banga (`docs/guides/I18N.md` → "Tik funkcija PRs touch `en.json` "). `npm run check:pr-derived-paths` neveikia funkcijos PR, kuri redaguoja kitą lokalių katalogą.
+
+**Fokusuota kilpa**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # kai keičiami CLI tekstai / katalogai
 npm run lint
 ```
 
-Tai yra esamos sistemos gairės, o ne kvietimas plėsti jos įrankius ar raktų modelį.
-Kol kuriama pakaitinė sistema, i18n pataisos turi būti tikslinės. Nepaleiskite vertimo
-komandų, kurios kreipiasi į išorines paslaugas, nebent užduotis aiškiai reikalauja sugeneruotų vertimų ir
-jūs peržiūrėjote gautą skirtumą.
+Be `--mode=pr` šie vartai veikia atleidimo režimu lokaliai ir praneša apie kiekvieną raktą, pridėtą arba perrašytą ciklą `en.json`; tai yra leidimo atnaujinimo darbas, o ne jūsų PR.
+
+Tai yra esamos sistemos gairės, o ne kvietimas išplėsti jos įrankius ar pagrindinį modelį. Kuriant pakeitimo sistemą, i18n pleistrus laikykite chirurgiškai. Nevykdykite vertimo komandų, kurios iškviečia išorines paslaugas, nebent užduočiai aiškiai reikia sugeneruotų vertimų ir peržiūrėjote gautą skirtumą.
 
 ### CLI
 
 **Sutartys**
 
-- Viešosios komandos ir parinktys kataloge `bin/cli/`, sugeneruotos API komandos, išėjimo kodai, stdout/stderr ir
-  JSON išvesties struktūros, konfigūracijos / aplinkos veikimas bei į paketą įtraukti failai.
-- Naudotojui rodomos CLI eilutės turi naudoti CLI i18n sluoksnį, o `en` / `pt-BR` katalogai turi būti suderinti.
-- Išsaugokite Node kaip palaikomą vykdymo aplinką ir paskelbto dvejetainio failo sutartį.
+- Viešos komandos ir vėliavėlės `bin/cli/`, sugeneruotos API komandos, išėjimo kodai, stdout/stderr ir JSON išvesties formos, config/environment elgsena ir supakuoti failai.
+- CLI naudotojui skirtos eilutės turi naudoti CLI i18n sluoksnį (`t()` raktai, esantys `bin/cli/locales/en.json`). Funkcija PR redaguoja tik `en.json`; `pt-BR` ir kitos lokalės baigiamos išleidžiant.
+- Išsaugoti mazgą kaip palaikomą vykdymo laiką ir paskelbtą dvejetainę sutartį.
 
-**Tikslinis ciklas**
+**Fokusuota kilpa**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # sugeneruotos / sukomplektuotos CLI pakeitimai
-npm run check:pack-policy     # paketo viešojo paviršiaus pakeitimai
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Kai veikimas priklauso nuo analizavimo, failų ar išėjimo būsenos, vykdykite tikslią komandą laikinajame duomenų kataloge.
-CI atlieka platesnes paketo artefaktų ir ekosistemos patikras.
+Naudokite tikslią komandą laikinajame duomenų kataloge, kai elgsena priklauso nuo analizės, failų ar išėjimo būsenos. CI atlieka platesnius paketo artefaktų ir ekosistemų patikrinimus.
 
 ### Duomenų bazė
 
 **Sutartys**
 
-- Domeno moduliai yra kataloge `src/lib/db/`; konkrečius modulius importuokite tiesiogiai (senasis `localDb.ts` pakartotinio eksportavimo sluoksnis pašalintas).
-- Sunumeruotos, idempotentinės SQL migracijos kataloge `src/lib/db/migrations/`, operacijų saugumas, naujinimo
-  veikimas, indeksai ir kiekvienas schemos paveiktas kvietėjas.
-- Maršrutai ir apdorojimo funkcijos niekada tiesiogiai nevykdo neapdorotų SQL užklausų.
+- Domeno moduliai pagal `src/lib/db/`; importuoti konkrečius modulius tiesiogiai (buvo pašalintas senasis `localDb.ts` reeksporto sluoksnis).
+- Sunumeruoti, idempotenti SQL perkėlimai pagal `src/lib/db/migrations/`, operacijų sauga, naujinimo elgsena, indeksai ir kiekvienas skambinantis asmuo, kuriam taikoma schema.
+- Maršrutai ir tvarkytojai niekada neišduoda neapdoroto SQL tiesiogiai.
 
-**Tikslinis ciklas**
+**Fokusuota kilpa**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Pridėdami migraciją, išbandykite ir naują duomenų bazę, ir naujinimą iš ankstesnės schemos. Atliekant valymą, duomenų bazės testai
-turi uždaryti deskriptorius ir iškviesti `resetDbInstance()`. Vykdykite `npm run test:bun:db` tik tada, kai
-pasikeičia pagal galimybes palaikomas Bun adapterio kelias; Node išlieka autoritetinga vykdymo aplinka.
+Pridėdami perkėlimą išbandykite ir naują duomenų bazę, ir naujovinkite iš ankstesnės schemos. Duomenų bazės bandymai turi uždaryti rankenas ir iškviesti `resetDbInstance()` valymo metu. Paleiskite `npm run test:bun:db` tik tada, kai pasikeičia geriausias Bun adapterio kelias; Mazgas išlieka autoritetingas.
 
-### Kompiliavimas / diegimas
+### Sukurti / diegti
 
 **Sutartys**
 
-- Šakninio katalogo ir darbo sričių manifestai / užrakto failas, `scripts/build/`, autonominis Next.js surinkimas, `dist/`
-  paketo turinys, Electron platformos metaduomenys, CI darbo eigos ir diegimo kontrolinės reikšmės.
-- Palaikomi Node versijų intervalai ir `CLAUDE.md` leidžiamųjų sąraše nurodytas Bun naudojimas turi likti nepakeisti.
-- Kompiliavimo artefaktai lieka nesekami; taikomos priklausomybių, licencijų, darbo eigų ir paketų strategijos.
+- Šakninė ir darbo sritis manifests/lockfile, `scripts/build/`, Next.js atskiras surinkimas, `dist/` paketo turinys, Electron platformos metaduomenys, CI darbo eigos ir diegimo kontroliniai.
+- Palaikomi mazgų diapazonai ir leistinas Bun naudojimas `CLAUDE.md` turi likti nepakitę.
+- Sukurti artefaktai lieka nesekami; taikomos priklausomybės, licencijos, darbo eigos ir paketo strategijos.
 
-**Tikslinis ciklas**
+**Fokusuota kilpa**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # priklausomybių arba užrakto failo pakeitimai
-npm run check:pack-policy      # paskelbto paketo viešojo paviršiaus pakeitimai
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Vietoje naudokite `npm run build` tik tada, kai pakeitimas turi įtakos kompiliavimui, autonominiam surinkimui, ištekliams
-arba vykdymo aplinkos komplektavimui. Naudokite `npm run build:release` tik leidimo / diegimo patikrai. CI kompiliavimas yra
-galutinis kelių platformų patikros signalas; konkrečiai Electron platformai skirtiems pakeitimams reikalingas atitinkamas tikslinis kompiliavimas
-arba bazinio veikimo patikros įrodymas.
+Naudokite `npm run build` lokaliai tik tada, kai pakeitimas paveiks kompiliavimą, atskirą surinkimą, išteklius arba vykdymo laiko grupavimą. Naudokite `npm run build:release` tik release/deploy patvirtinimui. CI kūrimas yra galutinis kelių platformų signalas; Konkrečios platformos Electron pakeitimams reikia atitinkamo tikslaus kūrimo ar dūmų įrodymų.
 
 ## Kūrėjo scenarijai bendrai naudojamame kompiuteryje
 

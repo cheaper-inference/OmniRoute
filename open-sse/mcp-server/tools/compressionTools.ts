@@ -267,13 +267,14 @@ import {
   commandToId,
 } from "../../services/compression/engines/rtk/index.ts";
 import { resolveCallerScopeContext } from "../scopeEnforcement.ts";
-import { resolveMcpCallerApiKeyId } from "../mcpCallerIdentity.ts";
+import { resolveMcpToolOwnerId } from "../mcpCallerIdentity.ts";
 
 async function resolveCcrPrincipal(
   extra: McpToolExtraLike | undefined,
   scopes: readonly string[]
 ): Promise<string | undefined> {
-  const apiKeyPrincipal = await resolveMcpCallerApiKeyId();
+  // The key the transport authenticated (extra.authInfo.clientId) wins over the header lookup.
+  const apiKeyPrincipal = await resolveMcpToolOwnerId(extra);
   if (apiKeyPrincipal) return apiKeyPrincipal;
   const { callerId } = resolveCallerScopeContext(extra, scopes);
   return callerId === "anonymous" ? undefined : callerId;

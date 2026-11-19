@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-A vezérlőpult a `http://localhost:20128` címen nyílik meg, az API alap-URL-je pedig `http://localhost:20128/v1`.
+A műszerfal `http://localhost:20128` nál nyílik meg, API alap URL pedig `http://localhost:20128/v1`.
+
+> **npm felhasználók:** Ha az npm arra figyelmeztet, hogy a telepítési szkriptek blokkolva lettek (pl. `omniroute`, `better-sqlite3`), lásd: [Hibaelhárítás — npm install-scripts blocked](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm-felhasználók:** a `--allow-build` kapcsoló szükséges a `better-sqlite3` és az `@swc/core` natív összeállítási szkriptjeinek engedélyezéséhez. A `pnpm approve-builds -g` parancs nem támogatott globális telepítések esetén a pnpm v11 verziójában.
+> **pnpm felhasználók:** a `--allow-build` jelző szükséges a natív build szkriptek engedélyezéséhez `better-sqlite3` és `@swc/core` számára. A `pnpm approve-builds -g` parancs nem támogatott a pnpm v11 globális telepítéseinél.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-Az [AUR-csomag](https://aur.archlinux.org/packages/omniroute-bin) telepíti az OmniRoute-ot, és egy systemd felhasználói szolgáltatást biztosít.
+A [AUR csomag](https://aur.archlinux.org/packages/omniroute-bin) telepíti OmniRoute, és rendszeres felhasználói szolgáltatást biztosít.
 
-### Forráskódból
+### Forrásból
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Megjegyzés Windows rendszerhez:** Alapértelmezés szerint az OmniRoute a `%APPDATA%\omniroute` könyvtárat használja, ha a korábbi `%USERPROFILE%\.omniroute` könyvtár nem található. Másik adatkönyvtár-hely kiválasztásához állítsa be a `DATA_DIR` értékét.
+> **Windows megjegyzés:** Alapértelmezés szerint OmniRoute `%APPDATA%\omniroute` használja, ha a régi `%USERPROFILE%\.omniroute` könyvtár nincs jelen. Állítsa be `DATA_DIR` egy másik adatkönyvtár-hely kiválasztásához.
 
-> **Megjegyzés:** az `npm install` az első futtatáskor automatikusan létrehozza az `.env` fájlt az `.env.example` alapján. A későbbi telepítések nem írják felül a meglévő `.env` fájlt, így az egyéni beállítások megmaradnak. Az újbóli inicializáláshoz törölje az `.env` fájlt az ismételt futtatás előtt.
+> **Jegyzet:** `npm install` az első futtatáskor automatikusan generálja `.env` `.env.example` ből. A későbbi telepítések nem írják felül a meglévő `.env`, így a testreszabások megmaradnak. Az újbóli vetéshez törölje `.env`, mielőtt újra futtatná.
 
 ### Docker
 
-A teljes Docker-beállításhoz, beleértve a Compose-profilokat és a Caddy HTTPS-t, tekintse meg a [Docker-útmutatót](./DOCKER_GUIDE.md).
+Tekintse meg a [Docker útmutatót](./DOCKER_GUIDE.md) Docker teljes beállításához, beleértve a Compose profilokat és a Caddy HTTPS.
 
 ### Asztali alkalmazás (Electron)
 
-Az OmniRoute egy Electron 41 + electron-builder 26.10 alapú asztali csomagolóalkalmazást is tartalmaz. Elérhető szkriptek (a munkaterület gyökerében):
+OmniRoute egy Electron 41 + elektronépítőre épülő asztali borítót szállít 26.10. Elérhető szkriptek (munkaterület gyökér):
 
 ```bash
-npm run electron:dev          # Az asztali alkalmazás futtatása automatikus újratöltéssel
-npm run electron:build        # Összeállítás az aktuális operációs rendszerhez (automatikus felismerés)
-npm run electron:build:win    # Windows-telepítő (NSIS + hordozható)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # A csomagolt összeállítás gyors ellenőrzése
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Az asztali telepítők kiadásai a GitHub Releases oldalán találhatók. Az Electron részletes ismertetéséért (aláírás, IPC-híd, disztribúciók) tekintse meg az [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) fájlt _(egy későbbi fázisban létrehozva)_.
+Az asztali telepítők kiadásai GitHub kiadásokhoz csatolva vannak. A teljes Electron mélyrepüléshez (aláírás, IPC bridge, disztribúciók) lásd: [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Grafikus felület nélküli kiszolgáló (CI/automatizálás)
+### Fej nélküli szerver (CI/automation)
 
-Felügyelet nélküli beállításokhoz (Docker, Kubernetes, CI) használja a következőket:
+Felügyelet nélküli beállításokhoz (Docker, Kubernetes, CI) használja:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Környezeti változókkal (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` stb.) kombinálva ez lehetővé teszi egy teljes mértékben szkriptelhető OmniRoute-példány elindítását.
+Az env vars-okkal (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` stb.) kombinálva ez lehetővé teszi egy teljesen szkriptelhető OmniRoute példány felpörgetését.
 
-### CLI-beállítások
+### CLI Opciók
 
-| Parancs                 | Leírás                                                                                                      |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `omniroute`             | A kiszolgáló indítása (`PORT=20128`, az API és a vezérlőpult ugyanazon a porton)                            |
-| `omniroute setup`       | Vezetett CLI-kezdőbeállítás a jelszóhoz és az első szolgáltatóhoz                                           |
-| `omniroute doctor`      | Helyi állapotellenőrzések futtatása a kiszolgáló elindítása nélkül                                          |
-| `omniroute providers`   | Szolgáltatók felderítése, listázása, ellenőrzése és tesztelése a CLI-ből                                    |
-| `omniroute config`      | CLI-eszköz konfigurálása — konfigurációk listázása, lekérése, beállítása és ellenőrzése                     |
-| `omniroute status`      | Offline állapot-vezérlőpult — verzió, adatbázis, eszközök, konfiguráció                                     |
-| `omniroute logs`        | Használati naplók folyamatos olvasása az API-ból (támogatja a `--follow` kapcsolót)                         |
-| `omniroute update`      | OmniRoute-frissítések keresése vagy alkalmazása                                                             |
-| `omniroute provider`    | Szolgáltatói kapcsolatok kezelése — hozzáadás, listázás, eltávolítás, tesztelés, alapértelmezett beállítása |
-| `omniroute --port 3000` | A kanonikus/API-port beállítása 3000 értékre                                                                |
-| `omniroute --mcp`       | Az MCP-kiszolgáló indítása (stdio átviteli mód)                                                             |
-| `omniroute --no-open`   | A böngésző automatikus megnyitásának letiltása                                                              |
-| `omniroute --help`      | Súgó megjelenítése                                                                                          |
+| Parancs                 | Leírás                                                                   |
+| ----------------------- | ------------------------------------------------------------------------ |
+| `omniroute`             | Szerver indítása (`PORT=20128`, API és irányítópult ugyanazon a porton)  |
+| `omniroute setup`       | Irányított CLI bevezetés a jelszóhoz és az első szolgáltatóhoz           |
+| `omniroute doctor`      | Futtassa le a helyi állapotellenőrzéseket a kiszolgáló elindítása nélkül |
+| `omniroute providers`   | Fedezze fel, listázza, érvényesítse és tesztelje CLI szolgáltatóit       |
+| `omniroute config`      | CLI tool configuration — list, get, set, validate configs                |
+| `omniroute status`      | Offline állapot irányítópult — verzió, DB, eszközök, konfiguráció        |
+| `omniroute logs`        | Használati naplók streamelése a API (támogatja `--follow`)               |
+| `omniroute update`      | Ellenőrizze vagy alkalmazza OmniRoute frissítéseket                      |
+| `omniroute provider`    | Szolgáltatói kapcsolatok kezelése — add, list, remove, test, default     |
+| `omniroute --port 3000` | Állítsa canonical/API portot 3000-re                                     |
+| `omniroute --mcp`       | Indítsa el MCP szervert (stdio szállítás)                                |
+| `omniroute --no-open`   | Ne nyissa meg automatikusan a böngészőt                                  |
+| `omniroute --help`      | Segítség megjelenítése                                                   |
 
-A grafikus felület nélküli beállítás kapcsolókkal vagy környezeti változókkal szkriptelhető:
+A fej nélküli beállítás jelzőkkel vagy környezeti változókkal írható le:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -114,7 +116,7 @@ omniroute setup --non-interactive --add-provider --provider openai --api-key "$O
 omniroute setup --non-interactive --add-provider --provider openai --api-key "$OPENAI_API_KEY" --test-provider
 ```
 
-Helyi diagnosztika futtatása a vezérlőpult megnyitása nélkül:
+Futtassa le a helyi diagnosztikát az irányítópult megnyitása nélkül:
 
 ```bash
 omniroute doctor
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Szolgáltatók kezelése SSH-n vagy szkripteken keresztül, a vezérlőpult megnyitása nélkül:
+Szolgáltatók kezelése SSH vagy szkriptekből az irányítópult megnyitása nélkül:
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **Claude kód:**
 
+Claude kód HTTP keresztül csatlakozik, ami `omniroute --mcp` (stdio) nem indul el. A HTTP szállítás alapértelmezés szerint ki van kapcsolva: először engedélyezze a futó szerveren. Ha a műszerfali bejelentkezés engedélyezett, a hitelesítő adatok nélküli kérés `401` kap, ezért adjon át egy API kulcsot, amely tartalmazza `mcp:connect` (vagy `manage`); a `manage`/`admin` nélküli kulcsnak is szüksége van az egyes eszközök hatókörére (lásd: [MCP Server → MCP tool Scores](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
@@ -253,7 +259,7 @@ Vagy ha `mcpTransport` `streamable-http` (állítsa `/dashboard/mcp` re vagy `om
 
 A kulcs `Authorization: Bearer <api-key>` -ként utazik (lásd: [MCP Server → Távoli hozzáférés](../frameworks/MCP-SERVER.md#remote-access-manage-scope-bypass) távoli gazdagépekhez; a távoli kulcshoz `mcp:connect` és read/write hatókörei szükségesek).
 
-**Teljes MCP dokumentáció:** [MCP szerver README](../../open-sse/mcp-server/README.md) — 110 eszközök, IDE konfigurációk, Python/TS/Go kliensek. Üzemeltetői hivatkozás a tömörítési CCR/dedup eszközökhöz (jelölők, előfeltételek, szerszámonkénti hatókör, visszakeresési oldalszámozás, diagnosztika): [Compression Engines → Előfeltételek / kezelői útmutató](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+**Teljes MCP dokumentáció:** [MCP szerver README](../../open-sse/mcp-server/README.md) — 110 eszközök, IDE konfigurációk, Python/TS/Go kliensek. Kezelői hivatkozás a tömörítési CCR/dedup eszközökhöz (jelölők, előfeltételek, szerszámonkénti hatókör, visszakeresés oldalszámozása, diagnosztika): [Compression Engines → Előfeltételek / kezelői útmutató](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 ### A2A beállítás (ügynök-ügynök protokoll)
 

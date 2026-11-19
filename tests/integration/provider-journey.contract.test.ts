@@ -44,6 +44,9 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 // ---------------------------------------------------------------------------
 // Isolated storage + env — must be set BEFORE importing any DB-backed module.
