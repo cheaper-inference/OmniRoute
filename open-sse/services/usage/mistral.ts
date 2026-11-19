@@ -21,6 +21,7 @@ const PLAN_LABELS: Record<string, string> = {
   INDIVIDUAL: "Pro",
   EDU: "Student",
   TEAM: "Team",
+  API: "Studio",
 };
 
 export async function fetchJson(
@@ -78,7 +79,7 @@ export async function getMistralUsage(apiKey: string) {
   const planType =
     typeof whoami?.plan_type === "string" ? whoami.plan_type.trim().toLowerCase() : "";
   const planName = typeof whoami?.plan_name === "string" ? whoami.plan_name.toUpperCase() : "";
-  const plan = PLAN_LABELS[planName] ?? (planName || null);
+  const plan = planType === "api" ? PLAN_LABELS.API : (PLAN_LABELS[planName] ?? (planName || null));
 
   const showVibe = planType.length > 0 && planType !== "api";
   const showApi = planType.length > 0 && planType !== "chat";

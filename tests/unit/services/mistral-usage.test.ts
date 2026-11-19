@@ -60,7 +60,7 @@ test("API plan selects only the API budget", async () => {
 
   const usage = await getMistralUsage("secret-key");
 
-  assert.equal(usage.plan, "Team");
+  assert.equal(usage.plan, "Studio");
   assert.deepEqual(Object.keys(usage.quotas ?? {}), ["API Budget"]);
   assert.equal(usage.quotas?.["API Budget"].used, 8);
   assert.equal(usage.quotas?.["API Budget"].total, 20);
