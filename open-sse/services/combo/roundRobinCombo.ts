@@ -201,6 +201,11 @@ export async function handleRoundRobinCombo({
         // can opt in).
         failoverBeforeRetryExplicit:
           (combo.config as Record<string, unknown> | undefined)?.failoverBeforeRetry === true,
+        trackStreamReadinessInCircuitBreaker:
+          Boolean(
+            (combo.config as Record<string, unknown> | undefined)
+              ?.trackStreamReadinessInCircuitBreaker
+          ) || process.env.OMNIROUTE_CIRCUIT_BREAKER_TRACK_STREAM_TIMEOUT === "true",
       };
   // #9158: clamp combo-level concurrency to a sane bound — a config carrying a
   // huge or negative value would otherwise open an unbounded semaphore and
@@ -1298,16 +1303,17 @@ export async function handleRoundRobinCombo({
           }
 
           if (
-            !isStreamReadinessFailure &&
+            (!isStreamReadinessFailure || config.trackStreamReadinessInCircuitBreaker === true) &&
             !isTokenLimitBreach &&
             !scopedFailure &&
             TRANSIENT_FOR_SEMAPHORE.includes(result.status) &&
-            targetCooldownMs > 0
+            (targetCooldownMs > 0 || isStreamReadinessFailure)
           ) {
-            semaphore.markRateLimited(semaphoreKey, targetCooldownMs);
+            const rrCooldownMs = targetCooldownMs > 0 ? targetCooldownMs : 5000;
+            semaphore.markRateLimited(semaphoreKey, rrCooldownMs);
             log.warn(
               "COMBO-RR",
-              `${modelStr} error ${result.status}, cooldown ${targetCooldownMs}ms`
+              `${modelStr} error ${result.status}, cooldown ${rrCooldownMs}ms`
             );
           }
 

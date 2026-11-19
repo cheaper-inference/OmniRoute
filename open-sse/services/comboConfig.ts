@@ -165,6 +165,9 @@ const DEFAULT_COMBO_CONFIG = {
   //      "fixed" mechanism 2 but silently broke mechanism 1's default-on
   //      behavior for every combo without an explicit opt-in.
   failoverBeforeRetry: true,
+  // Opt-in: when true, stream readiness timeouts (STREAM_READINESS_TIMEOUT) also
+  // count toward the provider circuit breaker and round-robin semaphore cooldown.
+  trackStreamReadinessInCircuitBreaker: false,
   // Feature 4985: configurable response-body validation predicate (per-combo). When set,
   // a 200 OK whose body fails the predicate fails over to the next target.
   responseValidation: undefined as ResponseValidationConfig | undefined,
@@ -359,10 +362,14 @@ export function resolveComboConfig(
     cleanComboConfig.failoverBeforeRetry === true ||
     cleanProviderOverride.failoverBeforeRetry === true ||
     cleanGlobal.failoverBeforeRetry === true;
+  const trackStreamReadinessInCircuitBreaker =
+    Boolean(merged.trackStreamReadinessInCircuitBreaker) ||
+    process.env.OMNIROUTE_CIRCUIT_BREAKER_TRACK_STREAM_TIMEOUT === "true";
 
   return {
     ...merged,
     failoverBeforeRetryExplicit,
+    trackStreamReadinessInCircuitBreaker,
     shadowRouting: {
       ...DEFAULT_COMBO_CONFIG.shadowRouting,
       ...(isRecord(global.shadowRouting) ? clean(global.shadowRouting) : {}),
@@ -388,6 +395,8 @@ export function getDefaultComboConfig() {
     // default stays consistent (#10217 round-4 fix). With no cascade layer
     // setting the flag, it is a genuine non-opt-in → false.
     failoverBeforeRetryExplicit: false,
+    trackStreamReadinessInCircuitBreaker:
+      process.env.OMNIROUTE_CIRCUIT_BREAKER_TRACK_STREAM_TIMEOUT === "true",
   };
 }
 
@@ -407,5 +416,8 @@ export function resolveComboSetupConfig(combo: ComboConfigLike, settings: ComboS
     // distinction applies here (no `settings`, so only the combo's own config
     // can opt in).
     failoverBeforeRetryExplicit: comboConfig.failoverBeforeRetry === true,
+    trackStreamReadinessInCircuitBreaker:
+      Boolean(comboConfig.trackStreamReadinessInCircuitBreaker) ||
+      process.env.OMNIROUTE_CIRCUIT_BREAKER_TRACK_STREAM_TIMEOUT === "true",
   };
 }
