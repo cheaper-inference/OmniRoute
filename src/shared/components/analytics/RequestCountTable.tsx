@@ -102,7 +102,7 @@ export default function RequestCountTable({
                 <span className="font-medium capitalize">{row.provider}</span>
               </div>
             </TableCell>
-            <TableCell className="px-4 py-2.5 text-right font-mono font-semibold">
+            <TableCell className="px-4 py-2.5 text-right font-mono">
               {fmtFull(row.requests)}
             </TableCell>
             <TableCell

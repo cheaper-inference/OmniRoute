@@ -128,6 +128,7 @@ export default function CacheEntriesTab() {
           <Table
             className="text-sm"
             scrollbarLabel={t("entries")}
+            scrollLabel={t("entries")}
             containerClassName="rounded-none border-0"
           >
             <TableHeader>

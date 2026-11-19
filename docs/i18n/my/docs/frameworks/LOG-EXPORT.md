@@ -195,154 +195,150 @@ Payload များကို filesystem artifact မှ row တစ်ခုစ�
 
 ---
 
-## 4. BigQuery ဦးတည်ရာ
+## ၄။ BigQuery destination
 
-ဖွဲ့စည်းသတ်မှတ်မှု ကီးများ (`type: "bigquery"`):
+ဖွဲ့စည်းမှုကီးများ (`type: "bigquery"`):
 
-| ကီး                  | မှတ်ချက်များ                                                                                              |
-| -------------------- | --------------------------------------------------------------------------------------------------------- |
-| `projectId`          | dataset ကို သိမ်းဆည်းထားသော GCP project                                                                   |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                                           |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                                           |
-| `location`           | dataset ကို ဖန်တီးရန်လိုအပ်သည့်အခါမှသာ အသုံးပြုသည် (မူလတန်ဖိုး `EU`)                                      |
-| `serviceAccountJson` | Service account ကီး။ လျှို့ဝှက်အချက်အလက်ဖြစ်သည်။ သိမ်းဆည်းထားစဉ် ကုဒ်ဝှက်ထားပြီး မည်သည့်အခါမျှ ပြန်မပေးပါ |
-| `autoCreate`         | ပထမဆုံး ထုတ်ယူမှုတွင် dataset နှင့် table ကို ဖန်တီးသည် (မူလတန်ဖိုး `true`)                               |
+| ကီး                  | မှတ်ချက်                                                                                                            |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | dataset ကို ထိန်းသိမ်းထားသော GCP project                                                                            |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                     |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                     |
+| `location`           | dataset ကို ဖန်တီးရမည့်အခါတွင်သာ အသုံးပြုသည် (မူရင်း `EU`)                                                          |
+| `serviceAccountJson` | Service-account ကီး။ လျှို့ဝှက်ချက်ဖြစ်ပြီး သိမ်းဆည်းထားစဉ် ကုဒ်ဝှက်ထားကာ မည်သည့်အခါမျှ ပြန်မပေးပါ                  |
+| `autoCreate`         | မရှိသေးသော dataset/table ကို ဖန်တီးခြင်း၊ nullable usage-evidence ကော်လံများကို အခြေအနေအရ ထည့်ခြင်း (မူရင်း `true`) |
 
-Service account သည် ဦးတည်ရာ table အတွက် `bigquery.tables.updateData` လိုအပ်ပြီး၊
-`autoCreate` ဖွင့်ထားလျှင် `bigquery.datasets.create` / `bigquery.tables.create` လည်း လိုအပ်သည်။
+Service account တွင် ပစ်မှတ်ထားသော table အတွက် `bigquery.tables.updateData` ရှိရမည်ဖြစ်ပြီး
+`autoCreate` ဖွင့်ထားသည့်အခါ `bigquery.datasets.create` / `bigquery.tables.create` လည်း လိုအပ်သည်။
+ရှိပြီးသား table ကို အပ်ဒိတ်လုပ်၍ nullable usage-evidence field နှစ်ခု ထည့်ရန်လည်း
+`bigquery.tables.update` လိုအပ်သည်။ ခွင့်ပြုချက်တစ်ခုခု မရှိပါက export မအောင်မြင်ဘဲ cursor သည် ရှေ့မတိုးပါ။
 
-ဖွဲ့စည်းသတ်မှတ်ထားသော batch သည် HTTP ယူနစ်မဟုတ်ဘဲ **cursor** ယူနစ်ဖြစ်သည်။ `send()` က ၎င်းကို တစ်ကြိမ်လျှင် အများဆုံး အတန်း 500 ပါသော insertAll
-ခေါ်ဆိုမှုများအဖြစ် အပိုင်းခွဲပေးသဖြင့် `batch_size` ကြီးနေသော်လည်း BigQuery ၏ တောင်းဆိုမှုကန့်သတ်ချက် 10 MB ကို မကျော်နိုင်ပါ။
-ယာယီအခြေအနေကုဒ်များ (408/429/500/502/503/504) ကို တူညီသော insertIds များကို ပြန်သုံး၍ စောင့်ဆိုင်းချိန်ကို အဆတိုးပေးကာ
-သုံးကြိမ်အထိ ပြန်ကြိုးစားသည်။ အထောက်အထားစစ်ဆေးမှုနှင့် schema ဆိုင်ရာ ချို့ယွင်းမှုများတွင်မူ လုပ်ဆောင်မှုအချိန်ကို အလဟဿ မကုန်စေဘဲ
-ပထမအကြိမ်ကြိုးစားမှုတွင်ပင် အမှားထုတ်ပေးသည်။
+ဖွဲ့စည်းထားသော batch တစ်ခုသည် HTTP ယူနစ်မဟုတ်ဘဲ **cursor** ယူနစ်ဖြစ်သည်။ `send()` သည် ၎င်းကို
+တစ်ကြိမ်လျှင် အများဆုံး row ၅၀၀ ပါသော insertAll ခေါ်ဆိုမှုများအဖြစ် ခွဲပို့သောကြောင့်
+ကြီးမားသော `batch_size` သည် BigQuery ၏ 10 MB request ကန့်သတ်ချက်ကို မကျော်လွန်စေနိုင်ပါ။
+ယာယီအခြေအနေများ (408/429/500/502/503/504) ကို exponential
+backoff ဖြင့် အများဆုံး သုံးကြိမ်အထိ ပြန်လည်ကြိုးစားပြီး တူညီသော insertIds များကို ပြန်အသုံးပြုသည်။ auth နှင့် schema
+အမှားများက run ကို အချည်းနှီးမကုန်ဆုံးစေရန် ပထမဆုံးကြိုးစားမှုတွင်ပင် throw ဖြစ်သည်။
 
-မကြာမီကမှ ဖန်တီးထားသော table ကို streaming endpoint က မမြင်နိုင်သေးသဖြင့်
-စက္ကန့်အနည်းငယ်ကြာ 404 ပြန်ပေးသည်။ ထို 404 ကို ပြန်ကြိုးစားသော်လည်း **ယခုလုပ်ဆောင်မှုက table ကို ဖန်တီးထားသည့်အခါမှသာ** ဖြစ်သည် —
-အမှန်တကယ် မရှိသော table ဖြစ်လျှင် ချက်ချင်းပင် မအောင်မြင်ကြောင်း ပြသည်။ မကြာသေးမီက ဖျက်ထားသော အမည်ဖြင့်
-table ကို ပြန်ဖန်တီးလျှင် BigQuery က streaming ထည့်သွင်းမှုများကို မိနစ်အတော်ကြာ ငြင်းပယ်မည်ကို သတိပြုပါ။ ၎င်းသည်
-ဖျက်ပြီး ပြန်ဖန်တီးခြင်း၏ သဘောသဘာဝဖြစ်သောကြောင့် table ကို ဖျက်ပြီး ပြန်ထည့်မည့်အစား table အမည်အသစ်ကို သုံးပါ။
+ခဏကလေးက ဖန်တီးထားသော table သည် streaming endpoint တွင် ချက်ချင်းမမြင်ရသေးသဖြင့် စက္ကန့်အနည်းငယ်ကြာ
+404 ပြန်ဖြေနိုင်သည်။ ထို 404 ကို ပြန်လည်ကြိုးစားမည်ဖြစ်သော်လည်း **ဤ run က table ကို ဖန်တီးခဲ့သည့်အခါတွင်သာ** ဖြစ်သည် —
+အမှန်တကယ် မရှိသော table ဖြစ်ပါက ချက်ချင်းပျက်ကွက်မည်။ မကြာသေးမီက ဖျက်ထားသော table အမည်တစ်ခုအောက်တွင်
+table ကို ပြန်လည်ဖန်တီးခြင်းသည် BigQuery က streaming inserts များကို မိနစ်အတော်ကြာ ငြင်းပယ်စေနိုင်သည်ကို
+သတိပြုပါ။ ၎င်းသည် ဖျက်ပြီးမှ ပြန်လည်ဖန်တီးခြင်း၏ သဘောသဘာဝဖြစ်သောကြောင့် table တစ်ခုကို ဖျက်ပြီး ပြန်ထည့်မည့်အစား
+table အမည်အသစ်ကို အသုံးပြုရန် ဦးစားပေးပါ။
 
-**တစ်စိတ်တစ်ပိုင်း မအောင်မြင်မှုသည် အလွတ်မဟုတ်သော `insertErrors[]` နှင့်အတူ HTTP 200 အဖြစ် ရောက်လာသည်။** ၎င်းကို
-မအောင်မြင်မှုအဖြစ် သတ်မှတ်ပြီး အမှားထုတ်ပေးသည်။ ထို့ကြောင့် BigQuery က လက်မခံခဲ့သော အတန်းများကို ကျော်၍ cursor
-ရှေ့ဆက်မသွားနိုင်ပါ။ `tests/unit/log-export-bigquery.test.ts` က ဤအပြုအမူကို အတည်ပြုစစ်ဆေးထားသည်။
+**တစ်စိတ်တစ်ပိုင်း ပျက်ကွက်မှုသည် `insertErrors[]` မဗလာဖြစ်သော HTTP 200 အဖြစ် ရောက်လာသည်။** ၎င်းကို
+ပျက်ကွက်မှုအဖြစ် သတ်မှတ်ပြီး throw လုပ်သည်။ ထိုသို့လုပ်ခြင်းက BigQuery က လက်မခံခဲ့သော row များကို ကျော်လွန်၍
+cursor ရှေ့မတိုးစေရန် တားဆီးပေးသည်။ `tests/unit/log-export-bigquery.test.ts` တွင် ဤအပြုအမူကို
+အတည်ပြုစစ်ဆေးထားသည်။
 
-ဒေတာပို့ဆောင်မှုသည် ရိုးရိုး REST ဖြစ်သည် — ကိုယ်တိုင်လက်မှတ်ထိုးထားသော RS256 assertion ကို
-`https://oauth2.googleapis.com/token` တွင် access token နှင့် လဲလှယ်ပြီးနောက် အတန်းများကို `tabledata.insertAll` သို့ ပို့သည်။ Google SDK ကို
-ထည့်သွင်းအသုံးမပြုပါ။ Access token များကို (service account, scope) အတွဲတစ်ခုစီအလိုက် လုပ်ငန်းစဉ်အတွင်း ယာယီသိမ်းဆည်းထားသည်။
+Transport သည် ရိုးရိုး REST ဖြစ်သည် — self-signed RS256 assertion ကို
+`https://oauth2.googleapis.com/token` တွင် access token အဖြစ် လဲလှယ်ပြီး row များကို `tabledata.insertAll`
+သို့ ပို့သည်။ Google SDK ကို ထည့်သွင်းအသုံးပြုထားခြင်း မရှိပါ။ Access token များကို process အတွင်း
+(service account၊ scope) အလိုက် cache ပြုလုပ်ထားသည်။
 
-ဖန်တီးထားသော table တွင် Logs တက်ဘ်ရှိ field တစ်ခုစီအတွက် ကော်လံတစ်ခုနှင့် `exported_at` ပါဝင်ပြီး၊
-ခေါ်ဆိုမှုမှတ်တမ်းများကို လက်တွေ့ query လုပ်သည့်ပုံစံအတွက် အောက်ပါအတိုင်း စီစဉ်ထားသည်။
+ဖန်တီးထားသော table တွင် Logs-tab field တစ်ခုစီအတွက် ကော်လံတစ်ခုစီနှင့် `exported_at` ပါဝင်ပြီး
+call logs များကို အမှန်တကယ် query လုပ်ပုံနှင့် ကိုက်ညီအောင် ဖွဲ့စည်းထားသည်-
 
-- **`timestamp` အပေါ် အခြေခံ၍ နေ့အလိုက် partition ခွဲထားသည်**၊ ထို့ကြောင့် ရက်စွဲဖြင့် ကန့်သတ်ထားသော query သည် ထိုနေ့များကိုသာ စကင်ဖတ်သည်။
-- **`api_key_name`, `provider`, `model`, `status` တို့ဖြင့် cluster ဖွဲ့ထားသည်** (ထိုအစဉ်အတိုင်း)၊ ထို့ကြောင့်
-  မည်သူက လုပ်ဆောင်ခဲ့သည်၊ မည်သည့်နေရာသို့ ပို့ခဲ့သည် သို့မဟုတ် မအောင်မြင်ခဲ့ခြင်း ရှိမရှိဖြင့် စစ်ထုတ်ခြင်းသည် partition တစ်ခုစီအတွင်းရှိ မလိုအပ်သော block များကို ချန်လှပ်ပေးသည်။ BigQuery
-  သည် clustering ကော်လံ အများဆုံး လေးခုသာ ခွင့်ပြုပြီး အစဉ်သည် အရေးကြီးသည်။ `api_key_name` တစ်ခုတည်းဖြင့် စစ်ထုတ်ခြင်းက
-  မလိုအပ်သော block များကို ချန်လှပ်ပေးသော်လည်း `status` တစ်ခုတည်းဖြင့် စစ်ထုတ်ခြင်းက ထိုသို့ မလုပ်ပေးပါ။
-- **ရွေးချယ်သတ်မှတ်နိုင်သော partition ထိန်းသိမ်းကာလ** ကို `partitionExpirationDays` မှတစ်ဆင့် သတ်မှတ်နိုင်ပြီး (0 သည် အားလုံးကို ထိန်းသိမ်းထားသည်)၊
-  table ဖန်တီးချိန်တွင် အသုံးချသည်။
+- **`timestamp` ပေါ်တွင် နေ့အလိုက် partition ခွဲထားသည်**၊ ထို့ကြောင့် ရက်စွဲဖြင့် ကန့်သတ်ထားသော query သည်
+  ထိုနေ့များကိုသာ scan လုပ်မည်။
+- **`api_key_name`, `provider`, `model`, `status` ဖြင့် cluster ပြုလုပ်ထားသည်** (ထိုအစီအစဉ်အတိုင်း)၊ ထို့ကြောင့်
+  မည်သူက လုပ်ဆောင်ခဲ့သည်၊ မည်သည့်နေရာသို့ ပို့ခဲ့သည်၊ သို့မဟုတ် ပျက်ကွက်ခဲ့ခြင်း ရှိ/မရှိအပေါ် filter လုပ်ခြင်းသည်
+  partition တစ်ခုစီအတွင်းရှိ block များကို ဖယ်ရှားနိုင်သည်။ BigQuery သည် clustering ကော်လံ အများဆုံး လေးခုအထိသာ
+  ခွင့်ပြုထားပြီး အစီအစဉ်သည် အရေးကြီးသည်။ `api_key_name` တစ်ခုတည်းပေါ် filter လုပ်ပါက prune လုပ်နိုင်သော်လည်း
+  `status` တစ်ခုတည်းပေါ် filter လုပ်ပါက မလုပ်နိုင်ပါ။
+- **`partitionExpirationDays` မှတစ်ဆင့် ရွေးချယ်နိုင်သော partition retention** (0 ဖြစ်ပါက အားလုံးကို သိမ်းထားသည်) ကို
+  table ဖန်တီးသည့်အခါ အသုံးပြုသည်။
 
-သတ်မှတ်ချက်နှစ်ခုစလုံးကို ဖန်တီးချိန်တွင်သာ အသုံးချသည်။ ရှိပြီးသား table သည် ၎င်း၏ မူလဖွဲ့စည်းပုံကို ဆက်လက်ထိန်းသိမ်းထားမည်ဖြစ်သောကြောင့်
-၎င်းတို့ကို အသုံးပြုလိုလျှင် ဦးတည်ရာကို table id အသစ်တစ်ခုသို့ ညွှန်ပေးပါ။
+ဆက်တင်နှစ်ခုစလုံးသည် ဖန်တီးချိန်တွင်သာ သက်ရောက်သည်။ ရှိပြီးသား table သည် ၎င်းတွင် ရှိပြီးသား layout ကိုသာ
+ဆက်လက်အသုံးပြုမည်ဖြစ်သောကြောင့် ၎င်းတို့ကို အသုံးချလိုပါက destination ကို table id အသစ်သို့ ညွှန်ပြပါ။
 
-`tests/unit/log-export-bigquery.test.ts` သည် mapper နှင့် table schema တို့ အမြဲကိုက်ညီနေကြောင်း
-စစ်ဆေးပေးသဖြင့် ခေါ်ဆိုမှုမှတ်တမ်း ကော်လံအသစ်တစ်ခုကို ထုတ်ယူစဉ် အသိမပေးဘဲ ချန်လှပ်မသွားနိုင်ပါ။
+`tests/unit/log-export-bigquery.test.ts` သည် mapper နှင့် table schema တို့ တစ်ပြေးညီရှိနေကြောင်း
+အတည်ပြုစစ်ဆေးထားသဖြင့် call-log ကော်လံအသစ်တစ်ခုကို export လုပ်သည့်အခါ တိတ်တဆိတ် ပျောက်ဆုံးသွားမည်မဟုတ်ပါ။
 
-Batch များကို အတန်းအရေအတွက်နှင့် အမှတ်စဉ်ပြောင်းထားသော ဘိုက်ပမာဏ **နှစ်မျိုးစလုံး** ဖြင့် အပိုင်းခွဲသည်။ Payload များကို ထုတ်ယူသည့်အခါ
-အတန်းအရေအတွက်တစ်ခုတည်းဖြင့် မလုံလောက်ပါ။ Prompt များပါဝင်သော အတန်း 500 သည် မီဂါဘိုက် ဆယ်ဂဏန်းရှိနိုင်ပြီး insertAll
-သည် 10 MB ကျော်သော တောင်းဆိုမှုကို ငြင်းပယ်သည်။ အတန်း 500 သို့မဟုတ် 9 MB တို့အနက် ဦးစွာရောက်ရှိသည့် ကန့်သတ်ချက်တွင် အပိုင်းတစ်ခုကို အဆုံးသတ်သည်။
+Batch များကို **row အရေအတွက်နှင့် serialize ပြုလုပ်ထားသော byte အရွယ်အစား နှစ်မျိုးစလုံးအပေါ်မူတည်၍** ခွဲထားသည်။ Payload များကို
+export လုပ်သောအခါ row အရေအတွက်တစ်ခုတည်းဖြင့် မလုံလောက်ပါ။ prompt များပါသော row ၅၀၀ သည် ဆယ်ဂါဘိုက်များစွာအထိ
+ရှိနိုင်ပြီး insertAll သည် 10 MB ထက်ကျော်သော request ကို ငြင်းပယ်သည်။ Chunk များကို row ၅၀၀ သို့မဟုတ် 9 MB ရောက်သည့်အခါ၊
+မည်သည့်အရာက အရင်ဖြစ်သည်ဖြစ်စေ ပိတ်သိမ်းသည်။
 
 ---
 
-## 5. OTLP/HTTP trace များ၏ ပို့ဆောင်ရာနေရာ
+## 5. OTLP/HTTP traces destination
 
-ပြင်ဆင်သတ်မှတ်ချက်တွင် `type: "otlp-http"` ကို အသုံးပြုသည်။ ဤသည်မှာ သိမ်းဆည်းထားသော
-ခေါ်ဆိုမှုမှတ်တမ်းများကို cursor အခြေပြု၍ အချိန်ဇယားအလိုက် ထုတ်ပို့ခြင်းဖြစ်ပြီး၊
-`open-sse/services/routing/otel.ts` ရှိ တတ်နိုင်သမျှသာ လုပ်ဆောင်သည့် တိုက်ရိုက် routing-event လက်ခံစနစ် မဟုတ်ပါ။
-၎င်းသည် ထိုလက်ခံစနစ်၏ environment variable များ၊ timer များ သို့မဟုတ် buffer များကို ဖတ်ရှုခြင်း၊ ပြောင်းလဲခြင်း မပြုပါ။
-နှစ်ခုလုံးကို ဖွင့်ထားပါက သီးခြားလွတ်လပ်သော span နှစ်မျိုး ထွက်ပေါ်နိုင်သည်။
-ဤခေါ်ဆိုမှုမှတ်တမ်း span များကို ခွဲခြားရန် `omniroute.log-export` instrumentation scope ကို အသုံးပြုပါ။
+Config တွင် `type: "otlp-http"` ကို အသုံးပြုသည်။ ၎င်းသည် သိမ်းဆည်းထားသော call log များကို အချိန်ဇယားအတိုင်း cursor ဖြင့် တင်ပို့ခြင်းဖြစ်ပြီး၊
+`open-sse/services/routing/otel.ts` ရှိ အကောင်းဆုံးကြိုးစားမှုဖြင့် တိုက်ရိုက် routing-event sink မဟုတ်ပါ။ ၎င်းသည် ထို sink ၏ environment
+variable များ၊ timer များ သို့မဟုတ် buffer များကို ဖတ်ရှုခြင်း၊ ပြောင်းလဲခြင်း မပြုပါ။ နှစ်ခုလုံးကို ဖွင့်ထားပါက span အမျိုးအစား
+နှစ်မျိုး သီးခြားထွက်ပေါ်နိုင်သည်။ ဤ call-log span များကို ခွဲခြားရန် `omniroute.log-export` instrumentation scope ကို
+အသုံးပြုပါ။
 
-| သော့                     | မူလတန်ဖိုး / ရည်ရွယ်ချက်                                                                             |
-| ------------------------ | ---------------------------------------------------------------------------------------------------- |
-| `endpoint`               | HTTP(S) traces URL အပြည့်အစုံ လိုအပ်သည်။ `/v1/traces` နောက်ဆက်ကို ထပ်မထည့်ပါ                         |
-| `headers`                | ရွေးချယ်နိုင်သော `Name: value` စာကြောင်းများ သို့မဟုတ် string များပါသည့် JSON object၊ ကုဒ်ဝှက်ထားသည် |
-| `requestHeaderAllowlist` | ဗလာ (ပိတ်ထားသည်)၊ span attribute များအဖြစ် ဖမ်းယူမည့် client header အမည်များ/ရှေ့ဆက်များ             |
-| `serviceName`            | `omniroute`၊ resource ၏ `service.name`                                                               |
-| `langfuseMapping`        | `false`၊ Langfuse generation/session/user attribute များ ထည့်ပေးသည်                                  |
-| `identity`               | `pseudonymous`၊ `keyName` သို့မဟုတ် `none`                                                           |
-| `paths`                  | `/v1/chat/completions`၊ `/v1/responses`၊ `/v1/messages`                                              |
-| `timeoutMs`              | HTTP ကြိုးပမ်းမှုတစ်ကြိမ်လျှင် `30000`                                                               |
-| `environment`            | သတ်မှတ်မထားပါ၊ ရွေးချယ်နိုင်သော `langfuse.environment`                                               |
+| Key                      | Default / purpose                                                                                |
+| ------------------------ | ------------------------------------------------------------------------------------------------ |
+| `endpoint`               | HTTP(S) traces URL အပြည့်အစုံ လိုအပ်သည်။ `/v1/traces` suffix ကို ထပ်မပေါင်းပါ                    |
+| `headers`                | ရွေးချယ်နိုင်သော `Name: value` စာကြောင်းများ သို့မဟုတ် string များပါ JSON object၊ ကုဒ်ဝှက်ထားသည် |
+| `requestHeaderAllowlist` | အလွတ် (ပိတ်ထားသည်)။ span attribute များအဖြစ် ဖမ်းယူမည့် client header name/prefix များ           |
+| `serviceName`            | `omniroute`၊ resource `service.name`                                                             |
+| `langfuseMapping`        | `false`၊ Langfuse generation/session/user attribute များကို ထည့်ပေးသည်                           |
+| `identity`               | `pseudonymous`၊ `keyName` သို့မဟုတ် `none`                                                       |
+| `paths`                  | `/v1/chat/completions`၊ `/v1/responses`၊ `/v1/messages`                                          |
+| `timeoutMs`              | HTTP ကြိုးပမ်းမှုတစ်ကြိမ်လျှင် `30000`                                                           |
+| `environment`            | သတ်မှတ်မထားပါ။ ရွေးချယ်နိုင်သော `langfuse.environment`                                           |
 
-ယေဘုယျ dashboard သည် ဤအကွက်များကို ပြသပေးသည်။ `paths` သည် API array တစ်ခု သို့မဟုတ်
-တိကျသော path များကို စာကြောင်းအသစ်များ/ကော်မာများဖြင့် ခွဲထားသော textarea တစ်ခုကို လက်ခံသည်။
-Embeddings၊ rerank နှင့် အခြား path များကို အတိအလင်း ခွင့်ပြုမထားလျှင် ကျော်သွားမည်။
-ကျော်သွားသော row များလည်း cursor ကို ရှေ့တိုးစေသည်။ ရှိပြီးသား runner ၏
-`exported`/`exportedTotal` ကောင်တာများသည် လက်ခံထားသော span များကို မရေတွက်ဘဲ၊
-စစ်ထုတ်ထားသော row များအပါအဝင် လုပ်ဆောင်ပြီးသော မူရင်း row များကို ရေတွက်သည်။
-စစ်ထုတ်ခြင်းကို child process အတွင်း လုပ်ဆောင်ပြီး ၎င်း၏ IPC/cursor သဘောတူညီချက်ကို မပြောင်းလဲပါ။
+ယေဘုယျ dashboard သည် ဤ field များကို ပြသသည်။ `paths` သည် API array သို့မဟုတ် newline/comma များဖြင့် ခွဲထားသော exact path များပါ
+textarea ကို လက်ခံသည်။ Embeddings၊ rerank နှင့် အခြား path များကို အတိအကျ ခွင့်ပြုထားခြင်းမရှိပါက ကျော်သွားမည်။ ကျော်သွားသော row
+များသည် cursor ကို ဆက်လက်တိုးစေသည်။ ရှိပြီးသား runner ၏ `exported`/`exportedTotal` counter များသည် လက်ခံထားသော span များအစား
+filter လုပ်ထားသော row များအပါအဝင် လုပ်ဆောင်ပြီးသော source row များကို ရေတွက်သည်။ Filtering ကို child တွင် ပြုလုပ်ပြီး ၎င်း၏
+IPC/cursor contract ကို မပြောင်းလဲပါ။
 
-URL စစ်ဆေးအတည်ပြုခြင်းသည် `src/shared/network/outboundUrlGuard.ts` မှ DB မလိုအပ်သော
-`parseAndValidateNonMetadataUrl` အကူအညီလုပ်ဆောင်ချက်ကို အသုံးပြုသည်။ ၎င်းမှာ `block-metadata` မူဝါဒဖြစ်သည်။
-၎င်းတွင် private URL များကို ခွင့်ပြုထားသည့် webhook validator ကဲ့သို့ပင် ခြွင်းချက်မရှိသော
-metadata/protocol/URL အတွင်းပါဝင်သည့် အထောက်အထား စစ်ဆေးမှုများ ရှိသော်လည်း၊ global
-feature-flag override မလိုဘဲ localhost/LAN ပစ်မှတ်များကို ရည်ရွယ်ချက်ရှိရှိ ခွင့်ပြုထားသည်။
-ထို့ကြောင့် private HTTP endpoint များအပါအဝင် ကိုယ်တိုင် host လုပ်ထားသော Langfuse၊ Phoenix၊ Tempo နှင့် Collector
-endpoint များကို အသုံးပြုနိုင်သည်။ Cloud-metadata host များကို အမြဲပိတ်ပင်ထားသည်။
-Redirect များကို လိုက်မသွားသောကြောင့် collector သည် အထောက်အထားများကို အခြား host သို့ လွှဲပို့မရပါ။
-ရှိပြီးသား စာသားအခြေပြု URL guard ကဲ့သို့ပင်၊ ဤစနစ်သည် DNS resolution ကို ပုံသေချည်နှောင်မထားပါ။
-စီမံခန့်ခွဲသူ ထိန်းချုပ်ထားသော host များကိုသာ သတ်မှတ်ပါ။ Endpoint သည် ယုံကြည်ရသော ကွန်ရက်ပေါ်တွင် မရှိပါက HTTPS ကို ဦးစားပေးပါ။
+URL validation သည် `src/shared/network/outboundUrlGuard.ts` မှ DB မလိုအပ်သော `parseAndValidateNonMetadataUrl` helper ကို
+အသုံးပြုသည် — `block-metadata` policy ဖြစ်သည်။ ၎င်းတွင် webhook validator နှင့် တူညီသော metadata/protocol/embedded-credential
+စစ်ဆေးမှုများကို ခြွင်းချက်မရှိ ပြုလုပ်သော်လည်း private URL များကို ခွင့်ပြုထားသည်။ သို့သော် global feature-flag override မလိုဘဲ
+localhost/LAN target များကို ရည်ရွယ်ချက်ရှိရှိ ခွင့်ပြုထားသည်။ ထို့ကြောင့် private HTTP endpoint များအပါအဝင် self-hosted Langfuse၊
+Phoenix၊ Tempo နှင့် Collector endpoint များကို အသုံးပြုနိုင်သည်။ Cloud-metadata host များကို အမြဲပိတ်ထားသည်။
+Redirect များကို လိုက်မလုပ်သောကြောင့် collector သည် credential များကို အခြား host တစ်ခုသို့ redirect လုပ်၍ မရပါ။
+ရှိပြီးသား lexical URL guard ကဲ့သို့ပင် ၎င်းသည် DNS resolution ကို pin မလုပ်ပါ။ ထို့ကြောင့် operator က ထိန်းချုပ်ထားသော host များကိုသာ
+သတ်မှတ်ပါ။ Endpoint သည် ယုံကြည်စိတ်ချရသော network ပေါ်တွင် မရှိပါက HTTPS ကို ဦးစားပေးပါ။
 
-### Payload နှင့် ပို့ဆောင်ခြင်း
+### Payload and delivery
 
-OTLP/HTTP JSON (`ExportTraceServiceRequest`၊ `Content-Type: application/json`) သည် ခွင့်ပြုထားသော
-row တစ်ခုစီအတွက် CLIENT span တစ်ခုကို သယ်ဆောင်ပြီး ၎င်း၏ တိကျသော request path ဖြင့် အမည်ပေးသည်။
-Path ဖြင့် အမည်ပေးခြင်းက span အမည်ထဲတွင် model သို့မဟုတ် identity အချက်အလက်များ မထည့်သွင်းဘဲ
-Chat Completions၊ Responses နှင့် Messages တို့ကို ခွဲခြားပေးသည်။
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) သည် ခွင့်ပြုထားသော row တစ်ခုစီအတွက်
+CLIENT span တစ်ခုစီကို သယ်ဆောင်ပြီး၊ ထို span ကို ၎င်း၏ exact request path ဖြင့် အမည်ပေးသည်။ Path naming သည် span name အတွင်း
+model သို့မဟုတ် identity data များ ထည့်သွင်းခြင်းမရှိဘဲ Chat Completions၊ Responses နှင့် Messages တို့ကို ခွဲခြားပေးသည်။
 Resource attribute များတွင် `service.name` နှင့် package ၏ `service.version` ပါဝင်သည်။
 
-ပုံမှန် chat ကြိုးပမ်းမှု မှတ်တမ်းတင်စနစ် (`open-sse/handlers/chatCore/attemptLogging.ts`) သည်
-ပြီးဆုံးချိန်တွင် `duration = Date.now() - startTime` ကို ရေးသားပြီး timestamp ကို မပေးပါ။
-`src/lib/usage/callLogs.ts` ရှိ `saveCallLogOperation` သည် timestamp ၏ မူလတန်ဖိုးကို
-ရေးသားသည့် (ပြီးဆုံးသည့်) အချိန်အဖြစ် သတ်မှတ်သည်။ ထို့ကြောင့် ထုတ်ပို့ရာတွင် အဆုံးချိန် = row timestamp နှင့်
-အစချိန် = အဆုံးချိန် − ကြာချိန်ဟု သတ်မှတ်သည် (မီလီစက္ကန့်မှ ဒဿမ နာနိုစက္ကန့်သို့ ပြောင်းလဲသည်)။
-ခေါ်ဆိုသူပေးထားသော ယခင်အချိန် timestamp များကိုလည်း အဆုံးချိန်အဖြစ် ထိန်းသိမ်းထားသည်။
-Row တစ်ခုချင်းအလိုက် အစချိန်/ပြီးဆုံးချိန် ခွဲခြားသည့် အမှတ်အသား မရှိပါ။
-Null ဖြစ်သော ကြာချိန်သည် သုညဖြစ်သွားသည်။ မမှန်ကန်သော/ပျောက်နေသော timestamp များသည်
-မတည်ငြိမ်သော span များ ဖန်တီးမည့်အစား batch ကို မအောင်မြင်စေသည်။
-`ttftMs` သည် null ဖြစ်နိုင်ပြီး `omniroute.ttft_ms` သို့ ချိတ်ဆက်သတ်မှတ်သည်။
+ပုံမှန် chat attempt logger (`open-sse/handlers/chatCore/attemptLogging.ts`) သည် ပြီးဆုံးချိန်တွင်
+`duration = Date.now() - startTime` ကို ရေးသားပြီး timestamp ကို မပေးပါ။ `src/lib/usage/callLogs.ts` ရှိ
+`saveCallLogOperation` သည် timestamp ကို write (completion) အချိန်အဖြစ် default သတ်မှတ်သည်။ ထို့ကြောင့် export သည် end ကို row
+timestamp အဖြစ် သတ်မှတ်ပြီး start ကို end − duration (milliseconds ကို decimal nanoseconds သို့ ပြောင်းပြီး) အဖြစ် သတ်မှတ်သည်။
+Caller က ပေးထားသော historical timestamp များကိုလည်း end time အဖြစ် ထိန်းသိမ်းထားသည်။ row တစ်ခုချင်းစီအတွက်
+start/completion ခွဲခြားသတ်မှတ်ချက် မရှိပါ။ Null duration သည် သုညဖြစ်လာသည်။ မမှန်ကန်သော သို့မဟုတ် မရှိသော timestamp များသည်
+အဆုံးအဖြတ်မရသော span များ ဖန်တီးမည့်အစား batch ကို fail ဖြစ်စေသည်။ `ttftMs` သည် nullable ဖြစ်ပြီး `omniroute.ttft_ms` သို့
+map လုပ်သည်။
 
-Attribute များတွင် `gen_ai.operation.name="chat"`၊ provider၊ တောင်းဆိုထားသော/တုံ့ပြန်သော model၊
-အဝင်/အထွက် token များ၊ ရွေးချယ်နိုင်သော cache ဖတ်ရှုမှု/cache ဖန်တီးမှု/reasoning token များ၊ HTTP အခြေအနေ၊
-combo၊ cache ရင်းမြစ်၊ session tag နှင့် correlation id တို့ ပါဝင်သည်။
-ကိန်းပြည့် OTLP တန်ဖိုးများနှင့် timestamp များသည် ဒဿမ string များဖြစ်သည်။ String၊ boolean နှင့်
-အပိုင်းကိန်းများသည် ၎င်းတို့၏ မူရင်း OTLP တန်ဖိုးအမျိုးအစားများကို အသုံးပြုသည်။
-အမှား span များတွင် ERROR အခြေအနေနှင့် အန္တရာယ်ရှိသော အချက်အလက်များ ဖယ်ရှားထားသည့် အခြေအနေစာသား ပါဝင်သည်။
-စံမှတ်တမ်းတွင် upstream host URL မပါသောကြောင့် collector ကို model server ဟု မှားယွင်းသတ်မှတ်မည့်အစား
-`server.address` ကို ချန်လှပ်ထားသည်။ ကုန်ကျစရိတ်ကို မထုတ်ပို့ပါ။
+Attribute များတွင် `gen_ai.operation.name="chat"`၊ provider၊ requested/response model၊ input/output token များ၊
+ရွေးချယ်နိုင်သော cache-read/cache-creation/reasoning token များ၊ HTTP status၊ combo၊ cache source၊ session tag နှင့်
+correlation id တို့ ပါဝင်သည်။ Integer OTLP value များနှင့် timestamp များသည် decimal string များဖြစ်သည်။ string၊ boolean နှင့်
+fractional number များသည် ၎င်းတို့၏ native OTLP value variant များကို အသုံးပြုသည်။ Error span များတွင် ERROR status နှင့်
+သန့်စင်ထားသော status message ပါဝင်သည်။ Canonical record တွင် upstream host URL မရှိသောကြောင့် collector ကို model server အဖြစ်
+မှားယွင်းစွာ သတ်မှတ်မိခြင်းမဖြစ်စေရန် `server.address` ကို မထည့်ပါ။ Cost ကို export မလုပ်ပါ။
 
-`includeBodies=true` ဖြစ်မှသာ အကြောင်းအရာကို ဖြည့်သွင်းရယူသည်။ `langfuseMapping=false` ဖြစ်လျှင်
-`gen_ai.input.messages` / `gen_ai.output.messages` တို့သည် ပုံစံပြန်ပြင်ထားသော semconv
-messages array မဟုတ်ဘဲ OmniRoute က သိမ်းဆည်းထားသည့်အတိုင်း အန္တရာယ်ရှိသော အချက်အလက်များ ဖယ်ရှားထားသည့်
-request/response body JSON ကို သယ်ဆောင်သည် (parse လုပ်နိုင်လျှင် စံပုံစံပြောင်းထားသည်)။
-ဖြတ်တောက်ထားသော/JSON မဟုတ်သော body များသည် မူရင်းစာသားအဖြစ် ကျန်ရှိသည်။ `langfuseMapping=true` ဖြစ်လျှင်
-body များကို `langfuse.observation.input` / `langfuse.observation.output` အဖြစ်သာ ထုတ်ပေးသည်။
-Body တစ်ခုစီ တစ်ကြိမ်သာ ပို့ရန် `gen_ai.*.messages` attribute များကို ချန်လှပ်ထားသည်။
-မုဒ်နှစ်မျိုးလုံးသည် ရှိပြီးသား အကြောင်းအရာဖြည့်သွင်းရယူသည့် လမ်းကြောင်းမှ `maxBodyBytes` ကို ဆက်ခံသည်။
-`omniroute.bodies_truncated=true` သည် ဖြတ်တောက်ထားမှုကို အမှတ်အသားပြုသည်။
-ဤပို့ဆောင်ရာနေရာသည် ထပ်ဆောင်း pipeline snapshot များ သို့မဟုတ် အန္တရာယ်ရှိသော အချက်အလက်များ မဖယ်ရှားထားသည့်
-artifact ဖတ်ရှုမှုများကို မထည့်သွင်းပါ။ ရွေးချယ်နိုင်သော request-header ဖမ်းယူမှုသည် အောက်တွင် ဖော်ပြထားသော
-ရှိပြီးသား အကြောင်းအရာဖြည့်သွင်းရယူထားသည့် client snapshot ကို အသုံးပြုသည်။
-Body များ ထုတ်ပို့ရာတွင် နာရီအလိုက် အလုပ်ကြွေးများ စုပုံစေမည့်အစား
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` ကဲ့သို့ မိနစ်အဆင့် အချိန်ဇယားကို အသုံးပြုပါ။
+`includeBodies=true` ဖြစ်မှသာ content ကို hydrate လုပ်သည်။ `langfuseMapping=false` ဖြစ်ပါက
+`gen_ai.input.messages` / `gen_ai.output.messages` သည် OmniRoute က သိမ်းဆည်းထားသည့်အတိုင်း သန့်စင်ထားသော
+request/response body JSON ကို သယ်ဆောင်သည် (parse လုပ်နိုင်ပါက canonicalize ပြုလုပ်ထားသည်)။ ပြန်လည်ဖွဲ့စည်းထားသော semconv
+messages array မဟုတ်ပါ။ ဖြတ်တောက်ထားသော သို့မဟုတ် JSON မဟုတ်သော body များသည် raw text အဖြစ် ကျန်ရှိသည်။
+`langfuseMapping=true` ဖြစ်ပါက body များကို `langfuse.observation.input` / `langfuse.observation.output` အဖြစ်သာ
+ထုတ်ပေးသည်။ ထို့ကြောင့် body တစ်ခုစီကို တစ်ကြိမ်သာ ပို့ရန် `gen_ai.*.messages` attribute များကို ချန်လှပ်ထားသည်။
+Mode နှစ်ခုစလုံးသည် ရှိပြီးသား hydration path မှ `maxBodyBytes` ကို အမွေဆက်ခံသည်။
+ဖြတ်တောက်ထားခြင်းကို `omniroute.bodies_truncated=true` ဖြင့် အမှတ်အသားပြုသည်။
+ဤ destination က ထပ်ဆောင်း pipeline snapshot များ သို့မဟုတ် sanitization မပြုလုပ်ထားသော artifact read များကို မထည့်သွင်းပါ။
+ရွေးချယ်နိုင်သော request-header capture သည် အောက်တွင် ဖော်ပြထားသော ရှိပြီးသား hydrated client snapshot ကို အသုံးပြုသည်။
+Body များကို export လုပ်သည့်အခါ နာရီစဉ် backlog စုဆောင်းမည့်အစား
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` ကဲ့သို့ မိနစ်အဆင့် cadence ကို အသုံးပြုပါ။
 
-### ရွေးချယ်နိုင်သော client request header များ
+### Optional client request headers
 
-Header ဖမ်းယူမှုကို **မူလအတိုင်း ပိတ်ထားသည်**။ ပို့ဆောင်ရာနေရာ၏ ပြင်ဆင်သတ်မှတ်ချက်တွင်
-`requestHeaderAllowlist` ကို သတ်မှတ်ပြီး **Prompt များနှင့် တုံ့ပြန်ချက်များကို ထုတ်ပို့ရန်**
-(ပို့ဆောင်ရာနေရာတွင် `includeBodies: true`) ကို ဖွင့်ပါ။
-ခွင့်ပြုစာရင်းသည် API array တစ်ခု သို့မဟုတ် စာကြောင်းအသစ်/ကော်မာဖြင့် အမည်များ ခွဲထားသော textarea တစ်ခုကို လက်ခံသည်။
+Header capture ကို **ပုံမှန်အားဖြင့် ပိတ်ထားသည်**။ Destination config တွင် `requestHeaderAllowlist` ကို သတ်မှတ်ပြီး
+**Export prompts and responses** (`includeBodies: true` on the destination) ကို ဖွင့်ပါ။
+Allowlist သည် API array သို့မဟုတ် newline/comma ဖြင့် ခွဲထားသော name များပါ textarea ကို လက်ခံသည်။
 
 ```json
 {
@@ -350,77 +346,41 @@ Header ဖမ်းယူမှုကို **မူလအတိုင်း ပ
 }
 ```
 
-အမည်များကို စာလုံးအကြီးအသေး မခွဲခြားဘဲ အတိအကျ ကိုက်ညီစစ်ဆေးသည်။ သို့သော် အဆုံးတွင်ရှိသော `*` တစ်ခုတည်းက ဗလာမဟုတ်သည့်
-header အမည်ရှေ့ဆက်ကို ရွေးချယ်ပေးသည်။ သီးသန့် `*`၊ အလယ်တွင် ထည့်ထားသော wildcard များနှင့် မမှန်ကန်သော HTTP header အမည်များကို လက်မခံပါ။
-ရွေးချယ်သတ်မှတ်ချက် အများဆုံး 64 ခု ရှိနိုင်ပြီး တစ်ခုစီ၏ အမည်/ရှေ့ဆက်သည် ASCII ဘိုက် 256 ထက် မပိုရပါ။
-ဤဆက်တင်သည် exporter ကို collector ထံ အထောက်အထားစိစစ်ပေးသော `headers` နှင့် သီးခြားဖြစ်သည်။
+အမည်များကို စာလုံးအကြီးအသေးမခွဲဘဲ တိတိကျကျ ကိုက်ညီရမည်၊ အဆုံးတွင် တစ်ခုတည်းသော `*` ပါရှိပါက အလွတ်မဟုတ်သော
+header-name ရှေ့စာလုံးအစိတ်အပိုင်းကို ရွေးချယ်သည်။ သီးခြား `*`၊ ထည့်သွင်းထားသော wildcard များနှင့် မမှန်ကန်သော HTTP header အမည်များကို ပယ်ချသည်။
+Selector အများဆုံး 64 ခုအထိ ရှိနိုင်ပြီး တစ်ခုချင်းစီတွင် အများဆုံး 256 ASCII bytes ရှိသော အမည်/ရှေ့စာလုံးအစိတ်အပိုင်း ပါဝင်နိုင်သည်။
+ဤ setting သည် exporter ကို collector ဖြင့် authentication ပြုလုပ်ပေးသော `headers` နှင့် သီးခြားဖြစ်သည်။
 
-ဖမ်းယူမှုသည် သိမ်းဆည်းထားသော အသေးစိတ် pipeline ၏
-`clientRawRequest` (သို့မဟုတ် ယခင်စနစ်၏ `clientRequest`) မှ ဖြည့်သွင်းထားသည့် `pipeline_client_request` ကိုသာ ဖတ်သည်။ Provider request header များကို အစားထိုးအသုံးပြုခြင်း လုံးဝမရှိပါ။
-Request ကို မှတ်တမ်းတင်စဉ်က အသေးစိတ် pipeline logging ကို ဖွင့်ထားပြီး ဖြစ်ရမည်။
-`includeBodies` ကို ပိတ်ထားလျှင် သို့မဟုတ် client-snapshot JSON ပျောက်နေ၊ ပျက်စီးနေ သို့မဟုတ် ဖြတ်တောက်ခံထားရလျှင် header
-attribute များကို မထုတ်ပေးပါ။ `maxBodyBytes` ကို တိုးမြှင့်ခြင်းဖြင့် export လုပ်ချိန် snapshot ဖြတ်တောက်ခံရမှုကို ရှောင်နိုင်သည်။
-သို့သော် မူလက မသိမ်းဆည်းခဲ့သော အသေးစိတ်အချက်အလက်ကို ပြန်မရနိုင်ပါ။ 1 MiB ထက်ကြီးသော သို့မဟုတ်
-header entry 256 ခုထက်ပိုသော snapshot ကို လျစ်လျူရှုသည်။ လက်ရှိ prompt/response export သည် header ဖမ်းယူမှုနှင့်အတူ
-ဆက်လက်ဖွင့်ထားဆဲဖြစ်သည်။ ခွင့်ပြုစာရင်းသည် header များသာ ဖြည့်သွင်းသည့် mode ကို မပေးပါ။
+Capture သည် သိမ်းဆည်းထားသော အသေးစိတ် pipeline ၏ `clientRawRequest` (သို့မဟုတ် အဟောင်း `clientRequest`) မှ ဖြည့်သွင်းထားသော `pipeline_client_request` ကိုသာ ဖတ်သည်။ Provider request headers သို့ ပြန်လည်အသုံးမပြုပါ။
+Request ကို မှတ်တမ်းတင်ချိန်တွင် အသေးစိတ် pipeline logging ကို ဖွင့်ထားပြီးဖြစ်ရမည်။ `includeBodies` ကို ပိတ်ထားပါက၊ သို့မဟုတ် client-snapshot JSON ပျောက်ဆုံးခြင်း၊ ပျက်စီးခြင်း သို့မဟုတ် ဖြတ်တောက်ခံရခြင်း ရှိပါက header attributes များကို ထုတ်ပေးမည်မဟုတ်ပါ။ `maxBodyBytes` ကို တိုးမြှင့်ခြင်းဖြင့် export အချိန် snapshot ဖြတ်တောက်ခံရမှုကို ရှောင်ရှားနိုင်သော်လည်း မသိမ်းဆည်းခဲ့သော အသေးစိတ်ကို ပြန်လည်ရယူ၍ မရနိုင်ပါ။ 1 MiB ထက်ကြီးသော သို့မဟုတ် header entry 256 ခုထက်ပိုပါဝင်သော snapshot ကို လျစ်လျူရှုသည်။ ရှိပြီးသား prompt/response export သည် header capture နှင့်အတူ ဆက်လက်ဖွင့်ထားသည်။ Allowlist သည် headers-only hydration mode ကို မပေးပါ။
 
-ရွေးချယ်ထားသော တန်ဖိုးများသည် string တစ်ခုတည်း ဖြစ်နေလျှင်ပင် `http.request.header.<full lowercase header name>` OTLP string array များအဖြစ် ပြောင်းလဲသည်။
-ဥပမာ `X-OmniRoute-Meta-Team: example-team` သည်
-`http.request.header.x-omniroute-meta-team` ဖြစ်လာပြီး တန်ဖိုးမှာ
+ရွေးချယ်ထားသောတန်ဖိုးများသည် string တစ်ခုတည်းဖြစ်နေသော်လည်း `http.request.header.<full lowercase header name>` OTLP string arrays အဖြစ် ပြောင်းလဲသွားသည်။ ဥပမာ `X-OmniRoute-Meta-Team: example-team` သည်
+`http.request.header.x-omniroute-meta-team` အဖြစ် ပြောင်းလဲပြီး
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}` ဖြစ်သည်။
-ရှေ့ဆက်အပြည့်အစုံကို မပြောင်းဘဲ ထိန်းသိမ်းထားသည်။ ၎င်းတို့သည် သာမန် header များသာဖြစ်ပြီး လုပ်ငန်းဆိုင်ရာ field ခွဲခြမ်းခြင်း သို့မဟုတ်
-`omniroute.metadata.*` / Langfuse metadata အဖြစ် ပြောင်းလဲခြင်း မရှိပါ။ `langfuseMapping` သည် header ၏
-အဓိပ္ပာယ်သတ်မှတ်ချက်ကို မပြောင်းလဲပါ။ ရွေးချယ်ထားသော တန်ဖိုးတစ်ခုတည်းရှိသည့် `User-Agent` သည် စံ scalar
-`user_agent.original` ကိုလည်း သတ်မှတ်ပေးသည်။ တန်ဖိုးတစ်ခုအတွင်းရှိ ကော်မာများအလိုက် ခွဲမထုတ်ပါ။ စာလုံးအကြီးအသေး ကွဲပြားမှုများကို သိမ်းဆည်းထားသော
-entry အစီအစဉ်အတိုင်း ပေါင်းစည်းသည်။ ကွဲပြားမှုတစ်ခုခု မမှန်ကန်လျှင် ထို header တစ်ခုလုံးကို ချန်လှပ်သည်။ Attribute များကို စာလုံးအသေးအမည်အလိုက် စီစဉ်သည်။
+ရှေ့စာလုံးအစိတ်အပိုင်းအပြည့်အစုံကို ထိန်းသိမ်းထားသည်။ ၎င်းတို့သည် သာမန် headers များဖြစ်ပြီး business-field parsing သို့မဟုတ်
+`omniroute.metadata.*` / Langfuse metadata ပြောင်းလဲခြင်း မပြုလုပ်ပါ။ `langfuseMapping` သည် header semantics ကို မပြောင်းလဲပါ။ ရွေးချယ်ထားသော single-valued `User-Agent` သည် စံ scalar `user_agent.original` ကိုလည်း သတ်မှတ်ပေးသည်။ တန်ဖိုးတစ်ခုအတွင်းရှိ comma များကို ခွဲခြားမည်မဟုတ်ပါ။ စာလုံးအကြီးအသေးကွဲပြားသော version များသည် သိမ်းဆည်းထားသော entry အစီအစဉ်အတိုင်း ပေါင်းစည်းမည်ဖြစ်ပြီး မမှန်ကန်သော variant တစ်ခုခုရှိပါက ထို header တစ်ခုလုံးကို မထည့်သွင်းပါ။ Attributes များကို lowercase အမည်အတိုင်း စီစဉ်ထားသည်။
 
-Authorization၊ Proxy-Authorization၊ Cookie၊ Set-Cookie၊ API-key header များ၊
-auth/token/secret/password/credential အမှတ်အသားများ ပါဝင်သော အမည်များနှင့် အတွင်းပိုင်း gateway အထောက်အထားများကို
-ရွေးချယ်ထားလျှင်ဖြစ်စေ၊ သိမ်းဆည်းရာတွင် တစ်စိတ်တစ်ပိုင်း ဖုံးကွယ်ထားလျှင်ဖြစ်စေ အမြဲ ဖယ်ထုတ်သည်။ သိရှိထားသော အထောက်အထားပုံစံများအတွက်
-မျှဝေသုံးစွဲသော အထောက်အထားရှာဖွေကိရိယာကို ပြန်သုံးသည်။ ဖုံးကွယ်မှုအမှတ်အသားများကို ဘေးကင်းသောတန်ဖိုးအဖြစ် export မလုပ်ဘဲ ချန်လှပ်သည်။
-String များနှင့် ဗလာမဟုတ်သော string array များကိုသာ လက်ခံသည်။ နံပါတ်များ သို့မဟုတ် object များကို အတင်းပြောင်းလဲခြင်း မရှိပါ။
-မမှန်ကန်သော အမည်များ၊ prototype key များ၊ control character များ (horizontal tab မှလွဲ၍) နှင့် ပုံစံမမှန်သော Unicode
-တို့ကို batch မအောင်မြင်စေခြင်း သို့မဟုတ် ၎င်းတို့၏ အကြောင်းအရာကို error များတွင် ထင်ဟပ်ဖော်ပြခြင်း မရှိဘဲ လျစ်လျူရှုသည်။
+Authorization၊ Proxy-Authorization၊ Cookie၊ Set-Cookie၊ API-key headers၊ auth/token/secret/password/credential marker များပါဝင်သော အမည်များနှင့် internal gateway credentials များကို ရွေးချယ်ထားသည်ဖြစ်စေ၊ storage တွင် တစ်စိတ်တစ်ပိုင်း mask လုပ်ထားသည်ဖြစ်စေ အမြဲဖယ်ရှားသည်။ သိရှိထားသော credential pattern များသည် shared credential detector ကို ပြန်လည်အသုံးပြုသည်။ Redaction marker များကို safe value အဖြစ် မထုတ်ပေးဘဲ ဖယ်ရှားသည်။ String များနှင့် အလွတ်မဟုတ်သော string arrays များကိုသာ လက်ခံပြီး number များ သို့မဟုတ် object များကို အလိုအလျောက် ပြောင်းလဲမည်မဟုတ်ပါ။ မမှန်ကန်သောအမည်များ၊ prototype keys များ၊ control character များ (horizontal tab မှလွဲ၍) နှင့် ပုံစံမမှန်သော Unicode များကို batch မအောင်မြင်စေဘဲ၊ ၎င်းတို့၏အကြောင်းအရာကို error များအတွင်း ပြန်လည်ဖော်ပြခြင်းမရှိဘဲ လျစ်လျူရှုသည်။
 
-Span တစ်ခုစီသည် header အများဆုံး 32 ခု၊ header တစ်ခုလျှင် တန်ဖိုး 16 ခု၊ တန်ဖိုးတစ်ခုလျှင် UTF-8 ဘိုက် 4096၊
-ဖမ်းယူထားသော header အမည်များနှင့် တန်ဖိုးများအားလုံး စုစုပေါင်း UTF-8 ဘိုက် 16384 အထိ ဖမ်းယူသည်။ အရွယ်အစားကျော်လွန်သော/မမှန်ကန်သော header များကို
-ဖြတ်တောက်ခြင်းမပြုဘဲ တစ်ခုလုံး ချန်လှပ်သည်။ ရွေးချယ်မှုသည် စနစ်လည်ပတ်သူ၏ ကိုယ်ရေးအချက်အလက်ကာကွယ်ရေးဆိုင်ရာ ဆုံးဖြတ်ချက်ဖြစ်သည်။ ဘေးကင်းပုံရသော အမည်များတွင်ပင်
-ကိုယ်ရေးအချက်အလက် ပါဝင်နိုင်ပြီး ဤကန့်သတ်ချက်များ/ရှာဖွေကိရိယာများသည် ယေဘုယျ PII ဖယ်ရှားရေးကိရိယာ မဟုတ်ပါ။
+Span တစ်ခုချင်းစီသည် header အများဆုံး 32 ခု၊ header တစ်ခုလျှင် value အများဆုံး 16 ခု၊ value တစ်ခုလျှင် UTF-8 bytes အများဆုံး 4096 နှင့် ဖမ်းယူထားသော header အမည်များနှင့် တန်ဖိုးများအားလုံးအတွက် UTF-8 bytes စုစုပေါင်း အများဆုံး 16384 အထိသာ ဖမ်းယူသည်။ အရွယ်အစားကျော်လွန်သော/မမှန်ကန်သော headers များကို တစ်ခုလုံးဖယ်ရှားပြီး ဖြတ်တောက်မည်မဟုတ်ပါ။ ရွေးချယ်မှုသည် operator ၏ privacy ဆုံးဖြတ်ချက်ဖြစ်သည်။ အန္တရာယ်ကင်းပုံရသော အမည်များတွင်ပင် ကိုယ်ရေးကိုယ်တာအချက်အလက်များ ပါဝင်နိုင်ပြီး ဤကန့်သတ်ချက်များနှင့် detector များသည် အထွေထွေ PII scrubber မဟုတ်ပါ။
 
-### ပေးပို့မှု ကန့်သတ်ချက်များ
+### ပို့ဆောင်မှု ကန့်သတ်ချက်များ
 
-Request များကို envelope အပါအဝင် span 500 နှင့် UTF-8 JSON 4 MiB အထိ ကန့်သတ်ထားသည်။
-Cursor batch တစ်ခု၏ ပထမဆုံး request မပို့မီ ခွင့်ပြုထားသော span တိုင်း၏ အရွယ်အစားကို စစ်ဆေးသည်။ သီးခြား
-span တစ်ခုက ကန့်သတ်ချက်ထက် ကြီးနေလျှင် ထို batch ၏ မည်သည့်အစိတ်အပိုင်းကိုမျှ မပို့ဘဲ
-`maxBodyBytes` ကို လျှော့ချရန် လမ်းညွှန်ချက်နှင့်အတူ မအောင်မြင်ကြောင်း ပြသည်။ အသိမပေးဘဲ ဖယ်ပစ်ခြင်း မရှိပါ။ ကြိုတင်စစ်ဆေးမှုသည် record ရည်ညွှန်းချက်များနှင့်
-ဘိုက်အရေအတွက်များကိုသာ ထိန်းသိမ်းပြီး ယာယီ span/JSON တစ်ခုစီကို ဖယ်ရှားသည်။ Batch ၏ serialize လုပ်ထားသော ဒုတိယမိတ္တူကို
-သိမ်းထားမည့်အစား အရွယ်အစားကန့်သတ်ထားသော အပိုင်းများအတွက် span များကို ပြန်တည်ဆောက်သည်။ HTTP 408/429/5xx၊ ကွန်ရက်ချို့ယွင်းမှုနှင့် timeout များအတွက် အများဆုံး
-သုံးကြိမ် ကြိုးပမ်းပြီး 250/500 ms အဆတိုး စောင့်ဆိုင်းချိန်ကို သုံးသည်။ `Retry-After` စက္ကန့် သို့မဟုတ် HTTP ရက်စွဲများသည်
-စောင့်ဆိုင်းချိန်ကို 5 စက္ကန့်အထိ တိုးစေနိုင်သည်။ အခြား status များသည် ချက်ချင်း မအောင်မြင်ပါ။ OTLP 2xx တစ်စိတ်တစ်ပိုင်း ငြင်းပယ်မှုသည်လည်း
-ပျောက်ဆုံးသော span ကို လက်ခံပြီးကြောင်း အတည်ပြုမည့်အစား error ထုတ်သည်။ ဗလာ သို့မဟုတ် မှန်ကန်သော JSON အတည်ပြုတုံ့ပြန်မှုများကို လက်ခံပြီး
-တုံ့ပြန်မှုဖတ်ရှုသည့် အရွယ်အစားကို 64 KiB အထိ ကန့်သတ်ထားသည်။
+Request များကို span 500 ခုနှင့် envelope အပါအဝင် UTF-8 JSON 4 MiB အထိ ကန့်သတ်ထားသည်။
+ခွင့်ပြုထားသော span တစ်ခုချင်းစီ၏ အရွယ်အစားကို cursor batch ၏ ပထမ request မတိုင်မီ စစ်ဆေးသည်။ ကန့်သတ်ချက်ထက်ကြီးသော span တစ်ခုရှိပါက ထို batch ၏ မည်သည့်အစိတ်အပိုင်းကိုမျှ မပို့ဘဲ `maxBodyBytes` ကို လျှော့ချရန် လမ်းညွှန်ချက်နှင့်အတူ fail ဖြစ်သည်။ တိတ်တဆိတ် ဖယ်ရှားမည်မဟုတ်ပါ။ Preflight သည် record references နှင့် byte counts များကိုသာ ထိန်းသိမ်းပြီး ယာယီ span/JSON တစ်ခုချင်းစီကို ဖျက်သည်။ ထို့နောက် batch ၏ serialized copy တစ်ခုကို ထပ်မံမထိန်းသိမ်းဘဲ bounded chunk များအတွက် span များကို ပြန်လည်တည်ဆောက်သည်။ HTTP 408/429/5xx၊ network failures နှင့် timeouts များအတွက် အများဆုံး
+သုံးကြိမ် ကြိုးစားပြီး 250/500 ms exponential backoff အသုံးပြုသည်။ `Retry-After` seconds သို့မဟုတ် HTTP dates များသည် delay ကို 5 seconds အထိ တိုးမြှင့်နိုင်သည်။ အခြား status များသည် ချက်ချင်း fail ဖြစ်သည်။ OTLP 2xx partial rejection သည် ပျောက်ဆုံးသွားသော span ကို acknowledge ပြုလုပ်မည့်အစား throw လုပ်သည်။ အလွတ် သို့မဟုတ် မှန်ကန်သော JSON acknowledgement များကို လက်ခံပြီး response-read cap သည်
+64 KiB ဖြစ်သည်။
 
-Error များတွင် exporter ကိုယ်တိုင်ပိုင်ဆိုင်သော အချက်အလက်များသာ ပါဝင်သည်။ ၎င်းတို့မှာ HTTP status၊ ပြန်ကြိုးစားမှုအမျိုးအစား၊ ကြိုးပမ်းမှုအရေအတွက်နှင့် ပို့ပြီးသော span
-အရေအတွက်များ သို့မဟုတ် ပုံသေ အတည်ပြုတုံ့ပြန်မှု/ကွန်ရက်ချို့ယွင်းမှု စာသားများဖြစ်သည်။ Collector တုံ့ပြန်မှု body များ၊
-တစ်စိတ်တစ်ပိုင်း အောင်မြင်မှုအရေအတွက်များနှင့် တုံ့ပြန်မှု header များကို error၊ log သို့မဟုတ်
-dashboard ထဲသို့ လုံးဝ မကူးယူပါ။ မအောင်မြင်သော သို့မဟုတ် တစ်စိတ်တစ်ပိုင်းသာ လက်ခံထားသော batch ကို လက်ခံပြီးကြောင်း အတည်မပြုပါ။ Destination တွင်
-ထို status နှင့်အတူ မအောင်မြင်နေကြောင်း ပြသပြီး cursor သည် နောက်ဆုံး အတည်ပြုပြီးသော batch တွင်သာ ရှိနေကာ နောက်တစ်ကြိမ် လုပ်ဆောင်သည့်အခါ
-တူညီသော row များကို ပြန်ပို့သည်။ အမြဲတမ်းပျက်ကွက်စေသော status များသည် collector သို့မဟုတ် configuration ကို
-မပြင်မချင်း ဆက်လက် မအောင်မြင်နေမည်။ တုံ့ပြန်မှုအသေးစိတ်အတွက် collector ၏ ကိုယ်ပိုင် log များကို အသုံးပြုပါ။ Call-log error အကျဉ်းချုပ်များသည်
-၎င်းတို့၏ သီးခြား ဖုံးကွယ်မှုကို ဆက်လက်သုံးသည်။
-`prepare()` သည် မည်သည့်အရာကိုမျှ ပြင်ဆင်ဖန်တီးမပေးပါ။ Test သည် `{"resourceSpans":[]}` ကို အတိအကျ POST လုပ်ပြီး
-call-log span များ မရေးဘဲ HTTP status ကို အစီရင်ခံသည်။
+Error များတွင် exporter ပိုင်ဆိုင်သော အချက်အလက်များသာ ပါဝင်သည်။ HTTP status၊ retry class၊ attempts နှင့် ပို့ပြီးသော span အရေအတွက်များ၊ သို့မဟုတ် သတ်မှတ်ထားသော acknowledgement/network failure စာသားများသာ ပါဝင်သည်။ Collector response body များ၊ partial-success count များနှင့် response headers များကို error များ၊ logs များ သို့မဟုတ် dashboard ထဲသို့ မကူးယူပါ။ Fail ဖြစ်သော သို့မဟုတ် တစ်စိတ်တစ်ပိုင်းသာ လက်ခံထားသော batch ကို acknowledge မပြုလုပ်ပါ။ Destination သည် ထို status ဖြင့် Failing အဖြစ် ပြသပြီး cursor သည် နောက်ဆုံး acknowledge ပြုလုပ်ထားသော batch တွင် ရပ်နေကာ နောက်တစ်ကြိမ် run တွင် အတူတူ rows များကို ပြန်ပို့မည်။ Permanent status များသည် collector သို့မဟုတ် configuration ကို ပြင်ဆင်သည်အထိ ဆက်လက် fail ဖြစ်နေမည်။ Response အသေးစိတ်များအတွက် collector ၏ ကိုယ်ပိုင် logs များကို အသုံးပြုပါ။ Call-log error summary များသည် ၎င်းတို့၏ သီးခြား redaction ကို ဆက်လက်ထိန်းသိမ်းထားသည်။
+`prepare()` သည် မည်သည့်အရာကိုမျှ provision မပြုလုပ်ပါ။ Test သည် `{"resourceSpans":[]}` ကို အတိအကျ post လုပ်ပြီး call-log spans မရေးသားဘဲ HTTP status ကို report လုပ်သည်။
 
-Trace id နှင့် span id များသည်
-`"omniroute.trace\\0" + callLogId` နှင့် `"omniroute.span\\0" + callLogId` တို့အပေါ် SHA-256 တွက်ချက်မှု၏ ပထမဆုံး 32/16 hex ဂဏန်းများ ဖြစ်သည်။ ပြန်ပို့မှုများတွင်
-တူညီသော id များ ပါဝင်သည်။ ၎င်းသည် ထပ်နေမှုဖယ်ရှားမည်ဟု အာမခံခြင်း မဟုတ်ပါ။ Langfuse
-v4 ingestion အပါအဝင် backend အချို့သည် id တူသော span များ၏ ထပ်နေမှုကို မဖယ်ရှားပါ။ စနစ်ရပ်တန့်မှု သို့မဟုတ် အပိုင်းတစ်စိတ်တစ်ပိုင်း မအောင်မြင်မှုကြောင့်
-အတည်မပြုရသေးသော cursor batch တစ်ခုကိုသာ အများဆုံး ပြန်ပို့နိုင်သည်။ ၎င်း၏ နောက်ဆုံး HTTP အပိုင်းသာမက batch တစ်ခုလုံး
-ထပ်နေခြင်း ဖြစ်နိုင်သည်။ ဤအပေးအယူကို ထည့်သွင်းစဉ်းစားပြီး cursor batch အရွယ်အစားကို ရွေးချယ်ပါ။
+Trace ids နှင့် span ids များသည်
+`"omniroute.trace\\0" + callLogId` နှင့် `"omniroute.span\\0" + callLogId` အပေါ် SHA-256 အသုံးပြု၍ ရရှိသော ပထမ 32/16 hex digits များဖြစ်သည်။ ပြန်လည်ပို့သောအခါ တူညီသော ids များကို သယ်ဆောင်သည်။ ၎င်းသည် deduplication အာမခံချက် မဟုတ်ပါ။ Langfuse
+v4 ingestion အပါအဝင် backend အချို့သည် id တူညီသော span များကို deduplicate မပြုလုပ်ပါ။ Crash ဖြစ်ခြင်း သို့မဟုတ် partial chunk failure ဖြစ်ခြင်းကြောင့် acknowledge မပြုလုပ်ရသေးသော cursor batch တစ်ခုတည်းကိုသာ ပြန်လည်ပို့နိုင်သည်။ ထို batch တစ်ခုလုံးသည် duplicate ဖြစ်နိုင်ပြီး ၎င်း၏ နောက်ဆုံး HTTP chunk တစ်ခုတည်းသာ duplicate ဖြစ်မည်မဟုတ်ပါ။ ထို tradeoff ကို ထည့်သွင်းစဉ်းစား၍ cursor batch size ကို ရွေးချယ်ပါ။
 
 ### Langfuse ဥပမာ
 
-ကိုယ်တိုင် host လုပ်ထားသော Langfuse instance အတွက် ဤ field များကို သတ်မှတ်ပါ။
+Self-hosted Langfuse instance အတွက် ဤ fields များကို configure လုပ်ပါ။
 
 ```json
 {
@@ -433,45 +393,41 @@ v4 ingestion အပါအဝင် backend အချို့သည် id တူ
 }
 ```
 
-Authorization တန်ဖိုးကို မိမိစက်တွင် `public-key:secret-key` စာသားအတိုင်း၏ Base64 အဖြစ် တည်ဆောက်ပါ
-(ဥပမာ `Buffer.from(publicKey + ":" + secretKey).toString("base64")` ဖြင့်)။
-အမှန်တကယ် အထောက်အထားများကို log၊ screenshot သို့မဟုတ် issue များထဲသို့ မကူးထည့်ပါနှင့်။ Mapping သည်
-`x-langfuse-ingestion-version: 4` ကို အလိုအလျောက် သတ်မှတ်ပေးသည်။ Authorization ကိုမူ `headers` တွင် ဆက်လက် ပေးရသည်။
-Header များနှင့် ထုတ်ပေးထားသော identity salt နှစ်မျိုးစလုံးသည် လက်ရှိ ကုဒ်ဝှက်ထားသော secret-field
-ယန္တရားနှင့် API placeholder များကို သုံးသည်။ `STORAGE_ENCRYPTION_KEY` လိုအပ်သည်။
+Authorization value ကို literal `public-key:secret-key`
+string ၏ Base64 အဖြစ် local တွင် တည်ဆောက်ပါ (ဥပမာ `Buffer.from(publicKey + ":" + secretKey).toString("base64")` ဖြင့်)။
+တကယ့် credentials များကို logs၊ screenshots သို့မဟုတ် issues များထဲသို့ မကူးထည့်ပါနှင့်။ Mapping သည်
+`x-langfuse-ingestion-version: 4` ကို အလိုအလျောက် သတ်မှတ်ပေးပြီး Authorization ကို `headers` ထဲတွင် ဆက်လက်ပေးရမည်။
+Headers နှင့် ထုတ်ပေးထားသော identity salt နှစ်ခုစလုံးသည် ရှိပြီးသား encrypted secret-field mechanism နှင့် API placeholders များကို အသုံးပြုသည်။ `STORAGE_ENCRYPTION_KEY` လိုအပ်သည်။
 
-Mapping သည် generation အမျိုးအစား/မော်ဒယ်၊ JSON အသုံးပြုမှုအသေးစိတ်များ (အဝင်/အထွက်/စုစုပေါင်းနှင့် ရရှိနိုင်သော
-cache key များ)၊ JSON အဝင်/အထွက် snapshot များ၊ ERROR/DEFAULT အဆင့်၊ မသင့်လျော်သောအချက်အလက်များ ဖယ်ရှားထားသည့် အခြေအနေစာသား၊
-trace အမည်၊ session id၊ မဖြစ်မနေမဟုတ်သော environment နှင့် provider၊ တောင်းဆိုထားသော မော်ဒယ်၊ path၊ combo၊ cache
-ရင်းမြစ်နှင့် အခြေအနေတို့အတွက် စစ်ထုတ်နိုင်သော
-`langfuse.observation.metadata.<key>` တို့ကို ထည့်သွင်းပေးသည်။ TTFT ကို သိရှိပြီး ကြာချိန်အတွင်း ရှိနေမှသာ
-`langfuse.observation.completion_start_time` သည် စတင်ချိန် + TTFT ကို ISO 8601 ပုံစံဖြင့် ဖော်ပြသည်။
-ကုန်ကျစရိတ် attribute များကို မပို့ပါ။
+သတ်မှတ်ပေးခြင်းတွင် generation type/model၊ JSON အသုံးပြုမှုအသေးစိတ် (input/output/total နှင့် ရရှိနိုင်သော
+cache keys)၊ JSON input/output snapshots၊ ERROR/DEFAULT အဆင့်၊ သန့်စင်ထားသော status message၊
+trace name၊ session id၊ ရွေးချယ်နိုင်သော environment နှင့် provider၊ requested model၊ path၊ combo၊ cache
+source နှင့် status တို့အတွက် filter လုပ်နိုင်သော
+`langfuse.observation.metadata.<key>` တို့ ပါဝင်သည်။ `langfuse.observation.completion_start_time` သည်
+စတင်ချိန်တွင် ISO 8601 ပုံစံဖြင့် ရှိပြီး TTFT ကို သိရှိထားကာ duration အတွင်း ရှိသည့်အခါတွင်သာ
+TTFT ကို ပေါင်းထည့်ထားသည်။ cost attributes များကို မပို့ပါ။
 
-Identity မုဒ်များသည် `langfuse.user.id` အပေါ် သက်ရောက်သည်-
+Identity modes များသည် `langfuse.user.id` အတွက် သက်ရောက်သည်-
 
-- `pseudonymous` (မူလသတ်မှတ်ချက်)- destination တစ်ခုစီအတွက် ကျပန်း 32-byte salt ဖြင့် API key ၏ အတွင်းပိုင်း id ကို
-  HMAC-SHA256 ပြုလုပ်ထားသော တန်ဖိုးဖြစ်သည်။ Salt မရှိပါက ဖန်တီးချိန်တွင် ထုတ်ပေးပြီး၊
-  `identitySalt` အဖြစ် ကုဒ်ဝှက်သိမ်းဆည်းကာ မည်သည့်အခါမျှ ပြန်မပေးဘဲ ပြင်ဆင်မှုများအတွင်း ဆက်လက်ထိန်းသိမ်းထားသည်။ မူရင်း key id များကို
-  span attribute များထဲသို့ မည်သည့်အခါမျှ မထည့်ပါ။ Destination တစ်ခု၏ salt ကို ပြန်ဖန်တီးခြင်း/အသစ်လဲခြင်းသည် identity များကို ပြောင်းလဲစေသည်။
-- `keyName`: ပြင်ဆင်သတ်မှတ်ထားသော API key အမည်ဖြစ်ပြီး အော်ပရေတာ၏ ထိုအညွှန်းအမည်ကို ရည်ရွယ်ချက်ရှိရှိ ဖော်ပြပေးသည်။
-- `none`: user id မပါဝင်ပါ။ Session tag များ ရှိနေပါက ဆက်လက် export လုပ်ပေးသည်။ ဤမုဒ်များသည်
-  မည်သည့် prompt အကြောင်းအရာကိုမဆို သို့မဟုတ် အော်ပရေတာပေးထားသော session/correlation အညွှန်းများကို အမည်မဖော်နိုင်အောင် မပြုလုပ်ပေးပါ။
+- `pseudonymous` (မူလတန်ဖိုး): API key ၏ internal id ကို random ဖြစ်သော destination တစ်ခုစီအလိုက် 32-byte salt ဖြင့် HMAC-SHA256 ပြုလုပ်ထားခြင်း ဖြစ်သည်။ salt မရှိပါက ဖန်တီးချိန်တွင် ထုတ်လုပ်ပြီး `identitySalt` အဖြစ် စာဝှက်ထားသည်၊ ပြန်လည်ပေးပို့ခြင်း မပြုဘဲ တည်းဖြတ်မှုများအတွင်း ဆက်လက်ထိန်းသိမ်းထားသည်။ မူရင်း key ids များကို span attributes များထဲသို့ မည်သည့်အခါမျှ ထည့်သွင်းခြင်းမပြုပါ။ destination တစ်ခု၏ salt ကို ပြန်လည်ဖန်တီးခြင်း/လဲလှယ်ခြင်းသည် identities များကို ပြောင်းလဲစေသည်။
+- `keyName`: သတ်မှတ်ထားသော API key name ဖြစ်ပြီး operator label ကို ရည်ရွယ်ချက်ရှိရှိ ဖော်ပြသည်။
+- `none`: user id မရှိပါ။ ရှိနေပါက session tags များကို ဆက်လက် export ပြုလုပ်သည်။ ဤ modes များသည် မည်သည့် prompt content မဆို သို့မဟုတ် operator မှ ပေးထားသော session/correlation labels များကို အမည်ဝှက်ပေးခြင်း မပြုပါ။
 
-### ယခင်ဒေတာများ ပြန်ဖြည့်သွင်းခြင်းမပြုဘဲ စတင်ခြင်း
+### Backfill မပြုလုပ်ဘဲ စတင်ခြင်း
 
-ဖန်တီးချိန်တွင်သာ **လက်ရှိနေရာမှ စတင်ရန် (ရှိပြီးသား log များကို ကျော်ရန်)** ကို ဖွင့်ပါ သို့မဟုတ်
-create API payload ၏ ထိပ်ဆုံးအဆင့်တွင် `startFromCurrentPosition: true` ကို ပေးပို့ပါ။ ၎င်းသည် migration မလိုဘဲ
-လက်ရှိ cursor helper များကို အသုံးပြု၍ `cursor_row_id` ကို လက်ရှိထိန်းသိမ်းထားသော call-log rowid များထဲမှ အမြင့်ဆုံးတန်ဖိုးဖြင့်
-အစပြုသတ်မှတ်ပေးသည်။ မူလသတ်မှတ်ချက်မှာ false ဖြစ်သည် (cursor 0 နှင့် ထိန်းသိမ်းထားသော မှတ်တမ်းဟောင်းများကို ပြန်ဖြည့်သွင်းခြင်း)။
-၎င်းသည် အပ်ဒိတ်လုပ်ချိန်တွင် cursor ကို ပြန်သတ်မှတ်ရန် ဆက်တင်မဟုတ်ပါ။
+ဖန်တီးချိန်တွင်သာ **လက်ရှိနေရာမှ စတင်ရန် (ရှိပြီးသား logs များကို ကျော်ရန်)** ကို ဖွင့်ပါ သို့မဟုတ်
+create API payload ၏ top level တွင် `startFromCurrentPosition: true` ကို ထည့်ပါ။ ၎င်းသည် migration မပြုလုပ်ဘဲ
+ရှိနေသေးသော call-log rowid များ၏ လက်ရှိအမြင့်ဆုံးတန်ဖိုးကို ရှိပြီးသား cursor helpers များကို အသုံးပြု၍
+`cursor_row_id` အဖြစ် စတင်သတ်မှတ်ပေးသည်။ မူလတန်ဖိုးမှာ false ဖြစ်သည် (cursor 0 နှင့် သိမ်းဆည်းထားသော
+history ကို backfill ပြုလုပ်ခြင်း)။ ၎င်းသည် update-time cursor reset setting မဟုတ်ပါ။
 
-မျှဝေအသုံးပြုသော `ttftMs` ကို ထည့်သွင်းခြင်းသည် BigQuery mapper
-နှင့် ဇယားအသစ် schema တွင် null ခွင့်ပြုသော `ttft_ms` ကော်လံကိုလည်း ထည့်ပေးသည်။ ၎င်း၏ schema စမ်းသပ်မှုက စံသတ်မှတ်ထားသော record field တိုင်းအတွက်
-ကော်လံတစ်ခုစီ ရှိရန် လိုအပ်သည်။ ရှိပြီးသားဇယားများသည် မပြောင်းလဲဘဲ ဆက်လက် export လုပ်သည်။ `prepare()` သည် ဇယား schema ကို ဖတ်ပြီး
-ထိုကော်လံ မရှိသည့်အခါ `ttft_ms` ကိုသာ ချန်လှပ်သည်။ နောက်တစ်ကြိမ် လုပ်ဆောင်ချိန်တွင် TTFT ရရှိရန်
-null ခွင့်ပြုသော INT64 ကော်လံကို ထည့်ပါ သို့မဟုတ် ဇယားအသစ်ကို အသုံးပြုပါ။ PATCH၊ အလိုအလျောက် schema ပြောင်းလဲခြင်း သို့မဟုတ် ထပ်ဆောင်း
-ခွင့်ပြုချက်များ မလိုအပ်ပါ။ အခြား row field အားလုံးအတွက် တင်းကျပ်သော schema စစ်ဆေးမှုကို ဆက်လက်ထိန်းသိမ်းထားသည်။
+မျှဝေသုံးသော `ttftMs` ထည့်သွင်းမှုသည် BigQuery mapper နှင့် new-table schema တို့တွင် nullable `ttft_ms` column
+တစ်ခုကိုလည်း ထည့်သွင်းသည်- ၎င်း၏ schema test သည် canonical record field တစ်ခုစီတွင် column တစ်ခုစီ
+ရှိရန် လိုအပ်သည်။ ရှိပြီးသား tables များသည် မပြောင်းလဲဘဲ export ဆက်လုပ်သည်- `prepare()` သည် table schema ကို
+ဖတ်ပြီး ထို column မရှိသည့်အခါတွင်သာ `ttft_ms` ကို ချန်လှပ်သည်။ နောက်တစ်ကြိမ် run တွင် TTFT ရရှိရန်
+nullable INT64 column ကို ထည့်ပါ သို့မဟုတ် table အသစ်ကို အသုံးပြုပါ။ ရွေးချယ်နိုင်သော TTFT column သည် schema
+update ကို မဖြစ်ပေါ်စေပါ။ Usage-evidence columns များသည် အောက်ပါ conditional၊ opt-in compatibility flow
+အတိုင်း လိုက်နာသည်။ အခြား row fields များသည် တင်းကျပ်သော schema စစ်ဆေးမှုကို ဆက်လက်ခံယူသည်။
 
 ---
 
@@ -496,15 +452,16 @@ dashboard ဖောင်တို့အားလုံးသည် registry က
 
 ---
 
-## 7. အသုံးပြုလုပ်ဆောင်ခြင်း
+## ၇။ လုပ်ဆောင်ခြင်း
 
-- **Dashboard**: ချိတ်ဆက်မှုများ → မှတ်တမ်းထုတ်ပို့ခြင်း။ ပေးပို့မည့်နေရာတစ်ခု ထည့်ပြီး အတန်းများ မရေးသားဘဲ
-  အထောက်အထားများကို စစ်ဆေးရန် **စမ်းသပ်ရန်** ကို လုပ်ဆောင်ပါ။ ထို့နောက် ၎င်းကို ဖွင့်ပါ။
-- **လုပ်ဆောင်ရန် ကျန်ရှိမှု**: ပေးပို့မည့်နေရာ ကတ်တစ်ခုစီတွင် စောင့်ဆိုင်းနေသော အတန်းများနှင့် cursor ကို ပြသသည်။ `GET
-/api/log-export/status` သည် တူညီသော ကိန်းဂဏန်းများအပြင် နောက်ဆုံး job လုပ်ဆောင်မှု 20 ခုကိုလည်း ပြန်ပေးသည်။
-- **ပေးပို့မည့်နေရာတစ်ခု မအောင်မြင်ခြင်းသည် အခြားနေရာများကို မအောင်မြင်စေမည် မဟုတ်ပါ** — လုပ်ဆောင်မှုအကျဉ်းချုပ်သည် နေရာတစ်ခုချင်းစီ၏
-  အခြေအနေကို `last_status` / `last_error` တွင် မှတ်တမ်းတင်ပြီး၊ job လုပ်ဆောင်မှုမှတ်တမ်းက စုစုပေါင်းအခြေအနေကို သိမ်းထားသည်။
-- **ပေးပို့မည့်နေရာတစ်ခုကို ဖျက်ခြင်းသည် ၎င်း၏ cursor ကိုပါ ဖျက်ပစ်သည်။** ၎င်းကို ပြန်ထည့်ပါက ထိန်းသိမ်းထားသည့်
-  call log များအနက် အဟောင်းဆုံးမှ စတင်မည်ဖြစ်သဖြင့် ထိုနေရာတွင် ရှိပြီးသားဖြစ်နိုင်သည့် အတန်းများကို ပြန်ပို့မည်ဖြစ်သည်။ BigQuery တွင် အတန်းတစ်ခုချင်းစီ၏
-  `insertId` က ယင်းထပ်ပို့မှုကို BigQuery ၏ ထပ်တူဒေတာဖယ်ရှားရေး အချိန်ကာလအတွင်း၌သာ ကိုင်တွယ်ပေးနိုင်သောကြောင့်
-  ပေးပို့မည့်နေရာကို ဖျက်ခြင်းထက် ပိတ်ထားခြင်းကို ဦးစားပေးပါ။
+- **ဒက်ရှ်ဘုတ်**: Integrations → Log export သို့သွားပါ။ Destination တစ်ခုထည့်ပြီး credential များကို row မရေးဘဲ စစ်ဆေးရန် **စမ်းသပ်ရန်** ကို လုပ်ဆောင်ပါ၊ ထို့နောက် ၎င်းကို ဖွင့်ပါ။
+- **ဆိုင်းငံ့စာရင်း**: Destination card တစ်ခုစီတွင် ဆိုင်းငံ့နေသော row များနှင့် cursor ကို ပြသထားပြီး၊ `GET
+/api/log-export/status` က တူညီသော ကိန်းဂဏန်းများအပြင် နောက်ဆုံး job run ၂၀ ခုကို ပြန်ပေးသည်။
+- **Destination တစ်ခု မအောင်မြင်ခြင်းသည် အခြား Destination များကို မအောင်မြင်စေပါ** — run summary တွင် Destination တစ်ခုချင်းစီ၏ အခြေအနေကို `last_status` / `last_error` တွင် မှတ်တမ်းတင်ထားပြီး၊ job run history တွင် စုစုပေါင်းအခြေအနေကို ထိန်းသိမ်းထားသည်။
+- **Destination တစ်ခုကို ဖျက်ခြင်းသည် ၎င်း၏ cursor ကိုလည်း ဖျက်သည်။** ၎င်းကို ပြန်ထည့်ပါက သိမ်းဆည်းထားဆဲ call log ထဲမှ အဟောင်းဆုံးနေရာမှ စတင်မည်ဖြစ်ပြီး၊ Destination တွင် ရှိပြီးသားဖြစ်နိုင်သည့် row များကို ပြန်လည်ပို့မည်ဖြစ်သည်။ BigQuery တွင် row တစ်ခုချင်းစီအတွက် `insertId` သည် BigQuery ၏ ကိုယ်ပိုင် ထပ်တူဖယ်ရှားခြင်းကာလအတွင်းသာ ၎င်းကို တားဆီးပေးနိုင်သောကြောင့် Destination တစ်ခုကို ဖျက်ခြင်းထက် ပိတ်ထားရန် ဦးစားပေးပါ။
+
+### အသုံးပြုမှုအထောက်အထား schema ကိုက်ညီမှု
+
+BigQuery table အသစ်များတွင် nullable `usage_evidence` (JSON ပါဝင်သော STRING) နှင့် `usage_estimated` (BOOL) တို့ ပါဝင်သည်။ `autoCreate` ကို ဖွင့်ထားပါက ရှိပြီးသား table သို့ ပျောက်ဆုံးနေသော nullable column များကိုသာ ထည့်နိုင်သည်။ Exporter သည် field metadata အပါအဝင် ရှိပြီးသား schema အပြည့်အစုံကို ထိန်းသိမ်းထားပြီး၊ ပြန်ရရှိသော etag ကို အသုံးပြုကာ အခြေအနေအလိုက် PATCH ကို ပေးပို့သည်။ တစ်ပြိုင်နက်တည်း schema ပြောင်းလဲမှု ဖြစ်ပေါ်ပါက ၎င်းကို overwrite မလုပ်ဘဲ export မအောင်မြင်သွားမည်ဖြစ်ပြီး၊ နောက်တစ်ကြိမ် run တွင် table ကို ထပ်မံဖတ်မည်ဖြစ်သည်။
+
+`autoCreate` ကို ပိတ်ထားပါက usage evidence ပါဝင်သော record များကို export မလုပ်မီ ဤ column များကို ကိုယ်တိုင်ထည့်ပါ။ schema/etag metadata ပျောက်ဆုံးနေခြင်း သို့မဟုတ် update မအောင်မြင်ခြင်းတို့ကြောင့် evidence ပါဝင်သော insert များကိုလည်း တားဆီးမည်ဖြစ်သည်။ ထိုမအောင်မြင်မှု ဖြစ်ပေါ်ပါက export cursor သည် ရှေ့သို့ မတိုးဘဲ evidence ကိုလည်း တိတ်တဆိတ် ဖယ်ရှားမည်မဟုတ်ပါ။ Export ပိတ်ဆို့ခံနေရသည့်အချိန်တွင် local log retention သည် ဆက်လက်သက်ရောက်နေမည်ဖြစ်သောကြောင့် သိမ်းဆည်းထားသော source row များ သက်တမ်းကုန်မသွားမီ မအောင်မြင်မှုကို ဖြေရှင်းပါ။
