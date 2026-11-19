@@ -81,6 +81,17 @@ export const GEMINI_4_ARGON_PROMO_PRICING = {
   cache_creation: 2.0,
 };
 
+// Gemini 4 Neon (2026-11-18) launched at a flat paid-tier price with no introductory
+// discount: $3/$15 per 1M input/output tokens, cached input $0.15 (95% off input).
+// https://blog.google/innovation-and-ai/models-and-research/gemini-models/introducing-gemini-4-neon
+export const GEMINI_4_NEON_PRICING = {
+  input: 3.0,
+  output: 15.0,
+  cached: 0.15,
+  reasoning: 15.0,
+  cache_creation: 3.0,
+};
+
 // Gemini 3.8 Flash paid-tier pricing through 2026-12-31; standard becomes
 // $1.50/$7.50/$0.15 (input/output/cached input) on 2027-01-01. Keep separate
 // from 3.7 so their rates can diverge.
