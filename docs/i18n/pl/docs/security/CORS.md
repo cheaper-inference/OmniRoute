@@ -116,31 +116,10 @@ Originy są dopasowywane case-insensitively z ignorowanym trailing slash, więc
 można ustawić w runtime w **Dashboard → Security → CORS Allowed Origins** bez
 restartu.
 
-## Klucze API vs sesje cookie
+## klucze API a sesje plików cookie
 
-- **Bearer / `x-api-key` (powierzchnia inference `/v1/*`):** przeglądarki nigdy nie dołączają
-  ich automatycznie. CORS nie jest tu sensowną barierą — barierą jest klucz API —
-  dlatego ta powierzchnia jest celowo permisywna, żeby klienci browser i
-  Electron mogli odczytywać odpowiedzi, do których już są uprawnieni. Złagodzone echo
-  podąża za zwalidowanym kluczem, a nie za samą obecnością nagłówka: gdy
-  `REQUIRE_API_KEY=false` obsługuje żądanie anonimowo, jego udana odpowiedź zachowuje
-  allowlistę fail-closed. Odrzucenia auth (401) pozostają czytelne, aby klienci mogli
-  pokazać unieważniony lub błędnie wpisany klucz (#5242): własne 401 pipeline'u zachowuje
-  echo, a route, który sam odrzuca klucz po tym, jak pipeline obsłużył żądanie jako
-  anonimowe (`/v1/models` i `/v1beta/models` przy skonfigurowanym management auth,
-  ograniczone do właściciela `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases`
-  oraz route'y kandydatów auto-combo), dodaje echo do tego 401 przez
-  `credentialRejectionHeaders()`. O echo decyduje to, czy żądanie niesie nagłówek z
-  poświadczeniami (`Authorization`, `x-api-key`, `x-goog-api-key` lub cookie
-  `auth_token`), a nie to, który z nich sprawdził route, i nigdy nie jest ono łączone z
-  `Access-Control-Allow-Credentials`; body to stała koperta błędu. Route'y management pod
-  `/api/v1/` chronione przez `requireManagementAuth()` (`/api/v1/management/*`,
-  `/api/v1/registered-keys`) nie dodają echo: przy `REQUIRE_API_KEY=false` ich 401/403 nie
-  jest czytelne cross-origin.
-- **Cookie session (dashboard):** chroniona przez domyślne fail-closed **oraz**
-  brak `Access-Control-Allow-Credentials` na wspólnej ścieżce. Trzymaj
-  originy management/dashboard poza jakąkolwiek permisywną konfiguracją; muszą pozostać ściśle
-  fail-closed.
+- **Nośnik / `x-api-key` (powierzchnia wnioskowania `/v1/*` ):** przeglądarki nigdy nie dołączają ich automatycznie. CORS nie jest tutaj znaczącą barierą. — klucz API jest barierą — i dlatego ta powierzchnia jest celowo zezwalająca, aby klienci przeglądarek i Electron mogli czytać odpowiedzi, do których już mają prawo. Zrelaksowane echo podąża za zatwierdzonym kluczem, a nie samą obecnością nagłówka: kiedy `REQUIRE_API_KEY=false` obsługuje żądanie anonimowo, jego pomyślna odpowiedź utrzymuje listę dozwolonych zamkniętą w przypadku awarii. Odrzucenia uwierzytelnienia (401) pozostają czytelne, dzięki czemu klienci mogą uzyskać unieważniony lub błędnie wpisany klucz (#5242): własny 401 potoku przechowuje echo, a trasa, która sama odrzuca klucz po tym, jak potok obsłuży go jako anonimowy (`/v1/models` i `/v1beta/models` ze skonfigurowaną autoryzacją zarządzania, trasami `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` i auto-combo o zasięgu właściciela) dodaje echo do tego 401 poprzez `credentialRejectionHeaders()`. Echo jest wprowadzane w oparciu o żądanie niosące nagłówek poświadczenia (`Authorization`, `x-api-key`, `x-goog-api-key` lub plik cookie `auth_token` ), a nie to, na którym z nich sprawdzana jest trasa, i nigdy nie jest sparowane z `Access-Control-Allow-Credentials`; treść jest stałą kopertą błędu. Trasy zarządzania w `/api/v1/` strzeżone przez `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) nie dodają echa: w przypadku `REQUIRE_API_KEY=false` ich 401/403 nie jest czytelny między źródłami.
+- **Sesja cookies (pulpit nawigacyjny):** chroniony przez domyślne zamknięcie awaryjne** I** przez brak `Access-Control-Allow-Credentials` na współdzielonej ścieżce. Trzymaj pochodzenie management/dashboard z dala od jakiejkolwiek konfiguracji zezwalającej; muszą pozostać dokładnie zamknięte.
 
 ## Handshake'i WebSocket (`/v1/responses`, `/v1/ws`)
 

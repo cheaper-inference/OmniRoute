@@ -295,72 +295,72 @@ Tətbiq edilmiş nümunələr üçün `open-sse/utils/stream.ts` və `open-sse/u
 
 ---
 
-## Layihə Strukturu
+## Layihənin strukturu
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # İdarə paneli səhifələri (23 bölmə)
-│   ├── api/                # API marşrutları (51 kataloq)
-│   └── login/              # Autentifikasiya səhifələri (.tsx)
-├── domain/                 # Siyasət mühərriki (policyEngine, comboResolver, costRules və s.)
-├── lib/                    # Əsas biznes məntiqi (.ts)
-│   ├── a2a/                # Agent-to-Agent v0.3 protokol serveri
-│   ├── acp/                # Agent Communication Protocol reyestri
-│   ├── compliance/         # Uyğunluq siyasəti mühərriki
-│   ├── db/                 # SQLite domen modulları + 130 miqrasiya
-│   ├── memory/             # Davamlı dialoq yaddaşı
-│   ├── oauth/              # OAuth provayderləri, xidmətləri və utilitləri
-│   ├── skills/             # Genişləndirilə bilən bacarıq çərçivəsi
-│   ├── usage/              # İstifadənin izlənməsi və xərcin hesablanması
-│   └── localDb.ts          # Yalnız təkrar ixrac qatı — heç vaxt buraya məntiq əlavə etməyin
-├── middleware/              # Sorğu ara proqramı (promptInjectionGuard)
-├── mitm/                   # MITM proksisi (sertifikat, DNS, hədəf marşrutlaşdırması)
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # React komponentləri (.tsx)
-│   ├── constants/          # Provayder tərifləri (329), MCP əhatə dairələri, 20 marşrutlaşdırma strategiyası
-│   ├── utils/              # Dövrə açarı, təmizləyici, autentifikasiya köməkçiləri
-│   └── validation/         # Zod v4 sxemləri
-└── sse/                    # SSE proksi emal xətti
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sse iş sahəsi
-├── executors/              # 150 icraçı modulu (icraçı sinifləri + hər provayder üçün köməkçilər)
-├── handlers/               # 11 sorğu emalçısı (söhbət, cavablar, vektor təsvirləri, şəkillər və s.)
-├── mcp-server/             # MCP serveri (110 unikal alət, 3 nəqliyyat mexanizmi, 33 əhatə dairəsi)
-├── services/               # 178 üst səviyyəli xidmət (combo, autoCombo, rateLimitManager və s.)
-├── translator/             # Format çeviriciləri (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
-├── transformer/            # Responses API transformatoru
-└── utils/                  # 22 utilit modulu (axın, TLS, proksi, jurnallaşdırma)
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electron masaüstü tətbiqi (çarpaz platformalı)
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.js test icraçısı (1 574 test faylı)
-├── integration/            # İnteqrasiya testləri
-├── e2e/                    # Playwright testləri
-├── security/               # Təhlükəsizlik testləri
-├── translator/             # Çeviriciyə xas testlər
-└── load/                   # Yük testləri
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # Arxitektura Qərarlarının Qeydləri
-├── architecture/            # Sistem arxitekturası və dayanıqlılığı
-├── comparison/              # OmniRoute və alternativlərin müqayisəsi
-├── compression/             # Sıxılma təlimatları və qaydaları
-├── dev/                     # Tərtibat təlimatları
-├── diagrams/                # Arxitektura diaqramları
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
 ├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
-├── guides/                  # İstifadəçi təlimatı, Docker, quraşdırma, nasazlıqların aradan qaldırılması
-├── i18n/                    # Beynəlmiləlləşdirilmiş README tərcümələri
-├── marketing/               # Marketinq materialları
-├── ops/                     # Yerləşdirmə, proksi, əhatə dairəsi, buraxılışlar
-├── providers/               # Provayderlərə xas sənədlər
-├── reference/               # API arayışı, mühit dəyişənləri, CLI alətləri, pulsuz səviyyələr
-├── releases/                # Buraxılış qeydləri
-├── routing/                 # Avtomatik kombinasiya mühərriki, mühakimənin təkrar icrası
-├── screenshots/             # İdarə panelinin ekran görüntüləri
-├── security/                # Qoruyucu məhdudiyyətlər, uyğunluq, gizlilik, tokenlər
-└── specs/                   # Dizayn spesifikasiyaları
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---

@@ -3,6 +3,7 @@
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import Icon from "@/shared/components/Icon";
 import { UsageAnalytics, CardSkeleton } from "@/shared/components";
@@ -125,9 +126,14 @@ function AnalyticsPageContent() {
 }
 
 export default function AnalyticsPage() {
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   return (
-    <Suspense fallback={<CardSkeleton />}>
-      <AnalyticsPageContent />
-    </Suspense>
+    <div className="flex flex-col gap-6">
+      <PageHeader compact title={tSidebar("usage")} description={tHeader("analyticsDescription")} />
+      <Suspense fallback={<CardSkeleton />}>
+        <AnalyticsPageContent />
+      </Suspense>
+    </div>
   );
 }
