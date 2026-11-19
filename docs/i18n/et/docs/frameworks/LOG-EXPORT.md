@@ -198,142 +198,155 @@ tagastatud väljakirjelduste põhjal, nii et uus sihtkoht ei nõua kasutajaliide
 
 ## 4. BigQuery sihtkoht
 
-Seadistusvõtmed (`type: "bigquery"`):
+Konfiguratsioonivõtmed (`type: "bigquery"`):
 
-| Võti                 | Märkused                                                                |
-| -------------------- | ----------------------------------------------------------------------- |
-| `projectId`          | Andmestikku sisaldav GCP projekt                                        |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                         |
-| `tableId`            | `[A-Za-z0-9_]+`                                                         |
-| `location`           | Kasutatakse ainult siis, kui andmestik tuleb luua (vaikimisi `EU`)      |
-| `serviceAccountJson` | Teenusekonto võti. Saladus: salvestatult krüptitud, ei tagastata kunagi |
-| `autoCreate`         | Loo andmestik ja tabel esimesel eksportimisel (vaikimisi `true`)        |
+| Võti                 | Märkused                                                                                                       |
+| -------------------- | -------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | Andmekogumit sisaldav GCP projekt                                                                              |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                |
+| `location`           | Kasutatakse ainult siis, kui andmekogum tuleb luua (vaikimisi `EU`)                                            |
+| `serviceAccountJson` | Teenusekonto võti. Salajane: puhkeolekus krüptitud, seda ei tagastata                                          |
+| `autoCreate`         | Puuduva andmekogumi/tabeli loomine; nullitavate kasutustõendi veergude tingimuslik lisamine (vaikimisi `true`) |
 
-Teenusekontol peab sihttabelis olema õigus `bigquery.tables.updateData` ning lisaks
-`bigquery.datasets.create` / `bigquery.tables.create`, kui `autoCreate` on sisse lülitatud.
+Teenusekontol peab sihttabelis olema `bigquery.tables.updateData` ning kui `autoCreate` on sisse lülitatud,
+lisaks õigused `bigquery.datasets.create` / `bigquery.tables.create`.
+Olemasoleva tabeli uuendamiseks kahe nullitava kasutustõendi välja lisamisega on vaja ka
+`bigquery.tables.update` õigust. Puuduv õigus nurjab eksportimise ilma kursori edasiliigutamiseta.
 
-Seadistatud partii on **kursori** ühik, mitte HTTP ühik: `send()` jagab selle kuni 500 reaga insertAll
-kutseteks, nii et suur `batch_size` ei saa ületada BigQuery 10 MB päringumahu piirangut.
-Ajutiste olekukoodide (408/429/500/502/503/504) korral proovitakse kuni kolm korda uuesti eksponentsiaalselt
-kasvava ooteajaga, kasutades samu insertIds-väärtusi; autentimis- ja skeemivigade korral visatakse erind juba esimesel katsel,
-selle asemel et raisata kogu käivituskorda.
+Konfigureeritud pakett on **kursori** ühik, mitte HTTP-päringu ühik: `send()` tükeldab selle
+insertAll-kutseteks, milles on kõige rohkem 500 rida, seega suur `batch_size` ei saa põhjustada BigQuery
+10 MB päringupiiri ületamist. Ajutiste olekute (408/429/500/502/503/504) korral proovitakse kuni kolm korda
+uuesti eksponentsiaalse tagasipöördumisega, kasutades samu insertId-sid; autentimis- ja skeemivead põhjustavad
+erandi juba esimesel katsel, selle asemel et jooks ära kulutada.
 
-Äsja loodud tabel pole voogedastuse lõpp-punktile veel nähtav ning see vastab
-mõne sekundi jooksul koodiga 404. Selle 404 korral proovitakse uuesti, kuid **ainult siis, kui tabel loodi selle käivituskorra ajal** —
-tegelikult puuduva tabeli korral katkestatakse endiselt kiiresti. Pange tähele, et tabeli uuesti loomisel hiljuti
-kustutatud nimega keeldub BigQuery mitu minutit voogedastuse kaudu ridu lisamast; see on
-kustutamise ja taasloomise eripära, seega eelistage tabeli kustutamisele ja uuesti lisamisele uut tabelinime.
+Hetk tagasi loodud tabel ei ole voogedastuse lõpp-punktile veel nähtav ja vastab mõne sekundi jooksul
+olekukoodiga 404. Seda 404-vastust proovitakse uuesti, kuid **ainult siis, kui see jooks lõi tabeli** —
+päriselt puuduv tabel nurjub kohe. Pange tähele, et hiljuti kustutatud tabeli sama nime all uuesti loomisel
+keeldub BigQuery mitme minuti jooksul voogedastuse lisamisi vastu võtmast; see tuleneb kustutamisele
+järgnevast uuesti loomisest, seega eelistage tabeli kustutamise ja uuesti lisamise asemel uut tabelinime.
 
-**Osaline tõrge saabub HTTP 200 vastusena koos mittetühja `insertErrors[]` väärtusega.** Seda käsitletakse
-tõrkena ja visatakse erind, mis takistabki kursoril liikumast edasi ridadest, mida BigQuery kunagi
-vastu ei võtnud; `tests/unit/log-export-bigquery.test.ts` kinnistab selle käitumise.
+**Osaline tõrge saabub HTTP 200 vastusena, milles `insertErrors[]` ei ole tühi.** Seda käsitletakse
+tõrkena ja visatakse erand, mis peatab kursori liikumise edasi ridadest, mida BigQuery vastu ei võtnud;
+`tests/unit/log-export-bigquery.test.ts` fikseerib selle käitumise.
 
-Andmeedastus kasutab tavalist REST-i — iseallkirjastatud RS256 tõend vahetatakse pääsutõendi vastu aadressil
-`https://oauth2.googleapis.com/token`, seejärel saadetakse read meetodisse `tabledata.insertAll`. Google'i SDK-d
-sõltuvusena ei kaasata. Pääsutõendeid hoitakse protsessisiseses vahemälus iga (teenusekonto, õiguste ulatus) paari kohta.
+Transport on tavaline REST — ise allkirjastatud RS256-väide vahetatakse juurdepääsutõendi vastu aadressil
+`https://oauth2.googleapis.com/token`, seejärel saadetakse read `tabledata.insertAll`-i. Google'i SDK-d ei
+lisata. Juurdepääsutõendeid puhverdatakse protsessi sees teenusekonto ja skoobi kaupa.
 
-Loodud tabelis on üks veerg iga logide vahekaardi välja kohta ning lisaks `exported_at`; selle struktuur arvestab
-seda, kuidas kutselogisid tegelikult päritakse:
+Loodud tabel sisaldab iga vahekaardi Logs välja kohta üht veergu ning välja `exported_at` ja on kujundatud
+selle järgi, kuidas kõnelogisid tegelikult päritakse:
 
-- **Päevapõhine partitsioneerimine välja `timestamp` järgi**, nii et kuupäevaga piiratud päring skannib ainult vastavaid päevi.
-- **Klasterdamine väljade `api_key_name`, `provider`, `model`, `status` järgi** (selles järjekorras), nii et filtreerimine
-  käivitaja, sihtkoha või ebaõnnestumise järgi jätab igas partitsioonis mittevajalikud plokid vahele. BigQuery
-  lubab kuni nelja klasterdamisveergu ja nende järjekord on oluline: ainult välja `api_key_name` järgi filtreerimine
-  võimaldab plokke vahele jätta, ainult välja `status` järgi filtreerimine mitte.
-- **Valikuline partitsioonide säilitusaeg** võtme `partitionExpirationDays` kaudu (0 säilitab kõik), rakendatakse
-  tabeli loomisel.
+- **Päeva kaupa jaotatud välja `timestamp` alusel**, nii et kuupäevadega piiratud päring skannib ainult neid päevi.
+- **Klastritud väljade `api_key_name`, `provider`, `model`, `status` järgi** (selles järjekorras), nii et filtreerimine
+  selle järgi, kes seda käivitas, kuhu see suunati või kas see nurjus, kärbib iga partitsiooni sees olevaid plokke.
+  BigQuery lubab kõige rohkem nelja klasterdusveergu ja järjekord on oluline: ainult `api_key_name`-i järgi
+  filtreerimine kärbib plokke, ainult `status`-i järgi filtreerimine seda ei tee.
+- **Valikuline partitsioonide säilitamine** parameetri `partitionExpirationDays` kaudu (0 säilitab kõik), mida
+  rakendatakse tabeli loomisel.
 
-Mõlemad sätted rakenduvad loomisel. Olemasolev tabel säilitab oma senise struktuuri, seega
-suunake sihtkoht uue tabeli ID-le, kui soovite need kasutusele võtta.
+Mõlemad sätted rakenduvad loomise ajal. Olemasolev tabel säilitab juba olemasoleva paigutuse, seega suunake
+sihtkoht uuele tabeli ID-le, kui soovite need kasutusele võtta.
 
-`tests/unit/log-export-bigquery.test.ts` kontrollib, et vastendaja ja tabeli skeem püsiksid
-kooskõlas, nii et uut kutselogi veergu ei saaks eksportimisel märkamatult välja jätta.
+`tests/unit/log-export-bigquery.test.ts` kinnitab, et teisendaja ja tabeliskeem püsivad sünkroonis, nii et
+uut kõnelogi veergu ei saa väljundisse saatmisel vaikimisi kõrvale jätta.
 
-Partiid jagatakse osadeks **nii** ridade arvu kui ka serialiseeritud baitide hulga järgi. Ainult ridade arvust ei piisa,
-kui eksporditakse ka andmesisu: 500 viipasid sisaldavat rida võivad võtta kümneid megabaite ning insertAll
-lükkab üle 10 MB päringu tagasi. Osad lõpetatakse 500 rea või 9 MB juures, olenevalt sellest, kumb piir enne täitub.
+Pakette tükeldatakse **nii ridade arvu kui ka serialiseeritud baitide järgi**. Ainult ridade arvust ei piisa,
+kui eksporditakse kasulikku sisu: viipasid sisaldavad 500 rida võivad olla kümneid megabaite suured ning
+insertAll lükkab üle 10 MB suuruse päringu tagasi. Tükid lõpetatakse 500 rea või 9 MB täitumisel, olenevalt
+sellest, kumb saabub varem.
 
 ---
 
-## 5. OTLP/HTTP jälgede sihtkoht
+## 5. OTLP/HTTP-i jälgede sihtkoht
 
-Konfiguratsioon kasutab väärtust `type: "otlp-http"`. See on salvestatud kutselogide ajastatud,
-kursoripõhine eksport, mitte jooksvalt marsruutimise sündmusi võimaluste piires edastav väljund failis
-`open-sse/services/routing/otel.ts`. See ei loe ega muuda selle väljundi keskkonnamuutujaid,
-taimereid ega puhvreid. Mõlema lubamine võib tekitada kahte sõltumatut tüüpi jäljelõike;
-nende kutselogide jäljelõikude eristamiseks kasutage instrumentatsiooniala `omniroute.log-export`.
+Konfiguratsioon kasutab `type: "otlp-http"`. See on püsivate kõnelogide ajastatud,
+kursori toel eksportimine, mitte parima pingutuse põhimõttel töötav reaalajas
+marsruutimise sündmuste sihtkoht failis
+`open-sse/services/routing/otel.ts`. See ei loe ega muuda selle sihtkoha keskkonnamuutujaid,
+taimereid ega puhvreid. Mõlema lubamine võib tekitada kahte sõltumatut tüüpi span'e;
+kasuta `omniroute.log-export` instrumentatsiooni skoopi nende kõnelogi span'ide
+eristamiseks.
 
-| Võti                     | Vaikeväärtus / otstarve                                                                  |
-| ------------------------ | ---------------------------------------------------------------------------------------- |
-| `endpoint`               | Nõutav täielik HTTP(S)-jälgede URL; järelliidet `/v1/traces` ei lisata                   |
-| `headers`                | Valikulised `Name: value` read või stringidest koosnev JSON-objekt; krüpteeritud         |
-| `requestHeaderAllowlist` | Tühi (väljas); kliendi päiste nimed/prefiksid, mis talletatakse jäljelõigu atribuutidena |
-| `serviceName`            | `omniroute`; ressursi `service.name`                                                     |
-| `langfuseMapping`        | `false`; lisab Langfuse’i genereerimise/seansi/kasutaja atribuudid                       |
-| `identity`               | `pseudonymous`, `keyName` või `none`                                                     |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                  |
-| `timeoutMs`              | `30000` iga HTTP-katse kohta                                                             |
-| `environment`            | Määramata; valikuline `langfuse.environment`                                             |
+| Võti                     | Vaikeväärtus / otstarve                                                        |
+| ------------------------ | ------------------------------------------------------------------------------ |
+| `endpoint`               | Nõutav täielik HTTP(S)-i jälgede URL; järelliidet `/v1/traces` ei lisata       |
+| `headers`                | Valikulised `Name: value` read või stringide JSON-objekt; krüptitud            |
+| `requestHeaderAllowlist` | Tühi (väljas); kliendi päise nimed/eesliited, mida span'i atribuutidena koguda |
+| `serviceName`            | `omniroute`; ressursi `service.name`                                           |
+| `langfuseMapping`        | `false`; lisab Langfuse'i genereerimise/seansi/kasutaja atribuudid             |
+| `identity`               | `pseudonymous`, `keyName` või `none`                                           |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                        |
+| `timeoutMs`              | `30000` iga HTTP-katse kohta                                                   |
+| `environment`            | Määramata; valikuline `langfuse.environment`                                   |
 
 Üldine juhtpaneel kuvab need väljad. `paths` aktsepteerib API massiivi või tekstiala,
-kus täpsed teed on eraldatud reavahetuste/komadega. Vektoriesituste, ümberjärjestamise ja muud teed
-jäetakse vahele, kui neid pole sõnaselgelt lubatud. Ka vahelejäetud read liigutavad kursorit edasi; olemasoleva
-käivitaja loendurid `exported`/`exportedTotal` loendavad töödeldud lähteridu, sealhulgas filtreeritud
-ridu, mitte vastuvõetud jäljelõike. Filtreerimine toimub alamprotsessis, muutmata selle
-IPC-/kursorilepingut.
+kus täpsed teed on eraldatud reavahetuste või komadega. Embedding'u-, rerank'i- ja
+muud teed jäetakse vahele, kui neid pole selgesõnaliselt lubatud. Vahele jäetud read
+viivad siiski kursorit edasi; olemasoleva käitaja `exported`/`exportedTotal` loendurid
+loendavad töödeldud lähteridu, sealhulgas filtreeritud ridu, mitte aktsepteeritud span'e.
+Filtreerimine toimub alamprotsessis, muutmata selle IPC-/kursori lepingut.
 
-URL-i valideerimiseks kasutatakse andmebaasist sõltumatut abifunktsiooni `parseAndValidateNonMetadataUrl` failist
-`src/shared/network/outboundUrlGuard.ts`: poliitikat `block-metadata`. Sellel on samad
-tingimusteta metaandmete/protokolli/URL-i manustatud autentimisandmete kontrollid nagu veebikonksu valideerijal,
-kui privaatsed URL-id on lubatud, kuid see lubab teadlikult localhost-/LAN-sihtkohti ilma globaalse
-funktsioonilipu ülekirjutuseta. See võimaldab kasutada isehostitud Langfuse’i, Phoenixi, Tempo ja Collectori
-lõpp-punkte, sealhulgas privaatseid HTTP-lõpp-punkte. Pilve metaandmete hostid on alati blokeeritud.
-Ümbersuunamisi ei järgita, seega ei saa kollektor autentimisandmeid teisele hostile suunata.
-Nagu olemasolev leksikaalne URL-i kaitse, ei fikseeri ka see DNS-lahendust; seadistage ainult
-operaatori kontrolli all olevaid hoste. Eelistage HTTPS-i alati, kui lõpp-punkt ei asu usaldusväärses võrgus.
+URL-i valideerimisel kasutatakse andmebaasivaba abifunktsiooni
+`parseAndValidateNonMetadataUrl` failist `src/shared/network/outboundUrlGuard.ts`:
+poliitikat `block-metadata`. Sellel on samad tingimusteta metaandmete/protokolli/
+manustatud mandaadi kontrollid nagu webhook'i valideerijal, kuid privaatsed URL-id on
+lubatud; samas lubab see sihilikult localhosti/LAN-i sihtkohad ilma globaalse
+funktsioonilipu alistamiseta. See võimaldab isemajutatavaid Langfuse'i, Phoenixi, Tempo ja
+Collectori lõpp-punkte, sealhulgas privaatseid HTTP-lõpp-punkte. Pilve metaandmete hostid
+blokeeritakse alati. Ümbersuunamisi ei järgita, mistõttu collector ei saa mandaate teise
+hosti suunata. Nagu olemasolev leksikaalne URL-i valvur, ei seo ka see DNS-i lahendust
+kindla aadressiga; konfigureeri ainult operaatori hallatavaid hoste. Kui lõpp-punkt ei asu
+usaldusväärses võrgus, eelista HTTPS-i.
 
-### Andmesisu ja edastamine
+### Kasulik koormus ja edastus
 
-OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) sisaldab iga
-lubatud rea kohta ühte CLIENT-jäljelõiku, mille nimi on selle täpne päringutee. Teepõhine nimetamine eristab
-Chat Completionsi, Responsesi ja Messagesi, lisamata jäljelõigu nimesse mudeli- või identiteediandmeid.
-Ressursi atribuutide hulka kuuluvad `service.name` ja paketi `service.version`.
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) sisaldab
+iga lubatud rea kohta ühte CLIENT span'i, mille nimi põhineb täpsel päringu teel. Teede
+nimetamine eristab Chat Completionsi, Responsesi ja Messagesi, lisamata span'i nimesse
+mudeli- või identiteediandmeid. Ressursi atribuudid sisaldavad `service.name`-i ja paketi
+`service.version`-i.
 
-Tavaline vestluskatsete logija (`open-sse/handlers/chatCore/attemptLogging.ts`) kirjutab
-lõpetamisel `duration = Date.now() - startTime` ega anna ajatemplit;
-`saveCallLogOperation` failis `src/lib/usage/callLogs.ts` määrab ajatempli vaikeväärtuseks kirjutamise
-(lõpetamise) aja. Eksport määrab seetõttu lõpuajaks rea ajatempli ja algusajaks lõpuaja miinus kestuse
-(millisekundid teisendatakse kümnendkujul nanosekunditeks). Ka kutsuja antud ajaloolised ajatemplid
-säilitatakse lõpuajana; reapõhist alguse/lõpetamise eristajat pole.
-Nullväärtusega kestus muutub nulliks. Vigased/puuduvad ajatemplid põhjustavad partii nurjumise, mitte
-mittedeterministlike jäljelõikude loomise. `ttftMs` võib olla nullväärtusega ja vastendatakse atribuudile `omniroute.ttft_ms`.
+Tavaline vestluse katse logija
+(`open-sse/handlers/chatCore/attemptLogging.ts`) kirjutab lõpetamisel
+`duration = Date.now() - startTime` ega anna ajatemplit; `saveCallLogOperation` failis
+`src/lib/usage/callLogs.ts` määrab vaikimisi ajatempli kirjutamise (lõpetamise) ajaks.
+Seetõttu määrab eksport lõpuajaks rea ajatempli ning algusajaks lõpuaja miinus kestus
+(millisekundid teisendatuna kümnendvormingus nanosekunditeks). Helistaja antud ajaloolised
+ajaptemplid säilitatakse samuti lõpuajana; rea alguse/lõpetamise eristust ei ole.
+Nullkestus muutub nulliks. Vigased või puuduvad ajatemplid nurjuvad kogu partiiga, selle
+asemel et luua mittedeterministlikke span'e. `ttftMs` on nullable ja kaardistatakse väärtusele
+`omniroute.ttft_ms`.
 
-Atribuutide hulka kuuluvad `gen_ai.operation.name="chat"`, teenusepakkuja, taotletud/vastuse mudel,
-sisend-/väljundtokenid, valikulised vahemälust lugemise/vahemälu loomise/arutlustokenid, HTTP-olek,
-kombinatsioon, vahemälu allikas, seansi silt ja korrelatsiooniidentifikaator. OTLP täisarvuväärtused ja ajatemplid
-on kümnendkujul stringid; stringid, tõeväärtused ja murdarvud kasutavad oma loomulikke OTLP-väärtuse
-variante. Veaga jäljelõikudel on olek ERROR ja puhastatud olekuteade. Kanoonilises
-kirjes pole ülesvoolu hosti URL-i, seega jäetakse `server.address` välja, selle asemel et
-kollektorit ekslikult mudeliserverina tuvastada. Kulu ei ekspordita.
+Atribuudid sisaldavad `gen_ai.operation.name="chat"` väärtust, teenusepakkujat,
+taotletud/vastuse mudelit, sisend-/väljundtokeneid, valikulisi vahemälust lugemise,
+vahemälu loomise ja arutluse tokeneid, HTTP olekut, kombinatsiooni, vahemälu allikat,
+seansi silti ja korrelatsiooni ID-d. OTLP täisarvud ja ajatemplid on kümnendstringid;
+stringid, tõeväärtused ja murdarvud kasutavad oma loomulikke OTLP väärtuse variante.
+Vea span'idel on ERROR-olek ja puhastatud olekuteade. Kanooniline kirje ei sisalda
+ülesvoolu hosti URL-i, mistõttu `server.address` jäetakse välja, selle asemel et
+identifitseerida collectorit ekslikult mudeliserverina. Kulu ei ekspordita.
 
-Ainult `includeBodies=true` laadib sisu juurde. Kui `langfuseMapping=false`,
-sisaldavad `gen_ai.input.messages` / `gen_ai.output.messages` puhastatud päringu/vastuse
-sisu JSON-i kujul, nagu OmniRoute selle salvestas (parsitavuse korral kanoonilisel kujul), mitte semantiliste konventsioonide järgi ümberkujundatud
-sõnumimassiivina. Kärbitud/mitte-JSON-sisu jääb toortekstiks. Kui `langfuseMapping=true`,
-väljastatakse sisu ainult atribuutidena `langfuse.observation.input` / `langfuse.observation.output`;
-atribuudid `gen_ai.*.messages` jäetakse välja, nii et iga sisu saadetakse üks kord. Mõlemad režiimid
-pärivad väärtuse `maxBodyBytes` olemasolevast sisu juurdelaadimise töövoost;
-`omniroute.bodies_truncated=true` tähistab kärpimist.
-See sihtkoht ei lisa täiendavaid töötlusahela hetktõmmiseid ega puhastamata artefaktide lugemist;
-valikuline päringupäiste talletamine kasutab allpool kirjeldatud olemasolevat juurdelaaditud kliendi hetktõmmist.
-Sisu eksportimisel kasutage minutipõhist sagedust, näiteks `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`,
-mitte ärge koguge tunnist mahajäämust.
+Ainult `includeBodies=true` laadib sisu. Kui `langfuseMapping=false`, sisaldavad
+`gen_ai.input.messages` / `gen_ai.output.messages` OmniRoute'i salvestatud puhastatud
+päringu/vastuse keha JSON-i (parsitava sisu korral kanoonilisena), mitte ümberkujundatud
+semconv-sõnumite massiivi. Kärbitud või JSON-ivälised kehad jäävad töötlemata tekstiks.
+Kui `langfuseMapping=true`, väljastatakse kehad ainult kujul
+`langfuse.observation.input` / `langfuse.observation.output`; `gen_ai.*.messages`
+atribuudid jäetakse välja, et iga keha saadetaks üks kord. Mõlemad režiimid pärivad
+olemasolevalt hüdraatimise teelt `maxBodyBytes` väärtuse;
+`omniroute.bodies_truncated=true` märgib kärpimist.
+See sihtkoht ei lisa täiendavaid konveieri hetktõmmiseid ega puhastamata artefaktide
+lugemisi; valikuline päringu päiste kogumine kasutab allpool kirjeldatud olemasolevat
+hüdraaditud kliendi hetktõmmist. Kehade eksportimisel kasuta minutilähedast sagedust, näiteks
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, mitte ära lase tekkida tunnipikkusel järjekorral.
 
-### Valikulised kliendi päringupäised
+### Valikulised kliendi päringu päised
 
-Päiste talletamine on **vaikimisi välja lülitatud**. Määrake sihtkoha konfiguratsioonis `requestHeaderAllowlist`
-ja lubage **Ekspordi viibad ja vastused** (sihtkohal `includeBodies: true`).
-Lubatud päiste loend aktsepteerib API massiivi või tekstiala, kus nimed on eraldatud reavahetuste/komadega:
+Päiste kogumine on **vaikimisi välja lülitatud**. Määra sihtkoha konfiguratsioonis
+`requestHeaderAllowlist` ja luba **Export prompts and responses**
+(sihtkohas `includeBodies: true`). Lubatud loend aktsepteerib API massiivi või tekstiala,
+kus nimed on eraldatud reavahetuste või komadega:
 
 ```json
 {
@@ -341,73 +354,70 @@ Lubatud päiste loend aktsepteerib API massiivi või tekstiala, kus nimed on era
 }
 ```
 
-Nimed peavad kattuma täpselt, kuid tõstutundetult, välja arvatud juhul, kui üks lõpus olev `*` valib mittetühja
-päisenime prefiksi. Üksik `*`, nime sees olevad metamärgid ja vigased HTTP-päisenimed lükatakse tagasi.
-Valijaid võib olla kuni 64 ning iga nimi/prefiks võib olla kuni 256 ASCII-baiti pikk.
-See säte on eraldi sättest `headers`, mis autendib eksportija koguja juures.
+Nimed sobivad tõstutundlikkusest sõltumatult ja täpselt, välja arvatud juhul, kui üksainus lõpus olev `*` valib mittetühja
+päise nime prefiksi. Paljas `*`, põimitud metamärgid ja sobimatud HTTP-päiste nimed lükatakse tagasi.
+Valijaid on kõige rohkem 64 ning igaühe nimi või prefiks võib olla kuni 256 ASCII-baiti.
+See säte on eraldi sättest `headers`, mis autentib eksportija kogujale.
 
-Päiste hõive loeb ainult välja `pipeline_client_request`, mis täidetakse salvestatud üksikasjaliku töötlusahela väljast
-`clientRawRequest` (või pärandväljast `clientRequest`). Teenusepakkuja päringu päiseid ei kasutata kunagi varuallikana.
-Päringu salvestamise ajal pidi töötlusahela üksikasjalik logimine olema lubatud. Kui
-`includeBodies` on keelatud või kliendi hetktõmmise JSON puudub, on rikutud või kärbitud, ei väljastata ühtegi päiseatribuuti.
-Sätte `maxBodyBytes` suurendamine võib vältida hetktõmmise kärpimist eksportimisel;
-see ei saa taastada üksikasju, mida pole kunagi salvestatud. Üle 1 MiB suurust või rohkem kui
-256 päisekirjet sisaldavat hetktõmmist eiratakse. Olemasolev viiba/vastuse eksport jääb päiste hõive kõrval
-lubatuks; lubatud väärtuste loend ei paku ainult päiseid laadivat režiimi.
+Püük loeb ainult väärtust `pipeline_client_request`, mis täidetakse salvestatud üksikasjaliku konveieri
+`clientRawRequest`-ist (või pärandvariandist `clientRequest`). See ei kasuta kunagi varuvariandina teenusepakkuja päringu päiseid.
+Üksikasjalik konveieri logimine pidi päringu salvestamise ajal olema lubatud. Kui
+`includeBodies` on keelatud või kliendi hetktõmmise JSON puudub, on rikutud või kärbitud, siis päiseatribuute ei väljastata.
+`maxBodyBytes` suurendamine võib vältida hetktõmmise kärpimist eksportimise ajal;
+see ei saa taastada üksikasju, mida kunagi ei salvestatud. Hetktõmmist, mis on suurem kui 1 MiB või sisaldab rohkem kui
+256 päisekirjet, eiratakse. Olemasolev viiba/vastuse eksport jääb päiste püüdmise kõrval lubatuks; lubatud loend ei paku ainult päiste
+hüdratsiooni režiimi.
 
-Valitud väärtustest saavad OTLP stringimassiivid `http.request.header.<full lowercase header name>`,
-isegi ühe stringi korral. Näiteks `X-OmniRoute-Meta-Team: example-team` muutub atribuudiks
-`http.request.header.x-omniroute-meta-team` väärtusega
+Valitud väärtustest saavad OTLP stringimassiivid kujul `http.request.header.<full lowercase header name>`,
+isegi ühe stringi korral. Näiteks `X-OmniRoute-Meta-Team: example-team` muutub väärtuseks
+`http.request.header.x-omniroute-meta-team`, mille sisu on
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Kogu prefiks säilitatakse: need on tavalised päised, ilma äriväljade parsimise või
-`omniroute.metadata.*` / Langfuse'i metaandmeteks teisendamiseta. `langfuseMapping` ei muuda päiste
-semantikat. Valitud üheväärtuseline `User-Agent` määrab ka standardse skalaaratribuudi
-`user_agent.original`. Ühe väärtuse sees olevaid komasid ei kasutata tükeldamiseks. Tõstuvariandid ühendatakse salvestatud
-kirjete järjekorras; mis tahes vigase variandi korral jäetakse kogu päis välja. Atribuudid järjestatakse väiketähtedeks teisendatud nime järgi.
+Täielik prefiks säilitatakse: need on tavalised päised, mille puhul ei parsita ärivälju ega teisendata neid
+`omniroute.metadata.*`-iks ega Langfuse'i metaandmeteks. `langfuseMapping` ei muuda päiste semantikat. Valitud ühekordse väärtusega
+`User-Agent` määrab ka standardse skalaarse väärtuse `user_agent.original`. Ühe väärtuse sees olevaid komasid ei tükeldata.
+Tõstutundlikkuse variandid ühendatakse salvestatud kirjete järjekorras; mis tahes sobimatu variant jätab kogu selle päise välja.
+Atribuudid järjestatakse väiketähelise nime järgi.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-võtme päised, nimed, mis sisaldavad
-auth/token/secret/password/credential markereid, ja lüüsi sisemised autentimisandmed jäetakse alati
-välja, isegi kui need on valitud või salvestuses osaliselt maskeeritud. Teadaolevate autentimisandmete mustrite tuvastamiseks kasutatakse
-ühist autentimisandmete tuvastajat; redigeerimismarkerid jäetakse välja, mitte ei ekspordita ohutute väärtustena.
-Aktsepteeritakse ainult stringe ja mittetühje stringimassiive; arve ega objekte ei teisendata.
-Vigaseid nimesid, prototüübivõtmeid, juhtmärke (välja arvatud horisontaalne tabeldusmärk) ja vigast Unicode'i
-eiratakse, ilma et pakktöö nurjuks või nende sisu veateadetes kajastuks.
+`Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie`, API-võtme päised, autentimise/märgi/saladuse/parooli/mandaadi
+tunnuseid sisaldavad nimed ja sisemise lüüsi mandaadid jäetakse alati välja, isegi kui need on valitud või salvestuses osaliselt maskitud.
+Teadaolevad mandaadimustrid kasutavad ühist mandaatide tuvastajat; redigeerimistähised jäetakse välja, mitte ei ekspordita turvaliste väärtustena.
+Lubatud on ainult stringid ja mittetühjad stringimassiivid; numbreid ega objekte ei sunnita stringideks.
+Sobimatud nimed, prototüübi võtmed, juhtmärgid (välja arvatud horisontaalne tabeldusmärk) ja vigane Unicode eiratakse ilma partiid nurjamata
+või nende sisu vigades kajastamata.
 
-Iga span hõivab kuni 32 päist, 16 väärtust päise kohta, 4096 UTF-8 baiti väärtuse kohta
-ning kokku 16384 UTF-8 baiti hõivatud päisenimede ja väärtuste peale. Liiga suured või vigased päised
-jäetakse tervikuna välja, mitte ei kärbita. Valik on operaatori privaatsusotsus: ohutuna näivad nimed
-võivad siiski sisaldada isikuandmeid ning need piirangud ja tuvastajad ei ole üldotstarbeline isikuandmete eemaldaja.
+Iga span püüab kõige rohkem 32 päist, 16 väärtust päise kohta, 4096 UTF-8-baiti väärtuse kohta
+ja kokku 16384 UTF-8-baiti püütud päise nimede ning väärtuste peale. Liiga suured või sobimatud päised jäetakse tervikuna välja, mitte ei kärbita.
+Valik on operaatori privaatsusotsus: turvalisena näivad nimed võivad siiski sisaldada isikuandmeid ning need piirangud ja tuvastajad ei ole üldotstarbeline
+PII-puhastaja.
 
 ### Edastuspiirangud
 
-Päringud on piiratud 500 span'i ja 4 MiB UTF-8 JSON-iga, sealhulgas ümbris.
-Iga lubatud span'i suurust kontrollitakse enne kursoripaki esimest päringut. Kui üksik
-span ületab piirangu, ei saadeta sellest pakist midagi ning toiming nurjub juhisega vähendada
-`maxBodyBytes` väärtust; span'i ei jäeta vaikselt välja. Eelkontroll säilitab ainult kirjete viited ja
-baidiarvud, loobudes igast ajutisest span'ist/JSON-ist; span'id koostatakse piiratud suurusega osade jaoks uuesti,
-selle asemel et hoida pakist teist serialiseeritud koopiat. HTTP 408/429/5xx, võrgutõrgete ja ajalõppude korral tehakse kuni
-kolm katset, eksponentsiaalselt kasvava 250/500 ms ooteajaga. `Retry-After` sekundid või HTTP-kuupäevad
-võivad pikendada ooteaega kuni 5 sekundini. Muud olekukoodid põhjustavad kohese nurjumise. Ka OTLP 2xx osaline tagasilükkamine tekitab erindi, selle asemel
-et kadunud span kinnitada; aktsepteeritakse tühje või korrektse JSON-iga kinnitusi ning
-vastuse lugemise piirang on 64 KiB.
+Päringutele kehtivad piirangud: 500 span-i ja 4 MiB UTF-8 JSON-i, kaasa arvatud ümbris.
+Iga lubatud span kontrollitakse suuruse suhtes enne kursoripartii esimest päringut. Piirangust suurem üksik
+span ei saada sellest partiist ühtki osa ja nurjub juhisega vähendada väärtust
+`maxBodyBytes`; seda ei jäeta vaikselt välja. Eelkontroll säilitab ainult kirjete viited
+ja baidiarvud ning kustutab iga ajutise span-i/JSON-i; span-id ehitatakse piiratud tükkide
+jaoks uuesti, selle asemel et hoida partii teist serialiseeritud koopiat. HTTP 408/429/5xx, võrgutõrked ja ajalõpud saavad kõige rohkem
+kolm katset, eksponentsiaalse 250/500 ms tagasiminekuajaga. `Retry-After`-i sekundid või HTTP-kuupäevad
+võivad pikendada viivitust kuni 5 sekundini. Muud olekud nurjuvad kohe. OTLP 2xx osalise tagasilükkamise korral visatakse samuti viga, mitte ei kinnitata
+kaduma läinud span-i; tühjad või kehtivad JSON-kinnitused aktsepteeritakse, vastuse lugemise ülempiiriga
+64 KiB.
 
-Vead sisaldavad ainult eksportijale kuuluvaid fakte: HTTP-olekukoodi, korduskatse klassi, katsete ja saadetud span'ide
-arvu või fikseeritud sõnastust kinnituse/võrgutõrke kohta. Koguja vastuste sisu,
-osalise õnnestumise arve ega vastusepäiseid ei kopeerita kunagi vigadesse, logidesse ega
-töölauale. Nurjunud või osaliselt aktsepteeritud pakki ei kinnitata: sihtkoht kuvab
-selle olekuga nurjumist, kursor jääb viimase kinnitatud paki juurde ning järgmine käivitus
-saadab samad read uuesti. Püsivate olekukoodide korral jätkub nurjumine, kuni koguja või konfiguratsioon
-on parandatud. Vastuse üksikasjade jaoks kasutage koguja enda logisid. Väljakutselogi veakokkuvõtete puhul säilib
-nende eraldi tundlike andmete eemaldamine.
-`prepare()` ei loo midagi; Test saadab täpselt `{"resourceSpans":[]}` ja teatab
-HTTP-olekukoodi ilma väljakutselogi span'e kirjutamata.
+Vead sisaldavad ainult eksportija hallatavaid fakte: HTTP-olekut, uuestikatsetamise klassi, katsete arvu ja saadetud span-ide
+arvu või kindlaksmääratud kinnituse-/võrgutõrke sõnastust. Koguja vastuse kehasid,
+osalise edu arve ja vastusepäiseid ei kopeerita kunagi vigadesse, logidesse ega juhtpaneelile. Nurjunud või osaliselt vastu võetud partiid ei kinnitata:
+sihtkoht kuvab oleku Failing koos selle olekuga, kursor jääb viimase kinnitatud partii juurde ja järgmine käituskord
+saadab samad read uuesti. Püsivad olekud jäävad nurjunuks, kuni koguja või konfiguratsioon parandatakse.
+Vastuse üksikasju vaadake koguja enda logidest. Kõnelogi vigade kokkuvõtetes säilitatakse eraldi redigeerimine.
+`prepare()` ei varusta midagi; Test saadab täpselt `{"resourceSpans":[]}` ja teatab
+HTTP-oleku ilma kõnelogi spane kirjutamata.
 
-Jälje-ID-d ja span'i-ID-d on avaldiste
-`"omniroute.trace\\0" + callLogId` ja `"omniroute.span\\0" + callLogId` SHA-256 räsi esimesed 32/16 kuueteistkümnendnumbrit. Kordussaatmised kannavad
-identseid ID-sid. See ei taga duplikaatide eemaldamist: mõned taustsüsteemid, sealhulgas Langfuse'i
-v4 andmehõive, ei eemalda sama ID-ga span'ide duplikaate. Krahh või osa saatmise nurjumine võib
-põhjustada kõige rohkem ühe kinnitamata kursoripaki kordussaatmise; dubleeruda võib kogu see pakk,
-mitte ainult selle viimane HTTP-osa. Valige kursoripaki suurus seda kompromissi arvestades.
+Jälgede ID-d ja span-ide ID-d on vastavalt SHA-256 esimese 32/16 kuueteistkümnendmärki väärtustest
+`"omniroute.trace\\0" + callLogId` ja `"omniroute.span\\0" + callLogId`. Uuesti saadetud andmetel on
+samad ID-d. See ei taga deduplitseerimist: mõned taustsüsteemid, sealhulgas Langfuse'i v4 sissevõtt,
+ei deduplitseeri sama ID-ga spane. Krahh või osalise tüki nurjumine võib uuesti saata kõige rohkem ühe kinnitamata kursori
+partii; kogu see partii võib dubleeruda, mitte ainult selle viimane HTTP-tükk. Valige kursori partii suurus seda kompromissi
+arvestades.
 
 ### Langfuse'i näide
 
@@ -424,44 +434,44 @@ Seadistage isemajutatud Langfuse'i eksemplari jaoks järgmised väljad:
 }
 ```
 
-Koostage Authorization väärtus kohapeal, kodeerides literaalse stringi `public-key:secret-key`
-Base64-kujule (näiteks avaldisega `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Ärge kleepige tegelikke autentimisandmeid logidesse, kuvatõmmistesse ega probleemiteadetesse. Vastendus määrab automaatselt
-`x-langfuse-ingestion-version: 4`; Authorization tuleb endiselt anda väljas `headers`.
-Nii päised kui ka genereeritud identiteedisool kasutavad olemasolevat krüptitud saladuseväljade
-mehhanismi ja API kohatäitjaid; `STORAGE_ENCRYPTION_KEY` on nõutav.
+Koostage väärtus Authorization kohapeal, kodeerides sõna-sõnalt stringi `public-key:secret-key`
+Base64-vormingusse (näiteks väärtusega `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Ärge lisage tegelikke mandaate logidesse, kuvatõmmistesse ega probleemikirjeldustesse. Vastendamine
+määrab automaatselt `x-langfuse-ingestion-version: 4`; Authorization tuleb endiselt edastada väljal `headers`.
+Nii päised kui ka loodud identiteedisool kasutavad olemasolevat krüptitud salavälja mehhanismi ja API kohatäitjaid;
+`STORAGE_ENCRYPTION_KEY` on nõutav.
 
-Vastendus lisab genereerimise tüübi/mudeli, kasutusandmed JSON-vormingus (sisend/väljund/kogusumma ja saadaolevad
-vahemäluvõtmed), sisendi/väljundi hetktõmmised JSON-vormingus, taseme ERROR/DEFAULT, puhastatud olekuteate,
-jälje nime, seansi ID, valikulise keskkonna ning filtreeritava
-`langfuse.observation.metadata.<key>` teenusepakkuja, taotletud mudeli, tee, kombinatsiooni, vahemälu
-allika ja oleku jaoks. `langfuse.observation.completion_start_time` on ISO 8601 vormingus
-algusaeg + TTFT ainult siis, kui TTFT on teada ja jääb kestuse piiresse. Kuluatribuute ei saadeta.
+Vastendus lisab genereerimise tüübi/mudeli, JSON-i kasutusandmed (sisendi/väljundi/kogusumma ja saadaolevad
+vahemälu võtmed), JSON-i sisendi/väljundi hetktõmmised, ERROR/DEFAULT-taseme,
+puhastatud olekuteate, trace'i nime, seansi ID, valikulise keskkonna ja filtreeritava
+`langfuse.observation.metadata.<key>`-i teenusepakkuja, taotletud mudeli, tee, kombinatsiooni, vahemälu
+allika ja oleku jaoks. `langfuse.observation.completion_start_time` on ISO 8601 vormingus algusaja
+väärtus + TTFT ainult siis, kui TTFT on teada ja jääb kestuse sisse. Kuluatribuute ei saadeta.
 
-Identiteedirežiimid rakenduvad atribuudile `langfuse.user.id`:
+Identiteedirežiimid rakenduvad väljale `langfuse.user.id`:
 
 - `pseudonymous` (vaikimisi): API-võtme sisemise ID HMAC-SHA256 koos juhusliku
-  sihtkohapõhise 32-baidise soolaga. Kui sool puudub, genereeritakse see loomisel, krüpteeritakse
-  kujul `identitySalt`, seda ei tagastata kunagi ning see säilitatakse muutmisel. Võtmete töötlemata ID-sid ei
-  lisata kunagi span-atribuutidesse. Sihtkoha soola taasloomine/vahetamine muudab identiteete.
-- `keyName`: seadistatud API-võtme nimi, mis avaldab tahtlikult selle operaatori määratud sildi.
-- `none`: kasutaja ID puudub. Seansisildid eksporditakse endiselt, kui need on olemas; need režiimid ei
-  anonüümi suvalist viibasisu ega operaatori antud seansi-/korrelatsioonisilte.
+  iga sihtkoha jaoks loodud 32-baidise soolaga. Sool genereeritakse loomisel, kui see puudub, krüpteeritakse
+  nimega `identitySalt`, seda ei tagastata ja see säilitatakse redigeerimiste ajal. Toorvõtmete ID-sid ei panda kunagi
+  span'i atribuutidesse. Sihtkoha soola uuesti loomine/pööramine muudab identiteete.
+- `keyName`: konfigureeritud API-võtme nimi, mis paljastab tahtlikult selle operaatori määratud sildi.
+- `none`: kasutaja ID puudub. Seansi sildid eksporditakse nende olemasolu korral endiselt; need režiimid ei
+  anonümiseeri suvalist viiba sisu ega operaatori antud seansi-/korrelatsioonisilte.
 
-### Alustamine ilma ajalooliste andmete järeltäiteta
+### Alustamine ilma tagasitäiteta
 
-Ainult loomisel lubage **Alusta praegusest asukohast (jäta olemasolevad logid vahele)** või edastage
-`startFromCurrentPosition: true` loomise API-päringu andmete ülatasemel. See lähtestab
-`cursor_row_id` säilitatud kutselogi praegusele suurimale rowid väärtusele, kasutades olemasolevaid kursori
-abifunktsioone ja ilma migratsioonita. Vaikeväärtus on false (kursor 0 ja säilitatud ajaloo järeltäide).
-See ei ole uuendamisel kasutatav kursori lähtestamise säte.
+Ainult loomisel lubage **Alusta praegusest positsioonist (jäta olemasolevad logid vahele)** või edastage
+`startFromCurrentPosition: true` loomise API kasuliku koormuse tipptasemel. See lähtestab
+`cursor_row_id` praegu säilitatava kõnelogi rea maksimaalsele rowid-väärtusele, kasutades olemasolevaid kursori
+abifunktsioone ja ilma migratsioonita. Vaikimisi on väärtus false (kursor 0 ja säilitatud ajaloo tagasitäide).
+See ei ole värskendamise ajal kasutatav kursori lähtestamise seadistus.
 
-Ühise `ttftMs` lisandusega lisatakse ka nullväärtust lubav veerg `ttft_ms` BigQuery vastendajasse
-ja uue tabeli skeemi: selle skeemitest nõuab, et igal kanoonilise kirje väljal oleks vastav
-veerg. Olemasolevate tabelite eksport jätkub muutumatult: `prepare()` loeb tabeli skeemi ja
-jätab välja ainult `ttft_ms`, kui see veerg puudub. Lisage nullväärtust lubav INT64 veerg, et saada TTFT
-järgmisel käivitusel, või kasutage uut tabelit. PATCH, automaatne skeemimuudatus ega täiendavad
-õigused pole vajalikud; kõigi ülejäänud reaväljade puhul säilib range skeemikontroll.
+Ühise `ttftMs`-i lisamine lisab BigQuery vastendusse ja uue tabeli skeemi ka tühistatava
+`ttft_ms`-i veeru: skeemitest nõuab, et igal kanoonilisel kirjeväljal oleks veerg. Olemasolevad tabelid jätkavad
+muutumatut eksportimist: `prepare()` loeb tabeli skeemi ja jätab `ttft_ms`-i välja ainult siis, kui see veerg puudub.
+TTFT saamiseks järgmisel käivitamisel lisage tühistatav INT64-veerg või kasutage uut tabelit. Valikuline TTFT-veerg
+ei käivita skeemi uuendamist. Kasutusandmete tõendamise veerud järgivad allpool kirjeldatud tingimuslikku,
+osalemiseks lubamist nõudvat ühilduvusvoogu; teiste rea väljade puhul säilib range skeemikontroll.
 
 ---
 
@@ -486,15 +496,29 @@ Kaks reeglit uue sihtkoha jaoks:
 
 ---
 
-## 7. Kasutamine
+## 7. Selle kasutamine
 
-- **Töölaud**: Integratsioonid → Logide eksport. Lisa sihtkoht, käivita **Test**, et kontrollida pääsuandmeid
-  ilma ridu kirjutamata, ning seejärel luba sihtkoht.
-- **Töötlemisjärjekord**: iga sihtkoha kaart näitab ootel ridu ja kursorit; `GET
-/api/log-export/status` tagastab samad näitajad koos viimase 20 töö käivitusega.
-- **Ühe sihtkoha tõrge ei põhjusta teiste ebaõnnestumist** — käivituse kokkuvõte salvestab iga sihtkoha
-  oleku väljadesse `last_status` / `last_error` ning töö käivituste ajalugu säilitab koondtulemuse.
-- **Sihtkoha kustutamine kustutab ka selle kursori.** Selle uuesti lisamisel alustatakse vanimast säilitatud
-  kutselogist, mistõttu saadetakse uuesti read, mis võivad sihtkohas juba olemas olla. BigQuery puhul
-  väldib reapõhine `insertId` seda ainult BigQuery enda duplikaatide eemaldamise ajaakna piires, seega eelista
-  sihtkoha keelamist selle kustutamisele.
+- **Armatuurlaud**: Integratsioonid → Logi eksport. Lisage sihtkoht, käivitage **Test**, et mandaate
+  kontrollida ridu kirjutamata, seejärel lubage see.
+- **Mahajäämus**: iga sihtkoha kaart näitab ootel ridu ja kursorit; `GET
+/api/log-export/status` tagastab samad näitajad ning viimased 20 töö käivitamist.
+- **Ühe sihtkoha tõrge ei põhjusta teiste tõrget** — käivituse kokkuvõte salvestab sihtkohapõhise
+  oleku väljades `last_status` / `last_error` ning töö käivitamise ajalugu säilitab koondtulemuse.
+- **Sihtkoha kustutamisel kustutatakse selle kursor.** Selle uuesti lisamisel alustatakse vanimast säilitatud
+  kõnelogist, mistõttu saadetakse uuesti read, mis võivad sihtkohas juba olemas olla. BigQuery puhul
+  kõrvaldab rea `insertId` selle mõju ainult BigQuery enda duplikaatide eemaldamise akna jooksul, seega
+  eelistage sihtkoha kustutamisele selle keelamist.
+
+### Kasutustõendi skeemi ühilduvus
+
+Uued BigQuery tabelid sisaldavad nullväärtust lubavaid välju `usage_evidence` (STRING, mis sisaldab JSON-i) ja
+`usage_estimated` (BOOL). Kui `autoCreate` on lubatud, saab olemasolev tabel juurde ainult need puuduvad
+nullväärtust lubavad veerud. Eksportija säilitab kogu olemasoleva skeemi, sealhulgas välja metaandmed, ning
+saadab tagastatud etagi abil tingimusliku PATCH-päringu. Samaaegne skeemimuudatus põhjustab ekspordi
+nurjumise selle ülekirjutamise asemel; järgmisel käivitamisel loetakse tabel uuesti.
+
+Kui `autoCreate` on keelatud, lisage need veerud enne kasutustõenditega kirjete eksportimist ise.
+Puuduvad skeemi- või etagi metaandmed või ebaõnnestunud värskendus takistavad samuti tõendit sisaldavate
+kirjete lisamist. Ekspordi kursor ei liigu selle tõrke korral edasi ja tõendeid ei jäeta kunagi
+vaikselt kõrvale. Kohaliku logi säilitamise reeglid kehtivad ka ekspordi blokeerimise ajal, seega
+lahendage tõrge enne säilitatud lähtereadude aegumist.
