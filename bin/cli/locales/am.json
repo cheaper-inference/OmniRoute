@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "ገደቡ አዎንታዊ ኢንቲጀር መሆን አለበት።",
     "error": "ስህተት፦ {message}",
     "serverOffline": "የOmniRoute አገልጋይ ከመስመር ውጭ ነው። በዚህ ያስጀምሩት፦ omniroute serve",
     "authRequired": "ማረጋገጫ ያስፈልጋል። OMNIROUTE_API_KEY ያዘጋጁ ወይም ይህን ያስኪዱ፦ omniroute setup",

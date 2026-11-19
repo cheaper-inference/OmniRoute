@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Limit musbat butun son boʻlishi kerak.",
     "error": "Xato: {message}",
     "serverOffline": "OmniRoute serveri oflayn. Uni quyidagi buyruq bilan ishga tushiring: omniroute serve",
     "authRequired": "Autentifikatsiya talab qilinadi. OMNIROUTE_API_KEY ni sozlang yoki quyidagi buyruqni bajaring: omniroute setup",

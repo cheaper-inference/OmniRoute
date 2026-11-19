@@ -11,7 +11,7 @@
  */
 
 import { RateLimitReason } from "../config/constants.ts";
-import { parseDayGranularityResetMs } from "./quotaResetParsing.ts";
+import { parseDayGranularityResetMs, parseIsoDateTimeResetMs } from "./quotaResetParsing.ts";
 
 type RateLimitReasonValue = (typeof RateLimitReason)[keyof typeof RateLimitReason];
 
@@ -20,6 +20,9 @@ export interface QuotaTextFallback {
   cooldownMs: number;
   reason: RateLimitReasonValue;
   usedUpstreamRetryHint?: boolean;
+  /** Mirrors accountFallback.ts's RetryHintProvenance — kept local to avoid a circular import. */
+  retryHintSource?:
+    "header" | "google_rpc_retry_info" | "body" | "body_structured" | "body_iso_reset";
   quotaResetHintMs?: number;
 }
 
@@ -63,32 +66,44 @@ export function isSubscriptionQuotaText(lower: string, provider?: string | null)
 
 export const SUBSCRIPTION_QUOTA_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 
+/** Same value space as accountFallback.ts's RetryHintProvenance (kept local to avoid a circular import). */
+export type QuotaTextHintProvenance =
+  "header" | "google_rpc_retry_info" | "body" | "body_structured" | "body_iso_reset";
+
 /**
  * Builds the QUOTA_EXHAUSTED fallback for the subscription-quota text above.
  * Honor upstream Retry-After / reset hints only when the caller's profile
- * enables them (via `getUpstreamRetryHintMs`); otherwise apply a local 1h
+ * enables them (via `getUpstreamRetryHint`); otherwise apply a local 1h
  * cooldown so all Pro accounts on the same subscription tier stop cycling
  * through tight retries. (We deliberately do not use COOLDOWN_MS.paymentRequired
  * — that constant is 2 minutes, shorter than the recovery time of a
  * subscription quota.)
  *
- * `getUpstreamRetryHintMs`/`parseRetryFromErrorText` are injected by the
- * caller (accountFallback.ts) to avoid importing back into that file.
+ * `getUpstreamRetryHint` (whole hint, so the provenance survives to callers:
+ * auth.ts's per-model 402/403 branch treats only an actually-applied upstream
+ * hint as authoritative when shortening a lock) and `parseRetryFromErrorText`
+ * are injected by the caller (accountFallback.ts) to avoid importing back into that file.
  */
 export function buildSubscriptionQuotaFallback(
   errorStr: string,
-  getUpstreamRetryHintMs: () => number | null,
+  getUpstreamRetryHint: () => { retryAfterMs: number; provenance: QuotaTextHintProvenance } | null,
   parseRetryFromErrorText: (text: string, provider?: string | null) => number | null,
-  provider?: string | null
+  provider?: string | null,
+  detectRetryHint?: () => { retryAfterMs: number; provenance: QuotaTextHintProvenance } | null
 ): QuotaTextFallback | null {
   if (!isSubscriptionQuotaText(errorStr.toLowerCase(), provider)) return null;
-  const hintMs = getUpstreamRetryHintMs();
-  const bodyHint = parseRetryFromErrorText(errorStr, provider);
+  const hint = getUpstreamRetryHint();
+  const detected = detectRetryHint ? detectRetryHint() : null;
+  const bodyHint = detected?.retryAfterMs ?? parseRetryFromErrorText(errorStr, provider);
   return {
     shouldFallback: true,
-    cooldownMs: hintMs ?? SUBSCRIPTION_QUOTA_COOLDOWN_MS,
+    cooldownMs: hint?.retryAfterMs ?? SUBSCRIPTION_QUOTA_COOLDOWN_MS,
     reason: RateLimitReason.QUOTA_EXHAUSTED,
-    usedUpstreamRetryHint: Boolean(hintMs),
+    usedUpstreamRetryHint: Boolean(hint?.retryAfterMs),
+    // Keep the applied hint's provenance: callers decide which cooldowns may shorten
+    // an existing lock from provenance, and a locally scaled cooldown (no applied
+    // hint) must never look authoritative (#CO-402 review).
+    retryHintSource: hint?.provenance ?? detected?.provenance,
     quotaResetHintMs: bodyHint ?? undefined,
   };
 }
@@ -141,11 +156,21 @@ export function buildWeeklyQuotaFallback(
     typeof parsedResetMs === "number" && parsedResetMs > 0
       ? parsedResetMs
       : WEEKLY_QUOTA_COOLDOWN_MS;
+  // Provenance follows the selected hint: a "resets in N days" countdown wins over an ISO
+  // instant in parseDayGranularityResetMs and must stay capped by maxCooldownMs.
+  const isoResetMs = parseIsoDateTimeResetMs(
+    errorStr,
+    MAX_WEEKLY_QUOTA_COOLDOWN_MS,
+    nowMs,
+    provider
+  );
+  const isIso = isoResetMs !== null && isoResetMs === parsedResetMs;
   return {
     shouldFallback: true,
     cooldownMs,
     reason: RateLimitReason.QUOTA_EXHAUSTED,
     usedUpstreamRetryHint: typeof parsedResetMs === "number" && parsedResetMs > 0,
+    retryHintSource: isIso ? "body_iso_reset" : "body",
     quotaResetHintMs:
       typeof parsedResetMs === "number" && parsedResetMs > 0 ? parsedResetMs : undefined,
   };

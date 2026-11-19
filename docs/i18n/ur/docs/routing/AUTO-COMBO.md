@@ -187,36 +187,48 @@ curl -X POST http://localhost:20128/v1/chat/completions \
 
 اس دستاویز میں بیان کردہ اصل الجھن کے لیے [#7992](https://github.com/diegosouzapw/OmniRoute/issues/7992) اور [#7111](https://github.com/diegosouzapw/OmniRoute/issues/7111) دیکھیں۔
 
-## یہ کیسے کام کرتا ہے (محفوظ شدہ آٹو-کومبوز)
+## یہ کیسے کام کرتا ہے (محفوظ شدہ Auto-Combos)
 
-آٹو-کومبو انجن ایک **16-عنصری اسکورنگ فنکشن** (`open-sse/services/autoCombo/scoring.ts` میں متعین → `DEFAULT_WEIGHTS`) استعمال کرتے ہوئے ہر درخواست کے لیے متحرک طور پر بہترین فراہم کنندہ/ماڈل منتخب کرتا ہے۔ طے شدہ اوزان کا مجموعہ `1.0` ہے؛ حسبِ ضرورت اوزان کو `normalizeScoringWeights()` کے ذریعے دوبارہ معمول پر لایا جاتا ہے۔ سولہ میں سے دو — `cacheAffinity` اور `resetWindowAffinity` — کا طے شدہ وزن `0` ہے؛ `reliability` کا وزن `DEFAULT_WEIGHTS` میں `0`، مگر عمومی پیکس میں `0.03` اور `reliability-first` میں `0.04` ہے، جبکہ `quality` کا وزن پیکس میں `0.02` (`quality-first` میں `0.03`) ہے: پھر بھی ہر امیدوار کے لیے ان کا حساب لگایا جاتا ہے، اور `cacheAffinity` اسکور سے باہر پرامپٹ-کیش کی نقل ہٹانے کو کنٹرول کرتا ہے، لہٰذا صفر طے شدہ وزن والے عوامل بطورِ طے شدہ ووٹ نہیں دیتے، جبکہ پیکس ایسا کرتے ہیں۔
+Auto-Combo Engine ہر درخواست کے لیے **16 عوامل پر مشتمل اسکورنگ فنکشن** (جس کی تعریف `open-sse/services/autoCombo/scoring.ts` → `DEFAULT_WEIGHTS` میں ہے) استعمال کرتے ہوئے بہترین provider/model کو متحرک طور پر منتخب کرتا ہے۔ پہلے سے طے شدہ weights کا مجموعہ `1.0` ہے؛ حسبِ ضرورت weights کو `normalizeScoringWeights()` کے ذریعے دوبارہ معمول پر لایا جاتا ہے۔ سولہ میں سے دو — `cacheAffinity` اور `resetWindowAffinity` — کا پہلے سے طے شدہ weight `0` ہے؛ `reliability` کا `DEFAULT_WEIGHTS` میں `0`، عمومی packs میں `0.03`، اور `reliability-first` میں `0.04` ہے؛ جبکہ `quality` کا packs میں `0.02` (`quality-first` میں `0.03`) ہے: یہ سب ہر candidate کے لیے پھر بھی calculate کیے جاتے ہیں، اور `cacheAffinity` اسکور سے باہر prompt-cache deduplication کو کنٹرول کرتا ہے، اس لیے صفر والے default عوامل بطورِ default ووٹ نہیں دیتے، جبکہ packs ایسا کرتے ہیں۔
 
-![آٹو-کومبو کی 16-عنصری اسکورنگ](../diagrams/exported/auto-combo-scoring.svg)
+![Auto-Combo کے 16 عوامل پر مشتمل اسکورنگ](../diagrams/exported/auto-combo-scoring.svg)
 
-> ماخذ: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (`npm run docs:render-diagrams` کے ذریعے دوبارہ تیار کریں)۔ فائل کا نام تاریخی ہے؛ ماخذ اور رینڈر شدہ خاکہ `DEFAULT_WEIGHTS` میں متعین تمام 16 عوامل دکھاتے ہیں۔
+> ماخذ: [diagrams/auto-combo-scoring.mmd](../diagrams/auto-combo-scoring.mmd) (`npm run docs:render-diagrams` کے ذریعے دوبارہ تیار کریں)۔ فائل کا نام تاریخی ہے؛ ماخذ اور رینڈر کیا گیا diagram `DEFAULT_WEIGHTS` میں اعلان کردہ تمام 16 عوامل دکھاتے ہیں۔
 
-| عامل                  | طے شدہ وزن | وضاحت                                                                                                                                                                                                                                    |
-| :-------------------- | :--------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `quota`               | 0.1429     | باقی ماندہ کوٹہ / شرح کی حد کی اضافی گنجائش [0..1]                                                                                                                                                                                       |
-| `health`              | 0.1605     | سرکٹ بریکر سے حاصل کردہ صحت کا اسکور (CLOSED=1.0، HALF_OPEN=0.5، OPEN=0.0)                                                                                                                                                               |
-| `costInv`             | 0.1429     | **مخلوط** لاگت کا معکوس (60% اِن پٹ + 40% آؤٹ پٹ ٹوکن کی قیمت، معمول پر لائی گئی) — کم قیمت = زیادہ اسکور                                                                                                                                |
-| `latencyInv`          | 0.1143     | پول کے لحاظ سے معمول پر لائی گئی p95 تاخیر کا معکوس — زیادہ تیز = زیادہ اسکور                                                                                                                                                            |
-| `taskFit`             | 0.0762     | کام کی قسم سے مطابقت (کوڈنگ، جائزہ، منصوبہ بندی، تجزیہ، ڈیبگنگ، دستاویزات)                                                                                                                                                               |
-| `stability`           | 0.0476     | تاخیر کے معیاری انحراف سے حاصل کردہ تغیر پر مبنی استحکام — جس امیدوار کے جوابی وقت میں زیادہ اتار چڑھاؤ ہو، اسے کم اسکور ملتا ہے                                                                                                         |
-| `tierPriority`        | 0.0476     | اکاؤنٹ درجے کی ترجیح — Ultra=1.0، Pro=0.67، Standard=0.33، Free=0.0                                                                                                                                                                      |
-| `tierAffinity`        | 0.0476     | امیدوار کے درجے اور مینی فیسٹ کے تجویز کردہ درجے کے درمیان مناسبت                                                                                                                                                                        |
-| `specificityMatch`    | 0.0476     | درخواست کی تخصیص (مینی فیسٹ اشارہ) اور ماڈل کے درجے کے درمیان مطابقت                                                                                                                                                                     |
-| `contextAffinity`     | 0.0476     | درخواست کی سیاقی دریچے کی ضرورت اور ماڈل کے سیاقی دریچے کے درمیان مناسبت                                                                                                                                                                 |
-| `sessionAvailability` | 0.0476     | اس سیشن کے لیے امیدوار کنکشن کے OAuth سیشن کی دستیابی (`getOAuthSessionAvailability()`؛ غیر OAuth کنکشنز کو 1.0 اسکور ملتا ہے)                                                                                                           |
-| `connectionDensity`   | 0.0476     | ایک ہی فراہم کنندہ کے کنکشنز میں بوجھ تقسیم کرتا ہے (ارتکاز مخالف)                                                                                                                                                                       |
-| `cacheAffinity`       | 0.00       | اس کنکشن کی جانب رینڈے وو ہیش مناسبت، جس کے پاس اس درخواست کا پرامپٹ-کیش سابقہ پہلے سے موجود ہونے کا سب سے زیادہ امکان ہو (`open-sse/services/combo/promptCacheAffinity.ts`)؛ بطورِ طے شدہ غیر فعال (#8008)                              |
-| `resetWindowAffinity` | 0.00       | ان کنکشنز کی جانب جھکاؤ جن کا کوٹہ ری سیٹ دریچہ موافق ہو (بطورِ طے شدہ غیر فعال)                                                                                                                                                         |
-| `quality`             | 0.03       | روٹنگ-ایونٹ کوالٹی ٹریکر سے حاصل کردہ، فیڈبیک پر مبنی آؤٹ پٹ معیار کا اشارہ؛ مشاہدات سے محروم امیدواروں کو غیر جانب دار 0.5 ملتا ہے                                                                                                      |
-| `reliability`         | 0.00       | استعمال کی 24 گھنٹے کی سرگزشت سے، دس نمونوں کی کم از کم حد کے بعد، مشاہدہ شدہ کامیابی کا حصہ، `1 - failureRate` (بصورتِ دیگر حقیقی وقتی میٹرکس)؛ جن امیدواروں کے کوئی مشاہدات نہ ہوں، ان کی قدر 1.0 سمجھی جاتی ہے۔ بطورِ طے شدہ غیر فعال |
+| عامل                  | پہلے سے طے شدہ Weight | تفصیل                                                                                                                                                                                                                                    |
+| :-------------------- | :-------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `quota`               | 0.1429                | باقی ماندہ quota / rate-limit headroom [0..1]                                                                                                                                                                                            |
+| `health`              | 0.1605                | circuit breaker سے حاصل کردہ health score (CLOSED=1.0، HALF_OPEN=0.5، OPEN=0.0)                                                                                                                                                          |
+| `costInv`             | 0.1429                | معکوس **blended** لاگت (60% input + 40% output token price، معمول پر لائی گئی) — کم لاگت = زیادہ اسکور                                                                                                                                   |
+| `latencyInv`          | 0.1143                | pool کے مطابق معمول پر لائی گئی معکوس p95 latency — زیادہ تیز = زیادہ اسکور                                                                                                                                                              |
+| `taskFit`             | 0.0762                | task-type fitness (coding، review، planning، analysis، debugging، docs)                                                                                                                                                                  |
+| `stability`           | 0.0476                | latency standard deviation سے حاصل کردہ variance-based stability — جس candidate کے response time میں زیادہ اتار چڑھاؤ ہو، اس کا اسکور کم ہوتا ہے                                                                                         |
+| `tierPriority`        | 0.0476                | account-tier priority — Ultra=1.0، Pro=0.67، Standard=0.33، Free=0.0                                                                                                                                                                     |
+| `tierAffinity`        | 0.0476                | candidate کے tier اور manifest کی تجویز کردہ tier کے درمیان affinity                                                                                                                                                                     |
+| `specificityMatch`    | 0.0476                | درخواست کی specificity (manifest hint) اور model tier کے درمیان مطابقت                                                                                                                                                                   |
+| `contextAffinity`     | 0.0476                | درخواست کی context-window ضرورت اور model کی context window کے درمیان affinity                                                                                                                                                           |
+| `sessionAvailability` | 0.0476                | اس session کے لیے candidate connection کی OAuth session availability (`getOAuthSessionAvailability()`؛ non-OAuth connections کا اسکور 1.0 ہوتا ہے)                                                                                       |
+| `connectionDensity`   | 0.0476                | ایک ہی provider کی connections کے درمیان load تقسیم کرتا ہے (anti-concentration)                                                                                                                                                         |
+| `cacheAffinity`       | 0.00                  | اس connection کی طرف Rendezvous-hash affinity جس کے پاس اس درخواست کا prompt-cache prefix پہلے سے موجود ہونے کا سب سے زیادہ امکان ہو (`open-sse/services/combo/promptCacheAffinity.ts`)؛ بطورِ default غیر فعال (#8008)                  |
+| `resetWindowAffinity` | 0.00                  | ان connections کی طرف جھکاؤ جن کی quota reset window سازگار ہو (بطورِ default غیر فعال)                                                                                                                                                  |
+| `quality`             | 0.03                  | routing-event quality tracker سے حاصل کردہ feedback-driven output-quality signal؛ جن candidates کے بارے میں observations نہ ہوں انہیں neutral 0.5 ملتا ہے                                                                                |
+| `reliability`         | 0.00                  | دس samples کی کم از کم حد کے پیچھے 24 گھنٹے کی usage history سے مشاہدہ شدہ success share، `1 - failureRate` (بصورتِ دیگر real-time metrics)؛ جن candidates کے بارے میں observations نہ ہوں ان کی قدر 1.0 ہوتی ہے۔ بطورِ default غیر فعال |
 
-`quality` (`open-sse/services/routing/quality.ts`): `cold restart → ∅`; `observations = 0 → score 0.5`.
+in-memory `quality` tracker (`open-sse/services/routing/quality.ts`) cold restart
+کے بعد خالی ہوتا ہے، اس لیے پہلے
+observations درج ہونے تک ہر candidate کا اسکور neutral `0.5` رہتا ہے۔
 
-**مجموعہ:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0`، جیسا کہ `DEFAULT_WEIGHTS` میں متعین ہے؛ اسکورنگ سے پہلے صارف کے ترتیب دیے گئے اوزان کو `normalizeScoringWeights()` کے ذریعے دوبارہ معمول پر لا کر ایک تقسیم میں بدلا جاتا ہے۔
+> **ناقابلِ مطالعہ کوٹا (#15347)۔** جب کسی provider کے پاس quota fetcher موجود ہو لیکن وہ پڑھنے کے قابل کچھ واپس نہ کرے
+> (fetch ناکام ہو، credentials غائب ہوں، usage صرف message پر مشتمل ہو، یا snapshot malformed ہو اور اس میں
+> parseable `windows` بھی نہ ہوں اور finite `percentUsed` بھی نہ ہو، جس میں `percentUsed: null` بھی شامل ہے)، تو candidate
+> `quota` axis پر `0` اسکور کرتا ہے اور اس کا حتمی اسکور `UNREADABLE_QUOTA_SOFT_DEPRIORITIZE_FACTOR` (0.5، `autoStrategy.ts`) سے
+> ضرب پاتا ہے؛ یہ connection-status penalty جیسا ہی soft-penalty pattern ہے۔ ناکام usage read، provider کے بارے میں نہیں بلکہ
+> telemetry کے بارے میں ثبوت ہے، اس لیے یہ کسی بھی حقیقی reading سے، حتیٰ کہ تصدیق شدہ 100%-used reading سے بھی، سختی سے نیچے
+> rank ہوتا ہے، لیکن اسے کبھی hard-block یا evict نہیں کیا جاتا۔ جس provider کی کوئی cap نہیں ہوتی وہ `unlimited: true` رپورٹ کرتا ہے
+> اور اسے مکمل quota اسکور ملتا ہے؛ جس provider کے لیے کوئی quota fetcher رجسٹرڈ نہیں ہوتا، اس کے پاس telemetry source بالکل نہیں
+> ہوتا اور وہ `100` کی default قدر برقرار رکھتا ہے۔
+
+**مجموعہ:** `0.1429 + 0.1605 + 0.1429 + 0.1143 + 0.0762 + (7 × 0.0476) + 0.00 + 0.00 + 0.03 + 0.00 = 1.0` جیسا کہ `DEFAULT_WEIGHTS` میں ظاہر کیا گیا ہے؛ صارف کی جانب سے ترتیب دی گئی weights کو scoring سے پہلے `normalizeScoringWeights()` کے ذریعے ایک distribution میں دوبارہ normalize کیا جاتا ہے۔
 
 ## موڈ پیکس
 
@@ -278,53 +290,71 @@ curl -sS http://localhost:20128/v1/chat/completions \
 `config.budgetFallback` ان پٹس کو فراہم کی جاتی ہیں۔ کسی کومبو کی محفوظ شدہ `config.budgetFallback` ("strict" |
 "cheapest") مستقل پالیسی متعین کرتی ہے؛ ہیڈر ایک واحد درخواست کے لیے اسے اوور رائیڈ کرتا ہے۔
 
-## تمام روٹنگ کی حکمت عملی
+## تمام روٹنگ حکمتِ عملیاں
 
-OmniRoute کا کومبو انجن سپورٹ کرتا ہے۔** 20 روٹنگ کی حکمت عملی** ( `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` میں اعلان کیا گیا)۔ آٹو کومبو انجن خود `auto` حکمت عملی کے تحت سامنے آیا ہے۔ دوسرے مستقل کمبوس کے لیے دستیاب ہیں۔
+OmniRoute کا کومبو انجن **22 روٹنگ حکمتِ عملیوں** کو سپورٹ کرتا ہے (جن کا اعلان `src/shared/constants/routingStrategies.ts` → `ROUTING_STRATEGY_VALUES` میں کیا گیا ہے)۔ Auto Combo انجن خود `auto` حکمتِ عملی کے تحت دستیاب ہے؛ باقی حکمتِ عملیاں محفوظ شدہ کومبو کے لیے دستیاب ہیں۔
 
-| حکمت عملی           | تفصیل                                                                                                                                                                                       |
-| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `priority`          | واضح ترجیح کے ساتھ پہلے ہدف کی ترتیب دی گئی فہرست                                                                                                                                           |
-| `weighted`          | فی ہدف وزن کے لحاظ سے بے ترتیب وزن                                                                                                                                                          |
-| `round-robin`       | اہداف کے ذریعے ترتیب سے چکر لگائیں (بیچڈ؛ نیچے دیکھیں)                                                                                                                                      |
-| `context-relay`     | اہداف میں سیاق و سباق کو ہینڈ آف کریں (طویل گفتگو)                                                                                                                                          |
-| `fill-first`        | اگلے پر جانے سے پہلے ہر ہدف کا کوٹہ پُر کریں۔                                                                                                                                               |
-| `p2c`               | Power-of-2-choices بے ترتیب بوجھ کا توازن                                                                                                                                                   |
-| `random`            | یکساں بے ترتیب انتخاب                                                                                                                                                                       |
-| `least-used`        | کم ترین موجودہ بوجھ کے ساتھ ہدف کا انتخاب کریں۔                                                                                                                                             |
-| `cost-optimized`    | کیٹلاگ کی قیمتوں کے مطابق فی درخواست $ کو کم سے کم کریں۔                                                                                                                                    |
-| `reset-aware` ⭐    | کوٹہ ری سیٹ ٹائم کے لحاظ سے ترجیح دیں — مختصر ری سیٹ ونڈوز کو اونچا درجہ دیا گیا۔                                                                                                           |
-| `reset-window`      | ان اہداف کو ترجیح دیں جن کا کوٹہ ونڈو جلد از جلد دوبارہ سیٹ ہو جائے۔                                                                                                                        |
-| `headroom`          | سب سے زیادہ باقی کوٹہ ہیڈ روم کے ساتھ ہدف کا انتخاب کریں۔                                                                                                                                   |
-| `quota-weighted`    | ختم شدہ اکاؤنٹس کو چھوڑیں، پھر باقی میں سے کوٹہ کے تناسب سے منتخب کریں جو فلائٹ بوجھ سے تقسیم کیا گیا ہے۔ موجودہ بات چیت پن رہتی ہے۔                                                        |
-| `strict-random`     | دہرائے جانے کی نقل کے بغیر بے ترتیب                                                                                                                                                         |
-| `auto`              | آٹو کومبو اسکورنگ (16 فیکٹر) — استعمال کریں۔** سفارش کی**                                                                                                                                   |
-| `lkgp`              | آخری معروف-اچھا راستہ (آخری کامیاب فراہم کنندہ کو پن کرتا ہے، پھر قواعد پر واپس آتا ہے)                                                                                                     |
-| `context-optimized` | موجودہ سیاق و سباق کے سائز کے لیے بہترین فٹ کے ساتھ ہدف کا انتخاب کریں۔                                                                                                                     |
-| `cache-optimized`   | اہداف کو فوری طور پر کیش affinity — کے ذریعے دوبارہ ترتیب دیں اس درخواست کے کیشڈ سابقہ کو پہلے سے ہی رکھنے کا امکان سب سے پہلے ہے (`open-sse/services/combo/promptCacheAffinity.ts`, #8008) |
-| `fusion` 🧬         | متوازی طور پر ماڈلز کے پینل کی طرف فین آؤٹ کریں، پھر جج کے ذریعے ایک جواب کی ترکیب کریں (نیچے دیکھیں)                                                                                       |
-| `pipeline`          | اہداف کو ترتیب وار چلائیں، ہر قدم کے آؤٹ پٹ کو اگلے مرحلے کے ان پٹ میں تھریڈ کرتے ہوئے؛ صرف آخری جواب دیا جاتا ہے (#6396)                                                                   |
+| Strategy            | Description                                                                                                                                                                                                                           |
+| :------------------ | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `priority`          | واضح ترجیح کے ساتھ پہلے ہدف کی ترتیب وار فہرست                                                                                                                                                                                        |
+| `weighted`          | ہر ہدف کے وزن کے مطابق وزنی بے ترتیب انتخاب                                                                                                                                                                                           |
+| `round-robin`       | اہداف میں ترتیب کے ساتھ باری باری چکر لگائیں (بیچز میں؛ ذیل میں دیکھیں)                                                                                                                                                               |
+| `context-relay`     | اہداف کے درمیان کانٹیکسٹ منتقل کریں (طویل گفتگو کے لیے)                                                                                                                                                                               |
+| `fill-first`        | اگلے ہدف کی طرف جانے سے پہلے ہر ہدف کا کوٹا مکمل کریں                                                                                                                                                                                 |
+| `p2c`               | پاور-آف-2-چوائسز پر مبنی بے ترتیب لوڈ بیلنسنگ                                                                                                                                                                                         |
+| `random`            | یکساں امکان کے ساتھ بے ترتیب انتخاب                                                                                                                                                                                                   |
+| `least-used`        | موجودہ طور پر سب سے کم لوڈ والے ہدف کا انتخاب کریں                                                                                                                                                                                    |
+| `cost-optimized`    | کیٹلاگ کی قیمتوں کے مطابق فی درخواست لاگت کو کم سے کم کریں                                                                                                                                                                            |
+| `reset-aware` ⭐    | کوٹے کے ری سیٹ کے وقت کے مطابق ترجیح دیں — مختصر ری سیٹ ونڈوز کو زیادہ درجہ دیا جاتا ہے                                                                                                                                               |
+| `reset-window`      | ایسے اہداف کو ترجیح دیں جن کی کوٹا ونڈو سب سے پہلے ری سیٹ ہوتی ہے                                                                                                                                                                     |
+| `expiry-first`      | پہلے اس اکاؤنٹ کا کوٹا استعمال کریں جو بصورتِ دیگر بغیر استعمال کے ختم ہو جاتا — سب سے زیادہ بچا ہوا کوٹا اور قریب ترین ری سیٹ کی آخری تاریخ پہلے آتی ہے                                                                              |
+| `headroom`          | سب سے زیادہ باقی ماندہ کوٹا گنجائش والے ہدف کا انتخاب کریں                                                                                                                                                                            |
+| `quota-weighted`    | ختم شدہ اکاؤنٹس کو چھوڑ دیں، پھر باقی اہداف میں بچا ہوا کوٹا تقسیم بر زیرِعمل لوڈ کے تناسب سے انتخاب کریں؛ موجودہ گفتگوئیں اپنے ہدف کے ساتھ منسلک رہتی ہیں                                                                            |
+| `strict-random`     | تکرار کو منفرد بنائے بغیر بے ترتیب انتخاب                                                                                                                                                                                             |
+| `auto`              | Auto Combo اسکورنگ (16 عوامل) استعمال کریں — **تجویز کردہ**                                                                                                                                                                           |
+| `lkgp`              | آخری معلوم قابلِ اعتماد راستہ (آخری کامیاب فراہم کنندہ کے ساتھ منسلک رہتا ہے، پھر قواعد پر واپس آتا ہے)                                                                                                                               |
+| `context-optimized` | موجودہ کانٹیکسٹ کے حجم کے لیے بہترین موزوں ہدف کا انتخاب کریں                                                                                                                                                                         |
+| `cache-optimized`   | پرامپٹ-کیش وابستگی کے مطابق اہداف کو دوبارہ ترتیب دیں — جس کنکشن کے پاس اس درخواست کا کیش شدہ سابقہ پہلے سے موجود ہونے کا سب سے زیادہ امکان ہو، اسے پہلے آزمایا جاتا ہے (`open-sse/services/combo/promptCacheAffinity.ts`, #8008)     |
+| `fusion` 🧬         | ماڈلز کے ایک پینل کو متوازی طور پر چلائیں، پھر جج کے ذریعے ایک جواب تیار کریں (ذیل میں دیکھیں)                                                                                                                                        |
+| `pipeline`          | اہداف کو یکے بعد دیگرے چلائیں، ہر مرحلے کے آؤٹ پٹ کو اگلے مرحلے کے اِن پٹ میں منتقل کریں؛ صرف آخری جواب واپس کیا جاتا ہے (#6396)                                                                                                      |
+| `jev`               | صارف کی درجہ بند ترجیحی فہرست؛ TypeSafe Jev طے کرتا ہے کہ اس درخواست کے لیے کون سی اندراجات چلیں گی۔ فاتح پہلے آتا ہے، دیگر منظور شدہ اہداف صارف کی ترتیب برقرار رکھتے ہیں۔ Jev دستیاب نہ ہو تو صارف کی ترتیب پر واپس آتا ہے (#15276) |
 
 ⭐ = v3.8.0 میں نیا · 🧬 = v3.8.36 میں نیا
 
-### `weighted` سیمنٹکس
+### `weighted` کے مفاہیم
 
-`weighted` ہے a** متناسب بے ترتیب قرعہ اندازی فی درخواست** (`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`)، ایک برابری نہیں:
+`weighted` **ہر درخواست کے لیے متناسب بے ترتیب انتخاب** ہے
+(`open-sse/services/combo/targetSorters.ts` → `selectWeightedTarget`)، نہ کہ مساوی تقسیم کرنے والا طریقہ:
 
-- ہر درخواست ڈرا کرتی ہے۔** ایک** امکان کے ساتھ قدم `weight / totalWeight`; بقیہ مراحل اس درخواست کے لیے فال بیک چین کے طور پر نزولی وزن کے ذریعے ترتیب دیے گئے ہیں۔
-- ایک قدم جس کا وزن `0` (یا غائب) ہے۔** کبھی نہیں کھینچا** جب کہ کسی دوسرے قدم کا وزن > 0 — ہوتا ہے یہ تیار کردہ قدم کے ناکام ہونے کے بعد ہی فال بیک کے طور پر کام کر سکتا ہے۔ صرف جب** تمام** وزن 0 ہے کیا انتخاب یکساں ہو جاتا ہے۔
-- وہ اقدامات جن کے اہداف تمام دستیاب نہیں ہیں — فراہم کنندہ سرکٹ بریکر `OPEN`، کنکشن کولڈاؤن، ماڈل لاک آؤٹ — ہونے سے پہلے ہی قرعہ اندازی سے ہٹا دیا جاتا ہے (`open-sse/services/combo/targetResolution.ts`)، اس لیے ایک صحت مند قدم عارضی طور پر ہر درخواست کو جیت سکتا ہے۔
-- `stickyWeightedLimit` (combo config، default `1` = آف) دوبارہ ڈرائنگ سے پہلے مسلسل کامیابیوں کے لیے تیار کردہ قدم کو پن کرتا ہے۔
+- ہر درخواست احتمال `weight / totalWeight` کے ساتھ **ایک** مرحلہ منتخب کرتی ہے؛ باقی مراحل اس درخواست کے لیے fallback chain کے طور پر وزن کی نزولی ترتیب میں رہتے ہیں۔
+- جس مرحلے کا وزن `0` ہو (یا موجود نہ ہو)، اسے اس وقت **کبھی منتخب نہیں کیا جاتا** جب کسی دوسرے مرحلے کا وزن > 0 ہو — یہ صرف منتخب مرحلے کی ناکامی کے بعد fallback کے طور پر کام کر سکتا ہے۔ صرف اس صورت میں جب **تمام** وزن 0 ہوں، انتخاب uniform ہو جاتا ہے۔
+- جن مراحل کے تمام targets دستیاب نہ ہوں — provider circuit breaker `OPEN`، connection cooldown، model lockout — انہیں انتخاب سے پہلے ہٹا دیا جاتا ہے
+  (`open-sse/services/combo/targetResolution.ts`)، اس لیے ایک صحت مند مرحلہ عارضی طور پر ہر درخواست جیت سکتا ہے۔
+- `stickyWeightedLimit` (combo config، default `1` = off) منتخب مرحلے کو دوبارہ انتخاب کرنے سے پہلے اتنی مسلسل کامیابیوں تک برقرار رکھتا ہے۔
 
-سخت گردش کے لیے `round-robin` استعمال کریں۔ `weighted` پر مساوی وزن شماریاتی — دیتا ہے نہ کہ سخت — توازن۔
+سخت rotation کے لیے `round-robin` استعمال کریں؛ `weighted` میں مساوی weights شماریاتی — نہ کہ سخت — توازن فراہم کرتے ہیں۔
 
-### ایجنٹی پائپ لائن موڈ
+### Agentic pipeline mode
 
-کم از کم دو ماڈلز والا `pipeline` کومبو `config.agenticOrchestration.enabled` کے ساتھ planner/executor روٹنگ کا انتخاب کر سکتا ہے۔ پہلا ہدف منصوبہ بندی اور حتمی جوابات کا مالک ہے۔ دوسرا ہدف کلائنٹ کی مقامی ٹول کالز کا اخراج کرتا ہے۔ OmniRoute درخواست کے پروٹوکول سے ٹول کے نتائج کے تسلسل کا پتہ لگاتا ہے، منصوبہ ساز سے پوچھتا ہے کہ آیا کسی اور ٹول راؤنڈ کی ضرورت ہے، اور متحرک طور پر یا تو ایگزیکیوٹر یا پلانر کو کلائنٹ کا سامنا کرنے والا آخری مرحلہ بناتا ہے۔
+کم از کم دو models والا `pipeline` combo، `config.agenticOrchestration.enabled` کے ذریعے planner/executor routing اختیار کر سکتا ہے۔ پہلا target planning اور حتمی جوابات کا ذمہ دار ہوتا ہے؛ دوسرا target client-native tool calls جاری کرتا ہے۔ OmniRoute درخواست کے protocol سے tool-result continuations کا پتا لگاتا ہے، planner سے پوچھتا ہے کہ آیا ایک اور tool round درکار ہے، اور executor یا planner میں سے کسی ایک کو client-facing حتمی مرحلہ متحرک طور پر بناتا ہے۔
 
-ٹول کے نتائج کے تسلسل پر، OmniRoute اس وقت بھی عمل درآمد روک دیتا ہے جب لگاتار دو مکمل راؤنڈز ایک ہی ٹول کالز کو غیر تبدیل شدہ نتائج کے ساتھ دہراتے ہیں، یا جب مسلسل دو راؤنڈز میں ہر واضح طور پر نشان زد نتیجہ ناکام ہو جاتا ہے۔ تبدیل شدہ نتائج بار بار کال کرنے کی اجازت دیتے ہیں (مثال کے طور پر، پولنگ)۔ گارڈ ایک تازہ صارف کی درخواست پر دوبارہ سیٹ کرتا ہے، متوازی کالوں کو ایک راؤنڈ میں گروپ کرتا ہے، اور Anthropic، چیٹ کی تکمیل، جوابات اور Gemini ہسٹری کو سپورٹ کرتا ہے۔ منصوبہ ساز کو وجہ موصول ہوتی ہے اور حتمی جواب کا مالک ہوتا ہے چاہے وہ کسی دوسرے ٹول راؤنڈ کی درخواست کرے۔
+اختیاری `config.agenticOrchestration.contextCompaction` ہر planner یا executor dispatch سے پہلے الگ payload budget لاگو کرتا ہے۔ اسے واضح طور پر فعال کریں:
 
-دوسرے ہدف کے بعد اضافی ماڈلز کو ایگزیکٹو بیک اپ کا حکم دیا جاتا ہے۔ ایک ناکام HTTP جواب یا نقل و حمل کی استثنیٰ اگلے ایگزیکیوٹر کی طرف پیش قدمی کرتی ہے، جس میں وہی منصوبہ ساز فیصلہ اور مقامی ٹولز ہوتے ہیں لیکن اس ایگزیکیوٹر کا اپنا قدم فوری اور حل شدہ کنکشن ہوتا ہے۔ پہلا کامیاب جواب بغیر تبدیلی کے واپس کر دیا گیا، بشمول SSE سٹریمنگ؛ کامیاب سلسلہ شروع ہونے کے بعد ناکامیوں کی یہاں دوبارہ کوشش نہیں کی جا سکتی۔ اگر تمام ایگزیکیوٹرز ناکام ہو جاتے ہیں، تو آخری ناکامی واپس آ جاتی ہے۔ کلائنٹ اسقاط حمل ڈسپیچ روکتا ہے۔
+```json
+{
+  "enabled": true,
+  "defaultMaxChars": 400000,
+  "targetRatio": 0.72,
+  "toolResultMaxChars": 24000,
+  "modelMaxChars": { "provider/planner": 175000, "provider/executor": 300000 }
+}
+```
+
+یہ operator کے منتخب کردہ serialized JSON character budgets ہیں، token context windows یا upstream کی ضمانت شدہ limits نہیں۔ exact model IDs، default کو override کرتے ہیں۔ threshold سے اوپر پہنچنے پر compaction یکساں tool definitions ہٹا دیتا ہے، بڑے tool evidence کو digest کے ساتھ مختصر کرتا ہے، اور پرانے مکمل history groups کو target ratio کی جانب ہٹا دیتا ہے۔ یہ system/developer instructions، تازہ ترین user request، آخری tool round بشمول parallel calls/results، اور Gemini کی ابتدائی routing instruction محفوظ رکھتا ہے۔ top-level instructions اور tool settings برقرار رہتے ہیں۔ omission marker ہٹائی گئی history کا اندراج کرتا ہے؛ یہ semantic summary نہیں بلکہ deterministic trimming ہے۔ اگر pinned context اب بھی budget سے تجاوز کرے تو model سے رابطہ کرنے سے پہلے درخواست 413 واپس کرتی ہے۔ Compaction غیر فعال ہونے یا threshold سے کم ہونے کی صورت میں درخواست میں کوئی تبدیلی نہیں کی جاتی۔
+
+Tool-result continuations پر، OmniRoute اس وقت execution بھی روک دیتا ہے جب مسلسل دو مکمل rounds میں وہی tool calls غیر تبدیل شدہ results کے ساتھ دہرائے جائیں، یا مسلسل دو rounds میں ہر واضح طور پر نشان زد result ناکام ہو۔ تبدیل شدہ results بار بار calls کی اجازت دیتے ہیں (مثلاً polling)۔ یہ guard نئی user request پر reset ہو جاتا ہے، parallel calls کو ایک round میں group کرتا ہے، اور Anthropic، Chat Completions، Responses اور Gemini histories کو سپورٹ کرتا ہے۔ planner کو وجہ موصول ہوتی ہے اور وہ حتمی جواب کا ذمہ دار ہوتا ہے، چاہے وہ ایک اور tool round کی درخواست کرے۔
+
+دوسرے target کے بعد آنے والے اضافی models executor backups کی ترتیب میں ہوتے ہیں۔ ناکام HTTP response یا transport exception اگلے executor کی طرف بڑھتا ہے، جبکہ وہی planner decision اور native tools برقرار رہتے ہیں، مگر اس executor کا اپنا step prompt اور resolved connection استعمال ہوتا ہے۔ پہلی کامیاب response کو بغیر تبدیلی کے واپس کیا جاتا ہے، بشمول SSE streaming؛ کامیاب stream شروع ہونے کے بعد کی ناکامیوں کو یہاں دوبارہ آزمایا نہیں جا سکتا۔ اگر تمام executors ناکام ہو جائیں تو آخری failure واپس کی جاتی ہے۔ Client aborts dispatch روک دیتے ہیں۔
 
 ```json
 {
@@ -336,17 +366,17 @@ OmniRoute کا کومبو انجن سپورٹ کرتا ہے۔** 20 روٹنگ ک
 }
 ```
 
-ایگزیکیوٹر ایک ہی جواب میں متعدد آزاد کالوں کا اخراج کر سکتا ہے۔ منحصر کالوں کو بعد میں کلائنٹ کے آلے کے نتائج کے موڑ میں سنبھالا جاتا ہے، منصوبہ ساز ہر نتیجے کا جائزہ لے کر۔ `maxToolRounds` `8` پر ڈیفالٹ کرتا ہے اور `1`–`32` قبول کرتا ہے۔ ایک بار پہنچنے کے بعد، منصوبہ ساز کو بہترین دستیاب حتمی جواب پیش کرنا چاہیے۔ اندرونی منصوبہ ساز کے فیصلوں کو بفر کیا جاتا ہے، جبکہ منتخب کلائنٹ کا سامنا کرنے والا جواب اصل اسٹریمنگ ترجیح کو محفوظ رکھتا ہے۔
+Executor ایک ہی response میں متعدد آزاد calls جاری کر سکتا ہے۔ Dependent calls کو بعد کے client tool-result turns میں سنبھالا جاتا ہے، جبکہ planner ہر result کا جائزہ لیتا ہے۔ `maxToolRounds` کا default `8` ہے اور یہ `1`–`32` قبول کرتا ہے؛ حد تک پہنچنے کے بعد planner کو دستیاب بہترین حتمی جواب تیار کرنا ہوتا ہے۔ اندرونی planner decisions کو buffer کیا جاتا ہے، جبکہ منتخب client-facing response اصل streaming preference برقرار رکھتی ہے۔
 
-### `round-robin` چپچپا بیچ اور اکاؤنٹ کی توسیع
+### `round-robin` sticky batch and account expansion
 
-راؤنڈ رابن بیچ ہے، ایک درخواست فی قدم نہیں:
+Round-robin کو batch کی صورت میں چلایا جاتا ہے، ہر request کے لیے الگ step نہیں:
 
-- `stickyRoundRobinLimit` (combo config، پھر `comboStickyRoundRobinLimit`، پھر `settings.stickyRoundRobinLimit`، ڈیفالٹ** 3** ) گھومنے سے پہلے مسلسل کئی کامیابیوں کے لیے ایک ہی ہدف رکھتا ہے۔ ایک درخواست کی گردش کے لیے کومبو اوور رائڈ کو `1` پر سیٹ کریں۔ کومبو ایڈیٹر مؤثر قدر اور یہ کس پرت سے آیا ہے دکھاتا ہے۔
-- `connectionAwareExpansion` (combo config، پھر ترتیبات، پہلے سے طے شدہ** جھوٹا** ) روٹیشن سے پہلے فراہم کنندہ کی سطح کے ہر قدم کو فی اکاؤنٹ اہداف میں پھیلاتا ہے۔ گروپ-B کی حکمت عملی (ترجیح، وزنی، راؤنڈ رابن، بے ترتیب، p2c، کم سے کم استعمال شدہ، لاگت کے لیے موزوں، lkgp، فل فرسٹ، سخت-رینڈم، سیاق و سباق کے لیے موزوں، کیشے کے لیے موزوں، سیاق و سباق سے متعلق ریلے، فیوژن، پائپ لائن) فراہم کنندہ کی سطح کا منظر اس وقت تک برقرار رکھتی ہیں جب تک یہ آن نہ ہو۔ کومبو ایڈیٹر inherit/on/off کو ظاہر کرتا ہے۔ inherit عالمی ڈیفالٹ (آف) کا استعمال کرتا ہے۔
-- پرامپٹ کیشے لوکلٹی روٹنگ (`promptCacheAffinityEnabled`, default** سچ ہے** ) پن کیے ہوئے کنکشنز کو دوبارہ ترتیب دیتا ہے تاکہ مماثل کیشے کیز ایک اکاؤنٹ پر رہیں۔ یہ راؤنڈ رابن اور وزنی گردش کو پن کیے ہوئے فی اکاؤنٹ کے مراحل پر فوقیت دیتا ہے۔ اگر آپ کو سخت گردش کی ضرورت ہو تو اسے سیٹنگز → کومبو ڈیفالٹس کے تحت بند کر دیں۔ کوئی فی کومبو اوور رائڈ نہیں ہے۔
+- `stickyRoundRobinLimit` (combo config، پھر `comboStickyRoundRobinLimit`، پھر `settings.stickyRoundRobinLimit`، default **3**) rotate کرنے سے پہلے اتنی مسلسل کامیابیوں تک وہی target برقرار رکھتا ہے۔ ایک request کے بعد rotation کے لیے combo override کو `1` پر سیٹ کریں۔ Combo editor مؤثر value اور اس کے ماخذ کی layer دکھاتا ہے۔
+- `connectionAwareExpansion` (combo config، پھر settings، default **false**) rotation سے پہلے ہر provider-level step کو فی-account targets میں پھیلاتا ہے۔ Group-B strategies (priority, weighted, round-robin, random, p2c, least-used, cost-optimized, lkgp, fill-first, strict-random, context-optimized, cache-optimized, context-relay, fusion, pipeline, jev) اس option کے فعال ہونے تک provider-level view برقرار رکھتی ہیں۔ Combo editor inherit / on / off فراہم کرتا ہے؛ inherit عالمی default (off) استعمال کرتا ہے۔
+- Prompt-cache locality routing (`promptCacheAffinityEnabled`, default **true**) pinned connections کو اس طرح دوبارہ ترتیب دیتی ہے کہ matching cache keys ایک ہی account پر رہیں۔ یہ pinned per-account steps کے درمیان round-robin اور weighted rotation پر ترجیح رکھتی ہے۔ اگر آپ کو strict rotation درکار ہو تو اسے Settings → Combo defaults کے تحت بند کریں۔ اس کا per-combo override موجود نہیں ہے۔
 
-ایک ماڈل پر ملٹی اکاؤنٹ گردش کے لیے، ترجیح دیں۔** ایک متحرک اکاؤنٹ مرحلہ** (خالی `connectionId`، پورا پول) چپچپا حد `1` کے ساتھ، تین پن والے `connectionId` s کے ساتھ نہیں۔ RR کاؤنٹر کے آگے بڑھنے کے باوجود بھی پن کیے ہوئے اقدامات کے علاوہ وابستگی ایک ہی اکاؤنٹ پر ٹوٹ جاتی ہے۔
+ایک model پر multi-account rotation کے لیے تین pinned `connectionId`s کے بجائے **ایک dynamic-account step** (خالی `connectionId`، پورا pool) اور sticky limit `1` کو ترجیح دیں۔ Pinned steps اور affinity ایک ہی account پر مرکوز ہو جاتے ہیں، حتیٰ کہ RR counter آگے بڑھتا رہے۔
 
 ## فیوژن حکمتِ عملی
 
@@ -812,44 +842,43 @@ Tier 1 (سبسکرپشن) کو بھرپور ترجیح دینے کے لیے، `t
 
 ## ٹیسٹنگ اور کوریج
 
-### قطعی روٹنگ-فیصلہ میٹرکس (`npm run test:combo:matrix`)
+### تعیّن شدہ routing-decision میٹرکس (`npm run test:combo:matrix`)
 
-`tests/integration/combo-matrix/*.test.ts`، فرضی اپ اسٹریم کے ساتھ حقیقی کومبو پائپ لائن کے ذریعے تمام 19
-عوامی حکمتِ عملیوں کے روٹنگ **فیصلے** کو ابتدا سے انتہا تک ثابت کرتا ہے۔
+`tests/integration/combo-matrix/*.test.ts` حقیقی combo pipeline کے ذریعے mocked upstream کے ساتھ end-to-end اس میں شامل عوامی strategies کے routing **decision** کو ثابت کرتا ہے۔
 کوریج میں شامل ہیں:
 
-- تمام 19 `ROUTING_STRATEGY_VALUES` حکمتِ عملیاں (ترتیب یافتہ، وزن دار، لاگت، سیاق، فیوژن، …)۔
-- `quota-share` (اندرونی) ابتدا سے انتہا تک: حقیقی `selectQuotaShareTarget` جوڑ کے ذریعے DRR کی منصفانہ تقسیم + سچوریشن پر ترجیح میں کمی (`registerQuotaFetcher` / `setLKGP` /
-  `__setHeadroomSaturationFetcherForTests`)۔
-- اہداف کی ہر تعداد میں `context-relay` یونیورسل-ہینڈ آف کوریج۔
+- تمام 21 `ROUTING_STRATEGY_VALUES` strategies (ordered، weighted، cost، context، fusion، …)۔
+- `quota-share` (اندرونی) end-to-end: حقیقی `selectQuotaShareTarget` seam (`registerQuotaFetcher` / `setLKGP` /
+  `__setHeadroomSaturationFetcherForTests`) کے ذریعے DRR fairness + saturation deprioritization۔
+- ہر target count میں `context-relay` universal-handoff کوریج۔
 
-یہ سویٹ CI (`test:integration` جاب) میں `--test-concurrency=1` اور
-`--test-force-exit` کے ساتھ چلتا ہے، لہٰذا یہ قطعی ہے اور اسے لائیو اسناد درکار نہیں ہوتیں۔
+یہ suite CI (`test:integration` job) میں `--test-concurrency=1` اور
+`--test-force-exit` کے ساتھ چلتا ہے، اس لیے یہ تعیّن شدہ ہے اور اسے live credentials کی ضرورت نہیں ہوتی۔
 
-### مشروط لائیو اسموک ٹیسٹس (CI میں نہیں — حقیقی پرووائیڈرز)
+### مشروط live smoke (CI میں نہیں — حقیقی providers)
 
-| کمانڈ                                  | یہ کیا کرتی ہے                                                                             |
-| :------------------------------------- | :----------------------------------------------------------------------------------------- |
-| `npm run test:combo:live`              | `RUN_COMBO_LIVE=1` کے ساتھ اِن-پروسیس حقیقی روٹنگ؛ لائیو OmniRoute DB کا اسنیپ شاٹ لیتی ہے |
-| `npm run test:combo:live:vps`          | لائیو OmniRoute سرور کے خلاف HTTP کالز (`COMBO_LIVE_BASE_URL` سیٹ کریں)                    |
-| `npm run test:combo:live:vps:failover` | یہی عمل، دانستہ فیل اوور منظرناموں کے ساتھ                                                 |
+| Command                                | یہ کیا کرتا ہے                                                                                 |
+| :------------------------------------- | :--------------------------------------------------------------------------------------------- |
+| `npm run test:combo:live`              | `RUN_COMBO_LIVE=1` کے ساتھ in-process حقیقی routing؛ ایک live OmniRoute DB کا snapshot لیتا ہے |
+| `npm run test:combo:live:vps`          | live OmniRoute server کے خلاف HTTP calls (`COMBO_LIVE_BASE_URL` سیٹ کریں)                      |
+| `npm run test:combo:live:vps:failover` | وہی، جان بوجھ کر failover scenarios کے ساتھ                                                    |
 
-یہ اسموک ٹیسٹس حقیقی وائر پاتھ (کومبو → پرووائیڈر → تکمیل) کو آزماتے ہیں۔ انہیں
-جان بوجھ کر CI سے خارج رکھا گیا ہے کیونکہ انہیں لائیو اسناد اور VPS رسائی درکار ہوتی ہے۔
+یہ smoke tests حقیقی wire path (combo → provider → completion) کی جانچ کرتے ہیں۔ انہیں
+جان بوجھ کر CI سے خارج رکھا گیا ہے کیونکہ ان کے لیے live credentials اور VPS access درکار ہے۔
 
 ---
 
 ## فائلیں
 
-| فائل                                                      | مقصد                                                                                                    |
-| :-------------------------------------------------------- | :------------------------------------------------------------------------------------------------------ |
-| `open-sse/services/autoCombo/scoring.ts`                  | 16 عوامل پر مبنی اسکورنگ فنکشن، `DEFAULT_WEIGHTS`، پول نارم                                             |
-| `open-sse/services/autoCombo/taskFitness.ts`              | ماڈل × ٹاسک موزونیت لُک اَپ                                                                             |
-| `open-sse/services/autoCombo/engine.ts`                   | انتخاب کی منطق، بینڈٹ، بجٹ کی حد                                                                        |
-| `open-sse/services/autoCombo/selfHealing.ts`              | اخراج، پروبز، وقوعہ موڈ                                                                                 |
-| `open-sse/services/autoCombo/modePacks.ts`                | 6 ویٹ پروفائلز (تیز ترسیل، لاگت بچانے والا، معیار اوّل، آف لائن موافق، قابلِ اعتماد اوّل، افراتفری موڈ) |
-| `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` پریفکس پارسر + 6 ویریئنٹس                                                                       |
-| `open-sse/services/autoCombo/virtualFactory.ts`           | فعال کنکشنز سے اِن میموری `AutoComboConfig` بناتا ہے                                                    |
-| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | پرووائیڈر رجسٹری کو ماک کرنے کے لیے ٹیسٹ ہُک                                                            |
-| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (20 حکمتِ عملیاں)                                                             |
-| `src/sse/handlers/chat.ts`                                | انضمام: آٹو پریفکس شارٹ سرکٹ                                                                            |
+| فائل                                                      | مقصد                                                                                                   |
+| :-------------------------------------------------------- | :----------------------------------------------------------------------------------------------------- |
+| `open-sse/services/autoCombo/scoring.ts`                  | 16 عوامل پر مشتمل اسکورنگ فنکشن، `DEFAULT_WEIGHTS`، پول نارم                                           |
+| `open-sse/services/autoCombo/taskFitness.ts`              | ماڈل × ٹاسک فٹنس کا لُک اَپ                                                                            |
+| `open-sse/services/autoCombo/engine.ts`                   | انتخاب کی منطق، بینڈیٹ، بجٹ کی حد                                                                      |
+| `open-sse/services/autoCombo/selfHealing.ts`              | اخراج، پروبز، واقعہ موڈ                                                                                |
+| `open-sse/services/autoCombo/modePacks.ts`                | 6 وزن پروفائلز (ship-fast، cost-saver، quality-first، offline-friendly، reliability-first، chaos-mode) |
+| `open-sse/services/autoCombo/autoPrefix.ts`               | `auto/` پریفکس پارسر + 6 ویریئنٹس                                                                      |
+| `open-sse/services/autoCombo/virtualFactory.ts`           | فعال کنکشنز سے میموری میں `AutoComboConfig` تیار کرتا ہے                                               |
+| `open-sse/services/autoCombo/providerRegistryAccessor.ts` | پرووائیڈر رجسٹری کی موکنگ کے لیے ٹیسٹ ہُک                                                              |
+| `src/shared/constants/routingStrategies.ts`               | `ROUTING_STRATEGY_VALUES` (22 حکمتِ عملیاں)                                                            |
+| `src/sse/handlers/chat.ts`                                | انٹیگریشن: آٹو پریفکس شارٹ سرکٹ                                                                        |

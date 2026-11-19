@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Limita trebuie să fie un număr întreg pozitiv.",
     "error": "Eroare: {message}",
     "serverOffline": "Serverul OmniRoute este offline. Porniți cu: omniroute serve",
     "authRequired": "Autentificare necesară. Setați OMNIROUTE_API_KEY sau rulați: omniroute setup",

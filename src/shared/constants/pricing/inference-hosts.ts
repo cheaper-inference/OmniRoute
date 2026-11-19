@@ -428,6 +428,8 @@ export const DEFAULT_PRICING_INFERENCE = {
       reasoning: 0,
       cache_creation: 0,
     },
+    // #18604: GPT OSS 20B on the same free hosted endpoint tier (#18464 rationale).
+    "openai/gpt-oss-20b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },
   },
   nebius: {
     "openai/gpt-oss-120b": { input: 0, output: 0, cached: 0, reasoning: 0, cache_creation: 0 },

@@ -230,7 +230,6 @@ test("animate-spin stays within its budget: new spinners use the Spinner adapter
 
 test("no raw <kbd> outside the kit Kbd", () => {
   const hits = countBy(APP, /<kbd\b/g);
-  delete hits["src/shared/components/CommandPalette.tsx"]; // moves with the kit Command palette
   assert.deepEqual(hits, {});
 });
 

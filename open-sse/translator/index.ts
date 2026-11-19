@@ -43,6 +43,7 @@ import { acceptsInlineToolAdditions, hoistToolAdditions } from "./helpers/claude
 import { isStrictResponsesToolHistoryEnabled } from "./helpers/responsesToolHistory.ts";
 import {
   buildAssistantMessageCacheKey,
+  buildToolCallCacheKey,
   lookupReasoning,
   recordReplay,
   requiresReasoningReplay,
@@ -54,6 +55,7 @@ import {
 } from "./request/openai-responses/helpers.ts";
 import { applyReasoningInputPolicy } from "../services/reasoningInputPolicy.ts";
 import { normalizeReasoningRequest } from "@/shared/reasoning/effortStandardization";
+import { hoistSystemDirectiveEffort } from "./request/claude-to-openai.ts";
 
 bootstrapTranslatorRegistry();
 export { register } from "./registry.ts";
@@ -287,7 +289,7 @@ function replayOpenAIReasoningMessage(
       : null;
   const cacheKey = hasToolCalls
     ? typeof firstToolCall?.id === "string"
-      ? firstToolCall.id
+      ? buildToolCallCacheKey(options.reasoningCacheScope, firstToolCall.id)
       : ""
     : buildAssistantMessageCacheKey(options.reasoningCacheScope, messages, messageIndex);
   if (cacheKey && !options.videoTranscriptSensitive) {
@@ -427,6 +429,20 @@ export function translateRequest(
   const isGlmFamilyUpstream =
     ["opencode-go", "opencode-zen"].includes(normalizedProvider) ||
     /glm|zhipu|z-ai/i.test(normalizedModel);
+
+  // Claude → OpenAI shaped targets take the turn's effort from the last system directive.
+  // The steps below read only the top-level effort, so move it there first. A `default` rule
+  // was matched without seeing the directive and would overwrite it: the directive stays in
+  // the messages and the translator reads it from there.
+  if (
+    sourceFormat === FORMATS.CLAUDE &&
+    targetFormat !== FORMATS.CLAUDE &&
+    (targetFormat === FORMATS.OPENAI || !getRequestTranslator(sourceFormat, targetFormat)) &&
+    (result as { _omnirouteReasoningRule?: { effortMode?: string } })._omnirouteReasoningRule
+      ?.effortMode !== "default"
+  ) {
+    result = hoistSystemDirectiveEffort(result);
+  }
 
   // Phase 2: Apply thinking budget control before normalization. Gemini targets receive
   // the model so a native thinkingLevel reaches the translator instead of a lossy budget.
@@ -759,6 +775,7 @@ export function translateRequest(
     const preserveCache = isClaudePassthrough || options?.preserveCacheControl === true;
     result = prepareClaudeRequest(result, provider, preserveCache, model, {
       fallbackToHeuristicWhenNoMarkers: true,
+      reasoningCacheScope: options?.reasoningCacheScope,
     });
   }
 
@@ -900,7 +917,9 @@ export function translateRequest(
         // Client reasoning wins above. Otherwise try authentic replay before
         // retaining Kimi Code's empty protocol marker as the final fallback.
         if (firstToolUseId && !options?.videoTranscriptSensitive) {
-          const cached = lookupReasoning(firstToolUseId);
+          const cached = lookupReasoning(
+            buildToolCallCacheKey(options?.reasoningCacheScope, firstToolUseId)
+          );
           if (cached) {
             if (thinkingBlock) {
               thinkingBlock.type = "thinking";
