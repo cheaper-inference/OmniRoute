@@ -40,9 +40,9 @@ test("freebuffProvider: registry entry has valid structure and catalog", () => {
   assert.ok(flash, "deepseek/deepseek-v4-flash must exist in freebuff models");
   assert.equal(flash?.supportsReasoning, true);
 
-  const minimax = freebuffProvider.models.find((m) => m.id === "minimax/minimax-m3");
-  assert.ok(minimax, "minimax/minimax-m3 must exist in freebuff models");
-  assert.equal(minimax?.supportsVision, true);
+  const luna = freebuffProvider.models.find((m) => m.id === "openai/gpt-6-luna");
+  assert.ok(luna, "openai/gpt-6-luna must exist in freebuff models");
+  assert.equal(luna?.supportsVision, true);
 });
 
 test("OAUTH_PROVIDERS: freebuff is a dual-auth card (browser login + pasted token)", () => {

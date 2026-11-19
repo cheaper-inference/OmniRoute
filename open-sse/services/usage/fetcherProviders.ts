@@ -42,6 +42,9 @@ export const USAGE_FETCHER_PROVIDERS = [
   "minimax",
   "minimax-cn",
   "crof",
+  // Freebuff weighted session pools + Freebucks (GET codebuff.com/api/v1/freebuff/session)
+  "freebuff",
+  "fb",
   // ClinePass 5-hour / weekly / monthly limits (GET /api/v1/users/me/plan/usage-limits)
   "clinepass",
   "bailian-coding-plan",

@@ -1,0 +1,235 @@
+{
+ "status": "none",
+ "accessTier": "limited",
+ "freebucks": {
+  "balance": 10,
+  "daily": {
+   "limit": 25,
+   "spent": 15,
+   "remaining": 10,
+   "resetAt": "2026-11-11T22:00:00.000Z",
+   "resetTimeZone": "Europe/Kiev"
+  },
+  "wallet": {
+   "balance": 0,
+   "monthlyBonus": 0
+  },
+  "planId": null,
+  "prices": {
+   "m-7e20df6765": 20,
+   "m-00032eaeec": 10,
+   "m-cb71f819fe": 25,
+   "m-096e75164d": 15,
+   "m-0a6f9dd646": 20,
+   "m-5a5d0e255e": 20,
+   "m-79033aedfe": 20,
+   "m-9a7e098cc1": 0,
+   "m-69307952f8": 0,
+   "m-22ff70c712": 0,
+   "m-3b095d8b43": 5,
+   "m-ffcbc2bcf3": 20,
+   "m-f8d6ac83f8": 15,
+   "m-5dafce7f08": 100,
+   "m-6adcd6d671": 200,
+   "m-94d83cc7e6": 250,
+   "m-7d6e1b3ae0": 150,
+   "m-8db1ccbba6": 10,
+   "m-61c26317cc": 5,
+   "m-02244092cb": 0,
+   "m-ddc687c50f": 0,
+   "m-9877f4d3ee": 0,
+   "m-5b6a604eb6": 30,
+   "m-7e3441b13b": 30
+  },
+  "priceNotices": {
+   "m-9a7e098cc1": "Promotional",
+   "m-69307952f8": "Promotional",
+   "m-7d6e1b3ae0": "2 per day",
+   "m-6adcd6d671": "1 per day"
+  },
+  "offPeak": {},
+  "priceChanges": [],
+  "planRequiredModelIds": [
+   "m-5a5d0e255e",
+   "m-ffcbc2bcf3",
+   "m-5b6a604eb6",
+   "m-7e3441b13b",
+   "m-7d6e1b3ae0"
+  ],
+  "upgrade": {
+   "kind": "limited_offer",
+   "cta": "Get 7x usage for $8",
+   "tooltip": "DeepSeek V4.1 Flash 10/17: 7 hours a day on Starter instead of 1 hour for free. $8/mo.",
+   "modelId": "m-096e75164d"
+  }
+ },
+ "subscription": {
+  "tierId": null,
+  "tiers": [
+   {
+    "id": "starter",
+    "displayName": "Starter",
+    "priceUsd": 8,
+    "yearlyPriceUsd": 75,
+    "firstPeriodPriceUsd": 8,
+    "dailySessions": 3,
+    "fiveDaySessions": 10,
+    "monthlySessions": 30,
+    "dailyPremiumSessions": 3,
+    "disclaimers": [
+     "The weekly limit is a rolling 7-day window — it frees up as your oldest sessions age out, rather than resetting on a fixed day",
+     "Daily hours reset at midnight Pacific; unused ones do not carry over",
+     "Adds to your free sessions rather than replacing them",
+     "Limits are subject to change"
+    ],
+    "current": false,
+    "upgrade": true,
+    "downgrade": false,
+    "purchasable": true,
+    "yearlyPurchasable": true
+   },
+   {
+    "id": "plus",
+    "displayName": "Plus",
+    "priceUsd": 25,
+    "yearlyPriceUsd": 235,
+    "firstPeriodPriceUsd": 25,
+    "dailySessions": 7,
+    "fiveDaySessions": 26,
+    "monthlySessions": 100,
+    "dailyPremiumSessions": 7,
+    "disclaimers": [
+     "The weekly limit is a rolling 7-day window — it frees up as your oldest sessions age out, rather than resetting on a fixed day",
+     "Daily hours reset at midnight Pacific; unused ones do not carry over",
+     "Adds to your free sessions rather than replacing them",
+     "Limits are subject to change"
+    ],
+    "current": false,
+    "upgrade": true,
+    "downgrade": false,
+    "purchasable": true,
+    "yearlyPurchasable": true
+   },
+   {
+    "id": "pro",
+    "displayName": "Pro",
+    "priceUsd": 60,
+    "yearlyPriceUsd": 560,
+    "firstPeriodPriceUsd": 60,
+    "dailySessions": 11,
+    "fiveDaySessions": 66,
+    "monthlySessions": 210,
+    "dailyPremiumSessions": 11,
+    "disclaimers": [
+     "The weekly limit is a rolling 7-day window — it frees up as your oldest sessions age out, rather than resetting on a fixed day",
+     "Daily hours reset at midnight Pacific; unused ones do not carry over",
+     "Adds to your free sessions rather than replacing them",
+     "Limits are subject to change"
+    ],
+    "current": false,
+    "upgrade": true,
+    "downgrade": false,
+    "purchasable": true,
+    "yearlyPurchasable": true
+   }
+  ]
+ },
+ "rateLimitsByModel": {
+  "m-096e75164d": {
+   "model": "m-096e75164d",
+   "entitlementBreakdown": {
+    "base": 6,
+    "referral": 0,
+    "streak": 0
+   },
+   "limit": 6,
+   "pool": "limited",
+   "poolLabel": "Daily",
+   "period": "pacific_day",
+   "resetTimeZone": "America/Los_Angeles",
+   "resetAt": "2026-11-12T08:00:00.000Z",
+   "windowHours": 24,
+   "recentCount": 0
+  },
+  "m-00032eaeec": {
+   "model": "m-00032eaeec",
+   "entitlementBreakdown": {
+    "base": 6,
+    "referral": 0,
+    "streak": 0
+   },
+   "limit": 6,
+   "pool": "limited",
+   "poolLabel": "Daily",
+   "period": "pacific_day",
+   "resetTimeZone": "America/Los_Angeles",
+   "resetAt": "2026-11-12T08:00:00.000Z",
+   "windowHours": 24,
+   "recentCount": 0
+  },
+  "m-7e20df6765": {
+   "model": "m-7e20df6765",
+   "entitlementBreakdown": {
+    "base": 6,
+    "referral": 0,
+    "streak": 0
+   },
+   "limit": 6,
+   "pool": "limited",
+   "poolLabel": "Daily",
+   "period": "pacific_day",
+   "resetTimeZone": "America/Los_Angeles",
+   "resetAt": "2026-11-12T08:00:00.000Z",
+   "windowHours": 24,
+   "recentCount": 0
+  },
+  "m-69307952f8": {
+   "model": "m-69307952f8",
+   "entitlementBreakdown": {
+    "base": 6,
+    "referral": 0,
+    "streak": 0
+   },
+   "limit": 6,
+   "pool": "limited",
+   "poolLabel": "Daily",
+   "period": "pacific_day",
+   "resetTimeZone": "America/Los_Angeles",
+   "resetAt": "2026-11-12T08:00:00.000Z",
+   "windowHours": 24,
+   "recentCount": 0
+  },
+  "m-9a7e098cc1": {
+   "model": "m-9a7e098cc1",
+   "entitlementBreakdown": {
+    "base": 6,
+    "referral": 0,
+    "streak": 0
+   },
+   "limit": 6,
+   "pool": "limited",
+   "poolLabel": "Daily",
+   "period": "pacific_day",
+   "resetTimeZone": "America/Los_Angeles",
+   "resetAt": "2026-11-12T08:00:00.000Z",
+   "windowHours": 24,
+   "recentCount": 0
+  }
+ },
+ "desktopSessionCounts": {
+  "premium": 0,
+  "unlimited": 0
+ },
+ "countryVerified": false,
+ "verificationCanChangeAccess": false,
+ "verificationReason": "region_locked",
+ "message": "Call POST to start a free session.",
+ "referral": {
+  "code": "ref-00000000-0000-0000-0000-000000000000",
+  "referrerName": "Test User",
+  "githubLinked": false,
+  "qualifiedCount": 0
+ },
+ "countryBlockReason": "country_not_allowed",
+ "ipPrivacySignals": null
+}
