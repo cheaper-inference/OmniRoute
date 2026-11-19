@@ -12,9 +12,16 @@ import {
 import {
   approvalFor,
   evaluateEligibility,
+  currentBatchWindow,
+  currentSuitePredicate,
   frozenBranches,
   isBaseFrozen,
+  laneOf,
+  prCheckState,
+  prChecksNeedWorkflowRuns,
+  prGatesReason,
   selectBatch,
+  selectLane,
 } from "../../../scripts/merge-queue/eligibility.mjs";
 
 const config = loadConfig();
@@ -777,11 +784,12 @@ test("selectBatch: green PR checks first, then pending/unknown, then failing (FI
 });
 
 test("selectBatch: at most batch.maxSize, the oldest first", () => {
-  const list = Array.from({ length: 9 }, (_, i) => candidate(i + 1, 100 - i));
+  // No ctx.batchSize (adaptive off, or a caller that passes none): the ceiling is maxSize.
+  const list = Array.from({ length: 15 }, (_, i) => candidate(i + 1, 100 - i));
   const result = selectBatch(list, makeCtx());
-  assert.equal(config.batch.maxSize, 6);
-  assert.deepEqual(nums(result), [1, 2, 3, 4, 5, 6]);
-  assert.match(result.reason, /6 of 9/);
+  assert.equal(config.batch.maxSize, 12);
+  assert.deepEqual(nums(result), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]);
+  assert.match(result.reason, /12 of 15 eligible \(batch\.maxSize 12\)/);
 });
 
 test("selectBatch: waits for maxWaitMinutes while the batch is not full", () => {
@@ -793,8 +801,8 @@ test("selectBatch: waits for maxWaitMinutes while the batch is not full", () => 
   const go = selectBatch(old, makeCtx());
   assert.equal(go.waiting, false);
   assert.deepEqual(nums(go), [1, 2]);
-  // a full batch never waits
-  const full = Array.from({ length: 6 }, (_, i) => candidate(i + 1, 1));
+  // a full batch never waits (full = batch.maxSize when the context names no batch size)
+  const full = Array.from({ length: config.batch.maxSize }, (_, i) => candidate(i + 1, 1));
   assert.equal(selectBatch(full, makeCtx()).waiting, false);
 });
 
@@ -819,4 +827,658 @@ test("selectBatch ignores ineligible entries passed by mistake", () => {
   bad.eligibility = { ...bad.eligibility, eligible: false };
   const result = selectBatch([bad, candidate(1, 60)], makeCtx());
   assert.deepEqual(nums(result), [1]);
+});
+
+// ───────────────────────────── PR gates (prChecksRequired) ─────────────────────────────
+
+/** A check run as github.listCheckRuns normalizes it. */
+function checkRun(
+  id,
+  name,
+  { status = "completed", conclusion = "success", suite = id, app } = {}
+) {
+  return {
+    id,
+    name,
+    status,
+    conclusion: status === "completed" ? conclusion : null,
+    startedAt: iso(30),
+    completedAt: status === "completed" ? iso(20) : null,
+    htmlUrl: null,
+    appSlug: app ?? "github-actions",
+    headBranch: "feature",
+    checkSuiteId: suite,
+    output: { title: null, summary: null, text: null },
+  };
+}
+
+const gatesCtx = (overrides = {}) =>
+  makeCtx({
+    config: { ...liveConfig, prChecksRequired: ["Gate / CI", "Gate / Quality"] },
+    ...overrides,
+  });
+
+test("the shipped config requires the three PR gates", () => {
+  assert.deepEqual(config.prChecksRequired, ["Gate / CI", "Gate / Quality", "API Route Typecheck"]);
+});
+
+test("G3: with the shipped gates, a PR whose API Route Typecheck is red, pending or missing (never ran on the head) is pr-checks-not-green", () => {
+  const shipped = makeCtx({ config: { ...liveConfig, prChecksRequired: config.prChecksRequired } });
+  const both = { "Gate / CI": "success", "Gate / Quality": "success" };
+  const green = { ...both, "API Route Typecheck": "success" };
+  assert.equal(evaluateEligibility(makePr({ prChecks: green }), shipped).eligible, true);
+  for (const [prChecks, detail] of [
+    [{ ...both, "API Route Typecheck": "failure" }, "API Route Typecheck failure"],
+    [{ ...both, "API Route Typecheck": "pending" }, "API Route Typecheck pending"],
+    // A draft or a head pushed before the workflow existed: no run of that name on the head.
+    [{ ...both, "API Route Typecheck": null }, "API Route Typecheck missing"],
+    [both, "API Route Typecheck missing"],
+  ]) {
+    const result = evaluateEligibility(makePr({ prChecks }), shipped);
+    assert.equal(result.eligible, false, JSON.stringify(prChecks));
+    assert.deepEqual(result.reasons, [{ code: "pr-checks-not-green", detail }]);
+    assert.deepEqual(result.actions, [], "no action: the PR waits");
+  }
+  // From the head's check runs: no run named API Route Typecheck reads as null (missing).
+  assert.equal(prCheckState([], "API Route Typecheck"), null);
+});
+
+test("pr-checks-not-green for failure, pending and missing", () => {
+  const green = { "Gate / CI": "success", "Gate / Quality": "success" };
+  assert.equal(evaluateEligibility(makePr({ prChecks: green }), gatesCtx()).eligible, true);
+  for (const [prChecks, detail] of [
+    [
+      { "Gate / CI": "failure", "Gate / Quality": "pending" },
+      "Gate / CI failure; Gate / Quality pending",
+    ],
+    [{ "Gate / CI": "success", "Gate / Quality": "failure" }, "Gate / Quality failure"],
+    [{ "Gate / CI": "pending", "Gate / Quality": "success" }, "Gate / CI pending"],
+    [{ "Gate / CI": null, "Gate / Quality": "success" }, "Gate / CI missing"],
+    [{ "Gate / Quality": "success" }, "Gate / CI missing"],
+    [{}, "Gate / CI missing; Gate / Quality missing"],
+    [null, "Gate / CI missing; Gate / Quality missing"],
+  ]) {
+    const result = evaluateEligibility(makePr({ prChecks }), gatesCtx());
+    assert.equal(result.eligible, false, JSON.stringify(prChecks));
+    assert.deepEqual(result.reasons, [{ code: "pr-checks-not-green", detail }]);
+    assert.ok(INELIGIBLE_REASONS.includes("pr-checks-not-green"));
+    // No action: the label stays, nothing is posted; the PR waits for its gates.
+    assert.deepEqual(result.actions, [], JSON.stringify(prChecks));
+  }
+  // Turned green later: eligible again, nobody touched the PR.
+  const later = evaluateEligibility(makePr({ prChecks: green }), gatesCtx());
+  assert.deepEqual(later.reasons, []);
+  // Without required gates the rule never applies.
+  const none = makeCtx({ config: { ...liveConfig, prChecksRequired: [] } });
+  assert.equal(evaluateEligibility(makePr({ prChecks: {} }), none).eligible, true);
+  // The base-repair lane (reserved) is exempt; any other lane is ignored.
+  const red = makePr({ prChecks: { "Gate / CI": "failure", "Gate / Quality": "failure" } });
+  assert.equal(evaluateEligibility(red, gatesCtx({ lane: "base-repair" })).eligible, true);
+  for (const lane of ["hotfix", "", undefined, "normal"]) {
+    assert.deepEqual(codes(evaluateEligibility(red, gatesCtx({ lane }))), ["pr-checks-not-green"]);
+  }
+});
+
+test("a success from another app or a later duplicate-named job does not count", () => {
+  // no run of that name
+  assert.equal(prCheckState([checkRun(1, "Gate / Quality")], "Gate / CI"), null);
+  assert.equal(prCheckState([], "Gate / CI"), null);
+  assert.equal(prCheckState(undefined, "Gate / CI"), null);
+  // GitHub Actions success
+  assert.equal(prCheckState([checkRun(1, "Gate / CI")], "Gate / CI"), "success");
+  // another app's success is ignored: neither green nor red
+  assert.equal(prCheckState([checkRun(1, "Gate / CI", { app: "some-app" })], "Gate / CI"), null);
+  assert.equal(
+    prCheckState(
+      [checkRun(1, "Gate / CI", { conclusion: "failure" }), checkRun(2, "Gate / CI", { app: "x" })],
+      "Gate / CI"
+    ),
+    "failure"
+  );
+  assert.equal(
+    prCheckState(
+      [checkRun(1, "Gate / CI", { status: "in_progress" }), checkRun(2, "Gate / CI", { app: "x" })],
+      "Gate / CI"
+    ),
+    "pending"
+  );
+  // a later job of the same name in another suite does not hide the red gate (worst counts)
+  const masked = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }),
+    checkRun(11, "Gate / CI", { conclusion: "success", suite: 2 }),
+  ];
+  assert.equal(prCheckState(masked, "Gate / CI"), "failure");
+  // a pending duplicate in another suite keeps the gate pending
+  const pendingDup = [
+    checkRun(10, "Gate / CI", { suite: 1 }),
+    checkRun(11, "Gate / CI", { status: "queued", suite: 2 }),
+  ];
+  assert.equal(prCheckState(pendingDup, "Gate / CI"), "pending");
+  // inside ONE suite the newest run (a re-run) supersedes the earlier attempt, both ways
+  assert.equal(
+    prCheckState(
+      [
+        checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }),
+        checkRun(12, "Gate / CI", { suite: 1 }),
+      ],
+      "Gate / CI"
+    ),
+    "success"
+  );
+  assert.equal(
+    prCheckState(
+      [
+        checkRun(12, "Gate / CI", { conclusion: "failure", suite: 1 }),
+        checkRun(10, "Gate / CI", { suite: 1 }),
+      ],
+      "Gate / CI"
+    ),
+    "failure"
+  );
+  // every non-success conclusion is red for a required gate, skipped and neutral included
+  for (const conclusion of [
+    "failure",
+    "cancelled",
+    "timed_out",
+    "action_required",
+    "startup_failure",
+    "stale",
+    "skipped",
+    "neutral",
+    null,
+  ]) {
+    assert.equal(
+      prCheckState([checkRun(1, "Gate / CI", { conclusion })], "Gate / CI"),
+      "failure",
+      String(conclusion)
+    );
+  }
+  for (const status of ["queued", "in_progress", "waiting", "requested", "pending"]) {
+    assert.equal(prCheckState([checkRun(1, "Gate / CI", { status })], "Gate / CI"), "pending");
+  }
+  // runs without a suite id are each counted on their own (nothing supersedes them)
+  assert.equal(
+    prCheckState(
+      [
+        checkRun(1, "Gate / CI", { conclusion: "failure", suite: null }),
+        checkRun(2, "Gate / CI", { suite: null }),
+      ],
+      "Gate / CI"
+    ),
+    "failure"
+  );
+});
+
+test("prCheckState with suiteIsCurrent: a superseded run of the same workflow no longer counts", () => {
+  // ci.yml ran twice on the head (a retarget is an `edited` event, cancel-in-progress): the first
+  // run's `if: always()` gate concluded failure (or cancelled) in suite 1, the newer run is green
+  // in suite 2. Only suite 2 is current.
+  const onlyNewest = (suite) => suite !== 1;
+  for (const conclusion of ["failure", "cancelled"]) {
+    const superseded = [
+      checkRun(10, "Gate / CI", { conclusion, suite: 1 }),
+      checkRun(20, "Gate / CI", { suite: 2 }),
+    ];
+    assert.equal(prCheckState(superseded, "Gate / CI", onlyNewest), "success", conclusion);
+    // without suiteIsCurrent: the old reading, every suite counts and the worst wins
+    assert.equal(prCheckState(superseded, "Gate / CI"), "failure", conclusion);
+    assert.equal(prCheckState(superseded, "Gate / CI", undefined), "failure", conclusion);
+  }
+  // the newer run of the same workflow is the red one: red
+  const turnedRed = [
+    checkRun(10, "Gate / CI", { suite: 1 }),
+    checkRun(20, "Gate / CI", { conclusion: "failure", suite: 2 }),
+  ];
+  assert.equal(prCheckState(turnedRed, "Gate / CI", onlyNewest), "failure");
+  // a green suite of ANOTHER workflow next to the red gate: both current, the worst wins
+  const otherWorkflow = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }),
+    checkRun(20, "Gate / CI", { suite: 2 }),
+  ];
+  assert.equal(
+    prCheckState(otherWorkflow, "Gate / CI", () => true),
+    "failure"
+  );
+  // a run without a suite id always counts, whatever suiteIsCurrent says
+  const noSuite = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: null }),
+    checkRun(20, "Gate / CI", { suite: 2 }),
+  ];
+  assert.equal(
+    prCheckState(noSuite, "Gate / CI", () => false),
+    "failure"
+  );
+  // nothing current → null (missing)
+  assert.equal(
+    prCheckState(
+      [checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 })],
+      "Gate / CI",
+      () => false
+    ),
+    null
+  );
+  // a re-run of failed jobs stays in its suite: newest per suite, as before
+  const rerun = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }),
+    checkRun(11, "Gate / CI", { suite: 1 }),
+  ];
+  assert.equal(
+    prCheckState(rerun, "Gate / CI", () => true),
+    "success"
+  );
+});
+
+test("currentSuitePredicate: the newest run of each workflow is current; an unmapped suite is kept", () => {
+  /** A pull_request workflow run as github.listWorkflowRuns normalizes it (the fields used). */
+  const wf = (id, workflowId, checkSuiteId) => ({
+    id,
+    workflowId,
+    checkSuiteId,
+    event: "pull_request",
+  });
+  const isCurrent = currentSuitePredicate([
+    wf(100, 7, 1), // ci.yml, cancelled by the retarget
+    wf(300, 7, 3), // ci.yml again: current
+    wf(200, 8, 2), // quality.yml, its only run: current
+    wf(400, null, 4), // no workflow id: cannot be placed, so its suite is not known
+    wf(500, 9, null), // no suite: ignored
+  ]);
+  assert.equal(isCurrent(1), false, "an older run of the same workflow");
+  assert.equal(isCurrent(3), true);
+  assert.equal(isCurrent(2), true, "another workflow's newest run");
+  assert.equal(isCurrent(4), true, "a run without a workflow id is unknown: kept");
+  assert.equal(isCurrent(99), true, "a suite no listed run maps to (another app): kept");
+  // the order of the listing does not matter: the highest id wins
+  const reversed = currentSuitePredicate([wf(300, 7, 3), wf(100, 7, 1)]);
+  assert.equal(reversed(1), false);
+  assert.equal(reversed(3), true);
+  // an empty or failed listing knows nothing: every suite is current
+  assert.equal(currentSuitePredicate([])(1), true);
+  assert.equal(currentSuitePredicate(undefined)(1), true);
+
+  // End to end over prCheckState: old failed suite + newer green suite of the same workflow
+  const runs = [
+    checkRun(10, "Gate / CI", { conclusion: "failure", suite: 1 }),
+    checkRun(30, "Gate / CI", { suite: 3 }),
+  ];
+  assert.equal(prCheckState(runs, "Gate / CI", isCurrent), "success");
+  // the same job name green in another workflow (suite 2) next to the red gate: red
+  const masked = [
+    checkRun(30, "Gate / CI", { conclusion: "failure", suite: 3 }),
+    checkRun(20, "Gate / CI", { suite: 2 }),
+  ];
+  assert.equal(prCheckState(masked, "Gate / CI", isCurrent), "failure");
+  // a red suite the listing cannot map stays in next to the newest green one
+  const unmapped = [
+    checkRun(30, "Gate / CI", { suite: 3 }),
+    checkRun(90, "Gate / CI", { conclusion: "failure", suite: 99 }),
+  ];
+  assert.equal(prCheckState(unmapped, "Gate / CI", isCurrent), "failure");
+});
+
+test("currentSuitePredicate: a run supersedes only a run of the same workflow and the same event", () => {
+  // The concurrency group is `${{ github.workflow }}-${{ github.ref }}`: a pull_request run and a
+  // workflow_dispatch run of ci.yml on the same head never cancel each other.
+  const wf = (id, checkSuiteId, event, workflowId = 7) => ({
+    id,
+    workflowId,
+    checkSuiteId,
+    event,
+  });
+  const gate = (conclusions) =>
+    prCheckState(
+      conclusions.map(([id, suite, conclusion]) =>
+        checkRun(id, "Gate / CI", { conclusion, suite })
+      ),
+      "Gate / CI",
+      currentSuitePredicate(conclusions.map(([id, suite, , event]) => wf(id * 10, suite, event)))
+    );
+  // a red pull_request run + a later green workflow_dispatch of the same workflow → red
+  assert.equal(
+    gate([
+      [1, 1, "failure", "pull_request"],
+      [2, 2, "success", "workflow_dispatch"],
+    ]),
+    "failure"
+  );
+  // a green pull_request run + a later red workflow_dispatch → red
+  assert.equal(
+    gate([
+      [1, 1, "success", "pull_request"],
+      [2, 2, "failure", "workflow_dispatch"],
+    ]),
+    "failure"
+  );
+  // an old red dispatch, a newer green dispatch and a green pull_request run → green
+  assert.equal(
+    gate([
+      [1, 1, "failure", "workflow_dispatch"],
+      [2, 2, "success", "pull_request"],
+      [3, 3, "success", "workflow_dispatch"],
+    ]),
+    "success"
+  );
+  // round 1 still holds: a superseded red pull_request run + a newer green one → green
+  assert.equal(
+    gate([
+      [1, 1, "failure", "pull_request"],
+      [2, 2, "success", "pull_request"],
+    ]),
+    "success"
+  );
+  // a run without an event is its own group: it supersedes nothing and nothing supersedes it
+  for (const missing of ["", undefined, null]) {
+    assert.equal(
+      gate([
+        [1, 1, "failure", missing],
+        [2, 2, "success", missing],
+      ]),
+      "failure",
+      `two runs without an event (${missing})`
+    );
+    assert.equal(
+      gate([
+        [1, 1, "failure", "pull_request"],
+        [2, 2, "success", missing],
+      ]),
+      "failure",
+      `an event-less run does not supersede a pull_request run (${missing})`
+    );
+    assert.equal(
+      gate([
+        [1, 1, "failure", missing],
+        [2, 2, "success", "pull_request"],
+      ]),
+      "failure",
+      `a pull_request run does not supersede an event-less run (${missing})`
+    );
+  }
+  // the predicate itself: per (workflowId, event), only the highest run id is current
+  const isCurrent = currentSuitePredicate([
+    wf(100, 1, "pull_request"),
+    wf(200, 2, "workflow_dispatch"),
+    wf(300, 3, "pull_request"),
+    wf(400, 4, "workflow_dispatch"),
+    wf(150, 5, "pull_request", 8), // another workflow, same event: its own group
+    wf(500, 6, ""),
+    wf(50, 7, ""),
+  ]);
+  assert.deepEqual(
+    [1, 2, 3, 4, 5, 6, 7].map((suite) => isCurrent(suite)),
+    [false, false, true, true, true, true, true]
+  );
+});
+
+test("prChecksNeedWorkflowRuns: only when two suites carry a gate and disagree", () => {
+  const gates = ["Gate / CI", "Gate / Quality"];
+  // one suite per gate (the usual head): nothing to list
+  assert.equal(
+    prChecksNeedWorkflowRuns(
+      [checkRun(1, "Gate / CI", { suite: 1 }), checkRun(2, "Gate / Quality", { suite: 2 })],
+      gates
+    ),
+    false
+  );
+  // a re-run in the same suite: still one suite
+  assert.equal(
+    prChecksNeedWorkflowRuns(
+      [
+        checkRun(1, "Gate / CI", { conclusion: "failure", suite: 1 }),
+        checkRun(3, "Gate / CI", { suite: 1 }),
+      ],
+      gates
+    ),
+    false
+  );
+  // two suites that agree (both green, both red): the answer is the same either way
+  for (const conclusion of ["success", "failure"]) {
+    assert.equal(
+      prChecksNeedWorkflowRuns(
+        [
+          checkRun(1, "Gate / CI", { conclusion, suite: 1 }),
+          checkRun(2, "Gate / CI", { conclusion, suite: 2 }),
+        ],
+        gates
+      ),
+      false,
+      conclusion
+    );
+  }
+  // two suites that disagree on one gate: list
+  assert.equal(
+    prChecksNeedWorkflowRuns(
+      [
+        checkRun(1, "Gate / CI", { conclusion: "failure", suite: 1 }),
+        checkRun(2, "Gate / CI", { suite: 2 }),
+      ],
+      gates
+    ),
+    true
+  );
+  assert.equal(
+    prChecksNeedWorkflowRuns(
+      [
+        checkRun(1, "Gate / Quality", { suite: 1 }),
+        checkRun(2, "Gate / Quality", { status: "queued", suite: 2 }),
+      ],
+      gates
+    ),
+    true
+  );
+  // a disagreement on a name that is not a gate does not count
+  assert.equal(
+    prChecksNeedWorkflowRuns(
+      [checkRun(1, "lint", { conclusion: "failure", suite: 1 }), checkRun(2, "lint", { suite: 2 })],
+      gates
+    ),
+    false
+  );
+  assert.equal(prChecksNeedWorkflowRuns(null, gates), false);
+  assert.equal(prChecksNeedWorkflowRuns([], []), false);
+});
+
+test("prGatesReason is the rule evaluateEligibility applies", () => {
+  const red = makePr({ prChecks: { "Gate / CI": "failure", "Gate / Quality": null } });
+  assert.deepEqual(prGatesReason(red, gatesCtx()), {
+    code: "pr-checks-not-green",
+    detail: "Gate / CI failure; Gate / Quality missing",
+  });
+  assert.deepEqual(evaluateEligibility(red, gatesCtx()).reasons, [prGatesReason(red, gatesCtx())]);
+  const green = makePr({ prChecks: { "Gate / CI": "success", "Gate / Quality": "success" } });
+  assert.equal(prGatesReason(green, gatesCtx()), null);
+  assert.equal(prGatesReason(makePr(), gatesCtx()), null, "revalidate: no prChecks");
+  assert.equal(prGatesReason(red, gatesCtx({ lane: "base-repair" })), null);
+  assert.equal(
+    prGatesReason(red, makeCtx({ config: { ...liveConfig, prChecksRequired: [] } })),
+    null
+  );
+});
+
+test("absent prChecks (revalidate) never blocks", () => {
+  // revalidate reads no PR gate: the snapshot has no prChecks key at all
+  const pr = makePr();
+  assert.equal(Object.hasOwn(pr, "prChecks"), false);
+  const result = evaluateEligibility(pr, gatesCtx());
+  assert.equal(result.eligible, true);
+  assert.deepEqual(result.reasons, []);
+  assert.equal(evaluateEligibility(makePr({ prChecks: undefined }), gatesCtx()).eligible, true);
+});
+
+test("selectBatch honours ctx.batchSize for the wait and for the slice", () => {
+  const ten = Array.from({ length: 10 }, (_, i) => candidate(i + 1, 1 + i / 10));
+  // slice: 10 young eligible PRs, window 6 → a full batch of the 6 oldest, no wait
+  const cut = selectBatch(ten, makeCtx({ batchSize: 6 }));
+  assert.equal(cut.waiting, false);
+  assert.deepEqual(nums(cut), [10, 9, 8, 7, 6, 5]);
+  assert.match(cut.reason, /6 of 10 eligible \(batch window 6\)/);
+  // without ctx.batchSize the same pool waits for maxSize (12)
+  const noWindow = selectBatch(ten, makeCtx());
+  assert.equal(noWindow.waiting, true);
+  assert.match(noWindow.reason, /10\/12 eligible/);
+  // wait: 3 young PRs with window 4 → wait; window 3 → full, no wait
+  const three = ten.slice(0, 3);
+  const waits = selectBatch(three, makeCtx({ batchSize: 4 }));
+  assert.equal(waits.waiting, true);
+  assert.deepEqual(waits.batch, []);
+  assert.match(waits.reason, /3\/4 eligible/);
+  assert.deepEqual(nums(selectBatch(three, makeCtx({ batchSize: 3 }))), [3, 2, 1]);
+  // after maxWaitMinutes a window that is not full starts anyway
+  const old = [candidate(1, config.batch.maxWaitMinutes + 1), candidate(2, 1)];
+  assert.deepEqual(nums(selectBatch(old, makeCtx({ batchSize: 4 }))), [1, 2]);
+  // a window of 1 takes one PR
+  assert.deepEqual(nums(selectBatch(ten, makeCtx({ batchSize: 1 }))), [10]);
+  // an invalid ctx.batchSize falls back to maxSize
+  for (const batchSize of [0, -1, 2.5, "6", null]) {
+    assert.equal(selectBatch(ten, makeCtx({ batchSize })).waiting, true, String(batchSize));
+  }
+});
+
+test("currentBatchWindow: maxSize without adaptive; stored window clamped; startSize by default", () => {
+  const adaptive = { ...liveConfig, batch: { ...liveConfig.batch, adaptive: true, startSize: 6 } };
+  const fixed = { ...liveConfig, batch: { ...liveConfig.batch, adaptive: false } };
+  const at = (batchWindow) => ({ ...initialState(BASE, NOW), batchWindow });
+  assert.equal(currentBatchWindow(fixed, at(3)), 12, "adaptive off: always maxSize");
+  assert.equal(currentBatchWindow(adaptive, initialState(BASE, NOW)), 6, "no window: startSize");
+  assert.equal(currentBatchWindow(adaptive, null), 6);
+  assert.equal(currentBatchWindow(adaptive, at(9)), 9);
+  assert.equal(currentBatchWindow(adaptive, at(20)), 12, "a window above a lowered maxSize");
+  for (const bad of [0, -2, 1.5, "7", null]) {
+    assert.equal(currentBatchWindow(adaptive, at(bad)), 6, String(bad));
+  }
+  const raisedMin = { ...adaptive, batch: { ...adaptive.batch, minSize: 4 } };
+  assert.equal(currentBatchWindow(raisedMin, at(2)), 4, "never below minSize");
+  const noStart = {
+    ...adaptive,
+    batch: { maxSize: 8, minSize: 1, maxWaitMinutes: 10, adaptive: true },
+  };
+  assert.equal(currentBatchWindow(noStart, null), 8, "startSize defaults to maxSize");
+});
+
+// ───────────────────────────── lanes (hotfix, base-repair) ─────────────────────────────
+
+const LANES = { hotfixLabel: "omni-queue-hotfix", baseRepairLabel: "omni-queue-base-repair" };
+
+test("the shipped config names both lane labels", () => {
+  assert.deepEqual(config.lanes, LANES);
+});
+
+/** A candidate (see `candidate`) that also carries the lane `labels`, applied by `actor`. */
+function laneCandidate(n, labeledMinutesAgo, labels, { actor = APPROVER, headSha } = {}) {
+  const c = candidate(n, labeledMinutesAgo);
+  if (headSha) c.pr.headSha = headSha;
+  c.pr.labels = [config.label, ...labels];
+  c.pr.timeline = [
+    ...c.pr.timeline,
+    ...labels.map((label) => labeledEvent(label, actor, labeledMinutesAgo - 1)),
+  ];
+  return c;
+}
+
+test("a lane label applied by a non-approver is ignored", () => {
+  const ctx = makeCtx();
+  for (const label of [LANES.hotfixLabel, LANES.baseRepairLabel]) {
+    const byApprover = laneCandidate(1, 30, [label]).pr;
+    const byOther = laneCandidate(1, 30, [label], { actor: "contributor" }).pr;
+    assert.equal(laneOf(byOther, ctx), null, label);
+    assert.notEqual(laneOf(byApprover, ctx), null, label);
+    // only the latest `labeled` event counts: re-applied by someone else, it no longer counts
+    const reapplied = {
+      ...byApprover,
+      timeline: [...byApprover.timeline, labeledEvent(label, "contributor", 5)],
+    };
+    assert.equal(laneOf(reapplied, ctx), null, `${label} re-applied by a non-approver`);
+    // the label must be present: an old labeled event of a removed label is not a lane
+    assert.equal(laneOf({ ...byApprover, labels: [config.label] }, ctx), null, label);
+    assert.equal(selectLane([laneCandidate(1, 30, [label], { actor: "x" })], ctx), null, label);
+  }
+  // both labels by an approver: base-repair
+  assert.equal(
+    laneOf(laneCandidate(1, 30, [LANES.hotfixLabel, LANES.baseRepairLabel]).pr, ctx),
+    "base-repair"
+  );
+  // case-insensitive, as GitHub label names
+  assert.equal(laneOf(laneCandidate(1, 30, ["OMNI-QUEUE-HOTFIX"]).pr, ctx), "hotfix");
+  // without a lanes section in the config there are no lanes
+  const noLanes = makeCtx({ config: { ...liveConfig, lanes: null } });
+  assert.equal(laneOf(laneCandidate(1, 30, [LANES.hotfixLabel]).pr, noLanes), null);
+  assert.equal(selectLane([laneCandidate(1, 30, [LANES.hotfixLabel])], noLanes), null);
+});
+
+test("selectLane: hotfix first, batch of one, no wait", () => {
+  // plenty of time left before batch.maxWaitMinutes: selectBatch would wait, a lane never does
+  const young = 1;
+  const plain = candidate(1, young + 3);
+  const repairOld = laneCandidate(2, young + 2, [LANES.baseRepairLabel]);
+  const hotfixNew = laneCandidate(3, young, [LANES.hotfixLabel]);
+  const hotfixOld = laneCandidate(4, young + 1, [LANES.hotfixLabel]);
+  const list = [plain, repairOld, hotfixNew, hotfixOld];
+  assert.equal(selectBatch(list, makeCtx()).waiting, true, "the FIFO would wait");
+  const picked = selectLane(list, makeCtx());
+  assert.equal(picked.lane, "hotfix");
+  assert.deepEqual(picked.batch, [
+    {
+      n: 4,
+      head: hotfixOld.pr.headSha,
+      title: "PR 4",
+      author: "user4",
+      labeledAt: iso(young + 1),
+    },
+  ]);
+  // without a hotfix, the oldest base-repair PR goes before the FIFO
+  const repair = selectLane([plain, repairOld], makeCtx());
+  assert.deepEqual([repair.lane, nums(repair)], ["base-repair", [2]]);
+  // no lane PR: nothing (the FIFO decides)
+  assert.equal(selectLane([plain, candidate(5, 40)], makeCtx()), null);
+  assert.equal(selectLane([], makeCtx()), null);
+  // an ineligible lane PR is never picked
+  const blocked = laneCandidate(6, 40, [LANES.hotfixLabel]);
+  blocked.eligibility = { ...blocked.eligibility, eligible: false };
+  assert.equal(selectLane([blocked, plain], makeCtx()), null);
+});
+
+test("repairOnly picks only base-repair", () => {
+  const hotfix = laneCandidate(1, 50, [LANES.hotfixLabel]);
+  const plain = candidate(2, 60);
+  const repairA = laneCandidate(3, 30, [LANES.baseRepairLabel]);
+  const repairB = laneCandidate(4, 40, [LANES.baseRepairLabel], { headSha: "e".repeat(40) });
+  const only = (list, state) =>
+    selectLane(list, makeCtx(state ? { state } : {}), { repairOnly: true });
+  assert.equal(only([hotfix, plain]), null, "no hotfix, no FIFO PR");
+  const picked = only([hotfix, plain, repairA, repairB]);
+  assert.deepEqual([picked.lane, nums(picked)], ["base-repair", [4]]);
+  // a repair already tried at its current head is skipped; at another head it is not
+  const tried = { ...initialState(BASE, NOW), repairTried: { 4: "e".repeat(40) } };
+  assert.deepEqual(nums(only([repairA, repairB], tried)), [3]);
+  const moved = { ...initialState(BASE, NOW), repairTried: { 4: "f".repeat(40) } };
+  assert.deepEqual(nums(only([repairA, repairB], moved)), [4]);
+  // outside repairOnly a tried repair is skipped too (it is never recomposed at that head)
+  assert.deepEqual(nums(selectLane([repairB, repairA], makeCtx({ state: tried }))), [3]);
+});
+
+test("a base-repair PR is eligible with red PR gates; a hotfix is not", () => {
+  const red = { "Gate / CI": "failure", "Gate / Quality": "failure" };
+  const ctx = gatesCtx();
+  const repair = { ...laneCandidate(1, 30, [LANES.baseRepairLabel]).pr, prChecks: red };
+  const hotfix = { ...laneCandidate(2, 30, [LANES.hotfixLabel]).pr, prChecks: red };
+  const repairLane = laneOf(repair, ctx);
+  const hotfixLane = laneOf(hotfix, ctx);
+  assert.equal(repairLane, "base-repair");
+  assert.equal(hotfixLane, "hotfix");
+  assert.equal(evaluateEligibility(repair, { ...ctx, lane: repairLane }).eligible, true);
+  assert.deepEqual(codes(evaluateEligibility(hotfix, { ...ctx, lane: hotfixLane })), [
+    "pr-checks-not-green",
+  ]);
+  // a lane label by a non-approver is no exemption
+  const fake = {
+    ...laneCandidate(3, 30, [LANES.baseRepairLabel], { actor: "contributor" }).pr,
+    prChecks: red,
+  };
+  assert.deepEqual(codes(evaluateEligibility(fake, { ...ctx, lane: laneOf(fake, ctx) })), [
+    "pr-checks-not-green",
+  ]);
+  // the lane label adds to the rules, it replaces none: still needs the queue label
+  const unqueued = { ...repair, labels: [LANES.baseRepairLabel] };
+  assert.ok(
+    codes(evaluateEligibility(unqueued, { ...ctx, lane: "base-repair" })).includes("no-label")
+  );
 });

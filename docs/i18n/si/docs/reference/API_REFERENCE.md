@@ -757,67 +757,166 @@ OpenAI-අනුකූල කණ්ඩායම් සැකසීම.
 
 ---
 
-## API සොයන්න
+## සෙවුම් API
 
-Web/search සපයන්නා වියුක්ත කිරීම (Tavily, Brave, Exa, Serper, ආදිය).
+වෙබ්/සෙවුම් සැපයුම්කරු වියුක්තකරණය (Tavily, Brave, Exa, Serper, ආදිය).
 
-| ක්රමය | මාර්ගය                 | විස්තරය                                                                                                     |
-| ----- | ---------------------- | ----------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | වින්‍යාසගත සෙවුම් සපයන්නන්ගේ + හැකියාවන් ලැයිස්තුගත කරන්න                                                   |
-| POST  | `/v1/search`           | `v1SearchSchema` මගින් වලංගු කරන ලද සෙවුම් විමසුමක් — ශරීරය ධාවනය කරන්න, caching/coalescing සඳහා සහය දක්වයි |
-| GET   | `/v1/search/analytics` | එක්-සැපයුම්කරු hit/latency/cache සංඛ්යා ලේඛන                                                                |
+| Method | Path                   | Description                                                                                                           |
+| ------ | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | වින්යාස කර ඇති සෙවුම් සැපයුම්කරුවන් සහ හැකියාවන් ලැයිස්තුගත කිරීම                                                     |
+| POST   | `/v1/search`           | සෙවුම් විමසුමක් ධාවනය කිරීම — සිරුර `v1SearchSchema` මගින් වලංගුකරණය කරනු ලබන අතර caching/coalescing සඳහා සහාය දක්වයි |
+| GET    | `/v1/search/analytics` | එක් එක් සැපයුම්කරුගේ hit/latency/cache සංඛ්යාලේඛන                                                                     |
 
-**සත්‍යාපනය:** දරන්නා API යතුර (`extractApiKey` + `isValidApiKey`). සෙවුම් ප්‍රතිපත්තිය `enforceApiKeyPolicy` හරහා බලාත්මක කර ඇත.
+**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). සෙවුම් ප්රතිපත්තිය `enforceApiKeyPolicy` හරහා බලාත්මක කෙරේ.
 
-**ස්වයං-තේරීම:** `provider` නොමැතිව, වින්‍යාසගත සම්බන්ධතාවයක් සහිත ලාභම සැපයුම්කරු පළමුව ක්‍රියාත්මක වන අතර ඊළඟ ලාභම අසාර්ථකත්වය වේ. නොමිලේ අවසන් සේවා සපයන්නන් (`duckduckgo-free`) භාවිතා කරනු ලබන්නේ වෙනත් කිසිවක් වින්‍යාස කර නොමැති විට පමණි. ස්වයං-සත්කාරක SearXNG එහි සම්බන්ධතාවය සැබෑ `baseUrl` ගබඩා කළ පසු වින්‍යාස කළ ලෙස ගණන් ගනු ලැබේ (නාමාවලිය පෙරනිමි `http://localhost:8888/search` නොවේ): එය පසුව යතුරු කරන ලද ඒවාට වඩා $0 සපයන්නෙකු ලෙස ශ්‍රේණිගත වේ, SearXNG 400, 401, 40403 වලංගු නොවන පිළිතුරු `baseUrl`, අසාර්ථක ලෙස ලාභම යතුරු සපයන්නා සමඟ ශ්‍රේණිගත වේ URL `http(s)` වලාකුළු-පාර-දත්ත ලිපිනයක ඇති ලකුණු ගණන් නොගනී. ටෝකනයක් ගබඩා කරන SearXNG සම්බන්ධතාවයක් මේ ආකාරයෙන් ශ්‍රේණිගත වන්නේ `https://` හෝ loopback `http://` හරහා පමණි. දුරස්ථ සරල `http://` හරහා එය කිසිවිටෙක අසාර්ථක නොවන අතර අවසාන විසඳුම ලෙස පවතී, වෙනත් කිසිදු සැපයුම්කරුවෙකු වින්‍යාස කර නොමැති විට හෝ නමෙන් ඉල්ලා සිටින විට පමණක් භාවිතා කරයි, එබැවින් එය එම අවස්ථා දෙකේදී පැහැදිලි පෙළකින් ටෝකනය යවයි.
+### නම් කළ search/fetch සංයෝජන
+
+`POST /v1/search` සහ `POST /v1/web/fetch` යන දෙකම සුරකින ලද සංයෝජන නාමයක් ලෙස `model` පිළිගනී.
+`model` හෝ පැහැදිලි `provider` එකක් භාවිත කරන්න; දෙකම යැවූ විට `400` ආපසු ලබා දෙයි.
+ක්ෂේත්ර දෙකෙන් එකක්වත් නොමැති විට, පවතින ස්වයංක්රීය සැපයුම්කරු තේරීම වෙනසකින් තොරව පවතී.
+
+Combo Builder සහ එහි Add Model catalog යන දෙකම සම්බන්ධිත සැපයුම්කරුවන් සඳහා native web-operation ඇතුළත් කිරීම් නිරාවරණය කරයි, ඔවුන් සතුව LLM model ලැයිස්තුවක් නොමැති අවස්ථාවලදී පවා. Serper මගින් **Web search** පෙන්වයි;
+Tavily මගින් **Web search / Page extraction** පෙන්වයි, fetch-only සැපයුම්කරුවන් මගින් **Page extraction** පෙන්වයි.
+ඇතුළත් කිරීම සහ ගිණුම සාමාන්ය පරිදි තෝරන්න. එක් Tavily ඇතුළත් කිරීමක් web endpoints දෙකම සඳහා සේවය කරයි;
+මෙම operation ඇතුළත් කිරීම් chat-only client selectors හෝ chat model probes වෙත එක් නොකෙරේ.
+
+උදාහරණයක් ලෙස, පහත අනුපිළිවෙළගත targets සහිත `shared-free` නමින් **priority** සංයෝජනයක් සාදන්න:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+ඉන්පසු සෑම surface එකකම එකම නාමය භාවිත කරන්න:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Search මගින් Tavily පසුව Serper සලකා බලයි; fetch මගින් Tavily පසුව Jina Reader සලකා බලයි;
+chat මගින් විශේෂිත search/fetch සැපයුම්කරුවන් මඟහැර OpenAI සලකා බලයි. අනුකූලතාව ලැබෙන්නේ
+model නාමයක ඇති වචනවලින් නොව, search/fetch executor registries වෙතිනි.
+Filtering සිදු වන්නේ credential selection සහ dispatch වලට පෙර වන අතර, සුරකින ලද සංයෝජනය කිසිවිටෙක සංස්කරණය නොකරයි.
+
+Non-chat capability routes මගින් `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used`, සහ `p2c` සඳහා සහාය දක්වයි. `fusion`, `pipeline`, සහ `context-relay` වැනි
+chat-only synthesis strategies, search හෝ generated media වෙත නිහඬව යෙදවීම වෙනුවට non-chat routes මත ප්රතික්ෂේප කරනු ලැබේ.
+පවතින combo engine මගින් upstream quota failures ඇතුළුව අනුපිළිවෙළගත fallback හසුරුවන අතර,
+step IDs, account pins, එක් එක් step සඳහා account allowlists, nested references,
+caller connection/quota scopes සහ combo access policy රඳවා ගනී. ප්රතිඵල ඒවායේ native
+search/fetch schema රඳවා ගනී, සැබෑ provider ද ඇතුළුව; `X-OmniRoute-Combo-Trace` මගින් routing decision හඳුනා ගනී.
+නොදන්නා combos සඳහා `404` ආපසු ලැබේ; inactive combos සහ අනුකූල targets නොමැති සංයෝජන සඳහා `400` ආපසු ලැබේ.
+
+සෑම combo උත්සාහයක්ම එක් පැහැදිලි provider එකක් භාවිත කරයි. එයට combo එකේ පිටුපසින් native automatic
+provider pool කැඳවිය නොහැක. පැහැදිලි-provider requests ඒවායේ පවතින single-provider හැසිරීම රඳවා ගනී.
+විශේෂිත search/fetch providers ඉලක්ක කරන සෘජු chat requests, OpenAI-style executor එකකට වැටී යාම වෙනුවට
+ක්රියාත්මක කළ හැකි JSON `400` එකක් ආපසු ලබා දෙයි.
+
+### Capability-specific combo routes
+
+සුරකින ලද combos සතුව API capabilities වන keys සහිත `routes` object එකක් තිබිය හැක. සෑම route එකකටම
+තමන්ගේ target list, strategy සහ runtime config හිමි වේ. ඉහළ මට්ටමේ `models`, `strategy` සහ `config`
+legacy-compatible Chat plan ලෙස පවතී; `routes` නොමැති පැරණි combos වෙනසකින් තොරව තවදුරටත් ක්රියා කරයි.
+
+සහාය දක්වන route keys වන්නේ `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations`, සහ `audio-generation` ය. Endpoint projection සිදු වන්නේ credential
+selection, scoring හෝ dispatch වලට පෙරය. Nested combo references මගින් එම capability සඳහා child combo හි route තෝරයි.
+
+`POST /v1/music/generations` සහ `POST /v1/ocr` මගින් `model` තුළ combo නාමයක් පිළිගනී. Native
+ElevenLabs-compatible `POST /v1/music` මගින් `model_id` තුළ combo නාමයක් ද පිළිගනී, නමුත් එම native endpoint හි භාවිත කළ හැකි සෑම
+target එකක්ම ElevenLabs music model එකක් විය යුතුය, එවිට එහි binary response contract
+රඳවා ගත හැක. `POST /v1/sound-generation` මගින් එම native-binary constraint යටතේ `model_id` තුළ
+`audio-generation` combo එකක් පිළිගනී. විවිධ music providers සඳහා `/v1/music/generations` භාවිත කරන්න.
+
+**Auto-select:** `provider` නොමැති විට, වින්යාසගත connection එකක් සහිත අඩුම මිලැති provider පළමුව ධාවනය වන අතර
+ඊළඟ අඩුම මිලැති provider failover වේ. Free last-resort providers (`duckduckgo-free`) භාවිත කරන්නේ වෙනත් කිසිවක් වින්යාස කර නොමැති විට පමණි.
+Self-hosted SearXNG එකක් එහි connection මගින් සැබෑ `baseUrl` එකක් (catalog default `http://localhost:8888/search` නොවන) ගබඩා කළ පසු වින්යාසගත එකක් ලෙස සැලකේ:
+එවිට එය keyed providers වලට ඉදිරියෙන් $0 provider එකක් ලෙස ශ්රේණිගත වන අතර, SearXNG 400, 401, 403 හෝ 404 ආපසු ලබා දෙන විට පවා,
+අඩුම මිලැති keyed provider failover ලෙස පවතී. වලංගු `http(s)` URL එකක් නොවන හෝ cloud-metadata address එකක් වෙත යොමු වන
+`baseUrl` එකක් ගණන් නොගැනේ. Token එකක් ගබඩා කරන SearXNG connection එකක් මෙලෙස ශ්රේණිගත වන්නේ `https://` හෝ loopback `http://` හරහා පමණි.
+Remote plain `http://` හරහා එය කිසිවිටෙක failover එකක් නොවන අතර, වෙනත් provider එකක් වින්යාස කර නොමැති විට හෝ
+නාමයෙන් ඉල්ලා සිටින විට පමණක් භාවිත කරන last resort එකක් ලෙස පවතී; එම අවස්ථා දෙකේදී token එක cleartext ලෙස යවනු ලැබේ.
 
 ### Exa සහ Tavily `provider_options`
 
-Exa සහ Tavily නම් පරතරය සහිත බෑගයකින් සපයන්නා-විශේෂිත ක්ෂේත්‍ර කියවන්න: `provider_options.exa` (හෝ `provider_options["exa-search"]`) සහ `provider_options.tavily` (හෝ `provider_options["tavily-search"]`). පහත යතුරු පමණක් යොමු කෙරේ. සෑම එකක්ම `open-sse/handlers/search/providerOptionsPassthrough.ts` හි තමන්ගේම Zod යෝජනා ක්‍රමයට එරෙහිව පරීක්ෂා කරනු ලබන අතර, වැරදි වර්ගය සහිත යතුරක් හෙළනු ලැබේ. auth, base URL, `stream` සහ `outputSchema` ඇතුළුව වෙනත් ඕනෑම යතුරක් නොසලකා හරිනු ලැබේ. වෙනත් සපයන්නන් විසින් භාවිතා කරන පැතලි යතුරු (`cx`, `depth`, ...) පෙර පරිදිම ක්‍රියා කරයි.
+Exa සහ Tavily නම් කළ namespace සහිත bag එකකින් provider-විශේෂිත fields කියවයි:
+`provider_options.exa` (හෝ `provider_options["exa-search"]`) සහ `provider_options.tavily`
+(හෝ `provider_options["tavily-search"]`) යන ඒවායින්. පහත keys පමණක් ඉදිරියට යවනු ලැබේ. සෑම එකක්ම
+`open-sse/handlers/search/providerOptionsPassthrough.ts` හි තමන්ගේම Zod schema එකට එරෙහිව පරීක්ෂා
+කරනු ලබන අතර, වැරදි type එකක් සහිත key එකක් ඉවත් කරනු ලැබේ. auth, base URL,
+`stream` සහ `outputSchema` ඇතුළුව වෙනත් ඕනෑම key එකක් නොසලකා හරිනු ලැබේ. වෙනත් providers විසින්
+භාවිත කරන flat keys (`cx`, `depth`, ...) පෙර පරිදිම ක්රියා කරයි.
 
-| සපයන්නා | ඉහළ මට්ටමේ ක්ෂේත්ර                                                                                                                                                                                                                                                                                                                                                        | කූඩු කළා                                                                                                                                  |
-| ------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa     | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (පැතලි ප්‍රාථමික), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` පෙරනිමි `{ text: true, highlights: true }` හරහා ඒකාබද්ධ විය |
-| ටවිලි   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                         |
+| Provider | Top-level fields                                                                                                                                                                                                                                                                                                                                                          | Nested                                                                                                                                      |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (flat primitives), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` පෙරනිමි `{ text: true, highlights: true }` මත merge කරනු ලැබේ |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                           |
 
-සාමාන්‍ය ක්ෂේත්‍ර සැමවිටම ජය ගනී: `query`, `max_results`, `filters` (වසම්), `country` සහ `search_type` වෙතින් ව්‍යුත්පන්න වූ මාතෘකාව. Exa හි, `search_type: "news"` `category: "news"` තබා ගනී. Tavily `search_type: "finance"` (`topic: "finance"`) ද පිළිගනී.
+Generic fields සෑම විටම ප්රමුඛ වේ: `query`, `max_results`, `filters` (domains), `country` සහ
+`search_type` වෙතින් ව්යුත්පන්න කරන topic එක. Exa හි, `search_type: "news"` මඟින්
+`category: "news"` එලෙසම පවත්වා ගනී. Tavily `search_type: "finance"` ද පිළිගනී
+(`topic: "finance"`).
 
-ෆයර්ක්‍රෝල් සෙවුම් පිරිවැය වාර්තා කරන ලද ප්‍රතිඵල 10 කින් ආරම්භ කරන ලද කොටසකට, වාරිකයකට ඩොලර් 0.002 (බැර 2) සහ ඇමතුමකට අවම වශයෙන් එක් වාරණ ( [ෆයර්ක්‍රෝල් බිල්පත්](https://docs.firecrawl.dev/billing) ): 11 ප්‍රතිඵල සඳහා ඩොලර් 0.004 ක් වැය වේ.
+Firecrawl search පිරිවැය, ආපසු ලබා දුන් results 10කින් ආරම්භ කරන සෑම block එකකටම $0.002 (credits 2)
+ලෙසත්, එක් call එකකට අවම වශයෙන් එක් block එකක් ලෙසත් වාර්තා කරනු ලැබේ
+([Firecrawl බිල්පත්කරණය](https://docs.firecrawl.dev/billing)): results 11ක් සඳහා $0.004ක් වැය වේ.
 
-සාමාන්‍ය `time_range` දැන් සපයන්නන් දෙදෙනාටම ළඟා වේ: Exa හට `startPublishedDate` (ISO වේලා මුද්‍රාව) සහ Tavily `start_date` (`YYYY-MM-DD`) ලබා ගනී. `provider_options` හි පැහැදිලි දිනයක් සිතියම්ගත කළ දිනය අභිබවා යයි.
+Generic `time_range` දැන් providers දෙකටම ලැබේ: Exa වෙත `startPublishedDate` (ISO timestamp) සහ
+Tavily වෙත `start_date` (`YYYY-MM-DD`) ලෙස යවනු ලැබේ. `provider_options` හි පැහැදිලිව දක්වා ඇති
+date එක mapped date එක අභිබවා යයි.
 
-Exa ප්‍රතිඵල `id`, `highlights` (සෑම උද්දීපනයක්ම, `snippet` ලෙස භාවිතා කරන පළමු එක පමණක් නොවේ), `highlight_scores`, `summary`, `subpages`, `entities` සහ `extras` `provider_raw` හි තබා ගනී. Tavily ප්රතිඵල `images` සහ `favicon` තබා ගන්න.
+Exa results `id`, `highlights` (`snippet` සඳහා භාවිත කළ පළමු එක පමණක් නොව, සෑම highlight එකක්ම),
+`highlight_scores`, `summary`, `subpages`, `entities` සහ `extras` `provider_raw` තුළ පවත්වා ගනී.
+Tavily results `images` සහ `favicon` පවත්වා ගනී.
 
-Linkup සෙවුම් පිරිවැය `depth` `fast` සහ `standard` සඳහා $0.005 සහ `deep` සඳහා $0.05 ( [Linkup මිලකරණය](https://docs.linkup.so/pages/documentation/development/pricing) ), `depth` පැමිණෙන්නේ `provider_options` හෝ සම්බන්ධතා සැකසුම් වලින් වුවද.
+`depth` `fast` සහ `standard` සඳහා $0.005ක් ලෙසත්, `deep` සඳහා $0.05ක් ලෙසත් Linkup search
+පිරිවැය වාර්තා කරනු ලැබේ
+([Linkup මිල ගණන්](https://docs.linkup.so/pages/documentation/development/pricing)),
+`depth` ලැබෙන්නේ `provider_options` වෙතින් වුවද connection හි settings වෙතින් වුවද එය අදාළ වේ.
 
-Exa `type: "lite"` (Exa 3.0) කුඩා ක්ෂේත්‍ර කට්ටලයක් පිළිගන්නා අතර වෙනත් ඕනෑම ක්ෂේත්‍රයක් සකසා ඇති විට සම්පූර්ණ ඉල්ලීම ප්‍රතික්ෂේප කරයි. lite සඳහා, `additionalQueries`, `systemPrompt` සහ `text` සහ `highlights` හැර සෑම `contents` යතුරක්ම ඇමතුමට පෙර අත්හරිනු ලැබේ. අත්හරින ලද `subpages`, `subpageTarget`, `highlights.numSentences` සහ `highlights.highlightsPerUrl` තවදුරටත් යොමු නොකෙරේ.
+Exa `type: "lite"` (Exa 3.0) කුඩා fields කට්ටලයක් පිළිගන්නා අතර වෙනත් කිසියම් field එකක්
+සකසා තිබේ නම් සම්පූර්ණ request එක ප්රතික්ෂේප කරයි. lite සඳහා, `additionalQueries`, `systemPrompt`
+සහ `contents` හි `text` සහ `highlights` හැර අනෙකුත් සෑම key එකක්ම call එකට පෙර ඉවත් කරනු ලැබේ.
+අවලංගු කර ඇති `subpages`, `subpageTarget`, `highlights.numSentences` සහ
+`highlights.highlightsPerUrl` තවදුරටත් ඉදිරියට යවනු නොලැබේ.
 
-පිරිවැය ගිණුම්කරණය යනු Exa ගේම මිලකරණය අනුගමනය කරන Exa හැර, පැතලි රෙජිස්ට්‍රි `costPerQuery` වේ: `auto` සඳහා ඇමතුමකට $0.007 (සහ උරුමය `fast`) හෝ `lite` සඳහා $0.004 (සහ උරුමය `instant`), ප්‍රතිඵල 10ක් ආවරණය කරයි; එක් එක් ප්‍රතිඵලයක් සඳහා $0.001; සහ `contents.summary` සකසා ඇති විට ලැබෙන ප්‍රතිඵලයකට $0.001. Tavily `search_depth` `basic`, `fast` සහ `ultra-fast` සඳහා ණය 1 ($0.008) ලෙසත්, `advanced` සඳහා ණය 2 ($0.016) ( [Tavily API ණය](https://docs.tavily.com/documentation/api-credits) ) ලෙසත් සටහන් වේ. Tavily උසස් වෙත උත්ශ්‍රේණි කරන `auto_parameters: true` සහිත ඇමතුමක් තවමත් ණය 1කින් වාර්තා වේ.
+පිරිවැය ගණනය flat registry එක වන `costPerQuery` අනුව සිදු වේ. එහෙත් Exa සඳහා Exa හිම
+මිල ගණන් අනුගමනය කරයි: results 10ක් ආවරණය කරමින් `auto` (සහ legacy `fast`) සඳහා call එකකට
+$0.007ක් හෝ `lite` (සහ legacy `instant`) සඳහා $0.004ක්; ඉන්පසු එක් එක් අමතර result එකකට
+$0.001ක්; සහ `contents.summary` සකසා ඇති විට ආපසු ලබා දෙන සෑම result එකකටම $0.001ක්.
+`search_depth` `basic`, `fast` සහ `ultra-fast` සඳහා Tavily credits 1ක් ($0.008) ලෙසත්,
+`advanced` සඳහා credits 2ක් ($0.016) ලෙසත් වාර්තා කරනු ලැබේ
+([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). `auto_parameters: true`
+සහිත call එකක් Tavily විසින් advanced වෙත උසස් කළද එය තවමත් credit 1ක් ලෙස වාර්තා කරනු ලැබේ.
 
 ---
 
 ## Web Fetch API
 
-වින්යාස කළ web-fetch provider එකක් (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract) හරහා URL එකකින් අන්තර්ගතය උපුටා ගන්න.
+සකසා ඇති web-fetch provider එකක් (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch) හරහා URL එකකින් අන්තර්ගතය උපුටා ගන්න.
 
-Parallel Extract (`parallel-search`, Parallel Search සඳහා භාවිත කරන API key එකම) ලබා දෙන්නේ Markdown
-පමණි — වෙනත් ඕනෑම `format` එකක් `400` දෝෂයකට හේතු වේ — සහ අන්තර්ගතය අක්ෂර 100,000කට සීමා කරයි. ඉලක්ක පිටුවම උපුටා ගත නොහැකි විට, upstream සේවාව එය HTTP 200ක් ඇතුළත වාර්තා කරයි;
-OmniRoute එය ස්ථාවර පණිවිඩයක් සහිත `422` ලෙස ඉදිරිපත් කරයි.
+Parallel Extract (`parallel-search`, Parallel Search හා එකම API key භාවිත කරයි) Markdown
+පමණක් ආපසු ලබා දෙයි — වෙනත් ඕනෑම `format` එකක් `400` දෝෂයක් ඇති කරයි — සහ අන්තර්ගතය අක්ෂර 100,000කට සීමා කරයි. ඉලක්ක පිටුවම උපුටා ගත නොහැකි විට, upstream සේවාව එය HTTP 200 ප්රතිචාරයක් තුළ වාර්තා කරයි; OmniRoute එය ස්ථාවර පණිවිඩයක් සහිත `422` ලෙස ඉදිරිපත් කරයි.
 
-| ක්රමය | මාර්ගය          | විස්තර                                                                  |
-| ----- | --------------- | ----------------------------------------------------------------------- |
-| POST  | `/v1/web/fetch` | URL එක fetch/scrape කිරීම — body එක `v1WebFetchSchema` මගින් වලංගු කරයි |
+Keenable Fetch (`keenable-search`) ද Markdown පමණක් ආපසු ලබා දෙයි (වෙනත් ඕනෑම `format` එකක් `400` දෝෂයක් ඇති කරයි) සහ අන්තර්ගතය අක්ෂර 100,000කට සීමා කරයි. එය key එකක් නොමැතිවද ක්රියා කරයි: connection එකක් නොමැති explicit `provider: "keenable-search"` request එකක් Keenable හි key රහිත endpoint එක භාවිත කරයි (IP එකකට අදාළ rate limits). සකසා ඇති key එකක් එම limits පමණක් ඉවත් කරයි; auto-select මඟින් Keenable භාවිත කරන්නේ key එකක් සකසා ඇති විට පමණි.
 
-**Auth:** Bearer API key (`extractApiKey` + `isValidApiKey`). ප්රතිපත්තිය `enforceApiKeyPolicy` හරහා බලාත්මක කරයි.
+| Method | Path            | Description                                                                    |
+| ------ | --------------- | ------------------------------------------------------------------------------ |
+| POST   | `/v1/web/fetch` | URL එකක් ලබාගැනීම/උපුටාගැනීම — body එක `v1WebFetchSchema` මඟින් වලංගුකරණය කරයි |
 
-**Quota-aware fallback (#8297):** පැහැදිලි `provider` එකක් ලබා නොදුන් විට, pool එක
+**සත්යාපනය:** Bearer API key (`extractApiKey` + `isValidApiKey`). ප්රතිපත්තිය `enforceApiKeyPolicy` මඟින් ක්රියාත්මක කරයි.
+
+නම් කළ සංයෝජන ඉහත [`model` routing contract](#named-searchfetch-combinations) භාවිත කරයි; fetch-විශේෂිත විකල්ප සහ ප්රතිචාර එලෙසම රඳවා ගනී.
+
+**Quota-aware fallback (#8297):** `provider` හෝ `model` කිසිවක් ලබා දී නොමැති විට, pool එක
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) ස්ථාවර
-ප්රමුඛතා අනුපිළිවෙළකින් (fill-first) පරීක්ෂා කරයි — rate-limited නමුත් වින්යාස කර ඇති provider එකක් request එක කෙටි කර නතර කිරීම වෙනුවට මඟ හරියි, සහ නැවත උත්සාහ කළ හැකි/quota upstream failure එකක් (HTTP 429 සැමවිටම; Firecrawl/Tavily/TinyFish quota ආකාරයේ free tiers සඳහා 402/403 —
-Jina Reader සඳහා නොවේ, සහ සාමාන්ය 400 bad request එකක් සඳහා කිසිවිටෙක නොවේ) request කරන අවස්ථාවේදී තවමත් උත්සාහ නොකළ credential සහිත ඊළඟ provider වෙත යොමු කරයි. Pool එකේ සෑම provider එකක්ම අවසන් වූ විට, endpoint එක පෙර තිබූ සාමාන්ය `400` වෙනුවට `Retry-After` header එකක් සහිත තනි `429` එකක් ලබා දෙයි. පැහැදිලි `provider` එකක් ඉල්ලා ඇති විට, නිහඬ fallback එකක් **නොමැත** — rate-limited හෝ අසාර්ථක වූ පැහැදිලි provider එක තමන්ගේම දෝෂය ඉදිරිපත් කරයි (rate-limited නම් `429`, එසේ නොමැතිනම් upstream status එක).
-
----
+`parallel-search` → `keenable-search`) ස්ථාවර ප්රමුඛතා අනුපිළිවෙළකට (පිරවීම-ප්රථම) සලකා බලයි — rate-limited නමුත් සකසා ඇති provider එකක් request එක කෙටි මඟින් අවසන් කරනවා වෙනුවට මඟහරින අතර, නැවත උත්සාහ කළ හැකි/quota upstream failure එකක් (HTTP 429 සෑම විටම; Firecrawl/Tavily/TinyFish quota ආකාරයේ නොමිලේ tiers සඳහා 402/403 — Jina Reader සඳහා නොවේ, එසේම සාමාන්ය 400 bad request එකක් සඳහා කිසිවිටෙක නොවේ) request එකේදී තවම උත්සාහ නොකළ මීළඟ credential සහිත provider වෙත ගලා යයි. Pool එකේ සෑම provider එකක්ම අවසන් වූ විට, endpoint එක පෙර තිබූ සාමාන්ය `400` වෙනුවට (`Retry-After` header එකක් සහිත) තනි `429` ප්රතිචාරයක් ලබා දෙයි. Explicit `provider` එකක් ඉල්ලා ඇති විට, නිහඬ fallback එකක් **නොමැත** — rate-limited හෝ අසාර්ථක explicit provider එක තමන්ගේම දෝෂය ඉදිරිපත් කරයි (rate-limited නම් `429`, එසේ නොමැති නම් upstream status එක).
 
 ## WebSocket Streaming
 
@@ -880,21 +979,18 @@ CLI එක `base_url + /responses` WebSocket එකක් බවට upgrade ක�
 
 ---
 
-## කෝටා සහ ගැටලු වාර්තාකරණය
+## කෝටා සහ ගැටලු වාර්තා කිරීම
 
-| ක්රමය | මාර්ගය              | විස්තරය                                                                                                |
-| ----- | ------------------- | ------------------------------------------------------------------------------------------------------ |
-| GET   | `/v1/quotas/check`  | ලියාපදිංචි කළ යතුරක් නිකුත් කිරීමට පෙර `provider` + `accountId` සඳහා කෝටාව පූර්ව වලංගු කිරීම           |
-| POST  | `/v1/issues/report` | GitHub වෙත කෝටා/යතුරු නිකුත් කිරීමේ අසාර්ථකත්වයක් වාර්තා කිරීම (`GITHUB_ISSUES_REPO` + ටෝකනය අවශ්ය වේ) |
+| ක්රමය | මාර්ගය              | විස්තරය                                                                                               |
+| ----- | ------------------- | ----------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/quotas/check`  | ලියාපදිංචි කළ යතුරක් නිකුත් කිරීමට පෙර `provider` + `accountId` සඳහා කෝටාව පූර්ව-වලංගු කිරීම          |
+| POST  | `/v1/issues/report` | GitHub වෙත කෝටා/යතුරු නිකුත් කිරීමේ අසාර්ථකත්වයක් වාර්තා කිරීම (`GITHUB_ISSUES_REPO` + ටෝකනය අවශ්යයි) |
 
-**සත්යාපනය:** Bearer API යතුර (`isAuthenticated`).
+**සත්යාපනය:** `/v1/quotas/check` මඟින් Bearer API යතුරක් (`isAuthenticated`) භාවිත කරයි. `/v1/issues/report` කළමනාකරණයට පමණක් සීමා වේ (`requireManagementAuth`), `/api/v1/registered-keys` මෙන්ම: ඩෑෂ්බෝඩ් සැසියක්, දේශීය CLI ටෝකනයක්, හෝ `manage`/`admin` පරාසයක් සහිත API යතුරක් භාවිත කළ හැක; inference-only API යතුරු සඳහා `403` ලැබේ.
 
-### කෝටා සැසිය ප්රතිසාධනය (විකල්පයෙන් සක්රීය කළ හැක)
+### කෝටා සැසි ප්රතිසාධනය (විකල්පයෙන් සක්රීය කළ හැක)
 
-ප්රවාහගත නොවන `POST /v1/chat/completions` හෝ `POST /v1/responses` ඉල්ලීමක්
-අවසන් කෝටා දෝෂයකින් (`402`/`429`/`503`, එහි body එකේ කෝටාව හෝ credits අවසන් වී ඇති බව සඳහන් වන විට)
-අසාර්ථක වුවහොත්, දෝෂය ආපසු ලබා දීම වෙනුවට එය තාවකාලිකව තබා පසුව නැවත ධාවනය කළ හැක. ඉල්ලීම්කරු එක් එක්
-ඉල්ලීම සඳහා පහත headers තුන සමඟ මෙය සක්රීය කරයි:
+අවසන් කෝටා දෝෂයක් (`402`/`429`/`503`, එහි body තුළ කෝටාව හෝ credits අවසන් වී ඇති බව සඳහන් වේ) හේතුවෙන් අසාර්ථක වන streaming නොවන `POST /v1/chat/completions` හෝ `POST /v1/responses` ඉල්ලීමක්, දෝෂය ආපසු ලබා දීම වෙනුවට පසුව නැවත ධාවනය කිරීමට තාවකාලිකව රඳවා තැබිය හැක. ඉල්ලීමකට අනුව caller විසින් headers තුනක් සමඟ මෙය සක්රීය කරයි:
 
 | Header                       | අගය                                 |
 | ---------------------------- | ----------------------------------- |
@@ -902,13 +998,7 @@ CLI එක `base_url + /responses` WebSocket එකක් බවට upgrade ක�
 | `x-omniroute-session`        | සැසි id, `[A-Za-z0-9._:-]{1,128}`   |
 | `x-omniroute-recovery-turn`  | සැසිය තුළ අනන්ය turn id (එම නීතියම) |
 
-`stream: false` වන, tools, tool history හෝ `previous_response_id` නොමැති, සහ
-`x-omniroute-connection` pin එකක් නොමැති turns පමණක් සුදුසු වන අතර, `STORAGE_ENCRYPTION_KEY` සකසා තිබිය යුතුය
-(ඉල්ලීම පැය 24ක් දක්වා සංකේතනය කර ගබඩා කරනු ලැබේ). එවිට ප්රතිචාරය
-`202` සහ `recovery.poll` සමඟ ලැබේ; `GET /v1/quota-recoveries/{id}` මඟින් විමසන්න (`pending` අතරතුර `202`,
-සම්පූර්ණ වූ විට ප්රතිසාධනය කළ body එක සමඟ `200`) හෝ `DELETE` මඟින් අවලංගු කරන්න. ටිකට්පත් සෑදූ API
-යතුරට පමණක් දෘශ්ය වේ. ප්රතිඵලය අවිනිශ්චිත වන නැවත ධාවනයක් දෙවරක් යැවීම වෙනුවට
-`needs_confirmation` තත්ත්වයෙන් අවසන් වේ. මූලාශ්රය: `src/lib/quota/quotaSessionRecovery.ts`.
+`stream: false` turns පමණක්, tools, tool history හෝ `previous_response_id` නොමැති විටත්, `x-omniroute-connection` pin එකක් නොමැති විටත් සුදුසුකම් ලබයි. එසේම `STORAGE_ENCRYPTION_KEY` සකසා තිබිය යුතුය (ඉල්ලීම පැය 24ක් දක්වා සංකේතනය කර ගබඩා කෙරේ). ඉන්පසු ප්රතිචාරය `202` වන අතර `recovery.poll` අඩංගු වේ; `GET /v1/quota-recoveries/{id}` මඟින් පරීක්ෂා කරන්න (`202` පවතින විට, අවසන් වූ විට ප්රතිසාධනය කළ body සමඟ `200`) හෝ `DELETE` මඟින් අවලංගු කරන්න. ටිකට්පත් ඒවා සාදන ලද API යතුරට පමණක් දෘශ්යමාන වේ. ප්රතිඵලය අවිනිශ්චිත වන නැවත ධාවනයක් දෙවරක් යැවීම වෙනුවට `needs_confirmation` තත්ත්වයෙන් අවසන් වේ. මූලාශ්රය: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1664,17 +1754,21 @@ OmniRoute සිදුවීම් (ඉල්ලීම් සම්පූර්�
 
 ## ලියාපදිංචි කළ යතුරු (ස්වයංක්රීය කළමනාකරණය)
 
-දෛනික/පැයක කෝටා සහිත, පසුබිම් provider/account එකකට එරෙහිව API යතුරු නිකුත් කිරීමට සහ භ්රමණය කිරීමට ස්වයංක්රීය යතුරු කළමනාකරණ උපපද්ධතිය භාවිත කරයි.
+දෛනික/පැයක කෝටා සමඟ, පසුබිම් සැපයුම්කරුවෙකු/ගිණුමකට එරෙහිව API යතුරු නිකුත් කිරීමට සහ භ්රමණය කිරීමට ස්වයංක්රීය යතුරු කළමනාකරණ උපපද්ධතිය භාවිත කරයි.
 
-| ක්රමය  | මාර්ගය                                | විස්තරය                                                                                                                                                                                                                           |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | ලියාපදිංචි කළ යතුරු ලැයිස්තුගත කරන්න (ආවරණය කළ prefix පමණි)                                                                                                                                                                       |
-| POST   | `/api/v1/registered-keys`             | නව ලියාපදිංචි කළ යතුරක් නිකුත් කරන්න — අන්තර්ගතය: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. මුල් යතුර **එක් වරක් පමණක්** ආපසු ලබා දෙයි. කෝටා ප්රතික්ෂේපයකදී `429` ආපසු ලබා දෙයි. |
-| GET    | `/api/v1/registered-keys/[id]`        | ලියාපදිංචි කළ යතුරක පාර-දත්ත ලබා ගන්න (මුල් දත්ත නොමැත)                                                                                                                                                                           |
-| DELETE | `/api/v1/registered-keys/[id]`        | ලියාපදිංචි කළ යතුරක් අවලංගු කරන්න                                                                                                                                                                                                 |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | පැහැදිලි අවලංගු කිරීමේ endpoint එක (DELETE හා සමාන බලපෑමක්)                                                                                                                                                                       |
+| Method | Path                                  | Description                                                                                                                                                                                                                      |
+| ------ | ------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | ලියාපදිංචි කළ යතුරු ලැයිස්තුගත කරන්න (සැඟවූ prefix එක පමණි)                                                                                                                                                                      |
+| POST   | `/api/v1/registered-keys`             | නව ලියාපදිංචි කළ යතුරක් නිකුත් කරන්න — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. අමු යතුර **එක් වරක් පමණක්** ආපසු ලබා දෙයි. කෝටා ප්රතික්ෂේප කිරීමකදී `429` ආපසු ලබා දෙයි. |
+| GET    | `/api/v1/registered-keys/[id]`        | ලියාපදිංචි කළ යතුරක metadata ලබා ගන්න (අමු ද්රව්ය නොමැත)                                                                                                                                                                         |
+| DELETE | `/api/v1/registered-keys/[id]`        | ලියාපදිංචි කළ යතුරක් අවලංගු කරන්න                                                                                                                                                                                                |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | පැහැදිලි අවලංගු කිරීමේ endpoint එක (DELETE හා සමාන ප්රතිඵලය)                                                                                                                                                                     |
+| GET    | `/api/v1/providers/[provider]/limits` | සැපයුම්කරුගේ නිකුත් කිරීමේ සීමාවන් කියවන්න                                                                                                                                                                                       |
+| PUT    | `/api/v1/providers/[provider]/limits` | සැපයුම්කරුගේ නිකුත් කිරීමේ සීමාවන් සකසන්න — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                        |
+| GET    | `/api/v1/accounts/[id]/limits`        | ගිණුමේ නිකුත් කිරීමේ සීමාවන් කියවන්න                                                                                                                                                                                             |
+| PUT    | `/api/v1/accounts/[id]/limits`        | ගිණුමේ නිකුත් කිරීමේ සීමාවන් සකසන්න — සැපයුම්කරුගේ route එකට සමාන body එක                                                                                                                                                        |
 
-**සත්යාපනය:** කළමනාකරණ session/API key (`requireManagementAuth`) — `/api/keys` සඳහා භාවිත කරන එකම ආරක්ෂක පරීක්ෂකය: dashboard session එකක්, දේශීය CLI token එකක්, හෝ `manage`/`admin` scope සහිත API key එකක්; inference-only API keys සඳහා `403` ලැබේ. `/v1/quotas/check` සහ `/v1/issues/report` ද බලන්න.
+**සත්යාපනය:** කළමනාකරණ session/API key (`requireManagementAuth`) — `/api/keys` සඳහා භාවිත කරන එම guard එකම: dashboard session එකක්, local CLI token එකක්, හෝ `manage`/`admin` scope සහිත API key එකක්; inference-only API keys සඳහා `403` ලැබේ. `/v1/quotas/check` සහ `/v1/issues/report` ද බලන්න.
 
 ---
 
