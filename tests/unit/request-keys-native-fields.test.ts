@@ -60,3 +60,29 @@ test("dedup hashes differ when a generation control differs", () => {
     );
   }
 });
+
+test("dedup hashes differ for translated Claude bodies that differ only in their stop control", async () => {
+  const { translateRequest } = await import("../../open-sse/translator/index.ts");
+  const { FORMATS } = await import("../../open-sse/translator/formats.ts");
+  const translate = (stop: string[]) =>
+    translateRequest(
+      FORMATS.OPENAI,
+      FORMATS.CLAUDE,
+      "claude-haiku-4-5",
+      {
+        model: "claude-haiku-4-5",
+        messages: [{ role: "user", content: "hi" }],
+        temperature: 0,
+        stream: false,
+        stop,
+      },
+      false,
+      {},
+      "claude"
+    ) as Record<string, unknown>;
+  const left = translate(["a"]);
+  const right = translate(["b"]);
+  assert.deepEqual(left.stop_sequences, ["a"], "the translator carries stop as stop_sequences");
+  assert.equal(left.stop, undefined);
+  assert.notEqual(computeRequestHash(left), computeRequestHash(right));
+});
