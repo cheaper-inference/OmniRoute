@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { getSettledModelCatalogResponse } from "../_setup/modelCatalogFixture.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-cc-models-"));
 process.env.DATA_DIR = TEST_DATA_DIR;
@@ -50,7 +51,8 @@ test("v1 models exposes CC-compatible fallback models under the provider node pr
     },
   });
 
-  const response = await v1ModelsCatalog.getUnifiedModelsResponse(
+  const response = await getSettledModelCatalogResponse(
+    v1ModelsCatalog,
     new Request("http://localhost/api/v1/models", { method: "GET" })
   );
 
