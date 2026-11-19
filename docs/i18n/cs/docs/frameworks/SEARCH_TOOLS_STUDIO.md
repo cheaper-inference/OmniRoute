@@ -36,36 +36,36 @@ Studio se třemi kartami, které sjednocuje webové vyhledávání, extrakci web
 
 ## Karty
 
-### Karta Vyhledávání
+### Karta Hledat
 
-Rozšiřuje stávající `SearchForm` + `ResultsPanel` + `RerankPanel` do podoby karty:
+Vyvine stávající `SearchForm` + `ResultsPanel` + `RerankPanel` na kartu:
 
-- Dotaz → výsledky (název, URL, úryvek, skóre relevance).
-- Metadata poskytovatele v panelu Konfigurace (náklady, kvóta, stav).
-- Sekce pro změnu pořadí: výběr modelu pro změnu pořadí, přeuspořádání výsledků, zobrazení `positionDelta`.
-- Prázdný stav s výzvou k akci, pokud nejsou nakonfigurováni žádní poskytovatelé vyhledávání.
-- Historie vyhledávání prostřednictvím `SearchHistory.tsx`.
-- Volá `POST /v1/search` (stávající koncový bod, beze změn).
+- Dotaz na výsledky → (název, URL, úryvek, skóre relevance).
+- Metadata poskytovatele v podokně Konfigurace (cena, kvóta, stav).
+- Přehodnotit sekci: vybrat model přehodnocení, změnit pořadí výsledků, zobrazit `positionDelta`.
+- Prázdný stav se CTA, když nejsou nakonfigurováni žádní poskytovatelé vyhledávání.
+- Historie vyhledávání přes `SearchHistory.tsx`.
+- Volání `POST /v1/search` (existující koncový bod, žádné změny).
 
-### Karta Extrakce
+### Karta škrábání
 
-Nová karta pro extrakci obsahu z URL prostřednictvím `POST /v1/web/fetch` (vytvořeno v plánu 05):
+Nová karta pro extrahování obsahu z URL přes `POST /v1/web/fetch` (vytvořeno v plánu 05):
 
-- Vstup: URL + přepínač celé stránky + výběr formátu (markdown / text / HTML).
-- Odeslání → načtení → vykreslení `ScrapeResult.tsx`.
-- `ScrapeResult` vykresluje náhled markdownu + přepínač nezpracovaného obsahu.
-- Limit: pokud tělo odpovědi přesáhne **256 KB**, uživatelské rozhraní zobrazí `(zkráceno, zobrazit nezpracovaný obsah)` a otevře nezpracovaný obsah v modálním okně Monaco (D21).
-- Panel metadat: poskytovatel (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), latence, náklady, velikost odpovědi, počet odkazů.
-- Používá hook `useScrapeFetch.ts`.
+- Vstup: URL + celostránkový přepínač formátu + (markdown / text / HTML).
+- Odeslat → fetch → render `ScrapeResult.tsx`.
+- `ScrapeResult` vykreslí náhled markdown přepínač + raw.
+- Cap: pokud tělo odpovědi >** 256 KB** , UI ukazuje `(truncated, view raw)` a otevře se raw v monackém modálu (D21).
+- Panel metadat: poskytovatel (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), latence, cena, velikost odpovědi, počet odkazů.
+- Používá hák `useScrapeFetch.ts`.
 
-### Karta Porovnání
+### Porovnat Tab
 
-Spouští stejný dotaz/URL paralelně až u **4 poskytovatelů** (D22):
+Spustí stejnou query/URL napříč až** 4 poskytovatelé paralelně** (D22):
 
-- Sloupce vedle sebe pro jednotlivé poskytovatele.
-- Metriky: latence, náklady, počet výsledků, velikost odpovědi.
-- Výpočet překryvu URL pro vyhledávání (počet sdílených URL oproti počátečnímu výsledku).
-- Volá `POST /v1/search` (vyhledávání) nebo `POST /v1/web/fetch` (extrakce) pro každého poskytovatele.
+- Sloupce vedle sebe na poskytovatele.
+- Metriky: latence, cena, počet výsledků, velikost odezvy.
+- výpočet překrytí URL pro vyhledávání (počet sdílených URLs vs počáteční výsledek).
+- Volání `POST /v1/search` (vyhledávání) nebo `POST /v1/web/fetch` (scrapování) na poskytovatele.
 
 ---
 
@@ -98,15 +98,15 @@ Spouští stejný dotaz/URL paralelně až u **4 poskytovatelů** (D22):
 
 ---
 
-## Katalog poskytovatelů
+## Katalog poskytovatele
 
-`ProviderCatalog.tsx` zpřístupňuje úplný seznam poskytovatelů z `GET /api/search/providers`
-(rozšířený ve F4 o poskytovatele načítání):
+`ProviderCatalog.tsx` zpřístupní úplný seznam poskytovatelů ze `GET /api/search/providers` (rozšířený v F4 tak, aby zahrnoval poskytovatele načtení):
 
-| `kind` | `"search"` (20 poskytovatelů) nebo `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 poskytovatelů) nebo `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, agilní-search, anysearch-search, parallel-search, keenable-search) |
 
-Stav je **odvozen v okamžiku požadavku** na základě kontroly, zda přihlašovací údaje existují a zda
-jsou všechny klíče aktuálně v režimu cooldown.
+Stav je** odvozené v době požadavku** kontrolou, zda existují přihlašovací údaje a zda jsou všechny klíče aktuálně v cooldownu.
+
+`codex-search` (Codex Web Search) nemá žádný vlastní klíč: znovu používá připojený účet Codex (ChatGPT), takže každé vyhledávání utratí kvótu předplatného ChatGPT a trvá asi 10–40 s. Spustí se, když jej požadavek pojmenuje; automatický výběr vyžaduje příznak funkce `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` (ve výchozím nastavení vypnuto).
 
 ---
 
@@ -118,18 +118,18 @@ Zástupný symbol klíče API je vždy `$OMNIROUTE_API_KEY` (D11, sdílený s Pl
 
 ---
 
-## Změny backendu
+## Backend Změny
 
 Pro tuto funkci byla potřeba pouze jedna změna backendu:
 
-### Rozšíření `GET /api/search/providers`
+### Rozšířená `GET /api/search/providers`
 
-Soubor `src/app/api/search/providers/route.ts` byl rozšířen tak, aby:
+`src/app/api/search/providers/route.ts` byla rozšířena na:
 
-- Zahrnoval v poli všechny poskytovatele načítání (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
-- Přidával ke každé položce `kind: "search" | "fetch"`.
-- Přidával `status: "configured" | "missing" | "rate_limited"` odvozený z aktuálního stavu přihlašovacích údajů.
-- Zachovával zpětnou kompatibilitu — stávající pole (`id`, `name` atd.) zůstávají beze změny.
+- Zahrňte do pole každého poskytovatele načtení (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`).
+- Přidejte `kind: "search" | "fetch"` ke každé položce.
+- Přidejte `status: "configured" | "missing" | "rate_limited"` odvozené z aktuálního stavu pověření.
+- Zachovat zpětnou kompatibilitu — stávajících polí (`id`, `name` atd.) beze změny.
 
 ---
 

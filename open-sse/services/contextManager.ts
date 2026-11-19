@@ -78,6 +78,33 @@ const IMAGE_REMOVED_PLACEHOLDER = "[Earlier image removed to fit context window]
 // Rough chars-per-token ratio for quick estimation
 const CHARS_PER_TOKEN = 4;
 
+// CJK characters (kana, Han, Hangul) cost about one token each, not 1/4 token. Each one
+// already counts as one serialized char, so it carries the other three on top. Same
+// ranges as the usage tracker's estimator (open-sse/utils/usageTracking.ts).
+const CJK_EXTRA_CHARS = CHARS_PER_TOKEN - 1;
+
+function cjkExtraChars(value: string): number {
+  let count = 0;
+  // Iterate by code point: a supplementary Han character is two UTF-16 units.
+  for (const char of value) {
+    const code = char.codePointAt(0) as number;
+    if (
+      (code >= 0x3000 && code <= 0x9fff) ||
+      (code >= 0xac00 && code <= 0xd7af) ||
+      (code >= 0xf900 && code <= 0xfaff) ||
+      (code >= 0x20000 && code <= 0x2fa1f)
+    ) {
+      count++;
+    }
+  }
+  return count * CJK_EXTRA_CHARS;
+}
+
+/** Serialized length of a JSON string plus the CJK weight, in estimate chars. */
+function estimateStringChars(value: string): number {
+  return encodedStringLength(value) + cjkExtraChars(value);
+}
+
 // Bounded per-image token budget used in place of measuring the raw base64
 // payload as text. In line with the owner's PoC (~1052 total for prompt +
 // 1 image) and litellm's calculate_img_tokens() default-count fast-path —
@@ -353,7 +380,7 @@ function isOmittedValue(value: unknown): boolean {
 function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags): VirtualMeasure {
   if (node === null) return { chars: 4, mediaTokens: 0 };
   const type = typeof node;
-  if (type === "string") return { chars: encodedStringLength(node as string), mediaTokens: 0 };
+  if (type === "string") return { chars: estimateStringChars(node as string), mediaTokens: 0 };
   if (type === "boolean") return { chars: node ? 4 : 5, mediaTokens: 0 };
   if (type === "number") {
     return {
@@ -373,7 +400,10 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
     // so it was measured raw — no substitution, no budgets. Any aliasing makes
     // per-slot deltas unsound, so pruning callers fall back to recounting.
     if (flags) flags.aliasedObject = true;
-    return { chars: jsonLength(obj), mediaTokens: 0 };
+    // shortcut: builds the JSON string (aliasing only comes from programmatic input, never JSON.parse); add a CJK-aware jsonLength if this ever shows up in a profile.
+    // Throws on a cycle like jsonLength. Raw length plus the CJK weight of its strings.
+    const json = JSON.stringify(obj) ?? "";
+    return { chars: json.length + cjkExtraChars(json), mediaTokens: 0 };
   }
   seen.add(obj);
 
@@ -435,7 +465,7 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
     if (!first) chars += 1;
     first = false;
     const result = measureVirtual(value, seen, flags);
-    chars += encodedStringLength(key) + 1 + result.chars;
+    chars += estimateStringChars(key) + 1 + result.chars;
     mediaTokens += result.mediaTokens;
   }
   return { chars, mediaTokens };
@@ -453,7 +483,7 @@ function measureVirtual(node: unknown, seen: Set<object>, flags?: MeasureFlags):
 export function estimateTokens(text: unknown): number {
   if (!text) return 0;
   if (typeof text === "string") {
-    return Math.ceil(text.length / CHARS_PER_TOKEN);
+    return Math.ceil((text.length + cjkExtraChars(text)) / CHARS_PER_TOKEN);
   }
   const { chars, mediaTokens } = measureVirtual(text, new Set());
   return Math.ceil(chars / CHARS_PER_TOKEN) + mediaTokens;

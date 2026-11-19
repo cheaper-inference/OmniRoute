@@ -132,7 +132,9 @@ function redactResponse(
 }
 export class CredentialMaskerGuardrail extends BaseGuardrail {
   constructor(options: { enabled?: boolean; priority?: number } = {}) {
-    super("credential-masker", { enabled: options.enabled, priority: options.priority ?? 95 });
+    // Below the PII masker (10): its broad phone/card rules rewrite the digit middle of a
+    // token and leave the prefix and tail in clear. Above the media bridges (5-7).
+    super("credential-masker", { enabled: options.enabled, priority: options.priority ?? 9 });
   }
 
   async preCall(
