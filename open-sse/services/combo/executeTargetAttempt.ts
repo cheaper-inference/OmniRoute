@@ -1003,6 +1003,7 @@ export async function executeTargetAttempt(
       modelScopedClaudeCooldownMs,
       lockoutHintMs,
       lockoutHintVerified,
+      lockoutHintIsRelativeProse,
     } = targetFailure;
     // #6692: this connection was just classified as provider/connection-level
     // exhausted — if it's the currently sticky-bound one, release the pin now
@@ -1270,12 +1271,17 @@ export async function executeTargetAttempt(
               exactCooldownMs:
                 modelScopedClaudeCooldownMs ?? selectLockoutCooldownMs(lockoutHintMs, mlSettings),
               maxCooldownMs: mlSettings.maxCooldownMs,
+              quotaProseMaxCooldownMs: mlSettings.quotaProseMaxCooldownMs,
               // A 403 with no quota proof locks the exact model, not the quota
               // family — a restricted key/forbidden route must not park sibling
               // models of the same connection for the cooldown.
               scope: classifyLockoutScope(result.status, errorText),
               // Preserve authoritative structured/header resets; clamp body prose.
               exactCooldownIsUpstreamReset: lockoutHintVerified,
+              // #20343: relative-prose resets clamp to the dedicated prose
+              // ceiling (6h default) — not the 30m generic cap (relock loop),
+              // and not the raw 76h window (permanent lock on early resets).
+              exactCooldownIsRelativeProseReset: lockoutHintIsRelativeProse,
             }
           );
           lockoutRecorded = true;
@@ -1389,12 +1395,17 @@ export async function executeTargetAttempt(
             exactCooldownMs:
               modelScopedClaudeCooldownMs ?? selectLockoutCooldownMs(lockoutHintMs, mlSettings),
             maxCooldownMs: mlSettings.maxCooldownMs,
+            quotaProseMaxCooldownMs: mlSettings.quotaProseMaxCooldownMs,
             // A 403 with no quota proof locks the exact model, not the quota
             // family — a restricted key/forbidden route must not park sibling
             // models of the same connection for the cooldown.
             scope: classifyLockoutScope(result.status, errorText),
             // Preserve authoritative structured/header resets; clamp body prose.
             exactCooldownIsUpstreamReset: lockoutHintVerified,
+            // #20343: relative-prose resets clamp to the dedicated prose ceiling
+            // (6h default) — not the 30m generic cap (relock loop), and not the
+            // raw 76h window (permanent lock on early resets).
+            exactCooldownIsRelativeProseReset: lockoutHintIsRelativeProse,
           }
         );
       }

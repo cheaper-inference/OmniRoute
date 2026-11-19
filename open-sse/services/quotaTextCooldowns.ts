@@ -21,7 +21,7 @@ export interface QuotaTextFallback {
   reason: RateLimitReasonValue;
   usedUpstreamRetryHint?: boolean;
   /** Mirrors accountFallback.ts's RetryHintProvenance — kept local to avoid a circular import. */
-  retryHintSource?: "header" | "google_rpc_retry_info" | "body" | "body_structured";
+  retryHintSource?: QuotaTextHintProvenance;
   quotaResetHintMs?: number;
 }
 
@@ -67,7 +67,7 @@ export const SUBSCRIPTION_QUOTA_COOLDOWN_MS = 60 * 60 * 1000; // 1 hour
 
 /** Same value space as accountFallback.ts's RetryHintProvenance (kept local to avoid a circular import). */
 export type QuotaTextHintProvenance =
-  "header" | "google_rpc_retry_info" | "body" | "body_structured";
+  "header" | "google_rpc_retry_info" | "body" | "body_structured" | "body_relative_countdown";
 
 /**
  * Builds the QUOTA_EXHAUSTED fallback for the subscription-quota text above.
