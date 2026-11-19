@@ -63,7 +63,7 @@ import { execFileSync } from "node:child_process";
 import path from "node:path";
 import crypto from "node:crypto";
 import process from "node:process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { normalizeLocaleText } from "./glossary-normalize.mjs";
 import { buildMirrorBar } from "./lib/language-bar.mjs";
 import {
@@ -78,6 +78,7 @@ import {
 import { translateMarkdownWithGoogle } from "./lib/google-translate.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
 import { applyNumericSectionDelta } from "./lib/numeric-section-delta.mjs";
+import { realpathSync } from "node:fs";
 
 // ----- .env loader --------------------------------------------------------
 // Loads variables from a local `.env` (gitignored) into process.env without
@@ -1736,7 +1737,7 @@ async function main() {
 }
 
 // argv[1] is unset under `node -e` (the refresh workflow imports blockingDrift that way).
-const isDirectRun = !!process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isDirectRun = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) {
   main().catch((err) => {
     logError(err?.stack || err?.message || String(err));

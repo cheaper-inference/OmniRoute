@@ -20,7 +20,8 @@
  */
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 /**
  * @param {string[]} files relative paths from git diff
@@ -284,8 +285,7 @@ function main() {
   process.stdout.write(`domains=${classifyDomains(files).join(",")}\n`);
 }
 
-const isMain =
-  process.argv[1] && path.resolve(fileURLToPath(import.meta.url)) === path.resolve(process.argv[1]);
+const isMain = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 
 if (isMain) {
   main();

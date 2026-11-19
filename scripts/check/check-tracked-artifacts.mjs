@@ -21,7 +21,8 @@
 // paths aninhados legítimos como `src/lib/logs/` NÃO são atingidos.
 
 import { execFileSync } from "node:child_process";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const FORBIDDEN_PREFIXES = [
   "node_modules/",
@@ -137,4 +138,4 @@ function main() {
   process.exit(1);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

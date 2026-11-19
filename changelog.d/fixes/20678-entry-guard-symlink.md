@@ -1,0 +1,1 @@
+- **fix(scripts):** resolve `argv[1]` before comparing, so a checker reached through a symlinked path runs instead of exiting 0 with no output ([#20678](https://github.com/cheaper-inference/OmniRoute/pull/20678))

@@ -23,7 +23,8 @@
 //   node scripts/check/check-mutation-ratchet.mjs <a.json> <b.json> ... --ratchet
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const ROOT = process.cwd();
 const BASELINE_PATH = path.join(ROOT, "config/quality/quality-baseline.json");
@@ -173,6 +174,6 @@ function main(argv) {
   process.exit(0);
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main(process.argv);
 }

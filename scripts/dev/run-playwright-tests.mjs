@@ -1,8 +1,9 @@
 #!/usr/bin/env node
 
 import { spawn } from "node:child_process";
-import { pathToFileURL } from "node:url";
+
 import { sanitizeColorEnv } from "../build/runtime-env.mjs";
+import { realpathSync } from "node:fs";
 
 // Playwright CLI subcommands that are forwarded untouched. Anything else (a spec path, a
 // `--grep`, `--project=…`) is a `test` argument, so `npm run test:e2e -- tests/e2e/x.spec.ts`
@@ -58,6 +59,6 @@ function main() {
   });
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main();
 }

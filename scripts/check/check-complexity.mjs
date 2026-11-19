@@ -6,7 +6,8 @@
 // violations never inflate this baseline.
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 import {
   ESLINT_ARGS,
   countComplexityViolations,
@@ -61,4 +62,4 @@ function main() {
   console.log(`[complexity] OK — ${current} violações (baseline ${baseline.count})`);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

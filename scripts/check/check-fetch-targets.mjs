@@ -14,8 +14,9 @@
 //   Excluídos: src/app/api/**, src/lib/db/**, *.test.ts, *.spec.ts, node_modules
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { assertNoStale } from "./lib/allowlist.mjs";
+import { realpathSync } from "node:fs";
 
 const cwd = process.cwd();
 const SRC = path.join(cwd, "src");
@@ -155,17 +156,18 @@ export function resolveApiPrefixToRoute(prefix, routeFiles) {
  */
 export function routeExportsMethod(routeSource, method) {
   // Direct export: `export [async] function METHOD` or `export const METHOD`
-  const directRe = new RegExp(
-    `export\\s+(?:async\\s+)?(?:function|const)\\s+${method}\\b`
-  );
+  const directRe = new RegExp(`export\\s+(?:async\\s+)?(?:function|const)\\s+${method}\\b`);
   if (directRe.test(routeSource)) return true;
   // Re-export: `export { GET, PUT } from "…"`
   const reExportRe = /export\s*\{([^}]+)\}\s*from/g;
   let m;
   while ((m = reExportRe.exec(routeSource))) {
-    const names = m[1]
-      .split(",")
-      .map((s) => s.trim().split(/\s+as\s+/)[0].trim());
+    const names = m[1].split(",").map((s) =>
+      s
+        .trim()
+        .split(/\s+as\s+/)[0]
+        .trim()
+    );
     if (names.includes(method)) return true;
   }
   return false;
@@ -297,4 +299,4 @@ function main() {
   }
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

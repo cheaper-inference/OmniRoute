@@ -11,8 +11,9 @@
 // Everything the diagram draws lives in PRIVACY_LOCAL_COPY: it is both the drawn text and what the
 // outlining step shapes (scripts/docs/readme-outline.mjs).
 import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+
 import { outlineSvg } from "./readme-outline.mjs";
+import { realpathSync } from "node:fs";
 import {
   SWITZER_ROLES,
   svgOpen,
@@ -168,7 +169,7 @@ export async function renderPrivacyLocal() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/privacy-local.svg";

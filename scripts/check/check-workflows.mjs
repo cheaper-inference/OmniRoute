@@ -39,9 +39,10 @@
 import { execFileSync, spawnSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { load as yamlLoad } from "js-yaml";
 import { findProvenanceOnSelfHosted, formatProvenanceFinding } from "./lib/provenanceRunner.mjs";
+import { realpathSync } from "node:fs";
 
 const ROOT = process.cwd();
 const WORKFLOWS_DIR = path.join(ROOT, ".github", "workflows");
@@ -556,7 +557,7 @@ function main() {
   process.exit(0);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     main();
   } catch (error) {

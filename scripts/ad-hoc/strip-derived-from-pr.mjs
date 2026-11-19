@@ -31,6 +31,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 const REPO = "cheaper-inference/OmniRoute";
@@ -450,8 +451,7 @@ async function main() {
   console.log(JSON.stringify(summary, null, 2));
 }
 
-const invokedDirectly =
-  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const invokedDirectly = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (invokedDirectly) {
   main().catch((err) => {
     console.error(`strip-derived-from-pr: ${err.message}`);

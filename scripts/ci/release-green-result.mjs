@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 // No npm dependencies: this verifier must still run after installation/validator failure.
 import { appendFileSync, readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 export function verifyReleaseGreenReport(report, exitCode, candidateSha, eventName) {
   const expectedProfile =
@@ -75,7 +76,7 @@ export function verifyReleaseGreenReport(report, exitCode, candidateSha, eventNa
   };
 }
 
-if (process.argv[1] === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const [path, exitCode, candidateSha, eventName] = process.argv.slice(2);
   let report;
   try {

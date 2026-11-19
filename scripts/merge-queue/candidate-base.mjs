@@ -18,7 +18,6 @@
 //
 // Zero dependencies (node built-ins only), like every module under scripts/merge-queue/.
 
-import { pathToFileURL } from "node:url";
 import {
   baseCheckSha12,
   isSha,
@@ -27,6 +26,7 @@ import {
   sanitizeBase,
 } from "./contracts.mjs";
 import { createGit } from "./gitexec.mjs";
+import { realpathSync } from "node:fs";
 
 /**
  * @param {{message: string, headSha: string, ref?: string|null}} input
@@ -139,6 +139,6 @@ export function main(argv = process.argv.slice(2), io = {}) {
   }
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exitCode = main();
 }

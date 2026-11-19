@@ -9,9 +9,10 @@
 // Everything the strip draws lives in WORKS_ZERO_CONFIG_COPY: it is both the drawn text and what the
 // outlining step shapes (scripts/docs/readme-outline.mjs).
 import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, afterKicker, roleWidth } from "./readme-diagram-theme.mjs";
+import { realpathSync } from "node:fs";
 
 // Step tiles: geometry, status token, number-circle fill, icon path(s) and the tile's own text
 // (number, title, command line, body lines, optional trailing mono line).
@@ -181,7 +182,7 @@ export async function renderReadmeWorksZeroConfig() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/works-zero-config.svg";

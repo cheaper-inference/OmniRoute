@@ -23,6 +23,7 @@
 
 import { execFileSync } from "node:child_process";
 import { randomUUID } from "node:crypto";
+import { realpathSync } from "node:fs";
 
 // ---------------------------------------------------------------------------
 // Config
@@ -226,9 +227,7 @@ export async function listHealthyProviders(candidates) {
 // ---------------------------------------------------------------------------
 // Preflight self-check (run directly: node scripts/test/_vpsClient.mjs)
 // ---------------------------------------------------------------------------
-const isMain = process.argv[1]?.endsWith("_vpsClient.mjs");
-
-if (isMain) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   (async () => {
     console.log("=== OmniRoute VPS Phase-3 Preflight ===");
     console.log(`Base URL: ${BASE_URL}`);

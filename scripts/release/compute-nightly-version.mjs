@@ -15,6 +15,7 @@ import { readFileSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { parseVersion, resolveDistTag } from "./dist-tag.mjs";
+import { realpathSync } from "node:fs";
 
 export { resolveDistTag };
 
@@ -75,7 +76,7 @@ function main(argv) {
   process.stdout.write(`${computeNightlyVersion({ baseVersion, date, sha })}\n`);
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     main(process.argv.slice(2));
   } catch (error) {

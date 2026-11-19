@@ -61,6 +61,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const SOURCE_EXT_RE = /\.(?:ts|tsx)$/;
 const TEST_FILE_RE = /\.(?:test|spec)\.(?:ts|tsx)$/;
@@ -759,6 +760,5 @@ function main() {
   );
 }
 
-const isDirectRun =
-  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isDirectRun = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) main();

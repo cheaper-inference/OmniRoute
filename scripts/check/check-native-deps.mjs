@@ -32,7 +32,8 @@
 import fs from "node:fs";
 import path from "node:path";
 import { createRequire } from "node:module";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const ROOT = process.cwd();
 
@@ -156,7 +157,7 @@ export function formatMissingReport(missing) {
     "",
     "They cannot simply be ignored: each one is listed in serverExternalPackages, and",
     "the bundler must resolve a request before it can externalise it. Without them the",
-    "build fails with \"Module not found\" several minutes from now.",
+    'build fails with "Module not found" several minutes from now.',
     "",
     "Fix (any one of these):",
     `  1. npm install ${missing.join(" ")} --no-save --foreground-scripts`,
@@ -212,4 +213,4 @@ function main() {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

@@ -1,7 +1,18 @@
 import test from "node:test";
 import assert from "node:assert/strict";
+import { spawnSync } from "node:child_process";
+import fs from "node:fs";
+import os from "node:os";
+import path from "node:path";
 import { Writable } from "node:stream";
+import { fileURLToPath } from "node:url";
 import { redactString, redact, RedactTransform } from "../../scripts/sre/redact-logs.mjs";
+
+const SCRIPT = fileURLToPath(new URL("../../scripts/sre/redact-logs.mjs", import.meta.url));
+
+function runCli(args: string[], input = "", script = SCRIPT) {
+  return spawnSync(process.execPath, [script, ...args], { input, encoding: "utf-8" });
+}
 
 // ─── 1. email ────────────────────────────────────────────────────────────────
 
@@ -296,4 +307,63 @@ test("redactString: counts do not bleed across calls", () => {
   redactString("a@b.com");
   const { counts } = redactString("no pii here at all");
   assert.deepEqual(counts, {});
+});
+
+// ─── 14. CLI ─────────────────────────────────────────────────────────────────
+
+test("cli: stdin is redacted", () => {
+  const result = runCli([], "password=hunter2secret\n");
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /\[REDACTED_[A-Z_]+\]/);
+  assert.doesNotMatch(result.stdout, /hunter2secret/);
+});
+
+test("cli: every --file input is redacted, not just the first", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "redact-cli-"));
+  const first = path.join(dir, "a.log");
+  const second = path.join(dir, "b.log");
+  fs.writeFileSync(first, "alpha user alice@example.com\n");
+  fs.writeFileSync(second, "beta user bob@example.com\n");
+
+  const result = runCli(["--file", first, "--file", second]);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /alpha user \[REDACTED_EMAIL\]/);
+  assert.match(
+    result.stdout,
+    /beta user \[REDACTED_EMAIL\]/,
+    "the second file has to be processed too"
+  );
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("cli: --output keeps one sink open for every input", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "redact-cli-out-"));
+  const first = path.join(dir, "a.log");
+  const second = path.join(dir, "b.log");
+  const out = path.join(dir, "out.log");
+  fs.writeFileSync(first, "one alice@example.com\n");
+  fs.writeFileSync(second, "two bob@example.com\n");
+
+  const result = runCli(["--file", first, "--file", second, "--output", out]);
+  assert.equal(result.status, 0, result.stderr);
+  const written = fs.readFileSync(out, "utf-8").trim().split("\n");
+  assert.equal(written.length, 2, `expected both inputs, got: ${JSON.stringify(written)}`);
+  fs.rmSync(dir, { recursive: true, force: true });
+});
+
+test("cli: --strict exits 3 once something was redacted", () => {
+  const result = runCli(["--strict"], "password=hunter2secret\n");
+  assert.equal(result.status, 3, result.stderr);
+});
+
+test("cli: a symlinked path is still the entry program", () => {
+  const dir = fs.mkdtempSync(path.join(os.tmpdir(), "redact-cli-link-"));
+  const link = path.join(dir, "checkout");
+  fs.symlinkSync(path.resolve(path.dirname(SCRIPT), "../.."), link, "dir");
+  const linked = path.join(link, "scripts", "sre", "redact-logs.mjs");
+
+  const result = runCli([], "password=hunter2secret\n", linked);
+  assert.equal(result.status, 0, result.stderr);
+  assert.match(result.stdout, /\[REDACTED_[A-Z_]+\]/, "a symlinked invocation must run the CLI");
+  fs.rmSync(dir, { recursive: true, force: true });
 });

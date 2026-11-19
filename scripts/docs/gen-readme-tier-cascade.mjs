@@ -14,10 +14,11 @@
 // animates `fill` here: state dots and labels are stacked kit-colored copies whose opacities
 // cross-fade on the same keyTimes.
 import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc } from "./readme-diagram-theme.mjs";
 import { RF } from "./readmeFacts.mjs";
+import { realpathSync } from "node:fs";
 
 const TIERS = [
   { kicker: "TIER 1 · SUBSCRIPTION", models: ["Claude Code", "Codex", "Copilot"] },
@@ -247,7 +248,7 @@ export async function renderTierCascade() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/tier-cascade.svg";

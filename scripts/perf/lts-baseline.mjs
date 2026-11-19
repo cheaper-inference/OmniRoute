@@ -45,6 +45,7 @@ import os from "node:os";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
 import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 export const DEFAULT_TTFB_ENDPOINTS = Object.freeze([
   "/api/health",
@@ -765,8 +766,7 @@ async function main() {
   }
 }
 
-const isDirectRun =
-  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isDirectRun = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) {
   main().catch((e) => {
     console.error(`[lts-baseline] fatal: ${errorMessage(e)}`);

@@ -1,7 +1,8 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
-import { pathToFileURL } from "node:url";
+
 import * as yaml from "js-yaml";
+import { realpathSync } from "node:fs";
 
 /** Refresh the deployed spec from its canonical source without trusting request headers. */
 export function writePublicOpenApi(projectRoot, outputRoot = projectRoot) {
@@ -38,7 +39,7 @@ export function writePublicOpenApi(projectRoot, outputRoot = projectRoot) {
 
 // `npm run gen:public-openapi` refreshes the committed copy. Dev and build never write to it:
 // builds generate their own output (assembleStandalone), so the source tree stays clean.
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const written = writePublicOpenApi(process.cwd());
   console.log(written ? "public/openapi.yaml updated." : "public/openapi.yaml is up to date.");
 }

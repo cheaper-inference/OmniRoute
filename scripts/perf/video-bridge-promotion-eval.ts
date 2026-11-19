@@ -22,9 +22,9 @@
  */
 import { readFile } from "node:fs/promises";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { z } from "zod";
+import { realpathSync } from "node:fs";
 
 import {
   aggregatePromotionObservations,
@@ -421,9 +421,7 @@ async function main(): Promise<void> {
   );
 }
 
-const isMainModule =
-  typeof process.argv[1] === "string" &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMainModule = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isMainModule) {
   main().catch(() => {
     console.error("Video Bridge promotion eval failed validation or execution.");

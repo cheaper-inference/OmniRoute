@@ -6,6 +6,7 @@ import os from "node:os";
 import path from "node:path";
 import { spawn } from "node:child_process";
 import { pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
 import {
   generateGlobalErrorMessages,
   generateRouteHandlerMessages,
@@ -484,8 +485,6 @@ export async function main() {
   }
 }
 
-const entryScript = process.argv[1] ? pathToFileURL(process.argv[1]).href : null;
-
-if (entryScript === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   await main();
 }

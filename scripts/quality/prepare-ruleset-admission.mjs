@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const WRITABLE_FIELDS = ["name", "target", "enforcement", "bypass_actors", "conditions", "rules"];
 function canonical(value) {
@@ -128,7 +129,7 @@ export function verifyRulesetSnapshot(proposal, snapshot) {
   }
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     const [snapshotPath, policyPath, appId] = process.argv.slice(2);
     if (!snapshotPath || !policyPath || !appId || process.argv.length !== 5) {

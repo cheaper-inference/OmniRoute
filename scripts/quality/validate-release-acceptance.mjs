@@ -5,6 +5,7 @@ import { fileURLToPath } from "node:url";
 import Ajv from "ajv";
 import { reduce } from "./release-acceptance/reduce.mjs";
 import { verifyEvidenceFiles } from "./release-acceptance/evidence.mjs";
+import { realpathSync } from "node:fs";
 
 const ROOT = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
@@ -88,6 +89,6 @@ export async function main(argv = process.argv) {
   return exitFor(report.verdict);
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().then((code) => process.exit(code));
 }

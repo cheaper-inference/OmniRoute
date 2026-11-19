@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 import {
   archiveChecksum,
   packArchiveName,
@@ -32,7 +33,7 @@ export async function collectOptionalPacks(indexFile, packsDir, outputDir) {
   return collected;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(path.resolve(process.argv[1])).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const [indexFile, packsDir, outputDir] = process.argv.slice(2);
   if (!indexFile || !packsDir || !outputDir) {
     throw new Error("usage: collect-optional-packs <index-file> <packs-dir> <output-dir>");

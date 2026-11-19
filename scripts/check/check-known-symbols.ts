@@ -55,9 +55,10 @@
 // supressão — então a semântica de stale-enforcement não se aplica a elas.
 
 import { readFileSync, readdirSync } from "node:fs";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 import { dirname, resolve as resolvePath, basename, extname } from "node:path";
 import { assertNoStale } from "./lib/allowlist.mjs";
+import { realpathSync } from "node:fs";
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = resolvePath(HERE, "..", "..");
@@ -734,7 +735,7 @@ async function main(): Promise<void> {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().catch((err) => {
     console.error(
       `[known-symbols] erro fatal: ${err instanceof Error ? err.message : String(err)}`

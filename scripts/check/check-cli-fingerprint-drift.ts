@@ -15,6 +15,7 @@ import { CLAUDE_CODE_CLIENT_VERSION } from "../../src/shared/constants/claudeCod
 import { DEFAULT_CODEX_CLIENT_VERSION } from "../../src/shared/constants/codexClient.ts";
 import { GITHUB_COPILOT_CLI_VERSION } from "../../open-sse/config/providerHeaderProfiles.ts";
 import { GROK_BUILD_DEFAULT_CLIENT_VERSION } from "../../open-sse/config/grokBuild.ts";
+import { realpathSync } from "node:fs";
 
 const execFileAsync = promisify(execFile);
 
@@ -192,7 +193,6 @@ async function main(): Promise<void> {
   process.exitCode = exitCode;
 }
 
-const isDirectExecution = process.argv[1]?.endsWith("check-cli-fingerprint-drift.ts");
-if (isDirectExecution) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   await main();
 }

@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 function sectionRange(text, ver, nextVer) {
   const lines = text.split("\n");
@@ -47,7 +48,7 @@ export function syncChangelogSection(root, ver, nextVer) {
   return n;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const [ver, nextVer] = process.argv.slice(2);
   if (!ver || !nextVer) {
     console.error("usage: sync-changelog-i18n.mjs <ver> <nextVer>");

@@ -39,9 +39,10 @@ import { mkdtempSync, rmSync } from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { createInterface } from "node:readline/promises";
-import { fileURLToPath } from "node:url";
+
 import { load as yamlLoad } from "js-yaml";
 import { resolveDistTag } from "./dist-tag.mjs";
+import { realpathSync } from "node:fs";
 
 export const CANONICAL_REPO = "cheaper-inference/OmniRoute";
 /** Former names GitHub still redirects to the canonical repository (transfer of 2026-10-21). */
@@ -878,7 +879,7 @@ async function main(argv) {
   return runCut(opts, createRealIo(root));
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main(process.argv.slice(2)).then(
     (code) => process.exit(code),
     (error) => {

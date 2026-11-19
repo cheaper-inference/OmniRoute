@@ -40,6 +40,7 @@ import path from "node:path";
 import process from "node:process";
 import { fileURLToPath } from "node:url";
 import { IntlMessageFormat } from "intl-messageformat";
+import { realpathSync } from "node:fs";
 
 const SCRIPT_DIR = path.dirname(fileURLToPath(import.meta.url));
 const ROOT = path.resolve(SCRIPT_DIR, "..", "..");
@@ -167,9 +168,6 @@ function main() {
 }
 
 // Only run the CLI when invoked directly, so the pure helpers stay importable in tests.
-if (
-  process.argv[1] &&
-  path.resolve(process.argv[1]) === path.resolve(fileURLToPath(import.meta.url))
-) {
+if (process.argv[1] && process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main();
 }

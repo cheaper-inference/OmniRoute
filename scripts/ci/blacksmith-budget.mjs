@@ -12,7 +12,8 @@
 // No npm dependencies: runs on a bare runner with only the workflow token.
 
 import { appendFileSync } from "node:fs";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const WORKFLOWS = ["docker-publish.yml"];
 const COUNTED = new Set(["success", "failure", "timed_out", null]);
@@ -133,6 +134,6 @@ async function main() {
   if (env.GITHUB_STEP_SUMMARY) appendFileSync(env.GITHUB_STEP_SUMMARY, `${line}\n`);
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] ?? "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   await main();
 }

@@ -3,7 +3,8 @@
 import { createHash } from "node:crypto";
 import { cpSync, existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 export const SUPPORTED_ZCODE_SHA256 =
   "fad4c35c4c36ec210d8a06d3fa0e77de23c8545e2eb6ff90aea1eb38d1e6275f";
@@ -88,7 +89,7 @@ export function prepareZcodeImageRuntime(sourceFile, outputDirectory) {
   return receipt;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   if (process.argv.length !== 4)
     throw new Error(
       "Usage: node scripts/ops/zcode-image-runtime.mjs <installed-zcode.cjs> <isolated-output-directory>"

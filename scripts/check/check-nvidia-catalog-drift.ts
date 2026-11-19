@@ -1,4 +1,5 @@
 import { FREE_MODEL_BUDGETS } from "../../open-sse/config/freeModelCatalog.data.ts";
+import { realpathSync } from "node:fs";
 import reviewedLiveIds from "../../open-sse/config/nvidiaHostedModels.snapshot.json" with { type: "json" };
 
 const NVIDIA_MODELS_URL = "https://integrate.api.nvidia.com/v1/models";
@@ -102,7 +103,6 @@ async function main(): Promise<void> {
   }
 }
 
-const isDirectExecution = process.argv[1]?.endsWith("check-nvidia-catalog-drift.ts");
-if (isDirectExecution) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   await main();
 }

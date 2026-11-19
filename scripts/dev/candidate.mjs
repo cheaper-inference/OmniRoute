@@ -36,6 +36,7 @@ import path from "node:path";
 import { fileURLToPath } from "node:url";
 
 import { pickTarball, stopChild } from "../check/check-pack-boot.mjs";
+import { realpathSync } from "node:fs";
 
 export const CANDIDATE_ROOT_REL = path.join("_artifacts", "candidate");
 const PACKAGE_NAME = "omniroute";
@@ -891,8 +892,7 @@ export async function main(argv, { repoRoot = DEFAULT_REPO_ROOT, io = null } = {
   }
 }
 
-const isDirectRun =
-  process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isDirectRun = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) {
   main(process.argv.slice(2)).then((code) => process.exit(code));
 }
