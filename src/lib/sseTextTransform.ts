@@ -1,5 +1,6 @@
 import { transformStreamWithCancel } from "../../open-sse/utils/cancelableTransformStream.ts";
 import { resolveStreamIndices } from "./streamIndices";
+import { createResponsesSseText } from "./responsesSseText";
 export type FieldCategory = "content" | "reasoning" | "toolArgs" | "partialJson";
 
 // Keys that always map to a fixed category, regardless of where they appear in the chunk.
@@ -207,6 +208,11 @@ export function checkIfSnapshot(json: any): boolean {
 
 const fallbackDecoder = new TextDecoder();
 
+/**
+ * Parse fragmented SSE and process provider payload fields without changing event framing.
+ * Snapshots are processed independently; buffered tails drain before stop events or EOF.
+ * Responses lanes use schema-aware routing and may release processor state after draining.
+ */
 export function createSseTextTransform(
   processor: (
     text: string,
@@ -218,7 +224,7 @@ export function createSseTextTransform(
   ) => string,
   onFlush?: (lastJson: any, isJsonStream?: boolean, lastContentJson?: any) => any,
   onCancel?: () => void,
-  opts?: { processToolArgs?: boolean }
+  opts?: { processToolArgs?: boolean; releaseResponsesLane?: (index: string) => void }
 ): TransformStream {
   const encoder = new TextEncoder();
   const decoder = new TextDecoder("utf-8");
@@ -232,6 +238,22 @@ export function createSseTextTransform(
   let currentEventLine = "";
   let lastEventLine = "";
   let pendingEventLine = "";
+  const responses = createResponsesSseText(processor, {
+    processToolArgs: opts?.processToolArgs,
+    release: opts?.releaseResponsesLane,
+    classify: classifyField,
+  });
+  let responsesStream = false;
+  const emitResponses = (
+    events: Record<string, unknown>[],
+    controller: TransformStreamDefaultController
+  ) => {
+    for (const event of events) {
+      controller.enqueue(
+        encoder.encode(`event: ${event.type}\ndata: ${JSON.stringify(event)}\n\n`)
+      );
+    }
+  };
   let sawEventLine = false;
 
   // Claude flushes are synthetic content_block_delta frames: clients that dispatch on the
@@ -278,7 +300,8 @@ export function createSseTextTransform(
       lastPrefix = prefix;
       const segment = line.startsWith("data: ") ? line.slice(6) : line.slice(5);
       if (segment === "[DONE]") {
-        if (onFlush && !flushed) {
+        if (responsesStream) emitResponses(responses.drain(), controller);
+        if (!responsesStream && onFlush && !flushed) {
           emitFlushed(
             onFlush(lastJson, isJsonStream, lastContentJson),
             controller,
@@ -394,7 +417,12 @@ export function createSseTextTransform(
           };
 
           const claudeEvent = isClaudeStreamEvent(json);
-          if (claudeEvent) {
+          const isResponses = typeof json.type === "string" && json.type.startsWith("response.");
+          if (isResponses) {
+            responsesStream = true;
+            emitResponses(responses.transform(json), controller);
+            matched = true;
+          } else if (claudeEvent) {
             matched = sanitizeClaudeEvent();
           } else {
             sanitizeObject(json, 0, 0);
@@ -414,7 +442,7 @@ export function createSseTextTransform(
             flushed = false;
           }
 
-          if (isStopSignal && onFlush && !flushed) {
+          if (!isResponses && isStopSignal && onFlush && !flushed) {
             // A Claude stop signal passes its own frame: the flush helper drains every block
             // that still holds a tail, and the last frame may be a `ping`, which would send
             // the flush down the generic path. Other stop signals keep the last frame as the
@@ -532,7 +560,8 @@ export function createSseTextTransform(
           controller.enqueue(encoder.encode(pendingEventLine + "\n"));
           pendingEventLine = "";
         }
-        if (onFlush && !flushed) {
+        if (responsesStream) emitResponses(responses.drain(), controller);
+        if (!responsesStream && onFlush && !flushed) {
           emitFlushed(
             onFlush(lastJson, isJsonStream, lastContentJson),
             controller,

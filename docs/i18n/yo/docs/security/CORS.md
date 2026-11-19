@@ -116,31 +116,10 @@ fo slash tó wà ní ìparí, nítorí náà `http://localhost:3000` àti
 `http://localhost:3000/` jẹ́ ọ̀kan náà. A tún lè ṣètò CSV kan náà ní runtime nínú
 **Dashboard → Security → CORS Allowed Origins** láì ṣe restart.
 
-## Àwọn API key ní ìfiwéra pẹ̀lú cookie session
+## awọn bọtini API vs awọn akoko kuki
 
-- **Bearer / `x-api-key` (ojú inference `/v1/*`):** àwọn browser kì í so
-  ìwọ̀nyí mọ́ request fúnra wọn láéláé. CORS kì í ṣe ìdènà tó nítumọ̀ níbí — API key ni
-  ìdènà náà — ìdí nìyẹn tí ojú yìí fi mọ̀ọ́mọ̀ jẹ́ permissive kí àwọn client
-  browser àti Electron lè ka àwọn response tí wọ́n ti ní ẹ̀tọ́ sí.
-  Echo tí a ṣe ní ìrọ̀rùn yìí ń tẹ̀lé key tí a ti fìdí rẹ̀ múlẹ̀, kì í ṣe wíwà header
-  nìkan: nígbà tí `REQUIRE_API_KEY=false` bá sin request kan láìlórúkọ, response rẹ̀ tó
-  yọrí sí rere máa ń pa allowlist fail-closed mọ́. Àwọn ìkọ̀sílẹ̀ auth (401) ṣì máa ń ṣeé
-  kà kí àwọn client lè fi key tí a ti fagilé tàbí tí a tẹ̀ ní àṣìṣe hàn (#5242): 401 ti
-  pipeline fúnra rẹ̀ máa ń pa echo mọ́, àti route kan tí ó fúnra rẹ̀ kọ key náà lẹ́yìn tí
-  pipeline ti sin ín gẹ́gẹ́ bí aláìlórúkọ (`/v1/models` àti `/v1beta/models` nígbà tí a
-  ti ṣètò management auth, àwọn route tí ó jẹ́ ti olóhun nìkan `/v1/files`,
-  `/v1/batches`, `/v1/media`, `/v1/session-leases` àti àwọn candidate route auto-combo)
-  máa ń fi echo kún 401 náà nípasẹ̀ `credentialRejectionHeaders()`. Echo náà dá lórí bóyá
-  request náà gbé credential header kan (`Authorization`, `x-api-key`, `x-goog-api-key`
-  tàbí cookie `auth_token`), kì í ṣe lórí èwo nínú wọn ni route náà ṣàyẹ̀wò, a kì í sì
-  so ó pọ̀ mọ́ `Access-Control-Allow-Credentials` láéláé; body rẹ̀ jẹ́ error envelope tí
-  kò yí padà. Àwọn management route lábẹ́ `/api/v1/` tí `requireManagementAuth()` ń dáàbò
-  bò (`/api/v1/management/*`, `/api/v1/registered-keys`) kì í fi echo kún un: pẹ̀lú
-  `REQUIRE_API_KEY=false`, a kò lè ka 401/403 wọn láti origin mìíràn.
-- **Cookie session (dashboard):** default **fail-closed** ń dáàbò bò ó, àti pé
-  `Access-Control-Allow-Credentials` kò sí lórí shared path náà. Má ṣe fi àwọn origin
-  management/dashboard sínú config permissive èyíkéyìí; wọ́n gbọ́dọ̀ dúró gẹ́gẹ́ bí
-  fail-closed pátápátá.
+- **Olumu / `x-api-key` (oju itọka `/v1/*` ):** aṣàwákiri kò so awọn wọnyi laifọwọyi. CORS kii ṣe idena ti o nilari nibi — bọtini API jẹ idena — eyiti o jẹ idi ti dada yẹn ni imomose nitorina aṣawakiri ati awọn alabara Electron le ka awọn idahun ti wọn ni ẹtọ tẹlẹ. Iwoyi ti o ni ihuwasi tẹle bọtini ti a fọwọsi, kii ṣe wiwa akọsori lasan: nigbati `REQUIRE_API_KEY=false` ṣe iranṣẹ ibeere kan lailorukọ, esi aṣeyọri rẹ jẹ ki atokọ gbigba-ikuna kuna. Awọn ijusile auth (401) duro ni kika ki awọn alabara le ṣe afihan bọtini ifagile tabi ti ko tọ (#5242): opo gigun ti ara 401 tọju iwoyi, ati ipa-ọna ti o kọ bọtini funrararẹ lẹhin opo gigun ti epo yoo jẹ ailorukọ (`/v1/models` ati `/v1beta/models` pẹlu atunto iṣakoso iṣakoso, oniwun-scoped `/v1/files`, `/v1/batches`- `/v1/media`, ati `/v1/session-leases` ) ṣe afikun iwoyi si 401 yẹn nipasẹ `credentialRejectionHeaders()`. Iwoyi jẹ bọtini lori ibeere ti o gbe akọsori iwe-ẹri (`Authorization`, `x-api-key`, `x-goog-api-key` tabi kuki `auth_token` ), kii ṣe lori eyiti ninu wọn ni ipa ọna ti ṣayẹwo, ati pe a ko so pọ pẹlu `Access-Control-Allow-Credentials`; ara jẹ apoowe aṣiṣe ti o wa titi. Awọn ipa-ọna iṣakoso labẹ `/api/v1/` ti o ni aabo nipasẹ `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) ma ṣe ṣafikun iwoyi: pẹlu `REQUIRE_API_KEY=false` wọn 401/403 kii ṣe orisun agbelebu.
+- **Igba kuki (dasibodu):** ni aabo nipasẹ awọn kuna-pipade aiyipada** ati** nipa isansa ti `Access-Control-Allow-Credentials` lori ọna ti o pin. Jeki awọn orisun management/dashboard kuro ni eyikeyi atunto iyọọda; wọn gbọdọ duro gangan kuna-pipade.
 
 ## Àwọn handshake WebSocket (`/v1/responses`, `/v1/ws`)
 

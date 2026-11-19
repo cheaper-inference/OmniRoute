@@ -123,7 +123,7 @@ export default function IntelligentComboPanel({
           <div>
             <div className="flex items-center gap-2">
               <Icon name="auto_awesome" size={18} className="text-primary" />
-              <h2 className="text-lg font-semibold text-text-main">
+              <h2 className="text-lg text-text-main">
                 {getI18nOrFallback(t, "intelligentPanelTitle", "Intelligent Routing Dashboard")}
               </h2>
             </div>
@@ -263,7 +263,14 @@ export default function IntelligentComboPanel({
                         </span>
                       </div>
 
-                      <div className="mt-2 h-2 rounded-full bg-bg-subtle overflow-hidden">
+                      <div
+                        role="progressbar"
+                        aria-label={formatProviderLabel(entry.provider, activeProviders)}
+                        aria-valuemin={0}
+                        aria-valuemax={100}
+                        aria-valuenow={percentage}
+                        className="mt-2 h-2 rounded-full bg-bg-subtle overflow-hidden"
+                      >
                         <div
                           className="h-full rounded-full bg-chart-2 transition-all"
                           style={{ width: `${percentage}%` }}

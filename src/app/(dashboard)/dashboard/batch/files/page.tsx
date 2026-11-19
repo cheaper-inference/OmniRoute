@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from "react";
 import { useTranslations } from "next-intl";
+import { PageHeader } from "@omniroute/ui-kit/page-header";
 import Button from "@/shared/components/Button";
 import FilesListTab from "../FilesListTab";
 import FilesConceptCard from "../components/FilesConceptCard";
@@ -12,6 +13,8 @@ import type { BatchRecord } from "@/lib/db/batches";
 
 export default function BatchFilesPage() {
   const t = useTranslations("common");
+  const tSidebar = useTranslations("sidebar");
+  const tHeader = useTranslations("header");
   const [files, setFiles] = useState<FileRecord[]>([]);
   const [filesTotal, setFilesTotal] = useState(0);
   const [batches, setBatches] = useState<BatchRecord[]>([]);
@@ -49,6 +52,11 @@ export default function BatchFilesPage() {
 
   return (
     <div className="flex flex-col gap-6">
+      <PageHeader
+        compact
+        title={tSidebar("batchFiles")}
+        description={tHeader("batchFilesDescription")}
+      />
       <FilesConceptCard />
       <div className="flex justify-end">
         <Button icon="upload" onClick={() => setShowUpload(true)}>

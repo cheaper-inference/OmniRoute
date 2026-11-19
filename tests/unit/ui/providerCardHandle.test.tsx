@@ -138,4 +138,35 @@ describe("ProviderCardHandle imperative API", () => {
     });
     expect(h!.getProviderId()).toBe("kimi-coding");
   });
+  it.each([
+    ["ultrafast", "Ultrafast"],
+    ["priority", "Fast"],
+    ["flex", "Flex"],
+  ] as const)("renders configured %s without losing the card chip", async (tier, label) => {
+    container = document.createElement("div");
+    document.body.appendChild(container);
+    const root = createRoot(container);
+    mounted.push({ root, container });
+    await act(async () =>
+      root.render(
+        <ProviderCard
+          providerId="codex"
+          provider={{ id: "codex", name: "Codex" }}
+          stats={{ total: 1, connected: 1, codexServiceTier: tier }}
+          authType="oauth"
+          onToggle={() => {}}
+        />
+      )
+    );
+    const chip = Array.from(container.querySelectorAll<HTMLElement>("[title]")).find((element) =>
+      element.textContent?.trim().endsWith(label)
+    );
+    expect(chip).toBeDefined();
+    if (tier === "ultrafast") {
+      expect(chip!.title).toContain("gpt-6-astra");
+      expect(chip!.title).not.toContain("active");
+    } else {
+      expect(chip!.title).toContain("active");
+    }
+  });
 });

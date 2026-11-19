@@ -184,31 +184,94 @@ Ligikaudu 30+ tabeli täielik loend asub kataloogis `src/lib/db/migrations/`.
 
 ---
 
-## Migratsioonid
+## Ränded
 
-OmniRoute kasutab kaustas `src/lib/db/migrations/` **versioonitud ja idempotentseid migratsioone**. Iga migratsioon on eraldi SQL-fail nimega `NNN_description.sql`.
+OmniRoute kasutab** versioonidega, idempotentsed migratsioonid** `src/lib/db/migrations/`. Iga migratsioon on üks SQL fail. Kaks nimevormingut eksisteerivad koos; `_omniroute_migrations` s salvestatud versioon on numbriline eesliide.
 
-### Migratsioonide nimetamine
+### Migratsiooni nimetamine
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Vorming                                            | Näide                                | Kasutatud                                                                                                                                                |
+| -------------------------------------------------- | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (täpselt 3 numbrit)          | `241_seen_models.sql`                | Vana seeria `001`–`241`. Külmutatud ajatempli vormingu maandumisel (`240` ja `241` liideti vahetult enne seda): ükski uus fail ei saa järjekorranumbrit. |
+| `YYYYMMDDHHMMSS_description.sql` (14 numbrit, UTC) | `20261113120000_add_usage_index.sql` | Iga migratsioon, mis on loodud alates 2026-11-13.                                                                                                        |
 
-### Kuidas migratsioone käitatakse
+Miks muutus: järjestikuste numbritega valis paralleelne PRs sama järgmise numbri ja kõik peale ühe pidid enne ühendamist ümber nummerdama. UTC ajatempel annab igale PR oma versiooni.
 
-Käivitamisel teeb `migrationRunner.ts` järgmist:
+Ajatempli vormingu reeglid (jõustab `npm run check:migration-numbering`, jagab `scripts/check/lib/migrationNaming.mjs` generaatoriga):
 
-1. Loob tabeli `_omniroute_migrations`, kui seda pole olemas
-2. Pärib juba rakendatud migratsioonid
-3. Rakendab kõik uued migratsioonid järjest, igaühe eraldi transaktsioonis
-4. Salvestab iga rakendatud migratsiooni koos ajatempliga
+- Ajatempel on tõeline UTC kuupäev ja kellaaeg, mitte varem kui `20261113000000` ja mitte rohkem kui 10 minutit tulevikus.
+- Kirjeldus on väiketähtedega `snake_case` mis algab tähega (`a-z`, `0-9`, üksik `_` sõnade vahel), maksimaalselt 80 tähemärki.
+- Kaks sama ajatempliga faili on duplikaat.
+- Vahede puudumise reegel kehtib ainult vanade seeriate puhul: kõik numbrid alates `001` kuni `241` peavad olemas olema, välja arvatud teadaolevad lüngad `026`, `055` ja `121`. `241` (või mis tahes vana faili) kustutamine ebaõnnestub. `001` ja `241` ei saa kunagi lisada `KNOWN_GAPS` lubatud loendisse. Ajatempliga failid ei tekita kunagi tühimikku.
+- Iga `src/lib/db/migrations/` kirje peab olema tavaline fail, millel on kehtiv väiketähtedega `.sql` nimi. Kataloog, sümlink, `.SQL` või `.sql.bak` -fail, peidetud fail või tühikuga nimi rikub väravat, sest jooksja jätab selle vaikselt vahele või jookseb alglaadimisel kokku.
+
+**Rakenda tellimus.** Jooksja sorteerib eesliite arvväärtuse, mitte teksti järgi: kõigepealt vanad `001`–`241` failid, seejärel ajatempliga failid ajatempli järjekorras, seejärel kõik `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` -ga registreeritud nimeruumiga kataloogid (versioonid nagu `ee-001`). Ootel migreerumine on mis tahes fail, mille versioon ei ole `_omniroute_migrations`, nii et migratsioon vanemast harust, mis liidetakse uuema järel, kehtib ka olemasolevates andmebaasides.
+
+**Ajatempel on loomise järjekord, mitte liitmisjärjekord.** Kui teie üleviimine sõltub tabelist või veerust, mis on loodud migratsiooniga koos a** uuem** ajatempel (nt üks teisest PR, mis esimesena liideti), käivitaks värske andmebaas kõigepealt teie oma ja see ebaõnnestub. Kui teie PR on endiselt avatud, taastage failinimi `npm run db:new-migration`, et see saaks uuema ajatempli, või muutke see iseseisvaks. `npm run test:migrations:fresh` rakendab iga migratsiooni tühjale andmebaasile ja püüab selle kinni.
+
+### Ühendatud migratsiooni ei kustutata ega nimetata ümber
+
+Kui migratsioonifail on väljalaskeharus või `main`, on see juba homoloogide ja arendajate andmebaasides, VPS installides ja ettevõtte sünkroonimises jooksnud. Sellest ajast alates:
+
+- **Ärge kunagi kustutage seda.** Värsked installid kaotaksid oma skeemi, samas kui täiendatud andmebaasid säilitavad selle.
+- **Ärge kunagi nimetage seda ümber.** `_omniroute_migrations` versioon ei vastaks enam failile, nii et iga andmebaas, mis seda juba rakendas, käivitaks selle uuesti. Mitte-idempotentne SQL dubleerib seejärel andmed või peatab alglaadimise.
+- **Kas vajate teistsugust skeemi?** Looge `npm run db:new-migration` abil uus migratsioon.
+
+Ümbernimetamine on ohutu ainult faili puhul, mis pole veel ühendatud, millele viitavad värava vihjed. Väljalaskemärgend ei muuda siin midagi: iga tõuge `release/v*` harule avaldab Docker `:next` kujutise ja töötab homoloogil, VPS installidel ja ettevõtte sünkroonimisel, nii et liidetud migratsioon on käivitatud tõelistes andmebaasides enne `vX.Y.Z` märgendi olemasolu. Värav ebaõnnestub iga põhifaili eemaldamisel, olenemata sellest, kas see on märgistatud või mitte.
+
+- **Ühendatud migratsiooni ennistamine.** Faili kustutav `git revert` rikub väravat. Hoidke faili alles ja tühistage selle skeem uues migratsioonis: `npm run db:new-migration -- <description>`, koos `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` ja nii edasi. Täiendatud ja värsked andmebaasid lõpevad seejärel sama skeemiga.
+- **Üks aktsepteeritud ümbernimetamine: ühilduvuskirje ja identne sisu.** Kui liidetud fail peab liikuma (näiteks kahel liidetud failil on ajatempel ja jooksja peatub versiooni kokkupõrkega), nimetage hilisem fail ümber ilma selle SQL puudutamata ja lisage `{ fromVersion, fromName, toVersion, toName }` `RENAMED_MIGRATION_COMPATIBILITY` -le `src/lib/db/migrationRunner/constants.ts`. Vana versiooni rakendanud andmebaaside `_omniroute_migrations` rida teisaldatakse selle asemel, et faili uuesti käivitada. Värav hoiatab sellise ümbernimetamise eest ja käivitab selle alati kommutatsioonikontrolli, olenemata uuest ajatemplist: värsked installid rakendavad faili uude asukohta, täiendatud andmebaasid mitte, seega valige uus ajatempel vana lähedal. Värava ümbernimetamine ebaõnnestub, kui sisu muudetakse (skeemi muudatus toimub ikka uuel migreerimisel) või kui kirje sihtfail pole kettal.
+- **Ärge kunagi nimetage ümber sama ajatempli jooksul.** Ümbernimetamine, mis säilitab ajatempli ja muudab ainult kirjeldust, ei toimi, kas sisestusega või ilma. Kirjega, mille `toVersion` võrdub selle `fromVersion`, kustutab jooksja vana `_omniroute_migrations` rea ja rakendab faili uuesti igas andmebaasis, mis seda juba käivitas. Ilma kirjeta jälgib jooksja ainult versiooni: see jätab nendes andmebaasides faili vahele (uut sisu seal kunagi ei käivitata) ja logib igal alglaadimisel ümber nummerdamisvea. Kasutage teist ajatemplit ja ühilduvuskirjet või jätke nimi alles.
+- **Värav kontrollib, et ümbernimetatud fail ei töötaks uuesti.** Iga hõlmatud ümbernimetamise korral edastab värav kommutatsioonikontrollile uue failinime `--must-not-apply` abil. Kontroll käivitab uuendatud andmebaasi tõelise jooksjaga ja kui jooksja rakendab selle faili uuesti (näiteks seetõttu, et kirjel on vale versioon või nimi või kuna värava tekstiparser luges `constants.ts` erinevalt TypeScript), siis värav `migration renomeada rodaria de novo` ebaõnnestub ja palub teil kontrollida kirje vana ja uut versiooni ja nimesid.
+
+### Mida värav baasi vastu kontrollib
+
+Tõmbepäringu ja ühendamisjärjekorra käitamisel võrdleb `npm run check:migration-numbering` kettal olevat `src/lib/db/migrations/` sama kataloogiga põhiharus. Alus on järgmises järjekorras: `--base-latest-tag`, `--base <ref>`, `MIGRATION_BASE_REF` muutuja või kui `GITHUB_EVENT_NAME` on `pull_request`, `pull_request_target` või `merge_group`, ühendamise kohustuse esimene ülem, sündmuse kasuliku koormuse `merge_group.base_sha` või `git merge-base HEAD origin/$GITHUB_BASE_REF`. Tõmbepäringu või ühendamisjärjekorra käivitamisel ilma lahendatava aluseta värav ebaõnnestub. Väljaspool CI ilma `--base` prindib see `comparação com a base: pulada (sem --base)` ja jätab need reeglid vahele.
+
+`--base-latest-tag` võrdleb uusima väljalaskesildiga (`vX.Y.Z` semveri järjekorras; sufikseeritud silte , nagu ööbrändid , ei arvestata ), mis on `HEAD` ajaloos samade reeglitega kui `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) käivitab värava sel viisil, kuna tõuke- ja ajastatud käitamistel pole tõmbetaotluste baasi ja liitmine võib maanduda ilma värske CI käitamiseta. Kui ajaloos pole vabastamise silti, värav ebaõnnestub; käivitage `git fetch --tags` (in CI, `actions/checkout` koos `fetch-depth: 0` -ga toob sildid).
+
+| Tõmbetaotluse muutmine                                                                                   | Tulemus                                                                                                                                                                                                                                                                                                                                            |
+| -------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Alusel olev fail nimetatakse ümber `RENAMED_MIGRATION_COMPATIBILITY` kirjega                             | **Hoiatus** kui sisu on identne ja kommutatsioonikontroll käitatakse olenemata uuest ajatemplist; see nurjub, kui uus asukoht muudab lõplikku skeemi (võta ümbernimetamine tagasi või vali teine uus ajatempel, kus see pendeldab) või kui jooksja rakendab ümbernimetatud faili uuesti täiendatud andmebaasis.** Ebaõnnestunud** kui sisu muutub. |
+| Alusel olev fail nimetatakse ümber, säilitades selle ajatempli (muutub ainult kirjeldus)                 | **Ebaõnnestunud** , kirjega või ilma: jooksja rakendab selle uuesti (koos kirjega) või jätab selle versiooni järgi vahele (ilma üheta). Kasutage teist ajatemplit ja ühilduvuskirjet või jätke nimi alles.                                                                                                                                         |
+| Aluses olev fail kustutatakse või nimetatakse ümber ilma kirjeta                                         | **Ebaõnnestunud** , olenemata sellest, kas fail on väljalaskesildis või mitte. Selle tagasivõtmiseks taastage fail käsuga `git checkout <base> -- src/lib/db/migrations/<file>`; selle skeemi ennistamiseks lisage `DROP ... IF EXISTS`-ga uus migratsioon.                                                                                        |
+| Alusel oleval failil on erinev sisu                                                                      | **Hoiatus** ( `::warning` -märkus GitHub toimingutes) ja kommutatsioonikontroll käivitub. See nurjub, kui redigeerimine muudab lõplikku skeemi, kuna täiendatud andmebaasid ei rakenda redigeeritud faili uuesti: pange muudatus uude migratsiooni. Kahjutu muudatus (kommentaar, `IF NOT EXISTS`) ainult hoiatab.                                 |
+| Ajatempliga fail lisatakse ajatempliga, mis ei ole uuem kui baasi uusim                                  | Käivitab kommutatsioonikontrolli, mida kirjeldatakse allpool.                                                                                                                                                                                                                                                                                      |
+| Vanas vormingus `NNN_` fail lisatakse numbriga baasi uusima vanas vormingus faili alla                   | **Ebaõnnestunud** , isegi kui `KNOWN_GAPS` on redigeeritud samas tõmbetaotluses: vana seeria on külmutatud, looge migratsioon käsuga `npm run db:new-migration`. Aktsepteeritakse vanas vormingus faile, mis on kõrgemad kui baasi uusim fail ( `release/v*` kuni `main` tõmbamistaotlus).                                                         |
+| Ebasoodne, muudetud või ümbernimetatud fail sisaldab `INSERT`, `UPDATE`, `DELETE` või `REPLACE` avaldusi | **Hoiatus** : kommutatsioonikontroll ei võrdle andmeid, seega vaadake, kas uuendatud ja värskete andmebaaside rakendamise järjekord muudab tulemust.                                                                                                                                                                                               |
+
+Kommutatsioonikontrolli üks käitamine hõlmab korrast ära, redigeeritud ja ümbernimetatud failid koos.
+
+Kommutatsioonikontroll (`scripts/check/migration-commutation.ts`) loob kaks ajutist andmebaasi tegeliku installiteega: an** täiendatud** üks (käivitage põhimigratsioonidega, seejärel käivitage uuesti samast failist koos tõmbepäringu migreerimisega) ja** värske** üks (üks buut koos tõmbepäringu migreerimisega). See võrdleb saadud skeeme: tabeleid ja veerge (eirates veergude järjekorda), UNIQUE / PRIMARY KEY ja FOREIGN KEY piiranguid, iga tabeli normaliseeritud `CREATE TABLE` teksti (mis hõlmab CHECK piiranguid, võrdlusi, genereeritud veerge ja tabelivalikuid), indekseid, päästikuid ja vaateid. Rea andmeid ei võrrelda. Kui need ühtivad, prindib värav, et fail on korrast ära, kuid liigub tööle ja läheb edasi. Kui need erinevad, siis värav ebaõnnestub koos erinevuse ja vihjega: korrast ära faili puhul genereerige selle nimi `npm run db:new-migration` abil, mis on ohutu, kuna fail pole veel ühendatud; redigeeritud põhifaili puhul taastage põhisisu ja asetage muudatus uude migratsiooni; ümbernimetatud faili puhul võtke ümbernimetamine tagasi või valige selle edasi-tagasi liikumise kohta uus ajatempel, mitte kunagi sama ajatempel teise nimega. Kui kontroll ise ei käivitu, siis värav CI ebaõnnestub ja hoiatab ainult lokaalselt. Redigeeritud baasfaili puhul koostatakse täiendatud andmebaas selle faili baasi sisuga ja teine alglaadimine jätab selle vahele, kuna selle versioon on juba salvestatud. Ümbernimetatud faili puhul luuakse täiendatud andmebaas failiga selle vana nime all ja teine alglaadimine liigutab selle uuesti käivitamise asemel selle `_omniroute_migrations` rea läbi ühilduvuskirje; värav edastab uue nime koodiga `--must-not-apply`, nii et kontroll nurjub, kui teine alglaadimine seda rakendab. Kui tõmbepäringu migreerimine ei rakendu uuendatud teele, st pärast iga baasmigreerimist (olenemata sellest, kas see ka uuel installimisel ebaõnnestub või mitte), teatab värav `migration do PR não aplica` ja palub teil SQL baasi praeguse skeemi alusel parandada; kui fail sõltub teisest hilisema ajatempliga tõmbepäringu migratsioonist, genereerige selle nimi käsuga `npm run db:new-migration`.
+
+Sama võrdluse lokaalseks käivitamiseks edastage otse põhi, näiteks `npm run check:migration-numbering -- --base origin/<base-branch>` või `npm run check:migration-numbering -- --base-latest-tag` et võrrelda uusima versiooniga.
+
+### Avatud PR `NNN` migratsiooni teisendamine
+
+Enne lülitit avatud tõmbamistaotlus võib siiski sisaldada järjestikust faili, näiteks `242_add_widgets.sql`. Vanad numbrid `241` kohal lükatakse tagasi, seega teisendage see enne ühendamist:
+
+1. **Nimetage fail ümber generaatoriga, säilitades kirjelduse.** Uue nime saamiseks käivitage `npm run db:new-migration -- <same description>`, teisaldage SQL sellesse ja kustutage vana `NNN_` fail. Kirjeldus peab jääma identseks: allolev ühilduvuskirje vastab sellele.
+2. **Add a compatibility entry if a persistent database ran the old number.** If any database that is kept (homolog, a VPS, a contributor's own install) ran a build of the PR with the `NNN_` file, add `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` to `RENAMED_MIGRATION_COMPATIBILITY` in `src/lib/db/migrationRunner/constants.ts`. This is **required for `237` to `241`**: those slots now hold the canonical `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` and `241_seen_models.sql`, and without the entry such a database skips the canonical migration forever and runs the converted one again. It also works for a slot that stays empty, such as `242`, when the destination is a timestamp. When in doubt, add the entry. Where you add it in the array does not matter: when an entry's target slot still holds a row that another entry moves away (for example `237` holding a PR row while an older `usage_history_calculated_cost` row waits to move into `237`), the runner lets that entry wait until the slot is free. Only a real conflict, such as a slot held by a row no entry moves, or two entries that swap slots, stops the boot with `Cannot reconcile ...`.
+3. **Hoidke SQL idempotent** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), sest teisendatud migratsioon võib kohtuda andmebaasiga, kus selle skeem on juba olemas.
+4. **Teisaldage versioonivõtmega erijuhtumeid.** Kui PR lisas oma vanale numbrile tähtede `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) või `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`), muutke võti uue ajatempli vastu.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` on toimiv näide ümbernimetatud migratsiooni testist.
+
+### Tagasiportides filiaalidesse enne vahetust
+
+Ärge kunagi valige või teisaldage `YYYYMMDDHHMMSS_` faili harusse, mis on varasem lülitile (nt vanem `release/v*` haru). Sealne jooksja sorteerib failinimed tekstina, nii et ajatempliga fail jookseks värskes andmebaasis `201_` ja `202_` vahel ning sealne vana värav ei mõista 14-kohalisi eesliiteid. Kirjutage sellisele harule muudatus selle haru järgmise `NNN_` failina idempotent, nii et ajatempliga versiooni saabumisel on see no-op.
+
+### Kuidas migratsioonid kulgevad
+
+Käivitamisel `migrationRunner.ts`:
+
+1. Loob `_omniroute_migrations` tabeli, kui seda pole olemas
+2. Päringud juba rakendatud migratsioonide kohta
+3. Rakendab kõik uued migratsioonid järjekorras, igaüks tehingus
+4. Salvestab iga rakendatud migratsiooni ajatempliga
 
 ```ts
-// src/lib/db/migrationRunner.ts (lihtsustatud)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotentsus
 
-Migratsioonid peavad olema **idempotentsed** — nende teistkordsel käitamisel ei tohiks midagi muutuda:
+Ränded peavad olema** idempotentne** — nende kaks korda käivitamine peaks olema no-op:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Kasutage julgelt klausleid `IF NOT EXISTS`, `IF EXISTS` ja `OR IGNORE` / `OR REPLACE`.
+Kasutage `IF NOT EXISTS`, `IF EXISTS` ja `OR IGNORE` / `OR REPLACE` klausleid.
 
 ### Uue migratsiooni lisamine
 
-1. **Tehke kindlaks järgmine number**: `ls src/lib/db/migrations/ | tail -1`
-2. **Looge fail**: `NNN_my_change.sql`
-3. **Kasutage ohutut DDL-i**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Täitke olemasolevad andmed hoolikalt**: kasutage olemasolevate ridade töötlemiseks konstruktsiooni `UPDATE ... WHERE ...`
-5. **Testige koopial**: ärge kunagi käitage testimata migratsioone tootmiskeskkonnas
+1. **Looge fail generaatoriga** : `npm run db:new-migration -- <description>` (näiteks `npm run db:new-migration -- add combo priority`). See kirjutab `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` praeguse UTC ajaga ja kommentaari päisega, liigub ühe sekundi edasi, kui see ajatempel võetakse, ega kirjuta kunagi faili üle. Ära vali numbrit käsitsi.
+2. **Kasutage turvalist DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Täitke andmed hoolikalt** : kasutage `UPDATE ... WHERE ...` olemasolevate ridade käsitlemiseks
+4. **Kontrolli järjekorda ja nimesid** : `npm run test:migrations:fresh` (kõik migratsioonid tühjas andmebaasis) ja `npm run check:migration-numbering`
+5. **Test koopia peal** : ärge kunagi käivitage tootmises testimata migratsioone
 
 Näide:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Tagasiühildumatud muudatused** (nt veergude eemaldamine) on keerulised. OmniRoute EI toeta varasemale versioonile üleminekut — kui migratsioon on rakendatud, on skeemimuudatus püsiv. Planeerige vastavalt.
+> **Tagasiühildumatud muudatused** (nt veergude kukutamine) on keerulised. OmniRoute kas NOT toetab — alandamist, kui migratsioon on rakendatud, on skeemi muudatus püsiv. Planeerige vastavalt.
 
 ---
 
@@ -405,50 +468,51 @@ See kasutab SQLite'i veebipõhist varundus-API-t, mistõttu on käsku ohutu käi
 
 ## Jõudluse häälestamine
 
-### WAL-režiim
+### WAL režiim
 
-WAL on vaikimisi lubatud. Suure kirjutuskoormuse korral kaaluge järgmist:
+WAL on vaikimisi lubatud. Suure kirjutamiskoormuse korral kaaluge järgmist.
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Kontrollpunkt iga 1000 lehekülje järel
-PRAGMA journal_size_limit = 67108864;  -- WAL-i piirang 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute ei määra `journal_size_limit`. Kontrollpunkt teisaldab WAL raamid põhifaili, kuid WAL fail säilitab oma suurima eraldatud suuruse. `OMNIROUTE_WAL_GUARD_MAX_MB` valvur ainult hoiatab ja käivitab `wal_checkpoint(RESTART)`; see ei ole kettasuurune kork.
 
 ### Indeksid
 
-Jõudluse jaoks olulised indeksid (migratsioonid loovad need automaatselt):
+Peamised jõudluse indeksid (migreerimisega automaatselt loodud):
 
-- `idx_models_provider` — mudelite otsing teenusepakkuja järgi
-- `idx_combo_targets_combo_id` — kombinatsiooni sihtmärkide laiendamine
-- `idx_usage_history_api_key_timestamp` — kasutusanalüütika
-- `idx_quota_snapshots_api_key_window` — kvootide jälgimine
+- `idx_models_provider` — mudeli otsingud pakkuja järgi
+- `idx_combo_targets_combo_id` — kombineeritud sihtmärgi laiendus
+- `idx_usage_history_api_key_timestamp` — kasutusanalüüs
+- `idx_quota_snapshots_api_key_window` — kvoodi jälgimine
 - `idx_call_logs_timestamp` — kõnelogi päringud
 
-Uue indeksi lisamiseks looge migratsioon:
+Uue indeksi lisamiseks looge migratsioon.
 
 ```sql
 -- 023_add_my_index.sql
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Mälukaardistatud sisend/väljund
+### Mälukaardistatud I/O
 
-Väga suurte andmebaaside (>10 GB) korral saab mälukaardistust kohandada SQLite'i pragma abil:
+Väga suurte andmebaaside (> 10GB) puhul saab mälu kaardistamist reguleerida SQLite pragma kaudu:
 
 ```sql
--- Määrake SQLite'i pragma abil (kohandage failis core.ts või käitusajal)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
 ### Tihendamine
 
-Pikka aega töötavatele OmniRoute'i eksemplaridele tuleb kasuks aeg-ajalt käivitatav `VACUUM`:
+Pikaajalised OmniRoute eksemplarid saavad aeg-ajalt `VACUUM` kasu:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Käivitage seda kord kuus vähese liiklusega ajavahemikul. (WAL-režiim vähendab vajadust, kuid ei kõrvalda seda.)
+Käivitage igakuiselt vähese liiklusega akende ajal. (WAL režiim vähendab vajadust, kuid ei kõrvalda seda.)
 
 ---
 
