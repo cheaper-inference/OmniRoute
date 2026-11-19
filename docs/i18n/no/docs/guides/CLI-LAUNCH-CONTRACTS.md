@@ -1,0 +1,59 @@
+# Shared CLI launch and configuration contracts (Norsk)
+
+🌐 **Languages:** 🇺🇸 [English](../../../../guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇹 [am](../../../am/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇦 [ar](../../../ar/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇦🇿 [az](../../../az/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇬 [bg](../../../bg/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇩 [bn](../../../bn/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇦 [bs](../../../bs/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇨🇿 [cs](../../../cs/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇩🇰 [da](../../../da/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇩🇪 [de](../../../de/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇬🇷 [el](../../../el/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇸 [es](../../../es/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇪🇪 [et](../../../et/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇷 [fa](../../../fa/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇫🇮 [fi](../../../fi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇫🇷 [fr](../../../fr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇪 [ga](../../../ga/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [gu](../../../gu/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [ha](../../../ha/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇱 [he](../../../he/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [hi](../../../hi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇭🇷 [hr](../../../hr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇭🇺 [hu](../../../hu/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇦🇲 [hy](../../../hy/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇩 [id](../../../id/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [ig](../../../ig/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇹 [it](../../../it/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇯🇵 [ja](../../../ja/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇬🇪 [ka](../../../ka/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇭 [km](../../../km/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [kn](../../../kn/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇷 [ko](../../../ko/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇹 [lt](../../../lt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇻 [lv](../../../lv/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [ml](../../../ml/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [mr](../../../mr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇾 [ms](../../../ms/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇹 [mt](../../../mt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇲🇲 [my](../../../my/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇵 [ne](../../../ne/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇱 [nl](../../../nl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [or](../../../or/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [pa](../../../pa/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇭 [phi](../../../phi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇱 [pl](../../../pl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇹 [pt](../../../pt/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇧🇷 [pt-BR](../../../pt-BR/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇴 [ro](../../../ro/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇺 [ru](../../../ru/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇱🇰 [si](../../../si/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇰 [sk](../../../sk/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇮 [sl](../../../sl/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇷🇸 [sr](../../../sr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇸🇪 [sv](../../../sv/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇰🇪 [sw](../../../sw/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [ta](../../../ta/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇮🇳 [te](../../../te/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇭 [th](../../../th/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇷 [tr](../../../tr/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇺🇦 [uk-UA](../../../uk-UA/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇵🇰 [ur](../../../ur/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇺🇿 [uz](../../../uz/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇻🇳 [vi](../../../vi/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇳🇬 [yo](../../../yo/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇨🇳 [zh-CN](../../../zh-CN/docs/guides/CLI-LAUNCH-CONTRACTS.md) · 🇹🇼 [zh-TW](../../../zh-TW/docs/guides/CLI-LAUNCH-CONTRACTS.md)
+
+---
+
+Den nøytrale `config/cli-tools-manifest.json` kontrakten erklærer kanoniske IDs, aliaser, binære kandidater, oppsettsoppskrifter, modellargumenter og muligheter. Den vanlige nodeadapteren i `bin/cli/cli-manifest.mjs` og TypeScript adapteren i `src/shared/constants/cliIntegrationManifest.ts` leser den samme filen. Kjøretid, katalog, konfigurering, fullføring, generatorer og backend-registrering kontrolleres sammen av `tests/unit/cli/cli-manifest-drift.test.ts`. Å være katalogisert betyr ikke at et verktøy kan startes eller konfigureres. Spesielt forblir 5dive kun konfigurert.
+
+## Barnemiljø og livssyklus
+
+`omniroute run`, `omniroute launch` og `omniroute launch-codex` arver en godkjenningsliste OS/terminal kompatibilitet og injiserer det valgte målets legitimasjon. Ikke-relaterte leverandør- og databasehemmeligheter arves ikke som standard. `--inherit-env` gjenoppretter eksplisitt full arv fra foreldremiljøet; bare bruk den når den valgte tredjepartsprosessen skal motta disse verdiene. Dette er miljøfiltrering, ikke en OS sandkasse: prosessen kjører fortsatt med innringerens filsystemtillatelser.
+
+Avbrudds- og avslutningssignaler videresendes til barnet. Starteren venter på barnets lukkehendelse før den fjerner den midlertidige konfigurasjonen. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` kontrollerer utsettelsesperioden før tvungen avslutning (standard 5000 millisekunder).
+
+## Gemini vedvarende oppsett
+
+```bash
+omniroute setup-gemini --remote https://omni.example --model provider/model --yes
+omniroute configure gemini --model provider/model --yes
+omniroute run gemini --model provider/model --dry-run --json
+```
+
+De to første kommandoene konfigurerer denne maskinen for den valgte lokale eller eksterne serveren. Oppsettet bevarer urelaterte JSON innstillinger, velger Gemini API-nøkkelauthorisering og skriver endepunktet og legitimasjonen til en privat `.gemini/.env` fil. Den nekter ugyldig JSON i stedet for å overskrive den. Endepunkt URLs må være HTTP(S), uten innebygd legitimasjon, spørringsparametere eller fragmenter. Tørrkjørt utskriftsbaner, ikke legitimasjonsverdier.
+
+`GEMINI_CLI_HOME` eller `--gemini-home` velger den vedvarende hjemmeroten. En faktisk `run gemini` oppretter og fjerner senere sitt eget midlertidige hjem. Ingen av modusene omgår Gemini arbeidsområdetillitssjekker.
+
+## Codex -profiler
+
+`configure codex` skriver en privat `<name>.config.toml` med en modell og dens OmniRoute leverandørendepunkt. Legitimasjon refereres gjennom `OMNIROUTE_API_KEY`, aldri innebygd. Startkommandoen setter den valgte modellen på `model` -tasten på øverste nivå, ikke inne i `model_providers`.
+
+Separate profilfiler er den gjeldende dokumenterte Codex kontrakten; de overlegger brukerkonfigurasjonen når de er valgt med `codex --profile <name>`. Se [den offisielle profilreferansen](https://learn.chatgpt.com/docs/config-file/config-advanced#profiles) og [OmniRoute Codex veiledningen](./CODEX-CLI-CONFIGURATION.md).
+
+## Hermetisk kommandoutførelse
+
+Med en eksplisitt `DATA_DIR` forhindrer innstilling `OMNIROUTE_CLI_SKIP_DEFAULT_DATA_ENV=1` oppstart fra å falle gjennom til standard brukerdatakatalogens påloggingsmiljø. Dette er nyttig for isolerte tester. Den deaktiverer ikke andre eksplisitt valgte miljøfiler.
+
+## Arbeidskatalog `.env`
+
+CLI leser `.env` filer i denne rekkefølgen, og den første filen som angir en nøkkel vinner: den eksplisitte `DATA_DIR`, standarddatakatalogen, gjeldende arbeidskatalog, deretter pakkekatalogen. Shell-variabler vinner alltid.
+
+Arbeidskatalogen kan tilhøre noen andre (et klonet depot, et utpakket arkiv), og `omniroute serve` sender CLI miljøet videre til serveren og til hvert verktøy serveren kjører. Så en `.env` der kan bare sette disse nøklene, oppført i `bin/cli/utils/untrustedCwdEnv.mjs`:
+
+| Nøkkel                          | Aksepterte verdier                                                        |
+| ------------------------------- | ------------------------------------------------------------------------- |
+| `REQUIRE_API_KEY`               | `true`, `1` eller `yes` i alle fall, verdiene serveren behandler som på   |
+| `LANG`, `LC_ALL`, `LC_MESSAGES` | opptil 64 bokstaver, sifre, `_`, `.`, `@` eller `-`                       |
+| `LANGUAGE`                      | det samme, pluss `:`                                                      |
+| `TZ`                            | opptil 64 bokstaver, sifre, `_`, `+`, `-` eller `/`, starter ikke med `/` |
+| `NO_COLOR`, `FORCE_COLOR`       | opptil 16 bokstaver og sifre                                              |
+
+Hver verdi `REQUIRE_API_KEY` aksepterer slår avmerkingen på, så filen kan ikke slå av avkryssingen selv. Det bestemmer imidlertid ikke resultatet: serveren leser en `REQUIRE_API_KEY` overstyring som er lagret i databasen før miljøet, mens oppstartsadvarselen om å lytte på alle grensesnitt uten en API -nøkkel kun leser miljøet. Med en lagret overstyring av `false` lar en arbeidskatalog `REQUIRE_API_KEY=true` API åpen og skjuler den advarselen. `TZ` regelen er smalere enn POSIX: den avviser `.`, `:`, `,` og `<>`, så `:Area/City` formen og regler som `EST5EDT,M3.2.0,M11.1.0` må settes i skallet eller i `<DATA_DIR>/.env`.
+
+Navn må samsvare nøyaktig, med store bokstaver. Enhver annen linje, en verdi som ikke oppfyller kontrollen, og et navn som ikke er vanlige ASCII bokstaver, sifre og `_` (for eksempel en med en NUL byte eller en like-bokstav) hoppes over. CLI skriver ut en advarsel som gir navn til nøklene den ikke kan angi og en som gir navn til tillatte nøkler den ignorerte, hver med hva som skal endres (`TZ (expected a zone name such as Europe/Berlin)`, `lang (write the name as LANG)`). Verken skriver ut verdiene. Filbaner i disse meldingene, og `.env` banen `omniroute doctor` -rapporter, escapes når de inneholder kontroll- eller bidi-tegn. Begrensningen gjelder ikke når arbeidskatalogen er datakatalogen eller pakkekatalogen.
+
+`PORT`, `API_PORT` og `DASHBOARD_PORT` er ikke på listen. Uten en base URL fra en kilde med høyere prioritet, snakker CLI til `localhost:<PORT>`, og det som lytter der mottar CLIAPI nøkkel, konteksttokenet og CLI maskintokenet (`x-omniroute-cli-token`, se [CLI_TOKEN.md](../security/CLI_TOKEN.md) ), som den lokale serveren aksepterer for administrasjonsanrop fra loopback. En port fra arbeidskatalogen ville la den filen velge lytteren, så sett portene i skallet, i `<DATA_DIR>/.env` eller med `--port` alternativet for kommandoer som har en (`serve`, `launch`, `run`).
+
+Parseren har ingen `export` syntaks. En linje som `export LD_PRELOAD=...` navngir en variabel `export LD_PRELOAD`; fra arbeidskatalogen hoppes den over, og i andre `.env` -filer angir den det bokstavelige navnet, som ingenting leser.
+
+CLI parer en konteksts lagrede token (tilgangstoken eller eldre API nøkkel) bare med den kontekstens egen opprinnelse: skjema, vert og port, sammenlignet med `URL.origin`. Dette gjelder forespørsler som gjøres gjennom CLIHTTP -klient (`--base-url`, `OMNIROUTE_BASE_URL`, `omniroute connect <new-url>`) og for `launch`, `launch codex`, `configure` og `setup-*` -kommandoene som skriver en base URL og taster inn i et annet verktøys konfigurasjon. Pekte på en annen server med `--remote`, de bruker en eksplisitt `--api-key` eller `OMNIROUTE_API_KEY` hvis en er satt, og ingen kontekst-token. Sammenligningen er nøyaktig, så `localhost` og `127.0.0.1`, eller en vert med og uten en etterfølgende prikk, teller som forskjellige servere og får ingen konteksttoken. En URL med brukerinformasjon, en omvendt skråstrek eller mellomrom samsvarer aldri, fordi andre URL parsere (Pythons `urllib` og `httpx`, for eksempel) kan lese en annen vert fra den. For forespørsler som CLI sender seg selv, dekker denne sjekken bare ordningen og autoriteten, så en id med et mellomrom i banen eller spørringen beholder tokenet.
