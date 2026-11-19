@@ -87,6 +87,8 @@ type BuildRequestOptions = {
   sessionId?: string | null;
   preserveCacheControl?: boolean;
   preserveClaudeMessages?: boolean;
+  /** Owner of replayed tool-call reasoning; see buildReasoningCacheScope. */
+  reasoningCacheScope?: string | null;
   redactThinking?: boolean;
   summarizeThinking?: boolean;
 };
@@ -229,19 +231,20 @@ export function buildClaudeCodeCompatibleRequest({
   preserveCacheControl = false,
   preserveClaudeMessages = false,
   summarizeThinking = false,
+  reasoningCacheScope = null,
 }: BuildRequestOptions) {
   const normalized = normalizedBody || {};
   const preparedClaudeBody = claudeBody
     ? preserveClaudeMessages
       ? prepareClaudeCodeCompatibleSemanticBody(claudeBody)
-      : prepareClaudeCodeCompatibleBody(claudeBody, preserveCacheControl)
+      : prepareClaudeCodeCompatibleBody(claudeBody, preserveCacheControl, reasoningCacheScope)
     : null;
   const normalizedMessages = Array.isArray(normalized.messages)
     ? (normalized.messages as MessageLike[])
     : [];
   const extractedClaudeBody =
     !preparedClaudeBody && sourceBody
-      ? extractClaudeBodyFromSource(sourceBody, preserveCacheControl)
+      ? extractClaudeBodyFromSource(sourceBody, preserveCacheControl, reasoningCacheScope)
       : null;
   const effectiveClaudeBody = preparedClaudeBody || extractedClaudeBody;
   const messages = effectiveClaudeBody
@@ -863,7 +866,8 @@ function buildClaudeCodeCompatibleToolChoice(choice: unknown) {
 
 function prepareClaudeCodeCompatibleBody(
   claudeBody: Record<string, unknown>,
-  preserveCacheControl: boolean
+  preserveCacheControl: boolean,
+  reasoningCacheScope: string | null
 ) {
   void preserveCacheControl;
   const prepared = prepareClaudeRequest(
@@ -877,7 +881,9 @@ function prepareClaudeCodeCompatibleBody(
       thinking: (readRecord(claudeBody.thinking) || null) as Record<string, unknown> | null,
     },
     CLAUDE_CODE_COMPATIBLE_PREFIX,
-    true
+    true,
+    null,
+    { reasoningCacheScope }
   );
 
   return readRecord(prepared);
@@ -918,7 +924,8 @@ function prepareClaudeCodeCompatibleSemanticBody(claudeBody: Record<string, unkn
 
 function extractClaudeBodyFromSource(
   sourceBody: Record<string, unknown>,
-  preserveCacheControl: boolean
+  preserveCacheControl: boolean,
+  reasoningCacheScope: string | null
 ): Record<string, unknown> | null {
   const rawMessages = Array.isArray(sourceBody.messages)
     ? (sourceBody.messages as MessageLike[])
@@ -946,7 +953,8 @@ function extractClaudeBodyFromSource(
       ...(hasClaudeSystem ? {} : { system: extractCustomSystemBlocks(rawMessages) }),
       messages: normalizedMessages,
     },
-    preserveCacheControl
+    preserveCacheControl,
+    reasoningCacheScope
   );
 }
 

@@ -103,34 +103,8 @@ belgilash mumkin.
 
 ## API kalitlari va cookie seanslari
 
-- **Bearer / `x-api-key` (`/v1/*` inferensiya interfeysi):** brauzerlar ularni hech
-  qachon avtomatik ravishda biriktirmaydi. Bu yerda CORS mazmunli toʻsiq emas —
-  toʻsiq API kalitidir — shu sababli brauzer va Electron mijozlari oʻzlari allaqachon
-  foydalanish huquqiga ega boʻlgan javoblarni oʻqiy olishi uchun ushbu interfeys
-  ataylab erkin qilingan.
-  Erkin origin qaytarish faqat sarlavha mavjudligiga emas, balki tasdiqlangan kalitga
-  bogʻliq: `REQUIRE_API_KEY=false` soʻrovni anonim tarzda xizmat qilganda, uning
-  muvaffaqiyatli javobi xavfsiz tarzda rad etuvchi ruxsat roʻyxatini saqlab qoladi.
-  Autentifikatsiya rad javoblari (401) oʻqiladigan boʻlib qoladi, shunda mijozlar bekor
-  qilingan yoki xato yozilgan kalitni koʻrsata oladi (#5242): pipeline'ning oʻz 401 javobi
-  origin qaytarishni saqlaydi, pipeline soʻrovni anonim sifatida xizmat qilgandan keyin
-  kalitni oʻzi rad etadigan marshrut esa (boshqaruv autentifikatsiyasi sozlangan
-  `/v1/models` va `/v1beta/models`, egasiga bogʻlangan `/v1/files`, `/v1/batches`,
-  `/v1/media`, `/v1/session-leases` hamda auto-combo nomzod marshrutlari) shu 401 javobiga
-  `credentialRejectionHeaders()` orqali origin qaytarishni qoʻshadi. Qaytarish
-  soʻrovda hisob maʼlumotlari sarlavhasi (`Authorization`, `x-api-key`, `x-goog-api-key`
-  yoki `auth_token` cookie) borligiga bogʻliq, marshrut ulardan qaysi birini
-  tekshirganiga emas, va u hech qachon `Access-Control-Allow-Credentials` bilan birga
-  kelmaydi; javob tanasi qatʼiy xato konverti hisoblanadi. `/api/v1/` ostidagi
-  `requireManagementAuth()` bilan himoyalangan boshqaruv marshrutlari
-  (`/api/v1/management/*`, `/api/v1/registered-keys`) origin qaytarishni qoʻshmaydi:
-  `REQUIRE_API_KEY=false` boʻlganda ularning 401/403 javoblarini boshqa origindan oʻqib
-  boʻlmaydi.
-- **Cookie seansi (boshqaruv paneli):** xavfsiz tarzda rad etuvchi standart sozlama
-  **hamda** umumiy yoʻlda `Access-Control-Allow-Credentials` mavjud emasligi bilan
-  himoyalangan. Boshqaruv/boshqaruv paneli manbalarini ruxsat beruvchi hech qanday
-  konfiguratsiyaga kiritmang; ular aynan xavfsiz tarzda rad etuvchi holatda qolishi
-  kerak.
+- **Bearer / `x-api-key` ( `/v1/*` xulosa yuzasi):** brauzerlar ularni hech qachon avtomatik ravishda biriktirmaydi. CORS bu yerda mazmunli to'siq emas — API kaliti — to'siqdir, shuning uchun bu sirt qasddan ruxsat beruvchi bo'lib, brauzer va Electron mijozlari o'zlari allaqachon olish huquqiga ega bo'lgan javoblarni o'qishlari mumkin. Bo'shashgan aks-sado sarlavhaning mavjudligini emas, balki tasdiqlangan kalitni kuzatib boradi: `REQUIRE_API_KEY=false` so'rovga anonim xizmat ko'rsatsa, uning muvaffaqiyatli javobi muvaffaqiyatsiz yopiq ruxsatlar ro'yxatini saqlab qoladi. Ruxsat berishni rad etishlar (401) o‘qilishi mumkin bo‘lib, mijozlar bekor qilingan yoki noto‘g‘ri kiritilgan kalitni (#5242) ko‘rsatishi mumkin: quvur liniyasining o‘ziga xos 401 aks-sadosini saqlab qoladi va quvur liniyasi anonim sifatida xizmat qilgandan so‘ng kalitni rad etuvchi marshrut (`/v1/models` va `/v1beta/models` boshqaruv autentsiyasi sozlangan, egasi-scopedz , `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` ) va avtomatik kombinatsiyalangan nomzod marshrutlari) `credentialRejectionHeaders()` orqali o'sha 401 ga aks-sado qo'shadi. Echo, ularning qaysi birida marshrut tekshirilganiga emas, hisob maʼlumotlari sarlavhasi (`Authorization`, `x-api-key`, `x-goog-api-key` yoki `auth_token` cookie) boʻlgan soʻrovga kiritiladi va hech qachon `Access-Control-Allow-Credentials` bilan bogʻlanmaydi; tanasi qattiq xato konvertidir. `requireManagementAuth()` (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) tomonidan qo'riqlanadigan `/api/v1/` ostida boshqaruv marshrutlari aks-sadoni qo'shmaydi: `REQUIRE_API_KEY=false` bilan ularning 401/403 o'zaro kelib chiqishi o'qilmaydi.
+- **Cookie seansi (boshqaruv paneli):** muvaffaqiyatsiz yopilgan sukut bilan himoyalangan** va** umumiy yo'lda `Access-Control-Allow-Credentials` yo'qligi bilan. management/dashboard manbalarini har qanday ruxsat beruvchi konfiguratsiyadan uzoqroq tuting; ular to'liq yopiq qolishi kerak.
 
 ## WebSocket qoʻl siqishuvlari (`/v1/responses`, `/v1/ws`)
 

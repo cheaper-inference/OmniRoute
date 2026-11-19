@@ -134,8 +134,8 @@ Nested guides also exist next to the code they describe: `open-sse/services/AGEN
 | `vitest.quarantine.config.ts` | Runs the quarantined files listed in `config/quality/vitest-exclusions.json`                    |
 | `vitest.e2e-live.config.ts`   | Live-server Vitest suites (`tests/e2e/ecosystem.test.ts`, `tests/e2e/protocol-clients.test.ts`) |
 | `playwright.config.ts`        | Playwright E2E (`tests/e2e/**/*.spec.ts`, `npm run test:e2e`)                                   |
-| `stryker.conf.json`           | Stryker mutation testing (`npm run test:mutation`)                                              |
-| `stryker.disablebail.json`    | Stryker variant without bail, for test-redundancy measurement                                   |
+| `stryker.conf.mjs`            | Stryker mutation testing (`npm run test:mutation`; computes `tap.testFiles` from `mutate`)      |
+| `stryker.disablebail.mjs`     | Stryker variant without bail, for test-redundancy measurement                                   |
 | `promptfooconfig.yaml`        | promptfoo LLM-security suite                                                                    |
 | `codecov.yml`                 | Codecov patch-coverage settings                                                                 |
 

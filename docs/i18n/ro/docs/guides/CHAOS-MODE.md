@@ -44,25 +44,23 @@ nu este afectat niciodată de aceasta.
    răspunsul ultimului membru care a reușit. Celelalte răspunsuri ale panoului nu sunt returnate, astfel încât
    plătiți pentru N apeluri și primiți o singură completare.
 
-## Configurare
+## Înființat
 
-1. Deschideți **Panou de control → Chaos Mode** (`/dashboard/chaos`).
-2. **Activați-l** — Chaos Mode este livrat **dezactivat în mod implicit** (`enabled: false` în
-   `src/lib/chaos/chaosConfig.ts`). Cât timp este dezactivat, `POST /api/chaos/run` răspunde cu
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. Alegeți participanții și valorile implicite (salvate pentru fiecare instanță prin intermediul magazinului de setări):
+1. Deschide** Tabloul de bord → Chaos Mode** (`/dashboard/chaos`).
+2. Întoarce-l** pe** — Chaos Mode** dezactivat implicit** (`enabled: false` în `src/lib/chaos/chaosConfig.ts`). În timp ce este dezactivat, `POST /api/chaos/run` răspunde `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Alegeți participanții și valorile implicite (persistate pentru fiecare instanță prin intermediul magazinului de setări):
 
-   | Câmp                | Semnificație                                                           | Valoare implicită / limite                |
-   | ------------------- | ---------------------------------------------------------------------- | ----------------------------------------- |
-   | `enabled`           | Comutator principal                                                    | `false`                                   |
-   | `defaultMode`       | `parallel` sau `collaborative` (vedeți mai jos)                        | `parallel`                                |
-   | `providerOverrides` | Participare per furnizor (`providerId`, `modelId` opțional, `enabled`) | gol = fiecare furnizor activ, maximum 200 |
-   | `systemPrompt`      | Suprascriere pentru promptul de sistem Chaos încorporat                | opțional, maximum 10 000 de caractere     |
-   | `timeoutMs`         | Durata maximă pentru fiecare apel de model                             | `120000` (5 000–600 000)                  |
-   | `maxTokens`         | `max_tokens` pentru fiecare apel de model                              | `4096` (256–128 000)                      |
+   | Domeniu             | Sens                                                                          | Implicit / limite                     |
+   | ------------------- | ----------------------------------------------------------------------------- | ------------------------------------- |
+   | `enabled`           | Comutator principal                                                           | `false`                               |
+   | `defaultMode`       | `parallel` sau `collaborative` (vezi mai jos)                                 | `parallel`                            |
+   | `providerOverrides` | Participarea fiecărui furnizor (`providerId`, `modelId` opțional , `enabled`) | gol = fiecare furnizor activ, max 200 |
+   | `systemPrompt`      | Suprascriere pentru promptul încorporat al sistemului Chaos                   | opțional, max 10 000 de caractere     |
+   | `timeoutMs`         | Timp maxim per apel model                                                     | `120000` (5 000–600 000)              |
+   | `maxTokens`         | `max_tokens` per model de apel                                                | `4096` (256–128 000)                  |
 
-4. Rulați un **test direct din pagină** — panoul de rezultate afișează răspunsul,
-   starea și durata fiecărui furnizor.
+4. Oferiți fiecărui furnizor participant a** model** . Modelul unui furnizor este `modelId` de anulare activată pe pagina Mod Chaos (câștigă), în caz contrar,** model implicit** a legăturii sale. Un ID de furnizor nu este niciodată folosit ca nume de model. Un furnizor care nu este** nu chemat** : apare în rezultate ca `status: "error"` cu mesajul _"No model set for this provider. Set a model for it on the Chaos Mode page or a default model on connection."_ și un `modelId` gol , în timp ce ceilalți furnizori rulează normal. Dacă niciun furnizor selectat nu are un model, rularea eșuează înaintea oricărei solicitări în amonte cu _"Niciun furnizor nu are un model setat..."_ (HTTP 500 la ambele puncte finale).
+5. Rulați a** testați din pagina însăși** — panoul de rezultate arată răspunsul fiecărui furnizor, starea și durata.
 
 ## Moduri de execuție
 
@@ -74,27 +72,24 @@ nu este afectat niciodată de aceasta.
 
 ## API
 
-### `POST /api/chaos/run` — sesiunea panoului de control
+### sesiune de tablou de bord `POST /api/chaos/run` —
 
-Autentificat prin cookie (sesiunea de administrare — consultați
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); utilizat de pagina panoului de control.
+Autentificat prin cookie (sesiunea de management — vezi [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); utilizat de pagina tabloului de bord.
 
 ```jsonc
-// corpul cererii
+// body
 {
-  "task": "Compare approaches to X", // obligatoriu
-  "providers": ["glm", "kimi"], // filtru opțional
-  "mode": "parallel", // opțional — suprascrie defaultMode
-  "systemPrompt": "…", // suprascriere opțională
-  "maxTokens": 4096, // suprascriere opțională
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
-### `POST /api/skills/collect/chaos` — cheie API
+### `POST /api/skills/collect/chaos` — API
 
-Variantă cu token Bearer pentru apelanți externi. Cheia trebuie să includă **permisiunea Chaos Mode**
-(`chaosModeEnabled`), care este **dezactivată în mod implicit** — activați-o pentru fiecare cheie în
-**Panou de control → API Manager → editați cheia → permisiuni → Chaos Mode**. Același corp al cererii ca mai sus.
+Varianta purtător-token pentru apelanții externi. Cheia trebuie să poarte** Permisiune pentru modul Chaos** (`chaosModeEnabled`), care este** dezactivat implicit** — activează-l pe tastare** Tabloul de bord → API Manager → cheie de editare → permisiuni → Chaos Mode** . Același corp ca mai sus.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Ambele endpoint-uri returnează aceeași structură:
+Ambele puncte finale returnează aceeași formă:
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ Ambele endpoint-uri returnează aceeași structură:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // doar în modul colaborativ
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## Depanare
 
-- **`400 Chaos Mode is not enabled`** — consultați pasul 2 de mai sus: comutatorul global este dezactivat.
-- **Cheia API este respinsă pentru `/api/skills/collect/chaos`** — cheia nu are permisiunea individuală
-  `chaosModeEnabled` (dezactivată în mod implicit; aceasta este o setare, nu o eroare).
-- **Un furnizor pe care îl așteptați lipsește din rezultate** — verificați `providerOverrides` pe pagina
-  Chaos Mode (o suprascriere dezactivată îl exclude) și dacă conexiunea furnizorului este
-  activă.
+- **`400 Chaos Mode is not enabled`** — pasul 2 de mai sus: comutatorul global este oprit.
+- **Cheia API este respinsă pe `/api/skills/collect/chaos`** — cheia nu are permisiunea `chaosModeEnabled` per-cheie (dezactivată implicit; aceasta este o setare, nu o eroare).
+- **Un furnizor arată `No model set for this provider`** — își setează modelul pe pagina Chaos Mode sau un model implicit pe conexiunea sa (consultați Configurare, pasul 4).
+- **Un furnizor pe care îl așteptați lipsește din rezultate** — verificați `providerOverrides` pe pagina Chaos Mode (o modificare dezactivată o exclude) și dacă conexiunea furnizorului este activă.
