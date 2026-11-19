@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Sleutel verwijderen"
   },
   "plugins": {
+    "privilegesWarningTitle": "Plug-ins worden uitgevoerd met volledige rechten",
+    "privilegesWarningBody": "Een plug-in draait als een gewoon Node.js -proces met dezelfde toegang als OmniRoute: het kan bestanden lezen, programma's uitvoeren en het netwerk gebruiken, ongeacht de machtigingen die het manifest aangeeft. Installeer alleen plug-ins die u vertrouwt.",
     "title": "Plug-ins",
     "description": "Installeer en beheer plug-ins om de functionaliteit van OmniRoute uit te breiden",
     "loading": "Plug-ins laden...",
