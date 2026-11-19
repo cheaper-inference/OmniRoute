@@ -48,6 +48,18 @@ export function matchesSearch(
 }
 
 /**
+ * Search keywords for an option of a picker that lowercases the query with the browser locale and
+ * then does a plain substring match (the kit SearchableSelect). Returns the folded text and, when
+ * it has an "i", the dotless spelling too: in a Turkish-locale browser an upper-case "I"
+ * lowercases to "ı", so "OPENAI" reaches the picker as "openaı".
+ */
+export function searchKeywordsFor(input: string | null | undefined): string {
+  const folded = normalizeForSearch(input);
+  const dotless = folded.replace(/i/g, "ı");
+  return dotless === folded ? folded : `${folded} ${dotless}`;
+}
+
+/**
  * Checks if `text` matches any whitespace-separated token in `query`.
  * Returns `true` if `query` is empty or if any token is found in `text`.
  * Full query match takes priority over token-level OR fallback.
@@ -60,7 +72,10 @@ export function matchesAnyToken(
   if (!q) return true;
   const normalizedText = normalizeForSearch(text);
   if (normalizedText.includes(q)) return true;
-  return q.split(/\s+/).filter(Boolean).some((token) => normalizedText.includes(token));
+  return q
+    .split(/\s+/)
+    .filter(Boolean)
+    .some((token) => normalizedText.includes(token));
 }
 
 const trCollator = new Intl.Collator("tr", {
