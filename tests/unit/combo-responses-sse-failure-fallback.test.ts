@@ -604,7 +604,10 @@ test("combo cancels a discarded upstream stream after a pre-content Responses SS
         { model: "openai/primary", weight: 0 },
         { model: "openai/secondary", weight: 0 },
       ],
-      config: { maxRetries: 0, retryDelayMs: 0 },
+      // The primary stream stays open after its response.failed frame, so the combo leaves it
+      // through the per-target first-output deadline. Without an explicit value that deadline is
+      // the cooldown-wait budget + 10 s (310 s), which made this one test take five minutes.
+      config: { maxRetries: 0, retryDelayMs: 0, targetTimeoutMs: 1_000 },
     },
     handleSingleModel: async (_body: unknown, model: string) =>
       model.endsWith("/primary") ? primary : sseResponse(healthy),

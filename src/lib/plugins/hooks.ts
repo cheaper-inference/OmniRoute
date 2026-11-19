@@ -185,11 +185,8 @@ export async function emitHookBlocking(
 
   for (const reg of list) {
     assertPluginHandlerAllowed();
-    // Mirror emitHook: rate-limit the hot blocking path too
-    if (isRateLimited(reg.pluginName)) {
-      log.warn("hook.blocking_rate_limited", { event, pluginName: reg.pluginName });
-      continue;
-    }
+    // No rate limit here: this handler decides on the request, so skipping it would let
+    // the request through unchecked. Only fire-and-forget hooks (emitHook) are limited.
     try {
       // Chain the payload: each handler must see the body/metadata as mutated by
       // previous handlers, not the original static payload — otherwise plugin B
@@ -234,9 +231,53 @@ export interface PluginContext {
   /** Client request headers available at the call site. Optional — not all callers
    *  have access to headers (e.g. internal triggers, retries). Exposed so
    *  observability/trace-export plugins can read request-scoped context sent by the
-   *  client (trace ids, correlation ids, session markers). */
+   *  client (trace ids, correlation ids, session markers). Credential headers are removed
+   *  before a hook sees the context (see redactPluginContext). */
   headers?: Record<string, string | string[] | undefined>;
   metadata: Record<string, unknown>;
+}
+
+// ── Credential redaction ──
+// Plugins are third-party code running as an ordinary Node process with the OmniRoute
+// user's privileges, so anything in the hook context is readable by them. The client's
+// credentials never go there: the request pipeline keeps its own (unmodified) copy.
+
+const CREDENTIAL_HEADER_NAMES: ReadonlySet<string> = new Set([
+  "authorization",
+  "x-api-key",
+  "proxy-authorization",
+  // The dashboard session token travels in a cookie.
+  "cookie",
+]);
+
+/** API key record fields that carry the key itself or a fingerprint of it. */
+const API_KEY_SECRET_FIELDS: ReadonlySet<string> = new Set(["key", "apiKey", "rawKey", "keyHash"]);
+
+function omitFields(
+  record: Record<string, unknown>,
+  shouldOmit: (field: string) => boolean
+): Record<string, unknown> {
+  return Object.fromEntries(Object.entries(record).filter(([field]) => !shouldOmit(field)));
+}
+
+/**
+ * Copy of a hook context without the client's credentials: drops the `authorization`,
+ * `x-api-key`, `proxy-authorization` and `cookie` headers (any casing) and the key value/fingerprint
+ * from the API key record. The input is never mutated.
+ */
+function redactPluginContext<T extends PluginContext>(ctx: T): T {
+  const redacted: T = { ...ctx };
+  if (ctx.headers && typeof ctx.headers === "object") {
+    redacted.headers = omitFields(ctx.headers, (name) =>
+      CREDENTIAL_HEADER_NAMES.has(name.toLowerCase())
+    ) as PluginContext["headers"];
+  }
+  if (ctx.apiKeyInfo && typeof ctx.apiKeyInfo === "object") {
+    redacted.apiKeyInfo = omitFields(ctx.apiKeyInfo as Record<string, unknown>, (field) =>
+      API_KEY_SECRET_FIELDS.has(field)
+    );
+  }
+  return redacted;
 }
 
 export interface PluginResult {
@@ -333,7 +374,7 @@ export async function runOnRequest(ctx: PluginContext): Promise<PluginResult> {
   // When no plugins exist, avoid lazy loading arbitrary plugin code in this request.
   if (!canInitializeRequestPlugins()) return {};
   await ensurePluginsLoaded();
-  return emitHookBlocking("onRequest", ctx);
+  return emitHookBlocking("onRequest", redactPluginContext(ctx));
 }
 
 /**
@@ -342,10 +383,11 @@ export async function runOnRequest(ctx: PluginContext): Promise<PluginResult> {
 export async function runOnResponse(ctx: PluginContext, response: unknown): Promise<unknown> {
   let currentResponse = response;
   const list = hooks.get("onResponse") || [];
+  const hookCtx = redactPluginContext(ctx);
   for (const reg of list) {
     assertPluginHandlerAllowed();
     try {
-      const result = await reg.handler({ ...ctx, response: currentResponse });
+      const result = await reg.handler({ ...hookCtx, response: currentResponse });
       if (
         result !== undefined &&
         result !== null &&
@@ -366,7 +408,7 @@ export async function runOnResponse(ctx: PluginContext, response: unknown): Prom
  * Run onError hooks — fire-and-forget notification.
  */
 export async function runOnError(ctx: PluginContext, error: Error): Promise<void> {
-  await emitHook("onError", { ...ctx, error });
+  await emitHook("onError", { ...redactPluginContext(ctx), error });
 }
 
 /**

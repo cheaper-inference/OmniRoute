@@ -47,8 +47,12 @@ import { getSettings } from "@/lib/db/settings";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { withInjectionGuard } from "@/middleware/promptInjectionGuard";
 import { saveCallLog } from "@/lib/usageDb";
+import type { z } from "zod";
+import type { ApiKeyPolicyResult } from "@/shared/utils/apiKeyPolicy";
+import { runWebEndpointCombo } from "@/lib/combos/webEndpointCombo";
 import { isModelLocked } from "@omniroute/open-sse/services/accountFallback.ts";
 import { orderAutoSearchFallbacks } from "@/lib/search/codexSearchAutoFallback";
+import { searchKeyLockModel } from "@omniroute/open-sse/handlers/search/borrowedKeyLock.ts";
 
 const CORS_HEADERS = {
   "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
@@ -113,9 +117,12 @@ async function resolveSearchCredentials(
 
   for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
     const fallbackCredentials = withoutKeyScopeBlocked(
-      await getProviderCredentialsWithQuotaPreflight(fallbackId, null, allowedConnections).catch(
-        () => null
-      )
+      await getProviderCredentialsWithQuotaPreflight(
+        fallbackId,
+        null,
+        allowedConnections,
+        searchKeyLockModel(providerId)
+      ).catch(() => null)
     );
     if (fallbackCredentials && !isAllRateLimitedCredentials(fallbackCredentials)) {
       if (
@@ -165,7 +172,6 @@ function buildDomainFilter(filters?: {
  * POST /v1/search — execute a web search
  */
 async function postHandler(request: Request, context: unknown) {
-  const requestStartTime = Date.now();
   let rawBody: unknown;
   try {
     rawBody = await request.json();
@@ -182,14 +188,38 @@ async function postHandler(request: Request, context: unknown) {
   if (body.provider === "x_search") body.provider = "x-search";
   if (body.provider === "x-search") body.search_type = "x";
 
-  // Enforce API key policies — use "search" as model identifier for consistent policy config
-  const policy = await enforceApiKeyPolicy(request, "search");
+  // Native requests keep the "search" policy; named combos use their own grant.
+  const policy = await enforceApiKeyPolicy(request, body.model || "search");
   if (policy.rejection) return policy.rejection;
   // GHSA-3w2r: provider credentials stay inside the key's connection scope.
   const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
   if (scope.rejection) return scope.rejection;
   const { allowedConnections } = scope;
 
+  const settings = await getSettings().catch(() => ({}));
+  if (body.model) {
+    return runWebEndpointCombo({
+      name: body.model,
+      endpoint: "search",
+      request,
+      body,
+      policy,
+      allowedConnections,
+      settings,
+      dispatch: (provider, scopedConnections) =>
+        executeSearchBody({ ...body, model: undefined, provider }, policy, scopedConnections),
+    });
+  }
+  return executeSearchBody(body, policy, allowedConnections);
+}
+
+/** Execute a validated search body through a direct provider or named combo. */
+async function executeSearchBody(
+  body: z.infer<typeof v1SearchSchema>,
+  policy: ApiKeyPolicyResult,
+  allowedConnections: string[] | null
+): Promise<Response> {
+  const requestStartTime = Date.now();
   const settings = await getSettings().catch(() => ({}) as any);
   const blockedProviders = settings?.blockedProviders || [];
 

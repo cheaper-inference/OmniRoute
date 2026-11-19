@@ -39,18 +39,25 @@ test.after(() => {
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
-// Shared assertions: every successful media Response must carry the
-// X-OmniRoute-* cost telemetry headers (parity with chat/embeddings).
-function assertCostTelemetryHeaders(response: Response) {
+// Identity metadata survives both known and unknown billing. Unknown is not free.
+function assertCostTelemetryHeaders(
+  response: Response,
+  expectedCost: "known" | "unknown" = "known"
+) {
   assert.equal(response.status, 200);
 
   const cost = response.headers.get(OMNIROUTE_RESPONSE_HEADERS.responseCost);
-  assert.ok(cost, "response cost header must be present");
-  assert.match(
-    cost as string,
-    /^\d+\.\d{10}$/,
-    `cost header must be a fixed-10-decimal number, got: ${cost}`
-  );
+  if (expectedCost === "unknown") {
+    assert.equal(cost, null, "an unknown image cost must not be reported as zero");
+    assert.equal(response.headers.get("X-OmniRoute-Cost-Status"), "unknown");
+  } else {
+    assert.ok(cost, "response cost header must be present");
+    assert.match(
+      cost as string,
+      /^\d+\.\d{10}$/,
+      `cost header must be a fixed-10-decimal number, got: ${cost}`
+    );
+  }
 
   const version = response.headers.get(OMNIROUTE_RESPONSE_HEADERS.version);
   assert.ok(version && version.trim().length > 0, "version header must be non-empty");
@@ -59,7 +66,7 @@ function assertCostTelemetryHeaders(response: Response) {
   assert.ok(provider && provider.trim().length > 0, "provider header must be present");
 }
 
-test("v1 images generation success Response carries cost telemetry headers", async () => {
+test("v1 image generation without a tariff preserves metadata and reports unknown cost", async () => {
   globalThis.fetch = (async (url: unknown) => {
     const stringUrl = String(url);
     if (stringUrl === "http://localhost:7860/sdapi/v1/txt2img") {
@@ -82,7 +89,7 @@ test("v1 images generation success Response carries cost telemetry headers", asy
     })
   );
 
-  assertCostTelemetryHeaders(response);
+  assertCostTelemetryHeaders(response, "unknown");
   const body = (await response.json()) as { data?: unknown[] };
   assert.ok(Array.isArray(body.data) && body.data.length >= 1, "should return image data");
 });

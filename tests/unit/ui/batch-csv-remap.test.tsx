@@ -106,12 +106,12 @@ it("blocks wizard navigation until the changed mapping is applied", async () => 
   select(1, "body.messages[0].content");
   apply();
   const next = screen.getByText("wizardNext").closest("button")!;
-  expect(next.disabled).toBe(false);
+  expect(next.getAttribute("aria-disabled")).toBeNull();
   select(1, "");
-  expect(next.disabled).toBe(true);
+  expect(next.getAttribute("aria-disabled")).toBe("true");
   select(2, "body.messages[0].content");
   apply();
-  expect(next.disabled).toBe(false);
+  expect(next.getAttribute("aria-disabled")).toBeNull();
 });
 
 it("invalidates the old conversion while a replacement file is still being read", async () => {

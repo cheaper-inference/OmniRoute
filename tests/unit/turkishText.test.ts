@@ -5,6 +5,7 @@ import {
   matchesSearch,
   matchesAnyToken,
   compareTr,
+  searchKeywordsFor,
 } from "../../src/shared/utils/turkishText.ts";
 
 test("normalizeForSearch: İ combining-dot üretmez (i'ye katlanır)", () => {
@@ -141,4 +142,20 @@ test("matchesAnyToken: null/undefined guard mirrors matchesSearch", () => {
   assert.equal(matchesAnyToken("text", null), true);
   assert.equal(matchesAnyToken(undefined, "query"), false);
   assert.equal(matchesAnyToken("text", undefined), true);
+});
+
+// A picker that lowercases the query with the browser locale and then does a substring match
+// (the kit SearchableSelect) sees "OPENAI" as "openaı" in a Turkish-locale browser.
+test("searchKeywordsFor: adds the dotless spelling a Turkish-locale query produces", () => {
+  const keywords = searchKeywordsFor("openai");
+  assert.equal(keywords, "openai openaı");
+  assert.ok(keywords.includes("OPENAI".toLocaleLowerCase("tr")));
+  assert.ok(keywords.includes("OPENAI".toLocaleLowerCase("en")));
+});
+
+test("searchKeywordsFor: folds accents and returns one spelling when there is no i", () => {
+  assert.equal(searchKeywordsFor("Çözüm"), "cozum");
+  assert.equal(searchKeywordsFor("codex"), "codex");
+  assert.equal(searchKeywordsFor(""), "");
+  assert.equal(searchKeywordsFor(null), "");
 });
