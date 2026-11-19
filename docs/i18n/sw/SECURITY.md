@@ -6,11 +6,11 @@
 
 ## Kuripoti Udhaifu
 
-Ukigundua udhaifu wa kiusalama katika OmniRoute, tafadhali uripoti kwa kuwajibika:
+Ukigundua athari ya kiusalama katika OmniRoute, tafadhali iripoti kwa kuwajibika:
 
-1. **USIFUNGUE** suala la umma la GitHub
-2. Tumia [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Jumuisha: maelezo, hatua za kuzalisha tatizo upya, na athari zinazoweza kutokea
+1. **DO NOT** fungua suala la GitHub la umma
+2. Tumia [Ushauri wa Usalama GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Jumuisha: maelezo, hatua za kuzaliana, na athari inayowezekana
 
 ## Ratiba ya Majibu
 
@@ -29,25 +29,14 @@ Ukigundua udhaifu wa kiusalama katika OmniRoute, tafadhali uripoti kwa kuwajibik
 | 3.7.x   | ✅ Usalama                                                  |
 | < 3.7.0 | ❌ Haitumiki                                                |
 
-## Kipindi cha usaidizi wa LTS (v3.9.x)
+## dirisha la usaidizi la LTS (v3.9.x)
 
-Baada ya 3.8.59 toleo linalofuata ni **3.9.0**, ambalo linaanzisha mkondo wa usaidizi wa muda mrefu kwenye tawi la
-`stable/v3` (angalia [`ROADMAP.md`](ROADMAP.md) → "Awamu ya 3 — v3.9.0 LTS").
+Baada ya 3.8.59 toleo linalofuata ni** 3.9.0** , ambayo inafungua mstari wa usaidizi wa muda mrefu kwenye tawi la `stable/v3` (tazama [`ROADMAP.md`](ROADMAP.md) → "Awamu ya 3 — v3.9.0 LTS").
 
-- **Kile ambacho `stable/v3` hupokea:** marekebisho ya hitilafu, viraka vya usalama na masasisho ya watoa huduma. Vipengele vipya
-  huenda kwenye mkondo wa v4; mkondo wa LTS unatanguliza uthabiti. `npm install omniroute`
-  (`latest` dist-tag) hubaki kwenye v3 katika kipindi chote cha mzunguko wa v4.
-- **Muda wa kipindi:** `stable/v3` hupokea **marekebisho ya usalama na ya hitilafu muhimu zinazojirudia kwa
-  miezi 12 baada ya kutolewa kwa 3.9.0, au hadi siku 90 baada ya v4.0.0 kuchapishwa kama `latest` —
-  chochote kitakachotokea baadaye**. Tarehe ya mwisho inayotokana na hilo hurekodiwa katika maelezo ya toleo la 3.9.0 na katika
-  [`ROADMAP.md`](ROADMAP.md) wakati toleo hilo linapotolewa.
-- **Kuripoti udhaifu katika mkondo wa LTS:** tumia njia ileile kama kwa toleo lingine lolote —
-  [Ushauri wa Usalama wa GitHub](https://github.com/diegosouzapw/OmniRoute/security/advisories/new) wa faragha,
-  kamwe si suala la umma. Taja toleo ulilojaribu (kwa mfano `3.9.2`); marekebisho huwekwa kwenye
-  `stable/v3` na kuhamishiwa mbele hadi v4.
-- **Msingi wa usalama wakati wa kutolewa kwa LTS:** hali iliyopimwa ya kichanganuzi, uthibitisho wa ulinzi wa njia na
-  wa vitambulisho vya umma hurekodiwa katika
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Nini `stable/v3` inapokea:** kurekebishwa kwa hitilafu, viraka vya usalama na masasisho ya mtoa huduma. Vipengele vipya huenda kwenye kituo cha v4; mstari LTS ni utulivu-kwanza. `npm install omniroute` ( `latest` dist-tag) hukaa kwenye v3 wakati wa mzunguko mzima wa v4.
+- **Muda wa dirisha:** `stable/v3` inapokea** marekebisho ya usalama na rejeshi muhimu kwa miezi 12 baada ya kukatwa kwa 3.9.0, au hadi siku 90 baada ya v4.0.0 kuchapishwa kama `latest` — yoyote itakayokuja baadaye.** . Tarehe ya mwisho inayotokana imerekodiwa katika maelezo ya toleo ya 3.9.0 na katika [`ROADMAP.md`](ROADMAP.md) wakati kukata kunatokea.
+- **Kuripoti udhaifu katika mstari LTS :** chaneli sawa na toleo lingine lolote — [Ushauri wa Usalama GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new) wa kibinafsi, kamwe sio suala la umma. Sema ni toleo gani ulilojaribu (kwa mfano `3.9.2`); hurekebisha ardhi kwenye `stable/v3` na kutumwa mbele kwa v4.
+- **Msingi wa usalama katika kata LTS :** hali ya kichanganuzi kilichopimwa, walinzi wa njia na uthibitisho wa vitambulisho vya umma hunakiliwa katika [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 

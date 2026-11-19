@@ -199,140 +199,164 @@ de geretourneerde veldbeschrijvingen, zodat een nieuwe bestemming geen UI-wijzig
 
 Configuratiesleutels (`type: "bigquery"`):
 
-| Sleutel              | Opmerkingen                                                                        |
-| -------------------- | ---------------------------------------------------------------------------------- |
-| `projectId`          | GCP-project dat de dataset bevat                                                   |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                    |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                    |
-| `location`           | Alleen gebruikt als de dataset moet worden aangemaakt (standaard `EU`)             |
-| `serviceAccountJson` | Sleutel van het serviceaccount. Geheim: versleuteld opgeslagen, nooit teruggegeven |
-| `autoCreate`         | De dataset en tabel bij de eerste export aanmaken (standaard `true`)               |
+| Sleutel              | Opmerkingen                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | GCP-project dat de dataset bevat                                                                                    |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                     |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                     |
+| `location`           | Alleen gebruikt wanneer de dataset moet worden aangemaakt (standaard `EU`)                                          |
+| `serviceAccountJson` | Sleutel van het serviceaccount. Geheim: versleuteld opgeslagen, nooit teruggegeven                                  |
+| `autoCreate`         | Ontbrekende dataset/tabel aanmaken; conditioneel nullable kolommen voor gebruiksbewijs toevoegen (standaard `true`) |
 
 Het serviceaccount heeft `bigquery.tables.updateData` nodig op de doeltabel, plus
 `bigquery.datasets.create` / `bigquery.tables.create` wanneer `autoCreate` is ingeschakeld.
+Voor het bijwerken van een bestaande tabel om de twee nullable velden voor gebruiksbewijs toe te
+voegen, is ook `bigquery.tables.update` vereist. Een ontbrekende machtiging laat de export
+mislukken zonder de cursor vooruit te schuiven.
 
-Een geconfigureerde batch is een **cursor**-eenheid, geen HTTP-eenheid: `send()` splitst deze op in insertAll-
-aanroepen van maximaal 500 rijen, zodat een grote `batch_size` de aanvraaglimiet van 10 MB van BigQuery niet kan overschrijden.
-Bij tijdelijke statussen (408/429/500/502/503/504) wordt maximaal drie keer opnieuw geprobeerd met exponentieel
-oplopende wachttijden, waarbij dezelfde insertIds worden hergebruikt; authenticatie- en schemafouten veroorzaken bij de eerste poging een uitzondering, in plaats
-van de uitvoering te verspillen.
+Een geconfigureerde batch is een **cursor-eenheid**, geen HTTP-eenheid: `send()` verdeelt deze in
+insertAll-aanroepen van maximaal 500 rijen, zodat een grote `batch_size` de limiet van 10 MB per
+BigQuery-verzoek niet kan overschrijden. Tijdelijke statussen (408/429/500/502/503/504) worden
+maximaal drie keer opnieuw geprobeerd met exponentiële back-off, waarbij dezelfde insertIds
+opnieuw worden gebruikt; authenticatie- en schemafouten leiden al bij de eerste poging tot een
+exception, in plaats van de uitvoering onnodig te laten doorgaan.
 
-Een tabel die zojuist is aangemaakt, is nog niet zichtbaar voor het streamingendpoint, dat enkele seconden lang
-404 retourneert. Bij die 404 wordt opnieuw geprobeerd, maar **alleen als deze uitvoering de tabel heeft aangemaakt** —
-een daadwerkelijk ontbrekende tabel leidt nog steeds direct tot een fout. Houd er rekening mee dat BigQuery streaming-invoegingen enkele minuten weigert
-als een tabel opnieuw wordt aangemaakt onder een naam die onlangs is verwijderd; dat is een
-eigenschap van verwijderen en opnieuw aanmaken, dus gebruik liever een nieuwe tabelnaam dan een tabel te verwijderen en opnieuw toe te voegen.
+Een tabel die zojuist is aangemaakt, is nog niet zichtbaar voor het streaming-eindpunt, dat
+gedurende enkele seconden 404 retourneert. Die 404 wordt opnieuw geprobeerd, maar **alleen wanneer
+deze uitvoering de tabel heeft aangemaakt** — een daadwerkelijk ontbrekende tabel mislukt nog
+steeds direct. Let op: wanneer een tabel onder een naam die onlangs is verwijderd opnieuw wordt
+aangemaakt, weigert BigQuery gedurende enkele minuten streaming-inserts; dat is een eigenschap
+van verwijderen en daarna opnieuw aanmaken. Gebruik daarom bij voorkeur een nieuwe tabelnaam in
+plaats van een tabel te verwijderen en opnieuw toe te voegen.
 
-**Een gedeeltelijke fout wordt geretourneerd als HTTP 200 met een niet-lege `insertErrors[]`.** Dit wordt behandeld als
-een fout en veroorzaakt een uitzondering, waardoor de cursor niet verdergaat dan rijen die BigQuery nooit
-heeft geaccepteerd; `tests/unit/log-export-bigquery.test.ts` legt dit gedrag vast.
+**Een gedeeltelijke fout komt binnen als HTTP 200 met een niet-lege `insertErrors[]`.** Dit wordt
+als een fout behandeld en leidt tot een exception. Daarmee wordt voorkomen dat de cursor voorbij
+rijen gaat die BigQuery nooit heeft geaccepteerd; `tests/unit/log-export-bigquery.test.ts` legt dit
+gedrag vast.
 
-Het transport verloopt via gewone REST — een zelfondertekende RS256-assertie wordt ingewisseld voor een toegangstoken bij
-`https://oauth2.googleapis.com/token`, waarna rijen naar `tabledata.insertAll` worden verstuurd. Er wordt geen Google SDK
-binnengehaald. Toegangstokens worden binnen het proces gecachet per (serviceaccount, scope).
+Het transport gebruikt eenvoudige REST — een zelfondertekende RS256-assertie wordt uitgewisseld
+voor een toegangstoken op
+`https://oauth2.googleapis.com/token`, waarna rijen naar `tabledata.insertAll` worden gestuurd.
+Er wordt geen Google SDK binnengehaald. Toegangstokens worden in het proces gecachet per
+(serviceaccount, scope).
 
-De aangemaakte tabel bevat één kolom per veld op het tabblad Logs plus `exported_at`, en is ingedeeld op basis van
-hoe aanroeplogboeken daadwerkelijk worden doorzocht:
+De aangemaakte tabel bevat één kolom per veld op het tabblad Logs plus `exported_at`, en is
+ingericht voor de manier waarop aanroeplogboeken daadwerkelijk worden opgevraagd:
 
-- **Per dag gepartitioneerd op `timestamp`**, zodat een query met een datumbereik alleen die dagen scant.
-- **Geclusterd op `api_key_name`, `provider`, `model`, `status`** (in die volgorde), zodat filteren op
-  wie de aanroep uitvoerde, waar deze naartoe ging of of deze mislukte, blokken binnen elke partitie uitsluit. BigQuery
-  staat maximaal vier clusterkolommen toe en de volgorde is van belang: een filter op alleen `api_key_name`
-  sluit blokken uit, een filter op alleen `status` niet.
-- **Optionele bewaartermijn voor partities** via `partitionExpirationDays` (0 bewaart alles), toegepast
+- **Gepartitioneerd per dag op `timestamp`**, zodat een query die door een datum wordt begrensd
+  alleen die dagen scant.
+- **Geclusterd op `api_key_name`, `provider`, `model`, `status`** (in die volgorde), zodat
+  filteren op wie de aanroep uitvoerde, waar deze naartoe ging of of deze mislukte, blokken binnen
+  elke partitie uitsluit. BigQuery staat maximaal vier clusterkolommen toe en de volgorde is van
+  belang: een filter op alleen `api_key_name` sluit blokken uit, een filter op alleen `status` doet
+  dat niet.
+- **Optioneel behoud van partities** via `partitionExpirationDays` (0 behoudt alles), toegepast
   wanneer de tabel wordt aangemaakt.
 
-Beide instellingen worden toegepast bij het aanmaken. Een bestaande tabel behoudt de bestaande indeling, dus
-laat de bestemming naar een nieuwe tabel-ID verwijzen als u deze instellingen wilt gebruiken.
+Beide instellingen worden toegepast bij het aanmaken. Een bestaande tabel behoudt de indeling die
+deze al heeft. Wijs de bestemming daarom naar een nieuwe tabel-id als je deze instellingen wilt
+gebruiken.
 
-`tests/unit/log-export-bigquery.test.ts` controleert dat de mapper en het tabelschema synchroon blijven,
-zodat een nieuwe kolom in het aanroeplogboek niet ongemerkt verloren kan gaan tijdens de export.
+`tests/unit/log-export-bigquery.test.ts` controleert dat de mapper en het tabelschema synchroon
+blijven, zodat een nieuwe kolom voor aanroeplogboeken onderweg niet stilletjes kan worden
+weggelaten.
 
-Batches worden opgesplitst op basis van **zowel** het aantal rijen als het aantal geserialiseerde bytes. Alleen het aantal rijen is niet voldoende
-zodra payloads worden geëxporteerd: 500 rijen met prompts kunnen tientallen megabytes beslaan, en insertAll
-weigert aanvragen van meer dan 10 MB. Een deelbatch wordt afgesloten bij 500 rijen of 9 MB, afhankelijk van welke grens het eerst wordt bereikt.
+Batches worden opgesplitst op basis van **zowel het aantal rijen als het aantal
+geserialiseerde bytes**. Alleen het aantal rijen is niet voldoende zodra payloads worden
+geëxporteerd: 500 rijen met prompts kunnen tientallen megabytes groot zijn, en insertAll weigert
+een verzoek van meer dan 10 MB. Delen worden gesloten bij 500 rijen of 9 MB, afhankelijk van wat
+het eerst wordt bereikt.
 
 ---
 
-## 5. OTLP/HTTP-bestemming voor traces
+## 5. OTLP/HTTP-tracesbestemming
 
-De configuratie gebruikt `type: "otlp-http"`. Dit is een geplande, cursorgestuurde export van opgeslagen
-aanroeplogboeken, niet de best-effort-sink voor live routeringsgebeurtenissen in
-`open-sse/services/routing/otel.ts`. Deze export leest of wijzigt de omgevingsvariabelen,
-timers of buffers van die sink niet. Als beide worden ingeschakeld, kunnen er twee onafhankelijke soorten spans ontstaan;
-gebruik de instrumentatiescope `omniroute.log-export` om deze spans uit aanroeplogboeken te onderscheiden.
+De configuratie gebruikt `type: "otlp-http"`. Dit is een geplande, cursorgebaseerde export van
+bewaarde oproeplogboeken, niet de best-effort live sink voor routeringsgebeurtenissen in
+`open-sse/services/routing/otel.ts`. Deze leest de omgevingsvariabelen, timers of buffers van die
+sink niet en wijzigt ze ook niet. Als u beide inschakelt, kunnen twee onafhankelijke soorten spans
+worden geproduceerd; gebruik de instrumentatiescope `omniroute.log-export` om deze oproeplogspans
+van elkaar te onderscheiden.
 
-| Sleutel                  | Standaard / doel                                                                                 |
-| ------------------------ | ------------------------------------------------------------------------------------------------ |
-| `endpoint`               | Vereiste volledige HTTP(S)-URL voor traces; het achtervoegsel `/v1/traces` wordt niet toegevoegd |
-| `headers`                | Optionele regels met `Name: value` of een JSON-object met tekenreeksen; versleuteld              |
-| `requestHeaderAllowlist` | Leeg (uit); namen/voorvoegsels van clientheaders die als spanattributen worden vastgelegd        |
-| `serviceName`            | `omniroute`; resource `service.name`                                                             |
-| `langfuseMapping`        | `false`; voegt Langfuse-attributen voor generatie/sessie/gebruiker toe                           |
-| `identity`               | `pseudonymous`, `keyName` of `none`                                                              |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                          |
-| `timeoutMs`              | `30000` per HTTP-poging                                                                          |
-| `environment`            | Niet ingesteld; optioneel `langfuse.environment`                                                 |
+| Sleutel                  | Standaardwaarde/doel                                                                                       |
+| ------------------------ | ---------------------------------------------------------------------------------------------------------- |
+| `endpoint`               | Vereiste volledige HTTP(S)-traces-URL; er wordt geen `/v1/traces`-achtervoegsel toegevoegd                 |
+| `headers`                | Optionele regels van het type `Name: value` of JSON-object met tekenreeksen; versleuteld                   |
+| `requestHeaderAllowlist` | Leeg (uitgeschakeld); namen/voorvoegsels van clientheaders die als spanattributen moeten worden vastgelegd |
+| `serviceName`            | `omniroute`; resource `service.name`                                                                       |
+| `langfuseMapping`        | `false`; voegt Langfuse-generation/session/user-attributen toe                                             |
+| `identity`               | `pseudonymous`, `keyName` of `none`                                                                        |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                                    |
+| `timeoutMs`              | `30000` per HTTP-poging                                                                                    |
+| `environment`            | Niet ingesteld; optioneel `langfuse.environment`                                                           |
 
-Het generieke dashboard geeft deze velden weer. `paths` accepteert een API-array of een tekstgebied
-met exacte paden, gescheiden door nieuwe regels/komma's. Embeddings, rerank en andere paden worden
-overgeslagen, tenzij ze expliciet zijn toegestaan. Overgeslagen rijen verplaatsen de cursor nog steeds; de bestaande
-tellers `exported`/`exportedTotal` van de runner tellen verwerkte bronrijen, inclusief gefilterde
-rijen, in plaats van geaccepteerde spans. Het filteren gebeurt in het onderliggende proces, zonder het
-IPC-/cursorcontract te wijzigen.
+Het algemene dashboard geeft deze velden weer. `paths` accepteert een API-array of een tekstvak
+met exacte paden, gescheiden door nieuwe regels/komma's. Embeddings, reranking en andere paden
+worden overgeslagen tenzij ze expliciet zijn toegestaan. Overgeslagen rijen verhogen de cursor
+nog steeds; de tellers `exported`/`exportedTotal` van de bestaande runner tellen verwerkte
+bronrijen, inclusief gefilterde rijen, in plaats van geaccepteerde spans. Het filteren gebeurt in
+het child-proces, zonder het IPC-/cursorcontract ervan te wijzigen.
 
-URL-validatie gebruikt de helper `parseAndValidateNonMetadataUrl`, die geen database nodig heeft, uit
-`src/shared/network/outboundUrlGuard.ts`: het beleid `block-metadata`. Deze heeft dezelfde
-onvoorwaardelijke controles op metadata, protocollen en ingesloten inloggegevens als de webhookvalidator met
-privé-URL's toegestaan, maar staat bewust localhost-/LAN-doelen toe zonder een globale
-featureflag-override. Dit maakt zelfgehoste Langfuse-, Phoenix-, Tempo- en Collector-
-endpoints mogelijk, inclusief privé-HTTP-endpoints. Cloudmetadatahosts worden altijd geblokkeerd.
-Omleidingen worden niet gevolgd, zodat een collector inloggegevens niet naar een andere host kan omleiden.
-Net als de bestaande lexicale URL-beveiliging zet dit de DNS-resolutie niet vast; configureer alleen
-hosts die door de beheerder worden beheerd. Geef de voorkeur aan HTTPS wanneer het endpoint zich niet op een vertrouwd netwerk bevindt.
+URL-validatie gebruikt de DB-vrije helper `parseAndValidateNonMetadataUrl` uit
+`src/shared/network/outboundUrlGuard.ts`: het beleid `block-metadata`. Dit heeft dezelfde
+onvoorwaardelijke controles op metadata, protocollen en ingebedde referenties als de
+webhookvalidator, waarbij private URL's zijn toegestaan, maar staat localhost-/LAN-doelen
+bewust toe zonder een algemene feature-flag-override. Hierdoor zijn self-hosted Langfuse-,
+Phoenix-, Tempo- en Collector-eindpunten mogelijk, inclusief private HTTP-eindpunten.
+Cloud-metadat hosts worden altijd geblokkeerd. Redirects worden niet gevolgd, zodat een
+collector geen referenties naar een andere host kan doorsturen. Net als de bestaande lexicale
+URL-guard legt dit geen DNS-resolutie vast; configureer alleen hosts die door de operator worden
+beheerd. Geef de voorkeur aan HTTPS wanneer het eindpunt zich niet op een vertrouwd netwerk
+bevindt.
 
-### Payload en aflevering
+### Payload en levering
 
 OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) bevat één
-CLIENT-span per toegestane rij, met het exacte aanvraagpad als naam. Naamgeving op basis van het pad onderscheidt
-Chat Completions, Responses en Messages zonder model- of identiteitsgegevens in de
-spannaam op te nemen. Resourceattributen omvatten `service.name` en de `service.version` van het pakket.
+CLIENT-span per toegestane rij, genoemd naar het exacte aanvraagpad. Door naamgeving op basis van
+het pad worden Chat Completions, Responses en Messages van elkaar onderscheiden zonder model- of
+identiteitsgegevens in de span-naam op te nemen. Resource-attributen omvatten `service.name` en
+de `service.version` van het pakket.
 
 De normale logger voor chatpogingen (`open-sse/handlers/chatCore/attemptLogging.ts`) schrijft
-`duration = Date.now() - startTime` bij voltooiing en levert geen tijdstempel aan;
-`saveCallLogOperation` in `src/lib/usage/callLogs.ts` stelt het tijdstempel standaard in op het schrijf-
-(voltooiings)tijdstip. De export stelt daarom einde = tijdstempel van de rij en begin = einde − duur in
-(milliseconden, omgezet naar decimale nanoseconden). Historische tijdstempels die door de aanroeper zijn aangeleverd,
-blijven eveneens behouden als eindtijd; er is geen aanduiding per rij die onderscheid maakt tussen begin en voltooiing.
-Een null-duur wordt nul. Ongeldige/ontbrekende tijdstempels laten de batch mislukken in plaats van
-niet-deterministische spans te maken. `ttftMs` kan null zijn en wordt toegewezen aan `omniroute.ttft_ms`.
+`duration = Date.now() - startTime` bij voltooiing en levert geen tijdstempel;
+`saveCallLogOperation` in `src/lib/usage/callLogs.ts` stelt de tijdstempel standaard in op het
+moment van schrijven (voltooiing). De export stelt daarom end in op de tijdstempel van de rij en
+start op end − duration (milliseconden, omgerekend naar decimale nanoseconden). Door de aanroeper
+geleverde historische tijdstempels worden eveneens als eindtijd behouden; er is geen onderscheid
+per rij tussen start en voltooiing. Een null-duration wordt nul. Ongeldige of ontbrekende
+tijdstempels laten de batch mislukken in plaats van niet-deterministische spans te creëren.
+`ttftMs` is nullable en wordt gekoppeld aan `omniroute.ttft_ms`.
 
-Attributen omvatten `gen_ai.operation.name="chat"`, provider, aangevraagd model/antwoordmodel,
-invoer-/uitvoertokens, optionele tokens voor cachelezen/cacheaanmaak/redeneren, HTTP-status,
-combo, cachebron, sessietag en correlatie-id. Gehele OTLP-waarden en tijdstempels
-zijn decimale tekenreeksen; tekenreeksen, booleans en niet-gehele getallen gebruiken hun eigen OTLP-waardevarianten.
-Foutspans hebben de status ERROR en een opgeschoond statusbericht. Het canonieke
-record bevat geen upstream-host-URL, dus `server.address` wordt weggelaten in plaats van
-de collector ten onrechte als modelserver aan te duiden. Kosten worden niet geëxporteerd.
+Attributen omvatten `gen_ai.operation.name="chat"`, provider, aangevraagd/responsmodel,
+invoer-/uitvoertokens, optionele cache-read-/cache-creation-/reasoning-tokens, HTTP-status,
+combinatie, cachebron, sessietag en correlatie-id. Gehele OTLP-waarden en tijdstempels zijn
+decimale tekenreeksen; tekenreeksen, booleans en gebroken getallen gebruiken hun eigen OTLP-
+waardevarianten. Foutspans hebben de status ERROR en een opgeschoonde statusmelding. Het
+canonieke record bevat geen upstream-host-URL, dus `server.address` wordt weggelaten in plaats
+van de collector onterecht als modelserver te identificeren. Kosten worden niet geëxporteerd.
 
-Alleen `includeBodies=true` laadt de inhoud. Met `langfuseMapping=false`
-bevatten `gen_ai.input.messages` / `gen_ai.output.messages` de opgeschoonde JSON van de aanvraag-/antwoordbody
-zoals opgeslagen door OmniRoute (gecanonicaliseerd indien parseerbaar), niet een opnieuw vormgegeven semconv-
-berichtenarray. Afgekapte/niet-JSON-body's blijven onbewerkte tekst. Met `langfuseMapping=true`
-worden body's alleen uitgevoerd als `langfuse.observation.input` / `langfuse.observation.output`;
-de attributen `gen_ai.*.messages` worden weggelaten, zodat elke body één keer wordt verzonden. Beide modi
-erven `maxBodyBytes` van het bestaande laadpad;
-`omniroute.bodies_truncated=true` markeert afkapping.
-Deze bestemming voegt geen extra pipelinesnapshots of leesbewerkingen van niet-opgeschoonde artefacten toe;
-het optioneel vastleggen van aanvraagheaders gebruikt de hieronder beschreven bestaande geladen clientsnapshot.
-Gebruik bij het exporteren van body's een interval op minuutniveau, zoals `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`,
-in plaats van elk uur een achterstand op te bouwen.
+Alleen `includeBodies=true` laadt inhoud. Met `langfuseMapping=false` bevatten
+`gen_ai.input.messages` / `gen_ai.output.messages` de opgeschoonde JSON van de aanvraag-/
+responsbody zoals opgeslagen door OmniRoute (gecanonicaliseerd wanneer parseerbaar), en niet een
+opnieuw vormgegeven semconv-berichtenarray. Afgekapte/niet-JSON-bodies blijven onbewerkte tekst.
+Met `langfuseMapping=true` worden bodies alleen uitgegeven als
+`langfuse.observation.input` / `langfuse.observation.output`; de attributen
+`gen_ai.*.messages` worden weggelaten zodat elke body één keer wordt verzonden. Beide modi nemen
+`maxBodyBytes` over van het bestaande hydratatiepad; `omniroute.bodies_truncated=true` markeert
+afkapping.
+Deze bestemming voegt geen extra pipeline-snapshots of het uitlezen van niet-opgeschoonde
+artefacten toe; het optioneel vastleggen van aanvraagheaders gebruikt de bestaande geladen
+clientsnapshot die hieronder wordt beschreven. Gebruik bij het exporteren van bodies een cadence
+op minuteniveau, zoals `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, in plaats van elk uur een
+achterstand op te bouwen.
 
 ### Optionele aanvraagheaders van de client
 
-Het vastleggen van headers staat **standaard uit**. Stel `requestHeaderAllowlist` in de bestemmingsconfiguratie in
-en schakel **Prompts en antwoorden exporteren** in (`includeBodies: true` op de bestemming).
-De lijst met toegestane headers accepteert een API-array of een tekstgebied met namen gescheiden door nieuwe regels/komma's:
+Het vastleggen van headers is **standaard uitgeschakeld**. Stel `requestHeaderAllowlist` in de
+bestemmingsconfiguratie in en schakel **Prompts en antwoorden exporteren** in
+(`includeBodies: true` op de bestemming).
+De allowlist accepteert een API-array of een tekstvak met namen, gescheiden door nieuwe regels of
+komma's:
 
 ```json
 {
@@ -340,73 +364,82 @@ De lijst met toegestane headers accepteert een API-array of een tekstgebied met 
 }
 ```
 
-Namen worden hoofdletterongevoelig en exact vergeleken, tenzij één afsluitende `*` een niet-leeg
-voorvoegsel van een headernaam selecteert. Een losse `*`, ingebedde jokertekens en ongeldige HTTP-headernamen worden geweigerd.
-Er zijn maximaal 64 selectors, elk met een naam/voorvoegsel van maximaal 256 ASCII-bytes.
+Namen komen hoofdletterongevoelig en exact overeen, tenzij een enkele afsluitende `*` een niet-lege
+headernaam-prefix selecteert. Een losse `*`, ingesloten wildcards en ongeldige HTTP-headernamen worden
+afgewezen. Er zijn maximaal 64 selectors, elk met een naam/prefix van maximaal 256 ASCII-bytes.
 Deze instelling staat los van `headers`, waarmee de exporter zich bij de collector authenticeert.
 
-Bij het vastleggen wordt alleen `pipeline_client_request` gelezen, dat wordt gevuld vanuit `clientRawRequest`
-(of het verouderde `clientRequest`) van de opgeslagen gedetailleerde pipeline. Er wordt nooit teruggevallen op requestheaders van de provider.
-Gedetailleerde pipelinelogging moet ingeschakeld zijn geweest toen het verzoek werd vastgelegd. Als
-`includeBodies` is uitgeschakeld, of als de JSON van de clientsnapshot ontbreekt, beschadigd of afgekapt is, worden er geen headerattributen
-uitgevoerd. Het verhogen van `maxBodyBytes` kan voorkomen dat snapshots tijdens het exporteren worden afgekapt;
-het kan geen details herstellen die nooit zijn opgeslagen. Een snapshot groter dan 1 MiB of met meer dan
-256 headeritems wordt genegeerd. De bestaande export van prompts/antwoorden blijft ingeschakeld naast
-het vastleggen van headers; de toestemmingslijst biedt geen hydratatiemodus voor uitsluitend headers.
+Capture leest uitsluitend `pipeline_client_request`, dat wordt gevuld vanuit `clientRawRequest` van de
+opgeslagen gedetailleerde pipeline (of het legacy-veld `clientRequest`). Er wordt nooit teruggevallen op
+requestheaders van de provider. Gedetailleerde pipelinelogging moet zijn ingeschakeld toen het request
+werd vastgelegd. Als `includeBodies` is uitgeschakeld, of als de JSON van de client-snapshot ontbreekt,
+beschadigd of afgekapt is, worden er geen headerattributen uitgegeven. Door `maxBodyBytes` te verhogen
+kan afkappen van de snapshot tijdens het exporteren worden voorkomen; hiermee kan detail dat nooit is
+opgeslagen niet worden hersteld. Een snapshot van meer dan 1 MiB of met meer dan 256 headeritems wordt
+genegeerd. De bestaande export van prompt en response blijft naast headercapture ingeschakeld; de
+allowlist biedt geen hydrationmodus die uitsluitend headers verwerkt.
 
-Geselecteerde waarden worden OTLP-stringarrays onder `http.request.header.<full lowercase header name>`,
-zelfs bij één enkele string. Zo wordt `X-OmniRoute-Meta-Team: example-team`
+Geselecteerde waarden worden OTLP-stringarrays met de naam
+`http.request.header.<full lowercase header name>`, ook voor één enkele string. Bijvoorbeeld,
+`X-OmniRoute-Meta-Team: example-team` wordt
 `http.request.header.x-omniroute-meta-team` met
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Het volledige voorvoegsel blijft behouden: dit zijn gewone headers, zonder parsing van bedrijfsvelden of
-conversie naar `omniroute.metadata.*` / Langfuse-metadata. `langfuseMapping` verandert de semantiek van headers
-niet. Een geselecteerde `User-Agent` met één waarde stelt ook de standaard scalaire waarde
-`user_agent.original` in. Komma's binnen één waarde worden niet gebruikt om de waarde op te splitsen. Hoofdlettervarianten worden samengevoegd in de volgorde van de opgeslagen
-items; bij een ongeldige variant wordt die volledige header weggelaten. Attributen worden geordend op naam in kleine letters.
+De volledige prefix blijft behouden: dit zijn gewone headers, zonder parsing van bedrijfsvelden of
+conversie naar `omniroute.metadata.*` / Langfuse-metadata. `langfuseMapping` wijzigt de semantiek van
+headers niet. Een geselecteerde header `User-Agent` met één waarde stelt ook de standaard scalar
+`user_agent.original` in. Komma's binnen één waarde worden niet gesplitst. Varianten van hoofdletters
+en kleine letters worden samengevoegd in de volgorde waarin ze zijn opgeslagen; als een variant
+ongeldig is, wordt die volledige header weggelaten. Attributen worden op kleine letters van de naam
+gesorteerd.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-sleutelheaders, namen die
-auth/token/secret/password/credential-markeringen bevatten en interne gatewayreferenties worden altijd
-uitgesloten, zelfs als ze geselecteerd zijn of gedeeltelijk gemaskeerd zijn opgeslagen. Voor bekende patronen van toegangsgegevens wordt
-de gedeelde detector voor toegangsgegevens hergebruikt; maskeringsmarkeringen worden weggelaten en niet als veilige waarden geëxporteerd.
-Alleen strings en niet-lege stringarrays worden geaccepteerd; getallen of objecten worden niet geconverteerd.
-Ongeldige namen, prototypesleutels, besturingstekens (behalve horizontale tabs) en ongeldige Unicode
-worden genegeerd zonder dat de batch mislukt of hun inhoud in fouten wordt weergegeven.
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-key-headers, namen met
+auth/token/secret/password/credential-markeringen en interne gatewayreferenties worden altijd
+uitgesloten, ook als ze zijn geselecteerd of gedeeltelijk gemaskeerd in de opslag. Bekende
+referentiepatronen gebruiken opnieuw de gedeelde referentiedetector; redactie-markeringen worden
+weggelaten en niet als veilige waarden geëxporteerd. Alleen strings en niet-lege stringarrays worden
+geaccepteerd; getallen of objecten worden niet automatisch geconverteerd. Ongeldige namen,
+prototype-sleutels, besturingstekens (behalve horizontale tabs) en ongeldige Unicode worden genegeerd
+zonder dat de batch mislukt of de inhoud ervan in fouten wordt weergegeven.
 
-Elke span legt maximaal 32 headers vast, met 16 waarden per header, 4096 UTF-8-bytes per waarde
-en in totaal 16384 UTF-8-bytes voor alle vastgelegde headernamen en -waarden. Te grote/ongeldige headers
-worden volledig weggelaten, niet afgekapt. Selectie is een privacybeslissing van de beheerder: onschuldig ogende namen
-kunnen nog steeds persoonsgegevens bevatten, en deze limieten/detectoren zijn geen algemeen hulpmiddel om persoonsgegevens te verwijderen.
+Elke span bevat maximaal 32 headers, 16 waarden per header, 4096 UTF-8-bytes per waarde en in totaal
+16384 UTF-8-bytes voor de vastgelegde headernamen en -waarden. Te grote of ongeldige headers worden
+volledig weggelaten en niet afgekapt. Selectie is een privacybeslissing van de operator: ogenschijnlijk
+veilige namen kunnen nog steeds persoonsgegevens bevatten, en deze limieten/detectors zijn geen
+algemene PII-scrubber.
 
 ### Leveringslimieten
 
-Verzoeken zijn beperkt tot 500 spans en 4 MiB UTF-8-JSON, inclusief de envelop.
-Elke toegestane span wordt op grootte gecontroleerd vóór het eerste verzoek van een cursorbatch. Als een afzonderlijke
-span groter is dan de limiet, wordt geen enkel deel van die batch verzonden en treedt een fout op met het advies om
-`maxBodyBytes` te verlagen; de span wordt niet stilzwijgend overgeslagen. De voorafgaande controle bewaart alleen recordverwijzingen en
-byteaantallen en verwijdert elke tijdelijke span/JSON; spans worden opnieuw opgebouwd voor begrensde delen
-in plaats van een tweede geserialiseerde kopie van de batch in het geheugen te houden. Bij HTTP 408/429/5xx, netwerkfouten en time-outs worden maximaal
-drie pogingen gedaan, met exponentiële wachttijden van 250/500 ms. `Retry-After` in seconden of als HTTP-datum
-kan een wachttijd verlengen tot maximaal 5 seconden. Andere statussen leiden direct tot een fout. Ook een gedeeltelijke afwijzing met OTLP 2xx veroorzaakt een fout in plaats van
-een verloren span als ontvangen te bevestigen; lege bevestigingen of bevestigingen met geldige JSON worden geaccepteerd, met een
-leeslimiet van 64 KiB voor het antwoord.
+Requests zijn beperkt tot 500 spans en 4 MiB UTF-8-JSON, inclusief de envelope.
+Elke toegestane span wordt gecontroleerd op grootte vóór het eerste request van een cursorsbatch. Als
+een afzonderlijke span groter is dan de limiet, wordt geen deel van die batch verzonden en mislukt de
+bewerking met instructies om `maxBodyBytes` te verlagen; de span wordt niet stilzwijgend verwijderd.
+De preflight-bewerking bewaart alleen recordreferenties en byteaantallen en verwijdert elke tijdelijke
+span/JSON; spans worden opnieuw opgebouwd voor begrensde chunks, zodat er geen tweede geserialiseerde
+kopie van de batch wordt bewaard. HTTP 408/429/5xx, netwerkfouten en time-outs krijgen maximaal
+drie pogingen, met een exponentiële backoff van 250/500 ms. `Retry-After`-seconden of HTTP-datums
+kunnen een vertraging tot maximaal 5 seconden verlengen. Andere statussen mislukken onmiddellijk.
+OTLP 2xx-gedeeltelijke afwijzing genereert ook een fout in plaats van een verloren span te bevestigen;
+lege of geldige JSON-bevestigingen worden geaccepteerd, met een limiet van 64 KiB voor het lezen van
+de response.
 
-Fouten bevatten alleen gegevens van de exporter zelf: HTTP-status, herhaalclassificatie, aantal pogingen en aantal verzonden
-spans, of vaste formuleringen voor bevestigings-/netwerkfouten. Antwoordbodies van de collector,
-aantallen van gedeeltelijk geslaagde verwerkingen en antwoordheaders worden nooit overgenomen in fouten, logs of het
-dashboard. Een mislukte of gedeeltelijk geaccepteerde batch wordt niet als ontvangen bevestigd: de bestemming toont
-Mislukt met die status, de cursor blijft bij de laatst bevestigde batch en bij de volgende uitvoering
-worden dezelfde rijen opnieuw verzonden. Permanente statussen blijven fouten veroorzaken totdat de collector of configuratie
-is hersteld. Gebruik de eigen logs van de collector voor antwoorddetails. Foutsamenvattingen in het aanroeplogboek behouden
-hun afzonderlijke maskering.
-`prepare()` richt niets in; Test verstuurt exact `{"resourceSpans":[]}` via POST en rapporteert
-de HTTP-status zonder spans van het aanroeplogboek te schrijven.
+Fouten bevatten alleen feiten die eigendom zijn van de exporter: HTTP-status, retryklasse, aantal
+pogingen en verzonden spanaantallen, of vaste bewoordingen voor bevestigings-/netwerkfouten.
+Response-inhoud van de collector, aantallen gedeeltelijke successen en responseheaders worden nooit
+overgenomen in fouten, logs of het dashboard. Een mislukte of gedeeltelijk geaccepteerde batch wordt
+niet bevestigd: de bestemming toont Failing met die status, de cursor blijft op de laatst bevestigde
+batch staan en de volgende run verzendt dezelfde rijen opnieuw. Permanente statussen blijven mislukken
+totdat de collector of configuratie is hersteld. Gebruik de eigen logs van de collector voor
+responsegegevens. Foutsamenvattingen in het call-log behouden hun afzonderlijke redactie.
+`prepare()` maakt niets aan; Test verstuurt exact `{"resourceSpans":[]}` en rapporteert de
+HTTP-status zonder call-log-spans te schrijven.
 
-Trace-ID's en span-ID's zijn de eerste 32/16 hexadecimale cijfers van SHA-256 over
-`"omniroute.trace\\0" + callLogId` en `"omniroute.span\\0" + callLogId`. Opnieuw verzonden spans hebben
-identieke ID's. Dit garandeert geen deduplicatie: sommige backends, waaronder Langfuse
-v4-ingestie, dedupliceren geen spans met dezelfde ID. Een crash of een fout in een deel van een batch kan ertoe leiden dat
-hoogstens die ene onbevestigde cursorbatch opnieuw wordt verzonden; die hele batch kan worden gedupliceerd,
-niet alleen het laatste HTTP-deel. Houd bij het kiezen van de cursorbatchgrootte rekening met deze afweging.
+Trace-id's en span-id's zijn de eerste 32/16 hexadecimale cijfers van SHA-256 over
+`"omniroute.trace\\0" + callLogId` en `"omniroute.span\\0" + callLogId`. Opnieuw verzonden gegevens
+bevatten identieke id's. Dit is geen garantie voor deduplicatie: sommige backends, waaronder de
+Langfuse v4-ingestie, dedupliceren spans met dezelfde id niet. Door een crash of een gedeeltelijk
+mislukte chunk kan maximaal de ene niet-bevestigde cursorsbatch opnieuw worden verzonden; die volledige
+batch kan worden gedupliceerd, niet alleen de laatste HTTP-chunk. Kies de grootte van de cursorsbatch
+met die afweging in gedachten.
 
 ### Langfuse-voorbeeld
 
@@ -423,44 +456,48 @@ Configureer deze velden voor een zelfgehoste Langfuse-instantie:
 }
 ```
 
-Maak de Authorization-waarde lokaal aan als Base64 van de letterlijke string `public-key:secret-key`
-(bijvoorbeeld met `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Plak geen echte toegangsgegevens in logs, schermafbeeldingen of issues. De mapping stelt automatisch
-`x-langfuse-ingestion-version: 4` in; Authorization wordt nog steeds aangeleverd via `headers`.
-Zowel de headers als de gegenereerde identiteitssalt gebruiken het bestaande mechanisme voor versleutelde
+Bouw de Authorization-waarde lokaal op als Base64 van de letterlijke tekenreeks
+`public-key:secret-key` (bijvoorbeeld met `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
+Plak echte referenties niet in logs, schermafbeeldingen of issues. De mapping stelt automatisch
+`x-langfuse-ingestion-version: 4` in; Authorization wordt nog steeds aangeleverd in `headers`.
+Zowel headers als de gegenereerde identity-salt gebruiken het bestaande mechanisme voor versleutelde
 geheime velden en API-placeholders; `STORAGE_ENCRYPTION_KEY` is vereist.
 
-De mapping voegt het generatietype/-model, JSON-gebruiksdetails (invoer/uitvoer/totaal en beschikbare
-cachesleutels), JSON-momentopnamen van invoer/uitvoer, het niveau ERROR/DEFAULT, een opgeschoond statusbericht,
-de tracenaam, de sessie-id, een optionele omgeving en filterbare
-`langfuse.observation.metadata.<key>` toe voor provider, aangevraagd model, pad, combinatie,
-cachebron en status. `langfuse.observation.completion_start_time` is een ISO 8601-tijdstip op
-start + TTFT, maar alleen wanneer TTFT bekend is en binnen de duur valt. Er worden geen kostenattributen verzonden.
+Mapping voegt het generatie type/model, JSON-gebruiksdetails (input/output/totaal en beschikbare
+cachesleutels), JSON-input-/outputsnapshots, het niveau ERROR/DEFAULT, een opgeschoond
+statusbericht, de tracenaam, sessie-ID, optionele omgeving en het filterbare
+`langfuse.observation.metadata.<key>` toe voor provider, aangevraagd model, pad, combinatie, cachebron
+en status. `langfuse.observation.completion_start_time` is ISO 8601 op het startmoment + TTFT, alleen
+wanneer TTFT bekend is en binnen de duur valt. Er worden geen kostenattributen verzonden.
 
 Identiteitsmodi zijn van toepassing op `langfuse.user.id`:
 
-- `pseudonymous` (standaard): HMAC-SHA256 van de interne id van de API-sleutel met een willekeurige
-  salt van 32 bytes per bestemming. De salt wordt bij het aanmaken gegenereerd als deze ontbreekt, versleuteld
-  als `identitySalt`, nooit geretourneerd en bij bewerkingen behouden. Ruwe sleutel-id's worden nooit
-  in spanattributen opgenomen. Het opnieuw aanmaken/roteren van de salt van een bestemming verandert de identiteiten.
-- `keyName`: de geconfigureerde API-sleutelnaam, waarmee dat door de beheerder ingestelde label bewust wordt onthuld.
-- `none`: geen gebruikers-id. Sessietags worden nog steeds geëxporteerd wanneer ze aanwezig zijn; deze modi
-  anonimiseren geen willekeurige promptinhoud of door de beheerder opgegeven sessie-/correlatielabels.
+- `pseudonymous` (standaard): HMAC-SHA256 van de interne ID van de API-sleutel met een willekeurige
+  salt van 32 bytes per bestemming. De salt wordt bij het aanmaken gegenereerd als deze ontbreekt,
+  versleuteld als `identitySalt`, nooit geretourneerd en tijdens bewerkingen behouden. Ruwe
+  sleutel-ID's worden nooit in spanattributen geplaatst. Het opnieuw aanmaken of roteren van de salt
+  van een bestemming wijzigt de identiteiten.
+- `keyName`: de geconfigureerde naam van de API-sleutel, waarbij dat operatorlabel bewust wordt
+  onthuld.
+- `none`: geen gebruikers-ID. Sessietags worden nog steeds geëxporteerd wanneer deze aanwezig zijn;
+  deze modi anonimiseren geen willekeurige promptinhoud of door operators aangeleverde sessie-/
+  correlatielabels.
 
-### Starten zonder historische gegevens aan te vullen
+### Starten zonder backfill
 
-Schakel alleen bij het aanmaken **Start vanaf de huidige positie (bestaande logs overslaan)** in of geef
-`startFromCurrentPosition: true` mee op het hoogste niveau van de payload voor de aanmaak-API. Dit initialiseert
-`cursor_row_id` op de huidige maximale rowid van de bewaarde aanroeplogs met behulp van de bestaande
-cursorhulpfuncties, zonder migratie. De standaardwaarde is false (cursor 0 en aanvulling vanuit de bewaarde historie).
-Dit is geen instelling om de cursor bij een update opnieuw in te stellen.
+Alleen bij het aanmaken activeer je **Starten vanaf de huidige positie (bestaande logboeken overslaan)** of geef je
+`startFromCurrentPosition: true` door op het hoogste niveau van de create API-payload. Hiermee wordt
+`cursor_row_id` geïnitialiseerd op de huidige maximale bewaarde rowid van het call-log met behulp van de
+bestaande cursorhelpers, zonder migratie. De standaardwaarde is false (cursor 0 en backfill van de
+bewaarde geschiedenis). Dit is geen instelling voor het resetten van de cursor tijdens updates.
 
 De gedeelde toevoeging van `ttftMs` voegt ook een nullable kolom `ttft_ms` toe aan de BigQuery-mapper
-en het schema voor nieuwe tabellen: de schematest vereist dat elk canoniek recordveld een
-kolom heeft. Bestaande tabellen blijven ongewijzigd exporteren: `prepare()` leest het tabelschema en
-laat alleen `ttft_ms` weg wanneer die kolom ontbreekt. Voeg de nullable INT64-kolom toe om TTFT
-bij de volgende uitvoering te krijgen, of gebruik een nieuwe tabel. Er zijn geen PATCH, automatische schemawijziging of aanvullende
-machtigingen vereist; voor alle andere rijvelden blijft strikte schemacontrole gelden.
+en het schema van nieuwe tabellen: de schematest vereist dat elk canoniek recordveld een kolom heeft.
+Bestaande tabellen blijven ongewijzigd exporteren: `prepare()` leest het tabelschema en laat alleen
+`ttft_ms` weg wanneer die kolom ontbreekt. Voeg de nullable INT64-kolom toe om TTFT bij de volgende
+uitvoering te krijgen, of gebruik een nieuwe tabel. De optionele TTFT-kolom activeert geen
+schemaupdatering. Gebruiksevidentie-kolommen volgen de onderstaande voorwaardelijke, opt-in
+compatibiliteitsprocedure; voor andere rijvelden blijft strikte schemacontrole gelden.
 
 ---
 
@@ -485,15 +522,29 @@ Twee regels voor een nieuwe bestemming:
 
 ---
 
-## 7. Gebruik en beheer
+## 7. Bediening
 
 - **Dashboard**: Integraties → Logexport. Voeg een bestemming toe, voer **Test** uit om de inloggegevens te controleren
   zonder rijen te schrijven en schakel de bestemming vervolgens in.
-- **Achterstand**: elke bestemmingskaart toont de wachtende rijen en de cursor; `GET
-/api/log-export/status` retourneert dezelfde cijfers plus de laatste 20 jobuitvoeringen.
-- **Een falende bestemming laat de andere niet mislukken** — de uitvoeringssamenvatting registreert de status
-  per bestemming in `last_status` / `last_error`, en de uitvoeringsgeschiedenis van de job bewaart het totaaloverzicht.
-- **Als je een bestemming verwijdert, wordt ook de cursor ervan verwijderd.** Als je deze opnieuw toevoegt, begint de export bij het oudste bewaarde
-  aanroeplogboek, waardoor rijen opnieuw worden verzonden die de bestemming mogelijk al bevat. Bij BigQuery
-  vangt de `insertId` per rij dit alleen op binnen het eigen deduplicatievenster van BigQuery. Schakel
-  een bestemming daarom liever uit dan deze te verwijderen.
+- **Achterstand**: op elke bestemmingskaart worden de openstaande rijen en de cursor weergegeven; `GET
+/api/log-export/status` retourneert dezelfde cijfers plus de laatste 20 taakuitvoeringen.
+- **Een falende bestemming laat de andere bestemmingen niet falen** — het uitvoeringsoverzicht registreert de status per bestemming
+  in `last_status` / `last_error`, en de geschiedenis van taakuitvoeringen bewaart het totaaloverzicht.
+- **Een bestemming verwijderen verwijdert de bijbehorende cursor.** Als u de bestemming opnieuw toevoegt, wordt gestart bij het oudste
+  bewaarde aanroeplogboek, waardoor rijen opnieuw worden verzonden die de bestemming mogelijk al bevat. Op BigQuery voorkomt de
+  `insertId` dit alleen binnen het eigen deduplicatievenster van BigQuery, dus schakel een bestemming bij voorkeur uit
+  in plaats van deze te verwijderen.
+
+### Compatibiliteit van het schema voor gebruiksbewijs
+
+Nieuwe BigQuery-tabellen bevatten `usage_evidence` (STRING met JSON) en
+`usage_estimated` (BOOL), beide nullable. Als `autoCreate` is ingeschakeld, kan een bestaande tabel alleen
+deze ontbrekende nullable kolommen ontvangen. De exporter behoudt het volledige bestaande schema,
+inclusief veldmetagegevens, en verstuurt een voorwaardelijke PATCH met de geretourneerde etag. Een gelijktijdige
+schemewijziging laat de export mislukken in plaats van deze te overschrijven; bij de volgende uitvoering wordt de
+tabel opnieuw gelezen.
+
+Als `autoCreate` is uitgeschakeld, voegt u deze kolommen zelf toe voordat u records met gebruiksbewijs exporteert.
+Ontbrekende schema-/etagmetagegevens of een mislukte update verhinderen ook invoegingen die gebruiksbewijs bevatten.
+De exportcursor schuift bij die fout niet op en bewijs wordt nooit stilzwijgend verwijderd. Lokale logretentie blijft van
+toepassing zolang een export is geblokkeerd, dus los de fout op voordat bewaarde bronrijen verlopen.

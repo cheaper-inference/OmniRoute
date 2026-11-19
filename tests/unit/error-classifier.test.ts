@@ -30,13 +30,21 @@ test("classifyProviderError: 402 => QUOTA_EXHAUSTED", () => {
 });
 
 test("classifyProviderError: 400 + billing signal => QUOTA_EXHAUSTED", () => {
+  // On a 400 the billing phrase counts only with a structured credit code: the
+  // message alone may be caller input echoed back by the upstream.
   const result = classifyProviderError(400, {
-    error: { message: "insufficient_quota: exceeded your current quota" },
+    error: {
+      message: "insufficient_quota: exceeded your current quota",
+      code: "insufficient_quota",
+    },
   });
   assert.equal(result, PROVIDER_ERROR_TYPES.QUOTA_EXHAUSTED);
 
   const resultExhausted = classifyProviderError(400, {
-    error: { message: "The free tier of the model has been exhausted." },
+    error: {
+      message: "The free tier of the model has been exhausted.",
+      code: "insufficient_quota",
+    },
   });
   assert.equal(resultExhausted, PROVIDER_ERROR_TYPES.QUOTA_EXHAUSTED);
 });
@@ -571,10 +579,7 @@ test("#17043: Claude native weekly 429 is quota exhaustion, not an RPM throttle"
   const payload = {
     error: { message: "This request would exceed your account's rate limit" },
   };
-  assert.equal(
-    classifyProviderError(429, payload, "claude"),
-    PROVIDER_ERROR_TYPES.QUOTA_EXHAUSTED
-  );
+  assert.equal(classifyProviderError(429, payload, "claude"), PROVIDER_ERROR_TYPES.QUOTA_EXHAUSTED);
   assert.equal(
     classifyProviderError(429, payload, "openai"),
     PROVIDER_ERROR_TYPES.RATE_LIMITED,
