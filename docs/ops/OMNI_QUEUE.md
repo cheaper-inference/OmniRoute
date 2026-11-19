@@ -12,6 +12,13 @@ the default `mode` in `config/merge-queue/config.json` is `shadow` (compose and 
 Until the owner approves the cut-over (see [Cut-over and rollback](#cut-over-and-rollback)), Mergify
 and the `queue` label stay the default merge path.
 
+> **2026-11-19: the Mergify merge queue is retired** (owner's decision; step 1 of
+> [Cut-over and rollback](#cut-over-and-rollback)). `.mergify.yml` no longer defines a queue and
+> refuses the Mergify commands that merge or rewrite a pull request. Until omni-queue runs in live
+> mode, release PRs are merged by hand under the repository ruleset "Require green gates on the
+> active release" (`Gate / CI` + `Gate / Quality`); mentions below of Mergify as the current merge
+> path describe the state before that date.
+
 ## Why
 
 - **Cost.** Mergify bills per active contributor seat, and batching with automatic bisection is a
