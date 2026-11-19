@@ -940,7 +940,14 @@ export async function withRateLimit(
   correlationId = undefined,
   opts = undefined
 ) {
-  if (!rollingRpmGateEnabled() || !enabledConnections.has(connectionId)) {
+  const hasBudget = typeof remainingBudgetMs === "number" && Number.isFinite(remainingBudgetMs);
+  // An exhausted explicit budget fails at once in withBottleneckLimit; the gate would read a
+  // non-positive wait as "no deadline" and could hold the call for a slot first.
+  if (
+    !rollingRpmGateEnabled() ||
+    !enabledConnections.has(connectionId) ||
+    (hasBudget && remainingBudgetMs <= 0)
+  ) {
     return withBottleneckLimit(
       provider,
       connectionId,
@@ -952,7 +959,6 @@ export async function withRateLimit(
       opts
     );
   }
-  const hasBudget = typeof remainingBudgetMs === "number" && Number.isFinite(remainingBudgetMs);
   const maxWaitMs = hasBudget
     ? remainingBudgetMs
     : resolveRequestQueueMaxWaitMs(provider, undefined, connectionId ?? undefined);
@@ -976,7 +982,8 @@ export async function withRateLimit(
         return fn(s);
       },
       signal,
-      hasBudget ? remainingBudgetMs - (Date.now() - startedAt) : remainingBudgetMs,
+      // The time spent at the gate comes off the same budget; maxWaitMs=0 stays "no deadline".
+      maxWaitMs > 0 ? maxWaitMs - (Date.now() - startedAt) : remainingBudgetMs,
       correlationId,
       opts
     );
