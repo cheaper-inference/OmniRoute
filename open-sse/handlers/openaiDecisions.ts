@@ -23,11 +23,11 @@ export const openaiDecisionSchema = z
 
 export async function handleOpenAIDecisions(
   body: z.infer<typeof openaiDecisionSchema>,
-  credentials: { apiKey?: unknown },
+  credentials: object,
   signal: AbortSignal,
   send: typeof fetch = fetch
 ): Promise<Response> {
-  if (typeof credentials.apiKey !== "string" || !credentials.apiKey) {
+  if (!("apiKey" in credentials) || typeof credentials.apiKey !== "string" || !credentials.apiKey) {
     return errorResponse(401, "An OpenAI Platform API key is required.");
   }
   try {
