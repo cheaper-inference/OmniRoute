@@ -67,3 +67,30 @@ export function resolveComboNoLog(args: {
   }
   return false;
 }
+
+/**
+ * Async wrapper for the chat hot path.
+ *
+ * Returns false without touching the combo cache at all when the request is not
+ * a combo request, so a plain model call pays nothing for this rung. A cache or
+ * DB failure also degrades to "logging on" rather than failing the request —
+ * the key/header rungs still apply.
+ */
+export async function resolveComboNoLogForRequest(args: {
+  comboName?: string | null;
+  comboId?: string | null;
+  getCombos: () => Promise<unknown[]>;
+}): Promise<boolean> {
+  const name = typeof args.comboName === "string" && args.comboName.trim() ? args.comboName : null;
+  const id = typeof args.comboId === "string" && args.comboId.trim() ? args.comboId : null;
+  if (!name && !id) return false;
+  try {
+    return resolveComboNoLog({
+      comboName: name,
+      comboId: id,
+      combos: await args.getCombos(),
+    });
+  } catch {
+    return false;
+  }
+}

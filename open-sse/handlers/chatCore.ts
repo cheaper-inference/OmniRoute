@@ -60,7 +60,7 @@ import {
 } from "../config/codexIdentity.ts";
 import { trackRequestDevice } from "./chatCore/deviceTracking.ts";
 import { getCombosCached } from "./chatCore/comboContextCache.ts";
-import { resolveComboNoLog } from "./chatCore/comboNoLog.ts";
+import { resolveComboNoLogForRequest } from "./chatCore/comboNoLog.ts";
 import { resolveConnectionUpstreamOverrides } from "./chatCore/connectionUpstreamOverrides.ts";
 import {
   buildRegisteredProviderRequest,
@@ -947,13 +947,14 @@ async function handleChatCoreInner({
   // Payload-logging opt-outs. The key flag withholds for every request made
   // with that key; a combo's `config.noLog` withholds for everything routed
   // through it. Both are opt-outs — a request is logged only when neither is on.
-  const noLogEnabled =
-    apiKeyInfo?.noLog === true ||
-    resolveComboNoLog({
-      comboName: typeof comboName === "string" ? comboName : null,
-      comboId: typeof routingComboId === "string" ? routingComboId : null,
-      combos: await getCombosCached(),
-    });
+  // The combo lookup only runs for combo requests, so a plain model call pays
+  // no extra cache/DB work here.
+  const comboNoLog = await resolveComboNoLogForRequest({
+    comboName,
+    comboId: routingComboId,
+    getCombos: getCombosCached,
+  });
+  const noLogEnabled = apiKeyInfo?.noLog === true || comboNoLog;
   // Consolidate settings reads — fetch once, reuse throughout the request
   const settings = cachedSettings ?? (await getCachedSettings());
   const geminiPromptCacheMode = settings.geminiPromptCacheMode === "implicit" ? "implicit" : "off";

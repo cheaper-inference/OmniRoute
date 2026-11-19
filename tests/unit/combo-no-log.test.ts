@@ -71,3 +71,37 @@ test("malformed rows are skipped instead of throwing", () => {
   assert.equal(resolveComboNoLog({ comboName: "ok", combos: dirty }), true);
   assert.equal(resolveComboNoLog({ comboName: "nope", combos: dirty }), false);
 });
+
+test("the hot-path wrapper skips the combo cache for non-combo requests", async () => {
+  const { resolveComboNoLogForRequest } =
+    await import("../../open-sse/handlers/chatCore/comboNoLog.ts");
+  let reads = 0;
+  const getCombos = async () => {
+    reads += 1;
+    return combos;
+  };
+
+  assert.equal(await resolveComboNoLogForRequest({ getCombos }), false);
+  assert.equal(
+    await resolveComboNoLogForRequest({ comboName: null, comboId: null, getCombos }),
+    false
+  );
+  assert.equal(reads, 0, "a plain model call must not read the combo cache");
+
+  assert.equal(await resolveComboNoLogForRequest({ comboName: "fast", getCombos }), true);
+  assert.equal(reads, 1);
+});
+
+test("the hot-path wrapper degrades to logging on when the combo store fails", async () => {
+  const { resolveComboNoLogForRequest } =
+    await import("../../open-sse/handlers/chatCore/comboNoLog.ts");
+  assert.equal(
+    await resolveComboNoLogForRequest({
+      comboName: "fast",
+      getCombos: async () => {
+        throw new Error("db closed");
+      },
+    }),
+    false
+  );
+});

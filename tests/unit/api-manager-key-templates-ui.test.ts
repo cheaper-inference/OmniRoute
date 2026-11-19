@@ -475,9 +475,8 @@ test("ApiManagerPageClient, modals, and 6-tab editor preserve permanent row acti
   assert.ok(editorSrc.includes("\u2192"), "routing separator retains Unicode arrow");
 });
 
-test("en.json and pl.json contain all translation keys referenced across Key Templates UI files", () => {
+test("en.json contains every translation key referenced across Key Templates UI files", () => {
   const en = JSON.parse(readFileSync(join(OVERLAY_ROOT, "src/i18n/messages/en.json"), "utf8"));
-  const pl = JSON.parse(readFileSync(join(OVERLAY_ROOT, "src/i18n/messages/pl.json"), "utf8"));
 
   const files = [
     join(API_MANAGER_DIR, "ApiManagerPageClient.tsx"),
@@ -501,7 +500,7 @@ test("en.json and pl.json contain all translation keys referenced across Key Tem
   ];
 
   const missingEn: string[] = [];
-  const missingPl: string[] = [];
+  let scanned = 0;
 
   for (const file of files) {
     const src = readFileSync(file, "utf8");
@@ -509,17 +508,21 @@ test("en.json and pl.json contain all translation keys referenced across Key Tem
     let match: RegExpExecArray | null;
     while ((match = regex.exec(src)) !== null) {
       const key = match[1];
+      scanned += 1;
       if (typeof en.apiManager[key] !== "string") {
         missingEn.push(`${key} (in ${file})`);
-      }
-      if (typeof pl.apiManager[key] !== "string") {
-        missingPl.push(`${key} (in ${file})`);
       }
     }
   }
 
   assert.deepEqual(missingEn, []);
-  assert.deepEqual(missingPl, []);
+  // Non-English catalogs are DERIVED (config/quality/derived-paths/translation.json →
+  // ui-locale-catalogs): a feature PR adds keys to en.json only, and the dashboard
+  // falls back to English (src/i18n/request.ts deepMergeFallback) until the
+  // translation wave completes the locales. Asserting pl.json parity here would
+  // demand exactly the edit check:pr-derived-paths rejects, so this pins the English
+  // source instead — plus a non-vacuous scan, so a broken file list cannot pass green.
+  assert.ok(scanned > 0, "the scan must have found translation keys to check");
 });
 
 test("fractional quota limits and budget warning thresholds survive an untouched template draft", () => {
