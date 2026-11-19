@@ -1,1 +1,0 @@
-- **feat(search):** TinyFish search is available as a fallback-only web and news search provider; it reuses the stored TinyFish key and is never the first automatic choice.
