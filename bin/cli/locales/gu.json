@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "મર્યાદા સકારાત્મક પૂર્ણાંક હોવી જોઈએ.",
     "error": "ભૂલ: {message}",
     "serverOffline": "OmniRoute સર્વર ઑફલાઇન છે. તેને આ કમાન્ડથી શરૂ કરો: omniroute serve",
     "authRequired": "પ્રમાણીકરણ જરૂરી છે. OMNIROUTE_API_KEY સેટ કરો અથવા આ કમાન્ડ ચલાવો: omniroute setup",

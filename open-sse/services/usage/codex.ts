@@ -15,6 +15,7 @@ import {
 } from "../codexUsageQuotas.ts";
 import { isCodexLimitReached } from "../codexQuotaSignals.ts";
 import { fetchWithConnectionProxy } from "../connectionProxyFetch.ts";
+import { throttleQuotaFetch } from "../quotaFetchThrottle.ts";
 import { getCodexBackendIdentityHeaders } from "../../config/codexClient.ts";
 import { getFieldValue } from "./scalars.ts";
 
@@ -69,23 +70,31 @@ export async function getCodexUsage(
       headers["chatgpt-account-id"] = accountId;
     }
 
-    const signal = AbortSignal.timeout(20_000);
-    const response = connectionId
-      ? await fetchWithConnectionProxy(
-          connectionId,
-          CODEX_CONFIG.usageUrl,
-          {
-            method: "GET",
-            headers,
-            signal,
-          },
-          { fetchFn: codexUsageFetch }
-        )
-      : await codexUsageFetch(CODEX_CONFIG.usageUrl, {
+    // The 20 s bound starts when the request is dispatched, after the quota throttle
+    // gate, so a queued read is not aborted before it is sent.
+    const fetchUsage: CodexUsageFetch = (input, init) =>
+      codexUsageFetch(input, { ...init, signal: AbortSignal.timeout(20_000) });
+    let response: Response | null;
+    if (connectionId) {
+      // Keep the gate immediately adjacent to the network boundary, after proxy
+      // resolution. The helper also invalidates a gated task when proxy
+      // fast-fail settles first, so a reported failure cannot dispatch later.
+      response = await fetchWithConnectionProxy(
+        connectionId,
+        CODEX_CONFIG.usageUrl,
+        {
           method: "GET",
           headers,
-          signal,
-        });
+        },
+        { fetchFn: fetchUsage, beforeFetch: throttleQuotaFetch }
+      );
+    } else {
+      await throttleQuotaFetch();
+      response = await fetchUsage(CODEX_CONFIG.usageUrl, {
+        method: "GET",
+        headers,
+      });
+    }
     if (!response) {
       throw new Error("Codex API error: proxied request failed");
     }
