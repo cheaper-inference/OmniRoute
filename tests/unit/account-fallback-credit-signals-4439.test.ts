@@ -47,7 +47,10 @@ test("400 bare insufficient_user_quota code rotates and parks", () => {
 test("400 'run out of funds' rotates and parks", () => {
   for (const text of ["You have run out of funds", "Account is out of funds."]) {
     assert.equal(isCreditsExhausted(text), true, text);
-    const { result, terminal } = classify(400, text);
+    // On a 400 the phrase alone may be caller text echoed back; the structured
+    // credit code is what makes it an account fact (see the 400 status gate).
+    const body = JSON.stringify({ error: { message: text, code: "insufficient_balance" } });
+    const { result, terminal } = classify(400, body);
     assert.equal(result.shouldFallback, true, text);
     assert.equal(result.creditsExhausted, true, text);
     assert.equal(terminal, "credits_exhausted", text);

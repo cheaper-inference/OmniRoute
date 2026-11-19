@@ -29,70 +29,61 @@ mabadiliko na mikataba yake, ukaguzi mahususi, na ufunikaji wa CI.
 6. **Rekodi ushahidi.** Katika kiolezo cha PR, orodhesha amri zilizoendeshwa, kila faili la jaribio lililoongezwa au kubadilishwa,
    uhamishaji au feature flags, na uthibitishaji wowote wa CI pekee ambao bado unasubiri.
 
-## Njia kuu kulingana na aina ya badiliko
+## Njia za dhahabu kwa aina ya mabadiliko
 
-Amri zilizo hapa chini ni ukaguzi wa chini kabisa unaolenga eneo husika, si ruhusa ya kuruka jaribio linaloshughulikia moja kwa moja
-tabia uliyobadilisha.
+Amri zilizo hapa chini ni ukaguzi unaozingatia kiwango cha chini zaidi, sio ruhusa ya kuruka jaribio ambalo linashughulikia moja kwa moja tabia uliyobadilisha.
 
 ### Mtoa huduma
 
 **Mikataba**
 
-- Ufafanuzi wa mtoa huduma katika `src/shared/constants/providers/` na ujumuishaji wake katika
-  `src/shared/constants/providers.ts`.
-- Modeli na uwezo katika `open-sse/config/providerRegistry.ts` au mafaili yake ya registry yaliyotolewa.
-- Uchaguzi wa executor/translator, usanidi wa OAuth au API key, asset za dashibodi, na rejeleo
-  la mtoa huduma lililozalishwa inapohitajika.
-- Vitambulisho vya umma lazima vitumie `resolvePublicCred()`; majibu ya hitilafu lazima yatumie visaidizi vya pamoja
-  vya kusafisha hitilafu. Tazama `docs/security/PUBLIC_CREDS.md` (git; halijumuishwi katika `/docs`) na
-  [Usafishaji wa Hitilafu](../security/ERROR_SANITIZATION.md).
+- Ufafanuzi wa mtoaji katika `src/shared/constants/providers/` na muundo wake katika `src/shared/constants/providers.ts`.
+- Mifano na uwezo katika `open-sse/config/providerRegistry.ts` au faili zake za usajili zilizotolewa.
+- uteuzi wa Executor/translator, OAuth au usanidi wa ufunguo wa API na vipengee vya dashibodi. Usiweke michoro `docs/reference/PROVIDER_REFERENCE.md` au README iliyofanywa upya: uonyeshaji upya wa toleo unaiandika upya (`check:pr-derived-paths` inashindwa kipengele cha PR kinachozibeba).
+- Hati tambulishi za umma lazima zitumie `resolvePublicCred()`; majibu ya makosa lazima yatumie visaidizi vya hitilafu vilivyoshirikiwa. Tazama `docs/security/PUBLIC_CREDS.md` (git; haijajumuishwa `/docs`) na [Usafishaji wa Makosa](../security/ERROR_SANITIZATION.md).
 
-**Mzunguko mahususi**
+**Kitanzi kilicholenga**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # katalogi inapobadilika; commit tofauti zilizozalishwa
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Pia jaribu kila familia ya maombi iliyoathiriwa: chat, Responses, images, embeddings, audio, au video.
-Kagua tofauti za katalogi iliyozalishwa na golden kama mabadiliko ya mkataba; usizikubali bila kuzichunguza.
+Pia jaribu kila ombi la familia lililoathiriwa: gumzo, Majibu, picha, upachikaji, sauti au video. Kagua katalogi iliyozalishwa na tofauti za dhahabu kadri mkataba unavyobadilika; usiwakubali kwa upofu.
 
-### Uelekezaji
+### Kuelekeza
 
 **Mikataba**
 
-- Thamani za umma za mkakati na metadata ya UI katika `src/shared/constants/routingStrategies.ts`.
-- Usambazaji na upangaji chini ya `open-sse/services/combo.ts` na `open-sse/services/combo/`.
-- Schema za combo, uhifadhi, hali ya ustahimilivu, uwezo wa modeli, na vidhibiti vya API/UI.
-- [Injini ya Auto-Combo](../routing/AUTO-COMBO.md) na nyaraka za ustahimilivu wakati tabia inapobadilika.
+- Thamani za mikakati ya umma na metadata UI katika `src/shared/constants/routingStrategies.ts`.
+- Kutuma na kuagiza chini ya `open-sse/services/combo.ts` na `open-sse/services/combo/`.
+- Miradi ya mchanganyiko, uimara, hali ya uthabiti, uwezo wa kielelezo na vidhibiti vya API/UI.
+- [Injini ya Mchanganyiko Kiotomatiki](../routing/AUTO-COMBO.md) na hati za uthabiti tabia inapobadilika.
 
-**Mzunguko mahususi**
+**Kitanzi kilicholenga**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # mabadiliko ya mkakati au usambazaji
-npm run check:known-symbols      # mabadiliko ya usajili wa mkakati
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Tumia majaribio thabiti ya upstream iliyoigwa ndani ya mazingira yako. Majaribio ya moja kwa moja ya msingi ya combo yanahitaji vitambulisho na
-hufanywa mwenyewe; si mbadala wa CI.
+Tumia majaribio ya kinadharia ya kudhihakiwa ndani ya nchi. Sigara za kuchana moja kwa moja zinahitaji kitambulisho na ni za mikono, si vibadala vya CI.
 
 ### UI / UX
 
 **Mikataba**
 
-- Mipaka ya route/page ya Next.js na component za pamoja chini ya `src/app/` na
-  `src/shared/components/`.
-- Miundo ya majibu ya API, hali za upakiaji/tupu/hitilafu, tabia ya kibodi na kisoma skrini,
-  mpangilio unaobadilika kulingana na skrini, mandhari, na upanuzi wa locale.
-- Mifuatano chanzo ya UI ya Kiingereza katika `src/i18n/messages/en.json`; usiweke moja kwa moja maandishi mapya yanayoonekana kwa mtumiaji ndani ya msimbo.
+- Next.js route/page na mipaka ya sehemu iliyoshirikiwa chini ya `src/app/` na `src/shared/components/`.
+- maumbo ya majibu API, hali za loading/empty/error, tabia ya kibodi na kisoma skrini, mpangilio unaoitikia, mandhari na upanuzi wa lugha.
+- Kiingereza UI chanzo masharti katika `src/i18n/messages/en.json`; usiweke msimbo mkali nakala mpya inayomkabili mtumiaji.
 
-**Mzunguko mahususi**
+**Kitanzi kilicholenga**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Endesha programu kwa mabadiliko ya mwingiliano au mwonekano na ukague viewport nyembamba na pana. CI huendesha
-uundaji wa uzalishaji na mikusanyiko mipana zaidi ya majaribio; tabia ya mwonekano bado inahitaji component mahususi, Playwright,
-au ukaguzi wa mwenyewe uliorekodiwa unaofaa kwa badiliko hilo.
+Endesha programu kwa maingiliano au mabadiliko ya kuona na uangalie lango nyembamba na pana. CI inaendesha ujenzi wa uzalishaji na vyumba vipana zaidi; tabia ya kuona bado inahitaji kipengele kilicholengwa, Playwright, au ukaguzi wa mwongozo ulioandikwa unaofaa kwa mabadiliko.
 
 ### i18n
 
 **Mikataba**
 
-- `src/i18n/messages/en.json` ndicho chanzo cha UI; `config/i18n.json` ndicho chanzo cha locale.
-- Katalogi za CLI ziko kando chini ya `bin/cli/locales/`.
-- Hifadhi placeholders na tags za ICU bila mabadiliko yoyote. Usitafsiri majina ya bidhaa/mtoa huduma/modeli,
-  majina ya protocol na header, amri, vitambulishi vya msimbo/JSON, URLs, environment variables, au
-  istilahi zinazolindwa kama vile `OmniRoute`, `OAuth`, `MCP`, na `A2A`. Orodha ya sasa ya chanzo ni
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` ndio chanzo cha UI ; `config/i18n.json` ndio chanzo cha eneo.
+- katalogi CLI huishi kando chini ya `bin/cli/locales/`.
+- Hifadhi vishika nafasi vya ICU na vitambulisho haswa. Usitafsiri majina ya product/provider/model, itifaki na vichwa vya habari, amri, vitambulishi vya code/JSON, URLs, vigezo vya mazingira, au maneno yanayolindwa kama vile `OmniRoute`, `OAuth`, `MCP`, na `A2A`. Orodha ya sasa ya chanzo ni `scripts/i18n/glossary/protected-terms.json`.
 
-**Mzunguko mahususi**
+Kipengele PR huhariri `src/i18n/messages/en.json` pekee (CLI: `bin/cli/locales/en.json`); lugha zingine hukamilika mara moja kwa kila toleo kwa uonyeshaji upya wa toleo au wimbi la tafsiri (`docs/guides/I18N.md` → "Kipengele cha PRs touch `en.json` pekee"). `npm run check:pr-derived-paths` inashindwa na kipengele PR ambacho huhariri katalogi nyingine ya eneo.
+
+**Kitanzi kilicholenga**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # mifuatano/katalogi za CLI zinapobadilika
 npm run lint
 ```
 
-Huu ni mwongozo wa mfumo uliopo, si mwaliko wa kupanua zana zake au modeli ya key.
-Dumisha viraka vya i18n vikiwa mahususi huku mfumo mbadala ukiendelea kubuniwa. Usiendeshe amri za tafsiri
-zinazotumia huduma za nje isipokuwa jukumu linahitaji waziwazi tafsiri zilizozalishwa na
-umekagua tofauti za mabadiliko yaliyotokana nazo.
+Bila `--mode=pr` milango hii huendeshwa katika hali ya kutolewa ndani ya nchi na kuripoti kila funguo mzunguko ulioongezwa au kuandika upya katika `en.json`; hiyo ni kazi ya kiburudisho cha kutolewa, sio PR yako.
+
+Huu ni mwongozo kwa mfumo uliopo, si mwaliko wa kupanua zana zake au muundo muhimu. Weka viraka vya i18n kwa upasuaji wakati mfumo wa kubadilisha unaundwa. Usikimbilie amri za utafsiri ambazo huita huduma za nje isipokuwa jukumu hilo linahitaji tafsiri zilizotolewa waziwazi na umekagua tofauti inayotokana.
 
 ### CLI
 
 **Mikataba**
 
-- Amri na bendera za umma katika `bin/cli/`, amri za API zinazozalishwa, misimbo ya kutoka, stdout/stderr na
-  miundo ya matokeo ya JSON, tabia ya usanidi/mazingira, na faili zilizofungashwa.
-- Maandishi ya CLI yanayoonekana kwa mtumiaji lazima yatumie safu ya i18n ya CLI na yaweke katalogi za `en`/`pt-BR` zikiwa zimeoanishwa.
-- Dumisha Node kama mazingira ya utekelezaji yanayotumika na mkataba wa binary iliyochapishwa.
+- Amri za umma na bendera katika `bin/cli/`, amri za API zilizozalishwa, misimbo ya kuondoka, maumbo ya matokeo ya stdout/stderr na JSON, tabia ya config/environment na faili zilizofungashwa.
+- CLI mifuatano inayomkabili mtumiaji lazima itumie safu ya CLI i18n (`t()` vitufe vilivyopo `bin/cli/locales/en.json`). Kipengele PR huhariri `en.json` pekee; `pt-BR` na maeneo mengine yanakamilika wakati wa kutolewa.
+- Hifadhi Njia kama muda unaotumika na mkataba wa binary uliochapishwa.
 
-**Mzunguko lengwa**
+**Kitanzi kilicholenga**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # mabadiliko ya CLI iliyozalishwa/iliyofungamanishwa
-npm run check:pack-policy     # mabadiliko ya sehemu ya kifurushi
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Tumia amri kamili katika saraka ya muda ya data wakati tabia inategemea uchanganuzi, faili, au hali ya
-kutoka. CI hufanya ukaguzi mpana zaidi wa vizalia vya kifurushi na mfumo-ikolojia.
+Tumia amri kamili katika saraka ya data ya muda wakati tabia inategemea uchanganuzi, faili, au hali ya kuondoka. CI hufanya ukaguzi wa vizalia vya kifurushi pana na mfumo ikolojia.
 
 ### Hifadhidata
 
 **Mikataba**
 
-- Moduli za kikoa chini ya `src/lib/db/`; leta moduli mahususi moja kwa moja (safu ya zamani ya kusafirisha upya ya `localDb.ts` iliondolewa).
-- Uhamishaji wa SQL wenye nambari na usiobadilisha matokeo ukirudiwa chini ya `src/lib/db/migrations/`, usalama wa miamala, tabia ya
-  usasishaji, faharasa, na kila sehemu inayoita iliyoathiriwa na schema.
-- Routes na handlers hazitekelezi kamwe SQL ghafi moja kwa moja.
+- Moduli za kikoa chini ya `src/lib/db/`; ingiza moduli maalum moja kwa moja (safu ya zamani ya kuuza nje `localDb.ts` iliondolewa).
+- Uhamaji wa SQL wenye nambari, wasio na uwezo chini ya `src/lib/db/migrations/`, usalama wa muamala, tabia ya kuboresha, faharasa, na kila mpigaji simu aliyeathiriwa na taratibu.
+- Njia na vidhibiti hazitoi SQL ghafi moja kwa moja.
 
-**Mzunguko lengwa**
+**Kitanzi kilicholenga**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Jaribu hifadhidata mpya na pia usasishaji kutoka schema iliyotangulia unapoongeza uhamishaji. Majaribio ya hifadhidata
-lazima yafunge handles na yaite `resetDbInstance()` wakati wa usafishaji. Tekeleza `npm run test:bun:db` tu wakati
-njia ya adapta ya Bun ya kadiri ya uwezo inapobadilika; Node inabaki kuwa mamlaka.
+Jaribu hifadhidata mpya na usasishe kutoka kwa schema ya hapo awali wakati wa kuongeza uhamishaji. Vipimo vya hifadhidata lazima vifunge vishikizo na kupiga `resetDbInstance()` wakati wa kusafisha. Endesha `npm run test:bun:db` tu wakati njia bora ya adapta Bun inabadilika; Node inabaki kuwa na mamlaka.
 
-### Kujenga / kupeleka
+### Jenga / weka
 
 **Mikataba**
 
-- Manifests/lockfile za mzizi na workspace, `scripts/build/`, uundaji wa Next.js standalone, yaliyomo kwenye kifurushi cha `dist/`,
-  metadata ya majukwaa ya Electron, workflows za CI, na sentineli za upelekaji.
-- Masafa ya Node yanayotumika na matumizi yaliyoruhusiwa ya Bun katika `CLAUDE.md` lazima yabaki bila kubadilika.
-- Vizalia vya ujenzi visifuatiliwe; sera za utegemezi, leseni, workflow na vifurushi zinatumika.
+- Mizizi na nafasi ya kazi manifests/lockfile, `scripts/build/`, Next.js mkusanyiko wa pekee, maudhui ya kifurushi cha `dist/`, metadata ya jukwaa la Electron, mtiririko wa kazi CI, na walinzi wa usambazaji.
+- Masafa ya Njia zinazotumika na matumizi ya Bun yaliyoorodheshwa katika `CLAUDE.md` lazima yabaki bila kubadilika.
+- Jenga mabaki ya kusalia bila kufuatiliwa; utegemezi, leseni, mtiririko wa kazi, na sera za kifurushi zinatumika.
 
-**Mzunguko lengwa**
+**Kitanzi kilicholenga**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # mabadiliko ya utegemezi au lockfile
-npm run check:pack-policy      # mabadiliko ya sehemu ya kifurushi kilichochapishwa
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Tumia `npm run build` ndani ya mazingira yako tu wakati mabadiliko yanaathiri ukusanyaji, uundaji wa standalone, assets,
-au ufungamanishaji wa mazingira ya utekelezaji. Tumia `npm run build:release` tu kwa uthibitishaji wa toleo/upelekaji. Ujenzi wa CI ndio
-ishara ya mwisho ya majukwaa mbalimbali; mabadiliko ya Electron mahususi kwa jukwaa yanahitaji ujenzi lengwa unaolingana
-au ushahidi wa smoke test.
+Tumia `npm run build` ndani ya nchi pekee wakati mabadiliko yanaathiri mkusanyiko, mkusanyiko wa pekee, vipengee, au kuunganisha wakati wa utekelezaji. Tumia `npm run build:release` kwa uthibitishaji wa release/deploy pekee. CI's build ni ishara ya mwisho ya jukwaa-msalaba; mabadiliko ya Electron mahususi ya jukwaa yanahitaji ulinganifu unaozingatia muundo au ushahidi wa moshi.
 
 ## Skripti za wasanidi programu kwa mashine inayoshirikiwa
 
