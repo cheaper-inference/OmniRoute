@@ -215,6 +215,8 @@ export function hoistLeadingTextSystemMessages(payload: Record<string, unknown>)
     if (m == null || typeof m !== "object" || !isSystemRole(m.role)) break;
     if (typeof m.content === "string") {
       if (m.content.length > 0) blocks.push({ type: "text", text: m.content });
+      // A string-content message leaves messages[] here too, so its directive moves up as well.
+      foldDirective(payload, m);
       continue;
     }
     if (Array.isArray(m.content) && m.content.length > 0) {

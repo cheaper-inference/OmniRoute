@@ -81,3 +81,31 @@ test("guard: plain string and text blocks without markers hoist as before", () =
   );
   assert.equal((payload.messages as unknown[]).length, 1);
 });
+
+test("a string-content system message also folds its output_config into the top level", () => {
+  const payload: Body = {
+    messages: [
+      { role: "system", content: "style", output_config: { effort: "high" } },
+      { role: "user", content: [{ type: "text", text: "hi" }] },
+    ],
+  };
+  hoistLeadingTextSystemMessages(payload);
+  assert.deepEqual(
+    (payload.system ?? []).map((b) => b.text),
+    ["style"]
+  );
+  assert.equal((payload.messages as unknown[]).length, 1);
+  assert.deepEqual(payload.output_config, { effort: "high" });
+});
+
+test("an explicit top-level output_config wins over a string-content message's one", () => {
+  const payload: Body = {
+    output_config: { effort: "low" },
+    messages: [
+      { role: "system", content: "style", output_config: { effort: "high" } },
+      { role: "user", content: [{ type: "text", text: "hi" }] },
+    ],
+  };
+  hoistLeadingTextSystemMessages(payload);
+  assert.deepEqual(payload.output_config, { effort: "low" });
+});
