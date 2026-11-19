@@ -176,7 +176,7 @@ export default function RadarOffersPage() {
         <Card>
           <div className="flex flex-col items-center gap-4 py-8 text-center">
             <Icon name="redeem" size={36} className="text-primary" />
-            <h2 className="text-xl font-semibold">{t("keyRequiredTitle")}</h2>
+            <h2 className="text-xl">{t("keyRequiredTitle")}</h2>
             <p className="max-w-xl text-text-muted">{t("keyRequiredDescription")}</p>
             <div className="flex flex-col sm:flex-row gap-3">
               {contributorClaimUrl && (
@@ -216,9 +216,7 @@ export default function RadarOffersPage() {
                     <p className="text-xs uppercase tracking-wide text-text-muted">
                       {offer.provider}
                     </p>
-                    <h2 className="text-lg font-semibold">
-                      {localizeRadarOfferText(offer.title, locale)}
-                    </h2>
+                    <h2 className="text-lg">{localizeRadarOfferText(offer.title, locale)}</h2>
                   </div>
                   <span
                     className={`rounded-full px-2 py-1 text-xs font-medium ${

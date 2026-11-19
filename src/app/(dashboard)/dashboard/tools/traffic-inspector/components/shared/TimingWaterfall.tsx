@@ -42,7 +42,15 @@ export function TimingWaterfall({ request }: TimingWaterfallProps) {
                   {seg.ms}ms ({pct.toFixed(1)}%)
                 </span>
               </div>
-              <div className="h-4 w-full rounded bg-bg-subtle">
+              <div
+                role="progressbar"
+                aria-label={seg.label}
+                aria-valuemin={0}
+                aria-valuemax={total}
+                aria-valuenow={seg.ms}
+                aria-valuetext={`${seg.ms}ms (${pct.toFixed(1)}%)`}
+                className="h-4 w-full rounded bg-bg-subtle"
+              >
                 <div
                   className={`h-full rounded ${seg.color}`}
                   style={{ width: `${Math.max(pct, 0.5)}%` }}

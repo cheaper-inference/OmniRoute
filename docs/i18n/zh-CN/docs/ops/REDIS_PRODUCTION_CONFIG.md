@@ -6,33 +6,31 @@
 
 ## 概述
 
-Redis 是 OmniRoute 中的**可选软依赖项**——当 Redis 不可用时，应用程序会优雅降级（回退到内存实现）。在生产环境中，调优 Redis 可以降低四种不同工作负载的延迟：
+Redis 是 OmniRoute 中的**可选软依赖**——当 Redis 不可用时，应用会优雅降级（使用内存回退机制）。在生产环境中，调优 Redis 可降低以下四种不同工作负载的延迟：
 
-| 工作负载     | 驱动                          | 客户端工厂                                       | 键模式                                         |
-| ------------ | ----------------------------- | ------------------------------------------------ | ---------------------------------------------- |
-| 速率限制     | `rateLimiter.ts`              | `getRedisClient()` — 延迟初始化的 `ioredis` 单例 | `<prefix>rl:*` 基于 Lua 原子操作的速率限制窗口 |
-| 身份验证缓存 | `apiKeys.ts`                  | 复用 `rateLimiter` 的客户端                      | 带 TTL 的 `<prefix>auth:api_key:<sha256>`      |
-| 配额存储     | `redisQuotaStore.ts`          | 独立的 `getRedisClient(url)` 单例                | `<prefix>quota:*`，可按实例配置                |
-| 预热熔断器   | `redisCircuitBreakerStore.ts` | `circuitBreakerFactory.ts` 中的独立客户端        | `<prefix>warmup:cb:<connectionId>`             |
+| 工作负载     | 驱动程序                      | 客户端工厂                                       | 键模式                                  |
+| ------------ | ----------------------------- | ------------------------------------------------ | --------------------------------------- |
+| 速率限制     | `rateLimiter.ts`              | `getRedisClient()` — 延迟初始化的 `ioredis` 单例 | `<prefix>rl:*` Lua 原子速率限制窗口     |
+| 身份验证缓存 | `apiKeys.ts`                  | 复用 `rateLimiter` 的客户端                      | `<prefix>auth:api_key:<sha256>`，带 TTL |
+| 配额存储     | `redisQuotaStore.ts`          | 独立的 `getRedisClient(url)` 单例                | `<prefix>quota:*`，可按实例配置         |
+| 预热熔断器   | `redisCircuitBreakerStore.ts` | `circuitBreakerFactory.ts` 中的独立客户端        | `<prefix>warmup:cb:<connectionId>`      |
 
-所有四种工作负载共享同一个命名空间前缀，因此 OmniRoute 可以与其他应用共存于同一个 Redis 实例中（例如 `127.0.0.1:6379`）。请参阅[键命名空间](#key-namespacing)。
-
----
+所有四种工作负载共享同一个命名空间前缀，因此 OmniRoute 可以与其他应用共存于同一个 Redis 实例（例如 `127.0.0.1:6379`）。请参阅[键命名空间](#key-namespacing)。
 
 ## 当前配置（代码默认值）
 
-| 设置                             | 值                                                  | 位置                                                                                  |
-| -------------------------------- | --------------------------------------------------- | ------------------------------------------------------------------------------------- |
-| `REDIS_URL` 环境变量             | `redis://redis:6379`（compose），可选               | `rateLimiter.ts:5`、`.env.example`                                                    |
-| `REDIS_KEY_PREFIX` 环境变量      | `omniroute:`（默认值）                              | `rateLimiter.ts`、`redisQuotaStore.ts`、`redisCircuitBreakerStore.ts`、`.env.example` |
-| `QUOTA_STORE_REDIS_URL` 环境变量 | 独立配置，可以与 `REDIS_URL` 不同                   | `quota/storeFactory.ts`                                                               |
-| `QUOTA_STORE_DRIVER`             | `"sqlite"`（默认值），可选 `"redis"`                | `quota/storeFactory.ts`                                                               |
-| ioredis `maxRetriesPerRequest`   | `3`                                                 | `rateLimiter.ts` 客户端创建                                                           |
-| `enableReadyCheck`               | 未设置（ioredis 默认值：`true`）                    | —                                                                                     |
-| `lazyConnect`                    | 未设置（ioredis 默认值：`false`）                   | —                                                                                     |
-| `retryStrategy`                  | 未设置（ioredis 默认值：以 200ms 为基数，指数退避） | —                                                                                     |
-| TLS / 密码 / DB 索引             | **未配置**                                          | —                                                                                     |
-| Sentinel / Cluster               | **未配置**——仅支持独立单节点                        | —                                                                                     |
+| 设置                             | 值                                                 | 位置                                                                                  |
+| -------------------------------- | -------------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `REDIS_URL` 环境变量             | `redis://redis:6379`（compose），可选              | `rateLimiter.ts:5`、`.env.example`                                                    |
+| `REDIS_KEY_PREFIX` 环境变量      | `omniroute:`（默认值）                             | `rateLimiter.ts`、`redisQuotaStore.ts`、`redisCircuitBreakerStore.ts`、`.env.example` |
+| `QUOTA_STORE_REDIS_URL` 环境变量 | 独立设置，可与 `REDIS_URL` 不同                    | `quota/storeFactory.ts`                                                               |
+| `QUOTA_STORE_DRIVER`             | `"sqlite"`（默认值），可选 `"redis"`               | `quota/storeFactory.ts`                                                               |
+| ioredis `maxRetriesPerRequest`   | `3`                                                | `rateLimiter.ts` 客户端创建                                                           |
+| `enableReadyCheck`               | 未设置（ioredis 默认值：`true`）                   | —                                                                                     |
+| `lazyConnect`                    | 未设置（ioredis 默认值：`false`）                  | —                                                                                     |
+| `retryStrategy`                  | 未设置（ioredis 默认值：200ms 基础延迟，指数退避） | —                                                                                     |
+| TLS / 密码 / DB 索引             | **未配置**                                         | —                                                                                     |
+| Sentinel / Cluster               | **未配置** — 仅支持独立单节点                      | —                                                                                     |
 
 ---
 
@@ -58,59 +56,55 @@ REDIS_KEY_PREFIX=omniroute:
 
 ### 1. 连接池 / 客户端选项（ioredis `Redis` 构造函数）
 
-当前代码创建了一个没有自定义选项的 `new Redis(url)`。对于生产环境中的多副本部署，请在代码中传入客户端工厂，或封装 `getRedisClient()`：
+当前代码创建了一个没有自定义选项的 `new Redis(url)`。对于生产环境中的多副本部署，请在代码中传入客户端工厂，或包装 `getRedisClient()`：
 
 ```typescript
 const redis = new Redis(REDIS_URL, {
   maxRetriesPerRequest: null, // 不限制重试次数；由 retryStrategy 决定
-  enableReadyCheck: true, // 在接受调用之前确认服务器已就绪
+  enableReadyCheck: true, // 在接受调用前确认服务器已就绪
   lazyConnect: true, // 构造时不连接；等待首次调用
   retryStrategy: (times) => {
-    if (times > 10) return null; // 重试 10 次后放弃 → 稍后重新连接
-    return Math.min(times * 200, 5000); // 200ms、400ms、…，最大 5s
+    if (times > 10) return null; // 10 次重试后放弃 → 稍后重新连接
+    return Math.min(times * 200, 5000); // 200 毫秒、400 毫秒，……，上限为 5 秒
   },
   enableAutoPipelining: true, // 将并发命令合并为一次 TCP 写入
-  keepAlive: 10000, // 每 10s 执行一次 TCP keep-alive
+  keepAlive: 10000, // 每 10 秒发送一次 TCP 保活
 });
 ```
 
-**关键权衡：**
+**主要权衡：**
 
-- `maxRetriesPerRequest: null` + `retryStrategy` — 生产环境中的首选设置，使 Redis
-  短暂重启时不会立即导致所有请求失败。`checkRateLimit()` 中的内存回退机制会处理失败路径。
-- `lazyConnect: true` — 避免服务器开始接受连接之前必须依赖 Redis 已经启动。
-- `enableAutoPipelining: true` — 减少并发速率限制检查所需的往返次数；
-  在单连接超过 50 RPS 时尤其有益。
+- `maxRetriesPerRequest: null` + `retryStrategy` — 生产环境首选，这样 Redis 短暂重启不会立即导致每个请求失败。`checkRateLimit()` 中的内存回退机制会吸收失败路径。
+- `lazyConnect: true` — 避免服务器在开始接受连接前必须依赖 Redis 已经启动。
+- `enableAutoPipelining: true` — 减少并发速率限制检查的往返次数；在单个连接上达到 >50 RPS 时效果显著。
 
 ### 2. Redis 服务器配置（`redis.conf`）
 
 ```
 # 内存
-maxmemory 80%                        # 为操作系统页缓存预留空间
-maxmemory-policy allkeys-lru         # 在内存压力下淘汰过期的身份验证缓存条目
+maxmemory 80%                        # 为操作系统页缓存留出空间
+maxmemory-policy allkeys-lru         # 内存压力下驱逐过期的身份验证缓存条目
 
-# 持久化（可选 — 即使不启用，OmniRoute 也具备崩溃安全性）
+# 持久化（可选 — OmniRoute 即使没有持久化也能安全处理崩溃）
 save 300 1                           # 如果至少有 1 个键发生变化，则每 5 分钟至少创建一次快照
 appendonly no                        # 不需要 AOF；数据可以重新生成
 appendfsync no                       # 无 fsync 开销（RDB 已足够）
 
 # 网络
-timeout 0                            # 不断开空闲连接
-tcp-keepalive 300                    # 5 分钟 keep-alive
-tcp-backlog 511                      # 用于突发负载的连接积压队列
+timeout 0                            # 不因空闲而断开连接
+tcp-keepalive 300                    # 5 分钟 TCP 保活
+tcp-backlog 511                      # 应对突发负载的连接积压队列
 
 # 性能
-hz 10                                # 默认值；延迟敏感场景可设为 100
-activedefrag yes                     # 当碎片率 >10% 时自动进行碎片整理
+hz 10                                # 默认值；对延迟敏感时设为 100
+activedefrag yes                     # 碎片率 >10% 时自动进行碎片整理
 ```
 
-**`maxmemory-policy allkeys-lru` 的权衡：** 身份验证缓存条目可能会在内存压力下被淘汰。
-这是安全的 — `setCachedApiKey` 始终会在缓存未命中时重新填充，而 SQLite 回退存储是权威数据源。
-速率限制器的 Lua 脚本会创建较小且设计上生命周期很短的键。
+**`maxmemory-policy allkeys-lru` 的权衡：** 身份验证缓存条目可能会在内存压力下被驱逐。这是安全的 — `setCachedApiKey` 在缓存未命中时始终会重新填充，SQLite 回退存储是权威数据源。速率限制器 Lua 脚本创建的键本身就很小且生命周期很短。
 
 ### 3. Docker Compose 设置
 
-生产环境 compose（`docker-compose.prod.yml`）使用 `redis:8.6.2-alpine`。添加：
+生产环境的 compose（`docker-compose.prod.yml`）使用 `redis:8.6.2-alpine`。添加：
 
 ```yaml
 redis:
@@ -137,21 +131,17 @@ redis:
 
 ### 4. 多实例 / 扩展注意事项
 
-**所有副本共用单个 Redis** — 速率限制器的 Lua 脚本依赖单一权威键空间。
-如果不同副本背后使用多个 Redis 实例，将会失去原子性并使预算翻倍。
-所有应用程序副本都应使用同一个 Redis（或具有故障转移能力的 Redis Sentinel 集群）。
+**所有副本使用同一个 Redis** — 速率限制器 Lua 脚本依赖单一的权威键空间。副本后配置多个 Redis 实例会破坏原子性并使配额加倍。所有应用副本应使用单个 Redis（或支持故障转移的 Redis Sentinel 集群）。
 
-**连接数：** 每个应用程序副本会打开到 Redis 的 **2 个 TCP 连接**
-（速率限制器客户端 + 配额存储客户端）。10 个副本 → 20 个连接，
-远低于默认 Redis 实例的 10k 连接上限。
+**连接数：** 每个应用副本会打开到 Redis 的 **2 个 TCP 连接**（速率限制器客户端 + 配额存储客户端）。10 个副本对应 20 个连接，远低于默认 Redis 实例的 10k 连接上限。
 
 ### 5. 监控
 
-通过健康检查端点公开：
+通过健康检查端点暴露：
 
 ```typescript
-// src/app/api/monitoring/health/route.ts 已经调用了 rateLimiter 函数
-// 添加 Redis 专用检查：
+// src/app/api/monitoring/health/route.ts 已经调用 rateLimiter 函数
+// 添加 Redis 专属检查：
 //   1. 通过 ioredis .ping() 检查 PING 延迟
 //   2. 通过 INFO memory 检查内存使用情况
 //   3. 通过 INFO clients 检查连接数
@@ -160,9 +150,17 @@ redis:
 
 需要关注的关键指标：
 
-- **每秒淘汰的键数** — 如果持续不为零，请增大 `maxmemory`
-- **被阻塞的客户端** — 非零值表明 Lua 脚本运行缓慢或存在较高争用
-- **被拒绝的连接** — 已达到连接数限制；在 20 个连接的情况下很少发生
+- **每秒驱逐的键数** — 如果持续非零，请增加 `maxmemory`
+- **被阻塞的客户端** — 非零通常表示 Lua 脚本执行缓慢或竞争激烈
+- **被拒绝的连接** — 已达到连接数限制；对于 20 个连接来说很少见
+
+### 6. Redis 兼容服务器
+
+此处使用的任何服务器都必须能够运行 Lua 脚本：速率限制器会执行一次 `EVAL`。在不支持 Lua 的服务器上，`checkRateLimit()` 会记录 `[RATE_LIMITER] Redis eval failed, falling back to in-memory rate limiting`，并按进程计数，因此每个副本会独立执行限制。选择启用的共享会话亲和性存储（`OMNIROUTE_SESSION_AFFINITY_STORE=redis`）也会通过 `EVAL` 读取和更新固定关系；不支持 Lua 时，它会记录 `[SESSION_AFFINITY] Redis error; falling back to SQLite.`，并且每个副本维护自己的固定关系。其他工作负载使用普通命令（`SET ... EX`、`GET`、`DEL`、`MGET`、`EXPIRE`、`INCRBYFLOAT`、哈希和集合），语义缓存的 Redis 后端不会发送任何 `FT.*` 命令。
+
+已使用 OmniRoute 3.8.52 进行测试：KiviDB 1.2.0 及其 Lua 镜像（`kividb/kividb:v1.2.0-lua`）。速率限制器（包括共享计数器的第二个进程）、身份验证缓存、配额存储、预热断路器、语义缓存存储，以及通过聊天处理程序发送的 `/v1/chat/completions` 请求，通过了 Redis 8.10.3 上 19 项检查中的 18 项。唯一不同的是：`INCRBYFLOAT` 将 `0.1 + 0.2` 存储为 `0.30000000000000004`，而 Redis 存储为 `0.3`（[kividbio/kividb#387](https://github.com/kividbio/kividb/issues/387)）。配额存储会使用 `parseFloat` 解析二者，但这两个数字在末位有所不同，因此恰好落在配额边界上的比较结果可能会不同。会话亲和性存储未包含在该次运行中。
+（[设置](https://github.com/kividbio/kividb/blob/master/docs/integrations/omniroute.md)，
+[结果](https://github.com/kividbio/kividb/tree/master/benchmarks/omniroute-compat)）
 
 ---
 
@@ -187,10 +185,10 @@ flowchart LR
 
 | 文件                               | 用途                                             |
 | ---------------------------------- | ------------------------------------------------ |
-| `src/shared/utils/rateLimiter.ts`  | 主 Redis 客户端、Lua 限流脚本、内存回退机制      |
-| `src/lib/db/apiKeys.ts`            | 身份验证缓存——Redis→SQLite 回退                  |
+| `src/shared/utils/rateLimiter.ts`  | 主要 Redis 客户端、Lua 限流脚本、内存回退机制    |
+| `src/lib/db/apiKeys.ts`            | 身份验证缓存 — Redis→SQLite 回退                 |
 | `src/lib/quota/redisQuotaStore.ts` | 用于可选配额存储的独立 Redis 客户端              |
-| `src/lib/quota/storeFactory.ts`    | 在 `sqlite` 和 `redis` 配额驱动之间切换          |
+| `src/lib/quota/storeFactory.ts`    | 在 `sqlite` 和 `redis` 配额驱动程序之间切换      |
 | `docker-compose.prod.yml`          | 生产环境 Redis 容器（镜像 `redis:8.6.2-alpine`） |
 | `.env.example`                     | Redis 环境变量文档                               |
 | `src/app/api/local/redis/`         | 用于开发容器编排的 API 路由                      |
