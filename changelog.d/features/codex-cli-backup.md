@@ -5,3 +5,4 @@
 - **feat(cli-tools):** set `OMNIROUTE_CODEX_RELOAD_HINT=true` and the Codex settings Apply response adds `reloadNeeded` and a `reloadHint` after it writes a model catalog (off by default; advice only).
 - **feat(cli-tools):** The Hermes Agent settings API takes an optional `profile` (or `applyToAll`) to read or write one Hermes profile instead of only the default home; without them nothing changes.
 - **feat(db):** A backup restore now blocks new database opens while it swaps the files, so every request after `restored: true` reads the restored database.
+- **fix(cli-tools):** applying Codex settings now writes `env_key = "OMNIROUTE_API_KEY"` and keeps the key in `~/.codex/.env` (mode `0600`) instead of `OPENAI_API_KEY` plus an `auth.json` entry, which Codex ignores for a custom provider; `auth.json` is no longer touched, Reset removes the `.env` line, and users re-apply once.

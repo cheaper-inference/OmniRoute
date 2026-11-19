@@ -6,17 +6,18 @@ import path from "node:path";
 import { SignJWT } from "jose";
 
 /**
- * Applying Codex settings writes config.toml and then auth.json. If the second write fails,
- * the first must not stay behind: new routing with old auth is a broken pair. The failure is
- * forced with a read-only auth.json (it reads fine, so the clobber guard does not fire; only
- * the write fails). A crash between the two writes is not covered.
+ * Applying Codex settings writes config.toml and then the key into ~/.codex/.env. If the second
+ * write fails, the first must not stay behind: new routing with old auth is a broken pair. The
+ * failure is forced with a dangling .env symlink (it reads as absent, but the write cannot
+ * create its target). A crash between the two writes is not covered.
  */
 
 const TEST_ROOT = fs.mkdtempSync(path.join(os.tmpdir(), "omr-codex-rollback-"));
 const TEST_HOME = path.join(TEST_ROOT, "fake-home");
 const CODEX_DIR = path.join(TEST_HOME, ".codex");
 const CONFIG_PATH = path.join(CODEX_DIR, "config.toml");
-const AUTH_PATH = path.join(CODEX_DIR, "auth.json");
+const ENV_PATH = path.join(CODEX_DIR, ".env");
+const DANGLING_TARGET = path.join(TEST_ROOT, "no-such-dir", "target.env");
 fs.mkdirSync(CODEX_DIR, { recursive: true });
 
 const originalHome = os.homedir;
@@ -41,11 +42,6 @@ test.after(() => {
   else process.env.JWT_SECRET = originalJwtSecret;
   if (originalWriteFlag === undefined) delete process.env.CLI_ALLOW_CONFIG_WRITES;
   else process.env.CLI_ALLOW_CONFIG_WRITES = originalWriteFlag;
-  try {
-    fs.chmodSync(AUTH_PATH, 0o644);
-  } catch {
-    /* already gone */
-  }
   fs.rmSync(TEST_ROOT, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
 });
 
@@ -69,53 +65,45 @@ const post = async () => {
 };
 
 const OLD_CONFIG = 'model = "old-model"\n\n[mcp_servers.keep]\ncommand = "keep-me"\n';
-const OLD_AUTH = JSON.stringify({ OPENAI_API_KEY: "old-key-value" }, null, 2);
+const OLD_ENV = "OMNIROUTE_API_KEY=old-key-value\n";
+const breakEnvWrite = () => {
+  fs.rmSync(ENV_PATH, { force: true });
+  fs.symlinkSync(DANGLING_TARGET, ENV_PATH);
+};
+const canBreakEnvWrite = (t: { skip: (m: string) => void }) => {
+  if (process.platform !== "win32") return true;
+  t.skip("symlinks need privileges on Windows, so the write cannot be made to fail this way");
+  return false;
+};
 
-test("a failed auth.json write puts config.toml back and keeps old auth", async (t) => {
-  if (typeof process.getuid === "function" && process.getuid() === 0) {
-    t.skip("root ignores file modes, so the write cannot be made to fail");
-    return;
-  }
+test("a failed .env write puts config.toml back", async (t) => {
+  if (!canBreakEnvWrite(t)) return;
   fs.writeFileSync(CONFIG_PATH, OLD_CONFIG);
-  fs.writeFileSync(AUTH_PATH, OLD_AUTH);
-  fs.chmodSync(AUTH_PATH, 0o444);
+  breakEnvWrite();
 
   const response = await post();
 
   assert.equal(response.status, 500);
   assert.equal(fs.readFileSync(CONFIG_PATH, "utf8"), OLD_CONFIG, "config.toml must be restored");
-  assert.equal(fs.readFileSync(AUTH_PATH, "utf8"), OLD_AUTH, "auth.json must be untouched");
+  assert.equal(fs.existsSync(DANGLING_TARGET), false, "the failed write must create nothing");
 });
 
 test("both files are written when nothing fails", async () => {
-  try {
-    fs.chmodSync(AUTH_PATH, 0o644);
-  } catch {
-    /* may not exist */
-  }
+  fs.rmSync(ENV_PATH, { force: true });
   fs.writeFileSync(CONFIG_PATH, OLD_CONFIG);
-  fs.writeFileSync(AUTH_PATH, OLD_AUTH);
+  fs.writeFileSync(ENV_PATH, OLD_ENV);
 
   const response = await post();
 
   assert.equal(response.status, 200);
   assert.match(fs.readFileSync(CONFIG_PATH, "utf8"), /gpt-5\.6-sol/);
-  assert.equal(JSON.parse(fs.readFileSync(AUTH_PATH, "utf8")).OPENAI_API_KEY, "new-key-value");
+  assert.equal(fs.readFileSync(ENV_PATH, "utf8"), "OMNIROUTE_API_KEY=new-key-value\n");
 });
 
 test("a failed write on a first-time setup removes the config.toml it created", async (t) => {
-  if (typeof process.getuid === "function" && process.getuid() === 0) {
-    t.skip("root ignores file modes, so the write cannot be made to fail");
-    return;
-  }
-  try {
-    fs.chmodSync(AUTH_PATH, 0o644);
-  } catch {
-    /* may not exist */
-  }
+  if (!canBreakEnvWrite(t)) return;
   fs.rmSync(CONFIG_PATH, { force: true });
-  fs.writeFileSync(AUTH_PATH, OLD_AUTH);
-  fs.chmodSync(AUTH_PATH, 0o444);
+  breakEnvWrite();
 
   const response = await post();
 

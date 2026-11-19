@@ -25,15 +25,12 @@ import {
   writeCodexModelCatalog,
   type CodexCatalogWriteResult,
 } from "@/lib/cliTools/codexModelCatalogWriter";
-import {
-  configClobberRefusalResponse,
-  parseJsonObject,
-  readExistingConfig,
-} from "../_lib/readExistingConfig";
+import { configClobberRefusalResponse, readExistingConfig } from "../_lib/readExistingConfig";
 
 const getCodexConfigPath = () => getCliConfigPaths("codex").config;
 const getCodexAuthPath = () => getCliConfigPaths("codex").auth;
 const getCodexDir = () => path.dirname(getCodexConfigPath());
+const getCodexEnvPath = () => path.join(getCodexDir(), ".env");
 // The catalog path is stored with forward slashes (Codex accepts them on Windows).
 const toTomlPath = (filePath: string) => filePath.replace(/\\/g, "/");
 
@@ -79,6 +76,45 @@ const hasOmniRouteConfig = (config: string | null) => {
     config.includes('model_provider = "omniroute"') ||
     config.includes("[model_providers.omniroute]")
   );
+};
+
+// A custom provider reads its key only from `env_key`, never from auth.json (that file serves the
+// built-in OpenAI provider). Codex loads ~/.codex/.env at startup, so Apply keeps the key there.
+const CODEX_API_KEY_ENV = "OMNIROUTE_API_KEY";
+// .env values are parsed (quotes, `$VAR` expansion, newlines): only plain key characters are written.
+const SAFE_ENV_VALUE = /^[\w.~+/=:@-]+$/;
+const isEnvKeyLine = (line: string) => line.startsWith(`${CODEX_API_KEY_ENV}=`);
+
+// Set (or, with null, drop) the OMNIROUTE_API_KEY line in place; every other line stays as it was.
+const setEnvKey = (existing: string, value: string | null): string => {
+  const lines: string[] = [];
+  let placed = value === null;
+  for (const line of existing.split(/\r?\n/)) {
+    if (!isEnvKeyLine(line)) lines.push(line);
+    else if (!placed) {
+      lines.push(`${CODEX_API_KEY_ENV}=${value}`);
+      placed = true;
+    }
+  }
+  while (lines.length && lines[lines.length - 1] === "") lines.pop();
+  if (!placed) lines.push(`${CODEX_API_KEY_ENV}=${value}`);
+  return lines.length ? `${lines.join("\n")}\n` : "";
+};
+
+const readEnvFile = (envPath: string) =>
+  fs.readFile(envPath, "utf-8").catch((error: NodeJS.ErrnoException) => {
+    if (error.code === "ENOENT") return "";
+    throw error;
+  });
+
+// Drop the OMNIROUTE_API_KEY line from ~/.codex/.env; other lines stay, an emptied file goes away.
+// A failed write is not swallowed: a key that stays behind must not be reported as removed.
+const removeEnvKey = async (envPath: string) => {
+  const envText = await readEnvFile(envPath);
+  if (!envText.split(/\r?\n/).some(isEnvKeyLine)) return;
+  const next = setEnvKey(envText, null);
+  if (next === "") await fs.unlink(envPath);
+  else await fs.writeFile(envPath, next);
 };
 
 // GET - Check codex CLI and read current settings
@@ -174,29 +210,34 @@ export async function POST(request: Request) {
     // Canonical key resolution (#13563): by keyId -> submitted apiKey -> sk_omniroute.
     // Matches cline/forge/openclaw/grok-build/jcode-settings.
     const apiKey = await resolveApiKey(keyId, validation.data.apiKey);
+    if (!SAFE_ENV_VALUE.test(apiKey)) {
+      return NextResponse.json(
+        { error: "API key has characters that cannot be stored in ~/.codex/.env" },
+        { status: 400 }
+      );
+    }
 
     const codexDir = getCodexDir();
     const configPath = getCodexConfigPath();
-    const authPath = getCodexAuthPath();
+    const envPath = getCodexEnvPath();
 
     // Ensure directory exists
     await fs.mkdir(codexDir, { recursive: true });
 
     // Backup current configs before modifying
-    await createMultiBackup("codex", [configPath, authPath]);
+    await createMultiBackup("codex", [configPath, envPath]);
 
-    // Read BOTH files before writing either one. A file that exists but cannot
+    // Read the existing config before writing anything. A file that exists but cannot
     // be read or parsed is not an empty config: the merge below writes the result
-    // back, which would replace every provider/MCP server in config.toml and the
-    // ChatGPT OAuth tokens in auth.json. Only ENOENT means "start fresh".
+    // back, which would replace every provider/MCP server in config.toml.
+    // Only ENOENT means "start fresh".
     const doc: TomlDoc = (await readExistingConfig(configPath, parseConfig)) ?? {};
-    const authData: Record<string, any> =
-      (await readExistingConfig(authPath, parseJsonObject)) ?? {};
+    const existingEnv = await readEnvFile(envPath);
 
     // Carry the user's intent forward off the deprecated Codex feature flag (#1327).
     migrateFeatureFlags(doc);
 
-    // Update only OmniRoute related fields (api_key goes to auth.json, not config.toml)
+    // Update only OmniRoute related fields (the api key goes to ~/.codex/.env, not config.toml)
     doc.model = model;
 
     if (reasoningEffort && reasoningEffort !== "none") {
@@ -209,7 +250,7 @@ export async function POST(request: Request) {
     const effectiveWireApi = wireApi ?? "responses";
     const normalizedBaseUrl = normalizeCodexBaseUrl(baseUrl, effectiveWireApi);
 
-    // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY
+    // Always create a custom provider to reliably pass wire_api and use OMNIROUTE_API_KEY (.env)
     doc.model_provider = "omniroute";
     doc.model_providers = {
       ...asRecord(doc.model_providers),
@@ -217,7 +258,7 @@ export async function POST(request: Request) {
         name: "OmniRoute",
         base_url: normalizedBaseUrl,
         wire_api: effectiveWireApi,
-        env_key: "OPENAI_API_KEY",
+        env_key: CODEX_API_KEY_ENV,
       },
     };
     delete doc.openai_base_url;
@@ -246,12 +287,11 @@ export async function POST(request: Request) {
       if (catalog.catalogPath) doc.model_catalog_json = toTomlPath(catalog.catalogPath);
     }
 
-    // Write merged config, then auth.json with OPENAI_API_KEY (Codex reads this first).
+    // Write merged config, then the key into ~/.codex/.env (0600); auth.json is not touched.
     // If the second write fails the first is put back: new routing must not meet old auth.
-    authData.OPENAI_API_KEY = apiKey;
     await writeFilesWithRollback([
       { path: configPath, content: toToml(doc) },
-      { path: authPath, content: JSON.stringify(authData, null, 2) },
+      { path: envPath, content: setEnvKey(existingEnv, apiKey), mode: 0o600 },
     ]);
 
     // Persist last-configured timestamp
@@ -293,7 +333,7 @@ export async function DELETE(request: Request) {
     const configPath = getCodexConfigPath();
 
     // Backup current configs before resetting
-    await createMultiBackup("codex", [configPath, getCodexAuthPath()]);
+    await createMultiBackup("codex", [configPath, getCodexAuthPath(), getCodexEnvPath()]);
 
     // Read and parse existing config; a file that does not parse is refused, not rewritten.
     const doc = await readExistingConfig(configPath, parseConfig);
@@ -336,7 +376,7 @@ export async function DELETE(request: Request) {
     const configContent = toToml(doc);
     await fs.writeFile(configPath, configContent);
 
-    // Remove OPENAI_API_KEY from auth.json
+    // Remove the key an older Apply wrote into auth.json
     const authPath = getCodexAuthPath();
     try {
       const existingAuth = await fs.readFile(authPath, "utf-8");
@@ -352,6 +392,8 @@ export async function DELETE(request: Request) {
     } catch {
       /* No auth file */
     }
+
+    await removeEnvKey(getCodexEnvPath());
 
     await removeCodexModelCatalog(codexDir);
 
