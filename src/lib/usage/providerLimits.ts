@@ -77,7 +77,9 @@ import {
   type CredentialRefreshOptions,
   type ProviderConnectionLike,
 } from "./providerLimits/credentialRefresh";
+import { getProviderLimitsConcurrency } from "./providerLimits/concurrency";
 export { shouldAttemptRotatingRefresh } from "./providerLimits/credentialRefresh";
+export { getProviderLimitsConcurrency };
 type JsonRecord = Record<string, unknown>;
 type SyncSource = "manual" | "scheduled";
 
@@ -937,28 +939,6 @@ export function getProviderLimitsSyncSpacingMs(): number {
   if (rawEnv === undefined || rawEnv === "") return DEFAULT_PROVIDER_LIMITS_SYNC_SPACING_MS;
   const raw = Number(rawEnv);
   return Number.isFinite(raw) && raw >= 0 ? raw : DEFAULT_PROVIDER_LIMITS_SYNC_SPACING_MS;
-}
-
-/** Default chunk concurrency for non-OAuth connections in `syncAllProviderLimits()`. */
-const DEFAULT_PROVIDER_LIMITS_CONCURRENCY = 5;
-
-/**
- * Concurrency (chunk size) for non-OAuth (local/API-key) connections in
- * `syncAllProviderLimits()`. OAuth connections always run sequentially (chunk
- * size 1) regardless of this setting.
- *
- * Reads `PROVIDER_LIMITS_CONCURRENCY` (positive integer, default `5`).
- * Unset, non-integer, or non-positive values fall back to `5`.
- */
-export function getProviderLimitsConcurrency(): number {
-  const rawEnv = process.env.PROVIDER_LIMITS_CONCURRENCY;
-  if (rawEnv === undefined) return DEFAULT_PROVIDER_LIMITS_CONCURRENCY;
-  const trimmed = rawEnv.trim();
-  if (!/^\d+$/.test(trimmed)) return DEFAULT_PROVIDER_LIMITS_CONCURRENCY;
-  const parsed = Number.parseInt(trimmed, 10);
-  return Number.isSafeInteger(parsed) && parsed >= 1
-    ? parsed
-    : DEFAULT_PROVIDER_LIMITS_CONCURRENCY;
 }
 
 export async function getLastProviderLimitsAutoSyncTime(): Promise<string | null> {
