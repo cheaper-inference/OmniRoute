@@ -174,19 +174,16 @@ export default function HomeRecentRequests({ enabled = true }: { enabled?: boole
             persistentScrollbars={false}
             containerClassName="overflow-visible rounded-none border-0"
             scrollbarLabel={t("recentRequests")}
+            scrollLabel={t("recentRequests")}
           >
             <TableHeader className="sticky top-0 z-10 bg-surface">
               <TableRow className="border-b border-border text-text-muted">
                 <TableHead className="w-2 py-1.5" />
-                <TableHead className="py-1.5 text-left font-semibold">
-                  {t("recentRequestsModel")}
-                </TableHead>
-                <TableHead className="py-1.5 text-right font-semibold whitespace-nowrap">
+                <TableHead className="py-1.5 text-left">{t("recentRequestsModel")}</TableHead>
+                <TableHead className="py-1.5 text-right whitespace-nowrap">
                   {t("recentRequestsTokens")}
                 </TableHead>
-                <TableHead className="py-1.5 text-right font-semibold">
-                  {t("recentRequestsWhen")}
-                </TableHead>
+                <TableHead className="py-1.5 text-right">{t("recentRequestsWhen")}</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

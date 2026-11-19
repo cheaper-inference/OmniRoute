@@ -115,17 +115,10 @@ export function assembleStreamingPipeline(
       activeTimeoutMs: args.activeTimeoutMs,
     }
   );
-  if (isPiiTransformEnabled({ piiDisabledGuardrails: args.piiDisabledGuardrails ?? [] })) {
-    if (typeof args.createPiiTransform === "function") {
-      piiStream = piiStream.pipeThrough((args.createPiiTransform as () => TransformStream)());
-    } else if (deps.isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")) {
-      piiStream = piiStream.pipeThrough(deps.createPiiSseTransform());
-    }
-  }
-
-  // Credential redaction is opt-in, gated per request by the same flag and
-  // opt-out name as the non-streaming post-call guardrail. Off or opted out
-  // enqueues no transform, so bytes pass through untouched.
+  // Credential redaction runs before the PII transform, as the guardrails do: the broad phone
+  // rule would otherwise rewrite the digit middle of a token. Opt-in, gated per request by
+  // the same flag and opt-out name as the non-streaming post-call guardrail. Off or opted
+  // out enqueues no transform, so bytes pass through untouched.
   if (
     isCredentialTransformEnabled({
       credentialRedactionEnabled: args.credentialRedactionEnabled ?? false,
@@ -133,6 +126,14 @@ export function assembleStreamingPipeline(
     })
   ) {
     piiStream = piiStream.pipeThrough(deps.createCredentialSseTransform());
+  }
+
+  if (isPiiTransformEnabled({ piiDisabledGuardrails: args.piiDisabledGuardrails ?? [] })) {
+    if (typeof args.createPiiTransform === "function") {
+      piiStream = piiStream.pipeThrough((args.createPiiTransform as () => TransformStream)());
+    } else if (deps.isFeatureFlagEnabled("PII_RESPONSE_SANITIZATION")) {
+      piiStream = piiStream.pipeThrough(deps.createPiiSseTransform());
+    }
   }
 
   if (progressEnabled) {

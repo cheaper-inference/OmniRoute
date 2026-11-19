@@ -32,6 +32,9 @@ import {
   type JsonObject,
   type RecordedRequest,
 } from "./_providerJourneyHarness.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 // ---------------------------------------------------------------------------
 // Isolated storage + env — must be set BEFORE importing any DB-backed module.

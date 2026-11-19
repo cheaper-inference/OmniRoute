@@ -147,8 +147,11 @@ test.each([
     // so its controls are queried there instead of in the mount container.
     const el = document.body;
     async function next() {
-      const button = el.querySelector("button[data-wizard-next]") as HTMLButtonElement;
-      expect(button.disabled).toBe(false);
+      const button = Array.from(el.querySelectorAll("button")).find(
+        (b) => b.textContent === "wizardNext"
+      )!;
+      expect(button).toBeDefined();
+      expect(button.getAttribute("aria-disabled")).toBeNull();
       await act(async () => button.click());
     }
     await select(el, 0, "openai");

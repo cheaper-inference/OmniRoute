@@ -84,7 +84,7 @@ describe("cache settings with real Chinese catalogs", () => {
     expect(screen.getByText("维度：1,536")).toBeTruthy();
     expect(screen.getByText("词元上限：8,191")).toBeTruthy();
     expect(screen.getByText("输入：文本和图像")).toBeTruthy();
-    fireEvent.click(screen.getByRole("tab", { name: "Redis 向量存储" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Redis 向量存储" }));
     expect(screen.getByLabelText("Redis 键前缀")).toHaveProperty("value", "omniroute:semcache:");
     expect(screen.getByLabelText("Redis URL")).toHaveProperty(
       "placeholder",
@@ -121,7 +121,7 @@ describe("cache settings with real Chinese catalogs", () => {
 
   it("localizes saving feedback without translating provider/model/backend wire values", async () => {
     await loaded();
-    fireEvent.click(screen.getByRole("tab", { name: "Redis 向量存储" }));
+    fireEvent.click(screen.getByRole("radio", { name: "Redis 向量存储" }));
     let resolve!: (value: Response) => void;
     fetchMock.mockImplementationOnce(
       () =>
