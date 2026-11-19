@@ -1,0 +1,1 @@
+- **fix(providers):** register Gemini 4 Carbon shared tiers and bare alias, filter out uncallable disabled discovery stubs, and resolve aliases during per-account inventory routing so Carbon requests route strictly to eligible accounts

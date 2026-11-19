@@ -60,6 +60,7 @@ export const CI_INPUT_MODALITIES: Readonly<Record<string, readonly string[]>> = 
   "gemini-3.7-flash-batch": ["text", "image", "video"],
   "gemini-3.8-flash": ["text", "image", "audio", "video", "pdf"],
   "gemini-4-argon": ["text", "image", "audio", "video", "pdf"],
+  "gemini-4-carbon": ["text", "image", "audio", "video", "pdf"],
   "gemini-omni-flash-preview": ["text", "image", "audio", "video", "pdf"],
   "gemma-3-12b-it": ["text", "image"],
   "gemma-3-27b-it": ["text", "image"],

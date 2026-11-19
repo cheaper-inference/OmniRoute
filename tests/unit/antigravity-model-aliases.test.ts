@@ -68,6 +68,8 @@ test("resolveAntigravityModelId maps the documented Antigravity aliases to upstr
   assert.equal(resolveAntigravityModelId("gemini-3.8-flash-medium"), "gemini-3.8-flash-medium");
   assert.equal(resolveAntigravityModelId("gemini-3.8-flash-low"), "gemini-3.8-flash-low");
   assert.equal(resolveAntigravityModelId("gpt-oss-120b"), "gpt-oss-120b-medium");
+  assert.equal(resolveAntigravityModelId("gemini-4-carbon"), "gemini-4-carbon-medium");
+  assert.equal(resolveAntigravityModelId("gemini-4-carbon-high"), "gemini-4-carbon-high");
   assert.equal(resolveAntigravityModelId("gemini-claude-sonnet-4-5"), "claude-sonnet-4-6");
   assert.equal(resolveAntigravityModelId("gemini-claude-sonnet-4-5-thinking"), "claude-sonnet-4-6");
   assert.equal(
@@ -118,6 +120,8 @@ test("isUserCallableAntigravityModelId only allows public chat-capable model IDs
 
 test("isDiscoverableAntigravityModelId accepts new live chat models without a static catalog entry", () => {
   assert.equal(isDiscoverableAntigravityModelId("gemini-3.8-flash-high"), true);
+  assert.equal(isDiscoverableAntigravityModelId("gemini-4-carbon-disabled"), false);
+  assert.equal(isDiscoverableAntigravityModelId("gemini-4-carbon-medium"), true);
   assert.equal(isDiscoverableAntigravityModelId("claude-sonnet-5"), true);
   assert.equal(isDiscoverableAntigravityModelId("gemini-new-live-tier"), true);
   // GA and currently served legacy ids must not be confused with a retired preview.
