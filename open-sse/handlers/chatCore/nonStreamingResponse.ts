@@ -983,11 +983,8 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
         geminiPromptCache: cacheUsageLogMeta?.geminiPromptCache,
         cacheSource: "upstream",
       });
-      persistFailureUsage(
-        HTTP_STATUS.BAD_GATEWAY,
-        "malformed_translated_response",
-        toFailureUsageAggregate(usage)
-      );
+      // No tokens here: recordNonStreamingUsageStats above already wrote them on the success row.
+      persistFailureUsage(HTTP_STATUS.BAD_GATEWAY, "malformed_translated_response");
       trackPendingRequest(
         model,
         provider,

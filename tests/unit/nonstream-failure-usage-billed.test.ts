@@ -1,6 +1,7 @@
 // F-C2-17: failed non-stream paths wrote a failure usage row with no token counts even though the
-// upstream had already billed them. Two paths: a buffered Responses body with status "failed"
-// (the leg extracts its usage), and a malformed translated 200 (usage extracted from the body).
+// upstream had already billed them. A buffered Responses body with status "failed" (the leg
+// extracts its usage) records them on the failure row; a malformed translated 200 already
+// recorded them on the success-path usage row, so its failure row must not repeat them.
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
@@ -137,8 +138,9 @@ test("a failed Responses body records the tokens the upstream already billed", a
   assert.equal(failures[0].aggregate?.completion_tokens, 30);
 });
 
-test("a malformed 200 records the tokens extracted from its body", async () => {
+test("a malformed 200 records the tokens extracted from its body once, on the success row", async () => {
   const failures: FailureCall[] = [];
+  const successRows: Array<Record<string, number>> = [];
   const upstream = {
     id: "chatcmpl-1",
     object: "chat.completion",
@@ -154,10 +156,15 @@ test("a malformed 200 records the tokens extracted from its body", async () => {
       targetFormat: "openai",
       clientResponseFormat: "openai",
       detectMalformedNonStream: () => "empty_choices",
+      recordNonStreamingUsageStats: (usage: Record<string, number>) => successRows.push(usage),
     })
   );
+  // The success-path usage row is written before the malformed check, so it already carries the
+  // billed tokens; a second copy on the failure row would count one upstream response twice.
+  assert.equal(successRows.length, 1);
+  assert.equal(successRows[0].prompt_tokens, 80);
+  assert.equal(successRows[0].completion_tokens, 20);
   const malformed = failures.find((call) => call.code === "malformed_translated_response");
   assert.ok(malformed, `no malformed failure row: ${JSON.stringify(failures)}`);
-  assert.equal(malformed.aggregate?.prompt_tokens, 80);
-  assert.equal(malformed.aggregate?.completion_tokens, 20);
+  assert.equal(malformed.aggregate, undefined);
 });
