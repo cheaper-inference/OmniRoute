@@ -85,6 +85,19 @@ function appendWhereCondition(whereClause: string, condition: string): string {
   return whereClause ? `${whereClause} AND (${condition})` : `WHERE (${condition})`;
 }
 
+// Mirrors the `${provider}:${normalizedModel}` key built by getCachedInputAnalytics. A row
+// with a missing model (usage writers store `entry.model || null`) maps to "unknown" there,
+// so it must here too instead of dereferencing null (#20453).
+function providerModelCacheKey(
+  provider: unknown,
+  model: unknown,
+  normalizeModel: (model: string) => string
+): string {
+  const providerKey = typeof provider === "string" && provider ? provider : "unknown";
+  const modelKey = typeof model === "string" && model ? normalizeModel(model) : "unknown";
+  return `${providerKey.toLowerCase()}:${modelKey.toLowerCase()}`;
+}
+
 function formatUtcDate(date: Date): string {
   return date.toISOString().slice(0, 10);
 }
@@ -469,8 +482,8 @@ async function computeAnalyticsResponse(
 
     const byModel = Array.from(modelMap.values())
       .map((row) => ({
-        ...(cachedInput.byProviderModel?.get(
-          `${String(row.provider || "unknown").toLowerCase()}:${normalizeModelName(row.model).toLowerCase()}`
+        ...(cachedInput.byProviderModel.get(
+          providerModelCacheKey(row.provider, row.model, normalizeModelName)
         ) ?? cachedInput.byModel.find((item) => normalizeModelName(item.model) === row.model)),
         model: row.model,
         provider: row.provider,

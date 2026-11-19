@@ -116,6 +116,9 @@ export function ModelTable({ byModel, summary, displayMode = "compact" }: ModelT
                     style={{ backgroundColor: getSeriesColor(i) }}
                   />
                   <span className="font-medium">{m.model}</span>
+                  {m.provider ? (
+                    <span className="text-xs text-text-muted">{m.provider}</span>
+                  ) : null}
                 </div>
               </TableCell>
               <TableCell className="px-4 py-2.5 text-right font-mono text-text-muted">

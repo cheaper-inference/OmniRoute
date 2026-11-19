@@ -32,18 +32,15 @@ export function getCachedInputAnalytics(
     .prepare(`SELECT model, ${columns} FROM ${unifiedSource} AS _u GROUP BY model`)
     .all(unifiedParams) as MeasurementRow[];
   const filteredHistoryMissing = keyFilteredHistoryMissing(options);
+  const modelOf = (row: MeasurementRow) => normalizeModel((row.model ?? "unknown").toLowerCase());
   const models = new Map<string, CachedInputMeasurement & { model: string }>();
   for (const row of rows) {
-    const model = normalizeModel((row.model ?? "unknown").toLowerCase());
+    const model = modelOf(row);
     const existing = models.get(model) ?? {
       model,
-      cachedInputTokens: null,
-      cachedInputTokensComplete: !filteredHistoryMissing,
+      ...emptyMeasurement(filteredHistoryMissing),
     };
-    if (row.cachedInputTokens !== null)
-      existing.cachedInputTokens = (existing.cachedInputTokens ?? 0) + row.cachedInputTokens;
-    existing.cachedInputTokensComplete &&= Boolean(row.cachedInputTokensComplete);
-    models.set(model, existing);
+    models.set(model, addMeasurement(existing, row));
   }
   const providerRows = db
     .prepare(
@@ -52,17 +49,9 @@ export function getCachedInputAnalytics(
     .all(unifiedParams) as MeasurementRow[];
   const byProviderModel = new Map<string, CachedInputMeasurement>();
   for (const row of providerRows) {
-    const provider = (row.provider ?? "unknown").toLowerCase();
-    const model = normalizeModel((row.model ?? "unknown").toLowerCase());
-    const key = `${provider}:${model}`;
-    const existing = byProviderModel.get(key) ?? {
-      cachedInputTokens: null,
-      cachedInputTokensComplete: !filteredHistoryMissing,
-    };
-    if (row.cachedInputTokens !== null)
-      existing.cachedInputTokens = (existing.cachedInputTokens ?? 0) + row.cachedInputTokens;
-    existing.cachedInputTokensComplete &&= Boolean(row.cachedInputTokensComplete);
-    byProviderModel.set(key, existing);
+    const key = `${(row.provider ?? "unknown").toLowerCase()}:${modelOf(row)}`;
+    const existing = byProviderModel.get(key) ?? emptyMeasurement(filteredHistoryMissing);
+    byProviderModel.set(key, addMeasurement(existing, row));
   }
   return {
     summary: {
@@ -73,6 +62,17 @@ export function getCachedInputAnalytics(
     byModel: Array.from(models.values()),
     byProviderModel,
   };
+}
+
+function emptyMeasurement(filteredHistoryMissing: boolean): CachedInputMeasurement {
+  return { cachedInputTokens: null, cachedInputTokensComplete: !filteredHistoryMissing };
+}
+
+function addMeasurement<T extends CachedInputMeasurement>(existing: T, row: MeasurementRow): T {
+  if (row.cachedInputTokens !== null)
+    existing.cachedInputTokens = (existing.cachedInputTokens ?? 0) + row.cachedInputTokens;
+  existing.cachedInputTokensComplete &&= Boolean(row.cachedInputTokensComplete);
+  return existing;
 }
 
 // Key-filtered history omits archives because they contain no key identity.

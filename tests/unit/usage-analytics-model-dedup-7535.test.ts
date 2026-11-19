@@ -211,3 +211,61 @@ test("#20453: byModel retains separate per-provider rows for a shared model name
   );
   assert.equal(totalRequests, 109);
 });
+
+test("#20453: a usage row with a NULL model keeps the analytics response alive", async () => {
+  const db = core.getDbInstance();
+  const insertStmt = db.prepare(
+    `INSERT INTO usage_history (provider, model, connection_id, api_key_id, api_key_name, tokens_input, tokens_output, tokens_cache_read, success, latency_ms, timestamp)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`
+  );
+  insertStmt.run(
+    "groq",
+    null,
+    "conn-groq",
+    "key-groq",
+    "Groq Key",
+    120,
+    30,
+    7,
+    1,
+    90,
+    new Date().toISOString()
+  );
+  insertStmt.run(
+    "groq",
+    "groq/gpt-oss-120b",
+    "conn-groq",
+    "key-groq",
+    "Groq Key",
+    150,
+    40,
+    50,
+    1,
+    90,
+    new Date(Date.now() - 1000).toISOString()
+  );
+
+  const response = await analyticsRoute.GET(makeRequest("http://localhost/api/usage/analytics"));
+  const body = await response.json();
+
+  assert.equal(
+    response.status,
+    200,
+    `analytics must not fail on a NULL model: ${JSON.stringify(body)}`
+  );
+  const nullModelRow = body.byModel.find(
+    (row: { model: string | null; provider: string }) =>
+      row.model === null && row.provider === "groq"
+  );
+  assert.ok(
+    nullModelRow,
+    `the NULL-model row must still be emitted: ${JSON.stringify(body.byModel)}`
+  );
+  assert.equal(nullModelRow.requests, 1);
+  assert.equal(nullModelRow.cachedInputTokens, 7);
+  const sharedRow = body.byModel.find(
+    (row: { model: string | null; provider: string }) =>
+      row.model === "gpt-oss-120b" && row.provider === "groq"
+  );
+  assert.equal(sharedRow?.cachedInputTokens, 50);
+});
