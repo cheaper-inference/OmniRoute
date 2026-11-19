@@ -49,6 +49,8 @@ function parseCsvRow(line: string): string[] {
  * Handles CRLF and LF; does not collapse multiple empty lines.
  */
 function splitLines(s: string, limit = Infinity): string[] {
+  if (limit === Infinity && !s.includes('"')) return s.split(/\r\n?|\n/).filter(Boolean);
+
   const out: string[] = [];
   let start = 0;
   let inQuotes = false;
@@ -103,28 +105,30 @@ function safePropSet(obj: object, key: string | number, value: unknown): void {
   });
 }
 
-/**
- * Set a nested value in `target` using a dot/bracket path such as:
- *   "custom_id"
- *   "body.max_tokens"
- *   "body.messages[0].content"
- *
- * Silently ignores malformed path segments or forbidden key names.
- */
-function setByPath(target: Record<string, unknown>, path: string, value: unknown): void {
+/** Tokenize a dot/bracket mapping path once before processing the CSV rows. */
+function parsePath(path: string): Array<string | number> {
   const tokens: Array<string | number> = [];
 
   for (const part of path.split(".")) {
     const match = part.match(/^([^[]+)((?:\[\d+\])*)$/);
     if (!match) continue;
     const key = match[1];
-    if (FORBIDDEN_KEYS.has(key)) return; // reject forbidden key
+    if (FORBIDDEN_KEYS.has(key)) return [];
     tokens.push(key);
     for (const idx of match[2].match(/\d+/g) ?? []) {
       tokens.push(Number(idx));
     }
   }
 
+  return tokens;
+}
+
+/** Set a nested value at a validated mapping path. */
+function setByPath(
+  target: Record<string, unknown>,
+  tokens: ReadonlyArray<string | number>,
+  value: unknown
+): void {
   if (tokens.length === 0) return;
 
   let cur: Record<string, unknown> = target;
@@ -140,9 +144,7 @@ function setByPath(target: Record<string, unknown>, path: string, value: unknown
     cur = nextCur as Record<string, unknown>;
   }
 
-  const lastKey = tokens.at(-1)!;
-  if (typeof lastKey === "string" && FORBIDDEN_KEYS.has(lastKey)) return;
-  safePropSet(cur, lastKey, value);
+  safePropSet(cur, tokens[tokens.length - 1], value);
 }
 
 // ── Public API ────────────────────────────────────────────────────────────────
@@ -177,6 +179,23 @@ export function csvToJsonl(rawInput: CsvToJsonlInput): {
   }
 
   const headers = parseCsvRow(lines[0]);
+  const mapping = new Map(Object.entries(input.mapping));
+  const mappedPaths = new Set(mapping.values());
+  const columns = headers.flatMap((header, index) => {
+    const path = mapping.get(header);
+    if (!path) return [];
+    const messageContent = path.startsWith("body.messages[") && path.endsWith(".content");
+    const rolePath = messageContent ? path.replace(".content", ".role") : "";
+    return [
+      {
+        index,
+        path,
+        messageContent,
+        tokens: parsePath(path),
+        defaultRoleTokens: rolePath && !mappedPaths.has(rolePath) ? parsePath(rolePath) : [],
+      },
+    ];
+  });
   const out: string[] = [];
   const errors: Array<{ row: number; reason: string }> = [];
   let skipped = 0;
@@ -201,12 +220,8 @@ export function csvToJsonl(rawInput: CsvToJsonlInput): {
     let hasContent = false;
     let hasCustomId = false;
 
-    for (let c = 0; c < headers.length; c++) {
-      const header = headers[c];
-      const path = input.mapping[header];
-      if (!path) continue;
-
-      const raw = cells[c] ?? "";
+    for (const { index, path, messageContent, tokens, defaultRoleTokens } of columns) {
+      const raw = cells[index] ?? "";
 
       if (path === "custom_id") {
         if (raw.trim().length === 0) {
@@ -215,21 +230,18 @@ export function csvToJsonl(rawInput: CsvToJsonlInput): {
         }
         request.custom_id = raw;
         hasCustomId = true;
-      } else if (path.startsWith("body.messages[") && path.endsWith(".content")) {
-        setByPath(request, path, raw);
+      } else if (messageContent) {
+        setByPath(request, tokens, raw);
         // Auto-fill role: "user" unless the mapping already maps a role for this slot
-        const rolePath = path.replace(".content", ".role");
-        if (!Object.values(input.mapping).includes(rolePath)) {
-          setByPath(request, rolePath, "user");
-        }
+        setByPath(request, defaultRoleTokens, "user");
         hasContent = true;
       } else if (path === "body.input" || path === "body.prompt") {
-        setByPath(request, path, raw);
+        setByPath(request, tokens, raw);
         hasContent = true;
       } else if (path.startsWith("body.")) {
         // Coerce numeric fields (max_tokens, temperature, top_p, etc.)
         const num = Number(raw);
-        setByPath(request, path, Number.isFinite(num) && raw.trim() !== "" ? num : raw);
+        setByPath(request, tokens, Number.isFinite(num) && raw.trim() !== "" ? num : raw);
       }
     }
 
