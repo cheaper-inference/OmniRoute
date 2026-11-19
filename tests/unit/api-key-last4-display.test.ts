@@ -33,9 +33,14 @@ describe("API Key Last 4 Masking and Display (#19982)", () => {
       assert.equal(formatApiKeyLast4(bareKey), "••••••••1234");
     });
 
-    it("formats short keys without throwing errors", () => {
-      assert.equal(formatApiKeyLast4("sk-1"), "sk-••••••••sk-1");
-      assert.equal(formatApiKeyLast4("abcd"), "••••••••abcd");
+    it("keeps short keys wholly masked instead of showing them as their last 4", () => {
+      assert.equal(formatApiKeyLast4("sk-1"), "••••••••");
+      assert.equal(formatApiKeyLast4("abcd"), "••••••••");
+      assert.equal(formatApiKeyLast4("abcdefg"), "••••••••");
+      // The dashboard receives the stored mask: a head shorter than 8 is the whole key.
+      assert.equal(formatApiKeyLast4(maskStoredApiKey("abcd")), "••••••••");
+      assert.equal(formatApiKeyLast4(maskStoredApiKey("abcdefg")), "••••••••");
+      assert.equal(formatApiKeyLast4("abcdefgh"), "••••••••efgh");
     });
 
     it("formats already stored masked keys consistently", () => {

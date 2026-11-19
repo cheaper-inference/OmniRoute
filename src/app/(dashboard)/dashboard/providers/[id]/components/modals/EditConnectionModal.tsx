@@ -19,7 +19,7 @@ import {
   normalizeAntigravityClientProfileSetting,
 } from "@/shared/constants/antigravityClientProfile";
 import { parseExtraApiKeys } from "@/shared/utils/parseApiKeys";
-import { formatApiKeyLast4 } from "@/shared/utils/apiKeyMask";
+import { formatApiKeyLast4, looksLikeMaskedApiKey } from "@/shared/utils/apiKeyMask";
 import { freeOnlyImportHintKey, providerSupportsFreeOnlyImport } from "@/shared/utils/freeModels";
 import { useNotificationStore } from "@/store/notificationStore";
 import { type CodexServiceTier } from "@/lib/providers/requestDefaults";
@@ -276,6 +276,11 @@ export default function EditConnectionModal({
       ? providerText(t, "awsPollySecretAccessKeyLabel", "AWS Secret Access Key")
       : (vertexCopy?.label ?? (apiKeyOptional ? t("apiKeyOptionalLabel") : t("apiKeyLabel")));
   const maskedSavedKey = connection?.apiKey ? formatApiKeyLast4(connection.apiKey) : null;
+  // A key revealed by the API (ALLOW_API_KEY_REVEAL) is shown as returned; only the
+  // default stored mask is reformatted to its last 4 characters.
+  const primaryKeyDisplay = looksLikeMaskedApiKey(connection?.apiKey)
+    ? maskedSavedKey
+    : connection?.apiKey;
   const apiCredentialPlaceholder = isWebSessionCredential
     ? webSessionCredential.placeholder
     : (vertexCopy?.placeholder ?? (maskedSavedKey || t("enterNewApiKey")));
@@ -1513,7 +1518,7 @@ export default function EditConnectionModal({
                     <span
                       className={`flex-1 min-w-0 break-all font-mono text-xs bg-bg-subtle px-3 py-2 rounded border border-border ${statusColor}`}
                     >
-                      {statusIcon} {t("primaryKey")}: {maskedSavedKey ?? connection.apiKey}
+                      {statusIcon} {t("primaryKey")}: {primaryKeyDisplay}
                     </span>
                     {health && (
                       <span
