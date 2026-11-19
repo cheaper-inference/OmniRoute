@@ -11,20 +11,24 @@ OmniRoute 可以在平台事件发生时触发 HTTP webhook。可使用它们与
 
 调度器使用 HMAC-SHA256 对每次投递进行签名，在发生暂时性故障时重试，跟踪每个 webhook 的投递健康状况，并自动禁用持续失败的端点。
 
-## 支持的事件
+## 支持的活动
 
-`WebhookEvent` 类型（`src/lib/webhooks/eventDescriptions.ts`，由 `src/lib/webhookDispatcher.ts` 使用）目前准确地定义了四种事件：
+`WebhookEvent`类型（`src/lib/webhooks/eventDescriptions.ts`，由`src/lib/webhookDispatcher.ts`使用）当前对八个事件进行建模：
 
-| 事件                | 触发条件                            |
-| ------------------- | ----------------------------------- |
-| `request.completed` | 代理请求成功完成                    |
-| `request.failed`    | 代理请求在所有重试/回退均失败后失败 |
-| `quota.exceeded`    | API 密钥达到预算/配额阈值           |
-| `test.ping`         | 测试端点使用的合成事件              |
+| 事件                      | 触发时                                                       |
+| ------------------------- | ------------------------------------------------------------ |
+| `request.completed`       | 代理请求成功完成                                             |
+| `request.failed`          | 代理请求在所有retries/fallback之后失败                       |
+| `quota.exceeded`          | API密钥跨越budget/quota阈值                                  |
+| `proxy.set_aside`         | 代理池成员在多次拒绝后被搁置（仅限过渡）                     |
+| `proxy.pool.exhausted`    | 代理池范围的每个成员都被预留                                 |
+| `provider.reset_redeemed` | 自动应用银行重置已兑换重置积分或Claude每周会话重置           |
+| `provider.exhausted`      | 提供者的每个帐户正在冷却（每个提供者每 10 分钟最多冷却一次） |
+| `test.ping`               | 测试端点使用的综合事件                                       |
 
-订阅可使用字面值 `"*"` 接收所有事件。`events` 中未知的事件名称会在调度时被忽略。
+订阅接受文字`"*"`来接收每个事件。 `events`中的未知事件名称在调度时将被忽略。
 
-> 注意：调度器 API 已接入，但部分非 `test.ping` 事件的生产调用点仍在陆续实现中。请使用 `grep dispatchEvent` 检查当前版本中哪些路径会调用调度器。
+> 注意：调度程序API已连接，但某些非`test.ping`事件的生产调用站点仍在登陆。检查`grep dispatchEvent`以查看当前在您的版本中哪些路径调用调度程序。
 
 ## 架构
 
@@ -118,21 +122,20 @@ Telegram / 自定义有效载荷转换器）由 `070_webhooks_kind_metadata.sql`
 
 所有端点都需要管理身份验证（`requireManagementAuth`）。
 
-| 端点                            | 方法   | 说明                            |
-| ------------------------------- | ------ | ------------------------------- |
-| `/api/webhooks`                 | GET    | 列出 webhook（密钥已掩码）      |
-| `/api/webhooks`                 | POST   | 创建 webhook                    |
-| `/api/webhooks/[id]`            | GET    | webhook 详情（完整密钥）        |
-| `/api/webhooks/[id]`            | PUT    | 更新字段                        |
-| `/api/webhooks/[id]`            | DELETE | 删除                            |
-| `/api/webhooks/[id]/test`       | POST   | 触发一次 `test.ping`（不重试）  |
-| `/api/webhooks/[id]/deliveries` | GET    | 获取某个 webhook 最近的投递尝试 |
-| `/api/webhooks/validate-url`    | POST   | 预先验证 URL（SSRF 防护）       |
+| 端点                            | 方法   | 描述                         |
+| ------------------------------- | ------ | ---------------------------- |
+| `/api/webhooks`                 | GET    | 列出 webhooks（隐藏秘密）    |
+| `/api/webhooks`                 | POST   | 创建网络钩子                 |
+| `/api/webhooks/[id]`            | GET    | Webhook 详细信息（完全秘密） |
+| `/api/webhooks/[id]`            | PUT    | 更新字段                     |
+| `/api/webhooks/[id]`            | DELETE | 消除                         |
+| `/api/webhooks/[id]/test`       | POST   | 触发`test.ping` （不重试）   |
+| `/api/webhooks/[id]/deliveries` | GET    | 最近尝试传送一个 Webhook     |
+| `/api/webhooks/validate-url`    | POST   | 飞行前URL验证（SSRF防护）    |
 
-`GET /api/webhooks` 会将密钥掩码为 `<前 10 个字符>...`，以避免
-在列表页面上泄露。仅在确实需要密钥时使用 `[id]` GET。
+`GET /api/webhooks`向`<first 10 chars>...`隐藏秘密，以避免在列表页面上泄露。当您确实需要秘密时，请使用`[id]` GET 。
 
-### 创建 webhook
+### 创建网络钩子
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks \
@@ -146,18 +149,16 @@ curl -X POST http://localhost:20128/api/webhooks \
   }'
 ```
 
-如果省略 `secret`，服务器会生成一个 `whsec_<hex>` 密钥，并在
-响应中返回该密钥。
+如果省略`secret` ，服务器会生成`whsec_<hex>`密钥并在响应中返回它。
 
-### 测试 webhook
+### 测试网络钩子
 
 ```bash
 curl -X POST http://localhost:20128/api/webhooks/<id>/test \
   -H "Cookie: auth_token=..."
 ```
 
-返回 `{ delivered, status, error }`。不会进行重试——这有助于
-快速验证接收方是否接受有效载荷和签名。
+返回`{ delivered, status, error }`。不尝试重试—对于快速验证接收器是否接受有效负载和签名很有用。
 
 ## 仪表板
 

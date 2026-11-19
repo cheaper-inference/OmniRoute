@@ -30,72 +30,61 @@ typ změny s jeho kontrakty, cílenými kontrolami a pokrytím v CI.
 6. **Zaznamenejte důkazy.** V šabloně PR uveďte spuštěné příkazy, všechny přidané nebo změněné
    testovací soubory, migrace či příznaky funkcí a veškeré validace čekající pouze na CI.
 
-## Osvědčené postupy podle typu změny
+## Zlaté stezky podle typu změny
 
-Níže uvedené příkazy představují minimální cílené kontroly, nikoli svolení vynechat test, který přímo
-pokrývá změněné chování.
+Níže uvedené příkazy představují minimální cílené kontroly, nikoli oprávnění k přeskočení testu, který přímo pokrývá chování, které jste změnili.
 
 ### Poskytovatel
 
-**Kontrakty**
+**Smlouvy**
 
-- Definice poskytovatele v `src/shared/constants/providers/` a její zahrnutí v
-  `src/shared/constants/providers.ts`.
-- Modely a schopnosti v `open-sse/config/providerRegistry.ts` nebo v extrahovaných souborech registru.
-- Výběr executoru/translatoru, konfigurace OAuth nebo API klíče, prostředky dashboardu a případně
-  generovaná referenční dokumentace poskytovatele.
-- Veřejné přihlašovací údaje musí používat `resolvePublicCred()`; chybové odpovědi musí používat
-  sdílené pomocné funkce pro sanitizaci chyb. Viz `docs/security/PUBLIC_CREDS.md` (git; nekompiluje
-  se do `/docs`) a [Sanitizace chyb](../security/ERROR_SANITIZATION.md).
+- Definice poskytovatele v `src/shared/constants/providers/` a jeho složení v `src/shared/constants/providers.ts`.
+- Modely a možnosti v `open-sse/config/providerRegistry.ts` nebo jeho extrahovaných souborech registru.
+- výběr Executor/translator, konfigurace klíče OAuth nebo API a aktiva řídicího panelu. Nekomprimujte regenerované diagramy `docs/reference/PROVIDER_REFERENCE.md` nebo README : aktualizace vydání je přepíše (`check:pr-derived-paths` selže s funkcí PR, která je přenáší).
+- Veřejné přihlašovací údaje musí používat `resolvePublicCred()`; chybové odpovědi musí používat sdílené sanitované pomocníky při chybách. Viz `docs/security/PUBLIC_CREDS.md` (git; není zkompilován do `/docs`) a [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Cílený cyklus**
+**Zaměřená smyčka**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # při změně katalogu; commitněte vygenerovaný rozdíl
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Otestujte také každou dotčenou skupinu požadavků: chat, Responses, obrázky, embeddings, zvuk nebo
-video. Rozdíly v generovaném katalogu a referenčních výstupech kontrolujte jako změny kontraktů;
-nepřijímejte je bez kontroly.
+Otestujte také všechny dotčené skupiny požadavků: chat, odpovědi, obrázky, vložení, zvuk nebo video. Zkontrolujte vygenerovaný katalog a zlaté diffy při změnách smlouvy; nepřijímejte je slepě.
 
 ### Směrování
 
-**Kontrakty**
+**Smlouvy**
 
-- Veřejné hodnoty strategií a metadata UI v `src/shared/constants/routingStrategies.ts`.
-- Odesílání a pořadí v `open-sse/services/combo.ts` a `open-sse/services/combo/`.
-- Schémata combo, perzistence, stav odolnosti, schopnosti modelů a ovládací prvky API/UI.
-- [Modul Auto-Combo](../routing/AUTO-COMBO.md) a dokumentace odolnosti při změně chování.
+- Hodnoty veřejné strategie a metadata UI v `src/shared/constants/routingStrategies.ts`.
+- Odeslání a objednání pod `open-sse/services/combo.ts` a `open-sse/services/combo/`.
+- Kombinovaná schémata, persistence, stav odolnosti, schopnosti modelu a ovládací prvky API/UI.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) a dokumentace odolnosti při změně chování.
 
-**Cílený cyklus**
+**Zaměřená smyčka**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # změny strategie nebo odesílání
-npm run check:known-symbols      # změny registrace strategie
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Lokálně používejte deterministické testy s mockovanými upstreamy. Živé základní testy combo vyžadují
-přihlašovací údaje, provádějí se ručně a nenahrazují CI.
+Lokálně použijte deterministické simulované upstream testy. Živé kombinované kouře vyžadují přihlašovací údaje a jsou manuální, nikoli náhražky CI.
 
 ### UI / UX
 
-**Kontrakty**
+**Smlouvy**
 
-- Hranice tras/stránek Next.js a sdílených komponent v `src/app/` a
-  `src/shared/components/`.
-- Tvary odpovědí API, stavy načítání/prázdného obsahu/chyb, chování klávesnice a čteček obrazovky,
-  responzivní rozvržení, motivy a rozšíření lokalizace.
-- Zdrojové anglické řetězce UI v `src/i18n/messages/en.json`; nový text určený uživatelům nevkládejte
-  přímo do kódu.
+- Next.js route/page a sdílené hranice komponent pod `src/app/` a `src/shared/components/`.
+- tvary odezvy API, stavy loading/empty/error, chování klávesnice a čtečky obrazovky, responzivní rozvržení, tématika a rozšíření národního prostředí.
+- anglické zdrojové řetězce UI v `src/i18n/messages/en.json`; nekódujte novou kopii pro uživatele.
 
-**Cílený cyklus**
+**Zaměřená smyčka**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -104,69 +93,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Při změnách interakce nebo vzhledu spusťte aplikaci a zkontrolujte úzké i široké viewporty. CI spustí
-produkční sestavení a širší sady testů; vizuální chování stále vyžaduje cílený test komponenty,
-Playwright nebo zdokumentovanou ruční kontrolu odpovídající dané změně.
+Spusťte aplikaci pro interakci nebo vizuální změny a zkontrolujte úzké i široké výřezy. CI provozuje produkční sestavení a širší sady; vizuální chování stále vyžaduje cílenou komponentu, Playwright nebo zdokumentovanou ruční kontrolu vhodnou pro změnu.
 
 ### i18n
 
-**Kontrakty**
+**Smlouvy**
 
-- `src/i18n/messages/en.json` je zdrojem UI; `config/i18n.json` je zdrojem lokalizací.
-- Katalogy CLI jsou uloženy samostatně v `bin/cli/locales/`.
-- Zachovejte zástupné symboly a značky ICU přesně. Nepřekládejte názvy produktů/poskytovatelů/modelů,
-  názvy protokolů a hlaviček, příkazy, identifikátory kódu/JSON, adresy URL, proměnné prostředí ani
-  chráněné výrazy, jako jsou `OmniRoute`, `OAuth`, `MCP` a `A2A`. Aktuální zdrojový seznam je
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` je zdroj UI ; `config/i18n.json` je zdroj národního prostředí.
+- katalogy CLI žijí samostatně pod `bin/cli/locales/`.
+- Přesně zachovejte zástupné symboly a značky ICU. Nepřekládejte názvy product/provider/model, názvy protokolů a hlaviček, příkazy, identifikátory code/JSON, URLs, proměnné prostředí nebo chráněné výrazy jako `OmniRoute`, `OAuth`, `MCP` a `A2A`. Aktuální zdrojový seznam je `scripts/i18n/glossary/protected-terms.json`.
 
-**Cílený cyklus**
+Prvek PR upravuje pouze `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); ostatní lokality jsou dokončeny jednou za vydání aktualizací vydání nebo vlnou překladu (`docs/guides/I18N.md` → "Pouze funkce PRs dotyk `en.json` "). `npm run check:pr-derived-paths` selže funkci PR, která upravuje jiný katalog lokalit.
+
+**Zaměřená smyčka**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # při změně řetězců/katalogů CLI
 npm run lint
 ```
 
-Toto jsou pokyny pro stávající systém, nikoli výzva k rozšiřování jeho nástrojů nebo modelu klíčů.
-Dokud se navrhuje náhradní systém, udržujte změny i18n přesně zacílené. Nespouštějte překladové
-příkazy, které volají externí služby, pokud úloha výslovně nevyžaduje generované překlady a pokud
-jste výsledný rozdíl nezkontrolovali.
+Bez `--mode=pr` tyto brány běží v režimu uvolnění lokálně a hlásí každý klíč přidaný nebo přepsaný v `en.json`; to je práce na obnovení vydání, ne vaše PR.
+
+Toto je návod pro stávající systém, nikoli výzva k rozšíření jeho nástrojů nebo modelu klíče. Během navrhování náhradního systému nechte náplasti i18n chirurgické. Nespouštějte překladové příkazy, které volají externí služby, pokud úloha výslovně nevyžaduje vygenerované překlady a pokud jste nezkontrolovali výsledný rozdíl.
 
 ### CLI
 
-**Kontrakty**
+**Smlouvy**
 
-- Veřejné příkazy a přepínače v `bin/cli/`, generované příkazy API, návratové kódy, stdout/stderr a
-  struktury výstupu JSON, chování konfigurace/prostředí a soubory obsažené v balíčku.
-- Řetězce CLI určené uživatelům musí používat i18n vrstvu CLI a zachovávat katalogy `en`/`pt-BR` synchronizované.
-- Zachovejte Node jako podporované běhové prostředí a smluvní rozhraní publikovaného binárního souboru.
+- Veřejné příkazy a příznaky v `bin/cli/`, generované příkazy API, ukončovací kódy, výstupní tvary stdout/stderr a JSON, chování config/environment a zabalené soubory.
+- Uživatelské řetězce CLI musí používat vrstvu CLI i18n ( klíče `t()`, které existují v `bin/cli/locales/en.json`). Prvek PR upravuje pouze `en.json`; `pt-BR` a ostatní lokality jsou dokončeny při vydání.
+- Zachovat Node jako podporované běhové prostředí a publikovanou binární smlouvu.
 
-**Cílený cyklus**
+**Zaměřená smyčka**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # změny generovaného/sbaleného CLI
-npm run check:pack-policy     # změny veřejného rozhraní balíčku
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Pokud chování závisí na parsování, souborech nebo návratovém stavu, použijte přesný příkaz v dočasném datovém adresáři.
-CI provádí širší kontroly artefaktů balíčku a ekosystému.
+Použijte přesný příkaz v dočasném datovém adresáři, když chování závisí na analýze, souborech nebo stavu ukončení. CI provádí širší kontroly artefaktů balíčku a ekosystému.
 
 ### Databáze
 
-**Smluvní rozhraní**
+**Smlouvy**
 
-- Doménové moduly v `src/lib/db/`; importujte konkrétní moduly přímo (stará reexportní vrstva `localDb.ts` byla odstraněna).
-- Číslované, idempotentní SQL migrace v `src/lib/db/migrations/`, bezpečnost transakcí, chování při upgradu,
-  indexy a všichni volající ovlivnění schématem.
-- Routy a handlery nikdy přímo nevydávají nezpracované SQL dotazy.
+- Doménové moduly pod `src/lib/db/`; import konkrétních modulů přímo (stará vrstva reexportu `localDb.ts` byla odstraněna).
+- Číslované, idempotentní migrace SQL pod `src/lib/db/migrations/`, bezpečnost transakcí, chování při upgradu, indexy a každý volající ovlivněný schématem.
+- Trasy a handlery nikdy nevydávají surovou SQL přímo.
 
-**Cílený cyklus**
+**Zaměřená smyčka**
 
 ```bash
 npm run check:migration-numbering
@@ -176,33 +159,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Při přidávání migrace otestujte jak novou databázi, tak upgrade z předchozího schématu. Databázové testy
-musí během úklidu zavřít handly a zavolat `resetDbInstance()`. Příkaz `npm run test:bun:db` spusťte pouze tehdy,
-když se mění nezaručená cesta adaptéru Bun; Node zůstává autoritativní.
+Při přidávání migrace otestujte jak novou databázi, tak upgrade z předchozího schématu. Testy databáze musí během čištění zavřít úchyty a volat `resetDbInstance()`. Spusťte `npm run test:bun:db` pouze tehdy, když se změní cesta adaptéru Bun s nejlepším úsilím; Uzel zůstává autoritativní.
 
 ### Sestavení / nasazení
 
-**Smluvní rozhraní**
+**Smlouvy**
 
-- Kořenové manifesty a manifesty pracovních prostorů / lockfile, `scripts/build/`, samostatné sestavení Next.js, obsah balíčku
-  `dist/`, metadata platforem Electron, pracovní postupy CI a kontrolní body nasazení.
-- Podporované rozsahy Node a povolené použití Bun uvedené v `CLAUDE.md` musí zůstat beze změny.
-- Artefakty sestavení zůstávají nesledované; platí zásady pro závislosti, licence, pracovní postupy a balíčky.
+- Kořenový a pracovní prostor manifests/lockfile, `scripts/build/`, samostatné sestavení Next.js, obsah balíčku `dist/`, metadata platformy Electron, pracovní postupy CI a hlídače nasazení.
+- Podporované rozsahy uzlů a použití Bun uvedené v seznamu povolených v `CLAUDE.md` musí zůstat nedotčené.
+- Artefakty sestavení zůstávají nesledované; platí zásady závislosti, licence, pracovního postupu a balíčků.
 
-**Cílený cyklus**
+**Zaměřená smyčka**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # změny závislostí nebo lockfilu
-npm run check:pack-policy      # změny veřejného rozhraní publikovaného balíčku
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Příkaz `npm run build` používejte lokálně pouze tehdy, když změna ovlivňuje kompilaci, samostatné sestavení, assety
-nebo sbalování běhového prostředí. Příkaz `npm run build:release` používejte pouze k ověření vydání/nasazení. Sestavení v CI je
-konečným signálem napříč platformami; změny Electron specifické pro určitou platformu vyžadují odpovídající cílené sestavení
-nebo doklad z rychlého ověřovacího testu.
+Použijte `npm run build` lokálně pouze v případě, že změna ovlivní kompilaci, samostatné sestavení, aktiva nebo runtime svazování. `npm run build:release` používejte pouze pro ověření release/deploy. sestavení CI je konečným signálem napříč platformami; Změny Electron specifické pro platformu vyžadují odpovídající důkazy o sestavení nebo kouři.
 
 ## Vývojářské skripty pro sdílený stroj
 

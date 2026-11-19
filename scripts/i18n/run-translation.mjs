@@ -77,6 +77,7 @@ import {
 } from "./lib/translate-backend.mjs";
 import { translateMarkdownWithGoogle } from "./lib/google-translate.mjs";
 import { adoptState, mergeAdoptedState, refreshTargetHashes } from "./lib/translation-state.mjs";
+import { applyNumericSectionDelta } from "./lib/numeric-section-delta.mjs";
 
 // ----- .env loader --------------------------------------------------------
 // Loads variables from a local `.env` (gitignored) into process.env without
@@ -922,7 +923,12 @@ export function sectionHashes(sections) {
 // `null` means "no reuse possible — translate the whole body": no recorded
 // hashes, or the mirror on disk does not have the section count the hashes
 // were recorded for (a hand edit, or a mirror written by an older pipeline).
-export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
+export function planSectionReuse({
+  previousHashes,
+  previousSections = null,
+  sections,
+  mirrorSections,
+}) {
   if (!Array.isArray(previousHashes) || previousHashes.length !== mirrorSections.length) {
     return null;
   }
@@ -933,6 +939,11 @@ export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
     previousHashes.length === now.length
       ? now.map((_, i) => i)
       : alignSectionHashes(previousHashes, now);
+  // Count-only edits need the exact previous source of every recorded section.
+  const verifiedPrevious =
+    Array.isArray(previousSections) && previousSections.length === previousHashes.length
+      ? sectionHashes(previousSections)
+      : [];
   const reuse = new Map();
   const translate = [];
   now.forEach((h, i) => {
@@ -945,10 +956,26 @@ export function planSectionReuse({ previousHashes, sections, mirrorSections }) {
     // of the 36 pre-expansion locales were adopted as English, 2026-09-16 audit) — never reuse it.
     // Section 0 of a mirror that starts with a YAML block is the old extractor's leaked
     // frontmatter (24 newer locales, 2026-09-16) — always rebuild it.
-    const leakedFrontmatter = j === 0 && /^---\s*\n/.test(mirrorSections[j]);
-    const untranslated = looksUntranslated(mirrorSections[j], sections[i]);
-    if (h === previousHashes[j] && !untranslated && !leakedFrontmatter)
-      reuse.set(i, mirrorSections[j]);
+    // A changed section is reused only as a proven count-only edit of the same section.
+    const numericUpdate =
+      h !== previousHashes[j] &&
+      typeof verifiedPrevious[j] === "string" &&
+      verifiedPrevious[j] === previousHashes[j]
+        ? applyNumericSectionDelta(previousSections[j], sections[i], mirrorSections[j])
+        : null;
+    const candidate = numericUpdate ?? mirrorSections[j];
+    const leakedFrontmatter = j === 0 && /^---\s*\n/.test(candidate);
+    const untranslated = looksUntranslated(candidate, sections[i]);
+    // A matching source hash only describes what was requested. Older adopted
+    // mirrors may still omit rows or code literals; validate reused bytes too.
+    const checked = validateTranslatedChunk(sections[i], candidate);
+    if (
+      (h === previousHashes[j] || numericUpdate !== null) &&
+      !untranslated &&
+      !leakedFrontmatter &&
+      checked.problems.length === 0
+    )
+      reuse.set(i, checked.text);
     else translate.push(i);
   });
   return { reuse, translate };
@@ -1016,7 +1043,12 @@ export function mirrorNeedsRebuild(mirrorText, sourceText) {
   const body = extractMirrorBody(mirrorText);
   if (/^---\s*\n[\s\S]{0,600}?\n---\s*\n/.test(body)) return true; // leaked frontmatter
   const sourceBody = stripTopHeading(sourceText.replace(/^---\n[\s\S]*?\n---\n+/, ""));
-  return looksUntranslated(body, sourceBody); // still English
+  const checked = validateTranslatedChunk(sourceBody, body);
+  return (
+    looksUntranslated(body, sourceBody) ||
+    checked.problems.length > 0 ||
+    checked.text !== body.trim()
+  );
 }
 
 /**
@@ -1113,12 +1145,22 @@ export function mirrorLastCommitDate(mirrorRel, { cwd = ROOT } = {}) {
   }
 }
 
+const exactSourceSnapshots = new Map();
+
 async function resolveSectionPlan({ task, state, opts, sections }) {
   if (task.missingTarget || opts.force) return null;
   const recorded = state.sources[task.rel]?.locales?.[task.locale];
   let previousHashes = recorded?.section_hashes;
+  let exactOldText = null;
+  if (recorded?.source_hash) {
+    const key = `${task.rel}:${recorded.source_hash}`;
+    if (!exactSourceSnapshots.has(key)) {
+      exactSourceSnapshots.set(key, findSourceTextByHash(task.rel, recorded.source_hash));
+    }
+    exactOldText = await exactSourceSnapshots.get(key);
+  }
   if (!previousHashes && recorded?.source_hash) {
-    let oldText = await findSourceTextByHash(task.rel, recorded.source_hash);
+    let oldText = exactOldText;
     if (!oldText) {
       // `updated_at` is bumped by `--adopt`, so prefer the date of the last commit that
       // actually wrote the mirror (mirrors are only written by translation runs).
@@ -1131,7 +1173,13 @@ async function resolveSectionPlan({ task, state, opts, sections }) {
   if (!previousHashes) return null;
   const mirrorText = await fs.readFile(task.targetAbs, "utf8");
   const mirrorSections = splitSections(extractMirrorBody(mirrorText));
-  return planSectionReuse({ previousHashes, sections, mirrorSections });
+  // A timestamp fallback is not proof of the previous source. Numeric edits
+  // require both the exact source snapshot and the recorded mirror bytes.
+  const previousSections =
+    exactOldText && recorded?.target_hash === sha256(Buffer.from(mirrorText, "utf8"))
+      ? splitSections(stripTopHeading(exactOldText))
+      : undefined;
+  return planSectionReuse({ previousHashes, previousSections, sections, mirrorSections });
 }
 
 // A chunk the validator keeps rejecting used to be retried CHUNK_ATTEMPTS times on the same
@@ -1150,10 +1198,6 @@ export async function translateChunk(
   backend,
   { call = callChat, label = "chunk", depth = 0 } = {}
 ) {
-  const messages = [
-    { role: "system", content: system },
-    { role: "user", content: chunk },
-  ];
   const chain = [backend.model, ...(backend.fallbackModels ?? [])].filter(Boolean);
   let checked;
   for (let level = 0; level < chain.length; level++) {
@@ -1162,12 +1206,30 @@ export async function translateChunk(
       model: chain[level],
       fallbackModels: chain.slice(level + 1),
     };
+    // Each model starts from the source alone; its own rejected answers come back with the
+    // validator's findings so a retry can correct them instead of repeating the same output.
+    const messages = [
+      { role: "system", content: system },
+      { role: "user", content: chunk },
+    ];
     for (let attempt = 1; attempt <= CHUNK_ATTEMPTS; attempt++) {
       checked = validateTranslatedChunk(chunk, await call(messages, levelBackend));
       if (checked.problems.length === 0) return checked.text;
       logWarn(
         `  ${label} rejected (${chain[level]}, attempt ${attempt}/${CHUNK_ATTEMPTS}): ${checked.problems.join("; ")}`
       );
+      if (attempt < CHUNK_ATTEMPTS) {
+        messages.push(
+          { role: "assistant", content: checked.text },
+          {
+            role: "user",
+            content:
+              `The previous translation failed validation: ${checked.problems.join("; ")}. ` +
+              "Return a complete corrected translation of the original source. " +
+              "Preserve every inline code literal exactly and return only the translated markdown.",
+          }
+        );
+      }
     }
   }
   if (depth < SPLIT_DEPTH && chunk.length > SPLIT_MIN_CHARS) {
@@ -1585,6 +1647,13 @@ async function main() {
           } else {
             translatedBody = await translateBody(body, localeEntry, backend);
           }
+          // Check the assembled document before writing content or advancing
+          // provenance, including sections that came from the reuse cache.
+          const checked = validateTranslatedChunk(body, translatedBody);
+          if (checked.problems.length) {
+            throw new Error(`assembled document failed validation: ${checked.problems.join("; ")}`);
+          }
+          translatedBody = checked.text;
         } catch (err) {
           stats.failed++;
           failures.push({ rel: task.rel, locale: task.locale, error: err.message });

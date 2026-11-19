@@ -29,70 +29,61 @@ de cambio habitual con sus contratos, comprobaciones específicas y cobertura de
 6. **Registra las evidencias.** En la plantilla de la PR, enumera los comandos ejecutados, todos los archivos de prueba añadidos o modificados,
    las migraciones o indicadores de funcionalidad y cualquier validación exclusiva de CI que aún esté pendiente.
 
-## Rutas recomendadas por tipo de cambio
+## Caminos dorados por tipo de cambio
 
-Los comandos siguientes son comprobaciones específicas mínimas, no una autorización para omitir una prueba que cubra directamente el
-comportamiento que has cambiado.
+Los comandos a continuación son comprobaciones mínimas enfocadas, no permiso para omitir una prueba que cubre directamente el comportamiento que cambió.
 
 ### Proveedor
 
 **Contratos**
 
-- La definición del proveedor en `src/shared/constants/providers/` y su composición en
-  `src/shared/constants/providers.ts`.
-- Los modelos y las capacidades en `open-sse/config/providerRegistry.ts` o en sus archivos de registro extraídos.
-- La selección del ejecutor/traductor, la configuración de OAuth o de la clave de API, los recursos del panel y la referencia
-  generada del proveedor cuando corresponda.
-- Las credenciales públicas deben usar `resolvePublicCred()`; las respuestas de error deben usar las funciones auxiliares compartidas
-  de saneamiento de errores. Consulta `docs/security/PUBLIC_CREDS.md` (git; no se compila en `/docs`) y
-  [Saneamiento de errores](../security/ERROR_SANITIZATION.md).
+- Definición del proveedor en `src/shared/constants/providers/` y su composición en `src/shared/constants/providers.ts`.
+- Modelos y capacidades en `open-sse/config/providerRegistry.ts` o sus archivos de registro extraídos.
+- Selección Executor/translator, configuración de clave OAuth o API y recursos del panel. No confirme los diagramas `docs/reference/PROVIDER_REFERENCE.md` o README regenerados: la actualización de la versión los reescribe (`check:pr-derived-paths` falla en una característica PR que los lleva).
+- Las credenciales públicas deben utilizar `resolvePublicCred()`; las respuestas de error deben utilizar los asistentes de error desinfectados compartidos. Consulte `docs/security/PUBLIC_CREDS.md` (git; no compilado en `/docs`) y [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Ciclo específico**
+**Bucle enfocado**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # cuando cambie el catálogo; confirma las diferencias generadas
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Prueba también cada familia de solicitudes afectada: chat, Responses, imágenes, incrustaciones, audio o vídeo.
-Revisa las diferencias del catálogo generado y de las referencias maestras como cambios de contrato; no las aceptes sin revisarlas.
+Pruebe también cada familia de solicitudes afectadas: chat, respuestas, imágenes, incrustaciones, audio o video. Revise el catálogo generado y las diferencias doradas a medida que cambia el contrato; no los aceptes ciegamente.
 
 ### Enrutamiento
 
 **Contratos**
 
-- Los valores públicos de las estrategias y los metadatos de la interfaz de usuario en `src/shared/constants/routingStrategies.ts`.
-- La distribución y el orden en `open-sse/services/combo.ts` y `open-sse/services/combo/`.
-- Los esquemas de Combo, la persistencia, el estado de resiliencia, las capacidades de los modelos y los controles de la API/interfaz de usuario.
-- [Motor Auto-Combo](../routing/AUTO-COMBO.md) y la documentación de resiliencia cuando cambie el comportamiento.
+- Valores de estrategia pública y metadatos UI en `src/shared/constants/routingStrategies.ts`.
+- Envíos y pedidos bajo `open-sse/services/combo.ts` y `open-sse/services/combo/`.
+- Esquemas combinados, persistencia, estado de resiliencia, capacidades del modelo y controles API/UI.
+- [Motor Auto-Combo](../routing/AUTO-COMBO.md) y documentación de resiliencia cuando cambia el comportamiento.
 
-**Ciclo específico**
+**Bucle enfocado**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # cambios de estrategia o distribución
-npm run check:known-symbols      # cambios de registro de estrategias
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Usa localmente pruebas deterministas con servicios ascendentes simulados. Las pruebas rápidas de Combo en vivo requieren credenciales y son
-manuales, no sustituyen a CI.
+Utilice pruebas deterministas simuladas localmente. Los humos combinados en vivo requieren credenciales y son manuales, no sustitutos CI.
 
-### Interfaz de usuario / Experiencia de usuario
+### UI / UX
 
 **Contratos**
 
-- La ruta/página de Next.js y los límites de los componentes compartidos en `src/app/` y
-  `src/shared/components/`.
-- Las formas de las respuestas de la API, los estados de carga/vacío/error, el comportamiento del teclado y de los lectores de pantalla,
-  el diseño adaptable, los temas y la ampliación de configuraciones regionales.
-- Las cadenas fuente en inglés de la interfaz de usuario en `src/i18n/messages/en.json`; no codifiques directamente nuevos textos visibles para el usuario.
+- Next.js route/page y límites de componentes compartidos bajo `src/app/` y `src/shared/components/`.
+- Formas de respuesta API, estados loading/empty/error, comportamiento del teclado y del lector de pantalla, diseño responsivo, temática y expansión regional.
+- Cadenas fuente de UI en inglés en `src/i18n/messages/en.json`; no codifique la nueva copia para el usuario.
 
-**Ciclo específico**
+**Bucle enfocado**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Ejecuta la aplicación para los cambios visuales o de interacción y comprueba tanto ventanas gráficas estrechas como anchas. CI ejecuta la
-compilación de producción y conjuntos de pruebas más amplios; el comportamiento visual sigue necesitando una comprobación específica mediante componentes,
-Playwright o una comprobación manual documentada adecuada al cambio.
+Ejecute la aplicación para interacción o cambios visuales y verifique las ventanas gráficas estrechas y anchas. CI ejecuta la versión de producción y las suites más amplias; El comportamiento visual aún necesita un componente enfocado, Playwright o una verificación manual documentada adecuada al cambio.
 
 ### i18n
 
 **Contratos**
 
-- `src/i18n/messages/en.json` es la fuente de la interfaz de usuario; `config/i18n.json` es la fuente de las configuraciones regionales.
-- Los catálogos de la CLI se encuentran por separado en `bin/cli/locales/`.
-- Conserva exactamente los marcadores de posición y las etiquetas de ICU. No traduzcas nombres de productos/proveedores/modelos,
-  nombres de protocolos y encabezados, comandos, identificadores de código/JSON, URL, variables de entorno ni
-  términos protegidos como `OmniRoute`, `OAuth`, `MCP` y `A2A`. La lista fuente actual es
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` es la fuente UI ; `config/i18n.json` es la fuente local.
+- Los catálogos CLI se encuentran separados en `bin/cli/locales/`.
+- Conserve exactamente los marcadores de posición y las etiquetas ICU. No traduzca nombres product/provider/model, nombres de protocolos y encabezados, comandos, identificadores code/JSON, URLs, variables de entorno o términos protegidos como `OmniRoute`, `OAuth`, `MCP` y `A2A`. La lista de fuentes actual es `scripts/i18n/glossary/protected-terms.json`.
 
-**Ciclo específico**
+Una característica PR edita solo `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); las otras configuraciones regionales se completan una vez por versión mediante la actualización de la versión o una ola de traducción (`docs/guides/I18N.md` → "Función PRs touch `en.json` solamente"). `npm run check:pr-derived-paths` falla en una función PR que edita otro catálogo local.
+
+**Bucle enfocado**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # cuando cambien las cadenas o los catálogos de la CLI
 npm run lint
 ```
 
-Estas son directrices para el sistema existente, no una invitación a ampliar sus herramientas ni su modelo de claves.
-Mantén los parches de i18n muy específicos mientras se diseña el sistema de reemplazo. No ejecutes comandos de traducción
-que llamen a servicios externos, salvo que la tarea requiera explícitamente traducciones generadas y
-hayas revisado las diferencias resultantes.
+Sin `--mode=pr` estas puertas se ejecutan en modo de liberación localmente e informan cada clave que el ciclo agregó o reescribió en `en.json`; ese es el trabajo de la actualización de la versión, no el de su PR.
+
+Esta es una guía para el sistema existente, no una invitación a ampliar sus herramientas o modelo clave. Mantenga los parches i18n quirúrgicos mientras se diseña el sistema de reemplazo. No ejecute comandos de traducción que llamen a servicios externos a menos que la tarea requiera explícitamente traducciones generadas y haya revisado la diferencia resultante.
 
 ### CLI
 
 **Contratos**
 
-- Comandos públicos y flags en `bin/cli/`, comandos de API generados, códigos de salida, stdout/stderr y
-  estructuras de salida JSON, comportamiento de la configuración/entorno y archivos empaquetados.
-- Las cadenas de la CLI visibles para el usuario deben usar la capa i18n de la CLI y mantener alineados los catálogos `en`/`pt-BR`.
-- Mantenga Node como el entorno de ejecución compatible y preserve el contrato del binario publicado.
+- Comandos públicos y banderas en `bin/cli/`, comandos API generados, códigos de salida, formas de salida stdout/stderr y JSON, comportamiento config/environment y archivos empaquetados.
+- Las cadenas de CLI orientadas al usuario deben usar la capa CLI i18n (claves `t()` que existen en `bin/cli/locales/en.json`). Una característica PR edita solo `en.json`; `pt-BR` y las demás configuraciones regionales se completan en el momento del lanzamiento.
+- Conserve Node como el tiempo de ejecución admitido y el contrato binario publicado.
 
-**Ciclo específico**
+**Bucle enfocado**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # cambios en la CLI generada/empaquetada
-npm run check:pack-policy     # cambios en la superficie del paquete
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Use el comando exacto en un directorio de datos temporal cuando el comportamiento dependa del análisis, de los archivos o del estado de
-salida. CI realiza las comprobaciones más amplias de los artefactos del paquete y del ecosistema.
+Utilice el comando exacto en un directorio de datos temporal cuando el comportamiento dependa del análisis, los archivos o el estado de salida. CI realiza comprobaciones más amplias de ecosistemas y artefactos de paquetes.
 
 ### Base de datos
 
 **Contratos**
 
-- Módulos de dominio en `src/lib/db/`; importe módulos específicos directamente (se eliminó la antigua capa de reexportación `localDb.ts`).
-- Migraciones SQL numeradas e idempotentes en `src/lib/db/migrations/`, seguridad de las transacciones, comportamiento de
-  actualización, índices y cada invocador afectado por el esquema.
-- Las rutas y los manejadores nunca ejecutan SQL sin procesar directamente.
+- Módulos de dominio bajo `src/lib/db/`; importe módulos específicos directamente (se eliminó la antigua capa de reexportación `localDb.ts` ).
+- Migraciones SQL numeradas e idempotentes bajo `src/lib/db/migrations/`, seguridad de transacciones, comportamiento de actualización, índices y cada persona que llama afectada por el esquema.
+- Las rutas y los controladores nunca emiten SQL sin formato directamente.
 
-**Ciclo específico**
+**Bucle enfocado**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Al añadir una migración, pruebe tanto una base de datos nueva como la actualización desde el esquema anterior. Las pruebas de base de datos
-deben cerrar los manejadores y llamar a `resetDbInstance()` durante la limpieza. Ejecute `npm run test:bun:db` únicamente cuando
-cambie la ruta del adaptador de Bun sin garantías; Node sigue siendo la referencia autoritativa.
+Pruebe una base de datos nueva y actualice desde el esquema anterior al agregar una migración. Las pruebas de la base de datos deben cerrar identificadores y llamar `resetDbInstance()` durante la limpieza. Ejecute `npm run test:bun:db` solo cuando cambie la ruta del adaptador Bun de mejor esfuerzo; Node sigue teniendo autoridad.
 
-### Compilación / despliegue
+### Construir/implementar
 
 **Contratos**
 
-- Manifiestos/archivo de bloqueo de la raíz y del workspace, `scripts/build/`, ensamblado standalone de Next.js, contenido del paquete `dist/`,
-  metadatos de plataforma de Electron, flujos de trabajo de CI y centinelas de despliegue.
-- Los rangos de Node compatibles y el uso permitido de Bun en `CLAUDE.md` deben permanecer intactos.
-- Los artefactos de compilación no deben incluirse en el control de versiones; se aplican las políticas de dependencias, licencias, flujos de trabajo y paquetes.
+- Raíz y espacio de trabajo manifests/lockfile, `scripts/build/`, ensamblaje independiente Next.js, contenido del paquete `dist/`, metadatos de la plataforma Electron, flujos de trabajo CI y centinelas de implementación.
+- Los rangos de nodos admitidos y el uso Bun incluido en la lista permitida en `CLAUDE.md` deben permanecer intactos.
+- Los artefactos de construcción no se rastrean; Se aplican políticas de dependencia, licencia, flujo de trabajo y paquetes.
 
-**Ciclo específico**
+**Bucle enfocado**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # cambios en las dependencias o en el archivo de bloqueo
-npm run check:pack-policy      # cambios en la superficie del paquete publicado
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Use `npm run build` localmente solo cuando el cambio afecte a la compilación, al ensamblado standalone, a los recursos
-o al empaquetado en tiempo de ejecución. Use `npm run build:release` únicamente para la validación de versiones/despliegues. La compilación de CI es
-la señal final multiplataforma; los cambios de Electron específicos de una plataforma necesitan la compilación específica correspondiente
-o evidencias de una prueba de humo.
+Utilice `npm run build` localmente solo cuando el cambio afecte a la compilación, el ensamblaje independiente, los activos o la agrupación en tiempo de ejecución. Utilice `npm run build:release` solo para la validación release/deploy. La compilación de CI es la señal multiplataforma final; Los cambios Electron específicos de la plataforma necesitan evidencia de compilación o humo centrada en la coincidencia.
 
 ## Scripts de desarrollo para una máquina compartida
 

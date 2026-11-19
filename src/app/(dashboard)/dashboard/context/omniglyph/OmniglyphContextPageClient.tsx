@@ -82,7 +82,7 @@ function EconomicsCard() {
   const t = useTranslations("omniglyph");
   return (
     <Card className="p-6">
-      <h2 className="mb-4 text-lg font-semibold">{t("economicsTitle")}</h2>
+      <h2 className="mb-4 text-lg">{t("economicsTitle")}</h2>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
         {ECONOMICS.map((e) => (
           <div key={e.id} className="flex flex-col gap-1">
@@ -100,7 +100,7 @@ function BeforeAfterCard() {
   return (
     <Card className="p-6">
       <div className="mb-1 flex items-baseline justify-between">
-        <h2 className="text-lg font-semibold">{t("beforeAfterTitle")}</h2>
+        <h2 className="text-lg">{t("beforeAfterTitle")}</h2>
         <span className="text-sm font-medium text-success">
           {t("blockSavings", { percent: SAMPLE_METRICS.savingsPct })}
         </span>
@@ -145,7 +145,7 @@ function GatesCard() {
   const t = useTranslations("omniglyph");
   return (
     <Card className="p-6">
-      <h2 className="mb-1 text-lg font-semibold">{t("gatesTitle")}</h2>
+      <h2 className="mb-1 text-lg">{t("gatesTitle")}</h2>
       <p className="mb-4 text-xs text-text-muted">
         {t.rich("gatesDescription", {
           code: (chunks) => <code>{chunks}</code>,
@@ -181,7 +181,7 @@ function ProfileCard(props: {
   return (
     <Card className="p-6">
       <div className="flex flex-col gap-3">
-        <h2 className="text-lg font-semibold">{t("profileTitle")}</h2>
+        <h2 className="text-lg">{t("profileTitle")}</h2>
         <p className="max-w-xl text-sm text-text-muted">{t("profileDescription")}</p>
         <Select
           className="w-full max-w-sm"
@@ -216,7 +216,7 @@ function EnableCard(props: {
     <Card className="p-6">
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
-          <h2 className="text-lg font-semibold">{t("enableTitle")}</h2>
+          <h2 className="text-lg">{t("enableTitle")}</h2>
           <p className="max-w-xl text-sm text-text-muted">
             {t.rich("enableDescription", {
               code: (chunks) => <code>{chunks}</code>,
