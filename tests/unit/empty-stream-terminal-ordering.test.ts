@@ -312,3 +312,142 @@ test("a withheld terminal is released when the upstream stays open after it", as
   assert.ok(text.endsWith("data: [DONE]\n\n"), `the terminal must reach the client: ${text}`);
   assert.ok(Date.now() - started < 5000, "the release must be bounded by the grace window");
 });
+
+// Shapes the empty verdict must keep classifying as answers: with the terminal
+// withheld, a misclassification here would turn a valid turn into a visible error.
+const LEGIT_SHAPES: Array<{ name: string; format: string | null; frames: string[] }> = [
+  {
+    name: "reasoning-only chat turn cut at length",
+    format: null,
+    frames: [
+      OPENAI_CHUNK('{"role":"assistant","reasoning_content":"thinking"}', "null"),
+      OPENAI_CHUNK("{}", '"length"'),
+      DONE,
+    ],
+  },
+  {
+    name: "content_filter with no content",
+    format: null,
+    frames: [
+      OPENAI_CHUNK('{"role":"assistant"}', "null"),
+      OPENAI_CHUNK("{}", '"content_filter"'),
+      DONE,
+    ],
+  },
+  {
+    name: "chat tool call with empty arguments",
+    format: null,
+    frames: [
+      OPENAI_CHUNK(
+        '{"role":"assistant","tool_calls":[{"index":0,"id":"call_1","type":"function","function":{"name":"ls","arguments":""}}]}',
+        "null"
+      ),
+      OPENAI_CHUNK("{}", '"tool_calls"'),
+      DONE,
+    ],
+  },
+  {
+    name: "Claude tool_use without input_json_delta",
+    format: FORMATS.CLAUDE,
+    frames: [
+      'event: message_start\ndata: {"type":"message_start","message":{"role":"assistant"}}\n\n',
+      'event: content_block_start\ndata: {"type":"content_block_start","index":0,"content_block":{"type":"tool_use","id":"toolu_1","name":"ls","input":{}}}\n\n',
+      'event: content_block_stop\ndata: {"type":"content_block_stop","index":0}\n\n',
+      'event: message_delta\ndata: {"type":"message_delta","delta":{"stop_reason":"tool_use"}}\n\n',
+      'event: message_stop\ndata: {"type":"message_stop"}\n\n',
+    ],
+  },
+  {
+    name: "Responses function_call only in output_item.done",
+    format: FORMATS.OPENAI_RESPONSES,
+    frames: [
+      'event: response.created\ndata: {"type":"response.created","response":{"id":"resp_1"}}\n\n',
+      'event: response.output_item.done\ndata: {"type":"response.output_item.done","output_index":0,"item":{"type":"function_call","id":"fc_1","call_id":"call_1","name":"ls","arguments":"{}"}}\n\n',
+      // Real upstreams and OmniRoute's Responses translator repeat the output in
+      // response.completed; an output_item.done alone is not counted as content
+      // outside the readiness probe (#16438), a pre-existing classifier choice.
+      'event: response.completed\ndata: {"type":"response.completed","response":{"id":"resp_1","status":"completed","output":[{"type":"function_call","id":"fc_1","call_id":"call_1","name":"ls","arguments":"{}"}]}}\n\n',
+    ],
+  },
+];
+
+for (const shape of LEGIT_SHAPES) {
+  test(`legit shape is not turned into an error: ${shape.name}`, async () => {
+    const text = await runClientStream(shape.frames, { format: shape.format });
+    assert.equal(
+      text,
+      shape.frames.join(""),
+      `the stream must reach the client unchanged, got: ${text}`
+    );
+  });
+}
+
+/** A content-less chat stream whose upstream never closes after `[DONE]`. */
+function keepAliveEmptyUpstream(): ReadableStream<Uint8Array> {
+  const encoder = new TextEncoder();
+  return new ReadableStream<Uint8Array>({
+    start(controller) {
+      for (const frame of GEMINI_EMPTY_STREAM) controller.enqueue(encoder.encode(frame));
+    },
+  });
+}
+
+test("a read failure after a withheld terminal keeps the error-after-terminal rule", async () => {
+  const encoder = new TextEncoder();
+  let pulls = 0;
+  const upstream = new ReadableStream<Uint8Array>({
+    pull(controller) {
+      if (pulls < GEMINI_EMPTY_STREAM.length) {
+        controller.enqueue(encoder.encode(GEMINI_EMPTY_STREAM[pulls++]));
+        return;
+      }
+      controller.error(new Error("upstream socket reset"));
+    },
+  });
+  const text = await drainStream(
+    createDisconnectAwareStream(
+      { readable: upstream, writable: noopAbortWritable() },
+      createStreamController({ provider: "test", model: "test-model" })
+    )
+  );
+  // Same as before the hold-back (stream-handler.test.ts "errors after OpenAI DONE"):
+  // the withheld terminal is released once, and the transport error is not added.
+  assert.equal(text, GEMINI_EMPTY_STREAM.join(""), `got: ${text}`);
+});
+
+test("a trusted empty turn is not delayed by the hold-back", async () => {
+  const started = Date.now();
+  const reader = createDisconnectAwareStream(
+    { readable: keepAliveEmptyUpstream(), writable: noopAbortWritable() },
+    createStreamController({ provider: "test", model: "test-model" }),
+    { permitsEmptyTurn: () => true }
+  ).getReader();
+  const decoder = new TextDecoder();
+  let text = "";
+  while (!text.includes("[DONE]")) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    text += decoder.decode(value);
+  }
+  await reader.cancel("client_done");
+  const elapsed = Date.now() - started;
+  assert.ok(elapsed < 500, `released without the grace wait (${elapsed} ms)`);
+});
+
+test("a client that leaves during the grace window is a disconnect, not a completion", async () => {
+  let disconnected = false;
+  const reader = createDisconnectAwareStream(
+    { readable: keepAliveEmptyUpstream(), writable: noopAbortWritable() },
+    createStreamController({
+      provider: "test",
+      model: "test-model",
+      onDisconnect() {
+        disconnected = true;
+      },
+    })
+  ).getReader();
+  const first = await reader.read();
+  assert.ok(first.value, "the role frame is forwarded");
+  await reader.cancel("client_left");
+  assert.equal(disconnected, true, "the controller records a disconnect");
+});

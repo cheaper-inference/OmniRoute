@@ -677,6 +677,7 @@ export function createDisconnectAwareStream(
     if (!held) return;
     heldTerminalChunk = null;
     controller.enqueue(held);
+    streamController.markClientTerminalSeen?.();
   };
 
   /**
@@ -700,7 +701,6 @@ export function createDisconnectAwareStream(
     const boundaryBefore = terminalWatcher.atBoundary();
     clientTerminalSeen = terminalWatcher.note(terminalDecoder.decode(chunk, { stream: true }));
     if (!clientTerminalSeen) return true;
-    streamController.markClientTerminalSeen?.();
     // Hold only a self-contained event — both ends on an event boundary — so no
     // other byte is ever delayed or reordered, and only while the stream still
     // looks empty: content, an in-band error or a legitimate empty terminal all
@@ -710,11 +710,14 @@ export function createDisconnectAwareStream(
       terminalWatcher.atBoundary() &&
       !contentWatcher.sawContent() &&
       !contentWatcher.sawError() &&
-      !contentWatcher.sawLegitEmptyTerminal()
+      !contentWatcher.sawLegitEmptyTerminal() &&
+      options.permitsEmptyTurn?.() !== true
     ) {
       heldTerminalChunk = chunk;
       return false;
     }
+    // The controller learns about the terminal only once the client can see it.
+    streamController.markClientTerminalSeen?.();
     return true;
   };
 
@@ -765,7 +768,7 @@ export function createDisconnectAwareStream(
           // transform pipe. Cancel it so the provider stops generating for a
           // client that is gone. A completed terminal stream with a grace window
           // hands the inner reader to the bounded drain so late usage can flush.
-          if (clientTerminalSeen) {
+          if (clientTerminalSeen && !heldTerminalChunk) {
             if (Number(streamController.clientDisconnectGracePeriodMs) > 0) {
               completionDrain.start();
             }
@@ -784,6 +787,17 @@ export function createDisconnectAwareStream(
           let result = await readNextChunk(controller);
           while (!result.done && !admitClientChunk(controller, result.value)) {
             result = await readNextChunk(controller);
+          }
+          if (heldTerminalChunk && !streamController.isConnected()) {
+            // The client left while the terminal was withheld: it never saw an
+            // ending, and the upstream's end is not the provider's verdict.
+            heldTerminalChunk = null;
+            try {
+              controller.close();
+            } catch {
+              // Expected: downstream may have already closed
+            }
+            return;
           }
           if (result.done) {
             contentWatcher.finish();
@@ -878,8 +892,8 @@ export function createDisconnectAwareStream(
 
           if (clientTerminalSeen) {
             try {
-              // The client is still waiting for an ending: release the withheld
-              // terminal rather than closing the stream without one.
+              // An error after the terminal keeps meaning a completed stream
+              // (stream-handler.test.ts): release the withheld terminal as is.
               flushHeldTerminal(controller);
             } catch {
               // downstream may have closed
@@ -926,7 +940,8 @@ export function createDisconnectAwareStream(
       async cancel(reason) {
         const deferCompletedToolHandoff =
           streamController.shouldDeferCompletedToolHandoff?.() === true;
-        if (clientTerminalSeen) {
+        // A withheld terminal never reached the client: this is a disconnect.
+        if (clientTerminalSeen && !heldTerminalChunk) {
           if (Number(streamController.clientDisconnectGracePeriodMs) > 0) {
             completionDrain.start();
             streamController.handleComplete();
