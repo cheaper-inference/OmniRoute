@@ -302,3 +302,38 @@ test("#20449 worker resolution falls back cleanly when moduleUrl is not a valid 
     fs.rmSync(layoutRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   }
 });
+
+test("#20449 an unusable module URL skips module-relative workers instead of guessing", () => {
+  // When the build-time module URL cannot be turned into a local path, resolution must
+  // not fall back to this source tree's own worker: it continues with the cwd layout.
+  const layoutRoot = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-worker-bad-url-"));
+  try {
+    const cwd = path.join(layoutRoot, "app");
+    const cwdTs = path.join(cwd, "src", "lib", "usage", "callLogArtifactWorker.ts");
+    fs.mkdirSync(path.dirname(cwdTs), { recursive: true });
+    fs.writeFileSync(cwdTs, "");
+
+    for (const moduleUrl of [
+      "webpack-internal:///./src/lib/usage/callLogArtifactWriter.ts",
+      "not a url",
+    ]) {
+      const probed: string[] = [];
+      const resolved = resolveCallLogArtifactWorker({
+        moduleUrl,
+        cwd,
+        entryFile: null,
+        fileExists: (candidate) => {
+          probed.push(candidate);
+          return fs.existsSync(candidate);
+        },
+      });
+      assert.deepEqual(resolved, { workerFile: cwdTs, execArgv: [] }, moduleUrl);
+      assert.ok(
+        probed.every((candidate) => candidate.startsWith(layoutRoot)),
+        `only cwd-relative candidates are probed for ${moduleUrl}: ${probed.join(", ")}`
+      );
+    }
+  } finally {
+    fs.rmSync(layoutRoot, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  }
+});
