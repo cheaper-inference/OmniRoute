@@ -104,19 +104,6 @@ const IMPORT_TOKEN_PROVIDERS = new Set([
 ]);
 
 /**
- * #10143: re-importing a token onto an existing connection must keep its persisted
- * device identity, or the account presents to the upstream as a new device.
- */
-function keepDeviceIdentity<T extends { providerSpecificData?: Record<string, unknown> }>(
-  tokenData: T,
-  existing: { providerSpecificData?: Record<string, unknown> | null } | undefined
-): T {
-  const cliUserID = existing?.providerSpecificData?.cliUserID;
-  if (typeof cliUserID !== "string" || !tokenData.providerSpecificData) return tokenData;
-  return { ...tokenData, providerSpecificData: { ...tokenData.providerSpecificData, cliUserID } };
-}
-
-/**
  * Constant-time string comparison to prevent timing-oracle attacks (CWE-208).
  * Handles null/undefined safely and different-length strings.
  */
@@ -909,7 +896,7 @@ export async function POST(
         const matchId = typeof match?.id === "string" ? match.id : null;
         if (matchId) {
           connection = await updateProviderConnection(matchId, {
-            ...buildOAuthTokenUpdate(keepDeviceIdentity(tokenData, match), expiresAt),
+            ...buildOAuthTokenUpdate(tokenData, expiresAt),
             ...antigravityPersistStatus(degradedProject),
             isActive: true,
           });
