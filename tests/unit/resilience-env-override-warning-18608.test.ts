@@ -66,6 +66,22 @@ test("an env flag that agrees with the saved boolean is not reported", () => {
   assert.deepEqual(found, []);
 });
 
+test("a yes env value follows each flag's runtime parser before an override is reported", () => {
+  // settings.ts seeds providerCooldown/quotaPreflight from true/1/on only, so "yes" is off
+  // there and agrees with a saved false; the stream toggles read "yes" as on.
+  process.env.PROVIDER_COOLDOWN_ENABLED = "yes";
+  process.env.QUOTA_PREFLIGHT_CUTOFF_ENABLED = "yes";
+  process.env.STREAM_RECOVERY_ENABLED = "yes";
+  const found = findResilienceEnvOverrides({
+    resilienceSettings: {
+      providerCooldown: { enabled: false },
+      quotaPreflight: { enabled: false },
+      streamRecovery: { enabled: false },
+    },
+  });
+  assert.deepEqual(found, [{ env: "STREAM_RECOVERY_ENABLED", envValue: true, saved: false }]);
+});
+
 test("nothing is reported without an env value, without a saved boolean, or for an unreadable env value", () => {
   const saved = { resilienceSettings: { streamRecovery: { enabled: false } } };
   assert.deepEqual(findResilienceEnvOverrides(saved), []);

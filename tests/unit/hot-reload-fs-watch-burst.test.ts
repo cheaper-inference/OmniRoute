@@ -11,6 +11,9 @@ import os from "node:os";
 import path from "node:path";
 
 const TEST_DATA_DIR = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-hot-reload-burst-"));
+// test:unit:fast shares process.env across files (--test-isolation=none): restore both after.
+const ORIGINAL_DATA_DIR = process.env.DATA_DIR;
+const ORIGINAL_DISABLE_BACKGROUND = process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
 process.env.DATA_DIR = TEST_DATA_DIR;
 process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES = "1"; // poll off: only the file watcher runs
 
@@ -32,6 +35,11 @@ test.after(() => {
   resetRuntimeSettingsStateForTests();
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
+  if (ORIGINAL_DATA_DIR === undefined) delete process.env.DATA_DIR;
+  else process.env.DATA_DIR = ORIGINAL_DATA_DIR;
+  if (ORIGINAL_DISABLE_BACKGROUND === undefined)
+    delete process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES;
+  else process.env.OMNIROUTE_DISABLE_BACKGROUND_SERVICES = ORIGINAL_DISABLE_BACKGROUND;
 });
 
 test("a burst of watcher events causes only a few settings reads", async () => {
@@ -58,6 +66,10 @@ test("a burst of watcher events causes only a few settings reads", async () => {
       emit("storage.sqlite-wal");
       await sleep(5);
     }
+    // Wait for the debounced reload itself (bounded) rather than trusting a fixed delay on a
+    // slow runner, then give any trailing reload time to land so the upper bound counts it.
+    const deadline = Date.now() + 5_000;
+    while (settingsReads === 0 && Date.now() < deadline) await sleep(25);
     await sleep(800);
   } finally {
     db.prepare = realPrepare as typeof db.prepare;

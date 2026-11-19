@@ -57,3 +57,14 @@ test("a rejection with no identified key writes no usage_history row", async () 
   const rows = (await usageHistory.getUsageDb()).data.history;
   assert.equal(rows.length, 0);
 });
+
+test("two rejections of one key in the same millisecond keep two usage_history rows", async (t) => {
+  // Each rejection is one real request; the natural-key dedup guard (meant for replayed
+  // retries of one write) must not fold two of them into one row.
+  t.mock.timers.enable({ apis: ["Date"], now: Date.parse("2026-11-18T12:00:00.000Z") });
+  await logAdmissionRejection(rejection(), entry("key-burst"));
+  await logAdmissionRejection(rejection(), entry("key-burst"));
+  t.mock.timers.reset();
+  const rows = await keyRows("key-burst");
+  assert.equal(rows.length, 2, `expected one row per rejection, got ${rows.length}`);
+});

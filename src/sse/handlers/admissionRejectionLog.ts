@@ -60,19 +60,24 @@ export async function logAdmissionRejection(
     // A rejection that names an API key also counts against that key in usage_history
     // (success:false), as recordRejectedRequestUsage does; the per-key usage report reads this
     // table, so a key whose traffic is all rejected would otherwise show zero requests.
+    // One call per rejected request, so the natural-key dedup (meant for replays of one
+    // write) is off: two rejections in the same millisecond are two requests.
     if (entry.apiKeyId) {
-      await saveRequestUsage({
-        provider: "-",
-        model: entry.model,
-        apiKeyId: entry.apiKeyId,
-        apiKeyName: entry.apiKeyName,
-        tokens: {},
-        serviceTier: "standard",
-        status: String(rejection.status),
-        success: false,
-        latencyMs: 0,
-        endpoint: entry.path,
-      });
+      await saveRequestUsage(
+        {
+          provider: "-",
+          model: entry.model,
+          apiKeyId: entry.apiKeyId,
+          apiKeyName: entry.apiKeyName,
+          tokens: {},
+          serviceTier: "standard",
+          status: String(rejection.status),
+          success: false,
+          latencyMs: 0,
+          endpoint: entry.path,
+        },
+        { deduplicate: false }
+      );
     }
   } catch {}
 }
