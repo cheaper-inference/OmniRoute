@@ -4,6 +4,7 @@ import fs from "node:fs";
 import path from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { announceMirrorPlan, planMirrorAssertions } from "../_helpers/mirrorFreshness.ts";
 import { assertMirrorRepairRejectsUnsafeLocale } from "../_helpers/mirrorRepairLocaleGuard.ts";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
@@ -41,9 +42,20 @@ test("the English resilience source documents zero-attempt cooldown recovery", (
     assert(sourceParagraph.includes(token));
 });
 
-test("every resilience mirror includes the pre-dispatch retry and terminal contracts", () => {
+// Release mode asserts every recorded locale. PR mode asserts the mirrors whose pre-dispatch
+// section is unchanged in English since their translation; a PR that rewrites that section leaves
+// its mirrors to the translation wave (tests/_helpers/mirrorFreshness.ts).
+test("every resilience mirror includes the pre-dispatch retry and terminal contracts", (t) => {
+  const plan = planMirrorAssertions({
+    root,
+    source: relativeSource,
+    locales: Object.keys(state.sources[relativeSource].locales),
+    anchors: ["The same gate covers the pre-dispatch case (#16319)", "#16319 · comboCooldownWait"],
+    state,
+  });
+  announceMirrorPlan(t, plan);
   const missing: string[] = [];
-  for (const locale of Object.keys(state.sources[relativeSource].locales)) {
+  for (const locale of plan.assert) {
     const target = read(`docs/i18n/${locale}/${relativeSource}`);
     for (const token of [
       "#16319",

@@ -44,25 +44,23 @@ mechanizm wykonywania wielomodelowego, a nie strategia routingu: nie ma on żadn
    odpowiedź ostatniego członka, którego wywołanie zakończyło się powodzeniem. Pozostałe odpowiedzi panelu nie są zwracane, więc
    płacisz za N wywołań, a otrzymujesz jedno ukończenie.
 
-## Konfiguracja
+## Organizować coś
 
-1. Otwórz **Panel → Tryb Chaos** (`/dashboard/chaos`).
-2. **Włącz** go — Tryb Chaos jest **domyślnie wyłączony** (`enabled: false` w
-   `src/lib/chaos/chaosConfig.ts`). Gdy jest wyłączony, `POST /api/chaos/run` zwraca
-   `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. Wybierz uczestników i wartości domyślne (utrwalane dla każdej instancji za pośrednictwem magazynu ustawień):
+1. Otwarte** Pulpit nawigacyjny → tryb chaosu** (`/dashboard/chaos`).
+2. Obróć to** NA** — Statki w trybie Chaosu** domyślnie wyłączone** (`enabled: false` w `src/lib/chaos/chaosConfig.ts`). Gdy jest wyłączony, `POST /api/chaos/run` odpowiada `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Wybierz uczestników i ustawienia domyślne (utrwalone dla każdej instancji za pośrednictwem magazynu ustawień):
 
-   | Pole                | Znaczenie                                                                              | Wartość domyślna / limity                 |
-   | ------------------- | -------------------------------------------------------------------------------------- | ----------------------------------------- |
-   | `enabled`           | Przełącznik główny                                                                     | `false`                                   |
-   | `defaultMode`       | `parallel` lub `collaborative` (patrz niżej)                                           | `parallel`                                |
-   | `providerOverrides` | Uczestnictwo poszczególnych dostawców (`providerId`, opcjonalnie `modelId`, `enabled`) | puste = każdy aktywny dostawca, maks. 200 |
-   | `systemPrompt`      | Zastąpienie wbudowanego promptu systemowego Chaos                                      | opcjonalne, maks. 10 000 znaków           |
-   | `timeoutMs`         | Maksymalny czas każdego wywołania modelu                                               | `120000` (5 000–600 000)                  |
-   | `maxTokens`         | `max_tokens` dla każdego wywołania modelu                                              | `4096` (256–128 000)                      |
+   | Pole                | Oznaczający                                                                      | Domyślne / limity                                       |
+   | ------------------- | -------------------------------------------------------------------------------- | ------------------------------------------------------- |
+   | `enabled`           | Przełącznik główny                                                               | `false`                                                 |
+   | `defaultMode`       | `parallel` lub `collaborative` (patrz poniżej)                                   | `parallel`                                              |
+   | `providerOverrides` | Udział poszczególnych dostawców (`providerId`, opcjonalnie `modelId`, `enabled`) | puste = dla każdego aktywnego dostawcy, maksymalnie 200 |
+   | `systemPrompt`      | Zastąpienie wbudowanego monitu systemu Chaos                                     | opcjonalnie, maks. 10 000 znaków                        |
+   | `timeoutMs`         | Maksymalny czas na połączenie modelu                                             | `120000` (5 000–600 000)                                |
+   | `maxTokens`         | `max_tokens` za połączenie modelu                                                | `4096` (256–128 000)                                    |
 
-4. Uruchom **test bezpośrednio na stronie** — panel wyników pokaże odpowiedź,
-   status i czas wykonania każdego dostawcy.
+4. Daj każdemu uczestniczącemu dostawcy a** model** . Model dostawcy to `modelId` jego włączonego zastąpienia na stronie Tryb Chaosu (wygrywa), w przeciwnym razie** domyślny model** jego połączenia. Identyfikator dostawcy nigdy nie jest używany jako nazwa modelu. Dostawca, który nie ma żadnego z nich, nie jest** nie zadzwonił** : pojawia się w wynikach jako `status: "error"` z komunikatem _"Nie ustawiono modelu dla tego dostawcy. Ustaw dla niego model na stronie Tryb Chaosu lub model domyślny w połączeniu."_ i pustym `modelId`, podczas gdy pozostali dostawcy działają normalnie. Jeśli żaden wybrany dostawca nie ma modelu, uruchomienie zakończy się niepowodzeniem przed jakimkolwiek żądaniem nadrzędnym z komunikatem _"Żaden dostawca nie ma zestawu modelu. ..."_ (HTTP 500 na obu punktach końcowych).
+5. Uruchom A** przetestuj na samej stronie** — panel wyników pokazuje odpowiedź, status i czas trwania każdego dostawcy.
 
 ## Tryby wykonywania
 
@@ -74,27 +72,24 @@ mechanizm wykonywania wielomodelowego, a nie strategia routingu: nie ma on żadn
 
 ## API
 
-### `POST /api/chaos/run` — sesja panelu
+### sesja panelu `POST /api/chaos/run` —
 
-Uwierzytelnianie za pomocą plików cookie (sesja zarządzania — patrz
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); używane przez stronę panelu.
+Uwierzytelnione za pomocą plików cookie (sesja zarządzania — patrz [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); używany przez stronę panelu kontrolnego.
 
 ```jsonc
-// treść żądania
+// body
 {
-  "task": "Compare approaches to X", // wymagane
-  "providers": ["glm", "kimi"], // opcjonalny filtr
-  "mode": "parallel", // opcjonalne — zastępuje defaultMode
-  "systemPrompt": "…", // opcjonalne zastąpienie
-  "maxTokens": 4096, // opcjonalne zastąpienie
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
-### `POST /api/skills/collect/chaos` — klucz API
+### `POST /api/skills/collect/chaos` — API klucz
 
-Wariant wykorzystujący token Bearer, przeznaczony dla klientów zewnętrznych. Klucz musi mieć
-**uprawnienie Trybu Chaos** (`chaosModeEnabled`), które jest **domyślnie wyłączone** — włącz je osobno dla każdego klucza w
-**Panel → Menedżer API → edytuj klucz → uprawnienia → Tryb Chaos**. Treść żądania jest taka sama jak powyżej.
+Wariant tokena na okaziciela dla rozmówców zewnętrznych. Klucz musi nosić** Pozwolenie na tryb chaosu** (`chaosModeEnabled`), czyli** domyślnie wyłączone** — włącz to za pomocą klucza** Pulpit nawigacyjny → API Menedżer → klawisz edycji → uprawnienia → Tryb chaosu** . To samo ciało co powyżej.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Oba punkty końcowe zwracają dane w tym samym formacie:
+Oba punkty końcowe zwracają ten sam kształt:
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ Oba punkty końcowe zwracają dane w tym samym formacie:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // tylko w trybie collaborative
+  "summary": "…", // collaborative mode only
 }
 ```
 
 ## Rozwiązywanie problemów
 
-- **`400 Chaos Mode is not enabled`** — patrz krok 2 powyżej: przełącznik globalny jest wyłączony.
-- **Klucz API jest odrzucany przez `/api/skills/collect/chaos`** — klucz nie ma uprawnienia
-  `chaosModeEnabled` (domyślnie wyłączonego; jest to ustawienie, a nie błąd).
-- **W wynikach brakuje oczekiwanego dostawcy** — sprawdź `providerOverrides` na stronie
-  Trybu Chaos (wyłączone zastąpienie powoduje jego wykluczenie) oraz upewnij się, że połączenie z dostawcą
-  jest aktywne.
+- **`400 Chaos Mode is not enabled`** — krok 2 powyżej: przełącznik globalny jest wyłączony.
+- **Klucz API zostaje odrzucony na `/api/skills/collect/chaos`** — kluczowi brakuje uprawnień `chaosModeEnabled` dla poszczególnych klawiszy (domyślnie wyłączone; jest to ustawienie, a nie błąd).
+- **Dostawca pokazuje `No model set for this provider`** — ustaw swój model na stronie Tryb Chaosu lub model domyślny na swoim połączeniu (patrz Konfiguracja, krok 4).
+- **W wynikach brakuje oczekiwanego dostawcy** — sprawdź `providerOverrides` na stronie Tryb Chaosu (wyłączone nadpisanie wyklucza to) i czy połączenie dostawcy jest aktywne.
