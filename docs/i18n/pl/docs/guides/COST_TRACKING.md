@@ -90,7 +90,7 @@ Nazwy modeli są najpierw normalizowane (przedrostki ścieżek dostawców, takie
 
 ### Sposób rejestrowania wydatków
 
-- Koszt żądania jest obliczany po udzieleniu odpowiedzi i rejestrowany w trybie „uruchom i zapomnij”, dzięki czemu nigdy nie zwiększa się opóźnienia dla klienta. Zużycie współdzielonego limitu jest planowane w następnym takcie pętli zdarzeń za pośrednictwem [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- Koszt pojedynczego żądania jest obliczany w momencie zakończenia żądania. Zużycie współdzielonego limitu jest planowane w następnym takcie pętli zdarzeń za pośrednictwem [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
 - Wydatki na klucze API są buforowane i opróżniane partiami przez [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (domyślny interwał opróżniania 60 s, bufor na 1000 wpisów). Możliwość strojenia poprzez:
 
   | Kop. zm                             | Domyślny | Zamiar                                           |
@@ -98,7 +98,29 @@ Nazwy modeli są najpierw normalizowane (przedrostki ścieżek dostawców, takie
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000`  | Interwał spłukiwania w milisekundach.            |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`   | Maksymalnie buforowane wpisy przed opróżnieniem. |
 
-Dane dotyczące kosztów panelu kontrolnego są następujące** nie** odczytane z zapisanej kwoty w dolarach w wierszu — są ponownie obliczane na bieżąco na podstawie liczby tokenów i bieżącej tabeli cen za każdym razem, gdy uruchamiany jest punkt końcowy analizy. Oznacza to, że skorygowanie błędnej ceny (i ponowna synchronizacja) aktualizuje historyczne szacunki kosztów z mocą wsteczną.
+Koszty preferują dokładną opłatę podaną przez dostawcę (`provider_cost_usd`), następnie migawkę żądania według cen katalogowych (`calculated_cost_usd`), a następnie ponowną wycenę tokenową z bieżącego katalogu. Przechowywane koszty nie są ponownie naliczane na podstawie liczby tokenów. Starsze wiersze zawierające tylko tokeny nadal zmieniają się, gdy zmienia się ich cena katalogowa.
+
+### OCR i osadzania
+
+- Pomyślne żądania `/v1/ocr` wykorzystują nadrzędny `usage_info.pages_processed`, a nie żądany zakres stron lub liczbę zwróconych obiektów strony. Oszacowanie to strony × `ocr_cost_per_page` (absolutne USD/page,** nie** USD/million).
+- Żądania z adnotacjami dotyczącymi dokumentów lub ramek ograniczających wymagają osobnej taryfy `ocr_cost_per_annotated_page`. Bez tego koszt pozostaje nieznany; zwykła taryfa OCR nie jest po cichu zastępowana.
+- LiteLLM sync mapuje swoje nadrzędne pole `annotation_cost_per_page` na `ocr_cost_per_annotated_page`, zachowując bezwzględną wartość USD/page i wpisy zawierające wyłącznie adnotacje, w tym jawne zero. Dostarczone pole kanoniczne ma pierwszeństwo; nieprawidłowe wartości aliasów są ignorowane. Zastąpienia cen użytkownika zachowują swój normalny priorytet. Zobacz [klucze cenowe OCR firmy LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- Użycie OCR przechowuje liczbę stron, cenę jednostkową, obliczony koszt USD, klucz API i wybrane połączenie. Strony nigdy nie są reprezentowane jako tokeny. Dzienniki połączeń zawierają metadane rozliczeniowe, a nie dokument URLs, PDF Bajty lub wyodrębniony tekst.
+- Pomyślne żądania `/v1/embeddings` rejestrują jeden wiersz użycia na partię fizyczną, w tym oddzielne partie zakończone w tej samej milisekundie. Opłaty zgłaszane przez dostawcę mają pierwszeństwo przed szacunkami tokenów; owijarki combo nie dodają opłaty.
+- Historia użytkowania, analiza kosztów, okna provider/account, limity wydatków klucza API, księga kosztów żądań i codzienne podsumowania użytkowania obejmują te opłaty. Klucze bez dziennika zachowują rozliczenie numeryczne bez zachowywania tekstu źródłowego.
+- Brakujące informacje dotyczące wykorzystania lub taryf** nieznany** , nie jest bezpłatny: nagłówek „koszt odpowiedzi” został pominięty, a istniejąca polityka bezpłatnego użytkowania ma zastosowanie do ograniczonych kluczy API. Jawnie skonfigurowane stawki zerowe pozostają ważne przy zerowym koszcie użytkowania.
+
+Jest to rachunkowość typu forward. Na podstawie tej migracji nie można zrekonstruować starych wywołań OCR/embedding, które nigdy nie zapisywały historii użytkowania. Szacunki katalogowe są szacunkami USD, a nie fakturą i nie obejmują przeliczania walut, podatków ani rabatów.
+
+### Mowa i obrazy
+
+- Udane próby `/v1/audio/transcriptions`, `/v1/audio/speech` i generowania obrazu mają tę samą rachunkowość numeryczną. Połączenia bezpośrednie i kombi zawierają klucz API osoby dzwoniącej i wybrane połączenie; opakowanie combo nigdy nie dodaje drugiego obciążenia.
+- USD zgłoszona przez dostawcę wygrywa z szacunkami katalogowymi, w tym wyraźną zerową opłatą. OpenRouterJSON `usage.cost` jest normalizowane do `cost_usd`. W przeciwnym razie zmierzone tokeny korzystają z cen tokenów, sekundy transkrypcji korzystają z cen na sekundę, wprowadzanie mowy wykorzystuje liczbę znaków Unicode, a obrazy z ceną ryczałtową korzystają z faktycznie zwróconej liczby, a nie żądanego `n`.
+- Binarny OpenRouter TTS nie ma treści użycia JSON. Po zakończeniu dźwięku lub anulowaniu dzwoniącego, OmniRoute wysyła zapytanie o jego wygenerowanie ID na** To samo** skonfigurowane pochodzenie OpenRouter. Żądanie EU nigdy nie wraca do źródła globalnego. Jest to wyszukiwanie ograniczone, tylko do odczytu; synteza nie jest ponawiana do celów księgowych. Rekordy rozliczeniowe mogą pojawić się po zakończeniu odtwarzania dźwięku: ponowne wyszukiwanie odbywa się w tle przez maksymalnie około 52 sekundy, włączając terminy sieciowe.
+- Podczas tego wyszukiwania odpowiedź audio zawiera `X-OmniRoute-Cost-Status: pending` i nie ma nagłówka kosztu odpowiedzi. Jego końcowa opłata pojawia się w historii użytkowania, analityce i księdze kluczy po uzgodnieniu. Jeśli metadane są niedostępne, używana jest skonfigurowana migawka taryfowa; w przeciwnym razie koszt pozostaje nieznany.
+- Sekundy, znaki i liczby obrazów mają oddzielne pola jednostek rozliczeniowych, nigdy nie są liczone fałszywe tokeny. Księgowość zachowuje wyłącznie użycie numeryczne, a nie tekst mowy, transkrypcje lub bajty obrazu. Istniejące wyjątki dotyczące obrazów bez ceny pozostają niezmienione: taryfa dotycząca rzeczywiście brakującego obrazu nie blokuje nowego klucza z ograniczonym dostępem, a w odpowiedzi pomija się nagłówek kosztu, zamiast deklarować, że połączenie jest bezpłatne. Awaria magazynu cen nadal powoduje zachowanie dowodów użycia w celu wymuszenia zamknięcia w przypadku awarii.
+
+Nie wymyślono ani nie uzupełniono żadnych historycznych opłat speech/image. Rozliczenia z operatorem pozostają punktem odniesienia dla faktur i połączeń, których opłaty nie zostały zgłoszone.
 
 ---
 

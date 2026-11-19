@@ -96,48 +96,48 @@ Upozorenja dolaze iz zastarjelih raspona peer zavisnosti u paketima trećih stra
 
 ---
 
-## Upozorenje o blokiranim npm install-scripts skriptama (globalna instalacija)
+## npm install-scripts Blocked Warning (globalna instalacija)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Prilikom pokretanja naredbe `npm install -g omniroute`, novije verzije npm-a (v11+ i v12+) prema zadanim postavkama blokiraju skripte životnog ciklusa paketa i prikazuju upozorenje o install-scripts skriptama:
+Kada se pokreće `npm install -g omniroute`, novije verzije npm-a (v11 + i v12 +) blokiraju skripte životnog ciklusa paketa prema zadanim postavkama i prikazuju upozorenje o instalacijskim skriptama:
 
 ```
-npm warn install-scripts 7 paketa imalo je blokirane instalacijske skripte jer nisu obuhvaćeni postavkom allowScripts:
+npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
   omniroute@<version> (postinstall: node scripts/build/postinstall.mjs)
   keytar, @parcel/watcher, @swc/core, protobufjs, esbuild, onnxruntime-node
 ```
 
 ### Može li se ovo upozorenje zanemariti?
 
-**Djelimično, ali pokretanje bez skripti se ne preporučuje.** OmniRoute uključuje pouzdane rezervne opcije: ako se nativni `better-sqlite3` binarni moduli ne mogu učitati iz samostalnog paketa, aplikacija prelazi na alternativne upravljačke programe kao što su `node:sqlite` ili `sql.js` (pogledajte [Određivanje SQLite izvršnog okruženja](../ops/SQLITE_RUNTIME.md)). Server će se i dalje pokrenuti, ali korištenje WASM rezervnih opcija kao što je `sql.js` onemogućava SQLite WAL (Write-Ahead Logging) režim i povećava opterećenje memorije i sinhronizacije diska.
+**Djelomično, ali se ne preporučuje pokretanje bez skripti.** OmniRoute uključuje graciozne rezerve: ako se izvorna `better-sqlite3` veza ne mogu učitati iz samostalnog paketa, aplikacija se vraća preko alternativnih drajvera kao što su `node:sqlite` ili `sql.js` (pogledajte [SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) ). Server će se i dalje pokrenuti, ali pokretanje na WASM rezervnim opcijama kao što je `sql.js` onemogućuje SQLite WAL (Write-Ahead Logging) mod i povećava troškove memorije i sinhronizacije diska.
 
-### Koje su skripte zaista potrebne?
+### Koje su skripte zapravo potrebne?
 
-Nisu sve blokirane skripte neophodne za pokretanje OmniRoutea:
+Nisu sve blokirane skripte neophodne za pokretanje OmniRoute:
 
-- **Neophodne (`omniroute`, `better-sqlite3`):** OmniRoute se pokreće iz samostalnog paketa Next.js aplikacije (`dist/`). Tokom instalacije npm preuzima ili kompajlira nativni SQLite upravljački program specifičan za host u direktoriju najvišeg nivoa `node_modules/better-sqlite3/`. OmniRouteova `postinstall` skripta (`scripts/build/postinstall.mjs`) zatim provjerava i kopira ove binarne datoteke specifične za host u `dist/node_modules/` kako bi im samostalni server mogao pristupiti. Ako je OmniRouteova postinstall skripta blokirana, ovaj korak kopiranja se preskače.
-- **Opcionalne/tranzitivne (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Ovo su pomoćni alati za izgradnju, alati za praćenje promjena ili uslužni programi sistemskog spremišta ključeva. Njihovo dopuštanje sprečava upozorenja pri izgradnji, ali nisu potrebni za osnovnu funkcionalnost usmjeravanja.
-- **Isključena (`onnxruntime-node`):** Opcionalna zavisnost za lokalne AI ugradnje i **nije** potrebna za pokretanje OmniRoutea. Njena postinstall skripta preuzima približno 300 MB CUDA resursa s NuGet-a; nemojte je uključivati na listu dopuštenih paketa osim ako izričito namjeravate koristiti lokalno ONNX ubrzanje na podržanom hardveru.
+- **Osnovno (`omniroute`, `better-sqlite3`):** OmniRoute se pokreće iz Next.js samostalnog paketa aplikacija (`dist/`). Tokom instalacije, npm preuzima ili kompajlira domaći SQLite drajver specifičan za host u `node_modules/better-sqlite3/` najvišeg nivoa. OmniRoute `postinstall` skripta (`scripts/build/postinstall.mjs`) zatim provjerava i kopira ove binarne datoteke specifične za host u `dist/node_modules/` tako da im samostalni server može pristupiti. Ako je `omniroute`-ova postinstalacijska skripta blokirana, ovaj korak kopiranja se preskače.
+- **Optional/transitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** To su pomoćnici za izgradnju, alati za praćenje ili sistemski uslužni programi za privjesak ključeva. Njihovo dopuštanje sprečava upozorenja o izgradnji, ali nisu potrebna za funkcionalnost jezgre usmjeravanja.
+- **Isključeno (`onnxruntime-node`):** Opciona ovisnost za lokalne AI ugradnje i is** ne** potrebno za pokretanje OmniRoute a. Njegova postinstall skripta preuzima ~ 300MB CUDA imovine sa NuGet; nemojte ga uključivati u listu dopuštenja osim ako izričito ne namjeravate koristiti lokalno ONNX ubrzanje na podržanom hardveru.
 
-### Preporučeno rješenje
+### Preporučena popravka
 
-Da biste dopustili potrebne instalacijske skripte tokom globalne instalacije i uklonili upozorenja, proslijedite `--allow-scripts` za OmniRoute i njegove nativne zavisnosti:
+Da biste omogućili potrebne skripte za instalaciju tokom globalne instalacije i utišali upozorenja, proslijedite `--allow-scripts` za OmniRoute i njegove izvorne zavisnosti:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Alternativno, da biste ovo trajno konfigurirali za sve globalne instalacije na svom korisničkom računu:
+Alternativno, da ovo trajno konfigurirate za sve globalne instalacije na vašem korisničkom računu:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
 npm install -g omniroute
 ```
 
-### Provjerite instalaciju
+### Provjerite svoju instalaciju
 
-Nakon instalacije pokrenite ugrađeni dijagnostički alat kako biste provjerili jesu li nativni binarni moduli i izvršno okruženje ispravni:
+Nakon instalacije, pokrenite ugrađeni dijagnostički alat kako biste osigurali da su izvorni vezivanja i okruženje za izvršavanje zdravi:
 
 ```bash
 omniroute doctor
@@ -848,13 +848,13 @@ Potpune detalje o `OMNIROUTE_READY_TIMEOUT_MS` pogledajte u [`docs/reference/ENV
 
 Dijagnostička matrica za alate kompresije CCR (`ccr`) i `session-dedup`. Za potpunu referencu operatera (markeri, preduvjeti, opsezi po alatu, paginacija za dohvaćanje) pogledajte [Kompresijski motori → Preduvjeti / vodič za operatera](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-| Simptom                                                                                               | Vjerovatni uzrok                                                                                                                                     | Verify                                                                                                                                | Popravi                                                                                                                                                                                                                                                                       |
-| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **MCP 403** — `403 LOCAL_ONLY`                                                                        | Route-guard loopback auth, a ne transportna greška. Nijedan `Bearer`, ili ključ bez `mcp:connect`/`manage`/`admin`, nije stigao do `/api/mcp/` rute. | Zahtjev je nosio no/invalid `Authorization` zaglavlje.                                                                                | Pošaljite važeći `Bearer` ključ. Daljinski ključ može držati `mcp:connect` (ovlašćuje `/api/mcp/` samo lokalno izdvajanje) plus specifičan read/write opseg koji mu je potreban.                                                                                              |
-| **blok nije pronađen** — `omniroute_ccr_retrieve` odbija hash                                         | Haš nije 24-heksadecimalna vrijednost ili je pogrešno kopiran, ili je blok već istekao/izbačen.                                                      | Uporedite heš sa 24-heksadecimalnom vrednošću u `[CCR retrieve hash=…]` markeru; provjerite `omniroute_ccr_stats` za stanje trgovine. | Doslovno kopirajte 24-hex heš sa markera. Ako je blok zaista nestao, prošao je svoju TTL ili nikada nije stigao do trajne memorije (blokovi preko 512 KB, i svaki blok u vremenu rada u oblaku, ostaju samo u memoriji i ne prežive ponovno pokretanje).                      |
-| **CCR no-op** — blok nije komprimiran (tekst se vraća nepromijenjen)                                  | Blokirajte ispod praga kompresije ili je CCR motor/režim neaktivan.                                                                                  | Provjerite aktivnu kompresiju `strategy`/`enabled` i veličinu bloka u odnosu na prag.                                                 | Omogućite CCR (ili složeni način rada koji ga pokreće) i potvrdite da je blok dovoljno velik da ga vrijedi pohraniti. No-op nije greška — već "ništa za komprimiranje."                                                                                                       |
-| **dedup marker** — `[dedup:ref sha=…]` se pojavljuje u izlazu                                         | **Namjerno osvrtanje** , a ne gubitak ili greška. `session-dedup` je uklonjen tekst koji je već poslan u ranijem dijelu iste sesije.                 | Potvrdite da se isti tekst pojavljuje ranije u sesiji.                                                                                | Ne radite ništa — ne zovite alat i ne pokušavajte da ga rekonstruišete. Prva pojava je kanonska kopija; trenutni red se nikada ne prepisuje, već se dedupira u kasnijem krugu.                                                                                                |
-| **Code Mode** — `omniroute_ccr_*` alati odsutni u `tools[]` / CCR instrukciji nisu ubačeni (OpenCode) | OpenCode Code Mode (podrazumevano) oglašava samo izvorne alate modelu, skrivajući MCP alate od `tools[]`.                                            | Provjerite unos OpenCode MCP servera za `codemode`.                                                                                   | Postavite `codemode: false` na unos servera (a** klijent** podešavanje) tako da se MCP alati oglašavaju. Instrukcija CCR protokola preuzimanja ostaje isključena: server pod imenom `omniroute` izlaže `omniroute_omniroute_ccr_retrieve`, a `_` nije odgovarajući separator. |
+| Simptom                                                                                               | Vjerovatni uzrok                                                                                                                                     | Verify                                                                                                                                | Popravi                                                                                                                                                                                                                                                                                       |
+| ----------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                        | Route-guard loopback auth, a ne transportna greška. Nijedan `Bearer`, ili ključ bez `mcp:connect`/`manage`/`admin`, nije stigao do `/api/mcp/` rute. | Zahtjev je nosio no/invalid `Authorization` zaglavlje.                                                                                | Pošaljite važeći `Bearer` ključ. Daljinski ključ može držati `mcp:connect` (ovlašćuje `/api/mcp/` samo lokalno izdvajanje) plus specifičan read/write opseg koji mu je potreban.                                                                                                              |
+| **blok nije pronađen** — `omniroute_ccr_retrieve` odbija hash                                         | Haš nije 24-heksadecimalna vrijednost ili je pogrešno kopiran, ili je blok već istekao/izbačen.                                                      | Uporedite heš sa 24-heksadecimalnom vrednošću u `[CCR retrieve hash=…]` markeru; provjerite `omniroute_ccr_stats` za stanje trgovine. | Doslovno kopirajte 24-hex heš sa markera. Ako je blok zaista nestao, prošao je svoju TTL ili nikada nije stigao do trajne memorije (blokovi preko 512 KB, i svaki blok u vremenu rada u oblaku, ostaju samo u memoriji i ne prežive ponovno pokretanje).                                      |
+| **CCR no-op** — blok nije komprimiran (tekst se vraća nepromijenjen)                                  | Blokirajte ispod praga kompresije ili je CCR motor/režim neaktivan.                                                                                  | Provjerite aktivnu kompresiju `strategy`/`enabled` i veličinu bloka u odnosu na prag.                                                 | Omogućite CCR (ili složeni način rada koji ga pokreće) i potvrdite da je blok dovoljno velik da ga vrijedi pohraniti. No-op nije greška — već "ništa za komprimiranje."                                                                                                                       |
+| **dedup marker** — `[dedup:ref sha=…]` se pojavljuje u izlazu                                         | **Namjerno osvrtanje** , a ne gubitak ili greška. `session-dedup` je uklonjen tekst koji je već poslan u ranijem dijelu iste sesije.                 | Potvrdite da se isti tekst pojavljuje ranije u sesiji.                                                                                | Ne radite ništa — ne zovite alat i ne pokušavajte da ga rekonstruišete. Prva pojava je kanonska kopija; trenutni red se nikada ne prepisuje, već se dedupira u kasnijem krugu.                                                                                                                |
+| **Code Mode** — `omniroute_ccr_*` alati odsutni u `tools[]` / CCR instrukciji nisu ubačeni (OpenCode) | OpenCode Code Mode (podrazumevano) oglašava samo izvorne alate modelu, skrivajući MCP alate od `tools[]`.                                            | Provjerite unos OpenCode MCP servera za `codemode`.                                                                                   | Postavite `codemode: false` na unos servera (a** klijent** podešavanje) tako da se MCP alati oglašavaju. Server pod imenom `omniroute` izlaže `omniroute_omniroute_ccr_retrieve`; `_` je podudarni separator, tako da se CCR instrukcija ubacuje pod tim imenom kada zahtjev nosi CCR marker. |
 
 Više simptoma:
 

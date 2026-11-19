@@ -1,5 +1,6 @@
 "use client";
 
+import { useTranslations } from "next-intl";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import { Alert } from "@omniroute/ui-kit/alert";
 import Card from "@/shared/components/Card";
@@ -48,6 +49,7 @@ export default function KeyPolicySixTabEditor(props: KeyPolicySixTabEditorProps)
     hasBlockingReferenceIssues,
     disabled,
   } = model;
+  const tc = useTranslations("common");
   const ActiveTab = TAB_COMPONENTS[activeTab];
   return (
     <KeyPolicyEditorContext.Provider value={model}>
@@ -66,6 +68,7 @@ export default function KeyPolicySixTabEditor(props: KeyPolicySixTabEditorProps)
                 ? t("templateStaleReferencesBlockingDesc")
                 : t("templateStaleReferencesWarningDesc")
             }
+            dismissLabel={tc("close")}
           />
         )}
 

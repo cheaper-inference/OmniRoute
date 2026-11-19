@@ -4,6 +4,7 @@ import { sanitizeErrorMessage } from "@omniroute/open-sse/utils/error.ts";
 import { getProviderCredentialsWithQuotaPreflight } from "./auth";
 import { isCredentialDiagnosticSentinel } from "./credentialSentinel";
 import { checkAndRefreshToken } from "./tokenRefresh";
+import { imageQuotaPreflightOptions } from "./imageQuotaSelectionPolicy";
 import * as log from "../utils/logger";
 
 interface ImageGenerationResult {
@@ -123,6 +124,7 @@ async function defaultSelectNextCredentials(
     requestedModel,
     {
       excludeConnectionIds: Array.from(excludedConnectionIds),
+      ...imageQuotaPreflightOptions(provider),
     }
   );
 }
