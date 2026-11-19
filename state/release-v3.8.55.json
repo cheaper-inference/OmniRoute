@@ -3,65 +3,72 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b5",
+    "batchId": "b6",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b5-f07fddeb90a1",
-    "candidateSha": "f07fddeb90a12d51958e2008448837fb1dc59b0c",
-    "baseSha": "f05732fbfbbf9468a714cf743b5746868032b854",
-    "treeSha": "8afc78dc50aede271ef851cfcd16d4c6bcb0137b",
+    "candidateRef": "omni-queue/release-v3.8.55/b6-7a768a02ac40",
+    "candidateSha": "7a768a02ac40fcef60af1f5e3c9032bab8a8e450",
+    "baseSha": "fbd339668384803bc3a9d42370fc413a55e013d5",
+    "treeSha": "6d7a1c25835ab412cd2aa14949b21b64a410d5ef",
     "prs": [
       {
-        "n": 20670,
-        "head": "47e32c3fa0231b891dadbf37e339a3df000135ea",
-        "title": "fix(deps): resolve glob and minimatch advisories through overrides",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-19T19:31:09Z"
+        "n": 20275,
+        "head": "2684763dd5f5ba74b1fb62d7a9a80edf7fe99671",
+        "title": "fix(responses): ensure streaming response.output_text.delta carries item_id (#20257)",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-19T19:53:38Z"
       },
       {
-        "n": 19846,
-        "head": "b15396963a957596685f5dbc4426c564021c5dd0",
-        "title": "fix(webdav): enforce rate limiting and lockout on basic auth attempts",
+        "n": 20286,
+        "head": "a9729042983ab5f9401399ca20fc7082bb1652ef",
+        "title": "feat(providers): enable strictChatHistory repair for custom OpenAI-compatible nodes (#20262)",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:21Z"
+        "labeledAt": "2026-11-19T19:53:44Z"
       },
       {
-        "n": 19914,
-        "head": "fd5265c904adada96a349f2d209a095f211714d9",
-        "title": "fix(mitm): use dynamic os.platform checks for certificate trust detection (#19863)",
+        "n": 20299,
+        "head": "7748a95d4699d405f4886f8f229a76838d753ca5",
+        "title": "fix(db): resolve provider alias for parameter filter storage and retrieval (#20295)",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:24Z"
+        "labeledAt": "2026-11-19T19:53:50Z"
       },
       {
-        "n": 20102,
-        "head": "cee847c19b8e3aae88a6f670ec73ff73efe0e5b9",
-        "title": "fix(codebuddy): bound gap wildcards in AGENT_PATTERN to prevent auto-mode prompt false positives (#20098)",
+        "n": 20320,
+        "head": "087c600d874ac9f5986bff2a65cba427758c1e7d",
+        "title": "feat(db): support persistent boolean model capability overrides",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:26Z"
+        "labeledAt": "2026-11-19T19:53:56Z"
       },
       {
-        "n": 20115,
-        "head": "b294213affdcb67d63e06b9cd44e77491ec37e09",
-        "title": "fix(oauth): reset cooldown and backoff when renewing OAuth tokens (#20067)",
+        "n": 20464,
+        "head": "71d1e05edfadcca39cede4873df7ed2da74a7eda",
+        "title": "fix(catalog): preserve Codex 872k context window for codex/gpt-6.1-sol (#20437)",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:29Z"
+        "labeledAt": "2026-11-19T19:54:00Z"
       },
       {
-        "n": 20268,
-        "head": "085427318d7d9267e046826d943fa14de718dd37",
-        "title": "fix(providers): add Gemini 4 Hydrogen specs, bare alias, output cap, and pricing (#20124)",
+        "n": 20465,
+        "head": "e8d91215d6c8b7778fd94f98328aece1cf827412",
+        "title": "fix(catalog): declare accepted effort tiers for opencode-go/deepseek-v4.1-flash (#20436)",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:31Z"
+        "labeledAt": "2026-11-19T19:54:03Z"
       },
       {
-        "n": 20270,
-        "head": "b165c0fa0582453a3d7840cab31c45f3b974dc25",
-        "title": "fix(messages): inject reasoning_content placeholder for DeepSeek thinking models (#20260)",
+        "n": 20467,
+        "head": "cea3b0e63d2bd02ec090c1f3666d6344c1af96e4",
+        "title": "fix(catalog): omit generic effort_tiers on Antigravity tier-suffixed models (#20435)",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:34Z"
+        "labeledAt": "2026-11-19T19:54:06Z"
+      },
+      {
+        "n": 20468,
+        "head": "5fa146acebb374c1c4387fca40ff7e60c72a07e6",
+        "title": "fix(analytics): retain per-provider rows in byModel for shared model names (#20453)",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-19T19:54:09Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-19T21:16:56.773Z",
+    "startedAt": "2026-11-19T22:34:09.241Z",
     "attempts": 0,
     "bisect": null
   },
@@ -84,12 +91,14 @@
     "processed": {
       "19788": "78b7a2b34b564454a234e2b0fed15eee2ff5900d",
       "19798": "ea246abe1c7b22dd5be931f58d3ddc78ec0a8667",
+      "20268": "085427318d7d9267e046826d943fa14de718dd37",
+      "20270": "b165c0fa0582453a3d7840cab31c45f3b974dc25",
       "20616": "97013f5becf14020c55b685c9d0d43d5ae93d0c3"
     }
   },
   "counters": {
-    "batchSeq": 5,
-    "ciRuns": 6,
+    "batchSeq": 6,
+    "ciRuns": 7,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 2,
@@ -382,8 +391,69 @@
         "20670": "2026-11-19T19:31:09Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44616525159"
+    },
+    {
+      "at": "2026-11-19T22:32:44.595Z",
+      "type": "checks-green",
+      "batchId": "b5",
+      "prs": [
+        20670,
+        19846,
+        19914,
+        20102,
+        20115,
+        20268,
+        20270
+      ],
+      "sha": "f07fddeb90a12d51958e2008448837fb1dc59b0c",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44629567788"
+    },
+    {
+      "at": "2026-11-19T22:33:04.297Z",
+      "type": "would-land",
+      "batchId": "b5",
+      "prs": [
+        20670,
+        19846,
+        19914,
+        20102,
+        20115,
+        20268,
+        20270
+      ],
+      "sha": "f07fddeb90a12d51958e2008448837fb1dc59b0c",
+      "detail": "shadow mode: would merge-ff onto f05732fbfbbf; merged meanwhile by another path: #20670, #19846, #19914, #20102, #20115",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44629567788"
+    },
+    {
+      "at": "2026-11-19T22:34:12.626Z",
+      "type": "batch-started",
+      "batchId": "b6",
+      "prs": [
+        20275,
+        20286,
+        20299,
+        20320,
+        20464,
+        20465,
+        20467,
+        20468
+      ],
+      "sha": "7a768a02ac40fcef60af1f5e3c9032bab8a8e450",
+      "detail": "8 PR(s) on fbd339668384; window 8",
+      "labeledAt": {
+        "20275": "2026-11-19T19:53:38Z",
+        "20286": "2026-11-19T19:53:44Z",
+        "20299": "2026-11-19T19:53:50Z",
+        "20320": "2026-11-19T19:53:56Z",
+        "20464": "2026-11-19T19:54:00Z",
+        "20465": "2026-11-19T19:54:03Z",
+        "20467": "2026-11-19T19:54:06Z",
+        "20468": "2026-11-19T19:54:09Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44629567788"
     }
   ],
-  "updatedAt": "2026-11-19T21:45:26.256Z",
-  "batchWindow": 7
+  "updatedAt": "2026-11-19T22:34:14.115Z",
+  "batchWindow": 8
 }
