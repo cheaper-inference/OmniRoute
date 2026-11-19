@@ -66,6 +66,7 @@ import {
 } from "./entrypointWrap.ts";
 import { makeMemoKey, memoLookup, memoStore, isDeterministicMode } from "./resultMemo.ts";
 import { applyLossyRequestPolicy } from "./lossyRequestPolicy.ts";
+import { projectGeminiToolOutputs } from "./geminiToolOutputs.ts";
 export { resolveCacheAwareConfig } from "./cacheAwareConfig.ts";
 
 // The rate-limited fail-open notifier lives in its own module so the worker pool
@@ -297,7 +298,14 @@ export function applyCompression(
     cachingContext?: CachingDetectionContext;
   }
 ): CompressionResult {
-  return withCompressionEntrypointGuards(body, options, (b) => runCompression(b, mode, options));
+  const projected = projectGeminiToolOutputs(body);
+  if (!projected.adapted) {
+    return withCompressionEntrypointGuards(body, options, (b) => runCompression(b, mode, options));
+  }
+  const result = withCompressionEntrypointGuards(projected.body, options, (b) =>
+    runCompression(b, mode, options)
+  );
+  return { ...result, body: projected.restore(result.body) };
 }
 
 function runCompression(
@@ -510,9 +518,16 @@ export async function applyCompressionAsync(
     cachingContext?: CachingDetectionContext;
   }
 ): Promise<CompressionResult> {
-  return withCompressionEntrypointGuardsAsync(body, options, (b) =>
+  const projected = projectGeminiToolOutputs(body);
+  if (!projected.adapted) {
+    return withCompressionEntrypointGuardsAsync(body, options, (b) =>
+      runCompressionAsync(b, mode, options)
+    );
+  }
+  const result = await withCompressionEntrypointGuardsAsync(projected.body, options, (b) =>
     runCompressionAsync(b, mode, options)
   );
+  return { ...result, body: projected.restore(result.body) };
 }
 
 async function runCompressionAsync(
