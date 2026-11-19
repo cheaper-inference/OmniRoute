@@ -23,6 +23,7 @@ const { extractUserTurnText, extractAssistantTurnText, extractAgentSessionTurn }
   await import("../../open-sse/handlers/chatCore/agentSessionTurn.ts");
 const { resolveSessionTurn } = await import("../../open-sse/handlers/chatCore/agentContext.ts");
 const { createSSEStream } = await import("../../open-sse/utils/stream.ts");
+const { TOOL_USE_NAMES_FIELD } = await import("../../open-sse/utils/sessionTurnToolNames.ts");
 const { FORMATS } = await import("../../open-sse/translator/formats.ts");
 const { GET: getMessagesRoute } =
   await import("../../src/app/api/v1/me/sessions/[id]/messages/route.ts");
@@ -480,9 +481,28 @@ test("streamed Anthropic passthrough yields the assistant text and tool_use name
   const completion = await assembleStream(chunks, claudePassthroughOptions());
 
   const message = (completion.responseBody as AssembledChatBody).choices[0].message;
-  assert.equal(message.tool_calls, undefined, "the assembled body gains no name-only tool_calls");
-  assert.ok(!JSON.stringify(completion.responseBody).includes("Read"), "names stay off the wire");
-  assert.ok(!JSON.stringify(completion.clientPayload).includes("tool_calls"), "call log unchanged");
+  // The stream summary lists the native tool_use call itself, arguments included (#19557);
+  // the turn capture must add nothing beside it — no name-only tool_calls.
+  assert.deepEqual(
+    message.tool_calls,
+    [
+      {
+        id: "toolu_0",
+        index: 0,
+        type: "function",
+        function: { name: "Read", arguments: '{"file_path":"a.ts"}' },
+      },
+    ],
+    "the assembled body gains no name-only tool_calls"
+  );
+  assert.ok(
+    !JSON.stringify(completion.responseBody).includes(TOOL_USE_NAMES_FIELD),
+    "the captured names stay off the serialized body"
+  );
+  assert.ok(
+    !JSON.stringify(completion.clientPayload).includes(TOOL_USE_NAMES_FIELD),
+    "call log unchanged by the capture"
+  );
   const turn = streamedAssistantTurn(completion);
   assert.equal(turn.assistantText, "Let me check the tests.");
   assert.deepEqual(turn.toolNames, ["Read"]);
@@ -518,7 +538,7 @@ test("streamed Anthropic passthrough keeps at most 20 tool names", async () => {
   assert.deepEqual(streamedAssistantTurn(completion).toolNames, names.slice(0, 20));
 });
 
-test("the semantic cache stores the Claude passthrough body without tool names", async () => {
+test("the semantic cache does not store a Claude passthrough body that called tools", async () => {
   const completion = await assembleStream(
     claudeToolUseStream(["Read"], "Cached text."),
     claudePassthroughOptions()
@@ -544,9 +564,8 @@ test("the semantic cache stores the Claude passthrough body without tool names",
     }
   );
 
-  const replayed = JSON.parse(JSON.stringify(cachedBody)) as AssembledChatBody;
-  assert.equal(replayed.choices[0].message.content, "Cached text.");
-  assert.equal(replayed.choices[0].message.tool_calls, undefined, "no malformed tool calls replay");
+  // A response that carries tool calls is never cached (#19448), so no tool call can replay.
+  assert.equal(cachedBody, null, "no tool calls replay from the cache");
 });
 
 test("streamed OpenAI upstream translated for an Anthropic client yields text and tools", async () => {

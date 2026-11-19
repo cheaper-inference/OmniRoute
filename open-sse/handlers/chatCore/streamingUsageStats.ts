@@ -41,6 +41,11 @@ export type RecordStreamingUsageStatsContext = {
   emittedOutput?: boolean;
 };
 
+/** Agent attribution for the usage row (session identity and the captured turn, both optional). */
+function streamingUsageAgentFields(ctx: RecordStreamingUsageStatsContext) {
+  return { agentContext: ctx.agentContext ?? null, sessionTurn: ctx.sessionTurn ?? null };
+}
+
 function persistStreamingUsageRow(usage: object, ctx: RecordStreamingUsageStatsContext): void {
   const { provider, model, streamStatus, startTime, ttft, streamErrorCode } = ctx;
   saveRequestUsage({
@@ -60,8 +65,7 @@ function persistStreamingUsageRow(usage: object, ctx: RecordStreamingUsageStatsC
     comboStrategy: ctx.isCombo ? ctx.comboStrategy || undefined : undefined,
     endpoint: ctx.endpoint || undefined,
     cpaAuthIndex: ctx.cpaAuthIndex || undefined,
-    agentContext: ctx.agentContext ?? null,
-    sessionTurn: ctx.sessionTurn ?? null,
+    ...streamingUsageAgentFields(ctx),
   }).catch((err) => {
     console.error("Failed to save usage stats:", err.message);
   });
