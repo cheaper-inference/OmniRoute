@@ -6,6 +6,7 @@ import { join } from "node:path";
 import { fileURLToPath } from "node:url";
 import test from "node:test";
 import { load as loadYaml } from "js-yaml";
+import { expression } from "../_helpers/workflowExpression.mjs";
 import { evaluateAdmission } from "../../scripts/quality/admission-verdict.mjs";
 
 const policy = JSON.parse(
@@ -323,11 +324,24 @@ for (const profile of ["ci", "quality"]) {
     const checkName = policy.profiles[profile].checkName;
     const unrequestedName = `Admission not requested / ${profile === "ci" ? "CI" : "Quality"}`;
     assert.ok(verdict.name.endsWith(`&& '${checkName}' || '${unrequestedName}' }}`), verdict.name);
-    // Classification failure still reaches always(); queue description edits remain excluded.
-    assert.match(
-      verdict.if,
-      /^\$\{\{ always\(\) && !\(github\.event_name == 'pull_request' && github\.event\.action == 'edited' && github\.event\.pull_request\.user\.login == 'mergify\[bot\]' && /
-    );
+    // Classification failure still reaches the gate. A metadata-only edit, even with
+    // a null previous body, cannot replace the check for the candidate being tested.
+    assert.match(verdict.if, /^\$\{\{ always\(\) && /);
+    const edit = {
+      "github.event_name": "pull_request",
+      "github.event.action": "edited",
+      "github.event.changes.base": null,
+      "github.event.changes.body": { from: null },
+      "github.event.changes.title": null,
+      "github.event.pull_request.draft": true,
+      "needs.changes.result": "failure",
+      "needs.changes.outputs.queueCandidate": "false",
+    };
+    assert.equal(Boolean(expression(verdict.if, edit)), false);
+    assert.equal(expression(verdict.name, edit), `${checkName} (PR metadata edit)`);
+    edit["github.event.changes.base"] = { ref: { from: "main" } };
+    assert.equal(Boolean(expression(verdict.if, edit)), true);
+    assert.equal(expression(verdict.name, edit), checkName);
     assert.deepEqual(workflow.on.pull_request.branches, ["main", "release/**"]);
     // Push runs only for main since 2026-10-18: each change already ran the matrix on its
     // PR and Release-Green validates the merged combination on release/** (the per-push
