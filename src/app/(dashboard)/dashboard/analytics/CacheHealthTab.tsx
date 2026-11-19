@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
+import { Progress } from "@omniroute/ui-kit/progress";
 import Card from "@/shared/components/Card";
 import Badge from "@/shared/components/Badge";
 import { Skeleton } from "@/shared/components/Loading";
@@ -90,7 +91,7 @@ function Metric({ label, value, hint }: { label: string; value: string; hint?: s
 function CacheWriteTiers({ data, t }: { data: CacheHealthResponse; t: Translator }) {
   return (
     <Card>
-      <h3 className="mb-3 text-sm font-semibold text-text-main">
+      <h3 className="mb-3 text-sm text-text-main">
         {text(t, "cacheHealthWriteTiers", "Reported cache-write tiers")}
       </h3>
       <div className="grid grid-cols-2 gap-6 md:grid-cols-4">
@@ -182,7 +183,7 @@ export default function CacheHealthTab() {
     <div className="flex flex-col gap-4">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-2">
-          <h2 className="text-lg font-semibold text-text-main">
+          <h2 className="text-lg text-text-main">
             {text(t, "cacheHealthTitle", "Prompt cache health")}
           </h2>
           <Badge variant={verdictVariant(data.verdict)}>
@@ -243,7 +244,7 @@ export default function CacheHealthTab() {
           <Card>
             <div className="flex flex-col gap-3">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h3 className="text-sm font-semibold text-text-main">
+                <h3 className="text-sm text-text-main">
                   {text(t, "cacheHealthConcentration", "Where the writes are concentrated")}
                 </h3>
                 <span className="text-xs text-text-muted">
@@ -258,15 +259,17 @@ export default function CacheHealthTab() {
                 {text(t, "cacheHealthOfWrites", "of all written tokens")} (
                 {compact(data.heavyWriteCalls)} {text(t, "cacheHealthCallsLower", "calls")}).
               </p>
-              <div className="h-2 w-full overflow-hidden rounded-full bg-bg-subtle">
-                <div
-                  className={cn(
-                    "h-full rounded-full",
-                    data.heavyWriteTokenShare > 0.75 ? "bg-error" : "bg-warning"
-                  )}
-                  style={{ width: `${Math.min(100, data.heavyWriteTokenShare * 100)}%` }}
-                />
-              </div>
+              <Progress
+                aria-label={text(
+                  t,
+                  "cacheHealthConcentration",
+                  "Where the writes are concentrated"
+                )}
+                aria-valuetext={pct(data.heavyWriteTokenShare)}
+                value={data.heavyWriteTokenShare * 100}
+                tone={data.heavyWriteTokenShare > 0.75 ? "danger" : "warning"}
+                animate={false}
+              />
               <div className="grid grid-cols-2 gap-4 pt-1 md:grid-cols-4">
                 <Metric label="p50" value={compact(data.writeP50)} />
                 <Metric label="p90" value={compact(data.writeP90)} />
@@ -277,7 +280,7 @@ export default function CacheHealthTab() {
           </Card>
 
           <Card>
-            <h3 className="mb-3 text-sm font-semibold text-text-main">
+            <h3 className="mb-3 text-sm text-text-main">
               {text(t, "cacheHealthByModel", "By model (worst ratio first)")}
             </h3>
             <Table
@@ -288,20 +291,20 @@ export default function CacheHealthTab() {
             >
               <TableHeader>
                 <TableRow>
-                  <TableHead className="pb-2 pr-4 font-medium">
+                  <TableHead className="pb-2 pr-4">
                     {text(t, "cacheHealthModel", "Model")}
                   </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right font-medium">
+                  <TableHead className="pb-2 pr-4 text-right">
                     {text(t, "cacheHealthCalls", "Calls")}
                   </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right font-medium">
+                  <TableHead className="pb-2 pr-4 text-right">
                     {text(t, "cacheHealthRead", "Read")}
                   </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right font-medium">
+                  <TableHead className="pb-2 pr-4 text-right">
                     {text(t, "cacheHealthWrite", "Written")}
                   </TableHead>
-                  <TableHead className="pb-2 pr-4 text-right font-medium">W/R</TableHead>
-                  <TableHead className="pb-2 text-right font-medium">
+                  <TableHead className="pb-2 pr-4 text-right">W/R</TableHead>
+                  <TableHead className="pb-2 text-right">
                     {text(t, "cacheHealthHeavy", "Heavy")}
                   </TableHead>
                 </TableRow>
@@ -323,7 +326,7 @@ export default function CacheHealthTab() {
                     </TableCell>
                     <TableCell
                       className={cn(
-                        "py-2 pr-4 text-right font-medium",
+                        "py-2 pr-4 text-right",
                         m.writeReadRatio > 1
                           ? "text-error"
                           : m.writeReadRatio > 0.2

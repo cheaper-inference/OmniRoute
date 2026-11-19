@@ -367,6 +367,7 @@ export default function TokensPage() {
           ) : (
             <Table
               scrollbarLabel={t("tokensTransactionHistory")}
+              scrollLabel={t("tokensTransactionHistory")}
               containerClassName="rounded-none border-0"
             >
               <TableHeader>

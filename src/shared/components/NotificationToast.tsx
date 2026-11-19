@@ -114,9 +114,14 @@ function NotificationBridge() {
 }
 
 export default function NotificationToast() {
+  const t = useTranslations("common");
   return (
     <>
-      <Toaster position="top-right" />
+      <Toaster
+        position="top-right"
+        closeLabel={t("dismissNotification")}
+        announcementLabel={(message) => t("notificationAnnouncement", { message })}
+      />
       <NotificationBridge />
     </>
   );
