@@ -35,7 +35,7 @@ function identity(value: unknown): string | undefined {
   // Node's Headers rejects any code point above U+00FF, which would fail the whole request
   // at header build. Hash such an id: one conversation keeps one stable, header-safe value.
   if (/[^\u0000-\u00ff]/.test(id)) {
-    return `sid_${createHash("sha256").update(id).digest("hex").slice(0, 32)}`;
+    return `sid_${createHash("sha256").update(id, "utf16le").digest("hex").slice(0, 32)}`;
   }
   return id || undefined;
 }

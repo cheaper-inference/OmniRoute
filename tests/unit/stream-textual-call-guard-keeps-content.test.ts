@@ -118,3 +118,61 @@ test("prose that mentions a tool call and then continues is passed through uncha
   ]);
   assert.equal(frames.map(contentOf).join(""), "Use [Tool call: terminal] to run it.");
 });
+
+async function runResponses(events: JsonRecord[]) {
+  const source = new ReadableStream({
+    start(controller) {
+      for (const event of events) {
+        controller.enqueue(textEncoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+      }
+      controller.close();
+    },
+  });
+  const stream = createSSEStream({
+    mode: "passthrough",
+    sourceFormat: FORMATS.OPENAI_RESPONSES,
+    clientResponseFormat: FORMATS.OPENAI_RESPONSES,
+    provider: "test",
+    model: "m",
+    body: {
+      input: "hi",
+      tools: [{ type: "function", name: "terminal", parameters: { type: "object" } }],
+    },
+  } as never);
+  const text = await new Response(source.pipeThrough(stream)).text();
+  return text
+    .split("\n")
+    .filter((line) => line.startsWith("data:") && !line.includes("[DONE]"))
+    .map((line) => JSON.parse(line.slice(5)) as JsonRecord);
+}
+
+for (const terminalType of [
+  "response.completed",
+  "response.done",
+  "response.cancelled",
+  "response.canceled",
+]) {
+  test(`a held Responses textual-call header is sent before a ${terminalType} terminal event`, async () => {
+    const held = '[Tool call: terminal]\nArguments: {"command":';
+    const frames = await runResponses([
+      { type: "response.created", response: { id: "resp_1", status: "in_progress" } },
+      { type: "response.output_text.delta", item_id: "msg_1", output_index: 0, delta: held },
+      { type: terminalType, response: { id: "resp_1", status: "completed", output: [] } },
+    ]);
+    const terminalAt = frames.findIndex((frame) => frame.type === terminalType);
+    assert.ok(terminalAt >= 0, "the terminal event is forwarded");
+    const textOf = (frame: JsonRecord) =>
+      frame.type === "response.output_text.delta" && typeof frame.delta === "string"
+        ? frame.delta
+        : "";
+    assert.equal(
+      frames
+        .slice(terminalAt + 1)
+        .map(textOf)
+        .join(""),
+      "",
+      "no text after terminal"
+    );
+    assert.equal(frames.slice(0, terminalAt).map(textOf).join(""), held);
+  });
+}

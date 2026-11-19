@@ -67,3 +67,11 @@ test("control characters and oversize ids are still rejected", () => {
   assert.equal(resolveOpencodeSessionIdentity({}, { session_id: "x".repeat(257) }), undefined);
   assert.equal(resolveOpencodeSessionIdentity({}, { session_id: "   " }), undefined);
 });
+
+test("distinct lone-surrogate ids keep distinct hashed session values", () => {
+  const high = resolveOpencodeSessionIdentity({}, { session_id: "conv-\ud800" });
+  const low = resolveOpencodeSessionIdentity({}, { session_id: "conv-\udc00" });
+  assert.ok(high && low, "both ids are kept");
+  assert.notEqual(high, low);
+  assert.doesNotThrow(() => new Headers({ "x-opencode-session": high }));
+});

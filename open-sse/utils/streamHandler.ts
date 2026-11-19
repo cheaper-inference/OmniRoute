@@ -684,7 +684,8 @@ export function createDisconnectAwareStream(
   const highWaterMark = options.highWaterMark ?? 16384;
   const queueStrategy = {
     highWaterMark,
-    size: (chunk: unknown) => (chunk instanceof Uint8Array ? chunk.byteLength : 1),
+    // An empty chunk still costs 1, or a stalled client could queue them without bound.
+    size: (chunk: unknown) => (chunk instanceof Uint8Array ? Math.max(1, chunk.byteLength) : 1),
   };
 
   return new ReadableStream(

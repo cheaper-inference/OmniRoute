@@ -106,3 +106,32 @@ test("a reading client still receives every byte, including a chunk larger than 
   assert.deepEqual(sizes.slice(0, 3), [10, 100 * 1024, 10]);
   assert.equal(total, 10 + 100 * 1024 + 10);
 });
+
+test("a stalled client does not let empty chunks pile up without bound", async () => {
+  const state = { produced: 0 };
+  const empty = new Uint8Array(0);
+  const readable = new ReadableStream<Uint8Array>(
+    {
+      pull(controller) {
+        if (state.produced >= SOURCE_FRAMES) {
+          controller.close();
+          return;
+        }
+        state.produced++;
+        controller.enqueue(empty);
+      },
+    },
+    { highWaterMark: 0 }
+  );
+  const stream = createDisconnectAwareStream(
+    { readable, writable: createNoopAbortWritable() },
+    createStreamController()
+  );
+  await settle(state);
+  // Each empty chunk costs at least one unit, so the 16 KiB budget caps the read-ahead.
+  assert.ok(
+    state.produced <= 16 * 1024 + MAX_FRAMES_AHEAD,
+    `pulled ${state.produced} empty chunks ahead of a client that never read`
+  );
+  await stream.cancel("test done");
+});

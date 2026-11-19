@@ -1800,11 +1800,7 @@ export function createSSEStream(options: StreamOptions = {}) {
                     continue;
                   }
 
-                  if (
-                    parsed.type === "response.completed" ||
-                    parsed.type === "response.incomplete" ||
-                    parsed.type === "response.failed"
-                  ) {
+                  if (TERMINAL_STREAM_EVENT_TYPES.has(parsed.type as string)) {
                     releaseHeldTextualCallContent(controller);
                   }
 
