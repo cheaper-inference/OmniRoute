@@ -24,19 +24,21 @@ Ale typičtí klienti (Cursor, Cline, Roo Code, OpenAI SDK) stahují `reasoning_
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 Zachycení probíhá v `open-sse/handlers/chatCore.ts` (dvě místa, na dvou místech volání `cacheReasoningFromAssistantMessage` ). Přehrání proběhne v `open-sse/translator/index.ts` po vynucení schématu, ale před odesláním.
+
+Záznamy volání nástroje jsou uloženy pod `buildToolCallCacheKey()`, přehledem rozsahu požadavku a ID volání nástroje, takže stejné id používané jiným klíčem API nebo relací nevybere položku. Rozsah pochází z `buildReasoningCacheScope()`: ID klíče API plus klíč relace, pokud jej má požadavek. Sloupec `tool_call_id` a řídicí panel proto zobrazují tento výtah pro tyto položky.
 
 Obyčejné tahy asistenta (bez volání nástroje) jsou klíčovány odlišně: `buildAssistantMessageCacheKey()` zpracovává rozsah relace plus normalizovaný přepis ve formátu OpenAI až do tohoto tahu, protože DeepSeek vyžaduje zdůvodnění _každého_ předchozího tahu, jakmile je přítomen `tools`. U cílů Responses-API (například `opencode-go/deepseek-v4-flash`, směrované do `/responses`) tělo proti směru proudění nese `input`, nikoli `messages`, takže `translateRequest()` (`open-sse/translator/index.ts`) hlásí hlavní transkript, který natrávil prostřednictvím možnosti zpětného volání, a zachycovací místa stráví stejný přepis. Přehrávání Responses běží na pivotu OpenAI pro každý zdrojový formát, takže klienti Anthropic Messages (Claude → OpenAI → Responses) jsou také přehráni.
 

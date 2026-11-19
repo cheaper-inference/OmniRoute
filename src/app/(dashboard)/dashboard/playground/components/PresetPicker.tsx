@@ -152,7 +152,7 @@ export default function PresetPicker({ configState, setConfigState }: PresetPick
                   variant="ghost"
                   size="sm"
                   onClick={() => handleLoad(preset.id)}
-                  className="h-auto min-h-0 flex-1 justify-start truncate px-1 py-0.5 text-left text-[11px] font-normal"
+                  className="h-auto min-h-0 flex-1 justify-start truncate px-1 py-0.5 text-left text-[11px]"
                   aria-label={`Load preset "${preset.name}"`}
                 >
                   {preset.name}

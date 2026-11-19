@@ -270,7 +270,7 @@ function PiCardHeader({ tool, t, isExpanded, onToggle, statusBadge }) {
         </div>
         <div className="min-w-0">
           <div className="flex items-center gap-2">
-            <h3 className="font-medium text-sm">{tool.name}</h3>
+            <h3 className="text-sm">{tool.name}</h3>
             <CliStatusBadge {...statusBadge} />
           </div>
           <p className="text-xs text-text-muted truncate">{t("toolDescriptions.pi")}</p>
@@ -294,7 +294,7 @@ function runtimeHeadline(t, piStatus, cliReady) {
 
 function PiRuntimeStatus({ t, piStatus, cliReady }) {
   return (
-    <div className="flex items-start gap-3 p-3 rounded-lg border bg-bg-secondary/50 border-border">
+    <div className="flex items-start gap-3 p-3 rounded-lg border bg-bg-subtle/50 border-border">
       <Icon
         name={cliReady ? "check_circle" : "warning"}
         size={18}
@@ -319,7 +319,7 @@ function PiRuntimeStatus({ t, piStatus, cliReady }) {
 
 function PiInstallHint({ t }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-secondary/50 p-3">
+    <div className="rounded-lg border border-border bg-bg-subtle/50 p-3">
       <p className="text-sm font-medium mb-1">{t("piInstallTitle")}</p>
       <p className="text-xs text-text-muted mb-2">{t("piInstallInstructions")}</p>
       <code className="block overflow-x-auto whitespace-pre rounded bg-bg-subtle px-3 py-2 text-xs">
@@ -477,7 +477,7 @@ function PiMessageBanner({ message }) {
 /** Copy-paste fallback for remote/headless installs. */
 function PiManualPreview({ t }) {
   return (
-    <div className="rounded-lg border border-border bg-bg-secondary/50 p-3">
+    <div className="rounded-lg border border-border bg-bg-subtle/50 p-3">
       <p className="text-xs font-medium text-text-muted mb-2">{t("piManualConfigTitle")}</p>
       <pre className="text-[11px] font-mono overflow-x-auto whitespace-pre text-text-main">
         {t("piManualConfigSample")}
@@ -490,7 +490,7 @@ function PiManualPreview({ t }) {
 
 function PiBackupRow({ t, backup, restoringBackup, onRestore }) {
   return (
-    <div className="flex items-center justify-between gap-2 p-2 rounded bg-bg-secondary/50 text-xs">
+    <div className="flex items-center justify-between gap-2 p-2 rounded bg-bg-subtle/50 text-xs">
       <div className="flex flex-col">
         <span className="font-medium">{backup.originalFile}</span>
         <span className="text-text-muted">{new Date(backup.createdAt).toLocaleString()}</span>

@@ -26,68 +26,61 @@
 6. **記錄證據。** 在 PR 範本中列出已執行的命令、每個新增或變更的測試檔案、
    遷移或功能旗標，以及任何仍待執行且僅限 CI 的驗證。
 
-## 依變更類型分類的黃金路徑
+## 按變更類型劃分的黃金路徑
 
-下列命令是最低限度的重點檢查，並不代表可以略過直接涵蓋您所變更行為的測試。
+下面的命令是最低限度的重點檢查，而不是跳過直接涵蓋您更改的行為的測試的權限。
 
 ### 提供者
 
-**契約**
+**合約**
 
-- `src/shared/constants/providers/` 中的提供者定義，以及其在
-  `src/shared/constants/providers.ts` 中的組合方式。
-- `open-sse/config/providerRegistry.ts` 或其拆分出的登錄檔案中的模型與功能。
-- 執行器／轉譯器選擇、OAuth 或 API 金鑰設定、儀表板資產，以及適用時產生的
-  提供者參考文件。
-- 公開憑證必須使用 `resolvePublicCred()`；錯誤回應必須使用共用的淨化
-  錯誤輔助函式。請參閱 `docs/security/PUBLIC_CREDS.md`（位於 git 中；不會編譯至 `/docs`）及
-  [錯誤淨化](../security/ERROR_SANITIZATION.md)。
+- `src/shared/constants/providers/`中的提供者定義及其`src/shared/constants/providers.ts`中的組成。
+- `open-sse/config/providerRegistry.ts`或其提取的註冊表檔案中的模型和功能。
+- Executor/translator選擇、 OAuth或 API 金鑰配置和儀表板資產。不要提交重新產生的`docs/reference/PROVIDER_REFERENCE.md`或README圖：發布刷新會重寫它們（`check:pr-derived-paths`使承載它們的PR功能失敗）。
+- 公共憑證必須使用`resolvePublicCred()`；錯誤回應必須使用共享的清理錯誤助手。請參閱`docs/security/PUBLIC_CREDS.md` （git；未編譯到`/docs`中）和[Error Sanitization](../security/ERROR_SANITIZATION.md) 。
 
-**重點迴圈**
+**聚焦循環**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # 當目錄變更時；提交產生的差異
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-也請測試每個受影響的請求系列：聊天、Responses、圖片、嵌入、音訊或影片。
-請將產生的目錄與黃金差異視為契約變更進行審查；請勿盲目接受。
+也測試每個受影響的請求系列：聊天、回應、圖像、嵌入、音訊或視訊。當合約發生變化時，審查產生的目錄和黃金差異；不要盲目接受它們。
 
 ### 路由
 
-**契約**
+**合約**
 
-- `src/shared/constants/routingStrategies.ts` 中的公開策略值與 UI 中繼資料。
-- `open-sse/services/combo.ts` 與 `open-sse/services/combo/` 下的分派及排序。
-- Combo 結構描述、持久化、復原狀態、模型功能，以及 API／UI 控制項。
-- 行為變更時應參閱[自動 Combo 引擎](../routing/AUTO-COMBO.md)與復原能力文件。
+- `src/shared/constants/routingStrategies.ts`中的公共策略值和UI資料。
+- 根據`open-sse/services/combo.ts`和`open-sse/services/combo/`進行調度和訂購。
+- 組合模式、持久性、彈性狀態、模型功能和API/UI控制。
+- 行為改變時的[自動組合引擎](../routing/AUTO-COMBO.md)和彈性文件。
 
-**重點迴圈**
+**聚焦循環**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # 策略或分派變更
-npm run check:known-symbols      # 策略註冊變更
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-請在本機使用具確定性的模擬上游測試。即時 Combo 冒煙測試需要憑證，且須手動執行，
-不能取代 CI。
+在本地使用確定性模擬上游測試。現場組合煙霧需要憑證並且是手動的，而不是CI替代品。
 
 ### UI / UX
 
-**契約**
+**合約**
 
-- `src/app/` 與 `src/shared/components/` 下的 Next.js 路由／頁面及共用元件邊界。
-- API 回應格式、載入／空白／錯誤狀態、鍵盤與螢幕閱讀器行為、
-  回應式版面配置、主題及語系擴充。
-- `src/i18n/messages/en.json` 中的英文 UI 來源字串；請勿硬編碼新的使用者可見文案。
+- Next.js route/page以及`src/app/`和`src/shared/components/`下的共享組件邊界。
+- API回應形狀、 loading/empty/error狀態、鍵盤和螢幕閱讀器行為、回應式佈局、主題和區域設定擴展。
+- `src/i18n/messages/en.json`中的英文UI來源字串；不要對新的使用者導向的副本進行硬編碼。
 
-**重點迴圈**
+**聚焦循環**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -96,67 +89,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-若有互動或視覺變更，請執行應用程式，並檢查窄幅及寬幅視窗。CI 會執行
-正式環境建置與更廣泛的測試套件；視覺行為仍需要適合該變更的重點元件測試、Playwright
-測試或有記錄的手動檢查。
+運行應用程式進行互動或視覺變化，並檢查窄視口和寬視口。 CI運行生產構建和更廣泛的套件；視覺行為仍然需要一個集中的組件、 Playwright或適合更改的記錄的手動檢查。
 
-### i18n
+### 國際化
 
-**契約**
+**合約**
 
-- `src/i18n/messages/en.json` 是 UI 來源；`config/i18n.json` 是語系來源。
-- CLI 目錄另行存放於 `bin/cli/locales/` 下。
-- 請完整保留 ICU 預留位置及標籤。請勿翻譯產品／提供者／模型名稱、
-  通訊協定與標頭名稱、命令、程式碼／JSON 識別碼、URL、環境變數，或
-  `OmniRoute`、`OAuth`、`MCP` 及 `A2A` 等受保護詞彙。目前的來源清單為
-  `scripts/i18n/glossary/protected-terms.json`。
+- `src/i18n/messages/en.json`是UI源； `config/i18n.json`是語言環境源。
+- CLI目錄單獨存在於`bin/cli/locales/`下。
+- 準確保留ICU佔位符和標籤。請勿翻譯product/provider/model名稱、協定和標頭名稱、指令、 code/JSON識別碼、 URLs、環境變數或受保護術語，例如`OmniRoute`、 `OAuth`、 `MCP`和`A2A`。目前來源列表是`scripts/i18n/glossary/protected-terms.json`。
 
-**重點迴圈**
+特徵PR僅編輯`src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`)；其他區域設定在每個版本中透過版本刷新或轉換波完成一次（`docs/guides/I18N.md` → “僅限PRs touch `en.json`功能”）。 `npm run check:pr-derived-paths`未能實作編輯另一語言環境目錄的PR功能。
+
+**聚焦循環**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # 當 CLI 字串／目錄變更時
 npm run lint
 ```
 
-這是現有系統的指引，並非擴充其工具或鍵模型的邀請。
-在替代系統的設計期間，i18n 修補應保持精準。除非任務明確要求產生翻譯，
-而且您已審查產生的差異，否則請勿執行會呼叫外部服務的翻譯命令。
+如果沒有`--mode=pr`這些門在本地以發布模式運行，並報告在`en.json`中添加或重寫的周期的每個密鑰；這是發布刷新的工作，而不是您的PR的工作。
+
+這是對現有系統的指導，而不是擴展其工具或關鍵模型的邀請。在設計替代系統的同時，保持 i18n 補丁的外科手術。不要執行呼叫外部服務的翻譯命令，除非任務明確需要產生的翻譯並且您已查看產生的差異。
 
 ### CLI
 
-**契約**
+**合約**
 
-- `bin/cli/` 中的公開命令與旗標、產生的 API 命令、結束代碼、stdout/stderr 與
-  JSON 輸出結構、設定／環境行為，以及封裝的檔案。
-- CLI 面向使用者的字串必須使用 CLI i18n 層，並維持 `en`/`pt-BR` 目錄同步。
-- 保持 Node 為支援的執行環境，並維持已發布的二進位檔契約。
+- `bin/cli/`中的公共命令和標誌、產生的API命令、退出代碼、 stdout/stderr和JSON輸出形狀、 config/environment行為和打包檔案。
+- CLI面向使用者的字串必須使用CLI i18n 層（ `bin/cli/locales/en.json`中存在的`t()`鍵）。特徵PR僅編輯`en.json`； `pt-BR`和其他語言環境在發佈時完成。
+- 保留 Node 作為受支援的運行時和發布的二進制合約。
 
-**聚焦迴圈**
+**聚焦循環**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # 產生／封裝的 CLI 變更
-npm run check:pack-policy     # 套件介面變更
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-當行為取決於剖析、檔案或結束狀態時，請在暫存資料目錄中使用完全相同的命令。CI 會執行更廣泛的套件成品與生態系統檢查。
+當行為取決於解析、檔案或退出狀態時，請在暫存資料目錄中使用精確命令。 CI執行更廣泛的包工件和生態系統檢查。
 
 ### 資料庫
 
-**契約**
+**合約**
 
-- `src/lib/db/` 下的領域模組；直接匯入特定模組（舊的 `localDb.ts` 重新匯出層已移除）。
-- `src/lib/db/migrations/` 下具編號且具冪等性的 SQL 移轉、交易安全性、升級
-  行為、索引，以及所有受結構描述影響的呼叫端。
-- 路由與處理常式絕不可直接執行原始 SQL。
+- `src/lib/db/`下的域模組；直接匯入特定模組（舊的`localDb.ts`重新匯出層已刪除）。
+- `src/lib/db/migrations/`下的編號、冪等SQL遷移、事務安全、升級行為、索引以及受模式影響的每個呼叫者。
+- 路由和處理程序從不直接發出原始SQL 。
 
-**聚焦迴圈**
+**聚焦循環**
 
 ```bash
 npm run check:migration-numbering
@@ -166,28 +155,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-新增移轉時，請同時測試全新資料庫及從先前結構描述升級。資料庫測試必須關閉控制代碼，並在清理期間呼叫 `resetDbInstance()`。只有在盡力支援的 Bun 轉接器路徑發生變更時，才執行 `npm run test:bun:db`；Node 仍是權威基準。
+新增遷移時，測試新資料庫並從先前架構升級。資料庫測試必須關閉句柄並在清理期間呼叫`resetDbInstance()` 。僅當盡力而為的Bun適配器路徑發生變化時才運行`npm run test:bun:db` ；節點仍然具有權威性。
 
-### 建置／部署
+### 建置/部署
 
-**契約**
+**合約**
 
-- 根目錄與工作區資訊清單／鎖定檔、`scripts/build/`、Next.js 獨立組裝、`dist/`
-  套件內容、Electron 平台中繼資料、CI 工作流程，以及部署哨兵。
-- 必須保持支援的 Node 版本範圍，以及 `CLAUDE.md` 中允許清單內的 Bun 用法不變。
-- 建置成品維持不受追蹤；相依套件、授權、工作流程與套件政策皆適用。
+- 根和工作區manifests/lockfile、 `scripts/build/`、 Next.js獨立組件、 `dist/`包內容、 Electron平台元資料、 CI工作流程和部署哨兵。
+- 支援的節點範圍和`CLAUDE.md`中允許使用的Bun必須保持不變。
+- 建置工件不被追蹤；依賴項、許可證、工作流程和套件策略均適用。
 
-**聚焦迴圈**
+**聚焦循環**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # 相依套件或鎖定檔變更
-npm run check:pack-policy      # 已發布套件的介面變更
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-只有在變更會影響編譯、獨立組裝、資產或執行階段封裝時，才在本機使用 `npm run build`。僅將 `npm run build:release` 用於發布／部署驗證。CI 的建置是最終的跨平台判定依據；平台特定的 Electron 變更需要對應的聚焦建置或冒煙測試證據。
+僅當變更影響編譯、獨立程序集、資產或執行時間捆綁時，才在本機使用`npm run build` 。僅將`npm run build:release`用於release/deploy驗證。 CI的建構是最終的跨平台訊號；特定於平台的Electron變更需要匹配的重點建構或煙霧證據。
 
 ## 共用機器的開發者指令碼
 
