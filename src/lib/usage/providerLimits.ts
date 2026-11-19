@@ -1367,8 +1367,8 @@ export async function syncAllProviderLimits(
     isActive: true,
   })) as unknown as ProviderConnectionLike[];
   // The scheduled sweep leaves banned accounts alone: each poll of a banned org adds one
-  // more upstream rejection. Manual syncs and per-card reads still check live, so a
-  // wrongly banned account can clear itself.
+  // more upstream rejection. Manual syncs and per-card reads still poll them live; a usage
+  // read never lifts the ban itself (maybeClearRecoveredQuotaState keeps terminal statuses).
   const connections = connectionRows.filter(
     (connection) =>
       isSupportedUsageConnection(connection) &&
