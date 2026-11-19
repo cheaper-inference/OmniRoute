@@ -151,3 +151,48 @@ test("route: explicit ollama-search reuses the ollama-cloud key; auto-select ign
     globalThis.fetch = originalFetch;
   }
 });
+
+test("route: a rate-limited ollama-search key falls through to the ollama-cloud key", async () => {
+  const searchConnection = await providersDb.createProviderConnection({
+    provider: "ollama-search",
+    authType: "apikey",
+    name: "ollama-search-limited",
+    apiKey: "ollama-search-key",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  assert.ok(searchConnection?.id);
+  await providersDb.updateProviderConnection(String(searchConnection.id), {
+    rateLimitedUntil: new Date(Date.now() + 60_000).toISOString(),
+  });
+  await providersDb.createProviderConnection({
+    provider: "ollama-cloud",
+    authType: "apikey",
+    name: "ollama-cloud-usable",
+    apiKey: "ollama-cloud-key",
+    isActive: true,
+    testStatus: "active",
+    providerSpecificData: {},
+  });
+  const originalFetch = globalThis.fetch;
+  const auth: string[] = [];
+  globalThis.fetch = async (url, init = {}) => {
+    assert.equal(String(url), OLLAMA_FETCH_URL);
+    auth.push(String((init.headers as Record<string, string>).Authorization));
+    return ollamaPage();
+  };
+  try {
+    const response = await webFetchRoute.POST(
+      new Request("http://localhost/api/v1/web/fetch", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ url: "https://example.com", provider: "ollama-search" }),
+      })
+    );
+    assert.equal(response.status, 200);
+    assert.deepEqual(auth, ["Bearer ollama-cloud-key"]);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});

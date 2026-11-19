@@ -90,14 +90,18 @@ async function resolveCredentials(
 ): Promise<CredentialsLookup> {
   try {
     // A search-only provider id (ollama-search) reuses the key of its parent
-    // provider, the same way /v1/search does.
+    // provider, the same way /v1/search does: a rate-limited lookup is kept and
+    // returned only when no later credential id has a usable key.
+    let rateLimited: CredentialsLookup = null;
     for (const id of [providerId, ...getSearchCredentialFallbacks(providerId)]) {
       const creds = withoutKeyScopeBlocked(
         await getProviderCredentialsWithQuotaPreflight(id, null, allowedConnections)
       );
-      if (creds) return creds as CredentialsLookup;
+      if (!creds) continue;
+      if (!isAllRateLimitedCredentials(creds)) return creds as CredentialsLookup;
+      rateLimited ??= creds as CredentialsLookup;
     }
-    return null;
+    return rateLimited;
   } catch {
     return null;
   }

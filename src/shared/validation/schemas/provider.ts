@@ -97,7 +97,8 @@ function requireAzureOpenAiBaseUrl(
   data: { provider: string; providerSpecificData?: Record<string, unknown> },
   ctx: z.RefinementCtx
 ): void {
-  if (data.provider !== "azure-openai") return;
+  // The POST handler saves the canonical id, so the `azure` alias needs the same endpoint.
+  if (resolveProviderId(data.provider) !== "azure-openai") return;
   const baseUrl = data.providerSpecificData?.baseUrl;
   if (typeof baseUrl === "string" && baseUrl.trim().length > 0) return;
   ctx.addIssue({

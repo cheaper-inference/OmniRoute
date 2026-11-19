@@ -124,3 +124,77 @@ test("a response with fewer predictions than inputs fails closed", async () => {
   );
   assert.equal(result.success, false);
 });
+
+test("gemini-embedding-001 sends one input per :predict call and merges vectors in order", async () => {
+  let served = 0;
+  const { result, calls } = await run(
+    { model: "vertex/gemini-embedding-001", input: ["alpha", "beta"] },
+    () => {
+      served += 1;
+      return Response.json({ predictions: [{ embeddings: { values: [served, served] } }] });
+    }
+  );
+  assert.equal(result.success, true, result.error);
+  assert.equal(calls.length, 2, "one request per input");
+  for (const call of calls) {
+    assert.ok(call.url.endsWith("/publishers/google/models/gemini-embedding-001:predict"));
+  }
+  assert.deepEqual(
+    calls.map((call) => call.body?.instances),
+    [
+      [{ content: "alpha", task_type: "RETRIEVAL_QUERY" }],
+      [{ content: "beta", task_type: "RETRIEVAL_QUERY" }],
+    ]
+  );
+  assert.deepEqual(
+    result.data?.data.map((d) => [d.index, d.embedding]),
+    [
+      [0, [1, 1]],
+      [1, [2, 2]],
+    ]
+  );
+});
+
+test("a failed token exchange is an upstream error (502) under a deadline, not a client 400", async () => {
+  // A distinct client_email so no cached token from the tests above is reused.
+  const serviceAccount = JSON.stringify({
+    ...JSON.parse(SERVICE_ACCOUNT),
+    client_email: "svc-token-down@demo-project.iam.example",
+  });
+  const original = globalThis.fetch;
+  const predictCalls: string[] = [];
+  let tokenSignal: unknown = null;
+  globalThis.fetch = async (url, init) => {
+    if (String(url) === "https://oauth2.googleapis.com/token") {
+      tokenSignal = init?.signal;
+      return new Response("backend error", { status: 503 });
+    }
+    predictCalls.push(String(url));
+    return Response.json(predictions(1));
+  };
+  try {
+    const result = (await handleEmbedding({
+      body: { model: MODEL, input: "x" },
+      credentials: { apiKey: serviceAccount, providerSpecificData: { region: "europe-west4" } },
+      log: null,
+    })) as { success: boolean; status?: number };
+    assert.equal(result.success, false);
+    assert.equal(result.status, 502);
+    assert.equal(predictCalls.length, 0);
+    assert.ok(tokenSignal instanceof AbortSignal, "the token exchange carries a deadline");
+  } finally {
+    globalThis.fetch = original;
+  }
+});
+
+test("a service account without a private key is refused with 400 before any upstream call", async () => {
+  const { private_key: _omitted, ...rest } = JSON.parse(SERVICE_ACCOUNT) as Record<string, string>;
+  const { result, calls } = await run(
+    { model: MODEL, input: "x" },
+    () => Response.json(predictions(1)),
+    { apiKey: JSON.stringify(rest), providerSpecificData: {} } as never
+  );
+  assert.equal(result.success, false);
+  assert.equal(result.status, 400);
+  assert.equal(calls.length, 0);
+});

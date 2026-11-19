@@ -64,6 +64,7 @@ import {
   getAccessToken,
   looksLikeServiceAccountJson,
   parseSAFromApiKey,
+  type ServiceAccount,
 } from "../executors/vertexAuth.ts";
 import { readResponseTextWithinCap } from "../utils/responseBodyCap.ts";
 import { getGitHubCopilotChatHeaders } from "../config/providerHeaderProfiles.ts";
@@ -167,6 +168,8 @@ interface PreparedEmbeddingRequest {
   bedrock?: BedrockEmbeddingPlan;
   /** Set only for `nativeInvokeProtocol: "vertex-predict"`. */
   vertex?: VertexEmbeddingPlan;
+  /** Vertex service account; its token is minted in the dispatch stage. */
+  vertexServiceAccount?: ServiceAccount;
 }
 
 interface ParsedEmbeddingResponse {
@@ -791,8 +794,9 @@ async function readVertexEmbeddingText(response: Response): Promise<string> {
 }
 
 /**
- * Vertex prepare stage: service-account token, project URL and `:predict` body. Every client
- * mistake throws here, so it surfaces as a 400 and never as a 502 that cools the connection.
+ * Vertex prepare stage: service account, project URL and `:predict` body. Every client mistake
+ * throws here, so it surfaces as a 400 and never as a 502 that cools the connection. The token
+ * exchange is an upstream call, so it runs in the dispatch stage.
  */
 async function prepareVertexTransport(
   runtime: EmbeddingRuntime,
@@ -805,6 +809,11 @@ async function prepareVertexTransport(
   const serviceAccount = parseSAFromApiKey(apiKey);
   const project = serviceAccount.project_id;
   if (!project) throw new Error("Service Account JSON is missing project_id");
+  if (!serviceAccount.client_email || !serviceAccount.private_key) {
+    throw new Error(
+      "Service Account JSON is missing required fields (client_email or private_key)"
+    );
+  }
   const region = runtime.credentials?.providerSpecificData?.region;
   const plan = buildVertexEmbeddingPlan(
     runtime.model || "",
@@ -818,27 +827,43 @@ async function prepareVertexTransport(
     project,
     typeof region === "string" ? region : null
   );
-  prepared.headers.Authorization = `Bearer ${await getAccessToken(serviceAccount)}`;
+  prepared.vertexServiceAccount = serviceAccount;
 }
 
-/** Dispatch stage for Vertex: one `:predict` call, reply read under a byte cap, mapped to OpenAI. */
+/**
+ * Dispatch stage for Vertex: token exchange (bounded, an upstream failure is a 502/504), then
+ * one `:predict` call per plan body, each reply read under a byte cap, merged in input order.
+ */
 async function fetchVertexEmbeddingBatch(
   prepared: PreparedEmbeddingRequest,
   plan: VertexEmbeddingPlan,
   reqLogger: RequestLogger
 ): Promise<Response> {
-  reqLogger.logTargetRequest(prepared.upstreamUrl, prepared.headers, prepared.upstreamBody);
-  const response = await fetch(prepared.upstreamUrl, {
-    method: "POST",
-    headers: prepared.headers,
-    body: JSON.stringify(prepared.upstreamBody),
-    signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
-  });
-  if (!response.ok) return response;
-  const text = await readVertexEmbeddingText(response);
-  return new Response(JSON.stringify(mapVertexEmbeddingResponse(JSON.parse(text), plan)), {
+  if (prepared.vertexServiceAccount) {
+    const token = await getAccessToken(
+      prepared.vertexServiceAccount,
+      AbortSignal.timeout(FETCH_TIMEOUT_MS)
+    );
+    prepared.headers.Authorization = `Bearer ${token}`;
+  }
+  const predictions: unknown[] = [];
+  let lastHeaders = new Headers();
+  for (const upstreamBody of plan.bodies) {
+    reqLogger.logTargetRequest(prepared.upstreamUrl, prepared.headers, upstreamBody);
+    const response = await fetch(prepared.upstreamUrl, {
+      method: "POST",
+      headers: prepared.headers,
+      body: JSON.stringify(upstreamBody),
+      signal: AbortSignal.timeout(FETCH_TIMEOUT_MS),
+    });
+    if (!response.ok) return response;
+    lastHeaders = response.headers;
+    const raw = JSON.parse(await readVertexEmbeddingText(response)) as { predictions?: unknown };
+    if (Array.isArray(raw?.predictions)) predictions.push(...raw.predictions);
+  }
+  return new Response(JSON.stringify(mapVertexEmbeddingResponse({ predictions }, plan)), {
     status: 200,
-    headers: response.headers,
+    headers: lastHeaders,
   });
 }
 
@@ -1099,7 +1124,8 @@ async function executeEmbedding(
   try {
     const response = await dispatchEmbeddingRequest(prepared, singleTexts, runtime.reqLogger);
     // Fan-out providers make one upstream call per body/text; count each one.
-    const requestCount = prepared.bedrock?.bodies.length ?? singleTexts?.length ?? 1;
+    const requestCount =
+      prepared.bedrock?.bodies.length ?? prepared.vertex?.bodies.length ?? singleTexts?.length ?? 1;
     return response.ok
       ? handleUpstreamSuccess(runtime, prepared, response, requestCount)
       : handleUpstreamFailure(runtime, response);

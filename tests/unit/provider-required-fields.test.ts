@@ -25,6 +25,14 @@ test("azure-openai without a base URL is refused at create", () => {
   assert.ok(paths.includes("providerSpecificData.baseUrl"), `paths: ${paths.join(",")}`);
 });
 
+test("the azure alias without a base URL is refused at create", () => {
+  const result = create("azure");
+  assert.equal(result.success, false);
+  const paths = result.success ? [] : result.error.issues.map((i) => i.path.join("."));
+  assert.ok(paths.includes("providerSpecificData.baseUrl"), `paths: ${paths.join(",")}`);
+  assert.equal(create("azure", { baseUrl: "https://my-resource.openai.azure.com" }).success, true);
+});
+
 test("azure-openai with a blank base URL is refused at create", () => {
   assert.equal(create("azure-openai", { baseUrl: "   " }).success, false);
 });

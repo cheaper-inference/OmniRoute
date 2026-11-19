@@ -19,6 +19,8 @@ export const VERTEX_EMBEDDING_TASK_TYPE = "RETRIEVAL_QUERY";
 /** Hard cap on the reply body, in bytes. 256 inputs x 3072 floats stays far below it. */
 export const VERTEX_EMBEDDING_MAX_RESPONSE_BYTES = 16 * 1024 * 1024;
 const MAX_INSTANCES = 250;
+/** Models that take a single input text per `:predict` request; their inputs go one per call. */
+const SINGLE_INSTANCE_MODELS = new Set(["gemini-embedding-001"]);
 
 export interface VertexEmbeddingPlan {
   /** Requested model id, echoed back in the merged OpenAI-shaped response. */
@@ -28,6 +30,8 @@ export interface VertexEmbeddingPlan {
     instances: { content: string; task_type: string }[];
     parameters?: Record<string, number>;
   };
+  /** One `:predict` body per upstream call: `[body]`, or one per input for single-instance models. */
+  bodies: VertexEmbeddingPlan["body"][];
 }
 
 export function resolveVertexEmbeddingUrl(
@@ -63,7 +67,10 @@ export function buildVertexEmbeddingPlan(
       throw new Error("dimensions must be a positive integer");
     body.parameters = { outputDimensionality: size };
   }
-  return { model, itemCount: items.length, body };
+  const bodies = SINGLE_INSTANCE_MODELS.has(model)
+    ? body.instances.map((instance) => ({ ...body, instances: [instance] }))
+    : [body];
+  return { model, itemCount: items.length, body, bodies };
 }
 
 /** Map `predictions[].embeddings.values` to an OpenAI list; a count mismatch fails closed. */

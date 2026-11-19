@@ -67,7 +67,11 @@ export function isExpressApiKey(apiKey?: string | null): boolean {
   );
 }
 
-export async function getAccessToken(sa: ServiceAccount): Promise<string> {
+/**
+ * Mint (or reuse) the service-account access token. `signal` bounds the OAuth exchange,
+ * response body included, so a stalled token endpoint cannot outlast the caller's deadline.
+ */
+export async function getAccessToken(sa: ServiceAccount, signal?: AbortSignal): Promise<string> {
   if (!sa.client_email || !sa.private_key) {
     throw new Error(
       "Service Account JSON is missing required fields (client_email or private_key)"
@@ -103,6 +107,7 @@ export async function getAccessToken(sa: ServiceAccount): Promise<string> {
       grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
       assertion: jwt,
     }),
+    ...(signal ? { signal } : {}),
   });
 
   if (!tokenRes.ok) {

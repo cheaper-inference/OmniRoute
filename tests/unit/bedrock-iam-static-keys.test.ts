@@ -18,23 +18,35 @@ const iam = (extra: Record<string, unknown> = {}) => ({
 });
 const bearer = () => ({ apiKey: "bearer-key", providerSpecificData: { region: "eu-west-2" } });
 
+type SdkClientConfig = {
+  credentials: () => Promise<{
+    accessKeyId: string;
+    secretAccessKey: string;
+    sessionToken?: string;
+  }>;
+  authSchemePreference?: () => Promise<string[]>;
+};
+/** The SDK client carries `config`; the executor's `BedrockClientLike` declares only send/destroy. */
+const clientConfig = (client: unknown): SdkClientConfig =>
+  (client as { config: SdkClientConfig }).config;
+
 test("IAM connection: the SDK client signs with the static keys, not a bearer token", async () => {
   const client = new BedrockExecutor().createClient(iam());
-  const creds = await client.config.credentials();
+  const creds = await clientConfig(client).credentials();
   assert.equal(creds.accessKeyId, KEY_ID);
   assert.equal(creds.secretAccessKey, SECRET);
   assert.equal(creds.sessionToken, undefined);
-  assert.notDeepEqual(await client.config.authSchemePreference?.(), ["httpBearerAuth"]);
+  assert.notDeepEqual(await clientConfig(client).authSchemePreference?.(), ["httpBearerAuth"]);
 });
 
 test("IAM connection: an optional session token is passed on", async () => {
   const client = new BedrockExecutor().createClient(iam({ awsSessionToken: SESSION }));
-  assert.equal((await client.config.credentials()).sessionToken, SESSION);
+  assert.equal((await clientConfig(client).credentials()).sessionToken, SESSION);
 });
 
 test("a connection without awsAccessKeyId keeps the bearer path", async () => {
   const client = new BedrockExecutor().createClient(bearer());
-  assert.deepEqual(await client.config.authSchemePreference(), ["httpBearerAuth"]);
+  assert.deepEqual(await clientConfig(client).authSchemePreference?.(), ["httpBearerAuth"]);
 });
 
 test("IAM connection: the logged request header does not claim a bearer token", () => {
