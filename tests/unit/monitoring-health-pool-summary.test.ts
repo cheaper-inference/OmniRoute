@@ -82,6 +82,29 @@ test("a pool above the threshold answers 503 with summaryHealth false", async ()
   assert.equal(body.unhealthRatioThreshold, 0.25);
 });
 
+test("the verdict compares the exact ratio, not the rounded one shown in the body", async () => {
+  // 1 of 3 unhealthy = 0.333..., shown as 0.33, but it exceeds a 0.33 threshold.
+  for (const row of [
+    { name: "third-ok-1", testStatus: "active" },
+    { name: "third-ok-2", testStatus: "active" },
+    { name: "third-expired", testStatus: "expired" },
+  ]) {
+    await providersDb.createProviderConnection({
+      provider: "mistral",
+      authType: "apikey",
+      apiKey: `sk-mistral-${row.name}`,
+      name: row.name,
+      isActive: true,
+      testStatus: row.testStatus,
+    });
+  }
+  const res = await asManager("provider=mistral&unhealthRatioThreshold=0.33");
+  const body = (await res.json()) as Record<string, unknown>;
+  assert.equal(body.unhealthyRatio, 0.33);
+  assert.equal(body.summaryHealth, false);
+  assert.equal(res.status, 503);
+});
+
 test("a pool with no active account is unhealthy (ratio 1), not silently fine", async () => {
   const res = await asManager("provider=anthropic");
   const body = (await res.json()) as Record<string, unknown>;

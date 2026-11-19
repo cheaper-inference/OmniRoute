@@ -165,8 +165,10 @@ async function poolHealthResponse(request: Request, authError: Response | null) 
       Object.keys(summarizeConnectionCooldown([connection], nowMs)).length > 0
   ).length;
   const total = connections.length;
-  const unhealthyRatio = total === 0 ? 1 : Math.round((unhealthy / total) * 100) / 100;
-  const summaryHealth = unhealthyRatio <= unhealthRatioThreshold;
+  // Judge on the exact ratio; round only the value shown in the body (1/3 must fail a 0.33 bar).
+  const exactRatio = total === 0 ? 1 : unhealthy / total;
+  const unhealthyRatio = Math.round(exactRatio * 100) / 100;
+  const summaryHealth = exactRatio <= unhealthRatioThreshold;
   return NextResponse.json(
     {
       provider,
