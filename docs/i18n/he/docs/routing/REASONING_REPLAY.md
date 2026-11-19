@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 לכידה מתרחשת ב- `open-sse/handlers/chatCore.ts` (שני אתרים, בשני אתרי הקריאה של `cacheReasoningFromAssistantMessage` ). השידור החוזר מתרחש ב- `open-sse/translator/index.ts` לאחר כפיית הסכמה אך לפני השליחה.
+
+ערכי כלים-קריאה מאוחסנים תחת `buildToolCallCacheKey()`, תקציר של היקף הבקשה ומזהה הקריאה לכלי, כך שאותו מזהה המשמש מפתח API אחר או סשן אחר אינו בוחר את הערך. ההיקף מגיע מ- `buildReasoningCacheScope()`: מזהה מפתח API, בתוספת מפתח ההפעלה כאשר לבקשה יש אחד. עמודת `tool_call_id` ולוח המחוונים מציגים אפוא תקציר זה עבור ערכים אלה.
 
 סיבובי עוזר רגילים (ללא כלים) מקודדים בצורה שונה: `buildAssistantMessageCacheKey()` מעכל את היקף הפגישה בתוספת התמלול המנורמל בפורמט OpenAI עד לאותו תור, מכיוון ש- DeepSeek דורש את ההיגיון של _כל_ תור קודם ברגע `tools` קיים. עבור יעדי Responses-API (לדוגמה `opencode-go/deepseek-v4-flash`, מנותב ל- `/responses`) הגוף במעלה הזרם נושא `input`, לא `messages`, אז `translateRequest()` (`open-sse/translator/index.ts`) מדווח על תמליל הציר שהוא עיכל באמצעות אפשרות התקשרות חוזרת ואתרי הלכידה מעכלים את אותו תמליל. אישור ההשמעה החוזר של Responses פועל על ציר OpenAI עבור כל פורמט מקור, כך שגם לקוחות Anthropic Messages (Claude → OpenAI → Responses) מושמעים מחדש.
 

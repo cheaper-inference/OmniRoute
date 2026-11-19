@@ -48,8 +48,8 @@ Block the request and optionally return a custom response.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
@@ -76,15 +76,22 @@ onRequest: (ctx) => {
 
 ## Plugin Context (`PluginContext`)
 
-| Field       | Type                      | Description               |
-| ----------- | ------------------------- | ------------------------- |
-| `requestId` | `string`                  | Unique request identifier |
-| `model`     | `string`                  | Requested model name      |
-| `provider`  | `string`                  | Target provider ID        |
-| `body`      | `Record<string, unknown>` | Request body              |
-| `headers`   | `Record<string, string>`  | Request headers           |
-| `metadata`  | `Record<string, unknown>` | Mutable metadata          |
-| `timestamp` | `number`                  | Request timestamp         |
+| Field        | Type                      | Description                 |
+| ------------ | ------------------------- | --------------------------- |
+| `requestId`  | `string`                  | Unique request identifier   |
+| `model`      | `string`                  | Requested model name        |
+| `provider`   | `string`                  | Target provider ID          |
+| `body`       | `Record<string, unknown>` | Request body                |
+| `headers`    | `Record<string, string>`  | Request headers (see note)  |
+| `metadata`   | `Record<string, unknown>` | Mutable metadata            |
+| `timestamp`  | `number`                  | Request timestamp           |
+| `apiKeyInfo` | `object` (optional)       | API key metadata (see note) |
+
+The context never carries the client's credentials: the `authorization`, `x-api-key`,
+`proxy-authorization` and `cookie` headers are removed (any casing), and `apiKeyInfo` keeps the key's
+metadata (such as `id`, `name` and `scopes`) but not the key value or its fingerprint
+(`redactPluginContext()` in `src/lib/plugins/hooks.ts`). This applies to `onRequest`,
+`onResponse` and `onError`.
 
 ## Manifest (`plugin.json`)
 
@@ -139,17 +146,22 @@ Or as simple booleans (default priority 100):
 
 ## Permission System
 
-Plugins run in a sandboxed VM context. Access to external resources requires explicit permissions:
+Plugins are **not sandboxed**. Each active plugin runs as a separate, ordinary Node.js child
+process (`loadPlugin()` in `src/lib/plugins/loader.ts`) under the same operating-system user as
+OmniRoute, with no VM context and no Node.js permission flags. Plugin code can use `node:fs`,
+`node:child_process`, `fetch` and every other Node.js API: it can read and write any file the
+OmniRoute user can (including the data directory), run programs and reach the network.
 
-| Permission   | Grants                                                       |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Read-only `process.env` proxy                                |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+The manifest's `requires.permissions` accepts `network`, `file-read`, `file-write`, `env` and
+`exec`, but today only `env` has an effect at runtime:
 
-Without a permission, the corresponding globals are simply not available in the sandbox.
+| Permission                                   | Effect today                                                                                                                                                                                                                             |
+| -------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | The plugin process also receives `PORT`, `HOSTNAME`, `TZ` and `TMPDIR`. Without it, it receives only `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` and `PLUGIN_NAME` (plus `SystemRoot` and `windir` on Windows). |
+| `network`, `file-read`, `file-write`, `exec` | None. They are declarations only: nothing is blocked when they are missing.                                                                                                                                                              |
+
+Installing a plugin is like installing any other program on the host. Install only plugins whose
+source you trust.
 
 ## Config Schema
 
@@ -217,7 +229,7 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
     const window = 60000; // 1 minute
     const maxRequests = 100;

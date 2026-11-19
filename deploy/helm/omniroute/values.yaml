@@ -6,7 +6,7 @@
 replicaCount: 1
 
 image:
-  repository: diegosouzapw/omniroute
+  repository: cheaperinference/omniroute
   # Pin a real SemVer (or a digest) for anything you care about. `latest` only
   # moves when a stable release promotes it, so it silently lags merged fixes.
   tag: "latest"
