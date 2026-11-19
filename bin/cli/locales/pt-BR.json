@@ -12,8 +12,7 @@
     "dryRun": "[simulação] faria: {action}",
     "cancelled": "Cancelado.",
     "jsonOpt": "Saída em JSON",
-    "yesOpt": "Pular confirmação",
-    "positiveIntegerRequired": "O limite deve ser um número inteiro positivo."
+    "yesOpt": "Pular confirmação"
   },
   "setup": {
     "title": "Configuração do OmniRoute",
