@@ -313,8 +313,11 @@ exits with status 1:
 ```
 
 Use an `https://` URL, or, on a network you trust, set
-`OMNIROUTE_ALLOW_INSECURE_REMOTE=1` in your shell or the data-dir `.env` (a `.env`
-in the working directory cannot set it). Loopback addresses never need it. See
+`OMNIROUTE_ALLOW_INSECURE_REMOTE=1` in your shell or the data-dir `.env`. A `.env`
+in the working directory cannot set it, unless that directory is the data dir or the
+package root. The package-root `.env` can set it too, but the next `npm i -g`
+replaces that file, so keep the opt-in in the shell or the data-dir `.env`. Loopback
+addresses never need it. See
 [ENVIRONMENT.md](../reference/ENVIRONMENT.md#cli-binary-omniroute-helpers).
 
 ---
