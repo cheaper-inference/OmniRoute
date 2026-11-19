@@ -9,6 +9,15 @@ import assert from "node:assert/strict";
 const { ChatAdmissionController } =
   await import("../../src/shared/middleware/chatBodyAdmission.ts");
 const { withChatAdmission } = await import("../../src/shared/middleware/withChatAdmission.ts");
+const core = await import("../../src/lib/db/core.ts");
+const callLogs = await import("../../src/lib/usage/callLogs.ts");
+
+// Admission reads the body-size settings (DB) and a rejection is logged as a call log: drain
+// those writes, then close the DB handle, or the runner can hang on the open connection.
+test.after(async () => {
+  await callLogs.closeCallLogSaves();
+  core.resetDbInstance();
+});
 
 function request(body: string): Request {
   return new Request("http://x/v1/messages", {
@@ -48,6 +57,29 @@ test("a small but structurally heavy body is shed while heavyweight capacity is 
   assert.equal((await res.json()).error.code, "chat_admission_busy");
   assert.equal(controller.activeHeavy, 1, "only the original holder has a lease");
   held.release();
+});
+
+test("queueMs 0 is honoured by the structure stage: a lease freed during the wait is not taken", async () => {
+  const { controller, held } = busyController();
+  let called = false;
+  const wrapped = withChatAdmission(
+    async () => {
+      called = true;
+      return new Response("ok");
+    },
+    { controller, queueMs: 0, heapPressureCheck: () => true }
+  );
+  // Free the busy lease shortly after the request arrives: a stage that waits (the default
+  // queue time) would take it and admit; a zero-wait stage has already shed the request.
+  const timer = setTimeout(() => held.release(), 50);
+  try {
+    const res = await wrapped(request(heavyBody()));
+    assert.equal(res.status, 503);
+    assert.equal(called, false);
+  } finally {
+    clearTimeout(timer);
+    if (controller.activeHeavy > 0) held.release();
+  }
 });
 
 test("a small structurally heavy body holds a lease while the handler runs, then releases it", async () => {

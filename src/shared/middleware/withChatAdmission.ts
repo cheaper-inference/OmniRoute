@@ -29,7 +29,11 @@ type RouteHandler = (request: Request, ...args: any[]) => Promise<Response> | Re
 async function admitSmallBodyStructure(
   request: Request,
   lease: ChatAdmissionLease | null,
-  options: { controller?: ChatAdmissionController; heapPressureCheck?: () => boolean }
+  options: {
+    controller?: ChatAdmissionController;
+    heapPressureCheck?: () => boolean;
+    queueMs?: number;
+  }
 ) {
   if (lease) return { admit: true as const, lease };
   let parsed: unknown;
@@ -42,7 +46,8 @@ async function admitSmallBodyStructure(
     controller: options.controller,
     heapPressureCheck: options.heapPressureCheck,
     sessionId: resolveSessionId(request),
-    queueMs: CHAT_ADMISSION_QUEUE_MAX_MS,
+    // The same wait the byte stage was given: queueMs 0 sheds a busy request at once.
+    queueMs: options.queueMs ?? CHAT_ADMISSION_QUEUE_MAX_MS,
     signal: request.signal,
   });
 }
