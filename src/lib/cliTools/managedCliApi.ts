@@ -58,27 +58,7 @@ export async function handleManagedCliRequest(
     if (request.method !== "POST") {
       return noStore(new Response(null, { status: 405, headers: { Allow: "GET, POST" } }));
     }
-    let body: unknown;
-    try {
-      body = await request.json();
-    } catch {
-      return noStore(createErrorResponse({ status: 400, message: "Invalid JSON body" }));
-    }
-    const parsed = actionSchema.safeParse(body);
-    if (!parsed.success) {
-      return noStore(createErrorResponse({ status: 400, message: "Invalid CLI runtime action" }));
-    }
-    if (parsed.data.action === "check") {
-      const items = await (dependencies.list ?? listManagedCliRuntimes)({ checkUpdates: true });
-      return noStore(NextResponse.json({ items }));
-    }
-    if (!getManagedCliDefinition(parsed.data.toolId)) {
-      return noStore(createErrorResponse({ status: 404, message: "Unsupported managed CLI tool" }));
-    }
-    const item = await (dependencies.update ?? updateManagedCliRuntime)(parsed.data.toolId);
-    const effects = (dependencies.effects ?? applyManagedCliUpdateEffects)(item);
-    log.info({ toolId: item.id, version: item.installedVersion }, "Managed CLI update completed");
-    return noStore(NextResponse.json({ item, effects }));
+    return await handleManagedCliPost(request, dependencies);
   } catch (error) {
     const known = error instanceof ManagedCliRuntimeError;
     const code = known ? error.code : "UPDATE_FAILED";
@@ -93,4 +73,31 @@ export async function handleManagedCliRequest(
       })
     );
   }
+}
+
+async function handleManagedCliPost(
+  request: Request,
+  dependencies: ManagedCliApiDependencies
+): Promise<Response> {
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return noStore(createErrorResponse({ status: 400, message: "Invalid JSON body" }));
+  }
+  const parsed = actionSchema.safeParse(body);
+  if (!parsed.success) {
+    return noStore(createErrorResponse({ status: 400, message: "Invalid CLI runtime action" }));
+  }
+  if (parsed.data.action === "check") {
+    const items = await (dependencies.list ?? listManagedCliRuntimes)({ checkUpdates: true });
+    return noStore(NextResponse.json({ items }));
+  }
+  if (!getManagedCliDefinition(parsed.data.toolId)) {
+    return noStore(createErrorResponse({ status: 404, message: "Unsupported managed CLI tool" }));
+  }
+  const item = await (dependencies.update ?? updateManagedCliRuntime)(parsed.data.toolId);
+  const effects = (dependencies.effects ?? applyManagedCliUpdateEffects)(item);
+  log.info({ toolId: item.id, version: item.installedVersion }, "Managed CLI update completed");
+  return noStore(NextResponse.json({ item, effects }));
 }

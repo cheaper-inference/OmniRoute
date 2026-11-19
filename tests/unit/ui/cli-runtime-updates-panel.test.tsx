@@ -410,4 +410,19 @@ describe("CLI runtime updates panel", () => {
     expect(screen.getByRole("alert").textContent).toContain("incomplete runtime information");
     expect(refreshModels).not.toHaveBeenCalled();
   });
+  it("shows the npm policy requirement without claiming an update or refreshing models", async () => {
+    inventory = [available({ id: "claude", name: "Claude Code" })];
+    render(<CliRuntimeUpdatesPanel />);
+    await screen.findByRole("region", { name: "Claude Code" });
+    const message =
+      "This CLI requires stable npm 11.18+ or npm 12. Update npm separately and retry.";
+    onRuntimeRequest = () =>
+      response({ error: { message, details: { code: "npm_policy_unsupported" } } }, 409);
+    fireEvent.click(screen.getByRole("button", { name: "Update Claude Code" }));
+    await screen.findByText(
+      "Finished. CLIs updated: 0. Updates not confirmed: 1. Failed checks: 0."
+    );
+    expect(screen.getByRole("alert").textContent).toContain(message);
+    expect(refreshModels).not.toHaveBeenCalled();
+  });
 });

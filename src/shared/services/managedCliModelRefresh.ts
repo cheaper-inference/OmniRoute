@@ -81,13 +81,7 @@ export async function refreshManagedCliProviderModels(
         options.signal
       );
       // A fallback can return HTTP 200 and the old catalog; that is not a fresh discovery.
-      if (
-        payload.source === "api" &&
-        !payload.failure &&
-        !payload.degraded &&
-        Array.isArray(payload.models) &&
-        payload.models.length > 0
-      ) {
+      if (isFreshModelDiscovery(payload)) {
         result.refreshed += 1;
       } else {
         result.failed += 1;
@@ -98,4 +92,14 @@ export async function refreshManagedCliProviderModels(
     }
   }
   return result;
+}
+
+function isFreshModelDiscovery(payload: Record<string, unknown>): boolean {
+  return (
+    payload.source === "api" &&
+    !payload.failure &&
+    !payload.degraded &&
+    Array.isArray(payload.models) &&
+    payload.models.length > 0
+  );
 }

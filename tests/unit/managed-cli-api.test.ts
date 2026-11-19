@@ -234,3 +234,19 @@ test("unexpected installer details are not returned to the browser", async () =>
   assert.equal(response.status, 500);
   assert.doesNotMatch(await response.text(), /private-command-output|do-not-leak|stack/);
 });
+
+test("npm policy requirement reaches the browser with its actionable message", async () => {
+  const message = "This CLI requires stable npm 11.18+ or npm 12. Update npm separately and retry.";
+  const response = await handleManagedCliRequest(
+    await authenticated({ action: "update", toolId: "claude" }),
+    {
+      update: async () => {
+        throw new ManagedCliRuntimeError("npm_policy_unsupported", message, 409);
+      },
+    }
+  );
+  assert.equal(response.status, 409);
+  const payload = await response.json();
+  assert.equal(payload.error.details.code, "npm_policy_unsupported");
+  assert.equal(payload.error.message, message);
+});

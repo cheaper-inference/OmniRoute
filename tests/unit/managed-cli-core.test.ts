@@ -219,7 +219,8 @@ test("registry responses have bounded bodies and a timeout covering stalled bodi
 test("npm arguments remain fixed and paths/credentials are kept out of the argument vector", () => {
   const prefix = "G:\\Program Files\\Portable\\Scripts\\runtime";
   const args = buildManagedCliInstallArgs(getManagedCliDefinition("claude")!, "2.1.260");
-  assert.ok(args.includes("--allow-scripts=@anthropic-ai/claude-code"));
+  assert.ok(args.includes("--strict-allow-scripts"));
+  assert.ok(!args.some((arg) => arg.startsWith("--allow-scripts=")));
   assert.ok(args.includes("--include=optional"));
   assert.ok(args.includes("--engine-strict"));
   assert.ok(!args.some((arg) => arg.includes(prefix)));
@@ -260,12 +261,10 @@ test("packaged Codex and Qoder entries skip lifecycle scripts that can alter glo
 });
 
 test("Claude and Droid retain only the required approved installation scripts", () => {
-  for (const [toolId, packageName] of [
-    ["claude", "@anthropic-ai/claude-code"],
-    ["droid", "droid"],
-  ]) {
+  for (const toolId of ["claude", "droid"]) {
     const args = buildManagedCliInstallArgs(getManagedCliDefinition(toolId)!, "1.2.3");
-    assert.ok(args.includes(`--allow-scripts=${packageName}`));
+    assert.ok(args.includes("--strict-allow-scripts"));
+    assert.ok(!args.some((arg) => arg.startsWith("--allow-scripts=")));
     assert.ok(!args.includes("--ignore-scripts"));
   }
 });

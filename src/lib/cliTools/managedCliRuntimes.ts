@@ -102,49 +102,78 @@ const BLOCK_MESSAGES: Record<string, string> = {
   version_unknown: "The installed CLI version could not be determined safely.",
 };
 
-export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDependencies = {}) {
-  const root = dependencies.root ?? getManagedCliRoot;
-  const env = dependencies.env ?? (() => process.env);
-  const platform = dependencies.platform ?? (() => os.platform());
-  const now = dependencies.now ?? (() => new Date());
-  const detect =
-    dependencies.detect ??
-    (async (toolId: string) =>
-      (await import("@/shared/services/cliRuntime")).getCliRuntimeStatus(toolId));
-  const install = dependencies.install ?? installManagedCliCandidate;
-  const probe = dependencies.probe ?? probeManagedCliCandidate;
-  const activate = dependencies.activate ?? activateManagedCliPointer;
-  const acquireLock = dependencies.acquireLock ?? acquireManagedCliFileLock;
-  const checks = new Map<string, CheckedVersion>();
+function runtimeReason(item: ManagedCliRuntimeItem, blocked: string | null): string {
+  if (blocked) return blocked;
+  if (item.error) return "check_failed";
+  if (!item.latestVersion) return "unchecked";
+  return item.updateAvailable ? "update_available" : "up_to_date";
+}
 
-  async function check(definition: ManagedCliDefinition): Promise<CheckedVersion> {
+function runtimeSource(
+  override: boolean,
+  managed: boolean,
+  installed: boolean
+): ManagedCliRuntimeItem["source"] {
+  if (override) return "override";
+  if (managed) return "managed";
+  return installed ? "external" : "missing";
+}
+
+class ManagedCliRuntimeManager {
+  private readonly dependencies: ManagedCliRuntimeDependencies;
+  private readonly root: NonNullable<ManagedCliRuntimeDependencies["root"]>;
+  private readonly env: NonNullable<ManagedCliRuntimeDependencies["env"]>;
+  private readonly platform: NonNullable<ManagedCliRuntimeDependencies["platform"]>;
+  private readonly now: NonNullable<ManagedCliRuntimeDependencies["now"]>;
+  private readonly detect: NonNullable<ManagedCliRuntimeDependencies["detect"]>;
+  private readonly install: NonNullable<ManagedCliRuntimeDependencies["install"]>;
+  private readonly probe: NonNullable<ManagedCliRuntimeDependencies["probe"]>;
+  private readonly activate: NonNullable<ManagedCliRuntimeDependencies["activate"]>;
+  private readonly acquireLock: NonNullable<ManagedCliRuntimeDependencies["acquireLock"]>;
+  private readonly checks = new Map<string, CheckedVersion>();
+
+  constructor(dependencies: ManagedCliRuntimeDependencies) {
+    this.dependencies = dependencies;
+    this.root = dependencies.root ?? getManagedCliRoot;
+    this.env = dependencies.env ?? (() => process.env);
+    this.platform = dependencies.platform ?? (() => os.platform());
+    this.now = dependencies.now ?? (() => new Date());
+    this.detect =
+      dependencies.detect ??
+      (async (toolId: string) =>
+        (await import("@/shared/services/cliRuntime")).getCliRuntimeStatus(toolId));
+    this.install = dependencies.install ?? installManagedCliCandidate;
+    this.probe = dependencies.probe ?? probeManagedCliCandidate;
+    this.activate = dependencies.activate ?? activateManagedCliPointer;
+    this.acquireLock = dependencies.acquireLock ?? acquireManagedCliFileLock;
+  }
+
+  async check(definition: ManagedCliDefinition): Promise<CheckedVersion> {
     let result: CheckedVersion;
     try {
-      const latestVersion = await fetchManagedCliLatestVersion(definition, dependencies.fetch);
-      result = { latestVersion, checkedAt: now().toISOString(), error: null };
+      const latestVersion = await fetchManagedCliLatestVersion(definition, this.dependencies.fetch);
+      result = { latestVersion, checkedAt: this.now().toISOString(), error: null };
     } catch {
       result = {
         latestVersion: null,
-        checkedAt: now().toISOString(),
+        checkedAt: this.now().toISOString(),
         error:
           "Could not check the official package registry. Try again when registry access is available.",
       };
       log.warn({ toolId: definition.id }, "CLI update check failed");
     }
-    checks.set(definition.id, result);
+    this.checks.set(definition.id, result);
     return result;
   }
 
-  async function inventory(
+  private async detectSelectedRuntime(
     definition: ManagedCliDefinition,
-    checkUpdates: boolean
-  ): Promise<ManagedCliRuntimeItem> {
-    const override = hasManagedCliOverride(definition, env());
-    const managed = override ? null : readManagedCliInstallation(definition.id, root(), platform());
+    managed: ManagedCliInstallation | null
+  ): Promise<{ detected: ManagedCliDetectedRuntime; detectionError: string | null }> {
     let detected: ManagedCliDetectedRuntime;
     let detectionError: string | null = null;
     try {
-      detected = await detect(definition.id);
+      detected = await this.detect(definition.id);
     } catch {
       detected = {
         installed: Boolean(managed),
@@ -153,11 +182,25 @@ export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDe
       };
       detectionError = "Could not inspect the installed CLI runtime.";
     }
-    const checked = checkUpdates ? await check(definition) : checks.get(definition.id);
+    return { detected, detectionError };
+  }
+
+  async inventory(
+    definition: ManagedCliDefinition,
+    checkUpdates: boolean
+  ): Promise<ManagedCliRuntimeItem> {
+    const override = hasManagedCliOverride(definition, this.env());
+    const managed = override
+      ? null
+      : readManagedCliInstallation(definition.id, this.root(), this.platform());
+    const { detected, detectionError } = await this.detectSelectedRuntime(definition, managed);
+    const checked = checkUpdates ? await this.check(definition) : this.checks.get(definition.id);
     const installedVersion = parseManagedCliVersion(detected.version);
     const latestVersion = checked?.latestVersion ?? null;
     const normalizeCommandPath = (command: string) =>
-      platform() === "win32" ? path.win32.normalize(command).toLowerCase() : path.resolve(command);
+      this.platform() === "win32"
+        ? path.win32.normalize(command).toLowerCase()
+        : path.resolve(command);
     const selectedManaged = Boolean(
       managed &&
       detected.commandPath &&
@@ -171,13 +214,7 @@ export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDe
       latestVersion,
       installed: Boolean(detected.installed),
       runnable: Boolean(detected.runnable),
-      source: override
-        ? "override"
-        : selectedManaged
-          ? "managed"
-          : detected.installed
-            ? "external"
-            : "missing",
+      source: runtimeSource(override, selectedManaged, detected.installed),
       commandPath: detected.commandPath ?? null,
       updateAvailable: Boolean(
         installedVersion &&
@@ -191,44 +228,38 @@ export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDe
     };
     const blocked = blockedReason(item, definition);
     item.canUpdate = blocked === null;
-    item.reason =
-      blocked ??
-      (item.error
-        ? "check_failed"
-        : latestVersion
-          ? item.updateAvailable
-            ? "update_available"
-            : "up_to_date"
-          : "unchecked");
+    item.reason = runtimeReason(item, blocked);
     return item;
   }
 
-  async function listManagedCliRuntimes({
-    checkUpdates = false,
-  }: { checkUpdates?: boolean } = {}): Promise<ManagedCliRuntimeItem[]> {
+  async listManagedCliRuntimes({ checkUpdates = false }: { checkUpdates?: boolean } = {}): Promise<
+    ManagedCliRuntimeItem[]
+  > {
     log.debug({ checkUpdates }, "Reading managed CLI inventory");
     return Promise.all(
-      listManagedCliDefinitions().map((definition) => inventory(definition, checkUpdates))
+      listManagedCliDefinitions().map((definition) => this.inventory(definition, checkUpdates))
     );
   }
 
-  async function installAndActivate(
+  async installAndActivate(
     definition: ManagedCliDefinition,
     latestVersion: string
   ): Promise<ManagedCliInstallation> {
     const pointer: ManagedCliPointer = {
       version: latestVersion,
       installationId: `${latestVersion}-${randomUUID()}`,
-      updatedAt: now().toISOString(),
+      updatedAt: this.now().toISOString(),
     };
-    const prefix = path.join(root(), definition.id, "versions", pointer.installationId);
+    const prefix = path.join(this.root(), definition.id, "versions", pointer.installationId);
     await fs.mkdir(prefix, { mode: 0o700 });
-    assertManagedCliPath(root(), prefix);
+    assertManagedCliPath(this.root(), prefix);
     let activated = false;
     try {
       try {
-        await install(definition, latestVersion, prefix);
-      } catch {
+        await this.install(definition, latestVersion, prefix);
+      } catch (error) {
+        if (error instanceof ManagedCliRuntimeError && error.code === "npm_policy_unsupported")
+          throw error;
         throw new ManagedCliRuntimeError(
           "install_failed",
           "The CLI update could not be installed. The previous version is still active. Check npm, network access, Node compatibility and data-directory permissions.",
@@ -237,8 +268,13 @@ export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDe
       }
       let candidate: ManagedCliInstallation;
       try {
-        candidate = inspectManagedCliInstallation(definition, root(), pointer, platform());
-        if (parseManagedCliVersion(await probe(candidate, definition)) !== latestVersion)
+        candidate = inspectManagedCliInstallation(
+          definition,
+          this.root(),
+          pointer,
+          this.platform()
+        );
+        if (parseManagedCliVersion(await this.probe(candidate, definition)) !== latestVersion)
           throw new Error("Unexpected executable version");
       } catch {
         throw new ManagedCliRuntimeError(
@@ -247,14 +283,14 @@ export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDe
           502
         );
       }
-      if (hasManagedCliOverride(definition, env()))
+      if (hasManagedCliOverride(definition, this.env()))
         throw new ManagedCliRuntimeError(
           "explicit_override",
           BLOCK_MESSAGES.explicit_override,
           409
         );
       try {
-        await activate(root(), definition, pointer);
+        await this.activate(this.root(), definition, pointer);
         activated = true;
       } catch {
         throw new ManagedCliRuntimeError(
@@ -267,11 +303,11 @@ export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDe
     } finally {
       if (
         !activated &&
-        readManagedCliInstallation(definition.id, root(), platform())?.pointer.installationId !==
-          pointer.installationId
+        readManagedCliInstallation(definition.id, this.root(), this.platform())?.pointer
+          .installationId !== pointer.installationId
       ) {
         try {
-          assertManagedCliPath(root(), prefix);
+          assertManagedCliPath(this.root(), prefix);
           await fs.rm(prefix, { recursive: true, force: true });
         } catch {
           log.warn({ toolId: definition.id }, "Could not clean up an unactivated CLI candidate");
@@ -280,11 +316,11 @@ export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDe
     }
   }
 
-  async function updateManagedCliRuntime(toolId: string): Promise<ManagedCliRuntimeItem> {
+  async updateManagedCliRuntime(toolId: string): Promise<ManagedCliRuntimeItem> {
     const definition = getManagedCliDefinition(toolId);
     if (!definition)
       throw new ManagedCliRuntimeError("unsupported_tool", "Unsupported CLI tool.", 404);
-    const lockKey = `${path.resolve(root())}:${definition.id}`;
+    const lockKey = `${path.resolve(this.root())}:${definition.id}`;
     if (updateLocks.has(lockKey))
       throw new ManagedCliRuntimeError(
         "update_in_progress",
@@ -294,25 +330,25 @@ export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDe
     updateLocks.add(lockKey);
     let releaseFileLock: (() => Promise<void>) | undefined;
     try {
-      let current = await inventory(definition, false);
+      let current = await this.inventory(definition, false);
       let blocked = blockedReason(current, definition);
       if (blocked) throw new ManagedCliRuntimeError(blocked, BLOCK_MESSAGES[blocked], 409);
-      const toolDir = await ensureManagedCliDirectories(root(), definition.id);
-      releaseFileLock = await acquireLock(toolDir);
+      const toolDir = await ensureManagedCliDirectories(this.root(), definition.id);
+      releaseFileLock = await this.acquireLock(toolDir);
       // Another server worker may have activated a newer version before this lock was acquired.
-      current = await inventory(definition, false);
+      current = await this.inventory(definition, false);
       blocked = blockedReason(current, definition);
       if (blocked) throw new ManagedCliRuntimeError(blocked, BLOCK_MESSAGES[blocked], 409);
-      const checked = await check(definition);
+      const checked = await this.check(definition);
       if (!checked.latestVersion)
         throw new ManagedCliRuntimeError("check_failed", checked.error!, 502);
       if (compareManagedCliVersions(checked.latestVersion, current.installedVersion!) <= 0)
-        return inventory(definition, false);
+        return this.inventory(definition, false);
       log.info(
         { toolId: definition.id, version: checked.latestVersion },
         "Installing managed CLI update"
       );
-      const candidate = await installAndActivate(definition, checked.latestVersion);
+      const candidate = await this.installAndActivate(definition, checked.latestVersion);
       log.info(
         { toolId: definition.id, version: candidate.version },
         "Managed CLI update activated"
@@ -351,8 +387,14 @@ export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDe
       }
     }
   }
+}
 
-  return { listManagedCliRuntimes, updateManagedCliRuntime };
+export function createManagedCliRuntimeManager(dependencies: ManagedCliRuntimeDependencies = {}) {
+  const manager = new ManagedCliRuntimeManager(dependencies);
+  return {
+    listManagedCliRuntimes: manager.listManagedCliRuntimes.bind(manager),
+    updateManagedCliRuntime: manager.updateManagedCliRuntime.bind(manager),
+  };
 }
 
 const manager = createManagedCliRuntimeManager();

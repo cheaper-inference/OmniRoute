@@ -55,6 +55,11 @@ Explicit `CLI_CODEX_BIN`, `CLI_CLAUDE_BIN`, `CLI_DROID_BIN`, `CLI_QODER_BIN` and
 an explicit override. A failed version check remains an error or unknown state rather
 than being reported as up to date. Registry access, npm and a compatible Node.js runtime
 are required on the OmniRoute host; Windows paths containing spaces are supported.
+Claude Code and Droid additionally require stable npm 11.18+ within major 11 or npm 12
+to enforce the staged project’s explicit `allowScripts` policy in strict mode. Older,
+prerelease and unreviewed future-major npm versions are refused before installation;
+update npm separately, then retry. Codex and Qoder remain script-free and do not have
+this extra npm-version requirement. OmniRoute does not upgrade npm automatically.
 
 **Installed version** and **Provider client version** are separate. The latter is the
 identity OmniRoute advertises for its direct Codex/Claude provider calls. A verified

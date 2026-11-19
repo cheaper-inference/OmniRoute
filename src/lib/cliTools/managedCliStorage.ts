@@ -83,6 +83,21 @@ async function respectLegacyOwner(toolDir: string): Promise<void> {
   }
 }
 
+async function legacyClaimModifiedAt(
+  directory: string,
+  name: string,
+  pid: number,
+  startedAt: number | undefined
+): Promise<number | undefined> {
+  if (pid !== process.pid || startedAt !== undefined) return undefined;
+  try {
+    return (await fs.lstat(path.join(directory, name))).mtimeMs;
+  } catch {
+    // A renamed choosing marker remains a blocker for this directory snapshot.
+    return undefined;
+  }
+}
+
 async function readLockClaims(directory: string): Promise<LockClaim[]> {
   const claims: LockClaim[] = [];
   for (const name of await fs.readdir(directory)) {
@@ -91,14 +106,7 @@ async function readLockClaims(directory: string): Promise<LockClaim[]> {
     const pid = Number(match[1]);
     if (!Number.isSafeInteger(pid) || pid < 1) continue;
     const startedAt = match[2] ? Number(match[2]) : undefined;
-    let modifiedAt: number | undefined;
-    if (pid === process.pid && startedAt === undefined) {
-      try {
-        modifiedAt = (await fs.lstat(path.join(directory, name))).mtimeMs;
-      } catch {
-        // A renamed choosing marker remains a blocker for this directory snapshot.
-      }
-    }
+    const modifiedAt = await legacyClaimModifiedAt(directory, name, pid, startedAt);
     if (!ownerIsAlive(pid, startedAt, modifiedAt)) {
       // Every claim has a unique name that is never reused by a newer owner.
       await fs.unlink(path.join(directory, name)).catch(() => {});

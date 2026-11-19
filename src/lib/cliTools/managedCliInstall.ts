@@ -11,6 +11,8 @@ import {
 } from "@/shared/services/managedCliRuntime";
 import { buildManagedCliInvocation } from "@/shared/services/managedCliInvocation.mjs";
 import { executeManagedCliCommand as execute } from "./managedCliProcess";
+import { ManagedCliRuntimeError } from "./managedCliError";
+import { buildManagedCliNpmManifest, supportsManagedCliNpmPolicy } from "./managedCliNpmPolicy.mjs";
 
 const ENVIRONMENT_KEYS = [
   "PATH",
@@ -82,7 +84,7 @@ export function buildManagedCliInstallArgs(
   )
     throw new TypeError("Unsupported CLI package");
   const scriptsPolicy = approved.lifecyclePackages.length
-    ? `--allow-scripts=${approved.lifecyclePackages.join(",")}`
+    ? "--strict-allow-scripts"
     : "--ignore-scripts";
   return [
     "install",
@@ -100,23 +102,39 @@ export function buildManagedCliInstallArgs(
 export async function installManagedCliCandidate(
   definition: ManagedCliDefinition,
   version: string,
-  prefix: string
+  prefix: string,
+  run: typeof execute = execute
 ): Promise<void> {
   const args = buildManagedCliInstallArgs(definition, version);
+  const approved = getManagedCliDefinition(definition.id)!;
+  const windows = os.platform() === "win32";
+  const command = windows ? "npm.cmd" : "npm";
+  const options = {
+    cwd: prefix,
+    env: buildManagedCliInstallEnvironment(prefix),
+    // npm.cmd needs cmd.exe; arguments are fixed flags or validated catalog values.
+    ...(windows ? { shell: true } : {}),
+  };
+  if (approved.lifecyclePackages.length) {
+    const npmVersion = await run(command, ["--version"], { ...options, timeout: 20_000 });
+    if (!supportsManagedCliNpmPolicy(npmVersion)) {
+      throw new ManagedCliRuntimeError(
+        "npm_policy_unsupported",
+        "This CLI requires npm 11.18 or newer in major 11, or stable npm 12, to enforce its installation-script policy. Update npm separately and retry. The previous CLI remains active.",
+        409
+      );
+    }
+  }
   await fs.writeFile(
     path.join(prefix, "package.json"),
-    JSON.stringify({ name: `omniroute-managed-${definition.id}`, version: "0.0.0", private: true }),
+    JSON.stringify(buildManagedCliNpmManifest(approved)),
     { flag: "wx", mode: 0o600 }
   );
   await fs.writeFile(path.join(prefix, ".npmrc"), "", { flag: "wx", mode: 0o600 });
   await fs.writeFile(path.join(prefix, ".npmrc-global"), "", { flag: "wx", mode: 0o600 });
-  const windows = os.platform() === "win32";
-  await execute(windows ? "npm.cmd" : "npm", args, {
-    cwd: prefix,
-    env: buildManagedCliInstallEnvironment(prefix),
+  await run(command, args, {
+    ...options,
     timeout: 300_000,
-    // npm.cmd requires cmd.exe; every argument is a fixed flag or validated catalog value.
-    ...(windows ? { shell: true } : {}),
   });
 }
 

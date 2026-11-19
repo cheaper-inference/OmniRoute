@@ -9,6 +9,8 @@ import Card from "@/shared/components/Card";
 import type { ManagedCliRuntimeItem } from "@/lib/cliTools/managedCliRuntimes";
 import { useCliRuntimeUpdates, type RuntimeRequestFailure } from "./useCliRuntimeUpdates";
 
+type RuntimeState = ReturnType<typeof useCliRuntimeUpdates>;
+
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
 const REASON_KEYS: Record<string, string> = {
@@ -56,6 +58,17 @@ function CheckedTime({ value, t }: { value: string | null; t: Translate }) {
   );
 }
 
+function isReady(item: ManagedCliRuntimeItem) {
+  return (
+    item.installed &&
+    item.runnable &&
+    item.canUpdate &&
+    item.updateAvailable &&
+    Boolean(item.installedVersion && item.latestVersion) &&
+    !item.error
+  );
+}
+
 function RuntimeCard({
   item,
   busy,
@@ -73,13 +86,7 @@ function RuntimeCard({
 }) {
   const status = statusOf(item);
   const reasonKey = item.reason ? REASON_KEYS[item.reason] : null;
-  const ready =
-    item.installed &&
-    item.runnable &&
-    item.canUpdate &&
-    item.updateAvailable &&
-    Boolean(item.installedVersion && item.latestVersion) &&
-    !item.error;
+  const ready = isReady(item);
   const headingId = `cli-runtime-${item.id}`;
   return (
     <Card role="region" aria-labelledby={headingId} padding="sm" className="min-w-0">
@@ -96,38 +103,7 @@ function RuntimeCard({
           {t(`status.${updating ? "updating" : status.key}`)}
         </Badge>
       </div>
-      <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
-        <div className="min-w-0">
-          <dt className="text-xs text-text-muted">{t("installedVersion")}</dt>
-          <dd className="mt-1 break-all tabular-nums" dir="ltr">
-            {item.installedVersion || t(item.installed ? "unknownVersion" : "notInstalled")}
-          </dd>
-        </div>
-        <div className="min-w-0">
-          <dt className="text-xs text-text-muted">{t("latestVersion")}</dt>
-          <dd className="mt-1 break-all tabular-nums" dir="ltr">
-            {item.latestVersion || t("unknownVersion")}
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs text-text-muted">{t("sourceLabel")}</dt>
-          <dd className="mt-1">{t(`sources.${item.source}`)}</dd>
-        </div>
-        <div>
-          <dt className="text-xs text-text-muted">{t("lastChecked")}</dt>
-          <dd className="mt-1">
-            <CheckedTime value={item.checkedAt} t={t} />
-          </dd>
-        </div>
-        {item.commandPath && (
-          <div className="col-span-2 min-w-0">
-            <dt className="text-xs text-text-muted">{t("executable")}</dt>
-            <dd className="mt-1 break-all text-xs" dir="ltr">
-              {item.commandPath}
-            </dd>
-          </div>
-        )}
-      </dl>
+      <RuntimeDetails item={item} t={t} />
       {reasonKey && <p className="mt-4 text-sm text-text-muted">{t(reasonKey)}</p>}
       {item.id === "openclaw" && item.reason === "update_unsupported" && (
         <a
@@ -163,124 +139,87 @@ function RuntimeCard({
   );
 }
 
-export default function CliRuntimeUpdatesPanel() {
-  const t = useTranslations("cliCode.runtimeUpdates");
-  const { items, operation, error, rowErrors, summary, identities, identityFailed, run } =
-    useCliRuntimeUpdates();
-  const busy = operation !== null;
-  const loading = operation?.kind === "load";
-  const hasInstalled = items.some((item) => item.installed);
+function RuntimeDetails({ item, t }: { item: ManagedCliRuntimeItem; t: Translate }) {
   return (
-    <div className="flex min-w-0 flex-col gap-6">
-      <PageHeader compact title={t("title")} description={t("description")} />
-      <Link href="/dashboard/cli-code" className="w-fit text-sm text-primary hover:underline">
-        {t("backToCliCode")}
-      </Link>
-
-      <Card padding="sm" surface="subtle">
-        <p id="cli-runtime-update-scope" className="text-sm text-text-main">
-          {t("updateScope")}
-        </p>
-        <p className="mt-2 text-sm text-text-muted">{t("localAccess")}</p>
-        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-          <Button
-            variant="secondary"
-            icon="refresh"
-            disabled={busy}
-            loading={operation?.kind === "check"}
-            onClick={() => void run("check")}
-          >
-            {t("checkForUpdates")}
-          </Button>
-          <Button
-            icon="system_update_alt"
-            disabled={busy || !hasInstalled}
-            loading={operation?.kind === "batch"}
-            onClick={() => void run("batch")}
-            aria-describedby="cli-runtime-update-scope"
-          >
-            {t("checkAndUpdate")}
-          </Button>
+    <>
+      <dl className="mt-5 grid grid-cols-2 gap-x-4 gap-y-4 text-sm">
+        <div className="min-w-0">
+          <dt className="text-xs text-text-muted">{t("installedVersion")}</dt>
+          <dd className="mt-1 break-all tabular-nums" dir="ltr">
+            {item.installedVersion || t(item.installed ? "unknownVersion" : "notInstalled")}
+          </dd>
         </div>
-      </Card>
-
-      {error && (
-        <Card padding="sm">
-          <p role="alert" className="text-sm text-error">
-            {failureText(error, t)}
-          </p>
-          <Button
-            className="mt-3"
-            size="sm"
-            variant="secondary"
-            disabled={busy}
-            onClick={() => void run("load")}
-          >
-            {t("retry")}
-          </Button>
-        </Card>
-      )}
-
-      <div role="status" aria-live="polite" aria-atomic="true" className="text-sm">
-        {loading && <p>{t("loading")}</p>}
-        {operation?.kind === "check" && <p>{t("checking")}</p>}
-        {operation?.toolId && (
-          <p>
-            {t("updatingTool", {
-              name: items.find((item) => item.id === operation.toolId)?.name || operation.toolId,
-            })}
-          </p>
-        )}
-        {operation?.kind === "batch" && !operation.toolId && <p>{t("checking")}</p>}
-        {summary && (
-          <div className="space-y-2">
-            <p>
-              {summary.kind === "check"
-                ? t("checkSummary", { available: summary.available, failed: summary.checkFailed })
-                : t("updateSummary", {
-                    updated: summary.updated,
-                    failed: summary.failed,
-                    checkFailed: summary.checkFailed,
-                  })}
-            </p>
-            {summary.kind === "update" && summary.updated === 0 && summary.failed === 0 && (
-              <p className="text-text-muted">{t("noEligibleUpdates")}</p>
-            )}
-            {summary.updated > 0 && <p>{t("restartSessions")}</p>}
-            {summary.modelsRefreshed > 0 && (
-              <p>{t("modelsRefreshed", { count: summary.modelsRefreshed })}</p>
-            )}
-            {summary.modelRefreshFailed > 0 && (
-              <p className="text-warning">
-                {t("modelRefreshFailed")}{" "}
-                <Link href="/dashboard/providers" className="underline">
-                  {t("openProviders")}
-                </Link>
-              </p>
-            )}
+        <div className="min-w-0">
+          <dt className="text-xs text-text-muted">{t("latestVersion")}</dt>
+          <dd className="mt-1 break-all tabular-nums" dir="ltr">
+            {item.latestVersion || t("unknownVersion")}
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs text-text-muted">{t("sourceLabel")}</dt>
+          <dd className="mt-1">{t(`sources.${item.source}`)}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-text-muted">{t("lastChecked")}</dt>
+          <dd className="mt-1">
+            <CheckedTime value={item.checkedAt} t={t} />
+          </dd>
+        </div>
+        {item.commandPath && (
+          <div className="col-span-2 min-w-0">
+            <dt className="text-xs text-text-muted">{t("executable")}</dt>
+            <dd className="mt-1 break-all text-xs" dir="ltr">
+              {item.commandPath}
+            </dd>
           </div>
         )}
-      </div>
+      </dl>
+    </>
+  );
+}
 
-      {!loading && !error && items.length === 0 && (
-        <Card padding="sm">
-          <p>{t("empty")}</p>
-        </Card>
+function RuntimeSummary({ summary, t }: { summary: RuntimeState["summary"]; t: Translate }) {
+  return (
+    <>
+      {summary && (
+        <div className="space-y-2">
+          <p>
+            {summary.kind === "check"
+              ? t("checkSummary", { available: summary.available, failed: summary.checkFailed })
+              : t("updateSummary", {
+                  updated: summary.updated,
+                  failed: summary.failed,
+                  checkFailed: summary.checkFailed,
+                })}
+          </p>
+          {summary.kind === "update" && summary.updated === 0 && summary.failed === 0 && (
+            <p className="text-text-muted">{t("noEligibleUpdates")}</p>
+          )}
+          {summary.updated > 0 && <p>{t("restartSessions")}</p>}
+          {summary.modelsRefreshed > 0 && (
+            <p>{t("modelsRefreshed", { count: summary.modelsRefreshed })}</p>
+          )}
+          {summary.modelRefreshFailed > 0 && (
+            <p className="text-warning">
+              {t("modelRefreshFailed")}{" "}
+              <Link href="/dashboard/providers" className="underline">
+                {t("openProviders")}
+              </Link>
+            </p>
+          )}
+        </div>
       )}
-      <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2" aria-busy={busy}>
-        {items.map((item) => (
-          <RuntimeCard
-            key={item.id}
-            item={item}
-            busy={busy}
-            updating={operation?.toolId === item.id}
-            error={rowErrors[item.id]}
-            onUpdate={() => void run("update", item)}
-            t={t}
-          />
-        ))}
-      </div>
+    </>
+  );
+}
 
+function ProviderVersions({
+  identities,
+  identityFailed,
+  t,
+}: Pick<RuntimeState, "identities" | "identityFailed"> & { t: Translate }) {
+  return (
+    <>
       <Card padding="sm">
         <h2 className="ci-heading text-lg">{t("providerClientTitle")}</h2>
         <p className="mt-2 text-sm text-text-muted">{t("providerClientDescription")}</p>
@@ -322,6 +261,130 @@ export default function CliRuntimeUpdatesPanel() {
           </dl>
         )}
       </Card>
+    </>
+  );
+}
+
+function RuntimeProgress({
+  operation,
+  items,
+  summary,
+  t,
+}: Pick<RuntimeState, "operation" | "items" | "summary"> & { t: Translate }) {
+  const loading = operation?.kind === "load";
+  return (
+    <>
+      <div role="status" aria-live="polite" aria-atomic="true" className="text-sm">
+        {loading && <p>{t("loading")}</p>}
+        {operation?.kind === "check" && <p>{t("checking")}</p>}
+        {operation?.toolId && (
+          <p>
+            {t("updatingTool", {
+              name: items.find((item) => item.id === operation.toolId)?.name || operation.toolId,
+            })}
+          </p>
+        )}
+        {operation?.kind === "batch" && !operation.toolId && <p>{t("checking")}</p>}
+        <RuntimeSummary summary={summary} t={t} />
+      </div>
+    </>
+  );
+}
+
+function RuntimeActions({
+  operation,
+  items,
+  run,
+  t,
+}: Pick<RuntimeState, "operation" | "items" | "run"> & { t: Translate }) {
+  const busy = operation !== null;
+  const hasInstalled = items.some((item) => item.installed);
+  return (
+    <>
+      <Card padding="sm" surface="subtle">
+        <p id="cli-runtime-update-scope" className="text-sm text-text-main">
+          {t("updateScope")}
+        </p>
+        <p className="mt-2 text-sm text-text-muted">{t("localAccess")}</p>
+        <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          <Button
+            variant="secondary"
+            icon="refresh"
+            disabled={busy}
+            loading={operation?.kind === "check"}
+            onClick={() => void run("check")}
+          >
+            {t("checkForUpdates")}
+          </Button>
+          <Button
+            icon="system_update_alt"
+            disabled={busy || !hasInstalled}
+            loading={operation?.kind === "batch"}
+            onClick={() => void run("batch")}
+            aria-describedby="cli-runtime-update-scope"
+          >
+            {t("checkAndUpdate")}
+          </Button>
+        </div>
+      </Card>
+    </>
+  );
+}
+
+export default function CliRuntimeUpdatesPanel() {
+  const t = useTranslations("cliCode.runtimeUpdates");
+  const { items, operation, error, rowErrors, summary, identities, identityFailed, run } =
+    useCliRuntimeUpdates();
+  const busy = operation !== null;
+  const loading = operation?.kind === "load";
+  return (
+    <div className="flex min-w-0 flex-col gap-6">
+      <PageHeader compact title={t("title")} description={t("description")} />
+      <Link href="/dashboard/cli-code" className="w-fit text-sm text-primary hover:underline">
+        {t("backToCliCode")}
+      </Link>
+
+      <RuntimeActions operation={operation} items={items} run={run} t={t} />
+
+      {error && (
+        <Card padding="sm">
+          <p role="alert" className="text-sm text-error">
+            {failureText(error, t)}
+          </p>
+          <Button
+            className="mt-3"
+            size="sm"
+            variant="secondary"
+            disabled={busy}
+            onClick={() => void run("load")}
+          >
+            {t("retry")}
+          </Button>
+        </Card>
+      )}
+
+      <RuntimeProgress operation={operation} items={items} summary={summary} t={t} />
+
+      {!loading && !error && items.length === 0 && (
+        <Card padding="sm">
+          <p>{t("empty")}</p>
+        </Card>
+      )}
+      <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-2" aria-busy={busy}>
+        {items.map((item) => (
+          <RuntimeCard
+            key={item.id}
+            item={item}
+            busy={busy}
+            updating={operation?.toolId === item.id}
+            error={rowErrors[item.id]}
+            onUpdate={() => void run("update", item)}
+            t={t}
+          />
+        ))}
+      </div>
+
+      <ProviderVersions identities={identities} identityFailed={identityFailed} t={t} />
     </div>
   );
 }

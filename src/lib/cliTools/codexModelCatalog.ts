@@ -202,6 +202,10 @@ export async function loadBundledCodexCatalog(codexHome: string): Promise<CodexM
     maxBuffer: BUNDLED_CATALOG_MAX_BUFFER,
     ...(!invocation && shouldUseShellForCommand(command) ? { shell: true } : {}),
   });
+  return parseBundledCodexCatalog(stdout);
+}
+
+function parseBundledCodexCatalog(stdout: unknown): CodexModelCatalog {
   const parsed = JSON.parse(String(stdout));
   if (!Array.isArray(parsed?.models) || parsed.models.length === 0) {
     throw new Error("Codex bundled catalog has no models");

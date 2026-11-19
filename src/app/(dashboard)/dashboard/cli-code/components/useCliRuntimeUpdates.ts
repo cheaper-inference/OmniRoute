@@ -47,6 +47,26 @@ function failureOf(error: unknown): RuntimeRequestFailure {
     : { status: 0, code: null, message: null };
 }
 
+function responseFailure(data: unknown, status: number): RuntimeRequestFailure {
+  const error = record(data) ? data.error : null;
+  const details = record(error) && record(error.details) ? error.details : null;
+  return {
+    status,
+    code:
+      details && typeof details.code === "string"
+        ? details.code
+        : record(error) && typeof error.code === "string"
+          ? error.code
+          : null,
+    message:
+      typeof error === "string"
+        ? error
+        : record(error) && typeof error.message === "string"
+          ? error.message
+          : null,
+  };
+}
+
 async function requestJson(
   url: string,
   signal: AbortSignal,
@@ -65,23 +85,7 @@ async function requestJson(
   });
   const data: unknown = await response.json().catch(() => null);
   if (!response.ok) {
-    const error = record(data) ? data.error : null;
-    const details = record(error) && record(error.details) ? error.details : null;
-    throw new RuntimeRequestError({
-      status: response.status,
-      code:
-        details && typeof details.code === "string"
-          ? details.code
-          : record(error) && typeof error.code === "string"
-            ? error.code
-            : null,
-      message:
-        typeof error === "string"
-          ? error
-          : record(error) && typeof error.message === "string"
-            ? error.message
-            : null,
-    });
+    throw new RuntimeRequestError(responseFailure(data, response.status));
   }
   if (!record(data)) {
     throw new RuntimeRequestError({ status: 0, code: "invalid_response", message: null });
@@ -117,15 +121,91 @@ function readItems(data: Record<string, unknown>): ManagedCliRuntimeItem[] {
   return data.items;
 }
 
-export function useCliRuntimeUpdates() {
-  const [items, setItems] = useState<ManagedCliRuntimeItem[]>([]);
-  const [operation, setOperation] = useState<Operation | null>({ kind: "load" });
-  const [error, setError] = useState<RuntimeRequestFailure | null>(null);
-  const [rowErrors, setRowErrors] = useState<Record<string, RuntimeRequestFailure>>({});
-  const [summary, setSummary] = useState<UpdateSummary | null>(null);
+function readUpdatedItem(data: Record<string, unknown>, id: string): ManagedCliRuntimeItem {
+  if (
+    !isRuntimeItem(data.item) ||
+    data.item.id !== id ||
+    !data.item.installed ||
+    !data.item.runnable ||
+    !data.item.installedVersion
+  ) {
+    throw new RuntimeRequestError({ status: 0, code: "invalid_response", message: null });
+  }
+  return data.item;
+}
+
+async function refreshModels(
+  id: string,
+  signal: AbortSignal,
+  current: () => boolean,
+  result: UpdateSummary
+) {
+  try {
+    const refresh = await refreshManagedCliProviderModels(id, fetch, {
+      signal,
+    });
+    result.modelsRefreshed += refresh.refreshed;
+    result.modelRefreshFailed += refresh.failed;
+  } catch {
+    if (current()) result.modelRefreshFailed += 1;
+  }
+}
+
+async function updateCandidates(
+  candidates: ManagedCliRuntimeItem[],
+  kind: OperationKind,
+  controller: AbortController,
+  current: () => boolean,
+  result: UpdateSummary,
+  setOperation: (operation: Operation) => void,
+  setItems: (update: (previous: ManagedCliRuntimeItem[]) => ManagedCliRuntimeItem[]) => void,
+  setRowErrors: (
+    update: (
+      previous: Record<string, RuntimeRequestFailure>
+    ) => Record<string, RuntimeRequestFailure>
+  ) => void
+) {
+  for (const candidate of candidates) {
+    if (!current()) return;
+    setOperation({ kind, toolId: candidate.id });
+    try {
+      const data = await requestJson(API_PATH, controller.signal, {
+        action: "update",
+        toolId: candidate.id,
+      });
+      const next = readUpdatedItem(data, candidate.id);
+      if (!current()) return;
+      setItems((previous) => previous.map((item) => (item.id === next.id ? next : item)));
+      if (next.installedVersion !== candidate.installedVersion) result.updated += 1;
+      await refreshModels(candidate.id, controller.signal, current, result);
+    } catch (failure) {
+      if (!current()) return;
+      result.failed += 1;
+      setRowErrors((previous) => ({ ...previous, [candidate.id]: failureOf(failure) }));
+    }
+  }
+}
+
+function batchCandidates(
+  kind: OperationKind,
+  next: ManagedCliRuntimeItem[]
+): ManagedCliRuntimeItem[] {
+  return kind === "batch"
+    ? next.filter(
+        (item) =>
+          item.installed &&
+          item.runnable &&
+          item.canUpdate &&
+          !item.error &&
+          item.updateAvailable &&
+          Boolean(item.installedVersion && item.latestVersion)
+      )
+    : [];
+}
+
+function useProviderIdentities() {
   const [identities, setIdentities] = useState<ProviderClientVersion[] | null>(null);
   const [identityFailed, setIdentityFailed] = useState(false);
-  const active = useRef<AbortController | null>(null);
   const identityRequest = useRef<AbortController | null>(null);
 
   const refreshIdentities = useCallback(async () => {
@@ -154,9 +234,21 @@ export function useCliRuntimeUpdates() {
     }
   }, []);
 
+  const abortIdentities = useCallback(() => identityRequest.current?.abort(), []);
+  return { identities, identityFailed, refreshIdentities, abortIdentities };
+}
+
+function useInitialRuntimeLoad(
+  activeRef: { current: AbortController | null },
+  abortIdentities: () => void,
+  refreshIdentities: () => Promise<void>,
+  setItems: (items: ManagedCliRuntimeItem[]) => void,
+  setError: (error: RuntimeRequestFailure) => void,
+  setOperation: (operation: Operation | null) => void
+) {
   useEffect(() => {
     const controller = new AbortController();
-    active.current = controller;
+    activeRef.current = controller;
     const load = async () => {
       try {
         const data = await requestJson(API_PATH, controller.signal);
@@ -165,8 +257,8 @@ export function useCliRuntimeUpdates() {
       } catch (failure) {
         if (!controller.signal.aborted) setError(failureOf(failure));
       } finally {
-        if (active.current === controller && !controller.signal.aborted) {
-          active.current = null;
+        if (activeRef.current === controller && !controller.signal.aborted) {
+          activeRef.current = null;
           setOperation(null);
         }
       }
@@ -175,10 +267,42 @@ export function useCliRuntimeUpdates() {
     void refreshIdentities();
     return () => {
       controller.abort();
-      active.current?.abort();
-      identityRequest.current?.abort();
+      activeRef.current?.abort();
+      abortIdentities();
     };
-  }, [refreshIdentities]);
+  }, [activeRef, abortIdentities, refreshIdentities, setItems, setError, setOperation]);
+}
+
+function newSummary(kind: OperationKind): UpdateSummary {
+  return {
+    kind: kind === "check" ? "check" : "update",
+    updated: 0,
+    failed: 0,
+    checkFailed: 0,
+    available: 0,
+    modelsRefreshed: 0,
+    modelRefreshFailed: 0,
+  };
+}
+
+export function useCliRuntimeUpdates() {
+  const [items, setItems] = useState<ManagedCliRuntimeItem[]>([]);
+  const [operation, setOperation] = useState<Operation | null>({ kind: "load" });
+  const [error, setError] = useState<RuntimeRequestFailure | null>(null);
+  const [rowErrors, setRowErrors] = useState<Record<string, RuntimeRequestFailure>>({});
+  const [summary, setSummary] = useState<UpdateSummary | null>(null);
+  const active = useRef<AbortController | null>(null);
+  const { identities, identityFailed, refreshIdentities, abortIdentities } =
+    useProviderIdentities();
+
+  useInitialRuntimeLoad(
+    active,
+    abortIdentities,
+    refreshIdentities,
+    setItems,
+    setError,
+    setOperation
+  );
 
   const run = useCallback(
     async (kind: OperationKind, selected?: ManagedCliRuntimeItem) => {
@@ -191,15 +315,7 @@ export function useCliRuntimeUpdates() {
       setError(null);
       setRowErrors({});
       setSummary(null);
-      const result: UpdateSummary = {
-        kind: kind === "check" ? "check" : "update",
-        updated: 0,
-        failed: 0,
-        checkFailed: 0,
-        available: 0,
-        modelsRefreshed: 0,
-        modelRefreshFailed: 0,
-      };
+      const result = newSummary(kind);
       try {
         let candidates = selected ? [selected] : [];
         if (kind !== "update") {
@@ -213,55 +329,18 @@ export function useCliRuntimeUpdates() {
           setItems(next);
           result.checkFailed = next.filter((item) => Boolean(item.error)).length;
           result.available = next.filter((item) => item.updateAvailable).length;
-          candidates =
-            kind === "batch"
-              ? next.filter(
-                  (item) =>
-                    item.installed &&
-                    item.runnable &&
-                    item.canUpdate &&
-                    !item.error &&
-                    item.updateAvailable &&
-                    Boolean(item.installedVersion && item.latestVersion)
-                )
-              : [];
+          candidates = batchCandidates(kind, next);
         }
-        for (const candidate of candidates) {
-          if (!current()) return;
-          setOperation({ kind, toolId: candidate.id });
-          try {
-            const data = await requestJson(API_PATH, controller.signal, {
-              action: "update",
-              toolId: candidate.id,
-            });
-            if (
-              !isRuntimeItem(data.item) ||
-              data.item.id !== candidate.id ||
-              !data.item.installed ||
-              !data.item.runnable ||
-              !data.item.installedVersion
-            ) {
-              throw new RuntimeRequestError({ status: 0, code: "invalid_response", message: null });
-            }
-            if (!current()) return;
-            const next = data.item;
-            setItems((previous) => previous.map((item) => (item.id === next.id ? next : item)));
-            if (next.installedVersion !== candidate.installedVersion) result.updated += 1;
-            try {
-              const refresh = await refreshManagedCliProviderModels(candidate.id, fetch, {
-                signal: controller.signal,
-              });
-              result.modelsRefreshed += refresh.refreshed;
-              result.modelRefreshFailed += refresh.failed;
-            } catch {
-              if (current()) result.modelRefreshFailed += 1;
-            }
-          } catch (failure) {
-            if (!current()) return;
-            result.failed += 1;
-            setRowErrors((previous) => ({ ...previous, [candidate.id]: failureOf(failure) }));
-          }
-        }
+        await updateCandidates(
+          candidates,
+          kind,
+          controller,
+          current,
+          result,
+          setOperation,
+          setItems,
+          setRowErrors
+        );
         if (!current()) return;
         if (kind === "update" || kind === "batch") await refreshIdentities();
         if (current() && kind !== "load") setSummary(result);

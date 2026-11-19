@@ -365,3 +365,23 @@ test("a lock-cleanup failure cannot mask activation or permanently hold the proc
   assert.equal((await f.manager.updateManagedCliRuntime("codex")).installedVersion, "1.1.0");
   assert.equal((await f.manager.updateManagedCliRuntime("codex")).installedVersion, "1.1.0");
 });
+
+test("unsupported npm policy stays actionable and preserves the active runtime", async (t) => {
+  const f = await fixture(t);
+  await f.manager.updateManagedCliRuntime("codex");
+  const activePath = path.join(f.root, "codex", "active.json");
+  const before = await fs.readFile(activePath, "utf8");
+  f.setLatest("1.2.0");
+  const failed = createManagedCliRuntimeManager({
+    ...f.deps,
+    install: async () => {
+      throw new ManagedCliRuntimeError("npm_policy_unsupported", "Update npm separately.", 409);
+    },
+  });
+  await assert.rejects(failed.updateManagedCliRuntime("codex"), {
+    code: "npm_policy_unsupported",
+    httpStatus: 409,
+  });
+  assert.equal(await fs.readFile(activePath, "utf8"), before);
+  assert.equal((await fs.readdir(path.join(f.root, "codex", "versions"))).length, 1);
+});
