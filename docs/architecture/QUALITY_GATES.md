@@ -370,7 +370,10 @@ The commands behind it:
   `readme-diagrams`, `skills` (generated `SKILL.md`), `e2e-timings` (skipped until the tree
   ships `syncE2eTimings`), `ui-keys` (prunes keys `en.json` dropped and, with
   `--rewritten-since=<ref>` — default `origin/main` — re-queues English values rewritten since
-  the last release), `llm-mirrors` and `verify-generated` (after a write, `check:generated-artifacts`
+  the last release; the values are translated in the same run by the backend configured in the
+  environment or in `.env` (`OMNIROUTE_TRANSLATION_*`, only those keys are read) or by the
+  Google engine. Without a backend it never writes `__MISSING__` markers: the release profile
+  fails, the nightly skips the keys, and `--allow-untranslated` writes them on purpose), `llm-mirrors` and `verify-generated` (after a write, `check:generated-artifacts`
   and `check:agent-skills-sync` in release mode must pass; skipped in `--check` and when `--only`
   leaves it out; a failure is exit 2). The
   `changelog` step is opt-in (`--with-changelog`, release profile only). `--profile=nightly`
