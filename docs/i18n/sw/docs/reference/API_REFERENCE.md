@@ -787,99 +787,145 @@ Uchakataji wa makundi unaoendana na OpenAI.
 
 ## API ya Utafutaji
 
-Abstraction ya watoa huduma wa wavuti/utafutaji (Tavily, Brave, Exa, Serper, n.k.).
+Uondoaji wa uondoaji wa watoa huduma wa wavuti/utafutaji (Tavily, Brave, Exa, Serper, n.k.).
 
-| Mbinu | Njia                   | Maelezo                                                                                                              |
-| ----- | ---------------------- | -------------------------------------------------------------------------------------------------------------------- |
-| GET   | `/v1/search`           | Orodhesha watoa huduma wa utafutaji waliosanidiwa + uwezo wao                                                        |
-| POST  | `/v1/search`           | Tekeleza swali la utafutaji — mwili unathibitishwa na `v1SearchSchema`, unaauni uhifadhi wa akiba/kuunganisha maombi |
-| GET   | `/v1/search/analytics` | Takwimu za majaribio ya hit, muda wa majibu na akiba kwa kila mtoa huduma                                            |
+| Method | Path                   | Description                                                                                                            |
+| ------ | ---------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/search`           | Orodhesha watoa huduma wa utafutaji waliowekwa + uwezo                                                                 |
+| POST   | `/v1/search`           | Tekeleza swali la utafutaji — mwili unathibitishwa na `v1SearchSchema`, inasaidia uhifadhi wa akiba/kuunganisha maombi |
+| GET    | `/v1/search/analytics` | Takwimu za kila mtoa huduma kuhusu matokeo/muda wa kusubiri/akiba                                                      |
 
 **Uthibitishaji:** Ufunguo wa API wa Bearer (`extractApiKey` + `isValidApiKey`). Sera ya utafutaji inatekelezwa kupitia `enforceApiKeyPolicy`.
 
-**Uteuzi otomatiki:** bila `provider`, mtoa huduma wa gharama nafuu zaidi aliye na muunganisho uliosanidiwa huendeshwa
-kwanza, na anayefuata kwa gharama ndiye njia mbadala. Watoa huduma wa bure wa mwisho wa matumizi (`duckduckgo-free`)
-hutumika tu wakati hakuna kingine kilichosanidiwa. SearXNG inayojipangisha huhesabiwa kuwa imesanidiwa mara tu muunganisho
-wake unapohifadhi `baseUrl` halisi (si katalogi-msingi `http://localhost:8888/search`): kisha hupangwa kama mtoa huduma wa $0
-mbele ya wale wenye funguo, huku mtoa huduma mwenye ufunguo wa gharama nafuu zaidi akiwa njia mbadala, ikijumuisha wakati
-SearXNG inapojibu 400, 401, 403 au 404. `baseUrl` ambayo si URL halali ya `http(s)` au inayoelekeza kwenye anwani ya metadata
-ya wingu haihesabiwi. Muunganisho wa SearXNG unaohifadhi tokeni hupangwa kwa njia hii tu kupitia `https://` au loopback
-`http://`. Kupitia `http://` ya mbali isiyo na usimbaji fiche, kamwe si njia mbadala na hubaki kuwa chaguo la mwisho,
-ikitumika tu wakati hakuna mtoa huduma mwingine aliyesanidiwa au inapoitishwa kwa jina, kwa hivyo hutuma tokeni hiyo
-bila usimbaji fiche katika hali hizo mbili.
+### Mchanganyiko uliotajwa wa utafutaji/uchotaji
+
+`POST /v1/search` na `POST /v1/web/fetch` zote zinakubali `model` kama jina la mchanganyiko uliohifadhiwa.  
+Tumia ama `model` au `provider` iliyoainishwa wazi; kutuma zote mbili kunarudisha `400`.  
+Bila sehemu yoyote kati ya hizo, uteuzi wa kiotomatiki wa mtoa huduma uliopo unaendelea bila mabadiliko.
+
+Combo Builder na katalogi yake ya Add Model zinaonyesha maingizo asilia ya utendaji wa wavuti kwa watoa huduma waliounganishwa, hata wakati hawana orodha ya miundo ya LLM. Serper huonyesha **Web search**; Tavily huonyesha **Web search / Page extraction**, na watoa huduma wa uchotaji pekee huonyesha **Page extraction**. Chagua ingizo na akaunti kama kawaida. Ingizo moja la Tavily hutumika kwa endpoint zote mbili za wavuti; maingizo haya ya utendaji hayaongezwi kwenye viteuzi vya wateja vya mazungumzo pekee au uchunguzi wa miundo ya mazungumzo.
+
+Kwa mfano, unda mchanganyiko wa **priority** unaoitwa `shared-free` wenye malengo haya yaliyopangwa:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Kisha tumia jina hilo hilo kwenye kila uso:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Utafutaji huzingatia Tavily kisha Serper; uchotaji huzingatia Tavily kisha Jina Reader; mazungumzo huruka watoa huduma maalum wa utafutaji/uchotaji na huzingatia OpenAI. Upatanifu unatokana na sajili za vitekeleza utafutaji/uchotaji, si kutokana na maneno katika jina la muundo. Uchujaji hufanyika kabla ya uteuzi wa kitambulisho na utumaji, na kamwe hauhariri mchanganyiko uliohifadhiwa.
+
+Mikondo ya uwezo isiyo ya mazungumzo inasaidia `priority`, `fill-first`, `round-robin`, `weighted`, `random`, `strict-random`, `least-used`, na `p2c`. Mikakati ya usanisi ya mazungumzo pekee kama vile `fusion`, `pipeline`, na `context-relay` hukataliwa kwenye mikondo isiyo ya mazungumzo badala ya kutumika kimya kimya kwenye utafutaji au midia iliyozalishwa. Injini iliyopo ya mchanganyiko hushughulikia urejeshaji uliopangwa, ikijumuisha hitilafu za viwango kutoka kwa huduma za juu, na huhifadhi vitambulisho vya hatua, pini za akaunti, orodha za akaunti zinazoruhusiwa kwa kila hatua, marejeo yaliyopachikwa, maeneo ya muunganisho/kikomo cha matumizi ya mpigaji na sera ya ufikiaji wa mchanganyiko. Matokeo huhifadhi schema asilia ya utafutaji/uchotaji, ikijumuisha mtoa huduma halisi; `X-OmniRoute-Combo-Trace` hutambulisha uamuzi wa uelekezaji. Mchanganyiko usiojulikana hurudisha `404`; mchanganyiko usiotumika na mchanganyiko usio na malengo yanayooana hurudisha `400`.
+
+Kila jaribio la mchanganyiko hutumia mtoa huduma mmoja aliyeainishwa wazi. Haiwezi kuita hifadhi asilia ya mtoa huduma ya kiotomatiki iliyo nyuma ya mchanganyiko bila kujulikana. Maombi ya mtoa huduma yaliyoainishwa wazi huhifadhi tabia yake iliyopo ya mtoa huduma mmoja. Maombi ya moja kwa moja ya mazungumzo yanayolenga watoa huduma maalum wa utafutaji/uchotaji hurudisha `400` ya JSON yenye maelekezo ya hatua, badala ya kuangukia kwenye kitekeleza cha mtindo wa OpenAI.
+
+### Mikondo ya mchanganyiko mahususi kwa uwezo
+
+Mchanganyiko uliohifadhiwa unaweza kuwa na kitu cha `routes` ambacho funguo zake ni uwezo wa API. Kila mkondo unamiliki orodha yake ya malengo, mkakati, na usanidi wa wakati wa utekelezaji. `models`, `strategy`, na `config` za kiwango cha juu zinasalia kuwa mpango wa Chat unaoendana na matoleo ya zamani; mchanganyiko wa zamani usio na `routes` unaendelea kufanya kazi bila mabadiliko.
+
+Funguo za mikondo zinazotumika ni `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`, `image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`, `audio-translations`, na `audio-generation`. Makadirio ya endpoint hufanyika kabla ya uteuzi wa kitambulisho, ukadiriaji, au utumaji. Marejeo ya mchanganyiko yaliyopachikwa huchagua mkondo wa mchanganyiko wa mtoto kwa uwezo huo huo.
+
+`POST /v1/music/generations` na `POST /v1/ocr` zinakubali jina la mchanganyiko katika `model`. `POST /v1/music` asilia inayooana na ElevenLabs pia inakubali jina la mchanganyiko katika `model_id`, lakini kila lengo linaloweza kutumika kwenye endpoint hiyo asilia lazima liwe muundo wa muziki wa ElevenLabs ili mkataba wake wa majibu ya jozi uhifadhiwe. `POST /v1/sound-generation` inakubali mchanganyiko wa `audio-generation` katika `model_id` chini ya sharti hilo hilo la jozi asilia. Tumia `/v1/music/generations` kwa watoa huduma wa muziki tofauti.
+
+**Uteuzi wa kiotomatiki:** bila `provider`, mtoa huduma wa gharama ya chini zaidi mwenye muunganisho uliowekwa hutumika kwanza na anayefuata kwa gharama ndiye wa kushindwa kwake. Watoa huduma wa bure wa mwisho wa dharura (`duckduckgo-free`) hutumika tu wakati hakuna kitu kingine kilichowekwa. SearXNG inayojihudumia huhesabiwa kuwa imewekwa mara tu muunganisho wake unapohifadhi `baseUrl` halisi (si chaguo-msingi la katalogi `http://localhost:8888/search`): kisha huorodheshwa kama mtoa huduma wa $0 kabla ya wale wanaohitaji funguo, huku mtoa huduma wa funguo mwenye gharama ya chini zaidi akiwa wa kushindwa kwake, ikijumuisha wakati SearXNG inajibu 400, 401, 403 au 404. `baseUrl` ambayo si URL halali ya `http(s)` au inayoelekeza kwenye anwani ya metadata ya wingu haihesabiwi. Muunganisho wa SearXNG unaohifadhi tokeni hupangwa kwa njia hii tu kupitia `https://` au `http://` ya loopback. Kupitia `http://` ya mbali isiyo na usimbaji, kamwe si wa kushindwa kwake na hubaki kuwa chaguo la mwisho, akitumiwa tu wakati hakuna mtoa huduma mwingine aliyowekwa au anapoombwa kwa jina, hivyo tokeni hutumwa bila usimbaji katika hali hizo mbili.
 
 ### `provider_options` za Exa na Tavily
 
-Exa na Tavily husoma sehemu mahususi za mtoa huduma kutoka kwenye kifurushi chenye nafasi za majina:
+Exa na Tavily husoma sehemu mahususi za mtoa huduma kutoka kwenye kifurushi chenye nafasi ya majina:
 `provider_options.exa` (au `provider_options["exa-search"]`) na `provider_options.tavily`
-(au `provider_options["tavily-search"]`). Ni funguo zilizo hapa chini pekee zinazopitishwa. Kila moja
-hukaguliwa dhidi ya schema yake ya Zod katika `open-sse/handlers/search/providerOptionsPassthrough.ts`,
-na ufunguo wenye aina isiyo sahihi huondolewa. Ufunguo mwingine wowote hupuuziwa, ikijumuisha uthibitishaji,
-URL ya msingi, `stream` na `outputSchema`. Funguo tambarare zinazotumiwa na watoa huduma wengine (`cx`, `depth`, ...)
-zinaendelea kufanya kazi kama awali.
+(au `provider_options["tavily-search"]`). Vifunguo vilivyo hapa chini pekee ndivyo
+hupitishwa. Kila kimoja hukaguliwa dhidi ya schema yake ya Zod katika
+`open-sse/handlers/search/providerOptionsPassthrough.ts`,
+na ufunguo wenye aina isiyo sahihi huondolewa. Vifunguo vingine vyovyote hupuuzwa, ikijumuisha auth, base URL,
+`stream` na `outputSchema`. Vifunguo bapa vinavyotumiwa na watoa huduma wengine (`cx`, `depth`, ...)
+hufanya kazi kama hapo awali.
 
-| Mtoa huduma | Sehemu za kiwango cha juu                                                                                                                                                                                                                                                                                                                                                 | Zilizowekwa ndani                                                                                                                                   |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (vigeu tambarare), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                              | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` zikiunganishwa juu ya chaguomsingi `{ text: true, highlights: true }` |
-| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                   |
+| Mtoa huduma | Sehemu za kiwango cha juu                                                                                                                                                                                                                                                                                                                                                 | Zilizopachikwa                                                                                                                                     |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (primitive bapa), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                               | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` huunganishwa juu ya chaguo-msingi `{ text: true, highlights: true }` |
+| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                  |
 
 Sehemu za jumla hushinda kila wakati: `query`, `max_results`, `filters` (vikoa), `country` na
-mada inayotokana na `search_type`. Kwenye Exa, `search_type: "news"` huhifadhi `category: "news"`.
-Tavily pia hukubali `search_type: "finance"` (`topic: "finance"`).
+mada inayotokana na `search_type`. Kwenye Exa, `search_type: "news"` huhifadhi
+`category: "news"`. Tavily pia inakubali `search_type: "finance"` (`topic: "finance"`).
 
-Gharama ya utafutaji wa Firecrawl hurekodiwa kwa kila kundi lililoanzishwa la matokeo 10 yaliyorejeshwa, kwa $0.002 (mikopo 2)
-kwa kila kundi na angalau kundi moja kwa kila mwito
+Gharama ya utafutaji wa Firecrawl hurekodiwa kwa kila kundi lililoanzishwa la matokeo 10
+yaliyorejeshwa, kwa $0.002 (mikopo 2) kwa kundi, na angalau kundi moja kwa kila mwito
 ([Malipo ya Firecrawl](https://docs.firecrawl.dev/billing)): matokeo 11 hugharimu $0.004.
 
-Jumla ya `time_range` sasa hufikia watoa huduma wote wawili: Exa hupata `startPublishedDate` (muhuri wa muda wa ISO)
-na Tavily hupata `start_date` (`YYYY-MM-DD`). Tarehe iliyo wazi katika `provider_options`
-hubatilisha iliyopangwa.
+`time_range` ya jumla sasa hufikia watoa huduma wote wawili: Exa hupata `startPublishedDate`
+(muhuri wa muda wa ISO) na Tavily hupata `start_date` (`YYYY-MM-DD`). Tarehe iliyo wazi katika
+`provider_options` hubatilisha ile iliyopangwa.
 
-Matokeo ya Exa huhifadhi `id`, `highlights` (kila dondoo, si ya kwanza tu iliyotumiwa kama
+Matokeo ya Exa huhifadhi `id`, `highlights` (kila highlight, si ya kwanza tu iliyotumiwa kama
 `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` na `extras` katika
 `provider_raw`. Matokeo ya Tavily huhifadhi `images` na `favicon`.
 
-Gharama ya utafutaji wa Linkup hurekodiwa kuwa $0.005 kwa `depth` `fast` na `standard`, na $0.05 kwa
-`deep` ([Bei za Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
+Gharama ya utafutaji wa Linkup hurekodiwa kuwa $0.005 kwa `depth` `fast` na `standard` na
+$0.05 kwa `deep` ([Bei za Linkup](https://docs.linkup.so/pages/documentation/development/pricing)),
 iwe `depth` imetoka kwenye `provider_options` au mipangilio ya muunganisho.
 
-Exa `type: "lite"` (Exa 3.0) hukubali seti ndogo ya sehemu na hukataa ombi zima
-wakati sehemu nyingine yoyote imewekwa. Kwa lite, `additionalQueries`, `systemPrompt` na kila ufunguo wa
-`contents` isipokuwa `text` na `highlights` huondolewa kabla ya mwito. Zilizoacha kutumika
-`subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl` hazipitishwi tena.
+Exa `type: "lite"` (Exa 3.0) inakubali seti ndogo ya sehemu na hukataa mwito mzima
+wakati sehemu nyingine yoyote imewekwa. Kwa lite, `additionalQueries`, `systemPrompt` na kila
+ufunguo wa `contents` isipokuwa `text` na `highlights` huondolewa kabla ya mwito. Vigezo vilivyopitwa na
+wakati `subpages`, `subpageTarget`, `highlights.numSentences` na `highlights.highlightsPerUrl` havipitishwi tena.
 
-Uhasibu wa gharama hutumia rejista tuli `costPerQuery`, isipokuwa kwa Exa, ambayo hufuata
-bei zake yenyewe: $0.007 kwa kila mwito wa `auto` (na `fast` ya urithi) au $0.004 kwa `lite` (na
-`instant` ya urithi), ikijumuisha matokeo 10; $0.001 kwa kila matokeo ya ziada; na $0.001 kwa
-kila matokeo yanayorejeshwa wakati `contents.summary` imewekwa. Tavily hurekodiwa kama
-krediti 1 ($0.008) kwa `search_depth` `basic`, `fast` na `ultra-fast`, na krediti 2 ($0.016) kwa
-`advanced`
-([krediti za API za Tavily](https://docs.tavily.com/documentation/api-credits)). Mwito wenye
-`auto_parameters: true` ambao Tavily huuboresha hadi `advanced` bado hurekodiwa kama krediti 1.
+Uhasibu wa gharama ni sajili bapa ya `costPerQuery`, isipokuwa kwa Exa, ambayo hufuata
+bei yake yenyewe: $0.007 kwa mwito kwa `auto` (na ya zamani `fast`) au $0.004 kwa `lite`
+(na ya zamani `instant`), zikijumuisha matokeo 10; $0.001 kwa kila matokeo ya ziada; na $0.001 kwa
+kila matokeo yaliyorejeshwa wakati `contents.summary` imewekwa. Tavily hurekodiwa kwa mkopo 1 ($0.008) kwa
+`search_depth` `basic`, `fast` na `ultra-fast`, na mikopo 2 ($0.016) kwa `advanced`
+([Mikopo ya Tavily API](https://docs.tavily.com/documentation/api-credits)). Mwito wenye
+`auto_parameters: true` ambao Tavily huupandisha hadi advanced bado hurekodiwa kwa mkopo 1.
 
 ---
 
 ## API ya Web Fetch
 
-Toa maudhui kutoka kwenye URL kupitia mtoa huduma wa web-fetch aliyesanidiwa (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Dondoa maudhui kutoka URL kupitia mtoa huduma wa web-fetch aliyesanidiwa (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, API key ileile kama Parallel Search) hurejesha Markdown
-pekee — `format` nyingine yoyote husababisha `400` — na hupunguza maudhui hadi herufi 100,000. Wakati
-ukurasa lengwa wenyewe hauwezi kutolewa, huduma ya upstream huripoti hilo ndani ya HTTP 200;
-OmniRoute huwasilisha hilo kama `422` yenye ujumbe maalum.
+Parallel Extract (`parallel-search`, hutumia API key ileile kama Parallel Search) hurejesha Markdown
+pekee — `format` nyingine yoyote ni `400` — na huweka ukomo wa maudhui kuwa herufi 100,000. Wakati
+ukurasa lengwa wenyewe hauwezi kudondolewa, upstream huripoti hilo ndani ya HTTP 200;
+OmniRoute huwasilisha hilo kama `422` yenye ujumbe maalum usiobadilika.
+
+Keenable Fetch (`keenable-search`) pia hurejesha Markdown pekee ( `format` nyingine yoyote ni
+`400`) na huweka ukomo wa maudhui kuwa herufi 100,000. Hufanya kazi bila key: ombi lililo wazi la
+`provider: "keenable-search"` lisilo na connection hutumia endpoint ya Keenable isiyohitaji key
+(vikomo vya maombi kwa kila IP). Key iliyosanidiwa huondoa vikomo hivyo pekee; uteuzi wa kiotomatiki
+hutumia Keenable tu wakati key imesanidiwa.
 
 | Method | Path            | Description                                                  |
 | ------ | --------------- | ------------------------------------------------------------ |
-| POST   | `/v1/web/fetch` | Fetch/scrape URL — mwili huthibitishwa na `v1WebFetchSchema` |
+| POST   | `/v1/web/fetch` | Leta/chambua URL — mwili huthibitishwa na `v1WebFetchSchema` |
 
-**Uthibitishaji:** Bearer API key (`extractApiKey` + `isValidApiKey`). Sera hutekelezwa kupitia `enforceApiKeyPolicy`.
+**Uthibitishaji:** Bearer API key (`extractApiKey` + `isValidApiKey`). Sera hutekelezwa kupitia
+`enforceApiKeyPolicy`.
 
-**Fallback inayozingatia quota (#8297):** wakati hakuna `provider` iliyotolewa wazi, kundi
+Michanganyiko iliyotajwa hutumia [mkataba wa uelekezaji wa `model`](#named-searchfetch-combinations)
+ulio hapo juu, huku ikihifadhi chaguo na majibu mahususi ya fetch.
+
+**Fallback inayozingatia quota (#8297):** wakati `provider` wala `model` haijatolewa, pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) hupitiwa kwa mpangilio maalum wa kipaumbele (fill-first) — mtoa huduma
-aliyefikia kikomo cha kasi lakini amesanidiwa hurukwa badala ya kusitisha ombi, na hitilafu ya upstream inayoweza kujaribiwa tena/quota (HTTP 429 kila wakati; 402/403 kwa viwango vya bure vya Firecrawl/Tavily/TinyFish vya aina ya quota —
-si kwa Jina Reader, na kamwe si kwa ombi la kawaida batili la 400) hupitishwa kwa mtoa huduma mwingine mwenye kitambulisho halali ambaye bado hajajaribiwa wakati wa ombi. Wakati kila mtoa huduma katika kundi amemaliza uwezo wake, endpoint hurejesha `429` moja (ikiwa na kichwa cha `Retry-After`) badala ya `400` ya jumla iliyotumika hapo awali. Wakati `provider` maalum imeombwa, hakuna fallback ya kimya — mtoa huduma maalum aliyefikia kikomo cha kasi au anayeshindwa huwasilisha kosa lake mwenyewe (`429` ikiwa amefikia kikomo cha kasi, vinginevyo hali ya upstream).
+`parallel-search` → `keenable-search`) hupitiwa kwa mpangilio maalum wa kipaumbele (fill-first) —
+mtoa huduma aliyewekewa kikomo cha kasi lakini aliyesanidiwa hurukwa badala ya kusitisha ombi,
+na hitilafu ya upstream inayoweza kujaribiwa tena/quota (HTTP 429 kila wakati; 402/403 kwa Firecrawl/Tavily/TinyFish
+free tiers za mtindo wa quota — si kwa Jina Reader, na kamwe si `400` ya ombi batili) hupitishwa kwa
+mtoa huduma mwingine wa credentialed ambaye bado hajajaribiwa wakati wa ombi. Wakati kila mtoa huduma
+kwenye pool imekwisha, endpoint hurejesha `429` moja (ikiwa na kichwa cha `Retry-After`) badala ya
+`400` ya jumla iliyotumika awali. Wakati `provider` mahususi imeombwa, hakuna fallback ya kimya —
+mtoa huduma mahususi aliyewekewa kikomo cha kasi au anayeshindwa huonyesha hitilafu yake mwenyewe
+(`429` ikiwa amefikia kikomo cha kasi, vinginevyo hali ya upstream).
 
 ---
 
@@ -946,38 +992,29 @@ CLI huboresha `base_url + /responses` kuwa WebSocket na OmniRoute huunganisha kw
 
 ---
 
-## Ripoti ya Kiwango cha Matumizi na Matatizo
+## Kuripoti Vikomo na Masuala
 
-| Method | Path                | Description                                                                                                         |
-| ------ | ------------------- | ------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/v1/quotas/check`  | Kuthibitisha mapema kiwango cha matumizi kwa `provider` + `accountId` kabla ya kutoa ufunguo uliosajiliwa           |
-| POST   | `/v1/issues/report` | Kuripoti kushindwa kwa utoaji wa ufunguo/kiwango cha matumizi kwa GitHub (inahitajika `GITHUB_ISSUES_REPO` + token) |
+| Mbinu | Njia                | Maelezo                                                                                                  |
+| ----- | ------------------- | -------------------------------------------------------------------------------------------------------- |
+| GET   | `/v1/quotas/check`  | Kuthibitisha mapema kikomo cha matumizi kwa `provider` + `accountId` kabla ya kutoa ufunguo uliosajiliwa |
+| POST  | `/v1/issues/report` | Kuripoti kushindwa kwa utoaji wa kikomo/ufunguo kwa GitHub (inahitajika `GITHUB_ISSUES_REPO` + token)    |
 
-**Uthibitishaji:** Ufunguo wa API wa Bearer (`isAuthenticated`).
+**Uthibitishaji:** `/v1/quotas/check` inahitaji ufunguo wa API wa Bearer (`isAuthenticated`). `/v1/issues/report` ni ya usimamizi pekee (`requireManagementAuth`), kama `/api/v1/registered-keys`: kikao cha dashibodi,
+tokeni ya CLI ya ndani, au ufunguo wa API wenye wigo wa `manage`/`admin`; funguo za API za inference pekee hupata `403`.
 
-### Urejeshaji wa kipindi cha kiwango cha matumizi (kwa kuchagua)
+### Urejeshaji wa kikao cha kikomo cha matumizi (wa hiari)
 
-Ombi lisilo la mtiririko la `POST /v1/chat/completions` au `POST /v1/responses` linaloshindwa
-kwa hitilafu ya mwisho ya kiwango cha matumizi (`402`/`429`/`503` ambayo mwili wake unasema
-kuwa kiwango cha matumizi au salio limekwisha) linaweza kuhifadhiwa na kuchezeshwa tena baadaye
-badala ya kurudisha hitilafu. Mpigaji hujiandikisha kwa kila ombi kwa kutumia vichwa vitatu:
+`POST /v1/chat/completions` au `POST /v1/responses` isiyotumia utiririshaji ambayo inashindwa kwa hitilafu ya mwisho ya kikomo cha matumizi (`402`/`429`/`503` ambayo mwili wake unasema kuwa kikomo cha matumizi au salio la credits limekwisha)
+inaweza kuhifadhiwa na kuchezeshwa tena baadaye badala ya kurudisha hitilafu. Anayepiga simu hujiunga kwa kila ombi kwa vichwa vitatu:
 
-| Header                       | Value                                                              |
-| ---------------------------- | ------------------------------------------------------------------ |
-| `x-omniroute-quota-recovery` | `auto`                                                             |
-| `x-omniroute-session`        | kitambulisho cha kipindi, `[A-Za-z0-9._:-]{1,128}`                 |
-| `x-omniroute-recovery-turn`  | kitambulisho cha zamu cha kipekee ndani ya kipindi (kanuni ileile) |
+| Kichwa                       | Thamani                                                             |
+| ---------------------------- | ------------------------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                                              |
+| `x-omniroute-session`        | kitambulisho cha kikao, `[A-Za-z0-9._:-]{1,128}`                    |
+| `x-omniroute-recovery-turn`  | kitambulisho cha zamu cha kipekee ndani ya kikao (kanuni hiyo hiyo) |
 
-Zamu za `stream: false` pekee zisizo na zana, historia ya zana au
-`previous_response_id`, na zisizo na pini ya `x-omniroute-connection`, ndizo zinazostahiki, na
-`STORAGE_ENCRYPTION_KEY` lazima iwekwe (ombi huhifadhiwa kwa usimbaji fiche kwa hadi saa 24).
-Jibu huwa `202` lenye `recovery.poll`; piga `GET /v1/quota-recoveries/{id}` (`202` ikiwa bado
-inasubiri, `200` lenye mwili uliorejeshwa linapokamilika) au ghairi kwa `DELETE`. Tiketi
-zinaonekana tu kwa ufunguo wa API ulioziunda. Uchezeshaji tena ambao matokeo yake hayana
-uhakika huishia katika `needs_confirmation` badala ya kutumwa mara mbili. Chanzo:
-`src/lib/quota/quotaSessionRecovery.ts`.
-
----
+Ni zamu zenye `stream: false` pekee zisizo na zana, historia ya zana au `previous_response_id`, na zisizo na pini ya `x-omniroute-connection`, ndizo zinazostahiki; `STORAGE_ENCRYPTION_KEY` lazima iwekwe (ombi huhifadhiwa likiwa limetiwa usimbaji kwa hadi saa 24). Jibu huwa `202` lenye
+`recovery.poll`; piga `GET /v1/quota-recoveries/{id}` (`202` linaposubiri, `200` likiwa na mwili uliorejeshwa linapokamilika) au ghairi kwa `DELETE`. Tiketi huonekana tu kwa ufunguo wa API ulioziunda. Uchezeshaji tena ambao matokeo yake hayana uhakika huishia katika `needs_confirmation` badala ya kutumwa mara mbili. Chanzo: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ## Matumizi ya kujihudumia (`/api/usage/om-usage`)
 
@@ -1708,17 +1745,21 @@ Usajili wa vijihamishi vya wavuti vinavyotoka kwa matukio ya OmniRoute (ukamilis
 
 ## Funguo Zilizosajiliwa (Usimamizi Otomatiki)
 
-Hutumika na mfumo wa usimamizi wa funguo otomatiki kutoa na kuzungusha funguo za API dhidi ya mtoa huduma/akaunti inayounga mkono, zikiwa na mgao wa kila siku/kila saa.
+Hutumika na mfumo mdogo wa usimamizi otomatiki wa funguo kutoa na kuzungusha funguo za API dhidi ya mtoa huduma/akaunti msingi, zikiwa na viwango vya kila siku/kila saa.
 
-| Mbinu  | Njia                                  | Maelezo                                                                                                                                                                                                          |
-| ------ | ------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Orodhesha funguo zilizosajiliwa (kiambishi awali kilichofichwa pekee)                                                                                                                                            |
-| POST   | `/api/v1/registered-keys`             | Toa ufunguo mpya uliosajiliwa — mwili: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Hurejesha ufunguo ghafi **mara moja**. Hurejesha `429` iwapo mgao umekataliwa. |
-| GET    | `/api/v1/registered-keys/[id]`        | Pata metadata ya ufunguo uliosajiliwa (hakuna nyenzo ghafi)                                                                                                                                                      |
-| DELETE | `/api/v1/registered-keys/[id]`        | Batilisha ufunguo uliosajiliwa                                                                                                                                                                                   |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Mwisho wa wazi wa kubatilisha (athari sawa na DELETE)                                                                                                                                                            |
+| Mbinu  | Njia                                  | Maelezo                                                                                                                                                                                                                                   |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Orodhesha funguo zilizosajiliwa (kiambishi awali kilichofichwa pekee)                                                                                                                                                                     |
+| POST   | `/api/v1/registered-keys`             | Toa ufunguo mpya uliosajiliwa — mwili: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Hurejesha ufunguo ghafi **mara moja tu**. Hurejesha `429` ikiwa ombi limekataliwa kwa sababu ya kikomo. |
+| GET    | `/api/v1/registered-keys/[id]`        | Pata metadata ya ufunguo uliosajiliwa (hakuna data ghafi)                                                                                                                                                                                 |
+| DELETE | `/api/v1/registered-keys/[id]`        | Batilisha ufunguo uliosajiliwa                                                                                                                                                                                                            |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint ya wazi ya kubatilisha (matokeo sawa na DELETE)                                                                                                                                                                                  |
+| GET    | `/api/v1/providers/[provider]/limits` | Soma vikomo vya utoaji vya mtoa huduma                                                                                                                                                                                                    |
+| PUT    | `/api/v1/providers/[provider]/limits` | Weka vikomo vya utoaji vya mtoa huduma — mwili: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                                   |
+| GET    | `/api/v1/accounts/[id]/limits`        | Soma vikomo vya utoaji vya akaunti                                                                                                                                                                                                        |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Weka vikomo vya utoaji vya akaunti — mwili sawa na njia ya mtoa huduma                                                                                                                                                                    |
 
-**Uthibitishaji:** session/ufunguo wa API wa usimamizi (`requireManagementAuth`) — kizuizi sawa na `/api/keys`: session ya dashibodi, tokeni ya CLI ya ndani, au ufunguo wa API wenye wigo wa `manage`/`admin`; funguo za API za inferensi pekee hupata `403`. Tazama pia `/v1/quotas/check` na `/v1/issues/report`.
+**Uthibitishaji:** kipindi cha usimamizi/ufunguo wa API (`requireManagementAuth`) — ulinzi uleule kama wa `/api/keys`: kipindi cha dashibodi, tokeni ya CLI ya ndani, au ufunguo wa API wenye upeo wa `manage`/`admin`; funguo za API za makisio pekee hupata `403`. Tazama pia `/v1/quotas/check` na `/v1/issues/report`.
 
 ---
 

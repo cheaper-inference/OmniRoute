@@ -146,7 +146,14 @@ function QuotaWindowRow({
         <span>{label}</span>
         <span className="font-medium">{Math.round(remaining)}% left</span>
       </div>
-      <div className="h-1.5 overflow-hidden rounded-full bg-bg-muted">
+      <div
+        role="progressbar"
+        aria-label={label}
+        aria-valuemin={0}
+        aria-valuemax={100}
+        aria-valuenow={remaining}
+        className="h-1.5 overflow-hidden rounded-full bg-muted"
+      >
         <div
           className="h-full rounded-full transition-all"
           style={{ width: `${remaining}%`, backgroundColor: getBarColor(remaining).bar }}
@@ -179,7 +186,7 @@ export default function AntigravityQuotaGroups({
             key={group.id}
             className="rounded-md border border-border/60 bg-bg-subtle/40 p-2"
           >
-            <h4 className="mb-2 text-xs font-semibold text-text-main">{group.displayName}</h4>
+            <h4 className="mb-2 text-xs text-text-main">{group.displayName}</h4>
             <div className="flex flex-col gap-2">
               <QuotaWindowRow label="5 hour" window={group.windows?.session} now={now} />
               <QuotaWindowRow label="Weekly" window={group.windows?.weekly} now={now} />

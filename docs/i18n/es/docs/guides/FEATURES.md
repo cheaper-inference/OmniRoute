@@ -57,29 +57,19 @@ Las conexiones de OpenRouter pueden almacenar un `preset` por conexión en Confi
 
 ---
 
-## 🎨 Combos
+## Combos 🎨
 
-Crea combos de enrutamiento de modelos con 19 estrategias públicas: priority, weighted, round-robin, context-relay, fill-first, p2c (selección entre dos opciones), random, least-used, cost-optimized, reset-aware, reset-window, headroom, strict-random, auto, lkgp (último proveedor válido conocido), context-optimized, cache-optimized, **fusion** (distribuye la solicitud en paralelo a un panel de modelos y luego sintetiza una única respuesta mediante un juez) y **pipeline**. Cada combo encadena varios modelos con conmutación por error automática e incluye plantillas rápidas y comprobaciones de disponibilidad.
+Cree combinaciones de enrutamiento de modelos con 22 estrategias públicas: prioridad, ponderado, round robin, retransmisión de contexto, llenado primero, p2c (poder de dos opciones), aleatorio, menos utilizado, de costo optimizado, con reconocimiento de reinicio, reinicio de ventana, vencimiento primero, espacio libre, ponderado por cuota, aleatorio estricto, automático, lkgp (último proveedor bueno conocido), optimizado por contexto, optimizado por caché,** fusión** (desplegarse hacia un panel de modelos en paralelo, luego sintetizar una respuesta a través de un juez),** tubería** , y** Jev** (una admisión voluntaria TypeSafe Jev sobre su lista clasificada). Cada combo encadena múltiples modelos con respaldo automático e incluye plantillas rápidas y comprobaciones de preparación.
 
-Mejoras recientes de los combos:
+Mejoras combinadas recientes:
 
-- **Constructor estructurado de combos** — crea cada paso seleccionando el proveedor, el modelo y la cuenta o conexión exacta
-- **Compatibilidad con proveedores repetidos** — reutiliza el mismo proveedor varias veces en un combo, siempre que la tupla `(provider, model, connection)` sea única
-- **Estado de los destinos del combo** — las vistas de análisis y estado ahora distinguen los destinos o pasos individuales del combo, en lugar de agruparlo todo en cadenas de modelos
-- **Ordenación de niveles compuestos** — `defaultTier -> fallbackTier` ahora influye en el orden de ejecución y conmutación por error en tiempo de ejecución para los pasos de nivel superior del combo
-- **Plantillas de prompts del sistema** — el `system_message` del combo admite los marcadores de posición del lado del servidor
-  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` y `{{FINGERPRINT}}`,
-  que se expanden a partir del destino al que realmente se ha enrutado justo antes del envío.
-  Se usa una lista de permitidos y no son recursivos; los marcadores de posición desconocidos permanecen literales; los valores vacíos
-  se expanden como vacíos; los prompts del sistema del cliente nunca se reescriben. `{{FINGERPRINT}}`
-  solo se resuelve para proveedores gratuitos basados en huellas digitales con una huella fijada o
-  rotada automáticamente; en otros casos se expande como vacío (por ejemplo,
-  conexiones con una única huella digital o proveedores que no utilizan huellas digitales). La expansión abarca el
-  bucle de envío estándar, round-robin y las sesiones fijadas de caché de contexto;
-  las estrategias fusion, chaos, pipeline y nested-execute todavía no expanden
-  los marcadores de posición.
+- **Generador de combos estructurados** — crea cada paso seleccionando proveedor, modelo y account/connection exacto
+- **Soporte repetido del proveedor** — reutiliza el mismo proveedor muchas veces en un combo siempre que la tupla `(provider, model, connection)` sea única
+- **Salud del objetivo combinado** Las superficies de salud y análisis — ahora distinguen el combo targets/steps individual en lugar de colapsar todo en cadenas de modelo.
+- **Orden de niveles compuestos** — `defaultTier -> fallbackTier` ahora influye en el orden de execution/fallback en tiempo de ejecución para los pasos combinados de nivel superior
+- **Plantillas de avisos del sistema** — combo `system_message` admite marcadores de posición `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` y `{{FINGERPRINT}}` del lado del servidor, ampliados desde el destino realmente enrutado justo antes del envío. Listado permitido y no recursivo; los marcadores de posición desconocidos permanecen literales; los valores vacíos se expanden hasta quedar vacíos; Las indicaciones del sistema cliente nunca se reescriben. `{{FINGERPRINT}}` se resuelve solo para proveedores gratuitos basados en huellas digitales con una huella digital fijada o rotada automáticamente. — se expande para vaciar en otros lugares (por ejemplo, conexiones de una sola huella digital, proveedores que no son fp). La expansión cubre las sesiones de bucle de despacho estándar, round robin y caché de contexto anclado; Las estrategias de fusión, caos, canalización y ejecución anidada aún no expanden los marcadores de posición.
 
-![Panel de combos](../screenshots/02-combos.png)
+![Combos Dashboard](../screenshots/02-combos.png)
 
 ---
 
@@ -200,23 +190,23 @@ Los correos electrónicos de las cuentas OAuth se ocultan de forma predeterminad
 
 ---
 
-## 👁️ Control de visibilidad de modelos _(v3.5.6+)_
+## Alternancia de visibilidad del modelo 👁️ _(v3.5.6 +)_
 
-La lista de modelos de la página del proveedor ahora incluye:
+La lista de modelos de páginas de proveedores ahora incluye:
 
-- **Barra de búsqueda/filtro en tiempo real** — Encuentra rápidamente modelos específicos
-- **Control de visibilidad por modelo** (icono 👁) — Los modelos ocultos aparecen atenuados y se excluyen del catálogo `/v1/models`
-- **Insignia de recuento activo** (`N/M activos`) — Muestra de un vistazo cuántos modelos están habilitados respecto al total
+- **Barra search/filter en tiempo real** — Encuentre rápidamente modelos específicos
+- **Alternar visibilidad por modelo** (icono 👁 ) — Los modelos ocultos aparecen atenuados y excluidos del catálogo `/v1/models`
+- **Insignia de recuento activo** (`N/M active`) — Muestra de un vistazo cuántos modelos están habilitados frente al total
 
 ---
 
-## 🔧 Reparación del entorno OAuth _(v3.6.1+)_
+## 🔧 OAuth Reparación de entorno _(v3.6.1 +)_
 
-Acción «Reparar entorno» con un solo clic para proveedores OAuth que restaura las variables de entorno que faltan y corrige el estado de autenticación dañado. Accesible desde `Panel → Proveedores → [Proveedor OAuth] → Reparar entorno`. Detecta y repara automáticamente:
+Acción "Reparar entorno" con un solo clic para proveedores OAuth que restaura las variables de entorno faltantes y corrige el estado de autenticación roto. Accesible desde `Dashboard → Providers → [OAuth Provider] → Repair env`. Detecta y repara automáticamente:
 
-- Credenciales de cliente OAuth que faltan
-- Entradas dañadas del archivo de entorno
-- Saneamiento de rutas de copias de seguridad
+- Faltan credenciales de cliente OAuth
+- Entradas de archivos env corruptas
+- Desinfección de la ruta de respaldo
 
 ---
 

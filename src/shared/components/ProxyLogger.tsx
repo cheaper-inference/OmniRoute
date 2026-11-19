@@ -20,6 +20,7 @@ import Button from "./Button";
 import ColumnToggle from "./ColumnToggle";
 import EmptyState from "./EmptyState";
 import Input from "./Input";
+import InteractiveTableRow from "./InteractiveTableRow";
 import Select from "./Select";
 import ProxyLogDetail from "./ProxyLogDetail";
 import {
@@ -312,7 +313,7 @@ export default function ProxyLogger() {
             </Badge>
           )}
           {testsCount > 0 && (
-            <Badge size="sm" className="border-chart-3/30 bg-chart-3/10 text-chart-3">
+            <Badge size="sm" className="border-chart-3/30 bg-chart-3/10 text-chart-3-ink">
               {testsCount} {t("filterTests")}
             </Badge>
           )}
@@ -488,7 +489,7 @@ export default function ProxyLogger() {
                 aria-pressed={isActive}
                 onClick={() => setSelectedProvider(isActive ? "" : p)}
                 className={cn(
-                  "h-7 min-h-7 rounded-full border px-3 text-xs font-semibold uppercase",
+                  "h-7 min-h-7 rounded-full border px-3 text-xs uppercase",
                   isActive
                     ? "border-border-strong ring-1 ring-border-strong"
                     : "border-transparent hover:bg-bg-subtle"
@@ -573,9 +574,9 @@ export default function ProxyLogger() {
                   })[0] ?? null;
 
                 return (
-                  <TableRow
+                  <InteractiveTableRow
                     key={log.id}
-                    onClick={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
+                    onActivate={() => setSelectedLog(selectedLog?.id === log.id ? null : log)}
                     className={cn(
                       "cursor-pointer hover:bg-info/10 transition-colors",
                       isError && "bg-error/5"
@@ -717,7 +718,7 @@ export default function ProxyLogger() {
                         {formatTime(log.timestamp)}
                       </TableCell>
                     )}
-                  </TableRow>
+                  </InteractiveTableRow>
                 );
               })}
             </TableBody>
