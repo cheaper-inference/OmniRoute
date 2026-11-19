@@ -74,9 +74,7 @@
     }
   ],
   "shadow": {
-    "processed": {
-      "20630": "393a8a45d89ba2ceb6d8d8331350193173ec0a65"
-    }
+    "processed": {}
   },
   "counters": {
     "batchSeq": 4,
@@ -318,5 +316,5 @@
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44602926075"
     }
   ],
-  "updatedAt": "2026-11-19T19:56:33.292Z"
+  "updatedAt": "2026-11-19T20:16:19.207Z"
 }
