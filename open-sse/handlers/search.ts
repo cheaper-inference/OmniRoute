@@ -11,6 +11,7 @@ import { randomUUID } from "crypto";
  *   and xquik-search (direct X API search — explicit or credentialed fallback)
  *   and anysearch-search (free public web search — fallback-only)
  *   and parallel-search (Parallel Search API — web only)
+ *   and keenable-search (Keenable: keyless by default, optional key; fallback-only)
  *
  * Request format:
  * {
@@ -22,7 +23,7 @@ import { randomUUID } from "crypto";
  */
 
 export { resolveSearchBaseUrl, SearchBaseUrlOverrideError } from "./search/baseUrl.ts";
-import { resolveSearchBaseUrl } from "./search/baseUrl.ts";
+import { resolveSearchBaseUrl, searchBaseUrlGuard } from "./search/baseUrl.ts";
 import type { SearchUsage } from "./search/reportedCost.ts";
 import {
   getSearchProvider,
@@ -39,6 +40,7 @@ import * as xquikSearch from "./search/xquikSearch.ts";
 import * as anysearchSearch from "./search/anysearchSearch.ts";
 import * as kimiSearch from "./search/kimiSearch.ts";
 import * as parallelSearch from "./search/parallelSearch.ts";
+import * as keenableSearch from "./search/keenableSearch.ts";
 import { executeCodexSearch } from "./search/codexSearch.ts";
 import { freeWebSearch } from "../services/freeWebSearch.ts";
 import { saveCallLog } from "@/lib/usageDb";
@@ -734,7 +736,8 @@ function buildSearxngRequest(
   if (page) qp.set("pageno", String(page));
 
   const headers: Record<string, string> = { Accept: "application/json" };
-  if (params.token) {
+  // The operator token never goes to a caller-chosen base URL.
+  if (params.token && searchBaseUrlGuard(config, params) !== "public-only") {
     headers["Authorization"] = `Bearer ${params.token}`;
   }
 
@@ -793,6 +796,7 @@ const requestBuilders: Record<string, SearchRequestBuilder> = {
   "xquik-search": xquikSearch.buildXquikSearchRequest,
   "anysearch-search": anysearchSearch.buildAnysearchSearchRequest,
   "parallel-search": parallelSearch.buildParallelSearchRequest,
+  "keenable-search": keenableSearch.buildKeenableSearchRequest,
 };
 
 function buildRequest(
@@ -1427,6 +1431,7 @@ const responseNormalizers: Record<string, SearchResponseNormalizer> = {
   "xquik-search": (data) => xquikSearch.normalizeXquikSearchResponse(data, makeResult),
   "anysearch-search": (data) => anysearchSearch.normalizeAnysearchSearchResponse(data, makeResult),
   "parallel-search": (data) => parallelSearch.normalizeParallelSearchResponse(data, makeResult),
+  "keenable-search": (data) => keenableSearch.normalizeKeenableSearchResponse(data, makeResult),
 };
 
 function normalizeResponse(
@@ -1854,6 +1859,7 @@ async function tryProvider(
     config,
     url,
     init,
+    guard: searchBaseUrlGuard(config, { ...params, providerSpecificData }),
     controller,
     timer,
     query,

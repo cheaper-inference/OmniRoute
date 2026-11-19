@@ -572,7 +572,7 @@ export default function RequestTimeline({
         style={{ minHeight: HEADER_HEIGHT }}
       >
         <div className="flex items-center gap-3">
-          <h2 className="text-sm font-semibold text-text-main">{t("title")}</h2>
+          <h2 className="text-sm text-text-main">{t("title")}</h2>
           <span className="text-[10px] text-text-muted font-mono">
             {t("visibleCount", { visible: visibleLogs.length, total: logs.length })}
           </span>
@@ -827,7 +827,7 @@ export default function RequestTimeline({
           }}
         >
           <div className="w-px h-full bg-error shadow-[0_0_8px_var(--color-error)] -translate-x-1/2" />
-          <div className="absolute top-[2px] -translate-x-1/2 bg-error text-bg text-[8px] font-mono px-1.5 py-0.5 rounded-b-sm font-bold tracking-wider">
+          <div className="absolute top-[2px] -translate-x-1/2 bg-error text-bg text-[8px] font-mono px-1.5 py-0.5 rounded-b-sm font-semibold tracking-wider">
             NOW
           </div>
         </div>
@@ -872,7 +872,10 @@ export default function RequestTimeline({
                 : hoveredLog.model || t("unknownModel")}
             </span>
             {hoveredLog.active && (
-              <Badge size="sm" className="border-chart-3/30 bg-chart-3/20 text-[9px] text-chart-3">
+              <Badge
+                size="sm"
+                className="border-chart-3/30 bg-chart-3/20 text-[9px] text-chart-3-ink"
+              >
                 {t("active")}
               </Badge>
             )}

@@ -15,6 +15,7 @@ const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const analyticsRoute = await import("../../src/app/api/usage/analytics/route.ts");
+const analyticsCache = await import("../../src/lib/usage/analyticsResponseCache.ts");
 const providers = await import("../../src/shared/constants/providers.ts");
 
 function makeRequest(url: string) {
@@ -23,6 +24,8 @@ function makeRequest(url: string) {
 
 test.beforeEach(() => {
   core.resetDbInstance();
+  // A slow runner can keep a report for the cache TTL; every test here seeds new data.
+  analyticsCache.clearAnalyticsResponseCache();
   apiKeysDb.resetApiKeyState();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
   fs.mkdirSync(TEST_DATA_DIR, { recursive: true });

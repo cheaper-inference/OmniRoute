@@ -8,6 +8,7 @@ const tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-skillssh-"));
 const originalDataDir = process.env.DATA_DIR;
 process.env.DATA_DIR = tmpDir;
 
+const { createManagementSessionHeaders } = await import("../helpers/managementSession.ts");
 const core = await import("../../src/lib/db/core.ts");
 const settingsDb = await import("../../src/lib/db/settings.ts");
 const { GLOBAL_SKILL_OWNER_ID, skillRegistry } = await import("../../src/lib/skills/registry.ts");
@@ -217,7 +218,8 @@ test("skillssh install route registers a skill from skills.sh", async () => {
 
   const req = new Request("http://localhost/api/skills/skillssh/install", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    // The install route requires management auth even when login is off.
+    headers: await createManagementSessionHeaders({ "content-type": "application/json" }),
     body: JSON.stringify({
       name: "docker-best-practices",
       description: "Docker best practices skill",
@@ -247,7 +249,8 @@ test("skillssh install route registers a skill from skills.sh", async () => {
 test("skillssh install route returns 400 for invalid payload", async () => {
   const req = new Request("http://localhost/api/skills/skillssh/install", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    // The install route requires management auth even when login is off.
+    headers: await createManagementSessionHeaders({ "content-type": "application/json" }),
     body: JSON.stringify({
       name: "",
       description: "Missing name",
@@ -265,7 +268,8 @@ test("skillssh install route returns 500 when SKILL.md fetch fails", async () =>
 
   const req = new Request("http://localhost/api/skills/skillssh/install", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    // The install route requires management auth even when login is off.
+    headers: await createManagementSessionHeaders({ "content-type": "application/json" }),
     body: JSON.stringify({
       name: "missing-skill",
       description: "Skill that does not exist",
@@ -291,7 +295,8 @@ test("skillssh install route defaults version to 1.0.0 when omitted", async () =
 
   const req = new Request("http://localhost/api/skills/skillssh/install", {
     method: "POST",
-    headers: { "content-type": "application/json" },
+    // The install route requires management auth even when login is off.
+    headers: await createManagementSessionHeaders({ "content-type": "application/json" }),
     body: JSON.stringify({
       name: "version-default-test",
       description: "Test version default",

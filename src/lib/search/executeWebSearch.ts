@@ -1,6 +1,7 @@
 import { getSettings } from "@/lib/db/settings";
 import { isProviderBlockedByIdOrAlias } from "@/shared/utils/noAuthProviders";
 import { getProviderCredentials } from "@/sse/services/auth";
+import { searchKeyLockModel } from "@omniroute/open-sse/handlers/search/borrowedKeyLock.ts";
 import { isCredentialDiagnosticSentinel } from "@/sse/services/credentialSentinel";
 import { isModelLocked } from "@omniroute/open-sse/services/accountFallback.ts";
 import { orderAutoSearchFallbacks } from "@/lib/search/codexSearchAutoFallback";
@@ -81,7 +82,12 @@ async function resolveSearchCredentials(providerId: string) {
     return creds;
   }
   for (const fallbackId of getSearchCredentialFallbacks(providerId)) {
-    const fallback = await getProviderCredentials(fallbackId).catch(() => null);
+    const fallback = await getProviderCredentials(
+      fallbackId,
+      null,
+      null,
+      searchKeyLockModel(providerId)
+    ).catch(() => null);
     if (fallback && !isCredentialDiagnosticSentinel(fallback)) {
       if (
         providerId === "codex-search" &&
@@ -205,14 +211,13 @@ export async function executeWebSearch(
       typeof input.provider_options?.baseUrl === "string" &&
       input.provider_options.baseUrl.trim().length > 0
     ) {
-      credentials = {
-        providerSpecificData: { baseUrl: input.provider_options.baseUrl.trim() },
-      };
+      // The caller URL stays caller input (public hosts only), not operator config.
+      credentials = {};
     }
     if (!credentials) {
       throw new WebSearchExecutionError(
         providerConfig.authType === "none"
-          ? `Search provider ${providerConfig.id} is not configured. Set its base URL in the dashboard or pass provider_options.baseUrl.`
+          ? `Search provider ${providerConfig.id} is not configured. Set its base URL in the dashboard, or pass a public provider_options.baseUrl.`
           : `No credentials configured for search provider: ${providerConfig.id}. Add an API key for "${providerConfig.id}" in the dashboard.`,
         400
       );
