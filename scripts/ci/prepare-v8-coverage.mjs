@@ -115,6 +115,46 @@ function absolutePath(value, base) {
   return null;
 }
 
+function c8CoveragePolicy(cwd) {
+  const policy = buildYargs().parse(["report", "--exclude=tests/**", "--exclude=**/*.test.*"]);
+  const exclude = new TestExclude({
+    cwd,
+    exclude: policy.exclude,
+    include: policy.include,
+    extension: policy.extension,
+    excludeNodeModules: policy.excludeNodeModules,
+    relativePath: !policy.allowExternal,
+  });
+  return { policy, exclude };
+}
+
+function verifyEmbeddedSources(data, origin, target, sources, exclude) {
+  for (const [url, cache] of Object.entries(data["source-map-cache"] || {})) {
+    const absolute = absolutePath(url);
+    const path = absolute && inside(origin, absolute);
+    const map = cache?.data;
+    if (!path || !sources.has(path) || !exclude.shouldInstrument(resolve(target, path))) continue;
+    if (map?.sourcesContent == null) continue;
+    if (
+      !Array.isArray(map.sourcesContent) ||
+      !Array.isArray(map.sources) ||
+      map.sourcesContent.length > map.sources.length
+    )
+      throw new Error("V8_EVIDENCE_INCOMPLETE:generated-evidence-embedded-source");
+    const root = map.sourceRoot
+      ? absolutePath(map.sourceRoot, dirname(absolute))
+      : dirname(absolute);
+    if (!root) throw new Error("V8_EVIDENCE_INCOMPLETE:generated-evidence-embedded-source");
+    for (const [index, text] of map.sourcesContent.entries()) {
+      if (text == null) continue;
+      const source = absolutePath(map.sources[index], root);
+      const expected = source && sources.get(inside(origin, source));
+      if (typeof text !== "string" || !expected || hash(text) !== expected.sha256)
+        throw new Error(`V8_EVIDENCE_INCOMPLETE:generated-evidence-embedded-source (${path})`);
+    }
+  }
+}
+
 function validateCoverage(data) {
   if (!data || !Array.isArray(data.result)) throw new Error("Invalid V8 coverage result");
   for (const script of data.result) {
@@ -225,6 +265,7 @@ export async function packCoverageShard(options) {
   const shard = shardIdentity(options.shard);
   const sourceRoot = resolve(options.sourceRoot || process.cwd());
   const tree = gitTree(sourceRoot, binding.candidateSha);
+  const { exclude } = c8CoveragePolicy(sourceRoot);
   const input = resolve(options.inputDirectory);
   const files = (await readdir(input)).sort();
   if (!files.length) throw new Error("No V8 coverage inputs");
@@ -245,6 +286,8 @@ export async function packCoverageShard(options) {
       for (const path of referenced) {
         if (!sources.has(path)) sources.set(path, await sourceIdentity(sourceRoot, path, tree));
       }
+      // c8 may use embedded source text instead of reading the checked-out file.
+      verifyEmbeddedSources(data, sourceRoot, sourceRoot, sources, exclude);
       const packed = await compress(bytes, { level: 1 });
       await writeFile(join(stage, "raw", `${name}.gz`), packed, { flag: "wx" });
       inputs.push({
@@ -401,15 +444,7 @@ export async function prepareCoverageShards(options) {
       throw new Error("Incomplete coverage shard inventory");
   }
   inputs.sort((a, b) => (a.name < b.name ? -1 : a.name > b.name ? 1 : a.index - b.index));
-  const policy = buildYargs().parse(["report", "--exclude=tests/**", "--exclude=**/*.test.*"]);
-  const exclude = new TestExclude({
-    cwd: sourceRoot,
-    exclude: policy.exclude,
-    include: policy.include,
-    extension: policy.extension,
-    excludeNodeModules: policy.excludeNodeModules,
-    relativePath: !policy.allowExternal,
-  });
+  const { policy, exclude } = c8CoveragePolicy(sourceRoot);
   const { output, stage } = await freshStage(options.outputDirectory);
   const instrumentedShards = new Set();
   const layouts = createSourceMapLayoutProjector();
@@ -429,6 +464,7 @@ export async function prepareCoverageShards(options) {
         throw new Error("Raw coverage hash mismatch");
       const data = JSON.parse(bytes.toString("utf8"));
       validateCoverage(data);
+      verifyEmbeddedSources(data, item.origin, sourceRoot, verifiedSources, exclude);
       const maps = new Map();
       for (const [url, cache] of Object.entries(data["source-map-cache"] || {})) {
         const absolute = absolutePath(url);
