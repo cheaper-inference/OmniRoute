@@ -182,6 +182,10 @@ export const comboRuntimeConfigSchema = z
   .object({
     responseValidation: responseValidationSchema.optional(),
     strategy: comboStrategySchema.optional(),
+    // Payload-logging opt-out for this combo. true = withhold request/response
+    // message content from call logs for every request routed through it;
+    // false/absent = log (the other opt-out rungs still apply).
+    noLog: z.boolean().optional(),
     maxRetries: z.coerce.number().int().min(0).max(10).optional(),
     retryDelayMs: z.coerce.number().int().min(0).max(60000).optional(),
     fallbackDelayMs: z.coerce.number().int().min(0).max(60000).optional(),

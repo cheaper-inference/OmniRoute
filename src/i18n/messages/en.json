@@ -9515,6 +9515,7 @@
     "promptCacheAffinity": "Prompt-cache locality routing",
     "promptCacheAffinityDesc": "Prefer the same provider account for matching prompt-cache keys while preserving health and quota failover.",
     "reasoningTokenBuffer": "Reasoning token buffer",
+    "comboLoggingToggle": "Logging",
     "reasoningTokenBufferDesc": "Allow combo routing to add max_tokens headroom only for known reasoning models when the full buffer fits inside a known output cap.",
     "zeroLatencyOptimizations": "Zero-latency optimizations",
     "zeroLatencyOptimizationsDesc": "Opt in to hedging, predictive TTFT skips, and proactive fallback compression. Leave off to prevent these latency features from racing targets or compressing fallback requests.",
