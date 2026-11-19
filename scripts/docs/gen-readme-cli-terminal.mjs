@@ -21,6 +21,7 @@ import { writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { drawnSymbol, outlineSvg } from "./readme-outline.mjs";
 import { KIT, svgOpen, esc } from "./readme-diagram-theme.mjs";
+import { RF } from "./readmeFacts.mjs";
 
 const NB = " "; // NBSP runs keep the column alignment (spaces collapse in <text>)
 const nb = (n) => NB.repeat(n);
@@ -32,8 +33,9 @@ const INV = KIT.dark;
 
 // The gate-checked provider total (scripts/check/check-docs-counts-sync.mjs reads
 // "<n> providers" from the title); the health line and the "… N more providers" footer of the
-// providers screen derive from it so the three numbers can never disagree.
-const PROVIDER_TOTAL = 393;
+// providers screen derive from it so the three numbers can never disagree. It comes from the
+// facts snapshot (./readmeFacts.mjs), refreshed only by `npm run release:refresh-derived`.
+const PROVIDER_TOTAL = RF.providers;
 
 // The three screens: command, then header + 4 lines + a dim footer line. Segments are plain
 // strings or { t, c } with c ∈ ok | warn | err | dim.
