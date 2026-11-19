@@ -1037,6 +1037,9 @@ async function handleChatImplementation(
 
   // T05 — Task-Aware Smart Routing
   // Detect the semantic task type and optionally route to the optimal model
+  // The model the client admitted, captured before task-aware / web-search / reasoning
+  // rewrites: prompt-tag eligibility is decided on this value alone.
+  const admittedModelStr = modelStr;
   let resolvedModelStr = modelStr;
   let taskRouteInfo: { taskType: string; wasRouted: boolean } | null = null;
   if (getTaskRoutingConfig().enabled) {
@@ -1095,16 +1098,32 @@ async function handleChatImplementation(
   // Prompt-level combo tags (#20706): a leading `[tag]` on the newest user message
   // that carries one selects the routing combo. Explicit model ids win, and a tag can
   // never widen the API key's allowed combos.
-  const promptTag = applyPromptTagRouting(body, {
-    combos: (await getCombosCachedForChat()).map((candidate) => candidate.name),
-    allowedCombos: apiKeyInfo?.allowedCombos ?? null,
-  });
-  if (promptTag.combo) {
-    log.info("PROMPT-TAG", `[${promptTag.tag}] -> combo "${promptTag.combo}"`);
-    resolvedModelStr = `combo/${promptTag.combo}`;
-    body = { ...body, model: resolvedModelStr };
-  } else if (promptTag.tag) {
-    log.debug("PROMPT-TAG", `[${promptTag.tag}] ignored (${promptTag.reason})`);
+  // An explicit reasoning rule is operator policy: it outranks a tag typed in the prompt,
+  // and both must not name different combos (dispatch and authorization would diverge).
+  const promptTagEligible = !reasoningDecision?.targetCombo;
+  let promptTagCombo: any = null;
+  if (promptTagEligible) {
+    const promptTag = applyPromptTagRouting(body, {
+      combos: (await getCombosCachedForChat()).map((candidate) => candidate.name),
+      allowedCombos: apiKeyInfo?.allowedCombos ?? null,
+      eligibleModel: admittedModelStr,
+    });
+    if (promptTag.combo) {
+      // Exact-name lookup, and the record itself is carried into dispatch: rebuilding the
+      // name as `combo/<name>` could select a different record when both spellings exist.
+      promptTagCombo = await getCombo(promptTag.combo);
+      if (promptTagCombo) {
+        log.info("PROMPT-TAG", `[${promptTag.tag}] -> combo "${promptTagCombo.name}"`);
+        body = { ...promptTag.body, model: promptTagCombo.name };
+        resolvedModelStr = promptTagCombo.name;
+      } else {
+        log.warn("PROMPT-TAG", `[${promptTag.tag}] resolved to missing combo "${promptTag.combo}"`);
+      }
+    } else if (promptTag.tag) {
+      log.debug("PROMPT-TAG", `[${promptTag.tag}] ignored (${promptTag.reason})`);
+    }
+  } else if (reasoningDecision?.targetCombo) {
+    log.debug("PROMPT-TAG", "tag not consulted: a reasoning rule already selected the combo");
   }
 
   const autoRouting = await resolveAutoRoutingState(resolvedModelStr);

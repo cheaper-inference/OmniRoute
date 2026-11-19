@@ -90,14 +90,20 @@ test("an explicit model in the request outranks the tag", () => {
   assert.equal((body.messages[0] as { content: string }).content, "[audit] привет");
 });
 
-test("applies routing and strips the tag when the request is combo-scoped", () => {
+test("applies routing and strips the tag in the returned body only", () => {
   const viaAlias = { model: "combo/coding-fast", messages: [{ role: "user", content: "[audit] привет" }] };
   const aliasVerdict = applyPromptTagRouting(viaAlias, {
     combos: COMBOS,
     aliases: { audit: "audit-pro" },
   });
   assert.equal(aliasVerdict.combo, "audit-pro");
-  assert.equal((viaAlias.messages[0] as { content: string }).content, "привет");
+  assert.ok(aliasVerdict.combo);
+  // The caller's body keeps the tag: it is the history persisted for continuation turns.
+  assert.equal((viaAlias.messages[0] as { content: string }).content, "[audit] привет");
+  const sent = (aliasVerdict.body.messages as Array<{ content: string }>)[0];
+  assert.equal(sent.content, "привет");
+  // ...and the original message object is not the one sent upstream.
+  assert.notEqual(sent, viaAlias.messages[0]);
 
   const exact = { model: "combo/coding-fast", messages: [{ role: "user", content: "[audit-pro] привет" }] };
   assert.equal(applyPromptTagRouting(exact, { combos: COMBOS }).combo, "audit-pro");
@@ -111,3 +117,33 @@ test("prose in brackets is not treated as a routing tag", () => {
   assert.equal(isIdentifierTag("audit"), true);
 });
 
+test("ambiguous case-insensitive combo names are not guessed", () => {
+  const mixed = ["Audit", "audit", "coding-fast"];
+  assert.equal(resolvePromptTagCombo("audit", { combos: mixed }).combo, "audit");
+  assert.deepEqual(resolvePromptTagCombo("AUDIT", { combos: mixed }), { combo: null, reason: "unknown" });
+});
+
+test("eligibility is decided on the model the client admitted, not the rewritten one", () => {
+  // Task-aware routing rewrote body.model to a combo, but the client asked for a concrete model.
+  const body = {
+    model: "combo/coding-fast",
+    messages: [{ role: "user", content: "[audit] привет" }],
+  };
+  const verdict = applyPromptTagRouting(body, {
+    combos: COMBOS,
+    eligibleModel: "ttc/claude-sonnet-5-5",
+  });
+  assert.equal(verdict.combo, null);
+  assert.equal(verdict.combo === null && verdict.reason, "explicit-model");
+});
+
+test("strips the tag from content parts without touching the caller's parts", () => {
+  const body = { messages: [{ role: "user", content: [{ type: "text", text: "[og] привет" }] }] };
+  const verdict = applyPromptTagRouting(body, { combos: COMBOS, aliases: { og: "opencode-go" } });
+  assert.equal(verdict.combo, "opencode-go");
+  assert.ok(verdict.combo);
+  const originalParts = body.messages[0].content as Array<{ text: string }>;
+  assert.equal(originalParts[0].text, "[og] привет");
+  const sentParts = (verdict.body.messages as Array<{ content: Array<{ text: string }> }>)[0].content;
+  assert.equal(sentParts[0].text, "привет");
+});
