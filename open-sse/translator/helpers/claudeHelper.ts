@@ -768,7 +768,11 @@ export function prepareClaudeRequest(
     filtered = fixToolUseOrdering(filtered);
 
     // Anthropic 400s on a past assistant turn that ends in thinking; an emptied turn goes here.
-    filtered = dropTrailingHistoricalThinking(filtered).filter(
+    // A "none" node declared that it does not validate thinking: drop nothing.
+    if (thinkingReplayOverride !== "none") {
+      filtered = dropTrailingHistoricalThinking(filtered);
+    }
+    filtered = filtered.filter(
       (msg) => !(msg.role === "assistant" && Array.isArray(msg.content) && msg.content.length === 0)
     );
 
