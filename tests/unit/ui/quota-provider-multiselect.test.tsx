@@ -29,7 +29,7 @@ function Harness() {
 
 it("combines providers, deselects individually and resets to all", () => {
   render(<Harness />);
-  fireEvent.click(screen.getByLabelText("Providers", { selector: "summary" }));
+  fireEvent.click(screen.getByRole("button", { name: "Providers" }));
   fireEvent.click(screen.getByRole("checkbox", { name: "OpenAI Codex" }));
   expect(screen.getByRole("status").textContent).toBe("codex");
   fireEvent.click(screen.getByRole("checkbox", { name: "Claude Code" }));

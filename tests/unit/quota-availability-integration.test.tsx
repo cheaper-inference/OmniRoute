@@ -249,7 +249,7 @@ it.each([false, true])(
 it("shows Kimi in the provider filter while preserving the moonshot filter value", async () => {
   fixture(false, false, ["moonshot", "kimi-coding"]);
   mount("en");
-  fireEvent.click(await screen.findByLabelText("Filter quota providers", { selector: "summary" }));
+  fireEvent.click(await screen.findByRole("button", { name: "Filter quota providers" }));
   const filter = screen.getByRole("group", { name: "Filter quota providers" });
   const kimi = within(filter).getByRole("checkbox", { name: "Kimi" });
   const kimiCoding = within(filter).getByRole("checkbox", { name: "Kimi Coding" });
