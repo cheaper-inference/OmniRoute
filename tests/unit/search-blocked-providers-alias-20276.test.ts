@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
+import { cleanupTempDataDir } from "../_setup/tempDataDir.ts";
 
 const TEST_DATA_DIR = fs.mkdtempSync(
   path.join(os.tmpdir(), "omniroute-search-blocked-alias-20276-test-")
@@ -12,6 +13,8 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "search-blocked-alias
 
 const { updateSettings } = await import("../../src/lib/db/settings.ts");
 const { POST } = await import("../../src/app/api/v1/search/route.ts");
+
+test.after(() => cleanupTempDataDir(TEST_DATA_DIR));
 
 test("POST /v1/search rejects blocked search provider requested via alias (kimi-search via moonshot) with 403 (#20276)", async () => {
   await updateSettings({ blockedProviders: ["kimi-search"] });
