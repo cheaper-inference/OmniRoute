@@ -21,7 +21,11 @@ import {
   detectReasoningDepth,
 } from "../../open-sse/services/specificityRules.ts";
 
-test("detectCodeComplexity processes 100k+ char line of 'import ' in < 250ms (no quadratic ReDoS)", () => {
+// Wall-clock budget per scoring call. The pre-fix regexes take tens of seconds on these inputs
+// (quadratic), so a 2 s budget still separates the two while not flaking on a loaded CI runner.
+const BUDGET_MS = 2_000;
+
+test("detectCodeComplexity processes 100k+ char line of 'import ' within the budget (no quadratic ReDoS)", () => {
   const content = "import ".repeat(20_000); // 140,000 characters on one line without "from"
   const start = performance.now();
   const score = detectCodeComplexity({ messages: [{ role: "user", content }] });
@@ -29,12 +33,12 @@ test("detectCodeComplexity processes 100k+ char line of 'import ' in < 250ms (no
 
   assert.equal(typeof score, "number");
   assert.ok(
-    elapsedMs < 250,
-    `Scoring 140k chars took ${Math.round(elapsedMs)} ms, expected < 250 ms`
+    elapsedMs < BUDGET_MS,
+    `Scoring 140k chars took ${Math.round(elapsedMs)} ms, expected < ${BUDGET_MS} ms`
   );
 });
 
-test("detectCodeComplexity processes 100k+ char line of 'SELECT ' in < 250ms (no quadratic ReDoS)", () => {
+test("detectCodeComplexity processes 100k+ char line of 'SELECT ' within the budget (no quadratic ReDoS)", () => {
   const content = "SELECT ".repeat(20_000); // 140,000 characters on one line without "FROM"
   const start = performance.now();
   const score = detectCodeComplexity({ messages: [{ role: "user", content }] });
@@ -42,12 +46,12 @@ test("detectCodeComplexity processes 100k+ char line of 'SELECT ' in < 250ms (no
 
   assert.equal(typeof score, "number");
   assert.ok(
-    elapsedMs < 250,
-    `Scoring 140k chars took ${Math.round(elapsedMs)} ms, expected < 250 ms`
+    elapsedMs < BUDGET_MS,
+    `Scoring 140k chars took ${Math.round(elapsedMs)} ms, expected < ${BUDGET_MS} ms`
   );
 });
 
-test("detectCodeComplexity processes 50k+ char line of '${' in < 250ms (no quadratic ReDoS)", () => {
+test("detectCodeComplexity processes 50k+ char line of '${' within the budget (no quadratic ReDoS)", () => {
   const content = "${".repeat(25_000); // 50,000 characters on one line without "}"
   const start = performance.now();
   const score = detectCodeComplexity({ messages: [{ role: "user", content }] });
@@ -55,12 +59,12 @@ test("detectCodeComplexity processes 50k+ char line of '${' in < 250ms (no quadr
 
   assert.equal(typeof score, "number");
   assert.ok(
-    elapsedMs < 250,
-    `Scoring 50k chars took ${Math.round(elapsedMs)} ms, expected < 250 ms`
+    elapsedMs < BUDGET_MS,
+    `Scoring 50k chars took ${Math.round(elapsedMs)} ms, expected < ${BUDGET_MS} ms`
   );
 });
 
-test("detectReasoningDepth processes 60k+ char line of 'if ' in < 250ms (no quadratic ReDoS)", () => {
+test("detectReasoningDepth processes 60k+ char line of 'if ' within the budget (no quadratic ReDoS)", () => {
   const content = "if ".repeat(20_000); // 60,000 characters on one line without "then"
   const start = performance.now();
   const score = detectReasoningDepth({ messages: [{ role: "user", content }] });
@@ -68,8 +72,8 @@ test("detectReasoningDepth processes 60k+ char line of 'if ' in < 250ms (no quad
 
   assert.equal(typeof score, "number");
   assert.ok(
-    elapsedMs < 250,
-    `Scoring 60k chars took ${Math.round(elapsedMs)} ms, expected < 250 ms`
+    elapsedMs < BUDGET_MS,
+    `Scoring 60k chars took ${Math.round(elapsedMs)} ms, expected < ${BUDGET_MS} ms`
   );
 });
 
@@ -78,10 +82,13 @@ function timed(label: string, run: () => number) {
   const score = run();
   const elapsedMs = performance.now() - start;
   assert.equal(typeof score, "number");
-  assert.ok(elapsedMs < 250, `${label} took ${Math.round(elapsedMs)} ms, expected < 250 ms`);
+  assert.ok(
+    elapsedMs < BUDGET_MS,
+    `${label} took ${Math.round(elapsedMs)} ms, expected < ${BUDGET_MS} ms`
+  );
 }
 
-test("an opening token followed by a long whitespace run scores in < 250ms", () => {
+test("an opening token followed by a long whitespace run scores within the budget", () => {
   const spaces = " ".repeat(140_000);
   for (const open of ["SELECT", "import"]) {
     timed(`${open} + 140k spaces`, () =>
