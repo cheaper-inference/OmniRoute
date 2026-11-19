@@ -52,3 +52,17 @@ export async function attributedPercentConsumed(
   if (!(total > 0) || !(mine > 0)) return 0;
   return Math.min(1, mine / total) * consumedTotal;
 }
+
+/** Records this request's tokens in the shadow bucket. Fail-open (B29): store errors are swallowed. */
+export async function recordPercentProxy(
+  store: QuotaStore,
+  apiKeyId: string,
+  dimKey: DimensionKey,
+  cost: RecordConsumptionInput["cost"]
+): Promise<void> {
+  const proxyCost = percentProxyCost(cost);
+  if (proxyCost <= 0) return;
+  await store.consume(apiKeyId, percentProxyDimKey(dimKey), proxyCost).catch(() => {
+    // Fail-open per B29
+  });
+}

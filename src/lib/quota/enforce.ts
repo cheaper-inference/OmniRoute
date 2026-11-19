@@ -20,7 +20,7 @@ import { decideFairShare } from "./fairShare";
 import { resolvePlan } from "./planResolver";
 import { getSaturation } from "./saturationSignals";
 import { getQuotaStore } from "./QuotaStore";
-import { attributedPercentConsumed, percentProxyCost, percentProxyDimKey } from "./percentProxy";
+import { attributedPercentConsumed, recordPercentProxy } from "./percentProxy";
 import { listAllocationsForApiKey, getPool } from "@/lib/db/quotaPools";
 import { getModelCap } from "@/lib/db/quotaModelCaps";
 import { listEnabledSchedules } from "@/lib/db/quotaSchedules";
@@ -379,12 +379,7 @@ export async function recordConsumption(input: RecordConsumptionInput): Promise<
     }
     if (dim.unit === "percent") {
       // #19904: shadow token bucket so enforcement can attribute the upstream % per key.
-      const proxyCost = percentProxyCost(input.cost);
-      if (proxyCost > 0) {
-        await store.consume(input.apiKeyId, percentProxyDimKey(dimKey), proxyCost).catch(() => {
-          // Fail-open per B29
-        });
-      }
+      await recordPercentProxy(store, input.apiKeyId, dimKey, input.cost);
     }
   }
 
