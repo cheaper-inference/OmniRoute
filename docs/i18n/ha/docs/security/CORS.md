@@ -117,33 +117,10 @@ Ana daidaita asali ba tare da la’akari da bambancin manyan da ƙananan haruffa
 saita CSV ɗin a lokacin aiki a **Dashboard → Security → CORS Allowed Origins** ba tare da
 sake kunnawa ba.
 
-## Maɓallan API da zaman cookie
+## makullin API vs zaman kuki
 
-- **Bearer / `x-api-key` (farfajiyar inference ta `/v1/*`):** browsers ba sa haɗa
-  waɗannan ta atomatik. CORS ba katanga mai ma’ana ba ce a nan — maɓallin API ne
-  katangar — shi ya sa aka tsara wannan farfajiya ta zama mai sassauci domin browser da
-  Electron clients su iya karanta amsoshin da suke da haƙƙin samu.
-  Mayar da asali mai sassauci yana bin key ɗin da aka tabbatar, ba kawai kasancewar
-  header ɗin ba: idan `REQUIRE_API_KEY=false` ta yi wa buƙata hidima ba tare da sanin mai
-  ita ba, amsarta mai nasara tana ci gaba da bin jerin izinin da ke rufewa idan an gaza.
-  Ƙin tantancewa (401) suna ci gaba da kasancewa masu karantuwa domin clients su iya
-  nuna key da aka soke ko aka rubuta ba daidai ba (#5242): 401 na pipeline ɗin kanta yana
-  riƙe mayar da asalin, kuma hanyar da ita kanta ta ƙi key ɗin bayan pipeline ta yi wa
-  buƙatar hidima a matsayin wadda ba a san mai ita ba (`/v1/models` da `/v1beta/models`
-  idan an saita tantancewar gudanarwa, hanyoyin da suka keɓanta ga mai shi `/v1/files`,
-  `/v1/batches`, `/v1/media`, `/v1/session-leases` da hanyoyin ’yan takarar auto-combo)
-  tana ƙara mayar da asalin a wannan 401 ta hanyar `credentialRejectionHeaders()`. Mayar
-  da asalin ya dogara ne kan ko buƙatar tana ɗauke da header na shaida (`Authorization`,
-  `x-api-key`, `x-goog-api-key` ko cookie na `auth_token`), ba kan wanne daga cikinsu
-  hanyar ta duba ba, kuma ba a taɓa haɗa shi da `Access-Control-Allow-Credentials` ba;
-  jikin amsar ambulan kuskure ne da ba ya canzawa. Hanyoyin gudanarwa a ƙarƙashin
-  `/api/v1/` da `requireManagementAuth()` ke kiyayewa (`/api/v1/management/*`,
-  `/api/v1/registered-keys`) ba sa ƙara mayar da asalin: tare da `REQUIRE_API_KEY=false`,
-  ba za a iya karanta 401/403 ɗinsu daga wani asali ba.
-- **Zaman cookie (dashboard):** ana kiyaye shi ta tsohuwar ƙa’idar rufewa idan an gaza **da kuma**
-  rashin `Access-Control-Allow-Credentials` a kan hanyar da ake amfani da ita tare. Kada ka saka
-  asalan gudanarwa/dashboard a cikin wani saitin sassauci; dole su ci gaba da kasancewa
-  a rufe idan an gaza.
+- **Bearer / `x-api-key` (filin zance `/v1/*` ):** masu bincike ba sa haɗa waɗannan ta atomatik. CORS ba shamaki bane mai ma'ana anan — maɓallin API shine shingen — wanda shine dalilin da yasa wannan saman ya halatta da gangan don haka mai bincike da Electron abokan ciniki zasu iya karanta martanin da suka cancanci. Sake amsawa yana bin ingantacciyar maɓalli, ba kawai gaban mai taken ba: lokacin da `REQUIRE_API_KEY=false` ya gabatar da buƙatu ba tare da sunansa ba, nasarar nasararsa yana kiyaye jerin abubuwan ba da izini. Auth rejections (401) stay readable so clients can surface a revoked or mistyped key (#5242): the pipeline's own 401 keeps the echo, and a route that refuses the key itself after the pipeline served it as anonymous (`/v1/models` and `/v1beta/models` with management auth configured, the owner-scoped `/v1/files`, `/v1/batches`, `/v1/media`, `/v1/session-leases` and auto-combo candidate routes) yana ƙara echo zuwa wancan 401 ta hanyar `credentialRejectionHeaders()`. An yi maɓalli na echo akan buƙatun ɗauke da madannin shaidar (`Authorization`, `x-api-key`, `x-goog-api-key` ko kuki ɗin `auth_token` ), ba akan wanne daga cikinsu aka duba hanyar ba, kuma ba a taɓa haɗa shi da `Access-Control-Allow-Credentials` ba; jiki ne kafaffen ambulan kuskure. Hanyoyin gudanarwa a ƙarƙashin `/api/v1/` waɗanda `requireManagementAuth()` ke kiyaye su (`/api/v1/management/*`, `/api/v1/registered-keys`, `/api/v1/providers/[provider]/limits`, `/api/v1/accounts/[id]/limits`, `/api/v1/issues/report`) ba sa ƙara amsawa: tare da `REQUIRE_API_KEY=false` 401/403 ɗin su ba asalin giciye ba ne.
+- **Zaman kuki (dashboard):** ana kiyaye shi ta hanyar da ba a rufe ba** kuma** ta hanyar rashin `Access-Control-Allow-Credentials` akan tafarki daya. Tsare tushen management/dashboard daga kowane tsari mai izini; dole ne su kasance a rufe sosai.
 
 ## Musafahar WebSocket (`/v1/responses`, `/v1/ws`)
 

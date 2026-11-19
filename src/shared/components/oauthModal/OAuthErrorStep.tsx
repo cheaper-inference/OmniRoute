@@ -32,7 +32,7 @@ export default function OAuthErrorStep({
       <div className="size-16 mx-auto mb-4 rounded-full bg-error/10 flex items-center justify-center">
         <Icon name="error" size={30} className="text-error" />
       </div>
-      <h3 className="text-lg font-semibold mb-2">{errorTitle}</h3>
+      <h3 className="text-lg mb-2">{errorTitle}</h3>
       <p className="text-sm text-error mb-4">
         <LinkifiedText text={error} />
       </p>

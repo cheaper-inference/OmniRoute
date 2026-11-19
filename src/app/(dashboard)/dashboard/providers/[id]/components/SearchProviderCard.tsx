@@ -14,7 +14,7 @@ interface SearchProviderCardProps {
 export default function SearchProviderCard({ providerId, t }: SearchProviderCardProps) {
   return (
     <Card>
-      <h2 className="text-lg font-semibold mb-4">{t("searchProvider")}</h2>
+      <h2 className="text-lg mb-4">{t("searchProvider")}</h2>
       <p className="text-sm text-text-muted">{t("searchProviderDesc")}</p>
       {providerId === "perplexity-search" && (
         <div className="mt-3 flex items-center gap-2 px-3 py-2 rounded-lg bg-info/10 border border-info/20">

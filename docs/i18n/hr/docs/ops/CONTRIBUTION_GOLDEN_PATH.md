@@ -29,70 +29,61 @@ vrstu promjene s njezinim ugovorima, ciljanim provjerama i pokrivenošću u CI-j
 6. **Zabilježite dokaze.** U predlošku PR-a navedite pokrenute naredbe, svaku dodanu ili promijenjenu testnu datoteku,
    migracije ili zastavice značajki te sve provjere ograničene na CI koje još nisu dovršene.
 
-## Preporučeni postupci prema vrsti promjene
+## Zlatne staze prema vrsti promjene
 
-Naredbe u nastavku minimalne su ciljane provjere, a ne dopuštenje za preskakanje testa koji izravno pokriva
-ponašanje koje ste promijenili.
+Naredbe ispod su minimalne fokusirane provjere, a ne dopuštenje za preskakanje testa koji izravno pokriva ponašanje koje ste promijenili.
 
-### Pružatelj usluge
+### Davatelj
 
 **Ugovori**
 
-- Definicija pružatelja usluge u `src/shared/constants/providers/` i njezino sastavljanje u
-  `src/shared/constants/providers.ts`.
-- Modeli i mogućnosti u `open-sse/config/providerRegistry.ts` ili izdvojenim datotekama registra.
-- Odabir izvršitelja/prevoditelja, konfiguracija OAuth-a ili API ključa, resursi nadzorne ploče i generirana
-  referenca pružatelja usluge, kada je primjenjivo.
-- Javne vjerodajnice moraju upotrebljavati `resolvePublicCred()`; odgovori s pogreškama moraju upotrebljavati zajedničke pomoćne funkcije
-  za uklanjanje osjetljivih podataka iz pogrešaka. Pogledajte `docs/security/PUBLIC_CREDS.md` (git; nije prevedeno u `/docs`) i
-  [Uklanjanje osjetljivih podataka iz pogrešaka](../security/ERROR_SANITIZATION.md).
+- Definicija pružatelja usluga u `src/shared/constants/providers/` i njegov sastav u `src/shared/constants/providers.ts`.
+- Modeli i mogućnosti u `open-sse/config/providerRegistry.ts` ili njegovim ekstrahiranim datotekama registra.
+- Executor/translator odabir, konfiguracija OAuth ili API ključa i sredstva nadzorne ploče. Nemojte predavati regenerirane `docs/reference/PROVIDER_REFERENCE.md` ili README dijagrame: osvježavanje izdanja ih prepisuje (`check:pr-derived-paths` ne radi značajku PR koja ih nosi).
+- Javne vjerodajnice moraju koristiti `resolvePublicCred()`; odgovori na pogreške moraju koristiti dijeljene sanirane pomoćnike za pogreške. Pogledajte `docs/security/PUBLIC_CREDS.md` (git; nije kompajliran u `/docs`) i [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Ciljana petlja**
+**Fokusirana petlja**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # kada se katalog promijeni; predajte generiranu razliku
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Također testirajte svaku obuhvaćenu skupinu zahtjeva: razgovor, Responses, slike, ugrađivanja, zvuk ili video.
-Pregledajte generirane razlike kataloga i referentnih rezultata kao promjene ugovora; nemojte ih prihvatiti bez provjere.
+Također testirajte svaku pogođenu obitelj zahtjeva: chat, odgovore, slike, ugradnje, audio ili video. Pregledajte generirani katalog i zlatne razlike kao izmjene ugovora; ne prihvaćajte ih slijepo.
 
 ### Usmjeravanje
 
 **Ugovori**
 
-- Javne vrijednosti strategija i metapodaci korisničkog sučelja u `src/shared/constants/routingStrategies.ts`.
-- Raspoređivanje i redoslijed u `open-sse/services/combo.ts` i `open-sse/services/combo/`.
-- Combo sheme, trajna pohrana, stanje otpornosti, mogućnosti modela i API/UI kontrole.
-- [Mehanizam Auto-Combo](../routing/AUTO-COMBO.md) i dokumentacija o otpornosti kada se ponašanje promijeni.
+- Vrijednosti javne strategije i UI metapodaci u `src/shared/constants/routingStrategies.ts`.
+- Slanje i naručivanje pod `open-sse/services/combo.ts` i `open-sse/services/combo/`.
+- Kombinirane sheme, postojanost, stanje otpornosti, mogućnosti modela i API/UI kontrole.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) i dokumentacija o otpornosti kada se ponašanje promijeni.
 
-**Ciljana petlja**
+**Fokusirana petlja**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # promjene strategije ili raspoređivanja
-npm run check:known-symbols      # promjene registracije strategije
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Lokalno upotrebljavajte determinističke testove s lažnim uzvodnim sustavima. Testovi osnovne funkcionalnosti aktivnog combo sustava zahtijevaju vjerodajnice i
-izvode se ručno; nisu zamjena za CI.
+Lokalno koristite determinističke lažne upstream testove. Kombinirani dimovi uživo zahtijevaju vjerodajnice i ručni su, a ne zamjena CI.
 
 ### UI / UX
 
 **Ugovori**
 
-- Next.js ruta/stranica i granice dijeljenih komponenti u `src/app/` i
-  `src/shared/components/`.
-- Oblici API odgovora, stanja učitavanja/praznog sadržaja/pogreške, ponašanje tipkovnice i čitača zaslona,
-  prilagodljivi raspored, teme i proširenje lokalizacije.
-- Izvorni engleski nizovi korisničkog sučelja u `src/i18n/messages/en.json`; nemojte izravno ugrađivati novi tekst namijenjen korisnicima.
+- Next.js route/page i zajedničke granice komponenti pod `src/app/` i `src/shared/components/`.
+- oblici odgovora API, stanja loading/empty/error, ponašanje tipkovnice i čitača zaslona, responzivni izgled, tematizacija i proširenje lokalizacije.
+- Engleski UI izvorni nizovi u `src/i18n/messages/en.json`; nemojte kodirati novu kopiju okrenutu prema korisniku.
 
-**Ciljana petlja**
+**Fokusirana petlja**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Pokrenite aplikaciju za promjene interakcije ili vizualnog prikaza i provjerite uske i široke prikaze. CI pokreće
-produkcijsku izgradnju i šire pakete testova; vizualno ponašanje i dalje zahtijeva ciljanu komponentu, Playwright
-ili dokumentiranu ručnu provjeru primjerenu promjeni.
+Pokrenite aplikaciju za interakciju ili vizualne promjene i provjerite uske i široke prozore. CI vodi proizvodnu izgradnju i šire pakete; vizualno ponašanje i dalje treba fokusiranu komponentu, Playwright ili dokumentiranu ručnu provjeru koja odgovara promjeni.
 
 ### i18n
 
 **Ugovori**
 
-- `src/i18n/messages/en.json` izvor je za korisničko sučelje; `config/i18n.json` izvor je za lokalizacije.
-- CLI katalozi nalaze se odvojeno u `bin/cli/locales/`.
-- Točno očuvajte ICU rezervirana mjesta i oznake. Nemojte prevoditi nazive proizvoda/pružatelja usluga/modela,
-  nazive protokola i zaglavlja, naredbe, identifikatore koda/JSON-a, URL-ove, varijable okruženja ni
-  zaštićene pojmove kao što su `OmniRoute`, `OAuth`, `MCP` i `A2A`. Trenutačni izvorni popis nalazi se u
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` je UI izvor; `config/i18n.json` je izvor lokalizacije.
+- CLI katalozi žive odvojeno pod `bin/cli/locales/`.
+- Točno sačuvajte ICU rezervirana mjesta i oznake. Nemojte prevoditi product/provider/model nazive, nazive protokola i zaglavlja, naredbe, code/JSON identifikatore, URLs, varijable okoline ili zaštićene termine kao što su `OmniRoute`, `OAuth`, `MCP` i `A2A`. Trenutni popis izvora je `scripts/i18n/glossary/protected-terms.json`.
 
-**Ciljana petlja**
+Značajka PR uređuje samo `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); ostale lokalne postavke dovršavaju se jednom po izdanju osvježavanjem izdanja ili valom prijevoda (`docs/guides/I18N.md` → "Samo značajka PRs dodir `en.json` "). `npm run check:pr-derived-paths` ne uspijeva značajku PR koja uređuje drugi katalog lokaliteta.
+
+**Fokusirana petlja**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # kada se promijene CLI nizovi/katalozi
 npm run lint
 ```
 
-Ovo su smjernice za postojeći sustav, a ne poziv na proširenje njegovih alata ili modela ključeva.
-Neka i18n zakrpe budu precizno ograničene dok se projektira zamjenski sustav. Nemojte pokretati naredbe za prevođenje
-koje pozivaju vanjske usluge, osim ako zadatak izričito zahtijeva generirane prijevode i
-ako ste pregledali nastalu razliku.
+Bez `--mode=pr` ova vrata rade lokalno u načinu otpuštanja i prijavljuju svaki ključ koji je ciklus dodao ili prepisao u `en.json`; to je posao osvježavanja izdanja, a ne vašeg PR-a.
+
+Ovo je smjernica za postojeći sustav, a ne poziv na proširenje alata ili ključnog modela. Neka i18n flasteri budu kirurški dok se dizajnira zamjenski sustav. Nemojte pokretati naredbe prijevoda koje pozivaju vanjske usluge osim ako zadatak izričito zahtijeva generirane prijevode i ako ste pregledali rezultirajući diff.
 
 ### CLI
 
 **Ugovori**
 
-- Javne naredbe i zastavice u `bin/cli/`, generirane API naredbe, izlazni kodovi, stdout/stderr i
-  strukture JSON izlaza, ponašanje konfiguracije/okruženja te zapakirane datoteke.
-- Tekstovi CLI-ja namijenjeni korisnicima moraju upotrebljavati CLI i18n sloj, a katalozi `en`/`pt-BR` moraju ostati usklađeni.
-- Očuvajte Node kao podržano izvršno okruženje i ugovor objavljene binarne datoteke.
+- Javne naredbe i oznake u `bin/cli/`, generirane API naredbe, izlazni kodovi, stdout/stderr i JSON izlazni oblici, config/environment ponašanje i pakirane datoteke.
+- CLI nizovi okrenuti prema korisniku moraju koristiti CLI i18n sloj (`t()` ključevi koji postoje u `bin/cli/locales/en.json`). Značajka PR uređuje samo `en.json`; `pt-BR` i ostale lokalne postavke su dovršene pri izdavanju.
+- Sačuvajte Node kao podržano vrijeme izvođenja i objavljeni binarni ugovor.
 
-**Fokusirani ciklus**
+**Fokusirana petlja**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # promjene generiranog/pakiranog CLI-ja
-npm run check:pack-policy     # promjene površine paketa
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Upotrijebite točnu naredbu u privremenom podatkovnom direktoriju kada ponašanje ovisi o raščlanjivanju, datotekama ili izlaznom
-statusu. CI provodi šire provjere artefakata paketa i ekosustava.
+Koristite točnu naredbu u privremenom podatkovnom direktoriju kada ponašanje ovisi o raščlanjivanju, datotekama ili statusu izlaza. CI izvodi šire provjere artefakata paketa i ekosustava.
 
 ### Baza podataka
 
 **Ugovori**
 
-- Domenski moduli nalaze se u `src/lib/db/`; izravno uvozite određene module (stari sloj ponovnog izvoza `localDb.ts` uklonjen je).
-- Numerirane, idempotentne SQL migracije nalaze se u `src/lib/db/migrations/`, uz sigurnost transakcija, ponašanje pri nadogradnji,
-  indekse i sve pozivatelje na koje utječe shema.
-- Rute i rukovatelji nikada ne izvršavaju neobrađeni SQL izravno.
+- Moduli domene pod `src/lib/db/`; izravno uvesti određene module (stari `localDb.ts` sloj ponovnog izvoza je uklonjen).
+- Numerirane, idempotentne SQL migracije pod `src/lib/db/migrations/`, sigurnost transakcije, ponašanje nadogradnje, indeksi i svaki pozivatelj na kojeg utječe shema.
+- Rute i rukovatelji nikad ne izdaju sirovi SQL izravno.
 
-**Fokusirani ciklus**
+**Fokusirana petlja**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Pri dodavanju migracije testirajte i novu bazu podataka i nadogradnju s prethodne sheme. Testovi baze podataka
-moraju zatvoriti sve resurse i pozvati `resetDbInstance()` tijekom čišćenja. Pokrenite `npm run test:bun:db` samo kada
-se promijeni opcionalna putanja Bun adaptera; Node ostaje mjerodavan.
+Testirajte svježu bazu podataka i nadogradite prethodnu shemu prilikom dodavanja migracije. Testovi baze podataka moraju zatvoriti držače i pozvati `resetDbInstance()` tijekom čišćenja. Pokrenite `npm run test:bun:db` samo kada se promijeni staza best-effort Bun adaptera; Čvor ostaje mjerodavan.
 
-### Izgradnja / implementacija
+### Izgradite/postavite
 
 **Ugovori**
 
-- Korijenski manifesti i manifesti radnih prostora/datoteka zaključavanja, `scripts/build/`, Next.js samostalno sastavljanje, sadržaj paketa
-  `dist/`, metapodaci Electron platforme, CI tijekovi rada i kontrolne oznake implementacije.
-- Podržani rasponi verzija za Node i dopuštena uporaba Buna navedena u `CLAUDE.md` moraju ostati nepromijenjeni.
-- Artefakti izgradnje ne prate se u repozitoriju; primjenjuju se pravila za ovisnosti, licence, tijekove rada i pakete.
+- Korijenski i radni prostor manifests/lockfile, `scripts/build/`, samostalni sklop Next.js, sadržaj paketa `dist/`, metapodaci platforme Electron, tijek rada CI i nadzornici implementacije.
+- Podržani rasponi čvorova i dopuštena upotreba Bun u `CLAUDE.md` moraju ostati netaknuti.
+- Artefakti izgradnje ostaju nepraćeni; primjenjuju se pravila ovisnosti, licence, tijeka rada i paketa.
 
-**Fokusirani ciklus**
+**Fokusirana petlja**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # promjene ovisnosti ili datoteke zaključavanja
-npm run check:pack-policy      # promjene površine objavljenog paketa
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Lokalno upotrijebite `npm run build` samo kada promjena utječe na prevođenje, samostalno sastavljanje, resurse
-ili pakiranje izvršnog okruženja. Upotrijebite `npm run build:release` samo za provjeru izdanja/implementacije. CI-jeva izgradnja
-konačni je signal za više platformi; promjene Electrona specifične za platformu zahtijevaju odgovarajuću fokusiranu izgradnju
-ili dokaz brzog testiranja.
+Upotrijebite `npm run build` lokalno samo kada promjena utječe na kompilaciju, samostalnu montažu, sredstva ili paket vremena izvođenja. Koristite `npm run build:release` samo za release/deploy provjeru valjanosti. CI-ova izvedba je konačni međuplatformski signal; Electron promjene specifične za platformu trebaju odgovarajuće fokusirane građevne ili dimne dokaze.
 
 ## Razvojne skripte za dijeljeno računalo
 
