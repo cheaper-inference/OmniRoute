@@ -228,6 +228,7 @@ export const updateSettingsSchema = z.object({
   setupComplete: z.boolean().optional(),
   blockedProviders: z.array(z.string().max(100)).optional(),
   noAuthFallbackDisabledProviders: z.array(z.string().max(100)).optional(),
+  codexHideForcedReasoningModels: z.boolean().optional(),
   hidePaidModels: z.boolean().optional(),
   // #9418/#13562: catalog/auto-combo already consume both flags (open-sse
   // autoCombo + /v1/models catalog), but neither was ever added here — Zod
