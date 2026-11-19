@@ -146,7 +146,7 @@ Provider and model totals for v3.8.55 to v3.8.59 are measured when each release 
 [![npm version](https://img.shields.io/npm/v/omniroute?color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 [![npm downloads per month](https://img.shields.io/npm/dm/omniroute?label=npm%2Fmonth&color=cb3837&logo=npm)](https://www.npmjs.com/package/omniroute)
 [![Latest release](https://img.shields.io/github/v/release/cheaper-inference/OmniRoute?label=latest%20release&logo=github&color=20211c)](https://github.com/cheaper-inference/OmniRoute/releases/latest)
-[![Docker Hub](https://img.shields.io/docker/v/diegosouzapw/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
+[![Docker Hub](https://img.shields.io/docker/v/cheaperinference/omniroute?label=Docker%20Hub&logo=docker&color=2496ED)](https://hub.docker.com/r/cheaperinference/omniroute)
 [![Docker pulls](https://img.shields.io/docker/pulls/diegosouzapw/omniroute?label=docker%20pulls&logo=docker&color=2496ED)](https://hub.docker.com/r/diegosouzapw/omniroute)
 [![Release asset downloads](https://img.shields.io/github/downloads/cheaper-inference/OmniRoute/total?style=flat&label=release%20asset%20downloads&logo=github&color=47848F)](https://github.com/cheaper-inference/OmniRoute/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=flat-square)](LICENSE)
@@ -173,7 +173,7 @@ Every section of this README, grouped by what you want to do.
 <a id="languages"></a>
 
 <div align="center">
-  <b>Read this README in 67 languages</b>
+  <b>🌐 In 67 languages</b>
   <br/><br/>
   <a href="README.md"><img src="docs/assets/flags/us.svg" width="30" alt="English (en)" title="English (en)"></a>
   <a href="docs/i18n/pt-BR/README.md"><img src="docs/assets/flags/br.svg" width="30" alt="Português — Brasil (pt-BR)" title="Português — Brasil (pt-BR)"></a>
@@ -847,10 +847,10 @@ The dashboard catalog lists **39 integrations** (28 coding tools and 11 agents).
     <td align="center" width="96"><a href="https://github.com/openai/codex"><img src="./public/providers/codex.svg" width="40" height="40" alt="Codex CLI"/><br/><sub><b>Codex CLI</b></sub></a></td>
     <td align="center" width="96"><img src="./public/providers/gemini.svg" width="40" height="40" alt="Gemini CLI"/><br/><sub><b>Gemini CLI</b></sub></td>
     <td align="center" width="96"><a href="https://qwenlm.github.io/qwen-code-docs/en/users/configuration/model-providers/"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qwen-color.svg" width="40" height="40" alt="Qwen Code"/><br/><sub><b>Qwen Code</b></sub></a></td>
-    <td align="center" width="96"><a href="https://github.com/anomalyco/opencode"><img src="./docs/assets/cli-icons/opencode.svg" width="40" height="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub></a></td>
-    <td align="center" width="96"><a href="https://aider.chat/docs/config/options.html"><img src="./docs/assets/cli-icons/aider.svg" width="40" height="40" alt="Aider"/><br/><sub><b>Aider</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/anomalyco/opencode"><img src="./docs/assets/cli-icons/opencode-tile.svg" width="40" height="40" alt="OpenCode"/><br/><sub><b>OpenCode</b></sub></a></td>
+    <td align="center" width="96"><a href="https://aider.chat/docs/config/options.html"><img src="./docs/assets/cli-icons/aider-tile.svg" width="40" height="40" alt="Aider"/><br/><sub><b>Aider</b></sub></a></td>
     <td align="center" width="96"><a href="https://block.github.io/goose/"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/goose.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/goose.svg" width="40" height="40" alt="Goose"/></picture><br/><sub><b>Goose</b></sub></a></td>
-    <td align="center" width="96"><a href="https://github.com/whycorporation/whycodes"><img src="./docs/assets/cli-icons/whycodes.svg" width="40" height="40" alt="WhyCodes"/><br/><sub><b>WhyCodes</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/whycorporation/whycodes"><img src="./docs/assets/cli-icons/whycodes-tile.svg" width="40" height="40" alt="WhyCodes"/><br/><sub><b>WhyCodes</b></sub></a></td>
   </tr>
 </table>
 
@@ -878,11 +878,11 @@ Every command honors the active remote context (`omniroute connect <host>`). `--
   <tr>
     <td align="center" width="96"><a href="https://docs.cline.bot/"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/cline.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/cline.svg" width="40" height="40" alt="Cline"/></picture><br/><sub><b>Cline</b></sub></a></td>
     <td align="center" width="96"><a href="https://docs.continue.dev/"><img src="./public/providers/continue.svg" width="40" height="40" alt="Continue"/><br/><sub><b>Continue</b></sub></a></td>
-    <td align="center" width="96"><a href="https://github.com/Kilo-Org/kilocode"><img src="./docs/assets/cli-icons/kilo.svg" width="40" height="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub></a></td>
-    <td align="center" width="96"><a href="https://5dive.ai"><img src="./docs/assets/cli-icons/5dive.svg" width="40" height="40" alt="5dive"/><br/><sub><b>5dive</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/Kilo-Org/kilocode"><img src="./docs/assets/cli-icons/kilo-tile.svg" width="40" height="40" alt="Kilo Code"/><br/><sub><b>Kilo Code</b></sub></a></td>
+    <td align="center" width="96"><a href="https://5dive.ai"><img src="./docs/assets/cli-icons/5dive-tile.svg" width="40" height="40" alt="5dive"/><br/><sub><b>5dive</b></sub></a></td>
     <td align="center" width="96"><a href="https://docs.cursor.com/settings/models"><img src="./public/providers/cursor.svg" width="40" height="40" alt="Cursor"/><br/><sub><b>Cursor</b></sub></a></td>
     <td align="center" width="96"><a href="https://docs.roocode.com/"><img src="./public/providers/roocode.svg" width="40" height="40" alt="Roo Code"/><br/><sub><b>Roo Code</b></sub></a></td>
-    <td align="center" width="96"><a href="https://github.com/charmbracelet/crush"><img src="./docs/assets/cli-icons/crush.svg" width="40" height="40" alt="Crush"/><br/><sub><b>Crush</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/charmbracelet/crush"><img src="./docs/assets/cli-icons/crush-tile.svg" width="40" height="40" alt="Crush"/><br/><sub><b>Crush</b></sub></a></td>
     <td align="center" width="96"><a href="https://zed.dev/docs/ai/llm-providers#openai-api-compatible"><img src="./public/providers/zed-hosted.svg" width="40" height="40" alt="Zed"/><br/><sub><b>Zed</b></sub></a></td>
   </tr>
 </table>
@@ -912,31 +912,31 @@ These catalog entries have a per-tool guide in the dashboard. Set the tool's Ope
 
 <table>
   <tr>
-    <td align="center" width="96"><a href="https://github.com/Hmbown/CodeWhale"><img src="./docs/assets/cli-icons/codewhale.svg" width="40" height="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/Hmbown/CodeWhale"><img src="./docs/assets/cli-icons/codewhale-tile.svg" width="40" height="40" alt="CodeWhale"/><br/><sub><b>CodeWhale</b></sub></a></td>
     <td align="center" width="96"><a href="https://github.com/hunterbown/deepseek-tui"><img src="./public/providers/deepseek.svg" width="40" height="40" alt="DeepSeek TUI"/><br/><sub><b>DeepSeek TUI</b></sub></a></td>
     <td align="center" width="96"><img src="./public/providers/factory.svg" width="40" height="40" alt="Factory Droid"/><br/><sub><b>Factory Droid</b></sub></td>
-    <td align="center" width="96"><a href="https://github.com/antinomyhq/forge"><img src="./docs/assets/cli-icons/forge.svg" width="40" height="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/antinomyhq/forge"><img src="./docs/assets/cli-icons/forge-tile.svg" width="40" height="40" alt="ForgeCode"/><br/><sub><b>ForgeCode</b></sub></a></td>
     <td align="center" width="96"><a href="https://x.ai/cli"><img src="./public/providers/grok.svg" width="40" height="40" alt="Grok Build"/><br/><sub><b>Grok Build</b></sub></a></td>
   </tr>
   <tr>
     <td align="center" width="96"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" height="40" alt="Hermes Agent"/></picture><br/><sub><b>Hermes Agent</b></sub></td>
-    <td align="center" width="96"><a href="https://github.com/1jehuang/jcode"><img src="./docs/assets/cli-icons/jcode.svg" width="40" height="40" alt="jcode"/><br/><sub><b>jcode</b></sub></a></td>
-    <td align="center" width="96"><a href="https://docs.letta.com"><img src="./docs/assets/cli-icons/letta.svg" width="40" height="40" alt="Letta CLI"/><br/><sub><b>Letta CLI</b></sub></a></td>
-    <td align="center" width="96"><a href="https://github.com/can1357/oh-my-pi"><img src="./docs/assets/cli-icons/omp.svg" width="40" height="40" alt="Oh My Pi"/><br/><sub><b>Oh My Pi</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/1jehuang/jcode"><img src="./docs/assets/cli-icons/jcode-tile.svg" width="40" height="40" alt="jcode"/><br/><sub><b>jcode</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.letta.com"><img src="./docs/assets/cli-icons/letta-tile.svg" width="40" height="40" alt="Letta CLI"/><br/><sub><b>Letta CLI</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/can1357/oh-my-pi"><img src="./docs/assets/cli-icons/omp-tile.svg" width="40" height="40" alt="Oh My Pi"/><br/><sub><b>Oh My Pi</b></sub></a></td>
     <td align="center" width="96"><img src="./public/providers/openclaw.svg" width="40" height="40" alt="OpenClaw"/><br/><sub><b>OpenClaw</b></sub></td>
   </tr>
   <tr>
-    <td align="center" width="96"><a href="https://github.com/badlogic/pi"><img src="./docs/assets/cli-icons/pi.svg" width="40" height="40" alt="Pi"/><br/><sub><b>Pi</b></sub></a></td>
-    <td align="center" width="96"><a href="https://github.com/PrimeIntellect-ai/prime-agent"><img src="./docs/assets/cli-icons/prime-agent.svg" width="40" height="40" alt="Prime Agent"/><br/><sub><b>Prime Agent</b></sub></a></td>
-    <td align="center" width="96"><a href="https://github.com/leonardcser/smelt"><img src="./docs/assets/cli-icons/smelt.svg" width="40" height="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub></a></td>
-    <td align="center" width="96"><a href="https://github.com/asheshgoplani/agent-deck"><img src="./docs/assets/cli-icons/agent-deck.svg" width="40" height="40" alt="Agent Deck"/><br/><sub><b>Agent Deck</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/badlogic/pi"><img src="./docs/assets/cli-icons/pi-tile.svg" width="40" height="40" alt="Pi"/><br/><sub><b>Pi</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/PrimeIntellect-ai/prime-agent"><img src="./docs/assets/cli-icons/prime-agent-tile.svg" width="40" height="40" alt="Prime Agent"/><br/><sub><b>Prime Agent</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/leonardcser/smelt"><img src="./docs/assets/cli-icons/smelt-tile.svg" width="40" height="40" alt="Smelt"/><br/><sub><b>Smelt</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/asheshgoplani/agent-deck"><img src="./docs/assets/cli-icons/agent-deck-tile.svg" width="40" height="40" alt="Agent Deck"/><br/><sub><b>Agent Deck</b></sub></a></td>
     <td align="center" width="96"><a href="https://code.visualstudio.com/docs/copilot/overview"><img src="./public/providers/copilot.svg" width="40" height="40" alt="GitHub Copilot"/><br/><sub><b>GitHub Copilot</b></sub></a></td>
   </tr>
   <tr>
     <td align="center" width="96"><a href="https://docs.cursor.com/advanced/api"><img src="./public/providers/cursor.svg" width="40" height="40" alt="Cursor Agent CLI"/><br/><sub><b>Cursor Agent CLI</b></sub></a></td>
-    <td align="center" width="96"><a href="https://docs.openinterpreter.com/"><img src="./docs/assets/cli-icons/interpreter.svg" width="40" height="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub></a></td>
-    <td align="center" width="96"><a href="https://github.com/Gitlawb/openclaude"><img src="./docs/assets/cli-icons/openclaude.svg" width="40" height="40" alt="OpenClaude"/><br/><sub><b>OpenClaude</b></sub></a></td>
-    <td align="center" width="96"><a href="https://docs.warp.dev/"><img src="./docs/assets/cli-icons/warp.svg" width="40" height="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.openinterpreter.com/"><img src="./docs/assets/cli-icons/interpreter-tile.svg" width="40" height="40" alt="Open Interpreter"/><br/><sub><b>Open Interpreter</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/Gitlawb/openclaude"><img src="./docs/assets/cli-icons/openclaude-tile.svg" width="40" height="40" alt="OpenClaude"/><br/><sub><b>OpenClaude</b></sub></a></td>
+    <td align="center" width="96"><a href="https://docs.warp.dev/"><img src="./docs/assets/cli-icons/warp-tile.svg" width="40" height="40" alt="Warp AI"/><br/><sub><b>Warp AI</b></sub></a></td>
     <td align="center" width="96"><img src="./public/providers/cli-generic.svg" width="40" height="40" alt="Custom CLI"/><br/><sub><b>Custom CLI</b></sub></td>
   </tr>
 </table>
@@ -954,10 +954,10 @@ These tools do not accept a custom base URL. ZCode connects through its local ap
   <tr>
     <td align="center" width="96"><a href="https://zcode.z.ai"><img src="./public/providers/zhipu.svg" width="40" height="40" alt="ZCode"/><br/><sub><b>ZCode</b></sub></a></td>
     <td align="center" width="96"><picture><source media="(prefers-color-scheme:dark)" srcset="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-png@1.91.0/dark/nousresearch.png"/><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/nousresearch.svg" width="40" height="40" alt="Hermes"/></picture><br/><sub><b>Hermes</b></sub></td>
-    <td align="center" width="96"><img src="./docs/assets/cli-icons/antigravity.svg" width="40" height="40" alt="Antigravity"/><br/><sub><b>Antigravity</b></sub></td>
+    <td align="center" width="96"><img src="./docs/assets/cli-icons/antigravity-tile.svg" width="40" height="40" alt="Antigravity"/><br/><sub><b>Antigravity</b></sub></td>
     <td align="center" width="96"><img src="./public/providers/kiro.svg" width="40" height="40" alt="Kiro"/><br/><sub><b>Kiro</b></sub></td>
-    <td align="center" width="96"><img src="./docs/assets/cli-icons/amp.svg" width="40" height="40" alt="Amp"/><br/><sub><b>Amp</b></sub></td>
-    <td align="center" width="96"><img src="./docs/assets/cli-icons/devin.svg" width="40" height="40" alt="Devin CLI"/><br/><sub><b>Devin CLI</b></sub></td>
+    <td align="center" width="96"><img src="./docs/assets/cli-icons/amp-tile.svg" width="40" height="40" alt="Amp"/><br/><sub><b>Amp</b></sub></td>
+    <td align="center" width="96"><img src="./docs/assets/cli-icons/devin-tile.svg" width="40" height="40" alt="Devin CLI"/><br/><sub><b>Devin CLI</b></sub></td>
     <td align="center" width="96"><img src="https://cdn.jsdelivr.net/npm/@lobehub/icons-static-svg@1.91.0/icons/qoder-color.svg" width="40" height="40" alt="Qoder CLI"/><br/><sub><b>Qoder CLI</b></sub></td>
     <td align="center" width="96"><img src="./public/providers/windsurf.svg" width="40" height="40" alt="Windsurf"/><br/><sub><b>Windsurf</b></sub></td>
   </tr>
@@ -970,7 +970,7 @@ deyin.ai and Zoo Code are not in the catalog or the CLI manifest. Configure them
 <table>
   <tr>
     <td align="center" width="96"><a href="https://deyin.ai"><img src="./public/deyin.svg" width="40" height="40" alt="deyin.ai"/><br/><sub><b>deyin.ai</b></sub></a></td>
-    <td align="center" width="96"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./docs/assets/cli-icons/zoo-code.svg" width="40" height="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub></a></td>
+    <td align="center" width="96"><a href="https://github.com/Zoo-Code-Org/Zoo-Code"><img src="./docs/assets/cli-icons/zoo-code-tile.svg" width="40" height="40" alt="Zoo Code"/><br/><sub><b>Zoo Code</b></sub></a></td>
   </tr>
 </table>
 
@@ -1043,7 +1043,7 @@ Each number counts something different. None of them is added to another.
 
 <table>
   <tr>
-    <td valign="top" width="25%"><img src="./docs/assets/provider-icons/kilo-gateway.svg" width="32" height="32" alt="Kilo Gateway"/><br/><b>Kilo Gateway</b><br/><sub>Recurring</sub><br/><sub>Kilo Auto Free, Tencent Hy3</sub><br/><sub>12 free models, no published token cap</sub></td>
+    <td valign="top" width="25%"><img src="./docs/assets/provider-icons/kilo-gateway-tile.svg" width="32" height="32" alt="Kilo Gateway"/><br/><b>Kilo Gateway</b><br/><sub>Recurring</sub><br/><sub>Kilo Auto Free, Tencent Hy3</sub><br/><sub>12 free models, no published token cap</sub></td>
     <td valign="top" width="25%"><img src="./public/providers/requesty.svg" width="32" height="32" alt="Requesty"/><br/><b>Requesty</b><br/><sub>Recurring</sub><br/><sub>GPT-OSS 120B, Nemotron 3 Nano 30B</sub><br/><sub>About 200 requests/day</sub></td>
     <td valign="top" width="25%"><img src="./public/providers/zhipu.svg" width="32" height="32" alt="Z.AI GLM"/><br/><b>Z.AI GLM</b><br/><sub>Recurring</sub><br/><sub>GLM-4.7-Flash, GLM-4.5-Flash</sub><br/><sub>No published token cap</sub></td>
     <td valign="top" width="25%"><img src="./public/providers/baidu.svg" width="32" height="32" alt="Baidu ERNIE"/><br/><b>Baidu ERNIE</b><br/><sub>Recurring</sub><br/><sub>ERNIE 4.0 8K</sub><br/><sub>No published token cap</sub></td>
@@ -1102,7 +1102,7 @@ Provider limits and eligibility change; check the provider before you rely on a 
 <table>
   <tr><th align="left">Platform</th><th align="left">Install</th><th align="left">Notes</th></tr>
   <tr><td align="left" nowrap><b>npm (Node.js)</b></td><td align="left" nowrap><code>npm install -g omniroute</code> → <code>omniroute</code></td><td align="left">Windows, macOS and Linux. Node.js <code>&gt;=22.22.2 &lt;23</code> or <code>&gt;=24 &lt;27</code></td></tr>
-  <tr><td align="left" nowrap><b>Docker</b></td><td align="left"><code>docker run -d -p 20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest</code></td><td align="left"><code>linux/amd64</code> and <code>linux/arm64</code>. Releases are also mirrored to <code>cheaperinference/omniroute</code></td></tr>
+  <tr><td align="left" nowrap><b>Docker</b></td><td align="left"><code>docker run -d -p 20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest</code></td><td align="left"><code>linux/amd64</code> and <code>linux/arm64</code>. Earlier images and the <code>next</code> channel stay on <code>diegosouzapw/omniroute</code></td></tr>
   <tr><td align="left" nowrap><b>Podman</b></td><td align="left" nowrap><code>podman compose</code> or Quadlet</td><td align="left">Ready-made units in <a href="contrib/podman/README.md"><code>contrib/podman</code></a></td></tr>
   <tr><td align="left" nowrap><b>Headless server / VPS</b></td><td align="left" nowrap><code>omniroute serve --headless</code></td><td align="left">API only, dashboard off. Hardened Compose bundle in <a href="contrib/vps/README.md"><code>contrib/vps</code></a></td></tr>
   <tr><td align="left" nowrap><b>Desktop app (Electron)</b></td><td align="left" nowrap><a href="https://github.com/cheaper-inference/OmniRoute/releases/latest">Download from Releases</a></td><td align="left">Windows <code>.exe</code>, macOS <code>.dmg</code> (Intel and Apple Silicon), Linux <code>.AppImage</code> and <code>.deb</code> (x64 and arm64)</td></tr>
@@ -1131,7 +1131,7 @@ Provider limits and eligibility change; check the provider before you rely on a 
 | npm downloads, last 30 days        |   371,000+ | `omniroute`, 17 October – 15 November 2026                                   |
 | npm downloads since first publish  | 1,450,000+ | `omniroute`, 14 February – 15 November 2026                                  |
 | Docker pulls, historical image     | 1,900,000+ | `diegosouzapw/omniroute`, since February 2026                                |
-| Docker pulls, organization mirror  |        143 | `cheaperinference/omniroute`, mirror opened 16 November 2026                 |
+| Docker pulls, organization image   |        143 | `cheaperinference/omniroute`, the official image since 16 November 2026      |
 | Desktop installer downloads        |   201,000+ | Release assets ending in `.exe`, `.dmg`, `.AppImage` or `.deb`, 283 releases |
 | All GitHub release asset downloads |   574,000+ | Installers plus update manifests, source archives, SBOMs and optional packs  |
 | OmniCopilot, VS Code Marketplace   |    49,000+ | Marketplace `install` statistic                                              |
@@ -1539,7 +1539,7 @@ Use these only for clients that cannot attach `Authorization: Bearer ...`. Heade
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 `:latest` follows the highest **published** stable SemVer. It does not track git `main`. Pin `:X.Y.Z` for GitOps. See [Docker Release Channels](docs/guides/DOCKER_GUIDE.md#release-channels).The image pins **`OMNIROUTE_MEMORY_MB=1024`**. That is enough for the dashboard and a light chat. **Coding agents** (`POST /v1/responses` from Claude Code, Codex, Grok, …) need a much larger V8 heap or the process `FATAL ERROR`s at ~12 GiB under two overlapping long contexts. Size the container above the heap (native buffers sit outside V8):
@@ -1553,7 +1553,7 @@ docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 Full table: [Docker Guide — runtime RAM](docs/guides/DOCKER_GUIDE.md#runtime-ram-for-coding-agents).
@@ -1787,7 +1787,7 @@ What OmniRoute is built with, as declared in [`package.json`](package.json) on `
   <tr><td nowrap><b>Testing</b></td><td>Node.js test runner + Vitest + Playwright — 9,500+ test files under <code>tests/</code> (unit, integration, E2E, security, ecosystem)</td></tr>
   <tr><td nowrap><b>Platforms</b></td><td>npm (Windows / macOS / Linux) · Docker (linux/amd64, linux/arm64) · Kubernetes (Kustomize + Helm) · Desktop (Electron) · Android (Termux) · PWA</td></tr>
   <tr><td nowrap><b>CI/CD</b></td><td>GitHub Actions — npm publish through Trusted Publishing (OIDC) and Docker Hub images on release</td></tr>
-  <tr><td nowrap><b>Links</b></td><td><a href="https://omniroute.online">Website</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/diegosouzapw/omniroute">Docker Hub</a></td></tr>
+  <tr><td nowrap><b>Links</b></td><td><a href="https://omniroute.online">Website</a> · <a href="https://www.npmjs.com/package/omniroute">npm</a> · <a href="https://hub.docker.com/r/cheaperinference/omniroute">Docker Hub</a></td></tr>
 </table>
 
 <div align="center">

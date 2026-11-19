@@ -50,14 +50,14 @@ const PROVIDERS = [["kilo-gateway", "Kilo Gateway", "KG"]];
 /** Every tile, as { path (repo-relative), id, name, initials, desc }. */
 export const CLI_ICON_TILES = [
   ...CLI_TOOLS.map(([id, name, initials]) => ({
-    path: `docs/assets/cli-icons/${id}.svg`,
+    path: `docs/assets/cli-icons/${id}-tile.svg`,
     id,
     name,
     initials,
     desc: CLI_DESC,
   })),
   ...PROVIDERS.map(([id, name, initials]) => ({
-    path: `docs/assets/provider-icons/${id}.svg`,
+    path: `docs/assets/provider-icons/${id}-tile.svg`,
     id,
     name,
     initials,

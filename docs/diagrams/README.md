@@ -86,7 +86,7 @@ derived baselines").
 ### CLI and provider text tiles
 
 The neutral 52×52 initials tiles the README uses for CLI tools and providers with no icon stored in
-the repository (`docs/assets/cli-icons/*.svg`, `docs/assets/provider-icons/kilo-gateway.svg`) are
+the repository (`docs/assets/cli-icons/*-tile.svg`, `docs/assets/provider-icons/kilo-gateway-tile.svg`) are
 not diagrams, but they are generated the same way: `node scripts/docs/gen-cli-icon-tiles.mjs`
 rewrites every tile from the list in that script, and `tests/unit/docs/readme-cli-icons-svg.test.ts`
 byte-compares the committed files. Each tile says in its `<title>` that it is a text tile, not the
