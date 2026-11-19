@@ -121,8 +121,8 @@ test("the TS7 shadow and zero-new-diagnostics ratchet use one pinned compiler an
   // ref arrives via that step's PR_BASE_SHA env binding.
   assert.match(
     block,
-    /PR_BASE_SHA:\s*\$\{\{ github\.event\.pull_request\.base\.sha \}\}/,
-    "the ratchet must compare against the exact pull-request base commit"
+    /PR_BASE_SHA:\s*\$\{\{ github\.event\.pull_request\.base\.sha \|\| needs\.changes\.outputs\.candidateBase \}\}/,
+    "the ratchet must compare against the exact pull-request (or omni-queue candidate) base commit"
   );
   assert.match(
     block,

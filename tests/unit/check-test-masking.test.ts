@@ -14,6 +14,9 @@ import {
   extractProdConditions,
   extractImports,
   findReimplementedConditions,
+  countModeConditionalSkips,
+  countModeConditionalSkipsByHelper,
+  evaluateModeConditionalSkips,
 } from "../../scripts/check/check-test-masking.mjs";
 
 // ─── Existing tests (must stay green) ────────────────────────────────────────
@@ -563,11 +566,7 @@ test("MASKED: test re-implements `status >= 500` without importing the owner →
     "  assert.equal(localCheck(503), true);",
     "});",
   ].join("\n");
-  const flags = findReimplementedConditions(
-    [PROD_SERVER_ERROR],
-    testSrc,
-    extractImports(testSrc)
-  );
+  const flags = findReimplementedConditions([PROD_SERVER_ERROR], testSrc, extractImports(testSrc));
   assert.equal(flags.length, 1);
   assert.equal(flags[0].condition, "status >= 500");
   assert.equal(flags[0].owner, "isServerError");
@@ -583,11 +582,7 @@ test("CLEAN: test imports and calls the real function → not flagged", () => {
     "  assert.equal(isServerError(200), false);",
     "});",
   ].join("\n");
-  const flags = findReimplementedConditions(
-    [PROD_SERVER_ERROR],
-    testSrc,
-    extractImports(testSrc)
-  );
+  const flags = findReimplementedConditions([PROD_SERVER_ERROR], testSrc, extractImports(testSrc));
   assert.deepEqual(flags, []);
 });
 
@@ -599,11 +594,7 @@ test("CLEAN: importing the owner exempts even a textual copy of its condition", 
     "// documents that isServerError fires when status >= 500",
     'test("t", () => { isServerError(503); });',
   ].join("\n");
-  const flags = findReimplementedConditions(
-    [PROD_SERVER_ERROR],
-    testSrc,
-    extractImports(testSrc)
-  );
+  const flags = findReimplementedConditions([PROD_SERVER_ERROR], testSrc, extractImports(testSrc));
   assert.deepEqual(flags, []);
 });
 
@@ -625,4 +616,74 @@ test("findReimplementedConditions: matches despite operator-spacing differences"
   const flags = findReimplementedConditions([prod], testSrc, extractImports(testSrc));
   assert.equal(flags.length, 1);
   assert.equal(flags[0].condition, "status >= 500");
+});
+
+// ─── Gate-mode conditional skips (plan 2026-11-13, derived artifacts) ──────────
+// `{ skip: releaseOnlyUnlessTouched(...) }` runs the test in release mode and, in a PR, only
+// when the PR edits the generated artifact. countSkips() cannot see it (it is neither a skip
+// modifier call nor the literal true skip option), so the gate reports it on its own line
+// instead of answering a plain OK.
+
+test("countModeConditionalSkips counts releaseOnlyUnlessTouched( uses", () => {
+  const src = [
+    'const a = { skip: releaseOnlyUnlessTouched("docs/diagrams/readme-hero.svg") };',
+    'test("x", { skip: releaseOnlyUnlessTouched ("y") }, () => {});',
+    "// releaseOnlyUnlessTouched is documented here without a call",
+  ].join("\n");
+  assert.equal(countModeConditionalSkips(src), 2);
+  assert.equal(countSkips(src), 0, "the hard-skip counter stays as it was");
+});
+
+test("evaluateModeConditionalSkips reports a net increase, never a decrease", () => {
+  const lines = evaluateModeConditionalSkips([
+    { file: "tests/unit/docs/readme-hero-svg.test.ts", baseModeSkips: 0, headModeSkips: 1 },
+    { file: "tests/unit/b.test.ts", baseModeSkips: 2, headModeSkips: 1 },
+    { file: "tests/unit/c.test.ts" },
+  ]);
+  assert.equal(lines.length, 1);
+  assert.match(
+    lines[0],
+    /tests\/unit\/docs\/readme-hero-svg\.test\.ts: 1 novo\(s\) skip\(s\) condicional/
+  );
+});
+
+test("evaluateModeConditionalSkips ignores the gate's own self-test fixtures", () => {
+  const lines = evaluateModeConditionalSkips([
+    { file: "tests/unit/check-test-masking.test.ts", baseModeSkips: 0, headModeSkips: 2 },
+  ]);
+  assert.deepEqual(lines, []);
+});
+
+test("countModeConditionalSkipsByHelper sees every gate-mode helper, never an import line", () => {
+  const src = [
+    'import { localeParityIsReleaseOnly, localeParityOptions } from "./parity-helpers.ts";',
+    'test("pt-BR parity", localeParityOptions(), () => {});',
+    "if (placeholderParityDeferred(key)) continue;",
+    "const missing = localeParityIsReleaseOnly ? [] : [key];",
+    "announceMirrorPlan(t, plan);",
+  ].join("\n");
+  assert.deepEqual(countModeConditionalSkipsByHelper(src), {
+    localeParityOptions: 1,
+    localeParityIsReleaseOnly: 1,
+    placeholderParityDeferred: 1,
+    announceMirrorPlan: 1,
+  });
+  assert.equal(countModeConditionalSkips(src), 4);
+  assert.equal(countSkips(src), 0);
+});
+
+test("evaluateModeConditionalSkips names the helpers and skips the helpers' own unit tests", () => {
+  const lines = evaluateModeConditionalSkips([
+    {
+      file: "tests/unit/i18n-pt-br.test.ts",
+      baseModeSkips: 0,
+      headModeSkips: 1,
+      headModeHelpers: ["localeParityOptions"],
+    },
+    { file: "tests/unit/locale-parity-mode.test.ts", baseModeSkips: 0, headModeSkips: 9 },
+    { file: "tests/unit/mirror-freshness-helper.test.ts", baseModeSkips: 0, headModeSkips: 4 },
+  ]);
+  assert.equal(lines.length, 1);
+  assert.match(lines[0], /^tests\/unit\/i18n-pt-br\.test\.ts: 1 novo/);
+  assert.match(lines[0], /localeParityOptions — paridade de chaves/);
 });

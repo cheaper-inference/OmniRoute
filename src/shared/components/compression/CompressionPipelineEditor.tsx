@@ -142,7 +142,7 @@ export function CompressionPipelineEditor({ steps, onChange, engineIntensities }
   return (
     <div className="space-y-3" data-testid="compression-pipeline-editor">
       <div className="flex items-center justify-between">
-        <h3 className="text-sm font-semibold text-text-main">{t("pipeline")}</h3>
+        <h3 className="text-sm text-text-main">{t("pipeline")}</h3>
         <Button
           variant="outline"
           size="sm"
