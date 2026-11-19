@@ -121,7 +121,8 @@ function isRemembered(key: string): boolean {
   return false;
 }
 
-async function readCappedText(response: Response, maxBytes: number): Promise<string | null> {
+/** Reads at most `maxBytes`; `null` when the body is larger. Throws on a network error or timeout. */
+async function readCappedBytes(response: Response, maxBytes: number): Promise<Buffer | null> {
   const declared = Number(response.headers.get("content-length"));
   if (Number.isFinite(declared) && declared > maxBytes) return null;
   if (!response.body) return null;
@@ -139,7 +140,16 @@ async function readCappedText(response: Response, maxBytes: number): Promise<str
     }
     chunks.push(value);
   }
-  return new TextDecoder("utf-8", { fatal: true }).decode(Buffer.concat(chunks));
+  return Buffer.concat(chunks);
+}
+
+/** Strict UTF-8 decode; `null` for a body that is not valid UTF-8. */
+function decodeUtf8(bytes: Buffer): string | null {
+  try {
+    return new TextDecoder("utf-8", { fatal: true }).decode(bytes);
+  } catch {
+    return null;
+  }
 }
 
 function writeAtomically(file: string, content: string): void {
@@ -154,14 +164,75 @@ function writeAtomically(file: string, content: string): void {
   }
 }
 
-type FetchOutcome = { ok: true } | { ok: false; reason: string; retryAfterMs: number };
+/**
+ * Why a fetch failed. `offline` (timeout or network error) stops lookups for the whole version;
+ * anything else is remembered for that page only, for `retryAfterMs`.
+ */
+type FetchFailure = { reason: string; offline: boolean; retryAfterMs: number };
 
+const offlineFailure = (reason: string): FetchFailure => ({
+  reason,
+  offline: true,
+  retryAfterMs: RETRY_TTL_MS,
+});
+
+const pageFailure = (reason: string, retryAfterMs: number = MISS_TTL_MS): FetchFailure => ({
+  reason,
+  offline: false,
+  retryAfterMs,
+});
+
+async function discardBody(response: Response): Promise<void> {
+  await response.body?.cancel().catch(() => {});
+}
+
+/** `null` for a `200` text response from the requested URL, otherwise why it is refused. */
+async function checkResponse(response: Response, url: string): Promise<FetchFailure | null> {
+  let failure: FetchFailure | null = null;
+  if (response.url && response.url !== url) {
+    failure = pageFailure("unexpected-url");
+  } else if (response.status !== 200) {
+    const retryAfterMs = response.status >= 500 ? RETRY_TTL_MS : MISS_TTL_MS;
+    failure = pageFailure(`status-${response.status}`, retryAfterMs);
+  } else if (!/^text\/(?:plain|markdown)\b/i.test(response.headers.get("content-type") ?? "")) {
+    failure = pageFailure("content-type");
+  }
+  if (failure) await discardBody(response);
+  return failure;
+}
+
+/** Reads, decodes and caches an accepted response; `null` once the file is in the cache. */
+async function storeBody(
+  response: Response,
+  file: string,
+  maxBytes: number,
+  signal: AbortSignal
+): Promise<FetchFailure | null> {
+  let bytes: Buffer | null;
+  try {
+    bytes = await readCappedBytes(response, maxBytes);
+  } catch {
+    return offlineFailure(signal.aborted ? "timeout" : "network");
+  }
+  if (bytes === null) return pageFailure("too-large");
+
+  const text = decodeUtf8(bytes);
+  if (text === null) return pageFailure("invalid-utf8");
+
+  try {
+    writeAtomically(file, text);
+  } catch {
+    return pageFailure("cache-write", RETRY_TTL_MS);
+  }
+  return null;
+}
+
+/** Fetches the mirror into the cache; `null` on success. */
 async function fetchIntoCache(
   lookup: Lookup,
   options: DocsI18nRemoteOptions
-): Promise<FetchOutcome> {
+): Promise<FetchFailure | null> {
   const fetchImpl = options.fetchImpl ?? globalThis.fetch;
-  const maxBytes = options.maxBytes ?? DOCS_I18N_REMOTE_MAX_BYTES;
   const signal = AbortSignal.timeout(options.timeoutMs ?? DOCS_I18N_REMOTE_TIMEOUT_MS);
 
   let response: Response;
@@ -175,37 +246,12 @@ async function fetchIntoCache(
       headers: { accept: "text/plain" },
     });
   } catch {
-    return { ok: false, reason: signal.aborted ? "timeout" : "network", retryAfterMs: 0 };
+    return offlineFailure(signal.aborted ? "timeout" : "network");
   }
 
-  if (response.url && response.url !== lookup.url) {
-    return { ok: false, reason: "unexpected-url", retryAfterMs: MISS_TTL_MS };
-  }
-  if (response.status !== 200) {
-    await response.body?.cancel().catch(() => {});
-    const retryAfterMs = response.status >= 500 ? RETRY_TTL_MS : MISS_TTL_MS;
-    return { ok: false, reason: `status-${response.status}`, retryAfterMs };
-  }
-  const contentType = response.headers.get("content-type") ?? "";
-  if (!/^text\/(?:plain|markdown)\b/i.test(contentType)) {
-    await response.body?.cancel().catch(() => {});
-    return { ok: false, reason: "content-type", retryAfterMs: MISS_TTL_MS };
-  }
-
-  let text: string | null;
-  try {
-    text = await readCappedText(response, maxBytes);
-  } catch {
-    return { ok: false, reason: signal.aborted ? "timeout" : "body", retryAfterMs: 0 };
-  }
-  if (text === null) return { ok: false, reason: "too-large", retryAfterMs: MISS_TTL_MS };
-
-  try {
-    writeAtomically(lookup.file, text);
-  } catch {
-    return { ok: false, reason: "cache-write", retryAfterMs: RETRY_TTL_MS };
-  }
-  return { ok: true };
+  const refused = await checkResponse(response, lookup.url);
+  if (refused) return refused;
+  return storeBody(response, lookup.file, options.maxBytes ?? DOCS_I18N_REMOTE_MAX_BYTES, signal);
 }
 
 /**
@@ -236,13 +282,12 @@ export async function ensureRemoteDocsMirror(
   let pending = inFlight.get(pageKey);
   if (!pending) {
     pending = fetchIntoCache(lookup, options)
-      .catch((): FetchOutcome => ({ ok: false, reason: "unexpected", retryAfterMs: RETRY_TTL_MS }))
-      .then((outcome) => {
-        if (outcome.ok) return true;
-        if (outcome.retryAfterMs > 0) rememberMiss(pageKey, outcome.retryAfterMs);
-        else rememberMiss(offlineKey, RETRY_TTL_MS);
+      .catch((): FetchFailure => pageFailure("unexpected", RETRY_TTL_MS))
+      .then((failure) => {
+        if (!failure) return true;
+        rememberMiss(failure.offline ? offlineKey : pageKey, failure.retryAfterMs);
         log.warn(
-          { locale, page: lookup.relPath, version: lookup.version, reason: outcome.reason },
+          { locale, page: lookup.relPath, version: lookup.version, reason: failure.reason },
           "Could not fetch the translated doc; serving English"
         );
         return false;

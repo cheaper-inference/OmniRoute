@@ -221,6 +221,37 @@ test("a network failure backs off: the next page does not wait on GitHub again",
   assert.equal(fetchImpl.calls.length, 1, "an offline install pays the timeout once, not per page");
 });
 
+test("a body that is not UTF-8 is a miss for that page, not an offline version", async (t) => {
+  const docsRoot = npmDocsRoot(t);
+  fs.mkdirSync(path.join(docsRoot, "guides"), { recursive: true });
+  fs.writeFileSync(path.join(docsRoot, "guides", "I18N.md"), "# I18N\n");
+  const cacheDir = tempDir(t, "omniroute-docs-cache-");
+  const fetchImpl = fakeFetch((url) =>
+    url.endsWith(QUICK_START_SOURCE)
+      ? new Response(new Uint8Array([0x23, 0x20, 0xff, 0xfe, 0xfd]), {
+          status: 200,
+          headers: { "content-type": "text/plain; charset=utf-8" },
+        })
+      : textResponse(MIRROR)
+  );
+  const remote = { fetchImpl, cacheDir, version: "3.8.54-utf8" };
+  const guides = { slug: ["guides", "i18n"], sourcePath: "guides/I18N.md" };
+
+  assert.equal(await load(docsRoot, remote), null, "the invalid body serves English");
+  assert.ok(await load(docsRoot, remote, guides), "another page of the same version still fetches");
+  assert.equal(await load(docsRoot, remote), null);
+  assert.deepEqual(
+    fetchImpl.calls.map((call) => call.url),
+    [PINNED_URL("3.8.54-utf8"), PINNED_URL("3.8.54-utf8", "pt-BR", "guides/I18N.md")],
+    "the invalid page is remembered as a miss and not fetched again"
+  );
+  assert.equal(
+    fs.existsSync(path.join(cacheDir, "v3.8.54-utf8", "i18n", "pt-BR", "docs", "getting-started")),
+    false,
+    "nothing is cached for the invalid page"
+  );
+});
+
 test("concurrent requests for the same page share one fetch", async (t) => {
   const docsRoot = npmDocsRoot(t);
   const cacheDir = tempDir(t, "omniroute-docs-cache-");
