@@ -14,6 +14,11 @@ import { buildHealthcheckPath } from "./cliRuntimeHealthcheckPath";
 import { appendWindowsKnownBinPaths, mergeWindowsLookupPath } from "./cliRuntimeWindowsNode";
 import { getNpmGlobalPrefix } from "./cliRuntimeNpmPrefix";
 import {
+  findRunnableAlternate,
+  listPosixPathCandidates,
+  parseWhereCandidates,
+} from "./cliRuntimeFallthrough";
+import {
   describeContainerTarget,
   hasBindMountAt,
   isRunningInContainer,
@@ -1211,6 +1216,20 @@ export const getCliPrimaryConfigPath = (toolId: string) => {
   return firstKey ? paths[firstKey] : null;
 };
 
+const listAlternateCandidates = async (
+  command: string,
+  env: Record<string, string | undefined>
+): Promise<string[]> => {
+  if (command.includes("/") || command.includes("\\")) return [];
+  if (!isWindows()) return listPosixPathCandidates(command, env.PATH || "");
+  const located = await runProcess("where.exe", [command], {
+    env,
+    timeoutMs: 3000,
+    useShell: false,
+  });
+  return located.ok ? parseWhereCandidates(located.stdout, normalizeMsys2Path) : [];
+};
+
 export const getCliRuntimeStatus = async (toolId: string) => {
   toolId = normalizeCliToolId(toolId);
   const tool = CLI_TOOLS[toolId];
@@ -1273,17 +1292,32 @@ export const getCliRuntimeStatus = async (toolId: string) => {
     };
   }
 
-  const healthcheck = await checkRunnable(
+  const healthTimeout = Number(tool.healthcheckTimeoutMs || 4000);
+  let healthcheck = await checkRunnable(
     located.commandPath || command || "", // located + executable ⇒ commandPath set
     env,
-    Number(tool.healthcheckTimeoutMs || 4000)
+    healthTimeout
   );
+  let resolvedPath = located.commandPath;
+  if (!healthcheck.runnable && command) {
+    // #20452: a stale shim must not hide a working binary later on PATH.
+    const alt = await findRunnableAlternate(
+      await listAlternateCandidates(command, env),
+      located.commandPath,
+      isSafePath,
+      (candidate) => checkRunnable(candidate, env, healthTimeout)
+    );
+    if (alt) {
+      healthcheck = alt.healthcheck as typeof healthcheck;
+      resolvedPath = alt.commandPath;
+    }
+  }
   return {
     installed: true,
     runnable: healthcheck.runnable,
     version: healthcheck.version,
     command,
-    commandPath: located.commandPath,
+    commandPath: resolvedPath,
     reason: healthcheck.reason,
     runtimeMode,
     requiresBinary,
