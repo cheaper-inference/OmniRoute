@@ -156,4 +156,32 @@ describe("snapshot-data.sh and restore-data.sh keep WAL data", () => {
         "live-only-in-wal",
       ]);
     }));
+
+  it("ops_cp_db drops a stale destination WAL when the source has none", () =>
+    withTmp((root) => {
+      // Two restores in the same UTC second reuse one pre-restore_ directory: the second copy
+      // must not pair its main file with the WAL the first copy left there.
+      const src = path.join(root, "src.sqlite");
+      const dst = path.join(root, "dst.sqlite");
+      const srcDb = new Database(src);
+      srcDb.exec("CREATE TABLE notes (v TEXT); INSERT INTO notes VALUES ('fresh')");
+      srcDb.close();
+      assert.equal(fs.existsSync(`${src}-wal`), false);
+      fs.writeFileSync(dst, "older main file");
+      fs.writeFileSync(`${dst}-wal`, "wal of another database state");
+      const r = spawnSync("bash", ["-c", 'source "$OPS_COMMON" && ops_cp_db "$SRC" "$DST"'], {
+        encoding: "utf8",
+        stdio: ["ignore", "pipe", "pipe"],
+        env: {
+          ...process.env,
+          DATA_DIR: path.join(root, "data"),
+          OPS_COMMON: path.join(BIN, "_ops-common.sh"),
+          SRC: src,
+          DST: dst,
+        },
+      });
+      assert.equal(r.status, 0, r.stderr);
+      assert.equal(fs.existsSync(`${dst}-wal`), false, "the stale destination WAL must be removed");
+      assert.deepEqual(readNotes(dst), ["fresh"]);
+    }));
 });
