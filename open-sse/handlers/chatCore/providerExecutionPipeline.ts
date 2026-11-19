@@ -714,12 +714,19 @@ export async function runProviderExecutionPipeline(
 
     if (policy.allowModelFallback) {
       let fallbackMessage = attempt.response.statusText || "upstream error";
+      // The context-overflow check also reads a plain-text body, as toOutcome() does; the
+      // model-unavailable check keeps reading only the JSON error message.
+      let overflowMessage = fallbackMessage;
       try {
-        const parsed = JSON.parse(await readResponseTextWithinCap(attempt.response.clone())) as {
-          error?: { message?: unknown };
-        };
-        if (typeof parsed?.error?.message === "string" && parsed.error.message) {
-          fallbackMessage = parsed.error.message;
+        const text = await readResponseTextWithinCap(attempt.response.clone());
+        try {
+          const parsed = JSON.parse(text) as { error?: { message?: unknown } };
+          if (typeof parsed?.error?.message === "string" && parsed.error.message) {
+            fallbackMessage = parsed.error.message;
+          }
+          overflowMessage = fallbackMessage;
+        } catch {
+          if (text.trim()) overflowMessage = text;
         }
       } catch {
         // keep statusText
@@ -741,7 +748,7 @@ export async function runProviderExecutionPipeline(
       }
       // A 400 context overflow is recoverable on a larger-context sibling. The streaming path and
       // the leg's own branch already do this; the pipeline outcome skipped the leg branch.
-      if (isContextOverflowError(status, fallbackMessage) && input.getContextOverflowFallback) {
+      if (isContextOverflowError(status, overflowMessage) && input.getContextOverflowFallback) {
         const nextModel = await input.getContextOverflowFallback(
           wire.currentModel,
           wire.triedModels

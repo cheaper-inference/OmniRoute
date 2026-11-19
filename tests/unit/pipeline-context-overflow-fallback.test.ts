@@ -181,3 +181,31 @@ test("a follow-up phase (model fallback not allowed) does not switch models on o
   assert.equal(calls, 1);
   assert.equal(outcome.kind, "error");
 });
+
+test("a plain-text context-overflow 400 also resends on the larger-context model", async () => {
+  const { runProviderExecutionPipeline } =
+    await import("../../open-sse/handlers/chatCore/providerExecutionPipeline.ts");
+  const sent: string[] = [];
+  const plainOverflow = (): ChatCoreExecutorResult => ({
+    response: new Response("This model's maximum context length is 8192 tokens", {
+      status: 400,
+      headers: { "content-type": "text/plain" },
+    }),
+    url: "https://upstream.test/v1/chat/completions",
+    headers: { "content-type": "text/plain" },
+    transformedBody: { model: "gpt-5" },
+  });
+  const input = makeInput({
+    policy: { allowAccountRotation: true, allowModelFallback: true },
+    provider: "openai",
+    send: async (model) => {
+      sent.push(model);
+      return sent.length === 1 ? plainOverflow() : makeAttempt(okBody, 200);
+    },
+    getNextFamilyFallback: () => null,
+  });
+  input.getContextOverflowFallback = async () => "gpt-5-large";
+  const outcome = await runProviderExecutionPipeline(input);
+  assert.deepEqual(sent, ["gpt-5", "gpt-5-large"]);
+  assert.equal(outcome.kind, "response");
+});
