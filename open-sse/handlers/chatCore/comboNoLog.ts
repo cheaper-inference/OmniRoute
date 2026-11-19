@@ -7,8 +7,9 @@
  * here from the shared combo cache, so the hot path pays no extra DB query.
  *
  * Precedence: this is one more opt-out rung in the chain, never a re-enable.
- * `true` withholds; `false`/absent falls through to the other rungs (key,
- * request header, global, connection, model).
+ * `true` withholds; `false`/absent falls through to the other rungs. The full
+ * chain, most specific first: request header > API key > combo > model >
+ * connection > global.
  */
 
 /** Minimal shape read off a persisted combo record. */

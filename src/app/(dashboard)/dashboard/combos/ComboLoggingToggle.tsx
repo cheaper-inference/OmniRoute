@@ -41,7 +41,7 @@ export default function ComboLoggingToggle({ config, setConfig, t }: Props) {
         text={getI18nOrFallback(
           t,
           "advancedHelp.comboLogging",
-          "When off, every request routed through this combo stores only call-log metadata: timestamp, model, provider, status, duration, token counts and errors. Request and response message content is never saved. Turning it off here overrides the global, connection and per-model toggles for this combo."
+          "When off, every request routed through this combo stores only call-log metadata: timestamp, model, provider, status, duration, token counts and errors. Request and response message content is never saved. This combines with the request, key, model, connection and global toggles: if any of them is off, message content is withheld."
         )}
       />
     </div>

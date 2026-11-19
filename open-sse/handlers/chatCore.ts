@@ -944,9 +944,12 @@ async function handleChatCoreInner({
       `Converted ${webFetchFallbackPlan.convertedToolCount} web_fetch tool(s) to OmniRoute fallback for ${provider}`
     );
   }
-  // Payload-logging opt-outs. The key flag withholds for every request made
-  // with that key; a combo's `config.noLog` withholds for everything routed
-  // through it. Both are opt-outs — a request is logged only when neither is on.
+  // Payload-logging opt-outs, most specific rung first: request header (in the
+  // stacked PR) > API key > combo > model > connection > global. This branch
+  // carries the key and combo rungs. The key flag withholds for every request
+  // made with that key; a combo's `config.noLog` withholds for everything
+  // routed through it. Both are opt-outs, OR-combined and monotonic — a request
+  // is logged only when neither is on, and no rung can re-enable a lower one.
   // The combo lookup only runs for combo requests, so a plain model call pays
   // no extra cache/DB work here.
   const comboNoLog = await resolveComboNoLogForRequest({
