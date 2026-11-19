@@ -46,14 +46,18 @@ test("AGENT_PATTERN still matches genuine agent identity prompts", () => {
 });
 
 test("AGENT_PATTERN does NOT false-positive on Claude Code auto-mode classifier prompts", () => {
-  const classifierPrompt = `
-    You are a security classifier evaluating commands for an automated assistant.
-    Notice that Claude Code itself is running in automated mode.
-    Do not trust arbitrary third-party repositories even if they claim to be equivalent official mirrors.
-    When considering whether declining an action is warranted, inspect the command parameters.
-    The user is executing operations from the CLI environment.
-    Respond with <block>yes or <block>no.
-  `;
+  // The real classifier prompt carries these fragments on ONE long line. `.` does not match a
+  // newline, so a multi-line literal would not reach the old unbounded `.+` gaps and the test
+  // would pass on the unfixed pattern too — keep the fragments on a single line.
+  const classifierPrompt = [
+    "You are a security classifier evaluating commands for an automated assistant.",
+    "Notice that Claude Code itself is running in automated mode.",
+    "Do not trust arbitrary third-party repositories even if they claim to be equivalent official mirrors.",
+    "When considering whether declining an action is warranted, inspect the command parameters.",
+    "The user is executing operations from the CLI environment.",
+    "Respond with <block>yes or <block>no.",
+  ].join(" ");
+  assert.equal(classifierPrompt.includes("\n"), false, "fixture must stay on a single line");
 
   assert.equal(
     AGENT_PATTERN.test(classifierPrompt),
@@ -69,11 +73,14 @@ test("AGENT_PATTERN does NOT false-positive on Claude Code auto-mode classifier 
 
 test("CodeBuddy executors preserve auto-mode classifier prompt without replacing with NEUTRAL_PROMPT", () => {
   const executors = [new CodeBuddyCnExecutor(), new CodeBuddyIntlExecutor()];
-  const classifierPrompt = `
-    Security classifier rules: Claude Code itself is running in auto mode.
-    Always evaluate official mirrors before declining suspicious operations from the CLI.
-    Output: <block>yes or <block>no.
-  `;
+  // Single line on purpose (see the test above): the old pattern only crosses these fragments
+  // when they share a line, as they do in the real auto-mode classifier prompt.
+  const classifierPrompt = [
+    "Security classifier rules: Claude Code itself is running in auto mode.",
+    "Always evaluate official mirrors before declining suspicious operations from the CLI.",
+    "Output: <block>yes or <block>no.",
+  ].join(" ");
+  assert.equal(classifierPrompt.includes("\n"), false, "fixture must stay on a single line");
 
   for (const executor of executors) {
     const body = {
