@@ -79,7 +79,7 @@ function OrganizationCard({
     new Date(seconds * 1000).toLocaleString(locale, { timeZone: "UTC" });
   return (
     <article className="rounded-lg border border-border p-3 space-y-2">
-      <h3 className="break-all font-medium">{org.organizationId}</h3>
+      <h3 className="break-all">{org.organizationId}</h3>
       {org.costs ? (
         <>
           <p className="text-xl font-semibold">{money.format(org.costs.totalUsd)}</p>
@@ -96,11 +96,10 @@ function OrganizationCard({
         </p>
       )}
       <Button
-        variant="ghost"
+        variant="destructive-ghost"
         size="sm"
         disabled={saving}
         onClick={() => onRemove(org.organizationId)}
-        className="text-error"
       >
         {t("remove")}
       </Button>
@@ -232,7 +231,7 @@ export default function OpenAIBillingPanel() {
       aria-label={t("title")}
     >
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 className="font-semibold text-text-main">{t("title")}</h2>
+        <h2 className="text-text-main">{t("title")}</h2>
         <a
           className="text-sm text-primary underline"
           href={BILLING_URL}
