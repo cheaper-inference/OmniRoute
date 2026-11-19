@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Eliminar clave"
   },
   "plugins": {
+    "privilegesWarningTitle": "Los complementos se ejecutan con todos los privilegios",
+    "privilegesWarningBody": "Un complemento se ejecuta como un proceso Node.js normal con el mismo acceso que OmniRoute: puede leer archivos, ejecutar programas y utilizar la red, independientemente de los permisos que declare su manifiesto. Instale solo complementos en los que confíe.",
     "title": "Complementos",
     "description": "Instala y gestiona plugins para ampliar la funcionalidad de OmniRoute",
     "loading": "Cargando plugins...",
