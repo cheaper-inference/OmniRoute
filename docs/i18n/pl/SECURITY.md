@@ -4,13 +4,13 @@
 
 ---
 
-## Zgłaszanie podatności
+## Zgłaszanie luk w zabezpieczeniach
 
-Jeśli odkryjesz podatność bezpieczeństwa w OmniRoute, zgłoś ją w odpowiedzialny sposób:
+Jeśli odkryjesz lukę w zabezpieczeniach OmniRoute, zgłoś ją w sposób odpowiedzialny:
 
-1. **NIE** otwieraj publicznego zgłoszenia w GitHub
-2. Użyj [GitHub Security Advisories](https://github.com/diegosouzapw/OmniRoute/security/advisories/new)
-3. Dołącz: opis, kroki umożliwiające odtworzenie oraz potencjalny wpływ
+1. **DO NOT** otwórz publiczny problem GitHub
+2. Skorzystaj [z porad bezpieczeństwa GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new)
+3. Uwzględnij: opis, etapy reprodukcji i potencjalny wpływ
 
 ## Harmonogram reakcji
 
@@ -29,25 +29,14 @@ Jeśli odkryjesz podatność bezpieczeństwa w OmniRoute, zgłoś ją w odpowied
 | 3.7.x   | ✅ Bezpieczeństwo                                     |
 | < 3.7.0 | ❌ Nieobsługiwane                                     |
 
-## Okres wsparcia LTS (v3.9.x)
+## Okno wsparcia LTS (v3.9.x)
 
-Po wersji 3.8.59 następną wersją jest **3.9.0**, która rozpoczyna linię długoterminowego wsparcia w gałęzi
-`stable/v3` (zobacz [`ROADMAP.md`](ROADMAP.md) → „Faza 3 — v3.9.0 LTS”).
+Po 3.8.59 jest następna wersja** 3.9.0** , co otwiera długoterminową linię wsparcia na gałęzi `stable/v3` (patrz [`ROADMAP.md`](ROADMAP.md) → „Phase 3 — v3.9.0 LTS”).
 
-- **Co trafia do `stable/v3`:** poprawki błędów, poprawki zabezpieczeń i aktualizacje dostawców. Nowe
-  funkcje trafiają do kanału v4; priorytetem linii LTS jest stabilność. `npm install omniroute`
-  (dist-tag `latest`) pozostaje przy v3 przez cały cykl v4.
-- **Czas trwania okresu wsparcia:** gałąź `stable/v3` otrzymuje **poprawki zabezpieczeń i krytycznych regresji przez
-  12 miesięcy od wydania 3.9.0 lub do 90 dni po opublikowaniu v4.0.0 jako `latest` —
-  w zależności od tego, który termin przypada później**. Wynikowa data zakończenia wsparcia jest odnotowywana w informacjach o wydaniu 3.9.0 oraz w
-  [`ROADMAP.md`](ROADMAP.md) w momencie wydania.
-- **Zgłaszanie luki w zabezpieczeniach w linii LTS:** należy użyć tego samego kanału co w przypadku każdej innej wersji —
-  prywatnego zgłoszenia [GitHub Security Advisory](https://github.com/diegosouzapw/OmniRoute/security/advisories/new),
-  nigdy publicznego zgłoszenia problemu. Podaj przetestowaną wersję (na przykład `3.9.2`); poprawki trafiają do
-  `stable/v3`, a następnie są przenoszone do v4.
-- **Stan bazowy zabezpieczeń w momencie wydania LTS:** zmierzony stan skanera oraz dowody dotyczące zabezpieczeń tras
-  i publicznych danych uwierzytelniających są rejestrowane w
-  [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
+- **Co `stable/v3` otrzymuje:** poprawki błędów, poprawki zabezpieczeń i aktualizacje dostawców. Nowe funkcje trafiają do kanału v4; linia LTS jest na pierwszym miejscu stabilność. `npm install omniroute` (znacznik `latest` dist) pozostaje na v3 przez cały cykl v4.
+- **Czas trwania okna:** `stable/v3` otrzymuje** poprawki bezpieczeństwa i krytyczne regresje przez 12 miesięcy po wersji 3.9.0 lub do 90 dni po opublikowaniu wersji 4.0.0 jako `latest` — w zależności od tego, co nastąpi później** . Wynikowa data końcowa jest zapisywana w informacjach o wydaniu 3.9.0 oraz w [`ROADMAP.md`](ROADMAP.md), kiedy nastąpi cięcie.
+- **Zgłaszanie luki w linii LTS :** ten sam kanał, co każda inna wersja — prywatny [poradnik bezpieczeństwa GitHub](https://github.com/cheaper-inference/OmniRoute/security/advisories/new), nigdy nie jest sprawą publiczną. Powiedz, którą wersję testowałeś (na przykład `3.9.2`); poprawki lądują na `stable/v3` i są przenoszone do wersji 4.
+- **Poziom bazowy bezpieczeństwa przy cięciu LTS :** zmierzony stan skanera, dowody kontroli trasy i poświadczenia publiczne są rejestrowane w [`docs/security/LTS_SECURITY_BASELINE.md`](docs/security/LTS_SECURITY_BASELINE.md).
 
 ---
 

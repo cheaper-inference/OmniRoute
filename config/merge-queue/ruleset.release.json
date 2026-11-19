@@ -1,5 +1,5 @@
 {
-  "_comment": "omni-queue ruleset template for ONE release branch (docs/ops/OMNI_QUEUE.md). Applied by scripts/merge-queue/apply-ruleset.mjs, which replaces {{base}}, suffixes the name with the branch and sets the App bypass actor_id from --app-id. Keys starting with '_' are stripped before the REST call. No required-checks rule on purpose: the queue validates the candidate, not the PR.",
+  "_comment": "omni-queue ruleset template for ONE release branch (docs/ops/OMNI_QUEUE.md). Applied by scripts/merge-queue/apply-ruleset.mjs, which replaces {{base}}, suffixes the name with the branch, and fills {{statusContext}} (config.landing.statusContext) and integration_id (--app-id) of the single required status. Keys starting with '_' are stripped before the REST call. The release branch has no pull_request rule and NO bypass actor: the only way a commit reaches it is a push or merge of a commit carrying the land status written by the queue's GitHub App. The queue writes that status on the validated candidate right before landing it (the landing push itself is made as config.landing.actor). required_status_checks is allowed here for this one check only: the queue validates the candidate, not the PR.",
   "name": "omni-queue release protection",
   "target": "branch",
   "enforcement": "active",
@@ -13,20 +13,13 @@
     { "type": "deletion" },
     { "type": "non_fast_forward" },
     {
-      "type": "pull_request",
+      "type": "required_status_checks",
       "parameters": {
-        "required_approving_review_count": 0,
-        "dismiss_stale_reviews_on_push": false,
-        "require_code_owner_review": false,
-        "require_last_push_approval": false,
-        "required_review_thread_resolution": false,
-        "require_extra_approval_for_unattributed_changes": false,
-        "allowed_merge_methods": ["merge", "squash", "rebase"]
+        "strict_required_status_checks_policy": false,
+        "do_not_enforce_on_create": false,
+        "required_status_checks": [{ "context": "{{statusContext}}", "integration_id": null }]
       }
     }
   ],
-  "bypass_actors": [
-    { "actor_id": null, "actor_type": "Integration", "bypass_mode": "always" },
-    { "actor_id": 5, "actor_type": "RepositoryRole", "bypass_mode": "always" }
-  ]
+  "bypass_actors": []
 }

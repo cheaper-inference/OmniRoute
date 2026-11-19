@@ -55,7 +55,7 @@ export function NinerouterInstallWizard() {
           <Icon name="download" size={20} />
         </div>
         <div>
-          <h3 className="font-medium text-sm">{t("install9Router")}</h3>
+          <h3 className="text-sm">{t("install9Router")}</h3>
           <p className="text-xs text-text-muted">{t("install9RouterDescription")}</p>
         </div>
       </div>

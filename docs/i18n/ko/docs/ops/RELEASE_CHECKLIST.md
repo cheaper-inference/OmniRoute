@@ -5,243 +5,262 @@
 ---
 
 > **최종 업데이트:** 2026-08-28 — v3.8.51
-> 자동화를 위해 Claude Code 스킬을 활용하도록 릴리스 흐름을 간소화했습니다.
+> 자동화를 위해 Claude Code 스킬을 활용하는 간소화된 릴리스 흐름입니다.
 >
-> **릴리스 사이에도 큐/브랜치를 정상 상태로 유지하세요:** [RELEASE_GREEN.md](./RELEASE_GREEN.md)를 참조하세요.
-> (`/green-prs` 제품군 + `npm run check:release-green` + `/babysit` + 야간 실행). 이를
-> 주기적으로, 특히 이 체크리스트를 실행하기 **전에** 수행하면 릴리스 PR을 정상 상태로 시작할 수 있습니다.
+> **릴리스 간 큐/브랜치를 green 상태로 유지:** [RELEASE_GREEN.md](./RELEASE_GREEN.md) 참조
+> (`/green-prs` 제품군 + `npm run check:release-green` + `/babysit` + nightly). 이를 주기적으로 실행하면 — 특히 **이 체크리스트 전에** 실행하면 — 릴리스 PR이 green 상태로 시작합니다.
 
-## 요약
+## TL;DR
 
 ```bash
-# 1. 버전 업데이트 + CHANGELOG 생성(스킬)
+# 1. 버전 업데이트 + CHANGELOG 생성 (스킬)
 /version-bump-cc patch    # 또는 minor/major
 
 # 2. 로컬에서 품질 게이트 실행
 npm run check              # 린트 + 테스트
-npm run test:coverage      # 전체 커버리지 게이트(60/60/60/60)
+npm run test:coverage      # 전체 커버리지 게이트 (60/60/60/60)
 
 # 3. 빌드 및 스모크 테스트
 npm run build
 npm run test:e2e           # 선택 사항이지만 권장
 
-# 4. 릴리스 생성(스킬)
+# 4. 릴리스 생성 (스킬)
 /generate-release-cc
 
-# 5. 배포(스킬)
+# 5. 배포 (스킬)
 /deploy-vps-both-cc        # 또는 akamai-cc / local-cc
 
-# 6. 릴리스 증빙 캡처(스킬)
+# 6. 릴리스 증거 수집 (스킬)
 /capture-release-evidences-cc
 ```
 
-## npm Trusted Publishing(v3.8.51부터 기본값) — 요청 시 스테이징, 대체 수단으로 직접 게시
+## npm Trusted Publishing (v3.8.51부터 기본값) — 요청 시 staged, 대체 수단으로 direct
 
-`npm-publish.yml`은 기본적으로 **npm Trusted Publishing(OIDC)**을 통해 게시합니다.
-`stage-npm` 작업(github-hosted)은 해당 실행에서 사용할 수 있도록 GitHub의 id-token을
-수명이 짧은 npm 자격 증명으로 교환합니다. 따라서 저장소 시크릿에 수명이 긴 npm 토큰이
-필요하지 않고, 2FA 프롬프트도 없으며, 출처 증명이 첨부됩니다.
-이는 2FA를 건너뛰는 토큰이 폐지됨에 따라 npm이 현재 허용하는 우회 방식입니다.
-WS1.3 보장(유출된 토큰만으로는 게시할 수 없음 — 애초에 토큰이 없음)을 유지하면서,
-프로젝트가 v3.8.48까지 사용하던 완전 자동화 흐름을 복원합니다.
+`npm-publish.yml`은 기본적으로 **npm Trusted Publishing (OIDC)** 을 통해 게시합니다.
+`stage-npm` 작업(github-hosted)은 실행마다 GitHub의 id-token을 단기 npm
+자격 증명으로 교환합니다. 저장소 시크릿에 장기 npm 토큰이 필요하지 않고, 2FA 프롬프트도 없으며, provenance가 연결됩니다.
+이는 2FA를 건너뛰는 토큰이 폐기되는 현재 npm 제재를 우회하는 방법입니다.
+또한 토큰이 유출되어도 단독으로 게시할 수 없다는 WS1.3 보장을 유지하면서,
+v3.8.48까지 프로젝트가 사용하던 완전 자동화 흐름을 복원합니다.
 
-**일회성 설정(소유자):** npmjs.com → package `omniroute` → Settings → _Trusted
+**일회성 설정(소유자):** npmjs.com → 패키지 `omniroute` → Settings → _Trusted
 Publisher_ → GitHub: owner `diegosouzapw`, repo `OmniRoute`, workflow `npm-publish.yml`
-(environment: none). 이 설정이 존재하기 전에는 자동 단계가 `ENEEDAUTH`와 함께 실패합니다.
-아래의 `publish_mode=staged` 또는 `direct`로 다시 디스패치하세요.
+(environment: none). 이 설정이 존재할 때까지 자동 단계는 `ENEEDAUTH`와 함께 실패합니다.
+`publish_mode=staged`(아래 참조) 또는 `direct`로 다시 디스패치하세요.
 
-### 스테이징 게시(요청 시 — `publish_mode=staged`)
+### Staged 게시 (요청 시 — `publish_mode=staged`)
 
-npm-publish 워크플로는 더 이상 직접 게시하지 않습니다. 패킹된 tarball을 부팅하여
-(`check:pack-boot`) 확인한 다음 `npm stage publish`를 실행합니다. 정확히 동일한 바이트가
-레지스트리에 보관되지만, 소유자가 승인하기 전까지는 **설치할 수 없습니다**. 사람의 2FA
-게이트는 검증 전이 아니라 검증 후로 이동했습니다.
+npm-publish 워크플로는 더 이상 직접 게시하지 않습니다. 패키징된 tarball을
+부팅(`check:pack-boot`)한 다음 `npm stage publish`를 실행합니다. 정확한 바이트가
+레지스트리에 보관되지만 **소유자가 승인하기 전에는 설치할 수 없습니다.**
+사람의 2FA 게이트는 이전이 아니라 증명 이후로 이동했습니다.
 
-**워크플로가 정상 완료된 후 소유자가 수행할 절차:**
+**워크플로가 green 상태가 된 후 소유자가 수행할 흐름:**
 
 1. `npm stage list omniroute` — stage id를 찾습니다(워크플로 요약에도 출력됨).
 2. 스테이징된 바이트를 확인합니다(권장): `npm stage download <id>`를 실행한 다음,
-   다운로드한 tarball을 임시 prefix에 설치하고 부팅합니다(`npm run check:pack-boot`는
+   다운로드한 tarball을 임시 prefix에 설치하고 부팅합니다(`npm run check:pack-boot`가
    CI에서 동일한 pack→install→boot 판정을 자동화함).
-3. `npm stage approve <id>` — 2FA 프롬프트 승인이 곧 게시입니다. `npm stage reject <id>`는 폐기합니다.
-4. 게시 후 안전망: 게시 후 검증 도구(v3.8.49 계획의 WS1.4)는 공개 레지스트리에서
-   게시된 버전을 깨끗한 컨테이너에 설치하고 부팅합니다.
+3. `npm stage approve <id>` — 2FA 프롬프트가 곧 게시입니다. `npm stage reject <id>`는 폐기합니다.
+4. 게시 후 네트워크 확인: (v3.8.49 계획의 WS1.4인) 게시 후 검증기가
+   공개 레지스트리에서 게시된 버전을 깨끗한 컨테이너에 설치하고 부팅합니다.
 
-**긴급 대체 수단:** `publish_mode=direct`를 사용한 `workflow_dispatch`는 기존의
-즉시 `npm publish` 방식을 복원합니다(스테이징 자체가 오작동하는 경우에만 사용하고,
-그 이유를 기록하세요).
+**긴급 대체 수단:** `workflow_dispatch`에서 `publish_mode=direct`를 사용하면
+기존의 즉시 `npm publish`가 복원됩니다(스테이징 자체에 문제가 있을 때만 사용하고, 이유를 기록하세요).
 
-**일회성 강화(소유자, npmjs.com):** 유출된 수명이 긴 토큰으로 어디서든 직접
-`npm publish`를 실행할 수 없도록 `omniroute`의 Trusted Publisher를 stage-only 모드로
-구성하세요. CI에서는 스테이징만 가능하며, 소유자의 2FA를 통해서만 릴리스할 수 있습니다.
+**일회성 강화(소유자, npmjs.com):** `omniroute`의 Trusted Publisher를
+stage-only 모드로 구성하여 유출된 장기 토큰으로 어디서든 `npm publish`를 직접
+실행할 수 없도록 하세요 — CI는 스테이징만 할 수 있고, 소유자의 2FA만 릴리스를 수행합니다.
 
-**손상된 아티팩트 대응 절차(변경 없음):** 기본적으로 즉시
-`npm deprecate omniroute@<bad> "<reason> — use <fixed>"`를 실행합니다(몇 분이면 완료되며 되돌릴 수 있음).
-`npm unpublish`는 72시간 이내이고 종속 항목이 없는 경우에만 사용하며, 절대로 첫 번째 조치로 사용하지 마세요.
-Docker에서는 버전 태그를 절대 다시 작성하지 마세요. 롤백은 `latest`가 마지막으로 정상인 digest를
-다시 가리키도록 하는 것입니다.
+**손상된 아티팩트 대응 절차(변경 없음):** 기본 대응으로
+`npm deprecate omniroute@<bad> "<reason> — use <fixed>"`를 사용하세요
+(수 분 내 처리 가능하며 되돌릴 수 있음). `npm unpublish`는 72시간/종속 항목 없음
+조건 내에서만 사용하고, 첫 조치로는 절대 사용하지 마세요. Docker에서는 버전 태그를
+다시 작성하지 마세요 — 롤백은 `latest`를 마지막 정상 digest로 다시 가리키는 것입니다.
 
-**Docker Hub `latest`(모든 안정 SemVer 게시 시 필수):**
-`docker-publish` 워크플로는 반드시 `X.Y.Z` 태그를 지정해야 하며,
-`should-promote-latest.sh`가 해당 버전이 가장 높은 안정 SemVer임을 확인하면
-동일한 **digest**로 `:latest` 태그도 지정해야 합니다. 작업 완료 후 Hub의 `latest`
-digest는 새 SemVer digest와 같아야 하며, `last_updated`도 갱신되어야 합니다.
-릴리스 노트에서 git에만 존재하는 수정 사항을 설명하면서 `:latest`는 이전 빌드를
-가리키도록 방치하지 마세요. Compose 빠른 시작에서는 `:latest`를 사용하며,
-GitOps에서는 계속 `X.Y.Z`로 고정해야 합니다. [Docker 릴리스 채널](../guides/DOCKER_GUIDE.md#release-channels)과 #10317을 참조하세요.
+**Docker Hub `latest` (모든 안정 SemVer 게시에 필수):**
+`docker-publish` 워크플로는 **`X.Y.Z`와, `should-promote-latest.sh`가 이것이
+가장 높은 안정 SemVer라고 판단하는 경우 `:latest`도 모두 태그해야 하며**, 두 태그는
+동일한 digest를 사용해야 합니다. 작업 후 Hub의 `latest` digest는 새 SemVer digest와
+같아야 하고 `last_updated`도 변경되어야 합니다. 릴리스 노트에서 git에만 존재하는
+수정 사항을 언급하면서 `:latest`를 이전 빌드에 그대로 두지 마세요.
+Compose 빠른 시작은 `:latest`를 사용하고, GitOps에서는 계속 `X.Y.Z`를 고정해야 합니다.
+[Docker 릴리스 채널](../guides/DOCKER_GUIDE.md#release-channels) 및 #10317을 참조하세요.
 
-## 핫픽스 패스트 레인(라벨 `hotfix`)
+**Docker Hub 조직 저장소(`cheaperinference/omniroute`):** Docker Hub는
+저장소를 네임스페이스 간에 이동할 수 없으므로 `diegosouzapw/omniroute`는 pull 기록과
+모든 릴리스를 유지합니다. `docker-publish`의 `mirror-org-dockerhub` 작업은
+릴리스된 각 버전(및 승격된 경우 `:latest`)을 `ghcr.io/cheaper-inference/omniroute`에서
+조직 저장소로 복사합니다. 이 작업에는 `DOCKERHUB_ORG_USERNAME` /
+`DOCKERHUB_ORG_TOKEN` 시크릿이 필요합니다. 시크릿이 없으면 작업은
+"Docker Hub org mirror skipped" 경고와 함께 green 상태를 유지하며 다른 레지스트리는
+정상적으로 게시됩니다. 이후 릴리스된 버전을 그곳에 게시하려면 **Actions → Mirror Docker image to the Docker Hub org → Run
+workflow**를 `version=X.Y.Z`와 함께 실행하세요(가장 높은 안정 버전인 경우
+`promote_latest`도 지정). 기존 이미지를 복사할 뿐 다시 빌드하지 않습니다.
 
-`hotfix` 라벨이 지정된 PR은 무거운 CI 매트릭스(9샤드 E2E, 커버리지 래칫,
-quality-gate, quality-extended)를 건너뛰고 빠르고 신호도가 높은 게이트인 빌드,
-유닛 샤드, 통합, vitest, 린트/타입 검사, 문서 동기화, `check:pack-artifact`
-및 tarball 부팅 스모크 테스트(`check:pack-boot`)를 유지합니다. 목표: 약 33분이 아닌 ≤15분 내 통과.
+## 핫픽스 패스트 레인 (레이블 `hotfix`)
 
-**진입 정책 — 네 가지 모두 필수(Chromium/VS Code/Node 긴급 레인을 모델로 함):**
+`hotfix` 레이블이 지정된 PR은 대규모 CI 매트릭스(9-샤드 E2E, 커버리지 래칫,
+품질 게이트, 확장 품질)를 건너뛰고 빠르고 신호가 높은 게이트인 빌드,
+단위 테스트 샤드, 통합 테스트, vitest, 린트/타입 검사, docs-sync, `check:pack-artifact`
+및 tarball 부트 스모크(`check:pack-boot`)를 유지합니다. 목표는 약 33분 대신
+15분 이내에 통과 상태가 되는 것입니다.
 
-1. **심각도**: 프로덕션이 중단된 상태여야 합니다. 즉, 게시된 아티팩트가 부팅 시 충돌하거나,
-   보안 수정이 필요하거나, 릴리스의 모든 사용자가 영향을 받는 경우입니다. "중요함"은 "중단됨"이 아닙니다.
-2. **권한**: 저장소 소유자만 `hotfix` 라벨을 적용합니다. 이 라벨 자체가
-   승인입니다. 캠페인 PR에서 자체적으로 사용해서는 안 됩니다.
-3. **증거**: PR 본문에 이전에 완전히 통과한 무거운 실행(건너뛴 작업이
-   재검증할 테스트 스위트)과 수정 사항 자체의 실패 후 통과 테스트를 링크합니다.
-4. **범위**: cherry-pick 전용입니다. 최소한의 수정만 포함하며, 리팩터링이나 끼워 넣는 변경은 허용하지 않습니다.
+**진입 정책 — 네 가지 모두 필수 (Chromium/VS Code/Node 비상 레인을 모델로 함):**
 
-건너뛴 커버리지/래칫 영역은 릴리스 브랜치의 다음 전체 실행에서
-재검증됩니다(지속적인 릴리스 통과 상태). 이 레인은 검증이 아니라 대기만 건너뜁니다.
-테스트 전용 변경 사항(모든 파일이 `tests/` 아래에 있고 `tests/e2e/` 아래에는 없음)은
-라벨 없이 자동으로 E2E 매트릭스를 건너뜁니다.
+1. **심각도**: 프로덕션이 중단된 상태여야 합니다 — 게시된 아티팩트가 부팅 시 충돌하거나,
+   보안 수정이거나, 릴리스의 모든 사용자가 영향을 받는 경우입니다. "중요함"은 "중단됨"을 의미하지 않습니다.
+2. **권한**: 저장소 소유자만 `hotfix` 레이블을 적용합니다. 레이블 자체가 승인입니다 — 캠페인 PR에서
+   절대로 직접 적용하지 마세요.
+3. **증거**: PR 본문에 이전의 완전히 통과한 대규모 실행(건너뛴 작업이 다시 검증할 스위트)과
+   수정 사항 자체의 실패 후 통과 테스트 링크를 포함해야 합니다.
+4. **범위**: 체리픽 전용 — 최소한의 수정만 허용하며, 리팩터링이나 부수적인 변경은 포함하지 않습니다.
 
-## 상세 체크리스트
+건너뛴 커버리지/래칫 영역은 릴리스 브랜치에서 다음 전체 실행(지속적인 릴리스 그린)을 통해
+다시 검증됩니다 — 이 레인은 대기만 건너뛸 뿐, 검증을 건너뛰는 것이 아닙니다.
+테스트만 변경된 diff(`tests/` 아래의 모든 파일이며 `tests/e2e/` 아래는 없음)는 레이블 없이도
+E2E 매트릭스를 자동으로 건너뜁니다.
+
+## 세부 체크리스트
 
 ### 릴리스 전
 
-- [ ] 이 릴리스를 대상으로 하는 모든 PR이 `release/vX.Y.0`에 병합됨
-- [ ] 이 버전과 관련해 열려 있는 모든 Linear/이슈 항목이 종료되었거나 다음 마일스톤으로 이동됨
-- [ ] `release/vX.Y.0` 브랜치에서 CI 통과
+- [ ] 이 릴리스 대상으로 지정된 모든 PR이 `release/vX.Y.0`에 병합됨
+- [ ] 이 버전에 대한 모든 미해결 Linear/이슈 항목이 종료되었거나 다음 마일스톤으로 이관됨
+- [ ] `release/vX.Y.0` 브랜치의 CI가 통과함
 - [ ] 코드에 `TODO(release)` 마커가 없음: `grep -r "TODO(release)" src/ open-sse/`
-- [ ] Docker 베이스 이미지가 최신 상태임(현재 `node:24.15.0-trixie-slim`)
+- [ ] Docker 기본 이미지가 최신 상태임 (현재 `node:24.15.0-trixie-slim`)
 
 ### 버전 및 변경 로그
 
-- [ ] `/version-bump-cc <patch|minor|major>` 실행(Claude Code 스킬)
-  - `package.json`, `electron/package.json` 버전 상향
-  - 마지막 태그 이후의 git 커밋으로 `CHANGELOG.md` 재생성
-  - README.md 배지 업데이트
-- [ ] CHANGELOG.md를 수동으로 검토하고 필요한 경우 커밋 메시지 정리
-- [ ] `CHANGELOG.md`의 최신 semver 섹션이 `package.json` 버전과 일치하는지 확인
-- [ ] 예정된 작업을 위해 `## [Unreleased]`를 변경 로그의 첫 번째 섹션으로 유지
-- [ ] `docs/openapi.yaml` 업데이트 → `info.version`이 `package.json` 버전과 일치해야 함
+- [ ] `/version-bump-cc <patch|minor|major>` 실행 (Claude Code 스킬)
+  - `package.json`, `electron/package.json`의 버전을 올림
+  - 마지막 태그 이후의 git 커밋으로부터 `CHANGELOG.md`를 재생성함
+  - README.md 배지를 업데이트함
+- [ ] `CHANGELOG.md`를 수동으로 검토하고 필요한 경우 커밋 메시지를 정리함
+- [ ] `CHANGELOG.md`의 최신 semver 섹션이 `package.json` 버전과 일치함
+- [ ] 향후 작업을 위해 `## [Unreleased]`를 변경 로그의 첫 번째 섹션으로 유지함
+- [ ] `docs/openapi.yaml` → `info.version`이 `package.json` 버전과 일치해야 함
 
 ### 코드 품질
 
-- [ ] `npm run lint` — 오류 0개(경고는 기존에 존재하던 항목)
+- [ ] `npm run lint` — 오류 0개 (경고는 기존 항목)
 - [ ] `npm run typecheck:core` — 문제 없음
-- [ ] `npm run typecheck:noimplicit:core` — 문제 없음(엄격 모드)
-- [ ] `npm run check:cycles:ratchet` — 고정된 `metrics.cycles` 상한 이내(`check:cycles`만 실행하면 순환 참조가 하나라도 있을 경우 종료 코드 1, #15281)
+- [ ] `npm run typecheck:noimplicit:core` — 문제 없음 (엄격 모드)
+- [ ] `npm run check:cycles:ratchet` — 고정된 `metrics.cycles` 상한 이내
+      (일반 `check:cycles`는 사이클이 하나라도 있으면 종료 코드 1 반환, #15281)
 - [ ] `npm run check:any-budget:t11` — 예산 이내
 - [ ] `npm run check:route-validation:t06` — 문제 없음
-- [ ] `npm run check:node-runtime` — 지원되는 런타임 최저 버전 충족(`src/shared/utils/nodeRuntimeSupport.ts`의 `SUPPORTED_NODE_RANGE`에 따라 `>=22.22.2 <23`, `>=24.0.0 <27`; `package.json`의 `engines`와 일치)
+- [ ] `npm run check:node-runtime` — 지원 런타임 하한 충족
+      (`src/shared/utils/nodeRuntimeSupport.ts`의 `SUPPORTED_NODE_RANGE`에 따라
+      `>=22.22.2 <23`, `>=24.0.0 <27`; `package.json`의 `engines`와 일치)
 
 ### 테스트
 
 - [ ] `npm run test:unit` — 통과
-- [ ] `npm run test:vitest` — 통과(MCP 서버, autoCombo, 캐시)
-- [ ] `npm run test:coverage` — 60/60/60/60 기준 충족(구문/라인/함수/분기)
-- [ ] `npm run test:integration` — 통과(DB/핸들러와 관련된 변경 사항이 있는 경우)
-- [ ] `npm run test:combo:matrix` — 통과(콤보 전략 매트릭스: 공개된 19개 라우팅 전략의 선택 결정을 모두 결정론적으로 검증하며, 콤보 라우팅, 전략 결정 또는 폴백 로직을 수정한 경우 실행)
-- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **선택 사항/수동**(게이트로 제한된 실제 업스트림 스모크 테스트; VPS `root@192.168.0.15`에서 읽기 전용 DB 스냅샷을 가져옴; 실제 제공자를 호출하여 크레딧이 소모됨; CI에서는 절대 실행되지 않음; 게이트가 없으면 정상적으로 건너뜀)
-- [ ] `npm run test:combo:live:vps` — **선택 사항/수동**(3단계 VPS 라이브 스모크 테스트: 일반 Node ESM을 통해 실제 `.15` 서버를 대상으로 7개의 HTTP 시나리오 실행; `ssh root@192.168.0.15` 필요; `__live_test__*` 콤보만 생성/삭제; 실제 제공자를 호출함; CI에서는 절대 실행되지 않음)
-- [ ] `npm run test:e2e` — 통과(UI 변경 사항)
-- [ ] `npm run test:protocols:e2e` — 통과(MCP/A2A 변경 사항)
+- [ ] `npm run test:vitest` — 통과 (MCP 서버, autoCombo, 캐시)
+- [ ] `npm run test:coverage` — 게이트 60/60/60/60 충족 (문장/라인/함수/분기)
+- [ ] `npm run test:integration` — 통과 (변경 사항이 DB/핸들러에 영향을 주는 경우)
+- [ ] `npm run test:combo:matrix` — 통과 (콤보 전략 매트릭스: 공개 라우팅 전략 22개의 선택 결정을
+      결정론적으로 검증함; 콤보 라우팅, 전략 확인 또는 폴백 로직을 변경할 때 실행)
+- [ ] `RUN_COMBO_LIVE=1 npm run test:combo:live` — **선택 사항/수동 실행**
+      (게이트된 실제 업스트림 스모크 테스트; VPS `root@192.168.0.15`에서 읽기 전용 DB 스냅샷을 가져옴;
+      실제 제공자를 호출하고 크레딧이 소요됨; CI에서는 실행되지 않음; 게이트 없이 정상적으로 건너뜀)
+- [ ] `npm run test:combo:live:vps` — **선택 사항/수동 실행**
+      (3단계 VPS 실시간 스모크 테스트: 일반 Node ESM을 통해 실시간 `.15` 서버에 대한 HTTP 시나리오 7개;
+      `ssh root@192.168.0.15` 필요; `__live_test__*` 콤보만 생성/삭제함; 실제 제공자를 호출함; CI에서는 실행되지 않음)
+- [ ] `npm run test:e2e` — 통과 (UI 변경)
+- [ ] `npm run test:protocols:e2e` — 통과 (MCP/A2A 변경)
 - [ ] `npm run test:ecosystem` — 통과
 
-### 훅(Husky 검증 완료)
+### 훅 (Husky 검증)
 
 Husky 훅은 `.husky/`에 있으며 git 작업 시 자동으로 실행됩니다.
 
 - **pre-commit:** `npx lint-staged + node scripts/check/check-docs-sync.mjs + npm run check:any-budget:t11`
-- **pre-push:** 빠르고 결정론적인 게이트 — `npm run check:any-budget:t11 && npm run check:tracked-artifacts`(2026-06-13 활성화). `test:unit`은 의도적으로 제외됨(느리며 CI `test-unit` 작업에서 처리됨).
-  - 릴리스 브랜치를 푸시하기 전에 `npm run test:unit`을 수동으로 실행합니다.
+- **pre-push:** 빠른 결정론적 게이트 — `npm run check:any-budget:t11 && npm run check:tracked-artifacts`
+  (2026-06-13에 활성화됨). 의도적으로 `test:unit`을 제외함 (느림; CI의 `test-unit` 작업에서 처리됨).
+  - 릴리스 브랜치에 푸시하기 전에 `npm run test:unit`을 수동으로 실행하세요.
 
-훅이 실패하면 근본적인 문제를 수정하고 `--no-verify`로 우회하지 마세요.
+훅이 실패하면 `--no-verify`로 우회하지 말고 근본 원인을 수정하세요.
 
 ### Conventional Commits
 
-릴리스에 포함되는 모든 커밋은 `type(scope): subject` 형식을 따라야 합니다.
+릴리스 대상인 모든 커밋은 `type(scope): subject` 형식을 따라야 합니다.
 
-**유효한 타입:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
+**유효한 유형:** `feat`, `fix`, `refactor`, `docs`, `test`, `chore`, `perf`, `style`, `ci`
 
 **유효한 범위:** `db`, `sse`, `oauth`, `dashboard`, `api`, `cli`, `docker`, `ci`, `mcp`, `a2a`, `memory`, `skills`, `cloud-agent`, `guardrails`, `compression`, `auto-combo`, `resilience`, `providers`, `executors`, `translator`, `domain`, `authz`
 
-호환성을 깨는 변경 사항: `BREAKING CHANGE:` 푸터를 추가하거나 범위 뒤에 `!`를 추가합니다(예: `feat(api)!: drop /v0`).
+호환성이 깨지는 변경: `BREAKING CHANGE:` 푸터를 추가하거나 범위 뒤에 `!`를 추가합니다
+(예: `feat(api)!: drop /v0`).
 
 ### 문서
 
-- [ ] `npm run check:docs-sync` 통과(pre-commit에서 자동 실행)
-- [ ] `npm run check:docs-all` 통과(통합 검사: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
-- [ ] `npm run check:env-doc-sync` 종료 코드 0 — 코드 ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` 환경 변수 계약이 온전함
-- [ ] `npm run check:doc-links` 종료 코드 0 — 구조 개편 후 깨진 내부 마크다운 참조가 없음
-- [ ] 스토리지/런타임 불일치 여부에 대해 `docs/architecture/ARCHITECTURE.md` 검토
-- [ ] 환경 변수 및 운영 관련 불일치 여부에 대해 `docs/guides/TROUBLESHOOTING.md` 검토
+- [ ] `npm run check:docs-sync` 통과 (pre-commit에 의해 자동 실행)
+- [ ] `npm run check:docs-all` 통과 (통합 검사: docs-sync + docs-counts + env-doc-sync + deprecated-versions + doc-links)
+- [ ] `npm run check:env-doc-sync`가 0으로 종료 — 코드 ↔ `.env.example` ↔ `docs/reference/ENVIRONMENT.md` 환경 변수 계약이 유지됨
+- [ ] `npm run check:doc-links`가 0으로 종료 — 구조 변경 후 끊어진 내부 마크다운 참조 없음
+- [ ] `docs/architecture/ARCHITECTURE.md`에서 스토리지/런타임 불일치 검토
+- [ ] `docs/guides/TROUBLESHOOTING.md`에서 환경 변수 및 운영 불일치 검토
 - [ ] `.env.example`이 변경된 경우: `docs/reference/ENVIRONMENT.md` 업데이트
-- [ ] 새 기능에 UI가 있는 경우: `docs/guides/USER_GUIDE.md`에 해당 내용 포함
+- [ ] 새 기능에 UI가 있는 경우: `docs/guides/USER_GUIDE.md`에 해당 기능 언급
 - [ ] 새 기능에 API가 있는 경우: `docs/reference/API_REFERENCE.md` + `docs/openapi.yaml` 업데이트
-- [ ] 새 기능이 모듈인 경우: 전용 `docs/<MODULE>.md`가 존재함
-- [ ] 호환성을 깨는 변경 사항인 경우: `docs/guides/TROUBLESHOOTING.md`에 마이그레이션 참고 사항 포함
+- [ ] 새 기능이 모듈인 경우: 전용 `docs/<MODULE>.md` 존재
+- [ ] 호환성이 깨지는 변경인 경우: `docs/guides/TROUBLESHOOTING.md`에 마이그레이션 참고 사항 추가
 
 ### i18n
 
-- [ ] `npm run i18n:check` 종료 코드 0 — 번역 상태(`.i18n-state.json`)가 원본 문서와 동기화됨(엄격 모드에서 변경된 원본이 없음; 막판 문서 수정에는 경고 모드 안내를 허용할 수 있지만 태그 지정 전에는 0이어야 함)
-- [ ] `npm run i18n:check-ui-coverage` 종료 코드 0 — 모든 UI 로케일이 80% 커버리지 하한 이상
-- [ ] `npm run i18n:sync-ui:dry`가 대상 로케일 66개 전체에서 누락된 키 0개로 보고됨(`en` 원본을 제외한 모든 로케일)
-- [ ] 영어 원본 문서가 변경된 경우 태그 지정 전에 `npm run i18n:run` 실행(`.env`에 `OMNIROUTE_TRANSLATION_API_KEY` 필요)
-- [ ] 사소한 번역 기여는 다음 릴리스로 연기할 수 있음(CHANGELOG에 기록)
+- [ ] `npm run i18n:check`가 0으로 종료 — 번역 상태(`.i18n-state.json`)가 원본 문서와 동기화됨 (엄격 모드에서 변경 이력이 남은 원본 없음; 경고 모드의 안내는 마감 직전 문서 수정에 허용되지만, 태그 생성 전에는 0이어야 함)
+- [ ] `npm run i18n:check-ui-coverage`가 0으로 종료 — 모든 UI 로케일의 커버리지가 80% 기준 이상
+- [ ] `npm run i18n:sync-ui:dry`가 대상 로케일 66개 전체에서 누락된 키 0개를 보고 (원본인 `en`을 제외한 모든 로케일)
+- [ ] 원본 영어 문서가 변경된 경우, 태그 생성 전에 `npm run i18n:run` 실행 (`.env`에 `OMNIROUTE_TRANSLATION_API_KEY` 필요)
+- [ ] 번역 기여가 사소한 변경인 경우 다음 릴리스로 미룰 수 있음 (CHANGELOG에 기록)
 
 ### 데이터베이스 마이그레이션
 
 - [ ] `src/lib/db/migrations/`에 새 파일이 있는 경우:
-  - [ ] 각 마이그레이션이 멱등성을 보장함(`CREATE TABLE IF NOT EXISTS` 등)
-  - [ ] 마이그레이션이 트랜잭션으로 래핑됨
-  - [ ] 번호가 올바르게 지정됨(순서에 누락 없음)
-- [ ] 새 설치 환경에서 테스트: `~/.omniroute/omniroute.db`를 삭제하고 `npm run dev` 실행
+  - [ ] 각 마이그레이션은 멱등적이어야 함 (`CREATE TABLE IF NOT EXISTS` 등)
+  - [ ] 마이그레이션은 트랜잭션으로 래핑
+  - [ ] 올바르게 번호가 지정됨 (시퀀스에 누락 없음)
+- [ ] 새로 설치한 환경에서 테스트: `~/.omniroute/omniroute.db`를 삭제하고 `npm run dev` 실행
 - [ ] 기존 설치 환경에서 테스트: DB를 백업하고 마이그레이션을 실행한 후 스키마 확인
-- [ ] 마이그레이션이 테이블을 다시 작성하는 경우 WAL 파일(`-wal`, `-shm`)이 올바르게 처리됨
+- [ ] 마이그레이션에서 테이블을 다시 작성하는 경우 WAL 파일(`-wal`, `-shm`)이 올바르게 처리됨
 
-### 공급자 카탈로그(Zod 검증)
+### 프로바이더 카탈로그 (Zod 검증)
 
-- [ ] `src/shared/constants/providers.ts` Zod 스키마가 로드 시점에 유효함
-  - [ ] 모든 공급자에 필수 필드(`id`, `label`, `kind` 등)가 있음
-  - [ ] 새로운 무료 공급자에 `freeNote`가 제공됨
-  - [ ] OAuth 공급자의 `oauthConfig`가 `src/lib/oauth/constants/oauth.ts`에 등록됨
-- [ ] 새 공급자를 추가한 경우: `open-sse/executors/`에 해당 실행기가 있음
-- [ ] OpenAI 형식이 아닌 경우: `open-sse/translator/`에 변환기가 있음
-- [ ] 모델이 `open-sse/config/providerRegistry.ts`에 등록됨
-- [ ] `tests/unit/`의 단위 테스트가 공급자 분류 및 라우팅을 검증함
+- [ ] `src/shared/constants/providers.ts` Zod 스키마가 로드 시 유효함
+  - [ ] 모든 프로바이더에 필수 필드(`id`, `label`, `kind` 등)가 있음
+  - [ ] 새 무료 프로바이더에 `freeNote`가 제공됨
+  - [ ] OAuth 프로바이더에 `src/lib/oauth/constants/oauth.ts`에 등록된 `oauthConfig`가 있음
+- [ ] 새 프로바이더를 추가한 경우: `open-sse/executors/`에 해당 실행기 추가
+- [ ] OpenAI 형식이 아닌 경우: `open-sse/translator/`에 변환기 추가
+- [ ] `open-sse/config/providerRegistry.ts`에 모델 등록
+- [ ] `tests/unit/`의 단위 테스트에서 프로바이더 분류 및 라우팅을 다룸
 
-### 데스크톱(Electron)
+### 데스크톱 (Electron)
 
 `electron/`이 변경된 경우:
 
-- [ ] `npm run electron:smoke:packaged`가 통과함
-- [ ] `:win`, `:mac`, `:linux` 중 하나 이상에서 빌드를 테스트함
-- [ ] 코드 서명 인증서가 만료되지 않음(서명하는 경우)
-- [ ] `electron/package.json` 버전이 루트 `package.json`과 일치함
-- [ ] `stable`로 릴리스하는 경우 자동 업데이트 채널 포인터가 업데이트됨
+- [ ] `npm run electron:smoke:packaged` 통과
+- [ ] `:win`, `:mac`, `:linux` 중 하나 이상에 대해 빌드 테스트
+- [ ] 코드 서명 인증서가 만료되지 않음 (서명하는 경우)
+- [ ] `electron/package.json` 버전이 루트 `package.json`과 일치
+- [ ] `stable`로 릴리스하는 경우 자동 업데이트 채널 포인터 업데이트
 
 ### 빌드 레이아웃
 
-저장소는 서로 다른 세 개의 출력 디렉터리를 사용합니다. 절대 혼동하지 마세요:
+저장소는 서로 구분되는 세 개의 출력 디렉터리를 사용합니다 — 절대 혼동하지 마세요:
 
-| 디렉터리  | 용도                                               | 추적 여부          |
-| --------- | -------------------------------------------------- | ------------------ |
-| `src/`    | 애플리케이션 소스(TypeScript / TSX)                | 예                 |
-| `.build/` | 빌드 중간 산출물 — `next build` 출력(`distDir`)    | 아니요(gitignored) |
-| `dist/`   | 배포 가능한 npm 번들 — `assembleStandalone`로 구성 | 아니요(gitignored) |
+| 디렉터리  | 용도                                               | 추적 여부           |
+| --------- | -------------------------------------------------- | ------------------- |
+| `src/`    | 애플리케이션 소스 (TypeScript / TSX)               | 예                  |
+| `.build/` | 빌드 중간 산출물 — `next build` 출력 (`distDir`)   | 아니요 (gitignored) |
+| `dist/`   | 배포 가능한 npm 번들 — `assembleStandalone`이 조립 | 아니요 (gitignored) |
 
 > **운영자 참고:** 원격 VPS 이미지 디렉터리는 계속 `/usr/lib/node_modules/omniroute/app/`입니다.
-> **저장소 내부** 빌드 출력만 이동했습니다(`app/` → `dist/`). 배포 스킬은
-> `dist/`의 내용을 원격 `app/` 디렉터리로 rsync하므로 VPS 경로를 변경할 필요가 없습니다.
+> 변경된 것은 **저장소 내부** 빌드 출력뿐입니다 (`app/` → `dist/`). 배포 스킬은
+> `dist/` 콘텐츠를 원격 `app/` 디렉터리로 rsync하므로 VPS 경로를 변경할 필요가 없습니다.
 
 **단일 빌드 흐름:**
 
@@ -250,27 +269,26 @@ npm run build:release
   └─ rm -rf .build dist          (정리)
   └─ next build → .build/next/   (중간 산출물)
   └─ assembleStandalone          (standalone + static + public + natives를 dist/로 복사)
-  └─ dist/BUILD_SHA 기록         (HEAD 센티널)
+  └─ dist/BUILD_SHA 작성         (HEAD 센티널)
 ```
 
-배포를 위해 `npm run build`를 실행한 뒤 별도로 `npm run build:cli`를 실행하지 마세요.
-한 번의 명령으로 클린 재빌드와 센티널 생성을 수행하는 `npm run build:release`를 사용하세요.
+배포를 위해 `npm run build` 후 별도로 `npm run build:cli`를 실행하지 마세요 — 한 번의 명령으로 정리된 재빌드와 센티널을 수행하는 `npm run build:release`를 사용하세요.
 
 ### 산출물 검증
 
-- [ ] `npm run build:release`가 성공하고 `dist/BUILD_SHA` == `git rev-parse --short HEAD`임
-- [ ] `npm run check:pack-artifact`가 깨끗함 — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` 또는 기타 로컬 잔여물이 없음
-- [ ] 빌드 후 `dist/server.js`가 존재함
-- [ ] 선택적 로컬 패키징 런타임 스모크 테스트: `npm run dev:candidate -- build` 후 `npm run dev:candidate -- validate`를 실행하면 격리된 `DATA_DIR`에서 패키징된 tarball이 부팅되고 `/api/health` + `/v1/models`를 확인함([기여 골든 패스](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) 참조)
+- [ ] `npm run build:release` 성공 및 `dist/BUILD_SHA` == `git rev-parse --short HEAD`
+- [ ] `npm run check:pack-artifact`가 깨끗함 — `app.__qa_backup`, `scripts/scratch`, `package-lock.json` 또는 기타 로컬 잔여물 없음
+- [ ] 빌드 후 `dist/server.js` 존재
+- [ ] 선택적 로컬 패키징 런타임 스모크: `npm run dev:candidate -- build` 후 `npm run dev:candidate -- validate` 실행 시 격리된 `DATA_DIR`에서 패키징된 tarball을 부팅하고 `/api/health` + `/v1/models` 확인 ([Contribution Golden Path](CONTRIBUTION_GOLDEN_PATH.md#local-candidate-loop) 참조)
 
-### 태깅 및 릴리스
+### 태그 생성 및 릴리스
 
-- [ ] `/generate-release-cc` 실행(Claude Code 스킬):
-  - `vX.Y.Z` 태그 생성
+- [ ] `/generate-release-cc` 실행 (Claude Code 스킬):
+  - 태그 `vX.Y.Z` 생성
   - 태그 및 브랜치 푸시
-  - 변경 로그 본문이 포함된 GitHub Release 생성
-  - Electron 설치 프로그램 첨부(빌드한 경우)
-- [ ] 또는 수동으로 실행:
+  - 변경 로그 본문과 함께 GitHub Release 열기
+  - Electron 설치 프로그램 첨부 (빌드된 경우)
+- [ ] 또는 수동으로:
   ```bash
   git tag -a vX.Y.Z -m "Release vX.Y.Z"
   git push origin vX.Y.Z
@@ -279,15 +297,15 @@ npm run build:release
 
 ### 배포
 
-배포 스킬은 가벼운 rsync 흐름을 사용합니다. `npm pack`이나 `npm i -g`는 사용하지 않습니다:
+배포 스킬은 가벼운 rsync 흐름을 사용합니다 — `npm pack`도, `npm i -g`도 사용하지 않습니다:
 
-- [ ] 대상에 맞는 배포 스킬 사용:
-  - `/deploy-vps-local-cc` — 로컬 VPS(192.168.0.15)
-  - `/deploy-vps-akamai-cc` — Akamai VPS(69.164.221.35)
+- [ ] 대상에 맞는 배포 스킬을 사용합니다:
+  - `/deploy-vps-local-cc` — 로컬 VPS (192.168.0.15)
+  - `/deploy-vps-akamai-cc` — Akamai VPS (69.164.221.35)
   - `/deploy-vps-both-cc` — 둘 다
-- [ ] 배포 전에 `dist/BUILD_SHA` == `git rev-parse --short HEAD`인지 확인
-- [ ] 실제 `node_modules`가 있는 곳에서 빌드를 실행해야 함(메인 체크아웃 또는 `npm ci`를 실행한 worktree — 심볼릭 링크된 worktree는 사용하지 말 것)
-- [ ] 배포된 인스턴스 스모크 테스트:
+- [ ] 배포 전에 `dist/BUILD_SHA` == `git rev-parse --short HEAD`인지 확인합니다.
+- [ ] `node_modules`가 실제 디렉터리인 환경에서 빌드해야 합니다(메인 체크아웃 또는 `npm ci`를 실행한 worktree — 심볼릭 링크된 worktree는 사용하지 않음).
+- [ ] 배포된 인스턴스의 스모크 테스트:
   - `/dashboard/health` 열기 → 버전 문자열이 릴리스와 일치하는지 확인
   - 알려진 공급자를 대상으로 `/v1/chat/completions` 요청 실행
   - `/api/monitoring/health`가 `CLOSED` 회로 차단기를 반환하는지 확인
@@ -298,25 +316,24 @@ npm run build:release
 - [ ] `/capture-release-evidences-cc` 실행(Claude Code 스킬)
   - 새 기능의 WebP 스크린샷/녹화 캡처
   - 릴리스 노트/블로그 게시물에 첨부
-- [ ] GitHub Discussions / Discord에 릴리스 공지 게시
+- [ ] 릴리스 공지로 GitHub Discussions / Discord 업데이트
 - [ ] 다음 버전의 마일스톤 생성
-- [ ] 중요 업데이트인 경우: 토론을 고정하거나 인앱 배너를 위해 `news.json`에 게시
+- [ ] 긴급한 경우: 토론을 고정하거나 앱 내 배너를 위해 `news.json`에 게시
 
 ### Radar 공개 출시 게이트
 
-Radar 공지는 의도적으로 `active: false` 상태로 커밋되어 있습니다. 아래의 모든 항목에 대한 증빙이 완료된 후 별도
-변경으로 활성화합니다:
+Radar 공지는 의도적으로 `active: false` 상태로 커밋되어 있습니다. 아래 모든 항목에 대한 증거가 확보된 후 별도의 변경을 통해 활성화합니다.
 
-- [ ] 스택된 모든 Radar PR이 병합되었고 release-tip CI가 통과함
-- [ ] `RADAR_ENABLED`가 기본적으로 꺼진 상태에서 OSS Radar 라우트를 배포하고 스모크 테스트함
-- [ ] 지정된 Radar 호스트에서 `GET /planos`, `/termos`, `/privacidade`, `/reembolso`를 스모크 테스트함
-- [ ] 비공개 서비스에 운영자 신원/연락처/주소와 소유자가 승인한 법률 검토를 기록함
-- [ ] 테스트 모드에서만 Stripe Checkout 및 서명된 webhook을 테스트함
-- [ ] 승인된 발신자/도메인으로 암호화된 트랜잭션 이메일 전송을 한 번 테스트함
-- [ ] 백업 복원 및 감독하에 예산 상한이 적용된 연구 실행을 한 번 검증함
-- [ ] 기부 증빙을 수락하기 전에 BRL/PIX 검토 정책을 승인함
-- [ ] 앞선 게이트를 모두 통과한 후에만 공개 Checkout을 활성화하고 새 `news.json` ID를 활성화함
-- [ ] 홈 배너가 현지화된 문구를 사용하며 이전 ID를 닫은 후 새 ID가 다시 나타나는지 확인함
+- [ ] 모든 Radar 스택 PR이 병합되고 릴리스 기준 CI가 통과함
+- [ ] `RADAR_ENABLED`를 기본적으로 계속 비활성화한 상태에서 OSS Radar 라우트를 배포하고 스모크 테스트
+- [ ] 지정된 Radar 호스트에서 `GET /planos`, `/termos`, `/privacidade`, `/reembolso` 스모크 테스트
+- [ ] 운영자 신원/연락처/주소와 소유자가 승인한 법률 검토를 비공개 서비스에 기록
+- [ ] 테스트 모드에서만 Stripe Checkout 및 서명된 웹훅 실행
+- [ ] 승인된 발신자/도메인을 사용해 암호화된 트랜잭션 이메일을 한 건 전송
+- [ ] 백업 복원을 입증하고 감독하에 예산 한도를 설정한 연구 실행을 한 번 수행
+- [ ] 기부 증거를 수락하기 전에 BRL/PIX 검토 정책 승인
+- [ ] 앞선 게이트를 통과한 후에만 공개 Checkout을 활성화하고, 새로운 `news.json` ID 활성화
+- [ ] Home 배너가 현지화된 문구를 사용하며, 이전 ID를 해제한 후 새로운 ID가 다시 표시되는지 확인
 
 ## 임베디드 서비스 스모크 테스트 (v3.8.4+)
 
@@ -324,133 +341,124 @@ Radar 공지는 의도적으로 `active: false` 상태로 커밋되어 있습니
 
 ### 새 DB 부팅 (마이그레이션 충돌 감지 — v3.8.4 핫픽스 이후 추가됨)
 
-- [ ] `DATA_DIR=$(mktemp -d) npm start &` — 부팅될 때까지 10초 대기
-- [ ] `curl -s http://127.0.0.1:20128/api/services/9router/status | jq '.tool'`이 `"9router"`를 반환함(404 또는 500이 아니어야 함). 마이그레이션 `071_services.sql`이 적용되고 행이 시딩되었는지 확인합니다.
-- [ ] `sqlite3 $DATA_DIR/storage.sqlite "PRAGMA table_info(version_manager);" | grep -E "provider_expose|logs_buffer_path|last_sync_at"`가 3개 행을 반환함.
-- [ ] `sqlite3 $DATA_DIR/storage.sqlite "PRAGMA table_info(webhooks);" | grep -E "kind|metadata_encrypted"`가 2개 행을 반환함(`070_webhooks_kind_metadata.sql`이 적용되었는지 검증).
-- [ ] `node --import tsx/esm --test tests/unit/db/no-migration-collisions.test.ts`가 통과함 — 향후 충돌을 방지합니다.
+- [ ] `DATA_DIR=$(mktemp -d) npm start &` — 부팅을 위해 10초 대기
+- [ ] `curl -s http://127.0.0.1:20128/api/services/9router/status | jq '.tool'`이 `"9router"`를 반환하는지 확인 (`404` 및 `500`이 아님). 마이그레이션 `071_services.sql`이 적용되고 행이 시드되었는지 확인합니다.
+- [ ] `sqlite3 $DATA_DIR/storage.sqlite "PRAGMA table_info(version_manager);" | grep -E "provider_expose|logs_buffer_path|last_sync_at"`가 3개의 행을 반환하는지 확인합니다.
+- [ ] `sqlite3 $DATA_DIR/storage.sqlite "PRAGMA table_info(webhooks);" | grep -E "kind|metadata_encrypted"`가 2개의 행을 반환하는지 확인합니다 (`070_webhooks_kind_metadata.sql`이 적용되었는지 검증).
+- [ ] `node --import tsx/esm --test tests/unit/db/no-migration-collisions.test.ts`가 통과하는지 확인 — 향후 충돌을 방지합니다.
 
 ### 9Router
 
-- [ ] `POST /api/services/9router/install`이 2분 이내에 `installedVersion`과 함께 200을 반환함
-- [ ] `POST /api/services/9router/start`가 30초 이내에 200과 `state: "running"`을 반환함
-- [ ] `GET /api/services/9router/status`가 `health: "healthy"`를 보고함
-- [ ] `"model": "9router/auto/..."`이 포함된 `POST /v1/chat/completions`가 200을 반환함(9Router를 통한 엔드투엔드 라우팅)
-- [ ] `GET /dashboard/providers/services/9router/embed/dashboard`가 프록시 내부에 9Router 네이티브 UI를 렌더링함(직접적인 `127.0.0.1:port` iframe을 사용하지 않음)
-- [ ] `POST /api/services/9router/rotate-key`가 `{ keyRotated: true }`를 반환하고 서비스가 정상적으로 재시작됨
-- [ ] `POST /api/services/9router/stop`이 200과 `state: "stopped"`를 반환함
-- [ ] `GET /api/services/9router/logs?tail=50`이 최근 로그 행을 포함한 `snapshot` 이벤트가 있는 SSE 스트림을 반환함
-- [ ] PATH에 `npm`이 없는 환경에서 설치할 경우 친절한 오류 메시지(스택 트레이스가 아닌 메시지)와 함께 500을 반환함
+- [ ] `POST /api/services/9router/install`이 2분 이내에 `installedVersion`과 함께 200을 반환하는지 확인
+- [ ] `POST /api/services/9router/start`가 30초 이내에 200과 `state: "running"`을 반환하는지 확인
+- [ ] `GET /api/services/9router/status`가 `health: "healthy"`를 보고하는지 확인
+- [ ] `"model": "9router/auto/..."`를 사용한 `POST /v1/chat/completions`가 200을 반환하는지 확인 (9Router를 통한 엔드투엔드 라우팅)
+- [ ] `GET /dashboard/providers/services/9router/embed/dashboard`가 프록시 내부에 9Router 네이티브 UI를 렌더링하는지 확인 (직접적인 `127.0.0.1:port` iframe이 아님)
+- [ ] `POST /api/services/9router/rotate-key`가 `{ keyRotated: true }`를 반환하고 서비스가 정상적으로 재시작되는지 확인
+- [ ] `POST /api/services/9router/stop`이 200과 `state: "stopped"`를 반환하는지 확인
+- [ ] `GET /api/services/9router/logs?tail=50`이 최근 줄을 포함한 `snapshot` 이벤트와 함께 SSE 스트림을 반환하는지 확인
+- [ ] `npm`이 PATH에 없는 환경에서 설치할 경우 스택 트레이스가 아닌 친화적인 오류 메시지와 함께 500을 반환하는지 확인
 
 ### CLIProxyAPI
 
-- [ ] `POST /api/services/cliproxy/install`이 2분 이내에 200을 반환함
-- [ ] `POST /api/services/cliproxy/start`가 30초 이내에 200과 `state: "running"`을 반환함
-- [ ] `GET /api/services/cliproxy/status`가 `health: "healthy"`를 보고함
-- [ ] `POST /api/services/cliproxy/stop`이 200과 `state: "stopped"`를 반환함
-- [ ] `GET /api/services/cliproxy/logs?tail=50`이 SSE 스트림을 반환함
+- [ ] `POST /api/services/cliproxy/install`이 2분 이내에 200을 반환하는지 확인
+- [ ] `POST /api/services/cliproxy/start`가 30초 이내에 200과 `state: "running"`을 반환하는지 확인
+- [ ] `GET /api/services/cliproxy/status`가 `health: "healthy"`를 보고하는지 확인
+- [ ] `POST /api/services/cliproxy/stop`이 200과 `state: "stopped"`를 반환하는지 확인
+- [ ] `GET /api/services/cliproxy/logs?tail=50`이 SSE 스트림을 반환하는지 확인
 
-### 보안 회귀 테스트
+### 보안 회귀
 
-- [ ] `curl -H "X-Forwarded-For: 1.2.3.4" http://localhost:20128/api/services/9router/start`가 `403 LOCAL_ONLY`를 반환함
-- [ ] `curl -H "X-Forwarded-For: 1.2.3.4" http://localhost:20128/api/services/cliproxy/start`가 `403 LOCAL_ONLY`를 반환함
-- [ ] `/api/services/*`의 오류 응답에 `err.stack`이나 절대 파일 경로가 포함되지 않음
+- [ ] `curl -H "X-Forwarded-For: 1.2.3.4" http://localhost:20128/api/services/9router/start`가 `403 LOCAL_ONLY`를 반환하는지 확인
+- [ ] `curl -H "X-Forwarded-For: 1.2.3.4" http://localhost:20128/api/services/cliproxy/start`가 `403 LOCAL_ONLY`를 반환하는지 확인
+- [ ] `/api/services/*`의 오류 응답에 `err.stack` 또는 절대 파일 경로가 포함되지 않는지 확인
 
-## v3.8.0+ 확인 사항
+## v3.8.0+ 확인 항목
 
 v3.8.x 릴리스를 배포하기 전에 다음 추가 항목을 확인하세요.
 
-- [ ] `omniroute --tray`가 macOS에서 부팅됨(systray2가 `~/.omniroute/runtime/`에 설치됨)
-- [ ] `omniroute --tray`가 Linux에서 부팅됨(DISPLAY 필요, 설정되지 않은 경우 정상적으로 오류 처리)
-- [ ] `omniroute --tray`가 Windows에서 부팅됨(PowerShell NotifyIcon 사용, 추가 바이너리 없음)
-- [ ] `omniroute config tray enable`이 자동 시작 항목을 생성하고, 비활성화하면 해당 항목이 제거됨
-- [ ] `npm install -g omniroute@<this-version>`이 치명적인 종료 없이 postinstall을 실행함
-- [ ] 업데이트 경로가 선택적 의존성을 유지함: `omniroute update --apply`와 자동 업데이트 프로그램이
-      `npm install -g … --include=optional`을 실행하여 `optionalDependencies`(better-sqlite3,
-      keytar, tls-client 및 llmlingua SLM 스택: `@atjsh/llmlingua-2@2.0.5`,
-      `js-tiktoken`)가 업데이트 후에도 유지되도록 함. ultra `modelPath` SLM 티어에는
-      tinybert 모델도 필요하며, 최초 사용 시 `${DATA_DIR}/models/llmlingua`에 자동으로 다운로드됨. 이후 postinstall
-      (`scripts/build/colocateOptionals.mjs`)은 SLM 선택적 의존성 클로저를 `dist/node_modules`에 함께 배치하여
-      워커가 단일 `@huggingface/transformers` ^4.2.0 인스턴스를 해석하도록 함
-      — 독립 실행형 트레이스는 동적으로 가져오는 선택적 의존성이 아니라 transformers만 번들링하므로,
-      이 과정이 없으면 워커가 루트의 transformers에 대해 llmlingua-2를 로드하고
-      SLM 티어가 조용히 실패 후 우회 처리됨.
-- [ ] `.env`가 없어도 `omniroute status`가 작동함(CLI 토큰 경로, 루프백 전용)
-- [ ] `curl http://localhost:20128/api/shutdown`이 401을 반환함(항상 보호되는 경로)
-- [ ] `curl -H "host: evil.com" http://localhost:20128/api/mcp/sse`가 401을 반환함(루프백 가드)
-- [ ] 최초 실행 시 SQLite 런타임이 `bundled`로 해석됨(번들 바이너리가 해당 플랫폼에서 유효함)
-- [ ] `node_modules/better-sqlite3`가 삭제되면 SQLite 런타임이 `runtime`으로 폴백함
-- [ ] Smart MCP 필터가 실제 `playwright-mcp browser_snapshot` 출력을 압축함(50% 이상 감소)
-- [ ] `skills/omniroute*/SKILL.md` 파일 10개 모두 raw GitHub URL을 통해 공개적으로 가져올 수 있음
-- [ ] 새로 설정할 때 온보딩 마법사에 "작동 방식" 티어 둘러보기 단계가 표시됨
-- [ ] 홈 대시보드의 티어 커버리지 위젯에 구성된 개수와 활성 개수가 표시됨
+- [ ] `omniroute --tray`가 macOS에서 부팅되는지 확인 (`systray2`가 `~/.omniroute/runtime/`에 설치됨)
+- [ ] `omniroute --tray`가 Linux에서 부팅되는지 확인 (DISPLAY 필요; 설정되지 않은 경우 정상적으로 오류 처리)
+- [ ] `omniroute --tray`가 Windows에서 부팅되는지 확인 (PowerShell NotifyIcon, 추가 바이너리 없음)
+- [ ] `omniroute config tray enable`이 자동 시작 항목을 생성하고, disable이 이를 제거하는지 확인
+- [ ] `npm install -g omniroute@<this-version>`이 치명적인 종료 없이 postinstall을 실행하는지 확인
+- [ ] 업데이트 경로가 선택적 의존성을 유지하는지 확인: `omniroute update --apply`와 자동 업데이트 프로그램이
+      `npm install -g … --include=optional`을 실행하여 `optionalDependencies` (`better-sqlite3`,
+      `keytar`, `tls-client`, 그리고 llmlingua SLM 스택인 `@atjsh/llmlingua-2@2.0.5`,
+      `js-tiktoken`)가 업데이트 후에도 유지되는지 확인합니다. ultra `modelPath` SLM 계층에는
+      tinybert 모델도 필요하며, 최초 사용 시 `${DATA_DIR}/models/llmlingua`에 자동으로 다운로드됩니다. Postinstall
+      (`scripts/build/colocateOptionals.mjs`)은 이후 SLM 선택적 의존성 클로저를
+      `dist/node_modules`에 함께 배치하여 워커가 단일 `@huggingface/transformers` ^4.2.0
+      인스턴스를 확인하도록 합니다 — 독립형 트레이스 번들은 transformers만 포함하고 동적으로 임포트되는
+      선택적 의존성은 포함하지 않으므로, 이 과정이 없으면 워커가 루트의 transformers에 대해 llmlingua-2를
+      로드하게 되고 SLM 계층이 자동으로 조용히 fail-open됩니다.
+- [ ] `.env` 없이도 `omniroute status`가 작동하는지 확인 (CLI 토큰 경로, 루프백 전용)
+- [ ] `curl http://localhost:20128/api/shutdown`이 401을 반환하는지 확인 (항상 보호되는 라우트)
+- [ ] `curl -H "host: evil.com" http://localhost:20128/api/mcp/sse`가 401을 반환하는지 확인 (루프백 가드)
+- [ ] 최초 실행 시 SQLite 런타임이 `bundled`로 확인되는지 확인 (플랫폼에 맞는 번들이 포함된 바이너리)
+- [ ] `node_modules/better-sqlite3`가 삭제되었을 때 SQLite 런타임이 `runtime`으로 대체되는지 확인
+- [ ] Smart MCP 필터가 실제 `playwright-mcp browser_snapshot` 출력을 압축하는지 확인 (50% 이상 감소)
+- [ ] `skills/omniroute*/SKILL.md` 파일 10개 모두 raw GitHub URL을 통해 공개적으로 가져올 수 있는지 확인
+- [ ] 온보딩 마법사가 새로 설정할 때 "How It Works" 계층 둘러보기 단계를 표시하는지 확인
+- [ ] 홈 대시보드 계층 적용 범위 위젯에 구성됨/활성 개수가 표시되는지 확인
 
 ---
 
-## 3.9.0 LTS 분기 (3.8.58에서 리허설)
+## 3.9.0 LTS 분기 생성 (3.8.58에서 리허설)
 
-v3.8.59 다음 버전은 3.9.0이며, 그 최종 커밋은 수명이 긴 두 브랜치가 됩니다:
-`stable/v3`(v3 LTS 라인, npm `latest`)와 `develop`(v4, 4.0.0으로 버전 상향, npm
-`nightly`). 브랜치/채널 모델, 정방향 포팅 및 레이블은
-[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)에 있으며, 계획은 [ROADMAP](../../ROADMAP.md)(Phase 3)에 있습니다. 분기는 한 번만 실행됩니다.
-3.8.58에서는 포크에서 전체 과정을 처음부터 끝까지 리허설하고, 3.8.59는
-[GO/NO-GO 체크리스트](./LTS_GO_NO_GO.md)로 마무리됩니다.
+v3.8.59 이후 다음 버전은 3.9.0이며, 해당 버전의 tip은 수명이 긴 두 브랜치가 됩니다:
+`stable/v3` (v3 LTS 라인, npm `latest`) 및 `develop` (v4, 4.0.0으로 업데이트, npm
+`nightly`). 브랜치/채널 모델, 포워드 포트 및 레이블은
+[RELEASE_STRATEGY.md](./RELEASE_STRATEGY.md)에 있으며, 계획은 [ROADMAP](../../ROADMAP.md)의 Phase 3에
+있습니다. 분기 생성은 한 번만 실행됩니다.
+3.8.58에서는 포크에서 처음부터 끝까지 리허설하고, 3.8.59에서는
+[GO/NO-GO 체크리스트](./LTS_GO_NO_GO.md)로 마무리합니다.
 
-### 드라이런(읽기 전용, 언제든 안전)
+### 드라이 런 (읽기 전용, 언제든 안전하게 실행 가능)
 
 ```bash
-npm run release:dry-run-lts-cut                       # 실제 분기: HEAD에서 3.9.0, 이전 태그 v3.8.59
+npm run release:dry-run-lts-cut                       # 실제 분기 생성: HEAD에서 3.9.0, 이전 태그 v3.8.59
 npm run release:dry-run-lts-cut -- --from <3.9.0-tip> # 소스 커밋 고정
 ```
 
-`scripts/release/dry-run-lts-cut.mjs`는 아무 작업도 실행하지 않습니다. git과 `gh`를 읽고
-전체 순서를 출력합니다. 여기에는 사전 조건(소스가 해석됨, 소스 저장소에 전체 이력이 있음 —
-얕은 클론에서는 `stable/v3`를 푸시할 수 없으며, 수신 측에서 첫 번째 접합된 부모 커밋의 팩을
-거부하므로 전체 클론에서 분기하거나 먼저 `git fetch --unshallow origin` 실행 — 이전
-태그가 존재함, `package.json`이 대상 버전임, `release-freeze` 이슈가 열려 있음, 기존
-릴리스 브랜치에 열린 `Release branch not green` 이슈가 없음 — 존재하지 않는 브랜치는
-green이 아니라 `?` unknown으로 보고됨 — Mergify `release` 큐가 구성되어 있음(G11:
-`queue_rules`, `checks_timeout`, 레이블 `queue`), `release/*` 규칙 세트가 여전히 삭제와
-강제 푸시를 차단함, `stable/v3`와 `develop`이 아직 존재하지 않음), 두 브랜치 단계,
-어떤 휴면 워크플로 트리거와 `if:` 조건이 참이 되는지(그리고 어떤 것이 저장소 변수에 의해
-계속 차단되거나 정식 저장소로 고정되는지), 예상 dist-tag(`latest` → 3.9.0, `next`와
-`nightly`는 비어 있음), 롤백이 포함됩니다. 종료 코드 `0` = `RESULT: READY`,
-`1` = 차단 사전 조건 실패(`✗`), `2` = 사용법 오류입니다. `--advisory <id,...>`는
-검사를 숨기지 않은 채 경고(`!`)로 낮춥니다.
+`scripts/release/dry-run-lts-cut.mjs`는 아무것도 실행하지 않습니다. git과 `gh`를 읽고 전체 순서를 출력합니다 — 사전 조건(소스 확인, 소스 저장소에 전체 이력이 있는지 확인 —
+shallow clone은 `stable/v3`을 push할 수 없으며, 수신 측은 첫 번째 graft된 부모에서 pack을 거부하므로 전체 clone에서 분기를 생성하거나 먼저 `git fetch --unshallow origin`을 실행해야 함 — 이전
+태그 존재, `package.json`이 대상 버전인지 확인, `release-freeze` 이슈가 열려 있는지 확인, 기존 릴리스 브랜치에 열린
+`Release branch not green` 이슈가 없는지 확인 —
+존재하지 않는 브랜치는 `?` 알 수 없음으로 보고되며, 절대 green으로 간주되지 않음 — Mergify `release` 큐가
+구성되어 있는지 확인(G11: `queue_rules`, `checks_timeout`,
+레이블 `queue`), `release/*` 규칙 세트가 여전히 삭제 및 강제 푸시를 차단하는지 확인, `stable/v3` 및
+`develop`이 아직 존재하지 않는지 확인), 두 브랜치 단계, 비활성 워크플로 트리거와 `if:` 조건 중 어떤 것이 활성화되는지(그리고 어떤 것이 저장소 변수로 제한되거나 정식 저장소에 고정되는지), 예상 dist-tag(`latest` → 3.9.0, `next` 및
+`nightly`는 비어 있음) 및 롤백을 출력합니다. 종료 코드 `0` = `RESULT: READY`, `1` = 차단 사전 조건
+실패(`✗`), `2` = 사용 오류입니다. `--advisory <id,...>`는 검사를 경고(`!`)로 낮추지만 숨기지는 않습니다.
 
-3.9.0 릴리스 동결이 아직 유지되는 동안 실제 분기의 드라이런을 실행하십시오. 브랜치는 태그
-생성 후, Phase 12c에서 동결을 해제하기 전에 생성됩니다.
+3.9.0 릴리스 동결이 아직 열려 있는 동안 실제 분기 생성의 드라이 런을 실행합니다 — 브랜치는 태그 생성 후, Phase 12c에서 동결을 해제하기 전에 생성됩니다.
 
-### 3.8.58 리허설(포크 전용)
+### 3.8.58 리허설 (포크에서만)
 
 ```bash
-# 1. 리허설 매개변수를 사용하여 현재 최종 커밋에서 드라이런
+# 1. 리허설 매개변수를 사용하여 현재 tip에서 드라이 런
 npm run release:dry-run-lts-cut -- --target-version 3.8.58 --previous-tag v3.8.57 \
   --advisory freeze,base-green
 
-# 2. 포크 원격 저장소를 대상으로 실행(origin 또는 URL이 정식
-#    저장소인 원격 저장소는 거부됨; 모든 단계에서 터미널 확인을 요청함)
+# 2. FORK 원격 저장소를 대상으로 실행 (origin 또는 URL이 정식 저장소인 모든 원격 저장소는
+#    거부됨; 모든 단계에서 터미널의 확인을 요청함)
 git remote add rehearsal https://github.com/<you>/OmniRoute.git
 node scripts/release/dry-run-lts-cut.mjs --execute --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 
-# 3. 포크에서 휴면 워크플로 실행(드라이런에서 정식 저장소 고정이
-#    보고되는 경우 workflow_dispatch 사용) 후 롤백
+# 3. 포크에서 비활성 워크플로를 실행하고(dry-run에서 정식 저장소 고정으로 보고된 경우 workflow_dispatch 사용), 그런 다음 롤백
 node scripts/release/dry-run-lts-cut.mjs --execute --rollback --remote rehearsal \
   --target-version 3.8.58 --previous-tag v3.8.57 --advisory freeze,base-green
 ```
 
-develop 버전 상향 커밋은 git plumbing으로 생성되며(작업 트리는 건드리지 않음), 주기 시작
-커밋과 동일한 다섯 파일의 버전을 올립니다: `package.json`, `open-sse/package.json`,
-`electron/package.json`, `package-lock.json`, `docs/openapi.yaml`. 이후 첫 번째
-PR 전에 `develop`에서 `[4.0.0]` CHANGELOG 섹션과 그 i18n 미러를 엽니다. 스크립트는
-npm dist-tag를 절대 변경하지 않습니다. 해당 작업은 임시 패키지에서 리허설하십시오.
+develop 범프 커밋은 git plumbing을 사용하여 생성되며(작업 트리는 변경하지 않음), 사이클 시작 커밋과 동일한 다음 5개 파일을 업데이트합니다: `package.json`, `open-sse/package.json`,
+`electron/package.json`, `package-lock.json` 및 `docs/openapi.yaml`. `[4.0.0]`
+CHANGELOG 섹션과 해당 i18n 미러는 이후 `develop`에서, 첫 번째 PR 전에 생성됩니다. 스크립트는 npm dist-tag을 변경하지 않습니다 — dist-tag은 스크래치 패키지에서 리허설합니다.
 
-### PR 미리 보기 아티팩트(한 번 빌드하고 동일한 바이트를 승격)
+### PR 미리 보기 아티팩트 (한 번 빌드하고 동일한 바이트를 승격)
 
-`.github/workflows/preview-artifact.yml`은 PR 헤드에서 프로덕션 tarball 하나를 빌드하고
-바로 그 빌드를 검증합니다(#8084 슬라이스 (a)). 동일 저장소 PR만 지원하며, 아무것도
-게시하지 않습니다.
+`.github/workflows/preview-artifact.yml`은 PR head에서 하나의 프로덕션 tarball을 빌드하고 해당 빌드를 검증합니다(#8084 슬라이스 (a)). 동일 저장소의 PR만 대상으로 하며, 아무것도 게시하지 않습니다.
 
 ```bash
 gh workflow run preview-artifact.yml -f pr_number=<N>   # 또는 `preview-artifact` 레이블 추가
@@ -460,36 +468,34 @@ gh attestation verify omniroute-*.tgz --repo diegosouzapw/OmniRoute
 npm install -g ./omniroute-*.tgz                          # 미리 보기 설치
 ```
 
-실행 과정에서는 `npm ci`, `npm run build:release`, `npm run check:pack-artifact`를
-실행하고 tarball을 패킹한 다음, `npm run check:pack-boot`(가짜 시크릿, 임시 데이터
-디렉터리)를 실행하고 다시 패킹합니다. 다이제스트가 동일하지 않으면 실패합니다. 그런 다음
-`artifact-identity.json`(헤드 SHA, 베이스 SHA, lockfile 해시, 플랫폼, 아키텍처,
-node ABI, 번들러, 빌드 정책 — `scripts/release/artifact-identity.mjs`)을 기록하고,
-별도 작업에서 tarball을 증명합니다. 미리 보기를 승격한다는 것은 해당 tarball을 설치한다는
-뜻입니다. 소스에서 다시 빌드하지 마십시오.
+실행 과정에서는 `npm ci`, `npm run build:release`, `npm run check:pack-artifact`를 실행하고 tarball을 패키징한 다음,
+`npm run check:pack-boot`(가짜 시크릿, 임시 데이터 디렉터리)를 실행하고 다시 패키징합니다. 다이제스트가 동일하지 않으면 실패하며, 이후 `artifact-identity.json`(head SHA, base
+SHA, lockfile 해시, 플랫폼, 아키텍처, node ABI, 번들러, 빌드 정책 —
+`scripts/release/artifact-identity.mjs`)을 기록하고 별도의 작업에서 tarball에 증명을 추가합니다. 미리 보기를 승격한다는 것은 해당 tarball을 설치하는 것을 의미합니다. 소스에서 다시 빌드하지 마십시오.
 
-### 분기(3.9.0, GO 이후)
+### 분기 생성 (3.9.0, GO 이후)
 
-1. [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)에 GO가 기록되어 있습니다.
-2. `npm run release:dry-run-lts-cut -- --from v3.9.0`이 `RESULT: READY`를 출력합니다.
-3. 드라이런에서 출력한 명령을 사용하여 `origin`에 브랜치를 수동으로 생성합니다. 스크립트는
-   `origin`으로의 푸시를 거부합니다. 검토된 develop 커밋을 재사용하려면 먼저 포크를
-   대상으로 3.9.0 최종 커밋에서 `--execute` 리허설을 실행하십시오. 두 SHA가 모두
-   출력되며, 동일한 커밋을 푸시할 수 있습니다:
+1. [LTS_GO_NO_GO.md](./LTS_GO_NO_GO.md)에 GO를 기록합니다.
+2. `npm run release:dry-run-lts-cut -- --from v3.9.0`을 실행하여 `RESULT: READY`가 출력되는지 확인합니다.
+3. 드라이 런에서 출력되는 명령을 사용하여 수동으로 `origin`에 브랜치를 생성합니다 —
+   스크립트는 `origin`으로 push하는 것을 거부합니다. 검토된 develop 커밋을 재사용하려면 먼저 포크를 대상으로 3.9.0 tip에서 `--execute` 리허설을 실행합니다. 그러면 두 SHA가 출력되며,
+   동일한 커밋을 push할 수 있습니다:
 
    ```bash
    git push origin <stable-sha>:refs/heads/stable/v3 <develop-sha>:refs/heads/develop
    ```
 
-4. 첫 번째 PR이 병합되기 전에 `stable/v3` 및 `develop`을 보호합니다(규칙 세트 + 병합 큐).
-5. 비활성 워크플로는 브랜치가 존재하면 활성화됩니다: `forward-port.yml`(`stable/v3`에 푸시),
-   `validate-stable-pr.yml`(`stable/v3` 대상 PR) 및 `nightly-v4-build.yml`
-   (`develop` 빌드). 실제 가동 전에 `secrets.FORWARD_PORT_TOKEN` 저장소 시크릿을 설정합니다(포워드 포트 PR에서 CI가 실행되도록 하기 위함). 야간 게시는 소유자가 저장소 변수
+4. 첫 번째 PR이 생성되기 전에 `stable/v3` 및 `develop`을 보호합니다(규칙 세트 + 머지 큐).
+5. 비활성 상태인 워크플로는 브랜치가 존재하면 활성화됩니다: `forward-port.yml` (`stable/v3`에
+   푸시), `validate-stable-pr.yml` (`stable/v3`을 대상으로 하는 PR), `nightly-v4-build.yml`
+   (`develop` 빌드). Go-live 전에 리포지토리 시크릿 `secrets.FORWARD_PORT_TOKEN`을 설정해야
+   합니다(그래야 CI가 포워드 포트 PR에서 실행됨). 소유자가 리포지토리 변수
    `vars.NIGHTLY_PUBLISH`를 `true`로 설정하고 npm Trusted Publishing이
-   `nightly-v4-build.yml`을 허용할 때까지 비활성 상태로 유지됩니다. 채널 결정은 `scripts/release/dist-tag.mjs`에서 수행되며, 이는
-   `npm-publish.yml`이 사용하는 것과 동일한 리졸버입니다.
-6. 채널을 확인합니다: `npm view omniroute dist-tags --json`에서 `latest` = 3.9.0으로 표시되고, v4가 게시되기 전까지
-   `next` / `nightly`는 없어야 합니다.
+   `nightly-v4-build.yml`을 승인할 때까지 nightly 게시 기능은 계속 비활성화됩니다. 채널
+   확인은 `scripts/release/dist-tag.mjs`에서 수행하며, `npm-publish.yml`에서도 동일한
+   확인기를 사용합니다.
+6. 채널을 확인합니다: `npm view omniroute dist-tags --json`의 결과에서 v4가 게시될 때까지
+   `latest` = 3.9.0이고 `next` / `nightly`가 없어야 합니다.
 7. 필요한 경우 롤백합니다: `git push origin --delete refs/heads/stable/v3 refs/heads/develop`
    및 `npm dist-tag add omniroute@3.8.59 latest`.
 
@@ -499,26 +505,26 @@ node ABI, 번들러, 빌드 정책 — `scripts/release/artifact-identity.mjs`)�
 
 릴리스에 심각한 문제가 있는 경우:
 
-1. `gh release edit vX.Y.Z --prerelease`(최신 릴리스가 아닌 것으로 표시)
-2. `git tag -d vX.Y.Z && git push --delete origin vX.Y.Z`(아직 사용자가 채택하지 않은 경우에만)
-3. 또는: `release/vX.Y.0`에서 핫픽스 → 패치 릴리스 `vX.Y.(Z+1)`
-4. GitHub Discussions와 Discord에 즉시 공지
+1. `gh release edit vX.Y.Z --prerelease` (최신 릴리스가 아닌 것으로 표시)
+2. `git tag -d vX.Y.Z && git push --delete origin vX.Y.Z` (아직 사용자가 채택하지 않은 경우에만)
+3. 또는 `release/vX.Y.0`에서 핫픽스 → 패치 릴리스 `vX.Y.(Z+1)`
+4. 즉시 GitHub Discussions와 Discord에서 공지
 
 ## 엄격한 규칙
 
-- `main`에 직접 커밋하지 않기
-- `main` 또는 `release/*` 브랜치에 `git push --force`를 절대 사용하지 않기
-- Husky 훅을 절대 건너뛰지 않기(`--no-verify`)
-- 비밀 정보, 자격 증명 또는 `.env` 파일을 절대 커밋하지 않기
-- 커버리지는 ≥60/60/60/60(구문/라인/함수/브랜치)을 유지해야 함
-- `src/`, `open-sse/`, `electron/` 또는 `bin/`의 프로덕션 코드를 변경할 때는 항상 테스트를 추가하거나 업데이트하기
+- `main`에 직접 커밋하지 마세요.
+- `main` 또는 `release/*` 브랜치에 `git push --force`를 사용하지 마세요.
+- Husky 훅을 건너뛰지 마세요(`--no-verify`).
+- 비밀 정보, 자격 증명 또는 `.env` 파일을 커밋하지 마세요.
+- 커버리지는 ≥60/60/60/60(문장/라인/함수/브랜치)을 유지해야 합니다.
+- `src/`, `open-sse/`, `electron/` 또는 `bin/`의 프로덕션 코드를 변경할 때는 항상 테스트를 추가하거나 업데이트하세요.
 
-## 자동화된 동기화 검사
+## 자동 동기화 검사
 
-PR을 열기 전에 로컬에서 문서 동기화 검사를 실행하세요:
+PR을 열기 전에 로컬에서 문서 동기화 가드를 실행하세요.
 
 ```bash
 npm run check:docs-sync
 ```
 
-CI도 `.github/workflows/ci.yml`에서 이 검사(lint 작업)를 실행합니다.
+CI에서도 `.github/workflows/ci.yml`의 lint 작업에서 이 검사를 실행합니다.
