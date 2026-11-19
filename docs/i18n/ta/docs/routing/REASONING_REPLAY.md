@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 பிடிப்பு `open-sse/handlers/chatCore.ts` இல் நடக்கிறது (இரண்டு தளங்கள், இரண்டு `cacheReasoningFromAssistantMessage` அழைப்பு தளங்களில்). ஸ்கீமா வற்புறுத்தலுக்குப் பிறகு, ஆனால் அனுப்புவதற்கு முன்பு `open-sse/translator/index.ts` இல் மறுவிளைவு நடக்கும்.
+
+டூல்-அழைப்பு உள்ளீடுகள் `buildToolCallCacheKey()` இன் கீழ் சேமிக்கப்படும், இது கோரிக்கை நோக்கம் மற்றும் கருவி அழைப்பு ஐடியின் செரிமானமாகும், எனவே மற்றொரு API விசை அல்லது அமர்வு பயன்படுத்தும் அதே ஐடி உள்ளீட்டைத் தேர்ந்தெடுக்காது. நோக்கம் `buildReasoningCacheScope()` இலிருந்து வருகிறது: API விசை ஐடி மற்றும் கோரிக்கையில் ஒன்று இருக்கும்போது அமர்வு விசை. `tool_call_id` நெடுவரிசையும் டாஷ்போர்டும் அந்த உள்ளீடுகளுக்கு இந்த டைஜெஸ்ட்டைக் காட்டுகின்றன.
 
 எளிய (கருவி-அழைப்பு அல்லாத) உதவியாளர் திருப்பங்கள் வித்தியாசமாக விசைப்படுத்தப்படுகின்றன: `buildAssistantMessageCacheKey()` அமர்வு நோக்கத்தையும் அந்தத் திருப்பம் வரை இயல்பாக்கப்பட்ட OpenAI- வடிவ டிரான்ஸ்கிரிப்டையும் ஜீரணிக்கச் செய்கிறது, ஏனெனில் DeepSeek `tools` இருக்கும் போது _every_ முன் திருப்பத்தின் காரணம் தேவைப்படுகிறது. Responses-API இலக்குகளுக்கு (உதாரணமாக `opencode-go/deepseek-v4-flash`, `/responses` க்கு அனுப்பப்பட்டது) அப்ஸ்ட்ரீம் உடல் `input` அல்ல, `messages` கொண்டு செல்கிறது, எனவே `translateRequest()` (`open-sse/translator/index.ts`) ஒரு கால்பேக் விருப்பத்தின் மூலம் ஜீரணித்த பிவோட் டிரான்ஸ்கிரிப்டைப் புகாரளிக்கிறது மற்றும் அதே டிரான்ஸ்கிரிப்டைப் பிடிப்பு தளங்கள் ஜீரணிக்கின்றன. மறுமொழிகள் ரீப்ளே பாஸ் ஒவ்வொரு மூல வடிவத்திற்கும் OpenAI பைவட்டில் இயங்குகிறது, எனவே Anthropic செய்திகள் கிளையன்ட்களும் (Claude → OpenAI → Responses) மீண்டும் இயக்கப்படும்.
 

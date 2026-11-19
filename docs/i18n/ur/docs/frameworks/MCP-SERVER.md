@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -130,7 +132,7 @@ Claude Desktop، Cursor، Cline، اور ہم آہنگ MCP کلائنٹس کے �
 | ٹول                                 | دائرہ کار           | تفصیل                                                                                                                        |
 | :---------------------------------- | :------------------ | :--------------------------------------------------------------------------------------------------------------------------- |
 | `omniroute_compression_status`      | `read:compression`  | کمپریشن کی ترتیبات، تجزیات کا خلاصہ، اور کیشے سے آگاہی کے اعدادوشمار (بشمول `analytics.mcpDescriptionCompression` میٹا ڈیٹا) |
-| `omniroute_compression_configure`   | `write:compression` | کمپریشن موڈ، حد، ہدف کا تناسب، سسٹم پرامپٹ تحفظ، MCP تفصیل کمپریشن ٹوگل کو ترتیب دیں                                         |
+| `omniroute_compression_configure`   | `write:compression` | کمپریشن موڈ، حد، ہدف کا تناسب، سسٹم پرامپٹ تحفظ، MCP تفصیل کمپریشن ٹوگل ترتیب دیں                                            |
 | `omniroute_set_compression_engine`  | `write:compression` | فعال انجن (off/caveman/rtk/stacked) اور Caveman/RTK شدت کا انتخاب کریں۔                                                      |
 | `omniroute_list_compression_combos` | `read:compression`  | کمپریشن کومبوز اور ان کے انجن کی پائپ لائنوں کے نام درج کریں۔                                                                |
 | `omniroute_compression_combo_stats` | `read:compression`  | کمپریشن کومبو اور انجن کے لحاظ سے گروپ کردہ تجزیات                                                                           |
@@ -143,7 +145,7 @@ Claude Desktop، Cursor، Cline، اور ہم آہنگ MCP کلائنٹس کے �
 | `omniroute_rtk_discover`            | `read:compression`  | آپٹ ان RTK آؤٹ پٹ نمونوں میں بار بار چلنے والے شور کو دریافت کریں۔                                                           |
 | `omniroute_rtk_learn`               | `read:compression`  | آپٹ ان نمونوں سے ایک قابل جائزہ RTK فلٹر ڈرافٹ تیار کریں۔                                                                    |
 
-CCR اندراجات دو درجے والے اسٹور کا استعمال کرتے ہیں: مقامی نان کلاؤڈ رن ٹائمز پر، ایک پائیدار SQLite ٹائر (`ccr_blocks`، آن بذریعہ ڈیفالٹ) کے ذریعے ایک گرم ان-میموری ٹائر بیکڈ ہوتا ہے، لہذا ایک بلاک اس وقت تک بے دخلی یا دوبارہ شروع ہونے سے بچ جاتا ہے جب تک کہ اس کا TTL ختم نہ ہو جائے — سوائے اس کے جو 512 سے زیادہ بلاکس اور کلاؤڈ KB سے زیادہ میموری پر چلتے ہیں۔ ہر بلاک 2 MiB تک محدود ہے، ہر پرنسپل 16 MiB تک، اور عالمی اسٹور 64 MiB تک محدود ہے۔ اندراجات 24 گھنٹے کے TTL (زیادہ سے زیادہ سات دن) کے لیے طے شدہ ہیں۔ مکمل MCP بازیافت 256 KiB تک محدود ہے۔ رینجڈ اور گریپ موڈز کے ذریعے بڑے بلاکس دستیاب رہتے ہیں۔ سٹوریج، بازیافت، فہرست سازی، معائنہ، حذف، اور اعدادوشمار کو توثیق شدہ API کلیدی پرنسپل کے ذریعے الگ تھلگ کیا جاتا ہے۔ آڈٹ ریکارڈ میں ہیشز اور سائز کا میٹا ڈیٹا ہوتا ہے، کبھی مواد نہیں ہوتا۔ آپریٹر کا سامنا کرنے والی تفصیلات (دو مارکر، کلائنٹ کی شرائط، `codemode:false`، فی ٹول اسکوپس، صفحہ بندی، اور ایک تشخیصی میٹرکس) [Compression Engines → شرائط / آپریٹر گائیڈ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) میں رہتے ہیں۔
+CCR اندراجات دو درجے والے اسٹور کا استعمال کرتے ہیں: مقامی نان کلاؤڈ رن ٹائمز پر، ایک پائیدار SQLite ٹائر (`ccr_blocks`، آن ڈیفالٹ) کے ذریعے ایک گرم ان-میموری ٹائر بیکڈ ہوتا ہے، لہذا ایک بلاک بے دخلی یا دوبارہ شروع ہونے تک زندہ رہتا ہے جب تک کہ اس کا TTL — ختم نہ ہو جائے، سوائے اس کے 512 بلاکس، جو 512 سے زائد KB `COMPRESSION_CCR_DURABLE_STORE=false`، کلاؤڈ رن ٹائم سے زیادہ چلتے ہیں۔ صرف میموری پائیدار تحریر بہترین کوشش ہے: اسے چھوڑ دیا جاتا ہے جب کہ 1,000 تحریریں پہلے سے زیر التوا ہیں، اور ایک ناکام SQLite تحریر لاگ ان ہوتی ہے، دوبارہ کوشش نہیں کی جاتی ہے، تاکہ دوبارہ شروع کرنے پر وہ بلاک کھو جائے۔ ہر بلاک 2 MiB تک محدود ہے، ہر پرنسپل 16 MiB، اور عالمی اسٹور 64 MiB تک محدود ہے۔ اندراجات پہلے سے طے شدہ 24-hour TTL (زیادہ سے زیادہ سات دن)۔ مکمل MCP بازیافت 256 KiB تک محدود ہے۔ رینجڈ اور گریپ موڈز کے ذریعے بڑے بلاکس دستیاب رہتے ہیں۔ سٹوریج، بازیافت، فہرست سازی، معائنہ، حذف، اور اعدادوشمار کو توثیق شدہ API کلیدی پرنسپل کے ذریعے الگ تھلگ کیا جاتا ہے۔ آڈٹ ریکارڈ میں ہیش اور سائز کا میٹا ڈیٹا ہوتا ہے، کبھی مواد نہیں ہوتا۔ آپریٹر کا سامنا کرنے والی تفصیلات (دو مارکر، کلائنٹ کی شرائط، `codemode:false`، فی ٹول اسکوپس، صفحہ بندی، اور ایک تشخیصی میٹرکس) [Compression Engines → کی شرائط / آپریٹر گائیڈ](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) میں رہتے ہیں۔
 
 `omniroute_compression_status` `analytics.mcpDescriptionCompression` کے تحت MCP تفصیل کمپریشن کو الگ سے رپورٹ کرتا ہے۔ وہ قدریں MCP قابل فہرست وضاحتوں کے لیے میٹا ڈیٹا کے سائز کے تخمینے ہیں (`tools`, `prompts`, `resources`, اور `resourceTemplates`); وہ فراہم کنندہ کے استعمال کی رسیدیں نہیں ہیں اور `source: "mcp_metadata_estimate"` سے نشان زد ہیں۔
 

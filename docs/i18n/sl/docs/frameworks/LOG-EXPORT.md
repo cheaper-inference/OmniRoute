@@ -199,140 +199,145 @@ vrnjenih opisov polj, zato nov cilj ne zahteva sprememb uporabniškega vmesnika.
 
 Konfiguracijski ključi (`type: "bigquery"`):
 
-| Ključ                | Opombe                                                                        |
-| -------------------- | ----------------------------------------------------------------------------- |
-| `projectId`          | Projekt GCP, ki vsebuje podatkovno zbirko                                     |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                               |
-| `tableId`            | `[A-Za-z0-9_]+`                                                               |
-| `location`           | Uporablja se samo, kadar je treba ustvariti podatkovno zbirko (privzeto `EU`) |
-| `serviceAccountJson` | Ključ storitvenega računa. Skrivnost: šifrirana v mirovanju, nikoli vrnjena   |
-| `autoCreate`         | Ustvari podatkovno zbirko in tabelo ob prvem izvozu (privzeto `true`)         |
+| Ključ                | Opombe                                                                                                                        |
+| -------------------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | Projekt GCP, v katerem je nabor podatkov                                                                                      |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                               |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                               |
+| `location`           | Uporablja se samo, ko je treba ustvariti nabor podatkov (privzeto `EU`)                                                       |
+| `serviceAccountJson` | Ključ servisnega računa. Skrivnost: šifriran med mirovanjem, nikoli vrnjen                                                    |
+| `autoCreate`         | Ustvari manjkajoči nabor podatkov/tabelo; pogojno doda stolpce z ničelnimi vrednostmi za dokazila o uporabi (privzeto `true`) |
 
-Storitveni račun potrebuje dovoljenje `bigquery.tables.updateData` za ciljno tabelo ter
-`bigquery.datasets.create` / `bigquery.tables.create`, kadar je `autoCreate` vklopljen.
+Servisni račun potrebuje `bigquery.tables.updateData` za ciljno tabelo ter
+`bigquery.datasets.create` / `bigquery.tables.create`, ko je `autoCreate` vklopljen.
+Posodobitev obstoječe tabele z dodajanjem dveh stolpcev z ničelnimi vrednostmi za dokazila o uporabi zahteva tudi
+`bigquery.tables.update`. Če dovoljenje manjka, izvoz spodleti, ne da bi se njegov kazalec pomaknil naprej.
 
-Konfigurirani paket je enota **kazalca**, ne enota HTTP: `send()` ga razdeli na klice insertAll
-z največ 500 vrsticami, zato velika vrednost `batch_size` ne more preseči omejitve zahtev BigQuery na 10 MB.
-Pri prehodnih statusih (408/429/500/502/503/504) se poskus ponovi do trikrat z eksponentnim
-podaljševanjem čakanja in ponovno uporabo istih insertIds; napake pri preverjanju pristnosti in shemi sprožijo izjemo že ob prvem poskusu,
-namesto da bi po nepotrebnem porabljale izvajanje.
+Konfigurirana serija je enota **kazalca**, ne HTTP-enota: `send()` jo razdeli na klice insertAll
+z največ 500 vrsticami, zato velik `batch_size` ne more preseči omejitve 10 MB za zahtevo BigQuery.
+Prehodna stanja (408/429/500/502/503/504) se z eksponentnim umikom ponovijo največ trikrat,
+pri čemer se znova uporabijo isti insertIds; napake pri preverjanju pristnosti in shemi se sprožijo že ob prvem
+poskusu, namesto da bi po nepotrebnem porabile izvajanje.
 
-Pravkar ustvarjena tabela končni točki za pretočno vstavljanje še ni vidna, zato ta nekaj sekund odgovarja
-s statusom 404. Pri tem statusu 404 se poskus ponovi, vendar **samo, če je tabelo ustvarilo to izvajanje** —
-če tabela dejansko manjka, se izvajanje še vedno hitro konča z napako. Upoštevajte, da BigQuery pri ponovnem ustvarjanju tabele z imenom,
-ki je bilo nedavno izbrisano, več minut zavrača pretočno vstavljanje; to je
-lastnost postopka brisanja in ponovnega ustvarjanja, zato raje uporabite novo ime tabele, kot da obstoječo izbrišete in znova dodate.
+Tabela, ustvarjena pred nekaj trenutki, še ni vidna pretočni končni točki, ki nekaj sekund odgovarja
+s 404. Ta 404 se ponovi, vendar **samo, ko je tabela ustvarjena v tem izvajanju** —
+resnično manjkajoča tabela še vedno takoj povzroči napako. Upoštevajte, da BigQuery pri
+ponovnem ustvarjanju tabele z imenom, ki je bilo nedavno izbrisano, več minut zavrača pretočne vstavljanja;
+to je lastnost zaporedja brisanja in ponovnega ustvarjanja, zato je bolje uporabiti novo ime tabele kot pa
+tabelo izbrisati in znova dodati.
 
-**Delna napaka prispe kot HTTP 200 z nepraznim `insertErrors[]`.** To se obravnava kot
-napaka in sproži izjemo, kar prepreči, da bi se kazalec premaknil mimo vrstic, ki jih BigQuery ni
-sprejel; `tests/unit/log-export-bigquery.test.ts` zagotavlja to vedenje.
+**Delna napaka prispe kot HTTP 200 z nepraznim `insertErrors[]`.** Obravnava se kot
+napaka in sproži izjemo, s čimer se kazalec ne pomakne čez vrstice, ki jih BigQuery ni sprejel;
+`tests/unit/log-export-bigquery.test.ts` določa to vedenje.
 
-Prenos poteka prek navadnega REST — samopodpisana trditev RS256 se zamenja za dostopni žeton na
-`https://oauth2.googleapis.com/token`, nato pa se vrstice pošljejo v `tabledata.insertAll`. Noben Google SDK se
-ne vključi. Dostopni žetoni se predpomnijo znotraj procesa za vsak par (storitveni račun, obseg).
+Prenos poteka prek običajnega REST — samopodpisana trditev RS256 se zamenja za žeton dostopa na
+`https://oauth2.googleapis.com/token`, nato pa se vrstice pošljejo v `tabledata.insertAll`. Noben Google SDK
+se ne vključi. Žetoni dostopa se v procesu predpomnijo za vsak par (servisni račun, obseg).
 
-Ustvarjena tabela ima po en stolpec za vsako polje na zavihku Dnevniki ter `exported_at` in je organizirana glede na
-dejanski način poizvedovanja po dnevnikih klicev:
+Ustvarjena tabela vsebuje po en stolpec za vsako polje zavihka Logs ter `exported_at` in je zasnovana
+za način, na katerega se dnevniki klicev dejansko poizvedujejo:
 
-- **Razdeljena na dnevne particije po `timestamp`**, zato poizvedba, omejena z datumom, pregleda samo te dni.
-- **Razvrščena v gruče po `api_key_name`, `provider`, `model`, `status`** (v tem vrstnem redu), zato filtriranje glede na
-  to, kdo je izvedel klic, kam je bil poslan ali ali je spodletel, izloči bloke znotraj vsake particije. BigQuery
-  dovoljuje največ štiri stolpce za razvrščanje v gruče, njihov vrstni red pa je pomemben: filter samo po `api_key_name`
-  izloča bloke, filter samo po `status` pa ne.
-- **Izbirno obdobje hrambe particij** prek `partitionExpirationDays` (0 ohrani vse), ki se uporabi
+- **Razdeljena je po dnevih na podlagi `timestamp`**, zato poizvedba, omejena samo z datumom, prebere le te dni.
+- **Gruppirana je po `api_key_name`, `provider`, `model`, `status`** (v tem vrstnem redu), zato filtriranje po
+  tem, kdo jo je izvedel, kam je bila poslana ali ali je spodletela, izloči bloke znotraj vsake particije. BigQuery
+  dovoljuje največ štiri stolpce za grupiranje, vrstni red pa je pomemben: filter samo po `api_key_name`
+  izloči bloke, filter samo po `status` pa ne.
+- **Izbirno ohranjanje particij** prek `partitionExpirationDays` (0 ohrani vse), uporabljeno
   ob ustvarjanju tabele.
 
-Obe nastavitvi se uporabita ob ustvarjanju. Obstoječa tabela ohrani svojo trenutno organizacijo, zato
+Obe nastavitvi se uporabita ob ustvarjanju. Obstoječa tabela ohrani svojo trenutno razporeditev, zato
 cilj usmerite na nov ID tabele, če ju želite uveljaviti.
 
 `tests/unit/log-export-bigquery.test.ts` preverja, da preslikovalnik in shema tabele ostajata
-usklajena, tako da novega stolpca dnevnika klicev med izvozom ni mogoče tiho izpustiti.
+usklajena, zato novega stolpca dnevnika klicev na poti navzven ni mogoče tiho izpustiti.
 
-Paketi se delijo na dele glede na **oboje**: število vrstic in število serializiranih bajtov. Samo število vrstic ni dovolj,
-ko se izvažajo tudi vsebine: 500 vrstic s pozivi lahko obsega več deset megabajtov, insertAll pa
-zavrne zahtevo, večjo od 10 MB. Posamezen del se zaključi pri 500 vrsticah ali 9 MB, kar nastopi prej.
+Serije se razdelijo glede na **število vrstic in serializirane bajte**. Samo število vrstic ni dovolj,
+ko se izvažajo vsebine: 500 vrstic s pozivi je lahko velikih več deset megabajtov, insertAll
+pa zavrne zahtevo, večjo od 10 MB. Deli se zaključijo pri 500 vrsticah ali 9 MB, kar nastopi prej.
 
 ---
 
-## 5. Cilj za sledi OTLP/HTTP
+## 5. Cilj sledenj OTLP/HTTP
 
-Konfiguracija uporablja `type: "otlp-http"`. To je načrtovan izvoz shranjenih
-dnevnikov klicev s kazalcem, ne pa ponor dogodkov usmerjanja v živo po načelu najboljšega truda v
-`open-sse/services/routing/otel.ts`. Ne bere ali spreminja okolijskih
-spremenljivk, časovnikov ali medpomnilnikov tega ponora. Če omogočite oboje, lahko nastaneta dve neodvisni vrsti razponov;
-za razlikovanje teh razponov dnevnikov klicev uporabite obseg instrumentacije `omniroute.log-export`.
+Konfiguracija uporablja `type: "otlp-http"`. To je načrtovan izvoz trajno shranjenih dnevnikov
+klicev, podprt s kazalcem, in ne ponajboljši usmerjevalnik dogodkov v živo v
+`open-sse/services/routing/otel.ts`. Ne bere in ne spreminja okoljskih spremenljivk,
+časovnikov ali medpomnilnikov tega ponora. Če omogočite oba, lahko nastaneta dve neodvisni vrsti razponov;
+uporabite instrumentacijski obseg `omniroute.log-export`, da ločite te razpone dnevnikov klicev.
 
-| Ključ                    | Privzeta vrednost / namen                                                         |
-| ------------------------ | --------------------------------------------------------------------------------- |
-| `endpoint`               | Obvezen celoten URL HTTP(S) za sledi; pripona `/v1/traces` se ne doda             |
-| `headers`                | Izbirne vrstice `Name: value` ali objekt JSON z nizi; šifrirano                   |
-| `requestHeaderAllowlist` | Prazno (izklopljeno); imena/predpone glav odjemalca za zajem kot atributi razpona |
-| `serviceName`            | `omniroute`; atribut vira `service.name`                                          |
-| `langfuseMapping`        | `false`; doda atribute Langfuse za generiranje/sejo/uporabnika                    |
-| `identity`               | `pseudonymous`, `keyName` ali `none`                                              |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                           |
-| `timeoutMs`              | `30000` na poskus HTTP                                                            |
-| `environment`            | Ni nastavljeno; izbirni `langfuse.environment`                                    |
+| Ključ                    | Privzeto / namen                                                                            |
+| ------------------------ | ------------------------------------------------------------------------------------------- |
+| `endpoint`               | Zahtevan celoten URL sledenj HTTP(S); pripona `/v1/traces` ni dodana                        |
+| `headers`                | Izbirne vrstice `Name: value` ali objekt JSON z nizi; šifrirano                             |
+| `requestHeaderAllowlist` | Prazno (izklopljeno); imena/glave ali predpone glav odjemalca za zajem kot atributi razpona |
+| `serviceName`            | `omniroute`; vir `service.name`                                                             |
+| `langfuseMapping`        | `false`; doda atribute generiranja/seje/uporabnika Langfuse                                 |
+| `identity`               | `pseudonymous`, `keyName` ali `none`                                                        |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                     |
+| `timeoutMs`              | `30000` na poskus HTTP                                                                      |
+| `environment`            | Ni nastavljeno; izbirni `langfuse.environment`                                              |
 
-Splošna nadzorna plošča prikazuje ta polja. `paths` sprejme polje prek API-ja ali besedilno območje
-z natančnimi potmi, ločenimi z novimi vrsticami/vejicami. Poti za vektorske vložitve, ponovno razvrščanje in druge poti se
-preskočijo, razen če so izrecno dovoljene. Tudi preskočene vrstice premaknejo kazalec; števca
-`exported`/`exportedTotal` obstoječega izvajalnika štejeta obdelane izvorne vrstice, vključno s filtriranimi
-vrsticami, ne pa sprejetih razponov. Filtriranje poteka v podrejenem procesu, ne da bi se spremenil njegov
-dogovor glede IPC/kazalca.
+Splošna nadzorna plošča izriše ta polja. `paths` sprejema polje API ali besedilno polje
+z natančnimi potmi, ločenimi z novimi vrsticami/vejicami. Vdelave, prerangiranje in druge poti
+so preskočene, razen če so izrecno dovoljene. Preskočene vrstice še vedno premaknejo kazalec naprej;
+obstoječa števca `exported`/`exportedTotal` v izvajalniku štejeta obdelane izvorne vrstice,
+vključno s filtriranimi vrsticami, ne pa sprejetih razponov. Filtriranje se izvede v podrejenem procesu,
+ne da bi se spremenila pogodba IPC/kazalca.
 
-Preverjanje URL-jev uporablja pomožno funkcijo `parseAndValidateNonMetadataUrl` iz
-`src/shared/network/outboundUrlGuard.ts`, ki ne potrebuje podatkovne zbirke: pravilnik `block-metadata`. Izvaja enaka
-brezpogojna preverjanja metapodatkov/protokola/vdelanih poverilnic kot validator spletnih kavljev z
-omogočenimi zasebnimi URL-ji, vendar namenoma dovoljuje cilje localhost/LAN brez globalnega
-preglasa z zastavico funkcionalnosti. To omogoča samostojno gostovane končne točke Langfuse, Phoenix, Tempo in Collector,
-vključno z zasebnimi končnimi točkami HTTP. Gostitelji metapodatkov v oblaku so vedno blokirani.
-Preusmeritvam se ne sledi, zato zbiralnik ne more preusmeriti poverilnic na drugega gostitelja.
-Tako kot obstoječa leksikalna zaščita URL-jev tudi ta ne fiksira razreševanja DNS; konfigurirajte le
-gostitelje pod nadzorom upravljavca. Kadar končna točka ni v zaupanja vrednem omrežju, dajte prednost HTTPS.
+Preverjanje URL-ja uporablja pomočnik `parseAndValidateNonMetadataUrl`, neodvisen od zbirke podatkov,
+iz `src/shared/network/outboundUrlGuard.ts`: pravilnik `block-metadata`. Ima enaka
+brezpogojna preverjanja metapodatkov/protokola/vdelanih poverilnic kot preverjevalnik spletnih kavljev,
+pri čemer so zasebni URL-ji dovoljeni, vendar namerno dovoljuje cilje localhost/LAN brez globalne
+preglasitve zastavice funkcije. To omogoča končne točke samostojno gostujočih storitev Langfuse,
+Phoenix, Tempo in Collector, vključno z zasebnimi končnimi točkami HTTP. Gostitelji metapodatkov
+v oblaku so vedno blokirani. Preusmeritve se ne upoštevajo, zato zbiralnik ne more preusmeriti
+poverilnic na drugega gostitelja. Tako kot obstoječa leksikalna zaščita URL-jev tudi ta ne zaklene
+razreševanja DNS; konfigurirajte samo gostitelje, ki jih nadzoruje upravljavec. Kadar končna točka
+ni v zaupanja vrednem omrežju, raje uporabite HTTPS.
 
-### Vsebina in dostava
+### Koristni tovor in dostava
 
-OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) prenaša en
-razpon CLIENT na dovoljeno vrstico, poimenovan z njeno natančno potjo zahteve. Poimenovanje po poti razlikuje
-Chat Completions, Responses in Messages, ne da bi v ime
-razpona vključevalo podatke o modelu ali identiteti. Atributi vira vključujejo `service.name` in `service.version` paketa.
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) vsebuje en
+razpon CLIENT za vsako dovoljeno vrstico, poimenovan z njeno natančno potjo zahteve. Poimenovanje
+poti razlikuje Chat Completions, Responses in Messages, ne da bi v ime razpona vključevalo podatke
+o modelu ali identiteti. Atributi vira vključujejo `service.name` in `service.version` paketa.
 
 Običajni zapisovalnik poskusov klepeta (`open-sse/handlers/chatCore/attemptLogging.ts`) ob zaključku zapiše
-`duration = Date.now() - startTime` in ne poda časovnega žiga;
-`saveCallLogOperation` v `src/lib/usage/callLogs.ts` privzeto nastavi časovni žig na čas zapisa
-(zaključka). Izvoz zato nastavi konec = časovni žig vrstice in začetek = konec − trajanje
-(milisekunde, pretvorjene v decimalne nanosekunde). Tudi zgodovinski časovni žigi,
-ki jih poda klicatelj, se ohranijo kot končni čas; na ravni vrstice ni ločevanja med začetkom in zaključkom.
-Trajanje z vrednostjo null postane nič. Neveljavni/manjkajoči časovni žigi povzročijo neuspeh paketa, namesto da bi ustvarili
-nedeterministične razpone. `ttftMs` lahko vsebuje null in se preslika v `omniroute.ttft_ms`.
+`duration = Date.now() - startTime` in ne posreduje časovnega žiga;
+`saveCallLogOperation` v `src/lib/usage/callLogs.ts` privzeto nastavi časovni žig na čas pisanja
+(zaključka). Izvoz zato nastavi konec na časovni žig vrstice, začetek pa na konec − trajanje
+(milisekunde, pretvorjene v decimalne nanosekunde). Časovni žigi iz preteklosti, ki jih posreduje klicatelj,
+se prav tako ohranijo kot čas konca; razlikovanje začetka/zaključka na ravni posamezne vrstice ne obstaja.
+Vrednost null za trajanje se pretvori v nič. Neveljavni ali manjkajoči časovni žigi povzročijo napako
+paketa, namesto da bi ustvarili nedeterministične razpone. `ttftMs` lahko vsebuje null in se preslika
+v `omniroute.ttft_ms`.
 
 Atributi vključujejo `gen_ai.operation.name="chat"`, ponudnika, zahtevani/odzivni model,
-vhodne/izhodne žetone, izbirne žetone za branje iz predpomnilnika/ustvarjanje predpomnilnika/sklepanje, stanje HTTP,
-kombinacijo, vir predpomnilnika, oznako seje in korelacijski ID. Celoštevilske vrednosti OTLP in časovni žigi
-so decimalni nizi; nizi, logične vrednosti in necela števila uporabljajo svoje izvorne različice vrednosti OTLP.
-Razponi napak imajo stanje ERROR in prečiščeno sporočilo o stanju. Kanonični
-zapis nima URL-ja nadrejenega gostitelja, zato je `server.address` izpuščen, namesto da bi
-zbiralnik napačno označeval kot strežnik modela. Strošek se ne izvozi.
+vhodne/izhodne žetone, izbirne žetone za branje predpomnilnika/ustvarjanje predpomnilnika/razmišljanje,
+stanje HTTP, kombinacijo, vir predpomnilnika, oznako seje in ID korelacije. Celoštevilske vrednosti
+OTLP in časovni žigi so decimalni nizi; nizi, logične vrednosti in ulomljena števila uporabljajo
+svoje izvorne različice vrednosti OTLP. Razponi z napakami imajo stanje ERROR in očiščeno sporočilo
+stanja. Kanonični zapis nima URL-ja gostitelja navzgor, zato je `server.address` izpuščen, namesto
+da bi napačno identificiral zbiralnik kot strežnik modela. Strošek se ne izvaža.
 
-Vsebino naloži samo `includeBodies=true`. Pri `langfuseMapping=false`
-`gen_ai.input.messages` / `gen_ai.output.messages` vsebujeta prečiščeni telesi zahteve/odziva
-v obliki JSON, kot ju shrani OmniRoute (kanonizirani, kadar ju je mogoče razčleniti), ne pa preoblikovanega polja
-sporočil po semantičnih konvencijah. Odrezana telesa in telesa, ki niso JSON, ostanejo surovo besedilo. Pri `langfuseMapping=true`
-se telesi oddajata samo kot `langfuse.observation.input` / `langfuse.observation.output`;
-atributi `gen_ai.*.messages` so izpuščeni, tako da je vsako telo poslano enkrat. Oba načina
-podedujeta `maxBodyBytes` iz obstoječega postopka nalaganja;
-`omniroute.bodies_truncated=true` označuje odrezovanje.
-Ta cilj ne dodaja dodatnih posnetkov cevovoda ali branja neprečiščenih artefaktov;
-izbirni zajem glav zahtev uporablja obstoječi naloženi posnetek odjemalca, opisan spodaj.
-Pri izvozu teles uporabite razpored na ravni minut, na primer `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`,
-namesto da bi se neobdelani podatki kopičili eno uro.
+Samo `includeBodies=true` naloži vsebino. Ko je `langfuseMapping=false`,
+`gen_ai.input.messages` / `gen_ai.output.messages` vsebujejo očiščeno JSON-vsebino zahteve/odgovora,
+kot jo je shranil OmniRoute (kanonizirano, če jo je mogoče razčleniti), ne pa preoblikovanega polja
+sporočil semconv. Obrezane/ne-JSON-vsebine ostanejo neobdelano besedilo. Ko je
+`langfuseMapping=true`, se telesa oddajo samo kot `langfuse.observation.input` /
+`langfuse.observation.output`; atributi `gen_ai.*.messages` so izpuščeni, zato je vsako telo
+poslano enkrat. Oba načina podedujeta `maxBodyBytes` iz obstoječe poti nalaganja;
+`omniroute.bodies_truncated=true` označuje obrezovanje.
+Ta cilj ne dodaja dodatnih posnetkov cevovoda ali branj nenasaniranih artefaktov;
+izbirni zajem glav zahtev uporablja obstoječi posnetek odjemalca, opisan spodaj.
+Pri izvozu teles uporabljajte minutno pogostost, na primer `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`,
+namesto kopičenja urnega zaostanka.
 
 ### Izbirne glave zahtev odjemalca
 
 Zajem glav je **privzeto izklopljen**. V konfiguraciji cilja nastavite `requestHeaderAllowlist`
-in omogočite **Izvoz pozivov in odzivov** (`includeBodies: true` pri cilju).
-Seznam dovoljenih glav sprejme polje prek API-ja ali besedilno območje z imeni, ločenimi z novimi vrsticami/vejicami:
+in omogočite **Izvozi pozive in odgovore** (`includeBodies: true` na cilju).
+Dovoljeni seznam sprejema polje API ali besedilno polje z imeni, ločenimi z novimi vrsticami/vejicami:
 
 ```json
 {
@@ -340,77 +345,58 @@ Seznam dovoljenih glav sprejme polje prek API-ja ali besedilno območje z imeni,
 }
 ```
 
-Imena se ujemajo natančno in ne glede na velikost črk, razen če en sam končni `*` izbere neprazno
-predpono imena glave. Samostojni `*`, vdelani nadomestni znaki in neveljavna imena glav HTTP so zavrnjeni.
-Izbirnikov je lahko največ 64, vsak pa ima ime/predpono z največ 256 bajti ASCII.
-Ta nastavitev je ločena od `headers`, ki izvoznika overi pri zbiralniku.
+Imena se ujemajo ne glede na velikost črk in natančno, razen če ena sama končna `*` izbere neprazen predponi imena glave. Samostojni `*`, vdelane nadomestne znake in neveljavna imena glav HTTP zavrnemo.
+Na voljo je največ 64 izbirnikov, pri čemer ima lahko vsak ime/predpono, dolgo največ 256 bajtov ASCII.
+Ta nastavitev je ločena od nastavitve `headers`, ki izvoznika overi pri zbiralniku.
 
-Zajem bere samo `pipeline_client_request`, napolnjen iz `clientRawRequest` shranjenega podrobnega cevovoda
-(ali starejšega `clientRequest`). Nikoli ne uporabi glav zahteve ponudnika kot nadomestnega vira.
-Podrobno beleženje cevovoda je moralo biti omogočeno ob beleženju zahteve. Če je
-`includeBodies` onemogočen ali če JSON posnetka odjemalca manjka, je poškodovan ali odrezan, se atributi
-glav ne oddajo. Povečanje `maxBodyBytes` lahko prepreči rezanje posnetka med izvozom;
-ne more pa obnoviti podrobnosti, ki nikoli niso bile shranjene. Posnetek, večji od 1 MiB ali z več kot
-256 vnosi glav, se prezre. Obstoječi izvoz pozivov/odgovorov ostane omogočen poleg
-zajema glav; seznam dovoljenih ne zagotavlja načina nalaganja samo glav.
+Zajem bere samo iz `pipeline_client_request`, ki se napolni iz shranjenega podrobnega cevovoda
+`clientRawRequest` (ali starejšega `clientRequest`). Nikoli ne uporabi rezervnega vira v obliki glav zahtevka ponudnika.
+Podrobno beleženje cevovoda mora biti omogočeno v času beleženja zahtevka. Če je
+`includeBodies` onemogočen ali če JSON posnetka odjemalca manjka, je poškodovan ali okrnjen, se atributi glav ne oddajo. Povečanje `maxBodyBytes` lahko prepreči krajšanje posnetka med izvozom;
+ne more pa obnoviti podrobnosti, ki niso bile nikoli shranjene. Posnetek, večji od 1 MiB ali vsebuje več kot
+256 vnosov glav, se prezre. Obstoječi izvoz pozivov/odgovorov ostane omogočen skupaj z zajemom glav; seznam dovoljenih ne zagotavlja načina hidracije samo za glave.
 
 Izbrane vrednosti postanejo polja nizov OTLP `http.request.header.<full lowercase header name>`,
-tudi če gre za en sam niz. Na primer, `X-OmniRoute-Meta-Team: example-team` postane
+tudi če gre za eno samo nizovno vrednost. Na primer, `X-OmniRoute-Meta-Team: example-team` postane
 `http.request.header.x-omniroute-meta-team` z
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-Celotna predpona se ohrani: to so navadne glave, brez razčlenjevanja poslovnih polj ali
-pretvorbe v metapodatke `omniroute.metadata.*` / Langfuse. `langfuseMapping` ne spreminja semantike
-glav. Izbrani `User-Agent` z eno vrednostjo nastavi tudi standardni skalarni atribut
-`user_agent.original`. Vejice znotraj ene vrednosti se ne uporabljajo za razdeljevanje. Različice z različno velikostjo črk se združijo v vrstnem
-redu shranjenih vnosov; katera koli neveljavna različica povzroči izpustitev celotne glave. Atributi so razvrščeni po imenih z malimi črkami.
+Celotna predpona se ohrani: to so običajne glave, brez razčlenjevanja poslovnih polj ali pretvorbe v
+`omniroute.metadata.*` / metapodatke Langfuse. `langfuseMapping` ne spremeni semantike glav. Izbrana glava `User-Agent` z eno vrednostjo nastavi tudi standardno skalarno polje
+`user_agent.original`. Vejice znotraj ene vrednosti se ne razdelijo. Različice velikosti črk se združijo v vrstnem redu shranjenih vnosov; če je katera koli različica neveljavna, se celotna glava izpusti. Atributi so razvrščeni po imenih v malih črkah.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, glave s ključi API, imena, ki vsebujejo
-oznake auth/token/secret/password/credential, in interne poverilnice prehoda so vedno
-izključeni, tudi če so izbrani ali delno zakriti v shrambi. Znani vzorci poverilnic uporabljajo
-skupni detektor poverilnic; oznake zakritja se izpustijo in se ne izvozijo kot varne vrednosti.
-Sprejeti so samo nizi in neprazna polja nizov; števila ali objekti se ne pretvarjajo.
-Neveljavna imena, ključi prototipov, krmilni znaki (razen vodoravnega tabulatorja) in nepravilno oblikovan Unicode
-se prezrejo, ne da bi paket spodletel ali da bi bila njihova vsebina vključena v napake.
+Glave Authorization, Proxy-Authorization, Cookie, Set-Cookie in glave API-ključev, imena, ki vsebujejo označevalce
+auth/token/secret/password/credential, ter notranje poverilnice prehoda so vedno izključene, tudi če so izbrane ali delno maskirane v shrambi. Znani vzorci poverilnic ponovno uporabijo skupni detektor poverilnic; oznake za redigiranje se izpustijo in se ne izvozijo kot varne vrednosti. Sprejmejo se samo nizi in neprazna polja nizov; številke ali predmeti se ne pretvorijo. Neveljavna imena, ključi prototipov, kontrolni znaki (razen vodoravnega tabulatorja) in nepravilno oblikovan Unicode se prezrejo, ne da bi paket spodletel ali da bi se njihova vsebina odražala v napakah.
 
-Vsak razpon zajame največ 32 glav, 16 vrednosti na glavo, 4096 bajtov UTF-8 na vrednost
-in skupno 16384 bajtov UTF-8 za imena in vrednosti zajetih glav. Prevelike/neveljavne glave
-se izpustijo v celoti in se ne režejo. Izbira je odločitev upravljavca glede zasebnosti: tudi navidezno varna imena
-lahko vsebujejo osebne podatke, te omejitve/detektorji pa niso splošno orodje za odstranjevanje osebnih podatkov.
+Vsak razpon zajame največ 32 glav, 16 vrednosti na glavo, 4096 bajtov UTF-8 na vrednost in 16384 skupnih bajtov UTF-8 za imena in vrednosti zajetih glav. Prevelike/neveljavne glave se izpustijo v celoti, ne skrajšajo. Izbira je odločitev upravljavca glede zasebnosti: tudi na videz varna imena lahko vsebujejo osebne podatke, te omejitve in detektorji pa niso splošni čistilnik PII.
 
 ### Omejitve dostave
 
-Zahteve so omejene na 500 razponov in 4 MiB JSON v kodiranju UTF-8, vključno z ovojnico.
-Velikost vsakega dovoljenega razpona se preveri pred prvo zahtevo paketa kazalca. Če je posamezen
-razpon večji od omejitve, se ne pošlje noben del tega paketa, postopek pa spodleti z navodilom za zmanjšanje
-`maxBodyBytes`; razpon se ne zavrže tiho. Predhodno preverjanje hrani samo sklice na zapise in
-število bajtov ter zavrže vsak začasni razpon/JSON; razponi se znova sestavijo za velikostno omejene dele,
-namesto da bi se hranila druga serializirana kopija paketa. Pri HTTP 408/429/5xx, omrežnih napakah in časovnih prekoračitvah se izvedejo največ
-trije poskusi z eksponentnim zamikom 250/500 ms. Sekunde ali datumi HTTP v `Retry-After`
-lahko podaljšajo zamik do 5 sekund. Drugi statusi povzročijo takojšen neuspeh. Tudi delna zavrnitev OTLP 2xx sproži izjemo, namesto da bi
-potrdila izgubljeni razpon; sprejete so prazne potrditve ali potrditve z veljavnim JSON, z
-omejitvijo branja odgovora na 64 KiB.
+Zahtevki so omejeni na 500 razponov in 4 MiB JSON-a UTF-8, vključno z ovojnico.
+Vsak dovoljen razpon se preveri glede velikosti pred prvim zahtevkom paketa kazalca. Posamezen
+razpon, večji od omejitve, ne pošlje nobenega dela tega paketa in spodleti z navodilom za znižanje
+`maxBodyBytes`; ne zavrže se tiho. Predhodno preverjanje ohrani samo sklice na zapise in števila bajtov ter zavrže vsak začasni razpon/JSON; razponi se znova sestavijo za omejene delčke, namesto da bi hranili drugo serializirano kopijo paketa. HTTP 408/429/5xx, omrežne napake in časovne omejitve dobijo največ
+tri poskuse z eksponentnim umikom 250/500 ms. `Retry-After` v sekundah ali datumi HTTP
+lahko podaljšajo zakasnitev do 5 sekund. Druga stanja povzročijo takojšnjo napako. Delna zavrnitev OTLP 2xx prav tako povzroči napako, namesto da bi potrdila izgubljeni razpon; prazne ali veljavne potrditve JSON se sprejmejo, omejitev branja odgovora pa je
+64 KiB.
 
-Napake vsebujejo samo podatke, ki jih določa izvoznik: status HTTP, razred ponovnega poskusa, število poskusov in poslanih
-razponov ali vnaprej določeno besedilo o neuspešni potrditvi/omrežni napaki. Telesa odgovorov zbiralnika,
-števila delno uspešnih obdelav in glave odgovorov se nikoli ne kopirajo v napake, dnevnike ali
-nadzorno ploščo. Neuspešen ali delno sprejet paket se ne potrdi: cilj prikaže
-stanje neuspeha s tem statusom, kazalec ostane pri zadnjem potrjenem paketu, naslednji zagon pa
-znova pošlje iste vrstice. Trajni statusi še naprej povzročajo neuspeh, dokler zbiralnik ali konfiguracija
-nista popravljena. Za podrobnosti odgovorov uporabite dnevnike zbiralnika. Povzetki napak v dnevniku klicev ohranijo
-svoje ločeno zakrivanje.
-`prepare()` ne pripravi nobenih virov; preizkus pošlje natanko `{"resourceSpans":[]}` in sporoči
-status HTTP, ne da bi zapisal razpone dnevnika klicev.
+Napake vsebujejo samo dejstva, ki jih določa izvoznik: stanje HTTP, razred ponovnega poskusa, število poskusov in število poslanih razponov ali nespremenljivo besedilo za napako potrditve/omrežja. Telesa odgovorov zbiralnika,
+števila delnih uspehov in glave odgovorov se nikoli ne kopirajo v napake, dnevnike ali nadzorno ploščo. Paket, ki ni uspel ali je bil delno sprejet, ni potrjen: cilj prikaže stanje
+Failing s tem stanjem, kazalec ostane pri zadnjem potrjenem paketu, naslednji zagon pa
+znova pošlje iste vrstice. Trajna stanja še naprej povzročajo napake, dokler zbiralnik ali konfiguracija
+ni popravljena. Za podrobnosti o odgovorih uporabite lastne dnevnike zbiralnika. Ločeni povzetki napak dnevnika klicev ohranijo svoje redigiranje.
+`prepare()` ne pripravi ničesar; Test objavi natanko `{"resourceSpans":[]}` in poroča
+stanje HTTP, ne da bi zapisal razpone dnevnika klicev.
 
-Identifikatorji sledi in identifikatorji razponov so prvih 32/16 šestnajstiških števk zgoščene vrednosti SHA-256 za
+ID-ji sledi in ID-ji razponov so prvih 32 oziroma 16 šestnajstiških števk SHA-256 nad
 `"omniroute.trace\\0" + callLogId` in `"omniroute.span\\0" + callLogId`. Ponovna pošiljanja imajo
-enake identifikatorje. To ne zagotavlja odstranjevanja dvojnikov: nekateri zaledni sistemi, vključno z zajemom Langfuse
-v4, ne odstranjujejo podvojenih razponov z enakim identifikatorjem. Sesutje ali delna napaka pri pošiljanju dela paketa lahko
-povzroči ponovno pošiljanje največ enega nepotrjenega paketa kazalca; podvoji se lahko celoten paket,
-ne le njegov zadnji del HTTP. Pri izbiri velikosti paketa kazalca upoštevajte ta kompromis.
+enake ID-je. To ni zagotovilo za preprečevanje podvajanja: nekatera zaledja, vključno z vnosom Langfuse
+v4, ne odstranjujejo podvojenih razponov z istim ID-jem. Zrušitev ali napaka delnega delčka lahko
+znova pošlje največ en nepotrjen paket kazalca; celoten ta paket se lahko podvoji,
+ne le njegov zadnji del HTTP. Velikost paketa kazalca izberite ob upoštevanju tega kompromisa.
 
-### Primer za Langfuse
+### Primer Langfuse
 
-Za samostojno gostovani primerek Langfuse konfigurirajte ta polja:
+Za samostojno gostujoči primerek Langfuse konfigurirajte ta polja:
 
 ```json
 {
@@ -423,44 +409,44 @@ Za samostojno gostovani primerek Langfuse konfigurirajte ta polja:
 }
 ```
 
-Vrednost Authorization sestavite lokalno kot kodiranje Base64 dobesednega niza `public-key:secret-key`
+Vrednost Authorization lokalno sestavite kot Base64 dobesednega niza `public-key:secret-key`
 (na primer z `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
-Pravih poverilnic ne lepite v dnevnike, posnetke zaslona ali prijave težav. Preslikava samodejno
-nastavi `x-langfuse-ingestion-version: 4`; Authorization se še vedno poda v `headers`.
-Tako glave kot ustvarjena sol za identiteto uporabljajo obstoječi mehanizem šifriranih skrivnih polj
-in nadomestne oznake API; `STORAGE_ENCRYPTION_KEY` je obvezen.
+Pravih poverilnic ne prilepite v dnevnike, posnetke zaslona ali poročila o težavah. Preslikava samodejno
+nastavi `x-langfuse-ingestion-version: 4`; Authorization je še vedno naveden v `headers`.
+Glave in ustvarjena sol identitete uporabljajo obstoječi mehanizem šifriranih polj skrivnosti ter nadomestne oznake API; zahtevan je `STORAGE_ENCRYPTION_KEY`.
 
-Preslikava doda vrsto/model generiranja, podrobnosti o uporabi v obliki JSON (vhod/izhod/skupaj in razpoložljive
-ključe predpomnilnika), posnetke vhoda/izhoda v obliki JSON, raven ERROR/DEFAULT, očiščeno sporočilo o stanju,
-ime sledi, ID seje, izbirno okolje in atribut
-`langfuse.observation.metadata.<key>`, po katerem je mogoče filtrirati, za ponudnika, zahtevani model, pot, kombinacijo, vir
-predpomnilnika in stanje. `langfuse.observation.completion_start_time` je čas v obliki ISO 8601,
-izračunan kot začetek + TTFT, vendar le, če je TTFT znan in znotraj trajanja. Atributi stroškov se ne pošiljajo.
+Preslikava doda vrsto generiranja/model, podrobnosti o uporabi JSON-a (vhod/izhod/skupaj in razpoložljivi
+ključi predpomnilnika), posnetke vhodnih/izhodnih podatkov JSON, raven ERROR/DEFAULT, očiščeno
+statusno sporočilo, ime sledi, ID seje, izbirno okolje in filtrirni
+`langfuse.observation.metadata.<key>` za ponudnika, zahtevani model, pot, kombinacijo, vir predpomnilnika
+in stanje. `langfuse.observation.completion_start_time` je v zapisu ISO 8601 ob
+začetku + TTFT samo, kadar je TTFT znan in znotraj trajanja. Atributi stroškov se ne pošiljajo.
 
 Načini identitete veljajo za `langfuse.user.id`:
 
 - `pseudonymous` (privzeto): HMAC-SHA256 notranjega ID-ja ključa API z naključno
-  32-bajtno soljo za vsak cilj posebej. Če sol ni podana, se ustvari ob ustvarjanju, šifrira
-  kot `identitySalt`, nikoli ne vrne in ohrani med urejanjem. Neobdelani ID-ji ključev se nikoli ne
-  vključijo v atribute razponov. Ponovno ustvarjanje ali zamenjava soli cilja spremeni identitete.
-- `keyName`: nastavljeno ime ključa API, ki namerno razkrije to oznako, določeno s strani upravljavca.
-- `none`: brez ID-ja uporabnika. Oznake sej se še vedno izvažajo, kadar so prisotne; ti načini ne
-  anonimizirajo poljubne vsebine pozivov ali oznak sej/korelacije, ki jih določi upravljavec.
+  32-bajtno soljo za posamezni cilj. Sol se ob ustvarjanju ustvari, če manjka, šifrira
+  kot `identitySalt`, se nikoli ne vrne in se ohrani pri urejanju. Surovi ID-ji ključev se
+  nikoli ne zapišejo v atribute razponov. Ponovno ustvarjanje/zamenjava soli cilja spremeni identitete.
+- `keyName`: konfigurirano ime ključa API, kar namerno razkrije to oznako upravljavca.
+- `none`: brez ID-ja uporabnika. Oznake sej se še vedno izvozijo, kadar so prisotne; ti načini
+  ne anonimizirajo poljubne vsebine pozivov ali oznak sej/komunikacije, ki jih vnese upravljavec.
 
-### Začetek brez naknadnega uvoza zgodovine
+### Začetek brez dopolnitve
 
-Samo ob ustvarjanju omogočite **Začni s trenutnega položaja (preskoči obstoječe dnevnike)** ali podajte
-`startFromCurrentPosition: true` na najvišji ravni podatkov zahteve API za ustvarjanje. S tem se
-`cursor_row_id` z obstoječimi pomožnimi funkcijami za kazalec inicializira na trenutni največji ohranjeni rowid dnevnika klicev,
-brez migracije. Privzeta vrednost je false (kazalec 0 in naknadni uvoz ohranjene zgodovine).
+Samo ob ustvarjanju omogočite **Začni s trenutnim položajem (preskoči obstoječe dnevnike)** ali na najvišji ravni
+tovora API-ja za ustvarjanje posredujte `startFromCurrentPosition: true`. To inicializira
+`cursor_row_id` na trenutno največjo ohranjeno vrednost rowid dnevnika klicev z uporabo obstoječih
+pomožnih funkcij kazalca, brez migracije. Privzeta vrednost je false (kazalec 0 in dopolnitev ohranjene zgodovine).
 To ni nastavitev za ponastavitev kazalca ob posodobitvi.
 
-Skupna dopolnitev `ttftMs` doda tudi stolpec `ttft_ms`, ki dopušča vrednost null, v preslikovalnik BigQuery
-in shemo novih tabel: njen preizkus sheme zahteva, da ima vsako polje kanoničnega zapisa ustrezen
-stolpec. Izvoz v obstoječe tabele ostane nespremenjen: `prepare()` prebere shemo tabele in
-izpusti samo `ttft_ms`, kadar ta stolpec manjka. Dodajte stolpec INT64, ki dopušča vrednost null, da boste ob naslednjem zagonu
-prejeli TTFT, ali uporabite novo tabelo. PATCH, samodejna sprememba sheme ali dodatna
-dovoljenja niso potrebni; za vsa druga polja vrstic še naprej velja strogo preverjanje sheme.
+Skupna razširitev `ttftMs` doda tudi stolpec nullable `ttft_ms` v preslikovalnik BigQuery
+in shemo nove tabele: njen preizkus sheme zahteva, da ima vsako polje kanoničnega zapisa svoj
+stolpec. Obstoječe tabele še naprej izvažajo nespremenjeno: `prepare()` prebere shemo tabele
+in izpusti samo `ttft_ms`, kadar ta stolpec manjka. Dodajte stolpec nullable INT64, da dobite TTFT
+pri naslednjem zagonu, ali uporabite novo tabelo. Izbirni stolpec TTFT ne sproži posodobitve sheme. Stolpci z dokazi o uporabi
+sledijo spodnjemu pogojnemu združljivostnemu postopku z izrecno vključitvijo; druga polja vrstic ohranjajo strogo
+preverjanje sheme.
 
 ---
 
@@ -485,15 +471,29 @@ Dve pravili za nov cilj:
 
 ---
 
-## 7. Upravljanje
+## 7. Uporaba
 
-- **Nadzorna plošča**: Integracije → Izvoz dnevnikov. Dodajte cilj, zaženite **Preizkus**, da preverite poverilnice
-  brez zapisovanja vrstic, nato ga omogočite.
-- **Zaostanek**: vsaka kartica cilja prikazuje čakajoče vrstice in kazalec; `GET
-/api/log-export/status` vrne iste podatke in zadnjih 20 izvedb opravila.
-- **Neuspeh enega cilja ne povzroči neuspeha drugih** — povzetek izvedbe zabeleži stanje posameznega cilja
-  v `last_status` / `last_error`, zgodovina izvedb opravila pa hrani skupno stanje.
-- **Z izbrisom cilja izbrišete tudi njegov kazalec.** Ob ponovnem dodajanju se obdelava začne pri najstarejšem ohranjenem
-  dnevniškem zapisu klica, zato se znova pošljejo tudi vrstice, ki jih cilj morda že ima. V BigQuery vrednost
-  `insertId` za posamezno vrstico prepreči podvajanje le znotraj časovnega okna za odstranjevanje dvojnikov v BigQuery, zato cilj raje onemogočite,
-  kot da ga izbrišete.
+- **Nadzorna plošča**: Integrations → Log export. Dodajte cilj, za preverjanje poverilnic zaženite
+  **Preizkusi**, ne da bi zapisovali vrstice, nato pa ga omogočite.
+- **Zaostanek**: kartica vsakega cilja prikazuje čakajoče vrstice in kazalec; `GET
+/api/log-export/status` vrne enake podatke ter zadnjih 20 zagonov opravil.
+- **Napaka enega cilja ne povzroči napake pri drugih** — povzetek zagona zabeleži stanje za posamezen cilj
+  v `last_status` / `last_error`, zgodovina zagonov opravil pa ohrani skupni rezultat.
+- **Brisanje cilja izbriše njegov kazalec.** Če ga znova dodate, se začne pri najstarejšem ohranjenem
+  dnevniku klicev, zato se znova pošljejo vrstice, ki jih cilj morda že vsebuje. V BigQueryju `insertId`
+  to prepreči le v okviru lastnega okna za odstranjevanje dvojnikov v BigQueryju, zato je bolje cilj
+  onemogočiti, kot ga izbrisati.
+
+### Združljivost sheme dokazov o uporabi
+
+Nove tabele BigQuery vključujejo nullable `usage_evidence` (STRING, ki vsebuje JSON) in
+`usage_estimated` (BOOL). Ko je omogočen `autoCreate`, lahko obstoječa tabela prejme
+samo te manjkajoče nullable stolpce. Izvoznik ohrani celotno obstoječo shemo, vključno z metapodatki polj,
+in pošlje pogojni PATCH z uporabo vrnjenega etag. Sočasna sprememba sheme povzroči neuspeh izvoza,
+namesto da bi jo prepisala; pri naslednjem zagonu se tabela znova prebere.
+
+Ko je `autoCreate` onemogočen, morate te stolpce dodati sami, preden izvozite zapise z dokazi o uporabi.
+Manjkajoči metapodatki sheme/etag ali neuspešna posodobitev prav tako preprečijo vstavljanja z dokazi.
+Kazalec izvoza se ob takšni napaki ne premakne naprej in dokazi niso nikoli tiho zavrženi.
+Lokalno ohranjanje dnevnikov še vedno velja, ko je izvoz blokiran, zato napako odpravite, preden poteče
+rok hrambe izvornih vrstic.
