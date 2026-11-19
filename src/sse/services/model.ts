@@ -361,6 +361,10 @@ function buildRuntimeModelMeta(
   const metadata = resolveRuntimeFormats(customMatch, syncedMatch, compatOverrideMatch);
   copyRegistryThinkingMetadata(metadata, registryMatch);
   copySyncedThinkingMetadata(metadata, syncedMatch);
+  // The operator's own flag on the custom row (case-insensitive id match, like supportsVision) wins.
+  if (typeof customMatch?.supportsThinking === "boolean") {
+    metadata.supportsThinking = customMatch.supportsThinking;
+  }
   return metadata;
 }
 

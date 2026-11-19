@@ -216,6 +216,10 @@ function withAddTimeContextOverride<T extends object>(
   };
 }
 
+/** Opt-in "Thinking capable" mark: only `true` is stored, anything else adds no key. */
+const optInThinkingMeta = (supportsThinking: boolean | null | undefined) =>
+  supportsThinking === true ? { supportsThinking } : {};
+
 /**
  * POST /api/provider-models
  * Body: { provider, modelId, modelName?, contextWindowOverride? }
@@ -253,6 +257,7 @@ export async function POST(request) {
       max_output_tokens: maxOutputTokens,
       // #1904: manual vision-capability override set in the add-model form.
       supportsVision,
+      supportsThinking,
       // #9820: optional video-generation job preset (job/poll path).
       generationConfig,
       isFree,
@@ -293,6 +298,7 @@ export async function POST(request) {
         ...(Array.isArray(supportedInputTypes) ? { supportedInputTypes } : {}),
         ...(typeof modelType === "string" ? { modelType } : {}),
         ...(endpointCapabilitySource ? { endpointCapabilitySource } : {}),
+        ...optInThinkingMeta(supportsThinking),
       }
     );
 
@@ -347,6 +353,7 @@ export async function PUT(request) {
       contextWindowOverride,
       maxOutputTokenOverride,
       supportsVision,
+      supportsThinking,
       thinkingReplay,
       generationConfig,
       isFree,
@@ -368,6 +375,7 @@ export async function PUT(request) {
       updates.preserveOpenAIDeveloperRole = preserveOpenAIDeveloperRole;
     if ("upstreamHeaders" in raw) updates.upstreamHeaders = upstreamHeaders;
     if ("supportsVision" in raw) updates.supportsVision = supportsVision;
+    if ("supportsThinking" in raw) updates.supportsThinking = supportsThinking;
     if ("isFree" in raw) updates.isFree = isFree;
     // #9820: video-generation job preset — schema is non-nullable optional, so
     // presence implies a well-formed { preset } object; null is rejected by Zod.

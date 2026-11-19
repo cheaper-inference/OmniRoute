@@ -102,6 +102,8 @@ export type CompatModelRow = {
   /** #1904: manual vision-capability override for custom models whose upstream
    * discovery metadata doesn't self-report an image input modality. */
   supportsVision?: boolean;
+  /** Opt-in manual thinking-capable flag for custom models (self-hosted reasoning backends). */
+  supportsThinking?: boolean;
   isFree?: boolean;
 };
 

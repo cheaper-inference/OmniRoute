@@ -210,6 +210,40 @@ export function readCustomModelsByProvider(
   }
 }
 
+/**
+ * Explicit custom-model "Thinking capable" flag, opt-in: true only when this provider's own
+ * `customModels` row for the id (case-insensitive) carries `supportsThinking: true`. Reads the
+ * snapshot's rows when given, else one key_value read, like the vision override above.
+ */
+export function getCustomModelThinkingFlag(
+  providerId: string,
+  modelId: string,
+  rows?: CustomModelsByProvider | null
+): boolean {
+  if (!providerId || !modelId) return false;
+  try {
+    // A supplied snapshot is the whole truth (a provider missing from it has no custom rows): no DB read.
+    const stored = rows
+      ? rows[providerId]
+      : JSON.parse(
+          getKeyValue(
+            getDbInstance()
+              .prepare("SELECT value FROM key_value WHERE namespace = 'customModels' AND key = ?")
+              .get(providerId)
+          ).value ?? "null"
+        );
+    return (
+      Array.isArray(stored) &&
+      stored.some(
+        (row) =>
+          typeof row?.id === "string" && idsEqual(row.id, modelId) && row.supportsThinking === true
+      )
+    );
+  } catch {
+    return false;
+  }
+}
+
 /** Derive the explicit custom-model vision overrides from already-read `customModels` rows. */
 export function buildCustomModelVisionOverrides(
   customModelsByProvider: CustomModelsByProvider

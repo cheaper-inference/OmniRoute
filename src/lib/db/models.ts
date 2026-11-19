@@ -69,6 +69,7 @@ export {
   type ConnectionAdmissionRef,
 } from "./models/freeOnlyAdmission";
 export {
+  getCustomModelThinkingFlag,
   getCustomModelVisionOverride,
   listCustomModelVisionOverrides,
   buildCustomModelVisionOverrides,
@@ -169,6 +170,7 @@ export async function addCustomModel(
     supportedInputTypes?: string[];
     modelType?: "chat" | "embedding" | "image" | "rerank";
     endpointCapabilitySource?: "declared" | "inferred" | "defaulted" | "operator";
+    supportsThinking?: boolean;
   }
 ) {
   const db = getDbInstance();
@@ -206,6 +208,7 @@ export async function addCustomModel(
       ? { supportedInputTypes: extraMeta.supportedInputTypes }
       : {}),
     ...(typeof extraMeta?.modelType === "string" ? { modelType: extraMeta.modelType } : {}),
+    ...(extraMeta?.supportsThinking === true ? { supportsThinking: true } : {}),
   };
   models.push(model);
   db.prepare(
@@ -854,6 +857,11 @@ export async function updateCustomModel(
   // #1904: manual vision-capability override — `null` clears back to the
   // id-based heuristic in getCustomVisionCapabilityFields().
   applyTriStateBooleanOverride(next, updates, "supportsVision");
+  // Opt-in flag: only `true` is stored; `false` and `null` both clear the key (never an inert false).
+  if (Object.prototype.hasOwnProperty.call(updates, "supportsThinking")) {
+    if (updates.supportsThinking === true) next.supportsThinking = true;
+    else delete next.supportsThinking;
+  }
   applyTriStateBooleanOverride(next, updates, "isFree");
   if (updates.supportedEndpoints !== undefined) {
     next.endpointCapabilitySource = "operator";
