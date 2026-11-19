@@ -27,8 +27,24 @@ export type PluginRequestGateResult<TBody> =
 // client requests, not attempts. A plain pass-through is therefore remembered per client request
 // (the headers snapshot chat.ts builds once) and target. A block or a rewrite is never remembered:
 // the next attempt gets the plugin's answer again.
+// A hook that rewrites the body in place and returns the same object is a rewrite too: a
+// failover attempt can get its own top-level copy of the body (chat.ts copies it when it rewrites
+// the model), which would miss the edit. It is detected by comparing the body's top-level property
+// references before and after the hook (cheap, no serialization). Nested in-place edits are shared
+// with such a copy, so they still reach the next attempt.
 // shortcut: a caller with no headers snapshot is never remembered; upgrade if one needs it.
 const passedThrough = new WeakMap<object, Set<string>>();
+
+function topLevelSnapshot(body: unknown): unknown[] | null {
+  if (!body || typeof body !== "object") return null;
+  return Object.entries(body as Record<string, unknown>).flat();
+}
+
+function keepsTopLevel(before: unknown[] | null, body: unknown): boolean {
+  const after = topLevelSnapshot(body);
+  if (before === null || after === null) return before === after;
+  return before.length === after.length && before.every((value, i) => Object.is(value, after[i]));
+}
 
 export async function runPluginRequestGate<TBody>(
   args: Omit<Parameters<typeof runPluginOnRequestHook>[0], "body"> & { body: TBody }
@@ -36,6 +52,7 @@ export async function runPluginRequestGate<TBody>(
   const owner = args.headers ?? null;
   const key = `${args.provider}\u0000${args.model}`;
   if (owner && passedThrough.get(owner)?.has(key)) return { blocked: false, body: args.body };
+  const before = owner ? topLevelSnapshot(args.body) : null;
   const pluginGate = await runPluginOnRequestHook(args);
   if (pluginGate.blocked === true) {
     return {
@@ -57,6 +74,8 @@ export async function runPluginRequestGate<TBody>(
   if (pluginGate.body && pluginGate.body !== args.body) {
     return { blocked: false, body: pluginGate.body };
   }
-  if (owner) passedThrough.set(owner, (passedThrough.get(owner) ?? new Set()).add(key));
+  if (owner && keepsTopLevel(before, args.body)) {
+    passedThrough.set(owner, (passedThrough.get(owner) ?? new Set()).add(key));
+  }
   return { blocked: false, body: args.body };
 }

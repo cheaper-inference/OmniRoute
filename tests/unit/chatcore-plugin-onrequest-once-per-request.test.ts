@@ -180,3 +180,24 @@ test("a body-rewriting hook is asked again on every call", async () => {
     assert.deepEqual(second.body, first.body);
   }
 });
+
+test("a hook that rewrites the body in place and returns the same object is asked again", async () => {
+  const hook = { calls: 0 };
+  registerHook("onRequest", PLUGIN, (ctx: { body: { messages?: unknown[] } }) => {
+    hook.calls += 1;
+    ctx.body.messages = [{ role: "user", content: "rewritten-in-place" }];
+    return { body: ctx.body };
+  });
+  const headers = { "x-test": "1" };
+  await runPluginRequestGate(gateArgs(headers));
+  // The failover attempt gets its own top-level body object: the in-place rewrite of the first
+  // attempt is not on it, so the hook must run again.
+  const second = await runPluginRequestGate(gateArgs(headers));
+  assert.equal(hook.calls, 2);
+  assert.equal(second.blocked, false);
+  if (!second.blocked) {
+    assert.deepEqual((second.body as { messages: unknown[] }).messages, [
+      { role: "user", content: "rewritten-in-place" },
+    ]);
+  }
+});
