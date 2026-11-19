@@ -11,7 +11,7 @@ import {
   downloadUpstreamMedia,
   UPSTREAM_MEDIA_LIMITS,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../../utils/remoteMediaFetch.ts";
 import { sanitizeErrorMessage } from "../../utils/error.ts";
 import { abortedVideoResult, POLL_ABORTED, pollJsonAfter } from "./abort.ts";
 

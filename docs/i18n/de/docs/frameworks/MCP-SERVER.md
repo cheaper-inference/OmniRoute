@@ -20,6 +20,8 @@ Oder über den Open-SSe-Verkehr:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -139,12 +141,12 @@ Cursor, Cline und kompatiblen MCP-Clients.
 | `omniroute_ccr_retrieve`            | `read:compression`  | Rufen Sie CCR -Inhalte vollständig oder mit den Modi „Kopf“, „Ende“, „Zeilen“, „Grep“ und „Statistik“ ab                                                                         |
 | `omniroute_ccr_inspect`             | `read:compression`  | Überprüfen Sie CCR -Metadaten des Anrufers, ohne Inhalte zurückzugeben                                                                                                           |
 | `omniroute_ccr_list`                | `read:compression`  | Listen Sie paginierte Metadaten für CCR -Blöcke im Besitz des Anrufers auf                                                                                                       |
-| `omniroute_ccr_delete`              | `write:compression` | Löschen Sie einen CCR -Block, der dem Anrufer gehört                                                                                                                             |
-| `omniroute_ccr_stats`               | `read:compression`  | Melden Sie die aufruferbezogene Speichernutzung, Lebenszykluszähler und Speichergrenzen                                                                                          |
+| `omniroute_ccr_delete`              | `write:compression` | Löschen Sie einen CCR -Block im Besitz des Anrufers                                                                                                                              |
+| `omniroute_ccr_stats`               | `read:compression`  | Melden Sie aufruferbezogene Speichernutzung, Lebenszykluszähler und Speichergrenzen                                                                                              |
 | `omniroute_rtk_discover`            | `read:compression`  | Entdecken Sie wiederkehrendes Rauschen in Opt-in- RTK -Ausgabebeispielen                                                                                                         |
 | `omniroute_rtk_learn`               | `read:compression`  | Generieren Sie einen überprüfbaren RTK -Filterentwurf aus Opt-in-Beispielen                                                                                                      |
 
-CCR -Einträge verwenden einen zweistufigen Speicher: eine Hot-In-Memory-Schicht, die auf lokalen Nicht-Cloud-Laufzeiten durch eine dauerhafte SQLite Schicht (`ccr_blocks`, standardmäßig aktiviert) unterstützt wird, sodass ein Block die Räumung oder einen Neustart überlebt, bis sein TTL aufgebraucht ist — ausgenommen sind Blöcke über 512 KB und Cloud-Laufzeiten, die nur im Speicher verbleiben. Jeder Block ist auf 2 MiB begrenzt, jeder Principal auf 16 MiB und der globale Speicher auf 64 MiB. Die Einträge werden standardmäßig im 24-Stunden TTL (maximal sieben Tage) angezeigt. Der vollständige MCP Abruf ist auf 256 KiB beschränkt. Größere Blöcke bleiben über die Ranged- und Grep-Modi verfügbar. Speicherung, Abruf, Auflistung, Überprüfung, Löschung und Statistiken werden durch den authentifizierten API-Schlüsselprinzipal isoliert. Prüfdatensätze enthalten Hashes und Größenmetadaten, niemals Inhalte. Bedienerbezogene Details (die beiden Markierungen, Client-Voraussetzungen, `codemode:false`, pro-tool-Umfänge, Paginierung und eine Diagnosematrix) finden Sie in [den Komprimierungs-Engines → -Voraussetzungen/Bedienerhandbuch](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR -Einträge verwenden einen zweistufigen Speicher: eine Hot-In-Memory-Schicht, die auf lokalen Nicht-Cloud-Laufzeiten durch eine dauerhafte SQLite Schicht (`ccr_blocks`, standardmäßig aktiviert) unterstützt wird, so dass ein Block die Räumung oder einen Neustart überlebt, bis sein TTL aufgebraucht ist — mit Ausnahme von Blöcken über 512 KB, Cloud-Laufzeiten und `COMPRESSION_CCR_DURABLE_STORE=false`, die nur im Speicher verbleiben. Beim dauerhaften Schreiben handelt es sich um die bestmögliche Methode: Es wird verworfen, während bereits 1.000 Schreibvorgänge ausstehen, und ein fehlgeschlagener SQLite Schreibvorgang wird protokolliert und nicht erneut versucht, sodass der Block beim Neustart verloren geht. Jeder Block ist auf 2 MiB begrenzt, jeder Principal auf 16 MiB und der globale Speicher auf 64 MiB. Einträge werden standardmäßig im 24-Stunden TTL (maximal sieben Tage) angezeigt. Der vollständige Abruf MCP ist auf 256 KiB begrenzt; Größere Blöcke bleiben über die Ranged- und Grep-Modi verfügbar. Speicherung, Abruf, Auflistung, Überprüfung, Löschung und Statistiken werden durch den authentifizierten API-Schlüsselprinzipal isoliert. Prüfdatensätze enthalten Hashes und Größenmetadaten, niemals Inhalte. Bedienerbezogene Details (die beiden Markierungen, Client-Voraussetzungen, `codemode:false`, pro-tool-Umfänge, Paginierung und eine Diagnosematrix) finden Sie in [den Komprimierungs-Engines → -Voraussetzungen/Bedienerhandbuch](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` meldet die Komprimierung MCP -Beschreibung separat unter `analytics.mcpDescriptionCompression`. Bei diesen Werten handelt es sich um Schätzungen der Metadatengröße für MCP auflistbare Beschreibungen (`tools`, `prompts`, `resources` und `resourceTemplates`); Es handelt sich nicht um Nutzungsbelege des Anbieters und sie sind mit `source: "mcp_metadata_estimate"` gekennzeichnet.
 
@@ -154,7 +156,7 @@ Zusätzlich zu den oben genannten Komprimierungstools enthält OmniRoute einen P
 
 Wichtige Verhaltensweisen:
 
-- Reduziert ≥ 30 aufeinanderfolgende wiederholte Geschwisterzeilen in die Kopf + Schwanz-Zusammenfassung
+- Reduziert ≥ 30 aufeinanderfolgende wiederholte Geschwisterzeilen in die Zusammenfassung von head + tail
 - Behält die von Playwright/computer-use benötigten `[ref=eXX]` Anker bei
 - Schneidet übergroßen Text (> 50.000 Zeichen) hart mit einem Navigationshinweis ab
 - Erwartete Einsparungen:** 60–80 %** auf Browser-Snapshot-Payloads
