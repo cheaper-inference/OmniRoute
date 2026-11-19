@@ -59,11 +59,15 @@ async function postHandler(request: Request) {
   const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
   if (scope.rejection) return scope.rejection;
 
+  const pin = request.headers.get("x-omniroute-connection");
+  if (pin && scope.allowedConnections && !scope.allowedConnections.includes(pin)) {
+    return errorResponse(403, "Connection outside permitted scope");
+  }
   const resolvedProvider = "gemini";
   const credentials = await getProviderCredentialsWithQuotaPreflight(
     resolvedProvider,
     null,
-    scope.allowedConnections,
+    pin ? [pin] : scope.allowedConnections,
     model
   );
   if (!credentials) {
