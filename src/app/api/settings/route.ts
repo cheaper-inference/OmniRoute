@@ -395,6 +395,21 @@ export async function PATCH(request: Request) {
     );
   }
   const attemptedKeys = attemptedKeysOf(rawBody);
+  if (Object.hasOwn(rawBody, "resilienceSettings")) {
+    // Resilience settings have their own validated merge path; Zod would strip the key here and
+    // answer 200 without saving it (#20445).
+    emitSettingsFailureAudit(request, actor, "VALIDATION_FAILED", attemptedKeys);
+    return NextResponse.json(
+      {
+        error: {
+          code: "USE_RESILIENCE_ENDPOINT",
+          message:
+            'resilienceSettings cannot be set through /api/settings; use PATCH /api/resilience (for example { "p2cLatency": { "weight": 8 } })',
+        },
+      },
+      { status: 400 }
+    );
+  }
   const expectedRevision = parseExpectedRevision(request, rawBody);
 
   try {

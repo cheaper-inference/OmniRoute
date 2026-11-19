@@ -1,0 +1,1 @@
+- fix(settings): PATCH /api/settings now rejects `resilienceSettings` with a pointer to PATCH /api/resilience instead of silently dropping it, and `omniroute resilience config set` gains `--p2c-latency-weight` (#20445)
