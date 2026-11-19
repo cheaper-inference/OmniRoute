@@ -9,6 +9,8 @@
 
 import { useTranslations } from "next-intl";
 import { useEffect, useState } from "react";
+import { Progress } from "@omniroute/ui-kit/progress";
+import Card from "@/shared/components/Card";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 
@@ -82,14 +84,14 @@ function StatCard({
   sub?: string;
 }) {
   return (
-    <div className="card p-4 flex flex-col gap-1">
+    <Card className="p-4 flex flex-col gap-1">
       <div className="flex items-center gap-2 text-text-muted text-sm">
         <Icon name={icon} size={18} />
         {label}
       </div>
-      <div className="text-2xl font-bold text-text">{value}</div>
+      <div className="text-2xl font-semibold text-text-main">{value}</div>
       {sub && <div className="text-xs text-text-muted">{sub}</div>}
-    </div>
+    </Card>
   );
 }
 
@@ -110,17 +112,12 @@ function ProviderBar({
   return (
     <div className="flex flex-col gap-1">
       <div className="flex justify-between text-sm">
-        <span className="font-medium text-text">{provider}</span>
+        <span className="font-medium text-text-main">{provider}</span>
         <span className="text-text-muted">
           {count} {queriesLabel} · ${costUsd.toFixed(4)}
         </span>
       </div>
-      <div className="h-2 rounded-full bg-bg-muted overflow-hidden">
-        <div
-          className="h-full rounded-full bg-primary transition-all"
-          style={{ width: `${pct}%` }}
-        />
-      </div>
+      <Progress aria-label={provider} aria-valuetext={`${pct}%`} value={pct} animate={false} />
       <div className="text-xs text-text-muted text-right">{pct}%</div>
     </div>
   );
@@ -165,15 +162,15 @@ export default function SearchAnalyticsTab() {
 
   if (error || !stats) {
     return (
-      <div className="card p-6 text-center text-text-muted">
+      <Card className="p-6 text-center text-text-muted">
         <Icon name="search_off" size={32} className="mb-2 block" />
         {error || t("searchAnalyticsNoData")}
         <p className="text-xs mt-2">
           {t.rich("searchAnalyticsNoDataDescription", {
-            code: (chunks) => <code className="bg-bg-muted px-1 rounded">{chunks}</code>,
+            code: (chunks) => <code className="bg-muted px-1 rounded">{chunks}</code>,
           })}
         </p>
-      </div>
+      </Card>
     );
   }
 
@@ -215,8 +212,8 @@ export default function SearchAnalyticsTab() {
 
       {/* Provider Breakdown */}
       {providers.length > 0 && (
-        <div className="card p-5">
-          <h3 className="font-semibold text-text mb-4 flex items-center gap-2">
+        <Card className="p-5">
+          <h3 className="text-text-main mb-4 flex items-center gap-2">
             <Icon name="hub" size={20} className="text-primary" />
             {t("searchAnalyticsProviderBreakdown")}
           </h3>
@@ -232,20 +229,20 @@ export default function SearchAnalyticsTab() {
               />
             ))}
           </div>
-        </div>
+        </Card>
       )}
 
       {/* Empty state */}
       {stats.total === 0 && (
-        <div className="card p-8 text-center text-text-muted">
+        <Card className="p-8 text-center text-text-muted">
           <Icon name="travel_explore" size={48} className="mb-3 block text-primary opacity-50" />
-          <p className="font-medium text-text">{t("searchAnalyticsNoSearchesYet")}</p>
+          <p className="font-medium text-text-main">{t("searchAnalyticsNoSearchesYet")}</p>
           <p className="text-sm mt-1">
             {t.rich("searchAnalyticsEmptyDescription", {
-              code: (chunks) => <code className="bg-bg-muted px-1 rounded">{chunks}</code>,
+              code: (chunks) => <code className="bg-muted px-1 rounded">{chunks}</code>,
             })}
           </p>
-        </div>
+        </Card>
       )}
 
       {/* Free tier note */}

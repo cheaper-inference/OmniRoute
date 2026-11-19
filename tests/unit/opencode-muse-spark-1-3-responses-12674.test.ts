@@ -81,10 +81,14 @@ test("Responses-format executor hits /responses with x-api-key auth and no Beare
       const headers = executor.buildHeaders({ apiKey: "sk-test" }, true, null, modelId);
       // The free sibling is gated: since 2026-10-21 it rides the anonymous /inference
       // lane with the lane's `public` credential instead of the operator key (which that
-      // lane 403s). The paid sibling keeps the real key on the keyed lane.
+      // lane 403s). The paid sibling sends Authorization: Bearer along with x-api-key (#19315).
       const expectedKey = modelId.endsWith("-free") ? "public" : "sk-test";
       assert.equal(headers["x-api-key"], expectedKey);
-      assert.equal(headers["Authorization"], undefined);
+      if (modelId.endsWith("-free")) {
+        assert.equal(headers["Authorization"], undefined);
+      } else {
+        assert.equal(headers["Authorization"], "Bearer sk-test");
+      }
     }
   }
 });

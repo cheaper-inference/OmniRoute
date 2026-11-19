@@ -342,17 +342,16 @@ mbíonn sé le feiceáil riamh mar rogha is féidir leis an úsáideoir a roghn�
 
 ---
 
-## Cumhdach Tástála
+## Clúdach Tástála
 
-Soláthraítear dhá shraith de chumhdach uathoibrithe leis an inneall quota-share:
+Dhá shraith de long clúdaigh uathoibrithe leis an inneall cuóta-roinnte:
 
-| Sraith                  | Ordú                                                                   | An méid a chumhdaíonn sé                                                                                                                                                                                                     |
-| :---------------------- | :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Aonad (29 tástáil)      | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Sceidealóir DRR, geatáil sáithiúcháin, teorainneacha comhthreomhaireachta, matamaitic fairShare, ciúáil riaráiste                                                                                                            |
-| Maitrís chomhtháthaithe | `npm run test:combo:matrix`                                            | Cinneadh ródaithe ó cheann ceann tríd an bhfíorphíblíne teaglamaí; cothroime DRR + ísliú tosaíochta de bharr sáithiúcháin trí chomhéadain bheo (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite              | Ordú                                                                   | Cad a chlúdaíonn sé                                                                                                                                                                                          |
+| :----------------- | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Aonad (29 tástáil) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | sceidealóir DRR, geata sáithiúcháin, caipíní comhairgeadra, fairShare math, scuaine riaráiste                                                                                                                |
+| Maitrís comhtháthú | `npm run test:combo:matrix`                                            | Cinneadh ródaithe deireadh go deireadh tríd an bhfíor-phíblíne teaglama; DRR cothroime sáithiú dí- tosaíochta + trí shíoga beo (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Ritheann an mhaitrís chomhtháthaithe in CI in éineacht leis na 19 straitéis phoiblí ar fad. Is féidir an tsraith aonad
-a rith ina haonar.
+Ritheann an maitrís comhtháthaithe in CI taobh le gach ceann de na 22 straitéis phoiblí. Is féidir an tsraith aonad a reáchtáil ina aonar.
 
 ---
 

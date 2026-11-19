@@ -345,15 +345,14 @@ muncul sebagai pilihan yang boleh dipilih oleh pengguna dalam UI atau API.
 
 ## Liputan Ujian
 
-Dua lapisan liputan automatik disertakan bersama enjin quota-share:
+Dua lapisan liputan automatik dihantar dengan enjin perkongsian kuota:
 
-| Suit              | Perintah                                                               | Perkara yang diliputi                                                                                                                                                                                                                     |
-| :---------------- | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Unit (29 ujian)   | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Penjadual DRR, pengawalan ketepuan, had keserentakan, pengiraan fairShare, penggiliran baris gilir tunggakan                                                                                                                              |
-| Matriks integrasi | `npm run test:combo:matrix`                                            | Keputusan penghalaan hujung ke hujung melalui saluran gabungan sebenar; keadilan DRR + penurunan keutamaan akibat ketepuan melalui titik integrasi langsung (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite             | Perintah                                                               | Apa yang terkandung di dalamnya                                                                                                                                                                                              |
+| :---------------- | :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Unit (29 ujian)   | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | penjadual DRR, gating tepu, topi konkurensi, matematik fairShare, baris beratur tertunggak                                                                                                                                   |
+| Matriks integrasi | `npm run test:combo:matrix`                                            | Keputusan penghalaan hujung ke hujung melalui saluran paip kombo sebenar; DRR fairness + ketepuan penolakan keutamaan melalui jahitan langsung (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Matriks integrasi dijalankan dalam CI bersama kesemua 19 strategi awam. Suit unit
-boleh dijalankan secara kendiri.
+Matriks penyepaduan berjalan dalam CI bersama kesemua 22 strategi awam. Suite unit boleh dijalankan secara bersendirian.
 
 ---
 

@@ -443,6 +443,7 @@ export default function RtkContextPageClient() {
         description={t("description")}
         actions={
           <SegmentedControl
+            semantics="radio"
             aria-label={t("viewMode")}
             value={viewMode}
             onChange={(v) => setViewMode(v as "simple" | "advanced")}
@@ -593,7 +594,7 @@ export default function RtkContextPageClient() {
         <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
           {Object.entries(groupedFilters).map(([category, items]) => (
             <div key={category} className="rounded-lg border border-border bg-bg p-3">
-              <h3 className="text-xs font-semibold capitalize text-text-main">{category}</h3>
+              <h3 className="text-xs capitalize text-text-main">{category}</h3>
               <div className="mt-2 space-y-2">
                 {items.map((filter) => {
                   const enabled = config ? !config.disabledFilters.includes(filter.id) : true;
@@ -605,7 +606,7 @@ export default function RtkContextPageClient() {
                       <div className="flex items-start justify-between gap-2">
                         <div className="min-w-0">
                           <p className="text-xs font-medium text-text-main">{filter.name}</p>
-                          <p className="mt-0.5 text-[11px] text-text-muted">{filter.description}</p>
+                          <p className="mt-0.5 text-xs text-text-muted">{filter.description}</p>
                         </div>
                         <Checkbox
                           aria-label={filter.name}

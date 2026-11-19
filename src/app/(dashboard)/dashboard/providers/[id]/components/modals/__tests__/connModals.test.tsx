@@ -435,16 +435,18 @@ describe("conn-modals (Phase 1c extraction)", () => {
       />
     );
 
-    // The region picker is the kit (Radix) Select since KEA-7886: a combobox trigger
-    // labelled by the field, showing the selected option's label ("… (Beijing)").
+    // The region picker is the kit NativeSelect since #19620 (OS picker on phones): a real
+    // <select> labelled by the field, with the stored region selected ("… (Beijing)").
     const regionLabel = Array.from(c.querySelectorAll("label")).find((label) =>
       label.textContent?.includes("apiRegionLabel")
     );
-    const regionSelect = regionLabel ? document.getElementById(regionLabel.htmlFor) : null;
-    expect(regionSelect?.getAttribute("role")).toBe("combobox");
+    const regionSelect = regionLabel
+      ? (document.getElementById(regionLabel.htmlFor) as HTMLSelectElement | null)
+      : null;
+    expect(regionSelect?.tagName).toBe("SELECT");
     expect(kitSelectValue(regionSelect!)).toBe("china-beijing");
-    expect(regionSelect?.textContent).toContain("(Beijing)");
-    expect(regionSelect?.textContent).not.toContain("(Singapore)");
+    expect(regionSelect?.selectedOptions[0]?.textContent).toContain("(Beijing)");
+    expect(regionSelect?.selectedOptions[0]?.textContent).not.toContain("(Singapore)");
   });
 
   it("EditConnectionModal renders without ReferenceError for oauth connection", () => {
