@@ -67,7 +67,7 @@
 
 |                           |          v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | ------------------------- | :-----------------------: | :---------: | :-------------------: |
-| 🌐 Providers              |            352            |   **358**   |          393          |
+| 🌐 Providers              |            352            |   **358**   |          394          |
 | 🧠 Unique chat model IDs  |           1320            |  **1374**   |         1491          |
 | 🖼️ Modality Bridge        | 🆕 vision + audio + video |      ✓      |           ✓           |
 | 📡 Radar free catalog     |         🆕 opt-in         |      ✓      |           ✓           |
@@ -108,7 +108,7 @@
   <tr>
     <td align="right"><b>⚙️ Features</b></td>
     <td align="center"><a href="#-combos--the-flagship">🎯 Combos</a></td>
-    <td align="center"><a href="#-393-ai-providers--153-catalog-marked-free">🌐 Providers</a></td>
+    <td align="center"><a href="#-394-ai-providers--153-catalog-marked-free">🌐 Providers</a></td>
     <td align="center"><a href="#-full-cli--a2a--mcp">🔌 CLI &amp; MCP</a></td>
   </tr>
   <tr>
