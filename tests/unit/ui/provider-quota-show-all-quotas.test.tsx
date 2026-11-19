@@ -148,7 +148,10 @@ describe("ProviderQuotaWidget fillHeight", () => {
     vi.spyOn(HTMLElement.prototype, "getBoundingClientRect").mockImplementation(function (
       this: HTMLElement
     ) {
-      const index = Number(this.dataset.providerIndex ?? -1);
+      const index =
+        this.tagName === "SECTION"
+          ? Array.from(container.querySelectorAll("section")).indexOf(this)
+          : -1;
       const height = index >= 0 ? sizes[index] : 0;
       return { height, width: 0, top: 0, left: 0, right: 0, bottom: height, x: 0, y: 0 } as DOMRect;
     });
@@ -201,6 +204,18 @@ describe("ProviderQuotaWidget fillHeight", () => {
     expect(sections[0].className).toContain("border-b");
     expect(sections[1].className).toContain("border-b");
     expect(sections[2].className).not.toContain("border-b");
+  });
+
+  it("snaps to the first provider of each page and pads the pages to the viewport", async () => {
+    await renderFilled(true);
+
+    const sections = Array.from(container.querySelectorAll("section")) as HTMLElement[];
+    expect(sections.map((section) => section.className.includes("snap-start"))).toEqual([
+      true,
+      false,
+      true,
+    ]);
+    expect(sections.map((section) => section.style.marginBottom)).toEqual(["", "40px", "190px"]);
   });
 
   it("keeps the natural, non-scrolling layout when fillHeight is off", async () => {

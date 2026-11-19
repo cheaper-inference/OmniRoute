@@ -5,7 +5,6 @@ export interface TrendWindow {
   endDate: string;
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000;
 const FIXED_DAYS: Partial<Record<TrendRange, number>> = { "1d": 1, "7d": 7, "30d": 30, "90d": 90 };
 
 /**
@@ -34,7 +33,8 @@ export function previousWindow(
     const days = FIXED_DAYS[range];
     if (!days) return null;
     end = new Date(now);
-    start = new Date(now.getTime() - days * DAY_MS);
+    start = new Date(now);
+    start.setDate(start.getDate() - days);
   }
 
   const length = end.getTime() - start.getTime();

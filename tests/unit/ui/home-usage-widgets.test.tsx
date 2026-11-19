@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import React from "react";
+import React, { type ReactNode } from "react";
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
@@ -12,13 +12,22 @@ vi.mock("next-intl", () => ({
 vi.mock("@/shared/components/analytics", async (importOriginal) => ({
   ...(await importOriginal<typeof import("@/shared/components/analytics")>()),
   ActivityHeatmap: () => <div data-testid="activity-heatmap" />,
-  CustomRangePicker: ({ onApply }: { onApply: (start: string, end: string) => void }) => (
-    <button
-      type="button"
-      onClick={() => onApply("2026-11-01T00:00:00.000Z", "2026-11-05T00:00:00.000Z")}
-    >
-      apply-custom
-    </button>
+  CustomRangePicker: ({
+    children,
+    onApply,
+  }: {
+    children: ReactNode;
+    onApply: (start: string, end: string) => void;
+  }) => (
+    <>
+      {children}
+      <button
+        type="button"
+        onClick={() => onApply("2026-11-01T00:00:00.000Z", "2026-11-05T00:00:00.000Z")}
+      >
+        apply-custom
+      </button>
+    </>
   ),
 }));
 

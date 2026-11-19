@@ -44,7 +44,6 @@ type QuotaData = Record<string, any>;
 interface ProviderQuotaWidgetProps {
   autoRefreshInterval?: number;
   compact?: boolean;
-  providers?: string[];
   showAllQuotas?: boolean;
   /** Fill the height of the parent and scroll the providers inside, one whole page at a time. */
   fillHeight?: boolean;
@@ -190,7 +189,6 @@ function ConnectionQuotas({
 export default function ProviderQuotaWidget({
   autoRefreshInterval = 0,
   compact = false,
-  providers,
   showAllQuotas = false,
   fillHeight = false,
 }: ProviderQuotaWidgetProps) {
@@ -233,7 +231,6 @@ export default function ProviderQuotaWidget({
         (connection) =>
           connection.isActive !== false &&
           supportsProviderQuota(connection.provider, connection) &&
-          (!providers || providers.includes(connection.provider)) &&
           (connection.authType === "oauth" || connection.authType === "apikey")
       );
       setConnections(relevant);
@@ -242,7 +239,7 @@ export default function ProviderQuotaWidget({
     } finally {
       setLoading(false);
     }
-  }, [providers]);
+  }, []);
 
   useEffect(() => {
     void (async () => {

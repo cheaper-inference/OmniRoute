@@ -244,22 +244,25 @@ function UsageRangeSelector({
           label={tAnalytics(RANGE_LABEL_KEYS[value])}
         />
       ))}
-      <RangeButton
-        active={range === "custom"}
-        onClick={() => setShowCustomPicker(true)}
-        label={tAnalytics("customRange")}
-      />
-      {showCustomPicker && (
-        <CustomRangePicker
-          start={custom.start}
-          end={custom.end}
-          onApply={(start: string, end: string) => {
-            setShowCustomPicker(false);
-            onApplyCustom(start, end);
-          }}
-          onClose={() => setShowCustomPicker(false)}
-        />
-      )}
+      <CustomRangePicker
+        open={showCustomPicker}
+        onOpenChange={setShowCustomPicker}
+        start={custom.start}
+        end={custom.end}
+        onApply={(start: string, end: string) => {
+          setShowCustomPicker(false);
+          onApplyCustom(start, end);
+        }}
+      >
+        <Button
+          size="sm"
+          variant={range === "custom" ? "primary" : "ghost"}
+          aria-pressed={range === "custom"}
+          className="h-7 min-h-7 px-3 text-xs"
+        >
+          {tAnalytics("customRange")}
+        </Button>
+      </CustomRangePicker>
     </div>
   );
 }

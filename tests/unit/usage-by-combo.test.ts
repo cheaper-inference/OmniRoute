@@ -80,8 +80,17 @@ test("by-combo groups requests and tokens per combo and ignores calls without co
 });
 
 test("by-combo respects the range boundary", async () => {
-  await saveLog({ comboName: "coder", timestamp: hoursAgo(23) });
-  await saveLog({ comboName: "coder", timestamp: hoursAgo(25) });
+  const dayStart = new Date();
+  dayStart.setDate(dayStart.getDate() - 1);
+  const minute = 60 * 1000;
+  await saveLog({
+    comboName: "coder",
+    timestamp: new Date(dayStart.getTime() + minute).toISOString(),
+  });
+  await saveLog({
+    comboName: "coder",
+    timestamp: new Date(dayStart.getTime() - minute).toISOString(),
+  });
 
   const day = await (
     await route.GET(
@@ -192,4 +201,21 @@ test("by-combo ytd starts on January 1st of the current year", async () => {
   ).json();
 
   assert.equal(body.combos[0].requests, 1);
+});
+
+test("by-combo includes a row stored exactly at a custom bound given without milliseconds", async () => {
+  await saveLog({ comboName: "coder", timestamp: "2026-11-05T00:00:00.000Z" });
+
+  const query = new URLSearchParams({
+    range: "custom",
+    startDate: "2026-11-05T00:00:00Z",
+    endDate: "2026-11-06T00:00:00Z",
+  });
+  const body = await (
+    await route.GET(
+      await makeManagementSessionRequest(`http://localhost/api/usage/by-combo?${query}`)
+    )
+  ).json();
+
+  assert.equal(body.combos[0]?.requests, 1);
 });

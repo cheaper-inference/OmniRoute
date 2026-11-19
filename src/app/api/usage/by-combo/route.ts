@@ -45,12 +45,10 @@ export async function GET(request: Request) {
     const { range, startDate, endDate } = parsed.data;
     const since =
       range === "custom"
-        ? (startDate as string)
+        ? new Date(startDate as string).toISOString()
         : (getRangeStartIso(range) ?? new Date(0).toISOString());
-    return NextResponse.json({
-      range,
-      combos: getComboUsageSummary(since, range === "custom" ? endDate : undefined),
-    });
+    const until = range === "custom" ? new Date(endDate as string).toISOString() : undefined;
+    return NextResponse.json({ range, combos: getComboUsageSummary(since, until) });
   } catch (error) {
     console.error("[API] GET /api/usage/by-combo error:", error);
     return NextResponse.json(buildErrorBody(500, "Failed to build combo usage summary"), {

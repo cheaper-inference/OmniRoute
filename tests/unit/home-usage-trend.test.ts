@@ -21,8 +21,10 @@ test("previousWindow: fixed ranges end where the current range starts and have t
     assert.ok(window, range);
     const start = new Date(window.startDate).getTime();
     const end = new Date(window.endDate).getTime();
-    assert.equal(end - start, days * 86400000, `${range} length`);
-    assert.equal(end, NOW.getTime() - days * 86400000, `${range} end = current start`);
+    const currentStart = new Date(NOW);
+    currentStart.setDate(currentStart.getDate() - days);
+    assert.equal(end, currentStart.getTime(), `${range} end = current start`);
+    assert.equal(end - start, NOW.getTime() - currentStart.getTime(), `${range} length`);
   }
 });
 
@@ -88,4 +90,20 @@ test("formatPercentChange: sign, precision and the 0% case", () => {
   assert.equal(formatPercentChange(0.04), "0%");
   assert.equal(formatPercentChange(-0.04), "0%");
   assert.equal(formatPercentChange(250), "+250%");
+});
+
+test("previousWindow: fixed ranges follow calendar days across a daylight saving change", () => {
+  const original = process.env.TZ;
+  process.env.TZ = "Europe/Madrid";
+  try {
+    const now = new Date("2026-03-29T12:00:00+02:00");
+    const window = previousWindow("1d", NONE, now);
+    assert.ok(window);
+    const currentStart = new Date(now);
+    currentStart.setDate(currentStart.getDate() - 1);
+    assert.equal(window.endDate, currentStart.toISOString());
+  } finally {
+    if (original === undefined) delete process.env.TZ;
+    else process.env.TZ = original;
+  }
 });
