@@ -20,6 +20,7 @@ import {
 import { computeFinishReason } from "../translator/response/openai-responses/synthesizeCompletedToolCalls.ts";
 import { containsTextualToolCallMarker } from "../utils/textualToolCall.ts";
 import { stripObfuscationZeroWidth } from "../utils/zeroWidth.ts";
+import { isRegisteredFeatureFlagEnabled } from "../utils/registeredFeatureFlag.ts";
 import { getAnyReasoningValue } from "../utils/reasoningFields.ts";
 import {
   caseInsensitiveToolNameLookup,
@@ -674,7 +675,16 @@ export function translateNonStreamingResponse(
         message.tool_calls = toolCalls;
       }
       if (message.content === undefined) {
-        message.content = "";
+        // Opt-in CLAUDE_REFUSAL_EXPLANATION_ENABLED (default off): a refusal with no text
+        // carries its safeguard explanation as the assistant content.
+        const refusalExplanation = toRecord(root.stop_details).explanation;
+        message.content =
+          root.stop_reason === "refusal" &&
+          typeof refusalExplanation === "string" &&
+          refusalExplanation &&
+          isRegisteredFeatureFlagEnabled("CLAUDE_REFUSAL_EXPLANATION_ENABLED")
+            ? refusalExplanation
+            : "";
       }
 
       // Same mapping as the streaming claude-to-openai path (convertStopReason):
