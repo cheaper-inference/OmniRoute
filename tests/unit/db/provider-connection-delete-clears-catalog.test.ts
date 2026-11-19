@@ -28,6 +28,10 @@ const providersDb = await import("../../../src/lib/db/providers.ts");
 const modelsDb = await import("../../../src/lib/db/models.ts");
 const providerByIdRoute = await import("../../../src/app/api/providers/[id]/route.ts");
 const providersRoute = await import("../../../src/app/api/providers/route.ts");
+const { settleConnectionFollowUpsAfterEachTest } =
+  await import("../../helpers/connectionFollowUps.ts");
+
+settleConnectionFollowUpsAfterEachTest();
 
 type CatalogRow = { key: string };
 

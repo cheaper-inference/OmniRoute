@@ -9,6 +9,11 @@ import {
   NIMBLE_CLIENT_SOURCE,
   NIMBLE_CLIENT_SOURCE_HEADER,
 } from "@omniroute/open-sse/config/nimble.ts";
+import {
+  KEENABLE_API_BASE,
+  KEENABLE_APP_TITLE,
+  KEENABLE_TITLE_HEADER,
+} from "@omniroute/open-sse/config/keenable.ts";
 
 // Providers whose HTTP 400 means "bad credentials", not a request-shape quirk. Google Custom
 // Search answers 400 for an invalid API key (API_KEY_INVALID) and for an unknown Search Engine ID
@@ -150,6 +155,20 @@ export const SEARCH_VALIDATOR_CONFIGS: Record<
       method: "POST",
       headers: { "Content-Type": "application/json", "x-api-key": apiKey },
       body: JSON.stringify({ mode: "fast" }),
+    },
+  }),
+  // Keyed endpoint only: an invalid key answers 401, a valid one runs a 1-result search.
+  // The key goes to the fixed Keenable host; validateSearchProvider never follows redirects.
+  "keenable-search": (apiKey) => ({
+    url: `${KEENABLE_API_BASE}/v1/search`,
+    init: {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-API-Key": apiKey,
+        [KEENABLE_TITLE_HEADER]: KEENABLE_APP_TITLE,
+      },
+      body: JSON.stringify({ query: "test", max_results: 1 }),
     },
   }),
   "linkup-search": (apiKey) => ({
