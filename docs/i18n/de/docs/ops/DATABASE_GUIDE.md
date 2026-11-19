@@ -186,29 +186,92 @@ Die vollständige Liste mit über 30 Tabellen befindet sich in `src/lib/db/migra
 
 ## Migrationen
 
-OmniRoute verwendet **versionierte, idempotente Migrationen** in `src/lib/db/migrations/`. Jede Migration ist eine einzelne SQL-Datei mit dem Namen `NNN_description.sql`.
+OmniRoute verwendet** versionierte, idempotente Migrationen** in `src/lib/db/migrations/`. Bei jeder Migration handelt es sich um eine einzelne SQL Datei. Es existieren zwei Benennungsformate nebeneinander. Die in `_omniroute_migrations` aufgezeichnete Version ist das numerische Präfix.
 
-### Benennung von Migrationen
+### Migrationsbenennung
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Format                                             | Beispiel                             | Verwendet für                                                                                                                                                                            |
+| -------------------------------------------------- | ------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (genau 3 Ziffern)            | `241_seen_models.sql`                | Die alte Serie `001`–`241`. Eingefroren, als das Zeitstempelformat landete (`240` und `241` wurden unmittelbar davor zusammengeführt): Keine neue Datei erhält eine fortlaufende Nummer. |
+| `YYYYMMDDHHMMSS_description.sql` (14 Ziffern, UTC) | `20261113120000_add_usage_index.sql` | Jede Migration, die ab dem 13.11.2026 erstellt wurde.                                                                                                                                    |
 
-### Ausführung von Migrationen
+Warum die Änderung: Bei fortlaufenden Nummern wählte Parallel PRs dieselbe nächste Nummer und alle bis auf eine mussten vor dem Zusammenführen neu nummeriert werden. Ein UTC Zeitstempel gibt jedem PR seine eigene Version.
 
-Beim Start führt `migrationRunner.ts` folgende Schritte aus:
+Regeln für das Zeitstempelformat (erzwungen von `npm run check:migration-numbering`, gemeinsam mit dem Generator in `scripts/check/lib/migrationNaming.mjs`):
 
-1. Erstellt die Tabelle `_omniroute_migrations`, falls sie nicht existiert
-2. Fragt bereits angewendete Migrationen ab
-3. Wendet alle neuen Migrationen der Reihe nach an, jeweils innerhalb einer Transaktion
-4. Zeichnet jede angewendete Migration mit einem Zeitstempel auf
+- Der Zeitstempel ist ein echtes UTC Datum und eine echte ZQA-Uhrzeit, nicht früher als `20261113000000` und nicht mehr als 10 Minuten in der Zukunft.
+- Die Beschreibung ist klein geschriebenes `snake_case` beginnend mit einem Buchstaben (`a-z`, `0-9`, einzelnes `_` zwischen Wörtern), maximal 80 Zeichen.
+- Zwei Dateien mit demselben Zeitstempel sind ein Duplikat.
+- Die No-Gap-Regel gilt nur für die alte Reihe: Jede Zahl von `001` bis `241` muss existieren, mit Ausnahme der bekannten Lücken `026`, `055` und `121`. Das Löschen von `241` (oder einer anderen alten Datei) schlägt fehl. `001` und `241` können niemals zur `KNOWN_GAPS` Zulassungsliste hinzugefügt werden. Mit Zeitstempeln versehene Dateien erzeugen niemals eine Lücke.
+- Jeder Eintrag in `src/lib/db/migrations/` muss eine reguläre Datei mit einem gültigen kleingeschriebenen `.sql` -Namen sein. Ein Verzeichnis, ein symbolischer Link, eine `.SQL` oder `.sql.bak` Datei, eine versteckte Datei oder ein Name mit einem Leerzeichen scheitert am Gate, weil der Läufer es stillschweigend überspringt oder beim Booten abstürzt.
+
+**Auftrag anwenden.** Der Runner sortiert nach dem numerischen Wert des Präfixes, nicht nach Text: zuerst die alten `001`-`241` -Dateien, dann die mit Zeitstempel versehenen Dateien in der Reihenfolge der Zeitstempel, dann alle bei `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` registrierten Namespace-Verzeichnisse (Versionen wie `ee-001`). Eine ausstehende Migration ist jede Datei, deren Version sich nicht in `_omniroute_migrations` befindet. Daher gilt eine Migration von einem älteren Zweig, der nach einem neueren zusammengeführt wird, weiterhin für vorhandene Datenbanken.
+
+**Der Zeitstempel ist die Erstellungsreihenfolge, nicht die Zusammenführungsreihenfolge.** Wenn Ihre Migration von einer Tabelle oder Spalte abhängt, die durch eine Migration mit a erstellt wurde** neuer** Wenn Sie einen Zeitstempel verwenden (z. B. einen von einem anderen PR, der zuerst zusammengeführt wurde), würde eine neue Datenbank Ihre Datenbank zuerst ausführen und fehlschlagen. Während Ihr PR noch geöffnet ist, generieren Sie den Dateinamen mit `npm run db:new-migration` neu, damit er einen neueren Zeitstempel erhält, oder machen Sie ihn unabhängig. `npm run test:migrations:fresh` wendet jede Migration auf eine leere Datenbank an und fängt dies ab.
+
+### Eine zusammengeführte Migration wird niemals gelöscht oder umbenannt
+
+Sobald sich eine Migrationsdatei in einem Release-Zweig oder `main` befindet, wurde sie bereits auf Homolog- und Entwicklerdatenbanken, auf VPS Installationen und in der Enterprise-Synchronisierung ausgeführt. Von da an:
+
+- **Löschen Sie es niemals.** Bei Neuinstallationen würde das Schema verloren gehen, während bei aktualisierten Datenbanken es erhalten bleibt.
+- **Benennen Sie es niemals um.** Die Version in `_omniroute_migrations` würde nicht mehr mit einer Datei übereinstimmen, sodass jede Datenbank, die sie bereits angewendet hat, sie erneut ausführen würde. Nicht idempotentes SQL dupliziert dann Daten oder stoppt den Startvorgang.
+- **Benötigen Sie ein anderes Schema?** Erstellen Sie eine neue Migration mit `npm run db:new-migration`.
+
+Das Umbenennen ist nur für eine Datei sicher, die noch nicht zusammengeführt wurde. Dies ist der Fall, auf den sich die Hinweise des Gates beziehen. Ein Release-Tag ändert hier nichts: Jeder Push an einen `release/v*` Zweig veröffentlicht das Docker `:next` Image und wird auf Homolog, VPS Installationen und der Enterprise-Synchronisierung ausgeführt, sodass eine zusammengeführte Migration auf echten Datenbanken ausgeführt wurde, bevor ein `vX.Y.Z` Tag vorhanden ist. Das Gate schlägt bei jedem Entfernen einer Basisdatei fehl, unabhängig davon, ob sie mit Tags versehen ist oder nicht.
+
+- **Eine zusammengeführte Migration rückgängig machen.** Ein `git revert`, der die Datei löscht, scheitert am Gate. Behalten Sie die Datei und machen Sie ihr Schema in einer neuen Migration rückgängig: `npm run db:new-migration -- <description>`, mit `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` usw. Aktualisierte und neue Datenbanken enden dann mit demselben Schema.
+- **Die akzeptierte Umbenennung: ein Kompatibilitätseintrag und identischer Inhalt.** Wenn eine zusammengeführte Datei verschoben werden muss (z. B. zwei zusammengeführte Dateien teilen sich einen Zeitstempel und der Runner stoppt mit einer Versionskollision), benennen Sie die spätere Datei um, ohne ihre SQL zu berühren, und fügen Sie `{ fromVersion, fromName, toVersion, toName }` zu `RENAMED_MIGRATION_COMPATIBILITY` in `src/lib/db/migrationRunner/constants.ts` hinzu. Bei Datenbanken, die die alte Version angewendet haben, wird die `_omniroute_migrations` Zeile verschoben, anstatt die Datei erneut auszuführen. Das Gate warnt vor einer solchen Umbenennung und führt immer die Umwandlungsprüfung durch, unabhängig vom neuen Zeitstempel: Bei Neuinstallationen wird die Datei an der neuen Position angewendet, bei aktualisierten Datenbanken nicht. Wählen Sie daher einen neuen Zeitstempel in der Nähe des alten. Das Gate schlägt bei der Umbenennung fehl, wenn sich der Inhalt geändert hat (eine Schemaänderung geht weiterhin in eine neue Migration ein) oder wenn sich die Zieldatei des Eintrags nicht auf der Festplatte befindet.
+- **Benennen Sie niemals innerhalb desselben Zeitstempels um.** Eine Umbenennung, bei der der Zeitstempel erhalten bleibt und nur die Beschreibung geändert wird, schlägt mit oder ohne Eintrag fehl. Bei einem Eintrag, dessen `toVersion` gleich seinem `fromVersion` ist, löscht der Läufer die alte `_omniroute_migrations` Zeile und wendet die Datei erneut auf jede Datenbank an, in der sie bereits ausgeführt wurde. Ohne Eintrag verfolgt der Runner nur die Version: Er überspringt die Datei in diesen Datenbanken (neuer Inhalt wird dort nie ausgeführt) und protokolliert bei jedem Start einen Neunummerierungsfehler. Verwenden Sie einen anderen Zeitstempel und einen Kompatibilitätseintrag oder behalten Sie den Namen bei.
+- **Das Gate prüft, ob die umbenannte Datei nicht erneut ausgeführt wird.** Bei jeder abgedeckten Umbenennung übergibt das Gate den neuen Dateinamen an die Kommutierungsprüfung mit `--must-not-apply`. Die Prüfung startet die aktualisierte Datenbank mit dem echten Läufer, und wenn der Läufer diese Datei erneut anwendet (z. B. weil der Eintrag eine falsche Version oder einen falschen Namen hat oder weil der Textparser des Gates `constants.ts` anders liest als TypeScript“), schlägt das Gate mit `migration renomeada rodaria de novo` fehl und fordert Sie auf, die alten und neuen Versionen und Namen des Eintrags zu überprüfen.
+
+### Was das Tor gegenüber der Basis prüft
+
+Bei Pull-Request- und Merge-Queue-Läufen vergleicht `npm run check:migration-numbering` `src/lib/db/migrations/` auf der Festplatte mit demselben Verzeichnis im Basiszweig. Die Basis ist in dieser Reihenfolge: `--base-latest-tag`, `--base <ref>`, die `MIGRATION_BASE_REF` Variable oder, wenn `GITHUB_EVENT_NAME` `pull_request`, `pull_request_target` oder `merge_group` ist, das erste übergeordnete Element des Merge-Commits, das `merge_group.base_sha` der Ereignisnutzlast oder `git merge-base HEAD origin/$GITHUB_BASE_REF`. Bei einem Pull-Request- oder Merge-Queue-Lauf ohne auflösbare Basis schlägt das Gate fehl. Außerhalb CI ohne `--base` gibt es `comparação com a base: pulada (sem --base)` aus und überspringt diese Regeln.
+
+`--base-latest-tag` vergleicht mit dem neuesten Release-Tag (`vX.Y.Z` in halber Reihenfolge; Suffix-Tags wie Nightlies zählen nicht), das sich in der Geschichte von `HEAD` befindet, mit den gleichen Regeln wie `--base`. Release-Green (`scripts/quality/validate-release-green.mjs`) führt das Gate auf diese Weise aus, da Push- und geplante Ausführungen keine Pull-Request-Basis haben und eine Zusammenführung ohne einen neuen CI -Lauf erfolgen kann. Ohne Release-Tag im Verlauf schlägt das Gate fehl; Führen Sie `git fetch --tags` aus (in CI bringt `actions/checkout` mit `fetch-depth: 0` die Tags).
+
+| Änderung am Pull-Request                                                                                                                      | Ergebnis                                                                                                                                                                                                                                                                                                                                                                                                                                                |
+| --------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Eine auf der Basis vorhandene Datei wird mit einem `RENAMED_MIGRATION_COMPATIBILITY` Eintrag umbenannt                                        | **Warnung** wenn der Inhalt identisch ist und die Kommutierungsprüfung unabhängig vom neuen Zeitstempel ausgeführt wird; Es schlägt fehl, wenn die neue Position das endgültige Schema ändert (die Umbenennung rückgängig machen oder einen anderen neuen Zeitstempel auswählen, in den es wechselt) oder wenn der Läufer die umbenannte Datei erneut auf eine aktualisierte Datenbank anwenden würde.** Scheitert** wenn sich der Inhalt geändert hat. |
+| Eine auf der Basis vorhandene Datei wird unter Beibehaltung ihres Zeitstempels umbenannt (nur die Beschreibung ändert sich).                  | **Scheitert** , mit oder ohne Eintrag: Der Läufer würde es erneut anwenden (mit dem Eintrag) oder es nach Version überspringen (ohne einen). Verwenden Sie einen anderen Zeitstempel und einen Kompatibilitätseintrag oder behalten Sie den Namen bei.                                                                                                                                                                                                  |
+| Eine auf der Basis vorhandene Datei wird gelöscht oder ohne Eintrag umbenannt                                                                 | **Scheitert** , unabhängig davon, ob sich die Datei in einem Release-Tag befindet oder nicht. Um dies rückgängig zu machen, stellen Sie die Datei mit `git checkout <base> -- src/lib/db/migrations/<file>` wieder her; Um das Schema zurückzusetzen, fügen Sie eine neue Migration mit `DROP ... IF EXISTS` hinzu.                                                                                                                                     |
+| Eine auf der Basis vorhandene Datei hat einen anderen Inhalt                                                                                  | **Warnung** (eine `::warning` -Anmerkung in GitHub Aktionen) und die Kommutierungsprüfung wird ausgeführt. Es schlägt fehl, wenn die Bearbeitung das endgültige Schema ändert, da aktualisierte Datenbanken die bearbeitete Datei nicht erneut anwenden: Fügen Sie die Änderung in eine neue Migration ein. Eine harmlose Bearbeitung (ein Kommentar, `IF NOT EXISTS`) warnt nur.                                                                       |
+| Eine zeitgestempelte Datei wird mit einem Zeitstempel hinzugefügt, der nicht neuer als der neueste der Basis ist                              | Führt die unten beschriebene Kommutierungsprüfung durch.                                                                                                                                                                                                                                                                                                                                                                                                |
+| Eine `NNN_` Datei im alten Format wird mit einer Nummer unterhalb der neuesten Datei im alten Format der Basis hinzugefügt                    | **Scheitert** , auch wenn `KNOWN_GAPS` im selben Pull-Request bearbeitet wird: Die alte Serie ist eingefroren, erstellen Sie die Migration mit `npm run db:new-migration`. Dateien im alten Format über dem neuesten der Basis (eine `release/v*` zu `main` Pull-Anfrage) werden akzeptiert.                                                                                                                                                            |
+| Eine nicht in der Reihenfolge befindliche, bearbeitete oder umbenannte Datei enthält `INSERT`, `UPDATE`, `DELETE` oder `REPLACE` -Anweisungen | **Warnung** : Die Kommutierungsprüfung vergleicht keine Daten. Überprüfen Sie daher, ob die Reihenfolge, in der aktualisierte und neue Datenbanken sie anwenden, das Ergebnis ändert.                                                                                                                                                                                                                                                                   |
+
+Ein Durchlauf der Kommutierungsprüfung umfasst die außer Betrieb befindlichen, die bearbeiteten und die umbenannten Dateien zusammen.
+
+Die Kommutierungsprüfung (`scripts/check/migration-commutation.ts`) erstellt zwei temporäre Datenbanken mit dem tatsächlichen Installationspfad: an** aufgewertet** eine (Booten mit den Basismigrationen, dann erneutes Booten mit derselben Datei mit den Migrationen der Pull-Anfrage) und a** frisch** eins (ein Boot mit den Migrationen der Pull-Anfrage). Es vergleicht die resultierenden Schemata: Tabellen und Spalten (ohne Berücksichtigung der Spaltenreihenfolge), UNIQUE / PRIMARY KEY und FOREIGN KEY Einschränkungen, den normalisierten `CREATE TABLE` Text jeder Tabelle (der CHECK Einschränkungen, Sortierungen, generierte Spalten und Tabellenoptionen abdeckt), Indizes, Trigger und Ansichten. Zeilendaten werden nicht verglichen. Wenn sie übereinstimmen, gibt das Gate aus, dass die Datei nicht in Ordnung ist, wandelt sie jedoch um und geht weiter. Wenn sie sich unterscheiden, schlägt das Gate mit der Differenz und einem Hinweis für den Fall fehl: Für eine Datei, die nicht in der richtigen Reihenfolge ist, generieren Sie ihren Namen mit `npm run db:new-migration` neu. Dies ist sicher, da die Datei noch nicht zusammengeführt ist. Stellen Sie für eine bearbeitete Basisdatei den Basisinhalt wieder her und fügen Sie die Änderung in eine neue Migration ein. Machen Sie für eine umbenannte Datei die Umbenennung rückgängig oder wählen Sie einen anderen neuen Zeitstempel aus, in den sie wechselt, niemals denselben Zeitstempel mit einem anderen Namen. Wenn die Prüfung selbst nicht ausgeführt werden kann, schlägt das Gate in CI fehl und warnt nur lokal. Bei einer bearbeiteten Basisdatei wird die aktualisierte Datenbank mit dem Basisinhalt dieser Datei erstellt und beim zweiten Start übersprungen, da ihre Version bereits aufgezeichnet ist. Bei einer umbenannten Datei wird die aktualisierte Datenbank mit der Datei unter ihrem alten Namen erstellt und beim zweiten Start wird die `_omniroute_migrations` Zeile durch den Kompatibilitätseintrag verschoben, anstatt sie erneut auszuführen. Das Gate übergibt den neuen Namen mit `--must-not-apply`, sodass die Prüfung fehlschlägt, wenn er beim zweiten Start angewendet wird. Wenn eine Pull-Request-Migration auf dem aktualisierten Pfad fehlschlägt, d. h. nach jeder Basismigration (unabhängig davon, ob sie auch bei einer Neuinstallation fehlschlägt oder nicht), meldet das Gate `migration do PR não aplica` und fordert Sie auf, den SQL anhand des aktuellen Schemas der Basis zu korrigieren. Wenn die Datei von einer anderen Pull-Request-Migration mit einem späteren Zeitstempel abhängt, generieren Sie ihren Namen mit `npm run db:new-migration` neu.
+
+Um denselben Vergleich lokal auszuführen, übergeben Sie die Basis explizit, zum Beispiel `npm run check:migration-numbering -- --base origin/<base-branch>` oder `npm run check:migration-numbering -- --base-latest-tag` um mit der neuesten Version zu vergleichen.
+
+### Konvertieren einer `NNN` Migration von Open PR
+
+Eine vor dem Switch geöffnete Pull-Anfrage enthält möglicherweise immer noch eine sequentielle Datei wie `242_add_widgets.sql`. Alte Zahlen über `241` werden abgelehnt. Konvertieren Sie sie daher vor dem Zusammenführen:
+
+1. **Benennen Sie die Datei mit dem Generator um und behalten Sie dabei die Beschreibung bei.** Führen Sie `npm run db:new-migration -- <same description>` aus, um den neuen Namen zu erhalten, verschieben Sie SQL hinein und löschen Sie die alte `NNN_` Datei. Die Beschreibung muss identisch bleiben: Der Kompatibilitätseintrag unten stimmt darauf überein.
+2. **Fügen Sie einen Kompatibilitätseintrag hinzu, wenn eine persistente Datenbank die alte Nummer ausgeführt hat.** Wenn eine Datenbank, die beibehalten wird (Homolog, ein VPS, die eigene Installation eines Mitwirkenden), einen Build des PR mit der `NNN_` Datei ausgeführt hat, fügen Sie `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` zu `RENAMED_MIGRATION_COMPATIBILITY` in `src/lib/db/migrationRunner/constants.ts` hinzu. Das ist** erforderlich für `237` bis `241`** : Diese Slots enthalten jetzt die kanonischen `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` und `241_seen_models.sql`, und ohne den Eintrag überspringt eine solche Datenbank die kanonische Migration für immer und führt die konvertierte Migration erneut aus. Es funktioniert auch für einen Slot, der leer bleibt, z. B. `242`, wenn das Ziel ein Zeitstempel ist. Fügen Sie im Zweifelsfall den Eintrag hinzu. Wo Sie es im Array hinzufügen, spielt keine Rolle: Wenn der Zielslot eines Eintrags immer noch eine Zeile enthält, die ein anderer Eintrag wegbewegt ( `237` hält beispielsweise eine PR Zeile, während eine ältere `usage_history_calculated_cost` -Zeile darauf wartet, in `237` verschoben zu werden), lässt der Runner diesen Eintrag warten, bis der Slot frei ist. Nur ein echter Konflikt, z. B. ein Slot, der von einer Reihe ohne Eintragsbewegungen oder zwei Einträgen, die Slots tauschen, gehalten wird, stoppt den Start mit `Cannot reconcile ...`.
+3. **Halten Sie die SQL idempotent** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), da die konvertierte Migration möglicherweise auf eine Datenbank trifft, deren Schema bereits vorhanden ist.
+4. **Verschieben Sie Sonderfälle mit Versionsschlüssel.** Wenn die PR einen Fall für ihre alte Nummer in `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) oder in `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`) hinzugefügt hat, ändern Sie den Schlüssel auf den neuen Zeitstempel.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` ist ein funktionierendes Beispiel für einen Test für eine umbenannte Migration.
+
+### Backports zu Zweigen vor dem Wechsel
+
+Niemals eine `YYYYMMDDHHMMSS_` -Datei auswählen oder in einen Zweig zurückportieren, der älter ist als der Wechsel (z. B. einen älteren `release/v*` Zweig). Der Runner dort sortiert Dateinamen als Text, sodass eine zeitgestempelte Datei zwischen `201_` und `202_` in einer neuen Datenbank laufen würde, und das alte Gate dort versteht keine 14-stelligen Präfixe. Schreiben Sie in einem solchen Zweig die Änderung als die nächste `NNN_` Datei dieses Zweigs, idempotent, sodass es sich um ein No-Op handelt, wenn die mit einem Zeitstempel versehene Version später eintrifft.
+
+### Wie Migrationen ablaufen
+
+Beim Start `migrationRunner.ts`:
+
+1. Erstellt `_omniroute_migrations` Tabelle, falls nicht vorhanden
+2. Abfragen für bereits angewendete Migrationen
+3. Wendet alle neuen Migrationen der Reihe nach an, jeweils in einer Transaktion
+4. Zeichnet jede durchgeführte Migration mit Zeitstempel auf
 
 ```ts
-// src/lib/db/migrationRunner.ts (vereinfacht)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -225,7 +288,7 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 
 ### Idempotenz
 
-Migrationen müssen **idempotent** sein — eine zweimalige Ausführung sollte keine Auswirkungen haben:
+Migrationen müssen sein** idempotent** — sie zweimal auszuführen, sollte ein No-Op sein:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,26 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-Verwenden Sie großzügig die Klauseln `IF NOT EXISTS`, `IF EXISTS` und `OR IGNORE` / `OR REPLACE`.
+Verwenden Sie die Klauseln `IF NOT EXISTS`, `IF EXISTS` und `OR IGNORE` / `OR REPLACE` großzügig.
 
 ### Hinzufügen einer neuen Migration
 
-1. **Nächste Nummer ermitteln**: `ls src/lib/db/migrations/ | tail -1`
-2. **Datei erstellen**: `NNN_my_change.sql`
-3. **Sicheres DDL verwenden**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Daten sorgfältig nachpflegen**: Verwenden Sie `UPDATE ... WHERE ...`, um vorhandene Zeilen zu berücksichtigen
-5. **An einer Kopie testen**: Führen Sie niemals ungetestete Migrationen in der Produktion aus
+1. **Erstellen Sie die Datei mit dem Generator** : `npm run db:new-migration -- <description>` (zum Beispiel `npm run db:new-migration -- add combo priority`). Es schreibt `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` mit der aktuellen UTC Zeit und einem Kommentar-Header, geht eine Sekunde weiter, wenn dieser Zeitstempel verwendet wird, und überschreibt niemals eine Datei. Wählen Sie eine Zahl nicht von Hand aus.
+2. **Verwenden Sie sicheres DDL** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Daten sorgfältig auffüllen** : Verwenden Sie `UPDATE ... WHERE ...`, um vorhandene Zeilen zu verarbeiten
+4. **Reihenfolge und Benennung prüfen** : `npm run test:migrations:fresh` (alle Migrationen auf einer leeren Datenbank) und `npm run check:migration-numbering`
+5. **Testen Sie es an einer Kopie** : Führen Sie niemals ungetestete Migrationen in der Produktion durch
 
 Beispiel:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Nicht abwärtskompatible Änderungen** (z. B. das Löschen von Spalten) sind problematisch. OmniRoute unterstützt KEIN Downgrade — sobald eine Migration angewendet wurde, ist die Schemaänderung dauerhaft. Planen Sie entsprechend.
+> **Abwärtsinkompatible Änderungen** (z. B. das Löschen von Spalten) sind schwierig. OmniRoute unterstützt NOT das Downgrade — sobald eine Migration angewendet wird, ist die Schemaänderung dauerhaft. Planen Sie entsprechend.
 
 ---
 
@@ -405,24 +468,25 @@ Hierbei wird die Online-Backup-API von SQLite verwendet — die Ausführung ist 
 
 ## Leistungsoptimierung
 
-### WAL-Modus
+### WAL -Modus
 
-WAL ist standardmäßig aktiviert. Für schreibintensive Workloads sollten Sie Folgendes in Betracht ziehen:
+WAL ist standardmäßig aktiviert. Berücksichtigen Sie bei Workloads mit hohem Schreibaufwand Folgendes:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint alle 1000 Seiten
-PRAGMA journal_size_limit = 67108864;  -- WAL-Obergrenze von 64 MB
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute setzt `journal_size_limit` nicht. Ein Prüfpunkt verschiebt WAL Frames in die Hauptdatei, aber die WAL Datei behält ihre größte zugewiesene Größe. Der `OMNIROUTE_WAL_GUARD_MAX_MB` Guard warnt nur und führt `wal_checkpoint(RESTART)` aus; Es handelt sich nicht um eine Begrenzung der Festplattengröße.
 
 ### Indizes
 
-Wichtige Indizes für die Leistung (werden durch Migrationen automatisch erstellt):
+Wichtige Leistungsindizes (automatisch erstellt durch Migrationen):
 
-- `idx_models_provider` — Modellsuche nach Anbieter
-- `idx_combo_targets_combo_id` — Erweiterung von Kombinationszielen
-- `idx_usage_history_api_key_timestamp` — Nutzungsanalysen
-- `idx_quota_snapshots_api_key_window` — Kontingentverfolgung
-- `idx_call_logs_timestamp` — Abfragen von Aufrufprotokollen
+- `idx_models_provider` — -Modellsuche nach Anbieter
+- `idx_combo_targets_combo_id` — Combo-Zielerweiterung
+- `idx_usage_history_api_key_timestamp` — Nutzungsanalyse
+- `idx_quota_snapshots_api_key_window` — Quotenverfolgung
+- `idx_call_logs_timestamp` — Anrufprotokollabfragen
 
 Um einen neuen Index hinzuzufügen, erstellen Sie eine Migration:
 
@@ -431,24 +495,24 @@ Um einen neuen Index hinzuzufügen, erstellen Sie eine Migration:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Speicherabgebildete E/A
+### Speicherabgebildetes I/O
 
-Für sehr große Datenbanken (>10 GB) kann die Speicherabbildung über ein SQLite-Pragma angepasst werden:
+Für sehr große Datenbanken (> 10 GB) kann die Speicherzuordnung über SQLite Pragma angepasst werden:
 
 ```sql
--- Über SQLite-Pragma festlegen (in core.ts oder zur Laufzeit anpassen)
-PRAGMA mmap_size = 268435456;  -- 256 MB
+-- Set via SQLite pragma (adjust in core.ts or runtime)
+PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Komprimierung
+### Verdichtung
 
-Lang laufende OmniRoute-Instanzen profitieren von einem gelegentlichen `VACUUM`:
+Lang laufende OmniRoute Instanzen profitieren von gelegentlichem `VACUUM`:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Führen Sie dies monatlich in Zeitfenstern mit geringem Datenverkehr aus. (Der WAL-Modus reduziert die Notwendigkeit, beseitigt sie jedoch nicht vollständig.)
+Monatlich in verkehrsarmen Zeitfenstern ausführen. (WAL Modus reduziert den Bedarf, beseitigt ihn jedoch nicht.)
 
 ---
 

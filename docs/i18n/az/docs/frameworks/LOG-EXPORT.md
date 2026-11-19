@@ -199,140 +199,160 @@ qaytarılan sahə təsvirləri əsasında qurulur, buna görə də yeni təyinat
 
 Konfiqurasiya açarları (`type: "bigquery"`):
 
-| Açar                 | Qeydlər                                                                          |
-| -------------------- | -------------------------------------------------------------------------------- |
-| `projectId`          | Verilənlər dəstinin yerləşdiyi GCP layihəsi                                      |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                  |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                  |
-| `location`           | Yalnız verilənlər dəsti yaradılmalı olduqda istifadə edilir (standart: `EU`)     |
-| `serviceAccountJson` | Xidmət hesabının açarı. Məxfi: saxlanarkən şifrələnir, heç vaxt geri qaytarılmır |
-| `autoCreate`         | İlk ixrac zamanı verilənlər dəstini və cədvəli yarat (standart: `true`)          |
+| Açar                 | Qeydlər                                                                                                              |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | Dataset-i saxlayan GCP layihəsi                                                                                      |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                      |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                      |
+| `location`           | Yalnız dataset yaradılmalı olduqda istifadə edilir (standart `EU`)                                                   |
+| `serviceAccountJson` | Xidmət hesabının açarı. Məxfi məlumat: yaddaşda şifrələnir, heç vaxt geri qaytarılmır                                |
+| `autoCreate`         | Çatışmayan dataset-i/cədvəli yaradır; nullable istifadə sübutu sütunlarını şərti olaraq əlavə edir (standart `true`) |
 
-Xidmət hesabına hədəf cədvəldə `bigquery.tables.updateData` icazəsi, həmçinin
-`autoCreate` aktiv olduqda `bigquery.datasets.create` / `bigquery.tables.create` icazələri lazımdır.
+Xidmət hesabına hədəf cədvəl üzərində `bigquery.tables.updateData`, həmçinin `autoCreate` aktiv olduqda
+`bigquery.datasets.create` / `bigquery.tables.create` icazələri lazımdır.
+Mövcud cədvələ iki nullable istifadə sübutu sahəsini əlavə etmək üçün də
+`bigquery.tables.update` tələb olunur. Çatışmayan icazə eksportu dayandırır və kursorunu irəlilətmir.
 
-Konfiqurasiya edilmiş paket HTTP vahidi deyil, **kursor** vahididir: `send()` onu hər birində
-ən çox 500 sətir olan insertAll çağırışlarına bölür, buna görə böyük `batch_size` BigQuery-nin 10 MB sorğu limitini aşa bilməz.
-Müvəqqəti statuslar (408/429/500/502/503/504) zamanı eyni insertIds dəyərlərindən təkrar istifadə edilməklə, eksponensial
-artan gözləmə intervalları ilə üç dəfəyədək yenidən cəhd edilir; autentifikasiya və sxem xətaları isə icranı boş yerə
-davam etdirmək əvəzinə ilk cəhddə istisna yaradır.
+Konfiqurasiya edilmiş paket HTTP vahidi deyil, **kursor** vahididir: `send()` onu ən çox 500 sətrlik
+insertAll çağırışlarına bölür, buna görə böyük `batch_size` BigQuery-nin 10 MB-lıq sorğu limitini
+aşa bilməz. Keçici statuslar (408/429/500/502/503/504) eksponensial
+gecikmə ilə üç dəfəyə qədər yenidən yoxlanılır və eyni insertIds istifadə olunur; autentifikasiya və
+sxem xətaları isə icranı boş yerə sərf etməmək üçün ilk cəhddə istisna yaradır.
 
-Bir neçə an əvvəl yaradılmış cədvəl axın son nöqtəsində hələ görünmür və bu son nöqtə
-bir neçə saniyə ərzində 404 cavabı verir. Bu 404 cavabı zamanı yenidən cəhd edilir, lakin **yalnız cədvəl bu icra zamanı yaradılıbsa** —
-həqiqətən mövcud olmayan cədvəl üçün xəta yenə dərhal baş verir. Nəzərə alın ki, yaxın vaxtlarda silinmiş adla
-cədvəli yenidən yaratmaq BigQuery-nin bir neçə dəqiqə ərzində axınla sətir əlavə edilməsini rədd etməsinə səbəb olur; bu,
-silib-yenidən-yaratma əməliyyatının xüsusiyyətidir, ona görə cədvəli silib yenidən əlavə etməkdənsə, yeni cədvəl adına üstünlük verin.
+Bir neçə dəqiqə əvvəl yaradılmış cədvəl axın endpoint-i üçün hələ görünməyə bilər və endpoint
+bir neçə saniyə ərzində 404 cavabı qaytara bilər. Bu 404 yenidən yoxlanılır, lakin **yalnız bu icra
+cədvəli yaradıbsa** — həqiqətən çatışmayan cədvəl dərhal uğursuz olur. Qeyd edək ki,
+bu yaxınlarda silinmiş cədvəlin adını yenidən yaratmaq BigQuery-nin axın əlavələrini bir neçə dəqiqə
+ərzində rədd etməsinə səbəb olur; bu, silib-yenidən yaratma əməliyyatının xüsusiyyətidir, buna görə də
+cədvəli silib yenidən əlavə etmək əvəzinə yeni cədvəl adından istifadə etmək daha məqsədəuyğundur.
 
-**Qismən uğursuzluq boş olmayan `insertErrors[]` ilə HTTP 200 kimi gəlir.** Bu, uğursuzluq kimi
-qəbul edilir və istisna yaradır; məhz bu, kursorun BigQuery-nin heç vaxt qəbul etmədiyi sətirlərdən
-irəli keçməsinin qarşısını alır; `tests/unit/log-export-bigquery.test.ts` bu davranışı təsdiqləyir.
+**Qismən uğursuzluq boş olmayan `insertErrors[]` ilə HTTP 200 şəklində gəlir.** Bu, uğursuzluq
+kimi qəbul edilir və istisna yaradır; nəticədə BigQuery-nin qəbul etmədiyi sətrlərdən sonra kursorun
+irəliləməsinin qarşısı alınır. `tests/unit/log-export-bigquery.test.ts` bu davranışı təsdiqləyir.
 
-Ötürmə adi REST vasitəsilə aparılır — öz açarı ilə imzalanmış RS256 təsdiqi
-`https://oauth2.googleapis.com/token` ünvanında giriş tokeni ilə dəyişdirilir, sonra sətirlər `tabledata.insertAll` ünvanına göndərilir. Heç bir Google SDK-sı
-əlavə edilmir. Giriş tokenləri proses daxilində hər (xidmət hesabı, səlahiyyət dairəsi) cütü üçün keşlənir.
+Nəqliyyat mexanizmi sadə REST-dir — öz imzası ilə imzalanmış RS256 təsdiqi
+`https://oauth2.googleapis.com/token` ünvanında giriş tokeninə dəyişdirilir, sonra sətrlər
+`tabledata.insertAll`-a göndərilir. Heç bir Google SDK-si əlavə edilmir. Giriş tokenləri proses
+daxilində (xidmət hesabı, əhatə dairəsi) üzrə keşlənir.
 
-Yaradılmış cədvəldə Jurnallar vərəqindəki hər sahə üçün bir sütun, üstəlik `exported_at` olur və cədvəl
-çağırış jurnallarının faktiki sorğulanma üsuluna uyğun təşkil edilir:
+Yaradılmış cədvəldə Logs tabındakı hər sahə üçün bir sütun və `exported_at` olur və cədvəl
+çağırış jurnallarının faktiki sorğulanma üsuluna uyğun qurulur:
 
-- **`timestamp` üzrə gündəlik bölmələrə ayrılır**, beləliklə tarixlə məhdudlaşdırılmış sorğu yalnız həmin günləri skan edir.
-- **`api_key_name`, `provider`, `model`, `status` üzrə klasterləşdirilir** (bu ardıcıllıqla), beləliklə
-  kimin icra etdiyi, hara yönləndirildiyi və ya uğursuz olub-olmadığı üzrə filtrləmə hər bölmə daxilindəki blokları skandan kənarlaşdırır. BigQuery
-  ən çox dörd klasterləşdirmə sütununa icazə verir və ardıcıllıq əhəmiyyətlidir: yalnız `api_key_name` üzrə filtr
-  blokları skandan kənarlaşdırır, yalnız `status` üzrə filtr isə bunu etmir.
-- **Bölmələr üçün istəyə bağlı saxlanma müddəti** `partitionExpirationDays` vasitəsilə (0 hər şeyi saxlayır) təyin edilir və
-  cədvəl yaradılarkən tətbiq olunur.
+- **`timestamp` üzrə günlərə bölünür**, beləliklə tarixlə məhdudlaşdırılmış sorğu yalnız həmin günləri skan edir.
+- **`api_key_name`, `provider`, `model`, `status` üzrə (bu ardıcıllıqla) klasterləşdirilir**, beləliklə
+  sorğunu kimin icra etdiyinə, onun hara yönləndirildiyinə və ya uğursuz olub-olmadığına görə filtr
+  tətbiq edildikdə hər bölmənin daxilindəki bloklar ixtisar olunur. BigQuery ən çox dörd klasterləşdirmə
+  sütununa icazə verir və ardıcıllıq əhəmiyyətlidir: yalnız `api_key_name` üzrə filtr blokları
+  ixtisar edir, yalnız `status` üzrə filtr isə bunu etmir.
+- `partitionExpirationDays` vasitəsilə **istəyə bağlı bölmə saxlanma müddəti** (0 hər şeyi saxlayır);
+  bu parametr cədvəl yaradılarkən tətbiq edilir.
 
-Hər iki parametr yaradılma zamanı tətbiq olunur. Mövcud cədvəl əvvəlki təşkil formasını saxlayır, ona görə
-bunları tətbiq etmək istəyirsinizsə, təyinatı yeni cədvəl identifikatoruna yönəldin.
+Hər iki parametr yalnız yaradılma zamanı tətbiq olunur. Mövcud cədvəl artıq malik olduğu quruluşu
+saxlayır; buna görə də bunları tətbiq etmək istəyirsinizsə, təyinatı yeni cədvəl identifikatoruna yönəldin.
 
-`tests/unit/log-export-bigquery.test.ts` uyğunlaşdırıcının və cədvəl sxeminin sinxron qalmasını yoxlayır,
-beləliklə yeni çağırış jurnalı sütunu ixrac zamanı səssizcə itirilə bilməz.
+`tests/unit/log-export-bigquery.test.ts` mapper-in və cədvəl sxeminin sinxronluğunu qoruduğunu
+təsdiqləyir, beləliklə yeni çağırış jurnalı sütunu çıxış zamanı səssizcə itirilə bilməz.
 
-Paketlər **həm** sətir sayına, **həm də** seriallaşdırılmış bayt ölçüsünə görə hissələrə bölünür. Sorğu məzmunları ixrac edildikdə
-təkcə sətir sayı kifayət etmir: promptları ehtiva edən 500 sətir onlarla meqabayt tuta bilər və insertAll
-10 MB-dan böyük sorğunu rədd edir. Hissələr 500 sətrə və ya 9 MB-a çatdıqda tamamlanır — hansı həddə əvvəl çatılarsa.
+Paketlər həm **sətr sayına**, həm də serializasiya olunmuş baytların sayına görə bölünür. Yalnız
+sətr sayını nəzərə almaq payload-lar eksport edildikdən sonra kifayət etmir: prompt-ları daşıyan 500
+sətr onlarla meqabayt ola bilər və insertAll 10 MB-dan böyük sorğunu rədd edir. Paketlər, bunlardan
+hansı daha tez baş verirsə, 500 sətrdə və ya 9 MB-da bağlanır.
 
 ---
 
-## 5. OTLP/HTTP izlərinin təyinatı
+## 5. OTLP/HTTP izləri təyinatı
 
-Konfiqurasiya `type: "otlp-http"` istifadə edir. Bu, saxlanılmış çağırış jurnallarının
-planlaşdırılmış, kursor əsaslı ixracıdır; `open-sse/services/routing/otel.ts` daxilindəki
-canlı marşrutlaşdırma hadisələrini mümkün qədər çatdırmağa çalışan qəbuledici deyil. O, həmin qəbuledicinin mühit
-dəyişənlərini, taymerlərini və ya buferlərini oxumur və dəyişdirmir. Hər ikisinin aktivləşdirilməsi iki müstəqil növ span yarada bilər;
-bu çağırış jurnalı spanlarını fərqləndirmək üçün `omniroute.log-export` instrumentasiya əhatəsindən istifadə edin.
+Konfiqurasiya `type: "otlp-http"` istifadə edir. Bu, davamlılaşdırılmış çağırış
+jurnallarının planlaşdırılmış, kursor əsaslı ixracıdır; `open-sse/services/routing/otel.ts`
+faylındakı ən yaxşı səy prinsipi ilə işləyən canlı marşrutlaşdırma hadisələri qəbuledicisi
+deyil. O, həmin qəbuledicinin mühit dəyişənlərini, taymerlərini və ya buferlərini oxumur
+və dəyişmir. Hər ikisinin aktivləşdirilməsi iki müstəqil span növünün yaranmasına səbəb
+ola bilər; bu çağırış jurnalı span-larını fərqləndirmək üçün `omniroute.log-export`
+instrumentasiya əhatəsindən istifadə edin.
 
-| Açar                     | Standart dəyər / məqsəd                                                                         |
-| ------------------------ | ----------------------------------------------------------------------------------------------- |
-| `endpoint`               | Tam HTTP(S) iz URL-i tələb olunur; `/v1/traces` sonluğu əlavə edilmir                           |
-| `headers`                | İstəyə bağlı `Name: value` sətirləri və ya sətir dəyərlərindən ibarət JSON obyekti; şifrələnir  |
-| `requestHeaderAllowlist` | Boş (söndürülüb); span atributları kimi qeydə alınacaq müştəri başlıqlarının adları/prefiksləri |
-| `serviceName`            | `omniroute`; resursun `service.name` atributu                                                   |
-| `langfuseMapping`        | `false`; Langfuse generasiya/sessiya/istifadəçi atributları əlavə edir                          |
-| `identity`               | `pseudonymous`, `keyName` və ya `none`                                                          |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                         |
-| `timeoutMs`              | Hər HTTP cəhdi üçün `30000`                                                                     |
-| `environment`            | Təyin edilməyib; istəyə bağlı `langfuse.environment`                                            |
+| Açar                     | İlkin dəyər / məqsəd                                                                   |
+| ------------------------ | -------------------------------------------------------------------------------------- |
+| `endpoint`               | Tələb olunan tam HTTP(S) izləri URL-i; `/v1/traces` suffiksi əlavə edilmir             |
+| `headers`                | İstəyə bağlı `Name: value` sətirləri və ya sətirlərdən ibarət JSON obyekti; şifrələnir |
+| `requestHeaderAllowlist` | Boş (söndürülüb); span atributları kimi tutulacaq klient başlıq adları/prefiksləri     |
+| `serviceName`            | `omniroute`; resursun `service.name` dəyəri                                            |
+| `langfuseMapping`        | `false`; Langfuse generasiya/sessiya/istifadəçi atributlarını əlavə edir               |
+| `identity`               | `pseudonymous`, `keyName` və ya `none`                                                 |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                                |
+| `timeoutMs`              | Hər HTTP cəhdi üçün `30000`                                                            |
+| `environment`            | Təyin edilməyib; istəyə bağlı `langfuse.environment`                                   |
 
-Ümumi idarəetmə paneli bu sahələri göstərir. `paths` API massivi və ya dəqiq yolların
-yeni sətirlər/vergüllərlə ayrıldığı mətn sahəsi qəbul edir. Embeddings, rerank və digər yollar
-açıq şəkildə icazə verilmədikcə ötürülür. Ötürülən sətirlər də kursoru irəlilədir; mövcud
-icraçının `exported`/`exportedTotal` sayğacları qəbul edilmiş spanları deyil, filtrlənmiş
-sətirlər də daxil olmaqla emal edilmiş mənbə sətirlərini sayır. Filtrləmə törəmə prosesdə, onun
-IPC/kursor müqaviləsini dəyişdirmədən həyata keçirilir.
+Ümumi idarəetmə paneli bu sahələri göstərir. `paths` API massivi və ya yeni
+sətirlər/vergüllərlə ayrılmış dəqiq yolları ehtiva edən mətn sahəsini qəbul edir.
+Embeddings, rerank və digər yollar açıq şəkildə icazə verilmədikcə ötürülmür.
+Ötürülməyən sətirlər yenə də kursoru irəlilədir; mövcud icraedicinin
+`exported`/`exportedTotal` sayğacları qəbul edilmiş span-ları deyil, filtrlənmiş sətirlər
+də daxil olmaqla işlənmiş mənbə sətirlərini sayır. Filtrləmə uşaq prosesində aparılır və
+onun IPC/kursor müqaviləsi dəyişdirilmir.
 
-URL yoxlaması `src/shared/network/outboundUrlGuard.ts` daxilindəki verilənlər bazasından
-asılı olmayan `parseAndValidateNonMetadataUrl` köməkçisindən istifadə edir: `block-metadata` siyasəti. O,
-özəl URL-lərə icazə verilmiş webhook yoxlayıcısı ilə eyni şərtsiz metadata/protokol/URL-ə daxil edilmiş giriş məlumatları yoxlamalarını
-tətbiq edir, lakin qlobal funksiya bayrağını dəyişmədən localhost/LAN hədəflərinə qəsdən
-icazə verir. Bu, öz serverinizdə yerləşdirilən Langfuse, Phoenix, Tempo və Collector
-son nöqtələrindən, o cümlədən özəl HTTP son nöqtələrindən istifadə etməyə imkan verir. Bulud metadatası hostları həmişə bloklanır.
-Yönləndirmələr izlənilmir, buna görə kollektor giriş məlumatlarını başqa hosta yönləndirə bilməz.
-Mövcud leksik URL qoruyucusu kimi, bu da DNS həllini sabitləmir; yalnız
-operatorun nəzarətində olan hostları konfiqurasiya edin. Son nöqtə etibarlı şəbəkədə deyilsə, HTTPS-ə üstünlük verin.
+URL yoxlaması `src/shared/network/outboundUrlGuard.ts` faylındakı verilənlər bazasından
+asılı olmayan `parseAndValidateNonMetadataUrl` köməkçisindən istifadə edir:
+`block-metadata` siyasəti. Bu siyasət webhook yoxlayıcısındakı metadata/protokol/gömülü
+etimadnamə yoxlamalarını qeyd-şərtsiz eyni qaydada tətbiq edir, lakin şəxsi URL-lərə
+icazə verir və qlobal funksiya bayrağı üzərindən dəyişiklik tələb etmir. Bu, şəxsi HTTP
+endpoint-ləri də daxil olmaqla, öz serverinizdə yerləşdirilən Langfuse, Phoenix, Tempo və
+Collector endpoint-lərindən istifadə etməyə imkan verir. Bulud metadata hostları həmişə
+bloklanır. Yönləndirmələr izlənilmir; buna görə kollektor etimadnamələri başqa hosta
+yönləndirə bilməz. Mövcud leksik URL qorumasında olduğu kimi, bu mexanizm DNS
+rezolyusiyasını sabitləmir; yalnız operatorun nəzarət etdiyi hostları konfiqurasiya edin.
+Endpoint etibarlı şəbəkədə yerləşmədikdə HTTPS-ə üstünlük verin.
 
-### Faydalı yük və çatdırılma
+### Payload və çatdırılma
 
-OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) icazə verilmiş hər sətir üçün
-dəqiq sorğu yoluna uyğun adlandırılmış bir CLIENT spanı daşıyır. Yola əsaslanan adlandırma
-model və ya kimlik məlumatlarını span adına daxil etmədən Chat Completions, Responses və Messages-i
-fərqləndirir. Resurs atributlarına `service.name` və paketin `service.version` atributu daxildir.
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) icazə
+verilmiş hər sətir üçün bir CLIENT span daşıyır; span dəqiq sorğu yolunun adı ilə
+adlandırılır. Yol adlandırılması span adında model və ya identifikasiya məlumatlarını
+yerləşdirmədən Chat Completions, Responses və Messages sorğularını fərqləndirir. Resurs
+atributlarına `service.name` və paketin `service.version` dəyərləri daxildir.
 
-Adi çat cəhdi jurnalçısı (`open-sse/handlers/chatCore/attemptLogging.ts`) tamamlanma zamanı
-`duration = Date.now() - startTime` yazır və vaxt nişanı təqdim etmir;
-`src/lib/usage/callLogs.ts` daxilindəki `saveCallLogOperation` vaxt nişanını standart olaraq yazılma
-(tamamlanma) vaxtına təyin edir. Buna görə ixrac zamanı son = sətrin vaxt nişanı və başlanğıc = son − müddət
-(millisaniyə ilə, onluq nanosaniyələrə çevrilərək) təyin olunur. Çağıran tərəfin təqdim etdiyi keçmiş vaxt nişanları
-da son vaxt kimi saxlanılır; hər sətir üçün başlanğıc/tamamlanma fərqləndiricisi yoxdur.
-Null müddət sıfıra çevrilir. Yanlış/çatışmayan vaxt nişanları
-qeyri-deterministik spanlar yaratmaq əvəzinə paketin uğursuz olmasına səbəb olur. `ttftMs` null ola bilər və `omniroute.ttft_ms` atributuna uyğunlaşdırılır.
+Adi çat cəhdi qeydiyyatçısı (`open-sse/handlers/chatCore/attemptLogging.ts`) tamamlanma
+zamanı `duration = Date.now() - startTime` yazır və zaman möhürü təqdim etmir;
+`src/lib/usage/callLogs.ts` faylındakı `saveCallLogOperation` zaman möhürünü yazılma
+(tamamlanma) vaxtına təyin edir. Buna görə ixrac zamanı end = sətirin zaman möhürü,
+start = end − duration olur (millisaniyələr onluq nanosaniyələrə çevrilir). Çağıran
+tərəfindən verilmiş tarixi zaman möhürləri də end vaxtı kimi qorunur; hər sətir üzrə
+başlanğıc/tamamlanma fərqləndiricisi yoxdur. Null duration sıfıra çevrilir. Yanlış və ya
+çatışmayan zaman möhürləri qeyri-deterministik span-lar yaratmaq əvəzinə paketin
+uğursuz olmasına səbəb olur. `ttftMs` nullable-dır və `omniroute.ttft_ms` atributuna
+uyğunlaşdırılır.
 
-Atributlara `gen_ai.operation.name="chat"`, provayder, sorğulanan/cavab modeli,
-giriş/çıxış tokenləri, istəyə bağlı keşdən oxuma/keş yaratma/mühakimə tokenləri, HTTP statusu,
-combo, keş mənbəyi, sessiya etiketi və korrelyasiya identifikatoru daxildir. Tam ədəd OTLP dəyərləri və vaxt nişanları
-onluq sətirlərdir; sətirlər, məntiqi dəyərlər və kəsr ədədləri öz doğma OTLP dəyər
-variantlarından istifadə edir. Xəta spanları ERROR statusuna və təmizlənmiş status mesajına malikdir. Kanonik
-qeyddə yuxarı axın hostunun URL-i yoxdur, buna görə kollektoru yanlışlıqla
-model serveri kimi göstərmək əvəzinə `server.address` buraxılır. Xərc ixrac edilmir.
+Atributlara `gen_ai.operation.name="chat"`, provayder, tələb olunan/cavab model,
+giriş/çıxış tokenləri, istəyə bağlı keşdən oxuma/keş yaratma/əsaslandırma tokenləri, HTTP
+statusu, combo, keş mənbəyi, sessiya teqi və korrelyasiya identifikatoru daxildir. Tam
+ədəd OTLP dəyərləri və zaman möhürləri onluq sətirlərdir; sətirlər, boolean dəyərlər və
+kəsr ədədləri öz yerli OTLP dəyər variantlarından istifadə edir. Xəta span-ları ERROR
+statusuna və təmizlənmiş status mesajına malikdir. Kanonik qeyddə upstream host URL-i
+olmadığı üçün `server.address` buraxılır; beləliklə kollektor yanlış olaraq model serveri
+kimi göstərilmir. Xərc ixrac edilmir.
 
-Yalnız `includeBodies=true` məzmunu yükləyib tamamlayır. `langfuseMapping=false` olduqda,
-`gen_ai.input.messages` / `gen_ai.output.messages` yenidən formalaşdırılmış semconv
-mesajlar massivini deyil, OmniRoute tərəfindən saxlanılmış təmizlənmiş sorğu/cavab
-gövdəsinin JSON-unu (təhlil edilə bildikdə kanonikləşdirilmiş şəkildə) daşıyır. Kəsilmiş/JSON olmayan gövdələr xam mətn olaraq qalır. `langfuseMapping=true` olduqda,
-gövdələr yalnız `langfuse.observation.input` / `langfuse.observation.output` kimi göndərilir;
-hər gövdənin bir dəfə göndərilməsi üçün `gen_ai.*.messages` atributları buraxılır. Hər iki rejim
-`maxBodyBytes` dəyərini mövcud məzmun yükləmə yolundan götürür;
-`omniroute.bodies_truncated=true` kəsilməni işarələyir.
-Bu təyinat əlavə emal xətti ani görüntüləri və ya təmizlənməmiş artefakt oxumaları əlavə etmir;
-istəyə bağlı sorğu başlıqlarının qeydə alınması aşağıda təsvir edilən, mövcud yüklənmiş müştəri ani görüntüsündən istifadə edir.
-Gövdələri ixrac edərkən saatlıq yığılma yaratmaq əvəzinə
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` kimi dəqiqə səviyyəli intervaldan istifadə edin.
+Yalnız `includeBodies=true` məzmunu yükləyir. `langfuseMapping=false` olduqda,
+`gen_ai.input.messages` / `gen_ai.output.messages` atributları OmniRoute tərəfindən
+saxlanılan təmizlənmiş sorğu/cavab gövdəsi JSON-unu (təhlil edilə bildikdə
+kanonikləşdirilmiş formada) daşıyır; onlar yenidən formalaşdırılmış semconv mesajlar
+massivi deyil. Kəsilmiş/JSON olmayan gövdələr xam mətn olaraq qalır.
+`langfuseMapping=true` olduqda, gövdələr yalnız `langfuse.observation.input` /
+`langfuse.observation.output` kimi ötürülür; hər gövdənin bir dəfə göndərilməsi üçün
+`gen_ai.*.messages` atributları buraxılır. Hər iki rejim mövcud yükləmə yolundan
+`maxBodyBytes` dəyərini miras alır; kəsilməni `omniroute.bodies_truncated=true`
+göstərir. Bu təyinat tərəfindən əlavə pipeline snapshot-ları və ya təmizlənməmiş
+artefakt oxunuşları əlavə edilmir; istəyə bağlı sorğu başlığı tutulması aşağıda təsvir
+olunan mövcud yüklənmiş klient snapshot-ından istifadə edir. Gövdələri ixrac edərkən
+saatlıq geridə qalan iş yığını toplamaq əvəzinə, `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`
+kimi dəqiqə səviyyəli intervaldan istifadə edin.
 
-### İstəyə bağlı müştəri sorğusu başlıqları
+### İstəyə bağlı klient sorğu başlıqları
 
-Başlıqların qeydə alınması **standart olaraq söndürülüb**. Təyinat konfiqurasiyasında `requestHeaderAllowlist` təyin edin
-və **Sorğuları və cavabları ixrac et** seçimini aktivləşdirin (təyinatda `includeBodies: true`).
-İcazə siyahısı API massivi və ya adların yeni sətir/vergüllə ayrıldığı mətn sahəsi qəbul edir:
+Başlıq tutulması **standart olaraq söndürülüb**. Təyinat konfiqurasiyasında
+`requestHeaderAllowlist` təyin edin və **Sorğuları və cavabları ixrac et** seçimini
+aktivləşdirin (təyinatda `includeBodies: true`).
+
+İcazə siyahısı API massivi və ya yeni sətir/vergüllə ayrılmış adları qəbul edən mətn sahəsi
+kimi işləyir:
 
 ```json
 {
@@ -340,77 +360,80 @@ və **Sorğuları və cavabları ixrac et** seçimini aktivləşdirin (təyinatd
 }
 ```
 
-Adlar böyük-kiçik hərf fərqi nəzərə alınmadan və tam uyğunluqla müqayisə edilir; yalnız sonda yerləşən tək `*` boş olmayan
-başlıq adı prefiksini seçir. Tək `*`, adın daxilindəki əvəzedici simvollar və etibarsız HTTP başlıq adları rədd edilir.
-Ən çox 64 selektor ola bilər və hər birinin adı/prefiksi ən çox 256 ASCII baytı uzunluğunda ola bilər.
-Bu parametr eksporteri kollektorda autentifikasiya edən `headers` parametrindən ayrıdır.
+Adlar böyük-kiçik hərfə həssas olmadan və tam uyğunlaşdırılır; yalnız sondakı tək `*` boş olmayan
+header-adı prefiksini seçir. Tək `*`, daxili wildcard-lar və etibarsız HTTP header adları rədd edilir.
+Ən çox 64 selector ola bilər və hər birinin adı/prefiksi ən çox 256 ASCII baytından ibarət ola bilər.
+Bu parametr `headers` parametrindən ayrıdır; `headers` exporter-i collector-a autentifikasiya edir.
 
-Başlıqların toplanması yalnız saxlanmış ətraflı konveyerin
-`clientRawRequest` (və ya köhnə `clientRequest`) sahəsindən doldurulan `pipeline_client_request` sahəsini oxuyur. Provayder sorğusunun başlıqlarına heç vaxt ehtiyat mənbə kimi müraciət edilmir.
-Sorğu qeydə alınarkən ətraflı konveyer jurnallaşdırması aktiv olmalı idi.
-`includeBodies` deaktivdirsə və ya müştəri vəziyyətinin anlıq görüntüsünün JSON-u yoxdursa, zədələnibsə və ya kəsilibsə, heç bir başlıq
-atributu yaradılmır. `maxBodyBytes` dəyərini artırmaq ixrac zamanı anlıq görüntünün kəsilməsinin qarşısını ala bilər;
-bu, heç vaxt saxlanmamış təfərrüatları bərpa edə bilməz. Ölçüsü 1 MiB-dan böyük olan və ya
-256-dan çox başlıq qeydi ehtiva edən anlıq görüntü nəzərə alınmır. Mövcud sorğu/cavab ixracı başlıqların toplanması ilə yanaşı
-aktiv qalır; icazə siyahısı yalnız başlıqların yüklənməsi rejimini təmin etmir.
+Capture yalnız saxlanılmış ətraflı pipeline-dan `clientRawRequest` (və ya köhnə `clientRequest`) əsasında
+doldurulan `pipeline_client_request` məlumatını oxuyur. O, heç vaxt provider request header-larına
+qayıtmır. Ətraflı pipeline logging sorğu qeydə alınarkən aktivləşdirilmiş olmalıdır. `includeBodies`
+deaktiv olduqda və ya client-snapshot JSON-u çatışmadıqda, korlandıqda və ya kəsildikdə heç bir header
+atributu yaradılmır. `maxBodyBytes` dəyərinin artırılması export zamanı snapshot-un kəsilməsinin qarşısını
+ala bilər; heç vaxt saxlanılmamış detalları bərpa edə bilməz. 1 MiB-dan böyük və ya 256-dan çox header
+entry-si olan snapshot nəzərə alınmır. Mövcud prompt/response export-u header capture ilə yanaşı aktiv
+qalır; allowlist yalnız header-lar üçün hydration rejimi təmin etmir.
 
-Seçilmiş dəyərlər, hətta tək sətir olduqda belə, `http.request.header.<full lowercase header name>` OTLP sətir massivlərinə çevrilir.
-Məsələn, `X-OmniRoute-Meta-Team: example-team`
-`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}` dəyəri ilə
-`http.request.header.x-omniroute-meta-team` atributuna çevrilir.
-Tam prefiks qorunur: bunlar biznes sahələrinin təhlili və ya
-`omniroute.metadata.*` / Langfuse metadatasına çevrilmə olmadan adi başlıqlardır. `langfuseMapping` başlıqların
-semantikasını dəyişmir. Seçilmiş təkdəyərli `User-Agent` həmçinin standart skalyar
-`user_agent.original` atributunu təyin edir. Bir dəyərin daxilindəki vergüllər üzrə bölünmə aparılmır. Böyük-kiçik hərf variantları saxlanmış
-qeydlərin ardıcıllığı ilə birləşdirilir; hər hansı etibarsız variant bütün başlığın buraxılmasına səbəb olur. Atributlar kiçik hərfli ada görə sıralanır.
+Seçilmiş dəyərlər, hətta tək string üçün də, OTLP string massivləri kimi
+`http.request.header.<full lowercase header name>` atributlarına çevrilir. Məsələn,
+`X-OmniRoute-Meta-Team: example-team` belə bir
+`http.request.header.x-omniroute-meta-team` atributuna çevrilir:
+`{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
+Tam prefiks qorunur: bunlar adi header-lardır; biznes-sahəsi parsing-i və ya
+`omniroute.metadata.*` / Langfuse metadata çevrilməsi aparılmır. `langfuseMapping` header
+semantikasını dəyişmir. Seçilmiş, tək dəyərli `User-Agent` həmçinin standart scalar
+`user_agent.original` atributunu təyin edir. Bir dəyərin daxilindəki vergüllər bölünmür. Böyük-kiçik
+hərf variantları saxlanılmış entry sırasına əsasən birləşdirilir; hər hansı etibarsız variant həmin
+header-ın hamısının buraxılmasına səbəb olur. Atributlar kiçik hərflərlə yazılmış ada görə sıralanır.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, API açarı başlıqları, adlarında
-auth/token/secret/password/credential işarələri olan başlıqlar və daxili şlüzün giriş məlumatları həmişə
-istisna edilir, hətta seçilmiş və ya saxlanmada qismən maskalanmış olsalar belə. Məlum giriş məlumatı nümunələri
-ortaq giriş məlumatı detektorundan istifadə edir; gizlətmə markerləri buraxılır, təhlükəsiz dəyərlər kimi ixrac edilmir.
-Yalnız sətirlər və boş olmayan sətir massivləri qəbul edilir; ədədlər və obyektlər məcburi çevrilmir.
-Etibarsız adlar, prototip açarları, idarəetmə simvolları (üfüqi tabulyasiya istisna olmaqla) və səhv formalaşmış Unicode
-paketin uğursuz olmasına və ya onların məzmununun xətalarda əks olunmasına səbəb olmadan nəzərə alınmır.
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-key header-ları, auth/token/secret/password/credential
+marker-ları olan adlar və daxili gateway credential-ları seçilsə və ya storage-da qismən maskalansa belə,
+həmişə xaric edilir. Məlum credential nümunələri ümumi credential detector-dan istifadə edir; redaction
+marker-ları təhlükəsiz dəyər kimi ixrac edilmir. Yalnız string-lər və boş olmayan string massivləri qəbul edilir;
+ədədlər və obyektlər çevrilmir. Etibarsız adlar, prototype key-lər, control character-lər (horizontal tab
+istisna olmaqla) və düzgün formalaşmamış Unicode dəyərləri batch uğursuz olmadan və məzmunları error-larda
+əks olunmadan nəzərə alınmır.
 
-Hər span ən çox 32 başlıq, hər başlıq üçün 16 dəyər, hər dəyər üçün 4096 UTF-8 baytı
-və toplanmış başlıq adları ilə dəyərləri üzrə cəmi 16384 UTF-8 baytı toplayır. Həddindən böyük/etibarsız başlıqlar
-kəsilmir, bütövlükdə buraxılır. Seçim operatorun məxfiliklə bağlı qərarıdır: təhlükəsiz görünən adlar
-yenə də şəxsi məlumat ehtiva edə bilər və bu məhdudiyyətlər/detektorlar ümumi təyinatlı fərdi identifikasiya məlumatı təmizləyicisi deyil.
+Hər span ən çox 32 header, hər header üçün 16 dəyər, hər dəyər üçün 4096 UTF-8 baytı və capture edilmiş
+header adları ilə dəyərləri üzrə ümumilikdə 16384 UTF-8 baytı saxlayır. Ölçüsü həddən artıq böyük və ya
+etibarsız header-lar kəsilmir, bütöv şəkildə buraxılır. Seçim operatorun məxfilik qərarıdır: təhlükəsiz
+görünən adlar belə şəxsi məlumatlar ehtiva edə bilər və bu məhdudiyyətlər/detector-lar ümumi PII
+təmizləyicisi deyil.
 
 ### Çatdırılma məhdudiyyətləri
 
-Sorğular zərf daxil olmaqla 500 span və 4 MiB UTF-8 JSON ilə məhdudlaşdırılır.
-İcazə verilən hər spanın ölçüsü kursor paketinin ilk sorğusundan əvvəl yoxlanılır. Ayrı-ayrı
-span limitdən böyükdürsə, həmin paketin heç bir hissəsi göndərilmir və `maxBodyBytes`
-dəyərini azaltmaq tövsiyəsi ilə xəta yaranır; span səssizcə atılmır. İlkin yoxlama yalnız qeyd istinadlarını və
-bayt saylarını saxlayır, hər müvəqqəti spanı/JSON-u atır; paketin ikinci seriallaşdırılmış nüsxəsini
-saxlamaq əvəzinə spanlar məhdud ölçülü hissələr üçün yenidən qurulur. HTTP 408/429/5xx, şəbəkə nasazlıqları və gözləmə vaxtının bitməsi zamanı
-250/500 ms eksponensial gözləmə ilə ən çox üç cəhd edilir. `Retry-After` saniyələri və ya HTTP tarixləri
-gözləməni 5 saniyəyə qədər uzada bilər. Digər statuslar dərhal uğursuzluq yaradır. OTLP 2xx qismən rədd cavabı da
-itirilmiş spanı təsdiqləmək əvəzinə xəta yaradır; boş və ya etibarlı JSON təsdiqləri
-64 KiB cavab oxuma limiti ilə qəbul edilir.
+Sorğular envelope daxil olmaqla 500 span və 4 MiB UTF-8 JSON ilə məhdudlaşır.
+İcazə verilən hər span cursor batch-inin ilk sorğusundan əvvəl ölçü yoxlamasından keçirilir. Limitdən
+böyük fərdi span həmin batch-in heç bir hissəsini göndərmir və `maxBodyBytes` dəyərini azaltmaq
+istiqamətində göstərişlərlə uğursuz olur; səssizcə buraxılmır. Preflight yalnız record reference-larını
+və bayt saylarını saxlayır, hər müvəqqəti span/JSON-u atır; ikinci seriallaşdırılmış batch nüsxəsi
+saxlanılmasın deyə span-lar məhdud ölçülü hissələr üçün yenidən yaradılır. HTTP 408/429/5xx, şəbəkə
+uğursuzluqları və timeout-lar ən çox üç cəhd alır və 250/500 ms eksponensial backoff tətbiq olunur.
+`Retry-After` saniyələri və ya HTTP tarixləri gecikməni 5 saniyəyədək artıra bilər. Digər status-lar
+dərhal uğursuz olur. OTLP 2xx qismən rəddi də itirilmiş span-ı təsdiqləmək əvəzinə exception yaradır;
+boş və ya etibarlı JSON təsdiqləri qəbul edilir və cavabın oxunması 64 KiB ilə məhdudlaşdırılır.
 
-Xətalar yalnız eksporterə aid faktları ehtiva edir: HTTP statusu, təkrar cəhd sinfi, cəhdlərin və göndərilmiş spanların
-sayı və ya təsdiq/şəbəkə nasazlığı haqqında sabit mətn. Kollektorun cavab gövdələri,
-qismən uğur sayları və cavab başlıqları heç vaxt xətalara, jurnallara və ya
-idarə panelinə köçürülmür. Uğursuz və ya qismən qəbul edilmiş paket təsdiqlənmir: təyinat həmin statusla
-uğursuzluq vəziyyətini göstərir, kursor son təsdiqlənmiş paketdə qalır və növbəti icra
-eyni sətirləri yenidən göndərir. Daimi statuslar kollektor və ya konfiqurasiya
-düzəldilənədək uğursuzluq yaratmağa davam edir. Cavab təfərrüatları üçün kollektorun öz jurnallarından istifadə edin. Çağırış jurnalı xəta xülasələrinin
-ayrıca gizlətmə mexanizmi saxlanılır.
-`prepare()` heç nə yaratmır; Test dəqiq olaraq `{"resourceSpans":[]}` göndərir və
-çağırış jurnalı spanlarını yazmadan HTTP statusunu bildirir.
+Error-lar yalnız exporter-in sahib olduğu faktları ehtiva edir: HTTP statusu, retry sinfi, cəhdlərin sayı
+və göndərilmiş span sayı, yaxud sabit acknowledgement/network failure mətnləri. Collector response body-ləri,
+partial-success sayları və response header-ları heç vaxt error-lara, log-lara və dashboard-a köçürülmür.
+Uğursuz və ya qismən qəbul edilmiş batch təsdiqlənmir: destination həmin statusla Failing göstərir,
+cursor son təsdiqlənmiş batch-də qalır və növbəti icra eyni sətirləri yenidən göndərir. Permanent status-lar
+collector və ya konfiqurasiya düzəldilənədək uğursuz olaraq qalır. Response detalları üçün collector-un
+öz log-larından istifadə edin. Call-log error xülasələri ayrıca redaction mexanizmini saxlayır.
+`prepare()` heç nə provision etmir; Test tam olaraq `{"resourceSpans":[]}` göndərir və call-log span-ları
+yazmadan HTTP statusunu bildirir.
 
-İz identifikatorları və span identifikatorları
-`"omniroute.trace\\0" + callLogId` və `"omniroute.span\\0" + callLogId` üzərində hesablanmış SHA-256-nın ilk 32/16 onaltılıq rəqəmidir. Təkrar göndərişlərdə
-eyni identifikatorlar istifadə olunur. Bu, dublikatların aradan qaldırılmasına zəmanət deyil: Langfuse
-v4 qəbulu da daxil olmaqla bəzi arxa sistemlər eyni identifikatorlu spanların dublikatlarını aradan qaldırmır. Qəza və ya hissənin qismən uğursuzluğu
-ən çox bir təsdiqlənməmiş kursor paketinin yenidən göndərilməsinə səbəb ola bilər; yalnız onun son HTTP hissəsi deyil,
-bütün paket təkrarlana bilər. Kursor paketinin ölçüsünü seçərkən bu kompromisi nəzərə alın.
+Trace id-lər və span id-lər
+`"omniroute.trace\\0" + callLogId` və `"omniroute.span\\0" + callLogId` üzərində SHA-256-nın
+ilk 32/16 hexadecimal rəqəmidir. Yenidən göndərişlər eyni id-ləri daşıyır. Bu, deduplication zəmanəti deyil:
+Langfuse v4 ingestion daxil olmaqla bəzi backend-lər eyni-id-li span-ları deduplicate etmir. Crash və ya
+qismən chunk uğursuzluğu ən çox təsdiqlənməmiş bir cursor batch-inin yenidən göndərilməsinə səbəb ola bilər;
+yalnız son HTTP chunk deyil, həmin batch-in hamısı dublikat ola bilər. Cursor batch ölçüsünü bu mübadiləni
+nəzərə alaraq seçin.
 
 ### Langfuse nümunəsi
 
-Öz serverinizdə yerləşdirilən Langfuse instansiyası üçün bu sahələri konfiqurasiya edin:
+Self-hosted Langfuse instance üçün bu sahələri konfiqurasiya edin:
 
 ```json
 {
@@ -423,46 +446,29 @@ bütün paket təkrarlana bilər. Kursor paketinin ölçüsünü seçərkən bu 
 }
 ```
 
-Authorization dəyərini lokal olaraq hərfi `public-key:secret-key`
-sətrinin Base64 kodlaşdırılması ilə yaradın (məsələn, `Buffer.from(publicKey + ":" + secretKey).toString("base64")` ilə).
-Həqiqi giriş məlumatlarını jurnallara, ekran görüntülərinə və ya problem bildirişlərinə yapışdırmayın. Uyğunlaşdırma avtomatik olaraq
+Authorization dəyərini lokal olaraq literal `public-key:secret-key` sətrinin Base64-ü kimi yaradın
+(məsələn, `Buffer.from(publicKey + ":" + secretKey).toString("base64")` vasitəsilə).
+Həqiqi credential-ları log-lara, screenshot-lara və ya issue-lara yerləşdirməyin. Mapping avtomatik olaraq
 `x-langfuse-ingestion-version: 4` təyin edir; Authorization yenə də `headers` daxilində verilir.
-Həm başlıqlar, həm də yaradılmış identiklik duzu mövcud şifrələnmiş məxfi sahə
-mexanizmindən və API yer tutucularından istifadə edir; `STORAGE_ENCRYPTION_KEY` tələb olunur.
+Həm header-lar, həm də yaradılmış identity salt mövcud encrypted secret-field mexanizmindən və API
+placeholder-larından istifadə edir; `STORAGE_ENCRYPTION_KEY` tələb olunur.
 
-Uyğunlaşdırma generasiya növünü/modelini, JSON istifadə təfərrüatlarını (giriş/çıxış/cəmi və mövcud
-keş açarları), JSON giriş/çıxış anlıq görüntülərini, ERROR/DEFAULT səviyyəsini, təmizlənmiş status mesajını,
-iz adını, sessiya identifikatorunu, istəyə bağlı mühiti və provayder, tələb olunan model, yol, kombinasiya, keş
-mənbəyi və status üçün filtrlənə bilən
-`langfuse.observation.metadata.<key>` atributunu əlavə edir. `langfuse.observation.completion_start_time` yalnız TTFT məlum olduqda və müddət daxilində olduqda
-başlanğıc + TTFT anını ISO 8601 formatında göstərir. Heç bir xərc atributu göndərilmir.
+Xəritələmə generasiya tipini/modelini, JSON istifadə təfərrüatlarını (giriş/çıxış/cəmi və mövcud keş açarları), JSON giriş/çıxış anlıq görüntülərini, ERROR/DEFAULT səviyyəsini, sanitarlaşdırılmış status mesajını, trace adını, sessiya identifikatorunu, provayder, tələb olunan model, yol, kombinasiyа, keş mənbəyi və status üçün ixtiyari mühiti və filtrlənə bilən
+`langfuse.observation.metadata.<key>` məlumatlarını əlavə edir. `langfuse.observation.completion_start_time` ISO 8601 formatındadır və yalnız TTFT məlumdursa və müddət daxilindədirsə, başlanğıc vaxtına + TTFT əlavə edilməklə hesablanır. Heç bir xərc atributu göndərilmir.
 
-Kimlik rejimləri `langfuse.user.id` atributuna tətbiq olunur:
+Kimlik rejimləri `langfuse.user.id` üçün tətbiq edilir:
 
-- `pseudonymous` (standart): API açarının daxili identifikatorunun hər təyinat üçün təsadüfi
-  32 baytlıq salt ilə HMAC-SHA256 heşi. Salt mövcud deyilsə, yaradılma zamanı generasiya olunur,
-  `identitySalt` kimi şifrələnir, heç vaxt qaytarılmır və redaktələr zamanı saxlanılır. Xam açar identifikatorları heç vaxt
-  span atributlarına daxil edilmir. Təyinatın salt dəyərinin yenidən yaradılması/dəyişdirilməsi kimlikləri dəyişir.
-- `keyName`: konfiqurasiya edilmiş API açarının adı; bu, operatorun verdiyi həmin etiketi qəsdən açıqlayır.
-- `none`: istifadəçi identifikatoru yoxdur. Sessiya teqləri mövcud olduqda yenə də ixrac edilir; bu rejimlər
-  ixtiyari prompt məzmununu və ya operatorun təqdim etdiyi sessiya/korrelyasiya etiketlərini anonimləşdirmir.
+- `pseudonymous` (standart): API açarının daxili identifikatorunun təsadüfi, təyinat üzrə 32 baytlıq duz ilə HMAC-SHA256 nəticəsi. Duz yaradılma zamanı yoxdursa yaradılır, `identitySalt` kimi şifrələnir, heç vaxt geri qaytarılmır və redaktələr zamanı saxlanılır. Xam açar identifikatorları heç vaxt span atributlarına yerləşdirilmir. Təyinatın duzunun yenidən yaradılması/dəyişdirilməsi identifikatorları dəyişir.
+- `keyName`: konfiqurasiya edilmiş API açarının adı; operator etiketinin qəsdən açıqlanmasıdır.
+- `none`: istifadəçi identifikatoru yoxdur. Sessiya teqləri mövcud olduqda yenə də ixrac edilir; bu rejimlər ixtiyari sorğu məzmununu və ya operator tərəfindən təqdim edilmiş sessiya/korrelyasiya etiketlərini anonimləşdirmir.
 
-### Tarixçəni geriyə dönük doldurmadan başlamaq
+### Geriyə doldurma olmadan başlama
 
-Yalnız yaradılma zamanı **Cari mövqedən başla (mövcud jurnalları ötür)** seçimini aktivləşdirin və ya
-yaratma API sorğusunun məlumat yükünün üst səviyyəsində `startFromCurrentPosition: true` ötürün. Bu,
-miqrasiya aparmadan, mövcud kursor köməkçi funksiyalarından istifadə edərək `cursor_row_id` dəyərini hazırda saxlanılan çağırış jurnalı sətirlərinin maksimum rowid dəyərinə
-təyin edir. Standart dəyər false-dur (kursor 0 və saxlanılan tarixçənin geriyə dönük doldurulması).
-Bu, yeniləmə zamanı kursoru sıfırlamaq üçün parametr deyil.
+Yalnız yaradılma zamanı **Cari mövqedən başla (mövcud jurnalları ötür)** seçimini aktivləşdirin və ya yaratma API yükünün ən üst səviyyəsində
+`startFromCurrentPosition: true` ötürün. Bu, mövcud kursor köməkçilərindən istifadə etməklə və miqrasiya olmadan `cursor_row_id` dəyərini saxlanılan çağırış jurnalı sətirlərinin cari maksimum rowid dəyərinə təyin edir. Standart dəyər false-dur (kursor 0 və saxlanılmış tarixçənin geriyə doldurulması).
+Bu, yeniləmə zamanı kursorun sıfırlanması ayarı deyil.
 
-Paylaşılan `ttftMs` əlavəsi BigQuery uyğunlaşdırıcısına və yeni cədvəl sxeminə
-null qəbul edən `ttft_ms` sütununu da əlavə edir: onun sxem testi hər kanonik qeyd sahəsi üçün
-sütun olmasını tələb edir. Mövcud cədvəllər dəyişiklik olmadan ixrac edilməyə davam edir: `prepare()` cədvəl sxemini oxuyur və
-həmin sütun olmadıqda yalnız `ttft_ms` sahəsini buraxır. Növbəti işəsalmada TTFT əldə etmək üçün null qəbul edən INT64 sütununu
-əlavə edin və ya yeni cədvəldən istifadə edin. PATCH, avtomatik sxem dəyişikliyi və ya əlavə
-icazələr tələb olunmur; bütün digər sətir sahələri üçün ciddi sxem yoxlaması saxlanılır.
-
----
+Paylaşılan `ttftMs` əlavəsi BigQuery xəritələyicisinə və yeni cədvəl sxeminə nullable `ttft_ms` sütununu da əlavə edir: onun sxem testi hər bir kanonik qeyd sahəsinin bir sütuna malik olmasını tələb edir. Mövcud cədvəllər dəyişmədən ixrac edilməyə davam edir: `prepare()` cədvəl sxemini oxuyur və yalnız həmin sütun olmadıqda `ttft_ms` sütununu çıxarır. Növbəti icrada TTFT əldə etmək üçün nullable INT64 sütununu əlavə edin və ya yeni cədvəldən istifadə edin. İxtiyari TTFT sütunu sxem yeniləməsini işə salmır. İstifadə sübutu sütunları aşağıda göstərilən şərti, qoşulma tələb edən uyğunluq axınını izləyir; digər sətir sahələri ciddi sxem yoxlamasını saxlayır.
 
 ## 6. Təyinat məntəqəsinin əlavə edilməsi
 
@@ -485,15 +491,33 @@ Yeni təyinat məntəqəsi üçün iki qayda:
 
 ---
 
-## 7. İstismar
+## 7. İstifadə
 
-- **İdarəetmə paneli**: İnteqrasiyalar → Jurnal ixracı. Təyinat məntəqəsi əlavə edin, sətirləri yazmadan
-  giriş məlumatlarını yoxlamaq üçün **Test** əməliyyatını işə salın, sonra onu aktivləşdirin.
-- **Növbədəki məlumatlar**: hər təyinat məntəqəsinin kartında gözləyən sətirlər və kursor göstərilir; `GET
-/api/log-export/status` eyni göstəriciləri və tapşırığın son 20 icrasını qaytarır.
-- **Bir təyinat məntəqəsinin uğursuzluğu digərlərinin uğursuzluğuna səbəb olmur** — icra xülasəsi hər təyinat məntəqəsinin
-  vəziyyətini `last_status` / `last_error` daxilində qeydə alır, tapşırığın icra tarixçəsi isə ümumi nəticəni saxlayır.
-- **Təyinat məntəqəsi silindikdə onun kursoru da silinir.** Yenidən əlavə edildikdə proses saxlanılan ən köhnə
-  çağırış jurnalından başlayır və təyinat məntəqəsində artıq mövcud ola bilən sətirlər yenidən göndərilir. BigQuery-də hər sətirə aid
-  `insertId` bunun qarşısını yalnız BigQuery-nin öz dublikatları aradan qaldırma müddəti daxilində alır, buna görə də təyinat məntəqəsini
-  silməkdənsə deaktiv etməyə üstünlük verin.
+- **İdarə paneli**: İnteqrasiyalar → Jurnal ixracı. Təyinat əlavə edin, etimadnamələri
+  yazmadan yoxlamaq üçün **Sına** əməliyyatını icra edin, sonra onu aktivləşdirin.
+- **Gözləmə növbəsi**: hər təyinat kartında gözləyən sətirlər və kursor göstərilir; `GET
+/api/log-export/status` eyni göstəriciləri, həmçinin son 20 tapşırıq icrasını qaytarır.
+- **Uğursuz təyinat digərlərinin uğursuz olmasına səbəb olmur** — icmalda hər təyinatın
+  statusu `last_status` / `last_error` sahələrində qeyd olunur, tapşırıq icra tarixçəsi isə
+  ümumi nəticəni saxlayır.
+- **Təyinatın silinməsi onun kursorunu da silir.** Təyinatı yenidən əlavə etdikdə, ən köhnə
+  saxlanılan çağırış jurnalından başlayır və təyinatın artıq saxladığı sətirləri yenidən göndərə
+  bilər. BigQuery-də hər sətir üçün `insertId` bunu yalnız BigQuery-nin öz dublikatların
+  aradan qaldırılması pəncərəsi daxilində neytrallaşdırır; buna görə təyinatı silməkdənsə
+  deaktiv etmək üstün tutulur.
+
+### İstifadə sübutu sxeminin uyğunluğu
+
+Yeni BigQuery cədvəllərinə null ola bilən `usage_evidence` (JSON ehtiva edən STRING) və
+`usage_estimated` (BOOL) sütunları daxildir. `autoCreate` aktiv olduqda, mövcud cədvələ
+yalnız bu çatışmayan null ola bilən sütunlar əlavə edilə bilər. İxracçı sahə metadataları da
+daxil olmaqla mövcud sxemi tam şəkildə qoruyur və qaytarılmış etag ilə şərti PATCH göndərir.
+Paralel sxem dəyişikliyi onun üzərinə yazılmaq əvəzinə ixracın uğursuz olmasına səbəb olur;
+növbəti icra cədvəli yenidən oxuyur.
+
+`autoCreate` deaktiv olduqda, istifadə sübutu olan qeydləri ixrac etməzdən əvvəl bu
+sütunları özünüz əlavə edin. Sxem/etag metadatalarının çatışmaması və ya uğursuz yeniləmə
+də sübut ehtiva edən daxiletmələrin qarşısını alır. Bu uğursuzluq zamanı ixrac kursoru
+irəliləmir və sübut heç vaxt səssizcə atılmır. İxrac bloklandığı müddətdə yerli jurnalın
+saxlanma qaydaları yenə tətbiq olunur; buna görə saxlanılan mənbə sətirlərinin müddəti
+bitməzdən əvvəl uğursuzluğu aradan qaldırın.

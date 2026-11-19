@@ -33,7 +33,10 @@ export const HISTORY_LIMIT = 200;
 export const BASE_CHECK_LIMIT = 10;
 /**
  * Land-status withdrawals GitHub refused, kept for the next ticks to retry (state.landWithdrawals,
- * one per SHA). When full, the oldest entry is dropped (the tick records an `error` event).
+ * one per SHA), and the size of their overflow (state.landWithdrawalsOverflow, the refusals that
+ * found the main list full). Nothing is dropped: a full main list pauses a base that is not paused
+ * yet with reason `error`; a refusal that fits in neither list is named in the pause detail and in
+ * an `error` event (tick recordFullWithdrawals).
  */
 export const LAND_WITHDRAWALS_LIMIT = 20;
 
@@ -57,11 +60,54 @@ export const APPROVAL_CONTEXTS = Object.freeze({
  */
 export const APPROVAL_STATUS_SKEW_SECONDS = 6 * 60 * 60;
 
+/**
+ * Start of the `error` event a tick records when it refuses a `resume` (resumeRefusal), and of
+ * the CLI's message for it: the CLI's wait loop stops when it sees such an event.
+ */
+export const RESUME_REFUSED_PREFIX = "resume refused";
+
+/**
+ * The resume rule, shared by the tick (which enforces it after its retry pass, and on the
+ * automatic lifts of a base-red pause), the CLI (which refuses early) and the dashboard (which
+ * says to wait): a `resume` is refused while
+ * state.landWithdrawalsOverflow holds entries; entries of state.landWithdrawals alone do not
+ * block it. Returns how many overflow entries block it (0: a resume is allowed).
+ * @param {QueueState|null} state
+ */
+export function resumeBlockers(state) {
+  return Array.isArray(state?.landWithdrawalsOverflow) ? state.landWithdrawalsOverflow.length : 0;
+}
+
+/**
+ * The refusal of a `resume` under the rule above, or null when a resume is allowed: the detail of
+ * the tick's `error` event and the CLI's message. It names both counts and says how to get out.
+ * @param {QueueState|null} state
+ */
+export function resumeRefusal(state) {
+  const overflow = resumeBlockers(state);
+  if (!overflow) return null;
+  const main = Array.isArray(state?.landWithdrawals) ? state.landWithdrawals.length : 0;
+  return (
+    `${RESUME_REFUSED_PREFIX}: landWithdrawalsOverflow holds ${overflow} ` +
+    `${overflow === 1 ? "entry" : "entries"} (landWithdrawals ${main}); the pause stays. Wait ` +
+    "until the ticks of the paused base write them (both lists are retried on every tick), then " +
+    "resume again; for an entry GitHub refuses for good, see docs/ops/OMNI_QUEUE.md, Incidents, " +
+    '"Paused: landWithdrawals is full" (the last resort)'
+  );
+}
+
 /** Kinds of work a candidate ref can carry. */
 export const CANDIDATE_KINDS = Object.freeze(["batch", "base-check"]);
 
 /** Stages of the in-flight candidate. `landing` = verdict green, landing not yet confirmed. */
 export const STAGES = Object.freeze(["testing", "landing"]);
+
+/**
+ * Lanes of a batch of one, each selected by its label (config.lanes, eligibility.laneOf): a
+ * `hotfix` goes ahead of the FIFO at the next batch start; a `base-repair` too, and it is the only
+ * thing the queue processes while the base is paused as `base-red` (its landing lifts the pause).
+ */
+export const QUEUE_LANES = Object.freeze(["hotfix", "base-repair"]);
 
 /** Why the queue of a base is paused. */
 export const PAUSE_REASONS = Object.freeze([
@@ -79,6 +125,8 @@ export const EVENT_TYPES = Object.freeze([
   "pr-dequeued", // removed from the queue (label removed + comment); detail = reason code
   "checks-green",
   "checks-red",
+  "flaky-rerun", // a red batch or bisection segment: its failed jobs are re-run once (same run)
+  // before it is classified; detail = the jobs and what follows if the re-run fails too
   "checks-timeout",
   "land-blessed", // the App wrote the land status (landing.statusContext) on the commits about to
   // land: the candidate (merge-ff) or each PR head (squash-api); detail = how many, the context
@@ -101,6 +149,8 @@ export const EVENT_TYPES = Object.freeze([
   "resumed",
   "tree-divergence",
   "error",
+  "queue-stalled", // the queue stopped making progress (dashboard.assessHealth): one per episode,
+  // with one comment on the dashboard issue mentioning the approvers; detail = the reasons
 ]);
 
 /** Reason codes returned by eligibility (`eligibility.mjs`). */
@@ -116,6 +166,9 @@ export const INELIGIBLE_REASONS = Object.freeze([
   "head-changed-after-label", // approval status exists for an older head only
   "protected-approval-missing",
   "conflicting",
+  // a gate of config.prChecksRequired is not green on the head: no action, the PR waits; never
+  // stored in the state (only on the dashboard), so an older version has nothing to clean
+  "pr-checks-not-green",
   "shadow-processed", // shadow mode already settled this exact head (would-land / would-dequeue)
   "in-flight",
 ]);
@@ -176,13 +229,52 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  *                                   timeouts, set only while that holds for EVERY run (=
  *                                   attempts); absent otherwise, and in documents written before
  *                                   it existed (= first run not known to be a timeout)
- * @property {number} [landAttempts] stage "landing" only: ticks that blessed this batch for
- *                                   landing, counted (and saved) before each blessing; absent at
- *                                   stage "testing", and in documents written before it existed
- *                                   (= 1 at the landing stage). See tick LANDING_ATTEMPTS_LIMIT
+ * @property {number} [landAttempts] ticks that blessed this candidate for landing and reached
+ *                                   no verdict, counted (and saved) before each blessing. It
+ *                                   belongs to the candidate, at either stage: kept through a
+ *                                   hold, pending checks, a re-run, an infra retry and main()'s
+ *                                   failure path; a new candidate (recomposition, new batch) has
+ *                                   none, and an operator's pause or resume deletes it. Absent in
+ *                                   documents written before it existed (= 1 at the landing
+ *                                   stage). See tick LANDING_ATTEMPTS_LIMIT (live mode only)
+ * @property {RerunRecord} [rerun]  the failed jobs of this candidate were re-run once (tick
+ *                                   onRed); absent before that, in documents written before it
+ *                                   existed, and on an infra retry (a new ref)
+ * @property {"hotfix"|"base-repair"} [lane]  a lane batch of one (QUEUE_LANES), kept through
+ *                                   every copy of the record (infra retry, landing stage, re-run,
+ *                                   back to testing, recomposition) and on the base check of a red
+ *                                   lane batch (and its pendingRed); absent for an ordinary batch
+ *                                   and in documents written before it existed
+ * @property {FreezeHold} [freezeHold]  a green batch the tick holds because the base is under a
+ *                                   release freeze (tick holdFrozen): set by the first held tick,
+ *                                   closed (endedAt) by the first tick that processes the batch
+ *                                   without holding it, and by the landing stage; kept by the
+ *                                   other copies of the record (back to testing, re-run, manual
+ *                                   pause), dropped by an infra retry (a new run, a new start);
+ *                                   absent for a batch never held and in documents written before
+ *                                   it existed
  * @property {BisectState|null} bisect
  * @property {PendingRed|null} [pendingRed]  kind "base-check" only: the red batch waiting for the
  *                                   verdict of the bare-base run (absent/null otherwise)
+ */
+
+/**
+ * @typedef {object} FreezeHold  A release-freeze hold of the in-flight batch (InFlight.freezeHold).
+ *   While it is open (no endedAt) the batch is waiting, not stalled (dashboard.assessHealth);
+ *   once it ended, the in-flight rule counts from endedAt instead of the batch's startedAt.
+ * @property {string} since       ISO time of the first tick that held the batch
+ * @property {string} [endedAt]   ISO time of the first tick that no longer held it
+ */
+
+/**
+ * @typedef {object} RerunRecord  A re-run of the failed jobs of the in-flight candidate.
+ * @property {string} ref           the candidate ref whose push run(s) were re-run
+ * @property {string} requestedAt   ISO time of the request (tick clock); the wait for the re-run
+ *                                  to start is counted from it (tick RERUN_START_MINUTES)
+ * @property {number} afterMs       newest GitHub timestamp (ms) of the red attempt: a failure that
+ *                                  started at or before it is the old one, not the re-run's
+ * @property {number[]} runIds      the workflow runs GitHub accepted to re-run
+ * @property {string[]} jobs        names of the failed jobs of those runs
  */
 
 /**
@@ -196,6 +288,7 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {BisectState|null} bisect   bisection the red candidate belonged to, if any
  * @property {number} [timedOutRuns]     a parked hang only: how many runs of it timed out (the
  *                                       culprit comment states that number)
+ * @property {"hotfix"|"base-repair"} [lane]  the lane of the parked batch, if it is a lane batch
  */
 
 /**
@@ -254,7 +347,75 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {LandWithdrawal[]} [landWithdrawals]  oldest first, at most LAND_WITHDRAWALS_LIMIT,
  *                                       one per SHA; absent when there is none (and in documents
  *                                       written before it existed)
+ * @property {LandWithdrawal[]} [landWithdrawalsOverflow]  the refusals that found landWithdrawals
+ *                                       full, retried alike; oldest first, at most
+ *                                       LAND_WITHDRAWALS_LIMIT, no SHA of landWithdrawals; absent
+ *                                       when there is none (and in documents written before it
+ *                                       existed; code before it carries it along and ignores it)
+ * @property {number} [batchWindow]      config.batch.adaptive only: the size of the next root
+ *                                       batch (eligibility.currentBatchWindow reads it, clamped to
+ *                                       [minSize, maxSize]); absent until the window first moves
+ *                                       (and in documents written before it existed): startSize.
+ *                                       When present, validateState requires a positive integer
+ *                                       (the clamp to the configured sizes happens on read)
+ * @property {Object<string, string>} [repairTried]  PR number (string) → head SHA of a base-repair
+ *                                       PR whose candidate failed like the base: that head is
+ *                                       never composed again. An entry goes when the PR is no
+ *                                       longer queued for base repair (closed, merged, a label
+ *                                       removed) or its head changed; absent when empty (and in
+ *                                       documents written before it existed)
+ * @property {Object<string, {head: string, baseSha: string, drops: number}>} [repairInfraDrops]
+ *                                       PR number (string) → infrastructure drops of that base
+ *                                       repair head under a base-red pause, on base tip `baseSha`;
+ *                                       at config.infraRetries + 1 the lane stops composing it until
+ *                                       the head or the base moves. An entry goes when the PR is
+ *                                       closed, retargeted or its head changes; absent when empty
+ *                                       (and in documents written before it existed; older code
+ *                                       ignores it)
+ * @property {number} [failedTicks]     ticks in a row that threw (main()'s failure path counts
+ *                                       them in the save of their `error` event; a tick that
+ *                                       completes deletes it): the error-streak rule of
+ *                                       dashboard.assessHealth. A positive integer when present;
+ *                                       absent while ticks complete (and in documents written
+ *                                       before it existed; older code ignores it)
+ * @property {string} [failedSince]      ISO time of the first of those failed ticks: written and
+ *                                       deleted together with failedTicks by the tick, but
+ *                                       validateState checks each field on its own (it does not
+ *                                       require the pair; a lone failedTicks counts from now)
+ * @property {{count: number, since: string}} [landingsWithoutVerdict]  landings in a row of this
+ *                                       base (any batch) that ended without a verdict: counted in
+ *                                       the save before each blessing (tick markLanding), deleted
+ *                                       by a landing that answers, by a `landed` batch and by an
+ *                                       operator's pause or resume; `since` = the first of them.
+ *                                       dashboard.assessHealth rule 6. Absent otherwise (and in
+ *                                       documents written before it existed; older code ignores
+ *                                       it and carries it along)
+ * @property {StalledEpisode} [stalled]  the queue has stalled (dashboard.assessHealth): the
+ *                                       episode the queue-stalled event and the dashboard comment
+ *                                       were raised for. Present while it lasts, removed when the
+ *                                       queue is no longer stalled; absent in documents written
+ *                                       before it existed (older code ignores it)
  * @property {string} updatedAt          ISO
+ */
+
+/**
+ * @typedef {object} StalledEpisode  One stalled-queue episode (QueueState.stalled).
+ * @property {string} since       ISO instant the oldest stall condition began (the alert key)
+ * @property {string[]} reasons   why the queue was stalled when the episode was raised
+ * @property {string} [openedAt]  ISO time the tick recorded the episode (the watchdog's grace
+ *                                counts from it); absent in an episode written before it existed
+ *                                (the watchdog then counts from `since`)
+ * @property {true} [notified]    the episode's comment is on the dashboard issue; absent until
+ *                                then, and every tick (completed or failed) tries to post it
+ *                                again meanwhile (the comment key makes the retry idempotent)
+ * @property {string[]} [kinds]   the rules that held when the episode opened
+ *                                (dashboard.assessHealthDetail `causes`): a cause of another kind
+ *                                that begins later opens a new episode (tick.trackStall). Absent in
+ *                                an episode written before it existed (older code ignores it)
+ * @property {number} [quietTicks] an episode opened by failed ticks: the completed ticks in a row
+ *                                that found no stall since (tick trackStall); it closes at
+ *                                STALL_CLEAR_COMPLETED_TICKS, a failed tick deletes the count.
+ *                                Absent otherwise (older code ignores it)
  */
 
 /**
@@ -277,6 +438,29 @@ const SAFE_SEGMENT_RE = /^[A-Za-z0-9._-]+$/;
  * @property {string} [body]   comment markdown (the marker is appended by the executor)
  * @property {string} [label]  label to remove
  */
+
+/**
+ * How many land-status withdrawals the state stores for retry, both lists together
+ * (state.landWithdrawals and state.landWithdrawalsOverflow); 0 when there is none.
+ * @param {QueueState|null} state
+ */
+export function storedWithdrawalCount(state) {
+  const count = (list) => (Array.isArray(list) ? list.length : 0);
+  return count(state?.landWithdrawals) + count(state?.landWithdrawalsOverflow);
+}
+
+/**
+ * Does a base have queue work? A candidate in flight, a pause, a stored land-status withdrawal
+ * (either list: a commit that may still carry the App's `success` until a tick writes `failure`
+ * on it), or (`labeled`) an open pull request carrying the queue label whose base is this base,
+ * drafts included: ticks visit such a base (tick.discoverBases) and save its state at least
+ * hourly. Shared by the CLI's STALE line and the watchdog's staleness signal.
+ * @param {QueueState|null} state
+ * @param {boolean} labeled
+ */
+export function hasQueueWork(state, labeled) {
+  return Boolean(state?.inFlight || state?.paused || storedWithdrawalCount(state) > 0 || labeled);
+}
 
 /** @returns {QueueState} */
 export function initialState(base, now = new Date().toISOString()) {
@@ -329,6 +513,20 @@ function prRefErrors(pr, where) {
 
 const isPrNumber = (v) => Number.isSafeInteger(v) && v > 0;
 
+/** inFlight.rerun (RerunRecord). */
+function isRerunRecord(r) {
+  return (
+    isRecord(r) &&
+    typeof r.ref === "string" &&
+    isIso(r.requestedAt) &&
+    isCount(r.afterMs) &&
+    Array.isArray(r.runIds) &&
+    r.runIds.every((id) => Number.isSafeInteger(id) && id > 0) &&
+    Array.isArray(r.jobs) &&
+    r.jobs.every((job) => typeof job === "string")
+  );
+}
+
 /** History event: known type, ISO `at`, and `prs` (when present) a list of PR numbers. */
 function isValidEvent(e) {
   if (!isRecord(e) || !EVENT_TYPES.includes(e.type) || !isIso(e.at)) return false;
@@ -373,6 +571,11 @@ export function validateState(state) {
       if (f.landAttempts !== undefined && !isCount(f.landAttempts)) {
         errors.push("inFlight.landAttempts");
       }
+      if (f.rerun !== undefined && !isRerunRecord(f.rerun)) errors.push("inFlight.rerun");
+      if (f.lane !== undefined && !QUEUE_LANES.includes(f.lane)) errors.push("inFlight.lane");
+      if (f.freezeHold !== undefined && !isFreezeHold(f.freezeHold)) {
+        errors.push("inFlight.freezeHold");
+      }
       if (f.bisect !== null) {
         const b = f.bisect;
         if (!isRecord(b) || !Array.isArray(b.segments) || !Array.isArray(b.culprits)) {
@@ -406,18 +609,108 @@ export function validateState(state) {
   if (!isRecord(c) || counterKeys.some((k) => !isCount(c[k]))) errors.push("counters");
   if (!Array.isArray(state.history)) errors.push("history");
   else if (state.history.some((e) => !isValidEvent(e))) errors.push("history[]");
-  if (state.landWithdrawals !== undefined) errors.push(...landWithdrawalsErrors(state));
+  if (state.landWithdrawals !== undefined) {
+    errors.push(...withdrawalListErrors(state, "landWithdrawals"));
+  }
+  if (state.landWithdrawalsOverflow !== undefined) {
+    errors.push(...withdrawalListErrors(state, "landWithdrawalsOverflow"));
+  }
+  if (
+    state.batchWindow !== undefined &&
+    !(Number.isSafeInteger(state.batchWindow) && state.batchWindow >= 1)
+  ) {
+    errors.push("batchWindow");
+  }
+  if (state.repairTried !== undefined && !isRepairTried(state.repairTried)) {
+    errors.push("repairTried");
+  }
+  if (state.repairInfraDrops !== undefined && !isRepairInfraDrops(state.repairInfraDrops)) {
+    errors.push("repairInfraDrops");
+  }
+  if (
+    state.failedTicks !== undefined &&
+    !(Number.isSafeInteger(state.failedTicks) && state.failedTicks >= 1)
+  ) {
+    errors.push("failedTicks");
+  }
+  if (state.failedSince !== undefined && !isIso(state.failedSince)) errors.push("failedSince");
+  if (state.stalled !== undefined && !isStalledEpisode(state.stalled)) errors.push("stalled");
+  if (state.landingsWithoutVerdict !== undefined && !isLandingRun(state.landingsWithoutVerdict)) {
+    errors.push("landingsWithoutVerdict");
+  }
   if (!isIso(state.updatedAt)) errors.push("updatedAt");
   return errors;
 }
 
-/** Optional state.landWithdrawals: a bounded list of LandWithdrawal, one per SHA. */
-function landWithdrawalsErrors({ landWithdrawals: list }) {
-  if (!Array.isArray(list) || list.length > LAND_WITHDRAWALS_LIMIT) return ["landWithdrawals"];
+/** Optional state.repairTried: PR number (decimal, no leading zero) → 40-hex head SHA. */
+function isRepairTried(map) {
+  return (
+    isRecord(map) &&
+    Object.entries(map).every(([n, sha]) => /^[1-9][0-9]*$/.test(n) && SHA_RE.test(sha ?? ""))
+  );
+}
+
+/**
+ * Optional state.repairInfraDrops: PR number (decimal, no leading zero) → {head: 40-hex, baseSha:
+ * 40-hex, drops: positive integer}.
+ */
+function isRepairInfraDrops(map) {
+  return (
+    isRecord(map) &&
+    Object.entries(map).every(
+      ([n, e]) =>
+        /^[1-9][0-9]*$/.test(n) &&
+        isRecord(e) &&
+        SHA_RE.test(e.head ?? "") &&
+        SHA_RE.test(e.baseSha ?? "") &&
+        Number.isSafeInteger(e.drops) &&
+        e.drops >= 1
+    )
+  );
+}
+
+/** Optional inFlight.freezeHold: {since: ISO, endedAt?: ISO}. */
+function isFreezeHold(hold) {
+  return isRecord(hold) && isIso(hold.since) && (hold.endedAt === undefined || isIso(hold.endedAt));
+}
+
+/**
+ * Optional state.stalled: {since: ISO, reasons: string[], openedAt?: ISO, notified?: true,
+ * quietTicks?: positive integer, kinds?: string[]}.
+ */
+function isStalledEpisode(episode) {
+  return (
+    isRecord(episode) &&
+    isIso(episode.since) &&
+    Array.isArray(episode.reasons) &&
+    episode.reasons.every((r) => typeof r === "string") &&
+    (episode.openedAt === undefined || isIso(episode.openedAt)) &&
+    (episode.notified === undefined || episode.notified === true) &&
+    (episode.quietTicks === undefined ||
+      (Number.isSafeInteger(episode.quietTicks) && episode.quietTicks >= 1)) &&
+    (episode.kinds === undefined ||
+      (Array.isArray(episode.kinds) && episode.kinds.every((k) => typeof k === "string")))
+  );
+}
+
+/** Optional state.landingsWithoutVerdict: {count: positive integer, since: ISO}. */
+function isLandingRun(run) {
+  return isRecord(run) && Number.isSafeInteger(run.count) && run.count >= 1 && isIso(run.since);
+}
+
+/**
+ * Optional state.landWithdrawals and state.landWithdrawalsOverflow: each a bounded list of
+ * LandWithdrawal, one entry per SHA across both lists (an overflow entry may not repeat a SHA of
+ * the main list).
+ */
+function withdrawalListErrors(state, field) {
+  const list = state[field];
+  if (!Array.isArray(list) || list.length > LAND_WITHDRAWALS_LIMIT) return [field];
   const errors = [];
-  const seen = new Set();
+  const main = field === "landWithdrawals" || !Array.isArray(state.landWithdrawals);
+  const seen = new Set(main ? [] : state.landWithdrawals.map((w) => w?.sha));
   list.forEach((w, i) => {
-    const where = `landWithdrawals[${i}]`;
+    const where = `${field}[${i}]`;
     if (!isRecord(w)) return errors.push(where);
     if (!SHA_RE.test(w.sha ?? "") || seen.has(w.sha)) errors.push(`${where}.sha`);
     seen.add(w.sha);
