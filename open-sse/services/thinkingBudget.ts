@@ -101,15 +101,19 @@ export function gemini38ThinkingLevelFromBudget(
   return "high";
 }
 
-function clientAskedForThoughts(body: Record<string, unknown>): boolean {
-  return body.includeThoughts === true || body.include_thoughts === true;
+function clientDeclinedThoughts(body: Record<string, unknown>): boolean {
+  return body.includeThoughts === false || body.include_thoughts === false;
 }
 
 /**
  * Gemini 3.8 honors thinkingLevel, not a 3.7 numeric thinkingBudget.
  * Gemini 4+ rejects the numeric budget off-switch, so there it becomes thinkingLevel "low";
  * versions <= 3 keep { thinkingBudget: 0, includeThoughts: false }.
- * Omit includeThoughts unless the client asked - thoughts share maxOutputTokens.
+ * includeThoughts defaults to true, like every other Gemini thinking path (#4170):
+ * without it the upstream sends nothing while the model thinks, so a long think
+ * looks like a stalled stream and hits the response-start deadline. The flag only
+ * returns thought summaries; thinking tokens are spent either way. A client can
+ * still opt out with includeThoughts / include_thoughts: false.
  */
 export function gemini38ThinkingConfig(
   model: string,
@@ -130,7 +134,7 @@ export function gemini38ThinkingConfig(
   } = {
     thinkingLevel: gemini38ThinkingLevelFromBudget(model, budget),
   };
-  if (clientAskedForThoughts(body)) {
+  if (!clientDeclinedThoughts(body)) {
     thinkingConfig.includeThoughts = true;
   }
   return thinkingConfig;

@@ -34,38 +34,38 @@ Studio z trzema kartami, łączące wyszukiwanie w internecie, pobieranie treśc
 
 ---
 
-## Karty
+## Zakładki
 
-### Karta wyszukiwania
+### Zakładka Szukaj
 
-Rozszerza istniejące komponenty `SearchForm` + `ResultsPanel` + `RerankPanel` do postaci karty:
+Ewoluuje istniejącą `SearchForm` + `ResultsPanel` + `RerankPanel` w zakładkę:
 
-- Zapytanie → wyniki (tytuł, URL, fragment, wynik trafności).
-- Metadane dostawcy w panelu konfiguracji (koszt, limit, status).
-- Sekcja ponownego rankingowania: wybór modelu ponownego rankingowania, zmiana kolejności wyników, wyświetlanie `positionDelta`.
-- Stan pusty z wezwaniem do działania, gdy nie skonfigurowano żadnych dostawców wyszukiwania.
-- Historia wyszukiwania za pośrednictwem `SearchHistory.tsx`.
+- Zapytanie o wyniki → (tytuł, URL, fragment, wynik trafności).
+- Metadane dostawcy w panelu Konfiguracja (koszt, limit, status).
+- Sekcja zmiany rankingu: wybierz model, zmień kolejność wyników, pokaż `positionDelta`.
+- Pusty stan z CTA gdy nie skonfigurowano żadnych dostawców wyszukiwania.
+- Historia wyszukiwania poprzez `SearchHistory.tsx`.
 - Wywołuje `POST /v1/search` (istniejący punkt końcowy, bez zmian).
 
-### Karta pobierania treści
+### Zakładka zeskrobania
 
-Nowa karta do wyodrębniania treści z adresu URL za pośrednictwem `POST /v1/web/fetch` (utworzonego w planie 05):
+Nowa zakładka do wydobywania zawartości z URL poprzez `POST /v1/web/fetch` (utworzona w planie 05):
 
-- Dane wejściowe: URL + przełącznik pełnej strony + selektor formatu (markdown / tekst / HTML).
-- Prześlij → pobierz → wyrenderuj `ScrapeResult.tsx`.
-- `ScrapeResult` renderuje podgląd markdown + przełącznik widoku surowego.
-- Limit: jeśli treść odpowiedzi przekracza **256 KB**, interfejs wyświetla `(obcięto, wyświetl surowe dane)` i otwiera surowe dane w oknie modalnym Monaco (D21).
-- Panel metadanych: dostawca (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search), opóźnienie, koszt, rozmiar odpowiedzi, liczba linków.
-- Używa hooka `useScrapeFetch.ts`.
+- Wejście: URL + pełnostronicowy przełącznik wyboru formatu + (przecena / tekst / HTML).
+- Prześlij → fetch → render `ScrapeResult.tsx`.
+- `ScrapeResult` renderuje podgląd przeceny + surowy przełącznik.
+- Czapka: jeśli odpowiedź ciała >** 256 KB** , UI pokazuje `(truncated, view raw)` i otwiera się w trybie surowym w trybie Monako (D21).
+- Panel metadanych: dostawca (firecrawl/jina-reader/tavily-search/tinyfish/nimble-search/anysearch-search/parallel-search/keenable-search), opóźnienie, koszt, rozmiar odpowiedzi, liczba linków.
+- Używa haka `useScrapeFetch.ts`.
 
-### Karta porównania
+### Porównaj tab
 
-Uruchamia to samo zapytanie/ten sam adres URL równolegle u maksymalnie **4 dostawców** (D22):
+Działa na tym samym query/URL aż do** 4 dostawców równolegle** (D22):
 
-- Kolumny obok siebie dla każdego dostawcy.
+- Kolumny obok siebie według dostawcy.
 - Metryki: opóźnienie, koszt, liczba wyników, rozmiar odpowiedzi.
-- Obliczanie pokrywania się adresów URL dla wyszukiwania (liczba współdzielonych adresów URL względem początkowego wyniku).
-- Wywołuje `POST /v1/search` (wyszukiwanie) lub `POST /v1/web/fetch` (pobieranie treści) dla każdego dostawcy.
+- Obliczanie nakładania się URL dla wyszukiwania (liczba udostępnionych URLs vs wynik początkowy).
+- Wywołuje `POST /v1/search` (wyszukiwanie) lub `POST /v1/web/fetch` (scrape) na każdego dostawcę.
 
 ---
 
@@ -100,13 +100,13 @@ Uruchamia to samo zapytanie/ten sam adres URL równolegle u maksymalnie **4 dost
 
 ## Katalog dostawców
 
-`ProviderCatalog.tsx` udostępnia pełną listę dostawców z `GET /api/search/providers`
-(rozszerzoną w F4 o dostawców pobierania):
+`ProviderCatalog.tsx` udostępnia pełną listę dostawców z `GET /api/search/providers` (rozszerzoną w F4 o dostawców pobierania):
 
-| `kind` | `"search"` (20 dostawców) lub `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, nimble-search, anysearch-search, parallel-search) |
+| `kind` | `"search"` (24 dostawców) lub `"fetch"` (firecrawl, jina-reader, tavily-search, tinyfish, zwinne-wyszukiwanie, anysearch-wyszukiwanie, równoległe wyszukiwanie, Keeable-search) |
 
-Status jest **ustalany w momencie żądania** poprzez sprawdzenie, czy dane uwierzytelniające istnieją oraz czy
-wszystkie klucze są obecnie w okresie karencji.
+Stan jest** uzyskane w momencie żądania** sprawdzając, czy istnieją poświadczenia i czy wszystkie klucze są obecnie w fazie odnowienia.
+
+`codex-search` (Codex Web Search) nie ma własnego klucza: ponownie wykorzystuje połączone konto Codex (ChatGPT), więc każde wyszukiwanie zużywa limit subskrypcji ChatGPT i zajmuje około 10–40 sekund. Działa, gdy żądanie nada mu nazwę; automatyczny wybór wymaga flagi funkcji `CODEX_SEARCH_AUTO_FALLBACK_ENABLED` (domyślnie wyłączonej).
 
 ---
 
@@ -120,16 +120,16 @@ Symbol zastępczy klucza API to zawsze `$OMNIROUTE_API_KEY` (D11, współdzielon
 
 ## Zmiany w backendzie
 
-Dla tej funkcji wymagana była tylko jedna zmiana w backendzie:
+Ta funkcja wymagała tylko jednej zmiany w backendie:
 
-### Rozszerzony endpoint `GET /api/search/providers`
+### Rozszerzone `GET /api/search/providers`
 
-Plik `src/app/api/search/providers/route.ts` został rozszerzony tak, aby:
+`src/app/api/search/providers/route.ts` została rozszerzona na:
 
-- Uwzględniać w tablicy każdego dostawcę pobierania (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`).
-- Dodawać `kind: "search" | "fetch"` do każdego elementu.
-- Dodawać `status: "configured" | "missing" | "rate_limited"` określany na podstawie aktualnego stanu danych uwierzytelniających.
-- Zachować zgodność wsteczną — istniejące pola (`id`, `name` itd.) pozostają bez zmian.
+- Uwzględnij każdego dostawcę pobierania (`firecrawl`, `jina-reader`, `tavily-search`, `tinyfish`, `nimble-search`, `anysearch-search`, `parallel-search`, `keenable-search`) w tablicy.
+- Dodaj `kind: "search" | "fetch"` do każdego przedmiotu.
+- Dodaj `status: "configured" | "missing" | "rate_limited"` pochodzące ze stanu poświadczeń na żywo.
+- Zachowaj kompatybilność wsteczną — istniejących pól (`id`, `name` itp.) bez zmian.
 
 ---
 

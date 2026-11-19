@@ -11,7 +11,8 @@ import {
 
 // Official Ollama PAYG sources checked 2026-10-27/28 name these exact API IDs.
 // gemma4:31b is bound by https://ollama.com/library/gemma4:31b-cloud.
-// This removes a static grant; it does not infer a legacy account's entitlement.
+// Ollama then ended the free tier for every account on 2026-11-09 (#19334), so the provider is
+// out of the free catalog and a payload "free" flag has no documented tier to apply to.
 const pricedCloudIds = [
   "deepseek-v4-pro",
   "kimi-k2.6",
@@ -21,7 +22,7 @@ const pricedCloudIds = [
 ];
 
 for (const id of pricedCloudIds) {
-  test(`#17028 Ollama ${id} needs live free evidence, not a static grant`, () => {
+  test(`#17028 Ollama ${id} has no static grant and no free tier for live evidence (#19334)`, () => {
     const model = { id };
     assert.equal(isCatalogFreeModel("ollama-cloud", id), false);
     assert.equal(isFreeModel("ollama-cloud", model), false);
@@ -31,8 +32,8 @@ for (const id of pricedCloudIds) {
       models: [model],
       freeFilterEmpty: false,
     });
-    // Account-specific affirmative evidence remains usable; contradictory prices still veto it.
-    assert.equal(isFreeModel("ollama-cloud", { id, isFree: true }), true);
+    // With no free tier left, a payload free flag is ignored; contradictory prices stay vetoed.
+    assert.equal(isFreeModel("ollama-cloud", { id, isFree: true }), false);
     assert.equal(isFreeModel("ollama-cloud", { id, isFree: true, pricing: { input: 1 } }), false);
   });
 }
@@ -61,14 +62,13 @@ test("#17028 seven exact free offers have evidence while regional and account ga
     assert.ok(evidence.has(key), key);
     assert.equal(policy.debt.includes(key), false, key);
   }
-  for (const key of [
-    "agnes-cn/agnes-2.5-flash",
-    "aion/aion-labs/aion-3.0",
-    "ollama-cloud/qwen3.5:397b",
-  ]) {
+  for (const key of ["agnes-cn/agnes-2.5-flash", "aion/aion-labs/aion-3.0"]) {
     assert.equal(evidence.has(key), false, key);
     assert.ok(policy.debt.includes(key), key);
   }
+  // Removed from the catalog with the end of Ollama's free tier (#19334): neither evidence nor debt.
+  assert.equal(evidence.has("ollama-cloud/qwen3.5:397b"), false);
+  assert.equal(policy.debt.includes("ollama-cloud/qwen3.5:397b"), false);
 });
 
 test("#17028 Requesty NVIDIA trial retains its published training and use restrictions", () => {

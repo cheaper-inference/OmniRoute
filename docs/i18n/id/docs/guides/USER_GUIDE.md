@@ -372,7 +372,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI secara otomatis memuat `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` di direktori kerja hanya dapat menyetel daftar pendek kunci yang diizinkan (port, `REQUIRE_API_KEY`, pengaturan lokal dan warna); masukkan semuanya ke dalam `~/.omniroute/.env`. Lihat [kontrak peluncuran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI secara otomatis memuat `.env` dari `~/.omniroute/.env` atau `./.env`. `./.env` di direktori kerja hanya dapat menyetel daftar kunci pendek yang diizinkan (`REQUIRE_API_KEY`, pengaturan lokal, zona waktu dan warna, bukan port); masukkan semuanya ke dalam `~/.omniroute/.env`. Lihat [kontrak peluncuran CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Modus baki
 
@@ -423,7 +423,7 @@ Saat Anda tidak lagi memerlukan OmniRoute, kami menyediakan dua skrip cepat untu
 
 | Memerintah               | Tindakan                                                                                      |
 | ------------------------ | --------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Menghapus aplikasi sistem tapi** menyimpan DB dan konfigurasi Anda** di `~/.omniroute`.       |
+| `npm run uninstall`      | Menghapus aplikasi sistem tetapi** menyimpan DB dan konfigurasi Anda** di `~/.omniroute`.     |
 | `npm run uninstall:full` | Menghapus aplikasi AND secara permanen** menghapus semua konfigurasi, kunci, dan database** . |
 
 > Catatan: Untuk menjalankan perintah ini, navigasikan ke folder proyek OmniRoute (jika Anda mengkloningnya) dan jalankan. Alternatifnya, jika diinstal secara global, Anda cukup menjalankan `npm uninstall -g omniroute`.
@@ -734,8 +734,8 @@ Pilih awalan yang berbeda (`mygw`, `acme-proxy`). Jika permintaan ke node kustom
 
 Kunci-kunci ini masuk ke `providerSpecificData` koneksi (misalnya melalui `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — untuk koneksi yang kompatibel dengan format obrolan OpenAI yang gatewaynya menolak nama alat yang panjang. Nama yang lebih panjang dikirim sebagai alias pendek dan dikembalikan sebagai respons.
-- `quotaEndpoint` — titik akhir quota/credits gateway, dibaca untuk strip kuota dasbor dan perutean sadar kuota. Bekerja pada koneksi yang kompatibel dengan OpenAI dan Anthropic; bentuk lengkapnya didokumentasikan dalam `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (integer, 1–1024) — untuk koneksi yang kompatibel dengan format obrolan OpenAI yang gatewaynya menolak nama alat yang panjang. Nama yang lebih panjang dikirim sebagai alias pendek dan dikembalikan sebagai respons. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code sudah memiliki nama alias lebih dari 64 karakter tanpa pengaturan. Nilai koneksi menggantikan default Azure OpenAI / Azure AI Foundry (koneksi Azure di belakang gateway yang lebih ketat) dan menetapkan batas untuk node kustom yang kompatibel; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go dan Muse Code menjaga batas registrinya dan mengabaikannya.
+- `quotaEndpoint` — titik akhir quota/credits gateway, baca untuk strip kuota dasbor dan perutean sadar kuota. Bekerja pada koneksi yang kompatibel dengan OpenAI dan Anthropic; bentuk lengkapnya didokumentasikan di `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -752,7 +752,7 @@ Kunci-kunci ini masuk ke `providerSpecificData` koneksi (misalnya melalui `PUT /
 
 ### Merangkai OmniRoute Rekan
 
-Gerbang OmniRoute lain dapat ditambahkan sebagai a** Kompatibel dengan OpenAI khusus** penyedia. Gunakan basis `/v1` URL rekan dan kunci API khusus dengan hak istimewa paling rendah yang dikeluarkan oleh rekan tersebut.
+Gerbang OmniRoute lain dapat ditambahkan sebagai a** Kompatibel dengan OpenAI khusus** penyedia. Gunakan `/v1` basis URL rekan dan kunci API khusus dengan hak istimewa paling rendah yang dikeluarkan oleh rekan tersebut.
 
 Untuk rantai timbal balik atau multi-hop, aktifkan opt-in loop guard di setiap gateway:
 
@@ -832,9 +832,9 @@ Mengembalikan model yang dikelompokkan berdasarkan penyedia dengan tipe (`chat`,
 
 ### LLM Gateway Intelligence (Fase 9)
 
-- **Cache Semantik** — Cache otomatis non-streaming, suhu respons = 0 (bypass dengan `X-OmniRoute-No-Cache: true`)
+- **Cache Semantik** — Auto-cache non-streaming, suhu = 0 tanggapan (bypass dengan `X-OmniRoute-No-Cache: true`)
 - **Minta Idempotensi** — Menghapus duplikat permintaan dalam waktu 5 detik melalui header `Idempotency-Key` atau `X-Request-Id`
-- **Pelacakan Kemajuan** — Ikut serta dalam acara SSE `event: progress` melalui header `X-OmniRoute-Progress: true`
+- **Pelacakan Kemajuan** — Ikut serta acara SSE `event: progress` melalui header `X-OmniRoute-Progress: true`
 
 ---
 
@@ -863,27 +863,27 @@ Konfigurasikan melalui** Dasbor → Pengaturan → Perutean** . Dasbor memaparka
 
 **Strategi yang terlihat di dasbor (perutean tingkat akun):**
 
-| Strategi                       | Keterangan                                                                                                 |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------- |
-| **Isi Dulu**                   | Menggunakan akun dalam urutan prioritas — akun utama menangani semua permintaan hingga tidak tersedia      |
-| **Usul**                       | Menggilir semua akun dengan batas melekat yang dapat dikonfigurasi (default: 3 panggilan per akun)         |
-| **P2C (Kekuatan Dua Pilihan)** | Pilih 2 akun acak dan rute ke akun yang lebih sehat — menyeimbangkan beban dengan kesadaran akan kesehatan |
-| **Acak**                       | Memilih akun secara acak untuk setiap permintaan menggunakan pengacakan Fisher-Yates                       |
-| **Paling Sedikit Digunakan**   | Merutekan ke akun dengan stempel waktu `lastUsedAt` terlama, mendistribusikan lalu lintas secara merata    |
-| **Biaya Dioptimalkan**         | Merutekan ke akun dengan nilai prioritas terendah, mengoptimalkan penyedia berbiaya terendah               |
+| Strategi                       | Keterangan                                                                                              |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| **Isi Dulu**                   | Menggunakan akun dalam urutan prioritas akun utama — menangani semua permintaan hingga tidak tersedia   |
+| **Usul**                       | Menggilir semua akun dengan batas melekat yang dapat dikonfigurasi (default: 3 panggilan per akun)      |
+| **P2C (Kekuatan Dua Pilihan)** | Memilih 2 akun acak dan rute ke yang lebih sehat memuat saldo — dengan kesadaran akan kesehatan         |
+| **Acak**                       | Memilih akun secara acak untuk setiap permintaan menggunakan pengacakan Fisher-Yates                    |
+| **Paling Sedikit Digunakan**   | Merutekan ke akun dengan stempel waktu `lastUsedAt` terlama, mendistribusikan lalu lintas secara merata |
+| **Biaya Dioptimalkan**         | Merutekan ke akun dengan nilai prioritas terendah, mengoptimalkan penyedia berbiaya terendah            |
 
 **Kombo tingkat lanjut dan strategi otomatis** (dapat dikonfigurasi per kombo atau melalui awalan `auto/*` — lihat [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
-- `priority` — ketertiban yang ketat, tidak pernah bersifat round-robin
+- `priority` — ketertiban yang ketat, tidak pernah round-robin
 - `weighted` — lalu lintas proporsional dibagi dengan bobot per model
-- `fill-first` — tiriskan model pertama hingga batasnya tercapai
+- `fill-first` — tiriskan model pertama hingga batas tercapai
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Kekuatan Dua Pilihan)
 - `least-used` dan `cost-optimized`
-- `auto` — berdasarkan skor untuk semua kandidat
+- `auto` — berbasis skor di semua kandidat
 - `lkgp` (Penyedia Baik yang Terakhir Diketahui) — menyematkan ke penyedia terakhir yang berhasil, lalu kembali ke aturan
 - `context-optimized` — memilih model dengan jendela konteks bebas terbesar
-- `context-relay` - merangkai model konteks panjang untuk putaran lanjutan
+- `context-relay` — merangkai model konteks panjang untuk putaran lanjutan
 
 #### Header Sesi Lengket Eksternal
 
@@ -893,7 +893,7 @@ Untuk afinitas sesi eksternal (misalnya, agen Claude Code/Codex di belakang prok
 X-Session-Id: your-session-key
 ```
 
-OmniRoute juga menerima `x_session_id` dan mengembalikan kunci sesi yang efektif di `X-OmniRoute-Session-Id`.
+OmniRoute juga menerima `x_session_id` dan mengembalikan kunci sesi efektif di `X-OmniRoute-Session-Id`.
 
 Jika Anda menggunakan Nginx dan mengirim header berbentuk garis bawah, aktifkan:
 
@@ -995,7 +995,7 @@ OmniRoute menerapkan ketahanan tingkat penyedia dengan lima komponen:
    - **Waktu Minimum Antar Permintaan** — Kesenjangan minimum dalam milidetik antar permintaan
    - **Permintaan Serentak Maks** — Permintaan simultan maksimum per akun
 
-2. **Pendinginan Koneksi** — Konfigurasi tipe per autentikasi untuk satu koneksi setelah kegagalan yang dapat dicoba lagi:
+2. **Pendinginan Koneksi** — Konfigurasi tipe per-auth untuk koneksi tunggal setelah kegagalan yang dapat dicoba lagi:
    - **Pendinginan Dasar** — Jendela cooldown default untuk kegagalan upstream yang dapat dicoba lagi
    - **Gunakan Petunjuk Coba Ulang Hulu** — Menghormati `Retry-After` resmi atau petunjuk pengaturan ulang bila diberikan
    - **Langkah Mundur Maks** — Tingkat backoff eksponensial maksimum untuk kegagalan berulang
@@ -1003,10 +1003,10 @@ OmniRoute menerapkan ketahanan tingkat penyedia dengan lima komponen:
 3. **Pemutus Arus Penyedia** — Melacak kegagalan penyedia end-to-end, menandai penyedia terdegradasi pada ambang peringatan yang dikonfigurasi, dan membuka pemutus ketika ambang kegagalan yang dikonfigurasi tercapai:
    - **Ambang Batas Degradasi** — Kegagalan penyedia berturut-turut sebelum memasuki `DEGRADED`
    - **Ambang Kegagalan** — Kegagalan penyedia berturut-turut sebelum memasuki `OPEN`
-   - **Atur Ulang Batas Waktu** — Jangka waktu sebelum penyedia diuji lagi
+   - **Atur Ulang Batas Waktu** — Jendela waktu sebelum penyedia diuji lagi
    - **CLOSED** (Sehat) — Permintaan mengalir secara normal
    - **DEGRADED** — Permintaan masih mengalir sementara peningkatan kegagalan dilacak
-   - **OPEN** — Penyedia diblokir sementara setelah kegagalan berulang kali
+   - **OPEN** Penyedia — diblokir sementara setelah kegagalan berulang kali
    - **HALF_OPEN** — Menguji apakah penyedia telah pulih
 
    Batas kecepatan `429` cakupan koneksi tetap berlaku** Pendinginan Koneksi** dan tidak dihitung sebagai pemutus penyedia.
@@ -1015,7 +1015,7 @@ OmniRoute menerapkan ketahanan tingkat penyedia dengan lima komponen:
 
 4. **Tunggu Cooldown** — Jika setiap kandidat koneksi sudah didinginkan, OmniRoute dapat menunggu hingga cooldown paling awal dan mencoba kembali permintaan klien yang sama secara otomatis.
 
-5. **Deteksi Otomatis Batas Nilai** — Saat penyedia upstream mengembalikan jendela tunggu eksplisit, petunjuk tersebut akan menggantikan cooldown koneksi lokal saat pengaturan diaktifkan.
+5. **Deteksi Otomatis Batas Nilai** — Ketika penyedia upstream mengembalikan jendela tunggu eksplisit, petunjuk tersebut mengesampingkan cooldown koneksi lokal ketika pengaturan diaktifkan.
 
 **Kiat Pro:** Gunakan** Kesehatan** halaman untuk memeriksa dan menyetel ulang pemutus penyedia langsung setelah pemadaman. Halaman Ketahanan hanya mengubah konfigurasi.
 
@@ -1061,7 +1061,7 @@ Halaman pengaturan disusun menjadi** 7 tab** untuk navigasi yang mudah:
 | --------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Umum**        | Alat penyimpanan sistem, perilaku default, visibilitas terowongan Endpoint                                                                                                |
 | **Penampilan**  | Kontrol tema (light/dark/system), visibilitas sidebar, panel matikan untuk kartu terowongan Cloudflare/Tailscale/ngrok                                                    |
-| **AI**          | Memikirkan anggaran (passthrough / auto-strip / custom / adaptif - lihat [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), perintah sistem global, statistik cache yang cepat |
+| **AI**          | Memikirkan anggaran (passthrough / auto-strip / custom / adaptif — lihat [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), perintah sistem global, statistik cache yang cepat |
 | **Keamanan**    | pengaturan Login/Password, Kontrol Akses IP, autentikasi API untuk `/models`, Pemblokiran Penyedia, pelindung injeksi cepat                                               |
 | **Rute**        | Strategi perutean global (Isi Pertama / Round Robin / P2C / Acak / Paling Sedikit Digunakan / Optimasi Biaya), alias model wildcard, rantai fallback, default kombo       |
 | **Ketangguhan** | Antrean permintaan, waktu tunggu koneksi, konfigurasi pemutus penyedia, dan perilaku menunggu waktu tunggu                                                                |
@@ -1078,7 +1078,7 @@ Akses melalui** Dasbor → Biaya** .
 | tab          | Tujuan                                                                                                  |
 | ------------ | ------------------------------------------------------------------------------------------------------- |
 | **Anggaran** | Tetapkan batas pengeluaran per kunci API dengan anggaran daily/weekly/monthly dan pelacakan waktu nyata |
-| **Harga**    | Lihat dan edit entri harga model — biaya per 1K token input/output per penyedia                         |
+| **Harga**    | Lihat dan edit entri harga model biaya — per 1K token input/output per penyedia                         |
 
 ```bash
 # API: Set a budget

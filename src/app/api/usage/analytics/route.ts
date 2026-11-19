@@ -318,6 +318,8 @@ async function computeAnalyticsResponse(
       normalizeModelName
     );
     const summary = {
+      estimated: Number(summaryRow?.estimatedRequests || 0) > 0,
+      unknownEvidence: Number(summaryRow?.unknownEvidenceRequests || 0) > 0,
       ...cachedInput.summary,
       totalRequests: Number(summaryRow?.totalRequests || 0),
       promptTokens: Number(summaryRow?.promptTokens || 0),

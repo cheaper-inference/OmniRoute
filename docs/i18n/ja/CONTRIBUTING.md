@@ -292,72 +292,72 @@ PR を作成する前に、
 
 ---
 
-## プロジェクト構成
+## プロジェクトの構造
 
 ```
 src/                        # TypeScript (.ts / .tsx)
 ├── app/                    # Next.js 16 App Router
-│   ├── (dashboard)/        # ダッシュボードページ（23セクション）
-│   ├── api/                # APIルート（51ディレクトリ）
-│   └── login/              # 認証ページ（.tsx）
-├── domain/                 # ポリシーエンジン（policyEngine、comboResolver、costRulesなど）
-├── lib/                    # コアビジネスロジック（.ts）
-│   ├── a2a/                # Agent-to-Agent v0.3プロトコルサーバー
-│   ├── acp/                # Agent Communication Protocolレジストリ
-│   ├── compliance/         # コンプライアンスポリシーエンジン
-│   ├── db/                 # SQLiteドメインモジュール + 130件のマイグレーション
-│   ├── memory/             # 永続的な会話メモリ
-│   ├── oauth/              # OAuthプロバイダー、サービス、ユーティリティ
-│   ├── skills/             # 拡張可能なスキルフレームワーク
-│   ├── usage/              # 使用量の追跡とコスト計算
-│   └── localDb.ts          # 再エクスポート専用レイヤー — ここにはロジックを追加しないこと
-├── middleware/              # リクエストミドルウェア（promptInjectionGuard）
-├── mitm/                   # MITMプロキシ（証明書、DNS、ターゲットルーティング）
+│   ├── (dashboard)/        # Dashboard pages (23 sections)
+│   ├── api/                # API routes (51 directories)
+│   └── login/              # Auth pages (.tsx)
+├── domain/                 # Policy engine (policyEngine, comboResolver, costRules, etc.)
+├── lib/                    # Core business logic (.ts)
+│   ├── a2a/                # Agent-to-Agent v0.3 protocol server
+│   ├── acp/                # Agent Communication Protocol registry
+│   ├── compliance/         # Compliance policy engine
+│   ├── db/                 # SQLite domain modules + 130 migrations
+│   ├── memory/             # Persistent conversational memory
+│   ├── oauth/              # OAuth providers, services, and utilities
+│   ├── skills/             # Extensible skill framework
+│   ├── usage/              # Usage tracking and cost calculation
+│   └── localDb.ts          # Re-export layer only — never add logic here
+├── middleware/              # Request middleware (promptInjectionGuard)
+├── mitm/                   # MITM proxy (cert, DNS, target routing)
 ├── shared/
-│   ├── components/         # Reactコンポーネント（.tsx）
-│   ├── constants/          # プロバイダー定義（329件）、MCPスコープ、20種類のルーティング戦略
-│   ├── utils/              # サーキットブレーカー、サニタイザー、認証ヘルパー
-│   └── validation/         # Zod v4スキーマ
-└── sse/                    # SSEプロキシパイプライン
+│   ├── components/         # React components (.tsx)
+│   ├── constants/          # Provider definitions (329), MCP scopes, 22 routing strategies
+│   ├── utils/              # Circuit breaker, sanitizer, auth helpers
+│   └── validation/         # Zod v4 schemas
+└── sse/                    # SSE proxy pipeline
 
-open-sse/                   # @omniroute/open-sseワークスペース
-├── executors/              # 150個のエグゼキューターモジュール（エグゼキュータークラス + プロバイダー別ヘルパー）
-├── handlers/               # 11個のリクエストハンドラー（チャット、レスポンス、埋め込み、画像など）
-├── mcp-server/             # MCPサーバー（110種類のツール、3種類のトランスポート、33スコープ）
-├── services/               # 178個のトップレベルサービス（combo、autoCombo、rateLimitManagerなど）
-├── translator/             # フォーマットトランスレーター（OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama）
-├── transformer/            # Responses APIトランスフォーマー
-└── utils/                  # 22個のユーティリティモジュール（ストリーム、TLS、プロキシ、ロギング）
+open-sse/                   # @omniroute/open-sse workspace
+├── executors/              # 150 executor modules (executor classes + per-provider helpers)
+├── handlers/               # 11 request handlers (chat, responses, embeddings, images, etc.)
+├── mcp-server/             # MCP server (110 unique tools, 3 transports, 33 scopes)
+├── services/               # 178 top-level services (combo, autoCombo, rateLimitManager, etc.)
+├── translator/             # Format translators (OpenAI ↔ Claude ↔ Gemini ↔ Responses ↔ Ollama)
+├── transformer/            # Responses API transformer
+└── utils/                  # 22 utility modules (stream, TLS, proxy, logging)
 
-electron/                   # Electronデスクトップアプリ（クロスプラットフォーム）
+electron/                   # Electron desktop app (cross-platform)
 
 tests/
-├── unit/                   # Node.jsテストランナー（1,574個のテストファイル）
-├── integration/            # 統合テスト
-├── e2e/                    # Playwrightテスト
-├── security/               # セキュリティテスト
-├── translator/             # トランスレーター固有のテスト
-└── load/                   # 負荷テスト
+├── unit/                   # Node.js test runner (1,574 test files)
+├── integration/            # Integration tests
+├── e2e/                    # Playwright tests
+├── security/               # Security tests
+├── translator/             # Translator-specific tests
+└── load/                   # Load tests
 
 docs/
-├── adr/                     # アーキテクチャ決定記録
-├── architecture/            # システムアーキテクチャとレジリエンス
-├── comparison/              # OmniRouteと代替製品の比較
-├── compression/             # 圧縮ガイドとルール
-├── dev/                     # 開発ガイド
-├── diagrams/                # アーキテクチャ図
-├── frameworks/              # MCP、A2A、OpenCode、Memory、Skills
-├── guides/                  # ユーザーガイド、Docker、セットアップ、トラブルシューティング
-├── i18n/                    # 国際化されたREADME翻訳
-├── marketing/               # マーケティング資料
-├── ops/                     # デプロイ、プロキシ、カバレッジ、リリース
-├── providers/               # プロバイダー固有のドキュメント
-├── reference/               # APIリファレンス、環境変数、CLIツール、無料枠
-├── releases/                # リリースノート
-├── routing/                 # 自動コンボエンジン、推論リプレイ
-├── screenshots/             # ダッシュボードのスクリーンショット
-├── security/                # ガードレール、コンプライアンス、ステルス、トークン
-└── specs/                   # 設計仕様
+├── adr/                     # Architecture Decision Records
+├── architecture/            # System architecture & resilience
+├── comparison/              # OmniRoute vs alternatives
+├── compression/             # Compression guides & rules
+├── dev/                     # Development guides
+├── diagrams/                # Architecture diagrams
+├── frameworks/              # MCP, A2A, OpenCode, Memory, Skills
+├── guides/                  # User guide, Docker, setup, troubleshooting
+├── i18n/                    # Internationalized README translations
+├── marketing/               # Marketing materials
+├── ops/                     # Deployment, proxy, coverage, releases
+├── providers/               # Provider-specific docs
+├── reference/               # API reference, env vars, CLI tools, free tiers
+├── releases/                # Release notes
+├── routing/                 # Auto-combo engine, reasoning replay
+├── screenshots/             # Dashboard screenshots
+├── security/                # Guardrails, compliance, stealth, tokens
+└── specs/                   # Design specs
 ```
 
 ---
