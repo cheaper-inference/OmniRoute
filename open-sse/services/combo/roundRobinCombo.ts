@@ -7,6 +7,7 @@ import {
   getRuntimeProviderProfile,
   hasPerModelQuota,
   isModelLocked,
+  recordProviderFailure,
   recordProviderSuccess,
 } from "../accountFallback.ts";
 import {
@@ -30,8 +31,7 @@ import {
   resolveTargetFingerprint,
 } from "../comboAgentMiddleware.ts";
 import {
-  resolveComboConfig,
-  getDefaultComboConfig,
+  resolveComboSetupConfig,
   resolveComboQueueDepth,
 } from "../comboConfig.ts";
 import { getHiddenModelsByProvider } from "@/models";
@@ -113,6 +113,7 @@ import {
   isLocalQueueCapacityErrorBody,
   isLocalProcessPressureResponse,
   isProviderCircuitOpenResult,
+  shouldRecordProviderBreakerFailure,
   toRecordedTarget,
   getExhaustedTargetSkipReason,
   requestScopedReplayKey,
@@ -191,22 +192,7 @@ export async function handleRoundRobinCombo({
   perTargetAdmission = null,
   heldAttempt = {},
 }: HandleRoundRobinOptions): Promise<Response> {
-  const config = settings
-    ? resolveComboConfig(combo, settings)
-    : {
-        ...getDefaultComboConfig(),
-        ...(combo.config || {}),
-        // See resolveComboConfig's failoverBeforeRetryExplicit comment in
-        // comboConfig.ts (no `settings` here, so only the combo's own config
-        // can opt in).
-        failoverBeforeRetryExplicit:
-          (combo.config as Record<string, unknown> | undefined)?.failoverBeforeRetry === true,
-        trackStreamReadinessInCircuitBreaker:
-          Boolean(
-            (combo.config as Record<string, unknown> | undefined)
-              ?.trackStreamReadinessInCircuitBreaker
-          ) || process.env.OMNIROUTE_CIRCUIT_BREAKER_TRACK_STREAM_TIMEOUT === "true",
-      };
+  const config = resolveComboSetupConfig(combo, settings);
   // #9158: clamp combo-level concurrency to a sane bound — a config carrying a
   // huge or negative value would otherwise open an unbounded semaphore and
   // flood targets (or deadlock at 0).
@@ -1300,6 +1286,39 @@ export async function handleRoundRobinCombo({
               undefined,
               target
             );
+          }
+
+          const nextRrTarget =
+            offset + 1 < modelCount ? filteredTargets[rrTargetIndexAt(offset + 1)] : undefined;
+          const sameProviderNext =
+            typeof nextRrTarget?.provider === "string" && nextRrTarget.provider === provider;
+          if (
+            provider &&
+            provider !== "unknown" &&
+            shouldRecordProviderBreakerFailure({
+              isStreamReadinessFailure,
+              isStreamEarlyEof,
+              trackStreamReadinessInCircuitBreaker: Boolean(
+                config.trackStreamReadinessInCircuitBreaker
+              ),
+              status: result.status,
+              sameProviderNext,
+              skipProviderBreaker: fallbackResult.skipProviderBreaker,
+              requestScopedFailure: scopedFailure,
+              error: errorText,
+              isProxyUnreachable: structuredError?.code === "proxy_unreachable",
+              providerCircuitOpen: isProviderCircuitOpenResult(result, errorText),
+            }) &&
+            !isDraining()
+          ) {
+            const isQueueTimeout =
+              errorText.includes("RATE_LIMIT_QUEUE_TIMEOUT") ||
+              errorText.includes("RATE_LIMIT_QUEUE_WEDGED");
+            recordProviderFailure(provider, log, targetWithConnection.connectionId, profile, {
+              isQueueTimeout,
+              isNetworkError: structuredError?.code === "proxy_unreachable",
+              providerProbeSettled: isProviderProbeResponse(result),
+            });
           }
 
           if (

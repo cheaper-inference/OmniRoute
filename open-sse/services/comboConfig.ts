@@ -344,8 +344,11 @@ export function resolveComboConfig(
   const cleanProviderOverride = clean(providerOverride);
   const cleanComboConfig = clean(comboConfig);
 
+  const envTrackStreamReadiness =
+    process.env.OMNIROUTE_CIRCUIT_BREAKER_TRACK_STREAM_TIMEOUT === "true";
   const merged = {
     ...DEFAULT_COMBO_CONFIG,
+    trackStreamReadinessInCircuitBreaker: envTrackStreamReadiness,
     ...cleanGlobal,
     ...cleanProviderOverride,
     ...cleanComboConfig,
@@ -362,9 +365,9 @@ export function resolveComboConfig(
     cleanComboConfig.failoverBeforeRetry === true ||
     cleanProviderOverride.failoverBeforeRetry === true ||
     cleanGlobal.failoverBeforeRetry === true;
-  const trackStreamReadinessInCircuitBreaker =
-    Boolean(merged.trackStreamReadinessInCircuitBreaker) ||
-    process.env.OMNIROUTE_CIRCUIT_BREAKER_TRACK_STREAM_TIMEOUT === "true";
+  const trackStreamReadinessInCircuitBreaker = Boolean(
+    merged.trackStreamReadinessInCircuitBreaker
+  );
 
   return {
     ...merged,
@@ -409,15 +412,17 @@ export function getDefaultComboConfig() {
 export function resolveComboSetupConfig(combo: ComboConfigLike, settings: ComboSettingsLike) {
   if (settings) return resolveComboConfig(combo, settings);
   const comboConfig = (combo?.config as Record<string, unknown>) || {};
+  const defaults = getDefaultComboConfig();
   return {
-    ...getDefaultComboConfig(),
+    ...defaults,
     ...comboConfig,
-    // See resolveComboConfig's failoverBeforeRetryExplicit comment — same
-    // distinction applies here (no `settings`, so only the combo's own config
+    // When settings are absent, only the combo's own config can opt in; the
+    // same explicit-vs-default distinction applies here (no `settings`, so only the combo's own config
     // can opt in).
     failoverBeforeRetryExplicit: comboConfig.failoverBeforeRetry === true,
-    trackStreamReadinessInCircuitBreaker:
-      Boolean(comboConfig.trackStreamReadinessInCircuitBreaker) ||
-      process.env.OMNIROUTE_CIRCUIT_BREAKER_TRACK_STREAM_TIMEOUT === "true",
+    trackStreamReadinessInCircuitBreaker: Boolean(
+      comboConfig.trackStreamReadinessInCircuitBreaker ??
+        defaults.trackStreamReadinessInCircuitBreaker
+    ),
   };
 }
