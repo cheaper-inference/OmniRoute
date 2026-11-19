@@ -14,6 +14,11 @@ import { extendCodexGpt56EffortValues } from "../../src/shared/reasoning/effortS
 import { isCodexExtendedEffortBaseModel } from "../../src/shared/reasoning/codexExtendedEffort.ts";
 import * as reasoningMetadata from "../../src/lib/vscode/reasoningMetadata.ts";
 import { supportsVscodeServiceTierVariants } from "../../src/lib/vscode/serviceTierVariants.ts";
+import {
+  getResolvedModelCapabilitiesWithLimitSources,
+  type ModelCapabilityResolutionSnapshot,
+} from "../../src/lib/modelCapabilities.ts";
+import { enrichCatalogModelEntry } from "../../src/lib/modelMetadataRegistry.ts";
 
 const MODEL = "gpt-6.1-sol";
 const EFFORTS = ["low", "medium", "high", "xhigh", "max", "ultra"];
@@ -174,4 +179,70 @@ test("Responses Lite keeps delegation for GPT-6.1 Sol ultra only", async () => {
     assert.equal(captured[0].model, MODEL);
     assert.equal(captured[0].parallel_tool_calls, effort === "ultra");
   }
+});
+
+test("#20437 codex/gpt-6.1-sol retains 872k Codex window even when synced models.dev carries 1,050,000 API limit", () => {
+  const syncedRow = {
+    tool_call: true,
+    reasoning: true,
+    attachment: true,
+    structured_output: true,
+    temperature: null,
+    modalities_input: JSON.stringify(["text", "image"]),
+    modalities_output: JSON.stringify(["text"]),
+    knowledge_cutoff: null,
+    release_date: null,
+    last_updated: null,
+    status: "stable",
+    family: "gpt-6",
+    open_weights: false,
+    limit_context: 1_050_000,
+    limit_input: 922_000,
+    limit_output: 128_000,
+    interleaved_field: null,
+  };
+  const snapshot: ModelCapabilityResolutionSnapshot = {
+    inputModalities: new Map(),
+    synced: {
+      openai: { [MODEL]: syncedRow },
+      cx: { [MODEL]: syncedRow },
+    },
+    maxTokenOverrides: new Map(),
+    maxInputTokenOverrides: new Map(),
+    reasoningEffortsOverrides: new Map(),
+    contextOverrides: new Map(),
+    customVisionOverrides: new Map(),
+    compatVisionOverrides: new Map(),
+    syncedAvailableModelVision: new Map(),
+  };
+
+  const codexCaps = getResolvedModelCapabilitiesWithLimitSources(`codex/${MODEL}`, snapshot);
+  assert.equal(codexCaps.capabilities.contextWindow, 872_000);
+  assert.equal(codexCaps.capabilities.maxInputTokens, 872_000);
+  assert.equal(codexCaps.limitSources.contextWindow, `registry:codex/${MODEL}`);
+
+  const openaiCaps = getResolvedModelCapabilitiesWithLimitSources(`openai/${MODEL}`, snapshot);
+  assert.equal(openaiCaps.capabilities.contextWindow, 1_050_000);
+
+  const enrichedCodex = enrichCatalogModelEntry(
+    { id: `codex/${MODEL}`, owned_by: "codex", root: MODEL },
+    undefined,
+    {
+      modelsDevPricing: {},
+      userPricing: {},
+      capabilityResolutionSnapshot: snapshot,
+    }
+  );
+  assert.equal(enrichedCodex.context_length, 872_000);
+
+  assert.deepEqual(
+    extendCodexGpt56EffortValues("codex", "gpt-6.1-terra", [
+      "low",
+      "medium",
+      "high",
+      "xhigh",
+      "max",
+    ]),
+    EFFORTS
+  );
 });
