@@ -324,14 +324,21 @@ function getBaseModelIdentity(target: ResolvedComboTarget): string {
 }
 
 /**
- * #20191: index of the first entry in `targets` that belongs to the same combo step as `target`.
- * Affinity expansion turns a step into `step@account` targets, so steps are matched by their
- * base identity rather than by the (possibly expanded) execution key. -1 when none matches.
+ * #20191: index of `target` in `targets`, or of the first entry of the same combo step.
+ * The exact execution key wins, so already-per-connection targets (connection-aware expansion's
+ * `step@c0`, `step@c1`, …) keep their account dimension and round-robin still rotates across
+ * them. Only when the target itself is absent — prompt-cache affinity expanded its step into
+ * `step@account` targets, or one of those maps back to its step — are steps matched by their
+ * base identity. -1 when none matches.
  */
 export function findSameStepIndex(
   targets: ResolvedComboTarget[],
   target: ResolvedComboTarget
 ): number {
+  const exactIndex = target.executionKey
+    ? targets.findIndex((entry) => entry.executionKey === target.executionKey)
+    : -1;
+  if (exactIndex >= 0) return exactIndex;
   const step = getBaseModelIdentity(target);
   return targets.findIndex((entry) => getBaseModelIdentity(entry) === step);
 }

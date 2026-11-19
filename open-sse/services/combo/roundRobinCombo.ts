@@ -1056,8 +1056,8 @@ export async function handleRoundRobinCombo({
               );
             }
 
-            // #948, #20191: advance past the step that ACTUALLY served, in the initialTargets
-            // index space (an affinity-expanded step@account target maps back to its step).
+            // #948, #20191: advance past the target that ACTUALLY served, in initialTargets space
+            // (exact entry first; only an affinity-expanded step@account maps back to its step).
             // Read side applies `% initialTargets.length`, so servedIndex + 1 is correct.
             const servedIndex = findSameStepIndex(initialTargets, target);
             if (stickyRoundRobinEnabled) {

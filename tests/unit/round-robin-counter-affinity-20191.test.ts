@@ -14,6 +14,8 @@ const stick = await import("../../open-sse/services/combo/sessionStickiness.ts")
 const dbCore = await import("../../src/lib/db/core.ts");
 const { getSettings } = await import("../../src/lib/db/settings.ts");
 const providersDb = await import("../../src/lib/db/providers.ts");
+const { findSameStepIndex } = await import("../../open-sse/services/combo/promptCacheAffinity.ts");
+const { registerQuotaFetcher } = await import("../../open-sse/services/quotaPreflight.ts");
 
 function makeLog() {
   return { info() {}, warn() {}, debug() {}, error() {} };
@@ -169,6 +171,54 @@ test("round-robin rotates across steps when affinity expands them into per-accou
   }
 
   assert.deepEqual(served, ["mock-a", "mock-b", "mock-c", "mock-a", "mock-b", "mock-c"]);
+});
+
+test("findSameStepIndex keeps the account dimension of per-connection targets (#20191)", () => {
+  const target = (executionKey: string) =>
+    ({ executionKey, modelStr: "p/m" }) as Parameters<typeof findSameStepIndex>[1];
+  const expanded = [target("s@c0"), target("s@c1"), target("s@c2"), target("t")];
+
+  // An exact entry wins over the first entry of its step.
+  assert.equal(findSameStepIndex(expanded, target("s@c2")), 2);
+  assert.equal(findSameStepIndex(expanded, target("t")), 3);
+  // Only an absent target falls back to its step (affinity expansion maps step <-> step@account).
+  assert.equal(findSameStepIndex(expanded, target("s")), 0);
+  assert.equal(findSameStepIndex([target("s"), target("t")], target("t@c9")), 1);
+  assert.equal(findSameStepIndex(expanded, target("u")), -1);
+});
+
+test("round-robin spans connection-expanded targets while prompt-cache affinity is engaged (#20191)", async () => {
+  // connectionAwareExpansion turns the single step into step@account targets BEFORE the RR
+  // counter is read, so the rotation unit is model x connection. A shared system prompt makes
+  // affinity resolve a key on every request; it must not collapse the rotation onto one account.
+  const provider = "mock-cae-affinity";
+  registerQuotaFetcher(provider, async () => ({ used: 0, total: 100, percentUsed: 0 }));
+  const ids: string[] = [];
+  for (const suffix of ["1", "2", "3"]) {
+    const connection = await providersDb.createProviderConnection({
+      provider,
+      authType: "apikey",
+      name: `${provider}-${suffix}`,
+      apiKey: `sk-${provider}-${suffix}`,
+      isActive: true,
+    });
+    assert.ok(connection, `connection ${suffix} must be created`);
+    ids.push(String(connection.id));
+  }
+  const combo = {
+    name: "rr-cae-affinity-test",
+    strategy: "round-robin",
+    config: { maxRetries: 0, disableSessionStickiness: true, connectionAwareExpansion: true },
+    models: [`${provider}/m-x`],
+  };
+
+  const served: string[] = [];
+  for (let i = 0; i < 3; i++) {
+    served.push(await dispatchWithPrefix(combo, "Shared system prompt", `User query ${i}`));
+  }
+
+  assert.equal(new Set(served).size, 3, `expected 3 distinct connections, got ${served}`);
+  for (const id of ids) assert.ok(served.includes(id), `connection ${id} must be hit`);
 });
 
 test("getSettings falls back to databaseSettings namespace for promptCacheAffinityEnabled (#20191)", async () => {
