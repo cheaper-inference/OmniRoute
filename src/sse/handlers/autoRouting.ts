@@ -1,4 +1,5 @@
 import { errorResponse } from "@omniroute/open-sse/utils/error.ts";
+import { hasUnsafeModelIdSyntax } from "@omniroute/open-sse/utils/modelIdSafety.ts";
 import { HTTP_STATUS } from "@omniroute/open-sse/config/constants.ts";
 import type { AutoVariant } from "@omniroute/open-sse/services/autoCombo/autoPrefix.ts";
 import {
@@ -131,10 +132,17 @@ export async function createVirtualAutoCombo(
 ): Promise<any | Response> {
   if (!state.isAutoRouting || combo !== null) return combo;
   if (!state.recognizedBuiltInAuto) {
-    return unknownModelResponse(
-      `Model '${state.model}' is not a valid combo or provider. Unknown built-in auto combo.`,
-      endpointPath
-    );
+    const message = `Model '${state.model}' is not a valid combo or provider. Unknown built-in auto combo.`;
+    // A malformed name (path traversal, control characters, URL-rewriting syntax) stays a 400,
+    // like the general model resolver; only a well-formed unknown name is a 404.
+    if (
+      /\.\.[\/\\]/.test(state.model) ||
+      /[\x00-\x1f]/.test(state.model) ||
+      hasUnsafeModelIdSyntax(state.model)
+    ) {
+      return errorResponse(HTTP_STATUS.BAD_REQUEST, message);
+    }
+    return unknownModelResponse(message, endpointPath);
   }
 
   try {

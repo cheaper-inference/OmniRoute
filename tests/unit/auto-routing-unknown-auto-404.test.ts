@@ -79,3 +79,10 @@ test("a recognised auto variant keeps its own answer, not the unknown-template o
   const { json } = await ask("/v1/chat/completions", "auto/coding:pro");
   assert.doesNotMatch(json.error.message, /Unknown built-in auto combo/i);
 });
+
+test("a malformed auto/<x> name stays a 400, not an unknown-model 404", async () => {
+  for (const model of ["auto/../not-a-real-template", "auto/x%2e%2e", "auto/x?y"]) {
+    const { status } = await ask("/v1/chat/completions", model);
+    assert.equal(status, 400, model);
+  }
+});

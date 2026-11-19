@@ -2813,20 +2813,27 @@ export async function markAccountUnavailable(
               await resolveDailyResetForProvider(provider)
             )
           : null;
+      // A model-scoped Claude quota 429 must not stretch the connection cooldown over sibling
+      // models; a cached connection-wide Claude reset outranks the retry hint, as on the main path.
+      const claudeScope = longer
+        ? readClaudeScope({ connectionId, provider, status, errorText, model })
+        : null;
+      const extendedMs = claudeScope?.cooldownMs ?? longer?.cooldownMs ?? 0;
       if (
         longer?.usedUpstreamRetryHint &&
+        claudeScope?.scope !== "model" &&
         !longer.permanent &&
         longer.ruleScope !== "model" &&
-        longer.cooldownMs > existingCooldownMs - Date.now()
+        extendedMs > existingCooldownMs - Date.now()
       ) {
         await updateProviderConnection(connectionId, {
-          rateLimitedUntil: getUnavailableUntil(longer.cooldownMs),
+          rateLimitedUntil: getUnavailableUntil(extendedMs),
         });
         log.info(
           "AUTH",
-          `${connectionId.slice(0, 8)} cooldown extended to ${Math.ceil(longer.cooldownMs / 1000)}s by a longer upstream reset`
+          `${connectionId.slice(0, 8)} cooldown extended to ${Math.ceil(extendedMs / 1000)}s by a longer upstream reset`
         );
-        return { shouldFallback: true, cooldownMs: longer.cooldownMs };
+        return { shouldFallback: true, cooldownMs: extendedMs };
       }
       log.info(
         "AUTH",
