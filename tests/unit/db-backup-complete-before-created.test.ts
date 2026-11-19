@@ -160,3 +160,23 @@ test("backupDbFileAwaited resolves only when the copy is whole and rejects when 
     "the failed copy leaves nothing behind"
   );
 });
+
+test("a cleanup failure after a failed copy still reports the copy error", async () => {
+  const restoreBackup = failBackupAfterPartialWrite();
+  const realRmSync = fs.rmSync;
+  fs.rmSync = ((target: fs.PathLike, options?: fs.RmOptions) => {
+    if (String(target).endsWith(".tmp")) {
+      throw Object.assign(new Error("EBUSY: resource busy or locked"), { code: "EBUSY" });
+    }
+    return realRmSync(target, options);
+  }) as typeof fs.rmSync;
+  try {
+    await assert.rejects(
+      () => backupDb.backupDbFileAwaited("manual", { mandatory: true }),
+      /disk full/
+    );
+  } finally {
+    fs.rmSync = realRmSync;
+    restoreBackup();
+  }
+});

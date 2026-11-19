@@ -45,7 +45,11 @@ async function writeBackupFile(backupFile: string) {
     await getDbInstance().backup(tempFile);
     await renameFileWithRetry(tempFile, backupFile);
   } catch (err) {
-    fs.rmSync(tempFile, { force: true });
+    try {
+      fs.rmSync(tempFile, { force: true });
+    } catch {
+      // Best effort (EBUSY/EPERM while a handle is still open): report the copy error.
+    }
     throw err;
   }
 }
