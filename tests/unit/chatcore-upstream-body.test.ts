@@ -1052,3 +1052,148 @@ test("#18912 OpenAI Responses targets keep the reasoning object", async () => {
   });
   assert.deepEqual(out.reasoning, { effort: "high" });
 });
+
+// #20639: DeepSeek V4 thinks by default and answers a forced tool_choice with HTTP 400 while
+// thinking is on. The choice is dropped only when the final wire body has thinking on.
+const DEEPSEEK_TOOLS = [{ type: "function", function: { name: "lookup", parameters: {} } }];
+const DEEPSEEK_FORCED_CHOICES = [
+  ["required", "required"],
+  ["named tool", { type: "function", function: { name: "lookup" } }],
+] as const;
+
+async function deepseekOutbound(
+  fields: Record<string, unknown>,
+  extra: Record<string, unknown> = {}
+) {
+  return prepareUpstreamBody({
+    translatedBody: {
+      model: "deepseek-v4-pro",
+      messages: [{ role: "user", content: "hi" }],
+      tools: DEEPSEEK_TOOLS,
+      ...fields,
+    },
+    modelToCall: "deepseek-v4-pro",
+    provider: "deepseek",
+    targetFormat: FORMATS.OPENAI,
+    credentials: null,
+    ...extra,
+  });
+}
+
+for (const [label, toolChoice] of DEEPSEEK_FORCED_CHOICES) {
+  for (const [mode, fields] of [
+    ["no thinking field", {}],
+    ["reasoning_effort high", { reasoning_effort: "high" }],
+    ["thinking enabled", { thinking: { type: "enabled" } }],
+    [
+      "thinking enabled beats effort none",
+      { thinking: { type: "enabled" }, reasoning_effort: "none" },
+    ],
+  ] as const) {
+    test(`#20639 DeepSeek V4 drops a forced tool_choice (${label}) with thinking on: ${mode}`, async () => {
+      const out = await deepseekOutbound({ ...fields, tool_choice: toolChoice });
+      assert.equal("tool_choice" in out, false);
+      assert.deepEqual(out.tools, DEEPSEEK_TOOLS);
+    });
+  }
+
+  for (const [mode, fields, extra] of [
+    ["thinking disabled", { thinking: { type: "disabled" } }, {}],
+    ["reasoning_effort none", { reasoning_effort: "none" }, {}],
+    [
+      "-none alias (resolved effort)",
+      {},
+      { originModel: "deepseek-v4-pro", resolvedThinkingEffort: "none" },
+    ],
+  ] as const) {
+    test(`#20639 DeepSeek V4 keeps a forced tool_choice (${label}) with thinking off: ${mode}`, async () => {
+      const out = await deepseekOutbound({ ...fields, tool_choice: toolChoice }, extra);
+      assert.deepEqual(out.tool_choice, toolChoice);
+      assert.deepEqual(out.tools, DEEPSEEK_TOOLS);
+    });
+  }
+}
+
+test("#20639 DeepSeek V4 leaves tool_choice auto and none alone with thinking on", async () => {
+  for (const choice of ["auto", "none"]) {
+    const out = await deepseekOutbound({ tool_choice: choice });
+    assert.equal(out.tool_choice, choice);
+  }
+});
+
+test("#20639 DeepSeek V4.1 flash alias drops a forced tool_choice with thinking on", async () => {
+  const out = await deepseekOutbound(
+    { tool_choice: "required" },
+    { modelToCall: "deepseek-flash" }
+  );
+  assert.equal("tool_choice" in out, false);
+});
+
+test("#20639 other providers keep a forced tool_choice for the same model id", async () => {
+  const out = await deepseekOutbound({ tool_choice: "required" }, { provider: "openrouter" });
+  assert.equal(out.tool_choice, "required");
+});
+
+test("#20639 Claude tool_choice any with thinking translates, then drops on DeepSeek", async () => {
+  const claudeBody = {
+    model: "deepseek-v4-pro",
+    max_tokens: 2048,
+    messages: [{ role: "user", content: "hi" }],
+    tools: [{ name: "lookup", description: "d", input_schema: { type: "object", properties: {} } }],
+    tool_choice: { type: "any" },
+  };
+  const translate = (extra: Record<string, unknown>) =>
+    translateRequest(
+      FORMATS.CLAUDE,
+      FORMATS.OPENAI,
+      "deepseek-v4-pro",
+      { ...claudeBody, ...extra },
+      true,
+      null,
+      "deepseek"
+    ) as Record<string, unknown>;
+  const prepare = (translatedBody: Record<string, unknown>) =>
+    prepareUpstreamBody({
+      translatedBody,
+      modelToCall: "deepseek-v4-pro",
+      provider: "deepseek",
+      targetFormat: FORMATS.OPENAI,
+      credentials: null,
+    });
+
+  const on = await prepare(translate({ thinking: { type: "enabled", budget_tokens: 4096 } }));
+  assert.equal("tool_choice" in on, false);
+
+  const off = await prepare(translate({ thinking: { type: "disabled" } }));
+  assert.ok(off.tool_choice, "thinking disabled must keep the forced choice");
+});
+
+test("#20639 a payload rule that turns thinking off after normalization keeps the forced choice", async () => {
+  setPayloadRulesConfig({
+    default: [],
+    override: [{ models: [{ name: "deepseek-v4-pro" }], params: { reasoning_effort: "none" } }],
+    filter: [],
+  });
+  try {
+    const out = await deepseekOutbound({ tool_choice: "required" });
+    assert.equal(out.reasoning_effort, "none");
+    assert.equal(out.tool_choice, "required");
+  } finally {
+    resetPayloadRulesConfigForTests();
+  }
+});
+
+test("#20639 a payload rule that turns thinking on after normalization drops the forced choice", async () => {
+  setPayloadRulesConfig({
+    default: [],
+    override: [{ models: [{ name: "deepseek-v4-pro" }], params: { reasoning_effort: "high" } }],
+    filter: [],
+  });
+  try {
+    const out = await deepseekOutbound({ tool_choice: "required" });
+    assert.equal(out.reasoning_effort, "high");
+    assert.equal("tool_choice" in out, false);
+  } finally {
+    resetPayloadRulesConfigForTests();
+  }
+});

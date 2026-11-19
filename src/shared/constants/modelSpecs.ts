@@ -1142,6 +1142,23 @@ export function normalizeThinkingForModel<T extends Record<string, unknown>>(
 }
 
 /**
+ * True when a `tool_choice` forces a tool call: `"required"` / `"any"`, or an object of
+ * type `any`, `tool` or `function` (a named tool). `"auto"`, `"none"` and unset are not forced.
+ */
+export function isForcedToolChoice(toolChoice: unknown): boolean {
+  return (
+    toolChoice === "required" ||
+    toolChoice === "any" ||
+    (toolChoice !== null &&
+      typeof toolChoice === "object" &&
+      !Array.isArray(toolChoice) &&
+      ["any", "tool", "function"].includes(
+        String((toolChoice as Record<string, unknown>).type || "").toLowerCase()
+      ))
+  );
+}
+
+/**
  * Normalize tool-choice constraints that a resolved model cannot accept.
  *
  * Claude Fable 5.1 always uses adaptive thinking and rejects tool choices that force
@@ -1154,18 +1171,7 @@ export function normalizeForcedToolChoiceForModel<T extends Record<string, unkno
   modelId: string
 ): T {
   if (!getModelSpec(modelId)?.rejectsForcedToolChoice) return body;
-
-  const toolChoice = body.tool_choice;
-  const forced =
-    toolChoice === "required" ||
-    toolChoice === "any" ||
-    (toolChoice !== null &&
-      typeof toolChoice === "object" &&
-      !Array.isArray(toolChoice) &&
-      ["any", "tool", "function"].includes(
-        String((toolChoice as Record<string, unknown>).type || "").toLowerCase()
-      ));
-  if (!forced) return body;
+  if (!isForcedToolChoice(body.tool_choice)) return body;
 
   const { tool_choice: _omitted, ...rest } = body;
   return rest as T;
