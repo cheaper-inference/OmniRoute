@@ -343,17 +343,16 @@ a sì mọ̀ọ́mọ̀ yọ ọ́ kúrò nínú `ROUTING_STRATEGY_VALUES` kí �
 
 ---
 
-## Ìborí Ìdánwò
+## Ideri Idanwo
 
-Àwọn ipele méjì ti ìborí aládàáṣiṣẹ́ wà pẹ̀lú ẹ̀rọ quota-share:
+Awọn ipele meji ti ọkọ oju-omi agbegbe adaṣe adaṣe pẹlu ẹrọ ipin ipin-ipin:
 
-| Àkójọpọ̀ ìdánwò   | Àṣẹ                                                                    | Ohun tí ó bo                                                                                                                                                                                                              |
-| :--------------- | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Unit (ìdánwò 29) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR scheduler, ìdènà nígbà ìkúnwọ̀n, àwọn òpin ìṣiṣẹ́ ní ìgbà kan náà, ìṣirò fairShare, fífi backlog sínú ìlà                                                                                                               |
-| Matrix ìṣọ̀kan    | `npm run test:combo:matrix`                                            | Ìpinnu ìdarí ipa-ọ̀nà láti ìbẹ̀rẹ̀ dé òpin nípasẹ̀ pipeline combo gidi; ìdájọ́ òdodo DRR + yíyọ ìkúnwọ̀n sí ipò àìkókó nípasẹ̀ àwọn seam tó ń ṣiṣẹ́ (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite                | Òfin                                                                   | Ohun ti o bo                                                                                                                                                                                     |
+| :------------------- | :--------------------------------------------------------------------- | :----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Ẹyọ (awọn idanwo 29) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR iṣeto, gating ekunrere, concurrency fila, fairShare isiro, backlog queuing                                                                                                                   |
+| Matrix Integration   | `npm run test:combo:matrix`                                            | Ipinnu ipa-ọna ipari-si-opin nipasẹ opo gigun ti konbo gidi; DRR iṣotitọ + iyọkuro itẹlọrun nipasẹ awọn okun ifiwe (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Matrix ìṣọ̀kan náà ń ṣiṣẹ́ nínú CI pẹ̀lú gbogbo àwọn ọgbọ́n gbangba 19. A lè ṣiṣẹ́ àkójọpọ̀ ìdánwò unit
-lọ́tọ̀.
+Matrix Integration nṣiṣẹ ni CI lẹgbẹẹ gbogbo awọn ọgbọn gbangba 22. Suite kuro le ṣee ṣiṣẹ ni imurasilẹ.
 
 ---
 

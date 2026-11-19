@@ -70,7 +70,7 @@ export default function UsageTokenBufferTab() {
           <Icon name="pin" size={20} />
         </div>
         <div>
-          <h3 className="text-lg font-semibold">{t("storageUsageTokenBuffer")}</h3>
+          <h3 className="text-lg">{t("storageUsageTokenBuffer")}</h3>
           <p className="text-sm text-text-muted">{t("storageUsageTokenBufferDesc")}</p>
         </div>
       </div>
