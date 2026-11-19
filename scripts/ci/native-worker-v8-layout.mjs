@@ -6,10 +6,35 @@ import { isInternalThread } from "node:worker_threads";
 const cliEntry = new URL("../../bin/omniroute.mjs", import.meta.url).href;
 const cliRoot = fileURLToPath(new URL("../../bin/cli/", import.meta.url));
 const cliTsxBridge = new URL("native-cli-v8-tsx.mjs", import.meta.url).href;
+// Node loads these worker, tray and standalone MCP modules as native TypeScript.
+const nativeSources = new Set(
+  [
+    "src/lib/usage/callLogArtifactWorker.ts",
+    "src/lib/usage/callLogArtifacts.ts",
+    "src/lib/dataPaths.ts",
+    "src/lib/logEnv.ts",
+    "src/lib/db/booleanSetting.ts",
+    "src/shared/constants/callLogSizeLimitMarkers.ts",
+    "bin/cli/runtime/trayRuntime.ts",
+    "src/shared/platform/windowsProcess.ts",
+    "open-sse/utils/errorSanitization.ts",
+    "open-sse/utils/errorPathRedaction.ts",
+    "open-sse/utils/credentialPatterns.ts",
+    "open-sse/utils/providerSafety.ts",
+    "open-sse/utils/registeredFeatureFlag.ts",
+  ].map((file) => fileURLToPath(new URL(`../../${file}`, import.meta.url)))
+);
 
-function loadCliSource(url, context, nextLoad) {
+function loadNativeCoverageSource(url, context, nextLoad) {
   if (url.startsWith("file:")) {
     const filename = fileURLToPath(url);
+    if (nativeSources.has(filename)) {
+      return {
+        format: "module-typescript",
+        source: readFileSync(filename),
+        shortCircuit: true,
+      };
+    }
     if (filename.startsWith(cliRoot) && filename.endsWith(".mjs")) {
       return { format: "module", source: readFileSync(filename), shortCircuit: true };
     }
@@ -18,7 +43,7 @@ function loadCliSource(url, context, nextLoad) {
 }
 
 export function registerNativeCliCoverage() {
-  registerHooks({ load: loadCliSource });
+  registerHooks({ load: loadNativeCoverageSource });
 }
 
 const tsxImport = ["tsx/esm", "tsx"].find((name) =>
@@ -29,23 +54,6 @@ const tsxImport = ["tsx/esm", "tsx"].find((name) =>
 );
 
 if (process.env.NODE_V8_COVERAGE && !isInternalThread) {
-  // Node loads the worker and standalone MCP dependencies as native TypeScript.
-  // Keep their source layout in callers instrumented through tsx too.
-  const nativeSources = new Set(
-    [
-      "src/lib/usage/callLogArtifactWorker.ts",
-      "src/lib/usage/callLogArtifacts.ts",
-      "src/lib/dataPaths.ts",
-      "src/lib/logEnv.ts",
-      "src/lib/db/booleanSetting.ts",
-      "src/shared/constants/callLogSizeLimitMarkers.ts",
-      "open-sse/utils/errorSanitization.ts",
-      "open-sse/utils/errorPathRedaction.ts",
-      "open-sse/utils/credentialPatterns.ts",
-      "open-sse/utils/providerSafety.ts",
-      "open-sse/utils/registeredFeatureFlag.ts",
-    ].map((file) => fileURLToPath(new URL(`../../${file}`, import.meta.url)))
-  );
   const { extensions } = createRequire(import.meta.url);
   const nativeTypeScript = extensions[".ts"] ?? extensions[".js"];
 
@@ -54,26 +62,14 @@ if (process.env.NODE_V8_COVERAGE && !isInternalThread) {
   if (tsxImport) await import(tsxImport);
   registerHooks({
     resolve(specifier, context, nextResolve) {
-      // The CLI installs tsx after it has configured stdout. Re-register the
-      // native CLI load hook at that same import, after tsx takes precedence.
+      // The CLI installs tsx after it has configured stdout. Apply the native
+      // loader again at that import so it takes precedence over tsx.
       if (specifier === "tsx/esm" && context.parentURL === cliEntry) {
         return { url: cliTsxBridge, format: "module", shortCircuit: true };
       }
       return nextResolve(specifier, context);
     },
-    load(url, context, nextLoad) {
-      if (tsxImport && url.startsWith("file:")) {
-        const filename = fileURLToPath(url);
-        if (nativeSources.has(filename)) {
-          return {
-            format: "module-typescript",
-            source: readFileSync(filename),
-            shortCircuit: true,
-          };
-        }
-      }
-      return loadCliSource(url, context, nextLoad);
-    },
+    load: loadNativeCoverageSource,
   });
 
   if (tsxImport === "tsx") {
