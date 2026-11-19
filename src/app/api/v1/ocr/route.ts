@@ -24,6 +24,8 @@ import {
   isAllRateLimitedCredentials,
   rateLimitedProviderResponse,
 } from "@/app/api/v1/_shared/rateLimit";
+import { getComboByName } from "@/lib/db/combos";
+import { runModelEndpointCombo } from "@/lib/combos/modelEndpointCombo";
 import { getRequestedModelEndpointMismatch } from "@/lib/providerModels/modelEndpointGuard";
 import { recordOcrRequest } from "@/lib/usage/specialtyRequestAccounting";
 
@@ -70,10 +72,59 @@ export async function OPTIONS() {
   });
 }
 
+/** Dispatch one resolved combo target through the matching OCR provider. */
+async function dispatchOcrModel(
+  body: Record<string, unknown> & { model: string },
+  allowedConnections: string[] | null,
+  accounting: { apiKeyInfo?: { id?: string; name?: string } | null; startTime: number }
+): Promise<Response> {
+  const { provider } = parseOcrModel(body.model);
+  const resolvedProvider = provider || "mistral";
+  const credentials = await getProviderCredentialsWithQuotaPreflight(
+    resolvedProvider,
+    null,
+    allowedConnections
+  );
+  if (!credentials) {
+    return errorResponse(
+      HTTP_STATUS.BAD_REQUEST,
+      `No credentials for provider: ${resolvedProvider}`
+    );
+  }
+  if (isKeyScopeBlockedCredentials(credentials)) {
+    return keyScopeBlockedResponse(resolvedProvider, credentials);
+  }
+  if (isAllRateLimitedCredentials(credentials)) {
+    return rateLimitedProviderResponse(resolvedProvider, credentials);
+  }
+
+  const tokenReadyCredentials = await resolveVertexOcrAccessToken(resolvedProvider, credentials);
+  const ocrCredentials = resolveOcrCredentials(tokenReadyCredentials, resolvedProvider);
+  const response = await handleOcr({
+    body,
+    credentials: ocrCredentials,
+    onSuccess: (result) =>
+      recordOcrRequest({
+        ...result,
+        apiKeyId: accounting.apiKeyInfo?.id,
+        apiKeyName: accounting.apiKeyInfo?.name,
+        connectionId:
+          "connectionId" in credentials && typeof credentials.connectionId === "string"
+            ? credentials.connectionId
+            : null,
+        startTime: accounting.startTime,
+        annotated: Boolean(body.bbox_annotation_format || body.document_annotation_format),
+      }),
+  });
+  if (response?.ok) await clearRecoveredProviderState(credentials);
+  return response;
+}
+
 /**
  * POST /v1/ocr — document OCR
  * Mistral OCR API compatible.
  */
+/** Validate and execute an OCR request, including named combo routing. */
 async function postHandler(request, _context) {
   const startTime = Date.now();
   let rawBody;
@@ -101,52 +152,30 @@ async function postHandler(request, _context) {
   // the same scope chat applies.
   const scope = await resolveKeyConnectionScope(policy.apiKeyInfo);
   if (scope.rejection) return scope.rejection;
-
-  const { provider } = parseOcrModel(model);
-
-  // Default to mistral if no provider prefix
-  const resolvedProvider = provider || "mistral";
-  const credentials = await getProviderCredentialsWithQuotaPreflight(
-    resolvedProvider,
-    null,
-    scope.allowedConnections
-  );
-  if (!credentials) {
-    return errorResponse(
-      HTTP_STATUS.BAD_REQUEST,
-      `No credentials for provider: ${resolvedProvider}`
-    );
+  const routedBody = { ...body, model };
+  if (!model.includes("/")) {
+    const combo = await getComboByName(model);
+    if (combo) {
+      return runModelEndpointCombo({
+        name: model,
+        endpoint: "ocr",
+        request,
+        body: routedBody,
+        policy,
+        allowedConnections: scope.allowedConnections,
+        dispatch: (targetBody, allowedConnections) =>
+          dispatchOcrModel(
+            targetBody as Record<string, unknown> & { model: string },
+            allowedConnections,
+            { apiKeyInfo: policy.apiKeyInfo, startTime }
+          ),
+      });
+    }
   }
-  if (isKeyScopeBlockedCredentials(credentials)) {
-    return keyScopeBlockedResponse(resolvedProvider, credentials);
-  }
-  if (isAllRateLimitedCredentials(credentials)) {
-    return rateLimitedProviderResponse(resolvedProvider, credentials);
-  }
-
-  const tokenReadyCredentials = await resolveVertexOcrAccessToken(resolvedProvider, credentials);
-  const ocrCredentials = resolveOcrCredentials(tokenReadyCredentials, resolvedProvider);
-
-  const response = await handleOcr({
-    body: { ...body, model },
-    credentials: ocrCredentials,
-    onSuccess: (result) =>
-      recordOcrRequest({
-        ...result,
-        apiKeyId: policy.apiKeyInfo?.id,
-        apiKeyName: policy.apiKeyInfo?.name,
-        connectionId:
-          "connectionId" in credentials && typeof credentials.connectionId === "string"
-            ? credentials.connectionId
-            : null,
-        startTime,
-        annotated: Boolean(body.bbox_annotation_format || body.document_annotation_format),
-      }),
+  return dispatchOcrModel(routedBody, scope.allowedConnections, {
+    apiKeyInfo: policy.apiKeyInfo,
+    startTime,
   });
-  if (response?.ok) {
-    await clearRecoveredProviderState(credentials);
-  }
-  return response;
 }
 
 export const POST = withInjectionGuard(postHandler);

@@ -875,61 +875,126 @@ caller không phải phiên (lấy, xóa, hủy và kiểm tra `input_file_id` k
 
 ---
 
-## API tìm kiếm
+## API Tìm kiếm
 
 Lớp trừu tượng hóa nhà cung cấp web/tìm kiếm (Tavily, Brave, Exa, Serper, v.v.).
 
-| Phương thức | Đường dẫn              | Mô tả                                                                                                        |
-| ----------- | ---------------------- | ------------------------------------------------------------------------------------------------------------ |
-| GET         | `/v1/search`           | Liệt kê các nhà cung cấp tìm kiếm đã cấu hình và các khả năng                                                |
-| POST        | `/v1/search`           | Chạy truy vấn tìm kiếm — phần thân được xác thực bởi `v1SearchSchema`, hỗ trợ lưu vào bộ nhớ đệm/gộp yêu cầu |
-| GET         | `/v1/search/analytics` | Thống kê lượt truy cập/độ trễ/bộ nhớ đệm theo từng nhà cung cấp                                              |
+| Phương thức | Đường dẫn              | Mô tả                                                                                                    |
+| ----------- | ---------------------- | -------------------------------------------------------------------------------------------------------- |
+| GET         | `/v1/search`           | Liệt kê các nhà cung cấp tìm kiếm đã cấu hình + các khả năng                                             |
+| POST        | `/v1/search`           | Thực hiện truy vấn tìm kiếm — nội dung được xác thực bởi `v1SearchSchema`, hỗ trợ bộ nhớ đệm/gộp yêu cầu |
+| GET         | `/v1/search/analytics` | Thống kê lượt truy cập/độ trễ/bộ nhớ đệm theo từng nhà cung cấp                                          |
 
-**Xác thực:** Khóa API Bearer (`extractApiKey` + `isValidApiKey`). Chính sách tìm kiếm được thực thi thông qua `enforceApiKeyPolicy`.
+**Xác thực:** Khóa API Bearer (`extractApiKey` + `isValidApiKey`). Chính sách tìm kiếm được thực thi qua `enforceApiKeyPolicy`.
 
-**Tự động chọn:** khi không có `provider`, nhà cung cấp rẻ nhất có kết nối đã cấu hình sẽ được chạy
-trước, còn nhà cung cấp rẻ tiếp theo sẽ là phương án chuyển đổi dự phòng. Các nhà cung cấp miễn phí
-dùng làm phương án cuối (`duckduckgo-free`) chỉ được sử dụng khi không có nhà cung cấp nào khác được
-cấu hình. SearXNG tự lưu trữ được xem là đã cấu hình khi kết nối của nó lưu một `baseUrl` thực
-(không phải giá trị mặc định của danh mục `http://localhost:8888/search`): khi đó, nó được xếp hạng
-là nhà cung cấp có giá $0, đứng trước các nhà cung cấp yêu cầu khóa, với nhà cung cấp yêu cầu khóa
-rẻ nhất làm phương án chuyển đổi dự phòng, kể cả khi SearXNG trả về lỗi 400, 401, 403 hoặc 404. Một
-`baseUrl` không phải là URL `http(s)` hợp lệ hoặc trỏ đến địa chỉ siêu dữ liệu đám mây sẽ không được
-tính. Kết nối SearXNG lưu mã thông báo chỉ được xếp hạng theo cách này khi sử dụng `https://` hoặc
-`http://` loopback. Với `http://` từ xa không mã hóa, nó không bao giờ được dùng làm phương án chuyển
-đổi dự phòng và vẫn là phương án cuối, chỉ được sử dụng khi không có nhà cung cấp nào khác được cấu
-hình hoặc khi được yêu cầu theo tên; do đó, mã thông báo sẽ được gửi dưới dạng văn bản thuần trong
-hai trường hợp đó.
+### Các tổ hợp tìm kiếm/tải nội dung có tên
+
+Cả `POST /v1/search` và `POST /v1/web/fetch` đều chấp nhận `model` dưới dạng tên tổ hợp đã lưu.
+Sử dụng `model` hoặc `provider` rõ ràng; gửi cả hai sẽ trả về `400`.
+Nếu không có trường nào trong hai trường này, cơ chế tự động chọn nhà cung cấp hiện tại vẫn không thay đổi.
+
+Cả Combo Builder và danh mục Add Model của nó đều hiển thị các mục thao tác web gốc
+cho các nhà cung cấp đã kết nối, ngay cả khi chúng không có danh sách mô hình LLM. Serper hiển thị **Tìm kiếm web**;
+Tavily hiển thị **Tìm kiếm web / Trích xuất trang**, còn các nhà cung cấp chỉ hỗ trợ tải nội dung hiển thị **Trích xuất trang**.
+Chọn mục và tài khoản như bình thường. Một mục Tavily duy nhất phục vụ cả hai endpoint web;
+các mục thao tác này không được thêm vào các bộ chọn chỉ dành cho chat hoặc các lần thăm dò mô hình chat.
+
+Ví dụ: tạo một tổ hợp **ưu tiên** có tên `shared-free` với các mục tiêu theo thứ tự sau:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Sau đó sử dụng cùng tên này trên mỗi giao diện:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Tìm kiếm sẽ xét Tavily rồi đến Serper; tải nội dung sẽ xét Tavily rồi đến Jina Reader;
+chat bỏ qua các nhà cung cấp tìm kiếm/tải nội dung chuyên dụng và xét OpenAI. Tính tương thích
+đến từ các registry thực thi tìm kiếm/tải nội dung, không phải từ các từ trong tên mô hình.
+Việc lọc được thực hiện trước khi chọn thông tin xác thực và phân phối, đồng thời không bao giờ chỉnh sửa tổ hợp đã lưu.
+
+Các route khả năng không dành cho chat hỗ trợ `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` và `p2c`. Các chiến lược tổng hợp chỉ dành cho chat như
+`fusion`, `pipeline` và `context-relay` sẽ bị từ chối trên các route không dành cho chat thay vì
+âm thầm được áp dụng cho tìm kiếm hoặc phương tiện được tạo.
+Công cụ tổ hợp hiện tại xử lý cơ chế chuyển dự phòng theo thứ tự, bao gồm cả các lỗi hạn ngạch từ upstream,
+đồng thời giữ lại ID bước, ghim tài khoản, danh sách cho phép tài khoản theo từng bước, tham chiếu lồng nhau,
+phạm vi kết nối/hạn ngạch của bên gọi và chính sách truy cập tổ hợp. Kết quả giữ nguyên
+lược đồ tìm kiếm/tải nội dung gốc, bao gồm nhà cung cấp thực tế; `X-OmniRoute-Combo-Trace` xác định
+quyết định định tuyến. Tổ hợp không xác định trả về `404`; các tổ hợp không hoạt động và các tổ hợp
+không có mục tiêu tương thích trả về `400`.
+
+Mỗi lần thử tổ hợp sử dụng một nhà cung cấp rõ ràng. Tổ hợp không thể tự ý gọi vào nhóm nhà cung cấp
+tự động gốc phía sau nó. Các yêu cầu chỉ định nhà cung cấp rõ ràng vẫn giữ nguyên hành vi một nhà cung cấp.
+Các yêu cầu chat trực tiếp nhắm đến các nhà cung cấp tìm kiếm/tải nội dung chuyên dụng sẽ trả về JSON `400`
+có hướng dẫn xử lý, thay vì chuyển tiếp đến trình thực thi kiểu OpenAI.
+
+### Các route tổ hợp theo khả năng
+
+Các tổ hợp đã lưu có thể chứa một đối tượng `routes` với các khóa là các khả năng API. Mỗi route sở hữu
+danh sách mục tiêu, chiến lược và cấu hình thời gian chạy riêng. `models`, `strategy` và `config` cấp cao nhất
+vẫn là kế hoạch Chat tương thích với phiên bản cũ; các tổ hợp cũ không có `routes` tiếp tục hoạt động không thay đổi.
+
+Các khóa route được hỗ trợ là `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` và `audio-generation`. Việc ánh xạ endpoint được thực hiện trước khi chọn thông tin xác thực,
+tính điểm hoặc phân phối. Các tham chiếu tổ hợp lồng nhau sẽ chọn route của tổ hợp con cho cùng một khả năng.
+
+`POST /v1/music/generations` và `POST /v1/ocr` chấp nhận tên tổ hợp trong `model`. Endpoint gốc
+tương thích với ElevenLabs `POST /v1/music` cũng chấp nhận tên tổ hợp trong `model_id`, nhưng mọi
+mục tiêu có thể sử dụng trên endpoint gốc đó phải là mô hình nhạc ElevenLabs để giữ nguyên hợp đồng phản hồi
+nhị phân. `POST /v1/sound-generation` chấp nhận tổ hợp `audio-generation` trong `model_id` theo
+cùng ràng buộc nhị phân gốc. Sử dụng `/v1/music/generations` cho các nhà cung cấp nhạc không đồng nhất.
+
+**Tự động chọn:** nếu không có `provider`, nhà cung cấp rẻ nhất có kết nối được cấu hình sẽ chạy
+đầu tiên và nhà cung cấp rẻ tiếp theo sẽ là phương án chuyển dự phòng. Các nhà cung cấp miễn phí dùng làm
+phương án cuối (`duckduckgo-free`) chỉ được sử dụng khi không có cấu hình nào khác. SearXNG tự lưu trữ
+được tính là đã cấu hình khi kết nối của nó lưu một `baseUrl` thực (không phải giá trị mặc định của danh mục
+`http://localhost:8888/search`): khi đó nó được xếp hạng là nhà cung cấp $0 trước các nhà cung cấp yêu cầu khóa,
+với nhà cung cấp có khóa rẻ nhất làm phương án chuyển dự phòng, kể cả khi SearXNG trả về 400, 401, 403 hoặc 404.
+`baseUrl` không phải URL `http(s)` hợp lệ hoặc trỏ đến địa chỉ siêu dữ liệu đám mây sẽ không được tính.
+Kết nối SearXNG lưu token chỉ được xếp hạng theo cách này khi sử dụng `https://` hoặc `http://` loopback.
+Với `http://` từ xa không mã hóa, nó không bao giờ là phương án chuyển dự phòng và vẫn là phương án cuối,
+chỉ được sử dụng khi không có nhà cung cấp nào khác được cấu hình hoặc khi được yêu cầu theo tên; do đó
+token sẽ được gửi dưới dạng văn bản thuần trong hai trường hợp này.
 
 ### `provider_options` của Exa và Tavily
 
-Exa và Tavily đọc các trường dành riêng cho từng nhà cung cấp từ một nhóm có không gian tên:
+Exa và Tavily đọc các trường dành riêng cho từng nhà cung cấp từ một túi có namespace:
 `provider_options.exa` (hoặc `provider_options["exa-search"]`) và `provider_options.tavily`
-(hoặc `provider_options["tavily-search"]`). Chỉ các khóa dưới đây được chuyển tiếp. Mỗi khóa được
-kiểm tra theo lược đồ Zod riêng trong `open-sse/handlers/search/providerOptionsPassthrough.ts`,
+(hoặc `provider_options["tavily-search"]`). Chỉ các khóa bên dưới được chuyển tiếp. Mỗi khóa được
+kiểm tra theo schema Zod riêng trong `open-sse/handlers/search/providerOptionsPassthrough.ts`,
 và khóa có kiểu không đúng sẽ bị loại bỏ. Mọi khóa khác đều bị bỏ qua, bao gồm thông tin xác thực,
-URL cơ sở, `stream` và `outputSchema`. Các khóa phẳng được những nhà cung cấp khác sử dụng (`cx`,
+base URL, `stream` và `outputSchema`. Các khóa phẳng được những nhà cung cấp khác sử dụng (`cx`,
 `depth`, ...) vẫn hoạt động như trước.
 
-| Nhà cung cấp | Các trường cấp cao nhất                                                                                                                                                                                                                                                                                                                                                   | Lồng nhau                                                                                                                                       |
-| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (kiểu nguyên thủy phẳng), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                       | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` được gộp trên giá trị mặc định `{ text: true, highlights: true }` |
-| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                               |
+| Nhà cung cấp | Trường cấp cao nhất                                                                                                                                                                                                                                                                                                                                                       | Lồng nhau                                                                                                                                            |
+| ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa          | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (các giá trị nguyên thủy dạng phẳng), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                           | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` được hợp nhất trên giá trị mặc định `{ text: true, highlights: true }` |
+| Tavily       | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                    |
 
 Các trường chung luôn được ưu tiên: `query`, `max_results`, `filters` (tên miền), `country` và
-chủ đề được suy ra từ `search_type`. Với Exa, `search_type: "news"` vẫn giữ
+chủ đề được suy ra từ `search_type`. Với Exa, `search_type: "news"` giữ nguyên
 `category: "news"`. Tavily cũng chấp nhận `search_type: "finance"` (`topic: "finance"`).
 
-Chi phí tìm kiếm Firecrawl được ghi nhận theo từng khối 10 kết quả trả về đã bắt đầu, với giá
-$0.002 (2 tín dụng) mỗi khối và tối thiểu một khối cho mỗi lần gọi
-([Thanh toán Firecrawl](https://docs.firecrawl.dev/billing)): 11 kết quả có giá $0.004.
+Chi phí tìm kiếm Firecrawl được ghi nhận theo mỗi khối 10 kết quả được trả về, ở mức $0.002 (2
+tín dụng) mỗi khối và tối thiểu một khối cho mỗi lần gọi
+([Thanh toán Firecrawl](https://docs.firecrawl.dev/billing)): 11 kết quả có chi phí $0.004.
 
-Trường `time_range` chung hiện được chuyển đến cả hai nhà cung cấp: Exa nhận
-`startPublishedDate` (dấu thời gian ISO), còn Tavily nhận `start_date` (`YYYY-MM-DD`). Ngày cụ thể
-trong `provider_options` sẽ ghi đè ngày được ánh xạ.
+`time_range` chung hiện được chuyển đến cả hai nhà cung cấp: Exa nhận `startPublishedDate` (dấu
+thời gian ISO) và Tavily nhận `start_date` (`YYYY-MM-DD`). Ngày tháng cụ thể trong
+`provider_options` sẽ ghi đè ngày được ánh xạ.
 
-Kết quả Exa giữ lại `id`, `highlights` (mọi nội dung nổi bật, không chỉ nội dung đầu tiên được dùng
-làm `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` và `extras` trong
+Kết quả Exa giữ lại `id`, `highlights` (mọi nội dung làm nổi bật, không chỉ nội dung đầu tiên được
+dùng làm `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` và `extras` trong
 `provider_raw`. Kết quả Tavily giữ lại `images` và `favicon`.
 
 Chi phí tìm kiếm Linkup được ghi nhận ở mức $0.005 cho `depth` `fast` và `standard`, và $0.05 cho
@@ -939,40 +1004,56 @@ bất kể `depth` đến từ `provider_options` hay từ cài đặt của k�
 Exa `type: "lite"` (Exa 3.0) chấp nhận một tập trường nhỏ hơn và từ chối toàn bộ yêu cầu khi có
 bất kỳ trường nào khác được thiết lập. Đối với lite, `additionalQueries`, `systemPrompt` và mọi khóa
 `contents` ngoại trừ `text` và `highlights` sẽ bị loại bỏ trước khi gọi. Các trường không còn được
-khuyến nghị `subpages`, `subpageTarget`, `highlights.numSentences` và `highlights.highlightsPerUrl`
-không còn được chuyển tiếp.
+khuyến nghị `subpages`, `subpageTarget`, `highlights.numSentences` và
+`highlights.highlightsPerUrl` không còn được chuyển tiếp.
 
-Việc hạch toán chi phí là sổ đăng ký phẳng `costPerQuery`, ngoại trừ Exa, sử dụng cách tính giá riêng của Exa: $0.007 cho mỗi lần gọi đối với `auto` (và `fast` cũ) hoặc $0.004 đối với `lite` (và
-`instant` cũ), bao gồm 10 kết quả; $0.001 cho mỗi kết quả bổ sung; và $0.001 cho mỗi
-kết quả được trả về khi đặt `contents.summary`. Tavily được ghi nhận là 1 credit ($0.008) cho
-`search_depth` `basic`, `fast` và `ultra-fast`, và 2 credit ($0.016) cho `advanced`
-([Tavily API credits](https://docs.tavily.com/documentation/api-credits)). Một lần gọi với
-`auto_parameters: true` mà Tavily nâng cấp lên advanced vẫn được ghi nhận là 1 credit.
+Việc hạch toán chi phí sử dụng registry phẳng `costPerQuery`, ngoại trừ Exa, được tính theo bảng
+giá riêng của Exa: $0.007 mỗi lần gọi cho `auto` (và `fast` cũ) hoặc $0.004 cho `lite` (và
+`instant` cũ), bao gồm 10 kết quả; $0.001 cho mỗi kết quả bổ sung; và $0.001 cho mỗi kết quả
+được trả về khi đặt `contents.summary`. Tavily được ghi nhận ở mức 1 tín dụng ($0.008) cho
+`search_depth` `basic`, `fast` và `ultra-fast`, và 2 tín dụng ($0.016) cho `advanced`
+([Tín dụng API Tavily](https://docs.tavily.com/documentation/api-credits)). Một lần gọi có
+`auto_parameters: true` mà Tavily nâng cấp lên advanced vẫn được ghi nhận ở mức 1 tín dụng.
 
 ---
 
-## API Web Fetch
+## API Tìm nạp web
 
-Trích xuất nội dung từ một URL thông qua nhà cung cấp web-fetch đã cấu hình (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Trích xuất nội dung từ một URL thông qua nhà cung cấp tính năng tìm nạp web đã cấu hình (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-Parallel Extract (`parallel-search`, sử dụng cùng API key với Parallel Search) chỉ trả về Markdown
-— mọi `format` khác đều trả về `400` — và giới hạn nội dung ở 100.000 ký tự. Khi không thể trích xuất chính trang đích, upstream sẽ báo lỗi trong HTTP 200;
+Parallel Extract (`parallel-search`, sử dụng cùng API key với Parallel Search) chỉ trả về Markdown — mọi
+`format` khác đều trả về `400` — và giới hạn nội dung ở 100.000 ký tự. Khi không thể trích xuất chính
+trang đích, upstream sẽ báo lỗi trong HTTP 200;
 OmniRoute hiển thị lỗi đó dưới dạng `422` với một thông báo cố định.
 
-| Method | Path            | Description                                                             |
-| ------ | --------------- | ----------------------------------------------------------------------- |
-| POST   | `/v1/web/fetch` | Lấy nội dung/scrape một URL — body được xác thực bởi `v1WebFetchSchema` |
+Keenable Fetch (`keenable-search`) cũng chỉ trả về Markdown (mọi `format` khác đều trả về `400`) và giới
+hạn nội dung ở 100.000 ký tự. Tính năng này hoạt động mà không cần key: một request
+`provider: "keenable-search"` rõ ràng không có connection sẽ sử dụng endpoint không cần key của Keenable
+(giới hạn tốc độ theo từng IP). Key đã cấu hình chỉ gỡ bỏ các giới hạn đó; tính năng tự động chọn chỉ sử
+dụng Keenable khi đã cấu hình key.
 
-**Xác thực:** API key Bearer (`extractApiKey` + `isValidApiKey`). Chính sách được thực thi qua `enforceApiKeyPolicy`.
+| Phương thức | Đường dẫn       | Mô tả                                                           |
+| ----------- | --------------- | --------------------------------------------------------------- |
+| POST        | `/v1/web/fetch` | Tìm nạp/cào một URL — body được xác thực bởi `v1WebFetchSchema` |
 
-**Chuyển dự phòng có nhận biết quota (#8297):** khi không cung cấp `provider` rõ ràng, pool
+**Xác thực:** API key Bearer (`extractApiKey` + `isValidApiKey`). Chính sách được thực thi thông qua `enforceApiKeyPolicy`.
+
+Các tổ hợp có tên sử dụng [hợp đồng định tuyến `model`](#named-searchfetch-combinations)
+ở trên, đồng thời giữ nguyên các tùy chọn và phản hồi riêng của việc tìm nạp.
+
+**Dự phòng nhận biết hạn ngạch (#8297):** khi không cung cấp `provider` cũng như `model`, pool
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) được
-duyệt theo thứ tự ưu tiên cố định (fill-first) — nhà cung cấp đã cấu hình nhưng bị giới hạn tốc độ sẽ được bỏ qua
-thay vì kết thúc sớm request, và lỗi upstream có thể thử lại/quota (HTTP 429 luôn; 402/403 đối với các free tier mang tính quota của Firecrawl/Tavily/TinyFish —
-không áp dụng cho Jina Reader, và không bao giờ áp dụng cho một request 400 không hợp lệ) sẽ chuyển sang credential của nhà cung cấp tiếp theo chưa được thử tại thời điểm request. Khi mọi nhà cung cấp trong pool đều hết quota, endpoint trả về một `429` duy nhất (kèm header
-`Retry-After`) thay vì `400` chung chung như trước đây. Khi yêu cầu một `provider` rõ ràng, sẽ **không** có chuyển dự phòng ngầm — một provider rõ ràng bị giới hạn tốc độ hoặc gặp lỗi sẽ trả về lỗi riêng của nó (`429` nếu bị giới hạn tốc độ, nếu không thì trả về status của upstream).
+`parallel-search` → `keenable-search`) được
+duyệt theo thứ tự ưu tiên cố định (ưu tiên lấp đầy) — nhà cung cấp đã cấu hình nhưng bị giới hạn tốc độ sẽ được
+bỏ qua thay vì kết thúc request ngay, và lỗi upstream có thể thử lại/vượt hạn ngạch
+(HTTP 429 luôn; 402/403 đối với các tầng miễn phí có kiểu hạn ngạch của Firecrawl/Tavily/TinyFish —
+không áp dụng cho Jina Reader và không bao giờ áp dụng cho yêu cầu 400 không hợp lệ đơn thuần) sẽ chuyển sang
+nhà cung cấp tiếp theo chưa được thử có thông tin xác thực tại thời điểm request. Khi mọi nhà cung cấp trong
+pool đều đã cạn hạn ngạch, endpoint trả về một `429` duy nhất (kèm header
+`Retry-After`) thay vì `400` chung chung như trước đây. Khi yêu cầu một `provider` rõ ràng, sẽ **không** có dự phòng
+âm thầm — nhà cung cấp rõ ràng bị giới hạn tốc độ hoặc gặp lỗi sẽ trả về lỗi riêng của nó (`429` nếu bị giới hạn tốc độ,
+nếu không thì trả về trạng thái upstream).
 
 ---
 
@@ -1043,16 +1124,16 @@ CLI nâng cấp `base_url + /responses` thành một WebSocket và OmniRoute t�
 
 | Phương thức | Đường dẫn           | Mô tả                                                                                   |
 | ----------- | ------------------- | --------------------------------------------------------------------------------------- |
-| GET         | `/v1/quotas/check`  | Xác thực trước hạn ngạch cho một `provider` + `accountId` trước khi cấp khóa đã đăng ký |
+| GET         | `/v1/quotas/check`  | Kiểm tra trước hạn ngạch cho `provider` + `accountId` trước khi cấp một khóa đã đăng ký |
 | POST        | `/v1/issues/report` | Báo cáo lỗi cấp hạn ngạch/khóa lên GitHub (yêu cầu `GITHUB_ISSUES_REPO` + token)        |
 
-**Xác thực:** Khóa API Bearer (`isAuthenticated`).
+**Xác thực:** `/v1/quotas/check` nhận khóa API Bearer (`isAuthenticated`). `/v1/issues/report` chỉ dành cho quản trị viên (`requireManagementAuth`), tương tự như `/api/v1/registered-keys`: một phiên dashboard,
+token CLI cục bộ hoặc khóa API có phạm vi `manage`/`admin`; các khóa API chỉ dùng cho suy luận sẽ nhận `403`.
 
-### Khôi phục phiên hạn ngạch (tùy chọn)
+### Khôi phục phiên hạn ngạch (tùy chọn bật)
 
-Một yêu cầu `POST /v1/chat/completions` hoặc `POST /v1/responses` không streaming bị lỗi với
-lỗi hạn ngạch kết thúc (`402`/`429`/`503`, trong đó body cho biết hạn ngạch hoặc tín dụng đã cạn kiệt)
-có thể được tạm dừng và phát lại sau thay vì trả về lỗi. Bên gọi chọn tham gia cho từng yêu cầu bằng ba header:
+Một yêu cầu `POST /v1/chat/completions` hoặc `POST /v1/responses` không streaming bị lỗi với lỗi hạn ngạch cuối cùng (`402`/`429`/`503` mà phần nội dung cho biết hạn ngạch hoặc tín dụng đã cạn kiệt)
+có thể được tạm lưu và phát lại sau thay vì trả về lỗi. Bên gọi bật tùy chọn này cho từng yêu cầu bằng ba header:
 
 | Header                       | Giá trị                                     |
 | ---------------------------- | ------------------------------------------- |
@@ -1060,13 +1141,8 @@ có thể được tạm dừng và phát lại sau thay vì trả về lỗi. B
 | `x-omniroute-session`        | id phiên, `[A-Za-z0-9._:-]{1,128}`          |
 | `x-omniroute-recovery-turn`  | id lượt duy nhất trong phiên (cùng quy tắc) |
 
-Chỉ các lượt `stream: false` không có tools, lịch sử tool hoặc `previous_response_id`, và không
-ghim `x-omniroute-connection`, mới đủ điều kiện; đồng thời phải thiết lập `STORAGE_ENCRYPTION_KEY`
-(yêu cầu được lưu trữ ở dạng mã hóa trong tối đa 24 giờ). Sau đó phản hồi là `202` với
-`recovery.poll`; thăm dò bằng `GET /v1/quota-recoveries/{id}` (`202` khi đang chờ, `200` kèm
-body đã khôi phục khi hoàn tất) hoặc hủy bằng `DELETE`. Ticket chỉ hiển thị với khóa API đã tạo chúng.
-Một lần phát lại có kết quả không chắc chắn sẽ kết thúc ở `needs_confirmation` thay vì được gửi hai lần.
-Nguồn: `src/lib/quota/quotaSessionRecovery.ts`.
+Chỉ các lượt `stream: false` không có công cụ, lịch sử công cụ hoặc `previous_response_id`, và không có ghim `x-omniroute-connection`, mới đủ điều kiện; đồng thời phải đặt `STORAGE_ENCRYPTION_KEY` (yêu cầu được lưu trữ dưới dạng mã hóa trong tối đa 24 giờ). Sau đó, phản hồi sẽ là `202` với
+`recovery.poll`; gọi thăm dò `GET /v1/quota-recoveries/{id}` (`202` trong khi đang chờ, `200` kèm nội dung đã khôi phục khi hoàn tất) hoặc hủy bằng `DELETE`. Vé chỉ hiển thị với khóa API đã tạo chúng. Một lần phát lại có kết quả không chắc chắn sẽ kết thúc ở trạng thái `needs_confirmation` thay vì được gửi hai lần. Nguồn: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1816,17 +1892,21 @@ Các gói đăng ký webhook gửi đi cho các sự kiện của OmniRoute (ho�
 
 ## Các khóa đã đăng ký (Tự động quản lý)
 
-Được sử dụng bởi hệ thống quản lý khóa tự động để cấp và xoay vòng API key cho một provider/tài khoản phía sau, với hạn mức theo ngày/giờ.
+Được sử dụng bởi hệ thống quản lý khóa tự động để cấp và xoay vòng các khóa API trên một nhà cung cấp/tài khoản lưu trữ, với hạn mức theo ngày/giờ.
 
-| Phương thức | Đường dẫn                             | Mô tả                                                                                                                                                                                                 |
-| ----------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET         | `/api/v1/registered-keys`             | Liệt kê các khóa đã đăng ký (chỉ hiển thị tiền tố đã che)                                                                                                                                             |
-| POST        | `/api/v1/registered-keys`             | Cấp khóa đã đăng ký mới — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Trả về khóa thô **một lần duy nhất**. Trả về `429` khi từ chối do hạn mức. |
-| GET         | `/api/v1/registered-keys/[id]`        | Lấy siêu dữ liệu của khóa đã đăng ký (không có khóa thô)                                                                                                                                              |
-| DELETE      | `/api/v1/registered-keys/[id]`        | Thu hồi một khóa đã đăng ký                                                                                                                                                                           |
-| POST        | `/api/v1/registered-keys/[id]/revoke` | Endpoint thu hồi rõ ràng (có tác dụng giống DELETE)                                                                                                                                                   |
+| Method | Path                                  | Description                                                                                                                                                                                                       |
+| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET    | `/api/v1/registered-keys`             | Liệt kê các khóa đã đăng ký (chỉ hiển thị tiền tố đã được che)                                                                                                                                                    |
+| POST   | `/api/v1/registered-keys`             | Cấp một khóa đã đăng ký mới — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Trả về khóa thô **một lần duy nhất**. Trả về `429` khi bị từ chối do vượt hạn mức. |
+| GET    | `/api/v1/registered-keys/[id]`        | Lấy siêu dữ liệu của khóa đã đăng ký (không có dữ liệu thô)                                                                                                                                                       |
+| DELETE | `/api/v1/registered-keys/[id]`        | Thu hồi một khóa đã đăng ký                                                                                                                                                                                       |
+| POST   | `/api/v1/registered-keys/[id]/revoke` | Endpoint thu hồi rõ ràng (có cùng tác động như DELETE)                                                                                                                                                            |
+| GET    | `/api/v1/providers/[provider]/limits` | Đọc các giới hạn cấp khóa của nhà cung cấp                                                                                                                                                                        |
+| PUT    | `/api/v1/providers/[provider]/limits` | Thiết lập các giới hạn cấp khóa của nhà cung cấp — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                  |
+| GET    | `/api/v1/accounts/[id]/limits`        | Đọc các giới hạn cấp khóa của tài khoản                                                                                                                                                                           |
+| PUT    | `/api/v1/accounts/[id]/limits`        | Thiết lập các giới hạn cấp khóa của tài khoản — cùng body như route của nhà cung cấp                                                                                                                              |
 
-**Xác thực:** phiên/API key quản lý (`requireManagementAuth`) — cùng cơ chế bảo vệ như `/api/keys`: phiên dashboard, token CLI cục bộ hoặc API key có phạm vi `manage`/`admin`; API key chỉ dành cho suy luận sẽ nhận `403`. Xem thêm `/v1/quotas/check` và `/v1/issues/report`.
+**Xác thực:** phiên/API key quản lý (`requireManagementAuth`) — cùng một guard như `/api/keys`: phiên dashboard, token CLI cục bộ hoặc API key có phạm vi `manage`/`admin`; các API key chỉ dùng cho suy luận sẽ nhận `403`. Xem thêm `/v1/quotas/check` và `/v1/issues/report`.
 
 ---
 
