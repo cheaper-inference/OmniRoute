@@ -25,31 +25,26 @@ og kjører kode i underprosesser, så rutene er utilgjengelige fra en
 opprinnelse som ikke er loopback, uavhengig av autentisering. Se
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Slik henger det sammen
+## Hvordan det passer Together
 
 ```
-Kontrollpanel (/dashboard/plugins)
-  ├─ Fanen "Installert"  → GET /api/plugins            (listPlugins)
-  │                        POST /api/plugins/scan      (pluginManager.scan)
-  │                        POST /api/plugins/{name}/activate|deactivate
-  │                        DELETE /api/plugins/{name}   (avinstaller)
-  └─ Fanen "Markedsplass" → GET /api/plugins/marketplace
-                             → listMarketplacePlugins()
-                               ├─ ingen egendefinert URL → innebygd SEED_REGISTRY
-                               └─ egendefinert URL → isSafeMarketplaceUrl() SSRF-vern
-                                                   → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Registerlag** — `src/lib/plugins/marketplace.ts`: viser / søker i
-  katalogen og faller tilbake til startregisteret ved enhver feil.
-- **Livssykluslag** — `src/lib/plugins/manager.ts` (`pluginManager`-singleton):
-  installer, oppgrader, aktiver, deaktiver, avinstaller, skann og last inn ved oppstart.
-- **Manifestlag** — `src/lib/plugins/manifest.ts`: Zod-skjema + standardverdier for
-  `plugin.json`.
-- **Skanner** — `src/lib/plugins/scanner.ts`: finner programtillegg på disken under
-  programtilleggskatalogen.
-- **Laster** — `src/lib/plugins/loader.ts`: starter hvert programtillegg i en isolert
-  underprosess og formidler hook-kall via IPC.
+- **Registerlag** — `src/lib/plugins/marketplace.ts`: lister / søker i katalogen, og faller tilbake til frøregisteret ved eventuelle feil.
+- **Livssykluslag** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): installer, oppgrader, aktiver, deaktiver, avinstaller, skann, oppstart last.
+- **Manifest lag** — `src/lib/plugins/manifest.ts`: Zod -skjema + er standard for `plugin.json`.
+- **Skanner** — `src/lib/plugins/scanner.ts`: oppdager plugins på disken under plugin-katalogen.
+- **Laster** — `src/lib/plugins/loader.ts`: skaper hvert plugin i en separat Node.js underordnet prosess og meglere kobler opp samtaler over IPC. Barnet er ikke en sandkasse (se "Isolering av plugin-utførelse" nedenfor).
 
 ## Markedsplasskatalog
 
@@ -83,29 +78,26 @@ innhold, logger `listMarketplacePlugins()` en advarsel og faller tilbake til sta
 > «kommer snart»-varsel. Installasjon utføres i dag gjennom installasjonsflyten fra en lokal bane
 > (`POST /api/plugins`) og søk etter programtillegg på disken (`POST /api/plugins/scan`).
 
-## REST-API
+## REST API
 
-Alle endepunkter krever administrasjonsautentisering (`requireManagementAuth`) **og** er
-kun tilgjengelige via loopback — `/api/plugins` og `/api/plugins/` er oppført i
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Alle endepunkter krever administrasjonsgodkjenning (`requireManagementAuth`)** og** er loopback-bare — `/api/plugins` og `/api/plugins/` er oppført i `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endepunkt                        | Metode | Beskrivelse                                                     |
-| -------------------------------- | ------ | --------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Vis installerte programtillegg (valgfritt `?status=`-filter)    |
-| `/api/plugins`                   | POST   | Installer et programtillegg fra en absolutt lokal bane          |
-| `/api/plugins/scan`              | POST   | Skann programtilleggskatalogen og registrer nye programtillegg  |
-| `/api/plugins/marketplace`       | GET    | Vis katalogoppføringer fra markedsplassen                       |
-| `/api/plugins/[name]`            | GET    | Hent detaljer om et installert programtillegg                   |
-| `/api/plugins/[name]`            | DELETE | Avinstaller et programtillegg                                   |
-| `/api/plugins/[name]/activate`   | POST   | Aktiver (last inn + registrer hooks)                            |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktiver (utløs `onDeactivate`, avregistrer hooks)             |
-| `/api/plugins/[name]/config`     | GET    | Hent programtilleggskonfigurasjon + konfigurasjonsskjema        |
-| `/api/plugins/[name]/config`     | PUT    | Oppdater programtilleggskonfigurasjonen (validert mot skjemaet) |
+| Endepunkt                        | Metode | Beskrivelse                                             |
+| -------------------------------- | ------ | ------------------------------------------------------- |
+| `/api/plugins`                   | GET    | Liste installerte plugins (valgfritt `?status=` filter) |
+| `/api/plugins`                   | POST   | Installer en plugin fra plugin-kildekatalogen           |
+| `/api/plugins/scan`              | POST   | Skann plugin-katalogen og registrer nye plugins         |
+| `/api/plugins/marketplace`       | GET    | List markedsplasskatalogoppføringer                     |
+| `/api/plugins/[name]`            | GET    | Få installert plugin-detaljer                           |
+| `/api/plugins/[name]`            | DELETE | Avinstaller en plugin                                   |
+| `/api/plugins/[name]/activate`   | POST   | Aktiver (last inn + registerkroker)                     |
+| `/api/plugins/[name]/deactivate` | POST   | Deaktiver (fire `onDeactivate`, avregistrer kroker)     |
+| `/api/plugins/[name]/config`     | GET    | Få plugin config + config skjema                        |
+| `/api/plugins/[name]/config`     | PUT    | Oppdater plugin-konfigurasjon (validert mot skjema)     |
 
-`status`-filteret for `GET /api/plugins` godtar én av
-`installed` / `active` / `inactive` / `error`. En ugyldig verdi returnerer `400`.
+`GET /api/plugins` `status` filteret godtar en av `installed` / `active` / `inactive` / `error`. En ugyldig verdi returnerer `400`.
 
-### Vis installerte programtillegg
+### Liste installerte plugins
 
 ```bash
 curl http://localhost:20128/api/plugins \
@@ -121,10 +113,9 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` må være **absolutt** og kan ikke inneholde `..`-traverseringssegmenter eller
-nullbyte (håndheves av Zod). Kildekatalogen må inneholde en gyldig
-`plugin.json` (eller være en overordnet katalog til en slik fil). Ved suksess er responsen `201` med
-raden for det installerte programtillegget.
+`path` må være en** absolutt** banen til en katalog** inne i plugin-kildekatalogen** : `plugin-sources` ved siden av plugin-roten, så `~/.omniroute/plugin-sources/` som standard, eller `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` når den variabelen er satt (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). Kopier eller klon plugin-en der først. Installasjonen avvises med `400` når banen inneholder `..` eller en nullbyte, ligger utenfor den katalogen, løses utenfor den gjennom en symbolkobling, inneholder en symbolkobling hvis mål er utenfor den, eller når katalogen ikke eksisterer. Kildekatalogen må inneholde en gyldig `plugin.json` (eller være en forelder til en). Ved suksess er svaret `201` med den installerte plugin-raden.
+
+I motsetning til de andre plugin-rutene, krever denne administrasjonslegitimasjonen (en dashbord-økt eller en API -nøkkel med administreringsomfang) selv når pålogging er deaktivert (`requireLogin=false`): å installere kode er aldri en anonym handling.
 
 ### Bla gjennom markedsplassen
 
@@ -133,7 +124,7 @@ curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Oppdater programtilleggskonfigurasjonen
+### Oppdater plugin-konfigurasjonen
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -142,10 +133,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` validerer hver angitte verdi mot programtilleggets
-`configSchema` (deklarert i manifestet): `number`-felt respekterer `min`/`max`,
-og `select`-felt må samsvare med deklarert `enum`. Nøkler som ikke finnes i skjemaet,
-slippes gjennom.
+`PUT .../config` validerer hver oppgitt verdi mot pluginens `configSchema` (erklært i manifestet): `number` feltene respekterer `min`/`max`, `select` -feltene må samsvare med det deklarerte `enum`. Nøkler som ikke er til stede i skjemaet tillates gjennom.
 
 ## Konfigurasjon
 
@@ -203,80 +191,58 @@ startregisteret.
 
 ## Sikkerhet
 
-### Rutenivå — kun tilbakekobling
+### Bare rute tier — loopback
 
-Programtillegg kjører kode i opprettede underprosesser, så hele `/api/plugins`-grensesnittet
-er klassifisert som `LOCAL_ONLY` (nivå 1). Håndheving av tilbakekobling utføres
-alltid **før** enhver autentiseringskontroll, slik at et lekket administrasjonstoken som når
-maskinen gjennom en tunnel, fortsatt ikke kan installere, aktivere eller avinstallere et programtillegg.
-Se [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) og
-ufravikelige regler nr. 15 / 17.
+Plugins kjører kode i skapte barneprosesser, slik at hele `/api/plugins` overflaten er klassifisert `LOCAL_ONLY` (Tier 1). Loopback-håndhevelse kjører ubetinget** før** enhver autentiseringssjekk, så et lekket administrasjonstoken som når boksen over en tunnel kan fortsatt ikke installere, aktivere eller avinstallere en plugin. Se [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) og harde regler #15 / #17.
 
-### SSRF-beskyttelse for markedsplassregisteret
+### Marketplace register SSRF guard
 
-En egendefinert register-URL er konfigurasjon som kan påvirkes av en angriper, så før
-den hentes, kjører `listMarketplacePlugins()` den gjennom to lag:
+Et tilpasset register URL er angriperpåvirkelig konfigurasjon, så før du henter det, kjører `listMarketplacePlugins()` det gjennom to lag:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
    - Avviser alt som ikke er `http:` / `https:`.
-   - Avviser eksplisitte private/tilbakekoblings-/lokale koblings-/ULA-verter (IPv4 **og** IPv6,
-     inkludert IPv4-mappede) via den kanoniske `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Slår opp **både** `A`- og `AAAA`-oppføringer og avviser dersom **en hvilken som helst** oppslått
-     adresse er privat — dette lukker omgåelsen offentlig vertsnavn → privat IP.
-   - **Avviser ved feil**: en DNS-oppslagsfeil fører til at URL-en avvises.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): bruker URL-beskyttelsen for kun
-   offentlige adresser på nytt under hentingen og **blokkerer omdirigeringer** (ingen overgang fra offentlig → privat via `30x`).
+   - Avviser bokstavelige private/loopback/link-local/ULA verter (IPv4** og** IPv6, inkludert IPv4-mapped) via den kanoniske `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
+   - Løser** både** `A` og `AAAA` registrerer og avviser if** noen** løst adresse er privat — lukker det offentlige vertsnavnet → private-IP-bypass.
+   - **Mislykkes lukket** : en DNS -oppløsningsfeil avviser URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): bruker den offentlige-bare URL vakten på nytt ved henting og** blokkerer omdirigeringer** (ingen offentlig → privat `30x` pivot).
 
-En URL som ikke består ett av lagene, avbryter ikke forespørselen — markedsplassen
-går automatisk tilbake til det innebygde startregisteret og logger en advarsel.
+En URL som mislykkes i begge lagene avbryter ikke forespørselen — markedsplassen faller stille tilbake til det innebygde frøregisteret og logger en advarsel.
 
-> Denne beskyttelsen ble styrket i PR #3774 spesifikt for å slå opp A + AAAA og bruke
-> den kanoniske `isPrivateHost` i stedet for en kontroll begrenset til IPv4.
+> Denne guarden ble herdet i PR #3774 spesielt for å løse A + AAAA og bruke den kanoniske `isPrivateHost` i stedet for en IPv4-only -sjekk.
 
-### Isolering av programtilleggskjøring
+### Isolering av plugin-utførelse
 
-- **Prosessisolering** — `loadPlugin()` (`src/lib/plugins/loader.ts`) starter
-  hvert programtillegg i en separat Node.js-underprosess og kommuniserer via IPC.
-  Hook-kall har et tidsavbrudd med eskalering fra `SIGTERM` → `SIGKILL`.
-- **Tillatt liste for miljøvariabler** — underprosessen mottar bare et tillatt sett med miljøvariabler;
-  det bredere settet gis kun når manifestet ber om
-  `env`-tillatelsen.
-- **Banebegrensning** — installasjon/oppgradering/avinstallasjon kontrollerer at programtilleggets
-  katalog og `manifest.main` løses **innenfor** den administrerte programtilleggsroten
-  før kopiering eller rekursiv sletting (beskytter mot manipulerte databasebaner og
-  `../`-traversering i `manifest.main`). Ved aktivering løses symbolske lenker via
-  `realpath`, og et inngangspunkt som unnslipper programtilleggskatalogen, nektes lastet.
-- **Valgfri integritetsbinding** — et manifest kan deklarere et `integrity`-felt
-  (`sha256-<base64>`, SRI-format). Når det finnes, verifiserer lasteren
-  hashverdien til inngangsfilen ved innlasting og nekter aktivering ved avvik. Dette er
-  valgfri deteksjon av manipulering, **ikke** en sikkerhetsgrense — ruting begrenset
-  til tilbakekobling og tillatelsesmodellen er de faktiske grensene.
+> **Plugins er ikke i sandkasse.** Barnet er en vanlig Node.js prosess som kjører som OmniRoute brukeren, uten VM kontekst og ingen Node.js tillatelsesflagg, så plugin-kode kan lese og skrive hvilken som helst fil som brukeren kan, kjøre programmer og nå nettverket. `requires.permissions` bestemmer bare hvilke miljøvariabler barnet mottar; de andre tillatelsene håndheves ikke. Installer kun plugins du stoler på. Prosessgrensen nedenfor inneholder krasj og henger; det er ikke en sikkerhetsgrense.
+
+- **Prosessisolasjon** — `loadPlugin()` (`src/lib/plugins/loader.ts`) skaper hvert plugin i en separat Node.js underordnet prosess og kommuniserer over IPC. Hook-anrop har en tidsavbrudd med `SIGTERM` → `SIGKILL` eskalering.
+- **Env tillatelsesliste** — barnet mottar bare et godkjent sett med miljøvariabler; det bredere settet gis bare når manifestet ber om `env` tillatelse.
+- **Installer kildebegrensning** — `POST /api/plugins` leser kun fra plugin-kildekatalogen (se "Installer fra en lokal bane"): banen er kanonisert med `realpath`, må holde seg strengt inne i den katalogen, og et kildetre som har en symbolkobling som unnslipper den, blir avvist før noe kopieres.
+- **Inneslutning av stien** — install/upgrade/uninstall hevder at plugin-katalogen og `manifest.main` løser seg** innenfor** den administrerte plugin-roten før kopiering eller rekursiv sletting (beskytter mot manipulerte DB -baner og `../` -kryssing i `manifest.main`). Aktivering løser symbolkoblinger via `realpath` og nekter å laste inn et inngangspunkt som unnslipper plugin-katalogen.
+- **Valgfri integritetspinne** — et manifest kan erklære et `integrity` (`sha256-<base64>`, SRI format) felt. Når den er tilstede, verifiserer lasteren hash for oppføringsfilen ved lastetid og nekter å aktiveres ved mismatch. Det er opt-in sabotasjedeteksjon,** ikke** en sikkerhetsgrense: den begrenser ikke hva en lastet plugin kan gjøre.
+- **Ingen klientlegitimasjon i kroker** — konteksten som sendes til `onRequest`, `onResponse` og `onError` har `authorization`, `x-api-key`, `proxy-authorization` og `cookie` -overskriftene fjernet, og API nøkkelposten har ingen nøkkelverdi (`redactPluginContext()` i `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
-Valideres av `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
+Validert av `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Felt               | Type      | Merknader                                                             |
-| ------------------ | --------- | --------------------------------------------------------------------- |
-| `name`             | string    | Påkrevd; kebab-case (`^[a-z0-9-]+$`), 1–100 tegn                      |
-| `version`          | string    | Påkrevd; semver (`MAJOR.MINOR.PATCH`)                                 |
-| `description`      | string?   | ≤ 500 tegn                                                            |
-| `author`           | string?   | ≤ 200 tegn                                                            |
-| `license`          | string?   | Standardverdi er `MIT`                                                |
-| `main`             | string?   | Inngangsfil; standardverdi er `index.js`                              |
-| `source`           | enum?     | `local` \| `marketplace` (standardverdi er `local`)                   |
-| `tags`             | string[]? | Søkeetiketter                                                         |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                       |
-| `hooks`            | object?   | Boolske verdier som angir hvilke hooks programtillegget implementerer |
-| `skills`           | object[]? | Valgfrie ferdighetsdefinisjoner                                       |
-| `enabledByDefault` | boolean?  | Aktiver automatisk ved installasjon                                   |
-| `configSchema`     | object?   | Kart over konfigurasjonsfelt (`string`/`number`/`boolean`/`select`)   |
-| `integrity`        | string?   | Valgfri `sha256-<base64>`-binding for inngangsfilen                   |
+| Felt               | Type         | Notater                                                             |
+| ------------------ | ------------ | ------------------------------------------------------------------- |
+| `name`             | streng       | Påkrevd; kebab-etui (`^[a-z0-9-]+$`), 1–100 tegn                    |
+| `version`          | streng       | Påkrevd; semver (`MAJOR.MINOR.PATCH`)                               |
+| `description`      | streng?      | ≤ 500 tegn                                                          |
+| `author`           | streng?      | ≤ 200 tegn                                                          |
+| `license`          | streng?      | Standard er `MIT`                                                   |
+| `main`             | streng?      | Oppføringsfil; standard til `index.js`                              |
+| `source`           | enum?        | `local` \| `marketplace` (standard er `local`)                      |
+| `tags`             | streng[]?    | Søk koder                                                           |
+| `requires`         | gjenstand?   | `{ omniroute?, permissions[] }`                                     |
+| `hooks`            | gjenstand?   | Boolere som erklærer hvilke kroker plugin-en implementerer          |
+| `skills`           | gjenstand[]? | Valgfrie ferdighetsdefinisjoner                                     |
+| `enabledByDefault` | boolsk?      | Automatisk aktivert ved installasjon                                |
+| `configSchema`     | gjenstand?   | Kart over konfigurasjonsfelt (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | streng?      | Valgfri `sha256-<base64>` -oppføringsfil-pin                        |
 
-Tillatelser hentes fra enum-verdiene
-`network` / `file-read` / `file-write` / `env` / `exec`.
+Tillatelser er hentet fra enum `network` / `file-read` / `file-write` / `env` / `exec`. Bare `env` har en kjøretidseffekt (en litt større miljøvariabel godkjenningsliste for barnet); de andre er erklæringer og håndheves ikke.
 
 ## Livssyklusflyt
 
@@ -335,19 +301,16 @@ Tabellen `plugins` (migrering `076_create_plugins.sql`):
 Plugin-metrikker og -analyse spores i flere tabeller
 (`090_plugin_metrics.sql`, `091_plugin_analytics.sql`).
 
-## Kontrollpanel
+## Dashbord
 
-Kontrollpanelsiden på `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) har to faner:
+Dashboardsiden på `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) har to faner:
 
-- **Installert** — viser installerte plugins med de deklarerte hookene deres, en
-  bryter for aktivering/deaktivering, en avinstalleringsknapp og handlingen
-  «Skann etter plugins» (`POST /api/plugins/scan`).
-- **Markedsplass** — viser katalogen fra `GET /api/plugins/marketplace` med et
-  felt for å angi URL-en til et egendefinert register.
+- **Installert** — viser installerte plugins med de deklarerte krokene, en activate/deactivate -veksler, en avinstalleringsknapp og en "Skann etter plugins"-handling (`POST /api/plugins/scan`).
+- **Markedsplass** — viser katalogen fra `GET /api/plugins/marketplace` med et felt for å angi det tilpassede registeret URL.
 
-En konfigurasjonsside for hver plugin finnes på `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Siden viser alltid en advarsel om at plugins kjører med alle rettighetene til OmniRoute prosessen.
+
+En konfigurasjonsside per plugin lever på `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Se også
 

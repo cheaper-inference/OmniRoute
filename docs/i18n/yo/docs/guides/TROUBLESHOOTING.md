@@ -467,7 +467,7 @@ wo [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Àtúnṣe títí láé:** Ṣe bind sí IPv4 ní tààrà nípa lílo `-p 127.0.0.1:20128:20128` nínú àṣẹ `docker run` rẹ:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Èyí ń fi agbára mú bind IPv4, ó sì tún ń dènà fífi proxy hàn lórí gbogbo interface host.
 
