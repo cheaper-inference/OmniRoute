@@ -8,9 +8,10 @@ import {
   type SystemContentBlock,
   type ToolConfiguration,
 } from "@aws-sdk/client-bedrock-runtime";
-import { createHash, randomUUID } from "node:crypto";
+import { randomUUID } from "node:crypto";
 
 import { BaseExecutor } from "./base.ts";
+import { opaqueTokenFingerprint } from "../utils/opaqueTokenFingerprint.ts";
 import { PROVIDERS } from "../config/constants.ts";
 import { buildBedrockNativeConverseUrl, resolveBedrockRegion } from "../config/bedrock.ts";
 import * as prl from "../utils/providerRequestLogging.ts";
@@ -958,7 +959,7 @@ export class BedrockExecutor extends BaseExecutor {
   createClient(credentials): BedrockClientLike {
     const region = resolveBedrockRegion(credentials?.providerSpecificData);
     const customUserAgent = getCustomUserAgent(credentials?.providerSpecificData);
-    const keyFingerprint = createHash("sha256").update(credentials.apiKey).digest("hex");
+    const keyFingerprint = opaqueTokenFingerprint(credentials.apiKey);
     const cacheKey = JSON.stringify([region, customUserAgent, keyFingerprint]);
     const cached = this.clients.get(cacheKey);
     if (cached) return cached;

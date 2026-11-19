@@ -128,7 +128,7 @@ export default function RelayProxyClient() {
       {showCreate && (
         <Card>
           <div className="p-4 space-y-4">
-            <h2 className="text-sm font-semibold">{t("createTitle")}</h2>
+            <h2 className="text-sm">{t("createTitle")}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <Input
                 label={t("nameRequired")}
@@ -166,7 +166,7 @@ export default function RelayProxyClient() {
       {newTokenData && (
         <Card>
           <div className="p-4 space-y-3">
-            <h2 className="text-sm font-semibold text-success">{t("createdTitle")}</h2>
+            <h2 className="text-sm text-success">{t("createdTitle")}</h2>
             <div className="bg-bg-subtle border border-border rounded-lg p-3">
               <p className="text-xs text-text-muted mb-1">
                 {t.rich("tokenFor", {
@@ -187,7 +187,7 @@ export default function RelayProxyClient() {
       {/* Usage Guide */}
       <Card>
         <div className="p-4 space-y-2">
-          <h2 className="text-sm font-semibold">{t("usage")}</h2>
+          <h2 className="text-sm">{t("usage")}</h2>
           <p className="text-xs text-text-muted">{t("usageDescription")}</p>
           <pre className="text-xs bg-bg-subtle border border-border rounded-lg p-3 overflow-x-auto">
             {`curl ${displayBaseUrl}/v1/relay/chat/completions \\
@@ -201,9 +201,7 @@ export default function RelayProxyClient() {
       {/* Tokens List */}
       <Card>
         <div className="p-4">
-          <h2 className="text-sm font-semibold mb-3">
-            {t("tokenCount", { count: tokens.length })}
-          </h2>
+          <h2 className="text-sm mb-3">{t("tokenCount", { count: tokens.length })}</h2>
           {loading ? (
             <p className="text-sm text-text-muted">{t("loading")}</p>
           ) : tokens.length === 0 ? (

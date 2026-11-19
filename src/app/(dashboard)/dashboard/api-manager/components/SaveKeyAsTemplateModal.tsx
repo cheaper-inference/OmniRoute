@@ -388,6 +388,7 @@ function CaptureFormFields({ model }: { model: SaveTemplateModel }) {
           icon={<Icon name="error" />}
           title={t("templatePreviewRefusedTitle")}
           description={previewError}
+          dismissLabel={tc("close")}
         />
       )}
 

@@ -265,6 +265,56 @@ test("pre-flight reports pricing freshness as drift, not as a hard failure", asy
   );
 });
 
+test("migration-numbering and migrations-fresh are HARD gates, numbering first", async () => {
+  const fs = await import("node:fs");
+  const src = fs.readFileSync(
+    new URL("../../scripts/quality/validate-release-green.mjs", import.meta.url),
+    "utf8"
+  );
+  // Timestamped migrations can depend on a later-dated one; only a fresh-install run of the
+  // whole set catches it, and it has to block the release (it runs in --quick as well).
+  assert.match(
+    src,
+    /hardCmd\(\s*"migrations-fresh"[\s\S]*?"run",\s*"test:migrations:fresh"/,
+    "migrations-fresh must run test:migrations:fresh as a HARD gate"
+  );
+  assert.doesNotMatch(src, /driftCmd\(\s*"migrations-fresh"/);
+  // The static numbering gate runs as a HARD step right before it (cheaper, clearer message
+  // for a duplicated timestamp than the runner's collision error inside the fresh run).
+  assert.match(
+    src,
+    /hardCmd\(\s*"migration-numbering"[\s\S]*?"run",\s*"check:migration-numbering"/,
+    "migration-numbering must run check:migration-numbering as a HARD gate"
+  );
+  assert.doesNotMatch(src, /driftCmd\(\s*"migration-numbering"/);
+  // Push/schedule runs have no PR base: the step compares the tree with the newest release
+  // tag instead, so a non-commuting pair that landed by a manual merge is still caught.
+  assert.match(
+    src,
+    /hardCmd\(\s*"migration-numbering"[\s\S]*?\["run",\s*"check:migration-numbering",\s*"--",\s*"--base-latest-tag"\]/,
+    "migration-numbering must compare with the latest release tag (--base-latest-tag)"
+  );
+  const numberingAt = src.search(/hardCmd\(\s*"migration-numbering"/);
+  const freshAt = src.search(/hardCmd\(\s*"migrations-fresh"/);
+  assert.ok(
+    numberingAt !== -1 && numberingAt < freshAt,
+    "migration-numbering must run before migrations-fresh"
+  );
+  const pkg = JSON.parse(
+    fs.readFileSync(new URL("../../package.json", import.meta.url), "utf8")
+  ) as { scripts: Record<string, string> };
+  assert.match(
+    pkg.scripts["check:migration-numbering"] ?? "",
+    /scripts\/check\/check-migration-numbering\.mjs/,
+    "check:migration-numbering must run the numbering gate"
+  );
+  assert.match(
+    pkg.scripts["test:migrations:fresh"] ?? "",
+    /tests\/unit\/db\/migrations-fresh-database\.test\.ts/,
+    "test:migrations:fresh must run the fresh-database migration test"
+  );
+});
+
 test("pre-flight --hermetic scrubs the live-test trigger vars (2026-07-05 false-positive fix)", async () => {
   const fs = await import("node:fs");
   const src = fs.readFileSync(

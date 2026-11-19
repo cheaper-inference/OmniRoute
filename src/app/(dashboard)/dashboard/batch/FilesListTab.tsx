@@ -17,6 +17,7 @@ import Badge from "@/shared/components/Badge";
 import GuardedAction from "@/shared/components/GuardedAction";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
+import InteractiveTableRow from "@/shared/components/InteractiveTableRow";
 import Select from "@/shared/components/Select";
 import { cn } from "@/shared/utils/cn";
 import { matchesSearch } from "@/shared/utils/turkishText";
@@ -238,10 +239,10 @@ export default function FilesListTab({
                 const canDelete = related.length === 0 || allTerminal;
 
                 return (
-                  <TableRow
+                  <InteractiveTableRow
                     key={file.id}
-                    onClick={() => handleFileClick(file)}
-                    data-state={selectedFileId === file.id ? "selected" : undefined}
+                    onActivate={() => handleFileClick(file)}
+                    selected={selectedFileId === file.id}
                     className={cn("cursor-pointer", selectedFileId === file.id && "bg-accent/10")}
                   >
                     <TableCell className="font-mono text-xs text-text-muted max-w-[140px]">
@@ -343,7 +344,7 @@ export default function FilesListTab({
                         </GuardedAction>
                       </div>
                     </TableCell>
-                  </TableRow>
+                  </InteractiveTableRow>
                 );
               })
             )}
