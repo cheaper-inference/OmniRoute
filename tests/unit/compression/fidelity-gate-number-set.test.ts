@@ -45,3 +45,13 @@ test("numeric: the check can be switched off", () => {
     true
   );
 });
+
+test("numeric: an over-limit digit run is never split into fragments that satisfy the check", () => {
+  const r = checkFidelity("run 12 jobs", "run " + "9".repeat(40) + "12 jobs", ON);
+  assert.equal(r.passed, false);
+  assert.equal(r.failedInvariant, "numeric");
+});
+
+test("numeric: an over-limit input literal does not demand its fragments in the output", () => {
+  assert.equal(checkFidelity("id " + "7".repeat(52), "id redacted", ON).passed, true);
+});

@@ -35,8 +35,10 @@ const CRITICAL_KINDS = new Set([
 // NUMERIC_RE matches one standalone number literal: digits with optional ./, groups between digit
 // runs (e.g. "1,3" in a diff hunk, "3.5"). A trailing separator is punctuation, not part of the
 // number. The input and output literals are compared as sets, so "12" never matches inside "123".
+// The lookarounds keep a literal whole: a run longer than the bounds (over 40 digits, or over 10
+// separators) matches nothing, so its fragments never count as standalone numbers on either side.
 // All quantifiers are bounded (ReDoS).
-const NUMERIC_RE = /\d{1,40}(?:[.,]\d{1,40}){0,10}/g;
+const NUMERIC_RE = /(?<!\d|\d[.,])\d{1,40}(?:[.,]\d{1,40}){0,10}(?![.,]?\d)/g;
 const JSON_KEY_RE = /"([A-Za-z_$][\w$-]{0,80})"\s*:/g;
 const HUNK_RE = /@@ -\d{1,9}(?:,\d{1,9})? \+\d{1,9}(?:,\d{1,9})? @@/g;
 
