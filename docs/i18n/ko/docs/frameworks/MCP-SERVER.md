@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -136,14 +138,14 @@ Claude Desktop, Cursor, Cline 및 호환되는 MCP 클라이언트 설정은 [MC
 | `omniroute_compression_combo_stats` | `read:compression`  | 압축 콤보 및 엔진별로 그룹화된 분석                                                            |
 | `omniroute_ccr_store`               | `write:compression` | 제한된 인메모리 CCR 저장소에 호출자 격리 콘텐츠를 저장하고 마커와 `ccr://` 참조를 반환합니다.  |
 | `omniroute_ccr_retrieve`            | `read:compression`  | 전체 또는 헤드, 테일, 라인, grep 및 통계 모드를 사용하여 CCR 콘텐츠를 검색합니다.              |
-| `omniroute_ccr_inspect`             | `read:compression`  | 콘텐츠를 반환하지 않고 호출자 소유의 CCR 메타데이터를 검사합니다.                              |
+| `omniroute_ccr_inspect`             | `read:compression`  | 콘텐츠를 반환하지 않고 호출자가 소유한 CCR 메타데이터를 검사합니다.                            |
 | `omniroute_ccr_list`                | `read:compression`  | 호출자가 소유한 CCR 블록에 대한 페이지가 매겨진 메타데이터 나열                                |
 | `omniroute_ccr_delete`              | `write:compression` | 호출자가 소유한 CCR 블록 삭제                                                                  |
 | `omniroute_ccr_stats`               | `read:compression`  | 호출자 범위 메모리 사용량, 수명 주기 카운터 및 저장 제한 보고                                  |
 | `omniroute_rtk_discover`            | `read:compression`  | 옵트인 RTK 출력 샘플에서 반복되는 노이즈 발견                                                  |
 | `omniroute_rtk_learn`               | `read:compression`  | 옵트인 샘플에서 검토 가능한 RTK 필터 초안 생성                                                 |
 
-CCR 항목은 2계층 저장소를 사용합니다. 즉, 로컬 비클라우드 런타임에서 내구성 있는 SQLite 계층(`ccr_blocks`, 기본적으로 켜져 있음)으로 지원되는 핫 인 메모리 계층을 사용하므로 블록은 TTL — 모두 소모할 때까지 제거 또는 재시작 후에도 유지됩니다. 단, 512개 이상의 KB 및 클라우드 런타임은 메모리 전용으로 유지됩니다. 각 블록은 2 MiB, 각 주체는 16 MiB, 전역 저장소는 64 MiB 로 제한됩니다. 항목은 기본적으로 24시간 TTL (최대 7일)로 설정됩니다. 전체 MCP 검색은 256 KiB 로 제한됩니다. 더 큰 블록은 ranged 및 grep 모드를 통해 계속 사용할 수 있습니다. 저장, 검색, 나열, 검사, 삭제 및 통계는 인증된 API 키 주체에 의해 격리됩니다. 감사 기록에는 해시 및 크기 메타데이터가 포함되며 콘텐츠는 포함되지 않습니다. 운영자 측 세부 정보(두 개의 마커, 클라이언트 전제 조건, `codemode:false`, 도구별 범위, 페이지 매김 및 진단 매트릭스)는 [압축 엔진 → 전제 조건 / 운영자 가이드](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) 에 있습니다.
+CCR 항목은 2계층 저장소를 사용합니다. 로컬 비클라우드 런타임에서 내구성 있는 SQLite 계층(`ccr_blocks`, 기본적으로 켜져 있음)으로 지원되는 핫 인 메모리 계층을 사용하므로 블록은 TTL — 다 소모할 때까지 제거 또는 다시 시작에서 살아남습니다. 단, 512개 이상의 블록은 KB, 클라우드 런타임 및 `COMPRESSION_CCR_DURABLE_STORE=false` 는 메모리 전용으로 유지됩니다. 내구성 있는 쓰기는 최선의 노력입니다. 1,000개의 쓰기가 이미 보류 중인 동안 삭제되고 실패한 SQLite 쓰기는 재시도되지 않고 기록되므로 다시 시작할 때 블록이 손실됩니다. 각 블록은 2 MiB, 각 주체는 16 MiB, 전역 저장소는 64 MiB 로 제한됩니다. 항목의 기본값은 24시간 TTL (최대 7일)입니다. 전체 MCP 검색은 256 KiB 으로 제한됩니다. 더 큰 블록은 ranged 및 grep 모드를 통해 계속 사용할 수 있습니다. 저장, 검색, 나열, 검사, 삭제 및 통계는 인증된 API 키 주체에 의해 격리됩니다. 감사 기록에는 해시 및 크기 메타데이터가 포함되며 콘텐츠는 포함되지 않습니다. 운영자 측 세부 정보(두 개의 마커, 클라이언트 전제 조건, `codemode:false`, 도구별 범위, 페이지 매김 및 진단 매트릭스)는 [압축 엔진 → 전제 조건 / 운영자 가이드](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) 에 있습니다.
 
 `omniroute_compression_status` `analytics.mcpDescriptionCompression` 에서 별도로 MCP 설명 압축을 보고합니다. 해당 값은 MCP 목록 가능 설명(`tools`, `prompts`, `resources` 및 `resourceTemplates`)에 대한 메타데이터 크기 추정치입니다. 이는 공급자 사용 영수증이 아니며 `source: "mcp_metadata_estimate"` 로 표시됩니다.
 
