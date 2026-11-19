@@ -31,8 +31,11 @@ function parsePolicy(raw: string | undefined): Array<[string, Mode]> {
 export function applyStreamingPolicy(
   endpointPath: string,
   stream: boolean,
-  env: Record<string, string | undefined> = process.env
+  env: Record<string, string | undefined> = process.env,
+  options: { jsonOnly?: boolean } = {}
 ): StreamingPolicyResult {
+  // A JSON-only endpoint (native Codex compact) keeps its resolved flag: no rule forces SSE.
+  if (options.jsonOnly) return { stream };
   const rule = parsePolicy(env.OMNIROUTE_STREAMING_POLICY).find(([prefix]) =>
     endpointPath.startsWith(prefix)
   );

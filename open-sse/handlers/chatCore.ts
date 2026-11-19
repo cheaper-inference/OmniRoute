@@ -1170,15 +1170,17 @@ async function handleChatCoreInner({
   // flag into resolveStreamFlag would force `stream=true` and skip that
   // conversion, yielding STREAM_EARLY_EOF for JSON callers. (#2081, #6126)
   const providerRequiresStreaming = REGISTRY[provider]?.forceStream === true;
-  const resolvedStream =
-    nativeCodexPassthrough && isCompactResponsesEndpoint(endpointPath)
-      ? false
-      : resolveStreamFlag(body?.stream, acceptHeader, sourceFormat, {
-          userAgent: streamUserAgent,
-          streamDefaultMode: apiKeyInfo?.streamDefaultMode,
-        });
-  // Operator streaming policy (OMNIROUTE_STREAMING_POLICY, off when unset).
-  const streamingPolicy = applyStreamingPolicy(endpointPath, resolvedStream);
+  const compactJsonOnly = nativeCodexPassthrough && isCompactResponsesEndpoint(endpointPath);
+  const resolvedStream = compactJsonOnly
+    ? false
+    : resolveStreamFlag(body?.stream, acceptHeader, sourceFormat, {
+        userAgent: streamUserAgent,
+        streamDefaultMode: apiKeyInfo?.streamDefaultMode,
+      });
+  // Operator streaming policy (OMNIROUTE_STREAMING_POLICY, off when unset); compact stays JSON.
+  const streamingPolicy = applyStreamingPolicy(endpointPath, resolvedStream, process.env, {
+    jsonOnly: compactJsonOnly,
+  });
   if (streamingPolicy.error) {
     trackPendingRequest(model, provider, pendingConnId, false, undefined, pendingRequestOwner ?? pendingRequestId);
     return createErrorResult(streamingPolicy.error.status, streamingPolicy.error.message);

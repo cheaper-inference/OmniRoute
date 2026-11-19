@@ -20,8 +20,9 @@ export function isToolRejectionDeferEnabled(): boolean {
   return process.env.OMNIROUTE_TOOL_REJECTION_DEFER === "true";
 }
 
+/** Per connection: expanded targets share provider and model but not a connection. */
 function keyOf(target: ResolvedComboTarget): string {
-  return `${target.provider}|${target.modelStr}`;
+  return `${target.provider}|${target.modelStr}|${target.connectionId ?? ""}`;
 }
 
 /** Tool requests only; the digest tells distinct requests apart without keeping content. */
@@ -42,7 +43,13 @@ export function recordToolRejection(target: ResolvedComboTarget, body: Record<st
   const key = keyOf(target);
   const entry = entries.get(key) ?? { requests: new Map(), deferredUntil: 0 };
   for (const [seen, at] of entry.requests) if (now - at > WINDOW_MS) entry.requests.delete(seen);
+  // Newest last; only the most recent REJECTION_THRESHOLD distinct requests are kept, so the
+  // history and the window scan stay bounded under a sustained rejection workload.
+  entry.requests.delete(id);
   entry.requests.set(id, now);
+  while (entry.requests.size > REJECTION_THRESHOLD) {
+    entry.requests.delete(entry.requests.keys().next().value as string);
+  }
   if (entry.requests.size >= REJECTION_THRESHOLD) entry.deferredUntil = now + DEFER_MS;
   entries.delete(key);
   entries.set(key, entry);
@@ -64,6 +71,11 @@ export function deferToolRejectingTargets<T extends ResolvedComboTarget>(
   const deferred = (t: T) => (entries.get(keyOf(t))?.deferredUntil ?? 0) > now;
   const ready = targets.filter((t) => !deferred(t));
   return ready.length === targets.length ? targets : [...ready, ...targets.filter(deferred)];
+}
+
+/** Test-only: distinct rejected requests retained for a target. */
+export function __toolRejectionHistorySizeForTests(target: ResolvedComboTarget): number {
+  return entries.get(keyOf(target))?.requests.size ?? 0;
 }
 
 export function __resetToolRejectionTrackerForTests(): void {

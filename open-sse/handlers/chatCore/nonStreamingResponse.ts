@@ -49,7 +49,10 @@ import { buildMalformedResponseDiagnostic } from "../../utils/responseShapeDiagn
 import { lockModel } from "../../services/accountFallback.ts";
 
 import { buildPostCallGuardrailContext } from "../chatCore/postCallGuardrailContext.ts";
-import { buildNonStreamingResponseHeaders } from "../chatCore/nonStreamingResponseHeaders.ts";
+import {
+  buildNonStreamingResponseHeaders,
+  contextWindowForServedModel,
+} from "../chatCore/nonStreamingResponseHeaders.ts";
 import { maybeWrapForcedNonStreamingResponsesJson } from "../chatCore/responsesJsonToSse.ts";
 import { runProviderExecutionPipeline } from "../chatCore/providerExecutionPipeline.ts";
 import { admitQuotaShareRotation } from "../chatCore/quotaSharePreHook.ts";
@@ -1112,7 +1115,7 @@ export async function runNonStreamingResponse(deps: NonStreamingDeps) {
       compressionResponseMeta,
       comboStrategy,
       fallbackAttempts,
-      contextWindow: contextLimit,
+      contextWindow: contextWindowForServedModel(contextLimit, currentModel, effectiveModel),
     });
     // #6426: align response body `model` with the `X-OmniRoute-Model` header
     // (both must be the resolved backend model). Some upstreams (notably legacy

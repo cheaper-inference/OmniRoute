@@ -75,6 +75,30 @@ test("invalid entries are ignored and never loosen a valid one", () => {
   assert.equal(applyStreamingPolicy("/v1/chat/completions", true, policy).error?.status, 400);
 });
 
+test("a JSON-only endpoint (native Codex compact) is never forced to stream", () => {
+  const always = env("/v1/responses=always");
+  assert.deepEqual(applyStreamingPolicy("/v1/responses/compact", false, always), { stream: true });
+  assert.deepEqual(
+    applyStreamingPolicy("/v1/responses/compact", false, always, { jsonOnly: true }),
+    { stream: false }
+  );
+});
+
+test("chatCore: native Codex compact passes jsonOnly to the policy", () => {
+  const source = fs.readFileSync(
+    path.join(import.meta.dirname, "../../open-sse/handlers/chatCore.ts"),
+    "utf8"
+  );
+  assert.match(
+    source,
+    /const compactJsonOnly = nativeCodexPassthrough && isCompactResponsesEndpoint\(endpointPath\);/
+  );
+  assert.match(
+    source,
+    /applyStreamingPolicy\(endpointPath, resolvedStream, process\.env, \{\s*jsonOnly: compactJsonOnly,\s*\}\)/
+  );
+});
+
 function chatJson() {
   return new Response(
     JSON.stringify({

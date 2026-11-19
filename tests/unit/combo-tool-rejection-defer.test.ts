@@ -109,3 +109,61 @@ test("flag on: a served tool request clears earlier rejections", async () => {
   for (let n = 4; n <= 5; n++) await send(bad, good, n, true);
   assert.deepEqual(await send(bad, good, 6, true), [bad, good], "count restarted after the serve");
 });
+
+const tracker = await import("../../open-sse/services/combo/toolRejectionTracker.ts");
+const { resolveComboTargetPipeline } =
+  await import("../../open-sse/services/combo/targetResolution.ts");
+
+const toolBody = (n: number) => ({
+  messages: [{ role: "user", content: `tracker request ${n}` }],
+  tools: TOOLS,
+});
+const target = (modelStr: string, connectionId?: string) =>
+  ({ modelStr, provider: "openai", connectionId }) as never;
+
+test("flag on: rejection state is kept per connection", () => {
+  process.env[FLAG] = "true";
+  const a = target("openai/defer-conn", "conn-a");
+  const b = target("openai/defer-conn", "conn-b");
+  for (let n = 1; n <= 3; n++) tracker.recordToolRejection(a, toolBody(n));
+  // A request served on connection B must not clear connection A's rejections.
+  tracker.recordToolServed(b, toolBody(4));
+  assert.deepEqual(tracker.deferToolRejectingTargets([a, b], toolBody(5)), [b, a]);
+});
+
+test("flag on: each target keeps only the most recent distinct rejected requests", () => {
+  process.env[FLAG] = "true";
+  const t = target("openai/defer-bounded", "conn-bounded");
+  for (let n = 1; n <= 50; n++) tracker.recordToolRejection(t, toolBody(n));
+  assert.equal(tracker.__toolRejectionHistorySizeForTests(t), 3);
+  assert.deepEqual(tracker.deferToolRejectingTargets([t], toolBody(51)), [t]);
+});
+
+test("flag on: the target pipeline applies the deferral before it hands back the order", async () => {
+  process.env[FLAG] = "true";
+  const [bad, good] = ["openai/defer-bad-g", "openai/defer-good-g"];
+  for (let n = 1; n <= 3; n++) tracker.recordToolRejection(target(bad), toolBody(n));
+  const result = await resolveComboTargetPipeline({
+    body: toolBody(4),
+    combo: { id: "c-defer-g", name: "combo-defer-g", models: [bad, good], config: {} },
+    strategy: "priority",
+    config: {},
+    settings: null,
+    allCombos: null,
+    relayOptions: null,
+    signal: null,
+    apiKeyAllowedConnections: null,
+    log,
+    resilienceSettings: { providerCooldown: { enabled: false } },
+    isModelAvailable: undefined,
+    handleSingleModelWithTimeout: async () => ok200(),
+    buildAutoCandidates: async () => [],
+  } as never);
+  assert.ok(!("earlyResponse" in result), "expected a resolved pipeline");
+  assert.deepEqual(
+    (result as { orderedTargets: Array<{ modelStr: string }> }).orderedTargets.map(
+      (t) => t.modelStr
+    ),
+    [good, bad]
+  );
+});

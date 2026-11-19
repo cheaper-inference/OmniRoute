@@ -109,6 +109,21 @@ test("non-streaming header builder adds the context headers only with the env fl
   assert.equal(on[REMAINING], "880");
 });
 
+test("after a family fallback the pre-dispatch window is not reported", async () => {
+  const { contextWindowForServedModel } =
+    await import("../../open-sse/handlers/chatCore/nonStreamingResponseHeaders.ts");
+  assert.equal(contextWindowForServedModel(1000, "gpt-4o-mini", "gpt-4o-mini"), 1000);
+  assert.equal(contextWindowForServedModel(1000, "gpt-4.1", "gpt-4o-mini"), null);
+  const source = fs.readFileSync(
+    path.join(import.meta.dirname, "../../open-sse/handlers/chatCore/nonStreamingResponse.ts"),
+    "utf8"
+  );
+  assert.match(
+    source,
+    /contextWindow: contextWindowForServedModel\(contextLimit, currentModel, effectiveModel\)/
+  );
+});
+
 test("chatCore leaves the context headers off by default", async () => {
   delete process.env[FLAG];
   const result = await callChat();

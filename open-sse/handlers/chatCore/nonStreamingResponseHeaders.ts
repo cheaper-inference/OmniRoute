@@ -11,6 +11,19 @@
 import { OMNIROUTE_RESPONSE_HEADERS } from "@/shared/constants/headers";
 import { attachOmniRouteMetaHeaders as defaultAttachMeta } from "@/domain/omnirouteResponseMeta";
 
+/**
+ * The window resolved before dispatch describes the resolved model (with any combo override).
+ * After a family fallback another model served the response, so its window is unknown here and
+ * the context headers are left out rather than describe the wrong model.
+ */
+export function contextWindowForServedModel(
+  contextLimit: number | null | undefined,
+  servedModel: string,
+  resolvedModel: string
+): number | null {
+  return servedModel === resolvedModel ? (contextLimit ?? null) : null;
+}
+
 export function buildNonStreamingResponseHeaders(
   args: {
     provider: string | null | undefined;

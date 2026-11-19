@@ -533,7 +533,6 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
   // After the sanitizers, which read `reasoning.effort`, and after payload rules can add it.
   bodyToSend = foldReasoningForOpenAIChat(bodyToSend, provider, targetFormat);
   bodyToSend = defaultImageDetail(bodyToSend, isOpencodeClient);
-  bodyToSend = dedupeBuiltinWebTools(bodyToSend, opts.clientRawRequest?.headers);
   // Relevance selection runs before the provider cap so the cap keeps the useful tools.
   const disclosure = applyToolDisclosure(bodyToSend, opts.toolDisclosure, {
     rawBody: opts.rawBody,
@@ -556,6 +555,8 @@ export async function prepareUpstreamBody(opts: PrepareUpstreamBodyOptions): Pro
     targetFormat,
     log
   );
+  // After selection and the cap: a built-in web tool goes only when its MCP replacement survived.
+  bodyToSend = dedupeBuiltinWebTools(bodyToSend, opts.clientRawRequest?.headers);
   const connectionCacheOverride = resolveConnectionCacheOverride(credentials?.providerSpecificData);
   bodyToSend = await injectPromptCacheKey(
     bodyToSend,

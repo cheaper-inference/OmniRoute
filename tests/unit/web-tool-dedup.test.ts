@@ -111,3 +111,16 @@ test("flag off (default): every tool is kept", async () => {
   const names = ["WebSearch", "WebFetch", ...EXA];
   assert.deepEqual(await toolNames(names), names);
 });
+
+test("the cap runs first: a built-in is dropped only when its MCP replacement survives", async () => {
+  const { getEffectiveToolLimit } = await import("../../open-sse/services/toolLimitDetector.ts");
+  const limit = getEffectiveToolLimit("test");
+  const fillers = Array.from({ length: limit }, (_, i) => `filler_${i}`);
+  // Exa sits last, so the cap removes it; the built-ins must then stay.
+  const names = await toolNames(["WebSearch", "WebFetch", ...fillers, EXA[0]], {
+    format: "openai",
+  });
+  assert.equal(names.length, limit);
+  assert.deepEqual(names.slice(0, 2), ["WebSearch", "WebFetch"]);
+  assert.ok(!names.includes(EXA[0]));
+});
