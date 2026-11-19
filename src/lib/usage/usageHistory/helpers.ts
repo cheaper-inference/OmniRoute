@@ -1,3 +1,4 @@
+import { storedUsageEvidence } from "../storedUsageEvidence";
 /**
  * Pure, stateless helpers extracted from usageHistory.ts.
  * No DB access, no module-level state — safe to import anywhere.
@@ -31,6 +32,7 @@ export function normalizeServiceTier(value: unknown): string {
 export function mapUsageHistoryRow(row: unknown) {
   const r = asRecord(row);
   return {
+    ...storedUsageEvidence(r),
     provider: toStringOrNull(r.provider),
     model: toStringOrNull(r.model),
     connectionId: toStringOrNull(r.connection_id),
@@ -40,11 +42,16 @@ export function mapUsageHistoryRow(row: unknown) {
     serviceTier: normalizeServiceTier(r.service_tier),
     providerCredits: r.provider_credits ?? null,
     providerCostUsd: r.provider_cost_usd ?? null,
+    calculatedCostUsd: r.calculated_cost_usd ?? null,
+    billingUnit: toStringOrNull(r.billing_unit),
+    billingQuantity: r.billing_quantity ?? null,
+    billingUnitPriceUsd: r.billing_unit_price_usd ?? null,
     tokens: {
       input: toNumberValue(r.tokens_input),
       output: toNumberValue(r.tokens_output),
-      cacheRead: toNumberValue(r.tokens_cache_read),
-      cacheCreation: toNumberValue(r.tokens_cache_creation),
+      cacheRead: r.tokens_cache_read == null ? null : toNumberValue(r.tokens_cache_read),
+      cacheCreation:
+        r.tokens_cache_creation == null ? null : toNumberValue(r.tokens_cache_creation),
       reasoning: toNumberValue(r.tokens_reasoning),
     },
     status: toStringOrNull(r.status),

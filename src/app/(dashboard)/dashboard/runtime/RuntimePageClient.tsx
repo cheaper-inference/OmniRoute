@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import Link from "next/link";
 import { PageHeader, SectionHeader as KitSectionHeader } from "@omniroute/ui-kit/page-header";
+import { Progress } from "@omniroute/ui-kit/progress";
 import { Tile } from "@omniroute/ui-kit/tile";
 import {
   Table,
@@ -651,12 +652,19 @@ export default function RuntimePageClient() {
           />
 
           <div className="mb-4 mt-2">
-            <div className="h-2 rounded-sm bg-border/60 overflow-hidden">
-              <div
-                className="h-full rounded-sm bg-gradient-to-r from-success via-warning to-error/40"
-                style={{ width: `${overallPercent}%` }}
-              />
-            </div>
+            <Progress
+              aria-label={t("resilienceTitle")}
+              aria-valuetext={t("providersHealthy", { percent: overallPercent })}
+              value={overallPercent}
+              tone={
+                counts.openCircuits > 0
+                  ? "danger"
+                  : counts.halfCircuits + counts.degradedCircuits + counts.unknownCircuits > 0
+                    ? "warning"
+                    : "success"
+              }
+              animate={false}
+            />
             <div className="mt-1 text-[11px] text-text-muted tabular-nums">
               {t("providersHealthy", { percent: overallPercent })}
             </div>
@@ -698,7 +706,7 @@ export default function RuntimePageClient() {
                         <span className="truncate flex-1">
                           {resolveProviderName(b.provider, nodeMap)}
                         </span>
-                        <span style={{ color: tone.dot }} className="text-[10px] font-bold">
+                        <span style={{ color: tone.dot }} className="text-[10px] font-semibold">
                           {tone.label}
                         </span>
                       </div>
@@ -827,6 +835,7 @@ export default function RuntimePageClient() {
             trailing={
               <div className="flex items-center gap-1.5">
                 <Select
+                  native
                   compact
                   aria-label={t("feedFilterLabel")}
                   value={feedFilter}
@@ -907,7 +916,12 @@ export default function RuntimePageClient() {
             </div>
           ) : (
             <div className="mt-2">
-              <Table className="text-sm" scrollbarLabel={t("sessionsTitle")}>
+              <Table
+                className="text-sm"
+                scrollbarLabel={t("sessionsTitle")}
+                scrollLabel={t("sessionsTitle")}
+                containerClassName="rounded-none border-0"
+              >
                 <TableHeader>
                   <TableRow>
                     <TableHead>{t("tblSession")}</TableHead>
@@ -938,7 +952,7 @@ export default function RuntimePageClient() {
                       </TableCell>
                       <TableCell>
                         {s.connectionId ? (
-                          <span className="font-mono text-[10px] text-chart-2">
+                          <span className="font-mono text-[10px] text-chart-2-ink">
                             {shortId(s.connectionId, 12)}
                           </span>
                         ) : (
@@ -1062,7 +1076,7 @@ function KpiCard({
           <span className="block text-[11px] uppercase tracking-wider font-semibold text-text-muted">
             {label}
           </span>{" "}
-          <span className="mt-1 block text-2xl font-bold tabular-nums" style={{ color: tone }}>
+          <span className="mt-1 block text-2xl font-semibold tabular-nums" style={{ color: tone }}>
             {value}
           </span>
         </>
@@ -1139,10 +1153,10 @@ function LayerSection({
     <div className="mt-4 border-t border-border/40 pt-3 first-of-type:border-t-0 first-of-type:pt-0">
       <div className="flex items-center justify-between gap-2 mb-2">
         <div className="flex items-center gap-2">
-          <span className="text-[10px] uppercase tracking-wider font-bold text-text-muted">
+          <span className="text-[10px] uppercase tracking-wider font-semibold text-text-muted">
             Layer {id}
           </span>
-          <h3 className="text-[13px] font-semibold text-text-main">{title}</h3>
+          <h3 className="text-[13px] text-text-main">{title}</h3>
         </div>
         <span
           className="text-[10px] font-semibold px-2 py-0.5 rounded-full tabular-nums"
@@ -1198,7 +1212,7 @@ function QuotaGroup({
   return (
     <div>
       <div
-        className="text-[10px] font-bold uppercase tracking-wider mb-1.5"
+        className="text-[10px] font-semibold uppercase tracking-wider mb-1.5"
         style={{ color: tc.text }}
       >
         {label}
@@ -1218,7 +1232,7 @@ function QuotaGroup({
               <div className="text-[10px] text-text-muted">{m.window ?? ""}</div>
             </div>
             {typeof m.remainingPercent === "number" && (
-              <span className="text-[11px] font-bold tabular-nums" style={{ color: tc.text }}>
+              <span className="text-[11px] font-semibold tabular-nums" style={{ color: tc.text }}>
                 {Math.round(m.remainingPercent)}%
               </span>
             )}
