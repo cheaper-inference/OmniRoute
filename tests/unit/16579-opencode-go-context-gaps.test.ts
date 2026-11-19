@@ -176,9 +176,15 @@ test("#16579 does not override explicit output caps for unrelated models", () =>
 
 test("#20436 opencode-go/deepseek-v4.1-flash and deepseek-flash declare accepted effort tiers", async () => {
   const { getResolvedModelCapabilities } = await import("../../src/lib/modelCapabilities.ts");
+  // Pin both checks to registry data: a locally stored reasoning-effort override
+  // must not change what this regression asserts.
+  const snapshot = {
+    ...createModelCapabilityResolutionSnapshot(),
+    reasoningEffortsOverrides: new Map(),
+  };
 
   for (const id of ["opencode-go/deepseek-v4.1-flash", "opencode-go/deepseek-flash"]) {
-    const resolved = getResolvedModelCapabilities(id);
+    const resolved = getResolvedModelCapabilities(id, { persistedOverrides: false });
     assert.equal(resolved.supportsThinking, true, `${id} should report supportsThinking=true`);
     assert.deepEqual(
       resolved.supportedThinkingEfforts,
@@ -186,11 +192,15 @@ test("#20436 opencode-go/deepseek-v4.1-flash and deepseek-flash declare accepted
       `${id} should resolve to exact upstream effort tiers ["low", "high", "max"]`
     );
 
-    const enriched = enrichCatalogModelEntry({
-      id,
-      root: id.split("/")[1],
-      owned_by: "opencode-go",
-    }) as { capabilities?: { effort_tiers?: string[]; thinking?: boolean } };
+    const enriched = enrichCatalogModelEntry(
+      {
+        id,
+        root: id.split("/")[1],
+        owned_by: "opencode-go",
+      },
+      undefined,
+      { modelsDevPricing: {}, userPricing: {}, capabilityResolutionSnapshot: snapshot }
+    ) as { capabilities?: { effort_tiers?: string[]; thinking?: boolean } };
     assert.equal(
       enriched.capabilities?.thinking,
       true,
