@@ -74,11 +74,21 @@ describe("ImprovePromptButton", () => {
     expect(modal.querySelectorAll("svg[data-icon='auto_awesome']").length).toBe(2);
   });
 
-  it("button is disabled when model is empty", () => {
+  it("button is blocked when model is empty", async () => {
     const config = { ...BASE_CONFIG, model: "" };
     const el = renderButton(config);
     const btn = el.querySelector("[aria-label='Improve prompt using AI']") as HTMLButtonElement;
-    expect(btn.disabled).toBe(true);
+    // GuardedAction (decision 4): inactive, with "set a model first" as its reason, and a click
+    // never opens the quota confirmation.
+    expect(btn.getAttribute("aria-disabled")).toBe("true");
+    expect(btn.getAttribute("data-blocked")).toBe("true");
+    expect(
+      document.getElementById(btn.getAttribute("aria-describedby") ?? "")?.textContent
+    ).toBeTruthy();
+    await act(async () => {
+      btn.click();
+    });
+    expect(document.querySelector("[role='alertdialog']")).toBeNull();
   });
 
   it("button is enabled when model is set", () => {

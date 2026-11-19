@@ -49,6 +49,16 @@ describe("the enrichment overlay reaches the picker", () => {
     assert.equal(m.name, "combo - Combo Fast");
   });
 
+  it("keeps a combo's name when its overlay entry carries no name (CodeRabbit R2)", () => {
+    const m = applyEnrichment(
+      model("Duo", "combo - Duo"),
+      { pricing: { input: 1, output: 2 }, freeType: "recurring-monthly" as const },
+      { isCombo: true }
+    );
+    assert.equal(m.name, "combo - Duo");
+    assert.equal(m.cost.input, 1);
+  });
+
   it("still overlays pricing", () => {
     const m = applyEnrichment(model("x"), { pricing: { input: 3, output: 15 } });
     assert.equal(m.cost.input, 3);
