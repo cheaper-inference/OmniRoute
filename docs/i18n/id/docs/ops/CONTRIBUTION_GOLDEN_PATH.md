@@ -29,70 +29,61 @@ jenis perubahan umum dengan kontrak, pemeriksaan terfokus, dan cakupan CI-nya.
 6. **Catat bukti.** Dalam templat PR, cantumkan perintah yang dijalankan, setiap file pengujian yang ditambahkan atau diubah,
    migrasi atau feature flag, dan semua validasi khusus CI yang masih tertunda.
 
-## Alur utama berdasarkan jenis perubahan
+## Jalur emas berdasarkan jenis perubahan
 
-Perintah di bawah adalah pemeriksaan terfokus minimum, bukan izin untuk melewatkan pengujian yang secara langsung mencakup
-perilaku yang Anda ubah.
+Perintah di bawah ini adalah pemeriksaan terfokus minimum, bukan izin untuk melewati tes yang secara langsung mencakup perilaku yang Anda ubah.
 
-### Provider
+### Penyedia
 
 **Kontrak**
 
-- Definisi provider di `src/shared/constants/providers/` dan komposisinya di
-  `src/shared/constants/providers.ts`.
-- Model dan kapabilitas di `open-sse/config/providerRegistry.ts` atau file registry hasil ekstraksinya.
-- Pemilihan executor/translator, konfigurasi OAuth atau API key, aset dashboard, dan referensi
-  provider yang dihasilkan jika berlaku.
-- Kredensial publik harus menggunakan `resolvePublicCred()`; respons error harus menggunakan helper error
-  bersama yang telah disanitasi. Lihat `docs/security/PUBLIC_CREDS.md` (git; tidak dikompilasi ke dalam `/docs`) dan
-  [Sanitasi Error](../security/ERROR_SANITIZATION.md).
+- Definisi penyedia di `src/shared/constants/providers/` dan komposisinya di `src/shared/constants/providers.ts`.
+- Model dan kemampuan di `open-sse/config/providerRegistry.ts` atau file registri yang diekstraksi.
+- pemilihan Executor/translator, konfigurasi OAuth atau kunci API, dan aset dasbor. Jangan komit diagram `docs/reference/PROVIDER_REFERENCE.md` atau README yang dibuat ulang: penyegaran rilis akan menulis ulang diagram tersebut (`check:pr-derived-paths` menggagalkan fitur PR yang membawanya).
+- Kredensial publik harus menggunakan `resolvePublicCred()`; respons kesalahan harus menggunakan pembantu kesalahan yang telah disanitasi bersama. Lihat `docs/security/PUBLIC_CREDS.md` (git; tidak dikompilasi menjadi `/docs`) dan [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Siklus terfokus**
+**Lingkaran terfokus**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # ketika katalog berubah; commit diff yang dihasilkan
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Uji juga setiap kelompok permintaan yang terpengaruh: chat, Responses, gambar, embedding, audio, atau video.
-Tinjau diff katalog yang dihasilkan dan golden sebagai perubahan kontrak; jangan menerimanya tanpa pemeriksaan.
+Uji juga setiap kelompok permintaan yang terpengaruh: obrolan, Tanggapan, gambar, penyematan, audio, atau video. Tinjau katalog yang dihasilkan dan perbedaan emas seiring perubahan kontrak; jangan menerimanya begitu saja.
 
-### Routing
+### Rute
 
 **Kontrak**
 
 - Nilai strategi publik dan metadata UI di `src/shared/constants/routingStrategies.ts`.
-- Dispatch dan pengurutan di bawah `open-sse/services/combo.ts` dan `open-sse/services/combo/`.
-- Skema combo, persistensi, status ketahanan, kapabilitas model, dan kontrol API/UI.
-- [Mesin Auto-Combo](../routing/AUTO-COMBO.md) dan dokumentasi ketahanan ketika perilaku berubah.
+- Pengiriman dan pemesanan di bawah `open-sse/services/combo.ts` dan `open-sse/services/combo/`.
+- Skema kombo, persistensi, status ketahanan, kemampuan model, dan kontrol API/UI.
+- Dokumentasi [Mesin Kombo Otomatis](../routing/AUTO-COMBO.md) dan ketahanan saat perilaku berubah.
 
-**Siklus terfokus**
+**Lingkaran terfokus**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # perubahan strategi atau dispatch
-npm run check:known-symbols      # perubahan pendaftaran strategi
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Gunakan pengujian upstream tiruan yang deterministik secara lokal. Smoke test combo langsung memerlukan kredensial dan
-bersifat manual, bukan pengganti CI.
+Gunakan pengujian hulu tiruan deterministik secara lokal. Asap kombo langsung memerlukan kredensial dan bersifat manual, bukan pengganti CI.
 
 ### UI / UX
 
 **Kontrak**
 
-- Route/page Next.js dan batas komponen bersama di bawah `src/app/` dan
-  `src/shared/components/`.
-- Bentuk respons API, status pemuatan/kosong/error, perilaku keyboard dan pembaca layar,
-  tata letak responsif, tema, dan perluasan locale.
-- String sumber UI bahasa Inggris di `src/i18n/messages/en.json`; jangan melakukan hard-code pada teks baru yang ditampilkan kepada pengguna.
+- Next.js route/page dan batas komponen bersama di bawah `src/app/` dan `src/shared/components/`.
+- bentuk respons API, status loading/empty/error, perilaku keyboard dan pembaca layar, tata letak responsif, tema, dan perluasan lokal.
+- String sumber UI bahasa Inggris di `src/i18n/messages/en.json`; jangan melakukan hard-code pada salinan baru yang dilihat pengguna.
 
-**Siklus terfokus**
+**Lingkaran terfokus**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Jalankan aplikasi untuk perubahan interaksi atau visual dan periksa viewport sempit maupun lebar. CI menjalankan
-build produksi dan rangkaian pengujian yang lebih luas; perilaku visual tetap memerlukan komponen terfokus, Playwright,
-atau pemeriksaan manual terdokumentasi yang sesuai dengan perubahan.
+Jalankan aplikasi untuk interaksi atau perubahan visual dan periksa area pandang sempit dan lebar. CI menjalankan pembangunan produksi dan rangkaian yang lebih luas; perilaku visual masih memerlukan komponen terfokus, Playwright, atau pemeriksaan manual terdokumentasi yang sesuai dengan perubahan.
 
 ### i18n
 
 **Kontrak**
 
-- `src/i18n/messages/en.json` adalah sumber UI; `config/i18n.json` adalah sumber locale.
-- Katalog CLI berada secara terpisah di bawah `bin/cli/locales/`.
-- Pertahankan placeholder dan tag ICU secara persis. Jangan terjemahkan nama produk/provider/model,
-  nama protokol dan header, perintah, identifier kode/JSON, URL, environment variable, atau
-  istilah terlindungi seperti `OmniRoute`, `OAuth`, `MCP`, dan `A2A`. Daftar sumber saat ini adalah
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` adalah sumber UI ; `config/i18n.json` adalah sumber lokal.
+- Katalog CLI tersedia secara terpisah di bawah `bin/cli/locales/`.
+- Pertahankan placeholder dan tag ICU dengan tepat. Jangan terjemahkan nama product/provider/model, nama protokol dan header, perintah, pengidentifikasi code/JSON, URLs, variabel lingkungan, atau istilah yang dilindungi seperti `OmniRoute`, `OAuth`, `MCP`, dan `A2A`. Daftar sumber saat ini adalah `scripts/i18n/glossary/protected-terms.json`.
 
-**Siklus terfokus**
+Sebuah fitur PR hanya mengedit `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); lokal lainnya diselesaikan satu kali per rilis dengan penyegaran rilis atau gelombang terjemahan (`docs/guides/I18N.md` → "Fitur PRs sentuh `en.json` saja"). `npm run check:pr-derived-paths` gagal dalam fitur PR yang mengedit katalog lokal lain.
+
+**Lingkaran terfokus**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # ketika string/katalog CLI berubah
 npm run lint
 ```
 
-Ini adalah panduan untuk sistem yang ada, bukan ajakan untuk memperluas tooling atau model key-nya.
-Jaga agar patch i18n tetap terarah selama sistem pengganti sedang dirancang. Jangan jalankan perintah terjemahan
-yang memanggil layanan eksternal kecuali tugas tersebut secara eksplisit memerlukan terjemahan yang dihasilkan dan
-Anda telah meninjau diff yang dihasilkan.
+Tanpa `--mode=pr` gerbang ini berjalan dalam mode rilis secara lokal dan melaporkan setiap kunci yang ditambahkan atau ditulis ulang oleh siklus `en.json`; itu adalah pekerjaan penyegaran rilis, bukan milik Anda PR.
+
+Ini adalah panduan untuk sistem yang sudah ada, bukan undangan untuk memperluas perangkat atau model utamanya. Biarkan patch i18n tetap dioperasi saat sistem pengganti sedang dirancang. Jangan jalankan perintah terjemahan yang memanggil layanan eksternal kecuali tugas tersebut secara eksplisit memerlukan terjemahan yang dihasilkan dan Anda telah meninjau perbedaan yang dihasilkan.
 
 ### CLI
 
 **Kontrak**
 
-- Perintah dan flag publik di `bin/cli/`, perintah API yang dihasilkan, kode keluar, stdout/stderr dan
-  bentuk output JSON, perilaku konfigurasi/lingkungan, serta file yang dikemas.
-- String CLI yang ditampilkan kepada pengguna harus menggunakan lapisan i18n CLI dan menjaga katalog `en`/`pt-BR` tetap selaras.
-- Pertahankan Node sebagai runtime yang didukung serta kontrak biner yang dipublikasikan.
+- Perintah dan tanda publik di `bin/cli/`, perintah API yang dihasilkan, kode keluar, bentuk keluaran stdout/stderr dan JSON, perilaku config/environment, dan file paket.
+- string yang dilihat pengguna CLI harus menggunakan lapisan CLI i18n ( kunci `t()` yang ada di `bin/cli/locales/en.json`). Sebuah fitur PR hanya mengedit `en.json`; `pt-BR` dan lokal lainnya selesai saat rilis.
+- Pertahankan Node sebagai runtime yang didukung dan kontrak biner yang dipublikasikan.
 
-**Siklus terfokus**
+**Lingkaran terfokus**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # perubahan CLI yang dihasilkan/dibundel
-npm run check:pack-policy     # perubahan permukaan paket
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Gunakan perintah yang tepat di direktori data sementara ketika perilaku bergantung pada penguraian, file, atau status
-keluar. CI melakukan pemeriksaan artefak paket dan ekosistem yang lebih luas.
+Gunakan perintah yang tepat di direktori data sementara ketika perilakunya bergantung pada penguraian, file, atau status keluar. CI melakukan artefak paket yang lebih luas dan pemeriksaan ekosistem.
 
 ### Basis data
 
 **Kontrak**
 
-- Modul domain di bawah `src/lib/db/`; impor modul tertentu secara langsung (lapisan ekspor ulang `localDb.ts` yang lama telah dihapus).
-- Migrasi SQL bernomor dan idempoten di bawah `src/lib/db/migrations/`, keamanan transaksi, perilaku
-  peningkatan, indeks, serta setiap pemanggil yang terdampak oleh skema.
-- Rute dan handler tidak pernah menjalankan SQL mentah secara langsung.
+- Modul domain di bawah `src/lib/db/`; impor modul tertentu secara langsung (lapisan ekspor ulang `localDb.ts` lama telah dihapus).
+- Migrasi SQL idempoten bernomor di bawah `src/lib/db/migrations/`, keamanan transaksi, perilaku pemutakhiran, indeks, dan setiap pemanggil yang terpengaruh oleh skema.
+- Rute dan penangan tidak pernah mengeluarkan SQL mentah secara langsung.
 
-**Siklus terfokus**
+**Lingkaran terfokus**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Uji basis data baru maupun peningkatan dari skema sebelumnya ketika menambahkan migrasi. Pengujian basis data
-harus menutup handle dan memanggil `resetDbInstance()` selama pembersihan. Jalankan `npm run test:bun:db` hanya ketika
-jalur adaptor Bun yang bersifat upaya terbaik berubah; Node tetap menjadi acuan utama.
+Uji database baru dan tingkatkan dari skema sebelumnya saat menambahkan migrasi. Pengujian basis data harus menutup pegangan dan memanggil `resetDbInstance()` selama pembersihan. Jalankan `npm run test:bun:db` hanya ketika jalur adaptor Bun upaya terbaik berubah; Node tetap berwibawa.
 
-### Build / deployment
+### Bangun / terapkan
 
 **Kontrak**
 
-- Manifes/lockfile root dan workspace, `scripts/build/`, perakitan standalone Next.js, konten paket
-  `dist/`, metadata platform Electron, alur kerja CI, serta sentinel deployment.
-- Rentang Node yang didukung dan penggunaan Bun yang diizinkan dalam `CLAUDE.md` harus tetap dipertahankan.
-- Artefak build tetap tidak dilacak; kebijakan dependensi, lisensi, alur kerja, dan paket tetap berlaku.
+- Root dan ruang kerja manifests/lockfile, `scripts/build/`, perakitan mandiri Next.js, konten paket `dist/`, metadata platform Electron, alur kerja CI, dan penjaga penerapan.
+- Rentang Node yang didukung dan penggunaan Bun yang diizinkan di `CLAUDE.md` harus tetap utuh.
+- Artefak yang dibangun tetap tidak terlacak; kebijakan ketergantungan, lisensi, alur kerja, dan paket berlaku.
 
-**Siklus terfokus**
+**Lingkaran terfokus**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # perubahan dependensi atau lockfile
-npm run check:pack-policy      # perubahan permukaan paket yang dipublikasikan
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Gunakan `npm run build` secara lokal hanya ketika perubahan memengaruhi kompilasi, perakitan standalone, aset,
-atau pembundelan runtime. Gunakan `npm run build:release` hanya untuk validasi rilis/deployment. Build CI merupakan
-indikator lintas platform terakhir; perubahan Electron khusus platform memerlukan build terfokus yang sesuai
-atau bukti smoke test.
+Gunakan `npm run build` secara lokal hanya jika perubahan memengaruhi kompilasi, perakitan mandiri, aset, atau bundling waktu proses. Gunakan `npm run build:release` hanya untuk validasi release/deploy. build CI adalah sinyal lintas platform terakhir; Perubahan Electron khusus platform memerlukan bukti build atau smoke yang terfokus dan cocok.
 
 ## Skrip developer untuk mesin bersama
 
