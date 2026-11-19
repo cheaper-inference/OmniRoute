@@ -20,6 +20,7 @@ import {
   antigravityPersistStatus,
   type AntigravityDegradedProjectState,
 } from "@/lib/oauth/antigravityProjectGate";
+import { hasActiveCooldown } from "@/lib/usage/providerLimits";
 
 /**
  * Constant-time string comparison to prevent timing-oracle attacks (CWE-208).
@@ -161,20 +162,44 @@ export function buildOAuthConnectionCreatePayload(
   };
 }
 
-/** Replace all token-lifetime metadata together when a user signs in again. */
+/**
+ * Replace token-lifetime metadata when a user signs in again.
+ *
+ * If the connection is currently cooling down from a real upstream rate-limit / quota
+ * exhaustion (#20067, Codex review), rotating or renewing OAuth credentials does NOT
+ * replenish the upstream quota. In that case, preserving rateLimitedUntil and backoffLevel
+ * prevents dispatching traffic straight back into the exhausted window, and preserving
+ * the error metadata (lastErrorType, errorCode, lastErrorAt) ensures that observed quota
+ * resets (e.g. Claude #17043) can subsequently recognize and release the cooldown.
+ *
+ * When there is no active cooldown, all error metadata and backoff state are cleanly reset.
+ */
 export function buildOAuthTokenUpdate(
   tokenData: Record<string, unknown>,
-  expiresAt: string | null
+  expiresAt: string | null,
+  existingConnection?: Record<string, unknown> | null,
+  now: number = Date.now()
 ) {
+  const activeCooldown =
+    existingConnection != null &&
+    hasActiveCooldown(existingConnection as { rateLimitedUntil?: string | null }, now);
+
   return {
     ...tokenData,
     expiresAt,
     tokenExpiresAt: expiresAt,
-    lastError: null,
-    lastErrorAt: null,
-    lastErrorType: null,
-    lastErrorSource: null,
-    errorCode: null,
+    ...(activeCooldown
+      ? {}
+      : {
+          testStatus: "active",
+          lastError: null,
+          lastErrorAt: null,
+          lastErrorType: null,
+          lastErrorSource: null,
+          errorCode: null,
+          rateLimitedUntil: null,
+          backoffLevel: 0,
+        }),
   };
 }
 
@@ -236,9 +261,9 @@ export async function persistOAuthConnection(
     const matchId = typeof match?.id === "string" ? match.id : null;
     if (matchId) {
       connection = await updateProviderConnection(matchId, {
-        ...buildOAuthTokenUpdate(tokenData, expiresAt),
+        ...buildOAuthTokenUpdate(tokenData, expiresAt, match),
         ...m365ConnectionUpdate(provider, match, tokenData),
-        ...antigravityPersistStatus(degradedProject),
+        ...(degradedProject ? antigravityPersistStatus(degradedProject) : {}),
         isActive: true,
       });
     }
