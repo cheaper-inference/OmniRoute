@@ -8,6 +8,7 @@ import {
   type OutboundUrlGuardMode,
 } from "@/shared/network/outboundUrlGuard";
 import { getDispatcherOptions } from "./proxyDispatcher.ts";
+import { stampOwnListenerSelfHop } from "./selfHop.ts";
 
 /**
  * Connect-time outbound guard (DNS-rebinding, GHSA-cmhj-wh2f-9cgx).
@@ -171,8 +172,11 @@ export function fetchWithConnectGuard(
     return fetch(url, { ...init, dispatcher: getGuardedDispatcher(guard) } as RequestInit);
   }
   const transport = getBunGuardedTransport();
+  // The patched ambient fetch stamps own-listener requests (admission bypass); this path skips it.
+  const options: RequestInit = { ...init };
+  stampOwnListenerSelfHop(url, options);
   return transport.fetch(url, {
-    ...init,
+    ...options,
     dispatcher: transport.agents.get(guard),
   } as never) as unknown as Promise<Response>;
 }

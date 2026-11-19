@@ -17,6 +17,7 @@ import {
   CONNECT_GUARD_BLOCKED_CODE,
   getGuardedDispatcher,
 } from "../../open-sse/utils/connectGuardDispatcher.ts";
+import { SELF_HOP_HEADER, ownListenerSelfHopToken } from "../../open-sse/utils/selfHop.ts";
 
 const ENV_KEYS = [
   "OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS",
@@ -29,6 +30,9 @@ const ENV_KEYS = [
   "https_proxy",
   "all_proxy",
   "no_proxy",
+  "PORT",
+  "DASHBOARD_PORT",
+  "API_PORT",
 ];
 const OPERATOR = { providerSpecificData: { baseUrl: "https://operator-host.invalid/v1" } };
 
@@ -152,4 +156,38 @@ test("Bun: /v1/search hops use the guarded path, and public-only still refuses a
     });
     assert.equal(requests(), 1, "only the allowed hop reached the upstream");
   });
+});
+
+test("Bun: a guarded call to this process's own listener still carries the self-hop stamp", async () => {
+  // On Node the ambient (proxy-patched) fetch stamps own-listener requests so a combo calling this
+  // instance skips admission; the Bun path bypasses that fetch, so it must stamp them itself.
+  const seen: Array<string | undefined> = [];
+  const server = http.createServer((req, res) => {
+    seen.push(req.headers[SELF_HOP_HEADER] as string | undefined);
+    res.end("ok");
+  });
+  await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+  const port = (server.address() as { port: number }).port;
+  try {
+    await asBun({ PORT: String(port) }, async (ambientCalls) => {
+      const own = await dispatchGuarded(
+        "openai-compatible-chat-test",
+        `http://127.0.0.1:${port}/v1`,
+        { headers: { authorization: "Bearer k" }, signal: AbortSignal.timeout(2_000) },
+        OPERATOR
+      );
+      assert.equal(await own.text(), "ok");
+      const other = await dispatchGuarded(
+        "openai-compatible-chat-test",
+        `http://operator-host.invalid:${port}/v1`,
+        { signal: AbortSignal.timeout(2_000) },
+        OPERATOR
+      );
+      assert.equal(await other.text(), "ok");
+      assert.equal(ambientCalls(), 0);
+    });
+  } finally {
+    await new Promise((resolve) => server.close(resolve));
+  }
+  assert.deepEqual(seen, [ownListenerSelfHopToken(), undefined]);
 });
