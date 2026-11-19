@@ -130,7 +130,7 @@ export function getProvider(name) {
  * - zed-hosted: native-app redirect is `?user_id=&access_token=`; the attempt is bound by its
  *   one-time RSA key pair (server decrypts with the attempt's private key verifier).
  */
-export const STATELESS_CALLBACK_PROVIDERS: ReadonlySet<string> = new Set(["cline", "zed-hosted"]);
+const STATELESS_CALLBACK_PROVIDERS: ReadonlySet<string> = new Set(["cline", "zed-hosted"]);
 
 /**
  * Generate auth data for a provider.
