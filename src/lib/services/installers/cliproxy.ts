@@ -20,12 +20,18 @@ import {
   installVersion,
   getCurrentBinaryPath,
   getInstalledVersions,
+  findBinaryInDir,
 } from "@/lib/versionManager/binaryManager.ts";
 
 export const CLIPROXY_DEFAULT_PORT = 8317;
 
+/**
+ * The data directory db/core.ts resolved at boot: absolute even for a relative
+ * DATA_DIR, and already past its unwritable-directory fallback, so the binary and
+ * config always sit next to the database instead of under a raw env value.
+ */
 export function getEffectiveDataDir(): string {
-  return process.env.DATA_DIR || DATA_DIR;
+  return DATA_DIR;
 }
 
 export function getBinDir(): string {
@@ -53,9 +59,10 @@ export interface SpawnArgs {
 }
 
 /**
- * Reads the installed version from the symlink target directory name,
- * falling back on Windows (or where copyFile was used instead of symlink)
- * to inspecting installed version directories and the version_manager DB table.
+ * Reads the installed version from the symlink target directory name. Where the
+ * managed binary is a copy instead of a symlink (Windows), its parent is plain
+ * bin/, so fall back to the committed version_manager row and then to the newest
+ * version directory that really holds an extracted binary (#20180).
  */
 export async function getInstalledVersion(): Promise<string | null> {
   const effectiveDir = getEffectiveDataDir();
@@ -66,23 +73,34 @@ export async function getInstalledVersion(): Promise<string | null> {
     if (m) return m[1];
   }
 
-  // Windows fallback: when unprivileged symlinks are unavailable, installVersion
-  // copies the binary directly to bin/cliproxyapi.exe so dirname is "bin".
-  // Check versioned subdirectories in bin/ (cliproxyapi-<version>/) or DB row.
-  try {
-    const versions = await getInstalledVersions(effectiveDir);
-    if (versions.length > 0) {
-      versions.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
-      return versions[0];
-    }
-  } catch {}
+  // install()/rollbackTool() record the version they put in place; the newest
+  // directory is not it after a rollback or an install of an older release.
+  const committed = await readCommittedVersion();
+  if (committed) return committed;
 
+  return newestExtractedVersion(effectiveDir);
+}
+
+async function readCommittedVersion(): Promise<string | null> {
   try {
     const tool = await getVersionManagerTool("cliproxy");
-    if (tool?.installedVersion) return tool.installedVersion;
-  } catch {}
+    return tool?.installedVersion || null;
+  } catch {
+    return null;
+  }
+}
 
-  return null;
+/**
+ * downloadRelease() creates cliproxyapi-<version>/ before the download, so a failed
+ * update leaves an empty directory behind: only count directories with a binary.
+ */
+async function newestExtractedVersion(dataDir: string): Promise<string | null> {
+  const binDir = path.join(dataDir, "bin");
+  const versions = (await getInstalledVersions(dataDir)).filter((version) =>
+    findBinaryInDir(path.join(binDir, `cliproxyapi-${version}`))
+  );
+  versions.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+  return versions[0] ?? null;
 }
 
 export async function getLatestVersion(): Promise<string | null> {
@@ -133,6 +151,37 @@ export async function update(): Promise<InstallResult> {
 }
 
 /**
+ * #20180: the managed copy/symlink in bin/ can go missing (a failed Windows copy, a
+ * cleaned bin/). Use the newest extracted version, found with the installer's own
+ * lookup (nested archive folders included), and try to restore the managed entry so
+ * the next start finds it directly. Synchronous, like resolveSpawnArgs().
+ */
+function recoverManagedBinary(binDir: string, managedPath: string): string | null {
+  let versionDirs: string[];
+  try {
+    versionDirs = fs.readdirSync(binDir).filter((entry) => entry.startsWith("cliproxyapi-"));
+  } catch {
+    return null;
+  }
+  versionDirs.sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
+  for (const versionDir of versionDirs) {
+    const binary = findBinaryInDir(path.join(binDir, versionDir));
+    if (!binary) continue;
+    try {
+      if (os.platform() === "win32") {
+        fs.copyFileSync(binary, managedPath);
+      } else {
+        fs.symlinkSync(binary, managedPath);
+      }
+    } catch {
+      // Best effort: spawning the versioned binary directly still works.
+    }
+    return binary;
+  }
+  return null;
+}
+
+/**
  * Build spawn args for ServiceSupervisor.start().
  *
  * Writes config.yaml synchronously — safe because the destination is a
@@ -150,42 +199,10 @@ export function resolveSpawnArgs(port: number, managementKey?: string): SpawnArg
   // path on Windows and failing with ENOENT even when a valid .exe exists
   // (same fold class as b43a212680 / #10244/#10293).
   const executableName = os.platform() === "win32" ? "cliproxyapi.exe" : "cliproxyapi";
-  let symlinkPath = path.join(binDir, executableName);
-
-  if (!fs.existsSync(symlinkPath)) {
-    // If the top-level binary copy/symlink does not exist, look into versioned dirs
-    try {
-      const entries = fs.readdirSync(binDir);
-      const versionDirs = entries
-        .filter((e) => e.startsWith("cliproxyapi-"))
-        .sort((a, b) => b.localeCompare(a, undefined, { numeric: true }));
-      for (const vDir of versionDirs) {
-        const candidates = [
-          "cli-proxy-api.exe",
-          "CLIProxyAPI.exe",
-          "cliproxyapi.exe",
-          "cli-proxy-api",
-          "CLIProxyAPI",
-          "cliproxyapi",
-        ];
-        for (const name of candidates) {
-          const candidate = path.join(binDir, vDir, name);
-          if (fs.existsSync(candidate)) {
-            try {
-              if (os.platform() === "win32") {
-                fs.copyFileSync(candidate, symlinkPath);
-              } else {
-                fs.symlinkSync(candidate, symlinkPath);
-              }
-            } catch {}
-            symlinkPath = candidate;
-            break;
-          }
-        }
-        if (symlinkPath !== path.join(binDir, executableName)) break;
-      }
-    } catch {}
-  }
+  const managedPath = path.join(binDir, executableName);
+  const symlinkPath = fs.existsSync(managedPath)
+    ? managedPath
+    : (recoverManagedBinary(binDir, managedPath) ?? managedPath);
 
   fs.mkdirSync(configDir, { recursive: true });
   const configPath = path.join(configDir, "config.yaml");

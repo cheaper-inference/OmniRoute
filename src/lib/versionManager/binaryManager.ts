@@ -8,11 +8,15 @@ import { pipeline } from "stream/promises";
 import { execFile } from "child_process";
 import { promisify } from "util";
 import { getChecksums, getReleaseByVersion } from "./releaseChecker.ts";
-import { getDefaultDataDir } from "../dataPaths.ts";
+import { resolveDataDir } from "../dataPaths.ts";
 
 const execFileAsync = promisify(execFile);
+/**
+ * DATA_DIR made absolute (a relative value would break the managed symlink target),
+ * else the OS default data directory.
+ */
 export function getDefaultBinaryDataDir(): string {
-  return process.env.DATA_DIR || getDefaultDataDir();
+  return resolveDataDir();
 }
 
 type Platform = "linux" | "darwin" | "windows" | "freebsd";
@@ -125,7 +129,8 @@ function managedBinaryName(): string {
   return os.platform() === "win32" ? "cliproxyapi.exe" : "cliproxyapi";
 }
 
-function findBinaryInDir(dir: string): string | null {
+/** The extracted CLIProxyAPI executable in `dir` or one wrapper folder below it. */
+export function findBinaryInDir(dir: string): string | null {
   const candidates = [
     "cli-proxy-api",
     "cli-proxy-api.exe",
@@ -144,7 +149,7 @@ function findBinaryInDir(dir: string): string | null {
     const entries = fsSync.readdirSync(dir, { withFileTypes: true });
     for (const entry of entries) {
       if (entry.isDirectory()) {
-        const subDir = path.join(dir, entry.name);
+        const subDir = path.join(/* turbopackIgnore: true */ dir, entry.name);
         for (const name of candidates) {
           const candidatePath = path.join(/* turbopackIgnore: true */ subDir, name);
           if (fsSync.existsSync(candidatePath)) {
