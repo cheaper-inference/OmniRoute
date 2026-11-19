@@ -1,8 +1,5 @@
 import { opaqueTokenFingerprint } from "../../utils/opaqueTokenFingerprint.ts";
-import {
-  analyzePrefix,
-  generatePromptCacheKey,
-} from "../../../src/lib/promptCache/prefixAnalyzer.ts";
+import { analyzePrefix } from "../../../src/lib/promptCache/prefixAnalyzer.ts";
 import { getCachedProviderPoolConnections } from "../providerConnectionPool.ts";
 import { parseModel } from "../model.ts";
 import type { ResolvedComboTarget } from "./types.ts";
@@ -100,17 +97,19 @@ export function resolvePromptCacheAffinityKey(
   if (!body) return null;
 
   const explicit = readExplicitPromptCacheKey(body);
-  const messages = normalizeResponsesInput(body);
-  const prefixAnalysis = messages ? analyzePrefix(messages) : null;
-  // The analyzer intentionally returns a legacy empty-content hash for callers
-  // that need that historical value. Affinity must not use it: a request with
-  // only a first user turn has no reusable prompt prefix and would collapse
-  // otherwise distinct conversations onto one account.
-  const prefixKey =
-    prefixAnalysis && prefixAnalysis.prefixEndIdx >= 0
-      ? generatePromptCacheKey(messages || [])
-      : "";
-  const key = explicit ?? prefixKey;
+  let key = explicit;
+  if (!key) {
+    const messages = normalizeResponsesInput(body);
+    const prefixAnalysis = messages ? analyzePrefix(messages) : null;
+    // The analyzer intentionally returns a legacy empty-content hash for callers
+    // that need that historical value. Affinity must not use it: a request with
+    // only a first user turn has no reusable prompt prefix and would collapse
+    // otherwise distinct conversations onto one account.
+    key =
+      prefixAnalysis && prefixAnalysis.prefixEndIdx >= 0
+        ? `omni-${prefixAnalysis.prefixHash.slice(0, 32)}`
+        : "";
+  }
   if (!key) return null;
 
   const source: PromptCacheAffinitySource = explicit ? "explicit" : "prefix";
@@ -183,7 +182,8 @@ export function calculatePromptCacheAffinityScores(
  * original target as a fail-open fallback when no eligible account is known.
  */
 export async function expandPromptCacheAffinityTargets(
-  targets: ResolvedComboTarget[]
+  targets: ResolvedComboTarget[],
+  apiKeyAllowedConnectionIds: string[] | null = null
 ): Promise<ResolvedComboTarget[]> {
   const providers = Array.from(
     new Set(
@@ -210,14 +210,22 @@ export async function expandPromptCacheAffinityTargets(
       }
     })
   );
-  return expandPromptCacheAffinityTargetsFromConnections(targets, connectionsByProvider);
+  return expandPromptCacheAffinityTargetsFromConnections(
+    targets,
+    connectionsByProvider,
+    apiKeyAllowedConnectionIds
+  );
 }
 
 export function expandPromptCacheAffinityTargetsFromConnections(
   targets: ResolvedComboTarget[],
-  connectionsByProvider: Map<string, Array<Record<string, unknown>>>
+  connectionsByProvider: Map<string, Array<Record<string, unknown>>>,
+  apiKeyAllowedConnectionIds: string[] | null = null
 ): ResolvedComboTarget[] {
   const expandedTargets: ResolvedComboTarget[] = [];
+  // Cache affinity must never introduce account candidates outside the caller's key scope.
+  const apiKeyScope =
+    apiKeyAllowedConnectionIds === null ? null : new Set(apiKeyAllowedConnectionIds);
   for (const target of targets) {
     if (target.connectionId) {
       const provider =
@@ -249,9 +257,11 @@ export function expandPromptCacheAffinityTargetsFromConnections(
           )
         )
       : null;
-    const scopedConnectionIds = allowedConnectionIds
-      ? connectionIds.filter((connectionId) => allowedConnectionIds.has(connectionId))
-      : connectionIds;
+    const scopedConnectionIds = connectionIds.filter(
+      (connectionId) =>
+        (!allowedConnectionIds || allowedConnectionIds.has(connectionId)) &&
+        (!apiKeyScope || apiKeyScope.has(connectionId))
+    );
     if (scopedConnectionIds.length === 0) {
       expandedTargets.push(target);
       continue;
@@ -311,6 +321,26 @@ function getBaseModelIdentity(target: ResolvedComboTarget): string {
 
   // Use executionKey as primary (preserves stepId grouping), fall back to modelStr
   return baseExecutionKey || modelStr;
+}
+
+/**
+ * #20191: index of `target` in `targets`, or of the first entry of the same combo step.
+ * The exact execution key wins, so already-per-connection targets (connection-aware expansion's
+ * `step@c0`, `step@c1`, …) keep their account dimension and round-robin still rotates across
+ * them. Only when the target itself is absent — prompt-cache affinity expanded its step into
+ * `step@account` targets, or one of those maps back to its step — are steps matched by their
+ * base identity. -1 when none matches.
+ */
+export function findSameStepIndex(
+  targets: ResolvedComboTarget[],
+  target: ResolvedComboTarget
+): number {
+  const exactIndex = target.executionKey
+    ? targets.findIndex((entry) => entry.executionKey === target.executionKey)
+    : -1;
+  if (exactIndex >= 0) return exactIndex;
+  const step = getBaseModelIdentity(target);
+  return targets.findIndex((entry) => getBaseModelIdentity(entry) === step);
 }
 
 /**

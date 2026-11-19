@@ -51,63 +51,63 @@ OmniRoute/
 
 ---
 
-## Fișiere din rădăcină
+## Fișierele rădăcină
 
-| Fișier                                      | Scop                                                                                                            |
-| ------------------------------------------- | --------------------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Pagină de prezentare pentru marketing + pornire rapidă + matrice de funcționalități (vezi și `llm.txt`)         |
-| **CHANGELOG.md**                            | Jurnal de modificări pentru fiecare versiune (generat automat de abilitatea `/version-bump-cc`)                 |
-| **LICENSE**                                 | Textul licenței MIT                                                                                             |
-| **CLAUDE.md**                               | Reguli de proiect pentru agenții Claude Code (reguli stricte, convenții, scenarii)                              |
-| **AGENTS.md**                               | La fel ca CLAUDE.md, dar pentru agenții AI non-Claude (Codex, Cursor etc.)                                      |
-| **GEMINI.md**                               | Reguli concise pentru agenții bazați pe Gemini (subset al CLAUDE.md)                                            |
-| **CONTRIBUTING.md**                         | Ghid pentru contribuitori: configurare, commituri convenționale, testare, fluxul PR                             |
-| **SECURITY.md**                             | Politica de raportare a vulnerabilităților, versiunile acceptate, modelul de amenințări                         |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — așteptări privind comportamentul în comunitate                                           |
-| **llm.txt**                                 | Pagină de prezentare în text simplu, optimizată pentru crawlere LLM (SEO pentru asistenți AI)                   |
-| **package.json**                            | Manifest npm, scripturi, dependențe, motoare, prag de acoperire c8                                              |
-| **package-lock.json**                       | Arbore de dependențe blocat                                                                                     |
-| **tsconfig.json**                           | Configurația TypeScript rădăcină                                                                                |
-| **tsconfig.typecheck-core.json**            | Configurația verificării tipurilor pentru nucleul `src/`                                                        |
-| **tsconfig.typecheck-noimplicit-core.json** | Verificare strictă a tipurilor (`noImplicitAny`)                                                                |
-| **tsconfig.tsbuildinfo**                    | Cache pentru compilarea incrementală TS (ignorat de git)                                                        |
-| **next.config.mjs**                         | Configurația de compilare Next.js 16 (ieșire autonomă)                                                          |
-| **next-env.d.ts**                           | Tipuri de mediu generate automat de Next.js                                                                     |
-| **eslint.config.mjs**                       | Configurație ESLint de tip flat (reguli pentru fiecare zonă a proiectului)                                      |
-| **prettier.config.mjs**                     | Reguli de formatare Prettier                                                                                    |
-| **postcss.config.mjs**                      | Configurație PostCSS pentru fluxul Tailwind/CSS                                                                 |
-| **playwright.config.ts**                    | Configurația testelor E2E Playwright                                                                            |
-| **vitest.config.ts**                        | Configurație Vitest (suita implicită)                                                                           |
-| **vitest.mcp.config.ts**                    | Configurație Vitest pentru serverul MCP / suitele autoCombo / cache                                             |
-| **sonar-project.properties**                | Configurație SonarQube/SonarCloud (calitatea codului)                                                           |
-| **Dockerfile**                              | Compilare Docker în mai multe etape (builder → runner-base → runner-cli)                                        |
-| **docker-compose.yml**                      | Configurație compose pentru dezvoltare, cu 4 profiluri (base, cli, host, cliproxyapi) + serviciu auxiliar redis |
-| **docker-compose.prod.yml**                 | Configurație compose pentru producție (portul 20130, redis, volume denumite)                                    |
-| **.dockerignore**                           | Fișiere excluse din contextul Docker                                                                            |
-| **fly.toml**                                | Configurație de implementare Fly.io (regiunea `sin`, portul 20128, volumul /data)                               |
-| **.env.example**                            | Șablon de fișier de mediu (copiat automat în `.env` la prima instalare)                                         |
-| **.gitignore**                              | Modele de ignorare Git                                                                                          |
-| **.npmignore**                              | Lista de excluderi pentru publicarea npm                                                                        |
-| **.npmrc**                                  | Configurație npm (registru, politica fișierului de blocare)                                                     |
-| **.node-version**                           | Versiune Node fixată (utilizată de instrumentele compatibile cu nvm)                                            |
-| **.nvmrc**                                  | Versiune Node fixată pentru nvm                                                                                 |
-| **eslint.complexity.config.mjs**            | Configurație ESLint pentru pragul de complexitate (`scripts/check/check-complexity.mjs --config`)               |
-| **eslint.sonarjs.config.mjs**               | Configurație ESLint pentru regulile SonarJS (complexitate cognitivă / duplicare)                                |
-| **source.config.ts**                        | Configurație sursă Fumadocs `defineDocs` (alimentează `.source/`)                                               |
-| **knip.json**                               | Configurație Knip — fișiere/exporturi/dependențe neutilizate (alimentează pragul pentru cod neutilizat)         |
-| **stryker.conf.json**                       | Configurație Stryker pentru testarea prin mutații                                                               |
-| **.size-limit.json**                        | Configurația bugetului pentru dimensiunea bundle-ului                                                           |
-| **promptfooconfig.yaml**                    | Configurația evaluărilor promptfoo                                                                              |
-| **.gitleaks.toml**                          | Setul de reguli gitleaks pentru scanarea secretelor                                                             |
-| **.zizmor.yml**                             | Configurația zizmor pentru analiza de securitate a GitHub Actions                                               |
-| **socket.yml**                              | Configurația Socket.dev pentru lanțul de aprovizionare                                                          |
-| **news.json**                               | Fluxul localizat de anunțuri v2; elementul de lansare Radar este livrat inactiv                                 |
-| **flake.nix** / **flake.lock**              | Definiția shellului de dezvoltare Nix + fișierul de blocare                                                     |
-| **.env**                                    | Secrete locale (ignorate de git — generate din `.env.example`)                                                  |
+| Fişier                                      | Scop                                                                                               |
+| ------------------------------------------- | -------------------------------------------------------------------------------------------------- |
+| **README.md**                               | Pagina de destinație de marketing + pornire rapidă matrice de caracteristici + (vezi și `llm.txt`) |
+| **CHANGELOG.md**                            | Jurnal de modificări per lansare (generat automat de abilitate `/version-bump-cc` )                |
+| **LICENSE**                                 | textul licenței MIT                                                                                |
+| **CLAUDE.md**                               | Reguli de proiect pentru agenții Claude Code (reguli stricte, convenții, scenarii)                 |
+| **AGENTS.md**                               | La fel ca CLAUDE.md, dar pentru agenții AI non-Claude (Codex, Cursor, etc.)                        |
+| **GEMINI.md**                               | Reguli concise pentru agenții bazați pe Gemeni (subset de CLAUDE.md)                               |
+| **CONTRIBUTING.md**                         | Ghid pentru colaboratori: configurare, comitere convenționale, testare, flux PR                    |
+| **SECURITY.md**                             | Politica de raportare a vulnerabilităților, versiuni acceptate, model de amenințare                |
+| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — așteptările privind comportamentul comunității                              |
+| **llm.txt**                                 | Aterizare în text simplu optimizată pentru crawlerele LLM (SEO pentru asistenții AI )              |
+| **package.json**                            | Manifest npm, scripturi, dependențe, motoare, poarta de acoperire c8                               |
+| **package-lock.json**                       | Arborele de dependență blocat                                                                      |
+| **tsconfig.json**                           | Root TypeScript config                                                                             |
+| **tsconfig.typecheck-core.json**            | Typecheck config pentru `src/` core                                                                |
+| **tsconfig.typecheck-noimplicit-core.json** | Verificare strictă de tip (`noImplicitAny`).                                                       |
+| **tsconfig.tsbuildinfo**                    | TS incremental build cache (gitignored)                                                            |
+| **Următorul.config.mjs**                    | Configurație build Next.js 16 (ieșire independentă)                                                |
+| **următorul-env.d.ts**                      | Next.js tipuri de mediu generate automat                                                           |
+| **eslint.config.mjs**                       | ESLint flat config (reguli pe zonă de proiect)                                                     |
+| **mai frumos.config.mjs**                   | regulile de formatare Prettier                                                                     |
+| **postcss.config.mjs**                      | PostCSS config pentru conducta Tailwind/CSS                                                        |
+| **dramaturg.config.ts**                     | Playwright E2E test config                                                                         |
+| **vitest.config.ts**                        | Vitest config (suită implicită)                                                                    |
+| **vitest.mcp.config.ts**                    | Vitest config pentru serverul MCP / autoCombo / suitele cache                                      |
+| **sonar-proiect.proprietati**               | SonarQube/SonarCloud config (calitatea codului)                                                    |
+| **Dockerfile**                              | Construire Docker în mai multe etape (builder → runner-base → runner-cli)                          |
+| **docker-compose.yml**                      | Dev compunere cu 4 profiluri (bază, cli, gazdă, cliproxyapi) + redis sidecar                       |
+| **docker-compune.prod.yml**                 | Compunere de producție (port 20130, redis, volume denumite)                                        |
+| **.dockerignore**                           | Fișierele excluse din contextul Docker                                                             |
+| **fly.toml**                                | Configurație de implementare Fly.io (regiunea `sin`, portul 20128, /volumul de date)               |
+| **.env.exemplu**                            | Fișier mediu șablon (copiat automat în `.env` la prima instalare)                                  |
+| **.gitignore**                              | Git ignora modele                                                                                  |
+| **.npmignore**                              | npm publică lista de excluderi                                                                     |
+| **.npmrc**                                  | config npm (registru, politică de blocare)                                                         |
+| **.versiunea-nod**                          | Pinul versiunii nodului (utilizat de instrumentele compatibile cu nvm)                             |
+| **.nvmrc**                                  | Pin versiunea nodului pentru nvm                                                                   |
+| **eslint.complexitate.config.mjs**          | ESLint config pentru complexitatea clichet (`scripts/check/check-complexity.mjs --config`)         |
+| **eslint.sonarjs.config.mjs**               | ESLint config pentru regulile SonarJS (complexitate cognitivă / duplicare)                         |
+| **sursă.config.ts**                         | Configurare sursă Fumadocs `defineDocs` (feeduri `.source/`)                                       |
+| **knip.json**                               | Knip config — files/exports/deps neutilizat (alimentează poarta codului mort)                      |
+| **stryker.conf.mjs**                        | Configurație de testare a mutațiilor Stryker (calculează `tap.testFiles` din `mutate`)             |
+| **.size-limit.json**                        | set-limită dimensiune buget configurație                                                           |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                              |
+| **.gitleaks.toml**                          | set de reguli de scanare secretă gitleaks                                                          |
+| **.zizmor.yml**                             | zizmor GitHub-Actions security-lint config                                                         |
+| **socket.yml**                              | Configurarea lanțului de aprovizionare Socket.dev                                                  |
+| **news.json**                               | Feed de anunțuri v2 localizat; Elementul de lansare radar este livrat inactiv                      |
+| **fulg.nix** /** fulg.blocare**             | Nix dev-shell definiție + lock                                                                     |
+| **.env**                                    | Secrete locale (gitignored — generat din `.env.example`)                                           |
 
-> **Mutate din rădăcină în v3.8.26 (pentru simplificare):**
+> **Mutat din rădăcină în v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` și fișierul generat `quality-metrics.json` (ignorat de git). Consultați [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` și `quality-metrics.json` generat (gitignored). Vezi [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -152,7 +152,7 @@ src/
 | `app/(dashboard)/dashboard/memory/`                                          | Memory Studio (planul 21): `page.tsx` (shell cu 3 file), `components/` (MemoryConceptCard, MemoryEngineStatus, EmbeddingSourceSelector, EditMemoryModal, RetrievePreview, QdrantConfigCard, RerankConfigCard), `components/tabs/` (MemoriesTab, PlaygroundTab, EngineTab), `hooks/` (useEngineStatususeMemorySettings |
 | `app/(dashboard)/dashboard/tools/agent-bridge/`                              | Pagina tabloului de bord AgentBridge Card server —, 9 carduri de agent, asistent de configurare, mapare model, listă de ocolire. i18n PT-BR + EN. Vezi `docs/frameworks/AGENTBRIDGE.md`.                                                                                                                              |
 | `app/(dashboard)/dashboard/tools/traffic-inspector/`                         | Pagina tabloului de bord Traffic Inspector — DevTools split, 7 file de detalii, 4 comutări pentru modul de captură, înregistrare de sesiune, colorare context. i18n PT-BR + EN. Vezi `docs/frameworks/TRAFFIC_INSPECTOR.md`.                                                                                          |
-| `app/(dashboard)/dashboard/activity/`                                        | Pagina de feed de activitate (Grupul B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — vezi `docs/architecture/MONITORING_SECTIONS.md`                                                                                                    |
+| `app/(dashboard)/dashboard/activity/`                                        | Pagina de flux de activitate (Grupul B): `page.tsx` (server) + `ActivityFeedClient.tsx` + `components/{ActivityFeed,ActivityItem,DayHeader,EventTypeFilter}.tsx` — vezi `docs/architecture/MONITORING_SECTIONS.md`                                                                                                    |
 | `app/(dashboard)/dashboard/costs/quota-share/`                               | Pagina de partajare a cotelor (Grupul B): `QuotaSharePageClient.tsx` + `components/{PoolCard,DimensionBar,AllocationTable,BurnRateChart,QuotaConceptCard,CreatePoolModal,EditAllocationsModal}.tsx` + `hooks/{usePools,usePoolUsage,useLocalStoragePoolMigration}.ts`                                                 |
 | `app/(dashboard)/dashboard/costs/quota-share/plans/`                         | Pagina de configurare a planului furnizorului (Grupul B): `page.tsx` + `ProviderPlanConfigClient.tsx` — dimensiunile cotei per conexiune înlocuire                                                                                                                                                                    |
 | `app/docs/`                                                                  | Vizualizator de documentație încorporat (rendează `docs/*.md`)                                                                                                                                                                                                                                                        |
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | --------------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componenta tabloului de bord API: adaptoare peste `packages/ui-kit` — vezi `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nume de pictograme utilizate de ecranele componente → Lucide (`<Icon>`)                             |
-| `constants/providers.ts`         | **381 de furnizori** cu validare Zod (sursa adevărului)                                                         |
+| `constants/providers.ts`         | **394 de furnizori** cu validare Zod (sursa adevărului)                                                         |
 | `constants/cliTools.ts`          | Registrul extern al instrumentului CLI                                                                          |
-| `constants/routingStrategies.ts` | **20 de strategii de rutare** cu prioritati                                                                     |
+| `constants/routingStrategies.ts` | **22 de strategii de rutare** cu prioritati                                                                     |
 | `constants/publicApiRoutes.ts`   | Rute care necesită autentificare Bearer (vs management)                                                         |
 | `constants/upstreamHeaders.ts`   | Listă de respingere antet pentru solicitările din amonte                                                        |
 | `validation/schemas.ts`          | Scheme ~ 80 Zod (sursă unică de adevăr pentru contractele API )                                                 |
@@ -265,7 +265,7 @@ Spațiu de lucru npm separat (`@omniroute/open-sse`). Gestionează procesarea ce
 ```
 open-sse/
 ├── handlers/            # 16 fișiere (12 gestionare + 4 auxiliare): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search etc.
-├── executors/           # 150 de module de execuție (clase care extind BaseExecutor + funcții auxiliare pentru fiecare furnizor)
+├── executors/           # 163 de module de execuție (clase care extind BaseExecutor + funcții auxiliare pentru fiecare furnizor)
 ├── translator/          # Convertoare de format (9 pentru cereri, 9 pentru răspunsuri, 9 auxiliare)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # Peste ~80 de module de servicii (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt stealth, modelDeprecation, taskAwareRouter, workflowFSM etc.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integrari externe CLI + Intern OmniRoute CLI                                              |
 | `I18N.md`                   | Arhitectură i18n, adăugarea unei limbi, 67 de locații                                     |
 | `UNINSTALL.md`              | Curățați pașii de dezinstalare                                                            |
-| `PROVIDER_REFERENCE.md`     | **Generat automat** catalog cu 381 de furnizori (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Generat automat** catalog cu 394 de furnizori (regen: `npm run gen:provider-reference`) |
 
 ### Subsistem scufundări adânci
 

@@ -5,6 +5,8 @@ import { readFileSync, readdirSync, statSync } from "node:fs";
 import { join, dirname } from "node:path";
 import { fileURLToPath } from "node:url";
 
+import { localeParityOptions } from "../_helpers/localeParityMode.ts";
+
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
 const require = createRequire(import.meta.url);
@@ -67,7 +69,9 @@ test("en.json contém todas as chaves usadas via t() nos comandos", () => {
   assert.deepEqual(missing, [], `Chaves faltando em en.json: ${missing.join(", ")}`);
 });
 
-test("pt-BR.json tem todas as seções top-level de en.json", () => {
+// Locale parity is a release-mode assertion: a feature PR adds CLI keys to en.json only and the
+// release refresh (syncUiKeys catalog "cli") completes the locales — tests/_helpers/localeParityMode.ts.
+test("pt-BR.json tem todas as seções top-level de en.json", localeParityOptions(), () => {
   const enTop = Object.keys(en as object);
   const ptTop = new Set(Object.keys(ptBR as object));
   const missing = enTop.filter((k) => !ptTop.has(k));
@@ -78,7 +82,7 @@ for (const [name, cat] of [
   ["zh-CN", zhCN],
   ["zh-TW", zhTW],
 ] as const) {
-  test(name + ".json tem paridade total de chaves com en.json", () => {
+  test(name + ".json tem paridade total de chaves com en.json", localeParityOptions(), () => {
     const catKeys = flattenKeys(cat as Record<string, unknown>);
     const missing = [...enKeys].filter((k) => !catKeys.has(k));
     assert.deepEqual(missing, [], name + ".json chaves faltando: " + missing.join(", "));
@@ -175,6 +179,29 @@ test("t() usa pt-BR quando disponível", async () => {
   const result = t("health.noServer");
   assert.ok(result.includes("omniroute serve"), `Esperava mensagem pt-BR, obteve: ${result}`);
   resetForTests();
+});
+
+test("invalid CLI limits use the configured locale's positive integer message", async (context) => {
+  const { parsePositiveInt } = await import("../../bin/cli/utils/positiveInteger.mjs");
+  const { resetForTests, setLocale } = await import("../../bin/cli/i18n.mjs");
+  context.after(resetForTests);
+  const { locales } = JSON.parse(readFileSync(join(ROOT, "config", "i18n.json"), "utf8")) as {
+    locales: Array<{ code: string }>;
+  };
+
+  for (const { code } of locales) {
+    const catalog = JSON.parse(
+      readFileSync(join(ROOT, "bin", "cli", "locales", `${code}.json`), "utf8")
+    ) as { common?: { positiveIntegerRequired?: unknown } };
+    const message = catalog.common?.positiveIntegerRequired;
+    assert.ok(typeof message === "string" && message.trim(), `Missing catalog message for ${code}`);
+    assert.doesNotMatch(message, /^__MISSING__:/, `Untranslated message for ${code}`);
+    if (code !== "en") {
+      assert.notEqual(message, en.common.positiveIntegerRequired, `English message for ${code}`);
+    }
+    assert.equal(setLocale(code), code);
+    assert.throws(() => parsePositiveInt("0"), { name: "InvalidArgumentError", message }, code);
+  }
 });
 
 test("maltese catalog interpolates the saved path", async () => {

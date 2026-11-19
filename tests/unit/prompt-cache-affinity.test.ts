@@ -107,6 +107,31 @@ test("expands unbound targets to active allowed accounts before cache routing", 
   assert.equal(expanded[0].executionKey, "step-a@account-b");
 });
 
+test("cache expansion respects the caller API-key connection scope", () => {
+  const unbound = { ...target("step-a", ""), connectionId: null };
+  const connections = new Map([
+    ["codex", [{ id: "account-a" }, { id: "account-b" }, { id: "account-c" }]],
+  ]);
+  const scoped = expandPromptCacheAffinityTargetsFromConnections([unbound], connections, [
+    "account-b",
+  ]);
+  assert.deepEqual(
+    scoped.map((entry) => entry.connectionId),
+    ["account-b"]
+  );
+  assert.equal(scoped[0]?.executionKey, "step-a@account-b");
+
+  const intersected = expandPromptCacheAffinityTargetsFromConnections(
+    [{ ...unbound, allowedConnectionIds: ["account-a", "account-b"] }],
+    connections,
+    ["account-b", "account-c"]
+  );
+  assert.deepEqual(
+    intersected.map((entry) => entry.connectionId),
+    ["account-b"]
+  );
+});
+
 test("expanded auto candidates receive exactly one concrete account cache score", () => {
   const unbound = { ...target("step-a", ""), connectionId: null };
   const expanded = expandPromptCacheAffinityTargetsFromConnections(

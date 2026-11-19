@@ -5,6 +5,9 @@ import os from "node:os";
 import path from "node:path";
 import { MockAgent, setGlobalDispatcher } from "undici";
 import { makeManagementSessionRequest } from "../helpers/managementSession.ts";
+import { settleConnectionFollowUpsAfterEachTest } from "../helpers/connectionFollowUps.ts";
+
+settleConnectionFollowUpsAfterEachTest();
 
 // uncloseai is in NOAUTH_PROVIDERS and is not in FREE_APIKEY_PROVIDER_IDS, so
 // isManagedProviderConnectionId() does not admit it. POST still returned
@@ -23,10 +26,14 @@ process.env.DISABLE_SQLITE_AUTO_BACKUP = "true";
 const network = new MockAgent();
 network.disableNetConnect();
 setGlobalDispatcher(network);
-globalThis.fetch = async () => Response.json({ data: [], models: [] });
 
 const core = await import("../../src/lib/db/core.ts");
 const providersRoute = await import("../../src/app/api/providers/route.ts");
+
+// After the imports: loading the route loads proxyFetch, which replaces globalThis.fetch with
+// its own fetch on explicit dispatchers (the MockAgent above never sees those). A stub
+// assigned before the import is overwritten, and the auto-test reaches the real provider.
+globalThis.fetch = async () => Response.json({ data: [], models: [] });
 
 function resetDb() {
   core.resetDbInstance();

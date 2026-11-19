@@ -21,6 +21,7 @@ import { Badge, Button, Checkbox, ReorderControl, Select, Toggle } from "@/share
 import { pickDisplayValue } from "@/shared/utils/maskEmail";
 import useEmailPrivacyStore from "@/store/emailPrivacyStore";
 import { isClaudeExtraUsageBlockEnabled } from "@/lib/providers/claudeExtraUsage";
+import { getCodexServiceTierBadge } from "./codexServiceTierBadge";
 import { shouldShowConnectionLastError, formatRelativeAge } from "./connectionRowHelpers";
 import { readStoredVerificationUrl } from "@omniroute/open-sse/services/antigravityVerification.ts";
 import type { ConnectionRowProps } from "./connectionRowTypes";
@@ -38,6 +39,7 @@ import {
 } from "@/shared/utils/providerQuotaVisibility";
 import ProviderQuotaVisibilityToggle from "./ProviderQuotaVisibilityToggle";
 import CodexPingNowButton from "./CodexPingNowButton";
+import { formatApiKeyLast4 } from "@/shared/utils/apiKeyMask";
 
 // ---------------------------------------------------------------------------
 // Types (exported so the client can reference them without re-importing)
@@ -160,6 +162,7 @@ export default function ConnectionRow({
         t("oauthAccount")
       )
     : connection.name;
+  const maskedApiKey = !isOAuth && connection.apiKey ? formatApiKeyLast4(connection.apiKey) : null;
   const applyCodexAuthLabel = providerText(t, "applyCodexAuthLocal", "Apply auth");
   const exportCodexAuthLabel = providerText(t, "exportCodexAuthFile", "Export auth");
   const applyClaudeAuthLabel = providerText(t, "applyClaudeAuthLocal", "Apply auth");
@@ -238,42 +241,11 @@ export default function ConnectionRow({
     : "default";
   const codexServiceTierIsGlobal =
     isCodex && codexGlobalServiceMode !== undefined && codexGlobalServiceMode !== "none";
-  const codexServiceTierBadge =
-    codexServiceTier === "priority"
-      ? {
-          label: providerText(t, "codexTierFastLabel", "Fast"),
-          icon: "bolt",
-          className: "bg-info/15 text-info",
-          title: codexServiceTierIsGlobal
-            ? providerText(
-                t,
-                "providerDetailGlobalPriorityActive",
-                "Global Codex priority service tier is active"
-              )
-            : providerText(
-                t,
-                "providerDetailConnectionPriorityActive",
-                "Codex priority service tier is active for this connection"
-              ),
-        }
-      : codexServiceTier === "flex"
-        ? {
-            label: providerText(t, "codexTierFlexLabel", "Flex"),
-            icon: "speed",
-            className: "bg-chart-2/15 text-chart-2",
-            title: codexServiceTierIsGlobal
-              ? providerText(
-                  t,
-                  "providerDetailGlobalFlexActive",
-                  "Global Codex flex service tier is active"
-                )
-              : providerText(
-                  t,
-                  "providerDetailConnectionFlexActive",
-                  "Codex flex service tier is active for this connection"
-                ),
-          }
-        : null;
+  const codexServiceTierBadge = getCodexServiceTierBadge(
+    t,
+    codexServiceTier,
+    codexServiceTierIsGlobal
+  );
   const claudeBlockExtraUsageEnabled = isClaude
     ? isClaudeExtraUsageBlockEnabled("claude", connection.providerSpecificData)
     : false;
@@ -359,8 +331,16 @@ export default function ConnectionRow({
           className="hidden text-text-muted sm:inline-block"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium break-words sm:truncate">
-            {displayName}
+          <p className="text-sm font-medium break-words sm:truncate flex items-center gap-2 flex-wrap">
+            <span>{displayName}</span>
+            {maskedApiKey && (
+              <span
+                className="font-mono text-xs font-normal text-text-muted bg-bg-subtle px-1.5 py-0.5 rounded border border-border shrink-0 select-all"
+                title={maskedApiKey}
+              >
+                {maskedApiKey}
+              </span>
+            )}
             {codexAccount && (
               <span
                 className="font-normal text-text-muted"
@@ -475,7 +455,7 @@ export default function ConnectionRow({
               size="sm"
               icon="shield"
               onClick={() => onToggleRateLimit(!rateLimitEnabled)}
-              className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+              className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                 rateLimitShielded
                   ? "bg-success/15 text-success hover:bg-success/25"
                   : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -508,7 +488,7 @@ export default function ConnectionRow({
                   icon="sync"
                   onClick={() => onToggleAutoSync?.(!autoSyncEnabled)}
                   disabled={connection.isActive === false}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium disabled:opacity-40 disabled:cursor-not-allowed ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs disabled:opacity-40 disabled:cursor-not-allowed ${
                     autoSyncEnabled
                       ? "bg-success/15 text-success hover:bg-success/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -553,7 +533,7 @@ export default function ConnectionRow({
                   size="sm"
                   icon="payments"
                   onClick={() => onToggleClaudeExtraUsage?.(!claudeBlockExtraUsageEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     !claudeBlockExtraUsageEnabled
                       ? "bg-warning/15 text-warning hover:bg-warning/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -573,7 +553,7 @@ export default function ConnectionRow({
                   size="sm"
                   icon="payments"
                   onClick={() => onToggleCodexPaidCredits(!codexPaidCreditsEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     codexPaidCreditsEnabled
                       ? "bg-warning/15 text-warning hover:bg-warning/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -650,7 +630,7 @@ export default function ConnectionRow({
                   size="sm"
                   icon="timer"
                   onClick={() => onToggleCodex5h?.(!codex5hEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     codex5hEnabled
                       ? "bg-info/15 text-info hover:bg-info/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -664,9 +644,9 @@ export default function ConnectionRow({
                   size="sm"
                   icon="date_range"
                   onClick={() => onToggleCodexWeekly?.(!codexWeeklyEnabled)}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     codexWeeklyEnabled
-                      ? "bg-chart-3/15 text-chart-3 hover:bg-chart-3/25"
+                      ? "bg-chart-3/15 text-chart-3-ink hover:bg-chart-3/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
                   }`}
                   title={t("codexWeeklyToggleTitle")}
@@ -684,7 +664,7 @@ export default function ConnectionRow({
                   icon="vpn_lock"
                   onClick={() => onToggleProxyEnabled(!proxyEnabled)}
                   aria-label={proxyEnabled ? t("proxyEnabledTitle") : t("proxyDisabledTitle")}
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     proxyEnabled
                       ? "bg-success/15 text-success hover:bg-success/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
@@ -708,9 +688,9 @@ export default function ConnectionRow({
                       ? t("perKeyProxyEnabledTitle")
                       : t("perKeyProxyDisabledTitle")
                   }
-                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs font-medium ${
+                  className={`h-auto min-h-0 gap-1 rounded px-1.5 py-0.5 text-xs ${
                     perKeyProxyEnabled
-                      ? "bg-chart-3/15 text-chart-3 hover:bg-chart-3/25"
+                      ? "bg-chart-3/15 text-chart-3-ink hover:bg-chart-3/25"
                       : "bg-bg-subtle text-text-muted/50 hover:text-text-muted hover:bg-bg-subtle"
                   }`}
                   title={
@@ -750,7 +730,7 @@ export default function ConnectionRow({
                       icon="vpn_lock"
                       onClick={onProxy}
                       disabled={!onProxy}
-                      className={`h-auto min-h-0 gap-0.5 rounded px-1.5 py-0.5 text-xs font-medium ${colorClass}`}
+                      className={`h-auto min-h-0 gap-0.5 rounded px-1.5 py-0.5 text-xs ${colorClass}`}
                       title={t("proxyConfiguredBySource", {
                         source: label,
                         host: proxyHost || t("configured"),
@@ -925,11 +905,11 @@ export default function ConnectionRow({
               aria-label={t("proxyConfig")}
             />
             <Button
-              variant="ghost"
+              variant="destructive-ghost"
               size="icon-sm"
               icon="delete"
               onClick={onDelete}
-              className="size-7 min-h-7 rounded hover:bg-error/10 text-error"
+              className="size-7 min-h-7 rounded"
               title={t("delete")}
               aria-label={t("delete")}
             />

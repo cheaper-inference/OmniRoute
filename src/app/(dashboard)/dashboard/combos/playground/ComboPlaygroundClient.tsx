@@ -140,7 +140,7 @@ export default function ComboPlaygroundClient() {
       {/* Configuration Panel */}
       <Card>
         <div className="p-4 space-y-4">
-          <h2 className="text-sm font-semibold">{t("playgroundConfiguration")}</h2>
+          <h2 className="text-sm">{t("playgroundConfiguration")}</h2>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Combo Selector */}
@@ -187,7 +187,7 @@ export default function ComboPlaygroundClient() {
           <Card>
             <div className="p-4 space-y-3">
               <div className="flex flex-wrap items-center justify-between gap-2">
-                <h2 className="text-sm font-semibold">{t("playgroundRoutingPath")}</h2>
+                <h2 className="text-sm">{t("playgroundRoutingPath")}</h2>
                 <div className="flex flex-wrap items-center gap-3 text-sm">
                   <span className="text-text-muted">
                     {t("playgroundStrategy")}: <strong>{result.strategy}</strong>
@@ -267,7 +267,7 @@ export default function ComboPlaygroundClient() {
           {result.warnings.length > 0 && (
             <Card>
               <div className="p-4 space-y-2">
-                <h3 className="text-sm font-semibold text-warning">
+                <h3 className="text-sm text-warning">
                   {t("playgroundWarningCount", { count: result.warnings.length })}
                 </h3>
                 {result.warnings.map((w, i) => (
@@ -283,7 +283,7 @@ export default function ComboPlaygroundClient() {
           {result.errors.length > 0 && (
             <Card>
               <div className="p-4 space-y-2">
-                <h3 className="text-sm font-semibold text-error">
+                <h3 className="text-sm text-error">
                   {t("playgroundErrorCount", { count: result.errors.length })}
                 </h3>
                 {result.errors.map((e, i) => (

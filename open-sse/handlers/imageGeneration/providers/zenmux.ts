@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { saveCallLog } from "../../imageResult.ts";
-import { fetchUntrustedRemoteImage } from "@/shared/network/remoteImageFetch";
+import { fetchUntrustedRemoteImage } from "../../../utils/remoteMediaFetch.ts";
 import { FetchTimeoutError, fetchWithTimeout } from "@/shared/utils/fetchTimeout";
 import { sanitizeErrorMessage } from "../../../utils/error.ts";
 
