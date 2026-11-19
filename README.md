@@ -12,8 +12,6 @@
 <br/>
 <br/>
 
-</div>
-
 # 🚀 OmniRoute — The Free AI Gateway
 
 **Created by [Diego Souza](https://github.com/diegosouzapw)**
