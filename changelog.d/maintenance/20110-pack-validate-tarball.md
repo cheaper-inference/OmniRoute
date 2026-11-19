@@ -1,0 +1,1 @@
+- **perf(release):** the package gate validates the tarball that was just built instead of asking npm for a second dry-run file list — one tree walk instead of two, and the check covers the bytes that ship ([#20110](https://github.com/cheaper-inference/OmniRoute/pull/20110) — thanks @maxmad64bis)
