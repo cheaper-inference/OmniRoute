@@ -331,17 +331,16 @@ ta taɓa bayyana a matsayin zaɓin da mai amfani zai iya zaɓa a cikin UI ko API
 
 ---
 
-## Yawan Gwaje-gwajen da Aka Rufe
+## Rubutun Gwaji
 
-Injin quota-share yana zuwa da matakai biyu na gwaje-gwaje masu sarrafa kansu:
+Yadudduka biyu na jirgi mai ɗaukar hoto mai sarrafa kansa tare da injin rabon rabo:
 
-| Rukunin gwaji            | Umurni                                                                 | Abin da yake rufewa                                                                                                                                                                                        |
-| :----------------------- | :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Naúra (gwaje-gwaje 29)   | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Mai tsara jadawalin DRR, katange saturation, iyakokin concurrency, lissafin fairShare, jerin jiran backlog                                                                                                 |
-| Matrix na haɗaɗɗen gwaji | `npm run test:combo:matrix`                                            | Shawarar routing daga farko zuwa ƙarshe ta cikin ainihin combo pipeline; adalcin DRR + rage fifikon saturation ta live seams (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite             | Umurni                                                                 | Abin da ya rufe                                                                                                                                                                                           |
+| :---------------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Naúrar (gwaji 29) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | mai tsara jadawalin DRR, gating jikewa, iyakoki, lissafin fairShare, jerin gwano na baya                                                                                                                  |
+| Matrix hadewa     | `npm run test:combo:matrix`                                            | Ƙaddamar da yanke shawara ta ƙarshe ta hanyar bututun haɗuwa na ainihi; DRR adalci + jikewa deprioritization via live seams (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Matrix na haɗaɗɗen gwaji yana gudana a cikin CI tare da dukkan dabarun jama'a guda 19. Za a iya
-gudanar da rukunin gwajin naúra shi kaɗai.
+Matrix ɗin haɗin kai yana gudana a cikin CI tare da duk dabarun jama'a 22. Za'a iya gudanar da rukunin rukunin su kadai.
 
 ---
 

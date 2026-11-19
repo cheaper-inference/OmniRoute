@@ -18,7 +18,7 @@
 
 ---
 
-## Mbinu za Usakinishaji
+## Sakinisha Mbinu
 
 ### npm (inapendekezwa)
 
@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-Dashibodi hufunguka kwenye `http://localhost:20128` na URL ya msingi ya API ni `http://localhost:20128/v1`.
+Dashibodi hufunguliwa kwa `http://localhost:20128` na msingi wa API URL ni `http://localhost:20128/v1`.
+
+> **watumiaji wa npm:** Ikiwa npm itaonya kuwa hati za kusakinisha zilizuiwa (kwa mfano, `omniroute`, `better-sqlite3`), angalia [Utatuzi wa matatizo — npm install-scripts umezuiwa](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install).
 
 ### pnpm
 
@@ -36,7 +38,7 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **Watumiaji wa pnpm:** alama ya `--allow-build` inahitajika ili kuwezesha hati asilia za ujenzi kwa `better-sqlite3` na `@swc/core`. Amri ya `pnpm approve-builds -g` haitumiki kwa usakinishaji wa kimataifa kwenye pnpm v11.
+> **watumiaji wa pnpm:** bendera `--allow-build` inahitajika ili kuwezesha hati asili za `better-sqlite3` na `@swc/core`. Amri `pnpm approve-builds -g` haitumiki kwa usakinishaji wa kimataifa kwenye pnpm v11.
 
 ### Arch Linux (AUR)
 
@@ -45,68 +47,68 @@ yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[Kifurushi cha AUR](https://aur.archlinux.org/packages/omniroute-bin) husakinisha OmniRoute na kutoa huduma ya mtumiaji ya systemd.
+[Kifurushi cha AUR](https://aur.archlinux.org/packages/omniroute-bin) husakinisha OmniRoute na hutoa huduma ya mtumiaji ya mfumo.
 
-### Kutoka kwenye Msimbo Chanzo
+### Kutoka Chanzo
 
 ```bash
 npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Dokezo la Windows:** Kwa chaguo-msingi, OmniRoute hutumia `%APPDATA%\omniroute` wakati saraka ya zamani ya `%USERPROFILE%\.omniroute` haipo. Weka `DATA_DIR` ili kuchagua eneo tofauti la saraka ya data.
+> **Windows :** Kwa chaguo-msingi, OmniRoute hutumia `%APPDATA%\omniroute` wakati saraka ya `%USERPROFILE%\.omniroute` urithi haipo. Weka `DATA_DIR` ili kuchagua eneo tofauti la saraka ya data.
 
-> **Dokezo:** `npm install` huzalisha kiotomatiki `.env` kutoka `.env.example` wakati wa uendeshaji wa kwanza. Usakinishaji unaofuata hautaandika juu ya `.env` iliyopo, kwa hivyo marekebisho yanahifadhiwa. Ili kuizalisha upya, futa `.env` kabla ya kuiendesha tena.
+> **Kumbuka:** `npm install` hutengeneza `.env` kiotomatiki kutoka `.env.example` mara ya kwanza. Usakinishaji unaofuata hautabatilisha `.env` iliyopo, kwa hivyo ubinafsishaji huhifadhiwa. Ili kuweka upya mbegu, futa `.env` kabla ya kuanza tena.
 
 ### Docker
 
-Angalia [Mwongozo wa Docker](./DOCKER_GUIDE.md) kwa usanidi kamili wa Docker, ikijumuisha wasifu wa Compose na Caddy HTTPS.
+Tazama [Mwongozo Docker](./DOCKER_GUIDE.md) kwa usanidi kamili Docker pamoja na wasifu wa Tunga na Caddy HTTPS.
 
-### Programu ya Kompyuta ya Mezani (Electron)
+### Programu ya Eneo-kazi (Electron)
 
-OmniRoute huja na programu ya kompyuta ya mezani iliyojengwa kwa Electron 41 + electron-builder 26.10. Hati zinazopatikana (mzizi wa workspace):
+OmniRoute husafirisha kanga ya eneo-kazi iliyojengwa kwa Electron 41 + kijenzi cha elektroni 26.10. Maandishi yanayopatikana (mizizi ya nafasi ya kazi):
 
 ```bash
-npm run electron:dev          # Endesha programu ya kompyuta ya mezani kwa upakiaji upya wa moja kwa moja
-npm run electron:build        # Jenga kwa OS ya sasa (hugunduliwa kiotomatiki)
-npm run electron:build:win    # Kisakinishaji cha Windows (NSIS + portable)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # Jaribu kwa ufupi kifurushi kilichojengwa
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-Matoleo ya visakinishaji vya programu ya kompyuta ya mezani huambatishwa kwenye GitHub Releases. Kwa maelezo kamili kuhusu Electron (utiasaini, daraja la IPC, distros), angalia [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(iliundwa katika hatua ya baadaye)_.
+Matoleo ya visakinishi vya eneo-kazi yameambatishwa kwenye Matoleo GitHub. Kwa upigaji mbizi kamili wa Electron (kutia saini, daraja la IPC, distros), angalia [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_.
 
-### Seva isiyo na kiolesura (CI/otomatiki)
+### Seva isiyo na kichwa (CI/automation)
 
-Kwa usanidi usiohitaji usimamizi (Docker, Kubernetes, CI), tumia:
+Kwa usanidi ambao haujashughulikiwa (Docker, Kubernetes, CI), tumia:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-Ikiunganishwa na vigeu vya mazingira (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, n.k.), hii hukuwezesha kuanzisha tukio la OmniRoute linaloweza kuendeshwa kikamilifu kwa hati.
+Ikichanganywa na env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, n.k.), hii hukuruhusu kusogeza mfano OmniRoute unaoweza kuandikwa kikamilifu.
 
-### Chaguo za CLI
+### CLI Chaguzi
 
-| Amri                    | Maelezo                                                                                    |
-| ----------------------- | ------------------------------------------------------------------------------------------ |
-| `omniroute`             | Anzisha seva (`PORT=20128`, API na dashibodi kwenye bandari moja)                          |
-| `omniroute setup`       | Mwongozo wa CLI wa kuweka nenosiri na mtoa huduma wa kwanza                                |
-| `omniroute doctor`      | Endesha ukaguzi wa afya wa ndani bila kuanzisha seva                                       |
-| `omniroute providers`   | Gundua, orodhesha, thibitisha na ujaribu watoa huduma kupitia CLI                          |
-| `omniroute config`      | Usanidi wa zana ya CLI — orodhesha, pata, weka na uthibitishe usanidi                      |
-| `omniroute status`      | Dashibodi ya hali nje ya mtandao — toleo, DB, zana na usanidi                              |
-| `omniroute logs`        | Tiririsha kumbukumbu za matumizi kutoka API (inaauni `--follow`)                           |
-| `omniroute update`      | Angalia au tekeleza masasisho ya OmniRoute                                                 |
-| `omniroute provider`    | Dhibiti miunganisho ya watoa huduma — ongeza, orodhesha, ondoa, jaribu, weka chaguo-msingi |
-| `omniroute --port 3000` | Weka bandari kanoni/API kuwa 3000                                                          |
-| `omniroute --mcp`       | Anzisha seva ya MCP (usafirishaji wa stdio)                                                |
-| `omniroute --no-open`   | Usifungue kivinjari kiotomatiki                                                            |
-| `omniroute --help`      | Onyesha msaada                                                                             |
+| Amri                    | Maelezo                                                                                       |
+| ----------------------- | --------------------------------------------------------------------------------------------- |
+| `omniroute`             | Anzisha seva (`PORT=20128`, API na dashibodi kwenye bandari moja)                             |
+| `omniroute setup`       | Uingizaji wa CLI unaoongozwa kwa nenosiri na mtoaji wa kwanza                                 |
+| `omniroute doctor`      | Fanya ukaguzi wa afya wa ndani bila kuanzisha seva                                            |
+| `omniroute providers`   | Gundua, orodhesha, thibitisha, na jaribu watoa huduma kutoka CLI                              |
+| `omniroute config`      | CLI orodha ya usanidi wa zana —, pata, weka, thibitisha usanidi                               |
+| `omniroute status`      | Toleo la dashibodi ya hali ya nje ya mtandao —, DB, zana, usanidi                             |
+| `omniroute logs`        | Tiririsha kumbukumbu za matumizi kutoka kwa API (inasaidia `--follow`)                        |
+| `omniroute update`      | Angalia au utumie masasisho OmniRoute                                                         |
+| `omniroute provider`    | Dhibiti miunganisho ya watoa huduma — kuongeza, kuorodhesha, kuondoa, kujaribu, chaguo-msingi |
+| `omniroute --port 3000` | Weka bandari canonical/API iwe 3000                                                           |
+| `omniroute --mcp`       | Anzisha seva MCP (usafiri wa stdio)                                                           |
+| `omniroute --no-open`   | Usifungue kivinjari kiotomatiki                                                               |
+| `omniroute --help`      | Onyesha usaidizi                                                                              |
 
-Usanidi usio na kiolesura unaweza kuendeshwa kwa hati kwa kutumia alama au vigeu vya mazingira:
+Usanidi usio na kichwa unaweza kuandikwa na bendera au anuwai za mazingira:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-Dhibiti watoa huduma kupitia SSH au hati bila kufungua dashibodi:
+Dhibiti watoa huduma kutoka SSH au hati bila kufungua dashibodi:
 
 ```bash
 omniroute providers available
@@ -226,8 +228,12 @@ npm run test:protocols:e2e
 
 **Msimbo wa Claude :**
 
+Claude Code inaunganisha juu HTTP, ambayo `omniroute --mcp` (stdio) haianzi. Usafiri wa HTTP umezimwa kwa chaguo-msingi: iwezeshe kwenye seva inayoendesha kwanza. Wakati kuingia kwenye dashibodi kumewashwa, ombi bila kitambulisho hupata `401`, kwa hivyo pitisha kitufe cha API ambacho kina `mcp:connect` (au `manage`); ufunguo usio na `manage`/`admin` pia unahitaji upeo wa kila chombo (tazama [MCP Server → MCP scopes tool](../frameworks/MCP-SERVER.md#mcp-tool-scopes) ).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
