@@ -269,6 +269,20 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
   coverageByModule();
   openapiCoverage();
   await i18nUiCoverage();
+  // The standalone collector is also copied into isolated fixtures that ship only
+  // scripts/quality and scripts/i18n. Measure this optional metric when the proof
+  // module is present, and require a valid registry before publishing the value.
+  const proofModule = path.join(cwd, "scripts/check/lib/exemption-proof.mjs");
+  if (fs.existsSync(proofModule)) {
+    const { countRuntimeExemptions } = await import(pathToFileURL(proofModule).href);
+    const registry = JSON.parse(
+      fs.readFileSync(path.join(cwd, "config/quality/gate-exemptions.json"), "utf8")
+    );
+    if (!Array.isArray(registry.exemptions)) {
+      throw new Error("invalid exemption registry: exemptions must be an array");
+    }
+    out["exemptions.runtime"] = countRuntimeExemptions({ root: cwd, registry });
+  }
   fs.writeFileSync(
     path.join(cwd, "config/quality/quality-metrics.json"),
     JSON.stringify(out, null, 2) + "\n"

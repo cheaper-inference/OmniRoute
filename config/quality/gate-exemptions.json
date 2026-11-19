@@ -32,7 +32,13 @@
       "reference": "#17028",
       "scope": ["src/lib/docsSanitizer.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_ATTR is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_COLUMNS",
@@ -45,7 +51,13 @@
       "reference": "#17028",
       "scope": ["src/lib/db/versionManager.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_COLUMNS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_CORE_SCHEMES",
@@ -58,7 +70,13 @@
       "reference": "#17028",
       "scope": ["src/lib/proxySubscription/coreEndpoint.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_CORE_SCHEMES is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_DEVIN_EXACT",
@@ -71,7 +89,13 @@
       "reference": "#17028",
       "scope": ["scripts/devin-bridge/runtime-policy.mjs"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_DEVIN_EXACT is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_DEVIN_SUFFIXES",
@@ -84,7 +108,13 @@
       "reference": "#17028",
       "scope": ["scripts/devin-bridge/runtime-policy.mjs"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_DEVIN_SUFFIXES is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_DURATIONS",
@@ -97,7 +127,13 @@
       "reference": "#17028",
       "scope": ["open-sse/handlers/videoGeneration/minimaxHandler.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_DURATIONS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_FETCH_SCHEMES",
@@ -110,7 +146,13 @@
       "reference": "#17028",
       "scope": ["src/lib/proxySubscription/fetchGuard.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_FETCH_SCHEMES is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_FLAGS",
@@ -123,7 +165,13 @@
       "reference": "#17028",
       "scope": ["scripts/merge-queue/cli.mjs"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_FLAGS is required by its red-proof case",
+        "neutralValue": "{}"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_HOSTS",
@@ -136,7 +184,13 @@
       "reference": "#17028",
       "scope": ["src/server/ws/liveServer.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_HOSTS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_HTTP_METHODS",
@@ -149,7 +203,13 @@
       "reference": "#17028",
       "scope": ["src/lib/skills/builtins.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_HTTP_METHODS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_IDP_HOST_SUFFIXES",
@@ -162,7 +222,13 @@
       "reference": "#17028",
       "scope": ["open-sse/services/kiroExternalIdp.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_IDP_HOST_SUFFIXES is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_IMAGE_TYPES",
@@ -175,7 +241,13 @@
       "reference": "#17028",
       "scope": ["src/app/api/settings/favicon/route.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_IMAGE_TYPES is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_JWT_VERIFY_FILES",
@@ -188,7 +260,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/dashboard-session-verifier-source-guard.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_JWT_VERIFY_FILES is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_LOCAL_CORE_HOSTS",
@@ -201,7 +279,13 @@
       "reference": "#17028",
       "scope": ["src/lib/proxySubscription/coreEndpoint.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_LOCAL_CORE_HOSTS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_MESSAGE_TYPES",
@@ -214,7 +298,13 @@
       "reference": "#17028",
       "scope": ["open-sse/executors/copilot-m365-frames.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_MESSAGE_TYPES is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_NOAUTH_PROVIDERS",
@@ -227,7 +317,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/noauth-autocombo-allowlist.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_NOAUTH_PROVIDERS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_NON_AUDIO_TYPES",
@@ -240,7 +336,13 @@
       "reference": "#17028",
       "scope": ["open-sse/utils/transcriptionRemoteAudio.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_NON_AUDIO_TYPES is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_ORIGINS",
@@ -253,7 +355,13 @@
       "reference": "#17028",
       "scope": ["src/server/ws/liveServer.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_ORIGINS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_OUTPUT_FORMATS",
@@ -266,7 +374,13 @@
       "reference": "#17028",
       "scope": ["open-sse/handlers/imageUpscale/stability.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_OUTPUT_FORMATS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_RESOLUTIONS",
@@ -279,7 +393,13 @@
       "reference": "#17028",
       "scope": ["open-sse/handlers/videoGeneration/minimaxHandler.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_RESOLUTIONS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_RESPONSES_USAGE_FIELDS",
@@ -292,7 +412,13 @@
       "reference": "#17028",
       "scope": ["open-sse/handlers/responseSanitizer/usageFields.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_RESPONSES_USAGE_FIELDS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_RESPONSE_HEADERS",
@@ -305,7 +431,13 @@
       "reference": "#17028",
       "scope": ["src/app/api/v1/_shared/elevenLabsProxy.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_RESPONSE_HEADERS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_SANDBOX_IMAGES",
@@ -318,7 +450,13 @@
       "reference": "#17028",
       "scope": ["src/lib/skills/builtins.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_SANDBOX_IMAGES is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_SCHEMES",
@@ -331,7 +469,13 @@
       "reference": "#17028",
       "scope": ["src/lib/memory/genericBackend.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_SCHEMES is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_TAGS",
@@ -344,7 +488,13 @@
       "reference": "#17028",
       "scope": ["src/lib/docsSanitizer.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_TAGS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_TOOLS",
@@ -357,7 +507,13 @@
       "reference": "#17028",
       "scope": ["open-sse/executors/chatgpt.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_TOOLS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_TRY_PATH_PREFIXES",
@@ -370,7 +526,13 @@
       "reference": "#17028",
       "scope": ["src/app/api/openapi/try/route.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_TRY_PATH_PREFIXES is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_UPDATE_COLUMNS",
@@ -383,7 +545,13 @@
       "reference": "#17028",
       "scope": ["src/lib/cloudAgent/db.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_UPDATE_COLUMNS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_URLS",
@@ -396,7 +564,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/webhook-ssrf-guard.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_URLS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/ALLOWED_USAGE_FIELDS",
@@ -409,7 +583,13 @@
       "reference": "#17028",
       "scope": ["open-sse/handlers/responseSanitizer/usageFields.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "ALLOWED_USAGE_FIELDS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/EXEMPT_PROVIDERS",
@@ -422,7 +602,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/oauth-modal-device-code-providers.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "EXEMPT_PROVIDERS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_ANTIGRAVITY_PLAN_LABELS",
@@ -435,7 +621,13 @@
       "reference": "#17028",
       "scope": ["open-sse/services/usage/antigravity.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_ANTIGRAVITY_PLAN_LABELS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_BACKENDS",
@@ -448,7 +640,13 @@
       "reference": "#17028",
       "scope": ["src/lib/memory/genericBackend.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_BACKENDS is required by its red-proof case",
+        "neutralValue": "{}"
+      }
     },
     {
       "id": "check:provider-consistency/KNOWN_CATALOG_ONLY",
@@ -474,7 +672,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/aimlapi-catalog-repair.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_DEAD_IDS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_DEEPGRAM_PARAMS",
@@ -487,7 +691,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/deepgram-stt-diarization.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_DEEPGRAM_PARAMS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:migration-numbering/KNOWN_DUPLICATE_VERSIONS",
@@ -513,7 +723,13 @@
       "reference": "#17028",
       "scope": ["src/lib/providerModels/modelDiscovery.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_EMBEDDING_DIMENSIONS is required by its red-proof case",
+        "neutralValue": "{}"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_EMBEDDING_FIELDS",
@@ -526,7 +742,13 @@
       "reference": "#17028",
       "scope": ["open-sse/handlers/embeddings.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_EMBEDDING_FIELDS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_EMBEDDING_PREFIXES",
@@ -539,7 +761,13 @@
       "reference": "#17028",
       "scope": ["src/lib/providerModels/modelDiscovery.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_EMBEDDING_PREFIXES is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_ENGINE_IDS",
@@ -552,7 +780,13 @@
       "reference": "#17028",
       "scope": ["src/lib/db/compressionCombos.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_ENGINE_IDS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_ENGLISH_ONLY",
@@ -565,7 +799,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/compression/output-styles-i18n-matrix.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_ENGLISH_ONLY is required by its red-proof case",
+        "neutralValue": "{}"
+      }
     },
     {
       "id": "check:migration-numbering/KNOWN_GAPS",
@@ -591,7 +831,13 @@
       "reference": "#17028",
       "scope": ["src/lib/skills/githubCollector.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_GOLD_REPOS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_GPT_OSS_",
@@ -604,7 +850,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/gptoss-provider-inference-5852.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_GPT_OSS_ is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:fabricated-docs/KNOWN_HOOKS",
@@ -617,7 +869,13 @@
       "reference": "#17028",
       "scope": ["scripts/check/check-fabricated-docs.mjs"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_HOOKS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_INPUT_COST",
@@ -630,7 +888,13 @@
       "reference": "#17028",
       "scope": ["scripts/test/combo-live-vps.mjs"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_INPUT_COST is required by its red-proof case",
+        "neutralValue": "{}"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_KEYS",
@@ -643,7 +907,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/build/file-size-baseline-shape.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_KEYS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_LIMIT",
@@ -656,7 +926,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/chatcore-combo-sibling-specific-14931.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_LIMIT is required by its red-proof case",
+        "neutralValue": "0"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_LIMIT_ENV",
@@ -669,7 +945,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/chatcore-combo-sibling-specific-14931.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_LIMIT_ENV is required by its red-proof case",
+        "neutralValue": "\"\""
+      }
     },
     {
       "id": "check:public-creds/KNOWN_LITERAL_CREDS",
@@ -708,7 +990,13 @@
       "reference": "#17028",
       "scope": ["open-sse/executors/claude-web/stream.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_METADATA_EVENTS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:fetch-targets/KNOWN_MISSING",
@@ -747,7 +1035,13 @@
       "reference": "#17028",
       "scope": ["scripts/i18n/check-glossary-consistency.mjs"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_MISTRANSLATIONS is required by its red-proof case",
+        "neutralValue": "{}"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_MODEL",
@@ -760,7 +1054,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/chatcore-combo-sibling-specific-14931.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_MODEL is required by its red-proof case",
+        "neutralValue": "\"\""
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_MODEL_IDS",
@@ -773,7 +1073,13 @@
       "reference": "#17028",
       "scope": ["open-sse/services/model.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_MODEL_IDS rejects an unlisted model",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_MODEL_PRICING",
@@ -786,7 +1092,13 @@
       "reference": "#17028",
       "scope": ["open-sse/services/providerCostData.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_MODEL_PRICING is required by its red-proof case",
+        "neutralValue": "{}"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_OFFENDING_FIELDS",
@@ -799,7 +1111,13 @@
       "reference": "#17028",
       "scope": ["open-sse/config/providerFieldStrips.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_OFFENDING_FIELDS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_PLANS",
@@ -812,7 +1130,13 @@
       "reference": "#17028",
       "scope": ["src/lib/quota/planRegistry.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_PLANS is required by its red-proof case",
+        "neutralValue": "{}"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_POLICIES",
@@ -825,7 +1149,13 @@
       "reference": "#17028",
       "scope": ["src/lib/quota/fairShare.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_POLICIES is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_PRESETS",
@@ -838,7 +1168,13 @@
       "reference": "#17028",
       "scope": ["open-sse/services/conolSessionModel.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_PRESETS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_PROVIDER",
@@ -851,7 +1187,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/chatcore-combo-sibling-specific-14931.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_PROVIDER is required by its red-proof case",
+        "neutralValue": "\"\""
+      }
     },
     {
       "id": "check:db-rules/KNOWN_RAW_SQL",
@@ -877,7 +1219,13 @@
       "reference": "#17028",
       "scope": ["tests/integration/combo-live/auto.live.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_REAL_MODEL_FRAGMENTS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_REASONING_EFFORTS",
@@ -890,7 +1238,13 @@
       "reference": "#17028",
       "scope": ["src/lib/vscode/reasoningMetadata.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_REASONING_EFFORTS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:provider-consistency/KNOWN_REGISTRY_ONLY",
@@ -916,7 +1270,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/build/eslint-suppressions-pruned.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_STALE is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:docs-symbols/KNOWN_STALE_DOC_REFS",
@@ -955,7 +1315,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/provider-icon-devin-desktop.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_SVGS is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_TEXT_ONLY_DESPITE_SYNC",
@@ -968,7 +1334,13 @@
       "reference": "#17028",
       "scope": ["src/lib/modelCapabilities.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_TEXT_ONLY_DESPITE_SYNC is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_THEMES",
@@ -981,7 +1353,13 @@
       "reference": "#17028",
       "scope": ["src/store/themeStore.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_THEMES is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:route-guard-membership/KNOWN_TRANSITIVE_SPAWN_SINKS",
@@ -1046,7 +1424,13 @@
       "reference": "#17028",
       "scope": ["src/shared/utils/secretsValidator.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_WEAK_SECRETS is required by its red-proof case",
+        "neutralValue": "[]"
+      }
     },
     {
       "id": "check:gate-manifest/KNOWN_WRONG_UNTIL_SKILLS_FACTS_MERGE",
@@ -1059,7 +1443,13 @@
       "reference": "#17028",
       "scope": ["tests/unit/agentSkills-route-paths.test.ts"],
       "diffScope": false,
-      "lastReviewedRelease": "v3.8.55"
+      "lastReviewedRelease": "v3.8.55",
+      "surface": "runtime",
+      "redProof": {
+        "test": "tests/unit/exemption-red-proof.test.mjs",
+        "case": "KNOWN_WRONG_UNTIL_SKILLS_FACTS_MERGE is required by its red-proof case",
+        "neutralValue": "new Set()"
+      }
     },
     {
       "id": "config/.license-allowlist.json",

@@ -11,6 +11,11 @@
       "direction": "down",
       "eps": 0
     },
+    "exemptions.runtime": {
+      "value": 65,
+      "direction": "down",
+      "eps": 0
+    },
     "coverage.statements": {
       "value": 67.33,
       "direction": "up",

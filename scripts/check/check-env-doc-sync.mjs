@@ -283,6 +283,12 @@ const IGNORE_FROM_CODE = new Set([
   // Next.js-internal switch, not OmniRoute config: scripts/dev/standalone-server-ws.mjs sets it
   // so Next skips its own SIGINT/SIGTERM handlers and the wrapper owns shutdown.
   "NEXT_MANUAL_SIG_HANDLE",
+  // Runtime-exemption proof signals: passed from the proof runner into its child
+  // process to neutralize one declaration in memory; never operator-facing config.
+  "OMNIROUTE_EXEMPTION_PROOF_LINE",
+  "OMNIROUTE_EXEMPTION_PROOF_NEUTRAL",
+  "OMNIROUTE_EXEMPTION_PROOF_REGISTER",
+  "OMNIROUTE_EXEMPTION_PROOF_TARGET",
 ]);
 
 // Vars documented in ENVIRONMENT.md but intentionally absent from .env.example.

@@ -538,14 +538,29 @@ if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
       const resolution = resolveCheckBase({ cwd: process.cwd(), env: process.env });
       const base = resolution.status === "resolved" ? resolution.sha : "HEAD";
       const evidence = collectGateExemptionEvidence({ base });
-      const result = checkGateExemptions(evidence);
+      const registryResult = checkGateExemptions(evidence);
+      // Imported only here: the normal manifest path must stay runnable before npm ci.
+      const { checkRuntimeExemptions, runProof } = await import(
+        new URL("../check/lib/exemption-proof.mjs", import.meta.url).href
+      );
+      const dynamic = process.argv.includes("--proof=dynamic");
+      const result = await checkRuntimeExemptions({
+        root: process.cwd(),
+        registry: evidence.registry,
+        warnings: registryResult.warnings,
+        summary: registryResult.summary,
+        now: evidence.now,
+        ...(dynamic ? { proofRunner: runProof } : {}),
+      });
       const { new: fresh, frozen, total, ratchet } = result.summary;
       process.stdout.write(
         `diff scope: ${fresh} new, ${frozen} frozen, ${total} total (ratchet: ${ratchet})\n`
       );
+      process.stdout.write(`${result.summary.exemptionsRuntime}\n`);
       for (const warning of result.warnings) process.stdout.write(`${warning}\n`);
-      for (const error of result.errors) process.stderr.write(`[gate-exemptions] ${error}\n`);
-      if (result.errors.length) process.exitCode = 1;
+      const errors = [...registryResult.errors, ...result.errors];
+      for (const error of errors) process.stderr.write(`[gate-exemptions] ${error}\n`);
+      if (errors.length) process.exitCode = 1;
     } catch (error) {
       process.stderr.write(`[gate-exemptions] ${error.message}\n`);
       process.exitCode = 2;
