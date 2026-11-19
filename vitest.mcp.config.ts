@@ -1,10 +1,14 @@
 import { defineConfig } from "vitest/config";
 import path from "path";
+import { isolatedDataDirEnv } from "./tests/_setup/vitestDataDir";
 
 export default defineConfig({
   test: {
     environment: "node",
     globals: true,
+    // A throwaway DATA_DIR for the run, so no suite can reach the developer's ~/.omniroute.
+    env: isolatedDataDirEnv(),
+    globalSetup: ["./tests/_setup/vitestDataDir.ts"],
     pool: "threads",
     // MCP suites initialize isolated SQLite databases; Vitest 5 at 20 workers
     // makes native migration/close operations contend and flakes audit tests.

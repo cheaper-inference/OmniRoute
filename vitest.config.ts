@@ -1,6 +1,7 @@
 import { defineConfig } from "vitest/config";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { isolatedDataDirEnv } from "./tests/_setup/vitestDataDir";
 
 export default defineConfig({
   test: {
@@ -10,6 +11,9 @@ export default defineConfig({
     testTimeout: 20000,
     globals: true,
     setupFiles: ["./tests/_setup/vitestUiPolyfills.ts"],
+    // A throwaway DATA_DIR for the run, so no suite can reach the developer's ~/.omniroute.
+    env: isolatedDataDirEnv(),
+    globalSetup: ["./tests/_setup/vitestDataDir.ts"],
     pool: "threads",
     maxWorkers: 20,
     fileParallelism: true,
@@ -23,7 +27,6 @@ export default defineConfig({
       "src/shared/hooks/__tests__/**/*.test.tsx",
       "src/lib/memory/__tests__/**/*.test.ts",
       "src/lib/skills/__tests__/**/*.test.ts",
-      "tests/unit/encryption.test.ts",
       "tests/unit/**/*.test.tsx",
       "open-sse/**/__tests__/**/*.test.ts",
       "open-sse/services/**/__tests__/**/*.test.ts",
