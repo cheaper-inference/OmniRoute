@@ -3,58 +3,65 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b4",
+    "batchId": "b5",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b4-b7f1ad39432c",
-    "candidateSha": "b7f1ad39432c7b4002097ab3c77e43b4d1eed58f",
-    "baseSha": "6d87faf23640404336404dc101b74125be666258",
-    "treeSha": "8be6b05e7487030e757d6516c1dd45755ed4a56b",
+    "candidateRef": "omni-queue/release-v3.8.55/b5-f07fddeb90a1",
+    "candidateSha": "f07fddeb90a12d51958e2008448837fb1dc59b0c",
+    "baseSha": "f05732fbfbbf9468a714cf743b5746868032b854",
+    "treeSha": "8afc78dc50aede271ef851cfcd16d4c6bcb0137b",
     "prs": [
       {
-        "n": 20616,
-        "head": "97013f5becf14020c55b685c9d0d43d5ae93d0c3",
-        "title": "chore(ci): retire the Mergify merge queue",
+        "n": 20670,
+        "head": "47e32c3fa0231b891dadbf37e339a3df000135ea",
+        "title": "fix(deps): resolve glob and minimatch advisories through overrides",
         "author": "diegosouzapw",
-        "labeledAt": "2026-11-19T19:52:23Z"
+        "labeledAt": "2026-11-19T19:31:09Z"
       },
       {
-        "n": 19788,
-        "head": "78b7a2b34b564454a234e2b0fed15eee2ff5900d",
-        "title": "fix(cache): do not store upstream refusals and obsolescence notices in semantic cache (#19619)",
+        "n": 19846,
+        "head": "b15396963a957596685f5dbc4426c564021c5dd0",
+        "title": "fix(webdav): enforce rate limiting and lockout on basic auth attempts",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:09Z"
+        "labeledAt": "2026-11-19T19:53:21Z"
       },
       {
-        "n": 19798,
-        "head": "ea246abe1c7b22dd5be931f58d3ddc78ec0a8667",
-        "title": "fix(openrouter): treat capability 404 responses as request-scoped without model lockout",
+        "n": 19914,
+        "head": "fd5265c904adada96a349f2d209a095f211714d9",
+        "title": "fix(mitm): use dynamic os.platform checks for certificate trust detection (#19863)",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:11Z"
+        "labeledAt": "2026-11-19T19:53:24Z"
       },
       {
-        "n": 19804,
-        "head": "41a52b2f4df98fde67b6063193055f7f6d4d9c1e",
-        "title": "fix(sse): bound heartbeat queue and stop timer on abandoned streams",
+        "n": 20102,
+        "head": "cee847c19b8e3aae88a6f670ec73ff73efe0e5b9",
+        "title": "fix(codebuddy): bound gap wildcards in AGENT_PATTERN to prevent auto-mode prompt false positives (#20098)",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:14Z"
+        "labeledAt": "2026-11-19T19:53:26Z"
       },
       {
-        "n": 19844,
-        "head": "bc24bb240304af4fccabb2e581d31a457f816fdb",
-        "title": "fix(telegram): enforce bidirectional timestamp bounds and anti-replay on initData",
+        "n": 20115,
+        "head": "b294213affdcb67d63e06b9cd44e77491ec37e09",
+        "title": "fix(oauth): reset cooldown and backoff when renewing OAuth tokens (#20067)",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:16Z"
+        "labeledAt": "2026-11-19T19:53:29Z"
       },
       {
-        "n": 19845,
-        "head": "4273a5e34f618b438ed6895fe3f9e4aa39cf6e80",
-        "title": "fix(authz): include /a2a and /connect in proxy matcher and classify /a2a as CLIENT_API",
+        "n": 20268,
+        "head": "085427318d7d9267e046826d943fa14de718dd37",
+        "title": "fix(providers): add Gemini 4 Hydrogen specs, bare alias, output cap, and pricing (#20124)",
         "author": "rafacpti23",
-        "labeledAt": "2026-11-19T19:53:19Z"
+        "labeledAt": "2026-11-19T19:53:31Z"
+      },
+      {
+        "n": 20270,
+        "head": "b165c0fa0582453a3d7840cab31c45f3b974dc25",
+        "title": "fix(messages): inject reasoning_content placeholder for DeepSeek thinking models (#20260)",
+        "author": "rafacpti23",
+        "labeledAt": "2026-11-19T19:53:34Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-19T19:54:48.398Z",
+    "startedAt": "2026-11-19T21:16:56.773Z",
     "attempts": 0,
     "bisect": null
   },
@@ -74,11 +81,18 @@
     }
   ],
   "shadow": {
-    "processed": {}
+    "processed": {
+      "19788": "78b7a2b34b564454a234e2b0fed15eee2ff5900d",
+      "19798": "ea246abe1c7b22dd5be931f58d3ddc78ec0a8667",
+      "19804": "41a52b2f4df98fde67b6063193055f7f6d4d9c1e",
+      "19844": "bc24bb240304af4fccabb2e581d31a457f816fdb",
+      "19845": "4273a5e34f618b438ed6895fe3f9e4aa39cf6e80",
+      "20616": "97013f5becf14020c55b685c9d0d43d5ae93d0c3"
+    }
   },
   "counters": {
-    "batchSeq": 4,
-    "ciRuns": 5,
+    "batchSeq": 5,
+    "ciRuns": 6,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 2,
@@ -314,7 +328,65 @@
         "20616": "2026-11-19T19:52:23Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44602926075"
+    },
+    {
+      "at": "2026-11-19T21:14:55.556Z",
+      "type": "checks-green",
+      "batchId": "b4",
+      "prs": [
+        20616,
+        19788,
+        19798,
+        19804,
+        19844,
+        19845
+      ],
+      "sha": "b7f1ad39432c7b4002097ab3c77e43b4d1eed58f",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44616525159"
+    },
+    {
+      "at": "2026-11-19T21:15:16.657Z",
+      "type": "would-land",
+      "batchId": "b4",
+      "prs": [
+        20616,
+        19788,
+        19798,
+        19804,
+        19844,
+        19845
+      ],
+      "sha": "b7f1ad39432c7b4002097ab3c77e43b4d1eed58f",
+      "detail": "shadow mode: would merge-ff onto 6d87faf23640",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44616525159"
+    },
+    {
+      "at": "2026-11-19T21:17:00.980Z",
+      "type": "batch-started",
+      "batchId": "b5",
+      "prs": [
+        20670,
+        19846,
+        19914,
+        20102,
+        20115,
+        20268,
+        20270
+      ],
+      "sha": "f07fddeb90a12d51958e2008448837fb1dc59b0c",
+      "detail": "7 PR(s) on f05732fbfbbf; window 7",
+      "labeledAt": {
+        "19846": "2026-11-19T19:53:21Z",
+        "19914": "2026-11-19T19:53:24Z",
+        "20102": "2026-11-19T19:53:26Z",
+        "20115": "2026-11-19T19:53:29Z",
+        "20268": "2026-11-19T19:53:31Z",
+        "20270": "2026-11-19T19:53:34Z",
+        "20670": "2026-11-19T19:31:09Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44616525159"
     }
   ],
-  "updatedAt": "2026-11-19T20:16:19.207Z"
+  "updatedAt": "2026-11-19T21:17:02.869Z",
+  "batchWindow": 7
 }
