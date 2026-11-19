@@ -38,7 +38,10 @@ test("#17186: migration record names never carry the numeric prefix", () => {
 
   for (const filename of files) {
     const match = filename.match(MIGRATION_FILENAME_RE);
-    assert.ok(match, `migration filename must match NNN_name.sql: ${filename}`);
+    assert.ok(
+      match,
+      `migration filename must match <version>_name.sql (NNN_ or YYYYMMDDHHMMSS_): ${filename}`
+    );
     // `name` is what the runner stores in the applied record (match[2]).
     const name = match[2];
     assert.ok(

@@ -195,78 +195,87 @@ dos descritores de campos retornados, de modo que um novo destino não exige alt
 
 ---
 
-## 4. Destino BigQuery
+## 4. Destino do BigQuery
 
 Chaves de configuração (`type: "bigquery"`):
 
-| Chave                | Observações                                                                   |
-| -------------------- | ----------------------------------------------------------------------------- |
-| `projectId`          | Projeto do GCP que contém o conjunto de dados                                 |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                               |
-| `tableId`            | `[A-Za-z0-9_]+`                                                               |
-| `location`           | Usado apenas quando o conjunto de dados precisa ser criado (padrão `EU`)      |
-| `serviceAccountJson` | Chave da conta de serviço. Segredo: criptografado em repouso, nunca retornado |
-| `autoCreate`         | Cria o conjunto de dados e a tabela na primeira exportação (padrão `true`)    |
+| Chave                | Observações                                                                                                              |
+| -------------------- | ------------------------------------------------------------------------------------------------------------------------ |
+| `projectId`          | Projeto do GCP que contém o conjunto de dados                                                                            |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                                          |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                                          |
+| `location`           | Usado somente quando o conjunto de dados precisa ser criado (padrão `EU`)                                                |
+| `serviceAccountJson` | Chave da conta de serviço. Segredo: criptografada em repouso, nunca retornada                                            |
+| `autoCreate`         | Cria o conjunto de dados/tabela ausente; adiciona condicionalmente colunas anuláveis de evidência de uso (padrão `true`) |
 
 A conta de serviço precisa de `bigquery.tables.updateData` na tabela de destino, além de
 `bigquery.datasets.create` / `bigquery.tables.create` quando `autoCreate` estiver ativado.
+Atualizar uma tabela existente para adicionar os dois campos anuláveis de evidência de uso também
+exige `bigquery.tables.update`. A ausência de uma permissão faz a exportação falhar sem avançar
+seu cursor.
 
-Um lote configurado é uma unidade de **cursor**, não de HTTP: `send()` o divide em chamadas insertAll
-de no máximo 500 linhas, de modo que um `batch_size` grande não ultrapasse o limite de 10 MB por requisição do BigQuery.
-Códigos de status transitórios (408/429/500/502/503/504) geram até três novas tentativas com espera
-exponencial, reutilizando os mesmos insertIds; falhas de autenticação e de esquema lançam uma exceção na primeira tentativa, em vez
-de desperdiçar a execução.
+Um lote configurado é uma unidade de **cursor**, não uma unidade HTTP: `send()` o divide em
+chamadas insertAll de no máximo 500 linhas, portanto um `batch_size` grande não pode exceder o
+limite de 10 MB das solicitações do BigQuery. Status transitórios (408/429/500/502/503/504) são
+tentados novamente até três vezes com recuo exponencial, reutilizando os mesmos insertIds; falhas
+de autenticação e de esquema lançam um erro na primeira tentativa, em vez de consumir a execução.
 
-Uma tabela recém-criada ainda não está visível para o endpoint de streaming, que responde com
-404 por alguns segundos. Esse 404 gera novas tentativas, mas **somente quando a tabela foi criada nesta execução** —
-uma tabela realmente inexistente continua causando falha imediata. Observe que recriar uma tabela com um nome que
-foi excluído recentemente faz o BigQuery recusar inserções por streaming durante vários minutos; isso é uma
-característica do processo de excluir e recriar, portanto prefira um novo nome de tabela em vez de excluir e adicionar a mesma tabela novamente.
+Uma tabela criada há poucos instantes ainda não fica visível para o endpoint de streaming, que
+responde 404 por alguns segundos. Esse 404 é tentado novamente, mas **somente quando esta execução
+criou a tabela** — uma tabela realmente ausente ainda falha imediatamente. Observe que recriar uma
+tabela com um nome que foi excluído recentemente faz o BigQuery recusar inserções de streaming por
+vários minutos; isso é uma propriedade da exclusão seguida de recriação, portanto prefira um novo
+nome de tabela em vez de excluir e adicionar novamente uma tabela.
 
-**Uma falha parcial chega como HTTP 200 com `insertErrors[]` não vazio.** Isso é tratado como
-uma falha e lança uma exceção, o que impede o cursor de avançar além de linhas que o BigQuery nunca
-aceitou; `tests/unit/log-export-bigquery.test.ts` garante esse comportamento.
+**Uma falha parcial chega como HTTP 200 com um `insertErrors[]` não vazio.** Isso é tratado como
+uma falha e lança um erro, impedindo que o cursor avance além das linhas que o BigQuery nunca
+aceitou; `tests/unit/log-export-bigquery.test.ts` fixa esse comportamento.
 
-O transporte usa REST puro — uma asserção RS256 autoassinada é trocada por um token de acesso em
-`https://oauth2.googleapis.com/token` e, em seguida, as linhas são enviadas para `tabledata.insertAll`. Nenhum SDK do Google é
-incluído. Os tokens de acesso são armazenados em cache no processo por (conta de serviço, escopo).
+O transporte é REST simples — uma asserção RS256 autoassinada é trocada por um token de acesso em
+`https://oauth2.googleapis.com/token`, e as linhas são enviadas para `tabledata.insertAll`. Nenhum
+SDK do Google é incluído. Os tokens de acesso são armazenados em cache no processo por (conta de
+serviço, escopo).
 
-A tabela criada contém uma coluna para cada campo da aba Logs, além de `exported_at`, e é organizada de acordo com
-a forma como os logs de chamadas são realmente consultados:
+A tabela criada contém uma coluna para cada campo da aba Logs, além de `exported_at`, e é
+estruturada para a forma como os registros de chamadas são realmente consultados:
 
-- **Particionada por dia com base em `timestamp`**, para que uma consulta delimitada por data examine apenas esses dias.
-- **Agrupada por `api_key_name`, `provider`, `model`, `status`** (nessa ordem), para que filtros por
-  quem executou, para onde a chamada foi enviada ou se houve falha eliminem blocos dentro de cada partição. O BigQuery
-  permite no máximo quatro colunas de agrupamento, e a ordem importa: um filtro apenas por `api_key_name`
-  elimina blocos; um filtro apenas por `status`, não.
+- **Particionada por dia em `timestamp`**, para que uma consulta limitada por data examine somente
+  esses dias.
+- **Agrupada por `api_key_name`, `provider`, `model`, `status`** (nessa ordem), para que a filtragem por
+  quem executou, para onde foi enviada ou se falhou elimine blocos dentro de cada partição. O
+  BigQuery permite no máximo quatro colunas de agrupamento, e a ordem é importante: um filtro
+  somente em `api_key_name` elimina blocos, mas um filtro somente em `status` não.
 - **Retenção opcional de partições** por meio de `partitionExpirationDays` (0 mantém tudo), aplicada
   quando a tabela é criada.
 
-Ambas as configurações se aplicam no momento da criação. Uma tabela existente mantém a organização que já possui, portanto
-aponte o destino para um novo ID de tabela se quiser adotá-las.
+Ambas as configurações são aplicadas no momento da criação. Uma tabela existente mantém o layout
+que já possui; portanto, aponte o destino para um novo id de tabela se quiser adotá-las.
 
-`tests/unit/log-export-bigquery.test.ts` verifica se o mapeador e o esquema da tabela permanecem
-sincronizados, para que uma nova coluna do log de chamadas não seja descartada silenciosamente durante a exportação.
+`tests/unit/log-export-bigquery.test.ts` garante que o mapeador e o esquema da tabela permaneçam
+sincronizados, para que uma nova coluna de registro de chamada não seja silenciosamente descartada
+durante a exportação.
 
-Os lotes são divididos **tanto** pela quantidade de linhas quanto pelo tamanho serializado em bytes. Apenas a quantidade de linhas não é suficiente
-quando os payloads são exportados: 500 linhas contendo prompts podem ocupar dezenas de megabytes, e insertAll
-rejeita requisições acima de 10 MB. Cada bloco é fechado ao atingir 500 linhas ou 9 MB, o que ocorrer primeiro.
+Os lotes são divididos considerando **tanto a quantidade de linhas quanto os bytes serializados**.
+A quantidade de linhas, por si só, não é suficiente quando os payloads são exportados: 500 linhas
+contendo prompts podem ocupar dezenas de megabytes, e insertAll rejeita uma solicitação acima de
+10 MB. Os blocos são encerrados em 500 linhas ou 9 MB, o que ocorrer primeiro.
 
 ---
 
 ## 5. Destino de traces OTLP/HTTP
 
-A configuração usa `type: "otlp-http"`. Esta é uma exportação agendada, baseada em cursor, dos
-logs de chamadas persistidos, não o destino de eventos de roteamento em tempo real de melhor esforço em
-`open-sse/services/routing/otel.ts`. Ela não lê nem altera as variáveis de ambiente,
-os temporizadores ou os buffers desse destino. Habilitar ambos pode produzir dois tipos independentes de spans;
-use o escopo de instrumentação `omniroute.log-export` para distinguir esses spans de logs de chamadas.
+A configuração usa `type: "otlp-http"`. Esta é uma exportação agendada, com cursor, de
+logs de chamadas persistidos, e não o sink de eventos de roteamento em tempo real de melhor
+esforço em `open-sse/services/routing/otel.ts`. Ela não lê nem altera as variáveis de
+ambiente, os temporizadores ou os buffers desse sink. Habilitar ambos pode produzir dois
+tipos independentes de spans; use o escopo de instrumentação `omniroute.log-export` para
+distinguir esses spans de logs de chamadas.
 
 | Chave                    | Padrão / finalidade                                                                           |
 | ------------------------ | --------------------------------------------------------------------------------------------- |
-| `endpoint`               | URL HTTP(S) completa de traces obrigatória; nenhum sufixo `/v1/traces` é acrescentado         |
-| `headers`                | Linhas `Name: value` ou objeto JSON de strings opcionais; criptografados                      |
-| `requestHeaderAllowlist` | Vazia (desativada); nomes/prefixos de cabeçalhos do cliente a capturar como atributos de span |
+| `endpoint`               | URL completa de traces HTTP(S) obrigatória; nenhum sufixo `/v1/traces` é anexado              |
+| `headers`                | Linhas opcionais `Name: value` ou objeto JSON de strings; criptografado                       |
+| `requestHeaderAllowlist` | Vazio (desativado); nomes/prefixos de cabeçalhos do cliente a capturar como atributos do span |
 | `serviceName`            | `omniroute`; recurso `service.name`                                                           |
 | `langfuseMapping`        | `false`; adiciona atributos de geração/sessão/usuário do Langfuse                             |
 | `identity`               | `pseudonymous`, `keyName` ou `none`                                                           |
@@ -274,65 +283,72 @@ use o escopo de instrumentação `omniroute.log-export` para distinguir esses sp
 | `timeoutMs`              | `30000` por tentativa HTTP                                                                    |
 | `environment`            | Não definido; `langfuse.environment` opcional                                                 |
 
-O painel genérico renderiza esses campos. `paths` aceita um array via API ou uma área de texto
-com caminhos exatos separados por quebras de linha/vírgulas. Embeddings, rerank e outros caminhos são
-ignorados, a menos que sejam explicitamente permitidos. As linhas ignoradas ainda avançam o cursor; os contadores
-`exported`/`exportedTotal` do executor existente contam as linhas de origem processadas, incluindo as linhas
-filtradas, em vez dos spans aceitos. A filtragem é feita no processo filho, sem alterar seu
-contrato de IPC/cursor.
+O dashboard genérico renderiza esses campos. `paths` aceita uma matriz da API ou uma área
+de texto com caminhos exatos separados por novas linhas/vírgulas. Embeddings, rerank e
+outros caminhos são ignorados, a menos que sejam explicitamente permitidos. As linhas
+ignoradas ainda avançam o cursor; os contadores `exported`/`exportedTotal` do runner
+existente contam as linhas de origem processadas, incluindo as filtradas, em vez dos spans
+aceitos. A filtragem é feita no processo filho, sem alterar o contrato de IPC/cursor.
 
-A validação de URL usa a função auxiliar `parseAndValidateNonMetadataUrl`, que não depende do banco de dados, de
+A validação de URL usa o helper `parseAndValidateNonMetadataUrl` sem dependência do DB, de
 `src/shared/network/outboundUrlGuard.ts`: a política `block-metadata`. Ela tem as mesmas
-verificações incondicionais de metadados/protocolo/credenciais embutidas do validador de webhooks com
-URLs privadas habilitadas, mas permite deliberadamente destinos localhost/LAN sem uma
-sobrescrita global por flag de recurso. Isso permite endpoints auto-hospedados do Langfuse, Phoenix, Tempo e Collector,
-incluindo endpoints HTTP privados. Hosts de metadados de nuvem são sempre bloqueados.
-Redirecionamentos não são seguidos, portanto um coletor não pode redirecionar credenciais para outro host.
-Assim como a proteção lexical de URL existente, isso não fixa a resolução DNS; configure apenas
-hosts controlados pelo operador. Prefira HTTPS sempre que o endpoint não estiver em uma rede confiável.
+verificações incondicionais de metadados/protocolo/credenciais incorporadas do validador de
+webhook, com URLs privadas permitidas, mas deliberadamente permite destinos localhost/LAN
+sem uma substituição global de feature flag. Isso permite endpoints autohospedados do
+Langfuse, Phoenix, Tempo e Collector, incluindo endpoints HTTP privados. Hosts de
+metadados de nuvem são sempre bloqueados. Redirecionamentos não são seguidos, portanto um
+collector não pode redirecionar credenciais para um host diferente. Assim como o guard de
+URL léxico existente, isso não fixa a resolução DNS; configure apenas hosts controlados pelo
+operador. Prefira HTTPS sempre que o endpoint não estiver em uma rede confiável.
 
 ### Payload e entrega
 
-O JSON OTLP/HTTP (`ExportTraceServiceRequest`, `Content-Type: application/json`) transporta um
-span CLIENT por linha permitida, nomeado pelo caminho exato da solicitação. A nomeação por caminho distingue
-Chat Completions, Responses e Messages sem incorporar dados de modelo ou identidade no
-nome do span. Os atributos de recurso incluem `service.name` e o `service.version` do pacote.
+O JSON OTLP/HTTP (`ExportTraceServiceRequest`, `Content-Type: application/json`) transporta
+um span CLIENT por linha permitida, nomeado pelo caminho exato da solicitação. A nomeação
+por caminho distingue Chat Completions, Responses e Messages sem incorporar dados do modelo
+ou da identidade ao nome do span. Os atributos do recurso incluem `service.name` e a
+`service.version` do pacote.
 
-O registrador normal de tentativas de chat (`open-sse/handlers/chatCore/attemptLogging.ts`) grava
-`duration = Date.now() - startTime` na conclusão e não fornece um timestamp;
-`saveCallLogOperation` em `src/lib/usage/callLogs.ts` usa por padrão o horário da gravação
-(conclusão) como timestamp. Portanto, a exportação define fim = timestamp da linha e início = fim − duração
-(milissegundos, convertidos em nanossegundos decimais). Timestamps históricos fornecidos pelo
-chamador também são preservados como horário de término; não há um discriminador de início/conclusão por linha.
-Uma duração nula se torna zero. Timestamps inválidos/ausentes fazem o lote falhar em vez de criar
-spans não determinísticos. `ttftMs` aceita nulo e é mapeado para `omniroute.ttft_ms`.
+O logger normal de tentativas de chat (`open-sse/handlers/chatCore/attemptLogging.ts`)
+grava `duration = Date.now() - startTime` na conclusão e não fornece um timestamp;
+`saveCallLogOperation` em `src/lib/usage/callLogs.ts` define o timestamp como padrão para o
+momento da gravação (conclusão). Portanto, a exportação define end = timestamp da linha e
+start = end − duração (milissegundos, convertidos em nanossegundos decimais). Timestamps
+históricos fornecidos pelo chamador também são preservados como o horário de término; não há
+um discriminador de início/conclusão por linha. Uma duração nula se torna zero. Timestamps
+inválidos/ausentes fazem o lote falhar, em vez de criar spans não determinísticos.
+`ttftMs` é anulável e mapeia para `omniroute.ttft_ms`.
 
-Os atributos incluem `gen_ai.operation.name="chat"`, provedor, modelo solicitado/da resposta,
-tokens de entrada/saída, tokens opcionais de leitura de cache/criação de cache/raciocínio, status HTTP,
-combo, origem do cache, tag de sessão e ID de correlação. Valores inteiros OTLP e timestamps
-são strings decimais; strings, booleanos e números fracionários usam suas variantes nativas de
-valor OTLP. Spans de erro têm status ERROR e uma mensagem de status sanitizada. O registro
-canônico não tem uma URL do host upstream, portanto `server.address` é omitido em vez de identificar
-incorretamente o coletor como o servidor do modelo. O custo não é exportado.
+Os atributos incluem `gen_ai.operation.name="chat"`, provedor, modelo solicitado/de
+resposta, tokens de entrada/saída, tokens opcionais de leitura/criação de cache e de
+raciocínio, status HTTP, combo, origem do cache, tag de sessão e ID de correlação. Valores
+inteiros OTLP e timestamps são strings decimais; strings, booleanos e números fracionários
+usam suas variantes nativas de valor OTLP. Spans de erro têm status ERROR e uma mensagem de
+status sanitizada. O registro canônico não possui a URL do host upstream, portanto
+`server.address` é omitido, em vez de identificar incorretamente o collector como o
+servidor do modelo. O custo não é exportado.
 
-Somente `includeBodies=true` carrega o conteúdo. Com `langfuseMapping=false`,
+Somente `includeBodies=true` hidrata o conteúdo. Com `langfuseMapping=false`,
 `gen_ai.input.messages` / `gen_ai.output.messages` transportam o JSON sanitizado do corpo da
-solicitação/resposta conforme armazenado pelo OmniRoute (canonicalizado quando analisável), não um array
-de mensagens reestruturado segundo as convenções semânticas. Corpos truncados/não JSON permanecem como texto bruto. Com `langfuseMapping=true`,
-os corpos são emitidos apenas como `langfuse.observation.input` / `langfuse.observation.output`;
-os atributos `gen_ai.*.messages` são omitidos para que cada corpo seja enviado uma única vez. Ambos os modos
-herdam `maxBodyBytes` do fluxo de carregamento existente;
-`omniroute.bodies_truncated=true` indica truncamento.
-Nenhum snapshot adicional do pipeline nem leitura de artefatos não sanitizados é adicionado por este destino;
-a captura opcional de cabeçalhos da solicitação usa o snapshot do cliente já carregado descrito abaixo.
-Use uma frequência em minutos, como `OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, ao exportar
-corpos, em vez de acumular uma fila de pendências por hora.
+solicitação/resposta conforme armazenado pelo OmniRoute (canônico quando analisável), e não
+uma matriz de mensagens semconv remodelada. Corpos truncados/não JSON permanecem como texto
+bruto. Com `langfuseMapping=true`, os corpos são emitidos somente como
+`langfuse.observation.input` / `langfuse.observation.output`; os atributos
+`gen_ai.*.messages` são omitidos para que cada corpo seja enviado uma única vez. Ambos os
+modos herdam `maxBodyBytes` do caminho de hidratação existente;
+`omniroute.bodies_truncated=true` marca o truncamento.
+Nenhum snapshot adicional do pipeline ou leitura de artefatos não sanitizados é adicionado
+por este destino; a captura opcional de cabeçalhos da solicitação usa o snapshot existente
+e hidratado do cliente descrito abaixo. Use uma cadência de nível de minuto, como
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"`, ao exportar corpos, em vez de acumular um
+backlog de uma hora.
 
-### Cabeçalhos opcionais de solicitação do cliente
+### Cabeçalhos opcionais da solicitação do cliente
 
-A captura de cabeçalhos é **desativada por padrão**. Defina `requestHeaderAllowlist` na configuração do destino
+A captura de cabeçalhos está **desativada por padrão**. Defina `requestHeaderAllowlist` na configuração do destino
 e habilite **Exportar prompts e respostas** (`includeBodies: true` no destino).
-A lista de permissões aceita um array via API ou uma área de texto com nomes separados por quebras de linha/vírgulas:
+A lista de permissões aceita uma matriz da API ou uma área de texto com nomes separados por
+novas linhas/vírgulas:
 
 ```json
 {
@@ -340,77 +356,44 @@ A lista de permissões aceita um array via API ou uma área de texto com nomes s
 }
 ```
 
-Os nomes são comparados de forma exata, sem diferenciar maiúsculas de minúsculas, a menos que um único `*` no final selecione um prefixo
-não vazio de nome de cabeçalho. Um `*` isolado, curingas no meio do nome e nomes de cabeçalhos HTTP inválidos são rejeitados.
-São permitidos no máximo 64 seletores, cada um com um nome/prefixo de até 256 bytes ASCII.
+Os nomes correspondem sem diferenciar maiúsculas de minúsculas e exatamente, a menos que um único `*` terminal selecione um prefixo não vazio de nome de cabeçalho. `*` sozinho, curingas incorporados e nomes de cabeçalho HTTP inválidos são rejeitados. Há no máximo 64 seletores, cada um com um nome/prefixo de no máximo 256 bytes ASCII.
 Essa configuração é separada de `headers`, que autentica o exportador no coletor.
 
-A captura lê apenas `pipeline_client_request`, preenchido a partir de
-`clientRawRequest` (ou do legado `clientRequest`) do pipeline detalhado salvo. Ela nunca recorre aos cabeçalhos da requisição ao provedor.
-O registro detalhado do pipeline precisa ter sido habilitado quando a requisição foi registrada. Com
-`includeBodies` desabilitado, ou se o JSON do snapshot do cliente estiver ausente, corrompido ou truncado, nenhum atributo
-de cabeçalho será emitido. Aumentar `maxBodyBytes` pode evitar o truncamento do snapshot durante a exportação;
-isso não pode restaurar detalhes que nunca foram salvos. Um snapshot com mais de 1 MiB ou contendo mais de
-256 entradas de cabeçalho é ignorado. A exportação existente de prompts/respostas permanece habilitada junto com
-a captura de cabeçalhos; a lista de permissões não oferece um modo de hidratação somente de cabeçalhos.
+A captura lê apenas `pipeline_client_request`, preenchido a partir de `clientRawRequest` (ou do legado `clientRequest`) do pipeline detalhado salvo. Ela nunca recorre aos cabeçalhos da solicitação do provedor. O registro detalhado do pipeline deve ter sido habilitado quando a solicitação foi registrada. Com `includeBodies` desabilitado, ou com JSON do snapshot do cliente ausente, corrompido ou truncado, nenhum atributo de cabeçalho é emitido. Aumentar `maxBodyBytes` pode evitar o truncamento do snapshot no momento da exportação; isso não pode restaurar detalhes que nunca foram salvos. Um snapshot com mais de 1 MiB ou contendo mais de 256 entradas de cabeçalho é ignorado. A exportação existente de prompt/resposta continua habilitada junto com a captura de cabeçalhos; a lista de permissões não fornece um modo de hidratação somente de cabeçalhos.
 
-Os valores selecionados se tornam arrays de strings OTLP `http.request.header.<full lowercase header name>`,
-mesmo quando há apenas uma string. Por exemplo, `X-OmniRoute-Meta-Team: example-team` se torna
+Os valores selecionados tornam-se matrizes de strings OTLP `http.request.header.<full lowercase header name>`, mesmo para uma única string. Por exemplo, `X-OmniRoute-Meta-Team: example-team` torna-se
 `http.request.header.x-omniroute-meta-team` com
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}`.
-O prefixo completo é preservado: esses são cabeçalhos comuns, sem análise de campos de negócio nem
-conversão para `omniroute.metadata.*` / metadados do Langfuse. `langfuseMapping` não altera a semântica
-dos cabeçalhos. Um `User-Agent` selecionado com valor único também define o atributo escalar padrão
-`user_agent.original`. Vírgulas dentro de um valor não são usadas para separá-lo. Variantes de maiúsculas e minúsculas são mescladas na ordem
-das entradas salvas; qualquer variante inválida faz com que o cabeçalho inteiro seja omitido. Os atributos são ordenados pelo nome em minúsculas.
+O prefixo completo é preservado: estes são cabeçalhos comuns, sem análise de campos de negócio ou conversão para `omniroute.metadata.*` / metadados do Langfuse. `langfuseMapping` não altera a semântica dos cabeçalhos. Um `User-Agent` selecionado com valor único também define o escalar padrão `user_agent.original`. Vírgulas dentro de um valor não são separadas. Variantes de maiúsculas e minúsculas são mescladas na ordem das entradas salvas; qualquer variante inválida omite todo esse cabeçalho. Os atributos são ordenados pelo nome em minúsculas.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, cabeçalhos de chave de API, nomes contendo
-marcadores de auth/token/secret/password/credential e credenciais internas do gateway são sempre
-excluídos, mesmo que sejam selecionados ou estejam parcialmente mascarados no armazenamento. Os padrões conhecidos de credenciais reutilizam
-o detector compartilhado de credenciais; marcadores de ocultação são omitidos, não exportados como valores seguros.
-Somente strings e arrays não vazios de strings são aceitos; números ou objetos não são convertidos.
-Nomes inválidos, chaves de protótipo, caracteres de controle (exceto tabulação horizontal) e Unicode malformado
-são ignorados sem causar falha no lote nem reproduzir seu conteúdo nos erros.
+`Authorization`, `Proxy-Authorization`, `Cookie`, `Set-Cookie`, cabeçalhos de chave de API, nomes que contenham marcadores de autenticação/token/segredo/senha/credencial e credenciais internas do gateway são sempre excluídos, mesmo quando selecionados ou parcialmente mascarados no armazenamento. Padrões de credenciais conhecidos reutilizam o detector de credenciais compartilhado; marcadores de redação são omitidos, não exportados como valores seguros. Apenas strings e matrizes de strings não vazias são aceitas; números ou objetos não são convertidos. Nomes inválidos, chaves de protótipo, caracteres de controle (exceto tabulação horizontal) e Unicode malformado são ignorados sem falhar o lote ou refletir seu conteúdo nos erros.
 
-Cada span captura no máximo 32 cabeçalhos, 16 valores por cabeçalho, 4096 bytes UTF-8 por valor
-e um total de 16384 bytes UTF-8 entre os nomes e valores dos cabeçalhos capturados. Cabeçalhos grandes demais ou inválidos
-são omitidos por inteiro, não truncados. A seleção é uma decisão de privacidade do operador: nomes aparentemente seguros
-ainda podem conter dados pessoais, e esses limites/detectores não são um mecanismo geral de remoção de informações de identificação pessoal (PII).
+Cada span captura no máximo 32 cabeçalhos, 16 valores por cabeçalho, 4096 bytes UTF-8 por valor e 16384 bytes UTF-8 totais entre os nomes e valores dos cabeçalhos capturados. Cabeçalhos muito grandes ou inválidos são omitidos por inteiro, não truncados. A seleção é uma decisão de privacidade do operador: nomes aparentemente seguros ainda podem conter dados pessoais, e esses limites/detectores não são um sanitizador geral de PII.
 
 ### Limites de entrega
 
-As requisições são limitadas a 500 spans e 4 MiB de JSON UTF-8, incluindo o envelope.
-O tamanho de cada span permitido é verificado antes da primeira requisição de um lote do cursor. Um
-span individual maior que o limite impede o envio de qualquer parte desse lote e causa uma falha com orientação para reduzir
-`maxBodyBytes`; ele não é descartado silenciosamente. A verificação prévia mantém apenas referências aos registros e
-contagens de bytes, descartando cada span/JSON temporário; os spans são reconstruídos para blocos de tamanho limitado,
-em vez de manter uma segunda cópia serializada do lote. Respostas HTTP 408/429/5xx, falhas de rede e tempos limite permitem no máximo
-três tentativas, com espera exponencial de 250/500 ms entre elas. Segundos ou datas HTTP de `Retry-After`
-podem estender a espera para até 5 segundos. Outros status causam falha imediata. A rejeição parcial OTLP 2xx também lança um erro em vez de
-confirmar um span perdido; confirmações vazias ou em JSON válido são aceitas, com um
-limite de leitura da resposta de 64 KiB.
+As solicitações são limitadas a 500 spans e 4 MiB de JSON UTF-8, incluindo o envelope.
+Cada span permitido tem seu tamanho verificado antes da primeira solicitação de um lote do cursor. Um span individual maior que o limite não envia nenhuma parte desse lote e falha com instruções para reduzir `maxBodyBytes`; ele não é descartado silenciosamente. A pré-verificação retém apenas referências aos registros e contagens de bytes, descartando cada span/JSON temporário; os spans são reconstruídos para partes limitadas, em vez de manter uma segunda cópia serializada do lote. HTTP 408/429/5xx, falhas de rede e timeouts recebem no máximo
+três tentativas, com backoff exponencial de 250/500 ms. `Retry-After` em segundos ou datas HTTP
+pode estender um atraso até 5 segundos. Outros status falham imediatamente. A rejeição parcial 2xx do OTLP também gera um erro, em vez de confirmar um span perdido; confirmações JSON vazias ou válidas são aceitas, com um limite de leitura da resposta de
+64 KiB.
 
-Os erros contêm apenas informações próprias do exportador: status HTTP, classe de retentativa, tentativas e contagens
-de spans enviados, ou mensagens fixas de falha de confirmação/rede. Os corpos das respostas do coletor,
-as contagens de sucesso parcial e os cabeçalhos de resposta nunca são copiados para erros, logs ou o
-painel. Um lote com falha ou parcialmente aceito não é confirmado: o destino exibe
+Os erros contêm apenas fatos pertencentes ao exportador: status HTTP, classe de repetição, tentativas e contagens de spans enviados, ou uma mensagem fixa de falha de confirmação/rede. Corpos de resposta do coletor, contagens de sucesso parcial e cabeçalhos de resposta nunca são copiados para erros, logs ou o painel. Um lote com falha ou aceito parcialmente não é confirmado: o destino mostra
 Falhando com esse status, o cursor permanece no último lote confirmado e a próxima execução
-reenvia as mesmas linhas. Status permanentes continuam causando falhas até que o coletor ou a configuração
-sejam corrigidos. Use os logs do próprio coletor para obter detalhes das respostas. Os resumos de erros dos logs de chamadas mantêm
-sua ocultação separada.
-`prepare()` não provisiona nada; Testar envia via POST exatamente `{"resourceSpans":[]}` e informa
-o status HTTP sem gravar spans de logs de chamadas.
+reenvia as mesmas linhas. Status permanentes continuam falhando até que o coletor ou a configuração seja corrigido. Use os próprios logs do coletor para obter detalhes da resposta. Os resumos de erros do registro de chamadas mantêm sua redação separada.
+`prepare()` não provisiona nada; Test faz um POST exatamente de `{"resourceSpans":[]}` e informa
+o status HTTP sem gravar spans no registro de chamadas.
 
-Os IDs de trace e de span são os primeiros 32/16 dígitos hexadecimais do SHA-256 de
-`"omniroute.trace\\0" + callLogId` e `"omniroute.span\\0" + callLogId`. Os reenvios contêm
+Os IDs de trace e os IDs de span são os primeiros 32/16 dígitos hexadecimais de SHA-256 sobre
+`"omniroute.trace\\0" + callLogId` e `"omniroute.span\\0" + callLogId`. Os reenvios carregam
 IDs idênticos. Isso não é uma garantia de desduplicação: alguns backends, incluindo a ingestão do Langfuse
-v4, não desduplicam spans com o mesmo ID. Uma falha abrupta ou falha parcial de um bloco pode
-reenviar, no máximo, o único lote do cursor não confirmado; esse lote inteiro pode ser duplicado,
-não apenas seu último bloco HTTP. Escolha o tamanho do lote do cursor levando essa contrapartida em consideração.
+v4, não deduplicam spans com o mesmo ID. Uma falha ou falha parcial de uma parte pode
+reenviar no máximo o lote do cursor não confirmado; todo esse lote pode ser duplicado,
+não apenas sua última parte HTTP. Escolha o tamanho do lote do cursor considerando essa troca.
 
 ### Exemplo do Langfuse
 
-Configure estes campos para uma instância auto-hospedada do Langfuse:
+Configure estes campos para uma instância do Langfuse hospedada por você:
 
 ```json
 {
@@ -423,44 +406,44 @@ Configure estes campos para uma instância auto-hospedada do Langfuse:
 }
 ```
 
-Monte o valor de Authorization localmente como Base64 da string literal `public-key:secret-key`
+Crie o valor de Authorization localmente como Base64 da string literal `public-key:secret-key`
 (por exemplo, com `Buffer.from(publicKey + ":" + secretKey).toString("base64")`).
 Não cole credenciais reais em logs, capturas de tela ou issues. O mapeamento define automaticamente
-`x-langfuse-ingestion-version: 4`; Authorization continua sendo fornecido em `headers`.
-Tanto os cabeçalhos quanto o salt de identidade gerado usam o mecanismo existente de campos secretos
-criptografados e os placeholders da API; `STORAGE_ENCRYPTION_KEY` é obrigatório.
+`x-langfuse-ingestion-version: 4`; Authorization ainda é fornecido em `headers`.
+Tanto os cabeçalhos quanto o salt de identidade gerado usam o mecanismo existente de campos secretos criptografados e placeholders de API; `STORAGE_ENCRYPTION_KEY` é obrigatório.
 
 O mapeamento adiciona tipo/modelo de geração, detalhes de uso em JSON (entrada/saída/total e chaves
-de cache disponíveis), snapshots de entrada/saída em JSON, nível ERROR/DEFAULT, mensagem de status sanitizada,
-nome do trace, ID da sessão, ambiente opcional e
+de cache disponíveis), instantâneos de entrada/saída em JSON, nível ERROR/DEFAULT, mensagem de status
+sanitizada, nome do trace, id da sessão, ambiente opcional e
 `langfuse.observation.metadata.<key>` filtrável para provedor, modelo solicitado, caminho, combinação, origem
-do cache e status. `langfuse.observation.completion_start_time` segue o formato ISO 8601 em
+do cache e status. `langfuse.observation.completion_start_time` é ISO 8601 no
 início + TTFT somente quando o TTFT é conhecido e está dentro da duração. Nenhum atributo de custo é enviado.
 
 Os modos de identidade se aplicam a `langfuse.user.id`:
 
-- `pseudonymous` (padrão): HMAC-SHA256 do ID interno da chave de API com um salt aleatório
-  de 32 bytes por destino. O salt é gerado na criação, se estiver ausente, criptografado
-  como `identitySalt`, nunca retornado e mantido durante as edições. Os IDs brutos das chaves nunca são
-  incluídos nos atributos de span. Recriar/rotacionar o salt de um destino altera as identidades.
-- `keyName`: o nome configurado da chave de API, revelando intencionalmente esse rótulo definido pelo operador.
-- `none`: nenhum ID de usuário. As tags de sessão continuam sendo exportadas quando presentes; esses modos não
+- `pseudonymous` (padrão): HMAC-SHA256 do id interno da chave de API com um salt aleatório de 32 bytes
+  por destino. O salt é gerado na criação, caso esteja ausente, criptografado como `identitySalt`, nunca
+  retornado e mantido durante as edições. Ids brutos de chave nunca são colocados nos atributos dos spans.
+  Recriar/alternar o salt de um destino altera as identidades.
+- `keyName`: o nome configurado da chave de API, revelando intencionalmente esse rótulo do operador.
+- `none`: nenhum id de usuário. As tags de sessão ainda são exportadas quando presentes; esses modos não
   anonimizam conteúdo arbitrário de prompts nem rótulos de sessão/correlação fornecidos pelo operador.
 
-### Iniciar sem preenchimento retroativo
+### Iniciar sem um preenchimento retroativo
 
-Somente na criação, habilite **Iniciar da posição atual (ignorar logs existentes)** ou passe
+Somente na criação, habilite **Iniciar na posição atual (ignorar logs existentes)** ou passe
 `startFromCurrentPosition: true` no nível superior do payload da API de criação. Isso inicializa
-`cursor_row_id` com o maior rowid atual dos logs de chamadas retidos, usando os utilitários de cursor
-existentes, sem migração. O padrão é false (cursor 0 e preenchimento retroativo do histórico retido).
-Essa não é uma configuração de redefinição do cursor durante a atualização.
+`cursor_row_id` com o rowid máximo atual do registro de chamadas retido usando os helpers de cursor
+existentes, sem uma migração. O padrão é false (cursor 0 e preenchimento retroativo do histórico retido).
+Essa configuração não redefine o cursor durante uma atualização.
 
-A adição compartilhada de `ttftMs` também adiciona uma coluna `ttft_ms` que aceita valores nulos ao mapeador do BigQuery
-e ao esquema de novas tabelas: seu teste de esquema exige que cada campo de registro canônico tenha uma
-coluna. As tabelas existentes continuam exportando sem alterações: `prepare()` lê o esquema da tabela e
-omite apenas `ttft_ms` quando essa coluna está ausente. Adicione a coluna INT64 que aceita valores nulos para obter o TTFT
-na próxima execução ou use uma nova tabela. Não é necessário PATCH, alteração automática de esquema nem permissões
-adicionais; todos os outros campos de linha mantêm a verificação estrita de esquema.
+A adição compartilhada de `ttftMs` também adiciona uma coluna anulável `ttft_ms` ao mapeador do BigQuery
+e ao esquema de novas tabelas: o teste de esquema exige que cada campo de registro canônico tenha uma
+coluna. As tabelas existentes continuam exportando sem alterações: `prepare()` lê o esquema da tabela
+e omite apenas `ttft_ms` quando essa coluna está ausente. Adicione a coluna INT64 anulável para obter o TTFT
+na próxima execução ou use uma tabela nova. A coluna opcional de TTFT não aciona uma atualização de esquema. As colunas de evidência de uso
+seguem o fluxo condicional de compatibilidade com adesão explícita abaixo; os demais campos das linhas mantêm
+a verificação estrita do esquema.
 
 ---
 
@@ -485,15 +468,31 @@ Duas regras para um novo destino:
 
 ---
 
-## 7. Operando a funcionalidade
+## 7. Operação
 
 - **Painel**: Integrações → Exportação de logs. Adicione um destino, execute **Testar** para verificar as credenciais
   sem gravar linhas e, em seguida, habilite-o.
-- **Pendências**: cada cartão de destino mostra as linhas pendentes e o cursor; `GET
-/api/log-export/status` retorna os mesmos números mais as últimas 20 execuções do job.
-- **Um destino com falha não faz os outros falharem** — o resumo da execução registra o
-  status por destino em `last_status` / `last_error`, e o histórico de execuções do job mantém os dados agregados.
-- **Excluir um destino exclui seu cursor.** Adicioná-lo novamente inicia a partir do registro
-  de chamada retido mais antigo, o que reenvia linhas que o destino talvez já tenha. No BigQuery, o
-  `insertId` por linha absorve essa duplicação apenas dentro da janela de desduplicação do próprio BigQuery, portanto, prefira desabilitar
-  um destino em vez de excluí-lo.
+- **Backlog**: cada cartão de destino mostra as linhas pendentes e o cursor; `GET
+/api/log-export/status` retorna os mesmos valores, além das últimas 20 execuções de tarefas.
+- **Uma falha em um destino não faz os outros falharem** — o resumo da execução registra o
+  status por destino em `last_status` / `last_error`, e o histórico de execuções mantém o agregado.
+- **Excluir um destino exclui o cursor correspondente.** Adicioná-lo novamente começa pelo log de chamadas
+  retido mais antigo, reenviando linhas que o destino talvez já contenha. No BigQuery, o `insertId` por linha
+  absorve isso apenas dentro da própria janela de desduplicação do BigQuery; portanto, prefira desabilitar
+  um destino a excluí-lo.
+
+### Compatibilidade do esquema de evidências de uso
+
+As novas tabelas do BigQuery incluem `usage_evidence` anulável (STRING contendo JSON) e
+`usage_estimated` (BOOL). Com `autoCreate` habilitado, uma tabela existente pode receber
+somente essas colunas anuláveis ausentes. O exportador preserva todo o esquema existente,
+incluindo os metadados dos campos, e envia um PATCH condicional usando o etag retornado. Uma
+alteração simultânea no esquema faz a exportação falhar em vez de sobrescrevê-lo; a próxima
+execução lê a tabela novamente.
+
+Com `autoCreate` desabilitado, adicione essas colunas antes de exportar registros
+com evidências de uso. A ausência de metadados de esquema/etag ou uma atualização
+malsucedida também impede inserções que contenham evidências. O cursor de exportação não avança
+em caso de falha, e as evidências nunca são descartadas silenciosamente. A retenção de logs local
+continua sendo aplicada enquanto uma exportação está bloqueada; portanto, resolva a falha antes que
+as linhas de origem retidas expirem.

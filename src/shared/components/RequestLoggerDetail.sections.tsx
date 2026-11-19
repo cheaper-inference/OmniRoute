@@ -54,6 +54,29 @@ export function isBodySizeLimitOmission(value) {
   return isSizeLimitOmissionMarker(value);
 }
 
+// A "copied" flag that resets itself after a short delay. The reset timer is cleared on unmount:
+// left running, it fired after the component (and, in tests, jsdom) was gone (#19329).
+// PayloadSection, StreamSection and the panel's "copy all" share it.
+export function useTransientFlag(resetMs = 2000) {
+  const [active, setActive] = useState(false);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(
+    () => () => {
+      if (timerRef.current !== null) clearTimeout(timerRef.current);
+    },
+    []
+  );
+  const trigger = () => {
+    setActive(true);
+    if (timerRef.current !== null) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => {
+      timerRef.current = null;
+      setActive(false);
+    }, resetMs);
+  };
+  return [active, trigger] as const;
+}
+
 // ─── Payload Code Block ─────────────────────────────────────────────────────
 // Renders parsed payloads as a collapsible JSON tree (the kit JsonTree) so
 // deeply nested request/response bodies (tool args, message arrays) can be
@@ -77,7 +100,7 @@ export function PayloadSection({
   const t = useTranslations("requestLogger.detail");
   const resolvedSectionId = sectionId || title;
   const expandLevel = useJsonTreeExpandLevel(resolvedSectionId);
-  const [copied, setCopied] = useState(false);
+  const [copied, flashCopied] = useTransientFlag();
   const [open, setOpen] = useState(defaultOpen);
   const treeContainerRef = useRef(null);
 
@@ -93,10 +116,7 @@ export function PayloadSection({
 
   const handleCopy = async () => {
     const success = await onCopy();
-    if (success !== false) {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    }
+    if (success !== false) flashCopied();
   };
 
   useTimestampTitles(treeContainerRef, open && parsedJson !== null);
@@ -105,9 +125,7 @@ export function PayloadSection({
     <div>
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center gap-3">
-          <h3 className="text-[11px] text-text-muted uppercase tracking-wider font-semibold">
-            {title}
-          </h3>
+          <h3 className="text-[11px] text-text-muted uppercase">{title}</h3>
           {collapsible && (
             <Button
               variant="ghost"
@@ -306,9 +324,7 @@ export function ConversationContextSection({ log, detail }) {
     <div>
       <div className="flex items-center justify-between gap-3 mb-2">
         <div className="flex items-center gap-3">
-          <h3 className="text-[11px] text-text-muted uppercase tracking-wider font-semibold">
-            {t("conversationContext")}
-          </h3>
+          <h3 className="text-[11px] text-text-muted uppercase">{t("conversationContext")}</h3>
           <Button
             variant="ghost"
             size="icon-sm"
