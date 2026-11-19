@@ -20,6 +20,7 @@ import { applyCustomHeaders } from "./default/customHeaders.ts";
 import {
   CustomJsonError,
   type CustomJsonConfig,
+  assertCustomJsonKeyTransport,
   buildCustomJsonHeaders,
   buildCustomJsonRequest,
   extractCustomJsonText,
@@ -102,6 +103,9 @@ type PreparedRequest = {
 function prepareRequest(input: ExecuteInput, providerData: JsonRecord, endpoint: string) {
   const config = normalizeCustomJsonConfig(providerData.customJson, endpoint);
   const payload = buildCustomJsonRequest(config, input.model, input.body);
+  // Also checked by normalizeCustomJsonConfig; repeated at the point the key is attached so
+  // a node stored before the rule fails closed instead of sending the key over plain HTTP.
+  assertCustomJsonKeyTransport(config, endpoint);
   const built = buildCustomJsonHeaders(config, input.credentials?.apiKey);
   const headers: Record<string, string> = { ...built.base };
   applyCustomHeaders(headers, providerData.customHeaders);
