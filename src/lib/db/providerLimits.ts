@@ -124,13 +124,25 @@ function normalizeCacheEntry(value: unknown): ProviderLimitsCacheEntry | null {
   };
 }
 
-export function getProviderLimitsCache(connectionId: string): ProviderLimitsCacheEntry | null {
-  if (isBuildPhase || isCloud) return null;
-  const db = getDbInstance() as unknown as DbLike;
+function readStoredCacheEntry(db: DbLike, connectionId: string): ProviderLimitsCacheEntry | null {
   const row = db
     .prepare("SELECT value FROM key_value WHERE namespace = ? AND key = ?")
     .get(PROVIDER_LIMITS_CACHE_NAMESPACE, connectionId) as KeyValueRow | undefined;
-  const cached = row?.value ? normalizeCacheEntry(parseJson(row.value)) : null;
+  return row?.value ? normalizeCacheEntry(parseJson(row.value)) : null;
+}
+
+/** The persisted read time itself, before the Codex quota-state display projection. */
+export function getStoredProviderLimitsFetchedAt(connectionId: string): string | null {
+  if (isBuildPhase || isCloud) return null;
+  return (
+    readStoredCacheEntry(getDbInstance() as unknown as DbLike, connectionId)?.fetchedAt ?? null
+  );
+}
+
+export function getProviderLimitsCache(connectionId: string): ProviderLimitsCacheEntry | null {
+  if (isBuildPhase || isCloud) return null;
+  const db = getDbInstance() as unknown as DbLike;
+  const cached = readStoredCacheEntry(db, connectionId);
   const connection = db.prepare(`${CODEX_QUOTA_DISPLAY_SQL} AND id = ?`).get(connectionId) as
     CodexQuotaDisplayRow | undefined;
   return connection

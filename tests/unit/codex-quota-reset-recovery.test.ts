@@ -297,6 +297,27 @@ test("slow pre-reset poll cannot replace newer accepted post-reset routing evide
   await usage.fetchAndPersistProviderLimits(connection.id, "manual");
   assert.equal(cache.getQuotaCache(connection.id)!.quotas.weekly.remainingPercentage, 95);
 });
+test("a timed-out older poll cannot overwrite a newer persisted provider-limits read", async () => {
+  const connection = await seed();
+  const limitsDb = await import("../../src/lib/db/providerLimits.ts");
+  const newerReadAt = new Date(Date.now() + 60_000).toISOString();
+  codexUsage.setCodexUsageFetchForTests(async () => {
+    calls++;
+    // A later flight, started after this one hit the flight cap, persisted its read first.
+    limitsDb.setProviderLimitsCache(connection.id, {
+      quotas: { weekly: { used: 10, total: 100, remainingPercentage: 90 } },
+      plan: "newer-flight",
+      message: null,
+      fetchedAt: newerReadAt,
+      source: "manual",
+    });
+    return response(99);
+  });
+  const result = await usage.fetchAndPersistProviderLimits(connection.id, "manual");
+  const stored = limitsDb.getProviderLimitsCache(connection.id);
+  assert.equal(stored?.plan, "newer-flight");
+  assert.equal(result.cache.plan, "newer-flight");
+});
 test("fresh blocking window suppressing recovery still invalidates held lease", async () => {
   const connection = await seed();
   cache.getQuotaCache(connection.id)!.quotas.weekly.observedAt = Date.now();

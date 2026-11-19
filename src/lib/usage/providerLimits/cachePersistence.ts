@@ -1,5 +1,6 @@
 import {
   getProviderLimitsCache,
+  getStoredProviderLimitsFetchedAt,
   setProviderLimitsCache,
   type ProviderLimitsCacheEntry,
 } from "@/lib/db/providerLimits";
@@ -16,6 +17,12 @@ export function cacheReadObservedAt(
   readStartedAt: string
 ): string | undefined {
   return connection.provider === "codex" && usage._stale !== true ? readStartedAt : undefined;
+}
+
+/** Reads are dated at dispatch, so a later stored date means a newer read already landed. */
+function isOlderThanStoredRead(connectionId: string, fetchedAt: string): boolean {
+  const stored = Date.parse(getStoredProviderLimitsFetchedAt(connectionId) ?? "");
+  return Number.isFinite(stored) && stored > Date.parse(fetchedAt);
 }
 
 function servePreviousLimitsCache(
@@ -72,6 +79,19 @@ export function persistMergedProviderLimitsCache(
   // Don't persist error-only entries (429 etc.) — would wipe prior good cache.
   if (cache === previous && newCache.message) {
     return servePreviousLimitsCache(connectionId, connection, usage, newCache, previous);
+  }
+  // A flight detached by the flight cap still persists when it settles: it must not replace
+  // the read a later flight already stored.
+  if (
+    connection.provider === "codex" &&
+    previous &&
+    isOlderThanStoredRead(connectionId, newCache.fetchedAt)
+  ) {
+    return {
+      connection,
+      usage: { ...usage, quotas: previous.quotas, fetchedAt: previous.fetchedAt },
+      cache: previous,
+    };
   }
 
   const mergedUsage: JsonRecord = {
