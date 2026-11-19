@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Alisin ang key"
   },
   "plugins": {
+    "privilegesWarningTitle": "Ang mga plugin ay tumatakbo nang may ganap na mga pribilehiyo",
+    "privilegesWarningBody": "Ang isang plugin ay tumatakbo bilang isang regular na proseso Node.js na may parehong access gaya ng OmniRoute: maaari itong magbasa ng mga file, magpatakbo ng mga programa at gamitin ang network, anuman ang mga pahintulot na idineklara ng manifest nito. Mag-install lamang ng mga plugin na pinagkakatiwalaan mo.",
     "title": "Mga plugin",
     "description": "Mag-install at mamahala ng mga plugin upang palawakin ang functionality ng OmniRoute",
     "loading": "Nilo-load ang mga plugin...",
