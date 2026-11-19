@@ -160,7 +160,9 @@ function convertMessages(messages, preserveToolResults = false) {
               toolCallMetaMap.get(normalizeToolCallId(toolCallId));
             const toolName = toolMeta?.name || "tool";
             const toolContent = extractContent(tr.content);
-            parts.push(buildToolResultBlock(toolName, toolCallId, toolContent));
+            // Same id as the assistant call it answers (see withPairedId).
+            const pairedId = preserveToolResults ? normalizeToolCallId(toolCallId) : toolCallId;
+            parts.push(buildToolResultBlock(toolName, pairedId, toolContent));
           }
         }
         const joined = parts.filter(Boolean).join("\n");

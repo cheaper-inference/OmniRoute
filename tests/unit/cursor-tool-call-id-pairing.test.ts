@@ -89,3 +89,26 @@ test("Other Cursor-shaped consumers keep the raw assistant id and the text-block
     false
   );
 });
+
+test("Cursor: a Claude tool_result block carries the same id as the assistant call", () => {
+  const out = translate(
+    [
+      { role: "user", content: "go" },
+      {
+        role: "assistant",
+        content: "",
+        tool_calls: [{ id: longId, type: "function", function: { name: "f", arguments: "{}" } }],
+      },
+      { role: "user", content: [{ type: "tool_result", tool_use_id: longId, content: "result" }] },
+    ],
+    "cursor"
+  );
+  const assistant = out.find((message) => message.role === "assistant");
+  const resultText = out
+    .filter((message) => message.role === "user")
+    .map((message) => (typeof message.content === "string" ? message.content : ""))
+    .join("\n");
+  assert.equal(assistant?.tool_calls?.[0].id, "call_a");
+  assert.match(resultText, /<tool_call_id>call_a<\/tool_call_id>/);
+  assert.doesNotMatch(resultText, /fc_b/);
+});

@@ -72,3 +72,29 @@ test("the non-streaming Gemini-family path counts reasoning once too", () => {
     thoughtsTokenCount: 60,
   });
 });
+
+test("the non-streaming Gemini-family path reads Responses-style usage names too", () => {
+  const out = translateNonStreamingResponse(
+    {
+      id: "chatcmpl-2",
+      model: "m",
+      choices: [{ index: 0, message: { role: "assistant", content: "hi" }, finish_reason: "stop" }],
+      usage: {
+        input_tokens: 10,
+        output_tokens: 100,
+        total_tokens: 110,
+        input_tokens_details: { cached_tokens: 4 },
+        output_tokens_details: { reasoning_tokens: 60 },
+      },
+    },
+    FORMATS.OPENAI,
+    FORMATS.GEMINI
+  ) as { response: { usageMetadata: Record<string, number> } };
+  assert.deepEqual(out.response.usageMetadata, {
+    promptTokenCount: 10,
+    candidatesTokenCount: 40,
+    totalTokenCount: 110,
+    thoughtsTokenCount: 60,
+    cachedContentTokenCount: 4,
+  });
+});

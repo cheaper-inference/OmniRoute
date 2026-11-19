@@ -1051,8 +1051,9 @@ function convertOpenAINonStreamingToGeminiFamily(openaiResponse: JsonRecord): Js
     OPENAI_TO_GEMINI_FINISH_REASON[toString(choice.finish_reason, "stop")] ?? "STOP";
 
   const usageSrc = toRecord(openaiResponse.usage);
-  const promptTokens = toFiniteNumber(usageSrc.prompt_tokens, 0);
-  const completionTokens = toFiniteNumber(usageSrc.completion_tokens, 0);
+  // Some OpenAI-compatible upstreams report the Responses names (input/output_tokens).
+  const promptTokens = toFiniteNumber(usageSrc.prompt_tokens ?? usageSrc.input_tokens, 0);
+  const completionTokens = toFiniteNumber(usageSrc.completion_tokens ?? usageSrc.output_tokens, 0);
   const extraUsage = geminiExtraUsageCounts(usageSrc);
 
   const geminiResponse: JsonRecord = {
