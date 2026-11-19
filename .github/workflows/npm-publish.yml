@@ -312,7 +312,10 @@ jobs:
         # its budget had never been measured against a real run. It then blew the limit
         # on its debut: `npm pack` alone took 24m37s, leaving 5 minutes for two installs
         # and two boots. 30 was a guess; 60 is sized to the one measurement we have.
-        timeout-minutes: 60
+        # 120 since the v3.8.54 re-publish (run 44220411903): on the shared .113 runner the
+        # step's own `npm pack` took 23m09s, the clean install 17m31s and the 3.8.53 install
+        # 10m39s, and the upgrade was still installing when the 60-minute limit killed it.
+        timeout-minutes: 120
         run: npm run check:install-upgrade
 
       # WS1.3 (D2, v3.8.49 plan): STAGED publishing by default — `npm stage publish`
@@ -447,12 +450,13 @@ jobs:
           echo "✅ Published omniroute@$VERSION (dist-tag=$TAG) via Trusted Publishing"
 
       - name: Publish to npm (staged — owner approves with 2FA)
-        # Only on an explicit request now: Trusted Publishing below is the default.
+        # Only on an explicit request now: Trusted Publishing above is the default. Staging
+        # also goes through OIDC (Trusted Publishers allow `npm stage publish`); the approve
+        # step still needs the owner's 2FA.
         if: github.event_name == 'workflow_dispatch' && inputs.publish_mode == 'staged'
         env:
           VERSION: ${{ needs.publish.outputs.version }}
           TAG: ${{ needs.publish.outputs.tag }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
           TARBALL="omniroute-${VERSION}.tgz"
@@ -476,6 +480,9 @@ jobs:
           } >> "$GITHUB_STEP_SUMMARY"
           echo "✅ Staged omniroute@$VERSION (dist-tag=$TAG) — awaiting owner 'npm stage approve'"
 
+      # The one step still on a token: for when Trusted Publishing itself is broken. npm caps
+      # write tokens at 90 days, so mint a fresh granular token (publish on omniroute, 2FA
+      # bypass) and set NPM_TOKEN right before dispatching publish_mode=direct.
       - name: Publish to npm (DIRECT — emergency fallback)
         if: github.event_name == 'workflow_dispatch' && inputs.publish_mode == 'direct'
         env:
@@ -595,10 +602,13 @@ jobs:
         working-directory: "@omniroute/opencode-plugin"
         run: npm test
 
+      # Trusted Publishing (OIDC), like the main package: no NODE_AUTH_TOKEN. npm >= 11.5
+      # detects the job's id-token itself. The Trusted Publisher of this package
+      # (cheaper-inference/OmniRoute, npm-publish.yml, no environment, "npm publish" allowed)
+      # was set up on 2026-11-18, after the long-lived NPM_TOKEN expired and v3.8.54's
+      # plugin publishes answered E404.
       - name: Publish @omniroute/opencode-plugin to npm
         working-directory: "@omniroute/opencode-plugin"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
           PKG_VERSION=$(node -p "require('./package.json').version")
@@ -718,10 +728,13 @@ jobs:
         working-directory: "@omniroute/opencode-plugin-v2"
         run: npm test
 
+      # Trusted Publishing (OIDC), like the main package: no NODE_AUTH_TOKEN. npm >= 11.5
+      # detects the job's id-token itself. The Trusted Publisher of this package
+      # (cheaper-inference/OmniRoute, npm-publish.yml, no environment, "npm publish" allowed)
+      # was set up on 2026-11-18, after the long-lived NPM_TOKEN expired and v3.8.54's
+      # plugin publishes answered E404.
       - name: Publish @omniroute/opencode-plugin-v2 to npm
         working-directory: "@omniroute/opencode-plugin-v2"
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
           set -euo pipefail
           PKG_VERSION=$(node -p "require('./package.json').version")
