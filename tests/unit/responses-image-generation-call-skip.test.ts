@@ -55,3 +55,10 @@ test("other unrepresentable input items are still rejected", () => {
     );
   }
 });
+
+test("an input of only a replayed image_generation_call still sends one message", () => {
+  const result = translate([
+    { type: "image_generation_call", id: "ig_3", status: "completed", result: "Zml4dHVyZQ==" },
+  ]) as { messages?: Array<{ role?: string; content?: unknown }> };
+  assert.deepEqual(result.messages, [{ role: "user", content: "..." }]);
+});
