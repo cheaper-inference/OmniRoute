@@ -330,17 +330,16 @@ kuonekana kama chaguo linaloweza kuchaguliwa na mtumiaji katika UI au API.
 
 ---
 
-## Ufunikaji wa Majaribio
+## Chanjo ya Mtihani
 
-Tabaka mbili za ufunikaji wa kiotomatiki hutolewa pamoja na injini ya quota-share:
+Tabaka mbili za meli ya kiotomatiki iliyo na injini ya kushiriki kiasi:
 
-| Kundi                  | Amri                                                                   | Kinachofunikwa                                                                                                                                                                                                                    |
-| :--------------------- | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Kipimo (majaribio 29)  | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | Kiratibu cha DRR, udhibiti wa ujazo, vikomo vya uendeshaji sambamba, hesabu za fairShare, upangaji wa foleni ya kazi zilizolimbikizwa                                                                                             |
-| Matriki ya ujumuishaji | `npm run test:combo:matrix`                                            | Uamuzi wa uelekezaji wa mwanzo hadi mwisho kupitia mchakato halisi wa combo; usawa wa DRR + kupunguza kipaumbele wakati wa ujazo kupitia sehemu hai (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite                 | Amri                                                                   | Inashughulikia nini                                                                                                                                                                                                                |
+| :-------------------- | :--------------------------------------------------------------------- | :--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Sehemu (majaribio 29) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | kipanga ratiba DRR, nafasi ya kueneza, kofia za kubadilishana fedha, hesabu ya fairShare, kupanga foleni nyuma                                                                                                                     |
+| Matrix ya ujumuishaji | `npm run test:combo:matrix`                                            | Uamuzi wa uelekezaji wa mwisho-hadi-mwisho kupitia bomba halisi la mchanganyiko; DRR fairness + kueneza upendeleo kupitia mishororo ya moja kwa moja (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Matriki ya ujumuishaji huendeshwa katika CI pamoja na mikakati yote 19 ya umma. Kundi la majaribio ya kipimo
-linaweza kuendeshwa kivyake.
+Matrix ya ujumuishaji inaendeshwa kwa CI pamoja na mikakati yote 22 ya umma. Kitengo cha kitengo kinaweza kuendeshwa kivyake.
 
 ---
 

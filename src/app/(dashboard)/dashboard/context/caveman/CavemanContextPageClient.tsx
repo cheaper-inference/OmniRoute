@@ -186,6 +186,7 @@ export default function CavemanContextPageClient() {
         description={t("description")}
         actions={
           <SegmentedControl
+            semantics="radio"
             aria-label={t("viewMode")}
             value={viewMode}
             onChange={(v) => setViewMode(v as "simple" | "advanced")}

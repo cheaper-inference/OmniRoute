@@ -9,6 +9,11 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 
 // ── i18n stub ─────────────────────────────────────────────────────────────────
+const segmentedMock = vi.hoisted(() => ({
+  value: "",
+  onChange: (_value: string) => {},
+}));
+
 vi.mock("next-intl", () => ({
   useTranslations: () => (key: string) => key,
 }));
@@ -45,30 +50,44 @@ vi.mock("@/shared/components", () => ({
   Badge: ({ children }: { children: React.ReactNode }) => (
     <span data-testid="badge">{children}</span>
   ),
-  SegmentedControl: ({
-    options,
+  SegmentedTabs: ({
     value,
     onChange,
+    children,
+  }: {
+    value: string;
+    onChange: (v: string) => void;
+    children: React.ReactNode;
+  }) => {
+    segmentedMock.value = value;
+    segmentedMock.onChange = onChange;
+    return <div data-testid="segmented-tabs">{children}</div>;
+  },
+  SegmentedPanel: ({ value, children }: { value: string; children: React.ReactNode }) =>
+    value === segmentedMock.value ? <div role="tabpanel">{children}</div> : null,
+  SegmentedControl: ({
+    options,
     "aria-label": ariaLabel,
   }: {
     options: Array<{ value: string; label: string }>;
-    value: string;
-    onChange: (v: string) => void;
     "aria-label"?: string;
-  }) => (
-    <div role="tablist" aria-label={ariaLabel} data-testid="segmented-control" data-value={value}>
-      {options.map((opt) => (
-        <button
-          key={opt.value}
-          role="tab"
-          data-testid={`tab-${opt.value}`}
-          onClick={() => onChange(opt.value)}
-        >
-          {opt.label}
-        </button>
-      ))}
-    </div>
-  ),
+  }) => {
+    const { value, onChange } = segmentedMock;
+    return (
+      <div role="tablist" aria-label={ariaLabel} data-testid="segmented-control" data-value={value}>
+        {options.map((opt) => (
+          <button
+            key={opt.value}
+            role="tab"
+            data-testid={`tab-${opt.value}`}
+            onClick={() => onChange(opt.value)}
+          >
+            {opt.label}
+          </button>
+        ))}
+      </div>
+    );
+  },
   Button: ({ children }: { children: React.ReactNode }) => (
     <button data-testid="button">{children}</button>
   ),
@@ -81,107 +100,79 @@ vi.mock("@/shared/components", () => ({
 }));
 
 // ── useTranslateSession stub (now lifted to shell) ────────────────────────────
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/hooks/useTranslateSession",
-  () => ({
-    useTranslateSession: () => ({
-      result: {
-        detected: null,
-        target: "openai",
-        status: "idle",
-        responsePreview: null,
-        translatedJson: null,
-        pipelinePath: null,
-        intermediateJson: null,
-        errorMessage: null,
-        latencyMs: null,
-      },
-      run: vi.fn(),
-      reset: vi.fn(),
-    }),
+vi.mock("@/app/(dashboard)/dashboard/translator/hooks/useTranslateSession", () => ({
+  useTranslateSession: () => ({
+    result: {
+      detected: null,
+      target: "openai",
+      status: "idle",
+      responsePreview: null,
+      translatedJson: null,
+      pipelinePath: null,
+      intermediateJson: null,
+      errorMessage: null,
+      latencyMs: null,
+    },
+    run: vi.fn(),
+    reset: vi.fn(),
   }),
-);
+}));
 
 // ── Sub-component stubs that capture received props ───────────────────────────
 const capturedTranslateTabProps: Array<{
   forceOpenAdvancedSlug?: string | null;
 }> = [];
 
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard",
-  () => ({
-    default: () => <div data-testid="translator-concept-card" />,
-  }),
-);
+vi.mock("@/app/(dashboard)/dashboard/translator/components/TranslatorConceptCard", () => ({
+  default: () => <div data-testid="translator-concept-card" />,
+}));
 
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/components/TranslateTab",
-  () => ({
-    default: ({
-      forceOpenAdvancedSlug,
-    }: {
-      forceOpenAdvancedSlug?: string | null;
-      onAdvancedSlugChange?: (slug: string | null) => void;
-      session?: unknown;
-    }) => {
-      capturedTranslateTabProps.push({ forceOpenAdvancedSlug });
-      return (
-        <div data-testid="translate-tab" data-force-open={forceOpenAdvancedSlug ?? "none"} />
-      );
-    },
-  }),
-);
+vi.mock("@/app/(dashboard)/dashboard/translator/components/TranslateTab", () => ({
+  default: ({
+    forceOpenAdvancedSlug,
+  }: {
+    forceOpenAdvancedSlug?: string | null;
+    onAdvancedSlugChange?: (slug: string | null) => void;
+    session?: unknown;
+  }) => {
+    capturedTranslateTabProps.push({ forceOpenAdvancedSlug });
+    return <div data-testid="translate-tab" data-force-open={forceOpenAdvancedSlug ?? "none"} />;
+  },
+}));
 
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/components/MonitorTab",
-  () => ({
-    default: ({ onGoToTranslate }: { onGoToTranslate?: () => void }) => (
-      <div data-testid="monitor-tab" data-has-callback={String(!!onGoToTranslate)} />
-    ),
-  }),
-);
+vi.mock("@/app/(dashboard)/dashboard/translator/components/MonitorTab", () => ({
+  default: ({ onGoToTranslate }: { onGoToTranslate?: () => void }) => (
+    <div data-testid="monitor-tab" data-has-callback={String(!!onGoToTranslate)} />
+  ),
+}));
 
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection",
-  () => ({
-    default: ({
-      children,
-      forceOpenSlug,
-    }: {
-      children?: React.ReactNode;
-      forceOpenSlug?: string | null;
-    }) => (
-      <div
-        data-testid="advanced-section"
-        data-force-open-slug={forceOpenSlug ?? "none"}
-      >
-        {children}
-      </div>
-    ),
-  }),
-);
+vi.mock("@/app/(dashboard)/dashboard/translator/components/advanced/AdvancedSection", () => ({
+  default: ({
+    children,
+    forceOpenSlug,
+  }: {
+    children?: React.ReactNode;
+    forceOpenSlug?: string | null;
+  }) => (
+    <div data-testid="advanced-section" data-force-open-slug={forceOpenSlug ?? "none"}>
+      {children}
+    </div>
+  ),
+}));
 
 const capturedRawJsonProps: Array<{ forceOpen?: boolean }> = [];
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/components/advanced/RawJsonPanel",
-  () => ({
-    default: ({ forceOpen }: { forceOpen?: boolean }) => {
-      capturedRawJsonProps.push({ forceOpen });
-      return (
-        <div data-testid="raw-json-panel" data-force-open={String(forceOpen ?? false)} />
-      );
-    },
-  }),
-);
+vi.mock("@/app/(dashboard)/dashboard/translator/components/advanced/RawJsonPanel", () => ({
+  default: ({ forceOpen }: { forceOpen?: boolean }) => {
+    capturedRawJsonProps.push({ forceOpen });
+    return <div data-testid="raw-json-panel" data-force-open={String(forceOpen ?? false)} />;
+  },
+}));
 
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/components/advanced/PipelineView",
-  () => ({
-    default: ({ forceOpen }: { forceOpen?: boolean; pipelineSteps?: unknown[] }) => (
-      <div data-testid="pipeline-view" data-force-open={String(forceOpen ?? false)} />
-    ),
-  }),
-);
+vi.mock("@/app/(dashboard)/dashboard/translator/components/advanced/PipelineView", () => ({
+  default: ({ forceOpen }: { forceOpen?: boolean; pipelineSteps?: unknown[] }) => (
+    <div data-testid="pipeline-view" data-force-open={String(forceOpen ?? false)} />
+  ),
+}));
 
 vi.mock(
   "@/app/(dashboard)/dashboard/translator/components/advanced/StreamTransformerAccordion",
@@ -192,17 +183,14 @@ vi.mock(
         data-force-open={String(forceOpen ?? false)}
       />
     ),
-  }),
+  })
 );
 
-vi.mock(
-  "@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion",
-  () => ({
-    default: ({ forceOpen }: { forceOpen?: boolean }) => (
-      <div data-testid="test-bench-accordion" data-force-open={String(forceOpen ?? false)} />
-    ),
-  }),
-);
+vi.mock("@/app/(dashboard)/dashboard/translator/components/advanced/TestBenchAccordion", () => ({
+  default: ({ forceOpen }: { forceOpen?: boolean }) => (
+    <div data-testid="test-bench-accordion" data-force-open={String(forceOpen ?? false)} />
+  ),
+}));
 
 vi.mock(
   "@/app/(dashboard)/dashboard/translator/components/advanced/CompressionPreviewAccordion",
@@ -213,7 +201,7 @@ vi.mock(
         data-force-open={String(forceOpen ?? false)}
       />
     ),
-  }),
+  })
 );
 
 // ── DOM lifecycle helpers ─────────────────────────────────────────────────────
