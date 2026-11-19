@@ -1045,7 +1045,7 @@ export class DefaultExecutor extends BaseExecutor {
       if (aliases) attachMuseCodeToolNameMap(withDefaults, aliases);
     }
 
-    return applyRegistryBodyRepairs(this.provider, withDefaults);
+    return applyRegistryBodyRepairs(this.provider, withDefaults, credentials?.providerSpecificData);
   }
 
   // Reasoning models (ClinePass, OpenRouter, etc.) leave content empty when the reasoning
