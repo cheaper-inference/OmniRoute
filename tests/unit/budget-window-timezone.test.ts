@@ -12,6 +12,11 @@ const { getBudgetWindow } = await import("../../src/domain/costRules.ts");
 
 const ENV = "OMNIROUTE_BUDGET_TIMEZONE";
 
+// Cleared before each test too: an inherited value would put the UTC-default case on the zoned path.
+test.beforeEach(() => {
+  delete process.env[ENV];
+});
+
 test.afterEach(() => {
   delete process.env[ENV];
 });
