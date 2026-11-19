@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI laster automatisk `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbeidskatalogen kan angi bare en kort tillatelsesliste med nøkler (porter, `REQUIRE_API_KEY`, lokalitet og fargeinnstillinger); legg alt annet i `~/.omniroute/.env`. Se [CLI lanseringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI laster automatisk inn `.env` fra `~/.omniroute/.env` eller `./.env`. En `./.env` i arbeidskatalogen kan angi bare en kort tillatelsesliste med nøkler (`REQUIRE_API_KEY`, locale, tidssone og fargeinnstillinger, ikke portene); legg alt annet i `~/.omniroute/.env`. Se [CLI lanseringskontrakter](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Skuffmodus
 
@@ -716,7 +716,7 @@ Enhver gateway som snakker OpenAI API (en selvvertstjent proxy, vLLM, en tredjep
 2. **Navn** : en visningsetikett for noden.
 3. **Prefiks** : rutenavnet. Klienter kaller modeller som `<prefix>/<model>`, så en node med prefikset `mygw` tjener `mygw/gpt-4o-mini`. Påkrevd; det er ingen tegnbegrensning.
 4. **API Type** : endepunktfamilien gatewayen betjener (chatfullføringer, svar, innebygginger, lyd, bilder).
-5. **Base URL** : API roten, opp til og med `/v1` (for eksempel `https://gateway.example.com/v1`), ikke hele `/chat/completions` banen. Gatewayer med ikke-standard stier setter dem under** Avanserte innstillinger** (chatbane, modellerbane).
+5. **Base URL** : API roten, opp til og inkludert `/v1` (for eksempel `https://gateway.example.com/v1`), ikke hele `/chat/completions` banen. Gatewayer med ikke-standard stier setter dem under** Avanserte innstillinger** (chatbane, modellerbane).
 6. De**API nøkkel (for sjekk)** feltet tester kun tilkoblingen. Etter å ha opprettet noden, åpne den og bruk** Legg til tilkobling** for å lagre nøkkelen som forespørsler vil bruke.
 
 Noden får en intern id av formen `openai-compatible-<apiType>-<uuid>`; du trenger aldri å skrive det, prefikset er det offentlige navnet.
@@ -735,7 +735,7 @@ Velg et distinkt prefiks (`mygw`, `acme-proxy`). Hvis forespørsler til en tilpa
 
 Disse tastene går i en tilkoblings `providerSpecificData` (for eksempel via `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (heltall, 1–1024) – for OpenAI chat-format-kompatible tilkoblinger hvis gateway avviser lange verktøynavn. Lengre navn sendes som korte aliaser og gjenopprettes i svaret.
+- `toolNameMaxLength` (heltall, 1–1024) — for OpenAI chat-format-kompatible tilkoblinger hvis gateway avviser lange verktøynavn. Lengre navn sendes som korte aliaser og gjenopprettes i svaret. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go og Muse Code aliaser allerede over 64 tegn uten innstillinger. En tilkoblingsverdi erstatter Azure OpenAI / Azure AI Foundry-standarden (en Azure-tilkobling bak en strengere gateway) og setter grensen for en tilpasset kompatibel node; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go og Muse Code beholder sin registergrense og ignorerer den.
 - `quotaEndpoint` — gatewayens quota/credits endepunkt, les for dashboard-kvotestripen og kvotebevisst ruting. Fungerer på både OpenAI- og Anthropic-kompatible tilkoblinger; den fullstendige formen er dokumentert i `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -753,7 +753,7 @@ Disse tastene går i en tilkoblings `providerSpecificData` (for eksempel via `PU
 
 ### Kjede OmniRoute Peers
 
-En annen OmniRoute gateway kan legges til som en** Egendefinert OpenAI-kompatibel** leverandør. Bruk peerens `/v1` base URL og en dedikert, minst-privilegert API nøkkel utstedt av den peeren.
+En annen OmniRoute gateway kan legges til som en** Tilpasset OpenAI-kompatibel** leverandør. Bruk peerens `/v1` base URL og en dedikert, minst-privilegert API nøkkel utstedt av den peeren.
 
 For gjensidige eller multi-hop kjeder, aktiver opt-in loop guard på hver gateway:
 
@@ -833,9 +833,9 @@ Returnerer modeller gruppert etter leverandør med typer (`chat`, `embedding`, `
 
 ### LLM Gateway Intelligence (fase 9)
 
-- **Semantisk cache** — Automatisk cacher ikke-streaming, temperatur = 0-svar (omgå med `X-OmniRoute-No-Cache: true`)
+- **Semantisk cache** — automatisk cacher ikke-streaming, temperatur = 0 svar (omgå med `X-OmniRoute-No-Cache: true`)
 - **Be om idempotens** — Dedupliserer forespørsler innen 5s via `Idempotency-Key` eller `X-Request-Id` header
-- **Fremdriftssporing** — Meld deg på SSE `event: progress` hendelser via `X-OmniRoute-Progress: true` header
+- **Fremdriftssporing** — Opt-in SSE `event: progress` hendelser via `X-OmniRoute-Progress: true` header
 
 ---
 
@@ -864,25 +864,25 @@ Konfigurer via** Dashboard → Innstillinger → Ruting** . Dashbordet viser de 
 
 **Dashboard-synlige strategier (ruting på kontonivå):**
 
-| Strategi                       | Beskrivelse                                                                                                      |
-| ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| **Fyll først**                 | Bruker kontoer i prioritert rekkefølge - primærkonto håndterer alle forespørsler inntil den ikke er tilgjengelig |
-| **Round Robin**                | Bla gjennom alle kontoer med en konfigurerbar klebrig grense (standard: 3 anrop per konto)                       |
-| **P2C (Power of Two Choices)** | Velger 2 tilfeldige kontoer og ruter til den sunnere – balanserer belastning med bevissthet om helse             |
-| **Tilfeldig**                  | Velger tilfeldig en konto for hver forespørsel ved hjelp av Fisher-Yates shuffle                                 |
-| **Minst brukt**                | Ruter til kontoen med det eldste `lastUsedAt` tidsstempelet, og fordeler trafikken jevnt                         |
-| **Kostnadsoptimalisert**       | Ruter til kontoen med den laveste prioritetsverdien, optimaliserer for de laveste kostnadsleverandørene          |
+| Strategi                       | Beskrivelse                                                                                             |
+| ------------------------------ | ------------------------------------------------------------------------------------------------------- |
+| **Fyll først**                 | Bruker kontoer i prioritert rekkefølge — primærkonto håndterer alle forespørsler inntil utilgjengelig   |
+| **Round Robin**                | Bla gjennom alle kontoer med en konfigurerbar klebrig grense (standard: 3 anrop per konto)              |
+| **P2C (Power of Two Choices)** | Velger 2 tilfeldige kontoer og ruter til den sunnere — balanserer belastning med bevissthet om helse    |
+| **Tilfeldig**                  | Velger tilfeldig en konto for hver forespørsel ved hjelp av Fisher-Yates shuffle                        |
+| **Minst brukt**                | Ruter til kontoen med det eldste `lastUsedAt` tidsstempelet, og fordeler trafikken jevnt                |
+| **Kostnadsoptimalisert**       | Ruter til kontoen med den laveste prioritetsverdien, optimaliserer for de laveste kostnadsleverandørene |
 
-**Avanserte kombinasjons- og autostrategier** (konfigurerbar per kombinasjon eller via `auto/*` prefikser - se [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Avanserte kombinasjons- og autostrategier** (konfigurerbar per kombinasjon eller via `auto/*` -prefikser — se [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — streng orden, aldri round-robins
-- `weighted` — proporsjonal trafikk delt etter vekt per modell
-- `fill-first` — tøm den første modellen til grensene når
+- `weighted` — proporsjonal trafikk fordelt på vekter per modell
+- `fill-first` — drener den første modellen til grensene når
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Power of Two Choices)
 - `least-used` og `cost-optimized`
-- `auto` - score-drevet på tvers av alle kandidater
-- `lkgp` (Last Known Good Provider) – pins til den siste vellykkede leverandøren, og faller deretter tilbake til reglene
+- `auto` — score-drevet på tvers av alle kandidater
+- `lkgp` (Last Known Good Provider) — pins til den siste vellykkede leverandøren, og faller deretter tilbake til reglene
 - `context-optimized` — velger modellen med det største gratis kontekstvinduet
 - `context-relay` — lenker langkontekstmodeller for oppfølgingssvinger
 
@@ -932,7 +932,7 @@ Her er eksempler på mønstre for å kombinere flere leverandører og ruting mel
 
 #### 1. Coding Agent Combo: High-End Reasoning med Cost/Speed Fallback
 
-Ideell for kodingsmidler (OpenCode, Claude Code, Cursor, Cline). Ruter innledningsvis til frontier resonneringsmodeller, faller tilbake til raske kodingsmodeller på kvotebruk eller feil.
+Ideell for kodingsmidler (OpenCode, Claude Code, Cursor, Cline). Ruter i utgangspunktet til grenseresonneringsmodeller, faller tilbake til raske kodingsmodeller på kvotebruk eller feil.
 
 - **Dashbord** : Combos → Ny Combo → Navn: `agent-coding` → Strategi: `Priority`
 - **Modeller** :
@@ -991,24 +991,24 @@ Konfigurer via** Dashboard → Innstillinger → Resilience** .
 
 OmniRoute implementerer motstandskraft på leverandørnivå med fem komponenter:
 
-1. **Be om kø og tempo** — Forespørselsforming på systemnivå:
+1. **Be om kø og tempo** — forespørselsforming på systemnivå:
    - **Forespørsler per minutt (RPM)** — Maksimalt antall forespørsler per minutt per konto
-   - **Minimum tid mellom forespørsler** — Minimumsavstand i millisekunder mellom forespørsler
+   - **Minimum tid mellom forespørsler** — Minimum gap i millisekunder mellom forespørsler
    - **Maks samtidige forespørsler** — Maksimalt antall samtidige forespørsler per konto
 
 2. **Tilkobling Nedkjøling** — Per-auth-type konfigurasjon for en enkelt tilkobling etter feil som kan prøves på nytt:
    - **Base Nedkjøling** — Standard nedkjølingsvindu for oppstrømsfeil som kan prøves på nytt
-   - **Bruk oppstrøms prøvetips** — Heder autoritative `Retry-After` eller tilbakestill hint når det er gitt
+   - **Bruk oppstrøms prøvetips** — respekterer autoritative `Retry-After` eller tilbakestill hint når gitt
    - **Max Backoff Steps** — Maksimalt eksponentielt backoff-nivå for gjentatte feil
 
 3. **Leverandørs strømbryter** — Sporer ende-til-ende-leverandørfeil, merker en leverandør som er degradert ved den konfigurerte advarselsterskelen, og åpner bryteren når den konfigurerte feilterskelen er nådd:
-   - **Degraderingsterskel** — Påfølgende leverandørfeil før du går inn i `DEGRADED`
-   - **Feilterskel** — Påfølgende leverandørfeil før du går inn i `OPEN`
+   - **Degraderingsterskel** — Konsekutive leverandørfeil før du går inn i `DEGRADED`
+   - **Feilterskel** — Konsekutive leverandørfeil før du går inn i `OPEN`
    - **Tilbakestill tidsavbrudd** — Tidsvindu før leverandøren testes igjen
-   - **CLOSED** (Sunn) — Forespørslene flyter normalt
-   - **DEGRADED** — Forespørsler flyter fortsatt mens forhøyede feil spores
-   - **OPEN** — Leverandøren er midlertidig blokkert etter gjentatte feil
-   - **HALF_OPEN** — Tester om leverandøren har kommet seg
+   - **CLOSED** (Sunn) — Forespørsler flyter normalt
+   - **DEGRADED** — -forespørsler flyter fortsatt mens forhøyede feil spores
+   - **OPEN** — leverandøren er midlertidig blokkert etter gjentatte feil
+   - **HALF_OPEN** — Tester om leverandøren har gjenopprettet
 
    Tilkoblingsbestemte `429` -hastighetsgrenser forblir inne** Tilkobling Nedkjøling** og teller ikke mot leverandøravbruddet.
 
@@ -1016,9 +1016,9 @@ OmniRoute implementerer motstandskraft på leverandørnivå med fem komponenter:
 
 4. **Vent på nedkjøling** — Hvis alle kandidatforbindelser allerede kjøles ned, kan OmniRoute vente på den tidligste nedkjølingen og automatisk prøve den samme klientforespørselen på nytt.
 
-5. **Rate Limit Auto-deteksjon** — Når oppstrømsleverandører returnerer eksplisitte ventevinduer, overstyrer disse hintene nedkjølingen av lokal tilkobling når innstillingen er aktivert.
+5. **Rate Limit Auto-deteksjon** — Når oppstrømsleverandører returnerer eksplisitte ventevinduer, overstyrer disse hintene den lokale tilkoblingsavkjølingen når innstillingen er aktivert.
 
-**Pro tips:** Bruk** Helse** side for å inspisere og tilbakestille live leverandørbrytere etter et strømbrudd. Resilience-siden endrer kun konfigurasjon.
+**Pro tips:** Bruk** Helse** side for å inspisere og tilbakestille live-leverandørbrytere etter et strømbrudd. Resilience-siden endrer kun konfigurasjon.
 
 ---
 
@@ -1060,12 +1060,12 @@ Innstillingssiden er organisert i** 7 faner** for enkel navigering:
 
 | Tab           | Innhold                                                                                                                                                        |
 | ------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **General**   | Systemlagringsverktøy, standard oppførsel, synlighet for endepunkttunnel                                                                                       |
+| **General**   | Systemlagringsverktøy, standard oppførsel, Synlighet for endepunkttunnel                                                                                       |
 | **Utseende**  | Temakontroller (light/dark/system), sidefeltsynlighet, panelbrytere for Cloudflare/Tailscale/ngrok -tunnelkort                                                 |
 | **AI**        | Tenkebudsjett (passthrough / auto-strip / tilpasset / adaptiv — se [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), global systemmelding, prompt cache-statistikk |
 | **Sikkerhet** | Login/Password innstillinger, IP tilgangskontroll, API auth for `/models`, leverandørblokkering, prompt-injeksjonsvakt                                         |
 | **Ruting**    | Global rutingstrategi (Fill First / Round Robin / P2C / Random / Minst brukt / Cost Optimized), jokertegnmodellaliaser, reservekjeder, kombinasjonsstandarder  |
-| **Spenst**    | Forespørselskø, tilkoblingsnedkjøling, leverandørbryterkonfigurasjon og vent-på-nedkjølingsatferd                                                              |
+| **Spenst**    | Forespørselskø, tilkoblingsnedkjøling, konfigurasjon for leverandørbryter og oppførsel for vente-på-nedkjøling                                                 |
 | **Avansert**  | Global proxy-konfigurasjon (HTTP/SOCKS5), proxy-overstyringer per leverandør                                                                                   |
 
 Generelt dupliserer ikke lenger skrivebeskyttet logging og cache-notater. Databaseoppbevaring og optimaliseringsinnstillinger opprettholdes gjennom `/api/settings/database`; manuell cache-tømming bruker `DELETE /api/cache`. Requests for forespørsel og proxy-logger kontrolleres av `CALL_LOGS_TABLE_MAX_ROWS` og `PROXY_LOGS_TABLE_MAX_ROWS`.
@@ -1079,7 +1079,7 @@ Tilgang via** Dashboard → Kostnader** .
 | Tab             | Hensikt                                                                                   |
 | --------------- | ----------------------------------------------------------------------------------------- |
 | **Budsjett**    | Angi utgiftsgrenser per API nøkkel med daily/weekly/monthly budsjetter og sanntidssporing |
-| **Prissetting** | Se og rediger modellprisoppføringer – kostnad per 1K input/output -tokens per leverandør  |
+| **Prissetting** | Se og rediger modellprisoppføringer — kostnad per 1K input/output -tokens per leverandør  |
 
 ```bash
 # API: Set a budget
@@ -1091,7 +1091,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Kostnadssporing:** Hver forespørsel logger tokenbruk og beregner kostnad ved å bruke pristabellen. Se sammenbrudd i** Dashboard → Bruk** etter leverandør, modell og API nøkkel.
+**Kostnadssporing:** Hver forespørsel logger tokenbruk og beregner kostnad ved hjelp av pristabellen. Se sammenbrudd i** Dashboard → Bruk** etter leverandør, modell og API nøkkel.
 
 ---
 
@@ -1172,7 +1172,7 @@ Tilgang via** Dashboard → Health** . Sanntids systemhelseoversikt med 6 kort:
 | Kort                  | Hva den viser                                                  |
 | --------------------- | -------------------------------------------------------------- |
 | **Systemstatus**      | Oppetid, versjon, minnebruk, datakatalog                       |
-| **Leverandørhelse**   | Global leverandørs strømbryter kjøretidstilstand               |
+| **Leverandørhelse**   | Global leverandør strømbryter kjøretidstilstand                |
 | **Satsgrenser**       | Aktive tilkoblingsnedkjølinger per konto med gjenværende tid   |
 | **Aktive lockouter**  | Aktive lockouter med modellomfang og midlertidige utelukkelser |
 | **Signaturbuffer**    | Dedupliseringsbufferstatistikk (aktive nøkler, trefffrekvens)  |

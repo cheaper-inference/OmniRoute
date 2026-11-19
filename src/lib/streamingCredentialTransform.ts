@@ -287,6 +287,15 @@ function createChoiceBufferStore(maxBufferedChoices: number): ChoiceBufferStore 
   };
 }
 
+/** Bytes still held across every block's buffers (what the buffering limit charges). */
+function countBufferedBytes(store: ChoiceBufferStore): number {
+  let total = 0;
+  for (const buffers of store.buffers.values()) {
+    for (const value of Object.values(buffers)) total += value.length;
+  }
+  return total;
+}
+
 function hasRemainingBuffers(store: ChoiceBufferStore): boolean {
   for (const [, buffers] of store.takeAll()) {
     for (const key of Object.keys(buffers) as BufferedField[]) {
@@ -672,10 +681,7 @@ export function createCredentialSseTransform(
         ? flushEmptyStream(getBuffers, isJsonStream)
         : flushRemainingByShape(store, lastJson, lastContentJson);
     // A per-block flush leaves other tails in memory; keep them charged against the limit.
-    bufferedBytes = 0;
-    for (const buffers of store.buffers.values()) {
-      for (const value of Object.values(buffers)) bufferedBytes += value.length;
-    }
+    bufferedBytes = countBufferedBytes(store);
     return flushed;
   };
 
