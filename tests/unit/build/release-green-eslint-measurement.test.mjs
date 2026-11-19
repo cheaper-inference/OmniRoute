@@ -109,6 +109,30 @@ test("CI explicitly selects the same-run lint artifact and cannot ignore its fai
   assert.notEqual(download["continue-on-error"], true);
 });
 
+// quality-gate still runs when the lint job failed (its `if:` accepts needs.lint.result ==
+// 'failure'), and its ESLint download is strict. So the lint job must produce the artifact even
+// when a step before the JSON report failed (check:node-runtime, audit:deps): otherwise the
+// download fails and the complexity / duplication / dead-code ratchets never run.
+test("the lint job produces the ESLint artifact even after an earlier lint step failed", () => {
+  const workflow = parseYaml(readFileSync(join(root, ".github/workflows/ci.yml"), "utf8"));
+  assert.match(workflow.jobs["quality-gate"].if, /needs\.lint\.result == 'failure'/);
+  const steps = workflow.jobs.lint.steps;
+  const runsAfterFailure = (step) => /!cancelled\(\)|always\(\)/.test(String(step.if ?? ""));
+  const report = steps.findIndex((step) => step.run === "npm run lint:json");
+  const upload = steps.findIndex((step) => step.name === "Upload ESLint results");
+  assert.ok(report > 0 && upload > report);
+  const failable = steps
+    .slice(0, report)
+    .filter((step) => step.run && !runsAfterFailure(step))
+    .map((step) => step.run);
+  assert.ok(failable.length > 0, "the report really follows failable lint steps");
+  assert.ok(runsAfterFailure(steps[report]), "ESLint (JSON report) runs after a failed step");
+  assert.ok(runsAfterFailure(steps[upload]), "the upload runs after a failed step");
+  const cache = steps.find((step) => step.name === "Restore ESLint file cache");
+  assert.ok(runsAfterFailure(cache), "the report keeps its cache after a failed step");
+  assert.match(cache.if, /github\.event_name == 'pull_request'/);
+});
+
 for (const invalid of [
   [],
   {},

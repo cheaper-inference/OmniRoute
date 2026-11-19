@@ -46,23 +46,21 @@ mitme mudeli käivituskeskkond, mitte marsruutimisstrateegia: see ei mõjuta kun
 
 ## Seadistamine
 
-1. Avage **Töölaud → Kaoserežiim** (`/dashboard/chaos`).
-2. Lülitage see **sisse** — Kaoserežiim on vaikimisi **keelatud** (`enabled: false` failis
-   `src/lib/chaos/chaosConfig.ts`). Kui see on keelatud, vastab `POST /api/chaos/run`
-   koodiga `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
-3. Valige osalejad ja vaikeväärtused (salvestatakse iga eksemplari kohta seadete hoidlas):
+1. Avatud** Armatuurlaud → Chaos Mode** (`/dashboard/chaos`).
+2. Pöörake seda** sisse** — Chaos Mode laevad** vaikimisi keelatud** (`enabled: false` in `src/lib/chaos/chaosConfig.ts`). Kui see on keelatud, vastab `POST /api/chaos/run` `400 — "Chaos Mode is not enabled. Enable it in Dashboard → Chaos Mode."`.
+3. Valige osalejad ja vaikeseaded (säilitatakse iga juhtumi kohta seadete poe kaudu):
 
-   | Väli                | Tähendus                                                                       | Vaikeväärtus / piirangud                       |
-   | ------------------- | ------------------------------------------------------------------------------ | ---------------------------------------------- |
-   | `enabled`           | Pealüliti                                                                      | `false`                                        |
-   | `defaultMode`       | `parallel` või `collaborative` (vt allpool)                                    | `parallel`                                     |
-   | `providerOverrides` | Teenusepakkujapõhine osalemine (`providerId`, valikuline `modelId`, `enabled`) | tühi = kõik aktiivsed teenusepakkujad, max 200 |
-   | `systemPrompt`      | Sisseehitatud Chaose süsteemiviiba alistamine                                  | valikuline, max 10 000 märki                   |
-   | `timeoutMs`         | Maksimaalne aeg ühe mudelikutse kohta                                          | `120000` (5 000–600 000)                       |
-   | `maxTokens`         | `max_tokens` ühe mudelikutse kohta                                             | `4096` (256–128 000)                           |
+   | Väli                | Tähendus                                                                | Vaikimisi / piirangud                |
+   | ------------------- | ----------------------------------------------------------------------- | ------------------------------------ |
+   | `enabled`           | Pealüliti                                                               | `false`                              |
+   | `defaultMode`       | `parallel` või `collaborative` (vt allpool)                             | `parallel`                           |
+   | `providerOverrides` | Pakkujapõhine osalemine (`providerId`, valikuline `modelId`, `enabled`) | tühi = iga aktiivne pakkuja, max 200 |
+   | `systemPrompt`      | Sisseehitatud Chaose süsteemiviipa alistamine                           | valikuline, kuni 10 000 tähemärki    |
+   | `timeoutMs`         | Maksimaalne aeg mudelikõne kohta                                        | `120000` (5 000–600 000)             |
+   | `maxTokens`         | `max_tokens` mudelikõne kohta                                           | `4096` (256–128 000)                 |
 
-4. Käivitage **test otse lehelt** — tulemuste paneel kuvab iga teenusepakkuja vastuse,
-   oleku ja kestuse.
+4. Andke igale osalevale pakkujale a** mudel** . Pakkuja mudel on selle lubatud alistamise `modelId` lehel Chaos Mode (see võidab), vastasel juhul** vaikemudel** selle ühendusest. Pakkuja ID-d ei kasutata kunagi mudeli nimena. Pakkuja, kellel pole kumbagi** ei kutsutud** : see kuvatakse tulemustes `status: "error"` na sõnumiga _"Selle pakkuja jaoks pole mudelit määratud. Määrake selle jaoks mudel Chaos Mode lehel või ühenduse vaikemudel."_ ja tühi `modelId`, samal ajal kui teised pakkujad töötavad normaalselt. Kui ühelgi valitud pakkujal pole mudelit, siis käivitamine nurjub enne ülesvoolu päringut _"Ühelgi pakkujal pole mudelit määratud. …"_ (mõlemal lõpp-punktil HTTP 500).
+5. Käivita a** test lehelt endalt** — tulemuste paneel näitab iga pakkuja vastust, olekut ja kestust.
 
 ## Käitusrežiimid
 
@@ -74,27 +72,24 @@ mitme mudeli käivituskeskkond, mitte marsruutimisstrateegia: see ei mõjuta kun
 
 ## API
 
-### `POST /api/chaos/run` — töölaua seanss
+### `POST /api/chaos/run` — armatuurlaua seanss
 
-Küpsistega autenditud (haldusseanss — vt
-[MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md)); seda kasutab töölaua leht.
+Küpsise abil autentitud (haldusseanss — vt [MANAGEMENT-AUTH.md](MANAGEMENT-AUTH.md) ); mida kasutab armatuurlaua leht.
 
 ```jsonc
-// päringu keha
+// body
 {
-  "task": "Compare approaches to X", // kohustuslik
-  "providers": ["glm", "kimi"], // valikuline filter
-  "mode": "parallel", // valikuline — alistab defaultMode
-  "systemPrompt": "…", // valikuline alistus
-  "maxTokens": 4096, // valikuline alistus
+  "task": "Compare approaches to X", // required
+  "providers": ["glm", "kimi"], // optional filter
+  "mode": "parallel", // optional — overrides defaultMode
+  "systemPrompt": "…", // optional override
+  "maxTokens": 4096, // optional override
 }
 ```
 
-### `POST /api/skills/collect/chaos` — API-võti
+### `POST /api/skills/collect/chaos` — API võti
 
-Välistele kutsujatele mõeldud Bearer-loaga variant. Võtmel peab olema **Kaoserežiimi õigus**
-(`chaosModeEnabled`), mis on **vaikimisi välja lülitatud** — lubage see iga võtme jaoks eraldi jaotises
-**Töölaud → API-haldur → võtme muutmine → õigused → Kaoserežiim**. Päringu keha on sama mis eespool.
+Kandja märgiga variant välistele helistajatele. Võti peab kandma** Kaoserežiimi luba** (`chaosModeEnabled`), mis on** vaikimisi välja lülitatud** — lubab selle iga sisestusklahvi kohta** Armatuurlaud → API haldur → redigeerimisklahv → load → kaoserežiim** . Sama keha nagu ülal.
 
 ```bash
 curl -X POST http://localhost:20128/api/skills/collect/chaos \
@@ -103,7 +98,7 @@ curl -X POST http://localhost:20128/api/skills/collect/chaos \
   -d '{"task":"Compare approaches to X","mode":"parallel"}'
 ```
 
-Mõlemad lõpp-punktid tagastavad sama struktuuriga vastuse:
+Mõlemad lõpp-punktid tagastavad sama kuju:
 
 ```jsonc
 {
@@ -122,15 +117,13 @@ Mõlemad lõpp-punktid tagastavad sama struktuuriga vastuse:
       "durationMs": 3210,
     },
   ],
-  "summary": "…", // ainult koostöörežiimis
+  "summary": "…", // collaborative mode only
 }
 ```
 
-## Tõrkeotsing
+## Veaotsing
 
-- **`400 Chaos Mode is not enabled`** — vt ülaltoodud 2. sammu: globaalne lüliti on välja lülitatud.
-- **API-võti lükatakse lõpp-punktis `/api/skills/collect/chaos` tagasi** — võtmel puudub võtmepõhine
-  õigus `chaosModeEnabled` (vaikimisi välja lülitatud; see on seadistus, mitte viga).
-- **Oodatud teenusepakkuja puudub tulemustest** — kontrollige Kaoserežiimi lehel valikut
-  `providerOverrides` (keelatud alistus välistab teenusepakkuja) ja seda, kas teenusepakkuja ühendus on
-  aktiivne.
+- **`400 Chaos Mode is not enabled`** — 2. samm ülal: globaalne lüliti on välja lülitatud.
+- **API võti lükatakse `/api/skills/collect/chaos` tagasi** — võtmel puudub klahvipõhine `chaosModeEnabled` luba (vaikimisi väljas; see on säte, mitte viga).
+- **Pakkuja näitab `No model set for this provider`** — määras oma mudeli Chaos Mode lehel või vaikemudeli ühenduses (vt Seadistamine, samm 4).
+- **Tulemustest puudub oodatud pakkuja** — kontrollige `providerOverrides` lehel Chaos Mode (keelatud alistamine välistab selle) ja seda, kas teenusepakkuja ühendus on aktiivne.
