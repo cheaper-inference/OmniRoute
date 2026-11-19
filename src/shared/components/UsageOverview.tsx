@@ -1,10 +1,13 @@
 "use client";
+import UsageEvidenceNotice from "./UsageEvidenceNotice";
 import { useTranslations } from "next-intl";
 import Card from "./Card";
 import CachedInputTokens from "./CachedInputTokens";
 import { fmtFull, fmtCost } from "@/shared/utils/formatting";
 
 type OverviewStats = {
+  estimated?: boolean;
+  unknownEvidence?: boolean;
   totalRequests: number;
   totalPromptTokens: number;
   totalCompletionTokens: number;
@@ -40,6 +43,9 @@ export default function UsageOverview({ stats }: { stats: OverviewStats }) {
   const fmt = fmtFull;
   return (
     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="md:col-span-3">
+        <UsageEvidenceNotice estimated={stats.estimated} unknownEvidence={stats.unknownEvidence} />
+      </div>
       <Card className="px-4 py-3 flex flex-col gap-1">
         <div className="flex justify-between items-start">
           <div className="flex flex-col gap-1">

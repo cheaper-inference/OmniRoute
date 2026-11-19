@@ -24,19 +24,21 @@ Param Incorrect: The reasoning_content in the thinking mode must be passed back 
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
 ক্যাপচার `open-sse/handlers/chatCore.ts` তে ঘটে (দুটি সাইট, দুটি `cacheReasoningFromAssistantMessage` কল সাইটে)। রিপ্লে `open-sse/translator/index.ts` এ স্কিমা জবরদস্তির পরে কিন্তু প্রেরণের আগে ঘটে।
+
+টুল-কল এন্ট্রিগুলি `buildToolCallCacheKey()` এর অধীনে সংরক্ষিত হয়, অনুরোধের সুযোগের একটি ডাইজেস্ট এবং টুল কল আইডি, তাই অন্য API কী বা সেশন দ্বারা ব্যবহৃত একই আইডি এন্ট্রি নির্বাচন করে না। স্কোপটি `buildReasoningCacheScope()` থেকে আসে : API কী আইডি, এবং অনুরোধের একটি থাকলে সেশন কী। তাই `tool_call_id` কলাম এবং ড্যাশবোর্ড সেই এন্ট্রিগুলির জন্য এই ডাইজেস্ট দেখায়।
 
 প্লেইন (নন-টুল-কল) অ্যাসিস্ট্যান্ট টার্নগুলি আলাদাভাবে কী করা হয়: `buildAssistantMessageCacheKey()` সেশন স্কোপ এবং সেই টার্ন পর্যন্ত স্বাভাবিক ওপেনএআই-ফরম্যাট ট্রান্সক্রিপ্ট হজম করে, কারণ DeepSeek জন্য `tools` উপস্থিত হলে _every_ আগের টার্নের যুক্তি প্রয়োজন। রেসপন্স-এপিআই লক্ষ্যগুলির জন্য (উদাহরণস্বরূপ `opencode-go/deepseek-v4-flash`, `/responses` এ রাউট করা হয়েছে) আপস্ট্রিম বডি `input` বহন করে, `messages` নয়, তাই `translateRequest()` (`open-sse/translator/index.ts`) একটি কলব্যাক বিকল্পের মাধ্যমে হজম করা পিভট ট্রান্সক্রিপ্টের রিপোর্ট করে এবং ক্যাপচার সাইটগুলি একই ট্রান্সক্রিপ্ট হজম করে৷ রেসপন্স রিপ্লে পাস প্রতিটি সোর্স ফরম্যাটের জন্য OpenAI পিভটে চলে, তাই Anthropic মেসেজ ক্লায়েন্ট (Claude → OpenAI → রেসপন্স)ও রিপ্লে করা হয়।
 

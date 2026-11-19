@@ -20,6 +20,8 @@ Eller via open-sse transport:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -128,23 +130,23 @@ Cursor, Cline og kompatible MCP-klienter.
 
 ## Kompressionsværktøjer (13)
 
-| Værktøj                             | Omfang              | Beskrivelse                                                                                                                            |
-| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------- |
-| `omniroute_compression_status`      | `read:compression`  | Komprimeringsindstillinger, analyseoversigt og cache-bevidste statistikker (inkluderer `analytics.mcpDescriptionCompression` metadata) |
-| `omniroute_compression_configure`   | `write:compression` | Konfigurer komprimeringstilstand, tærskel, målforhold, system-prompt-bevaring, MCP -beskrivelse komprimering til/fra                   |
-| `omniroute_set_compression_engine`  | `write:compression` | Vælg den aktive motor (off/caveman/rtk/stacked) og Caveman/RTK -intensitet                                                             |
-| `omniroute_list_compression_combos` | `read:compression`  | Liste navngivne kompressionskombinationer og deres motorrørledninger                                                                   |
-| `omniroute_compression_combo_stats` | `read:compression`  | Analytics grupperet efter kompressionskombination og motor                                                                             |
-| `omniroute_ccr_store`               | `write:compression` | Gem opkaldsisoleret indhold i det afgrænsede CCR -lager i hukommelsen og returner en markør plus `ccr://` reference                    |
-| `omniroute_ccr_retrieve`            | `read:compression`  | Hent CCR indhold i sin helhed eller med hoved-, hale-, linjer-, grep- og statstilstande                                                |
-| `omniroute_ccr_inspect`             | `read:compression`  | Undersøg opkaldsejede CCR -metadata uden at returnere indhold                                                                          |
-| `omniroute_ccr_list`                | `read:compression`  | Liste paginerede metadata for opkaldsejede CCR blokke                                                                                  |
-| `omniroute_ccr_delete`              | `write:compression` | Slet en opkaldsejet CCR -blok                                                                                                          |
-| `omniroute_ccr_stats`               | `read:compression`  | Rapportér opkaldsbaseret hukommelsesbrug, livscyklustællere og butiksgrænser                                                           |
-| `omniroute_rtk_discover`            | `read:compression`  | Opdag tilbagevendende støj i opt-in RTK output samples                                                                                 |
-| `omniroute_rtk_learn`               | `read:compression`  | Generer et udkast til RTK -filter, der kan gennemgås, fra tilvalgsprøver                                                               |
+| Værktøj                             | Omfang              | Beskrivelse                                                                                                                           |
+| :---------------------------------- | :------------------ | :------------------------------------------------------------------------------------------------------------------------------------ |
+| `omniroute_compression_status`      | `read:compression`  | Kompressionsindstillinger, analyseoversigt og cache-bevidste statistikker (inkluderer `analytics.mcpDescriptionCompression` metadata) |
+| `omniroute_compression_configure`   | `write:compression` | Konfigurer komprimeringstilstand, tærskel, målforhold, system-prompt-bevaring, MCP -beskrivelse komprimering til/fra                  |
+| `omniroute_set_compression_engine`  | `write:compression` | Vælg den aktive motor (off/caveman/rtk/stacked) og Caveman/RTK -intensitet                                                            |
+| `omniroute_list_compression_combos` | `read:compression`  | Liste navngivne kompressionskombinationer og deres motorrørledninger                                                                  |
+| `omniroute_compression_combo_stats` | `read:compression`  | Analytics grupperet efter kompressionskombination og motor                                                                            |
+| `omniroute_ccr_store`               | `write:compression` | Gem opkaldsisoleret indhold i det afgrænsede CCR -lager i hukommelsen og returner en markør plus `ccr://` reference                   |
+| `omniroute_ccr_retrieve`            | `read:compression`  | Hent CCR indhold i sin helhed eller med hoved-, hale-, linjer-, grep- og statstilstande                                               |
+| `omniroute_ccr_inspect`             | `read:compression`  | Undersøg opkaldsejede CCR -metadata uden at returnere indhold                                                                         |
+| `omniroute_ccr_list`                | `read:compression`  | Liste paginerede metadata for opkaldsejede CCR blokke                                                                                 |
+| `omniroute_ccr_delete`              | `write:compression` | Slet en opkaldsejet CCR -blok                                                                                                         |
+| `omniroute_ccr_stats`               | `read:compression`  | Rapportér opkaldsbaseret hukommelsesbrug, livscyklustællere og butiksgrænser                                                          |
+| `omniroute_rtk_discover`            | `read:compression`  | Opdag tilbagevendende støj i opt-in RTK output samples                                                                                |
+| `omniroute_rtk_learn`               | `read:compression`  | Generer et udkast til RTK -filter, der kan gennemgås, fra tilvalgsprøver                                                              |
 
-CCR indgange bruger et lager i to niveauer: et varmt lager i hukommelsen understøttet, på lokale ikke-sky-kørselstider, af et holdbart SQLite niveau (`ccr_blocks`, slået til som standard), så en blok overlever eviction eller en genstart, indtil dens TTL løber tør — undtagen blokke over 512 KB og forbliver kun i skyhukommelsen. Hver blok er begrænset til 2 MiB, hver principal til 16 MiB og den globale butik til 64 MiB. Indgange er som standard en 24-timers TTL (maksimalt syv dage). Fuld MCP -hentning er begrænset til 256 KiB; større blokke forbliver tilgængelige gennem ranged- og grep-tilstandene. Opbevaring, hentning, notering, inspektion, sletning og statistik isoleres af den autentificerede API-nøgle-principal. Revisionsposter indeholder hash- og størrelsesmetadata, aldrig indhold. Operatørvendte detaljer (de to markører, klientforudsætninger, `codemode:false`, per-tool scopes, paginering og en diagnostisk matrix) findes i [Compression Engines → Prerequisites/operatørvejledning](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR indgange bruger et lager i to niveauer: et varmt lager i hukommelsen understøttet, på lokale ikke-sky-kørselstider, af et holdbart SQLite niveau (`ccr_blocks`, slået til som standard), så en blok overlever eviction eller en genstart, indtil dens TTL løber tør — undtagen blokerer over 512 KB, som forbliver cloud- `COMPRESSION_CCR_DURABLE_STORE=false`, som forbliver cloud-on-time. Den holdbare skrivning er den bedste indsats: den droppes, mens 1.000 skrivninger allerede er afventende, og en mislykket SQLite skrivning logges, ikke forsøges igen, så blokeringen går tabt ved genstart. Hver blok er begrænset til 2 MiB, hver principal til 16 MiB og det globale lager til 64 MiB. Indgange er som standard en 24-timers TTL (maksimalt syv dage). Fuld MCP hentning er begrænset til 256 KiB; større blokke forbliver tilgængelige gennem ranged- og grep-tilstandene. Opbevaring, hentning, notering, inspektion, sletning og statistik isoleres af den autentificerede API-nøgle-principal. Revisionsposter indeholder hash- og størrelsesmetadata, aldrig indhold. Operatørvendte detaljer (de to markører, klientforudsætninger, `codemode:false`, per-tool scopes, paginering og en diagnostisk matrix) findes i [Compression Engines → Prerequisites/operatørvejledning](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` rapporterer MCP -beskrivelseskomprimering separat under `analytics.mcpDescriptionCompression`. Disse værdier er metadatastørrelsesestimater for MCP listebare beskrivelser (`tools`, `prompts`, `resources` og `resourceTemplates`); de er ikke kvitteringer for udbyderbrug og er markeret med `source: "mcp_metadata_estimate"`.
 

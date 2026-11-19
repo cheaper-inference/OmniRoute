@@ -28,7 +28,14 @@ export default function ModalWizard({ className, labels, ...props }: WizardProps
       className={cn(IN_MODAL_CLASS, className)}
       labels={{
         stepCount,
+        progress: t("modalWizardProgress"),
+        // The kit joins these to the step title inside the step link ("Go back to " + title +
+        // ", completed"); the catalog holds the words, the separators stay here.
+        previousStepPrefix: `${t("modalWizardGoBackTo")} `,
+        stepPrefix: `${t("modalWizardGoTo")} `,
+        completedSuffix: `, ${t("modalWizardCompleted")}`,
         back: t("back"),
+        skip: t("skip"),
         next: t("next"),
         saving: t("saving"),
         loading: t("loading"),
