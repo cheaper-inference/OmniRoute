@@ -1,0 +1,1 @@
+- **fix(db):** Logging in again on an existing OAuth connection no longer replaces its stored settings: Claude keeps its device identity (`cliUserID`), and every provider keeps operator controls such as `limitPolicy`, `quotaPreflightEnabled`, `allowPaidCredits` and the Claude opt-ins ([#20692](https://github.com/cheaper-inference/OmniRoute/pull/20692)) — thanks @AndresDiagoM
