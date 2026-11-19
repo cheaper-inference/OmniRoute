@@ -301,7 +301,6 @@ import { computeRequestHash, shouldDeduplicate } from "../services/requestDedup.
 import {
   compressContext,
   estimateTokens,
-  getTokenLimit,
   resolveTokenLimit,
   getComboTargetTokenLimit,
   resolveComboContextLimit,
@@ -1679,11 +1678,10 @@ async function handleChatCoreInner({
       }
       const compressionInputBody = body as Record<string, unknown>;
       // Adaptive context-budget (Sub-project C): model context window + request max_tokens drive
-      // the budget target. getTokenLimit is already imported; provider/effectiveModel resolved above.
+      // the budget target. Reuse the same resolution that set contextLimitEnforced, so a
+      // CONTEXT_LENGTH_* env change mid-request cannot swap in the placeholder window.
       const adaptiveModelContextLimit =
-        provider && effectiveModel && contextLimitEnforced
-          ? getTokenLimit(provider, effectiveModel)
-          : null;
+        provider && effectiveModel && contextLimitEnforced ? ownTokenLimit.limit : null;
       const requestMaxTokens =
         typeof (compressionInputBody as Record<string, unknown>)?.max_tokens === "number"
           ? ((compressionInputBody as Record<string, unknown>).max_tokens as number)
