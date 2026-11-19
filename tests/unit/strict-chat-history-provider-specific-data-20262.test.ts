@@ -95,7 +95,7 @@ test("strictChatHistory via providerSpecificData repairs broken tool sequence on
 });
 
 test("validateProviderSpecificData accepts boolean strictChatHistory and rejects invalid values (#20262)", () => {
-  const schema = z.record(z.unknown()).superRefine(validateProviderSpecificData);
+  const schema = z.record(z.string(), z.unknown()).superRefine(validateProviderSpecificData);
 
   const validTrue = schema.safeParse({ strictChatHistory: true });
   assert.equal(validTrue.success, true);

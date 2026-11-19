@@ -269,6 +269,9 @@ export default function EditConnectionModal({
   const isPlainAnthropicCompatible = isAnthropicCompatibleProvider(provider) && !isCcCompatible;
   const isOpenAICompatible = isOpenAICompatibleProvider(provider);
   const isCompatible = isOpenAICompatible || isAnthropicCompatibleProvider(provider);
+  // Sequence repair only rewrites a Chat Completions `messages` array, so the
+  // option is inert (and hidden) on Responses-API connections, which send `input`.
+  const supportsStrictChatHistory = isOpenAICompatible && !isResponsesConnection;
   const vertexCopy = isVertex ? getVertexCredentialCopy(t) : null;
   const apiCredentialLabel = webSessionCredential
     ? getWebSessionCredentialLabel(t, webSessionCredential, apiKeyOptional)
@@ -735,10 +738,10 @@ export default function EditConnectionModal({
           updates.providerSpecificData.keepMidConversationSystem =
             formData.keepMidConversationSystem ? true : undefined;
         }
-        if (isOpenAICompatible) {
-          updates.providerSpecificData.strictChatHistory = formData.strictChatHistory
-            ? true
-            : undefined;
+        if (supportsStrictChatHistory) {
+          // Explicit boolean, not `undefined`: the PUT route merges
+          // { ...existing, ...incoming }, so dropping the key would keep a stored `true`.
+          updates.providerSpecificData.strictChatHistory = formData.strictChatHistory === true;
         }
         updates.providerSpecificData.peakHourProtection = normalizePeakHourProtectionForSave(
           formData.peakHourProtection
@@ -835,7 +838,7 @@ export default function EditConnectionModal({
       )}
     />
   ) : null;
-  const strictChatHistoryToggle = isOpenAICompatible ? (
+  const strictChatHistoryToggle = supportsStrictChatHistory ? (
     <Toggle
       checked={formData.strictChatHistory}
       onChange={(checked) => setFormData({ ...formData, strictChatHistory: checked })}
