@@ -469,7 +469,6 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         setShowCloudflaredTunnel(tunnelVisibility.showCloudflaredTunnel);
         setShowTailscaleFunnel(tunnelVisibility.showTailscaleFunnel);
         setShowNgrokTunnel(tunnelVisibility.showNgrokTunnel);
-        if (data.ngrokAuthToken) setNgrokToken(data.ngrokAuthToken);
         setCustomSystemPromptEnabled(!!data.customSystemPromptEnabled);
         setCustomSystemPrompt(data.customSystemPrompt || "");
 
@@ -1283,10 +1282,10 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
       <div className="flex flex-col gap-2">
         <PageHeader compact title={t("title")} description={t("subtitle")} />
         <div className="flex items-center gap-3 mt-2">
-          <code className="text-sm bg-card-subtle px-3 py-1 rounded-md text-text-main font-mono">
+          <code className="text-sm bg-bg-subtle px-3 py-1 rounded-md text-text-main font-mono">
             {displayBaseUrl}/v1
           </code>
-          <a href="#test" className="text-sm text-action font-medium hover:underline">
+          <a href="#test" className="text-sm text-primary font-medium hover:underline">
             {t("testEndpoint")}
           </a>
         </div>
@@ -1314,7 +1313,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
 
         {/* Endpoint Card */}
         <Card>
-          <h2 className="text-lg font-semibold mb-4">{t("title")}</h2>
+          <h2 className="text-lg mb-4">{t("title")}</h2>
 
           {/* Cloud Status Toast */}
           {cloudStatus && (
@@ -1395,7 +1394,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                       onClick={() => void copy(url, `lan_${url}`)}
                       title={t("copyUrlTitle", { url })}
                       aria-label={t("copyUrlTitle", { url })}
-                      className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] font-normal text-text-muted"
+                      className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] text-text-muted"
                     >
                       <code className="font-mono">{url.replace(/^https?:\/\//, "")}</code>
                       <Icon
@@ -1609,7 +1608,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                           }}
                           title={`${tc("copy")} ${tailscaleIpUrl}`}
                           aria-label={`${tc("copy")} ${tailscaleIpUrl}`}
-                          className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] font-normal text-text-muted"
+                          className="h-auto min-h-0 gap-0.5 px-1 py-0 text-[10px] text-text-muted"
                         >
                           <code className="font-mono">
                             {tailscaleIpUrl.replace(/^https?:\/\//, "")}
@@ -1716,7 +1715,6 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                             "Optional sudo password"
                           )}
                           disabled={tailscaleBusy}
-                          className="font-mono text-sm"
                         />
                       </div>
                     )}
@@ -1847,7 +1845,6 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                             "Enter your ngrok authtoken"
                           )}
                           disabled={ngrokBusy}
-                          className="font-mono text-sm"
                         />
                       </div>
                     )}
@@ -1877,7 +1874,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   value={customSystemPrompt}
                   onChange={(e) => handleCustomSystemPromptChange(e.target.value)}
                   placeholder={t("customSystemPromptPlaceholder")}
-                  className="w-64 text-xs"
+                  className="w-64"
+                  inputClassName="text-xs"
                 />
               )}
               <Toggle
@@ -1893,7 +1891,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         <Card>
           <div className="flex items-center justify-between mb-5">
             <div>
-              <h2 className="text-lg font-semibold">{t("available")}</h2>
+              <h2 className="text-lg">{t("available")}</h2>
               <p className="text-sm text-text-muted">
                 {modelsLoading
                   ? translateOrFallback("loadingModels", "Loading available models...")
@@ -1909,9 +1907,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="hub" className="text-sm text-primary" />
-              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-                {t("categoryCore")}
-              </h3>
+              <h3 className="text-xs text-text-muted uppercase">{t("categoryCore")}</h3>
               <div className="flex-1 h-px bg-border/50" />
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
@@ -1970,9 +1966,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           <div className="mb-5">
             <div className="flex items-center gap-2 mb-3">
               <Icon name="perm_media" className="text-sm text-chart-3" />
-              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-                {t("categoryMedia")}
-              </h3>
+              <h3 className="text-xs text-text-muted uppercase">{t("categoryMedia")}</h3>
               <div className="flex-1 h-px bg-border/50" />
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
@@ -2068,9 +2062,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
             <div className="mb-5">
               <div className="flex items-center gap-2 mb-3">
                 <Icon name="travel_explore" className="text-sm text-info" />
-                <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-                  {t("categorySearch")}
-                </h3>
+                <h3 className="text-xs text-text-muted uppercase">{t("categorySearch")}</h3>
                 <div className="flex-1 h-px bg-border/50" />
               </div>
               <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
@@ -2097,9 +2089,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
           <div>
             <div className="flex items-center gap-2 mb-3">
               <Icon name="build" className="text-sm text-warning" />
-              <h3 className="text-xs font-semibold text-text-muted uppercase tracking-wider">
-                {t("categoryUtility")}
-              </h3>
+              <h3 className="text-xs text-text-muted uppercase">{t("categoryUtility")}</h3>
               <div className="flex-1 h-px bg-border/50" />
             </div>
             <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
@@ -2448,7 +2438,7 @@ function ProviderModelsModal({
     if (groupModels.length === 0) return null;
     return (
       <div className="mb-4">
-        <h4 className="text-xs font-semibold text-text-muted uppercase tracking-wider mb-2 flex items-center gap-1.5">
+        <h4 className="text-xs text-text-muted uppercase mb-2 flex items-center gap-1.5">
           <Icon name={icon} className="text-sm" />
           {title} ({groupModels.length})
         </h4>

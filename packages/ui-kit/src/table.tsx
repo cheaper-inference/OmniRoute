@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useId, useState } from "react";
-import type { ComponentProps } from "react";
+import type { ComponentProps, CSSProperties } from "react";
 import { ExternalLink } from "lucide-react";
 import { cn } from "./lib/utils";
 import { TableLoadingRegion, type TableLoadingRegionProps } from "./table-loading";
@@ -16,8 +16,16 @@ export interface TableProps extends ComponentProps<"table"> {
   loadingIndicator?: TableLoadingRegionProps["loadingIndicator"];
   /** Accessible noun phrase used for the persistent horizontal scrollbar. */
   scrollbarLabel?: string;
-  /** Set false to use the browser's native horizontal scrollbar only. */
+  /**
+   * Set false to use the browser's native horizontal scrollbar only. Defaults to true, or to
+   * false when `maxHeight` is set, because a capped table keeps its native scrollbars in view.
+   */
   persistentScrollbars?: boolean;
+  /**
+   * Caps the height of the scroll container (a number is pixels). The rows then scroll inside
+   * it, under a header row that stays in view, and the container takes focus while it overflows.
+   */
+  maxHeight?: string | number;
   /**
    * Accessible name of the scroll container while the table overflows. When omitted, the
    * container is named by the table caption, then by the table's own `aria-labelledby` or
@@ -81,7 +89,8 @@ export function Table({
   className,
   containerClassName,
   scrollbarLabel = "Table",
-  persistentScrollbars = true,
+  maxHeight,
+  persistentScrollbars = maxHeight === undefined,
   scrollLabel,
   loading,
   loadingLabel,
@@ -102,12 +111,17 @@ export function Table({
           ? { "aria-label": props["aria-label"] }
           : undefined;
   const scrollProps = overflowing ? { tabIndex: 0, ...(name ? { role: "region", ...name } : {}) } : {};
+  const capProps = maxHeight === undefined ? {} : {
+    "data-capped": "",
+    style: { "--ci-table-max-height": typeof maxHeight === "number" ? `${maxHeight}px` : maxHeight } as CSSProperties,
+  };
   const table = (
     <div
       ref={setContainer}
       data-slot="table-container"
       data-overflowing={overflowing || undefined}
       className={cn("ci-table-container", containerClassName)}
+      {...capProps}
       {...scrollProps}
     >
       <table data-slot="table" className={cn("ci-table", className)} {...props} />
