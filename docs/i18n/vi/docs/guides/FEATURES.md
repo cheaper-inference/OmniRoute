@@ -57,29 +57,26 @@ Các kết nối OpenRouter có thể lưu một `preset` riêng cho từng kế
 
 ---
 
-## 🎨 Tổ hợp
+## 🎨 Các combo
 
-Tạo các tổ hợp định tuyến mô hình với 19 chiến lược công khai: ưu tiên, có trọng số, luân phiên, chuyển tiếp ngữ cảnh, lấp đầy trước, p2c (lựa chọn theo sức mạnh của hai phương án), ngẫu nhiên, ít được sử dụng nhất, tối ưu chi phí, nhận biết đặt lại, cửa sổ đặt lại, dung lượng dự phòng, ngẫu nhiên nghiêm ngặt, tự động, lkgp (nhà cung cấp hoạt động tốt gần nhất), tối ưu ngữ cảnh, tối ưu bộ nhớ đệm, **hợp nhất** (gửi song song đến một nhóm mô hình, sau đó tổng hợp một câu trả lời thông qua mô hình đánh giá) và **đường ống**. Mỗi tổ hợp liên kết nhiều mô hình với cơ chế dự phòng tự động, đồng thời bao gồm các mẫu thiết lập nhanh và kiểm tra trạng thái sẵn sàng.
+Tạo các combo định tuyến mô hình với 22 chiến lược công khai: priority, weighted, round-robin, context-relay, fill-first, p2c (power-of-two choices), random, least-used, cost-optimized, reset-aware, reset-window, expiry-first, headroom, quota-weighted, strict-random, auto, lkgp (last-known-good-provider), context-optimized, cache-optimized, **fusion** (phân phối yêu cầu đến một nhóm mô hình chạy song song, sau đó tổng hợp thành một câu trả lời thông qua một bộ đánh giá), **pipeline** và **jev** (cơ chế tiếp nhận Jev TypeSafe tùy chọn trên danh sách đã xếp hạng). Mỗi combo kết hợp nhiều mô hình với cơ chế dự phòng tự động, đồng thời bao gồm các mẫu dựng nhanh và kiểm tra mức độ sẵn sàng.
 
-Các cải tiến gần đây đối với tổ hợp:
+Các cải tiến gần đây của combo:
 
-- **Trình tạo tổ hợp có cấu trúc** — tạo từng bước bằng cách chọn nhà cung cấp, mô hình và chính xác tài khoản/kết nối
-- **Hỗ trợ lặp lại nhà cung cấp** — tái sử dụng cùng một nhà cung cấp nhiều lần trong một tổ hợp, miễn là bộ `(provider, model, connection)` là duy nhất
-- **Tình trạng đích của tổ hợp** — các giao diện phân tích và tình trạng hiện phân biệt từng đích/bước riêng lẻ trong tổ hợp thay vì gộp tất cả thành chuỗi mô hình
-- **Thứ tự tầng tổng hợp** — `defaultTier -> fallbackTier` hiện ảnh hưởng đến thứ tự thực thi/dự phòng trong thời gian chạy đối với các bước tổ hợp cấp cao nhất
-- **Mẫu lời nhắc hệ thống** — `system_message` của tổ hợp hỗ trợ các phần giữ chỗ phía máy chủ
-  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` và `{{FINGERPRINT}}`,
-  được mở rộng từ đích thực sự được định tuyến ngay trước khi gửi đi.
-  Chỉ các giá trị trong danh sách cho phép được hỗ trợ và không xử lý đệ quy; các phần giữ chỗ không xác định được giữ nguyên theo nghĩa đen; giá trị trống
-  được mở rộng thành chuỗi trống; lời nhắc hệ thống từ máy khách không bao giờ bị ghi lại. `{{FINGERPRINT}}`
-  chỉ được phân giải cho các nhà cung cấp miễn phí dựa trên dấu vân tay có dấu vân tay được ghim hoặc
-  tự động xoay vòng — ở nơi khác, nó được mở rộng thành chuỗi trống (ví dụ:
-  kết nối dùng một dấu vân tay duy nhất, nhà cung cấp không dùng dấu vân tay). Việc mở rộng áp dụng cho
-  vòng lặp gửi tiêu chuẩn, chiến lược luân phiên và các phiên bộ nhớ đệm ngữ cảnh được ghim;
-  các chiến lược hợp nhất, hỗn loạn, đường ống và thực thi lồng nhau hiện chưa mở rộng
-  các phần giữ chỗ.
+- **Trình dựng combo có cấu trúc** — tạo từng bước bằng cách chọn nhà cung cấp, mô hình và tài khoản/kết nối cụ thể
+- **Hỗ trợ nhà cung cấp lặp lại** — sử dụng lại cùng một nhà cung cấp nhiều lần trong một combo, miễn là bộ `(provider, model, connection)` là duy nhất
+- **Tình trạng sức khỏe của mục tiêu combo** — các bề mặt phân tích và tình trạng sức khỏe hiện phân biệt từng mục tiêu/bước combo thay vì gộp tất cả thành các chuỗi mô hình
+- **Thứ tự tầng kết hợp** — `defaultTier -> fallbackTier` hiện ảnh hưởng đến thứ tự thực thi/dự phòng trong thời gian chạy đối với các bước combo cấp cao nhất
+- **Mẫu system prompt** — `system_message` của combo hỗ trợ các trình giữ chỗ phía máy chủ
+  `{{MODEL_ID}}`, `{{PROVIDER_ID}}`, `{{ACCOUNT}}` và `{{FINGERPRINT}}`
+  , được mở rộng từ mục tiêu thực tế được định tuyến ngay trước khi phân phối.
+  Các trình giữ chỗ được cho phép và không đệ quy; trình giữ chỗ không xác định vẫn giữ nguyên dạng chữ; giá trị trống được mở rộng thành giá trị trống; system prompt phía máy khách không bao giờ bị viết lại. `{{FINGERPRINT}}`
+  chỉ được phân giải đối với các nhà cung cấp miễn phí dựa trên fingerprint có fingerprint được ghim hoặc tự động xoay vòng — ở các trường hợp khác, nó được mở rộng thành giá trị trống (ví dụ:
+  các kết nối có một fingerprint duy nhất, nhà cung cấp không dùng fp). Việc mở rộng bao phủ vòng lặp phân phối tiêu chuẩn, round-robin và các phiên bộ nhớ đệm ngữ cảnh được ghim;
+  các chiến lược fusion, chaos, pipeline và nested-execute hiện chưa mở rộng
+  các trình giữ chỗ.
 
-![Bảng điều khiển Tổ hợp](../screenshots/02-combos.png)
+![Bảng điều khiển Combos](../screenshots/02-combos.png)
 
 ---
 
@@ -316,14 +313,14 @@ Gói cấu hình được tạo bởi `src/lib/sync/bundle.ts`. Các ứng dụn
 
 ---
 
-## 🛡️ Truy xuất ra ngoài an toàn & Cơ chế bảo vệ SSRF _(v3.6.6+)_
+## 🛡️ Bảo vệ Fetch outbound an toàn & ngăn SSRF _(v3.6.6+)_
 
-Tất cả lệnh gọi xác thực nhà cung cấp và khám phá mô hình giờ đây đều đi qua cơ chế bảo vệ kết nối ra ngoài gồm hai lớp:
+Tất cả các lệnh gọi xác thực provider và phát hiện model hiện đều đi qua lớp bảo vệ outbound gồm hai tầng:
 
-1. **Cơ chế bảo vệ URL** (`src/shared/network/outboundUrlGuard.ts`) — Chặn các dải IP riêng tư/loopback/link-local trước khi socket được mở.
-2. **Trình bao bọc truy xuất an toàn** (`src/shared/network/safeOutboundFetch.ts`) — Áp dụng cơ chế bảo vệ URL, chuẩn hóa thời gian chờ và thử lại các lỗi tạm thời bằng chiến lược thời gian chờ tăng dần theo cấp số nhân.
+1. **Bộ bảo vệ URL** (`src/shared/network/outboundUrlGuard.ts`) — Trước tiên kiểm tra hostname hoặc địa chỉ IP dạng literal của đích theo đúng cách được ghi; ở chế độ chỉ cho phép public, trình bao bọc safe-fetch cũng phân giải tên và từ chối các kết quả private. Theo mặc định, bộ bảo vệ chặn các endpoint siêu dữ liệu đám mây — toàn bộ 169.254.0.0/16 cùng các hostname siêu dữ liệu đã biết; `OMNIROUTE_ALLOW_LOCAL_PROVIDER_URLS=false` cũng chặn các host private và loopback; `OMNIROUTE_ALLOW_PRIVATE_PROVIDER_URLS=true` (hoặc `OUTBOUND_SSRF_GUARD_ENABLED=false` theo cách cũ) sẽ tắt các kiểm tra này. Giá trị được lưu từ công tắc trên dashboard của flag sẽ được ưu tiên hơn biến của flag, và các provider cục bộ tích hợp sẵn sẽ bỏ qua bộ bảo vệ trong quá trình xác thực key. Xem `docs/reference/ENVIRONMENT.md`.
+2. **Trình bao bọc safe fetch** (`src/shared/network/safeOutboundFetch.ts`) — Áp dụng bộ bảo vệ URL, chuẩn hóa timeout và thử lại các lỗi tạm thời với thời gian chờ tăng theo cấp số nhân.
 
-Các vi phạm cơ chế bảo vệ được trả về dưới dạng HTTP 422 (`URL_GUARD_BLOCKED`) và được ghi vào nhật ký kiểm toán tuân thủ thông qua `providerAudit.ts`.
+Các vi phạm bộ bảo vệ sẽ hiển thị dưới dạng `URL_GUARD_BLOCKED` — HTTP 503 thông qua `getSafeOutboundFetchErrorStatus` (400 trên route phát hiện model) — còn các lần chặn SSRF thực sự trong quá trình xác thực sẽ được ghi vào audit log dưới dạng các sự kiện `provider.validation.ssrf_blocked`.
 
 ---
 

@@ -53,61 +53,61 @@ OmniRoute/
 
 ## Rotfiler
 
-| File                                        | Formål                                                                                            |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------- |
-| **README.md**                               | Landingsside for markedsføring + hurtigstart + funksjonsmatrise (se også `llm.txt`)               |
-| **CHANGELOG.md**                            | Endringslogg per utgivelse (automatisk generert av ferdigheten `/version-bump-cc`)                |
-| **LICENSE**                                 | MIT-lisenstekst                                                                                   |
-| **CLAUDE.md**                               | Prosjektregler for Claude Code-agenter (ufravikelige regler, konvensjoner, scenarioer)            |
-| **AGENTS.md**                               | Samme som CLAUDE.md, men for AI-agenter som ikke er basert på Claude (Codex, Cursor osv.)         |
-| **GEMINI.md**                               | Kortfattede regler for Gemini-baserte agenter (delmengde av CLAUDE.md)                            |
-| **CONTRIBUTING.md**                         | Bidragsyterveiledning: oppsett, konvensjonelle commits, testing, PR-flyt                          |
-| **SECURITY.md**                             | Retningslinjer for rapportering av sårbarheter, støttede versjoner, trusselmodell                 |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — forventninger til oppførsel i fellesskapet                                 |
-| **llm.txt**                                 | Landingsside i ren tekst, optimalisert for LLM-gjennomsøkere (SEO for AI-assistenter)             |
-| **package.json**                            | npm-manifest, skript, avhengigheter, motorer, c8-dekningsport                                     |
-| **package-lock.json**                       | Låst avhengighetstre                                                                              |
-| **tsconfig.json**                           | TypeScript-rotkonfigurasjon                                                                       |
-| **tsconfig.typecheck-core.json**            | Typesjekk-konfigurasjon for kjernen i `src/`                                                      |
-| **tsconfig.typecheck-noimplicit-core.json** | Streng (`noImplicitAny`) typesjekk                                                                |
-| **tsconfig.tsbuildinfo**                    | Hurtigbuffer for inkrementell TS-bygging (ignorert av Git)                                        |
-| **next.config.mjs**                         | Byggekonfigurasjon for Next.js 16 (frittstående utdata)                                           |
-| **next-env.d.ts**                           | Automatisk genererte miljøtyper for Next.js                                                       |
-| **eslint.config.mjs**                       | Flat ESLint-konfigurasjon (regler per prosjektområde)                                             |
-| **prettier.config.mjs**                     | Formateringsregler for Prettier                                                                   |
-| **postcss.config.mjs**                      | PostCSS-konfigurasjon for Tailwind/CSS-pipelinen                                                  |
-| **playwright.config.ts**                    | Konfigurasjon for Playwright E2E-tester                                                           |
-| **vitest.config.ts**                        | Vitest-konfigurasjon (standard testpakke)                                                         |
-| **vitest.mcp.config.ts**                    | Vitest-konfigurasjon for MCP-server / autoCombo / hurtigbuffertestpakker                          |
-| **sonar-project.properties**                | SonarQube/SonarCloud-konfigurasjon (kodekvalitet)                                                 |
-| **Dockerfile**                              | Flertrinns Docker-bygging (builder → runner-base → runner-cli)                                    |
-| **docker-compose.yml**                      | Compose-oppsett for utvikling med 4 profiler (base, cli, host, cliproxyapi) + redis-sidecontainer |
-| **docker-compose.prod.yml**                 | Compose-oppsett for produksjon (port 20130, redis, navngitte volumer)                             |
-| **.dockerignore**                           | Filer som er ekskludert fra Docker-konteksten                                                     |
-| **fly.toml**                                | Distribusjonskonfigurasjon for Fly.io (region `sin`, port 20128, /data-volum)                     |
-| **.env.example**                            | Mal for miljøfil (kopieres automatisk til `.env` ved første installasjon)                         |
-| **.gitignore**                              | Ignoreringsmønstre for Git                                                                        |
-| **.npmignore**                              | Ekskluderingsliste for npm-publisering                                                            |
-| **.npmrc**                                  | npm-konfigurasjon (register, retningslinjer for låsefil)                                          |
-| **.node-version**                           | Fastlåst Node-versjon (brukes av nvm-kompatible verktøy)                                          |
-| **.nvmrc**                                  | Fastlåst Node-versjon for nvm                                                                     |
-| **eslint.complexity.config.mjs**            | ESLint-konfigurasjon for kompleksitetssperren (`scripts/check/check-complexity.mjs --config`)     |
-| **eslint.sonarjs.config.mjs**               | ESLint-konfigurasjon for SonarJS-regler (kognitiv kompleksitet / duplisering)                     |
-| **source.config.ts**                        | Fumadocs `defineDocs`-kildekonfigurasjon (leverer data til `.source/`)                            |
-| **knip.json**                               | Knip-konfigurasjon — ubrukte filer/eksporter/avhengigheter (leverer data til død-kode-sperren)    |
-| **stryker.conf.json**                       | Konfigurasjon for mutasjonstesting med Stryker                                                    |
-| **.size-limit.json**                        | Konfigurasjon av størrelsesbudsjett for size-limit                                                |
-| **promptfooconfig.yaml**                    | Konfigurasjon av promptfoo-evaluering                                                             |
-| **.gitleaks.toml**                          | Regelsett for hemmelighetsskanning med gitleaks                                                   |
-| **.zizmor.yml**                             | Konfigurasjon av sikkerhetslinting for GitHub Actions med zizmor                                  |
-| **socket.yml**                              | Konfigurasjon av forsyningskjedesikkerhet for Socket.dev                                          |
-| **news.json**                               | Lokalisert kunngjøringsstrøm for v2; Radar-lanseringselementet leveres inaktivt                   |
-| **flake.nix** / **flake.lock**              | Definisjon og låsefil for Nix-utviklingsskall                                                     |
-| **.env**                                    | Lokale hemmeligheter (ignorert av git – generert fra `.env.example`)                              |
+| Fil                                         | Hensikt                                                                                        |
+| ------------------------------------------- | ---------------------------------------------------------------------------------------------- |
+| **README.md**                               | Markedsføringslandingsside + quick start + funksjonsmatrise (se også `llm.txt`)                |
+| **CHANGELOG.md**                            | Endringslogg per utgivelse (automatisk generert av `/version-bump-cc` ferdigheten)             |
+| **LICENSE**                                 | MIT lisenstekst                                                                                |
+| **CLAUDE.md**                               | Prosjektregler for Claude Code-agenter (harde regler, konvensjoner, scenarier)                 |
+| **AGENTS.md**                               | Samme som CLAUDE.md, men for ikke-Claude AI agenter (Codex, Cursor, etc.)                      |
+| **GEMINI.md**                               | Konsise regler for Gemini-baserte agenter (undergruppe av CLAUDE.md)                           |
+| **CONTRIBUTING.md**                         | Bidragsyterguide: oppsett, konvensjonelle forpliktelser, testing, PR -flyt                     |
+| **SECURITY.md**                             | Sårbarhetsrapporteringspolicy, støttede versjoner, trusselmodell                               |
+| **CODE_OF_CONDUCT.md**                      | Bidragsyter Covenant — community atferd forventninger                                          |
+| **llm.txt**                                 | Vanlig tekstlanding optimalisert for LLM crawlere (SEO for AI assistenter)                     |
+| **package.json**                            | npm-manifest, skript, avhengigheter, motorer, c8-dekningsport                                  |
+| **package-lock.json**                       | Låst avhengighetstre                                                                           |
+| **tsconfig.json**                           | Root TypeScript konfig                                                                         |
+| **tsconfig.typecheck-core.json**            | Typecheck config for `src/` core                                                               |
+| **tsconfig.typecheck-noimplicit-core.json** | Streng (`noImplicitAny`) typekontroll                                                          |
+| **tsconfig.tsbuildinfo**                    | TS inkrementell byggebuffer (gitignored)                                                       |
+| **neste.config.mjs**                        | Next.js 16 build-konfigurasjon (frittstående utgang)                                           |
+| **neste-env.d.ts**                          | Next.js automatisk genererte env-typer                                                         |
+| **eslint.config.mjs**                       | ESLint flat config (regler per prosjektområde)                                                 |
+| **penere.config.mjs**                       | Prettier -formateringsregler                                                                   |
+| **postcss.config.mjs**                      | PostCSS -konfigurasjon for Tailwind/CSS rørledning                                             |
+| **dramatiker.config.ts**                    | Playwright E2E test konfig                                                                     |
+| **vitest.config.ts**                        | Vitest config (standard suite)                                                                 |
+| **vitest.mcp.config.ts**                    | Vitest config for MCP server / autoCombo / cache suiter                                        |
+| **sonar-project.properties**                | SonarQube/SonarCloud config (kodekvalitet)                                                     |
+| **Dockerfil**                               | Flertrinns Docker build (bygger → runner-base → runner-cli)                                    |
+| **docker-compose.yml**                      | Dev compose med 4 profiler (base, cli, host, cliproxyapi) + redis sidevogn                     |
+| **docker-komponere.prod.yml**               | Produksjonskomponering (port 20130, redis, navngitte volumer)                                  |
+| **.dockerignore**                           | Filer ekskludert fra Docker kontekst                                                           |
+| **fly.toml**                                | Fly.io-distribusjonskonfigurasjon (region `sin`, port 20128, /datavolum)                       |
+| **.env.eksempel**                           | Env-mal-fil (autokopiert til `.env` ved første installasjon)                                   |
+| **.gitignore**                              | Git ignorere mønstre                                                                           |
+| **.npmignore**                              | npm publiserer ekskluderingsliste                                                              |
+| **.npmrc**                                  | npm-konfigurasjon (register, låsefilpolicy)                                                    |
+| **.node-versjon**                           | Nodeversjonspinne (brukt av nvm-kompatible verktøy)                                            |
+| **.nvmrc**                                  | Node versjon pin for nvm                                                                       |
+| **eslint.kompleksitet.config.mjs**          | ESLint -konfigurasjon for kompleksitetsratchet (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | ESLint -konfigurasjon for SonarJS -regler (kognitiv kompleksitet / duplisering)                |
+| **kilde.config.ts**                         | Fumadocs `defineDocs` kildekonfigurasjon (feeds `.source/`)                                    |
+| **knip.json**                               | Knip config — ubrukt files/exports/deps (mater dødkodeporten)                                  |
+| **stryker.conf.mjs**                        | Stryker mutasjonstesting konfig (beregner `tap.testFiles` fra `mutate`)                        |
+| **.size-limit.json**                        | budsjettkonfigurasjon for størrelsesgrense                                                     |
+| **promptfooconfig.yaml**                    | promptfoo eval config                                                                          |
+| **.gitleaks.toml**                          | gitleaks regelsett for hemmelig skanning                                                       |
+| **.zizmor.yml**                             | zizmor GitHub-Actions sikkerhets-lint-konfig                                                   |
+| **socket.yml**                              | Socket.dev forsyningskjede konfig                                                              |
+| **news.json**                               | Lokalisert v2-kunngjøringsfeed; Radar lanseringselement sendes inaktivt                        |
+| **flake.nix** /** flak.lås**                | Nix dev-shell definition + lås                                                                 |
+| **.env**                                    | Lokale hemmeligheter (gitignored — generert fra `.env.example`)                                |
 
-> **Flyttet ut av roten i v3.8.26 (opprydding):**
+> **Flyttet ut av roten i v3.8.26 (declutter):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` og den genererte `quality-metrics.json` (ignorert av git). Se [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` og den genererte `quality-metrics.json` (gitignored). Se [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -192,10 +192,10 @@ src/
 | `memory/embedding/`                      | Innebyggingslag med flere kilder: `index.ts` (oppløser), `remote.ts`, `staticPotion.ts`, `transformersLocal.ts`, `cache.ts`, `types.ts` (plan 21)                                                                                                                                                                  |
 | `memory/vectorStore.ts`                  | sqlite-vec v0.1.9 wrapper — KNN brute-force + hybrid RRF (FTS5 + vektor, k = 60). Lazy-init, degraderes elegant når sqlite-vec utilgjengelig. (plan 21)                                                                                                                                                            |
 | `memory/reindex.ts`                      | `runReindexBatch()` — behandler minner med `needs_reindex=1` i bakgrunnen; kalt av `POST /api/memory/reindex` og lazy-backfill-bane. (plan 21)                                                                                                                                                                     |
-| `monitoring/`                            | Helsesjekker, metrikkutslipp                                                                                                                                                                                                                                                                                       |
+| `monitoring/`                            | Helsesjekker, beregninger utslipp                                                                                                                                                                                                                                                                                  |
 | `oauth/`                                 | OAuth/import strømmer for 22 leverandørmoduler (agy, antigravity, claude, cline, codebuddy-cn, codex, cursor, devin-desktop, ghe-copilot, github, gitlab-duo, grok-cli-oauth, grok-cli, kilocode, kimi-coding, kiro, qoder- traference, zed)                                                                       |
 | `plugins/`                               | Plugin-register                                                                                                                                                                                                                                                                                                    |
-| `promptCache/`                           | Antropiske hurtigbufferbruddpunkter                                                                                                                                                                                                                                                                                |
+| `promptCache/`                           | Antropisk stil hurtigbufferbruddpunkter                                                                                                                                                                                                                                                                            |
 | `skills/`                                | Ferdighetsrammeverk (innebygd + marketplace + SkillsSH) — se `docs/frameworks/SKILLS.md`                                                                                                                                                                                                                           |
 | `playground/`                            | Playground Studio delte hjelpere: `codeExport.ts` (curl/Python/TS generator), `promptImprover.ts` (meta-prompt-bygger), `streamMetrics.ts` (ren TTFT/TPS), `types.ts` (pristabell) — se `docs/frameworks/PLAYGROUND_STUDIO.md`                                                                                     |
 | `webhookDispatcher.ts`                   | HMAC webhook levering — se `docs/frameworks/WEBHOOKS.md`                                                                                                                                                                                                                                                           |
@@ -234,7 +234,7 @@ src/
 | -------- | ---------------------------------------------------------------------------------------------------- |
 | `authz/` | Autorisasjonsrørledning: `classify` → `policies` → `enforce` — se `docs/architecture/AUTHZ_GUIDE.md` |
 | `cors/`  | CORS -konfigurasjon                                                                                  |
-| `auth/`  | Session mellomvare                                                                                   |
+| `auth/`  | Økt mellomvare                                                                                       |
 
 ### `src/shared/`
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | -------------------------------------------------------------------------------------------------- |
 | `components/`                    | Dashboard komponent API: adaptere over `packages/ui-kit` — se `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: ikonnavn som brukes av skjermene → Lucide-komponenter (`<Icon>`)                       |
-| `constants/providers.ts`         | **381 tilbydere** med Zod -validering (kilde til sannhet)                                          |
+| `constants/providers.ts`         | **394 tilbydere** med Zod -validering (kilde til sannhet)                                          |
 | `constants/cliTools.ts`          | Eksternt CLI -verktøyregister                                                                      |
-| `constants/routingStrategies.ts` | **20 rutingstrategier** med prioriteringer                                                         |
+| `constants/routingStrategies.ts` | **22 rutingstrategier** med prioriteringer                                                         |
 | `constants/publicApiRoutes.ts`   | Ruter som krever bærer (mot administrasjon) autentisering                                          |
 | `constants/upstreamHeaders.ts`   | Overskriftsavvisningsliste for oppstrømsforespørsler                                               |
 | `validation/schemas.ts`          | ~ 80 Zod -skjemaer (enkelt kilde til sannhet for API kontrakter)                                   |
@@ -265,7 +265,7 @@ Separat npm-arbeidsområde (`@omniroute/open-sse`). Håndterer behandling av for
 ```
 open-sse/
 ├── handlers/            # 16 filer (12 håndterere + 4 hjelpefiler): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search osv.
-├── executors/           # 150 kjøringsmoduler (klasser som utvider BaseExecutor + leverandørspesifikke hjelpefiler)
+├── executors/           # 163 kjøringsmoduler (klasser som utvider BaseExecutor + leverandørspesifikke hjelpefiler)
 ├── translator/          # Formatkonverterere (9 for forespørsler, 9 for svar, 9 hjelpefiler)
 ├── transformer/         # Responses API ↔ Chat Completions (TransformStream)
 ├── services/            # ~80+ tjenestemoduler (combo, accountFallback, autoCombo, reasoningCache, claude code/chatgpt i skjult modus, modelDeprecation, taskAwareRouter, workflowFSM osv.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Eksterne CLI -integrasjoner + Intern OmniRoute CLI                                      |
 | `I18N.md`                   | i18n-arkitektur, legger til et språk, 67 lokaliteter                                    |
 | `UNINSTALL.md`              | Rengjør avinstalleringstrinn                                                            |
-| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog med 381 leverandører (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Autogenerert** katalog med 394 leverandører (regen: `npm run gen:provider-reference`) |
 
 ### Delsystem dypdykk
 

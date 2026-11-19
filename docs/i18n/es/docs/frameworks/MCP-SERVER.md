@@ -20,6 +20,8 @@ O mediante el transporte abierto:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -33,7 +35,7 @@ omniroute mcp disable
 omniroute mcp restart                                 # resets active sse/streamable-http sessions
 ```
 
-`mcp enable`/`mcp disable` PATCH el mismo `mcpEnabled` (y opcionalmente `mcpTransport`) configurando el tablero alterna a través de `/api/settings`. `mcp restart` llama a `POST /api/mcp/restart`: derriba las sesiones activas `sse`/`streamable-http` para que la siguiente solicitud se reinicie limpiamente, devuelve `409` si MCP está deshabilitado y `501` para el transporte `stdio` (los clientes stdio poseen su propio subproceso — no hay un identificador en el proceso para reiniciar).
+`mcp enable`/`mcp disable` PATCH el mismo `mcpEnabled` (y opcionalmente `mcpTransport`) configurando el tablero se alterna a través de `/api/settings`. `mcp restart` llama a `POST /api/mcp/restart`: derriba las sesiones activas `sse`/`streamable-http` para que la siguiente solicitud se reinicie limpiamente, devuelve `409` si MCP está deshabilitado y `501` para el transporte `stdio` (los clientes stdio poseen su propio subproceso — no hay un identificador en el proceso para reiniciar).
 
 ## Transportes
 
@@ -144,7 +146,7 @@ Cursor, Cline y clientes MCP compatibles.
 | `omniroute_rtk_discover`            | `read:compression`  | Descubra el ruido recurrente en muestras de salida opcionales RTK                                                                                          |
 | `omniroute_rtk_learn`               | `read:compression`  | Genere un borrador de filtro RTK revisable a partir de muestras optativas                                                                                  |
 
-Las entradas CCR utilizan un almacén de dos niveles: un nivel activo en memoria respaldado, en tiempos de ejecución locales fuera de la nube, por un nivel SQLite duradero (`ccr_blocks`, activado de forma predeterminada), de modo que un bloque sobrevive al KB o a un reinicio hasta que su TTL se —. Cada bloque está limitado a 2 MiB, cada principal a 16 MiB y el almacén global a 64 MiB. Las entradas tienen por defecto un TTL de 24 horas (máximo siete días). La recuperación completa MCP está limitada a 256 KiB; Los bloques más grandes permanecen disponibles a través de los modos a distancia y grep. El almacenamiento, la recuperación, el listado, la inspección, la eliminación y las estadísticas están aislados por el principal de clave API autenticado. Los registros de auditoría contienen hashes y metadatos de tamaño, nunca contenido. Los detalles orientados al operador (los dos marcadores, requisitos previos del cliente, `codemode:false`, alcances por herramienta, paginación y una matriz de diagnóstico) se encuentran en [Requisitos previos/guía del operador de Compression Engines →](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+Las entradas CCR utilizan un almacén de dos niveles: un nivel activo en memoria respaldado, en tiempos de ejecución locales fuera de la nube, por un nivel SQLite duradero (`ccr_blocks`, activado de forma predeterminada), de modo que un bloque sobreviva al desalojo o a un reinicio hasta que su TTL se agote — excepto los bloques superiores a 512 KB, tiempos de ejecución en la nube y `COMPRESSION_CCR_DURABLE_STORE=false`, que permanecen solo en memoria. La escritura duradera es el mejor esfuerzo: se descarta mientras ya hay 1000 escrituras pendientes, y una escritura SQLite fallida se registra, no se reintenta, por lo que ese bloque se pierde al reiniciar. Cada bloque está limitado a 2 MiB, cada principal a 16 MiB y el almacén global a 64 MiB. Las entradas tienen por defecto un TTL de 24 horas (máximo siete días). La recuperación completa MCP está limitada a 256 KiB; Los bloques más grandes permanecen disponibles a través de los modos a distancia y grep. El almacenamiento, la recuperación, el listado, la inspección, la eliminación y las estadísticas están aislados por el principal de clave API autenticado. Los registros de auditoría contienen hashes y metadatos de tamaño, nunca contenido. Los detalles orientados al operador (los dos marcadores, requisitos previos del cliente, `codemode:false`, alcances por herramienta, paginación y una matriz de diagnóstico) se encuentran en [Requisitos previos/guía del operador de Compression Engines →](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` informa la compresión de la descripción MCP por separado en `analytics.mcpDescriptionCompression`. Esos valores son estimaciones del tamaño de los metadatos para descripciones enumerables MCP (`tools`, `prompts`, `resources` y `resourceTemplates`); no son recibos de uso del proveedor y están marcados con `source: "mcp_metadata_estimate"`.
 

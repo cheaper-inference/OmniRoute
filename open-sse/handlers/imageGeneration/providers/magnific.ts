@@ -14,7 +14,7 @@ import {
   UPSTREAM_MEDIA_LIMITS,
   downloadUpstreamMedia,
   upstreamMediaErrorText,
-} from "@/shared/network/remoteImageFetch";
+} from "../../../utils/remoteMediaFetch.ts";
 
 const DEFAULT_POLL_INTERVAL_MS = 4000;
 const DEFAULT_POLL_TIMEOUT_MS = 180000;
