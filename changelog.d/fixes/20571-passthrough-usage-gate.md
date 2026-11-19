@@ -1,0 +1,1 @@
+- **fix(sse):** passthrough streams no longer re-estimate the request body on every chunk. The usage receipt that repairs Claude's final `message_delta` is now resolved only for that event, which removes the event-loop stalls on long Codex/Responses histories ([#20571](https://github.com/diegosouzapw/OmniRoute/pull/20571)) — thanks @TheViniAlmeida
