@@ -15,7 +15,26 @@ All requests require a valid Bearer token or session cookie. Obtain a token via 
 
 ## Endpoints
 
-_No endpoints mapped for this area yet._
+### GET /api/github-skills
+
+GET github skills
+
+```bash
+curl http://localhost:20128/api/github-skills \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN"
+```
+
+### POST /api/github-skills
+
+POST github skills
+
+```bash
+curl -X POST http://localhost:20128/api/github-skills \
+  -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
+  -H "Content-Type: application/json" \
+  -d '{}'
+```
+
 ## Payloads
 
 See the full OpenAPI specification at `GET /api/openapi/spec` or `docs/openapi.yaml` for detailed request/response schemas.

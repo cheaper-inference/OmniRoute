@@ -34,6 +34,9 @@ import {
  * @property {string} [detail]
  * @property {string} [newBaseSha]
  * @property {string} [actualTree]   squash-api: tree of the base after the last merge
+ * @property {true} [rateLimited]    squash-api "merge-failed": the merge call failed with an error
+ *                                   the client marked as a rate limit (github isRateLimited); not a
+ *                                   verdict on the PR, the tick retries it as an error
  */
 
 /** Porcelain push summaries that mean "the base is no longer where we composed on". */
@@ -417,7 +420,8 @@ export function landMergeFf({ git, base, candidateSha, expectedBaseSha, prs }) {
 /**
  * squash-api: verify the base tip == expectedBaseSha (else "base-moved", nothing merged); then
  * for each PR in order `gh.mergePull(n, {method:"squash", sha: pr.head})`; stop at the first
- * failure ("merge-failed"); finally compare the base tip's tree with candidateTreeSha —
+ * failure ("merge-failed", with `rateLimited: true` when the call failed with an error the client
+ * marked as a rate limit); finally compare the base tip's tree with candidateTreeSha —
  * mismatch → {ok:false, reason:"tree-divergence", actualTree}. The tick pauses the queue and
  * opens an issue on divergence.
  *
@@ -448,7 +452,13 @@ export async function landSquashApi({ gh, base, prs, expectedBaseSha, candidateT
     try {
       res = await gh.mergePull(pr.n, { method: "squash", sha: pr.head });
     } catch (err) {
-      res = { merged: false, status: 0, message: String(err?.message ?? err) };
+      res = {
+        merged: false,
+        status: 0,
+        message: String(err?.message ?? err),
+        // The client's mark survives into the result: a rate limit is no verdict on the PR.
+        rateLimited: err?.rateLimited === true,
+      };
     }
     if (!res?.merged) {
       return {
@@ -456,6 +466,7 @@ export async function landSquashApi({ gh, base, prs, expectedBaseSha, candidateT
         reason: "merge-failed",
         merged,
         detail: `#${pr.n}: ${res?.status ?? "?"} ${String(res?.message ?? "").slice(0, 500)}`,
+        ...(res?.rateLimited === true ? { rateLimited: true } : {}),
       };
     }
     merged.push(pr.n);
