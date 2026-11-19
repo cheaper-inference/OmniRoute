@@ -10,6 +10,7 @@ import assert from "node:assert/strict";
 
 const { shouldSkipConnDisable } = await import("../../open-sse/services/combo/comboPredicates.ts");
 const { checkFallbackError } = await import("../../open-sse/services/accountFallback.ts");
+const { isQuotaExhaustedText } = await import("../../open-sse/config/errorConfig.ts");
 
 const OUT_OF_EXTRA_USAGE =
   "You're out of extra usage. Add more at claude.ai/settings/usage and keep going.";
@@ -32,6 +33,23 @@ test("out-of-extra-usage 400 via structured error object is not skipped", () => 
     error: { message: OUT_OF_EXTRA_USAGE },
   };
   assert.equal(shouldSkipConnDisable(result, false, false, "claude"), false);
+});
+
+test("out-of-extra-usage 400 behind an earlier rate-limit phrase is not skipped", () => {
+  const result = {
+    status: 400,
+    errorType: "invalid_request_error",
+    rawMessage: `Rate limit exceeded: ${OUT_OF_EXTRA_USAGE}`,
+  };
+  assert.equal(shouldSkipConnDisable(result, false, false, "claude"), false);
+});
+
+test("isQuotaExhaustedText sees a quota phrase even when an earlier rule matches first", () => {
+  assert.equal(isQuotaExhaustedText(`Rate limit exceeded: ${OUT_OF_EXTRA_USAGE}`), true);
+  assert.equal(isQuotaExhaustedText("Too many requests, quota exceeded"), true);
+  assert.equal(isQuotaExhaustedText("Rate limit exceeded"), false);
+  assert.equal(isQuotaExhaustedText(""), false);
+  assert.equal(isQuotaExhaustedText(null), false);
 });
 
 test("out-of-extra-usage 400 yields a short, non-terminal fallback cooldown", () => {
