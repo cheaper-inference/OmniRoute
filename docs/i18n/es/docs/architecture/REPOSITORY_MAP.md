@@ -53,61 +53,61 @@ OmniRoute/
 
 ## Archivos raíz
 
-| Archivo                                     | Propósito                                                                                                          |
-| ------------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
-| **README.md**                               | Página de inicio de marketing + inicio rápido + matriz de características (véase también `llm.txt`)                |
-| **CHANGELOG.md**                            | Registro de cambios por versión (generado automáticamente por la habilidad `/version-bump-cc`)                     |
-| **LICENSE**                                 | Texto de la licencia MIT                                                                                           |
-| **CLAUDE.md**                               | Reglas del proyecto para agentes de Claude Code (reglas estrictas, convenciones, escenarios)                       |
-| **AGENTS.md**                               | Igual que CLAUDE.md, pero para agentes de IA distintos de Claude (Codex, Cursor, etc.)                             |
-| **GEMINI.md**                               | Reglas concisas para agentes basados en Gemini (subconjunto de CLAUDE.md)                                          |
-| **CONTRIBUTING.md**                         | Guía para colaboradores: configuración, commits convencionales, pruebas, flujo de PR                               |
-| **SECURITY.md**                             | Política de notificación de vulnerabilidades, versiones compatibles, modelo de amenazas                            |
-| **CODE_OF_CONDUCT.md**                      | Contributor Covenant — expectativas de comportamiento de la comunidad                                              |
-| **llm.txt**                                 | Página de inicio en texto sin formato optimizada para rastreadores LLM (SEO para asistentes de IA)                 |
-| **package.json**                            | Manifiesto de npm, scripts, dependencias, motores, umbral de cobertura de c8                                       |
-| **package-lock.json**                       | Árbol de dependencias bloqueado                                                                                    |
-| **tsconfig.json**                           | Configuración raíz de TypeScript                                                                                   |
-| **tsconfig.typecheck-core.json**            | Configuración de comprobación de tipos para el núcleo de `src/`                                                    |
-| **tsconfig.typecheck-noimplicit-core.json** | Comprobación estricta de tipos (`noImplicitAny`)                                                                   |
-| **tsconfig.tsbuildinfo**                    | Caché de compilación incremental de TS (ignorada por git)                                                          |
-| **next.config.mjs**                         | Configuración de compilación de Next.js 16 (salida independiente)                                                  |
-| **next-env.d.ts**                           | Tipos de entorno generados automáticamente por Next.js                                                             |
-| **eslint.config.mjs**                       | Configuración plana de ESLint (reglas por área del proyecto)                                                       |
-| **prettier.config.mjs**                     | Reglas de formato de Prettier                                                                                      |
-| **postcss.config.mjs**                      | Configuración de PostCSS para el pipeline de Tailwind/CSS                                                          |
-| **playwright.config.ts**                    | Configuración de pruebas E2E de Playwright                                                                         |
-| **vitest.config.ts**                        | Configuración de Vitest (suite predeterminada)                                                                     |
-| **vitest.mcp.config.ts**                    | Configuración de Vitest para el servidor MCP y las suites de autoCombo/caché                                       |
-| **sonar-project.properties**                | Configuración de SonarQube/SonarCloud (calidad del código)                                                         |
-| **Dockerfile**                              | Compilación de Docker multietapa (builder → runner-base → runner-cli)                                              |
-| **docker-compose.yml**                      | Compose de desarrollo con 4 perfiles (base, cli, host, cliproxyapi) + contenedor auxiliar de redis                 |
-| **docker-compose.prod.yml**                 | Compose de producción (puerto 20130, redis, volúmenes con nombre)                                                  |
-| **.dockerignore**                           | Archivos excluidos del contexto de Docker                                                                          |
-| **fly.toml**                                | Configuración de despliegue de Fly.io (región `sin`, puerto 20128, volumen /data)                                  |
-| **.env.example**                            | Plantilla de archivo de entorno (copiada automáticamente a `.env` en la primera instalación)                       |
-| **.gitignore**                              | Patrones de exclusión de git                                                                                       |
-| **.npmignore**                              | Lista de exclusión para la publicación en npm                                                                      |
-| **.npmrc**                                  | Configuración de npm (registro, política del archivo de bloqueo)                                                   |
-| **.node-version**                           | Versión fijada de Node (utilizada por herramientas compatibles con nvm)                                            |
-| **.nvmrc**                                  | Versión fijada de Node para nvm                                                                                    |
-| **eslint.complexity.config.mjs**            | Configuración de ESLint para el control incremental de complejidad (`scripts/check/check-complexity.mjs --config`) |
-| **eslint.sonarjs.config.mjs**               | Configuración de ESLint para reglas de SonarJS (complejidad cognitiva/duplicación)                                 |
-| **source.config.ts**                        | Configuración de origen `defineDocs` de Fumadocs (alimenta `.source/`)                                             |
-| **knip.json**                               | Configuración de Knip — archivos/exportaciones/dependencias sin usar (alimenta el control de código muerto)        |
-| **stryker.conf.json**                       | Configuración de pruebas de mutación de Stryker                                                                    |
-| **.size-limit.json**                        | Configuración del presupuesto del bundle de size-limit                                                             |
-| **promptfooconfig.yaml**                    | Configuración de evaluación de promptfoo                                                                           |
-| **.gitleaks.toml**                          | Conjunto de reglas de análisis de secretos de gitleaks                                                             |
-| **.zizmor.yml**                             | Configuración de linting de seguridad de GitHub Actions con zizmor                                                 |
-| **socket.yml**                              | Configuración de la cadena de suministro de Socket.dev                                                             |
-| **news.json**                               | Feed localizado de anuncios de v2; el elemento de lanzamiento de Radar se distribuye inactivo                      |
-| **flake.nix** / **flake.lock**              | Definición del entorno de desarrollo de Nix + archivo de bloqueo                                                   |
-| **.env**                                    | Secretos locales (ignorados por Git; generados a partir de `.env.example`)                                         |
+| Archivo                                     | Objetivo                                                                                              |
+| ------------------------------------------- | ----------------------------------------------------------------------------------------------------- |
+| **README.md**                               | Página de inicio de marketing + inicio rápido matriz de funciones + (ver también `llm.txt`)           |
+| **CHANGELOG.md**                            | Registro de cambios por lanzamiento (generado automáticamente por la habilidad `/version-bump-cc` )   |
+| **LICENSE**                                 | texto de licencia MIT                                                                                 |
+| **CLAUDE.md**                               | Reglas de proyecto para agentes de código Claude (reglas estrictas, convenciones, escenarios)         |
+| **AGENTS.md**                               | Igual que CLAUDE.md pero para agentes que no sean Claude AI (Codex, Cursor, etc.)                     |
+| **GEMINI.md**                               | Reglas concisas para agentes basados en Géminis (subconjunto de CLAUDE.md)                            |
+| **CONTRIBUTING.md**                         | Guía para contribuyentes: configuración, confirmaciones convencionales, pruebas, flujo PR             |
+| **SECURITY.md**                             | Política de informes de vulnerabilidades, versiones compatibles, modelo de amenazas                   |
+| **CODE_OF_CONDUCT**                         | Expectativas de comportamiento de la comunidad — del Pacto del Colaborador                            |
+| **llm.txt**                                 | Aterrizaje de texto sin formato optimizado para rastreadores LLM (SEO para asistentes AI )            |
+| **package.json**                            | manifiesto npm, scripts, dependencias, motores, puerta de cobertura c8                                |
+| **package-lock.json**                       | Árbol de dependencia bloqueado                                                                        |
+| **tsconfig.json**                           | Configuración raíz TypeScript                                                                         |
+| **tsconfig.typecheck-core.json**            | Configuración de verificación de tipo para `src/` core                                                |
+| **tsconfig.typecheck-noimplicit-core.json** | Verificación de tipo estricta (`noImplicitAny`)                                                       |
+| **tsconfig.tsbuildinfo**                    | caché de compilación incremental TS (gitignored)                                                      |
+| **próximo.config.mjs**                      | Configuración de compilación Next.js 16 (salida independiente)                                        |
+| **siguiente-env.d.ts**                      | tipos de entorno generados automáticamente Next.js                                                    |
+| **eslint.config.mjs**                       | Configuración plana ESLint (reglas por área de proyecto)                                              |
+| **más bonita.config.mjs**                   | reglas de formato Prettier                                                                            |
+| **postcss.config.mjs**                      | Configuración PostCSS para tubería Tailwind/CSS                                                       |
+| **dramaturgo.config.ts**                    | configuración de prueba Playwright E2E                                                                |
+| **vitest.config.ts**                        | configuración Vitest (suite predeterminada)                                                           |
+| **vitest.mcp.config.ts**                    | Configuración Vitest para el servidor MCP / autoCombo / suites de caché                               |
+| **proyecto-sonar.properties**               | configuración SonarQube/SonarCloud (calidad del código)                                               |
+| **archivo acoplable**                       | Construcción Docker de varias etapas (constructor → runner-base → runner-cli)                         |
+| **docker-compose.yml**                      | Desarrollador compone con 4 perfiles (base, cli, host, cliproxyapi) + redis sidecar                   |
+| **docker-componer.prod.yml**                | Composición de producción (puerto 20130, redis, volúmenes con nombre)                                 |
+| **.dockerignore**                           | Archivos excluidos del contexto Docker                                                                |
+| **fly.toml**                                | Configuración de implementación de Fly.io (región `sin`, puerto 20128, volumen de datos)              |
+| **.env.ejemplo**                            | Archivo de entorno de plantilla (copiado automáticamente a `.env` en la primera instalación)          |
+| **.gitignore**                              | Git ignora patrones                                                                                   |
+| **.npmignorar**                             | npm publica lista de exclusión                                                                        |
+| **.npmrc**                                  | npm config (registro, política de archivos de bloqueo)                                                |
+| **.versión-nodo**                           | Pin de versión de nodo (utilizado por herramientas compatibles con nvm)                               |
+| **.nvmrc**                                  | Pin de versión de nodo para nvm                                                                       |
+| **eslint.complejidad.config.mjs**           | Configuración ESLint para el trinquete de complejidad (`scripts/check/check-complexity.mjs --config`) |
+| **eslint.sonarjs.config.mjs**               | Configuración ESLint para reglas SonarJS (complejidad cognitiva/duplicación)                          |
+| **fuente.config.ts**                        | Configuración de fuente de Fumadocs `defineDocs` (alimenta `.source/`)                                |
+| **knip.json**                               | Knip config — files/exports/deps no utilizado (alimenta la puerta de código muerto)                   |
+| **stryker.conf.mjs**                        | Configuración de prueba de mutaciones de Stryker (calcula `tap.testFiles` a partir de `mutate`)       |
+| **.size-limit.json**                        | configuración de presupuesto de paquete de límite de tamaño                                           |
+| **promptfooconfig.yaml**                    | configuración de evaluación de aviso                                                                  |
+| **.gitleaks.toml**                          | conjunto de reglas de escaneo secreto de gitleaks                                                     |
+| **.zizmor.yml**                             | Configuración de lint de seguridad de zizmor GitHub-Actions                                           |
+| **socket.yml**                              | Configuración de la cadena de suministro de Socket.dev                                                |
+| **news.json**                               | Feed de anuncios v2 localizado; El elemento de lanzamiento de radar se envía inactivo                 |
+| **escama.nix** /** escama.bloqueo**         | Bloqueo + de definición de Nix dev-shell                                                              |
+| **.env**                                    | Secretos locales (gitignored — generado a partir de `.env.example`)                                   |
 
-> **Movido fuera de la raíz en v3.8.26 (limpieza):**
+> **Sacado de la raíz en v3.8.26 (ordenar):**
 >
-> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` y el archivo generado `quality-metrics.json` (ignorado por Git). Consulta [`## config/`](#config--static-configs--quality-gate-state).
+> - **→ `config/quality/`:** `quality-baseline.json`, `complexity-baseline.json`, `duplication-baseline.json`, `file-size-baseline.json`, `test-discovery-baseline.json`, `dependency-allowlist.json`, `.license-allowlist.json` y el `quality-metrics.json` generado (gitignored). Ver [`## config/`](#config--static-configs--quality-gate-state).
 
 ---
 
@@ -242,9 +242,9 @@ src/
 | -------------------------------- | ---------------------------------------------------------------------------------------------------------- |
 | `components/`                    | Componente del tablero API: adaptadores sobre `packages/ui-kit` — ver `docs/architecture/DESIGN_SYSTEM.md` |
 | `constants/iconMap.ts`           | `ICON_MAP`: nombres de iconos utilizados por las pantallas → Componentes de Lucide (`<Icon>`)              |
-| `constants/providers.ts`         | **381 proveedores** con validación Zod (fuente de verdad)                                                  |
+| `constants/providers.ts`         | **394 proveedores** con validación Zod (fuente de verdad)                                                  |
 | `constants/cliTools.ts`          | Registro externo de herramientas CLI                                                                       |
-| `constants/routingStrategies.ts` | **20 estrategias de enrutamiento** con prioridades                                                         |
+| `constants/routingStrategies.ts` | **22 estrategias de enrutamiento** con prioridades                                                         |
 | `constants/publicApiRoutes.ts`   | Rutas que requieren autenticación de portador (frente a administración)                                    |
 | `constants/upstreamHeaders.ts`   | Lista de rechazo de encabezado para solicitudes ascendentes                                                |
 | `validation/schemas.ts`          | Esquemas ~ 80 Zod (fuente única de verdad para contratos API )                                             |
@@ -265,7 +265,7 @@ Espacio de trabajo npm independiente (`@omniroute/open-sse`). Gestiona el proces
 ```
 open-sse/
 ├── handlers/            # 16 archivos (12 controladores + 4 auxiliares): chatCore, responsesHandler, embeddings, audio, image, video, music, rerank, moderations, search, etc.
-├── executors/           # 150 módulos ejecutores (clases que extienden BaseExecutor + auxiliares por proveedor)
+├── executors/           # 163 módulos ejecutores (clases que extienden BaseExecutor + auxiliares por proveedor)
 ├── translator/          # Conversores de formato (9 de solicitudes, 9 de respuestas, 9 auxiliares)
 ├── transformer/         # API de respuestas ↔ Completado de chat (TransformStream)
 ├── services/            # ~80+ módulos de servicio (combo, accountFallback, autoCombo, reasoningCache, modo sigiloso de claude code/chatgpt, modelDeprecation, taskAwareRouter, workflowFSM, etc.)
@@ -412,7 +412,7 @@ open-sse/
 | `CLI-TOOLS.md`              | Integraciones CLI externas + OmniRoute internas CLI                                                |
 | `I18N.md`                   | Arquitectura i18n, agregando un idioma, 67 configuraciones regionales                              |
 | `UNINSTALL.md`              | Pasos de desinstalación limpia                                                                     |
-| `PROVIDER_REFERENCE.md`     | **Generado automáticamente** catálogo de 381 proveedores (regen: `npm run gen:provider-reference`) |
+| `PROVIDER_REFERENCE.md`     | **Generado automáticamente** catálogo de 394 proveedores (regen: `npm run gen:provider-reference`) |
 
 ### Inmersiones profundas en el subsistema
 

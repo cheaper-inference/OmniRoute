@@ -243,7 +243,11 @@ export default function McpAuditTab() {
         ) : data.entries.length === 0 ? (
           <EmptyState icon="terminal" title={t("noMcpEvents")} />
         ) : (
-          <Table scrollbarLabel={t("mcpAudit")} className="min-w-[860px] text-left">
+          <Table
+            scrollbarLabel={t("mcpAudit")}
+            scrollLabel={t("mcpAudit")}
+            className="min-w-[860px] text-left"
+          >
             <TableHeader>
               <TableRow>
                 <TableHead>{t("timestamp")}</TableHead>
