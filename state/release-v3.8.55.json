@@ -2,7 +2,27 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b2",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b2-f6acc51b3eed",
+    "candidateSha": "f6acc51b3eedd601dd5c47ef036169a26f002bee",
+    "baseSha": "3de17c8a2a32b104319166a3679d3b5c60911317",
+    "treeSha": "0d55544e76808002734d2de717a4ab835bf6eeb6",
+    "prs": [
+      {
+        "n": 20630,
+        "head": "393a8a45d89ba2ceb6d8d8331350193173ec0a65",
+        "title": "fix(dashboard): clear the payload section copied-state timer on unmount",
+        "author": "diegosouzapw",
+        "labeledAt": "2026-11-19T15:24:12Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-19T15:34:19.060Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
@@ -22,8 +42,8 @@
     "processed": {}
   },
   "counters": {
-    "batchSeq": 1,
-    "ciRuns": 2,
+    "batchSeq": 2,
+    "ciRuns": 3,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 1,
@@ -142,7 +162,21 @@
       "sha": "b728fe2de5e72cc51b2f63b99f38a2304c71aa2f",
       "detail": "base moved cc59ad70b2e9 → b728fe2de5e7 after a base-red pause",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44505143879"
+    },
+    {
+      "at": "2026-11-19T15:34:22.229Z",
+      "type": "batch-started",
+      "batchId": "b2",
+      "prs": [
+        20630
+      ],
+      "sha": "f6acc51b3eedd601dd5c47ef036169a26f002bee",
+      "detail": "1 PR(s) on 3de17c8a2a32; window 6",
+      "labeledAt": {
+        "20630": "2026-11-19T15:24:12Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44556139104"
     }
   ],
-  "updatedAt": "2026-11-19T15:24:37.370Z"
+  "updatedAt": "2026-11-19T15:34:24.121Z"
 }
