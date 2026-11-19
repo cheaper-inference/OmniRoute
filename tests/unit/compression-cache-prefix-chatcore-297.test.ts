@@ -19,6 +19,7 @@ process.env.API_KEY_SECRET = process.env.API_KEY_SECRET || "test-cache-prefix-29
 const core = await import("../../src/lib/db/core.ts");
 const readCacheDb = await import("../../src/lib/db/readCache.ts");
 const compressionDb = await import("../../src/lib/db/compression.ts");
+const combosDb = await import("../../src/lib/db/combos.ts");
 const { handleChatCore } = await import("../../open-sse/handlers/chatCore.ts");
 const { resetAllCircuitBreakers } = await import("../../src/shared/utils/circuitBreaker.ts");
 const { waitForCallLogSaves, closeCallLogSaves } = await import("../../src/lib/usage/callLogs.ts");
@@ -103,7 +104,8 @@ test.after(async () => {
 async function sendToClaude(
   messages: Json[],
   extra: Json = {},
-  endpoint = "/v1/messages"
+  endpoint = "/v1/messages",
+  comboName: string | null = null
 ): Promise<Json> {
   let captured: Json | null = null;
   globalThis.fetch = async (url: string | URL | Request, init?: RequestInit) => {
@@ -143,7 +145,8 @@ async function sendToClaude(
     onStreamFailure: () => {},
     onDisconnect: () => {},
     userAgent: "test-agent",
-    comboName: null,
+    isCombo: comboName !== null,
+    comboName,
   });
   assert.ok(result.success, `request should succeed: ${JSON.stringify(result).slice(0, 600)}`);
   assert.ok(captured, "the provider request should be captured");
@@ -258,4 +261,47 @@ test("an OpenAI-format client routed to Claude keeps its old tool message verbat
     .find((block) => block.type === "tool_result");
   assert.ok(result, "the tool message reaches Claude as a tool_result block");
   assert.equal(String(result.content), LONG);
+});
+
+test("a combo context_length above the model default keeps the cached prefix protected", async () => {
+  // The env override shrinks claude's own window below this request (~10k estimated tokens),
+  // while the combo record declares 1M. The combo limit is the one enforced, so the request is
+  // not an overflow and the cache-prefix guard must keep protecting the history.
+  const COMBO = "c297-combo-context-length";
+  const previous = process.env.CONTEXT_LENGTH_CLAUDE;
+  process.env.CONTEXT_LENGTH_CLAUDE = "4000";
+  try {
+    await combosDb.createCombo({
+      name: COMBO,
+      strategy: "priority",
+      context_length: 1_000_000,
+      models: ["claude/claude-opus-5"],
+    });
+    const messages = [
+      { role: "user", content: "start" },
+      toolUse("t1"),
+      toolResult("t1", LONG),
+      toolUse("t2"),
+      toolResult("t2", LONG),
+      { role: "assistant", content: [{ type: "text", text: "thinking" }] },
+      { role: "user", content: "current question" },
+    ];
+
+    const sent = (await sendToClaude(structuredClone(messages), {}, "/v1/messages", COMBO))
+      .messages as Json[];
+
+    assert.equal(
+      firstToolResultText(sent[2]),
+      LONG,
+      "the cached tool result must not be truncated"
+    );
+    assert.equal(
+      firstToolResultText(sent[4]),
+      LONG,
+      "the cached tool result must not be truncated"
+    );
+  } finally {
+    if (previous === undefined) delete process.env.CONTEXT_LENGTH_CLAUDE;
+    else process.env.CONTEXT_LENGTH_CLAUDE = previous;
+  }
 });
