@@ -1,12 +1,8 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { mkdtempSync, rmSync } from "node:fs";
-import { tmpdir } from "node:os";
-import { join } from "node:path";
+import { createTempDataDir } from "../_setup/tempDataDir.ts";
 
-const dataDir = mkdtempSync(join(tmpdir(), "omni-context-18582-"));
-process.env.DATA_DIR = dataDir;
-const core = await import("../../src/lib/db/core.ts");
+const { cleanup } = createTempDataDir("omni-context-18582-");
 const sync = await import("../../src/lib/modelsDevSync.ts");
 const contexts = await import("../../src/lib/db/modelContextOverrides.ts");
 const overrides = await import("../../src/lib/db/modelCapabilityOverrides.ts");
@@ -20,10 +16,7 @@ const provider = "openai-compatible-chat-18582";
 const model = "gemma-4-E2B-it-GGUF";
 const input = { provider, model };
 
-test.after(() => {
-  core.resetDbInstance();
-  rmSync(dataDir, { recursive: true, force: true });
-});
+test.after(cleanup);
 
 test("#18582 context override replaces stale synced input limits in the gate and catalog", () => {
   sync.saveModelsDevCapabilities({
