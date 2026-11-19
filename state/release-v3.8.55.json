@@ -1,13 +1,7 @@
 {
   "version": 1,
   "base": "release/v3.8.55",
-  "paused": {
-    "reason": "base-red",
-    "since": "2026-11-19T09:16:58.494Z",
-    "baseSha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
-    "detail": "all 1 failure(s) also fail on base cc59ad70b2e9 (1 matched by check name only: no test-level key)",
-    "issue": 20406
-  },
+  "paused": null,
   "inFlight": null,
   "baseChecks": [
     {
@@ -141,7 +135,14 @@
       "sha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
       "detail": "all 1 failure(s) also fail on base cc59ad70b2e9 (1 matched by check name only: no test-level key)",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44494913411"
+    },
+    {
+      "at": "2026-11-19T10:23:32.140Z",
+      "type": "resumed",
+      "sha": "b728fe2de5e72cc51b2f63b99f38a2304c71aa2f",
+      "detail": "base moved cc59ad70b2e9 → b728fe2de5e7 after a base-red pause",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44505143879"
     }
   ],
-  "updatedAt": "2026-11-19T10:18:33.878Z"
+  "updatedAt": "2026-11-19T10:23:41.531Z"
 }
