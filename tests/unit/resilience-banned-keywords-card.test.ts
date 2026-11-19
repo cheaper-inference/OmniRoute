@@ -3,10 +3,8 @@ import assert from "node:assert/strict";
 
 import { readSrc } from "../_helpers/readSrc";
 
-const RESILIENCE =
-  "src/app/(dashboard)/dashboard/settings/components/ResilienceTab.tsx";
-const SECURITY =
-  "src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx";
+const RESILIENCE = "src/app/(dashboard)/dashboard/settings/components/ResilienceTab.tsx";
+const SECURITY = "src/app/(dashboard)/dashboard/settings/components/SecurityTab.tsx";
 
 function assertInOrder(source: string, labels: string[]) {
   let lastIndex = -1;
@@ -33,7 +31,7 @@ test("banned keywords are committed only after the server accepts the write", ()
 
   // A failed PATCH must not leave the UI showing a keyword the server rejected.
   assertInOrder(source, [
-    'if (!res.ok) throw new Error(`HTTP ${res.status}`);',
+    "if (!res.ok) throw new Error(`HTTP ${res.status}`);",
     "bannedKeywordsRef.current = next;",
     "setBannedKeywords(next);",
     "return true;",
@@ -59,10 +57,7 @@ test("a failed settings load never renders the misleading empty state", () => {
   // Editing while the list is unknown must be disabled, otherwise a single
   // PATCH would overwrite the real server-side keywords.
   assert.match(source, /disabled=\{bannedKeywordsBusy\}/);
-  assertInOrder(source, [
-    "bannedKeywordsLoadFailed ? (",
-    '"noCustomBannedSignals",',
-  ]);
+  assertInOrder(source, ["bannedKeywordsLoadFailed ? (", '"noCustomBannedSignals",']);
 
   // The failure notice must not reuse `failedLoadResilience`: that key exists
   // in every locale, so tx() would render "Failed to load resilience status"
@@ -106,15 +101,11 @@ test("banned keywords editor survives a failed resilience-data load", () => {
   assert.ok(loadingGuard < failedGuard, "both resilience-data guards must remain in order");
 
   const renders = source.match(/\{bannedKeywordsCard\}/g) ?? [];
-  assert.ok(
-    renders.length >= 3,
-    "card must render on the loading, failed and loaded branches"
-  );
+  assert.ok(renders.length >= 3, "card must render on the loading, failed and loaded branches");
 
   // Same position on all three branches, otherwise the card jumps down the
   // page once /api/resilience resolves.
-  const firstChild =
-    source.match(/<div className="space-y-6">\s*\{bannedKeywordsCard\}/g) ?? [];
+  const firstChild = source.match(/<div className="space-y-6">\s*\{bannedKeywordsCard\}/g) ?? [];
   assert.equal(
     firstChild.length,
     3,

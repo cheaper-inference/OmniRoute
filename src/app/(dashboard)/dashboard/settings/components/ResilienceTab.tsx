@@ -1351,9 +1351,7 @@ export default function ResilienceTab() {
         </div>
         {bannedKeywordsLoadFailed ? (
           <div className="flex items-center gap-2">
-            <p className="text-xs text-error">
-              {tx("errorOccurred", "An error occurred")}
-            </p>
+            <p className="text-xs text-error">{tx("errorOccurred", "An error occurred")}</p>
             <Button
               variant="ghost"
               size="sm"
@@ -1385,10 +1383,7 @@ export default function ResilienceTab() {
           </div>
         ) : (
           <p className="text-xs text-text-muted">
-            {tx(
-              "noCustomBannedSignals",
-              "No custom keywords. Only built-in keywords are active."
-            )}
+            {tx("noCustomBannedSignals", "No custom keywords. Only built-in keywords are active.")}
           </p>
         )}
       </div>
