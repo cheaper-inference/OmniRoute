@@ -138,6 +138,21 @@ describe("opencode config generator — reasoning variants from effort_tiers", (
     assert.deepEqual(Object.keys(models["cu/gpt-5-high"].variants), tiers);
   });
 
+  it("writes no variants for a registered Codex `-ultra` alias whose base id is listed", async () => {
+    const codexTiers = ["low", "medium", "high", "xhigh", "max", "ultra"];
+    stubCatalog([
+      { id: "cx/gpt-6-sol", capabilities: { reasoning: true, effort_tiers: codexTiers } },
+      { id: "cx/gpt-6-sol-ultra", capabilities: { reasoning: true, effort_tiers: codexTiers } },
+      { id: "dv/nemotron-3", capabilities: { reasoning: true, effort_tiers: tiers } },
+      { id: "dv/nemotron-3-ultra", capabilities: { reasoning: true, effort_tiers: tiers } },
+    ]);
+    const models = (await generate()).provider.omniroute.models;
+    assert.deepEqual(Object.keys(models["cx/gpt-6-sol"].variants), codexTiers);
+    assert.equal("variants" in models["cx/gpt-6-sol-ultra"], false);
+    // `-ultra` is only an effort suffix for registered Codex bases.
+    assert.deepEqual(Object.keys(models["dv/nemotron-3-ultra"].variants), tiers);
+  });
+
   it("writes no variants for a `-minimal` alias whose base id is listed", async () => {
     const museTiers = ["minimal", "low", "medium", "high"];
     stubCatalog([

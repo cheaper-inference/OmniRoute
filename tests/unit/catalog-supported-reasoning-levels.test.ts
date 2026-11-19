@@ -115,3 +115,37 @@ test("a `-minimal` alias of a listed base id emits no supported_reasoning_levels
   assert.deepEqual(rows.get("mc/muse-ember-1.0")!.supported_reasoning_levels, tiers);
   assert.equal("supported_reasoning_levels" in rows.get("mc/muse-ember-1.0-minimal")!, false);
 });
+
+test("a registered Codex `-ultra` alias of a listed base id emits no supported_reasoning_levels", async () => {
+  const tiers = ["low", "medium", "high", "xhigh", "max", "ultra"];
+  const rows = await rowsFor([
+    {
+      id: "cx/gpt-6-sol",
+      object: "model",
+      owned_by: "combo",
+      capabilities: { effort_tiers: tiers },
+    },
+    {
+      id: "cx/gpt-6-sol-ultra",
+      object: "model",
+      owned_by: "combo",
+      capabilities: { effort_tiers: tiers },
+    },
+    {
+      id: "dv/nemotron-3",
+      object: "model",
+      owned_by: "combo",
+      capabilities: { effort_tiers: tiers },
+    },
+    {
+      id: "dv/nemotron-3-ultra",
+      object: "model",
+      owned_by: "combo",
+      capabilities: { effort_tiers: tiers },
+    },
+  ]);
+  assert.deepEqual(rows.get("cx/gpt-6-sol")!.supported_reasoning_levels, tiers);
+  assert.equal("supported_reasoning_levels" in rows.get("cx/gpt-6-sol-ultra")!, false);
+  // `-ultra` is only an effort suffix for registered Codex bases.
+  assert.deepEqual(rows.get("dv/nemotron-3-ultra")!.supported_reasoning_levels, tiers);
+});
