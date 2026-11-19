@@ -44,6 +44,13 @@ type LoggerLike =
 
 const DEFAULT_FALLBACK_CODES = [429, 500, 502, 503, 504];
 
+// Executors built by the `fallback` branch: they map the connection model on the native leg
+// themselves, so the retry leg keeps the original model for its own (CLIProxyAPI) mapping.
+const fallbackWrappers = new WeakSet<object>();
+function isFallbackWrapper(executor: unknown): boolean {
+  return typeof executor === "object" && executor !== null && fallbackWrappers.has(executor);
+}
+
 /** Trusted request-local validation may inspect the fully resolved executor, never a client flag. */
 export function createExecutorResolver(
   log: LoggerLike,
@@ -58,10 +65,10 @@ export function createExecutorResolver(
       log,
       credentials?.providerSpecificData ?? null
     );
-    const mapped = wrapExecutorWithConnectionModelMapping(
-      executor,
-      credentials?.providerSpecificData
-    );
+    // The fallback wrapper applies the connection model mapping to its native leg only.
+    const mapped = isFallbackWrapper(executor)
+      ? executor
+      : wrapExecutorWithConnectionModelMapping(executor, credentials?.providerSpecificData);
     return validationFence ? validationFence(mapped) : mapped;
   };
 }
@@ -179,7 +186,11 @@ export async function resolveExecutorWithProxy(
   // backend on specific failures. The backend defaults to CLIProxyAPI so every
   // pre-existing fallback config behaves exactly as before; fallbackBackend
   // === "dario" opts the retry leg over to Dario instead.
-  const nativeExec = await getExecutor(prov);
+  // A per-connection model mapping renames the model for the native upstream only.
+  const nativeExec = wrapExecutorWithConnectionModelMapping(
+    await getExecutor(prov),
+    providerSpecificData
+  );
   const fallbackBackend: FallbackBackend = cfg.fallbackBackend;
   const { fallbackCodes, dedicatedApiKey } = await loadCliproxyapiSettings();
 
@@ -235,5 +246,6 @@ export async function resolveExecutorWithProxy(
       throw proxyErr;
     }
   };
+  fallbackWrappers.add(wrapper);
   return wrapper;
 }

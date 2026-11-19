@@ -84,6 +84,56 @@ test("a connection mapping with no matching pattern leaves the model alone", asy
   assert.equal(seen[0].body.model, "my-alias");
 });
 
+test("fallback mode: the native leg gets the mapped model, the CLIProxyAPI leg the original one", async () => {
+  const upstreamProxyDb = await import("../../src/lib/db/upstreamProxy.ts");
+  const { clearUpstreamProxyConfigCache } =
+    await import("../../open-sse/handlers/chatCore/comboContextCache.ts");
+  await upstreamProxyDb.upsertUpstreamProxyConfig({
+    providerId: "openai",
+    mode: "fallback",
+    enabled: true,
+    // The CLIProxyAPI mapping is keyed by the model the client named.
+    cliproxyapiModelMapping: { "my-alias": "proxy-model" },
+  });
+  clearUpstreamProxyConfigCache();
+  const native: string[] = [];
+  const proxy: string[] = [];
+  globalThis.fetch = (async (url: unknown, init?: { body?: unknown }) => {
+    const body = JSON.parse(String(init?.body ?? "{}")) as { model?: string };
+    if (String(url).includes("8317")) {
+      proxy.push(String(body.model));
+      return new Response(JSON.stringify({ choices: [] }), {
+        status: 200,
+        headers: { "content-type": "application/json" },
+      });
+    }
+    native.push(String(body.model));
+    return new Response(JSON.stringify({ error: { message: "upstream down" } }), {
+      status: 503,
+      headers: { "content-type": "application/json" },
+    });
+  }) as typeof fetch;
+  try {
+    const credentials = {
+      apiKey: "test-key-placeholder",
+      providerSpecificData: { modelMapping: { "my-alias": "real-upstream-model" } },
+    };
+    const executor = await createExecutorResolver(quietLog, credentials)("openai");
+    await executor.execute({
+      model: "my-alias",
+      body: { model: "my-alias", messages: [{ role: "user", content: "hi" }] },
+      stream: false,
+      credentials,
+      log: quietLog,
+    } as never);
+    assert.deepEqual(native, ["real-upstream-model"]);
+    assert.deepEqual(proxy, ["proxy-model"], "the CLIProxyAPI mapping still finds my-alias");
+  } finally {
+    await upstreamProxyDb.deleteUpstreamProxyConfig("openai");
+    clearUpstreamProxyConfigCache();
+  }
+});
+
 test("the wrapper keeps the executor's own methods working", async () => {
   const { getExecutor } = await import("../../open-sse/executors/index.ts");
   const { wrapExecutorWithConnectionModelMapping } =
