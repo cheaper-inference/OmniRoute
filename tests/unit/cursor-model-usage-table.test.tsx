@@ -52,6 +52,7 @@ function renderCard(props: Record<string, unknown>) {
       onOpenCutoff={() => {}}
       onOpenCost={() => {}}
       canEditCutoff={false}
+      now={Date.UTC(2026, 0, 1)}
       hasCutoffOverrides={false}
       {...props}
     />
@@ -87,12 +88,18 @@ describe("Cursor per-model usage table on the Quota card", () => {
   });
 
   it("keeps the card exactly as before when the aggregate call failed (no rows)", () => {
-    const withoutRows = renderCard({}).innerHTML;
-    expect(renderCard({ cursorModelUsage: undefined }).innerHTML).toBe(withoutRows);
-    expect(renderCard({ cursorModelUsage: [] }).innerHTML).toBe(withoutRows);
-    expect(renderCard({ cursorModelUsage: "garbage" }).innerHTML).toBe(withoutRows);
-    expect(withoutRows).not.toContain("cursor-model-usage");
-    expect(withoutRows).toContain("API");
+    vi.useFakeTimers({ toFake: ["Date"], now: new Date("2026-01-01T00:00:00.000Z") });
+    try {
+      const withoutRows = renderCard({}).innerHTML;
+      vi.setSystemTime(new Date("2026-01-01T00:01:00.000Z"));
+      expect(renderCard({ cursorModelUsage: undefined }).innerHTML).toBe(withoutRows);
+      expect(renderCard({ cursorModelUsage: [] }).innerHTML).toBe(withoutRows);
+      expect(renderCard({ cursorModelUsage: "garbage" }).innerHTML).toBe(withoutRows);
+      expect(withoutRows).not.toContain("cursor-model-usage");
+      expect(withoutRows).toContain("API");
+    } finally {
+      vi.useRealTimers();
+    }
   });
 
   it("does not render the table for other providers or while the card shows an error", () => {
