@@ -3533,6 +3533,8 @@ export function createSSEStream(options: StreamOptions = {}) {
             return;
           if (buffer.trim()) {
             const parsed = parseSSELine(buffer.trim());
+            // An unterminated final [DONE] is still the upstream's finish (see the main loop).
+            if (parsed?.done && state) state.doneMarkerSeen = true;
             if (parsed && !parsed.done) {
               if (emitTranslatedFailureAndAbort(controller, parsed)) return;
               if (targetFormat === FORMATS.OPENAI) normalizeArrayContentChunk(parsed);

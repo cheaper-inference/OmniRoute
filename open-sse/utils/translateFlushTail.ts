@@ -110,7 +110,10 @@ function isSkippedTailLine(parsed: unknown, context: TranslateFlushTailContext):
   }
   context.noteReasoning(parsed, context.now());
   if (context.shouldDropCommentary(record)) return true;
-  return record.done === true;
+  if (record.done !== true) return false;
+  // The translators read this at stream end: [DONE] means the upstream finished, not a cut.
+  context.state.doneMarkerSeen = true;
+  return true;
 }
 
 function trackTailToolTiming(record: JsonRecord, context: TranslateFlushTailContext): void {

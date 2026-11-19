@@ -91,3 +91,15 @@ test("stream: output with no terminal event and no [DONE] is reported as a failu
   assert.equal(failures.length, 1);
   assert.equal((failures[0] as { code?: string }).code, "stream_early_eof");
 });
+
+test("stream: an unterminated final [DONE] line still counts as the upstream's finish", async () => {
+  // No newline after [DONE]: the line reaches flush() as the leftover buffer, not the main loop.
+  const { failures } = await runStream([frame(delta), "data: [DONE]"]);
+  assert.equal(failures.length, 0, JSON.stringify(failures).slice(0, 300));
+});
+
+test("stream: a final [DONE] held by the multiline normalizer still counts as the finish", async () => {
+  // One newline and no blank line after [DONE]: the normalizer keeps it as its pending tail.
+  const { failures } = await runStream([frame(delta), "data: [DONE]\n"]);
+  assert.equal(failures.length, 0, JSON.stringify(failures).slice(0, 300));
+});
