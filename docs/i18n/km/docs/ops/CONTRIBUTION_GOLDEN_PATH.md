@@ -29,70 +29,61 @@
 6. **កត់ត្រាភស្តុតាង។** ក្នុងគំរូ PR រាយពាក្យបញ្ជាដែលបានដំណើរការ រាល់ឯកសារតេស្តដែលបានបន្ថែម ឬផ្លាស់ប្តូរ
    migration ឬ feature flag និងការផ្ទៀងផ្ទាត់ដែលដំណើរការតែលើ CI ណាមួយដែលនៅរង់ចាំ។
 
-## ផ្លូវគំរូតាមប្រភេទការផ្លាស់ប្តូរ
+## ផ្លូវមាសតាមប្រភេទផ្លាស់ប្តូរ
 
-ពាក្យបញ្ជាខាងក្រោមគឺជាការត្រួតពិនិត្យចំគោលដៅអប្បបរមា មិនមែនជាការអនុញ្ញាតឱ្យរំលងតេស្តដែលគ្របដណ្តប់ដោយផ្ទាល់លើ
-ឥរិយាបថដែលអ្នកបានផ្លាស់ប្តូរទេ។
+ពាក្យបញ្ជាខាងក្រោមគឺជាការត្រួតពិនិត្យដែលផ្តោតលើអប្បបរមា មិនមែនជាការអនុញ្ញាតឱ្យរំលងការធ្វើតេស្តដែលគ្របដណ្តប់ដោយផ្ទាល់នូវអាកប្បកិរិយាដែលអ្នកបានផ្លាស់ប្តូរនោះទេ។
 
-### Provider
+### អ្នកផ្តល់សេវា
 
 **កិច្ចសន្យា**
 
-- និយមន័យ Provider ក្នុង `src/shared/constants/providers/` និងការផ្គុំរបស់វាក្នុង
-  `src/shared/constants/providers.ts`។
-- Model និងសមត្ថភាពក្នុង `open-sse/config/providerRegistry.ts` ឬឯកសារ registry ដែលបានបំបែកចេញ។
-- ការជ្រើសរើស executor/translator ការកំណត់រចនាសម្ព័ន្ធ OAuth ឬ API-key ទ្រព្យធន dashboard និងឯកសារយោង
-  provider ដែលបានបង្កើតដោយស្វ័យប្រវត្តិ នៅពេលអនុវត្ត។
-- ព័ត៌មានសម្ងាត់សាធារណៈត្រូវប្រើ `resolvePublicCred()`; response កំហុសត្រូវប្រើ helper កំហុសរួម
-  ដែលបានសម្អាតទិន្នន័យរសើប។ សូមមើល `docs/security/PUBLIC_CREDS.md` (git; មិនត្រូវបានចងក្រងចូលក្នុង `/docs`) និង
-  [ការសម្អាតទិន្នន័យរសើបពីកំហុស](../security/ERROR_SANITIZATION.md)។
+- និយមន័យអ្នកផ្តល់សេវានៅក្នុង `src/shared/constants/providers/` និងសមាសភាពរបស់វានៅក្នុង `src/shared/constants/providers.ts`។
+- ម៉ូដែល និងសមត្ថភាពនៅក្នុង `open-sse/config/providerRegistry.ts` ឬឯកសារចុះបញ្ជីដែលបានស្រង់ចេញរបស់វា។
+- ការជ្រើសរើស Executor/translator, OAuth ឬការកំណត់រចនាសម្ព័ន្ធ API-key និងទ្រព្យសម្បត្តិផ្ទាំងគ្រប់គ្រង។ កុំធ្វើដ្យាក្រាម `docs/reference/PROVIDER_REFERENCE.md` ឬ README ដែលបង្កើតឡើងវិញ៖ ការចេញផ្សាយធ្វើឲ្យស្រស់សរសេរឡើងវិញ (`check:pr-derived-paths` បរាជ័យមុខងារ PR ដែលផ្ទុកពួកវា)។
+- អត្តសញ្ញាណប័ណ្ណសាធារណៈត្រូវតែប្រើ `resolvePublicCred()`; ការឆ្លើយតបកំហុសត្រូវតែប្រើឧបករណ៍ជំនួយដែលមានអនាម័យរួមគ្នា។ សូមមើល `docs/security/PUBLIC_CREDS.md` (git; មិនបានចងក្រងជា `/docs`) និង [Error Sanitization](../security/ERROR_SANITIZATION.md) ។
 
-**វដ្តចំគោលដៅ**
+**រង្វិលជុំផ្តោត**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # នៅពេលកាតាឡុកផ្លាស់ប្តូរ; commit diff ដែលបានបង្កើត
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-ត្រូវសាកល្បងរាល់ក្រុម request ដែលរងផលប៉ះពាល់ផងដែរ៖ chat, Responses, images, embeddings, audio ឬ video។
-ពិនិត្យកាតាឡុកដែលបានបង្កើត និង golden diff ជាការផ្លាស់ប្តូរកិច្ចសន្យា; កុំទទួលយកពួកវាដោយមិនពិនិត្យ។
+សាកល្បងផងដែរនូវរាល់ការស្នើសុំដែលរងផលប៉ះពាល់នៃគ្រួសារ៖ ការជជែក ការឆ្លើយតប រូបភាព ការបង្កប់ អូឌីយ៉ូ ឬវីដេអូ។ ពិនិត្យឡើងវិញនូវកាតាឡុកដែលបានបង្កើត និងភាពខុសគ្នាមាសនៅពេលដែលការផ្លាស់ប្តូរកិច្ចសន្យា។ កុំទទួលយកពួកគេដោយងងឹតងងល់។
 
-### Routing
+### ការនាំផ្លូវ
 
 **កិច្ចសន្យា**
 
-- តម្លៃ strategy សាធារណៈ និង metadata របស់ UI ក្នុង `src/shared/constants/routingStrategies.ts`។
-- ការបញ្ជូន និងការរៀបលំដាប់ក្រោម `open-sse/services/combo.ts` និង `open-sse/services/combo/`។
-- Combo schema ការរក្សាទុក ស្ថានភាពធន់ទ្រាំ សមត្ថភាព model និងឧបករណ៍បញ្ជា API/UI។
-- [ម៉ាស៊ីន Auto-Combo](../routing/AUTO-COMBO.md) និងឯកសារស្តីពីភាពធន់ទ្រាំ នៅពេលឥរិយាបថផ្លាស់ប្តូរ។
+- តម្លៃយុទ្ធសាស្ត្រសាធារណៈ និងទិន្នន័យមេតា UI ក្នុង `src/shared/constants/routingStrategies.ts`។
+- ចែកចាយនិងបញ្ជាទិញនៅក្រោម `open-sse/services/combo.ts` និង `open-sse/services/combo/`។
+- គ្រោងការណ៍បន្សំ ការតស៊ូ ស្ថានភាពធន់ សមត្ថភាពគំរូ និងការគ្រប់គ្រង API/UI ។
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) និងឯកសារភាពធន់នៅពេលដែលឥរិយាបថផ្លាស់ប្តូរ។
 
-**វដ្តចំគោលដៅ**
+**រង្វិលជុំផ្តោត**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # ការផ្លាស់ប្តូរ strategy ឬ dispatch
-npm run check:known-symbols      # ការផ្លាស់ប្តូរការចុះឈ្មោះ strategy
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-ប្រើតេស្ត mocked-upstream ដែលមានលទ្ធផលកំណត់ជាក់លាក់នៅមូលដ្ឋាន។ ការធ្វើ live combo smoke test តម្រូវឱ្យមានព័ត៌មានសម្ងាត់ ហើយជា
-ការធ្វើដោយដៃ មិនមែនជាជំនួសសម្រាប់ CI ទេ។
+ប្រើការសាកល្បងចំអកឡើងលើដែលកំណត់ក្នុងមូលដ្ឋាន។ ការជក់បារីបន្តផ្ទាល់តម្រូវឱ្យមានព័ត៌មានបញ្ជាក់អត្តសញ្ញាណ និងជាសៀវភៅដៃ មិនមែនជាការជំនួស CI ទេ។
 
 ### UI / UX
 
 **កិច្ចសន្យា**
 
-- route/page របស់ Next.js និងព្រំដែន component រួមក្រោម `src/app/` និង
-  `src/shared/components/`។
-- ទម្រង់ response របស់ API ស្ថានភាព loading/empty/error ឥរិយាបថ keyboard និង screen-reader
-  ប្លង់ responsive theme និងការពង្រីក locale។
-- string ប្រភព UI ជាភាសាអង់គ្លេសក្នុង `src/i18n/messages/en.json`; កុំ hard-code អត្ថបទថ្មីដែលបង្ហាញដល់អ្នកប្រើ។
+- Next.js route/page និងព្រំដែនសមាសភាគដែលបានចែករំលែកនៅក្រោម `src/app/` និង `src/shared/components/`។
+- រូបរាងឆ្លើយតប API, ស្ថានភាព loading/empty/error, ក្តារចុច និងឥរិយាបថកម្មវិធីអានអេក្រង់ ប្លង់ឆ្លើយតប រូបរាង និងការពង្រីកមូលដ្ឋាន។
+- ខ្សែអក្សរប្រភព UI ជាភាសាអង់គ្លេសនៅក្នុង `src/i18n/messages/en.json`; កុំសរសេរកូដចម្លងដែលប្រឈមមុខនឹងអ្នកប្រើប្រាស់ថ្មី។
 
-**វដ្តចំគោលដៅ**
+**រង្វិលជុំផ្តោត**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-ដំណើរការ app សម្រាប់ការផ្លាស់ប្តូរអន្តរកម្ម ឬទិដ្ឋភាព ហើយពិនិត្យទាំង viewport តូច និងធំ។ CI ដំណើរការ
-production build និងឈុតតេស្តទូលំទូលាយជាងនេះ; ឥរិយាបថដែលមើលឃើញនៅតែត្រូវការតេស្ត component ចំគោលដៅ Playwright
-ឬការត្រួតពិនិត្យដោយដៃដែលបានកត់ត្រា និងសមស្របនឹងការផ្លាស់ប្តូរ។
+ដំណើរការកម្មវិធីសម្រាប់អន្តរកម្ម ឬការផ្លាស់ប្តូរដែលមើលឃើញ ហើយពិនិត្យមើលទាំងទិដ្ឋភាពតូចចង្អៀត និងធំទូលាយ។ CI ដំណើរការការកសាងផលិតកម្មនិងឈុតទូលំទូលាយ; ឥរិយាបទដែលមើលឃើញនៅតែត្រូវការសមាសធាតុផ្តោត, Playwright, ឬការត្រួតពិនិត្យដោយដៃដែលបានចងក្រងដែលសមស្របនឹងការផ្លាស់ប្តូរ។
 
 ### i18n
 
 **កិច្ចសន្យា**
 
-- `src/i18n/messages/en.json` គឺជាប្រភព UI; `config/i18n.json` គឺជាប្រភព locale។
-- កាតាឡុក CLI ស្ថិតនៅដាច់ដោយឡែកក្រោម `bin/cli/locales/`។
-- រក្សាទុក placeholder និង tag របស់ ICU ឱ្យដូចដើមទាំងស្រុង។ កុំបកប្រែឈ្មោះ product/provider/model
-  ឈ្មោះ protocol និង header ពាក្យបញ្ជា identifier របស់ code/JSON URL environment variable ឬ
-  ពាក្យដែលបានការពារ ដូចជា `OmniRoute`, `OAuth`, `MCP` និង `A2A`។ បញ្ជីប្រភពបច្ចុប្បន្នគឺ
-  `scripts/i18n/glossary/protected-terms.json`។
+- `src/i18n/messages/en.json` គឺជាប្រភព UI ; `config/i18n.json` គឺជាប្រភពមូលដ្ឋាន។
+- កាតាឡុក CLI រស់នៅដោយឡែកពីគ្នាក្រោម `bin/cli/locales/`។
+- រក្សាកន្លែងដាក់ និងស្លាក ICU យ៉ាងពិតប្រាកដ។ កុំបកប្រែឈ្មោះ product/provider/model ពិធីការ និងឈ្មោះបឋមកថា ពាក្យបញ្ជា ការកំណត់អត្តសញ្ញាណ code/JSON URLs អថេរបរិស្ថាន ឬពាក្យដែលបានការពារដូចជា `OmniRoute`, `OAuth`, `MCP`, និង `A2A`។ បញ្ជីប្រភពបច្ចុប្បន្នគឺ `scripts/i18n/glossary/protected-terms.json`។
 
-**វដ្តចំគោលដៅ**
+លក្ខណៈពិសេសមួយ PR កែសម្រួលតែ `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); មូលដ្ឋានផ្សេងទៀតត្រូវបានបញ្ចប់ម្តងក្នុងមួយការចេញផ្សាយដោយការធ្វើឱ្យស្រស់ឬរលកបកប្រែ (`docs/guides/I18N.md` → "លក្ខណៈពិសេស PRs ប៉ះ `en.json` តែប៉ុណ្ណោះ") ។ `npm run check:pr-derived-paths` បរាជ័យលក្ខណៈពិសេស PR ដែលកែសម្រួលកាតាឡុកមូលដ្ឋានផ្សេងទៀត។
+
+**រង្វិលជុំផ្តោត**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # នៅពេល string/catalog របស់ CLI ផ្លាស់ប្តូរ
 npm run lint
 ```
 
-នេះជាការណែនាំសម្រាប់ប្រព័ន្ធដែលមានស្រាប់ មិនមែនជាការអញ្ជើញឱ្យពង្រីក tooling ឬគំរូ key របស់វាទេ។
-រក្សា patch i18n ឱ្យតូច និងចំគោលដៅ ខណៈដែលប្រព័ន្ធជំនួសកំពុងត្រូវបានរចនា។ កុំដំណើរការពាក្យបញ្ជាបកប្រែ
-ដែលហៅសេវាខាងក្រៅ លុះត្រាតែកិច្ចការតម្រូវយ៉ាងច្បាស់ឱ្យមានការបកប្រែដែលបានបង្កើតដោយស្វ័យប្រវត្តិ ហើយ
-អ្នកបានពិនិត្យ diff ដែលជាលទ្ធផល។
+ដោយគ្មាន `--mode=pr` ច្រកទ្វារទាំងនេះដំណើរការនៅក្នុងរបៀបចេញផ្សាយក្នុងស្រុក ហើយរាយការណ៍រាល់គន្លឹះដែលវដ្តត្រូវបានបន្ថែម ឬសរសេរឡើងវិញនៅក្នុង `en.json`; នោះគឺជាការងាររបស់ Refresh ដែលត្រូវបានចេញផ្សាយ មិនមែនជា PR របស់អ្នកទេ។
+
+នេះគឺជាការណែនាំសម្រាប់ប្រព័ន្ធដែលមានស្រាប់ មិនមែនជាការអញ្ជើញឱ្យពង្រីកឧបករណ៍ ឬគំរូគន្លឹះរបស់វានោះទេ។ រក្សាបំណះ i18n វះកាត់ខណៈពេលដែលប្រព័ន្ធជំនួសកំពុងត្រូវបានរចនា។ កុំដំណើរការពាក្យបញ្ជាបកប្រែដែលហៅសេវាកម្មខាងក្រៅ លុះត្រាតែកិច្ចការនោះតម្រូវឱ្យមានការបកប្រែដែលបានបង្កើតយ៉ាងច្បាស់ ហើយអ្នកបានពិនិត្យមើលភាពខុសគ្នាលទ្ធផល។
 
 ### CLI
 
 **កិច្ចសន្យា**
 
-- ពាក្យបញ្ជា និង flags សាធារណៈនៅក្នុង `bin/cli/`, ពាក្យបញ្ជា API ដែលបានបង្កើត, exit codes, stdout/stderr និង
-  ទម្រង់លទ្ធផល JSON, ឥរិយាបថ config/environment និងឯកសារដែលបានវេចខ្ចប់។
-- ខ្សែអក្សរដែលបង្ហាញដល់អ្នកប្រើ CLI ត្រូវតែប្រើស្រទាប់ i18n របស់ CLI និងរក្សា catalogs `en`/`pt-BR` ឱ្យស្របគ្នា។
-- រក្សា Node ជា runtime ដែលបានគាំទ្រ និងរក្សាកិច្ចសន្យារបស់ binary ដែលបានផ្សព្វផ្សាយ។
+- ពាក្យបញ្ជាសាធារណៈ និងទង់ជាតិនៅក្នុង `bin/cli/` បានបង្កើតពាក្យបញ្ជា API លេខកូដចេញ រូបរាងលទ្ធផល stdout/stderr និង JSON ឥរិយាបថ config/environment និងឯកសារដែលបានខ្ចប់។
+- CLI ខ្សែអក្សរដែលប្រឈមមុខនឹងអ្នកប្រើប្រាស់ត្រូវតែប្រើស្រទាប់ CLI i18n (`t()` keys ដែលមាននៅក្នុង `bin/cli/locales/en.json`)។ លក្ខណៈពិសេសមួយ PR កែសម្រួលតែ `en.json`; `pt-BR` និងមូលដ្ឋានផ្សេងទៀតត្រូវបានបញ្ចប់នៅពេលចេញផ្សាយ។
+- រក្សាទុកថ្នាំងជាពេលវេលាដំណើរការដែលបានគាំទ្រ និងកិច្ចសន្យាគោលពីរដែលបានបោះពុម្ពផ្សាយ។
 
-**វដ្តផ្តោតជាក់លាក់**
+**រង្វិលជុំផ្តោត**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # ការផ្លាស់ប្តូរ CLI ដែលបានបង្កើត/ចងជាកញ្ចប់
-npm run check:pack-policy     # ការផ្លាស់ប្តូរផ្ទៃសាធារណៈរបស់ package
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-ប្រើពាក្យបញ្ជាដូចបានកំណត់ខាងលើឱ្យបានត្រឹមត្រូវនៅក្នុងថតទិន្នន័យបណ្តោះអាសន្ន នៅពេលឥរិយាបថអាស្រ័យលើការញែកទិន្នន័យ ឯកសារ ឬស្ថានភាពចាកចេញ។
-CI អនុវត្តការត្រួតពិនិត្យ artifact របស់ package និងប្រព័ន្ធអេកូឡូស៊ីក្នុងវិសាលភាពទូលំទូលាយជាងនេះ។
+ប្រើពាក្យបញ្ជាពិតប្រាកដនៅក្នុងថតទិន្នន័យបណ្ដោះអាសន្ន នៅពេលដែលឥរិយាបថអាស្រ័យលើការញែក ឯកសារ ឬស្ថានភាពចេញ។ CI អនុវត្តការត្រួតពិនិត្យវត្ថុបុរាណ និងប្រព័ន្ធអេកូកាន់តែទូលំទូលាយ។
 
 ### មូលដ្ឋានទិន្នន័យ
 
 **កិច្ចសន្យា**
 
-- ម៉ូឌុល domain នៅក្រោម `src/lib/db/`; import ម៉ូឌុលជាក់លាក់ដោយផ្ទាល់ (ស្រទាប់ re-export ចាស់ `localDb.ts` ត្រូវបានដកចេញហើយ)។
-- SQL migrations ដែលមានលេខរៀង និងអាចដំណើរការម្តងហើយម្តងទៀតដោយមិនបង្កផលប៉ះពាល់ នៅក្រោម `src/lib/db/migrations/`, សុវត្ថិភាព transaction, ឥរិយាបថ upgrade,
-  indexes និងគ្រប់ caller ដែលរងផលប៉ះពាល់ដោយ schema។
-- Routes និង handlers មិនត្រូវចេញ raw SQL ដោយផ្ទាល់ឡើយ។
+- ម៉ូឌុលដែនក្រោម `src/lib/db/`; នាំចូលម៉ូឌុលជាក់លាក់ដោយផ្ទាល់ (ស្រទាប់នាំចេញឡើងវិញ `localDb.ts` ចាស់ត្រូវបានយកចេញ) ។
+- ការធ្វើចំណាកស្រុក SQL ដែលមានលេខរៀង ជាក់ស្តែងនៅក្រោម `src/lib/db/migrations/` សុវត្ថិភាពប្រតិបត្តិការ ធ្វើឱ្យប្រសើរឡើងនូវឥរិយាបទ សន្ទស្សន៍ និងរាល់អ្នកហៅទូរសព្ទដែលរងផលប៉ះពាល់ដោយគ្រោងការណ៍។
+- ផ្លូវនិងអ្នកដោះស្រាយមិនដែលចេញ SQL ឆៅដោយផ្ទាល់ទេ។
 
-**វដ្តផ្តោតជាក់លាក់**
+**រង្វិលជុំផ្តោត**
 
 ```bash
 npm run check:migration-numbering
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-សាកល្បងទាំងមូលដ្ឋានទិន្នន័យថ្មីសុទ្ធ និងការដំឡើងកំណែពី schema មុន នៅពេលបន្ថែម migration។ ការធ្វើតេស្តមូលដ្ឋានទិន្នន័យ
-ត្រូវតែបិទ handles និងហៅ `resetDbInstance()` អំឡុងពេលសម្អាត។ ដំណើរការ `npm run test:bun:db` តែនៅពេល
-ផ្លូវ Bun adapter បែប best-effort ផ្លាស់ប្តូរប៉ុណ្ណោះ; Node នៅតែជាប្រភពកំណត់ស្តង់ដារ។
+សាកល្បងទាំងមូលដ្ឋានទិន្នន័យថ្មី និងធ្វើឱ្យប្រសើរឡើងពីគ្រោងការណ៍មុន នៅពេលបន្ថែមការផ្ទេរ។ ការធ្វើតេស្តមូលដ្ឋានទិន្នន័យត្រូវតែបិទចំណុចទាញ និងហៅ `resetDbInstance()` កំឡុងពេលសម្អាត។ ដំណើរការ `npm run test:bun:db` តែនៅពេលដែលការផ្លាស់ប្តូរផ្លូវអាដាប់ទ័រ Bun ដែលខិតខំប្រឹងប្រែងល្អបំផុត។ Node នៅតែអនុញ្ញាត។
 
-### ការបង្កើត / ការដាក់ឱ្យដំណើរការ
+### សាងសង់ / ដាក់ពង្រាយ
 
 **កិច្ចសន្យា**
 
-- Manifests/lockfile នៅ root និង workspace, `scripts/build/`, ការរៀបចំ Next.js standalone, មាតិកា package ក្នុង `dist/`,
-  metadata តាម platform របស់ Electron, CI workflows និង deployment sentinels។
-- ជួរកំណែ Node ដែលបានគាំទ្រ និងការប្រើ Bun ដែលបានអនុញ្ញាតជាមុនក្នុង `CLAUDE.md` ត្រូវតែរក្សាទុកដដែល។
-- Build artifacts មិនត្រូវបានតាមដាន; គោលការណ៍ dependency, license, workflow និង package ត្រូវបានអនុវត្ត។
+- Root និងកន្លែងធ្វើការ manifests/lockfile, `scripts/build/`, Next.js standalone assembly , `dist/` package contents , Electron platform metadata, CI workflows, and deployment sentinels.
+- ជួរថ្នាំងដែលគាំទ្រ និងការប្រើប្រាស់ Bun ដែលបានចុះបញ្ជីអនុញ្ញាតក្នុង `CLAUDE.md` ត្រូវតែនៅដដែល។
+- កសាងវត្ថុបុរាណ នៅតែមិនតាមដាន; ភាពអាស្រ័យ អាជ្ញាប័ណ្ណ លំហូរការងារ និងគោលការណ៍កញ្ចប់ត្រូវបានអនុវត្ត។
 
-**វដ្តផ្តោតជាក់លាក់**
+**រង្វិលជុំផ្តោត**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # ការផ្លាស់ប្តូរ dependency ឬ lockfile
-npm run check:pack-policy      # ការផ្លាស់ប្តូរផ្ទៃសាធារណៈរបស់ package ដែលបានផ្សព្វផ្សាយ
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-ប្រើ `npm run build` ក្នុងមូលដ្ឋានតែនៅពេលការផ្លាស់ប្តូរប៉ះពាល់ដល់ compilation, standalone assembly, assets
-ឬ runtime bundling។ ប្រើ `npm run build:release` សម្រាប់តែការផ្ទៀងផ្ទាត់ release/deploy ប៉ុណ្ណោះ។ Build របស់ CI គឺជា
-សញ្ញាចុងក្រោយឆ្លងកាត់គ្រប់ platform; ការផ្លាស់ប្តូរ Electron ជាក់លាក់តាម platform ត្រូវការភស្តុតាងពី focused build
-ឬ smoke test ដែលត្រូវគ្នា។
+ប្រើ `npm run build` ក្នុងស្រុកតែនៅពេលដែលការផ្លាស់ប្តូរប៉ះពាល់ដល់ការចងក្រង ការជួបប្រជុំគ្នាតែម្នាក់ឯង ទ្រព្យសម្បត្តិ ឬបណ្តុំពេលដំណើរការ។ ប្រើ `npm run build:release` សម្រាប់តែការបញ្ជាក់ release/deploy ប៉ុណ្ណោះ។ ការបង្កើតរបស់ CI គឺជាសញ្ញាឆ្លងវេទិកាចុងក្រោយ។ ការផ្លាស់ប្តូរ Electron ជាក់លាក់នៃវេទិកាត្រូវការការផ្គូផ្គងការផ្គូរផ្គងការផ្តោតការយកចិត្តទុកដាក់ឬភស្តុតាងផ្សែង។
 
 ## ស្គ្រីបសម្រាប់អ្នកអភិវឌ្ឍន៍លើម៉ាស៊ីនរួម
 
