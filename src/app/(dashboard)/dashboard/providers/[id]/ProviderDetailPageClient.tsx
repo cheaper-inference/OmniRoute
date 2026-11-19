@@ -844,7 +844,7 @@ export default function ProviderDetailPageClient() {
       {/* Models — hidden for search providers (they don't have models) */}
       {!isSearchProvider && !isUpstreamProxyProvider && (
         <Card>
-          <h2 className="text-lg font-semibold mb-4">{t("availableModels")}</h2>
+          <h2 className="text-lg mb-4">{t("availableModels")}</h2>
           <ProviderModelsSection
             providerId={providerId}
             providerAlias={providerAlias}

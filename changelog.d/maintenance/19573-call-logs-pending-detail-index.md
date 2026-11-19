@@ -1,1 +1,0 @@
-- **perf(db):** the once-a-minute recovery of stuck call-log detail writes uses a small partial index instead of scanning the whole call log table. ([#19573](https://github.com/cheaper-inference/OmniRoute/pull/19573))
