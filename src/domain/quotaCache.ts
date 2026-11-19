@@ -1180,7 +1180,7 @@ export function getQuotaWindowStatus(
     reachedThreshold:
       windowExpired ||
       window.fractionReported === false ||
-      isStaleSampleWithoutReset(observedAt, resetAt, now) ||
+      (remainingPercentage <= 0 && isStaleSampleWithoutReset(observedAt, resetAt, now)) ||
       (entry.provider !== "codex" && isWindowParkReleased(entry, now))
         ? false
         : remainingPercentage <= 0

@@ -48,6 +48,13 @@ test("flag on: an old window with a future reset keeps pausing the account until
   assert.equal(reached("future"), true);
 });
 
+test("flag on: a stale window past the threshold but not exhausted keeps pausing the account", () => {
+  process.env.QUOTA_STALE_SAMPLE_RELEASE = "true";
+  quota.setQuotaCache("half", "openai", { session: { remainingPercentage: 50 } });
+  quota.getQuotaCache("half")!.fetchedAt = Date.now() - 3 * HOUR;
+  assert.equal(quota.getQuotaWindowStatus("half", "session", 40)?.reachedThreshold, true);
+});
+
 test("flag off: a stale exhausted window with no reset keeps pausing the account (today's behaviour)", () => {
   seed("stale-off", 3 * HOUR);
   assert.equal(reached("stale-off"), true);
