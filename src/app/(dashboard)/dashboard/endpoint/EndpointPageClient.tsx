@@ -1,5 +1,6 @@
 "use client";
 
+import { decisionEndpointModels } from "@/shared/constants/decisionEndpointModels";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Alert } from "@omniroute/ui-kit/alert";
@@ -1981,7 +1982,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                   iconBg="bg-primary/10"
                   title={title}
                   path={path}
-                  models={null}
+                  models={decisionEndpointModels(allModels, path)}
+                  modelsLoading={modelsLoading}
                   copy={copy}
                   copied={copied}
                   baseUrl={currentEndpoint}
