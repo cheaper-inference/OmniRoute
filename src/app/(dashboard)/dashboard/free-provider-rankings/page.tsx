@@ -259,6 +259,7 @@ export default function FreeProviderRankingsPage() {
               <Table
                 className="min-w-0"
                 scrollbarLabel={t("title")}
+                scrollLabel={t("title")}
                 containerClassName="rounded-none border-0"
               >
                 <TableHeader>
