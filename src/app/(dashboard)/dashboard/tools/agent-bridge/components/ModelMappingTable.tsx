@@ -79,6 +79,7 @@ export function ModelMappingTable({ agentId, mappings, onSave }: ModelMappingTab
           <Table
             className="text-sm"
             scrollbarLabel={t("modelMappingsLabel")}
+            scrollLabel={t("modelMappingsLabel")}
             containerClassName="rounded-none border-0"
           >
             <TableHeader>

@@ -850,71 +850,195 @@ OpenAI-kompatibilis kötegelt feldolgozás.
 
 ---
 
-## Keresés API
+## Search API
 
-Web/search szolgáltató absztrakció (Tavily, Brave, Exa, Serper stb.).
+Webes/keresési szolgáltatói absztrakció (Tavily, Brave, Exa, Serper stb.).
 
-| Módszer | Útvonal                | Leírás                                                        |
-| ------- | ---------------------- | ------------------------------------------------------------- |
-| GET     | `/v1/search`           | Sorolja fel a konfigurált keresési szolgáltatók + képességeit |
-| POST    | `/v1/search`           | `v1SearchSchema` le caching/coalescing keresési —             |
-| GET     | `/v1/search/analytics` | Szolgáltatónkénti hit/latency/cache statisztika               |
+| Metódus | Útvonal                | Leírás                                                                                                                     |
+| ------- | ---------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | A konfigurált keresési szolgáltatók és képességek listázása                                                                |
+| POST    | `/v1/search`           | Keresési lekérdezés futtatása — a törzs ellenőrzését a `v1SearchSchema` végzi, és támogatja a gyorsítótárazást/összevonást |
+| GET     | `/v1/search/analytics` | Szolgáltatónkénti találati/késleltetési/gyorsítótár-statisztikák                                                           |
 
-**Auth:** Tartó API kulcs (`extractApiKey` + `isValidApiKey`). A keresési szabályzat `enforceApiKeyPolicy` keresztül érvényesítve.
+**Hitelesítés:** Bearer API-kulcs (`extractApiKey` + `isValidApiKey`). A keresési szabályzatot az `enforceApiKeyPolicy` érvényesíti.
 
-**Automatikus kiválasztás:** `provider` nélkül a legolcsóbb, konfigurált kapcsolattal rendelkező szolgáltató fut először, és a következő legolcsóbb a feladatátvétel. Az ingyenes utolsó szolgáltatók (`duckduckgo-free`) csak akkor használatosak, ha semmi más nincs beállítva. A saját üzemeltetésű SearXNG konfiguráltnak számít, ha a kapcsolata valódi `baseUrl` (nem a katalógus alapértelmezett `http://localhost:8888/search` `baseUrl` ) tárolja: ezután 0 dolláros szolgáltatóként szerepel a kulcsos szolgáltatók előtt, a legolcsóbb kulcsos szolgáltató pedig feladatátvételként, beleértve azt is, ha SearXNG 400, 401, 403 vagy 404 URL válaszol. `http(s)` -metaadat cím nem számít. A tokent tároló SearXNG kapcsolat csak `https://` vagy loopback `http://` felett rangsorolható. A távoli sima `http://` en soha nem jelent feladatátvételt, és csak az utolsó lehetőség marad, csak akkor használják, ha nincs más szolgáltató konfigurálva, vagy ha név szerint kérik, tehát ebben a két esetben egyértelmű szöveggel küldi el a tokent.
+### Elnevezett keresési/lekérési kombinációk
+
+Mind a `POST /v1/search`, mind a `POST /v1/web/fetch` elfogadja a mentett kombináció nevét `model` értékként.
+Használja a `model` vagy egy explicit `provider` mezőt; mindkettő elküldése `400` hibát ad.
+Ha egyik mező sincs megadva, a meglévő automatikus szolgáltatóválasztás változatlanul működik.
+
+Mind a Combo Builder, mind az Add Model katalógusa natív webműveleti bejegyzéseket tesz elérhetővé a csatlakoztatott szolgáltatókhoz, még akkor is, ha azokhoz nem tartozik LLM-modelllista. A Serpernél a **Webes keresés**;
+a Tavilynál a **Webes keresés / Oldalkinyerés**, a csak lekérést támogató szolgáltatóknál pedig az **Oldalkinyerés** jelenik meg.
+Válassza ki a bejegyzést és a fiókot a megszokott módon. Egyetlen Tavily-bejegyzés szolgálja ki mindkét webes végpontot;
+ezek a műveleti bejegyzések nem kerülnek be a csak csevegést támogató kliensválasztókba és csevegési modelltesztelőkbe.
+
+Például hozzon létre egy **priority** kombinációt `shared-free` néven, a következő sorrendben megadott célokkal:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Ezután használja ugyanazt a nevet minden felületen:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+A keresés először a Tavily, majd a Serper szolgáltatót veszi figyelembe; a lekérés először a Tavily, majd a Jina Reader szolgáltatót;
+a csevegés kihagyja a dedikált keresési/lekérési szolgáltatókat, és az OpenAI szolgáltatót veszi figyelembe. A kompatibilitást
+a keresési/lekérési végrehajtói regiszterek biztosítják, nem pedig a modell nevében szereplő szavak.
+A szűrés megelőzi a hitelesítő adatok kiválasztását és a küldést, és soha nem módosítja a mentett kombinációt.
+
+A nem csevegési képességek útvonalai támogatják a `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` és `p2c` stratégiákat. A csak csevegésre szolgáló szintézisstratégiákat, például a
+`fusion`, `pipeline` és `context-relay` stratégiát a rendszer elutasítja a nem csevegési útvonalakon, ahelyett hogy
+csendben alkalmazná őket a keresésre vagy a generált médiára.
+A meglévő kombinációs motor kezeli a sorrend szerinti tartalékmegoldásokat, beleértve a felsőbb szintű szolgáltató kvótakimerülési hibáit is,
+és megőrzi a lépésazonosítókat, a fiókhoz kötéseket, a lépésenkénti fiókengedélyezési listákat, a beágyazott hivatkozásokat,
+a hívó kapcsolat-/kvótahatóköreit és a kombináció-hozzáférési szabályzatot. Az eredmények megőrzik natív
+keresési/lekérési sémájukat, beleértve a tényleges szolgáltatót is; az `X-OmniRoute-Combo-Trace` azonosítja
+az útválasztási döntést. Az ismeretlen kombinációk `404` hibát adnak; az inaktív kombinációk és a kompatibilis célokat
+nem tartalmazó kombinációk `400` hibát adnak.
+
+Minden kombinációs kísérlet egyetlen explicit szolgáltatót használ. Nem hívhatja meg titokban a kombináció mögött
+működő natív automatikus szolgáltatói készletet. Az explicit szolgáltatót megcélzó kérések megtartják meglévő,
+egyetlen szolgáltatós viselkedésüket. A dedikált keresési/lekérési szolgáltatókat célzó közvetlen csevegési kérések
+ahelyett, hogy egy OpenAI-stílusú végrehajtóhoz esnének vissza, műveletet segítő JSON `400` hibát adnak.
+
+### Képességspecifikus kombinációs útvonalak
+
+A mentett kombinációk tartalmazhatnak egy `routes` objektumot, amelynek kulcsai API-képességek. Minden útvonal saját
+céllistával, stratégiával és futásidejű konfigurációval rendelkezik. A legfelső szintű `models`, `strategy` és `config`
+továbbra is a régi kompatibilitást biztosító Chat-terv; a `routes` nélküli régi kombinációk változatlanul működnek.
+
+A támogatott útvonalkulcsok: `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` és `audio-generation`. A végpont leképezése a hitelesítő adatok kiválasztása, a pontozás
+vagy a küldés előtt történik. A beágyazott kombinációhivatkozások a gyermek-kombináció azonos képességhez tartozó útvonalát választják ki.
+
+A `POST /v1/music/generations` és a `POST /v1/ocr` elfogadja a kombináció nevét `model` értékeként. A natív,
+ElevenLabs-kompatibilis `POST /v1/music` szintén elfogadja a kombináció nevét `model_id` értékeként, azonban ezen
+a natív végponton minden használható célnak ElevenLabs-zenei modellnek kell lennie, hogy megmaradjon a bináris válasz szerződése.
+A `POST /v1/sound-generation` ugyanilyen natív bináris megkötés mellett elfogad egy `audio-generation` kombinációt `model_id` értékként.
+Heterogén zenei szolgáltatókhoz használja a `/v1/music/generations` végpontot.
+
+**Automatikus kiválasztás:** `provider` nélkül először a legolcsóbb, konfigurált kapcsolattal rendelkező szolgáltató fut le,
+a következő legolcsóbb pedig tartalék szolgáltatóként szolgál. Az ingyenes, végső tartalékot jelentő szolgáltatók (`duckduckgo-free`)
+csak akkor használatosak, ha semmi más nincs konfigurálva. Egy saját üzemeltetésű SearXNG akkor számít konfiguráltnak, ha a
+kapcsolata valódi `baseUrl` értéket tárol (nem a katalógus alapértelmezett `http://localhost:8888/search` értékét): ekkor
+0 dolláros szolgáltatóként a kulccsal rendelkező szolgáltatók elé kerül, és a legolcsóbb kulcsos szolgáltató lesz a tartalék,
+akkor is, ha a SearXNG `400`, `401`, `403` vagy `404` hibával válaszol. Az olyan `baseUrl`, amely nem érvényes `http(s)` URL,
+vagy felhőmetaadat-címre mutat, nem számít konfiguráltnak. A tokent tároló SearXNG-kapcsolat csak `https://` vagy loopback
+`http://` esetén kerül ebbe a rangsorba. Távoli, egyszerű `http://` esetén soha nem lehet tartalék szolgáltató, és végső
+tartalékként marad használatban: csak akkor, ha nincs más konfigurált szolgáltató, vagy ha név szerint kérik; ebben a két esetben
+tehát a token egyszerű szövegként kerül elküldésre.
 
 ### Exa és Tavily `provider_options`
 
-Az Exa és a Tavily beolvassa a szolgáltató-specifikus mezőket egy névteres táskából: `provider_options.exa` (vagy `provider_options["exa-search"]`) és `provider_options.tavily` (vagy `provider_options["tavily-search"]`). Csak az alábbi kulcsok kerülnek továbbításra. Mindegyiket ellenőrzik a saját Zod sémájával `open-sse/handlers/search/providerOptionsPassthrough.ts` ben, és egy nem megfelelő típusú kulcs kerül kidobásra. Minden más kulcs figyelmen kívül marad, beleértve az auth, base URL, `stream` és `outputSchema`. A más szolgáltatók által használt lapos billentyűk (`cx`, `depth`, ...) a korábbiak szerint működnek.
+Az Exa és a Tavily szolgáltatóspecifikus mezőket egy névterezett tárolóból olvassa:
+`provider_options.exa` (vagy `provider_options["exa-search"]`) és `provider_options.tavily`
+(vagy `provider_options["tavily-search"]`). Csak az alábbi kulcsok kerülnek továbbításra. Mindegyiket
+a saját Zod-sémája ellenőrzi az
+`open-sse/handlers/search/providerOptionsPassthrough.ts` fájlban, és a hibás típusú kulcs
+eldobásra kerül. Minden más kulcs figyelmen kívül marad, beleértve az auth, a base URL,
+a `stream` és az `outputSchema` kulcsokat is. A más szolgáltatók által használt lapos kulcsok
+(`cx`, `depth`, ...) továbbra is a korábbiak szerint működnek.
 
-| Szolgáltató | Legfelső szintű mezők                                                                                                                                                                                                                                                                                                                                                     | Beágyazott                                                                                                                                       |
-| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (lapos primitívek), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` egyesült az alapértelmezett `{ text: true, highlights: true }` vel |
-| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                |
+| Szolgáltató | Felső szintű mezők                                                                                                                                                                                                                                                                                                                                                        | Beágyazott                                                                                                                                          |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa         | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (lapos primitívek), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                             | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` az alapértelmezett `{ text: true, highlights: true }` fölé összevonva |
+| Tavily      | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                                   |
 
-Mindig az általános mezők nyernek: `query`, `max_results`, `filters` (domains), `country` és a `search_type` ből származó téma. Az Exa-n a `search_type: "news"` megtartja `category: "news"`. Tavily `search_type: "finance"` (`topic: "finance"`) is elfogadja.
+Az általános mezők mindig elsőbbséget élveznek: `query`, `max_results`, `filters` (tartományok),
+`country`, valamint a `search_type` alapján meghatározott téma. Az Exa esetén a
+`search_type: "news"` megtartja a `category: "news"` értéket.
+A Tavily a `search_type: "finance"` értéket is elfogadja (`topic: "finance"`).
 
-A Firecrawl keresési költsége 10 visszaadott eredmény elindított blokkjára vonatkozik, blokkonként 0,002 USD (2 kredit) és hívásonként legalább egy blokk ( [Firecrawl-számlázás](https://docs.firecrawl.dev/billing) ): 11 találat 0,004 USD-ba kerül.
+A Firecrawl keresés költsége minden megkezdett, 10 visszaadott eredményből álló blokk után
+kerül rögzítésre, blokkonként $0.002 (2 kredit) áron, és hívásonként legalább egy blokkot
+számítva ([Firecrawl számlázás](https://docs.firecrawl.dev/billing)): 11 eredmény költsége $0.004.
 
-Az általános `time_range` mostantól mindkét szolgáltatót eléri: Exa `startPublishedDate` (ISO timestamp), Tavily pedig `start_date` (`YYYY-MM-DD`) kap. Az explicit dátum `provider_options` ben felülírja a leképezett dátumot.
+Az általános `time_range` most mindkét szolgáltatóhoz eljut: az Exa
+`startPublishedDate` (ISO-időbélyeg), a Tavily pedig `start_date` (`YYYY-MM-DD`) értéket kap.
+A `provider_options` explicit dátuma felülírja a leképezett értéket.
 
-Az Exa eredmények `id`, `highlights` (minden kiemelés, nem csak az első `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` és `extras` `provider_raw`-ben marad. A Tavily eredmények `images` és `favicon` maradnak.
+Az Exa eredményei az `id`, a `highlights` (minden kiemelést, nem csak az elsőt, amelyet
+`snippet` értékként használnak), a `highlight_scores`, a `summary`, a `subpages`, az
+`entities` és az `extras` mezőket a `provider_raw` mezőben őrzik meg. A Tavily eredményei az
+`images` és a `favicon` mezőket őrzik meg.
 
-A linkup keresési költsége 0,005 USD `depth` `fast` és `standard`, és 0,05 USD `deep` ( [Linkup pricing](https://docs.linkup.so/pages/documentation/development/pricing) ) esetében, függetlenül attól, hogy `depth` `provider_options` ből vagy a kapcsolat beállításaiból származik.
+A Linkup keresés költsége $0.005 a `depth` `fast` és `standard` értékei, valamint $0.05 a
+`deep` érték esetén ([Linkup árazása](https://docs.linkup.so/pages/documentation/development/pricing)),
+függetlenül attól, hogy a `depth` a `provider_options` értékéből vagy a kapcsolat beállításaiból
+származik.
 
-Az Exa `type: "lite"` (Exa 3.0) kisebb mezőket fogad el, és elutasítja a teljes kérést, ha bármely más mező be van állítva. Lite esetén `additionalQueries`, `systemPrompt` és `text` és `highlights` kivételével minden `contents` billentyű eldobásra kerül a hívás előtt. Az elavult `subpages`, `subpageTarget`, `highlights.numSentences` és `highlights.highlightsPerUrl` továbbítása már nem történik meg.
+Az Exa `type: "lite"` (Exa 3.0) kisebb mezőkészletet fogad el, és a teljes kérést elutasítja,
+ha bármely más mező be van állítva. A lite esetén az `additionalQueries`, a `systemPrompt`,
+valamint a `text` és a `highlights` kivételével minden `contents` kulcs eldobásra kerül a hívás
+előtt. Az elavult `subpages`, `subpageTarget`, `highlights.numSentences` és
+`highlights.highlightsPerUrl` már nem kerül továbbításra.
 
-A költségelszámolás a `costPerQuery` lapos nyilvántartás, kivéve az Exa esetében, amely az Exa saját árait követi: 0,007 USD hívásonként `auto` (és az örökölt `fast`) esetében vagy 0,004 USD `lite` (és az örökölt `instant`) esetében, amely 10 eredményt takar; 0,001 USD minden további eredményért; és 0,001 USD visszaadott eredményenként, ha `contents.summary` be van állítva. A Tavily 1 kreditet (0,008 USD) `search_depth` `basic`, `fast` és `ultra-fast` esetében, és 2 kreditet ($ 0,016) `advanced` esetében ( [Tavily API kredit](https://docs.tavily.com/documentation/api-credits) ). A `auto_parameters: true` folytatott hívást, amelyet Tavily haladó szintre frissít, továbbra is 1 kredittel rögzítenek.
+A költségelszámolás a lapos `costPerQuery`-regisztert használja, kivéve az Exát, amely az Exa
+saját árazását követi: hívásonként $0.007 az `auto` (és a régi `fast`), illetve $0.004 a
+`lite` (és a régi `instant`) esetén, 10 eredményig; minden további eredmény $0.001; továbbá
+$0.001 minden visszaadott eredmény után, ha a `contents.summary` be van állítva. A Tavily
+elszámolása 1 kreditként ($0.008) történik a `search_depth` `basic`, `fast` és `ultra-fast`
+értékei, valamint 2 kreditként ($0.016) az `advanced` érték esetén
+([Tavily API-kreditek](https://docs.tavily.com/documentation/api-credits)). Egy olyan hívás,
+amelyben az `auto_parameters: true` beállítás mellett a Tavily advanced szintre vált, továbbra
+is 1 kreditként kerül elszámolásra.
 
 ---
 
 ## Web Fetch API
 
-Tartalom kinyerése egy URL-ből konfigurált web-fetch-szolgáltatón keresztül (Firecrawl, Jina
-Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract).
+Tartalom kinyerése egy URL-címről egy konfigurált webes lekérési szolgáltatón
+keresztül (Firecrawl, Jina
+Reader, Tavily Extract, TinyFish Fetch, Nimble Extract, Parallel Extract, Keenable Fetch).
 
-A Parallel Extract (`parallel-search`, ugyanazt az API-kulcsot használja, mint a Parallel Search) csak Markdown formátumot ad vissza — bármely más `format` érték `400` hibát eredményez —, és a tartalmat 100 000 karakterben korlátozza. Ha magát a céloldalt nem lehet kinyerni, a upstream szolgáltatás ezt HTTP 200-as válaszon belül jelenti; az OmniRoute ezt `422` válaszként, rögzített üzenettel továbbítja.
+A Parallel Extract (`parallel-search`, ugyanazzal az API-kulccsal, mint a Parallel Search)
+csak Markdown-formátumot ad vissza — bármely más `format` érték `400` hibát eredményez
+—, és a tartalmat 100 000 karakterben korlátozza. Ha a céloldal maga nem nyerhető ki,
+a upstream szolgáltató ezt HTTP 200-as válaszon belül jelzi; az OmniRoute ezt `422`-ként,
+rögzített üzenettel továbbítja.
 
-| Metódus | Útvonal         | Leírás                                                           |
-| ------- | --------------- | ---------------------------------------------------------------- |
-| POST    | `/v1/web/fetch` | URL lekérése/kaparása — a törzset a `v1WebFetchSchema` ellenőrzi |
+A Keenable Fetch (`keenable-search`) szintén csak Markdown-formátumot ad vissza
+(bármely más `format` érték `400` hibát eredményez), és a tartalmat 100 000 karakterben
+korlátozza. Kulcs nélkül is működik: egy kapcsolat nélküli, kifejezetten
+`provider: "keenable-search"` értéket használó kérés a Keenable kulcs nélküli végpontját
+használja (IP-címenkénti sebességkorlátozással). A konfigurált kulcs csak ezeket a
+korlátozásokat oldja fel; az automatikus kiválasztás csak konfigurált kulcs esetén
+használja a Keenable szolgáltatást.
 
-**Hitelesítés:** Bearer API-kulcs (`extractApiKey` + `isValidApiKey`). A házirendet az `enforceApiKeyPolicy` érvényesíti.
+| Method | Path            | Description                                                            |
+| ------ | --------------- | ---------------------------------------------------------------------- |
+| POST   | `/v1/web/fetch` | URL lekérése/kaparása — a törzs validálását a `v1WebFetchSchema` végzi |
 
-**Kvótatudatos tartalékmegoldás (#8297):** amikor nincs explicit `provider` megadva, a készlet
-(`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) rögzített
-prioritási sorrendben (fill-first)
-kerül bejárásra — a sebességkorlátozott, de konfigurált szolgáltató átugrásra kerül
-ahelyett, hogy a kérés azonnal hibával leállna, továbbá egy újrapróbálható/kvótával kapcsolatos upstream-hiba
-(mindig a HTTP 429; a 402/403 a Firecrawl/Tavily/TinyFish kvótajellegű ingyenes csomagjainál —
-a Jina Reader esetében nem, és egyszerű, hibás kérés miatti 400 esetén soha) kérésenként továbblép
-a következő, még nem próbált, hitelesítő adatokkal rendelkező szolgáltatóra. Ha a készlet minden szolgáltatója kimerült, a végpont egyetlen `429` választ ad (`Retry-After`
-fejléc mellett) a korábbi általános `400` helyett. Explicit `provider` kérésekor nincs
-csendes tartalékmegoldás — a sebességkorlátozott vagy hibázó explicit szolgáltató a saját hibáját adja vissza (`429`, ha sebességkorlátozás történt, egyébként az upstream állapotkódját).
+**Hitelesítés:** Bearer API-kulcs (`extractApiKey` + `isValidApiKey`). A szabályzat
+érvényesítését az `enforceApiKeyPolicy` végzi.
 
----
+A megnevezett kombinációk a [`model` útválasztási szerződését](#named-searchfetch-combinations)
+használják, miközben megőrzik a lekérésre jellemző beállításokat és válaszokat.
+
+**Kvótafigyelő tartalék megoldás (#8297):** ha sem `provider`, sem `model` nincs megadva,
+a készlet (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
+`parallel-search` → `keenable-search`) rögzített prioritási sorrendben (fill-first) kerül
+bejárásra — a sebességkorlátozás alatt álló, de konfigurált szolgáltatót a rendszer átugorja
+ahelyett, hogy rövidre zárná a kérést, a próbálkozásra jogosult/kvótakimerülési upstream hiba
+(mindig a HTTP 429; a 402/403 a Firecrawl/Tavily/TinyFish kvóta jellegű ingyenes csomagjai
+esetén — a Jina Reader esetén nem, és egyszerű, hibás kérésre utaló 400 esetén soha) pedig
+a kérés időpontjában továbbhalad a következő, még nem próbált, hitelesített szolgáltatóhoz.
+Amikor a készlet minden szolgáltatója kimerült, a végpont egyetlen `429` választ ad vissza
+(`Retry-After` fejléccel) a korábbi általános `400` helyett. Ha kifejezetten egy `provider`
+értéket kérnek, nincs csendes tartalék megoldás — a sebességkorlátozás alatt álló vagy hibát
+adó kifejezett szolgáltató a saját hibáját adja vissza (`429`, ha sebességkorlátozás történt,
+ellenkező esetben az upstream állapotkódját).
 
 ## WebSocket-streamelés
 
@@ -981,37 +1105,36 @@ A CLI a `base_url + /responses` címet WebSocketté alakítja, az OmniRoute pedi
 
 ---
 
-## Kvóták és problémák jelentése
+## Kvóták és hibák jelentése
 
-| Metódus | Elérési út          | Leírás                                                                                               |
-| ------- | ------------------- | ---------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/quotas/check`  | Kvóta előzetes ellenőrzése egy `provider` + `accountId` pároshoz regisztrált kulcs kiadása előtt     |
-| POST    | `/v1/issues/report` | Kvóta- vagy kulcskibocsátási hiba jelentése a GitHub felé (a `GITHUB_ISSUES_REPO` + token szükséges) |
+| Method | Path                | Description                                                                                      |
+| ------ | ------------------- | ------------------------------------------------------------------------------------------------ |
+| GET    | `/v1/quotas/check`  | Kvóta előzetes ellenőrzése egy `provider` + `accountId` pároshoz regisztrált kulcs kiadása előtt |
+| POST   | `/v1/issues/report` | Kvóta-/kulcskibocsátási hiba jelentése a GitHubnak (a `GITHUB_ISSUES_REPO` + token szükséges)    |
 
-**Hitelesítés:** Bearer API-kulcs (`isAuthenticated`).
+**Hitelesítés:** A `/v1/quotas/check` Bearer API-kulcsot fogad (`isAuthenticated`). A `/v1/issues/report` csak
+felügyeleti hozzáféréssel használható (`requireManagementAuth`), az `/api/v1/registered-keys` végponthoz hasonlóan: dashboard-munkamenet,
+helyi CLI-token vagy `manage`/`admin` hatókörrel rendelkező API-kulcs szükséges; a csak következtetésre használható API-kulcsok `403` választ kapnak.
 
-### Kvótamunkamenet helyreállítása (opt-in)
+### Kvótamunkamenet helyreállítása (opcionális)
 
 Egy nem streamelt `POST /v1/chat/completions` vagy `POST /v1/responses` kérés, amely
-terminális kvótahibával (`402`/`429`/`503`, amelynek törzse szerint a kvóta vagy a kreditek kimerültek)
-sikertelen, eltárolható és később újrajátszható ahelyett, hogy a hiba visszaadásra kerülne. A hívó
-kérésenként, három fejléc használatával engedélyezheti ezt:
+végleges kvótahibával (`402`/`429`/`503`, amelynek törzse szerint a kvóta vagy a kreditek kimerültek)
+sikertelen, eltárolható és később újrajátszható a hiba visszaadása helyett. A hívó kérésenként három fejléc segítségével engedélyezheti ezt:
 
-| Fejléc                       | Érték                                                            |
+| Header                       | Value                                                            |
 | ---------------------------- | ---------------------------------------------------------------- |
 | `x-omniroute-quota-recovery` | `auto`                                                           |
 | `x-omniroute-session`        | munkamenet-azonosító, `[A-Za-z0-9._:-]{1,128}`                   |
-| `x-omniroute-recovery-turn`  | a munkameneten belül egyedi fordulóazonosító (ugyanez a szabály) |
+| `x-omniroute-recovery-turn`  | a munkameneten belül egyedi fordulóazonosító (ugyanaz a szabály) |
 
-Csak a `stream: false` beállítású, eszközök, eszközelőzmények vagy `previous_response_id` nélküli,
-valamint `x-omniroute-connection`-pin nélküli fordulók jogosultak erre, továbbá a
-`STORAGE_ENCRYPTION_KEY` változónak beállítva kell lennie (a kérés legfeljebb 24 órán át titkosítva
-kerül tárolásra). A válasz ekkor `202`, és tartalmazza a `recovery.poll` értéket; a lekérdezéshez
-használd a `GET /v1/quota-recoveries/{id}` végpontot (`202`, amíg függőben van, `200` a
-helyreállított törzzsel, amikor elkészült), vagy töröld a kérést a `DELETE` használatával. A jegyeket
-csak az őket létrehozó API-kulcs láthatja. Ha egy újrajátszás kimenetele bizonytalan, az
-`needs_confirmation` állapotban zárul, ahelyett hogy a kérés kétszer kerülne elküldésre.
-Forrás: `src/lib/quota/quotaSessionRecovery.ts`.
+Csak a `stream: false` értékű, eszközök, eszközelőzmények vagy `previous_response_id` nélküli fordulók jogosultak erre,
+továbbá nem lehet bennük `x-omniroute-connection` rögzítés, és a `STORAGE_ENCRYPTION_KEY` értékét be kell állítani
+(a kérés legfeljebb 24 órán át titkosítva lesz tárolva). A válasz ekkor `202`, és tartalmazza a
+`recovery.poll` értéket; lekérdezéshez használja a `GET /v1/quota-recoveries/{id}` végpontot (`202` függőben,
+`200` a helyreállított törzzsel a befejezés után), vagy törölje a `DELETE` használatával. A jegyeket csak az az API-kulcs láthatja,
+amely létrehozta őket. Ha egy újrajátszás kimenetele bizonytalan, az állapot `needs_confirmation` lesz ahelyett,
+hogy a kérés kétszer kerülne elküldésre. Forrás: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1764,17 +1887,21 @@ Kimenő webhook-előfizetések az OmniRoute eseményeihez (kérés befejezése, 
 
 ## Regisztrált kulcsok (automatikus kezelés)
 
-Az automatikus kulcskezelő alrendszer használja API-kulcsok kibocsátására és rotálására egy háttérszolgáltató/-fiók ellenében, napi/óránkénti kvótákkal.
+Az automatikus kulcskezelési alrendszer API-kulcsok kibocsátására és rotálására szolgál egy háttérszolgáltatónál/fióknál, napi/óránkénti kvótákkal.
 
-| Method | Path                                  | Description                                                                                                                                                                                                                   |
-| ------ | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Regisztrált kulcsok listázása (csak a maszkolt előtag)                                                                                                                                                                        |
-| POST   | `/api/v1/registered-keys`             | Új regisztrált kulcs kibocsátása — törzs: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. A nyers kulcsot **egyszer** adja vissza. Kvótaelutasítás esetén `429` értéket ad vissza. |
-| GET    | `/api/v1/registered-keys/[id]`        | Egy regisztrált kulcs metaadatainak lekérése (nyers kulcsanyag nélkül)                                                                                                                                                        |
-| DELETE | `/api/v1/registered-keys/[id]`        | Regisztrált kulcs visszavonása                                                                                                                                                                                                |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Explicit visszavonási végpont (ugyanaz a hatása, mint a DELETE-nek)                                                                                                                                                           |
+| Metódus | Útvonal                               | Leírás                                                                                                                                                                                                                        |
+| ------- | ------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | Regisztrált kulcsok listázása (csak a maszkolt előtag)                                                                                                                                                                        |
+| POST    | `/api/v1/registered-keys`             | Új regisztrált kulcs kibocsátása — törzs: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. A nyers kulcsot **egyszer** adja vissza. Kvótaelutasítás esetén `429` értéket ad vissza. |
+| GET     | `/api/v1/registered-keys/[id]`        | Egy regisztrált kulcs metaadatainak lekérése (nyers kulcsanyag nélkül)                                                                                                                                                        |
+| DELETE  | `/api/v1/registered-keys/[id]`        | Regisztrált kulcs visszavonása                                                                                                                                                                                                |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | Explicit visszavonási végpont (ugyanaz a hatása, mint a DELETE műveletnek)                                                                                                                                                    |
+| GET     | `/api/v1/providers/[provider]/limits` | A szolgáltató kibocsátási korlátainak lekérése                                                                                                                                                                                |
+| PUT     | `/api/v1/providers/[provider]/limits` | A szolgáltató kibocsátási korlátainak beállítása — törzs: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                             |
+| GET     | `/api/v1/accounts/[id]/limits`        | A fiók kibocsátási korlátainak lekérése                                                                                                                                                                                       |
+| PUT     | `/api/v1/accounts/[id]/limits`        | A fiók kibocsátási korlátainak beállítása — ugyanaz a törzs, mint a szolgáltatói útvonal esetén                                                                                                                               |
 
-**Hitelesítés:** kezelési munkamenet/API-kulcs (`requireManagementAuth`) — ugyanaz az ellenőrzés, mint a `/api/keys` esetében: dashboard-munkamenet, helyi CLI-token vagy `manage`/`admin` hatókörrel rendelkező API-kulcs; csak következtetésre használható API-kulcsok `403` hibát kapnak. Lásd még: `/v1/quotas/check` és `/v1/issues/report`.
+**Hitelesítés:** kezelési munkamenet/API-kulcs (`requireManagementAuth`) — ugyanaz az őr, mint az `/api/keys` esetében: irányítópult-munkamenet, helyi CLI-token vagy `manage`/`admin` hatókörrel rendelkező API-kulcs; a kizárólag következtetésre használható API-kulcsok `403` választ kapnak. Lásd még: `/v1/quotas/check` és `/v1/issues/report`.
 
 ---
 
@@ -1896,25 +2023,25 @@ Tartós beszélgetési/tényalapú memóriatároló, API-kulcsonként / munkamen
 
 ---
 
-## MCP-kiszolgáló
+## MCP-szerver
 
-Az OmniRoute beágyazott Model Context Protocol-kiszolgálót biztosít 3 átviteli móddal (stdio, SSE, streamable-http) és korlátozott hatókörű eszközökkel. Az alábbi irányítópult-végpontok állapot- és auditadatokat olvasnak, valamint proxyt biztosítanak a HTTP-átvitelekhez.
+Az OmniRoute beágyazott Model Context Protocol-szervert biztosít 3 transzporttal (stdio, SSE, streamable-http) és hatókörhöz kötött eszközökkel. Az alábbi irányítópult-végpontok állapot- és auditadatokat olvasnak be, valamint proxyként továbbítják a HTTP-transzportokat.
 
-| Metódus | Útvonal                | Leírás                                                                                                                       |                      |
-| ------- | ---------------------- | ---------------------------------------------------------------------------------------------------------------------------- | -------------------- |
-| GET     | `/api/mcp/status`      | Életjel, átviteli mód, online állapot, utolsó hívás, leggyakrabban használt eszközök, 24 órás sikerességi arány              |
-| GET     | `/api/mcp/tools`       | MCP-eszközök listája `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` mezőkkel                      |
-| GET     | `/api/mcp/sse`         | SSE-stream megnyitása az SSE-átvitelhez (`503` értéket ad vissza, ha az MCP le van tiltva, vagy az átviteli mód nem egyezik) |
-| POST    | `/api/mcp/sse`         | JSON-RPC-keret küldése az SSE-átvitelen                                                                                      |
-| GET     | `/api/mcp/stream`      | Az SSE-oldal megnyitása a Streamable HTTP-átvitelhez (a kiszolgáló által kezdeményezett üzenetekhez)                         |
-| POST    | `/api/mcp/stream`      | JSON-RPC-keret küldése a Streamable HTTP-átvitelen                                                                           |
-| DELETE  | `/api/mcp/stream`      | Streamable HTTP-munkamenet befejezése                                                                                        |
-| GET     | `/api/mcp/audit`       | Auditnapló lekérdezése — `?limit=`, `?offset=`, `?tool=`, `?success=true                                                     | false`, `?apiKeyId=` |
-| GET     | `/api/mcp/audit/stats` | Összesített auditstatisztikák (összesítés, sikerességi arány, átlagos időtartam, leggyakrabban használt eszközök)            |
+| Metódus | Elérési út | Leírás |
+| ------ | ---------------------- | ------------------------------------------------------------------------------------------------ | -------------------- |
+| GET | `/api/mcp/status` | Életjel, transzport, online állapot, utolsó hívás, leggyakrabban használt eszközök, 24 órás sikerességi arány |
+| GET | `/api/mcp/tools` | Az MCP-eszközök listája a következőkkel: `name`, `description`, `scopes`, `phase`, `auditLevel`, `sourceEndpoints` |
+| GET | `/api/mcp/sse` | SSE-adatfolyam megnyitása az SSE-transzporthoz (`503` értéket ad vissza, ha az MCP le van tiltva, vagy a transzport nem egyezik) |
+| POST | `/api/mcp/sse` | JSON-RPC-keret küldése az SSE-transzporton |
+| GET | `/api/mcp/stream` | Az átvihető HTTP-transzport SSE-oldalának megnyitása (szerver által kezdeményezett üzenetek) |
+| POST | `/api/mcp/stream` | JSON-RPC-keret küldése az átvihető HTTP-transzporton |
+| DELETE | `/api/mcp/stream` | Átvihető HTTP-munkamenet lezárása |
+| GET | `/api/mcp/audit` | Auditnapló lekérdezése — `?limit=`, `?offset=`, `?tool=`, `?success=true                                | false`, `?apiKeyId=` |
+| GET | `/api/mcp/audit/stats` | Összesített auditstatisztikák (összesítés, sikerességi arány, átlagos időtartam, leggyakrabban használt eszközök) |
 
-**Hitelesítés:** az `sse`/`stream` átviteli módok az MCP-specifikus hitelesítési felületet használják (Bearer API-kulcs `mcp` hatókörrel); a `status`/`tools`/`audit*` útvonalak az irányítópultról olvashatók (az irányítópult gazdagépének elérésén túl nincs szükség további hitelesítésre).
+**Hitelesítés:** az `sse`/`stream` transzportok az MCP-specifikus hitelesítési felületet használják (Bearer API-kulcs `mcp` hatókörrel); a `status`/`tools`/`audit*` útvonalak az irányítópultról olvashatók (az irányítópult-gazdagép elérésén túl nincs szükség további hitelesítésre).
 
-> Mindkét HTTP-átviteli módot a `settings.mcpEnabled` és a `settings.mcpTransport` szabályozza — az átviteli mód eltérése `400` értéket ad vissza, letiltott MCP-állapot esetén pedig `503` értéket.
+> Mindkét HTTP-transzportot a `settings.mcpEnabled` és a `settings.mcpTransport` vezérli — a transzport eltérése `400` értéket ad vissza, a letiltott MCP-állapot pedig `503` értéket.
 
 ---
 

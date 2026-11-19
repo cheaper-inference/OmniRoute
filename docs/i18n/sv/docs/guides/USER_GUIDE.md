@@ -356,7 +356,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI laddar automatiskt `.env` från `~/.omniroute/.env` eller `./.env`. En `./.env` i arbetskatalogen kan endast ställa in en kort godkännandelista med nycklar (portar, `REQUIRE_API_KEY`, språkinställningar och färginställningar); lägg allt annat i `~/.omniroute/.env`. Se [CLI lanseringskontrakt](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI laddar automatiskt `.env` från `~/.omniroute/.env` eller `./.env`. En `./.env` i arbetskatalogen kan endast ställa in en kort godkännandelista med nycklar (`REQUIRE_API_KEY`, locale, tidszon och färginställningar, inte portarna); lägg allt annat i `~/.omniroute/.env`. Se [CLI lanseringskontrakt](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Fackläge
 
@@ -582,28 +582,28 @@ post_install() {
 
 ### Miljövariabler
 
-| Variabel                                | Standard                  | Beskrivning                                                                                                                                                     |
-| --------------------------------------- | ------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(automatiskt genererad)_ | JWT -signeringshemligheten — genererades automatiskt vid första körningen och fortsatte att `server.env`; ställ in det explicit när datakatalogen är tillfällig |
-| `INITIAL_PASSWORD`                      | _(avstängd)_              | Första inloggningslösenordet. npm/source installationer börjar med `CHANGEME`: ersätt det. Avaktiverad: introduktionsguide                                      |
-| `DATA_DIR`                              | `~/.omniroute`            | Datakatalog (db, användning, loggar)                                                                                                                            |
-| `PORT`                                  | ram standard              | Serviceport (`20128` i exempel)                                                                                                                                 |
-| `HOSTNAME`                              | ram standard              | Bind värd (Docker är standard till `0.0.0.0`)                                                                                                                   |
-| `NODE_ENV`                              | runtime standard          | Ställ in `production` för utplacering                                                                                                                           |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Public base URL dök upp till instrumentpanelen och exponerades för servern (ersätter äldre `BASE_URL`)                                                          |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Cloud sync endpoint base URL (ersätter äldre `CLOUD_URL`)                                                                                                       |
-| `API_KEY_SECRET`                        | _(automatiskt genererad)_ | HMAC hemlighet för genererade API nycklar — genererades automatiskt vid första körningen och fortsatte till `server.env`                                        |
-| `REQUIRE_API_KEY`                       | `false`                   | Framtvinga bärarens API nyckel på `/v1/*`                                                                                                                       |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Tillåt autentiserade instrumentpanelanvändare att avslöja fullständiga lagrade API nyckelvärden på begäran                                                      |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Uppdateringskadens på serversidan för cachelagrade Provider Limits-data; UI refresh-knappar utlöser fortfarande manuell synkronisering                          |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Inaktivera automatiska SQLite -ögonblicksbilder före writes/import/restore; manuella säkerhetskopieringar fungerar fortfarande                                  |
-| `APP_LOG_TO_FILE`                       | `true`                    | Aktiverar utmatning av program och granskningslogg till disk                                                                                                    |
-| `AUTH_COOKIE_SECURE`                    | `false`                   | Forcera `Secure` auth-cookie (bakom HTTPS omvänd proxy)                                                                                                         |
-| `CLOUDFLARED_BIN`                       | avstängd                  | Använd en befintlig `cloudflared` -binär istället för hanterad nedladdning                                                                                      |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Transport för hanterade snabba tunnlar (`http2`, `quic` eller `auto`)                                                                                           |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js heap limit i MB                                                                                                                                         |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Max prompt cache-poster                                                                                                                                         |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Max semantiska cacheposter                                                                                                                                      |
+| Variabel                                | Standard                  | Beskrivning                                                                                                                                                  |
+| --------------------------------------- | ------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `JWT_SECRET`                            | _(automatiskt genererad)_ | JWT signeringshemlighet — genererades automatiskt vid första körningen och fortsatte att `server.env`; ställ in det explicit när datakatalogen är tillfällig |
+| `INITIAL_PASSWORD`                      | _(avstängd)_              | Första inloggningslösenordet. npm/source installationer börjar med `CHANGEME`: ersätt det. Avaktiverad: introduktionsguide                                   |
+| `DATA_DIR`                              | `~/.omniroute`            | Datakatalog (db, användning, loggar)                                                                                                                         |
+| `PORT`                                  | ram standard              | Serviceport (`20128` i exempel)                                                                                                                              |
+| `HOSTNAME`                              | ram standard              | Bind värd (Docker är standard till `0.0.0.0`)                                                                                                                |
+| `NODE_ENV`                              | runtime standard          | Ställ in `production` för utplacering                                                                                                                        |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | Public base URL dök upp till instrumentpanelen och exponerades för servern (ersätter äldre `BASE_URL`)                                                       |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | Cloud sync endpoint base URL (ersätter äldre `CLOUD_URL`)                                                                                                    |
+| `API_KEY_SECRET`                        | _(automatiskt genererad)_ | HMAC hemlighet för genererade API nycklar — genererades automatiskt vid första körningen och fortsatte till `server.env`                                     |
+| `REQUIRE_API_KEY`                       | `false`                   | Framtvinga bärarens API nyckel på `/v1/*`                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                   | Tillåt autentiserade instrumentpanelanvändare att avslöja fullständiga lagrade API nyckelvärden på begäran                                                   |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                      | Uppdateringskadens på serversidan för cachelagrade Provider Limits-data; UI refresh-knappar utlöser fortfarande manuell synkronisering                       |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                   | Inaktivera automatiska SQLite -ögonblicksbilder före writes/import/restore; manuella säkerhetskopieringar fungerar fortfarande                               |
+| `APP_LOG_TO_FILE`                       | `true`                    | Aktiverar utmatning av program och granskningslogg till disk                                                                                                 |
+| `AUTH_COOKIE_SECURE`                    | `false`                   | Forcera `Secure` auth-cookie (bakom HTTPS omvänd proxy)                                                                                                      |
+| `CLOUDFLARED_BIN`                       | avstängd                  | Använd en befintlig `cloudflared` -binär istället för hanterad nedladdning                                                                                   |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                   | Transport för hanterade snabba tunnlar (`http2`, `quic` eller `auto`)                                                                                        |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                     | Node.js heap limit i MB                                                                                                                                      |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                      | Max prompt cache-poster                                                                                                                                      |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                     | Max semantiska cacheposter                                                                                                                                   |
 
 För den fullständiga referensen till miljövariabeln, se [README](../README.md).
 
@@ -688,12 +688,12 @@ Eller använd Dashboard:** Leverantörer → [Provider] → anpassade modeller**
 
 Anmärkningar:
 
-- OpenRouter och OpenAI/Anthropic-compatible -leverantörer hanteras från** Tillgängliga modeller** endast. Manuell tillägg, import och automatisk synkronisering hamnar i samma lista med tillgängliga modeller, så det finns ingen separat avsnitt för anpassade modeller för dessa leverantörer.
-- De** Anpassade modeller** sektionen är avsedd för leverantörer som inte exponerar hanterad import av tillgängliga modeller.
+- OpenRouter och OpenAI/Anthropic-compatible -leverantörer hanteras från** Tillgängliga modeller** endast. Manuell tillägg, import och automatisk synkronisering hamnar i samma lista med tillgängliga modeller, så det finns inget separat avsnitt för anpassade modeller för dessa leverantörer.
+- De** Anpassade modeller** sektionen är avsedd för leverantörer som inte exponerar hanterade importer av tillgängliga modeller.
 
 ### Anpassade OpenAI-kompatibla leverantörer
 
-Vilken gateway som helst som talar OpenAI API (en självvärderad proxy, vLLM, en tredjepartsaggregator) kan läggas till som sin egen leverantörsnod:
+Vilken gateway som helst som talar OpenAI API (en proxy, vLLM, en tredjepartsaggregator) kan läggas till som sin egen leverantörsnod:
 
 1. **Leverantörer → Lägg till OpenAI kompatibel** .
 2. **Namn** : en displayetikett för noden.
@@ -718,7 +718,7 @@ Välj ett distinkt prefix (`mygw`, `acme-proxy`). Om förfrågningar till en anp
 
 Dessa nycklar går i en anslutnings `providerSpecificData` (till exempel via `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (heltal, 1–1024) — för OpenAI -chattformatkompatibla anslutningar vars gateway avvisar långa verktygsnamn. Längre namn skickas som korta alias och återställs i svaret.
+- `toolNameMaxLength` (heltal, 1–1024) — för OpenAI -chattformatkompatibla anslutningar vars gateway avvisar långa verktygsnamn. Längre namn skickas som korta alias och återställs i svaret. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go och Muse Code alias redan över 64 tecken utan inställning. Ett anslutningsvärde ersätter Azure OpenAI / Azure AI Foundry-standarden (en Azure-anslutning bakom en striktare gateway) och anger gränsen för en anpassad kompatibel nod; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go och Muse Code behåller sin registergräns och ignorerar den.
 - `quotaEndpoint` — gatewayens quota/credits slutpunkt, läs för instrumentpanelens kvotremsa och kvotmedveten routing. Fungerar på både OpenAI- och Anthropic-kompatibla anslutningar; den fullständiga formen dokumenteras i `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -816,7 +816,7 @@ Returnerar modeller grupperade efter leverantör med typer (`chat`, `embedding`,
 
 ### LLM Gateway Intelligence (fas 9)
 
-- **Semantisk cache** — Autocachar icke-strömmande, temperatur = 0-svar (förbikoppla med `X-OmniRoute-No-Cache: true`)
+- **Semantisk cache** — autocachar icke-strömmande, temperatur = 0 svar (förbikoppla med `X-OmniRoute-No-Cache: true`)
 - **Begär Idempotens** — Deduplicerar förfrågningar inom 5s via `Idempotency-Key` eller `X-Request-Id` header
 - **Framstegsspårning** — Opt-in SSE `event: progress` händelser via `X-OmniRoute-Progress: true` header
 
@@ -849,14 +849,14 @@ Konfigurera via** Dashboard → Inställningar → Routing** . Instrumentpanelen
 
 | Strategi                       | Beskrivning                                                                                                      |
 | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
-| **Fyll först**                 | Använder konton i prioriterad ordning – primärt konto hanterar alla förfrågningar tills det inte är tillgängligt |
+| **Fyll först**                 | Använder konton i prioriterad ordning — primära konto hanterar alla förfrågningar tills det inte är tillgängligt |
 | **Round Robin**                | Går igenom alla konton med en konfigurerbar sticky limit (standard: 3 samtal per konto)                          |
-| **P2C (Power of Two Choices)** | Väljer två slumpmässiga konton och vägar till det friskare - balanserar belastning med medvetenhet om hälsa      |
+| **P2C (Power of Two Choices)** | Väljer 2 slumpmässiga konton och vägar till den friskare — balanserar belastning med medvetenhet om hälsa        |
 | **Slumpmässig**                | Väljer slumpmässigt ett konto för varje begäran med Fisher-Yates shuffle                                         |
 | **Minst använda**              | Rutter till kontot med den äldsta `lastUsedAt` tidsstämpeln och fördelar trafiken jämnt                          |
 | **Kostnadsoptimerad**          | Rutter till kontot med lägst prioritetsvärde, optimerar för lägsta kostnadsleverantörer                          |
 
-**Avancerade kombinations- och autostrategier** (konfigurerbar per combo eller via `auto/*` prefix - se [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
+**Avancerade kombinations- och autostrategier** (konfigurerbar per combo eller via `auto/*` -prefix — se [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — strikt ordning, aldrig round-robins
 - `weighted` — proportionell trafik uppdelad efter vikter per modell
@@ -864,10 +864,10 @@ Konfigurera via** Dashboard → Inställningar → Routing** . Instrumentpanelen
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Power of Two Choices)
 - `least-used` och `cost-optimized`
-- `auto` — poängstyrd för alla kandidater
-- `lkgp` (Last Known Good Provider) — fäster till den senaste framgångsrika leverantören och faller sedan tillbaka till reglerna
+- `auto` — poängstyrd över alla kandidater
+- `lkgp` (Last Known Good Provider) — stiftar till den senaste framgångsrika leverantören och faller sedan tillbaka till reglerna
 - `context-optimized` — väljer modellen med det största fria sammanhangsfönstret
-- `context-relay` — kedjar modeller med långa sammanhang för uppföljande svängar
+- `context-relay` — kedjer långsammanhangsmodeller för uppföljande svängar
 
 #### Extern Sticky Session Header
 
@@ -979,19 +979,19 @@ OmniRoute implementerar motståndskraft på leverantörsnivå med fem komponente
    - **Minsta tid mellan förfrågningar** — Minsta mellanrum i millisekunder mellan förfrågningar
    - **Max samtidiga förfrågningar** — Maximalt antal samtidiga förfrågningar per konto
 
-2. **Anslutning Nedkylning** — Konfiguration per autentiseringstyp för en enda anslutning efter omprövningsbara misslyckanden:
-   - **Basnedkylning** — Standard nedkylningsfönster för omprövningsbara uppströmsfel
-   - **Använd uppströms Försökstips** — Hedrar auktoritativa `Retry-After` eller återställningstips när de tillhandahålls
-   - **Max backoff-steg** — Maximal exponentiell backoff-nivå för upprepade fel
+2. **Anslutning Nedkylning** — Per-auth-typ-konfiguration för en enda anslutning efter omprövningsbara misslyckanden:
+   - **Basnedkylning** — Standard nedkylningsfönster för uppströmsfel som går att försöka igen
+   - **Använd uppströms Försökstips** — hedrar auktoritativa `Retry-After` eller återställningstips när de tillhandahålls
+   - **Max backoff-steg** — Maximal exponentiell backoff-nivå för upprepade misslyckanden
 
-3. **Leverantörs strömbrytare** — Spårar leverantörsfel från ända till ända, markerar en leverantör som har försämrats vid den konfigurerade varningströskeln och öppnar brytaren när den konfigurerade feltröskeln nås:
-   - **Nedbrytningströskel** — Konsekutiva leverantörsfel innan du går in i `DEGRADED`
-   - **Misslyckande tröskel** — Konsekutiva leverantörsfel innan du går in i `OPEN`
+3. **Leverantörs strömbrytare** — Spårar leverantörsfel från ända till ända, markerar en leverantör som degraderats vid den konfigurerade varningströskeln och öppnar brytaren när den konfigurerade feltröskeln nås:
+   - **Nedbrytningströskel** — Konsekutiva leverantörsfel innan `DEGRADED` går in
+   - **Misslyckande tröskel** — Konsekutiva leverantörsfel innan `OPEN` går in
    - **Återställ timeout** — Tidsfönster innan leverantören testas igen
-   - **CLOSED** (Frisk) — Begäran flyter normalt
-   - **DEGRADED** — Förfrågningar strömmar fortfarande medan förhöjda fel spåras
-   - **OPEN** — Leverantören är tillfälligt blockerad efter upprepade fel
-   - **HALF_OPEN** — Testa om leverantören har återhämtat sig
+   - **CLOSED** (Hälsosamt) — Begäran flyter normalt
+   - **DEGRADED** — förfrågningar flyter fortfarande medan förhöjda fel spåras
+   - **OPEN** — leverantören är tillfälligt blockerad efter upprepade fel
+   - **HALF_OPEN** — Testar om leverantören har återhämtat sig
 
    Anslutningsomfattade `429` -hastighetsgränser kvarstår** Anslutning Nedkylning** och räknas inte mot leverantörsbrytaren.
 
@@ -1013,7 +1013,7 @@ Hantera säkerhetskopiering av databas i** Dashboard → Inställningar → Syst
 | ---------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **Exportera databas**        | Laddar ner den aktuella SQLite databasen som en `.sqlite` -fil                                                                                                        |
 | **Exportera alla (.tar.gz)** | Laddar ner ett fullständigt säkerhetskopieringsarkiv inklusive: databas, inställningar, kombinationer, leverantörsanslutningar (inga referenser), API -nyckelmetadata |
-| **Importera databas**        | Ladda upp en `.sqlite` fil för att ersätta den aktuella databasen. En förimport-säkerhetskopia skapas automatiskt om inte `DISABLE_SQLITE_AUTO_BACKUP=true`           |
+| **Importera databas**        | Ladda upp en `.sqlite` fil för att ersätta den nuvarande databasen. En förimport-säkerhetskopia skapas automatiskt om inte `DISABLE_SQLITE_AUTO_BACKUP=true`          |
 
 ```bash
 # API: Export database
@@ -1046,7 +1046,7 @@ Inställningssidan är organiserad i** 7 flikar** för enkel navigering:
 | **Allmän**      | Systemlagringsverktyg, standardbeteende, synlighet för slutpunktstunnel                                                                                           |
 | **Utseende**    | Temakontroller (light/dark/system), sidofältssynlighet, panelväxlar för Cloudflare/Tailscale/ngrok -tunnelkort                                                    |
 | **AI**          | Tänkande budget (passthrough / auto-strip / anpassad / adaptiv — se [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), global systemprompt, prompt cachestatistik      |
-| **Säkerhet**    | Login/Password inställningar, IP åtkomstkontroll, API auth för `/models`, Provider Blocking, prompt-injection guard                                               |
+| **Säkerhet**    | Login/Password inställningar, IP åtkomstkontroll, API auth för `/models`, leverantörsblockering, prompt-injektionsskydd                                           |
 | **Routing**     | Global routingstrategi (Fill First / Round Robin / P2C / Random / Minst använd / Kostnadsoptimerad), jokerteckenmodellalias, reservkedjor, kombinationsstandarder |
 | **Elasticitet** | Begärkö, nedkylning av anslutning, konfiguration av leverantörsbrytare och beteende för att vänta på nedkylning                                                   |
 | **Avancerad**   | Global proxykonfiguration (HTTP/SOCKS5), åsidosättande av proxy per leverantör                                                                                    |
@@ -1062,7 +1062,7 @@ Tillgång via** Dashboard → Kostnader** .
 | Flik             | Ändamål                                                                                         |
 | ---------------- | ----------------------------------------------------------------------------------------------- |
 | **Budget**       | Ställ in utgiftsgränser per API nyckel med daily/weekly/monthly budgetar och spårning i realtid |
-| **Prissättning** | Visa och redigera modellprisposter – kostnad per 1K input/output -tokens per leverantör         |
+| **Prissättning** | Visa och redigera modellprisposter — kostnad per 1K input/output -tokens per leverantör         |
 
 ```bash
 # API: Set a budget

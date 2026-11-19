@@ -86,9 +86,9 @@ test("implausible usage repair clears nested cache-read details before normaliza
     "claude"
   );
   assert.ok((claude?.input_tokens ?? 0) > 0);
-  assert.equal(claude?.cache_read_input_tokens, 0);
-  assert.equal(claude?.prompt_tokens_details?.cached_tokens, 0);
-  assert.equal(claude?.prompt_tokens_details?.cache_creation_tokens, 0);
+  assert.equal(claude?.cache_read_input_tokens, undefined);
+  assert.equal(claude?.prompt_tokens_details?.cached_tokens, undefined);
+  assert.equal(claude?.prompt_tokens_details?.cache_creation_tokens, undefined);
 
   const responses = sanitizeProviderUsageForRequest(
     {
@@ -99,8 +99,12 @@ test("implausible usage repair clears nested cache-read details before normaliza
     "openai-responses"
   );
   assert.ok((responses?.input_tokens ?? 0) > 0);
-  assert.equal(responses?.input_tokens_details?.cached_tokens, 0);
-  assert.equal(responses?.input_tokens_details?.cache_creation_tokens, 0);
+  assert.equal(responses?.input_tokens_details?.cached_tokens, undefined);
+  assert.equal(responses?.input_tokens_details?.cache_creation_tokens, undefined);
+  assert.equal(claude?.usage_evidence?.cacheRead.source, "unknown");
+  assert.equal(claude?.usage_evidence?.cacheCreation.source, "unknown");
+  assert.equal(responses?.usage_evidence?.cacheRead.source, "unknown");
+  assert.equal(responses?.usage_evidence?.cacheCreation.source, "unknown");
 });
 
 test("Responses SSE metadata uses normalized nested cache-read usage", async () => {
@@ -122,7 +126,10 @@ test("Responses SSE metadata uses normalized nested cache-read usage", async () 
       })}\n\n`,
     ]);
 
-    assert.match(output, /: x-omniroute-response-cost=0\.1090000000/);
+    // Visible output makes the reported zero incomplete: 4 characters estimate 2 tokens.
+    assert.match(output, /: x-omniroute-response-cost=0\.1091000000/);
+    assert.match(output, /: x-omniroute-tokens-out=2/);
+    assert.match(output, /"output":\{"source":"estimated","method":"observed_characters"\}/);
   } finally {
     if (previous === undefined) delete process.env.OMNIROUTE_SSE_COMMENTS;
     else process.env.OMNIROUTE_SSE_COMMENTS = previous;

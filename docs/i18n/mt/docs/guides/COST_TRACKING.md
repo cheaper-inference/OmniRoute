@@ -79,15 +79,37 @@ L-ismijiet tal-mudelli huma normalizzati l-ewwel (prefissi tal-mogħdija tal-for
 
 ### Kif tiġi rreġistrata l-infiq
 
-- L-ispiża għal kull talba tiġi kkalkulata wara r-rispons u tiġi rreġistrata nar u tinsa sabiex qatt ma żżid latency lill-klijent. Il-konsum tal-kwota kondiviża huwa skedat fuq il-linja tal-avveniment li jmiss permezz [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
-- L-infiq taċ-ċavetta API huwa buffered u mlaħlaħ f'lottijiet mill- [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervall ta' flush default 60s, buffer ta' 1,000 dħul). Sintonizzabbli permezz ta':
+- L-ispiża għal kull talba tiġi kkalkulata mat-tlestija tat-talba. Il-konsum tal-kwota maqsuma huwa skedat fuq il-marka tal-loop tal-avveniment li jmiss permezz [`src/lib/quota/spendRecorder.ts`](../../src/lib/quota/spendRecorder.ts).
+- L-infiq taċ-ċavetta API huwa buffered u mlaħalħa f'lottijiet mill- [`SpendBatchWriter`](../../src/lib/spend/batchWriter.ts) (intervall ta' flush default 60s, buffer ta' 1,000 dħul). Sintonizzabbli permezz ta':
 
   | Env var                             | Default | Għan                              |
   | ----------------------------------- | ------- | --------------------------------- |
   | `OMNIROUTE_SPEND_FLUSH_INTERVAL_MS` | `60000` | Aħsel intervall f'millisekondi.   |
   | `OMNIROUTE_SPEND_MAX_BUFFER_SIZE`   | `1000`  | Max buffered entrati qabel flush. |
 
-Iċ-ċifri tal-ispiża tad-dashboard huma** le** jinqraw minn ammont ta' dollaru maħżun għal kull ringiela — jiġu kkalkulati mill-ġdid fuq il-fly mill-għadd tat-tokens u t-tabella tal-prezzijiet kurrenti kull darba li jibda l-endpoint analitiku. Dan ifisser li tikkoreġi prezz ħażin (u terġa' tissinkronizza) taġġorna l-istimi tal-ispejjeż storiċi b'mod retroattiv.
+L-ispejjeż jippreferu ħlas eżatt irrapportat mill-fornitur (`provider_cost_usd`), imbagħad snapshot tat-talba bi prezz tal-katalgu (`calculated_cost_usd`), imbagħad token repricing mill-katalgu attwali. L-ispejjeż maħżuna ma jerġgħux jiġu ċċarġjati permezz tal-għadd tat-tokens tagħhom. Ringieli legacy ta' tokens biss għadhom jinbidlu meta jinbidel il-prezz tal-katalgu tagħhom.
+
+### OCR u embeddings
+
+- Talbiet `/v1/ocr` b'suċċess jużaw `usage_info.pages_processed` upstream , mhux il-firxa tal-paġna mitluba jew in-numru ta' oġġetti tal-paġna rritornati. L-istima hija paġni × `ocr_cost_per_page` (assoluta USD/page,** le** USD/million).
+- Talbiet b'annotazzjonijiet ta' dokument jew bounding-box jeħtieġu tariffa `ocr_cost_per_annotated_page` separata. Mingħajrha, l-ispiża tibqa 'mhux magħrufa; it-tariffa OCR ordinarja ma tkunx sostitwita fis-skiet.
+- LiteLLM sync jimmappa l-qasam `annotation_cost_per_page` upstream tiegħu `ocr_cost_per_annotated_page`, u jżomm il-valur USD/page assolut u l-entrati ta' annotazzjoni biss, inkluż żero espliċitu. Qasam kanoniku fornut jieħu preċedenza; valuri ta' alias invalidi huma injorati. L-overrides tal-prezzijiet tal-utenti jżommu l-prijorità normali tagħhom. Ara [ċ-ċwievet tal-prezzijiet OCR ta'LiteLLM](https://docs.litellm.ai/docs/providers/mistral_batches#batch-ocr-cost-tracking).
+- L-użu OCR jaħżen l-għadd tal-paġna, il-prezz tal-unità, l-ispiża USD ikkalkulata, iċ-ċavetta API u l-konnessjoni magħżula. Il-paġni qatt ma huma rappreżentati bħala tokens. Ir-reġistri tas-sejħiet fihom metadejta tal-kontijiet, mhux dokument URLs, PDF bytes jew test estratt.
+- Talbiet `/v1/embeddings` b'suċċess jirreġistraw ringiela ta' użu waħda għal kull lott fiżiku, inklużi lottijiet separati kompletati fl-istess millisekonda. It-tariffi rrapportati mill-fornitur jieħdu preċedenza fuq l-istimi tat-tokens; tgeżwir combo ma jżidux ħlas.
+- L-istorja tal-użu, l-Analitika tal-Ispejjeż, it-twieqi provider/account, il-limiti tal-infiq taċ-ċavetta tal-API, ir-reġistru tal-ispejjeż tat-talba u r-rollups tal-użu ta 'kuljum jinkludu dawn il-ħlasijiet. Iċ-ċwievet bla log iżommu l-kontabilità numerika mingħajr ma jżommu t-test tas-sors.
+- L-użu jew it-tariffi nieqsa huma** mhux magħruf** , mhux b'xejn: l-intestatura tal-ispiża tar-rispons titħalla barra, u l-politika eżistenti dwar l-użu bla prezz tapplika għal ċwievet API limitati. Ir-rati żero kkonfigurati b'mod espliċitu jibqgħu validi użu ta 'spiża żero.
+
+Din hija kontabilità bil-quddiem biss. Sejħiet OCR/embedding qodma li qatt ma kitbu storja tal-użu ma jistgħux jiġu rikostitwiti minn din il-migrazzjoni. L-istimi tal-katalgu huma stimi USD, mhux fattura, u ma jinkludux konverżjoni tal-munita, taxxa jew roħs.
+
+### Diskors u stampi
+
+- It-tentattivi b'suċċess `/v1/audio/transcriptions`, `/v1/audio/speech` u ta' ġenerazzjoni ta' immaġni jaqsmu kontabilità numerika. Sejħiet diretti u combo jġorru ċ-ċavetta API ta' min iċempel u l-konnessjoni magħżula; tgeżwir combo qatt ma jżid it-tieni debitu.
+- USD rapportata mill-fornitur tirbaħ fuq stima katalgu, inkluż ħlas żero espliċitu. OpenRouter's JSON `usage.cost` huwa normalizzat għal `cost_usd`. Inkella, tokens imkejla jużaw prezzijiet ta 'tokens, sekondi ta' traskrizzjoni jużaw prezzijiet kull sekonda, input tad-diskors juża għadd ta 'karattri Unicode, u immaġini bi prezz fiss jużaw in-numru attwalment ritornat, mhux l- `n` mitlub.
+- Binarju OpenRouter TTS m'għandux korp ta 'użu JSON. Wara li l-awdjo jitlesta jew min iċempel jikkanċella, OmniRoute jistaqsi l-ġenerazzjoni tiegħu ID fuq il-** l-istess** oriġini OpenRouter konfigurata. Talba EU qatt ma taqa' lura għall-oriġini globali. Din hija tfittxija delimitata, li tinqara biss; sinteżi ma terġax tiġi ppruvata għall-kontabilità. Ir-rekords tal-kontijiet jistgħu jidhru wara li l-awdjo jkun intemm: it-testijiet ta' tfittxija jerġgħu jibdew fl-isfond sa madwar 52 sekonda, inklużi l-iskadenzi tan-netwerk.
+- Matul dik il-ħarsa, ir-rispons tal-awdjo għandu `X-OmniRoute-Cost-Status: pending` u l-ebda header tal-ispiża tar-rispons. Il-ħlas finali tiegħu jidher fl-istorja tal-użu, l-analiżi u r-reġistru ewlieni wara r-rikonċiljazzjoni. Jekk il-metadata ma tkunx disponibbli, tintuża snapshot tat-tariffa kkonfigurat; inkella l-ispiża tibqa' mhux magħrufa.
+- Sekondi, karattri u għadd ta' immaġni għandhom oqsma separati tal-unità tal-kontijiet, qatt għadd ta' tokens foloz. Il-kontabilità żżomm biss użu numeriku, mhux test tad-diskors, traskrizzjonijiet jew bytes tal-immaġni. L-eżenzjonijiet eżistenti ta' immaġni bla prezz ma jinbidlux: tariffa ta' immaġini ġenwinament nieqsa ma tissakkarx ċavetta limitata ġdida, u r-rispons iħalli barra l-header tal-ispiża aktar milli tiddikjara s-sejħa ħielsa. Falliment fil-maħżen tal-prezzijiet xorta jżomm evidenza tal-użu għall-infurzar tal-falliment magħluq.
+
+Ebda charge speech/image storika hija ivvintata jew backfilled. Il-kontijiet tal-fornitur jibqa' r-referenza għall-fatturi u għal sejħiet li l-ħlas tagħhom ma kienx irrappurtat.
 
 ---
 

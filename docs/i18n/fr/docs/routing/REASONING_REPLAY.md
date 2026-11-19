@@ -24,19 +24,21 @@ Mais les clients typiques (Cursor, Cline, Roo Code, OpenAI SDK) suppriment `reas
 Turn N (assistant generates):
   → response contains reasoning_content + tool_calls
   → if requiresReasoningReplay(provider, model): cacheReasoningFromAssistantMessage()
-      writes (memory + DB), keyed by every tool_call.id
+      writes (memory + DB), one entry per tool_call.id within the request scope
   → forward response to client (which may or may not retain reasoning)
 
 Turn N+1 (client sends follow-up):
   → translator detects: requiresReasoningReplay(provider, model) === true
   → for each assistant message with tool_calls and no reasoning_content:
-      lookupReasoning(toolCalls[0].id) → memory → DB
+      lookupReasoning(buildToolCallCacheKey(scope, toolCalls[0].id)) → memory → DB
       hit  → msg.reasoning_content = cached; recordReplay()
       miss → msg.reasoning_content = "" (legacy fallback for older DeepSeek)
   → upstream sees consistent history → no 400
 ```
 
-La capture s'effectue dans `open-sse/handlers/chatCore.ts` (deux sites, sur les deux sites d'appel `cacheReasoningFromAssistantMessage` ). La relecture se produit dans `open-sse/translator/index.ts` après la coercition du schéma mais avant l'envoi.
+La capture s'effectue dans `open-sse/handlers/chatCore.ts` (deux sites, sur les deux sites d'appel `cacheReasoningFromAssistantMessage` ). La relecture se produit dans `open-sse/translator/index.ts` après la coercition du schéma mais avant l'expédition.
+
+Les entrées d'appel d'outil sont stockées sous `buildToolCallCacheKey()`, un résumé de la portée de la demande et de l'identifiant d'appel d'outil, de sorte que le même identifiant utilisé par une autre clé ou session API ne sélectionne pas l'entrée. La portée vient de `buildReasoningCacheScope()`: l'identifiant de la clé API, plus la clé de session lorsque la requête en a une. La colonne `tool_call_id` et le tableau de bord affichent donc ce résumé pour ces entrées.
 
 Les tours d'assistant simples (sans appel d'outil) sont saisis différemment : `buildAssistantMessageCacheKey()` digère la portée de la session ainsi que la transcription normalisée au format OpenAI jusqu'à ce tour, car DeepSeek nécessite le raisonnement de _chaque_ tour précédent une fois que `tools` est présent. Pour les cibles Responses-API (par exemple `opencode-go/deepseek-v4-flash`, acheminées vers `/responses`), le corps en amont transporte `input`, pas `messages`, donc `translateRequest()` (`open-sse/translator/index.ts`) rapporte la transcription pivot qu'il a digérée via une option de rappel et les sites de capture digèrent cette même transcription. La passe de relecture des réponses s'exécute sur le pivot OpenAI pour chaque format source, donc les clients de messages Anthropic (réponses Claude → OpenAI → ) sont également relus.
 
