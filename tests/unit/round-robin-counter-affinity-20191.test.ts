@@ -13,6 +13,7 @@ const { rrCounters, rrStickyTargets } = await import("../../open-sse/services/co
 const stick = await import("../../open-sse/services/combo/sessionStickiness.ts");
 const dbCore = await import("../../src/lib/db/core.ts");
 const { getSettings } = await import("../../src/lib/db/settings.ts");
+const providersDb = await import("../../src/lib/db/providers.ts");
 
 function makeLog() {
   return { info() {}, warn() {}, debug() {}, error() {} };
@@ -133,6 +134,41 @@ test("round-robin with stickyRoundRobinLimit > 1 rotates after threshold in init
   }
 
   assert.deepEqual(served, ["conn-A", "conn-A", "conn-B", "conn-B", "conn-C", "conn-C"]);
+});
+
+test("round-robin rotates across steps when affinity expands them into per-account targets (#20191)", async () => {
+  // Unpinned steps with two active accounts each: prompt-cache affinity expands every step into
+  // step@account targets, but the rotation still has to walk the three steps in order.
+  const accountsByProvider = new Map<string, string[]>();
+  for (const provider of ["mock-a", "mock-b", "mock-c"]) {
+    const ids: string[] = [];
+    for (const suffix of ["1", "2"]) {
+      const connection = await providersDb.createProviderConnection({
+        provider,
+        authType: "apikey",
+        name: `${provider}-${suffix}`,
+        apiKey: `sk-${provider}-${suffix}`,
+        isActive: true,
+      });
+      ids.push(String(connection.id));
+    }
+    accountsByProvider.set(provider, ids);
+  }
+  const base = makeRRCombo("rr-expanded-accounts-test", 1);
+  const combo = {
+    ...base,
+    models: base.models.map((model) => ({ ...model, connectionId: undefined })),
+  };
+  const providerOf = (connectionId: string) =>
+    [...accountsByProvider].find(([, ids]) => ids.includes(connectionId))?.[0] ?? "?";
+
+  const served: string[] = [];
+  for (let i = 0; i < 6; i++) {
+    const conn = await dispatchWithPrefix(combo, `Expanded prompt ${i}`, `User query ${i}`);
+    served.push(providerOf(conn));
+  }
+
+  assert.deepEqual(served, ["mock-a", "mock-b", "mock-c", "mock-a", "mock-b", "mock-c"]);
 });
 
 test("getSettings falls back to databaseSettings namespace for promptCacheAffinityEnabled (#20191)", async () => {

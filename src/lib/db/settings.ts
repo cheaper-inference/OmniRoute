@@ -166,6 +166,27 @@ function applySessionAffinityLegacyFallback(settings: Record<string, unknown>): 
   }
 }
 
+/**
+ * Merge stored rows over the defaults. `databaseSettings` rows go first and only fill keys the
+ * defaults already know (#20191), so a `settings` row for the same key always wins.
+ */
+function applyStoredSettingRows(settings: Record<string, unknown>, rows: unknown[]): void {
+  const isFallbackRow = (row: unknown) => toRecord(row).namespace === "databaseSettings";
+  const ordered = [...rows.filter(isFallbackRow), ...rows.filter((row) => !isFallbackRow(row))];
+  for (const row of ordered) {
+    const record = toRecord(row);
+    const key = typeof record.key === "string" ? record.key : null;
+    const rawValue = typeof record.value === "string" ? record.value : null;
+    if (!key || rawValue === null || key.startsWith("_")) continue;
+    if (isFallbackRow(row) && !(key in settings)) continue;
+    try {
+      settings[key] = JSON.parse(rawValue);
+    } catch {
+      settings[key] = rawValue;
+    }
+  }
+}
+
 export async function getSettings() {
   const db = getDbInstance();
   const rows = db
@@ -353,23 +374,7 @@ export async function getSettings() {
     // override: resolution falls back to the env var, then the captured pin.
     cliVersionOverrides: {},
   };
-  // Apply databaseSettings as fallback for recognized settings keys, and settings namespace overrides
-  const sortedRows = rows.slice().sort((a, b) => {
-    if (a.namespace === b.namespace) return 0;
-    return a.namespace === "databaseSettings" ? -1 : 1;
-  });
-  for (const row of sortedRows) {
-    const record = toRecord(row);
-    const key = typeof record.key === "string" ? record.key : null;
-    const rawValue = typeof record.value === "string" ? record.value : null;
-    if (!key || rawValue === null || key.startsWith("_")) continue;
-    if (row.namespace === "databaseSettings" && !(key in settings)) continue;
-    try {
-      settings[key] = JSON.parse(rawValue);
-    } catch {
-      settings[key] = rawValue;
-    }
-  }
+  applyStoredSettingRows(settings, rows);
 
   for (const encryptedKey of ENCRYPTED_SETTING_KEYS) {
     if (typeof settings[encryptedKey] === "string") {

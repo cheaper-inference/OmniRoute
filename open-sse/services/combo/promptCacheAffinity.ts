@@ -324,6 +324,19 @@ function getBaseModelIdentity(target: ResolvedComboTarget): string {
 }
 
 /**
+ * #20191: index of the first entry in `targets` that belongs to the same combo step as `target`.
+ * Affinity expansion turns a step into `step@account` targets, so steps are matched by their
+ * base identity rather than by the (possibly expanded) execution key. -1 when none matches.
+ */
+export function findSameStepIndex(
+  targets: ResolvedComboTarget[],
+  target: ResolvedComboTarget
+): number {
+  const step = getBaseModelIdentity(target);
+  return targets.findIndex((entry) => getBaseModelIdentity(entry) === step);
+}
+
+/**
  * Order eligible targets using rendezvous hashing.
  * @param scope - "model": sort only within same-model groups, preserving inter-model order;
  *               "global": sort across all targets (original behavior).

@@ -50,6 +50,7 @@ import { orderTargetsByEvalScores } from "../evalRouting.ts";
 import {
   applyPromptCacheAffinity,
   expandPromptCacheAffinityTargets,
+  findSameStepIndex,
   resolvePromptCacheAffinityKey,
 } from "./promptCacheAffinity.ts";
 import {
@@ -458,7 +459,7 @@ export async function handleRoundRobinCombo({
   }
   const scheduledTarget = initialTargets[startIndex % initialTargets.length];
   let rrStartIndex = scheduledTarget
-    ? filteredTargets.findIndex((t) => t.executionKey === scheduledTarget.executionKey)
+    ? findSameStepIndex(filteredTargets, scheduledTarget)
     : startIndex % filteredTargets.length;
   if (rrStartIndex < 0) {
     rrStartIndex = startIndex % filteredTargets.length;
@@ -1055,20 +1056,15 @@ export async function handleRoundRobinCombo({
               );
             }
 
+            // #948, #20191: advance past the step that ACTUALLY served, in the initialTargets
+            // index space (an affinity-expanded step@account target maps back to its step).
+            // Read side applies `% initialTargets.length`, so servedIndex + 1 is correct.
+            const servedIndex = findSameStepIndex(initialTargets, target);
             if (stickyRoundRobinEnabled) {
-              recordStickyRoundRobinSuccess(combo.name, target, stickyLimit, initialTargets);
+              const servedStep = initialTargets[servedIndex] ?? target;
+              recordStickyRoundRobinSuccess(combo.name, servedStep, stickyLimit, initialTargets);
             } else {
-              // #948, #20191: true round-robin (stickyLimit <= 1). Advance the pointer
-              // past the model that ACTUALLY served in the initialTargets index space so
-              // the next request rotates to the next target. Read side applies
-              // `% initialTargets.length`, so storing servedInitialIndex + 1 is correct.
-              const servedInitialIndex = initialTargets.findIndex(
-                (entry) => entry.executionKey === target.executionKey
-              );
-              rrCounters.set(
-                combo.name,
-                servedInitialIndex >= 0 ? servedInitialIndex + 1 : counter + 1
-              );
+              rrCounters.set(combo.name, servedIndex >= 0 ? servedIndex + 1 : counter + 1);
             }
 
             // #3825: (re)record the sticky binding so the next turn re-pins (prompt-cache).
