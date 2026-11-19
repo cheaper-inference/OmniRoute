@@ -279,3 +279,36 @@ test("sameIcuNames follows the ICU grammar of the placeholder-parity test", () =
   assert.equal(sameIcuNames("in <em>this</em> browser", "dans ce navigateur"), false);
   assert.equal(sameIcuNames("'{model}'", "'{modelo}'"), true, "a quoted run is literal text");
 });
+
+test("catalog comparison preserves literal base URLs and still rejects copied prose and markers", () => {
+  const literal = "https://relay.example.com/v1";
+  const en = {
+    providers: {
+      ccCompatibleBaseUrlPlaceholder: literal,
+      readableBaseUrlPlaceholder: "Enter a base URL",
+      urlStatus: "Ready",
+    },
+  };
+  const oldCatalog = {
+    providers: {
+      ccCompatibleBaseUrlPlaceholder: "https://example.com/v1",
+      readableBaseUrlPlaceholder: "Informe a URL-base",
+      urlStatus: "Pronto",
+    },
+  };
+  const newCatalog = {
+    providers: {
+      ccCompatibleBaseUrlPlaceholder: literal,
+      readableBaseUrlPlaceholder: "Enter a base URL",
+      urlStatus: "__MISSING__:Ready",
+    },
+  };
+  const actual = findCatalogRegressions({
+    baseEn: en,
+    headEn: en,
+    baseLocale: oldCatalog,
+    headLocale: newCatalog,
+  });
+  assert.deepEqual(actual.identical, ["providers.readableBaseUrlPlaceholder"]);
+  assert.deepEqual(actual.marker, ["providers.urlStatus"]);
+});
