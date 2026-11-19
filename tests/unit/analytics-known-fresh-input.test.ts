@@ -25,7 +25,12 @@ test.after(() => {
   fs.rmSync(data, { recursive: true, force: true });
 });
 
-test("raw known fresh input excludes unknown and inconsistent reads in both query branches", () => {
+test.beforeEach(() => {
+  const db = core.getDbInstance();
+  db.exec("DELETE FROM usage_history; DELETE FROM daily_usage_summary;");
+});
+
+function seedRawFixtures() {
   const db = core.getDbInstance();
   const insert = db.prepare(`INSERT INTO usage_history
     (provider, model, timestamp, tokens_input, tokens_output, tokens_cache_read, api_key_id)
@@ -38,6 +43,11 @@ test("raw known fresh input excludes unknown and inconsistent reads in both quer
   ].entries()) {
     insert.run(index % 2 ? "vendor/Model" : "Model", input, cached);
   }
+}
+
+test("raw known fresh input excludes unknown and inconsistent reads in both query branches", () => {
+  seedRawFixtures();
+  const db = core.getDbInstance();
   for (const query of [options, { ...options, sinceIso: "2020-03-01" }]) {
     const result = getCachedInputAnalytics(query, (model) => model.split("/").at(-1)!);
     assert.equal(result.summary.knownFreshInputTokens, 800);
@@ -56,6 +66,7 @@ test("raw known fresh input excludes unknown and inconsistent reads in both quer
 });
 
 test("archives contribute only complete consistent rows and never leak into key filters", () => {
+  seedRawFixtures();
   const db = core.getDbInstance();
   const insert = db.prepare(`INSERT INTO daily_usage_summary
     (provider, model, date, total_requests, total_input_tokens, total_output_tokens,
