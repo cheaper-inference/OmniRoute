@@ -16,6 +16,7 @@ import {
 // that owns it.
 import type { ProxyConfigLevel } from "@/shared/components/ProxyConfigModal";
 import RiskNoticeModal from "../../components/RiskNoticeModal";
+import { getRiskNoticeTermsUrl } from "../../riskNoticeTerms";
 import ChatGptOAuthModal from "@/shared/components/ChatGptOAuthModal";
 import CodexCliGuideModal from "../../components/CodexCliGuideModal";
 import SiliconFlowEndpointModal from "./SiliconFlowEndpointModal";
@@ -250,6 +251,7 @@ export default function ProviderModalsPanel({
           variant={providerInfo.riskNoticeVariant ?? "oauth"}
           providerId={providerId}
           providerName={providerInfo.name}
+          termsUrl={getRiskNoticeTermsUrl(providerId)}
           onConfirm={handleConfirmRiskNotice}
           onCancel={handleCancelRiskNotice}
         />

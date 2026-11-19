@@ -89,3 +89,41 @@ test("prompt normalization rejects empty prompts and non-native models", () => {
     /Empty user prompt/
   );
 });
+
+test("risk notice exposes the Google ToS link only for the native provider", async () => {
+  const { getRiskNoticeTermsUrl, isGeminiAppTosPreconditionError } =
+    await import("../../src/app/(dashboard)/dashboard/providers/riskNoticeTerms.ts");
+
+  assert.equal(
+    getRiskNoticeTermsUrl("gemini-app"),
+    "https://policies.google.com/terms",
+    "the risk modal must link the terms the user is asked to accept"
+  );
+  assert.equal(getRiskNoticeTermsUrl("openai"), undefined);
+
+  assert.equal(isGeminiAppTosPreconditionError(428, null, "gemini-neon"), true);
+  assert.equal(
+    isGeminiAppTosPreconditionError(428, null, "openai/gpt-4o"),
+    false,
+    "an unrelated 428 must not show Google's ToS link"
+  );
+  assert.equal(
+    isGeminiAppTosPreconditionError(200, "Accept the current Gemini Terms of Service", "gapp"),
+    true,
+    "in-band SSE errors keep the actionable message even when the HTTP status is 200"
+  );
+
+  const { extractSseErrorMessage } =
+    await import("../../src/app/(dashboard)/dashboard/providers/riskNoticeTerms.ts");
+  assert.equal(
+    extractSseErrorMessage({ message: "Accept the current Gemini Terms of Service" }, true),
+    "Accept the current Gemini Terms of Service",
+    "gemini-app emits the sanitized body directly in an SSE error event"
+  );
+  assert.equal(
+    extractSseErrorMessage({ message: "ordinary text" }, false),
+    null,
+    "a plain completion chunk must never be treated as an error"
+  );
+  assert.equal(extractSseErrorMessage({ error: { message: "wrapped" } }, false), "wrapped");
+});

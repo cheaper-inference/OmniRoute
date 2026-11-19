@@ -9,6 +9,8 @@ import {
   quotaFailureCode,
   safeQuota,
 } from "../../../open-sse/executors/gemini-app/quota.ts";
+import { REGISTRY } from "../../../open-sse/config/providers/index.ts";
+import { getProviderPluginManifestEntryFromRegistry } from "../../../open-sse/config/providerPluginManifest.ts";
 
 const usageModule = await import("../../../open-sse/services/usage.ts");
 
@@ -39,6 +41,23 @@ test("gemini-app is registered for quota visibility and the background fetcher",
   assert.ok(
     USAGE_FETCHER_PROVIDERS.includes("gapp"),
     "the alias must resolve in the manifest's alias-aware capability check"
+  );
+});
+
+test("plugin manifest advertises both usage capabilities for gemini-app", () => {
+  const entry = getProviderPluginManifestEntryFromRegistry(REGISTRY, "gemini-app");
+  assert.ok(entry, "gemini-app must resolve in the plugin manifest from the real registry");
+  assert.ok(
+    entry.capabilities.includes("usage-fetch"),
+    "the manifest must advertise usage-fetch for the wired gemini-app fetcher"
+  );
+  assert.ok(
+    entry.capabilities.includes("usage-supported"),
+    "the manifest must advertise usage-supported for the canonical gemini-app id"
+  );
+  assert.ok(
+    entry.capabilities.includes("oauth"),
+    "gemini-app keeps its OAuth capability alongside usage"
   );
 });
 

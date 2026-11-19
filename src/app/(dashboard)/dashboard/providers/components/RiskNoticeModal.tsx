@@ -14,6 +14,8 @@ interface RiskNoticeModalProps {
   variant: RiskNoticeVariant;
   providerId: string;
   providerName: string;
+  /** Provider-specific Terms of Service link, when the upstream requires one. */
+  termsUrl?: string;
   onConfirm: () => void;
   onCancel: () => void;
 }
@@ -22,6 +24,7 @@ export default function RiskNoticeModal({
   variant,
   providerId,
   providerName,
+  termsUrl,
   onConfirm,
   onCancel,
 }: RiskNoticeModalProps) {
@@ -38,6 +41,16 @@ export default function RiskNoticeModal({
           <div className="min-w-0 text-text-main">
             <p className="mb-2 text-sm font-semibold">{providerName}</p>
             <p className="whitespace-pre-line text-sm leading-6 text-text-muted">{t(variant)}</p>
+            {termsUrl && (
+              <a
+                href={termsUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-1 inline-block break-all text-sm text-primary underline underline-offset-2"
+              >
+                {termsUrl}
+              </a>
+            )}
           </div>
         </div>
 
