@@ -195,7 +195,7 @@ export default function FileDetailModal({
       {/* Related batches */}
       {relatedBatches.length > 0 && (
         <div>
-          <h3 className="text-[11px] uppercase tracking-wider font-medium text-text-muted mb-2">
+          <h3 className="text-[11px] uppercase text-text-muted mb-2">
             {t("batchFileUsedByCount", { count: relatedBatches.length })}
           </h3>
           <div className="space-y-1.5">
@@ -230,9 +230,7 @@ export default function FileDetailModal({
       {/* Contents */}
       <div className="flex-1 flex flex-col min-h-[300px]">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wider text-text-muted">
-            {t("batchFilePreview")}
-          </h3>
+          <h3 className="text-xs uppercase text-text-muted">{t("batchFilePreview")}</h3>
           {contents && (
             <Button variant="outline" size="sm" onClick={handleCopy} className="gap-1.5 text-xs">
               <Icon name={copied ? "check" : "content_copy"} size={14} />
