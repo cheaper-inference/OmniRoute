@@ -19,8 +19,14 @@ export function isEmpty200FailoverEnabled(env: Record<string, string | undefined
   );
 }
 
+// Claude reasoning counts as output: `thinking` carries it, `redacted_thinking` keeps it in `data`.
 const partIsEmpty = (part: unknown) =>
-  !isRecord(part) || (isBlank(part.text) && isBlank(part.refusal) && part.type !== "image_url");
+  !isRecord(part) ||
+  (isBlank(part.text) &&
+    isBlank(part.refusal) &&
+    isBlank(part.thinking) &&
+    !(part.type === "redacted_thinking" && !isBlank(part.data)) &&
+    part.type !== "image_url");
 
 function chatSaid(message: Json): boolean {
   const content = message.content;
@@ -72,8 +78,11 @@ function geminiFailure(json: Json): string | null {
   const parts = isRecord(candidate.content) ? candidate.content.parts : null;
   const empty =
     !Array.isArray(parts) ||
-    parts.every((p) => !isRecord(p) || (isBlank(p.text) && !p.functionCall));
-  return empty ? "empty STOP: candidate with no text and no function call" : null;
+    parts.every(
+      // Media (an image-only generation) is output too: `inlineData` or `fileData`.
+      (p) => !isRecord(p) || (isBlank(p.text) && !p.functionCall && !p.inlineData && !p.fileData)
+    );
+  return empty ? "empty STOP: candidate with no text, media or function call" : null;
 }
 
 /** A failure reason for an empty 200 body, or null (flag off, or the body said something). */

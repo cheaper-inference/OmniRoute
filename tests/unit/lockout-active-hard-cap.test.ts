@@ -74,6 +74,22 @@ test("cap on: active lockouts beyond the hard cap are evicted, soonest to expire
   assert.equal(failures.has("k0"), true, "escalation state is kept, so a re-lock keeps escalating");
 });
 
+test("cap on: the failure sweep keeps the escalation state of the lockouts the hard cap evicted", () => {
+  const base = Date.now() + 3_600_000;
+  const locks = new Map<string, ModelLockoutEntry>();
+  const failures = new Map<string, ModelFailureState>();
+  // Every lock has its failure record, so the failure map is over the cap as well.
+  for (let i = 0; i < 13; i += 1) {
+    locks.set(`k${i}`, entry(base + i * 1000));
+    failures.set(`k${i}`, failure());
+  }
+  evictLockoutOverflow(locks, failures, 10, 11);
+  assert.equal(locks.size, 11);
+  assert.equal(locks.has("k0") || locks.has("k1"), false, "the 2 closest to expiry went");
+  assert.equal(failures.size, 13, "no failure record went with its evicted lock");
+  assert.ok(failures.has("k0") && failures.has("k1"), "a re-lock of k0/k1 keeps escalating");
+});
+
 test("cap on: expired entries go first, then only as many active ones as the hard cap needs", () => {
   const now = Date.now();
   const locks = new Map<string, ModelLockoutEntry>();

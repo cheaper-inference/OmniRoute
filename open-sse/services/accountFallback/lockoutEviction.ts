@@ -42,13 +42,15 @@ export function evictLockoutOverflow(
       modelFailureState.delete(key);
     }
   }
-  evictActiveOverHardCap(modelLockouts, Math.max(hardCap, cap), hardCap > 0);
+  // The hard cap drops only the lock: the sweep below must not take the escalation state of
+  // the lockouts it just evicted with it.
+  const hardCapped = evictActiveOverHardCap(modelLockouts, Math.max(hardCap, cap), hardCap > 0);
   if (modelFailureState.size > cap) {
     const overflow = modelFailureState.size - cap;
     let evicted = 0;
     for (const key of modelFailureState.keys()) {
       if (evicted >= overflow) break;
-      if (!modelLockouts.has(key)) {
+      if (!modelLockouts.has(key) && !hardCapped.has(key)) {
         modelFailureState.delete(key);
         evicted++;
       }
@@ -72,14 +74,20 @@ export function resolveActiveLockoutHardCap(
   return /^[1-9]\d*$/.test(raw) ? Number(raw) : 0;
 }
 
+/** Returns the keys whose active lockout it evicted. */
 function evictActiveOverHardCap(
   modelLockouts: Map<string, ModelLockoutEntry>,
   limit: number,
   enabled: boolean
-): void {
-  if (!enabled || modelLockouts.size <= limit) return;
+): Set<string> {
+  const evicted = new Set<string>();
+  if (!enabled || modelLockouts.size <= limit) return evicted;
   const soonest = [...modelLockouts.entries()]
     .sort((a, b) => a[1].until - b[1].until)
     .slice(0, modelLockouts.size - limit);
-  for (const [key] of soonest) modelLockouts.delete(key);
+  for (const [key] of soonest) {
+    modelLockouts.delete(key);
+    evicted.add(key);
+  }
+  return evicted;
 }

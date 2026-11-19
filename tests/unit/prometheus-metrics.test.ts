@@ -105,6 +105,24 @@ test("distinct label sets are bounded: the overflow folds into one 'other' serie
   assert.equal(total, 700);
 });
 
+test("the overflow stays bounded when providers and status classes vary too", () => {
+  process.env.OMNIROUTE_PROMETHEUS_METRICS = "true";
+  const statuses = [200, 302, 404, 503, 0];
+  for (let i = 0; i < 700; i += 1) {
+    for (const status of statuses) {
+      metrics.recordRequestMetrics(row({ provider: `p-${i}`, model: "m", status }));
+    }
+  }
+  const series = metrics
+    .renderMetrics()
+    .split("\n")
+    .filter((l) => l.startsWith("omniroute_request_duration_seconds_count{"));
+  assert.ok(series.length <= 500 + statuses.length, `series ${series.length}`);
+  assert.ok(series.some((l) => l.includes('provider="other",model="other"')));
+  const total = series.reduce((n, l) => n + Number(l.split(" ").pop()), 0);
+  assert.equal(total, 700 * statuses.length);
+});
+
 test("saveCallLog feeds the metrics once, and skips upstream attempt rows", async () => {
   process.env.OMNIROUTE_PROMETHEUS_METRICS = "true";
   await callLogs.saveCallLog(row({ duration: 900, ttftMs: 120, upstreamHttp: { total: 2 } }));

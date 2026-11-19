@@ -111,3 +111,36 @@ test("gemini empty STOP: valid by default, failover with the flag; a reply with 
   const text = { candidates: [{ content: { parts: [{ text: "hi" }] }, finishReason: "STOP" }] };
   assert.equal((await verdict(text, true)).valid, true);
 });
+
+test("with the flag, a claude turn whose only output is reasoning stays valid", async () => {
+  const thinking = {
+    ...claudeEmpty(0),
+    content: [{ type: "thinking", thinking: "weighing the options", signature: "sig" }],
+  };
+  const redacted = { ...claudeEmpty(0), content: [{ type: "redacted_thinking", data: "opaque" }] };
+  assert.equal((await verdict(thinking, true)).valid, true);
+  assert.equal((await verdict(redacted, true)).valid, true);
+  const blank = { ...claudeEmpty(0), content: [{ type: "thinking", thinking: "  " }] };
+  assert.equal((await verdict(blank, true)).valid, false, "blank reasoning is still empty");
+});
+
+test("with the flag, a gemini image-only STOP keeps the generated media", async () => {
+  const image = {
+    candidates: [
+      {
+        content: { parts: [{ inlineData: { mimeType: "image/png", data: "iVBORw0KGgo=" } }] },
+        finishReason: "STOP",
+      },
+    ],
+  };
+  const file = {
+    candidates: [
+      {
+        content: { parts: [{ fileData: { mimeType: "image/png", fileUri: "gs://b/o.png" } }] },
+        finishReason: "STOP",
+      },
+    ],
+  };
+  assert.equal((await verdict(image, true)).valid, true);
+  assert.equal((await verdict(file, true)).valid, true);
+});
