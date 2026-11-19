@@ -12,9 +12,11 @@ import { dirname, resolve } from "node:path";
 // convention, which is `amber` everywhere else in this same component (e.g. the
 // `bg-amber-500/10 text-amber-500` badge). The warning icon must use amber, not yellow.
 
+// The update progress moved out of HomePageClient.tsx into the kit dialog in
+// UpdateProgressDialog.tsx (UI review 2026-11-15); the step status icons went with it.
 const here = dirname(fileURLToPath(import.meta.url));
 const source = readFileSync(
-  resolve(here, "../../../src/app/(dashboard)/dashboard/HomePageClient.tsx"),
+  resolve(here, "../../../src/app/(dashboard)/dashboard/UpdateProgressDialog.tsx"),
   "utf8"
 );
 
@@ -25,7 +27,7 @@ const warningIconMatch = source.match(/<Icon name="warning"[^>]*className="([^"]
 test("update-step warning icon renders with an amber color, not bare yellow", () => {
   assert.ok(
     warningIconMatch,
-    "expected to find the update-step `warning` <Icon> in HomePageClient.tsx"
+    "expected to find the update-step `warning` <Icon> in UpdateProgressDialog.tsx"
   );
   const className = warningIconMatch![1];
   assert.ok(
