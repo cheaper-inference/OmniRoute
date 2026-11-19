@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -155,7 +157,7 @@ Claude Desktop、Cursor、Cline、および互換性のある MCP クライア�
 | `omniroute_rtk_discover`            | `read:compression`  | オプトインRTK出力サンプルで繰り返し発生するノイズを検出する                                               |
 | `omniroute_rtk_learn`               | `read:compression`  | オプトイン サンプルからレビュー可能なRTKフィルター ドラフトを生成する                                     |
 
-CCRエントリは 2 層ストアを使用します。つまり、耐久性のあるSQLite層 (`ccr_blocks`、デフォルトでオン) によって、ローカルの非クラウド ランタイム上でバックアップされたホット インメモリ層です。そのため、ブロックは、 TTLが—使い果たすまで、エビクションまたは再起動後も存続します。ただし、512 KBを超えるブロックとメモリのみにとどまるクラウド ランタイムは除きます。各ブロックは 2 MiBに制限され、各プリンシパルは 16 MiBに、グローバル ストアは 64 MiBに制限されます。エントリのデフォルトは 24 時間のTTL (最大 7 日間) です。完全なMCPの取得は 256 KiBに制限されます。より大きなブロックは、引き続き ranged モードおよび grep モードを通じて使用できます。保存、取得、リスト、検査、削除、統計は、認証された API キー プリンシパルによって分離されます。監査レコードにはハッシュとサイズのメタデータが含まれますが、コンテンツは含まれません。オペレーター向けの詳細 (2 つのマーカー、クライアント前提条件、 `codemode:false`、ツールごとのスコープ、ページネーション、および診断マトリックス) は[、圧縮エンジン→前提条件 / オペレーター ガイド](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)に記載されています。
+CCRエントリは 2 層ストアを使用します。つまり、耐久性のあるSQLite層 (`ccr_blocks`、デフォルトでオン) によって、ローカルの非クラウド ランタイム上でバックアップされたホット インメモリ層です。そのため、ブロックは、そのTTL —使い果たすまで、エビクションまたは再起動後に存続します。ただし、メモリのみに留まる 512 KBを超えるブロック、クラウド ランタイム、および`COMPRESSION_CCR_DURABLE_STORE=false`除きます。永続書き込みはベスト エフォートです。つまり、1,000 件の書き込みがすでに保留されている間に削除され、失敗したSQLite書き込みは再試行されずにログに記録されるため、再起動時にブロックが失われます。各ブロックは 2 MiBに制限され、各プリンシパルは 16 MiBに、グローバル ストアは 64 MiBに制限されます。エントリのデフォルトは 24 時間のTTL (最大 7 日間) です。 MCP完全な取得は 256 KiBに制限されます。より大きなブロックは、引き続き ranged モードおよび grep モードを通じて使用できます。保存、取得、リスト、検査、削除、統計は、認証された API キー プリンシパルによって分離されます。監査レコードにはハッシュとサイズのメタデータが含まれますが、コンテンツは含まれません。オペレータ向けの詳細 (2 つのマーカー、クライアント前提条件、 `codemode:false`、ツールごとのスコープ、ページネーション、および診断マトリックス) は[、圧縮エンジン→前提条件 / オペレータ ガイド](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup)に記載されています。
 
 `omniroute_compression_status` `analytics.mcpDescriptionCompression`の下でMCP記述圧縮を個別に報告します。これらの値は、 MCPリスト可能な記述 (`tools`、 `prompts`、 `resources`、および`resourceTemplates`) のメタデータ サイズの推定値です。これらはプロバイダーの使用状況の領収書ではなく、 `source: "mcp_metadata_estimate"`のマークが付いています。
 

@@ -344,17 +344,16 @@ jotta se ei koskaan näy käyttäjän valittavissa olevana vaihtoehtona käyttö
 
 ---
 
-## Testikattavuus
+## Testin kattavuus
 
-Quota-share-moottorin mukana toimitetaan kaksi automaattisen testikattavuuden tasoa:
+Kaksi kerrosta automatisoitua peittoa toimitetaan kiintiönjakomoottorin kanssa:
 
-| Testisarja          | Komento                                                                | Mitä se kattaa                                                                                                                                                                                                                                                    |
-| :------------------ | :--------------------------------------------------------------------- | :---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Yksikkö (29 testiä) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR-ajastin, saturaatioportitus, rinnakkaisuusrajat, fairShare-laskenta, käsittelyjonoon asettaminen                                                                                                                                                              |
-| Integraatiomatriisi | `npm run test:combo:matrix`                                            | Reitityspäätös päästä päähän todellisen yhdistelmäputken kautta; DRR-oikeudenmukaisuus ja saturoituneiden kohteiden prioriteetin alentaminen reaaliaikaisten liityntäkohtien avulla (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Sviitti             | Komento                                                                | Mitä se kattaa                                                                                                                                                                                                              |
+| :------------------ | :--------------------------------------------------------------------- | :-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Yksikkö (29 testiä) | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR -ajastin, kyllästysportti, samanaikaisuuden ylärajat, fairShare matematiikka, ruuhkajono                                                                                                                                |
+| Integrointimatriisi | `npm run test:combo:matrix`                                            | Päästä päähän -reitityspäätös todellisen yhdistelmäputkilinjan kautta; DRR oikeudenmukaisuus + kyllästymisen priorisointi livesaumojen kautta (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Integraatiomatriisi suoritetaan CI:ssä kaikkien 19 julkisen strategian rinnalla. Yksikkötestisarja
-voidaan suorittaa itsenäisesti.
+Integraatiomatriisi toimii CI ssa kaikkien 22 julkisen strategian rinnalla. Yksikkösarjaa voidaan käyttää itsenäisesti.
 
 ---
 
