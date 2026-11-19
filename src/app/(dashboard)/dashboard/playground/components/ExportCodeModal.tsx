@@ -4,7 +4,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import { CodePreview } from "@omniroute/ui-kit/code-preview";
+import CodePreview from "@/shared/components/CodePreview";
 import { Tabs, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import Button from "@/shared/components/Button";
 import Modal from "@/shared/components/Modal";
@@ -29,6 +29,7 @@ const LANGUAGE_TABS: Array<{ id: ExportLanguage; label: string }> = [
  */
 export default function ExportCodeModal({ state, onClose }: ExportCodeModalProps) {
   const t = useTranslations("playground");
+  const tc = useTranslations("common");
   const [activeLanguage, setActiveLanguage] = useState<ExportLanguage>("curl");
 
   // Generate all snippets once (state is passed in from parent, not re-fetched).
@@ -92,6 +93,7 @@ export default function ExportCodeModal({ state, onClose }: ExportCodeModalProps
           code={currentCode}
           copyLabel={t("copy")}
           copiedLabel={t("copiedCode")}
+          codeLabel={tc("codeRegionLabel", { language: activeLabel })}
           aria-label={t("copyLangCode", { language: activeLanguage })}
         />
       )}

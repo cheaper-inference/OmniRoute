@@ -10,7 +10,10 @@ on:
     # each held up to 30 of the account's 40 hosted job slots — the queue that made PR
     # checks wait for hours. `main` keeps it: the release squash is the one push that
     # lands code nobody validated as a PR into main.
-    branches: [main]
+    # omni-queue/** (2026-11-13): the omni-queue merge-queue candidates (base + the batch's
+    # merge commits, pushed by the omni-queue App) run the full profile here, like merge_group.
+    # Each candidate is a fresh ref (no force-push), so cancel-in-progress never cancels one.
+    branches: [main, "omni-queue/**"]
   pull_request:
     branches: [main, "release/**"]
     types: [opened, synchronize, reopened, ready_for_review, converted_to_draft, edited]
@@ -62,6 +65,9 @@ jobs:
       testsOnly: ${{ steps.classify.outputs.testsOnly }}
       # Exposure only (one-CI-policy step 1, RFC #8084): no job depends on it yet.
       domains: ${{ steps.classify.outputs.domains }}
+      # omni-queue candidate base (the merge_group.base_sha of a push to omni-queue/**);
+      # empty on every other event.
+      candidateBase: ${{ steps.candidate.outputs.BASE_SHA }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
@@ -73,9 +79,16 @@ jobs:
           node-version: ${{ env.CI_NODE_VERSION }}
       - name: Validate gate inventory
         run: npm run check:gate-manifest
+      # github.event.before is all zeros on a new omni-queue/** branch; the candidate names its
+      # base in the Omni-Queue-Base trailer of its top merge commit (a base-check candidate is
+      # its own base). Fails closed when a batch candidate carries no valid base.
+      - name: Resolve the omni-queue candidate base
+        id: candidate
+        if: startsWith(github.ref, 'refs/heads/omni-queue/')
+        run: node scripts/merge-queue/candidate-base.mjs >> "$GITHUB_OUTPUT"
       - name: Validate recurring free catalog evidence
         env:
-          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
+          BASE_SHA: ${{ steps.candidate.outputs.BASE_SHA || github.event.pull_request.base.sha || github.event.merge_group.base_sha || github.event.before }}
         run: npm run check:free-catalog-evidence
 
       # Refuse a PR that targets its own head branch before spending anything on it. #8912 has
@@ -142,9 +155,16 @@ jobs:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
       - run: npm run check:node-runtime
+      # External state (the npm advisory database; "externalState" in
+      # config/quality/release-green-static-profile.json): advisory on an omni-queue candidate,
+      # so an advisory published during the batch's CI cannot throw the batch out.
       - run: npm run audit:deps
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
+      # The cache, the JSON report and its upload run even when a step above failed:
+      # quality-gate still runs on a failed lint job and its ESLint download is strict, so a
+      # missing artifact would skip the complexity / duplication / dead-code ratchets too.
       - name: Restore ESLint file cache
-        if: github.event_name == 'pull_request'
+        if: github.event_name == 'pull_request' && !cancelled()
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6
         with:
           path: |
@@ -159,6 +179,7 @@ jobs:
       # Single ESLint inventory (JSON) — quality-gate reuses the artifact instead of
       # a second cold full-tree pass for eslintWarnings ratchet counts.
       - name: ESLint (JSON report)
+        if: ${{ !cancelled() }}
         run: npm run lint:json
       - name: Upload ESLint results
         if: always()
@@ -172,9 +193,11 @@ jobs:
       # open-sse → src edge ceiling (metrics.boundaryOpenSseToSrc). On PRs it is base-relative
       # like check:file-size (#8522): max(ceiling, edges on the PR base), so drift other merges
       # added after the seed does not red an innocent PR. push → main stays absolute.
+      # omni-queue/** candidates are judged like a PR, against the candidate base: the absolute
+      # ceiling would red every candidate of a base that drifted, and blame the batch for it.
       - name: Boundary ratchet (open-sse → src)
         env:
-          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}
         run: |
           if [ -n "${PR_BASE_SHA:-}" ]; then
             npm run check:boundary:ratchet -- --base-ref "$PR_BASE_SHA"
@@ -190,7 +213,11 @@ jobs:
       - run: npm run check:deps
       - run: npm run check:file-size
       - run: npm run check:error-helper
-      - run: npm run check:migration-numbering
+      - name: Migration numbering and commutation
+        # Runs even if an earlier gate in this job failed: it is the check that keeps a
+        # migration from being re-applied or skipped on a user's database.
+        if: ${{ !cancelled() }}
+        run: npm run check:migration-numbering
       - run: npm run check:public-creds
       - run: npm run check:db-rules
       - run: npm run check:known-symbols
@@ -209,6 +236,21 @@ jobs:
         run: |
           printf '%s' "$PR_BODY" > "$RUNNER_TEMP/pr-body.md"
           npm run check:ai-attribution -- --range "$PR_BASE_SHA..$PR_HEAD_SHA" --pr-title "$PR_TITLE" --pr-body-file "$RUNNER_TEMP/pr-body.md"
+      # omni-queue/** candidates land fast-forward: the contributors' own commits enter the
+      # release as they are (no squash rewrites their messages), so the same range check runs on
+      # the candidate, from its base (Omni-Queue-Base) to the pushed head.
+      - name: "AI attribution in the omni-queue candidate range (Hard Rule #16)"
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/')
+        env:
+          CANDIDATE_BASE: ${{ needs.changes.outputs.candidateBase }}
+        run: npm run check:ai-attribution -- --range "$CANDIDATE_BASE..$GITHUB_SHA"
+      # Release-Green holds test-masking as a hard gate; on pull requests it runs in PR Test
+      # Policy, which never runs on a push. A candidate is judged here, against its base.
+      - name: Detect test-masking against the omni-queue candidate base
+        if: github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/')
+        env:
+          GITHUB_BASE_SHA: ${{ needs.changes.outputs.candidateBase }}
+        run: npm run check:test-masking
       # A test parked in vitest.config.ts's exclude list does not run, and looks like
       # coverage to whoever reads the tree. 62 files accumulated behind a comment pointing
       # at #8618 — closed in August while the list grew to 62; 51 of them passed when
@@ -226,6 +268,11 @@ jobs:
       # means a push to `main` catches the drift at the source instead of the next cycle
       # inheriting it.
       - run: npm run check:agent-skills-sync
+      # Generated artifacts (plan 2026-11-13, owner decision 2026-11-14): release mode compares
+      # every README SVG and e2e-timings.json with its generator; pr mode only the ones the PR
+      # edited, and every one when the diff base does not resolve. Here because this job has
+      # the full history (fetch-depth: 0) the shallow test-unit checkout lacks. ~70 s.
+      - run: npm run check:generated-artifacts
       # WS1.7 (v3.8.49 plan): Dockerfile lint (hadolint, pinned by digest).
       # failure-threshold=error keeps the 5 pre-existing warnings (DL3008/DL3003/
       # DL3016 version pinning / WORKDIR) visible without blocking; any ERROR fails.
@@ -352,12 +399,19 @@ jobs:
         run: npm run check:type-coverage
       - name: Compression budget ratchet (F2.4 / N4)
         run: npm run check:compression-budget
+      # Kit type scale (#19066 block 7): sizes under 12 px and font-bold may only go down. The
+      # pre-commit hook runs it too, but `git commit --no-verify` skips the hook.
+      - name: Type scale ratchet
+        run: npm run check:type-scale-ratchet -- --ratchet
       # CodeQL alerts ratchet — BLOQUEANTE (promovido de advisory na v3.8.26).
       # Lê metrics.codeqlAlerts.value de quality-baseline.json e sai 1 SOMENTE numa
       # regressão real (alertas abertos > baseline). Falha de medição (gh/auth/api)
       # é skip gracioso com exit 0 — security-events:read no job-level permissions.
+      # External state (the repository's open code-scanning alerts): advisory on an omni-queue
+      # candidate, blocking everywhere else.
       - name: CodeQL alerts ratchet (blocking)
         run: npm run check:codeql-ratchet
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Append summary
@@ -443,17 +497,22 @@ jobs:
         run: |
           set +e
           mkdir -p "$HOME/.local/bin"
-          # gitleaks — download latest linux x64 tarball via gh (authed), extract binary
+          # Pinned to quality.yml's versions: a scanner release must not change a ratchet's
+          # verdict mid-cycle, nor give one gate two verdicts on one omni-queue candidate.
+          GITLEAKS_VERSION=v8.30.1
+          OSV_SCANNER_VERSION=v2.3.8
+          OASDIFF_VERSION=v1.19.1
+          # gitleaks — pinned linux x64 tarball via gh (authed), extract binary
           rm -rf /tmp/gl && mkdir -p /tmp/gl
-          gh release download --repo gitleaks/gitleaks --pattern '*linux_x64.tar.gz' --dir /tmp/gl
+          gh release download "$GITLEAKS_VERSION" --repo gitleaks/gitleaks --pattern '*linux_x64.tar.gz' --dir /tmp/gl
           tar -xzf /tmp/gl/*linux_x64.tar.gz -C "$HOME/.local/bin" gitleaks
-          # osv-scanner — download latest linux amd64 bare binary via gh (authed)
+          # osv-scanner — pinned linux amd64 bare binary via gh (authed)
           rm -rf /tmp/osv && mkdir -p /tmp/osv
-          gh release download --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
+          gh release download "$OSV_SCANNER_VERSION" --repo google/osv-scanner --pattern '*linux_amd64' --dir /tmp/osv
           install -m 0755 /tmp/osv/*linux_amd64 "$HOME/.local/bin/osv-scanner"
-          # oasdiff — download latest linux amd64 tarball via gh (authed), extract binary
+          # oasdiff — pinned linux amd64 tarball via gh (authed), extract binary
           rm -rf /tmp/oasd && mkdir -p /tmp/oasd
-          gh release download --repo oasdiff/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
+          gh release download "$OASDIFF_VERSION" --repo oasdiff/oasdiff --pattern '*linux_amd64.tar.gz' --dir /tmp/oasd
           tar -xzf /tmp/oasd/*linux_amd64.tar.gz -C "$HOME/.local/bin" oasdiff
           # ALWAYS export the bin dir (even if any step above failed)
           echo "$HOME/.local/bin" >> "$GITHUB_PATH"
@@ -480,9 +539,11 @@ jobs:
       # failure in the advisory-scanner step above surfaces here as
       # `vulnCount=INCOMPLETE reason=binary-absent`. See the CVE-variance note in
       # docs/security/SUPPLY_CHAIN.md — a newly-disclosed CVE on an unchanged dep can
-      # red this gate; the fix is to bump the dep or re-baseline metrics.vulnCount.
+      # red this gate; the fix is to bump the dep or re-baseline metrics.vulnCount. That variance
+      # is external state: advisory on an omni-queue candidate, blocking everywhere else.
       - name: Vulnerability ratchet (osv-scanner, ratchet, blocking)
         run: npm run check:vuln-ratchet -- --ratchet
+        continue-on-error: ${{ github.event_name == 'push' && startsWith(github.ref, 'refs/heads/omni-queue/') }}
       # BLOCKING ratchet (Etapa 2): zizmorFindings must not regress vs the baseline.
       # ONLY zizmor is ratcheted — actionlint findings are reported, not blocking.
       # Both tools must complete with valid reports. Missing/broken scanners or
@@ -504,6 +565,10 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
+          # Depth 2: on a pull_request the checkout is GitHub's merge commit, and its first
+          # parent is the base the PR was merged onto. check:docs-counts (inside check:docs-all)
+          # runs in `pr` mode on feature PRs and diffs the managed numbers against that base.
+          fetch-depth: 2
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
@@ -513,7 +578,17 @@ jobs:
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
+      # Plan 2026-11-13 (derived numbers are written at release): on a feature PR the counts gate
+      # judges only the managed numbers the PR itself edited (diff against BASE_SHA, or the merge
+      # commit's first parent when the base moved), never a base that is behind the live code by
+      # design. The release PR (release/v* → main) and pushes keep the strict comparison.
+      # A manual dispatch on a feature branch (`gh workflow run ci.yml --ref <branch>`) runs in pr
+      # mode too: with no PR to diff, the gate checks content invariants only. Dispatch on main or
+      # release/v* stays strict (empty mode = automatic = release).
       - run: npm run check:docs-all
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.merge_group.base_sha }}
+          OMNIROUTE_GATE_MODE: ${{ github.event_name == 'workflow_dispatch' && github.ref_name != 'main' && !startsWith(github.ref_name, 'release/v') && 'pr' || '' }}
       # Previously-orphaned contract gates (existed as files, never wired anywhere).
       # All exit 0 today: cli-i18n is a hard gate, openapi-coverage is a ratchet
       # (floor ~36), openapi-security-tiers is advisory (Hard Rules #15/#17).
@@ -542,15 +617,19 @@ jobs:
       # and every mirror PR collided on `.i18n-state.json`. Mirrors are refreshed in a batch
       # `npm run i18n:run` after merge; the push run below, the nightly Release-Green and the
       # release cut keep the strict verdict, so stale mirrors still cannot ship in a release.
-      - name: Base checkout for the i18n drift baseline (PR only)
-        if: ${{ github.event_name == 'pull_request' }}
+      #
+      # omni-queue/** candidates take the pull-request path, against the candidate base: the
+      # strict verdict fails on drift the base already carries, which would red every candidate
+      # and blame the batch. The strict run stays on main, merge_group and workflow_dispatch.
+      - name: Base checkout for the i18n drift baseline (PR / omni-queue candidate)
+        if: ${{ github.event_name == 'pull_request' || startsWith(github.ref, 'refs/heads/omni-queue/') }}
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
-          ref: ${{ github.event.pull_request.base.sha }}
+          ref: ${{ github.event.pull_request.base.sha || needs.changes.outputs.candidateBase }}
           path: .i18n-base
           persist-credentials: false
-      - name: i18n docs drift (PR — advisory, mirrors are refreshed after merge)
-        if: ${{ github.event_name == 'pull_request' }}
+      - name: i18n docs drift (PR / omni-queue candidate — advisory, mirrors are refreshed after merge)
+        if: ${{ github.event_name == 'pull_request' || startsWith(github.ref, 'refs/heads/omni-queue/') }}
         run: |
           set -euo pipefail
           node scripts/i18n/check-translation-drift.mjs --root .i18n-base --json --warn > /tmp/i18n-base-drift.json
@@ -559,7 +638,7 @@ jobs:
             echo "::notice title=i18n mirrors pending::This PR changes English docs whose 66 mirrors are now stale. Nothing to do here: the mirrors are refreshed in the post-merge i18n batch."
           fi
       - name: i18n docs drift (sources changed since their translation)
-        if: ${{ github.event_name != 'pull_request' }}
+        if: ${{ github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/') }}
         run: node scripts/i18n/check-translation-drift.mjs
 
   docs-lint:
@@ -601,6 +680,21 @@ jobs:
     # drafts (ciclo v3.8.44: 123 runs pesados re-disparados por merges na release, 88 cancelados).
     # UI keys move with dashboard code OR message catalogs.
     if: ${{ github.event_name != 'pull_request' || ((github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true') && (needs.changes.outputs.i18n == 'true' || needs.changes.outputs.code == 'true')) }}
+    # Two modes (plan "derived numbers and texts resolved only at release", 2026-11-13; the
+    # scripts resolve it themselves through scripts/check/lib/gateMode.mjs, nothing to set here):
+    #   pr      — a feature PR (and a merge_group / omni-queue batch). The PR adds keys to en.json
+    #             only, so the completeness gates (value drift, new-key coverage, key completeness
+    #             UI + CLI, translation ratio) print `SKIP reason=pr-mode` and exit 0. Coverage
+    #             floor and ICU compilation still run: they judge what the PR wrote. That the PR
+    #             leaves the other locales alone is enforced by PR Test Policy →
+    #             check:pr-derived-paths (config/quality/derived-paths/translation.json). A PR
+    #             that does change locale catalogs (translation wave, release refresh) gets each
+    #             changed catalog judged against the merge base by the key-completeness steps
+    #             (lost keys or translations, new markers, broken placeholders).
+    #   release — the release PR (release/v* → main), pushes to main, workflow_dispatch: every
+    #             gate strict, as before; the diff-aware ones get BASE_REF=origin/main on the
+    #             release PR, so they judge the whole cycle after the release refresh
+    #             (syncUiKeys in scripts/i18n/sync-ui-keys.mjs) completed the catalogs.
     steps:
       # fetch-depth: 0 — the value-drift gate diffs en.json against the merge base to
       # find rewritten English strings. On a shallow clone the base ref is missing and
@@ -617,7 +711,13 @@ jobs:
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
-      - run: node scripts/i18n/check-ui-keys-coverage.mjs --threshold=65
+      # Both modes: a 65 % floor per locale is far from what one cycle of en.json-only keys
+      # moves (every locale measured 100 % on 2026-11-13; the largest recorded cycle added
+      # ~1,352 keys, ≈ 8 points on today's 15,249), so it only trips on a truncated or
+      # broken catalog.
+      - name: i18n UI coverage floor (≥ 65 % per locale)
+        run: node scripts/i18n/check-ui-keys-coverage.mjs --threshold=65
+      # Both modes: compiles the en.json the PR edits (and every catalog) with IntlMessageFormat.
       - name: i18n ICU compilation (all UI catalogs)
         run: npm run check:ui-icu
       # Real-translation ratchet: a leaf copied verbatim from en.json passes key
@@ -625,12 +725,12 @@ jobs:
       # Blocking since PR-4 retranslated the verbatim-English backlog: the share of
       # untranslated leaves per locale may only fall (ratchet baseline in
       # config/quality/i18n-translation-baseline.json; `npm run i18n:check-ratio:update`).
-      - name: i18n real-translation ratio
+      - name: i18n real-translation ratio (release mode)
         run: node scripts/i18n/check-translation-ratio.mjs
       # #8463: a rewritten English value used to leave its 39 translations behind
       # silently (googleOAuthWarning shipped wrong copy in 39 locales for months).
       # Key parity above cannot see it — a stale translation counts as covered.
-      - name: i18n UI value drift (stale translations)
+      - name: i18n UI value drift (stale translations, release mode)
         env:
           BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
         run: node scripts/i18n/check-ui-value-drift.mjs
@@ -640,7 +740,7 @@ jobs:
       # locale, and 11 absent keys out of ~13,000 leaves coverage at 99.9%. Incident: the
       # Phase 3 canvas keys were translated across the 42 locales that existed, then the EU
       # batch (#13044) took the repo to 51 and the nine newcomers shipped untranslated.
-      - name: i18n new-key coverage (a new key must reach every locale)
+      - name: i18n new-key coverage (a new key must reach every locale, release mode)
         env:
           BASE_REF: ${{ github.base_ref && format('origin/{0}', github.base_ref) || '' }}
         run: node scripts/i18n/check-new-key-coverage.mjs
@@ -650,13 +750,14 @@ jobs:
       # adding keys — the batch PR adds no key itself, so the new-key gate stays silent and
       # 43 absent keys out of ~13,000 still read 99.7 % coverage. Incident 2026-09-15:
       # batch 1 (#13044) landed 43 keys short in nine locales, batch 2 (#13660) 10 keys short
-      # in eight. Fix is `sync-ui-keys --locale=<codes> --translate-markers`.
-      - name: i18n key completeness (every locale carries every en.json key)
+      # in eight. Fix (release refresh or translation wave, never a feature PR):
+      # `sync-ui-keys --locale=<codes> --translate-markers`.
+      - name: i18n key completeness (every en.json key in every locale; pr mode — changed catalogs)
         run: node scripts/i18n/check-key-completeness.mjs
       # Same gate for the CLI catalogs (bin/cli/locales). check:cli-i18n only compares
       # pt-BR / zh-CN / zh-TW; 38 locales shipped with 1–24 of 830 keys for months
       # (audit 2026-09-16) and the CLI silently fell back to English for them.
-      - name: i18n key completeness (CLI catalogs)
+      - name: i18n key completeness (CLI catalogs; pr mode — changed catalogs)
         run: node scripts/i18n/check-key-completeness.mjs --catalog=cli
 
   # #8038: cheap glossary/protected-terms consistency gate —
@@ -747,6 +848,18 @@ jobs:
           node-version: ${{ env.CI_NODE_VERSION }}
       - name: Fetch base branch
         run: git fetch --no-tags origin "${GITHUB_BASE_REF}"
+      # Plan 2026-11-13 (derived files are written at release): translation mirrors, the
+      # non-English UI/CLI catalogs, generated docs and quality baselines each have ONE writer
+      # (a translation wave, `release:refresh-derived`, a nightly refresh PR). A feature PR that
+      # carries its own copy conflicts with every sibling that does the same (48 open PRs edited
+      # the same ~43 locale catalogs on 2026-11-13). Families + writer branches:
+      # config/quality/derived-paths/*.json. The diff base is the freshly fetched origin/<base>,
+      # not the event's base SHA: on a fast base the merge ref is newer than that SHA and the
+      # base's own commits would be judged as the PR's.
+      # Blocking since 2026-11-15 (owner decision): the two one-time passes over the open PRs
+      # (plan section 8 + the derived-families pass) restored the derived files they carried.
+      - name: Derived files stay out of feature PRs
+        run: npm run check:pr-derived-paths
       - name: Validate source changes include tests
         run: node scripts/check/check-pr-test-policy.mjs --summary-file .artifacts/pr-test-policy.md
       # Anti test-masking: flag net assert removal / new assert.ok(true) in changed tests.
@@ -779,7 +892,8 @@ jobs:
     # reaches the self-hosted runner (push / dispatch events are own-origin by
     # definition). Any failure path (VM down, var unset/false) also falls back to
     # ubuntu-latest.
-    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request') && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-latest' }}
+    # omni-queue/** candidates contain fork code: they never reach the self-hosted slot either.
+    runs-on: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/')) && fromJSON('["self-hosted","omni-build"]') || 'ubuntu-latest' }}
     needs: changes
     # Capacity is owned by the ONE omni-build runner slot (#12048), also used by
     # Docker amd64. Do not add another worker with that label on the same host
@@ -820,7 +934,7 @@ jobs:
       # tests/unit/ci-build-bundler-webpack.test.ts and heavy-build-queue.test.ts.
       - run: npm run build
         env:
-          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request') && '1' || '0' }}
+          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/')) && '1' || '0' }}
       - name: Verify colocated compression worker
         run: node --import tsx/esm --test tests/integration/compression-worker-standalone.int.test.ts
         env:
@@ -1021,8 +1135,12 @@ jobs:
     # own-origin pull requests into the dedicated `omni-ci` slots (omniroute-113-3/-4/-8,
     # 12G/16G and 4 CPUs each — a hosted runner's profile) while the setup-node cost is
     # re-measured. Default off; forks, merge_group and push always stay hosted.
-    runs-on: ${{ (vars.USE_VPS_TEST_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-ci"]') || 'ubuntu-latest' }}
-    timeout-minutes: 25
+    runs-on: ${{ (vars.USE_VPS_TEST_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && !startsWith(github.head_ref, 'omni-queue/')) && fromJSON('["self-hosted","omni-ci"]') || 'ubuntu-latest' }}
+    # 35, not 25 (2026-11-14): the suite grew into the ceiling. Over 72 green shard jobs of
+    # one day the mean was 19 min and the slowest 24; 19 of them (26%) ended within 3 min of
+    # the limit. A shard whose steps had all passed (tests 19 min, raw coverage upload 4 min)
+    # died as job-timeout `cancelled` (run 43651743993) and failed Gate / CI until a re-run.
+    timeout-minutes: 35
     # needs: changes (not build) — this job never downloads the next-build artifact;
     # gating it on Build only serialized ~20min of wall-clock for nothing. Jobs that
     # DO consume the artifact (e2e, package-artifact, electron-package-smoke) keep
@@ -1148,7 +1266,7 @@ jobs:
     # own-origin pull requests into the dedicated `omni-ci` slots (omniroute-113-3/-4/-8,
     # 12G/16G and 4 CPUs each — a hosted runner's profile) while the setup-node cost is
     # re-measured. Default off; forks, merge_group and push always stay hosted.
-    runs-on: ${{ (vars.USE_VPS_TEST_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository) && fromJSON('["self-hosted","omni-ci"]') || 'ubuntu-latest' }}
+    runs-on: ${{ (vars.USE_VPS_TEST_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && !startsWith(github.head_ref, 'omni-queue/')) && fromJSON('["self-hosted","omni-ci"]') || 'ubuntu-latest' }}
     timeout-minutes: 15
     # needs: changes (not build) — no artifact consumed; see test-unit note.
     needs: changes
@@ -1181,7 +1299,9 @@ jobs:
       # Trunk Flaky Tests upload — advisory (never blocks), own-origin only (fork PRs
       # have no TRUNK_TOKEN). Pinned by SHA (tag v2.1.2).
       - name: Upload test results to Trunk (advisory)
-        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        # Not on omni-queue/** candidates: their tree carries fork code, and Trunk would gain a
+        # branch per candidate.
+        if: ${{ always() && !startsWith(github.ref, 'refs/heads/omni-queue/') && !startsWith(github.head_ref, 'omni-queue/') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         continue-on-error: true
         uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
         with:
@@ -1207,7 +1327,13 @@ jobs:
     # 28–31 min (download 4 min, merge+report+gate 18 min, Codecov ≤5 min) and two of six
     # died at exactly 30 min as job-timeout `cancelled` (jobs 118735970655, 118737111780),
     # failing Quality Ratchet / PR Coverage Comment / Gate / CI until a re-run.
-    timeout-minutes: 45
+    # 75 on an omni-queue/** candidate (2026-11-14): the same step was cancelled at the 45-minute
+    # ceiling on a candidate (run 43614500902), and for the queue a timed-out job costs a second
+    # full CI and then pauses the base. Every other event keeps 45.
+    # 60, not 45 (2026-11-14): grown into again. Two PRs of one day died at exactly 45 min as
+    # job-timeout `cancelled` (runs 43619286507, 43625515181); the re-run that passed took
+    # 39m45s.
+    timeout-minutes: ${{ startsWith(github.ref, 'refs/heads/omni-queue/') && 75 || 60 }}
     needs: test-unit
     if: ${{ !cancelled() && needs.test-unit.result == 'success' }}
     env:
@@ -1305,7 +1431,9 @@ jobs:
       - name: Upload coverage to Codecov (informational)
         # Push/merge-queue only: on a PR it cost ~5 min of the job for an informational
         # patch-coverage note, and the PR no longer writes lcov.info (see the merge step).
-        if: ${{ always() && github.event_name != 'pull_request' }}
+        # Not on omni-queue/** candidates either: fork code ran in this job before the token
+        # step, and Codecov would gain a branch per candidate.
+        if: ${{ always() && github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/') }}
         # Informational means informational: its own ceiling and continue-on-error, so a
         # stalled upload can neither eat the job's budget nor turn a green job cancelled.
         timeout-minutes: 5
@@ -1338,7 +1466,8 @@ jobs:
     # Temporarily opt-in: the private project currently has no Sonar quota.
     # Re-enable without another code change by setting the repository Actions
     # variable SONARQUBE_ENABLED=true after quota/project access is restored.
-    if: ${{ vars.SONARQUBE_ENABLED == 'true' && !cancelled() && needs.test-coverage.result == 'success' }}
+    # Never on omni-queue/** candidates: the job env carries SONAR_TOKEN next to fork code.
+    if: ${{ vars.SONARQUBE_ENABLED == 'true' && !cancelled() && needs.test-coverage.result == 'success' && !startsWith(github.ref, 'refs/heads/omni-queue/') && !startsWith(github.head_ref, 'omni-queue/') }}
     env:
       SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
       SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
@@ -1543,7 +1672,9 @@ jobs:
           fi
       # WS5.2/5.3: Trunk Flaky Tests upload — advisory, own-origin only, SHA-pinned.
       - name: Upload test results to Trunk (advisory)
-        if: ${{ always() && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
+        # Not on omni-queue/** candidates: their tree carries fork code, and Trunk would gain a
+        # branch per candidate.
+        if: ${{ always() && !startsWith(github.ref, 'refs/heads/omni-queue/') && !startsWith(github.head_ref, 'omni-queue/') && (github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name == github.repository) }}
         continue-on-error: true
         uses: trunk-io/analytics-uploader@a86313c7029d22e6ea2d5c346060a224d90053dc # v2.1.6
         with:
