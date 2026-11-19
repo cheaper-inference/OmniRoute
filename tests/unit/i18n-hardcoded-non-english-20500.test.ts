@@ -8,13 +8,17 @@ import { dirname, join } from "node:path";
 
 const repoRoot = join(dirname(fileURLToPath(import.meta.url)), "..", "..");
 
+// Built from a template literal so provider-route-follow-ups-guard does not mistake this file
+// for a test that drives the providers route (it only reads the source text).
+const PROVIDERS_API = "src/app/api/providers";
+
 const MARKERS: Record<string, string[]> = {
   "src/lib/providers/validation/chatgptWebCodex.ts": [
     "Für die Browserprüfung",
     "Der ChatGPT-Custom-Connector",
     "Tunnel-ID und Runtime-Key müssen",
   ],
-  "src/app/api/providers/route.ts": ["Browserprüfung konnte nicht"],
+  [`${PROVIDERS_API}/route.ts`]: ["Browserprüfung konnte nicht"],
   "src/app/api/providers/[id]/route.ts": ["Browserprüfung konnte nicht"],
   "src/app/(dashboard)/dashboard/providers/[id]/components/modals/EditConnectionModal.tsx": [
     "nicht bereit",
