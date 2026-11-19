@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "הגבלה חייבת להיות מספר שלם חיובי.",
     "error": "שגיאה: {message}",
     "serverOffline": "שרת OmniRoute אינו מקוון. הפעילו אותו באמצעות: omniroute serve",
     "authRequired": "נדרש אימות. הגדירו את OMNIROUTE_API_KEY או הריצו: omniroute setup",
