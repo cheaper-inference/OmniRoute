@@ -15,6 +15,8 @@ const CODEX_SOL_PAID_PLANS = new Set([
   "business",
   "enterprise",
   "edu",
+  // ChatGPT Plus bought through an education offer: the OAuth token records it as "edu_plus".
+  "eduplus",
   "education",
 ]);
 
