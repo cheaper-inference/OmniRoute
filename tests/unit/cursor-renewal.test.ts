@@ -64,7 +64,11 @@ if (process.env.FAKE_CURSOR_AGENT_HANG === "1") {
     process.on("SIGTERM", () => {});
   }
   if (process.env.FAKE_CURSOR_AGENT_READY) {
-    fs.writeFileSync(process.env.FAKE_CURSOR_AGENT_READY, String(process.pid));
+    // Rename publishes the PID atomically: a reader never sees an empty file, whose
+    // Number("") === 0 would turn the cleanup kill into a signal to its own process group.
+    const readyTmp = process.env.FAKE_CURSOR_AGENT_READY + ".tmp";
+    fs.writeFileSync(readyTmp, String(process.pid));
+    fs.renameSync(readyTmp, process.env.FAKE_CURSOR_AGENT_READY);
   }
   const selfExitMs = process.env.FAKE_CURSOR_AGENT_SELF_EXIT_MS;
   if (selfExitMs) {
@@ -181,7 +185,10 @@ describe("runCursorAgentNudge", () => {
         assert.equal((await pending).signal, "SIGKILL");
       } finally {
         // Also reap the child on an assertion failure; never leave a hung fixture.
-        t.mock.timers.tick(900);
+        // A timer armed during tick() starts after that tick ends, so the SIGKILL
+        // follow-up armed by the deadline needs a tick of its own.
+        t.mock.timers.tick(600);
+        t.mock.timers.tick(300);
         if (!settled && fs.existsSync(readyPath)) {
           try {
             process.kill(Number(fs.readFileSync(readyPath, "utf8")), "SIGKILL");

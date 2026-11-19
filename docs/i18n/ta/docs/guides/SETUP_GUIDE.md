@@ -27,7 +27,9 @@ npm install -g omniroute
 omniroute
 ```
 
-டாஷ்போர்டு `http://localhost:20128` இல் திறக்கும்; API அடிப்படை URL `http://localhost:20128/v1` ஆகும்.
+டாஷ்போர்டு `http://localhost:20128` இல் திறக்கப்படும் மற்றும் API அடிப்படை URL `http://localhost:20128/v1` ஆகும்.
+
+> **npm பயனர்கள்:** நிறுவல் ஸ்கிரிப்டுகள் தடுக்கப்பட்டதாக npm எச்சரித்தால் (எ.கா., `omniroute`, `better-sqlite3`), [பிழையறிந்து — npm நிறுவல்-ஸ்கிரிப்டுகள் தடுக்கப்பட்டதைப்](./TROUBLESHOOTING.md#npm-install-scripts-blocked-warning-global-install) பார்க்கவும்.
 
 ### pnpm
 
@@ -36,16 +38,16 @@ pnpm add -g omniroute@latest --allow-build=better-sqlite3 --allow-build=@swc/cor
 omniroute
 ```
 
-> **pnpm பயனர்கள்:** `better-sqlite3` மற்றும் `@swc/core` ஆகியவற்றுக்கான நேட்டிவ் கட்டமைப்பு ஸ்கிரிப்ட்களை இயக்குவதற்கு `--allow-build` கொடி அவசியம். pnpm v11-இல் உலகளாவிய நிறுவல்களுக்கு `pnpm approve-builds -g` கட்டளை ஆதரிக்கப்படவில்லை.
+> **pnpm பயனர்கள்:** `better-sqlite3` மற்றும் `@swc/core` க்கான நேட்டிவ் பில்ட் ஸ்கிரிப்ட்களை இயக்க `--allow-build` கொடி தேவைப்படுகிறது. pnpm v11 இல் உலகளாவிய நிறுவல்களுக்கு `pnpm approve-builds -g` கட்டளை ஆதரிக்கப்படவில்லை.
 
-### Arch Linux (AUR)
+### ஆர்ச் Linux (AUR)
 
 ```bash
 yay -S omniroute-bin
 systemctl --user enable --now omniroute.service
 ```
 
-[AUR தொகுப்பு](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute-ஐ நிறுவி, systemd பயனர் சேவையையும் வழங்குகிறது.
+[AUR தொகுப்பு](https://aur.archlinux.org/packages/omniroute-bin) OmniRoute நிறுவுகிறது மற்றும் systemd பயனர் சேவையை வழங்குகிறது.
 
 ### மூலத்திலிருந்து
 
@@ -54,59 +56,59 @@ npm install
 PORT=20128 DASHBOARD_PORT=20129 NEXT_PUBLIC_BASE_URL=http://localhost:20129 npm run dev
 ```
 
-> **Windows குறிப்பு:** இயல்பாக, பழைய `%USERPROFILE%\.omniroute` கோப்பகம் இல்லாதபோது OmniRoute `%APPDATA%\omniroute`-ஐப் பயன்படுத்துகிறது. வேறொரு தரவுக் கோப்பக இருப்பிடத்தைத் தேர்ந்தெடுக்க `DATA_DIR`-ஐ அமைக்கவும்.
+> **Windows குறிப்பு:** முன்னிருப்பாக, மரபு `%USERPROFILE%\.omniroute` கோப்பகம் இல்லாதபோது OmniRoute `%APPDATA%\omniroute` பயன்படுத்துகிறது. வேறொரு தரவு அடைவு இருப்பிடத்தைத் தேர்வுசெய்ய `DATA_DIR` அமைக்கவும்.
 
-> **குறிப்பு:** முதல் இயக்கத்தின்போது `npm install`, `.env.example` இலிருந்து `.env`-ஐத் தானாக உருவாக்குகிறது. அடுத்தடுத்த நிறுவல்கள் ஏற்கெனவே உள்ள `.env`-ஐ மேலெழுதாது; எனவே தனிப்பயனாக்கங்கள் பாதுகாக்கப்படும். மீண்டும் தொடக்க மதிப்புகளை நிரப்ப, மறுபடியும் இயக்குவதற்கு முன் `.env`-ஐ நீக்கவும்.
+> **குறிப்பு:** `npm install` முதல் ஓட்டத்தில் `.env.example` இலிருந்து `.env` தானாக உருவாக்குகிறது. அடுத்தடுத்த நிறுவல்கள் ஏற்கனவே உள்ள `.env` மேலெழுதாது, எனவே தனிப்பயனாக்கங்கள் பாதுகாக்கப்படும். மீண்டும் விதைக்க, மீண்டும் இயங்கும் முன் `.env` நீக்கவும்.
 
 ### Docker
 
-Compose சுயவிவரங்கள் மற்றும் Caddy HTTPS உட்பட முழுமையான Docker அமைப்புக்கு [Docker வழிகாட்டி](./DOCKER_GUIDE.md) என்பதைப் பார்க்கவும்.
+சுயவிவரங்களை எழுதுதல் மற்றும் கேடி HTTPS உள்ளிட்ட முழுமையான Docker அமைப்பிற்கான [Docker வழிகாட்டியைப்](./DOCKER_GUIDE.md) பார்க்கவும்.
 
-### டெஸ்க்டாப் செயலி (Electron)
+### டெஸ்க்டாப் ஆப் (Electron)
 
-Electron 41 + electron-builder 26.10 அடிப்படையில் உருவாக்கப்பட்ட டெஸ்க்டாப் உறையுடன் OmniRoute வழங்கப்படுகிறது. கிடைக்கக்கூடிய ஸ்கிரிப்ட்கள் (பணியிட மூலக் கோப்பகம்):
+OmniRoute Electron 41 + எலக்ட்ரான்-பில்டர் 26.10 இல் கட்டப்பட்ட டெஸ்க்டாப் ரேப்பரை அனுப்புகிறது. கிடைக்கும் ஸ்கிரிப்டுகள் (பணியிட ரூட்):
 
 ```bash
-npm run electron:dev          # உடனடி மறுஏற்றத்துடன் டெஸ்க்டாப்பை இயக்கவும்
-npm run electron:build        # தற்போதைய OS-க்காகக் கட்டமைக்கவும் (தானாகக் கண்டறியப்படும்)
-npm run electron:build:win    # Windows நிறுவி (NSIS + கையடக்கப் பதிப்பு)
+npm run electron:dev          # Run desktop with hot-reload
+npm run electron:build        # Build for current OS (auto-detected)
+npm run electron:build:win    # Windows installer (NSIS + portable)
 npm run electron:build:mac    # macOS (dmg + zip, arm64+x64)
 npm run electron:build:linux  # Linux (AppImage + deb + rpm)
-npm run electron:smoke:packaged  # தொகுக்கப்பட்ட கட்டமைப்பை அடிப்படைச் சோதனை செய்யவும்
+npm run electron:smoke:packaged  # Smoke-test packaged build
 ```
 
-டெஸ்க்டாப் நிறுவிகளின் வெளியீடுகள் GitHub Releases-இல் இணைக்கப்பட்டுள்ளன. Electron குறித்த முழுமையான ஆழமான விளக்கத்திற்கு (கையொப்பமிடுதல், IPC பாலம், விநியோகங்கள்), [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) என்பதைப் பார்க்கவும் _(பின்னர் ஒரு கட்டத்தில் உருவாக்கப்பட்டது)_.
+டெஸ்க்டாப் நிறுவிகளின் வெளியீடுகள் GitHub வெளியீடுகளுடன் இணைக்கப்பட்டுள்ளன. முழு Electron டீப்-டைவ் (கையொப்பமிடுதல், IPC பிரிட்ஜ், டிஸ்ட்ரோஸ்), [`ELECTRON_GUIDE.md`](./ELECTRON_GUIDE.md) _(criado em fase posterior)_ ஐப் பார்க்கவும்.
 
-### திரையற்ற சேவையகம் (CI/தானியக்கம்)
+### ஹெட்லெஸ் சர்வர் (CI/automation)
 
-கவனிப்பில்லாத அமைப்புகளுக்கு (Docker, Kubernetes, CI), இதைப் பயன்படுத்தவும்:
+கவனிக்கப்படாத அமைப்புகளுக்கு (Docker, Kubernetes, CI), பயன்படுத்தவும்:
 
 ```bash
 omniroute setup --non-interactive
 omniroute providers test-batch
 ```
 
-சூழல் மாறிகளுடன் (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET` போன்றவை) இணைத்துப் பயன்படுத்தும்போது, முழுமையாக ஸ்கிரிப்ட் செய்யக்கூடிய OmniRoute நிகழ்வைத் தொடங்க இது உங்களை அனுமதிக்கிறது.
+env vars (`INITIAL_PASSWORD`, `OMNIROUTE_WS_BRIDGE_SECRET`, முதலியன) உடன் இணைந்து, OmniRoute நிகழ்வை முழுமையாக ஸ்கிரிப்ட் செய்ய இது உங்களை அனுமதிக்கிறது.
 
 ### CLI விருப்பங்கள்
 
-| கட்டளை                  | விளக்கம்                                                                                                    |
-| ----------------------- | ----------------------------------------------------------------------------------------------------------- |
-| `omniroute`             | சேவையகத்தைத் தொடங்கும் (`PORT=20128`, API மற்றும் டாஷ்போர்டு ஒரே போர்ட்டில்)                                |
-| `omniroute setup`       | கடவுச்சொல் மற்றும் முதல் வழங்குநருக்கான வழிகாட்டப்பட்ட CLI தொடக்க அமைப்பு                                   |
-| `omniroute doctor`      | சேவையகத்தைத் தொடங்காமல் உள்ளூர் செயல்நிலைச் சோதனைகளை இயக்கும்                                               |
-| `omniroute providers`   | CLI-இலிருந்து வழங்குநர்களைக் கண்டறிந்து, பட்டியலிட்டு, சரிபார்த்து, சோதிக்கும்                              |
-| `omniroute config`      | CLI கருவி உள்ளமைவு — உள்ளமைவுகளைப் பட்டியலிடுதல், பெறுதல், அமைத்தல், சரிபார்த்தல்                           |
-| `omniroute status`      | இணைப்பில்லா நிலை டாஷ்போர்டு — பதிப்பு, DB, கருவிகள், உள்ளமைவு                                               |
-| `omniroute logs`        | API-இலிருந்து பயன்பாட்டுப் பதிவுகளைத் தொடர்ச்சியாகக் காட்டும் (`--follow` ஆதரிக்கப்படுகிறது)                |
-| `omniroute update`      | OmniRoute புதுப்பிப்புகளைச் சரிபார்க்கும் அல்லது செயல்படுத்தும்                                             |
-| `omniroute provider`    | வழங்குநர் இணைப்புகளை நிர்வகிக்கும் — சேர்த்தல், பட்டியலிடுதல், நீக்குதல், சோதித்தல், இயல்புநிலையாக அமைத்தல் |
-| `omniroute --port 3000` | முதன்மை/API போர்ட்டை 3000 ஆக அமைக்கும்                                                                      |
-| `omniroute --mcp`       | MCP சேவையகத்தைத் தொடங்கும் (stdio போக்குவரத்து)                                                             |
-| `omniroute --no-open`   | உலாவியைத் தானாகத் திறக்காது                                                                                 |
-| `omniroute --help`      | உதவியைக் காட்டும்                                                                                           |
+| கட்டளை                  | விளக்கம்                                                                                    |
+| ----------------------- | ------------------------------------------------------------------------------------------- |
+| `omniroute`             | சேவையகத்தைத் தொடங்கவும் (`PORT=20128`, API மற்றும் டேஷ்போர்டு ஒரே போர்ட்டில்)               |
+| `omniroute setup`       | கடவுச்சொல் மற்றும் முதல் வழங்குநருக்கு வழிகாட்டப்பட்ட CLI ஆன்போர்டிங்                       |
+| `omniroute doctor`      | சேவையகத்தைத் தொடங்காமல் உள்ளூர் சுகாதார சோதனைகளை இயக்கவும்                                  |
+| `omniroute providers`   | CLI இலிருந்து வழங்குநர்களைக் கண்டறியவும், பட்டியலிடவும், சரிபார்க்கவும் மற்றும் சோதிக்கவும் |
+| `omniroute config`      | CLI கருவி கட்டமைப்பு — பட்டியல், பெறவும், அமைக்கவும், கட்டமைப்புகளை சரிபார்க்கவும்          |
+| `omniroute status`      | ஆஃப்லைன் நிலை டாஷ்போர்டு — பதிப்பு, DB, கருவிகள், கட்டமைப்பு                                |
+| `omniroute logs`        | API இலிருந்து ஸ்ட்ரீம் பயன்பாட்டு பதிவுகள் ( `--follow` ஆதரிக்கிறது)                        |
+| `omniroute update`      | OmniRoute புதுப்பிப்புகளைச் சரிபார்க்கவும் அல்லது விண்ணப்பிக்கவும்                          |
+| `omniroute provider`    | வழங்குநர் இணைப்புகளை நிர்வகி — சேர், பட்டியல், நீக்க, சோதனை, இயல்புநிலை                     |
+| `omniroute --port 3000` | canonical/API போர்ட்டை 3000 ஆக அமைக்கவும்                                                   |
+| `omniroute --mcp`       | MCP சேவையகத்தைத் தொடங்கு (stdio போக்குவரத்து)                                               |
+| `omniroute --no-open`   | உலாவியைத் தானாகத் திறக்க வேண்டாம்                                                           |
+| `omniroute --help`      | உதவி காட்டு                                                                                 |
 
-திரையற்ற அமைப்பை கொடிகள் அல்லது சூழல் மாறிகளைக் கொண்டு ஸ்கிரிப்ட் செய்யலாம்:
+ஹெட்லெஸ் அமைப்பை கொடிகள் அல்லது சூழல் மாறிகள் மூலம் ஸ்கிரிப்ட் செய்யலாம்:
 
 ```bash
 omniroute setup --non-interactive --password "$OMNIROUTE_PASSWORD"
@@ -122,7 +124,7 @@ omniroute doctor --json
 omniroute doctor --no-liveness
 ```
 
-டாஷ்போர்டைத் திறக்காமல் SSH அல்லது ஸ்கிரிப்ட்களிலிருந்து வழங்குநர்களை நிர்வகிக்கவும்:
+டாஷ்போர்டைத் திறக்காமல் SSH அல்லது ஸ்கிரிப்ட்களில் இருந்து வழங்குநர்களை நிர்வகிக்கவும்:
 
 ```bash
 omniroute providers available
@@ -219,13 +221,17 @@ npm run test:protocols:e2e
 
 **Claude குறியீடு:**
 
+Claude குறியீடு HTTP க்கு மேல் இணைக்கிறது, இது `omniroute --mcp` (stdio) தொடங்கவில்லை. HTTP போக்குவரத்து முன்னிருப்பாக முடக்கப்பட்டுள்ளது: முதலில் இயங்கும் சர்வரில் அதை இயக்கவும். டாஷ்போர்டு உள்நுழைவு இயக்கப்பட்டால், நற்சான்றிதழ் இல்லாத கோரிக்கைக்கு `401` கிடைக்கும், எனவே `mcp:connect` (அல்லது `manage`) வைத்திருக்கும் API விசையை அனுப்பவும். `manage`/`admin` இல்லாத ஒரு விசைக்கு ஒவ்வொரு கருவியின் நோக்கமும் தேவை ( [MCP சர்வர் → MCP கருவி நோக்கங்களைப்](../frameworks/MCP-SERVER.md#mcp-tool-scopes) பார்க்கவும்).
+
 ```bash
-claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream
+omniroute mcp enable --transport streamable-http
+claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream \
+  --header "Authorization: Bearer your-key"
 ```
 
 **Cursor / Cline:**
 
-உங்கள் MCP அமைப்புகளில் சேர்க்கவும் (stdio, விசையுடன், அழைப்பவருக்கு முதன்மை இருக்கும்):
+உங்கள் MCP அமைப்புகளைச் சேர்க்கவும் (stdio, விசையுடன், அழைப்பவருக்கு முதன்மை இருக்கும்):
 
 ```json
 {

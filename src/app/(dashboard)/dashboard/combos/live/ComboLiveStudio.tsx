@@ -3,7 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { NodeTypes } from "@xyflow/react";
 import { useTranslations } from "next-intl";
-import { Stat, StatRow } from "@omniroute/ui-kit/stat";
+import { Stat, StatRow, type StatTone } from "@omniroute/ui-kit/stat";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@omniroute/ui-kit/tabs";
 import Select from "@/shared/components/Select";
 import { FlowCanvas } from "@/shared/components/flow/FlowCanvas";
@@ -160,15 +160,18 @@ function EmptyState() {
 
 // ── Run summary ───────────────────────────────────────────────────────────
 //
-// Kit `Stat` cards for the current run. The numbers are not animated: the kit
-// NumberTicker restarts from 0 whenever its value changes, and this view
-// re-renders on every attempt event, so it would recount from zero each time.
+// Kit `Stat` cards for the current run. This view re-renders on every attempt
+// event, so the numbers count with `animateFrom="previous"`: each new value
+// counts on from the number on screen instead of restarting at zero (kit #189).
+// A run still in progress uses the kit warning tone (pending/running state).
 
-const OUTCOME_TONE: Record<ComboRunModel["outcome"], "default" | "positive" | "critical"> = {
-  running: "default",
+const OUTCOME_TONE: Record<ComboRunModel["outcome"], StatTone> = {
+  running: "warning",
   succeeded: "positive",
   exhausted: "critical",
 };
+
+const LIVE_COUNTER = { animate: true, animateFrom: "previous", animateOnView: false } as const;
 
 function RunSummary({ run }: { run: ComboRunModel }) {
   const t = useTranslations("combos");
@@ -181,12 +184,18 @@ function RunSummary({ run }: { run: ComboRunModel }) {
         format="text"
         value={run.strategy || null}
       />
-      <Stat labelVariant="eyebrow" label={t("liveStatTargets")} value={run.targets.length} />
+      <Stat
+        labelVariant="eyebrow"
+        label={t("liveStatTargets")}
+        value={run.targets.length}
+        {...LIVE_COUNTER}
+      />
       <Stat
         labelVariant="eyebrow"
         label={t("liveStatFailed")}
         value={failed}
         tone={failed > 0 ? "critical" : "default"}
+        {...LIVE_COUNTER}
       />
       <Stat
         labelVariant="eyebrow"

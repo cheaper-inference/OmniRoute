@@ -51,12 +51,15 @@ export function get(key: string): Float32Array | undefined {
     return undefined;
   }
   hitCount++;
+  // Reinsert so Map order is recency order; the entry keeps its original ts (TTL does not slide).
+  store.delete(key);
+  store.set(key, entry);
   return entry.vector;
 }
 
 export function set(key: string, vector: Float32Array): void {
   const max = getMax();
-  // LRU eviction: if at capacity, remove oldest entry
+  // LRU eviction: if at capacity, remove the least recently used entry (first in Map order)
   if (store.size >= max && !store.has(key)) {
     const oldestKey = store.keys().next().value;
     if (oldestKey !== undefined) {
