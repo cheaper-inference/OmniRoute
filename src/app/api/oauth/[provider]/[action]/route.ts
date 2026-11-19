@@ -31,6 +31,7 @@ import {
   antigravityPersistStatus,
 } from "@/lib/oauth/antigravityProjectGate";
 import { syncToCloud } from "@/lib/cloudSync";
+import { triggerAutoModelSync } from "@/lib/providerModels/autoModelSyncTrigger";
 import { startLocalServer } from "@/lib/oauth/utils/server";
 import { runWithProxyContextOrDirect } from "@omniroute/open-sse/utils/proxyFetch.ts";
 import {
@@ -607,6 +608,9 @@ export async function POST(
       }
 
       // Auto sync to Cloud if enabled
+      // A connection added here has no catalog until its first sync; the
+      // scheduler only reaches it on the next six-hour tick.
+      triggerAutoModelSync(connection);
       await syncToCloudIfEnabled();
 
       return NextResponse.json({
@@ -699,6 +703,9 @@ export async function POST(
         }
 
         // Auto sync to Cloud if enabled
+        // A connection added here has no catalog until its first sync; the
+        // scheduler only reaches it on the next six-hour tick.
+        triggerAutoModelSync(connection);
         await syncToCloudIfEnabled();
 
         return NextResponse.json({
@@ -836,6 +843,9 @@ export async function POST(
           );
         }
 
+        // A connection added here has no catalog until its first sync; the
+        // scheduler only reaches it on the next six-hour tick.
+        triggerAutoModelSync(connection);
         await syncToCloudIfEnabled();
 
         return NextResponse.json({
@@ -920,6 +930,9 @@ export async function POST(
           );
         }
 
+        // A connection added here has no catalog until its first sync; the
+        // scheduler only reaches it on the next six-hour tick.
+        triggerAutoModelSync(connection);
         await syncToCloudIfEnabled();
 
         return NextResponse.json({
