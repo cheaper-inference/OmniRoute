@@ -551,8 +551,10 @@ async function runOmniroute(argv: string[], launchDeps: object, registry?: objec
   const stderr = sink();
   let code: number | undefined;
   const program = createProgram();
-  program.commands.splice(
-    program.commands.findIndex((c) => c.name() === "launch"),
+  // commander types `commands` as readonly; the array is the program's own list.
+  const commands = program.commands as Command[];
+  commands.splice(
+    commands.findIndex((c) => c.name() === "launch"),
     1
   );
   registerLaunch(program, {
