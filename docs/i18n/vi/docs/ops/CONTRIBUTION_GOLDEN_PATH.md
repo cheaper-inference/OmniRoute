@@ -29,70 +29,61 @@ thay đổi phổ biến với các hợp đồng, bước kiểm tra trọng t�
 6. **Ghi lại bằng chứng.** Trong mẫu PR, hãy liệt kê các lệnh đã chạy, mọi tệp kiểm thử được thêm hoặc thay đổi,
    các migration hoặc feature flag và mọi bước xác thực chỉ chạy trên CI vẫn đang chờ xử lý.
 
-## Quy trình chuẩn theo loại thay đổi
+## Đường dẫn vàng theo loại thay đổi
 
-Các lệnh bên dưới là những bước kiểm tra trọng tâm tối thiểu, không phải sự cho phép để bỏ qua một kiểm thử trực tiếp bao phủ
-hành vi mà bạn đã thay đổi.
+Các lệnh bên dưới là các bước kiểm tra tập trung tối thiểu, không được phép bỏ qua bài kiểm tra liên quan trực tiếp đến hành vi bạn đã thay đổi.
 
-### Provider
+### nhà cung cấp
 
 **Hợp đồng**
 
-- Định nghĩa provider trong `src/shared/constants/providers/` và cách kết hợp của nó trong
-  `src/shared/constants/providers.ts`.
-- Các model và khả năng trong `open-sse/config/providerRegistry.ts` hoặc các tệp registry được tách ra từ đó.
-- Việc lựa chọn executor/translator, cấu hình OAuth hoặc API key, các asset của dashboard và tài liệu tham chiếu
-  provider được tạo tự động khi áp dụng.
-- Thông tin xác thực công khai phải sử dụng `resolvePublicCred()`; phản hồi lỗi phải sử dụng các helper làm sạch lỗi
-  dùng chung. Xem `docs/security/PUBLIC_CREDS.md` (git; không được biên dịch vào `/docs`) và
-  [Làm sạch lỗi](../security/ERROR_SANITIZATION.md).
+- Định nghĩa nhà cung cấp trong `src/shared/constants/providers/` và thành phần của nó trong `src/shared/constants/providers.ts`.
+- Các mô hình và khả năng trong `open-sse/config/providerRegistry.ts` hoặc các tệp đăng ký được trích xuất của nó.
+- lựa chọn Executor/translator, cấu hình OAuth hoặc khóa API và nội dung trang tổng quan. Không cam kết các sơ đồ `docs/reference/PROVIDER_REFERENCE.md` hoặc README được tái tạo: bản làm mới bản phát hành sẽ viết lại chúng (`check:pr-derived-paths` không thực hiện được một tính năng PR mang chúng).
+- Thông tin công khai phải sử dụng `resolvePublicCred()`; phản hồi lỗi phải sử dụng các trình trợ giúp lỗi đã được dọn dẹp chung. Xem `docs/security/PUBLIC_CREDS.md` (git; không được biên dịch thành `/docs`) và [Error Sanitization](../security/ERROR_SANITIZATION.md).
 
-**Vòng lặp trọng tâm**
+**Vòng lặp tập trung**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # khi danh mục thay đổi; hãy commit diff được tạo
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Đồng thời kiểm thử mọi nhóm request bị ảnh hưởng: chat, Responses, hình ảnh, embedding, âm thanh hoặc video.
-Hãy xem các diff của danh mục được tạo và golden diff như những thay đổi hợp đồng; đừng chấp nhận chúng một cách máy móc.
+Đồng thời kiểm tra mọi nhóm yêu cầu bị ảnh hưởng: trò chuyện, Phản hồi, hình ảnh, nội dung nhúng, âm thanh hoặc video. Xem lại danh mục đã tạo và những khác biệt vàng khi hợp đồng thay đổi; đừng chấp nhận chúng một cách mù quáng.
 
-### Định tuyến
+### Lộ trình
 
 **Hợp đồng**
 
-- Các giá trị chiến lược công khai và metadata UI trong `src/shared/constants/routingStrategies.ts`.
-- Hoạt động dispatch và thứ tự trong `open-sse/services/combo.ts` và `open-sse/services/combo/`.
-- Các schema combo, khả năng lưu trữ bền vững, trạng thái phục hồi, khả năng của model và các điều khiển API/UI.
-- [Công cụ Auto-Combo](../routing/AUTO-COMBO.md) và tài liệu về khả năng phục hồi khi hành vi thay đổi.
+- Giá trị chiến lược công khai và siêu dữ liệu UI trong `src/shared/constants/routingStrategies.ts`.
+- Gửi và đặt hàng theo `open-sse/services/combo.ts` và `open-sse/services/combo/`.
+- Lược đồ kết hợp, tính bền bỉ, trạng thái phục hồi, khả năng của mô hình và điều khiển API/UI.
+- [Auto-Combo Engine](../routing/AUTO-COMBO.md) và tài liệu về khả năng phục hồi khi hành vi thay đổi.
 
-**Vòng lặp trọng tâm**
+**Vòng lặp tập trung**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # khi chiến lược hoặc hoạt động dispatch thay đổi
-npm run check:known-symbols      # khi đăng ký chiến lược thay đổi
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Hãy sử dụng các kiểm thử upstream giả lập có tính xác định ở máy cục bộ. Các bước smoke test combo trực tiếp yêu cầu thông tin xác thực và được
-thực hiện thủ công, không thể thay thế cho CI.
+Sử dụng các thử nghiệm mô phỏng ngược dòng xác định cục bộ. Khói kết hợp trực tiếp yêu cầu thông tin xác thực và được thực hiện thủ công, không thay thế CI.
 
 ### UI / UX
 
 **Hợp đồng**
 
-- Route/page của Next.js và ranh giới component dùng chung trong `src/app/` và
-  `src/shared/components/`.
-- Cấu trúc phản hồi API, trạng thái đang tải/trống/lỗi, hành vi bàn phím và trình đọc màn hình,
-  bố cục đáp ứng, chủ đề và mở rộng locale.
-- Các chuỗi nguồn UI tiếng Anh trong `src/i18n/messages/en.json`; không được mã hóa cứng nội dung mới hiển thị cho người dùng.
+- Next.js route/page và các ranh giới thành phần được chia sẻ dưới `src/app/` và `src/shared/components/`.
+- hình dạng phản hồi API, trạng thái loading/empty/error, hoạt động của bàn phím và trình đọc màn hình, bố cục phản hồi, chủ đề và mở rộng ngôn ngữ.
+- Chuỗi nguồn UI tiếng Anh trong `src/i18n/messages/en.json`; không mã hóa cứng bản sao hướng tới người dùng mới.
 
-**Vòng lặp trọng tâm**
+**Vòng lặp tập trung**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,67 +92,61 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Chạy ứng dụng đối với các thay đổi về tương tác hoặc hình ảnh và kiểm tra cả viewport hẹp lẫn rộng. CI chạy
-bản dựng production và các bộ kiểm thử tổng quát hơn; hành vi trực quan vẫn cần một component trọng tâm, Playwright
-hoặc bước kiểm tra thủ công được ghi lại phù hợp với thay đổi.
+Chạy ứng dụng để tương tác hoặc thay đổi hình ảnh và kiểm tra cả khung nhìn hẹp và rộng. CI điều hành việc xây dựng sản xuất và các bộ sản phẩm rộng hơn; hành vi trực quan vẫn cần một thành phần tập trung, Playwright hoặc kiểm tra thủ công được ghi lại phù hợp với thay đổi.
 
 ### i18n
 
 **Hợp đồng**
 
-- `src/i18n/messages/en.json` là nguồn UI; `config/i18n.json` là nguồn locale.
-- Các danh mục CLI được lưu riêng trong `bin/cli/locales/`.
-- Giữ nguyên chính xác các placeholder và tag ICU. Không dịch tên sản phẩm/provider/model,
-  tên giao thức và header, lệnh, định danh code/JSON, URL, biến môi trường hoặc
-  các thuật ngữ được bảo vệ như `OmniRoute`, `OAuth`, `MCP` và `A2A`. Danh sách nguồn hiện tại là
-  `scripts/i18n/glossary/protected-terms.json`.
+- `src/i18n/messages/en.json` là nguồn UI ; `config/i18n.json` là nguồn địa phương.
+- Danh mục CLI tồn tại riêng biệt dưới `bin/cli/locales/`.
+- Bảo quản chính xác các phần giữ chỗ và thẻ ICU. Không dịch tên product/provider/model, tên giao thức và tiêu đề, lệnh, mã định danh code/JSON, URLs, biến môi trường hoặc các thuật ngữ được bảo vệ như `OmniRoute`, `OAuth`, `MCP` và `A2A`. Danh sách nguồn hiện tại là `scripts/i18n/glossary/protected-terms.json`.
 
-**Vòng lặp trọng tâm**
+Một tính năng PR chỉ chỉnh sửa `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); các ngôn ngữ khác được hoàn thành một lần cho mỗi bản phát hành bằng cách làm mới bản phát hành hoặc một đợt dịch thuật (`docs/guides/I18N.md` → "Chỉ tính năng PRs touch `en.json` "). `npm run check:pr-derived-paths` không thành công trong tính năng PR chỉnh sửa danh mục ngôn ngữ khác.
+
+**Vòng lặp tập trung**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # khi các chuỗi/danh mục CLI thay đổi
 npm run lint
 ```
 
-Đây là hướng dẫn dành cho hệ thống hiện có, không phải lời mời mở rộng công cụ hoặc mô hình key của hệ thống.
-Hãy giữ các bản vá i18n có phạm vi chính xác trong khi hệ thống thay thế đang được thiết kế. Không chạy các lệnh dịch
-gọi dịch vụ bên ngoài trừ khi tác vụ yêu cầu rõ ràng các bản dịch được tạo tự động và
-bạn đã xem xét diff tạo ra.
+Không có `--mode=pr` các cổng này chạy cục bộ ở chế độ phát hành và báo cáo mọi khóa mà chu trình đã thêm hoặc viết lại trong `en.json`; đó là công việc của bản làm mới bản phát hành, không phải của PR của bạn.
+
+Đây là hướng dẫn dành cho hệ thống hiện có, không phải là lời mời mở rộng công cụ hoặc mô hình khóa của nó. Giữ các bản vá i18n luôn hoạt động trong khi hệ thống thay thế đang được thiết kế. Không chạy các lệnh dịch gọi các dịch vụ bên ngoài trừ khi tác vụ yêu cầu rõ ràng các bản dịch được tạo và bạn đã xem xét sự khác biệt kết quả.
 
 ### CLI
 
 **Hợp đồng**
 
-- Các lệnh và cờ công khai trong `bin/cli/`, các lệnh API được tạo, mã thoát, stdout/stderr và
-  cấu trúc đầu ra JSON, hành vi cấu hình/môi trường và các tệp được đóng gói.
-- Các chuỗi hiển thị cho người dùng CLI phải sử dụng lớp i18n của CLI và giữ cho các danh mục `en`/`pt-BR` đồng bộ.
-- Duy trì Node là runtime được hỗ trợ và bảo toàn hợp đồng nhị phân đã phát hành.
+- Các lệnh và cờ công khai trong `bin/cli/`, các lệnh API được tạo, mã thoát, hình dạng đầu ra stdout/stderr và JSON, hành vi config/environment và các tệp được đóng gói.
+- Các chuỗi hướng tới người dùng CLI phải sử dụng lớp CLI i18n ( các khóa `t()` tồn tại trong `bin/cli/locales/en.json`). Một tính năng PR chỉ chỉnh sửa `en.json`; `pt-BR` và các ngôn ngữ khác được hoàn thành khi phát hành.
+- Giữ nguyên Node dưới dạng thời gian chạy được hỗ trợ và hợp đồng nhị phân được xuất bản.
 
 **Vòng lặp tập trung**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # các thay đổi CLI được tạo/đóng gói
-npm run check:pack-policy     # các thay đổi đối với bề mặt gói
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Sử dụng chính xác lệnh đó trong một thư mục dữ liệu tạm thời khi hành vi phụ thuộc vào việc phân tích cú pháp, tệp hoặc trạng thái
-thoát. CI thực hiện các bước kiểm tra rộng hơn đối với hiện vật gói và hệ sinh thái.
+Sử dụng lệnh chính xác trong thư mục dữ liệu tạm thời khi hành vi phụ thuộc vào phân tích cú pháp, tệp hoặc trạng thái thoát. CI thực hiện kiểm tra hệ sinh thái và tạo phẩm gói rộng hơn.
 
 ### Cơ sở dữ liệu
 
-**Các hợp đồng**
+**Hợp đồng**
 
-- Các mô-đun miền nằm trong `src/lib/db/`; nhập trực tiếp các mô-đun cụ thể (lớp tái xuất cũ `localDb.ts` đã bị xóa).
-- Các migration SQL được đánh số, có tính lũy đẳng trong `src/lib/db/migrations/`, độ an toàn của giao dịch, hành vi
-  nâng cấp, chỉ mục và mọi thành phần gọi chịu ảnh hưởng bởi schema.
-- Các route và handler không bao giờ thực thi trực tiếp SQL thô.
+- Các mô-đun miền theo `src/lib/db/`; nhập trực tiếp các mô-đun cụ thể (lớp tái xuất `localDb.ts` cũ đã bị xóa).
+- Di chuyển SQL được đánh số, bình thường theo `src/lib/db/migrations/`, an toàn giao dịch, hành vi nâng cấp, chỉ mục và mọi người gọi bị ảnh hưởng bởi lược đồ.
+- Các tuyến đường và trình xử lý không bao giờ phát hành SQL thô một cách trực tiếp.
 
 **Vòng lặp tập trung**
 
@@ -173,33 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Kiểm thử cả cơ sở dữ liệu mới và quá trình nâng cấp từ schema trước đó khi thêm migration. Các kiểm thử cơ sở dữ liệu
-phải đóng các handle và gọi `resetDbInstance()` trong quá trình dọn dẹp. Chỉ chạy `npm run test:bun:db` khi
-đường dẫn adapter Bun theo cơ chế nỗ lực tối đa thay đổi; Node vẫn là nguồn xác thực có thẩm quyền.
+Kiểm tra cả cơ sở dữ liệu mới và nâng cấp từ lược đồ trước đó khi thêm quá trình di chuyển. Kiểm tra cơ sở dữ liệu phải đóng các thẻ điều khiển và gọi `resetDbInstance()` trong quá trình dọn dẹp. Chỉ chạy `npm run test:bun:db` khi đường dẫn bộ điều hợp Bun nỗ lực tốt nhất thay đổi; Nút vẫn có thẩm quyền.
 
-### Xây dựng / triển khai
+### Xây dựng/triển khai
 
-**Các hợp đồng**
+**Hợp đồng**
 
-- Các manifest/lockfile ở thư mục gốc và workspace, `scripts/build/`, quá trình lắp ráp độc lập của Next.js, nội dung gói
-  `dist/`, siêu dữ liệu nền tảng Electron, các workflow CI và các sentinel triển khai.
-- Các phạm vi phiên bản Node được hỗ trợ và việc sử dụng Bun theo danh sách cho phép trong `CLAUDE.md` phải được giữ nguyên.
-- Các hiện vật xây dựng không được theo dõi; áp dụng các chính sách về dependency, giấy phép, workflow và gói.
+- Root và không gian làm việc manifests/lockfile, `scripts/build/`, Next.js lắp ráp độc lập, nội dung gói `dist/`, siêu dữ liệu nền tảng Electron, quy trình công việc CI và trọng điểm triển khai.
+- Phạm vi Nút được hỗ trợ và việc sử dụng Bun được liệt kê cho phép trong `CLAUDE.md` phải được giữ nguyên.
+- Xây dựng các tạo phẩm không bị theo dõi; áp dụng các chính sách phụ thuộc, giấy phép, quy trình làm việc và gói.
 
 **Vòng lặp tập trung**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # các thay đổi dependency hoặc lockfile
-npm run check:pack-policy      # các thay đổi đối với bề mặt gói đã phát hành
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Chỉ sử dụng `npm run build` cục bộ khi thay đổi ảnh hưởng đến việc biên dịch, lắp ráp độc lập, asset
-hoặc đóng gói runtime. Chỉ sử dụng `npm run build:release` để xác thực bản phát hành/triển khai. Bản build của CI là
-tín hiệu đa nền tảng cuối cùng; các thay đổi Electron dành riêng cho nền tảng cần có bản build tập trung tương ứng
-hoặc bằng chứng smoke test.
+Chỉ sử dụng `npm run build` cục bộ khi thay đổi ảnh hưởng đến quá trình biên dịch, tập hợp độc lập, nội dung hoặc gói thời gian chạy. Chỉ sử dụng `npm run build:release` để xác thực release/deploy. Bản dựng của CI là tín hiệu đa nền tảng cuối cùng; Các thay đổi Electron dành riêng cho nền tảng cần có bằng chứng xây dựng hoặc khói tập trung phù hợp.
 
 ## Các script dành cho nhà phát triển trên máy dùng chung
 

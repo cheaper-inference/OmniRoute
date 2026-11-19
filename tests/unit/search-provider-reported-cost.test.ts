@@ -164,11 +164,11 @@ test("caller provider_options.baseUrl never gets its reported cost trusted", asy
   const { data } = await executeWebSearch({
     query: "caller chosen host query",
     provider: "searxng-search",
-    provider_options: { baseUrl: "http://127.0.0.1:9999/evil" },
+    provider_options: { baseUrl: "https://caller-chosen.example/evil" },
     apiKeyId,
   });
 
-  assert.ok(seen[0].startsWith("http://127.0.0.1:9999/evil/search?"));
+  assert.ok(seen[0].startsWith("https://caller-chosen.example/evil/search?"));
   assert.equal(data.usage.search_cost_usd, SEARCH_PROVIDERS["searxng-search"].costPerQuery);
   assert.equal(data.usage.cost_source, undefined);
   await settle();

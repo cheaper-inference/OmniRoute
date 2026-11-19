@@ -1,1 +1,0 @@
-- **test(sse):** a survey test runs every executor's first model per request format on a deep-frozen body inside the egress guard, failing only when the survey itself breaks and listing in-place body writers as diagnostics (#18851).

@@ -189,7 +189,7 @@ function ProviderQuotaHeader({
       {dragHandle}
       <Icon name={open ? "expand_less" : "expand_more"} size={16} className="text-text-muted" />
       <div className="min-w-0 flex-1">
-        <h3 className="text-sm font-semibold text-text-main leading-5 truncate">
+        <h3 className="text-sm text-text-main truncate">
           {group && (
             <span
               className="me-2 inline-block h-2 w-2 rounded-full"

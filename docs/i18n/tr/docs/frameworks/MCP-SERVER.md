@@ -16,10 +16,12 @@ OmniRoute MCP yerleşiktir. Şununla başlayın:
 omniroute --mcp
 ```
 
-Veya open-sse aktarımı yoluyla:
+Veya open-sse taşıma yoluyla:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -143,9 +145,9 @@ Claude Desktop, Cursor, Cline ve uyumlu MCP istemcilerinin kurulumu için [MCP �
 | `omniroute_rtk_discover`            | `read:compression`  | İsteğe bağlı RTK çıktı örneklerinde yinelenen gürültüyü keşfedin                                                                     |
 | `omniroute_rtk_learn`               | `read:compression`  | Katılımcı örneklerden incelenebilir bir RTK filtre taslağı oluşturun                                                                 |
 
-CCR girişleri iki katmanlı bir depo kullanır: yerel bulut dışı çalışma zamanlarında dayanıklı bir SQLite katmanı (`ccr_blocks`, varsayılan olarak açık) tarafından desteklenen sıcak bir bellek içi katman, böylece bir blok, TTL bitene kadar çıkarmadan veya yeniden başlatmadan sağ çıkar —, 512 KB üzerindeki bloklar ve yalnızca bellekte kalan bulut çalışma zamanları hariç. Her blok 2 MiB ile, her ana birim 16 MiB ile ve global mağaza 64 MiB ile sınırlıdır. Girişler varsayılan olarak 24 saatlik TTL (maksimum yedi gün). Tam MCP alımı 256 KiB ile sınırlıdır; daha büyük bloklar aralıklı ve grep modları aracılığıyla kullanılabilir durumda kalır. Depolama, erişim, listeleme, inceleme, silme ve istatistikler, kimliği doğrulanmış API anahtarı ilkesiyle yalıtılır. Denetim kayıtları karmaları ve boyut meta verilerini içerir, asla içerik içermez. Operatörün karşılaştığı ayrıntılar (iki işaretleyici, istemci önkoşulları, `codemode:false`, araç başına kapsamlar, sayfalandırma ve tanılama matrisi) [Sıkıştırma Motorları → Önkoşulları / operatör kılavuzunda](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) mevcuttur.
+CCR girişleri iki katmanlı bir depo kullanır: yerel bulut dışı çalışma zamanlarında dayanıklı bir SQLite katmanı (`ccr_blocks`, varsayılan olarak açık) tarafından desteklenen sıcak bir bellek içi katman, böylece bir blok, TTL bitene kadar çıkarma veya yeniden başlatmadan sağ çıkar —, yalnızca bellekte kalan 512 KB, bulut çalışma zamanları ve `COMPRESSION_CCR_DURABLE_STORE=false` üzerindeki bloklar hariç. Dayanıklı yazma en iyi çabadır: 1000 yazma zaten beklemedeyken bırakılır ve başarısız bir SQLite yazma günlüğe kaydedilir, yeniden denenmez, böylece yeniden başlatma sırasında blok kaybolur. Her blok 2 MiB ile, her ana birim 16 MiB ile ve global mağaza 64 MiB ile sınırlıdır. Girişler varsayılan olarak 24 saatlik TTL (en fazla yedi gün). Tam MCP alımı 256 KiB ile sınırlıdır; daha büyük bloklar aralıklı ve grep modları aracılığıyla kullanılabilir durumda kalır. Depolama, erişim, listeleme, inceleme, silme ve istatistikler, kimliği doğrulanmış API anahtarı ilkesiyle yalıtılır. Denetim kayıtları karmaları ve boyut meta verilerini içerir, asla içerik içermez. Operatörün karşılaştığı ayrıntılar (iki işaretleyici, istemci önkoşulları, `codemode:false`, araç başına kapsamlar, sayfalandırma ve tanılama matrisi) [Sıkıştırma Motorları → Önkoşulları / operatör kılavuzunda](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) mevcuttur.
 
-`omniroute_compression_status` MCP açıklama sıkıştırmasını `analytics.mcpDescriptionCompression` altında ayrı olarak bildirir. Bu değerler, MCP listelenebilir açıklamalara (`tools`, `prompts`, `resources` ve `resourceTemplates`) yönelik meta veri boyutu tahminleridir; bunlar sağlayıcı kullanım makbuzları değildir ve `source: "mcp_metadata_estimate"` ile işaretlenmiştir.
+`omniroute_compression_status` MCP açıklama sıkıştırmasını `analytics.mcpDescriptionCompression` altında ayrı olarak bildirir. Bu değerler, MCP listelenebilir açıklamalar (`tools`, `prompts`, `resources` ve `resourceTemplates`) için meta veri boyutu tahminleridir; bunlar sağlayıcı kullanım makbuzları değildir ve `source: "mcp_metadata_estimate"` ile işaretlenmiştir.
 
 ### MCP Erişilebilirlik Ağacı Filtresi (v3.8.0)
 

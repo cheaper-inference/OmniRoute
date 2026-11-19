@@ -15,61 +15,61 @@
 5. **සමාලෝචනයට පෙර සමථයකට පත් කරන්න.** සක්රිය පාදකය fetch කර, එහි නව commits සහ එයට සාපේක්ෂව ඔබේ diff එක පරීක්ෂා කර, ඉන්පසු දායකත්ව කාර්ය ප්රවාහයට අනුව පාදකය rebase හෝ merge කරන්න. ජනනය කළ ගොනු සහ නාමාවලි ගැටුම් ඒවායේ මූලාශ්රයෙන් විසඳා, ඒවා නැවත ජනනය කර, ඉලක්කගත චක්රය නැවත ධාවනය කර, PR එක තවමත් සක්රිය නිකුතු ශාඛාව ඉලක්ක කරන බව තහවුරු කරන්න.
 6. **සාක්ෂි සටහන් කරන්න.** PR අච්චුවෙහි, ධාවනය කළ විධාන, එක් කළ හෝ වෙනස් කළ සෑම පරීක්ෂණ ගොනුවක්ම, migrations හෝ feature flags, සහ තවමත් බලාපොරොත්තුවෙන් ඇති CI-පමණක් වලංගුකරණය ලැයිස්තුගත කරන්න.
 
-## වෙනස්කම් වර්ගය අනුව ප්රධාන මාර්ග
+## වෙනස් කිරීමේ වර්ගය අනුව රන් මාර්ග
 
-පහත විධාන අවම ඉලක්කගත පරීක්ෂණ වන අතර, ඔබ වෙනස් කළ හැසිරීම සෘජුවම ආවරණය කරන පරීක්ෂණයක් මඟහැරීමට අවසරයක් නොවේ.
+පහත දැක්වෙන විධානයන් අවම අවධානය යොමු කළ චෙක්පත් වේ, ඔබ වෙනස් කළ හැසිරීම සෘජුව ආවරණය කරන පරීක්ෂණයක් මඟ හැරීමට අවසර නැත.
 
 ### සපයන්නා
 
 **ගිවිසුම්**
 
-- `src/shared/constants/providers/` තුළ ඇති සපයන්නාගේ නිර්වචනය සහ `src/shared/constants/providers.ts` තුළ එහි සංයුතිය.
-- `open-sse/config/providerRegistry.ts` හෝ එයින් වෙන් කළ registry ගොනු තුළ ඇති models සහ capabilities.
-- අදාළ වන විට executor/translator තේරීම, OAuth හෝ API-key වින්යාසය, dashboard සම්පත් සහ ජනනය කළ provider reference.
-- පොදු අක්තපත්ර `resolvePublicCred()` භාවිත කළ යුතුය; දෝෂ ප්රතිචාර හවුල් sanitized error helpers භාවිත කළ යුතුය. `docs/security/PUBLIC_CREDS.md` (git; `/docs` තුළට compile නොකෙරේ) සහ [දෝෂ සනීපාරක්ෂාව](../security/ERROR_SANITIZATION.md) බලන්න.
+- `src/shared/constants/providers/` හි සැපයුම්කරු අර්ථ දැක්වීම සහ `src/shared/constants/providers.ts` හි එහි සංයුතිය.
+- `open-sse/config/providerRegistry.ts` හෝ එහි උපුටා ගත් රෙජිස්ට්‍රි ගොනු වල ආකෘති සහ හැකියාවන්.
+- Executor/translator තේරීම, OAuth හෝ API-යතුරු වින්‍යාසය සහ උපකරණ පුවරු වත්කම්. ප්‍රතිජනනය කරන ලද `docs/reference/PROVIDER_REFERENCE.md` හෝ README රූප සටහන් සිදු නොකරන්න: නිකුතුව නැවුම් කිරීම ඒවා නැවත ලියයි (`check:pr-derived-paths` ඒවා රැගෙන යන විශේෂාංගයක් PR අසමත් වේ).
+- පොදු අක්තපත්ර `resolvePublicCred()` භාවිතා කළ යුතුය; දෝෂ ප්‍රතිචාර සඳහා හවුල් සනීපාරක්ෂක දෝෂ සහායක භාවිතා කළ යුතුය. `docs/security/PUBLIC_CREDS.md` (git; `/docs` බවට සම්පාදනය කර නැත) සහ [දෝෂ සනීපාරක්ෂාව](../security/ERROR_SANITIZATION.md) බලන්න.
 
-**ඉලක්කගත චක්රය**
+**නාභිගත ලූපය**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # නාමාවලිය වෙනස් වන විට; ජනනය කළ diff එක commit කරන්න
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-බලපෑමට ලක් වූ සෑම request family එකක්ම ද පරීක්ෂා කරන්න: chat, Responses, images, embeddings, audio, හෝ video. ජනනය කළ catalog සහ golden diffs ගිවිසුම් වෙනස්කම් ලෙස සමාලෝචනය කරන්න; ඒවා අන්ධ ලෙස පිළි නොගන්න.
+බලපෑමට ලක් වූ සෑම ඉල්ලීම් පවුලක්ම පරීක්ෂා කරන්න: කතාබස්, ප්‍රතිචාර, රූප, කාවැද්දීම්, ශ්‍රව්‍ය හෝ වීඩියෝ. කොන්ත්‍රාත්තුවේ වෙනස්කම් ලෙස ජනනය කරන ලද නාමාවලිය සහ රන් වෙනස්කම් සමාලෝචනය කරන්න; ඒවා අන්ධ ලෙස පිළිගන්න එපා.
 
 ### මාර්ගගත කිරීම
 
 **ගිවිසුම්**
 
-- `src/shared/constants/routingStrategies.ts` තුළ ඇති පොදු strategy values සහ UI metadata.
-- `open-sse/services/combo.ts` සහ `open-sse/services/combo/` යටතේ ඇති dispatch සහ ordering.
-- Combo schemas, persistence, resilience state, model capabilities, සහ API/UI controls.
-- හැසිරීම වෙනස් වන විට [Auto-Combo Engine](../routing/AUTO-COMBO.md) සහ resilience ලේඛන.
+- `src/shared/constants/routingStrategies.ts` හි පොදු උපාය අගයන් සහ UI පාරදත්ත.
+- `open-sse/services/combo.ts` සහ `open-sse/services/combo/` යටතේ යැවීම සහ ඇණවුම් කිරීම.
+- Combo schemas, persistence, resilience state, model capabilities, and API/UI controls.
+- හැසිරීම වෙනස් වන විට [ස්වයංක්‍රීය සංයුක්ත එන්ජිම](../routing/AUTO-COMBO.md) සහ ඔරොත්තු දීමේ ලේඛන.
 
-**ඉලක්කගත චක්රය**
+**නාභිගත ලූපය**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # strategy හෝ dispatch වෙනස්කම්
-npm run check:known-symbols      # strategy registration වෙනස්කම්
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-දේශීයව deterministic mocked-upstream පරීක්ෂණ භාවිත කරන්න. සජීවී combo smoke පරීක්ෂණ සඳහා අක්තපත්ර අවශ්ය වන අතර ඒවා අතින් සිදු කළ යුතුය; ඒවා CI සඳහා ආදේශක නොවේ.
+ප්‍රාදේශීය වශයෙන් අධිෂ්ඨානාත්මක උපහාසාත්මක පරීක්ෂණ භාවිතා කරන්න. සජීවී සංයෝජන දුම් සඳහා අක්තපත්‍ර අවශ්‍ය වන අතර ඒවා අතින්, CI ආදේශක නොවේ.
 
 ### UI / UX
 
 **ගිවිසුම්**
 
-- `src/app/` සහ `src/shared/components/` යටතේ ඇති Next.js route/page සහ හවුල් component සීමා.
-- API ප්රතිචාර හැඩතල, loading/empty/error තත්ත්ව, keyboard සහ screen-reader හැසිරීම, responsive layout, theming, සහ locale expansion.
-- `src/i18n/messages/en.json` තුළ ඇති ඉංග්රීසි UI මූලාශ්ර strings; නව පරිශීලක-මුහුණත් පෙළ hard-code නොකරන්න.
+- Next.js route/page සහ `src/app/` සහ `src/shared/components/` යටතේ කොටස් මායිම්.
+- API ප්‍රතිචාර හැඩතල, loading/empty/error තත්ත්‍වය, යතුරුපුවරුව සහ තිර කියවන්නාගේ හැසිරීම, ප්‍රතිචාරාත්මක පිරිසැලසුම, තේමාකරණය සහ පෙදෙසි ප්‍රසාරණය.
+- `src/i18n/messages/en.json` හි ඉංග්‍රීසි UI මූලාශ්‍ර තන්තු; නව පරිශීලක-මුහුණු පිටපත දෘඪ-කේත නොකරන්න.
 
-**ඉලක්කගත චක්රය**
+**නාභිගත ලූපය**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -78,60 +78,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-අන්තර්ක්රියා හෝ දෘශ්ය වෙනස්කම් සඳහා යෙදුම ධාවනය කර පටු සහ පුළුල් viewport දෙකම පරීක්ෂා කරන්න. CI මඟින් production build එක සහ පුළුල් පරීක්ෂණ කට්ටල ධාවනය කරයි; දෘශ්ය හැසිරීම සඳහා තවමත් වෙනස්කමට සුදුසු ඉලක්කගත component පරීක්ෂණයක්, Playwright පරීක්ෂණයක්, හෝ ලේඛනගත අතින් සිදු කරන පරීක්ෂාවක් අවශ්ය වේ.
+අන්තර්ක්‍රියා හෝ දෘශ්‍ය වෙනස්කම් සඳහා යෙදුම ධාවනය කර පටු සහ පුළුල් දර්ශන තොටුපළ දෙකම පරීක්ෂා කරන්න. CI නිෂ්පාදන ගොඩනැගීම සහ පුළුල් කට්ටල ධාවනය කරයි; දෘශ්‍ය හැසිරීමට තවමත් අවධානය යොමු කරන ලද සංරචකයක්, Playwright, හෝ වෙනස් කිරීමට සුදුසු ලේඛනගත අතින් පරීක්ෂාවක් අවශ්‍ය වේ.
 
 ### i18n
 
 **ගිවිසුම්**
 
-- `src/i18n/messages/en.json` යනු UI මූලාශ්රයයි; `config/i18n.json` යනු locale මූලාශ්රයයි.
-- CLI catalogs වෙනම `bin/cli/locales/` යටතේ පවතී.
-- ICU placeholders සහ tags නිවැරදිව එලෙසම සුරකින්න. product/provider/model නම්, protocol සහ header නම්, commands, code/JSON identifiers, URLs, environment variables, හෝ `OmniRoute`, `OAuth`, `MCP`, සහ `A2A` වැනි ආරක්ෂිත යෙදුම් පරිවර්තනය නොකරන්න. වත්මන් මූලාශ්ර ලැයිස්තුව `scripts/i18n/glossary/protected-terms.json` වේ.
+- `src/i18n/messages/en.json` යනු UI මූලාශ්‍රයයි; `config/i18n.json` යනු දේශීය මූලාශ්‍රයයි.
+- CLI නාමාවලි `bin/cli/locales/` යටතේ වෙන වෙනම ජීවත් වේ.
+- ICU ස්ථාන දරණ සහ ටැග් හරියටම සංරක්ෂණය කරන්න. product/provider/model නම්, ප්‍රොටෝකෝලය සහ ශීර්ෂ නාම, විධාන, code/JSON හඳුනාගැනීම්, URLs, පරිසර විචල්‍යයන් හෝ `OmniRoute`, `OAuth`, `MCP`, සහ `A2A` වැනි ආරක්ෂිත යෙදුම් පරිවර්තනය නොකරන්න. වත්මන් මූලාශ්ර ලැයිස්තුව `scripts/i18n/glossary/protected-terms.json` වේ.
 
-**ඉලක්කගත චක්රය**
+විශේෂාංගයක් PR සංස්කරණය කරන්නේ `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`) පමණි; අනෙක් පෙදෙසි නිකුතුවකට වරක් සම්පූර්ණ කරනු ලබන්නේ නිකුතු නැවුම් කිරීමකින් හෝ පරිවර්තන තරංගයකින් (`docs/guides/I18N.md` → "විශේෂාංග PRs ස්පර්ශ `en.json` පමණි"). `npm run check:pr-derived-paths` වෙනත් දේශීය නාමාවලියක් සංස්කරණය කරන PR විශේෂාංගයක් අසමත් වේ.
+
+**නාභිගත ලූපය**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # CLI strings/catalogs වෙනස් වන විට
 npm run lint
 ```
 
-මෙය පවතින පද්ධතිය සඳහා මාර්ගෝපදේශයකි; එහි tooling හෝ key model පුළුල් කිරීමට ආරාධනයක් නොවේ. ප්රතිස්ථාපන පද්ධතිය සැලසුම් කරන අතරතුර i18n patches නිශ්චිත හා සීමිතව තබා ගන්න. කාර්යය මඟින් ජනනය කළ පරිවර්තන පැහැදිලිව අවශ්ය කරන්නේ නම් සහ ප්රතිඵලයක් ලෙස ලැබෙන diff එක ඔබ සමාලෝචනය කර ඇත්නම් මිස, බාහිර සේවා කැඳවන පරිවර්තන විධාන ධාවනය නොකරන්න.
+`--mode=pr` නොමැතිව මෙම ද්වාර දේශීයව මුදා හැරීමේ මාදිලියේ ක්‍රියාත්මක වන අතර චක්‍රය එකතු කරන ලද හෝ `en.json` හි නැවත ලියන ලද සෑම යතුරක්ම වාර්තා කරයි; එය ඔබගේ PR ගේ නොව නිකුතු නැවුම් කිරීමේ කාර්යයයි.
+
+මෙය පවතින පද්ධතිය සඳහා මග පෙන්වීමක් මිස එහි මෙවලම් හෝ ප්‍රධාන ආකෘතිය පුළුල් කිරීමට ආරාධනාවක් නොවේ. ප්‍රතිස්ථාපන පද්ධතිය සැලසුම් කරන අතරතුර i18n පැච් ශල්‍යකර්මයක් ලෙස තබා ගන්න. කාර්යය සඳහා පැහැදිලිවම ජනනය කළ පරිවර්තන අවශ්‍ය නම් සහ ඔබ ප්‍රතිඵලය වන වෙනස සමාලෝචනය කර ඇත්නම් මිස බාහිර සේවාවන් අමතන පරිවර්තන විධාන ක්‍රියාත්මක නොකරන්න.
 
 ### CLI
 
 **ගිවිසුම්**
 
-- `bin/cli/` තුළ ඇති පොදු විධාන සහ flags, ජනනය කළ API විධාන, exit codes, stdout/stderr සහ
-  JSON ප්රතිදාන ව්යුහ, config/environment හැසිරීම, සහ package කළ ගොනු.
-- CLI පරිශීලකයාට පෙනෙන strings, CLI i18n ස්තරය භාවිත කළ යුතු අතර `en`/`pt-BR` catalogs සමපාතව තබාගත යුතුය.
-- සහාය දක්වන runtime එක ලෙස Node සහ ප්රකාශිත binary contract එක සුරකින්න.
+- `bin/cli/` හි පොදු විධාන සහ ධජ, ජනනය කරන ලද API විධාන, පිටවීමේ කේත, stdout/stderr සහ JSON ප්‍රතිදාන හැඩතල, config/environment හැසිරීම, සහ ඇසුරුම් කළ ගොනු.
+- CLI පරිශීලක-මුහුණු නූල් CLI i18n ස්ථරය ( `bin/cli/locales/en.json` හි පවතින `t()` යතුරු) භාවිතා කළ යුතුය. විශේෂාංගයක් PR සංස්කරණය කරන්නේ `en.json` පමණි; `pt-BR` සහ අනෙකුත් ස්ථාන මුදා හැරීමේදී සම්පූර්ණ වේ.
+- සහාය දක්වන ධාවන කාලය සහ ප්‍රකාශිත ද්විමය කොන්ත්‍රාත්තුව ලෙස නෝඩ් සුරකින්න.
 
-**කේන්ද්රගත චක්රය**
+**නාභිගත ලූපය**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # ජනනය කළ/bundle කළ CLI වෙනස්කම්
-npm run check:pack-policy     # package මතුපිට වෙනස්කම්
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-හැසිරීම parsing, ගොනු, හෝ exit status මත රඳා පවතින විට, තාවකාලික data directory එකක් තුළ නිශ්චිත විධානය භාවිත කරන්න. CI මඟින් වඩා පුළුල් package artifact සහ ecosystem පරීක්ෂණ සිදු කරයි.
+හැසිරීම විග්‍රහ කිරීම, ගොනු, හෝ පිටවීමේ තත්ත්වය මත රඳා පවතින විට තාවකාලික දත්ත නාමාවලියක නිශ්චිත විධානය භාවිතා කරන්න. CI පුළුල් පැකේජ පුරාවස්තු සහ පරිසර පද්ධති පරීක්ෂාවන් සිදු කරයි.
 
 ### දත්ත සමුදාය
 
 **ගිවිසුම්**
 
-- `src/lib/db/` යටතේ ඇති domain modules; නිශ්චිත modules සෘජුවම import කරන්න (පැරණි `localDb.ts` re-export ස්තරය ඉවත් කර ඇත).
-- `src/lib/db/migrations/` යටතේ අංක යෙදූ, idempotent SQL migrations, transaction ආරක්ෂාව, upgrade
-  හැසිරීම, indexes, සහ schema එකෙන් බලපෑමට ලක්වන සෑම caller එකක්ම.
-- Routes සහ handlers කිසිවිටෙකත් raw SQL සෘජුව නිකුත් නොකරයි.
+- `src/lib/db/` යටතේ වසම් මොඩියුල; නිශ්චිත මොඩියුල සෘජුවම ආනයනය කරන්න (පැරණි `localDb.ts` ප්‍රති-අපනයන ස්ථරය ඉවත් කරන ලදී).
+- `src/lib/db/migrations/` යටතේ අංකිත, idempotent SQL සංක්‍රමණයන්, ගණුදෙණු ආරක්ෂාව, උත්ශ්‍රේණිගත හැසිරීම්, දර්ශක, සහ යෝජනා ක්‍රමය මගින් බලපෑමට ලක් වූ සෑම ඇමතුම්කරුවෙකුම.
+- මාර්ග සහ හසුරුවන්නන් කිසිවිටෙකත් raw SQL ඍජුව නිකුත් නොකරයි.
 
-**කේන්ද්රගත චක්රය**
+**නාභිගත ලූපය**
 
 ```bash
 npm run check:migration-numbering
@@ -141,28 +144,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-migration එකක් එක් කරන විට, නව දත්ත සමුදායක් සහ පෙර schema එකෙන් upgrade කිරීම යන දෙකම පරීක්ෂා කරන්න. දත්ත සමුදා පරීක්ෂණ handles වසා cleanup අතරතුර `resetDbInstance()` ඇමතිය යුතුය. best-effort Bun adapter මාර්ගය වෙනස් වන විට පමණක් `npm run test:bun:db` ධාවනය කරන්න; Node තවදුරටත් ප්රාමාණික වේ.
+සංක්‍රමණයක් එක් කරන විට නැවුම් දත්ත සමුදායක් පරීක්ෂා කර පෙර ක්‍රමයෙන් උත්ශ්‍රේණි කරන්න. දත්ත සමුදා පරීක්‍ෂණ මගින් හසුරු වසා දමා පිරිසිදු කිරීමේදී `resetDbInstance()` ඇමතීමට සිදුවේ. හොඳම උත්සාහය Bun ඇඩැප්ටර මාර්ගය වෙනස් වූ විට පමණක් `npm run test:bun:db` ධාවනය කරන්න; Node බලයලත් ලෙස පවතී.
 
-### Build කිරීම / යෙදවීම
+### ගොඩනැගීම / යෙදවීම
 
 **ගිවිසුම්**
 
-- Root සහ workspace manifests/lockfile, `scripts/build/`, Next.js standalone assembly, `dist/`
-  package අන්තර්ගතය, Electron platform metadata, CI workflows, සහ deployment sentinels.
-- සහාය දක්වන Node පරාස සහ `CLAUDE.md` තුළ allow-list කර ඇති Bun භාවිතය නොවෙනස්ව පැවතිය යුතුය.
-- Build artifacts track නොකර තබන්න; dependency, license, workflow, සහ package ප්රතිපත්ති අදාළ වේ.
+- Root සහ Workspace manifests/lockfile, `scripts/build/`, Next.js ස්වාධීන එකලස් කිරීම, `dist/` පැකේජ අන්තර්ගතය, Electron වේදිකා පාර-දත්ත, CI කාර්ය ප්‍රවාහ, සහ යෙදවීමේ සෙන්ටිනල්ස්.
+- සහාය දක්වන නෝඩ් පරාස සහ `CLAUDE.md` හි අවසර-ලැයිස්තුගත Bun භාවිතය නොවෙනස්ව පැවතිය යුතුය.
+- කෞතුක වස්තු ගොඩනඟා නොතිබීම; යැපීම, බලපත්‍රය, කාර්ය ප්‍රවාහ සහ පැකේජ ප්‍රතිපත්ති අදාළ වේ.
 
-**කේන්ද්රගත චක්රය**
+**නාභිගත ලූපය**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # dependency හෝ lockfile වෙනස්කම්
-npm run check:pack-policy      # ප්රකාශිත package මතුපිට වෙනස්කම්
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-වෙනස්කම compilation, standalone assembly, assets, හෝ runtime bundling වෙත බලපාන විට පමණක් දේශීයව `npm run build` භාවිත කරන්න. Release/deploy තහවුරු කිරීම සඳහා පමණක් `npm run build:release` භාවිත කරන්න. CI හි build එක අවසාන cross-platform සංඥාව වේ; platform-specific Electron වෙනස්කම් සඳහා ගැළපෙන කේන්ද්රගත build එක හෝ smoke සාක්ෂි අවශ්ය වේ.
+වෙනස් කිරීම සම්පාදනය, ස්වාධීන එකලස් කිරීම, වත්කම්, හෝ ධාවන කාල බද්ධ කිරීම කෙරෙහි බලපාන විට පමණක් දේශීයව `npm run build` භාවිතා කරන්න. release/deploy වලංගු කිරීම සඳහා පමණක් `npm run build:release` භාවිතා කරන්න. CI's build යනු අවසාන හරස් වේදිකා සංඥාවයි; වේදිකාව-විශේෂිත Electron වෙනස්කම් සඳහා ගැළපෙන නාභිගත ගොඩනැගීම හෝ දුම් සාක්ෂි අවශ්‍ය වේ.
 
 ## හවුල් යන්ත්රයක් සඳහා සංවර්ධක ස්ක්රිප්ට්
 

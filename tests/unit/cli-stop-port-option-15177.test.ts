@@ -92,6 +92,9 @@ test("stale PID file still falls back to the port and kills the listener (no rea
           return true;
         },
         isPidRunning: (p: number) => (p === 424242 ? alive : false),
+        // The mocked listener is an OmniRoute server. Without this the real probe reads
+        // /proc/424242, finds no process ("gone") and, correctly, signals nothing.
+        classifyPidIdentity: () => "ours",
         sleep: async () => {},
       }
     );
