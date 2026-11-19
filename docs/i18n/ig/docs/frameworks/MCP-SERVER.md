@@ -20,6 +20,8 @@ Ma ọ bụ site na ụgbọ njem mepere emepe:
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -144,7 +146,7 @@ Cursor, Cline, na MCP client ndị dakọtara.
 | `omniroute_rtk_discover`            | `read:compression`  | Chọpụta mkpọtụ na-akpụgharị n'ọnụ n'ụdị mmepụta RTK                                                                                  |
 | `omniroute_rtk_learn`               | `read:compression`  | Mepụta ihe nzacha RTK nwere ike nyochaa site na nlele nnabata                                                                        |
 
-ntinye CCR na-eji ụlọ ahịa okpukpu abụọ: ebe nchekwa na-ekpo ọkụ na-akwado, na oge ịgba ọsọ na-abụghị nke ígwé ojii, site na ọkwa SQLite na-adịgide adịgide (`ccr_blocks`, na ndabara) ya mere ngọngọ na-adị ndụ nchụpụ ma ọ bụ malitegharịa ruo mgbe TTL ya kwụsịrị — ma e wezụga ngọngọ n'elu 512 KB na ígwé ojii na-agba ọsọ, nke na-anọ na ebe nchekwa. Ihe mgbochi ọ bụla nwere oke na 2 MiB, onye isi ọ bụla na 16 MiB, yana ụlọ ahịa zuru ụwa ọnụ na 64 MiB. Ndenye ndabara na TTL awa 24 (kachasị ụbọchị asaa). Mweghachi MCP zuru ezu bụ naanị 256 KiB; nnukwu ngọngọ na-adị site na ụdị grep na grep. Nchekwa, iweghachite, ndepụta, nyocha, ihichapụ, na stats bụ ndị isi API-igodo akwadoro kewapụrụ. Ndekọ nyocha nwere hashes na metadata nha, ọ nweghị ọdịnaya ọ bụla. Nkọwa onye ọrụ na-eche ihu (nkara abụọ ahụ, ihe ndị ahịa chọrọ, `codemode:false`, scopes per-tool, pagination, and a diagnostic matrix) bi na [Compression Engines → Prerequisites/operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
+CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB, cloud runtimes and `COMPRESSION_CCR_DURABLE_STORE=false`, which stay memory-only. The durable write is best effort: it is dropped while 1,000 writes are already pending, and a failed SQLite write is logged, not retried, so that block is lost on restart. Each block is limited to 2 MiB, each principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by the authenticated API-key principal. Audit records contain hashes and size metadata, never content. Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes, pagination, and a diagnostic matrix) live in [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
 `omniroute_compression_status` na-akọ mkpokọta nkọwa MCP iche iche n'okpuru `analytics.mcpDescriptionCompression`. Ụkpụrụ ndị ahụ bụ atụmatụ nha metadata maka nkọwa MCP nwere ike ịkọwa (`tools`, `prompts`, `resources`, na `resourceTemplates`); ha abụghị nnata ojiji nke onye na-eweta ya ma akara ya na `source: "mcp_metadata_estimate"`.
 
