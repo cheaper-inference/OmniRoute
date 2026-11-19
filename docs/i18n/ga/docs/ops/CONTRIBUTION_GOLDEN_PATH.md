@@ -29,70 +29,61 @@ athraithe lena chonarthaí, lena sheiceálacha spriocdhírithe, agus lena chlúd
 6. **Taifead an fhianaise.** Sa teimpléad PR, liostaigh na horduithe a ritheadh, gach comhad tástála a cuireadh leis nó a athraíodh,
    ascnaimh nó bratacha gné, agus aon bhailíochtú CI-amháin atá fós ar feitheamh.
 
-## Bealaí molta de réir cineál athraithe
+## Cosáin órga de réir cineáil athraithe
 
-Is seiceálacha spriocdhírithe íosta iad na horduithe thíos, agus ní cead iad tástáil a chlúdaíonn go díreach an
-t-iompar a d’athraigh tú a fhágáil ar lár.
+Is seiceálacha íosta fócasaithe iad na horduithe thíos, ní cead scipeáil a dhéanamh ar thástáil a chlúdaíonn go díreach an t-iompar a d'athraigh tú.
 
 ### Soláthraí
 
 **Conarthaí**
 
-- Sainmhíniú an tsoláthraí in `src/shared/constants/providers/` agus a chomhdhéanamh in
-  `src/shared/constants/providers.ts`.
-- Samhlacha agus cumais in `open-sse/config/providerRegistry.ts` nó ina chomhaid clárlainne eastósctha.
-- Roghnú an tseiceadóra/an aistritheora, cumraíocht OAuth nó eochrach API, sócmhainní an deais, agus tagairt ghinte
-  an tsoláthraí nuair is infheidhme.
-- Ní mór do dhintiúir phoiblí `resolvePublicCred()` a úsáid; ní mór do fhreagraí earráide na cúntóirí comhroinnte
-  sláintithe earráide a úsáid. Féach `docs/security/PUBLIC_CREDS.md` (git; ní thiomsaítear isteach in `/docs` é) agus
-  [Sláintiú Earráidí](../security/ERROR_SANITIZATION.md).
+- Sainmhíniú an tsoláthraí i `src/shared/constants/providers/` agus a chomhdhéanamh i `src/shared/constants/providers.ts`.
+- Samhlacha agus cumais i `open-sse/config/providerRegistry.ts` nó a comhaid clárlainne bhaintear.
+- roghnú Executor/translator, OAuth nó cumraíocht API-eochair agus sócmhainní deais. Ná tiomnaigh na léaráidí `docs/reference/PROVIDER_REFERENCE.md` nó README athghinte: athscríobhann an scaoileadh athnuachan iad (teipeann ar `check:pr-derived-paths` gné PR a iompraíonn iad).
+- Ní mór dintiúir phoiblí `resolvePublicCred()` a úsáid; ní mór do fhreagraí earráide na cúntóirí earráide sláintithe roinnte a úsáid. Féach `docs/security/PUBLIC_CREDS.md` (git; gan tiomsú i `/docs`) agus [Sláintíocht Earráide](../security/ERROR_SANITIZATION.md).
 
-**Lúb spriocdhírithe**
+**Lúb dírithe**
 
 ```bash
 npm run check:provider-consistency
 npm run check:provider-assets
 node --import tsx/esm --test tests/unit/provider-translate-path-golden.test.ts
 node --import tsx/esm --test tests/unit/<provider-or-executor>.test.ts
-npm run gen:provider-reference   # nuair a athraíonn an chatalóg; cuir an difríocht ghinte san áireamh i ngealltanas
+npm run gen:provider-reference   # preview the generated reference; do not commit it
 npm run lint
 ```
 
-Déan tástáil freisin ar gach teaghlach iarratais lena mbaineann: comhrá, Responses, íomhánna, leabuithe, fuaim, nó físeán.
-Déan athbhreithniú ar dhifríochtaí ginte na catalóige agus na dtagairtí órga mar athruithe conartha; ná glac leo go dall.
+Déan tástáil freisin ar gach teaghlach iarratais lena mbaineann: comhrá, Freagraí, íomhánna, leabaithe, fuaime nó físeáin. Athbhreithniú a dhéanamh ar chatalóg ginte agus ar dhifríochtaí órga de réir mar a athraíonn conarthaí; ná glac leo go dall.
 
 ### Ródú
 
 **Conarthaí**
 
-- Luachanna straitéise poiblí agus meiteashonraí UI in `src/shared/constants/routingStrategies.ts`.
-- Seoladh agus ordúchán faoi `open-sse/services/combo.ts` agus `open-sse/services/combo/`.
-- Scéimeanna teaglama, marthanacht, staid athléimneachta, cumais samhlacha, agus rialuithe API/UI.
-- [Inneall Auto-Combo](../routing/AUTO-COMBO.md) agus doiciméadacht athléimneachta nuair a athraíonn an t-iompar.
+- Luachanna straitéise poiblí agus meiteashonraí UI i `src/shared/constants/routingStrategies.ts`.
+- Seol agus ordú faoi `open-sse/services/combo.ts` agus `open-sse/services/combo/`.
+- Scéimre teaglama, marthanacht, staid athléimneachta, cumais mhúnla, agus rialuithe API/UI.
+- [Inneall Auto-Comó](../routing/AUTO-COMBO.md) agus doiciméadú athléimneachta nuair a athraíonn iompar.
 
-**Lúb spriocdhírithe**
+**Lúb dírithe**
 
 ```bash
 node --import tsx/esm --test tests/unit/combo-<behavior>.test.ts
-npm run test:combo:matrix        # athruithe ar straitéis nó ar sheoladh
-npm run check:known-symbols      # athruithe ar chlárú straitéise
+npm run test:combo:matrix        # strategy or dispatch changes
+npm run check:known-symbols      # strategy registration changes
 npm run lint
 ```
 
-Úsáid tástálacha cinntitheacha le réamhtheacht samhlaithe go háitiúil. Teastaíonn dintiúir ó thástálacha deataigh beo teaglama agus is
-tástálacha láimhe iad, ní ionadaithe ar CI.
+Bain úsáid as trialacha bréagtha cinntitheacha in aghaidh an tsrutha go háitiúil. Teastaíonn dintiúirí ó dheataigh teaglama beo agus is de láimh iad, ní hionadaigh CI.
 
 ### UI / UX
 
 **Conarthaí**
 
-- Bealach/leathanach Next.js agus teorainneacha comhpháirteanna comhroinnte faoi `src/app/` agus
-  `src/shared/components/`.
-- Cruthanna freagartha API, staideanna lódála/folmha/earráide, iompar méarchláir agus léitheora scáileáin,
-  leagan amach sofhreagrach, téamaí, agus leathnú logchaighdeán.
-- Teaghráin fhoinseacha Bhéarla don UI in `src/i18n/messages/en.json`; ná crua-chódaigh téacs nua atá dírithe ar úsáideoirí.
+- Next.js route/page agus teorainneacha comhpháirte roinnte faoi `src/app/` agus `src/shared/components/`.
+- cruthanna freagartha API, stáit loading/empty/error, iompar méarchlár agus léitheoir scáileáin, leagan amach sofhreagrach, téamaí, agus leathnú locale.
+- Teaghráin fhoinse UI Béarla i `src/i18n/messages/en.json`; ná crua-chód cóip nua atá os comhair an úsáideora.
 
-**Lúb spriocdhírithe**
+**Lúb dírithe**
 
 ```bash
 node --import tsx --test tests/unit/dashboard/<feature>.test.ts
@@ -101,69 +92,63 @@ npm run check:dashboard-typecheck
 npm run lint
 ```
 
-Rith an aip le haghaidh athruithe idirghníomhaíochta nó amhairc agus seiceáil amhaircphuirt chúnga agus leathana araon. Ritheann CI an
-tógáil táirgthe agus na sraitheanna níos leithne; tá gá fós le comhpháirt spriocdhírithe, Playwright,
-nó seiceáil láimhe dhoiciméadaithe atá oiriúnach don athrú chun iompar amhairc a thástáil.
+Rith an aip le haghaidh idirghníomhaíochta nó athruithe amhairc agus seiceáil na hamharcphointí caola agus leathana araon. reáchtálann CI an tógáil táirgeachta agus na seomraí níos leithne; Tá gá fós le comhpháirt dhírithe, Playwright, nó seiceáil láimhe doiciméadaithe a oireann don athrú d'iompar amhairc.
 
 ### i18n
 
 **Conarthaí**
 
-- Is é `src/i18n/messages/en.json` foinse an UI; is é `config/i18n.json` foinse na logchaighdeán.
-- Coinnítear catalóga CLI ar leithligh faoi `bin/cli/locales/`.
-- Caomhnaigh ionadchoinneálaithe agus clibeanna ICU go díreach. Ná haistrigh ainmneacha táirgí/soláthraithe/samhlacha,
-  ainmneacha prótacail agus ceanntásca, orduithe, aitheantóirí cóid/JSON, URLanna, athróga timpeallachta, ná
-  téarmaí cosanta amhail `OmniRoute`, `OAuth`, `MCP`, agus `A2A`. Is é an liosta foinse reatha
-  `scripts/i18n/glossary/protected-terms.json`.
+- Is é `src/i18n/messages/en.json` an fhoinse UI ; Is é `config/i18n.json` an fhoinse locale.
+- Cónaíonn catalóga CLI ar leithligh faoi `bin/cli/locales/`.
+- Caomhnaigh áitshealbhóirí agus clibeanna ICU go díreach. Ná haistrigh ainmneacha product/provider/model, ainmneacha prótacail agus ceanntásca, orduithe, aitheantóirí code/JSON, URLs, athróga timpeallachta, nó téarmaí cosanta mar `OmniRoute`, `OAuth`, `MCP`, agus `A2A`. Is é an liosta foinse reatha `scripts/i18n/glossary/protected-terms.json`.
 
-**Lúb spriocdhírithe**
+Ní chuireann gné PR in eagar ach `src/i18n/messages/en.json` (CLI: `bin/cli/locales/en.json`); cuirtear na logaí eile i gcrích uair amháin in aghaidh an scaoilte tríd an athnuachan scaoilte nó trí thonn aistriúcháin (`docs/guides/I18N.md` → "Feature PRs touch `en.json` only"). Teipeann ar `npm run check:pr-derived-paths` gné PR a chuireann catalóg locale eile in eagar.
+
+**Lúb dírithe**
 
 ```bash
-npm run i18n:sync-ui:dry
 npm run i18n:check-ui-coverage
-npm run i18n:check-value-drift
+npm run check:ui-icu
+node scripts/i18n/check-key-completeness.mjs --mode=pr      # what CI runs on your PR
+node scripts/i18n/check-ui-value-drift.mjs --mode=pr
+node scripts/check/check-cli-i18n.mjs --mode=pr              # when CLI strings change
 npm run i18n:check-glossary
-npm run check:cli-i18n          # nuair a athraíonn teaghráin/catalóga CLI
 npm run lint
 ```
 
-Is treoir í seo don chóras atá ann cheana, ní cuireadh chun a uirlisí ná a shamhail eochracha a leathnú.
-Coinnigh paistí i18n spriocdhírithe agus an córas ionaid á dhearadh. Ná rith orduithe aistriúcháin
-a ghlaonn ar sheirbhísí seachtracha mura n-éilíonn an tasc aistriúcháin ghinte go sainráite agus
-mura bhfuil athbhreithniú déanta agat ar an difríocht dá bharr.
+Gan `--mode=pr` ritheann na geataí seo i mód scaoilte go háitiúil agus tuairiscíonn siad gach eochair a cuireadh leis nó a athscríobhtar i `en.json`; is é sin obair an scaoileadh athnuachana, ní do PR's.
+
+Is treoir é seo don chóras atá ann cheana féin, ní cuireadh é chun a uirlisiú nó a eochair-mhúnla a leathnú. Coinnigh paistí i18n máinliachta agus an córas athsholáthair á dhearadh. Ná rith orduithe aistriúcháin a ghlaonn seirbhísí seachtracha orthu ach amháin má éilíonn an tasc go sainráite aistriúcháin ghinte agus go bhfuil athbhreithniú déanta agat ar an difríocht dá bharr.
 
 ### CLI
 
 **Conarthaí**
 
-- Orduithe poiblí agus bratacha in `bin/cli/`, orduithe API ginte, cóid scoir, stdout/stderr agus
-  cruthanna aschuir JSON, iompar cumraíochta/comhshaoil, agus comhaid phacáistithe.
-- Ní mór do theaghráin atá dírithe ar úsáideoirí CLI ciseal i18n an CLI a úsáid agus catalóga `en`/`pt-BR` a choinneáil ailínithe.
-- Caomhnaigh Node mar an t-am rite tacaithe agus conradh an dénártha fhoilsithe.
+- Orduithe poiblí agus bratacha i `bin/cli/`, ginte orduithe API, cóid scoir, cruthanna aschuir stdout/stderr agus JSON, iompar config/environment, agus comhaid pacáistithe.
+- Caithfidh teaghráin CLI aghaidh úsáideora an ciseal CLI i18n ( eochracha `t()` atá ann i `bin/cli/locales/en.json`) a úsáid. Ní chuireann gné PR in eagar ach `en.json`; `pt-BR` agus na logaí eile críochnaithe ag an scaoileadh.
+- Caomhnaigh Nód mar an t-am rite tacaithe agus an conradh dénártha foilsithe.
 
-**Lúb dhírithe**
+**Lúb dírithe**
 
 ```bash
 node --import tsx/esm --test tests/unit/cli/<command>.test.ts
-npm run check:cli-i18n
-npm run build:cli             # athruithe ar an CLI ginte/cuachta
-npm run check:pack-policy     # athruithe ar dhromchla an phacáiste
+node scripts/check/check-cli-i18n.mjs --mode=pr
+npm run build:cli             # generated/bundled CLI changes
+npm run check:pack-policy     # package-surface changes
 npm run lint
 ```
 
-Úsáid an t-ordú beacht i gcomhadlann sonraí shealadach nuair a bhraitheann an t-iompar ar pharsáil, ar chomhaid nó ar stádas
-scoir. Déanann CI na seiceálacha níos leithne ar dhéantáin phacáiste agus ar an éiceachóras.
+Bain úsáid as an ordú cruinn i eolaire sonraí sealadach nuair a bhraitheann iompar ar pharsáil, comhaid, nó stádas scoir. Déanann CI an déantúsán pacáiste níos leithne agus seiceálacha éiceachórais.
 
-### Bunachar sonraí
+### Bunachar Sonraí
 
 **Conarthaí**
 
-- Modúil fearainn faoi `src/lib/db/`; iompórtáil modúil shonracha go díreach (baineadh an seanchiseal ath-easpórtála `localDb.ts`).
-- Ascnamhuithe SQL uimhrithe, iidéimitheacha faoi `src/lib/db/migrations/`, sábháilteacht idirbheart, iompar
-  uasghrádaithe, innéacsanna, agus gach glaoiteoir a dtéann an scéimre i bhfeidhm air.
+- Modúil fearainn faoi `src/lib/db/`; modúil shonracha a allmhairiú go díreach (baineadh an sean-chiseal ath-onnmhairithe `localDb.ts` ).
+- Aistríonn SQL uimhrithe, dothuigthe faoi `src/lib/db/migrations/`, sábháilteacht idirbheart, iompar uasghrádaithe, innéacsanna, agus gach glaoiteoir a bhfuil tionchar ag an scéimre orthu.
 - Ní eisíonn bealaí agus láimhseálaithe SQL amh go díreach riamh.
 
-**Lúb dhírithe**
+**Lúb dírithe**
 
 ```bash
 npm run check:migration-numbering
@@ -173,32 +158,27 @@ node --import tsx/esm --test tests/unit/db/migration-<number>.test.ts
 npm run lint
 ```
 
-Déan tástáil ar bhunachar sonraí úr agus ar uasghrádú ón scéimre roimhe seo agus ascnamh á chur leis. Ní mór do thástálacha bunachair sonraí
-hanlaí a dhúnadh agus `resetDbInstance()` a ghlaoch le linn glanta. Ná rith `npm run test:bun:db` ach amháin nuair a athraíonn
-cosán oiriúnaitheora Bun ar bhonn na hiarrachta is fearr; is é Node an t-údarás i gcónaí.
+Déan bunachar sonraí úr a thástáil agus uasghrádú ón scéimre roimhe seo agus ascnamh á chur leis. Ní mór do thástálacha bunachar sonraí na lámha a dhúnadh agus glaoch ar `resetDbInstance()` le linn glantacháin. Rith `npm run test:bun:db` ach amháin nuair a athraíonn an cosán adapter Bun is fearr-iarracht; Fanann nód údarásach.
 
 ### Tógáil / imscaradh
 
 **Conarthaí**
 
-- Comhaid léirithe fréimhe agus spás oibre/an glaschomhad, `scripts/build/`, cóimeáil neamhspleách Next.js, inneachar pacáiste `dist/`,
-  meiteashonraí ardáin Electron, sreafaí oibre CI, agus fairtheoirí imscartha.
-- Ní mór raonta tacaithe Node agus úsáid Bun atá ar an liosta ceadaithe in `CLAUDE.md` a choinneáil slán.
-- Fanann déantáin tógála gan rianú; tá feidhm ag polasaithe spleáchais, ceadúnais, sreafa oibre agus pacáiste.
+- Fréamh agus spás oibre manifests/lockfile, `scripts/build/`, cóimeáil neamhspleách Next.js, inneachar an phacáiste `dist/`, meiteashonraí ardán Electron, sreafaí oibre CI, agus feighlithe imscartha.
+- Ní mór raonta nód tacaithe agus an úsáid cheadaithe Bun in `CLAUDE.md` fanacht slán.
+- Déantúsáin Tógáil fanacht untracked; Baineann beartais spleáchais, ceadúnais, sreabhadh oibre agus pacáiste.
 
-**Lúb dhírithe**
+**Lúb dírithe**
 
 ```bash
 node --import tsx/esm --test tests/unit/build/<behavior>.test.ts
 npm run check:build-scope
-npm run check:lockfile         # athruithe spleáchais nó glaschomhaid
-npm run check:pack-policy      # athruithe ar dhromchla an phacáiste fhoilsithe
+npm run check:lockfile         # dependency or lockfile changes
+npm run check:pack-policy      # published package surface changes
 npm run lint
 ```
 
-Ná húsáid `npm run build` go háitiúil ach amháin nuair a théann an t-athrú i bhfeidhm ar thiomsú, ar chóimeáil neamhspleách, ar shócmhainní,
-nó ar chuachadh am rite. Ná húsáid `npm run build:release` ach amháin chun eisiúint/imscaradh a bhailíochtú. Is í tógáil CI
-an comhartha trasardáin deiridh; teastaíonn an tógáil dhírithe chomhfhreagrach nó fianaise ó thástáil deataigh le haghaidh athruithe Electron a bhaineann go sonrach le hardán.
+Bain úsáid as `npm run build` go háitiúil ach amháin nuair a théann an t-athrú i bhfeidhm ar thiomsú, ar thionól neamhspleách, ar shócmhainní nó ar chuachadh ama rite. Bain úsáid as `npm run build:release` le haghaidh bailíochtú release/deploy amháin. Is é CI's build an comhartha tras-ardán deiridh; Teastaíonn an fhianaise chomhoiriúnaithe maidir le tógáil nó deataigh atá dírithe ar an ardán chun athruithe a dhéanamh Electron sonrach.
 
 ## Scripteanna forbróra do mheaisín comhroinnte
 

@@ -831,62 +831,185 @@ atšaukiant ir tikrinant `input_file_id` kuriant). `GET /v1/batches` atmeta anon
 
 ---
 
-## Ieškoti API
+## Paieškos API
 
-Web/search teikėjo abstrakcija (Tavily, Brave, Exa, Serper ir kt.).
+Žiniatinklio / paieškos teikėjų abstrakcija (Tavily, Brave, Exa, Serper ir kt.).
 
-| Metodas | Kelias                 | Aprašymas                                                                                    |
-| ------- | ---------------------- | -------------------------------------------------------------------------------------------- |
-| GET     | `/v1/search`           | Sukonfigūruotų paieškos paslaugų teikėjų + galimybių sąrašas                                 |
-| POST    | `/v1/search`           | Vykdykite paieškos užklausą — body, patvirtintą `v1SearchSchema`, palaiko caching/coalescing |
-| GET     | `/v1/search/analytics` | Teikėjo hit/latency/cache statistika                                                         |
+| Metodas | Kelias                 | Aprašymas                                                                                                             |
+| ------- | ---------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/v1/search`           | Išvardija sukonfigūruotus paieškos teikėjus ir jų galimybes                                                           |
+| POST    | `/v1/search`           | Vykdo paieškos užklausą — užklausos turinys tikrinamas pagal `v1SearchSchema`, palaiko kešavimą ir užklausų sujungimą |
+| GET     | `/v1/search/analytics` | Kiekvieno teikėjo įvykių, delsos ir kešo statistika                                                                   |
 
-**Auth:** Nešiklio API raktas (`extractApiKey` + `isValidApiKey`). Paieškos politika vykdoma naudojant `enforceApiKeyPolicy`.
+**Autentifikavimas:** Bearer API raktas (`extractApiKey` + `isValidApiKey`). Paieškos politika užtikrinama naudojant `enforceApiKeyPolicy`.
 
-**Automatinis pasirinkimas:** be `provider` pigiausias teikėjas su sukonfigūruotu ryšiu paleidžiamas pirmas, o kitas pigiausias yra perjungimas. Nemokami paskutinės galimybės teikėjai (`duckduckgo-free`) naudojami tik tada, kai nieko daugiau nesukonfigūruota. Savarankiškai priglobtas SearXNG laikomas sukonfigūruotu, kai jo ryšyje išsaugomas tikras `baseUrl` (ne numatytasis katalogo `http://localhost:8888/search`): tada jis yra 0 USD vertės tiekėjas, pranašesnis už raktinius tiekėjus, o pigiausias raktas turintis `baseUrl` yra perjungimas, URL kai SearXNG `http(s)` 400, 401, 403 arba 404 taškais. debesies metaduomenų adresas neįskaičiuojamas. SearXNG ryšys, kuriame saugomas atpažinimo ženklas, yra tik per `https://` arba loopback `http://`. Per nuotolinį paprastą `http://` tai niekada nėra perjungimas ir lieka paskutinė išeitis, naudojama tik tada, kai nesukonfigūruotas joks kitas teikėjas arba kai to prašoma pagal pavadinimą, todėl šiais dviem atvejais jis siunčia prieigos raktą aiškiu tekstu.
+### Pavadintos paieškos / gavimo kombinacijos
+
+Tiek `POST /v1/search`, tiek `POST /v1/web/fetch` priima `model` kaip išsaugotos kombinacijos pavadinimą.
+Naudokite arba `model`, arba aiškiai nurodytą `provider`; siunčiant abu grąžinama `400`.
+Jei nenurodytas nė vienas iš šių laukų, esamas automatinis teikėjo pasirinkimas nesikeičia.
+
+Tiek „Combo Builder“, tiek jo „Add Model“ katalogas prijungtiems teikėjams pateikia savuosius žiniatinklio operacijų įrašus, net jei jie neturi LLM modelių sąrašo. Serper rodo
+**Paieška internete**; Tavily rodo **Paieška internete / Puslapio išgavimas**, o tik gavimą palaikantys teikėjai rodo **Puslapio išgavimas**.
+Pasirinkite įrašą ir paskyrą kaip įprasta. Vienas Tavily įrašas naudojamas abiem žiniatinklio galiniams taškams;
+šie operacijų įrašai neįtraukiami į tik pokalbiams skirtus klientų parinkiklius ar pokalbių modelių tikrinimus.
+
+Pavyzdžiui, sukurkite **priority** kombinaciją pavadinimu `shared-free` su šiais eilės tvarka nurodytais taikiniais:
+
+1. `openai/gpt-4o`
+2. `tavily-search/web`
+3. `serper-search/web`
+4. `jina-reader/fetch`
+
+Tada naudokite tą patį pavadinimą kiekvienoje sąsajoje:
+
+```json
+{ "model": "shared-free", "query": "Open source speech recognition", "max_results": 5 }
+```
+
+```json
+{ "model": "shared-free", "url": "https://example.com", "format": "markdown" }
+```
+
+Paieška pirmiausia svarsto Tavily, tada Serper; gavimas pirmiausia svarsto Tavily, tada Jina Reader;
+pokalbiai praleidžia specializuotus paieškos / gavimo teikėjus ir svarsto OpenAI. Suderinamumą
+užtikrina paieškos / gavimo vykdytojų registrai, o ne modelio pavadinime esantys žodžiai.
+Filtravimas atliekamas prieš parenkant kredencialus ir išsiunčiant užklausą, o išsaugota kombinacija niekada
+nekeičiama.
+
+Ne pokalbių galimybių maršrutai palaiko `priority`, `fill-first`, `round-robin`, `weighted`,
+`random`, `strict-random`, `least-used` ir `p2c`. Tik pokalbiams skirtos sintezės strategijos, tokios kaip
+`fusion`, `pipeline` ir `context-relay`, ne pokalbių maršrutuose atmetamos, o ne
+tyliai pritaikomos paieškai ar generuojamai medijai.
+Esamas kombinacijų modulis tvarko atsarginį perėjimą pagal eilę, įskaitant kvotos viršijimo klaidas iš aukštesnio lygio paslaugų,
+ir išsaugo veiksmų ID, paskyros pririšimus, kiekvieno veiksmo paskyrų leidžiamuosius sąrašus,
+įdėtas nuorodas, skambinančiojo ryšio / kvotos sritis ir kombinacijos prieigos politiką. Rezultatuose išsaugoma
+jiems būdinga paieškos / gavimo schema, įskaitant tikrąjį teikėją; `X-OmniRoute-Combo-Trace` nurodo
+maršrutizavimo sprendimą. Nežinomos kombinacijos grąžina `404`; neaktyvios kombinacijos ir kombinacijos,
+kuriose nėra suderinamų taikinių, grąžina `400`.
+
+Kiekvienas kombinacijos bandymas naudoja vieną aiškiai nurodytą teikėją.
+Jis negali užkulisiuose iškviesti už kombinacijos ribų esančio savojo automatinio teikėjų telkinio.
+Užklausos su aiškiai nurodytu teikėju išlaiko esamą vieno teikėjo elgseną. Tiesioginės pokalbių užklausos,
+nukreiptos į specializuotus paieškos / gavimo teikėjus, grąžina informatyvų JSON `400`, užuot
+perėjusios prie OpenAI tipo vykdytojo.
+
+### Konkrečių galimybių kombinacijų maršrutai
+
+Išsaugotose kombinacijose gali būti `routes` objektas, kurio raktai yra API galimybės. Kiekvienas maršrutas turi
+savo taikinių sąrašą, strategiją ir vykdymo konfigūraciją. Aukščiausio lygio `models`, `strategy` ir `config`
+išlieka su senesnėmis versijomis suderinamu pokalbių planu; senos kombinacijos be `routes` toliau veikia nepakitusios.
+
+Palaikomi maršrutų raktai: `chat`, `search`, `web-fetch`, `embeddings`, `rerank`, `images`,
+`image-edits`, `videos`, `music`, `ocr`, `audio-speech`, `audio-transcriptions`,
+`audio-translations` ir `audio-generation`. Galinio taško projekcija atliekama prieš parenkant kredencialus,
+įvertinant ar išsiunčiant užklausą. Įdėtos kombinacijų nuorodos tai pačiai galimybei parenka antrinės kombinacijos maršrutą.
+
+`POST /v1/music/generations` ir `POST /v1/ocr` priima kombinacijos pavadinimą laukelyje `model`. Savąjį
+su ElevenLabs suderinamą `POST /v1/music` taip pat galima naudoti su kombinacijos pavadinimu laukelyje `model_id`,
+tačiau kiekvienas tinkamas taikinys šiame savajame galiniame taške turi būti ElevenLabs muzikos modelis, kad
+būtų išsaugota jo dvejetainio atsako sutartis. `POST /v1/sound-generation` priima `audio-generation` kombinaciją laukelyje `model_id`, taikant
+tą patį savąjį dvejetainio atsako apribojimą. Įvairiems muzikos teikėjams naudokite `/v1/music/generations`.
+
+**Automatinis pasirinkimas:** jei nenurodytas `provider`, pirmiausia vykdomas pigiausias teikėjas su sukonfigūruotu ryšiu,
+o kitas pagal kainą tampa atsarginiu. Nemokami kraštutinės atsargos teikėjai (`duckduckgo-free`) naudojami tik tada,
+kai niekas kitas nesukonfigūruota. Savarankiškai talpinamas SearXNG laikomas sukonfigūruotu, kai jo ryšyje išsaugotas tikras
+`baseUrl` (ne katalogo numatytasis `http://localhost:8888/search`): tokiu atveju jis vertinamas kaip 0 USD teikėjas prieš
+teikėjus, kuriems reikia rakto, o pigiausias teikėjas su raktu tampa atsarginiu, taip pat kai SearXNG grąžina 400, 401, 403 arba 404.
+`baseUrl`, kuris nėra galiojantis `http(s)` URL arba nurodo debesijos metaduomenų adresą, neįskaitomas. SearXNG ryšys,
+kuriame išsaugotas prieigos raktas, taip vertinamas tik naudojant `https://` arba ciklinio adreso `http://`.
+Naudojant nuotolinį paprastą `http://`, jis niekada nėra atsarginis teikėjas ir lieka kraštutinės atsargos teikėju;
+jis naudojamas tik tada, kai nesukonfigūruotas joks kitas teikėjas arba kai iškviečiamas pagal pavadinimą, todėl
+abiem šiais atvejais prieigos raktas siunčiamas nešifruotu tekstu.
 
 ### Exa ir Tavily `provider_options`
 
-„Exa“ ir „Tavily“ skaito konkretaus teikėjo laukus iš vardų tarpo: `provider_options.exa` (arba `provider_options["exa-search"]`) ir `provider_options.tavily` (arba `provider_options["tavily-search"]`). Persiunčiami tik žemiau esantys raktai. Kiekvienas iš jų patikrinamas pagal savo Zod schemą `open-sse/handlers/search/providerOptionsPassthrough.ts` ir atmetamas netinkamo tipo raktas. Bet koks kitas raktas yra ignoruojamas, įskaitant auth, base URL, `stream` ir `outputSchema`. Kitų tiekėjų naudojami plokšti klavišai (`cx`, `depth`, ...) veikia kaip anksčiau.
+„Exa“ ir „Tavily“ teikėjui būdingus laukus nuskaito iš vardų srities rinkinio:
+`provider_options.exa` (arba `provider_options["exa-search"]`) ir `provider_options.tavily`
+(arba `provider_options["tavily-search"]`). Persiunčiami tik toliau nurodyti raktai. Kiekvienas iš jų
+tikrinamas pagal atskirą „Zod“ schemą faile
+`open-sse/handlers/search/providerOptionsPassthrough.ts`, o netinkamo tipo raktas pašalinamas. Bet
+kuris kitas raktas ignoruojamas, įskaitant autentifikavimo duomenis, bazinį URL,
+`stream` ir `outputSchema`. Kitų teikėjų naudojami plokštieji raktai (`cx`, `depth`, ...) veikia
+kaip anksčiau.
 
-| Teikėjas | Aukščiausio lygio laukai                                                                                                                                                                                                                                                                                                                                                  | Įdėta                                                                                                                                    |
-| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
-| Pvz      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (plokštieji primityvai), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                        | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` sujungta su numatytuoju `{ text: true, highlights: true }` |
-| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                        |
+| Teikėjas | Aukščiausio lygio laukai                                                                                                                                                                                                                                                                                                                                                  | Įdėtiniai                                                                                                                                 |
+| -------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------- |
+| Exa      | `type`, `category`, `userLocation`, `moderation`, `additionalQueries`, `objective`, `systemPrompt`, `compliance` (plokštieji primityvai), `startPublishedDate`, `endPublishedDate`                                                                                                                                                                                        | `contents.{text, highlights, summary, extras, livecrawlTimeout, maxAgeHours}` suliejami su numatytuoju `{ text: true, highlights: true }` |
+| Tavily   | `search_depth`, `chunks_per_source`, `time_range`, `start_date`, `end_date`, `include_published_date`, `filter_by_published_date`, `include_answer`, `include_raw_content`, `include_images`, `include_image_descriptions`, `include_favicon`, `include_domains_mode`, `language`, `filter_by_language`, `auto_parameters`, `exact_match`, `include_usage`, `safe_search` | —                                                                                                                                         |
 
-Visada laimi bendrieji laukai: `query`, `max_results`, `filters` (domenai), `country` ir tema, kilusi iš `search_type`. „Exa“ `search_type: "news"` išlaiko `category: "news"`. Tavily taip pat priima `search_type: "finance"` (`topic: "finance"`).
+Bendrieji laukai visada turi pirmenybę: `query`, `max_results`, `filters` (domenai), `country` ir
+tema, išvesta iš `search_type`. Naudojant „Exa“, `search_type: "news"` išlaiko
+`category: "news"`. „Tavily“ taip pat priima `search_type: "finance"` (`topic: "finance"`).
 
-„Firecrawl“ paieškos kaina įrašoma už pradėtą 10 grąžintų rezultatų bloką, 0,002 USD (2 kreditai) už bloką ir bent vieną bloką už skambutį ( [„Firecrawl billing](https://docs.firecrawl.dev/billing) “): 11 rezultatų kainuoja 0,004 USD.
+„Firecrawl“ paieškos kaina registruojama už kiekvieną pradėtą 10 grąžintų rezultatų bloką — po
+$0.002 (2 kreditus) už bloką, o vienam iškvietimui taikomas bent vienas blokas
+([„Firecrawl“ atsiskaitymas](https://docs.firecrawl.dev/billing)): 11 rezultatų kainuoja $0.004.
 
-Bendrasis `time_range` dabar pasiekia abu teikėjus: Exa gauna `startPublishedDate` (ISO timestamp), o Tavily gauna `start_date` (`YYYY-MM-DD`). Tiksli data `provider_options` viršija susietą datą.
+Bendrasis `time_range` dabar pasiekia abu teikėjus: „Exa“ gauna `startPublishedDate` (ISO
+laiko žymą), o „Tavily“ — `start_date` (`YYYY-MM-DD`). Aiškiai nurodyta data
+`provider_options` perrašo susietąją.
 
-Exa rezultatai išlaikomi `id`, `highlights` (kiekvienas paryškinimas, ne tik pirmasis naudojamas kaip `snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ir `extras` `provider_raw`. Tavily rezultatai išlieka `images` ir `favicon`.
+„Exa“ rezultatuose `id`, `highlights` (kiekvienas paryškinimas, ne tik pirmasis, naudotas kaip
+`snippet`), `highlight_scores`, `summary`, `subpages`, `entities` ir `extras` išsaugomi
+`provider_raw`. „Tavily“ rezultatuose išsaugomi `images` ir `favicon`.
 
-Susiejimo paieškos kaina įrašoma 0,005 USD už `depth` `fast` ir `standard` ir 0,05 USD už `deep` ( [susiejimo kainodara](https://docs.linkup.so/pages/documentation/development/pricing) ), nesvarbu, ar `depth` gaunama iš `provider_options` ar ryšio nustatymų.
+„Linkup“ paieškos kaina registruojama kaip $0.005, kai `depth` yra `fast` arba `standard`, ir
+$0.05, kai `deep` ([„Linkup“ kainodara](https://docs.linkup.so/pages/documentation/development/pricing)),
+nesvarbu, ar `depth` gaunamas iš `provider_options`, ar iš ryšio nustatymų.
 
-Exa `type: "lite"` (Exa 3.0) priima mažesnį laukų rinkinį ir atmeta visą užklausą, kai nustatomas bet kuris kitas laukas. Lite, `additionalQueries`, `systemPrompt` ir kiekvienas `contents` klavišas, išskyrus `text` ir `highlights` atmetamas prieš skambinant. Nebenaudojami `subpages`, `subpageTarget`, `highlights.numSentences` ir `highlights.highlightsPerUrl` nebepersiunčiami.
+„Exa“ `type: "lite"` („Exa 3.0“) priima mažesnį laukų rinkinį ir atmeta visą užklausą, kai
+nustatomas bet kuris kitas laukas. Naudojant lite, prieš iškvietimą pašalinami
+`additionalQueries`, `systemPrompt` ir visi `contents` raktai, išskyrus `text` ir `highlights`.
+Nebepersiunčiami pasenę `subpages`, `subpageTarget`, `highlights.numSentences` ir
+`highlights.highlightsPerUrl`.
 
-Išlaidų apskaita yra vienodo registro `costPerQuery`, išskyrus Exa, kuri vadovaujasi pačios Exa kainodara: 0,007 USD už `auto` (ir senojo `fast`) skambutį arba 0,004 USD už `lite` (ir senąjį `instant`), apimanti 10 rezultatų; 0,001 USD už kiekvieną tolesnį rezultatą; ir 0,001 USD už grąžintą rezultatą, kai nustatytas `contents.summary`. Tavily įrašytas 1 kreditu (0,008 USD) už `search_depth` `basic`, `fast` ir `ultra-fast` ir 2 kreditus (0,016 USD) už `advanced` ( [Tavily API kreditai](https://docs.tavily.com/documentation/api-credits) ). Skambutis su `auto_parameters: true`, kurį Tavily atnaujina į išplėstinį, vis tiek įrašomas į 1 kreditą.
-
----
+Sąnaudų apskaita naudoja plokščią registrą `costPerQuery`, išskyrus „Exa“, kuri vadovaujasi
+savo kainodara: $0.007 už iškvietimą, kai naudojamas `auto` (ir senasis `fast`), arba $0.004,
+kai naudojamas `lite` (ir senasis `instant`), apimant 10 rezultatų; $0.001 už kiekvieną
+papildomą rezultatą; ir $0.001 už kiekvieną grąžintą rezultatą, kai nustatytas
+`contents.summary`. „Tavily“ registruojamas kaip 1 kreditas ($0.008), kai
+`search_depth` yra `basic`, `fast` arba `ultra-fast`, ir 2 kreditai ($0.016), kai `advanced`
+([„Tavily“ API kreditai](https://docs.tavily.com/documentation/api-credits)). Iškvietimas su
+`auto_parameters: true`, kurį „Tavily“ atnaujina į advanced, vis tiek registruojamas kaip
+1 kreditas.
 
 ## Web Fetch API
 
-Ištraukia turinį iš URL naudodama sukonfigūruotą žiniatinklio išgavimo teikėją („Firecrawl“, „Jina
-Reader“, „Tavily Extract“, „TinyFish Fetch“, „Nimble Extract“, „Parallel Extract“).
+Ištraukite turinį iš URL naudodami sukonfigūruotą žiniatinklio gavimo teikėją („Firecrawl“, „Jina
+Reader“, „Tavily Extract“, „TinyFish Fetch“, „Nimble Extract“, „Parallel Extract“, „Keenable Fetch“).
 
-„Parallel Extract“ (`parallel-search`, tas pats API raktas kaip ir „Parallel Search“) grąžina tik „Markdown“ — bet koks kitas `format` sukelia `400` klaidą, o turinio apimtis ribojama iki 100 000 simbolių. Kai pačio tikslinio puslapio nepavyksta išgauti, upstream sistema apie tai praneša HTTP 200 atsakyme; „OmniRoute“ tai pateikia kaip `422` su fiksuotu pranešimu.
+„Parallel Extract“ (`parallel-search`, naudoja tą patį API raktą kaip „Parallel Search“) grąžina tik Markdown —
+bet kokia kita `format` reikšmė sukelia `400` klaidą, o turinys apribojamas iki 100 000 simbolių. Kai
+pačio tikslinio puslapio nepavyksta išgauti, upstream sistema apie tai praneša HTTP 200 atsakyme;
+„OmniRoute“ tai pateikia kaip `422` su fiksuotu pranešimu.
 
-| Metodas | Kelias          | Aprašymas                                                              |
-| ------- | --------------- | ---------------------------------------------------------------------- |
-| POST    | `/v1/web/fetch` | Iškviečia / nuskaito URL — užklausos turinį tikrina `v1WebFetchSchema` |
+„Keenable Fetch“ (`keenable-search`) taip pat grąžina tik Markdown (bet kokia kita `format` reikšmė
+sukelia `400` klaidą), o turinys apribojamas iki 100 000 simbolių. Jis veikia ir be rakto: aiškiai
+nurodžius `provider: "keenable-search"` ir nepateikus ryšio, naudojamas „Keenable“ galinis taškas be rakto
+(taikomi vienam IP adresui skirti užklausų dažnio limitai). Sukonfigūruotas raktas tik panaikina šiuos
+limitus; automatinio pasirinkimo režimas naudoja „Keenable“ tik tada, kai raktas sukonfigūruotas.
 
-**Autentifikavimas:** „Bearer“ API raktas (`extractApiKey` + `isValidApiKey`). Politika taikoma naudojant `enforceApiKeyPolicy`.
+| Metodas | Kelias          | Aprašymas                                                                |
+| ------- | --------------- | ------------------------------------------------------------------------ |
+| POST    | `/v1/web/fetch` | Iškviesti / nuskaityti URL — užklausa tikrinama pagal `v1WebFetchSchema` |
 
-**Kvotą atsižvelgiantis rezervinis mechanizmas (#8297):** kai nenurodytas aiškus `provider`, telkinys
+**Autentifikavimas:** „Bearer“ API raktas (`extractApiKey` + `isValidApiKey`). Politika užtikrinama naudojant `enforceApiKeyPolicy`.
+
+Pavadintos kombinacijos naudoja [`model` maršrutizavimo sutartį](#named-searchfetch-combinations)
+aukščiau, išsaugodamos konkrečias gavimo parinktis ir atsakymus.
+
+**Kvotą atsižvelgiantis rezervinis pasirinkimas (#8297):** kai nepateikiamas nei `provider`, nei `model`, telkinys
 (`firecrawl` → `jina-reader` → `tavily-search` → `tinyfish` → `nimble-search` →
-`parallel-search`) tikrinamas nustatyta
-prioriteto tvarka (pirmiausia naudojamas pirmasis tinkamas teikėjas) — sukonfigūruotas, tačiau greičio ribojamas teikėjas praleidžiamas, užuot nutraukus užklausą, o pakartotinai bandytina / kvotos upstream klaida (HTTP 429 visada; 402/403 „Firecrawl“ / „Tavily“ / „TinyFish“ kvotos tipo nemokamiems planams — netaikoma „Jina Reader“ ir niekada netaikoma paprastai netinkamai 400 užklausai) užklausos metu perduodama kitam dar neišbandytam teikėjui, turinčiam kredencialus. Kai visi telkinio teikėjai išnaudoti, galinis taškas grąžina vieną `429` (su `Retry-After` antrašte), o ne ankstesnį bendrinį `400`. Kai aiškiai nurodytas `provider`, tylus rezervinis mechanizmas nenaudojamas — greičio ribojamo arba neatsakančio aiškiai nurodyto teikėjo klaida pateikiama tiesiogiai (`429`, jei taikomas greičio ribojimas, kitu atveju upstream būsena).
+`parallel-search` → `keenable-search`) pereinamas fiksuota
+prioriteto tvarka (pirmiausia užpildomas pirmasis) — teikėjas, kurio užklausų dažnio limitas pasiektas, bet kuris
+yra sukonfigūruotas, praleidžiamas, užuot nutraukus užklausą, o pakartotinai bandoma / kvotos viršijimo upstream klaida
+(HTTP 429 visada; 402/403 „Firecrawl“ / „Tavily“ / „TinyFish“ kvotos tipo nemokamuose planuose —
+bet ne „Jina Reader“ atveju ir niekada ne dėl paprastos 400 klaidos) užklausos vykdymo metu perduodama
+kitam dar neišbandytam kredencialus turinčiam teikėjui. Kai visi telkinio teikėjai išnaudoti, galinis taškas grąžina vieną
+`429` (su `Retry-After` antrašte), o ne ankstesnę bendrinę `400` klaidą. Kai aiškiai nurodomas `provider`, tylaus
+rezervinio pasirinkimo nėra — teikėjo, kurio užklausų dažnio limitas pasiektas arba kuris sugenda, klaida pateikiama
+tiesiogiai (`429`, jei pasiektas užklausų dažnio limitas, kitu atveju upstream būsena).
 
 ---
 
@@ -953,33 +1076,34 @@ CLI pakeičia `base_url + /responses` į WebSocket, o „OmniRoute“ perduoda j
 
 ## Kvotų ir problemų ataskaitos
 
-| Metodas | Kelias              | Aprašymas                                                                                             |
-| ------- | ------------------- | ----------------------------------------------------------------------------------------------------- |
-| GET     | `/v1/quotas/check`  | Iš anksto patikrinti `provider` + `accountId` kvotą prieš išduodant registruotą raktą                 |
-| POST    | `/v1/issues/report` | Pranešti apie kvotos / rakto išdavimo nesėkmę „GitHub“ (reikia `GITHUB_ISSUES_REPO` + prieigos rakto) |
+| Method | Path                | Description                                                                                          |
+| ------ | ------------------- | ---------------------------------------------------------------------------------------------------- |
+| GET    | `/v1/quotas/check`  | Iš anksto patikrinti kvotą `provider` + `accountId` kombinacijai prieš išduodant registruotą raktą   |
+| POST   | `/v1/issues/report` | Pranešti apie kvotos / rakto išdavimo klaidą „GitHub“ (reikia `GITHUB_ISSUES_REPO` + prieigos rakto) |
 
-**Autentifikavimas:** „Bearer“ API raktas (`isAuthenticated`).
+**Autentifikavimas:** `/v1/quotas/check` naudoja „Bearer“ API raktą (`isAuthenticated`). `/v1/issues/report` skirtas
+tik valdymui (`requireManagementAuth`), kaip ir `/api/v1/registered-keys`: prietaisų skydelio sesija,
+vietinis CLI prieigos raktas arba API raktas su `manage`/`admin` sritimi; tik išvadoms skirti API raktai gauna `403`.
 
-### Kvotos seanso atkūrimas (pasirenkama funkcija)
+### Kvotos sesijos atkūrimas (pasirenkama)
 
-Neužsikraunantis srautu `POST /v1/chat/completions` arba `POST /v1/responses`, kuris baigiasi
-galutine kvotos klaida (`402`/`429`/`503`, kurios atsakyme nurodoma, kad kvota arba kreditai
-išeikvoti), gali būti atidėtas ir vėliau pakartotas, užuot grąžinus klaidą. Skambinantysis
-pasirenka šią funkciją kiekvienai užklausai, nurodydamas tris antraštes:
+Nestreaminanti `POST /v1/chat/completions` arba `POST /v1/responses` užklausa, kuri baigiasi
+galutine kvotos klaida (`402`/`429`/`503`), kurios atsakyme nurodoma, kad kvota arba kreditai išnaudoti,
+gali būti išsaugota ir pakartota vėliau, užuot grąžinus klaidą. Iškvietėjas gali pasirinkti šią parinktį kiekvienai
+užklausai, nurodydamas tris antraštes:
 
-| Antraštė                     | Reikšmė                                       |
-| ---------------------------- | --------------------------------------------- |
-| `x-omniroute-quota-recovery` | `auto`                                        |
-| `x-omniroute-session`        | seanso ID, `[A-Za-z0-9._:-]{1,128}`           |
-| `x-omniroute-recovery-turn`  | seanse unikalus posūkio ID (ta pati taisyklė) |
+| Header                       | Value                                             |
+| ---------------------------- | ------------------------------------------------- |
+| `x-omniroute-quota-recovery` | `auto`                                            |
+| `x-omniroute-session`        | sesijos ID, `[A-Za-z0-9._:-]{1,128}`              |
+| `x-omniroute-recovery-turn`  | per sesiją unikalus posūkio ID (ta pati taisyklė) |
 
-Tinkamos naudoti tik užklausos su `stream: false`, be įrankių, įrankių istorijos ar
-`previous_response_id` ir be `x-omniroute-connection` prisegimo; taip pat turi būti nustatytas
-`STORAGE_ENCRYPTION_KEY` (užklausa saugoma užšifruota iki 24 val.). Tada atsakymas yra `202` su
-`recovery.poll`; apklauskite `GET /v1/quota-recoveries/{id}` (`202`, kol laukiama, `200` su
-atkurtu atsakymu, kai užbaigta) arba atšaukite naudodami `DELETE`. Bilietai matomi tik juos
-sukūrusiam API raktui. Jei pakartotinio siuntimo rezultatas neaiškus, atkūrimas baigiamas būsena
-`needs_confirmation`, o užklausa nesiunčiama du kartus. Šaltinis: `src/lib/quota/quotaSessionRecovery.ts`.
+Tinkamos tik `stream: false` užklausos be įrankių, įrankių istorijos ar `previous_response_id`, taip pat
+be `x-omniroute-connection` prisegimo; be to, turi būti nustatytas `STORAGE_ENCRYPTION_KEY`
+(užklausa saugoma šifruota iki 24 val.). Tada atsakymas yra `202` su
+`recovery.poll`; apklauskite naudodami `GET /v1/quota-recoveries/{id}` (`202`, kol vykdoma,
+`200` su atkurtu turiniu, kai baigta) arba atšaukite naudodami `DELETE`. Bilietai matomi tik juos sukūrusiam API
+raktui. Jei pakartotinio vykdymo rezultatas neaiškus, būsena tampa `needs_confirmation`, užuot užklausą išsiuntus du kartus. Šaltinis: `src/lib/quota/quotaSessionRecovery.ts`.
 
 ---
 
@@ -1731,19 +1855,23 @@ Išeinančios žiniatinklio kabliukų prenumeratos, skirtos „OmniRoute“ įvy
 
 ---
 
-## Užregistruoti raktai (automatinis valdymas)
+## Registruoti raktai (automatinis valdymas)
 
-Naudojama automatiniam raktų valdymo posistemiui, kad išduotų ir pasuktų API raktus pagalbinio teikėjo / paskyros atžvilgiu, taikant dienos / valandos kvotas.
+Naudojama automatinio raktų valdymo posistemės, kad būtų išduodami ir rotuojami API raktai pagalbinėje teikėjo / paskyros sistemoje, taikant dienos / valandos kvotas.
 
-| Method | Path                                  | Description                                                                                                                                                                                                           |
-| ------ | ------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| GET    | `/api/v1/registered-keys`             | Išvardyti užregistruotus raktus (tik užmaskuotas prefiksas)                                                                                                                                                           |
-| POST   | `/api/v1/registered-keys`             | Išduoti naują užregistruotą raktą — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Neapdorotas raktas grąžinamas **vieną kartą**. Kvotai neleidus, grąžinama `429`. |
-| GET    | `/api/v1/registered-keys/[id]`        | Gauti užregistruoto rakto metaduomenis (be neapdorotos medžiagos)                                                                                                                                                     |
-| DELETE | `/api/v1/registered-keys/[id]`        | Atšaukti užregistruotą raktą                                                                                                                                                                                          |
-| POST   | `/api/v1/registered-keys/[id]/revoke` | Aiškus atšaukimo galinis taškas (poveikis toks pats kaip DELETE)                                                                                                                                                      |
+| Metodas | Kelias                                | Aprašymas                                                                                                                                                                                                                 |
+| ------- | ------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| GET     | `/api/v1/registered-keys`             | Išvardyti registruotus raktus (rodoma tik užmaskuota prefikso dalis)                                                                                                                                                      |
+| POST    | `/api/v1/registered-keys`             | Išduoti naują registruotą raktą — body: `{name, provider?, accountId?, idempotencyKey?, expiresAt?, dailyBudget?, hourlyBudget?}`. Neapdorotas raktas grąžinamas **vieną kartą**. Kvotos atmetimo atveju grąžinama `429`. |
+| GET     | `/api/v1/registered-keys/[id]`        | Gauti registruoto rakto metaduomenis (be neapdorotos medžiagos)                                                                                                                                                           |
+| DELETE  | `/api/v1/registered-keys/[id]`        | Atšaukti registruotą raktą                                                                                                                                                                                                |
+| POST    | `/api/v1/registered-keys/[id]/revoke` | Aiškus atšaukimo galinis punktas (poveikis toks pats kaip DELETE)                                                                                                                                                         |
+| GET     | `/api/v1/providers/[provider]/limits` | Perskaityti teikėjo išdavimo limitus                                                                                                                                                                                      |
+| PUT     | `/api/v1/providers/[provider]/limits` | Nustatyti teikėjo išdavimo limitus — body: `{maxActiveKeys?, dailyIssueLimit?, hourlyIssueLimit?}`                                                                                                                        |
+| GET     | `/api/v1/accounts/[id]/limits`        | Perskaityti paskyros išdavimo limitus                                                                                                                                                                                     |
+| PUT     | `/api/v1/accounts/[id]/limits`        | Nustatyti paskyros išdavimo limitus — toks pats body kaip teikėjo maršrute                                                                                                                                                |
 
-**Autentifikavimas:** valdymo sesija / API raktas (`requireManagementAuth`) — ta pati apsauga kaip `/api/keys`: prietaisų skydelio sesija, vietinis CLI prieigos raktas arba API raktas su `manage` / `admin` apimtimi; tik išvadoms skirti API raktai gauna `403`. Taip pat žr. `/v1/quotas/check` ir `/v1/issues/report`.
+**Autentifikavimas:** valdymo sesija / API raktas (`requireManagementAuth`) — ta pati apsauga kaip `/api/keys`: skydelio sesija, vietinis CLI prieigos raktas arba API raktas su `manage`/`admin` apimtimi; tik išvadoms skirti API raktai gauna `403`. Taip pat žr. `/v1/quotas/check` ir `/v1/issues/report`.
 
 ---
 
