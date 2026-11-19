@@ -901,6 +901,46 @@ test("google PSE validator probes the base URL saved on the connection", async (
   );
 });
 
+test("google PSE validator rejects a saved base URL that answers 404 or redirects", async () => {
+  let nextStatus = 404;
+  globalThis.fetch = async (url) => {
+    assert.match(String(url), /^https:\/\/search\.example\.com\/wrong\?key=/);
+    return new Response(nextStatus === 404 ? "not found" : null, {
+      status: nextStatus,
+      headers: nextStatus === 404 ? {} : { Location: "https://elsewhere.example.com/" },
+    });
+  };
+  const probe = () =>
+    validateProviderApiKey({
+      provider: "google-pse-search",
+      apiKey: "google-key",
+      providerSpecificData: { cx: "engine-id", baseUrl: "https://search.example.com/wrong" },
+    });
+
+  const missing = await probe();
+  assert.equal(missing.valid, false);
+  assert.equal(missing.error, "Google PSE validation failed. Check the base URL.");
+
+  // A redirect is never followed, so it already fails before any status policy applies.
+  for (const status of [301, 302, 307]) {
+    nextStatus = status;
+    const result = await probe();
+    assert.equal(result.valid, false, `HTTP ${status}`);
+    assert.equal(String(result.error).includes("google-key"), false, "the key is never echoed");
+  }
+});
+
+test("search validator keeps the lenient 404 policy for providers other than Google PSE", async () => {
+  globalThis.fetch = async () => new Response("not found", { status: 404 });
+
+  const linkup = await validateProviderApiKey({
+    provider: "linkup-search",
+    apiKey: "linkup-key",
+  });
+  assert.equal(linkup.valid, true);
+  assert.equal(linkup.error, null);
+});
+
 test("search validator keeps the lenient 400 policy for providers other than Google PSE", async () => {
   globalThis.fetch = async () =>
     new Response(JSON.stringify({ error: "bad request" }), { status: 400 });
