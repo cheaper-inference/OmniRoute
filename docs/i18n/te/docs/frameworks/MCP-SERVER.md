@@ -20,6 +20,8 @@ omniroute --mcp
 
 ```bash
 # Streamable HTTP transport (default port 20128, in-process on the dashboard server)
+omniroute                                          # start the dashboard server
+omniroute mcp enable --transport streamable-http   # from another shell; HTTP is off by default
 # Client endpoint: http://localhost:20128/api/mcp/stream
 # stdio: omniroute --mcp
 ```
@@ -143,9 +145,9 @@ Claude డెస్క్టాప్, Cursor, Cline మరియు అను�
 | `omniroute_rtk_discover`            | `read:compression`  | ఆప్ట్-ఇన్ RTK అవుట్పుట్ నమూనాలలో పునరావృత శబ్దాన్ని కనుగొనండి                                                                      |
 | `omniroute_rtk_learn`               | `read:compression`  | ఎంపిక నమూనాల నుండి సమీక్షించదగిన RTK ఫిల్టర్ డ్రాఫ్ట్ను రూపొందించండి                                                               |
 
-CCR ఎంట్రీలు టూ-టైర్ స్టోర్ను ఉపయోగిస్తాయి: మన్నికైన SQLite టైర్ (`ccr_blocks`, డిఫాల్ట్గా ఆన్) ద్వారా స్థానిక KB కాని రన్టైమ్లలో హాట్ ఇన్-మెమరీ టైర్ బ్యాకప్ చేయబడి ఉంటుంది కాబట్టి ఒక బ్లాక్ ఎవిక్షన్ నుండి బయటపడుతుంది లేదా దాని TTL — అయిపోయే వరకు రీస్టార్ట్ చేస్తుంది ప్రతి బ్లాక్ 2 MiB కి, ప్రతి ప్రిన్సిపల్ 16 MiB కి మరియు గ్లోబల్ స్టోర్ 64 MiB కి పరిమితం చేయబడింది. ఎంట్రీలు 24-గంటల TTL కి డిఫాల్ట్గా ఉంటాయి (గరిష్టంగా ఏడు రోజులు). పూర్తి MCP తిరిగి పొందడం 256 KiB కి పరిమితం చేయబడింది; శ్రేణి మరియు grep మోడ్ల ద్వారా పెద్ద బ్లాక్లు అందుబాటులో ఉంటాయి. నిల్వ, పునరుద్ధరణ, జాబితా, తనిఖీ, తొలగింపు మరియు గణాంకాలు ప్రమాణీకరించబడిన API-కీ ప్రిన్సిపాల్ ద్వారా వేరుచేయబడతాయి. ఆడిట్ రికార్డ్లు హ్యాష్లు మరియు సైజ్ మెటాడేటాను కలిగి ఉంటాయి, ఎప్పుడూ కంటెంట్ కాదు. ఆపరేటర్-ఫేసింగ్ వివరాలు (రెండు మార్కర్లు, క్లయింట్ ముందస్తు అవసరాలు, `codemode:false`, పర్-టూల్ స్కోప్లు, పేజినేషన్ మరియు డయాగ్నస్టిక్ మ్యాట్రిక్స్) [కంప్రెషన్ ఇంజిన్ల → ప్రీరిక్విజిట్స్ / ఆపరేటర్ గైడ్లో](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup) ఉంటాయి.
+CCR entries use a two-tier store: a hot in-memory tier backed, on local non-cloud runtimes, by a durable SQLite tier (`ccr_blocks`, on by default) so a block survives eviction or a restart until its TTL runs out — except blocks over 512 KB, cloud runtimes and `COMPRESSION_CCR_DURABLE_STORE=false`, which stay memory-only. The durable write is best effort: it is dropped while 1,000 writes are already pending, and a failed SQLite write is logged, not retried, so that block is lost on restart. Each block is limited to 2 MiB, each principal to 16 MiB, and the global store to 64 MiB. Entries default to a 24-hour TTL (maximum seven days). Full MCP retrieval is limited to 256 KiB; larger blocks remain available through the ranged and grep modes. Storage, retrieval, listing, inspection, deletion, and stats are isolated by the authenticated API-key principal. Audit records contain hashes and size metadata, never content. Operator-facing details (the two markers, client prerequisites, `codemode:false`, per-tool scopes, pagination, and a diagnostic matrix) live in [Compression Engines → Prerequisites / operator guide](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-`omniroute_compression_status` `analytics.mcpDescriptionCompression` కింద విడిగా MCP వివరణ కుదింపును నివేదిస్తుంది. ఆ విలువలు MCP జాబితా చేయదగిన వివరణల కోసం మెటాడేటా-పరిమాణ అంచనాలు (`tools`, `prompts`, `resources`, మరియు `resourceTemplates`); అవి ప్రొవైడర్ వినియోగ రశీదులు కావు మరియు `source: "mcp_metadata_estimate"` తో గుర్తించబడతాయి.
+`omniroute_compression_status` MCP వివరణ కంప్రెషన్ను `analytics.mcpDescriptionCompression` కింద విడిగా నివేదిస్తుంది. ఆ విలువలు MCP జాబితా చేయదగిన వివరణల కోసం మెటాడేటా-పరిమాణ అంచనాలు (`tools`, `prompts`, `resources`, మరియు `resourceTemplates`); అవి ప్రొవైడర్ వినియోగ రశీదులు కావు మరియు `source: "mcp_metadata_estimate"` తో గుర్తించబడతాయి.
 
 ### MCP యాక్సెసిబిలిటీ ట్రీ ఫిల్టర్ (v3.8.0)
 
