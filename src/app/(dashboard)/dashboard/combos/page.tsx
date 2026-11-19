@@ -2103,8 +2103,9 @@ function ComboCardInner({
                 }}
                 className="opacity-100 md:opacity-0 md:group-hover:opacity-100 md:focus-visible:opacity-100"
                 tone="muted"
-                // Named by its title only (as before): an aria-label "Copy combo name" would also
-                // match label lookups for the "Combo name" field of the editor.
+                // The kit tooltip names this icon button (aria-label "Copy combo name"), which a
+                // label lookup for the editor's "Combo name" field also matches: find that field
+                // by role.
                 title={t("copyComboName")}
               >
                 <Icon name={copied === `combo-${combo.id}` ? "check" : "content_copy"} size={14} />
