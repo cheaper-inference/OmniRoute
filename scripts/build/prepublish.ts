@@ -31,6 +31,7 @@ import { buildMitmUtilities } from "./buildMitm.mjs";
 import { isNativeExecutable, resolveLocalBinEntry } from "./buildToolRunner.mjs";
 import { resolveBundledNpmEntry } from "./resolveNpmEntry.ts";
 import { getPrepublishDistDirRefusal } from "./prepublishPathSafety.ts";
+import { verifyNextInput } from "./standaloneInput.mjs";
 import {
   APP_STAGING_ALLOWED_EXACT_PATHS,
   APP_STAGING_ALLOWED_PATH_MATCHERS,
@@ -172,6 +173,17 @@ function removeEmptyDirectories(dir: string): boolean {
 }
 
 console.log("🔨 OmniRoute — Building for npm publish...\n");
+
+// Strict CI/observer consumers must prove the input BEFORE deleting staging or
+// invoking a builder. Ordinary local builds retain the historical fallback below.
+if (process.env.OMNIROUTE_REQUIRE_PREBUILT_NEXT === "1") {
+  try {
+    verifyNextInput(ROOT);
+  } catch {
+    console.error("PREBUILT_NEXT_REQUIRED: standalone input is missing, stale or unverified");
+    process.exit(1);
+  }
+}
 
 // ── Step 1: Clean previous dist/ directory ─────────────────
 if (existsSync(DIST_DIR)) {

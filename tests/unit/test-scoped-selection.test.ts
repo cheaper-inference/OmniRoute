@@ -106,8 +106,8 @@ const SCRIPT = fs.readFileSync(
   "utf8"
 );
 
-test("test-scoped.sh feeds the selector via --stdin (staged mode must not read git commits)", () => {
-  assert.match(SCRIPT, /select-impacted-tests\.mjs" --stdin/);
+test("test-scoped.sh preserves name/status via stdin (staged mode must not read git commits)", () => {
+  assert.match(SCRIPT, /select-impacted-tests\.mjs" --stdin-name-status(?:\s|\))/);
 });
 
 test("test-scoped.sh mirrors the CI loader split (#6787): dashboard→tsx, serial→concurrency=1, rest→tsx/esm", () => {

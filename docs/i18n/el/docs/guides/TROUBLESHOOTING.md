@@ -469,7 +469,7 @@ omniroute
 2. **Μόνιμη διόρθωση:** Κάντε ρητή δέσμευση στο IPv4 χρησιμοποιώντας `-p 127.0.0.1:20128:20128` στην εντολή `docker run`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Αυτό επιβάλλει τη δέσμευση IPv4 και αποτρέπει επίσης την έκθεση του proxy σε όλες τις διεπαφές του host.
 

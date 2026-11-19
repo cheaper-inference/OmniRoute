@@ -182,8 +182,11 @@ function commandIdentity(rawTokens, joinable, isFile) {
   if (tokens.length === 0) return "foreign";
   const exe = joinPathTokens(tokens, 0, (v) => EXECUTABLE_END.test(v), joinable, isFile);
   if (exe.ambiguous) return "unknown";
-  if (OMNIROUTE_COMMAND.test(exe.value)) return "ours";
-  if (!JS_RUNTIME.test(exe.value)) return "foreign";
+  // A runtime installed inside an OmniRoute directory can execute unrelated applications.
+  // Only its script identifies the application; standalone executables keep their own identity.
+  if (!JS_RUNTIME.test(exe.value)) {
+    return OMNIROUTE_COMMAND.test(exe.value) ? "ours" : "foreign";
+  }
   for (let i = exe.next; i < tokens.length; i++) {
     const arg = tokens[i].value;
     // Inline code (-e/-p) has no script file to prove anything.

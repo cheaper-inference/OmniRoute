@@ -460,6 +460,7 @@
   },
   "devDependencies": {
     "@axe-core/playwright": "^4.13.0",
+    "@bcoe/v8-coverage": "1.0.2",
     "@cyclonedx/cyclonedx-npm": "6.0.1",
     "@eslint/compat": "^2.1.1",
     "@playwright/test": "1.62.1",

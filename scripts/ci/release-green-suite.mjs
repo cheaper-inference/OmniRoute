@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 // Writes the result of one hosted Release-Green suite job (a `suites` matrix leg of
 // nightly-release-green.yml) for the validator's --suites-from reader.
-// Usage: node scripts/ci/release-green-suite.mjs <name> <exitCode> <logFile> <outDir> <workflowSha> <script> [shard]
+// Usage: node scripts/ci/release-green-suite.mjs <name> <exitCode> <logFile> <outDir> <workflowSha> <script> [shard] [producerExit teeExit]
 import { mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { createHash } from "node:crypto";
 import { join } from "node:path";
@@ -10,9 +10,7 @@ import { firstFailureLine, hostedSuiteIdentity } from "../quality/validate-relea
 
 const NAME_RE = /^(unit-\d+|integration-\d+|vitest)$/;
 
-/** The JSON one suite job reports: its name, exit code and first failure line. */
-export function suiteResult(name, exitCode, log) {
-  if (!NAME_RE.test(name)) throw new Error(`unknown suite name: ${name}`);
+function parseExitCode(exitCode) {
   const code = Number(exitCode);
   if (
     !/^(0|[1-9][0-9]*)$/.test(String(exitCode)) ||
@@ -22,11 +20,34 @@ export function suiteResult(name, exitCode, log) {
   ) {
     throw new Error(`invalid exit code: ${exitCode}`);
   }
-  return { name, code, detail: code === 0 ? "pass" : firstFailureLine(log) };
+  return code;
+}
+
+/** A measured producer failure is distinct from incomplete capture of its output. */
+export function suiteResult(name, exitCode, log, pipelineStatus) {
+  if (!NAME_RE.test(name)) throw new Error(`unknown suite name: ${name}`);
+  const code = parseExitCode(exitCode);
+  if (pipelineStatus !== undefined) {
+    if (!Array.isArray(pipelineStatus) || pipelineStatus.length !== 2)
+      throw new Error("expected producer and capture exit codes");
+    pipelineStatus = pipelineStatus.map(parseExitCode);
+    if (code !== (pipelineStatus.find((status) => status !== 0) ?? 0))
+      throw new Error("suite exit disagrees with pipeline status");
+  }
+  return {
+    name,
+    code,
+    detail: code === 0 ? "pass" : firstFailureLine(log),
+    ...(pipelineStatus && {
+      pipelineStatus,
+      evidenceState: pipelineStatus[1] === 0 ? "COMPLETE" : "INCOMPLETE",
+    }),
+  };
 }
 
 if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
-  const [name, exitCode, logFile, outDir, workflowSha, script, shard = ""] = process.argv.slice(2);
+  const [name, exitCode, logFile, outDir, workflowSha, script, shard = "", ...pipelineStatus] =
+    process.argv.slice(2);
   let log = "";
   try {
     log = readFileSync(logFile, "utf8");
@@ -37,7 +58,7 @@ if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
   const identity = hostedSuiteIdentity(process.cwd(), workflowSha);
   if (!identity) throw new Error("missing hosted suite execution identity");
   const result = {
-    ...suiteResult(name, exitCode, log),
+    ...suiteResult(name, exitCode, log, pipelineStatus.length ? pipelineStatus : undefined),
     ...identity,
     script: name === "vitest" ? "test:vitest+test:vitest:ui" : script,
     shard,

@@ -558,6 +558,8 @@ Tento proxy:
 
 Aktualizácie WebSocket pre vstavaný dashboard sú spracované sprievodným serverom na vyhradenom porte (pozri `src/lib/services/embedWsProxy.ts`).
 
+Každá inovácia je autorizovaná pred otvorením tunela s rovnakými pravidlami ako HTTP embed route: peer musí byť loopback bez reverznej proxy hlavičky presmerovania, `Origin` prehliadača musí byť pôvodom dashboardu (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` rozširujú predvolené nastavenia loopback) a volajúci potrebuje reláciu dashboardu alebo kľúč API v rozsahu správy, pokiaľ nie je zakázané prihlásenie do dashboardu.
+
 **Zabezpečenie:** Vložené proxy trasy sú klasifikované pod `LOCAL_ONLY_API_PREFIXES` a je možné ich získať iba zo spätnej slučky. Útočník, ktorý získa JWT cez tunel Cloudflare/Ngrok nemôže proxy do vstavaných služieb.
 
 ---

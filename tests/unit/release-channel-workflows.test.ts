@@ -116,7 +116,12 @@ test("npm-publish: dispatch offers the nightly and lts dist-tags", () => {
 });
 
 /** Executes the real resolve step in a scratch repo with the given tags and inputs. */
-function runResolveStep(version: string, tags: string[], requested = "auto") {
+function runResolveStep(
+  version: string,
+  tags: string[],
+  requested = "auto",
+  candidateVersion = version
+) {
   const { wf } = loadWorkflow("npm-publish.yml");
   const script = findStep(wf.jobs.publish, "Resolve version, dist-tag and skip flag").run ?? "";
   const dir = fs.mkdtempSync(path.join(os.tmpdir(), "omniroute-npm-publish-resolve-"));
@@ -135,6 +140,7 @@ function runResolveStep(version: string, tags: string[], requested = "auto") {
       path.join(repoRoot, "scripts/release/dist-tag.mjs"),
       path.join(dir, "scripts/release/dist-tag.mjs")
     );
+    fs.writeFileSync(path.join(dir, "package.json"), JSON.stringify({ version: candidateVersion }));
     // Fake `npm`: "not published yet" for the skip check.
     const bin = path.join(dir, "bin");
     fs.mkdirSync(bin);
@@ -174,6 +180,14 @@ const TAGS_GA = [...TAGS_V3, "v3.9.0", "v3.9.2", "v4.0.0"];
 test("npm-publish step: stable 3.8.x keeps resolving to latest / historic", () => {
   assert.equal(runResolveStep("3.8.52", TAGS_V3).tag, "latest");
   assert.equal(runResolveStep("3.8.51", TAGS_V3).tag, "historic");
+});
+
+test("npm-publish step: the candidate version determines whether a fresh build is needed", () => {
+  assert.equal(runResolveStep("3.8.52", TAGS_V3).candidate_version_matches, "true");
+  assert.equal(
+    runResolveStep("3.8.52", TAGS_V3, "auto", "3.8.55").candidate_version_matches,
+    "false"
+  );
 });
 
 test("npm-publish step: a 4.0.0 nightly can never take latest", () => {

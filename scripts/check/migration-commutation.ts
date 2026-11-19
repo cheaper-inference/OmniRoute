@@ -438,7 +438,13 @@ function bootOnce(
   outputFile: string
 ): Promise<BootResult> {
   return new Promise((resolve, reject) => {
-    const child = spawn(process.execPath, ["--import", "tsx/esm", BOOT_SCRIPT, outputFile], {
+    const args = ["--import", "tsx/esm", BOOT_SCRIPT, outputFile];
+    // Node propagates V8 coverage to child processes. An instrumented CI boot
+    // needs the repository's layout preload in its otherwise isolated setup.
+    if (process.env.NODE_V8_COVERAGE && process.env.OMNIROUTE_CI_SYNC_TSX_CACHE) {
+      args.unshift("--import", new URL("../ci/native-worker-v8-layout.mjs", import.meta.url).href);
+    }
+    const child = spawn(process.execPath, args, {
       cwd: REPO_ROOT,
       env: bootEnv(dataDir, homeDir, migrationsDir),
       stdio: ["ignore", "pipe", "pipe"],

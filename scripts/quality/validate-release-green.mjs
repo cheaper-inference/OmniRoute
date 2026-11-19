@@ -37,6 +37,8 @@
 //                   them against localhost and produce false-positive reds)
 //     --suites-from <dir>  consume hosted receipts instead of local suite execution;
 //                   requires --suites-workflow-sha <sha> from the producing workflow.
+//     --test-masking-base-sha <sha>  retain this local commit for both anti-masking passes;
+//                   otherwise capture the local origin/main tip once, without fetching.
 //
 // Per-gate output is saved to _artifacts/release-green/<gate>.log (gitignored) —
 // diagnose a red from the file instead of re-running the gate.
@@ -49,8 +51,13 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import { load as parseYaml } from "js-yaml";
 import { runGateProcess } from "./gate-process.mjs";
-import { eslintMeasurementCounts } from "./eslint-measurement.mjs";
-import { loadFullCiProfile, staticGateOutcome } from "./release-green-static-profile.mjs";
+import { eslintMeasurementCounts, readEslintMeasurement } from "./eslint-measurement.mjs";
+import {
+  loadFullCiProfile,
+  resolveTestMaskingBase,
+  staticGateOutcome,
+  testMaskingGateEnv,
+} from "./release-green-static-profile.mjs";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const ROOT = join(__dirname, "..", "..");
@@ -70,6 +77,30 @@ function saveGateLog(id, out) {
 }
 
 // ─── Pure helpers (exported for tests) ──────────────────────────────────────
+
+/** Complete JSON delivery before the CLI exits; pipe writes can finish asynchronously. */
+export async function writeObserverJson(report, output = process.stdout) {
+  const json = JSON.stringify(report, null, 2) + "\n";
+  await new Promise((resolve, reject) => {
+    const onError = (error) => reject(error);
+    output.once("error", onError);
+    try {
+      output.write(json, (error) => {
+        if (error) {
+          // Writable emits the error after invoking its callback. Keep the once-listener
+          // until that event so a rejected write cannot become an unhandled error.
+          reject(error);
+          return;
+        }
+        output.removeListener("error", onError);
+        resolve();
+      });
+    } catch (error) {
+      output.removeListener("error", onError);
+      reject(error);
+    }
+  });
+}
 
 /** Read the committed ratchet baseline value for a metric (null if unknown). */
 export function baselineValue(metric, root = ROOT) {
@@ -185,7 +216,8 @@ export function parseEslintJson(out) {
  * "could not parse eslint json" hides the actionable cause and sends maintainers debugging
  * the parser instead of the gate ceiling.
  */
-export function evaluateEslintRun({ code, out }, warningBaseline) {
+export function evaluateEslintRun(run, warningBaseline) {
+  const { code, out } = run;
   if (code !== 0) {
     return [
       {
@@ -200,7 +232,7 @@ export function evaluateEslintRun({ code, out }, warningBaseline) {
       },
     ];
   }
-  const parsed = parseEslintJson(out);
+  const parsed = Object.hasOwn(run, "measurement") ? run.measurement : parseEslintJson(out);
   let counts;
   try {
     counts = eslintMeasurementCounts(parsed);
@@ -586,7 +618,28 @@ export function parseHostedSuiteResult(text, expected) {
       (expected && Object.entries(expected).some(([key, value]) => r[key] !== value))
     )
       return null;
-    return { name: r.name, code: r.code, detail: typeof r.detail === "string" ? r.detail : "" };
+    if (
+      (r.evidenceState !== undefined && !["COMPLETE", "INCOMPLETE"].includes(r.evidenceState)) ||
+      (r.evidenceState === "INCOMPLETE" && r.code === 0)
+    )
+      return null;
+    if (r.pipelineStatus !== undefined) {
+      if (
+        !Array.isArray(r.pipelineStatus) ||
+        r.pipelineStatus.length !== 2 ||
+        !r.pipelineStatus.every((code) => Number.isInteger(code) && code >= 0 && code <= 255) ||
+        r.code !== (r.pipelineStatus.find((code) => code !== 0) ?? 0) ||
+        r.evidenceState !== (r.pipelineStatus[1] === 0 ? "COMPLETE" : "INCOMPLETE")
+      )
+        return null;
+    }
+    return {
+      name: r.name,
+      code: r.code,
+      detail: typeof r.detail === "string" ? r.detail : "",
+      ...(r.pipelineStatus ? { pipelineStatus: r.pipelineStatus } : {}),
+      ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
+    };
   } catch {
     return null;
   }
@@ -603,11 +656,17 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
   const lane = (id, label, names) => {
     const parts = [];
     let line = "";
+    let incomplete = false;
     for (const name of names) {
       const r = byName.get(name);
       if (!r) {
+        incomplete = true;
         parts.push(`${name} no result`);
         continue;
+      }
+      if (r.evidenceState === "INCOMPLETE") {
+        incomplete = true;
+        if (r.code === 0) parts.push(`${name} incomplete evidence`);
       }
       if (r.code === 0) continue;
       parts.push(`${name} ${r.code === 124 ? "TIMEOUT" : `exit ${r.code}`}`);
@@ -619,6 +678,7 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
       kind: "hard",
       ok: parts.length === 0,
       detail: parts.length === 0 ? "pass" : `${parts.join(", ")}${line ? ` — ${line}` : ""}`,
+      ...(incomplete ? { evidenceState: "INCOMPLETE" } : {}),
     };
   };
   const names = hostedSuiteNames(unitShards, integrationShards);
@@ -630,6 +690,7 @@ export function foldHostedSuiteResults(results, { unitShards, integrationShards 
             label: "Hosted suite receipt integrity",
             kind: "hard",
             ok: false,
+            evidenceState: "INCOMPLETE",
             detail: "invalid, unexpected or duplicate hosted suite receipt",
           },
         ]
@@ -730,14 +791,133 @@ function buildGateEnv(extra) {
 }
 
 const commandReceipts = [];
+const receiptCauses = new WeakMap();
 const cancellation = new AbortController();
+let observerCandidateSha = null;
+let observerRunContext = {};
+
+function readCheckoutSha() {
+  try {
+    const sha = execFileSync("git", ["rev-parse", "HEAD"], {
+      cwd: ROOT,
+      encoding: "utf8",
+      timeout: 5000,
+    }).trim();
+    return /^[0-9a-f]{40}$/.test(sha) ? sha : null;
+  } catch {
+    return null;
+  }
+}
+
+export function makePackPhaseReference(phase, invocationId, candidateSha, context = {}) {
+  if (
+    !["build-next", "build-cli", "stamp-build-sha", "validate-pack-artifact"].includes(
+      phase?.phaseId
+    ) ||
+    phase.mode !== "shared" ||
+    !Number.isSafeInteger(phase.budgetMs) ||
+    phase.budgetMs <= 0 ||
+    !Number.isSafeInteger(phase.preparationBudgetMs) ||
+    phase.preparationBudgetMs < phase.budgetMs ||
+    typeof invocationId !== "string" ||
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(invocationId) ||
+    typeof candidateSha !== "string" ||
+    !/^[0-9a-f]{40}$/.test(candidateSha)
+  )
+    throw new Error("Invalid package phase identity or budget");
+  const hosted =
+    context.hosted === true ||
+    [context.runId, context.runAttempt, context.workflowSha].some(
+      (value) => value !== undefined && value !== null && value !== ""
+    );
+  if (
+    hosted &&
+    (![context.runId, context.runAttempt].every(
+      (value) => typeof value === "string" && /^[1-9][0-9]*$/.test(value)
+    ) ||
+      typeof context.workflowSha !== "string" ||
+      !/^[0-9a-f]{40}$/.test(context.workflowSha))
+  )
+    throw new Error("Incomplete package workflow identity");
+  return {
+    schemaVersion: 1,
+    laneId: "pack-artifact",
+    phaseId: phase.phaseId,
+    mode: phase.mode,
+    budgetMs: phase.budgetMs,
+    preparationBudgetMs: phase.preparationBudgetMs,
+    invocationId,
+    candidateSha,
+    runId: hosted ? context.runId : null,
+    runAttempt: hosted ? context.runAttempt : null,
+    workflowSha: hosted ? context.workflowSha : null,
+  };
+}
+
+function matchesReceiptIdentity(receipt, identity) {
+  if (!receipt || typeof receipt !== "object") return false;
+  const descriptors = Object.getOwnPropertyDescriptors(receipt);
+  if (descriptors.invocationId?.value !== identity.invocationId) return false;
+  if (!identity.packPhase) return !Object.hasOwn(descriptors, "packPhase");
+  const phase = descriptors.packPhase?.value;
+  if (!phase || typeof phase !== "object") return false;
+  const phaseDescriptors = Object.getOwnPropertyDescriptors(phase);
+  const keys = Object.keys(identity.packPhase);
+  return (
+    Reflect.ownKeys(phaseDescriptors).length === keys.length &&
+    keys.every(
+      (key) =>
+        phaseDescriptors[key]?.enumerable &&
+        Object.hasOwn(phaseDescriptors[key], "value") &&
+        phaseDescriptors[key].value === identity.packPhase[key]
+    )
+  );
+}
+
+export function summarizeExecutionIncidents(checks) {
+  const incidents = new Map();
+  const blockedDependencies = [];
+  for (const check of checks) {
+    if (check.kind !== "hard" || check.ok) continue;
+    if (check.dependencyOf) {
+      blockedDependencies.push({ checkId: check.id, dependencyOf: check.dependencyOf });
+      continue;
+    }
+    const bound =
+      typeof check.causeId === "string" &&
+      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/.test(check.causeId);
+    const key = bound ? `command:${check.causeId}` : `check:${check.id}`;
+    if (!incidents.has(key))
+      incidents.set(key, { causeId: bound ? check.causeId : null, checkIds: [] });
+    incidents.get(key).checkIds.push(check.id);
+  }
+  return { incidentCount: incidents.size, incidents: [...incidents.values()], blockedDependencies };
+}
 
 async function run(cmd, cmdArgs, opts = {}) {
   const label = opts.label || `${cmd} ${cmdArgs.join(" ")}`;
-  const logPath = join(LOG_DIR, "commands", `${randomUUID()}.log`);
+  const invocationId = randomUUID();
+  const logPath = join(LOG_DIR, "commands", `${invocationId}.log`);
+  const packPhase = opts.packPhase
+    ? Object.freeze(
+        makePackPhaseReference(
+          opts.packPhase,
+          invocationId,
+          observerCandidateSha,
+          observerRunContext
+        )
+      )
+    : null;
+  const receiptIdentity = Object.freeze({ invocationId, ...(packPhase ? { packPhase } : {}) });
   const result = await runGateProcess(cmd, cmdArgs, {
+    receiptIdentity,
     cwd: ROOT,
-    env: buildGateEnv(opts.env),
+    env: buildGateEnv({
+      ...opts.env,
+      ...(packPhase?.phaseId === "build-next"
+        ? { OMNIROUTE_NEXT_PRODUCER_CONTEXT: JSON.stringify(packPhase) }
+        : {}),
+    }),
     logPath,
     timeout: opts.timeout || 30 * 60 * 1000,
     signal: cancellation.signal,
@@ -746,8 +926,13 @@ async function run(cmd, cmdArgs, opts = {}) {
         `… ${label}: ${Math.round(elapsedMs / 1000)}s, ${bytes} bytes, last output ${lastOutputAt}\n`
       ),
   });
-  commandReceipts.push({ command: label, receiptPath: result.receiptPath, ...result.receipt });
-  return result;
+  const receiptIdentityValid = matchesReceiptIdentity(result.receipt, receiptIdentity);
+  const entry = { command: label, receiptPath: result.receiptPath, ...result.receipt };
+  commandReceipts.push(entry);
+  // The mapping retains only verified identities; a missing or foreign receipt
+  // never receives a replacement UUID after its command has already executed.
+  receiptCauses.set(entry, receiptIdentityValid ? invocationId : null);
+  return { ...result, receiptIdentityValid };
 }
 
 const runAsync = run;
@@ -755,33 +940,125 @@ const runAsync = run;
 /**
  * Package-artifact gate, run the way ci.yml's pack job runs it (#10427).
  *
- * `check:pack-artifact` assembles dist/ through `build:cli` when staging is missing, and
- * `build:cli` never writes dist/BUILD_SHA — only `build:release` does. Pointing the ref at
- * HEAD (PACK_GATE_ENV) is not enough on its own: the guard still stops at "dist/BUILD_SHA is
- * missing". ci.yml builds, stamps, then validates; mirror that order here. The guard is not
- * relaxed: an unstamped dist/ or one built from another commit still fails.
+ * Build, stamp, then validate the prepared staging. The checker must not start a
+ * second build if staging disappears, and every phase needs its own bound receipt
+ * before the next phase can run. All phases spend the existing shared deadline.
  */
 async function runPackArtifactGate(timeoutMs) {
   const deadline = Date.now() + timeoutMs;
   const steps = [
-    { cmd: npmCmd, args: ["run", "build:cli"], env: BUILD_GATE_ENV },
-    { cmd: process.execPath, args: ["scripts/build/write-build-sha.mjs"] },
     {
+      phaseId: "build-next",
+      cmd: process.execPath,
+      args: ["scripts/build/build-fresh-next.mjs"],
+      env: BUILD_GATE_ENV,
+    },
+    { phaseId: "build-cli", cmd: npmCmd, args: ["run", "build:cli"], env: BUILD_GATE_ENV },
+    {
+      phaseId: "stamp-build-sha",
+      cmd: process.execPath,
+      args: ["scripts/build/write-build-sha.mjs"],
+    },
+    {
+      phaseId: "validate-pack-artifact",
       cmd: npmCmd,
-      args: ["run", "check:pack-artifact"],
+      args: ["run", "check:pack-artifact", "--", "--require-staging"],
       env: PACK_GATE_ENV,
     },
   ];
   let out = "";
+  let nextInputSha256;
   for (const step of steps) {
+    if (readCheckoutSha() !== observerCandidateSha) {
+      return {
+        code: 1,
+        out,
+        phaseId: step.phaseId,
+        evidenceState: "INCOMPLETE",
+        detail: "Package candidate identity changed before the command",
+      };
+    }
     const remaining = deadline - Date.now();
-    if (remaining <= 0) return classifyRunError({ killed: true, signal: "SIGTERM" }, timeoutMs);
-    const result = await runAsync(step.cmd, step.args, {
-      env: withHardGateMode(step.env),
-      timeout: remaining,
-    });
+    if (remaining <= 0) {
+      const failure = classifyRunError({ killed: true, signal: "SIGTERM" }, timeoutMs);
+      return { ...failure, out: out + failure.out, phaseId: step.phaseId };
+    }
+    let result;
+    try {
+      result = await runAsync(step.cmd, step.args, {
+        env: withHardGateMode({
+          ...step.env,
+          ...(step.phaseId === "build-cli"
+            ? { OMNIROUTE_REQUIRE_PREBUILT_NEXT: "1", OMNIROUTE_NEXT_INPUT_SHA256: nextInputSha256 }
+            : {}),
+        }),
+        timeout: remaining,
+        packPhase: {
+          phaseId: step.phaseId,
+          mode: "shared",
+          budgetMs: remaining,
+          preparationBudgetMs: timeoutMs,
+        },
+      });
+    } catch {
+      return {
+        code: 1,
+        out,
+        phaseId: step.phaseId,
+        evidenceState: "INCOMPLETE",
+        detail: "Package phase identity or evidence could not be established",
+      };
+    }
     out += result.out;
-    if (result.code !== 0) return { code: result.code, out };
+    if (
+      result.code !== 0 ||
+      result.receipt?.outcome !== "PASS" ||
+      result.receipt.exitCode !== 0 ||
+      result.receipt.signal !== null ||
+      !result.receiptIdentityValid
+    )
+      return {
+        code: result.code || 1,
+        out,
+        phaseId: step.phaseId,
+        ...(result.receiptIdentityValid ? { causeId: result.receipt.invocationId } : {}),
+        ...(!result.receiptIdentityValid
+          ? {
+              evidenceState: "INCOMPLETE",
+              detail: "Package receipt identity is missing or inconsistent",
+            }
+          : {}),
+      };
+    if (step.phaseId === "build-next") {
+      try {
+        const { nextDistPath, NEXT_INPUT_RECEIPT, readProofJson, readNextInput, requireProof } =
+          await import("../build/standaloneInput.mjs");
+        const dist = nextDistPath(ROOT);
+        const proof = readProofJson(join(dist, NEXT_INPUT_RECEIPT));
+        const receipt = readNextInput(dist, proof.sha256);
+        requireProof(
+          receipt.source.candidateSha === observerCandidateSha &&
+            receipt.producer.kind === "observer" &&
+            JSON.stringify(receipt.producer.phase) === JSON.stringify(result.receipt.packPhase),
+          "next-producer-receipt-mismatch"
+        );
+        writeFileSync(
+          join(LOG_DIR, `next-input-${result.receipt.invocationId}.json`),
+          readFileSync(join(dist, NEXT_INPUT_RECEIPT)),
+          { flag: "wx" }
+        );
+        nextInputSha256 = proof.sha256;
+      } catch {
+        return {
+          code: 1,
+          out,
+          phaseId: step.phaseId,
+          evidenceState: "INCOMPLETE",
+          causeId: result.receipt.invocationId,
+          detail: "Fresh Next product evidence is missing or inconsistent with its command",
+        };
+      }
+    }
   }
   return { code: 0, out };
 }
@@ -804,8 +1081,14 @@ async function runUnitShards(total, pool, timeout) {
 }
 
 async function main() {
+  let flushingJson = false;
   for (const signal of ["SIGINT", "SIGTERM"]) {
-    process.once(signal, () => cancellation.abort(signal));
+    process.once(signal, () => {
+      cancellation.abort(signal);
+      // Gates have finished before the final flush. A blocked consumer must not
+      // prevent the existing supervisor deadline from terminating this process.
+      if (flushingJson) process.exit(1);
+    });
   }
   const args = new Set(process.argv.slice(2));
   const JSON_OUT = args.has("--json");
@@ -822,12 +1105,64 @@ async function main() {
   const SUITES_WORKFLOW_SHA =
     suitesWorkflowIndex >= 0 ? process.argv[suitesWorkflowIndex + 1] : null;
 
+  let testMaskingBaseSha = null;
+  let testMaskingBaseError = null;
+  if (!QUICK || FULL_CI || process.argv.some((arg) => arg.startsWith("--test-masking"))) {
+    try {
+      testMaskingBaseSha = resolveTestMaskingBase(ROOT, process.argv.slice(2));
+    } catch (error) {
+      testMaskingBaseError = error;
+    }
+  }
+
   const results = [];
   const record = (r) => {
     results.push(r);
     const icon = r.ok ? "✅" : r.kind === "drift" ? "🟡" : "❌";
     process.stderr.write(`${icon} [${r.kind}] ${r.label}${r.detail ? ` — ${r.detail}` : ""}\n`);
   };
+
+  // Bind the observer before executing any command. A later checkout cannot
+  // retroactively become the candidate for evidence already collected.
+  observerCandidateSha = readCheckoutSha();
+  observerRunContext = {
+    runId: process.env.GITHUB_RUN_ID,
+    runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+    workflowSha: process.env.GITHUB_WORKFLOW_SHA,
+    jobId: process.env.GITHUB_JOB,
+    hosted: process.env.GITHUB_ACTIONS === "true",
+  };
+  const observerIdentity = Object.freeze({
+    schemaVersion: 1,
+    candidateSha: observerCandidateSha,
+    workflowSha: observerRunContext.workflowSha,
+    runId: observerRunContext.runId,
+    runAttempt: observerRunContext.runAttempt,
+    jobId: observerRunContext.jobId,
+    phase: "validation",
+  });
+  const hostedSuitesIdentity = SUITES_FROM ? hostedSuiteIdentity(ROOT, SUITES_WORKFLOW_SHA) : null;
+  if (!observerCandidateSha) {
+    record({
+      id: "candidate-identity",
+      label: "Observer candidate identity",
+      kind: "hard",
+      ok: false,
+      evidenceState: "INCOMPLETE",
+      detail: "Could not establish the candidate SHA before command execution",
+    });
+  }
+
+  if (testMaskingBaseError && QUICK && !FULL_CI) {
+    record({
+      id: "test-masking-base",
+      label: "Test-masking comparison base",
+      kind: "hard",
+      ok: false,
+      evidenceState: "INCOMPLETE",
+      detail: testMaskingBaseError.message,
+    });
+  }
 
   // Announce before running; supervisor heartbeats then distinguish a quiet process
   // from a missing observation without treating silence as a successful result.
@@ -881,16 +1216,22 @@ async function main() {
     // pre-existing debt in config/quality/eslint-suppressions.json must not count as
     // errors here — only NET-NEW violations are release reds. The cold release runner can
     // exceed 30 minutes as the repository grows, and this pre-flight often runs under load.
+    // Keep this invocation's machine report separate from interleaved console diagnostics.
+    const lintReportPath = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
+    mkdirSync(dirname(lintReportPath), { recursive: true });
+    writeFileSync(lintReportPath, "", { flag: "wx", mode: 0o600 });
     const lintRun = await run(
-      "npx",
+      process.execPath,
       [
-        "eslint",
+        join(ROOT, "node_modules", "eslint", "bin", "eslint.js"),
         ".",
         "--cache",
         "--cache-location",
         ".eslintcache",
         "--format",
         "json",
+        "--output-file",
+        lintReportPath,
         "--suppressions-location",
         "config/quality/eslint-suppressions.json",
         // An "unpruned" suppression means a previously-frozen violation was legitimately
@@ -907,16 +1248,11 @@ async function main() {
     );
     const { out } = lintRun;
     saveGateLog("lint", out);
-    for (const result of evaluateEslintRun(lintRun, baselineValue("eslintWarnings"))) {
-      record(result);
-    }
+    let measurement = null;
     if ([0, 1].includes(lintRun.code) && ["PASS", "FAIL"].includes(lintRun.receipt.outcome)) {
       try {
-        const parsed = parseEslintJson(out);
-        eslintMeasurementCounts(parsed);
-        const path = join(LOG_DIR, "commands", `${randomUUID()}.eslint.json`);
-        writeFileSync(path, `${JSON.stringify(parsed)}\n`, { flag: "wx", mode: 0o600 });
-        freshLintReport = path;
+        measurement = readEslintMeasurement(lintReportPath);
+        freshLintReport = lintReportPath;
       } catch {
         record({
           id: "lint-measurement",
@@ -926,6 +1262,12 @@ async function main() {
           detail: "no complete lint report retained for this execution",
         });
       }
+    }
+    for (const result of evaluateEslintRun(
+      { ...lintRun, measurement },
+      baselineValue("eslintWarnings")
+    )) {
+      record(result);
     }
   }
 
@@ -982,21 +1324,33 @@ async function main() {
   // config/quality/test-masking-allowlist.json; tautology/skip/deletion signals are never allowlistable.
   if (!QUICK) {
     announce("Test-masking (weakened-assert guard vs main)");
-    // best-effort fetch so the merge-base diff is accurate; ignore fetch failure (offline pre-flight)
-    await run("git", ["fetch", "--no-tags", "origin", "main", "--depth=200"], {
-      timeout: 60 * 1000,
-    });
-    const { code, out } = await run(npmCmd, ["run", "check:test-masking"], {
-      env: withHardGateMode({ GITHUB_BASE_REF: "main" }),
-    });
-    saveGateLog("test-masking", out);
-    record({
-      id: "test-masking",
-      label: "Test-masking (weakened-assert guard)",
-      kind: "hard",
-      ok: code === 0,
-      detail: code === 0 ? "no weakening" : firstFailureLine(out),
-    });
+    let env;
+    try {
+      if (testMaskingBaseError) throw testMaskingBaseError;
+      env = testMaskingGateEnv(ROOT, testMaskingBaseSha);
+    } catch (error) {
+      record({
+        id: "test-masking",
+        label: "Test-masking (weakened-assert guard)",
+        kind: "hard",
+        ok: false,
+        evidenceState: "INCOMPLETE",
+        detail: error.message,
+      });
+    }
+    if (env) {
+      const { code, out } = await run(npmCmd, ["run", "check:test-masking"], {
+        env: withHardGateMode(env),
+      });
+      saveGateLog("test-masking", out);
+      record({
+        id: "test-masking",
+        label: "Test-masking (weakened-assert guard)",
+        kind: "hard",
+        ok: code === 0,
+        detail: code === 0 ? "no weakening" : firstFailureLine(out),
+      });
+    }
   }
 
   // Remaining quality-gate / quality-extended ratchets that the PR→release
@@ -1115,6 +1469,7 @@ async function main() {
           label: "Hosted suites: read ci.yml's unit and integration matrices",
           kind: "hard",
           ok: false,
+          evidenceState: "INCOMPLETE",
           detail: "could not read the shard counts from .github/workflows/ci.yml",
         });
       } else {
@@ -1124,7 +1479,8 @@ async function main() {
         } catch {
           files = [];
         }
-        const expected = hostedSuiteIdentity(ROOT, SUITES_WORKFLOW_SHA);
+        const expected =
+          hostedSuitesIdentity?.candidateSha === observerCandidateSha ? hostedSuitesIdentity : null;
         const names = hostedSuiteNames(unitShards, integrationShards);
         const results = files.map((f) => {
           try {
@@ -1234,14 +1590,16 @@ async function main() {
         kind: "hard",
         ok: result.code === 0,
         detail: result.code === 0 ? "pass" : result.detail || firstFailureLine(result.out),
+        ...(result.causeId ? { causeId: result.causeId } : {}),
+        ...(result.phaseId ? { phaseId: result.phaseId } : {}),
+        ...(result.evidenceState ? { evidenceState: result.evidenceState } : {}),
       });
     }
 
     if (WITH_BUILD) {
       // WS1.2 (#7065 class): boot the REAL packed tarball from a clean install.
-      // check:pack-artifact is the builder for dist/ when staging is absent, so the
-      // boot smoke MUST run after it completes, never alongside it: it would race
-      // check:pack-boot against dist/server.js creation on clean worktrees.
+      // The package lane prepares and validates dist/. Boot smoke must consume
+      // only that completed lane, never race it or bypass an incomplete receipt.
       const packArtifactIndex = lanes.findIndex((g) => g.id === "pack-artifact");
       const packArtifactResult = slowResults[packArtifactIndex];
       const bootLabel = "Tarball boot-smoke (installed CLI serves /health)";
@@ -1255,6 +1613,7 @@ async function main() {
           kind: "hard",
           ok: false,
           detail: out,
+          dependencyOf: "pack-artifact",
         });
       } else {
         announce(bootLabel);
@@ -1276,14 +1635,18 @@ async function main() {
     }
   } else if (WITH_BUILD) {
     // --with-build without the suites (--quick): still verify the package artifact.
-    const { code, out } = await runPackArtifactGate(20 * 60 * 1000);
+    const result = await runPackArtifactGate(20 * 60 * 1000);
+    const { code, out } = result;
     saveGateLog("pack-artifact", out);
     record({
       id: "pack-artifact",
       label: "Package artifact (npm pack policy)",
       kind: "hard",
       ok: code === 0,
-      detail: code === 0 ? "pass" : firstFailureLine(out),
+      detail: code === 0 ? "pass" : result.detail || firstFailureLine(out),
+      ...(result.causeId ? { causeId: result.causeId } : {}),
+      ...(result.phaseId ? { phaseId: result.phaseId } : {}),
+      ...(result.evidenceState ? { evidenceState: result.evidenceState } : {}),
     });
   }
 
@@ -1292,13 +1655,19 @@ async function main() {
   if (FULL_CI) {
     let gates = [];
     try {
-      gates = loadFullCiProfile(ROOT);
+      if (testMaskingBaseError) throw testMaskingBaseError;
+      gates = loadFullCiProfile(ROOT, (root, ref) => {
+        if (ref !== "main") throw new Error("Unmodeled observer comparison base");
+        testMaskingGateEnv(root, testMaskingBaseSha);
+        return testMaskingBaseSha;
+      });
     } catch (err) {
       record({
         id: "full-ci-extract",
         label: "full-ci: validate explicit static profile",
         kind: "hard",
         ok: false,
+        evidenceState: "INCOMPLETE",
         detail: `invalid full static profile: ${err?.message || err}`,
       });
     }
@@ -1376,17 +1745,21 @@ async function main() {
   // A crashed or unobserved tool is not measured ratchet drift. Keep infrastructure
   // uncertainty blocking even when the command normally produces advisory findings.
   commandReceipts.forEach((receipt, index) => {
-    if (!["PASS", "FAIL"].includes(receipt.outcome)) {
+    const causeId = receiptCauses.get(receipt);
+    if (!causeId || !["PASS", "FAIL"].includes(receipt.outcome)) {
       record({
         id: `execution-${index}`,
         label: receipt.command,
         kind: "hard",
         ok: false,
-        detail: `${receipt.outcome}: ${receipt.receiptPath}`,
+        evidenceState: "INCOMPLETE",
+        detail: `${causeId ? receipt.outcome : "Receipt identity missing or inconsistent"}: ${receipt.receiptPath}`,
+        ...(causeId ? { causeId } : {}),
       });
     }
   });
   const { releaseGreen, hardFailures, drift } = computeVerdict(results);
+  const executionIncidents = summarizeExecutionIncidents(results);
 
   process.stderr.write("\n──────── verdict ────────\n");
   process.stderr.write(
@@ -1402,32 +1775,35 @@ async function main() {
   );
 
   if (JSON_OUT) {
-    process.stdout.write(
-      JSON.stringify(
-        {
-          schemaVersion: 1,
-          candidateSha: execFileSync("git", ["rev-parse", "HEAD"], {
-            cwd: ROOT,
-            encoding: "utf8",
-          }).trim(),
-          profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
-          completedAt: new Date().toISOString(),
-          releaseGreen,
-          hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
-          drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
-          checks: results.map((r) => ({
-            id: r.id,
-            kind: r.kind,
-            ok: r.ok,
-            detail: r.detail,
-            ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
-          })),
-          commandReceipts,
-        },
-        null,
-        2
-      ) + "\n"
-    );
+    flushingJson = true;
+    try {
+      await writeObserverJson({
+        schemaVersion: 1,
+        candidateSha: observerCandidateSha,
+        observerIdentity,
+        profile: QUICK ? "quick" : WITH_BUILD && FULL_CI ? "full" : "standard",
+        completedAt: new Date().toISOString(),
+        testMaskingBaseSha,
+        releaseGreen,
+        hardFailures: hardFailures.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
+        drift: drift.map((r) => ({ id: r.id, label: r.label, detail: r.detail })),
+        checks: results.map((r) => ({
+          id: r.id,
+          kind: r.kind,
+          ok: r.ok,
+          detail: r.detail,
+          ...(r.evidenceState ? { evidenceState: r.evidenceState } : {}),
+          ...(r.causeId ? { causeId: r.causeId } : {}),
+          ...(r.phaseId ? { phaseId: r.phaseId } : {}),
+          ...(r.dependencyOf ? { dependencyOf: r.dependencyOf } : {}),
+        })),
+        commandReceipts,
+        executionIncidents,
+      });
+    } catch {
+      process.stderr.write("Observer JSON output failed; evidence is incomplete.\n");
+      process.exit(1);
+    }
   }
 
   process.exit(releaseGreen ? 0 : 1);

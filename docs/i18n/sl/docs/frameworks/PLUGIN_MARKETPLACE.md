@@ -26,32 +26,26 @@ poti niso dosegljive iz izvora, ki ni povratna zanka, ne glede na preverjanje
 pristnosti. Glejte
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Kako vse skupaj deluje
+## Kako se prilega Together
 
 ```
-Nadzorna plošča (/dashboard/plugins)
-  ├─ Zavihek »Nameščeni« → GET /api/plugins            (listPlugins)
-  │                        POST /api/plugins/scan      (pluginManager.scan)
-  │                        POST /api/plugins/{name}/activate|deactivate
-  │                        DELETE /api/plugins/{name}   (odstranitev)
-  └─ Zavihek »Tržnica«    → GET /api/plugins/marketplace
-                             → listMarketplacePlugins()
-                               ├─ brez URL-ja po meri → vgrajeni SEED_REGISTRY
-                               └─ URL po meri → zaščita SSRF isSafeMarketplaceUrl()
-                                              → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Plast registra** — `src/lib/plugins/marketplace.ts`: navaja in išče po
-  katalogu ter ob kakršni koli napaki uporabi začetni register.
-- **Plast življenjskega cikla** — `src/lib/plugins/manager.ts` (edini primerek
-  `pluginManager`): namestitev, nadgradnja, aktiviranje, deaktiviranje,
-  odstranitev, pregledovanje in začetno nalaganje.
-- **Plast manifesta** — `src/lib/plugins/manifest.ts`: shema Zod in privzete
-  vrednosti za `plugin.json`.
-- **Pregledovalnik** — `src/lib/plugins/scanner.ts`: odkriva vtičnike na disku
-  v imeniku vtičnikov.
-- **Nalagalnik** — `src/lib/plugins/loader.ts`: zažene vsak vtičnik v izoliranem
-  podrejenem procesu in posreduje klice priključnih točk prek IPC-ja.
+- **Plast registra** — `src/lib/plugins/marketplace.ts`: izpiše/išče po katalogu in se vrne v semenski register ob kakršni koli napaki.
+- **Plast življenjskega cikla** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): namestitev, nadgradnja, aktiviranje, deaktiviranje, odstranitev, skeniranje, nalaganje ob zagonu.
+- **Manifestni sloj** — `src/lib/plugins/manifest.ts`: Zod nastavitve + za `plugin.json`.
+- **Skener** — `src/lib/plugins/scanner.ts`: odkrije vtičnike na disku v imeniku vtičnikov.
+- **Nakladalec** — `src/lib/plugins/loader.ts`: sproži vsak vtičnik v ločenem podrejenem procesu Node.js, posredniki pa klice prek IPC. Otrok ni peskovnik (glejte "Izolacija izvajanja vtičnika" spodaj).
 
 ## Katalog tržnice
 
@@ -89,34 +83,31 @@ seznam.
 
 ## REST API
 
-Vse končne točke zahtevajo skrbniško avtentikacijo (`requireManagementAuth`) **in**
-so dostopne samo prek povratne zanke — `/api/plugins` in `/api/plugins/` sta navedeni v
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Vse končne točke zahtevajo avtorizacijo upravljanja (`requireManagementAuth`)** in** sta samo povratna zanka — `/api/plugins` in `/api/plugins/` sta navedena v `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Končna točka                     | Metoda | Opis                                                    |
-| -------------------------------- | ------ | ------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Prikaže nameščene vtičnike (izbirni filter `?status=`)  |
-| `/api/plugins`                   | POST   | Namesti vtičnik z absolutne lokalne poti                |
-| `/api/plugins/scan`              | POST   | Pregleda imenik vtičnikov in registrira nove vtičnike   |
-| `/api/plugins/marketplace`       | GET    | Prikaže vnose kataloga tržnice                          |
-| `/api/plugins/[name]`            | GET    | Pridobi podrobnosti nameščenega vtičnika                |
-| `/api/plugins/[name]`            | DELETE | Odstrani vtičnik                                        |
-| `/api/plugins/[name]/activate`   | POST   | Aktivira (naloži + registrira kavlje)                   |
-| `/api/plugins/[name]/deactivate` | POST   | Deaktivira (sproži `onDeactivate`, odregistrira kavlje) |
-| `/api/plugins/[name]/config`     | GET    | Pridobi konfiguracijo vtičnika + konfiguracijsko shemo  |
-| `/api/plugins/[name]/config`     | PUT    | Posodobi konfiguracijo vtičnika (preverjeno po shemi)   |
+| Končna točka                     | Metoda | Opis                                                        |
+| -------------------------------- | ------ | ----------------------------------------------------------- |
+| `/api/plugins`                   | GET    | Seznam nameščenih vtičnikov (izbirni filter `?status=` )    |
+| `/api/plugins`                   | POST   | Namestite vtičnik iz izvornega imenika vtičnikov            |
+| `/api/plugins/scan`              | POST   | Preglejte imenik vtičnikov in registrirajte nove vtičnike   |
+| `/api/plugins/marketplace`       | GET    | Seznam vnosov v katalog tržnice                             |
+| `/api/plugins/[name]`            | GET    | Pridobite podrobnosti nameščenega vtičnika                  |
+| `/api/plugins/[name]`            | DELETE | Odstranite vtičnik                                          |
+| `/api/plugins/[name]/activate`   | POST   | Aktiviraj (naloži kljuke registra + )                       |
+| `/api/plugins/[name]/deactivate` | POST   | Deaktiviraj (proži `onDeactivate`, odjavi kljuke)           |
+| `/api/plugins/[name]/config`     | GET    | Pridobite konfiguracijsko + za konfiguracijo vtičnika       |
+| `/api/plugins/[name]/config`     | PUT    | Posodobi konfiguracijo vtičnika (preverjeno glede na shemo) |
 
-Filter `status` za `GET /api/plugins` sprejme eno od vrednosti
-`installed` / `active` / `inactive` / `error`. Neveljavna vrednost vrne `400`.
+Filter `GET /api/plugins` `status` sprejme enega od `installed` / `active` / `inactive` / `error`. Neveljavna vrednost vrne `400`.
 
-### Prikaz nameščenih vtičnikov
+### Seznam nameščenih vtičnikov
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### Namestitev z lokalne poti
+### Namestite z lokalne poti
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -125,19 +116,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-Vrednost `path` mora biti **absolutna** in ne sme vsebovati segmentov prehoda `..` ali
-ničelnih bajtov (to uveljavlja Zod). Izvorni imenik mora vsebovati veljavno datoteko
-`plugin.json` (ali pa mora biti nadrejeni imenik takega imenika). Ob uspehu ima odgovor
-stanje `201` in vsebuje vrstico nameščenega vtičnika.
+`path` mora biti** absolutno** pot do imenika** znotraj imenika virov vtičnika** : `plugin-sources` poleg korena vtičnika, torej `~/.omniroute/plugin-sources/` privzeto ali `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` ko je ta spremenljivka nastavljena (`getPluginSourcesDir()` v `src/lib/plugins/installSource.ts`). Tam najprej kopirajte ali klonirajte vtičnik. Namestitev je z `400` zavrnjena, če pot vsebuje `..` ali ničelni bajt, leži zunaj tega imenika, se razreši zunaj njega prek simbolne povezave, vsebuje simbolno povezavo, katere cilj je zunaj njega, ali ko imenik ne obstaja. Izvorni imenik mora vsebovati veljaven `plugin.json` (ali biti nadrejeni enemu). Ob uspehu je odgovor `201` z nameščeno vrstico vtičnika.
 
-### Brskanje po tržnici
+Za razliko od drugih poti vtičnika ta zahteva poverilnico za upravljanje (sejo nadzorne plošče ali ključ API z obsegom upravljanja), tudi če je prijava onemogočena (`requireLogin=false`): namestitev kode ni nikoli anonimno dejanje.
+
+### Pobrskajte po tržnici
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Posodobitev konfiguracije vtičnika
+### Posodobite konfiguracijo vtičnika
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -146,10 +136,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` preveri vsako podano vrednost glede na `configSchema` vtičnika
-(deklarirano v manifestu): polja `number` upoštevajo `min`/`max`, polja `select`
-pa se morajo ujemati z deklarirano vrednostjo `enum`. Ključi, ki niso prisotni
-v shemi, so dovoljeni.
+`PUT .../config` preveri vsako podano vrednost glede na `configSchema` vtičnika (deklarirano v manifestu): polja `number` upoštevajo `min`/`max`, polja `select` se morajo ujemati z deklariranim `enum`. Ključi, ki niso prisotni v shemi, so dovoljeni skozi.
 
 ## Konfiguracija
 
@@ -209,81 +196,58 @@ Zavihek »Tržnica« na nadzorni plošči vsebuje polje za ta URL (ki se prebere
 
 ## Varnost
 
-### Raven poti — samo povratna zanka
+### Samo povratna zanka ravni —
 
-Vtičniki izvajajo kodo v ustvarjenih podrejenih procesih, zato je celotna površina `/api/plugins`
-razvrščena kot `LOCAL_ONLY` (raven 1). Uveljavljanje povratne zanke se izvede
-brezpogojno **pred** vsakim preverjanjem pristnosti, zato zlorabljen žeton za upravljanje, ki doseže
-napravo prek tunela, še vedno ne more namestiti, aktivirati ali odstraniti vtičnika.
-Glejte [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) in
-stroga pravila št. 15 / št. 17.
+Vtičniki izvajajo kodo v ustvarjenih podrejenih procesih, zato je celotna površina `/api/plugins` razvrščena kot `LOCAL_ONLY` (stopnja 1). Uveljavljanje povratne zanke teče brezpogojno** prej** kakršno koli preverjanje pristnosti, tako da žeton upravljanja, ki je ušel, doseže polje preko tunela, še vedno ne more namestiti, aktivirati ali odstraniti vtičnika. Glejte [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) in trda pravila #15 / #17.
 
-### Zaščita registra tržnice pred SSRF
+### Tržni register SSRF guard
 
-Na URL registra po meri lahko vpliva napadalec, zato ga
-`listMarketplacePlugins()` pred pridobivanjem preveri v dveh plasteh:
+Registrski URL po meri je konfiguracija, na katero lahko vpliva napadalec, zato ga `listMarketplacePlugins()` preden ga pridobi, izvede skozi dve plasti:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - Zavrne vse, kar ni `http:` / `https:`.
-   - Zavrne dobesedno navedene zasebne gostitelje ter gostitelje povratne zanke, lokalne povezave in ULA (IPv4 **in** IPv6,
-     vključno z IPv4-mapped) prek kanonične funkcije `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Razreši **tako** zapise `A` kot `AAAA` in zavrne URL, če je **kateri koli** razrešeni
-     naslov zaseben — s tem prepreči obhod javno-ime-gostitelja → zasebni-IP.
-   - **Varno zavrne ob napaki**: napaka pri razreševanju DNS povzroči zavrnitev URL-ja.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): ob pridobivanju znova uporabi zaščito URL-jev,
-   omejeno na javne naslove, in **blokira preusmeritve** (brez prehoda javni → zasebni prek `30x`).
+   - Zavrača vse, kar ni `http:` / `https:`.
+   - Zavrača dobesedne gostitelje private/loopback/link-local/ULA (IPv4** in** IPv6, vključno z IPv4-mapped) prek kanoničnega `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`).
+   - Rešuje** oboje** `A` in `AAAA` zabeleži in zavrne if** katerikoli** razrešen naslov je zasebni — zapiranje javnega imena gostitelja → zasebnega IP obvoda.
+   - **Ne uspe zaprto** : napaka razrešitve DNS zavrne URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): ponovno uporabi javno zaščito URL ob času pridobivanja in** blokira preusmeritve** (brez javnega → zasebnega `30x` pivota).
 
-URL, ki ne prestane katere koli plasti, ne prekine zahteve — tržnica
-tiho preklopi na vgrajeni začetni register in zabeleži opozorilo.
+URL ki ne uspe na kateri koli plasti, ne prekine zahteve — tržnica se tiho vrne k vgrajenemu semenskemu registru in zabeleži opozorilo.
 
-> Ta zaščita je bila utrjena v PR #3774 posebej za razreševanje A + AAAA in uporabo
-> kanonične funkcije `isPrivateHost` namesto preverjanja, omejenega na IPv4.
+> Ta zaščita je bila okrepljena v PR #3774 posebej za razrešitev + AAAA in uporabo kanoničnega `isPrivateHost` namesto preverjanja IPv4-only.
 
-### Izolacija izvajanja vtičnikov
+### Izolacija izvajanja vtičnika
 
-- **Izolacija procesov** — `loadPlugin()` (`src/lib/plugins/loader.ts`) zažene
-  vsak vtičnik v ločenem podrejenem procesu Node.js in komunicira prek IPC.
-  Klici kavljev imajo časovno omejitev s stopnjevanjem `SIGTERM` → `SIGKILL`.
-- **Seznam dovoljenih okoljskih spremenljivk** — podrejeni proces prejme samo dovoljen nabor okoljskih
-  spremenljivk; širši nabor je odobren samo, kadar manifest zahteva
-  dovoljenje `env`.
-- **Omejitev poti** — namestitev/nadgradnja/odstranitev preveri, da se imenik vtičnika
-  in `manifest.main` razrešita **znotraj** upravljanega korenskega imenika vtičnikov
-  pred vsakim kopiranjem ali rekurzivnim brisanjem (zaščita pred spremenjenimi potmi v podatkovni zbirki in
-  prehajanjem `../` v `manifest.main`). Aktivacija razreši simbolne povezave prek
-  `realpath` in zavrne nalaganje vstopne točke, ki je zunaj imenika
-  vtičnika.
-- **Izbirna priponka celovitosti** — manifest lahko deklarira polje `integrity`
-  (`sha256-<base64>`, oblika SRI). Če je prisotno, nalagalnik ob nalaganju preveri zgoščeno vrednost
-  vstopne datoteke in ob neujemanju zavrne aktivacijo. To je
-  izbirno zaznavanje spreminjanja, **ne** varnostna meja — usmerjanje samo prek povratne zanke
-  in model dovoljenj sta dejanski meji.
+> **Vtičniki niso v peskovniku.** Otrok je navaden proces Node.js ki se izvaja kot uporabnik OmniRoute, brez konteksta VM in zastavic za dovoljenje Node.js, tako da lahko koda vtičnika bere in piše katero koli datoteko, ki jo lahko uporabnik, izvaja programe in doseže omrežje. `requires.permissions` samo odloči, katere spremenljivke okolja otrok prejme; druga dovoljenja niso uveljavljena. Namestite samo vtičnike, ki jim zaupate. Spodnja meja procesa vsebuje zrušitve in zastoje; to ni varnostna meja.
+
+- **Izolacija procesa** — `loadPlugin()` (`src/lib/plugins/loader.ts`) sproži vsak vtičnik v ločenem podrejenem procesu Node.js in komunicira prek IPC. Klici na kljukico imajo časovno omejitev z `SIGTERM` → `SIGKILL` stopnjevanjem.
+- **Env dovoljeni seznam** — otrok prejme samo niz dovoljenih spremenljivk okolja; širši nabor je odobren le, ko manifest zahteva dovoljenje `env`.
+- **Namestite zadrževanje vira** — `POST /api/plugins` bere samo iz izvornega imenika vtičnika (glejte »Namestitev z lokalne poti«): pot je kanonializirana z `realpath`, mora ostati strogo znotraj tega imenika in izvorno drevo, ki nosi simbolno povezavo, ki ji uide, je zavrnjeno, preden se karkoli kopira.
+- **Zadrževanje poti** — install/upgrade/uninstall trdi, da imenik vtičnikov in `manifest.main` razrešita** znotraj** upravljani koren vtičnika pred kakršno koli kopijo ali rekurzivnim brisanjem (ščiti pred spremenjenimi potmi DB in prehodom `../` v `manifest.main`). Aktivacija razreši simbolne povezave prek `realpath` in zavrne nalaganje vstopne točke, ki uide iz imenika vtičnikov.
+- **Izbirni zatič za celovitost** — lahko manifest deklarira polje `integrity` (format `sha256-<base64>`, SRI ). Ko je prisoten, nalagalnik preveri zgoščeno vrednost vnosne datoteke ob času nalaganja in zavrne aktiviranje ob neujemanju. Je opt-in zaznavanje posegov,** ne** varnostna meja: ne omejuje, kaj lahko naredi naložen vtičnik.
+- **V kavljih ni poverilnic odjemalca** — kontekst, posredovan v `onRequest`, `onResponse` in `onError` ima odstranjene glave `authorization`, `x-api-key`, `proxy-authorization` in `cookie`, zapis ključa API pa nima vrednosti ključa (`redactPluginContext()` v `src/lib/plugins/hooks.ts`).
 
 ## Manifest (`plugin.json`)
 
-Preverja ga `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
+Potrjeno z `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Polje              | Vrsta     | Opombe                                                                 |
-| ------------------ | --------- | ---------------------------------------------------------------------- |
-| `name`             | string    | Obvezno; kebab-case (`^[a-z0-9-]+$`), 1–100 znakov                     |
-| `version`          | string    | Obvezno; semver (`MAJOR.MINOR.PATCH`)                                  |
-| `description`      | string?   | ≤ 500 znakov                                                           |
-| `author`           | string?   | ≤ 200 znakov                                                           |
-| `license`          | string?   | Privzeto `MIT`                                                         |
-| `main`             | string?   | Vstopna datoteka; privzeto `index.js`                                  |
-| `source`           | enum?     | `local` \| `marketplace` (privzeto `local`)                            |
-| `tags`             | string[]? | Iskalne oznake                                                         |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                        |
-| `hooks`            | object?   | Logične vrednosti, ki določajo, katere kavlje vtičnik implementira     |
-| `skills`           | object[]? | Izbirne definicije veščin                                              |
-| `enabledByDefault` | boolean?  | Samodejna aktivacija ob namestitvi                                     |
-| `configSchema`     | object?   | Zemljevid konfiguracijskih polj (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Izbirna priponka vstopne datoteke `sha256-<base64>`                    |
+| Polje              | Vrsta       | Opombe                                                                 |
+| ------------------ | ----------- | ---------------------------------------------------------------------- |
+| `name`             | niz         | Obvezno; kebab-case (`^[a-z0-9-]+$`), 1–100 znakov                     |
+| `version`          | niz         | Obvezno; semver (`MAJOR.MINOR.PATCH`)                                  |
+| `description`      | niz?        | ≤ 500 znakov                                                           |
+| `author`           | niz?        | ≤ 200 znakov                                                           |
+| `license`          | niz?        | Privzeto je `MIT`                                                      |
+| `main`             | niz?        | Vstopna datoteka; privzeto je `index.js`                               |
+| `source`           | enum?       | `local` \| `marketplace` (privzeto `local`)                            |
+| `tags`             | niz []?     | Iskanje oznak                                                          |
+| `requires`         | predmet?    | `{ omniroute?, permissions[] }`                                        |
+| `hooks`            | predmet?    | Logične vrednosti, ki navajajo, katere kljuke implementira vtičnik     |
+| `skills`           | predmet []? | Izbirne definicije spretnosti                                          |
+| `enabledByDefault` | logično?    | Samodejno aktiviraj ob namestitvi                                      |
+| `configSchema`     | predmet?    | Zemljevid konfiguracijskih polj (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | niz?        | Izbirni pin za vstopno datoteko `sha256-<base64>`                      |
 
-Dovoljenja se izberejo iz naštevanja
-`network` / `file-read` / `file-write` / `env` / `exec`.
+Dovoljenja so črpana iz enuma `network` / `file-read` / `file-write` / `env` / `exec`. Samo `env` ima učinek izvajalnega časa (nekoliko večji seznam dovoljenih spremenljivk okolja za otroka); drugi so deklaracije in se ne uveljavljajo.
 
 ## Potek življenjskega cikla
 
@@ -343,17 +307,14 @@ Metrike in analitika vtičnikov se spremljajo v dodatnih tabelah
 
 ## Nadzorna plošča
 
-Stran nadzorne plošče na `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) ponuja dva zavihka:
+Stran nadzorne plošče na `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) ponuja dva zavihka:
 
-- **Nameščeni** — prikazuje nameščene vtičnike z njihovimi navedenimi kavlji,
-  stikalom za aktiviranje/deaktiviranje, gumbom za odstranitev in dejanjem »Poišči vtičnike«
-  (`POST /api/plugins/scan`).
-- **Tržnica** — prikazuje katalog iz `GET /api/plugins/marketplace` s
-  poljem za nastavitev URL-ja registra po meri.
+- **Nameščeno** — navaja nameščene vtičnike z njihovimi deklariranimi kljukicami, preklopom activate/deactivate, gumbom za odstranitev in dejanjem »Išči vtičnike« (`POST /api/plugins/scan`).
+- **Tržnica** — prikazuje katalog iz `GET /api/plugins/marketplace` s poljem za nastavitev registra po meri URL.
 
-Stran za konfiguracijo posameznega vtičnika je na `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+Na strani je vedno prikazano opozorilo, da se vtičniki izvajajo s polnimi pravicami procesa OmniRoute.
+
+Konfiguracijska stran za vsak vtičnik je na `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Glejte tudi
 

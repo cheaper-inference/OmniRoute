@@ -1,0 +1,1 @@
+- Count runner time from cancelled publish runs and all job pages before selecting Blacksmith. Incomplete, inconsistent or expired usage collection now selects the hosted runner without publishing a partial total; the estimate retains the explicit opt-in, existing weights and current-run exclusion.

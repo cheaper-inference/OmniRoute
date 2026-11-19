@@ -4,7 +4,14 @@ import assert from "node:assert/strict";
 const { selectRunsToCancel } = await import("../../scripts/ci/cancel-closed-pr-runs.mjs");
 
 const REPO = "cheaper-inference/OmniRoute";
-const ctx = { prNumber: 42, headRef: "fix/thing", headRepo: REPO, selfRunId: 999 };
+const ctx = {
+  prNumber: 42,
+  headRef: "fix/thing",
+  headRepo: REPO,
+  headSha: "a".repeat(40),
+  selfRunId: 999,
+  allowUnlinkedFallback: true,
+};
 
 function run(over: Record<string, unknown>) {
   return {
@@ -13,6 +20,7 @@ function run(over: Record<string, unknown>) {
     status: "queued",
     event: "pull_request",
     head_branch: "fix/thing",
+    head_sha: ctx.headSha,
     head_repository: { full_name: REPO },
     pull_requests: [],
     ...over,
@@ -30,7 +38,7 @@ test("cancels queued and running PR runs of the closed PR's branch", () => {
   );
 });
 
-test("takes a run GitHub links to the PR by number, even from a fork", () => {
+test("preserves a linked run whose repository contradicts the closed PR identity", () => {
   const fork = run({
     id: 5,
     head_repository: { full_name: "someone/OmniRoute" },
@@ -38,7 +46,7 @@ test("takes a run GitHub links to the PR by number, even from a fork", () => {
   });
   assert.deepEqual(
     selectRunsToCancel([fork], ctx).map((r: { id: number }) => r.id),
-    [5]
+    []
   );
 });
 

@@ -20,9 +20,11 @@ test("the full package lane receives the 90 minute shared deadline", () => {
   );
   assert.match(runner, /const deadline = Date\.now\(\) \+ timeoutMs/);
   assert.match(runner, /const remaining = deadline - Date\.now\(\)/);
-  assert.match(runner, /if \(remaining <= 0\) return classifyRunError/);
+  assert.match(runner, /if \(remaining <= 0\) \{\s*const failure = classifyRunError/);
   assert.match(runner, /timeout: remaining/);
-  assert.match(runner, /if \(result\.code !== 0\) return/);
+  assert.match(runner, /if \(\s*result\.code !== 0 \|\|/);
+  assert.match(runner, /result\.receipt\?\.outcome !== "PASS"/);
+  assert.match(runner, /!result\.receiptIdentityValid/);
 });
 
 test("the nightly full sweep selects the full package lane, not the quick path", () => {

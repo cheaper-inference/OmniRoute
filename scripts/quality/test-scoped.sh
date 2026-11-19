@@ -42,10 +42,16 @@ done
 
 # ── 1. Determine changed files ───────────────────────────────────────────────
 if [ "$STAGED" = true ]; then
-  CHANGED=$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACMR --cached)
+  CHANGED=$(git -C "$REPO_ROOT" diff --name-status --find-renames --cached)
 else
-  CHANGED=$(git -C "$REPO_ROOT" diff --name-only --diff-filter=ACMR HEAD~1...HEAD 2>/dev/null || \
-            git -C "$REPO_ROOT" diff --name-only --diff-filter=ACMR)
+  # Only an initial commit falls back to the working tree. A failed Git read must
+  # remain a failure, rather than becoming a successful empty alternative diff.
+  COMMIT_COUNT=$(git -C "$REPO_ROOT" rev-list --count --max-count=2 HEAD)
+  if [ "$COMMIT_COUNT" -ge 2 ]; then
+    CHANGED=$(git -C "$REPO_ROOT" diff --name-status --find-renames HEAD~1...HEAD)
+  else
+    CHANGED=$(git -C "$REPO_ROOT" diff --name-status --find-renames)
+  fi
 fi
 
 if [ -z "$CHANGED" ]; then
@@ -60,7 +66,7 @@ if [ "$FULL" = true ] || [ ! -f "$MAP_FILE" ]; then
 fi
 
 # ── 3. Select impacted tests (same selector as the CI TIA gate) ──────────────
-SEL=$(printf '%s\n' "$CHANGED" | node "$REPO_ROOT/scripts/quality/select-impacted-tests.mjs" --stdin)
+SEL=$(printf '%s\n' "$CHANGED" | node "$REPO_ROOT/scripts/quality/select-impacted-tests.mjs" --stdin-name-status)
 
 if echo "$SEL" | grep -q "__RUN_ALL__"; then
   echo "[test:scoped] Hub file or unmapped source changed — run the full suite: npm run test:unit"

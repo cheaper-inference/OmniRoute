@@ -235,7 +235,7 @@ test("pre-flight wires the test-masking PR-context gate against origin/main (v3.
   // (routed through buildGateEnv since the --hermetic scrub was added).
   assert.match(
     src,
-    /env:\s*buildGateEnv\(opts\.env\)/,
+    /env:\s*buildGateEnv\(\{\s*\.\.\.opts\.env,/,
     "run() must merge opts.env into the child env"
   );
   assert.match(
@@ -410,6 +410,24 @@ test("unit shards: the REAL ci.yml yields its shard count and the shard script e
   ) as { scripts: Record<string, string> };
   assert.match(pkg.scripts["test:unit:ci:shard"], /--test-shard=\$TEST_SHARD/);
   assert.match(pkg.scripts["test:unit:ci:shard"], /--test-concurrency=4/);
+});
+
+test("hosted unit jobs use the native CI budget in both observer matrices", async () => {
+  const { readFileSync } = await import("node:fs");
+  const { load } = await import("js-yaml");
+  type Workflow = { jobs: Record<string, { "timeout-minutes": number | string }> };
+  const readWorkflow = (file: string) =>
+    load(
+      readFileSync(new URL(`../../.github/workflows/${file}`, import.meta.url), "utf8")
+    ) as Workflow;
+
+  const unitBudget = readWorkflow("ci.yml").jobs["test-unit"]["timeout-minutes"];
+  assert.equal(typeof unitBudget, "number");
+  const observer = readWorkflow("nightly-release-green.yml");
+  const expected = "${{ matrix.script == 'test:unit:ci:shard' && " + unitBudget + " || 30 }}";
+  for (const job of ["suites", "main-suites"]) {
+    assert.equal(observer.jobs[job]["timeout-minutes"], expected, job);
+  }
 });
 
 test("unit shards: the pool gives each running shard four cores (its --test-concurrency)", () => {
@@ -905,10 +923,11 @@ test("every HARD command of the pre-flight goes through withHardGateMode; drift 
   );
   assert.doesNotMatch(driftCmd, /withHardGateMode/, "drift items keep the strict (release) view");
   for (const wiring of [
-    /env: withHardGateMode\(\{ GITHUB_BASE_REF: "main" \}\)/, // test-masking
+    /env = testMaskingGateEnv\(ROOT, testMaskingBaseSha\)/, // immutable test-masking base
+    /"check:test-masking"\][\s\S]{0,80}env: withHardGateMode\(env\)/, // test-masking mode
     /env: withHardGateMode\(\{ TEST_SHARD: `\$\{shard\}\/\$\{total\}` \}\)/, // unit shards
     /runAsync\(npmCmd, g\.args, \{ timeout: g\.timeout, env: withHardGateMode\(g\.env\) \}\)/, // lanes
-    /env: withHardGateMode\(step\.env\)/, // package artifact
+    /env: withHardGateMode\(\{\s*\.\.\.step\.env,/, // package artifact + verified input
     /"check:pack-boot"\][\s\S]{0,80}env: withHardGateMode\(\)/, // tarball boot
     /hardGate = fullCiKindFor\(g\.id, results, g\.kind\) === "hard"/, // --full-ci bucket
     /env: hardGate \? withHardGateMode\(gateEnv\) : gateEnv/, // --full-ci, HARD bucket only

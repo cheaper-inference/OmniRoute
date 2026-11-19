@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import test from "node:test";
 import { load } from "js-yaml";
+import { expression } from "../_helpers/workflowExpression.mjs";
 import { evaluateAdmission } from "../../scripts/quality/admission-verdict.mjs";
 
 const policy = JSON.parse(
@@ -10,6 +11,9 @@ const policy = JSON.parse(
 const ready = {
   "github.event_name": "pull_request",
   "github.event.action": "ready_for_review",
+  "github.event.changes.base": null,
+  "github.event.changes.body": null,
+  "github.event.changes.title": null,
   "github.event.pull_request.draft": false,
   "github.head_ref": "fix/example",
   "github.event.pull_request.user.id": 1,
@@ -33,77 +37,6 @@ const queue = {
   "github.event.pull_request.user.login": "mergify[bot]",
   "github.event.pull_request.user.type": "Bot",
 };
-
-// Interpret the bounded expression grammar used by these guards, including the
-// operand-returning &&/|| used in names and concurrency. Never execute workflow
-// text as JavaScript. Context values remain typed (a retarget contains an object).
-function expression(source, values) {
-  const text = String(source).replace(/^\$\{\{\s*|\s*\}\}$/g, "");
-  const tokens = text.match(/'(?:[^']|'')*'|[\w.-]+|&&|\|\||==|!=|[!>(),]/g) ?? [];
-  assert.equal(tokens.join(""), text.replace(/\s+(?=(?:[^']*'[^']*')*[^']*$)/g, ""));
-  let index = 0;
-  const number = (value) => (typeof value === "object" && value !== null ? NaN : Number(value));
-  const equal = (a, b) =>
-    typeof a === typeof b
-      ? typeof a === "string"
-        ? a.toLowerCase() === b.toLowerCase()
-        : a === b
-      : number(a) === number(b);
-  function primary() {
-    const token = tokens[index++];
-    if (token === "!") return !primary();
-    if (token === "(") {
-      const value = disjunction();
-      assert.equal(tokens[index++], ")");
-      return value;
-    }
-    if (token?.startsWith("'")) return token.slice(1, -1).replaceAll("''", "'");
-    if (["true", "false", "null"].includes(token) || /^\d+$/.test(token)) return JSON.parse(token);
-    if (["always", "cancelled", "startsWith"].includes(token)) {
-      assert.equal(tokens[index++], "(");
-      if (token !== "startsWith") {
-        assert.equal(tokens[index++], ")");
-        return token === "always";
-      }
-      const value = disjunction();
-      assert.equal(tokens[index++], ",");
-      const prefix = disjunction();
-      assert.equal(tokens[index++], ")");
-      return String(value).toLowerCase().startsWith(String(prefix).toLowerCase());
-    }
-    assert.ok(Object.hasOwn(values, token), `unsupported context: ${token}`);
-    return values[token];
-  }
-  function comparison() {
-    const a = primary();
-    const operator = tokens[index];
-    if (!["==", "!=", ">"].includes(operator)) return a;
-    index++;
-    const b = primary();
-    return operator === "==" ? equal(a, b) : operator === "!=" ? !equal(a, b) : a > b;
-  }
-  function conjunction() {
-    let value = comparison();
-    while (tokens[index] === "&&") {
-      index++;
-      const next = comparison();
-      value = value && next;
-    }
-    return value;
-  }
-  function disjunction() {
-    let value = conjunction();
-    while (tokens[index] === "||") {
-      index++;
-      const next = conjunction();
-      value = value || next;
-    }
-    return value;
-  }
-  const result = disjunction();
-  assert.equal(index, tokens.length);
-  return result;
-}
 
 function admissionContext(values) {
   return {
@@ -153,15 +86,20 @@ for (const profile of ["ci", "quality"]) {
     for (const action of ["opened", "synchronize", "converted_to_draft"]) {
       const values = valuesFor({ ...draft, "github.event.action": action });
       const producer = workflow.jobs[profile === "ci" ? "lint" : "fast-gates"];
+      assert.equal(Boolean(expression(workflow.jobs.changes.if, values)), true);
+      assert.equal(values["needs.changes.outputs.queueCandidate"], "false");
       assert.equal(Boolean(expression(producer.if, values)), false);
       assert.equal(Boolean(expression(gate.if, values)), false);
       assert.equal(expression(gate.name, values), notRequested);
       // The evaluator remains fail-closed if a caller incorrectly asks to admit this draft.
-      assert.equal(
-        evaluateAdmission(policy, profile, admissionContext(values), needsFor(profile, "skipped"))
-          .verdict,
-        "FAIL"
+      const receipt = evaluateAdmission(
+        policy,
+        profile,
+        admissionContext(values),
+        needsFor(profile, "skipped")
       );
+      assert.equal(receipt.verdict, "FAIL");
+      assert.ok(receipt.errors.includes("draft or unknown PR readiness"));
     }
   });
 
@@ -179,13 +117,25 @@ for (const profile of ["ci", "quality"]) {
       assert.equal(values["needs.changes.outputs.queueCandidate"], "false");
       assert.equal(Boolean(expression(gate.if, values)), false);
       assert.equal(expression(gate.name, values), notRequested);
+      const receipt = evaluateAdmission(
+        policy,
+        profile,
+        admissionContext(values),
+        needsFor(profile)
+      );
+      assert.equal(receipt.verdict, "FAIL");
+      assert.ok(receipt.errors.includes("draft or unknown PR readiness"));
     }
   });
 
   test(`${profile}: ready_for_review and ready PR updates retain required admission`, () => {
     assert.ok(workflow.on.pull_request.types.includes("ready_for_review"));
+    assert.ok(workflow.on.pull_request.types.includes("converted_to_draft"));
+    const producer = workflow.jobs[profile === "ci" ? "lint" : "fast-gates"];
     for (const action of ["ready_for_review", "opened", "synchronize", "reopened", "edited"]) {
       const values = valuesFor({ ...ready, "github.event.action": action });
+      assert.equal(Boolean(expression(workflow.jobs.changes.if, values)), true);
+      assert.equal(Boolean(expression(producer.if, values)), true);
       assert.equal(Boolean(expression(gate.if, values)), true);
       assert.equal(expression(gate.name, values), checkName);
     }
@@ -244,12 +194,16 @@ for (const profile of ["ci", "quality"]) {
 
   test(`${profile}: queue description edits retain their separate skipped check`, () => {
     const values = {
-      ...valuesFor({ ...queue, "github.event.action": "edited" }),
+      ...valuesFor({
+        ...queue,
+        "github.event.action": "edited",
+        "github.event.changes.body": { from: "old summary" },
+      }),
       "needs.changes.result": "skipped",
       "needs.changes.outputs.queueCandidate": "",
     };
     assert.equal(Boolean(expression(workflow.jobs.changes.if, values)), false);
     assert.equal(Boolean(expression(gate.if, values)), false);
-    assert.equal(expression(gate.name, values), `${checkName} (queue-draft edit)`);
+    assert.equal(expression(gate.name, values), `${checkName} (PR metadata edit)`);
   });
 }

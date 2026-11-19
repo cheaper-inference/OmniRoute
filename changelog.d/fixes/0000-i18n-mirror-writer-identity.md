@@ -1,0 +1,1 @@
+- Bind scheduled mirror refreshes to the selected base and final committed candidate, recheck freeze and failed-translation preimages after hooks, and update only a proven writer-owned branch with an explicit lease. New and refreshed PRs remain drafts with protected instruction mirrors identified for operator review.

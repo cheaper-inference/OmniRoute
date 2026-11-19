@@ -385,11 +385,12 @@ test("an absent batch.startSize next to an invalid batch.maxSize reports only th
   ]);
 });
 
-test("acceptance mirrors the Mergify merge_conditions of .mergify.yml", () => {
+test("candidate acceptance requires the aggregate gates, integrity and API typecheck", () => {
   assert.deepEqual(raw.requiredChecks, [
     "Gate / CI",
     "Gate / Quality",
     "Merge integrity (changelog + generated skills)",
+    "API Route Typecheck",
   ]);
   assert.deepEqual(raw.advisoryChecks, ["Build (advisory)"]);
   assert.equal(raw.checksTimeoutMinutes, 240);

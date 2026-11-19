@@ -489,3 +489,13 @@ export function findDuplicatedLocaleCatalogChunks(filePaths: string[]): string[]
     .flat()
     .sort();
 }
+
+/** An observer validates prepared staging without starting another build. */
+export function needsPackStagingBuild(
+  missingPaths: readonly string[],
+  requireStaging = false
+): boolean {
+  if (missingPaths.length === 0) return false;
+  if (requireStaging) throw new Error("PACK_STAGING_MISSING: prepared runtime files are required");
+  return true;
+}

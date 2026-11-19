@@ -558,6 +558,8 @@ GET|POST|... /dashboard/providers/services/9router/embed/[...path]
 
 내장된 대시보드에 대한 WebSocket 업그레이드는 전용 포트의 Companion Server에 의해 처리됩니다( `src/lib/services/embedWsProxy.ts` 참조).
 
+모든 업그레이드는 HTTP 포함 경로와 동일한 규칙에 따라 터널이 열리기 전에 승인됩니다. 피어는 역방향 프록시 전달 헤더 없이 루프백되어야 하고, 브라우저 `Origin` 대시보드 원본이어야 하며(`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` 루프백 기본값을 확장함) 호출자는 대시보드 로그인이 비활성화되지 않는 한 대시보드 세션 또는 관리 범위 API 키가 필요합니다.
+
 **보안:** 포함된 프록시 경로는 `LOCAL_ONLY_API_PREFIXES` 로 분류되며 루프백에서만 연결할 수 있습니다. Cloudflare/Ngrok 터널을 통해 JWT 획득한 공격자는 임베디드 서비스로 프록시를 사용할 수 없습니다.
 
 ---

@@ -10,6 +10,10 @@
 # corrupt every pattern (e.g. "*.sh\r" matches nothing).
 .gitattributes text eol=lf
 
+# The Next CI producer and consumers hash these checkout inputs across operating systems.
+/package-lock.json text eol=lf
+/.github/workflows/ci.yml text eol=lf
+
 # Generated files: GitHub collapses their diffs (linguist-generated) so a review shows the
 # source change, not thousands of regenerated lines. Each one is rewritten by its generator
 # in one refresh at release (release:refresh-derived) or a nightly refresh PR, never by a

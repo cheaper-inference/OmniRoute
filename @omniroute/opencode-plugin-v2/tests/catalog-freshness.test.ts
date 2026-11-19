@@ -1,8 +1,9 @@
-import { describe, it, mock, before, after, beforeEach, afterEach } from "node:test";
+import { describe, it, mock, afterEach } from "node:test";
 import assert from "node:assert/strict";
 import { mkdtempSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import { setImmediate as nextTurn } from "node:timers/promises";
 import plugin from "../src/index.js";
 import { startRefreshLoop } from "../src/refresh-loop.js";
 import { diskSnapshotPath, memoryCacheKey } from "../src/cache.js";
@@ -14,6 +15,15 @@ interface ReloadCounter {
 interface SetupResult {
   added: Array<{ info?: { id?: string }; models?: Array<{ id?: string }> }>;
   ctx: Record<string, unknown>;
+  published: (modelId: string) => Promise<void>;
+}
+
+function signal() {
+  let resolve!: () => void;
+  const promise = new Promise<void>((done) => {
+    resolve = done;
+  });
+  return { promise, resolve };
 }
 
 function isolateDisk(): () => void {
@@ -32,28 +42,40 @@ function setupCtx(
   apiKey = "k-" + providerId
 ): SetupResult {
   const added: SetupResult["added"] = [];
+  const publications = new Map<string, ReturnType<typeof signal>>();
+  const add = (input: unknown) => {
+    added.push(input as SetupResult["added"][number]);
+    for (const id of publishedIds(added)) publications.get(id)?.resolve();
+  };
   let transformCb: ((editor: { add: (input: unknown) => void }) => void) | undefined;
   const ctx: Record<string, unknown> = {
     options: { baseURL: "https://gw.example.com", providerId, apiKey, modelCacheTtlMs: 60000 },
     provider: {
       transform: (cb: (editor: { add: (input: unknown) => void }) => void) => {
         transformCb = cb;
-        cb({ add: (input: unknown) => added.push(input as SetupResult["added"][number]) });
+        cb({ add });
         return Promise.resolve({ dispose: async () => {} });
       },
       reload: async () => {
         reloads.count += 1;
         if (transformCb) {
-          transformCb({
-            add: (input: unknown) => added.push(input as SetupResult["added"][number]),
-          });
+          transformCb({ add });
         }
       },
     },
     model: { transform: () => Promise.resolve({ dispose: async () => {} }) },
     integration: { transform: () => Promise.resolve({ dispose: async () => {} }) },
   };
-  return { added, ctx };
+  return {
+    added,
+    ctx,
+    published: (modelId) => {
+      if (publishedIds(added).includes(modelId)) return Promise.resolve();
+      const publication = publications.get(modelId) ?? signal();
+      publications.set(modelId, publication);
+      return publication.promise;
+    },
+  };
 }
 
 function ok(body: unknown): Record<string, unknown> {
@@ -84,23 +106,80 @@ function publishedIds(added: SetupResult["added"]): string[] {
 }
 
 const registryKey = Symbol.for("omniroute.opencode-plugin-v2.refresh-loops");
+interface RefreshEntry {
+  stop: () => void;
+  state: {
+    entries: Map<string, unknown>;
+    fingerprint?: string;
+    optionalFingerprint?: string;
+  };
+}
 
-function getRegistry(): Map<
-  string,
-  { stop: () => void; state: { entries: Map<string, unknown> } }
-> {
-  const g = globalThis as unknown as Record<
-    symbol,
-    Map<string, { stop: () => void; state: { entries: Map<string, unknown> } }>
-  >;
+const restoreObservers = new Set<() => void>();
+
+function getRegistry(): Map<string, RefreshEntry> {
+  const g = globalThis as unknown as Record<symbol, Map<string, RefreshEntry>>;
   if (!g[registryKey]) g[registryKey] = new Map();
   return g[registryKey];
+}
+
+// These assignments occur after collection and optional snapshot persistence,
+// respectively. Observing inFlight alone would stop before either can finish.
+function nextStateWrite(
+  providerId: string,
+  field: "fingerprint" | "optionalFingerprint"
+): Promise<void> {
+  const entry = getRegistry().get(providerId);
+  assert.ok(entry, "the installation must be registered before observing a refresh");
+  const descriptor = Object.getOwnPropertyDescriptor(entry.state, field);
+  assert.ok(descriptor?.configurable && "value" in descriptor);
+  let value = entry.state[field];
+  const restore = () => {
+    Object.defineProperty(entry.state, field, { ...descriptor, value });
+    restoreObservers.delete(restore);
+  };
+  restoreObservers.add(restore);
+  return new Promise<void>((resolve) => {
+    Object.defineProperty(entry.state, field, {
+      configurable: true,
+      enumerable: descriptor.enumerable,
+      get: () => value,
+      set: (next: string | undefined) => {
+        value = next;
+        restore();
+        resolve();
+      },
+    });
+  });
+}
+
+async function finishColdStartup(providerId: string): Promise<void> {
+  const entry = getRegistry().get(providerId);
+  assert.ok(entry, "the installation is registered");
+  if (entry.state.optionalFingerprint === undefined) {
+    await nextStateWrite(providerId, "optionalFingerprint");
+  }
+  // The fixture's host reload is synchronous apart from its returned promise.
+  // Drain its queued continuations only after the real completion signal.
+  await nextTurn();
+}
+
+async function nextRefresh(
+  providerId: string,
+  options: { published?: Promise<void>; optional?: boolean } = {}
+): Promise<void> {
+  const complete = [nextStateWrite(providerId, "fingerprint")];
+  if (options.optional !== false) complete.push(nextStateWrite(providerId, "optionalFingerprint"));
+  if (options.published) complete.push(options.published);
+  await Promise.all(complete);
+  await nextTurn();
 }
 
 describe("catalog freshness (background refresh loop)", () => {
   let restoreDisk: (() => void) | undefined;
 
   afterEach(() => {
+    for (const restore of restoreObservers) restore();
     const reg = getRegistry();
     for (const entry of reg.values()) {
       try {
@@ -128,15 +207,17 @@ describe("catalog freshness (background refresh loop)", () => {
       return ok({ combos: [] }) as unknown as Response;
     }) as typeof fetch;
     const reloads: ReloadCounter = { count: 0 };
-    const { added, ctx } = setupCtx("t1", reloads);
+    const { added, ctx, published } = setupCtx("t1", reloads);
     try {
       await silence(async () => {
         await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 200));
+        await finishColdStartup("t1");
         const before = reloads.count;
+        assert.deepEqual(publishedIds(added), ["m1"]);
         gatewayModels = [{ id: "m1" }, { id: "m2" }];
-        await mock.timers.tick(60000);
-        await new Promise((r) => setTimeout(r, 200));
+        const refreshed = nextRefresh("t1", { published: published("m2") });
+        mock.timers.tick(60000);
+        await refreshed;
         assert.ok(publishedIds(added).includes("m2"), "m2 must be published after the tick");
         assert.equal(reloads.count - before, 1, "exactly one reload on the tick");
       });
@@ -160,11 +241,14 @@ describe("catalog freshness (background refresh loop)", () => {
     try {
       await silence(async () => {
         await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 200));
+        await finishColdStartup("t2");
         const before = reloads.count;
-        await mock.timers.tick(60000);
-        await new Promise((r) => setTimeout(r, 200));
+        assert.deepEqual(publishedIds(added), ["m1"]);
+        const refreshed = nextRefresh("t2");
+        mock.timers.tick(60000);
+        await refreshed;
         assert.equal(reloads.count - before, 0, "no reload when content is unchanged");
+        assert.deepEqual(publishedIds(added), ["m1"], "the same catalog remains published");
       });
     } finally {
       globalThis.fetch = origFetch;
@@ -174,30 +258,46 @@ describe("catalog freshness (background refresh loop)", () => {
   it("a refresh never overlaps itself", async () => {
     mock.timers.enable({ apis: ["setInterval"] });
     let refreshCalls = 0;
+    const release = signal();
+    const completed = signal();
     const stop = startRefreshLoop({
       intervalMs: 10,
       refresh: async () => {
         refreshCalls += 1;
-        await new Promise((r) => setTimeout(r, 200));
+        await release.promise;
+        completed.resolve();
       },
       logger: { warn: () => {} },
     });
     try {
-      await mock.timers.tick(25);
-      await new Promise((r) => setTimeout(r, 70));
-      assert.ok(refreshCalls <= 1, `expected at most one in-flight refresh, got ${refreshCalls}`);
+      mock.timers.tick(25);
+      assert.equal(refreshCalls, 1, "the first refresh is in flight");
+      mock.timers.tick(50);
+      assert.equal(refreshCalls, 1, "later ticks cannot overlap the held refresh");
+      release.resolve();
+      await completed.promise;
+      await nextTurn();
+      mock.timers.tick(10);
+      assert.equal(refreshCalls, 2, "a completed refresh allows the next tick");
     } finally {
       stop();
+      release.resolve();
+      await completed.promise;
+      await nextTurn();
     }
   });
 
   it("a second install replaces the loop instead of stacking it", async () => {
     restoreDisk = isolateDisk();
-    mock.timers.enable({ apis: ["setInterval"] });
+    mock.timers.enable({ apis: ["setInterval", "Date"], now: 0 });
     const origFetch = globalThis.fetch;
+    let modelsCalls = 0;
     globalThis.fetch = (async (url: unknown) => {
       const href = String(url);
-      if (href.includes("/v1/models")) return ok({ data: [{ id: "m1" }] }) as unknown as Response;
+      if (href.includes("/v1/models")) {
+        modelsCalls += 1;
+        return ok({ data: [{ id: "m1" }] }) as unknown as Response;
+      }
       return ok({ combos: [] }) as unknown as Response;
     }) as typeof fetch;
     const reloads: ReloadCounter = { count: 0 };
@@ -205,12 +305,18 @@ describe("catalog freshness (background refresh loop)", () => {
       for (let i = 0; i < 3; i++) {
         const { ctx } = setupCtx("t4", reloads);
         await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 20));
+        if (i === 0) await finishColdStartup("t4");
+        // Later installs use the completed disk snapshot; no optional fetch
+        // runs at setup, so waiting for another startup reload would hang.
+        else await nextTurn();
       }
       assert.equal(getRegistry().size, 1, "only one loop registered for the providerId");
+      assert.equal(modelsCalls, 1, "later installs reuse the warm snapshot");
       const before = reloads.count;
-      await mock.timers.tick(60000);
-      await new Promise((r) => setTimeout(r, 200));
+      const refreshed = nextRefresh("t4");
+      mock.timers.tick(60000);
+      await refreshed;
+      assert.equal(modelsCalls, 2, "only the surviving loop fetches on the tick");
       assert.equal(reloads.count - before, 1, "a single tick triggers a single refresh");
     } finally {
       globalThis.fetch = origFetch;
@@ -236,13 +342,14 @@ describe("catalog freshness (background refresh loop)", () => {
     try {
       await silence(async () => {
         await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 200));
+        await finishColdStartup("t5");
         const baseline = modelsCalls;
-        await mock.timers.tick(30000);
-        await new Promise((r) => setTimeout(r, 20));
+        mock.timers.tick(30000);
+        await nextTurn();
         assert.equal(modelsCalls, baseline, "no tick before the 60s floor");
-        await mock.timers.tick(30000);
-        await new Promise((r) => setTimeout(r, 200));
+        const refreshed = nextRefresh("t5");
+        mock.timers.tick(30000);
+        await refreshed;
         assert.equal(modelsCalls, baseline + 1, "first useful tick lands at 60s");
       });
     } finally {
@@ -273,10 +380,14 @@ describe("catalog freshness (background refresh loop)", () => {
     try {
       console.warn = (...args: unknown[]) => warns.push(args.map(String).join(" "));
       await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-      await new Promise((r) => setTimeout(r, 200));
+      await finishColdStartup("t6");
       const before = reloads.count;
-      await mock.timers.tick(60000);
-      await new Promise((r) => setTimeout(r, 200));
+      // A failed models fetch keeps the old entry; its optional tier therefore
+      // does not replace or persist that entry. Still await collection itself.
+      const refreshed = nextRefresh("t6", { optional: false });
+      mock.timers.tick(60000);
+      await refreshed;
+      assert.equal(modelsCalls, 2, "the failed refresh reached the gateway");
       assert.ok(publishedIds(added).includes("m1"), "last known catalog stays published");
       assert.equal(reloads.count - before, 0, "no reload when the refresh failed");
       assert.ok(
@@ -321,7 +432,7 @@ describe("catalog freshness (background refresh loop)", () => {
     try {
       connectionKey = undefined;
       await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-      await new Promise((r) => setTimeout(r, 50));
+      await nextTurn();
       const entries = getRegistry().get("t7")?.state.entries;
       assert.ok(entries, "the installation is registered");
       // Without a key the models fetcher refuses to run, so nothing is cached
@@ -331,8 +442,9 @@ describe("catalog freshness (background refresh loop)", () => {
       const previousKey = memoryCacheKey(baseURL, "\0");
       entries.set(previousKey, { models: [{ id: "old" }], combos: [], fetchedAt: Date.now() });
       connectionKey = "key-moved";
-      await mock.timers.tick(60000);
-      await new Promise((r) => setTimeout(r, 50));
+      const refreshed = nextRefresh("t7");
+      mock.timers.tick(60000);
+      await refreshed;
       assert.equal(
         entries.has(previousKey),
         false,
@@ -362,14 +474,15 @@ describe("catalog freshness (background refresh loop)", () => {
       return ok({ combos: [] }) as unknown as Response;
     }) as typeof fetch;
     const reloads: ReloadCounter = { count: 0 };
-    const { added, ctx } = setupCtx("f1", reloads);
+    const { added, ctx, published } = setupCtx("f1", reloads);
     try {
       await silence(async () => {
         await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 200));
+        await finishColdStartup("f1");
         gatewayModels = [{ id: "m1" }, { id: "m2" }];
-        await mock.timers.tick(60000);
-        await new Promise((r) => setTimeout(r, 200));
+        const refreshed = nextRefresh("f1", { published: published("m2") });
+        mock.timers.tick(60000);
+        await refreshed;
         assert.ok(publishedIds(added).includes("m2"));
       });
     } finally {
@@ -388,14 +501,16 @@ describe("catalog freshness (background refresh loop)", () => {
       return ok({ combos: [] }) as unknown as Response;
     }) as typeof fetch;
     const reloads: ReloadCounter = { count: 0 };
-    const { added, ctx } = setupCtx("f2", reloads);
+    const { added, ctx, published } = setupCtx("f2", reloads);
     try {
       await silence(async () => {
-        gatewayModels = [{ id: "m1" }, { id: "m2" }];
         await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 200));
-        await mock.timers.tick(60000);
-        await new Promise((r) => setTimeout(r, 200));
+        await finishColdStartup("f2");
+        assert.deepEqual(publishedIds(added), ["m1"]);
+        gatewayModels = [{ id: "m1" }, { id: "m2" }];
+        const refreshed = nextRefresh("f2", { published: published("m2") });
+        mock.timers.tick(60000);
+        await refreshed;
       });
       const { readFile } = await import("node:fs/promises");
       const snap = JSON.parse(await readFile(diskSnapshotPath("f2"), "utf8")) as {
@@ -403,6 +518,7 @@ describe("catalog freshness (background refresh loop)", () => {
       };
       const snapIds = snap.models.map((m) => m.id);
       const served = publishedIds(added);
+      assert.ok(served.includes("m2"), "the tick published the new model before checking disk");
       assert.ok(
         served.every((id) => snapIds.includes(id)),
         "served ids are a subset of the snapshot"
@@ -423,14 +539,15 @@ describe("catalog freshness (background refresh loop)", () => {
       return ok({ combos: [] }) as unknown as Response;
     }) as typeof fetch;
     const reloads: ReloadCounter = { count: 0 };
-    const { added, ctx } = setupCtx("f3", reloads);
+    const { added, ctx, published } = setupCtx("f3", reloads);
     try {
       await silence(async () => {
         await (plugin as { setup: (c: unknown) => Promise<() => void> }).setup(ctx);
-        await new Promise((r) => setTimeout(r, 200));
+        await finishColdStartup("f3");
         gatewayModels = [{ id: "m1" }, { id: "nvidia/direct" }];
-        await mock.timers.tick(60000);
-        await new Promise((r) => setTimeout(r, 200));
+        const refreshed = nextRefresh("f3", { published: published("nvidia/direct") });
+        mock.timers.tick(60000);
+        await refreshed;
         assert.ok(publishedIds(added).includes("nvidia/direct"), "reactivated branch is served");
       });
     } finally {

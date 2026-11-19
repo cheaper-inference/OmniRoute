@@ -1,0 +1,1 @@
+- **fix(ci):** Preserve structured timeout, process-error and signal metadata for incomplete dependency audits instead of reporting every missing JSON result as a parsing failure. Audit summaries retain the remaining package results without including raw process diagnostics.

@@ -21,12 +21,12 @@ on:
     types: [checks_requested]
   workflow_dispatch:
 
-  # A description edit on a Mergify queue draft (Mergify writes its queue summary there, and
-  # the Blacksmith app appends its footer, ~4 edits in the first 30 s) gets its own group and
-  # skips the matrix: in the shared group it cancelled the candidate's real run, and Mergify
-  # dequeued the PR on the cancelled checks ("checks interrupted", #18853/#18858 on 2026-11-03).
+# A title/body edit does not change the candidate. Give it a separate run group
+# so it cannot cancel the code-validation run, and a distinct skipped gate name.
+# Use GitHub's changes object, including a null/empty previous body. A base
+# retarget or an edit without a recognized changes object still runs admission.
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && format('-queue-edit-{0}', github.run_id) || '' }}
+  group: ${{ github.workflow }}-${{ github.ref }}${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) && format('-metadata-edit-{0}', github.run_id) || '' }}
   cancel-in-progress: true
 
 permissions:
@@ -38,13 +38,16 @@ env:
   # system TLS). Belt-and-suspenders with tests/_setup/isolateDataDir.ts.
   OMNIROUTE_SKIP_SYSTEM_TRUST: "1"
   CI_NODE_VERSION: "24"
+  # The V8 manifests require the producer and aggregator to have the same Node
+  # patch. A floating major can resolve to different patch versions on runner caches.
+  CI_V8_NODE_VERSION: "24.22.3"
   CI_NODE_24_VERSION: "24"
   CI_NODE_26_VERSION: "26"
 
 jobs:
   changes:
     name: Change Classification
-    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
+    if: ${{ !(github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) }}
     runs-on: ubuntu-latest
     outputs:
       # Match the official Mergify App and both repository IDs from GitHub's
@@ -879,6 +882,12 @@ jobs:
 
   build:
     name: Build
+    outputs:
+      nextArtifactId: ${{ steps.next-build-artifact.outputs.artifact-id }}
+      nextArtifactDigest: ${{ steps.next-build-artifact.outputs.artifact-digest }}
+      nextManifestSha256: ${{ steps.next-build-proof.outputs.manifestSha256 }}
+      nextArchiveSha256: ${{ steps.next-build-proof.outputs.archiveSha256 }}
+      nextProducerAttempt: ${{ steps.next-build-proof.outputs.producerAttempt }}
     # Dynamic runner: when the release captain flips the USE_VPS_RUNNER repo var to
     # 'true' (scripts/vps/release-runner-up.sh does it after the self-hosted VM is
     # online), push Builds (main only: release/** pushes stopped running this workflow
@@ -932,6 +941,11 @@ jobs:
       # runners cannot hold it and build with webpack (14 GB). Next 16.4.x regresses
       # (33 GB in the compile phase alone) - re-measure before bumping. Guarded by
       # tests/unit/ci-build-bundler-webpack.test.ts and heavy-build-queue.test.ts.
+      - name: Capture Next.js producer identity
+        env:
+          NEXT_BUILD_QUEUE_BASE: ${{ needs.changes.outputs.candidateBase }}
+          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/')) && '1' || '0' }}
+        run: node scripts/ci/next-build-provenance.mjs capture "$RUNNER_TEMP/next-build-source-$GITHUB_RUN_ATTEMPT.json"
       - run: npm run build
         env:
           OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/')) && '1' || '0' }}
@@ -946,20 +960,33 @@ jobs:
         env:
           RUN_STANDALONE_INT: "1"
       - name: Archive Next.js build for downstream jobs
+        id: next-build-proof
         # Use tar so the archive preserves paths relative to CWD (.build/next/...).
         # upload-artifact path-stripping is ambiguous when exclude patterns are used;
         # an explicit tar avoids the double-nesting issue (.build/next/next/...).
         # Keep standalone/node_modules intact: package/electron jobs consume the
         # Next-traced standalone tree and must not replace it with root node_modules.
+        env:
+          NEXT_BUILD_QUEUE_BASE: ${{ needs.changes.outputs.candidateBase }}
+          OMNIROUTE_USE_TURBOPACK: ${{ (vars.USE_VPS_RUNNER == 'true' && vars.USE_VPS_BUILD_RUNNER == 'true' && github.event_name != 'merge_group' && github.event_name != 'pull_request' && !startsWith(github.ref, 'refs/heads/omni-queue/')) && '1' || '0' }}
         run: |
-          tar -czf "$RUNNER_TEMP/e2e-build.tar.gz" \
+          mkdir "$RUNNER_TEMP/next-build-$GITHUB_RUN_ATTEMPT"
+          tar -czf "$RUNNER_TEMP/next-build-$GITHUB_RUN_ATTEMPT/e2e-build.tar.gz" \
             --exclude='.build/next/cache' \
+            --exclude='.build/next/.omniroute-next-input.json' \
             .build/next
+          node scripts/ci/next-build-provenance.mjs seal \
+            "$RUNNER_TEMP/next-build-source-$GITHUB_RUN_ATTEMPT.json" \
+            "$RUNNER_TEMP/next-build-$GITHUB_RUN_ATTEMPT"
       - name: Upload Next.js build for downstream jobs
+        id: next-build-artifact
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: next-build
-          path: ${{ runner.temp }}/e2e-build.tar.gz
+          name: next-build-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            ${{ runner.temp }}/next-build-${{ github.run_attempt }}/e2e-build.tar.gz
+            ${{ runner.temp }}/next-build-${{ github.run_attempt }}/next-build-provenance.json
+          if-no-files-found: error
           retention-days: 1
 
   package-artifact:
@@ -988,17 +1015,29 @@ jobs:
       - name: Download Next.js build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
-          name: next-build
-          # Workspace-relative on purpose: the matrix below includes windows-latest, whose
-          # default shell is pwsh, where $RUNNER_TEMP is empty (it is $env:RUNNER_TEMP) —
-          # #11896's first cut broke the Electron smoke on exactly that. A relative path
-          # works in bash and pwsh alike; hosted workspaces are ephemeral.
-          path: next-build-artifact
+          # Exact immutable ID from the successful producer, including partial reruns.
+          artifact-ids: ${{ needs.build.outputs.nextArtifactId }}
+          skip-decompress: true
+          digest-mismatch: error
+          path: _artifacts/next-build-download
       - name: Extract Next.js build artifact
+        shell: bash
+        env:
+          NEXT_BUILD_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}
+          NEXT_BUILD_ARTIFACT_ID: ${{ needs.build.outputs.nextArtifactId }}
+          NEXT_BUILD_ARTIFACT_DIGEST: ${{ needs.build.outputs.nextArtifactDigest }}
+          NEXT_BUILD_ARCHIVE_SHA256: ${{ needs.build.outputs.nextArchiveSha256 }}
+          NEXT_BUILD_MANIFEST_SHA256: ${{ needs.build.outputs.nextManifestSha256 }}
+          NEXT_BUILD_PRODUCER_ATTEMPT: ${{ needs.build.outputs.nextProducerAttempt }}
+          NEXT_BUILD_PRODUCER_RESULT: ${{ needs.build.result }}
+          NEXT_BUILD_QUEUE_BASE: ${{ needs.changes.outputs.candidateBase }}
         run: |
-          tar -xzf next-build-artifact/e2e-build.tar.gz
-      # build:cli consumes the downloaded .build/next standalone artifact and assembles dist/;
-      # it only rebuilds if the downloaded standalone artifact is missing.
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py unpack _artifacts/next-build-download _artifacts/next-build-verified
+          node scripts/ci/next-build-provenance.mjs verify _artifacts/next-build-verified
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py inspect _artifacts/next-build-verified/e2e-build.tar.gz
+          tar -xzf _artifacts/next-build-verified/e2e-build.tar.gz
+          node scripts/ci/next-build-provenance.mjs consume _artifacts/next-build-verified
+      # The strict receipt written above is checked again before build:cli changes staging.
       - run: npm run build:cli
       - name: Assert dist/server.js exists
         run: test -f dist/server.js || (echo "dist/server.js missing — build:cli did not assemble correctly" && exit 1)
@@ -1052,6 +1091,19 @@ jobs:
       - name: Boot-smoke the packed tarball
         run: npm run check:pack-boot
 
+      - name: Retain Next.js consumption evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: next-input-package-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            _artifacts/next-build-verified/next-build-provenance.json
+            _artifacts/next-build-verified/zip-verification.json
+            _artifacts/next-build-verified/next-build-consumption.json
+            _artifacts/next-build-verified/next-input.json
+          retention-days: 7
+          if-no-files-found: ignore
+
   electron-package-smoke:
     name: Electron Package Smoke (${{ matrix.os }})
     runs-on: ${{ matrix.os }}
@@ -1090,15 +1142,30 @@ jobs:
       - name: Download Next.js build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
-          name: next-build
-          # Workspace-relative on purpose: the matrix below includes windows-latest, whose
-          # default shell is pwsh, where $RUNNER_TEMP is empty (it is $env:RUNNER_TEMP) —
-          # #11896's first cut broke the Electron smoke on exactly that. A relative path
-          # works in bash and pwsh alike; hosted workspaces are ephemeral.
-          path: next-build-artifact
+          # Exact immutable ID from the successful producer, including partial reruns.
+          artifact-ids: ${{ needs.build.outputs.nextArtifactId }}
+          skip-decompress: true
+          digest-mismatch: error
+          path: _artifacts/next-build-download
       - name: Extract Next.js build artifact
+        shell: bash
+        env:
+          # Git Bash otherwise copies the symlink target and changes the extracted tree.
+          MSYS: ${{ runner.os == 'Windows' && 'winsymlinks:nativestrict' || '' }}
+          NEXT_BUILD_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}
+          NEXT_BUILD_ARTIFACT_ID: ${{ needs.build.outputs.nextArtifactId }}
+          NEXT_BUILD_ARTIFACT_DIGEST: ${{ needs.build.outputs.nextArtifactDigest }}
+          NEXT_BUILD_ARCHIVE_SHA256: ${{ needs.build.outputs.nextArchiveSha256 }}
+          NEXT_BUILD_MANIFEST_SHA256: ${{ needs.build.outputs.nextManifestSha256 }}
+          NEXT_BUILD_PRODUCER_ATTEMPT: ${{ needs.build.outputs.nextProducerAttempt }}
+          NEXT_BUILD_PRODUCER_RESULT: ${{ needs.build.result }}
+          NEXT_BUILD_QUEUE_BASE: ${{ needs.changes.outputs.candidateBase }}
         run: |
-          tar -xzf next-build-artifact/e2e-build.tar.gz
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py unpack _artifacts/next-build-download _artifacts/next-build-verified
+          node scripts/ci/next-build-provenance.mjs verify _artifacts/next-build-verified
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py inspect _artifacts/next-build-verified/e2e-build.tar.gz
+          tar -xzf _artifacts/next-build-verified/e2e-build.tar.gz
+          node scripts/ci/next-build-provenance.mjs consume _artifacts/next-build-verified
       - name: Install Electron dependencies
         working-directory: electron
         run: npm install --no-audit --no-fund
@@ -1121,6 +1188,19 @@ jobs:
         env:
           ELECTRON_SMOKE_TIMEOUT_MS: 60000
         run: xvfb-run -a npm run electron:smoke:packaged
+
+      - name: Retain Next.js consumption evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: next-input-electron-${{ matrix.os }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            _artifacts/next-build-verified/next-build-provenance.json
+            _artifacts/next-build-verified/zip-verification.json
+            _artifacts/next-build-verified/next-build-consumption.json
+            _artifacts/next-build-verified/next-input.json
+          retention-days: 7
+          if-no-files-found: ignore
 
   test-unit:
     name: Unit Tests (${{ matrix.shard }}/8)
@@ -1172,7 +1252,7 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
-          node-version: ${{ env.CI_NODE_VERSION }}
+          node-version: ${{ env.CI_V8_NODE_VERSION }}
       - uses: ./.github/actions/prepare-unit-storage
         with:
           cache: ${{ github.event_name == 'pull_request' }}
@@ -1192,6 +1272,7 @@ jobs:
       - name: Unit tests (shard ${{ matrix.shard }}/8) with V8 coverage
         env:
           TEST_SHARD: ${{ matrix.shard }}/8
+          TMPDIR: ${{ runner.temp }}/v8-tsx-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
           # NODE_OPTIONS (nao so o flag em test:unit:ci:shard) porque quem estoura o
           # heap e o processo `c8` que embrulha a suite — ele agrega ~577 MB de JSON
           # de cobertura bruta. Subir o teto so no node filho deixa o pai no default
@@ -1201,6 +1282,12 @@ jobs:
         run: |
           trap 'status=$?; { df -h "$GITHUB_WORKSPACE" "$RUNNER_TEMP"; du -sh coverage-shard; } || :; exit "$status"' EXIT
           rm -rf coverage-shard coverage-shard-report
+          # Capture the transforms this producer actually executes; a reused or
+          # shared TSX cache cannot establish generated-layout provenance.
+          node scripts/ci/prepare-v8-coverage.mjs init-cache "$TMPDIR" "$TEST_SHARD" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKSPACE"
+          V8_CACHE_PRELOAD="$(node -p 'require("node:url").pathToFileURL(process.argv[1]).href' "$GITHUB_WORKSPACE/scripts/ci/atomic-tsx-cache.mjs")"
+          V8_NATIVE_PRELOAD="$(node -p 'require("node:url").pathToFileURL(process.argv[1]).href' "$GITHUB_WORKSPACE/scripts/ci/native-worker-v8-layout.mjs")"
+          OMNIROUTE_CI_SYNC_TSX_CACHE="$TMPDIR" NODE_OPTIONS="$NODE_OPTIONS --import=$V8_CACHE_PRELOAD --import=$V8_NATIVE_PRELOAD" \
           npx c8 --merge-async \
             --temp-directory=coverage-shard \
             --reports-dir=coverage-shard-report \
@@ -1208,11 +1295,23 @@ jobs:
             --exclude=tests/** \
             --exclude=**/*.test.* \
             npm run test:unit:ci:shard
-      - name: Upload raw shard coverage
-        if: always()
+      - name: Package successful shard coverage
+        env:
+          TEST_SHARD: ${{ matrix.shard }}/8
+          TMPDIR: ${{ runner.temp }}/v8-tsx-${{ github.run_id }}-${{ github.run_attempt }}-${{ matrix.shard }}
+        run: node scripts/ci/prepare-v8-coverage.mjs pack coverage-shard coverage-shard-upload "$TEST_SHARD" "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKSPACE" "$TMPDIR"
+      - name: Upload complete shard coverage
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
-          name: coverage-shard-${{ matrix.shard }}
+          name: coverage-shard-${{ github.run_attempt }}-${{ matrix.shard }}
+          path: coverage-shard-upload/
+          compression-level: 0
+          if-no-files-found: error
+      - name: Preserve raw coverage from failed shards
+        if: failure()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: failed-unit-coverage-${{ github.run_attempt }}-${{ matrix.shard }}
           path: coverage-shard/*.json
           if-no-files-found: error
 
@@ -1242,15 +1341,42 @@ jobs:
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
-      - name: Install Bun (Windows)
-        if: runner.os == 'Windows'
-        shell: pwsh
+      # npm ci provisions Bun and its platform binary from the exact lockfile.
+      # Validate the executable and npm shim before the compatibility smoke.
+      - name: Verify locked Bun runtime
+        shell: bash
         run: |
-          powershell -c "iwr bun.sh/install.ps1 -useb | iex"
-          echo "$env:USERPROFILE\.bun\bin" | Out-File -FilePath $env:GITHUB_PATH -Append
-      - name: Install Bun (non-Windows)
-        if: runner.os != 'Windows'
-        run: npm install -g bun
+          node --input-type=module <<'NODE'
+          import assert from "node:assert/strict";
+          import { execFileSync } from "node:child_process";
+          import { readFileSync, realpathSync, statSync } from "node:fs";
+          import { isAbsolute, relative, resolve, sep } from "node:path";
+          const readJson = (path) => JSON.parse(readFileSync(path, "utf8"));
+          const expected = readJson("package.json").devDependencies.bun;
+          assert.match(expected, /^\d+\.\d+\.\d+$/);
+          const lock = readJson("package-lock.json");
+          assert.equal(lock.packages[""].devDependencies.bun, expected);
+          const locked = lock.packages["node_modules/bun"];
+          assert.equal(locked.version, expected);
+          const installed = readJson("node_modules/bun/package.json");
+          assert.equal(installed.version, expected);
+          assert.equal(installed.bin.bun, locked.bin.bun);
+          const packageRoot = resolve("node_modules/bun");
+          const executable = resolve(packageRoot, installed.bin.bun);
+          const localPath = relative(packageRoot, realpathSync(executable));
+          assert.ok(localPath && !isAbsolute(localPath) && localPath !== ".." && !localPath.startsWith(`..${sep}`));
+          const shim = resolve("node_modules/.bin", process.platform === "win32" ? "bun.cmd" : "bun");
+          if (process.platform === "win32") {
+            assert.ok(statSync(shim).isFile());
+            const shimText = readFileSync(shim, "utf8").replaceAll("\\", "/");
+            assert.ok(shimText.includes(`../bun/${installed.bin.bun}`));
+          } else {
+            assert.equal(realpathSync(shim), realpathSync(executable));
+          }
+          const actual = execFileSync(executable, ["--version"], { encoding: "utf8", timeout: 15000 }).trim();
+          assert.equal(actual, expected);
+          console.log(`bunVersion=${actual} source=package-lock.json`);
+          NODE
       - run: npm run test:bun:db
 
   test-vitest:
@@ -1315,6 +1441,9 @@ jobs:
   # the release gate can still exercise them via workflow_dispatch when needed).
   test-coverage:
     name: Coverage
+    permissions:
+      contents: read
+      actions: read
     runs-on: ubuntu-latest
     # 10min was sized before #7114 added the lcov reporter (Codecov/Sonar need it);
     # merging 8 shard JSONs + text+json+lcov now takes ~10-12min — three consecutive
@@ -1354,21 +1483,27 @@ jobs:
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
         with:
           package-manager-cache: false
-          node-version: ${{ env.CI_NODE_VERSION }}
+          node-version: ${{ env.CI_V8_NODE_VERSION }}
       - uses: ./.github/actions/npm-ci-retry
         with:
           # PR acceleration is not release-candidate provenance.
           cache: ${{ github.event_name == 'pull_request' }}
+      - name: Select coverage producers for this attempt
+        id: coverage_selection
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p coverage
+          node scripts/ci/select-v8-coverage.mjs coverage/coverage-selection.json 8
       - name: Download all shard coverage
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
-          pattern: coverage-shard-*
+          artifact-ids: ${{ steps.coverage_selection.outputs.artifact_ids }}
           path: coverage-shards/
-          merge-multiple: true
+          merge-multiple: false
       - name: Merge + report + gate
-        # Merging 8 shards of raw v8 coverage is memory-heavy. `--merge-async`
-        # keeps the V8 coverage merge incremental instead of loading every raw
-        # JSON blob into one in-memory merge, which avoids Node heap OOMs.
+        # Verify and merge each raw report in order without storing a second
+        # raw copy. c8 reads the aggregate for source mapping and reporting.
         # lcov only outside pull_request (2026-10-26): its sole consumer on a PR was the
         # informational Codecov upload below (SonarQube is off: vars.SONARQUBE_ENABLED is
         # unset), and the PR gate only needs the json/text summaries. The step took ~21 min
@@ -1376,19 +1511,15 @@ jobs:
         env:
           NODE_OPTIONS: --max-old-space-size=8192
           EVENT_NAME: ${{ github.event_name }}
+          RUN_HEAD_SHA: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.sha || github.sha }}
         run: |
           LCOV_REPORTER=()
           if [ "$EVENT_NAME" != "pull_request" ]; then LCOV_REPORTER=(--reporter=lcov); fi
           mkdir -p coverage
-          first_coverage_file=""
-          if [ -d coverage-shards ]; then
-            first_coverage_file="$(find coverage-shards -maxdepth 1 -type f -name '*.json' -print -quit)"
-          fi
-          if [ -z "$first_coverage_file" ]; then
-            echo "::error::No raw coverage shard data was downloaded."
-            find . -maxdepth 3 -type f | sort
-            exit 1
-          fi
+          # Retained producers keep their original attempts. The receipt binds all
+          # eight job/artifact identities and the aggregate sent to c8.
+          node scripts/ci/prepare-v8-coverage.mjs prepare coverage-shards coverage-shards-verified 8 "$GITHUB_SHA" "$GITHUB_RUN_ID" "$GITHUB_RUN_ATTEMPT" "$GITHUB_WORKSPACE" coverage/coverage-selection.json "$RUN_HEAD_SHA" "$GITHUB_REPOSITORY" > coverage/coverage-preparation.json
+          cat coverage/coverage-preparation.json
           # Gate aligned to the project's local coverage bar: `npm run test:coverage`
           # gates at 60/60/60/60, so CI must match it (the previous CI floor of 40
           # silently undershot the local bar — a real drift). Real merged coverage is
@@ -1396,7 +1527,7 @@ jobs:
           # coverage ratchet (quality-baseline.json) layers "must not drop vs baseline"
           # on top of this floor.
           npx c8 report \
-            --temp-directory coverage-shards \
+            --temp-directory coverage-shards-verified \
             --reports-dir coverage \
             --merge-async \
             --reporter=text-summary \
@@ -1406,6 +1537,7 @@ jobs:
             --exclude=**/*.test.* \
             --check-coverage \
             --statements 60 --lines 60 --functions 60 --branches 60
+          node scripts/ci/prepare-v8-coverage.mjs verify-report coverage
       - name: Build coverage summary
         if: always()
         run: |
@@ -1456,6 +1588,8 @@ jobs:
           path: |
             coverage/coverage-summary.json
             coverage/coverage-report.md
+            coverage/coverage-selection.json
+            coverage/coverage-preparation.json
             coverage/lcov.info
           if-no-files-found: warn
 
@@ -1642,15 +1776,28 @@ jobs:
       - name: Download Next.js build artifact
         uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
         with:
-          name: next-build
-          # Workspace-relative on purpose: the matrix below includes windows-latest, whose
-          # default shell is pwsh, where $RUNNER_TEMP is empty (it is $env:RUNNER_TEMP) —
-          # #11896's first cut broke the Electron smoke on exactly that. A relative path
-          # works in bash and pwsh alike; hosted workspaces are ephemeral.
-          path: next-build-artifact
+          # Exact immutable ID from the successful producer, including partial reruns.
+          artifact-ids: ${{ needs.build.outputs.nextArtifactId }}
+          skip-decompress: true
+          digest-mismatch: error
+          path: _artifacts/next-build-download
       - name: Extract Next.js build artifact
+        shell: bash
+        env:
+          NEXT_BUILD_PYTHON: ${{ runner.os == 'Windows' && 'python' || 'python3' }}
+          NEXT_BUILD_ARTIFACT_ID: ${{ needs.build.outputs.nextArtifactId }}
+          NEXT_BUILD_ARTIFACT_DIGEST: ${{ needs.build.outputs.nextArtifactDigest }}
+          NEXT_BUILD_ARCHIVE_SHA256: ${{ needs.build.outputs.nextArchiveSha256 }}
+          NEXT_BUILD_MANIFEST_SHA256: ${{ needs.build.outputs.nextManifestSha256 }}
+          NEXT_BUILD_PRODUCER_ATTEMPT: ${{ needs.build.outputs.nextProducerAttempt }}
+          NEXT_BUILD_PRODUCER_RESULT: ${{ needs.build.result }}
+          NEXT_BUILD_QUEUE_BASE: ${{ needs.changes.outputs.candidateBase }}
         run: |
-          tar -xzf next-build-artifact/e2e-build.tar.gz
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py unpack _artifacts/next-build-download _artifacts/next-build-verified
+          node scripts/ci/next-build-provenance.mjs verify _artifacts/next-build-verified
+          "$NEXT_BUILD_PYTHON" scripts/ci/unpack-next-build.py inspect _artifacts/next-build-verified/e2e-build.tar.gz
+          tar -xzf _artifacts/next-build-verified/e2e-build.tar.gz
+          node scripts/ci/next-build-provenance.mjs consume _artifacts/next-build-verified
       # WS4.1: duration-balanced shards (LPT over config/quality/e2e-timings.json).
       # Measured skew of plain --shard was 14× (24m47s vs 1m47s) — E2E was the CI
       # critical path. The balancer self-verifies completeness and exits non-zero on
@@ -1681,6 +1828,19 @@ jobs:
           junit-paths: junit-e2e-results.xml
           org-slug: omniroute
           token: ${{ secrets.TRUNK_TOKEN }}
+
+      - name: Retain Next.js consumption evidence
+        if: always()
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: next-input-e2e-${{ matrix.shard }}-${{ github.run_id }}-${{ github.run_attempt }}
+          path: |
+            _artifacts/next-build-verified/next-build-provenance.json
+            _artifacts/next-build-verified/zip-verification.json
+            _artifacts/next-build-verified/next-build-consumption.json
+            _artifacts/next-build-verified/next-input.json
+          retention-days: 7
+          if-no-files-found: ignore
 
   test-integration:
     name: Integration Tests (${{ matrix.shard }}/2)
@@ -1817,9 +1977,9 @@ jobs:
   admission-verdict:
     # Only requested candidates receive the required check name. An ordinary draft
     # deliberately skips its producer jobs and must not create a failed admission.
-    # Classifier failures still reach the gate; queue metadata edits keep their own name.
-    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && 'Gate / CI (queue-draft edit)' || (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Gate / CI' || 'Admission not requested / CI' }}
-    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
+    # Classifier failures still reach the gate; metadata-only edits keep their own name.
+    name: ${{ (github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) && 'Gate / CI (PR metadata edit)' || (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') && 'Gate / CI' || 'Admission not requested / CI' }}
+    if: ${{ always() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) && (github.event_name != 'pull_request' || github.event.pull_request.draft == false || needs.changes.outputs.queueCandidate == 'true' || needs.changes.result != 'success') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     needs:
@@ -1872,7 +2032,7 @@ jobs:
   ci-summary:
     name: CI Dashboard
     runs-on: ubuntu-latest
-    if: ${{ !cancelled() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && github.event.pull_request.user.login == 'mergify[bot]' && startsWith(github.head_ref, 'mergify/merge-queue/') && github.event.pull_request.head.repo.id == github.event.repository.id) }}
+    if: ${{ !cancelled() && !(github.event_name == 'pull_request' && github.event.action == 'edited' && !github.event.changes.base && (github.event.changes.body || github.event.changes.title)) }}
     needs:
       - changes
       - lint
