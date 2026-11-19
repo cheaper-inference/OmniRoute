@@ -564,6 +564,29 @@ export function resolveDynamicQuotaFetcher(
   return fetchNewApiAggregatorQuota;
 }
 
+/** Warn for each live window whose remaining quota is at or below its warn threshold. */
+function warnApproachingWindowCutoffs(
+  label: string,
+  windows: NonNullable<QuotaInfo["windows"]>,
+  thresholds?: PreflightQuotaThresholds
+): void {
+  for (const [windowName, windowInfo] of Object.entries(windows)) {
+    // A window whose reset already passed is stale: it no longer approaches any cutoff.
+    if (hasQuotaWindowReset(windowInfo.resetAt)) continue;
+    const warnRemainingPercent = resolveOrDefault(
+      thresholds?.resolveWarnRemainingPercent,
+      windowName,
+      DEFAULT_WARN_REMAINING_PERCENT
+    );
+    const remainingPercent = remainingPercentFrom(windowInfo.percentUsed);
+    if (isRemainingAtOrBelowThreshold(remainingPercent, warnRemainingPercent)) {
+      console.warn(
+        `[QuotaPreflight] ${label} ${windowName}: ${remainingPercent.toFixed(1)}% remaining — approaching cutoff`
+      );
+    }
+  }
+}
+
 export async function preflightQuota(
   provider: string,
   connectionId: string,
@@ -603,21 +626,11 @@ export async function preflightQuota(
 
   const windows = quota.windows;
   if (windows && Object.keys(windows).length > 0) {
-    const scopedWindows = windowsForScope(windows, scope);
-    for (const [windowName, windowInfo] of Object.entries(scopedWindows)) {
-      if (hasQuotaWindowReset(windowInfo.resetAt)) continue;
-      const warnRemainingPercent = resolveOrDefault(
-        thresholds?.resolveWarnRemainingPercent,
-        windowName,
-        DEFAULT_WARN_REMAINING_PERCENT
-      );
-      const remainingPercent = remainingPercentFrom(windowInfo.percentUsed);
-      if (isRemainingAtOrBelowThreshold(remainingPercent, warnRemainingPercent)) {
-        console.warn(
-          `[QuotaPreflight] ${provider}/${connectionId} ${windowName}: ${remainingPercent.toFixed(1)}% remaining — approaching cutoff`
-        );
-      }
-    }
+    warnApproachingWindowCutoffs(
+      `${provider}/${connectionId}`,
+      windowsForScope(windows, scope),
+      thresholds
+    );
   }
 
   const decision = evaluateQuotaCutoff(quota, thresholds, scope);
