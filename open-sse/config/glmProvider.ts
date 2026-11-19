@@ -205,10 +205,11 @@ export const GLM_SHARED_MODELS = Object.freeze([
     supportedThinkingEfforts: [],
   },
   {
+    // Vendor: 64K context (docs.bigmodel.cn glm-4.5v), 16K max output (docs.z.ai glm-4.5v).
     id: "glm-4.5v",
     name: "GLM 4.5V (Vision)",
-    contextLength: 16000,
-    maxOutputTokens: 32768,
+    contextLength: 64000,
+    maxOutputTokens: 16384,
     toolCalling: true,
     supportsReasoning: true,
     supportedThinkingEfforts: [],

@@ -42,3 +42,22 @@ test("GlmExecutor.transformForTransport leaves an in-range max_tokens for glm-4.
 
   assert.equal(transformed.max_tokens, 2048);
 });
+
+test("GlmExecutor.transformForTransport clamps max_tokens for glm-4.5v to the vendor 16K output cap", () => {
+  const executor = new GlmExecutor("glm");
+  const body = { messages: [{ role: "user", content: "describe this image" }], max_tokens: 32768 };
+
+  const transformed = executor.transformForTransport(
+    "glm-4.5v",
+    body,
+    false,
+    { apiKey: "glm-key" },
+    "openai"
+  ) as { max_tokens?: number };
+
+  assert.equal(
+    transformed.max_tokens,
+    16384,
+    "docs.z.ai glm-4.5v lists a 16K maximum output; 32768 would be rejected upstream"
+  );
+});
