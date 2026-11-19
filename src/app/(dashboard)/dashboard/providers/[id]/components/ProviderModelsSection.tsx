@@ -542,17 +542,17 @@ export default function ProviderModelsSection({
           compareDisabled={models.length === 0}
         />
       )}
-      {/* Positioned frame for the intelligence overlay, kept outside the grid so the panel is
-          not a grid cell; the minimum height keeps it usable over a short model list. */}
-      <div className={showIntelligence ? "relative min-h-80" : "relative"}>
-        {showIntelligence && (
-          <ModelIntelligencePanel
-            t={t}
-            providerId={providerId}
-            providerName={providerInfo?.name || providerId}
-            onClose={() => setShowIntelligence(false)}
-          />
-        )}
+      {/* The comparison panel takes the grid's place while it is open; the grid stays mounted
+          (hidden) so per-row state survives closing the panel. */}
+      {showIntelligence && (
+        <ModelIntelligencePanel
+          t={t}
+          providerId={providerId}
+          providerName={providerInfo?.name || providerId}
+          onClose={() => setShowIntelligence(false)}
+        />
+      )}
+      <div hidden={showIntelligence}>
         <AutoGrid>
           {displayModels.map((model) => {
             return (

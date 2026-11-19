@@ -6207,6 +6207,7 @@
     "intelligenceSearch": "Search models…",
     "intelligenceToggleModel": "Toggle {id}",
     "intelligenceRowTitle": "{id} · Intelligence: {score} · ELO: {elo}",
+    "intelligenceScoreBar": "Intelligence score of {id}",
     "intelligenceNoData": "No data",
     "intelligenceEmpty": "No intelligence scores available for this provider.",
     "intelligenceNoMatch": "No models match the active filters.",

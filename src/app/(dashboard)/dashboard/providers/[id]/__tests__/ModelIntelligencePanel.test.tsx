@@ -125,6 +125,12 @@ describe("ModelIntelligencePanel", () => {
     expect(container.querySelector('input[aria-label="Toggle kimi-k2.6"]')?.className).toContain(
       "ci-checkbox"
     );
+    // Each score bar is a named progressbar, so a screen reader announces the score.
+    const bar = container.querySelector('[role="progressbar"]');
+    expect(bar?.getAttribute("aria-label")).toBe("Intelligence score of kimi-k2.6");
+    expect(bar?.getAttribute("aria-valuemin")).toBe("0");
+    expect(bar?.getAttribute("aria-valuemax")).toBe("100");
+    expect(bar?.getAttribute("aria-valuenow")).toBe("92");
   });
 
   it("calls onClose when the close button is clicked", async () => {

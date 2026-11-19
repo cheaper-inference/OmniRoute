@@ -37,9 +37,9 @@ function StatusFrame({
   children: ReactNode;
 }) {
   return (
-    <div className="absolute inset-0 z-20 flex flex-col bg-surface border border-border rounded-lg p-4">
+    <div className="flex min-h-80 flex-col bg-surface border border-border rounded-lg p-4">
       <div className="flex items-center justify-between mb-4">
-        <h3 className="text-sm font-semibold text-text-main">{title}</h3>
+        <h3 className="text-sm text-text-main">{title}</h3>
         <CloseButton label={closeLabel} onClose={onClose} />
       </div>
       {children}
@@ -70,7 +70,7 @@ function IntelligenceToolbar({
 }) {
   return (
     <div className="flex flex-wrap items-center gap-2 border-b border-border bg-sidebar/30 px-3 py-2">
-      <h3 className="text-sm font-semibold text-text-main">{title}</h3>
+      <h3 className="text-sm text-text-main">{title}</h3>
       <div className="ml-auto flex flex-wrap items-center gap-2">
         <Button size="sm" variant="outline" onClick={onSelectAll}>
           {providerText(t, "intelligenceSelectAll", "Select All")}
@@ -125,7 +125,16 @@ function IntelligenceRow({
         )}
       >
         <span className="min-w-0 flex-1 truncate text-xs text-text-main">{model.modelId}</span>
-        <div className="h-5 w-40 shrink-0 overflow-hidden rounded bg-bg-subtle">
+        <div
+          role="progressbar"
+          aria-valuemin={0}
+          aria-valuemax={100}
+          aria-valuenow={Math.round(model.score * 100)}
+          aria-label={providerText(t, "intelligenceScoreBar", "Intelligence score of {id}", {
+            id: model.modelId,
+          })}
+          className="h-5 w-40 shrink-0 overflow-hidden rounded bg-bg-subtle"
+        >
           <div
             className="h-full rounded bg-primary transition-all"
             style={{
@@ -308,7 +317,7 @@ export default function ModelIntelligencePanel({
   }
 
   return (
-    <div className="absolute inset-0 z-20 flex flex-col overflow-hidden bg-surface border border-border rounded-lg">
+    <div className="flex min-h-80 flex-col overflow-hidden bg-surface border border-border rounded-lg">
       <IntelligenceToolbar
         t={t}
         title={title}
