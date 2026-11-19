@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                   |            v3.8.50             | **v3.8.51** |      `v3.8.54+`       |
+|                                   |            v3.8.50             | **v3.8.51** |      `v3.8.55+`       |
 | --------------------------------- | :----------------------------: | :---------: | :-------------------: |
 | 🌐 Nhà cung cấp                   |              352               |   **358**   |          394          |
 | 🧠 ID mô hình trò chuyện duy nhất |              1320              |  **1374**   |         1491          |
@@ -590,7 +590,7 @@ Radar hoạt động theo cơ chế chọn tham gia và chỉ sử dụng GET. �
 
 </div>
 
-> Những điểm nổi bật gần đây từ **v3.8.20 → v3.8.54**. Xem toàn bộ lịch sử trong [`CHANGELOG.md`](CHANGELOG.md).
+> Những điểm nổi bật gần đây từ **v3.8.20 → v3.8.55**. Xem toàn bộ lịch sử trong [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ Định tuyến `quota-weighted`** — chiến lược combo thứ 20 bỏ qua các tài khoản đã cạn quota, sau đó chọn trong số còn lại theo tỷ lệ quota còn lại ÷ tải đang xử lý, đồng thời giữ các cuộc hội thoại hiện có được ghim. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Chế độ không giao diện** — `omniroute serve --headless` (hoặc `OMNIROUTE_HEADLESS=1`) chỉ chạy proxy engine `/v1/*`, đồng thời tắt dashboard và các hệ thống chỉ dành cho dashboard. → [Chế độ không giao diện](docs/guides/HEADLESS.md)
@@ -1040,7 +1040,7 @@ omniroute
 ```
 
 > 💡 Thấy `npm warn ERESOLVE` hoặc cảnh báo peer-dep? [Chúng không gây hại](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Đang sử dụng npm 11 trở lên?** npm có thể chặn các script vòng đời của package trừ khi chúng được cho phép. `postinstall` của OmniRoute (`node scripts/build/postinstall.mjs`) là bắt buộc để chuẩn bị các file runtime native. Cho phép các package được nêu trong cảnh báo của npm khi cài đặt toàn cục. Với bộ package được OmniRoute 3.8.54 báo cáo:
+> **Đang sử dụng npm 11 trở lên?** npm có thể chặn các script vòng đời của package trừ khi chúng được cho phép. `postinstall` của OmniRoute (`node scripts/build/postinstall.mjs`) là bắt buộc để chuẩn bị các file runtime native. Cho phép các package được nêu trong cảnh báo của npm khi cài đặt toàn cục. Với bộ package được OmniRoute 3.8.55 báo cáo:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1835,7 +1835,7 @@ Giấy phép MIT - xem [LICENSE](LICENSE) để biết thêm chi tiết.
 
 **[⬆ Quay lại đầu trang](#-omniroute)** · Được xây dựng ❤️ vì cộng đồng AI mã nguồn mở.
 
-<sub>Được tạo bởi <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Giấy phép MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Được tạo bởi <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Giấy phép MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub Discussions đã được bật để cộng đồng hỏi đáp -->

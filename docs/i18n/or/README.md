@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                           |         v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
+|                           |         v3.8.50         | **v3.8.51** |      `v3.8.55+`       |
 | ------------------------- | :---------------------: | :---------: | :-------------------: |
 | 🌐 ପ୍ରଦାନକାରୀ             |           352           |   **358**   |          394          |
 | 🧠 ଅନନ୍ୟ ଚାଟ୍ ମଡେଲ୍ ID    |          1320           |  **1374**   |         1491          |
@@ -590,7 +590,7 @@ Radar ଇଚ୍ଛାଧୀନ ଏବଂ କେବଳ GET ପାଇଁ ଉଦ୍
 
 </div>
 
-> **v3.8.20 → v3.8.54** ମଧ୍ୟର ସାମ୍ପ୍ରତିକ ମୁଖ୍ୟ ବିଶେଷତା। ସମ୍ପୂର୍ଣ୍ଣ ଇତିହାସ [`CHANGELOG.md`](CHANGELOG.md) ରେ।
+> **v3.8.20 → v3.8.55** ମଧ୍ୟର ସାମ୍ପ୍ରତିକ ମୁଖ୍ୟ ବିଶେଷତା। ସମ୍ପୂର୍ଣ୍ଣ ଇତିହାସ [`CHANGELOG.md`](CHANGELOG.md) ରେ।
 
 - **⚖️ `quota-weighted` ରାଉଟିଂ** — 20ତମ କମ୍ବୋ ରଣନୀତି ପ୍ରଥମେ ଶେଷ ହୋଇଯାଇଥିବା ଆକାଉଣ୍ଟଗୁଡ଼ିକୁ ଛାଡ଼ିଦିଏ, ତା’ପରେ ଅବଶିଷ୍ଟ କୋଟା ÷ ଚାଲୁଥିବା ଲୋଡ୍ ଅନୁପାତରେ ଅବଶିଷ୍ଟଗୁଡ଼ିକ ମଧ୍ୟରୁ ଚୟନ କରେ, ଯାହା ଚାଲୁଥିବା କନଭର୍ସେସନ୍ଗୁଡ଼ିକୁ ସେହି ଆକାଉଣ୍ଟରେ ରଖେ। → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Headless ମୋଡ୍** — `omniroute serve --headless` (କିମ୍ବା `OMNIROUTE_HEADLESS=1`) କେବଳ `/v1/*` ପ୍ରକ୍ସି ଇଞ୍ଜିନ୍ ଚଲାଏ, ଡ୍ୟାସ୍ବୋର୍ଡ ଏବଂ କେବଳ-ଡ୍ୟାସ୍ବୋର୍ଡ ସବସିଷ୍ଟମ୍ଗୁଡ଼ିକୁ ବନ୍ଦ ରଖେ। → [Headless Mode](docs/guides/HEADLESS.md)
@@ -1039,7 +1039,7 @@ omniroute
 ```
 
 > 💡 `npm warn ERESOLVE` କିମ୍ବା peer-dep ସତର୍କତା ଦେଖୁଛନ୍ତି? [ସେଗୁଡ଼ିକ କ୍ଷତିକାରକ ନୁହେଁ](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated)।
-> **npm 11 କିମ୍ବା ତା’ପରବର୍ତ୍ତୀ ବ୍ୟବହାର କରୁଛନ୍ତି?** ଅନୁମତି ନଦିଆଯାଇଥିଲେ npm ପ୍ୟାକେଜ୍ ଲାଇଫ୍ସାଇକେଲ୍ ସ୍କ୍ରିପ୍ଟଗୁଡ଼ିକୁ ବ୍ଲକ୍ କରିପାରେ। OmniRouteର `postinstall` (`node scripts/build/postinstall.mjs`) ଏହାର ନେଟିଭ୍ ରନ୍ଟାଇମ୍ ଫାଇଲ୍ଗୁଡ଼ିକୁ ପ୍ରସ୍ତୁତ କରିବା ପାଇଁ ଆବଶ୍ୟକ। ଗ୍ଲୋବାଲ୍ ଭାବେ ଇନ୍ଷ୍ଟଲ୍ କରିବା ସମୟରେ npmର ସତର୍କତାରେ ନାମିତ ପ୍ୟାକେଜ୍ଗୁଡ଼ିକୁ ଅନୁମତି ଦିଅନ୍ତୁ। OmniRoute 3.8.54 ଦ୍ୱାରା ରିପୋର୍ଟ ହୋଇଥିବା ପ୍ୟାକେଜ୍ ସେଟ୍ ପାଇଁ:
+> **npm 11 କିମ୍ବା ତା’ପରବର୍ତ୍ତୀ ବ୍ୟବହାର କରୁଛନ୍ତି?** ଅନୁମତି ନଦିଆଯାଇଥିଲେ npm ପ୍ୟାକେଜ୍ ଲାଇଫ୍ସାଇକେଲ୍ ସ୍କ୍ରିପ୍ଟଗୁଡ଼ିକୁ ବ୍ଲକ୍ କରିପାରେ। OmniRouteର `postinstall` (`node scripts/build/postinstall.mjs`) ଏହାର ନେଟିଭ୍ ରନ୍ଟାଇମ୍ ଫାଇଲ୍ଗୁଡ଼ିକୁ ପ୍ରସ୍ତୁତ କରିବା ପାଇଁ ଆବଶ୍ୟକ। ଗ୍ଲୋବାଲ୍ ଭାବେ ଇନ୍ଷ୍ଟଲ୍ କରିବା ସମୟରେ npmର ସତର୍କତାରେ ନାମିତ ପ୍ୟାକେଜ୍ଗୁଡ଼ିକୁ ଅନୁମତି ଦିଅନ୍ତୁ। OmniRoute 3.8.55 ଦ୍ୱାରା ରିପୋର୍ଟ ହୋଇଥିବା ପ୍ୟାକେଜ୍ ସେଟ୍ ପାଇଁ:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1834,7 +1834,7 @@ MIT ଲାଇସେନ୍ସ - ବିବରଣୀ ପାଇଁ [LICENSE](LICENSE
 
 **[⬆ ଶୀର୍ଷକୁ ଫେରନ୍ତୁ](#-omniroute)** · ଓପନ୍-ସୋର୍ସ AI ସମୁଦାୟ ପାଇଁ ❤️ ସହିତ ନିର୍ମିତ।
 
-<sub><a href="https://github.com/diegosouzapw">Diego Souza</a>ଙ୍କ ଦ୍ୱାରା ସୃଷ୍ଟି · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT ଲାଇସେନ୍ସ · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub><a href="https://github.com/diegosouzapw">Diego Souza</a>ଙ୍କ ଦ୍ୱାରା ସୃଷ୍ଟି · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT ଲାଇସେନ୍ସ · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- ସମୁଦାୟର ପ୍ରଶ୍ନୋତ୍ତର ପାଇଁ GitHub Discussions ସକ୍ଷମ କରାଯାଇଛି -->

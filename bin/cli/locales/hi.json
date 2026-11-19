@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "सीमा एक धनात्मक पूर्णांक होनी चाहिए.",
     "error": "त्रुटि: {message}",
     "serverOffline": "OmniRoute सर्वर ऑफलाइन है। शुरू करें: omniroute serve",
     "authRequired": "प्रमाणीकरण आवश्यक है। OMNIROUTE_API_KEY सेट करें या चलाएं: omniroute setup",

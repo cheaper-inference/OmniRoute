@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                     |        v3.8.50         | **v3.8.51** |      `v3.8.54+`       |
+|                                     |        v3.8.50         | **v3.8.51** |      `v3.8.55+`       |
 | ----------------------------------- | :--------------------: | :---------: | :-------------------: |
 | 🌐 Palveluntarjoajat                |          352           |   **358**   |          394          |
 | 🧠 Yksilölliset chat-mallitunnukset |          1320          |  **1374**   |         1491          |
@@ -599,7 +599,7 @@ nykyisestä luettelosta on osoitteessa **[radar.omniroute.online/planos](https:/
 
 </div>
 
-> Viimeaikaiset kohokohdat välillä **v3.8.20 → v3.8.54**. Koko historia tiedostossa [`CHANGELOG.md`](CHANGELOG.md).
+> Viimeaikaiset kohokohdat välillä **v3.8.20 → v3.8.55**. Koko historia tiedostossa [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` -reititys** — 20. yhdistelmästrategia ohittaa loppuun käytetyt tilit ja arpoo sen jälkeen jäljellä olevien joukosta suhteessa jäljellä olevaan kiintiöön ÷ käynnissä olevien pyyntöjen määrään pitäen olemassa olevat keskustelut kiinnitettyinä. → [Automaattiset yhdistelmät](docs/routing/AUTO-COMBO.md)
 - **🧰 Päätön tila** — `omniroute serve --headless` (tai `OMNIROUTE_HEADLESS=1`) suorittaa vain `/v1/*`-välityspalvelukoneiston ja poistaa käytöstä hallintapaneelin sekä vain hallintapaneelille tarkoitetut alijärjestelmät. → [Päätön tila](docs/guides/HEADLESS.md)
@@ -1049,7 +1049,7 @@ omniroute
 ```
 
 > 💡 Näetkö `npm warn ERESOLVE`- tai peer-riippuvuuksien varoituksia? [Ne ovat harmittomia](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Käytätkö versiota npm 11 tai uudempaa?** npm saattaa estää pakettien elinkaarikomentosarjat, ellei niitä sallita. OmniRouten `postinstall` (`node scripts/build/postinstall.mjs`) tarvitaan sen natiivien runtime-tiedostojen valmistelemiseen. Salli npm:n varoituksessa nimetyt paketit asentaessasi paketteja globaalisti. OmniRoute 3.8.54:n ilmoittamalle pakettijoukolle:
+> **Käytätkö versiota npm 11 tai uudempaa?** npm saattaa estää pakettien elinkaarikomentosarjat, ellei niitä sallita. OmniRouten `postinstall` (`node scripts/build/postinstall.mjs`) tarvitaan sen natiivien runtime-tiedostojen valmistelemiseen. Salli npm:n varoituksessa nimetyt paketit asentaessasi paketteja globaalisti. OmniRoute 3.8.55:n ilmoittamalle pakettijoukolle:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1846,7 +1846,7 @@ MIT-lisenssi – katso lisätietoja tiedostosta [LICENSE](LICENSE).
 
 **[⬆ Takaisin alkuun](#-omniroute)** · Rakennettu ❤️:lla avoimen lähdekoodin tekoäly-yhteisöä varten.
 
-<sub>Tekijä: <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Tekijä: <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · MIT-lisenssi · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- GitHub-keskustelut käytössä yhteisön kysymyksiä ja vastauksia varten -->

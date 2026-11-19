@@ -71,7 +71,7 @@
 
 <div align="center">
 
-|                                          |         v3.8.50          | **v3.8.51** |      `v3.8.54+`       |
+|                                          |         v3.8.50          | **v3.8.51** |      `v3.8.55+`       |
 | ---------------------------------------- | :----------------------: | :---------: | :-------------------: |
 | 🌐 Masu samarwa                          |           352            |   **358**   |          394          |
 | 🧠 ID na musamman na samfuran hira       |           1320           |  **1374**   |         1491          |
@@ -590,7 +590,7 @@ Radar na zaɓi ne kuma GET-only. Abokin hulɗar OmniRoute ba ya loda prompts, zi
 
 </div>
 
-> Muhimman abubuwan baya-bayan nan daga **v3.8.20 → v3.8.54**. Cikakken tarihin yana cikin [`CHANGELOG.md`](CHANGELOG.md).
+> Muhimman abubuwan baya-bayan nan daga **v3.8.20 → v3.8.55**. Cikakken tarihin yana cikin [`CHANGELOG.md`](CHANGELOG.md).
 
 - **⚖️ `quota-weighted` routing** — dabarar combo ta 20 tana tsallake asusun da suka ƙare, sannan ta zaɓa daga sauran gwargwadon saura na quota ÷ nauyin ayyukan da ke gudana, tare da ci gaba da manna tattaunawar da ake da su. → [Auto-Combo](docs/routing/AUTO-COMBO.md)
 - **🧰 Yanayin mara dashboard** — `omniroute serve --headless` (ko `OMNIROUTE_HEADLESS=1`) yana tafiyar da injin wakilin `/v1/*` kaɗai, tare da kashe dashboard da tsarin da dashboard kaɗai ke amfani da su. → [Yanayin Mara Dashboard](docs/guides/HEADLESS.md)
@@ -1038,7 +1038,7 @@ omniroute
 ```
 
 > 💡 Ka ga `npm warn ERESOLVE` ko gargadin peer-dep? [Ba su da illa](docs/guides/TROUBLESHOOTING.md#npm-install-warnings-eresolve--peer--deprecated).
-> **Kana amfani da npm 11 ko sama da haka?** npm na iya toshe rubutun tsarin rayuwar package sai an ba su izini. `postinstall` na OmniRoute (`node scripts/build/postinstall.mjs`) ya zama dole domin shirya fayilolin runtime na asali. Ba wa packages da aka ambata a gargadin npm izini yayin shigarwa gaba ɗaya. Ga jerin packages da OmniRoute 3.8.54 ya bayar:
+> **Kana amfani da npm 11 ko sama da haka?** npm na iya toshe rubutun tsarin rayuwar package sai an ba su izini. `postinstall` na OmniRoute (`node scripts/build/postinstall.mjs`) ya zama dole domin shirya fayilolin runtime na asali. Ba wa packages da aka ambata a gargadin npm izini yayin shigarwa gaba ɗaya. Ga jerin packages da OmniRoute 3.8.55 ya bayar:
 >
 > ```bash
 > npm install -g --allow-scripts=omniroute,keytar,onnxruntime-node,@parcel/watcher,@swc/core,protobufjs,esbuild omniroute
@@ -1832,7 +1832,7 @@ Lasin MIT - duba [LICENSE](LICENSE) don ƙarin bayani.
 
 **[⬆ Komawa sama](#-omniroute)** · An gina shi da ❤️ domin al'ummar AI mai buɗaɗɗen tushe.
 
-<sub>Diego Souza ne ya ƙirƙira ta <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.54 · Node ≥22.22.2 · Lasin MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
+<sub>Diego Souza ne ya ƙirƙira ta <a href="https://github.com/diegosouzapw">Diego Souza</a> · OmniRoute v3.8.55 · Node ≥22.22.2 · Lasin MIT · <a href="https://omniroute.online">omniroute.online</a></sub>
 
 </div>
 <!-- An kunna GitHub Discussions domin tambayoyi da amsoshi na al'umma -->

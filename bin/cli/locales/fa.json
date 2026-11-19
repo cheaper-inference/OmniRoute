@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "حد باید یک عدد صحیح مثبت باشد.",
     "error": "خطا: {message}",
     "serverOffline": "سرور OmniRoute آفلاین است. با این دستور راه‌اندازی کنید: omniroute serve",
     "authRequired": "احراز هویت لازم است. OMNIROUTE_API_KEY را تنظیم کنید یا اجرا کنید: omniroute setup",

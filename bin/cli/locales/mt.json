@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Il-limitu għandu jkun numru sħiħ pożittiv.",
     "error": "Żball: {message}",
     "serverOffline": "is-servizz OmniRoute huwa offline. Bda' b: omniroute serve",
     "authRequired": "Jintalab awtentikazzjoni. Agħżel OMNIROUTE_API_KEY jew skurri: omniroute setup",

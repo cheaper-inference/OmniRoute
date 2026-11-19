@@ -6,6 +6,10 @@
 
 ## [3.8.31] — 2026-06-20
 
+## [3.8.55] — TBD
+
+---
+
 ## [3.8.54] — 2026-11-17
 
 _Living section — reconciled 2026-11-16 from all cycle commits (`6cc6965075` → `a9539085bd`, 920 non-merge commits). Bullets carry the merged PR and its author; direct pushes are listed with their commit hash. Regenerated at each `/generate-release` phase._
