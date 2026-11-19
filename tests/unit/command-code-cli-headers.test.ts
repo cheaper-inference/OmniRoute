@@ -1,6 +1,11 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 
+// The default-version checks below must not depend on the developer's
+// environment: COMMAND_CODE_VERSION is a supported override, read once at
+// module load, so clear it before this file's (per-process) import.
+delete process.env.COMMAND_CODE_VERSION;
+
 const { COMMAND_CODE_VERSION, buildCommandCodeCliHeaders } =
   await import("../../open-sse/executors/commandCode.ts");
 
