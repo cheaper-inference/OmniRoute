@@ -413,7 +413,7 @@ export default function CloudAgentsPage() {
       <Card className="border-primary/20 bg-primary/5">
         <div className="flex items-start justify-between gap-4 flex-wrap">
           <div>
-            <h2 className="text-sm font-semibold text-text-main">{t("aboutTitle")}</h2>
+            <h2 className="text-sm text-text-main">{t("aboutTitle")}</h2>
             <p className="text-sm text-text-muted mt-1">{t("aboutDescription")}</p>
           </div>
           <div className="flex items-center gap-2">
@@ -455,7 +455,7 @@ export default function CloudAgentsPage() {
                 <Icon name="add_task" size={20} />
               </div>
               <div>
-                <h3 className="text-lg font-semibold">{t("newTaskTitle")}</h3>
+                <h3 className="text-lg">{t("newTaskTitle")}</h3>
                 <p className="text-sm text-text-muted">{t("newTaskDescription")}</p>
               </div>
             </div>
@@ -752,10 +752,9 @@ export default function CloudAgentsPage() {
                       {t("cancel")}
                     </Button>
                     <Button
-                      variant="ghost"
+                      variant="destructive-ghost"
                       size="sm"
                       onClick={() => handleDeleteTask(selectedTask.id)}
-                      className="text-error hover:text-error"
                     >
                       <Icon name="delete" size={14} className="mr-1" />
                       {t("delete")}
@@ -785,7 +784,7 @@ export default function CloudAgentsPage() {
 
                   {/* Name + provider */}
                   <div>
-                    <h3 className="text-base font-semibold text-text-main">{agent.name}</h3>
+                    <h3 className="text-base text-text-main">{agent.name}</h3>
                     <p className="text-xs text-text-muted">{agent.provider}</p>
                   </div>
 
@@ -827,7 +826,7 @@ export default function CloudAgentsPage() {
         <Card>
           <div className="flex flex-col gap-6">
             <div>
-              <h3 className="text-base font-semibold text-text-main mb-1">
+              <h3 className="text-base text-text-main mb-1">
                 {t("settingsTitle") || "Cloud Agent Settings"}
               </h3>
               <p className="text-sm text-text-muted">

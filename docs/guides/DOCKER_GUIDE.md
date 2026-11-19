@@ -44,7 +44,7 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## With Environment File
@@ -60,7 +60,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -342,7 +342,7 @@ Size **cgroup `--memory` above the heap** — native buffers, SQLite, and compre
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Critical Environment Variables
@@ -398,14 +398,14 @@ runtime environment variable.
 
 ### Pre-built root image + runtime subpath
 
-Published `diegosouzapw/omniroute:*` images are built for the domain root. You can still
+Published `cheaperinference/omniroute:*` images are built for the domain root. You can still
 set `OMNIROUTE_BASE_PATH` at runtime; the container patches the bundle once on startup.
 Pair it with the matching public origin:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
@@ -446,7 +446,7 @@ OmniRoute can be securely exposed using Caddy's automatic SSL provisioning. Ensu
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
@@ -496,10 +496,17 @@ Endpoint tunnel panels (Cloudflare, Tailscale, ngrok) can be shown or hidden fro
 
 ## Image Tags
 
-| Image                    | Tag      | Size   | Description                                          |
-| ------------------------ | -------- | ------ | ---------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB | Highest **published** stable SemVer (not git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB | Pin this class of tag for GitOps                     |
+| Image                        | Tag      | Size   | Description                                          |
+| ---------------------------- | -------- | ------ | ---------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~250MB | Highest **published** stable SemVer (not git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~250MB | Pin this class of tag for GitOps                     |
+
+The same images are published to three repositories, with the same per-architecture digests:
+`cheaperinference/omniroute` (Docker Hub, the Cheaper Inference organization, from 3.8.53 on),
+`ghcr.io/cheaper-inference/omniroute` and the legacy `diegosouzapw/omniroute`, which keeps its
+pull history and still receives every release. Existing `diegosouzapw/omniroute` deployments
+keep updating; switching the image name is optional. The `:next` / `:next-web` pre-release
+channel below is published to `diegosouzapw/omniroute` and GHCR only.
 
 Multi-platform manifest: `linux/amd64` + `linux/arm64` native (Apple Silicon, AWS Graviton, Raspberry Pi). Docker selects the matching architecture automatically; pass `--platform linux/amd64` if you need to force AMD64 emulation on ARM hosts.
 
@@ -561,7 +568,7 @@ docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 
 Before testing, back up the OmniRoute data volume or bind-mounted data directory. To roll back, restore the previously used stable version or digest and recreate the container:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 

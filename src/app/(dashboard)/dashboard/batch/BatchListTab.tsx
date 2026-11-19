@@ -17,6 +17,7 @@ import Badge from "@/shared/components/Badge";
 import Button from "@/shared/components/Button";
 import Card from "@/shared/components/Card";
 import Input from "@/shared/components/Input";
+import InteractiveTableRow from "@/shared/components/InteractiveTableRow";
 import Select from "@/shared/components/Select";
 import { matchesSearch } from "@/shared/utils/turkishText";
 import { useConfirmDialog } from "@/shared/hooks/useConfirmDialog";
@@ -289,7 +290,7 @@ function BatchRowActions({
       {/* Delete — only for terminal statuses */}
       {isTerminal && (
         <Button
-          variant="ghost"
+          variant="destructive-ghost"
           size="icon-sm"
           onClick={async (e) => {
             e.stopPropagation();
@@ -314,7 +315,7 @@ function BatchRowActions({
           disabled={deletingId === batch.id}
           title={t("batchListDeleteBatchTitle")}
           aria-label={t("batchListDeleteBatchTitle")}
-          className="size-7 text-text-muted hover:text-error hover:bg-error/10"
+          className="size-7"
         >
           <Icon name={deletingId === batch.id ? "hourglass_empty" : "delete"} size={13} />
         </Button>
@@ -436,6 +437,7 @@ export default function BatchListTab({
           className="text-sm"
           aria-label={t("batchListBatchesTable")}
           scrollbarLabel={t("batchListBatchesTable")}
+          containerClassName="rounded-none border-0"
         >
           <TableHeader>
             <TableRow>
@@ -493,9 +495,9 @@ export default function BatchListTab({
                 })();
 
                 return (
-                  <TableRow
+                  <InteractiveTableRow
                     key={batch.id}
-                    onClick={() => setSelectedBatch(batch)}
+                    onActivate={() => setSelectedBatch(batch)}
                     className="cursor-pointer"
                   >
                     <TableCell>
@@ -572,7 +574,7 @@ export default function BatchListTab({
                         setDeletingId={setDeletingId}
                       />
                     </TableCell>
-                  </TableRow>
+                  </InteractiveTableRow>
                 );
               })
             )}

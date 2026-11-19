@@ -7,7 +7,7 @@
 import {
   fetchUntrustedRemoteImage,
   type RemoteImageFetchResult,
-} from "@/shared/network/remoteImageFetch";
+} from "../utils/remoteMediaFetch.ts";
 import { sanitizeErrorMessage } from "../utils/error.ts";
 import {
   ADOBE_FIREFLY_MAX_UPLOAD_BYTES,

@@ -11,16 +11,14 @@ type NamePosition = {
 type NameVisitor = (position: NamePosition) => JsonRecord;
 type AliasTarget = { identity: ToolIdentity; wireNames: Set<string>; hasIdentity: boolean };
 
-const COLLIDING_NAMES = new Set([
-  "read_file",
-  "write_file",
-  "edit_file",
-  "bash",
-  "web_search",
-  "tool_search",
-  "subagent_send_message",
-  "subagent_cancel",
-]);
+/**
+ * Every function name is aliased, not a list of known collisions. Muse refuses a request
+ * ("Muse Code subscriptions cover requests from the Muse Code client only") that declares a
+ * function under a name it keeps for its own client: its tool names (workflow, search,
+ * monitor, web_fetch, ...) and more (shell, apply_patch, update_plan). That set is the
+ * server's, it is not published, and it grows with Muse Code releases, so a hard-coded copy
+ * goes stale: it missed shell, OpenCode's shell tool.
+ */
 const MAX_NAME_LENGTH = 64;
 
 function isRecord(value: unknown): value is JsonRecord {
@@ -228,12 +226,11 @@ function addToSetMap(map: Map<string, Set<string>>, key: string, value: string):
   map.set(key, set);
 }
 
-function isReusableWire(prior: Ledgers, position: NamePosition, wire: string): boolean {
-  return (
-    !COLLIDING_NAMES.has(wire) &&
-    /^[A-Za-z0-9_-]{1,64}$/.test(wire) &&
-    (prior.aliases.has(wire) || previousIdentity(prior, position) !== undefined)
-  );
+/** Only this helper's own alias for the identity, never a client name or another layer's alias. */
+function isReusableWire(identity: ToolIdentity, wire: string): boolean {
+  if (wire === candidateName(identity, "")) return true;
+  const counter = /_([1-9][0-9]*)$/.exec(wire);
+  return counter !== null && wire === candidateName(identity, `_${counter[1]}`);
 }
 
 function indexDeclarations(prior: Ledgers, positions: NamePosition[]): DeclarationIndex {
@@ -248,7 +245,7 @@ function indexDeclarations(prior: Ledgers, positions: NamePosition[]): Declarati
     const wire = position.record.name as string;
     const key = identityKey(identity);
     addToSetMap(index.wireOwners, wire, key);
-    if (isReusableWire(prior, position, wire)) addToSetMap(index.reusable, key, wire);
+    if (isReusableWire(identity, wire)) addToSetMap(index.reusable, key, wire);
     // Also index client leaves: a still-ambiguous reference must stay ambiguous on redispatch.
     for (const name of new Set([wire, identity.name])) {
       const entries = index.declared.get(name) ?? new Map<string, ToolIdentity>();
@@ -289,7 +286,6 @@ function collectTargets(
   const targets = new Map<string, AliasTarget>();
   for (const position of positions) {
     const name = position.record.name as string;
-    if (!COLLIDING_NAMES.has(name)) continue;
     const identity = resolve(position);
     if (!identity) continue;
     const key = identityKey(identity);
@@ -362,16 +358,14 @@ function allocateAliases(
   return { aliases, identities, allocated };
 }
 
-function rewriteCollidingNames(
+function rewriteFunctionNames(
   body: JsonRecord,
   resolve: IdentityResolver,
   allocated: ReadonlyMap<string, string>
 ): JsonRecord {
   return visitRequest(body, (position) => {
     const name = position.record.name;
-    if (!position.isFunction || typeof name !== "string" || !COLLIDING_NAMES.has(name)) {
-      return position.record;
-    }
+    if (!position.isFunction || typeof name !== "string") return position.record;
     const identity = resolve(position);
     const alias = identity ? allocated.get(identityKey(identity)) : undefined;
     return alias ? { ...position.record, name: alias } : position.record;
@@ -394,8 +388,8 @@ function publishLedgers(
 }
 
 /**
- * Pure, inactive request helper for #18600. Alias only exact Muse-reserved FUNCTION names
- * on Responses declarations, additional_tools, function_call history, and function choices.
+ * Responses request helper for #18600. Alias every FUNCTION name on Responses declarations,
+ * additional_tools, function_call history, and function choices (see the note at the top).
  * Native namespace fields/containers stay native; flat tools never acquire a namespace.
  * Existing string aliases compose directly to client names; identities use a separate ledger.
  * Ambiguous bare references remain unchanged, rather than choosing the wrong namespace.
@@ -409,6 +403,6 @@ export function aliasMuseToolNames(body: unknown): unknown {
   const resolve: IdentityResolver = (position) => resolveIdentity(prior, index.declared, position);
   const targets = collectTargets(prior, positions, resolve);
   const { aliases, identities, allocated } = allocateAliases(prior, reserved, index, targets);
-  const rewritten = rewriteCollidingNames(body, resolve, allocated);
+  const rewritten = rewriteFunctionNames(body, resolve, allocated);
   return publishLedgers(body, rewritten, aliases, identities);
 }
