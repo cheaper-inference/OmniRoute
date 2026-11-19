@@ -237,6 +237,9 @@ export function createResponsesApiTransformStream(
     msgItemDone: {},
     reasoningId: "",
     reasoningIndex: -1,
+    // Every output_index a reasoning item has used. A reopened reasoning item must not take
+    // the index (and so the id) of an earlier one that is already done.
+    reasoningIndexes: new Set<number>(),
     reasoningBuf: "",
     reasoningPartAdded: false,
     reasoningDone: false,
@@ -340,6 +343,7 @@ export function createResponsesApiTransformStream(
       }
       state.reasoningId = `rs_${state.responseId}_${idx}`;
       state.reasoningIndex = idx;
+      state.reasoningIndexes.add(normalizeOutputIndex(idx));
 
       emit(controller, "response.output_item.added", {
         type: "response.output_item.added",
@@ -426,9 +430,7 @@ export function createResponsesApiTransformStream(
       Object.values(state.funcOutputIndex || {}).map((v) => normalizeOutputIndex(v))
     );
     const claimed = (i) =>
-      state.msgItemAdded[i] ||
-      allocatedToolIndexes.has(i) ||
-      (state.reasoningId && i === normalizeOutputIndex(state.reasoningIndex));
+      state.msgItemAdded[i] || allocatedToolIndexes.has(i) || state.reasoningIndexes.has(i);
     while (claimed(candidate)) candidate += 1;
     return candidate;
   };
@@ -748,10 +750,13 @@ export function createResponsesApiTransformStream(
             // Some upstreams put zeros (or {}) on every chunk. That is a placeholder: keep the
             // earlier value, or none, so the real trailing usage chunk is still awaited.
             const next = normalizeResponsesUsage(state.usage, parsed.usage);
-            if (
-              next &&
-              (usageNumber(next.input_tokens) ?? 0) + (usageNumber(next.output_tokens) ?? 0) > 0
-            ) {
+            // Judge the usage the client will see: cache writes kept out of input_tokens
+            // (cache_creation_in_prompt: false) are folded back in at the Responses boundary.
+            const visible = next ? normalizeResponsesContextUsage(next) : null;
+            const visibleTokens = visible
+              ? (usageNumber(visible.input_tokens) ?? 0) + (usageNumber(visible.output_tokens) ?? 0)
+              : 0;
+            if (visibleTokens > 0) {
               state.usage = next;
             }
           }

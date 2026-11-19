@@ -65,8 +65,24 @@ test("usage of zeros on every chunk does not freeze the final usage at zero", as
 
 test("an empty usage object does not become the response usage", async () => {
   const events = await run([textChunk(), finishChunk({ usage: {} }), "data: [DONE]\n\n"]);
-  const usage = completed(events)?.usage;
-  assert.ok(!usage || Object.keys(usage).length > 0, JSON.stringify(usage));
+  const response = completed(events);
+  assert.ok(response, "response.completed must be sent");
+  assert.equal(response.usage, undefined, JSON.stringify(response.usage));
+});
+
+test("usage made only of cache writes kept out of input_tokens is not a placeholder", async () => {
+  const events = await run([
+    textChunk(),
+    finishChunk({
+      usage: {
+        input_tokens: 0,
+        output_tokens: 0,
+        input_tokens_details: { cache_creation_tokens: 25, cache_creation_in_prompt: false },
+      },
+    }),
+    "data: [DONE]\n\n",
+  ]);
+  assert.equal(completed(events)?.usage?.input_tokens, 25);
 });
 
 test("a top-level upstream error becomes response.failed, not an empty completed", async () => {
@@ -94,12 +110,19 @@ test("[DONE] completes a response that waits for trailing usage, before the upst
   let text = "";
   const decoder = new TextDecoder();
   const deadline = Date.now() + 1500;
+  // One read stays pending across the 200 ms checks, so a chunk is never taken by a read
+  // whose result nobody awaits any more.
+  let pending: ReturnType<typeof reader.read> | null = null;
   while (Date.now() < deadline && !text.includes("response.completed")) {
+    pending ??= reader.read();
     const next = await Promise.race([
-      reader.read(),
+      pending,
       new Promise<null>((resolve) => setTimeout(() => resolve(null), 200)),
     ]);
-    if (next && !next.done) text += decoder.decode(next.value);
+    if (next === null) continue;
+    pending = null;
+    if (next.done) break;
+    text += decoder.decode(next.value);
   }
   release();
   await reader.cancel().catch(() => {});

@@ -99,3 +99,25 @@ test("continuous reasoning stays in one item", async () => {
   );
   assert.equal(items.length, 1);
 });
+
+test("a third reasoning item does not reuse the first one's output_index or id", async () => {
+  const list = events(
+    await run([
+      frame({ reasoning_content: "one" }),
+      frame({ content: "a" }),
+      frame({ reasoning_content: "two" }),
+      frame({ content: "b" }),
+      frame({ reasoning_content: "three" }),
+      frame({}, "stop"),
+      "data: [DONE]\n\n",
+    ])
+  );
+  const added = list.filter((e) => e.event === "response.output_item.added");
+  const indexes = added.map((e) => e.data.output_index);
+  assert.equal(new Set(indexes).size, indexes.length, `indexes ${JSON.stringify(indexes)}`);
+  const reasoningIds = added
+    .filter((e) => e.data.item?.type === "reasoning")
+    .map((e) => e.data.item?.id);
+  assert.equal(reasoningIds.length, 3);
+  assert.equal(new Set(reasoningIds).size, 3, `ids ${JSON.stringify(reasoningIds)}`);
+});
