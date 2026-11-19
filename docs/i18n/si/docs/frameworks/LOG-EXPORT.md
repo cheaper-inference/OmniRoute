@@ -196,141 +196,155 @@ UI පොදු ආකාරයෙන් ක්‍රියා කිරීම�
 
 ## 4. BigQuery ගමනාන්තය
 
-වින්‍යාස යතුරු (`type: "bigquery"`):
+වින්යාස යතුරු (`type: "bigquery"`):
 
-| යතුර                 | සටහන්                                                                           |
-| -------------------- | ------------------------------------------------------------------------------- |
-| `projectId`          | දත්ත කට්ටලය අඩංගු GCP ව්‍යාපෘතිය                                                |
-| `datasetId`          | `[A-Za-z0-9_]+`                                                                 |
-| `tableId`            | `[A-Za-z0-9_]+`                                                                 |
-| `location`           | දත්ත කට්ටලය සෑදිය යුතු විට පමණක් භාවිත වේ (පෙරනිමිය `EU`)                       |
-| `serviceAccountJson` | සේවා ගිණුම් යතුර. රහසකි: ගබඩා කර ඇති විට සංකේතනය කර ඇත, කිසිවිටෙක ආපසු ලබා නොදේ |
-| `autoCreate`         | පළමු නිර්යාතයේදී දත්ත කට්ටලය සහ වගුව සාදන්න (පෙරනිමිය `true`)                   |
+| යතුර                 | සටහන්                                                                                                         |
+| -------------------- | ------------------------------------------------------------------------------------------------------------- |
+| `projectId`          | දත්ත කට්ටලය අඩංගු GCP ව්යාපෘතිය                                                                               |
+| `datasetId`          | `[A-Za-z0-9_]+`                                                                                               |
+| `tableId`            | `[A-Za-z0-9_]+`                                                                                               |
+| `location`           | දත්ත කට්ටලය නිර්මාණය කළ යුතු විට පමණක් භාවිත වේ (පෙරනිමිය `EU`)                                               |
+| `serviceAccountJson` | සේවා ගිණුම් යතුර. රහසකි: ගබඩා කර ඇති විට සංකේතනය කර ඇත, කිසිවිටෙක ආපසු ලබා නොදේ                               |
+| `autoCreate`         | නැති දත්ත කට්ටලය/වගුව නිර්මාණය කරන්න; nullable usage-evidence තීරු කොන්දේසි සහිතව එක් කරන්න (පෙරනිමිය `true`) |
 
-සේවා ගිණුමට ඉලක්ක වගුව සඳහා `bigquery.tables.updateData` අවශ්‍ය වන අතර,
-`autoCreate` සක්‍රිය විට `bigquery.datasets.create` / `bigquery.tables.create` ද අවශ්‍ය වේ.
+සේවා ගිණුමට ඉලක්ක වගුව මත `bigquery.tables.updateData` අවසරය අවශ්ය වන අතර,
+`autoCreate` සක්රිය විට `bigquery.datasets.create` / `bigquery.tables.create` අවසරද අවශ්ය වේ.
+පවතින වගුවකට nullable usage-evidence ක්ෂේත්ර දෙක එක් කිරීමට
+`bigquery.tables.update` අවසරයද අවශ්ය වේ. අවශ්ය අවසරයක් නොමැති නම්, එහි cursor එක ඉදිරියට
+ගෙන නොයවා export එක අසාර්ථක වේ.
 
-වින්‍යාස කළ කාණ්ඩයක් යනු **කර්සර** ඒකකයක් මිස HTTP ඒකකයක් නොවේ: `send()` එය උපරිම පේළි 500 බැගින් වූ insertAll
-ඇමතුම්වලට බෙදයි. එබැවින් විශාල `batch_size` අගයකට BigQuery හි 10 MB ඉල්ලීම් සීමාව ඉක්මවිය නොහැක.
-තාවකාලික තත්ත්ව කේත (408/429/500/502/503/504) සඳහා එකම insertIds නැවත භාවිත කරමින්, ඝාතීය ලෙස වැඩි වන
-පොරොත්තු කාලයක් සහිතව තුන් වරක් දක්වා නැවත උත්සාහ කරයි; සත්‍යාපන සහ ස්කීමා අසාර්ථකතා ධාවනය අපතේ යැවීම වෙනුවට
-පළමු උත්සාහයේදීම ව්‍යතිරේකයක් ජනනය කරයි.
+වින්යාස කළ batch එකක් HTTP එකක් නොව **cursor** ඒකකයකි: `send()` එය උපරිම පේළි 500ක් සහිත
+insertAll ඇමතුම්වලට කොටස් කරයි. එබැවින් විශාල `batch_size` එකකට BigQuery හි 10 MB ඉල්ලීම්
+සීමාව ඉක්මවිය නොහැක. තාවකාලික තත්ත්වයන් (408/429/500/502/503/504) exponential
+backoff සමඟ උපරිම තුන් වරක් නැවත උත්සාහ කරයි; සෑම අවස්ථාවකම එකම insertIds නැවත භාවිත කරයි.
+සත්යාපන සහ schema අසාර්ථකතා පළමු උත්සාහයේදීම දෝෂයක් ඇති කරයි; එමඟින් run එක අනවශ්ය ලෙස
+වැය නොවේ.
 
-මොහොතකට පෙර සෑදූ වගුවක් ප්‍රවාහ අන්ත ලක්ෂ්‍යයට තවමත් නොපෙනෙන අතර, එය තත්පර
-කිහිපයක් සඳහා 404 ප්‍රතිචාරය ලබා දෙයි. එම 404 සඳහා නැවත උත්සාහ කරන්නේ **මෙම ධාවනයේදී වගුව සෑදූ විට පමණි** —
-සැබැවින්ම නොපවතින වගුවක් තවමත් වහාම අසාර්ථක වේ. මෑතකදී මකා දැමූ නමක් යටතේ
-වගුවක් නැවත සෑදීමෙන් BigQuery මිනිත්තු කිහිපයක් සඳහා ප්‍රවාහ ඇතුළත් කිරීම් ප්‍රතික්ෂේප කරන බව සලකන්න; එය
-මකා දමා නැවත සෑදීමේ ස්වභාවයකි. එබැවින් වගුවක් ඉවත් කර නැවත එක් කරනවාට වඩා නව වගු නමක් භාවිත කරන්න.
+මොහොතකට පෙර නිර්මාණය කළ වගුවක් streaming endpoint එකට තවමත් නොපෙනෙන බැවින්, එය
+තත්පර කිහිපයක් සඳහා 404 ප්රතිචාරයක් ලබා දිය හැක. එම 404 නැවත උත්සාහ කරනු ලබන්නේ
+**මෙම run එක වගුව නිර්මාණය කළ විට පමණි** — සැබවින්ම නැති වගුවක් ඉක්මනින්ම අසාර්ථක වේ.
+මෑතකදී මකා දැමූ වගුවක් එම නාමය යටතේ නැවත නිර්මාණය කළ විට, BigQuery streaming inserts
+මිනිත්තු කිහිපයක් ප්රතික්ෂේප කරන බව සලකන්න; මෙය delete-then-recreate ක්රියාවලියේ
+ගුණාංගයකි. එබැවින් වගුවක් ඉවත් කර නැවත එක් කිරීම වෙනුවට නව වගු නාමයක් භාවිත කිරීම වඩාත් සුදුසුය.
 
-**අර්ධ අසාර්ථකතාවක් හිස් නොවන `insertErrors[]` සමඟ HTTP 200 ලෙස ලැබේ.** එය
-අසාර්ථකතාවක් ලෙස සලකා ව්‍යතිරේකයක් ජනනය කරයි. BigQuery කිසිවිටෙක පිළි නොගත් පේළි පසුකර කර්සරය
-ඉදිරියට යාම වළක්වන්නේ මෙයයි; `tests/unit/log-export-bigquery.test.ts` මෙම හැසිරීම තහවුරු කරයි.
+**අර්ධ අසාර්ථකත්වයක් පැමිණෙන්නේ හිස් නොවන `insertErrors[]` සහිත HTTP 200 ලෙසය.** එය
+අසාර්ථකත්වයක් ලෙස සලකා දෝෂයක් ඇති කරයි. එමඟින් BigQuery පිළි නොගත් පේළි පසුකර cursor එක
+ඉදිරියට යාම නතර කරයි; `tests/unit/log-export-bigquery.test.ts` මෙම හැසිරීම තහවුරු කරයි.
 
-ප්‍රවාහනය සාමාන්‍ය REST හරහා සිදු වේ — ස්වයං-අත්සන් කළ RS256 ප්‍රකාශනයක්
-`https://oauth2.googleapis.com/token` හිදී ප්‍රවේශ ටෝකනයක් සඳහා හුවමාරු කර, ඉන්පසු පේළි `tabledata.insertAll` වෙත යවයි. Google SDK එකක්
-ඇතුළත් නොකෙරේ. එක් එක් (සේවා ගිණුම, විෂය පථය) යුගලය සඳහා ප්‍රවේශ ටෝකන ක්‍රියාවලිය තුළ හැඹිලිගත කෙරේ.
+ප්රවාහනය සාමාන්ය REST වේ — ස්වයං-අත්සන් කළ RS256 assertion එකක්
+`https://oauth2.googleapis.com/token` වෙත යවා access token එකක් ලබා ගනී, ඉන්පසු පේළි
+`tabledata.insertAll` වෙත යවයි. Google SDK එකක් ඇතුළත් නොවේ. Access token සේවා ගිණුම සහ
+scope අනුව ක්රියාවලි මතකයේ cache කරනු ලබයි.
 
-සාදන ලද වගුවේ Logs පටිත්තේ එක් එක් ක්ෂේත්‍රය සඳහා තීරුවක් සහ `exported_at` අඩංගු වන අතර, එය
-ඇමතුම් ලොග සැබැවින්ම විමසන ආකාරයට සැකසී ඇත:
+නිර්මාණය කළ වගුවේ Logs ටැබයේ එක් එක් ක්ෂේත්රයට එක් තීරුවක් සහ `exported_at` අඩංගු වන අතර,
+ඇමතුම් ලොග් සැබෑවටම විමසන ආකාරයට එය සැකසී ඇත:
 
-- **`timestamp` මත දින අනුව කොටස් කර ඇත**, එබැවින් දින පරාසයකට සීමා කළ විමසුමක් ස්කෑන් කරන්නේ එම දින පමණි.
-- **`api_key_name`, `provider`, `model`, `status` අනුව පොකුරු කර ඇත** (එම අනුපිළිවෙළට), එබැවින්
-  එය ධාවනය කළේ කවුද, එය ගියේ කොතැනටද, හෝ එය අසාර්ථක වූයේද යන්න අනුව පෙරීමෙන් එක් එක් කොටස තුළ ඇති බ්ලොක් බැහැර කරයි. BigQuery
-  උපරිම පොකුරුකරණ තීරු හතරකට ඉඩ දෙන අතර අනුපිළිවෙළ වැදගත් වේ: `api_key_name` පමණක් මත පදනම් වූ පෙරහනක්
-  බ්ලොක් බැහැර කරයි, `status` පමණක් මත පදනම් වූ පෙරහනක් එසේ නොකරයි.
-- `partitionExpirationDays` හරහා **විකල්ප කොටස් රඳවාගැනීම** (0 සියල්ල තබා ගනී), වගුව
-  සාදන විට යෙදේ.
+- **`timestamp` මත දින-කොටස්ගත කර ඇත**, එබැවින් දිනය අනුව සීමා කළ විමසුමක් එම දින පමණක් පරිලෝකනය කරයි.
+- **`api_key_name`, `provider`, `model`, `status` අනුව cluster කර ඇත** (එම අනුපිළිවෙළින්),
+  එබැවින් එය ක්රියාත්මක කළේ කවුරුන්ද, එය යොමු වූයේ කොතැනටද, නැතහොත් එය අසාර්ථක වූවාද
+  යන්න අනුව පෙරහන් කිරීමෙන් එක් එක් partition එක තුළ ඇති blocks ඉවත් කළ හැක. BigQuery
+  clustering තීරු උපරිම හතරකට ඉඩ දෙන අතර අනුපිළිවෙළ වැදගත් වේ:
+  `api_key_name` පමණක් මත ඇති පෙරහනක් blocks ඉවත් කරයි, නමුත් `status` පමණක් මත ඇති
+  පෙරහනක් එසේ නොකරයි.
+- **`partitionExpirationDays` හරහා විකල්ප partition retention** (`0` මඟින් සියල්ල තබා ගනී),
+  වගුව නිර්මාණය කරන විට යෙදේ.
 
-සැකසුම් දෙකම සෑදීමේදී යෙදේ. පවතින වගුවක් එහි දැනට ඇති සැකැස්මම තබා ගනී. එබැවින්
-ඒවා භාවිත කිරීමට අවශ්‍ය නම් ගමනාන්තය නව වගු හැඳුනුම්පතකට යොමු කරන්න.
+සැකසුම් දෙකම නිර්මාණය කරන අවස්ථාවේදී යෙදේ. පවතින වගුවක් දැනටමත් ඇති layout එකම
+තබා ගනී. එබැවින් ඒවා භාවිත කිරීමට අවශ්ය නම් ගමනාන්තය නව table id එකකට යොමු කරන්න.
 
-`tests/unit/log-export-bigquery.test.ts` මඟින් සිතියම්කාරකය සහ වගු ස්කීමාව එකිනෙකට අනුකූලව පවතින බව තහවුරු කරයි.
-එබැවින් නිර්යාතයේදී නව ඇමතුම්-ලොග තීරුවක් නිහඬව අත්හැර දැමිය නොහැක.
+`tests/unit/log-export-bigquery.test.ts` mapper එක සහ වගු schema එක එකිනෙකට අනුකූලව පවතින
+බව තහවුරු කරයි. එබැවින් නව call-log තීරුවක් පිටතට යන අතරතුර නිහඬව ඉවත් විය නොහැක.
 
-කාණ්ඩ කොටස්වලට බෙදන්නේ පේළි ගණන සහ අනුක්‍රමිකකරණය කළ බයිට් ගණන **යන දෙකම** අනුවය. දත්ත අන්තර්ගත නිර්යාත කරන විට
-පේළි ගණන පමණක් ප්‍රමාණවත් නොවේ: ප්‍රොම්ප්ට් අඩංගු පේළි 500ක් මෙගාබයිට් දස ගණනක් විය හැකි අතර, insertAll
-10 MB ඉක්මවන ඉල්ලීමක් ප්‍රතික්ෂේප කරයි. පේළි 500 හෝ 9 MB යන සීමාවලින් පළමුව ළඟා වන සීමාවේදී කොටස අවසන් වේ.
+Batches **පේළි ගණන සහ serialised bytes යන දෙකම අනුව** කොටස් කරනු ලැබේ. payloads export කළ
+පසු පේළි ගණන පමණක් ප්රමාණවත් නොවේ: prompts අඩංගු පේළි 500ක් දස දහස් MB ගණනක් විය
+හැකි අතර, 10 MB ඉක්මවන ඉල්ලීමක් insertAll ප්රතික්ෂේප කරයි. කොටස් පේළි 500කදී හෝ 9 MBදී,
+ඒ දෙකෙන් පළමුව පැමිණෙන අවස්ථාවේදී අවසන් වේ.
 
 ---
 
 ## 5. OTLP/HTTP traces ගමනාන්තය
 
-වින්‍යාසය `type: "otlp-http"` භාවිත කරයි. මෙය ස්ථිරව ගබඩා කළ ඇමතුම් ලොග්වල උපලේඛනගත, කර්සරයක් මත පදනම් වූ නිර්යාතයක් වන අතර,
-`open-sse/services/routing/otel.ts` හි ඇති හැකි උපරිම උත්සාහයෙන් ක්‍රියා කරන සජීවී රවුටින්-සිදුවීම් ග්‍රාහකය නොවේ.
-එය එම ග්‍රාහකයේ පරිසර විචල්‍ය, කාලමාපක හෝ බෆර කියවන්නේ හෝ වෙනස් කරන්නේ නැත. දෙකම සක්‍රිය කිරීමෙන් ස්වාධීන span වර්ග දෙකක් සෑදිය හැකිය;
-මෙම ඇමතුම්-ලොග් span වෙන්කර හඳුනාගැනීමට `omniroute.log-export` උපකරණකරණ විෂය පථය භාවිත කරන්න.
+Config uses `type: "otlp-http"`. මෙය
+`open-sse/services/routing/otel.ts` හි ඇති best-effort live routing-event sink එක නොව, ස්ථිර කර ඇති
+call logs සඳහා cursor-backed ලෙස නියමිත වේලාවට සිදු කරන export එකකි. එය එම sink හි environment
+variables, timers හෝ buffers කියවන්නේවත් වෙනස් කරන්නේවත් නැත. දෙකම සක්රීය කිරීමෙන් ස්වාධීන span
+වර්ග දෙකක් නිපදවිය හැක; මෙම call-log spans හඳුනා ගැනීමට `omniroute.log-export` instrumentation scope එක භාවිත කරන්න.
 
-| යතුර                     | පෙරනිමිය / අරමුණ                                                            |
-| ------------------------ | --------------------------------------------------------------------------- |
-| `endpoint`               | සම්පූර්ණ HTTP(S) traces URL එක අවශ්‍යය; `/v1/traces` ප්‍රත්‍යයක් එක් නොකෙරේ |
-| `headers`                | විකල්ප `Name: value` පේළි හෝ තන්තු අඩංගු JSON වස්තුවක්; සංකේතනය කෙරේ        |
-| `requestHeaderAllowlist` | හිස් (අක්‍රියයි); span ගුණාංග ලෙස ග්‍රහණය කළ යුතු සේවාලාභී ශීර්ෂ නාම/උපසර්ග |
-| `serviceName`            | `omniroute`; සම්පත් ගුණාංගය `service.name`                                  |
-| `langfuseMapping`        | `false`; Langfuse ජනන/සැසි/පරිශීලක ගුණාංග එක් කරයි                          |
-| `identity`               | `pseudonymous`, `keyName`, හෝ `none`                                        |
-| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                     |
-| `timeoutMs`              | එක් HTTP උත්සාහයකට `30000`                                                  |
-| `environment`            | සකසා නැත; විකල්ප `langfuse.environment`                                     |
+| Key                      | Default / purpose                                                            |
+| ------------------------ | ---------------------------------------------------------------------------- |
+| `endpoint`               | අවශ්ය සම්පූර්ණ HTTP(S) traces URL එක; `/v1/traces` suffix එකක් එකතු නොකෙරේ   |
+| `headers`                | විකල්ප `Name: value` පේළි හෝ strings සහිත JSON object එකක්; සංකේතනය කර ඇත    |
+| `requestHeaderAllowlist` | Empty (off); span attributes ලෙස capture කිරීමට client header names/prefixes |
+| `serviceName`            | `omniroute`; resource `service.name`                                         |
+| `langfuseMapping`        | `false`; Langfuse generation/session/user attributes එක් කරයි                |
+| `identity`               | `pseudonymous`, `keyName`, හෝ `none`                                         |
+| `paths`                  | `/v1/chat/completions`, `/v1/responses`, `/v1/messages`                      |
+| `timeoutMs`              | එක් HTTP උත්සාහයක් සඳහා `30000`                                              |
+| `environment`            | සකසා නැත; විකල්ප `langfuse.environment`                                      |
 
-සාමාන්‍ය උපකරණ පුවරුව මෙම ක්ෂේත්‍ර පෙන්වයි. `paths` සඳහා API අරාවක් හෝ නව පේළි/කොමා මඟින්
-වෙන් කළ නිශ්චිත මාර්ග අඩංගු පෙළ ප්‍රදේශයක් පිළිගනී. පැහැදිලිව අවසර දී නොමැති නම් embeddings, rerank සහ අනෙකුත් මාර්ග
-මඟ හරිනු ලැබේ. මඟහැරුණු පේළි ද කර්සරය ඉදිරියට ගෙන යයි; දැනට පවතින
-ධාවකයේ `exported`/`exportedTotal` ගණක ගණන් කරන්නේ පිළිගත් span වෙනුවට, පෙරහන් කළ
-පේළි ද ඇතුළුව සැකසූ මූලාශ්‍ර පේළිය. පෙරහන සිදු වන්නේ අනුක්‍රියාවලිය තුළ වන අතර, එහි
-IPC/කර්සර ගිවිසුම වෙනස් නොකෙරේ.
+සාමාන්ය dashboard එක මෙම fields render කරයි. `paths` සඳහා API array එකක් හෝ
+newline/commas මඟින් වෙන් කළ exact paths සහිත textarea එකක් පිළිගනී. Embeddings, rerank සහ
+වෙනත් paths, පැහැදිලිව අවසර දී නොමැති නම්, මඟ හරිනු ලැබේ. මඟ හරින ලද rows තවමත් cursor එක
+ඉදිරියට ගෙන යයි; පවතින runner හි `exported`/`exportedTotal` counters පිළිගත් spans
+වෙනුවට, filtered rows ඇතුළුව සැකසූ source rows ගණනය කරයි. Filtering සිදු කරන්නේ child තුළ වන
+අතර එහි IPC/cursor contract එක වෙනස් නොකරයි.
 
-URL වලංගුකරණය සඳහා
-`src/shared/network/outboundUrlGuard.ts` හි ඇති, DB අවශ්‍ය නොවන `parseAndValidateNonMetadataUrl` සහායකය භාවිත කරයි: එනම් `block-metadata` ප්‍රතිපත්තියයි. පුද්ගලික URL සඳහා අවසර දී ඇති webhook වලංගුකාරකයේ මෙන්ම
-කොන්දේසි විරහිත පාරදත්ත/ප්‍රොටෝකෝල/කාවැද්දූ අක්තපත්‍ර පරීක්ෂා මෙහිද ඇත,
-නමුත් ගෝලීය විශේෂාංග ධජ අභිබවා යාමකින් තොරව localhost/LAN ඉලක්ක සඳහා හිතාමතාම අවසර දෙයි.
-මෙමඟින් පුද්ගලික HTTP අන්ත ලක්ෂ්‍ය ද ඇතුළුව ස්වයං-සත්කාරක Langfuse, Phoenix, Tempo සහ Collector
-අන්ත ලක්ෂ්‍ය භාවිත කළ හැකිය. වලාකුළු පාරදත්ත ධාරක සෑම විටම අවහිර කෙරේ.
-යළි-යොමු අනුගමනය නොකරන බැවින්, collector එකකට අක්තපත්‍ර වෙනත් ධාරකයකට යළි යොමු කළ නොහැක.
-දැනට පවතින පදමය URL ආරක්ෂකය මෙන්, මෙය DNS විසඳුම ස්ථිර නොකරයි; ක්‍රියාකරු පාලනය කරන
-ධාරක පමණක් වින්‍යාස කරන්න. අන්ත ලක්ෂ්‍යය විශ්වාසදායී ජාලයක නොමැති විට සෑමවිටම HTTPS තෝරාගන්න.
+URL validation සඳහා DB-free `parseAndValidateNonMetadataUrl` helper එක
+`src/shared/network/outboundUrlGuard.ts` වෙතින් භාවිත කරයි: `block-metadata` policy එක.
+private URLs සඳහා අවසර දී ඇති නමුත්, webhook validator එකේ ඇති unconditional
+metadata/protocol/embedded-credential checks ම එහි ඇත; එහෙත් global feature-flag override එකක්
+නොමැතිව localhost/LAN targets සඳහා හිතාමතාම අවසර දෙයි. එමඟින් private HTTP endpoints ඇතුළුව
+self-hosted Langfuse, Phoenix, Tempo සහ Collector endpoints භාවිත කළ හැක. Cloud-metadata hosts
+සෑම විටම අවහිර කරනු ලැබේ. Redirects අනුගමනය නොකරන බැවින්, collector එකකට credentials වෙනත්
+host එකකට redirect කළ නොහැක. දැනට පවතින lexical URL guard එක මෙන්ම, මෙය DNS resolution pin
+නොකරයි; operator විසින් පාලනය කරන hosts පමණක් configure කරන්න. Endpoint එක විශ්වාසදායක
+network එකක නොමැති විට HTTPS භාවිත කිරීම වඩාත් සුදුසුය.
 
-### දත්ත අන්තර්ගතය සහ බෙදාහැරීම
+### Payload සහ delivery
 
-OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) අවසර ලත්
-එක් පේළියකට එක් CLIENT span එකක් බැගින් ගෙන යන අතර, එය එහි නිශ්චිත ඉල්ලීම් මාර්ගයෙන් නම් කෙරේ. මාර්ගය අනුව නම් කිරීමෙන්
-span නාමය තුළ ආකෘති හෝ අනන්‍යතා දත්ත කාවැද්දීමකින් තොරව Chat Completions, Responses සහ Messages වෙන්කර හඳුනාගත හැකිය.
-සම්පත් ගුණාංගවලට `service.name` සහ පැකේජයේ `service.version` ඇතුළත් වේ.
+OTLP/HTTP JSON (`ExportTraceServiceRequest`, `Content-Type: application/json`) මඟින් අවසර ලත්
+සෑම row එකක් සඳහාම එක් CLIENT span එකක් යවයි; එය එහි exact request path අනුව නම් කරනු ලැබේ.
+Path naming මඟින් span name තුළ model හෝ identity data ඇතුළත් නොකර Chat Completions,
+Responses සහ Messages වෙන්කර හඳුනාගත හැක. Resource attributes වල `service.name` සහ package හි
+`service.version` ඇතුළත් වේ.
 
-සාමාන්‍ය chat උත්සාහ ලොග් සටහන්කරු (`open-sse/handlers/chatCore/attemptLogging.ts`) සම්පූර්ණ වූ විට
-`duration = Date.now() - startTime` ලියන අතර කාලමුද්‍රාවක් සපයන්නේ නැත;
-`src/lib/usage/callLogs.ts` හි `saveCallLogOperation` කාලමුද්‍රාවේ පෙරනිමිය ලෙස ලිවීමේ
-(සම්පූර්ණ වීමේ) වේලාව යොදාගනී. එබැවින් නිර්යාතය අවසානය = පේළියේ කාලමුද්‍රාව සහ ආරම්භය = අවසානය − කාලසීමාව
-ලෙස සකසයි (මිලිතත්පර, දශම නැනෝතත්පර බවට පරිවර්තනය කෙරේ). අමතන්නා සපයන ඓතිහාසික කාලමුද්‍රා
-ද අවසාන වේලාව ලෙස සංරක්ෂණය කෙරේ; එක් එක් පේළිය සඳහා ආරම්භය/සම්පූර්ණ වීම වෙන්කර හඳුනාගන්නා සලකුණක් නොමැත.
-null කාලසීමාවක් ශුන්‍ය බවට පත්වේ. අවලංගු/නොමැති කාලමුද්‍රා හේතුවෙන්
-නිශ්චිත නොවන span සෑදීම වෙනුවට කාණ්ඩය අසාර්ථක වේ. `ttftMs` null විය හැකි අතර එය `omniroute.ttft_ms` වෙත අනුරූපණය වේ.
+සාමාන්ය chat attempt logger (`open-sse/handlers/chatCore/attemptLogging.ts`) completion අවස්ථාවේ
+`duration = Date.now() - startTime` ලියන අතර timestamp එකක් සපයන්නේ නැත;
+`src/lib/usage/callLogs.ts` හි `saveCallLogOperation` timestamp එක write
+(completion) time වෙත default කරයි. එබැවින් export එක end = row timestamp ලෙසත් start = end − duration
+(milliseconds, decimal nanoseconds බවට පරිවර්තනය කර) ලෙසත් සකසයි. Caller විසින් සපයන ලද
+historical timestamps ද end time ලෙසම සුරැකේ; එක් එක් row සඳහා start/completion discriminator
+නොමැත. Null duration එක zero බවට පත්වේ. Invalid/missing timestamps නිර්ණය කළ නොහැකි spans
+නිර්මාණය කරනවා වෙනුවට batch එක අසාර්ථක කරයි. `ttftMs` nullable වන අතර
+`omniroute.ttft_ms` වෙත map කරයි.
 
-ගුණාංගවලට `gen_ai.operation.name="chat"`, සැපයුම්කරු, ඉල්ලූ/ප්‍රතිචාර ආකෘතිය,
-ආදාන/ප්‍රතිදාන ටෝකන, විකල්ප cache-read/cache-creation/reasoning ටෝකන, HTTP තත්ත්වය,
-combo, හැඹිලි මූලාශ්‍රය, සැසි ටැගය සහ සහසම්බන්ධතා හැඳුනුම්පත ඇතුළත් වේ. පූර්ණ සංඛ්‍යා OTLP අගයන් සහ කාලමුද්‍රා
-දශම තන්තු වේ; තන්තු, බූලීය අගයන් සහ භාගික සංඛ්‍යා ඒවායේ ස්වදේශීය OTLP අගය
-ප්‍රභේද භාවිත කරයි. දෝෂ span වලට ERROR තත්ත්වය සහ සංවේදී දත්ත ඉවත් කළ තත්ත්ව පණිවිඩයක් ඇත. ප්‍රමිත වාර්තාවේ
-උඩුගං ධාරක URL එකක් නොමැති බැවින්, collector එක ආකෘති සේවාදායකය ලෙස වැරදියට
-හඳුනාගැනීම වෙනුවට `server.address` අතහැර දමනු ලැබේ. පිරිවැය නිර්යාත නොකෙරේ.
+Attributes වල `gen_ai.operation.name="chat"`, provider, requested/response model,
+input/output tokens, optional cache-read/cache-creation/reasoning tokens, HTTP status,
+combo, cache source, session tag සහ correlation id ඇතුළත් වේ. Integer OTLP values සහ timestamps
+decimal strings වේ; strings, booleans සහ fractional numbers ඒවායේ native OTLP value
+variants භාවිත කරයි. Error spans හට ERROR status එකක් සහ sanitized status message එකක් ඇත.
+Canonical record එකේ upstream host URL එකක් නොමැති බැවින්, collector එක model server ලෙස වැරදිව
+හඳුනා නොගැනීමට `server.address` ඉවත් කර ඇත. Cost export නොකරයි.
 
-අන්තර්ගතය පූරණය කරන්නේ `includeBodies=true` පමණි. `langfuseMapping=false` විට,
-`gen_ai.input.messages` / `gen_ai.output.messages` මඟින් OmniRoute විසින් ගබඩා කර ඇති පරිදි සංවේදී දත්ත ඉවත් කළ ඉල්ලීම්/ප්‍රතිචාර
-දේහ JSON ගෙන යයි (විග්‍රහ කළ හැකි විට ප්‍රමිත ආකෘතියට පත් කරයි), නැවත හැඩගැස්වූ semconv
-පණිවිඩ අරාවක් නොවේ. කපා හැරුණු/JSON නොවන දේහ අමු පෙළ ලෙසම පවතී. `langfuseMapping=true` විට,
-දේහ නිකුත් කරන්නේ `langfuse.observation.input` / `langfuse.observation.output` ලෙස පමණි;
-එක් එක් දේහය එක් වරක් පමණක් යැවෙන පරිදි `gen_ai.*.messages` ගුණාංග අතහැර දමනු ලැබේ. ක්‍රම දෙකටම
-දැනට පවතින අන්තර්ගත පූරණ මාර්ගයෙන් `maxBodyBytes` උරුම වේ;
-`omniroute.bodies_truncated=true` මඟින් කපා හැරීම සලකුණු කරයි.
-මෙම ගමනාන්තය අමතර නලමාර්ග සැණරූ හෝ සංවේදී දත්ත ඉවත් නොකළ දත්ත ගොනු කියවීම් එක් නොකරයි;
-විකල්ප ඉල්ලීම්-ශීර්ෂ ග්‍රහණය පහත විස්තර කර ඇති දැනට පවතින පූරණය කළ සේවාලාභී සැණරුව භාවිත කරයි.
-දේහ නිර්යාත කරන විට, පැයක පසුබැසීමක් එකතු වීමට ඉඩ දෙනවා වෙනුවට
-`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` වැනි මිනිත්තු මට්ටමේ කාල පරතරයක් භාවිත කරන්න.
+`includeBodies=true` වූ විට පමණක් content hydrate කරයි. `langfuseMapping=false` සමඟ,
+`gen_ai.input.messages` / `gen_ai.output.messages` මඟින් OmniRoute විසින් ගබඩා කළ sanitized
+request/response body JSON (parse කළ හැකි විට canonicalized) රැගෙන යයි; එය නැවත හැඩගැස්වූ
+semconv messages array එකක් නොවේ. Clipped/non-JSON bodies raw text ලෙස පවතී.
+`langfuseMapping=true` සමඟ, bodies යවනු ලබන්නේ `langfuse.observation.input` /
+`langfuse.observation.output` ලෙස පමණි; සෑම body එකක්ම එක් වරක් පමණක් යැවෙන පරිදි
+`gen_ai.*.messages` attributes ඉවත් කරයි. Modes දෙකම පවතින hydration path එකෙන්
+`maxBodyBytes` උරුම කරගනී;
+`omniroute.bodies_truncated=true` මඟින් clipping සලකුණු කරයි.
+මෙම destination මඟින් අමතර pipeline snapshots හෝ unsanitized artifact reads එකතු නොකරයි;
+විකල්ප request-header capture එක පහත විස්තර කර ඇති පවතින hydrated client snapshot භාවිත කරයි.
+Bodies export කරන විට hourly backlog එකක් එකතු කරගැනීම වෙනුවට
+`OMNIROUTE_LOG_EXPORT_CRON="*/5 * * * *"` වැනි minute-level cadence එකක් භාවිත කරන්න.
 
-### විකල්ප සේවාලාභී ඉල්ලීම් ශීර්ෂ
+### විකල්ප client request headers
 
-ශීර්ෂ ග්‍රහණය **පෙරනිමියෙන් අක්‍රියයි**. ගමනාන්ත වින්‍යාසයේ `requestHeaderAllowlist` සකසා
-**ප්‍රේරක සහ ප්‍රතිචාර නිර්යාත කරන්න** සක්‍රිය කරන්න (ගමනාන්තයේ `includeBodies: true`).
-අවසර ලැයිස්තුව API අරාවක් හෝ නව පේළි/කොමා මඟින් වෙන් කළ නාම අඩංගු පෙළ ප්‍රදේශයක් පිළිගනී:
+Header capture **පෙරනිමියෙන් අක්රීයයි**. Destination config තුළ `requestHeaderAllowlist` සකසා,
+**Export prompts and responses** සක්රීය කරන්න (destination එකේ `includeBodies: true`).
+Allowlist එක API array එකක් හෝ newline/comma-separated names සහිත textarea එකක් පිළිගනී:
 
 ```json
 {
@@ -338,77 +352,74 @@ combo, හැඹිලි මූලාශ්‍රය, සැසි ටැගය
 }
 ```
 
-අවසානයේ ඇති තනි `*` මඟින් හිස් නොවන ශීර්ෂ-නාම උපසර්ගයක් තෝරා නොගන්නේ නම්, නම් විශාල/කුඩා අකුරු වෙනස නොසලකා හරියටම ගැළපේ.
-තනි `*`, මැදට ඇතුළත් කළ වයිල්ඩ්කාඩ් සහ වලංගු නොවන HTTP ශීර්ෂ නම් ප්‍රතික්ෂේප කෙරේ.
-තේරීම්කාරක උපරිම 64ක් තිබිය හැකි අතර, එක් එක් නම/උපසර්ගය උපරිම ASCII බයිට 256ක් විය හැක.
-මෙම සැකසුම, අපනයනකරු එකතුකරන්නා වෙත සත්‍යාපනය කරන `headers` වෙතින් වෙන් වූවකි.
+නාම case-insensitive ලෙස සහ හරියටම ගැළපේ, අවසන් `*` එකක් nonempty
+header-name prefix එකක් තෝරාගන්නේ නම් හැර. හිස් `*`, embedded wildcards සහ අවලංගු HTTP header නාම ප්රතික්ෂේප කෙරේ.
+Selectors උපරිම 64ක් තිබිය හැකි අතර, එක් එක් selector එකේ නාමය/prefix එක ASCII bytes 256කට සීමා වේ.
+මෙම setting එක `headers` වෙතින් වෙන්ව පවතින අතර, `headers` මඟින් exporter එක collector වෙත authenticate කරයි.
 
-ග්‍රහණය කියවන්නේ සුරැකි සවිස්තරාත්මක පයිප්ලයිනයේ
-`clientRawRequest` (හෝ පැරණි `clientRequest`) වෙතින් පුරවන ලද `pipeline_client_request` පමණි. එය කිසිවිටෙක සැපයුම්කරුගේ ඉල්ලීම් ශීර්ෂ වෙත ආපසු යොමු නොවේ.
-ඉල්ලීම සටහන් කළ අවස්ථාවේ සවිස්තරාත්මක පයිප්ලයින් ලොග්කරණය සක්‍රියව තිබිය යුතුය.
-`includeBodies` අක්‍රිය කර ඇත්නම්, හෝ සේවාදායක ස්නැප්ෂොට් JSON අස්ථානගත වී, දූෂිත වී හෝ කප්පාදු වී ඇත්නම්, කිසිදු ශීර්ෂ
-ගුණාංගයක් නිකුත් නොකෙරේ. `maxBodyBytes` වැඩි කිරීමෙන් අපනයන අවස්ථාවේ ස්නැප්ෂොට් කප්පාදු වීම වළක්වාගත හැක;
-එහෙත් කිසිදා සුරැකී නැති විස්තර යළි ලබාගත නොහැක. 1 MiB ඉක්මවන හෝ
-ශීර්ෂ ඇතුළත් කිරීම් 256කට වඩා අඩංගු ස්නැප්ෂොට් නොසලකා හැරේ. පවතින ප්‍රේරක/ප්‍රතිචාර අපනයනය ශීර්ෂ ග්‍රහණය සමඟම
-සක්‍රියව පවතී; අවසර ලැයිස්තුව ශීර්ෂ පමණක් දත්ත පුරවන මාදිලියක් සපයන්නේ නැත.
+Capture කියවන්නේ සුරකින ලද detailed pipeline හි `clientRawRequest` (හෝ legacy `clientRequest`) වෙතින්
+පුරවා ඇති `pipeline_client_request` පමණි. එය කිසිවිටෙක provider request headers වෙත fallback නොවේ.
+Request එක record කරන අවස්ථාවේ detailed pipeline logging සක්රීය කර තිබිය යුතුය. `includeBodies` අක්රීය නම්,
+හෝ client-snapshot JSON නොමැති, දූෂිත හෝ clipped නම්, header attributes කිසිවක් නිකුත් නොවේ. `maxBodyBytes` වැඩි කිරීමෙන්
+export-time snapshot clipping වළක්වා ගත හැකි නමුත්, කිසිවිටෙක සුරකින ලද නොවන විස්තර නැවත ලබාගත නොහැක.
+1 MiB ඉක්මවන හෝ header entries 256කට වඩා අඩංගු snapshot එකක් නොසලකා හරිනු ලැබේ. පවතින prompt/response export එක
+header capture සමඟම සක්රීයව පවතී; allowlist එක headers-only hydration mode එකක් සපයන්නේ නැත.
 
-තෝරාගත් අගයන්, තනි තන්තුවක් සඳහා වුවද, `http.request.header.<full lowercase header name>` OTLP තන්තු අරා බවට පත්වේ.
+තෝරාගත් values, තනි string එකක් සඳහා පවා, `http.request.header.<full lowercase header name>` OTLP string arrays බවට පත්වේ.
 උදාහරණයක් ලෙස, `X-OmniRoute-Meta-Team: example-team` යන්න
 `http.request.header.x-omniroute-meta-team` බවට පත්වන්නේ
 `{"arrayValue":{"values":[{"stringValue":"example-team"}]}}` සමඟිනි.
-සම්පූර්ණ උපසර්ගය රඳවාගනී: මේවා සාමාන්‍ය ශීර්ෂ වන අතර, ව්‍යාපාරික ක්ෂේත්‍ර විග්‍රහයක් හෝ
-`omniroute.metadata.*` / Langfuse පාරදත්ත පරිවර්තනයක් සිදු නොවේ. `langfuseMapping` ශීර්ෂවල
-අර්ථය වෙනස් නොකරයි. තෝරාගත් තනි අගයක් සහිත `User-Agent` මඟින් සම්මත අදිශ
-`user_agent.original` ද සකසයි. එක් අගයක් තුළ ඇති කොමා අනුව එය බෙදන්නේ නැත. විශාල/කුඩා අකුරු ප්‍රභේද සුරැකි
-ඇතුළත් කිරීම් අනුපිළිවෙළට ඒකාබද්ධ වේ; කිසියම් වලංගු නොවන ප්‍රභේදයක් තිබේ නම් එම සම්පූර්ණ ශීර්ෂයම අත්හරී. ගුණාංග කුඩා අකුරු නාමය අනුව අනුපිළිවෙළට සකසයි.
+සම්පූර්ණ prefix එක සංරක්ෂණය කෙරේ: මේවා සාමාන්ය headers වන අතර business-field parsing හෝ
+`omniroute.metadata.*` / Langfuse metadata conversion සිදු නොවේ. `langfuseMapping` මඟින් header semantics වෙනස් නොවේ.
+තෝරාගත් single-valued `User-Agent` එකක් standard scalar `user_agent.original` ද සකසයි. එක් value එකක් තුළ ඇති commas බෙදා වෙන් නොකෙරේ.
+Case variants සුරකින ලද entry order එකේ merge කෙරේ; කිසියම් invalid variant එකක් තිබේ නම්, එම සම්පූර්ණ header එක ඉවත් කෙරේ.
+Attributes lowercase name අනුව අනුපිළිවෙළට සකසනු ලැබේ.
 
-Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-key ශීර්ෂ, auth/token/secret/password/credential
-සලකුණු අඩංගු නම් සහ අභ්‍යන්තර ද්වාර අක්තපත්‍ර, තෝරාගෙන තිබුණත් හෝ ගබඩාවේ අර්ධ වශයෙන් ආවරණය කර තිබුණත්,
-සැමවිටම බැහැර කෙරේ. දන්නා අක්තපත්‍ර රටා සඳහා
-හවුල් අක්තපත්‍ර හඳුනාගැනීමේ යන්ත්‍රය නැවත භාවිත වේ; වසන් කිරීමේ සලකුණු ආරක්ෂිත අගයන් ලෙස අපනයනය නොකර අත්හරී.
-තන්තු සහ හිස් නොවන තන්තු අරා පමණක් පිළිගනී; සංඛ්‍යා හෝ වස්තු බලෙන් පරිවර්තනය නොකෙරේ.
-වලංගු නොවන නම්, ප්‍රොටෝටයිප් යතුරු, පාලන අක්ෂර (තිරස් ටැබ් හැර) සහ වැරදි ලෙස සැකසුණු Unicode,
-කණ්ඩායම අසාර්ථක නොකර හෝ ඒවායේ අන්තර්ගතය දෝෂවල දැක්වීමකින් තොරව නොසලකා හැරේ.
+Authorization, Proxy-Authorization, Cookie, Set-Cookie, API-key headers, auth/token/secret/password/credential markers
+අඩංගු නාම සහ internal gateway credentials, තෝරාගෙන තිබුණද හෝ storage තුළ partially masked කර තිබුණද, සෑම විටම බැහැර කෙරේ.
+දන්නා credential patterns සඳහා shared credential detector එක නැවත භාවිත කෙරේ; redaction markers ආරක්ෂිත values ලෙස export නොකර
+ඉවත් කෙරේ. Strings සහ nonempty string arrays පමණක් පිළිගැනේ; numbers හෝ objects coerce නොකෙරේ.
+Invalid names, prototype keys, control characters (horizontal tab හැර) සහ malformed Unicode, batch එක අසාර්ථක නොකර හෝ
+ඒවායේ අන්තර්ගතය errors තුළ ප්රතිබිම්බනය නොකර නොසලකා හරිනු ලැබේ.
 
-එක් එක් span එක උපරිම ශීර්ෂ 32ක්, ශීර්ෂයකට අගයන් 16ක්, අගයකට UTF-8 බයිට 4096ක්,
-සහ ග්‍රහණය කළ ශීර්ෂ නම් හා අගයන් සියල්ල සඳහා මුළු UTF-8 බයිට 16384ක් ග්‍රහණය කරයි. ප්‍රමාණය ඉක්මවන/වලංගු නොවන ශීර්ෂ
-කප්පාදු නොකර සම්පූර්ණයෙන්ම අත්හරී. තේරීම ක්‍රියාකරුගේ පෞද්ගලිකත්ව තීරණයකි: ආරක්ෂිත ලෙස පෙනෙන නම්වල
-පවා පෞද්ගලික දත්ත අඩංගු විය හැකි අතර, මෙම සීමා/හඳුනාගැනීම් සාමාන්‍ය PII ඉවත්කිරීමේ යාන්ත්‍රණයක් නොවේ.
+එක් span එකක් උපරිම headers 32ක්, එක් header එකකට values 16ක්, එක් value එකකට UTF-8 bytes 4096ක්,
+සහ captured header names සහ values හරහා සම්පූර්ණ UTF-8 bytes 16384ක් ග්රහණය කරයි. සීමාව ඉක්මවන/අවලංගු headers
+සම්පූර්ණයෙන්ම ඉවත් කෙරේ, clip නොකෙරේ. Selection යනු operator privacy decision එකකි: ආරක්ෂිත ලෙස පෙනෙන නාමවල පවා
+personal data අඩංගු විය හැකි අතර, මෙම සීමා/detectors සාමාන්ය PII scrubber එකක් නොවේ.
 
-### බෙදාහැරීමේ සීමා
+### Delivery limits
 
-ආවරණය ද ඇතුළුව, ඉල්ලීම් span 500කට සහ UTF-8 JSON 4 MiBකට සීමා වේ.
-කර්සර කණ්ඩායමක පළමු ඉල්ලීමට පෙර අවසර ලත් සෑම span එකකම ප්‍රමාණය පරීක්ෂා කෙරේ. සීමාව ඉක්මවන තනි
-span එකක් තිබේ නම් එම කණ්ඩායමේ කිසිදු කොටසක් නොයවා, `maxBodyBytes`
-අඩු කිරීමට උපදෙස් සහිතව අසාර්ථක වේ; එය නිහඬව ඉවත් නොකෙරේ. පෙර පරීක්ෂාව වාර්තා යොමු සහ
-බයිට ගණන් පමණක් රඳවාගෙන, එක් එක් තාවකාලික span/JSON ඉවත දමයි; කණ්ඩායමේ දෙවන අනුක්‍රමික පිටපතක් රඳවාගන්නවා වෙනුවට,
-සීමා කළ කොටස් සඳහා span නැවත ගොඩනැගේ. HTTP 408/429/5xx, ජාල අසාර්ථකවීම් සහ කාලසීමා ඉක්මවීම් සඳහා උපරිම
-උත්සාහ තුනක් ලබාදෙන අතර, 250/500 ms ඝාතීය පසුබැසීමක් යොදයි. `Retry-After` තත්පර හෝ HTTP දින
-මඟින් ප්‍රමාදය තත්පර 5ක් දක්වා දිගු කළ හැක. අනෙකුත් තත්ත්වයන් වහාම අසාර්ථක වේ. OTLP 2xx අර්ධ ප්‍රතික්ෂේප කිරීමකදී ද
-අහිමි වූ span එකක් පිළිගත් බව තහවුරු කරනවා වෙනුවට දෝෂයක් නිකුත් කරයි; හිස් හෝ වලංගු JSON පිළිගැනීම් භාරගන්නා අතර,
-ප්‍රතිචාර කියවීමේ සීමාව 64 KiB වේ.
+Requests, envelope එක ඇතුළුව, spans 500කට සහ UTF-8 JSON 4 MiBකට සීමා වේ.
+Cursor batch එකක පළමු request එකට පෙර සෑම allowed span එකක්ම size-check කෙරේ. තනි span එකක් සීමාව ඉක්මවන්නේ නම්,
+එම batch එකේ කිසිදු කොටසක් යවා නොගෙන, `maxBodyBytes` අඩු කිරීමට උපදෙස් සමඟ fail වේ; එය නිහඬව ඉවත් නොකෙරේ.
+Preflight මඟින් record references සහ byte counts පමණක් තබාගෙන, එක් එක් temporary span/JSON ඉවත දමයි; batch එකේ
+දෙවන serialized copy එකක් තබා නොගෙන bounded chunks සඳහා spans නැවත ගොඩනඟනු ලැබේ. HTTP 408/429/5xx, network failures සහ timeouts සඳහා
+උත්සාහයන් උපරිම තුනක් ලැබෙන අතර, 250/500 ms exponential backoff භාවිත කෙරේ. `Retry-After` seconds හෝ HTTP dates මඟින්
+delay එක තත්පර 5ක් දක්වා දිගු කළ හැක. අනෙකුත් statuses වහාම fail වේ. OTLP 2xx partial rejection එකක්ද
+lost span එකක් acknowledge කිරීම වෙනුවට throw කරයි; empty හෝ valid JSON acknowledgements පිළිගැනේ, response-read cap එක
+64 KiB වේ.
 
-දෝෂවල අඩංගු වන්නේ අපනයනකරු සතු කරුණු පමණි: HTTP තත්ත්වය, නැවත උත්සාහ පන්තිය, උත්සාහ ගණන සහ යැවූ span
-ගණන, හෝ පිළිගැනීමේ/ජාල අසාර්ථකත්වය පිළිබඳ ස්ථාවර වචන පෙළකි. එකතුකරන්නාගේ ප්‍රතිචාර අන්තර්ගත,
-අර්ධ-සාර්ථක ගණන් සහ ප්‍රතිචාර ශීර්ෂ කිසිවිටෙක දෝෂ, ලොග් හෝ
-උපකරණ පුවරුවට පිටපත් නොකෙරේ. අසාර්ථක වූ හෝ අර්ධ වශයෙන් පිළිගත් කණ්ඩායමක් පිළිගත් බව තහවුරු නොකෙරේ: ගමනාන්තය
-එම තත්ත්වය සමඟ අසාර්ථක වෙමින් පවතින බව පෙන්වයි, කර්සරය අවසන් වරට පිළිගැනීම තහවුරු කළ කණ්ඩායමේ රැඳී සිටියි, ඊළඟ ධාවනයේදී
-එම පේළිම නැවත යවයි. එකතුකරන්නා හෝ වින්‍යාසය
-නිවැරදි කරන තෙක් ස්ථිර තත්ත්වයන් අසාර්ථක වෙමින් පවතී. ප්‍රතිචාර විස්තර සඳහා එකතුකරන්නාගේම ලොග් භාවිත කරන්න. ඇමතුම්-ලොග් දෝෂ සාරාංශ
-ඒවායේ වෙනම වසන් කිරීම රඳවාගනී.
-`prepare()` කිසිවක් සපයන්නේ නැත; පරීක්ෂාව හරියටම `{"resourceSpans":[]}` පළ කර,
-ඇමතුම්-ලොග් span ලිවීමෙන් තොරව HTTP තත්ත්වය වාර්තා කරයි.
+Errors තුළ අඩංගු වන්නේ exporter-owned facts පමණි: HTTP status, retry class, attempts සහ sent span
+counts, හෝ fixed acknowledgement/network failure wording ය. Collector response bodies,
+partial-success counts සහ response headers කිසිවිටෙක errors, logs හෝ dashboard වෙත පිටපත් නොකෙරේ.
+Failed හෝ partially accepted batch එකක් acknowledge නොකෙරේ: destination එක එම status එක සමඟ
+Failing ලෙස පෙන්වන අතර, cursor එක අවසන් වරට acknowledged කළ batch එකේ නවතී, ඊළඟ run එක
+එම rows නැවත යවයි. Permanent statuses, collector හෝ configuration එක නිවැරදි කරන තුරු, දිගටම failing ලෙස පවතී.
+Response details සඳහා collector හිම logs භාවිත කරන්න. Call-log error summaries ඒවාට වෙනම redaction එක රඳවා ගනී.
+`prepare()` කිසිවක් provision නොකරයි; Test මඟින් හරියටම `{"resourceSpans":[]}` POST කර
+call-log spans ලිවීමකින් තොරව HTTP status වාර්තා කරයි.
 
-Trace id සහ span id යනු
-`"omniroute.trace\\0" + callLogId` සහ `"omniroute.span\\0" + callLogId` සඳහා SHA-256 හි පළමු ෂඩ්දශම අංක 32/16 වේ. නැවත යැවීම්වල
-එකම id අඩංගු වේ. මෙය අනුපිටපත් ඉවත් කිරීමේ සහතිකයක් නොවේ: Langfuse
-v4 දත්ත ලබාගැනීම ඇතුළු සමහර පසුපස පද්ධති එකම id සහිත span වල අනුපිටපත් ඉවත් නොකරයි. බිඳවැටීමක් හෝ කොටසක අර්ධ අසාර්ථකත්වයක් නිසා
-උපරිම වශයෙන් පිළිගැනීම තහවුරු නොකළ එක් කර්සර කණ්ඩායමක් නැවත යැවිය හැක; එහි අවසන් HTTP කොටස පමණක් නොව,
-සම්පූර්ණ කණ්ඩායමම අනුපිටපත් විය හැක. එම වාසි-අවාසි සැලකිල්ලට ගෙන කර්සර කණ්ඩායම් ප්‍රමාණය තෝරන්න.
+Trace ids සහ span ids යනු
+`"omniroute.trace\\0" + callLogId` සහ `"omniroute.span\\0" + callLogId` මත SHA-256 හි
+පළමු 32/16 hex digits වේ. Re-sends එකම ids රැගෙන යයි. මෙය deduplication guarantee එකක් නොවේ:
+Langfuse v4 ingestion ඇතුළු සමහර backends එකම-id spans deduplicate නොකරයි. Crash එකක් හෝ partial chunk failure එකක්
+unacknowledged cursor batch එකක් පමණක් නැවත යැවීමට හේතු විය හැකි අතර; එම සම්පූර්ණ
+batch එක duplicate විය හැක, එහි අවසන් HTTP chunk එක පමණක් නොවේ. මෙම tradeoff එක සලකා
+cursor batch size එක තෝරන්න.
 
-### Langfuse උදාහරණය
+### Langfuse example
 
-ස්වයං-සත්කාරක Langfuse ස්ථාපනයක් සඳහා මෙම ක්ෂේත්‍ර වින්‍යාස කරන්න:
+Self-hosted Langfuse instance එකක් සඳහා මෙම fields configure කරන්න:
 
 ```json
 {
@@ -421,46 +432,31 @@ v4 දත්ත ලබාගැනීම ඇතුළු සමහර පසු�
 }
 ```
 
-Authorization අගය, `public-key:secret-key` යන වචනාර්ථ තන්තුවේ Base64 ලෙස දේශීයව සාදන්න
-(උදාහරණයක් ලෙස `Buffer.from(publicKey + ":" + secretKey).toString("base64")` සමඟ).
-සැබෑ අක්තපත්‍ර ලොග්, තිරපිටපත් හෝ ගැටලු වාර්තාවලට අලවන්න එපා. සිතියම්කරණය ස්වයංක්‍රීයව
-`x-langfuse-ingestion-version: 4` සකසයි; Authorization තවමත් `headers` තුළ සපයනු ලැබේ.
-ශීර්ෂ සහ ජනනය කරන අනන්‍යතා salt යන දෙකම පවතින සංකේතනය කළ රහස්-ක්ෂේත්‍ර
-යාන්ත්‍රණය සහ API ස්ථානධාරක භාවිත කරයි; `STORAGE_ENCRYPTION_KEY` අවශ්‍ය වේ.
+Authorization value එක locally, literal `public-key:secret-key`
+string එකේ Base64 ලෙස සාදන්න (උදාහරණයක් ලෙස `Buffer.from(publicKey + ":" + secretKey).toString("base64")` සමඟ).
+සැබෑ credentials logs, screenshots හෝ issues තුළ paste නොකරන්න. Mapping එක ස්වයංක්රීයව
+`x-langfuse-ingestion-version: 4` සකසයි; Authorization තවමත් `headers` තුළ සැපයිය යුතුය.
+Headers සහ generated identity salt දෙකම පවතින encrypted secret-field mechanism සහ API placeholders භාවිත කරන අතර;
+`STORAGE_ENCRYPTION_KEY` අවශ්ය වේ.
 
-සිතියම්කරණය මඟින් ජනන වර්ගය/මාදිලිය, JSON භාවිත විස්තර (ආදාන/ප්‍රතිදාන/මුළු සහ ලබාගත හැකි
-හැඹිලි යතුරු), JSON ආදාන/ප්‍රතිදාන සැණරූ, ERROR/DEFAULT මට්ටම, සංවේදී තොරතුරු ඉවත් කළ තත්ත්ව පණිවිඩය,
-ට්‍රේස් නාමය, සැසි හැඳුනුම්කාරකය, විකල්ප පරිසරය සහ සැපයුම්කරු, ඉල්ලූ මාදිලිය, මාර්ගය, සංයෝජනය, හැඹිලි
-මූලාශ්‍රය සහ තත්ත්වය සඳහා පෙරහන් කළ හැකි `langfuse.observation.metadata.<key>` එක් කරයි.
-`langfuse.observation.completion_start_time` යනු TTFT දන්නා සහ එය කාලසීමාව තුළ පවතින විට පමණක්,
-ආරම්භය + TTFT සඳහා වන ISO 8601 වේලාවයි. පිරිවැය ගුණාංග කිසිවක් යවනු නොලැබේ.
+සිතියම්කරණයට generation වර්ගය/මාදිලිය, JSON භාවිත විස්තර (ආදාන/ප්රතිදාන/මුළු සහ පවතින
+cache යතුරු), JSON ආදාන/ප්රතිදාන snapshot, ERROR/DEFAULT මට්ටම, පිරිසිදු කළ තත්ත්ව පණිවිඩය,
+trace නාමය, සැසි හැඳුනුම, විකල්ප පරිසරය සහ provider, ඉල්ලූ මාදිලිය, path, සංයෝජනය, cache
+මූලාශ්රය සහ තත්ත්වය සඳහා පෙරහන් කළ හැකි `langfuse.observation.metadata.<key>` එක් කරයි.
+`langfuse.observation.completion_start_time` යනු ආරම්භක වේලාව + TTFT වන ISO 8601 අගයකි; එය
+යවන්නේ TTFT දන්නා විට සහ එය කාලපරාසය තුළ ඇති විට පමණි. පිරිවැය attributes කිසිවක් යවන්නේ නැත.
 
-අනන්‍යතා ප්‍රකාර `langfuse.user.id` සඳහා අදාළ වේ:
+හැඳුනුම් මාදිලි `langfuse.user.id` සඳහා යෙදේ:
 
-- `pseudonymous` (පෙරනිමිය): එක් එක් ගමනාන්තයට අහඹු බයිට් 32ක salt අගයක් භාවිතයෙන් API යතුරේ අභ්‍යන්තර හැඳුනුම්කාරකය සඳහා ගණනය කළ HMAC-SHA256 අගයයි.
-  salt අගයක් නොමැති නම් නිර්මාණය කරන විට එය ජනනය කර, `identitySalt` ලෙස සංකේතනය කර,
-  කිසි විටෙක ආපසු ලබා නොදෙන අතර, සංස්කරණවලදී රඳවා ගනී. අමු යතුරු හැඳුනුම්කාරක කිසි විටෙක
-  span ගුණාංගවලට ඇතුළත් නොකරයි. ගමනාන්තයක salt අගය නැවත නිර්මාණය කිරීම/මාරු කිරීම අනන්‍යතා වෙනස් කරයි.
-- `keyName`: වින්‍යාස කළ API යතුරු නාමයයි; එම ක්‍රියාකරු ලේබලය හිතාමතාම හෙළි කරයි.
-- `none`: පරිශීලක හැඳුනුම්කාරකයක් නැත. සැසි ටැග් තිබේ නම් ඒවා තවදුරටත් නිර්යාත කෙරේ; මෙම ප්‍රකාර මඟින්
-  අත්තනෝමතික ප්‍රොම්ප්ට් අන්තර්ගතය හෝ ක්‍රියාකරු සැපයූ සැසි/සහසම්බන්ධතා ලේබල නිර්නාමික නොකරයි.
+- `pseudonymous` (පෙරනිමිය): අහඹු ලෙස, destination එකකට වෙන් වූ 32-byte salt එකක් සමඟ API key හි අභ්යන්තර id හි HMAC-SHA256 අගය. salt එක නොමැති නම් නිර්මාණයේදී ජනනය කර, `identitySalt` ලෙස සංකේතනය කර, කිසිවිටෙක ආපසු ලබා නොදී, සංස්කරණ අතරතුර රඳවා ගනී. අමු key id span attributes තුළ කිසිවිටෙක නොතබයි. destination එකක salt එක නැවත නිර්මාණය කිරීම/මාරු කිරීම මඟින් identities වෙනස් වේ.
+- `keyName`: වින්යාස කළ API key නාමය; එම operator label එක හිතාමතා හෙළි කරයි.
+- `none`: user id එකක් නැත. පවතින විට session tags තවමත් export කෙරේ; මෙම මාදිලි අත්තනෝමතික prompt අන්තර්ගතය හෝ operator විසින් සපයන session/correlation labels නිර්නාමික නොකරයි.
 
-### පෙර දත්ත පිරවීමකින් තොරව ආරම්භ කිරීම
+### backfill එකක් නොමැතිව ආරම්භ කිරීම
 
-නිර්මාණය කරන අවස්ථාවේ පමණක්, **වත්මන් ස්ථානයෙන් ආරම්භ කරන්න (පවතින ලොග් මඟ හරින්න)** සක්‍රිය කරන්න, නැතහොත්
-නිර්මාණ API දත්ත පැකේජයේ ඉහළම මට්ටමින් `startFromCurrentPosition: true` ලබා දෙන්න. එය සංක්‍රමණයකින් තොරව,
-පවතින කර්සර සහායක භාවිතයෙන් දැනට රඳවා ඇති ඇමතුම්-ලොග් rowid හි උපරිම අගයට
-`cursor_row_id` ආරම්භ කරයි. පෙරනිමිය false වේ (කර්සරය 0 සහ රඳවා ඇති ඉතිහාසයෙන් පෙර දත්ත පිරවීම).
-මෙය යාවත්කාලීන කරන අවස්ථාවේ කර්සරය යළි සැකසීමේ සැකසුමක් නොවේ.
+නිර්මාණය කිරීමේදී පමණක්, **වත්මන් ස්ථානයෙන් ආරම්භ කරන්න (පවතින logs මඟ හරින්න)** සක්රීය කරන්න, නැතහොත් create API payload හි ඉහළ මට්ටමේ `startFromCurrentPosition: true` යවන්න. එය migration එකක් නොමැතිව, පවතින cursor helpers භාවිතයෙන් `cursor_row_id` වත්මන් උපරිම රඳවා ඇති call-log rowid වෙත ආරම්භ කරයි. පෙරනිමිය false වේ (cursor 0 සහ රඳවා ඇති ඉතිහාසයේ backfill එක). මෙය update-time cursor reset සැකසුමක් නොවේ.
 
-හවුල් `ttftMs` එකතු කිරීම මඟින් BigQuery සිතියම්කරණයට
-සහ නව වගු ස්කීමාවට null විය හැකි `ttft_ms` තීරුවක් ද එක් කරයි: එහි ස්කීමා පරීක්ෂණයට සෑම සම්මත වාර්තා ක්ෂේත්‍රයක් සඳහාම
-තීරුවක් තිබීම අවශ්‍ය වේ. පවතින වගු වෙනසකින් තොරව නිර්යාත වීම දිගටම සිදු වේ: `prepare()` වගු ස්කීමාව කියවා,
-එම තීරුව නොමැති විට `ttft_ms` පමණක් අත්හරියි. ඊළඟ ධාවනයේදී TTFT ලබා ගැනීමට null විය හැකි INT64 තීරුව එක් කරන්න,
-නැතහොත් නව වගුවක් භාවිත කරන්න. PATCH, ස්වයංක්‍රීය ස්කීමා වෙනස් කිරීමක් හෝ අමතර
-අවසර අවශ්‍ය නොවේ; අනෙකුත් සියලු පේළි ක්ෂේත්‍ර සඳහා දැඩි ස්කීමා පරීක්ෂාව පවත්වා ගනී.
-
----
+හවුල් `ttftMs` එක් කිරීම BigQuery mapper එකට සහ නව-වගු schema එකට nullable `ttft_ms` තීරුවක් ද එක් කරයි: එහි schema පරීක්ෂණයට සෑම canonical record field එකකටම තීරුවක් තිබීම අවශ්ය වේ. පවතින වගු වෙනස් නොකර export කිරීම දිගටම සිදු කරයි: `prepare()` වගු schema එක කියවා, එම තීරුව නොමැති විට `ttft_ms` පමණක් ඉවත් කරයි. ඊළඟ ධාවනයේදී TTFT ලබා ගැනීමට nullable INT64 තීරුව එක් කරන්න, නැතහොත් නව වගුවක් භාවිත කරන්න. විකල්ප TTFT තීරුවක් schema update එකක් ක්රියාත්මක නොකරයි. Usage-evidence තීරු පහත conditional, opt-in compatibility ප්රවාහය අනුගමනය කරයි; අනෙකුත් පේළි ක්ෂේත්ර සඳහා දැඩි schema පරීක්ෂාව එලෙසම පවතී.
 
 ## 6. ගමනාන්තයක් එක් කිරීම
 
@@ -483,15 +479,28 @@ Authorization අගය, `public-key:secret-key` යන වචනාර්ථ �
 
 ---
 
-## 7. එය ක්‍රියාත්මක කිරීම
+## 7. එය ක්රියාත්මක කිරීම
 
-- **උපකරණ පුවරුව**: ඒකාබද්ධ කිරීම් → ලොග් අපනයනය. ගමනාන්තයක් එක් කර, පේළි ලිවීමකින් තොරව
-  අක්තපත්‍ර පරීක්ෂා කිරීමට **පරීක්ෂා කරන්න** ධාවනය කර, ඉන්පසු එය සක්‍රිය කරන්න.
-- **පොරොත්තු දත්ත**: එක් එක් ගමනාන්ත කාඩ්පතේ පොරොත්තු පේළි සහ කර්සරය පෙන්වයි; `GET
-/api/log-export/status` එම සංඛ්‍යා සමඟ අවසන් කාර්ය ධාවන 20 ද ආපසු ලබා දෙයි.
-- **එක් ගමනාන්තයක් අසාර්ථක වීම අනෙක් ඒවා අසාර්ථක නොකරයි** — ධාවන සාරාංශය එක් එක් ගමනාන්තයේ
-  තත්ත්වය `last_status` / `last_error` තුළ සටහන් කරන අතර, කාර්ය ධාවන ඉතිහාසය සමස්ත තොරතුරු රඳවා ගනී.
-- **ගමනාන්තයක් මකා දැමීමෙන් එහි කර්සරය ද මැකේ.** එය නැවත එක් කිරීම රඳවා ඇති පැරණිතම
-  ඇමතුම් ලොගයෙන් ආරම්භ වන අතර, ගමනාන්තය සතුව දැනටමත් තිබිය හැකි පේළි නැවත යවයි. BigQuery හි එක් එක් පේළියේ
-  `insertId` මඟින් එම අනුපිටපත් වළක්වන්නේ BigQuery හිම අනුපිටපත් ඉවත් කිරීමේ කාල පරාසය තුළ පමණි. එබැවින්
-  ගමනාන්තයක් මකා දැමීමට වඩා එය අක්‍රිය කිරීම වඩා සුදුසුය.
+- **පාලක පුවරුව**: Integrations → Log export. ගමනාන්තයක් එක් කර, අක්තපත්ර පරීක්ෂා කිරීමට පේළි ලිවීමකින් තොරව **පරීක්ෂා කරන්න** ධාවනය කර,
+  පසුව එය සක්රීය කරන්න.
+- **පසුබැසීම**: සෑම ගමනාන්ත කාඩ්පතකම පොරොත්තු පේළි සහ කර්සරය පෙන්වන අතර; `GET
+/api/log-export/status` මඟින් අවසන් රැකියා ධාවන 20 සමඟ එම සංඛ්යාම නැවත ලබා දෙයි.
+- **අසාර්ථක වන ගමනාන්තයක් අනෙක් ගමනාන්ත අසාර්ථක නොකරයි** — ධාවන සාරාංශය එක් එක් ගමනාන්තයේ
+  තත්ත්වය `last_status` / `last_error` තුළ සටහන් කරන අතර, රැකියා ධාවන ඉතිහාසය සමස්ත තත්ත්වය තබා ගනී.
+- **ගමනාන්තයක් මකා දැමීමෙන් එහි කර්සරයද මැකෙයි.** එය නැවත එක් කළ විට පැරණිතම රඳවාගත්
+  ඇමතුම් ලොගයෙන් ආරම්භ වන බැවින්, ගමනාන්තය සතුව දැනටමත් තිබිය හැකි පේළි නැවත යවනු ලැබේ. BigQuery තුළ, එක් පේළියකට ඇති
+  `insertId` මඟින් එය BigQuery හිම අනුපිටපත් ඉවත් කිරීමේ කාල කවුළුව තුළ පමණක් අවශෝෂණය කරයි. එබැවින්
+  ගමනාන්තයක් මකා දැමීමට වඩා එය අක්රීය කිරීම වඩාත් සුදුසුය.
+
+### භාවිත සාක්ෂි ස්කීමා අනුකූලතාව
+
+නව BigQuery වගු nullable `usage_evidence` (JSON අඩංගු STRING) සහ
+`usage_estimated` (BOOL) ඇතුළත් කරයි. `autoCreate` සක්රීය කර ඇති විට, පවතින වගුවකට
+මෙම අස්ථානගත nullable තීරු පමණක් එක් කළ හැක. Exporter මඟින් ක්ෂේත්ර මෙටාදත්ත ඇතුළුව
+පවතින සම්පූර්ණ ස්කීමාව ආරක්ෂා කර, ආපසු ලැබුණු etag භාවිතයෙන් කොන්දේසි සහිත PATCH එකක් යවයි. සමගාමී
+ස්කීමා වෙනස්කමක් සිදු වුවහොත් එය මත ලිවීම වෙනුවට export එක අසාර්ථක වන අතර; ඊළඟ ධාවනයේදී වගුව නැවත කියවනු ලැබේ.
+
+`autoCreate` අක්රීය කර ඇති විට, භාවිත සාක්ෂි සහිත වාර්තා export කිරීමට පෙර මෙම තීරු ඔබම එක් කරන්න.
+අස්ථානගත ස්කීමා/etag මෙටාදත්ත හෝ අසාර්ථක යාවත්කාලීන කිරීමක්ද සාක්ෂි සහිත insert වළක්වයි. එම අසාර්ථකත්වයේදී
+export කර්සරය ඉදිරියට නොයන අතර, සාක්ෂි කිසිවිටෙක නිහඬව ඉවත් නොකෙරේ. Export එක අවහිරව තිබෙන අතරතුරද
+දේශීය ලොග් රඳවාගැනීම අදාළ වන බැවින්, රඳවා ඇති මූලාශ්ර පේළි කල් ඉකුත්වීමට පෙර අසාර්ථකත්වය විසඳන්න.
