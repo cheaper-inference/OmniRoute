@@ -94,6 +94,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### امنیت و حمل و نقل
+
+احراز هویت WebDAV ردیابی و قفل شکست در هر IP را اعمال می کند (10 تلاش ناموفق در یک پنجره 60 ثانیه ای یک قفل 5 دقیقه ای با `429 Too Many Requests` و `Retry-After` را آغاز می کند). از آنجایی که WebDAV اعتبار احراز هویت اولیه را ارسال می کند، خاتمه TLS (یا مسیریابی از طریق یک تونل امن مانند Tailscale یا Cloudflare Tunnel) به شدت توصیه می شود هنگام دسترسی به نقطه پایانی WebDAV در خارج از حلقه بک.
+
 ### منبع زمینهٔ اختصاصی برای هر کلید API (اختیاری)
 
 پیکربندی Obsidian را میتوان از طریق جدول `api_key_context_sources` بهصورت

@@ -22,6 +22,7 @@ import {
   buildPipelinePayloadSections,
   hasConversationTurns,
   isBodySizeLimitOmission,
+  useTransientFlag,
 } from "@/shared/components/RequestLoggerDetail.sections";
 import { getResilienceBadges } from "@/shared/components/requestLoggerResilience";
 import { cn } from "@/shared/utils/cn";
@@ -181,28 +182,6 @@ export function parseStreamIntoSegments(joined: string): StreamSegment[] {
     }
   }
   return segments;
-}
-
-// A "copied" flag that resets itself after a short delay. The reset timer is cleared on unmount:
-// left running, it fired after the component (and, in tests, jsdom) was gone (#19329).
-function useTransientFlag(resetMs = 2000) {
-  const [active, setActive] = useState(false);
-  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  useEffect(
-    () => () => {
-      if (timerRef.current !== null) clearTimeout(timerRef.current);
-    },
-    []
-  );
-  const trigger = () => {
-    setActive(true);
-    if (timerRef.current !== null) clearTimeout(timerRef.current);
-    timerRef.current = setTimeout(() => {
-      timerRef.current = null;
-      setActive(false);
-    }, resetMs);
-  };
-  return [active, trigger] as const;
 }
 
 function StreamSection({ title, sectionId, json, onCopy }) {

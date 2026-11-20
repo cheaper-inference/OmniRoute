@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Ixtiyoriy) Tasvirni o‘chirish
+docker rmi cheaperinference/omniroute:latest
+# Eski o'rnatishlar eski nomni oldi:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

@@ -21,10 +21,10 @@ npm install -g omniroute
 ### Možnosť B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` je najvyššia **publikovaná** stabilná verzia SemVer. Nesleduje git `main`. Pre GitOps pripnite `diegosouzapw/omniroute:X.Y.Z`. Pozrite si [Značky obrazov / kanály vydaní](../guides/DOCKER_GUIDE.md#release-channels).
+`:latest` je najvyššia **publikovaná** stabilná verzia SemVer. Nesleduje git `main`. Pre GitOps pripnite `cheaperinference/omniroute:X.Y.Z`. Pozrite si [Značky obrazov / kanály vydaní](../guides/DOCKER_GUIDE.md#release-channels).
 
 ### Možnosť C: Zo zdrojového kódu
 

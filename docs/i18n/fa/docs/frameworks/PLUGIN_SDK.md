@@ -29,32 +29,32 @@ export default definePlugin({
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-تابع سازندهای که یک شیء Plugin را با مقادیر پیشفرض ایجاد میکند.
+تابع Factory که یک شی پلاگین با پیش فرض ایجاد می کند.
 
 **پارامترها:**
 
-- `name` (رشته، الزامی) — نام افزونه با قالب kebab-case
-- `priority` (عدد، اختیاری، پیشفرض: 100) — مقدار کمتر زودتر اجرا میشود
-- `enabled` (بولی، اختیاری، پیشفرض: true) — آیا در ابتدا فعال باشد؟
-- `onRequest` (تابع، اختیاری) — پیش از کنترلکنندهٔ چت اجرا میشود
-- `onResponse` (تابع، اختیاری) — پس از کنترلکنندهٔ چت اجرا میشود
-- `onError` (تابع، اختیاری) — هنگام بروز خطا در کنترلکننده اجرا میشود
+- `name` (رشته، مورد نیاز) — نام افزونه در کباب
+- `priority` (تعداد، اختیاری، پیشفرض: 100) — Lower ابتدا اجرا میشود
+- `enabled` (بولی، اختیاری، پیشفرض: درست) — شروع فعال است؟
+- `onRequest` (عملکرد، اختیاری) — قبل از کنترل کننده چت اجرا می شود
+- `onResponse` (عملکرد، اختیاری) — بعد از کنترل کننده چت اجرا می شود
+- `onError` (عملکرد، اختیاری) — با خطای کنترل کننده اجرا می شود
 
 ### `blockRequest(response?): BlockingHookResult`
 
-درخواست را مسدود کرده و در صورت نیاز، یک پاسخ سفارشی بازمیگرداند.
+درخواست را مسدود کنید و به صورت اختیاری یک پاسخ سفارشی برگردانید.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-بدنهٔ درخواست را پیش از رسیدن به ارائهدهنده تغییر میدهد.
+بدنه درخواست را قبل از رسیدن به ارائه دهنده تغییر دهید.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-فراداده را به زمینهٔ درخواست پیوست میکند.
+متادیتا را به زمینه درخواست پیوست کنید.
 
 ```ts
 onRequest: (ctx) => {
@@ -72,17 +72,20 @@ onRequest: (ctx) => {
 };
 ```
 
-## زمینهٔ افزونه (`PluginContext`)
+## زمینه پلاگین (`PluginContext`)
 
-| فیلد        | نوع                       | توضیحات                 |
-| ----------- | ------------------------- | ----------------------- |
-| `requestId` | `string`                  | شناسهٔ یکتای درخواست    |
-| `model`     | `string`                  | نام مدل درخواستی        |
-| `provider`  | `string`                  | شناسهٔ ارائهدهندهٔ مقصد |
-| `body`      | `Record<string, unknown>` | بدنهٔ درخواست           |
-| `headers`   | `Record<string, string>`  | سرآیندهای درخواست       |
-| `metadata`  | `Record<string, unknown>` | فرادادهٔ قابلتغییر      |
-| `timestamp` | `number`                  | برچسب زمانی درخواست     |
+| میدان        | تایپ کنید                 | توضیحات                                      |
+| ------------ | ------------------------- | -------------------------------------------- |
+| `requestId`  | `string`                  | شناسه درخواست منحصر به فرد                   |
+| `model`      | `string`                  | نام مدل درخواستی                             |
+| `provider`   | `string`                  | ارائه دهنده هدف ID                           |
+| `body`       | `Record<string, unknown>` | درخواست بدن                                  |
+| `headers`    | `Record<string, string>`  | سرصفحه های درخواستی (به یادداشت مراجعه کنید) |
+| `metadata`   | `Record<string, unknown>` | ابرداده قابل تغییر                           |
+| `timestamp`  | `number`                  | درخواست مهر زمانی                            |
+| `apiKeyInfo` | `object` (اختیاری)        | فراداده کلید API (به یادداشت مراجعه کنید)    |
+
+زمینه هرگز اعتبار مشتری را ندارد: سرصفحههای `authorization`، `x-api-key`، `proxy-authorization` و `cookie` حذف میشوند (هر نوع پوشش)، و `apiKeyInfo` ابردادههای کلید (مانند `id`، `name` و `scopes`) را نگه میدارد، اما مقدار کلید یا اثر انگشت آن را نگه نمیدارد (`redactPluginContext()` در `src/lib/plugins/hooks.ts`). این برای `onRequest`, `onResponse` و `onError` صدق می کند .
 
 ## مانیفست (`plugin.json`)
 
@@ -138,19 +141,18 @@ onRequest: (ctx) => {
 }
 ```
 
-## سیستم مجوزها
+## سیستم مجوز
 
-افزونهها در یک محیط VM ایزولهشده اجرا میشوند. دسترسی به منابع خارجی نیازمند مجوزهای صریح است:
+پلاگین ها هستند** سندباکس نشده** . هر افزونه فعال بهعنوان یک فرآیند جداگانه و عادی Node.js فرزند (`loadPlugin()` در `src/lib/plugins/loader.ts`) تحت همان کاربر سیستم عامل OmniRoute اجرا میشود، بدون زمینه VM و هیچ پرچم مجوز Node.js. کد پلاگین میتواند `node:fs`، `node:child_process`، `fetch` و هر Node.js API دیگری استفاده کند: میتواند هر فایلی را که کاربر OmniRoute میتواند بخواند و بنویسد (از جمله فهرست دادهها)، برنامهها را اجرا کند و به شبکه دسترسی پیدا کند.
 
-| مجوز         | امکانات اعطاشده                                              |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`، `AbortController`، `Headers`، `Request`، `Response` |
-| `file-read`  | `fs.readFile`، `fs.readdir`، `fs.stat`                       |
-| `file-write` | `fs.writeFile`، `fs.mkdir`، `fs.rm`                          |
-| `env`        | پراکسی فقطخواندنی `process.env`                              |
-| `exec`       | `child_process.exec`، `child_process.execSync`               |
+`requires.permissions` مانیفست `network`، `file-read`، `file-write`، `env` و `exec` را میپذیرد، اما امروزه فقط `env` در زمان اجرا تأثیر دارد:
 
-بدون یک مجوز، متغیرهای سراسری مربوطه بهسادگی در محیط ایزولهشده در دسترس نخواهند بود.
+| اجازه                                        | اثر امروز                                                                                                                                                                                                                                 |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | فرآیند پلاگین نیز `PORT`, `HOSTNAME`, `TZ` و `TMPDIR` را دریافت می کند. بدون آن فقط `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` و `PLUGIN_NAME` (به علاوه `SystemRoot` و `windir` روی Windows) را دریافت می کند. |
+| `network`, `file-read`, `file-write`, `exec` | هیچ کدام. آنها فقط اعلامیه هستند: هنگامی که آنها گم شوند هیچ چیز مسدود نمی شود.                                                                                                                                                           |
+
+نصب یک افزونه مانند نصب هر برنامه دیگری بر روی هاست است. فقط افزونه هایی را نصب کنید که به منبع آنها اعتماد دارید.
 
 ## طرحواره پیکربندی
 
@@ -192,9 +194,9 @@ onRequest: (ctx) => {
 | `onDeactivate`    | هنگام غیرفعالسازی افزونه             | `{ name, version, manifest }` |
 | `onUninstall`     | هنگام حذف افزونه (پیش از حذف فایلها) | `{ name, version, manifest }` |
 
-## نمونهها
+## نمونه ها
 
-### ثبتکننده درخواست
+### درخواست Logger
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### محدودکننده نرخ
+### محدود کننده نرخ
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // ۱ دقیقه
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -234,7 +236,7 @@ export default definePlugin({
 });
 ```
 
-### تبدیلکننده پاسخ
+### ترانسفورماتور واکنش
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

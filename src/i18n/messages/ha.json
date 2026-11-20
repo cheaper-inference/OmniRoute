@@ -13427,6 +13427,8 @@
     "wizardRemoveKey": "Cire maɓalli"
   },
   "plugins": {
+    "privilegesWarningTitle": "Plugins suna gudana tare da cikakkun gata",
+    "privilegesWarningBody": "Plugin yana gudana azaman tsarin Node.js na yau da kullun tare da dama iri ɗaya kamar OmniRoute: yana iya karanta fayiloli, gudanar da shirye-shirye da amfani da hanyar sadarwa, duk wani izini da bayanin sa ya bayyana. Sanya plugins ɗin da kuka dogara kawai.",
     "title": "Ƙarin shirye-shirye",
     "description": "Shigar kuma sarrafa ƙarin shirye-shirye don faɗaɗa ayyukan OmniRoute",
     "loading": "Ana loda ƙarin shirye-shirye...",
