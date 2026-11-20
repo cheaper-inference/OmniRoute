@@ -304,16 +304,16 @@ keerukus on ridade arvu suhtes O(n) ja see lisab tühise latentsuse.
 
 ---
 
-## Tihenduskombod
+## Kompressioonikombinatsioonid
 
-Tihenduskombod on nimelised tihendusprofiilid, mida saab määrata marsruutimiskombodele:
+Tihenduskombod nimetatakse tihendusprofiilideks, mida saab määrata marsruutimiskombodele:
 
-- `compression_combos`: talletab režiimi, konveieri, RTK konfiguratsiooni, keelekonfiguratsiooni ja vaikemarkerit
-- `compression_combo_assignments`: seob tihenduskombinatsiooni marsruutimiskomboga
-- käitusaegne integratsioon lahendab määratud tihenduskombinatsiooni enne üldisi kombo ülekirjutusi
-- analüütika sisaldab välju `compression_combo_id` ja `engine`
+- `compression_combos`: salvestab režiimi, torujuhtme, RTK konfiguratsiooni, keele konfiguratsiooni ja vaikemarkeri
+- `compression_combo_assignments`: vastendab tihenduskombo marsruutimise kombinatsiooniks
+- käitusaegne integratsioon lahendab määratud tihenduskombo enne üldise kombinatsiooni alistamist
+- analüütika hõlmab `compression_combo_id` ja `engine`
 
-Töölaua asukoht: `Töölaud -> Kontekst ja vahemälu -> Tihenduskombod`.
+Armatuurlaua pind: `Dashboard -> Context & Cache -> Compression Combos`.
 
 ## Eeltingimused / operaatori juhend (CCR & session-dedup)
 
@@ -333,7 +333,7 @@ MCP serverisse, mis paljastab CCR tööriistad, pääseb kolmel viisil. Vaikimis
 
 CCR on a** kahetasandiline** pood, mitte ainult mälus:
 
-- **Kuum mälusisene tasand** — ploki kohta 2 MiB, peamise kohta 16 MiB, globaalne 64 MiB. Kirjed on vaikimisi 24 h TTL (maksimaalselt 7 päeva). Täieliku MCP mälust otsimise ülempiir on 256 KiB; kõik suuremad on endiselt kättesaadavad vahemiku / grep režiimide kaudu.
+- **Kuum mälusisene tasand** — ploki kohta 2 MiB, peamise kohta 16 MiB, globaalne 64 MiB. Kirjed on vaikimisi 24 h TTL (maksimaalselt 7 päeva). Täielik MCP mälust otsimine on piiratud 256 KiB; kõik suuremad on endiselt kättesaadavad vahemiku / grep režiimide kaudu.
 - **Vastupidav SQLite tasand** (`ccr_blocks`, `COMPRESSION_CCR_DURABLE_STORE`, vaikimisi sisse lülitatud) — toetab mälus olevat taset, nii et plokk jääb ellu pärast LRU väljatõstmist, taaskäivitamist või laadimise maandumist teisele eksemplarile. Rida säilitab ploki TTL, nii et selle TTL möödunud plokk kaob mõlemast astmest.
 
 Kolm kaitset hoiavad vastupidavat tasandit piiratud — a plokk jääb ainult mäluks, kui:
@@ -342,7 +342,7 @@ Kolm kaitset hoiavad vastupidavat tasandit piiratud — a plokk jääb ainult m�
 2. käitusaeg on pilve käitusaeg (kohalikku ketast pole);
 3. `COMPRESSION_CCR_DURABLE_STORE=false`.
 
-Nii et "plokk kadus" ei ole üldine taaskäivitamise lugu: sub-512 KB plokk kohalikul, mittepilvepõhisel käituskeskkonnal püsib taaskäivituse läbi vastupidava tasandi, kuni selle TTL saab otsa. Muutuja kohta vaadake [Keskkonna viidet](../reference/ENVIRONMENT.md).
+Nii et "plokk kadus" ei ole üldine taaskäivituslugu: sub-512 KB plokk kohalikul, mittepilvepõhisel käitusajal peab püsima taaskäivitamisel püsiva tasandi kaudu, kuni selle TTL saab otsa, eeldusel, et selle püsiv kirjutamine õnnestus. See kirjutamine on parim pingutus ja jookseb päringu teelt välja: see katkestatakse, kui 1000 püsivat kirjutust on juba ootel, SQLite -kirjutusviga logitakse (`[ccr] durable persist failed`) ja seda ei proovita uuesti ning krahh enne edasilükatud kirjutamist kaotab ka selle. Selline plokk jääb ainult mäluks ja kaob pärast taaskäivitamist. Muutuja kohta vaadake [Keskkonna viidet](../reference/ENVIRONMENT.md).
 
 ### Kaks markerit
 
@@ -357,7 +357,7 @@ Nii et "plokk kadus" ei ole üldine taaskäivitamise lugu: sub-512 KB plokk koha
 
 - **Võti (stdio):** stdio-helistajal puudub päringupõhine identiteet, mistõttu see autentib `OMNIROUTE_API_KEY` (seatud MCP serveri `env`). Ilma selleta on helistaja anonüümne ja käsundiandjat vajavad tööriistad võivad halveneda.
 - **`tools[]` on süstimise eeltingimus.** Sisestatakse CCR retrieve-protocol käsk (#8033).** ainult** kui päringu reklaamitud `tools[]` tõestab, et klient võib tegelikult jõuda `omniroute_ccr_retrieve`. Vaste on lõpuosa vaste, mida piirab eraldaja (`__`, `.`, `/`, `:`) — ei ole kunagi tühi alamstring — nii et nimeruumiga nimi, näiteks `mcp__gateway__omniroute_ccr_retrieve` läheb arvesse. Puuduv või mittevastav `tools[]` tähendab, et käsku _ei_ sisestata.
-- **`codemode:false` (OpenCode kliendid).** OpenCode kasutab vaikimisi koodirežiimi, mis reklaamib mudelile ja mudelile ainult oma tööriistu** ei tee seda** pane MCP tööriistad algsesse `tools[]` loendisse. Määrake MCP serveri sisestuses `codemode: false`, et `omniroute_ccr_*` tööriistu reklaamitaks. See on a** klient** seade, mitte OmniRoute. Sellele ei sisestata veel käsku CCR : OpenCode nimetab tööriista `<server>_<tool>`, nii et server nimega `omniroute` paljastab `omniroute_omniroute_ccr_retrieve` ja `_` ei ole üks sobitatud eraldajatest.
+- **`codemode:false` (OpenCode kliendid).** OpenCode kasutab vaikimisi koodirežiimi, mis reklaamib mudelile ja mudelile ainult oma tööriistu** ei tee seda** pane MCP tööriistad algsesse `tools[]` loendisse. Määrake MCP serveri sisestuses `codemode: false`, et `omniroute_ccr_*` tööriistu reklaamitaks. See on a** klient** seade, mitte OmniRoute. OpenCode annab tööriistale nimeks `<server>_<tool>`, nii et server nimega `omniroute` paljastab `omniroute_omniroute_ccr_retrieve`; `_` on üks sobitatud eraldajatest, seega sisestatakse CCR käsk selle nime alla, kui päring sisaldab CCR -markerit.
 - **Direktorid.** Salvestus ja otsimine on isoleeritud autentitud printsiparaadi ( API võtme kohta). Võti näeb ainult oma plokke.
 
 ### Kasutusalad tööriista kohta
@@ -377,16 +377,16 @@ Puuduv ulatus tagastab an**MCP tööriista vea tulemus** (`isError: true`, mitte
 
 ### Kliendimaatriks
 
-| Klient            | Transport                                     | Konfiguratsioon kasutamiseks                                                                                                                                                                                                                     | `tools[]` reklaamitud? (→ CCR juhis sisestatud)                                                                                                                                            |
-| ----------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Claude kood       | striimitav-http                               | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                | Jah — MCP-võimeline; süstitud.                                                                                                                                                             |
-| Cursor / Cline    | `stdio`** või** `streamable-http`             | stdio: `omniroute --mcp` koos `OMNIROUTE_API_KEY` ga `env`; või kaug- MCP -sisend, mis osutab `http://localhost:20128/api/mcp/stream` (vt [häälestusjuhendit → MCP kliendi konfiguratsioon](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Jah — reklaamib `omniroute_ccr_*` tööriistu.                                                                                                                                               |
-| OpenCode          | striimitav-http                               | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` pluss `codemode: false`                                                                                                                                                 | Tööriistad, mida reklaamitakse ainult `codemode: false` ga; käsku ikka ei sisestata, sest `omniroute_omniroute_ccr_retrieve` ei sobi (vt [Kliendi eeltingimused](#client-prerequisites) ). |
-| OpenAI-ga ühilduv | OpenAI-ga ühilduv HTTP (vestluse lõpetamised) | standardse vestluse lõpetamise klient OpenAI-ga ühilduva lõpp-punkti vastu                                                                                                                                                                       | **Mitte kunagi** — tavalisel OpenAI-ga ühilduval helistajal ei öelda kunagi tööriistale helistamiseks ja juhiseid ei sisestata.                                                            |
+| Klient            | Transport                                     | Konfiguratsioon kasutamiseks                                                                                                                                                                                                                     | `tools[]` reklaamitud? (→ CCR juhis sisestatud)                                                                                                                                         |
+| ----------------- | --------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Claude kood       | striimitav-http                               | `claude mcp add --transport http omniroute http://localhost:20128/api/mcp/stream`                                                                                                                                                                | Jah — MCP-võimeline; süstitud.                                                                                                                                                          |
+| Cursor / Cline    | `stdio`** või** `streamable-http`             | stdio: `omniroute --mcp` koos `OMNIROUTE_API_KEY` ga `env`; või kaug- MCP -sisend, mis osutab `http://localhost:20128/api/mcp/stream` (vt [häälestusjuhendit → MCP kliendi konfiguratsioon](../guides/SETUP_GUIDE.md#mcp-client-configuration) ) | Jah — reklaamib `omniroute_ccr_*` tööriistu.                                                                                                                                            |
+| OpenCode          | striimitav-http                               | `opencode mcp add omniroute --url http://localhost:20128/api/mcp/stream` pluss `codemode: false`                                                                                                                                                 | Tööriistad, mida reklaamitakse ainult `codemode: false` ga; seejärel süstitakse, pannes nimeks `omniroute_omniroute_ccr_retrieve` (vt [Kliendi eeltingimused](#client-prerequisites) ). |
+| OpenAI-ga ühilduv | OpenAI-ga ühilduv HTTP (vestluse lõpetamised) | standardse vestluse lõpetamise klient OpenAI-ga ühilduva lõpp-punkti vastu                                                                                                                                                                       | **Mitte kunagi** — tavalisel OpenAI-ga ühilduval helistajal ei öelda kunagi tööriistale helistamiseks ja juhiseid ei sisestata.                                                         |
 
 ### Otsimise piirangud ja lehekülgede arv
 
-MCP tööriista tekstitulemused lõigatakse ümber `mcpAccessibility.maxTextChars` (vaikimisi `50000`). Ploki `full` allalaadimise piiriks on 256 KiB —** piiramatut täielikku allalaadimist pole** . Kui ploki `chars=N` on suur, lehitsege see, mitte ei tõmba kogu asja:
+MCP tööriista tekstitulemused lõigatakse ümber `mcpAccessibility.maxTextChars` (vaikimisi `50000`). Ploki `full` allalaadimise piiriks on 256 KiB —** ei ole piiramatut täielikku allalaadimist** . Kui ploki `chars=N` on suur, lehitsege see, mitte ei tõmba kogu asja:
 
 - Rusikareegel:**`chars > 40000` → kasutage `mode`** , mitte kunagi paljast täis.
 - `mode:"grep"` — regex `pattern` sobitatud ridade kaupa, kuni 1000 sobivat rida (`unique: true` drops kordub), odavaim "leia üks vajalik rida".
@@ -394,7 +394,7 @@ MCP tööriista tekstitulemused lõigatakse ümber `mcpAccessibility.maxTextChar
 - `mode:"head"` / `mode:"tail"` — first/last `n` read.
 - `mode:"stats"` — rida, tähemärki ja baite loetakse ilma kehata.
 
-Kasutage `mode:"lines"` koos `start`/`end`, et lehekülgede kaupa läbida, mitte kogu asja korraga nõuda.
+Kasutage `mode:"lines"` koos `start`/`end`, et kõndida lehekülgede kaupa pika ploki kaupa, mitte kogu asja korraga taotleda.
 
 ### Tööriistade nimetamine
 

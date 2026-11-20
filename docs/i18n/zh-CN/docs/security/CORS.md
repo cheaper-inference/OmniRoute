@@ -80,14 +80,10 @@ CORS_ALLOWED_ORIGINS="http://localhost:5173, http://localhost:3000"
 `http://localhost:3000` 和 `http://localhost:3000/` 等效。无需重启，
 也可以在运行时通过 **Dashboard → Security → CORS Allowed Origins** 设置相同的 CSV。
 
-## API 密钥与 Cookie 会话
+## API密钥与 cookie 会话
 
-- **Bearer / `x-api-key`（`/v1/*` 推理接口）：**浏览器绝不会自动附加
-  这些信息。CORS 在此处并不是有意义的屏障——真正的屏障是 API 密钥——
-  因此该接口有意采用宽松策略，使浏览器和 Electron 客户端能够读取它们本就有权访问的响应。放宽后的回显取决于已验证的密钥，而不仅仅是请求头是否存在：当 `REQUIRE_API_KEY=false` 以匿名方式处理某个请求时，其成功响应仍沿用默认拒绝的允许列表。认证拒绝（401）保持可读，以便客户端能够提示已撤销或输入错误的密钥（#5242）：管道自身返回的 401 保留回显；而在管道已按匿名方式处理请求之后，由路由自身拒绝密钥的情况（配置了管理认证时的 `/v1/models` 和 `/v1beta/models`、按所有者限定的 `/v1/files`、`/v1/batches`、`/v1/media`、`/v1/session-leases` 以及 auto-combo 候选路由），会通过 `credentialRejectionHeaders()` 为该 401 添加回显。回显的判断依据是请求是否携带凭据请求头（`Authorization`、`x-api-key`、`x-goog-api-key` 或 `auth_token` Cookie），而不是路由检查了其中哪一个，并且从不与 `Access-Control-Allow-Credentials` 搭配使用；响应体是固定的错误封装。受 `requireManagementAuth()` 保护的 `/api/v1/` 下的管理路由（`/api/v1/management/*`、`/api/v1/registered-keys`）不会添加回显：在 `REQUIRE_API_KEY=false` 时，它们的 401/403 无法被跨源读取。
-- **Cookie 会话（控制面板）：**受默认拒绝策略**以及**
-  共享路径上不存在 `Access-Control-Allow-Credentials` 的双重保护。
-  不要将管理/控制面板源纳入任何宽松配置；它们必须严格保持默认拒绝。
+- **Bearer / `x-api-key` （ `/v1/*`推理面）：**浏览器永远不会自动附加这些。 CORS在这里不是一个有意义的障碍— API键是障碍—这就是为什么该表面故意是宽松的，以便浏览器和Electron客户端可以读取他们已经有权获得的响应。宽松的回显遵循经过验证的密钥，而不仅仅是标头的存在：当`REQUIRE_API_KEY=false`匿名服务请求时，其成功响应会保留失败关闭的白名单。身份验证拒绝 (401) 保持可读，因此客户端可以显示已撤销或输入错误的密钥 (#5242)：管道自己的 401 保留回显，并且在管道将其作为匿名服务后拒绝密钥本身的路由（配置了管理身份验证的`/v1/models`和`/v1beta/models` ，所有者范围的`/v1/files`、 `/v1/batches`、 `/v1/media`、 `/v1/session-leases`和自动组合候选路由）通过以下方式将回显添加到该 401 `credentialRejectionHeaders()`. echo 以携带凭据标头（`Authorization`、 `x-api-key`、 `x-goog-api-key`或`auth_token` cookie）的请求为关键，而不是在路由检查的其中一个上，并且永远不会与`Access-Control-Allow-Credentials`配对；主体是一个固定误差包络线。由`requireManagementAuth()`保护的`/api/v1/`下的管理路由（`/api/v1/management/*`、 `/api/v1/registered-keys`、 `/api/v1/providers/[provider]/limits`、 `/api/v1/accounts/[id]/limits`、 `/api/v1/issues/report`）不添加 echo：使用`REQUIRE_API_KEY=false`时，它们的401/403不可读跨源。
+- **Cookie 会话（仪表板）：**受故障关闭默认值保护**和**由于共享路径上缺少`Access-Control-Allow-Credentials` 。让management/dashboard起源远离任何允许的配置；它们必须完全保持故障关闭状态。
 
 ## WebSocket 握手（`/v1/responses`、`/v1/ws`）
 

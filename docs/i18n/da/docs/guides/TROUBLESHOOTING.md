@@ -96,11 +96,11 @@ Advarslerne skyldes forældede intervaller for peer-afhængigheder i tredjeparts
 
 ---
 
-## Advarsel om blokerede npm-installationsscripts (global installation)
+## npm install-scripts Blokeret advarsel (global installation)
 
 <a name="npm-install-scripts-blocked-warning-global-install"></a>
 
-Når du kører `npm install -g omniroute`, blokerer nyere npm-versioner (v11+ og v12+) som standard pakkernes livscyklusscripts og viser en install-scripts-advarsel:
+Når du kører `npm install -g omniroute`, blokerer nyere npm-versioner (v11 + og v12 +) som standard pakkelivscyklusscripts og viser en advarsel om installationsscripts:
 
 ```
 npm warn install-scripts 7 packages had install scripts blocked because they are not covered by allowScripts:
@@ -110,25 +110,25 @@ npm warn install-scripts 7 packages had install scripts blocked because they are
 
 ### Kan denne advarsel ignoreres?
 
-**Delvist, men det anbefales ikke at køre uden scripts.** OmniRoute indeholder robuste reserveløsninger: Hvis native `better-sqlite3`-bindinger ikke kan indlæses fra den selvstændige pakke, skifter applikationen til alternative drivere såsom `node:sqlite` eller `sql.js` (se [SQLite-runtimeopløsning](../ops/SQLITE_RUNTIME.md)). Serveren starter stadig, men brug af WASM-reserveløsninger som `sql.js` deaktiverer SQLite WAL-tilstand (Write-Ahead Logging) og øger belastningen på hukommelsen og disksynkroniseringen.
+**Delvist, men at køre uden scripts anbefales ikke.** OmniRoute inkluderer yndefulde fallbacks: Hvis native `better-sqlite3` bindinger ikke kan indlæses fra den selvstændige bundt, falder applikationen tilbage gennem alternative drivere såsom `node:sqlite` eller `sql.js` (se [SQLite Runtime Resolution](../ops/SQLITE_RUNTIME.md) ). Serveren vil stadig starte, men kører på WASM faldbacks som `sql.js` deaktiverer SQLite WAL tilstanden (Write-Ahead Logging) og øger hukommelsen og disk-sync-overhead.
 
-### Hvilke scripts er faktisk nødvendige?
+### Hvilke scripts er egentlig nødvendige?
 
-Ikke alle blokerede scripts er nødvendige for at køre OmniRoute:
+Ikke alle blokerede scripts er afgørende for at køre OmniRoute:
 
-- **Nødvendige (`omniroute`, `better-sqlite3`):** OmniRoute kører fra en selvstændig Next.js-applikationspakke (`dist/`). Under installationen downloader eller kompilerer npm den værtsspecifikke native SQLite-driver i `node_modules/better-sqlite3/` på øverste niveau. OmniRoutes `postinstall`-script (`scripts/build/postinstall.mjs`) verificerer og kopierer derefter disse værtsspecifikke binære filer til `dist/node_modules/`, så den selvstændige server kan tilgå dem. Hvis OmniRoutes `postinstall`-script blokeres, springes dette kopieringstrin over.
-- **Valgfrie/transitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Disse er hjælpeværktøjer til builds, overvågningsværktøjer eller systemværktøjer til nøgleringe. Hvis de tillades, undgås buildadvarsler, men de er ikke nødvendige for den grundlæggende routingfunktionalitet.
-- **Udeladt (`onnxruntime-node`):** En valgfri afhængighed til lokale AI-embeddings, som **ikke** er nødvendig for at køre OmniRoute. Dens `postinstall`-script downloader ca. 300 MB CUDA-ressourcer fra NuGet. Medtag den ikke på tilladelseslisten, medmindre du udtrykkeligt har til hensigt at bruge lokal ONNX-acceleration på understøttet hardware.
+- **Vigtigt (`omniroute`, `better-sqlite3`):** OmniRoute kører fra en Next.js selvstændig applikationspakke (`dist/`). Under installationen downloader eller kompilerer npm den værtsspecifikke native SQLite driver i `node_modules/better-sqlite3/` på øverste niveau. OmniRoute's `postinstall` script (`scripts/build/postinstall.mjs`) verificerer og kopierer derefter disse værtsspecifikke binære filer til `dist/node_modules/`, så den selvstændige server kan få adgang til dem. Hvis `omniroute`'s postinstall-script er blokeret, springes dette kopitrin over.
+- **Optional/transitive (`keytar`, `@parcel/watcher`, `@swc/core`, `protobufjs`, `esbuild`):** Disse er byggehjælpere, overvågerværktøjer eller systemnøgleringsværktøjer. Ved at tillade dem forhindrer du build-advarsler, men de er ikke nødvendige for kerne-routingfunktionalitet.
+- **Ekskluderet (`onnxruntime-node`):** En valgfri afhængighed for lokale AI indlejringer og er** ikke** kræves for at OmniRoute kan køre. Dets postinstall-script downloader ~ 300MB CUDA aktiver fra NuGet; medtag det ikke på tilladelseslisten, medmindre du udtrykkeligt har til hensigt at bruge lokal ONNX acceleration på understøttet hardware.
 
-### Anbefalet løsning
+### Anbefalet rettelse
 
-For at tillade de nødvendige installationsscripts under en global installation og fjerne advarslerne skal du angive `--allow-scripts` for OmniRoute og dets native afhængigheder:
+For at tillade de nødvendige installationsscripts under en global installation og tavshedsadvarsler skal du videregive `--allow-scripts` for OmniRoute og dets oprindelige afhængigheder:
 
 ```bash
 npm install -g omniroute --allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild
 ```
 
-Alternativt kan du konfigurere dette permanent for alle globale installationer på din brugerkonto:
+Alternativt, for at konfigurere dette permanent for alle globale installationer på din brugerkonto:
 
 ```bash
 npm config set allow-scripts=omniroute,better-sqlite3,keytar,@parcel/watcher,@swc/core,protobufjs,esbuild --location=user
@@ -137,7 +137,7 @@ npm install -g omniroute
 
 ### Bekræft din installation
 
-Kør efter installationen det indbyggede diagnosticeringsværktøj for at sikre, at de native bindinger og runtime-miljøet fungerer korrekt:
+Efter installationen skal du køre det indbyggede diagnostiske værktøj for at sikre, at native bindinger og runtime-miljøet er sunde:
 
 ```bash
 omniroute doctor
@@ -470,7 +470,7 @@ i [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Permanent løsning:** Bind eksplicit til IPv4 ved at bruge `-p 127.0.0.1:20128:20128` i din `docker run`-kommando:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Dette gennemtvinger IPv4-bindingen og undgår samtidig at eksponere proxyen på alle værtens netværksgrænseflader.
 
@@ -823,30 +823,26 @@ Problemer, der er specifikke for v3.8.0-udgivelsen, samt deres aktuelle løsning
 
 ---
 
-## Langsom opstart / timeout for klarmelding
+## Langsom opstart / timeout for klarhed
 
-Hvis CLI'en viser `⚠ Serveren svarede ikke inden for 60 sek.`, men serveren
-faktisk fungerer, er tidsrammen for klarmeldingskontrollen for kort til dit miljø.
+Hvis CLI udskriver `⚠ Server did not respond within 60s`, men serveren faktisk fungerer, er parathedsprobebudgettet for kort til dit miljø.
 
-Dette sker ofte på Windows (antivirus, filsystemovervågning) eller i containere
-med stor arbejdsbelastning under opstart.
+Dette sker almindeligvis på Windows (antivirus, filsystemovervågning) eller containere med store opstartsbelastninger.
 
-**Løsning — øg tidsrammen:**
+**Fix — hæve budgettet:**
 
 ```bash
-# Via miljøvariabel (bevares på tværs af opstarter):
-export OMNIROUTE_READY_TIMEOUT_MS=180000   # 3 minutter
+# Via env var (persists across starts):
+export OMNIROUTE_READY_TIMEOUT_MS=180000   # 3 minutes
 omniroute serve
 
-# Via CLI-flag (kun denne ene gang):
+# Via CLI flag (one-off):
 omniroute serve --ready-timeout 180000
 ```
 
-Standarden er 60 000 ms (60 sek.). Advarslen er kun til orientering. Serveren
-fortsætter med at starte i baggrunden og vil være tilgængelig, når opstarten er fuldført.
+Standard er 60 000 ms (60 s). Advarslen er kun til orientering; serveren fortsætter med at starte i baggrunden og vil være tilgængelig, når opstarten er fuldført.
 
-Se [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) for alle
-oplysninger om `OMNIROUTE_READY_TIMEOUT_MS`.
+Se [`docs/reference/ENVIRONMENT.md`](../reference/ENVIRONMENT.md) for alle detaljer om `OMNIROUTE_READY_TIMEOUT_MS`.
 
 ---
 
@@ -854,13 +850,13 @@ oplysninger om `OMNIROUTE_READY_TIMEOUT_MS`.
 
 Diagnostisk matrix til kompressionsværktøjerne CCR (`ccr`) og `session-dedup`. For den fulde operatørreference (markører, forudsætninger, omfang pr. værktøj, paginering til hentning) se [Kompressionsmotorer → Forudsætninger / operatørvejledning](../compression/COMPRESSION_ENGINES.md#prerequisites--operator-guide-ccr--session-dedup).
 
-| Symptom                                                                                                             | Sandsynlig årsag                                                                                                                                       | Verificere                                                                                                              | Lave                                                                                                                                                                                                                                                                            |
-| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **MCP 403** — `403 LOCAL_ONLY`                                                                                      | Route-guard loopback-godkendelse, ikke en transportfejl. Ingen `Bearer`, eller en nøgle uden `mcp:connect`/`manage`/`admin`, nåede `/api/mcp/` -ruten. | Forespørgslen havde no/invalid `Authorization` header.                                                                  | Send en gyldig `Bearer` nøgle. En fjernnøgle kan indeholde `mcp:connect` (godkender `/api/mcp/` -kun lokalt udskæring) plus det specifikke read/write omfang, den har brug for.                                                                                                 |
-| **blok ikke fundet** — `omniroute_ccr_retrieve` afviser hashen                                                      | Hash er ikke en 24-hex-værdi eller blev kopieret forkert, eller blokken er allerede udløbet / blev smidt ud.                                           | Sammenlign hashen med 24-hex-værdien i `[CCR retrieve hash=…]` markøren; tjek `omniroute_ccr_stats` for butikstilstand. | Kopier den 24-hex-hash ordret fra markøren. Hvis blokken virkelig er væk, var den forbi sin TTL eller nåede aldrig den holdbare butik (blokke over 512 KB, og hver blok på en cloud-runtime, forbliv kun med hukommelse og overlever ikke en genstart).                         |
-| **CCR no-op** — en blok er ikke komprimeret (tekst kommer tilbage uændret)                                          | Blok under kompressionstærsklen, eller CCR motoren/tilstanden er inaktiv.                                                                              | Tjek den aktive komprimering `strategy`/`enabled` og blokstørrelsen i forhold til tærsklen.                             | Aktiver CCR (eller en stablet tilstand, der kører det), og bekræft, at blokken er stor nok til at være værd at gemme. En no-op er ikke en fejl — det er "intet at komprimere."                                                                                                  |
-| **dedup markør** — `[dedup:ref sha=…]` vises i output                                                               | **Forsætligt tilbageblik** , ikke et tab eller en fejl. `session-dedup` slettet tekst, der allerede er sendt i en tidligere omgang i samme session.    | Bekræft, at den samme tekst vises tidligere i sessionen.                                                                | Gør intet — ikke kalder et værktøj og prøv ikke at rekonstruere det. Den første forekomst er den kanoniske kopi; den aktuelle tur omskrives aldrig, den deduperes ved en senere tur.                                                                                            |
-| **Kodetilstand** — `omniroute_ccr_*` værktøjer fraværende fra `tools[]` / CCR instruktion ikke injiceret (OpenCode) | OpenCode Code Mode (standard) annoncerer kun native værktøjer til modellen, skjuler MCP -værktøjer fra `tools[]`.                                      | Tjek OpenCode MCP serverposten for `codemode`.                                                                          | Indstil `codemode: false` på serverindgangen (a** klient** indstilling), så MCP værktøjerne annonceres. CCR retrieve-protokol-instruktionen forbliver slukket: en server ved navn `omniroute` afslører `omniroute_omniroute_ccr_retrieve`, og `_` er ikke en matchet separator. |
+| Symptom                                                                                                             | Sandsynlig årsag                                                                                                                                       | Verificere                                                                                                              | Lave                                                                                                                                                                                                                                                                                                  |
+| ------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **MCP 403** — `403 LOCAL_ONLY`                                                                                      | Route-guard loopback-godkendelse, ikke en transportfejl. Ingen `Bearer`, eller en nøgle uden `mcp:connect`/`manage`/`admin`, nåede `/api/mcp/` -ruten. | Forespørgslen havde no/invalid `Authorization` header.                                                                  | Send en gyldig `Bearer` nøgle. En fjernnøgle kan indeholde `mcp:connect` (godkender `/api/mcp/` -kun lokalt udskæring) plus det specifikke read/write omfang, den har brug for.                                                                                                                       |
+| **blok ikke fundet** — `omniroute_ccr_retrieve` afviser hashen                                                      | Hash er ikke en 24-hex-værdi eller blev kopieret forkert, eller blokken er allerede udløbet / blev smidt ud.                                           | Sammenlign hashen med 24-hex-værdien i `[CCR retrieve hash=…]` markøren; tjek `omniroute_ccr_stats` for butikstilstand. | Kopier den 24-hex-hash ordret fra markøren. Hvis blokken virkelig er væk, var den forbi sin TTL eller nåede aldrig den holdbare butik (blokke over 512 KB, og hver blok på en cloud-runtime, forbliv kun med hukommelse og overlever ikke en genstart).                                               |
+| **CCR no-op** — en blok er ikke komprimeret (tekst kommer tilbage uændret)                                          | Blok under kompressionstærsklen, eller CCR motoren/tilstanden er inaktiv.                                                                              | Tjek den aktive komprimering `strategy`/`enabled` og blokstørrelsen i forhold til tærsklen.                             | Aktiver CCR (eller en stablet tilstand, der kører det), og bekræft, at blokken er stor nok til at være værd at gemme. En no-op er ikke en fejl — det er "intet at komprimere."                                                                                                                        |
+| **dedup markør** — `[dedup:ref sha=…]` vises i output                                                               | **Forsætligt tilbageblik** , ikke et tab eller en fejl. `session-dedup` slettet tekst, der allerede er sendt i en tidligere omgang i samme session.    | Bekræft, at den samme tekst vises tidligere i sessionen.                                                                | Gør intet — ikke kalder et værktøj og prøv ikke at rekonstruere det. Den første forekomst er den kanoniske kopi; den aktuelle tur omskrives aldrig, den deduperes ved en senere tur.                                                                                                                  |
+| **Kodetilstand** — `omniroute_ccr_*` værktøjer fraværende fra `tools[]` / CCR instruktion ikke injiceret (OpenCode) | OpenCode Code Mode (standard) annoncerer kun native værktøjer til modellen, skjuler MCP -værktøjer fra `tools[]`.                                      | Tjek OpenCode MCP serverposten for `codemode`.                                                                          | Indstil `codemode: false` på serverindgangen (a** klient** indstilling), så MCP værktøjerne annonceres. En server ved navn `omniroute` afslører `omniroute_omniroute_ccr_retrieve`; `_` er en matchet separator, så CCR instruktionen injiceres under det navn, når en anmodning bærer en CCR markør. |
 
 Flere symptomer:
 

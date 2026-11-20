@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] {action} ይደረግ ነበር",
     "cancelled": "ተሰርዟል።",
     "jsonOpt": "ውጤቱን እንደ JSON አቅርብ",
-    "yesOpt": "የማረጋገጫ ጥያቄውን ዝለል"
+    "yesOpt": "የማረጋገጫ ጥያቄውን ዝለል",
+    "positiveIntegerRequired": "ገደቡ አዎንታዊ ኢንቲጀር መሆን አለበት።"
   },
   "setup": {
     "title": "የOmniRoute ማዋቀር",

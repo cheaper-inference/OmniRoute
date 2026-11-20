@@ -50,6 +50,7 @@ beforeEach(() => {
 afterEach(() => {
   act(() => root.unmount());
   container.remove();
+  vi.unstubAllGlobals();
   vi.restoreAllMocks();
 });
 
@@ -125,17 +126,12 @@ describe("analytics tables name their overflowing scroll container", () => {
       "fetch",
       vi.fn(async () => Response.json(cacheHealthSummary))
     );
-    act(() => root.render(<CacheHealthTab />));
+    await act(async () => root.render(<CacheHealthTab />));
     await vi.waitFor(() => {
-      expect(container.querySelector("[data-slot='table-container']")).not.toBeNull();
+      const scroller = container.querySelector<HTMLElement>("[data-slot='table-container']");
+      expect(scroller).not.toBeNull();
+      expectNamedScrollRegion(scroller!, "cacheHealthByModel");
     });
-    // Let the kit measure the container after the table mounts.
-    await act(async () => {});
-    expectNamedScrollRegion(
-      container.querySelector<HTMLElement>("[data-slot='table-container']")!,
-      "cacheHealthByModel"
-    );
-    vi.unstubAllGlobals();
   });
 });
 

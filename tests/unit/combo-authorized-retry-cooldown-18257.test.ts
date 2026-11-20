@@ -81,6 +81,8 @@ const LONG_COOLDOWN_MS = 250;
 const LONG_COOLDOWN_SETTLE_MS = 300;
 const LONG_EXTENSION = { cooldownMs: 175, changeAfterMs: 65, extendMs: 225 };
 const LONG_EXTENSION_MAX_WAIT_MS = 200;
+// Default comboCooldownWait maxWaitMs and budgetMs of run(), in base milliseconds.
+const DEFAULT_WAIT_LIMIT_MS = 1000;
 const SCALED_CONFIG_KEYS = ["comboTimeoutMs", "hedgeDelayMs", "retryDelayMs"];
 const SCALED_WAIT_KEYS = ["maxWaitMs", "budgetMs"];
 const SCALED_OPTION_KEYS = [
@@ -270,9 +272,9 @@ async function run(
         resilienceSettings: {
           comboCooldownWait: {
             enabled: true,
-            maxWaitMs: 1000 * TIME_SCALE,
+            maxWaitMs: DEFAULT_WAIT_LIMIT_MS * TIME_SCALE,
             maxAttempts: 3,
-            budgetMs: 1000 * TIME_SCALE,
+            budgetMs: DEFAULT_WAIT_LIMIT_MS * TIME_SCALE,
             ...options.waitSettings,
           },
         },
@@ -434,9 +436,16 @@ for (const change of [
   });
 }
 
+// The control under test must be the only thing that prevents the wait. With the default
+// 120 ms cooldown the retry rereads the row ~320 ms (scaled) before it expires, and a stalled
+// event loop can spend that margin: in CI a 546 ms run let the cooldown lapse and the retry
+// through (200 !== 502). This cooldown leaves seconds of margin and stays below the default
+// maxWaitMs/budgetMs, so without the control the retry would wait for it.
+const PREVENTED_WAIT_COOLDOWN_MS = 600;
 for (const waitSettings of [{ enabled: false }, { maxWaitMs: 50 }, { maxAttempts: 0 }]) {
   test(`existing wait controls prevent a cooldown wait: ${JSON.stringify(waitSettings)}`, async () => {
-    const { response, calls } = await run({ waitSettings });
+    assert.ok(PREVENTED_WAIT_COOLDOWN_MS < DEFAULT_WAIT_LIMIT_MS);
+    const { response, calls } = await run({ waitSettings, cooldownMs: PREVENTED_WAIT_COOLDOWN_MS });
     assert.equal(response.status, 502);
     assert.equal(calls.length, 1);
   });
@@ -581,15 +590,24 @@ test("missing/read-failed rows preserve ordinary fallthrough but cannot reopen a
   }
 });
 
-// normalizeComboCooldownWait floors budgetMs at maxWaitMs, so keep maxWaitMs (x TIME_SCALE = 480)
-// just under budgetMs (x TIME_SCALE = 520): one ~375 ms wait fits, a second one cannot.
-for (const waitSettings of [{ maxAttempts: 1 }, { maxWaitMs: 120, budgetMs: 130 }]) {
+// Two timing faults made this flaky under load. Each target rereads its cooldown ~160 ms after its
+// retry is announced, and a wait is granted only when (cooldown end - now + 50 ms) <= maxWaitMs and
+// fits the shared budget. With a 480 ms cooldown and maxWaitMs 480: a stall that delayed the
+// cooldown write until the reread made the first wait ~530 ms, over maxWaitMs, so the first target
+// stopped without spending the allowance and the second one used it (200 !== 502); a stall after
+// the write let the cooldown lapse unwaited, with the same result. A 2 s cooldown (x TIME_SCALE)
+// leaves ~1.8 s of slack, and maxWaitMs = budgetMs = 2.6 s admits any first wait (1.4-2.05 s under
+// a 500 ms stall either side) while what is left can never cover a second one. With maxAttempts 1
+// the default limits fit one wait and the attempt count stops the second.
+const SHARED_WAIT_COOLDOWN_MS = 500;
+for (const waitSettings of [{ maxAttempts: 1 }, { maxWaitMs: 650, budgetMs: 650 }]) {
   test(`different targets share the existing request wait allowance: ${JSON.stringify(waitSettings)}`, async () => {
     const { response, calls } = await run({
       coolingFallback: true,
       retryFails: true,
       config: { maxGlobalAttempts: 4 },
       waitSettings,
+      cooldownMs: SHARED_WAIT_COOLDOWN_MS,
     });
     assert.equal(response.status, 502);
     assert.deepEqual(
@@ -715,8 +733,12 @@ for (const status of ["unavailable", "rate_limited"]) {
   }
 }
 
+// The cooldown row is built when its test runs, not when the file loads: these cases run last,
+// and on a loaded runner the file can take more than a minute to reach them, by which time a
+// load-time "+60 s" cooldown has already expired and the retry is rightly allowed.
+const freshCooldownRow = () => ({ rateLimitedUntil: new Date(Date.now() + 60_000).toISOString() });
 for (const retryRow of [
-  { rateLimitedUntil: new Date(Date.now() + 60_000).toISOString() },
+  freshCooldownRow,
   { testStatus: "banned" },
   { isActive: false },
   { lastErrorType: "auth_error", errorCode: "401" },
@@ -724,10 +746,12 @@ for (const retryRow of [
   { lastErrorType: "unknown" },
   { errorCode: "401" },
 ]) {
+  const label =
+    typeof retryRow === "function" ? '{"rateLimitedUntil":"now+60s"}' : JSON.stringify(retryRow);
   for (const preContent of [false, true]) {
-    test(`existing transient-provider allowance cannot bypass fresh protection ${JSON.stringify(retryRow)}, preContent=${preContent}`, async () => {
+    test(`existing transient-provider allowance cannot bypass fresh protection ${label}, preContent=${preContent}`, async () => {
       await runInheritedTransientRetry("unavailable", null, preContent, {
-        retryRow,
+        retryRow: typeof retryRow === "function" ? retryRow() : retryRow,
         expectRetry: false,
       });
     });

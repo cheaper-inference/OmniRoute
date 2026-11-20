@@ -368,7 +368,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`. `./.env` u radnom direktoriju može postaviti samo kratku listu dopuštenih ključeva (portovi, `REQUIRE_API_KEY`, lokalne postavke i postavke boja); sve ostalo stavi u `~/.omniroute/.env`. Pogledajte [ugovore o pokretanju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
+CLI automatski učitava `.env` iz `~/.omniroute/.env` ili `./.env`. `./.env` u radnom direktoriju može postaviti samo kratki popis dopuštenih ključeva (`REQUIRE_API_KEY`, lokalizacija, vremenska zona i postavke boja, ne portovi); sve ostalo stavi u `~/.omniroute/.env`. Pogledajte [ugovore o pokretanju CLI](CLI-LAUNCH-CONTRACTS.md#working-directory-env).
 
 ### Način ladice
 
@@ -730,8 +730,8 @@ Odaberite poseban prefiks (`mygw`, `acme-proxy`). Ako zahtjevi prema prilagođen
 
 Ovi ključevi idu u `providerSpecificData` veze (na primjer putem `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (cijeli broj, 1–1024) — za OpenAI chat-format kompatibilne veze čiji pristupnik odbija duga imena alata. Dulja imena šalju se kao kratki aliasi i vraćaju u odgovor.
-- `quotaEndpoint` — krajnja točka quota/credits pristupnika, pročitajte za traku kvote nadzorne ploče i usmjeravanje s obzirom na kvote. Radi na OpenAI- i Anthropic-kompatibilnim vezama; puni oblik je dokumentiran u `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (cijeli broj, 1–1024) — za veze kompatibilne sa OpenAI chat formatom čiji pristupnik odbija duga imena alata. Dulja imena šalju se kao kratki aliasi i vraćaju u odgovor. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code već imaju pseudonime preko 64 znaka bez postavke. Vrijednost veze zamjenjuje zadanu vrijednost Azure OpenAI / Azure AI Foundry (Azure veza iza strožeg pristupnika) i postavlja ograničenje za prilagođeni kompatibilni čvor; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go i Muse Code zadržavaju svoje ograničenje registra i ignoriraju ga.
+- `quotaEndpoint` — krajnja točka quota/credits pristupnika, pročitajte za traku kvota nadzorne ploče i usmjeravanje s obzirom na kvote. Radi na OpenAI- i Anthropic-kompatibilnim vezama; puni oblik je dokumentiran u `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -828,7 +828,7 @@ Vraća modele grupirane prema pružatelju s tipovima (`chat`, `embedding`, `imag
 
 ### LLM Gateway Intelligence (faza 9)
 
-- **Semantička predmemorija** — Automatski predmemorira odgovore bez strujanja, temperaturu = 0 (zaobići sa `X-OmniRoute-No-Cache: true`)
+- **Semantička predmemorija** — Automatski sprema u predmemoriju non-streaming, temperature = 0 odgovore (zaobići sa `X-OmniRoute-No-Cache: true`)
 - **Idempotencija zahtjeva** — Deduplicira zahtjeve unutar 5 s putem `Idempotency-Key` ili `X-Request-Id` zaglavlja
 - **Praćenje napretka** — Opt-in SSE `event: progress` događaji putem `X-OmniRoute-Progress: true` zaglavlja
 
@@ -859,14 +859,14 @@ Konfigurirajte putem** Nadzorna ploča → Postavke → Usmjeravanje** . Nadzorn
 
 **Strategije vidljive na nadzornoj ploči (usmjeravanje na razini računa):**
 
-| Strategija                | Opis                                                                                                         |
-| ------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| **Prvo ispunite**         | Koristi račune prema redoslijedu prioriteta — primarni račun obrađuje sve zahtjeve dok ne postane nedostupan |
-| **Razigravanje**          | Kruži kroz sve račune s podesivim ljepljivim ograničenjem (zadano: 3 poziva po računu)                       |
-| **P2C (Moć dva izbora)**  | Odabire 2 nasumična računa i usmjerava na zdraviji — uravnotežuje opterećenje sa sviješću o zdravlju         |
-| **Slučajno**              | Nasumično odabire račun za svaki zahtjev koristeći Fisher-Yatesovo miješanje                                 |
-| **Najmanje korišteno**    | Usmjerava prema računu s najstarijom `lastUsedAt` vremenskom oznakom, ravnomjerno raspoređujući promet       |
-| **Optimizirani troškovi** | Usmjerava prema računu s najnižom vrijednošću prioriteta, optimizirajući za pružatelje s najnižom cijenom    |
+| Strategija                | Opis                                                                                                      |
+| ------------------------- | --------------------------------------------------------------------------------------------------------- |
+| **Prvo ispunite**         | Koristi račune po prioritetu — primarni račun obrađuje sve zahtjeve dok ne postane nedostupan             |
+| **Razigravanje**          | Kruži kroz sve račune s podesivim ljepljivim ograničenjem (zadano: 3 poziva po računu)                    |
+| **P2C (Moć dva izbora)**  | Odabire 2 nasumična računa i usmjerava do zdravijeg — uravnotežuje opterećenje sa sviješću o zdravlju     |
+| **Slučajno**              | Nasumično odabire račun za svaki zahtjev koristeći Fisher-Yatesovo miješanje                              |
+| **Najmanje korišteno**    | Usmjerava prema računu s najstarijom `lastUsedAt` vremenskom oznakom, ravnomjerno raspoređujući promet    |
+| **Optimizirani troškovi** | Usmjerava prema računu s najnižom vrijednošću prioriteta, optimizirajući za pružatelje s najnižom cijenom |
 
 **Napredne kombinirane i automatske strategije** (podesivo po kombinaciji ili putem `auto/*` prefiksa — vidi [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
@@ -876,10 +876,10 @@ Konfigurirajte putem** Nadzorna ploča → Postavke → Usmjeravanje** . Nadzorn
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Moć dva izbora)
 - `least-used` i `cost-optimized`
-- `auto` — vođeno bodovanjem svih kandidata
-- `lkgp` (Last Known Good Provider) — pričvršćuje na posljednjeg uspješnog pružatelja, a zatim se vraća na pravila
-- `context-optimized` — odabire model s najvećim prozorom slobodnog konteksta
-- `context-relay` — lanci dugokontekstualnih modela za naknadne zaokrete
+- `auto` — na temelju rezultata svih kandidata
+- `lkgp` (posljednji poznati dobar pružatelj) — se prikači na posljednjeg uspješnog pružatelja, a zatim se vraća na pravila
+- `context-optimized` — bira model s najvećim prozorom slobodnog konteksta
+- `context-relay` — povezuje modele dugog konteksta za naknadne zaokrete
 
 #### Vanjsko ljepljivo zaglavlje sesije
 
@@ -897,7 +897,7 @@ Ako koristite Nginx i šaljete zaglavlja obrazaca podvlake, omogućite:
 underscores_in_headers on;
 ```
 
-#### Zamjenski nazivi modela
+#### Aliasi modela sa zamjenskim znakovima
 
 Stvorite uzorke zamjenskih znakova za ponovno mapiranje naziva modela:
 
@@ -989,31 +989,31 @@ OmniRoute implementira otpornost na razini pružatelja usluga s pet komponenti:
 1. **Red čekanja i tempo zahtjeva** — Oblikovanje zahtjeva na razini sustava:
    - **Zahtjevi po minuti (RPM)** — Maksimalan broj zahtjeva po minuti po računu
    - **Min. vrijeme između zahtjeva** — Minimalni razmak u milisekundama između zahtjeva
-   - **Maks. istodobnih zahtjeva** — Maksimalan broj istodobnih zahtjeva po računu
+   - **Maks. istodobnih zahtjeva** — Maksimalan broj istovremenih zahtjeva po računu
 
-2. **Hlađenje veze** — Konfiguracija po vrsti autentifikacije za jednu vezu nakon neuspjeha koji se mogu ponoviti:
-   - **Osnovno hlađenje** — Zadani prozor za hlađenje za kvarove uzvoda koji se mogu ponovno pokušati
-   - **Koristite upstream savjete za ponovni pokušaj** — Poštuje mjerodavne savjete `Retry-After` ili poništavanje ako su navedeni
-   - **Maks. koraci odustajanja** — Maksimalna eksponencijalna razina povlačenja za opetovane kvarove
+2. **Hlađenje veze** — Per-auth-type konfiguracija za jednu vezu nakon ponovnih neuspjeha:
+   - **Osnovno hlađenje** — Zadani prozor hlađenja za kvarove uzvoda koji se mogu ponovno pokušati
+   - **Koristite upstream savjete za ponovni pokušaj** — Poštuje autoritativne savjete `Retry-After` ili poništavanje ako su navedeni
+   - **Maks. koraci odustajanja** — Maksimalna eksponencijalna razina povlačenja za ponovljene kvarove
 
 3. **Prekidač strujnog kruga dobavljača** — Prati kvarove dobavljača s kraja na kraj, označava da je usluga degradiran na konfiguriranom pragu upozorenja i otvara prekidač kada se dosegne konfigurirani prag kvara:
    - **Prag degradacije** — Uzastopni kvarovi pružatelja prije ulaska `DEGRADED`
    - **Prag neuspjeha** — Uzastopni kvarovi pružatelja prije ulaska `OPEN`
    - **Poništi vremensko ograničenje** — Vremenski okvir prije ponovnog testiranja pružatelja usluga
-   - **CLOSED** (Zdravo) — Zahtjevi teku normalno
+   - **CLOSED** (Zdrav) — Zahtjevi teku normalno
    - **DEGRADED** — Zahtjevi i dalje teku dok se prate povišeni kvarovi
-   - **OPEN** — Davatelj je privremeno blokiran nakon opetovanih kvarova
-   - **HALF_OPEN** — Testiranje je li se pružatelj oporavio
+   - **OPEN** — Provider je privremeno blokiran nakon opetovanih kvarova
+   - **HALF_OPEN** — Testiranje ako se pružatelj oporavio
 
    Ograničenja stope `429` s opsegom veze ostaju** Hlađenje veze** i ne računaju se prema razbijaču pružatelja usluga.
 
    Stanje izvođenja prekidača pružatelja prikazano je na** Nadzorna ploča → Zdravlje** samo.
 
-4. **Pričekajte hlađenje** — Ako se svaka kandidatska veza već hladi, OmniRoute može pričekati najranije hlađenje i automatski ponovno pokušati isti zahtjev klijenta.
+4. **Pričekajte hlađenje** — Ako se svaka veza kandidata već hladi, OmniRoute može pričekati najranije hlađenje i automatski ponovno pokušati isti zahtjev klijenta.
 
-5. **Automatsko otkrivanje ograničenja brzine** — Kada pružatelji uzlaznih usluga vrate eksplicitne prozore čekanja, ti savjeti nadjačavaju hlađenje lokalne veze kada je postavka omogućena.
+5. **Automatsko otkrivanje ograničenja brzine** — Kada pružatelji uzvodnih usluga vrate eksplicitne prozore čekanja, ti savjeti nadjačavaju hlađenje lokalne veze kada je postavka omogućena.
 
-**Stručni savjet:** Koristite** Zdravlje** stranicu za pregled i resetiranje prekidača pružatelja usluga uživo nakon prekida. Stranica Resilience mijenja samo konfiguraciju.
+**Stručni savjet:** Koristite** Zdravlje** stranica za pregled i resetiranje prekidača pružatelja usluga uživo nakon prekida. Stranica Resilience mijenja samo konfiguraciju.
 
 ---
 
@@ -1074,7 +1074,7 @@ Pristup putem** Nadzorna ploča → Troškovi** .
 | tab          | Svrha                                                                                                            |
 | ------------ | ---------------------------------------------------------------------------------------------------------------- |
 | **Proračun** | Postavite ograničenja potrošnje po API ključu sa daily/weekly/monthly proračunima i praćenjem u stvarnom vremenu |
-| **Cijene**   | Pregledajte i uredite unose modela cijena — cijena po 1K input/output tokena po pružatelju                       |
+| **Cijene**   | Pregledajte i uredite unose cijena modela — cijene po 1K input/output tokena po pružatelju                       |
 
 ```bash
 # API: Set a budget
@@ -1152,7 +1152,7 @@ Konfigurirajte balansiranje po kombinaciji** Nadzorna ploča → kombinacije →
 | **Najmanje korišteno**    | Usmjerava do modela s najmanje nedavnih zahtjeva (koristi kombiniranu metriku) |
 | **Troškovno optimiziran** | Rute do najjeftinijeg dostupnog modela (koristi tablicu cijena)                |
 
-Mogu se postaviti globalne zadane kombinacije** Nadzorna ploča → Postavke → Usmjeravanje → Combo Defaults** . Combo target timeout prema zadanim postavkama nasljeđuje trenutni timeout zahtjeva. Koristiti** Ciljano vrijeme čekanja (sekunde)** na zadanim postavkama kombinacije ili pojedinačnoj kombinaciji samo kada bi kraće ograničenje po cilju trebalo pokrenuti brže vraćanje.
+Mogu se postaviti zadane globalne kombinacije** Nadzorna ploča → Postavke → Usmjeravanje → Combo Defaults** . Combo target timeout prema zadanim postavkama nasljeđuje trenutni timeout zahtjeva. Koristiti** Ciljano vrijeme čekanja (sekunde)** na zadanim postavkama kombinacije ili pojedinačnoj kombinaciji samo kada bi kraće ograničenje po cilju trebalo pokrenuti brže vraćanje.
 
 Kombinirane optimizacije bez kašnjenja su opt-in. Otiđi** Optimizacije bez kašnjenja** onemogućeno kako bi se spriječilo da ove značajke latencije utrkuju rezervne ciljeve, preskaču ciljeve na temelju TTFT povijesti ili komprimiraju rezervne zahtjeve; omogućavanje omogućuje konfiguriranu zaštitu, prediktivno preskakanje TTFT -a i proaktivnu pomoćnu kompresiju za razmjenu vjernosti routing/request za nižu latenciju repa.
 
@@ -1166,7 +1166,7 @@ Pristup putem** Nadzorna ploča → Zdravlje** . Pregled stanja sustava u stvarn
 
 | Kartica                        | Što pokazuje                                                                |
 | ------------------------------ | --------------------------------------------------------------------------- |
-| **Status sustava**             | Vrijeme rada, verzija, upotreba memorije, direktorij podataka               |
+| **Status sustava**             | Vrijeme rada, verzija, korištenje memorije, direktorij podataka             |
 | **Zdravlje pružatelja usluga** | Stanje izvođenja prekidača globalnog dobavljača                             |
 | **Ograničenja stope**          | Hlađenja aktivne veze po računu s preostalim vremenom                       |
 | **Aktivna zaključavanja**      | Aktivna zaključavanja i privremena isključenja na temelju modela            |
