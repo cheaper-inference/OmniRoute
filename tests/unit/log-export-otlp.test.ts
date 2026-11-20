@@ -8,6 +8,7 @@ import { createHmac } from "node:crypto";
 import { once } from "node:events";
 import { getLogExportDestinationType } from "../../src/lib/logExport/registry.ts";
 import type { LogExportRecord } from "../../src/lib/logExport/types.ts";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 import { createManagementSessionToken } from "../helpers/managementSession.ts";
 
 const packageVersion: string = JSON.parse(
@@ -34,6 +35,7 @@ const source = await import("../../src/lib/usage/callLogExportSource.ts");
 const route = await import("../../src/app/api/log-export/destinations/route.ts");
 const oneRoute = await import("../../src/app/api/log-export/destinations/[id]/route.ts");
 const otlp = await import("../../src/lib/logExport/destinations/otlpHttp.ts");
+const [, coveragePreload] = nativeCoverageArgs();
 
 type Payload = ReturnType<typeof otlp.buildOtlpPayload>;
 type Span = Payload["resourceSpans"][number]["scopeSpans"][number]["spans"][number];
@@ -101,6 +103,15 @@ function attributes(span: Span) {
 }
 const str = (stringValue: string) => ({ stringValue });
 const int = (value: number) => ({ intValue: String(value) });
+
+if (coveragePreload) {
+  test.beforeEach(() => {
+    runner.__setLogExportChildOptionsForTest({ coveragePreload });
+  });
+  test.afterEach(() => {
+    runner.__setLogExportChildOptionsForTest(null);
+  });
+}
 
 test.after(() => {
   core.resetDbInstance();
@@ -728,6 +739,7 @@ test("child runner end-to-end: cursor advances filtered rows, ttft mapped, secre
   const originalError = console.error;
   console.error = (...args: unknown[]) => output.push(args.join(" "));
   runner.__setLogExportChildOptionsForTest({
+    coveragePreload,
     onSpawn: (child) => {
       assert.equal(JSON.stringify(child.spawnargs).includes(secret), false);
       child.stdout?.on("data", (c: Buffer) => output.push(c.toString()));
@@ -845,6 +857,7 @@ test("real runner marks failure, retains pending rows and resends identical span
       let spawned = 0;
       runner.__setLogExportChildOptionsForTest({
         modulePath: "",
+        coveragePreload,
         onSpawn(child) {
           spawned++;
           child.stdout?.on("data", (c: Buffer) => output.push(c.toString()));
