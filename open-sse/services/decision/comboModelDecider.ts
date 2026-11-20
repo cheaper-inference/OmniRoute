@@ -1,0 +1,142 @@
+/**
+ * `combo-model` decider: one of the operator's own provider models answers the routing
+ * question in process, through the combo's `handleSingleModel` — the way the fusion judge
+ * runs (fusion.ts). Prompt and parser are the OpenAI-chat decision wire (#15641).
+ *
+ * Guards: a combo reference (`auto`, `auto/*`, a configured combo name, or any id without a
+ * provider prefix) is refused; the call is non-streaming, tool-free, temperature 0 with a small
+ * output budget and none of the client's system prompt, tools or history; it runs inside the
+ * decision scope, so a decision started from within it is refused (depth guard); one timeout
+ * aborts it through the target's `modelAbortSignal`.
+ */
+import { extractPanelText } from "../fusion.ts";
+import type { ComboCollectionLike, HandleSingleModel } from "../combo/types.ts";
+import { clampDecisionTimeout } from "./config.ts";
+import { decisionDepth, runInDecisionScope } from "./scope.ts";
+import { readBoundedJson } from "./transport.ts";
+import { decisionFailure, type Decider, type DecisionChoiceRequest } from "./types.ts";
+import {
+  DECISION_MAX_OUTPUT_TOKENS,
+  OPENAI_DECISION_SYSTEM_PROMPT,
+  buildOpenAiDecisionMessages,
+  parseDecisionAnswerText,
+  toDecisionChoiceResult,
+} from "./wires.ts";
+
+export interface ComboModelDeciderOptions {
+  /** `provider/model` of one of the operator's models. */
+  model?: string;
+  timeoutMs?: number;
+  /** The combo's `handleSingleModel`; absent outside a live request (e.g. the preview). */
+  dispatch?: HandleSingleModel;
+  allCombos?: ComboCollectionLike;
+  /** The client's request body: only its shape (messages / input / contents) is reused. */
+  clientBody?: Record<string, unknown> | null;
+  now?: () => number;
+}
+
+function comboNames(allCombos: ComboCollectionLike): Set<string> {
+  const list = Array.isArray(allCombos)
+    ? allCombos
+    : Array.isArray(allCombos?.combos)
+      ? allCombos.combos
+      : [];
+  return new Set(
+    list
+      .map((combo) => (combo as { name?: unknown } | null)?.name)
+      .filter((name): name is string => typeof name === "string" && name.length > 0)
+  );
+}
+
+/** True when `model` would route through a combo instead of one provider model. */
+export function isDecisionComboRef(model: string, allCombos: ComboCollectionLike): boolean {
+  const id = model.trim();
+  if (id === "auto" || id.startsWith("auto/") || !id.includes("/")) return true;
+  return comboNames(allCombos).has(id);
+}
+
+/** Decision body in the client's own wire shape, so the dispatcher translates it as usual. */
+function buildBody(model: string, request: DecisionChoiceRequest, clientBody: unknown) {
+  const [, user] = buildOpenAiDecisionMessages(request);
+  // One user turn carries the instructions: valid for OpenAI, Claude and Gemini alike.
+  const text = `${OPENAI_DECISION_SYSTEM_PROMPT}\n\n${user.content}`;
+  const shape = (clientBody ?? {}) as { input?: unknown; contents?: unknown; messages?: unknown };
+  const common = { model, stream: false, temperature: 0 };
+  if (!Array.isArray(shape.messages) && shape.input !== undefined) {
+    return {
+      ...common,
+      max_output_tokens: DECISION_MAX_OUTPUT_TOKENS,
+      input: [{ role: "user", content: text }],
+    };
+  }
+  if (!Array.isArray(shape.messages) && Array.isArray(shape.contents)) {
+    return {
+      ...common,
+      generationConfig: { temperature: 0, maxOutputTokens: DECISION_MAX_OUTPUT_TOKENS },
+      contents: [{ role: "user", parts: [{ text }] }],
+    };
+  }
+  return {
+    ...common,
+    max_tokens: DECISION_MAX_OUTPUT_TOKENS,
+    messages: [{ role: "user", content: text }],
+  };
+}
+
+export function createComboModelDecider(options: ComboModelDeciderOptions): Decider {
+  const now = options.now ?? Date.now;
+  const timeoutMs = clampDecisionTimeout(options.timeoutMs);
+
+  return async (request) => {
+    const model = options.model?.trim();
+    if (!model || !options.dispatch) return decisionFailure("not_configured");
+    if (isDecisionComboRef(model, options.allCombos)) return decisionFailure("recursion");
+    if (decisionDepth() > 0) return decisionFailure("recursion");
+    if (request.signal?.aborted) return decisionFailure("timeout");
+
+    const dispatch = options.dispatch;
+    const controller = new AbortController();
+    const onCallerAbort = () => controller.abort();
+    request.signal?.addEventListener("abort", onCallerAbort, { once: true });
+    const startedAt = now();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timedOut = new Promise<"timeout">((resolve) => {
+      timer = setTimeout(() => {
+        controller.abort();
+        resolve("timeout");
+      }, timeoutMs);
+    });
+    const call = runInDecisionScope(async () => {
+      const response = await dispatch(buildBody(model, request, options.clientBody), model, {
+        modelAbortSignal: controller.signal,
+      });
+      if (!response.ok) {
+        await response.body?.cancel().catch(() => {});
+        return { status: response.status } as const;
+      }
+      return { json: await readBoundedJson(response) } as const;
+    });
+    call.catch(() => {});
+
+    try {
+      const outcome = await Promise.race([call, timedOut]);
+      const latencyMs = Math.max(0, now() - startedAt);
+      if (outcome === "timeout" || controller.signal.aborted) {
+        return decisionFailure("timeout", { latencyMs });
+      }
+      if ("status" in outcome) {
+        return decisionFailure("http_error", { status: outcome.status, latencyMs });
+      }
+      const json = outcome.json as { model?: unknown } | null;
+      const answer = parseDecisionAnswerText(extractPanelText(json), json?.model ?? model);
+      return toDecisionChoiceResult(answer, request, latencyMs);
+    } catch {
+      return decisionFailure(controller.signal.aborted ? "timeout" : "invalid_response", {
+        latencyMs: Math.max(0, now() - startedAt),
+      });
+    } finally {
+      clearTimeout(timer);
+      request.signal?.removeEventListener("abort", onCallerAbort);
+    }
+  };
+}
