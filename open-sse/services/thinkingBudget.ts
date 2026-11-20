@@ -313,6 +313,10 @@ export function resolveClaudeNativeGeminiThinking(
     }
     const fromEffort = nativeGeminiEffort(toRecord(body.output_config).effort, supported);
     if (fromEffort && (fromEffort.includeThoughts || isGemini4PlusModel(model))) return fromEffort;
+    if (fixedTier && (body.thinking === false || thinking.type === "disabled")) {
+      const thinkingLevel = supported.includes("minimal") ? "minimal" : supported[0];
+      return thinkingLevel ? { thinkingLevel, includeThoughts: false } : null;
+    }
     return nativeGeminiDefault(supported, fixedTier);
   };
   return nativeGeminiThinkingConfig(model, body, resolve());

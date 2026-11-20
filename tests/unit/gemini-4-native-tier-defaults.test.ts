@@ -36,6 +36,48 @@ test("Gemini 4 fixed tier IDs are the default thinking level across translators"
   }
 });
 
+for (const [name, thinking] of [
+  ['thinking.type="disabled"', { type: "disabled" }],
+  ["thinking=false", false],
+] as const) {
+  test(`Claude ${name} overrides the Gemini 4 Hydrogen xhigh default`, () => {
+    const result = claudeToGeminiRequest(
+      "gemini-4-hydrogen-xhigh",
+      { ...claudeBody, thinking },
+      false
+    );
+    assert.deepEqual(result.generationConfig.thinkingConfig, {
+      thinkingLevel: "low",
+      includeThoughts: false,
+    });
+  });
+}
+
+test("Claude explicit level, budget and effort retain priority over the Gemini 4 fixed-tier default", () => {
+  const model = "gemini-4-hydrogen-xhigh";
+  for (const [request, expected] of [
+    [
+      {
+        thinkingLevel: "medium",
+        thinking: { type: "disabled" },
+        output_config: { effort: "high" },
+      },
+      { thinkingLevel: "medium", includeThoughts: true },
+    ],
+    [
+      { thinking: { type: "disabled" }, output_config: { effort: "high" } },
+      { thinkingLevel: "high", includeThoughts: true },
+    ],
+    [
+      { thinking: { type: "enabled", budget_tokens: 0 }, output_config: { effort: "high" } },
+      { thinkingLevel: "low" },
+    ],
+  ]) {
+    const result = claudeToGeminiRequest(model, { ...claudeBody, ...request }, false);
+    assert.deepEqual(result.generationConfig.thinkingConfig, expected, JSON.stringify(request));
+  }
+});
+
 test("Gemini 4 native levels retain explicit overrides and distinguish none and minimal", () => {
   for (const family of ["argon", "carbon", "hydrogen", "neon"]) {
     const model = `gemini-4-${family}`;

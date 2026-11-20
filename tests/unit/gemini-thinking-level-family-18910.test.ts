@@ -116,6 +116,7 @@ test("known Gemini 4 models send thinkingLevel low without thoughts for effort n
     const tc = openaiThinking(model, { max_tokens: 65536, reasoning_effort: "none" });
     assert.deepEqual(tc, { thinkingLevel: "low", includeThoughts: false }, model);
     assert.equal(tc?.thinkingBudget, undefined, model);
+    assert.equal(tc?.includeThoughts, false, model);
   }
 });
 
