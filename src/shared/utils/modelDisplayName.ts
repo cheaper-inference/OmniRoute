@@ -47,7 +47,7 @@ const DASH_VERSION_BRANDS = new Set(["gpt"]);
 const DATE_TOKEN = /^(19|20)\d{6}$/;
 
 /** "v4.1" / "V2.6" — an explicit version marker. */
-const VERSION_MARKER = /^v\d+([.\d]*)$/i;
+const VERSION_MARKER = /^v\d[.\d]*$/i;
 
 /** Digits left over after the brand prefix ("qwen3.8" -> "qwen" + "3.8"). */
 const BRANDED_VERSION = /^([A-Za-z]+)(\d[.\d]*)$/;
