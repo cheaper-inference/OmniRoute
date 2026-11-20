@@ -4,10 +4,9 @@
 
 ---
 
-v3.8.49'dan (kalite/hız planının WS3.2/WS3.4'ü) bu yana incelenmiş PR'ların
-`release/vX.Y.Z` dalına varsayılan birleştirme yolu **Mergify birleştirme kuyruğudur**
-(`.mergify.yml`); aşağıda belgelenen **manuel birleştirme treni** ise YEDEK YÖNTEMDİR —
-olaylar, sürüm dondurmaları sırasında veya Mergify Açık Kaynak planı değişirse kullanılır.
+> **2026-11-19: Birleştirme birleştirme sırası kullanımdan kaldırıldı** (sahibin kararı). `.mergify.yml` artık bir kuyruk tanımlamıyor ve bir çekme isteğini birleştiren veya yeniden yazan Birleştir komutlarını reddediyor. PRs sürümü, omni-queue canlı modda çalışana kadar ve bundan sonra omni-queue aracılığıyla ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) "Aktif sürümde yeşil kapılar gerektir" (`Gate / CI` + `Gate / Quality`) depo kural seti altında elle birleştirilir. Aşağıdaki Birleştirme bölümleri kuyruğu olduğu gibi tanımlar.
+
+V3.8.49'dan bu yana ( quality/velocity planının WS3.2/WS3.4 ), incelenen PRs `release/vX.Y.Z` varsayılan birleştirme yolu şudur:** Birleştirme kuyruğunu birleştir** (`.mergify.yml`); the** manuel birleştirme treni** Aşağıda, olaylar sırasında, sürümün dondurulması sırasında veya Açık Kaynak Birleştirme planının değişmesi durumunda kullanılan FALLBACK — belgelenmiştir.
 
 ## Varsayılan yol: Mergify kuyruğu
 
