@@ -1,7 +1,9 @@
 import { createSseTextTransform, type FieldCategory } from "./sseTextTransform";
 import {
   bufferField,
+  ensureResponsesTextDeltaIds,
   flushOpenAiTextBuffers,
+  responsesTextTailDelta,
   type BufferedField,
   type TextBuffers,
 } from "./sseTextBuffers";
@@ -379,7 +381,7 @@ function flushResponsesFormat(
       buffers.reasoning = "";
     }
     if (!parts.length) return null;
-    return { type: "response.output_text.delta", output_index: idx, delta: parts.join("") };
+    return responsesTextTailDelta(lastJson, idx, parts.join(""));
   }
   const finalJson = JSON.parse(JSON.stringify(lastJson)) as Record<string, unknown>;
   if (buffers.content) {
@@ -394,6 +396,7 @@ function flushResponsesFormat(
     finalJson.reasoning = buffers.reasoning;
     buffers.reasoning = "";
   }
+  ensureResponsesTextDeltaIds(finalJson, idx);
   return finalJson;
 }
 

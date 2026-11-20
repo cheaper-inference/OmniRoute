@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Keep mid-conversation system messages in place",
     "requireUserLastMessageDescription": "For upstreams that reject assistant prefill: drop trailing assistant turns (no tool_use) before sending. The model may regenerate its previous answer.",
     "requireUserLastMessageLabel": "Require conversation to end with a user message",
+    "strictChatHistoryDescription": "Repair interrupted tool-call sequences and coalesce adjacent assistant turns before sending to strict OpenAI-compatible upstreams.",
+    "strictChatHistoryLabel": "Strict chat history repair",
     "bulkPasteAdded": "{count, plural, one {1 key added} other {# keys added}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 duplicate skipped} other {# duplicates skipped}}",
     "bulkPasteHint": "Paste one API key per line. Empty lines are ignored and duplicate keys are skipped.",

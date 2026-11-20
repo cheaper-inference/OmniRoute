@@ -473,7 +473,7 @@ nájdete v súbore [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Trvalá oprava:** Explicitne nastavte väzbu na IPv4 použitím `-p 127.0.0.1:20128:20128` v príkaze `docker run`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Tým sa vynúti väzba IPv4 a zároveň sa zabráni sprístupneniu proxy na všetkých rozhraniach hostiteľa.
 
