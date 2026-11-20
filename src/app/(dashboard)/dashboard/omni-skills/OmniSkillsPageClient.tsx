@@ -19,7 +19,7 @@ import { OmniExecutionsTab } from "./components/OmniExecutionsTab";
 import { OmniSandboxTab } from "./components/OmniSandboxTab";
 import { OmniMarketplaceTab } from "./components/OmniMarketplaceTab";
 import type { OmniSkill } from "./components/OmniSkillCard";
-import type { JSX } from "react";
+import type { ComponentProps, JSX } from "react";
 
 interface Execution {
   id: string;
@@ -37,6 +37,19 @@ async function loadExecutions(page: number): Promise<unknown | null> {
   const res = await fetch(`${EXECUTIONS_API_PATH}?page=${page}&limit=20`);
   if (await detectLocalOnlyRejection(res, EXECUTIONS_API_PATH)) return null;
   return res.json();
+}
+
+/** An execution stat, or a dash when the executions route is local-only for this session. */
+function executionStat(localOnly: boolean, value: string | number): string | number {
+  return localOnly ? "—" : value;
+}
+
+/** The Executions tab: the list, or the notice when the route is local-only for this session. */
+function ExecutionsPanel({
+  localOnly,
+  ...listProps
+}: ComponentProps<typeof OmniExecutionsTab> & { localOnly: boolean }): JSX.Element {
+  return localOnly ? <LocalOnlyNotice /> : <OmniExecutionsTab {...listProps} />;
 }
 
 export function OmniSkillsPageClient(): JSX.Element {
@@ -249,13 +262,13 @@ export function OmniSkillsPageClient(): JSX.Element {
         <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("totalExecutions")}</p>
           <p className="text-2xl font-semibold text-primary mt-1">
-            {executionsLocalOnly ? "—" : execTotal}
+            {executionStat(executionsLocalOnly, execTotal)}
           </p>
         </Card>
         <Card padding="sm">
           <p className="text-xs text-text-muted uppercase tracking-wide">{t("successRate")}</p>
           <p className="text-2xl font-semibold text-warning mt-1">
-            {executionsLocalOnly ? "—" : `${successRate}%`}
+            {executionStat(executionsLocalOnly, `${successRate}%`)}
           </p>
         </Card>
       </div>
@@ -312,10 +325,9 @@ export function OmniSkillsPageClient(): JSX.Element {
         />
       )}
 
-      {activeTab === "executions" && executionsLocalOnly && <LocalOnlyNotice />}
-
-      {activeTab === "executions" && !executionsLocalOnly && (
-        <OmniExecutionsTab
+      {activeTab === "executions" && (
+        <ExecutionsPanel
+          localOnly={executionsLocalOnly}
           executions={executions}
           execPage={execPage}
           execTotalPages={execTotalPages}

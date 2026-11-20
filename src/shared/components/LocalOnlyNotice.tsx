@@ -24,5 +24,3 @@ export function LocalOnlyNotice({ className }: { className?: string }) {
     />
   );
 }
-
-export default LocalOnlyNotice;
