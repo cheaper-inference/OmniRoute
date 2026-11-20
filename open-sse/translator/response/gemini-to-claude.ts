@@ -232,7 +232,21 @@ export function geminiToClaudeResponse(chunk, state) {
         const providerCallId = part.functionCall.id;
         if (typeof providerCallId === "string" && providerCallId.length > 0) {
           const emittedIds: Set<string> = (state.emittedToolUseIds ??= new Set());
-          if (emittedIds.has(providerCallId)) continue;
+          if (emittedIds.has(providerCallId)) {
+            // The repeat can still carry this call's thoughtSignature; store it for
+            // this call so the next call does not pick it up as pending.
+            if (
+              typeof state.pendingThoughtSignature === "string" &&
+              state.pendingThoughtSignature
+            ) {
+              storeGeminiThoughtSignature(
+                buildGeminiThoughtSignatureKey(state.signatureNamespace, providerCallId),
+                state.pendingThoughtSignature
+              );
+              state.pendingThoughtSignature = null;
+            }
+            continue;
+          }
           emittedIds.add(providerCallId);
         }
         // Close any open text block first

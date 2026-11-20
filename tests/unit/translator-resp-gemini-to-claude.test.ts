@@ -331,3 +331,22 @@ test("Gemini -> Claude stream: a re-sent functionCall snapshot with the same id 
     ]
   );
 });
+
+test("Gemini -> Claude stream: a signature on a re-sent call snapshot stays with that call", async () => {
+  const { getGeminiThoughtSignature, clearGeminiThoughtSignatureMemoryForTests } =
+    await import("../../open-sse/services/geminiThoughtSignatureStore.ts");
+  clearGeminiThoughtSignatureMemoryForTests();
+
+  const state = { signatureNamespace: "conn-resent" };
+  const call = (id, extra = {}) => ({
+    candidates: [
+      { content: { parts: [{ functionCall: { id, name: "edit", args: {} }, ...extra }] } },
+    ],
+  });
+  geminiToClaudeResponse(call("call-a"), state);
+  geminiToClaudeResponse(call("call-a", { thoughtSignature: "sig-a" }), state);
+  geminiToClaudeResponse(call("call-b"), state);
+
+  assert.equal(getGeminiThoughtSignature("conn-resent:call-a"), "sig-a");
+  assert.equal(getGeminiThoughtSignature("conn-resent:call-b"), null);
+});
