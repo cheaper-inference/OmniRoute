@@ -478,7 +478,7 @@
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44646501430"
     }
   ],
-  "updatedAt": "2026-11-20T00:33:07.065Z",
+  "updatedAt": "2026-11-20T00:33:10.306Z",
   "batchWindow": 8,
   "failedTicks": 3,
   "failedSince": "2026-11-19T23:57:50.934Z",
@@ -490,6 +490,7 @@
     "openedAt": "2026-11-20T00:33:07.064Z",
     "kinds": [
       "failed-ticks"
-    ]
+    ],
+    "notified": true
   }
 }
