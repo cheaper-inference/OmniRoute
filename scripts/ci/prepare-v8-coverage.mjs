@@ -17,7 +17,7 @@ import {
 } from "./v8-transform-evidence.mjs";
 
 const require = createRequire(import.meta.url);
-const { mergeProcessCovs } = require("@bcoe/v8-coverage");
+const { mergeProcessCovs, mergeScriptCovs } = require("@bcoe/v8-coverage");
 const requireFromC8 = createRequire(require.resolve("c8/package.json"));
 const TestExclude = requireFromC8("test-exclude");
 const { buildYargs } = require("c8/lib/parse-args");
@@ -493,7 +493,7 @@ export async function prepareCoverageShards(options) {
   const layouts = createSourceMapLayoutProjector();
   const sourceMapCache = Object.create(null);
   const mergeOrder = createHash("sha256");
-  let merged = null;
+  const mergedScripts = new Map();
   let relocatedFiles = 0;
   let projectedFiles = 0;
   let ignoredNodeTestMockScripts = 0;
@@ -594,7 +594,10 @@ export async function prepareCoverageShards(options) {
           firstLayoutError ??= new Error(`${error.message} ${JSON.stringify(detail)}`, {
             cause: error,
           });
-          incompatibleLayouts.set(path, { ...detail, reason: error.message, occurrences: 1 });
+          const observation = { ...detail, reason: error.message };
+          incompatibleLayouts.set(path, { ...observation, occurrences: 1 });
+          if (incompatibleLayouts.size <= MAX_REPORTED_LAYOUT_SOURCES)
+            options.onLayoutConflict?.(observation);
         }
       }
       // Keep checking authenticated inputs for independent layout failures.
@@ -627,8 +630,21 @@ export async function prepareCoverageShards(options) {
           (policy.excludeAfterRemap || exclude.shouldInstrument(script.url))
         );
       });
-      const sample = { result: scripts };
-      merged = mergeProcessCovs(merged ? [merged, sample] : [sample]);
+      const sampleGroups = new Map();
+      for (const script of scripts) {
+        const group = sampleGroups.get(script.url);
+        if (group) {
+          group.push(script);
+        } else {
+          const prior = mergedScripts.get(script.url);
+          sampleGroups.set(script.url, prior ? [prior, script] : [script]);
+        }
+      }
+      // c8 groups each complete sample by URL before merging. Retain that
+      // order and avoid re-normalizing scripts absent from this sample.
+      for (const [url, group] of sampleGroups) {
+        mergedScripts.set(url, mergeScriptCovs(group));
+      }
       mergeOrder.update(JSON.stringify([item.name, item.index, item.sha256]) + "\n");
     }
     if (firstLayoutError) {
@@ -640,7 +656,9 @@ export async function prepareCoverageShards(options) {
     }
     if (instrumentedShards.size !== total)
       throw new Error("A shard has no instrumented candidate coverage");
-    if (!merged?.result.length) throw new Error("Empty merged candidate coverage");
+    if (!mergedScripts.size) throw new Error("Empty merged candidate coverage");
+    // The final process merge also sorts the URLs and assigns the script IDs.
+    const merged = mergeProcessCovs([{ result: [...mergedScripts.values()] }]);
     // c8 still performs source mapping and produces the reports. Only this
     // aggregate is written, so disk no longer holds all normalized raw inputs.
     for (const script of merged.result) {
@@ -748,6 +766,8 @@ async function main() {
           selection,
           runHeadSha,
           repository,
+          onLayoutConflict: (observation) =>
+            console.error(`[coverage-evidence] Layout conflict: ${JSON.stringify(observation)}`),
         })
       : operation === "verify-report"
         ? verifyCoverageReport({ reportDirectory: input })

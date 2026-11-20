@@ -8,6 +8,7 @@ import { dirname, join, resolve } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { gzipSync } from "node:zlib";
 import test from "node:test";
+import v8Coverage from "@bcoe/v8-coverage";
 import { load } from "js-yaml";
 
 const root = resolve(fileURLToPath(new URL("../../../", import.meta.url)));
@@ -407,19 +408,33 @@ test("incompatible producer layouts identify each source and leave no admitted a
     producerProofs: 0,
     firstObservation,
   };
-  await assert.rejects(prepareCoverageShards(options), (error) => {
-    const prefix = reason + " ";
-    assert.ok(error.message.startsWith(prefix));
-    assert.deepEqual(JSON.parse(error.message.slice(prefix.length)), firstConflict);
-    assert.deepEqual(error.layoutDiagnostics, {
-      sourceCount: 2,
-      sources: [
-        { ...firstConflict, reason, occurrences: total - 1 },
-        { ...firstConflict, source: secondSource, shard: 3, reason, occurrences: total - 2 },
-      ],
-    });
-    return true;
-  });
+  const observations = [];
+  await assert.rejects(
+    prepareCoverageShards({
+      ...options,
+      onLayoutConflict: (observation) => observations.push(observation),
+    }),
+    (error) => {
+      const prefix = reason + " ";
+      assert.ok(error.message.startsWith(prefix));
+      assert.deepEqual(JSON.parse(error.message.slice(prefix.length)), firstConflict);
+      assert.deepEqual(error.layoutDiagnostics, {
+        sourceCount: 2,
+        sources: [
+          { ...firstConflict, reason, occurrences: total - 1 },
+          { ...firstConflict, source: secondSource, shard: 3, reason, occurrences: total - 2 },
+        ],
+      });
+      return true;
+    }
+  );
+  assert.deepEqual(
+    observations.map(({ source, shard }) => ({ source, shard })),
+    [
+      { source: firstSource, shard: 2 },
+      { source: secondSource, shard: 3 },
+    ]
+  );
   assert.equal(existsSync(options.outputDirectory), false);
 });
 
@@ -1034,4 +1049,43 @@ test("coverage consumer preserves incremental c8 semantics for mixed function an
   // granularity, so later function-only records cannot replace their counts.
   // A single merge over all eight would discard the first two and report 19.
   assert.equal(fn.ranges[0].count, 22);
+});
+
+test("indexed coverage merging matches the incremental c8 aggregate with same-sample aliases", async (t) => {
+  const { prepareCoverageShards } = await helpers();
+  const { mergeProcessCovs } = v8Coverage;
+  let expected;
+  const options = await matrixArtifacts(t, {
+    input(index, sourceRoot) {
+      const sample = rawCoverage(index, sourceRoot);
+      const [script] = sample.result;
+      script.functions[0].isBlockCoverage = [1, 4, 7].includes(index);
+      if (index % 2 === 0) {
+        const duplicate = structuredClone(script);
+        duplicate.scriptId = "2";
+        duplicate.url += "?view=alternate";
+        duplicate.functions[0].isBlockCoverage = true;
+        duplicate.functions[0].ranges[0].count = 0;
+        sample.result.push(duplicate);
+      }
+      if (index === 1 || index === 8) {
+        const extra = structuredClone(script);
+        extra.scriptId = "3";
+        extra.url = pathToFileURL(
+          join(sourceRoot, "scripts/quality/check-skill-contract.mjs")
+        ).href;
+        sample.result.push(extra);
+      }
+      const nativeInput = structuredClone(sample);
+      for (const entry of nativeInput.result) entry.url = fileURLToPath(entry.url);
+      expected = mergeProcessCovs(expected ? [expected, nativeInput] : [nativeInput]);
+      return sample;
+    },
+  });
+  await prepareCoverageShards(options);
+  for (const entry of expected.result) entry.url = pathToFileURL(entry.url).href;
+  const actual = JSON.parse(
+    await readFile(join(options.outputDirectory, "coverage-merged.json"), "utf8")
+  );
+  assert.deepEqual(actual.result, expected.result);
 });
