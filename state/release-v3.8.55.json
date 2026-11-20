@@ -3,51 +3,25 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b7",
+    "batchId": "b8",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b7-aec6487361b1",
-    "candidateSha": "aec6487361b1805a78d97be12c6e0e6f6de3fac1",
-    "baseSha": "6a5dadd172195d2e1b39c6904f8f12af32192c91",
-    "treeSha": "b68a4769fee69aa70f61cf62acd5f5062fccb213",
+    "candidateRef": "omni-queue/release-v3.8.55/b8-bade93fcc989",
+    "candidateSha": "bade93fcc9896eccd1ab0c5f04779bde563a55e6",
+    "baseSha": "d1821d0db11dcfe92c2cde3629f06aabecc133dc",
+    "treeSha": "43fea13670dacf5345df2c62eff520a57dd49f3c",
     "prs": [
       {
-        "n": 14667,
-        "head": "431849af6effb01d2518483171e6fa28d13ed22f",
-        "title": "feat(api): list System One decision models on GET /v1/systemone/models",
-        "author": "PixmaNts",
-        "labeledAt": "2026-11-19T20:20:22Z"
-      },
-      {
-        "n": 14860,
-        "head": "537a2a9dd38dcfeb936fb37fa2ec26becd8d1925",
-        "title": "feat(dashboard): team reports for agent sessions by member and project",
+        "n": 14863,
+        "head": "009cc84a60dec564b1ee84cefebfad43464744ee",
+        "title": "feat(dashboard): API key details view and self-service quota settings",
         "author": "fouadSalkini",
-        "labeledAt": "2026-11-19T20:20:36Z"
-      },
-      {
-        "n": 20645,
-        "head": "a33d88de70de855992e820b1792827a9b80ed51c",
-        "title": "fix(release): sync-next-cycle opens a PR instead of pushing to the release branch",
-        "author": "diegosouzapw",
-        "labeledAt": "2026-11-19T21:56:23Z"
+        "labeledAt": "2026-11-19T20:20:57Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-20T06:36:08.766Z",
+    "startedAt": "2026-11-20T08:02:26.300Z",
     "attempts": 0,
-    "bisect": null,
-    "rerun": {
-      "ref": "omni-queue/release-v3.8.55/b7-aec6487361b1",
-      "requestedAt": "2026-11-20T07:52:04.002Z",
-      "afterMs": 1795161094000,
-      "runIds": [
-        44689132148
-      ],
-      "jobs": [
-        "Gate / CI",
-        "Vitest (MCP / autoCombo / UI components)"
-      ]
-    }
+    "bisect": null
   },
   "baseChecks": [
     {
@@ -66,12 +40,15 @@
   ],
   "shadow": {
     "processed": {
-      "20616": "97013f5becf14020c55b685c9d0d43d5ae93d0c3"
+      "14667": "431849af6effb01d2518483171e6fa28d13ed22f",
+      "14860": "537a2a9dd38dcfeb936fb37fa2ec26becd8d1925",
+      "20616": "97013f5becf14020c55b685c9d0d43d5ae93d0c3",
+      "20645": "a33d88de70de855992e820b1792827a9b80ed51c"
     }
   },
   "counters": {
-    "batchSeq": 7,
-    "ciRuns": 8,
+    "batchSeq": 8,
+    "ciRuns": 9,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 3,
@@ -724,8 +701,48 @@
       "sha": "aec6487361b1805a78d97be12c6e0e6f6de3fac1",
       "detail": "re-running the failed jobs of b7 once (Gate / CI, Vitest (MCP / autoCombo / UI components)) before a base check",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44698068868"
+    },
+    {
+      "at": "2026-11-20T08:01:43.563Z",
+      "type": "checks-green",
+      "batchId": "b7",
+      "prs": [
+        14667,
+        14860,
+        20645
+      ],
+      "sha": "aec6487361b1805a78d97be12c6e0e6f6de3fac1",
+      "detail": "green after re-running Gate / CI, Vitest (MCP / autoCombo / UI components) (flaky)",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44699253413"
+    },
+    {
+      "at": "2026-11-20T08:01:58.279Z",
+      "type": "would-land",
+      "batchId": "b7",
+      "prs": [
+        14667,
+        14860,
+        20645
+      ],
+      "sha": "aec6487361b1805a78d97be12c6e0e6f6de3fac1",
+      "detail": "shadow mode: would merge-ff onto 6a5dadd17219",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44699253413"
+    },
+    {
+      "at": "2026-11-20T08:03:21.547Z",
+      "type": "batch-started",
+      "batchId": "b8",
+      "prs": [
+        14863
+      ],
+      "sha": "bade93fcc9896eccd1ab0c5f04779bde563a55e6",
+      "detail": "1 PR(s) on d1821d0db11d; window 9",
+      "labeledAt": {
+        "14863": "2026-11-19T20:20:57Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44699253413"
     }
   ],
-  "updatedAt": "2026-11-20T07:52:27.513Z",
+  "updatedAt": "2026-11-20T08:03:24.014Z",
   "batchWindow": 9
 }
