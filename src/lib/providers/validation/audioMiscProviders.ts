@@ -4,6 +4,7 @@
 // dispatcher-state captures; behavior is byte-identical to the original inline defs.
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
 import { POE_DEFAULT_BASE_URL } from "@omniroute/open-sse/config/providers/registry/poe/index.ts";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import { normalizeBaseUrl } from "./urlHelpers";
 import {
   applyCustomUserAgent,
@@ -216,9 +217,9 @@ export function getAwsPollyRegion(providerSpecificData: any = {}) {
 }
 
 export function getAwsPollyBaseUrl(providerSpecificData: any = {}, region: string) {
-  return (
+  return stripTrailingSlashes(
     getAwsProviderString(providerSpecificData.baseUrl) || `https://polly.${region}.amazonaws.com`
-  ).replace(/\/+$/, "");
+  );
 }
 
 export async function validateAwsPollyProvider({ apiKey, providerSpecificData = {} }: any) {

@@ -1,4 +1,5 @@
 import { randomBytes } from "crypto";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 import { createErrorResponse, createErrorResponseFromUnknown } from "@/lib/api/errorResponse";
 import { isValidationFailure, validateBody } from "@/shared/validation/helpers";
@@ -319,7 +320,7 @@ export async function POST(request: Request) {
     // We accept the user's full org domain ("acme.deno.net") and derive the
     // org slug from it (split on first dot). Tolerates trailing dots / paths
     // by trimming first.
-    const cleanOrg = orgDomain.replace(/^https?:\/\//i, "").replace(/\/+$/, "");
+    const cleanOrg = stripTrailingSlashes(orgDomain.replace(/^https?:\/\//i, ""));
     const orgSlug = cleanOrg.split(".")[0];
     const deployHost = `${projectName}.${orgSlug}.deno.net`;
 

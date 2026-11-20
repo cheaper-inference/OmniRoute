@@ -9,6 +9,7 @@
 
 import { safeOutboundFetch } from "../../../src/shared/network/safeOutboundFetch";
 import { sanitizeErrorMessage } from "../../utils/error";
+import { stripTrailingSlashes } from "../../utils/urlSanitize";
 import { validateEmbeddingEndpoint, embeddingUrlGuard } from "./embeddingEndpoint";
 
 export interface EmbeddingResult {
@@ -168,9 +169,9 @@ export function createDefaultEmbeddingGenerator(config: {
       targetUrl = targetUrl.trim();
       if (!targetUrl.endsWith("/embeddings")) {
         if (!targetUrl.endsWith("/v1")) {
-          targetUrl = `${targetUrl.replace(/\/+$/, "")}/v1/embeddings`;
+          targetUrl = `${stripTrailingSlashes(targetUrl)}/v1/embeddings`;
         } else {
-          targetUrl = `${targetUrl.replace(/\/+$/, "")}/embeddings`;
+          targetUrl = `${stripTrailingSlashes(targetUrl)}/embeddings`;
         }
       }
     }

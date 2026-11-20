@@ -1,3 +1,5 @@
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
+
 type JsonRecord = Record<string, unknown>;
 
 export const QWEN_CODE_ENV_KEY = "OMNIROUTE_API_KEY";
@@ -10,9 +12,7 @@ const isRecord = (value: unknown): value is JsonRecord =>
 const cloneRecord = (value: unknown): JsonRecord => (isRecord(value) ? { ...value } : {});
 
 export const normalizeQwenCodeBaseUrl = (value: unknown): string => {
-  const baseUrl = String(value || "")
-    .trim()
-    .replace(/\/+$/, "");
+  const baseUrl = stripTrailingSlashes(String(value || "").trim());
   if (!baseUrl) return "";
   return baseUrl.endsWith("/v1") ? baseUrl : `${baseUrl}/v1`;
 };

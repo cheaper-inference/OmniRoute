@@ -1,7 +1,7 @@
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
+
 export function normalizeClaudeBaseUrl(value: string): string {
-  return String(value || "")
-    .trim()
-    .replace(/\/+$/, "");
+  return stripTrailingSlashes(String(value || "").trim());
 }
 
 export interface ClaudeDiscoverySnippetInput {

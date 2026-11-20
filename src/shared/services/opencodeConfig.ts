@@ -1,4 +1,5 @@
 import { applyEdits, modify, parse, printParseErrorCode, type ParseError } from "jsonc-parser";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 
 type OpenCodeCatalogModel = {
   id: string;
@@ -103,9 +104,7 @@ export const buildOpenCodeProviderConfig = ({
   modelLabels,
   catalog,
 }: OpenCodeConfigInput): Record<string, any> => {
-  const normalizedBaseUrl = String(baseUrl || "")
-    .trim()
-    .replace(/\/+$/, "");
+  const normalizedBaseUrl = stripTrailingSlashes(String(baseUrl || "").trim());
   const normalizedModel = normalizeValue(model);
   const normalizedModels = normalizeModels(models);
   const normalizedLabels = normalizeModelLabels(modelLabels);

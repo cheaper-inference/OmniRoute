@@ -3,6 +3,7 @@
 // byte-identical to the original inline defs.
 import { randomUUID } from "node:crypto";
 import { getRegistryEntry } from "@omniroute/open-sse/config/providerRegistry.ts";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import { COMMAND_CODE_VERSION } from "@omniroute/open-sse/executors/commandCode.ts";
 import {
   COMMAND_CODE_ZDR_HEADER,
@@ -83,7 +84,7 @@ export async function validateOpenAILikeProvider({
     const endpointUrl = customModelsUrl
       ? customModelsUrl.startsWith("http")
         ? customModelsUrl
-        : `${baseUrl.replace(/\/+$/, "")}/${customModelsUrl.replace(/^\/+/, "")}`
+        : `${stripTrailingSlashes(baseUrl)}/${customModelsUrl.replace(/^\/+/, "")}`
       : // addModelsSuffix strips a trailing /chat/completions before appending /models,
         // so an OpenAI-style baseUrl validates against /v1/models, not /v1/chat/completions/models.
         addModelsSuffix(baseUrl);

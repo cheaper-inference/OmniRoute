@@ -4,11 +4,12 @@ import {
   parseAndValidatePublicUrl,
 } from "../../../src/shared/network/outboundUrlGuard";
 import { getProviderValidationGuard } from "../../../src/shared/network/outboundUrlGuardPolicy";
+import { stripTrailingSlashes } from "../../utils/urlSanitize";
 
 export function embeddingEndpoint(baseUrl: string): string {
   const url = parseOutboundUrl(baseUrl.trim());
   if (url.search || url.hash) throw new Error("Embedding URL must not contain query or fragment");
-  const base = url.toString().replace(/\/+$/, "");
+  const base = stripTrailingSlashes(url.toString());
   if (base.endsWith("/embeddings")) return base;
   return base.endsWith("/v1") ? `${base}/embeddings` : `${base}/v1/embeddings`;
 }

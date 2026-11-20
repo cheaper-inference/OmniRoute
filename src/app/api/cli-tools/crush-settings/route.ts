@@ -3,6 +3,7 @@
 import { NextResponse } from "next/server";
 import fs from "fs/promises";
 import path from "path";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import { requireCliToolsAuth } from "@/lib/api/requireCliToolsAuth";
 import {
   ensureCliConfigWriteAllowed,
@@ -63,7 +64,7 @@ type CrushProvider = {
 const DEFAULT_CONTEXT_WINDOW = 128000;
 
 const ensureV1 = (url: string): string => {
-  const s = url.replace(/\/+$/, "");
+  const s = stripTrailingSlashes(url);
   return s.endsWith("/v1") ? s : `${s}/v1`;
 };
 

@@ -3,6 +3,7 @@
  */
 
 import { v4 as uuidv4 } from "uuid";
+import { stripTrailingSlashes } from "@omniroute/open-sse/utils/urlSanitize.ts";
 import * as codexFences from "./codexConnectionFences";
 import {
   mayWriteCodexConnection,
@@ -399,7 +400,7 @@ function isLocalProviderId(providerId: unknown): boolean {
 
 /** Trim + strip a trailing slash so cosmetic differences don't defeat the match. */
 function normalizeBaseUrlForDedup(value: unknown): string {
-  return typeof value === "string" ? value.trim().replace(/\/+$/, "") : "";
+  return typeof value === "string" ? stripTrailingSlashes(value.trim()) : "";
 }
 
 /**
