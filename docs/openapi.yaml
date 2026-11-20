@@ -16198,6 +16198,81 @@ paths:
                         success: { type: boolean }
         "404":
           description: Session not found
+  /api/v1/me/usage:
+    get:
+      tags:
+        - V1 Me
+      summary: "GET me › usage"
+      description: >-
+        Usage and cost series of the calling API key (also served at /v1/me/usage): totals, one
+        entry per UTC day, per day and model, per model and per provider. Only rows recorded with
+        the calling key's id are read, never rows of another key or rows without a key id. Off
+        unless the `QUOTA_SELF_PANEL` feature flag is on (a request that reaches the route gets
+        404 otherwise). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`;
+        the key is never read from the query string or a cookie. Requires scope `self:usage`.
+        The key is checked before `range`. `costUsd` is the billed cost, where flat-rate
+        subscription providers count $0. `listPriceUsd` prices the same usage at list price,
+        subscriptions included. Every response of this route carries `Cache-Control: no-store`;
+        a refusal before the route runs, for example by the client API policy or the IP filter,
+        does not.
+      security:
+        - BearerAuth: []
+        - XApiKeyAuth: []
+      parameters:
+        - name: range
+          in: query
+          required: false
+          description: >-
+            Window ending now. Longer windows are not offered: usage rows older than the
+            usage-history retention are deleted, and `coverage.truncatedByRetention` says when
+            the window is longer than that retention. Any other value, an empty value or a
+            repeated parameter is a 400.
+          schema:
+            type: string
+            enum: [1d, 7d, 30d, 90d]
+            default: 30d
+      responses:
+        "200":
+          description: Usage series of the calling key
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                enum: [no-store]
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SelfUsageSeries"
+        "400":
+          description: Invalid range
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "401":
+          description: Missing or invalid API key, or the server's environment key
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "403":
+          description: The key lacks the self:usage scope
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          description: The QUOTA_SELF_PANEL feature flag is off
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "500":
+          description: The usage series could not be built (fixed message, no detail)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
   /api/v1/models/{model}:
     get:
       tags:
@@ -17367,7 +17442,7 @@ components:
       type: apiKey
       in: header
       name: x-api-key
-      description: Inference API key sent in the x-api-key header (accepted by /v1/me/status and /v1/me/quota/{provider}).
+      description: Inference API key sent in the x-api-key header (accepted by /v1/me/status, /v1/me/quota/{provider} and /v1/me/usage).
     ManagementSessionAuth:
       type: apiKey
       in: cookie
@@ -19773,6 +19848,156 @@ components:
           description: Configured public API origin, never the request's origin.
         blocks:
           $ref: "#/components/schemas/SelfQuotaBlocks"
+    SelfUsageSeries:
+      type: object
+      description: >-
+        Usage and cost series of one API key. Days are UTC days. Every cost is summed row by row
+        and rounded to 6 decimals. `costUsd` is the billed cost, where flat-rate subscription
+        providers count $0. `listPriceUsd` is the same usage priced at list price,
+        subscriptions included.
+      additionalProperties: false
+      required: [range, generatedAt, coverage, summary, daily, dailyByModel, byModel, byProvider]
+      properties:
+        range:
+          type: string
+          enum: [1d, 7d, 30d, 90d]
+        generatedAt:
+          type: string
+          format: date-time
+        coverage:
+          type: object
+          additionalProperties: false
+          required: [from, to, retentionDays, truncatedByRetention]
+          properties:
+            from:
+              type: string
+              format: date-time
+            to:
+              type: string
+              format: date-time
+            retentionDays:
+              type: number
+              description: Days of raw usage history the server keeps.
+            truncatedByRetention:
+              type: boolean
+              description: True when the window is longer than the retention, so older days are missing.
+        summary:
+          type: object
+          additionalProperties: false
+          required:
+            [
+              requests,
+              promptTokens,
+              completionTokens,
+              totalTokens,
+              costUsd,
+              listPriceUsd,
+              successfulRequests,
+              successRatePct,
+              uniqueModels,
+              avgLatencyMs,
+              firstRequest,
+              lastRequest,
+            ]
+          properties:
+            requests: { type: number }
+            promptTokens: { type: number }
+            completionTokens: { type: number }
+            totalTokens: { type: number }
+            costUsd: { type: number }
+            listPriceUsd: { type: number }
+            successfulRequests: { type: number }
+            successRatePct: { type: number }
+            uniqueModels: { type: number }
+            avgLatencyMs: { type: number }
+            firstRequest: { type: [string, "null"], format: date-time }
+            lastRequest: { type: [string, "null"], format: date-time }
+        daily:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [date, requests, promptTokens, completionTokens, totalTokens, costUsd, listPriceUsd]
+            properties:
+              date: { type: string, format: date }
+              requests: { type: number }
+              promptTokens: { type: number }
+              completionTokens: { type: number }
+              totalTokens: { type: number }
+              costUsd: { type: number }
+              listPriceUsd: { type: number }
+        dailyByModel:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [date, model, totalTokens, costUsd, listPriceUsd]
+            properties:
+              date: { type: string, format: date }
+              model: { type: string }
+              totalTokens: { type: number }
+              costUsd: { type: number }
+              listPriceUsd: { type: number }
+        byModel:
+          type: array
+          description: Top 50 models by requests.
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [
+                model,
+                provider,
+                requests,
+                promptTokens,
+                completionTokens,
+                totalTokens,
+                costUsd,
+                listPriceUsd,
+                avgLatencyMs,
+                successRatePct,
+                lastUsed,
+              ]
+            properties:
+              model: { type: string }
+              provider: { type: string }
+              requests: { type: number }
+              promptTokens: { type: number }
+              completionTokens: { type: number }
+              totalTokens: { type: number }
+              costUsd: { type: number }
+              listPriceUsd: { type: number }
+              avgLatencyMs: { type: number }
+              successRatePct: { type: number }
+              lastUsed: { type: [string, "null"], format: date-time }
+        byProvider:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [
+                provider,
+                requests,
+                promptTokens,
+                completionTokens,
+                totalTokens,
+                costUsd,
+                listPriceUsd,
+                avgLatencyMs,
+                successRatePct,
+              ]
+            properties:
+              provider: { type: string }
+              requests: { type: number }
+              promptTokens: { type: number }
+              completionTokens: { type: number }
+              totalTokens: { type: number }
+              costUsd: { type: number }
+              listPriceUsd: { type: number }
+              avgLatencyMs: { type: number }
+              successRatePct: { type: number }
     ApiKey:
       type: object
       properties:

@@ -1,7 +1,8 @@
 /**
- * Authentication gate of the self-service routes (today `/v1/me/quota/{provider}`). Checks run in
- * a fixed order: feature flag, header credentials, key validation, key metadata, scope. Callers
- * can replace only the key store the gate reads; the checks themselves are not injectable.
+ * Authentication gate of the self-service routes (`/v1/me/quota/{provider}` and `/v1/me/usage`).
+ * Checks run in a fixed order: feature flag, header credentials, key validation, key metadata,
+ * scope. Callers can replace only the key store the gate reads; the checks themselves are not
+ * injectable.
  *
  * There is no per-address attempt limit here: behind a reverse proxy callers can share one
  * address (it depends on whether forwarded client addresses are trusted), so a lockout could let

@@ -398,6 +398,25 @@ including the key lookup itself; its cause is logged on the server and never ret
   the client API policy before the route runs, with that policy's 401 body instead of this
   route's.
 
+### Usage series (`GET /api/v1/me/usage`)
+
+`GET /api/v1/me/usage?range=<range>` (also served at `/v1/me/usage`) returns the calling key's
+own usage and cost: totals, one entry per UTC day, per day and model, per model (top 50 by
+requests) and per provider. It shares the flag, the authentication rules, the `self:usage`
+scope, `Cache-Control: no-store` and the error behavior of the quota route above. The key is
+checked before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500
+(`Failed to build usage`). `range` is one of `1d`, `7d`, `30d` (the default) or `90d`. Any
+other value, an empty value or a repeated parameter is a 400. Rows are selected by the calling
+key's id only. The key name column is never matched, and rows recorded without a key id are
+never counted. Longer windows are not offered: rows older than the usage-history retention
+(`retention.usageHistory`, 30 days by default) are deleted, and the daily summaries they are
+rolled into carry no key. `coverage` gives the window and sets `truncatedByRetention` when the
+window is longer than that retention. Two costs are reported. `costUsd` is the billed cost, as
+the usage analytics show it, and flat-rate subscription providers count $0 there, so it is 0
+for most quota-share traffic. `listPriceUsd` is the same usage priced at list price,
+subscriptions included. The response contract is `src/shared/schemas/selfUsage.ts`
+(`SelfUsageSeries` in `docs/openapi.yaml`).
+
 ---
 
 ## Environment Variables

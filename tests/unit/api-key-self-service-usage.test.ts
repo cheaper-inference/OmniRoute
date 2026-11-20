@@ -175,7 +175,8 @@ test("the owned source filters by api_key_id only and never reads the daily summ
     rawCutoffDate: "2026-04-27",
   });
   assert.match(unifiedSource, /api_key_id = @ownerApiKeyId/);
-  assert.ok(!unifiedSource.includes("api_key_name IN"));
+  // The name column is selected, but never compared to anything.
+  assert.doesNotMatch(unifiedSource, /api_key_name\s*(=|IN\b|LIKE\b)/i);
   assert.ok(!unifiedSource.includes("daily_usage_summary"));
   assert.deepEqual(
     [unifiedParams.ownerApiKeyId, unifiedParams.since],
