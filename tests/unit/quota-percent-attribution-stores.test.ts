@@ -157,7 +157,7 @@ for (const [name, make] of [
   ["sqlite", () => new SqliteQuotaStore()],
   ["redis", redisWithFakeClient],
 ] as const) {
-  test(`${name}: a rise is charged to the keys whose tokens explain it`, async () => {
+  test(`${name}: the growth since the window started is split by the tokens routed since then`, async () => {
     const store = make(),
       a = `${name}-a`,
       b = `${name}-b`,

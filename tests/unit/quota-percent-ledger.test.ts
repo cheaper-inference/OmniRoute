@@ -323,6 +323,16 @@ test("a rise does not store a reading's reset time that is already behind its da
   assert.deepEqual([kept.last, kept.baseline, kept.resetAt], [0.65, 0.1, T0 + 6 * MIN]);
 });
 
+test("opening a book does not store a reading's reset time that is behind its data time", () => {
+  const opened = run(null, COUNTERS, rd(0.4, 5, T0 + 4 * MIN)).state;
+  assert.deepEqual([opened.last, opened.baseline, opened.resetAt], [0.4, 0.4, null]);
+});
+
+test("a reset time equal to the reading's data time is not stored: it must be strictly ahead", () => {
+  const opened = run(null, COUNTERS, rd(0.4, 5, T0 + 5 * MIN)).state;
+  assert.deepEqual([opened.last, opened.resetAt], [0.4, null]);
+});
+
 // ─── Boundaries of rows 2, 3, 4, 6 and 7 ────────────────────────────────────
 
 test("row 2 boundary: a reset time exactly 30 minutes back is not old; one millisecond more is", () => {
@@ -628,6 +638,19 @@ test("observeLedger after the stored reset time: a newer reading turns the book;
     [2, 0.2, null]
   );
   assert.deepEqual(turned, await store.ledgerRead(KEY));
+});
+
+test("observeLedger: a reading taken just before the stored reset and observed after it is not charged", async () => {
+  const store = memoryStore();
+  await observeLedger(store, KEY, rd(0.2, 0, T0 + H), T0);
+  await observeLedger(store, KEY, rd(0.3, 30, T0 + H), T0 + 30 * MIN); // readAt = minute 30
+  const before = await store.ledgerRead(KEY);
+  assert.deepEqual([before.state?.readAt, before.state?.resetAt], [T0 + 30 * MIN, T0 + H]);
+  // Data time minute 59.5 (the stored reset is still ahead of it), clock at minute 60.2, same
+  // figure: the transition keeps the book, and the book of the ended window is not charged.
+  const observed = await observeLedger(store, KEY, rd(0.3, 59.5, T0 + H), T0 + 60.2 * MIN);
+  assert.equal(observed, null);
+  assert.deepEqual(await store.ledgerRead(KEY), before);
 });
 
 test("observeLedger never throws: a failed read gives null, a failed commit gives the snapshot read", async () => {

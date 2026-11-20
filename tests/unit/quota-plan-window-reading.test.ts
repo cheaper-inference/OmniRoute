@@ -135,6 +135,20 @@ test("codex: per-window figure, never the worst-case fallback", () => {
   );
 });
 
+test("codex: a window carrying fractionReported: false reads as without it", () => {
+  const session = { percentUsed: 0.25, resetAt: ISO };
+  const marked = { windows: { session: { ...session, fractionReported: false } } };
+  assert.deepEqual(codexPlanReading(marked, "5h", AT), {
+    used: 0.25,
+    resetAt: RESET,
+    fetchedAt: AT,
+  });
+  assert.deepEqual(
+    codexPlanReading(marked, "5h", AT),
+    codexPlanReading({ windows: { session } }, "5h", AT)
+  );
+});
+
 test("getSaturation keeps its value and the reading shares the cached fetch", async () => {
   let fetches = 0;
   oauthUsage(

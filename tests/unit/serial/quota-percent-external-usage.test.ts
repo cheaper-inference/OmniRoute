@@ -175,7 +175,7 @@ await test("quota-percent-external-usage", async (t) => {
     near(flat.internalByKey.k1, 0);
     near(flat.external, 70);
     mockUsage({ [C1]: { fiveHour: 71 } });
-    near((await attribute(C1)).internalByKey.k1, 1); // only the rise is the key's
+    near((await attribute(C1)).internalByKey.k1, 1); // only the growth is the key's
   });
 
   await t.test("one small request does not absorb a 20-point rise", async () => {
@@ -221,7 +221,8 @@ await test("quota-percent-external-usage", async (t) => {
         await ask(C5, "k1"); // opens the book at 0
         await burn(C5, "k1", 60_000);
         mockUsage({ [C5]: { weekly: 60 } });
-        assert.equal((await ask(C5, "k1")).kind, "block"); // 60 ≥ 25, even if part of the rise is external
+        // 60 ≥ 25: its tokens cover the whole growth, so the usage made elsewhere is charged to it.
+        assert.equal((await ask(C5, "k1")).kind, "block");
         const att = await attribute(C5);
         near(att.internalByKey.k1, 60); // min(60, 60_000 / 1000 / 100 = 0.6 of the bar) = 60 points
         near(att.external, 0);

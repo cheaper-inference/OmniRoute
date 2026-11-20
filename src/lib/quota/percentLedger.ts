@@ -395,9 +395,11 @@ function usableWithoutReading(snapshot: LedgerSnapshot, nowMs: number): BookSnap
  * returned.
  *
  * Null when there is no usable book: no book, a failed first read, a book whose stored reset time
- * already passed (a safety net: such a reading turns the book, so only a reading older than the
- * last applied one can leave it in place), or, without a reading, a book that may belong
- * to a provider window that already ended (isLedgerCurrentWithoutReading). The stored state is
+ * is not after `nowMs` (the transition compares that time with the reading's data time, this
+ * check with the clock: a reading older than the last applied one, or one taken before the reset
+ * and observed after it, such as a cached reading with the same figure, leaves that book in
+ * place), or, without a reading, a book that may belong to a provider window that already ended
+ * (isLedgerCurrentWithoutReading). The stored state is
  * left as it is either way: the next reading turns or updates it through the transition.
  */
 export async function observeLedger(

@@ -214,7 +214,7 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     if (dim.unit === "percent") {
       // percent (account-quota window): the saturation signal is the account
       // consumption; this key's part of it comes from the account's attribution
-      // book (rises of the figure explained by the tokens each key routed), and
+      // book (growth since the window started, split by tokens routed since), and
       // the book's external part is charged by weight only once it exceeds the
       // capacity no allocation claims. Never throws.
       const effectiveLimit = dim.limit * accountCount;
