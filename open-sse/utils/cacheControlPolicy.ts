@@ -22,6 +22,11 @@ import type { RoutingStrategyValue } from "../../src/shared/constants/routingStr
 export type CacheControlMode = "auto" | "always" | "never";
 export type GeminiPromptCacheMode = "off" | "implicit";
 
+/** Only an explicit opt-out disables the default Antigravity Gemini cache policy. */
+export function normalizeGeminiPromptCacheMode(value: unknown): GeminiPromptCacheMode {
+  return value === "off" ? "off" : "implicit";
+}
+
 /**
  * Cache control settings from the database
  */
@@ -323,11 +328,11 @@ export function providerUsesAutomaticPrefixCaching(
   provider: string | null | undefined,
   connectionCacheOverride?: ConnectionCacheOverride | null,
   model?: string | null,
-  geminiPromptCacheMode: GeminiPromptCacheMode | null = "implicit"
+  geminiPromptCacheMode?: GeminiPromptCacheMode | null
 ): boolean {
   if (!allowsAutomaticPrefixCaching(connectionCacheOverride)) return false;
   if (isAntigravityGeminiCacheTarget(provider, model)) {
-    return geminiPromptCacheMode === "implicit";
+    return normalizeGeminiPromptCacheMode(geminiPromptCacheMode) === "implicit";
   }
   if (
     connectionCacheOverride?.supportsPromptCaching === true &&

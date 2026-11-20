@@ -77,3 +77,25 @@ test("Antigravity automatic prefix eligibility follows Gemini mode and the conne
     true
   );
 });
+
+test("a null Gemini mode uses implicit prefix caching only on eligible connections", () => {
+  const model = "gemini-4-hydrogen-high";
+  assert.equal(providerUsesAutomaticPrefixCaching("antigravity", null, model, null), true);
+  assert.equal(
+    providerUsesAutomaticPrefixCaching("agy", { supportsPromptCaching: false }, model, null),
+    false
+  );
+  assert.equal(
+    providerUsesAutomaticPrefixCaching(
+      "agy",
+      { cacheControlPassthrough: "claude-format" },
+      model,
+      null
+    ),
+    false
+  );
+  assert.equal(
+    providerUsesAutomaticPrefixCaching("antigravity", null, "claude-sonnet-4-6", null),
+    false
+  );
+});

@@ -138,6 +138,19 @@ describe("#3955 automatic-cache prefix protection (no explicit cache_control)", 
     }
   });
 
+  it("protects the Antigravity Gemini system prefix when cache mode is null", () => {
+    const body = autoCacheBody("agy/gemini-3.8-flash");
+    const context = { geminiPromptCacheMode: null };
+    const cfgWithoutPreservation = cfg({ preserveSystemPrompt: false });
+    const detected = detectCachingContext(body, context);
+    assert.equal(detected.isCachingProvider, true);
+    assert.equal(detected.usesAutomaticPrefixCaching, true);
+    assert.equal(
+      resolveCacheAwareConfig(cfgWithoutPreservation, body, context).preserveSystemPrompt,
+      true
+    );
+  });
+
   it("keeps explicit off and non-Gemini models out of Antigravity prefix protection", () => {
     for (const [model, geminiPromptCacheMode] of [
       ["antigravity/gemini-4-hydrogen-high", "off"],

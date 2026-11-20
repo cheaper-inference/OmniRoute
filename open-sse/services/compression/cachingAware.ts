@@ -9,6 +9,7 @@
 import {
   isAntigravityGeminiCacheTarget,
   isOpenCodeLane,
+  normalizeGeminiPromptCacheMode,
   providerSupportsCaching,
   providerUsesAutomaticPrefixCaching,
   type ConnectionCacheOverride,
@@ -102,7 +103,8 @@ export function detectCachingContext(
     inferProviderFromModel(bodyRecord.model);
   const targetFormat = normalizeString(context.targetFormat)?.toLowerCase() ?? null;
   const resolvedModel = context.model ?? normalizeString(bodyRecord.model);
-  const { connectionCacheOverride, geminiPromptCacheMode = "implicit" } = context;
+  const { connectionCacheOverride } = context;
+  const geminiPromptCacheMode = normalizeGeminiPromptCacheMode(context.geminiPromptCacheMode);
   const usesAutomaticPrefixCaching = providerUsesAutomaticPrefixCaching(
     provider,
     connectionCacheOverride,
