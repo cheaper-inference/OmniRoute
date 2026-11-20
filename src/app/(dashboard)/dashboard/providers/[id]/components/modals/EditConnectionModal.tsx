@@ -189,6 +189,7 @@ export default function EditConnectionModal({
     disableCooling: connectionProviderSpecificData?.disableCooling === true,
     requireUserLastMessage: connectionProviderSpecificData?.requireUserLastMessage === true,
     keepMidConversationSystem: connectionProviderSpecificData?.keepMidConversationSystem === true,
+    strictChatHistory: connectionProviderSpecificData?.strictChatHistory === true,
     importFreeModelsOnly: connectionProviderSpecificData?.importFreeModelsOnly === true,
     commandCodeZdrEnabled: connectionProviderSpecificData?.zdrEnabled === true,
     tunnelId: stringField(connectionProviderSpecificData?.tunnelId),
@@ -267,8 +268,11 @@ export default function EditConnectionModal({
     providerAllowsOptionalApiKey(provider) || Boolean(isNoAuthWebSessionCredential);
   const isCcCompatible = isClaudeCodeCompatibleProvider(provider);
   const isPlainAnthropicCompatible = isAnthropicCompatibleProvider(provider) && !isCcCompatible;
-  const isCompatible =
-    isOpenAICompatibleProvider(provider) || isAnthropicCompatibleProvider(provider);
+  const isOpenAICompatible = isOpenAICompatibleProvider(provider);
+  const isCompatible = isOpenAICompatible || isAnthropicCompatibleProvider(provider);
+  // Sequence repair only rewrites a Chat Completions `messages` array, so the
+  // option is inert (and hidden) on Responses-API connections, which send `input`.
+  const supportsStrictChatHistory = isOpenAICompatible && !isResponsesConnection;
   const vertexCopy = isVertex ? getVertexCredentialCopy(t) : null;
   const apiCredentialLabel = webSessionCredential
     ? getWebSessionCredentialLabel(t, webSessionCredential, apiKeyOptional)
@@ -428,6 +432,7 @@ export default function EditConnectionModal({
         requireUserLastMessage: connection?.providerSpecificData?.requireUserLastMessage === true,
         keepMidConversationSystem:
           connection?.providerSpecificData?.keepMidConversationSystem === true,
+        strictChatHistory: connection?.providerSpecificData?.strictChatHistory === true,
         importFreeModelsOnly: connection?.providerSpecificData?.importFreeModelsOnly === true,
         commandCodeZdrEnabled: connection.providerSpecificData?.zdrEnabled === true,
         tunnelId: stringField(connection.providerSpecificData?.tunnelId),
@@ -740,6 +745,11 @@ export default function EditConnectionModal({
           updates.providerSpecificData.keepMidConversationSystem =
             formData.keepMidConversationSystem ? true : undefined;
         }
+        if (supportsStrictChatHistory) {
+          // Explicit boolean, not `undefined`: the PUT route merges
+          // { ...existing, ...incoming }, so dropping the key would keep a stored `true`.
+          updates.providerSpecificData.strictChatHistory = formData.strictChatHistory === true;
+        }
         updates.providerSpecificData.peakHourProtection = normalizePeakHourProtectionForSave(
           formData.peakHourProtection
         );
@@ -835,6 +845,18 @@ export default function EditConnectionModal({
       )}
     />
   ) : null;
+  const strictChatHistoryToggle = supportsStrictChatHistory ? (
+    <Toggle
+      checked={formData.strictChatHistory}
+      onChange={(checked) => setFormData({ ...formData, strictChatHistory: checked })}
+      label={providerText(t, "strictChatHistoryLabel", "Strict chat history repair")}
+      description={providerText(
+        t,
+        "strictChatHistoryDescription",
+        "Repair interrupted tool-call sequences and coalesce adjacent assistant turns before sending to strict OpenAI-compatible upstreams."
+      )}
+    />
+  ) : null;
   const openaiResponsesStoreToggle = isResponsesConnection ? (
     <Toggle
       checked={formData.openaiResponsesStoreEnabled}
@@ -921,6 +943,7 @@ export default function EditConnectionModal({
           {openaiResponsesStoreToggle}
           {requireUserLastMessageToggle}
           {keepMidConversationSystemToggle}
+          {strictChatHistoryToggle}
           <CommandCodeZdrToggle
             provider={provider}
             checked={formData.commandCodeZdrEnabled}
