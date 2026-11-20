@@ -61,6 +61,11 @@ function normalizePathname(rawPath: string): { path: string; reason?: Classifica
     return { path: "/connect" + tail, reason: "public_connect_page" };
   }
 
+  if (lower === "/quota" || lower.startsWith("/quota/")) {
+    const tail = path.slice("/quota".length) || "";
+    return { path: "/quota" + tail, reason: "public_quota_page" };
+  }
+
   for (const { alias, canonical, reason } of ALIAS_PREFIXES) {
     if (lower === alias) {
       return { path: canonical, reason };
@@ -98,6 +103,16 @@ export function classifyRoute(rawPath: string, method: string = "GET"): RouteCla
     return {
       routeClass: "PUBLIC",
       reason: "public_connect_page",
+      normalizedPath,
+    };
+  }
+
+  // Public self-service quota page (/quota/{provider}). The visitor authenticates inside the
+  // page with an API key sent to /api/v1/me/*; the page itself carries no data.
+  if (normalizedPath === "/quota" || normalizedPath.startsWith("/quota/")) {
+    return {
+      routeClass: "PUBLIC",
+      reason: "public_quota_page",
       normalizedPath,
     };
   }
