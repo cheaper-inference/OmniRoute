@@ -357,6 +357,7 @@ async function computeAnalyticsResponse(
       totalCost: 0,
       costReported: 0,
       costEstimated: 0,
+      costUnknown: 0,
       firstRequest: summaryRow?.firstRequest || "",
       lastRequest: summaryRow?.lastRequest || "",
       fallbackCount: Number(fallbackRow?.fallbacks || 0),
@@ -397,12 +398,14 @@ async function computeAnalyticsResponse(
     const dailyCostByDate = new Map<string, number>();
     let costReportedTotal = 0;
     let costEstimatedTotal = 0;
+    let costUnknownTotal = 0;
     for (const row of dailyCostRows) {
       const date = toStringValue(row.date);
       if (!date) continue;
 
-      // Calculate costs, keeping the provider-reported and catalog-priced parts
-      // apart so the summary can say how much of the figure is a bill.
+      // Calculate costs, keeping the provider-reported, catalog-priced and
+      // unknown-provenance (archived rollup) parts apart so the summary can say
+      // how much of the figure is a bill.
       const split = splitUsageRowCost(
         row,
         pricingByProvider,
@@ -414,6 +417,7 @@ async function computeAnalyticsResponse(
       );
       costReportedTotal += split.reported;
       costEstimatedTotal += split.estimated;
+      costUnknownTotal += split.unknown;
       dailyCostByDate.set(date, (dailyCostByDate.get(date) || 0) + split.total);
 
       // Group tokens by model for the day
@@ -518,6 +522,7 @@ async function computeAnalyticsResponse(
     summary.totalCost = roundCost(totalCost);
     summary.costReported = roundCost(costReportedTotal);
     summary.costEstimated = roundCost(costEstimatedTotal);
+    summary.costUnknown = roundCost(costUnknownTotal);
 
     const providerCostByProvider = new Map<string, number>();
     for (const row of providerCostRows) {
