@@ -258,7 +258,8 @@ function fusionJudgeModel(combo: FusionComboLike, settings: unknown): string | n
 /**
  * For a `fusion` combo whose judge the guard would refuse: the refusal, so the
  * request fails before the panel fans out. A judge that would not be refused
- * leaves the request state untouched.
+ * leaves the request state untouched. The trusted live combo test is exempt, as
+ * it is at dispatch.
  *
  * The judge's provider is its prefix, read like a dispatched target's: dispatch
  * strips no prefix from a target either, so a `no-think/…` judge resolves to the
@@ -268,13 +269,14 @@ function fusionJudgeModel(combo: FusionComboLike, settings: unknown): string | n
  * dispatch gate, which refuses the judge call after the panel has run.
  */
 export function agentGuardFusionJudgeRefusal(
-  ctx: Omit<GateTarget, "provider" | "modelStr" | "trustedLiveTest"> & {
+  ctx: Omit<GateTarget, "provider" | "modelStr"> & {
     combo: FusionComboLike;
     /** The settings the combo service receives for this combo (its `comboDefaults`). */
     settings?: unknown;
   }
 ): Response | null {
   try {
+    if (ctx.trustedLiveTest === true) return null;
     if (resolveAgentGuardMode() !== "block") return null;
     const judge = fusionJudgeModel(ctx.combo, ctx.settings);
     const provider = judge ? providerFromModelString(judge) : null;

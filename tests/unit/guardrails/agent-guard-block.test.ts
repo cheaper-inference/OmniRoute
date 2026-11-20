@@ -220,6 +220,26 @@ test("strict: the trusted live test is exempt; a client that only sends the test
     })?.status,
     403
   );
+  // The fusion judge pre-check takes the same exemption.
+  const fusion = {
+    name: "f",
+    strategy: "fusion",
+    models: ["glm/glm-5"],
+    config: { judgeModel: "cc/claude-opus-5" },
+  };
+  assert.equal(
+    gate.agentGuardFusionJudgeRefusal({
+      request: req(CURL),
+      combo: fusion,
+      trustedLiveTest: true,
+      log: quiet(),
+    }),
+    null
+  );
+  assert.equal(
+    gate.agentGuardFusionJudgeRefusal({ request: req(CURL), combo: fusion, log: quiet() })?.status,
+    403
+  );
 });
 test("a proxy that rewrites User-Agent: Claude Code stays official by x-app and anthropic-beta; with every marker stripped only strict refuses", () => {
   const stripped = { "user-agent": "Mozilla/5.0 (corp-proxy)" };
@@ -277,6 +297,34 @@ test("fails open: an exception while deciding never refuses and writes exactly o
   );
   const upstream = new Response("{}", { status: 502 });
   assert.equal(gate.settleAgentGuardCombo(broken, upstream), upstream);
+});
+test("fails open: a mode read that throws refuses nothing and writes one warn line with only the error's class name", () => {
+  const realEnv = process.env;
+  const unreadable = new Proxy(realEnv, {
+    get(target, key) {
+      if (key === "AGENT_GUARD_MODE") throw new TypeError("mode unreadable sk-SECRET");
+      return Reflect.get(target, key);
+    },
+  });
+  const failOpenLine = ["warn", "AGENT_GUARD", "agent guard failed open", { error: "TypeError" }];
+  const gateLog = capture();
+  const judgeLog = capture();
+  process.env = unreadable;
+  try {
+    assert.equal(
+      gate.agentGuardRefusal({ request: req(KILO), provider: "claude", log: gateLog.log }),
+      null
+    );
+    const combo = { strategy: "fusion", config: { judgeModel: "cc/claude-opus-5" } };
+    assert.equal(
+      gate.agentGuardFusionJudgeRefusal({ request: req(KILO), combo, log: judgeLog.log }),
+      null
+    );
+  } finally {
+    process.env = realEnv;
+  }
+  assert.deepEqual(gateLog.calls, [failOpenLine]);
+  assert.deepEqual(judgeLog.calls, [failOpenLine]);
 });
 test("fails open: a target let through by a failure counts as admitted, so the combo keeps its real error", () => {
   setMode("block");

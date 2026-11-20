@@ -1133,9 +1133,14 @@ async function handleChatImplementation(
     if (managedLease && isManagedComboUnsupported(combo, settings, allCombos))
       return managedComboRejection();
     // A configured fusion judge the agent guard refuses fails before the panel fans out.
-    const judgeRefusal =
-      !isComboLiveTest &&
-      agentGuardFusionJudgeRefusal({ request, combo, settings, apiKeyInfo, sourceFormat });
+    const judgeRefusal = agentGuardFusionJudgeRefusal({
+      request,
+      combo,
+      settings,
+      apiKeyInfo,
+      sourceFormat,
+      trustedLiveTest: isComboLiveTest,
+    });
     if (judgeRefusal) return judgeRefusal;
     log.info(
       "CHAT",
@@ -1187,7 +1192,11 @@ async function handleChatImplementation(
         throw error;
       }
       if (modelInfo?.errorType === "model_not_found") return "model_not_in_catalog";
-      const provider = comboCheckProvider(modelString, modelInfo, target?.providerId);
+      const provider = comboCheckProvider(
+        modelString,
+        modelInfo,
+        comboTargetCredentialProviderId(target)
+      );
       if (agentGuardRefusal({ request, provider, modelStr: modelString, apiKeyInfo })) return false;
       const resolvedModel = modelInfo.model || modelString;
       const githubGate = await ghComboGate(comboPreselectedCredentials, provider, resolvedModel);
