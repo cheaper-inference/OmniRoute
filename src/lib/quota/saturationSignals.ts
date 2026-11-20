@@ -177,7 +177,8 @@ function pickTokenTriple(
 
 /**
  * Store rate-limit headers from an upstream response for saturation signal use.
- * Called by the response handler after a successful request.
+ * Called by the response handler for every upstream response, including error
+ * responses such as a 429.
  *
  * Captures two independent signals, both keyed `${provider}:${connectionId}`:
  *   - REQUEST headers (per-minute RPM burst) — legacy, anthropic fallback.

@@ -349,11 +349,15 @@ test("a Response's headers drive the request-header fallback of getSaturation", 
     loadConnection: async () => ({ id: "hdr-conn-2", provider: "anthropic", authType: "apikey" }),
     fetchUsage: async () => ({ message: "no plan window" }),
   });
-  const val = await getSaturation("hdr-conn-2", "anthropic", {
-    unit: "requests",
-    window: "hourly",
-  });
-  satMod.__setAnthropicSaturationDepsForTests(null);
+  let val: number;
+  try {
+    val = await getSaturation("hdr-conn-2", "anthropic", {
+      unit: "requests",
+      window: "hourly",
+    });
+  } finally {
+    satMod.__setAnthropicSaturationDepsForTests(null);
+  }
   assert.ok(Math.abs(val - 0.7) < 1e-9, `expected ≈0.7, got ${val}`);
 });
 test("exhausted window from a Headers instance reads as fully saturated", () => {
