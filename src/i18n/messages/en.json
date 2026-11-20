@@ -2636,6 +2636,8 @@
     "bannedStatus": "Banned Status",
     "managementApiAccess": "Management API Access",
     "expirationDate": "Expiration Date",
+    "keyExpiryPresetPlusDays": "+{days} days",
+    "keyExpiryPresetsHint": "Sets the expiration to 23:59 of that day in this browser's time zone, counted from today.",
     "managementAccess": "Management Access",
     "allowedConnections": "Allowed Connections",
     "searchPlaceholder": "Search by name or token...",
