@@ -8,6 +8,9 @@ import { BOTH, PERCENT_PLAN, ctx, input, makeDeps } from "./fixtures/quotaSelfVi
 
 const R1 = "2026-05-27T18:00:00.000Z";
 const R2 = "2026-06-01T00:00:00.000Z";
+/** The builder's clock: the same instant as the fixture's `now`, before R1 and R2. */
+const NOW = Date.parse("2026-05-27T15:30:00.000Z");
+const PAST = "2026-05-27T15:00:00.000Z";
 
 function w(pct: number, resetAt: string | null) {
   return { usedPercentage: pct, remainingPercentage: 100 - pct, resetAt };
@@ -25,7 +28,8 @@ test("one neutral entry per pool connection, with account bars from the cached s
     [
       { connectionId: "conn-secret-1", quotas: CACHE },
       { connectionId: "conn-secret-2", quotas: CACHE, stale: true },
-    ]
+    ],
+    NOW
   );
   assert.deepEqual(
     accounts.map((a) => [a.slot, a.label]),
@@ -50,26 +54,33 @@ test("one neutral entry per pool connection, with account bars from the cached s
 });
 
 test("an unavailable, missing or unmapped account window is flagged, not zeroed", () => {
-  const failed = buildSelfViewAccounts(ctx(), [
-    { connectionId: "conn-secret-1", available: false, reason: "fetch_failed" },
-  ]);
+  const failed = buildSelfViewAccounts(
+    ctx(),
+    [{ connectionId: "conn-secret-1", available: false, reason: "fetch_failed" }],
+    NOW
+  );
   assert.deepEqual(failed[0].dimensions[0].account, {
     used: null,
     status: "unavailable",
     reason: "fetch_failed",
   });
-  const absent = buildSelfViewAccounts(ctx({ connectionIds: ["conn-secret-1", "conn-secret-2"] }), [
-    { connectionId: "conn-secret-2", quotas: CACHE },
-  ]);
+  const absent = buildSelfViewAccounts(
+    ctx({ connectionIds: ["conn-secret-1", "conn-secret-2"] }),
+    [{ connectionId: "conn-secret-2", quotas: CACHE }],
+    NOW
+  );
   assert.deepEqual([absent[0].dimensions[0].account?.reason, absent[1].slot], ["not_available", 2]);
-  const bailian = buildSelfViewAccounts(ctx({ provider: "bailian" }), [
-    { connectionId: "conn-secret-1", quotas: { other: w(5, null) } },
-  ]);
+  assert.equal(absent[1].dimensions[0].account?.used, 40);
+  const bailian = buildSelfViewAccounts(
+    ctx({ provider: "bailian" }),
+    [{ connectionId: "conn-secret-1", quotas: { other: w(5, null) } }],
+    NOW
+  );
   assert.equal(bailian[0].dimensions[0].account?.reason, "window_not_reported");
 });
 
 test("hidden account data leaves no account bar and no model windows", () => {
-  const [a] = buildSelfViewAccounts(ctx(), null);
+  const [a] = buildSelfViewAccounts(ctx(), null, NOW);
   assert.deepEqual(["account" in a.dimensions[0], "modelWindows" in a], [false, false]);
 });
 
@@ -168,7 +179,8 @@ test("an account dimension uses the plan limit of one account and skips placehol
   } as ProviderPlan;
   const accounts = buildSelfViewAccounts(
     ctx({ plan, connectionIds: ["conn-secret-1", "conn-secret-2", "conn-secret-4"] }),
-    [{ connectionId: "conn-secret-1", quotas: CACHE }]
+    [{ connectionId: "conn-secret-1", quotas: CACHE }],
+    NOW
   );
   assert.equal(accounts.length, 3);
   assert.deepEqual(
@@ -179,12 +191,16 @@ test("an account dimension uses the plan limit of one account and skips placehol
 });
 
 test("codex windows map to its own cache keys; a non-finite reading is not reported", () => {
-  const [codex] = buildSelfViewAccounts(ctx({ provider: "codex" }), [
-    {
-      connectionId: "conn-secret-1",
-      quotas: { session: w(25, R1), weekly: w(Number.NaN, R2), "gpt-5 weekly": w(3, R2) },
-    },
-  ]);
+  const [codex] = buildSelfViewAccounts(
+    ctx({ provider: "codex" }),
+    [
+      {
+        connectionId: "conn-secret-1",
+        quotas: { session: w(25, R1), weekly: w(Number.NaN, R2), "gpt-5 weekly": w(3, R2) },
+      },
+    ],
+    NOW
+  );
   assert.deepEqual(codex.dimensions[0].account, { used: 25, status: "ok", resetAt: R1 });
   assert.deepEqual(codex.dimensions[1].account, {
     used: null,
@@ -198,9 +214,92 @@ test("codex windows map to its own cache keys; a non-finite reading is not repor
 });
 
 test("an unexpected entry reason is replaced by a fixed one", () => {
-  const [account] = buildSelfViewAccounts(ctx(), [
-    { connectionId: "conn-secret-1", available: false, reason: "lookup of conn-secret-1 failed" },
-  ]);
+  const [account] = buildSelfViewAccounts(
+    ctx(),
+    [{ connectionId: "conn-secret-1", available: false, reason: "lookup of conn-secret-1 failed" }],
+    NOW
+  );
   assert.equal(account.dimensions[0].account?.reason, "not_available");
   assert.equal(account.modelWindows?.reason, "not_available");
+});
+
+test("a provider without a plan-window mapping reports no model windows and copies no label", async () => {
+  const quotas = { "key:alice-prod": w(10, R1), "upstream-limit-7f3a9c": w(20, R2) };
+  const deps = makeDeps({
+    plan: PERCENT_PLAN,
+    resolveConnectionProvider: async () => "tokenrouter",
+    resolveAccountQuotaEntries: async () => [{ connectionId: "conn-secret-1", quotas }],
+  });
+  const view = await buildQuotaSelfView(input({ provider: "tokenrouter", scopes: BOTH }), deps);
+  const [account] = view.pools[0].accounts;
+  assert.deepEqual(account.modelWindows, { status: "ok", windows: [] });
+  const serialized = JSON.stringify(view);
+  assert.ok(!serialized.includes("key:alice-prod"));
+  assert.ok(!serialized.includes("upstream-limit-7f3a9c"));
+
+  const [direct] = buildSelfViewAccounts(
+    ctx({ provider: "megabrain" }),
+    [{ connectionId: "conn-secret-1", quotas, stale: true }],
+    NOW
+  );
+  assert.deepEqual(direct.modelWindows, { status: "stale", windows: [] });
+});
+
+test("a reading whose reset time already passed is stale, with its numbers kept", () => {
+  const reading = (resetAt: string | null) => ({
+    "session (5h)": w(40, resetAt),
+    "weekly (7d)": w(81, R2),
+    "weekly fable (7d)": w(12, resetAt),
+  });
+  const [past] = buildSelfViewAccounts(
+    ctx(),
+    [{ connectionId: "conn-secret-1", quotas: reading(PAST) }],
+    NOW
+  );
+  assert.deepEqual(past.dimensions[0].account, { used: 40, status: "stale", resetAt: PAST });
+  assert.deepEqual(past.dimensions[1].account, { used: 81, status: "ok", resetAt: R2 });
+  assert.deepEqual(past.modelWindows, {
+    status: "stale",
+    windows: [{ label: "weekly fable (7d)", usedPercent: 12, resetAt: PAST }],
+  });
+
+  const [future] = buildSelfViewAccounts(
+    ctx(),
+    [{ connectionId: "conn-secret-1", quotas: reading(R1) }],
+    NOW
+  );
+  assert.deepEqual(future.dimensions[0].account, { used: 40, status: "ok", resetAt: R1 });
+  assert.equal(future.modelWindows?.status, "ok");
+
+  const [alreadyStale] = buildSelfViewAccounts(
+    ctx(),
+    [{ connectionId: "conn-secret-1", quotas: reading(PAST), stale: true }],
+    NOW
+  );
+  assert.deepEqual(alreadyStale.dimensions[0].account, {
+    used: 40,
+    status: "stale",
+    resetAt: PAST,
+  });
+  assert.equal(alreadyStale.modelWindows?.status, "stale");
+
+  const [unparseable] = buildSelfViewAccounts(
+    ctx(),
+    [{ connectionId: "conn-secret-1", quotas: reading("not a date") }],
+    NOW
+  );
+  assert.equal(unparseable.dimensions[0].account?.status, "ok");
+  assert.equal(unparseable.modelWindows?.status, "ok");
+});
+
+test("two entries for the same connection: the first one wins", () => {
+  const [account] = buildSelfViewAccounts(
+    ctx(),
+    [
+      { connectionId: "conn-secret-1", quotas: { "session (5h)": w(40, R1) } },
+      { connectionId: "conn-secret-1", quotas: { "session (5h)": w(90, R1) } },
+    ],
+    NOW
+  );
+  assert.deepEqual(account.dimensions[0].account, { used: 40, status: "ok", resetAt: R1 });
 });

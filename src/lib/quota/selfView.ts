@@ -27,6 +27,7 @@
  */
 
 import { hasSelfAccountQuotaScope, hasSelfUsageScope } from "@/shared/constants/selfServiceScopes";
+import { createLogger } from "@/shared/utils/logger";
 import {
   selfQuotaResponseSchema,
   type SelfQuotaPool,
@@ -67,6 +68,8 @@ type CoreDeps = Required<
     | "resolveAccountQuotaEntries"
   >
 > & { secret: string };
+
+const log = createLogger("quota:self-view");
 
 const COUNTABLE_UNITS: ReadonlySet<string> = new Set<CountableUnit>(["requests", "tokens", "usd"]);
 const CLAUDE_FAMILY: ReadonlySet<string> = new Set(["claude", "anthropic"]);
@@ -286,8 +289,9 @@ function allocationCap(allocation: PoolAllocation): SelfQuotaPool["cap"] {
 
 /**
  * Account entries for the pool's own connections, or null when the key may not see them.
- * A failed lookup is an empty list (every account reported unavailable). Never called with an
- * empty id list: resolveAccountQuotaEntries would read every active connection.
+ * A failed lookup is an empty list (every account reported unavailable) and a server-side warning
+ * (the error stays in the log, never in the view). Never called with an empty id list:
+ * resolveAccountQuotaEntries would read every active connection.
  */
 async function resolvePoolAccountEntries(
   ctx: SelfViewPoolContext,
@@ -302,7 +306,11 @@ async function resolvePoolAccountEntries(
       allowedConnections,
       sharedQuotaProviders: input.sharedQuotaProviders,
     });
-  } catch {
+  } catch (err) {
+    log.warn(
+      { err: (err as Error)?.message, poolId: ctx.pool.id },
+      "self-service quota view: account lookup failed"
+    );
     return [];
   }
 }
@@ -328,7 +336,11 @@ async function buildPoolView(
     cap: allocationCap(ctx.allocation),
     accountVisible: ctx.accountVisible,
     dimensions,
-    accounts: buildSelfViewAccounts(ctx, await resolvePoolAccountEntries(ctx, input, deps)),
+    accounts: buildSelfViewAccounts(
+      ctx,
+      await resolvePoolAccountEntries(ctx, input, deps),
+      deps.now()
+    ),
   };
 }
 

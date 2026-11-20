@@ -13,7 +13,12 @@
  * Account-level data (the `account` bar and `modelWindows`) comes only from the cached
  * provider-limits entries the caller passes in (`entries`); `entries === null` means the key may
  * not see account data, and those fields are omitted. A window the cache does not report is
- * `unavailable` / `window_not_reported`, never 0; a stale cached reading is `stale`.
+ * `unavailable` / `window_not_reported`, never 0. A stale cached reading, or one whose `resetAt`
+ * is already before `now` (the window reset since it was read), is `stale` with its numbers kept.
+ *
+ * Model windows are listed only for providers in PLAN_WINDOW_CACHE_KEYS, whose other cache keys
+ * are model or surface names. Other providers can key their cache by operator-chosen names or
+ * upstream key/limit ids, so none of their labels is copied: their `windows` is empty.
  */
 
 import type {
@@ -74,32 +79,55 @@ function cachedWindow(
   return reading && Number.isFinite(reading.usedPercentage) ? reading : null;
 }
 
-function accountBar(provider: string, dim: PercentDimension, state: EntryState): SelfQuotaBar {
+/** "stale" when the reading's window already reset before `now`; an unparseable time is ignored. */
+function readingStatus(
+  status: SelfQuotaStatus,
+  resetAt: string | null | undefined,
+  now: number
+): SelfQuotaStatus {
+  if (status !== "ok" || !resetAt) return status;
+  const resetMs = Date.parse(resetAt);
+  return Number.isFinite(resetMs) && resetMs < now ? "stale" : status;
+}
+
+function accountBar(
+  provider: string,
+  dim: PercentDimension,
+  state: EntryState,
+  now: number
+): SelfQuotaBar {
   if (!("quotas" in state)) return { used: null, status: "unavailable", reason: state.reason };
   const reading = cachedWindow(provider, dim.window, state.quotas);
   if (!reading) return { used: null, status: "unavailable", reason: WINDOW_NOT_REPORTED };
   return {
     used: (reading.usedPercentage / 100) * dim.limit,
-    status: state.status,
+    status: readingStatus(state.status, reading.resetAt, now),
     resetAt: reading.resetAt ?? null,
   };
 }
 
-function modelWindowsOf(provider: string, state: EntryState): ModelWindows {
+function modelWindowsOf(provider: string, state: EntryState, now: number): ModelWindows {
   if (!("quotas" in state)) return { status: "unavailable", reason: state.reason, windows: [] };
-  const planKeys = new Set(Object.values(PLAN_WINDOW_CACHE_KEYS[provider] ?? {}));
+  const mapping = Object.prototype.hasOwnProperty.call(PLAN_WINDOW_CACHE_KEYS, provider)
+    ? PLAN_WINDOW_CACHE_KEYS[provider]
+    : null;
+  if (!mapping) return { status: state.status, windows: [] };
+  const planKeys = new Set(Object.values(mapping));
   const windows: ModelWindows["windows"] = [];
+  let status = state.status;
   for (const [label, reading] of Object.entries(state.quotas)) {
     if (planKeys.has(label) || !reading || !Number.isFinite(reading.usedPercentage)) continue;
     windows.push({ label, usedPercent: reading.usedPercentage, resetAt: reading.resetAt ?? null });
+    status = readingStatus(status, reading.resetAt, now);
   }
-  return { status: state.status, windows };
+  return { status, windows };
 }
 
 function accountDimension(
   ctx: SelfViewPoolContext,
   dim: PercentDimension,
-  state: EntryState | null
+  state: EntryState | null,
+  now: number
 ): SelfQuotaAccountDimension {
   const dimension: SelfQuotaAccountDimension = {
     unit: "percent",
@@ -113,7 +141,7 @@ function accountDimension(
       reason: PERCENT_ATTRIBUTION_UNAVAILABLE,
     },
   };
-  if (state) dimension.account = accountBar(ctx.provider, dim, state);
+  if (state) dimension.account = accountBar(ctx.provider, dim, state, now);
   return dimension;
 }
 
@@ -121,10 +149,11 @@ function isPercentDimension(dim: QuotaDimension): dim is PercentDimension {
   return dim.unit === "percent" && dim.limit > Number.EPSILON;
 }
 
-/** entries = null when account data is hidden for this key. */
+/** entries = null when account data is hidden for this key; `now` is the view's clock (ms). */
 export function buildSelfViewAccounts(
   ctx: SelfViewPoolContext,
-  entries: AccountQuotaEntryLike[] | null
+  entries: AccountQuotaEntryLike[] | null,
+  now: number
 ): SelfQuotaAccount[] {
   const poolConnections = new Set(ctx.connectionIds);
   const byConnection = new Map<string, AccountQuotaEntryLike>();
@@ -140,9 +169,9 @@ export function buildSelfViewAccounts(
     const account: SelfQuotaAccount = {
       slot: index + 1,
       label: `Account ${index + 1}`,
-      dimensions: percentDimensions.map((dim) => accountDimension(ctx, dim, state)),
+      dimensions: percentDimensions.map((dim) => accountDimension(ctx, dim, state, now)),
     };
-    if (state) account.modelWindows = modelWindowsOf(ctx.provider, state);
+    if (state) account.modelWindows = modelWindowsOf(ctx.provider, state, now);
     return account;
   });
 }
