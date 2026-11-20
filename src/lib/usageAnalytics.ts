@@ -222,8 +222,9 @@ export async function computeAnalytics(
     weeklyCounts[dayOfWeek]++;
 
     // By model
-    if (!byModelMap[modelShort]) {
-      byModelMap[modelShort] = {
+    const modelProviderKey = `${entry.provider || "unknown"}:${modelShort}`;
+    if (!byModelMap[modelProviderKey]) {
+      byModelMap[modelProviderKey] = {
         model: modelShort,
         provider: entry.provider,
         requests: 0,
@@ -233,11 +234,11 @@ export async function computeAnalytics(
         cost: 0,
       };
     }
-    byModelMap[modelShort].requests++;
-    byModelMap[modelShort].promptTokens += pt;
-    byModelMap[modelShort].completionTokens += ct;
-    byModelMap[modelShort].totalTokens += totalTkns;
-    byModelMap[modelShort].cost += cost;
+    byModelMap[modelProviderKey].requests++;
+    byModelMap[modelProviderKey].promptTokens += pt;
+    byModelMap[modelProviderKey].completionTokens += ct;
+    byModelMap[modelProviderKey].totalTokens += totalTkns;
+    byModelMap[modelProviderKey].cost += cost;
 
     // By account
     const accountName = entry.connectionId

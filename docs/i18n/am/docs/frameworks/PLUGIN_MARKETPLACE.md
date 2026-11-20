@@ -25,31 +25,26 @@ child processes ውስጥ ኮድን ይጭናሉ እና ያስፈጽማሉ፤ �
 loopback ካልሆነ መነሻ ሊደረስባቸው አይችልም።
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md)ን ይመልከቱ።
 
-## ክፍሎቹ እንዴት አብረው እንደሚሠሩ
+## Together እንዴት እንደሚስማማ
 
 ```
-ዳሽቦርድ (/dashboard/plugins)
-  ├─ "የተጫኑ" ትር  → GET /api/plugins            (listPlugins)
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
   │                     POST /api/plugins/scan      (pluginManager.scan)
   │                     POST /api/plugins/{name}/activate|deactivate
-  │                     DELETE /api/plugins/{name}   (ማራገፍ)
-  └─ "ገበያ" ትር → GET /api/plugins/marketplace
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
                           → listMarketplacePlugins()
-                            ├─ ብጁ URL የለም → አብሮገነብ SEED_REGISTRY
-                            └─ ብጁ URL → isSafeMarketplaceUrl() SSRF መከላከያ
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
                                           → safeOutboundFetch(guard:"public-only")
 ```
 
-- **የሬጅስትሪ ንብርብር** — `src/lib/plugins/marketplace.ts`፦ ካታሎጉን ይዘረዝራል / ይፈልጋል፤
-  ማንኛውም ችግር ሲከሰት ወደ መነሻ ሬጅስትሪው ይመለሳል።
-- **የሕይወት ዑደት ንብርብር** — `src/lib/plugins/manager.ts` (`pluginManager` singleton)፦
-  መጫን፣ ማሻሻል፣ ማግበር፣ ማቦዘን፣ ማራገፍ፣ መቃኘት እና በጅማሬ ጊዜ መጫን።
-- **የማኒፌስት ንብርብር** — `src/lib/plugins/manifest.ts`፦ ለ
-  `plugin.json` የZod ስኪማ + ነባሪ እሴቶች።
-- **ስካነር** — `src/lib/plugins/scanner.ts`፦ በፕለጊን ማውጫው ሥር በዲስክ ላይ
-  ያሉ ፕለጊኖችን ያገኛል።
-- **ጫኝ** — `src/lib/plugins/loader.ts`፦ እያንዳንዱን ፕለጊን በተለየ
-  child process ውስጥ ያስጀምራል፣ እንዲሁም የhook ጥሪዎችን በIPC በኩል ያስተላልፋል።
+- **የመመዝገቢያ ንብርብር** — `src/lib/plugins/marketplace.ts`: ካታሎጉን ይዘረዝራል/ይፈልጋል፣ በማንኛውም ውድቀት ላይ ወደ ዘር መዝገብ ይመለሳሉ።
+- **የህይወት ዑደት ንብርብር** — `src/lib/plugins/manager.ts` (`pluginManager` singleton)፡ ጫን፣ አሻሽል፣ አግብር፣ አቦዝን፣ አራግፍ፣ ስካን፣ የማስነሻ ጭነት።
+- **አንጸባራቂ ንብርብር** — `src/lib/plugins/manifest.ts`: Zod schema + ነባሪ ለ `plugin.json`.
+- **ስካነር** — `src/lib/plugins/scanner.ts`: በተሰኪው ማውጫ ስር በዲስክ ላይ ተሰኪዎችን ያገኛል።
+- **ጫኚ** — `src/lib/plugins/loader.ts`: እያንዳንዱን ፕለጊን በተለየ Node.js ልጅ ሂደት ያፈልቃል እና ደላሎች በ IPC ላይ ጥሪዎችን ያቆራኛሉ። ልጁ ማጠሪያ አይደለም (ከዚህ በታች ያለውን "Plugin execution isolation" ይመልከቱ)።
 
 ## የገበያ ካታሎግ
 
@@ -85,34 +80,31 @@ loopback ካልሆነ መነሻ ሊደረስባቸው አይችልም።
 
 ## REST API
 
-ሁሉም የመዳረሻ ነጥቦች የአስተዳደር ማረጋገጫ (`requireManagementAuth`) ይፈልጋሉ፣ **እንዲሁም**
-ለloopback ብቻ የተገደቡ ናቸው — `/api/plugins` እና `/api/plugins/` በ
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) ውስጥ ተዘርዝረዋል።
+ሁሉም የመጨረሻ ነጥቦች የአስተዳደር ማረጋገጫ ያስፈልጋቸዋል (`requireManagementAuth`)** እና** loopback-ብቻ — `/api/plugins` እና `/api/plugins/` በ `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) ተዘርዝረዋል።
 
-| የመዳረሻ ነጥብ                        | ዘዴ     | መግለጫ                                            |
-| -------------------------------- | ------ | ----------------------------------------------- |
-| `/api/plugins`                   | GET    | የተጫኑ ፕለጊኖችን ዘርዝር (አማራጭ `?status=` ማጣሪያ)         |
-| `/api/plugins`                   | POST   | ከፍጹም የአካባቢ ዱካ ፕለጊን ጫን                           |
-| `/api/plugins/scan`              | POST   | የፕለጊን ማውጫውን ቃኝ እና አዳዲስ ፕለጊኖችን መዝግብ              |
-| `/api/plugins/marketplace`       | GET    | የገበያ ቦታ ካታሎግ ግቤቶችን ዘርዝር                         |
-| `/api/plugins/[name]`            | GET    | የተጫነ ፕለጊን ዝርዝሮችን አግኝ                            |
-| `/api/plugins/[name]`            | DELETE | ፕለጊንን አራግፍ                                      |
-| `/api/plugins/[name]/activate`   | POST   | አግብር (ጫን + hooks መዝግብ)                          |
-| `/api/plugins/[name]/deactivate` | POST   | አቦዝን (`onDeactivate`ን አስነሳ፣ hooksን ከምዝገባ አስወግድ) |
-| `/api/plugins/[name]/config`     | GET    | የፕለጊን config + config schema አግኝ                |
-| `/api/plugins/[name]/config`     | PUT    | የፕለጊን configን አዘምን (ከschemaው ጋር የተረጋገጠ)         |
+| የመጨረሻ ነጥብ                        | ዘዴ     | መግለጫ                                     |
+| -------------------------------- | ------ | ---------------------------------------- |
+| `/api/plugins`                   | GET    | የተጫኑ ተሰኪዎችን ይዘርዝሩ (አማራጭ `?status=` ማጣሪያ) |
+| `/api/plugins`                   | POST   | ተሰኪን ከተሰኪው ምንጮች ማውጫ ጫን                   |
+| `/api/plugins/scan`              | POST   | የተሰኪውን ማውጫ ይቃኙ እና አዲስ ተሰኪዎችን ይመዝግቡ       |
+| `/api/plugins/marketplace`       | GET    | የገበያ ቦታ ካታሎግ ግቤቶችን ይዘርዝሩ                 |
+| `/api/plugins/[name]`            | GET    | የተጫኑ ተሰኪ ዝርዝሮችን ያግኙ                      |
+| `/api/plugins/[name]`            | DELETE | ተሰኪን ያራግፉ                                |
+| `/api/plugins/[name]/activate`   | POST   | አግብር ( + መመዝገቢያ መንጠቆዎችን ይጫኑ)             |
+| `/api/plugins/[name]/deactivate` | POST   | አቦዝን (እሳት `onDeactivate`፣ መንጠቆዎችን አስወጣ)  |
+| `/api/plugins/[name]/config`     | GET    | ተሰኪ ውቅረት + config schema ያግኙ             |
+| `/api/plugins/[name]/config`     | PUT    | የፕለጊን ውቅረትን ያዘምኑ (በእቅድ የተረጋገጠ)           |
 
-የ`GET /api/plugins` `status` ማጣሪያ ከ
-`installed` / `active` / `inactive` / `error` አንዱን ይቀበላል። ልክ ያልሆነ እሴት `400` ይመልሳል።
+የ `GET /api/plugins` `status` ማጣሪያ ከ `installed` / `active` / `inactive` / `error` አንዱን ይቀበላል። ልክ ያልሆነ እሴት `400` ይመልሳል።
 
-### የተጫኑ ፕለጊኖችን ዘርዝር
+### የተጫኑ ተሰኪዎችን ይዘርዝሩ
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### ከአካባቢ ዱካ ጫን
+### ከአካባቢያዊ መንገድ ጫን
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -121,19 +113,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` **ፍጹም** መሆን አለበት፣ እንዲሁም `..` የዱካ መሻገሪያ ክፍሎችን ወይም
-null bytesን መያዝ የለበትም (በZod የሚያስገደድ)። የምንጭ ማውጫው ትክክለኛ
-`plugin.json` መያዝ አለበት (ወይም የአንዱ ወላጅ መሆን አለበት)። ሲሳካ ምላሹ የተጫነውን
-የፕለጊን ረድፍ ከ`201` ጋር ይመልሳል።
+`path` አንድ መሆን አለበት** ፍጹም** ወደ ማውጫ የሚወስደው መንገድ** በፕለጊን ምንጮች ማውጫ ውስጥ** : `plugin-sources` ከተሰኪው ስር ቀጥሎ፣ ስለዚህ `~/.omniroute/plugin-sources/` በነባሪ፣ ወይም ያ ተለዋዋጭ ሲዘጋጅ `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`)። መጀመሪያ እዚያ ያለውን ፕለጊን ይቅዱ ወይም ይቅዱ። መንገዱ `..` ወይም ባዶ ባይት ሲይዝ፣ ከማውጫው ውጪ ሲተኛ፣ ከሱ ውጪ በሲምሊንክ ሲፈታ፣ ኢላማው ውጭ የሆነ ሲምሊንክ ሲይዝ ወይም ማውጫው ከሌለ በ `400` መጫኑ ውድቅ ይሆናል። የምንጭ ማውጫው ትክክለኛ `plugin.json` (ወይም የአንድ ወላጅ መሆን) መያዝ አለበት። በስኬት ላይ ምላሹ ከተጫነው ተሰኪ ረድፍ ጋር `201` ነው።
 
-### የገበያ ቦታውን አስስ
+ከሌሎቹ ፕለጊን መንገዶች በተለየ ይህ የአስተዳደር ምስክርነት ያስፈልገዋል (የዳሽቦርድ ክፍለ ጊዜ ወይም የአስተዳደር-ወሰን API ቁልፍ) መግባት ቢሰናከልም (`requireLogin=false`)፡ ኮድ መጫን መቼም የማይታወቅ ተግባር ነው።
+
+### የገበያ ቦታውን ያስሱ
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### የፕለጊን configን አዘምን
+### የተሰኪ አወቃቀሩን ያዘምኑ
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -142,10 +133,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` እያንዳንዱን የቀረበ እሴት በፕለጊኑ
-`configSchema` (በmanifest ውስጥ የተገለጸ) መሠረት ያረጋግጣል፦ የ`number` መስኮች `min`/`max`ን
-ያከብራሉ፣ የ`select` መስኮች ከተገለጸው `enum` ጋር መዛመድ አለባቸው። በschemaው
-ውስጥ የሌሉ keys እንዲያልፉ ይፈቀድላቸዋል።
+`PUT .../config` እያንዳንዱን የቀረበውን ዋጋ በተሰኪው `configSchema` ያጸድቃል (በአንጸባራቂው ውስጥ ተገልጿል) `number` መስኮች `min`/`max` ን ያከብራሉ፣ `select` መስኮች ከተገለጸው `enum` ጋር መዛመድ አለባቸው። በእቅዱ ውስጥ የማይገኙ ቁልፎች ተፈቅደዋል።
 
 ## ውቅር
 
@@ -204,81 +192,58 @@ installationን በአንድነት ያንቀሳቅሳል።
 
 ## ደህንነት
 
-### የራውት ደረጃ — loopback ብቻ
+### መስመር ደረጃ — loopback ብቻ
 
-ፕለጊኖች ኮድን በተጀመሩ የልጅ ፕሮሰሶች ውስጥ ያስፈጽማሉ፤ ስለዚህ መላው `/api/plugins`
-ገጽታ `LOCAL_ONLY` (ደረጃ 1) ተብሎ ተመድቧል። የloopback ማስገደጃው ከማንኛውም
-የማረጋገጫ ፍተሻ **በፊት** ያለምንም ቅድመ ሁኔታ ይሰራል፤ ስለዚህ በቱነል
-በኩል ሳጥኑ ላይ የደረሰ ሾልኮ የወጣ የአስተዳደር ቶከን እንኳን ፕለጊን
-መጫን፣ ማግበር ወይም ማራገፍ አይችልም።
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) እና
-ጥብቅ ደንቦች #15 / #17ን ይመልከቱ።
+ፕለጊኖች በተወለዱ ሕጻናት ሂደቶች ውስጥ ኮድን ይፈጽማሉ፣ ስለዚህ አጠቃላይ `/api/plugins` ወለል `LOCAL_ONLY` (ደረጃ 1) ይመደባል። Loopback ማስፈጸም ያለ ምንም ቅድመ ሁኔታ ይሰራል** ከዚህ በፊት** ማንኛውም የማረጋገጫ ቼክ፣ ስለዚህ የፈሰሰ የአስተዳደር ቶከን በዋሻው ላይ ወደ ሣጥኑ ሲደርስ አሁንም ተሰኪን መጫን፣ ማግበር ወይም ማራገፍ አይችልም። [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) እና Hard Rules #15 / #17 ይመልከቱ።
 
-### የገበያ ቦታ ሬጅስትሪ SSRF መከላከያ
+### የገበያ ቦታ መዝገብ SSRF ጠባቂ
 
-ብጁ የሬጅስትሪ URL በአጥቂ ተጽዕኖ ሊደረግበት የሚችል ውቅር ነው፤ ስለዚህ
-ከመውሰዱ በፊት `listMarketplacePlugins()` በሁለት ንብርብሮች ያጣራዋል፦
+ብጁ መዝገብ URL አጥቂ-ተፅዕኖ ያለው ውቅር ነው፣ ስለዚህ `listMarketplacePlugins()` ከማምጣቱ በፊት በሁለት ንብርብሮች ውስጥ ያስኬዳል
 
-1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`)፦
-   - `http:` / `https:` ያልሆነን ማንኛውንም ነገር ውድቅ ያደርጋል።
-   - መደበኛውን `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`) በመጠቀም ቀጥተኛ private/loopback/link-local/ULA አስተናጋጆችን (IPv4 **እና** IPv6፣
-     IPv4-mappedን ጨምሮ) ውድቅ ያደርጋል።
-   - **ሁለቱንም** `A` እና `AAAA` መዝገቦች ይፈታል፤ እና ከተፈቱት
-     አድራሻዎች **ማንኛውም** private ከሆነ ውድቅ ያደርጋል — በዚህም public-hostname → private-IP ማለፊያውን ይዘጋል።
-   - **በመዝጋት ይከሽፋል**፦ የDNS መፍታት ካልተሳካ URLው ውድቅ ይደረጋል።
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`)፦ የpublic-only URL
-   መከላከያውን በማምጣት ጊዜ እንደገና ይተገብራል፤ እንዲሁም **ማዞሪያዎችን ያግዳል** (የpublic → private `30x`
-   ሽግግር አይኖርም)።
+1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
+   - `http:` / `https:` ያልሆነ ማንኛውንም ነገር ውድቅ ያደርጋል።
+   - private/loopback/link-local/ULA አስተናጋጆችን ውድቅ ያደርጋል (IPv4** እና** IPv6፣ IPv4-mapped ን ጨምሮ) በቀኖናዊው `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) በኩል።
+   - መፍትሄ ይሰጣል** ሁለቱም** `A` እና `AAAA` ይመዘግባል እና ከሆነ ውድቅ ያደርጋል** ማንኛውም** የተፈታ አድራሻ የግል — የህዝብ-አስተናጋጅ ስም → የግል-IP ማለፊያን ይዘጋል።
+   - **አልተሳካም ተዘግቷል።** DNS መፍታት አለመሳካት URL ውድቅ ያደርጋል።
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): የህዝብ ብቻ የሆነውን URL ጠባቂን በማምጣት ጊዜ እና እንደገና ይተገበራል።** ማዘዋወርን ያግዳል።** (ምንም የህዝብ → የግል `30x` pivot የለም)።
 
-ከሁለቱ ንብርብሮች በአንዱ ያልፈው URL ጥያቄውን አያቋርጥም — የገበያ ቦታው
-ያለምንም ማሳወቂያ አብሮ ወደተካተተው የመነሻ ሬጅስትሪ ይመለሳል፤ ማስጠንቀቂያም ይመዘግባል።
+የትኛውም ንብርብር ያልተሳካ URL ጥያቄውን አያስቀረውም — የገበያ ቦታው በፀጥታ ወደ አብሮገነብ የዘር መዝገብ ቤት ይወድቃል እና ማስጠንቀቂያ ይመዘግባል።
 
-> ይህ መከላከያ `A` + `AAAA`ን በተለይ ለመፍታት እና IPv4 ብቻን ከሚፈትሽ ፍተሻ ይልቅ
-> መደበኛውን `isPrivateHost` ለመጠቀም በPR #3774 ውስጥ ተጠናክሯል።
+> ይህ ጠባቂ በ PR #3774 በተለይ A + AAAA ለመፍታት እና ከ IPv4-only ቼክ ይልቅ ቀኖናዊውን `isPrivateHost` ለመጠቀም ጠንክሮ ነበር።
 
-### የፕለጊን አፈጻጸም መነጠል
+### ተሰኪ ማስፈጸሚያ ማግለል።
 
-- **የፕሮሰስ መነጠል** — `loadPlugin()` (`src/lib/plugins/loader.ts`)
-  እያንዳንዱን ፕለጊን በተለየ Node.js የልጅ ፕሮሰስ ውስጥ ያስጀምራል፤ በIPCም
-  ይገናኛል። የhook ጥሪዎች `SIGTERM` → `SIGKILL` የማጠናከሪያ ቅደም ተከተል ያለው የጊዜ ገደብ አላቸው።
-- **የEnv የተፈቀዱ ዝርዝር** — የልጅ ፕሮሰሱ የሚቀበለው በተፈቀዱት ዝርዝር ውስጥ
-  ያሉ የአካባቢ ተለዋዋጮችን ብቻ ነው፤ ሰፋ ያለው ስብስብ የሚፈቀደው manifestው
-  የ`env` ፈቃድ ሲጠይቅ ብቻ ነው።
-- **የዱካ ገደብ** — install/upgrade/uninstall፣ ማንኛውም ቅጂ ወይም ተደጋጋሚ ስረዛ ከመደረጉ በፊት የፕለጊኑ
-  ማውጫ እና `manifest.main` በሚተዳደረው የፕለጊን ስር ማውጫ **ውስጥ** እንደሚፈቱ ያረጋግጣሉ (በተበላሹ የDB ዱካዎች እና በ`manifest.main` ውስጥ ያለ `../` ዱካ ማቋረጥን ይከላከላል)። ማግበር symlinkዎችን በ
-  `realpath` ይፈታል፤ እና ከፕለጊኑ ማውጫ የሚወጣ መግቢያ ነጥብ ለመጫን እምቢ ይላል።
-- **አማራጭ የትክክለኛነት ማስማሪያ** — manifest የ`integrity`
-  (`sha256-<base64>`፣ SRI ቅርጸት) መስክ ሊያውጅ ይችላል። ሲኖር ጫኚው
-  በመጫን ጊዜ የመግቢያ ፋይሉን hash ያረጋግጣል፤ ካልተዛመደም ለማግበር እምቢ ይላል። ይህ
-  በምርጫ የሚነቃ የለውጥ ማወቂያ እንጂ **የደህንነት ወሰን አይደለም** — loopback-only ራውቲንግ
-  እና የፈቃድ ሞዴሉ እውነተኛዎቹ ወሰኖች ናቸው።
+> **ተሰኪዎች በማጠሪያ የተቀመጡ አይደሉም።** ልጁ እንደ OmniRoute ተጠቃሚ የሚሄድ ተራ Node.js ሂደት ነው፣ ምንም VM አውድ እና Node.js ፍቃድ ባንዲራ የለውም፣ ስለዚህ ፕለጊን ኮድ ተጠቃሚው የሚችለውን ማንኛውንም ፋይል ማንበብ እና መፃፍ፣ ፕሮግራሞችን ማስኬድ እና አውታረ መረቡ ላይ መድረስ ይችላል። `requires.permissions` ልጁ የሚቀበለው የትኞቹን የአካባቢ ተለዋዋጮች ብቻ ነው የሚወስነው; ሌሎች ፍቃዶች አይተገበሩም. የሚያምኗቸውን ፕለጊኖች ብቻ ይጫኑ። ከታች ያለው የሂደት ወሰን ብልሽቶችን እና ማንጠልጠያዎችን ይይዛል; የደህንነት ወሰን አይደለም.
 
-## Manifest (`plugin.json`)
+- **የማግለል ሂደት** — `loadPlugin()` (`src/lib/plugins/loader.ts`) እያንዳንዱን ፕለጊን በተለየ Node.js ልጅ ሂደት ያፈልቃል እና በ IPC ላይ ይገናኛል። መንጠቆ ጥሪዎች ከ `SIGTERM` → `SIGKILL` መጨመር ጋር ጊዜ ያለፈባቸው ናቸው።
+- **የኢንቪ የተፈቀደ ዝርዝር** — ልጁ የሚቀበለው የተፈቀደላቸው የአካባቢ ተለዋዋጮች ስብስብ ብቻ ነው። ሰፊው ስብስብ የሚሰጠው አንጸባራቂው የ `env` ፍቃድ ሲጠይቅ ብቻ ነው።
+- **የምንጭ መያዣን ጫን** — `POST /api/plugins` የሚነበበው ከተሰኪው የመረጃ ምንጮች ማውጫ ብቻ ነው ("ከአካባቢው ዱካ ጫን" የሚለውን ይመልከቱ)፡ መንገዱ በ `realpath` ቀኖናዊ ነው፣ በዚያ ማውጫ ውስጥ በጥብቅ መቆየት አለበት፣ እና ያመለጠ ሲምሊንክ የያዘ የምንጭ ዛፍ ምንም ነገር ከመቅዳት በፊት ውድቅ ተደርጓል።
+- **የመንገዱን መያዣ** — install/upgrade/uninstall የፕለጊን ማውጫ እና `manifest.main` እንደሚፈቱ አስረግጡ** ውስጥ** የሚተዳደረው plugin root ከማንኛውም ቅጂ ወይም ተደጋጋሚ መሰረዝ በፊት (ከተጣደፉ DB ዱካዎች እና `../` መሻገርን በ `manifest.main` ይከላከላል)። ማግበር ሲምሊንኮችን በ `realpath` ይፈታል እና ከተሰኪው ማውጫ ያመለጠውን የመግቢያ ነጥብ ለመጫን ፈቃደኛ አይሆንም።
+- **አማራጭ የአቋም ፒን** — አንጸባራቂ `integrity` (`sha256-<base64>`፣ SRI ቅርጸት) መስክ ሊያውጅ ይችላል። በሚገኝበት ጊዜ፣ ጫኚው የመግቢያ ፋይልን hash በጭነት ጊዜ ያረጋግጣል እና አለመመጣጠን ላይ ለማንቃት ፈቃደኛ አይሆንም። መርጦ መግባት ማጭበርበር ነው፣** አይደለም** የደህንነት ወሰን፡ የተጫነ ተሰኪ ማድረግ የሚችለውን አይገድብም።
+- **መንጠቆ ውስጥ ምንም የደንበኛ ምስክርነቶች** — ወደ `onRequest`፣ `onResponse` እና `onError` የተላለፈው አውድ `authorization`፣ `x-api-key`፣ `proxy-authorization` እና `cookie` ራስጌዎች ተወግደዋል እና API ቁልፍ መዝገብ ምንም ቁልፍ እሴት የለውም (`redactPluginContext()` በ `src/lib/plugins/hooks.ts`)።
 
-በ`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) የተረጋገጠ፦
+## አንጸባራቂ (`plugin.json`)
 
-| መስክ                | ዓይነት      | ማስታወሻዎች                                              |
-| ------------------ | --------- | ---------------------------------------------------- |
-| `name`             | string    | አስፈላጊ፤ kebab-case (`^[a-z0-9-]+$`)፣ 1–100 ቁምፊዎች      |
-| `version`          | string    | አስፈላጊ፤ semver (`MAJOR.MINOR.PATCH`)                  |
-| `description`      | string?   | ≤ 500 ቁምፊዎች                                          |
-| `author`           | string?   | ≤ 200 ቁምፊዎች                                          |
-| `license`          | string?   | ነባሪው `MIT` ነው                                        |
-| `main`             | string?   | የመግቢያ ፋይል፤ ነባሪው `index.js` ነው                        |
-| `source`           | enum?     | `local` \| `marketplace` (ነባሪው `local` ነው)           |
-| `tags`             | string[]? | የፍለጋ መለያዎች                                           |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                      |
-| `hooks`            | object?   | ፕለጊኑ የትኞቹን hooks እንደሚተገብር የሚያውጁ Booleans             |
-| `skills`           | object[]? | አማራጭ የክህሎት ትርጓሜዎች                                    |
-| `enabledByDefault` | boolean?  | ሲጫን በራስ-ሰር አግብር                                      |
-| `configSchema`     | object?   | የውቅር መስኮች ካርታ (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | አማራጭ `sha256-<base64>` የመግቢያ ፋይል ማስማሪያ               |
+በ `PluginManifestSchema` (`src/lib/plugins/manifest.ts`) የተረጋገጠ፦
 
-ፈቃዶች ከ
-`network` / `file-read` / `file-write` / `env` / `exec`
-enum ይወሰዳሉ።
+| መስክ                | ዓይነት      | ማስታወሻዎች                                               |
+| ------------------ | --------- | ----------------------------------------------------- |
+| `name`             | ሕብረቁምፊ    | የሚያስፈልግ; kebab-case (`^[a-z0-9-]+$`), 1-100 chars     |
+| `version`          | ሕብረቁምፊ    | የሚያስፈልግ; ሴቨር (`MAJOR.MINOR.PATCH`)                    |
+| `description`      | ሕብረቁምፊ?   | ≤ 500 chars                                           |
+| `author`           | ሕብረቁምፊ?   | ≤ 200 chars                                           |
+| `license`          | ሕብረቁምፊ?   | ለ `MIT` ነባሪዎች                                         |
+| `main`             | ሕብረቁምፊ?   | የመግቢያ ፋይል; ነባሪዎች ለ `index.js`                         |
+| `source`           | enum?     | `local` \| `marketplace` (ነባሪ ወደ `local`)             |
+| `tags`             | ሕብረቁምፊ[]? | መለያዎችን ይፈልጉ                                           |
+| `requires`         | ነገር?      | `{ omniroute?, permissions[] }`                       |
+| `hooks`            | ነገር?      | ቡሊያንስ ተሰኪው የትኛው መንጠቆ እንደሚሠራ ያውጃል።                     |
+| `skills`           | ነገር[]?    | አማራጭ የችሎታ ትርጓሜዎች                                      |
+| `enabledByDefault` | ቡሊያን?     | በመጫን ጊዜ በራስ-አግብር                                      |
+| `configSchema`     | ነገር?      | የማዋቀር መስኮች ካርታ (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | ሕብረቁምፊ?   | አማራጭ `sha256-<base64>` ማስገቢያ-ፋይል ፒን                   |
+
+ፈቃዶች ከ enum `network` / `file-read` / `file-write` / `env` / `exec` የተወሰዱ ናቸው። `env` ብቻ የአሂድ ውጤት አለው (ትንሽ ትልቅ አካባቢ-ለልጁ የሚፈቀድ ዝርዝር); ሌሎቹ መግለጫዎች ናቸው እና አልተተገበሩም.
 
 ## የሕይወት ዑደት ፍሰት
 
@@ -338,16 +303,14 @@ enum ይወሰዳሉ።
 
 ## ዳሽቦርድ
 
-በ`/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) የሚገኘው የዳሽቦርድ ገጽ ሁለት ትሮችን ያቀርባል፦
+በ `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) ያለው ዳሽቦርድ ገጽ ሁለት ትሮችን ይሰጣል፡-
 
-- **የተጫኑ** — የተጫኑ ፕለጊኖችን ከታወጁ hooks፣ ከማግበር/ማቦዘን መቀያየሪያ፣ ከማራገፊያ አዝራር እና ከ"ፕለጊኖችን ቃኝ"
-  ድርጊት (`POST /api/plugins/scan`) ጋር ይዘረዝራል።
-- **የገበያ ቦታ** — ከ`GET /api/plugins/marketplace` የሚገኘውን ካታሎግ፣ ብጁ registry URLን ለማቀናበር
-  ከሚያስችል መስክ ጋር ያሳያል።
+- **ተጭኗል** — የተጫኑ ተሰኪዎችን በተገለጹ መንጠቆቻቸው፣ activate/deactivate መቀያየሪያ፣ የማራገፊያ ቁልፍ እና የ"ስካን ፕለጊን" ድርጊት (`POST /api/plugins/scan`) ይዘረዝራል።
+- **የገበያ ቦታ** — ብጁ መዝገብ URL ለማዘጋጀት ከ `GET /api/plugins/marketplace` ያለውን ካታሎግ ከመስክ ጋር ያሳያል።
 
-የእያንዳንዱ ፕለጊን config ገጽ በ`/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) ይገኛል።
+ገጹ ሁል ጊዜ ፕለጊኖች OmniRoute ሂደት ሙሉ ልዩ መብቶች ጋር የሚሄዱ ማስጠንቀቂያ ያሳያል።
+
+በአንድ ተሰኪ ማዋቀር ገጽ `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) ላይ ይኖራል።
 
 ## በተጨማሪ ይመልከቱ
 

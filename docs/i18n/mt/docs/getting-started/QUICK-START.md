@@ -21,10 +21,10 @@ npm install -g omniroute
 ### Għażla B: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` hija l-ogħla verżjoni SemVer stabbli **ppubblikata**. Din **ma** ssegwix il-fergħa `main` ta' git. Uża `diegosouzapw/omniroute:X.Y.Z` bħala verżjoni fissa għal GitOps. Ara [Tags tal-Immaġni / Kanali tar-Rilaxx](../guides/DOCKER_GUIDE.md#release-channels).
+`:latest` hija l-ogħla verżjoni SemVer stabbli **ppubblikata**. Din **ma** ssegwix il-fergħa `main` ta' git. Uża `cheaperinference/omniroute:X.Y.Z` bħala verżjoni fissa għal GitOps. Ara [Tags tal-Immaġni / Kanali tar-Rilaxx](../guides/DOCKER_GUIDE.md#release-channels).
 
 ### Għażla C: Mill-Kodiċi Sors
 

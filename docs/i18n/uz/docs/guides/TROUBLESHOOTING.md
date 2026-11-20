@@ -457,7 +457,7 @@ To‘liq tafsilotlar va ikkita Kiro hisobini yonma-yon qo‘shish bo‘yicha bos
 2. **Doimiy tuzatish:** `docker run` buyrugʻida `-p 127.0.0.1:20128:20128` dan foydalanib, IPv4 manziliga aniq bogʻlang:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Bu IPv4 bogʻlanishini majburlaydi va proksining xostdagi barcha interfeyslarda ochiq boʻlishiga ham yoʻl qoʻymaydi.
 

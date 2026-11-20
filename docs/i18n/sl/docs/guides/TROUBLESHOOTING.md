@@ -469,7 +469,7 @@ glejte [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Trajni popravek:** Izrecno izvedite vezavo na IPv4 tako, da v ukazu `docker run` uporabite `-p 127.0.0.1:20128:20128`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    To vsili vezavo IPv4 in hkrati prepreči izpostavitev posredniškega strežnika na vseh vmesnikih gostitelja.
 
