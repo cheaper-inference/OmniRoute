@@ -105,3 +105,41 @@ test("defaultEndpointsForProviderNodeApiType maps a decisions node to decisions 
   assert.deepEqual(defaultEndpointsForProviderNodeApiType("decisions"), ["decisions"]);
   assert.deepEqual(defaultEndpointsForProviderNodeApiType("Decisions "), ["decisions"]);
 });
+
+test("decision-only discovered Ollama rows survive model mutation validation without becoming chat", () => {
+  const parsed = providerModelMutationSchema.parse({
+    provider: "ollama-local",
+    modelId: "clef:27b",
+    apiFormat: "systemone",
+    supportedEndpoints: ["systemone"],
+  });
+  assert.deepEqual(parsed.supportedEndpoints, ["systemone"]);
+  assert.deepEqual(classifyModelSupportedEndpoints(parsed.supportedEndpoints), {
+    type: "decisions",
+  });
+  assert.deepEqual(classifyModelSupportedEndpoints(["chat", "systemone"]), {});
+});
+
+test("custom System One nodes preserve native metadata through creation and validation", async () => {
+  const { createProviderNodeSchema, providerNodeValidateSchema } =
+    await import("../../src/shared/validation/schemas/provider.ts");
+  const { defaultEndpointsForProviderNodeApiType } =
+    await import("../../src/shared/constants/modelSupportedEndpoints.ts");
+  assert.equal(
+    createProviderNodeSchema.safeParse({
+      name: "Custom decisions",
+      prefix: "my-decider",
+      apiType: "systemone",
+      baseUrl: "https://decisions.example/v1",
+    }).success,
+    true
+  );
+  assert.equal(
+    providerNodeValidateSchema.safeParse({
+      apiType: "systemone",
+      baseUrl: "https://decisions.example/v1",
+    }).success,
+    true
+  );
+  assert.deepEqual(defaultEndpointsForProviderNodeApiType("systemone"), ["systemone"]);
+});

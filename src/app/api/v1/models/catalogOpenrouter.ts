@@ -16,11 +16,18 @@ export function normalizeOpenRouterModalities(value: unknown): string[] {
 }
 
 export function getOpenRouterModelType(inputModalities: string[], outputModalities: string[]) {
+  if (hasOpenRouterDecisions(outputModalities)) {
+    return outputModalities.includes("text") ? "chat" : "decisions";
+  }
   if (outputModalities.includes("image")) return "image";
   if (outputModalities.includes("audio")) return "audio";
   if (outputModalities.includes("video")) return "video";
   if (outputModalities.includes("embedding")) return "embedding";
   return "chat";
+}
+
+export function hasOpenRouterDecisions(outputModalities: string[]): boolean {
+  return outputModalities.includes("decision") || outputModalities.includes("decisions");
 }
 
 export function isZeroPrice(value: unknown) {

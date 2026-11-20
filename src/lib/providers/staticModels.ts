@@ -70,6 +70,9 @@ const STATIC_MODEL_PROVIDERS: Record<string, () => Array<{ id: string; name: str
       name: model.name || model.id,
     })),
   qoder: () => getStaticQoderModels(),
+  supersoniclabs: () => [
+    { id: "julia-1", name: "Julia-1", apiFormat: "systemone", supportedEndpoints: ["systemone"] },
+  ],
   // Non-LLM providers with no /v1/models endpoint — expose their selectable
   // capability ids as a static catalog so the model-import step shows a usable
   // list instead of a red "does not support models listing" failure.

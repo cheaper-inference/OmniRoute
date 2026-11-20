@@ -3,7 +3,7 @@ import { getApiKeySpendRows } from "@/lib/db/apiKeySpend";
 import type { ProviderLimitsCacheEntry } from "@/lib/db/providerLimits";
 import { getProviderQuotaWindowStartIso } from "@/lib/db/quotaResetEvents";
 import { getOldestSearchLedgerSpendSince, sumSearchLedgerSpendSince } from "@/lib/db/costLedger";
-import { calculateCostDetailed } from "./costCalculator";
+import { calculateCostDetailed, type CostCalculationResult } from "./costCalculator";
 import { isAnthropicMessagesRequest } from "@/shared/utils/anthropicErrorEnvelope";
 
 import {
@@ -511,6 +511,48 @@ function getOldestCountedUsageIso(rows: ReturnType<typeof getApiKeySpendRows>): 
   return oldestTimes.length > 0 ? new Date(Math.min(...oldestTimes)).toISOString() : null;
 }
 
+/**
+ * Prices one group's unmetered tokens and logs why a group is unpriced or failed. A decision
+ * endpoint group stays unpriced: decision endpoints can have different prices from chat for
+ * the same model, so without a reported cost the spend stays unknown and the existing
+ * fail-closed policy applies.
+ */
+async function priceUnmeteredSpendRow(
+  row: ReturnType<typeof getApiKeySpendRows>[number],
+  provider: string,
+  model: string
+): Promise<CostCalculationResult> {
+  if (row.decisionEndpoint) return { costUsd: 0, priced: false };
+
+  const result = await calculateCostDetailed(
+    provider,
+    model,
+    {
+      input: toNumber(row.promptTokens),
+      output: toNumber(row.completionTokens),
+      cacheRead: toNumber(row.cacheReadTokens),
+      cacheCreation: toNumber(row.cacheCreationTokens),
+      reasoning: toNumber(row.reasoningTokens),
+    },
+    {
+      provider,
+      model,
+      serviceTier: row.serviceTier || "standard",
+    }
+  );
+  if (result.failed) {
+    console.warn(
+      `[apiKeyUsageLimits] cost lookup failed for ${provider}/${model} — failing closed (#12341)`
+    );
+  } else if (!result.priced) {
+    console.warn(
+      `[apiKeyUsageLimits] no pricing found for ${provider}/${model} — usage counted as $0; ` +
+        "a configured USD quota fails closed unless the unpriced-usage policy opts out (#12341)"
+    );
+  }
+  return result;
+}
+
 async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promise<ApiKeyUsdSpend> {
   if (!apiKeyId) return EMPTY_SPEND;
   const rows = getApiKeySpendRows(apiKeyId, sinceIso);
@@ -530,34 +572,9 @@ async function getApiKeyUsdSpendSince(apiKeyId: string, sinceIso: string): Promi
     if (toNumber(row.unpricedUnitRequests) > 0) unpriced.add(`${provider}/${model}`);
     if (toNumber(row.unmeteredRequests) === 0) continue;
 
-    const { costUsd, priced, failed } = await calculateCostDetailed(
-      provider,
-      model,
-      {
-        input: toNumber(row.promptTokens),
-        output: toNumber(row.completionTokens),
-        cacheRead: toNumber(row.cacheReadTokens),
-        cacheCreation: toNumber(row.cacheCreationTokens),
-        reasoning: toNumber(row.reasoningTokens),
-      },
-      {
-        provider,
-        model,
-        serviceTier: row.serviceTier || "standard",
-      }
-    );
-    if (failed) {
-      hasPricingFailure = true;
-      console.warn(
-        `[apiKeyUsageLimits] cost lookup failed for ${provider}/${model} — failing closed (#12341)`
-      );
-    } else if (!priced) {
-      unpriced.add(`${provider}/${model}`);
-      console.warn(
-        `[apiKeyUsageLimits] no pricing found for ${provider}/${model} — usage counted as $0; ` +
-          "a configured USD quota fails closed unless the unpriced-usage policy opts out (#12341)"
-      );
-    }
+    const { costUsd, priced, failed } = await priceUnmeteredSpendRow(row, provider, model);
+    if (failed) hasPricingFailure = true;
+    else if (!priced) unpriced.add(`${provider}/${model}`);
     total += costUsd;
   }
 

@@ -1,6 +1,8 @@
 import { getDbInstance } from "./core";
+import { hasColumn } from "./schemaColumns";
 
 interface UsageCostRow {
+  decisionEndpoint?: number;
   storedCost: number | null;
   unmeteredRequests: number | null;
   unpricedUnitRequests: number | null;
@@ -18,12 +20,18 @@ interface UsageCostRow {
 /** Cost snapshots take precedence over token repricing, without double charging. */
 export function getApiKeySpendRows(apiKeyId: string, sinceIso: string): UsageCostRow[] {
   const db = getDbInstance();
+  // Decision endpoints are priced per endpoint, never from chat tokens (#18838). The cloud
+  // bootstrap schema has no usage_history.endpoint column, so none of its rows is a decision.
+  const decisionEndpoint = hasColumn(db, "usage_history", "endpoint")
+    ? "CASE WHEN endpoint IN ('/v1/decisions', '/v1/systemone') THEN 1 ELSE 0 END"
+    : "0";
   return db
     .prepare(
       `
       SELECT
         LOWER(provider) as provider,
         LOWER(model) as model,
+        ${decisionEndpoint} as decisionEndpoint,
         COALESCE(NULLIF(service_tier, ''), 'standard') as serviceTier,
         COALESCE(SUM(COALESCE(provider_cost_usd, calculated_cost_usd)), 0) as storedCost,
         SUM(CASE WHEN billing_unit IS NOT NULL AND COALESCE(provider_cost_usd, calculated_cost_usd) IS NULL THEN 1 ELSE 0 END) as unpricedUnitRequests,
@@ -38,7 +46,7 @@ export function getApiKeySpendRows(apiKeyId: string, sinceIso: string): UsageCos
       WHERE api_key_id = @apiKeyId
         AND timestamp >= @sinceIso
         AND (success = 1 OR COALESCE(provider_cost_usd, calculated_cost_usd) IS NOT NULL)
-      GROUP BY LOWER(provider), LOWER(model), serviceTier
+      GROUP BY LOWER(provider), LOWER(model), serviceTier, decisionEndpoint
     `
     )
     .all({ apiKeyId, sinceIso }) as UsageCostRow[];

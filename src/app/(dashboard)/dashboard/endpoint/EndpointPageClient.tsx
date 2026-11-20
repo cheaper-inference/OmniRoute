@@ -1,5 +1,6 @@
 "use client";
 
+import { resolveDecisionProtocol } from "@/shared/constants/decisionProtocol";
 import Icon from "@/shared/components/Icon";
 import { Spinner } from "@/shared/components/Loading";
 import { Alert } from "@omniroute/ui-kit/alert";
@@ -110,6 +111,9 @@ type EndpointModelSummary = {
   owned_by?: string;
   parent?: string;
   type?: string;
+  subtype?: string;
+  supported_endpoints?: string[];
+  api_format?: string;
   custom?: boolean;
   root?: string;
 };
@@ -333,7 +337,7 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   const fetchModels = async () => {
     setModelsLoading(true);
     try {
-      const res = await fetch("/v1/models");
+      const res = await fetch("/api/models/catalog");
       if (res.ok) {
         const data = await res.json();
         setAllModels(data.data || []);
@@ -367,6 +371,12 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
   // Filter out parent models (models with parent field set) to avoid showing duplicates
   const endpointData = useMemo(() => {
     const chat = allModels.filter((m) => !m.type && !m.parent);
+    const decisions = allModels.filter(
+      (m) => !m.parent && resolveDecisionProtocol(m) === "decisions"
+    );
+    const systemone = allModels.filter(
+      (m) => !m.parent && resolveDecisionProtocol(m) === "systemone"
+    );
     const embeddings = allModels.filter((m) => m.type === "embedding" && !m.parent);
     const images = allModels.filter((m) => m.type === "image" && !m.parent);
     const video = allModels.filter((m) => m.type === "video" && !m.parent);
@@ -380,6 +390,8 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
     const moderation = allModels.filter((m) => m.type === "moderation" && !m.parent);
     const music = allModels.filter((m) => m.type === "music" && !m.parent);
     return {
+      decisions,
+      systemone,
       chat,
       embeddings,
       images,
@@ -407,11 +419,20 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
       endpointData.music,
       endpointData.video,
     ].filter((m) => m.length > 0).length;
-    const utilityFixed = 3; // batch + files + list models (always available)
+    const utilityFixed = 4; // batch + files + list models + decision catalog
     const modelUtility =
       (endpointData.rerank.length > 0 ? 1 : 0) + (endpointData.moderation.length > 0 ? 1 : 0);
     const searchCount = searchProviders.length > 0 ? 1 : 0;
-    return chatCount + imageCount + otherMedia + utilityFixed + modelUtility + searchCount;
+    return (
+      chatCount +
+      imageCount +
+      otherMedia +
+      utilityFixed +
+      modelUtility +
+      searchCount +
+      (endpointData.decisions.length > 0 ? 1 : 0) +
+      (endpointData.systemone.length > 0 ? 1 : 0)
+    );
   }, [endpointData, searchProviders]);
 
   const postCloudAction = async (action, timeoutMs = CLOUD_ACTION_TIMEOUT_MS) => {
@@ -1958,6 +1979,53 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
                 copy={copy}
                 copied={copied}
                 baseUrl={currentEndpoint}
+              />
+            </div>
+          </div>
+
+          {/* Decisions */}
+          <div className="mb-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Icon name="psychology" className="text-sm text-info" />
+              <h3 className="text-xs text-text-muted uppercase">Decisions</h3>
+              <div className="flex-1 h-px bg-border/50" />
+            </div>
+            <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
+              <EndpointCard
+                icon="psychology"
+                iconColor="text-info"
+                iconBg="bg-info/10"
+                title="Decisions"
+                path="/v1/decisions"
+                models={endpointData.decisions}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="psychology"
+                iconColor="text-info"
+                iconBg="bg-info/10"
+                title="System One"
+                path="/v1/systemone"
+                models={endpointData.systemone}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
+              />
+              <EndpointCard
+                icon="psychology"
+                iconColor="text-info"
+                iconBg="bg-info/10"
+                title="Decision models"
+                path="/v1/systemone/models"
+                models={null}
+                copy={copy}
+                copied={copied}
+                baseUrl={currentEndpoint}
+                modelsLoading={modelsLoading}
               />
             </div>
           </div>

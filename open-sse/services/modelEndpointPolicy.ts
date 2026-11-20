@@ -109,11 +109,31 @@ function classifyOpenRouterModel(modelId: string): ModelEndpointDecision | null 
     : null;
 }
 
+function resolveOpenAiEndpointDecision(
+  modelId: string,
+  supportedEndpoints: readonly string[] | undefined,
+  explicit: ModelEndpointDecision | null
+): ModelEndpointDecision | null {
+  const decision = classifyOpenAiModel(modelId);
+  if (!decision) return null;
+  // Old imported rows carry a synthetic chat default. Only explicit specialty
+  // plus chat endpoints opt a known specialty model into chat selection.
+  const normalizedEndpoints = supportedEndpoints?.map(normalizeEndpoint) ?? [];
+  const specialtyEndpoints = decision.kind === "image" ? IMAGE_ENDPOINTS : VIDEO_ENDPOINTS;
+  const hasSpecialtyEndpoint = normalizedEndpoints.some((endpoint) =>
+    specialtyEndpoints.has(endpoint)
+  );
+  return explicit?.chatSelectable && hasSpecialtyEndpoint ? explicit : decision;
+}
+
 export function getModelEndpointDecision(
   provider: string | null | undefined,
   modelId: string,
   supportedEndpoints?: readonly string[]
 ): ModelEndpointDecision {
+  if (provider?.trim().toLowerCase() === "supersoniclabs") {
+    return { kind: "non-chat", chatSelectable: false, reason: "provider-policy" };
+  }
   const explicit = classifyExplicitEndpoints(supportedEndpoints);
   // Decisions-only providers (TypeSafe Jev, #14498) are never chat models, even
   // when a stored row carries the synthetic `["chat"]` default.
@@ -129,21 +149,8 @@ export function getModelEndpointDecision(
     if (openRouterDecision) return openRouterDecision;
   }
   if (provider?.trim().toLowerCase() === "openai") {
-    const openAiDecision = classifyOpenAiModel(modelId);
-    if (openAiDecision) {
-      // Old imported rows were persisted with `["chat"]` as a synthetic default
-      // even when upstream `/models` supplied no endpoint metadata. Do not let
-      // that default reclassify a known specialty model. A genuinely
-      // multi-endpoint model can opt in by explicitly naming both its specialty
-      // endpoint and a chat/Responses endpoint.
-      const normalizedEndpoints = supportedEndpoints?.map(normalizeEndpoint) ?? [];
-      const hasSpecialtyEndpoint =
-        openAiDecision.kind === "image"
-          ? normalizedEndpoints.some((endpoint) => IMAGE_ENDPOINTS.has(endpoint))
-          : normalizedEndpoints.some((endpoint) => VIDEO_ENDPOINTS.has(endpoint));
-      if (explicit?.chatSelectable && hasSpecialtyEndpoint) return explicit;
-      return openAiDecision;
-    }
+    const openAiDecision = resolveOpenAiEndpointDecision(modelId, supportedEndpoints, explicit);
+    if (openAiDecision) return openAiDecision;
   }
 
   if (explicit) return explicit;

@@ -14,6 +14,7 @@ const localDb = { updatePricing };
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const usageHistory = await import("../../src/lib/usage/usageHistory.ts");
 const usageLimits = await import("../../src/lib/usage/apiKeyUsageLimits.ts");
+const { calculateCostDetailed } = await import("../../src/lib/usage/costCalculator.ts");
 
 const NOW = Date.parse("2026-06-19T20:00:00.000Z");
 
@@ -54,6 +55,82 @@ test("API key USD usage limits persist and default off", async () => {
   assert.equal(metadata?.usageLimitEnabled, true);
   assert.equal(metadata?.dailyUsageLimitUsd, 10.5);
   assert.equal(metadata?.weeklyUsageLimitUsd, 50);
+});
+
+test("decision usage never inherits chat prices for the same model", async () => {
+  await localDb.updatePricing({ openai: { "decision-price-test": { input: 1, output: 1 } } });
+  const created = await apiKeysDb.createApiKey("Decision usage", "decision-test");
+  await usageHistory.saveRequestUsage({
+    provider: "openai",
+    model: "decision-price-test",
+    apiKeyId: created.id,
+    endpoint: "/v1/decisions",
+    tokens: { input: 1_000_000, output: 0 },
+    success: true,
+    timestamp: "2026-06-19T12:00:00.000Z",
+  });
+  await usageHistory.saveRequestUsage({
+    provider: "openai",
+    model: "decision-price-test",
+    apiKeyId: created.id,
+    endpoint: "/v1/chat/completions",
+    tokens: { input: 1_000_000, output: 0 },
+    success: true,
+    timestamp: "2026-06-19T12:01:00.000Z",
+  });
+  const status = await usageLimits.getApiKeyUsageLimitStatus(
+    { id: created.id, usageLimitEnabled: true, dailyUsageLimitUsd: 10 },
+    {
+      now: () => NOW,
+      getProviderConnections: async () => [],
+      getAllProviderLimitsCache: () => ({}),
+      getUnpricedUsagePolicy: () => "fail_closed",
+    }
+  );
+  assert.equal(status.dailySpentUsd, 1);
+  assert.equal(status.dailyHasUnpricedUsage, true);
+  assert.equal(status.dailyExceeded, true);
+});
+
+test("reported decision cost is billed exactly without token repricing", async () => {
+  const created = await apiKeysDb.createApiKey("Exact decision cost", "decision-cost-test");
+  await usageHistory.saveRequestUsage({
+    provider: "basal",
+    model: "any-version",
+    apiKeyId: created.id,
+    endpoint: "/v1/systemone",
+    tokens: { input_tokens: 20, cost_usd: 0.125 },
+    success: true,
+    timestamp: "2026-06-19T12:00:00.000Z",
+  });
+  const status = await usageLimits.getApiKeyUsageLimitStatus(
+    { id: created.id, usageLimitEnabled: true, dailyUsageLimitUsd: 10 },
+    {
+      now: () => NOW,
+      getProviderConnections: async () => [],
+      getAllProviderLimitsCache: () => ({}),
+    }
+  );
+  assert.equal(status.dailySpentUsd, 0.125);
+  assert.equal(status.dailyHasUnpricedUsage, false);
+});
+
+test("decision pricing marker survives shared cost calculation and exact-cost overrides", async () => {
+  const unknown = await calculateCostDetailed(
+    "openai",
+    "gpt-6-luna",
+    { input: 1000 },
+    { serviceTier: "decision-native" }
+  );
+  assert.equal(unknown.priced, false);
+  const reported = await calculateCostDetailed(
+    "openai",
+    "gpt-6-luna",
+    { input: 1000, cost_usd: 0.01 },
+    { serviceTier: "decision-native" }
+  );
+  assert.equal(reported.priced, true);
+  assert.equal(reported.costUsd, 0.01);
 });
 
 test("getApiKeyUsageLimitStatus aligns weekly USD spend with provider resetAt when available", async () => {

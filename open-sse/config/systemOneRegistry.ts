@@ -38,7 +38,7 @@ export const CLOUDFLARE_SYSTEMONE_MODELS: Readonly<Record<string, string>> = {
   clef: "clef",
   "clef-flash": "clef-flash",
 };
-const CLOUDFLARE_SYSTEMONE_PREFIXES = ["cloudflare-ai/", "cf/"];
+export const CLOUDFLARE_SYSTEMONE_PREFIXES = ["cloudflare-ai/", "cf/"];
 
 /**
  * Local Ollama (#14667). The URL comes from the `ollama-local` connection's base URL,

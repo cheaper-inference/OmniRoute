@@ -285,6 +285,7 @@ export const providerModelMutationSchema = z.object({
   source: z.string().trim().max(80).optional(),
   apiFormat: z
     .enum([
+      "systemone",
       "chat-completions",
       "responses",
       "embeddings",
@@ -423,6 +424,8 @@ export const createProviderNodeSchema = z
         "audio-transcriptions",
         "audio-speech",
         "images-generations",
+        "decisions",
+        "systemone",
         "custom-json",
       ])
       .optional(),
@@ -533,6 +536,8 @@ export const updateProviderNodeSchema = z
         "audio-transcriptions",
         "audio-speech",
         "images-generations",
+        "decisions",
+        "systemone",
         "custom-json",
       ])
       .optional(),
@@ -579,6 +584,8 @@ export const providerNodeValidateSchema = z.object({
       "audio-transcriptions",
       "audio-speech",
       "images-generations",
+      "decisions",
+      "systemone",
       "custom-json",
     ])
     .optional(),

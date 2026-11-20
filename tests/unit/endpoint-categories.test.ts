@@ -200,6 +200,6 @@ test("resolveEndpointCategory: maps /v1/systemone to 'decisions'", () => {
   assert.equal(resolveEndpointCategory("/v1/systemone"), "decisions");
 });
 
-test("resolveEndpointCategory: /v1/decisions is not a System One path (OpenAI wire contract)", () => {
-  assert.notEqual(resolveEndpointCategory("/v1/decisions"), "decisions");
+test("resolveEndpointCategory: native OpenAI decisions uses the same permission category", () => {
+  assert.equal(resolveEndpointCategory("/v1/decisions"), "decisions");
 });
