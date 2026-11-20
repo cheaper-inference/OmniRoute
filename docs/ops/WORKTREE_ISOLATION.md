@@ -96,14 +96,32 @@ inside your feature branch (a base-red fix is its own freeze-gated `fix/release-
 PR); and if you must open a PR anyway, add `⚠️ base-red inherited: #<issue>` to the PR body so
 reviewers and CI babysitters do not chase ghosts.
 
-## Sync-back landings are fast-forward, never squash
+## Sync-back landings are merge commits, never squash
 
 A `main → release/vX+1` sync-back (Phase 5 of `/generate-release`, or any later "bring main's
-post-release commits over" PR) must reach the release branch as the merge commit it already is:
-`git merge-base --is-ancestor origin/release/vX+1 <head>` then
-`git push origin <head>:refs/heads/release/vX+1` (GitHub marks the PR merged). Squash-merging it
-drops `main` from the release branch's ancestry and the next sync-back re-conflicts on every file
-main touched (551 conflicts on the v3.8.50 → v3.8.51 sync before the two-step merge). After
-landing, `git merge-base --is-ancestor origin/main origin/release/vX+1` must be true — and check
-that `config/quality/eslint-suppressions.json` / `quality-baseline.json` carried main's freezes
-(they merge as "ours" silently). Details: `.agents/skills/generate-release/phases/phase-5-next-cycle.md`.
+post-release commits over" PR) reaches the release branch through a pull request, and that PR
+lands as a **merge commit**. `release/vX+1` is the repository's default branch, and ruleset
+21899981 ("Require PR on default branch", no bypass actors) refuses a direct push to it.
+
+`node scripts/release/sync-next-cycle.mjs <X+1>` does the merge in a temporary detached
+worktree, runs `validate-release-green.mjs --quick` on the merged tree (unless
+`--skip-green-gate`), pushes the merge commit to the side branch
+`chore/sync-back-main-<first 12 hex of origin/main>` and opens a PR from it into
+`release/vX+1`. It never pushes to the release branch and never merges the PR. Re-running it
+after the side branch reached origin prints the open PR (or opens it) and stops. Its
+`--direct-push` flag keeps the old push to the release branch for a repository without such a
+ruleset; this repository refuses it.
+
+Landing the PR:
+
+1. Merge it with **Create a merge commit**, never squash or rebase. A squash drops `main` from
+   the release branch's ancestry and the next sync-back re-conflicts on every file main touched
+   (551 conflicts on the v3.8.50 → v3.8.51 sync before the two-step merge).
+2. The required gates must be green on the PR head before landing.
+3. After landing, `git merge-base --is-ancestor origin/main origin/release/vX+1` must be true —
+   and check that `config/quality/eslint-suppressions.json` / `quality-baseline.json` carried
+   main's freezes (they merge as "ours" silently).
+
+A sync-back done by hand follows the same path: merge `origin/main` on a side branch, open a PR
+into `release/vX+1`, land it as a merge commit (#20522 is the v3.8.54 → v3.8.55 example).
+Details: `.agents/skills/generate-release/phases/phase-5-next-cycle.md`.

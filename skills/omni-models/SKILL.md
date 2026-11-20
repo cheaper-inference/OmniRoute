@@ -59,12 +59,12 @@ curl http://localhost:20128/api/models \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN"
 ```
 
-### POST /api/models/alias
+### PUT /api/models/alias
 
 Create or update a model alias
 
 ```bash
-curl -X POST http://localhost:20128/api/models/alias \
+curl -X PUT http://localhost:20128/api/models/alias \
   -H "Authorization: Bearer $OMNIROUTE_TOKEN" \
   -H "Content-Type: application/json" \
   -d '{}'

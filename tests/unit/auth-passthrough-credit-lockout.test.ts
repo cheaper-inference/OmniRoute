@@ -162,10 +162,11 @@ test("single-model non-passthrough provider (openai) still terminates connection
     name: "openai-account",
   });
 
+  // A 400 parks a non-allow-listed provider only with a structured credit code.
   const result = await auth.markAccountUnavailable(
     conn.id,
     400,
-    "insufficient balance",
+    JSON.stringify({ error: { message: "insufficient balance", code: "insufficient_balance" } }),
     "openai",
     "gpt-4o"
   );
