@@ -5499,6 +5499,8 @@
     "databaseHealthDescription": "Diagnose and repair stale quota/domain rows and broken combo references.",
     "status": "Status",
     "attentionNeeded": "Attention needed",
+    "dbHealthChecking": "Checking…",
+    "dbHealthCheckFailed": "Check failed",
     "repairs": "Repairs",
     "repairing": "Repairing...",
     "runAutoRepair": "Run Auto-Repair",
