@@ -657,6 +657,7 @@ test("request uses public Responses contract, preserves opaque items and package
   assert.equal(body._secret, undefined);
   const input = body.input as Record<string, unknown>[];
   assert.equal(input[0].type, "additional_tools");
+  assert.equal(input[0].role, "developer");
   assert.equal(input[1].role, "developer");
   assert.deepEqual(input[2], opaque);
   assert.equal(source.input[0].role, "system");
