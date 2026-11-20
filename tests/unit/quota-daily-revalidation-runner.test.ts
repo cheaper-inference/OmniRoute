@@ -26,10 +26,8 @@ const DAY = 24 * HOUR;
 /** A lock whose window is still 5 days away, applied just now. */
 function lockProviderModel(provider: string, connectionId: string, model: string) {
   recordModelLockoutFailure(provider, connectionId, model, "429", 429, 3_000, null, {
-    exactCooldownMs: 7 * DAY,
+    exactCooldownMs: 5 * DAY,
     scope: "exact",
-    exactCooldownIsRelativeProseReset: true,
-    quotaProseMaxCooldownMs: 5 * DAY,
   });
 }
 

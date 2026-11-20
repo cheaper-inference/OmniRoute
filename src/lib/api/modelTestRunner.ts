@@ -437,6 +437,19 @@ export interface RunSingleModelTestOptions {
   streamChat?: boolean;
   /** A manual connection message; only supported for chat models. */
   prompt?: string;
+  /**
+   * Cap the answer length of a chat / Responses probe (chat `max_tokens`, Responses
+   * `max_output_tokens`). Used by background probes that only need the upstream to
+   * accept the request, e.g. the daily quota revalidation (one token).
+   */
+  maxOutputTokens?: number;
+  /** A 2xx with no text still proves the upstream accepted the request (tiny caps). */
+  acceptEmptyOutput?: boolean;
+  /**
+   * Keep every failure of this probe off the connection's state (cooldowns, terminal
+   * status, lockouts) even when the operator opted into `probeCanDisable`.
+   */
+  isolateFailures?: boolean;
 }
 
 export interface SingleModelTestResult {
@@ -566,6 +579,11 @@ export async function runSingleModelTest(
     timeoutMs = DEFAULT_MODEL_TEST_TIMEOUT_MS,
     streamChat = true,
   } = options;
+  const probeOptions = { isolateFailures: options.isolateFailures === true };
+  const maxOutputTokens =
+    typeof options.maxOutputTokens === "number" && options.maxOutputTokens > 0
+      ? Math.floor(options.maxOutputTokens)
+      : undefined;
 
   if (connectionId && (await isConnectionUnavailableToAuxiliaryActivity(connectionId))) {
     const fullModelId = modelId.includes("/") ? modelId : `${providerId}/${modelId}`;
@@ -658,7 +676,7 @@ export async function runSingleModelTest(
             model: fullModelStr,
             // Responses takes `input`, not `messages`.
             input: buildComboTestPrompt(),
-            max_output_tokens: RESPONSES_TEST_MAX_OUTPUT_TOKENS,
+            max_output_tokens: maxOutputTokens ?? RESPONSES_TEST_MAX_OUTPUT_TOKENS,
             // Non-streaming on purpose: the SSE reader below understands Chat
             // Completions deltas and the `output_text`/`output[]` shapes, but not
             // Responses stream events (`response.output_text.delta`), so a
@@ -667,7 +685,9 @@ export async function runSingleModelTest(
           }
         : buildComboTestRequestBody(fullModelStr, isEmbedding, {
             stream: !isEmbedding && streamChat,
-            maxTokens: !isEmbedding && streamChat ? STREAMING_CHAT_TEST_MAX_TOKENS : undefined,
+            maxTokens: isEmbedding
+              ? undefined
+              : (maxOutputTokens ?? (streamChat ? STREAMING_CHAT_TEST_MAX_TOKENS : undefined)),
           });
 
   if (options.prompt !== undefined && "messages" in testBody) {
@@ -719,11 +739,11 @@ export async function runSingleModelTest(
         // T-PROBE: wrap the scheduled fn, not the withRateLimit call — a
         // queued Bottleneck job executes from its own async resource and
         // would otherwise run outside the probe context below.
-        (signal) => runAsProbe(() => runInner(signal)),
+        (signal) => runAsProbe(() => runInner(signal), probeOptions),
         controller.signal
       );
     } else {
-      res = await runAsProbe(() => runInner(controller.signal));
+      res = await runAsProbe(() => runInner(controller.signal), probeOptions);
     }
   } catch (error: unknown) {
     clearTimeout(timeoutHandle);
@@ -809,12 +829,14 @@ export async function runSingleModelTest(
       // error frame inside a 200 stream (Sentinel blocks, "account
       // deactivated") would run outside runAsProbe and could still reach
       // markAccountUnavailable (#9817).
-      const parsedResponse = await runAsProbe(() =>
-        extractModelTestResponseText(
-          res,
-          !isEmbedding && !isRerank && !isResponses && streamChat,
-          isAudioSpeech
-        )
+      const parsedResponse = await runAsProbe(
+        () =>
+          extractModelTestResponseText(
+            res,
+            !isEmbedding && !isRerank && !isResponses && streamChat,
+            isAudioSpeech
+          ),
+        probeOptions
       );
       responseText = parsedResponse.text;
       streamError = parsedResponse.error;
@@ -845,7 +867,11 @@ export async function runSingleModelTest(
         ...(quotaFlags.isQuota ? { isQuota: true } : {}),
       };
     }
-    const outputState = classifyModelTestOutput(timedOut, responseText, isEmbedding || isRerank);
+    const outputState = classifyModelTestOutput(
+      timedOut,
+      responseText,
+      isEmbedding || isRerank || options.acceptEmptyOutput === true
+    );
     // A streaming response can yield partial text just as the test timeout
     // aborts the underlying request. Partial output does not make an aborted
     // request healthy: the call log correctly records that race as 499, so

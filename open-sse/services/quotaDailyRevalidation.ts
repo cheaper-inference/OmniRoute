@@ -10,8 +10,8 @@
  *     and only an operator can notice.
  *
  * A model locked for longer than a day is therefore retried at most once a day.
- * The probe is a real request: when it passes, the caller clears the lock and the
- * model returns to rotation.
+ * The probe is one minimal real request to that model on that connection: when the
+ * model answers, the caller clears the lock and the model returns to rotation.
  *
  * Opt-in: the pass runs only with the QUOTA_DAILY_REVALIDATION feature flag on
  * (default off), mirrored here by `enabled`. Off means this module selects
@@ -26,6 +26,8 @@ export type DailyRevalidationCandidate = {
   provider: string;
   connectionId: string;
   model: string | null | undefined;
+  /** The lock's reason (e.g. `quota_exhausted`), reused when a probe refreshes it. */
+  reason?: string;
   /** Epoch ms the lock expires at. */
   until: number;
   /** Epoch ms the lock was applied at; older locks are probed first. */

@@ -3,8 +3,9 @@
  *
  * `quotaDailyRevalidation.ts` decides which locks are due (pure, tested without a
  * store). This module applies that decision to the real model-lockout store and
- * the upstream: it probes the selected locks, clears the ones that answer and
- * leaves the rest exactly as they were.
+ * the upstream: it probes the selected locks (`quotaRevalidationProbe.ts`: one
+ * minimal request to the locked model on its connection), clears the ones whose
+ * model answered and leaves the rest locked.
  *
  * Opt-in: nothing happens without the QUOTA_DAILY_REVALIDATION flag (default off),
  * mirroring `autoDisabledRevalidation` — a deployment that never opts in keeps the
@@ -22,6 +23,10 @@ import {
   type ModelLockoutInfo,
 } from "@omniroute/open-sse/services/accountFallback.ts";
 import { isFeatureFlagEnabled } from "@/shared/utils/featureFlags";
+import {
+  probeLockedModel,
+  type DailyRevalidationVerdict,
+} from "@/lib/credentialHealth/quotaRevalidationProbe";
 
 import {
   MAX_DAILY_REVALIDATIONS_PER_SWEEP,
@@ -31,8 +36,7 @@ import {
 
 export const QUOTA_DAILY_REVALIDATION_FLAG = "QUOTA_DAILY_REVALIDATION";
 
-/** What one probe concluded. Only `recovered` unlocks the model. */
-export type DailyRevalidationVerdict = "recovered" | "still-locked" | "unknown";
+export type { DailyRevalidationVerdict };
 
 export type DailyRevalidationResult = {
   /** Locks the selector considered due on this sweep. */
@@ -76,11 +80,11 @@ type DailyRevalidationConnection = {
 
 /**
  * Connections whose locks the pass may probe: active, and not opted out of
- * health checks (`healthCheckInterval <= 0`). A probe goes through the regular
- * connection test, which switches a connection back on when it passes, so a
- * lock on an inactive connection (operator-disabled, ban-disabled or switched
- * off by the gateway) must never be probed from here; the capped auto-disabled
- * retest is the only path that may bring such a connection back.
+ * health checks (`healthCheckInterval <= 0`). A lock on an inactive connection
+ * (operator-disabled, ban-disabled or switched off by the gateway) is never
+ * probed from here: a pinned request to an inactive connection is the explicit
+ * re-activation probe, and the capped auto-disabled retest is the only path that
+ * may bring such a connection back.
  */
 function eligibleConnectionIds(
   connections: readonly DailyRevalidationConnection[] | null | undefined
@@ -98,8 +102,8 @@ function eligibleConnectionIds(
 
 /**
  * The active rows, through the shared connection read cache: a state read only.
- * The probe itself goes through testSingleConnection, which defers while an
- * exclusive session lease is active, so this pass never selects a connection.
+ * The probe itself goes through the model-test runner, which refuses a connection
+ * under an exclusive session lease, so this pass never selects a connection.
  */
 async function loadActiveConnections(): Promise<DailyRevalidationConnection[]> {
   const { getCachedProviderConnections } = await import("@/lib/db/readCache");
@@ -121,24 +125,38 @@ function isEnabled(): boolean {
   }
 }
 
-/** The store's locks as the selector expects them. */
+/**
+ * The store's locks as the selector expects them, one per provider/connection/model:
+ * a model can hold more than one lock key (quota family + exact), but it gets one
+ * probe, and the throttle below is keyed the same way.
+ */
 function toCandidates(nowMs: number): DailyRevalidationCandidate[] {
-  return getAllModelLockouts().map((lock: ModelLockoutInfo) => {
-    const candidate: DailyRevalidationCandidate = {
-      provider: lock.provider,
-      connectionId: lock.connectionId,
-      model: lock.model,
-      until: lock.until,
-      lockedAt: Date.parse(lock.lockedAt),
-    };
-    const probedAt = lastProbedAt.get(candidateKey(candidate));
-    if (typeof probedAt === "number") candidate.lastRevalidatedAt = probedAt;
-    // `lockedAt` is an ISO string; an unparseable one would make every order
-    // comparison NaN, so fall back to the sweep's clock (still oldest-first
-    // among the parseable ones).
-    if (!Number.isFinite(candidate.lockedAt)) candidate.lockedAt = nowMs;
-    return candidate;
-  });
+  const byKey = new Map<string, DailyRevalidationCandidate>();
+  for (const lock of getAllModelLockouts()) {
+    const candidate = toCandidate(lock, nowMs);
+    const key = candidateKey(candidate);
+    const seen = byKey.get(key);
+    if (!seen || candidate.until > seen.until) byKey.set(key, candidate);
+  }
+  return [...byKey.values()];
+}
+
+function toCandidate(lock: ModelLockoutInfo, nowMs: number): DailyRevalidationCandidate {
+  const candidate: DailyRevalidationCandidate = {
+    provider: lock.provider,
+    connectionId: lock.connectionId,
+    model: lock.model,
+    reason: lock.reason,
+    until: lock.until,
+    lockedAt: Date.parse(lock.lockedAt),
+  };
+  const probedAt = lastProbedAt.get(candidateKey(candidate));
+  if (typeof probedAt === "number") candidate.lastRevalidatedAt = probedAt;
+  // `lockedAt` is an ISO string; an unparseable one would make every order
+  // comparison NaN, so fall back to the sweep's clock (still oldest-first
+  // among the parseable ones).
+  if (!Number.isFinite(candidate.lockedAt)) candidate.lockedAt = nowMs;
+  return candidate;
 }
 
 type DailyRevalidationLogger = { info?: (msg: string) => void; warn?: (msg: string) => void };
@@ -198,10 +216,13 @@ async function revalidateOne(
 /**
  * Probe the quota locks that have outlived a day, once each per day.
  *
- * A passing probe clears the lock so the model returns to rotation; a failing or
- * inconclusive one leaves it untouched, because the upstream never confirmed the
- * quota was back. Only locks on active connections that keep their health
- * checks are probed, and nothing runs while the sweep cadence is 0.
+ * Each probe is one minimal request to the locked model on its connection. When
+ * the model answers, its lock is cleared and it returns to rotation; a quota
+ * answer keeps the lock (refreshed from the announced reset), and any other
+ * outcome leaves it untouched, because the upstream never confirmed the quota was
+ * back. Only that model's lock is ever affected. Only locks on active connections
+ * that keep their health checks are probed, and nothing runs while the sweep
+ * cadence is 0.
  */
 export async function runDailyQuotaRevalidation(
   deps: {
@@ -223,13 +244,13 @@ export async function runDailyQuotaRevalidation(
   // An operator who set the sweep cadence to 0 turned the sweep off: no probe.
   if (deps.sweepIntervalMs !== undefined && !(deps.sweepIntervalMs > 0)) return result;
 
-  const probe = deps.probe ?? probeWithConnectionTest;
-
   const nowMs = deps.nowMs ?? Date.now();
   const logger = deps.logger ?? {
     info: (msg: string) => console.log(msg),
     warn: (msg: string) => console.warn(msg),
   };
+  const probe: DailyRevalidationProbe =
+    deps.probe ?? ((candidate) => probeLockedModel(candidate, { logger, nowMs }));
 
   pruneProbed(nowMs, 24 * 60 * 60 * 1000);
 
@@ -253,25 +274,3 @@ export async function runDailyQuotaRevalidation(
 
   return result;
 }
-
-/**
- * The production probe: re-test the connection with the locked model.
- *
- * `testSingleConnection(id, model)` is the same path the operator's "test" button
- * takes, and the one `autoDisabledRevalidation` already uses, so a probe cannot
- * drift from what a real request would do. `valid` is the only verdict that says
- * the quota is back; a skipped (unverifiable) test must not unlock a model on a
- * guess.
- */
-export const probeWithConnectionTest: DailyRevalidationProbe = async (candidate) => {
-  const { testSingleConnection } = await import("@/app/api/providers/[id]/test/route");
-  const outcome = await testSingleConnection(
-    candidate.connectionId,
-    candidate.model ?? undefined,
-    // Never flip a connection on from here: this pass only decides whether the
-    // quota recovered, and `isActive` is someone else's decision.
-    { activateUnverified: false }
-  );
-  if (outcome?.skipped) return "unknown";
-  return outcome?.valid ? "recovered" : "still-locked";
-};
