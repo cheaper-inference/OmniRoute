@@ -303,16 +303,18 @@ export default function ProviderDetailPageClient() {
   );
   const oauthProviderId = resolveProviderOAuthBackendId(providerId, providerInfo);
   const isKeychainImportOnly = KEYCHAIN_IMPORT_ONLY_PROVIDERS.has(providerId);
+  // Keychain-import-only providers (zed) never get the OAuth add flow (#20573).
+  // copilot-m365-web is not keychain-only, so it stays first and unconditional.
   const providerSupportsOAuth =
-    !isKeychainImportOnly &&
-    (providerId === "copilot-m365-web" ||
-      providerInfo?.toggleAuthType === "oauth" ||
-      providerInfo?.toggleAuthType === "free" ||
-      oauthProviderId !== providerId ||
-      // A no-auth provider can still offer a dashboard sign-in: MiniMax Code
-      // takes an account code here and writes the credential into the local
-      // MiniMax Code profile.
-      supportsDeviceCodeLogin(providerId));
+    providerId === "copilot-m365-web" ||
+    (!isKeychainImportOnly &&
+      (providerInfo?.toggleAuthType === "oauth" ||
+        providerInfo?.toggleAuthType === "free" ||
+        oauthProviderId !== providerId ||
+        // A no-auth provider can still offer a dashboard sign-in: MiniMax Code
+        // takes an account code here and writes the credential into the local
+        // MiniMax Code profile.
+        supportsDeviceCodeLogin(providerId)));
   const subscriptionRisk = providerInfo?.subscriptionRisk === true;
 
   // ── Phase 1t.3: connection gate + risk-notice modal state ───────────────
