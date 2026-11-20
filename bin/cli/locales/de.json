@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "Der Grenzwert muss eine positive ganze Zahl sein.",
     "error": "Fehler: {message}",
     "serverOffline": "OmniRoute-Server ist offline. Starten mit: omniroute serve",
     "authRequired": "Authentifizierung erforderlich. OMNIROUTE_API_KEY setzen oder ausführen: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[Simulation] würde: {action}",
     "cancelled": "Abgebrochen.",
     "jsonOpt": "Ausgabe als JSON",
-    "yesOpt": "Bestätigung überspringen"
+    "yesOpt": "Bestätigung überspringen",
+    "positiveIntegerRequired": "Der Grenzwert muss eine positive ganze Zahl sein."
   },
   "setup": {
     "title": "OmniRoute-Einrichtung",

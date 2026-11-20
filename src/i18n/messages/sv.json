@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Ta bort nyckel"
   },
   "plugins": {
-    "privilegesWarningTitle": "Plugins körs med fullständiga rättigheter",
-    "privilegesWarningBody": "En plugin körs som en vanlig Node.js process med samma åtkomst som OmniRoute: den kan läsa filer, köra program och använda nätverket, oavsett vilka behörigheter som dess manifest deklarerar. Installera endast plugins som du litar på.",
     "title": "Insticksprogram",
     "description": "Installera och hantera insticksprogram för att utöka funktionaliteten i OmniRoute",
     "loading": "Läser in insticksprogram...",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Sök efter insticksprogram",
     "noPlugins": "Inga insticksprogram installerade",
     "noPluginsDescription": "Placera insticksprogramkataloger i ~/.omniroute/plugins/ och klicka på Sök.",
+    "privilegesWarningTitle": "Plugins körs med fullständiga rättigheter",
+    "privilegesWarningBody": "En plugin körs som en vanlig Node.js process med samma åtkomst som OmniRoute: den kan läsa filer, köra program och använda nätverket, oavsett vilka behörigheter som dess manifest deklarerar. Installera endast plugins som du litar på.",
     "activate": "Aktivera",
     "deactivate": "Inaktivera",
     "uninstall": "Avinstallera",

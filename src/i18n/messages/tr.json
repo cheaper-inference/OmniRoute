@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Anahtarı kaldır"
   },
   "plugins": {
-    "privilegesWarningTitle": "Eklentiler tam ayrıcalıklarla çalışır",
-    "privilegesWarningBody": "Bir eklenti, OmniRoute ile aynı erişime sahip normal bir Node.js işlemi olarak çalışır: manifestosunda belirtilen izinler ne olursa olsun dosyaları okuyabilir, programları çalıştırabilir ve ağı kullanabilir. Yalnızca güvendiğiniz eklentileri yükleyin.",
     "title": "Eklentiler",
     "description": "OmniRoute işlevselliğini genişleten eklentileri yükleyin ve yönetin",
     "loading": "Eklentiler yükleniyor...",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Eklentileri Tara",
     "noPlugins": "Yüklü eklenti yok",
     "noPluginsDescription": "Eklenti dizinlerini ~/.omniroute/plugins/ içine yerleştirin ve Tara'ya tıklayın.",
+    "privilegesWarningTitle": "Eklentiler tam ayrıcalıklarla çalışır",
+    "privilegesWarningBody": "Bir eklenti, OmniRoute ile aynı erişime sahip normal bir Node.js işlemi olarak çalışır: manifestosunda belirtilen izinler ne olursa olsun dosyaları okuyabilir, programları çalıştırabilir ve ağı kullanabilir. Yalnızca güvendiğiniz eklentileri yükleyin.",
     "activate": "Etkinleştir",
     "deactivate": "Devre dışı bırak",
     "uninstall": "Kaldır",

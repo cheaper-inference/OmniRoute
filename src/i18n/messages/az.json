@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Açarı sil"
   },
   "plugins": {
-    "privilegesWarningTitle": "Pluginlər tam imtiyazlarla işləyir",
-    "privilegesWarningBody": "Plugin OmniRoute ilə eyni girişi olan adi Node.js prosesi kimi işləyir: o, manifestinin elan etdiyi icazələrdən asılı olmayaraq faylları oxuya, proqramları işlədə və şəbəkədən istifadə edə bilər. Yalnız etibar etdiyiniz plaginləri quraşdırın.",
     "title": "Plaginlər",
     "description": "OmniRoute funksionallığını genişləndirmək üçün plaginləri quraşdırın və idarə edin",
     "loading": "Plaginlər yüklənir...",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Plaginləri skan et",
     "noPlugins": "Heç bir plagin quraşdırılmayıb",
     "noPluginsDescription": "Plagin qovluqlarını ~/.omniroute/plugins/ daxilində yerləşdirin və Skan et düyməsinə klikləyin.",
+    "privilegesWarningTitle": "Pluginlər tam imtiyazlarla işləyir",
+    "privilegesWarningBody": "Plugin OmniRoute ilə eyni girişi olan adi Node.js prosesi kimi işləyir: o, manifestinin elan etdiyi icazələrdən asılı olmayaraq faylları oxuya, proqramları işlədə və şəbəkədən istifadə edə bilər. Yalnız etibar etdiyiniz plaginləri quraşdırın.",
     "activate": "Aktivləşdir",
     "deactivate": "Deaktivləşdir",
     "uninstall": "Sil",

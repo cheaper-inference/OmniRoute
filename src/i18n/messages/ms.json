@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Alih keluar kunci"
   },
   "plugins": {
-    "privilegesWarningTitle": "Pemalam dijalankan dengan keistimewaan penuh",
-    "privilegesWarningBody": "Pemalam berjalan sebagai proses Node.js biasa dengan akses yang sama seperti OmniRoute: ia boleh membaca fail, menjalankan program dan menggunakan rangkaian, apa sahaja kebenaran yang diisytiharkan oleh manifesnya. Pasang hanya pemalam yang anda percayai.",
     "title": "Pemalam",
     "description": "Pasang dan urus pemalam untuk memperluas fungsi OmniRoute",
     "loading": "Memuatkan pemalam...",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Imbas Pemalam",
     "noPlugins": "Tiada pemalam dipasang",
     "noPluginsDescription": "Letakkan direktori pemalam dalam ~/.omniroute/plugins/ dan klik Imbas.",
+    "privilegesWarningTitle": "Pemalam dijalankan dengan keistimewaan penuh",
+    "privilegesWarningBody": "Pemalam berjalan sebagai proses Node.js biasa dengan akses yang sama seperti OmniRoute: ia boleh membaca fail, menjalankan program dan menggunakan rangkaian, apa sahaja kebenaran yang diisytiharkan oleh manifesnya. Pasang hanya pemalam yang anda percayai.",
     "activate": "Aktifkan",
     "deactivate": "Nyahaktifkan",
     "uninstall": "Nyahpasang",

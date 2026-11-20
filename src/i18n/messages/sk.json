@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Odstrániť kľúč"
   },
   "plugins": {
-    "privilegesWarningTitle": "Pluginy bežia s plnými oprávneniami",
-    "privilegesWarningBody": "Doplnok beží ako bežný proces Node.js s rovnakým prístupom ako OmniRoute: môže čítať súbory, spúšťať programy a používať sieť bez ohľadu na povolenia, ktoré jeho manifest deklaruje. Inštalujte iba doplnky, ktorým dôverujete.",
     "title": "Pluginy",
     "description": "Inštalácia a správa pluginov na rozšírenie funkcií OmniRoute",
     "loading": "Načítavajú sa pluginy...",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Vyhľadať pluginy",
     "noPlugins": "Nie sú nainštalované žiadne pluginy",
     "noPluginsDescription": "Umiestnite adresáre pluginov do ~/.omniroute/plugins/ a kliknite na Vyhľadať.",
+    "privilegesWarningTitle": "Pluginy bežia s plnými oprávneniami",
+    "privilegesWarningBody": "Doplnok beží ako bežný proces Node.js s rovnakým prístupom ako OmniRoute: môže čítať súbory, spúšťať programy a používať sieť bez ohľadu na povolenia, ktoré jeho manifest deklaruje. Inštalujte iba doplnky, ktorým dôverujete.",
     "activate": "Aktivovať",
     "deactivate": "Deaktivovať",
     "uninstall": "Odinštalovať",

@@ -13427,8 +13427,6 @@
     "wizardRemoveKey": "Rimuovi chiave"
   },
   "plugins": {
-    "privilegesWarningTitle": "I plugin vengono eseguiti con privilegi completi",
-    "privilegesWarningBody": "Un plugin viene eseguito come un normale processo Node.js con lo stesso accesso di OmniRoute: può leggere file, eseguire programmi e utilizzare la rete, qualunque siano le autorizzazioni dichiarate dal suo manifest. Installa solo i plugin di cui ti fidi.",
     "title": "Plugin",
     "description": "Installa e gestisci i plugin per estendere le funzionalità di OmniRoute",
     "loading": "Caricamento dei plugin...",
@@ -13436,6 +13434,8 @@
     "scanForPlugins": "Cerca plugin",
     "noPlugins": "Nessun plugin installato",
     "noPluginsDescription": "Inserisci le directory dei plugin in ~/.omniroute/plugins/ e fai clic su Cerca.",
+    "privilegesWarningTitle": "I plugin vengono eseguiti con privilegi completi",
+    "privilegesWarningBody": "Un plugin viene eseguito come un normale processo Node.js con lo stesso accesso di OmniRoute: può leggere file, eseguire programmi e utilizzare la rete, qualunque siano le autorizzazioni dichiarate dal suo manifest. Installa solo i plugin di cui ti fidi.",
     "activate": "Attiva",
     "deactivate": "Disattiva",
     "uninstall": "Disinstalla",
