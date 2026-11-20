@@ -443,6 +443,15 @@ export function validateProviderSpecificData(
     });
   }
 
+  const strictChatHistory = data.strictChatHistory;
+  if (strictChatHistory !== undefined && typeof strictChatHistory !== "boolean") {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "providerSpecificData.strictChatHistory must be a boolean",
+      path: ["strictChatHistory"],
+    });
+  }
+
   const preset = data.preset;
   if (preset !== undefined && preset !== null && !isOpenRouterPresetValue(preset)) {
     ctx.addIssue({

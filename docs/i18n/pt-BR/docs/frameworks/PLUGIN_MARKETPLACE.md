@@ -28,32 +28,26 @@ inacessíveis a partir de uma origem que não seja loopback, independentemente d
 autenticação. Consulte
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md).
 
-## Como Tudo se Encaixa
+## Como se encaixa Together
 
 ```
 Dashboard (/dashboard/plugins)
-  ├─ Aba "Instalados"   → GET /api/plugins            (listPlugins)
-  │                       POST /api/plugins/scan      (pluginManager.scan)
-  │                       POST /api/plugins/{name}/activate|deactivate
-  │                       DELETE /api/plugins/{name}   (desinstalação)
-  └─ Aba "Marketplace" → GET /api/plugins/marketplace
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
                           → listMarketplacePlugins()
-                            ├─ sem URL personalizada → SEED_REGISTRY integrado
-                            └─ URL personalizada → proteção SSRF isSafeMarketplaceUrl()
-                                                → safeOutboundFetch(guard:"public-only")
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **Camada de registro** — `src/lib/plugins/marketplace.ts`: lista/pesquisa o
-  catálogo, recorrendo ao registro inicial em caso de qualquer falha.
-- **Camada de ciclo de vida** — `src/lib/plugins/manager.ts` (singleton
-  `pluginManager`): instalação, atualização, ativação, desativação,
-  desinstalação, varredura e carregamento na inicialização.
-- **Camada de manifesto** — `src/lib/plugins/manifest.ts`: esquema Zod + valores
-  padrão para `plugin.json`.
-- **Scanner** — `src/lib/plugins/scanner.ts`: descobre plugins no disco, dentro
-  do diretório de plugins.
-- **Carregador** — `src/lib/plugins/loader.ts`: inicia cada plugin em um processo
-  filho isolado e intermedeia chamadas de hooks por IPC.
+- **Camada de registro** — `src/lib/plugins/marketplace.ts`: lista/pesquisa o catálogo, recorrendo ao registro de sementes em caso de falha.
+- **Camada de ciclo de vida** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): instalar, atualizar, ativar, desativar, desinstalar, verificar, carregar inicialização.
+- **Camada de manifesto** — `src/lib/plugins/manifest.ts`: esquema Zod padrões + para `plugin.json`.
+- **Scanner** — `src/lib/plugins/scanner.ts`: descobre plug-ins no disco no diretório de plug-ins.
+- **Carregador** — `src/lib/plugins/loader.ts`: gera cada plugin em um processo filho Node.js separado e os corretores conectam chamadas sobre IPC. O filho não é uma sandbox (consulte "Isolamento de execução do plug-in" abaixo).
 
 ## Catálogo do Marketplace
 
@@ -90,29 +84,26 @@ alternativa.
 > é realizada pelo fluxo de instalação via caminho local (`POST /api/plugins`) e
 > pela descoberta no disco (`POST /api/plugins/scan`).
 
-## API REST
+## REST API
 
-Todos os endpoints exigem autenticação de gerenciamento (`requireManagementAuth`) **e**
-são restritos ao loopback — `/api/plugins` e `/api/plugins/` estão listados em
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
+Todos os endpoints requerem autenticação de gerenciamento (`requireManagementAuth`)** e** são somente loopback — `/api/plugins` e `/api/plugins/` estão listados em `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`).
 
-| Endpoint                         | Método | Descrição                                                       |
-| -------------------------------- | ------ | --------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | Lista os plugins instalados (filtro `?status=` opcional)        |
-| `/api/plugins`                   | POST   | Instala um plugin a partir de um caminho local absoluto         |
-| `/api/plugins/scan`              | POST   | Verifica o diretório de plugins e registra novos plugins        |
-| `/api/plugins/marketplace`       | GET    | Lista as entradas do catálogo do marketplace                    |
-| `/api/plugins/[name]`            | GET    | Obtém os detalhes de um plugin instalado                        |
-| `/api/plugins/[name]`            | DELETE | Desinstala um plugin                                            |
-| `/api/plugins/[name]/activate`   | POST   | Ativa (carrega + registra hooks)                                |
-| `/api/plugins/[name]/deactivate` | POST   | Desativa (dispara `onDeactivate`, cancela o registro de hooks)  |
-| `/api/plugins/[name]/config`     | GET    | Obtém a configuração do plugin + esquema de configuração        |
-| `/api/plugins/[name]/config`     | PUT    | Atualiza a configuração do plugin (validada conforme o esquema) |
+| Ponto final                      | Método | Descrição                                                         |
+| -------------------------------- | ------ | ----------------------------------------------------------------- |
+| `/api/plugins`                   | GET    | Listar plugins instalados (filtro `?status=` opcional)            |
+| `/api/plugins`                   | POST   | Instale um plugin do diretório de fontes do plugin                |
+| `/api/plugins/scan`              | POST   | Digitalize o diretório de plugins e registre novos plugins        |
+| `/api/plugins/marketplace`       | GET    | Listar entradas do catálogo do marketplace                        |
+| `/api/plugins/[name]`            | GET    | Obtenha detalhes do plugin instalado                              |
+| `/api/plugins/[name]`            | DELETE | Desinstalar um plugin                                             |
+| `/api/plugins/[name]/activate`   | POST   | Ativar (carregar ganchos de registro + )                          |
+| `/api/plugins/[name]/deactivate` | POST   | Desativar (disparar `onDeactivate`, cancelar registro de ganchos) |
+| `/api/plugins/[name]/config`     | GET    | Obtenha o esquema de configuração + da configuração do plugin     |
+| `/api/plugins/[name]/config`     | PUT    | Atualizar configuração do plugin (validado em relação ao esquema) |
 
-O filtro `status` de `GET /api/plugins` aceita um dos seguintes valores:
-`installed` / `active` / `inactive` / `error`. Um valor inválido retorna `400`.
+O filtro `GET /api/plugins` `status` aceita um dos `installed` / `active` / `inactive` / `error`. Um valor inválido retorna `400`.
 
-### Listar plugins instalados
+### Listar plug-ins instalados
 
 ```bash
 curl http://localhost:20128/api/plugins \
@@ -128,19 +119,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-O `path` deve ser **absoluto** e não pode conter segmentos transversais `..` nem
-bytes nulos (restrição imposta pelo Zod). O diretório de origem deve conter um
-`plugin.json` válido (ou ser o diretório pai de um). Em caso de sucesso, a resposta
-é `201` com o registro do plugin instalado.
+O `path` deve ser um** absoluto** caminho para um diretório** dentro do diretório de fontes do plugin** : `plugin-sources` próximo à raiz do plugin, então `~/.omniroute/plugin-sources/` por padrão, ou `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` quando essa variável estiver definida (`getPluginSourcesDir()` em `src/lib/plugins/installSource.ts`). Copie ou clone o plugin primeiro. A instalação é recusada com `400` quando o caminho contém `..` ou um byte nulo, está fora desse diretório, é resolvido fora dele por meio de um link simbólico, contém um link simbólico cujo destino está fora dele ou quando o diretório não existe. O diretório de origem deve conter um `plugin.json` válido (ou ser pai de um). Em caso de sucesso, a resposta é `201` com a linha do plugin instalado.
 
-### Navegar pelo marketplace
+Ao contrário de outras rotas de plug-in, esta requer a credencial de gerenciamento (uma sessão de painel ou uma chave API com escopo de gerenciamento) mesmo quando o login está desabilitado (`requireLogin=false`): a instalação do código nunca é uma ação anônima.
+
+### Navegue pelo mercado
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### Atualizar a configuração do plugin
+### Atualizar configuração do plugin
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -149,10 +139,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` valida cada valor fornecido conforme o `configSchema` do plugin
-(declarado no manifesto): campos `number` respeitam `min`/`max`, e campos
-`select` devem corresponder ao `enum` declarado. Chaves que não estão presentes
-no esquema são permitidas.
+`PUT .../config` valida cada valor fornecido em relação ao `configSchema` do plugin (declarado no manifesto): os campos `number` honram `min`/`max`, os campos `select` devem corresponder ao `enum` declarado. Chaves não presentes no esquema são permitidas.
 
 ## Configuração
 
@@ -217,90 +204,58 @@ novamente por meio de `GET /api/settings`).
 
 ## Segurança
 
-### Nível da rota — somente loopback
+### Somente loopback do nível de rota —
 
-Os plugins executam código em processos filhos iniciados, portanto toda a
-superfície `/api/plugins` é classificada como `LOCAL_ONLY` (Nível 1). A restrição
-de loopback é aplicada incondicionalmente **antes** de qualquer verificação de
-autenticação, portanto nem mesmo um token de gerenciamento vazado que chegue à
-máquina por meio de um túnel pode instalar, ativar ou desinstalar um plugin.
-Consulte [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md)
-e as Regras Rígidas nº 15 / nº 17.
+Os plug-ins executam código em processos filhos gerados, portanto, toda a superfície `/api/plugins` é classificada como `LOCAL_ONLY` (Nível 1). A aplicação de loopback é executada incondicionalmente** antes** qualquer verificação de autenticação, portanto, um token de gerenciamento vazado que chega à caixa através de um túnel ainda não pode instalar, ativar ou desinstalar um plug-in. Veja [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) e regras rígidas #15 / #17.
 
-### Proteção contra SSRF no registro do marketplace
+### Guarda SSRF do registro do mercado
 
-Uma URL de registro personalizada é uma configuração que pode ser influenciada
-por um invasor, portanto, antes de buscá-la, `listMarketplacePlugins()` a
-submete a duas camadas:
+Um registro personalizado URL é uma configuração influenciável pelo invasor, portanto, antes de buscá-lo, `listMarketplacePlugins()` o executa em duas camadas:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - Rejeita tudo que não seja `http:` / `https:`.
-   - Rejeita hosts literais privados/de loopback/link-local/ULA (IPv4 **e**
-     IPv6, incluindo IPv4 mapeado) por meio da função canônica `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`).
-   - Resolve registros **tanto** `A` quanto `AAAA` e rejeita se **qualquer**
-     endereço resolvido for privado — eliminando a evasão por nome de host
-     público → IP privado.
-   - **Falha de forma segura**: uma falha na resolução de DNS faz com que a URL
-     seja rejeitada.
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): reaplica a proteção de URL
-   somente pública no momento da busca e **bloqueia redirecionamentos** (sem
-   pivô público → privado via `30x`).
+   - Rejeita qualquer coisa que não seja `http:` / `https:`.
+   - Rejeita hosts private/loopback/link-local/ULA literais (IPv4** e** IPv6, incluindo IPv4-mapped) através do `isPrivateHost` canônico (`src/shared/network/outboundUrlGuard.ts`).
+   - Resolve** ambos** registros `A` e `AAAA` e rejeita se** qualquer** o endereço resolvido é privado — fechando o bypass de IP privado → nome de host público.
+   - **Falha fechada** : uma falha na resolução DNS rejeita o URL.
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): reaplica o guarda URL somente público no momento da busca e** bloqueia redirecionamentos** (sem pivô → privado `30x` público).
 
-Uma URL que falhe em qualquer uma das camadas não interrompe a solicitação — o
-marketplace recorre silenciosamente ao registro inicial integrado e registra um
-aviso.
+Um URL que falha em qualquer uma das camadas não anula a solicitação. — o mercado volta silenciosamente para o registro de sementes integrado e registra um aviso.
 
-> Essa proteção foi reforçada no PR nº 3774 especificamente para resolver A +
-> AAAA e usar a função canônica `isPrivateHost` em vez de uma verificação
-> limitada a IPv4.
+> Essa proteção foi reforçada em PR #3774 especificamente para resolver A + AAAA e usar o `isPrivateHost` canônico em vez de uma verificação IPv4-only.
 
-### Isolamento da execução de plugins
+### Isolamento de execução de plugin
 
-- **Isolamento de processo** — `loadPlugin()` (`src/lib/plugins/loader.ts`)
-  inicia cada plugin em um processo filho separado do Node.js e se comunica por
-  IPC. As chamadas de hooks têm um tempo limite com escalonamento de `SIGTERM`
-  → `SIGKILL`.
-- **Lista de permissões de variáveis de ambiente** — o processo filho recebe
-  apenas um conjunto permitido de variáveis de ambiente; o conjunto mais amplo
-  só é concedido quando o manifesto solicita a permissão `env`.
-- **Contenção de caminho** — a instalação/atualização/desinstalação verifica se
-  o diretório do plugin e `manifest.main` são resolvidos **dentro** da raiz
-  gerenciada de plugins antes de qualquer cópia ou exclusão recursiva (isso
-  protege contra caminhos de banco de dados adulterados e travessia `../` em
-  `manifest.main`). A ativação resolve links simbólicos por meio de `realpath`
-  e se recusa a carregar um ponto de entrada que saia do diretório do plugin.
-- **Fixação opcional de integridade** — um manifesto pode declarar um campo
-  `integrity` (`sha256-<base64>`, formato SRI). Quando presente, o carregador
-  verifica o hash do arquivo de entrada no momento do carregamento e se recusa
-  a ativá-lo em caso de divergência. Trata-se de uma detecção opcional de
-  adulteração, **não** de uma fronteira de segurança — o roteamento restrito a
-  loopback e o modelo de permissões são as verdadeiras fronteiras.
+> **Os plug-ins não estão em sandbox.** O filho é um processo Node.js comum executado como usuário OmniRoute, sem contexto VM e sem sinalizadores de permissão Node.js, portanto, o código do plug-in pode ler e gravar qualquer arquivo que o usuário possa, executar programas e acessar a rede. `requires.permissions` apenas decide quais variáveis de ambiente o filho recebe; as outras permissões não são aplicadas. Instale apenas plug-ins em que você confia. O limite do processo abaixo contém travamentos e travamentos; não é um limite de segurança.
+
+- **Isolamento de processo** — `loadPlugin()` (`src/lib/plugins/loader.ts`) gera cada plugin em um processo filho Node.js separado e se comunica por meio de IPC. As chamadas de gancho têm um tempo limite com escalação `SIGTERM` → `SIGKILL`.
+- **Lista de permissões de ambiente** — o filho recebe apenas um conjunto de variáveis de ambiente permitidas; o conjunto mais amplo só é concedido quando o manifesto solicita a permissão `env`.
+- **Instalar contenção de origem** — `POST /api/plugins` lê apenas o diretório de fontes do plugin (veja "Instalar a partir de um caminho local"): o caminho é canônico com `realpath`, deve permanecer estritamente dentro desse diretório, e uma árvore de origem carregando um link simbólico que escapa dele é recusada antes que qualquer coisa seja copiada.
+- **Contenção de caminho** — install/upgrade/uninstall afirma que o diretório do plugin e `manifest.main` resolvem** dentro de** a raiz do plugin gerenciado antes de qualquer cópia ou exclusão recursiva (protege contra caminhos DB adulterados e travessia `../` em `manifest.main`). A ativação resolve links simbólicos via `realpath` e se recusa a carregar um ponto de entrada que escape do diretório do plugin.
+- **Pino de integridade opcional** — um manifesto pode declarar um campo `integrity` (`sha256-<base64>`, SRI format). Quando presente, o carregador verifica o hash do arquivo de entrada no momento do carregamento e se recusa a ativar em caso de incompatibilidade. É uma detecção de violação opcional,** não** um limite de segurança: não limita o que um plugin carregado pode fazer.
+- **Nenhuma credencial de cliente nos ganchos** — o contexto passado para `onRequest`, `onResponse` e `onError` tem os cabeçalhos `authorization`, `x-api-key`, `proxy-authorization` e `cookie` removidos e o registro de chave API não carrega nenhum valor de chave (`redactPluginContext()` em `src/lib/plugins/hooks.ts`).
 
 ## Manifesto (`plugin.json`)
 
 Validado por `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Campo              | Tipo      | Observações                                                           |
+| Campo              | Tipo      | Notas                                                                 |
 | ------------------ | --------- | --------------------------------------------------------------------- |
-| `name`             | string    | Obrigatório; kebab-case (`^[a-z0-9-]+$`), de 1 a 100 caracteres       |
-| `version`          | string    | Obrigatório; semver (`MAJOR.MINOR.PATCH`)                             |
-| `description`      | string?   | ≤ 500 caracteres                                                      |
-| `author`           | string?   | ≤ 200 caracteres                                                      |
-| `license`          | string?   | O padrão é `MIT`                                                      |
-| `main`             | string?   | Arquivo de entrada; o padrão é `index.js`                             |
+| `name`             | corda     | Obrigatório; kebab-case (`^[a-z0-9-]+$`), 1–100 caracteres            |
+| `version`          | corda     | Obrigatório; semver (`MAJOR.MINOR.PATCH`)                             |
+| `description`      | corda?    | ≤ 500 caracteres                                                      |
+| `author`           | corda?    | ≤ 200 caracteres                                                      |
+| `license`          | corda?    | O padrão é `MIT`                                                      |
+| `main`             | corda?    | Arquivo de entrada; o padrão é `index.js`                             |
 | `source`           | enum?     | `local` \| `marketplace` (o padrão é `local`)                         |
-| `tags`             | string[]? | Tags de pesquisa                                                      |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                       |
-| `hooks`            | object?   | Booleanos que declaram quais hooks o plugin implementa                |
-| `skills`           | object[]? | Definições opcionais de habilidades                                   |
-| `enabledByDefault` | boolean?  | Ativação automática na instalação                                     |
-| `configSchema`     | object?   | Mapa de campos de configuração (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | Fixação opcional `sha256-<base64>` do arquivo de entrada              |
+| `tags`             | corda[]?  | Tags de pesquisa                                                      |
+| `requires`         | objeto?   | `{ omniroute?, permissions[] }`                                       |
+| `hooks`            | objeto?   | Booleanos declarando quais ganchos os implementos do plugin           |
+| `skills`           | objeto[]? | Definições de habilidades opcionais                                   |
+| `enabledByDefault` | booleano? | Ativar automaticamente na instalação                                  |
+| `configSchema`     | objeto?   | Mapa de campos de configuração (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | corda?    | Pin opcional do arquivo de entrada `sha256-<base64>`                  |
 
-As permissões são obtidas do enum
-`network` / `file-read` / `file-write` / `env` / `exec`.
+As permissões são extraídas do enum `network` / `file-read` / `file-write` / `env` / `exec`. Apenas `env` tem um efeito de tempo de execução (uma lista de permissões de variáveis de ambiente um pouco maior para o filho); os outros são declarações e não são aplicados.
 
 ## Fluxo do ciclo de vida
 
@@ -360,17 +315,14 @@ As métricas/análises dos plugins são registradas em tabelas adicionais
 
 ## Painel
 
-A página do painel em `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) oferece duas abas:
+A página do painel em `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) fornece duas guias:
 
-- **Instalados** — lista os plugins instalados com seus hooks declarados, um
-  controle para ativar/desativar, um botão de desinstalação e uma ação "Procurar plugins"
-  (`POST /api/plugins/scan`).
-- **Marketplace** — exibe o catálogo de `GET /api/plugins/marketplace` com um
-  campo para definir a URL personalizada do registro.
+- **Instalado** — lista os plug-ins instalados com seus ganchos declarados, uma alternância activate/deactivate, um botão de desinstalação e uma ação "Verificar plug-ins" (`POST /api/plugins/scan`).
+- **Mercado** — mostra o catálogo do `GET /api/plugins/marketplace` com um campo para definir o registro personalizado URL.
 
-Uma página de configuração específica para cada plugin está disponível em `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
+A página sempre mostra um aviso de que os plugins são executados com todos os privilégios do processo OmniRoute.
+
+Uma página de configuração por plugin fica em `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`).
 
 ## Veja também
 
