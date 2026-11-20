@@ -3,6 +3,8 @@ import assert from "node:assert/strict";
 
 const { classifyClientAgent } =
   await import("../../../src/lib/guardrails/agentGuard/classifier.ts");
+const { providerFromModelString, evaluateAgentPolicy } =
+  await import("../../../src/lib/guardrails/agentGuard/policy.ts");
 
 const kind = (h: Parameters<typeof classifyClientAgent>[0]) => {
   const c = classifyClientAgent(h);
@@ -88,4 +90,50 @@ test("classifier: signals carry only the allowlisted headers, raw and capped at 
     "xTitle",
   ]);
   assert.doesNotMatch(JSON.stringify(c), /SECRET/);
+});
+
+test("providerFromModelString: prefixed, alias, quota-share and bare forms", () => {
+  const cases: Array<[string | null, string | null]> = [
+    ["claude/claude-sonnet-5", "claude"],
+    ["cc/claude-sonnet-5", "claude"],
+    [" cc/claude-sonnet-5 ", "claude"],
+    ["anthropic/claude-opus-4-8", "anthropic"],
+    ["qtSd/teamx/claude/claude-opus-4-8", "claude"],
+    ["qtSd/teamx/cc/claude-opus-4-8", "claude"],
+    ["openai/gpt-5", "openai"],
+    ["gpt-5", null],
+    ["", null],
+    [null, null],
+  ];
+  for (const [model, provider] of cases)
+    assert.equal(providerFromModelString(model), provider, String(model));
+});
+
+const signals = {
+  userAgent: "",
+  xApp: "",
+  anthropicBeta: "",
+  xTitle: "",
+  referer: "",
+  stainless: false,
+};
+const official = { agent: "claude-code", official: true, thirdParty: false, signals } as const;
+const kilo = { agent: "kilocode", official: false, thirdParty: true, signals } as const;
+const unknown = { agent: "unknown", official: false, thirdParty: false, signals } as const;
+
+test("policy: official allowed; third-party and unknown flagged with distinct reasons", () => {
+  assert.equal(evaluateAgentPolicy(official, "claude").action, "allow");
+  assert.deepEqual(evaluateAgentPolicy(kilo, "claude"), {
+    action: "flag",
+    reason: "third-party agent kilocode on claude",
+  });
+  assert.deepEqual(evaluateAgentPolicy(unknown, "anthropic"), {
+    action: "flag",
+    reason: "unidentified agent on anthropic",
+  });
+});
+
+test("policy: only claude and anthropic are observed", () => {
+  assert.equal(evaluateAgentPolicy(kilo, "glm").action, "allow");
+  assert.equal(evaluateAgentPolicy(kilo, null).action, "allow");
 });
