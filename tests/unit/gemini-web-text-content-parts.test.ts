@@ -130,7 +130,7 @@ test("Gemini tool mode rejects an unreadable last user array even after a readab
       },
     },
   ];
-  async function statusFor(lastUserContent: unknown): Promise<number> {
+  async function statusFor(lastUserContent: unknown, withTools = true): Promise<number> {
     const controller = new AbortController();
     controller.abort(new Error("stop before browser launch"));
     const result = await new GeminiWebExecutor().execute({
@@ -142,7 +142,7 @@ test("Gemini tool mode rejects an unreadable last user array even after a readab
           { role: "user", content: lastUserContent },
         ],
         stream: false,
-        tools,
+        ...(withTools ? { tools } : {}),
       },
       stream: false,
       credentials: { apiKey: "__Sec...est" },
@@ -159,4 +159,10 @@ test("Gemini tool mode rejects an unreadable last user array even after a readab
   assert.equal(await statusFor([{ type: "text", text: "Paris" }]), 499, "readable text parts pass");
   assert.equal(await statusFor("Paris"), 499, "string input is unchanged");
   assert.equal(await statusFor(""), 499, "an empty string last turn keeps its old behavior");
+
+  // Without tools too: the unreadable turn's image must not ride on the earlier question.
+  const mixed = [{ type: "text", text: "And this?" }, ...image, ...audio];
+  assert.equal(await statusFor(mixed, false), 400, "unreadable last turn with an attachment");
+  assert.equal(await statusFor([{ type: "text", text: "This?" }, ...image], false), 499);
+  assert.equal(await statusFor(audio, false), 499, "no attachment: old non-tool behavior kept");
 });

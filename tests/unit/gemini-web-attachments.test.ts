@@ -194,6 +194,38 @@ test("fetches http(s) URLs through the SSRF-guarded media fetcher", async () => 
   );
 });
 
+test("a declared image whose bytes are not an image is rejected with 415", async () => {
+  const exe = Buffer.from("MZ\x90\x00\x03\x00\x00\x00", "latin1").toString("base64");
+  await assert.rejects(
+    resolveGeminiWebAttachments([{ ref: `data:image/png;base64,${exe}` }]),
+    (e: unknown) => e instanceof GeminiWebAttachmentError && e.status === 415
+  );
+});
+
+test("attachment resolution stops when the request is cancelled", async () => {
+  const signals: unknown[] = [];
+  const fetchRemoteMedia = (async (url: string, options: { signal?: AbortSignal }) => {
+    signals.push(options.signal);
+    return { buffer: Buffer.from([0xff, 0xd8, 0xff, 0xe0]), contentType: "image/jpeg", url };
+  }) as never;
+  const live = new AbortController();
+  await resolveGeminiWebAttachments([{ ref: "https://example.com/a.jpg" }], {
+    fetchRemoteMedia,
+    signal: live.signal,
+  });
+  assert.equal(signals[0], live.signal, "the request signal reaches the remote fetch");
+
+  const aborted = new AbortController();
+  aborted.abort(new Error("client went away"));
+  await assert.rejects(
+    resolveGeminiWebAttachments([{ ref: "https://example.com/b.jpg" }], {
+      fetchRemoteMedia,
+      signal: aborted.signal,
+    })
+  );
+  assert.equal(signals.length, 1, "no download starts after the request is cancelled");
+});
+
 test("rejects unsupported MIME types with 415", async () => {
   for (const ref of [
     "data:application/zip;base64,UEsDBA==",
@@ -411,6 +443,14 @@ test("upload: a rejected upload, a missing control or no confirmation is a 422",
     attachFilesToGeminiComposer(noControl.page as never, file, 2_000),
     /upload control/
   );
+  const chunkOnly = fakePage({ onFiles: (_p, emit) => emit(uploadResponse(200, "upload")) });
+  await assert.rejects(
+    attachFilesToGeminiComposer(chunkOnly.page as never, file, 50),
+    /did not confirm/,
+    "an intermediate resumable chunk is not a finished file"
+  );
+  const failedChunk = fakePage({ onFiles: (_p, emit) => emit(uploadResponse(503, "upload")) });
+  await assert.rejects(attachFilesToGeminiComposer(failedChunk.page as never, file, 2_000), is422);
   const silent = fakePage({});
   await assert.rejects(
     attachFilesToGeminiComposer(silent.page as never, file, 50),

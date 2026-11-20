@@ -249,7 +249,8 @@ function decodeDataUrl(ref: string): { bytes: Buffer; mimeType: string } {
 
 async function fetchRemote(
   ref: string,
-  fetchMedia: typeof fetchRemoteMedia
+  fetchMedia: typeof fetchRemoteMedia,
+  signal?: AbortSignal
 ): Promise<{ bytes: Buffer; mimeType: string }> {
   if (!/^https?:\/\//i.test(ref)) {
     throw new GeminiWebAttachmentError("Attachment must be an http(s) URL or a base64 data URL");
@@ -261,6 +262,7 @@ async function fetchRemote(
       maxBytes: MAX_GEMINI_WEB_VIDEO_BYTES,
       maxRedirects: 3,
       timeoutMs: REMOTE_FETCH_TIMEOUT_MS,
+      signal,
     });
     return {
       bytes: remote.buffer,
@@ -304,23 +306,34 @@ function sanitizeFilename(name: string | undefined, fallback: string): string {
  */
 export async function resolveGeminiWebAttachments(
   sources: GeminiWebAttachmentSource[],
-  deps: { fetchRemoteMedia?: typeof fetchRemoteMedia; env?: NodeJS.ProcessEnv } = {}
+  deps: {
+    fetchRemoteMedia?: typeof fetchRemoteMedia;
+    env?: NodeJS.ProcessEnv;
+    signal?: AbortSignal;
+  } = {}
 ): Promise<GeminiWebAttachment[]> {
   const maxVideoSeconds = resolveMaxVideoSeconds(deps.env);
   const resolved: GeminiWebAttachment[] = [];
   let totalVideoSeconds = 0;
   for (const [index, source] of sources.entries()) {
+    deps.signal?.throwIfAborted();
     const loaded = source.ref.toLowerCase().startsWith("data:")
       ? decodeDataUrl(source.ref)
-      : await fetchRemote(source.ref, deps.fetchRemoteMedia ?? fetchRemoteMedia);
+      : await fetchRemote(source.ref, deps.fetchRemoteMedia ?? fetchRemoteMedia, deps.signal);
     if (!loaded.bytes.length) throw new GeminiWebAttachmentError("Attachment is empty");
 
     const declared = source.mimeType || loaded.mimeType;
     const fromExtension = MIME_BY_EXTENSION[extensionOf(source.name ?? source.ref) ?? ""];
-    const mimeType =
-      sniffMimeType(loaded.bytes) ??
-      (declared && declared !== "application/octet-stream" ? declared : fromExtension) ??
-      declared;
+    const sniffed = sniffMimeType(loaded.bytes);
+    const claimed = declared && declared !== "application/octet-stream" ? declared : fromExtension;
+    // An image or video always carries a signature; without one the declared type is a lie.
+    if (!sniffed && /^(image|video)\//.test(claimed ?? "")) {
+      throw new GeminiWebAttachmentError(
+        `Attachment content does not match its declared type "${claimed}"`,
+        415
+      );
+    }
+    const mimeType = sniffed ?? claimed ?? declared;
     const extension = SUPPORTED_MIME_TYPES[mimeType];
     if (!extension) {
       throw new GeminiWebAttachmentError(
@@ -410,7 +423,7 @@ interface UploadResponse {
   request(): { method(): string; headers(): Record<string, string> };
 }
 
-/** One per uploaded file: the finalizing POST to Gemini's upload host (not the resumable "start"). */
+/** An upload POST to Gemini's upload host (not the resumable "start"); "finalize" ends a file. */
 export function isGeminiUploadResponse(resp: UploadResponse): boolean {
   try {
     const url = new URL(resp.url());
@@ -463,8 +476,8 @@ export async function attachFilesToGeminiComposer(
   let failedStatus: number | null = null;
   const onResponse = (resp: UploadResponse) => {
     if (!isGeminiUploadResponse(resp)) return;
-    if (resp.ok()) confirmed++;
-    else failedStatus ??= resp.status();
+    if (!resp.ok()) failedStatus ??= resp.status();
+    else if (/finalize/i.test(resp.request().headers()["x-goog-upload-command"] ?? "")) confirmed++;
   };
   page.on("response", onResponse as never);
   try {
