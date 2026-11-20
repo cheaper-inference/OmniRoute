@@ -3,52 +3,71 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "basecheck-07a790f5c158",
-    "kind": "base-check",
-    "candidateRef": "omni-queue/release-v3.8.55/basecheck-07a790f5c158",
-    "candidateSha": "07a790f5c158c1358eb55aa5e31463bb5f22f769",
+    "batchId": "b15",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b15-07bdafc69c99",
+    "candidateSha": "07bdafc69c992c76cb5b21e6d16fd062f5637c21",
     "baseSha": "07a790f5c158c1358eb55aa5e31463bb5f22f769",
-    "treeSha": null,
-    "prs": [],
+    "treeSha": "58b38c5a74025fed6f6fd082f4451d4b15b9f16e",
+    "prs": [
+      {
+        "n": 19132,
+        "head": "beed91198d6f1f34a82955166724b2f61fa22ff0",
+        "title": "feat(antigravity): opt-in bounded per-account/model health quarantine",
+        "author": "Bl0ck154",
+        "labeledAt": "2026-11-20T15:49:45Z"
+      }
+    ],
     "stage": "testing",
-    "startedAt": "2026-11-20T18:40:24.380Z",
+    "startedAt": "2026-11-20T20:19:33.473Z",
     "attempts": 0,
-    "bisect": null,
-    "pendingRed": {
-      "batchId": "b14",
-      "candidateSha": "4822c03e1525ef435a088c96d8392a482e03e782",
-      "prs": [
-        {
-          "n": 19132,
-          "head": "beed91198d6f1f34a82955166724b2f61fa22ff0",
-          "title": "feat(antigravity): opt-in bounded per-account/model health quarantine",
-          "author": "Bl0ck154",
-          "labeledAt": "2026-11-20T15:49:45Z"
-        },
-        {
-          "n": 19149,
-          "head": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
-          "title": "feat(dashboard): allow multiple quota provider filters",
-          "author": "JxnLexn",
-          "labeledAt": "2026-11-20T15:49:56Z"
-        }
+    "bisect": {
+      "rootBatchId": "b14",
+      "segments": [
+        [
+          {
+            "n": 19132,
+            "head": "beed91198d6f1f34a82955166724b2f61fa22ff0",
+            "title": "feat(antigravity): opt-in bounded per-account/model health quarantine",
+            "author": "Bl0ck154",
+            "labeledAt": "2026-11-20T15:49:45Z"
+          }
+        ],
+        [
+          {
+            "n": 19149,
+            "head": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
+            "title": "feat(dashboard): allow multiple quota provider filters",
+            "author": "JxnLexn",
+            "labeledAt": "2026-11-20T15:49:56Z"
+          }
+        ]
       ],
-      "signatures": [
-        {
-          "check": "Gate / CI",
-          "key": "",
-          "infra": false
-        },
-        {
-          "check": "Integration Tests",
-          "key": "",
-          "infra": false
-        }
-      ],
-      "bisect": null
+      "culprits": [],
+      "landed": [],
+      "steps": 0,
+      "hang": false
     }
   },
   "baseChecks": [
+    {
+      "baseSha": "07a790f5c158c1358eb55aa5e31463bb5f22f769",
+      "ref": "omni-queue/release-v3.8.55/basecheck-07a790f5c158",
+      "status": "red",
+      "startedAt": "2026-11-20T18:40:24.380Z",
+      "signatures": [
+        {
+          "check": "Gate / Quality",
+          "key": "",
+          "infra": false
+        },
+        {
+          "check": "Fast Quality Gates",
+          "key": "",
+          "infra": false
+        }
+      ]
+    },
     {
       "baseSha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
       "ref": "omni-queue/release-v3.8.55/basecheck-cc59ad70b2e9",
@@ -96,12 +115,12 @@
     }
   },
   "counters": {
-    "batchSeq": 14,
-    "ciRuns": 16,
+    "batchSeq": 15,
+    "ciRuns": 17,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 5,
-    "bisections": 0,
+    "bisections": 1,
     "culprits": 0
   },
   "history": [
@@ -1153,8 +1172,42 @@
       "sha": "07a790f5c158c1358eb55aa5e31463bb5f22f769",
       "detail": "b14 red on a base with no verdict: testing the bare base",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44794883375"
+    },
+    {
+      "at": "2026-11-20T20:19:01.373Z",
+      "type": "checks-red",
+      "batchId": "basecheck-07a790f5c158",
+      "sha": "07a790f5c158c1358eb55aa5e31463bb5f22f769",
+      "detail": "base-check red: Gate / Quality, Fast Quality Gates",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44810166625"
+    },
+    {
+      "at": "2026-11-20T20:19:23.323Z",
+      "type": "bisect-split",
+      "batchId": "b14",
+      "prs": [
+        19132,
+        19149
+      ],
+      "sha": "4822c03e1525ef435a088c96d8392a482e03e782",
+      "detail": "batch of 2 red: testing #19132 first",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44810166625"
+    },
+    {
+      "at": "2026-11-20T20:19:38.406Z",
+      "type": "batch-started",
+      "batchId": "b15",
+      "prs": [
+        19132
+      ],
+      "sha": "07bdafc69c992c76cb5b21e6d16fd062f5637c21",
+      "detail": "bisect of b14: 1 PR(s) on 07a790f5c158",
+      "labeledAt": {
+        "19132": "2026-11-20T15:49:45Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44810166625"
     }
   ],
-  "updatedAt": "2026-11-20T19:46:08.779Z",
-  "batchWindow": 10
+  "updatedAt": "2026-11-20T20:20:36.159Z",
+  "batchWindow": 5
 }
