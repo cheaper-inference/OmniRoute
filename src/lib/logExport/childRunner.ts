@@ -38,6 +38,7 @@ export function resolveLogExportChild(context: ResolutionContext = {}) {
 }
 interface TestOptions {
   modulePath: string;
+  coveragePreload?: string;
   beforeAck?: () => Promise<void>;
   onSpawn?: (child: ChildProcess) => void;
   config?: Record<string, unknown>;
@@ -122,11 +123,13 @@ function buildExportChildEnv(): NodeJS.ProcessEnv {
 function spawnExportChildProcess(): ChildProcess {
   const { childFile, execArgv } = resolveLogExportChild();
   const heapMb = positiveInteger(process.env.OMNIROUTE_LOG_EXPORT_CHILD_MAX_OLD_SPACE_MB, 1024);
+  const coveragePreload = testOptions?.coveragePreload;
   return spawn(
     process.execPath,
     [
       `--max-old-space-size=${heapMb}`,
       "--disable-warning=ExperimentalWarning",
+      ...(coveragePreload ? ["--import", coveragePreload] : []),
       ...execArgv,
       childFile,
     ],

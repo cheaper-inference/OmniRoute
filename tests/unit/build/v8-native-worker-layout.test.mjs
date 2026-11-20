@@ -291,6 +291,44 @@ test("the installed-layout CLI records native coverage for checkout-backed modul
   assert.equal(invocations, 2, "include the default and edited installed .env launches");
 });
 
+test("the isolated Codex boundary child records native dataPaths coverage", async (t) => {
+  const coverage = await mkdtemp(join(tmpdir(), "codex-boundary-v8-coverage-"));
+  t.after(() => rm(coverage, { recursive: true, force: true }));
+  const env = {
+    ...process.env,
+    TMPDIR: coverage,
+    NODE_OPTIONS: `--import=${preload.href}`,
+    NODE_V8_COVERAGE: coverage,
+    OMNIROUTE_CI_SYNC_TSX_CACHE: coverage,
+  };
+  delete env.NODE_TEST_CONTEXT;
+  execFileSync(
+    process.execPath,
+    ["--import", "tsx/esm", "--test", "tests/unit/codex-response-failed-boundary.test.ts"],
+    { cwd: root, env, stdio: "pipe", timeout: 120_000 }
+  );
+
+  const fixture = new URL("tests/fixtures/codex-response-failed-boundary.fixture.ts", root).href;
+  const source = new URL("src/lib/dataPaths.ts", root);
+  const sourceLength = (await readFile(source, "utf8")).length;
+  let children = 0;
+  for (const file of await readdir(coverage)) {
+    if (!file.endsWith(".json")) continue;
+    const report = JSON.parse(await readFile(join(coverage, file), "utf8"));
+    if (!report.result.some(({ url }) => url === fixture)) continue;
+    children++;
+    const sample = report.result.find(({ url }) => url === source.href);
+    assert.ok(sample, "the Codex fixture must exercise dataPaths");
+    assert.equal(Boolean(report["source-map-cache"]?.[source.href]), false, source.href);
+    assert.ok(report.result.some(({ url }) => url === preload.href));
+    assert.equal(
+      sample.functions[0].ranges[0].endOffset,
+      sourceLength + `\n\n//# sourceURL=${source.href}`.length
+    );
+  }
+  assert.equal(children, 1, "check coverage emitted by the real isolated fixture subprocess");
+});
+
 test("the standalone media MCP and tsx share native coverage coordinates", async (t) => {
   const fixture = await mkdtemp(join(tmpdir(), "media-mcp-native-coverage-"));
   t.after(() => rm(fixture, { recursive: true, force: true }));
