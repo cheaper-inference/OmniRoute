@@ -2,9 +2,10 @@
 // Codex (codex-api/src/sse/responses.rs) rejects a terminal event whose `usage` is
 // an object without integer input_tokens/output_tokens/total_tokens, and fails the
 // turn when the stream has no terminal event. This table pins both contracts.
-import { describe, expect, it } from "vitest";
+import assert from "node:assert/strict";
+import { describe, it } from "node:test";
 
-import { createResponsesApiTransformStream } from "../responsesTransformer.ts";
+import { createResponsesApiTransformStream } from "../../open-sse/transformer/responsesTransformer.ts";
 
 const TERMINAL_TYPES = new Set(["response.completed", "response.failed", "response.incomplete"]);
 const encoder = new TextEncoder();
@@ -60,8 +61,21 @@ function terminals(events: Event[]): Event[] {
 
 function onlyTerminal(events: Event[]): Event {
   const found = terminals(events);
-  expect(found.map((e) => e.event)).toHaveLength(1);
+  assert.equal(found.map((e) => e.event).length, 1);
   return found[0];
+}
+
+/** Recursive subset match: every key in `expected` must match in `actual` (extra keys allowed). */
+function assertMatchObject(actual: unknown, expected: Record<string, unknown>, at = "value") {
+  assert.ok(actual !== null && typeof actual === "object", `${at} must be an object`);
+  const record = actual as Record<string, unknown>;
+  for (const [key, want] of Object.entries(expected)) {
+    if (want !== null && typeof want === "object" && !Array.isArray(want)) {
+      assertMatchObject(record[key], want as Record<string, unknown>, `${at}.${key}`);
+    } else {
+      assert.deepEqual(record[key], want, `${at}.${key}`);
+    }
+  }
 }
 
 function isCount(value: unknown): boolean {
@@ -71,22 +85,22 @@ function isCount(value: unknown): boolean {
 /** Mirrors Codex's ResponseCompletedUsage deserializer, plus "no float anywhere". */
 function expectCodexUsage(usage: unknown) {
   if (usage === null) return;
-  expect(typeof usage).toBe("object");
+  assert.equal(typeof usage, "object");
   const record = usage as Record<string, unknown>;
   for (const key of ["input_tokens", "output_tokens", "total_tokens"]) {
-    expect(isCount(record[key]), `${key}=${JSON.stringify(record[key])}`).toBe(true);
+    assert.equal(isCount(record[key]), true, `${key}=${JSON.stringify(record[key])}`);
   }
   if (record.input_tokens_details != null) {
     const details = record.input_tokens_details as Record<string, unknown>;
-    expect(isCount(details.cached_tokens)).toBe(true);
+    assert.equal(isCount(details.cached_tokens), true);
   }
   if (record.output_tokens_details != null) {
     const details = record.output_tokens_details as Record<string, unknown>;
-    expect(isCount(details.reasoning_tokens)).toBe(true);
+    assert.equal(isCount(details.reasoning_tokens), true);
   }
   const walk = (value: unknown, path: string) => {
     if (typeof value === "number") {
-      expect(isCount(value), `${path}=${value}`).toBe(true);
+      assert.equal(isCount(value), true, `${path}=${value}`);
     } else if (typeof value === "string" && /^\s*-?[\d.]/.test(value)) {
       throw new Error(`usage field ${path} is a numeric string: ${value}`);
     } else if (value && typeof value === "object") {
@@ -99,7 +113,7 @@ function expectCodexUsage(usage: unknown) {
 function terminalUsage(events: Event[]): unknown {
   const terminal = onlyTerminal(events);
   const response = terminal.data.response as Record<string, unknown>;
-  expect("usage" in response, "terminal response must carry usage (object or null)").toBe(true);
+  assert.equal("usage" in response, true, "terminal response must carry usage (object or null)");
   expectCodexUsage(response.usage);
   return response.usage;
 }
@@ -111,7 +125,7 @@ describe("usage shapes on the terminal event", () => {
       finish("stop"),
       usageOnly({ prompt_tokens: 7, completion_tokens: 3, total_tokens: 10 }),
     ]);
-    expect(terminalUsage(events)).toEqual({
+    assert.deepEqual(terminalUsage(events), {
       input_tokens: 7,
       input_tokens_details: { cached_tokens: 0 },
       output_tokens: 3,
@@ -122,7 +136,7 @@ describe("usage shapes on the terminal event", () => {
 
   it("missing usage becomes usage: null", async () => {
     const events = await run([text("Hi"), finish("stop")]);
-    expect(terminalUsage(events)).toBeNull();
+    assert.equal(terminalUsage(events), null);
   });
 
   it("float counts are coerced to integers", async () => {
@@ -130,7 +144,7 @@ describe("usage shapes on the terminal event", () => {
       text("Hi"),
       finish("stop", { prompt_tokens: 5.6, completion_tokens: 2.2, total_tokens: 7.8 }),
     ]);
-    expect(terminalUsage(events)).toMatchObject({
+    assertMatchObject(terminalUsage(events), {
       input_tokens: 6,
       output_tokens: 2,
       total_tokens: 8,
@@ -142,7 +156,7 @@ describe("usage shapes on the terminal event", () => {
       text("Hi"),
       `{"id":"chatcmpl-g2","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":5.0,"completion_tokens":1.0,"total_tokens":6.0}}`,
     ]);
-    expect(terminalUsage(events)).toMatchObject({
+    assertMatchObject(terminalUsage(events), {
       input_tokens: 5,
       output_tokens: 1,
       total_tokens: 6,
@@ -154,7 +168,7 @@ describe("usage shapes on the terminal event", () => {
       text("Hi"),
       finish("stop", { prompt_tokens: "12", completion_tokens: "3" }),
     ]);
-    expect(terminalUsage(events)).toMatchObject({
+    assertMatchObject(terminalUsage(events), {
       input_tokens: 12,
       output_tokens: 3,
       total_tokens: 15,
@@ -166,7 +180,7 @@ describe("usage shapes on the terminal event", () => {
       text("Hi"),
       `{"id":"chatcmpl-g2","choices":[{"index":0,"delta":{},"finish_reason":"stop"}],"usage":{"prompt_tokens":1e999,"completion_tokens":"NaN","total_tokens":"abc"}}`,
     ]);
-    expect(terminalUsage(events)).toBeNull();
+    assert.equal(terminalUsage(events), null);
   });
 
   it("negative counts are clamped to zero", async () => {
@@ -174,7 +188,7 @@ describe("usage shapes on the terminal event", () => {
       text("Hi"),
       finish("stop", { prompt_tokens: -5, completion_tokens: 3, total_tokens: -2 }),
     ]);
-    expect(terminalUsage(events)).toMatchObject({
+    assertMatchObject(terminalUsage(events), {
       input_tokens: 0,
       output_tokens: 3,
       total_tokens: 3,
@@ -183,7 +197,7 @@ describe("usage shapes on the terminal event", () => {
 
   it("partial object without total gets a derived total", async () => {
     const events = await run([text("Hi"), finish("stop", { input_tokens: 9, output_tokens: 4 })]);
-    expect(terminalUsage(events)).toMatchObject({
+    assertMatchObject(terminalUsage(events), {
       input_tokens: 9,
       output_tokens: 4,
       total_tokens: 13,
@@ -192,7 +206,7 @@ describe("usage shapes on the terminal event", () => {
 
   it("partial object with only one side is completed, not emitted partial", async () => {
     const events = await run([text("Hi"), finish("stop", { prompt_tokens: 5 })]);
-    expect(terminalUsage(events)).toMatchObject({
+    assertMatchObject(terminalUsage(events), {
       input_tokens: 5,
       output_tokens: 0,
       total_tokens: 5,
@@ -204,7 +218,7 @@ describe("usage shapes on the terminal event", () => {
       text("Hi"),
       finish("stop", { prompt_tokens_details: { cached_tokens: 3 } }),
     ]);
-    expect(terminalUsage(events)).toBeNull();
+    assert.equal(terminalUsage(events), null);
   });
 
   it("cache and reasoning details present (floats, strings) are integers", async () => {
@@ -218,7 +232,7 @@ describe("usage shapes on the terminal event", () => {
         completion_tokens_details: { reasoning_tokens: "7" },
       }),
     ]);
-    expect(terminalUsage(events)).toMatchObject({
+    assertMatchObject(terminalUsage(events), {
       input_tokens: 100,
       input_tokens_details: { cached_tokens: 40 },
       output_tokens: 20,
@@ -233,8 +247,8 @@ describe("usage shapes on the terminal event", () => {
       finish("stop", { prompt_tokens: 10, completion_tokens: 2, total_tokens: 12 }),
     ]);
     const usage = terminalUsage(events) as Record<string, unknown>;
-    expect(usage.input_tokens_details).toEqual({ cached_tokens: 0 });
-    expect(usage.output_tokens_details).toEqual({ reasoning_tokens: 0 });
+    assert.deepEqual(usage.input_tokens_details, { cached_tokens: 0 });
+    assert.deepEqual(usage.output_tokens_details, { reasoning_tokens: 0 });
   });
 
   it("Anthropic-style cache fields stay integers after context folding", async () => {
@@ -255,28 +269,28 @@ describe("exactly one terminal event", () => {
   it("double finish_reason with usage yields one terminal", async () => {
     const usage = { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 };
     const events = await run([text("Hi"), finish("stop", usage), finish("stop", usage)]);
-    expect(onlyTerminal(events).event).toBe("response.completed");
+    assert.equal(onlyTerminal(events).event, "response.completed");
   });
 
   it("double finish_reason without usage yields one terminal", async () => {
     const events = await run([text("Hi"), finish("stop"), finish("stop")]);
-    expect(onlyTerminal(events).event).toBe("response.completed");
+    assert.equal(onlyTerminal(events).event, "response.completed");
   });
 
   it("no finish_reason from upstream still yields one terminal", async () => {
     const events = await run([text("Hi"), text(" there")]);
-    expect(onlyTerminal(events).event).toBe("response.completed");
+    assert.equal(onlyTerminal(events).event, "response.completed");
     terminalUsage(events);
   });
 
   it("empty upstream stream still yields one terminal", async () => {
     const events = await run([]);
-    expect(onlyTerminal(events).event).toBe("response.completed");
+    assert.equal(onlyTerminal(events).event, "response.completed");
   });
 
   it("[DONE] only stream still yields one terminal", async () => {
     const events = await run(["[DONE]"]);
-    expect(onlyTerminal(events).event).toBe("response.completed");
+    assert.equal(onlyTerminal(events).event, "response.completed");
   });
 
   it("upstream error chunk mid-stream (finish_reason error) ends in one response.failed", async () => {
@@ -290,12 +304,12 @@ describe("exactly one terminal event", () => {
       "[DONE]",
     ]);
     const terminal = onlyTerminal(events);
-    expect(terminal.event).toBe("response.failed");
+    assert.equal(terminal.event, "response.failed");
     const response = terminal.data.response as Record<string, unknown>;
-    expect(response.status).toBe("failed");
+    assert.equal(response.status, "failed");
     const error = response.error as Record<string, unknown>;
-    expect(typeof error.message).toBe("string");
-    expect(error.code).toBe("stream_error");
+    assert.equal(typeof error.message, "string");
+    assert.equal(error.code, "stream_error");
     terminalUsage(events);
   });
 
@@ -305,8 +319,8 @@ describe("exactly one terminal event", () => {
       { error: { message: "rate limited", code: "rate_limit_exceeded" } },
     ]);
     const terminal = onlyTerminal(events);
-    expect(terminal.event).toBe("response.failed");
-    expect((terminal.data.response as Record<string, unknown>).error).toMatchObject({
+    assert.equal(terminal.event, "response.failed");
+    assertMatchObject((terminal.data.response as Record<string, unknown>).error, {
       code: "rate_limit_exceeded",
     });
   });
@@ -317,12 +331,12 @@ describe("exactly one terminal event", () => {
       finish("stop", { prompt_tokens: 1, completion_tokens: 1, total_tokens: 2 }),
       { error: { message: "late failure" } },
     ]);
-    expect(onlyTerminal(events).event).toBe("response.completed");
+    assert.equal(onlyTerminal(events).event, "response.completed");
   });
 
   it("length finish stays a single response.incomplete with valid usage", async () => {
     const events = await run([text("Hi"), finish("length", { prompt_tokens: 3.5 })]);
-    expect(onlyTerminal(events).event).toBe("response.incomplete");
+    assert.equal(onlyTerminal(events).event, "response.incomplete");
     terminalUsage(events);
   });
 });

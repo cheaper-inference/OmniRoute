@@ -1,14 +1,14 @@
+import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import path from "node:path";
-
-import { describe, expect, it } from "vitest";
+import { describe, it } from "node:test";
 
 import {
   resolveCallLogSessionTag,
   resolveLaunchSessionTag,
   resolveUsageAgentContext,
   withLaunchSession,
-} from "../chatCore/agentContext.ts";
+} from "../../../open-sse/handlers/chatCore/agentContext.ts";
 
 // An `olx_` bearer resolves to key metadata carrying
 // `launchSession`; its id becomes the client session id and its tool id the client, and its
@@ -36,11 +36,11 @@ describe("launch session agent context", () => {
       headers({ "x-claude-code-session-id": "tool-own-session" }),
       { launchSession: LAUNCH }
     );
-    expect(context.clientSessionId).toBe(LAUNCH.id);
-    expect(context.client).toBe("opencode");
+    assert.equal(context.clientSessionId, LAUNCH.id);
+    assert.equal(context.client, "opencode");
     // Prompt-derived project fields are untouched.
-    expect(context.projectName).toBe("demo");
-    expect(context.gitBranch).toBe("main");
+    assert.equal(context.projectName, "demo");
+    assert.equal(context.gitBranch, "main");
   });
 
   it("an explicit x-omniroute-session-id header still wins over the launch session", () => {
@@ -49,18 +49,18 @@ describe("launch session agent context", () => {
       headers({ "x-omniroute-session-id": "explicit-1" }),
       { launchSession: LAUNCH }
     );
-    expect(context.clientSessionId).toBe("explicit-1");
-    expect(context.client).toBe("opencode");
+    assert.equal(context.clientSessionId, "explicit-1");
+    assert.equal(context.client, "opencode");
   });
 
   it("is inert without a launch session (byte-identical context)", () => {
     const h = headers({ "x-claude-code-session-id": "tool-own-session" });
     const plain = resolveUsageAgentContext(claudeBody, h, {});
-    expect(resolveUsageAgentContext(claudeBody, h, null)).toEqual(plain);
-    expect(resolveUsageAgentContext(claudeBody, h, { launchSession: null })).toEqual(plain);
-    expect(plain.clientSessionId).toBe("tool-own-session");
-    expect(plain.client).toBe("claude-code");
-    expect(withLaunchSession(plain, h, { id: "", toolId: "x" })).toBe(plain);
+    assert.deepEqual(resolveUsageAgentContext(claudeBody, h, null), plain);
+    assert.deepEqual(resolveUsageAgentContext(claudeBody, h, { launchSession: null }), plain);
+    assert.equal(plain.clientSessionId, "tool-own-session");
+    assert.equal(plain.client, "claude-code");
+    assert.equal(withLaunchSession(plain, h, { id: "", toolId: "x" }), plain);
   });
 
   it("noLog keys still drop prompt-derived fields but keep the launch identity", () => {
@@ -68,17 +68,17 @@ describe("launch session agent context", () => {
       noLog: true,
       launchSession: LAUNCH,
     });
-    expect(context.clientSessionId).toBe(LAUNCH.id);
-    expect(context.projectPath).toBeNull();
-    expect(context.gitBranch).toBeNull();
+    assert.equal(context.clientSessionId, LAUNCH.id);
+    assert.equal(context.projectPath, null);
+    assert.equal(context.gitBranch, null);
   });
 
   it("falls back to the user-agent client when the session has no tool id", () => {
     const context = resolveUsageAgentContext(claudeBody, headers(), {
       launchSession: { id: LAUNCH.id },
     });
-    expect(context.client).toBe("claude-code");
-    expect(context.clientSessionId).toBe(LAUNCH.id);
+    assert.equal(context.client, "claude-code");
+    assert.equal(context.clientSessionId, LAUNCH.id);
   });
 
   it("works with plain-object headers too", () => {
@@ -87,34 +87,35 @@ describe("launch session agent context", () => {
       { "User-Agent": "opencode/1.0", "X-OmniRoute-Session-Id": "explicit-2" },
       { launchSession: LAUNCH }
     );
-    expect(context.clientSessionId).toBe("explicit-2");
+    assert.equal(context.clientSessionId, "explicit-2");
   });
 });
 
 describe("launch session tag", () => {
   it("is the session tag when no explicit header is present", () => {
-    expect(resolveLaunchSessionTag(headers(), { launchSession: LAUNCH })).toBe(LAUNCH.sessionTag);
+    assert.equal(resolveLaunchSessionTag(headers(), { launchSession: LAUNCH }), LAUNCH.sessionTag);
   });
 
   it("is null with an explicit x-omniroute-session-id header", () => {
-    expect(
+    assert.equal(
       resolveLaunchSessionTag(headers({ "x-omniroute-session-id": "explicit-1" }), {
         launchSession: LAUNCH,
-      })
-    ).toBeNull();
+      }),
+      null
+    );
   });
 
   it("is null without a launch session", () => {
-    expect(resolveLaunchSessionTag(headers(), null)).toBeNull();
-    expect(resolveLaunchSessionTag(headers(), {})).toBeNull();
-    expect(resolveLaunchSessionTag(null, { launchSession: { id: LAUNCH.id } })).toBeNull();
+    assert.equal(resolveLaunchSessionTag(headers(), null), null);
+    assert.equal(resolveLaunchSessionTag(headers(), {}), null);
+    assert.equal(resolveLaunchSessionTag(null, { launchSession: { id: LAUNCH.id } }), null);
   });
 
   it("call_logs precedence: launch tag, then conversation id, then explicit header", () => {
-    expect(resolveCallLogSessionTag(LAUNCH.sessionTag, "conv-1", null)).toBe(LAUNCH.sessionTag);
-    expect(resolveCallLogSessionTag(null, "conv-1", "explicit-1")).toBe("conv-1");
-    expect(resolveCallLogSessionTag(null, null, "explicit-1")).toBe("explicit-1");
-    expect(resolveCallLogSessionTag(null, null, null)).toBeNull();
+    assert.equal(resolveCallLogSessionTag(LAUNCH.sessionTag, "conv-1", null), LAUNCH.sessionTag);
+    assert.equal(resolveCallLogSessionTag(null, "conv-1", "explicit-1"), "conv-1");
+    assert.equal(resolveCallLogSessionTag(null, null, "explicit-1"), "explicit-1");
+    assert.equal(resolveCallLogSessionTag(null, null, null), null);
   });
 
   it("chatCore routes both session_tag writes through the launch-aware resolver", () => {
@@ -122,17 +123,22 @@ describe("launch session tag", () => {
       path.resolve(process.cwd(), "open-sse/handlers/chatCore.ts"),
       "utf8"
     );
-    expect(source).toContain(
-      "const launchSessionTag = resolveLaunchSessionTag(clientRawRequest?.headers, apiKeyInfo);"
+    assert.ok(
+      source.includes(
+        "const launchSessionTag = resolveLaunchSessionTag(clientRawRequest?.headers, apiKeyInfo);"
+      )
     );
-    expect(source).toContain(
-      "sessionTag: resolveCallLogSessionTag(launchSessionTag, conversationId, null)"
+    assert.ok(
+      source.includes(
+        "sessionTag: resolveCallLogSessionTag(launchSessionTag, conversationId, null)"
+      )
     );
-    expect(
+    assert.equal(
       source.match(
         /resolveCallLogSessionTag\(\s*launchSessionTag,\s*conversationId,\s*explicitSessionIdHeader\s*\)/g
-      )
-    ).toHaveLength(1);
-    expect(source).not.toContain("sessionTag: conversationId || explicitSessionIdHeader");
+      )?.length,
+      1
+    );
+    assert.ok(!source.includes("sessionTag: conversationId || explicitSessionIdHeader"));
   });
 });

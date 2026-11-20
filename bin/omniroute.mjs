@@ -102,13 +102,10 @@ if (shouldProvisionStorageKey(process.argv)) {
 // YAML (or JSON) on stdout and is meant to be piped —
 // `omniroute deploy k8s | kubectl apply -f -`. Env-loading notices and DB
 // warnings on stdout make that YAML unparseable ("control characters are not
-// allowed"), so they belong on stderr where a human still sees them.
-//
-// `launch` and `gateway` too: their `--json` output (launch plan, result, tool list, gateway
-// status, error document) is one JSON document on stdout, and a launch hands stdout to the
-// coding tool it starts.
+// allowed"), so they belong on stderr where a human still sees them. Same for
+// `launch`/`gateway` --json output.
 const STDOUT_IS_DATA =
-  process.argv.includes("--mcp") || ["deploy", "launch", "gateway"].includes(process.argv[2]);
+  process.argv.includes("--mcp") || /^(deploy|launch|gateway)$/.test(process.argv[2]);
 
 if (STDOUT_IS_DATA) {
   const { Console } = await import("node:console");
