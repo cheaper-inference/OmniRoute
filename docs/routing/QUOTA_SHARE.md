@@ -1,7 +1,7 @@
 ---
 title: "Quota Sharing Engine"
 version: 3.8.40
-lastUpdated: 2026-06-28
+lastUpdated: 2026-11-20
 ---
 
 # Quota Sharing Engine
@@ -171,6 +171,34 @@ QuotaDimension {
 ```
 
 A request must satisfy all dimensions to be allowed.
+
+### Percent dimensions: per-key attribution
+
+Percent plans (Claude, Codex, Bailian) report a single utilisation figure per
+account, so the provider gives no per-key counter for these dimensions.
+
+To give each key a part of that figure, the tokens each key routes are recorded
+in a per-key shadow bucket for the same window. `src/lib/quota/percentAttribution.ts`
+then splits the account usage in two:
+
+- **Internal part:** `min(account usage, pool tokens / DEFAULT_MIN_TOKENS_PER_PCT)`,
+  shared among the keys by the tokens each one routed.
+- **External part:** the rest of the account usage. It first consumes the
+  unallocated capacity (`100 − sum of the allocation weights`); only the excess
+  is shared among the keys by weight. Usage made outside OmniRoute on its own
+  therefore cannot bring a key to its fair share before the account is full.
+
+`GET /api/quota/pools/{id}/usage` reports the same per-key numbers, with one
+entry per account in `accounts`.
+
+An absolute cap in `percent` counts only the usage the key routed itself (its
+internal part). Usage made outside OmniRoute never counts toward the cap; it
+counts toward the fair share.
+
+**Known limitation:** once the pool's routed volume in a window reaches
+`account usage × DEFAULT_MIN_TOKENS_PER_PCT` tokens, the whole account figure
+is treated as internal, so subscription usage made outside OmniRoute is charged
+to the most active keys. Separating the two exactly is a follow-up step.
 
 ---
 
