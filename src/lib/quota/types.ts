@@ -75,6 +75,25 @@ export interface QuotaStore {
     planDimensions: Array<{ unit: string; window: string; limit: number }>
   ): Promise<PoolUsageSnapshot>;
   clear(apiKeyId: string, dim: DimensionKey): Promise<void>;
+  /**
+   * Add routed tokens to the key's cumulative counter on one pool connection. Never reads.
+   * An amount that is not a finite number above zero changes nothing.
+   */
+  ledgerRecordTokens(
+    poolId: string,
+    connectionId: string,
+    apiKeyId: string,
+    tokens: number,
+    nowMs: number
+  ): Promise<void>;
+  /** One consistent snapshot of the book of (pool, connection, window) and the counters of that pool connection. */
+  ledgerRead(key: LedgerKey): Promise<LedgerSnapshot>;
+  /**
+   * Compare-and-set on the revision: stores `next` only when the stored book is at revision
+   * next.rev - 1 (a missing book counts as 0). False when another writer already stored next.rev,
+   * when the stored book is at another revision, or when a number of `next` is not finite.
+   */
+  ledgerCommit(key: LedgerKey, next: LedgerState): Promise<boolean>;
 }
 
 export interface EnforceInput {

@@ -8,13 +8,8 @@
  * of that connection. The state transition itself lives in `@/lib/quota/percentLedger`.
  */
 
-import type {
-  LedgerCounter,
-  LedgerKey,
-  LedgerKeyState,
-  LedgerSnapshot,
-  LedgerState,
-} from "@/lib/quota/types";
+import { isStorableLedgerState, storedLedgerBook } from "@/lib/quota/percentLedger";
+import type { LedgerCounter, LedgerKey, LedgerSnapshot, LedgerState } from "@/lib/quota/types";
 import { getDbInstance } from "./core";
 
 interface StatementLike<TRow = unknown> {
@@ -72,27 +67,6 @@ export function addPercentLedgerTokens(
     .run(poolId, connectionId, apiKeyId, tokens, nowMs);
 }
 
-function isKeyState(value: unknown): value is LedgerKeyState {
-  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
-  const { attributed, seenTokens } = value as Record<string, unknown>;
-  return isUsableNumber(attributed) && isUsableNumber(seenTokens);
-}
-
-/** A finite number >= 0. */
-function isUsableNumber(value: unknown): value is number {
-  return typeof value === "number" && Number.isFinite(value) && value >= 0;
-}
-
-/** Every number of the state is finite: anything else would survive every later transition. */
-function isStorableState(state: LedgerState): boolean {
-  const numbers = [state.rev, state.last, state.external, state.readAt, state.updatedAt];
-  if (state.resetAt !== null) numbers.push(state.resetAt);
-  for (const keyState of Object.values(state.keys)) {
-    numbers.push(keyState.attributed, keyState.seenTokens);
-  }
-  return numbers.every((n) => typeof n === "number" && Number.isFinite(n));
-}
-
 function parseKeysJson(json: string): unknown {
   try {
     return JSON.parse(json);
@@ -101,36 +75,12 @@ function parseKeysJson(json: string): unknown {
   }
 }
 
-/**
- * The key map of a stored book. An entry that is not `{ attributed, seenTokens }` numbers, both
- * finite and >= 0, is dropped, and a map that does not parse to a plain object loses every entry; `complete` is false
- * then, so the caller moves the dropped part to external instead of failing the request.
- */
-function readKeys(json: string): { keys: Record<string, LedgerKeyState>; complete: boolean } {
-  const parsed = parseKeysJson(json);
-  if (typeof parsed !== "object" || parsed === null || Array.isArray(parsed)) {
-    return { keys: {}, complete: false };
-  }
-  const keys: Record<string, LedgerKeyState> = {};
-  let complete = true;
-  for (const [apiKeyId, value] of Object.entries(parsed)) {
-    if (isKeyState(value)) {
-      keys[apiKeyId] = { attributed: value.attributed, seenTokens: value.seenTokens };
-    } else {
-      complete = false;
-    }
-  }
-  return { keys, complete };
-}
-
 function rowToState(row: LedgerRow): LedgerState {
-  const { keys, complete } = readKeys(row.keys_json);
-  let external = row.external;
-  if (!complete) {
-    // Degrade to "all that is not attributed is external" rather than block the revision.
-    const attributed = Object.values(keys).reduce((sum, k) => sum + k.attributed, 0);
-    external = Math.max(0, row.last_used - attributed);
-  }
+  const { keys, external } = storedLedgerBook(
+    parseKeysJson(row.keys_json),
+    row.last_used,
+    row.external
+  );
   return {
     rev: row.rev,
     last: row.last_used,
@@ -171,7 +121,7 @@ export function readPercentLedger(key: LedgerKey): LedgerSnapshot {
  * A state with a number that is not finite is never stored (false, nothing written).
  */
 export function commitPercentLedger(key: LedgerKey, next: LedgerState): boolean {
-  if (!isStorableState(next)) return false;
+  if (!isStorableLedgerState(next)) return false;
   // One statement, so the revision check and the write cannot interleave with another writer.
   // The SELECT's WHERE keeps a missing row from being created at a revision other than 1; the
   // DO UPDATE's WHERE leaves an existing row untouched unless its revision is next.rev - 1.

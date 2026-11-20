@@ -15,15 +15,21 @@
  *   - a provider window turn (reset time moved forward, or a larger drop)
  *     starts over and applies the new figure as a rise from 0.
  *
- * applyReading is pure: no clock, no I/O, no mutation of its input.
+ * applyReading is pure: no clock, no I/O, no mutation of its input. It is the
+ * only implementation of the transition: a store keeps the book through three
+ * primitives (add tokens, read, compare-and-set on the revision) and
+ * observeLedger runs the read–apply–conditional-write loop over them, so every
+ * stored state came out of applyReading whatever the interleaving.
  */
 
 import type {
   LedgerCounter,
+  LedgerKey,
   LedgerKeyState,
   LedgerSnapshot,
   LedgerState,
   PlanWindowReading,
+  QuotaStore,
 } from "./types";
 
 const EPSILON = 1e-9;
@@ -230,4 +236,124 @@ export function applyReading(
     },
     changed: true,
   };
+}
+
+// ---------------------------------------------------------------------------
+// Storage boundary, shared by both stores
+// ---------------------------------------------------------------------------
+
+/** A finite number >= 0. */
+function isUsableNumber(value: unknown): value is number {
+  return typeof value === "number" && Number.isFinite(value) && value >= 0;
+}
+
+function isKeyState(value: unknown): value is LedgerKeyState {
+  if (typeof value !== "object" || value === null || Array.isArray(value)) return false;
+  const { attributed, seenTokens } = value as Record<string, unknown>;
+  return isUsableNumber(attributed) && isUsableNumber(seenTokens);
+}
+
+/**
+ * Every number of the state is finite: the only kind of state a store writes. An Infinity or a
+ * NaN would survive every later transition.
+ */
+export function isStorableLedgerState(state: LedgerState): boolean {
+  const numbers = [state.rev, state.last, state.external, state.readAt, state.updatedAt];
+  if (state.resetAt !== null) numbers.push(state.resetAt);
+  for (const keyState of Object.values(state.keys)) {
+    numbers.push(keyState.attributed, keyState.seenTokens);
+  }
+  return numbers.every((n) => typeof n === "number" && Number.isFinite(n));
+}
+
+/**
+ * The key map and external part of a stored book, as fresh objects. An entry that is not
+ * `{ attributed, seenTokens }` with both finite and >= 0 is dropped, and a value that is not a
+ * plain object loses every entry; the external part is then all that is not attributed, so a
+ * damaged book degrades instead of failing the request.
+ */
+export function storedLedgerBook(
+  rawKeys: unknown,
+  last: number,
+  external: number
+): { keys: Record<string, LedgerKeyState>; external: number } {
+  const entries =
+    typeof rawKeys === "object" && rawKeys !== null && !Array.isArray(rawKeys)
+      ? Object.entries(rawKeys)
+      : null;
+  const keys: Record<string, LedgerKeyState> = {};
+  let complete = entries !== null;
+  for (const [apiKeyId, value] of entries ?? []) {
+    if (isKeyState(value)) {
+      keys[apiKeyId] = { attributed: value.attributed, seenTokens: value.seenTokens };
+    } else {
+      complete = false;
+    }
+  }
+  if (complete) return { keys, external };
+  const attributed = Object.values(keys).reduce((sum, k) => sum + k.attributed, 0);
+  return { keys, external: Math.max(0, last - attributed) };
+}
+
+// ---------------------------------------------------------------------------
+// Observation: read, apply, conditional write
+// ---------------------------------------------------------------------------
+
+export type LedgerStore = Pick<QuotaStore, "ledgerRead" | "ledgerCommit">;
+
+async function readOrNull(store: LedgerStore, key: LedgerKey): Promise<LedgerSnapshot | null> {
+  try {
+    return await store.ledgerRead(key);
+  } catch {
+    return null;
+  }
+}
+
+/** One apply-and-commit round on `snapshot`: the state to return, and whether the commit lost. */
+async function applyAndCommit(
+  store: LedgerStore,
+  key: LedgerKey,
+  snapshot: LedgerSnapshot,
+  reading: PlanWindowReading,
+  nowMs: number,
+  minTokensPerPct: number
+): Promise<{ state: LedgerState | null; lost: boolean }> {
+  const { state, changed } = applyReading(snapshot, reading, nowMs, minTokensPerPct);
+  if (!changed) return { state, lost: false };
+  let won: boolean;
+  try {
+    won = (await store.ledgerCommit(key, state)) === true;
+  } catch {
+    return { state: snapshot.state, lost: false };
+  }
+  return won ? { state, lost: false } : { state: snapshot.state, lost: true };
+}
+
+/**
+ * Read the book, apply the reading, store the result when it changed. Never throws.
+ *
+ * Returns the state after this observation; the stored state when the reading changes nothing,
+ * when there is no reading, or when nothing could be written; null when there is no book or the
+ * first read fails. A commit lost to another writer gets one more round on a fresh read; when that
+ * one is lost too, the state of the second read is returned.
+ */
+export async function observeLedger(
+  store: LedgerStore,
+  key: LedgerKey,
+  reading: PlanWindowReading | null,
+  nowMs: number,
+  minTokensPerPct: number
+): Promise<LedgerState | null> {
+  try {
+    const first = await readOrNull(store, key);
+    if (!first || !reading) return first?.state ?? null;
+    const round = await applyAndCommit(store, key, first, reading, nowMs, minTokensPerPct);
+    if (!round.lost) return round.state;
+    const second = await readOrNull(store, key);
+    if (!second) return first.state;
+    return (await applyAndCommit(store, key, second, reading, nowMs, minTokensPerPct)).state;
+  } catch {
+    // A snapshot applyReading cannot use (a store returning something that is not a snapshot).
+    return null;
+  }
 }
