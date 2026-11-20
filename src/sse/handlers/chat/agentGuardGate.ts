@@ -43,6 +43,7 @@ import {
   type AgentGuardLogger,
 } from "@/lib/guardrails/agentGuard/logLine";
 import { isGuardedProvider, providerFromModelString } from "@/lib/guardrails/agentGuard/policy";
+import { normalizeRoutingStrategy } from "@/shared/constants/routingStrategies";
 import { resolveAgentGuardMode } from "@/lib/guardrails/agentGuard/settings";
 import * as defaultLog from "../../utils/logger";
 
@@ -246,7 +247,7 @@ type ComboSetupArgs = Parameters<typeof resolveComboSetupConfig>;
  * provider override applies to the judge.
  */
 function fusionJudgeModel(combo: FusionComboLike, settings: unknown): string | null {
-  if (!combo || combo.strategy !== "fusion") return null;
+  if (!combo || normalizeRoutingStrategy(combo.strategy) !== "fusion") return null;
   const config = resolveComboSetupConfig(
     combo as ComboSetupArgs[0],
     (settings ?? null) as ComboSetupArgs[1]

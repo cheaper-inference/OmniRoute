@@ -489,6 +489,19 @@ test("fusion: a judge the guard would refuse fails the request before the panel 
     403
   );
 });
+test("fusion: a strategy stored with other casing or spaces still gets the judge pre-check", () => {
+  setMode("block");
+  const refusal = (strategy: string) =>
+    gate.agentGuardFusionJudgeRefusal({
+      request: req(KILO),
+      combo: { strategy, config: { judgeModel: "anthropic/claude-opus-5" } },
+      log: quiet(),
+    });
+  for (const strategy of ["Fusion", " FUSION ", "fusion"]) {
+    assert.equal(refusal(strategy)?.status, 403, strategy);
+  }
+  assert.equal(refusal("priority"), null);
+});
 test("fusion: the judge is the one the service resolves, combo config over settings.comboDefaults", () => {
   setMode("block");
   const fusion = (config: Record<string, unknown> = {}) => ({

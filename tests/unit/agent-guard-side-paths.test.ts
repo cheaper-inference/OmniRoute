@@ -15,7 +15,7 @@ import { createHash } from "node:crypto";
 import test, { mock } from "node:test";
 import { fileURLToPath } from "node:url";
 
-const TEST_COUNT = 9;
+const TEST_COUNT = 10;
 
 if (typeof mock.module !== "function") {
   test("agent guard side paths run with module mocks in a child process", (t) => {
@@ -288,6 +288,26 @@ async function registerSidePathTests() {
     const unguarded = await POST(relayRequest(path, KILO));
     assert.equal(unguarded.status, 200);
     assert.equal(sidecarCalls.length, 1);
+  });
+
+  test("sidecar-only relay route: without a valid relay token the answer does not reveal block mode", async () => {
+    const POST = await importSidecarRoute();
+    const path = "/api/v1/relay/chat/completions/bifrost";
+    const answer = async (token: string | null) => {
+      const response = await POST(relayRequest(path, KILO, token));
+      return [response.status, await response.json()];
+    };
+    for (const token of [null, "relay_not_a_real_token"]) {
+      setGuard("off");
+      const unguarded = await answer(token);
+      setGuard("block");
+      const guarded = await answer(token);
+      // A missing token is a 401. An unknown token's answer is whatever the route gives
+      // today, so only its equality across the two modes is asserted.
+      if (token === null) assert.equal(unguarded[0], 401);
+      assert.notEqual(guarded[0], 503);
+      assert.deepEqual(guarded, unguarded);
+    }
   });
 
   test("sidecar-only relay route: a guard that fails lets the sidecar serve and writes one warn line", async () => {

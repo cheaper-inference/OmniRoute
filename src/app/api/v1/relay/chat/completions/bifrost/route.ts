@@ -124,25 +124,6 @@ export async function POST(request: Request) {
     );
   }
 
-  if (wouldRefuseAgent({ headers: request.headers, log })) {
-    // The TS path decides on the provider the request resolves to.
-    return new Response(
-      JSON.stringify(
-        buildErrorBody(
-          503,
-          "This request is served by the TS path. Use /api/v1/relay/chat/completions."
-        )
-      ),
-      {
-        status: 503,
-        headers: {
-          ...JSON_CORS_HEADERS,
-          "X-Bifrost-Fallback": "/api/v1/relay/chat/completions",
-        },
-      }
-    );
-  }
-
   try {
     // 1. Auth + rate limit — duplicated from the TS route so this route is
     //    standalone (we don't import the relay handler to keep the import
@@ -178,6 +159,25 @@ export async function POST(request: Request) {
         status: 401,
         headers: JSON_CORS_HEADERS,
       });
+    }
+
+    if (wouldRefuseAgent({ headers: request.headers, log })) {
+      // The TS path decides on the provider the request resolves to.
+      return new Response(
+        JSON.stringify(
+          buildErrorBody(
+            503,
+            "This request is served by the TS path. Use /api/v1/relay/chat/completions."
+          )
+        ),
+        {
+          status: 503,
+          headers: {
+            ...JSON_CORS_HEADERS,
+            "X-Bifrost-Fallback": "/api/v1/relay/chat/completions",
+          },
+        }
+      );
     }
 
     // 2a. Per-(token,IP) gate — mirrors the TypeScript relay fallback so the
