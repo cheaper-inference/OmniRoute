@@ -1,10 +1,10 @@
 "use client";
 
 import { Disclosure, DisclosureContent, DisclosureTrigger } from "@omniroute/ui-kit/disclosure";
-import { useEffect, useState } from "react";
 import { useTranslations } from "next-intl";
 import Input from "@/shared/components/Input";
-import { webhookUrlFieldError, webhookUrlProblem } from "../../../webhookFieldValidation";
+import { webhookUrlFieldFeedback } from "../../../webhookFieldValidation";
+import { useWebhookUrlCheck } from "./useWebhookUrlCheck";
 
 export interface DiscordConfig {
   webhookUrl: string;
@@ -18,60 +18,15 @@ interface DiscordConfigFormProps {
   showRequired?: boolean;
 }
 
-type UrlState = "idle" | "checking" | "ok" | "blocked" | "invalid";
-
 export function DiscordConfigForm({ value, onChange, t, showRequired }: DiscordConfigFormProps) {
   const tv = useTranslations("formValidation");
-  const [urlState, setUrlState] = useState<UrlState>("idle");
-
-  useEffect(() => {
-    const url = value.webhookUrl.trim();
-    const controller = new AbortController();
-    const askServer = webhookUrlProblem(value.webhookUrl) === null;
-    const delay = askServer ? 600 : 0;
-    const timer = setTimeout(async () => {
-      if (!askServer) {
-        setUrlState("idle");
-        return;
-      }
-      setUrlState("checking");
-      try {
-        const res = await fetch("/api/webhooks/validate-url", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url }),
-          signal: controller.signal,
-        });
-        const data = await res.json().catch(() => ({}));
-        setUrlState(data.valid ? "ok" : data.reason === "blocked_private" ? "blocked" : "invalid");
-      } catch {
-        if (!controller.signal.aborted) setUrlState("invalid");
-      }
-    }, delay);
-    return () => {
-      clearTimeout(timer);
-      controller.abort();
-    };
-  }, [value.webhookUrl]);
-
-  const urlHint =
-    urlState === "checking"
-      ? t("validateUrl.checking")
-      : urlState === "ok"
-        ? t("validateUrl.ok")
-        : urlState === "blocked"
-          ? t("validateUrl.blockedPrivate")
-          : urlState === "invalid" && value.webhookUrl.trim()
-            ? t("validateUrl.invalidUrl")
-            : "";
-
-  const urlError =
-    webhookUrlFieldError(value.webhookUrl, {
-      label: t("discord.webhookUrl"),
-      showRequired,
-      t,
-      tv,
-    }) ?? (urlHint && urlState !== "ok" && urlState !== "checking" ? urlHint : undefined);
+  const urlState = useWebhookUrlCheck(value.webhookUrl);
+  const url = webhookUrlFieldFeedback(value.webhookUrl, urlState, {
+    label: t("discord.webhookUrl"),
+    showRequired,
+    t,
+    tv,
+  });
 
   return (
     <div className="space-y-4">
@@ -81,11 +36,13 @@ export function DiscordConfigForm({ value, onChange, t, showRequired }: DiscordC
         onChange={(e) => onChange({ webhookUrl: e.target.value })}
         placeholder={t("discord.webhookUrlPlaceholder")}
         required
-        error={urlError}
+        error={url.error}
         hint={
           <>
-            {urlHint && (urlState === "ok" || urlState === "checking") && (
-              <span className={`block ${urlState === "ok" ? "text-success" : ""}`}>{urlHint}</span>
+            {url.status && (
+              <span className={`block ${urlState === "ok" ? "text-success" : ""}`}>
+                {url.status}
+              </span>
             )}
             <span className="block">{t("discord.webhookUrlHint")}</span>
           </>

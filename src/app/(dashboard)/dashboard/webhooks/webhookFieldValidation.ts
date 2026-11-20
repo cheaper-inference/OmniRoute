@@ -2,6 +2,9 @@ import { WEBHOOK_SECRET_MAX_LENGTH, WEBHOOK_URL_MAX_LENGTH } from "@/shared/cons
 
 export type WebhookUrlProblem = "required" | "tooLong" | "invalid";
 
+/** Where the server's check of a destination stands (see `useWebhookUrlCheck`). */
+export type WebhookUrlCheckState = "idle" | "checking" | "ok" | "blocked" | "invalid";
+
 /**
  * What is wrong with a webhook destination before the server is asked: empty, over the route's
  * length limit, or not an http(s) URL (the first thing the outbound guard refuses). `null` means
@@ -23,23 +26,22 @@ export function webhookUrlProblem(value: string): WebhookUrlProblem | null {
 
 type Translate = (key: string, values?: Record<string, string | number>) => string;
 
+interface WebhookUrlFieldOptions {
+  /** The field's visible label, named in the message. */
+  label: string;
+  showRequired?: boolean;
+  /** The `webhooks` translator the wizard is given. */
+  t: Translate;
+  /** The shared `formValidation` translator. */
+  tv: Translate;
+}
+
 /**
  * The inline message for a destination field, or `undefined` when the value can go to the
  * server check. "Required" is only said once the user has tried to continue (`showRequired`);
  * a malformed or over-long value is said as it is typed.
  */
-export function webhookUrlFieldError(
-  value: string,
-  options: {
-    /** The field's visible label, named in the message. */
-    label: string;
-    showRequired?: boolean;
-    /** The `webhooks` translator the wizard is given. */
-    t: Translate;
-    /** The shared `formValidation` translator. */
-    tv: Translate;
-  }
-): string | undefined {
+function webhookUrlFieldError(value: string, options: WebhookUrlFieldOptions): string | undefined {
   const problem = webhookUrlProblem(value);
   if (problem === "tooLong") {
     return options.tv("maxLength", {
@@ -55,9 +57,53 @@ export function webhookUrlFieldError(
   return undefined;
 }
 
+/** The server check's verdict in words; empty while there is nothing to say. */
+function webhookUrlCheckText(state: WebhookUrlCheckState, value: string, t: Translate): string {
+  if (state === "checking") return t("validateUrl.checking");
+  if (state === "ok") return t("validateUrl.ok");
+  if (state === "blocked") return t("validateUrl.blockedPrivate");
+  if (state === "invalid" && value.trim()) return t("validateUrl.invalidUrl");
+  return "";
+}
+
+/**
+ * What a destination field shows under itself. `error` is the field's own verdict (empty, over
+ * the limit, not an http(s) URL — said at once, without a round trip) or, for a value that
+ * passes it, the server's refusal. `status` is the server check while it runs or once it
+ * accepted the value; empty otherwise.
+ */
+export function webhookUrlFieldFeedback(
+  value: string,
+  state: WebhookUrlCheckState,
+  options: WebhookUrlFieldOptions
+): { error: string | undefined; status: string } {
+  const text = webhookUrlCheckText(state, value, options.t);
+  const pendingOrAccepted = state === "ok" || state === "checking";
+  return {
+    error: webhookUrlFieldError(value, options) ?? (text && !pendingOrAccepted ? text : undefined),
+    status: pendingOrAccepted ? text : "",
+  };
+}
+
 /** The signing secret is sent trimmed; over the route's limit it is refused, never cut. */
 export function webhookSecretTooLong(value: string): boolean {
   return value.trim().length > WEBHOOK_SECRET_MAX_LENGTH;
+}
+
+/**
+ * The inline message for a signing secret over the route's limit. The key is flagged, never
+ * cut: a truncated signing key would sign payloads the receiver cannot verify.
+ */
+export function webhookSecretFieldError(
+  value: string,
+  options: { label: string; tv: Translate }
+): string | undefined {
+  if (!webhookSecretTooLong(value)) return undefined;
+  return options.tv("maxLength", {
+    field: options.label,
+    max: WEBHOOK_SECRET_MAX_LENGTH,
+    count: value.trim().length,
+  });
 }
 
 /**
