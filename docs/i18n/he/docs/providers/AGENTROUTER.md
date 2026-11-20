@@ -47,7 +47,7 @@ docker run -d --name omniroute \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
   -e ENABLE_CC_COMPATIBLE_PROVIDER=true \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 לאחר ההפעלה מחדש, לוח הבקרה יציג אפשרות **הוספת ספק תואם Claude Code**, בנוסף לתהליכים הקיימים עבור ספקים תואמי OpenAI ותואמי Anthropic.

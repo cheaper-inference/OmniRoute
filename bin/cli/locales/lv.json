@@ -12,7 +12,8 @@
     "dryRun": "[testrežīms] veiktu {action}",
     "cancelled": "Atcelts.",
     "jsonOpt": "Izvade JSON formātā",
-    "yesOpt": "Izlaist apstiprinājuma pieprasījumu"
+    "yesOpt": "Izlaist apstiprinājuma pieprasījumu",
+    "positiveIntegerRequired": "Ierobežojumam ir jābūt pozitīvam veselam skaitlim."
   },
   "setup": {
     "title": "OmniRoute iestatīšana",

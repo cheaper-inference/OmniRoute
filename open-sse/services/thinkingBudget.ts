@@ -151,8 +151,8 @@ const NATIVE_GEMINI_EFFORT_LEVELS: ReadonlyMap<string, GeminiThinkingLevel> = ne
   ["low", "low"],
   ["medium", "medium"],
   ["high", "high"],
-  ["xhigh", "high"],
-  ["max", "high"],
+  ["xhigh", "xhigh"],
+  ["max", "xhigh"],
   ["auto", "high"],
 ]);
 
@@ -166,7 +166,15 @@ function nativeGeminiEffort(
 ): NativeGeminiThinking | null {
   if (typeof rawEffort !== "string") return null;
   const effort = rawEffort.trim().toLowerCase();
-  const thinkingLevel = NATIVE_GEMINI_EFFORT_LEVELS.get(effort);
+  let thinkingLevel = NATIVE_GEMINI_EFFORT_LEVELS.get(effort);
+  // Models without `minimal` (e.g. Gemini 4 Hydrogen) take their lowest level, so an
+  // explicit opt-out never falls through to a higher configured default.
+  if (thinkingLevel === "minimal" && !supported.includes("minimal") && supported.includes("low")) {
+    thinkingLevel = "low";
+  }
+  if (thinkingLevel === "xhigh" && !supported.includes("xhigh") && supported.includes("high")) {
+    thinkingLevel = "high";
+  }
   if (!thinkingLevel || !supported.includes(thinkingLevel)) return null;
   return { thinkingLevel, includeThoughts: effort !== "none" };
 }
@@ -177,7 +185,17 @@ function nativeGeminiBudget(
 ): NativeGeminiThinking | null {
   if (typeof rawBudget !== "number" || !Number.isFinite(rawBudget)) return null;
   const thinkingLevel: GeminiThinkingLevel =
-    rawBudget <= 0 ? "minimal" : rawBudget <= 1024 ? "low" : rawBudget <= 8192 ? "medium" : "high";
+    rawBudget <= 0
+      ? supported.includes("minimal")
+        ? "minimal"
+        : "low"
+      : rawBudget <= 1024
+        ? "low"
+        : rawBudget <= 8192
+          ? "medium"
+          : rawBudget > 24576 && supported.includes("xhigh")
+            ? "xhigh"
+            : "high";
   if (!supported.includes(thinkingLevel)) return null;
   return { thinkingLevel, includeThoughts: rawBudget > 0 };
 }

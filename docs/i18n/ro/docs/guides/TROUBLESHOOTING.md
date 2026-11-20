@@ -470,7 +470,7 @@ consultați [`docs/guides/KIRO_SETUP.md`](./KIRO_SETUP.md).
 2. **Remediere permanentă:** Asociați explicit adresa IPv4 utilizând `-p 127.0.0.1:20128:20128` în comanda `docker run`:
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Aceasta forțează asocierea IPv4 și evită, de asemenea, expunerea proxy-ului pe toate interfețele gazdei.
 
