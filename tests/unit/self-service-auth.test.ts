@@ -14,6 +14,7 @@ const core = await import("../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../src/lib/db/apiKeys.ts");
 const { SELF_USAGE_SCOPE } = await import("../../src/shared/constants/selfServiceScopes.ts");
 const { authenticateSelfServiceRequest } = await import("../../src/server/selfService/auth.ts");
+type SelfServiceKeyStore = import("../../src/server/selfService/auth.ts").SelfServiceKeyStore;
 
 test.after(() => {
   delete process.env.QUOTA_SELF_PANEL;
@@ -113,17 +114,19 @@ test("every refusal is a sanitized error body with Cache-Control: no-store", asy
 
 test("an injected key store cannot skip the flag, header, environment-key or scope checks", async () => {
   const reads: string[] = [];
-  const storeAnswering = (metadata: { id: string; name: string; scopes: string[] }) => ({
-    validateApiKey: async (key: string) => {
-      reads.push(key);
-      return true;
-    },
-    getApiKeyMetadata: async () => metadata,
-  });
+  // Only the fields the gate reads; the cast stands in for the full metadata row.
+  const storeAnswering = (metadata: { id: string; name: string; scopes: string[] }) =>
+    ({
+      validateApiKey: async (key: string) => {
+        reads.push(key);
+        return true;
+      },
+      getApiKeyMetadata: async () => metadata,
+    }) as unknown as SelfServiceKeyStore;
   const envKeyStore = storeAnswering({ id: "env-key", name: "env", scopes: [SELF_USAGE_SCOPE] });
   const unscopedStore = storeAnswering({ id: "k-1", name: "k", scopes: [] });
 
-  const withStore = async (r: Request, store: typeof envKeyStore) => {
+  const withStore = async (r: Request, store: SelfServiceKeyStore) => {
     const a = await authenticateSelfServiceRequest(r, store);
     return a.ok ? 200 : a.response.status;
   };
