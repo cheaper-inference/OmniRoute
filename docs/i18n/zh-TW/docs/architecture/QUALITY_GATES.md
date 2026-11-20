@@ -47,13 +47,13 @@ CLI要求`--evidence-root`驗證保留的證據。檔案解析為`<evidence-root
 
 使用`npm run quality:scan -- --list`或`npm run quality:scan:fast -- --list`檢查選定的別名而不執行它們。運行程序呼叫 npm 入口點，因此其運行時（包括配置的Bun ）被保留。清單將這些設定檔之外的別名記錄為單獨呼叫的，並且在唯讀掃描設定檔中禁止維護命令。
 
-這些設定檔僅涵蓋靜態掃描。他們不證明產品測試、覆蓋範圍、包裝、外部檢查或候選者的完全發布驗收。工作流程准入使用連結的`config/quality/admission-policy.json`和`scripts/quality/admission-verdict.mjs`。發布觀察者檔案保持獨立；獨立檢查其適用的支票和收據。完整觀察者的靜態命令在`config/quality/release-green-static-profile.json`中聲明，包括`audit:deps`、突變測試選擇和翻譯檢查。載入程式根據package.json和建模CI/Quality聲明驗證 npm 命令；它拒絕漂移，而不是將 shell 標記作為參數執行。所需的掃描器SKIP/INCOMPLETE輸出無法建立PASS。此設定檔記錄其外部排除，並且不會取代託管覆蓋範圍、測試矩陣、套件或部署證據。以下的散文清單僅供參考，並不是門實際運作的證據。
+These profiles cover the static scan only. They do not certify product tests, coverage, packaging, external checks or a candidate's full release acceptance. Workflow admission uses the linked `config/quality/admission-policy.json` and `scripts/quality/admission-verdict.mjs`. Release-observer profiles remain separate; inspect their applicable checks and receipts independently. The full observer's static commands are declared in `config/quality/release-green-static-profile.json`, including `audit:deps`, mutation-test selection and translation checks. The loader validates npm commands against package.json and modeled CI/Quality declarations; it rejects drift instead of executing shell tokens as arguments. Required scanner SKIP/INCOMPLETE output cannot establish PASS. The profile records its external exclusions and does not replace hosted coverage, test matrices, package or deployment evidence. The prose inventory below is a reference, not proof that a gate actually ran.
 
 腳本位於`scripts/check/` （策略門）和`scripts/quality/` （棘輪引擎）下。 CI的事實來源是`.github/workflows/ci.yml`。
 
 ### 發布PR快速路徑 (`quality.yml`)
 
-`.github/workflows/quality.yml`補充了main/release PRs上的CI ，推送到`main`、調度和合併組。 PRs使用路徑過濾的快速檢查。永久禁用的重複建置已被刪除；真正的build/package/boot檢查保留在CI中。單元套件和 vitest 僅在CI （`Unit Tests (N/8)`和`Vitest`）中運行。
+`.github/workflows/quality.yml`補充了main/release PRs上的CI ，推送到`main`、調度和合併組。 PRs使用路徑過濾的快速檢查。永久禁用的重複建置已被刪除； the real build/package/boot checks remain in CI.單元套件和 vitest 僅在CI （`Unit Tests (N/8)`和`Vitest`）中運行。
 
 | 工作                                             | 範圍                                                                                      | 阻塞           |
 | ------------------------------------------------ | ----------------------------------------------------------------------------------------- | -------------- |
@@ -66,7 +66,7 @@ CLI要求`--evidence-root`驗證保留的證據。檔案解析為`<evidence-root
 
 `npm run check:forgotten-sibling-tests`作為`Fast Quality Gates`的諮詢步驟運行，並重複使用測試影響圖背後的導入解析器。對於每個變更的生產模組，當拉取請求差異中缺少候選測試時，它會報告確定性`changed module/symbol -> static consumer -> candidate sibling test`鏈。 Markdown 摘要和JSON結果將保留為`forgotten-sibling-tests`工作流程工件，以便在任何阻止推出之前進行校準。
 
-桶再導出和動態導入只是分辨率診斷；他們絕不會造成阻礙性的發現。在`config/quality/forgotten-sibling-allowlist.json`中查看異常。每個條目必須命名消費者和候選測試，給出具體的理由，並連結GitHub問題或拉取請求。格式錯誤的條目無法關閉。異常無法抑制已刪除的候選測試或添加`.skip`/`.todo`的 diff ；斷言弱化和其他屏蔽仍然由獨立阻塞的`check:test-masking`門擁有。
+桶再匯出和動態匯入僅用於解析度診斷； they never create a blocking finding. 在`config/quality/forgotten-sibling-allowlist.json`中查看異常。每個條目必須命名消費者和候選測試，給出具體的理由，並連結GitHub問題或拉取請求。格式錯誤的條目無法關閉。異常無法抑制已刪除的候選測試或添加`.skip`/`.todo`的差異；斷言弱化和其他屏蔽仍然由獨立阻塞的`check:test-masking`門擁有。
 
 ### 職位： `lint`
 
@@ -91,7 +91,7 @@ CLI要求`--evidence-root`驗證保留的證據。檔案解析為`<evidence-root
 | `check:vitest-exclusions`         | 每個Vitest排除都會命名一個追蹤問題並出現在`config/quality/vitest-exclusions.json` (#13204) 中                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 是的                                |
 | `check:file-size`                 | 來源檔案（ `src/`、 `open-sse/`、 `electron/`、 `bin/`中的`.ts`/`.tsx` ）保留在`cap`中，測試檔案（`*.test.ts(x)`）保留在`testCap`中；凍結在`file-size-baseline.json` (`frozen` / `testFrozen`) 中的檔案不得超過其記錄的大小                                                                                                                                                                                                                                                                                                                                                                                                                                                                  | 是的                                |
 | `check:error-helper`              | executors/handlers中的錯誤回應使用`buildErrorBody()` / `sanitizeErrorMessage()` （硬規則#12）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                | 是的                                |
-| `check:migration-numbering`       | 遷移SQL檔案依序編號，無間隙或重複                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            | 是的                                |
+| `check:migration-numbering`       | 移轉檔名：舊的`001`–`241`系列被凍結，新檔為`YYYYMMDDHHMMSS_<description>.sql`。針對PR基礎，它拒絕已刪除的遷移、沒有相容性條目的重命名遷移，以及最終架構無法交換的無序或編輯的遷移                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                            |
 | `check:public-creds`              | `publicCreds.ts`之外沒有文字OAuth `client_id`/`client_secret`或 Firebase Web 金鑰（硬規則#11）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                               | 是的                                |
 | `check:db-rules`                  | `src/lib/db/`模組之外沒有原始SQL ；沒有從`localDb.ts`進口桶（硬規則#2/#5）                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   | 是的                                |
 | `check:known-symbols`             | 在其調度表中註冊的提供者執行程式、路由策略和轉換器與磁碟上的檔案—沒有孤立或未聲明的符號                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                      | 是的                                |
@@ -133,16 +133,16 @@ CLI要求`--evidence-root`驗證保留的證據。檔案解析為`<evidence-root
 
 ### 職位： `quality-extended`
 
-混合作業，沒有作業等級`continue-on-error`：透過`--ratchet`的步驟在測量迴歸與`quality-baseline.json`上失敗。只有`check:circular-deps`和掃描器安裝步驟是建議性的（步驟等級`continue-on-error: true`）。外部掃描器透過`gh release download`安裝；當 gitleaks 不存在時， `check:secrets`會自跳過（退出 0），而`check:vuln-ratchet`、 `check:workflows`和`check:openapi-breaking`當測量缺失時會失敗關閉。
+混合作業，沒有作業等級`continue-on-error`：透過`--ratchet`的步驟在測量迴歸與`quality-baseline.json`上失敗。只有`check:circular-deps`和掃描器安裝步驟是建議性的（步驟等級`continue-on-error: true`）。外部掃描器透過`gh release download`安裝；當 gitleaks 不存在時， `check:secrets`會自我跳過（退出 0），而`check:vuln-ratchet`、 `check:workflows`和`check:openapi-breaking`當缺少測量值時會失敗關閉。
 
-| 腳本                     | 驗證                                                                                                                                                  | 阻塞                            |
-| ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
-| `check:circular-deps`    | 無迴圈依賴 (dpdm)                                                                                                                                     | **諮詢**                        |
-| `check:bundle-size`      | 捆包尺寸不超過上限；無法測量的尺寸也會失敗                                                                                                            | **使用--ratchet進行阻止**       |
-| `check:secrets`          | 如果二進位檔案不存在，秘密掃描 (gitleaks) —會跳過                                                                                                     | **使用--ratchet進行阻止**       |
-| `check:vuln-ratchet`     | 依賴項漏洞（osv-scanner）不會回歸—如果未測量， `--ratchet`會像INCOMPLETE一樣失敗（退出 2）                                                            | **使用--ratchet進行阻止**       |
-| `check:workflows`        | 工作流程 lint (actionlint + zizmor)； missing/broken掃描器、無效報告或缺少棘輪基線會因INCOMPLETE失敗。有效的結果遵循選定的strict/advisory/ratchet政策 | 需要執行; zizmor 棘輪在CI中阻塞 |
-| `check:openapi-breaking` | 針對固定事件提交的公共API合約（PR merge-base、push before、merge-group base； scheduled/manual checkout 第一個父級）；所需測量失敗關閉                | **使用--ratchet進行阻止**       |
+| 腳本                     | 驗證                                                                                                                                                    | 阻塞                            |
+| ------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------- |
+| `check:circular-deps`    | 無迴圈依賴 (dpdm)                                                                                                                                       | **諮詢**                        |
+| `check:bundle-size`      | 捆紮尺寸不超過上限；無法測量的尺寸也會失敗                                                                                                              | **使用--ratchet進行阻止**       |
+| `check:secrets`          | 如果二進位檔案不存在，秘密掃描 (gitleaks) —會跳過                                                                                                       | **使用--ratchet進行阻止**       |
+| `check:vuln-ratchet`     | 依賴項漏洞（osv-scanner）不會回歸—如果未測量， `--ratchet`會像INCOMPLETE一樣失敗（退出 2）                                                              | **使用--ratchet進行阻止**       |
+| `check:workflows`        | 工作流程 lint (actionlint + zizmor)； missing/broken掃描器、無效報告或缺少棘輪基線會失敗，如INCOMPLETE。有效的結果遵循選定的strict/advisory/ratchet政策 | 需要執行; zizmor 棘輪在CI中阻塞 |
+| `check:openapi-breaking` | 針對固定事件提交的公共API合約（PR merge-base、push before、merge-group base； scheduled/manual checkout 第一個父級）；所需測量失敗關閉                  | **使用--ratchet進行阻止**       |
 
 ### 職位： `docs-sync-strict`
 
@@ -168,18 +168,18 @@ CLI要求`--evidence-root`驗證保留的證據。檔案解析為`<evidence-root
 
 PR功能僅編輯英文來源。 `docs/i18n/<locale>/**`鏡像（包括 66 個`llm.txt`副本和翻譯後的`CHANGELOG.md`檔）和`.i18n-state.json`由翻譯波（`docs/i18n-*` / `chore/i18n-*`分支，預定的`i18n-mirror-refresh.yml`）和發布（`npm run release:sync-changelog-i18n`）一步重寫。因此，鏡像閘門以兩種模式運行，由`scripts/check/lib/gateMode.mjs`解析（`--mode=pr|release`，然後`OMNIROUTE_GATE_MODE`，然後 Actions 事件；本地運行是`release`）：
 
-- `check:docs-sync` —發布模式運行每次檢查。 PR模式保留package.json/OpenAPI版本、根CHANGELOG標題和取代的文件防護，並為`llm.txt`鏡像副本和翻譯的CHANGELOG部分—打印`SKIP reason=pr-mode` ，除非PR寫入鏡像：在`config/quality/derived-paths/*.json`中聲明為`docs/i18n/**`系列編寫器的頭分支嚴格運行這兩項檢查，並且當 diffn 基解析時，其自己的`CHANGELOG.md` `docs/i18n/<locale>/llm.txt`編輯diff 基礎不會在depth-1簽出（ `docs-sync-strict`作業）中解析，因此PR模式也執行一項不需要基礎的檢查：每個`llm.txt`鏡像都必須存在，保留其`---`分隔符號並攜帶根主體或大多數鏡像共享的主體。移動的底座會使所有鏡子同樣陳舊和失效；對一個鏡像的手動編輯失敗。翻譯後的`CHANGELOG.md`檔案在depth-1 PR簽出中沒有此類檢查。
-- 預提交掛鉤運行`check-docs-sync.mjs --mode=pr`：根據提交的作用來判斷提交。如果沒有該標誌，本地運行就是發布模式，並且編輯根`llm.txt`的合併PR將阻止該基礎上的每個後續提交，直到 Wave 運行。同樣的規則適用於 Husky 鉤子運行的任何模式感知門：鉤子傳遞`--mode=pr`，並且嚴格的判決保留在發布模式運行中（發布PR，推送到`main`，一個普通的本地運行）。
+- `check:docs-sync` —發布模式運行每次檢查。 PR模式保留package.json/OpenAPI版本、根CHANGELOG标题和取代的文档防护，并为`llm.txt`镜像副本和翻译的CHANGELOG部分—打印`SKIP reason=pr-mode` ，除非PR写入镜像：在`config/quality/derived-paths/*.json`中声明为`docs/i18n/**`系列编写器的头分支严格运行这两项检查，并且当 diff 基解析时，其自己的 diff 编辑`docs/i18n/<locale>/llm.txt`或`CHANGELOG.md`更改会严格运行该检查。 diff 基础不会在depth-1签出（ `docs-sync-strict`作业）中解析，因此PR模式还运行一项不需要基础的检查：每个`llm.txt`镜像都必须存在，保留其`---`分隔符并携带根主体或大多数镜像共享的主体。移動的底座會使所有鏡子同樣陳舊和失效；對一個鏡像的手動編輯失敗。翻譯後的`CHANGELOG.md`檔案在depth-1 PR簽出中沒有此類檢查。
+- 預提交掛鉤運行`check-docs-sync.mjs --mode=pr`：根據提交的作用來判斷提交。如果沒有該標誌，本地運行就是發布模式，並且編輯根`llm.txt`的合併PR將阻止該基礎上的每個後續提交，直到 Wave 運行。同样的规则适用于 Husky 钩子运行的任何模式感知门：钩子传递`--mode=pr`，并且严格的判决保留在发布模式运行中（发布PR，推送到`main`，一个普通的本地运行）。
 - 鏡像內容單元測試（`tests/_helpers/mirrorFreshness.ts`： `cycle-docs-mirror-contract`、 `resilience-pre-dispatch-docs-mirrors`、 `cli-env-quality-docs-mirrors`、 `docs/*-locales`） —發布模式斷言每個區域設定。 PR模式根據`.i18n-state.json` （整個文件哈希，或測試引腳的部分記錄的部分哈希）僅斷言英文源當前的鏡像，並有理由跳過過時的鏡像。 `target_hash`來源檢查在兩種模式下針對每個區域設定運作。新鮮度是每個`## `部分，單位`run-translation.mjs`哈希值；較長的部分（該文件的門庫存大約是其中的一半）意味著其中的任何編輯都會使這些鏡像變得陳舊，並且它們的 PR 模式斷言會跳過，直到下一波。英文來源不再包含的錨點會退回到整個文件比較。
 - `i18n translation drift` —關於PRs諮詢，嚴格推送、夜間和發布削減，因此過時的鏡像無法在發布中發布。
 
-`scripts/i18n/sync-llm-mirrors.mjs` （也導出為`syncLlmMirrors()`，帶有`--dry-run`）重寫`llm.txt`鏡像；發布刷新、翻譯波和計劃的`i18n-mirror-refresh.yml`運行它（刷新通過空運行檢測陳舊的`llm.txt`鏡像，因為漂移報告沒有列出它們，並在`check:docs-all`之前同步它們）。
+`scripts/i18n/sync-llm-mirrors.mjs` (also exported as `syncLlmMirrors()`, with `--dry-run`) rewrites the `llm.txt` mirrors; the release refresh, the translation wave and the scheduled `i18n-mirror-refresh.yml` run it (the refresh detects stale `llm.txt` mirrors with a dry run, since the drift report does not list them, and syncs them before `check:docs-all`).
 
 `docs/diagrams/`下的 12 個README SVGs已產生（`scripts/docs/gen-readme-<name>.mjs`； `npm run docs:readme-diagrams`重新產生所有這些）。每個都有一個位元組比較單元測試（`tests/unit/docs/readme-*-svg.test.ts`、 job `test-unit`），當提交的文件在發布模式下過時時，該測試會失敗；在PR中， `check:generated-artifacts`判斷PR編輯的SVG ，並且基礎的漂移留給發布刷新（請[參閱生成的文件和派生基線](#generated-files-and-derived-baselines-written-at-release)`<text>` — — `check:docs-counts` `<text>` SVG規範數字檢查讀取`SVG_DIAGRAM_FILES` (`scripts/check/check-docs-counts-sync.mjs`) 中列出的檔案： `docs/diagrams/readme-hero.svg`、 `free-tier-budget.svg`、 `promise-pillars.svg`、 `comparison-table.svg`、 `cli-terminal.svg`、 `tier-cascade.svg`，以及`public/images/tier-flow-dark.svg`和`tier-flow-light.svg`；永久免費、目錄條目、循環池和評分因素聲明也為`promise-pillars.svg`、 `free-tier-budget.svg`和`strategies-grid.svg`。這些生成器繪製的計數（提供程式總數、 MCP工具、路由策略、永久免費提供者等）來自`docs/reference/derived-facts.json`到`scripts/docs/readmeFacts.mjs`的事實快照，而不是來自文字，因此在任何分支上重新產生圖表都會重現提交的檔案。 `free-tier-budget.svg`從同一快照（`code.freeTierBudget`，事實探測記錄的目錄摘要）中提取行，因此對`FREE_MODEL_BUDGETS`的更改會在下次刷新時到達卡，而不是將CI變成紅色。
 
 ### 派生值： `pr`和`release`閘模式
 
-功能PR永遠不會寫入取決於其基礎狀態的值：提供者、遷移、MCP 工具和策略計數、 README SVG數字、事實快照。一步重新計算所有`npm run release:refresh-derived`，由發布版本和每晚派生刷新PR運行。所以**在版本之間，基礎設計位於即時程式碼後面**，並且在同級添加提供者後，將樹與實時代碼進行比較的門或測試將在每個PR上顯示為紅色。因此，判斷派生值的閘門以兩種模式之一運行，由`scripts/check/lib/gateMode.mjs`解析（第一個匹配獲勝）：
+功能PR永遠不會寫入取決於其基礎狀態的值：提供者、遷移、MCP 工具和策略計數、 README SVG數字、事實快照。一步重新計算所有`npm run release:refresh-derived`，由發布版本和每晚派生刷新PR運行。所以**在版本之間，基礎設計位於即時程式碼後面**，並且在兄弟添加了提供者之後，將樹與實時代碼進行比較的門或測試將在每個PR上顯示為紅色。因此，判斷派生值的閘門以兩種模式之一運行，由`scripts/check/lib/gateMode.mjs`解析（第一個匹配獲勝）：
 
 1. `--mode=pr|release`在命令列上；
 2. `OMNIROUTE_GATE_MODE`環境變數（`pr`或`release`）；
@@ -211,8 +211,8 @@ PR功能僅編輯英文來源。 `docs/i18n/<locale>/**`鏡像（包括 66 個`l
 
 背後的命令：
 
-- `npm run facts`每個派生數字列印為JSON (`scripts/release/facts.mjs`)。 `--key=code.mcpTools`列印一個值， `--snapshot`讀取已提交的快照而不是即時樹。當無法收集事實時退出2。
-- `npm run release:refresh-derived` (`scripts/release/refresh-derived.mjs`) 一次重新計算派生文件，按以下順序（ `--only=`的步驟 ID）： `provider-reference` (`docs/reference/PROVIDER_REFERENCE.md`)、 `facts` (快照)、 `numbers` (計數門的重寫計劃應用於文件，然後傳送到它們— `docs/i18n/`鏡像)、 `readme-diagrams`、 `skills` ( `SKILL.md`)、 `e2e-timings` `ui-keys` `syncE2eTimings` `en.json` —排隊自上次發布以來`origin/main`的英文值`--rewritten-since=<ref>` 、 `llm-mirrors`和`verify-generated` （寫入後，發布模式下的`check:generated-artifacts`和`check:agent-skills-sync`必須通過；在`--check`中跳過，當`--only`將其排除時；失敗是退出 2）。 `changelog`步驟是選擇加入的（`--with-changelog`，僅發布設定檔）。 `--profile=nightly`從不涉及版本聲明。使用`-- --check` ，當任何文件發生變更或託管值需要手動編輯（列出兩者）時，它不會寫入任何內容並退出 1；基礎設施故障時退出 2。 `--json`將結果列印為JSON。
+- `npm run facts`每個派生數字列印為JSON (`scripts/release/facts.mjs`)。 `--key=code.mcpTools`列印一個值， `--snapshot`讀取已提交的快照而不是即時樹。當無法收集到事實時，退出2。
+- `npm run release:refresh-derived` (`scripts/release/refresh-derived.mjs`) 一次重新計算派生文件，按以下順序（ `--only=`的步驟 ID）： `provider-reference` (`docs/reference/PROVIDER_REFERENCE.md`)、 `facts` (快照)、 `numbers` (計數門的重寫計劃應用於文件，然後傳送到它們的`docs/i18n/`鏡像)、 `readme-diagrams`、 `skills` ( `SKILL.md`)、 `--rewritten-since=<ref>` `e2e-timings` `syncE2eTimings` `ui-keys` — `en.json` `origin/main`自上次發布以來重寫的英文值；這些值由環境中配置的後端— `.env` （`OMNIROUTE_TRANSLATION_*`，僅讀取這些鍵）或Google引擎在同一運行中進行轉換。如果沒有後端`check:agent-skills-sync` `verify-generated` `check:generated-artifacts` `__MISSING__` `--allow-untranslated` `llm-mirrors` `--check`跳過，當`--only`將其排除時；失敗為退出 2）。 `changelog`步驟是選擇加入的（`--with-changelog`，僅發布設定檔）。 `--profile=nightly`從不觸及版本聲明。使用`-- --check` ，當任何文件發生變更或託管值需要手動編輯（列出兩者）時，它不會寫入任何內容並退出 1；基礎設施故障時退出 2。 `--json`將結果印為JSON。
 - `docs/reference/derived-facts.json`是上次刷新所使用的事實的快照。只有刷新才會寫它。 README SVG產生器讀取它，PR-time 單元測試將提交的文件和生成的文件與它進行比較— never 與實時代碼。此套件的單一即時比較是`tests/unit/check-docs-counts-sync.test.ts`中的「發布刷新關閉循環」：根據即時事實，應用於記憶體中的刷新重寫計畫不會留下任何未報告的STRICT漂移，並且重新規劃不會改變任何內容。
 
 要在本地重現（本地運行預設為`release`）：
@@ -243,13 +243,13 @@ npm run release:refresh-derived -- --check                       # what the rele
 
 不會跳過在`pr`模式下仍然更改語言環境目錄的PR （翻譯波、發布刷新、僅翻譯修復PR ： `check-key-completeness`會根據合併基礎 (`scripts/i18n/lib/touched-catalogs.mjs`) 上的同一目錄來判斷它更改的每個目錄，並在目錄丟失的鍵、 `en.json`缺少的鍵、真正的翻譯變成`__MISSING__:`標記或英文文本、或者不再觸及字串placeholders/tags PR中新的目錄必須攜帶整個`en.json`密鑰集。對於PR涉及的目錄，這涵蓋了比率和 CLI 奇偶校驗門將看到的內容。
 
-語言環境奇偶校驗單元測試（`cli-i18n-catalog`、 `i18n-pt-br`、 `i18n-vi-completeness`、 `i18n-placeholder-parity`）透過`tests/_helpers/localeParityMode.ts`遵循相同的模式：在`pr`模式下，它們跳過鍵奇偶校驗斷言，並讓發布刷新其英語自合併基礎以來發生變化的鍵的佔位符奇偶校驗（單元測試作業作業的簽出無法讀取時的每個鍵奇偶校驗（單元測試作業的簽出無法讀取時的每個鍵奇偶校驗（單元測試作業的簽出無法讀取時的每個鍵奇偶校驗）。那個幫手就是**僅有的**已批准的模式條件跳過： `check:test-masking`計算`.skip(`和`{ skip: true }` ，但不計算它返回的計算`{ skip: "<reason>" }` ，因此`tests/unit/locale-parity-mode.test.ts`固定允許使用它的測試列表—添加一個是對該列表的審查編輯。
+語言環境奇偶校驗單元測試（`cli-i18n-catalog`、 `i18n-pt-br`、 `i18n-vi-completeness`、 `i18n-placeholder-parity`）透過`tests/_helpers/localeParityMode.ts`遵循相同的模式：在`pr`模式下，它們跳過鍵奇偶校驗斷言，並讓發布刷新其英語自合併基礎以來發生變化的鍵的佔位符奇偶校驗（單元測試作業作業的簽出無法讀取時的每個鍵奇偶校驗（單元測試作業的簽出無法讀取時的每個鍵奇偶校驗（單元測試作業的簽出無法讀取時的每個鍵奇偶校驗）。 That helper is the**僅有的**已批准的模式條件跳過： `check:test-masking`計算`.skip(`和`{ skip: true }` ，但不計算它返回的計算`{ skip: "<reason>" }` ，因此`tests/unit/locale-parity-mode.test.ts`固定允許使用它的測試列表—添加一個是對該列表的審查編輯。
 
 #### `check-ui-value-drift` —陳舊翻譯門
 
 捕獲其他門在結構上看不到的國際化回歸：英語值被重寫，並且從_先前_英語派生的翻譯保留下來，因此非英語用戶繼續閱讀措辭自信、現在錯誤的副本。
 
-這是真的出貨了。當Antigravity登入助手登陸（#5203）時， `oauthModal.googleOAuthWarning`被重寫；** 43 語言環境中的 39 個**保留文字告訴操作員「複製完整的URL並將其貼到下面」 —是該提供者無法完成的流程。直到#8463才注意到它，因為：
+這是真的出貨了。當反重力登入助理登陸時， `oauthModal.googleOAuthWarning`被重寫（#5203）；** 43 語言環境中的 39 個**保留文字告訴操作員「複製完整的URL並將其貼到下面」 —該提供者無法完成的流程。直到#8463才注意到它，因為：
 
 - `sync-ui-keys`僅回填以下鍵**缺席的**，從來沒有那些**陳舊**;
 - `check-ui-keys-coverage`計算密鑰_存在_，因此過時的翻譯分數被覆蓋；
@@ -284,11 +284,11 @@ BASE_REF=origin/release/vX.Y.Z npm run i18n:check-value-drift
 
 僅在拉取請求上運行。
 
-| 腳本                   | 驗證                                                                                          | 阻塞 |
-| ---------------------- | --------------------------------------------------------------------------------------------- | ---- |
-| `check:pr-test-policy` | 更改`src/`、 `open-sse/`、 `electron/`或`bin/`中的生產代碼的PRs必須包含或更新測試（硬規則#8） | 是的 |
-| `check:test-masking`   | 更改的測試文件不會減少淨斷言計數或添加`assert.ok(true)`同義反复                               | 是的 |
-| `check:pr-evidence`    | PR主體引用了test/VPS變更證據（透過 greping PR散文—脆弱性來機械化硬規則#18 ，請參閱 Backlog）  | 是的 |
+| 腳本                   | 驗證                                                                                              | 阻塞 |
+| ---------------------- | ------------------------------------------------------------------------------------------------- | ---- |
+| `check:pr-test-policy` | 更改`src/`、 `open-sse/`、 `electron/`或`bin/`中的生產代碼的PRs必須包含或更新測試（硬規則#8）     | 是的 |
+| `check:test-masking`   | 更改的測試文件不會減少淨斷言計數或添加`assert.ok(true)`同義反复                                   | 是的 |
+| `check:pr-evidence`    | PR主體引用了test/VPS變更證據（透過 greping PR散文—脆弱化來機械化 Hard Rule #18 ，請參閱 Backlog） | 是的 |
 
 ### 職位： `test-vitest`
 
@@ -462,39 +462,30 @@ tip 上發生迴歸——亦即多次合併的組合導致迴歸，但沒有任�
 針對每個 PR 重新建立基準（那會掩蓋真正的迴歸）。請先加以判別：在認定是你的 PR 導致問題之前，
 先於探測用 worktree 中，針對純粹的 tip 重現紅燈狀態。
 
-## 產生的檔案與衍生基準（於發佈時寫入）
+## 產生的文件和派生基線（在發佈時編寫）
 
-計畫 2026-11-13（「衍生數字與文字僅在發佈時解析」）：一個功能 PR 會變更
-**來源** — `src/shared/constants/providers.ts`、`docs/openapi.yaml`、技能目錄、
-免費方案目錄，以及新的 e2e 規格。它不會重新產生由該來源計算出的檔案，也不會將測得的改善值寫入基準。
-這些檔案會由發佈重新整理（`release:refresh-derived`）或 nightly refresh PR 重寫一次。在此之前，每個相鄰的
-PR 都會攜帶自己重新產生的副本，並與下一次合併發生衝突（2026-11-13：321 個開放
-PR 中有 30 個重寫了 `PROVIDER_REFERENCE.md`，26–28 個重寫了 README 圖表）。
+計畫 2026-11-13（「僅在發佈時解析的派生數字和文字」）： PR一項功能更改了**來源**— `src/shared/constants/providers.ts`、 `docs/openapi.yaml`、技能目錄、免費目錄、新的 e2e 規格。它不會重新產生從該來源計算出的文件，也不會將測量到的改進儲存到基線中。這些檔案透過發布刷新 (`release:refresh-derived`) 或每晚刷新PR重寫一次。在此之前，每個同級PR都攜帶自己的重新生成的副本，並與下一次合併發生衝突（2026-11-13：321 個打開的PRs中的 30 重寫了`PROVIDER_REFERENCE.md`，26-28 重寫了README圖）。
 
-**防護機制。** `check:pr-derived-paths`（工作 `pr-test-policy`）會讓觸及
-`config/quality/derived-paths/` 中某個系列檔案的功能 PR 失敗：
+**守衛。** `check:pr-derived-paths` (job `pr-test-policy`) 使觸及`config/quality/derived-paths/`中的系列檔案的PR功能失敗：
 
-| 系列        | 檔案                                                                                                                                                           | 由誰重寫                                                                                                                  |
-| ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `generated` | `docs/reference/derived-facts.json`；`docs/reference/PROVIDER_REFERENCE.md`；十二個產生的 README SVG；`skills/*/references/**`；沒有自訂區塊的 `SKILL.md` 檔案 | `release:refresh-derived`（facts）、`gen:provider-reference`、`docs:readme-diagrams`、`generate-agent-skills.mjs --apply` |
-| `baselines` | `config/quality/e2e-timings.json`                                                                                                                              | `balance-e2e-shards.mjs --sync`（`syncE2eTimings()`）                                                                     |
+| 家庭        | 文件                                                                                                                                                   | 重寫者                                                                                                                       |
+| ----------- | ------------------------------------------------------------------------------------------------------------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------- |
+| `generated` | `docs/reference/derived-facts.json`; `docs/reference/PROVIDER_REFERENCE.md`;十二生成README SVGs; `skills/*/references/**`;沒有自訂區塊的`SKILL.md`文件 | `release:refresh-derived` （事實）、 `gen:provider-reference`、 `docs:readme-diagrams`、 `generate-agent-skills.mjs --apply` |
+| `baselines` | `config/quality/e2e-timings.json`                                                                                                                      | `balance-e2e-shards.mjs --sync` (`syncE2eTimings()`)                                                                         |
 
-寫入者（`release/v*`、`chore/derived-*`，以及基準的 `chore/bank-ratchet-*`）可免於此限制；只變更一個系列及其
-伴隨檔案的 PR 也同樣免除（對於 `generated`：產生器指令碼、其測試、agent-skill 輸入 — `src/shared/constants/agentSkills.ts`、手寫的 `skills/**`
-文件、`docs/openapi.yaml` — 以及 `changelog.d/**`），例如英雄版面變更及其重新產生的 SVG，
-或測試會讀取重新產生的 `SKILL.md` 檔案的技能修正。含有手寫
-`<!-- skill:custom-start -->` 區塊的 `SKILL.md` 不屬於該系列：其自訂區塊仍可在功能旁編輯。
+Writers (`release/v*`, `chore/derived-*`, and `chore/bank-ratchet-*` for baselines) are exempt; so is a PR that changes only one family plus its companions (for `generated`: the generator scripts, their tests, the agent-skill inputs — `src/shared/constants/agentSkills.ts`, the hand-written `skills/**` docs, `docs/openapi.yaml` — and `changelog.d/**`), e.g. a hero layout change with its regenerated SVG, or a skills fix whose test reads the regenerated `SKILL.md` files. A `SKILL.md` with a hand-written `<!-- skill:custom-start -->` block is not in the family: its custom block stays editable next to a feature.
 
-**各閘道模式的檢查**（`scripts/check/lib/gateMode.mjs`；輔助程式
-`scripts/check/lib/derivedArtifactScope.mjs`）：
+孤兒清理也不由家族來判斷：當合併基礎具有該鏡像且`<doc>`不再存在於PR的頭部時， PR可以刪除`docs/i18n/<locale>/<doc>` ，並且可以編輯`.i18n-state.json`僅從`sources`中刪除此類文件。守衛在`orphan-cleanup`下列出了這些文件。刪除仍然存在的文件的鏡像仍然是一種違規：沒有其他管道追蹤該狀態，並且`llm.txt`和`CHANGELOG.md`鏡像有自己的編寫器。
 
-| 檢查                                                                  | `release`（push、排程、release PR、本機）                      | `pr`（功能 PR、佇列批次）                                                                                                                                                   |
-| --------------------------------------------------------------------- | -------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `check:agent-skills-sync`                                             | 每個技能都必須等於產生器輸出                                   | 僅檢查 PR 編輯的技能（其產生文字（自訂區塊以外）或 `references/`）；否則為 `SKIP reason=pr-mode`                                                                            |
-| `check:generated-artifacts`（README SVG + e2e timings；需要完整歷史） | 每個 SVG 都必須等於其產生器輸出；每個規格都必須有 timings 項目 | 僅檢查 PR 編輯的成品；其餘為 `SKIP reason=pr-mode`；沒有差異基準 → 檢查每個成品（失敗關閉）                                                                                 |
-| README SVG 位元組比較測試（`tests/unit/docs/readme-*-svg.test.ts`）   | 每個 SVG                                                       | 僅檢查 PR 編輯的 SVG（在基準可解析時）；`test-unit` 的淺層 PR checkout 沒有基準，因此測試會以 `SKIP reason=base-unresolved` 略過，並由 `check:generated-artifacts` 負責比較 |
-| e2e timings 完整性（`tests/unit/balance-e2e-shards.test.ts`）         | 每個規格都必須有項目                                           | 與 SVG 測試相同的規則（新規格會以中位數權重執行）                                                                                                                           |
-| `check-quality-ratchet.mjs --require-tighten`                         | 未入帳的改善會失敗（除非 `_policy`）                           | 回報改善，但永不失敗；回歸仍會失敗                                                                                                                                          |
+**檢查，每門模式**（`scripts/check/lib/gateMode.mjs`；助手`scripts/check/lib/derivedArtifactScope.mjs`）：
+
+| 查看                                                                     | `release` （推送、調度、發布PR、本地）          | `pr` （特徵PR，佇列批次）                                                                                                                     |
+| ------------------------------------------------------------------------ | ----------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| `check:agent-skills-sync`                                                | 每個技能必須等於發電機輸出                      | 僅限PR編輯生成文字（自訂區塊之外）或`references/`的技能；否則`SKIP reason=pr-mode`                                                            |
+| `check:generated-artifacts` （README SVGs + e2e 計時；需要完整歷史記錄） | 每個SVG等於它的產生器；每個規格都有一個計時條目 | 僅PR編輯的工件；其餘`SKIP reason=pr-mode`；沒有差異基礎→判斷每個工件（失敗關閉）                                                              |
+| README SVG位元組比較測試 (`tests/unit/docs/readme-*-svg.test.ts`)        | 每個SVG                                         | 當基礎解析時， PR僅編輯SVG ； `test-unit`的淺PR結帳沒有基礎，因此測試會跳過`SKIP reason=base-unresolved`和`check:generated-artifacts`擁有比較 |
+| e2e 時序完整性 (`tests/unit/balance-e2e-shards.test.ts`)                 | 每個規格都有一個條目                            | 與SVG測試相同的規則（新規範以中位數權重運行）                                                                                                 |
+| `check-quality-ratchet.mjs --require-tighten`                            | 無銀行改進失敗（除非`_policy`）                 | 報告有改進，從未失敗；回歸仍失敗                                                                                                              |
 
 Release 模式保留這些檢查在拆分前的判定結果、結束碼和訊息；最多會新增一行，用於標示解析後的模式（`[agent-skills-sync] mode=release (auto: local run)`）。
 測試會透過 node:test 的 `{ skip: releaseOnlyUnlessTouched(...) }` 選項略過，而

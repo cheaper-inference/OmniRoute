@@ -21,10 +21,10 @@ npm install -g omniroute
 ### B variants: Docker
 
 ```bash
-docker run -d --name omniroute -p 20128:20128 diegosouzapw/omniroute:latest
+docker run -d --name omniroute -p 20128:20128 cheaperinference/omniroute:latest
 ```
 
-`:latest` ir jaunākā **publicētā** stabilā SemVer versija. Tā **neseko** git `main` zaram. GitOps vajadzībām piesaistiet konkrētu `diegosouzapw/omniroute:X.Y.Z` versiju. Skatiet sadaļu [Attēlu tagi / laidienu kanāli](../guides/DOCKER_GUIDE.md#release-channels).
+`:latest` ir jaunākā **publicētā** stabilā SemVer versija. Tā **neseko** git `main` zaram. GitOps vajadzībām piesaistiet konkrētu `cheaperinference/omniroute:X.Y.Z` versiju. Skatiet sadaļu [Attēlu tagi / laidienu kanāli](../guides/DOCKER_GUIDE.md#release-channels).
 
 ### C variants: no pirmkoda
 
