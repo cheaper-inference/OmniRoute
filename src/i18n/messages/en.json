@@ -11054,6 +11054,8 @@
     "suiteLatestRunsHint": "Most recent evaluation runs for this suite.",
     "saving": "Saving",
     "suiteBuilderCaseModelLabel": "Model (optional)",
+    "suiteBuilderCaseModelHint": "Used when a run targets \"{target}\". If empty, the case runs on {fallback}.",
+    "suiteBuilderCasePromptRequired": "Add a system prompt or a user prompt",
     "evalControlsTitle": "Evaluation Controls",
     "suiteBuilderEditTitle": "Edit Eval Suite",
     "suiteBuilderCaseStrategyLabel": "Validation Strategy",
