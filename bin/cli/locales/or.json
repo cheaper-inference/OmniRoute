@@ -1,6 +1,5 @@
 {
   "common": {
-    "positiveIntegerRequired": "ସୀମା ଏକ ସକାରାତ୍ମକ ପୂର୍ଣ୍ଣ ସଂଖ୍ୟା ହେବା ଆବଶ୍ୟକ।",
     "error": "ତ୍ରୁଟି: {message}",
     "serverOffline": "OmniRoute ସର୍ଭର ଅଫ୍‌ଲାଇନ୍ ଅଛି। ଏହାକୁ ଆରମ୍ଭ କରନ୍ତୁ: omniroute serve",
     "authRequired": "ପ୍ରମାଣୀକରଣ ଆବଶ୍ୟକ। OMNIROUTE_API_KEY ସେଟ୍ କରନ୍ତୁ କିମ୍ବା ଚଲାନ୍ତୁ: omniroute setup",
@@ -13,7 +12,8 @@
     "dryRun": "[dry-run] {action} କରାଯାଇଥାନ୍ତା",
     "cancelled": "ବାତିଲ୍ କରାଗଲା।",
     "jsonOpt": "JSON ଭାବେ ଆଉଟ୍‌ପୁଟ୍ କରନ୍ତୁ",
-    "yesOpt": "ନିଶ୍ଚିତକରଣ ପ୍ରମ୍ପ୍ଟ ଏଡ଼ାନ୍ତୁ"
+    "yesOpt": "ନିଶ୍ଚିତକରଣ ପ୍ରମ୍ପ୍ଟ ଏଡ଼ାନ୍ତୁ",
+    "positiveIntegerRequired": "ସୀମା ଏକ ସକାରାତ୍ମକ ପୂର୍ଣ୍ଣ ସଂଖ୍ୟା ହେବା ଆବଶ୍ୟକ।"
   },
   "setup": {
     "title": "OmniRoute ସେଟ୍‌ଅପ୍",

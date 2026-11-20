@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "대화 도중 시스템 메시지를 제자리에 유지",
     "requireUserLastMessageDescription": "보조 사전 채우기를 거부하는 업스트림의 경우 전송하기 전에 후행 보조 회전(tool_use 없음)을 삭제합니다. 모델은 이전 답변을 다시 생성할 수 있습니다.",
     "requireUserLastMessageLabel": "대화가 사용자 메시지로 끝나도록 요구",
+    "strictChatHistoryDescription": "엄격한 규칙을 적용하는 OpenAI 호환 제공업체에 보내기 전에 중단된 도구 호출 순서를 복구하고 연속된 어시스턴트 메시지를 병합합니다.",
+    "strictChatHistoryLabel": "엄격한 제공업체를 위한 채팅 기록 복구",
     "bulkPasteAdded": "{count, plural, one {키 1개 추가됨} other {키 #개 추가됨}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {중복 1개 건너뜀} other {중복 #개 건너뜀}}",
     "bulkPasteHint": "한 줄에 API 키 하나씩 붙여넣으세요. 빈 줄은 무시되며 중복 키는 건너뜁니다.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "키 제거"
   },
   "plugins": {
-    "privilegesWarningTitle": "플러그인은 모든 권한으로 실행됩니다.",
-    "privilegesWarningBody": "플러그인은 OmniRoute 와 동일한 액세스 권한을 가진 일반 Node.js 프로세스로 실행됩니다. 플러그인은 매니페스트에서 선언하는 모든 권한에 관계없이 파일을 읽고, 프로그램을 실행하고, 네트워크를 사용할 수 있습니다. 신뢰할 수 있는 플러그인만 설치하세요.",
     "title": "플러그인",
     "description": "OmniRoute 기능을 확장하는 플러그인을 설치하고 관리합니다",
     "loading": "플러그인 로드 중...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "플러그인 검색",
     "noPlugins": "설치된 플러그인이 없습니다",
     "noPluginsDescription": "플러그인 디렉터리를 ~/.omniroute/plugins/에 배치한 후 검색을 클릭하세요.",
+    "privilegesWarningTitle": "플러그인은 모든 권한으로 실행됩니다.",
+    "privilegesWarningBody": "플러그인은 OmniRoute 와 동일한 액세스 권한을 가진 일반 Node.js 프로세스로 실행됩니다. 플러그인은 매니페스트에서 선언하는 모든 권한에 관계없이 파일을 읽고, 프로그램을 실행하고, 네트워크를 사용할 수 있습니다. 신뢰할 수 있는 플러그인만 설치하세요.",
     "activate": "활성화",
     "deactivate": "비활성화",
     "uninstall": "제거",
