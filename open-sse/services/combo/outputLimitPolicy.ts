@@ -61,6 +61,21 @@ function contextRequirementsWithOutputCap(
   return { ...requirements, requiredContextTokens: requirements.estimatedInputTokens + cap };
 }
 
+function isAutomaticOutputCapRequest(
+  body: Record<string, unknown>,
+  options?: CompatFilterOptions
+): boolean {
+  return (
+    options?.sourceFormat === "claude" &&
+    options.outputLimitAdvisory === undefined &&
+    typeof body.max_tokens === "number" &&
+    Number.isSafeInteger(body.max_tokens) &&
+    body.max_tokens > 0 &&
+    body.max_completion_tokens === undefined &&
+    body.max_output_tokens === undefined
+  );
+}
+
 /**
  * null means the automatic policy does not apply. An empty map means it applies
  * but no target can use a dispatchable cap without another incompatibility.
@@ -72,13 +87,7 @@ export function getAutomaticOutputCapFallback(
   options?: CompatFilterOptions
 ): ReadonlyMap<ResolvedComboTarget, RequestCompatibilityRequirements> | null {
   if (
-    options?.sourceFormat !== "claude" ||
-    options.outputLimitAdvisory !== undefined ||
-    typeof body.max_tokens !== "number" ||
-    !Number.isSafeInteger(body.max_tokens) ||
-    body.max_tokens <= 0 ||
-    body.max_completion_tokens !== undefined ||
-    body.max_output_tokens !== undefined ||
+    !isAutomaticOutputCapRequest(body, options) ||
     !rejected.some(({ reasons }) => reasons.includes("output_tokens"))
   ) {
     return null;
