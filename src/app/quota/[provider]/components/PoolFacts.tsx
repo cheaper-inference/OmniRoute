@@ -1,10 +1,11 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import type { SelfQuotaPool } from "@/shared/schemas/selfQuota";
 
-import { amountText, policyKey, type FormatNumber } from "../lib/quotaText";
+import { amountText, policyKey } from "../lib/quotaText";
+import { useFormatNumber } from "../lib/useFormatNumber";
 
 interface PoolFactsProps {
   pool: SelfQuotaPool;
@@ -13,8 +14,7 @@ interface PoolFactsProps {
 /** The pool's rules in words: the key's weight, the policy past the share, a fixed cap. */
 export default function PoolFacts({ pool }: PoolFactsProps) {
   const t = useTranslations("quotaSelf");
-  const format = useFormatter();
-  const number: FormatNumber = (value, options) => format.number(value, options);
+  const number = useFormatNumber();
   const { cap } = pool;
 
   return (

@@ -1,11 +1,12 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import type { Policy, QuotaUnit } from "@/lib/quota/dimensions";
 import type { SelfQuotaShare } from "@/shared/schemas/selfQuota";
 
-import { shareFootnote, type FormatNumber } from "../lib/quotaText";
+import { shareFootnote } from "../lib/quotaText";
+import { useFormatNumber } from "../lib/useFormatNumber";
 import QuotaReading from "./QuotaReading";
 
 interface ShareReadingProps {
@@ -17,8 +18,7 @@ interface ShareReadingProps {
 /** The key's own part of a window: its bar with what is left, or the "no reserved share" line. */
 export default function ShareReading({ share, unit, policy }: ShareReadingProps) {
   const t = useTranslations("quotaSelf");
-  const format = useFormatter();
-  const number: FormatNumber = (value, options) => format.number(value, options);
+  const number = useFormatNumber();
   const footnote = shareFootnote(share, unit, policy, t, number);
 
   if (share.fairShare <= 0) {

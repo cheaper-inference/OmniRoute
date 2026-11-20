@@ -224,6 +224,8 @@ describe("self-service quota page", () => {
     enterKey(KEY);
     const badge = await screen.findByText("Key expires in 2 days");
     expect(badge.closest("[title]")?.getAttribute("title")).toMatch(/^Expires on /);
+    const describedBy = badge.closest("[aria-describedby]")?.getAttribute("aria-describedby");
+    expect(document.getElementById(describedBy ?? "")?.textContent).toMatch(/^Expires on /);
     cleanup();
 
     stubFetch({ [QUOTA]: () => jsonResponse(quotaView({ expiresAt: null })) });

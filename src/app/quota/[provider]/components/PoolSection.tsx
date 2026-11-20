@@ -8,7 +8,7 @@ import type { SelfQuotaPool } from "@/shared/schemas/selfQuota";
 import { accountRowIsEmpty, hasDrawnAccountReading } from "../lib/quotaText";
 import AccountRow from "./AccountRow";
 import PoolFacts from "./PoolFacts";
-import SharedWindowCard from "./SharedWindowCard";
+import WindowCard from "./WindowCard";
 
 interface PoolSectionProps {
   pool: SelfQuotaPool;
@@ -32,9 +32,14 @@ export default function PoolSection({ pool }: PoolSectionProps) {
         {dimensions.length > 0 ? (
           <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
             {dimensions.map((dimension) => (
-              <SharedWindowCard
+              <WindowCard
                 key={`${dimension.unit}:${dimension.window}`}
-                dimension={dimension}
+                window={dimension.window}
+                unit={dimension.unit}
+                limit={dimension.limit}
+                reading={dimension.total}
+                readingLabel={t("barPool")}
+                share={dimension.yourShare}
                 policy={pool.policy}
               />
             ))}

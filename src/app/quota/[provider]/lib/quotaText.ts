@@ -9,7 +9,7 @@ import type { NumberFormatOptions } from "next-intl";
 import type { Policy, QuotaUnit, QuotaWindow } from "@/lib/quota/dimensions";
 import type { SelfQuotaAccount, SelfQuotaShare } from "@/shared/schemas/selfQuota";
 
-export type Translate = (key: string, values?: Record<string, string | number>) => string;
+type Translate = (key: string, values?: Record<string, string | number>) => string;
 export type FormatNumber = (value: number, options?: NumberFormatOptions) => string;
 
 const REASON_KEYS: Record<string, string> = {

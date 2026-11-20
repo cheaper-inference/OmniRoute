@@ -1,19 +1,14 @@
 "use client";
 
-import { useFormatter, useTranslations } from "next-intl";
+import { useTranslations } from "next-intl";
 
 import Badge from "@/shared/components/Badge";
 import QuotaBar from "@/shared/components/quota/QuotaBar";
 import type { QuotaUnit } from "@/lib/quota/dimensions";
 import type { SelfQuotaStatus } from "@/shared/schemas/selfQuota";
 
-import {
-  amountText,
-  isDrawableReading,
-  percentLabel,
-  reasonKey,
-  type FormatNumber,
-} from "../lib/quotaText";
+import { amountText, isDrawableReading, percentLabel, reasonKey } from "../lib/quotaText";
+import { useFormatNumber } from "../lib/useFormatNumber";
 import ReadingCaption from "./ReadingCaption";
 
 interface QuotaReadingProps {
@@ -34,8 +29,7 @@ interface QuotaReadingProps {
 export default function QuotaReading(props: QuotaReadingProps) {
   const { label, unit, limit, used, status, reason, resetAt, footnote } = props;
   const t = useTranslations("quotaSelf");
-  const format = useFormatter();
-  const number: FormatNumber = (value, options) => format.number(value, options);
+  const number = useFormatNumber();
 
   if (status === "unavailable" || !isDrawableReading(limit, used)) {
     // A reading that was read but has no usable scale gets the generic sentence.

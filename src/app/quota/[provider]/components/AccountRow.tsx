@@ -6,7 +6,7 @@ import type { Policy } from "@/lib/quota/dimensions";
 import type { SelfQuotaAccount } from "@/shared/schemas/selfQuota";
 
 import { hasAccountReading } from "../lib/quotaText";
-import AccountWindowCard from "./AccountWindowCard";
+import WindowCard from "./WindowCard";
 
 interface AccountRowProps {
   account: SelfQuotaAccount;
@@ -41,9 +41,14 @@ export default function AccountRow({
       {account.dimensions.length > 0 ? (
         <div className="grid min-w-0 grid-cols-1 gap-3 sm:grid-cols-2">
           {account.dimensions.map((dimension) => (
-            <AccountWindowCard
+            <WindowCard
               key={`${dimension.unit}:${dimension.window}`}
-              dimension={dimension}
+              window={dimension.window}
+              unit={dimension.unit}
+              limit={dimension.limit}
+              reading={dimension.account}
+              readingLabel={t("barAccount")}
+              share={dimension.yourShare}
               policy={policy}
             />
           ))}

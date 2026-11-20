@@ -162,6 +162,36 @@ describe("self-service quota windows", () => {
     ).toBeTruthy();
   });
 
+  it("a stale reading of the key's own part is drawn as stale", () => {
+    renderPool({
+      dimensions: [
+        sharedDim({
+          total: undefined,
+          yourShare: { fairShare: 500, consumed: 120, remaining: 380, status: "stale" },
+        }),
+      ],
+    });
+    expect(bar("Your share").firstElementChild?.className).toContain("bg-border-strong");
+    expect(screen.getByText("May be out of date")).toBeTruthy();
+    expect(screen.getByText("380 requests left")).toBeTruthy();
+  });
+
+  it("a dollar window is written as currency by the page's formatter", () => {
+    renderPool({
+      dimensions: [
+        sharedDim({
+          unit: "usd",
+          limit: 100,
+          total: { used: 12.5, status: "ok" },
+          yourShare: { fairShare: 50, consumed: 10, remaining: 40, status: "ok" },
+        }),
+      ],
+    });
+    expect(bar("Pool (everyone)").getAttribute("aria-valuetext")).toBe("$12.50 of $100.00");
+    expect(bar("Your share").getAttribute("aria-valuetext")).toBe("$10.00 of $50.00");
+    expect(screen.getByText("$40.00 left")).toBeTruthy();
+  });
+
   it("every documented reason has its own sentence", () => {
     for (const [reason, sentence] of REASONS) {
       renderPool({
