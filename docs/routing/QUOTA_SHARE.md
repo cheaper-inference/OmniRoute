@@ -412,9 +412,9 @@ never counted. Longer windows are not offered: rows older than the usage-history
 (`retention.usageHistory`, 30 days by default) are deleted, and the daily summaries they are
 rolled into carry no key. `coverage` gives the window and sets `truncatedByRetention` when the
 window is longer than that retention. Two costs are reported. `costUsd` is the billed cost, as
-the usage analytics show it, and flat-rate subscription providers count $0 there, so it is 0
-for most quota-share traffic. `listPriceUsd` is the same usage priced at list price,
-subscriptions included. The response contract is `src/shared/schemas/selfUsage.ts`
+the usage analytics show it. Flat-rate subscription providers, such as the Claude Code plan,
+count $0 there, so a pool on such an account shows no billed cost. `listPriceUsd` is the same
+usage priced at list price, subscriptions included. The response contract is `src/shared/schemas/selfUsage.ts`
 (`SelfUsageSeries` in `docs/openapi.yaml`).
 
 ---

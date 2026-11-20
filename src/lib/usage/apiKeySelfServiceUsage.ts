@@ -7,7 +7,8 @@
  *
  * Two costs are reported side by side, both summed row by row and rounded by `roundCost`:
  * - `costUsd`: the billed cost, as the usage analytics show it by default. Flat-rate
- *   subscription providers count $0, so this is 0 for most quota-share traffic.
+ *   subscription providers (see flatRateProviders.ts, e.g. the Claude Code plan) count $0, so
+ *   a pool on such an account shows no billed cost.
  * - `listPriceUsd`: the same usage priced at list price, subscriptions included.
  *
  * Only model names, provider ids, counts, costs and dates are returned. The reused queries also
