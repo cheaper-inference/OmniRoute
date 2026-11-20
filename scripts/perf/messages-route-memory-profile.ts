@@ -936,6 +936,15 @@ async function runDriver(): Promise<void> {
 
   const cases: unknown[] = [];
   const scriptFile = fileURLToPath(import.meta.url);
+  // Carry the CI test's explicit repository preload through the filtered launch.
+  const coveragePreload = new URL("../ci/native-worker-v8-layout.mjs", import.meta.url).href;
+  const coverageArgs =
+    process.env.NODE_V8_COVERAGE &&
+    process.execArgv.some(
+      (arg, index) => arg === "--import" && process.execArgv[index + 1] === coveragePreload
+    )
+      ? ["--import", coveragePreload]
+      : [];
   for (const tokenEquivalent of tokenCases) {
     const caseDir = path.join(outputDir, `context-${tokenEquivalent}`);
     privateDirectory(caseDir);
@@ -944,6 +953,7 @@ async function runDriver(): Promise<void> {
       const worker = spawnSync(
         process.execPath,
         [
+          ...coverageArgs,
           "--expose-gc",
           "--import",
           "tsx/esm",
