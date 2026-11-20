@@ -9,9 +9,14 @@ const D = 24 * H;
 const at = (ms: number) => new Date(Date.parse(NOW) + ms).toISOString();
 
 describe("describeExpiry", () => {
-  test("a missing or unreadable expiry means the key does not expire", () => {
+  test("only a missing expiry means the key does not expire", () => {
     assert.deepEqual(describeExpiry(null, NOW), { kind: "none" });
-    assert.deepEqual(describeExpiry("garbage", NOW), { kind: "none" });
+    assert.deepEqual(describeExpiry(null, "garbage"), { kind: "none" });
+  });
+
+  test("an expiry or a clock that is not a date is unreadable, not 'does not expire'", () => {
+    assert.deepEqual(describeExpiry("garbage", NOW), { kind: "unreadable" });
+    assert.deepEqual(describeExpiry(at(D), "garbage"), { kind: "unreadable" });
   });
 
   test("less than an hour left, or already past, reads as soon", () => {

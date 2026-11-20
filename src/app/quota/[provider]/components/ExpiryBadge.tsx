@@ -13,7 +13,9 @@ interface ExpiryBadgeProps {
 }
 
 /** The catalog key and values of the badge text. */
-function badgeMessage(view: ExpiryView): [string, Record<string, number>?] {
+type ShownExpiry = Exclude<ExpiryView, { kind: "unreadable" }>;
+
+function badgeMessage(view: ShownExpiry): [string, Record<string, number>?] {
   switch (view.kind) {
     case "none":
       return ["expiryNone"];
@@ -26,17 +28,18 @@ function badgeMessage(view: ExpiryView): [string, Record<string, number>?] {
   }
 }
 
-function badgeVariant(view: ExpiryView): "default" | "error" | "warning" | "success" {
+function badgeVariant(view: ShownExpiry): "default" | "error" | "warning" | "success" {
   if (view.kind === "none") return "default";
   if (view.kind === "days") return view.tone;
   return "error";
 }
 
-/** How long the key has left, with its exact date on hover. */
+/** How long the key has left, with its exact date on hover; nothing when the expiry is unreadable. */
 export default function ExpiryBadge({ expiresAt, now }: ExpiryBadgeProps) {
   const t = useTranslations("quotaSelf");
   const format = useFormatter();
   const view = describeExpiry(expiresAt, now);
+  if (view.kind === "unreadable") return null;
   const title =
     view.kind === "none" || expiresAt === null
       ? undefined

@@ -231,6 +231,14 @@ describe("self-service quota page", () => {
     expect(await screen.findByText("Key does not expire")).toBeTruthy();
   });
 
+  it("an expiry that is not a date shows no expiry badge", async () => {
+    stubFetch({ [QUOTA]: () => jsonResponse(quotaView({ expiresAt: "not a date" })) });
+    renderPage();
+    enterKey(KEY);
+    expect(await screen.findByRole("heading", { name: "Pool A" })).toBeTruthy();
+    expect(screen.queryByText(/^Key (does not expire|expires)/)).toBeNull();
+  });
+
   it("an accepted key stays for the tab; remember moves it to the device", async () => {
     stubFetch({ [QUOTA]: () => jsonResponse(quotaView()) });
     renderPage();

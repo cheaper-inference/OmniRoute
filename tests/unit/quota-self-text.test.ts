@@ -7,7 +7,10 @@ import { QuotaWindowSchema } from "../../src/lib/quota/dimensions.ts";
 import type { SelfQuotaAccount } from "../../src/shared/schemas/selfQuota.ts";
 import {
   amountText,
+  accountRowIsEmpty,
   hasAccountReading,
+  hasDrawnAccountReading,
+  isDrawableReading,
   modelWindowsRepeatReason,
   policyKey,
   reasonKey,
@@ -136,6 +139,24 @@ describe("shareFootnote", () => {
   });
 });
 
+describe("isDrawableReading", () => {
+  test("a finite limit above 0 and a finite used value of 0 or more can be drawn", () => {
+    assert.equal(isDrawableReading(100, 0), true);
+    assert.equal(isDrawableReading(100, 40), true);
+    assert.equal(isDrawableReading(100, 250), true);
+  });
+
+  test("no scale, no value or a negative value cannot be drawn", () => {
+    assert.equal(isDrawableReading(0, 40), false);
+    assert.equal(isDrawableReading(-10, 40), false);
+    assert.equal(isDrawableReading(Number.NaN, 40), false);
+    assert.equal(isDrawableReading(Number.POSITIVE_INFINITY, 40), false);
+    assert.equal(isDrawableReading(100, null), false);
+    assert.equal(isDrawableReading(100, -20), false);
+    assert.equal(isDrawableReading(100, Number.NaN), false);
+  });
+});
+
 describe("account helpers", () => {
   const dimension = {
     unit: "percent" as const,
@@ -149,6 +170,46 @@ describe("account helpers", () => {
     assert.equal(hasAccountReading(accountWith({ dimensions: [dimension] })), false);
     const read = { ...dimension, account: { used: 40, status: "ok" as const } };
     assert.equal(hasAccountReading(accountWith({ dimensions: [read] })), true);
+  });
+
+  test("only a reading drawn with a number counts as a drawn account reading", () => {
+    const drawn = (account: { used: number | null; status: "ok" | "stale" | "unavailable" }) =>
+      hasDrawnAccountReading(accountWith({ dimensions: [{ ...dimension, account }] }));
+    assert.equal(drawn({ used: 40, status: "ok" }), true);
+    assert.equal(drawn({ used: 40, status: "stale" }), true);
+    assert.equal(drawn({ used: null, status: "unavailable" }), false);
+    assert.equal(drawn({ used: 40, status: "unavailable" }), false);
+    assert.equal(drawn({ used: null, status: "ok" }), false);
+    assert.equal(drawn({ used: -1, status: "ok" }), false);
+    assert.equal(hasDrawnAccountReading(accountWith({ dimensions: [dimension] })), false);
+    const noScale = { ...dimension, limit: 0, account: { used: 40, status: "ok" as const } };
+    assert.equal(hasDrawnAccountReading(accountWith({ dimensions: [noScale] })), false);
+  });
+
+  test("a row with no window and no model window to show is empty", () => {
+    assert.equal(accountRowIsEmpty(accountWith({})), true);
+    assert.equal(
+      accountRowIsEmpty(accountWith({ modelWindows: { status: "ok", windows: [] } })),
+      true
+    );
+    assert.equal(
+      accountRowIsEmpty(accountWith({ modelWindows: { status: "stale", windows: [] } })),
+      true
+    );
+    assert.equal(
+      accountRowIsEmpty(
+        accountWith({
+          modelWindows: { status: "unavailable", reason: "fetch_failed", windows: [] },
+        })
+      ),
+      false
+    );
+    const oneWindow = { label: "Opus", usedPercent: 10, resetAt: null };
+    assert.equal(
+      accountRowIsEmpty(accountWith({ modelWindows: { status: "ok", windows: [oneWindow] } })),
+      false
+    );
+    assert.equal(accountRowIsEmpty(accountWith({ dimensions: [dimension] })), false);
   });
 
   test("unavailable model windows that repeat an account bar's reason are skipped", () => {

@@ -16,15 +16,21 @@ export const DATE_TIME_FORMAT: DateTimeFormatOptions = {
 
 export type ExpiryView =
   | { kind: "none" }
+  | { kind: "unreadable" }
   | { kind: "soon" }
   | { kind: "hours"; hours: number }
   | { kind: "days"; days: number; tone: "success" | "warning" | "error" };
 
-/** Time left from `nowIso` (the response's generatedAt), never from the browser clock. */
+/**
+ * Time left from `nowIso` (the response's generatedAt), never from the browser clock. Only a null
+ * expiry means the key does not expire; an unreadable one is `unreadable`.
+ */
 export function describeExpiry(expiresAt: string | null, nowIso: string): ExpiryView {
-  const expires = expiresAt === null ? Number.NaN : Date.parse(expiresAt);
+  if (expiresAt === null) return { kind: "none" };
+  const expires = Date.parse(expiresAt);
   const now = Date.parse(nowIso);
-  if (Number.isNaN(expires) || Number.isNaN(now)) return { kind: "none" };
+  // A value that is not a date says nothing about the expiry: no badge rather than a wrong one.
+  if (Number.isNaN(expires) || Number.isNaN(now)) return { kind: "unreadable" };
 
   const left = expires - now;
   if (left < HOUR_MS) return { kind: "soon" };

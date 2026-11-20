@@ -104,9 +104,38 @@ export function shareFootnote(
   return t("shareLeft", { amount: amountText(unit, left, t, number) });
 }
 
-/** True when some window of the account carries the account-wide reading. */
+/**
+ * True when a reading has a scale a bar can honestly show: a finite limit above 0 and a finite,
+ * non-negative used value. Anything else is drawn as "not available", never as zero.
+ */
+export function isDrawableReading(limit: number, used: number | null): used is number {
+  return Number.isFinite(limit) && limit > 0 && used !== null && Number.isFinite(used) && used >= 0;
+}
+
+/** True when some window of the account carries the account-wide reading, whatever its state. */
 export function hasAccountReading(account: SelfQuotaAccount): boolean {
   return account.dimensions.some((dimension) => dimension.account !== undefined);
+}
+
+/** True when some account-wide reading of the account is drawn as a bar with a number. */
+export function hasDrawnAccountReading(account: SelfQuotaAccount): boolean {
+  return account.dimensions.some(
+    ({ account: reading, limit }) =>
+      reading !== undefined &&
+      reading.status !== "unavailable" &&
+      isDrawableReading(limit, reading.used)
+  );
+}
+
+/**
+ * True when the account row would have nothing to show: no window, and model windows that are
+ * absent or readable but empty (an unavailable block still prints its reason).
+ */
+export function accountRowIsEmpty(account: SelfQuotaAccount): boolean {
+  const modelWindows = account.modelWindows;
+  const modelWindowsEmpty =
+    !modelWindows || (modelWindows.status !== "unavailable" && modelWindows.windows.length === 0);
+  return account.dimensions.length === 0 && modelWindowsEmpty;
 }
 
 /**

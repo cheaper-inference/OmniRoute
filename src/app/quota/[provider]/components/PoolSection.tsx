@@ -5,7 +5,7 @@ import { useTranslations } from "next-intl";
 import Card from "@/shared/components/Card";
 import type { SelfQuotaPool } from "@/shared/schemas/selfQuota";
 
-import { hasAccountReading } from "../lib/quotaText";
+import { accountRowIsEmpty, hasDrawnAccountReading } from "../lib/quotaText";
 import AccountRow from "./AccountRow";
 import PoolFacts from "./PoolFacts";
 import SharedWindowCard from "./SharedWindowCard";
@@ -18,7 +18,9 @@ interface PoolSectionProps {
 export default function PoolSection({ pool }: PoolSectionProps) {
   const t = useTranslations("quotaSelf");
   const { accounts, dimensions } = pool;
-  const lagNote = pool.accountVisible && accounts.some(hasAccountReading);
+  // An account with no window and nothing else to show gets no row (not a bare heading).
+  const rows = accounts.filter((account) => !accountRowIsEmpty(account));
+  const lagNote = pool.accountVisible && accounts.some(hasDrawnAccountReading);
   const noWindows =
     dimensions.length === 0 && accounts.every((account) => account.dimensions.length === 0);
 
@@ -38,7 +40,7 @@ export default function PoolSection({ pool }: PoolSectionProps) {
             ))}
           </div>
         ) : null}
-        {accounts.map((account) => (
+        {rows.map((account) => (
           <AccountRow
             key={account.slot}
             account={account}

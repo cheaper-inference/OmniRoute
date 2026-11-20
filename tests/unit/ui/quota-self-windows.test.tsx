@@ -228,9 +228,58 @@ describe("self-service quota windows", () => {
     ).toBeTruthy();
   });
 
-  it("the lag note only appears when some account has an account reading", () => {
+  it("the lag note only appears when some account reading is drawn with a number", () => {
     renderPool({ accounts: [account({ dimensions: [accountDim({ account: undefined })] })] });
     expect(screen.queryByText(/can be a few minutes behind/)).toBeNull();
+    cleanup();
+
+    renderPool({
+      accounts: [
+        account({
+          dimensions: [
+            accountDim({ account: { used: null, status: "unavailable", reason: "fetch_failed" } }),
+          ],
+        }),
+      ],
+    });
+    expect(screen.queryByText(/can be a few minutes behind/)).toBeNull();
+  });
+
+  it("a reading without a usable scale is not available, never zero", () => {
+    renderPool({
+      dimensions: [
+        sharedDim({ unit: "tokens", limit: 0, total: { used: 400, status: "ok" } }),
+        sharedDim({ unit: "requests", limit: 100, total: { used: -20, status: "ok" } }),
+      ],
+    });
+    noBar("Pool (everyone)");
+    expect(screen.getAllByText("Not available")).toHaveLength(2);
+    expect(screen.getAllByText("This reading is not available.")).toHaveLength(2);
+    const text = document.body.textContent ?? "";
+    expect(text).not.toContain("of 0");
+    expect(text).not.toContain("-20");
+    expect(text).not.toMatch(/(^|\D)0%/);
+  });
+
+  it("an over-limit reading shows its real numbers with a full bar", () => {
+    renderPool({
+      dimensions: [
+        sharedDim({ unit: "requests", limit: 1000, total: { used: 1200, status: "ok" } }),
+      ],
+    });
+    const poolBar = bar("Pool (everyone)");
+    expect(poolBar.getAttribute("aria-valuenow")).toBe("100");
+    expect(poolBar.getAttribute("aria-valuetext")).toBe("1,200 of 1,000 requests");
+    expect(screen.getByText("120%")).toBeTruthy();
+  });
+
+  it("an account with nothing to show gets no row", () => {
+    renderPool({
+      dimensions: [sharedDim()],
+      accounts: [account({ dimensions: [accountDim()] }), account({ slot: 2, label: "Account 2" })],
+    });
+    expect(screen.getByRole("heading", { name: "Account 1" })).toBeTruthy();
+    expect(screen.queryByRole("heading", { name: "Account 2" })).toBeNull();
   });
 
   it("pool facts are stated in words", () => {
