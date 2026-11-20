@@ -8,6 +8,7 @@ import {
   type SystemOneCredentials,
 } from "@omniroute/open-sse/handlers/systemOne.ts";
 import {
+  CLOUDFLARE_SYSTEMONE_PREFIXES,
   resolveSystemOneTarget,
   type SystemOneTarget,
 } from "@omniroute/open-sse/config/systemOneRegistry.ts";
@@ -124,6 +125,19 @@ function bindConnectionUrl(
   }
 }
 
+/**
+ * A qualified model the legacy gateway does not resolve goes to the native decision adapter.
+ * The legacy Cloudflare alias namespace (`cloudflare-ai/<jev|clef|clef-flash>`, #16676) keeps
+ * its own refusal for unknown aliases; only a Workers AI model name (`cloudflare-ai/@cf/…`, the
+ * id native discovery publishes) leaves that namespace for the native adapter.
+ */
+function routesToNativeDecision(model: unknown): boolean {
+  if (typeof model !== "string" || !model.includes("/")) return false;
+  if (resolveSystemOneTarget(model)) return false;
+  const cloudflarePrefix = CLOUDFLARE_SYSTEMONE_PREFIXES.find((p) => model.startsWith(p));
+  return !cloudflarePrefix || model.slice(cloudflarePrefix.length).startsWith("@");
+}
+
 async function postHandler(request: Request): Promise<Response> {
   let rawBody: unknown;
   try {
@@ -141,12 +155,7 @@ async function postHandler(request: Request): Promise<Response> {
 
   // Extend the merged gateway without changing its TypeSafe/OpenRouter wire contract.
   // Unknown qualified providers use the native decision adapter and its stricter admission.
-  const requestedModel = record(rawBody).model;
-  if (
-    typeof requestedModel === "string" &&
-    requestedModel.includes("/") &&
-    !resolveSystemOneTarget(requestedModel)
-  ) {
+  if (routesToNativeDecision(record(rawBody).model)) {
     const { postDecision } = await import("./decisionRuntime");
     return postDecision(
       new Request(request.url, {

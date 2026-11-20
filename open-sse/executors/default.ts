@@ -168,6 +168,26 @@ function normalizeNvidiaToolCallIds(body: unknown): void {
   }
 }
 
+/**
+ * Native decision providers (System One / decisions) only answer on their own endpoint;
+ * a chat-style dispatch to them gets a 400 naming the endpoint to call instead.
+ */
+function rejectNativeDecisionEndpoint(provider: string, connectionFormat: unknown) {
+  const nativeFormat = getRegistryEntry(provider)?.format;
+  const formats = [nativeFormat, connectionFormat];
+  if (!formats.includes("systemone") && !formats.includes("decisions")) return null;
+  const endpoint = formats.includes("decisions") ? "decisions" : "systemone";
+  return {
+    response: Response.json(
+      buildErrorBody(400, `This provider requires POST /v1/${endpoint}.`, undefined, {
+        type: "invalid_request_error",
+        code: "native_endpoint_required",
+      }),
+      { status: 400 }
+    ),
+  };
+}
+
 export class DefaultExecutor extends BaseExecutor {
   constructor(provider) {
     super(provider, PROVIDERS[provider] || PROVIDERS.openai);
@@ -1130,28 +1150,11 @@ export class DefaultExecutor extends BaseExecutor {
   }
 
   async execute(input: ExecuteInput) {
-    const nativeFormat = getRegistryEntry(this.provider)?.format;
-    const connectionFormat = input.credentials?.providerSpecificData?.apiType;
-    if (
-      nativeFormat === "systemone" ||
-      nativeFormat === "decisions" ||
-      connectionFormat === "systemone" ||
-      connectionFormat === "decisions"
-    ) {
-      const endpoint =
-        nativeFormat === "decisions" || connectionFormat === "decisions"
-          ? "decisions"
-          : "systemone";
-      return {
-        response: Response.json(
-          buildErrorBody(400, `This provider requires POST /v1/${endpoint}.`, undefined, {
-            type: "invalid_request_error",
-            code: "native_endpoint_required",
-          }),
-          { status: 400 }
-        ),
-      };
-    }
+    const nativeEndpointRejection = rejectNativeDecisionEndpoint(
+      this.provider,
+      input.credentials?.providerSpecificData?.apiType
+    );
+    if (nativeEndpointRejection) return nativeEndpointRejection;
 
     // Custom JSON API nodes keep their immutable openai-compatible id; the stored apiType
     // (copied from the node onto each connection) selects the business-endpoint executor.

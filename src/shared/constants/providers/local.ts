@@ -28,6 +28,10 @@ export const LOCAL_PROVIDERS = {
     website: "https://huggingface.co/SupersonicLabs/Julia-1",
     authHint:
       "Optional API key. Configure decision.endpoint and decision.models for your Julia server.",
+    // No well-known port: the operator always configures the endpoint. An explicit null keeps
+    // `localDefault` on every LOCAL_PROVIDERS entry, so resolveLocalProviderBaseUrl() returns
+    // its documented `null` instead of `undefined`.
+    localDefault: null as string | null,
     passthroughModels: false,
   },
   "mlx-gemma": {
