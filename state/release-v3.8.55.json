@@ -3,79 +3,30 @@
   "base": "release/v3.8.55",
   "paused": null,
   "inFlight": {
-    "batchId": "b13",
+    "batchId": "b14",
     "kind": "batch",
-    "candidateRef": "omni-queue/release-v3.8.55/b13-798cc32c81f3",
-    "candidateSha": "798cc32c81f3e68f0ddc6c4063232dca3da566c2",
+    "candidateRef": "omni-queue/release-v3.8.55/b14-4822c03e1525",
+    "candidateSha": "4822c03e1525ef435a088c96d8392a482e03e782",
     "baseSha": "07a790f5c158c1358eb55aa5e31463bb5f22f769",
-    "treeSha": "d295058c2e567015a5f761cb40eef71ed96ec7ab",
+    "treeSha": "fe2ad410ca11a4843f9252a31a5a03b73f43b3b6",
     "prs": [
       {
-        "n": 20304,
-        "head": "c09c6f524eb094488071f59dce6d9b171bf634bd",
-        "title": "feat(routing): allow scoping task-aware routing to target and excluded models (#20294)",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-20T14:27:39Z"
-      },
-      {
-        "n": 20463,
-        "head": "d62a0ce8c22e50d4416a9675037b5d99eebf1b8f",
-        "title": "fix(callLogs): guard worker path resolution against cross-platform file URLs (#20449)",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-20T14:27:42Z"
-      },
-      {
-        "n": 19851,
-        "head": "10e1d1be773bc19015c112cfbf5dc1ef751cde91",
-        "title": "fix(providers): forward accountId to validation endpoint for Cloudflare Workers AI (#19304)",
-        "author": "rafacpti23",
-        "labeledAt": "2026-11-20T14:27:45Z"
-      },
-      {
-        "n": 20071,
-        "head": "c594cca68d13f75011c7ade3c0e681782ba3867c",
-        "title": "fix(api): drop dash-separated release dates from derived model display names",
-        "author": "Abelo9996",
-        "labeledAt": "2026-11-20T14:27:48Z"
-      },
-      {
-        "n": 18677,
-        "head": "97a3dda84747f8039df0f63896c96780d978ebde",
-        "title": "fix(api): price image edits and charge them to API-key budgets; price nested image model ids",
-        "author": "yourspraveen",
-        "labeledAt": "2026-11-20T14:36:30Z"
-      },
-      {
-        "n": 18737,
-        "head": "68cf0df31246015e2b33caa70a72cc1808f471e8",
-        "title": "feat(oauth): add native Qoder device flow sign-in",
-        "author": "Junior-HJ",
-        "labeledAt": "2026-11-20T14:36:39Z"
-      },
-      {
-        "n": 18738,
-        "head": "01781da04c16d5cf4adac8b1fd0a5dccbddde046",
-        "title": "feat(models): support GPT-6.1 Terra in OpenAI API and Codex",
+        "n": 19132,
+        "head": "beed91198d6f1f34a82955166724b2f61fa22ff0",
+        "title": "feat(antigravity): opt-in bounded per-account/model health quarantine",
         "author": "Bl0ck154",
-        "labeledAt": "2026-11-20T14:36:49Z"
+        "labeledAt": "2026-11-20T15:49:45Z"
       },
       {
-        "n": 18786,
-        "head": "267b99c512dbac09b2fe8876c9a9ec9b7913ab9f",
-        "title": "feat(audio): add Azure Speech text-to-speech provider",
-        "author": "Federicomang",
-        "labeledAt": "2026-11-20T14:36:59Z"
-      },
-      {
-        "n": 18804,
-        "head": "a140f9b78053705ef57686e6fc4b484d380c1776",
-        "title": "feat(opencode-plugin-v2): make the published catalog order configurable",
-        "author": "maxmad64bis",
-        "labeledAt": "2026-11-20T14:37:17Z"
+        "n": 19149,
+        "head": "ce0f2e3b64d51c480eccfd4c21b4ebeeaa0c2a0b",
+        "title": "feat(dashboard): allow multiple quota provider filters",
+        "author": "JxnLexn",
+        "labeledAt": "2026-11-20T15:49:56Z"
       }
     ],
     "stage": "testing",
-    "startedAt": "2026-11-20T15:46:51.203Z",
+    "startedAt": "2026-11-20T17:04:57.765Z",
     "attempts": 0,
     "bisect": null
   },
@@ -109,17 +60,26 @@
       "18626": "41c6c724064ddbd37f71179e6fc61de794f13934",
       "18631": "b4c81c43ab34e725d9473882f72c0195a57f858b",
       "18674": "9aa9b27457da70954b74a8212d1f2ebc1493b9b6",
+      "18677": "97a3dda84747f8039df0f63896c96780d978ebde",
+      "18737": "68cf0df31246015e2b33caa70a72cc1808f471e8",
+      "18738": "01781da04c16d5cf4adac8b1fd0a5dccbddde046",
+      "18786": "267b99c512dbac09b2fe8876c9a9ec9b7913ab9f",
+      "18804": "a140f9b78053705ef57686e6fc4b484d380c1776",
       "19807": "8761f1c70d72315ff49383d6c5935d5f208a4126",
       "19812": "a2ecc1011417f2250dbbac5eabe40b19bfef6b00",
+      "19851": "10e1d1be773bc19015c112cfbf5dc1ef751cde91",
       "19916": "36c01108d876b0d6cae868ac2557e7f78f59ce39",
+      "20071": "c594cca68d13f75011c7ade3c0e681782ba3867c",
       "20248": "63407581f7f667ee82f67e99e3839297e174ab7b",
       "20255": "a05328b926be449f4a3ad3d824cbbcc855701309",
-      "20272": "3d4ab0b2ca7ddae937cc94007bc1d86729975fa3"
+      "20272": "3d4ab0b2ca7ddae937cc94007bc1d86729975fa3",
+      "20304": "c09c6f524eb094488071f59dce6d9b171bf634bd",
+      "20463": "d62a0ce8c22e50d4416a9675037b5d99eebf1b8f"
     }
   },
   "counters": {
-    "batchSeq": 13,
-    "ciRuns": 14,
+    "batchSeq": 14,
+    "ciRuns": 15,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 4,
@@ -1074,8 +1034,61 @@
         "20463": "2026-11-20T14:27:42Z"
       },
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44766332254"
+    },
+    {
+      "at": "2026-11-20T17:03:25.579Z",
+      "type": "checks-green",
+      "batchId": "b13",
+      "prs": [
+        20304,
+        20463,
+        19851,
+        20071,
+        18677,
+        18737,
+        18738,
+        18786,
+        18804
+      ],
+      "sha": "798cc32c81f3e68f0ddc6c4063232dca3da566c2",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44779446870"
+    },
+    {
+      "at": "2026-11-20T17:03:51.824Z",
+      "type": "would-land",
+      "batchId": "b13",
+      "prs": [
+        20304,
+        20463,
+        19851,
+        20071,
+        18677,
+        18737,
+        18738,
+        18786,
+        18804
+      ],
+      "sha": "798cc32c81f3e68f0ddc6c4063232dca3da566c2",
+      "detail": "shadow mode: would merge-ff onto 07a790f5c158",
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44779446870"
+    },
+    {
+      "at": "2026-11-20T17:05:02.352Z",
+      "type": "batch-started",
+      "batchId": "b14",
+      "prs": [
+        19132,
+        19149
+      ],
+      "sha": "4822c03e1525ef435a088c96d8392a482e03e782",
+      "detail": "2 PR(s) on 07a790f5c158; window 10",
+      "labeledAt": {
+        "19132": "2026-11-20T15:49:45Z",
+        "19149": "2026-11-20T15:49:56Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44779446870"
     }
   ],
-  "updatedAt": "2026-11-20T16:51:37.673Z",
+  "updatedAt": "2026-11-20T17:05:03.897Z",
   "batchWindow": 10
 }
