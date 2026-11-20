@@ -19,9 +19,18 @@ type AgentGuardMode = "off" | "monitor";
 const LOG_TAG = "AGENT_GUARD";
 const MAX_MODEL_LENGTH = 200;
 
+/** DB override > env > default; an unreadable flag store falls back to the env value. */
+function readModeFlag(): string {
+  try {
+    return resolveFeatureFlag("AGENT_GUARD_MODE");
+  } catch {
+    return process.env.AGENT_GUARD_MODE ?? "";
+  }
+}
+
 function resolveMode(fixed: AgentGuardMode | undefined): AgentGuardMode {
   if (fixed) return fixed;
-  const value = resolveFeatureFlag("AGENT_GUARD_MODE").trim().toLowerCase();
+  const value = readModeFlag().trim().toLowerCase();
   return value === "monitor" ? "monitor" : "off";
 }
 

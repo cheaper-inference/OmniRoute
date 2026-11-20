@@ -282,15 +282,43 @@ test("guardrail: mode follows AGENT_GUARD_MODE (default off, env, DB override wi
     await g.preCall({}, { model: MODEL, headers: KILO, log });
     return calls.length;
   };
-  delete process.env.AGENT_GUARD_MODE;
-  assert.equal(await logged(), 0);
-  process.env.AGENT_GUARD_MODE = " Monitor ";
-  assert.equal(await logged(), 1);
-  flagsDb.setFeatureFlagOverride("AGENT_GUARD_MODE", "off");
-  assert.equal(await logged(), 0);
-  flagsDb.removeFeatureFlagOverride("AGENT_GUARD_MODE");
-  process.env.AGENT_GUARD_MODE = "block";
-  assert.equal(await logged(), 0);
+  const previousEnv = process.env.AGENT_GUARD_MODE;
+  try {
+    delete process.env.AGENT_GUARD_MODE;
+    assert.equal(await logged(), 0);
+    process.env.AGENT_GUARD_MODE = " Monitor ";
+    assert.equal(await logged(), 1);
+    flagsDb.setFeatureFlagOverride("AGENT_GUARD_MODE", "off");
+    assert.equal(await logged(), 0);
+    flagsDb.removeFeatureFlagOverride("AGENT_GUARD_MODE");
+    process.env.AGENT_GUARD_MODE = "block";
+    assert.equal(await logged(), 0);
+  } finally {
+    flagsDb.removeFeatureFlagOverride("AGENT_GUARD_MODE");
+    if (previousEnv === undefined) delete process.env.AGENT_GUARD_MODE;
+    else process.env.AGENT_GUARD_MODE = previousEnv;
+  }
+});
+test("guardrail: an unreadable flag store falls back to the AGENT_GUARD_MODE env value", async () => {
+  const previousEnv = process.env.AGENT_GUARD_MODE;
+  const db = core.getDbInstance();
+  flagsDb.clearFeatureFlagOverrideCache();
+  db.exec("ALTER TABLE key_value RENAME TO key_value_hidden");
+  try {
+    assert.throws(() => flagsDb.getFeatureFlagOverride("AGENT_GUARD_MODE"));
+    process.env.AGENT_GUARD_MODE = "monitor";
+    const { calls, log } = capture();
+    assert.deepEqual(
+      await new AgentGuardGuardrail().preCall({}, { model: MODEL, headers: KILO, log }),
+      { block: false }
+    );
+    assert.equal(calls.length, 1);
+  } finally {
+    db.exec("ALTER TABLE key_value_hidden RENAME TO key_value");
+    flagsDb.clearFeatureFlagOverrideCache();
+    if (previousEnv === undefined) delete process.env.AGENT_GUARD_MODE;
+    else process.env.AGENT_GUARD_MODE = previousEnv;
+  }
 });
 test("guardrail: a request that disables agent-guard is skipped by the registry (known limit)", async () => {
   const registry = new GuardrailRegistry();
