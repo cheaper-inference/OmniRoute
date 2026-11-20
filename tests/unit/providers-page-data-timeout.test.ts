@@ -90,26 +90,50 @@ describe("loadProviderPageData — never freezes the dashboard skeleton", () => 
 describe("loadProviderPageData — first paint does not wait for OpenRouter enrichment", () => {
   const STATS_URL = "/api/providers/openrouter-stats";
 
-  /** Every endpoint answers at once except the stats one, which never settles on its own. */
-  function slowStatsFetch(calls: string[]): typeof fetch {
-    const fast = jsonFetch({ "/api/providers": { connections: [{ id: "c1" }] } });
-    const hanging = hangingFetch();
-    return ((url: string | URL, init?: RequestInit) => {
-      calls.push(String(url));
-      return String(url) === STATS_URL ? hanging(url, init) : fast(url, init);
+  test("resolves while the stats request is still pending, then hands the stats over", async () => {
+    const entries = [{ slug: "openai", displayName: "OpenAI", popularityRank: 1 }];
+    const answers = jsonFetch({
+      "/api/providers": { connections: [{ id: "c1" }] },
+      [STATS_URL]: { data: entries },
+    });
+    let releaseStats!: () => void;
+    const statsGate = new Promise<void>((resolve) => (releaseStats = resolve));
+    // The stats answer only once released (or reject when the loader's timeout aborts them).
+    const fetchImpl = (async (url: string | URL, init?: RequestInit) => {
+      if (String(url) === STATS_URL) {
+        await Promise.race([
+          statsGate,
+          new Promise((_resolve, reject) =>
+            init?.signal?.addEventListener(
+              "abort",
+              () => reject(new DOMException("Aborted", "AbortError")),
+              { once: true }
+            )
+          ),
+        ]);
+      }
+      return answers(url, init);
     }) as unknown as typeof fetch;
-  }
 
-  test("resolves as soon as the essential requests do, without requesting the stats", async () => {
-    const calls: string[] = [];
+    // Waiting for the stats here would take the full 5000ms timeout (and lose them).
     const start = Date.now();
-    const data = await loadProviderPageData(slowStatsFetch(calls), 5000);
+    const data = await loadProviderPageData(fetchImpl, 5000);
     const elapsed = Date.now() - start;
-
     assert.deepEqual(data.connections, [{ id: "c1" }]);
-    assert.ok(!calls.includes(STATS_URL), "the first-paint loader must not request the stats");
-    // Waiting for the stats would take the full 5000ms timeout.
     assert.ok(elapsed < 4000, `first paint waited ${elapsed}ms for a non-essential request`);
+
+    let settled = false;
+    void data.openRouterProviderStats.then(() => (settled = true));
+    await new Promise((resolve) => setImmediate(resolve));
+    assert.equal(settled, false, "the stats were awaited before the first paint");
+
+    releaseStats();
+    assert.deepEqual(await data.openRouterProviderStats, entries);
+  });
+
+  test("the pending stats degrade to an empty list when the request never settles", async () => {
+    const data = await loadProviderPageData(hangingFetch(), 50);
+    assert.deepEqual(await data.openRouterProviderStats, []);
   });
 
   test("loadOpenRouterProviderStats returns the entries the route lists", async () => {

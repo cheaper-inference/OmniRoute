@@ -46,7 +46,6 @@ import {
   isPrimaryLlmProviderEntry,
   resolveVisibleWebFetchEntries,
   upsertProviderNodeById,
-  loadOpenRouterProviderStats,
   loadProviderPageData,
 } from "./providerPageUtils";
 import type { ProviderEntry, OpenRouterProviderStatsEntry } from "./providerPageUtils";
@@ -312,6 +311,7 @@ function ProvidersPageContent() {
         if (data.expirations) setExpirations(data.expirations);
         if (data.blockedProviders) setBlockedProviders(data.blockedProviders);
         setCodexGlobalServiceMode(getCodexGlobalServiceMode(data.settings));
+        void data.openRouterProviderStats.then(setOpenRouterProviderStats);
       } catch (error) {
         console.log("Error fetching data:", error);
       } finally {
@@ -319,9 +319,6 @@ function ProvidersPageContent() {
       }
     };
     fetchData();
-    // Enrichment for the cards' popularity chip: beside the first paint, never part of its
-    // gate (the route can spend up to 15s on openrouter.ai when its cache is cold).
-    void loadOpenRouterProviderStats().then(setOpenRouterProviderStats);
   }, []);
 
   useEffect(() => {

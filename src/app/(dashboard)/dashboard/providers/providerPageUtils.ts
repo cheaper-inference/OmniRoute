@@ -680,6 +680,12 @@ export interface ProviderPageData {
   expirations: any | null;
   blockedProviders: string[] | null;
   settings: any | null;
+  /**
+   * OpenRouter-sourced popularity/identity enrichment, still loading when the rest is
+   * returned: never part of the first-paint gate (see loadOpenRouterProviderStats). Resolves
+   * to an empty list if the sync hasn't run yet or the request failed; never rejects.
+   */
+  openRouterProviderStats: Promise<OpenRouterProviderStatsEntry[]>;
 }
 
 /** Mirrors ProviderPopularityEntry from src/lib/catalog/openrouterProviderStats.ts (kept local to avoid a server-only import from a client component). */
@@ -746,7 +752,8 @@ export async function loadProviderPageData(
   const safeJson = (url: string, init?: RequestInit) =>
     fetchProviderPageJson(url, fetchImpl, timeoutMs, init);
 
-  // The OpenRouter enrichment is deliberately NOT in this gate: see loadOpenRouterProviderStats.
+  // Started with the rest but deliberately NOT awaited: see loadOpenRouterProviderStats.
+  const openRouterProviderStats = loadOpenRouterProviderStats(fetchImpl, timeoutMs);
   const [connectionsData, nodesData, expirationsData, settingsData] = await Promise.all([
     safeJson("/api/providers"),
     safeJson("/api/provider-nodes"),
@@ -763,6 +770,7 @@ export async function loadProviderPageData(
       ? settingsData.blockedProviders
       : null,
     settings: settingsData ?? null,
+    openRouterProviderStats,
   };
 }
 
@@ -773,7 +781,7 @@ export async function loadProviderPageData(
  * Loaded beside the first paint, never as part of it: the route answers from a 24h disk
  * cache, but with a cold, expired or unwritable cache it calls three openrouter.ai endpoints
  * (15s timeout each) before it responds, and the page used to keep its skeleton up for all of
- * that. The cards render without the chip and gain it when this resolves.
+ * that. The cards render without the chip and gain it when this resolves. Never rejects.
  */
 export async function loadOpenRouterProviderStats(
   fetchImpl: typeof fetch = globalThis.fetch as typeof fetch,
