@@ -93,6 +93,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### ආරක්ෂාව සහ ප්‍රවාහනය
+
+WebDAV සත්‍යාපනය එක් IP අසාර්ථක ලුහුබැඳීම සහ අගුලු දැමීම බලාත්මක කරයි (තත්පර 60 ක කවුළුවක් තුළ අසාර්ථක උත්සාහයන් 10 ක් `429 Too Many Requests` සහ `Retry-After` සමඟ මිනිත්තු 5 ක අගුලු දැමීමක් සිදු කරයි). WebDAV මූලික සත්‍යාපන අක්තපත්‍ර සම්ප්‍රේෂණය කරන බැවින්, TLS අවසන් කිරීම (හෝ Tailscale හෝ Cloudflare Tunnel වැනි ආරක්ෂිත උමගක් හරහා ගමන් කිරීම) ලූප්බැක් පිටතින් WebDAV අන්ත ලක්ෂ්‍යයට ප්‍රවේශ වීමේදී දැඩි ලෙස නිර්දේශ කෙරේ.
+
 ### API යතුරකට වෙන් වූ සන්දර්භ මූලාශ්රය (විකල්ප)
 
 `api_key_context_sources` වගුව
