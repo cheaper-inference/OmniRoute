@@ -558,6 +558,8 @@ Tento proxy:
 
 Upgrady WebSocket pro embedded dashboard jsou řešeny doprovodným serverem na vyhrazeném portu (viz `src/lib/services/embedWsProxy.ts`).
 
+Každá aktualizace je autorizována před otevřením tunelu se stejnými pravidly jako HTTP embed route: peer musí mít zpětnou smyčku bez hlavičky pro předávání zpětného proxy, `Origin` prohlížeče musí být původem řídicího panelu (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` rozšiřují výchozí nastavení zpětné smyčky) a volající potřebuje relaci řídicího panelu nebo klíč API v rozsahu správy, pokud není zakázáno přihlášení k řídicímu panelu.
+
 **Zabezpečení:** Vložené proxy trasy jsou klasifikovány pod `LOCAL_ONLY_API_PREFIXES` a lze se k nim dostat pouze ze zpětné smyčky. Útočník, který získá JWT prostřednictvím tunelu Cloudflare/Ngrok nemůže proxy do embedded služeb.
 
 ---

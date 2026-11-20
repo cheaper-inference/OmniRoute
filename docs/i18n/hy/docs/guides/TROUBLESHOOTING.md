@@ -473,7 +473,7 @@ v3.8.0-ից _առաջ_ ներմուծված կապերը չունեն յուրա
 2. **Մշտական ուղղում․** Հստակորեն կապակցեք IPv4-ին՝ ձեր `docker run` հրամանում օգտագործելով `-p 127.0.0.1:20128:20128`․
    ```bash
    docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
-     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+     -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
    ```
    Սա պարտադրում է IPv4 կապակցում և նաև կանխում է պրոքսիի հասանելիությունը հոսթի բոլոր ինտերֆեյսներում։
 

@@ -95,6 +95,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Biztonság és közlekedés
+
+WebDAV hitelesítés IP-nkénti hibakövetést és zárolást kényszerít ki (10 sikertelen kísérlet 60 másodperces ablakon belül 5 perces zárolást vált ki `429 Too Many Requests` és `Retry-After` esetén). Mivel WebDAV alapszintű hitelesítési adatokat továbbít, TLS lezárása (vagy biztonságos alagúton, például Tailscale vagy Cloudflare Tunnel) erősen ajánlott, ha a WebDAV végponthoz a visszahurkoláson kívül hozzáfér.
+
 ### API-kulcsonkénti kontextusforrás (opcionális)
 
 Az Obsidian konfigurációja **API-kulcsonként** korlátozható az

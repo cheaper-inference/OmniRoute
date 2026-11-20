@@ -110,9 +110,30 @@ jobs:
         with:
           cache: false
 
+      # UI keys added or rewritten since the last release are translated in the same run: the
+      # refresh never writes __MISSING__ markers without a backend (they fail
+      # i18n-vi-completeness and the ratio gate on the base). Same engine rule as
+      # i18n-mirror-refresh.yml: the LLM chain when it is fully configured, else the
+      # structure-safe Google engine, which needs no endpoint and runs on a hosted runner.
       - name: Refresh derived numbers
         if: steps.base.outputs.skip == 'false'
-        run: npm run release:refresh-derived -- --profile=nightly
+        env:
+          OMNIROUTE_TRANSLATION_API_KEY: ${{ secrets.OMNIROUTE_TRANSLATION_API_KEY }}
+          OMNIROUTE_TRANSLATION_API_URL: ${{ secrets.OMNIROUTE_TRANSLATION_API_URL || vars.OMNIROUTE_TRANSLATION_API_URL }}
+          OMNIROUTE_TRANSLATION_MODEL: ${{ vars.OMNIROUTE_TRANSLATION_MODEL }}
+          OMNIROUTE_TRANSLATION_FALLBACK_MODELS: ${{ vars.OMNIROUTE_TRANSLATION_FALLBACK_MODELS }}
+          OMNIROUTE_TRANSLATION_GOOGLE_API_KEY: ${{ secrets.OMNIROUTE_TRANSLATION_GOOGLE_API_KEY }}
+        run: |
+          set -euo pipefail
+          if [ -n "$OMNIROUTE_TRANSLATION_API_KEY" ] && [ -n "$OMNIROUTE_TRANSLATION_API_URL" ] \
+            && [ -n "$OMNIROUTE_TRANSLATION_MODEL" ]; then
+            export OMNIROUTE_TRANSLATION_ENGINE="llm"
+          else
+            export OMNIROUTE_TRANSLATION_ENGINE="google"
+          fi
+          export OMNIROUTE_TRANSLATION_GOOGLE_FALLBACK="1"
+          echo "Translation engine: \`$OMNIROUTE_TRANSLATION_ENGINE\`" >> "$GITHUB_STEP_SUMMARY"
+          npm run release:refresh-derived -- --profile=nightly
 
       - name: Commit, push and open or update the refresh PR
         if: steps.base.outputs.skip == 'false'

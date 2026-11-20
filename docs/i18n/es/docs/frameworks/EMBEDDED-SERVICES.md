@@ -557,6 +557,8 @@ Este apoderado:
 
 Las actualizaciones WebSocket para el panel integrado son manejadas por un servidor complementario en un puerto dedicado (consulte `src/lib/services/embedWsProxy.ts`).
 
+Cada actualización se autoriza antes de que se abra el túnel, con las mismas reglas que la ruta de inserción HTTP : el interlocutor debe ser de bucle invertido sin encabezado de reenvío de proxy inverso, un navegador `Origin` debe ser un origen del panel (`LIVE_WS_ALLOWED_ORIGINS` / `LIVE_WS_ALLOWED_HOSTS` extiende los valores predeterminados del bucle invertido) y la persona que llama necesita una sesión del panel o una clave API de alcance de administración a menos que el inicio de sesión en el panel esté deshabilitado.
+
 **Seguridad:** Las rutas de proxy integradas se clasifican en `LOCAL_ONLY_API_PREFIXES` y solo se puede acceder a ellas desde loopback. Un atacante que obtiene un JWT a través de un túnel Cloudflare/Ngrok no puede acceder a servicios integrados.
 
 ---

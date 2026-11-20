@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { getTranslations } from "next-intl/server";
+import { getRouteHandlerTranslations } from "@/i18n/routeHandlerTranslations";
 import { handleTraeCallback } from "./handleCallback";
 
 /**
@@ -68,7 +68,9 @@ function htmlClose(message: Record<string, unknown>, t: (key: string) => string)
 }
 
 export async function GET(request: Request) {
-  const t = await getTranslations("auth");
+  // Not next-intl/server: a route handler that reaches src/i18n/request.ts bundles every
+  // locale catalog a second time (#20439). See src/i18n/routeHandlerTranslations.ts.
+  const t = await getRouteHandlerTranslations("auth");
   const q = new URL(request.url).searchParams;
   try {
     const result = await handleTraeCallback(q);

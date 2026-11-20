@@ -12,7 +12,8 @@
     "dryRun": "[dry-run] կկատարվեր՝ {action}",
     "cancelled": "Չեղարկված է։",
     "jsonOpt": "Արտածել JSON ձևաչափով",
-    "yesOpt": "Բաց թողնել հաստատման հարցումը"
+    "yesOpt": "Բաց թողնել հաստատման հարցումը",
+    "positiveIntegerRequired": "Սահմանը պետք է լինի դրական ամբողջ թիվ։"
   },
   "setup": {
     "title": "OmniRoute-ի կարգավորում",
