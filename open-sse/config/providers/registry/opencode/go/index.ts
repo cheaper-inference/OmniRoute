@@ -1,5 +1,5 @@
 import type { RegistryEntry } from "../../../shared.ts";
-import { OPENCODE_ZEN_GO_SHARED_MODELS } from "../../../shared.ts";
+import { GLM_SHARED_MODELS, OPENCODE_ZEN_GO_SHARED_MODELS } from "../../../shared.ts";
 
 export const opencode_goProvider: RegistryEntry = {
   id: "opencode-go",
@@ -27,23 +27,11 @@ export const opencode_goProvider: RegistryEntry = {
   // ceiling well above the 110s global cap for long reasoning generations.
   fetchStartTimeoutCapMs: 600_000,
   models: [
-    // GLM-5.3 — base model + effort-tier aliases (#6922, #20686).
-    // #10788: the tier vocabulary is declared on the base row so the catalog's
-    // variant synthesis (#9485) and the effort sanitizer share one source of
-    // truth with OpencodeExecutor's EFFORT_TIERS.
-    {
-      id: "glm-5.3",
-      name: "GLM-5.3",
-      supportsReasoning: true,
-      supportedThinkingEfforts: ["high", "max"],
-    },
-    { id: "glm-5.3-high", name: "GLM-5.3 (high effort)", supportsReasoning: true },
-    { id: "glm-5.3-max", name: "GLM-5.3 (max effort)", supportsReasoning: true },
-    {
-      id: "glm-5.3-flash",
-      name: "GLM-5.3 Flash",
-      supportsReasoning: true,
-    },
+    // GLM-5.3 and GLM-5.3-Flash (#6922, #20686): same limits and effort vocabulary as the shared
+    // GLM catalog (vendor Go list https://opencode.ai/zen/go/v1/models); the effort sanitizer clamps
+    // by it. Taken from #20693 with credit to @serenity-X.
+    GLM_SHARED_MODELS.find((m) => m.id === "glm-5.3")!,
+    GLM_SHARED_MODELS.find((m) => m.id === "glm-5.3-flash")!,
 
     ...OPENCODE_ZEN_GO_SHARED_MODELS,
     // models[0] (glm-5.3) is the dashboard default (LlmChatCard/ProviderTestSlideOver take models[0]).

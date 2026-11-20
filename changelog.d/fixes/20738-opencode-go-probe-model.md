@@ -1,0 +1,1 @@
+- **fix(providers):** OpenCode Go promotes live `glm-5.3` as probe model with shared GLM limits, adds `modelsUrl` sync capability, and forwards retired `glm-5.2` aliases ([#20738](https://github.com/cheaper-inference/OmniRoute/pull/20738)) — thanks @serenity-X.
