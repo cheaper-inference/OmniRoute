@@ -1,0 +1,1 @@
+- **fix(providers):** Clearing **Excluded Models** in Edit Connection now removes the saved exclusions instead of keeping them, for OAuth and API-key connections (#20745) — thanks @zerafachris

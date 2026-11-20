@@ -1,4 +1,8 @@
-import { parseExcludedModelsInput, parseRoutingTagsInput } from "../../providerInputParsers";
+import {
+  parseExcludedModelsForEdit,
+  parseExcludedModelsInput,
+  parseRoutingTagsInput,
+} from "../../providerInputParsers";
 import {
   assignCcCompatibleRequestDefaults,
   mergeCcCompatibleRequestDefaults,
@@ -174,7 +178,7 @@ export function assignEditApiKeyProviderSpecificData(options: {
     extraApiKeys: o.extraApiKeys.filter((key) => key.trim().length > 0),
     tag: o.formData.tag.trim() || undefined,
     tags: parseRoutingTagsInput(o.formData.routingTags),
-    excludedModels: parseExcludedModelsInput(o.formData.excludedModels),
+    excludedModels: parseExcludedModelsForEdit(o.formData.excludedModels),
     customUserAgent: o.formData.customUserAgent.trim(),
     ...o.openRouterPreset.getPatch(),
     ...(o.formData.passthroughModels ? { passthroughModels: true } : {}),

@@ -39,7 +39,7 @@ import {
   getProviderBaseUrlPlaceholder,
   isGlmProvider,
   parseRoutingTagsInput,
-  parseExcludedModelsInput,
+  parseExcludedModelsForEdit,
   formatRoutingTagsInput,
   formatExcludedModelsInput,
   getWebSessionCredentialLabel,
@@ -693,7 +693,7 @@ export default function EditConnectionModal({
           ...(connection.providerSpecificData || {}),
           tag: formData.tag.trim() || undefined,
           tags: parseRoutingTagsInput(formData.routingTags),
-          excludedModels: parseExcludedModelsInput(formData.excludedModels),
+          excludedModels: parseExcludedModelsForEdit(formData.excludedModels),
         };
         // zed-hosted is OAuth-only, so its optional billing portal link would
         // otherwise never reach the API-key branch above. The helper guards per
