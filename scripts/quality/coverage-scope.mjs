@@ -3,8 +3,9 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { posix, resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { isDeepStrictEqual } from "node:util";
+import { realpathSync } from "node:fs";
 
 // This policy is deliberately not derived from imported modules or observed hits.
 // A future collector must instrument the same original sources in every lane.
@@ -159,7 +160,7 @@ function main() {
   console.log(JSON.stringify(result, null, 2));
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     main();
   } catch (error) {

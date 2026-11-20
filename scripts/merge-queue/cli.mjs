@@ -26,7 +26,7 @@
 
 import { execFile } from "node:child_process";
 import { resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { promisify } from "node:util";
 import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
 import {
@@ -42,6 +42,7 @@ import {
   validateState,
 } from "./contracts.mjs";
 import { createGitHubClient } from "./github.mjs";
+import { realpathSync } from "node:fs";
 
 export const QUEUE_WORKFLOW = "omni-queue.yml";
 
@@ -733,7 +734,7 @@ export async function runCli(argv, deps = {}) {
   return 1;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   runCli(process.argv.slice(2)).then((code) => {
     process.exitCode = code;
   });

@@ -32,7 +32,8 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 const DEFAULT_ALLOWLIST = path.resolve(
   path.dirname(fileURLToPath(import.meta.url)),
@@ -220,6 +221,6 @@ export function main(argv = process.argv.slice(2)) {
   return 0;
 }
 
-if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exit(main());
 }

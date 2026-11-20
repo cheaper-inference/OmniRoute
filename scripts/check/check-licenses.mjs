@@ -19,7 +19,8 @@
 import { execFileSync } from "node:child_process";
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const ROOT = process.cwd();
 const ALLOWLIST_PATH = path.join(ROOT, "config/quality/.license-allowlist.json");
@@ -247,7 +248,7 @@ function main() {
 
 // Run only when invoked directly (not when imported by tests)
 const isMain =
-  process.argv[1] === pathToFileURL(import.meta.url).pathname ||
+  (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) ||
   process.argv[1]?.endsWith("check-licenses.mjs");
 
 if (isMain) {

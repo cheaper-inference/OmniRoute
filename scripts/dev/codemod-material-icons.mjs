@@ -11,7 +11,8 @@
 //   node scripts/dev/codemod-material-icons.mjs src/app/\(dashboard\)/dashboard/health [--write]
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const SPAN_RE =
   /<span((?:\s+(?:className="[^"]*"|aria-hidden(?:="true"|=\{true\})?|aria-label="[^"]*"|title="[^"]*"))*)\s*>\s*([a-z][a-z0-9_]+|\{[^{}]+\})\s*<\/span>/g;
@@ -190,7 +191,7 @@ function walk(p, out = []) {
   return out;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const args = process.argv.slice(2);
   const write = args.includes("--write");
   const targets = args.filter((a) => !a.startsWith("--"));

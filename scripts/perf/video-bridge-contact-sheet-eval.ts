@@ -4,9 +4,9 @@ import { createHash } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { performance } from "node:perf_hooks";
-import { fileURLToPath } from "node:url";
 
 import { z } from "zod";
+import { realpathSync } from "node:fs";
 
 import {
   buildVideoContactSheet,
@@ -567,9 +567,7 @@ async function main(): Promise<void> {
   );
 }
 
-const isMainModule =
-  typeof process.argv[1] === "string" &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMainModule = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isMainModule) {
   main().catch(() => {
     console.error("Video contact-sheet eval failed validation or execution.");

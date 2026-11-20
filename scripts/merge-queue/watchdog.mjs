@@ -64,7 +64,7 @@
 import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { DEFAULT_CONFIG_PATH, isManagedBase, loadConfig } from "./config.mjs";
 import {
   DASHBOARD_LABEL,
@@ -74,6 +74,7 @@ import {
   validateState,
 } from "./contracts.mjs";
 import { createGitHubClient } from "./github.mjs";
+import { realpathSync } from "node:fs";
 
 /** No state saved for more than this many whole minutes (exclusive), on a base with work. */
 export const WATCHDOG_LIMIT_MINUTES = 90;
@@ -860,7 +861,7 @@ export async function main(
 /** What the deadline's promise resolves with: never a result of the run. */
 const DEADLINE_HIT = Symbol("deadline");
 
-if (process.argv[1] && import.meta.url === pathToFileURL(resolve(process.argv[1])).href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   // process.exit: a run stopped by the deadline leaves retry sleeps and sockets pending, which
   // would otherwise keep the process alive until the job's own limit kills it.
   main()

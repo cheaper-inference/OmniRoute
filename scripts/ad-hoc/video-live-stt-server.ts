@@ -3,12 +3,13 @@
 import http from "node:http";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+
 import { timingSafeEqual } from "node:crypto";
 
 import { buildErrorBody } from "../../open-sse/utils/error.ts";
 
 import { validateVideoLiveContext } from "./video-live-smoke.ts";
+import { realpathSync } from "node:fs";
 
 export function createVideoLiveSttServer(options: {
   ownerKey: string;
@@ -73,7 +74,7 @@ export function createVideoLiveSttServer(options: {
   return server;
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const directory = process.env.DATA_DIR;
   if (
     !directory ||

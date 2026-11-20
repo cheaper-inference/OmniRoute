@@ -23,7 +23,8 @@
 // Output mirrors scripts/check/check-error-helper.mjs: `file:line :: rule :: hint`.
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 const cwd = process.cwd();
 
@@ -271,4 +272,4 @@ function main() {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

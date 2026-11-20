@@ -15,7 +15,8 @@ import fs from "node:fs";
 import { spawnSync as _spawnSync } from "node:child_process";
 import os from "node:os";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 
 let _spawnSyncImpl = _spawnSync;
 export function __setSpawnSyncForTest(fn) {
@@ -457,6 +458,6 @@ export function runFactsCli(
   return 0;
 }
 
-if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exitCode = runFactsCli();
 }

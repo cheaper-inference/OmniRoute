@@ -19,6 +19,7 @@ import fs from "node:fs";
 import os from "node:os";
 import path from "node:path";
 import { pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
 
 const POLL_INTERVAL_MS = 2_000;
 const BOOT_DEADLINE_MS = 240_000;
@@ -735,8 +736,7 @@ async function main() {
 }
 
 const isDirectRun =
-  process.argv[1] &&
-  path.resolve(process.argv[1]) === path.resolve(new URL(import.meta.url).pathname);
+  process.argv[1] && process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) {
   main().catch((e) => {
     console.error("[pack-boot] fatal:", e.message);

@@ -14,11 +14,12 @@ import http from "node:http";
 import https from "node:https";
 import tls from "node:tls";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+
 // CommonJS twin of the MITM data-dir + cert-model resolution (src/mitm/dataDir.ts,
 // src/mitm/cert/migration.ts): this script runs with plain `node`, so it cannot load
 // the TypeScript sources. src/mitm/ ships in the npm package next to bin/.
 import { createBridgeTlsProvider } from "../src/mitm/_internal/bridgeCert.cjs";
+import { realpathSync } from "node:fs";
 
 const PORT = parseInt(process.env.BRIDGE_PORT || "20129", 10);
 const ROUTER_URL = process.env.ROUTER_URL || "http://127.0.0.1:20128/v1/antigravity";
@@ -585,7 +586,7 @@ export {
   internalApp,
 };
 
-const isMain = process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+const isMain = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 
 if (isMain) {
   // Fail at startup (not on the first intercepted CONNECT) when the cert is missing.

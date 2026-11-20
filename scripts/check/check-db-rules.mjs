@@ -12,8 +12,9 @@
 // nenhuma violação real → gate falha com instrução de remoção.
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { assertNoStale } from "./lib/allowlist.mjs";
+import { realpathSync } from "node:fs";
 
 const cwd = process.cwd();
 const API_DIR = path.join(cwd, "src/app/api");
@@ -147,4 +148,4 @@ function main() {
   }
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import fs from "node:fs";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 function contentBlocks(message) {
   return Array.isArray(message?.message?.content) ? message.message.content : [];
@@ -98,7 +99,7 @@ export function validateClaudeEvidenceText(text, options) {
   }
 }
 
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const [
     evidencePath,
     marker,

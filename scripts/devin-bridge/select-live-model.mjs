@@ -1,7 +1,8 @@
 #!/usr/bin/env node
 import fs from "node:fs";
-import { pathToFileURL } from "node:url";
+
 import { DEVIN_MODEL_CATALOG } from "../../open-sse/config/providers/registry/devin/catalog.ts";
+import { realpathSync } from "node:fs";
 
 const candidateFields = new Set([
   "model_id",
@@ -95,7 +96,7 @@ export function selectLiveModel(
   return selected;
 }
 
-if (process.argv[1] && pathToFileURL(process.argv[1]).href === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const document = JSON.parse(fs.readFileSync(0, "utf8"));
   process.stdout.write(selectLiveModel(document));
 }

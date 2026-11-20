@@ -243,32 +243,41 @@ async function main() {
     return;
   }
 
-  const transform = new RedactTransform();
-
   // Build a WHATWG ReadableStream from each input source. We open files /
-  // stdin as a Node Readable and convert it via Readable.toWeb().
-  const { Readable } = await import("node:stream");
-  const { Writable: WritableStreamWeb } = await import("node:stream/web");
+  // stdin as a Node Readable and convert it via Readable.toWeb(). Files are
+  // read as bytes: TextDecoderStream below turns them into text, and a stream
+  // that already yields strings cannot go through it.
+  const { Readable, Writable: WritableStreamWeb } = await import("node:stream");
   const sources = args.files.length > 0 ? args.files : ["-"];
 
+  const sink = args.output ? createWriteStream(args.output, "utf8") : process.stdout;
+  const webSink = WritableStreamWeb.toWeb(sink);
+  const totals = {};
+
   for (const source of sources) {
-    const nodeSrc = source === "-" ? process.stdin : createReadStream(source, "utf8");
+    // One transform per input: a TransformStream cannot be piped through twice,
+    // so a second --file would otherwise come out empty.
+    const transform = new RedactTransform();
+    const nodeSrc = source === "-" ? process.stdin : createReadStream(source);
     const webSrc = Readable.toWeb(nodeSrc);
     const webDecoded = webSrc.pipeThrough(new TextDecoderStream("utf-8"));
     const webEncoded = webDecoded.pipeThrough(transform);
 
-    const sink = args.output ? createWriteStream(args.output, "utf8") : process.stdout;
-    const webSink = WritableStreamWeb.toWeb(sink);
-
     try {
-      await webEncoded.pipeTo(webSink);
+      // Keep the sink open so the next input appends instead of truncating.
+      await webEncoded.pipeTo(webSink, { preventClose: true });
     } catch (err) {
       process.stderr.write(`redact-logs: ${err.message}\n`);
       process.exit(1);
     }
+
+    for (const [key, value] of Object.entries(transform.counts)) {
+      totals[key] = (totals[key] ?? 0) + value;
+    }
   }
 
-  const totals = transform.counts;
+  if (args.output) sink.end();
+
   if (Object.keys(totals).length > 0) {
     const summary = Object.entries(totals)
       .map(([k, v]) => `${k}=${v}`)
@@ -281,9 +290,10 @@ async function main() {
 }
 
 // Only run as CLI when this module is the entrypoint (not when imported as a
-// library). `import.meta.url === pathToFileURL(process.argv[1]).href` is the
+// library). `process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename` is the
 // canonical ESM check.
-import { pathToFileURL } from "node:url";
-if (import.meta.url === pathToFileURL(process.argv[1]).href) {
+
+import { realpathSync } from "node:fs";
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main();
 }

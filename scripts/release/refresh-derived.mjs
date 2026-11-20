@@ -57,6 +57,7 @@ import path from "node:path";
 import { spawnSync } from "node:child_process";
 import { fileURLToPath, pathToFileURL } from "node:url";
 import { FACTS_SNAPSHOT_PATH, collectFacts, parseProviderTotal, serializeFacts } from "./facts.mjs";
+import { realpathSync } from "node:fs";
 import {
   SEMVER_RE,
   mirrorsOf,
@@ -984,7 +985,7 @@ async function main() {
   return exitCode;
 }
 
-if (process.argv[1] && pathToFileURL(path.resolve(process.argv[1])).href === import.meta.url) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().then(
     (code) => {
       process.exitCode = code;

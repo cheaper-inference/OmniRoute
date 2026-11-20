@@ -25,9 +25,10 @@
 // emite aviso mas não bloqueia — o gate principal (allowlist) ainda captura a dep nova.
 import fs from "node:fs";
 import path from "node:path";
-import { pathToFileURL } from "node:url";
+
 import { execFileSync } from "node:child_process";
 import { assertNoStale } from "./lib/allowlist.mjs";
+import { realpathSync } from "node:fs";
 
 const ROOT = process.cwd();
 const ALLOWLIST_PATH = path.join(ROOT, "config/quality/dependency-allowlist.json");
@@ -290,4 +291,4 @@ function main() {
   );
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) main();
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) main();

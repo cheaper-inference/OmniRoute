@@ -3,6 +3,7 @@
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
+import { realpathSync } from "node:fs";
 
 const here = dirname(fileURLToPath(import.meta.url));
 const root = join(here, "..");
@@ -49,7 +50,7 @@ export async function startChatGptWebCodexMcp(args = process.argv.slice(2), root
   await module.runChatGptMcpServer({ brokerSocketPath });
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   startChatGptWebCodexMcp().catch((error) => {
     console.error(
       `ChatGPT Web (Codex) MCP konnte nicht gestartet werden: ${error?.message || error}`

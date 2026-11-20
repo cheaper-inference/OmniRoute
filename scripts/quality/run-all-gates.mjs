@@ -12,8 +12,9 @@
 // Via npm: npm run quality:scan
 
 import { spawn } from "node:child_process";
-import { pathToFileURL } from "node:url";
+
 import { readManifest, resolveProfile } from "./gate-manifest.mjs";
+import { realpathSync } from "node:fs";
 
 const FAST_ONLY = process.argv.includes("--fast");
 // The manifest owns membership; package.json owns each command/runtime.
@@ -153,7 +154,7 @@ async function main() {
   console.log("[quality:scan] All selected static gates passed; not full release acceptance.");
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   main().catch((error) => {
     console.error(`[quality:scan] ${error.message}`);
     process.exitCode = 1;

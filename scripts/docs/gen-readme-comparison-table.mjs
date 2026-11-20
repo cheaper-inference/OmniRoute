@@ -12,10 +12,11 @@
 // OmniRoute's own counts (providers, routing strategies, compression engines, MCP tools, UI
 // locales) follow the facts snapshot through ./readmeFacts.mjs, as the counts gate enforces.
 import { writeFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+
 import { outlineSvg } from "./readme-outline.mjs";
 import { svgOpen, gridDefs, esc, afterKicker } from "./readme-diagram-theme.mjs";
 import { RF } from "./readmeFacts.mjs";
+import { realpathSync } from "node:fs";
 
 // Cells: a string is drawn as text; "yes" / "mid" / "no" draw the check / partial / cross glyph.
 // Column order: OmniRoute, 9router, OpenRouter, CLIProxyAPI, LiteLLM.
@@ -132,7 +133,7 @@ export async function renderComparisonTable() {
   );
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === process.argv[1]) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const i = process.argv.indexOf("--out");
   if (i >= 0 && !process.argv[i + 1]) throw new Error("--out requires a path");
   const out = i >= 0 ? process.argv[i + 1] : "docs/diagrams/comparison-table.svg";

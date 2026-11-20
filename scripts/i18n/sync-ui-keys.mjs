@@ -48,11 +48,12 @@
 import { promises as fs, existsSync, readFileSync } from "node:fs";
 import path from "node:path";
 import process from "node:process";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
 
 import { execFileSync } from "node:child_process";
 
 import { findStaleTranslations, flattenLeaves } from "./check-ui-value-drift.mjs";
+import { realpathSync } from "node:fs";
 import {
   ROUTE_HANDLER_MESSAGES_PATH,
   ROUTE_HANDLER_MESSAGE_KEYS,
@@ -1299,8 +1300,7 @@ async function writeLocaleResult(locale, merged, addedPaths, stats, opts) {
   return { addedPaths, translated: stats.translated };
 }
 
-const isDirectRun =
-  Boolean(process.argv[1]) && import.meta.url === pathToFileURL(process.argv[1]).href;
+const isDirectRun = process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename;
 if (isDirectRun) {
   main().catch((err) => {
     logError(err?.stack || err?.message || String(err));

@@ -29,7 +29,8 @@ import { execFileSync } from "node:child_process";
 import { createHash } from "node:crypto";
 import { readFileSync, writeFileSync } from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+
+import { realpathSync } from "node:fs";
 import {
   getEffectiveBuildMemoryBytes,
   resolveNextBuildBundlerFlag,
@@ -177,7 +178,7 @@ function main(argv) {
   process.stdout.write(json);
 }
 
-if (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     main(process.argv.slice(2));
   } catch (error) {

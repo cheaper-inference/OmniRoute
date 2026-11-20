@@ -3,10 +3,11 @@
 import { randomBytes } from "node:crypto";
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+
 import { parseEnv } from "node:util";
 
 import Database from "better-sqlite3";
+import { realpathSync } from "node:fs";
 
 export function validateVideoLiveSource(source: string | undefined): string {
   if (!source || !path.isAbsolute(source))
@@ -149,7 +150,7 @@ export async function prepareVideoLiveIsolation(sourceInput: string | undefined)
   }
 }
 
-if (process.argv[1] && path.resolve(process.argv[1]) === fileURLToPath(import.meta.url)) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   if (!process.argv.includes("--prepare")) {
     console.error(
       "Pass --prepare and OMNIROUTE_VIDEO_LIVE_SOURCE_DIR; no provider calls are made."

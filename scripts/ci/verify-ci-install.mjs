@@ -4,7 +4,8 @@ import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { resolve } from "node:path";
-import { pathToFileURL } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 function verifyDirectDependencyVersions(root) {
   const manifest = JSON.parse(readFileSync(resolve(root, "package.json"), "utf8"));
@@ -68,7 +69,7 @@ export function verifyCiInstall(root = process.cwd()) {
   };
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   try {
     console.log(`[verify-ci-install] ${JSON.stringify(verifyCiInstall())}`);
   } catch (error) {

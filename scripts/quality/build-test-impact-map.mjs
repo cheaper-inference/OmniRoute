@@ -4,6 +4,7 @@ import { fileURLToPath } from "node:url";
 import { globSync } from "tinyglobby";
 
 import { extractPathLiteralEdges } from "./lib/pathLiteralEdges.mjs";
+import { realpathSync } from "node:fs";
 
 const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const SRC_ROOTS = ["src", "open-sse"];
@@ -291,7 +292,7 @@ export function writeTestImpactMap(out, map) {
   }
 }
 
-if (fileURLToPath(import.meta.url) === path.resolve(process.argv[1] || "")) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   const result = buildTestImpactMap();
   const { testFileCount, ...map } = result;
   const out = path.join(ROOT, "config/quality/test-impact-map.json");

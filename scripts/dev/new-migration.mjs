@@ -23,7 +23,8 @@
 //   --help            usage
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath, pathToFileURL } from "node:url";
+import { fileURLToPath } from "node:url";
+import { realpathSync } from "node:fs";
 import {
   classifyMigrationFilename,
   formatMigrationTimestamp,
@@ -246,6 +247,6 @@ export function main(argv = process.argv.slice(2)) {
   return 1;
 }
 
-if (import.meta.url === pathToFileURL(process.argv[1] || "").href) {
+if (process.argv[1] && realpathSync(process.argv[1]) === import.meta.filename) {
   process.exitCode = main();
 }

@@ -29,7 +29,8 @@
 // hands the next INSERT the same rowid again.
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
+
+import { realpathSync } from "node:fs";
 
 export type ColumnShape = {
   name: string;
@@ -653,7 +654,8 @@ async function main(): Promise<void> {
 
 const invokedDirectly =
   typeof process.argv[1] === "string" &&
-  path.resolve(process.argv[1]) === fileURLToPath(import.meta.url);
+  process.argv[1] &&
+  realpathSync(process.argv[1]) === import.meta.filename;
 
 if (invokedDirectly) {
   main().then(
