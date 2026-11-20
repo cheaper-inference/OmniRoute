@@ -93,9 +93,12 @@ const LEGACY_DECISIONS: { [K in keyof StrategyTraits]: (s: string) => StrategyTr
   stickinessRespectsDeclaredOrder: (s) => s === "priority",
   // targetResolution.ts preScreenTargets
   preScreensTargets: (s) => s === "priority",
-  // targetResolution.ts modelOrderPreservingStrategies (#8370)
+  // targetResolution.ts modelOrderPreservingStrategies (#8370); round-robin joined it in #20191
+  // so a cross-model affinity reorder no longer pins every request to one rotation target.
   promptCacheAffinityScope: (s) =>
-    ["priority", "weighted", "fill-first", "quota-share", "jev"].includes(s) ? "model" : "global",
+    ["priority", "weighted", "fill-first", "quota-share", "jev", "round-robin"].includes(s)
+      ? "model"
+      : "global",
   // promptCacheAffinity.ts shouldProtectOriginalFirst (#8370)
   protectsFirstTargetFromAffinity: (s) =>
     s === "auto" ||

@@ -324,6 +324,26 @@ function getBaseModelIdentity(target: ResolvedComboTarget): string {
 }
 
 /**
+ * #20191: index of `target` in `targets`, or of the first entry of the same combo step.
+ * The exact execution key wins, so already-per-connection targets (connection-aware expansion's
+ * `step@c0`, `step@c1`, …) keep their account dimension and round-robin still rotates across
+ * them. Only when the target itself is absent — prompt-cache affinity expanded its step into
+ * `step@account` targets, or one of those maps back to its step — are steps matched by their
+ * base identity. -1 when none matches.
+ */
+export function findSameStepIndex(
+  targets: ResolvedComboTarget[],
+  target: ResolvedComboTarget
+): number {
+  const exactIndex = target.executionKey
+    ? targets.findIndex((entry) => entry.executionKey === target.executionKey)
+    : -1;
+  if (exactIndex >= 0) return exactIndex;
+  const step = getBaseModelIdentity(target);
+  return targets.findIndex((entry) => getBaseModelIdentity(entry) === step);
+}
+
+/**
  * Order eligible targets using rendezvous hashing.
  * @param scope - "model": sort only within same-model groups, preserving inter-model order;
  *               "global": sort across all targets (original behavior).

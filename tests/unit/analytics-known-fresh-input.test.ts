@@ -114,3 +114,72 @@ test("malformed source counters never inflate known fresh input", () => {
     assert.equal(row.knownFreshInputTokens, 0);
   }
 });
+
+test("shared model keeps provider-specific known input through archive and key filtering", () => {
+  const db = core.getDbInstance();
+  const raw = db.prepare(`INSERT INTO usage_history
+    (provider, model, timestamp, tokens_input, tokens_output, tokens_cache_read, api_key_id)
+    VALUES (?, ?, '2020-03-01T12:00:00.000Z', ?, 0, ?, ?)`);
+  raw.run("Alpha", "vendor/Model", 100, 40, "alpha-key");
+  raw.run("alpha", "Model", 60, 0, "alpha-key");
+  raw.run("beta", "Model", 300, 100, "beta-key");
+  raw.run("beta", "Model", 80, null, "beta-key");
+  const archive = db.prepare(`INSERT INTO daily_usage_summary
+    (provider, model, date, total_requests, total_input_tokens, total_output_tokens,
+     total_cost, total_cache_read_tokens, cached_input_unknown_requests)
+    VALUES (?, ?, '2020-01-01', 1, ?, 0, 0, ?, ?)`);
+  archive.run("alpha", "Model", 50, 10, 0);
+  archive.run("beta", "Model", 100, 20, 1);
+  const normalize = (model: string) => model.split("/").at(-1)!;
+
+  const all = getCachedInputAnalytics(options, normalize);
+  assert.equal(all.summary.knownFreshInputTokens, 360);
+  assert.deepEqual(all.byModel, [
+    {
+      model: "model",
+      knownFreshInputTokens: 360,
+      cachedInputTokens: 170,
+      cachedInputTokensComplete: false,
+    },
+  ]);
+  assert.deepEqual(all.byProviderModel.get("alpha:model"), {
+    knownFreshInputTokens: 160,
+    cachedInputTokens: 50,
+    cachedInputTokensComplete: true,
+  });
+  assert.deepEqual(all.byProviderModel.get("beta:model"), {
+    knownFreshInputTokens: 200,
+    cachedInputTokens: 120,
+    cachedInputTokensComplete: false,
+  });
+  assert.equal(all.byProviderModel.size, 2);
+
+  const recent = getCachedInputAnalytics({ ...options, sinceIso: "2020-03-01" }, normalize);
+  assert.equal(recent.summary.knownFreshInputTokens, 320);
+  assert.equal(recent.byModel[0].knownFreshInputTokens, 320);
+  assert.equal(recent.byProviderModel.get("alpha:model")?.knownFreshInputTokens, 120);
+  assert.equal(recent.byProviderModel.get("beta:model")?.knownFreshInputTokens, 200);
+
+  const keyOptions = {
+    ...options,
+    apiKeyWhere: "api_key_id = @key",
+    apiKeyParams: { key: "alpha-key" },
+  };
+  const filtered = getCachedInputAnalytics(keyOptions, normalize);
+  assert.deepEqual(filtered.summary, {
+    knownFreshInputTokens: 120,
+    cachedInputTokens: 40,
+    cachedInputTokensComplete: false,
+  });
+  assert.equal(filtered.byModel[0].knownFreshInputTokens, 120);
+  assert.deepEqual(filtered.byProviderModel.get("alpha:model"), filtered.summary);
+  assert.equal(filtered.byProviderModel.size, 1);
+  assert.equal(filtered.byProviderModel.has("beta:model"), false);
+
+  const filteredRecent = getCachedInputAnalytics(
+    { ...keyOptions, sinceIso: "2020-03-01" },
+    normalize
+  );
+  assert.equal(filteredRecent.byProviderModel.get("alpha:model")?.knownFreshInputTokens, 120);
+  assert.equal(filteredRecent.byProviderModel.get("alpha:model")?.cachedInputTokensComplete, true);
+});

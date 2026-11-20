@@ -1,5 +1,6 @@
 {
   "common": {
+    "positiveIntegerRequired": "Giới hạn phải là số nguyên dương.",
     "error": "Lỗi: {message}",
     "serverOffline": "Máy chủ OmniRoute đang offline. Khởi động với: omniroute serve",
     "authRequired": "Cần xác thực. Đặt OMNIROUTE_API_KEY hoặc chạy: omniroute setup",
