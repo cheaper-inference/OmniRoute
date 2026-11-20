@@ -10,6 +10,7 @@ import net from "node:net";
 import os from "node:os";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import { nativeCoverageArgs } from "./nativeCoverageArgs.ts";
 
 export const ROOT = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..", "..");
 export const BIN = path.join(ROOT, "bin", "omniroute.mjs");
@@ -75,11 +76,13 @@ export function cleanEnv(home: string, extra: Record<string, string> = {}) {
 }
 
 export function cliCoverageNodeArgs(bin: string) {
-  // Node inherits V8 coverage even with a clean environment. Keep
-  // NODE_OPTIONS scrubbed and pass only the repo's coverage preload.
-  return bin === BIN && process.env.NODE_V8_COVERAGE && process.env.OMNIROUTE_CI_SYNC_TSX_CACHE
-    ? ["--import", new URL("../../scripts/ci/native-worker-v8-layout.mjs", import.meta.url).href]
-    : [];
+  const args = nativeCoverageArgs();
+  if (!args.length || bin === BIN) return args;
+  try {
+    return fs.readFileSync(bin).equals(fs.readFileSync(BIN)) ? args : [];
+  } catch {
+    return [];
+  }
 }
 
 export function runCli(bin: string, args: string[], cwd: string, env: Record<string, string>) {

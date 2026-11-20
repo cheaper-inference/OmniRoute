@@ -5,20 +5,15 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
 import { fileURLToPath } from "node:url";
+import { nativeCoverageArgs } from "../_helpers/nativeCoverageArgs.ts";
 
 test("Codex app-server lifecycle survives retries and settles disconnects (#16029)", () => {
   const scratch = mkdtempSync(join(tmpdir(), "codex-lifecycle-16029-"));
-  // Node propagates V8 coverage to the child. Load the same repository source
-  // layout during the instrumented CI run while keeping the child env isolated.
-  const coveragePreload =
-    process.env.NODE_V8_COVERAGE && process.env.OMNIROUTE_CI_SYNC_TSX_CACHE
-      ? ["--import", new URL("../../scripts/ci/native-worker-v8-layout.mjs", import.meta.url).href]
-      : [];
   try {
     const result = spawnSync(
       process.execPath,
       [
-        ...coveragePreload,
+        ...nativeCoverageArgs(),
         "--import",
         "tsx/esm",
         "--import",
