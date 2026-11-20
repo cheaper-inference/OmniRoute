@@ -4,6 +4,7 @@ import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from "node:fs/promis
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import test from "node:test";
+import { fileURLToPath } from "node:url";
 
 const root = new URL("../../../", import.meta.url);
 const preload = new URL("scripts/ci/native-worker-v8-layout.mjs", root);
@@ -191,6 +192,61 @@ test("CLI and tray coverage keep the Node layout before and after tsx registrati
     await record("late", [], `await import(${JSON.stringify(cliTsx)});\n${imports}`),
     native
   );
+});
+
+test("the CLI doctor and native tray diagnostic share coverage coordinates", async (t) => {
+  const coverage = await mkdtemp(join(tmpdir(), "doctor-native-coverage-"));
+  t.after(() => rm(coverage, { recursive: true, force: true }));
+  const atomicPreload = new URL("scripts/ci/atomic-tsx-cache.mjs", root);
+  const tsxDriver = new URL("tests/unit/cli-doctor-prebuilt-native-binary-10083.test.ts", root);
+  const trayDriver = new URL("tests/unit/cli/tray-failure-diagnostics-17315.test.ts", root);
+  const tray = new URL("bin/cli/tray/traySystray.mjs", root);
+  const source = new URL("src/lib/cli-helper/doctor/checks.ts", root);
+  const sourceSize = (await readFile(source, "utf8")).length;
+  const env = {
+    ...process.env,
+    TMPDIR: coverage,
+    NODE_OPTIONS: `--import=${atomicPreload.href} --import=${preload.href}`,
+    NODE_V8_COVERAGE: coverage,
+    OMNIROUTE_CI_SYNC_TSX_CACHE: coverage,
+  };
+  delete env.NODE_TEST_CONTEXT;
+  execFileSync(
+    process.execPath,
+    [
+      "--import",
+      "tsx/esm",
+      "--test",
+      "--test-name-pattern",
+      "doctor finds a prebuilt|doctor surfaces the persisted tray failure",
+      fileURLToPath(tsxDriver),
+      fileURLToPath(trayDriver),
+    ],
+    { cwd: root, env, stdio: "pipe", timeout: 90_000 }
+  );
+
+  const producers = new Set();
+  for (const file of await readdir(coverage)) {
+    if (!file.endsWith(".json")) continue;
+    const report = JSON.parse(await readFile(join(coverage, file), "utf8"));
+    const script = report.result.find(({ url }) => url === source.href);
+    if (!script) continue;
+    const urls = new Set(report.result.map(({ url }) => url));
+    if (urls.has(tsxDriver.href)) {
+      assert.ok(urls.has(preload.href));
+      producers.add("tsx doctor");
+    } else if (urls.has(tray.href)) {
+      assert.equal(urls.has(preload.href), false);
+      producers.add("native tray doctor");
+    }
+    assert.equal(Boolean(report["source-map-cache"]?.[source.href]), false, source.href);
+    assert.equal(script.functions[0].ranges[0].startOffset, 0);
+    assert.equal(
+      script.functions[0].ranges[0].endOffset,
+      sourceSize + `\n\n//# sourceURL=${source.href}`.length
+    );
+  }
+  assert.deepEqual(producers, new Set(["tsx doctor", "native tray doctor"]));
 });
 
 test("the real CLI keeps native coverage through the clean-environment launcher", async (t) => {

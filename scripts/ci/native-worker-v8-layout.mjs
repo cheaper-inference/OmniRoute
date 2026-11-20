@@ -6,7 +6,7 @@ import { isInternalThread } from "node:worker_threads";
 const cliEntry = new URL("../../bin/omniroute.mjs", import.meta.url);
 const cliRoot = fileURLToPath(new URL("../../bin/cli/", import.meta.url));
 const cliTsxBridge = new URL("native-cli-v8-tsx.mjs", import.meta.url).href;
-// Node loads these worker, tray and standalone MCP modules as native TypeScript.
+// Node loads these modules natively in workers, CLI diagnostics, MCP and catalog checks.
 const nativeSources = new Set(
   [
     "src/lib/usage/callLogArtifactWorker.ts",
@@ -17,6 +17,8 @@ const nativeSources = new Set(
     "src/shared/constants/callLogSizeLimitMarkers.ts",
     "bin/cli/runtime/trayRuntime.ts",
     "src/shared/platform/windowsProcess.ts",
+    "src/lib/cli-helper/doctor/checks.ts",
+    "open-sse/config/freeModelCatalog.data.ts",
     "open-sse/utils/errorSanitization.ts",
     "open-sse/utils/errorPathRedaction.ts",
     "open-sse/utils/credentialPatterns.ts",
