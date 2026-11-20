@@ -71,7 +71,11 @@ test("grok-cli applies official Responses defaults without mutating client input
   >;
 
   assert.equal(out.store, false);
-  assert.deepEqual(out.include, ["file_search_call.results", "reasoning.encrypted_content"]);
+  assert.deepEqual(out.include, [
+    "file_search_call.results",
+    "reasoning.encrypted_content",
+    "no_inline_citations",
+  ]);
   assert.deepEqual(out.reasoning, { effort: "high" });
   assert.deepEqual(body, {
     model: "grok-4.5",
@@ -95,11 +99,11 @@ test("grok-cli preserves explicit store and de-duplicates encrypted reasoning in
   ) as Record<string, unknown>;
 
   assert.equal(out.store, true);
-  assert.deepEqual(out.include, ["reasoning.encrypted_content"]);
+  assert.deepEqual(out.include, ["reasoning.encrypted_content", "no_inline_citations"]);
   assert.deepEqual(out.reasoning, { effort: "xhigh" });
 });
 
-test("grok-cli preserves an explicit Responses reasoning summary", () => {
+test("grok-cli preserves an explicit Responses reasoning summary without injecting an effort", () => {
   const executor = new GrokCliExecutor();
   const out = executor.transformRequest(
     "grok-4.5",
@@ -111,7 +115,9 @@ test("grok-cli preserves an explicit Responses reasoning summary", () => {
     {} as never
   ) as Record<string, unknown>;
 
-  assert.deepEqual(out.reasoning, { summary: "concise", effort: "high" });
+  // The CLI's auxiliary turns (1.0.89) send `summary` with no `effort`; injecting one would
+  // force the heavyweight reasoning path xAI does not take for those turns.
+  assert.deepEqual(out.reasoning, { summary: "concise" });
 });
 
 test("grok-4.6 applies default high when client omits effort", async () => {
