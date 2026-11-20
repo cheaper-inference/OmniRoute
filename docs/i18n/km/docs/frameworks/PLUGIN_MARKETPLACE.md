@@ -25,31 +25,26 @@ OmniRoute ភ្ជាប់មកជាមួយប្រព័ន្ធកម�
 ប្រភពដែលមិនមែនជា loopback ទេ ដោយមិនគិតពីការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ។ សូមមើល
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md)។
 
-## របៀបដែលផ្នែកទាំងអស់ដំណើរការរួមគ្នា
+## របៀបដែលវាសមនឹង Together
 
 ```
-ផ្ទាំងគ្រប់គ្រង (/dashboard/plugins)
-  ├─ ផ្ទាំង "បានដំឡើង"  → GET /api/plugins            (listPlugins)
-  │                       POST /api/plugins/scan      (pluginManager.scan)
-  │                       POST /api/plugins/{name}/activate|deactivate
-  │                       DELETE /api/plugins/{name}   (លុបការដំឡើង)
-  └─ ផ្ទាំង "ទីផ្សារ" → GET /api/plugins/marketplace
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
                           → listMarketplacePlugins()
-                            ├─ គ្មាន URL ផ្ទាល់ខ្លួន → SEED_REGISTRY ដែលភ្ជាប់មកស្រាប់
-                            └─ URL ផ្ទាល់ខ្លួន → យន្តការការពារ SSRF isSafeMarketplaceUrl()
-                                             → safeOutboundFetch(guard:"public-only")
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **ស្រទាប់បញ្ជីចុះឈ្មោះ** — `src/lib/plugins/marketplace.ts`៖ រាយបញ្ជី / ស្វែងរកក្នុង
-  កាតាឡុក និងត្រឡប់ទៅប្រើបញ្ជីចុះឈ្មោះគ្រាប់ពូជវិញនៅពេលមានការបរាជ័យណាមួយ។
-- **ស្រទាប់វដ្តជីវិត** — `src/lib/plugins/manager.ts` (`pluginManager` singleton)៖
-  ដំឡើង ដំឡើងកំណែ ធ្វើឱ្យសកម្ម ធ្វើឱ្យអសកម្ម លុបការដំឡើង ស្កេន និងផ្ទុកនៅពេលចាប់ផ្តើម។
-- **ស្រទាប់ manifest** — `src/lib/plugins/manifest.ts`៖ Zod schema + តម្លៃលំនាំដើមសម្រាប់
-  `plugin.json`។
-- **កម្មវិធីស្កេន** — `src/lib/plugins/scanner.ts`៖ រកឃើញកម្មវិធីជំនួយនៅលើថាសក្រោម
-  ថតកម្មវិធីជំនួយ។
-- **កម្មវិធីផ្ទុក** — `src/lib/plugins/loader.ts`៖ ចាប់ផ្តើមកម្មវិធីជំនួយនីមួយៗក្នុង
-  child process ដាច់ដោយឡែក និងសម្របសម្រួលការហៅ hook តាម IPC។
+- **ស្រទាប់ចុះបញ្ជី** — `src/lib/plugins/marketplace.ts`: បញ្ជី / ស្វែងរកកាតាឡុកដោយត្រលប់ទៅបញ្ជីឈ្មោះគ្រាប់ពូជនៅលើការបរាជ័យណាមួយ។
+- **ស្រទាប់វដ្តជីវិត** — `src/lib/plugins/manager.ts` (`pluginManager` singleton): ដំឡើង ដំឡើងកំណែ ធ្វើឱ្យសកម្ម ធ្វើឱ្យអសកម្ម លុបការដំឡើង ស្កេន ចាប់ផ្ដើមផ្ទុក។
+- **ស្រទាប់បង្ហាញ** — `src/lib/plugins/manifest.ts`: Zod គ្រោងការណ៍ + លំនាំដើមសម្រាប់ `plugin.json`។
+- **ម៉ាស៊ីនស្កេន** — `src/lib/plugins/scanner.ts`: រកឃើញកម្មវិធីជំនួយនៅលើថាសក្រោមថតកម្មវិធីជំនួយ។
+- **ឧបករណ៍ផ្ទុក** — `src/lib/plugins/loader.ts`: បង្កើតកម្មវិធីជំនួយនីមួយៗនៅក្នុងដំណើរការកូន Node.js ដាច់ដោយឡែក ហើយឈ្មួញកណ្តាលភ្ជាប់ការហៅទូរស័ព្ទតាម IPC។ កូនមិនមែនជាប្រអប់ខ្សាច់ទេ (សូមមើល "ការដាច់ចេញពីការប្រតិបត្តិកម្មវិធីជំនួយ" ខាងក្រោម)។
 
 ## កាតាឡុកទីផ្សារ
 
@@ -85,34 +80,31 @@ OmniRoute ភ្ជាប់មកជាមួយប្រព័ន្ធកម�
 
 ## REST API
 
-ចំណុចបញ្ចប់ទាំងអស់ទាមទារការផ្ទៀងផ្ទាត់សិទ្ធិគ្រប់គ្រង (`requireManagementAuth`) **ហើយ**
-អាចចូលប្រើបានតែតាម loopback ប៉ុណ្ណោះ — `/api/plugins` និង `/api/plugins/` ត្រូវបានរាយក្នុង
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`)។
+ចំណុចបញ្ចប់ទាំងអស់ទាមទារការគ្រប់គ្រង (`requireManagementAuth`)** និង** គឺមានតែ — `/api/plugins` ហើយ `/api/plugins/` ត្រូវបានរាយក្នុង `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`)។
 
-| ចំណុចបញ្ចប់                      | វិធីសាស្ត្រ | ការពិពណ៌នា                                                       |
-| -------------------------------- | ----------- | ---------------------------------------------------------------- |
-| `/api/plugins`                   | GET         | រាយបញ្ជី plugin ដែលបានដំឡើង (តម្រង `?status=` ជាជម្រើស)          |
-| `/api/plugins`                   | POST        | ដំឡើង plugin ពី path មូលដ្ឋានដាច់ខាត                             |
-| `/api/plugins/scan`              | POST        | ស្កេនថត plugin ហើយចុះបញ្ជី plugin ថ្មីៗ                          |
-| `/api/plugins/marketplace`       | GET         | រាយធាតុនៅក្នុងកាតាឡុក marketplace                                |
-| `/api/plugins/[name]`            | GET         | ទទួលព័ត៌មានលម្អិតអំពី plugin ដែលបានដំឡើង                         |
-| `/api/plugins/[name]`            | DELETE      | លុបការដំឡើង plugin                                               |
-| `/api/plugins/[name]/activate`   | POST        | ធ្វើឱ្យសកម្ម (ផ្ទុក + ចុះបញ្ជី hooks)                            |
-| `/api/plugins/[name]/deactivate` | POST        | បិទដំណើរការ (ដំណើរការ `onDeactivate`, លុបការចុះបញ្ជី hooks)      |
-| `/api/plugins/[name]/config`     | GET         | ទទួល config របស់ plugin + config schema                          |
-| `/api/plugins/[name]/config`     | PUT         | ធ្វើបច្ចុប្បន្នភាព config របស់ plugin (បានផ្ទៀងផ្ទាត់តាម schema) |
+| ចំណុចបញ្ចប់                      | វិធីសាស្រ្ត | ការពិពណ៌នា                                                                           |
+| -------------------------------- | ----------- | ------------------------------------------------------------------------------------ |
+| `/api/plugins`                   | GET         | រាយបញ្ជីកម្មវិធីជំនួយដែលបានដំឡើង (តម្រង `?status=` ជាជម្រើស)                         |
+| `/api/plugins`                   | POST        | ដំឡើងកម្មវិធីជំនួយពីថតប្រភពកម្មវិធីជំនួយ                                             |
+| `/api/plugins/scan`              | POST        | ស្កេនបញ្ជីកម្មវិធីជំនួយ ហើយចុះឈ្មោះកម្មវិធីជំនួយថ្មី។                                |
+| `/api/plugins/marketplace`       | GET         | រាយបញ្ជីធាតុកាតាឡុកទីផ្សារ                                                           |
+| `/api/plugins/[name]`            | GET         | ទទួលបានព័ត៌មានលម្អិតកម្មវិធីជំនួយដែលបានដំឡើង                                         |
+| `/api/plugins/[name]`            | DELETE      | លុបកម្មវិធីជំនួយ                                                                     |
+| `/api/plugins/[name]/activate`   | POST        | ធ្វើឱ្យសកម្ម (ផ្ទុកទំពក់ចុះឈ្មោះ + )                                                 |
+| `/api/plugins/[name]/deactivate` | POST        | អសកម្ម (ភ្លើង `onDeactivate`, មិនចុះឈ្មោះទំពក់)                                      |
+| `/api/plugins/[name]/config`     | GET         | ទទួលបានកម្មវិធីជំនួយ config + config schema                                          |
+| `/api/plugins/[name]/config`     | PUT         | ធ្វើបច្ចុប្បន្នភាពការកំណត់រចនាសម្ព័ន្ធកម្មវិធីជំនួយ (មានសុពលភាពប្រឆាំងនឹងគ្រោងការណ៍) |
 
-តម្រង `status` របស់ `GET /api/plugins` ទទួលយកតម្លៃមួយក្នុងចំណោម
-`installed` / `active` / `inactive` / `error`។ តម្លៃមិនត្រឹមត្រូវនឹងត្រឡប់ `400`។
+តម្រង `GET /api/plugins` `status` ទទួលយកមួយនៃ `installed` / `active` / `inactive` / `error`។ តម្លៃមិនត្រឹមត្រូវត្រឡប់ `400`។
 
-### រាយបញ្ជី plugin ដែលបានដំឡើង
+### រាយបញ្ជីកម្មវិធីជំនួយដែលបានដំឡើង
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### ដំឡើងពី path មូលដ្ឋាន
+### ដំឡើងពីផ្លូវក្នុងស្រុក
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -121,19 +113,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` ត្រូវតែជា path **ដាច់ខាត** ហើយមិនអាចមាន segment ឆ្លងកាត់ `..` ឬ
-null bytes ទេ (អនុវត្តដោយ Zod)។ ថតប្រភពត្រូវតែមាន
-`plugin.json` ត្រឹមត្រូវ (ឬជាថតមេរបស់ថតដែលមានវា)។ នៅពេលជោគជ័យ response គឺ `201` ជាមួយ
-ជួរទិន្នន័យរបស់ plugin ដែលបានដំឡើង។
+`path` ត្រូវតែជា** ដាច់ខាត** ផ្លូវទៅកាន់ថតឯកសារ** នៅខាងក្នុងថតប្រភពកម្មវិធីជំនួយ** ៖ `plugin-sources` នៅជាប់នឹង root កម្មវិធីជំនួយ ដូច្នេះ `~/.omniroute/plugin-sources/` តាមលំនាំដើម ឬ `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` នៅពេលអថេរនោះត្រូវបានកំណត់ (`getPluginSourcesDir()` in `src/lib/plugins/installSource.ts`). ចម្លង ឬក្លូនកម្មវិធីជំនួយនៅទីនោះជាមុនសិន។ ការដំឡើងត្រូវបានបដិសេធជាមួយ `400` នៅពេលដែលផ្លូវមាន `..` ឬ null byte ស្ថិតនៅខាងក្រៅថតនោះ ដោះស្រាយនៅខាងក្រៅវាតាមរយៈ symlink មាន symlink ដែលគោលដៅគឺនៅខាងក្រៅវា ឬនៅពេលដែលថតមិនមាន។ ថតប្រភពត្រូវតែមាន `plugin.json` ត្រឹមត្រូវ (ឬជាមេមួយ)។ នៅលើជោគជ័យ ការឆ្លើយតបគឺ `201` ជាមួយនឹងជួរកម្មវិធីជំនួយដែលបានដំឡើង។
 
-### រុករក marketplace
+មិនដូចផ្លូវកម្មវិធីជំនួយផ្សេងទៀត នេះទាមទារឱ្យមានព័ត៌មានបញ្ជាក់អំពីការគ្រប់គ្រង (សម័យផ្ទាំងគ្រប់គ្រង ឬគ្រាប់ចុច API ដែលមានវិសាលភាពគ្រប់គ្រង) សូម្បីតែពេលការចូលត្រូវបានបិទ (`requireLogin=false`)៖ ការដំឡើងកូដមិនដែលជាសកម្មភាពអនាមិកទេ។
+
+### រកមើលទីផ្សារ
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### ធ្វើបច្ចុប្បន្នភាព config របស់ plugin
+### ធ្វើបច្ចុប្បន្នភាពការកំណត់រចនាសម្ព័ន្ធកម្មវិធីជំនួយ
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -142,10 +133,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` ផ្ទៀងផ្ទាត់តម្លៃនីមួយៗដែលបានផ្តល់ដោយផ្អែកលើ
-`configSchema` របស់ plugin (បានប្រកាសក្នុង manifest)៖ field ប្រភេទ `number` គោរពតាម `min`/`max`
-ហើយ field ប្រភេទ `select` ត្រូវតែត្រូវគ្នានឹង `enum` ដែលបានប្រកាស។ Key ដែលមិនមានក្នុង schema
-ត្រូវបានអនុញ្ញាតឱ្យឆ្លងកាត់។
+`PUT .../config` ធ្វើឱ្យមានសុពលភាពតម្លៃដែលបានផ្តល់នីមួយៗធៀបនឹង `configSchema` របស់កម្មវិធីជំនួយ (បានប្រកាសនៅក្នុងការបង្ហាញ): វាល `number` កិត្តិយស `min`/`max` វាល `select` ត្រូវតែផ្គូផ្គង `enum` ដែលបានប្រកាស។ គ្រាប់ចុចដែលមិនមាននៅក្នុងគ្រោងការណ៍ត្រូវបានអនុញ្ញាត។
 
 ## ការកំណត់រចនាសម្ព័ន្ធ
 
@@ -202,83 +190,60 @@ input ដែលត្រូវបានជ្រើស (`OMNIROUTE_PLUGINS_DIR`,
 > `listMarketplacePlugins()`) គោរពតាម key នេះ នៅពេលវាមានវត្តមានក្នុង settings
 > store។
 
-## សុវត្ថិភាព
+## សន្តិសុខ
 
-### កម្រិត Route — សម្រាប់តែ loopback ប៉ុណ្ណោះ
+### Route tier — loopback តែប៉ុណ្ណោះ
 
-Plugin ប្រតិបត្តិកូដក្នុង child process ដែលបាន spawn ដូច្នេះផ្ទៃ `/api/plugins`
-ទាំងមូលត្រូវបានចាត់ថ្នាក់ជា `LOCAL_ONLY` (កម្រិត 1)។ ការអនុវត្ត loopback ដំណើរការ
-ដោយគ្មានលក្ខខណ្ឌ **មុន** ការត្រួតពិនិត្យការផ្ទៀងផ្ទាត់អត្តសញ្ញាណណាមួយ ដូច្នេះ management token ដែលបានលេចធ្លាយ ហើយចូលដល់
-ម៉ាស៊ីនតាម tunnel នៅតែមិនអាចដំឡើង ដំណើរការ ឬលុប plugin បានទេ។
-សូមមើល [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) និង
-វិធានតឹងរ៉ឹង #15 / #17។
+កម្មវិធីជំនួយប្រតិបត្តិកូដនៅក្នុងដំណើរការកូនបង្កើតកូន ដូច្នេះផ្ទៃ `/api/plugins` ទាំងមូលត្រូវបានចាត់ថ្នាក់ `LOCAL_ONLY` (Tier 1)។ ការអនុវត្ត Loopback ដំណើរការដោយគ្មានលក្ខខណ្ឌ** ពីមុន** ការត្រួតពិនិត្យការផ្ទៀងផ្ទាត់ណាមួយ ដូច្នេះសញ្ញាសម្ងាត់គ្រប់គ្រងលេចធ្លាយទៅដល់ប្រអប់នៅលើផ្លូវរូងក្រោមដីនៅតែមិនអាចដំឡើង ធ្វើឱ្យសកម្ម ឬលុបកម្មវិធីជំនួយបានទេ។ សូមមើល [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) និង Hard Rules #15 / #17។
 
-### របាំងការពារ SSRF សម្រាប់ registry របស់ Marketplace
+### ការចុះបញ្ជីទីផ្សារ SSRF យាម
 
-URL របស់ registry ផ្ទាល់ខ្លួនគឺជាការកំណត់រចនាសម្ព័ន្ធដែលអ្នកវាយប្រហារអាចមានឥទ្ធិពលលើបាន ដូច្នេះមុនពេល
-ទាញយកវា `listMarketplacePlugins()` ដំណើរការវាឆ្លងកាត់ការការពារពីរជាន់៖
+URL បញ្ជីឈ្មោះផ្ទាល់ខ្លួនគឺជាការកំណត់រចនាសម្ព័ន្ធដែលអាចមានឥទ្ធិពលលើអ្នកវាយប្រហារ ដូច្នេះមុនពេលទាញយកវា `listMarketplacePlugins()` ដំណើរការវាតាមរយៈស្រទាប់ពីរ៖
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
    - បដិសេធអ្វីៗដែលមិនមែនជា `http:` / `https:`។
-   - បដិសេធ host ឯកជន/loopback/link-local/ULA ដែលបានបញ្ជាក់ដោយផ្ទាល់ (ទាំង IPv4 **និង** IPv6
-     រួមទាំង IPv4-mapped) តាមរយៈ `isPrivateHost` ស្តង់ដារ
-     (`src/shared/network/outboundUrlGuard.ts`)។
-   - ដោះស្រាយ record **ទាំង** `A` និង `AAAA` ហើយបដិសេធ ប្រសិនបើអាសយដ្ឋាន
-     ដែលបានដោះស្រាយ **ណាមួយ** ជាអាសយដ្ឋានឯកជន — ដើម្បីបិទចន្លោះឆ្លងកាត់ពី hostname សាធារណៈ → IP ឯកជន។
-   - **បរាជ័យដោយបិទជានិច្ច**៖ ការបរាជ័យក្នុងការដោះស្រាយ DNS នឹងធ្វើឱ្យ URL ត្រូវបានបដិសេធ។
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`)៖ អនុវត្តរបាំង URL សម្រាប់តែសាធារណៈឡើងវិញ
-   នៅពេល fetch និង **ទប់ស្កាត់ redirect** (មិនអនុញ្ញាត pivot `30x`
-   ពីសាធារណៈ → ឯកជន)។
+   - បដិសេធម៉ាស៊ីន private/loopback/link-local/ULA តាមព្យញ្ជនៈ (IPv4** និង** IPv6 រួមទាំង IPv4-mapped) តាមរយៈ Canonical `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) ។
+   - ដោះស្រាយ** ទាំងពីរ** `A` និង `AAAA` កត់ត្រា និងបដិសេធប្រសិនបើ** ណាមួយ។** អាសយដ្ឋានដែលបានដោះស្រាយគឺជា — ឯកជនបិទឈ្មោះសាធារណៈ-ម៉ាស៊ីនភ្ញៀវ → ឯកជន-IP ផ្លូវវាង។
+   - **បរាជ័យបិទ** ៖ ការបរាជ័យដំណោះស្រាយ DNS បដិសេធ URL។
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): re-applies the public-only URL guard at fetch time and **blocks redirects** (no public → private `30x` pivot).
 
-URL ដែលបរាជ័យនៅស្រទាប់ណាមួយ មិនធ្វើឱ្យ request ត្រូវបានបញ្ឈប់ទេ — marketplace
-នឹងត្រឡប់ទៅប្រើ seed registry ដែលមានស្រាប់ដោយស្ងាត់ៗ ហើយកត់ត្រាការព្រមាន។
+URL ដែលបរាជ័យក្នុងស្រទាប់ណាមួយមិនបោះបង់សំណើ — ទីផ្សារដោយស្ងៀមស្ងាត់ត្រឡប់ទៅបញ្ជីឈ្មោះគ្រាប់ពូជដែលភ្ជាប់មកជាមួយ ហើយកត់ត្រាការព្រមាន។
 
-> របាំងនេះត្រូវបានពង្រឹងនៅក្នុង PR #3774 ជាពិសេស ដើម្បីដោះស្រាយ A + AAAA និងប្រើ
-> `isPrivateHost` ស្តង់ដារ ជំនួសឱ្យការត្រួតពិនិត្យតែ IPv4។
+> ឆ្មាំនេះត្រូវបានរឹងនៅក្នុង PR #3774 ពិសេសដើម្បីដោះស្រាយ A + AAAA ហើយប្រើ `isPrivateHost` canonical ជំនួសឱ្យការត្រួតពិនិត្យ IPv4-only ។
 
-### ការញែកដាច់ដោយឡែកនៃការប្រតិបត្តិ Plugin
+### ភាពឯកោនៃការអនុវត្តកម្មវិធីជំនួយ
 
-- **ការញែក process ដាច់ដោយឡែក** — `loadPlugin()` (`src/lib/plugins/loader.ts`) spawn
-  plugin នីមួយៗក្នុង child process របស់ Node.js ដាច់ដោយឡែក ហើយទាក់ទងគ្នាតាម IPC។
-  ការហៅ hook មាន timeout ជាមួយនឹងការបង្កើនកម្រិតពី `SIGTERM` → `SIGKILL`។
-- **បញ្ជីអនុញ្ញាត Env** — child ទទួលបានតែសំណុំ environment variable
-  ដែលស្ថិតក្នុងបញ្ជីអនុញ្ញាតប៉ុណ្ណោះ។ សំណុំដែលទូលំទូលាយជាងនេះត្រូវបានផ្តល់ជូន តែនៅពេល manifest ស្នើសុំ
-  permission `env`។
-- **ការកំណត់ path ឱ្យស្ថិតក្នុងដែន** — ប្រតិបត្តិការ install/upgrade/uninstall ផ្ទៀងផ្ទាត់ថា directory របស់ plugin
-  និង `manifest.main` ត្រូវបានដោះស្រាយ **នៅខាងក្នុង** root របស់ plugin ដែលបានគ្រប់គ្រង
-  មុនពេល copy ឬ recursive delete ណាមួយ (ការពារប្រឆាំងនឹង path របស់ DB ដែលត្រូវបានកែប្រែដោយខុសច្បាប់ និង
-  traversal `../` នៅក្នុង `manifest.main`)។ ការដំណើរការ plugin ដោះស្រាយ symlink តាមរយៈ
-  `realpath` ហើយបដិសេធមិនផ្ទុក entry point ដែលគេចចេញពី directory របស់ plugin។
-- **ការខ្ទាស់ integrity ជាជម្រើស** — manifest អាចប្រកាស field `integrity`
-  (`sha256-<base64>` ទម្រង់ SRI)។ នៅពេលមានវត្តមាន loader នឹងផ្ទៀងផ្ទាត់ hash របស់
-  entry file នៅពេលផ្ទុក ហើយបដិសេធមិនដំណើរការ ប្រសិនបើមិនត្រូវគ្នា។ វាជាការរកឃើញការកែប្រែដោយខុសច្បាប់ដែលអាចជ្រើសរើសប្រើបាន
-  **មិនមែន** ជាព្រំដែនសុវត្ថិភាពទេ — routing សម្រាប់តែ loopback
-  និងគំរូ permission គឺជាព្រំដែនពិតប្រាកដ។
+> **កម្មវិធីជំនួយមិនត្រូវបាន Sandbox ទេ។** កូនគឺជាដំណើរការ Node.js ធម្មតាដែលកំពុងដំណើរការជាអ្នកប្រើប្រាស់ OmniRoute ដោយគ្មានបរិបទ VM និងគ្មានទង់ការអនុញ្ញាត Node.js ដូច្នេះកូដកម្មវិធីជំនួយអាចអាន និងសរសេរឯកសារណាមួយដែលអ្នកប្រើប្រាស់អាច ដំណើរការកម្មវិធី និងទៅដល់បណ្តាញ។ `requires.permissions` គ្រាន់តែសម្រេចចិត្តថាតើអថេរបរិស្ថានណាដែលកុមារទទួលបាន។ ការអនុញ្ញាតផ្សេងទៀតមិនត្រូវបានអនុវត្តទេ។ ដំឡើងតែកម្មវិធីជំនួយដែលអ្នកទុកចិត្តប៉ុណ្ណោះ។ ព្រំដែនដំណើរការខាងក្រោមមានការគាំង និងការព្យួរ។ វាមិនមែនជាព្រំដែនសន្តិសុខទេ។
+
+- **ភាពឯកោនៃដំណើរការ** — `loadPlugin()` (`src/lib/plugins/loader.ts`) បង្កើតកម្មវិធីជំនួយនីមួយៗក្នុងដំណើរការកូន Node.js ដាច់ដោយឡែក និងទំនាក់ទំនងតាម IPC។ ការហៅតាម Hook មានការអស់ពេលជាមួយនឹងការកើនឡើង `SIGTERM` → `SIGKILL` ។
+- **បញ្ជីអនុញ្ញាត Env** — កុមារទទួលបានតែសំណុំដែលបានអនុញ្ញាតនៃអថេរបរិស្ថាន។ សំណុំទូលំទូលាយត្រូវបានផ្តល់ឱ្យតែនៅពេលដែល manifest ស្នើសុំការអនុញ្ញាត `env` ។
+- **ដំឡើងការទប់ស្កាត់ប្រភព** — `POST /api/plugins` អានតែពីថតប្រភពកម្មវិធីជំនួយប៉ុណ្ណោះ (សូមមើល "ដំឡើងពីផ្លូវមូលដ្ឋាន"): ផ្លូវនេះត្រូវបាន canonicalized ជាមួយ `realpath` ត្រូវតែស្ថិតនៅយ៉ាងតឹងរ៉ឹងនៅក្នុងថតនោះ ហើយមែកធាងប្រភពដែលមាននិមិត្តសញ្ញាដែលរត់គេចពីវាត្រូវបានបដិសេធ មុនពេលដែលអ្វីៗត្រូវបានចម្លង។
+- **ការទប់ស្កាត់ផ្លូវ** — install/upgrade/uninstall អះអាងថាថតកម្មវិធីជំនួយនិង `manifest.main` ដោះស្រាយ** នៅខាងក្នុង** ឫសកម្មវិធីជំនួយដែលបានគ្រប់គ្រង មុនពេលច្បាប់ចម្លង ឬលុបឡើងវិញ (ការពារប្រឆាំងនឹងផ្លូវ DB ដែលត្រូវបានរំខាន និង `../` ឆ្លងកាត់នៅក្នុង `manifest.main`) ។ ការធ្វើឱ្យសកម្មដោះស្រាយ symlinks តាមរយៈ `realpath` ហើយបដិសេធមិនផ្ទុកចំណុចចូលដែលគេចចេញពីថតកម្មវិធីជំនួយ។
+- **ម្ជុលសុវត្ថិភាពស្រេចចិត្ត** — manifest អាចប្រកាសវាល `integrity` (`sha256-<base64>`, SRI format) ។ នៅពេលមានវត្តមាន កម្មវិធីផ្ទុកទិន្នន័យផ្ទៀងផ្ទាត់ hash ឯកសារចូលនៅពេលផ្ទុក ហើយបដិសេធមិនដំណើរការនៅពេលមិនស៊ីគ្នា។ វាគឺជាជម្រើសក្នុងការរកឃើញការរំខាន,** ទេ។** ព្រំដែនសុវត្ថិភាព៖ វាមិនកំណត់អ្វីដែលកម្មវិធីជំនួយដែលបានផ្ទុកអាចធ្វើបានទេ។
+- **មិនមានព័ត៌មានសម្គាល់អតិថិជននៅក្នុងទំពក់ទេ។** — បរិបទដែលបានឆ្លងទៅ `onRequest`, `onResponse` និង `onError` មានបឋមកថា `authorization`, `x-api-key`, `proxy-authorization` និង `cookie` ត្រូវបានដកចេញ ហើយកំណត់ត្រាគ្រាប់ចុច API មិនមានតម្លៃសោ (`redactPluginContext()` ក្នុង `src/lib/plugins/hooks.ts`) ។
 
 ## Manifest (`plugin.json`)
 
-ត្រូវបានផ្ទៀងផ្ទាត់ដោយ `PluginManifestSchema` (`src/lib/plugins/manifest.ts`)៖
+បញ្ជាក់ដោយ `PluginManifestSchema` (`src/lib/plugins/manifest.ts`):
 
-| Field              | Type      | កំណត់សម្គាល់                                                          |
-| ------------------ | --------- | --------------------------------------------------------------------- |
-| `name`             | string    | ទាមទារ; kebab-case (`^[a-z0-9-]+$`), 1–100 តួអក្សរ                    |
-| `version`          | string    | ទាមទារ; semver (`MAJOR.MINOR.PATCH`)                                  |
-| `description`      | string?   | ≤ 500 តួអក្សរ                                                         |
-| `author`           | string?   | ≤ 200 តួអក្សរ                                                         |
-| `license`          | string?   | លំនាំដើមជា `MIT`                                                      |
-| `main`             | string?   | entry file; លំនាំដើមជា `index.js`                                     |
-| `source`           | enum?     | `local` \| `marketplace` (លំនាំដើមជា `local`)                         |
-| `tags`             | string[]? | tag សម្រាប់ស្វែងរក                                                    |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                       |
-| `hooks`            | object?   | តម្លៃ Boolean ដែលប្រកាសថា plugin អនុវត្ត hook ណាខ្លះ                  |
-| `skills`           | object[]? | និយមន័យ skill ជាជម្រើស                                                |
-| `enabledByDefault` | boolean?  | ដំណើរការដោយស្វ័យប្រវត្តិនៅពេលដំឡើង                                    |
-| `configSchema`     | object?   | Map នៃ field កំណត់រចនាសម្ព័ន្ធ (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | ការខ្ទាស់ entry-file `sha256-<base64>` ជាជម្រើស                       |
+| វាល                | ប្រភេទ       | កំណត់ចំណាំ                                                         |
+| ------------------ | ------------ | ------------------------------------------------------------------ |
+| `name`             | ខ្សែអក្សរ    | ទាមទារ; kebab-case (`^[a-z0-9-]+$`) 1-100 តួអក្សរ                  |
+| `version`          | ខ្សែអក្សរ    | ទាមទារ; សេវើរ (`MAJOR.MINOR.PATCH`)                                |
+| `description`      | ខ្សែអក្សរ?   | ≤ 500 តួអក្សរ                                                      |
+| `author`           | ខ្សែអក្សរ?   | ≤ 200 តួអក្សរ                                                      |
+| `license`          | ខ្សែអក្សរ?   | លំនាំដើមទៅ `MIT`                                                   |
+| `main`             | ខ្សែអក្សរ?   | ឯកសារចូល; លំនាំដើមទៅ `index.js`                                    |
+| `source`           | enum?        | `local` \\                                                         | `marketplace` (លំនាំដើមទៅ `local`) |
+| `tags`             | ខ្សែអក្សរ[]? | ស្វែងរកស្លាក                                                       |
+| `requires`         | វត្ថុ?       | `{ omniroute?, permissions[] }`                                    |
+| `hooks`            | វត្ថុ?       | Booleans ប្រកាសថា ទំពក់ណាដែលកម្មវិធីជំនួយអនុវត្ត                   |
+| `skills`           | វត្ថុ[]?     | និយមន័យជំនាញស្រេចចិត្ត                                             |
+| `enabledByDefault` | ប៊ូលីន?      | បើកដំណើរការដោយស្វ័យប្រវត្តិនៅពេលដំឡើង                              |
+| `configSchema`     | វត្ថុ?       | ផែនទីនៃវាលកំណត់រចនាសម្ព័ន្ធ (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | ខ្សែអក្សរ?   | ខ្ទាស់ឯកសារបញ្ចូល `sha256-<base64>` ជាជម្រើស                       |
 
-Permission ត្រូវបានយកពី enum
-`network` / `file-read` / `file-write` / `env` / `exec`។
+ការអនុញ្ញាតត្រូវបានដកចេញពី enum `network` / `file-read` / `file-write` / `env` / `exec`។ មានតែ `env` ប៉ុណ្ណោះដែលមានឥទ្ធិពលពេលដំណើរការ (បញ្ជីអនុញ្ញាតអថេរបរិស្ថានដែលធំជាងបន្តិចសម្រាប់កុមារ); ផ្សេងទៀតគឺជាសេចក្តីប្រកាស និងមិនត្រូវបានអនុវត្ត។
 
 ## លំហូរវដ្តជីវិត
 
@@ -338,17 +303,14 @@ uninstall (DELETE /api/plugins/{name})
 
 ## ផ្ទាំងគ្រប់គ្រង
 
-ទំព័រផ្ទាំងគ្រប់គ្រងនៅ `/dashboard/plugins`
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) ផ្តល់ជូនផ្ទាំងពីរ៖
+ទំព័រផ្ទាំងគ្រប់គ្រងនៅ `/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) ផ្តល់នូវផ្ទាំងពីរ៖
 
-- **បានដំឡើង** — រាយបញ្ជី plugin ដែលបានដំឡើង ព្រមទាំង hooks ដែលបានប្រកាស ប៊ូតុងបិទ/បើក
-  activate/deactivate ប៊ូតុង uninstall និងសកម្មភាព "ស្កេនរក plugins"
-  (`POST /api/plugins/scan`)។
-- **ទីផ្សារ** — បង្ហាញកាតាឡុកពី `GET /api/plugins/marketplace` ជាមួយនឹង
-  វាលសម្រាប់កំណត់ registry URL ផ្ទាល់ខ្លួន។
+- **បានដំឡើង** — រាយបញ្ជីកម្មវិធីជំនួយដែលបានដំឡើងជាមួយនឹងទំពក់ដែលបានប្រកាសរបស់ពួកគេ បិទបើក activate/deactivate ប៊ូតុងលុបការដំឡើង និងសកម្មភាព "ស្កេនសម្រាប់កម្មវិធីជំនួយ" (`POST /api/plugins/scan`) ។
+- **ផ្សារ** — បង្ហាញកាតាឡុកពី `GET /api/plugins/marketplace` ជាមួយនឹងវាលមួយដើម្បីកំណត់ URL បញ្ជីឈ្មោះផ្ទាល់ខ្លួន។
 
-ទំព័រកំណត់រចនាសម្ព័ន្ធសម្រាប់ plugin នីមួយៗស្ថិតនៅ `/dashboard/plugins/[name]/config`
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`)។
+ទំព័រតែងតែបង្ហាញការព្រមានថាកម្មវិធីជំនួយដំណើរការជាមួយនឹងសិទ្ធិពេញលេញនៃដំណើរការ OmniRoute ។
+
+ទំព័រកំណត់រចនាសម្ព័ន្ធកម្មវិធីជំនួយនីមួយៗរស់នៅ `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) ។
 
 ## សូមមើលផងដែរ
 

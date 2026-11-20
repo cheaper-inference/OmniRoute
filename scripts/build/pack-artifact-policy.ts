@@ -460,3 +460,32 @@ export function findMissingArtifactPaths(
     .filter((requiredPath) => !normalizedPaths.has(requiredPath))
     .sort();
 }
+
+/**
+ * #20439: Turbopack names the server chunk of each full locale catalog
+ * (src/i18n/messages/<locale>.json) `src_i18n_messages_<locale>_json_[json]_cjs_<hash>._.js`.
+ * One per locale belongs to the page renderers (`server/chunks/ssr/`). npm 3.8.54 shipped a
+ * second copy of all 67 under `server/chunks/` (~79 MB unpacked) because the /authorize route
+ * handler — compiled in its own chunking context — reached src/i18n/request.ts through
+ * next-intl/server. Route handlers now translate through src/i18n/routeHandlerTranslations.ts;
+ * this returns every catalog chunk of a locale that has more than one, so check:pack-artifact
+ * fails if any server context starts bundling the catalogs again.
+ */
+const LOCALE_CATALOG_CHUNK = /(?:^|\/)src_i18n_messages_(.+?)_json_\[json\]_cjs_[^/]*\.js$/;
+
+export function localeCatalogChunkLocale(filePath: string): string | null {
+  return LOCALE_CATALOG_CHUNK.exec(normalizeArtifactPath(filePath))?.[1] ?? null;
+}
+
+export function findDuplicatedLocaleCatalogChunks(filePaths: string[]): string[] {
+  const byLocale = new Map<string, string[]>();
+  for (const filePath of filePaths.map(normalizeArtifactPath)) {
+    const locale = localeCatalogChunkLocale(filePath);
+    if (!locale) continue;
+    byLocale.set(locale, [...(byLocale.get(locale) ?? []), filePath]);
+  }
+  return [...byLocale.values()]
+    .filter((paths) => paths.length > 1)
+    .flat()
+    .sort();
+}

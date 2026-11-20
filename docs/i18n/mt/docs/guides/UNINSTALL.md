@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (Fakultattiv) Neħħi l-immaġni
+docker rmi cheaperinference/omniroute:latest
+# Installazzjonijiet anzjani ġibdu l-isem tal-legat:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

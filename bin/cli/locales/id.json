@@ -12,7 +12,8 @@
     "dryRun": "[simulasi] akan: {action}",
     "cancelled": "Dibatalkan.",
     "jsonOpt": "Keluaran sebagai JSON",
-    "yesOpt": "Lewati konfirmasi"
+    "yesOpt": "Lewati konfirmasi",
+    "positiveIntegerRequired": "Batas harus berupa bilangan bulat positif."
   },
   "setup": {
     "title": "Penyiapan OmniRoute",

@@ -927,6 +927,7 @@ export default function CostOverviewTab() {
             <TopListCard
               title={t("topModels")}
               nameKey="model"
+              qualifierKey="provider"
               valueKey="cost"
               secondaryKey="totalTokens"
               secondaryLabel={t("tokens")}

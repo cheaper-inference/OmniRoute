@@ -1841,9 +1841,28 @@ export async function getProviderCredentials(
       // has quota. When its lockout ends before the earliest quota reset, the request
       // is blocked by that lockout, not by quota exhaustion: report it as a model
       // cooldown with the lockout's retry time.
+      // The same holds for an account excluded because it just failed in this request:
+      // the fallback loop excludes it right after recording its short lockout, so it is
+      // reported as "excluded", not "modelLocked", while that lockout is what blocks it.
+      // Exclusion is decided before the account-cooldown and quota checks, so an excluded
+      // account counts only when it is not in an account cooldown and its own quota still
+      // allows the model once the lockout ends.
       const earliestModelLockout = requestedModel
         ? connections
-            .filter((connection) => connectionFilterStatus.get(connection.id) === "modelLocked")
+            .filter((connection) => {
+              const status = connectionFilterStatus.get(connection.id);
+              return (
+                status === "modelLocked" ||
+                (status === "excluded" &&
+                  !isAccountUnavailable(connection.rateLimitedUntil) &&
+                  !isQuotaExhaustedForRequest(
+                    connection.id,
+                    provider,
+                    requestedModel,
+                    connection.providerSpecificData
+                  ))
+              );
+            })
             .map((connection) => {
               const lockout = getModelLockoutInfo(provider, connection.id, requestedModel);
               return lockout &&

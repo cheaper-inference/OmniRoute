@@ -39,6 +39,7 @@ import {
 } from "@/shared/utils/providerQuotaVisibility";
 import ProviderQuotaVisibilityToggle from "./ProviderQuotaVisibilityToggle";
 import CodexPingNowButton from "./CodexPingNowButton";
+import { formatApiKeyLast4 } from "@/shared/utils/apiKeyMask";
 
 // ---------------------------------------------------------------------------
 // Types (exported so the client can reference them without re-importing)
@@ -161,6 +162,7 @@ export default function ConnectionRow({
         t("oauthAccount")
       )
     : connection.name;
+  const maskedApiKey = !isOAuth && connection.apiKey ? formatApiKeyLast4(connection.apiKey) : null;
   const applyCodexAuthLabel = providerText(t, "applyCodexAuthLocal", "Apply auth");
   const exportCodexAuthLabel = providerText(t, "exportCodexAuthFile", "Export auth");
   const applyClaudeAuthLabel = providerText(t, "applyClaudeAuthLocal", "Apply auth");
@@ -329,8 +331,16 @@ export default function ConnectionRow({
           className="hidden text-text-muted sm:inline-block"
         />
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium break-words sm:truncate">
-            {displayName}
+          <p className="text-sm font-medium break-words sm:truncate flex items-center gap-2 flex-wrap">
+            <span>{displayName}</span>
+            {maskedApiKey && (
+              <span
+                className="font-mono text-xs font-normal text-text-muted bg-bg-subtle px-1.5 py-0.5 rounded border border-border shrink-0 select-all"
+                title={maskedApiKey}
+              >
+                {maskedApiKey}
+              </span>
+            )}
             {codexAccount && (
               <span
                 className="font-normal text-text-muted"

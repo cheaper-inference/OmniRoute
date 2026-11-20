@@ -469,7 +469,6 @@ export default function APIPageClient({ machineId }: Readonly<APIPageClientProps
         setShowCloudflaredTunnel(tunnelVisibility.showCloudflaredTunnel);
         setShowTailscaleFunnel(tunnelVisibility.showTailscaleFunnel);
         setShowNgrokTunnel(tunnelVisibility.showNgrokTunnel);
-        if (data.ngrokAuthToken) setNgrokToken(data.ngrokAuthToken);
         setCustomSystemPromptEnabled(!!data.customSystemPromptEnabled);
         setCustomSystemPrompt(data.customSystemPrompt || "");
 
