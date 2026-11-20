@@ -107,3 +107,13 @@ export interface RecordConsumptionInput {
   model?: string;
   cost: { tokens?: number; usd?: number; requests?: number };
 }
+
+/** A provider plan-window figure fit to drive the attribution book. */
+export interface PlanWindowReading {
+  /** Account usage of the plan window, 0..1. */
+  used: number;
+  /** Provider reset of the window, epoch ms; null when the provider sent none. */
+  resetAt: number | null;
+  /** When this process built the cached saturation entry, epoch ms. */
+  fetchedAt: number;
+}
