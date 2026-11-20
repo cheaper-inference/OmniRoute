@@ -2,7 +2,27 @@
   "version": 1,
   "base": "release/v3.8.55",
   "paused": null,
-  "inFlight": null,
+  "inFlight": {
+    "batchId": "b11",
+    "kind": "batch",
+    "candidateRef": "omni-queue/release-v3.8.55/b11-b6dd0a169668",
+    "candidateSha": "b6dd0a1696681bfca5062552030831a38ea263e7",
+    "baseSha": "8f56803041779d3e501001f2cdec37b37f43d456",
+    "treeSha": "068b1d7cdcf4ea0b746c764262b64a4946baef9d",
+    "prs": [
+      {
+        "n": 18591,
+        "head": "5d23f3635bb810b7375582baf8c394e26d8ef462",
+        "title": "feat(dashboard): add the Grok Bot console",
+        "author": "HouMinXi",
+        "labeledAt": "2026-11-20T13:12:50Z"
+      }
+    ],
+    "stage": "testing",
+    "startedAt": "2026-11-20T13:24:16.513Z",
+    "attempts": 0,
+    "bisect": null
+  },
   "baseChecks": [
     {
       "baseSha": "cc59ad70b2e9a343f26860e0e040281cb433a37a",
@@ -32,8 +52,8 @@
     }
   },
   "counters": {
-    "batchSeq": 10,
-    "ciRuns": 11,
+    "batchSeq": 11,
+    "ciRuns": 12,
     "landedPrs": 0,
     "landedBatches": 0,
     "redBatches": 4,
@@ -856,8 +876,22 @@
       "sha": "212063f002231a4dbd53600d0e0ed3c3bf4221e6",
       "detail": "shadow mode: would merge-ff onto 632d84f569f7",
       "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44732907873"
+    },
+    {
+      "at": "2026-11-20T13:24:20.960Z",
+      "type": "batch-started",
+      "batchId": "b11",
+      "prs": [
+        18591
+      ],
+      "sha": "b6dd0a1696681bfca5062552030831a38ea263e7",
+      "detail": "1 PR(s) on 8f5680304177; window 9",
+      "labeledAt": {
+        "18591": "2026-11-20T13:12:50Z"
+      },
+      "url": "https://github.com/cheaper-inference/OmniRoute/actions/runs/44743913685"
     }
   ],
-  "updatedAt": "2026-11-20T13:13:52.485Z",
+  "updatedAt": "2026-11-20T13:24:22.933Z",
   "batchWindow": 9
 }
