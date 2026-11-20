@@ -186,29 +186,92 @@ Təxminən 30-dan çox cədvəlin tam siyahısı `src/lib/db/migrations/` daxili
 
 ## Miqrasiyalar
 
-OmniRoute `src/lib/db/migrations/` qovluğunda **versiyalaşdırılmış, idempotent miqrasiyalardan** istifadə edir. Hər miqrasiya `NNN_description.sql` formatında adlandırılmış ayrıca SQL faylıdır.
+OmniRoute istifadə edir** versiyalı, idempotent köçlər** `src/lib/db/migrations/`. Hər bir köçürmə tək SQL faylıdır. İki adlandırma formatı birlikdə mövcuddur; `_omniroute_migrations` -də qeydə alınan versiya rəqəmli prefiksdir.
 
-### Miqrasiyaların adlandırılması
+### Miqrasiya Adlandırma
 
-```
-001_initial_schema.sql
-002_mcp_a2a_tables.sql
-003_provider_node_custom_paths.sql
-...
-021_combo_call_log_targets.sql
-```
+| Format                                           | Misal                                | üçün istifadə olunur                                                                                                                                           |
+| ------------------------------------------------ | ------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `NNN_description.sql` (dəqiq 3 rəqəm)            | `241_seen_models.sql`                | Köhnə seriya `001`–`241`. Vaxt damğası formatı endikdə dondurulub (`240` və `241` ondan bir qədər əvvəl birləşdirilib): heç bir yeni fayl ardıcıl nömrə almır. |
+| `YYYYMMDDHHMMSS_description.sql` (14 rəqəm, UTC) | `20261113120000_add_usage_index.sql` | 2026-11-13 tarixindən yaranan hər miqrasiya.                                                                                                                   |
 
-### Miqrasiyalar necə icra olunur
+Dəyişiklik niyə: ardıcıl nömrələrlə paralel PRs eyni növbəti nömrəni seçdi və birindən başqa hamısı birləşmədən əvvəl yenidən nömrələnməlidir. UTC vaxt damgası hər PR öz versiyasını verir.
 
-Tətbiq başladıqda `migrationRunner.ts`:
+Vaxt damğası formatı üçün qaydalar ( `npm run check:migration-numbering` tərəfindən tətbiq edilir, `scripts/check/lib/migrationNaming.mjs`-də generatorla paylaşılır):
 
-1. Mövcud deyilsə, `_omniroute_migrations` cədvəlini yaradır
-2. Artıq tətbiq edilmiş miqrasiyaları sorğulayır
-3. Bütün yeni miqrasiyaları sıra ilə və hər birini ayrıca tranzaksiyada tətbiq edir
-4. Tətbiq edilmiş hər miqrasiyanı zaman nişanı ilə qeydə alır
+- Vaxt möhürü `20261113000000` dən tez olmayan və gələcəkdə 10 dəqiqədən çox olmayan real UTC tarixi və vaxtıdır.
+- Təsvir `snake_case` hərfi ilə başlayan kiçik hərflə (`a-z`, `0-9`, sözlər arasında tək `_` ), ən çoxu 80 simvoldan ibarətdir.
+- Eyni vaxt damğası olan iki fayl dublikatdır.
+- Qeyri-boşluq qaydası yalnız köhnə sıralara aiddir: `026`, `055` və `121` məlum boşluqlar istisna olmaqla, `001` -dan `241` ə qədər hər bir ədəd mövcud olmalıdır. `241` (və ya hər hansı köhnə fayl) silinməsi qapını uğursuz edir. `001` və `241` heç vaxt `KNOWN_GAPS` icazə siyahısına əlavə edilə bilməz. Vaxt damğası olan fayllar heç vaxt boşluq yaratmır.
+- `src/lib/db/migrations/` -dakı hər giriş etibarlı kiçik hərf `.sql` adı olan adi fayl olmalıdır. Kataloq, simvolik keçid, `.SQL` və ya `.sql.bak` faylı, gizli fayl və ya boşluqlu ad qapıdan keçmir, çünki qaçışçı onu səssizcə ötürər və ya açılış zamanı qəzaya uğrayar.
+
+**Sifariş tətbiq edin.** Qaçışçı mətnə görə deyil, prefiksin ədədi dəyərinə görə çeşidləyir: əvvəlcə köhnə `001`–`241` faylları, sonra zaman damğası sırası ilə zaman damğası qoyulmuş fayllar, sonra `OMNIROUTE_EXTRA_MIGRATIONS_DIRS` ilə qeydiyyatdan keçmiş istənilən ad boşluqlu qovluqlar ( `ee-001` kimi versiyalar). Gözləyən miqrasiya versiyası `_omniroute_migrations`-də olmayan hər hansı bir fayldır, ona görə də yenisindən sonra birləşən köhnə filialdan miqrasiya hələ də mövcud verilənlər bazalarına tətbiq edilir.
+
+**Vaxt möhürü birləşmə qaydası deyil, yaradılış sırasıdır.** Əgər miqrasiyanız a ilə miqrasiya tərəfindən yaradılmış cədvəl və ya sütundan asılıdırsa** daha yeni** vaxt damgası (məsələn, birinci birləşən digər PR dan biri), təzə verilənlər bazası əvvəlcə sizinkini işlədəcək və uğursuz olacaq. Sizin PR hələ açıq olsa da, fayl adını `npm run db:new-migration` ilə bərpa edin ki, o, daha yeni vaxt damğası əldə etsin və ya onu müstəqil edin. `npm run test:migrations:fresh` hər miqrasiyanı boş verilənlər bazasına tətbiq edir və bunu tutur.
+
+### Birləşdirilmiş miqrasiya heç vaxt silinmir və ya adı dəyişdirilmir
+
+Miqrasiya faylı buraxılış filialında və ya `main` da olduqdan sonra o, artıq homolog və developer verilənlər bazalarında, VPS quraşdırmalarında və Enterprise sinxronizasiyasında işləmişdir. Bundan sonra:
+
+- **Heç vaxt silməyin.** Təkmilləşdirilmiş verilənlər bazası onu saxlayarkən təzə quraşdırmalar öz sxemini itirəcək.
+- **Heç vaxt adını dəyişməyin.** `_omniroute_migrations` -dakı versiya artıq fayla uyğun gəlməyəcək, ona görə də onu tətbiq etmiş hər bir verilənlər bazası onu yenidən işə salacaq. Qeyri-idempotent SQL sonra məlumatları təkrarlayır və ya yükləməni dayandırır.
+- **Fərqli bir sxemə ehtiyacınız varmı?** `npm run db:new-migration` ilə yeni miqrasiya yaradın.
+
+Adının dəyişdirilməsi yalnız hələ birləşdirilməmiş fayl üçün təhlükəsizdir, bu da qapının göstərişlərinə istinad edir. Buraxılış teqi burada heç nəyi dəyişmir: `release/v*` filialına edilən hər təkan Docker `:next` şəklini dərc edir və homolog, VPS quraşdırmaları və Enterprise sinxronizasiyası üzərində işləyir, beləliklə, hər hansı `vX.Y.Z` teqi mövcud olmamışdan əvvəl birləşdirilmiş miqrasiya real verilənlər bazalarında həyata keçirilir. Qapı, işarələnmiş və ya olmayan əsas faylın hər silinməsində uğursuz olur.
+
+- **Birləşdirilmiş miqrasiyanın geri qaytarılması.** Faylı silən `git revert` qapını uğursuz edir. Faylı saxlayın və onun sxemini yeni köçürmədə geri alın: `npm run db:new-migration -- <description>`, `DROP TABLE IF EXISTS`, `DROP INDEX IF EXISTS` və s. ilə. Təkmilləşdirilmiş və təzə verilənlər bazaları daha sonra eyni sxemlə bitir.
+- **Qəbul edilən bir ad dəyişdirmə: uyğunluq girişi və eyni məzmun.** Birləşdirilmiş fayl hərəkət etməlidirsə (məsələn, iki birləşdirilmiş fayl vaxt damğasını paylaşır və qaçışçı versiyanın toqquşması ilə dayanırsa), SQL toxunmadan sonrakının adını dəyişdirin və `src/lib/db/migrationRunner/constants.ts`-də `RENAMED_MIGRATION_COMPATIBILITY` -ə `{ fromVersion, fromName, toVersion, toName }` əlavə edin. Köhnə versiyanı tətbiq edən verilənlər bazası faylı yenidən işə salmaq əvəzinə öz `_omniroute_migrations` sırasını köçürür. Qapı belə bir ad dəyişdirmə barədə xəbərdarlıq edir və yeni vaxt damğası nə olursa olsun, həmişə onun üzərində kommutasiya yoxlamasını həyata keçirir: təzə quraşdırmalar faylı yeni mövqeyində tətbiq edir, təkmilləşdirilmiş verilənlər bazası tətbiq etmir, ona görə də köhnənin yanında yeni vaxt damğası seçin. Məzmun dəyişdirildikdə (sxem dəyişikliyi hələ də yeni miqrasiyada gedir) və ya girişin hədəf faylı diskdə deyilsə, qapı adını dəyişdirə bilmir.
+- **Heç vaxt eyni vaxt damğası daxilində adını dəyişməyin.** Vaxt möhürünü saxlayan və yalnız təsviri dəyişən adının dəyişdirilməsi, girişlə və ya giriş olmadan darvazadan keçmir. `toVersion` `fromVersion` ə bərabər olan girişlə qaçışçı köhnə `_omniroute_migrations` cərgəsini silir və faylı artıq işləmiş hər bir verilənlər bazasında yenidən tətbiq edir. Giriş olmadan, qaçışçı yalnız versiyanı izləyir: o, həmin verilənlər bazasındakı faylı atlayır (yeni məzmun heç vaxt orada işləmir) və hər açılışda nömrələmə xətası qeyd edir. Başqa vaxt damğası və uyğunluq qeydindən istifadə edin və ya adı saxlayın.
+- **Qapı adı dəyişdirilmiş faylın yenidən işləmədiyini yoxlayır.** Hər əhatə olunmuş adının dəyişdirilməsi üçün qapı yeni fayl adını `--must-not-apply` ilə kommutasiya yoxlamasına keçir. Çek təkmilləşdirilmiş verilənlər bazasını real qaçışçı ilə yükləyir və qaçışçı həmin faylı yenidən tətbiq edərsə (məsələn, girişin yanlış versiyası və ya adı olduğu üçün və ya darvazanın mətn təhlilçisi `constants.ts` TypeScript-dən fərqli oxuduğu üçün), qapı `migration renomeada rodaria de novo` ilə uğursuz olur və sizdən girişin köhnə və yeni versiyalarını və adlarını yoxlamağı xahiş edir.
+
+### Qapının bazaya qarşı yoxladığı şey
+
+Çəkmə sorğusu və birləşmə növbəsi işlərində `npm run check:migration-numbering` diskdəki `src/lib/db/migrations/` baza filialındakı eyni kataloqla müqayisə edir. Baza bu qaydadadır: `--base-latest-tag`, `--base <ref>`, `MIGRATION_BASE_REF` dəyişəni və ya `GITHUB_EVENT_NAME` `pull_request` olduqda, `pull_request_target` və ya `merge_group`, birləşmənin ilk valideyni, hadisənin faydalı yükünün `merge_group.base_sha` və ya `git merge-base HEAD origin/$GITHUB_BASE_REF`. Çəkmə sorğusunda və ya həll edilə bilən bazası olmayan birləşmə növbəsində qapı uğursuz olur. `--base` olmadan CI xaricində `comparação com a base: pulada (sem --base)` çap edir və bu qaydaları atlayır.
+
+`--base-latest-tag` `--base` ilə eyni qaydalarla `HEAD` tarixində olan ən yeni buraxılış teqi (semver qaydasında `vX.Y.Z` ; gecələr kimi şəkilçi teqlər sayılmır) ilə müqayisə edir. Release-Green (`scripts/quality/validate-release-green.mjs`) qapını bu şəkildə idarə edir, çünki təkan və planlaşdırılmış qaçışların çəkmə sorğusu bazası yoxdur və birləşmə təzə CI qaçışı olmadan enə bilər. Tarixdə heç bir buraxılış etiketi olmadan darvaza uğursuz olur; `git fetch --tags` çalıştırın ( CI də , `fetch-depth: 0` ilə `actions/checkout` teqləri gətirir).
+
+| Çəkmə sorğusunda dəyişiklik edin                                                                                          | Nəticə                                                                                                                                                                                                                                                                                                                                                             |
+| ------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Bazada mövcud olan faylın adı `RENAMED_MIGRATION_COMPATIBILITY` girişi ilə dəyişdirilir                                   | **Xəbərdarlıq** məzmun eynidirsə və kommutasiya yoxlanışı yeni vaxt damğasından asılı olmayaraq işləyirsə; yeni mövqe son sxemi dəyişərsə (adını dəyişdirin və ya onun işlədiyi yerdə başqa yeni vaxt damğası seçin) və ya qaçışçı yenidən adı dəyişdirilmiş faylı təkmilləşdirilmiş verilənlər bazasında tətbiq edərsə, uğursuz olur.** Uğursuz** məzmun dəyişsə. |
+| Bazada mövcud olan faylın adı dəyişdirilərək vaxt damğası saxlanılır (yalnız təsvir dəyişir)                              | **Uğursuz** , girişlə və ya giriş olmadan: qaçışçı onu yenidən tətbiq edəcək (girişlə) və ya versiyaya görə (bir olmadan) keçəcək. Başqa vaxt damğası və uyğunluq qeydindən istifadə edin və ya adı saxlayın.                                                                                                                                                      |
+| Bazada mövcud olan fayl silinir və ya giriş olmadan adı dəyişdirilir                                                      | **Uğursuz** , faylın buraxılış etiketində olub-olmamasından asılı olmayaraq. Onu ləğv etmək üçün faylı `git checkout <base> -- src/lib/db/migrations/<file>` ilə bərpa edin; onun sxemini geri qaytarmaq üçün `DROP ... IF EXISTS` ilə yeni miqrasiya əlavə edin.                                                                                                  |
+| Bazada mövcud olan fayl müxtəlif məzmuna malikdir                                                                         | **Xəbərdarlıq** ( GitHub Actions-da `::warning` annotasiyası) və kommutasiya yoxlanışı həyata keçirilir. Redaktə yekun sxemi dəyişdirərsə, bu uğursuz olur, çünki təkmilləşdirilmiş verilənlər bazaları redaktə edilmiş faylı bir daha tətbiq etmir: dəyişikliyi yeni miqrasiyaya qoyun. Zərərsiz redaktə (şərh, `IF NOT EXISTS`) yalnız xəbərdarlıq edir.         |
+| Zaman damğası vurulmuş fayl bazanın ən yenisindən daha yeni olmayan vaxt damğası ilə əlavə edilir                         | Aşağıda təsvir edilən kommutasiya yoxlamasını həyata keçirir.                                                                                                                                                                                                                                                                                                      |
+| Köhnə formatlı `NNN_` faylı bazanın ən yeni köhnə format faylının altındakı nömrə ilə əlavə olunur                        | **Uğursuz** , `KNOWN_GAPS` eyni çəkmə sorğusunda redaktə olunsa belə: köhnə seriya dondurulub, `npm run db:new-migration` ilə miqrasiya yaradın. Bazanın ən yenisindən yuxarı olan köhnə formatlı fayllar ( `release/v*` -dən `main` çəkmə sorğusu) qəbul edilir.                                                                                                  |
+| Sıradan çıxmış, redaktə edilmiş və ya adı dəyişdirilmiş faylda `INSERT`, `UPDATE`, `DELETE` və ya `REPLACE` ifadələri var | **Xəbərdarlıq** : kommutasiya yoxlanışı məlumatları müqayisə etmir, ona görə də təkmilləşdirilmiş və təzə verilənlər bazalarının tətbiqi sırasının nəticəni dəyişib-dəyişdirmədiyini nəzərdən keçirin.                                                                                                                                                             |
+
+Kommutasiya yoxlamasının bir işi sıradan çıxmış, redaktə edilmiş və adı dəyişdirilmiş faylları birlikdə əhatə edir.
+
+Kommutasiya yoxlaması (`scripts/check/migration-commutation.ts`) real quraşdırma yolu ilə iki müvəqqəti verilənlər bazası qurur: a** təkmilləşdirilmiş** biri (əsas miqrasiya ilə yükləyin, sonra çəkmə sorğusunun miqrasiyaları ilə eyni faylda yenidən yükləyin) və** təzə** bir (çəkmə sorğusunun miqrasiyaları ilə bir açılış). O, nəticədə yaranan sxemləri müqayisə edir: cədvəllər və sütunlar (sütun sırasına məhəl qoymadan), UNIQUE / PRIMARY KEY və FOREIGN KEY məhdudiyyətləri, hər cədvəlin normallaşdırılmış `CREATE TABLE` mətni ( CHECK məhdudiyyətlərini, harmanlamaları, yaradılan sütunları və cədvəl seçimlərini əhatə edir), indekslər, tətiklər və görünüşlər. Sətir məlumatları müqayisə edilmir. Əgər onlar uyğun gəlirsə, qapı faylın sıradan çıxdığını yazır, lakin işə gedir və keçir. Əgər onlar fərqlidirsə, qapı fərq və iş üçün göstərişlə uğursuz olur: sıradan çıxmış fayl üçün onun adını `npm run db:new-migration` ilə bərpa edin, çünki fayl hələ birləşdirilməyib; redaktə edilmiş əsas fayl üçün əsas məzmunu bərpa edin və dəyişikliyi yeni miqrasiyaya qoyun; adı dəyişdirilmiş fayl üçün adının dəyişdirilməsini ləğv edin və ya onun işlədiyi yerdə başqa yeni vaxt damgası seçin, heç vaxt başqa adla eyni vaxt damgası olmasın. Çekin özü işləyə bilmirsə, qapı CI də uğursuz olur və yalnız yerli olaraq xəbərdarlıq edir. Redaktə edilmiş əsas fayl üçün təkmilləşdirilmiş verilənlər bazası həmin faylın baza məzmunu ilə qurulur və onun versiyası artıq qeydə alındığı üçün ikinci yükləmə onu atlayır. Adı dəyişdirilmiş fayl üçün təkmilləşdirilmiş verilənlər bazası köhnə adı altında fayl ilə qurulur və ikinci yükləmə `_omniroute_migrations` cərgəsini yenidən işə salmaq əvəzinə uyğunluq girişindən keçir; qapı yeni adı `--must-not-apply` ilə keçir, ona görə də ikinci yükləmə onu tətbiq edərsə yoxlama uğursuz olur. Əgər çəkmə sorğusu miqrasiyası təkmilləşdirilmiş yolda tətbiq olunmursa, yəni hər baza miqrasiyasından sonra (təzə quraşdırmada da uğursuz olub-olmamasından asılı olmayaraq) qapı `migration do PR não aplica` hesabat verir və sizdən bazanın cari sxeminə qarşı SQL düzəltməyi xahiş edir; fayl daha sonrakı vaxt damğası ilə başqa çəkmə sorğusu miqrasiyasından asılıdırsa, onun adını `npm run db:new-migration` ilə bərpa edin.
+
+Eyni müqayisəni yerli olaraq həyata keçirmək üçün bazanı açıq şəkildə ötürün, məsələn `npm run check:migration-numbering -- --base origin/<base-branch>` və ya ən son buraxılışla müqayisə etmək üçün `npm run check:migration-numbering -- --base-latest-tag`.
+
+### Açıq PR-nın `NNN` Miqrasiyasına çevrilməsi
+
+Keçiddən əvvəl açılmış çəkmə sorğusu hələ də `242_add_widgets.sql` kimi ardıcıl fayl daşıya bilər. `241` dən yuxarı olan köhnə nömrələr rədd edilir, ona görə də birləşmədən əvvəl onu çevirin:
+
+1. **Təsviri saxlayaraq faylın adını generatorla dəyişdirin.** Yeni adı almaq üçün `npm run db:new-migration -- <same description>` işə salın, SQL ni ona köçürün və köhnə `NNN_` faylını silin. Təsvir eyni qalmalıdır: aşağıda uyğunluq qeydi ona uyğun gəlir.
+2. **Davamlı verilənlər bazası köhnə nömrəni işlədirsə, uyğunluq girişi əlavə edin.** Əgər saxlanılan hər hansı verilənlər bazası (homolog, VPS, ianəçinin öz quraşdırması) `NNN_` faylı ilə PR quruluşunu işlədirsə, `src/lib/db/migrationRunner/constants.ts`-də `RENAMED_MIGRATION_COMPATIBILITY` -ə `{ fromVersion: "<NNN>", fromName: "<description>", toVersion: "<YYYYMMDDHHMMSS>", toName: "<description>" }` əlavə edin. bu** `237` - `241` üçün tələb olunur** : bu yuvalar indi kanonik `237_usage_history_calculated_cost.sql`, `238_codex_connection_fences.sql`, `239_call_logs_pending_detail_index.sql`, `240_provider_node_custom_json_config.sql` və `241_seen_models.sql` saxlayır və belə bir verilənlər bazası giriş olmadan kanonik miqrasiyanı əbədi olaraq atlayır və çevrilmiş olanı yenidən işə salır. O, həmçinin təyinat vaxt damğası olduqda, `242` kimi boş qalan yuva üçün işləyir. Şübhə olduqda, girişi əlavə edin. Onu massivdə hara əlavə etməyiniz vacib deyil: girişin hədəf yuvası hələ də başqa bir girişin uzaqlaşdığı cərgə saxladıqda (məsələn, köhnə `usage_history_calculated_cost` cərgəsi `237`-a keçməyi gözləyərkən `237` PR cərgəsini saxlayır), qaçışçı həmin girişi yuva boş olana qədər gözləməyə icazə verir. Yalnız real münaqişə, məsələn, heç bir giriş hərəkəti olmayan bir sıra tərəfindən tutulan yuva və ya yuvaları dəyişdirən iki giriş, `Cannot reconcile ...` ilə açılışı dayandırır.
+3. **SQL idempotent saxlayın** (`CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `INSERT OR IGNORE`), çünki çevrilmiş miqrasiya onun sxeminin artıq mövcud olduğu verilənlər bazasına cavab verə bilər.
+4. **Versiya açarlı xüsusi halları köçürün.** Əgər PR köhnə nömrəsinə `isSchemaAlreadyApplied()` (`src/lib/db/migrationRunner.ts`) və ya `OPTIONAL_FTS5_MIGRATION_VERSIONS` (`src/lib/db/migrationRunner/constants.ts`) ilə hərf əlavə edibsə, açarı yeni vaxt damğasına dəyişin.
+
+`tests/unit/db/codex-fence-migration-rename.test.ts` adı dəyişdirilmiş miqrasiya üçün sınaq nümunəsidir.
+
+### Keçiddən əvvəl filiallara qayıdır
+
+Heç vaxt `YYYYMMDDHHMMSS_` faylını keçiddən əvvəl olan filiala (məsələn, köhnə `release/v*` filialı) albalı seçməyin və ya backport etməyin. Oradakı qaçışçı fayl adlarını mətn kimi çeşidləyir, ona görə də vaxt damğası qoyulmuş fayl yeni verilənlər bazasında `201_` və `202_` arasında işləyəcək və oradakı köhnə qapı 14 rəqəmli prefiksləri başa düşmür. Belə bir filialda dəyişikliyi həmin filialın özünün növbəti `NNN_` faylı kimi yazın, idempotent, ona görə də vaxt damğası olan versiya sonra gələndə o, qeyri-opdur.
+
+### Miqrasiya necə gedir
+
+Başlanğıcda, `migrationRunner.ts`:
+
+1. Əgər mövcud deyilsə, `_omniroute_migrations` cədvəli yaradır
+2. Artıq tətbiq edilmiş köçürmələr üçün sorğular
+3. Hər bir tranzaksiyada hər hansı yeni miqrasiyanı ardıcıllıqla tətbiq edir
+4. Tətbiq olunan hər bir köçü vaxt damğası ilə qeyd edir
 
 ```ts
-// src/lib/db/migrationRunner.ts (sadələşdirilib)
+// src/lib/db/migrationRunner.ts (simplified)
 export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
   const applied = getAppliedMigrations(db);
   const available = readMigrationFiles(migrationsDir);
@@ -223,9 +286,9 @@ export async function runMigrations(db: SqliteDatabase, migrationsDir: string) {
 }
 ```
 
-### İdempotentlik
+### Qüsursuzluq
 
-Miqrasiyalar **idempotent** olmalıdır — onların iki dəfə icrası heç bir əməliyyatla nəticələnməməlidir:
+Köçlər olmalıdır** idempotent** — onları iki dəfə işə salmaq qeyri-op olmalıdır:
 
 ```sql
 -- 004_proxy_registry.sql
@@ -237,26 +300,27 @@ CREATE TABLE IF NOT EXISTS proxy_registry (
 );
 ```
 
-`IF NOT EXISTS`, `IF EXISTS` və `OR IGNORE` / `OR REPLACE` bəndlərindən geniş şəkildə istifadə edin.
+`IF NOT EXISTS`, `IF EXISTS` və `OR IGNORE` / `OR REPLACE` bəndlərindən liberal şəkildə istifadə edin.
 
 ### Yeni miqrasiyanın əlavə edilməsi
 
-1. **Növbəti nömrəni müəyyən edin**: `ls src/lib/db/migrations/ | tail -1`
-2. **Faylı yaradın**: `NNN_my_change.sql`
-3. **Təhlükəsiz DDL-dən istifadə edin**: `CREATE TABLE IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
-4. **Məlumatları ehtiyatla doldurun**: mövcud sətirləri emal etmək üçün `UPDATE ... WHERE ...` istifadə edin
-5. **Nüsxə üzərində sınaqdan keçirin**: sınaqdan keçirilməmiş miqrasiyaları heç vaxt istehsal mühitində icra etməyin
+1. **Generator ilə fayl yaradın** : `npm run db:new-migration -- <description>` (məsələn, `npm run db:new-migration -- add combo priority`). O, cari UTC vaxtı və şərh başlığı ilə `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` yazır, həmin vaxt damğası götürülərsə, bir saniyə irəliləyir və heç vaxt faylın üzərinə yazmır. Nömrəni əl ilə seçməyin.
+2. **Təhlükəsiz DDL istifadə edin** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
+3. **Məlumatları diqqətlə doldurun** : mövcud sətirləri idarə etmək üçün `UPDATE ... WHERE ...` istifadə edin
+4. **Sifarişi və adını yoxlayın** : `npm run test:migrations:fresh` (boş verilənlər bazasında bütün köçürmələr) və `npm run check:migration-numbering`
+5. **Bir nüsxədə sınaq** : istehsalda heç vaxt sınaqdan keçirilməmiş miqrasiyaları həyata keçirməyin
+6. **Koddan yaradılmış cədvəlin də miqrasiyaya ehtiyacı var** : modul da cədvəli tənbəl şəkildə yaradırsa (`CREATE TABLE IF NOT EXISTS`, özünü sağaltma yolu kimi saxlanılır), köçürmə onu eyni DDL ilə yaratmalıdır. Əks halda, təmiz quraşdırma və təkmilləşdirilmiş quraşdırma, həmin kod yolunun keçib-keçməməsindən asılı olaraq müxtəlif sxemlərlə başa çatır. `tests/unit/db/lazy-table-migration-guard.test.ts` `src/` və `open-sse/` skan edir və köçürmə olmadan tənbəl `CREATE` də uğursuz olur (#20557). Misal: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 
-Nümunə:
+Misal:
 
 ```sql
--- 022_add_combo_priority.sql
+-- 20261113120000_add_combo_priority.sql
 ALTER TABLE combos ADD COLUMN priority INTEGER DEFAULT 100;
 UPDATE combos SET priority = 100 WHERE priority IS NULL;
 CREATE INDEX IF NOT EXISTS idx_combos_priority ON combos(priority);
 ```
 
-> **Geriyə uyğun olmayan dəyişikliklər** (məsələn, sütunların silinməsi) mürəkkəbdir. OmniRoute əvvəlki versiyaya qayıtmanı dəstəkləmir — miqrasiya tətbiq edildikdən sonra sxem dəyişikliyi qalıcı olur. Planlaşdırarkən bunu nəzərə alın.
+> **Geriyə uyğun olmayan dəyişikliklər** (məsələn, sütunları atmaq) çətin olur. OmniRoute miqrasiya tətbiq edildikdən sonra NOT — endirilməsini dəstəkləyir, sxem dəyişikliyi daimidir. Buna uyğun olaraq planlaşdırın.
 
 ---
 
@@ -402,26 +466,27 @@ Bu, SQLite-ın onlayn ehtiyat nüsxələmə API-sindən istifadə edir — OmniR
 
 ---
 
-## Performansın Tənzimlənməsi
+## Performans Tuning
 
-### WAL Rejimi
+### WAL rejimi
 
-WAL standart olaraq aktivdir. Çoxlu yazma əməliyyatları olan iş yükləri üçün bunları nəzərdən keçirin:
+WAL default olaraq aktivdir. Yüksək yazma iş yükləri üçün nəzərə alın:
 
 ```sql
-PRAGMA wal_autocheckpoint = 1000;  -- Hər 1000 səhifədən bir yoxlama nöqtəsi yaradın
-PRAGMA journal_size_limit = 67108864;  -- 64MB WAL limiti
+PRAGMA wal_autocheckpoint = 1000;  -- Checkpoint every 1000 pages
 ```
+
+OmniRoute `journal_size_limit` təyin etmir. Yoxlama nöqtəsi WAL çərçivələrini əsas fayla köçürür, lakin WAL faylı ən böyük ayrılmış ölçüsünü saxlayır. `OMNIROUTE_WAL_GUARD_MAX_MB` mühafizəçisi yalnız xəbərdarlıq edir və `wal_checkpoint(RESTART)` işlədir; disk ölçüsündə qapaq deyil.
 
 ### İndekslər
 
-Performans üçün əsas indekslər (miqrasiyalar tərəfindən avtomatik yaradılır):
+Performans üçün əsas indekslər (miqrasiya tərəfindən avtomatik yaradılmışdır):
 
-- `idx_models_provider` — provayder üzrə model axtarışları
-- `idx_combo_targets_combo_id` — kombinasiya hədəflərinin genişləndirilməsi
+- provayder tərəfindən `idx_models_provider` — model axtarışları
+- `idx_combo_targets_combo_id` — Combo hədəf genişləndirilməsi
 - `idx_usage_history_api_key_timestamp` — istifadə analitikası
-- `idx_quota_snapshots_api_key_window` — kvotanın izlənməsi
-- `idx_call_logs_timestamp` — çağırış jurnalı sorğuları
+- `idx_quota_snapshots_api_key_window` — kvota izləmə
+- `idx_call_logs_timestamp` — zəng qeydləri sorğuları
 
 Yeni indeks əlavə etmək üçün miqrasiya yaradın:
 
@@ -430,24 +495,24 @@ Yeni indeks əlavə etmək üçün miqrasiya yaradın:
 CREATE INDEX IF NOT EXISTS idx_my_table_my_column ON my_table(my_column);
 ```
 
-### Yaddaşla Xəritələnmiş Giriş-Çıxış
+### Yaddaş Xəritəli I/O
 
-Çox böyük verilənlər bazaları (>10GB) üçün yaddaş xəritələnməsi SQLite pragma vasitəsilə tənzimlənə bilər:
+Çox böyük verilənlər bazası üçün (> 10GB), yaddaş xəritələşdirilməsi SQLite praqması vasitəsilə tənzimlənə bilər:
 
 ```sql
--- SQLite pragma vasitəsilə təyin edin (core.ts və ya icra mühitində tənzimləyin)
+-- Set via SQLite pragma (adjust in core.ts or runtime)
 PRAGMA mmap_size = 268435456;  -- 256MB
 ```
 
-### Sıxlaşdırma
+### Sıxılma
 
-Uzun müddət işləyən OmniRoute instansiyaları ara-sıra `VACUUM` əməliyyatından faydalanır:
+Uzunmüddətli OmniRoute nümunələri təsadüfi `VACUUM` dən faydalanır:
 
 ```bash
 sqlite3 ~/.omniroute/storage.sqlite "VACUUM;"
 ```
 
-Aşağı trafik dövrlərində ayda bir dəfə işə salın. (WAL rejimi ehtiyacı azaldır, lakin tamamilə aradan qaldırmır.)
+Trafik az olan pəncərələrdə aylıq işləyin. (WAL rejimi ehtiyacı azaldır, lakin aradan qaldırmır.)
 
 ---
 

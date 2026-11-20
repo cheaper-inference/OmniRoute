@@ -7,9 +7,10 @@
  * must surface as a clean 400, while a well-formed body keeps its existing behavior.
  *
  * DB setup mirrors tests/unit/api-malformed-json-400.test.ts: a temp DATA_DIR with no
- * configured password, so POST /api/plugins needs no login. PATCH /api/relay/tokens/[id]
- * always requires management auth, so its requests carry a manage-scoped API key, as in
- * tests/unit/relay-tokens-always-protected.test.ts, and target a seeded token. DB handles
+ * configured password. Both POST /api/plugins and PATCH /api/relay/tokens/[id] always
+ * require management auth, so their requests carry a manage-scoped API key, as in
+ * tests/unit/relay-tokens-always-protected.test.ts; the relay requests target a seeded
+ * token. DB handles
  * are released in test.after (resetDbInstance), as unreleased SQLite handles hang the runner.
  */
 
@@ -69,14 +70,21 @@ test.after(() => {
 
 test("POST /api/plugins — malformed JSON body returns 400", async () => {
   const res = await pluginsRoute.POST(
-    jsonRequest("http://localhost/api/plugins", "POST", "not-json") as never
+    managedJsonRequest("http://localhost/api/plugins", "POST", "not-json") as never
   );
   assert.equal(res.status, 400);
 });
 
+test("POST /api/plugins — malformed JSON without credentials is still 401", async () => {
+  const res = await pluginsRoute.POST(
+    jsonRequest("http://localhost/api/plugins", "POST", "not-json") as never
+  );
+  assert.equal(res.status, 401);
+});
+
 test("POST /api/plugins — well-formed but invalid body still returns 400", async () => {
   const res = await pluginsRoute.POST(
-    jsonRequest("http://localhost/api/plugins", "POST", JSON.stringify({})) as never
+    managedJsonRequest("http://localhost/api/plugins", "POST", JSON.stringify({})) as never
   );
   assert.equal(res.status, 400);
   const body = (await res.json()) as { error?: string };

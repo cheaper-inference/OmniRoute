@@ -4,7 +4,7 @@
 
 ---
 
-## Tezkor boshlash
+## Tez boshlash
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -25,36 +25,36 @@ export default definePlugin({
 });
 ```
 
-## API maʼlumotnomasi
+## API havolasi
 
 ### `definePlugin(def: PluginDefinition): Plugin`
 
-Standart qiymatlar bilan Plugin obyektini yaratadigan fabrika funksiyasi.
+Standart sozlamalar bilan Plugin obyektini yaratuvchi zavod funksiyasi.
 
 **Parametrlar:**
 
-- `name` (string, majburiy) — kebab-case formatidagi plagin nomi
-- `priority` (number, ixtiyoriy, standart: 100) — Qiymati pastroq bo‘lgan avval ishga tushadi
-- `enabled` (boolean, ixtiyoriy, standart: true) — Yoqilgan holda ishga tushirilsinmi?
-- `onRequest` (function, ixtiyoriy) — Chat ishlov beruvchisidan oldin ishga tushadi
-- `onResponse` (function, ixtiyoriy) — Chat ishlov beruvchisidan keyin ishga tushadi
-- `onError` (function, ixtiyoriy) — Ishlov beruvchi xatoligida ishga tushadi
+- `name` (string, zarur) — plagin nomi kabob-rejismasida
+- `priority` (raqam, ixtiyoriy, sukut bo'yicha: 100) — Avval pastroq ishlaydi
+- `enabled` (mantiqiy, ixtiyoriy, standart: rost) — Start yoqilganmi?
+- `onRequest` (funksiya, ixtiyoriy) — Chat ishlovchisidan oldin ishlaydi
+- `onResponse` (funksiya, ixtiyoriy) — Chat ishlov beruvchidan keyin ishlaydi
+- `onError` (funktsiya, ixtiyoriy) — Ishlovchi xatosi ustida ishlaydi
 
 ### `blockRequest(response?): BlockingHookResult`
 
-So‘rovni bloklash va ixtiyoriy ravishda maxsus javob qaytarish.
+So'rovni bloklang va ixtiyoriy ravishda maxsus javobni qaytaring.
 
 ```ts
 onRequest: (ctx) => {
-  if (!ctx.headers["authorization"]) {
-    return blockRequest({ error: "Unauthorized", status: 401 });
+  if (!ctx.headers?.["x-client-team"]) {
+    return blockRequest({ error: "Missing x-client-team header", status: 400 });
   }
 };
 ```
 
 ### `modifyBody(body): PluginResult`
 
-So‘rov provayderga yetib borishidan oldin uning tanasini o‘zgartirish.
+Provayderga yetib borgunga qadar so'rov tanasini o'zgartiring.
 
 ```ts
 onRequest: (ctx) => {
@@ -64,7 +64,7 @@ onRequest: (ctx) => {
 
 ### `addMetadata(metadata): PluginResult`
 
-So‘rov kontekstiga metamaʼlumotlarni biriktirish.
+Metamaʼlumotlarni soʻrov kontekstiga biriktiring.
 
 ```ts
 onRequest: (ctx) => {
@@ -74,15 +74,18 @@ onRequest: (ctx) => {
 
 ## Plagin konteksti (`PluginContext`)
 
-| Maydon      | Tur                       | Tavsif                            |
-| ----------- | ------------------------- | --------------------------------- |
-| `requestId` | `string`                  | Noyob so‘rov identifikatori       |
-| `model`     | `string`                  | So‘ralgan model nomi              |
-| `provider`  | `string`                  | Maqsadli provayder IDsi           |
-| `body`      | `Record<string, unknown>` | So‘rov tanasi                     |
-| `headers`   | `Record<string, string>`  | So‘rov sarlavhalari               |
-| `metadata`  | `Record<string, unknown>` | O‘zgartiriladigan metamaʼlumotlar |
-| `timestamp` | `number`                  | So‘rov vaqt tamg‘asi              |
+| Maydon       | Turi                      | Tavsif                                   |
+| ------------ | ------------------------- | ---------------------------------------- |
+| `requestId`  | `string`                  | Noyob so'rov identifikatori              |
+| `model`      | `string`                  | So'ralgan model nomi                     |
+| `provider`   | `string`                  | Maqsadli provayder ID                    |
+| `body`       | `Record<string, unknown>` | So'rov organi                            |
+| `headers`    | `Record<string, string>`  | Sarlavhalarni so'rash (eslatmaga qarang) |
+| `metadata`   | `Record<string, unknown>` | O'zgaruvchan metama'lumotlar             |
+| `timestamp`  | `number`                  | Vaqt tamg'asini so'rash                  |
+| `apiKeyInfo` | `object` (ixtiyoriy)      | API kalit metadata (eslatmaga qarang)    |
+
+Kontekst hech qachon mijozning hisobga olish ma'lumotlarini o'z ichiga olmaydi: `authorization`, `x-api-key`, `proxy-authorization` va `cookie` sarlavhalari o'chiriladi (har qanday korpus) va `apiKeyInfo` kalitning metama'lumotlarini ( `id`, `name` va `scopes` kabi) saqlaydi, lekin kalit qiymati yoki uning barmoq izini (`redactPluginContext()` dagi `src/lib/plugins/hooks.ts`) emas. Bu `onRequest`, `onResponse` va `onError` uchun amal qiladi.
 
 ## Manifest (`plugin.json`)
 
@@ -138,19 +141,18 @@ Yoki oddiy mantiqiy qiymatlar sifatida (standart ustuvorlik 100):
 }
 ```
 
-## Ruxsatlar tizimi
+## Ruxsat tizimi
 
-Plaginlar izolyatsiyalangan VM kontekstida ishlaydi. Tashqi resurslarga kirish uchun aniq ruxsatlar talab qilinadi:
+Plaginlar** qum qutisiga kiritilmagan** . Har bir faol plagin OmniRoute bilan bir xil operatsion tizim foydalanuvchisi ostida, VM konteksti va Node.js ruxsat belgilarisiz alohida, oddiy Node.js bola jarayoni ( `src/lib/plugins/loader.ts` da `loadPlugin()` ) sifatida ishlaydi. Plagin kodi `node:fs`, `node:child_process`, `fetch` va boshqa har qanday Node.js API foydalanishi mumkin: u OmniRoute foydalanuvchisi (jumladan, ma'lumotlar katalogini) o'qishi va yozishi, dasturlarni ishga tushirishi va tarmoqqa kirishi mumkin.
 
-| Ruxsat       | Taqdim etiladigan imkoniyatlar                               |
-| ------------ | ------------------------------------------------------------ |
-| `network`    | `fetch`, `AbortController`, `Headers`, `Request`, `Response` |
-| `file-read`  | `fs.readFile`, `fs.readdir`, `fs.stat`                       |
-| `file-write` | `fs.writeFile`, `fs.mkdir`, `fs.rm`                          |
-| `env`        | Faqat o‘qish uchun `process.env` proksisi                    |
-| `exec`       | `child_process.exec`, `child_process.execSync`               |
+Manifestning `requires.permissions` `network`, `file-read`, `file-write`, `env` va `exec` qabul qiladi, ammo bugungi kunda faqat `env` ish vaqtida ta'sir qiladi:
 
-Ruxsat bo‘lmasa, tegishli global obyektlar sinov muhitida mavjud bo‘lmaydi.
+| Ruxsat                                       | Bugungi kunda ta'sir                                                                                                                                                                                                    |
+| -------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `env`                                        | Plagin jarayoni `PORT`, `HOSTNAME`, `TZ` va `TMPDIR` ham oladi. Busiz u faqat `PATH`, `HOME`, `USER`, `LANG`, `LC_ALL`, `NODE_ENV`, `PLUGIN_ENTRY` va `PLUGIN_NAME` (plyus `SystemRoot` ga Windows va `windir` ) oladi. |
+| `network`, `file-read`, `file-write`, `exec` | Yo'q. Ular faqat deklaratsiyalardir: ular yo'qolganda hech narsa bloklanmaydi.                                                                                                                                          |
+
+Plaginni o'rnatish xostga boshqa har qanday dasturni o'rnatishga o'xshaydi. Faqat manbasiga ishonadigan plaginlarni o'rnating.
 
 ## Konfiguratsiya sxemasi
 
@@ -194,7 +196,7 @@ Konfiguratsiya qiymatlari ma’lumotlar bazasida saqlanadi va boshqaruv panelida
 
 ## Misollar
 
-### So‘rovlarni jurnalga yozish
+### So'rov jurnali
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";
@@ -207,7 +209,7 @@ export default definePlugin({
 });
 ```
 
-### Tezlik cheklovchisi
+### Tarif cheklovchisi
 
 ```ts
 import { definePlugin, blockRequest } from "omniroute/plugins/sdk";
@@ -218,9 +220,9 @@ export default definePlugin({
   name: "rate-limiter",
   priority: 10,
   onRequest: async (ctx) => {
-    const key = ctx.headers["x-api-key"] || "anonymous";
+    const key = ctx.apiKeyInfo?.id || "anonymous";
     const now = Date.now();
-    const window = 60000; // 1 daqiqa
+    const window = 60000; // 1 minute
     const maxRequests = 100;
 
     const timestamps = (requests.get(key) || []).filter((t) => t > now - window);
@@ -228,16 +230,13 @@ export default definePlugin({
     requests.set(key, timestamps);
 
     if (timestamps.length > maxRequests) {
-      return blockRequest({
-        error: "Tezlik chegarasidan oshib ketildi",
-        status: 429,
-      });
+      return blockRequest({ error: "Rate limit exceeded", status: 429 });
     }
   },
 });
 ```
 
-### Javobni o‘zgartiruvchi
+### Javob transformatori
 
 ```ts
 import { definePlugin } from "omniroute/plugins/sdk";

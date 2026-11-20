@@ -15,6 +15,7 @@ import {
   composeCandidate,
   deleteCandidate,
   fetchInputs,
+  mergeTree,
   prepareRepo,
   pushCandidate,
   scratchGit,
@@ -149,6 +150,99 @@ test("conflict inside the batch: the later PR is excludedBatchConflict, the othe
     env: { GIT_DIR: git.cwd },
   });
   assert.equal(shared, "line 1\nPR ONE\nline 3");
+});
+
+function promisorError(oid) {
+  return (
+    `fatal: remote error: upload-pack: not our ref ${oid}\n` +
+    `fatal: could not fetch ${"b".repeat(40)} from promisor remote\n`
+  );
+}
+
+test("mergeTree retries a stale promisor lookup when the refused blob is already local", (t) => {
+  const { sb, git, scratch } = setup(t);
+  const left = prRef(1, sb.publishPr(1, { "shared.txt": "line 1\nleft\nline 3\n" }));
+  const right = prRef(2, sb.publishPr(2, { "shared.txt": "line 1\nright\nline 3\n" }));
+  fetchInputs({ git, base: BASE, prs: [left, right] });
+  const blob = git.out(["hash-object", "-w", "--stdin"], {
+    env: { GIT_DIR: scratch },
+    input: "virtual merge base\n",
+  });
+  const attempts = [];
+  const observed = {
+    ...git,
+    run(args, opts) {
+      assert.equal(opts.env.GIT_DIR, scratch);
+      if (args[0] === "cat-file") assert.equal(opts.env.GIT_NO_LAZY_FETCH, "1");
+      if (args[0] === "merge-tree") {
+        attempts.push(args);
+        if (attempts.length === 1) {
+          return { code: 128, stdout: "", stderr: promisorError(blob) };
+        }
+      }
+      return git.run(args, opts);
+    },
+  };
+  assert.deepEqual(mergeTree(observed, left.head, right.head), { clean: false });
+  assert.equal(attempts.length, 2);
+  assert.deepEqual(attempts[1], attempts[0]);
+});
+
+test("mergeTree retains failures without evidence of a local refused blob", (t) => {
+  const { sb, git } = setup(t);
+  const { baseSha } = fetchInputs({ git, base: BASE, prs: [] });
+  const missing = "a".repeat(40);
+  const cases = [
+    { code: 128, stderr: promisorError(missing), probe: missing },
+    { code: 128, stderr: promisorError(baseSha), probe: baseSha },
+    { code: 128, stderr: `fatal: upload-pack: not our ref ${baseSha}\n` },
+    { code: 129, stderr: promisorError(baseSha) },
+  ];
+  for (const { code, stderr, probe } of cases) {
+    const attempts = [];
+    const checked = [];
+    const observed = {
+      ...git,
+      run(args, opts) {
+        if (args[0] === "merge-tree") {
+          attempts.push(args);
+          return { code, stdout: "", stderr };
+        }
+        assert.deepEqual(args.slice(0, 2), ["cat-file", "-t"]);
+        assert.equal(opts.env.GIT_NO_LAZY_FETCH, "1");
+        checked.push(args[2]);
+        return git.run(args, opts);
+      },
+    };
+    assert.throws(() => mergeTree(observed, baseSha, sb.baseSha()), {
+      message: `git merge-tree failed (exit ${code}): ${stderr.trim()}`,
+    });
+    assert.equal(attempts.length, 1);
+    assert.deepEqual(checked, probe ? [probe] : []);
+  }
+});
+
+test("mergeTree surfaces an error that persists after one promisor retry", (t) => {
+  const { git, scratch } = setup(t);
+  const { baseSha } = fetchInputs({ git, base: BASE, prs: [] });
+  const blob = git.out(["hash-object", "-w", "--stdin"], {
+    env: { GIT_DIR: scratch },
+    input: "virtual merge base\n",
+  });
+  const stderr = promisorError(blob);
+  let attempts = 0;
+  const observed = {
+    ...git,
+    run(args, opts) {
+      if (args[0] !== "merge-tree") return git.run(args, opts);
+      assert.ok(++attempts <= 2, "the merge may be retried only once");
+      return { code: 128, stdout: "", stderr };
+    },
+  };
+  assert.throws(() => mergeTree(observed, baseSha, baseSha), {
+    message: `git merge-tree failed (exit 128): ${stderr.trim()}`,
+  });
+  assert.equal(attempts, 2);
 });
 
 test("conflict with the bare base: excludedBaseConflict (leaves the queue)", (t) => {

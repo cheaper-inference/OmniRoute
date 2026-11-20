@@ -25,31 +25,26 @@ OmniRoute सँग WordPress-जस्तो प्लगइन प्रणा
 गैर-लुपब्याक मूलबाट यी रुटहरू पहुँचयोग्य हुँदैनन्।
 [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) हेर्नुहोस्।
 
-## यसले समग्र रूपमा कसरी काम गर्छ
+## यो कसरी Together फिट हुन्छ
 
 ```
-ड्यासबोर्ड (/dashboard/plugins)
-  ├─ "स्थापित" ट्याब       → GET /api/plugins            (listPlugins)
-  │                          POST /api/plugins/scan      (pluginManager.scan)
-  │                          POST /api/plugins/{name}/activate|deactivate
-  │                          DELETE /api/plugins/{name}   (स्थापना हटाउने)
-  └─ "मार्केटप्लेस" ट्याब → GET /api/plugins/marketplace
-                               → listMarketplacePlugins()
-                                 ├─ अनुकूलित URL छैन → अन्तर्निर्मित SEED_REGISTRY
-                                 └─ अनुकूलित URL → isSafeMarketplaceUrl() SSRF गार्ड
-                                                  → safeOutboundFetch(guard:"public-only")
+Dashboard (/dashboard/plugins)
+  ├─ "Installed" tab  → GET /api/plugins            (listPlugins)
+  │                     POST /api/plugins/scan      (pluginManager.scan)
+  │                     POST /api/plugins/{name}/activate|deactivate
+  │                     DELETE /api/plugins/{name}   (uninstall)
+  └─ "Marketplace" tab → GET /api/plugins/marketplace
+                          → listMarketplacePlugins()
+                            ├─ no custom URL → built-in SEED_REGISTRY
+                            └─ custom URL → isSafeMarketplaceUrl() SSRF guard
+                                          → safeOutboundFetch(guard:"public-only")
 ```
 
-- **रजिस्ट्री तह** — `src/lib/plugins/marketplace.ts`: क्याटलग सूचीबद्ध गर्छ / खोज्छ र
-  कुनै पनि विफलतामा प्रारम्भिक रजिस्ट्री प्रयोग गर्छ।
-- **जीवनचक्र तह** — `src/lib/plugins/manager.ts` (`pluginManager` सिङ्गलटन):
-  स्थापना, स्तरोन्नति, सक्रियता, निष्क्रियता, स्थापना हटाउने, स्क्यान, स्टार्टअप लोड।
-- **म्यानिफेस्ट तह** — `src/lib/plugins/manifest.ts`: `plugin.json` का लागि
-  Zod स्किमा + पूर्वनिर्धारित मानहरू।
-- **स्क्यानर** — `src/lib/plugins/scanner.ts`: प्लगइन डाइरेक्टरीअन्तर्गत
-  डिस्कमा रहेका प्लगइनहरू पत्ता लगाउँछ।
-- **लोडर** — `src/lib/plugins/loader.ts`: प्रत्येक प्लगइनलाई अलग गरिएको
-  चाइल्ड प्रोसेसमा सुरु गर्छ र IPC मार्फत हुक कलहरूको मध्यस्थता गर्छ।
+- **रजिस्ट्री तह** — `src/lib/plugins/marketplace.ts`: कुनै पनि असफलतामा बीज रजिस्ट्रीमा फर्केर, सूचीहरू / सूचीहरू खोज्नुहोस्।
+- **जीवनचक्र तह** — `src/lib/plugins/manager.ts` (`pluginManager` सिंगलटन): स्थापना गर्नुहोस्, अपग्रेड गर्नुहोस्, सक्रिय गर्नुहोस्, निष्क्रिय गर्नुहोस्, स्थापना रद्द गर्नुहोस्, स्क्यान गर्नुहोस्, स्टार्टअप लोड गर्नुहोस्।
+- **प्रकट तह** — `src/lib/plugins/manifest.ts`: `plugin.json` को लागि Zod स्कीमा + पूर्वनिर्धारित।
+- **स्क्यानर** — `src/lib/plugins/scanner.ts`: प्लगइन डाइरेक्टरी अन्तर्गत डिस्कमा प्लगइनहरू पत्ता लगाउँदछ।
+- **लोडर** — `src/lib/plugins/loader.ts`: प्रत्येक प्लगइनलाई छुट्टै Node.js चाइल्ड प्रक्रियामा स्प्यान गर्दछ र दलालहरूले IPC मा कलहरू हुक गर्दछ। बच्चा स्यान्डबक्स होइन (तल "प्लगइन कार्यान्वयन अलगाव" हेर्नुहोस्)।
 
 ## मार्केटप्लेस क्याटलग
 
@@ -85,34 +80,31 @@ OmniRoute सँग WordPress-जस्तो प्लगइन प्रणा
 
 ## REST API
 
-सबै endpoints का लागि management auth (`requireManagementAuth`) **आवश्यक हुन्छ** र ती
-loopback मा मात्र उपलब्ध हुन्छन् — `/api/plugins` र `/api/plugins/` लाई
-`LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) मा सूचीबद्ध गरिएको छ।
+सबै अन्तिम बिन्दुहरूलाई व्यवस्थापन प्रमाणीकरण आवश्यक छ (`requireManagementAuth`)** र** लुपब्याक-मात्र — `/api/plugins` र `/api/plugins/` `LOCAL_ONLY_API_PREFIXES` (`src/server/authz/routeGuard.ts`) मा सूचीबद्ध छन्।
 
-| Endpoint                         | विधि   | विवरण                                                            |
-| -------------------------------- | ------ | ---------------------------------------------------------------- |
-| `/api/plugins`                   | GET    | स्थापित plugins को सूची (`?status=` filter वैकल्पिक)             |
-| `/api/plugins`                   | POST   | निरपेक्ष local path बाट plugin स्थापना गर्ने                     |
-| `/api/plugins/scan`              | POST   | plugin directory scan गरी नयाँ plugins दर्ता गर्ने               |
-| `/api/plugins/marketplace`       | GET    | marketplace catalog entries को सूची देखाउने                      |
-| `/api/plugins/[name]`            | GET    | स्थापित plugin को विवरण प्राप्त गर्ने                            |
-| `/api/plugins/[name]`            | DELETE | plugin हटाउने                                                    |
-| `/api/plugins/[name]/activate`   | POST   | सक्रिय गर्ने (लोड गर्ने + hooks दर्ता गर्ने)                     |
-| `/api/plugins/[name]/deactivate` | POST   | निष्क्रिय गर्ने (`onDeactivate` चलाउने, hooks को दर्ता हटाउने)   |
-| `/api/plugins/[name]/config`     | GET    | plugin config + config schema प्राप्त गर्ने                      |
-| `/api/plugins/[name]/config`     | PUT    | plugin config अद्यावधिक गर्ने (schema विरुद्ध प्रमाणीकरण गरिएको) |
+| अन्तिम बिन्दु                    | विधि   | विवरण                                                                  |
+| -------------------------------- | ------ | ---------------------------------------------------------------------- |
+| `/api/plugins`                   | GET    | स्थापित प्लगइनहरू सूचीबद्ध गर्नुहोस् (वैकल्पिक `?status=` फिल्टर)      |
+| `/api/plugins`                   | POST   | प्लगइन स्रोत डाइरेक्टरीबाट प्लगइन स्थापना गर्नुहोस्                    |
+| `/api/plugins/scan`              | POST   | प्लगइन डाइरेक्टरी स्क्यान गर्नुहोस् र नयाँ प्लगइनहरू दर्ता गर्नुहोस्   |
+| `/api/plugins/marketplace`       | GET    | बजार सूची सूची प्रविष्टिहरू                                            |
+| `/api/plugins/[name]`            | GET    | स्थापित प्लगइन विवरण प्राप्त गर्नुहोस्                                 |
+| `/api/plugins/[name]`            | DELETE | प्लगइन अनइन्स्टल गर्नुहोस्                                             |
+| `/api/plugins/[name]/activate`   | POST   | सक्रिय गर्नुहोस् ( + दर्ता हुकहरू लोड गर्नुहोस्)                       |
+| `/api/plugins/[name]/deactivate` | POST   | निष्क्रिय गर्नुहोस् (फायर `onDeactivate`, दर्ता हुकहरू रद्द गर्नुहोस्) |
+| `/api/plugins/[name]/config`     | GET    | प्लगइन कन्फिगरेसन + कन्फिगरेसन स्कीमा प्राप्त गर्नुहोस्                |
+| `/api/plugins/[name]/config`     | PUT    | प्लगइन कन्फिगरेसन अपडेट गर्नुहोस् (स्कीमा विरुद्ध मान्य)               |
 
-`GET /api/plugins` को `status` filter ले
-`installed` / `active` / `inactive` / `error` मध्ये एउटा मान स्वीकार गर्छ। अमान्य मानले `400` फर्काउँछ।
+`GET /api/plugins` `status` फिल्टरले `installed` / `active` / `inactive` / `error` मध्ये एक स्वीकार गर्दछ। अवैध मानले `400` फर्काउँछ।
 
-### स्थापित plugins को सूची
+### स्थापित प्लगइनहरू सूचीबद्ध गर्नुहोस्
 
 ```bash
 curl http://localhost:20128/api/plugins \
   -H "Cookie: auth_token=..."
 ```
 
-### local path बाट स्थापना
+### स्थानीय मार्गबाट स्थापना गर्नुहोस्
 
 ```bash
 curl -X POST http://localhost:20128/api/plugins \
@@ -121,19 +113,18 @@ curl -X POST http://localhost:20128/api/plugins \
   -d '{ "path": "/absolute/path/to/my-plugin" }'
 ```
 
-`path` **निरपेक्ष** हुनुपर्छ र त्यसमा `..` traversal segments वा
-null bytes हुनु हुँदैन (Zod द्वारा लागू गरिएको)। Source directory मा मान्य
-`plugin.json` हुनुपर्छ (वा त्यो भएको directory को parent हुनुपर्छ)। सफल हुँदा response `201` र
-स्थापित plugin row हुन्छ।
+`path` हुनुपर्छ** निरपेक्ष** डाइरेक्टरीमा जाने बाटो** प्लगइन स्रोत निर्देशिका भित्र** : प्लगइन रूटको छेउमा `plugin-sources`, त्यसैले पूर्वनिर्धारित रूपमा `~/.omniroute/plugin-sources/`, वा `<parent of OMNIROUTE_PLUGINS_DIR>/plugin-sources/` जब त्यो चर सेट हुन्छ (`getPluginSourcesDir()` मा `src/lib/plugins/installSource.ts`)। त्यहाँ पहिले प्लगइन प्रतिलिपि वा क्लोन गर्नुहोस्। जब पथमा `..` वा नल बाइट हुन्छ, त्यो डाइरेक्टरी बाहिर हुन्छ, symlink मार्फत यसको बाहिर समाधान हुन्छ, symlink समावेश हुन्छ जसको लक्ष्य बाहिर हुन्छ, वा डाइरेक्टरी अवस्थित हुँदैन भने `400` सँग इन्स्टल गर्न अस्वीकार गरिन्छ। स्रोत डाइरेक्टरीमा मान्य `plugin.json` हुनु पर्छ (वा एकको अभिभावक हुनुहोस्)। सफलता मा प्रतिक्रिया स्थापित प्लगइन पङ्क्ति संग `201` छ।
 
-### marketplace हेर्नुहोस्
+अन्य प्लगइन मार्गहरू जस्तो नभई, लगइन असक्षम हुँदा पनि यसलाई व्यवस्थापन प्रमाण (ड्यासबोर्ड सत्र वा व्यवस्थापन-स्कोप गरिएको API कुञ्जी) आवश्यक पर्दछ (`requireLogin=false`): स्थापना कोड कहिल्यै बेनामी कार्य होइन।
+
+### बजार ब्राउज गर्नुहोस्
 
 ```bash
 curl http://localhost:20128/api/plugins/marketplace \
   -H "Cookie: auth_token=..."
 ```
 
-### plugin config अद्यावधिक गर्नुहोस्
+### प्लगइन कन्फिगरेसन अपडेट गर्नुहोस्
 
 ```bash
 curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
@@ -142,10 +133,7 @@ curl -X PUT http://localhost:20128/api/plugins/my-plugin/config \
   -d '{ "config": { "level": "debug", "maxItems": 100 } }'
 ```
 
-`PUT .../config` ले दिइएको प्रत्येक मानलाई plugin को
-`configSchema` (manifest मा घोषणा गरिएको) विरुद्ध प्रमाणीकरण गर्छ: `number` fields ले `min`/`max`
-पालना गर्छन्, र `select` fields घोषणा गरिएको `enum` सँग मेल खानुपर्छ। Schema मा नभएका keys लाई
-पनि अनुमति दिइन्छ।
+`PUT .../config` प्रत्येक प्रदान गरिएको मानलाई प्लगइनको `configSchema` (म्यानिफेस्टमा घोषणा गरिएको) विरुद्ध प्रमाणित गर्दछ: `number` क्षेत्रहरू सम्मानित `min`/`max`, `select` क्षेत्रहरू घोषित `enum` सँग मेल खानुपर्छ। स्कीमामा उपस्थित नभएका कुञ्जीहरू मार्फत अनुमति दिइन्छ।
 
 ## कन्फिगरेसन
 
@@ -205,81 +193,56 @@ Dashboard को "Marketplace" tab ले यो URL का लागि field �
 
 ### रुट टियर — लुपब्याक मात्र
 
-प्लगइनहरूले सिर्जना गरिएका चाइल्ड प्रोसेसहरूमा कोड कार्यान्वयन गर्छन्, त्यसैले सम्पूर्ण `/api/plugins`
-सतहलाई `LOCAL_ONLY` (टियर 1) का रूपमा वर्गीकृत गरिएको छ। लुपब्याक प्रवर्तन कुनै पनि
-प्रमाणीकरण जाँचभन्दा **अघि** निःसर्त रूपमा चल्छ, त्यसैले टनेलमार्फत मेसिनसम्म पुगेको लिक भएको
-व्यवस्थापन टोकनले समेत प्लगइन स्थापना, सक्रिय वा अनइन्स्टल गर्न सक्दैन।
-[`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) र
-कडा नियमहरू #15 / #17 हेर्नुहोस्।
+प्लगइनहरूले जन्मेको बाल प्रक्रियाहरूमा कोड कार्यान्वयन गर्दछ, त्यसैले सम्पूर्ण `/api/plugins` सतहलाई `LOCAL_ONLY` (Tier 1) वर्गीकृत गरिएको छ। लूपब्याक प्रवर्तन बिना शर्त चल्छ** अघि** कुनै पनि प्रमाणीकरण जाँच, त्यसैले टनेलमा बक्समा पुग्ने एउटा लीक व्यवस्थापन टोकन अझै पनि प्लगइन स्थापना, सक्रिय, वा स्थापना रद्द गर्न सक्दैन। [`docs/security/ROUTE_GUARD_TIERS.md`](../security/ROUTE_GUARD_TIERS.md) र कडा नियमहरू #15 / #17 हेर्नुहोस्।
 
-### मार्केटप्लेस रजिस्ट्री SSRF सुरक्षा
+### बजार रजिस्ट्री SSRF गार्ड
 
-अनुकूलन रजिस्ट्री URL आक्रमणकारीबाट प्रभावित हुन सक्ने कन्फिगरेसन हो, त्यसैले यसलाई
-फेच गर्नुअघि `listMarketplacePlugins()` ले दुई तहबाट जाँच गर्छ:
+अनुकूलन रजिस्ट्री URL आक्रमणकर्ता-प्रभावकारी कन्फिगरेसन हो, त्यसैले यसलाई ल्याउनु अघि `listMarketplacePlugins()` यसलाई दुई तहहरू मार्फत चलाउँछ:
 
 1. **`isSafeMarketplaceUrl(url)`** (`src/lib/plugins/marketplace.ts`):
-   - `http:` / `https:` नभएको कुनै पनि कुरा अस्वीकार गर्छ।
-   - क्यानोनिकल `isPrivateHost`
-     (`src/shared/network/outboundUrlGuard.ts`) मार्फत लिटरल निजी/लुपब्याक/लिङ्क-लोकल/ULA होस्टहरू (IPv4 **र** IPv6,
-     IPv4-म्याप गरिएका ठेगानासहित) अस्वीकार गर्छ।
-   - **दुवै** `A` र `AAAA` रेकर्डहरू रिजल्भ गर्छ र रिजल्भ गरिएको **कुनै पनि**
-     ठेगाना निजी भएमा अस्वीकार गर्छ — यसले सार्वजनिक-होस्टनाम → निजी-IP बाइपास बन्द गर्छ।
-   - **असफल हुँदा बन्द हुन्छ**: DNS रिजोल्युसन असफल भएमा URL अस्वीकार हुन्छ।
-2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`**
-   (`src/shared/network/safeOutboundFetch.ts`): फेच गर्ने समयमा सार्वजनिक-मात्र URL
-   गार्ड पुनः लागू गर्छ र **रिडाइरेक्टहरू रोक्छ** (सार्वजनिक → निजी `30x`
-   पिभट हुँदैन)।
+   - `http:` / `https:` नभएको कुनै पनि कुरालाई अस्वीकार गर्दछ।
+   - शाब्दिक private/loopback/link-local/ULA होस्टहरू अस्वीकार गर्दछ (IPv4** र** IPv6, IPv4-mapped सहित ) क्यानोनिकल `isPrivateHost` (`src/shared/network/outboundUrlGuard.ts`) मार्फत।
+   - समाधान गर्छ** दुबै** `A` र `AAAA` रेकर्ड गर्दछ र यदि अस्वीकार गर्दछ** कुनै पनि** समाधान गरिएको ठेगाना निजी — हो सार्वजनिक-होस्टनाम → निजी-आईपी बाइपास बन्द गर्दै।
+   - **असफल बन्द** : DNS रिजोल्युसन विफलताले URL लाई अस्वीकार गर्दछ।
+2. **`safeOutboundFetch(url, { guard: "public-only", timeoutMs: 5000 })`** (`src/shared/network/safeOutboundFetch.ts`): सार्वजनिक मात्र URL गार्ड ल्याउने समयमा र** अवरुद्ध पुनर्निर्देशन** (कुनै सार्वजनिक → निजी `30x` पिभोट छैन)।
 
-कुनै URL कुनै पनि तहमा असफल भएमा अनुरोध रद्द हुँदैन — मार्केटप्लेस
-मौन रूपमा अन्तर्निर्मित सिड रजिस्ट्रीमा फर्किन्छ र चेतावनी लग गर्छ।
+कुनै पनि तहमा असफल भएको URL ले अनुरोधलाई रद्द गर्दैन — बजार चुपचाप बिल्ट-इन बीज रजिस्ट्रीमा फर्कन्छ र चेतावनी लगाउँछ।
 
-> यो गार्डलाई PR #3774 मा विशेष रूपमा A + AAAA रिजल्भ गर्न र
-> IPv4-मात्र जाँचको सट्टा क्यानोनिकल `isPrivateHost` प्रयोग गर्न सुदृढ गरिएको थियो।
+> यो गार्ड PR #3774 मा विशेष गरी A + AAAA समाधान गर्न र IPv4-only चेकको सट्टा क्यानोनिकल `isPrivateHost` प्रयोग गर्न कडा बनाइएको थियो।
 
-### प्लगइन कार्यान्वयन पृथकीकरण
+### प्लगइन कार्यान्वयन अलगाव
 
-- **प्रोसेस पृथकीकरण** — `loadPlugin()` (`src/lib/plugins/loader.ts`) ले
-  प्रत्येक प्लगइनलाई छुट्टै Node.js चाइल्ड प्रोसेसमा स्पन गर्छ र IPC मार्फत सञ्चार गर्छ।
-  हुक कलहरूमा `SIGTERM` → `SIGKILL` एस्केलेसनसहित टाइमआउट हुन्छ।
-- **Env अनुमतिसूची** — चाइल्डले अनुमतिसूचीमा रहेका वातावरण
-  चलहरू मात्र प्राप्त गर्छ; म्यानिफेस्टले `env` अनुमति अनुरोध गर्दा मात्र विस्तृत सेट
-  प्रदान गरिन्छ।
-- **पाथ सीमाबद्धता** — स्थापना/अपग्रेड/अनइन्स्टलले कुनै पनि प्रतिलिपि वा पुनरावर्ती मेटाइअघि
-  प्लगइन डाइरेक्टरी र `manifest.main` व्यवस्थित प्लगइन रुटको **भित्रै**
-  रिजल्भ भएको सुनिश्चित गर्छ (छेडछाड गरिएका DB पाथहरू र
-  `manifest.main` मा हुने `../` ट्राभर्सलविरुद्ध सुरक्षा गर्छ)। सक्रियताले
-  `realpath` मार्फत सिमलिङ्कहरू रिजल्भ गर्छ र प्लगइन
-  डाइरेक्टरीबाट बाहिर निस्कने प्रवेश बिन्दु लोड गर्न अस्वीकार गर्छ।
-- **वैकल्पिक इन्टेग्रिटी पिन** — म्यानिफेस्टले `integrity`
-  (`sha256-<base64>`, SRI ढाँचा) फिल्ड घोषणा गर्न सक्छ। यो उपस्थित हुँदा, लोडरले
-  लोड गर्ने समयमा प्रवेश फाइलको ह्यास प्रमाणित गर्छ र नमिलेमा सक्रिय गर्न अस्वीकार गर्छ। यो
-  अप्ट-इन छेडछाड-पहिचान हो, सुरक्षा सीमा **होइन** — लुपब्याक-मात्र रुटिङ
-  र अनुमति मोडेल नै वास्तविक सीमाहरू हुन्।
+> **प्लगइनहरू स्यान्डबक्स गरिएका छैनन्।** बच्चा OmniRoute प्रयोगकर्ताको रूपमा चलिरहेको एक सामान्य Node.js प्रक्रिया हो, कुनै VM सन्दर्भ र कुनै Node.js अनुमति झण्डाहरू बिना, त्यसैले प्लगइन कोडले प्रयोगकर्ताले गर्न सक्ने कुनै पनि फाइल पढ्न र लेख्न सक्छ, प्रोग्रामहरू चलाउन र नेटवर्कमा पुग्न सक्छ। `requires.permissions` मात्र निर्णय गर्छ कि बच्चाले कुन परिवेश चरहरू प्राप्त गर्छ। अन्य अनुमतिहरू लागू छैनन्। तपाईंले विश्वास गर्ने प्लगइनहरू मात्र स्थापना गर्नुहोस्। तलको प्रक्रिया सीमाले क्र्यास र ह्याङ्गहरू समावेश गर्दछ; यो सुरक्षा सीमा होइन।
 
-## म्यानिफेस्ट (`plugin.json`)
+- **प्रक्रिया अलगाव** — `loadPlugin()` (`src/lib/plugins/loader.ts`) ले प्रत्येक प्लगइनलाई छुट्टै Node.js चाइल्ड प्रक्रियामा स्प्यान गर्छ र IPC मा सञ्चार गर्छ। हुक कलहरूमा `SIGTERM` → `SIGKILL` एस्केलेसनसँग टाइमआउट हुन्छ।
+- **Env अनुमति सूची** — बच्चाले वातावरणीय चरहरूको केवल एक स्वीकृत सेट प्राप्त गर्दछ; फराकिलो सेट तब मात्र दिइन्छ जब manifest ले `env` अनुमति अनुरोध गर्दछ।
+- **स्रोत कन्टेनमेन्ट स्थापना गर्नुहोस्** — `POST /api/plugins` प्लगइन स्रोत डाइरेक्टरीबाट मात्र पढ्छ ("स्थानीय मार्गबाट स्थापना गर्नुहोस्" हेर्नुहोस्): पथ `realpath` सँग क्यानोनिकलाइज गरिएको छ, त्यो डाइरेक्टरी भित्र कडाइका साथ रहनु पर्छ, र कुनै पनि कुरा प्रतिलिपि गर्नु अघि यो भाग्ने सिमलिङ्क बोक्ने स्रोत रूखलाई अस्वीकार गरिन्छ।
+- **मार्ग नियन्त्रण** — install/upgrade/uninstall जोड दिन्छ कि प्लगइन डाइरेक्टरी र `manifest.main` समाधान** भित्र** कुनै पनि प्रतिलिपि वा पुनरावर्ती मेटाउनु अघि व्यवस्थित प्लगइन रूट (छेड़छाड गरिएको DB पथहरू र `manifest.main` मा `../` ट्राभर्सल विरुद्ध गार्डहरू)। सक्रियताले `realpath` मार्फत सिमलिङ्कहरू समाधान गर्छ र प्लगइन डाइरेक्टरीबाट भाग्ने प्रविष्टि बिन्दु लोड गर्न अस्वीकार गर्दछ।
+- **वैकल्पिक अखंडता पिन** — a manifest ले `integrity` (`sha256-<base64>`, SRI ढाँचा) क्षेत्र घोषणा गर्न सक्छ। उपस्थित हुँदा, लोडरले लोड समयमा प्रविष्टि फाइल ह्यास प्रमाणित गर्छ र बेमेलमा सक्रिय गर्न अस्वीकार गर्दछ। यो छेडछाड पत्ता लगाउन अप्ट-इन हो,** होइन** सुरक्षा सीमा: यसले लोड गरिएको प्लगइनले के गर्न सक्छ भनेर सीमित गर्दैन।
+- **हुकहरूमा कुनै ग्राहक प्रमाणहरू छैनन्** — सन्दर्भ `onRequest`, `onResponse` र `onError` मा `authorization`, `x-api-key`, `proxy-authorization` र `cookie` हेडरहरू हटाइएको छ, र API कुञ्जी रेकर्डले कुनै कुञ्जी मान राख्दैन ( `src/lib/plugins/hooks.ts` मा`redactPluginContext()` )।
 
-`PluginManifestSchema` (`src/lib/plugins/manifest.ts`) द्वारा प्रमाणीकरण गरिएको:
+## प्रकट (`plugin.json`)
 
-| फिल्ड              | प्रकार    | टिप्पणी                                                        |
-| ------------------ | --------- | -------------------------------------------------------------- |
-| `name`             | string    | आवश्यक; kebab-case (`^[a-z0-9-]+$`), 1–100 वर्ण                |
-| `version`          | string    | आवश्यक; semver (`MAJOR.MINOR.PATCH`)                           |
-| `description`      | string?   | ≤ 500 वर्ण                                                     |
-| `author`           | string?   | ≤ 200 वर्ण                                                     |
-| `license`          | string?   | पूर्वनिर्धारित रूपमा `MIT`                                     |
-| `main`             | string?   | प्रवेश फाइल; पूर्वनिर्धारित रूपमा `index.js`                   |
-| `source`           | enum?     | `local` \| `marketplace` (पूर्वनिर्धारित रूपमा `local`)        |
-| `tags`             | string[]? | खोज ट्यागहरू                                                   |
-| `requires`         | object?   | `{ omniroute?, permissions[] }`                                |
-| `hooks`            | object?   | प्लगइनले कुन हुकहरू कार्यान्वयन गर्छ भनी घोषणा गर्ने बुलियनहरू |
-| `skills`           | object[]? | वैकल्पिक सीप परिभाषाहरू                                        |
-| `enabledByDefault` | boolean?  | स्थापना गर्दा स्वतः सक्रिय गर्ने                               |
-| `configSchema`     | object?   | कन्फिग फिल्डहरूको म्याप (`string`/`number`/`boolean`/`select`) |
-| `integrity`        | string?   | वैकल्पिक `sha256-<base64>` प्रवेश-फाइल पिन                     |
+`PluginManifestSchema` द्वारा मान्य (`src/lib/plugins/manifest.ts`):
 
-अनुमतिहरू
-`network` / `file-read` / `file-write` / `env` / `exec`
-enum बाट लिइन्छन्।
+| क्षेत्र            | टाइप गर्नुहोस् | नोटहरू                                                        |
+| ------------------ | -------------- | ------------------------------------------------------------- |
+| `name`             | तार            | आवश्यक; कबाब-केस (`^[a-z0-9-]+$`), 1-100 वर्ण                 |
+| `version`          | तार            | आवश्यक; semver (`MAJOR.MINOR.PATCH`)                          |
+| `description`      | तार?           | ≤ 500 वर्ण                                                    |
+| `author`           | तार?           | ≤ 200 वर्ण                                                    |
+| `license`          | तार?           | `MIT` मा पूर्वनिर्धारित                                       |
+| `main`             | तार?           | प्रविष्टि फाइल; `index.js` मा पूर्वनिर्धारित                  |
+| `source`           | enum?          | `local` \| `marketplace` ( `local` मा पूर्वनिर्धारित)         |
+| `tags`             | स्ट्रिङ []?    | ट्यागहरू खोज्नुहोस्                                           |
+| `requires`         | वस्तु?         | `{ omniroute?, permissions[] }`                               |
+| `hooks`            | वस्तु?         | बुलियनले कुन हुक प्लगइन लागू गर्दछ भनेर घोषणा गर्दै           |
+| `skills`           | वस्तु []?      | वैकल्पिक कौशल परिभाषा                                         |
+| `enabledByDefault` | बुलियन?        | स्थापनामा स्वतः सक्रिय गर्नुहोस्                              |
+| `configSchema`     | वस्तु?         | कन्फिग क्षेत्रको नक्सा (`string`/`number`/`boolean`/`select`) |
+| `integrity`        | तार?           | वैकल्पिक `sha256-<base64>` प्रविष्टि-फाइल पिन                 |
+
+अनुमतिहरू enum `network` / `file-read` / `file-write` / `env` / `exec` बाट कोरिएका छन्। केवल `env` मा रनटाइम प्रभाव हुन्छ (बच्चाको लागि थोरै ठूलो परिवेश-चर अनुमति सूची); अन्य घोषणाहरू हुन् र लागू हुँदैनन्।
 
 ## जीवनचक्र प्रवाह
 
@@ -339,17 +302,14 @@ Plugin का metrics/analytics थप तालिकाहरूमा ट्�
 
 ## ड्यासबोर्ड
 
-`/dashboard/plugins` मा रहेको ड्यासबोर्ड पृष्ठले
-(`src/app/(dashboard)/dashboard/plugins/page.tsx`) दुईवटा ट्याब उपलब्ध गराउँछ:
+`/dashboard/plugins` (`src/app/(dashboard)/dashboard/plugins/page.tsx`) मा ड्यासबोर्ड पृष्ठले दुई ट्याबहरू प्रदान गर्दछ:
 
-- **स्थापित** — स्थापित plugins लाई तिनका घोषित hooks, activate/deactivate
-  toggle, uninstall बटन, र "Plugins स्क्यान गर्नुहोस्" कार्य
-  (`POST /api/plugins/scan`) सहित सूचीबद्ध गर्छ।
-- **Marketplace** — आफूअनुकूल registry URL सेट गर्ने फिल्डसहित
-  `GET /api/plugins/marketplace` बाट प्राप्त catalog देखाउँछ।
+- **स्थापना गरियो** — तिनीहरूको घोषित हुकहरू, एक activate/deactivate टगल, एक अनइन्स्टल बटन, र "प्लगइनहरूको लागि स्क्यान" कार्य (`POST /api/plugins/scan`) सँग स्थापित प्लगइनहरू सूचीबद्ध गर्दछ।
+- **बजार** — कस्टम रजिस्ट्री URL सेट गर्न फिल्डको साथ `GET /api/plugins/marketplace` बाट क्याटलग देखाउँछ।
 
-प्रत्येक plugin को config पृष्ठ `/dashboard/plugins/[name]/config` मा रहन्छ
-(`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`)।
+पृष्ठले सधैं चेतावनी देखाउँछ कि प्लगइनहरू OmniRoute प्रक्रियाको पूर्ण विशेषाधिकारहरूसँग चल्छन्।
+
+प्रति-प्लगइन कन्फिगरेसन पृष्ठ `/dashboard/plugins/[name]/config` (`src/app/(dashboard)/dashboard/plugins/[name]/config/page.tsx`) मा रहन्छ।
 
 ## यो पनि हेर्नुहोस्
 

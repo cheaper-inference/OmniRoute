@@ -198,53 +198,48 @@ Prioritet (høyest til lavest):
 
 ---
 
-## Integrasjon i prosesseringskjeden
+## Rørledningsintegrasjon
 
-### PRE-hook (`open-sse/handlers/chatCore.ts`)
+### PRE krok (`open-sse/handlers/chatCore.ts`)
 
-Kjøres før oppstrømsutføreren, etter autentiserings- og policykontroller:
+Kjører før oppstrømsutføreren, etter autentiserings- og policysjekker:
 
 ```
 resolveComboTargets / handleSingleModel
   → enforceQuotaShare(apiKeyId, connectionId, provider, estimatedCost)
-      → getQuotaStore().peek() per dimensjon
+      → getQuotaStore().peek() per dimension
       → fairShare.decideFairShare()
-      → ved blokkering → returner 429 (buildErrorBody, hard regel nr. 12)
-      → hvis tillatt + nedprioritering → sett quotaSoftPenalty=true på kandidaten
+      → if block → return 429 (buildErrorBody, Hard Rule #12)
+      → if allow + deprioritize → set quotaSoftPenalty=true on candidate
   → executor.execute()
 ```
 
-**Fail-open**: Hvis `enforceQuotaShare` utløser et unntak, slippes forespørselen gjennom
-med en `pino.warn`-logg. Dette forhindrer at en feil i kvotemotoren blokkerer all
-trafikk.
+**Feil åpen** : hvis `enforceQuotaShare` kaster, tillates forespørselen gjennom med en `pino.warn` logg. Dette forhindrer en kvotemotorfeil fra å blokkere all trafikk.
 
-### POST-hook (registrer forbruk)
+### POST -krok (rekordforbruk)
 
 Etter et vellykket svar:
 
 ```
-executor returnerer suksess
+executor returns success
   → spendRecorder.recordConsumption(apiKeyId, connectionId, provider, actualCost)
-      → getQuotaStore().consume() per dimensjon
-      → fail-open: feil logges som pino.warn, aldri videresendt til klienten
+      → getQuotaStore().consume() per dimension
+      → fail-open: errors logged as pino.warn, never propagated to client
 ```
 
-**Merknad om avvik**: Hvis `consume` mislykkes etter svaret, registrerer den rullerende telleren
-for lite. Metningssignalet fra leverandøren (f.eks. `anthropic-ratelimit-unified-5h-utilization`)
-korrigerer det globale estimatet ved neste forespørsel.
+**Driftsnotat** : hvis `consume` mislykkes etter respons, teller den rullende telleren under. Metningssignalet fra leverandøren (f.eks. `anthropic-ratelimit-unified-5h-utilization`) korrigerer det globale estimatet ved neste forespørsel.
 
-### Myk straff for kombinasjoner (`open-sse/services/combo.ts`)
+### Combo myk straff (`open-sse/services/combo.ts`)
 
 Når `decision.deprioritize === true`:
 
 ```ts
 if (candidate.quotaSoftPenalty) {
-  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // standard 0,7
+  score *= QUOTA_SOFT_DEPRIORITIZE_FACTOR; // default 0.7
 }
 ```
 
-Straffen brukes etter alle andre poengberegningsfaktorer. Den reduserer sannsynligheten for at
-automatisk kombinasjonsvalg velger en mettet nøkkel, uten å blokkere den fullstendig.
+Straffen brukes etter alle andre scoringsfaktorer. Det reduserer sannsynligheten for autokombinasjon for å velge en mettet nøkkel uten å blokkere den hardt.
 
 ---
 
@@ -347,15 +342,14 @@ vises som et brukervalg i brukergrensesnittet eller API-et.
 
 ## Testdekning
 
-To lag med automatisert testdekning følger med quota-share-motoren:
+To lag med automatisert dekning sendes med kvotedelingsmotoren:
 
-| Testpakke           | Kommando                                                               | Hva den dekker                                                                                                                                                                                                                         |
-| :------------------ | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Enhet (29 tester)   | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR-planlegger, metningsstyring, samtidighetsgrenser, fairShare-beregning, kølegging av restanser                                                                                                                                      |
-| Integrasjonsmatrise | `npm run test:combo:matrix`                                            | Ende-til-ende-rutingsbeslutning gjennom den reelle kombinasjonspipelinen; DRR-rettferdighet + nedprioritering ved metning via aktive integrasjonspunkter (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
+| Suite               | Kommando                                                               | Hva den dekker                                                                                                                                                                                                       |
+| :------------------ | :--------------------------------------------------------------------- | :------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Enhet (29 tester)   | `node --import tsx/esm --test tests/unit/quota-share-strategy.test.ts` | DRR -planlegger, saturation gating, concurrency caps, fairShare math, backlog-kø                                                                                                                                     |
+| Integrasjonsmatrise | `npm run test:combo:matrix`                                            | End-to-end-rutingsbeslutning gjennom den virkelige kombinasjonsrørledningen; DRR fairness + metningsnedprioritering via direkte sømmer (`registerQuotaFetcher`, `setLKGP`, `__setHeadroomSaturationFetcherForTests`) |
 
-Integrasjonsmatrisen kjøres i CI sammen med alle de 19 offentlige strategiene. Enhetstestpakken
-kan kjøres separat.
+Integrasjonsmatrisen kjører i CI sammen med alle 22 offentlige strategier. Enhetspakken kan kjøres frittstående.
 
 ---
 

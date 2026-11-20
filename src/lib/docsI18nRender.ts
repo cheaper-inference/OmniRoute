@@ -2,6 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 import type { Tokens } from "marked";
 import { resolveSafeI18nSectionDir } from "@/lib/docsI18nPath";
+import { ensureRemoteDocsMirror, type DocsI18nRemoteOptions } from "@/lib/docsI18nRemote";
 import { normalizeDocsMarkdownLinks } from "@/lib/docsLinkResolver";
 import { withBasePath } from "@/shared/utils/basePath";
 import { createLogger } from "@/shared/utils/logger";
@@ -128,27 +129,56 @@ async function renderMirrorMarkdown(
   };
 }
 
+export type LoadTranslatedDocOptions = {
+  /**
+   * The English page's file relative to `docs/` (`page.path`, e.g. `getting-started/QUICK-START.md`).
+   * Needed only to fetch a mirror for an install without a bundled docs/i18n tree.
+   */
+  sourcePath?: string;
+  remote?: DocsI18nRemoteOptions;
+};
+
 /**
  * Loads `docs/i18n/<locale>/docs/<section>/<FILE>.md`, the layout that
  * `scripts/i18n/run-translation.mjs` produces, and renders it to sanitized HTML.
  *
  * Returns `null` whenever the English page should be served instead: default locale, no mirror
  * for this page or locale, or a mirror that cannot be read or rendered. A bad translation must
- * never take the docs page down. npm, Docker and Electron builds ship the mirrors this reads
- * (scripts/build/docsMirrorRuntime.mjs decides which).
+ * never take the docs page down.
+ *
+ * Docker and Electron builds ship the mirrors this reads (scripts/build/docsMirrorRuntime.mjs
+ * decides which), and a missing mirror there means English. The npm package ships none (#20438):
+ * when `<docsRoot>/i18n` does not exist, the one mirror a request needs is fetched from the
+ * installed version's tag and cached under DATA_DIR (src/lib/docsI18nRemote.ts,
+ * OMNIROUTE_DOCS_I18N_REMOTE=false turns it off), then rendered through the same path.
  */
 export async function loadTranslatedDoc(
   slug: string[],
   locale: string,
   englishToc: ReadonlyArray<{ url: string; depth: number }>,
-  docsRoot: string = path.resolve(process.cwd(), "docs")
+  docsRoot: string = path.resolve(process.cwd(), "docs"),
+  options: LoadTranslatedDocOptions = {}
 ): Promise<TranslatedDoc | null> {
   if (!locale || locale === "en") return null;
+
+  // No bundled mirrors (npm install): read from the DATA_DIR cache, fetching on a miss.
+  let mirrorRoot = docsRoot;
+  if (!fs.existsSync(path.join(docsRoot, "i18n"))) {
+    if (!options.sourcePath) return null;
+    const cacheRoot = await ensureRemoteDocsMirror(
+      locale,
+      slug,
+      options.sourcePath,
+      options.remote
+    );
+    if (!cacheRoot) return null;
+    mirrorRoot = cacheRoot;
+  }
 
   // 🛡️ Path traversal prevention — `locale` is a user-controllable cookie, so
   // validate segments + confine the resolved dir to docs/i18n before any fs read.
   // Centralized in resolveSafeI18nSectionDir (pure, unit-tested).
-  const sectionDir = resolveSafeI18nSectionDir(docsRoot, locale, slug);
+  const sectionDir = resolveSafeI18nSectionDir(mirrorRoot, locale, slug);
   if (!sectionDir || !fs.existsSync(sectionDir)) return null;
 
   try {

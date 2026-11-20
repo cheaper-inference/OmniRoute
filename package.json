@@ -1,6 +1,6 @@
 {
   "name": "omniroute",
-  "version": "3.8.54",
+  "version": "3.8.55",
   "description": "Unified AI router with hundreds of providers, RTK+Caveman compression, auto fallback, MCP/A2A, desktop, PWA, and OpenAI-compatible APIs.",
   "type": "module",
   "bin": {
@@ -107,7 +107,6 @@
     "bench:heap-body": "node --expose-gc --import tsx/esm scripts/perf/request-body-heap.ts",
     "bench:routing-events": "node --import tsx/esm scripts/perf/routing-events-bench.ts",
     "bench:egress-quota-rotation": "node --import tsx/esm scripts/perf/egress-quota-rotation-bench.ts",
-    "bench:highwatermark": "node --import tsx/esm scripts/perf/benchmark-highwatermark.ts",
     "perf:lts-baseline": "node scripts/perf/lts-baseline.mjs",
     "eval:compression": "node --import tsx scripts/compression-eval/index.ts",
     "eval:router": "node --import tsx scripts/router-eval/index.ts",
@@ -407,7 +406,7 @@
     "marked-terminal": "^7.3.0",
     "mermaid": "^11.17.2",
     "monaco-editor": "^0.56.0",
-    "next": "16.4.2",
+    "next": "16.4.6",
     "next-intl": "^4.14.0",
     "next-themes": "^0.4.6",
     "node-machine-id": "^1.1.12",
@@ -608,14 +607,10 @@
     "socket.io-parser": "^4.2.7",
     "tar": "^7.5.21",
     "libxmljs2": {
-      "minimatch": {
-        "brace-expansion": "^2.1.4"
-      }
+      "minimatch": "^11.0.4"
     },
     "rimraf": {
-      "minimatch@9": {
-        "brace-expansion": "^2.1.4"
-      }
+      "minimatch@9": "^11.0.4"
     },
     "@apidevtools/json-schema-ref-parser": {
       "js-yaml": "^5.4.2"
@@ -639,6 +634,8 @@
     },
     "get-uri": {
       "basic-ftp": "^6.2.3"
-    }
+    },
+    "glob": "$glob",
+    "minimatch@>=9.0.0": "^11.0.4"
   }
 }

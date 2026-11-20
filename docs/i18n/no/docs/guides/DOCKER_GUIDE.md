@@ -27,13 +27,9 @@
 
 ---
 
-## Hurtigkjøring
+## Rask løp
 
-> **Selvdrift med én kommando?** Se
-> [veiledningen for selvdrift](../getting-started/SELF_HOST_GUIDE.md) —
-> `docker compose -f docker-compose.selfhost.yml up -d` (publisert image +
-> Redis, kun loopback, uten valg av profil). Hurtigkjøringen nedenfor er
-> alternativet med én container for brukere som allerede kjører Redis et annet sted.
+> **Selvvert i én kommando?** Se [Self-Host Guide](../getting-started/SELF_HOST_GUIDE.md) — `docker compose -f docker-compose.selfhost.yml up -d` (publisert bilde + Redis, loopback-bare, ingen profilvalg). Hurtigkjøringen nedenfor er enkeltbeholderbanen for brukere som allerede kjører Redis andre steder.
 
 ```bash
 docker run -d \
@@ -42,13 +38,13 @@ docker run -d \
   --stop-timeout 40 \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Med miljøfil
 
 ```bash
-# Kopier og rediger .env først
+# Copy and edit .env first
 cp .env.example .env
 
 docker run -d \
@@ -58,7 +54,7 @@ docker run -d \
   --env-file .env \
   -p 20128:20128 \
   -v omniroute-data:/app/data \
-  diegosouzapw/omniroute:latest
+  cheaperinference/omniroute:latest
 ```
 
 ## Docker Compose
@@ -239,16 +235,16 @@ Produksjonsstakken kjører parallelt med Compose-miljøet for utvikling (med uli
 
 ## Dockerfile-stadier
 
-Repositoriet leveres med en flertrinns-Dockerfile (`Dockerfile`). Fire stadier er tilgjengelige; velg riktig `target` for ditt bruksområde.
+Depotet sender en flertrinns Dockerfile (`Dockerfile`). Fire stadier er eksponert; velg riktig `target` for ditt bruksområde.
 
-| Stadium       | Basisavbildning       | Formål                                                                                                                                                                                                                                                                                                                   |
-| ------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| `builder`     | `node:26-trixie-slim` | Installerer avhengigheter (`npm ci --legacy-peer-deps`) og kjører `npm run build` (Turbopack som standard — se Byggeressurser nedenfor)                                                                                                                                                                                  |
-| `runner-base` | `node:26-trixie-slim` | Produksjonskjøretid med den frittstående utdataen fra Next.js. **Ingen CLI-er for leverandører er inkludert.**                                                                                                                                                                                                           |
-| `runner-cli`  | `runner-base`         | Legger til `git`, `docker.io`, `docker-compose` og globale CLI-er: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`. **Velg dette for agentbaserte arbeidsflyter.**                                                                                                                                     |
-| `runner-web`  | `runner-base`         | Legger til Playwright + en Chromium-nettleser (`--with-deps`) for leverandører av nettøkter: `gemini-web`, `claude-web`, `claude-turnstile`. **Velg dette når du bruker disse leverandørene** — den vanlige avbildningen feiler ved forespørselstidspunktet uten dette (se merknaden om `-web` under Utgivelseskanaler). |
+| Scene         | Grunnbilde            | Hensikt                                                                                                                                                                                                                                                                                                  |
+| ------------- | --------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `builder`     | `node:26-trixie-slim` | Installerer deps (`npm ci --legacy-peer-deps`) og kjører `npm run build` (Turbopack som standard — se Byggetidsressurser nedenfor)                                                                                                                                                                       |
+| `runner-base` | `node:26-trixie-slim` | Produksjonstid med Next.js frittstående utgang.** Ingen leverandør CLIs medfølger.**                                                                                                                                                                                                                     |
+| `runner-cli`  | `runner-base`         | Legger til `git`, `docker.io`, `docker-compose` og global CLIs: `@openai/codex`, `@anthropic-ai/claude-code`, `droid`, `openclaw`.** Velg dette for agentiske arbeidsflyter.**                                                                                                                           |
+| `runner-web`  | `runner-base`         | Legger til Playwright + en Chromium-nettleser (`--with-deps`) for nettøktleverandører: `gemini-web`, `claude-web`, `claude-turnstile`.** Velg dette når du bruker disse leverandørene** — det vanlige bildet mislykkes på forespørselstidspunktet uten det (se `-web` -notatet under Utgivelseskanaler). |
 
-Bygg et bestemt mål manuelt:
+Bygg et spesifikt mål manuelt:
 
 ```bash
 docker build --target runner-base -t omniroute:base .
@@ -256,43 +252,19 @@ docker build --target runner-cli  -t omniroute:cli  .
 docker build --target runner-web  -t omniroute:web  .
 ```
 
-### Byggeressurser
+### Byggetidsressurser
 
-Tre byggeargumenter styrer hvor ressurskrevende `builder`-stadiet er. De gjelder bare under bygging —
-`OMNIROUTE_MEMORY_MB` (nedenfor) er en separat kjøretidsinnstilling.
+Tre byggearg styrer hva `builder` scenen koster. De er kun i byggetid — `OMNIROUTE_MEMORY_MB` (nedenfor) er en separat kjøretidsknapp.
 
-| Byggeargument               | Standard | Effekt                                                                                      |
-| --------------------------- | -------- | ------------------------------------------------------------------------------------------- |
-| `OMNIROUTE_USE_TURBOPACK`   | `0`      | `0` bygger med webpack: lavere maksimal minnebruk, men tregere. `1` aktiverer Turbopack.    |
-| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`   | Øvre grense for V8-heapen (`--max-old-space-size`) for den startede `next build`-prosessen. |
-| `OMNIROUTE_BUILD_WORKERS`   | `2`      | Angir `CIRCLE_NODE_TOTAL`; Next utleder `workers = N - 1` for innsamling av sidedata.       |
+| Bygg arg                    | Misligholde | Effekt                                                                            |
+| --------------------------- | ----------- | --------------------------------------------------------------------------------- |
+| `OMNIROUTE_USE_TURBOPACK`   | `0`         | `0` bygger med webpack: lavere toppminne, tregere. `1` velger Turbopack.          |
+| `OMNIROUTE_BUILD_MEMORY_MB` | `6144`      | V8 heap-tak (`--max-old-space-size`) for den avlede `next build`.                 |
+| `OMNIROUTE_BUILD_WORKERS`   | `2`         | Mater `CIRCLE_NODE_TOTAL`; Next utleder `workers = N - 1` for sidedatainnsamling. |
 
-`OMNIROUTE_BUILD_WORKERS` er den du bør øke på en kraftig byggemaskin, og den du bør
-mistenke når en ressursbegrenset bygging stopper **etter** `✓ Compiled successfully`. Hver
-arbeider for sidedata er en egen prosess, og det samme gjelder den overordnede `next build`-prosessen;
-en reproduksjon på en aktiv VPS (sak #7518) målte maksimal RSS for hver prosess til
-~4,5 GB uavhengig av heap-flagget i `NODE_OPTIONS` (Turbopack kompilerer i
-nativt/Rust-minne utenfor V8-heapen). Standardverdien `2` (→ 1 arbeider, totalt 2
-prosesser) er dimensjonert for de GitHub-driftede kjørerne med 16 GB / 4 vCPU som
-publiseringsprosessen bruker. Med `8` (→ 7 arbeidere) gikk denne kjøreren tom for minne, og
-buildkit avbrøt trinnet med `ResourceExhausted: ... cannot allocate memory`;
-`3` (→ 2 arbeidere) fikk fortsatt ikke plass etter at RSS per prosess ble målt
-direkte i stedet for å bli utledet. `tests/unit/docker-build-memory-budget.test.ts`
-utfører beregningen basert på den målte verdien og feiler hvis en av innstillingene
-blir for stor for kjøreren.
+`OMNIROUTE_BUILD_WORKERS` er den som hever på en stor byggmester og den som mistenker når en begrenset bygning dør** etter** `✓ Compiled successfully`. Hver sidedataarbeider er sin egen prosess, og det samme er den overordnede `next build` selv; en live VPS -reproduksjon (issue #7518) målte hver prosess topp RSS ved ~ 4,5 GB uavhengig av `NODE_OPTIONS` heap-flagget (Turbopack kompilerer i native/Rust -minne utenfor V8-heapen). Standarden for `2` (→ 1 arbeider, 2 prosesser totalt) er dimensjonert for de 16 GB / 4 vCPU GitHub-vertsløperne som publiseringspipelinen bruker. Ved `8` (→ 7 arbeidere) gikk den løperen tom for minne og buildkit mislyktes i trinnet med `ResourceExhausted: ... cannot allocate memory`; `3` (→ 2 arbeidere) passet fortsatt ikke når RSS per prosess ble målt direkte i stedet for utledet. `tests/unit/docker-build-memory-budget.test.ts` regner med den målte figuren og mislykkes hvis en av knappene vokser ut av løperen.
 
-Turbopack kompilerer i nativt Rust-minne som ligger **utenfor** V8-heapen, så
-`OMNIROUTE_BUILD_MEMORY_MB` begrenser det ikke. På en vert med en minnegrense blir
-byggingen da avsluttet med SIGKILL av OOM-avslutteren uten noen feilmelding — den
-stopper ganske enkelt midt i `Creating an optimized production build`, noe som ser ut
-som om prosessen har hengt seg opp, heller enn at den har gått tom for minne. Det er derfor
-`Dockerfile` bruker webpack som standard (`OMNIROUTE_USE_TURBOPACK=0`), i motsetning til
-`npm run dev` / `npm run build`, der Turbopack er standardvalget i koden: en enkel
-`docker build .` uten byggeargumenter (slik Railway og andre verter med ettklikksoppsett
-kjører den) må ikke stoppe lydløst på en byggemaskin med begrenset minne. De publiserte
-avbildningene angir allerede `OMNIROUTE_USE_TURBOPACK=0` eksplisitt i
-`docker-publish.yml`. På en byggemaskin med rikelig RAM kan du aktivere
-Turbopack for en raskere bygging:
+Turbopack kompilerer i innfødt Rust-minne som lever** utenfor** V8-haugen, så `OMNIROUTE_BUILD_MEMORY_MB` binder den ikke. På en vert med et minnetak blir bygningen da SIGKILLed av OOM killer uten noen feiltekst i det hele tatt — den stopper rett og slett midt i `Creating an optimized production build`, som leses som en henging i stedet for et tomt minne. Det er grunnen til at `Dockerfile` er standard til webpack (`OMNIROUTE_USE_TURBOPACK=0`), i motsetning til `npm run dev` / `npm run build`, der Turbopack er kodestandarden: en bare `docker build .` uten build-arg (det Railway og andre ett-klikks-verter kjører) må ikke dø stille på en minnebegrenset bygger. De publiserte bildene passerer allerede `OMNIROUTE_USE_TURBOPACK=0` eksplisitt i `docker-publish.yml`. På en byggherre med mye RAM, velg Turbopack for en raskere build:
 
 ```bash
 docker build --target runner-base \
@@ -300,48 +272,46 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` er aktivert, så `next build` kjører en overordnet prosess **og** en
-arbeiderprosess, og begge respekterer `OMNIROUTE_BUILD_MEMORY_MB` separat. Sett
-minnegrensen for containeren til omtrent det dobbelte av denne verdien, ikke bare én gang verdien.
+`webpackBuildWorker` er aktivert, så `next build` kjører en forelder** og** en arbeidsprosess og hver hedrer `OMNIROUTE_BUILD_MEMORY_MB` separat. Større beholderens tak over omtrent det dobbelte av verdien, ikke en gang.
 
 Målt på dette treet (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
-| Pakkebygger | Containergrense | Resultat                                  |
-| ----------- | --------------- | ----------------------------------------- |
-| Turbopack   | 8 GiB / 16 GiB  | OOM-avsluttet ved begge, uten feilmelding |
-| webpack     | 8 GiB           | byggearbeider avsluttet med SIGKILL       |
-| webpack     | 12 GiB          | fullført, nådde en topp på 11,1 GiB       |
+| Bundler   | Container tak  | Resultat                          |
+| --------- | -------------- | --------------------------------- |
+| Turbopack | 8 GiB / 16 GiB | OOM-drept på begge, stille        |
+| nettpakke | 8 GiB          | bygge arbeider SIGKILLed          |
+| nettpakke | 12 GiB         | lyktes, nådde en topp på 11,1 GiB |
 
-### Standardverdier ved kjøretid
+### Kjøretidsstandarder
 
-Standardverdier eksportert av `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
+Standarder eksportert av `runner-base`: `PORT=20128`, `HOSTNAME=0.0.0.0`, `OMNIROUTE_MEMORY_MB=1024`, `NODE_OPTIONS=--max-old-space-size=1024`, `DATA_DIR=/app/data`, `OMNIROUTE_MIGRATIONS_DIR=/app/migrations`.
 
-Minneatferd i Docker:
+Minneadferd i Docker:
 
-- Avbildningen setter `OMNIROUTE_MEMORY_MB=1024` og utleder `NODE_OPTIONS=--max-old-space-size=1024` fra denne.
-- Den faktiske serverprosessen startes av den frittstående oppstarteren, som leser `OMNIROUTE_MEMORY_MB` og legger til `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
-- Node bruker den siste gjentatte `--max-old-space-size`-verdien, så innstilling av `OMNIROUTE_MEMORY_MB` styrer den effektive heap-grensen i Docker.
-- Fordi avbildningen alltid setter den, brukes aldri oppstarterens eget RAM-kalibrerte reservevalg under Docker. Øk den eksplisitt for arbeidslasten (se tabellen nedenfor). `2048` er fortsatt for lite for kodeagenters `/v1/responses`.
+- Bildet setter `OMNIROUTE_MEMORY_MB=1024` og henter `NODE_OPTIONS=--max-old-space-size=1024` fra det.
+- Selve serverprosessen startes av den frittstående lanseringen, som leser `OMNIROUTE_MEMORY_MB` og legger til `--max-old-space-size=<OMNIROUTE_MEMORY_MB>`.
+- Node bruker den siste gjentatte `--max-old-space-size` verdien, så innstillingen av `OMNIROUTE_MEMORY_MB` kontrollerer den effektive Docker heap-grensen.
+- Fordi bildet alltid setter det, gjelder aldri launcherens egen RAM-kalibrerte fallback under Docker. Øk den eksplisitt for arbeidsbelastningen (tabell nedenfor). `2048` er fortsatt for liten for kodingsagent `/v1/responses`.
 
-### Kjøretids-RAM for kodeagenter
+### Runtime RAM for kodingsagenter
 
-Docker-standarden på 1 GiB er et minimum for kontrollpanelet og enkel chatting, ikke en størrelse for produksjon. Lange `POST /v1/responses`-forespørsler (hundrevis av meldinger, titalls verktøy) beholder flere grafer i minnet under komprimering. To overlappende forespørsler på ~3 MiB / ~750k tokener har fått V8 til å avbryte med **12 GiB** old-space (`FATAL ERROR: Reached heap limit`) og har også utløst cgroup-OOM ved 16 GiB. Se [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Standarden på 1 GiB Docker er et dashboard/light-chat gulv, ikke en produksjonsstørrelse. Lange `POST /v1/responses` kropper (hundrevis av meldinger, titalls verktøy) beholder flere grafer i minnet under komprimering. To overlappende ~ 3 MiB / ~ 750k-token-forespørsler har avbrutt V8 på en** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) og traff også en 16 GiB cgroup OOM. Se [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
 
-Dimensjoner **cgroup `--memory` høyere enn heap-størrelsen** — innebygde buffere, SQLite og mellomresultater fra komprimering befinner seg utenfor V8.
+Størrelse** cgroup `--memory` over haugen** — native buffere, SQLite og kompresjonsmellomprodukter sitter utenfor V8.
 
-| Arbeidslast                        | `OMNIROUTE_MEMORY_MB`            | Container / cgroup   | Merknader                                                                                                   |
-| ---------------------------------- | -------------------------------- | -------------------- | ----------------------------------------------------------------------------------------------------------- |
-| Kontrollpanel, én enkel chat       | `1024` (standard i avbildningen) | ≥2 GiB               |                                                                                                             |
-| Én kodeagent (Claude/Codex/Grok)   | `8192`                           | ≥10 GiB              | Typisk `/v1/responses` for én økt                                                                           |
-| To samtidige lange `/v1/responses` | `10240`–`12288`                  | ≥12–16 GiB           | Målt V8-avbrudd ved ~12 GiB heap                                                                            |
-| Tre+ samtidige lange kontekster    | ikke på én prosess               | serialiser / mer RAM | Standardgrensen for ressurskrevende forespørsler er 1 aktiv; å øke den uten mer RAM fører til avbrudd igjen |
+| Arbeidsmengde                      | `OMNIROUTE_MEMORY_MB`  | Beholder / cgruppe    | Notater                                                                            |
+| ---------------------------------- | ---------------------- | --------------------- | ---------------------------------------------------------------------------------- |
+| Dashboard, en lett chat            | `1024` (bildestandard) | ≥2 GiB                |                                                                                    |
+| Én kodeagent (Claude/Codex/Grok)   | `8192`                 | ≥10 GiB               | Typisk enkelt-økt `/v1/responses`                                                  |
+| To samtidige lange `/v1/responses` | `10240`–`12288`        | ≥12–16 GiB            | Målt V8 avbryter ved ~ 12 GiB haug                                                 |
+| Tre + samtidige lange sammenhenger | ikke på én prosess     | serialisere / mer RAM | Standard tungvektopptak er 1 under flyging; heve den uten RAM gjeninnfører aborten |
 
-`omniroute serve` på fysisk maskinvare kalibrerer til ~35 % av RAM (begrenset til `[512, 4096]`) når `OMNIROUTE_MEMORY_MB` **ikke er satt**. Docker setter alltid `1024`, så denne kalibreringen kjøres aldri i den offisielle avbildningen.
+`omniroute serve` på bart metall kalibrerer ~ 35 % av RAM (klemt `[512, 4096]`) når `OMNIROUTE_MEMORY_MB` er** deaktivert** . Docker setter alltid `1024`, slik at kalibrering aldri kjører i det offisielle bildet.
 
 ```bash
 docker run -d --name omniroute --restart unless-stopped --stop-timeout 40 \
   -e OMNIROUTE_MEMORY_MB=8192 --memory=10g \
-  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data diegosouzapw/omniroute:latest
+  -p 127.0.0.1:20128:20128 -v omniroute-data:/app/data cheaperinference/omniroute:latest
 ```
 
 ## Kritiske miljøvariabler
@@ -367,20 +337,11 @@ I tillegg til standardverdiene som er dokumentert i [ENVIRONMENT.md](../referenc
 
 ## Omvendt proxy på en underbane (Traefik / nginx)
 
-Next.js `basePath` kompileres inn i den frittstående pakken. OmniRoute registrerer den innbakte
-verdien i en kontrollfil i appens rotmappe (skrevet under `npm run build`; lest av
-`scripts/docker/ensure-docker-base-path.mjs`) og sammenligner den med
-`OMNIROUTE_BASE_PATH` når containeren starter. Når de er forskjellige og avbildningen ble
-bygget for domenets rot, omskriver inngangspunktet de frittstående manifestene, de
-innebygde literalene for `basePath`/`assetPrefix` (Next 16 gjengir URL-er for SSR-ressurser
-utelukkende fra `assetPrefix` — korrigeringsverktøyet speiler underbanen dit), de innbakte
-URL-ene for `/_next/static`-ressurser (klientreferansemanifester, medieimporter, forhåndsgjengitte
-feilsider) og klientens `process.env`-shim før `node dev/run-standalone.mjs`
-kjøres.
+Next.js `basePath` er kompilert i den frittstående pakken. OmniRoute registrerer den bakte verdien i en sentinel-fil ved approten (skrevet under `npm run build`; lest av `scripts/docker/ensure-docker-base-path.mjs`) og sammenligner den med `OMNIROUTE_BASE_PATH` når beholderen starter. Når de er forskjellige og bildet ble bygget for domeneroten, omskriver inngangspunktet de frittstående manifestene, de innebygde `basePath`/`assetPrefix` -literalene (Next 16 gjengir SSR asset URLs fra `assetPrefix` alene — patcheren speiler underbanen inn i den), den bakde `/_next/static` aktivaen-en URLs -manifester, preference, media-import-siden, preference og gjengir feilen. klient `process.env` shim før `node dev/run-standalone.mjs` kjører.
 
-### Bygging med Compose (anbefalt)
+### Skriv bygg (anbefalt)
 
-Angi begge variablene i `.env`, og bygg deretter på nytt slik at avbildningen og kjøremiljøet samsvarer:
+Sett begge variablene i `.env`, og bygg deretter opp igjen slik at bildet og kjøretiden stemmer overens:
 
 ```bash
 # .env
@@ -392,69 +353,52 @@ NEXT_PUBLIC_BASE_URL=https://myhostname.example.com/omniroute
 docker compose --profile base up -d --build
 ```
 
-`docker-compose.yml` videresender `OMNIROUTE_BASE_PATH` både som et Docker-byggeargument og som en
-miljøvariabel i kjøremiljøet.
+`docker-compose.yml` videresender `OMNIROUTE_BASE_PATH` som en Docker build-arg og som en kjøretidsmiljøvariabel.
 
-### Forhåndsbygd rotavbildning + underbane ved kjøring
+### Forhåndsbygd rotbilde + runtime underbane
 
-Publiserte `diegosouzapw/omniroute:*`-avbildninger er bygget for domenets rot. Du kan fortsatt
-angi `OMNIROUTE_BASE_PATH` ved kjøring; containeren korrigerer pakken én gang ved oppstart.
-Kombiner den med det tilsvarende offentlige opphavet:
+Publiserte `cheaperinference/omniroute:*` -bilder er bygget for domeneroten. Du kan fortsatt stille inn `OMNIROUTE_BASE_PATH` under kjøretid; beholderen lapper pakken én gang ved oppstart. Par den med den samsvarende offentlige opprinnelsen:
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     environment:
       OMNIROUTE_BASE_PATH: /omniroute
       NEXT_PUBLIC_BASE_URL: https://myhostname.example.com/omniroute
 ```
 
-Konfigurer den omvendte proxyen til å videresende den **fullstendige** eksterne banen (ikke fjern
-prefikset). Traefik bør rute `PathPrefix(`/omniroute`)` til containeren uten
-`StripPrefix`, slik at Next.js mottar `/omniroute/...` og leverer ressurser fra
-`/omniroute/_next/...`.
+Konfigurer omvendt proxy for å videresende** full** ekstern bane (ikke fjern prefikset). Traefik bør rute `PathPrefix(`/omniroute `)` til containeren uten `StripPrefix`, så Next.js mottar `/omniroute/...` og betjener eiendeler fra `/omniroute/_next/...`.
 
-Docker-helsesjekken undersøker det lettvektige livssyklusendepunktet `/healthz`, med
-aktiv `OMNIROUTE_BASE_PATH` som prefiks. `/api/monitoring/health` er fortsatt tilgjengelig for
-diagnostikk utført av mennesker eller kontrollpaneler. Hvis du vil at containerens HEALTHCHECK skal bruke det igjen (for eksempel
-for håndheving av grundige helsesjekker), angir du `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`.
-Denne banen er en **grundig** sjekk (database + overvåkingssammendrag) — egnet for Dockers
-sjeldne `HEALTHCHECK` hvis du velger å bruke den igjen, men **ikke** for intervaller i Kubernetes'
-`livenessProbe`.
+Docker -helsesjekken sonderer det lette `/healthz` livssyklusendepunktet med prefiks med den aktive `OMNIROUTE_BASE_PATH`. `/api/monitoring/health` forblir tilgjengelig for human/dashboard -diagnostikk; for å peke beholderen HEALTHCHECK tilbake mot den (for eksempel for dyp helsehåndhevelse), sett `OMNIROUTE_HEALTHCHECK_PATH=/api/monitoring/health`. Den veien er en** dyp** sjekk (DB + overvåkingssammendrag) — passende for Docker sjeldne `HEALTHCHECK` hvis du melder deg på igjen, men** ikke** for Kubernetes `livenessProbe` intervaller.
 
-For orkestreringssystemer (Kubernetes, Nomad osv.):
+For orkestratorer (Kubernetes, Nomad, etc.):
 
-| Kontroll            | Foretrekk                                                              | Unngå                                                          |
-| ------------------- | ---------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Aktivitet           | HTTP `GET /livez`, eller TCP på hovedporten (`PORT`, standard `20128`) | `/api/monitoring/health` som aktivitetskontroll                |
-| Beredskap           | HTTP `GET /healthz`                                                    | Korte tidsavbrudd som tolker en opptatt hendelsesløkke som død |
-| Grundig / svartboks | `/api/monitoring/health`                                               | —                                                              |
+| Probe           | Foretrekker                                                            | Unngå                                                    |
+| --------------- | ---------------------------------------------------------------------- | -------------------------------------------------------- |
+| Livlighet       | HTTP `GET /livez`, eller TCP på hovedporten (`PORT`, standard `20128`) | `/api/monitoring/health` som livlighet                   |
+| Beredskap       | HTTP `GET /healthz`                                                    | Trange timeouts som behandler event-loop opptatt som død |
+| Deep / blackbox | `/api/monitoring/health`                                               | —                                                        |
 
-`/healthz` rapporterer prosessens livssyklus (`ok` / `starting` / `stopping`). `/livez` viser
-bare om prosessen er i live (200 når behandleren kan kjøre; den venter ikke på
-beredskap). Begge kjører fortsatt i den samme Node-hendelsesløkken som forespørselsbehandlingen, så
-CPU-bundet katalog- eller komprimeringsarbeid kan forsinke dem — opptatt ≠ død. Foretrekk TCP-basert
-aktivitetskontroll hvis HTTP-kontroller får tidsavbrudd. Fullstendig veiledning for kontroller:
-[Overvåkingsveiledning — anbefalinger for Kubernetes-kontroller](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
+`/healthz` rapporterer prosesslivssyklus (`ok` / `starting` / `stopping`). `/livez` er kun prosesslevende (200 når behandleren kan kjøre; den venter ikke på beredskap). Begge kjører fortsatt på samme Node-hendelsesløkke som forespørselshåndtering, så CPU-bundet katalog eller komprimeringsarbeid kan forsinke dem — opptatt ≠ døde. Foretrekk TCP liveness hvis HTTP sonderne tar timeout. Full sondeveiledning: [Overvåkingsveiledning — Kubernetes sondeanbefalinger](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations).
 
-## Docker Compose med Caddy (automatisk HTTPS/TLS)
+## Docker Compose with Caddy (HTTPS Auto-TLS)
 
-OmniRoute kan eksponeres sikkert ved hjelp av Caddys automatiske SSL-klargjøring. Sørg for at domenets DNS A-post peker til serverens IP-adresse.
+OmniRoute kan eksponeres sikkert ved hjelp av Caddys automatiske SSL klargjøring. Sørg for at domenets DNS A-post peker til serverens IP.
 
 ```yaml
 services:
   omniroute:
-    image: diegosouzapw/omniroute:latest
+    image: cheaperinference/omniroute:latest
     container_name: omniroute
     restart: unless-stopped
     volumes:
       - omniroute-data:/app/data
     environment:
       - PORT=20128
-      # Nettleservendt opprinnelse for OAuth-tilbakekall, kontrollpanellenker og genererte offentlige URL-er.
+      # Browser-facing origin for OAuth callbacks, dashboard links, and generated public URLs.
       - NEXT_PUBLIC_BASE_URL=https://your-domain.com
-      # Intern URL for kommunikasjon mellom servere, planlagte jobber og forespørsler til seg selv.
+      # Internal server-to-server URL for scheduled jobs / self-fetches.
       - BASE_URL=http://omniroute:20128
       - AUTH_COOKIE_SECURE=true
 
@@ -471,12 +415,7 @@ volumes:
   omniroute-data:
 ```
 
-Caddy angir standard videresendingshoder for oppstrømsbeholderen. OmniRoute bruker
-`NEXT_PUBLIC_BASE_URL` som den kanoniske offentlige opprinnelsen for OAuth-tilbakekall og genererte offentlige
-lenker. Autentiserte skriveoperasjoner i kontrollpanelet bruker forespørsler med samme opprinnelse samt øktbundet CSRF-
-beskyttelse. Aktiver bare `OMNIROUTE_TRUST_PROXY` for avanserte distribusjoner der du bevisst
-vil at OmniRoute skal utlede den offentlige opprinnelsen fra klarerte videresendingshoder i stedet for eksplisitt
-konfigurasjon.
+Caddy angir standard videresendingshoder for oppstrøms container. OmniRoute bruker `NEXT_PUBLIC_BASE_URL` som den kanoniske offentlige opprinnelsen for OAuth tilbakeringing og genererte offentlige lenker; autentiserte dashbordskriver bruker forespørsler med samme opprinnelse pluss øktbundet CSRF beskyttelse. Aktiver bare `OMNIROUTE_TRUST_PROXY` for avanserte distribusjoner der du med vilje vil at OmniRoute skal utlede den offentlige opprinnelsen fra klarerte videresendte overskrifter i stedet for eksplisitt konfigurasjon.
 
 ## Cloudflare Quick Tunnel
 
@@ -493,49 +432,51 @@ Tunnelpaneler for endepunkter (Cloudflare, Tailscale, ngrok) kan vises eller skj
 - Docker-avbildninger inkluderer systemets CA-røtter og sender dem videre til administrerte `cloudflared`, noe som forhindrer TLS-klareringsfeil når tunnelen startes opp i beholderen.
 - Angi `CLOUDFLARED_BIN=/absolute/path/to/cloudflared` hvis du vil at OmniRoute skal bruke en eksisterende binærfil i stedet for å laste ned en.
 
-## Avbildningstagger
+## Bilde-tagger
 
-| Avbildning               | Tagg     | Størrelse | Beskrivelse                                             |
-| ------------------------ | -------- | --------- | ------------------------------------------------------- |
-| `diegosouzapw/omniroute` | `latest` | ~250MB    | Høyeste **publiserte** stabile SemVer (ikke git `main`) |
-| `diegosouzapw/omniroute` | `3.8.0`  | ~250MB    | Fest denne typen tagg for GitOps                        |
+| Bilde                        | Tag      | Størrelse | Beskrivelse                                          |
+| ---------------------------- | -------- | --------- | ---------------------------------------------------- |
+| `cheaperinference/omniroute` | `latest` | ~ 250 MB  | Høyest** publisert** stabil SemVer (ikke git `main`) |
+| `cheaperinference/omniroute` | `3.8.54` | ~ 250 MB  | Fest denne klassen med tag for GitOps                |
 
-Flerplattformmanifest: opprinnelig støtte for `linux/amd64` + `linux/arm64` (Apple Silicon, AWS Graviton, Raspberry Pi). Docker velger automatisk den samsvarende arkitekturen. Bruk `--platform linux/amd64` hvis du må fremtvinge AMD64-emulering på ARM-verter.
+De samme bildene er publisert til tre depoter, med samme per-arkitektur-sammendrag: `cheaperinference/omniroute` (Docker Hub, Cheaper Inference-organisasjonen, fra 3.8.53), `ghcr.io/cheaper-inference/omniroute` og den eldre `diegosouzapw/omniroute`, som beholder sin pull-historie og fortsatt mottar hver utgivelse. Eksisterende `diegosouzapw/omniroute` distribusjoner fortsett å oppdateres; bytte bildenavn er valgfritt. `:next` / `:next-web` forhåndsutgivelseskanalen nedenfor publiseres kun til `diegosouzapw/omniroute` og GHCR.
 
-### Utgivelseskanaler
+Multi-plattform manifest: `linux/amd64` + `linux/arm64` native (Apple Silicon, AWS Graviton, Raspberry Pi). Docker velger den matchende arkitekturen automatisk; pass `--platform linux/amd64` hvis du trenger å tvinge AMD64 emulering på ARM verter.
 
-OmniRoute publiserer separate Docker-kanaler for stabile utgivelser, aktiv testing av utgivelsesgrener og utviklingsbygg.
+### Slipp kanaler
 
-| Kanal                           | Kilde                                 | Endringsmulighet               | Anbefalt bruk                                                                                                                       |
-| ------------------------------- | ------------------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------------- |
-| `:<version>` / `:<version>-web` | Signert/versjonert utgivelse          | Uforanderlig                   | Produksjonsdistribusjoner som er festet til en nøyaktig utgivelse                                                                   |
-| `:latest` / `:latest-web`       | Høyeste **publiserte** stabile SemVer | Foranderlig stabil peker       | Følger stabile utgivelser **etter** en SemVer-publiseringsjobb — følger **ikke** `main` eller upubliserte `release/v*`-innsendinger |
-| `:next` / `:next-web`           | Gjeldende standardgren `release/v*`   | Foranderlig førutgivelsespeker | Testing av rettelser som er lagt inn på den aktive utgivelsesgrenen, men som ennå ikke er med i en stabil utgivelse                 |
-| `:main` / `:main-web`           | `main`-grenen                         | Foranderlig utviklingspeker    | Kun utviklings- og integrasjonstesting                                                                                              |
+OmniRoute publiserer separate Docker kanaler for stabile utgivelser, aktiv utgivelsesgrentesting og utviklingsbygg.
 
-#### Leverandører for nettøkter: `-web`-avbildningene
+| Kanal                           | Kilde                                | Foranderlighet          | Anbefalt bruk                                                                                                                  |
+| ------------------------------- | ------------------------------------ | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| `:<version>` / `:<version>-web` | Signed/versioned utgivelse           | Uforanderlig            | Produksjonsdistribusjoner som fester en nøyaktig utgivelse                                                                     |
+| `:latest` / `:latest-web`       | Høyest** publisert** stabil SemVer   | Mulig stabil peker      | Følger stabile utgivelser** etter** en SemVer publiseringsjobb gjør —** ikke** spor `main` eller uutgitte `release/v*` commits |
+| `:next` / `:next-web`           | Gjeldende standard `release/v*` gren | Mulig pre-release-peker | Tester rettelser som har landet på den aktive utgivelsesgrenen, men som ennå ikke er i en stabil utgivelse                     |
+| `:main` / `:main-web`           | `main` gren                          | Mulig utviklingspeker   | Kun utviklings- og integrasjonstesting                                                                                         |
 
-Hver kanal ovenfor har også en `-web`-tagg (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), bygget fra `runner-web`-stadiet — den samme avbildningen pluss Playwright og en Chromium-nettleser. Den vanlige avbildningen leveres **uten** Chromium. `gemini-web`, `claude-web` og `claude-turnstile` trenger den.
+#### Leverandører av nettøkter: `-web` bildene
 
-Feilen utsettes og oppstår ikke ved oppstart: Disse leverandørene viser modellene sine og fremstår som tilkoblet i kontrollpanelet, og først den første forespørselen mislykkes med
+Hver kanal ovenfor fungerer som en `-web` tag (`:latest-web`, `:<version>-web`, `:next-web`, `:main-web`), bygget fra `runner-web` stadiet — det samme bildet pluss Playwright og en Chromium-nettleser. Det enkle bildet sendes** uten** krom; `gemini-web`, `claude-web` og `claude-turnstile` trenger det.
+
+Feilen er utsatt, ikke oppstartstid: disse leverandørene viser modellene sine og vises som tilkoblet i dashbordet, og bare den første forespørselen mislykkes med
 
 ```
-[500]: Kunne ikke laste inn den eksterne modulen playwright: Feil: Finner ikke modulen
+[500]: Failed to load external module playwright: Error: Cannot find module
 '/app/node_modules/playwright/node_modules/playwright-core/browsers.json'
 ```
 
-Hvis du bruker disse leverandørene, henter du `-web`-taggen for kanalen du allerede bruker — ingenting annet endres. Ved en npm/CLI-installasjon (ingen Docker-avbildning) er den tilsvarende manglende komponenten nettleserbinærfilen: Kjør `npx playwright install chromium` på verten.
+Hvis du bruker disse leverandørene, trekk `-web` taggen til kanalen du allerede er på — ingenting annet endres. På en npm/CLI installasjon (ingen Docker bilde), er den tilsvarende manglende delen nettleserens binære: kjør `npx playwright install chromium` på verten.
 
-#### Bruk av førutgivelseskanalen
+#### Bruker forhåndsutgivelseskanalen
 
-`next`-kanalen bygges på nytt ved hvert push til den gjeldende standardgrenen `release/v*` og publiseres for både AMD64 og ARM64. Eldre vedlikeholdsgrener kan ikke overskrive den. Kanalen tilbyr et image som kan hentes, for rettelser som er slått sammen i den aktive release-grenen før den neste stabile taggen opprettes.
+`next` kanalen bygges om ved hvert trykk til gjeldende standard `release/v*` gren og publiseres for både AMD64 og ARM64. Eldre vedlikeholdsgrener kan ikke overskrive den. Kanalen gir et trekkbart bilde for rettelser som har slått seg sammen i den aktive utgivelsesgrenen før neste stabile tag kuttes.
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker pull diegosouzapw/omniroute:next-web
 ```
 
-For Docker Compose overstyrer du image-taggen som brukes av den valgte profilen, og henter og oppretter deretter tjenesten på nytt:
+For Docker Compose, overstyr bildekoden som brukes av den valgte profilen, trekk og gjenopprett tjenesten:
 
 ```yaml
 services:
@@ -550,30 +491,30 @@ docker compose up -d
 
 #### Sikkerhet og tilbakerulling
 
-`next` er en flytende førutgivelseskanal. Den kan endres ved ethvert push til den aktive release-grenen og er **ikke støttet for produksjonsbruk**. Fest image-digesten mens du evaluerer et bestemt bygg:
+`next` er en flytende pre-release-kanal. Den kan endres ved ethvert trykk til den aktive utgivelsesgrenen og er** støttes ikke for produksjonsbruk** . Fest bildesammendraget mens du evaluerer et spesifikt bygg:
 
 ```bash
 docker pull diegosouzapw/omniroute:next
 docker image inspect diegosouzapw/omniroute:next --format '{{index .RepoDigests 0}}'
 ```
 
-Før testing bør du sikkerhetskopiere OmniRoute-datavolumet eller den bind-monterte datakatalogen. For å rulle tilbake gjenoppretter du den stabile versjonen eller digesten som ble brukt tidligere, og oppretter containeren på nytt:
+Før du tester, sikkerhetskopierer du OmniRoute datavolumet eller bindingsmontert datakatalog. For å rulle tilbake, gjenopprett den tidligere brukte stabile versjonen eller fordøy og gjenskap beholderen:
 
 ```bash
-docker pull diegosouzapw/omniroute:<stable-version>
+docker pull cheaperinference/omniroute:<stable-version>
 docker compose up -d
 ```
 
-Et bygg fra en release-gren kan aldri flytte `latest`; bare en kvalifisert stabil semantisk versjon kan flytte den stabile pekeren. `next`-imagene beholder inspeksjonen av release-imaget og sperren for KRITISKE sårbarheter.
+En utgivelsesgren kan aldri flytte `latest`; bare en kvalifisert stabil semantisk versjon kan fremme den stabile pekeren. The `next` images retain the release image inspection and blocking CRITICAL-vulnerability gate.
 
-**`latest` er ingen garanti for at innholdet er oppdatert med git.** Sammenslåtte rettelser i `main` eller den aktive `release/v*`-grenen finnes **ikke** i `:latest` før et stabilt SemVer-image er publisert og publiseringsjobben flytter `:latest` (samme digest som denne SemVer-versjonen). Hvis `latest` ser ut til å stå stille mens GitHub allerede viser rettelsen, henter du `:next` for å teste release-grenen, eller venter på SemVer-taggen.
+**`latest` is not a currency guarantee for git.** Sammenslåtte rettelser på `main` eller på den aktive `release/v*` -grenen er** ikke** i `:latest` til et stabilt SemVer bilde er publisert og publiseringsjobben fremmer `:latest` (samme sammendrag som den SemVer). Hvis `latest` ser frosset ut mens GitHub allerede viser rettelsen, trekk `:next` for å teste utgivelsesgrenen eller vent på SemVer taggen.
 
-| Du ønsker                                                                     | Bruk                                 |
-| ----------------------------------------------------------------------------- | ------------------------------------ |
-| GitOps / produksjon som ikke må endres utilsiktet                             | Fest `:X.Y.Z` (eller image-digesten) |
-| Følge publiserte stabile versjoner og godta ny opprettelse ved hver utgivelse | `:latest`                            |
-| Teste upubliserte commits i `release/v*`                                      | `:next` (ikke for produksjon)        |
-| Teste `main`                                                                  | `:main` (ikke for produksjon)        |
+| Du vil                                                            | Bruk                                   |
+| ----------------------------------------------------------------- | -------------------------------------- |
+| GitOps / produksjon som ikke må drive                             | Pin `:X.Y.Z` (eller bildesammendraget) |
+| Følg publiserte staller og godta en gjenskaping på hver utgivelse | `:latest`                              |
+| Test uutgitte `release/v*` -forpliktelser                         | `:next` (ikke produksjon)              |
+| Test `main`                                                       | `:main` (ikke produksjon)              |
 
 ## Dashboardoppdateringer i Docker
 
