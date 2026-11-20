@@ -400,22 +400,39 @@ including the key lookup itself; its cause is logged on the server and never ret
 
 ### Usage series (`GET /api/v1/me/usage`)
 
-`GET /api/v1/me/usage?range=<range>` (also served at `/v1/me/usage`) returns the calling key's
-own usage and cost: totals, one entry per UTC day, per day and model, per model (top 50 by
-requests) and per provider. It shares the flag, the authentication rules, the `self:usage`
-scope, `Cache-Control: no-store` and the error behavior of the quota route above. The key is
-checked before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500
-(`Failed to build usage`). `range` is one of `1d`, `7d`, `30d` (the default) or `90d`. Any
-other value, an empty value or a repeated parameter is a 400. Rows are selected by the calling
-key's id only. The key name column is never matched, and rows recorded without a key id are
-never counted. Longer windows are not offered: rows older than the usage-history retention
-(`retention.usageHistory`, 30 days by default) are deleted, and the daily summaries they are
-rolled into carry no key. `coverage` gives the window and sets `truncatedByRetention` when the
-window is longer than that retention. Two costs are reported. `costUsd` is the billed cost, as
-the usage analytics show it. Flat-rate subscription providers, such as the Claude Code plan,
-count $0 there, so a pool on such an account shows no billed cost. `listPriceUsd` is the same
-usage priced at list price, subscriptions included. The response contract is `src/shared/schemas/selfUsage.ts`
-(`SelfUsageSeries` in `docs/openapi.yaml`).
+`GET /api/v1/me/usage?range=<range>` (also served at `/v1/me/usage`) returns the usage and cost
+of the calling key's own requests: totals, one entry per UTC day, per day and model, per model
+and per provider. It shares the flag, the authentication rules, the `self:usage` scope,
+`Cache-Control: no-store` and the error behavior of the quota route above. The key is checked
+before `range`. Errors are 400 (`Invalid range`), 401, 403, 404 and 500 (`Failed to build usage`).
+
+- `range` is one of `1d`, `7d`, `30d` (the default) or `90d`. Any other value, an empty value or
+  a repeated parameter is a 400. The set stops at `90d` to bound the cost of a call. The view
+  reads raw usage history only, never the daily summaries, which carry no key.
+- Rows are selected by the calling key's id. The key name column is never matched, and rows
+  recorded without a key id are never counted.
+- A call runs five grouped queries over the key's rows in the window. The built series is reused
+  for 60 seconds per key and range, and its `generatedAt` gives its age.
+- The window ends when the series is built. A row stamped later, for example by clock skew, is
+  not counted.
+- `coverage.retentionDays` is the operator's raw usage-history retention setting
+  (`retention.usageHistory` in the database settings). `coverage.truncatedByRetention` is true
+  when the requested range is longer than that setting. It compares the two numbers and does not
+  check whether rows are actually missing.
+- Provider and model are returned as recorded for the key's own requests. For a request refused
+  before it reached a provider, for example a combo whose every target was refused, the provider
+  is the routing label (the combo name, `auto` or `combo`) and the model is the string the client
+  sent.
+- Besides counts and costs, the response carries average latency, success rates and the times of
+  the first and last request.
+- `byModel` lists the 50 models with the most requests. With more models its entries do not add
+  up to `summary`, and `summary.uniqueModels` counts every recorded model spelling.
+- Two costs are reported. `costUsd` is the billed cost, as the usage analytics show it.
+  Flat-rate subscription providers, such as the Claude Code plan, count $0 there. `listPriceUsd`
+  is the same usage priced at list price, subscriptions included. A model with no price row
+  counts 0 in both, with no marker, so a total can be partial.
+- The response contract is `src/shared/schemas/selfUsage.ts` (`SelfUsageSeries` in
+  `docs/openapi.yaml`).
 
 ---
 

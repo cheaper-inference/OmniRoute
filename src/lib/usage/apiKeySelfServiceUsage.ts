@@ -3,17 +3,23 @@
  *
  * Every query reads the source of `buildApiKeyOwnedSource` (rows whose `api_key_id` is the
  * calling key's id, nothing else). Days are UTC days, as SQLite's DATE() reads the stored
- * ISO-8601 UTC timestamps. The window's bounds come from the injected clock.
+ * ISO-8601 UTC timestamps. The window runs from `now - range` to `now`, both from the injected
+ * clock, so a row stamped after `now` is not counted. Five grouped queries run per build;
+ * apiKeySelfServiceUsageCache.ts reuses a built series for 60 seconds.
  *
  * Two costs are reported side by side, both summed row by row and rounded by `roundCost`:
  * - `costUsd`: the billed cost, as the usage analytics show it by default. Flat-rate
  *   subscription providers (see flatRateProviders.ts, e.g. the Claude Code plan) count $0, so
  *   a pool on such an account shows no billed cost.
  * - `listPriceUsd`: the same usage priced at list price, subscriptions included.
+ * A model with no price row counts 0 in both, with no marker, so a total can be partial.
  *
- * Only model names, provider ids, counts, costs and dates are returned. The reused queries also
- * return `uniqueAccounts`, `uniqueApiKeys`, `serviceTier` and the raw cost inputs; they are read
- * here and never copied into the result. No SQL lives in this module.
+ * Provider and model are returned as recorded for the key's own requests (a request refused
+ * before it reached a provider carries the routing label as provider and the client's model
+ * string). `retentionDays` is the operator's raw usage-history retention setting
+ * (`retention.usageHistory`). The reused queries also return `uniqueAccounts`, `uniqueApiKeys`,
+ * `serviceTier` and the raw cost inputs; they are read here and never copied into the result.
+ * No SQL lives in this module.
  */
 
 import { getUserDatabaseSettings } from "@/lib/db/databaseSettings";
@@ -44,6 +50,7 @@ import { computeCostFromPricing, normalizeModelName } from "./costCalculator";
 
 const DAY_MS = 86_400_000;
 const RANGE_DAYS: Record<SelfUsageRange, number> = { "1d": 1, "7d": 7, "30d": 30, "90d": 90 };
+/** Fallback for a missing or invalid setting only. The stored setting is what applies. */
 const DEFAULT_RETENTION_DAYS = 30;
 const BY_MODEL_LIMIT = 50;
 const MISSING_SCOPE_ERROR = "missing_self_usage_scope";

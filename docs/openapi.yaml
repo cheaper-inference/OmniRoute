@@ -16204,17 +16204,22 @@ paths:
         - V1 Me
       summary: "GET me › usage"
       description: >-
-        Usage and cost series of the calling API key (also served at /v1/me/usage): totals, one
-        entry per UTC day, per day and model, per model and per provider. Only rows recorded with
-        the calling key's id are read, never rows of another key or rows without a key id. Off
-        unless the `QUOTA_SELF_PANEL` feature flag is on (a request that reaches the route gets
-        404 otherwise). Authenticate with `Authorization: Bearer <key>` or `x-api-key: <key>`;
-        the key is never read from the query string or a cookie. Requires scope `self:usage`.
-        The key is checked before `range`. `costUsd` is the billed cost, where flat-rate
-        subscription providers count $0. `listPriceUsd` prices the same usage at list price,
-        subscriptions included. Every response of this route carries `Cache-Control: no-store`;
-        a refusal before the route runs, for example by the client API policy or the IP filter,
-        does not.
+        Usage and cost series of the calling API key's own requests (also served at
+        /v1/me/usage): totals, one entry per UTC day, per day and model, per model and per
+        provider. Rows are selected by the calling key's id. The key name is never matched and
+        rows without a key id are never counted. Off unless the `QUOTA_SELF_PANEL` feature flag
+        is on (a request that reaches the route gets 404 otherwise). Authenticate with
+        `Authorization: Bearer <key>` or `x-api-key: <key>`; the key is never read from the query
+        string or a cookie. Requires scope `self:usage`. The key is checked before `range`.
+        Provider and model are returned as recorded. For a request refused before it reached a
+        provider, for example a combo whose every target was refused, the provider is the
+        routing label (the combo name, `auto` or `combo`) and the model is the string the client
+        sent. `costUsd` is the billed cost, where flat-rate subscription providers count $0.
+        `listPriceUsd` prices the same usage at list price, subscriptions included. A model with
+        no price row counts 0 in both, with no marker, so a total can be partial. A built series
+        is reused for 60 seconds per key and range; `generatedAt` gives its age. Every response
+        of this route carries `Cache-Control: no-store`; a refusal before the route runs, for
+        example by the client API policy or the IP filter, does not.
       security:
         - BearerAuth: []
         - XApiKeyAuth: []
@@ -16223,10 +16228,9 @@ paths:
           in: query
           required: false
           description: >-
-            Window ending now. Longer windows are not offered: usage rows older than the
-            usage-history retention are deleted, and `coverage.truncatedByRetention` says when
-            the window is longer than that retention. Any other value, an empty value or a
-            repeated parameter is a 400.
+            Window ending when the series is built. The set stops at `90d` to bound the cost of
+            a call. The view reads raw usage history only, never the daily summaries. Any other
+            value, an empty value or a repeated parameter is a 400.
           schema:
             type: string
             enum: [1d, 7d, 30d, 90d]
@@ -19854,7 +19858,7 @@ components:
         Usage and cost series of one API key. Days are UTC days. Every cost is summed row by row
         and rounded to 6 decimals. `costUsd` is the billed cost, where flat-rate subscription
         providers count $0. `listPriceUsd` is the same usage priced at list price,
-        subscriptions included.
+        subscriptions included. A model with no price row counts 0 in both, with no marker.
       additionalProperties: false
       required: [range, generatedAt, coverage, summary, daily, dailyByModel, byModel, byProvider]
       properties:
@@ -19877,10 +19881,12 @@ components:
               format: date-time
             retentionDays:
               type: number
-              description: Days of raw usage history the server keeps.
+              description: The operator's raw usage-history retention setting, in days.
             truncatedByRetention:
               type: boolean
-              description: True when the window is longer than the retention, so older days are missing.
+              description: >-
+                True when the requested range is longer than the retention setting. It compares
+                the two numbers and does not check whether rows are actually missing.
         summary:
           type: object
           additionalProperties: false
@@ -19908,7 +19914,9 @@ components:
             listPriceUsd: { type: number }
             successfulRequests: { type: number }
             successRatePct: { type: number }
-            uniqueModels: { type: number }
+            uniqueModels:
+              type: number
+              description: Distinct model names as recorded, every spelling counted.
             avgLatencyMs: { type: number }
             firstRequest: { type: [string, "null"], format: date-time }
             lastRequest: { type: [string, "null"], format: date-time }
@@ -19941,7 +19949,9 @@ components:
               listPriceUsd: { type: number }
         byModel:
           type: array
-          description: Top 50 models by requests.
+          description: >-
+            The 50 models with the most requests. With more models the entries do not add up to
+            `summary`.
           items:
             type: object
             additionalProperties: false

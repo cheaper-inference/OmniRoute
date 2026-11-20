@@ -16,6 +16,7 @@ process.env.API_KEY_SECRET = "test-secret-at-least-32-chars-long-0123456789";
 const core = await import("../../../src/lib/db/core.ts");
 const apiKeysDb = await import("../../../src/lib/db/apiKeys.ts");
 const usageHistory = await import("../../../src/lib/usage/usageHistory.ts");
+const dbSettings = await import("../../../src/lib/db/databaseSettings.ts");
 const { SELF_USAGE_SCOPE } = await import("../../../src/shared/constants/selfServiceScopes.ts");
 const { classifyRoute } = await import("../../../src/server/authz/classify.ts");
 const {
@@ -45,6 +46,8 @@ let c = { id: "", key: "" };
 let unscoped = { id: "", key: "" };
 let future = { id: "", key: "" };
 let revoked = { id: "", key: "" };
+let retention = { id: "", key: "" };
+let recorded = { id: "", key: "" };
 
 test.before(async () => {
   const created = await Promise.all([
@@ -54,8 +57,13 @@ test.before(async () => {
     apiKeysDb.createApiKey("Key unscoped", "test-machine", []),
     apiKeysDb.createApiKey("Key future", "test-machine", [SELF_USAGE_SCOPE]),
     apiKeysDb.createApiKey("Key losing scope", "test-machine", [SELF_USAGE_SCOPE]),
+    apiKeysDb.createApiKey("Key retention", "test-machine", [SELF_USAGE_SCOPE]),
+    apiKeysDb.createApiKey("Key recorded", "test-machine", [SELF_USAGE_SCOPE]),
   ]);
-  [a, b, c, unscoped, future, revoked] = created.map((k) => ({ id: k.id, key: k.key }));
+  [a, b, c, unscoped, future, revoked, retention, recorded] = created.map((k) => ({
+    id: k.id,
+    key: k.key,
+  }));
 });
 
 test.beforeEach(() => {
@@ -239,6 +247,51 @@ test("the gate runs before the reuse: a key that loses self:usage is refused at 
   await apiKeysDb.updateApiKeyPermissions(revoked.id, { scopes: [] });
   const after = await call("?range=7d", bearer(revoked.key));
   assert.deepEqual([after.status, after.headers.get("Cache-Control")], [403, "no-store"]);
+});
+
+test("coverage follows the operator's stored raw-history retention setting", async () => {
+  // Default wiring: no injected retention. A fresh database carries the value its migration
+  // seeded (046_database_settings.sql), not the code's fallback of 30.
+  const stored = dbSettings.getUserDatabaseSettings().retention;
+  const seeded = stored.usageHistory;
+  const fresh = await (await call("?range=90d", bearer(retention.key))).json();
+  assert.equal(fresh.coverage.retentionDays, seeded);
+  assert.notEqual(seeded, 30);
+  dbSettings.updateDatabaseSettings({ retention: { ...stored, usageHistory: 7 } });
+  try {
+    const month = await (await call("?range=30d", bearer(retention.key))).json();
+    assert.deepEqual(
+      [month.coverage.retentionDays, month.coverage.truncatedByRetention],
+      [7, true]
+    );
+    const week = await (await call("?range=7d", bearer(retention.key))).json();
+    assert.deepEqual([week.coverage.retentionDays, week.coverage.truncatedByRetention], [7, false]);
+  } finally {
+    dbSettings.updateDatabaseSettings({ retention: { ...stored } });
+  }
+});
+
+test("provider and model are returned as recorded; an unpriced model counts 0", async () => {
+  // The shape written for a combo whose every target was refused: the routing label as
+  // provider and the client's model string.
+  await seed({
+    apiKeyId: recorded.id,
+    provider: "team-internal-combo",
+    model: "my-alias",
+    success: false,
+    tokens: {},
+    comboStrategy: "team-internal-combo",
+  });
+  await seed({ apiKeyId: recorded.id, provider: "openai", model: "totally-unpriced-model-xyz" });
+  const body = await (await call("?range=1d", bearer(recorded.key))).json();
+  const providers = body.byProvider.map((p: { provider: string }) => p.provider).sort();
+  assert.deepEqual(providers, ["openai", "team-internal-combo"]);
+  const unpriced = body.byModel.find(
+    (m: { model: string }) => m.model === "totally-unpriced-model-xyz"
+  );
+  assert.deepEqual([unpriced.costUsd, unpriced.listPriceUsd], [0, 0]);
+  assert.deepEqual([body.summary.costUsd, body.summary.listPriceUsd], [0, 0]);
+  assert.equal(body.summary.successRatePct, 50);
 });
 
 test("range is a closed set with a default", async () => {
