@@ -1,0 +1,1 @@
+- **fix(executors):** Set the developer role on ChatGPT additional tool declarations so clients such as DeepSeek Harness can start tool-enabled sessions without an HTTP 400 ([#20734](https://github.com/cheaper-inference/OmniRoute/pull/20734)) — thanks @maxcraftsman
