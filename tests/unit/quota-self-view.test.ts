@@ -73,6 +73,26 @@ test("a failed store read is unavailable, never zero", async () => {
   });
 });
 
+test("a non-finite store read is unavailable, never a number", async () => {
+  const deps = makeDeps({ store: { peek: async () => Number.NaN } });
+  assert.deepEqual((await buildQuotaSelfView(input(), deps)).pools[0].dimensions[0].yourShare, {
+    fairShare: 500,
+    consumed: null,
+    remaining: null,
+    status: "unavailable",
+    reason: "store_unavailable",
+  });
+});
+
+test("with every provider shared (null) and both scopes, the pool total is visible", async () => {
+  const view = await buildQuotaSelfView(
+    input({ scopes: BOTH, sharedQuotaProviders: null }),
+    makeDeps()
+  );
+  assert.equal(view.pools[0].accountVisible, true);
+  assert.deepEqual(view.pools[0].dimensions[0].total, { used: 400, status: "ok" });
+});
+
 test("a failed pool total or store load is unavailable too", async () => {
   const unavailable = { used: null, status: "unavailable", reason: "store_unavailable" };
   const failedTotal = makeDeps({
@@ -143,5 +163,7 @@ test("refuses a key without self:usage and never leaks internal ids", async () =
   const json = JSON.stringify(await buildQuotaSelfView(input({ scopes: BOTH }), makeDeps()));
   for (const secret of ["pool-a-id", "pool-b-id", "conn-secret-1", "poolId", "connectionId"])
     assert.ok(!json.includes(secret));
+  // Ids of the other keys allocated in the same pools never appear either.
+  for (const otherKey of ["key-b", "key-c"]) assert.ok(!json.includes(otherKey));
   assert.doesNotThrow(() => selfQuotaResponseSchema.parse(JSON.parse(json)));
 });

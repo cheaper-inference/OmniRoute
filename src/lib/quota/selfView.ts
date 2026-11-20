@@ -10,8 +10,10 @@
  * Placeholder dimensions (limit not above Number.EPSILON) are skipped, as the gate skips them.
  *
  * A failed quota-store read is reported as `status: "unavailable"` with `consumed`/`remaining`
- * null, never as zero. Database reads (allocations, pools) are not caught: a failure there
- * propagates to the caller instead of being reported as "no pools".
+ * null, never as zero. Database reads of allocations and pools are not caught: a failure there
+ * propagates to the caller instead of being reported as "no pools". The connection-provider and
+ * plan lookups handle their own errors and answer "unknown"; a pool whose provider cannot be
+ * resolved that way is left out of the answer.
  *
  * The result goes through selfQuotaResponseSchema.parse(), so no pool id, connection id or
  * account identity leaves this module. The builder reads no request, header or environment
