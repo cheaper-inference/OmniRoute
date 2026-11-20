@@ -72,8 +72,21 @@ export const DEFAULT_DECISION_INSTRUCTIONS =
  */
 export const DECISION_MODEL_REQUEST_HEADER = "x-omniroute-decision-model";
 
-/** Truncation for model names that reach the log. */
+/** Longest upstream model name that may reach the log. */
 export const MAX_LOGGED_MODEL_CHARS = 100;
+
+const LOGGABLE_MODEL_NAME = /^[A-Za-z0-9][\w.:/@+-]*$/;
+
+/**
+ * The upstream-reported model name, only when it looks like a model id (no spaces, at most
+ * 100 characters). It comes from the decider's response body, so anything else is dropped
+ * rather than logged.
+ */
+export function toLoggableModelName(value: unknown): string | undefined {
+  if (typeof value !== "string") return undefined;
+  const name = value.trim();
+  return name.length <= MAX_LOGGED_MODEL_CHARS && LOGGABLE_MODEL_NAME.test(name) ? name : undefined;
+}
 
 export function decisionFailure(
   reason: DecisionFailureReason,

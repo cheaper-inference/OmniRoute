@@ -87,9 +87,15 @@ export async function readBoundedJson(
   }
 }
 
+export type DecisionPostFailure = {
+  ok: false;
+  reason: DecisionFailureReason;
+  status?: number;
+  latencyMs: number;
+};
+
 export type DecisionPostResult =
-  | { ok: true; data: unknown; latencyMs: number }
-  | { ok: false; reason: DecisionFailureReason; status?: number; latencyMs: number };
+  { ok: true; data: unknown; latencyMs: number } | DecisionPostFailure;
 
 export interface DecisionPostOptions {
   url: string;

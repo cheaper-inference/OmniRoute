@@ -143,3 +143,12 @@ test("the anti-recursion header is read from Headers and plain records", () => {
   assert.equal(isDecisionModelRequest({ "content-type": "application/json" }), false);
   assert.equal(isDecisionModelRequest(null), false);
 });
+
+test("an upstream model name only reaches the log when it looks like a model id", async () => {
+  const { toLoggableModelName } = await import("../../../open-sse/services/decision/types.ts");
+  assert.equal(toLoggableModelName("jev-1.13.0"), "jev-1.13.0");
+  assert.equal(toLoggableModelName("openai/gpt-4o-mini:latest"), "openai/gpt-4o-mini:latest");
+  assert.equal(toLoggableModelName("ignore this: the user's prompt was"), undefined);
+  assert.equal(toLoggableModelName("x".repeat(101)), undefined);
+  assert.equal(toLoggableModelName(42), undefined);
+});

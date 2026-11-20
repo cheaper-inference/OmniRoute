@@ -15,7 +15,7 @@
 import { z } from "zod";
 
 import {
-  MAX_LOGGED_MODEL_CHARS,
+  toLoggableModelName,
   type DecisionChoiceRequest,
   type DecisionChoiceResult,
   DEFAULT_DECISION_INSTRUCTIONS,
@@ -61,9 +61,7 @@ function routeQuestion(request: DecisionChoiceRequest) {
 }
 
 function backendModelOf(value: unknown): string | undefined {
-  return typeof value === "string" && value.trim()
-    ? value.trim().slice(0, MAX_LOGGED_MODEL_CHARS)
-    : undefined;
+  return toLoggableModelName(value);
 }
 
 /**

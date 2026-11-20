@@ -24,7 +24,7 @@ import {
 } from "../decision/menu.ts";
 import type { DecisionRoutingConfig } from "../decision/schema.ts";
 import { decisionDepth } from "../decision/scope.ts";
-import type { Decider } from "../decision/types.ts";
+import type { Decider, DecisionChoiceFailure } from "../decision/types.ts";
 import type { ProviderCandidate } from "./scoring.ts";
 import type { RouterStrategy, RoutingContext, RoutingDecision } from "./routerStrategy.ts";
 
@@ -94,7 +94,11 @@ export class DecisionStrategyImpl implements RouterStrategy {
       options,
       signal: decision.signal,
     });
-    if (!result.ok) return this.fallbackDecision(candidates, context, result.reason, kind);
+    if (!result.ok) {
+      // `strict: false` does not narrow the `ok` union, so name the failure variant.
+      const failure = result as DecisionChoiceFailure;
+      return this.fallbackDecision(candidates, context, failure.reason, kind);
+    }
     if (!Object.prototype.hasOwnProperty.call(options, result.choice)) {
       return this.fallbackDecision(candidates, context, "out_of_menu", kind);
     }

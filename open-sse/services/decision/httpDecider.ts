@@ -14,7 +14,7 @@ import {
   type DecisionCooldown,
 } from "./config.ts";
 import { resolveDecisionApiKey } from "./credentials.ts";
-import { postDecisionJson, type DecisionTransport } from "./transport.ts";
+import { postDecisionJson, type DecisionPostFailure, type DecisionTransport } from "./transport.ts";
 import { decisionFailure, type Decider, type DecisionWire } from "./types.ts";
 import {
   buildOpenAiChatWireBody,
@@ -79,8 +79,10 @@ export function createHttpDecider(options: HttpDeciderOptions): Decider {
       now,
     });
     if (!posted.ok) {
-      if (COOLDOWN_REASONS.has(posted.reason)) cooldown.trip(url);
-      return posted;
+      // `strict: false` does not narrow the `ok` union, so name the failure variant.
+      const failure = posted as DecisionPostFailure;
+      if (COOLDOWN_REASONS.has(failure.reason)) cooldown.trip(url);
+      return failure;
     }
     const answer =
       wire === "openai-chat"

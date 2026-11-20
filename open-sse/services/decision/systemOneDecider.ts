@@ -12,7 +12,7 @@ import {
 import { resolveDecisionApiKey } from "./credentials.ts";
 import {
   decisionFailure,
-  MAX_LOGGED_MODEL_CHARS,
+  toLoggableModelName,
   type Decider,
   type DecisionChoiceResult,
 } from "./types.ts";
@@ -59,7 +59,9 @@ export function createSystemOneDecider(options: SystemOneDeciderOptions): Decide
         choice: result.choice,
         confidence: result.confidence,
         probabilities: result.probabilities,
-        ...(result.model ? { backendModel: result.model.slice(0, MAX_LOGGED_MODEL_CHARS) } : {}),
+        ...(toLoggableModelName(result.model) && {
+          backendModel: toLoggableModelName(result.model),
+        }),
         latencyMs: Math.max(0, now() - startedAt),
       };
     }

@@ -25,7 +25,10 @@ import {
   describeDecisionMenu,
 } from "@omniroute/open-sse/services/decision/menu.ts";
 import type { DecisionRoutingConfig } from "@omniroute/open-sse/services/decision/schema.ts";
-import type { Decider } from "@omniroute/open-sse/services/decision/types.ts";
+import type {
+  Decider,
+  DecisionChoiceFailure,
+} from "@omniroute/open-sse/services/decision/types.ts";
 import { isRegisteredFeatureFlagEnabled } from "@omniroute/open-sse/utils/registeredFeatureFlag.ts";
 
 export interface DecisionPreviewInput {
@@ -102,13 +105,15 @@ export async function buildDecisionPreview(
     options: describeDecisionMenu(menu, candidates, config.descriptions),
   });
   if (!result.ok) {
+    // `strict: false` does not narrow the `ok` union, so name the failure variant.
+    const failure = result as DecisionChoiceFailure;
     return {
       menu,
       generated,
       test: {
         status: "failed",
-        reason: result.reason,
-        ...(typeof result.status === "number" ? { httpStatus: result.status } : {}),
+        reason: failure.reason,
+        ...(typeof failure.status === "number" ? { httpStatus: failure.status } : {}),
       },
     };
   }

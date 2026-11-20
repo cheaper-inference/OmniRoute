@@ -9,7 +9,11 @@
  */
 
 import { sanitizeErrorMessage } from "../../utils/error.ts";
-import { postDecisionJson, type DecisionTransport } from "../decision/transport.ts";
+import {
+  postDecisionJson,
+  type DecisionPostFailure,
+  type DecisionTransport,
+} from "../decision/transport.ts";
 
 export const TYPESAFE_PROVIDER_ID = "typesafe";
 export const TYPESAFE_SYSTEM_ONE_BASE_URL = "https://api.typesafe.ai";
@@ -255,15 +259,17 @@ export async function evaluateSystemOneChoice(
   });
 
   if (result.ok) return parseSystemOneChoiceResponse(result.data);
+  // `strict: false` does not narrow the `ok` union, so name the failure variant.
+  const failure = result as DecisionPostFailure;
   // Status only. Upstream bodies can echo the state or the key.
-  if (result.reason === "http_error") {
-    const status = result.status ?? null;
+  if (failure.reason === "http_error") {
+    const status = failure.status ?? null;
     return unavailable("http_error", `System One returned HTTP ${status}`, status);
   }
-  if (result.reason === "timeout") {
+  if (failure.reason === "timeout") {
     return unavailable("timeout", `System One timed out after ${timeoutMs}ms`);
   }
-  if (result.reason === "invalid_response") {
+  if (failure.reason === "invalid_response") {
     return unavailable("invalid_response", "System One response was not bounded JSON");
   }
   return unavailable("network_error", "System One request failed");
