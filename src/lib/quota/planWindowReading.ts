@@ -62,21 +62,22 @@ function windowEntry(
   return key && map ? asRecord(map[key]) : null;
 }
 
-/**
- * Shared shape of the Codex and Bailian quota: `windows[key] = { percentUsed, resetAt }`.
- * A window marked `fractionReported: false` carries a placeholder, not a figure.
- */
-function fractionWindowReading(
+/** Shared shape of the Codex and Bailian quota: `windows[key] = { percentUsed, resetAt }`. */
+function fractionWindowEntry(
   quota: unknown,
   keys: Partial<Record<QuotaWindow, string>>,
-  window: QuotaWindow,
-  fetchedAt: number
-): PlanWindowReading | null {
+  window: QuotaWindow
+): Record<string, unknown> | null {
   const q = asRecord(quota);
   if (!q || q.stale === true) return null;
-  const entry = windowEntry(q, "windows", keys, window);
-  if (!entry || entry.fractionReported === false) return null;
-  const used = entry.percentUsed;
+  return windowEntry(q, "windows", keys, window);
+}
+
+function fractionReading(
+  entry: Record<string, unknown> | null,
+  fetchedAt: number
+): PlanWindowReading | null {
+  const used = entry?.percentUsed;
   if (typeof used !== "number" || !Number.isFinite(used)) return null;
   return { used: clamp01(used), resetAt: resetMs(entry.resetAt), fetchedAt };
 }
@@ -126,14 +127,18 @@ export function codexPlanReading(
   window: QuotaWindow,
   fetchedAt: number
 ): PlanWindowReading | null {
-  return fractionWindowReading(quota, CODEX_WINDOW_KEYS, window, fetchedAt);
+  return fractionReading(fractionWindowEntry(quota, CODEX_WINDOW_KEYS, window), fetchedAt);
 }
 
-/** Bailian quota (fetchBailianQuota): the 5h, weekly or monthly window. */
+/**
+ * Bailian quota (fetchBailianQuota): the 5h, weekly or monthly window. A window the fetcher
+ * marks `totalReported: false` (no positive total) carries a placeholder, not a figure.
+ */
 export function bailianPlanReading(
   quota: unknown,
   window: QuotaWindow,
   fetchedAt: number
 ): PlanWindowReading | null {
-  return fractionWindowReading(quota, BAILIAN_WINDOW_KEYS, window, fetchedAt);
+  const entry = fractionWindowEntry(quota, BAILIAN_WINDOW_KEYS, window);
+  return entry?.totalReported === false ? null : fractionReading(entry, fetchedAt);
 }

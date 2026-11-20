@@ -56,13 +56,14 @@ export interface BailianTripleWindowQuota extends QuotaInfo {
 }
 
 /**
- * One Bailian window. `fractionReported: false` marks a window whose total was absent or
- * not positive: its `percentUsed` of 0 is a placeholder, not a reported figure.
+ * One Bailian window. `totalReported: false` marks a window whose total was absent or not
+ * positive: its `percentUsed` of 0 is a placeholder, not a reported figure. The name is
+ * deliberately not `fractionReported`, which combo scoring reads for every provider.
  */
 interface BailianQuotaWindow {
   percentUsed: number;
   resetAt: string | null;
-  fractionReported?: false;
+  totalReported?: false;
 }
 
 interface CacheEntry {
@@ -146,8 +147,8 @@ function buildHeaders(authKey: string): Record<string, string> {
 // ─── Response Parser ─────────────────────────────────────────────────────────
 
 /** The marker of a window without a positive total (absent when the total is positive). */
-function unreportedMarker(total: number): { fractionReported?: false } {
-  return total > 0 ? {} : { fractionReported: false };
+function unreportedMarker(total: number): { totalReported?: false } {
+  return total > 0 ? {} : { totalReported: false };
 }
 
 function parseBailianQuotaResponse(data: unknown): BailianTripleWindowQuota | null {

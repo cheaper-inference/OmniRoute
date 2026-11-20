@@ -26,6 +26,8 @@ const bailianFetcher = await import("../../open-sse/services/bailianQuotaFetcher
 const { connectionProxyTestOverride } =
   await import("../../open-sse/services/connectionProxyFetch.ts");
 const claudeUsage = await import("../../open-sse/services/usage/claude.ts");
+const { scoreQuotaPace } = await import("../../open-sse/services/combo/quotaPaceScoring.ts");
+const { resolveResetAwareConfig } = await import("../../open-sse/services/combo/quotaScoring.ts");
 const { _resetClaudeOauthUsageCooldown } =
   await import("../../open-sse/services/claudeUsageCooldown.ts");
 const { getSaturation, getPlanWindowReading } = sat;
@@ -202,62 +204,116 @@ test("providers without a plan-window mapping yield no reading", async () => {
   );
 });
 
-test("codex and bailian: a window marked as unreported gives no reading", () => {
-  const unreported = { percentUsed: 0, resetAt: ISO, fractionReported: false };
+test("bailian: a window marked as without a total gives no reading; codex ignores markers", () => {
+  const unreported = { percentUsed: 0, resetAt: ISO, totalReported: false };
   const bailian = {
     windows: { window_5h: unreported, window_weekly: unreported, window_monthly: unreported },
   };
   for (const w of ["5h", "weekly", "monthly"] as const) {
     assert.equal(bailianPlanReading(bailian, w, AT), null);
   }
-  assert.equal(codexPlanReading({ windows: { session: unreported } }, "5h", AT), null);
   assert.deepEqual(
     bailianPlanReading({ windows: { window_5h: { percentUsed: 0, resetAt: ISO } } }, "5h", AT),
     { used: 0, resetAt: RESET, fetchedAt: AT }
   );
+  // Codex reads its windows exactly as before any marker existed.
+  for (const marker of [{ totalReported: false }, { fractionReported: false }]) {
+    const session = { percentUsed: 0, resetAt: ISO, ...marker };
+    assert.deepEqual(codexPlanReading({ windows: { session } }, "5h", AT), {
+      used: 0,
+      resetAt: RESET,
+      fetchedAt: AT,
+    });
+  }
 });
 
-test("bailian fetcher marks a window without a positive total as unreported", async () => {
+type BailianWindowShape = {
+  percentUsed: number;
+  resetAt: string | null;
+  totalReported?: false;
+  fractionReported?: false;
+};
+type BailianQuotaShape = { windows: Record<string, BailianWindowShape> } & Record<string, unknown>;
+
+/** The quota fetchBailianQuota parses from one mocked upstream response. */
+async function fetchMockedBailian(quotaInfo: Record<string, number>): Promise<BailianQuotaShape> {
   connectionProxyTestOverride.resolveProxyForConnection = async () => null;
   globalThis.fetch = (async () =>
     Response.json({
       code: "Success",
-      data: {
-        codingPlanInstanceInfos: [
-          {
-            codingPlanQuotaInfo: {
-              per5HourUsedQuota: 10,
-              per5HourQuotaNextRefreshTime: 1_800_000_000,
-              perWeekUsedQuota: 30,
-              perWeekTotalQuota: 100,
-              perWeekQuotaNextRefreshTime: 1_800_000_000,
-              perBillMonthUsedQuota: 0,
-              perBillMonthTotalQuota: 0,
-            },
-          },
-        ],
-      },
+      data: { codingPlanInstanceInfos: [{ codingPlanQuotaInfo: quotaInfo }] },
     })) as typeof fetch;
-  const connectionId = `bailian-unreported-${Date.now()}`;
+  const connectionId = `bailian-unreported-${Date.now()}-${Math.random()}`;
   try {
-    const quota = (await bailianFetcher.fetchBailianQuota(connectionId, {
-      apiKey: "test-key",
-    })) as unknown as {
-      windows: Record<string, { percentUsed: number; fractionReported?: false }>;
-    };
-    assert.deepEqual(
-      [quota.windows.window_5h.percentUsed, quota.windows.window_5h.fractionReported],
-      [0, false]
-    );
-    assert.equal(quota.windows.window_monthly.fractionReported, false);
-    assert.equal("fractionReported" in quota.windows.window_weekly, false);
-    assert.equal(bailianPlanReading(quota, "5h", AT), null);
-    assert.equal(bailianPlanReading(quota, "weekly", AT)?.used, 0.3);
+    const quota = await bailianFetcher.fetchBailianQuota(connectionId, { apiKey: "test-key" });
+    return quota as unknown as BailianQuotaShape;
   } finally {
     bailianFetcher.invalidateBailianQuotaCache(connectionId);
     globalThis.fetch = originalFetch;
     connectionProxyTestOverride.resolveProxyForConnection = null;
   }
+}
+
+/** The same quota with every window rebuilt from `percentUsed` and `resetAt`, plus `extra`. */
+function withWindowMarker(quota: BailianQuotaShape, key: string, extra: object): BailianQuotaShape {
+  const plain = (w: BailianWindowShape) => ({ percentUsed: w.percentUsed, resetAt: w.resetAt });
+  const windows = Object.fromEntries(
+    Object.entries(quota.windows).map(([k, w]) => [
+      k,
+      k === key ? { ...plain(w), ...extra } : plain(w),
+    ])
+  );
+  return {
+    ...quota,
+    windows,
+    window5h: windows.window_5h,
+    windowWeekly: windows.window_weekly,
+    windowMonthly: windows.window_monthly,
+  };
+}
+
+test("bailian fetcher marks a window without a positive total as unreported", async () => {
+  const quota = await fetchMockedBailian({
+    per5HourUsedQuota: 10,
+    per5HourQuotaNextRefreshTime: 1_800_000_000,
+    perWeekUsedQuota: 30,
+    perWeekTotalQuota: 100,
+    perWeekQuotaNextRefreshTime: 1_800_000_000,
+    perBillMonthUsedQuota: 0,
+    perBillMonthTotalQuota: 0,
+  });
+  assert.deepEqual(
+    [quota.windows.window_5h.percentUsed, quota.windows.window_5h.totalReported],
+    [0, false]
+  );
+  assert.equal(quota.windows.window_monthly.totalReported, false);
+  assert.equal("totalReported" in quota.windows.window_weekly, false);
+  for (const w of Object.values(quota.windows)) assert.equal("fractionReported" in w, false);
+  assert.equal(bailianPlanReading(quota, "5h", AT), null);
+  assert.equal(bailianPlanReading(quota, "weekly", AT)?.used, 0.3);
+});
+
+test("the bailian marker leaves the quota-weighted pace score unchanged", async () => {
+  const now = Date.now();
+  const inHours = (h: number) => Math.floor((now + h * 3_600_000) / 1000);
+  const marked = await fetchMockedBailian({
+    per5HourUsedQuota: 10,
+    per5HourQuotaNextRefreshTime: inHours(3),
+    perWeekUsedQuota: 90,
+    perWeekTotalQuota: 100,
+    perWeekQuotaNextRefreshTime: inHours(100),
+    perBillMonthUsedQuota: 50,
+    perBillMonthTotalQuota: 100,
+    perBillMonthQuotaNextRefreshTime: inHours(50),
+  });
+  assert.equal(marked.windows.window_5h.totalReported, false); // the marker is really there
+  const unmarked = withWindowMarker(marked, "window_5h", {});
+  const config = resolveResetAwareConfig({ resetAwareExhaustionGuardPercent: 20 });
+  const score = scoreQuotaPace(marked, config, now).score;
+  assert.equal(score, scoreQuotaPace(unmarked, config, now).score);
+  // The scenario is sensitive: the pace scorer's own marker would have changed the score.
+  const scorerMarked = withWindowMarker(marked, "window_5h", { fractionReported: false });
+  assert.notEqual(score, scoreQuotaPace(scorerMarked, config, now).score);
 });
 
 test("a figure served from response headers is dated by its observation time", async () => {
