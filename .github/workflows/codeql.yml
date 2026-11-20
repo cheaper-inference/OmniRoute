@@ -1,31 +1,139 @@
-name: CodeQL
-# OWNER ACTION REQUIRED before enabling auto-triggers: advanced CodeQL conflicts with
-# GitHub "default setup" — the analyze step fails with "CodeQL analyses from advanced
-# configurations cannot be processed when the default setup is enabled". Switch repo
-# Settings → Code security → CodeQL from Default to Advanced, THEN restore the
-# push/pull_request/schedule triggers below. Until then this only runs on manual dispatch
-# so it never produces a red check on PRs. (The codeqlAlerts ratchet keeps working via the
-# default setup's alerts in the meantime.)
+name: CodeQL candidate evidence
+# Diagnostic branch. The published CodeQL ratchet remains the admission authority.
 on:
   workflow_dispatch:
+    inputs:
+      target:
+        description: Published branch whose exact tip is the comparison base
+        type: choice
+        options:
+          - release/v3.8.55
+          - main
+        required: true
+      base_sha:
+        description: Exact published base commit
+        type: string
+        required: true
+      candidate_sha:
+        description: Exact direct descendant to scan
+        type: string
+        required: true
+
 permissions:
   contents: read
+
 jobs:
-  analyze:
-    name: Analyze (javascript-typescript)
+  scan:
+    if: github.repository == 'cheaper-inference/OmniRoute' && github.actor == 'diegosouzapw'
     runs-on: ubuntu-latest
-    permissions:
-      security-events: write
-      actions: read
-      contents: read
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        role: [base, candidate]
+    env:
+      TARGET: ${{ inputs.target }}
+      BASE_SHA: ${{ inputs.base_sha }}
+      CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+      SOURCE_SHA: ${{ matrix.role == 'base' && inputs.base_sha || inputs.candidate_sha }}
+      WORKFLOW_COMMIT: ${{ github.sha }}
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Check input identities
+        shell: bash
+        run: |
+          [[ "$BASE_SHA" =~ ^[0-9a-f]{40}$ && "$CANDIDATE_SHA" =~ ^[0-9a-f]{40}$ ]]
+          test "$BASE_SHA" != "$CANDIDATE_SHA"
+          case "$TARGET" in main|release/v3.8.55) ;; *) exit 1 ;; esac
+          read -r live _ < <(git ls-remote https://github.com/cheaper-inference/OmniRoute.git "refs/heads/$TARGET")
+          test "$live" = "$BASE_SHA"
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          ref: ${{ github.sha }}
+          path: verifier
           persist-credentials: false
-      - uses: github/codeql-action/init@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
-          languages: javascript-typescript
-          queries: security-extended
-      - uses: github/codeql-action/analyze@33d7b85da1a04171e211befe2c739303b9a4c066 # v4.39.3
+          ref: ${{ env.SOURCE_SHA }}
+          path: source
+          persist-credentials: false
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
         with:
-          category: "/language:javascript-typescript"
+          node-version: "24"
+          package-manager-cache: false
+      - name: Verify checked-out commit and tree
+        shell: bash
+        run: |
+          test "$(git -C verifier rev-parse HEAD)" = "$WORKFLOW_COMMIT"
+          test "$(git -C source rev-parse HEAD)" = "$SOURCE_SHA"
+          if [ "$SOURCE_SHA" = "$CANDIDATE_SHA" ]; then
+            test "$(git -C source cat-file -p HEAD | sed -n 's/^parent //p')" = "$BASE_SHA"
+          fi
+          jq -n --arg commit "$SOURCE_SHA" --arg tree "$(git -C source rev-parse 'HEAD^{tree}')" \
+            --arg workflow "$WORKFLOW_COMMIT" --arg run "$GITHUB_RUN_ID" \
+            --arg attempt "$GITHUB_RUN_ATTEMPT" \
+            '{commit:$commit,tree:$tree,workflow:$workflow,run:$run,attempt:$attempt}' \
+            > "$RUNNER_TEMP/identity.json"
+      - name: Scan with the same CodeQL bundle and query suite
+        shell: bash
+        run: |
+          cd "$RUNNER_TEMP"
+          curl --fail --silent --show-error --location --retry 3 \
+            https://github.com/github/codeql-action/releases/download/codeql-bundle-v2.27.5/codeql-bundle-javascript-linux64.tar.zst \
+            --output codeql-bundle.tar.zst
+          echo 'b10957140a7969819022eac23a6a37d0c6a65de12a84704ca71c416b980edb5c  codeql-bundle.tar.zst' | sha256sum --check
+          node -e 'require("node:stream").pipeline(process.stdin,require("node:zlib").createZstdDecompress(),process.stdout,(error)=>{if(error)throw error})' \
+            < codeql-bundle.tar.zst | tar -xf -
+          ./codeql/codeql database create database --language javascript-typescript --build-mode none \
+            --source-root "$GITHUB_WORKSPACE/source" --threads 4
+          ./codeql/codeql database analyze database --threads 4 --format sarifv2.1.0 --output findings.sarif \
+            codeql/javascript-queries:codeql-suites/javascript-code-scanning.qls
+          node "$GITHUB_WORKSPACE/verifier/scripts/quality/codeql-candidate-evidence.mjs" \
+            collect findings.sarif identity.json > codeql-evidence.json
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: codeql-${{ matrix.role }}-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/codeql-evidence.json
+          if-no-files-found: error
+          retention-days: 14
+
+  compare:
+    needs: scan
+    runs-on: ubuntu-latest
+    env:
+      TARGET: ${{ inputs.target }}
+      BASE_SHA: ${{ inputs.base_sha }}
+      CANDIDATE_SHA: ${{ inputs.candidate_sha }}
+      WORKFLOW_COMMIT: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333
+        with:
+          pattern: codeql-*-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/receipts
+      - name: Compare exact evidence against the still-current published base
+        shell: bash
+        run: |
+          read -r live _ < <(git ls-remote https://github.com/cheaper-inference/OmniRoute.git "refs/heads/$TARGET")
+          test "$live" = "$BASE_SHA"
+          jq -n --arg base "$BASE_SHA" --arg candidate "$CANDIDATE_SHA" \
+            --arg workflow "$WORKFLOW_COMMIT" --arg run "$GITHUB_RUN_ID" \
+            --arg attempt "$GITHUB_RUN_ATTEMPT" \
+            '{base:$base,candidate:$candidate,workflow:$workflow,run:$run,attempt:$attempt}' \
+            > "$RUNNER_TEMP/expected.json"
+          node scripts/quality/codeql-candidate-evidence.mjs compare \
+            "$RUNNER_TEMP/receipts/codeql-base-$GITHUB_RUN_ATTEMPT/codeql-evidence.json" \
+            "$RUNNER_TEMP/receipts/codeql-candidate-$GITHUB_RUN_ATTEMPT/codeql-evidence.json" \
+            "$RUNNER_TEMP/expected.json" > "$RUNNER_TEMP/comparison.json"
+          jq . "$RUNNER_TEMP/comparison.json"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9
+        with:
+          name: codeql-comparison-${{ github.run_attempt }}
+          path: ${{ runner.temp }}/comparison.json
+          if-no-files-found: error
+          retention-days: 14
+      - name: Require a measured reduction with no new findings
+        shell: bash
+        run: jq -e '.verdict == "REDUCED"' "$RUNNER_TEMP/comparison.json"
