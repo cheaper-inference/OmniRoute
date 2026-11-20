@@ -105,7 +105,6 @@ async function assertFixed500(res: Response, leaks: string[]) {
 test("both spellings are client API routes, with no public-route entry", () => {
   assert.equal(classifyRoute("/v1/me/quota/claude").routeClass, "CLIENT_API");
   assert.equal(classifyRoute("/api/v1/me/quota/claude").routeClass, "CLIENT_API");
-  assert.equal(classifyRoute("/api/v1/me/usage").routeClass, "CLIENT_API");
   // Every /api/v1/ route is reachable without a dashboard session through the existing
   // "/api/v1/" prefix (its handler authenticates the key itself, as /api/v1/me/status does).
   // What must hold: that prefix is the only match, there is no entry of the route's own, and

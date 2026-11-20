@@ -74,6 +74,22 @@ test("the pool total is hidden without self:account-quota or when the provider i
   assert.equal("total" in notShared.dimensions[0], false);
 });
 
+test("both scopes with an empty sharing list see no account-level field", async () => {
+  const [pool] = (
+    await buildQuotaSelfView(input({ scopes: BOTH, sharedQuotaProviders: [] }), makeDeps())
+  ).pools;
+  assert.deepEqual([pool.accountVisible, "total" in pool.dimensions[0]], [false, false]);
+  assert.equal("modelWindows" in pool.accounts[0], false);
+});
+
+test("both scopes with the pool's provider in the sharing list see the account-level fields", async () => {
+  const [pool] = (
+    await buildQuotaSelfView(input({ scopes: BOTH, sharedQuotaProviders: ["claude"] }), makeDeps())
+  ).pools;
+  assert.deepEqual([pool.accountVisible, "total" in pool.dimensions[0]], [true, true]);
+  assert.equal("modelWindows" in pool.accounts[0], true);
+});
+
 test("a failed store read is unavailable, never zero", async () => {
   const deps = makeDeps({
     store: {
