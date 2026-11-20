@@ -18556,6 +18556,40 @@ components:
                       description: "Negative = surplus; positive = over-allocation"
                     borrowing:
                       type: boolean
+              accounts:
+                type: array
+                description: "Present for percent dimensions: one entry per pool connection."
+                items:
+                  type: object
+                  properties:
+                    connectionId:
+                      type: string
+                    globalUsedPercent:
+                      type: number
+                    consumedTotal:
+                      type: number
+                    internal:
+                      type: number
+                    external:
+                      type: number
+                    externalCharged:
+                      type: number
+                    perKey:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          apiKeyId:
+                            type: string
+                          consumed:
+                            type: number
+                          fairShare:
+                            type: number
+                          deficit:
+                            type: number
+                            description: "Negative = surplus; positive = over-allocation"
+                          borrowing:
+                            type: boolean
         burnRate:
           type: object
           nullable: true

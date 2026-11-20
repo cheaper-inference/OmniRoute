@@ -1,5 +1,24 @@
 import type { DimensionKey, Policy, QuotaDimension } from "./dimensions";
 
+export interface PoolUsagePerKey {
+  apiKeyId: string;
+  consumed: number;
+  fairShare: number;
+  deficit: number;
+  borrowing: boolean;
+}
+
+/** Percent dimensions: the attribution on one pool connection (account). */
+export interface PoolUsageAccount {
+  connectionId: string;
+  globalUsedPercent: number;
+  consumedTotal: number;
+  internal: number;
+  external: number;
+  externalCharged: number;
+  perKey: PoolUsagePerKey[];
+}
+
 export interface PoolUsageSnapshot {
   poolId: string;
   generatedAt: string;
@@ -8,13 +27,9 @@ export interface PoolUsageSnapshot {
     window: QuotaDimension["window"];
     limit: number;
     consumedTotal: number;
-    perKey: Array<{
-      apiKeyId: string;
-      consumed: number;
-      fairShare: number;
-      deficit: number;
-      borrowing: boolean;
-    }>;
+    perKey: PoolUsagePerKey[];
+    /** Present for percent dimensions: one entry per pool connection. */
+    accounts?: PoolUsageAccount[];
   }>;
   burnRate?: {
     tokensPerSecond: number;
