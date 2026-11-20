@@ -181,6 +181,9 @@ test("isRelayablePath refuses a fragment marker in the path and ignores one in t
 
 test("hasDotSegment unwraps nested encodings and never throws", () => {
   assert.equal(bridge.hasDotSegment("/v1/%25252e%25252e/x"), true);
+  // Seven levels deep: the percent sign of an encoded dot, itself encoded six times over.
+  const deep = `%${"25".repeat(6)}2e`;
+  assert.equal(bridge.hasDotSegment(`/v1/${deep}${deep}/x`), true);
   assert.equal(bridge.hasDotSegment("/v1/%zz/x"), false);
   assert.equal(bridge.hasDotSegment("/v1/models"), false);
   assert.equal(bridge.hasDotSegment("/v1/models/a..b"), false);
