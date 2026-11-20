@@ -14,6 +14,16 @@ import { PolicySchema, QuotaUnitSchema, QuotaWindowSchema } from "@/lib/quota/di
 
 export const selfQuotaStatusSchema = z.enum(["ok", "stale", "unavailable"]);
 
+/**
+ * The {provider} path segment, shared by the API route and the /quota/{provider} page: trimmed,
+ * lowercased, then a registry-id shape. Alias resolution happens after this check.
+ */
+export const selfQuotaProviderSegmentSchema = z
+  .string()
+  .trim()
+  .toLowerCase()
+  .regex(/^[a-z0-9][a-z0-9._-]{0,63}$/);
+
 const bar = z.object({
   used: z.number().nullable(),
   status: selfQuotaStatusSchema,

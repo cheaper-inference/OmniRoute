@@ -11,13 +11,14 @@
  * and never reaches the body or a header. Every response of this handler carries
  * `Cache-Control: no-store`.
  */
-import { z } from "zod";
-
 import { getApiKeySelfServiceSettings } from "@/lib/db/apiKeySelfServiceSettings";
 import { buildQuotaSelfView } from "@/lib/quota/selfView";
 import type { QuotaSelfViewInput } from "@/lib/quota/selfViewTypes";
 import { resolveProviderId } from "@/shared/constants/providers";
-import { selfQuotaResponseSchema } from "@/shared/schemas/selfQuota";
+import {
+  selfQuotaProviderSegmentSchema,
+  selfQuotaResponseSchema,
+} from "@/shared/schemas/selfQuota";
 import { getApiKeySecret } from "@/shared/utils/apiKey";
 import { createLogger } from "@/shared/utils/logger";
 
@@ -33,12 +34,6 @@ const log = createLogger("self-service:quota");
 
 const BUILD_FAILED_MESSAGE = "Failed to build quota view";
 const MISSING_SCOPE_ERROR = "missing_self_usage_scope";
-
-const providerSegmentSchema = z
-  .string()
-  .trim()
-  .toLowerCase()
-  .regex(/^[a-z0-9][a-z0-9._-]{0,63}$/);
 
 /** The gate itself is fixed; only the key store it reads can be replaced. */
 export interface SelfQuotaHandlerDeps {
@@ -79,7 +74,7 @@ export async function handleSelfQuotaGet(
     const auth = await authenticateSelfServiceRequest(request, deps.keyStore);
     if (!auth.ok) return auth.response;
 
-    const segment = providerSegmentSchema.safeParse(rawProvider);
+    const segment = selfQuotaProviderSegmentSchema.safeParse(rawProvider);
     if (!segment.success) return selfServiceError(400, "Invalid provider");
     const provider = resolveProviderId(segment.data).toLowerCase();
 
