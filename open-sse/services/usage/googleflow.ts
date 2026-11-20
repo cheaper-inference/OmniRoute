@@ -21,6 +21,8 @@ export interface GoogleFlowCreditsResult {
 
 const XSSI_PREFIX = ")]}'";
 const ONE_HOUR_MS = 60 * 60 * 1000;
+/** Each Flow RPC is bounded so a stalled flow.google.com connection cannot hang the limits poll. */
+export const FLOW_RPC_TIMEOUT_MS = 15_000;
 const flowCreditsCache = new Map<
   string,
   { data: { quotas: Record<string, UsageQuota> }; timestamp: number }
@@ -117,7 +119,8 @@ export function parseFlowCreditsReply(responseText: string): GoogleFlowCreditsRe
 
 export async function fetchFlowCredits(
   cookies: string,
-  fetchImpl: typeof fetch = fetch
+  fetchImpl: typeof fetch = fetch,
+  timeoutMs: number = FLOW_RPC_TIMEOUT_MS
 ): Promise<GoogleFlowCreditsResult> {
   const cookieHeader = normalizeFlowCookies(cookies);
   if (!cookieHeader) {
@@ -141,6 +144,7 @@ export async function fetchFlowCredits(
     method: "POST",
     headers,
     body: reqData,
+    signal: AbortSignal.timeout(timeoutMs),
   });
 
   let text = await response.text();
@@ -151,6 +155,7 @@ export async function fetchFlowCredits(
       method: "POST",
       headers,
       body: `${reqData}&at=${encodeURIComponent(xsrfMatch[1])}`,
+      signal: AbortSignal.timeout(timeoutMs),
     });
     text = await response.text();
   }

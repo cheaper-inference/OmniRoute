@@ -13,6 +13,8 @@ export interface GoogleFlowWebVideoHandlerArgs {
   providerConfig: { baseUrl: string };
   body: Record<string, unknown>;
   credentials: Record<string, unknown> | null;
+  /** Persists a session cookie Google rotated during the run (provider-connection DB module). */
+  onSessionCookieRotated?: (cookie: string) => Promise<void>;
   log?: { info?: (tag: string, msg: string) => void; error?: (tag: string, msg: string) => void };
 }
 
@@ -20,6 +22,7 @@ export async function handleGoogleFlowWebVideoGeneration({
   model,
   body,
   credentials,
+  onSessionCookieRotated,
   log,
 }: GoogleFlowWebVideoHandlerArgs): Promise<{
   success: boolean;
@@ -48,12 +51,6 @@ export async function handleGoogleFlowWebVideoGeneration({
       apiKey: typeof credentials?.apiKey === "string" ? credentials.apiKey : "",
       accessToken:
         typeof credentials?.accessToken === "string" ? credentials.accessToken : undefined,
-      connectionId:
-        typeof credentials?.connectionId === "string"
-          ? credentials.connectionId
-          : typeof credentials?.id === "string"
-            ? credentials.id
-            : undefined,
     };
 
     log?.info?.(
@@ -66,6 +63,7 @@ export async function handleGoogleFlowWebVideoGeneration({
       model,
       aspectRatio,
       credentials: creds,
+      onSessionCookieRotated,
     });
 
     return {

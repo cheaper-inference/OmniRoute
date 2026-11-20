@@ -196,6 +196,9 @@ export async function handleVideoGeneration({
   mediaSink = undefined,
   prepareFalInput = null,
   signal = null,
+  // Session-cookie providers (googleflow-web) hand back a rotated cookie; the route persists it
+  // through the provider-connection DB module.
+  onSessionCookieRotated = undefined,
 }) {
   if (signal?.aborted) return abortedVideoResult();
   let { provider, model } = parseVideoModel(body.model);
@@ -320,7 +323,14 @@ export async function handleVideoGeneration({
   }
 
   if (providerConfig.format === "googleflow-web" || provider === "googleflow-web") {
-    return handleGoogleFlowWebVideoGeneration({ model, providerConfig, body, credentials, log });
+    return handleGoogleFlowWebVideoGeneration({
+      model,
+      providerConfig,
+      body,
+      credentials,
+      onSessionCookieRotated,
+      log,
+    });
   }
 
   if (providerConfig.format === "comfyui") {

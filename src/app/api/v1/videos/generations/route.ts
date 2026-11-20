@@ -35,6 +35,7 @@ import {
 import type { MediaGenerationResultLike } from "@/app/api/v1/_shared/mediaGenerationRoute";
 import { getSpecialtyModelsResponse } from "@/app/api/v1/_shared/specialtyCatalog";
 import { executeImageWithCredentialFallback } from "@/sse/services/imageCredentialRetry";
+import { persistRotatedSessionCookie } from "@/sse/services/tokenRefresh";
 import {
   isVideoPromptOptional,
   resolveLocalOverrideCredentials,
@@ -217,6 +218,8 @@ async function postHandler(request, context) {
           mediaSink,
           ...(isCustomModel && { resolvedProvider: provider }),
           signal: request.signal,
+          // Session-cookie providers (googleflow-web) persist a rotated cookie.
+          onSessionCookieRotated: persistRotatedSessionCookie(attemptCredentials?.connectionId),
         })
       ),
   });

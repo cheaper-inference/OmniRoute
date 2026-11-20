@@ -4,7 +4,8 @@
  */
 
 import type { BrowserContext, Response as PlaywrightResponse } from "playwright";
-import { acquireFlowBrowser, releaseFlowBrowser } from "./browserLease.ts";
+import { acquireFlowBrowser, getStableFlowLauncher, releaseFlowBrowser } from "./browserLease.ts";
+import { isUrlHost, isUrlHostOrSubdomain } from "../../utils/urlHost.ts";
 import {
   normalizeFlowCookies,
   fetchFlowCredits,
@@ -20,6 +21,8 @@ export interface FlowVideoOptions {
   aspectRatio?: string;
   duration?: number;
   credentials: { apiKey?: string; accessToken?: string };
+  /** Persists the session cookie after Google rotated it during the run. */
+  onSessionCookieRotated?: (cookie: string) => Promise<void>;
 }
 
 export interface FlowImageOptions {
@@ -27,6 +30,8 @@ export interface FlowImageOptions {
   model?: string;
   aspectRatio?: string;
   credentials: { apiKey?: string; accessToken?: string };
+  /** Persists the session cookie after Google rotated it during the run. */
+  onSessionCookieRotated?: (cookie: string) => Promise<void>;
 }
 
 export interface FlowMediaResult {
@@ -37,63 +42,139 @@ export interface FlowMediaResult {
 
 /** Credential fields the Flow client reads beyond the cookie string. */
 type FlowCredentialExtras = {
-  connectionId?: string;
   customUserAgent?: unknown;
   providerSpecificData?: { customUserAgent?: unknown };
 };
 
-async function syncRotatedCookies(
-  context: Pick<BrowserContext, "cookies"> | null,
-  connectionId?: string
-): Promise<void> {
-  if (!context || !connectionId) return;
-  try {
-    const cookies = await context.cookies();
-    if (!Array.isArray(cookies) || cookies.length === 0) return;
-    const hasTimestamp = cookies.some((c) => c && c.name && c.name.includes("PSIDTS"));
-    if (!hasTimestamp) return;
+/** Google session cookies that rotate while a Flow page is open. */
+const ROTATABLE_FLOW_COOKIES = ["__Secure-1PSID", "__Secure-1PSIDTS", "__Secure-1PSIDCC"];
 
-    const fs = await import("fs").catch(() => null);
-    if (!fs || !fs.existsSync("/app/data/storage.sqlite") || !fs.existsSync("/app/data/server.env"))
-      return;
-
-    const crypto = await import("crypto");
-    const env = fs.readFileSync("/app/data/server.env", "utf8");
-    let key = "";
-    for (const line of env.split("\n")) {
-      if (line.startsWith("STORAGE_ENCRYPTION_KEY=")) {
-        key = line.split("=")[1].trim();
-      }
+/**
+ * Merge the cookies Google rotated during a run into the stored cookie header.
+ * Only cookies already present in the stored header, plus the rotating
+ * __Secure-1PSID* family, are taken from the browser jar; analytics/consent
+ * cookies the page picked up are never promoted to credentials. Returns null
+ * when nothing changed.
+ */
+export function mergeRotatedFlowCookies(
+  storedCookieHeader: string,
+  jarCookies: ReadonlyArray<{ name?: unknown; value?: unknown }>
+): string | null {
+  const jar = new Map<string, string>();
+  for (const cookie of jarCookies) {
+    if (cookie && typeof cookie.name === "string" && typeof cookie.value === "string") {
+      if (cookie.value) jar.set(cookie.name, cookie.value);
     }
-    if (!key) return;
-
-    const cookieStr = cookies
-      .filter((c) => c && typeof c.name === "string" && typeof c.value === "string")
-      .map((c) => `${c.name}=${c.value}`)
-      .join("; ");
-
-    const staticKey = crypto.scryptSync(key, "omniroute-field-encryption-v1", 32);
-    const iv = crypto.randomBytes(16);
-    const cipher = crypto.createCipheriv("aes-256-gcm", staticKey, iv, { authTagLength: 16 });
-    let enc = cipher.update(cookieStr, "utf8", "hex");
-    enc += cipher.final("hex");
-    const tag = cipher.getAuthTag().toString("hex");
-    const encrypted = "enc:v1:" + iv.toString("hex") + ":" + enc + ":" + tag;
-
-    const Database = (await import("better-sqlite3")).default;
-    const db = new Database("/app/data/storage.sqlite");
-    db.prepare("UPDATE provider_connections SET api_key = ?, updated_at = ? WHERE id = ?").run(
-      encrypted,
-      new Date().toISOString(),
-      connectionId
-    );
-    db.close();
-    console.log(
-      `[FLOW_DEBUG] Automatically synced rotated session cookies for connection ${connectionId} to storage.sqlite`
-    );
-  } catch (err) {
-    console.error("[FLOW_DEBUG] Failed to auto-sync rotated cookies:", err);
   }
+  const seen = new Set<string>();
+  let changed = false;
+  const merged: string[] = [];
+  for (const pair of storedCookieHeader.split(";")) {
+    const index = pair.indexOf("=");
+    if (index <= 0) continue;
+    const name = pair.slice(0, index).trim();
+    const value = pair.slice(index + 1).trim();
+    if (!name) continue;
+    seen.add(name);
+    const rotated = jar.get(name);
+    if (rotated !== undefined && rotated !== value) changed = true;
+    merged.push(`${name}=${rotated ?? value}`);
+  }
+  for (const name of ROTATABLE_FLOW_COOKIES) {
+    const rotated = jar.get(name);
+    if (!seen.has(name) && rotated !== undefined) {
+      merged.push(`${name}=${rotated}`);
+      changed = true;
+    }
+  }
+  return changed ? merged.join("; ") : null;
+}
+
+/**
+ * Read the live cookie jar after a run and hand rotated session cookies to the
+ * caller, which persists them through the provider-connection DB module. A
+ * persistence failure never fails the generation.
+ */
+export async function persistRotatedFlowCookies(
+  context: Pick<BrowserContext, "cookies"> | null,
+  storedCookieHeader: string,
+  onSessionCookieRotated?: (cookie: string) => Promise<void>
+): Promise<void> {
+  if (!context || !onSessionCookieRotated) return;
+  try {
+    const merged = mergeRotatedFlowCookies(storedCookieHeader, await context.cookies());
+    if (merged) await onSessionCookieRotated(merged);
+  } catch (err) {
+    console.warn(
+      "[FLOW_DEBUG] Failed to persist rotated cookies:",
+      err instanceof Error ? err.name : "unknown error"
+    );
+  }
+}
+
+function parseHttpsUrl(value: string | null | undefined): URL | null {
+  if (typeof value !== "string" || !value) return null;
+  try {
+    const url = new URL(value);
+    return url.protocol === "https:" ? url : null;
+  } catch {
+    return null;
+  }
+}
+
+/** A Flow video asset URL: flow-content.google/video/… or *.googlevideo.com/videoplayback. */
+export function isFlowVideoMediaUrl(value: string | null | undefined): boolean {
+  const url = parseHttpsUrl(value);
+  if (!url) return false;
+  if (isUrlHost(url.href, "flow-content.google")) return url.pathname.startsWith("/video/");
+  if (isUrlHostOrSubdomain(url.href, "googlevideo.com")) {
+    return url.pathname.startsWith("/videoplayback");
+  }
+  return false;
+}
+
+/** A Flow video asset URL that carries its CDN signature (a finished, fetchable render). */
+export function isSignedFlowVideoMediaUrl(value: string | null | undefined): boolean {
+  if (!isFlowVideoMediaUrl(value)) return false;
+  const url = new URL(value as string);
+  if (isUrlHost(url.href, "flow-content.google")) return url.searchParams.has("Signature");
+  return url.searchParams.has("sig") || url.searchParams.has("lsig");
+}
+
+/** A generated Flow image: *.googleusercontent.com/asb/… */
+export function isFlowImageMediaUrl(value: string | null | undefined): boolean {
+  const url = parseHttpsUrl(value);
+  return (
+    !!url &&
+    isUrlHostOrSubdomain(url.href, "googleusercontent.com") &&
+    url.pathname.startsWith("/asb/")
+  );
+}
+
+/** Flow bounced the session to Google sign-in or the public /about landing page. */
+export function isFlowSignedOutUrl(value: string | null | undefined): boolean {
+  if (isUrlHostOrSubdomain(value, "accounts.google.com")) return true;
+  return isFlowAboutUrl(value);
+}
+
+function isFlowAboutUrl(value: string | null | undefined): boolean {
+  const url = parseHttpsUrl(value);
+  return !!url && url.pathname.includes("/about");
+}
+
+/** Origin + path only: signed CDN query strings must never reach the logs. */
+function redactUrl(value: string): string {
+  const url = parseHttpsUrl(value);
+  return url ? `${url.origin}${url.pathname}` : "[unparseable url]";
+}
+
+type PlaywrightModule = typeof import("playwright");
+const importPlaywright = (): Promise<PlaywrightModule> => import("playwright");
+let loadPlaywright = importPlaywright;
+
+/** Test seam: drive the Flow client with a fake Playwright (null restores the real one). */
+export function setFlowPlaywrightLoaderForTests(loader: (() => Promise<unknown>) | null): void {
+  loadPlaywright = loader ? (loader as () => Promise<PlaywrightModule>) : importPlaywright;
 }
 
 // Map user model names to UI selector / model keys
@@ -175,13 +256,14 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
   let playwright: typeof import("playwright");
   try {
-    playwright = await import("playwright");
+    playwright = await loadPlaywright();
   } catch {
     throw new Error("Playwright is not installed. Run: npx playwright install chromium");
   }
 
-  const browser = await acquireFlowBrowser((options) => playwright.chromium.launch(options));
+  const browser = await acquireFlowBrowser(getStableFlowLauncher(playwright.chromium));
   let context: BrowserContext | null = null;
+  let mediaTimeout: ReturnType<typeof setTimeout> | undefined;
 
   try {
     const extras = opts.credentials as FlowCredentialExtras;
@@ -285,7 +367,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
     console.log("[FLOW_DEBUG] Initial explore URL:", page.url());
 
     // If redirected to /about, click the main entry button ("Get started", "Create with Google Flow", etc.)
-    if (page.url().includes("/about")) {
+    if (isFlowAboutUrl(page.url())) {
       console.log("[FLOW_DEBUG] Landed on /about, clicking CTA entry button...");
       const ctaBtn = page
         .locator(
@@ -301,10 +383,10 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
       }
     }
     console.log("[FLOW_DEBUG] Navigated to:", page.url());
-    if (page.url().includes("accounts.google.com") || page.url().includes("/about")) {
+    if (isFlowSignedOutUrl(page.url())) {
       throw new Error(
         "Google Flow session is expired or requires re-authentication (redirected to " +
-          page.url() +
+          redactUrl(page.url()) +
           ")"
       );
     }
@@ -393,6 +475,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
           reject(new Error("Timed out waiting for Veo video generation to complete (600s limit)"));
         }
       }, 600_000);
+      mediaTimeout = timeout;
 
       page.on("response", async (response: PlaywrightResponse) => {
         if (isFinished) return;
@@ -401,7 +484,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
         // Veo takes at least 15s to render; anything earlier is existing canvas asset
         if (!promptSentAt || now - promptSentAt < 15_000) {
-          if (url.includes("flow-content.google/video")) {
+          if (isFlowVideoMediaUrl(url)) {
             existingVideoUrls.add(url);
             const aid = extractAssetId(url);
             if (aid) existingAssetIds.add(aid);
@@ -410,13 +493,13 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         }
 
         // Direct CDN video request
-        if (
-          (url.includes("flow-content.google/video") && url.includes("Signature=")) ||
-          (url.includes("googlevideo.com/videoplayback") && url.includes("sig="))
-        ) {
+        if (isSignedFlowVideoMediaUrl(url)) {
           const aid = extractAssetId(url);
           if (!existingVideoUrls.has(url) && (!aid || !existingAssetIds.has(aid))) {
-            console.log("[FLOW_DEBUG] RESOLVED video response with direct CDN URL:", url);
+            console.log(
+              "[FLOW_DEBUG] RESOLVED video response with direct CDN URL:",
+              redactUrl(url)
+            );
             isFinished = true;
             clearTimeout(timeout);
             resolve(url);
@@ -426,11 +509,10 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
         // Catch any batchexecute, labs-flow, or direct video/stream response from Google Flow
         if (
-          url.includes("flow-content.google/video") ||
-          url.includes("googlevideo.com/videoplayback") ||
+          isFlowVideoMediaUrl(url) ||
+          isUrlHostOrSubdomain(url, "flow.google.com") ||
           url.includes("batchexecute") ||
-          url.includes("labs-flow") ||
-          url.includes("flow.google.com")
+          url.includes("labs-flow")
         ) {
           try {
             const body = await response.text();
@@ -446,9 +528,12 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
                 if (
                   !existingVideoUrls.has(cleanUrl) &&
                   (!aid || !existingAssetIds.has(aid)) &&
-                  cleanUrl.includes("Signature=")
+                  isSignedFlowVideoMediaUrl(cleanUrl)
                 ) {
-                  console.log("[FLOW_DEBUG] RESOLVED video response with clean URL:", cleanUrl);
+                  console.log(
+                    "[FLOW_DEBUG] RESOLVED video response with clean URL:",
+                    redactUrl(cleanUrl)
+                  );
                   isFinished = true;
                   clearTimeout(timeout);
                   resolve(cleanUrl);
@@ -460,6 +545,10 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
         }
       });
     });
+
+    // Observed here so a throw before Promise.race (e.g. editor.waitFor) cannot leave the
+    // timeout to reject unhandled later; the race below still sees the rejection.
+    videoPromise.catch(() => {});
 
     // Ensure video mode is selected in project settings if project defaulted to image
     try {
@@ -493,7 +582,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
 
     const videoPrompt = `Create a video: ${opts.prompt}`;
 
-    console.log("[FLOW_DEBUG] Typing prompt:", videoPrompt.slice(0, 50));
+    console.log("[FLOW_DEBUG] Typing prompt");
     const editor = page.locator(".ProseMirror").first();
     await editor.waitFor({ timeout: 15_000 });
     await editor.click();
@@ -580,13 +669,13 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
               return v ? v.src || v.currentSrc : null;
             })
             .catch(() => null);
-          if (
-            videoSrc &&
-            (videoSrc.includes("flow-content.google") || videoSrc.includes("googlevideo.com"))
-          ) {
+          if (videoSrc && isFlowVideoMediaUrl(videoSrc)) {
             const aid = extractAssetId(videoSrc);
             if (!existingVideoUrls.has(videoSrc) && (!aid || !existingAssetIds.has(aid))) {
-              console.log("[FLOW_DEBUG] RESOLVED video directly from <video> element:", videoSrc);
+              console.log(
+                "[FLOW_DEBUG] RESOLVED video directly from <video> element:",
+                redactUrl(videoSrc)
+              );
               isFinished = true;
               return videoSrc;
             }
@@ -602,13 +691,13 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
             .first();
           if (await downloadBtn.isVisible({ timeout: 300 }).catch(() => false)) {
             const href = await downloadBtn.getAttribute("href").catch(() => null);
-            if (
-              href &&
-              (href.includes("flow-content.google") || href.includes("googlevideo.com"))
-            ) {
+            if (href && isFlowVideoMediaUrl(href)) {
               const aid = extractAssetId(href);
               if (!existingVideoUrls.has(href) && (!aid || !existingAssetIds.has(aid))) {
-                console.log("[FLOW_DEBUG] RESOLVED video via download button href:", href);
+                console.log(
+                  "[FLOW_DEBUG] RESOLVED video via download button href:",
+                  redactUrl(href)
+                );
                 isFinished = true;
                 return href;
               }
@@ -624,7 +713,7 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
             return (
               !existingVideoUrls.has(v) &&
               (!aid || !existingAssetIds.has(aid)) &&
-              (v.includes("flow-content.google") || v.includes("googlevideo.com"))
+              isFlowVideoMediaUrl(v)
             );
           });
           if (newVideos.length > 0) {
@@ -653,9 +742,9 @@ export async function generateFlowVideo(opts: FlowVideoOptions): Promise<FlowMed
       format: "mp4",
     };
   } finally {
+    if (mediaTimeout) clearTimeout(mediaTimeout);
     if (context) {
-      const connectionId = (opts.credentials as FlowCredentialExtras)?.connectionId;
-      await syncRotatedCookies(context, connectionId).catch(() => {});
+      await persistRotatedFlowCookies(context, cookieHeader, opts.onSessionCookieRotated);
       await context.close().catch(() => {});
     }
     await releaseFlowBrowser(browser).catch(() => {});
@@ -674,13 +763,14 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
 
   let playwright: typeof import("playwright");
   try {
-    playwright = await import("playwright");
+    playwright = await loadPlaywright();
   } catch {
     throw new Error("Playwright is not installed. Run: npx playwright install chromium");
   }
 
-  const browser = await acquireFlowBrowser((options) => playwright.chromium.launch(options));
+  const browser = await acquireFlowBrowser(getStableFlowLauncher(playwright.chromium));
   let context: BrowserContext | null = null;
+  let mediaTimeout: ReturnType<typeof setTimeout> | undefined;
 
   try {
     const extras = opts.credentials as FlowCredentialExtras;
@@ -781,7 +871,7 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
     });
     await page.waitForTimeout(2_000);
 
-    if (page.url().includes("/about")) {
+    if (isFlowAboutUrl(page.url())) {
       const ctaBtn = page
         .locator(
           "a:has-text('Create with Google Flow'), a:has-text('Начать'), a:has-text('Попробовать'), a:has-text('Sign in'), a:has-text('Войти'), a[href*='flow.google.com'], button:has-text('Create')"
@@ -796,10 +886,10 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
       }
     }
 
-    if (page.url().includes("accounts.google.com") || page.url().includes("/about")) {
+    if (isFlowSignedOutUrl(page.url())) {
       throw new Error(
         "Google Flow session is expired or requires re-authentication (redirected to " +
-          page.url() +
+          redactUrl(page.url()) +
           ")"
       );
     }
@@ -827,6 +917,7 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
       const timeout = setTimeout(() => {
         reject(new Error("Timed out waiting for image generation to complete (60s limit)"));
       }, 60_000);
+      mediaTimeout = timeout;
 
       page.on("response", async (response: PlaywrightResponse) => {
         const url = response.url();
@@ -841,7 +932,7 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
             const match = /(https:\/\/lh3\.googleusercontent\.com\/asb\/[A-Za-z0-9_\-\/]+)/.exec(
               body
             );
-            if (match && match[1]) {
+            if (match && match[1] && isFlowImageMediaUrl(match[1])) {
               clearTimeout(timeout);
               resolve(match[1]);
             }
@@ -849,6 +940,10 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
         } catch {}
       });
     });
+
+    // Observed here so a throw before Promise.race (e.g. editor.waitFor) cannot leave the
+    // timeout to reject unhandled later; the race below still sees the rejection.
+    imagePromise.catch(() => {});
 
     const editor = page.locator(".ProseMirror").first();
     await editor.waitFor({ timeout: 15_000 });
@@ -886,11 +981,8 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
         }
         if (isFinished) return "";
         try {
-          const imgs = await page.$$eval("img", (els) =>
-            els
-              .map((e) => e.src || e.currentSrc)
-              .filter((s) => s && s.includes("googleusercontent.com/asb/"))
-          );
+          const srcs = await page.$$eval("img", (els) => els.map((e) => e.src || e.currentSrc));
+          const imgs = srcs.filter((src) => isFlowImageMediaUrl(src));
           if (imgs.length > 0) {
             isFinished = true;
             return imgs[0];
@@ -905,6 +997,11 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
     } finally {
       isFinished = true;
     }
+
+    if (!imageUrl) {
+      throw new Error("Google Flow image generation finished without producing an image URL");
+    }
+
     invalidateFlowCreditsCache();
 
     return {
@@ -912,9 +1009,9 @@ export async function generateFlowImage(opts: FlowImageOptions): Promise<FlowMed
       format: "png",
     };
   } finally {
+    if (mediaTimeout) clearTimeout(mediaTimeout);
     if (context) {
-      const connectionId = (opts.credentials as FlowCredentialExtras)?.connectionId;
-      await syncRotatedCookies(context, connectionId).catch(() => {});
+      await persistRotatedFlowCookies(context, cookieHeader, opts.onSessionCookieRotated);
       await context.close().catch(() => {});
     }
     await releaseFlowBrowser(browser).catch(() => {});

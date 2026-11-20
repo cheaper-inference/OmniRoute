@@ -57,7 +57,10 @@ import {
   runImageRequestWithAccounting,
 } from "@/lib/usage/imageRequestAccounting";
 import { executeImageWithCredentialFallback } from "@/sse/services/imageCredentialRetry";
-import { updateProviderCredentials } from "@/sse/services/tokenRefresh";
+import {
+  persistRotatedSessionCookie,
+  updateProviderCredentials,
+} from "@/sse/services/tokenRefresh";
 import { imageQuotaPreflightOptions } from "@/sse/services/imageQuotaSelectionPolicy";
 import { AUTHZ_HEADER_PEER_LOCALITY } from "@/server/authz/headers";
 import {
@@ -421,6 +424,8 @@ async function postHandler(request, context) {
                     });
                   }
                 : undefined,
+              // Session-cookie providers (googleflow-web) persist a rotated cookie the same way.
+              onSessionCookieRotated: persistRotatedSessionCookie(attemptCredentials?.connectionId),
               clientHeaders: publicBaseUrlHeaders(request.headers),
               // Trusted "loopback"|"lan"|"remote" verdict stamped by the authz
               // pipeline from the real TCP peer (never the spoofable Host

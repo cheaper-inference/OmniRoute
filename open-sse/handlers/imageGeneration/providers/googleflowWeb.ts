@@ -14,6 +14,8 @@ export interface GoogleFlowWebImageHandlerArgs {
   providerConfig: { baseUrl: string };
   body: Record<string, unknown>;
   credentials: Record<string, unknown> | null;
+  /** Persists a session cookie Google rotated during the run (provider-connection DB module). */
+  onSessionCookieRotated?: (cookie: string) => Promise<void>;
   log?: { info?: (tag: string, msg: string) => void; error?: (tag: string, msg: string) => void };
 }
 
@@ -21,6 +23,7 @@ export async function handleGoogleFlowWebImageGeneration({
   model,
   body,
   credentials,
+  onSessionCookieRotated,
   log,
 }: GoogleFlowWebImageHandlerArgs): Promise<{
   success: boolean;
@@ -61,6 +64,7 @@ export async function handleGoogleFlowWebImageGeneration({
       model,
       aspectRatio,
       credentials: creds,
+      onSessionCookieRotated,
     });
 
     const item: Record<string, unknown> = {
