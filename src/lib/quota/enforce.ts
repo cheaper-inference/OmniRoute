@@ -39,22 +39,6 @@ import {
 
 const SATURATION_THRESHOLD = Number(process.env.QUOTA_SATURATION_THRESHOLD ?? "0.5");
 
-/**
- * Units for which the store tracks a real pool-wide aggregate (sum of per-key
- * consumption via quota_consumption rows). For these units, globalUsedPercent
- * (the saturation signal from the upstream provider) is always 0 because no
- * external API reports a "percent used" for raw request/token/usd counters.
- *
- * Using globalUsedPercent × effectiveLimit for countable units would always
- * yield consumedTotal = 0, meaning the pool never saturates and per-key
- * overage is never blocked. We use store.poolConsumedTotal() instead, which
- * sums the actual consumption across all keys in the pool window.
- *
- * "percent" dimensions remain driven by the saturation signal because that IS
- * the authoritative consumption measure (the upstream provider percentage).
- */
-const COUNTABLE_UNITS = new Set(["requests", "tokens", "usd"]);
-
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -264,21 +248,8 @@ export async function enforceQuotaShare(input: EnforceInput): Promise<EnforceDec
     // This is the summed budget: N accounts contribute N × L capacity to the shared bucket.
     const effectiveLimit = dim.limit * accountCount;
 
-    // Derive consumedTotal based on the unit type:
-    //   - Countable units (requests/tokens/usd): use the real store aggregate so the
-    //     pool can actually saturate and block per-key overage. The saturation signal
-    //     (globalUsedPercent) is always 0 for these units — using it would permanently
-    //     keep consumedTotal at 0 and never trigger the block path.
-    //   - percent dimensions: the saturation signal IS the consumed signal (the upstream
-    //     provider returns a utilisation percentage, not raw counts).
-    let consumedTotal: number;
-    if (COUNTABLE_UNITS.has(dim.unit)) {
-      // Real pool-wide aggregate (sum of per-key consumption across all apiKeyIds).
-      consumedTotal = await store.poolConsumedTotal(pool.id, dimKey).catch(() => 0);
-    } else {
-      // percent (account-quota window): the saturation signal is authoritative.
-      consumedTotal = globalUsedPercent * effectiveLimit;
-    }
+    // Countable units (requests/tokens/usd): the real pool-wide store aggregate.
+    const consumedTotal = await store.poolConsumedTotal(pool.id, dimKey).catch(() => 0);
 
     dimensionsInfo.push({
       key: dimKey,
