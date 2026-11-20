@@ -462,10 +462,10 @@ test("gheCopilot OAuth postExchange falls back to /api/v3/copilot_internal/user 
       );
     }
     if (urlStr.endsWith("/api/v3/user")) {
-      return new Response(
-        JSON.stringify({ login: "corpuser", email: "corpuser@example.com" }),
-        { status: 200, headers: { "Content-Type": "application/json" } }
-      );
+      return new Response(JSON.stringify({ login: "corpuser", email: "corpuser@example.com" }), {
+        status: 200,
+        headers: { "Content-Type": "application/json" },
+      });
     }
     return new Response("unexpected", { status: 500 });
   };
@@ -481,23 +481,16 @@ test("gheCopilot OAuth postExchange falls back to /api/v3/copilot_internal/user 
       "https://msft.ghe.com/api/v3/user",
     ]);
     assert.equal(mapped.providerSpecificData.copilotToken, "gho_ghe_oauth_token");
-    assert.equal(
-      mapped.providerSpecificData.copilotApiUrl,
-      "https://copilot-api.msft.ghe.com"
-    );
-    assert.equal(
-      mapped.providerSpecificData.copilotProxyUrl,
-      "https://copilot-proxy.msft.ghe.com"
-    );
+    assert.equal(mapped.providerSpecificData.copilotApiUrl, "https://copilot-api.msft.ghe.com");
+    assert.equal(mapped.providerSpecificData.copilotProxyUrl, "https://copilot-proxy.msft.ghe.com");
   } finally {
     globalThis.fetch = originalFetch;
   }
 });
 
 test("refreshCopilotToken service falls back to /copilot_internal/user on 404 for GHE baseUrl", async () => {
-  const { refreshCopilotToken } = await import(
-    "../../open-sse/services/tokenRefresh/providers/copilot.ts"
-  );
+  const { refreshCopilotToken } =
+    await import("../../open-sse/services/tokenRefresh/providers/copilot.ts");
   const originalFetch = globalThis.fetch;
   const calledUrls: string[] = [];
 
@@ -543,4 +536,3 @@ test("refreshCopilotToken service falls back to /copilot_internal/user on 404 fo
     globalThis.fetch = originalFetch;
   }
 });
-

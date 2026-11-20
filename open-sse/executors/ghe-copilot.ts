@@ -182,6 +182,34 @@ export class GheCopilotExecutor extends GithubExecutor {
     return transformed;
   }
 
+  private async fetchGheCopilotUserFallback(
+    baseUrl: string,
+    githubAccessToken: string,
+    log?: { info?: (cat: string, msg: string) => void; error?: (cat: string, msg: string) => void },
+    credentials?: ProviderCredentials | null
+  ): Promise<CopilotTokenResult | null> {
+    const userUrl = `${baseUrl}/api/v3/copilot_internal/user`;
+    this.assertOutboundUrlAllowed(userUrl);
+    const userResponse = await dispatchGuarded(
+      this.provider,
+      userUrl,
+      { headers: { Authorization: `Bearer ${githubAccessToken}`, Accept: "application/json" } },
+      credentials
+    );
+    if (!userResponse.ok) return null;
+
+    const userData = await userResponse.json().catch(() => ({}));
+    log?.info?.("TOKEN", "GHE Copilot token resolved via copilot_internal/user");
+    const endpoints = userData?.endpoints
+      ? { proxy: userData.endpoints.proxy, api: userData.endpoints.api }
+      : undefined;
+    return {
+      token: githubAccessToken,
+      expiresAt: Math.floor(Date.now() / 1000) + 3600,
+      ...(endpoints ? { endpoints } : {}),
+    };
+  }
+
   override async refreshCopilotToken(
     githubAccessToken: string,
     log?: { info?: (cat: string, msg: string) => void; error?: (cat: string, msg: string) => void },
@@ -203,34 +231,9 @@ export class GheCopilotExecutor extends GithubExecutor {
       );
 
       if (!response.ok) {
-        if (response.status === 404) {
-          const userUrl = `${baseUrl}/api/v3/copilot_internal/user`;
-          this.assertOutboundUrlAllowed(userUrl);
-          const userResponse = await dispatchGuarded(
-            this.provider,
-            userUrl,
-            {
-              headers: {
-                Authorization: `Bearer ${githubAccessToken}`,
-                Accept: "application/json",
-              },
-            },
-            credentials
-          );
-          if (userResponse.ok) {
-            const userData = await userResponse.json().catch(() => ({}));
-            log?.info?.("TOKEN", "GHE Copilot token resolved via copilot_internal/user");
-            const endpoints = userData?.endpoints
-              ? { proxy: userData.endpoints.proxy, api: userData.endpoints.api }
-              : undefined;
-            return {
-              token: githubAccessToken,
-              expiresAt: Math.floor(Date.now() / 1000) + 3600,
-              ...(endpoints ? { endpoints } : {}),
-            };
-          }
-        }
-        return null;
+        return response.status === 404
+          ? await this.fetchGheCopilotUserFallback(baseUrl, githubAccessToken, log, credentials)
+          : null;
       }
       const data = await response.json();
       log?.info?.("TOKEN", "GHE Copilot token refreshed");

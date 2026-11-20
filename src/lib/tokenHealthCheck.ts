@@ -810,15 +810,14 @@ export async function checkConnection(conn: any) {
         copilotResult.token &&
         copilotAboutToExpire
       ) {
-        const endpoints = (
-          copilotResult as { endpoints?: { api?: string; proxy?: string } }
-        ).endpoints;
         refreshedProviderSpecificData = {
           ...providerSpecificData,
           copilotToken: copilotResult.token,
           copilotTokenExpiresAt: copilotResult.expiresAt,
-          ...(endpoints?.api ? { copilotApiUrl: endpoints.api } : {}),
-          ...(endpoints?.proxy ? { copilotProxyUrl: endpoints.proxy } : {}),
+          ...(copilotResult.endpoints?.api ? { copilotApiUrl: copilotResult.endpoints.api } : {}),
+          ...(copilotResult.endpoints?.proxy
+            ? { copilotProxyUrl: copilotResult.endpoints.proxy }
+            : {}),
         };
       }
 
