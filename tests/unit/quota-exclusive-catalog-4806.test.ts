@@ -282,3 +282,38 @@ test("restricted key parity: x-api-key lists what Bearer lists", async () => {
   );
   assert.deepEqual((await listIds({ "x-api-key": created.key })).ids, viaBearer.ids);
 });
+
+test("gated listing: a bare x-api-key is still not a credential", async () => {
+  // Scope-only by design: the request gate keeps the stricter extraction.
+  await settingsDb.updateSettings({
+    requireLogin: true,
+    password: "hashed-password",
+    requireAuthForModels: true,
+  });
+  const key = await seedExclusiveKey();
+  const bare = await listIds({ "x-api-key": key });
+  assert.equal(bare.status, 401);
+  assert.match(String(bare.error?.message), /Authentication required/i);
+  const anthropic = await listIds({ "x-api-key": key, "anthropic-version": "2023-06-01" });
+  assert.equal(anthropic.status, 200);
+  assert.ok(onlyOwnPool(anthropic.ids));
+});
+
+test("placeholder: an unknown x-api-key on an open listing still gets the full catalog", async () => {
+  await openListing();
+  await seedExclusiveKey();
+  const anonymous = await listIds();
+  for (const value of ["sk-placeholder", "not-a-real-key", "   "]) {
+    const res = await listIds({ "x-api-key": value });
+    assert.equal(res.status, 200, value);
+    assert.deepEqual(res.ids, anonymous.ids, value);
+  }
+});
+
+test("Bearer wins over x-api-key for scoping", async () => {
+  await openListing();
+  const exclusive = await seedExclusiveKey();
+  const open = await apiKeysDb.createApiKey("unrestricted", "machine-open");
+  const res = await listIds({ Authorization: `Bearer ${exclusive}`, "x-api-key": open.key });
+  assert.ok(onlyOwnPool(res.ids));
+});
