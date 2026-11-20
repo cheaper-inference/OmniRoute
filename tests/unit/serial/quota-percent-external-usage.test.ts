@@ -34,6 +34,7 @@ const { enforceQuotaShare, recordConsumption } = await import("../../../src/lib/
 const { decideFairShare } = await import("../../../src/lib/quota/fairShare.ts");
 const { attributePercentDimension } = await import("../../../src/lib/quota/percentAttribution.ts");
 const { SqliteQuotaStore } = await import("../../../src/lib/quota/sqliteQuotaStore.ts");
+const { recordStreamingConsumption } = await import("../../../src/lib/quota/spendRecorder.ts");
 const sat = await import("../../../src/lib/quota/saturationSignals.ts");
 const core = await import("../../../src/lib/db/core.ts");
 
@@ -504,6 +505,183 @@ await test("quota-percent-external-usage", async (t) => {
       // Account Y keeps its own book: the same key starts from 0 there and stops at 5 points too.
       assert.equal((await step(Y, 4.9)).kind, "allow");
       assert.match(reason(await step(Y, 5.1)), /Absolute quota cap reached/);
+    }
+  );
+
+  // ─── Documented limits (docs/routing/QUOTA_SHARE.md → Limitations) ───────
+
+  await t.test(
+    "usage made while the pool is idle is charged to the next key that routes, if the book is open",
+    async () => {
+      // The owner uses 60 points outside, no key routes, then k2 routes 30_000 tokens (0.6 point).
+      // Book opened before that usage: the growth of 60.6 is split by tokens, k2 explains 30.
+      const before = "conn-ext-limit-1a";
+      makePool(before, "weekly", hard(K4, 25));
+      mockUsage({ [before]: { weekly: 0 } });
+      await ask(before, "k1"); // opens the book at 0
+      mockUsage({ [before]: { weekly: 60 } });
+      await burn(before, "k2", 30_000);
+      mockUsage({ [before]: { weekly: 60.6 } });
+      assert.equal((await ask(before, "k2")).kind, "block"); // 30 + 30.6 / 4 = 37.65 ≥ 25
+      const a = await attribute(before);
+      near(a.internalByKey.k2, 30);
+      near(a.external, 30.6);
+      near(a.consumedByKey.k2, 37.65);
+
+      // Book opened after that usage (a request or the usage route): the 60 points are baseline.
+      const after = "conn-ext-limit-1b";
+      makePool(after, "weekly", hard(K4, 25));
+      mockUsage({ [after]: { weekly: 60 } });
+      await attribute(after); // the usage route opens the book at 60
+      await burn(after, "k2", 30_000);
+      mockUsage({ [after]: { weekly: 60.6 } });
+      assert.equal((await ask(after, "k2")).kind, "allow"); // 0.6 + 60 / 4 = 15.6 < 25
+      const b = await attribute(after);
+      near(b.internalByKey.k2, 0.6);
+      near(b.external, 60);
+      near(b.consumedByKey.k2, 15.6);
+    }
+  );
+
+  await t.test("a percent cap can refuse a key far below the saturation threshold", async () => {
+    // Weekly cap of 10. The owner used 12 points earlier in the window, then k1 routes 20_000
+    // tokens (0.4 point): k1's part is min(12.4, 20) = 12.4 ≥ 10 at an account figure of 12.4%.
+    const C = "conn-ext-limit-2";
+    makePool(C, "weekly", [
+      { apiKeyId: "k1", weight: 50, policy: "hard", capValue: 10, capUnit: "percent" },
+      { apiKeyId: "k2", weight: 50, policy: "hard" },
+    ]);
+    mockUsage({ [C]: { weekly: 0 } });
+    await ask(C, "k1"); // opens the book at 0
+    mockUsage({ [C]: { weekly: 12 } });
+    assert.equal((await ask(C, "k1")).kind, "allow"); // no tokens yet: nothing attributed
+    await burn(C, "k1", 20_000);
+    mockUsage({ [C]: { weekly: 12.4 } });
+    assert.match(reason(await ask(C, "k1")), /Absolute quota cap reached/);
+    const att = await attribute(C);
+    near(att.globalUsedPercent, 0.124); // far below QUOTA_SATURATION_THRESHOLD (0.5)
+    near(att.internalByKey.k1, 12.4);
+  });
+
+  await t.test(
+    "a request that does not end with status 200 records no tokens; its usage stays with the others",
+    async () => {
+      const C = "conn-ext-limit-3";
+      const pool = makePool(C, "5h", hard(K4, 25));
+      const counters = async () =>
+        (
+          await new SqliteQuotaStore().ledgerRead({
+            poolId: pool.id,
+            connectionId: C,
+            window: "5h",
+          })
+        ).counters;
+      mockUsage({ [C]: { fiveHour: 0 } });
+      await ask(C, "k1"); // opens the book at 0
+      await burn(C, "k2", 40_000); // k2 used 10 points and recorded 40_000 tokens
+
+      // k1's stream used 20 points, but the client disconnected (499): nothing is recorded.
+      const pending: Promise<void>[] = [];
+      await recordStreamingConsumption(
+        {
+          apiKeyId: "k1",
+          connectionId: C,
+          provider: PROV,
+          model: "claude-test",
+          streamUsage: { prompt_tokens: 20_000, completion_tokens: 0 },
+          streamStatus: 499,
+        },
+        {
+          calculateCost: async () => 0,
+          schedule: (input) => pending.push(recordConsumption(input)),
+        }
+      );
+      await Promise.all(pending);
+      assert.equal(pending.length, 0);
+      assert.deepEqual(Object.keys(await counters()), ["k2"]);
+
+      mockUsage({ [C]: { fiveHour: 30 } });
+      const att = await attribute(C);
+      near(att.internalByKey.k2, 30); // min(30, 40) = 30: k1's 20 points are charged to k2
+      near(att.internalByKey.k1, 0);
+      near(att.external, 0);
+      mockUsage({ [C]: { fiveHour: 30 } });
+      near((await attribute(C)).internalByKey.k2, 30); // and they never move back
+    }
+  );
+
+  await t.test(
+    "a lower figure inside a window the provider reports as open is not applied until it ends",
+    async () => {
+      mock.timers.enable({ apis: ["Date"], now: Date.now() });
+      try {
+        const C = "conn-ext-limit-4";
+        const R1 = Date.now() + 2 * H;
+        makePool(C, "5h", hard(K4, 25));
+        mockUsage({ [C]: { fiveHour: 0, reset: R1 } });
+        await ask(C, "k1"); // opens the book at 0, reset at R1
+        await burn(C, "k1", 30_000);
+        mockUsage({ [C]: { fiveHour: 30, reset: R1 } });
+        near((await attribute(C)).internalByKey.k1, 30);
+
+        // The provider lowers the figure to 5 and keeps the same reset time ahead.
+        mock.timers.setTime(R1 - H);
+        mockUsage({ [C]: { fiveHour: 5, reset: R1 } });
+        const kept = await attribute(C);
+        near(kept.globalUsedPercent, 0.05);
+        near(kept.internalByKey.k1, 30); // the book keeps its parts
+        near((await storedBook(C))?.last ?? -1, 0.3);
+
+        // Once the stored reset time passes, the next reading turns the book.
+        mock.timers.setTime(R1 + MIN);
+        mockUsage({ [C]: { fiveHour: 5, reset: R1 } });
+        const turned = await attribute(C);
+        near(turned.internalByKey.k1, 0);
+        near((await storedBook(C))?.baseline ?? -1, 0.05);
+      } finally {
+        mock.timers.reset();
+      }
+    }
+  );
+
+  await t.test(
+    "a reset time that moves back by more than 30 minutes is an old reading until the book turns",
+    async () => {
+      mock.timers.enable({ apis: ["Date"], now: Date.now() });
+      try {
+        const C = "conn-ext-limit-5";
+        const R1 = Date.now() + 2 * H;
+        makePool(C, "5h", hard(K4, 25));
+        mockUsage({ [C]: { fiveHour: 0, reset: R1 } });
+        await ask(C, "k1"); // opens the book at 0, reset at R1
+        await burn(C, "k1", 30_000);
+        mockUsage({ [C]: { fiveHour: 30, reset: R1 } });
+        near((await attribute(C)).internalByKey.k1, 30);
+        const stored = await storedBook(C);
+
+        // The reset time moves 45 minutes back and the figure rises to 40: the reading is old.
+        mock.timers.setTime(R1 - H);
+        mockUsage({ [C]: { fiveHour: 40, reset: R1 - 45 * MIN } });
+        const kept = await attribute(C);
+        near(kept.internalByKey.k1, 30);
+        near(kept.external, 0); // last stays 30: the 10 new points are not applied
+        assert.deepEqual(await storedBook(C), stored);
+
+        // Past the stored reset time the book is no longer charged, and still does not move.
+        mock.timers.setTime(R1 + MIN);
+        mockUsage({ [C]: { fiveHour: 40, reset: R1 - 45 * MIN } });
+        const ended = await attribute(C);
+        near(ended.internalByKey.k1, 0);
+        near(ended.external, 0);
+        assert.deepEqual(await storedBook(C), stored);
+
+        // A reading with a new window's reset time turns it.
+        mockUsage({ [C]: { fiveHour: 40, reset: R1 + 5 * H } });
+        await attribute(C);
+        near((await storedBook(C))?.baseline ?? -1, 0.4);
+      } finally {
+        mock.timers.reset();
+      }
     }
   );
 
