@@ -78,7 +78,7 @@ export default function ConductorPageClient() {
       const res = await fetch("/api/conductor/fleet");
       if (res.ok) setSnapshot(await res.json());
     } catch {
-      // rede local instável: mantém o último snapshot; o banner offline vem do servidor
+      // unstable local network: keep the last snapshot; the offline banner comes from the server
     }
   }, []);
 

@@ -10,7 +10,7 @@
  * Last synced: 2026-05 (B/G3 gap-closure). Source of truth: grep logAuditEvent repo.
  */
 export const HIGH_LEVEL_ACTIONS = [
-  // providers / connections — ALINHADO COM `logAuditEvent` real
+  // providers / connections — ALIGNED WITH the real `logAuditEvent`
   "provider.credentials.created",
   "provider.credentials.applied",
   "provider.credentials.updated",

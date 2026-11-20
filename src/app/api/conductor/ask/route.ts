@@ -1,8 +1,8 @@
 /**
- * POST /api/conductor/ask — proxy para o Faro (spokesperson do OmniConductor).
- * O /ask do Faro exige credencial do hub (server-side); o browser fala só com
- * esta rota. Resposta whitelisted {text, pending} — quando `pending` vier, a UI
- * oferece Sim/Não (a trava de confirmação é do motor do Faro; nunca contornada).
+ * POST /api/conductor/ask — proxy to Faro (OmniConductor spokesperson).
+ * Faro's /ask requires a hub credential (server-side); the browser talks only
+ * to this route. Whitelisted response {text, pending} — when `pending` is set,
+ * the UI offers Sim/Não (the confirmation gate lives in Faro's engine; never bypassed).
  */
 
 import { NextResponse } from "next/server";
@@ -26,12 +26,18 @@ export async function POST(request: Request) {
   }
   const parsed = askSchema.safeParse(raw);
   if (!parsed.success) {
-    return createErrorResponse({ status: 400, message: "Body must be { message: string (1-4000 chars) }" });
+    return createErrorResponse({
+      status: 400,
+      message: "Body must be { message: string (1-4000 chars) }",
+    });
   }
 
   const answer = await askFaro(parsed.data.message);
   if (!answer.ok) {
-    return createErrorResponse({ status: 503, message: "Faro (spokesperson) is offline or refused the request" });
+    return createErrorResponse({
+      status: 503,
+      message: "Faro (spokesperson) is offline or refused the request",
+    });
   }
   return NextResponse.json({ text: answer.text, pending: answer.pending });
 }

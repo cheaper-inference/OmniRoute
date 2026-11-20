@@ -1,10 +1,10 @@
 /**
  * openrouterCatalog.ts — Feature 09
- * Catálogo OpenRouter com cache persistente em arquivo JSON local.
+ * OpenRouter catalog with a persistent cache in a local JSON file.
  *
- * - TTL configurável via env OPENROUTER_CATALOG_TTL_MS (default: 24h)
- * - Fallback stale-if-error: retorna último snapshot válido se fetch falhar
- * - Atualização oportunista em background (não bloqueia o caller)
+ * - TTL configurable via the OPENROUTER_CATALOG_TTL_MS env var (default: 24h)
+ * - Stale-if-error fallback: returns the last valid snapshot if the fetch fails
+ * - Opportunistic background refresh (does not block the caller)
  */
 
 import fs from "fs";

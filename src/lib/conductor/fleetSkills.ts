@@ -61,7 +61,7 @@ export async function getFleetSkills(opts: FleetSkillsOptions = {}): Promise<Fle
     });
     if (res.ok) skills = deriveSkills(runnersSchema.parse(await res.json()));
   } catch {
-    skills = []; // hub offline / shape inválido: o card omite a frota, nunca quebra
+    skills = []; // hub offline / invalid shape: the card omits the fleet, never breaks
   }
   cache = { at: now(), skills };
   return skills;

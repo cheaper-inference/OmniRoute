@@ -183,11 +183,11 @@ export function getSqlJsPreInitError(filePath: string): string | undefined {
 }
 
 /**
- * Cache das Promises de inicialização EM VOO (não resolvidas ainda), por filePath.
- * Separado de getSqlJsCache() (que só guarda o adapter já resolvido) para que
- * chamadores concorrentes (BATCH/STARTUP/HealthCheck/ProviderLimitsSync no boot)
- * compartilhem UMA única leitura+decode do arquivo em vez de cada um chamar
- * fs.readFileSync + WASM decode independentemente (#6628 — thundering herd).
+ * Cache of IN-FLIGHT initialization Promises (not yet resolved), keyed by filePath.
+ * Separate from getSqlJsCache() (which only holds the already-resolved adapter) so
+ * concurrent callers (BATCH/STARTUP/HealthCheck/ProviderLimitsSync at boot)
+ * share ONE file read+decode instead of each calling
+ * fs.readFileSync + WASM decode independently (#6628 — thundering herd).
  */
 function getSqlJsPendingCache(): Map<string, Promise<SqliteAdapter>> {
   if (!globalThis.__omnirouteSqlJsInitPromises) {
@@ -318,7 +318,7 @@ export function isPackBootForcedSqlJsSmoke(env: NodeJS.ProcessEnv): boolean {
   return env.OMNIROUTE_PACK_BOOT_SMOKE === "1" && env.OMNIROUTE_PACK_BOOT_FORCE_SQLJS === "1";
 }
 
-/** Tenta abrir com better-sqlite3 e node:sqlite sincronamente. Retorna null se ambos falharem. */
+/** Tries to open synchronously with better-sqlite3 and node:sqlite. Returns null if both fail. */
 export function tryOpenSync(
   filePath: string,
   options?: Record<string, unknown>
@@ -328,9 +328,9 @@ export function tryOpenSync(
 }
 
 /**
- * Pré-inicializa sql.js para um filePath.
- * Armazena em globalThis para acesso posterior via getSqlJsAdapter().
- * Idempotente — seguro chamar múltiplas vezes.
+ * Pre-initializes sql.js for a filePath.
+ * Stored on globalThis for later access via getSqlJsAdapter().
+ * Idempotent — safe to call multiple times.
  */
 export async function preInitSqlJs(filePath: string): Promise<SqliteAdapter> {
   const cache = getSqlJsCache();
@@ -373,14 +373,14 @@ export async function preInitSqlJs(filePath: string): Promise<SqliteAdapter> {
   }
 }
 
-/** Retorna adapter sql.js pré-inicializado ou null se ainda não inicializado. */
+/** Returns the pre-initialized sql.js adapter, or null if it is not initialized yet. */
 export function getSqlJsAdapter(filePath: string): SqliteAdapter | null {
   return getSqlJsCache().get(filePath) ?? null;
 }
 
 /**
- * Factory assíncrona completa: tenta todos os drivers em cascata.
- * Ordem: bun:sqlite → better-sqlite3 → node:sqlite → sql.js
+ * Full async factory: tries every driver in cascade.
+ * Order: bun:sqlite → better-sqlite3 → node:sqlite → sql.js
  */
 export async function openDatabaseAsync(
   filePath: string,

@@ -27,8 +27,8 @@ const KNOWN_PLANS: Record<string, KnownPlanShape> = {
   glm: {
     provider: "glm",
     dimensions: [
-      // limit=0 = desconhecido; documentado. Mantido para correta detecção pelo planResolver.
-      // Sliding window / fair-share devem tratar limit=0 como "manual obrigatório".
+      // limit=0 = unknown; documented. Kept so planResolver detects it correctly.
+      // Sliding window / fair-share must treat limit=0 as "manual required".
       { unit: "tokens", window: "5h", limit: Number.EPSILON },
       { unit: "tokens", window: "weekly", limit: Number.EPSILON },
     ],
@@ -45,7 +45,7 @@ const KNOWN_PLANS: Record<string, KnownPlanShape> = {
   },
   // DeepSeek is prepaid in USD — its balance API is already wired (deepseekQuotaFetcher)
   // and shown on the quota page. fair-share supports the `usd` unit (COUNTABLE_UNITS),
-  // so set a USD budget here ("fixado por valor"); the proxy sums each key's USD cost.
+  // so set a USD budget here ("fixed by value"); the proxy sums each key's USD cost.
   deepseek: {
     provider: "deepseek",
     dimensions: [{ unit: "usd", window: "monthly", limit: Number.EPSILON }],

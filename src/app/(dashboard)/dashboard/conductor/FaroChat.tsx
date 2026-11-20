@@ -83,7 +83,7 @@ export default function FaroChat() {
       localStorage.setItem(STT_KEY, stt);
       localStorage.setItem(TTS_KEY, tts);
     } catch {
-      // modo privado: segue só em memória
+      // private mode: keep it in memory only
     }
   };
 

@@ -267,8 +267,8 @@ export const DEFAULT_PRICING_FRONTIER = {
     "gemini-4-argon": GEMINI_4_ARGON_PROMO_PRICING,
     "gemini-4-hydrogen": GEMINI_4_HYDROGEN_PRICING,
     "gemini-3.7-flash": GEMINI_3_7_FLASH_PROMO_PRICING,
-    // Gemini 3.1 Pro — novo flagship Google (2026-03-17)
-    // Context: 1.050.000 tokens | Max Output: 65.536
+    // Gemini 3.1 Pro — new Google flagship (2026-03-17)
+    // Context: 1,050,000 tokens | Max Output: 65,536
     "gemini-3.1-pro": {
       input: 2.0,
       output: 12.0,

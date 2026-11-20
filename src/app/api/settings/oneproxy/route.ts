@@ -1,5 +1,5 @@
-// Compat redirect: 1 release — endpoints movidos para /api/settings/free-proxies
-// Usa path relativo no header Location — nenhum input do usuário entra na URL destino.
+// Compat redirect: 1 release — endpoints moved to /api/settings/free-proxies
+// Uses a relative path in the Location header — no user input enters the destination URL.
 import { requireManagementAuth } from "@/lib/api/requireManagementAuth";
 
 function relativeRedirect(location: string): Response {

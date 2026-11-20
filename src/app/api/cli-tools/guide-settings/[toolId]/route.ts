@@ -180,7 +180,7 @@ async function saveContinueConfig({ baseUrl, apiKey, model }) {
         normalizeApiBase(m.apiBase).includes("omniroute") ||
         normalizeApiBase(m.apiBase).includes(`localhost:${apiPort}`) ||
         normalizeApiBase(m.apiBase).includes(`127.0.0.1:${apiPort}`) ||
-        // eslint-disable-next-line no-restricted-syntax -- teknik string kontrolü, kullanıcı metni araması değil
+        // eslint-disable-next-line no-restricted-syntax -- technical string check, not a user-text search
         String(m.apiKey || "")
           .toLowerCase()
           .includes("sk_omniroute"))

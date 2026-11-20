@@ -47,7 +47,7 @@ const VARIANT = {
 
 // While a modal is open, Radix hides everything outside it from assistive tech
 // (`aria-hidden`), sparing only elements that already carry `aria-live` when the dialog
-// opens. The kit Toaster root has none (pendência do kit: it should be a live region
+// opens. The kit Toaster root has none (kit gap: it should be a live region
 // itself), so a toast raised under a Modal would be hidden. Once the Toaster portals its
 // root (one render after mount, hence the observer), mark it as a polite live region, and
 // keep it out of `aria-hidden` when a dialog that opened in the same render already hid it.

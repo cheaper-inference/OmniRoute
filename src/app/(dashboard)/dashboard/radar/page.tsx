@@ -244,7 +244,7 @@ export default function RadarPage() {
   // Auto-sync on open: when the operator is already opted in and the cached
   // feed is stale (or absent), refresh it automatically once per mount so the
   // page always shows current data without requiring the manual Sync button
-  // (spec: dados atualizados a cada abrir da página). The ref guards against
+  // (spec: data refreshed on every page open). The ref guards against
   // re-firing when `meta` updates after the sync itself.
   const autoSyncFiredRef = useRef(false);
   useEffect(() => {

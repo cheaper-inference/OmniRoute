@@ -29,18 +29,18 @@ const optionalCustomEmbeddingUrl = z.preprocess(
     .nullable()
     .optional()
 );
-/** Schema estendido para PUT /api/settings/memory (D9). */
+/** Extended schema for PUT /api/settings/memory (D9). */
 export const MemorySettingsExtendedSchema = z
   .object({
-    // Campos legados (já existem)
+    // Legacy fields (already exist)
     enabled: z.boolean().optional(),
     maxTokens: z.number().int().min(0).max(16000).optional(),
     retentionDays: z.number().int().min(1).max(365).optional(),
     strategy: z.enum(["recent", "semantic", "hybrid"]).optional(),
     skillsEnabled: z.boolean().optional(),
-    // Campos novos (D9)
+    // New fields (D9)
     embeddingSource: z.enum(["remote", "static", "transformers", "auto"]).optional(),
-    embeddingProviderModel: z.string().nullable().optional(), // formato `provider/model`
+    embeddingProviderModel: z.string().nullable().optional(), // `provider/model` format
     customBaseUrl: optionalCustomEmbeddingUrl,
     customModelId: optionalCustomEmbeddingValue,
     transformersEnabled: z.boolean().optional(),
@@ -55,7 +55,7 @@ export const MemorySettingsExtendedSchema = z
   })
   .strict();
 
-/** PUT /api/memory/[id] body (D6 plano §5.3). */
+/** PUT /api/memory/[id] body (D6 plan §5.3). */
 export const MemoryUpdatePutSchema = z
   .object({
     type: z.nativeEnum(MemoryType).optional(),
@@ -65,13 +65,13 @@ export const MemoryUpdatePutSchema = z
   })
   .strict();
 
-/** POST /api/memory/retrieve-preview body (D6 plano §4.2). */
+/** POST /api/memory/retrieve-preview body (D6 plan §4.2). */
 export const RetrievePreviewSchema = z
   .object({
     query: z.string().min(1),
     strategy: z.enum(["exact", "semantic", "hybrid"]).default("hybrid"),
     maxTokens: z.number().int().positive().max(16000).default(2000),
-    apiKeyId: z.string().optional(), // opcional: testa global se ausente
+    apiKeyId: z.string().optional(), // optional: tests globally if absent
     limit: z.number().int().positive().max(100).default(20),
   })
   .strict();
@@ -79,7 +79,7 @@ export const RetrievePreviewSchema = z
 /** POST /api/memory/reindex body (D21). */
 export const MemoryReindexSchema = z
   .object({
-    force: z.boolean().default(false), // true = regenera TODOS os vetores
+    force: z.boolean().default(false), // true = regenerate ALL vectors
   })
   .strict();
 
@@ -92,7 +92,7 @@ export const MemorySummarizeSchema = z
   })
   .strict();
 
-/** Response shape do GET /api/memory/embedding-providers (D9 + plano §5.3). */
+/** Response shape of GET /api/memory/embedding-providers (D9 + plan §5.3). */
 export const EmbeddingProviderListingSchema = z.object({
   providers: z.array(
     z.object({
@@ -109,7 +109,7 @@ export const EmbeddingProviderListingSchema = z.object({
   ),
 });
 
-/** Response shape do GET /api/memory/engine-status (UI Engine tab — D11). */
+/** Response shape of GET /api/memory/engine-status (UI Engine tab — D11). */
 export const MemoryEngineStatusSchema = z.object({
   keyword: z.object({
     available: z.boolean(),
@@ -146,7 +146,7 @@ export const MemoryEngineStatusSchema = z.object({
   }),
 });
 
-/** Item de resultado do Playground (POST /api/memory/retrieve-preview response). */
+/** Playground result item (POST /api/memory/retrieve-preview response). */
 export const RetrievePreviewResultSchema = z.object({
   memories: z.array(
     z.object({

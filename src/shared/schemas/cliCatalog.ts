@@ -61,7 +61,7 @@ export type CliCatalogEntry = z.infer<typeof CliCatalogEntrySchema>;
 
 export const CliCatalogSchema = z.record(z.string(), CliCatalogEntrySchema);
 
-/** Cardinalidade obrigatória (Plano §3.1/§3.2 + D15). +1 (crush, decolua/9router#1233). */
+/** Required cardinality (Plan §3.1/§3.2 + D15). +1 (crush, decolua/9router#1233). */
 // +1 (2026-07-02): "codewhale" added as a dual entry alongside "deepseek-tui"
 // (CodeWhale is the actively-maintained successor to DeepSeek TUI).
 // +1 (grok-build, decolua/9router#2571): xAI Grok Build TUI coding agent.
