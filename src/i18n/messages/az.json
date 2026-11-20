@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Söhbətin ortasındakı sistem mesajlarını yerində saxlayın",
     "requireUserLastMessageDescription": "Köməkçinin əvvəlcədən doldurulmasını rədd edən yuxarı axınlar üçün: göndərməzdən əvvəl arxadakı köməkçini buraxın (alətdən istifadə olunmur). Model əvvəlki cavabını bərpa edə bilər.",
     "requireUserLastMessageLabel": "Söhbətin istifadəçi mesajı ilə bitməsini tələb edin",
+    "strictChatHistoryDescription": "OpenAI ilə uyğun olan və sərt qaydalar tətbiq edən provayderlərə göndərməzdən əvvəl yarımçıq alət çağırışı ardıcıllıqlarını düzəldir və köməkçinin ardıcıl mesajlarını birləşdirir.",
+    "strictChatHistoryLabel": "Sərt yoxlama üçün söhbət tarixçəsinin düzəldilməsi",
     "bulkPasteAdded": "{count, plural, one {1 açar əlavə edildi} other {# açar əlavə edildi}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {1 dublikat nəzərə alınmadı} other {# dublikat nəzərə alınmadı}}",
     "bulkPasteHint": "Hər sətirə bir API açarı yapışdırın. Boş sətirlər və dublikat açarlar nəzərə alınmır.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Açarı sil"
   },
   "plugins": {
-    "privilegesWarningTitle": "Pluginlər tam imtiyazlarla işləyir",
-    "privilegesWarningBody": "Plugin OmniRoute ilə eyni girişi olan adi Node.js prosesi kimi işləyir: o, manifestinin elan etdiyi icazələrdən asılı olmayaraq faylları oxuya, proqramları işlədə və şəbəkədən istifadə edə bilər. Yalnız etibar etdiyiniz plaginləri quraşdırın.",
     "title": "Plaginlər",
     "description": "OmniRoute funksionallığını genişləndirmək üçün plaginləri quraşdırın və idarə edin",
     "loading": "Plaginlər yüklənir...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Plaginləri skan et",
     "noPlugins": "Heç bir plagin quraşdırılmayıb",
     "noPluginsDescription": "Plagin qovluqlarını ~/.omniroute/plugins/ daxilində yerləşdirin və Skan et düyməsinə klikləyin.",
+    "privilegesWarningTitle": "Pluginlər tam imtiyazlarla işləyir",
+    "privilegesWarningBody": "Plugin OmniRoute ilə eyni girişi olan adi Node.js prosesi kimi işləyir: o, manifestinin elan etdiyi icazələrdən asılı olmayaraq faylları oxuya, proqramları işlədə və şəbəkədən istifadə edə bilər. Yalnız etibar etdiyiniz plaginləri quraşdırın.",
     "activate": "Aktivləşdir",
     "deactivate": "Deaktivləşdir",
     "uninstall": "Sil",

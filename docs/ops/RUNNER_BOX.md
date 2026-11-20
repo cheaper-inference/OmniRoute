@@ -170,3 +170,9 @@ is the per-listener memory budget above (ceiling 6 listeners), not CPU. The rema
 are process ones: land campaign PRs through the Mergify queue (`label=queue`, batches share
 one `merge_group` CI run instead of one run per PR plus one per push), trim the CodeQL
 default-setup languages, and filter `release-acceptance.yml` by the files it reads.
+
+> **2026-11-19: the Mergify merge queue is retired** (owner's decision). `.mergify.yml` no
+> longer defines a queue and refuses the Mergify commands that merge or rewrite a pull request.
+> Release PRs are merged by hand under the repository ruleset "Require green gates on the active
+> release" (`Gate / CI` + `Gate / Quality`) until omni-queue runs in live mode, and through
+> omni-queue after that ([OMNI_QUEUE.md](./OMNI_QUEUE.md)). The Mergify lever above no longer exists.

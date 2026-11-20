@@ -6733,6 +6733,8 @@
     "keepMidConversationSystemLabel": "Sarunas vidū saglabājiet sistēmas ziņojumus vietā",
     "requireUserLastMessageDescription": "Augštecēm, kas noraida Asistenta priekšaizpildīšanu: pirms nosūtīšanas nolaidiet palīga pagriezienus (bez tool_use). Modelis var atjaunot savu iepriekšējo atbildi.",
     "requireUserLastMessageLabel": "Pieprasīt, lai saruna beigtos ar lietotāja ziņojumu",
+    "strictChatHistoryDescription": "Izlabo pārtrauktās rīku izsaukumu secības un apvieno secīgus asistenta ziņojumus pirms nosūtīšanas ar OpenAI saderīgiem pakalpojumu sniedzējiem, kuri piemēro stingrus noteikumus.",
+    "strictChatHistoryLabel": "Tērzēšanas vēstures labošana stingru noteikumu ievērošanai",
     "bulkPasteAdded": "{count, plural, one {Pievienota 1 atslēga} other {Pievienotas # atslēgas}}",
     "bulkPasteDuplicatesIgnored": "{count, plural, one {Izlaists 1 dublikāts} other {Izlaisti # dublikāti}}",
     "bulkPasteHint": "Ielīmējiet vienu API atslēgu katrā rindā. Tukšās rindas tiek ignorētas, un dublētās atslēgas tiek izlaistas.",
@@ -13427,8 +13429,6 @@
     "wizardRemoveKey": "Noņemt atslēgu"
   },
   "plugins": {
-    "privilegesWarningTitle": "Spraudņi darbojas ar pilnām privilēģijām",
-    "privilegesWarningBody": "Spraudnis darbojas kā parasts Node.js process ar tādu pašu piekļuvi kā OmniRoute: tas var lasīt failus, palaist programmas un izmantot tīklu neatkarīgi no tā manifestā norādītajām atļaujām. Instalējiet tikai spraudņus, kuriem uzticaties.",
     "title": "Spraudņi",
     "description": "Instalējiet un pārvaldiet spraudņus, lai paplašinātu OmniRoute funkcionalitāti",
     "loading": "Notiek spraudņu ielāde...",
@@ -13436,6 +13436,8 @@
     "scanForPlugins": "Skenēt spraudņus",
     "noPlugins": "Nav instalēts neviens spraudnis",
     "noPluginsDescription": "Ievietojiet spraudņu direktorijas mapē ~/.omniroute/plugins/ un noklikšķiniet uz \"Skenēt spraudņus\".",
+    "privilegesWarningTitle": "Spraudņi darbojas ar pilnām privilēģijām",
+    "privilegesWarningBody": "Spraudnis darbojas kā parasts Node.js process ar tādu pašu piekļuvi kā OmniRoute: tas var lasīt failus, palaist programmas un izmantot tīklu neatkarīgi no tā manifestā norādītajām atļaujām. Instalējiet tikai spraudņus, kuriem uzticaties.",
     "activate": "Aktivizēt",
     "deactivate": "Deaktivizēt",
     "uninstall": "Atinstalēt",

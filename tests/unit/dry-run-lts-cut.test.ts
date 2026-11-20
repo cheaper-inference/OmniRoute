@@ -21,7 +21,7 @@ import {
   bumpLockfile,
   bumpManifest,
   bumpOpenApi,
-  evaluateMergifyQueue,
+  evaluateMergeQueue,
   evaluatePreconditions,
   executeCut,
   expectedDistTags,
@@ -35,8 +35,15 @@ import { resolveDistTag } from "../../scripts/release/dist-tag.mjs";
 const repoRoot = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "../..");
 const SCRIPT = path.join(repoRoot, "scripts/release/dry-run-lts-cut.mjs");
 const SHA = "1".repeat(40);
-// The real .mergify.yml of this checkout (G11: queue `release` with checks_timeout, #16066).
-const MERGIFY = fs.readFileSync(path.join(repoRoot, ".mergify.yml"), "utf8");
+// The real omni-queue config of this checkout (G11 since the Mergify `release` queue of #16066
+// was retired on 2026-11-19). The checkout's `mode` is whatever the queue runs today, so a ready
+// cut pins `live` explicitly; the shadow case is asserted on its own below.
+const QUEUE_CONFIG_RAW = JSON.parse(
+  fs.readFileSync(path.join(repoRoot, "config/merge-queue/config.json"), "utf8")
+);
+const queueConfig = (overrides: Record<string, unknown> = {}) =>
+  JSON.stringify({ ...QUEUE_CONFIG_RAW, ...overrides });
+const LIVE_QUEUE = queueConfig({ mode: "live" });
 
 type Facts = Parameters<typeof evaluatePreconditions>[0];
 
@@ -49,7 +56,7 @@ function goodFacts(overrides: Partial<Facts> = {}): Facts {
     freezeIssues: [{ number: 900, title: "🧊 Release freeze: release/v3.9.0" }],
     baseRedIssues: [],
     sourceBranchExists: true,
-    mergifyConfig: MERGIFY,
+    mergeQueueConfig: LIVE_QUEUE,
     queueLabelExists: true,
     releaseRulesetRules: ["deletion", "non_fast_forward"],
     remoteBranches: { "stable/v3": null, develop: null },
@@ -159,8 +166,10 @@ test("each failing precondition is reported with expected vs actual", () => {
     ],
     [{ remoteBranches: { "stable/v3": SHA, develop: null } }, "branches-absent", /stable\/v3/],
     [{ freezeIssues: null }, "freeze", /unknown/],
-    [{ queueLabelExists: false }, "merge-queue", /label `queue` missing/],
-    [{ mergifyConfig: null }, "merge-queue", /\.mergify\.yml missing/],
+    [{ queueLabelExists: false }, "merge-queue", /label `omni-queue` missing/],
+    [{ queueLabelExists: null }, "merge-queue", /label lookup failed/],
+    [{ mergeQueueConfig: null }, "merge-queue", /config\/merge-queue\/config\.json missing/],
+    [{ mergeQueueConfig: queueConfig({ mode: "shadow" }) }, "merge-queue", /mode is `shadow`/],
     [{ releaseRulesetRules: ["deletion"] }, "release-ruleset", /missing: non_fast_forward/],
     [{ releaseRulesetRules: null }, "release-ruleset", /unknown/],
   ];
@@ -190,25 +199,57 @@ test("base-green is unknown (never green) when the release branch does not exist
   assert.equal(existing?.verifiable, true);
 });
 
-test("G11 is the Mergify `release` queue, not GitHub's native merge queue", () => {
+test("G11 is omni-queue landing release PRs, not the retired Mergify queue", () => {
+  const branch = "release/v3.9.0";
+  // This checkout's config passes omni-queue's own validator and manages the cut's branch:
+  // whatever its mode, the only problem G11 may report on it is the mode.
+  const actual = evaluateMergeQueue(queueConfig(), branch);
+  assert.equal(actual.label, "omni-queue");
   assert.deepEqual(
-    evaluateMergifyQueue(MERGIFY),
-    { ok: true, problems: [] },
-    "G11 GO on this base"
+    actual.problems.filter((p) => !/^omni-queue mode is /.test(p)),
+    [],
+    "this checkout's omni-queue config is valid for release branches"
   );
-  const noTimeout = MERGIFY.replace(/^ {4}checks_timeout:.*\n/m, "");
-  assert.notEqual(noTimeout, MERGIFY, "fixture removed checks_timeout");
-  assert.deepEqual(evaluateMergifyQueue(noTimeout).problems, [
-    "queue `release` has no checks_timeout",
+  assert.deepEqual(evaluateMergeQueue(LIVE_QUEUE, branch), {
+    ok: true,
+    problems: [],
+    label: "omni-queue",
+    mode: "live",
+  });
+  // Shadow composes and tests but lands nothing: a configured queue, still a NO-GO for G11.
+  const shadow = evaluateMergeQueue(queueConfig({ mode: "shadow" }), branch);
+  assert.equal(shadow.ok, false);
+  assert.deepEqual(shadow.problems, [
+    "omni-queue mode is `shadow`: it lands nothing, release PRs are merged by hand",
   ]);
+  // Without checksTimeoutMinutes a hung check could park the queue: omni-queue's validator
+  // rejects the config, and G11 with it.
+  const { checksTimeoutMinutes: _timeout, ...noTimeout } = QUEUE_CONFIG_RAW;
+  const timeoutVerdict = evaluateMergeQueue(JSON.stringify({ ...noTimeout, mode: "live" }), branch);
+  assert.equal(timeoutVerdict.ok, false);
+  assert.match(timeoutVerdict.problems.join(), /invalid: .*checksTimeoutMinutes: /);
   assert.match(
-    evaluateMergifyQueue("queue_rules:\n  - name: other\n").problems.join(),
-    /no queue_rules entry named `release`/
+    evaluateMergeQueue(queueConfig({ mode: "live", label: "" }), branch).problems.join(),
+    /invalid: .*label: invalid/
   );
-  const noLabel = MERGIFY.replace(/label ?= ?queue/g, "label=other");
-  assert.match(evaluateMergifyQueue(noLabel).problems.join(), /`queue` label/);
-  assert.equal(evaluateMergifyQueue(null).ok, false);
-  assert.equal(evaluateMergifyQueue(": : :\n  - [").ok, false);
+  assert.match(
+    evaluateMergeQueue(queueConfig({ mode: "live", bases: "^main$" }), branch).problems.join(),
+    /does not manage release\/v3\.9\.0/
+  );
+  assert.equal(evaluateMergeQueue(null, branch).ok, false);
+  assert.equal(evaluateMergeQueue("{ not json", branch).ok, false);
+  const ready = evaluatePreconditions(goodFacts(), parseCutArgs([])).find(
+    (c) => c.id === "merge-queue"
+  );
+  assert.equal(ready?.ok, true);
+  assert.equal(ready?.actual, "configured (mode live, label `omni-queue`)");
+  // With no valid config there is no label to look up: only the config problem is reported.
+  const missing = evaluatePreconditions(
+    goodFacts({ mergeQueueConfig: null, queueLabelExists: null }),
+    parseCutArgs([])
+  ).find((c) => c.id === "merge-queue");
+  assert.equal(missing?.ok, false);
+  assert.equal(missing?.actual, "config/merge-queue/config.json missing at the source");
 });
 
 test("--advisory downgrades a check to a warning without hiding it", () => {
