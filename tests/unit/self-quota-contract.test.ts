@@ -8,7 +8,7 @@ const POOL = "0b6c3f0e-1111-4222-8333-444455556666";
 
 test("pool ref is opaque, stable, and bound to the key, the pool and the server secret", () => {
   const a = buildPoolRef("key-a", POOL, "s3cret");
-  assert.match(a, /^qpr_[A-Za-z0-9_-]{22}$/);
+  assert.match(a, /^qpr_[0-9a-f]{32}$/);
   assert.equal(a, buildPoolRef("key-a", POOL, "s3cret"));
   for (const other of [
     buildPoolRef("key-b", POOL, "s3cret"),
