@@ -70,6 +70,8 @@ docker rm omniroute
 docker volume rm omniroute-data
 
 # (ไม่บังคับ) ลบอิมเมจ
+docker rmi cheaperinference/omniroute:latest
+# การติดตั้งที่เก่ากว่าจะดึงชื่อเดิม:
 docker rmi diegosouzapw/omniroute:latest
 ```
 

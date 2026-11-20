@@ -96,6 +96,10 @@ curl http://localhost:20128/api/settings/obsidian/webdav
 curl -X DELETE http://localhost:20128/api/settings/obsidian/webdav
 ```
 
+### Təhlükəsizlik və Nəqliyyat
+
+WebDAV autentifikasiyası hər IP xətasının izlənilməsini və kilidlənməsini tətbiq edir (60 saniyəlik pəncərədə 10 uğursuz cəhd `429 Too Many Requests` və `Retry-After` ilə 5 dəqiqəlik blokadaya səbəb olur). WebDAV Əsas autentifikasiya etimadnaməsini ötürdüyünə görə, geri döngədən kənar WebDAV son nöqtəsinə daxil olarkən TLS dayandırılması (və ya Tailscale və ya Cloudflare Tunnel kimi təhlükəsiz tunel üzərindən marşrutlaşdırma) şiddətlə tövsiyə olunur.
+
 ### Hər API açarı üzrə kontekst mənbəyi (istəyə bağlı)
 
 Obsidian konfiqurasiyası `api_key_context_sources` cədvəli
