@@ -2,7 +2,7 @@
 // rows seeded through the src/lib/db modules and the quota gate's own recordConsumption. Checks
 // that the view matches what was seeded and what enforcement decides, and that nothing internal
 // or belonging to another key reaches the body or the headers.
-import test from "node:test";
+import test, { mock } from "node:test";
 import assert from "node:assert/strict";
 import fs from "node:fs";
 import os from "node:os";
@@ -30,6 +30,7 @@ test.beforeEach(() => {
 });
 
 test.after(() => {
+  mock.timers.reset();
   delete process.env.QUOTA_SELF_PANEL;
   core.resetDbInstance();
   fs.rmSync(TEST_DATA_DIR, { recursive: true, force: true, maxRetries: 5, retryDelay: 100 });
@@ -123,6 +124,10 @@ async function seed() {
   });
   return { conn, pool, alpha, bravo, charlie };
 }
+
+// A fixed mid-hour, mid-day instant for seeding and for both tests: the hourly model-cap bucket
+// and the daily token bucket cannot roll over between the seeded consumption and the read.
+mock.timers.enable({ apis: ["Date"], now: Date.UTC(2026, 10, 20, 12, 30, 0) });
 
 const seeded = await seed();
 

@@ -112,6 +112,21 @@ test("every refusal is a sanitized error body with Cache-Control: no-store", asy
   await assertRefusal(req(bearer("sk-bad")), 404, "Not found");
 });
 
+test("the key is validated against its row on every call, never from the validation cache", async () => {
+  const seen: unknown[] = [];
+  const store = {
+    validateApiKey: async (_key: string, options?: unknown) => {
+      seen.push(options);
+      return true;
+    },
+    getApiKeyMetadata: async () => ({ id: "k-1", name: "k", scopes: [SELF_USAGE_SCOPE] }),
+  } as unknown as SelfServiceKeyStore;
+  const first = await authenticateSelfServiceRequest(req(bearer("any")), store);
+  const second = await authenticateSelfServiceRequest(req(bearer("any")), store);
+  assert.deepEqual([first.ok, second.ok], [true, true]);
+  assert.deepEqual(seen, [{ bypassCache: true }, { bypassCache: true }]);
+});
+
 test("an injected key store cannot skip the flag, header, environment-key or scope checks", async () => {
   const reads: string[] = [];
   // Only the fields the gate reads; the cast stands in for the full metadata row.

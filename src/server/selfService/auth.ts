@@ -73,10 +73,14 @@ function readCredentialCandidates(request: Request): string[] {
   return [...new Set([bearer, xApiKey].filter((value): value is string => Boolean(value)))];
 }
 
-/** The first candidate the key store accepts, or null when none validates. */
+/**
+ * The first candidate the key store accepts, or null when none validates. The key row is read
+ * on every call (`bypassCache`): the validation cache would keep answering "valid" for up to a
+ * minute after a key's expiry, and this gate has no other expiry check.
+ */
 async function findValidCandidate(store: SelfServiceKeyStore, candidates: string[]) {
   for (const candidate of candidates) {
-    if (await store.validateApiKey(candidate)) return candidate;
+    if (await store.validateApiKey(candidate, { bypassCache: true })) return candidate;
   }
   return null;
 }
