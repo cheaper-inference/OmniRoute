@@ -6,6 +6,7 @@ import fs from "node:fs";
 import http from "node:http";
 import os from "node:os";
 import path from "node:path";
+import { PassThrough, Readable } from "node:stream";
 import {
   betterSqlite3Available,
   BETTER_SQLITE3_SKIP_REASON,
@@ -151,5 +152,72 @@ test(
       await new Promise((resolve) => server.close(resolve));
     }
     assert.deepEqual(fs.readFileSync(live), before);
+  })
+);
+
+test(
+  "restore refuses a running server before it asks for confirmation",
+  { skip },
+  withDataDir(async (dataDir, backupDir) => {
+    const live = makeCrashedLiveDb(dataDir);
+    makeDb(path.join(backupDir, "storage.sqlite"), ["restored"]);
+    const before = fs.readFileSync(live);
+    const server = http.createServer((_req, res) => res.end("{}"));
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    process.env.OMNIROUTE_BASE_URL = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+
+    // An asked prompt would read this "n" and end with exit code 0, not 1.
+    const stdin = Readable.from(["n\n"]);
+    const stdinDescriptor = Object.getOwnPropertyDescriptor(process, "stdin");
+    Object.defineProperty(process, "stdin", { value: stdin, configurable: true });
+    let code: number;
+    try {
+      code = await runRestoreCommand("b1", {});
+    } finally {
+      if (stdinDescriptor) Object.defineProperty(process, "stdin", stdinDescriptor);
+      await new Promise((resolve) => server.close(resolve));
+    }
+
+    assert.equal(code, 1);
+    assert.equal(stdin.readableDidRead, false, "stdin must not be read");
+    assert.deepEqual(fs.readFileSync(live), before);
+  })
+);
+
+test(
+  "restore refuses a server that becomes ready during confirmation",
+  { skip },
+  withDataDir(async (dataDir, backupDir) => {
+    const live = makeCrashedLiveDb(dataDir);
+    makeDb(path.join(backupDir, "storage.sqlite"), ["restored"]);
+    const before = fs.readFileSync(live);
+    const wal = fs.readFileSync(`${live}-wal`);
+    let ready = false;
+    const server = http.createServer((_req, res) => {
+      res.writeHead(ready ? 200 : 503).end("{}");
+    });
+    await new Promise<void>((resolve) => server.listen(0, "127.0.0.1", resolve));
+    process.env.OMNIROUTE_BASE_URL = `http://127.0.0.1:${(server.address() as { port: number }).port}`;
+
+    const stdin = new PassThrough();
+    const stdinDescriptor = Object.getOwnPropertyDescriptor(process, "stdin");
+    Object.defineProperty(process, "stdin", { value: stdin, configurable: true });
+    // Readline resumes input for the prompt; make the health check pass before answering.
+    stdin.once("resume", () => {
+      ready = true;
+      stdin.end("yes\n");
+    });
+    try {
+      assert.equal(await runRestoreCommand("b1", {}), 1);
+    } finally {
+      if (stdinDescriptor) Object.defineProperty(process, "stdin", stdinDescriptor);
+      stdin.destroy();
+      await new Promise((resolve) => server.close(resolve));
+    }
+
+    assert.equal(ready, true, "the confirmation must have run");
+    assert.deepEqual(fs.readFileSync(live), before);
+    assert.deepEqual(fs.readFileSync(`${live}-wal`), wal);
+    assert.deepEqual(rowsOf(live), ["live-only", "old"]);
   })
 );

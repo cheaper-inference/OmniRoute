@@ -485,6 +485,17 @@ export async function runRestoreCommand(backupId, opts = {}) {
   // `backup create --encrypt` writes `<name>.enc` payloads instead of plain names.
   const encrypted = FILES_TO_BACKUP.some((f) => existsSync(join(backupPath, `${f.name}.enc`)));
 
+  // A running server holds storage.sqlite open and keeps its WAL. Restore only while it is stopped.
+  async function restoreBlockedByServer() {
+    if (!(await isServerUp())) return false;
+    console.error(
+      `A server answers at ${getBaseUrl()}. Stop it (omniroute stop) before restore; nothing was changed.`
+    );
+    return true;
+  }
+
+  if (await restoreBlockedByServer()) return 1;
+
   if (!opts.yes) {
     const readline = await import("node:readline");
     const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
@@ -496,15 +507,8 @@ export async function runRestoreCommand(backupId, opts = {}) {
       console.log(t("common.cancelled"));
       return 0;
     }
-  }
-
-  // A running server holds storage.sqlite open and keeps its WAL. Replacing the file under it,
-  // or deleting the WAL, corrupts the database. Restore only while the server is stopped.
-  if (await isServerUp()) {
-    console.error(
-      `A server answers at ${getBaseUrl()}. Stop it (omniroute stop) before restore; nothing was changed.`
-    );
-    return 1;
+    // The server can start while the prompt is open.
+    if (await restoreBlockedByServer()) return 1;
   }
 
   // Decrypt every payload before touching live files. GCM rejects wrong keys and damaged data.
